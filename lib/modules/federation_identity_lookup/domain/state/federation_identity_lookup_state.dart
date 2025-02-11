@@ -1,7 +1,7 @@
 import 'package:fluffychat/app_state/failure.dart';
 import 'package:fluffychat/app_state/initial.dart';
 import 'package:fluffychat/app_state/success.dart';
-import 'package:fluffychat/modules/federation_identity_lookup/domain/models/federation_lookup_mxid_response.dart';
+import 'package:fluffychat/modules/federation_identity_lookup/domain/models/federation_contact.dart';
 
 class FederationIdentityLookupInitial extends Initial {
   const FederationIdentityLookupInitial() : super();
@@ -19,13 +19,13 @@ class FederationIdentityLookupLoading extends Success {
 
 class FederationIdentityLookupSuccess extends Success {
   const FederationIdentityLookupSuccess({
-    required this.federationLookupMxidResponse,
+    required this.newContacts,
   });
 
-  final FederationLookupMxidResponse federationLookupMxidResponse;
+  final Map<String, FederationContact> newContacts;
 
   @override
-  List<Object?> get props => [];
+  List<Object?> get props => [newContacts];
 }
 
 class FederationIdentityLookupFailure extends Failure {
@@ -44,8 +44,19 @@ class FederationIdentityCalculationHashesEmpty extends Failure {
   List<Object?> get props => [];
 }
 
-class FederationIdentityGetTokenFailure extends Failure {
-  const FederationIdentityGetTokenFailure();
+class FederationIdentityRegisterAccountFailure extends Failure {
+  const FederationIdentityRegisterAccountFailure({
+    required this.identityServer,
+  });
+
+  final String identityServer;
+
+  @override
+  List<Object?> get props => [identityServer];
+}
+
+class FederationIdentityGetHashDetailsFailure extends Failure {
+  const FederationIdentityGetHashDetailsFailure();
 
   @override
   List<Object?> get props => [];
