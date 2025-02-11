@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:fluffychat/modules/federation_identity_lookup/domain/models/federation_contact.dart';
 import 'package:fluffychat/modules/federation_identity_request_token/domain/models/federation_token_information.dart';
 
 class FederationArguments with EquatableMixin {
@@ -6,22 +7,18 @@ class FederationArguments with EquatableMixin {
 
   final FederationTokenInformation tokenInformation;
 
-  final Set<String>? phoneNumbers;
-
-  final Set<String>? emailAddresses;
+  final Map<String, FederationContact> contactMaps;
 
   FederationArguments({
     required this.federationUrl,
     required this.tokenInformation,
-    this.phoneNumbers,
-    this.emailAddresses,
+    required this.contactMaps,
   });
 
   @override
   List<Object?> get props => [
         federationUrl,
         tokenInformation,
-        phoneNumbers,
-        emailAddresses,
+        contactMaps,
       ];
 }
