@@ -85,6 +85,8 @@ extension SendFileExtension on Room {
 
     final tempDir = await getTemporaryDirectory();
 
+    Logs().d(
+        'sendFileEventMobile::File Path: ${fileInfo.filePath} - mimeType: ${fileInfo.mimeType}');
     if (TwakeMimeTypeExtension.heicMimeTypes.contains(fileInfo.mimeType) &&
         fileInfo is ImageFileInfo) {
       try {
@@ -92,12 +94,15 @@ extension SendFileExtension on Room {
         fileInfo = await convertHeicToJpgImage(fileInfo);
         File(oldFilePath).delete();
       } catch (e) {
-        Logs().e('sendFileEvent::Error while converting heic to jpg', e);
+        Logs().e('sendFileEventMobile::Error while converting heic to jpg', e);
       }
 
       final formattedDateTime = DateTime.now().getFormattedCurrentDateTime();
       final fileName = _generateThumbnailFileName(formattedDateTime, fileInfo);
       final targetPath = await _createThumbnailFile(tempDir, fileName);
+      Logs().d(
+        'sendFileEventMobile::Thumbnail target File Path: ${targetPath.path} - file name: $fileName',
+      );
       await _generateThumbnail(
         fileInfo as ImageFileInfo,
         targetPath: targetPath.path,
@@ -119,12 +124,12 @@ extension SendFileExtension on Room {
             .create();
     File? tempThumbnailFile;
     File? tempEncryptedThumbnailFile;
-    if (thumbnail != null) {
+    if (msgType == MessageTypes.Image || msgType == MessageTypes.Video) {
       tempThumbnailFile = await File(
-        '${tempDir.path}/$formattedDateTime${fileInfo.fileName}_thumbnail.jpg',
+        '${tempDir.path}/${formattedDateTime}_${fileInfo.fileName}_thumbnail.jpg',
       ).create();
       tempEncryptedThumbnailFile = await File(
-        '${tempDir.path}/$formattedDateTime${fileInfo.fileName}_encrypted_thumbnail',
+        '${tempDir.path}/${formattedDateTime}_${fileInfo.fileName}_encrypted_thumbnail',
       ).create();
     }
 
@@ -625,6 +630,8 @@ extension SendFileExtension on Room {
     required StreamController<Either<Failure, Success>>? uploadStreamController,
   }) async {
     try {
+      Logs().d(
+          'SendFileExtension::_generateThumbnail originalFile: ${originalFile.filePath} - targetPath: $targetPath');
       uploadStreamController?.add(const Right(GeneratingThumbnailState()));
 
       final result = await FlutterImageCompress.compressAndGetFile(
