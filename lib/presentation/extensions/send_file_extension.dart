@@ -86,7 +86,8 @@ extension SendFileExtension on Room {
     final tempDir = await getTemporaryDirectory();
 
     Logs().d(
-        'sendFileEventMobile::File Path: ${fileInfo.filePath} - mimeType: ${fileInfo.mimeType}');
+      'sendFileEventMobile::File Path: ${fileInfo.filePath} - mimeType: ${fileInfo.mimeType}',
+    );
     if (TwakeMimeTypeExtension.heicMimeTypes.contains(fileInfo.mimeType) &&
         fileInfo is ImageFileInfo) {
       try {
@@ -170,7 +171,10 @@ extension SendFileExtension on Room {
       if (thumbnail != null &&
           fileInfo.fileSize > 0 &&
           fileInfo.fileSize < thumbnail.fileSize) {
-        thumbnail = null; // in this case, the thumbnail is not usefull
+        Logs().d(
+          'sendFileEventMobile::Thumbnail is bigger than the original file',
+        );
+        thumbnail = fileInfo; // in this case, the thumbnail is not usefull
       }
     } else if (fileInfo is VideoFileInfo) {
       await _updateFakeSync(
@@ -631,7 +635,8 @@ extension SendFileExtension on Room {
   }) async {
     try {
       Logs().d(
-          'SendFileExtension::_generateThumbnail originalFile: ${originalFile.filePath} - targetPath: $targetPath');
+        'SendFileExtension::_generateThumbnail originalFile: ${originalFile.filePath} - targetPath: $targetPath',
+      );
       uploadStreamController?.add(const Right(GeneratingThumbnailState()));
 
       final result = await FlutterImageCompress.compressAndGetFile(
@@ -664,7 +669,10 @@ extension SendFileExtension on Room {
       uploadStreamController?.add(
         Left(GenerateThumbnailFailed(exception: e)),
       );
-      Logs().e('Error while generating thumbnail', e);
+      Logs().e(
+        'SendFileExtension::_generateThumbnail() Error while generating thumbnail',
+        e,
+      );
       return null;
     }
   }
