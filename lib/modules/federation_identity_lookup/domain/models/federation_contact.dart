@@ -14,43 +14,21 @@ class FederationContact with EquatableMixin {
     this.emails,
   });
 
-  Set<String> calculateHashUsingAllPeppers({
-    required String lookupPepper,
-    required Set<String> algorithms,
-  }) {
-    final Set<String> hashes = {};
-
-    if (algorithms.isEmpty) {
-      return hashes;
-    }
-
-    if (phoneNumbers != null) {
-      for (final phoneNumber in phoneNumbers!) {
-        final hash = phoneNumber.calculateHashWithAlgorithmSha256(
-          pepper: lookupPepper,
-        );
-
-        hashes.add(hash);
-      }
-    }
-
-    if (emails != null) {
-      for (final email in emails!) {
-        final hash = email.calculateHashWithAlgorithmSha256(
-          pepper: lookupPepper,
-        );
-
-        hashes.add(hash);
-      }
-    }
-
-    return hashes;
-  }
-
   @override
   List<Object?> get props => [
         id,
         phoneNumbers,
         emails,
       ];
+
+  FederationContact copyWith({
+    Set<FederationPhone>? phoneNumbers,
+    Set<FederationEmail>? emails,
+  }) {
+    return FederationContact(
+      id: id,
+      phoneNumbers: phoneNumbers ?? this.phoneNumbers,
+      emails: emails ?? this.emails,
+    );
+  }
 }
