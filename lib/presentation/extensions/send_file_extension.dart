@@ -58,6 +58,9 @@ extension SendFileExtension on Room {
       Logs().d(
         'SendImage::sendFileEvent(): FileSized ${fileInfo.fileSize} || maxMediaSize $maxMediaSize',
       );
+      Logs().d(
+        'SendImage::sendFileEvent(): path ${fileInfo.filePath}',
+      );
       if (maxMediaSize != null && maxMediaSize < fileInfo.fileSize) {
         uploadStreamController?.add(
           Left(
@@ -82,6 +85,9 @@ extension SendFileExtension on Room {
 
     final tempDir = await getTemporaryDirectory();
 
+    Logs().d(
+      'sendFileEventMobile::File Path: ${fileInfo.filePath} - mimeType: ${fileInfo.mimeType}',
+    );
     if (TwakeMimeTypeExtension.heicMimeTypes.contains(fileInfo.mimeType) &&
         fileInfo is ImageFileInfo) {
       try {
@@ -89,12 +95,15 @@ extension SendFileExtension on Room {
         fileInfo = await convertHeicToJpgImage(fileInfo);
         File(oldFilePath).delete();
       } catch (e) {
-        Logs().e('sendFileEvent::Error while converting heic to jpg', e);
+        Logs().e('sendFileEventMobile::Error while converting heic to jpg', e);
       }
 
       final formattedDateTime = DateTime.now().getFormattedCurrentDateTime();
       final fileName = _generateThumbnailFileName(formattedDateTime, fileInfo);
       final targetPath = await _createThumbnailFile(tempDir, fileName);
+      Logs().d(
+        'sendFileEventMobile::Thumbnail target File Path: ${targetPath.path} - file name: $fileName',
+      );
       await _generateThumbnail(
         fileInfo as ImageFileInfo,
         targetPath: targetPath.path,
@@ -114,12 +123,16 @@ extension SendFileExtension on Room {
     final tempEncryptedFile =
         await File('${tempDir.path}/$formattedDateTime${fileInfo.fileName}')
             .create();
-    final tempThumbnailFile = await File(
-      '${tempDir.path}/$formattedDateTime${fileInfo.fileName}_thumbnail.jpg',
-    ).create();
-    final tempEncryptedThumbnailFile = await File(
-      '${tempDir.path}/$formattedDateTime${fileInfo.fileName}_encrypted_thumbnail',
-    ).create();
+    File? tempThumbnailFile;
+    File? tempEncryptedThumbnailFile;
+    if (msgType == MessageTypes.Image || msgType == MessageTypes.Video) {
+      tempThumbnailFile = await File(
+        '${tempDir.path}/${formattedDateTime}_${fileInfo.fileName}_thumbnail.jpg',
+      ).create();
+      tempEncryptedThumbnailFile = await File(
+        '${tempDir.path}/${formattedDateTime}_${fileInfo.fileName}_encrypted_thumbnail',
+      ).create();
+    }
 
     // computing the thumbnail in case we can
     if (fileInfo is ImageFileInfo &&
@@ -131,7 +144,7 @@ extension SendFileExtension on Room {
       );
       thumbnail ??= await _generateThumbnail(
         fileInfo,
-        targetPath: tempThumbnailFile.path,
+        targetPath: tempThumbnailFile?.path ?? '',
         uploadStreamController: uploadStreamController,
       );
       fileInfo = ImageFileInfo(
@@ -158,7 +171,10 @@ extension SendFileExtension on Room {
       if (thumbnail != null &&
           fileInfo.fileSize > 0 &&
           fileInfo.fileSize < thumbnail.fileSize) {
-        thumbnail = null; // in this case, the thumbnail is not usefull
+        Logs().d(
+          'sendFileEventMobile::Thumbnail is bigger than the original file',
+        );
+        thumbnail = fileInfo; // in this case, the thumbnail is not usefull
       }
     } else if (fileInfo is VideoFileInfo) {
       await _updateFakeSync(
@@ -167,7 +183,7 @@ extension SendFileExtension on Room {
         FileSendingStatus.generatingThumbnail.name,
       );
       thumbnail ??= await _getThumbnailVideo(
-        tempThumbnailFile,
+        tempThumbnailFile ?? File(''),
         fileInfo,
         txid,
         uploadStreamController: uploadStreamController,
@@ -250,7 +266,7 @@ extension SendFileExtension on Room {
           );
           encryptedThumbnail = await encryptedService.encryptFile(
             fileInfo: thumbnail,
-            outputFile: tempEncryptedThumbnailFile,
+            outputFile: tempEncryptedThumbnailFile ?? File(''),
           );
           uploadStreamController?.add(
             const Right(
@@ -300,7 +316,7 @@ extension SendFileExtension on Room {
             fileInfo: FileInfo(
               thumbnail.fileName,
               isRoomEncrypted()
-                  ? tempEncryptedThumbnailFile.path
+                  ? tempEncryptedThumbnailFile?.path ?? ''
                   : thumbnail.filePath,
               thumbnail.fileSize,
             ),
@@ -422,8 +438,9 @@ extension SendFileExtension on Room {
     }
     await Future.wait([
       tempEncryptedFile.delete(),
-      tempThumbnailFile.delete(),
-      tempEncryptedThumbnailFile.delete(),
+      if (tempThumbnailFile != null) tempThumbnailFile.delete(),
+      if (tempEncryptedThumbnailFile != null)
+        tempEncryptedThumbnailFile.delete(),
     ]);
     return eventId;
   }
@@ -617,6 +634,9 @@ extension SendFileExtension on Room {
     required StreamController<Either<Failure, Success>>? uploadStreamController,
   }) async {
     try {
+      Logs().d(
+        'SendFileExtension::_generateThumbnail originalFile: ${originalFile.filePath} - targetPath: $targetPath',
+      );
       uploadStreamController?.add(const Right(GeneratingThumbnailState()));
 
       final result = await FlutterImageCompress.compressAndGetFile(
@@ -649,7 +669,10 @@ extension SendFileExtension on Room {
       uploadStreamController?.add(
         Left(GenerateThumbnailFailed(exception: e)),
       );
-      Logs().e('Error while generating thumbnail', e);
+      Logs().e(
+        'SendFileExtension::_generateThumbnail() Error while generating thumbnail',
+        e,
+      );
       return null;
     }
   }

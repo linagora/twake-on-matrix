@@ -444,14 +444,14 @@ class ChatController extends State<Chat>
     );
   }
 
-  void _handleReceivedShareFiles() {
+  Future<void> _handleReceivedShareFiles() async {
     if (shareFiles != null && room != null) {
-      final filesIsNotNull = shareFiles!.where((file) => file != null);
+      final filesIsNotNull = shareFiles!.whereNotNull();
       final uploadManger = getIt.get<UploadManager>();
       uploadManger.uploadFileMobile(
         room: room!,
         fileInfos: filesIsNotNull
-            .map((file) => FileInfo.fromMatrixFile(file!))
+            .map((file) => FileInfo.fromMatrixFile(file))
             .toList(),
       );
     }
@@ -2012,7 +2012,7 @@ class ChatController extends State<Chat>
       if (room == null) {
         return context.go("/error");
       }
-      _handleReceivedShareFiles();
+      await _handleReceivedShareFiles();
       _listenRoomUpdateEvent();
       initCachedPresence();
       await _requestParticipants();

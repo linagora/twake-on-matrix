@@ -33,7 +33,7 @@ target 'Runner' do
 
   flutter_install_all_ios_pods File.dirname(File.realpath(__FILE__))
   
-  target 'Twake Share' do
+  target 'TwakeShareExtension' do
     inherit! :search_paths
   end
 end
@@ -46,11 +46,9 @@ post_install do |installer|
       xcconfig = File.read(xcconfig_path)
       xcconfig_mod = xcconfig.gsub(/DT_TOOLCHAIN_DIR/, "TOOLCHAIN_DIR")
       File.open(xcconfig_path, "w") { |file| file << xcconfig_mod }
-      config.build_settings['ENABLE_BITCODE'] = 'NO'
-
-      # see https://github.com/flutter-webrtc/flutter-webrtc/issues/1054
-      config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '12.0'
-      config.build_settings["EXCLUDED_ARCHS[sdk=iphonesimulator*]"] = 'arm64 i386'
+      config.build_settings['EXPANDED_CODE_SIGN_IDENTITY'] = ""
+      config.build_settings['CODE_SIGNING_REQUIRED'] = "NO"
+      config.build_settings['CODE_SIGNING_ALLOWED'] = "NO"
 
       config.build_settings['GCC_PREPROCESSOR_DEFINITIONS'] ||= [
         '$(inherited)',

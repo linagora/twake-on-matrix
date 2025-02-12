@@ -3,11 +3,11 @@
 <plist version="1.0">
 <dict>
 	<key>AppGroupId</key>
-	<string>$(CUSTOM_GROUP_ID)</string>
+	<string>${CUSTOM_GROUP_ID}</string>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>
-	<string>Twake Share</string>
+	<string>TwakeShareExtension</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
@@ -21,7 +21,7 @@
 	<key>CFBundleShortVersionString</key>
 	<string>$(MARKETING_VERSION)</string>
 	<key>CFBundleVersion</key>
-	<string>$(CURRENT_PROJECT_VERSION)</string>
+	<string>1</string>
 	<key>NSExtension</key>
 	<dict>
 		<key>NSExtensionAttributes</key>
@@ -30,9 +30,9 @@
 			<dict>
 				<key>NSExtensionActivationSupportsFileWithMaxCount</key>
 				<integer>15</integer>
-				<key>NSExtensionActivationSupportsImageWithMaxCount</key>
-				<integer>15</integer>
 				<key>NSExtensionActivationSupportsMovieWithMaxCount</key>
+				<integer>15</integer>
+				<key>NSExtensionActivationSupportsImageWithMaxCount</key>
 				<integer>15</integer>
 				<key>NSExtensionActivationSupportsText</key>
 				<true/>
@@ -45,10 +45,10 @@
 				<string>Image</string>
 			</array>
 		</dict>
+		<key>NSExtensionMainStoryboard</key>
+		<string>MainInterface</string>
 		<key>NSExtensionPointIdentifier</key>
 		<string>com.apple.share-services</string>
-		<key>NSExtensionPrincipalClass</key>
-		<string>ShareViewController</string>
 	</dict>
 </dict>
 </plist>

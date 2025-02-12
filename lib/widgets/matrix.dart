@@ -306,7 +306,7 @@ class MatrixState extends State<Matrix>
         html.window.addEventListener('blur', onWindowBlur);
       }
       initMatrix();
-      initReceiveSharingIntent();
+      await initReceiveSharingIntent();
       if (PlatformInfos.isWeb) {
         initConfigWeb().then((_) => initSettings());
       } else {

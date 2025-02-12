@@ -1,5 +1,6 @@
 import UIKit
 import Flutter
+import receive_sharing_intent
 
 let apnTokenKey = "apnToken"
 
@@ -50,6 +51,15 @@ let apnTokenKey = "apnToken"
         let token = deviceToken.base64EncodedString()
         // Save the token to use in the future
         UserDefaults.standard.set(token, forKey: apnTokenKey)
+    }
+
+    override func application(_ app: UIApplication, open url: URL, options: [UIApplication.OpenURLOptionsKey : Any] = [:]) -> Bool {
+        let sharingIntent = SwiftReceiveSharingIntentPlugin.instance
+        if sharingIntent.hasMatchingSchemePrefix(url: url) {
+            return sharingIntent.application(app, open: url, options: options)
+        }
+
+        return super.application(app, open: url, options:options)
     }
     
     override func userNotificationCenter(_ center: UNUserNotificationCenter,
