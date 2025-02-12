@@ -13,10 +13,13 @@ abstract class FederationThirdPartyContact with EquatableMixin {
 
   final String thirdPartyId;
 
+  final Map<String, String>? thirdPartyIdToHashMap;
+
   FederationThirdPartyContact({
     this.matrixId,
     required this.thirdPartyIdType,
     required this.thirdPartyId,
+    this.thirdPartyIdToHashMap,
   });
 
   @override
@@ -24,6 +27,7 @@ abstract class FederationThirdPartyContact with EquatableMixin {
         matrixId,
         thirdPartyIdType,
         thirdPartyId,
+        thirdPartyIdToHashMap,
       ];
 
   String calculateHashWithAlgorithmSha256({
@@ -80,6 +84,7 @@ class FederationPhone extends FederationThirdPartyContact {
   FederationPhone({
     required this.number,
     super.matrixId,
+    super.thirdPartyIdToHashMap,
   }) : super(
           thirdPartyIdType: 'msisdn',
           thirdPartyId: number.msisdnSanitizer(),
@@ -90,14 +95,18 @@ class FederationPhone extends FederationThirdPartyContact {
         matrixId,
         number,
         thirdPartyIdType,
+        thirdPartyIdToHashMap,
       ];
 
   FederationPhone copyWith({
     String? matrixId,
+    Map<String, String>? thirdPartyIdToHashMap,
   }) {
     return FederationPhone(
       matrixId: matrixId ?? this.matrixId,
       number: number,
+      thirdPartyIdToHashMap:
+          thirdPartyIdToHashMap ?? this.thirdPartyIdToHashMap,
     );
   }
 }
@@ -108,6 +117,7 @@ class FederationEmail extends FederationThirdPartyContact {
   FederationEmail({
     super.matrixId,
     required this.address,
+    super.thirdPartyIdToHashMap,
   }) : super(
           thirdPartyIdType: 'email',
           thirdPartyId: address,
@@ -118,14 +128,18 @@ class FederationEmail extends FederationThirdPartyContact {
         address,
         matrixId,
         thirdPartyIdType,
+        thirdPartyIdToHashMap,
       ];
 
   FederationEmail copyWith({
     String? matrixId,
+    Map<String, String>? thirdPartyIdToHashMap,
   }) {
     return FederationEmail(
       matrixId: matrixId ?? this.matrixId,
       address: address,
+      thirdPartyIdToHashMap:
+          thirdPartyIdToHashMap ?? this.thirdPartyIdToHashMap,
     );
   }
 }
