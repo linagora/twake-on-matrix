@@ -28,7 +28,7 @@ extension SharedMediaFileExtension on SharedMediaFile {
       );
     }
     return MatrixFile(
-      bytes: null,
+      bytes: File(path).readAsBytesSync(),
       name: path.split("/").last,
       filePath: path,
       mimeType: mimeType,

@@ -2,7 +2,6 @@ import 'package:app_links/app_links.dart';
 import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/event/twake_event_types.dart';
 import 'package:fluffychat/pages/share/share.dart';
-import 'package:fluffychat/presentation/extensions/file_extension.dart';
 import 'package:fluffychat/presentation/extensions/shared_media_file_extension.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/utils/url_launcher.dart';
@@ -37,24 +36,21 @@ mixin ReceiveSharingIntentMixin<T extends StatefulWidget> on State<T> {
       _processIncomingSharedText(files.first.path);
       return;
     }
-    matrixState.shareContentList = await Future.wait(
-      files.map(
-        (sharedMediaFile) async {
-          final file = sharedMediaFile.toFile();
-          final matrixFile = await file.toMatrixFile();
-          Logs().d(
-            'ReceiveSharingIntentMixin::_processIncomingSharedFiles: Path ${matrixFile.filePath}',
-          );
-          Logs().d(
-            'ReceiveSharingIntentMixin::_processIncomingSharedFiles: Size ${matrixFile.size}',
-          );
-          return {
-            'msgtype': TwakeEventTypes.shareFileEventType,
-            'file': matrixFile,
-          };
-        },
-      ).toList(),
-    );
+    matrixState.shareContentList = files.map(
+      (sharedMediaFile) {
+        final file = sharedMediaFile.toMatrixFile();
+        Logs().d(
+          'ReceiveSharingIntentMixin::_processIncomingSharedFiles: Path ${file.filePath}',
+        );
+        Logs().d(
+          'ReceiveSharingIntentMixin::_processIncomingSharedFiles: Size ${file.size}',
+        );
+        return {
+          'msgtype': TwakeEventTypes.shareFileEventType,
+          'file': file,
+        };
+      },
+    ).toList();
     openSharePage();
   }
 

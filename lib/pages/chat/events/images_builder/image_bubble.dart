@@ -72,7 +72,7 @@ class ImageBubble extends StatelessWidget {
             ? MessageContentStyle.borderRadiusBubble
             : BorderRadius.zero,
         child: (PlatformInfos.isWeb &&
-                !event.isEventEncrypted(isThumbnail: thumbnailOnly))
+                !event.isBubbleEventEncrypted(isThumbnail: thumbnailOnly))
             ? UnencryptedImageBuilderWeb(
                 event: event,
                 isThumbnail: thumbnailOnly,

@@ -61,6 +61,10 @@ extension SendFileExtension on Room {
       Logs().d(
         'SendImage::sendFileEvent(): path ${fileInfo.filePath}',
       );
+
+      Logs().d(
+        'SendImage::sendFileEvent(): File info $fileInfo',
+      );
       if (maxMediaSize != null && maxMediaSize < fileInfo.fileSize) {
         uploadStreamController?.add(
           Left(
@@ -86,7 +90,8 @@ extension SendFileExtension on Room {
     final tempDir = await getTemporaryDirectory();
 
     Logs().d(
-        'sendFileEventMobile::File Path: ${fileInfo.filePath} - mimeType: ${fileInfo.mimeType}');
+      'sendFileEventMobile::File Path: ${fileInfo.filePath} - mimeType: ${fileInfo.mimeType}',
+    );
     if (TwakeMimeTypeExtension.heicMimeTypes.contains(fileInfo.mimeType) &&
         fileInfo is ImageFileInfo) {
       try {
@@ -170,6 +175,9 @@ extension SendFileExtension on Room {
       if (thumbnail != null &&
           fileInfo.fileSize > 0 &&
           fileInfo.fileSize < thumbnail.fileSize) {
+        Logs().d(
+          'sendFileEventMobile::Thumbnail is bigger than the original file',
+        );
         thumbnail = null; // in this case, the thumbnail is not usefull
       }
     } else if (fileInfo is VideoFileInfo) {
@@ -178,6 +186,7 @@ extension SendFileExtension on Room {
         fileSendingStatusKey,
         FileSendingStatus.generatingThumbnail.name,
       );
+      Logs().d('Video thumbnail generation started', thumbnail != null);
       thumbnail ??= await _getThumbnailVideo(
         tempThumbnailFile ?? File(''),
         fileInfo,
@@ -631,7 +640,8 @@ extension SendFileExtension on Room {
   }) async {
     try {
       Logs().d(
-          'SendFileExtension::_generateThumbnail originalFile: ${originalFile.filePath} - targetPath: $targetPath');
+        'SendFileExtension::_generateThumbnail originalFile: ${originalFile.filePath} - targetPath: $targetPath',
+      );
       uploadStreamController?.add(const Right(GeneratingThumbnailState()));
 
       final result = await FlutterImageCompress.compressAndGetFile(
@@ -664,7 +674,10 @@ extension SendFileExtension on Room {
       uploadStreamController?.add(
         Left(GenerateThumbnailFailed(exception: e)),
       );
-      Logs().e('Error while generating thumbnail', e);
+      Logs().e(
+        'SendFileExtension::_generateThumbnail() Error while generating thumbnail',
+        e,
+      );
       return null;
     }
   }
@@ -696,6 +709,7 @@ extension SendFileExtension on Room {
     String txid, {
     required StreamController<Either<Failure, Success>>? uploadStreamController,
   }) async {
+    Logs().d('Video thumbnail generation started', fileInfo);
     uploadStreamController?.add(const Right(GeneratingThumbnailState()));
     final int fileSize;
     if (fileInfo.imagePlaceholderBytes.isNotEmpty) {
