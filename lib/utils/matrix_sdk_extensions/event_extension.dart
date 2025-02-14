@@ -228,7 +228,10 @@ extension LocalizedBody on Event {
     );
   }
 
-  bool isEventEncrypted({bool isThumbnail = true}) {
-    return isThumbnail ? isThumbnailEncrypted : isAttachmentEncrypted;
+  bool isBubbleEventEncrypted({bool isThumbnail = true}) {
+    if (isThumbnail) {
+      return hasThumbnail ? isThumbnailEncrypted : isAttachmentEncrypted;
+    }
+    return isAttachmentEncrypted;
   }
 }
