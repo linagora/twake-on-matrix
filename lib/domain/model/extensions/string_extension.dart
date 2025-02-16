@@ -8,4 +8,9 @@ extension StringExtension on String {
   String get displayMentioned {
     return '@[$this]';
   }
+
+  String get convertToHttps {
+    final domain = split(':').first;
+    return 'https://$domain/';
+  }
 }

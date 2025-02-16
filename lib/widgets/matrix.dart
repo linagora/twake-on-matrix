@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 import 'package:fluffychat/data/model/federation_server/federation_configuration.dart';
+import 'package:fluffychat/data/model/federation_server/federation_server_information.dart';
 import 'package:fluffychat/domain/contact_manager/contacts_manager.dart';
 import 'package:fluffychat/domain/repository/federation_configurations_repository.dart';
 import 'package:fluffychat/presentation/mixins/init_config_mixin.dart';
@@ -606,6 +607,12 @@ class MatrixState extends State<Matrix>
         _setupAuthUrl();
         return;
       }
+      final federationConfigurations =
+          await getFederationConfigurations(client.userID!);
+
+      if (federationConfigurations != null) {
+        _setUpFederationServer(federationConfigurations.fedServerInformation);
+      }
       setUpToMServices(
         toMConfigurations.tomServerInformation,
         toMConfigurations.identityServerInformation,
@@ -672,6 +679,7 @@ class MatrixState extends State<Matrix>
     Logs().d('MatrixState::setUpFederationServicesInLogin: $federationSever');
 
     if (federationSever != null) {
+      _setUpFederationServer(federationSever);
       await _storeFederationConfiguration(
         client,
         FederationConfigurations(
@@ -698,6 +706,20 @@ class MatrixState extends State<Matrix>
       'MatrixState::_setUpToMServer: ${tomServerUrlInterceptor.hashCode}',
     );
     tomServerUrlInterceptor.changeBaseUrl(tomServer?.baseUrl?.toString());
+  }
+
+  void _setUpFederationServer(FederationServerInformation? federationServer) {
+    final federationServerUrlInterceptor = getIt.get<DynamicUrlInterceptors>(
+      instanceName: NetworkDI.federationServerUrlInterceptorName,
+    );
+
+    Logs().d(
+      'MatrixState::setUpFederationServer: ${federationServerUrlInterceptor.hashCode}',
+    );
+
+    federationServerUrlInterceptor.changeBaseUrl(
+      federationServer?.baseUrls?.first.toString(),
+    );
   }
 
   void _setUpHomeServer(Uri homeServerUri) {

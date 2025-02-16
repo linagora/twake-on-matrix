@@ -3,10 +3,9 @@ import 'dart:convert';
 import 'package:equatable/equatable.dart';
 import 'package:fluffychat/domain/model/contact/hash_details_response.dart';
 import 'package:crypto/crypto.dart';
+import 'package:fluffychat/domain/model/contact/third_party_status.dart';
 import 'package:fluffychat/utils/string_extension.dart';
 import 'package:matrix/encryption/utils/base64_unpadded.dart';
-
-import 'contact_status.dart';
 
 enum ThirdPartyIdType {
   email,
@@ -24,75 +23,190 @@ enum ThirdPartyIdType {
 }
 
 class Contact extends Equatable {
-  final String? email;
+  final String id;
+
+  final Set<Email>? emails;
 
   final String? displayName;
 
-  final String? matrixId;
-
-  final String? phoneNumber;
-
-  final ContactStatus? status;
+  final Set<PhoneNumber>? phoneNumbers;
 
   const Contact({
-    this.email,
+    required this.id,
+    this.emails,
     this.displayName,
-    this.matrixId,
-    this.phoneNumber,
-    this.status,
+    this.phoneNumbers,
   });
 
   @override
-  List<Object?> get props =>
-      [email, displayName, matrixId, phoneNumber, status];
+  List<Object?> get props => [
+        id,
+        emails,
+        displayName,
+        phoneNumbers,
+      ];
 
   Contact copyWith({
-    String? email,
     String? displayName,
-    String? matrixId,
-    String? phoneNumber,
-    ContactStatus? status,
+    Set<Email>? emails,
+    Set<PhoneNumber>? phoneNumbers,
   }) {
     return Contact(
-      email: email ?? this.email,
+      id: id,
       displayName: displayName ?? this.displayName,
+      emails: emails ?? this.emails,
+      phoneNumbers: phoneNumbers ?? this.phoneNumbers,
+    );
+  }
+}
+
+abstract class ThirdPartyContact with EquatableMixin {
+  final String? matrixId;
+
+  final String thirdPartyId;
+
+  final ThirdPartyIdType thirdPartyIdType;
+
+  final ThirdPartyStatus? status;
+
+  final Map<String, List<String>>? thirdPartyIdToHashMap;
+
+  ThirdPartyContact({
+    required this.thirdPartyId,
+    required this.thirdPartyIdType,
+    this.matrixId,
+    this.status,
+    this.thirdPartyIdToHashMap,
+  });
+
+  String calculateHashWithAlgorithmSha256({
+    required HashDetailsResponse hashDetails,
+    required String pepper,
+  }) {
+    final input = [thirdPartyId, thirdPartyIdType, pepper].join(' ');
+    final bytes = utf8.encode(input);
+    final lookupHash =
+        encodeBase64Unpadded(sha256.convert(bytes).bytes).urlSafeBase64;
+    return lookupHash;
+  }
+
+  String calculateHashWithoutAlgorithm() {
+    return [thirdPartyId, thirdPartyIdType].join(' ');
+  }
+
+  List<String> calculateHashUsingAllPeppers({
+    required HashDetailsResponse hashDetails,
+  }) {
+    final List<String> hashes = [];
+
+    if (hashDetails.algorithms == null || hashDetails.algorithms!.isEmpty) {
+      return hashes;
+    }
+
+    for (final algorithm in hashDetails.algorithms!) {
+      final peppers = {
+        hashDetails.lookupPepper,
+        ...?hashDetails.altLookupPeppers,
+      };
+
+      for (final pepper in peppers) {
+        if (algorithm == 'sha256') {
+          final hash = calculateHashWithAlgorithmSha256(
+            hashDetails: hashDetails,
+            pepper: pepper ?? '',
+          );
+          hashes.add(hash);
+        } else {
+          final hash = calculateHashWithoutAlgorithm();
+          hashes.add(hash);
+        }
+      }
+    }
+    return hashes;
+  }
+
+  @override
+  List<Object?> get props => [
+        thirdPartyId,
+        thirdPartyIdType,
+        matrixId,
+        status,
+        thirdPartyIdToHashMap,
+      ];
+}
+
+class PhoneNumber extends ThirdPartyContact {
+  final String number;
+
+  PhoneNumber({
+    required this.number,
+    super.matrixId,
+    super.status,
+    super.thirdPartyIdToHashMap,
+  }) : super(
+          thirdPartyId: number.msisdnSanitizer(),
+          thirdPartyIdType: ThirdPartyIdType.msisdn,
+        );
+
+  @override
+  List<Object?> get props => [
+        number,
+        matrixId,
+        status,
+        thirdPartyIdToHashMap,
+        thirdPartyId,
+        thirdPartyIdType,
+      ];
+
+  PhoneNumber copyWith({
+    String? matrixId,
+    ThirdPartyStatus? status,
+    Map<String, List<String>>? thirdPartyIdToHashMap,
+  }) {
+    return PhoneNumber(
+      number: number,
       matrixId: matrixId ?? this.matrixId,
-      phoneNumber: phoneNumber ?? this.phoneNumber,
       status: status ?? this.status,
+      thirdPartyIdToHashMap:
+          thirdPartyIdToHashMap ?? this.thirdPartyIdToHashMap,
+    );
+  }
+}
+
+class Email extends ThirdPartyContact {
+  final String address;
+
+  Email({
+    required this.address,
+    super.matrixId,
+    super.status,
+    super.thirdPartyIdToHashMap,
+  }) : super(
+          thirdPartyId: address,
+          thirdPartyIdType: ThirdPartyIdType.email,
+        );
+
+  Email copyWith({
+    String? matrixId,
+    ThirdPartyStatus? status,
+    Map<String, List<String>>? thirdPartyIdToHashMap,
+  }) {
+    return Email(
+      address: address,
+      matrixId: matrixId ?? this.matrixId,
+      status: status ?? this.status,
+      thirdPartyIdToHashMap:
+          thirdPartyIdToHashMap ?? this.thirdPartyIdToHashMap,
     );
   }
 
-  String? get thirdPartyId {
-    if (phoneNumber != null) {
-      return phoneNumber!.msisdnSanitizer();
-    }
-    return email;
-  }
-
-  ThirdPartyIdType? get thirdPartyIdType {
-    if (phoneNumber != null) {
-      return ThirdPartyIdType.msisdn;
-    }
-    if (email != null) {
-      return ThirdPartyIdType.email;
-    }
-    return null;
-  }
-
-  String? calLookupAddress({required HashDetailsResponse hashDetails}) {
-    if ((email == null && phoneNumber == null) || matrixId != null) {
-      return null;
-    }
-    final algorithm = hashDetails.algorithms?.firstOrNull ?? 'sha256';
-    if (algorithm == 'sha256') {
-      final pepper = hashDetails.lookupPepper ?? '';
-      final input = [thirdPartyId, thirdPartyIdType, pepper].join(' ');
-      final bytes = utf8.encode(input);
-      final lookupHash =
-          encodeBase64Unpadded(sha256.convert(bytes).bytes).urlSafeBase64;
-      return lookupHash;
-    } else {
-      return [thirdPartyId, thirdPartyIdType].join(' ');
-    }
-  }
+  @override
+  List<Object?> get props => [
+        address,
+        matrixId,
+        status,
+        thirdPartyIdToHashMap,
+        thirdPartyId,
+        thirdPartyIdType,
+      ];
 }

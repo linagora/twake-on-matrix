@@ -12,7 +12,7 @@ class LookupListMxidResponse extends Equatable {
   final Map<String, String>? inactiveMappings;
 
   @JsonKey(name: 'third_party_mappings')
-  final Map<String, ThirdPartyMappingsData>? thirdPartyMappings;
+  final Map<String, Set<String>>? thirdPartyMappings;
 
   const LookupListMxidResponse({
     this.mappings,
@@ -31,25 +31,4 @@ class LookupListMxidResponse extends Equatable {
         inactiveMappings,
         thirdPartyMappings,
       ];
-}
-
-@JsonSerializable()
-class ThirdPartyMappingsData with EquatableMixin {
-  @JsonKey(name: 'actives')
-  final Set<String>? actives;
-  @JsonKey(name: 'inactives')
-  final Set<String>? inactives;
-
-  ThirdPartyMappingsData({
-    this.actives,
-    this.inactives,
-  });
-
-  factory ThirdPartyMappingsData.fromJson(Map<String, dynamic> json) =>
-      _$ThirdPartyMappingsDataFromJson(json);
-
-  Map<String, dynamic> toJson() => _$ThirdPartyMappingsDataToJson(this);
-
-  @override
-  List<Object?> get props => [actives, inactives];
 }

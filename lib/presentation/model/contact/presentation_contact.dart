@@ -1,5 +1,5 @@
 import 'package:equatable/equatable.dart';
-import 'package:fluffychat/domain/model/contact/contact_new.dart';
+import 'package:fluffychat/domain/model/contact/contact.dart';
 import 'package:fluffychat/domain/model/contact/contact_status.dart';
 import 'package:fluffychat/domain/model/contact/contact_type.dart';
 import 'package:fluffychat/domain/model/contact/third_party_status.dart';
@@ -13,6 +13,8 @@ class PresentationContact extends Equatable {
 
   final String? matrixId;
 
+  final bool expandInformation;
+
   final ContactStatus? status;
 
   final ContactType? type;
@@ -24,6 +26,7 @@ class PresentationContact extends Equatable {
     this.matrixId,
     this.status,
     this.type,
+    this.expandInformation = false,
   });
 
   PresentationContact get presentationContactEmpty => const PresentationContact(
@@ -39,6 +42,7 @@ class PresentationContact extends Equatable {
         phoneNumbers,
         displayName,
         matrixId,
+        expandInformation,
         status,
         type,
       ];

@@ -20,7 +20,7 @@ class FederationIdentityEndpoint {
   );
 
   static final ServicePath registerServicePath = ServicePath(
-    '/register',
+    '/account/register',
   );
 }
 
