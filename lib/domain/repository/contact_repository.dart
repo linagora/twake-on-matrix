@@ -1,4 +1,4 @@
-import 'package:fluffychat/domain/model/contact/contact_new.dart';
+import 'package:fluffychat/domain/model/contact/contact.dart';
 import 'package:fluffychat/domain/model/contact/contact_query.dart';
 import 'package:fluffychat/domain/model/contact/lookup_mxid_request.dart';
 

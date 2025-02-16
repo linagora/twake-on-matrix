@@ -1,3 +1,4 @@
+import 'package:collection/collection.dart';
 import 'package:dartz/dartz.dart';
 import 'package:fluffychat/app_state/failure.dart';
 import 'package:fluffychat/app_state/success.dart';
@@ -15,18 +16,17 @@ class FederationIdentityLookupInteractor {
     required this.federationIdentityLookupRepository,
   });
 
-  Stream<Either<Failure, Success>> execute({
+  Future<Either<Failure, Success>> execute({
     required FederationArguments arguments,
-  }) async* {
+  }) async {
     try {
-      yield const Right(FederationIdentityLookupLoading());
       final registerResponse =
           await federationIdentityLookupRepository.register(
         tokenInformation: arguments.tokenInformation,
       );
 
       if (registerResponse.token == null && registerResponse.token!.isEmpty) {
-        yield Left(
+        return Left(
           FederationIdentityRegisterAccountFailure(
             identityServer: arguments.federationUrl,
           ),
@@ -39,22 +39,21 @@ class FederationIdentityLookupInteractor {
       );
 
       if (hashDetails.lookupPepper == null || hashDetails.algorithms == null) {
-        yield const Left(FederationIdentityGetHashDetailsFailure());
+        return const Left(FederationIdentityGetHashDetailsFailure());
       }
 
-      final contactIdToHashMap = {
-        for (final contact in arguments.contactMaps.values) contact.id: contact,
-      };
+      final contactIdToHashMap = {};
 
       final Map<String, FederationContact> newContacts = {};
 
-      final phoneToHashMap = <String, String>{};
-
-      final emailToHashMap = <String, String>{};
+      final Map<String, List<String>> hashToContactIdMappings = {};
 
       for (final contact in arguments.contactMaps.values) {
+        final phoneToHashMap = <String, String>{};
+
+        final emailToHashMap = <String, String>{};
         if (hashDetails.algorithms!.isEmpty) {
-          yield const Left(FederationIdentityGetHashDetailsFailure());
+          return const Left(FederationIdentityGetHashDetailsFailure());
         }
 
         if (contact.phoneNumbers != null) {
@@ -63,6 +62,10 @@ class FederationIdentityLookupInteractor {
               pepper: hashDetails.lookupPepper!,
             );
             phoneToHashMap.putIfAbsent(phone.number, () => hash);
+
+            hashToContactIdMappings.putIfAbsent(contact.id, () => []).addAll(
+                  phoneToHashMap.values,
+                );
           }
         }
 
@@ -73,6 +76,10 @@ class FederationIdentityLookupInteractor {
             );
 
             emailToHashMap.putIfAbsent(email.address, () => hash);
+
+            hashToContactIdMappings.putIfAbsent(contact.id, () => []).addAll(
+                  emailToHashMap.values,
+                );
           }
         }
 
@@ -85,19 +92,17 @@ class FederationIdentityLookupInteractor {
         contactIdToHashMap.putIfAbsent(contact.id, () => updatedContact);
       }
 
-      final contactToHashMap = {
-        ...phoneToHashMap,
-        ...emailToHashMap,
-      };
+      final contactToHashMap =
+          hashToContactIdMappings.values.expand((hash) => hash).toSet();
 
-      if (contactToHashMap.values.isEmpty) {
-        yield const Left(FederationIdentityCalculationHashesEmpty());
+      if (contactToHashMap.isEmpty) {
+        return const Left(FederationIdentityCalculationHashesEmpty());
       }
 
       final lookupMxidResponse =
           await federationIdentityLookupRepository.lookupMxid(
         request: FederationLookupMxidRequest(
-          addresses: contactToHashMap.values.toSet(),
+          addresses: contactToHashMap.toSet(),
           algorithm: hashDetails.algorithms?.firstOrNull,
           pepper: hashDetails.lookupPepper,
         ),
@@ -105,13 +110,17 @@ class FederationIdentityLookupInteractor {
       );
 
       if (lookupMxidResponse.mappings == null) {
-        yield const Left(
+        return const Left(
           FederationIdentityLookupFailure(exception: 'No mappings found'),
         );
       }
 
       for (final mapping in lookupMxidResponse.mappings!.entries) {
-        final contact = contactIdToHashMap[mapping.key];
+        final contactId = hashToContactIdMappings.entries
+            .firstWhereOrNull((entry) => entry.value.contains(mapping.key))
+            ?.key;
+
+        final contact = contactIdToHashMap[contactId];
         if (contact != null) {
           final updatedPhoneNumbers = _updatePhoneNumbers(
             contact,
@@ -135,13 +144,13 @@ class FederationIdentityLookupInteractor {
         }
       }
 
-      yield Right(
+      return Right(
         FederationIdentityLookupSuccess(
           newContacts: newContacts,
         ),
       );
     } catch (e) {
-      yield Left(FederationIdentityLookupFailure(exception: e));
+      return Left(FederationIdentityLookupFailure(exception: e));
     }
   }
 
@@ -188,14 +197,18 @@ class FederationIdentityLookupInteractor {
     for (final phoneNumber in contact.phoneNumbers!) {
       final thirdPartyIdToHashMap = phoneNumber.thirdPartyIdToHashMap ?? {};
 
-      if (thirdPartyIdToHashMap.values.contains(mappings.values.toString())) {
-        final updatePhoneNumber = phoneNumber.copyWith(
-          matrixId: mappings.keys.toString(),
-        );
-        updatedPhoneNumbers.add(updatePhoneNumber);
+      for (final matrixId in thirdPartyIdToHashMap.values) {
+        if (mappings.keys.contains(matrixId)) {
+          final updatedPhoneNumber = phoneNumber.copyWith(
+            matrixId: mappings.values.first,
+          );
+          updatedPhoneNumbers.add(updatedPhoneNumber);
+        }
       }
     }
-    return updatedPhoneNumbers;
+    return updatedPhoneNumbers.isNotEmpty
+        ? updatedPhoneNumbers
+        : contact.phoneNumbers!;
   }
 
   Set<FederationEmail> _updateEmails(
@@ -205,13 +218,15 @@ class FederationIdentityLookupInteractor {
     final updatedEmails = <FederationEmail>{};
     for (final email in contact.emails!) {
       final thirdPartyIdToHashMap = email.thirdPartyIdToHashMap ?? {};
-      if (thirdPartyIdToHashMap.values.contains(mappings.values.toString())) {
-        final updatedEmail = email.copyWith(
-          matrixId: mappings.keys.toString(),
-        );
-        updatedEmails.add(updatedEmail);
+      for (final matrixId in thirdPartyIdToHashMap.values) {
+        if (mappings.keys.contains(matrixId)) {
+          final updatedEmail = email.copyWith(
+            matrixId: mappings.values.first,
+          );
+          updatedEmails.add(updatedEmail);
+        }
       }
     }
-    return updatedEmails;
+    return updatedEmails.isNotEmpty ? updatedEmails : contact.emails!;
   }
 }

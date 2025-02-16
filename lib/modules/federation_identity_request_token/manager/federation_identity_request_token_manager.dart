@@ -11,15 +11,12 @@ import 'package:fluffychat/modules/federation_identity_request_token/data/networ
 import 'package:fluffychat/modules/federation_identity_request_token/data/repository/federation_identity_request_token_repository_impl.dart';
 import 'package:fluffychat/modules/federation_identity_request_token/domain/models/federation_token_request.dart';
 import 'package:fluffychat/modules/federation_identity_request_token/domain/usecase/federation_identity_request_token_interactor.dart';
+import 'package:flutter/foundation.dart';
 
 class FederationIdentityRequestTokenManager {
-  final FederationTokenRequest federationTokenRequest;
-
-  FederationIdentityRequestTokenManager({
-    required this.federationTokenRequest,
-  });
-
-  DioClient _bindingDio() {
+  DioClient _bindingDio({
+    required FederationTokenRequest federationTokenRequest,
+  }) {
     final headers = {
       HttpHeaders.acceptHeader:
           FederationIdentityRequestTokenEndpoint.acceptHeaderDefault,
@@ -28,14 +25,23 @@ class FederationIdentityRequestTokenManager {
       HttpHeaders.authorizationHeader: 'Bearer ${federationTokenRequest.token}',
     };
 
-    return DioClient(
-      Dio(
-        BaseOptions(
-          baseUrl: federationTokenRequest.federationUrl,
-          headers: headers,
-        ),
+    final dio = Dio(
+      BaseOptions(
+        baseUrl: federationTokenRequest.federationUrl,
+        headers: headers,
       ),
     );
+
+    if (kDebugMode) {
+      dio.interceptors.add(
+        LogInterceptor(
+          requestBody: true,
+          responseBody: true,
+        ),
+      );
+    }
+
+    return DioClient(dio);
   }
 
   FederationIdentityRequestTokenApi _bindingAPI(DioClient dio) {
@@ -58,8 +64,12 @@ class FederationIdentityRequestTokenManager {
     );
   }
 
-  FederationIdentityRequestTokenInteractor _bindingInteractor() {
-    final dio = _bindingDio();
+  FederationIdentityRequestTokenInteractor _bindingInteractor({
+    required FederationTokenRequest federationTokenRequest,
+  }) {
+    final dio = _bindingDio(
+      federationTokenRequest: federationTokenRequest,
+    );
     final api = _bindingAPI(dio);
     final datasource = _bindingDataSourceImpl(api);
     final repository = _bindingRepositoryImpl(datasource);
@@ -69,8 +79,12 @@ class FederationIdentityRequestTokenManager {
     );
   }
 
-  Stream<Either<Failure, Success>> execute() {
-    return _bindingInteractor().execute(
+  Future<Either<Failure, Success>> execute({
+    required FederationTokenRequest federationTokenRequest,
+  }) {
+    return _bindingInteractor(
+      federationTokenRequest: federationTokenRequest,
+    ).execute(
       mxid: federationTokenRequest.mxid,
     );
   }

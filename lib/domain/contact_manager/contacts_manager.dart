@@ -2,17 +2,14 @@ import 'package:dartz/dartz.dart';
 import 'package:fluffychat/app_state/failure.dart';
 import 'package:fluffychat/app_state/success.dart';
 import 'package:fluffychat/config/app_config.dart';
-import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/domain/app_state/contact/get_contacts_state.dart';
-import 'package:fluffychat/domain/app_state/contact/get_phonebook_contact_state_v2.dart';
-import 'package:fluffychat/domain/app_state/contact/get_phonebook_contacts_state.dart';
+import 'package:fluffychat/domain/app_state/contact/get_phonebook_contact_state.dart';
 import 'package:fluffychat/domain/usecase/contacts/get_tom_contacts_interactor.dart';
 import 'package:fluffychat/domain/usecase/contacts/phonebook_contact_interactor.dart';
-import 'package:fluffychat/domain/usecase/contacts/phonebook_contact_interactor_v2.dart';
 import 'package:fluffychat/presentation/extensions/value_notifier_custom.dart';
 
 class ContactsManager {
-  static const int _lookupChunkSize = 50;
+  static const int _lookupChunkSize = 10;
 
   final GetTomContactsInteractor getTomContactsInteractor;
 
@@ -29,10 +26,6 @@ class ContactsManager {
       _phonebookContactsNotifier =
       ValueNotifierCustom(const Right(GetPhonebookContactsInitial()));
 
-  final ValueNotifierCustom<Either<Failure, Success>>
-      _phonebookContactsV2Notifier =
-      ValueNotifierCustom(const Right(GetPhonebookContactsV2Initial()));
-
   ContactsManager({
     required this.getTomContactsInteractor,
     required this.phonebookContactInteractor,
@@ -43,9 +36,6 @@ class ContactsManager {
 
   ValueNotifierCustom<Either<Failure, Success>>
       getPhonebookContactsNotifier() => _phonebookContactsNotifier;
-
-  ValueNotifierCustom<Either<Failure, Success>>
-      getPhonebookContactsV2Notifier() => _phonebookContactsV2Notifier;
 
   bool get _isSynchronizedTomContacts =>
       _contactsNotifier.value.getSuccessOrNull<ContactsInitial>() != null;
@@ -72,22 +62,20 @@ class ContactsManager {
 
   void initialSynchronizeContacts({
     bool isAvailableSupportPhonebookContacts = false,
+    required String mxid,
   }) async {
-    getIt.get<PhonebookContactInteractorV2>().execute().listen(
-      (event) {
-        _phonebookContactsV2Notifier.value = event;
-      },
-    );
     if (!_isSynchronizedTomContacts) {
       return;
     }
     _getAllContacts(
       isAvailableSupportPhonebookContacts: isAvailableSupportPhonebookContacts,
+      mxid: mxid,
     );
   }
 
   void _getAllContacts({
     bool isAvailableSupportPhonebookContacts = false,
+    required String mxid,
   }) {
     getTomContactsInteractor.execute(limit: AppConfig.maxFetchContacts).listen(
       (event) {
@@ -97,19 +85,24 @@ class ContactsManager {
       () => _fetchPhonebookContacts(
         isAvailableSupportPhonebookContacts:
             isAvailableSupportPhonebookContacts,
+        mxid: mxid,
       ),
     );
   }
 
   void _fetchPhonebookContacts({
     bool isAvailableSupportPhonebookContacts = false,
+    required String mxid,
   }) async {
     if (!isAvailableSupportPhonebookContacts) {
       return;
     }
 
     phonebookContactInteractor
-        .execute(lookupChunkSize: _lookupChunkSize)
+        .execute(
+      lookupChunkSize: _lookupChunkSize,
+      mxid: mxid,
+    )
         .listen(
       (event) {
         _phonebookContactsNotifier.value = event;
@@ -117,6 +110,11 @@ class ContactsManager {
     );
   }
 
-  void refreshPhonebookContacts() =>
-      _fetchPhonebookContacts(isAvailableSupportPhonebookContacts: true);
+  void refreshPhonebookContacts({
+    required String mxid,
+  }) =>
+      _fetchPhonebookContacts(
+        isAvailableSupportPhonebookContacts: true,
+        mxid: mxid,
+      );
 }

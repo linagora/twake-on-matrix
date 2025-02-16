@@ -13,7 +13,8 @@ class FederationIdentityRequestTokenApi {
     final path =
         FederationIdentityRequestTokenEndpoint.requestTokenServicePath(mxid)
             .generateFederationIdentityRequestTokenEndpoint();
-    final response = await client.postToGetBody(path);
-    return response;
+    final response = await client.postToGetBody(path, data: {});
+
+    return FederationTokenInformation.fromJson(response);
   }
 }
