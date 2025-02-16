@@ -1,5 +1,5 @@
 import 'package:fluffychat/domain/app_state/contact/get_contacts_state.dart';
-import 'package:fluffychat/domain/app_state/contact/get_phonebook_contact_state_v2.dart';
+import 'package:fluffychat/domain/app_state/contact/get_phonebook_contact_state.dart';
 import 'package:fluffychat/domain/model/contact/contact_type.dart';
 import 'package:fluffychat/pages/contacts_tab/contacts_tab.dart';
 import 'package:fluffychat/pages/contacts_tab/contacts_tab_view_style.dart';
@@ -313,6 +313,13 @@ class _SilverExternalContact extends StatelessWidget {
           child: ExpansionContactListTile(
             contact: externalContact,
             highlightKeyword: controller.textEditingController.text,
+            onExpansionInformation: (contact) {
+              controller.onExpandInformation(
+                context: context,
+                path: 'rooms',
+                contact: contact,
+              );
+            },
           ),
         ),
       ),
@@ -331,7 +338,7 @@ class _SliverPhonebookLoading extends StatelessWidget {
   Widget build(BuildContext context) {
     return ValueListenableBuilder(
       valueListenable:
-          controller.contactsManager.getPhonebookContactsV2Notifier(),
+          controller.contactsManager.getPhonebookContactsNotifier(),
       builder: (context, state, _) {
         return state.fold(
           (failure) {
@@ -340,7 +347,7 @@ class _SliverPhonebookLoading extends StatelessWidget {
             );
           },
           (success) {
-            if (success is GetPhonebookContactsV2Success) {
+            if (success is GetPhonebookContactsSuccess) {
               if (success.progress == 100) {
                 return const SliverToBoxAdapter(
                   child: SizedBox(),
@@ -494,6 +501,13 @@ class _Contact extends StatelessWidget {
         child: ExpansionContactListTile(
           contact: contact,
           highlightKeyword: controller.textEditingController.text,
+          onExpansionInformation: (contact) {
+            controller.onExpandInformation(
+              context: context,
+              path: 'rooms',
+              contact: contact,
+            );
+          },
         ),
       ),
     );

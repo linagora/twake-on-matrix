@@ -141,6 +141,17 @@ class ContactsTabController extends State<ContactsTab>
                                         LinagoraSysColors.material().onSurface,
                                   ),
                             ),
+                            const SizedBox(height: 4),
+                            Text(
+                              phoneNumber.matrixId ?? '',
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .bodyMedium
+                                  ?.copyWith(
+                                    color:
+                                        LinagoraSysColors.material().onSurface,
+                                  ),
+                            ),
                           ],
                         ),
                       ],
@@ -184,6 +195,17 @@ class ContactsTabController extends State<ContactsTab>
                                         LinagoraSysColors.material().onSurface,
                                   ),
                             ),
+                            const SizedBox(height: 4),
+                            Text(
+                              email.matrixId ?? '',
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .bodyMedium
+                                  ?.copyWith(
+                                    color:
+                                        LinagoraSysColors.material().onSurface,
+                                  ),
+                            ),
                           ],
                         ),
                       ],
@@ -195,6 +217,17 @@ class ContactsTabController extends State<ContactsTab>
           ),
         ),
       ),
+    );
+  }
+
+  void onExpandInformation({
+    required BuildContext context,
+    required String path,
+    required PresentationContact contact,
+  }) {
+    _handleMatrixIdNull(
+      context: context,
+      contact: contact,
     );
   }
 
@@ -253,7 +286,7 @@ class ContactsTabController extends State<ContactsTab>
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) async {
-    await handleDidChangeAppLifecycleState(state);
+    await handleDidChangeAppLifecycleState(state, client: client);
   }
 
   @override

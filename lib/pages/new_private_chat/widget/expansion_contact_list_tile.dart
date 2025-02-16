@@ -13,15 +13,18 @@ import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:matrix/matrix.dart';
 
 typedef OnExpansionListTileTap = void Function();
+typedef OnExpansionInformation = void Function(PresentationContact);
 
 class ExpansionContactListTile extends StatelessWidget {
   final PresentationContact contact;
   final String highlightKeyword;
+  final OnExpansionInformation? onExpansionInformation;
 
   const ExpansionContactListTile({
     super.key,
     required this.contact,
     this.highlightKeyword = '',
+    this.onExpansionInformation,
   });
 
   @override
@@ -106,6 +109,33 @@ class ExpansionContactListTile extends StatelessWidget {
                           ),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
+                        ),
+                        InkWell(
+                          onTap: () {
+                            onExpansionInformation?.call(contact);
+                          },
+                          child: Container(
+                            decoration: BoxDecoration(
+                              color: LinagoraSysColors.material()
+                                  .onSurfaceVariant
+                                  .withOpacity(0.08),
+                              borderRadius: BorderRadius.circular(16),
+                            ),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 12.0,
+                              vertical: 4.0,
+                            ),
+                            margin: const EdgeInsets.only(top: 4.0),
+                            child: Text(
+                              'Expand',
+                              style: LinagoraTextStyle.material()
+                                  .bodyMedium
+                                  .copyWith(
+                                    color: LinagoraRefColors.material().primary,
+                                    fontFamily: 'Inter',
+                                  ),
+                            ),
+                          ),
                         ),
                       ] else ...[
                         Container(

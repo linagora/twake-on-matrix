@@ -9,21 +9,20 @@ class FederationIdentityRequestTokenInteractor {
 
   FederationIdentityRequestTokenInteractor({required this.repository});
 
-  Stream<Either<Failure, Success>> execute({
+  Future<Either<Failure, Success>> execute({
     required String mxid,
-  }) async* {
+  }) async {
     try {
-      yield const Right(FederationIdentityRequestTokenLoading());
       final response = await repository.requestToken(
         mxid: mxid,
       );
-      yield Right(
+      return Right(
         FederationIdentityRequestTokenSuccess(
           tokenInformation: response,
         ),
       );
     } catch (e) {
-      yield Left(
+      return Left(
         FederationIdentityRequestTokenFailure(
           exception: e,
         ),

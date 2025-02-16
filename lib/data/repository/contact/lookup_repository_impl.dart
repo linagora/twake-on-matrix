@@ -1,5 +1,6 @@
 import 'package:fluffychat/data/datasource/lookup_datasource.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
+import 'package:fluffychat/domain/model/contact/federation_identity_register_response.dart';
 import 'package:fluffychat/domain/model/contact/hash_details_response.dart';
 import 'package:fluffychat/domain/model/contact/lookup_list_mxid_request.dart';
 import 'package:fluffychat/domain/model/contact/lookup_list_mxid_response.dart';
@@ -16,5 +17,12 @@ class LookupRepositoryImpl implements LookupRepository {
   @override
   Future<LookupListMxidResponse> lookupListMxid(LookupListMxidRequest request) {
     return datasource.lookupListMxid(request);
+  }
+
+  @override
+  Future<FederationIdentityRegisterResponse> federationIdentityRegister({
+    required dynamic data,
+  }) {
+    return datasource.federationIdentityRegister(data: data);
   }
 }

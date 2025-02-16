@@ -4,12 +4,15 @@ import 'package:fluffychat/modules/federation_identity_lookup/domain/models/fede
 class FederationContact with EquatableMixin {
   final String id;
 
+  final String name;
+
   final Set<FederationPhone>? phoneNumbers;
 
   final Set<FederationEmail>? emails;
 
   FederationContact({
     required this.id,
+    required this.name,
     this.phoneNumbers,
     this.emails,
   });
@@ -17,6 +20,7 @@ class FederationContact with EquatableMixin {
   @override
   List<Object?> get props => [
         id,
+        name,
         phoneNumbers,
         emails,
       ];
@@ -27,6 +31,7 @@ class FederationContact with EquatableMixin {
   }) {
     return FederationContact(
       id: id,
+      name: name,
       phoneNumbers: phoneNumbers ?? this.phoneNumbers,
       emails: emails ?? this.emails,
     );

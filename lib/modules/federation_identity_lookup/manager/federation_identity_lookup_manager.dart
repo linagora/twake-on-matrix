@@ -11,29 +11,35 @@ import 'package:fluffychat/modules/federation_identity_lookup/data/network/feder
 import 'package:fluffychat/modules/federation_identity_lookup/data/repository_impl/federation_identity_lookup_repository_impl.dart';
 import 'package:fluffychat/modules/federation_identity_lookup/domain/models/federation_arguments.dart';
 import 'package:fluffychat/modules/federation_identity_lookup/domain/usecase/federation_identity_lookup_interactor.dart';
+import 'package:flutter/foundation.dart';
 
 class FederationIdentityLookupManager {
-  final FederationArguments arguments;
-
-  FederationIdentityLookupManager({
-    required this.arguments,
-  });
-
-  DioClient _bindingDio() {
+  DioClient _bindingDio({
+    required FederationArguments arguments,
+  }) {
     final headers = {
       HttpHeaders.acceptHeader: FederationIdentityEndpoint.acceptHeaderDefault,
       HttpHeaders.contentTypeHeader:
           FederationIdentityEndpoint.contentTypeHeaderDefault,
     };
 
-    return DioClient(
-      Dio(
-        BaseOptions(
-          baseUrl: arguments.federationUrl,
-          headers: headers,
-        ),
+    final dio = Dio(
+      BaseOptions(
+        baseUrl: arguments.federationUrl,
+        headers: headers,
       ),
     );
+
+    if (kDebugMode) {
+      dio.interceptors.add(
+        LogInterceptor(
+          requestBody: true,
+          responseBody: true,
+        ),
+      );
+    }
+
+    return DioClient(dio);
   }
 
   FederationIdentityLookupApi _bindingAPI(DioClient dio) {
@@ -56,8 +62,10 @@ class FederationIdentityLookupManager {
     );
   }
 
-  FederationIdentityLookupInteractor _bindingInteractor() {
-    final dio = _bindingDio();
+  FederationIdentityLookupInteractor _bindingInteractor({
+    required FederationArguments arguments,
+  }) {
+    final dio = _bindingDio(arguments: arguments);
     final api = _bindingAPI(dio);
     final datasource = _bindingDataSourceImpl(api);
     final repository = _bindingRepositoryImpl(datasource);
@@ -67,7 +75,11 @@ class FederationIdentityLookupManager {
     );
   }
 
-  Stream<Either<Failure, Success>> execute() {
-    return _bindingInteractor().execute(arguments: arguments);
+  Future<Either<Failure, Success>> execute({
+    required FederationArguments arguments,
+  }) {
+    return _bindingInteractor(arguments: arguments).execute(
+      arguments: arguments,
+    );
   }
 }

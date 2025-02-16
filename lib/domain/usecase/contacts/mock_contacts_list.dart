@@ -1,4 +1,4 @@
-import 'package:fluffychat/domain/model/contact/contact_new.dart';
+import 'package:fluffychat/domain/model/contact/contact.dart';
 
 final List<Contact> mockContacts = [
   // ================== 1
@@ -804,7 +804,14 @@ final List<Contact> mockContacts = [
     phoneNumbers: {
       PhoneNumber(number: '+84 36 6769439'),
     },
-    emails: const {},
+    emails: {
+      Email(
+        address: 'dphamhoang@linagora.com',
+      ),
+      Email(
+        address: 'quanghnguyen@linagora.com',
+      ),
+    },
   ),
   Contact(
     id: 'ba9004e2-e2ef-4dfb-b08a-c7d2d45680ae',
@@ -812,7 +819,11 @@ final List<Contact> mockContacts = [
     phoneNumbers: {
       PhoneNumber(number: '+84 94 469 73 89'),
     },
-    emails: const {},
+    emails: {
+      Email(
+        address: 'qkdo@linagora.com',
+      ),
+    },
   ),
   Contact(
     id: '5a8f353d-b00d-4bb1-bdd6-25c69db81a5e',

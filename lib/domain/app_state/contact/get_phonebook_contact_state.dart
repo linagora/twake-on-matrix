@@ -11,24 +11,29 @@ class GetPhonebookContactsInitial extends Initial {
 }
 
 class GetPhonebookContactsLoading extends Success {
-  final int progress;
-
-  const GetPhonebookContactsLoading({required this.progress});
+  const GetPhonebookContactsLoading();
 
   @override
-  List<Object?> get props => [progress];
+  List<Object?> get props => [];
 }
 
 class GetPhonebookContactsSuccess extends Success {
+  final int progress;
   final List<Contact> contacts;
 
-  const GetPhonebookContactsSuccess({required this.contacts});
+  const GetPhonebookContactsSuccess({
+    required this.progress,
+    required this.contacts,
+  });
 
   @override
-  List<Object?> get props => [contacts];
+  List<Object?> get props => [
+        progress,
+        contacts,
+      ];
 }
 
-class GetPhonebookContactsIsEmpty extends Failure {
+class GetPhonebookContactsIsEmpty extends Success {
   const GetPhonebookContactsIsEmpty();
 
   @override
@@ -38,7 +43,9 @@ class GetPhonebookContactsIsEmpty extends Failure {
 class GetPhonebookContactsFailure extends Failure {
   final dynamic exception;
 
-  const GetPhonebookContactsFailure({required this.exception});
+  const GetPhonebookContactsFailure({
+    required this.exception,
+  });
 
   @override
   List<Object?> get props => [exception];
