@@ -24,7 +24,7 @@ import 'package:fluffychat/modules/federation_identity_request_token/domain/mode
 import 'package:fluffychat/modules/federation_identity_request_token/domain/state/federation_identity_request_token_state.dart';
 import 'package:fluffychat/modules/federation_identity_request_token/manager/federation_identity_request_token_manager.dart';
 import 'package:fluffychat/domain/model/extensions/contact/contact_extension.dart';
-import 'package:flutter/cupertino.dart';
+import 'package:matrix/matrix.dart';
 
 class PhonebookContactInteractor {
   final PhonebookContactRepository _phonebookContactRepository =
@@ -73,8 +73,8 @@ class PhonebookContactInteractor {
             ),
           );
 
-      debugPrint(
-        'DEBUG::execute: federationIdentityRequestTokenRes: $federationIdentityRequestTokenRes',
+      Logs().d(
+        'PhonebookContactInteractor::execute: federationIdentityRequestTokenRes: $federationIdentityRequestTokenRes',
       );
 
       if (federationIdentityRequestTokenRes == null) {
@@ -86,8 +86,8 @@ class PhonebookContactInteractor {
         data: federationIdentityRequestTokenRes?.toJson(),
       );
 
-      debugPrint(
-        'DEBUG::execute: federationRegisterToken: $federationRegisterToken',
+      Logs().d(
+        'PhonebookContactInteractor::execute: federationRegisterToken: $federationRegisterToken',
       );
 
       if (federationRegisterToken.token == null ||
@@ -108,25 +108,19 @@ class PhonebookContactInteractor {
 
       final hashDetails = await _lookupRepository.getHashDetails();
 
-      debugPrint('DEBUG::execute: hashDetails: $hashDetails');
+      Logs().d(
+        'PhonebookContactInteractor::execute: hashDetails: $hashDetails',
+      );
 
       final contactIdToHashMap = {
         for (final contact in contacts) contact.id: contact,
       };
 
-      debugPrint('DEBUG::execute: contactIdToHashMap: $contactIdToHashMap');
-
       final chunks = contactIdToHashMap.values.slices(lookupChunkSize);
-
-      debugPrint('DEBUG::execute: chunks: ${chunks.length}');
 
       for (final chunkContacts in chunks) {
         final Map<String, List<String>> hashToContactIdMappings = {};
         final Map<String, Contact> contactIdToHashMap = {};
-
-        debugPrint(
-          'DEBUG::execute: progress: $progress',
-        );
 
         for (final chunkContact in chunkContacts) {
           final phoneToHashMap = <String, List<String>>{};
@@ -139,8 +133,6 @@ class PhonebookContactInteractor {
                 hashDetails,
               ),
             );
-
-            debugPrint('DEBUG::execute: phoneToHashMap: $phoneToHashMap');
 
             hashToContactIdMappings
                 .putIfAbsent(chunkContact.id, () => [])
@@ -156,8 +148,6 @@ class PhonebookContactInteractor {
                 hashDetails,
               ),
             );
-
-            debugPrint('DEBUG::execute: emailToHashMap: $emailToHashMap');
 
             hashToContactIdMappings
                 .putIfAbsent(chunkContact.id, () => [])
@@ -175,10 +165,6 @@ class PhonebookContactInteractor {
           contactIdToHashMap[chunkContact.id] = updatedContact;
         }
 
-        debugPrint(
-          'DEBUG::execute: hashToContactIdMappings: $hashToContactIdMappings',
-        );
-
         final request = LookupListMxidRequest(
           addresses:
               hashToContactIdMappings.values.expand((hash) => hash).toSet(),
@@ -186,11 +172,7 @@ class PhonebookContactInteractor {
           pepper: hashDetails.lookupPepper,
         );
 
-        debugPrint('DEBUG::execute: LookupListMxidRequest: $request');
-
         final response = await _lookupRepository.lookupListMxid(request);
-
-        debugPrint('DEBUG::execute: response lookupListMxid: $response');
 
         final Set<Contact> contactsFromMappings = {};
 
@@ -215,7 +197,9 @@ class PhonebookContactInteractor {
             mxid: mxid,
           );
 
-          debugPrint('DEBUG::execute: newContacts: $newContactsThirparty');
+          Logs().d(
+            'PhonebookContactInteractor::execute: newContacts: $newContactsThirparty',
+          );
 
           contactsFromThirdParty.addAll(newContactsThirparty);
         }
@@ -301,9 +285,6 @@ class PhonebookContactInteractor {
 
     for (final phoneNumber in contact.phoneNumbers!) {
       final hashes = phoneToHashMap[phoneNumber.number];
-      debugPrint(
-        'DEBUG::updateContactWithHashes: phoneNumber ${phoneNumber.number} hashes: $hashes',
-      );
       if (hashes != null) {
         final updatedPhoneNumber = phoneNumber.copyWith(
           thirdPartyIdToHashMap: phoneToHashMap,
@@ -314,9 +295,6 @@ class PhonebookContactInteractor {
 
     for (final email in contact.emails!) {
       final hashes = emailToHashMap[email.address];
-      debugPrint(
-        'DEBUG::updateContactWithHashes: email ${email.address} hashes: $hashes',
-      );
       if (hashes != null) {
         final emailUpdated = email.copyWith(
           thirdPartyIdToHashMap: emailToHashMap,
@@ -324,14 +302,6 @@ class PhonebookContactInteractor {
         updatedEmails.add(emailUpdated);
       }
     }
-
-    debugPrint(
-      'DEBUG::updateContactWithHashes: updatedPhoneNumbers: $updatedPhoneNumbers',
-    );
-
-    debugPrint(
-      'DEBUG::updateContactWithHashes: updatedEmails: $updatedEmails',
-    );
 
     return contact.copyWith(
       phoneNumbers: updatedPhoneNumbers,
@@ -344,10 +314,6 @@ class PhonebookContactInteractor {
     required Map<String, List<String>> hashToContactIdMappings,
     required List<Contact> chunkContacts,
   }) {
-    debugPrint(
-      'DEBUG::_handleLookupMappings: hashToContactIdMappings: $hashToContactIdMappings',
-    );
-
     final Set<Contact> currentContacts = chunkContacts.toSet();
 
     final Set<Contact> foundContact = _findContacts(
@@ -356,22 +322,10 @@ class PhonebookContactInteractor {
       chunkContacts,
     );
 
-    debugPrint(
-      'DEBUG::_handleLookupMappings: foundContact: $foundContact',
-    );
-
     final updatedContacts = _updateContacts(foundContact, mappings);
-
-    debugPrint(
-      'DEBUG::_handleLookupMappings: updatedContacts: $updatedContacts',
-    );
 
     currentContacts.removeAll(foundContact);
     currentContacts.addAll(updatedContacts);
-
-    debugPrint(
-      'DEBUG:: ==================DONE==================',
-    );
 
     return currentContacts;
   }
@@ -383,18 +337,12 @@ class PhonebookContactInteractor {
   ) {
     final Set<Contact> foundContact = {};
     for (final entry in mappings.entries) {
-      debugPrint(
-        'DEBUG::_findContacts: entry: ${entry.key}',
-      );
-
       final hash = entry.key;
       final contactIds = findContactIdByHash(
         hashToContactIdMappings: hashToContactIdMappings,
         hash: hash,
       );
-      debugPrint(
-        'DEBUG::_findContacts: contactIds: $contactIds',
-      );
+
       if (contactIds != null) {
         foundContact.addAll(
           chunkContacts.where(
@@ -443,21 +391,14 @@ class PhonebookContactInteractor {
     final updatedPhoneNumbers = <PhoneNumber>{};
     for (final phoneNumber in contact.phoneNumbers!) {
       final thirdPartyIdToHashMap = phoneNumber.thirdPartyIdToHashMap ?? {};
-      debugPrint(
-        'DEBUG::_updatePhoneNumbers: thirdPartyIdToHashMap: $thirdPartyIdToHashMap',
-      );
-      debugPrint(
-        'DEBUG::_updatePhoneNumbers: mappings: $mappings',
-      );
+
       if (thirdPartyIdToHashMap.values
           .expand((hashes) => hashes)
           .any((hash) => mappings.containsKey(hash))) {
         final hash = thirdPartyIdToHashMap.values
             .expand((hashes) => hashes)
             .firstWhere((hash) => mappings.containsKey(hash));
-        debugPrint(
-          'DEBUG::_updatePhoneNumbers: matrixID: ${mappings[hash]}',
-        );
+
         final updatePhoneNumber = phoneNumber.copyWith(
           matrixId: mappings[hash],
         );
@@ -555,13 +496,13 @@ class PhonebookContactInteractor {
       final result = await manager.execute(arguments: arguments);
       result.fold(
         (failure) {
-          debugPrint(
-            'DEBUG::_handleThirdPartyMappings: failure: $failure',
+          Logs().e(
+            'PhonebookContactInteractor::_handleThirdPartyMappings: failure: $failure',
           );
         },
         (success) {
-          debugPrint(
-            'DEBUG::_handleThirdPartyMappings: success: $success',
+          Logs().d(
+            'PhonebookContactInteractor::_handleThirdPartyMappings: success: $success',
           );
 
           if (success is FederationIdentityLookupSuccess) {
