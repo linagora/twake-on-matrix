@@ -42,9 +42,7 @@ class FederationIdentityLookupInteractor {
         return const Left(FederationIdentityGetHashDetailsFailure());
       }
 
-      final contactIdToHashMap = {};
-
-      final Map<String, FederationContact> newContacts = {};
+      final Map<String, FederationContact> contactIdToHashMap = {};
 
       final Map<String, List<String>> hashToContactIdMappings = {};
 
@@ -122,13 +120,13 @@ class FederationIdentityLookupInteractor {
 
         final contact = contactIdToHashMap[contactId];
         if (contact != null) {
-          final updatedPhoneNumbers = _updatePhoneNumbers(
+          final updatedPhoneNumber = _updatePhoneNumber(
             contact,
             {
               mapping.key: mapping.value,
             },
           );
-          final updatedEmails = _updateEmails(
+          final updatedEmails = _updateEmail(
             contact,
             {
               mapping.key: mapping.value,
@@ -136,17 +134,18 @@ class FederationIdentityLookupInteractor {
           );
 
           final updatedContact = contact.copyWith(
-            phoneNumbers: updatedPhoneNumbers,
-            emails: updatedEmails,
+            phoneNumbers:
+                replacePhoneNumber(contact.phoneNumbers, updatedPhoneNumber),
+            emails: replaceEmail(contact.emails, updatedEmails),
           );
 
-          newContacts.putIfAbsent(contact.id, () => updatedContact);
+          contactIdToHashMap[contact.id] = updatedContact;
         }
       }
 
       return Right(
         FederationIdentityLookupSuccess(
-          newContacts: newContacts,
+          newContacts: contactIdToHashMap,
         ),
       );
     } catch (e) {
@@ -163,21 +162,29 @@ class FederationIdentityLookupInteractor {
     final updatedEmails = <FederationEmail>{};
 
     for (final phoneNumber in contact.phoneNumbers!) {
-      final hashes = phoneToHashMap[phoneNumber.number];
-      if (hashes != null) {
-        final updatedPhoneNumber = phoneNumber.copyWith(
-          thirdPartyIdToHashMap: phoneToHashMap,
+      final phone = phoneToHashMap.keys.firstWhereOrNull(
+        (number) => number == phoneNumber.number,
+      );
+      if (phone != null) {
+        final phoneNumberUpdated = phoneNumber.copyWith(
+          thirdPartyIdToHashMap: {
+            phoneNumber.number: phoneToHashMap[phone]!,
+          },
         );
-        updatedPhoneNumbers.add(updatedPhoneNumber);
+        updatedPhoneNumbers.add(phoneNumberUpdated);
       }
     }
 
     for (final email in contact.emails!) {
-      final hashes = emailToHashMap[email.address];
+      final address = emailToHashMap.keys.firstWhereOrNull(
+        (address) => address == email.address,
+      );
 
-      if (hashes != null) {
+      if (address != null) {
         final emailUpdated = email.copyWith(
-          thirdPartyIdToHashMap: emailToHashMap,
+          thirdPartyIdToHashMap: {
+            email.address: emailToHashMap[address]!,
+          },
         );
         updatedEmails.add(emailUpdated);
       }
@@ -189,44 +196,79 @@ class FederationIdentityLookupInteractor {
     );
   }
 
-  Set<FederationPhone> _updatePhoneNumbers(
+  FederationPhone? _updatePhoneNumber(
     FederationContact contact,
     Map<String, String> mappings,
   ) {
-    final updatedPhoneNumbers = <FederationPhone>{};
     for (final phoneNumber in contact.phoneNumbers!) {
       final thirdPartyIdToHashMap = phoneNumber.thirdPartyIdToHashMap ?? {};
 
-      for (final matrixId in thirdPartyIdToHashMap.values) {
-        if (mappings.keys.contains(matrixId)) {
+      for (final hashMap in thirdPartyIdToHashMap.values) {
+        final foundHash = mappings.keys.firstWhereOrNull(
+          (hash) => hashMap == hash,
+        );
+        if (foundHash != null) {
           final updatedPhoneNumber = phoneNumber.copyWith(
-            matrixId: mappings.values.first,
+            matrixId: mappings[foundHash],
           );
-          updatedPhoneNumbers.add(updatedPhoneNumber);
+          return updatedPhoneNumber;
         }
       }
     }
-    return updatedPhoneNumbers.isNotEmpty
-        ? updatedPhoneNumbers
-        : contact.phoneNumbers!;
+
+    return null;
   }
 
-  Set<FederationEmail> _updateEmails(
+  FederationEmail? _updateEmail(
     FederationContact contact,
     Map<String, String> mappings,
   ) {
-    final updatedEmails = <FederationEmail>{};
     for (final email in contact.emails!) {
       final thirdPartyIdToHashMap = email.thirdPartyIdToHashMap ?? {};
-      for (final matrixId in thirdPartyIdToHashMap.values) {
-        if (mappings.keys.contains(matrixId)) {
+      for (final hashMap in thirdPartyIdToHashMap.values) {
+        final foundHash = mappings.keys.firstWhereOrNull(
+          (hash) => hashMap == hash,
+        );
+        if (foundHash != null) {
           final updatedEmail = email.copyWith(
-            matrixId: mappings.values.first,
+            matrixId: mappings[foundHash],
           );
-          updatedEmails.add(updatedEmail);
+          return updatedEmail;
         }
       }
     }
-    return updatedEmails.isNotEmpty ? updatedEmails : contact.emails!;
+    return null;
+  }
+
+  Set<FederationPhone> replacePhoneNumber(
+    Set<FederationPhone>? phoneNumbers,
+    FederationPhone? updatedPhoneNumber,
+  ) {
+    if (phoneNumbers == null || updatedPhoneNumber == null) {
+      return phoneNumbers ?? {};
+    }
+
+    return phoneNumbers.map((phone) {
+      if (phone.number == updatedPhoneNumber.number) {
+        return updatedPhoneNumber;
+      }
+      return phone;
+    }).toSet();
+  }
+
+  Set<FederationEmail> replaceEmail(
+    Set<FederationEmail>? emails,
+    FederationEmail? updatedEmail,
+  ) {
+    if (emails == null || updatedEmail == null) {
+      return emails ?? {};
+    }
+
+    return emails.map((email) {
+      if (email.address == updatedEmail.address) {
+        return updatedEmail;
+      }
+      return email;
+    }).toSet();
   }
 }
