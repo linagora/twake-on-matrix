@@ -1,3 +1,10 @@
+## [2.6.18+2330] - 2025-02-19
+### Fixed
+- [Encryption] Fix timeout for first sync
+- [Encryption] Change log level to verbose when enable log
+- [Encryption] Remove timeout for loading dialog
+- #2215 Fix cannot preview share media
+
 ## [2.6.17+2330] - 2025-01-24
 ### Fixed
 - #1139 Toast when copy message
