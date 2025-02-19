@@ -1,11 +1,11 @@
-import 'package:fluffychat/data/hive/dto/contact/contact_hive_obj.dart';
+import 'package:fluffychat/domain/model/contact/contact.dart';
 
 abstract class HiveThirdPartyContactDatasource {
-  Future<List<ContactHiveObj>> getThirdPartyContactByUserId(String userId);
+  Future<List<Contact>> getThirdPartyContactByUserId(String userId);
 
   Future<void> saveThirdPartyContactsForUser(
     String userId,
-    List<ContactHiveObj> contacts,
+    List<Contact> contacts,
   );
 
   Future<void> deleteThirdPartyContactBox();

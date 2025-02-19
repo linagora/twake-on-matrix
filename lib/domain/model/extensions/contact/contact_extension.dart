@@ -1,3 +1,5 @@
+import 'package:fluffychat/data/hive/dto/contact/contact_hive_obj.dart';
+import 'package:fluffychat/data/hive/dto/contact/third_party_contact_hive_obj.dart';
 import 'package:fluffychat/domain/model/contact/contact.dart';
 import 'package:fluffychat/modules/federation_identity_lookup/domain/models/federation_contact.dart';
 import 'package:fluffychat/modules/federation_identity_lookup/domain/models/federation_hash_details_response.dart';
@@ -11,6 +13,15 @@ extension ContactExtension on Contact {
       name: displayName ?? "",
       phoneNumbers: phoneNumbers?.map((phone) => phone.toFedPhone()).toSet(),
       emails: emails?.map((email) => email.toFedEmail()).toSet(),
+    );
+  }
+
+  ContactHiveObj toHiveObj() {
+    return ContactHiveObj(
+      id: id,
+      displayName: displayName,
+      emails: emails?.map((email) => email.toHiveObj()).toSet(),
+      phoneNumbers: phoneNumbers?.map((phone) => phone.toHiveObj()).toSet(),
     );
   }
 
@@ -323,12 +334,26 @@ extension PhoneNumberExtension on PhoneNumber {
       number: number,
     );
   }
+
+  PhoneNumberHiveObject toHiveObj() {
+    return PhoneNumberHiveObject(
+      number: number,
+      matrixId: matrixId ?? '',
+    );
+  }
 }
 
 extension EmailExtension on Email {
   FederationEmail toFedEmail() {
     return FederationEmail(
       address: address,
+    );
+  }
+
+  EmailHiveObject toHiveObj() {
+    return EmailHiveObject(
+      email: address,
+      matrixId: matrixId ?? '',
     );
   }
 }

@@ -1,6 +1,6 @@
 import 'package:fluffychat/data/datasource/contact/hive_third_party_contact_datasource.dart';
-import 'package:fluffychat/data/hive/dto/contact/contact_hive_obj.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
+import 'package:fluffychat/domain/model/contact/contact.dart';
 import 'package:fluffychat/domain/repository/contact/hive_contact_repository.dart';
 
 class HiveThirdPartyContactRepositoryImpl implements HiveContactRepository {
@@ -8,14 +8,14 @@ class HiveThirdPartyContactRepositoryImpl implements HiveContactRepository {
       getIt.get<HiveThirdPartyContactDatasource>();
 
   @override
-  Future<List<ContactHiveObj>> getThirdPartyContactByUserId(String userId) {
+  Future<List<Contact>> getThirdPartyContactByUserId(String userId) {
     return datasource.getThirdPartyContactByUserId(userId);
   }
 
   @override
   Future<void> saveThirdPartyContactsForUser(
     String userId,
-    List<ContactHiveObj> contacts,
+    List<Contact> contacts,
   ) {
     return datasource.saveThirdPartyContactsForUser(userId, contacts);
   }
