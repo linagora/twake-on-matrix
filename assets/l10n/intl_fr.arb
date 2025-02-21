@@ -2949,7 +2949,7 @@
   "@settingsLanguageDescription": {},
   "sendImages": "{count, plural, =1{Envoyer 1 image} other{Envoyer {count} images}}",
   "@sendImages": {},
-  "enterCaption": "Saisir une légende",
+  "enterCaption": "Ajouter une légende...",
   "@enterCaption": {},
   "failToSend": "L'envoi a échoué, veuillez réessayer",
   "@failToSend": {},
@@ -3236,5 +3236,15 @@
   "callViaCarrier": "Appeler",
   "@callViaCarrier": {},
   "scanQrCodeToJoin": "L'installation de l'application mobile vous permettra de contacter des personnes du carnet d'adresses de votre téléphone ; vos conversations seront synchronisées entre les appareils",
-  "@scanQrCodeToJoin": {}
+  "@scanQrCodeToJoin": {},
+  "phoneNumberCopiedToClipboard": "Numéro de téléphone copié dans le presse-papier",
+  "@phoneNumberCopiedToClipboard": {},
+  "areYouSureYouWantToDeleteAccount": "Confirmez-vous vouloir supprimer ce compte ?",
+  "@areYouSureYouWantToDeleteAccount": {},
+  "textCopiedToClipboard": "Texte copié dans le presse-papier",
+  "@textCopiedToClipboard": {},
+  "deleteLater": "Supprimer plus tard",
+  "@deleteLater": {},
+  "deleteAccountMessage": "Les salons que vous avez créés continueront à exister sans administrateur, à moins que vous ayez donné à un autre utilisateur un droit d'administrateur. Les autres utilisateurs du salon auront toujours accès à l'historique des messages avec vous. La suppression du compte ne supprimera pas ces messages.",
+  "@deleteAccountMessage": {}
 }
