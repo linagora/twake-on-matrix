@@ -1,3 +1,7 @@
+## [2.6.23+2330] - 2025-02-19
+### Fixed
+- Fix build iOS release with new provision profile
+
 ## [2.6.18+2330] - 2025-02-19
 ### Fixed
 - [Encryption] Fix timeout for first sync
