@@ -3221,5 +3221,15 @@
   "callViaCarrier": "Gọi qua Nhà mạng",
   "@callViaCarrier": {},
   "scanQrCodeToJoin": "Cài đặt ứng dụng di động sẽ cho phép bạn liên lạc với mọi người từ sổ địa chỉ trên điện thoại của bạn, các cuộc trò chuyện của bạn sẽ được đồng bộ hóa giữa các thiết bị",
-  "@scanQrCodeToJoin": {}
+  "@scanQrCodeToJoin": {},
+  "phoneNumberCopiedToClipboard": "Số điện thoại đã được sao chép",
+  "@phoneNumberCopiedToClipboard": {},
+  "deleteAccountMessage": "Các nhóm chat mà bạn đã tạo sẽ không có quản trị viên trừ khi bạn đã cấp quyền quản trị cho người khác. Người dùng vẫn sẽ có lịch sử tin nhắn với bạn. Xóa tài khoản sẽ không giải quyết được vấn đề.",
+  "@deleteAccountMessage": {},
+  "deleteLater": "Xoá sau",
+  "@deleteLater": {},
+  "areYouSureYouWantToDeleteAccount": "Bạn có chắc chắn muốn xóa tài khoản không?",
+  "@areYouSureYouWantToDeleteAccount": {},
+  "textCopiedToClipboard": "Văn bản đã được sao chép",
+  "@textCopiedToClipboard": {}
 }
