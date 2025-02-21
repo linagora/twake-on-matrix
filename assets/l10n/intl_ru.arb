@@ -2943,7 +2943,7 @@
   },
   "settingsLanguageDescription": "Выберите язык Twake Chat",
   "@settingsLanguageDescription": {},
-  "enterCaption": "Добавить описание",
+  "enterCaption": "Добавить описание...",
   "@enterCaption": {},
   "failToSend": "Отправить не удалось, повторите попытку",
   "@failToSend": {},
@@ -3239,5 +3239,15 @@
   "copyNumber": "Скопировать номер",
   "@copyNumber": {},
   "scanQrCodeToJoin": "Установка мобильного приложения позволит вам связаться с людьми из адресной книги телефона; ваши чаты синхронизируются между устройствами",
-  "@scanQrCodeToJoin": {}
+  "@scanQrCodeToJoin": {},
+  "phoneNumberCopiedToClipboard": "Номер телефона скопирован",
+  "@phoneNumberCopiedToClipboard": {},
+  "deleteLater": "Удалить позже",
+  "@deleteLater": {},
+  "areYouSureYouWantToDeleteAccount": "Вы уверены, что хотите удалить аккаунт?",
+  "@areYouSureYouWantToDeleteAccount": {},
+  "textCopiedToClipboard": "Текст скопирован",
+  "@textCopiedToClipboard": {},
+  "deleteAccountMessage": "Групповые чаты, которые вы создали, останутся неадминистрируемыми, если вы не предоставите другому пользователю права администратора. У пользователей по-прежнему будет доступ к истории сообщений – даже если вы удалите учетную запись.",
+  "@deleteAccountMessage": {}
 }
