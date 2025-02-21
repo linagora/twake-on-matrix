@@ -2979,7 +2979,7 @@
   },
   "settingsLanguageDescription": "Cài đặt ngôn ngữ bạn sử dụng trên Twake Chat",
   "@settingsLanguageDescription": {},
-  "enterCaption": "Nhập chú thích",
+  "enterCaption": "Nhập chú thích...",
   "@enterCaption": {},
   "failToSend": "Không gửi được, vui lòng thử lại",
   "@failToSend": {},
