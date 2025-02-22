@@ -788,7 +788,7 @@
     "type": "text",
     "placeholders": {}
   },
-  "friday": "Freitag",
+  "friday": "Fr",
   "@friday": {
     "type": "text",
     "placeholders": {}
@@ -813,27 +813,27 @@
     "type": "text",
     "placeholders": {}
   },
-  "groupDescription": "Gruppenbeschreibung",
+  "groupDescription": "Gruppenchatbeschreibung",
   "@groupDescription": {
     "type": "text",
     "placeholders": {}
   },
-  "groupDescriptionHasBeenChanged": "Gruppenbeschreibung wurde geändert",
+  "groupDescriptionHasBeenChanged": "Gruppenchatbeschreibung geändert",
   "@groupDescriptionHasBeenChanged": {
     "type": "text",
     "placeholders": {}
   },
-  "groupIsPublic": "Öffentliche Gruppe",
+  "groupIsPublic": "Gruppenchat ist öffentlich",
   "@groupIsPublic": {
     "type": "text",
     "placeholders": {}
   },
-  "groups": "Gruppen",
+  "groups": "Gruppenchats",
   "@groups": {
     "type": "text",
     "placeholders": {}
   },
-  "groupWith": "Gruppe mit {displayname}",
+  "groupWith": "Gruppenchat mit {displayname}",
   "@groupWith": {
     "type": "text",
     "placeholders": {
@@ -1122,7 +1122,7 @@
     "type": "text",
     "placeholders": {}
   },
-  "monday": "Montag",
+  "monday": "Mo",
   "@monday": {
     "type": "text",
     "placeholders": {}
@@ -1861,7 +1861,7 @@
     "type": "text",
     "placeholders": {}
   },
-  "unpin": "Abpinnen",
+  "unpin": "loslösen",
   "@unpin": {
     "type": "text",
     "placeholders": {}
@@ -2344,7 +2344,7 @@
   },
   "noEmailWarning": "Bitte gib eine gültige E-Mail-Adresse ein. Andernfalls kannst du dein Passwort nicht zurücksetzen. Wenn du das nicht möchtest, tippe erneut auf die Schaltfläche, um fortzufahren.",
   "@noEmailWarning": {},
-  "updateAvailable": "FluffyChat-Update verfügbar",
+  "updateAvailable": "Twake-Chat-Aktualisierung verfügbar",
   "@updateAvailable": {},
   "updateNow": "Update im Hintergrund starten",
   "@updateNow": {},
@@ -2522,5 +2522,41 @@
     "placeholders": {}
   },
   "invite": "Einladen",
-  "@invite": {}
+  "@invite": {},
+  "company": "Unternehmen",
+  "@company": {},
+  "aWhileAgo": "vor einiger Zeit",
+  "@aWhileAgo": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "download": "Herunterladen",
+  "@download": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "email": "E-Mail",
+  "@email": {},
+  "basicInfo": "GRUNDLEGENDE INFORMATIONEN",
+  "@basicInfo": {},
+  "countMembers": "{count, plural, =0{keine Mitglieder} =1{1 Mitglied} other{{count} Mitglieder}}",
+  "@countMembers": {
+    "type": "text",
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "newMessageInTwake": "Sie haben 1 verschlüsselte Nachricht",
+  "@newMessageInTwake": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "noMoreResult": "Kein weiteres Ergebnis!",
+  "@noMoreResult": {},
+  "matrixId": "Matrix-ID",
+  "@matrixId": {},
+  "loadingStatus": "Status wird geladen ...",
+  "@loadingStatus": {},
+  "clear": "Leeren",
+  "@clear": {}
 }
