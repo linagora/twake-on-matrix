@@ -1,21 +1,6 @@
 import 'package:fluffychat/app_state/failure.dart';
-import 'package:fluffychat/app_state/initial.dart';
 import 'package:fluffychat/app_state/success.dart';
 import 'package:fluffychat/modules/federation_identity_lookup/domain/models/federation_contact.dart';
-
-class FederationIdentityLookupInitial extends Initial {
-  const FederationIdentityLookupInitial() : super();
-
-  @override
-  List<Object?> get props => [];
-}
-
-class FederationIdentityLookupLoading extends Success {
-  const FederationIdentityLookupLoading();
-
-  @override
-  List<Object?> get props => [];
-}
 
 class FederationIdentityLookupSuccess extends Success {
   const FederationIdentityLookupSuccess({

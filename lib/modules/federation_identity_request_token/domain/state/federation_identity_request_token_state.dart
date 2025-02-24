@@ -10,13 +10,6 @@ class FederationIdentityRequestTokenInitial extends Initial {
   List<Object?> get props => [];
 }
 
-class FederationIdentityRequestTokenLoading extends Success {
-  const FederationIdentityRequestTokenLoading();
-
-  @override
-  List<Object?> get props => [];
-}
-
 class FederationIdentityRequestTokenSuccess extends Success {
   final FederationTokenInformation tokenInformation;
 
@@ -25,7 +18,7 @@ class FederationIdentityRequestTokenSuccess extends Success {
   });
 
   @override
-  List<Object?> get props => [];
+  List<Object?> get props => [tokenInformation];
 }
 
 class FederationIdentityRequestTokenFailure extends Failure {

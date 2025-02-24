@@ -35,7 +35,7 @@ class FederationIdentityLookupInteractor {
 
       final hashDetails =
           await federationIdentityLookupRepository.getHashDetails(
-        token: registerResponse.token!,
+        registeredToken: registerResponse.token!,
       );
 
       if (hashDetails.lookupPepper == null || hashDetails.algorithms == null) {
@@ -44,7 +44,7 @@ class FederationIdentityLookupInteractor {
 
       final Map<String, FederationContact> contactIdToHashMap = {};
 
-      final Map<String, List<String>> hashToContactIdMappings = {};
+      final Map<String, List<String>> contactIdToHashesMap = {};
 
       for (final contact in arguments.contactMaps.values) {
         final phoneToHashMap = <String, String>{};
@@ -56,12 +56,14 @@ class FederationIdentityLookupInteractor {
 
         if (contact.phoneNumbers != null) {
           for (final phone in contact.phoneNumbers!) {
-            final hash = phone.calculateHashWithAlgorithmSha256(
-              pepper: hashDetails.lookupPepper!,
+            final hashes = phone.calculateHashUsingAllPeppers(
+              hashDetails: hashDetails,
             );
-            phoneToHashMap.putIfAbsent(phone.number, () => hash);
+            for (final hash in hashes) {
+              phoneToHashMap.putIfAbsent(phone.number, () => hash);
+            }
 
-            hashToContactIdMappings.putIfAbsent(contact.id, () => []).addAll(
+            contactIdToHashesMap.putIfAbsent(contact.id, () => []).addAll(
                   phoneToHashMap.values,
                 );
           }
@@ -69,13 +71,14 @@ class FederationIdentityLookupInteractor {
 
         if (contact.emails != null) {
           for (final email in contact.emails!) {
-            final hash = email.calculateHashWithAlgorithmSha256(
-              pepper: hashDetails.lookupPepper!,
+            final hashes = email.calculateHashUsingAllPeppers(
+              hashDetails: hashDetails,
             );
 
-            emailToHashMap.putIfAbsent(email.address, () => hash);
-
-            hashToContactIdMappings.putIfAbsent(contact.id, () => []).addAll(
+            for (final hash in hashes) {
+              emailToHashMap.putIfAbsent(email.address, () => hash);
+            }
+            contactIdToHashesMap.putIfAbsent(contact.id, () => []).addAll(
                   emailToHashMap.values,
                 );
           }
@@ -91,7 +94,7 @@ class FederationIdentityLookupInteractor {
       }
 
       final contactToHashMap =
-          hashToContactIdMappings.values.expand((hash) => hash).toSet();
+          contactIdToHashesMap.values.expand((hash) => hash).toSet();
 
       if (contactToHashMap.isEmpty) {
         return const Left(FederationIdentityCalculationHashesEmpty());
@@ -104,7 +107,7 @@ class FederationIdentityLookupInteractor {
           algorithm: hashDetails.algorithms?.firstOrNull,
           pepper: hashDetails.lookupPepper,
         ),
-        token: registerResponse.token!,
+        registeredToken: registerResponse.token!,
       );
 
       if (lookupMxidResponse.mappings == null) {
@@ -114,7 +117,7 @@ class FederationIdentityLookupInteractor {
       }
 
       for (final mapping in lookupMxidResponse.mappings!.entries) {
-        final contactId = hashToContactIdMappings.entries
+        final contactId = contactIdToHashesMap.entries
             .firstWhereOrNull((entry) => entry.value.contains(mapping.key))
             ?.key;
 
@@ -203,9 +206,9 @@ class FederationIdentityLookupInteractor {
     for (final phoneNumber in contact.phoneNumbers!) {
       final thirdPartyIdToHashMap = phoneNumber.thirdPartyIdToHashMap ?? {};
 
-      for (final hashMap in thirdPartyIdToHashMap.values) {
+      for (final mappingHash in thirdPartyIdToHashMap.values) {
         final foundHash = mappings.keys.firstWhereOrNull(
-          (hash) => hashMap == hash,
+          (hash) => mappingHash == hash,
         );
         if (foundHash != null) {
           final updatedPhoneNumber = phoneNumber.copyWith(
@@ -225,9 +228,9 @@ class FederationIdentityLookupInteractor {
   ) {
     for (final email in contact.emails!) {
       final thirdPartyIdToHashMap = email.thirdPartyIdToHashMap ?? {};
-      for (final hashMap in thirdPartyIdToHashMap.values) {
+      for (final mappingHash in thirdPartyIdToHashMap.values) {
         final foundHash = mappings.keys.firstWhereOrNull(
-          (hash) => hashMap == hash,
+          (hash) => mappingHash == hash,
         );
         if (foundHash != null) {
           final updatedEmail = email.copyWith(
