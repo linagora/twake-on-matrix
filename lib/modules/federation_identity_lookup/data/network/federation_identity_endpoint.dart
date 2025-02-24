@@ -4,9 +4,6 @@ class FederationIdentityEndpoint {
   static const String federationIdentityRootPath = '/_matrix/identity';
   static const String federationIdentityAPIVersion = 'v2';
 
-  static const federationIdentityDioClientName =
-      'federationIdentityDioClientName';
-
   static const acceptHeaderDefault = 'application/json';
 
   static const contentTypeHeaderDefault = 'application/json';
