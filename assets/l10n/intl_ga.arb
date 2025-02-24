@@ -2419,7 +2419,7 @@
   "@copyImageSuccess": {},
   "selectedUsers": "Úsáideoirí roghnaithe",
   "@selectedUsers": {},
-  "photoSelectedCounter": "{comhaireamh, iolra, =1{1 grianghraf} eile{{count} grianghraif}} roghnaithe",
+  "photoSelectedCounter": "{count, plural, =1{1 grianghraf} other{{count} grianghraif}} roghnaithe",
   "@photoSelectedCounter": {
     "placeholders": {
       "count": {}
@@ -2529,7 +2529,7 @@
   "@recoveringYourEncryptedChats": {},
   "addDescription": "Cuir cur síos leis",
   "@addDescription": {},
-  "pinnedMessages": "{count, plural, =1{1 Pinned Message} other{{count} Pinned Messages}}}",
+  "pinnedMessages": "{count, plural, =1{1 Pinned Message} other{{count} Pinned Messages}}",
   "@pinnedMessages": {
     "type": "text",
     "placeholders": {
@@ -3085,7 +3085,7 @@
   "@profileInfo": {},
   "fileSavedToDownloads": "Sábháladh an comhad le hÍosluchtuithe",
   "@fileSavedToDownloads": {},
-  "messageSelected": "{count, plural, =0{No Messages} =1{1 Teachtaireacht} eile{{count} Teachtaireachtaí}} roghnaithe",
+  "messageSelected": "{count, plural, =0{No Messages} =1{1 Teachtaireacht} other{{count} Teachtaireachtaí}} roghnaithe",
   "@messageSelected": {
     "type": "text",
     "placeholders": {
@@ -3132,7 +3132,7 @@
   "@unlockOldMessages": {},
   "letsStart": "Tosaímis",
   "@letsStart": {},
-  "countMembers": "{comhaireamh, iolra, =0{no members} =1{1 ball} other{{count} members}}",
+  "countMembers": "{count, plural, =0{no members} =1{1 ball} other{{count} members}}",
   "@countMembers": {
     "type": "text",
     "placeholders": {

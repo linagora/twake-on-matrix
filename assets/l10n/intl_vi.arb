@@ -2999,7 +2999,7 @@
   "@groupName": {},
   "clearAllSelected": "Xóa tất cả các lựa chọn",
   "@clearAllSelected": {},
-  "pinnedMessages": "{count, plural, =1{1 Tin nhắn được ghim} other{{count} Tin nhắn được ghim}}}",
+  "pinnedMessages": "{count, plural, =1{1 Tin nhắn được ghim} other{{count} Tin nhắn được ghim}}",
   "@pinnedMessages": {
     "type": "text",
     "placeholders": {

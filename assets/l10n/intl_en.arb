@@ -2898,7 +2898,7 @@
       "count": {}
     }
   },
-  "pinnedMessages": "{count, plural, =1{1 Pinned Message} other{{count} Pinned Messages}}}",
+  "pinnedMessages": "{count, plural, =1{1 Pinned Message} other{{count} Pinned Messages}}",
   "@pinnedMessages": {
     "type": "text",
     "placeholders": {
