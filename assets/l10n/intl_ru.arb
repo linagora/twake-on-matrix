@@ -2900,7 +2900,7 @@
   "@hasInvitedYouToAChat": {},
   "doYouReallyWantToDeclineThisInvitation": "Вы действительно хотите отклонить это приглашение и удалить чат? Это действие нельзя отменить.",
   "@doYouReallyWantToDeclineThisInvitation": {},
-  "pinnedMessages": "{count, plural, =1{1 закрепленное сообщение} other{{count} закрепленных сообщения}}}",
+  "pinnedMessages": "{count, plural, =1{1 закрепленное сообщение} other{{count} закрепленных сообщения}}",
   "@pinnedMessages": {
     "type": "text",
     "placeholders": {
