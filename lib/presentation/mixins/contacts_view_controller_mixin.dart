@@ -62,11 +62,6 @@ mixin class ContactsViewControllerMixin {
     const Right(GetPhonebookContactsInitial()),
   );
 
-  final presentationPhonebookContactV2Notifier =
-      ValueNotifierCustom<Either<Failure, Success>>(
-    const Right(GetPhonebookContactsInitial()),
-  );
-
   final FocusNode searchFocusNode = FocusNode();
 
   final Debouncer<String> _debouncer = Debouncer(
@@ -336,8 +331,8 @@ mixin class ContactsViewControllerMixin {
   }
 
   Future<void> _refreshPhoneBookContacts(String keyword) async {
-    if (presentationPhonebookContactV2Notifier.isDisposed) return;
-    presentationPhonebookContactV2Notifier.value =
+    if (presentationPhonebookContactNotifier.isDisposed) return;
+    presentationPhonebookContactNotifier.value =
         contactsManager.getPhonebookContactsNotifier().value.fold(
       (failure) {
         if (failure is GetPhonebookContactsFailure) {
