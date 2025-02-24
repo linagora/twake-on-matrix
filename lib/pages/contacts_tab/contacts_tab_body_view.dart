@@ -67,7 +67,7 @@ class _SliverPhonebookList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ValueListenableBuilder(
-      valueListenable: controller.presentationPhonebookContactV2Notifier,
+      valueListenable: controller.presentationPhonebookContactNotifier,
       builder: (context, phonebookContactState, child) {
         return phonebookContactState.fold(
           (failure) {
