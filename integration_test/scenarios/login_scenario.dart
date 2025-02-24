@@ -1,6 +1,7 @@
 import 'package:fluffychat/pages/chat_list/chat_list.dart';
 import 'package:fluffychat/pages/homeserver_picker/homeserver_picker_view.dart';
 import 'package:fluffychat/pages/twake_welcome/twake_welcome.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:patrol/patrol.dart';
 import '../base/base_scenario.dart';
@@ -34,6 +35,16 @@ class LoginScenario extends BaseScenario {
     await loginRobot.pressSignInSsoLogin();
     await _handleWaitUntilVisibleHomeServerPickerView(loginRobot);
     await loginRobot.grantNotificationPermission($.nativeAutomator);
+    try{
+      await $.tap(
+      find.descendant(
+        of: find.byType(AppBar),
+        matching: find.byType(IconButton),
+      ),
+    );
+    }catch(e){
+      loginRobot.ignoreException();
+    }
     await expectViewVisible($(ChatList));
   }
 
