@@ -10,11 +10,11 @@ abstract class FederationIdentityLookupRepository {
   });
 
   Future<FederationHashDetailsResponse> getHashDetails({
-    required String token,
+    required String registeredToken,
   });
 
   Future<FederationLookupMxidResponse> lookupMxid({
     required FederationLookupMxidRequest request,
-    required String token,
+    required String registeredToken,
   });
 }

@@ -13,6 +13,7 @@ abstract class FederationThirdPartyContact with EquatableMixin {
 
   final String thirdPartyId;
 
+  /// Support for multiple peppers
   final Map<String, String>? thirdPartyIdToHashMap;
 
   FederationThirdPartyContact({

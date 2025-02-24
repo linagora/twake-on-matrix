@@ -16,21 +16,21 @@ class FederationIdentityLookupDatasourceImpl
 
   @override
   Future<FederationHashDetailsResponse> getHashDetails({
-    required String token,
+    required String registeredToken,
   }) {
     return federationIdentityLookupApi.getHashDetails(
-      token,
+      registeredToken,
     );
   }
 
   @override
   Future<FederationLookupMxidResponse> lookupMxid({
     required FederationLookupMxidRequest request,
-    required String token,
+    required String registeredToken,
   }) {
     return federationIdentityLookupApi.lookupMxid(
       request: request,
-      token: token,
+      token: registeredToken,
     );
   }
 
