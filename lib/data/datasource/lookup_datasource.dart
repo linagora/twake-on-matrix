@@ -1,3 +1,4 @@
+import 'package:fluffychat/domain/model/contact/federation_identity_register_response.dart';
 import 'package:fluffychat/domain/model/contact/hash_details_response.dart';
 import 'package:fluffychat/domain/model/contact/lookup_list_mxid_request.dart';
 import 'package:fluffychat/domain/model/contact/lookup_list_mxid_response.dart';
@@ -8,4 +9,8 @@ abstract class LookupDatasource {
   Future<LookupListMxidResponse> lookupListMxid(
     LookupListMxidRequest request,
   );
+
+  Future<FederationIdentityRegisterResponse> federationIdentityRegister({
+    required dynamic data,
+  });
 }

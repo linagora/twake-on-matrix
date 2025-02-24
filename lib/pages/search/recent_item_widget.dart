@@ -276,14 +276,14 @@ class _ContactInformation extends StatelessWidget {
                       ),
                       searchWord: searchKeyword,
                     ),
-                  if (contactPresentationSearch.email != null)
-                    _SearchHighlightText(
-                      text: contactPresentationSearch.email ?? "",
-                      style: ListItemStyle.subtitleTextStyle(
-                        fontFamily: 'Inter',
-                      ),
-                      searchWord: searchKeyword,
-                    ),
+                  // if (contactPresentationSearch.email != null)
+                  //   _SearchHighlightText(
+                  //     text: contactPresentationSearch.email ?? "",
+                  //     style: ListItemStyle.subtitleTextStyle(
+                  //       fontFamily: 'Inter',
+                  //     ),
+                  //     searchWord: searchKeyword,
+                  //   ),
                 ],
               ),
             ],

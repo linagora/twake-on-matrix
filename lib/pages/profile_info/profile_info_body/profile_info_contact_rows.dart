@@ -38,17 +38,19 @@ class ProfileInfoContactRows extends StatelessWidget {
                   return Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      if (success.contact.email != null)
+                      if (success.contact.emails != null)
                         IconCopiableProfileRow(
                           icon: Icons.alternate_email,
                           caption: L10n.of(context)!.email,
-                          copiableText: success.contact.email!,
+                          copiableText:
+                              success.contact.emails?.first.address ?? '',
                         ),
-                      if (success.contact.phoneNumber != null)
+                      if (success.contact.phoneNumbers != null)
                         IconCopiableProfileRow(
                           icon: Icons.call,
                           caption: L10n.of(context)!.phone,
-                          copiableText: success.contact.phoneNumber!,
+                          copiableText:
+                              success.contact.phoneNumbers?.first.number ?? '',
                         ),
                     ],
                   );

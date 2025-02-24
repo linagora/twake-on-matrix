@@ -40,13 +40,17 @@ class SearchContactsAndChatsController with SearchDebouncerMixin, SearchMixin {
   MatrixLocalizations get _matrixLocalizations =>
       MatrixLocals(L10n.of(context)!);
 
-  List<Room> get _rooms => Matrix.of(context).client.rooms;
+  Client get client => Matrix.of(context).client;
+
+  List<Room> get _rooms => client.rooms;
 
   void init() {
     initializeDebouncer((keyword) {
       _searchChatsFromLocal(keyword: keyword);
     });
-    contactManger.initialSynchronizeContacts();
+    contactManger.initialSynchronizeContacts(
+      mxid: client.userID!,
+    );
     fetchPreSearchChat();
   }
 

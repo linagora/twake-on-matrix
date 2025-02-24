@@ -11,14 +11,14 @@ mixin ComparablePresentationContactMixin {
     buffer1.writeAll([
       contact1.matrixId ?? "",
       contact1.displayName ?? "",
-      contact1.email ?? "",
+      contact1.emails ?? "",
       contact1.status ?? "",
     ]);
 
     buffer2.writeAll([
       contact2.matrixId ?? "",
       contact2.displayName ?? "",
-      contact2.email ?? "",
+      contact2.emails ?? "",
       contact2.status ?? "",
     ]);
 
