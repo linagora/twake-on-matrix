@@ -5,6 +5,7 @@ import 'package:fluffychat/pages/chat_list/chat_list_item_subtitle.dart';
 import 'package:fluffychat/pages/chat_list/chat_list_item_title.dart';
 import 'package:fluffychat/utils/dialog/twake_dialog.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
+import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/utils/twake_snackbar.dart';
 import 'package:fluffychat/widgets/avatar/avatar.dart';
 import 'package:flutter/material.dart';
@@ -13,6 +14,7 @@ import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:go_router/go_router.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:matrix/matrix.dart';
+import 'package:universal_html/html.dart' as html hide File;
 
 enum ArchivedRoomAction { delete, rejoin }
 
@@ -41,6 +43,14 @@ class ChatListItem extends StatelessWidget with ChatListItemMixin {
   });
 
   void clickAction(BuildContext context) async {
+    if (PlatformInfos.isWeb) {
+      try {
+        html.Notification.requestPermission();
+      } catch (e) {
+        Logs().e("Error requesting notification permission: $e");
+      }
+    }
+
     if (onTap != null) return onTap!();
     switch (room.membership) {
       case Membership.ban:
