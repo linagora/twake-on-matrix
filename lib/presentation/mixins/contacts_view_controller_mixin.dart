@@ -164,8 +164,8 @@ mixin class ContactsViewControllerMixin {
           currentContactPermission.isGranted) {
         contactsPermissionStatus = currentContactPermission;
         warningBannerNotifier.value = WarningContactsBannerState.hide;
-        contactsManager.refreshPhonebookContacts(
-          mxid: client.userID!,
+        contactsManager.synchronizePhonebookContacts(
+          withMxId: client.userID!,
         );
         return;
       }
@@ -205,7 +205,7 @@ mixin class ContactsViewControllerMixin {
       );
     });
     contactsManager.initialSynchronizeContacts(
-      mxid: client.userID!,
+      withMxId: client.userID!,
       isAvailableSupportPhonebookContacts: PlatformInfos.isMobile &&
           contactsPermissionStatus != null &&
           contactsPermissionStatus == PermissionStatus.granted,
@@ -510,8 +510,8 @@ mixin class ContactsViewControllerMixin {
     final currentContactsPermissionStatus =
         await _permissionHandlerService.requestContactsPermissionActions();
     if (currentContactsPermissionStatus == PermissionStatus.granted) {
-      contactsManager.refreshPhonebookContacts(
-        mxid: client.userID!,
+      contactsManager.synchronizePhonebookContacts(
+        withMxId: client.userID!,
       );
       warningBannerNotifier.value = WarningContactsBannerState.hide;
     } else {

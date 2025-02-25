@@ -49,7 +49,7 @@ class SearchContactsAndChatsController with SearchDebouncerMixin, SearchMixin {
       _searchChatsFromLocal(keyword: keyword);
     });
     contactManger.initialSynchronizeContacts(
-      mxid: client.userID!,
+      withMxId: client.userID!,
     );
     fetchPreSearchChat();
   }
