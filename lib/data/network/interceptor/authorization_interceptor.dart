@@ -12,6 +12,8 @@ class AuthorizationInterceptor extends InterceptorsWrapper {
     _accessToken = accessToken;
   }
 
+  String? get getAccessToken => _accessToken;
+
   @override
   void onRequest(RequestOptions options, RequestInterceptorHandler handler) {
     options.headers[HttpHeaders.authorizationHeader] = _bearerToken;

@@ -1,6 +1,5 @@
-import 'package:fluffychat/app_state/success.dart';
 import 'package:fluffychat/domain/app_state/contact/get_contacts_state.dart';
-import 'package:fluffychat/domain/app_state/contact/get_phonebook_contacts_state.dart';
+import 'package:fluffychat/domain/app_state/contact/get_phonebook_contact_state.dart';
 import 'package:fluffychat/domain/model/contact/contact_type.dart';
 import 'package:fluffychat/pages/contacts_tab/contacts_tab.dart';
 import 'package:fluffychat/pages/contacts_tab/contacts_tab_view_style.dart';
@@ -314,6 +313,13 @@ class _SilverExternalContact extends StatelessWidget {
           child: ExpansionContactListTile(
             contact: externalContact,
             highlightKeyword: controller.textEditingController.text,
+            onExpansionInformation: (contact) {
+              controller.onExpandInformation(
+                context: context,
+                path: 'rooms',
+                contact: contact,
+              );
+            },
           ),
         ),
       ),
@@ -331,15 +337,30 @@ class _SliverPhonebookLoading extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ValueListenableBuilder(
-      valueListenable: controller.presentationPhonebookContactNotifier,
-      builder: (context, phonebookContactState, child) {
-        final loading = phonebookContactState
-            .getSuccessOrNull<GetPhonebookContactsLoading>();
-        if (loading == null) {
-          return const SliverToBoxAdapter();
-        }
-        return SliverToBoxAdapter(
-          child: _PhonebookLoading(progress: loading.progress),
+      valueListenable:
+          controller.contactsManager.getPhonebookContactsNotifier(),
+      builder: (context, state, _) {
+        return state.fold(
+          (failure) {
+            return const SliverToBoxAdapter(
+              child: SizedBox(),
+            );
+          },
+          (success) {
+            if (success is GetPhonebookContactsSuccess) {
+              if (success.progress == 100) {
+                return const SliverToBoxAdapter(
+                  child: SizedBox(),
+                );
+              }
+              return SliverToBoxAdapter(
+                child: _PhonebookLoading(progress: success.progress),
+              );
+            }
+            return const SliverToBoxAdapter(
+              child: SizedBox(),
+            );
+          },
         );
       },
     );
@@ -480,6 +501,13 @@ class _Contact extends StatelessWidget {
         child: ExpansionContactListTile(
           contact: contact,
           highlightKeyword: controller.textEditingController.text,
+          onExpansionInformation: (contact) {
+            controller.onExpandInformation(
+              context: context,
+              path: 'rooms',
+              contact: contact,
+            );
+          },
         ),
       ),
     );

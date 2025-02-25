@@ -8,6 +8,7 @@ import 'package:fluffychat/data/network/homeserver_endpoint.dart';
 import 'package:fluffychat/data/network/identity_endpoint.dart';
 import 'package:fluffychat/data/network/interceptor/authorization_interceptor.dart';
 import 'package:fluffychat/data/network/interceptor/download_file_interceptor.dart';
+import 'package:fluffychat/data/network/interceptor/federation_authorization_interceptor.dart';
 import 'package:fluffychat/data/network/interceptor/matrix_dio_cache_interceptor.dart';
 import 'package:fluffychat/data/network/interceptor/dynamic_url_interceptor.dart';
 import 'package:fluffychat/di/base_di.dart';
@@ -18,6 +19,11 @@ class NetworkDI extends BaseDI {
   static const tomServerUrlInterceptorName = 'tomServerDynamicUrlInterceptor';
   static const tomServerDioName = 'tomServerDioName';
   static const tomDioClientName = 'tomServerDioClientName';
+
+  static const federationServerUrlInterceptorName =
+      'federationServerDynamicUrlInterceptor';
+  static const federationServerDioName = 'federationServerDioName';
+  static const federationDioClientName = 'federationServerDioClientName';
 
   static const identityServerUrlInterceptorName =
       'identityDynamicUrlInterceptor';
@@ -66,7 +72,10 @@ class NetworkDI extends BaseDI {
       () => DynamicUrlInterceptors(),
       instanceName: identityServerUrlInterceptorName,
     );
-
+    get.registerLazySingleton(
+      () => DynamicUrlInterceptors(),
+      instanceName: federationServerUrlInterceptorName,
+    );
     get.registerLazySingleton(
       () => DynamicUrlInterceptors(),
       instanceName: homeServerUrlInterceptorName,
@@ -74,6 +83,10 @@ class NetworkDI extends BaseDI {
 
     get.registerLazySingleton(
       () => AuthorizationInterceptor(),
+    );
+
+    get.registerLazySingleton(
+      () => FederationAuthorizationInterceptor(),
     );
 
     get.registerSingleton(
@@ -96,6 +109,7 @@ class NetworkDI extends BaseDI {
   void _bindDio(GetIt get) {
     _bindDioForTomServer(get);
     _bindDioForIdentityServer(get);
+    _bindDioForFederationServer(get);
     _bindDioForHomeServer(get);
   }
 
@@ -115,6 +129,28 @@ class NetworkDI extends BaseDI {
     get.registerLazySingleton<DioClient>(
       () => DioClient(get.get<Dio>(instanceName: tomServerDioName)),
       instanceName: tomDioClientName,
+    );
+  }
+
+  void _bindDioForFederationServer(GetIt get) {
+    final dio = Dio(get.get<BaseOptions>());
+    dio.interceptors.add(
+      get.get<DynamicUrlInterceptors>(
+        instanceName: federationServerUrlInterceptorName,
+      ),
+    );
+    dio.interceptors.add(get.get<FederationAuthorizationInterceptor>());
+    if (kDebugMode) {
+      dio.interceptors
+          .add(LogInterceptor(requestBody: true, responseBody: true));
+    }
+    get.registerLazySingleton<Dio>(
+      () => dio,
+      instanceName: federationServerDioName,
+    );
+    get.registerLazySingleton<DioClient>(
+      () => DioClient(get.get<Dio>(instanceName: federationServerDioName)),
+      instanceName: federationDioClientName,
     );
   }
 

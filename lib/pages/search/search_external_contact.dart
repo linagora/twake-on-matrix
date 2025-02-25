@@ -31,7 +31,6 @@ class SearchExternalContactWidget extends StatelessWidget {
           searchController.onSearchItemTap(
             ContactPresentationSearch(
               matrixId: newContact.matrixId,
-              email: newContact.email,
               displayName: newContact.displayName,
             ),
           );

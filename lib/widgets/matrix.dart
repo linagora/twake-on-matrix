@@ -1,6 +1,9 @@
 import 'dart:async';
 import 'dart:io';
+import 'package:fluffychat/data/model/federation_server/federation_configuration.dart';
+import 'package:fluffychat/data/model/federation_server/federation_server_information.dart';
 import 'package:fluffychat/domain/contact_manager/contacts_manager.dart';
+import 'package:fluffychat/domain/repository/federation_configurations_repository.dart';
 import 'package:fluffychat/presentation/mixins/init_config_mixin.dart';
 import 'package:fluffychat/presentation/model/client_login_state_event.dart';
 import 'package:fluffychat/widgets/layouts/agruments/logout_body_args.dart';
@@ -75,8 +78,6 @@ class Matrix extends StatefulWidget {
 
 class MatrixState extends State<Matrix>
     with WidgetsBindingObserver, ReceiveSharingIntentMixin, InitConfigMixin {
-  final tomConfigurationRepository = getIt.get<ToMConfigurationsRepository>();
-
   final _contactsManager = getIt.get<ContactsManager>();
 
   int _activeClient = -1;
@@ -431,6 +432,7 @@ class MatrixState extends State<Matrix>
     waitForFirstSync = false;
     markFirstLogin();
     await setUpToMServicesInLogin(newActiveClient);
+    await setUpFederationServicesInLogin(newActiveClient);
     await _storePersistActiveAccount(newActiveClient);
     matrixState.reSyncContacts();
     onClientLoginStateChanged.add(
@@ -461,6 +463,7 @@ class MatrixState extends State<Matrix>
     if (activeClient == null) return;
     waitForFirstSync = false;
     await setUpToMServicesInLogin(activeClient);
+    await setUpFederationServicesInLogin(activeClient);
     final result = await setActiveClient(activeClient);
     matrixState.reSyncContacts();
     if (result.isSuccess) {
@@ -581,6 +584,21 @@ class MatrixState extends State<Matrix>
     return null;
   }
 
+  Future<FederationConfigurations?> getFederationConfigurations(
+    String userId,
+  ) async {
+    try {
+      final federationConfigurationRepository =
+          getIt.get<FederationConfigurationsRepository>();
+      final federationConfigurations = await federationConfigurationRepository
+          .getFederationConfigurations(userId);
+      return federationConfigurations;
+    } catch (e) {
+      Logs().e('MatrixState::_getFederationConfigurations: $e');
+    }
+    return null;
+  }
+
   void _retrieveLocalToMConfiguration() async {
     if (client.userID == null) return;
     try {
@@ -588,6 +606,12 @@ class MatrixState extends State<Matrix>
       if (toMConfigurations == null) {
         _setupAuthUrl();
         return;
+      }
+      final federationConfigurations =
+          await getFederationConfigurations(client.userID!);
+
+      if (federationConfigurations != null) {
+        _setUpFederationServer(federationConfigurations.fedServerInformation);
       }
       setUpToMServices(
         toMConfigurations.tomServerInformation,
@@ -648,6 +672,24 @@ class MatrixState extends State<Matrix>
     setUpAuthorization(client);
   }
 
+  Future<void> setUpFederationServicesInLogin(Client client) async {
+    final federationSever = loginHomeserverSummary?.federationServer;
+    final identityServer =
+        loginHomeserverSummary?.discoveryInformation?.mIdentityServer;
+    Logs().d('MatrixState::setUpFederationServicesInLogin: $federationSever');
+
+    if (federationSever != null) {
+      _setUpFederationServer(federationSever);
+      await _storeFederationConfiguration(
+        client,
+        FederationConfigurations(
+          fedServerInformation: federationSever,
+          identityServerInformation: identityServer,
+        ),
+      );
+    }
+  }
+
   void setUpAuthorization(Client client) {
     final authorizationInterceptor = getIt.get<AuthorizationInterceptor>();
     Logs().d(
@@ -664,6 +706,20 @@ class MatrixState extends State<Matrix>
       'MatrixState::_setUpToMServer: ${tomServerUrlInterceptor.hashCode}',
     );
     tomServerUrlInterceptor.changeBaseUrl(tomServer?.baseUrl?.toString());
+  }
+
+  void _setUpFederationServer(FederationServerInformation? federationServer) {
+    final federationServerUrlInterceptor = getIt.get<DynamicUrlInterceptors>(
+      instanceName: NetworkDI.federationServerUrlInterceptorName,
+    );
+
+    Logs().d(
+      'MatrixState::setUpFederationServer: ${federationServerUrlInterceptor.hashCode}',
+    );
+
+    federationServerUrlInterceptor.changeBaseUrl(
+      federationServer?.baseUrls?.first.toString(),
+    );
   }
 
   void _setUpHomeServer(Uri homeServerUri) {
@@ -710,6 +766,33 @@ class MatrixState extends State<Matrix>
       );
     } catch (e) {
       Logs().e('Matrix::_storeToMConfiguration: error - $e');
+    }
+  }
+
+  Future<void> _storeFederationConfiguration(
+    Client client,
+    FederationConfigurations config,
+  ) async {
+    try {
+      Logs().e(
+        'Matrix::_storeFederationConfiguration: clientName - ${client.clientName}',
+      );
+      Logs().e(
+        'Matrix::_storeFederationConfiguration: userId - ${client.userID}',
+      );
+      if (client.userID == null) return;
+      final FederationConfigurationsRepository
+          federationConfigurationRepository =
+          getIt.get<FederationConfigurationsRepository>();
+      await federationConfigurationRepository.saveFederationConfigurations(
+        client.userID!,
+        config,
+      );
+      Logs().e(
+        'Matrix::_storeFederationConfiguration: configurationRepository - $federationConfigurationRepository',
+      );
+    } catch (e) {
+      Logs().e('Matrix::_storeFederationConfiguration: error - $e');
     }
   }
 

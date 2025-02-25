@@ -183,13 +183,13 @@ class ChatProfileInfoView extends StatelessWidget {
             return ChatDetailViewStyle.mediumToolbarHeightSliverAppBar;
           }
           if (success is LookupMatchContactSuccess) {
-            if (success.contact.email != null &&
-                success.contact.phoneNumber != null) {
+            if (success.contact.emails != null &&
+                success.contact.phoneNumbers != null) {
               return ChatDetailViewStyle.maxToolbarHeightSliverAppBar;
             }
 
-            if (success.contact.email != null ||
-                success.contact.phoneNumber != null) {
+            if (success.contact.emails != null ||
+                success.contact.phoneNumbers != null) {
               return ChatDetailViewStyle.mediumToolbarHeightSliverAppBar;
             }
 
@@ -300,22 +300,26 @@ class _Information extends StatelessWidget {
                             if (success is LookupMatchContactSuccess) {
                               return Column(
                                 children: [
-                                  if (success.contact.email != null) ...{
+                                  if (success.contact.emails != null) ...{
                                     const SizedBox(
                                       height: ChatProfileInfoStyle.textSpacing,
                                     ),
                                     _CopiableRowWithMaterialIcon(
                                       icon: Icons.alternate_email,
-                                      text: success.contact.email!,
+                                      text: success
+                                              .contact.emails?.first.address ??
+                                          '',
                                     ),
                                   },
-                                  if (success.contact.phoneNumber != null) ...{
+                                  if (success.contact.phoneNumbers != null) ...{
                                     const SizedBox(
                                       height: ChatProfileInfoStyle.textSpacing,
                                     ),
                                     _CopiableRowWithMaterialIcon(
                                       icon: Icons.call,
-                                      text: success.contact.phoneNumber!,
+                                      text: success.contact.phoneNumbers?.first
+                                              .number ??
+                                          '',
                                     ),
                                   },
                                 ],

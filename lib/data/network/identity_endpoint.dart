@@ -16,6 +16,9 @@ class IdentityEndpoint {
   static final ServicePath hashDetailsServicePath = ServicePath(
     '/hash_details',
   );
+  static final ServicePath accountRegisterServicePath = ServicePath(
+    '/account/register',
+  );
 }
 
 extension ServicePathExtensions on ServicePath {

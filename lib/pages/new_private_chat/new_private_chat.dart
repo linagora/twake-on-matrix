@@ -66,7 +66,6 @@ class NewPrivateChatController extends State<NewPrivateChat>
         path: 'rooms',
         contactPresentationSearch: ContactPresentationSearch(
           matrixId: contact.matrixId,
-          email: contact.email,
           displayName: contact.displayName,
         ),
       );
@@ -89,7 +88,10 @@ class NewPrivateChatController extends State<NewPrivateChat>
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) async {
-    await handleDidChangeAppLifecycleState(state);
+    await handleDidChangeAppLifecycleState(
+      state,
+      client: Matrix.of(context).client,
+    );
   }
 
   @override

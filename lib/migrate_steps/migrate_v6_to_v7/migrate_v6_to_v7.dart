@@ -10,16 +10,27 @@ class MigrateV6ToV7 extends MigrateSteps {
     Logs().d(
       'MigrateV6ToV7::onMigrate() Starting migration from v6 to v7',
     );
-    final hiveCollectionToMDatabase =
-        await getIt.getAsync<HiveCollectionToMDatabase>();
-    await hiveCollectionToMDatabase.clear();
-    Logs().d(
-      'MigrateV6ToV7::onMigrate(): Delete ToM database success',
-    );
+    await migrateHiveCollectionToMDatabase();
     final multipleAccountRepository = getIt.get<MultipleAccountRepository>();
     await multipleAccountRepository.deletePersistActiveAccount();
     Logs().d(
       'MigrateV6ToV7::onMigrate(): Delete persist active account success',
     );
+  }
+
+  Future<void> migrateHiveCollectionToMDatabase() async {
+    try {
+      final hiveCollectionToMDatabase =
+          await getIt.getAsync<HiveCollectionToMDatabase>();
+      await hiveCollectionToMDatabase.clear();
+      Logs().d(
+        'MigrateV6ToV7::onMigrate(): Delete ToM database success',
+      );
+    } catch (e) {
+      Logs().e(
+        'MigrateV6ToV7::onMigrate(): Delete ToM database failed',
+        e,
+      );
+    }
   }
 }

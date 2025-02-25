@@ -4,11 +4,11 @@ import 'package:fluffychat/app_state/failure.dart';
 import 'package:fluffychat/app_state/success.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/domain/app_state/contact/get_contacts_state.dart';
-import 'package:fluffychat/domain/app_state/contact/get_phonebook_contacts_state.dart';
+import 'package:fluffychat/domain/app_state/contact/get_phonebook_contact_state.dart';
 import 'package:fluffychat/domain/app_state/search/search_state.dart';
 import 'package:fluffychat/domain/contact_manager/contacts_manager.dart';
 import 'package:fluffychat/domain/model/contact/contact_type.dart';
-import 'package:fluffychat/domain/model/extensions/contact/contacts_extension.dart';
+import 'package:fluffychat/domain/model/extensions/contact/contact_extension.dart';
 import 'package:fluffychat/domain/usecase/search/search_recent_chat_interactor.dart';
 import 'package:fluffychat/presentation/enum/contacts/warning_contacts_banner_enum.dart';
 import 'package:fluffychat/presentation/extensions/contact/presentation_contact_extension.dart';
@@ -24,6 +24,7 @@ import 'package:fluffychat/utils/extension/presentation_search_extension.dart';
 import 'package:fluffychat/utils/permission_dialog.dart';
 import 'package:fluffychat/utils/permission_service.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
+import 'package:fluffychat/widgets/matrix.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:matrix/matrix.dart';
@@ -93,7 +94,9 @@ mixin class ContactsViewControllerMixin {
             onRefuseTap: _handleDenyPermissionDialog,
             onAcceptButton: () async {
               Navigator.of(dialogContext).pop();
-              await _handleRequestContactsPermission();
+              await _handleRequestContactsPermission(
+                client: Matrix.of(context).client,
+              );
             },
           );
         },
@@ -129,7 +132,10 @@ mixin class ContactsViewControllerMixin {
     }
   }
 
-  Future<void> handleDidChangeAppLifecycleState(AppLifecycleState state) async {
+  Future<void> handleDidChangeAppLifecycleState(
+    AppLifecycleState state, {
+    required Client client,
+  }) async {
     if (!PlatformInfos.isMobile) {
       return;
     }
@@ -158,7 +164,9 @@ mixin class ContactsViewControllerMixin {
           currentContactPermission.isGranted) {
         contactsPermissionStatus = currentContactPermission;
         warningBannerNotifier.value = WarningContactsBannerState.hide;
-        contactsManager.refreshPhonebookContacts();
+        contactsManager.synchronizePhonebookContacts(
+          withMxId: client.userID!,
+        );
         return;
       }
     }
@@ -197,6 +205,7 @@ mixin class ContactsViewControllerMixin {
       );
     });
     contactsManager.initialSynchronizeContacts(
+      withMxId: client.userID!,
       isAvailableSupportPhonebookContacts: PlatformInfos.isMobile &&
           contactsPermissionStatus != null &&
           contactsPermissionStatus == PermissionStatus.granted,
@@ -215,6 +224,14 @@ mixin class ContactsViewControllerMixin {
             matrixLocalizations: matrixLocalizations,
           ),
         );
+    contactsManager.getPhonebookContactsNotifier().addListener(
+          () => _refreshAllContacts(
+            context: context,
+            client: client,
+            matrixLocalizations: matrixLocalizations,
+          ),
+        );
+
     contactsManager.getPhonebookContactsNotifier().addListener(
           () => _refreshAllContacts(
             context: context,
@@ -487,11 +504,15 @@ mixin class ContactsViewControllerMixin {
     isSearchModeNotifier.value = false;
   }
 
-  Future<void> _handleRequestContactsPermission() async {
+  Future<void> _handleRequestContactsPermission({
+    required Client client,
+  }) async {
     final currentContactsPermissionStatus =
         await _permissionHandlerService.requestContactsPermissionActions();
     if (currentContactsPermissionStatus == PermissionStatus.granted) {
-      contactsManager.refreshPhonebookContacts();
+      contactsManager.synchronizePhonebookContacts(
+        withMxId: client.userID!,
+      );
       warningBannerNotifier.value = WarningContactsBannerState.hide;
     } else {
       contactsManager.updateNotShowWarningContactsDialogAgain = true;
