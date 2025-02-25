@@ -1,3 +1,7 @@
+## [2.6.25+2330] - 2025-02-25
+### Fixed
+- Translation vi, fr, ru
+
 ## [2.6.24+2330] - 2025-02-22
 ### Fixed
 - Update matrix dependency to make sure message keys were uploaded on sync event
