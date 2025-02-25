@@ -41,9 +41,7 @@ abstract class FederationThirdPartyContact with EquatableMixin {
     return lookupHash;
   }
 
-  String calculateHashWithoutAlgorithm({
-    required String pepper,
-  }) {
+  String calculateHashWithoutAlgorithm() {
     return [thirdPartyId, thirdPartyIdType].join(' ');
   }
 
@@ -53,6 +51,8 @@ abstract class FederationThirdPartyContact with EquatableMixin {
     final Set<String> hashes = {};
 
     if (hashDetails.algorithms == null || hashDetails.algorithms!.isEmpty) {
+      final hash = calculateHashWithoutAlgorithm();
+      hashes.add(hash);
       return hashes;
     }
 
@@ -68,9 +68,7 @@ abstract class FederationThirdPartyContact with EquatableMixin {
           );
           hashes.add(hash);
         } else {
-          final hash = calculateHashWithoutAlgorithm(
-            pepper: pepper ?? '',
-          );
+          final hash = calculateHashWithoutAlgorithm();
           hashes.add(hash);
         }
       }

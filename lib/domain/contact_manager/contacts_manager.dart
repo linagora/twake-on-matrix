@@ -2,8 +2,13 @@ import 'package:dartz/dartz.dart';
 import 'package:fluffychat/app_state/failure.dart';
 import 'package:fluffychat/app_state/success.dart';
 import 'package:fluffychat/config/app_config.dart';
+import 'package:fluffychat/data/network/interceptor/authorization_interceptor.dart';
+import 'package:fluffychat/data/network/interceptor/dynamic_url_interceptor.dart';
+import 'package:fluffychat/di/global/get_it_initializer.dart';
+import 'package:fluffychat/di/global/network_di.dart';
 import 'package:fluffychat/domain/app_state/contact/get_contacts_state.dart';
 import 'package:fluffychat/domain/app_state/contact/get_phonebook_contact_state.dart';
+import 'package:fluffychat/domain/usecase/contacts/federation_look_up_argument.dart';
 import 'package:fluffychat/domain/usecase/contacts/get_tom_contacts_interactor.dart';
 import 'package:fluffychat/domain/usecase/contacts/phonebook_contact_interactor.dart';
 import 'package:fluffychat/presentation/extensions/value_notifier_custom.dart';
@@ -62,46 +67,56 @@ class ContactsManager {
 
   void initialSynchronizeContacts({
     bool isAvailableSupportPhonebookContacts = false,
-    required String mxid,
+    required String withMxId,
   }) async {
     if (!_isSynchronizedTomContacts) {
       return;
     }
     _getAllContacts(
       isAvailableSupportPhonebookContacts: isAvailableSupportPhonebookContacts,
-      mxid: mxid,
+      withMxId: withMxId,
     );
   }
 
   void _getAllContacts({
     bool isAvailableSupportPhonebookContacts = false,
-    required String mxid,
+    required String withMxId,
   }) {
     getTomContactsInteractor.execute(limit: AppConfig.maxFetchContacts).listen(
       (event) {
         _contactsNotifier.value = event;
       },
     ).onDone(
-      () => _fetchPhonebookContacts(
+      () => _lookUpPhonebookContacts(
         isAvailableSupportPhonebookContacts:
             isAvailableSupportPhonebookContacts,
-        mxid: mxid,
+        withMxId: withMxId,
       ),
     );
   }
 
-  void _fetchPhonebookContacts({
+  void _lookUpPhonebookContacts({
     bool isAvailableSupportPhonebookContacts = false,
-    required String mxid,
+    required String withMxId,
   }) async {
     if (!isAvailableSupportPhonebookContacts) {
       return;
     }
 
+    final authorizationInterceptor = getIt.get<AuthorizationInterceptor>();
+
+    final homeServerUrlInterceptor = getIt.get<DynamicUrlInterceptors>(
+      instanceName: NetworkDI.homeServerUrlInterceptorName,
+    );
+
     phonebookContactInteractor
         .execute(
       lookupChunkSize: _lookupChunkSize,
-      mxid: mxid,
+      argument: FederationLookUpArgument(
+        federationUrl: homeServerUrlInterceptor.baseUrl ?? '',
+        withMxId: withMxId,
+        withAccessToken: authorizationInterceptor.getAccessToken ?? '',
+      ),
     )
         .listen(
       (event) {
@@ -110,11 +125,11 @@ class ContactsManager {
     );
   }
 
-  void refreshPhonebookContacts({
-    required String mxid,
+  void synchronizePhonebookContacts({
+    required String withMxId,
   }) =>
-      _fetchPhonebookContacts(
+      _lookUpPhonebookContacts(
         isAvailableSupportPhonebookContacts: true,
-        mxid: mxid,
+        withMxId: withMxId,
       );
 }
