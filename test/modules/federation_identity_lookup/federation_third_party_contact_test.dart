@@ -18,7 +18,9 @@ void main() {
           number: '123456789',
         ).calculateHashUsingAllPeppers(hashDetails: hashDetails);
 
-        expect(result, <String>{});
+        expect(result.isNotEmpty, true);
+
+        expect(result, {'123456789 msisdn'});
       },
     );
 
@@ -37,6 +39,8 @@ void main() {
         ).calculateHashUsingAllPeppers(hashDetails: hashDetails);
 
         expect(result.isNotEmpty, true);
+
+        expect(result, {'3ajyeUS818BntAyy_3tUdVll0Zn37PQvsYWJaPsCpyY'});
       },
     );
 
@@ -58,6 +62,14 @@ void main() {
         ).calculateHashUsingAllPeppers(hashDetails: hashDetails);
 
         expect(result.length, 2);
+
+        expect(
+          result,
+          {
+            '3ajyeUS818BntAyy_3tUdVll0Zn37PQvsYWJaPsCpyY',
+            '123456789 msisdn',
+          },
+        );
       },
     );
   });
@@ -75,6 +87,8 @@ void main() {
         ).calculateHashWithAlgorithmSha256(pepper: pepper);
 
         expect(result.isNotEmpty, true);
+
+        expect(result, 'dxslPU6M0Q2C_asaKTLP8a0ZA9_oXyQ0LY1XXvwEBjs');
       },
     );
 
@@ -90,6 +104,8 @@ void main() {
         ).calculateHashWithAlgorithmSha256(pepper: pepper);
 
         expect(result.isNotEmpty, true);
+
+        expect(result, '3ajyeUS818BntAyy_3tUdVll0Zn37PQvsYWJaPsCpyY');
       },
     );
   });

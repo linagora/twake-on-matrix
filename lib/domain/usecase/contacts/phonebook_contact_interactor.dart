@@ -2,11 +2,8 @@ import 'package:collection/collection.dart';
 import 'package:dartz/dartz.dart';
 import 'package:fluffychat/app_state/failure.dart';
 import 'package:fluffychat/app_state/success.dart';
-import 'package:fluffychat/data/network/interceptor/authorization_interceptor.dart';
-import 'package:fluffychat/data/network/interceptor/dynamic_url_interceptor.dart';
 import 'package:fluffychat/data/network/interceptor/federation_authorization_interceptor.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
-import 'package:fluffychat/di/global/network_di.dart';
 import 'package:fluffychat/domain/app_state/contact/get_phonebook_contact_state.dart';
 import 'package:fluffychat/domain/model/contact/contact.dart';
 import 'package:fluffychat/domain/model/contact/hash_details_response.dart';
@@ -15,6 +12,7 @@ import 'package:fluffychat/domain/model/extensions/string_extension.dart';
 import 'package:fluffychat/domain/repository/federation_configurations_repository.dart';
 import 'package:fluffychat/domain/repository/lookup_repository.dart';
 import 'package:fluffychat/domain/repository/phonebook_contact_repository.dart';
+import 'package:fluffychat/domain/usecase/contacts/federation_look_up_argument.dart';
 
 import 'package:fluffychat/modules/federation_identity_lookup/domain/models/federation_arguments.dart';
 import 'package:fluffychat/modules/federation_identity_lookup/domain/state/federation_identity_lookup_state.dart';
@@ -38,15 +36,9 @@ class PhonebookContactInteractor {
   final federationAuthorizationInterceptor =
       getIt.get<FederationAuthorizationInterceptor>();
 
-  final authorizationInterceptor = getIt.get<AuthorizationInterceptor>();
-
-  final homeServerUrlInterceptor = getIt.get<DynamicUrlInterceptors>(
-    instanceName: NetworkDI.homeServerUrlInterceptorName,
-  );
-
   Stream<Either<Failure, Success>> execute({
     int lookupChunkSize = 10,
-    required String mxid,
+    required FederationLookUpArgument argument,
   }) async* {
     try {
       int progress = 0;
@@ -57,9 +49,9 @@ class PhonebookContactInteractor {
       await FederationIdentityRequestTokenManager()
           .execute(
             federationTokenRequest: FederationTokenRequest(
-              federationUrl: "${homeServerUrlInterceptor.baseUrl ?? ''}/",
-              mxid: mxid,
-              token: authorizationInterceptor.getAccessToken ?? '',
+              federationUrl: "${argument.federationUrl}/",
+              mxid: argument.withMxId,
+              token: argument.withAccessToken,
             ),
           )
           .then(
@@ -194,7 +186,7 @@ class PhonebookContactInteractor {
             thirdPartyToHashes: response.thirdPartyMappings ?? {},
             hashToContactIdMappings: hashToContactIdMappings,
             newContacts: contactIdToHashMap.values.toList(),
-            mxid: mxid,
+            argument: argument,
           );
 
           Logs().d(
@@ -442,7 +434,7 @@ class PhonebookContactInteractor {
     required Map<String, Set<String>> thirdPartyToHashes,
     required Map<String, List<String>> hashToContactIdMappings,
     required List<Contact> newContacts,
-    required String mxid,
+    required FederationLookUpArgument argument,
   }) async {
     final List<Contact> updatedContact = [];
     for (final server in thirdPartyToHashes.keys) {
@@ -467,9 +459,9 @@ class PhonebookContactInteractor {
       await FederationIdentityRequestTokenManager()
           .execute(
             federationTokenRequest: FederationTokenRequest(
-              federationUrl: "${homeServerUrlInterceptor.baseUrl ?? ''}/",
-              mxid: mxid,
-              token: authorizationInterceptor.getAccessToken ?? '',
+              federationUrl: "${argument.federationUrl}/",
+              mxid: argument.withMxId,
+              token: argument.withAccessToken,
             ),
           )
           .then(
