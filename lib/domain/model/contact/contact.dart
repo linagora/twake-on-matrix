@@ -1,7 +1,6 @@
 import 'dart:convert';
 
 import 'package:equatable/equatable.dart';
-import 'package:fluffychat/domain/model/contact/hash_details_response.dart';
 import 'package:crypto/crypto.dart';
 import 'package:fluffychat/domain/model/contact/third_party_status.dart';
 import 'package:fluffychat/utils/string_extension.dart';
@@ -80,7 +79,6 @@ abstract class ThirdPartyContact with EquatableMixin {
   });
 
   String calculateHashWithAlgorithmSha256({
-    required HashDetailsResponse hashDetails,
     required String pepper,
   }) {
     final input = [thirdPartyId, thirdPartyIdType, pepper].join(' ');
@@ -95,24 +93,27 @@ abstract class ThirdPartyContact with EquatableMixin {
   }
 
   List<String> calculateHashUsingAllPeppers({
-    required HashDetailsResponse hashDetails,
+    String? lookupPepper,
+    Set<String>? altLookupPeppers,
+    Set<String>? algorithms,
   }) {
     final List<String> hashes = [];
 
-    if (hashDetails.algorithms == null || hashDetails.algorithms!.isEmpty) {
+    if (algorithms == null || algorithms.isEmpty) {
+      final hash = calculateHashWithoutAlgorithm();
+      hashes.add(hash);
       return hashes;
     }
 
-    for (final algorithm in hashDetails.algorithms!) {
+    for (final algorithm in algorithms) {
       final peppers = {
-        hashDetails.lookupPepper,
-        ...?hashDetails.altLookupPeppers,
+        lookupPepper,
+        ...?altLookupPeppers,
       };
 
       for (final pepper in peppers) {
         if (algorithm == 'sha256') {
           final hash = calculateHashWithAlgorithmSha256(
-            hashDetails: hashDetails,
             pepper: pepper ?? '',
           );
           hashes.add(hash);

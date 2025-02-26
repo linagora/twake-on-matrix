@@ -204,7 +204,7 @@ mixin class ContactsViewControllerMixin {
         matrixLocalizations: matrixLocalizations,
       );
     });
-    contactsManager.initialSynchronizeContacts(
+    await contactsManager.initialSynchronizeContacts(
       withMxId: client.userID!,
       isAvailableSupportPhonebookContacts: PlatformInfos.isMobile &&
           contactsPermissionStatus != null &&

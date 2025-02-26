@@ -347,6 +347,11 @@ class _SliverPhonebookLoading extends StatelessWidget {
             );
           },
           (success) {
+            if (success is GetPhonebookContactsLoading) {
+              return const SliverToBoxAdapter(
+                child: _PhonebookLoading(progress: 0),
+              );
+            }
             if (success is GetPhonebookContactsSuccess) {
               if (success.progress == 100) {
                 return const SliverToBoxAdapter(

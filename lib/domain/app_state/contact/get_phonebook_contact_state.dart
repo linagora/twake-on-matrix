@@ -50,3 +50,65 @@ class GetPhonebookContactsFailure extends Failure {
   @override
   List<Object?> get props => [exception];
 }
+
+class RequestTokenFailure extends Failure {
+  final dynamic exception;
+
+  const RequestTokenFailure({
+    required this.exception,
+  });
+
+  @override
+  List<Object?> get props => [exception];
+}
+
+class RegisterTokenFailure extends Failure {
+  final dynamic exception;
+
+  const RegisterTokenFailure({
+    required this.exception,
+  });
+
+  @override
+  List<Object?> get props => [exception];
+}
+
+class GetPhoneBookContactEmpty extends Success {
+  const GetPhoneBookContactEmpty();
+
+  @override
+  List<Object?> get props => [];
+}
+
+class GetPhoneBookContactFailure extends Failure {
+  final dynamic exception;
+
+  const GetPhoneBookContactFailure({
+    required this.exception,
+  });
+
+  @override
+  List<Object?> get props => [exception];
+}
+
+class GetHashDetailsFailure extends Failure {
+  final dynamic exception;
+
+  const GetHashDetailsFailure({
+    required this.exception,
+  });
+
+  @override
+  List<Object?> get props => [exception];
+}
+
+class LookUpContactFailure extends Failure {
+  final dynamic exception;
+
+  const LookUpContactFailure({
+    required this.exception,
+  });
+
+  @override
+  List<Object?> get props => [exception];
+}

@@ -30,7 +30,7 @@ class FederationIdentityLookupDatasourceImpl
   }) {
     return federationIdentityLookupApi.lookupMxid(
       request: request,
-      token: registeredToken,
+      registeredToken: registeredToken,
     );
   }
 

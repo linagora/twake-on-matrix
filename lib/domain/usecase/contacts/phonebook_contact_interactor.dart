@@ -2,21 +2,21 @@ import 'package:collection/collection.dart';
 import 'package:dartz/dartz.dart';
 import 'package:fluffychat/app_state/failure.dart';
 import 'package:fluffychat/app_state/success.dart';
-import 'package:fluffychat/data/network/interceptor/federation_authorization_interceptor.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/domain/app_state/contact/get_phonebook_contact_state.dart';
 import 'package:fluffychat/domain/model/contact/contact.dart';
-import 'package:fluffychat/domain/model/contact/hash_details_response.dart';
-import 'package:fluffychat/domain/model/contact/lookup_list_mxid_request.dart';
 import 'package:fluffychat/domain/model/extensions/string_extension.dart';
-import 'package:fluffychat/domain/repository/federation_configurations_repository.dart';
-import 'package:fluffychat/domain/repository/lookup_repository.dart';
 import 'package:fluffychat/domain/repository/phonebook_contact_repository.dart';
 import 'package:fluffychat/domain/usecase/contacts/federation_look_up_argument.dart';
 
 import 'package:fluffychat/modules/federation_identity_lookup/domain/models/federation_arguments.dart';
+import 'package:fluffychat/modules/federation_identity_lookup/domain/models/federation_hash_details_response.dart';
+import 'package:fluffychat/modules/federation_identity_lookup/domain/models/federation_lookup_mxid_request.dart';
+import 'package:fluffychat/modules/federation_identity_lookup/domain/models/federation_lookup_mxid_response.dart';
+import 'package:fluffychat/modules/federation_identity_lookup/domain/models/federation_register_response.dart';
 import 'package:fluffychat/modules/federation_identity_lookup/domain/state/federation_identity_lookup_state.dart';
 import 'package:fluffychat/modules/federation_identity_lookup/manager/federation_identity_lookup_manager.dart';
+import 'package:fluffychat/modules/federation_identity_lookup/manager/identity_lookup_manager.dart';
 import 'package:fluffychat/modules/federation_identity_request_token/domain/models/federation_token_information.dart';
 import 'package:fluffychat/modules/federation_identity_request_token/domain/models/federation_token_request.dart';
 import 'package:fluffychat/modules/federation_identity_request_token/domain/state/federation_identity_request_token_state.dart';
@@ -28,14 +28,6 @@ class PhonebookContactInteractor {
   final PhonebookContactRepository _phonebookContactRepository =
       getIt.get<PhonebookContactRepository>();
 
-  final LookupRepository _lookupRepository = getIt.get<LookupRepository>();
-
-  final federationConfigurationRepository =
-      getIt.get<FederationConfigurationsRepository>();
-
-  final federationAuthorizationInterceptor =
-      getIt.get<FederationAuthorizationInterceptor>();
-
   Stream<Either<Failure, Success>> execute({
     int lookupChunkSize = 10,
     required FederationLookUpArgument argument,
@@ -46,10 +38,14 @@ class PhonebookContactInteractor {
 
       FederationTokenInformation? federationIdentityRequestTokenRes;
 
+      FederationRegisterResponse? federationRegisterToken;
+
+      final List<Contact> contacts = [];
+
       await FederationIdentityRequestTokenManager()
           .execute(
             federationTokenRequest: FederationTokenRequest(
-              federationUrl: "${argument.federationUrl}/",
+              federationUrl: "${argument.homeServerUrl}/",
               mxid: argument.withMxId,
               token: argument.withAccessToken,
             ),
@@ -70,39 +66,88 @@ class PhonebookContactInteractor {
       );
 
       if (federationIdentityRequestTokenRes == null) {
+        yield const Left(RequestTokenFailure(exception: 'Token is empty'));
         return;
       }
 
-      final federationRegisterToken =
-          await _lookupRepository.federationIdentityRegister(
-        data: federationIdentityRequestTokenRes?.toJson(),
-      );
+      try {
+        final res = await IdentityLookupManager().register(
+          federationUrl: argument.federationUrl,
+          tokenInformation: federationIdentityRequestTokenRes!,
+        );
+        if (res.token == null || res.token!.isEmpty) {
+          yield const Left(RegisterTokenFailure(exception: 'Token is empty'));
+          return;
+        }
+
+        federationRegisterToken = res;
+      } catch (e) {
+        Logs().e(
+          'PhonebookContactInteractor::execute: Register: $e',
+        );
+        yield const Left(RegisterTokenFailure(exception: 'Register failed'));
+        return;
+      }
 
       Logs().d(
         'PhonebookContactInteractor::execute: federationRegisterToken: $federationRegisterToken',
       );
 
-      if (federationRegisterToken.token == null ||
-          federationRegisterToken.token!.isEmpty) {
-        return;
-      }
+      try {
+        final res = await _phonebookContactRepository.fetchContacts();
 
-      federationAuthorizationInterceptor.accessToken =
-          federationRegisterToken.token;
+        if (res.isEmpty) {
+          yield const Right(GetPhonebookContactsIsEmpty());
+          return;
+        }
 
-      final contacts = await _phonebookContactRepository.fetchContacts();
-
-      if (contacts.isEmpty) {
+        contacts.addAll(res);
+      } catch (e) {
+        Logs().e(
+          'PhonebookContactInteractor::execute: Register: $e',
+        );
+        yield Left(
+          GetPhoneBookContactFailure(exception: e),
+        );
         return;
       }
 
       final Set<Contact> updatedContact = {};
 
-      final hashDetails = await _lookupRepository.getHashDetails();
+      FederationHashDetailsResponse? hashDetails;
 
-      Logs().d(
-        'PhonebookContactInteractor::execute: hashDetails: $hashDetails',
-      );
+      try {
+        final res = await IdentityLookupManager().getHashDetails(
+          federationUrl: argument.federationUrl,
+          registeredToken: federationRegisterToken.token!,
+        );
+
+        Logs().d(
+          'PhonebookContactInteractor::execute: hashDetails: $hashDetails',
+        );
+
+        if (res.lookupPepper?.isEmpty == true &&
+            res.algorithms?.isEmpty == true) {
+          yield const Left(
+            GetHashDetailsFailure(
+              exception: 'Hash details is empty',
+            ),
+          );
+          return;
+        }
+
+        hashDetails = res;
+      } catch (e) {
+        Logs().e(
+          'PhonebookContactInteractor::execute: GetHashDetails: $e',
+        );
+        yield Left(
+          GetHashDetailsFailure(
+            exception: e,
+          ),
+        );
+        return;
+      }
 
       final contactIdToHashMap = {
         for (final contact in contacts) contact.id: contact,
@@ -157,15 +202,30 @@ class PhonebookContactInteractor {
           contactIdToHashMap[chunkContact.id] = updatedContact;
         }
 
-        final request = LookupListMxidRequest(
+        final request = FederationLookupMxidRequest(
           addresses:
               hashToContactIdMappings.values.expand((hash) => hash).toSet(),
           algorithm: hashDetails.algorithms?.firstOrNull,
           pepper: hashDetails.lookupPepper,
         );
-
-        final response = await _lookupRepository.lookupListMxid(request);
-
+        FederationLookupMxidResponse? response;
+        try {
+          response = await IdentityLookupManager().lookupMxid(
+            federationUrl: argument.federationUrl,
+            request: request,
+            registeredToken: federationRegisterToken.token!,
+          );
+        } catch (e) {
+          Logs().e(
+            'PhonebookContactInteractor::execute: LookupMxid: $e',
+          );
+          yield Left(
+            LookUpContactFailure(
+              exception: e,
+            ),
+          );
+          return;
+        }
         final Set<Contact> contactsFromMappings = {};
 
         final Set<Contact> contactsFromThirdParty = {};
@@ -240,12 +300,14 @@ class PhonebookContactInteractor {
 
   Map<String, List<String>> calculateHashesForPhoneNumbers(
     Set<PhoneNumber> phoneNumbers,
-    HashDetailsResponse hashDetails,
+    FederationHashDetailsResponse hashDetails,
   ) {
     final Map<String, List<String>> phoneToHashMap = {};
     for (final phoneNumber in phoneNumbers) {
       final hashes = phoneNumber.calculateHashUsingAllPeppers(
-        hashDetails: hashDetails,
+        lookupPepper: hashDetails.lookupPepper,
+        altLookupPeppers: hashDetails.altLookupPeppers,
+        algorithms: hashDetails.algorithms,
       );
       phoneToHashMap[phoneNumber.number] = hashes;
     }
@@ -255,12 +317,14 @@ class PhonebookContactInteractor {
 
   Map<String, List<String>> calculateHashesForEmails(
     Set<Email> emails,
-    HashDetailsResponse hashDetails,
+    FederationHashDetailsResponse hashDetails,
   ) {
     final Map<String, List<String>> emailToHashMap = {};
     for (final email in emails) {
       final hashes = email.calculateHashUsingAllPeppers(
-        hashDetails: hashDetails,
+        lookupPepper: hashDetails.lookupPepper,
+        altLookupPeppers: hashDetails.altLookupPeppers,
+        algorithms: hashDetails.algorithms,
       );
       emailToHashMap[email.address] = hashes;
     }
@@ -459,7 +523,7 @@ class PhonebookContactInteractor {
       await FederationIdentityRequestTokenManager()
           .execute(
             federationTokenRequest: FederationTokenRequest(
-              federationUrl: "${argument.federationUrl}/",
+              federationUrl: "${argument.homeServerUrl}/",
               mxid: argument.withMxId,
               token: argument.withAccessToken,
             ),
