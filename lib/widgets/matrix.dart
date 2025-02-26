@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:io';
 import 'package:fluffychat/data/model/federation_server/federation_configuration.dart';
-import 'package:fluffychat/data/model/federation_server/federation_server_information.dart';
 import 'package:fluffychat/domain/contact_manager/contacts_manager.dart';
 import 'package:fluffychat/domain/repository/federation_configurations_repository.dart';
 import 'package:fluffychat/presentation/mixins/init_config_mixin.dart';
@@ -607,12 +606,6 @@ class MatrixState extends State<Matrix>
         _setupAuthUrl();
         return;
       }
-      final federationConfigurations =
-          await getFederationConfigurations(client.userID!);
-
-      if (federationConfigurations != null) {
-        _setUpFederationServer(federationConfigurations.fedServerInformation);
-      }
       setUpToMServices(
         toMConfigurations.tomServerInformation,
         toMConfigurations.identityServerInformation,
@@ -679,7 +672,6 @@ class MatrixState extends State<Matrix>
     Logs().d('MatrixState::setUpFederationServicesInLogin: $federationSever');
 
     if (federationSever != null) {
-      _setUpFederationServer(federationSever);
       await _storeFederationConfiguration(
         client,
         FederationConfigurations(
@@ -706,20 +698,6 @@ class MatrixState extends State<Matrix>
       'MatrixState::_setUpToMServer: ${tomServerUrlInterceptor.hashCode}',
     );
     tomServerUrlInterceptor.changeBaseUrl(tomServer?.baseUrl?.toString());
-  }
-
-  void _setUpFederationServer(FederationServerInformation? federationServer) {
-    final federationServerUrlInterceptor = getIt.get<DynamicUrlInterceptors>(
-      instanceName: NetworkDI.federationServerUrlInterceptorName,
-    );
-
-    Logs().d(
-      'MatrixState::setUpFederationServer: ${federationServerUrlInterceptor.hashCode}',
-    );
-
-    federationServerUrlInterceptor.changeBaseUrl(
-      federationServer?.baseUrls?.first.toString(),
-    );
   }
 
   void _setUpHomeServer(Uri homeServerUri) {
@@ -798,13 +776,13 @@ class MatrixState extends State<Matrix>
 
   Future<void> _setUpToMServicesWhenChangingActiveClient(Client? client) async {
     Logs().d(
-      'Matrix::_checkHomeserverExists: Old twakeSupported - $twakeSupported',
+      'Matrix::_setUpToMServicesWhenChangingActiveClient: Old twakeSupported - $twakeSupported',
     );
     if (client == null && client?.userID == null) return;
     try {
       final toMConfigurations = await getTomConfigurations(client!.userID!);
       Logs().d(
-        'Matrix::_checkHomeserverExists: toMConfigurations - $toMConfigurations',
+        'Matrix::_setUpToMServicesWhenChangingActiveClient: toMConfigurations - $toMConfigurations',
       );
       if (toMConfigurations == null) {
         _setUpToMServer(null);
@@ -821,10 +799,10 @@ class MatrixState extends State<Matrix>
       _setUpToMServer(null);
       _setupAuthUrl();
       setUpAuthorization(client!);
-      Logs().e('Matrix::_checkHomeserverExists: error - $e');
+      Logs().e('Matrix::_setUpToMServicesWhenChangingActiveClient: error - $e');
     }
     Logs().d(
-      'Matrix::_checkHomeserverExists: New twakeSupported - $twakeSupported',
+      'Matrix::_setUpToMServicesWhenChangingActiveClient: New twakeSupported - $twakeSupported',
     );
   }
 

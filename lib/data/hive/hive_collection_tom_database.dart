@@ -138,6 +138,7 @@ class HiveCollectionToMDatabase {
 
   Future<void> clear() async {
     await tomConfigurationsBox.clear();
+    await federationConfigurationsBox.clear();
     if (PlatformInfos.isMobile) {
       await _collection.deleteFromDisk();
     }

@@ -8,6 +8,7 @@ import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/di/global/network_di.dart';
 import 'package:fluffychat/domain/app_state/contact/get_contacts_state.dart';
 import 'package:fluffychat/domain/app_state/contact/get_phonebook_contact_state.dart';
+import 'package:fluffychat/domain/repository/federation_configurations_repository.dart';
 import 'package:fluffychat/domain/usecase/contacts/federation_look_up_argument.dart';
 import 'package:fluffychat/domain/usecase/contacts/get_tom_contacts_interactor.dart';
 import 'package:fluffychat/domain/usecase/contacts/phonebook_contact_interactor.dart';
@@ -65,29 +66,29 @@ class ContactsManager {
         const Right(GetPhonebookContactsInitial());
   }
 
-  void initialSynchronizeContacts({
+  Future<void> initialSynchronizeContacts({
     bool isAvailableSupportPhonebookContacts = false,
     required String withMxId,
   }) async {
     if (!_isSynchronizedTomContacts) {
       return;
     }
-    _getAllContacts(
+    await _getAllContacts(
       isAvailableSupportPhonebookContacts: isAvailableSupportPhonebookContacts,
       withMxId: withMxId,
     );
   }
 
-  void _getAllContacts({
+  Future<void> _getAllContacts({
     bool isAvailableSupportPhonebookContacts = false,
     required String withMxId,
-  }) {
+  }) async {
     getTomContactsInteractor.execute(limit: AppConfig.maxFetchContacts).listen(
       (event) {
         _contactsNotifier.value = event;
       },
     ).onDone(
-      () => _lookUpPhonebookContacts(
+      () async => await _lookUpPhonebookContacts(
         isAvailableSupportPhonebookContacts:
             isAvailableSupportPhonebookContacts,
         withMxId: withMxId,
@@ -95,7 +96,7 @@ class ContactsManager {
     );
   }
 
-  void _lookUpPhonebookContacts({
+  Future<void> _lookUpPhonebookContacts({
     bool isAvailableSupportPhonebookContacts = false,
     required String withMxId,
   }) async {
@@ -109,11 +110,20 @@ class ContactsManager {
       instanceName: NetworkDI.homeServerUrlInterceptorName,
     );
 
+    final federationConfigurationRepository =
+        getIt.get<FederationConfigurationsRepository>();
+    final federationConfigurations = await federationConfigurationRepository
+        .getFederationConfigurations(withMxId);
+
     phonebookContactInteractor
         .execute(
       lookupChunkSize: _lookupChunkSize,
       argument: FederationLookUpArgument(
-        federationUrl: homeServerUrlInterceptor.baseUrl ?? '',
+        homeServerUrl: homeServerUrlInterceptor.baseUrl ?? '',
+        federationUrl: federationConfigurations
+                .fedServerInformation.baseUrls?.first
+                .toString() ??
+            '',
         withMxId: withMxId,
         withAccessToken: authorizationInterceptor.getAccessToken ?? '',
       ),

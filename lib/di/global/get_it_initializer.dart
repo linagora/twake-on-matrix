@@ -4,7 +4,6 @@ import 'package:fluffychat/config/app_grid_config/app_config_loader.dart';
 import 'package:fluffychat/data/datasource/contact/phonebook_datasource.dart';
 import 'package:fluffychat/data/datasource/federation_configurations_datasource.dart';
 import 'package:fluffychat/data/datasource/localizations/localizations_datasource.dart';
-import 'package:fluffychat/data/datasource/lookup_datasource.dart';
 import 'package:fluffychat/data/datasource/media/media_data_source.dart';
 import 'package:fluffychat/data/datasource/multiple_account/multiple_account_datasource.dart';
 import 'package:fluffychat/data/datasource/recovery_words_data_source.dart';
@@ -12,7 +11,6 @@ import 'package:fluffychat/data/datasource/server_config_datasource.dart';
 import 'package:fluffychat/data/datasource/server_search_datasource.dart';
 import 'package:fluffychat/data/datasource/tom_configurations_datasource.dart';
 import 'package:fluffychat/data/datasource/tom_contacts_datasource.dart';
-import 'package:fluffychat/data/datasource_impl/contact/lookup_datasource_impl.dart';
 import 'package:fluffychat/data/datasource_impl/contact/phonebook_contact_datasource_impl.dart';
 import 'package:fluffychat/data/datasource_impl/contact/tom_contacts_datasource_impl.dart';
 import 'package:fluffychat/data/datasource_impl/federation_configurations_datasource_impl.dart';
@@ -25,14 +23,12 @@ import 'package:fluffychat/data/datasource_impl/server_search_datasource_impl.da
 import 'package:fluffychat/data/datasource_impl/tom_configurations_datasource_impl.dart';
 import 'package:fluffychat/data/local/localizations/language_cache_manager.dart';
 import 'package:fluffychat/data/local/multiple_account/multiple_account_cache_manager.dart';
-import 'package:fluffychat/data/network/contact/lookup_api.dart';
 import 'package:fluffychat/data/network/contact/tom_contact_api.dart';
 import 'package:fluffychat/data/network/dio_cache_option.dart';
 import 'package:fluffychat/data/network/media/media_api.dart';
 import 'package:fluffychat/data/network/recovery_words/recovery_words_api.dart';
 import 'package:fluffychat/data/network/search/server_search_api.dart';
 import 'package:fluffychat/data/network/server_config_api.dart';
-import 'package:fluffychat/data/repository/contact/lookup_repository_impl.dart';
 import 'package:fluffychat/data/repository/contact/phonebook_contact_repository_impl.dart';
 import 'package:fluffychat/data/repository/contact/tom_contact_repository_impl.dart';
 import 'package:fluffychat/data/repository/federation_configurations_repository_impl.dart';
@@ -50,7 +46,6 @@ import 'package:fluffychat/domain/contact_manager/contacts_manager.dart';
 import 'package:fluffychat/domain/repository/contact_repository.dart';
 import 'package:fluffychat/domain/repository/federation_configurations_repository.dart';
 import 'package:fluffychat/domain/repository/localizations/localizations_repository.dart';
-import 'package:fluffychat/domain/repository/lookup_repository.dart';
 import 'package:fluffychat/domain/repository/multiple_account/multiple_account_repository.dart';
 import 'package:fluffychat/domain/repository/phonebook_contact_repository.dart';
 import 'package:fluffychat/domain/repository/recovery_words_repository.dart';
@@ -153,7 +148,6 @@ class GetItInitializer {
   void bindingAPI() {
     getIt.registerLazySingleton<RecoveryWordsAPI>(() => RecoveryWordsAPI());
     getIt.registerFactory<TomContactAPI>(() => TomContactAPI());
-    getIt.registerFactory<LookupAPI>(() => LookupAPI());
     getIt.registerSingleton<MediaAPI>(MediaAPI());
     getIt.registerSingleton<ServerSearchAPI>(ServerSearchAPI());
     getIt.registerSingleton<ServerConfigAPI>(ServerConfigAPI());
@@ -207,9 +201,6 @@ class GetItInitializer {
     getIt.registerFactory<TomContactsDatasource>(
       () => TomContactsDatasourceImpl(),
     );
-    getIt.registerFactory<LookupDatasource>(
-      () => LookupDatasourceImpl(),
-    );
     getIt.registerFactory<PhonebookContactDatasource>(
       () => PhonebookContactDatasourceImpl(),
     );
@@ -240,7 +231,6 @@ class GetItInitializer {
       () => RecoveryWordsRepositoryImpl(),
     );
     getIt.registerFactory<ContactRepository>(() => TomContactRepositoryImpl());
-    getIt.registerFactory<LookupRepository>(() => LookupRepositoryImpl());
     getIt.registerFactory<PhonebookContactRepository>(
       () => PhonebookContactRepositoryImpl(),
     );

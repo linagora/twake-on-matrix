@@ -11,9 +11,13 @@ class FederationLookupMxidResponse extends Equatable {
   @JsonKey(name: 'inactive_mappings')
   final Map<String, String>? inactiveMappings;
 
+  @JsonKey(name: 'third_party_mappings')
+  final Map<String, Set<String>>? thirdPartyMappings;
+
   const FederationLookupMxidResponse({
     this.mappings,
     this.inactiveMappings,
+    this.thirdPartyMappings,
   });
 
   factory FederationLookupMxidResponse.fromJson(Map<String, dynamic> json) =>
@@ -22,5 +26,5 @@ class FederationLookupMxidResponse extends Equatable {
   Map<String, dynamic> toJson() => _$FederationLookupMxidResponseToJson(this);
 
   @override
-  List<Object?> get props => [mappings, inactiveMappings];
+  List<Object?> get props => [mappings, inactiveMappings, thirdPartyMappings];
 }

@@ -354,10 +354,8 @@ class SettingsController extends State<Settings> with ConnectPageMixin {
       Logs().d(
         'SettingsController::_deleteFederationConfigurations - Client ID: ${currentClient.userID}',
       );
-      if (matrix.twakeSupported) {
-        await federationConfigurationsRepository
-            .deleteFederationConfigurations(currentClient.userID!);
-      }
+      await federationConfigurationsRepository
+          .deleteFederationConfigurations(currentClient.userID!);
       Logs().d(
         'SettingsController::_deleteFederationConfigurations - Success',
       );

@@ -11,13 +11,17 @@ class FederationHashDetailsResponse extends Equatable {
   @JsonKey(name: 'lookup_pepper')
   final String? lookupPepper;
 
+  @JsonKey(name: 'alt_lookup_peppers')
+  final Set<String>? altLookupPeppers;
+
   const FederationHashDetailsResponse({
     this.algorithms,
     this.lookupPepper,
+    this.altLookupPeppers,
   });
 
   @override
-  List<Object?> get props => [algorithms, lookupPepper];
+  List<Object?> get props => [algorithms, lookupPepper, altLookupPeppers];
 
   factory FederationHashDetailsResponse.fromJson(Map<String, dynamic> json) =>
       _$FederationHashDetailsResponseFromJson(json);

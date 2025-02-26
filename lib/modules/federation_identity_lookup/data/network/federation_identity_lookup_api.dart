@@ -28,13 +28,15 @@ class FederationIdentityLookupApi {
     return FederationRegisterResponse.fromJson(response);
   }
 
-  Future<FederationHashDetailsResponse> getHashDetails(String token) async {
+  Future<FederationHashDetailsResponse> getHashDetails(
+    String registeredToken,
+  ) async {
     final path = FederationIdentityEndpoint.hashDetailsServicePath
         .generateFederationIdentityEndpoint();
 
     final dioHeaders = client.getHeaders();
 
-    dioHeaders[HttpHeaders.authorizationHeader] = 'Bearer $token';
+    dioHeaders[HttpHeaders.authorizationHeader] = 'Bearer $registeredToken';
 
     final response = await client.get(
       path,
@@ -46,14 +48,14 @@ class FederationIdentityLookupApi {
 
   Future<FederationLookupMxidResponse> lookupMxid({
     required FederationLookupMxidRequest request,
-    required String token,
+    required String registeredToken,
   }) async {
     final path = FederationIdentityEndpoint.lookupServicePath
         .generateFederationIdentityEndpoint();
 
     final dioHeaders = client.getHeaders();
 
-    dioHeaders[HttpHeaders.authorizationHeader] = 'Bearer $token';
+    dioHeaders[HttpHeaders.authorizationHeader] = 'Bearer $registeredToken';
 
     final response = await client.postToGetBody(
       path,

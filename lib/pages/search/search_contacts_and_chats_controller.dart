@@ -44,11 +44,11 @@ class SearchContactsAndChatsController with SearchDebouncerMixin, SearchMixin {
 
   List<Room> get _rooms => client.rooms;
 
-  void init() {
+  Future<void> init() async {
     initializeDebouncer((keyword) {
       _searchChatsFromLocal(keyword: keyword);
     });
-    contactManger.initialSynchronizeContacts(
+    await contactManger.initialSynchronizeContacts(
       withMxId: client.userID!,
     );
     fetchPreSearchChat();
