@@ -400,4 +400,15 @@ extension StringCasingExtension on String {
       return '${this}auth.html';
     }
   }
+
+  String? findContactIdByHash({
+    required Map<String, List<String>> hashToContactIdMappings,
+  }) {
+    for (final entry in hashToContactIdMappings.entries) {
+      if (entry.value.contains(this)) {
+        return entry.key;
+      }
+    }
+    return null;
+  }
 }
