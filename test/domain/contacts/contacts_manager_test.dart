@@ -12,7 +12,7 @@
 // import 'package:fluffychat/domain/model/contact/contact.dart';
 // import 'package:fluffychat/domain/model/contact/contact_status.dart';
 // import 'package:fluffychat/domain/usecase/contacts/get_tom_contacts_interactor.dart';
-// import 'package:fluffychat/domain/usecase/contacts/phonebook_contact_interactor.dart';
+// import 'package:fluffychat/domain/usecase/contacts/federation_look_up_phonebook_contact_interactor.dart';
 // import 'package:flutter_test/flutter_test.dart';
 // import 'package:mockito/annotations.dart';
 // import 'package:mockito/mockito.dart';

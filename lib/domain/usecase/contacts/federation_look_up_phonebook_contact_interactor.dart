@@ -24,7 +24,7 @@ import 'package:fluffychat/modules/federation_identity_request_token/manager/fed
 import 'package:fluffychat/domain/model/extensions/contact/contact_extension.dart';
 import 'package:matrix/matrix.dart';
 
-class PhonebookContactInteractor {
+class FederationLookUpPhonebookContactInteractor {
   final PhonebookContactRepository _phonebookContactRepository =
       getIt.get<PhonebookContactRepository>();
 
@@ -40,9 +40,16 @@ class PhonebookContactInteractor {
 
       FederationRegisterResponse? federationRegisterToken;
 
+      final IdentityLookupManager identityLookupManager =
+          IdentityLookupManager();
+
+      final FederationIdentityRequestTokenManager
+          federationIdentityRequestTokenManager =
+          FederationIdentityRequestTokenManager();
+
       final List<Contact> contacts = [];
 
-      await FederationIdentityRequestTokenManager()
+      await federationIdentityRequestTokenManager
           .execute(
             federationTokenRequest: FederationTokenRequest(
               federationUrl: "${argument.homeServerUrl}/",
@@ -62,7 +69,7 @@ class PhonebookContactInteractor {
           );
 
       Logs().d(
-        'PhonebookContactInteractor::execute: federationIdentityRequestTokenRes: $federationIdentityRequestTokenRes',
+        'FederationLookUpPhonebookContactInteractor::execute: federationIdentityRequestTokenRes: $federationIdentityRequestTokenRes',
       );
 
       if (federationIdentityRequestTokenRes == null) {
@@ -71,7 +78,7 @@ class PhonebookContactInteractor {
       }
 
       try {
-        final res = await IdentityLookupManager().register(
+        final res = await identityLookupManager.register(
           federationUrl: argument.federationUrl,
           tokenInformation: federationIdentityRequestTokenRes!,
         );
@@ -83,14 +90,14 @@ class PhonebookContactInteractor {
         federationRegisterToken = res;
       } catch (e) {
         Logs().e(
-          'PhonebookContactInteractor::execute: Register: $e',
+          'FederationLookUpPhonebookContactInteractor::execute: Register: $e',
         );
         yield const Left(RegisterTokenFailure(exception: 'Register failed'));
         return;
       }
 
       Logs().d(
-        'PhonebookContactInteractor::execute: federationRegisterToken: $federationRegisterToken',
+        'FederationLookUpPhonebookContactInteractor::execute: federationRegisterToken: $federationRegisterToken',
       );
 
       try {
@@ -104,7 +111,7 @@ class PhonebookContactInteractor {
         contacts.addAll(res);
       } catch (e) {
         Logs().e(
-          'PhonebookContactInteractor::execute: Register: $e',
+          'FederationLookUpPhonebookContactInteractor::execute: Register: $e',
         );
         yield Left(
           GetPhoneBookContactFailure(exception: e),
@@ -117,13 +124,13 @@ class PhonebookContactInteractor {
       FederationHashDetailsResponse? hashDetails;
 
       try {
-        final res = await IdentityLookupManager().getHashDetails(
+        final res = await identityLookupManager.getHashDetails(
           federationUrl: argument.federationUrl,
           registeredToken: federationRegisterToken.token!,
         );
 
         Logs().d(
-          'PhonebookContactInteractor::execute: hashDetails: $hashDetails',
+          'FederationLookUpPhonebookContactInteractor::execute: hashDetails: $hashDetails',
         );
 
         if (res.lookupPepper?.isEmpty == true &&
@@ -139,7 +146,7 @@ class PhonebookContactInteractor {
         hashDetails = res;
       } catch (e) {
         Logs().e(
-          'PhonebookContactInteractor::execute: GetHashDetails: $e',
+          'FederationLookUpPhonebookContactInteractor::execute: GetHashDetails: $e',
         );
         yield Left(
           GetHashDetailsFailure(
@@ -165,8 +172,7 @@ class PhonebookContactInteractor {
           if (chunkContact.phoneNumbers != null &&
               chunkContact.phoneNumbers!.isNotEmpty) {
             phoneToHashMap.addAll(
-              calculateHashesForPhoneNumbers(
-                chunkContact.phoneNumbers!,
+              chunkContact.phoneNumbers!.calculateHashesForPhoneNumbers(
                 hashDetails,
               ),
             );
@@ -180,8 +186,7 @@ class PhonebookContactInteractor {
 
           if (chunkContact.emails != null && chunkContact.emails!.isNotEmpty) {
             emailToHashMap.addAll(
-              calculateHashesForEmails(
-                chunkContact.emails!,
+              chunkContact.emails!.calculateHashesForEmails(
                 hashDetails,
               ),
             );
@@ -193,10 +198,9 @@ class PhonebookContactInteractor {
                 );
           }
 
-          final updatedContact = updateContactWithHashes(
-            chunkContact,
-            phoneToHashMap,
-            emailToHashMap,
+          final updatedContact = chunkContact.updateContactWithHashes(
+            phoneToHashMap: phoneToHashMap,
+            emailToHashMap: emailToHashMap,
           );
 
           contactIdToHashMap[chunkContact.id] = updatedContact;
@@ -210,14 +214,14 @@ class PhonebookContactInteractor {
         );
         FederationLookupMxidResponse? response;
         try {
-          response = await IdentityLookupManager().lookupMxid(
+          response = await identityLookupManager.lookupMxid(
             federationUrl: argument.federationUrl,
             request: request,
             registeredToken: federationRegisterToken.token!,
           );
         } catch (e) {
           Logs().e(
-            'PhonebookContactInteractor::execute: LookupMxid: $e',
+            'FederationLookUpPhonebookContactInteractor::execute: LookupMxid: $e',
           );
           yield Left(
             LookUpContactFailure(
@@ -231,11 +235,11 @@ class PhonebookContactInteractor {
         final Set<Contact> contactsFromThirdParty = {};
 
         if (response.mappings != null && response.mappings!.isNotEmpty) {
-          final updatedContact = _handleLookupMappings(
-            mappings: response.mappings ?? {},
-            hashToContactIdMappings: hashToContactIdMappings,
-            chunkContacts: contactIdToHashMap.values.toList(),
-          );
+          final updatedContact =
+              contactIdToHashMap.values.toSet().handleLookupMappings(
+                    mappings: response.mappings ?? {},
+                    hashToContactIdMappings: hashToContactIdMappings,
+                  );
 
           contactsFromMappings.addAll(updatedContact);
         }
@@ -250,17 +254,16 @@ class PhonebookContactInteractor {
           );
 
           Logs().d(
-            'PhonebookContactInteractor::execute: newContacts: $newContactsThirparty',
+            'FederationLookUpPhonebookContactInteractor::execute: newContacts: $newContactsThirparty',
           );
 
           contactsFromThirdParty.addAll(newContactsThirparty);
         }
 
-        final combinedContacts = _combineContacts(
-          chunkContacts.toSet(),
-          contactsFromMappings,
-          contactsFromThirdParty,
-        );
+        final combinedContacts = chunkContacts.toSet().combineContacts(
+              contactsFromMappings: contactsFromMappings,
+              contactsFromThirdParty: contactsFromThirdParty,
+            );
 
         updatedContact.addAll(combinedContacts);
 
@@ -280,220 +283,6 @@ class PhonebookContactInteractor {
     }
   }
 
-  List<Contact> _combineContacts(
-    Set<Contact> chunkContacts,
-    Set<Contact> contactsFromMappings,
-    Set<Contact> contactsFromThirdParty,
-  ) {
-    final Map<String, Contact> uniqueContactsById = {};
-
-    for (final contact in [
-      ...chunkContacts,
-      ...contactsFromMappings,
-      ...contactsFromThirdParty,
-    ]) {
-      uniqueContactsById[contact.id] = contact;
-    }
-
-    return uniqueContactsById.values.toList();
-  }
-
-  Map<String, List<String>> calculateHashesForPhoneNumbers(
-    Set<PhoneNumber> phoneNumbers,
-    FederationHashDetailsResponse hashDetails,
-  ) {
-    final Map<String, List<String>> phoneToHashMap = {};
-    for (final phoneNumber in phoneNumbers) {
-      final hashes = phoneNumber.calculateHashUsingAllPeppers(
-        lookupPepper: hashDetails.lookupPepper,
-        altLookupPeppers: hashDetails.altLookupPeppers,
-        algorithms: hashDetails.algorithms,
-      );
-      phoneToHashMap[phoneNumber.number] = hashes;
-    }
-
-    return phoneToHashMap;
-  }
-
-  Map<String, List<String>> calculateHashesForEmails(
-    Set<Email> emails,
-    FederationHashDetailsResponse hashDetails,
-  ) {
-    final Map<String, List<String>> emailToHashMap = {};
-    for (final email in emails) {
-      final hashes = email.calculateHashUsingAllPeppers(
-        lookupPepper: hashDetails.lookupPepper,
-        altLookupPeppers: hashDetails.altLookupPeppers,
-        algorithms: hashDetails.algorithms,
-      );
-      emailToHashMap[email.address] = hashes;
-    }
-    return emailToHashMap;
-  }
-
-  Contact updateContactWithHashes(
-    Contact contact,
-    Map<String, List<String>> phoneToHashMap,
-    Map<String, List<String>> emailToHashMap,
-  ) {
-    final updatedPhoneNumbers = <PhoneNumber>{};
-    final updatedEmails = <Email>{};
-
-    for (final phoneNumber in contact.phoneNumbers!) {
-      final hashes = phoneToHashMap[phoneNumber.number];
-      if (hashes != null) {
-        final updatedPhoneNumber = phoneNumber.copyWith(
-          thirdPartyIdToHashMap: phoneToHashMap,
-        );
-        updatedPhoneNumbers.add(updatedPhoneNumber);
-      }
-    }
-
-    for (final email in contact.emails!) {
-      final hashes = emailToHashMap[email.address];
-      if (hashes != null) {
-        final emailUpdated = email.copyWith(
-          thirdPartyIdToHashMap: emailToHashMap,
-        );
-        updatedEmails.add(emailUpdated);
-      }
-    }
-
-    return contact.copyWith(
-      phoneNumbers: updatedPhoneNumbers,
-      emails: updatedEmails,
-    );
-  }
-
-  Set<Contact> _handleLookupMappings({
-    required Map<String, String> mappings,
-    required Map<String, List<String>> hashToContactIdMappings,
-    required List<Contact> chunkContacts,
-  }) {
-    final Set<Contact> currentContacts = chunkContacts.toSet();
-
-    final Set<Contact> foundContact = _findContacts(
-      mappings,
-      hashToContactIdMappings,
-      chunkContacts,
-    );
-
-    final updatedContacts = _updateContacts(foundContact, mappings);
-
-    currentContacts.removeAll(foundContact);
-    currentContacts.addAll(updatedContacts);
-
-    return currentContacts;
-  }
-
-  Set<Contact> _findContacts(
-    Map<String, String> mappings,
-    Map<String, List<String>> hashToContactIdMappings,
-    List<Contact> chunkContacts,
-  ) {
-    final Set<Contact> foundContact = {};
-    for (final entry in mappings.entries) {
-      final hash = entry.key;
-      final contactIds = findContactIdByHash(
-        hashToContactIdMappings: hashToContactIdMappings,
-        hash: hash,
-      );
-
-      if (contactIds != null) {
-        foundContact.addAll(
-          chunkContacts.where(
-            (contact) => contactIds.contains(contact.id),
-          ),
-        );
-      }
-    }
-    return foundContact;
-  }
-
-  String? findContactIdByHash({
-    required Map<String, List<String>> hashToContactIdMappings,
-    required String hash,
-  }) {
-    for (final entry in hashToContactIdMappings.entries) {
-      if (entry.value.contains(hash)) {
-        return entry.key;
-      }
-    }
-    return null;
-  }
-
-  Set<Contact> _updateContacts(
-    Set<Contact> foundContact,
-    Map<String, String> mappings,
-  ) {
-    final Set<Contact> updatedContacts = {};
-    for (final contact in foundContact) {
-      final updatedPhoneNumbers = _updatePhoneNumbers(contact, mappings);
-      final updatedEmails = _updateEmails(contact, mappings);
-      final updatedContact = _updateContact(
-        contact,
-        updatedPhoneNumbers,
-        updatedEmails,
-      );
-      updatedContacts.add(updatedContact);
-    }
-    return updatedContacts;
-  }
-
-  Set<PhoneNumber> _updatePhoneNumbers(
-    Contact contact,
-    Map<String, String> mappings,
-  ) {
-    final updatedPhoneNumbers = <PhoneNumber>{};
-    for (final phoneNumber in contact.phoneNumbers!) {
-      final thirdPartyIdToHashMap = phoneNumber.thirdPartyIdToHashMap ?? {};
-
-      if (thirdPartyIdToHashMap.values
-          .expand((hashes) => hashes)
-          .any((hash) => mappings.containsKey(hash))) {
-        final hash = thirdPartyIdToHashMap.values
-            .expand((hashes) => hashes)
-            .firstWhere((hash) => mappings.containsKey(hash));
-
-        final updatePhoneNumber = phoneNumber.copyWith(
-          matrixId: mappings[hash],
-        );
-        updatedPhoneNumbers.add(updatePhoneNumber);
-      }
-    }
-    return updatedPhoneNumbers;
-  }
-
-  Set<Email> _updateEmails(Contact contact, Map<String, String> mappings) {
-    final updatedEmails = <Email>{};
-    for (final email in contact.emails!) {
-      final thirdPartyIdToHashMap = email.thirdPartyIdToHashMap ?? {};
-      if (thirdPartyIdToHashMap.values
-          .expand((hashes) => hashes)
-          .any((hash) => mappings.containsKey(hash))) {
-        final hash = thirdPartyIdToHashMap.values
-            .expand((hashes) => hashes)
-            .firstWhere((hash) => mappings.containsKey(hash));
-        final updatedEmail = email.copyWith(
-          matrixId: mappings[hash],
-        );
-        updatedEmails.add(updatedEmail);
-      }
-    }
-    return updatedEmails;
-  }
-
-  Contact _updateContact(
-    Contact contact,
-    Set<PhoneNumber> updatedPhoneNumbers,
-    Set<Email> updatedEmails,
-  ) {
-    return contact.copyWith(
-      phoneNumbers: updatedPhoneNumbers,
-      emails: updatedEmails,
-    );
-  }
-
   Future<List<Contact>> _handleThirdPartyMappings({
     required Map<String, Set<String>> thirdPartyToHashes,
     required Map<String, List<String>> hashToContactIdMappings,
@@ -505,11 +294,10 @@ class PhonebookContactInteractor {
       final hashes = thirdPartyToHashes[server]!;
       final Map<String, Contact> contactsNeedToCalculate = {};
       for (final hash in hashes) {
-        final contact = findContactWithHash(
-          hashToContactIdMappings: hashToContactIdMappings,
-          hash: hash,
-          chunkContacts: newContacts,
-        );
+        final contact = newContacts.toSet().findContactWithHash(
+              hashToContactIdMappings: hashToContactIdMappings,
+              hash: hash,
+            );
 
         if (contact == null) {
           continue;
@@ -553,12 +341,12 @@ class PhonebookContactInteractor {
       result.fold(
         (failure) {
           Logs().e(
-            'PhonebookContactInteractor::_handleThirdPartyMappings: failure: $failure',
+            'FederationLookUpPhonebookContactInteractor::_handleThirdPartyMappings: failure: $failure',
           );
         },
         (success) {
           Logs().d(
-            'PhonebookContactInteractor::_handleThirdPartyMappings: success: $success',
+            'FederationLookUpPhonebookContactInteractor::_handleThirdPartyMappings: success: $success',
           );
 
           if (success is FederationIdentityLookupSuccess) {
@@ -568,23 +356,5 @@ class PhonebookContactInteractor {
       );
     }
     return updatedContact;
-  }
-
-  Contact? findContactWithHash({
-    required String hash,
-    required Map<String, List<String>> hashToContactIdMappings,
-    required List<Contact> chunkContacts,
-  }) {
-    final contactId = findContactIdByHash(
-      hashToContactIdMappings: hashToContactIdMappings,
-      hash: hash,
-    );
-    if (contactId == null) {
-      return null;
-    }
-    final contact = chunkContacts.firstWhere(
-      (contact) => contact.id == contactId,
-    );
-    return contact;
   }
 }

@@ -54,7 +54,8 @@ import 'package:fluffychat/domain/repository/server_search_repository.dart';
 import 'package:fluffychat/domain/repository/tom_configurations_repository.dart';
 import 'package:fluffychat/domain/usecase/app_grid/get_app_grid_configuration_interactor.dart';
 import 'package:fluffychat/domain/usecase/contacts/lookup_match_contact_interactor.dart';
-import 'package:fluffychat/domain/usecase/contacts/phonebook_contact_interactor.dart';
+import 'package:fluffychat/domain/usecase/contacts/federation_look_up_phonebook_contact_interactor.dart';
+import 'package:fluffychat/domain/usecase/contacts/twake_look_up_phonebook_contact_interactor.dart';
 import 'package:fluffychat/domain/usecase/create_direct_chat_interactor.dart';
 import 'package:fluffychat/domain/usecase/download_file_for_preview_interactor.dart';
 import 'package:fluffychat/domain/usecase/forward/forward_message_interactor.dart';
@@ -268,8 +269,11 @@ class GetItInitializer {
     getIt.registerFactory<GetTomContactsInteractor>(
       () => GetTomContactsInteractor(),
     );
-    getIt.registerFactory<PhonebookContactInteractor>(
-      () => PhonebookContactInteractor(),
+    getIt.registerFactory<FederationLookUpPhonebookContactInteractor>(
+      () => FederationLookUpPhonebookContactInteractor(),
+    );
+    getIt.registerFactory<TwakeLookupPhonebookContactInteractor>(
+      () => TwakeLookupPhonebookContactInteractor(),
     );
     getIt.registerSingleton<DownloadFileForPreviewInteractor>(
       DownloadFileForPreviewInteractor(),
@@ -313,7 +317,8 @@ class GetItInitializer {
     getIt.registerSingleton<ContactsManager>(
       ContactsManager(
         getTomContactsInteractor: getIt.get<GetTomContactsInteractor>(),
-        phonebookContactInteractor: getIt.get<PhonebookContactInteractor>(),
+        phonebookContactInteractor:
+            getIt.get<FederationLookUpPhonebookContactInteractor>(),
       ),
     );
     getIt.registerLazySingleton<SaveLanguageInteractor>(
