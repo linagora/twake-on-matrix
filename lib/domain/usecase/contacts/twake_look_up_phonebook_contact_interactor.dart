@@ -4,6 +4,7 @@ import 'package:fluffychat/app_state/failure.dart';
 import 'package:fluffychat/app_state/success.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/domain/app_state/contact/get_phonebook_contact_state.dart';
+import 'package:fluffychat/domain/exception/contacts/twake_lookup_exceptions.dart';
 import 'package:fluffychat/domain/model/contact/contact.dart';
 import 'package:fluffychat/domain/model/extensions/contact/contact_extension.dart';
 import 'package:fluffychat/domain/repository/phonebook_contact_repository.dart';
@@ -17,17 +18,18 @@ import 'package:matrix/matrix.dart';
 class TwakeLookupPhonebookContactInteractor {
   final PhonebookContactRepository _phonebookContactRepository =
       getIt.get<PhonebookContactRepository>();
+  final IdentityLookupManager _identityLookupManager =
+      getIt.get<IdentityLookupManager>();
 
   Stream<Either<Failure, Success>> execute({
     int lookupChunkSize = 10,
     required TwakeLookUpArgument argument,
   }) async* {
     int progress = 0;
-    yield const Right(GetPhonebookContactsLoading());
-
-    final IdentityLookupManager identityLookupManager = IdentityLookupManager();
-
+    Exception? chunkError;
     final List<Contact> contacts = [];
+
+    yield const Right(GetPhonebookContactsLoading());
 
     try {
       final res = await _phonebookContactRepository.fetchContacts();
@@ -53,7 +55,7 @@ class TwakeLookupPhonebookContactInteractor {
     FederationHashDetailsResponse? hashDetails;
 
     try {
-      final res = await identityLookupManager.getHashDetails(
+      final res = await _identityLookupManager.getHashDetails(
         federationUrl: argument.homeServerUrl,
         registeredToken: argument.withAccessToken,
       );
@@ -94,98 +96,141 @@ class TwakeLookupPhonebookContactInteractor {
     for (final chunkContacts in chunks) {
       final Map<String, List<String>> hashToContactIdMappings = {};
       final Map<String, Contact> contactIdToHashMap = {};
-
-      for (final chunkContact in chunkContacts) {
-        final phoneToHashMap = <String, List<String>>{};
-        final emailToHashMap = <String, List<String>>{};
-        if (chunkContact.phoneNumbers != null &&
-            chunkContact.phoneNumbers!.isNotEmpty) {
-          phoneToHashMap.addAll(
-            chunkContact.phoneNumbers!.calculateHashesForPhoneNumbers(
-              hashDetails,
-            ),
-          );
-
-          hashToContactIdMappings.putIfAbsent(chunkContact.id, () => []).addAll(
-                phoneToHashMap.values.expand((hash) => hash),
-              );
-        }
-
-        if (chunkContact.emails != null && chunkContact.emails!.isNotEmpty) {
-          emailToHashMap.addAll(
-            chunkContact.emails!.calculateHashesForEmails(
-              hashDetails,
-            ),
-          );
-
-          hashToContactIdMappings.putIfAbsent(chunkContact.id, () => []).addAll(
-                emailToHashMap.values.expand((hash) => hash),
-              );
-        }
-
-        final updatedContact = chunkContact.updateContactWithHashes(
-          phoneToHashMap: phoneToHashMap,
-          emailToHashMap: emailToHashMap,
-        );
-
-        contactIdToHashMap[chunkContact.id] = updatedContact;
-      }
-
-      final request = FederationLookupMxidRequest(
-        addresses:
-            hashToContactIdMappings.values.expand((hash) => hash).toSet(),
-        algorithm: hashDetails.algorithms?.firstOrNull,
-        pepper: hashDetails.lookupPepper,
-      );
-      FederationLookupMxidResponse? response;
       try {
-        response = await identityLookupManager.lookupMxid(
+        for (final chunkContact in chunkContacts) {
+          final phoneToHashMap = <String, List<String>>{};
+          final emailToHashMap = <String, List<String>>{};
+          if (chunkContact.phoneNumbers != null &&
+              chunkContact.phoneNumbers!.isNotEmpty) {
+            phoneToHashMap.addAll(
+              chunkContact.phoneNumbers!.calculateHashesForPhoneNumbers(
+                hashDetails,
+              ),
+            );
+
+            hashToContactIdMappings
+                .putIfAbsent(chunkContact.id, () => [])
+                .addAll(
+                  phoneToHashMap.values.expand((hash) => hash),
+                );
+          }
+
+          if (chunkContact.emails != null && chunkContact.emails!.isNotEmpty) {
+            emailToHashMap.addAll(
+              chunkContact.emails!.calculateHashesForEmails(
+                hashDetails,
+              ),
+            );
+
+            hashToContactIdMappings
+                .putIfAbsent(chunkContact.id, () => [])
+                .addAll(
+                  emailToHashMap.values.expand((hash) => hash),
+                );
+          }
+
+          final updatedContact = chunkContact.updateContactWithHashes(
+            phoneToHashMap: phoneToHashMap,
+            emailToHashMap: emailToHashMap,
+          );
+
+          contactIdToHashMap[chunkContact.id] = updatedContact;
+        }
+
+        final request = FederationLookupMxidRequest(
+          addresses:
+              hashToContactIdMappings.values.expand((hash) => hash).toSet(),
+          algorithm: hashDetails.algorithms?.firstOrNull,
+          pepper: hashDetails.lookupPepper,
+        );
+        FederationLookupMxidResponse? response;
+
+        response = await _identityLookupManager.lookupMxid(
           federationUrl: argument.homeServerUrl,
           request: request,
           registeredToken: argument.withAccessToken,
         );
-      } catch (e) {
-        Logs().e(
-          'FederationLookUpPhonebookContactInteractor::execute: LookupMxid: $e',
+
+        final Set<Contact> contactsFromMappings = {};
+
+        final mappingsFound = _handleMappings(
+          response.mappings,
+          hashToContactIdMappings,
+          contactIdToHashMap,
         );
-        yield Left(
-          LookUpContactFailure(
-            exception: e,
+        contactsFromMappings.addAll(mappingsFound);
+
+        final inActiveMappingFound = _handleMappings(
+          response.inactiveMappings,
+          hashToContactIdMappings,
+          contactIdToHashMap,
+        );
+        contactsFromMappings.addAll(inActiveMappingFound);
+
+        final combinedContacts = chunkContacts.toSet().combineContacts(
+          contactsFromMappings: contactsFromMappings,
+          contactsFromThirdParty: {},
+        );
+
+        updatedContact.addAll(combinedContacts);
+
+        progress++;
+
+        final progressStep = (progress / chunks.length * 100).toInt();
+
+        yield Right(
+          GetPhonebookContactsSuccess(
+            progress: progressStep,
+            contacts: updatedContact.toList(),
           ),
         );
-        return;
+      } catch (e) {
+        Logs().e(
+          'TwakeLookupPhonebookContactInteractor::execute: $e',
+        );
+        updatedContact.addAll(chunkContacts);
+        chunkError = TwakeLookupChunkException(e.toString());
+        continue;
       }
+    }
 
-      final Set<Contact> contactsFromMappings = {};
-
-      if (response.inactiveMappings != null &&
-          response.inactiveMappings!.isNotEmpty) {
-        final newContact =
-            contactIdToHashMap.values.toSet().handleLookupMappings(
-                  mappings: response.inactiveMappings ?? {},
-                  hashToContactIdMappings: hashToContactIdMappings,
-                );
-
-        contactsFromMappings.addAll(newContact);
-      }
-
-      final combinedContacts = chunkContacts.toSet().combineContacts(
-        contactsFromMappings: contactsFromMappings,
-        contactsFromThirdParty: {},
-      );
-
-      updatedContact.addAll(combinedContacts);
-
-      progress++;
-
-      final progressStep = (progress / chunks.length * 100).toInt();
-
-      yield Right(
-        GetPhonebookContactsSuccess(
-          progress: progressStep,
+    // finalize the process
+    if (chunkError != null) {
+      yield Left(
+        LookUpPhonebookContactPartialFailed(
+          exception: chunkError,
           contacts: updatedContact.toList(),
         ),
       );
+      return;
+    } else {
+      yield Right(
+        GetPhonebookContactsSuccess(
+          progress: 100,
+          contacts: updatedContact.toList(),
+        ),
+      );
+    }
+  }
+
+  Set<Contact> _handleMappings(
+    Map<String, String>? mappings,
+    Map<String, List<String>> hashToContactIdMappings,
+    Map<String, Contact> contactIdToHashMap,
+  ) {
+    try {
+      if (mappings != null && mappings.isNotEmpty) {
+        return contactIdToHashMap.values.toSet().handleLookupMappings(
+              mappings: mappings,
+              hashToContactIdMappings: hashToContactIdMappings,
+            );
+      }
+      return {};
+    } catch (e) {
+      Logs().e(
+        'TwakeLookupPhonebookContactInteractor::handleMappings: $e',
+      );
+      return {};
     }
   }
 }
