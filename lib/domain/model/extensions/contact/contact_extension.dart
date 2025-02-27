@@ -21,23 +21,27 @@ extension ContactExtension on Contact {
     final updatedPhoneNumbers = <PhoneNumber>{};
     final updatedEmails = <Email>{};
 
-    for (final phoneNumber in phoneNumbers!) {
-      final hashes = phoneToHashMap[phoneNumber.number];
-      if (hashes != null) {
-        final updatedPhoneNumber = phoneNumber.copyWith(
-          thirdPartyIdToHashMap: phoneToHashMap,
-        );
-        updatedPhoneNumbers.add(updatedPhoneNumber);
+    if (phoneNumbers != null && phoneNumbers!.isNotEmpty) {
+      for (final phoneNumber in phoneNumbers!) {
+        final hashes = phoneToHashMap[phoneNumber.number];
+        if (hashes != null) {
+          final updatedPhoneNumber = phoneNumber.copyWith(
+            thirdPartyIdToHashMap: phoneToHashMap,
+          );
+          updatedPhoneNumbers.add(updatedPhoneNumber);
+        }
       }
     }
 
-    for (final email in emails!) {
-      final hashes = emailToHashMap[email.address];
-      if (hashes != null) {
-        final emailUpdated = email.copyWith(
-          thirdPartyIdToHashMap: emailToHashMap,
-        );
-        updatedEmails.add(emailUpdated);
+    if (emails != null && emails!.isNotEmpty) {
+      for (final email in emails!) {
+        final hashes = emailToHashMap[email.address];
+        if (hashes != null) {
+          final emailUpdated = email.copyWith(
+            thirdPartyIdToHashMap: emailToHashMap,
+          );
+          updatedEmails.add(emailUpdated);
+        }
       }
     }
 
@@ -63,7 +67,7 @@ extension ContactExtension on Contact {
         updatedEmails.add(updatedEmail);
       }
     }
-    return updatedEmails;
+    return updatedEmails.isEmpty ? emails ?? {} : updatedEmails;
   }
 
   Set<PhoneNumber> updatePhoneNumbers(
@@ -86,7 +90,9 @@ extension ContactExtension on Contact {
         updatedPhoneNumbers.add(updatePhoneNumber);
       }
     }
-    return updatedPhoneNumbers;
+    return updatedPhoneNumbers.isEmpty
+        ? phoneNumbers ?? {}
+        : updatedPhoneNumbers;
   }
 
   Contact updateContact(

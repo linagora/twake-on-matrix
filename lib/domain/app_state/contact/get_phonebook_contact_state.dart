@@ -80,6 +80,19 @@ class GetPhoneBookContactEmpty extends Success {
   List<Object?> get props => [];
 }
 
+class LookUpPhonebookContactPartialFailed extends Failure {
+  final dynamic exception;
+  final List<Contact> contacts;
+
+  const LookUpPhonebookContactPartialFailed({
+    required this.exception,
+    required this.contacts,
+  });
+
+  @override
+  List<Object?> get props => [exception, contacts];
+}
+
 class GetPhoneBookContactFailure extends Failure {
   final dynamic exception;
 
