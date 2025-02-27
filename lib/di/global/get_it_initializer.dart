@@ -81,6 +81,7 @@ import 'package:fluffychat/domain/usecase/settings/save_language_interactor.dart
 import 'package:fluffychat/domain/usecase/settings/update_profile_interactor.dart';
 import 'package:fluffychat/domain/usecase/verify_name_interactor.dart';
 import 'package:fluffychat/event/twake_event_dispatcher.dart';
+import 'package:fluffychat/modules/federation_identity_lookup/manager/identity_lookup_manager.dart';
 import 'package:fluffychat/pages/chat/chat_pinned_events/pinned_events_controller.dart';
 import 'package:fluffychat/utils/famedlysdk_store.dart';
 import 'package:fluffychat/utils/manager/download_manager/download_manager.dart';
@@ -126,6 +127,7 @@ class GetItInitializer {
     getIt.registerSingleton(Store());
     getIt.registerFactory<AppConfigLoader>(() => AppConfigLoader());
     bindingCachingManager();
+    _bindingManagers();
   }
 
   void bindingCachingManager() {
@@ -359,6 +361,12 @@ class GetItInitializer {
   void _bindingControllers() {
     getIt.registerFactory<PinnedEventsController>(
       () => PinnedEventsController(),
+    );
+  }
+
+  void _bindingManagers() {
+    getIt.registerFactory<IdentityLookupManager>(
+      () => IdentityLookupManager(),
     );
   }
 }
