@@ -1,4 +1,5 @@
 import 'package:fluffychat/di/global/get_it_initializer.dart';
+import 'package:fluffychat/pages/contacts_tab/contacts_invitation_view.dart';
 import 'package:fluffychat/presentation/mixins/comparable_presentation_contact_mixin.dart';
 import 'package:fluffychat/pages/contacts_tab/contacts_tab_view.dart';
 import 'package:fluffychat/presentation/mixins/contacts_view_controller_mixin.dart';
@@ -13,7 +14,6 @@ import 'package:flutter/scheduler.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
-import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:matrix/matrix.dart';
 
 class ContactsTab extends StatefulWidget {
@@ -66,156 +66,8 @@ class ContactsTabController extends State<ContactsTab>
   }) {
     showAdaptiveBottomSheet(
       context: context,
-      builder: (context) => SizedBox(
-        width: double.infinity,
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(
-            horizontal: 16,
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                width: 32,
-                height: 4,
-                margin: const EdgeInsets.symmetric(vertical: 16),
-                decoration: BoxDecoration(
-                  color: LinagoraSysColors.material().outline,
-                  borderRadius: const BorderRadius.all(
-                    Radius.circular(100),
-                  ),
-                ),
-              ),
-              Text(
-                'Contact information',
-                style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                      color: LinagoraSysColors.material().onSurface,
-                    ),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                contact.displayName ?? '',
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: LinagoraSysColors.material().tertiary,
-                    ),
-                textAlign: TextAlign.center,
-                maxLines: 3,
-                overflow: TextOverflow.ellipsis,
-              ),
-              const SizedBox(height: 16),
-              if (contact.phoneNumbers != null &&
-                  contact.phoneNumbers!.isNotEmpty)
-                ...contact.phoneNumbers!.map(
-                  (phoneNumber) => Padding(
-                    padding: const EdgeInsets.symmetric(
-                      vertical: 8,
-                    ),
-                    child: Row(
-                      children: [
-                        Icon(
-                          Icons.call_outlined,
-                          size: 24,
-                          color: LinagoraSysColors.material().onSurface,
-                        ),
-                        const SizedBox(width: 16),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Phone number',
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .labelMedium
-                                  ?.copyWith(
-                                    color:
-                                        LinagoraSysColors.material().onSurface,
-                                  ),
-                            ),
-                            Text(
-                              phoneNumber.phoneNumber ?? '',
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .bodyMedium
-                                  ?.copyWith(
-                                    color:
-                                        LinagoraSysColors.material().onSurface,
-                                  ),
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              phoneNumber.matrixId ?? '',
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .bodyMedium
-                                  ?.copyWith(
-                                    color:
-                                        LinagoraSysColors.material().onSurface,
-                                  ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              if (contact.emails != null && contact.emails!.isNotEmpty)
-                ...contact.emails!.map(
-                  (email) => Padding(
-                    padding: const EdgeInsets.symmetric(
-                      vertical: 8,
-                    ),
-                    child: Row(
-                      children: [
-                        Icon(
-                          Icons.email_outlined,
-                          size: 24,
-                          color: LinagoraSysColors.material().onSurface,
-                        ),
-                        const SizedBox(width: 16),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Email',
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .labelMedium
-                                  ?.copyWith(
-                                    color:
-                                        LinagoraSysColors.material().onSurface,
-                                  ),
-                            ),
-                            Text(
-                              email.email,
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .bodyMedium
-                                  ?.copyWith(
-                                    color:
-                                        LinagoraSysColors.material().onSurface,
-                                  ),
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              email.matrixId ?? '',
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .bodyMedium
-                                  ?.copyWith(
-                                    color:
-                                        LinagoraSysColors.material().onSurface,
-                                  ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              const SizedBox(height: 56),
-            ],
-          ),
-        ),
+      builder: (context) => ContactsInvitationView(
+        contact: contact,
       ),
     );
   }
