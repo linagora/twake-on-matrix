@@ -27,6 +27,8 @@ import 'package:matrix/matrix.dart';
 class FederationLookUpPhonebookContactInteractor {
   final PhonebookContactRepository _phonebookContactRepository =
       getIt.get<PhonebookContactRepository>();
+  final IdentityLookupManager _identityLookupManager =
+      getIt.get<IdentityLookupManager>();
 
   Stream<Either<Failure, Success>> execute({
     int lookupChunkSize = 10,
@@ -39,9 +41,6 @@ class FederationLookUpPhonebookContactInteractor {
       FederationTokenInformation? federationIdentityRequestTokenRes;
 
       FederationRegisterResponse? federationRegisterToken;
-
-      final IdentityLookupManager identityLookupManager =
-          IdentityLookupManager();
 
       final FederationIdentityRequestTokenManager
           federationIdentityRequestTokenManager =
@@ -78,7 +77,7 @@ class FederationLookUpPhonebookContactInteractor {
       }
 
       try {
-        final res = await identityLookupManager.register(
+        final res = await _identityLookupManager.register(
           federationUrl: argument.federationUrl,
           tokenInformation: federationIdentityRequestTokenRes!,
         );
@@ -124,7 +123,7 @@ class FederationLookUpPhonebookContactInteractor {
       FederationHashDetailsResponse? hashDetails;
 
       try {
-        final res = await identityLookupManager.getHashDetails(
+        final res = await _identityLookupManager.getHashDetails(
           federationUrl: argument.federationUrl,
           registeredToken: federationRegisterToken.token!,
         );
@@ -214,7 +213,7 @@ class FederationLookUpPhonebookContactInteractor {
         );
         FederationLookupMxidResponse? response;
         try {
-          response = await identityLookupManager.lookupMxid(
+          response = await _identityLookupManager.lookupMxid(
             federationUrl: argument.federationUrl,
             request: request,
             registeredToken: federationRegisterToken.token!,

@@ -29,6 +29,13 @@ class FederationIdentityCalculationHashesEmpty extends Failure {
   List<Object?> get props => [];
 }
 
+class NoFederationIdentityURL extends Failure {
+  const NoFederationIdentityURL();
+
+  @override
+  List<Object?> get props => [];
+}
+
 class FederationIdentityRegisterAccountFailure extends Failure {
   const FederationIdentityRegisterAccountFailure({
     required this.identityServer,

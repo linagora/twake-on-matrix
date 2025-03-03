@@ -2,6 +2,7 @@ import 'package:collection/collection.dart';
 import 'package:dartz/dartz.dart';
 import 'package:fluffychat/app_state/failure.dart';
 import 'package:fluffychat/app_state/success.dart';
+import 'package:fluffychat/modules/federation_identity_lookup/domain/exceptions/federation_identity_lookup_exceptions.dart';
 import 'package:fluffychat/modules/federation_identity_lookup/domain/models/federation_arguments.dart';
 import 'package:fluffychat/modules/federation_identity_lookup/domain/models/federation_contact.dart';
 import 'package:fluffychat/modules/federation_identity_lookup/domain/models/federation_lookup_mxid_request.dart';
@@ -20,11 +21,14 @@ class FederationIdentityLookupInteractor {
     required FederationArguments arguments,
   }) async {
     try {
+      if (arguments.federationUrl.isEmpty) {
+        return const Left(NoFederationIdentityURL());
+      }
+
       final registerResponse =
           await federationIdentityLookupRepository.register(
         tokenInformation: arguments.tokenInformation,
       );
-
       if (registerResponse.token == null && registerResponse.token!.isEmpty) {
         return Left(
           FederationIdentityRegisterAccountFailure(
@@ -37,7 +41,6 @@ class FederationIdentityLookupInteractor {
           await federationIdentityLookupRepository.getHashDetails(
         registeredToken: registerResponse.token!,
       );
-
       if (hashDetails.lookupPepper == null || hashDetails.algorithms == null) {
         return const Left(FederationIdentityGetHashDetailsFailure());
       }
@@ -47,9 +50,9 @@ class FederationIdentityLookupInteractor {
       final Map<String, List<String>> contactIdToHashesMap = {};
 
       for (final contact in arguments.contactMaps.values) {
-        final phoneToHashMap = <String, String>{};
+        final phoneToHashMap = <String, List<String>>{};
 
-        final emailToHashMap = <String, String>{};
+        final emailToHashMap = <String, List<String>>{};
         if (hashDetails.algorithms!.isEmpty) {
           return const Left(FederationIdentityGetHashDetailsFailure());
         }
@@ -57,30 +60,32 @@ class FederationIdentityLookupInteractor {
         if (contact.phoneNumbers != null) {
           for (final phone in contact.phoneNumbers!) {
             final hashes = phone.calculateHashUsingAllPeppers(
-              hashDetails: hashDetails,
+              lookupPepper: hashDetails.lookupPepper,
+              altLookupPeppers: hashDetails.altLookupPeppers,
+              algorithms: hashDetails.algorithms,
             );
-            for (final hash in hashes) {
-              phoneToHashMap.putIfAbsent(phone.number, () => hash);
-            }
 
-            contactIdToHashesMap.putIfAbsent(contact.id, () => []).addAll(
-                  phoneToHashMap.values,
-                );
+            phoneToHashMap.putIfAbsent(phone.number, () => []).addAll(hashes);
+
+            contactIdToHashesMap
+                .putIfAbsent(contact.id, () => [])
+                .addAll(phoneToHashMap.values.expand((e) => e));
           }
         }
 
         if (contact.emails != null) {
           for (final email in contact.emails!) {
             final hashes = email.calculateHashUsingAllPeppers(
-              hashDetails: hashDetails,
+              lookupPepper: hashDetails.lookupPepper,
+              altLookupPeppers: hashDetails.altLookupPeppers,
+              algorithms: hashDetails.algorithms,
             );
 
-            for (final hash in hashes) {
-              emailToHashMap.putIfAbsent(email.address, () => hash);
-            }
-            contactIdToHashesMap.putIfAbsent(contact.id, () => []).addAll(
-                  emailToHashMap.values,
-                );
+            emailToHashMap.putIfAbsent(email.address, () => []).addAll(hashes);
+
+            contactIdToHashesMap
+                .putIfAbsent(contact.id, () => [])
+                .addAll(emailToHashMap.values.expand((e) => e));
           }
         }
 
@@ -110,9 +115,11 @@ class FederationIdentityLookupInteractor {
         registeredToken: registerResponse.token!,
       );
 
-      if (lookupMxidResponse.mappings == null) {
-        return const Left(
-          FederationIdentityLookupFailure(exception: 'No mappings found'),
+      if (lookupMxidResponse.mappings == null || lookupMxidResponse.mappings!.isEmpty) {
+        return Left(
+          FederationIdentityLookupFailure(
+              exception: LookUpFederationIdentityNotFoundException('No mappings found'),
+          ),
         );
       }
 
@@ -158,8 +165,8 @@ class FederationIdentityLookupInteractor {
 
   FederationContact updateContactWithHashes(
     FederationContact contact,
-    Map<String, String> phoneToHashMap,
-    Map<String, String> emailToHashMap,
+    Map<String, List<String>> phoneToHashMap,
+    Map<String, List<String>> emailToHashMap,
   ) {
     final updatedPhoneNumbers = <FederationPhone>{};
     final updatedEmails = <FederationEmail>{};
@@ -207,8 +214,9 @@ class FederationIdentityLookupInteractor {
       final thirdPartyIdToHashMap = phoneNumber.thirdPartyIdToHashMap ?? {};
 
       for (final mappingHash in thirdPartyIdToHashMap.values) {
-        final foundHash = mappings.keys.firstWhereOrNull(
-          (hash) => mappingHash == hash,
+        final foundHash = mappingHash.firstWhereOrNull(
+          (hash) =>
+              mappings.keys.firstWhereOrNull((key) => key == hash) != null,
         );
         if (foundHash != null) {
           final updatedPhoneNumber = phoneNumber.copyWith(
@@ -229,8 +237,9 @@ class FederationIdentityLookupInteractor {
     for (final email in contact.emails!) {
       final thirdPartyIdToHashMap = email.thirdPartyIdToHashMap ?? {};
       for (final mappingHash in thirdPartyIdToHashMap.values) {
-        final foundHash = mappings.keys.firstWhereOrNull(
-          (hash) => mappingHash == hash,
+        final foundHash = mappingHash.firstWhereOrNull(
+          (hash) =>
+              mappings.keys.firstWhereOrNull((key) => key == hash) != null,
         );
         if (foundHash != null) {
           final updatedEmail = email.copyWith(
