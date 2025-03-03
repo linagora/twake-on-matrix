@@ -1,26 +1,12 @@
-import 'dart:convert';
-
-import 'package:crypto/crypto.dart';
-import 'package:equatable/equatable.dart';
-import 'package:fluffychat/modules/federation_identity_lookup/domain/models/federation_hash_details_response.dart';
+import 'package:fluffychat/domain/model/contact/contact.dart';
 import 'package:fluffychat/utils/string_extension.dart';
-import 'package:matrix/encryption/utils/base64_unpadded.dart';
 
-abstract class FederationThirdPartyContact with EquatableMixin {
-  final String? matrixId;
-
-  final String thirdPartyIdType;
-
-  final String thirdPartyId;
-
-  /// Support for multiple peppers
-  final Map<String, String>? thirdPartyIdToHashMap;
-
+abstract class FederationThirdPartyContact extends ThirdPartyContact {
   FederationThirdPartyContact({
-    this.matrixId,
-    required this.thirdPartyIdType,
-    required this.thirdPartyId,
-    this.thirdPartyIdToHashMap,
+    super.matrixId,
+    required super.thirdPartyIdType,
+    required super.thirdPartyId,
+    super.thirdPartyIdToHashMap,
   });
 
   @override
@@ -30,51 +16,6 @@ abstract class FederationThirdPartyContact with EquatableMixin {
         thirdPartyId,
         thirdPartyIdToHashMap,
       ];
-
-  String calculateHashWithAlgorithmSha256({
-    required String pepper,
-  }) {
-    final input = [thirdPartyId, thirdPartyIdType, pepper].join(' ');
-    final bytes = utf8.encode(input);
-    final lookupHash =
-        encodeBase64Unpadded(sha256.convert(bytes).bytes).urlSafeBase64;
-    return lookupHash;
-  }
-
-  String calculateHashWithoutAlgorithm() {
-    return [thirdPartyId, thirdPartyIdType].join(' ');
-  }
-
-  Set<String> calculateHashUsingAllPeppers({
-    required FederationHashDetailsResponse hashDetails,
-  }) {
-    final Set<String> hashes = {};
-
-    if (hashDetails.algorithms == null || hashDetails.algorithms!.isEmpty) {
-      final hash = calculateHashWithoutAlgorithm();
-      hashes.add(hash);
-      return hashes;
-    }
-
-    for (final algorithm in hashDetails.algorithms!) {
-      final peppers = {
-        hashDetails.lookupPepper,
-      };
-
-      for (final pepper in peppers) {
-        if (algorithm == 'sha256') {
-          final hash = calculateHashWithAlgorithmSha256(
-            pepper: pepper ?? '',
-          );
-          hashes.add(hash);
-        } else {
-          final hash = calculateHashWithoutAlgorithm();
-          hashes.add(hash);
-        }
-      }
-    }
-    return hashes;
-  }
 }
 
 class FederationPhone extends FederationThirdPartyContact {
@@ -85,7 +26,7 @@ class FederationPhone extends FederationThirdPartyContact {
     super.matrixId,
     super.thirdPartyIdToHashMap,
   }) : super(
-          thirdPartyIdType: 'msisdn',
+          thirdPartyIdType: ThirdPartyIdType.msisdn,
           thirdPartyId: number.msisdnSanitizer(),
         );
 
@@ -99,7 +40,7 @@ class FederationPhone extends FederationThirdPartyContact {
 
   FederationPhone copyWith({
     String? matrixId,
-    Map<String, String>? thirdPartyIdToHashMap,
+    Map<String, List<String>>? thirdPartyIdToHashMap,
   }) {
     return FederationPhone(
       matrixId: matrixId ?? this.matrixId,
@@ -118,7 +59,7 @@ class FederationEmail extends FederationThirdPartyContact {
     required this.address,
     super.thirdPartyIdToHashMap,
   }) : super(
-          thirdPartyIdType: 'email',
+          thirdPartyIdType: ThirdPartyIdType.email,
           thirdPartyId: address,
         );
 
@@ -132,7 +73,7 @@ class FederationEmail extends FederationThirdPartyContact {
 
   FederationEmail copyWith({
     String? matrixId,
-    Map<String, String>? thirdPartyIdToHashMap,
+    Map<String, List<String>>? thirdPartyIdToHashMap,
   }) {
     return FederationEmail(
       matrixId: matrixId ?? this.matrixId,

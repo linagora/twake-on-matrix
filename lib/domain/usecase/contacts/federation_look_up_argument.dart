@@ -1,16 +1,14 @@
-import 'package:equatable/equatable.dart';
+import 'package:fluffychat/domain/usecase/contacts/twake_look_up_argument.dart';
 
-class FederationLookUpArgument with EquatableMixin {
-  final String homeServerUrl;
+class FederationLookUpArgument extends TwakeLookUpArgument {
   final String federationUrl;
   final String withMxId;
-  final String withAccessToken;
 
   FederationLookUpArgument({
-    required this.homeServerUrl,
+    required super.homeServerUrl,
     required this.federationUrl,
     required this.withMxId,
-    required this.withAccessToken,
+    required super.withAccessToken,
   });
 
   @override
