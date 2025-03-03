@@ -3,6 +3,7 @@ import 'package:fluffychat/domain/model/contact/contact.dart';
 import 'package:fluffychat/domain/model/contact/contact_status.dart';
 import 'package:fluffychat/domain/model/contact/contact_type.dart';
 import 'package:fluffychat/domain/model/contact/third_party_status.dart';
+import 'package:collection/collection.dart';
 
 class PresentationContact extends Equatable {
   final Set<PresentationEmail>? emails;
@@ -35,6 +36,15 @@ class PresentationContact extends Equatable {
         matrixId: '',
         status: ContactStatus.inactive,
       );
+
+  String get primaryEmail =>
+      emails?.firstWhereOrNull((email) => email.email.isNotEmpty)?.email ?? '';
+
+  String get primaryPhoneNumber =>
+      phoneNumbers
+          ?.firstWhereOrNull((phoneNumber) => phoneNumber.phoneNumber != null)
+          ?.phoneNumber ??
+      '';
 
   @override
   List<Object?> get props => [
