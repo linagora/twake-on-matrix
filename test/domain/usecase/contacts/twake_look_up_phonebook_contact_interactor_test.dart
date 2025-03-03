@@ -66,7 +66,7 @@ void main() {
               matrixId: '@alice:matrix.org',
               thirdPartyIdToHashMap: {
                 "(212)555-6789": [
-                  "6mWe5lBps9Rqabkqc_QIh0-jsdFogvcBi9EWs523fok"
+                  "6mWe5lBps9Rqabkqc_QIh0-jsdFogvcBi9EWs523fok",
                 ],
               },
             ),
@@ -76,7 +76,7 @@ void main() {
               address: 'alice@gmail.com',
               thirdPartyIdToHashMap: {
                 "alice@gmail.com": [
-                  "0OWxtHmcUFS0KCHxRc2E8SrcU28Q-5EuRT5MJxnDdkg"
+                  "0OWxtHmcUFS0KCHxRc2E8SrcU28Q-5EuRT5MJxnDdkg",
                 ],
               },
             ),
@@ -91,7 +91,7 @@ void main() {
               matrixId: '@bob:matrix.org',
               thirdPartyIdToHashMap: {
                 "(212)555-1234": [
-                  "WYOGPQyKEyY0iTxQoPTfk58eQvGi0_hpP2hI0S8cQeM"
+                  "WYOGPQyKEyY0iTxQoPTfk58eQvGi0_hpP2hI0S8cQeM",
                 ],
               },
             ),
@@ -101,7 +101,7 @@ void main() {
               address: 'bob@gmail.com',
               thirdPartyIdToHashMap: {
                 "bob@gmail.com": [
-                  "vd5fBacH_IoS6u1BuTJW5NYNdplO8pRrNBbUjCUiQ6M"
+                  "vd5fBacH_IoS6u1BuTJW5NYNdplO8pRrNBbUjCUiQ6M",
                 ],
               },
             ),
@@ -152,11 +152,15 @@ void main() {
           const Right<Failure, Success>(GetPhonebookContactsLoading()),
           Right<Failure, Success>(
             GetPhonebookContactsSuccess(
-                progress: 100, contacts: expectedContacts),
+              progress: 100,
+              contacts: expectedContacts,
+            ),
           ),
           Right<Failure, Success>(
             GetPhonebookContactsSuccess(
-                progress: 100, contacts: expectedContacts),
+              progress: 100,
+              contacts: expectedContacts,
+            ),
           ),
         ]),
       );
@@ -207,7 +211,7 @@ void main() {
               matrixId: '@bob:matrix.org',
               thirdPartyIdToHashMap: {
                 "(212)555-1234": [
-                  "WYOGPQyKEyY0iTxQoPTfk58eQvGi0_hpP2hI0S8cQeM"
+                  "WYOGPQyKEyY0iTxQoPTfk58eQvGi0_hpP2hI0S8cQeM",
                 ],
               },
             ),
@@ -217,7 +221,7 @@ void main() {
               address: 'bob@gmail.com',
               thirdPartyIdToHashMap: {
                 "bob@gmail.com": [
-                  "vd5fBacH_IoS6u1BuTJW5NYNdplO8pRrNBbUjCUiQ6M"
+                  "vd5fBacH_IoS6u1BuTJW5NYNdplO8pRrNBbUjCUiQ6M",
                 ],
               },
             ),
@@ -300,7 +304,9 @@ void main() {
         lookupPepper: 'pepper',
       );
       final argument = TwakeLookUpArgument(
-          homeServerUrl: 'https://example.com', withAccessToken: 'token');
+        homeServerUrl: 'https://example.com',
+        withAccessToken: 'token',
+      );
       when(mockRepository.fetchContacts()).thenAnswer((_) async => contacts);
       when(
         mockIdentityLookupManager.getHashDetails(
@@ -506,8 +512,11 @@ void main() {
 
       // Act
       final result = interactor.execute(
-          argument: TwakeLookUpArgument(
-              homeServerUrl: 'https://example.com', withAccessToken: 'token'));
+        argument: TwakeLookUpArgument(
+          homeServerUrl: 'https://example.com',
+          withAccessToken: 'token',
+        ),
+      );
 
       // Assert
       expect(
@@ -527,8 +536,11 @@ void main() {
 
       // Act
       final result = interactor.execute(
-          argument: TwakeLookUpArgument(
-              homeServerUrl: 'https://example.com', withAccessToken: 'token'));
+        argument: TwakeLookUpArgument(
+          homeServerUrl: 'https://example.com',
+          withAccessToken: 'token',
+        ),
+      );
 
       // Assert
       expect(
@@ -548,15 +560,20 @@ void main() {
       final expectedException = Exception('Error');
       final contacts = [const Contact(id: '1', displayName: 'Test 1')];
       when(mockRepository.fetchContacts()).thenAnswer((_) async => contacts);
-      when(mockIdentityLookupManager.getHashDetails(
-              federationUrl: anyNamed('federationUrl'),
-              registeredToken: anyNamed('registeredToken')))
-          .thenThrow(expectedException);
+      when(
+        mockIdentityLookupManager.getHashDetails(
+          federationUrl: anyNamed('federationUrl'),
+          registeredToken: anyNamed('registeredToken'),
+        ),
+      ).thenThrow(expectedException);
 
       // Act
       final result = interactor.execute(
-          argument: TwakeLookUpArgument(
-              homeServerUrl: 'https://example.com', withAccessToken: 'token'));
+        argument: TwakeLookUpArgument(
+          homeServerUrl: 'https://example.com',
+          withAccessToken: 'token',
+        ),
+      );
 
       // Assert
       expect(
@@ -583,7 +600,9 @@ void main() {
         lookupPepper: 'pepper',
       );
       final argument = TwakeLookUpArgument(
-          homeServerUrl: 'https://example.com', withAccessToken: 'token');
+        homeServerUrl: 'https://example.com',
+        withAccessToken: 'token',
+      );
       when(mockRepository.fetchContacts()).thenAnswer((_) async => contacts);
       when(
         mockIdentityLookupManager.getHashDetails(
@@ -666,7 +685,7 @@ void main() {
               matrixId: '@bob:matrix.org',
               thirdPartyIdToHashMap: {
                 "(212)555-1234": [
-                  "WYOGPQyKEyY0iTxQoPTfk58eQvGi0_hpP2hI0S8cQeM"
+                  "WYOGPQyKEyY0iTxQoPTfk58eQvGi0_hpP2hI0S8cQeM",
                 ],
               },
             ),
@@ -676,7 +695,7 @@ void main() {
               address: 'bob@gmail.com',
               thirdPartyIdToHashMap: {
                 "bob@gmail.com": [
-                  "vd5fBacH_IoS6u1BuTJW5NYNdplO8pRrNBbUjCUiQ6M"
+                  "vd5fBacH_IoS6u1BuTJW5NYNdplO8pRrNBbUjCUiQ6M",
                 ],
               },
             ),
@@ -695,7 +714,9 @@ void main() {
         lookupPepper: 'pepper',
       );
       final argument = TwakeLookUpArgument(
-          homeServerUrl: 'https://example.com', withAccessToken: 'token');
+        homeServerUrl: 'https://example.com',
+        withAccessToken: 'token',
+      );
       when(mockRepository.fetchContacts()).thenAnswer((_) async => contacts);
       when(
         mockIdentityLookupManager.getHashDetails(
@@ -736,7 +757,10 @@ void main() {
         emitsInOrder(<dynamic>[
           const Right<Failure, Success>(GetPhonebookContactsLoading()),
           Right<Failure, Success>(
-            GetPhonebookContactsSuccess(progress: 50, contacts: expectedContactsInSecondState),
+            GetPhonebookContactsSuccess(
+              progress: 50,
+              contacts: expectedContactsInSecondState,
+            ),
           ),
           Left<Failure, Success>(
             LookUpPhonebookContactPartialFailed(

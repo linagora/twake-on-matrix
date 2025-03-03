@@ -110,79 +110,45 @@ class ExpansionContactListTile extends StatelessWidget {
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
-                        InkWell(
-                          onTap: () {
-                            onExpansionInformation?.call(contact);
-                          },
-                          child: Container(
-                            decoration: BoxDecoration(
-                              color: LinagoraSysColors.material()
-                                  .onSurfaceVariant
-                                  .withOpacity(0.08),
-                              borderRadius: BorderRadius.circular(16),
-                            ),
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 12.0,
-                              vertical: 4.0,
-                            ),
-                            margin: const EdgeInsets.only(top: 4.0),
-                            child: Text(
-                              'Expand',
-                              style: LinagoraTextStyle.material()
-                                  .bodyMedium
-                                  .copyWith(
-                                    color: LinagoraRefColors.material().primary,
-                                    fontFamily: 'Inter',
-                                  ),
-                            ),
+                      ],
+                      if (contact.primaryEmail.isNotEmpty) ...[
+                        const SizedBox(height: 4.0),
+                        HighlightText(
+                          text: contact.primaryEmail,
+                          searchWord: highlightKeyword,
+                          style: ListItemStyle.subtitleTextStyle(
+                            fontFamily: 'Inter',
                           ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                         ),
-                      ] else ...[
-                        Container(
-                          decoration: BoxDecoration(
-                            color: LinagoraSysColors.material()
-                                .onSurfaceVariant
-                                .withOpacity(0.08),
-                            borderRadius: BorderRadius.circular(16),
-                          ),
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 12.0,
-                            vertical: 4.0,
-                          ),
-                          margin: const EdgeInsets.only(top: 4.0),
-                          child: Text(
-                            'Invite to Matrix',
-                            style: LinagoraTextStyle.material()
-                                .bodyMedium
-                                .copyWith(
-                                  color: LinagoraRefColors.material().primary,
-                                  fontFamily: 'Inter',
-                                ),
+                      ],
+                      if (contact.primaryPhoneNumber.isNotEmpty) ...[
+                        const SizedBox(height: 4.0),
+                        HighlightText(
+                          text: contact.primaryPhoneNumber,
+                          searchWord: highlightKeyword,
+                          style: ListItemStyle.subtitleTextStyle(
+                            fontFamily: 'Inter',
                           ),
                         ),
                       ],
-
-                      // if (contact.email != null)
-                      //   HighlightText(
-                      //     text: contact.email!,
-                      //     searchWord: highlightKeyword,
-                      //     style: ListItemStyle.subtitleTextStyle(
-                      //       fontFamily: 'Inter',
-                      //     ),
-                      //     maxLines: 1,
-                      //     overflow: TextOverflow.ellipsis,
-                      //   ),
-                      // if (contact.phoneNumber != null)
-                      //   HighlightText(
-                      //     text: contact.phoneNumber!,
-                      //     searchWord: highlightKeyword,
-                      //     style: ListItemStyle.subtitleTextStyle(
-                      //       fontFamily: 'Inter',
-                      //     ),
-                      //   ),
                     ],
                   ),
                 ),
+                if (contact.matrixId == null || contact.matrixId!.isEmpty)
+                  InkWell(
+                    onTap: () {
+                      onExpansionInformation?.call(contact);
+                    },
+                    child: Padding(
+                      padding: const EdgeInsets.all(8),
+                      child: Icon(
+                        Icons.person_add_alt_rounded,
+                        color: LinagoraRefColors.material().primary,
+                      ),
+                    ),
+                  ),
               ],
             );
           },
