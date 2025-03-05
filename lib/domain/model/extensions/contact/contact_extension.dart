@@ -51,6 +51,62 @@ extension ContactExtension on Contact {
     );
   }
 
+  Set<Email> _mergeEmails(Set<Email>? emails1, Set<Email>? emails2) {
+    final mergedEmails = <Email>{};
+    final allEmails = [...?emails1, ...?emails2];
+
+    final emailMap = <String, Email>{};
+    for (final email in allEmails) {
+      if (emailMap.containsKey(email.address)) {
+        // Merge with the existing email
+        emailMap[email.address] = emailMap[email.address]
+          !.copyWith(
+            matrixId: email.matrixId,
+            status: email.status,
+          );
+      } else {
+        // Add to the map
+        emailMap[email.address] = email;
+      }
+    }
+
+    mergedEmails.addAll(emailMap.values);
+    return mergedEmails;
+  }
+
+  // Merge two sets of phone numbers, combining properties
+  Set<PhoneNumber> _mergePhoneNumbers(Set<PhoneNumber>? phones1, Set<PhoneNumber>? phones2) {
+    final mergedPhones = <PhoneNumber>{};
+    final allPhones = [...?phones1, ...?phones2];
+
+    final phoneMap = <String, PhoneNumber>{};
+    for (final phone in allPhones) {
+      if (phoneMap.containsKey(phone.number)) {
+        // Merge with the existing phone number
+        phoneMap[phone.number] = phoneMap[phone.number]
+          !.copyWith(
+            matrixId: phone.matrixId,
+            status: phone.status,
+          );
+      } else {
+        // Add to the map
+        phoneMap[phone.number] = phone;
+      }
+    }
+
+    mergedPhones.addAll(phoneMap.values);
+    return mergedPhones;
+  }
+
+  Contact combine(Contact other) {
+    return Contact(
+      id: id,
+      displayName: displayName ?? other.displayName,
+      emails: _mergeEmails(emails, other.emails),
+      phoneNumbers: _mergePhoneNumbers(phoneNumbers, other.phoneNumbers),
+    );
+  }
+
   Set<Email> updateEmails(Map<String, String> mappings) {
     final updatedEmails = <Email>{};
     for (final email in emails!) {
@@ -188,12 +244,17 @@ extension SetContactExtension on Set<Contact> {
   }) {
     final Map<String, Contact> uniqueContactsById = {};
 
-    for (final contact in [
-      ...this,
-      ...contactsFromMappings,
-      ...contactsFromThirdParty,
-    ]) {
-      uniqueContactsById[contact.id] = contact;
+    // Combine all contacts into a single list
+    final allContacts = [...this, ...contactsFromMappings, ...contactsFromThirdParty];
+
+    for (final contact in allContacts) {
+      if (uniqueContactsById.containsKey(contact.id)) {
+        // If the contact already exists, combine the properties
+        uniqueContactsById[contact.id] = uniqueContactsById[contact.id]!.combine(contact);
+      } else {
+        // Otherwise, add the contact to the map
+        uniqueContactsById[contact.id] = contact;
+      }
     }
 
     return uniqueContactsById.values.toSet();

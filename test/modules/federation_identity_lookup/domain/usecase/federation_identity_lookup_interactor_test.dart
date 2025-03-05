@@ -1,15 +1,15 @@
 import 'package:fluffychat/modules/federation_identity_lookup/domain/exceptions/federation_identity_lookup_exceptions.dart';
+import 'package:fluffychat/modules/federation_identity_lookup/domain/models/federation_arguments.dart';
 import 'package:fluffychat/modules/federation_identity_lookup/domain/models/federation_contact.dart';
 import 'package:fluffychat/modules/federation_identity_lookup/domain/models/federation_hash_details_response.dart';
 import 'package:fluffychat/modules/federation_identity_lookup/domain/models/federation_lookup_mxid_response.dart';
 import 'package:fluffychat/modules/federation_identity_lookup/domain/models/federation_register_response.dart';
+import 'package:fluffychat/modules/federation_identity_lookup/domain/repository/federation_identity_lookup_repository.dart';
+import 'package:fluffychat/modules/federation_identity_lookup/domain/state/federation_identity_lookup_state.dart';
+import 'package:fluffychat/modules/federation_identity_lookup/domain/usecase/federation_identity_lookup_interactor.dart';
+import 'package:fluffychat/modules/federation_identity_request_token/domain/models/federation_token_information.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/annotations.dart';
-import 'package:fluffychat/modules/federation_identity_lookup/domain/models/federation_arguments.dart';
-import 'package:fluffychat/modules/federation_identity_lookup/domain/repository/federation_identity_lookup_repository.dart';
-import 'package:fluffychat/modules/federation_identity_lookup/domain/usecase/federation_identity_lookup_interactor.dart';
-import 'package:fluffychat/modules/federation_identity_lookup/domain/state/federation_identity_lookup_state.dart';
-import 'package:fluffychat/modules/federation_identity_request_token/domain/models/federation_token_information.dart';
 import 'package:mockito/mockito.dart';
 
 import '../../../federation_contact_fixtures.dart';
@@ -55,12 +55,12 @@ void main() {
       when(mockRepository.register(
               tokenInformation: testToken,),)
           .thenAnswer((_) async =>
-              const FederationRegisterResponse(token: 'valid_token'));
+              const FederationRegisterResponse(token: 'valid_token'),);
       when(mockRepository.getHashDetails(registeredToken: 'valid_token'))
           .thenAnswer((_) async => const FederationHashDetailsResponse(
                 algorithms: {'sha256'},
                 lookupPepper: 'pepper',
-              ));
+              ),);
 
       final result = await interactor.execute(
         arguments: FederationArguments(
@@ -73,7 +73,7 @@ void main() {
       expect(result.isLeft(), true);
       final failure = result.swap().getOrElse(() => throw Exception('Expect a failure'));
       expect(
-          failure, isA<FederationIdentityCalculationHashesEmpty>());
+          failure, isA<FederationIdentityCalculationHashesEmpty>(),);
     });
 
     test('should handle mixed phone/email contacts', () async {
@@ -100,7 +100,7 @@ void main() {
         (_) async => const FederationLookupMxidResponse(
           mappings: {
             '6mWe5lBps9Rqabkqc_QIh0-jsdFogvcBi9EWs523fok': '@alice:matrix.com',
-            '0OWxtHmcUFS0KCHxRc2E8SrcU28Q-5EuRT5MJxnDdkg': '@alice_mail:matrix.com'
+            '0OWxtHmcUFS0KCHxRc2E8SrcU28Q-5EuRT5MJxnDdkg': '@alice_mail:matrix.com',
           },
         ),
       );
@@ -130,22 +130,22 @@ void main() {
   group('MXID Lookup', () {
     test('should handle partial mapping matches', () async {
       when(mockRepository.register(
-              tokenInformation: testToken))
+              tokenInformation: testToken,),)
           .thenAnswer((_) async => const FederationRegisterResponse(token: 'valid_token'));
       when(mockRepository.getHashDetails(registeredToken: 'valid_token'))
           .thenAnswer((_) async => const FederationHashDetailsResponse(
                 algorithms: {'sha256'},
                 lookupPepper: 'pepper',
                 altLookupPeppers: {'pepper1', 'pepper2'},
-              ));
+              ),);
       when(mockRepository.lookupMxid(
         request: anyNamed('request'),
         registeredToken: anyNamed('registeredToken'),
-      )).thenAnswer((_) async => const FederationLookupMxidResponse(
+      ),).thenAnswer((_) async => const FederationLookupMxidResponse(
           mappings: {
             'lWcTz7CJ9a9OqxlYWsl2MibzKep0abdGl6g3I3t7BPM': '@alice_pepper1:matrix.com',
             'rJnCyQMaiAcZNw_qB5D5iCCjUdKUKF7Mzl18HMY6DjQ': '@alice_pepper2:matrix.com',
-          }));
+          },),);
 
       final contacts = {
         FederationContactFixtures.contact1.id: FederationContactFixtures.contact1,
@@ -175,23 +175,23 @@ void main() {
               ?.emails
               ?.first
               .matrixId,
-          '@alice_pepper2:matrix.com');
+          '@alice_pepper2:matrix.com',);
     });
 
     test('should handle empty lookup response', () async {
       when(mockRepository.register(
-              tokenInformation: testToken))
+              tokenInformation: testToken,),)
           .thenAnswer((_) async => const FederationRegisterResponse(token: 'valid_token'));
       when(mockRepository.getHashDetails(registeredToken: 'valid_token'))
           .thenAnswer((_) async => const FederationHashDetailsResponse(
                 algorithms: {'sha256'},
                 lookupPepper: 'pepper',
                 altLookupPeppers: {'pepper1', 'pepper2'},
-              ));
+              ),);
       when(mockRepository.lookupMxid(
         request: anyNamed('request'),
         registeredToken: anyNamed('registeredToken'),
-      )).thenAnswer((_) async => const FederationLookupMxidResponse(mappings: {}));
+      ),).thenAnswer((_) async => const FederationLookupMxidResponse(mappings: {}));
 
       final contacts = {
         FederationContactFixtures.contact1.id: FederationContactFixtures.contact1,
@@ -250,18 +250,18 @@ void main() {
 
     test('should handle invalid contact data', () async {
       when(mockRepository.register(
-              tokenInformation: testToken))
+              tokenInformation: testToken,),)
           .thenAnswer((_) async => const FederationRegisterResponse(token: 'valid_token'));
       when(mockRepository.getHashDetails(registeredToken: 'valid_token'))
           .thenAnswer((_) async => const FederationHashDetailsResponse(
                 algorithms: {'sha256'},
                 lookupPepper: 'pepper',
                 altLookupPeppers: {'pepper1', 'pepper2'},
-              ));
+              ),);
       when(mockRepository.lookupMxid(
         request: anyNamed('request'),
         registeredToken: anyNamed('registeredToken'),
-      )).thenAnswer((_) async => const FederationLookupMxidResponse(mappings: {}));
+      ),).thenAnswer((_) async => const FederationLookupMxidResponse(mappings: {}));
 
       final Map<String, FederationContact> contacts = {};
       final result = await interactor.execute(
@@ -285,22 +285,22 @@ void main() {
   group('Hash Details', () {
     test('should handle unsupported hash algorithms', () async {
       when(mockRepository.register(
-          tokenInformation: testToken))
+          tokenInformation: testToken,),)
           .thenAnswer((_) async => const FederationRegisterResponse(token: 'valid_token'));
       when(mockRepository.getHashDetails(registeredToken: 'valid_token'))
           .thenAnswer((_) async => const FederationHashDetailsResponse(
         algorithms: {'unsupported algorithm'},
         lookupPepper: 'pepper',
-      ));
+      ),);
 
       when(mockRepository.lookupMxid(
         request: anyNamed('request'),
         registeredToken: anyNamed('registeredToken'),
-      )).thenAnswer((_) async => const FederationLookupMxidResponse(
+      ),).thenAnswer((_) async => const FederationLookupMxidResponse(
           mappings: {
             '2125556789 msisdn': '@alice_pepper1:matrix.com',
             'alice@gmail.com email': '@alice_pepper2:matrix.com',
-          }));
+          },),);
 
       final contacts = {
         FederationContactFixtures.contact1.id: FederationContactFixtures.contact1,
@@ -330,7 +330,7 @@ void main() {
               ?.emails
               ?.first
               .matrixId,
-          '@alice_pepper2:matrix.com');
+          '@alice_pepper2:matrix.com',);
     });
   });
 }
