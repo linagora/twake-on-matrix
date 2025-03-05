@@ -115,10 +115,12 @@ class FederationIdentityLookupInteractor {
         registeredToken: registerResponse.token!,
       );
 
-      if (lookupMxidResponse.mappings == null || lookupMxidResponse.mappings!.isEmpty) {
+      if (lookupMxidResponse.mappings == null ||
+          lookupMxidResponse.mappings!.isEmpty) {
         return Left(
           FederationIdentityLookupFailure(
-              exception: LookUpFederationIdentityNotFoundException('No mappings found'),
+            exception:
+                LookUpFederationIdentityNotFoundException('No mappings found'),
           ),
         );
       }

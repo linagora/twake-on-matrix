@@ -22,7 +22,8 @@ class FederationIdentityRequestTokenManager {
           FederationIdentityRequestTokenEndpoint.acceptHeaderDefault,
       HttpHeaders.contentTypeHeader:
           FederationIdentityRequestTokenEndpoint.contentTypeHeaderDefault,
-      HttpHeaders.authorizationHeader: 'Bearer ${federationTokenRequest.accessToken}',
+      HttpHeaders.authorizationHeader:
+          'Bearer ${federationTokenRequest.accessToken}',
     };
 
     final dio = Dio(

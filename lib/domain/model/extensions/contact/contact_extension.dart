@@ -59,11 +59,10 @@ extension ContactExtension on Contact {
     for (final email in allEmails) {
       if (emailMap.containsKey(email.address)) {
         // Merge with the existing email
-        emailMap[email.address] = emailMap[email.address]
-          !.copyWith(
-            matrixId: email.matrixId,
-            status: email.status,
-          );
+        emailMap[email.address] = emailMap[email.address]!.copyWith(
+          matrixId: email.matrixId,
+          status: email.status,
+        );
       } else {
         // Add to the map
         emailMap[email.address] = email;
@@ -75,7 +74,8 @@ extension ContactExtension on Contact {
   }
 
   // Merge two sets of phone numbers, combining properties
-  Set<PhoneNumber> _mergePhoneNumbers(Set<PhoneNumber>? phones1, Set<PhoneNumber>? phones2) {
+  Set<PhoneNumber> _mergePhoneNumbers(
+      Set<PhoneNumber>? phones1, Set<PhoneNumber>? phones2) {
     final mergedPhones = <PhoneNumber>{};
     final allPhones = [...?phones1, ...?phones2];
 
@@ -83,11 +83,10 @@ extension ContactExtension on Contact {
     for (final phone in allPhones) {
       if (phoneMap.containsKey(phone.number)) {
         // Merge with the existing phone number
-        phoneMap[phone.number] = phoneMap[phone.number]
-          !.copyWith(
-            matrixId: phone.matrixId,
-            status: phone.status,
-          );
+        phoneMap[phone.number] = phoneMap[phone.number]!.copyWith(
+          matrixId: phone.matrixId,
+          status: phone.status,
+        );
       } else {
         // Add to the map
         phoneMap[phone.number] = phone;
@@ -245,12 +244,17 @@ extension SetContactExtension on Set<Contact> {
     final Map<String, Contact> uniqueContactsById = {};
 
     // Combine all contacts into a single list
-    final allContacts = [...this, ...contactsFromMappings, ...contactsFromThirdParty];
+    final allContacts = [
+      ...this,
+      ...contactsFromMappings,
+      ...contactsFromThirdParty
+    ];
 
     for (final contact in allContacts) {
       if (uniqueContactsById.containsKey(contact.id)) {
         // If the contact already exists, combine the properties
-        uniqueContactsById[contact.id] = uniqueContactsById[contact.id]!.combine(contact);
+        uniqueContactsById[contact.id] =
+            uniqueContactsById[contact.id]!.combine(contact);
       } else {
         // Otherwise, add the contact to the map
         uniqueContactsById[contact.id] = contact;

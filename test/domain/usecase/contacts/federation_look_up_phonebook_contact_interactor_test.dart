@@ -80,11 +80,14 @@ void main() {
 
     getIt.registerFactory<PhonebookContactRepository>(() => mockRepository);
     getIt.registerFactory<FederationIdentityRequestTokenManager>(
-        () => mockRequestTokenManager,);
+      () => mockRequestTokenManager,
+    );
     getIt.registerFactory<IdentityLookupManager>(
-        () => mockIdentityLookupManager,);
+      () => mockIdentityLookupManager,
+    );
     getIt.registerFactory<FederationIdentityLookupManager>(
-        () => mockFederationIdentityLookupManager,);
+      () => mockFederationIdentityLookupManager,
+    );
 
     interactor = FederationLookUpPhonebookContactInteractor();
   });
@@ -99,9 +102,11 @@ void main() {
         when(mockRepository.fetchContacts())
             .thenAnswer((_) async => testContacts);
 
-        when(mockRequestTokenManager.execute(
-                federationTokenRequest: testTokenRequest,),)
-            .thenAnswer(
+        when(
+          mockRequestTokenManager.execute(
+            federationTokenRequest: testTokenRequest,
+          ),
+        ).thenAnswer(
           (_) async => const Right<Failure, Success>(
             FederationIdentityRequestTokenSuccess(
               tokenInformation: tokenInformation,
@@ -129,9 +134,11 @@ void main() {
         when(mockRepository.fetchContacts())
             .thenAnswer((_) async => testContacts);
 
-        when(mockRequestTokenManager.execute(
-                federationTokenRequest: testTokenRequest,),)
-            .thenAnswer(
+        when(
+          mockRequestTokenManager.execute(
+            federationTokenRequest: testTokenRequest,
+          ),
+        ).thenAnswer(
           (_) async => const Right<Failure, Success>(
             FederationIdentityRequestTokenSuccess(
               tokenInformation: tokenInformation,
@@ -144,8 +151,11 @@ void main() {
             federationUrl: federationUrl,
             tokenInformation: tokenInformation,
           ),
-        ).thenAnswer((_) async => const FederationRegisterResponse(
-            token: 'aB7c9Dz4EfGh5iJkLm3nOp==',),);
+        ).thenAnswer(
+          (_) async => const FederationRegisterResponse(
+            token: 'aB7c9Dz4EfGh5iJkLm3nOp==',
+          ),
+        );
 
         final expectedException = Exception('Hash details failed');
         when(
@@ -170,9 +180,11 @@ void main() {
         when(mockRepository.fetchContacts())
             .thenAnswer((_) async => testContacts);
 
-        when(mockRequestTokenManager.execute(
-                federationTokenRequest: testTokenRequest,),)
-            .thenAnswer(
+        when(
+          mockRequestTokenManager.execute(
+            federationTokenRequest: testTokenRequest,
+          ),
+        ).thenAnswer(
           (_) async => const Right<Failure, Success>(
             FederationIdentityRequestTokenSuccess(
               tokenInformation: tokenInformation,
@@ -185,8 +197,11 @@ void main() {
             federationUrl: federationUrl,
             tokenInformation: tokenInformation,
           ),
-        ).thenAnswer((_) async => const FederationRegisterResponse(
-            token: 'aB7c9Dz4EfGh5iJkLm3nOp==',),);
+        ).thenAnswer(
+          (_) async => const FederationRegisterResponse(
+            token: 'aB7c9Dz4EfGh5iJkLm3nOp==',
+          ),
+        );
 
         const hashDetails = FederationHashDetailsResponse(
           algorithms: {'sha256'},
@@ -213,9 +228,12 @@ void main() {
           interactor.execute(argument: testArgument),
           emitsInOrder([
             const Right(GetPhonebookContactsLoading()),
-            Left(LookUpPhonebookContactPartialFailed(
+            Left(
+              LookUpPhonebookContactPartialFailed(
                 exception: TwakeLookupChunkException(exception.toString()),
-                contacts: testContacts,),),
+                contacts: testContacts,
+              ),
+            ),
           ]),
         );
       });
@@ -225,10 +243,12 @@ void main() {
 
         when(mockRepository.fetchContacts()).thenThrow(expectedException);
 
-        when(mockRequestTokenManager.execute(
-          federationTokenRequest: testTokenRequest,),)
-            .thenAnswer(
-              (_) async => const Right<Failure, Success>(
+        when(
+          mockRequestTokenManager.execute(
+            federationTokenRequest: testTokenRequest,
+          ),
+        ).thenAnswer(
+          (_) async => const Right<Failure, Success>(
             FederationIdentityRequestTokenSuccess(
               tokenInformation: tokenInformation,
             ),
@@ -240,8 +260,11 @@ void main() {
             federationUrl: federationUrl,
             tokenInformation: tokenInformation,
           ),
-        ).thenAnswer((_) async => const FederationRegisterResponse(
-          token: 'aB7c9Dz4EfGh5iJkLm3nOp==',),);
+        ).thenAnswer(
+          (_) async => const FederationRegisterResponse(
+            token: 'aB7c9Dz4EfGh5iJkLm3nOp==',
+          ),
+        );
 
         expectLater(
           interactor.execute(argument: testArgument),
@@ -255,12 +278,17 @@ void main() {
       test('should emit empty state when contacts list is empty', () async {
         when(mockRepository.fetchContacts()).thenAnswer((_) async => []);
 
-        when(mockRequestTokenManager.execute(
-                federationTokenRequest: testTokenRequest,),)
-            .thenAnswer((_) async => const Right<Failure, Success>(
-                  FederationIdentityRequestTokenSuccess(
-                      tokenInformation: tokenInformation,),
-                ),);
+        when(
+          mockRequestTokenManager.execute(
+            federationTokenRequest: testTokenRequest,
+          ),
+        ).thenAnswer(
+          (_) async => const Right<Failure, Success>(
+            FederationIdentityRequestTokenSuccess(
+              tokenInformation: tokenInformation,
+            ),
+          ),
+        );
 
         expectLater(
           interactor.execute(argument: testArgument),
@@ -275,11 +303,15 @@ void main() {
         when(mockRepository.fetchContacts())
             .thenAnswer((_) async => testContacts);
 
-        when(mockRequestTokenManager.execute(
-                federationTokenRequest: testTokenRequest,),)
-            .thenAnswer((_) async => const Left<Failure, Success>(
-                  RequestTokenFailure(exception: 'Failed to get token'),
-                ),);
+        when(
+          mockRequestTokenManager.execute(
+            federationTokenRequest: testTokenRequest,
+          ),
+        ).thenAnswer(
+          (_) async => const Left<Failure, Success>(
+            RequestTokenFailure(exception: 'Failed to get token'),
+          ),
+        );
 
         expectLater(
           interactor.execute(argument: testArgument),
@@ -294,18 +326,28 @@ void main() {
         when(mockRepository.fetchContacts())
             .thenAnswer((_) async => testContacts);
 
-        when(mockRequestTokenManager.execute(
-                federationTokenRequest: testTokenRequest,),)
-            .thenAnswer((_) async => const Right<Failure, Success>(
-                  FederationIdentityRequestTokenSuccess(
-                      tokenInformation: tokenInformation,),
-                ),);
+        when(
+          mockRequestTokenManager.execute(
+            federationTokenRequest: testTokenRequest,
+          ),
+        ).thenAnswer(
+          (_) async => const Right<Failure, Success>(
+            FederationIdentityRequestTokenSuccess(
+              tokenInformation: tokenInformation,
+            ),
+          ),
+        );
 
-        when(mockIdentityLookupManager.register(
-          federationUrl: federationUrl,
-          tokenInformation: tokenInformation,
-        ),).thenAnswer((_) async => const FederationRegisterResponse(
-            token: 'aB7c9Dz4EfGh5iJkLm3nOp==',),);
+        when(
+          mockIdentityLookupManager.register(
+            federationUrl: federationUrl,
+            tokenInformation: tokenInformation,
+          ),
+        ).thenAnswer(
+          (_) async => const FederationRegisterResponse(
+            token: 'aB7c9Dz4EfGh5iJkLm3nOp==',
+          ),
+        );
 
         // Empty hash details response
         const emptyHashDetails = FederationHashDetailsResponse(
@@ -313,17 +355,20 @@ void main() {
           lookupPepper: '',
         );
 
-        when(mockIdentityLookupManager.getHashDetails(
-          federationUrl: anyNamed('federationUrl'),
-          registeredToken: anyNamed('registeredToken'),
-        ),).thenAnswer((_) async => emptyHashDetails);
+        when(
+          mockIdentityLookupManager.getHashDetails(
+            federationUrl: anyNamed('federationUrl'),
+            registeredToken: anyNamed('registeredToken'),
+          ),
+        ).thenAnswer((_) async => emptyHashDetails);
 
         expectLater(
           interactor.execute(argument: testArgument),
           emitsInOrder([
             const Right(GetPhonebookContactsLoading()),
             const Left(
-                GetHashDetailsFailure(exception: 'Hash details is empty'),),
+              GetHashDetailsFailure(exception: 'Hash details is empty'),
+            ),
           ]),
         );
       });
@@ -368,9 +413,11 @@ void main() {
         when(mockRepository.fetchContacts())
             .thenAnswer((_) async => testContacts);
 
-        when(mockRequestTokenManager.execute(
-                federationTokenRequest: testTokenRequest,),)
-            .thenAnswer(
+        when(
+          mockRequestTokenManager.execute(
+            federationTokenRequest: testTokenRequest,
+          ),
+        ).thenAnswer(
           (_) async => const Right<Failure, Success>(
             FederationIdentityRequestTokenSuccess(
               tokenInformation: tokenInformation,
@@ -383,8 +430,11 @@ void main() {
             federationUrl: federationUrl,
             tokenInformation: tokenInformation,
           ),
-        ).thenAnswer((_) async => const FederationRegisterResponse(
-            token: 'aB7c9Dz4EfGh5iJkLm3nOp==',),);
+        ).thenAnswer(
+          (_) async => const FederationRegisterResponse(
+            token: 'aB7c9Dz4EfGh5iJkLm3nOp==',
+          ),
+        );
 
         const hashDetails = FederationHashDetailsResponse(
           algorithms: {'sha256'},
@@ -478,9 +528,11 @@ void main() {
         when(mockRepository.fetchContacts())
             .thenAnswer((_) async => testContacts);
 
-        when(mockRequestTokenManager.execute(
-                federationTokenRequest: testTokenRequest,),)
-            .thenAnswer(
+        when(
+          mockRequestTokenManager.execute(
+            federationTokenRequest: testTokenRequest,
+          ),
+        ).thenAnswer(
           (_) async => const Right<Failure, Success>(
             FederationIdentityRequestTokenSuccess(
               tokenInformation: tokenInformation,
@@ -493,8 +545,11 @@ void main() {
             federationUrl: federationUrl,
             tokenInformation: tokenInformation,
           ),
-        ).thenAnswer((_) async => const FederationRegisterResponse(
-            token: 'aB7c9Dz4EfGh5iJkLm3nOp==',),);
+        ).thenAnswer(
+          (_) async => const FederationRegisterResponse(
+            token: 'aB7c9Dz4EfGh5iJkLm3nOp==',
+          ),
+        );
 
         const hashDetails = FederationHashDetailsResponse(
           algorithms: {'sha256'},
@@ -612,8 +667,8 @@ void main() {
 
       test('should handle contacts with only phone numbers', () async {
         final phoneOnlyContacts = [
-          ContactFixtures.contact1.copyWith(emails: {})
-            .copyWith(phoneNumbers: {
+          ContactFixtures.contact1.copyWith(emails: {}).copyWith(
+            phoneNumbers: {
               PhoneNumber(
                 number: '(212)555-6789',
               ),
@@ -623,7 +678,8 @@ void main() {
               PhoneNumber(
                 number: '(213)555-1234',
               ),
-            },),
+            },
+          ),
           ContactFixtures.contact2.copyWith(emails: {}),
         ];
 
@@ -660,18 +716,28 @@ void main() {
         when(mockRepository.fetchContacts())
             .thenAnswer((_) async => phoneOnlyContacts);
 
-        when(mockRequestTokenManager.execute(
-                federationTokenRequest: testTokenRequest,),)
-            .thenAnswer((_) async => const Right<Failure, Success>(
-                  FederationIdentityRequestTokenSuccess(
-                      tokenInformation: tokenInformation,),
-                ),);
+        when(
+          mockRequestTokenManager.execute(
+            federationTokenRequest: testTokenRequest,
+          ),
+        ).thenAnswer(
+          (_) async => const Right<Failure, Success>(
+            FederationIdentityRequestTokenSuccess(
+              tokenInformation: tokenInformation,
+            ),
+          ),
+        );
 
-        when(mockIdentityLookupManager.register(
-          federationUrl: federationUrl,
-          tokenInformation: tokenInformation,
-        ),).thenAnswer((_) async => const FederationRegisterResponse(
-            token: 'aB7c9Dz4EfGh5iJkLm3nOp==',),);
+        when(
+          mockIdentityLookupManager.register(
+            federationUrl: federationUrl,
+            tokenInformation: tokenInformation,
+          ),
+        ).thenAnswer(
+          (_) async => const FederationRegisterResponse(
+            token: 'aB7c9Dz4EfGh5iJkLm3nOp==',
+          ),
+        );
 
         const hashDetails = FederationHashDetailsResponse(
           algorithms: {'sha256'},
@@ -679,23 +745,29 @@ void main() {
           altLookupPeppers: {'pepper1', 'pepper2'},
         );
 
-        when(mockIdentityLookupManager.getHashDetails(
-          federationUrl: anyNamed('federationUrl'),
-          registeredToken: anyNamed('registeredToken'),
-        ),).thenAnswer((_) async => hashDetails);
+        when(
+          mockIdentityLookupManager.getHashDetails(
+            federationUrl: anyNamed('federationUrl'),
+            registeredToken: anyNamed('registeredToken'),
+          ),
+        ).thenAnswer((_) async => hashDetails);
 
-        when(mockIdentityLookupManager.lookupMxid(
-          federationUrl: anyNamed('federationUrl'),
-          request: anyNamed('request'),
-          registeredToken: anyNamed('registeredToken'),
-        ),).thenAnswer((_) async => const FederationLookupMxidResponse(
-              mappings: {},
-              thirdPartyMappings: {
-                'tom.domain.com': {
-                  'lWcTz7CJ9a9OqxlYWsl2MibzKep0abdGl6g3I3t7BPM',
-                },
+        when(
+          mockIdentityLookupManager.lookupMxid(
+            federationUrl: anyNamed('federationUrl'),
+            request: anyNamed('request'),
+            registeredToken: anyNamed('registeredToken'),
+          ),
+        ).thenAnswer(
+          (_) async => const FederationLookupMxidResponse(
+            mappings: {},
+            thirdPartyMappings: {
+              'tom.domain.com': {
+                'lWcTz7CJ9a9OqxlYWsl2MibzKep0abdGl6g3I3t7BPM',
               },
-            ),);
+            },
+          ),
+        );
 
         when(
           mockRequestTokenManager.execute(
@@ -706,7 +778,7 @@ void main() {
             ),
           ),
         ).thenAnswer(
-              (_) async => const Right<Failure, Success>(
+          (_) async => const Right<Failure, Success>(
             FederationIdentityRequestTokenSuccess(
               tokenInformation: tokenInformation,
             ),
@@ -718,7 +790,7 @@ void main() {
             arguments: anyNamed('arguments'),
           ),
         ).thenAnswer(
-              (_) async => Right<Failure, Success>(
+          (_) async => Right<Failure, Success>(
             FederationIdentityLookupSuccess(
               newContacts: {
                 ContactFixtures.contact1.id: FederationContact(
@@ -757,32 +829,37 @@ void main() {
           result,
           emitsInOrder(<dynamic>[
             const Right<Failure, Success>(GetPhonebookContactsLoading()),
-            Right<Failure, Success>(GetPhonebookContactsSuccess(
-              progress: 100,
-              contacts: expectedContacts,
-            ),),
-            Right<Failure, Success>(GetPhonebookContactsSuccess(
-              progress: 100,
-              contacts: expectedContacts,
-            ),),
+            Right<Failure, Success>(
+              GetPhonebookContactsSuccess(
+                progress: 100,
+                contacts: expectedContacts,
+              ),
+            ),
+            Right<Failure, Success>(
+              GetPhonebookContactsSuccess(
+                progress: 100,
+                contacts: expectedContacts,
+              ),
+            ),
           ]),
         );
       });
 
       test('should handle contacts with only emails', () async {
         final emailOnlyContacts = [
-          ContactFixtures.contact1.copyWith(phoneNumbers: {})
-              .copyWith(emails: {
-            Email(
-              address: 'alice1@mail.com',
-            ),
-            Email(
-              address: 'alice2@mail.com',
-            ),
-            Email(
-              address: 'alice3@mail.com',
-            ),
-          },),
+          ContactFixtures.contact1.copyWith(phoneNumbers: {}).copyWith(
+            emails: {
+              Email(
+                address: 'alice1@mail.com',
+              ),
+              Email(
+                address: 'alice2@mail.com',
+              ),
+              Email(
+                address: 'alice3@mail.com',
+              ),
+            },
+          ),
           ContactFixtures.contact2.copyWith(phoneNumbers: {}),
         ];
 
@@ -820,18 +897,28 @@ void main() {
         when(mockRepository.fetchContacts())
             .thenAnswer((_) async => emailOnlyContacts);
 
-        when(mockRequestTokenManager.execute(
-          federationTokenRequest: testTokenRequest,),)
-            .thenAnswer((_) async => const Right<Failure, Success>(
-          FederationIdentityRequestTokenSuccess(
-            tokenInformation: tokenInformation,),
-        ),);
+        when(
+          mockRequestTokenManager.execute(
+            federationTokenRequest: testTokenRequest,
+          ),
+        ).thenAnswer(
+          (_) async => const Right<Failure, Success>(
+            FederationIdentityRequestTokenSuccess(
+              tokenInformation: tokenInformation,
+            ),
+          ),
+        );
 
-        when(mockIdentityLookupManager.register(
-          federationUrl: federationUrl,
-          tokenInformation: tokenInformation,
-        ),).thenAnswer((_) async => const FederationRegisterResponse(
-          token: 'aB7c9Dz4EfGh5iJkLm3nOp==',),);
+        when(
+          mockIdentityLookupManager.register(
+            federationUrl: federationUrl,
+            tokenInformation: tokenInformation,
+          ),
+        ).thenAnswer(
+          (_) async => const FederationRegisterResponse(
+            token: 'aB7c9Dz4EfGh5iJkLm3nOp==',
+          ),
+        );
 
         const hashDetails = FederationHashDetailsResponse(
           algorithms: {'sha256'},
@@ -839,23 +926,29 @@ void main() {
           altLookupPeppers: {'pepper1', 'pepper2'},
         );
 
-        when(mockIdentityLookupManager.getHashDetails(
-          federationUrl: anyNamed('federationUrl'),
-          registeredToken: anyNamed('registeredToken'),
-        ),).thenAnswer((_) async => hashDetails);
+        when(
+          mockIdentityLookupManager.getHashDetails(
+            federationUrl: anyNamed('federationUrl'),
+            registeredToken: anyNamed('registeredToken'),
+          ),
+        ).thenAnswer((_) async => hashDetails);
 
-        when(mockIdentityLookupManager.lookupMxid(
-          federationUrl: anyNamed('federationUrl'),
-          request: anyNamed('request'),
-          registeredToken: anyNamed('registeredToken'),
-        ),).thenAnswer((_) async => const FederationLookupMxidResponse(
-          mappings: {},
-          thirdPartyMappings: {
-            'tom.domain.com': {
-              'lWcTz7CJ9a9OqxlYWsl2MibzKep0abdGl6g3I3t7BPM',
+        when(
+          mockIdentityLookupManager.lookupMxid(
+            federationUrl: anyNamed('federationUrl'),
+            request: anyNamed('request'),
+            registeredToken: anyNamed('registeredToken'),
+          ),
+        ).thenAnswer(
+          (_) async => const FederationLookupMxidResponse(
+            mappings: {},
+            thirdPartyMappings: {
+              'tom.domain.com': {
+                'lWcTz7CJ9a9OqxlYWsl2MibzKep0abdGl6g3I3t7BPM',
+              },
             },
-          },
-        ),);
+          ),
+        );
 
         when(
           mockRequestTokenManager.execute(
@@ -866,7 +959,7 @@ void main() {
             ),
           ),
         ).thenAnswer(
-              (_) async => const Right<Failure, Success>(
+          (_) async => const Right<Failure, Success>(
             FederationIdentityRequestTokenSuccess(
               tokenInformation: tokenInformation,
             ),
@@ -878,7 +971,7 @@ void main() {
             arguments: anyNamed('arguments'),
           ),
         ).thenAnswer(
-              (_) async => Right<Failure, Success>(
+          (_) async => Right<Failure, Success>(
             FederationIdentityLookupSuccess(
               newContacts: {
                 ContactFixtures.contact1.id: FederationContact(
@@ -918,10 +1011,12 @@ void main() {
           result,
           emitsInOrder(<dynamic>[
             const Right<Failure, Success>(GetPhonebookContactsLoading()),
-            Right<Failure, Success>(GetPhonebookContactsSuccess(
-              progress: 100,
-              contacts: expectedContacts,
-            ),),
+            Right<Failure, Success>(
+              GetPhonebookContactsSuccess(
+                progress: 100,
+                contacts: expectedContacts,
+              ),
+            ),
           ]),
         );
       });
@@ -930,18 +1025,28 @@ void main() {
         when(mockRepository.fetchContacts())
             .thenAnswer((_) async => testContacts);
 
-        when(mockRequestTokenManager.execute(
-                federationTokenRequest: testTokenRequest,),)
-            .thenAnswer((_) async => const Right<Failure, Success>(
-                  FederationIdentityRequestTokenSuccess(
-                      tokenInformation: tokenInformation,),
-                ),);
+        when(
+          mockRequestTokenManager.execute(
+            federationTokenRequest: testTokenRequest,
+          ),
+        ).thenAnswer(
+          (_) async => const Right<Failure, Success>(
+            FederationIdentityRequestTokenSuccess(
+              tokenInformation: tokenInformation,
+            ),
+          ),
+        );
 
-        when(mockIdentityLookupManager.register(
-          federationUrl: federationUrl,
-          tokenInformation: tokenInformation,
-        ),).thenAnswer((_) async => const FederationRegisterResponse(
-            token: 'aB7c9Dz4EfGh5iJkLm3nOp==',),);
+        when(
+          mockIdentityLookupManager.register(
+            federationUrl: federationUrl,
+            tokenInformation: tokenInformation,
+          ),
+        ).thenAnswer(
+          (_) async => const FederationRegisterResponse(
+            token: 'aB7c9Dz4EfGh5iJkLm3nOp==',
+          ),
+        );
 
         const hashDetails = FederationHashDetailsResponse(
           algorithms: {'sha256'},
@@ -949,22 +1054,28 @@ void main() {
           altLookupPeppers: {'pepper1', 'pepper2'},
         );
 
-        when(mockIdentityLookupManager.getHashDetails(
-          federationUrl: anyNamed('federationUrl'),
-          registeredToken: anyNamed('registeredToken'),
-        ),).thenAnswer((_) async => hashDetails);
+        when(
+          mockIdentityLookupManager.getHashDetails(
+            federationUrl: anyNamed('federationUrl'),
+            registeredToken: anyNamed('registeredToken'),
+          ),
+        ).thenAnswer((_) async => hashDetails);
 
-        when(mockIdentityLookupManager.lookupMxid(
-          federationUrl: anyNamed('federationUrl'),
-          request: anyNamed('request'),
-          registeredToken: anyNamed('registeredToken'),
-        ),).thenAnswer((_) async => const FederationLookupMxidResponse(
-              mappings: {
-                '6mWe5lBps9Rqabkqc_QIh0-jsdFogvcBi9EWs523fok':
-                    '@alice:matrix.org',
-              },
-              thirdPartyMappings: {},
-            ),);
+        when(
+          mockIdentityLookupManager.lookupMxid(
+            federationUrl: anyNamed('federationUrl'),
+            request: anyNamed('request'),
+            registeredToken: anyNamed('registeredToken'),
+          ),
+        ).thenAnswer(
+          (_) async => const FederationLookupMxidResponse(
+            mappings: {
+              '6mWe5lBps9Rqabkqc_QIh0-jsdFogvcBi9EWs523fok':
+                  '@alice:matrix.org',
+            },
+            thirdPartyMappings: {},
+          ),
+        );
 
         // Test with chunk size of 1
         final result = interactor.execute(
@@ -1006,12 +1117,14 @@ void main() {
         final exception = Exception('Error');
 
         final expectedContacts = [
-          ContactFixtures.contact1.copyWith(phoneNumbers: {
-            PhoneNumber(
-              number: '(212)555-6789',
-              matrixId: '@alice:matrix.org',
-            ),
-          },),
+          ContactFixtures.contact1.copyWith(
+            phoneNumbers: {
+              PhoneNumber(
+                number: '(212)555-6789',
+                matrixId: '@alice:matrix.org',
+              ),
+            },
+          ),
           ContactFixtures.contact2,
           ContactFixtures.contact3,
           ContactFixtures.contact4,
@@ -1019,21 +1132,30 @@ void main() {
           ContactFixtures.contact6,
         ];
 
-        when(mockRepository.fetchContacts())
-            .thenAnswer((_) async => contacts);
+        when(mockRepository.fetchContacts()).thenAnswer((_) async => contacts);
 
-        when(mockRequestTokenManager.execute(
-          federationTokenRequest: testTokenRequest,),)
-            .thenAnswer((_) async => const Right<Failure, Success>(
-          FederationIdentityRequestTokenSuccess(
-            tokenInformation: tokenInformation,),
-        ),);
+        when(
+          mockRequestTokenManager.execute(
+            federationTokenRequest: testTokenRequest,
+          ),
+        ).thenAnswer(
+          (_) async => const Right<Failure, Success>(
+            FederationIdentityRequestTokenSuccess(
+              tokenInformation: tokenInformation,
+            ),
+          ),
+        );
 
-        when(mockIdentityLookupManager.register(
-          federationUrl: federationUrl,
-          tokenInformation: tokenInformation,
-        ),).thenAnswer((_) async => const FederationRegisterResponse(
-          token: 'aB7c9Dz4EfGh5iJkLm3nOp==',),);
+        when(
+          mockIdentityLookupManager.register(
+            federationUrl: federationUrl,
+            tokenInformation: tokenInformation,
+          ),
+        ).thenAnswer(
+          (_) async => const FederationRegisterResponse(
+            token: 'aB7c9Dz4EfGh5iJkLm3nOp==',
+          ),
+        );
 
         const hashDetails = FederationHashDetailsResponse(
           algorithms: {'sha256'},
@@ -1041,31 +1163,37 @@ void main() {
           altLookupPeppers: {'pepper1', 'pepper2'},
         );
 
-        when(mockIdentityLookupManager.getHashDetails(
-          federationUrl: anyNamed('federationUrl'),
-          registeredToken: anyNamed('registeredToken'),
-        ),).thenAnswer((_) async => hashDetails);
+        when(
+          mockIdentityLookupManager.getHashDetails(
+            federationUrl: anyNamed('federationUrl'),
+            registeredToken: anyNamed('registeredToken'),
+          ),
+        ).thenAnswer((_) async => hashDetails);
 
         int callCount = 0;
-        when(mockIdentityLookupManager.lookupMxid(
-          federationUrl: anyNamed('federationUrl'),
-          request: anyNamed('request'),
-          registeredToken: anyNamed('registeredToken'),
-        ),).thenAnswer((_) async {
-          callCount++;
-          if (callCount == 1) {
-            return const FederationLookupMxidResponse(
-              mappings: {},
-              thirdPartyMappings: {
-                'tom.domain.com': {
-                  'lWcTz7CJ9a9OqxlYWsl2MibzKep0abdGl6g3I3t7BPM',
+        when(
+          mockIdentityLookupManager.lookupMxid(
+            federationUrl: anyNamed('federationUrl'),
+            request: anyNamed('request'),
+            registeredToken: anyNamed('registeredToken'),
+          ),
+        ).thenAnswer(
+          (_) async {
+            callCount++;
+            if (callCount == 1) {
+              return const FederationLookupMxidResponse(
+                mappings: {},
+                thirdPartyMappings: {
+                  'tom.domain.com': {
+                    'lWcTz7CJ9a9OqxlYWsl2MibzKep0abdGl6g3I3t7BPM',
+                  },
                 },
-              },
-            );
-          } else {
-            throw exception;
-          }
-        },);
+              );
+            } else {
+              throw exception;
+            }
+          },
+        );
 
         when(
           mockRequestTokenManager.execute(
@@ -1076,7 +1204,7 @@ void main() {
             ),
           ),
         ).thenAnswer(
-              (_) async => const Right<Failure, Success>(
+          (_) async => const Right<Failure, Success>(
             FederationIdentityRequestTokenSuccess(
               tokenInformation: tokenInformation,
             ),
@@ -1088,7 +1216,7 @@ void main() {
             arguments: anyNamed('arguments'),
           ),
         ).thenAnswer(
-              (_) async => Right<Failure, Success>(
+          (_) async => Right<Failure, Success>(
             FederationIdentityLookupSuccess(
               newContacts: {
                 ContactFixtures.contact1.id: FederationContact(
@@ -1146,12 +1274,14 @@ void main() {
         final exception = Exception('Error');
 
         final expectedContacts = [
-          ContactFixtures.contact1.copyWith(phoneNumbers: {
-            PhoneNumber(
-              number: '(212)555-6789',
-              matrixId: '@alice:matrix.org',
-            ),
-          },),
+          ContactFixtures.contact1.copyWith(
+            phoneNumbers: {
+              PhoneNumber(
+                number: '(212)555-6789',
+                matrixId: '@alice:matrix.org',
+              ),
+            },
+          ),
           ContactFixtures.contact2,
           ContactFixtures.contact3,
           ContactFixtures.contact4,
@@ -1159,21 +1289,30 @@ void main() {
           ContactFixtures.contact6,
         ];
 
-        when(mockRepository.fetchContacts())
-            .thenAnswer((_) async => contacts);
+        when(mockRepository.fetchContacts()).thenAnswer((_) async => contacts);
 
-        when(mockRequestTokenManager.execute(
-          federationTokenRequest: testTokenRequest,),)
-            .thenAnswer((_) async => const Right<Failure, Success>(
-          FederationIdentityRequestTokenSuccess(
-            tokenInformation: tokenInformation,),
-        ),);
+        when(
+          mockRequestTokenManager.execute(
+            federationTokenRequest: testTokenRequest,
+          ),
+        ).thenAnswer(
+          (_) async => const Right<Failure, Success>(
+            FederationIdentityRequestTokenSuccess(
+              tokenInformation: tokenInformation,
+            ),
+          ),
+        );
 
-        when(mockIdentityLookupManager.register(
-          federationUrl: federationUrl,
-          tokenInformation: tokenInformation,
-        ),).thenAnswer((_) async => const FederationRegisterResponse(
-          token: 'aB7c9Dz4EfGh5iJkLm3nOp==',),);
+        when(
+          mockIdentityLookupManager.register(
+            federationUrl: federationUrl,
+            tokenInformation: tokenInformation,
+          ),
+        ).thenAnswer(
+          (_) async => const FederationRegisterResponse(
+            token: 'aB7c9Dz4EfGh5iJkLm3nOp==',
+          ),
+        );
 
         const hashDetails = FederationHashDetailsResponse(
           algorithms: {'sha256'},
@@ -1181,16 +1320,20 @@ void main() {
           altLookupPeppers: {'pepper1', 'pepper2'},
         );
 
-        when(mockIdentityLookupManager.getHashDetails(
-          federationUrl: anyNamed('federationUrl'),
-          registeredToken: anyNamed('registeredToken'),
-        ),).thenAnswer((_) async => hashDetails);
+        when(
+          mockIdentityLookupManager.getHashDetails(
+            federationUrl: anyNamed('federationUrl'),
+            registeredToken: anyNamed('registeredToken'),
+          ),
+        ).thenAnswer((_) async => hashDetails);
 
-        when(mockIdentityLookupManager.lookupMxid(
-          federationUrl: anyNamed('federationUrl'),
-          request: anyNamed('request'),
-          registeredToken: anyNamed('registeredToken'),
-        ),).thenAnswer((_) async => throw exception);
+        when(
+          mockIdentityLookupManager.lookupMxid(
+            federationUrl: anyNamed('federationUrl'),
+            request: anyNamed('request'),
+            registeredToken: anyNamed('registeredToken'),
+          ),
+        ).thenAnswer((_) async => throw exception);
 
         final result = interactor.execute(
           argument: testArgument,
@@ -1224,21 +1367,30 @@ void main() {
 
         final exception = Exception('Error');
 
-        when(mockRepository.fetchContacts())
-            .thenAnswer((_) async => contacts);
+        when(mockRepository.fetchContacts()).thenAnswer((_) async => contacts);
 
-        when(mockRequestTokenManager.execute(
-          federationTokenRequest: testTokenRequest,),)
-            .thenAnswer((_) async => const Right<Failure, Success>(
-          FederationIdentityRequestTokenSuccess(
-            tokenInformation: tokenInformation,),
-        ),);
+        when(
+          mockRequestTokenManager.execute(
+            federationTokenRequest: testTokenRequest,
+          ),
+        ).thenAnswer(
+          (_) async => const Right<Failure, Success>(
+            FederationIdentityRequestTokenSuccess(
+              tokenInformation: tokenInformation,
+            ),
+          ),
+        );
 
-        when(mockIdentityLookupManager.register(
-          federationUrl: federationUrl,
-          tokenInformation: tokenInformation,
-        ),).thenAnswer((_) async => const FederationRegisterResponse(
-          token: 'aB7c9Dz4EfGh5iJkLm3nOp==',),);
+        when(
+          mockIdentityLookupManager.register(
+            federationUrl: federationUrl,
+            tokenInformation: tokenInformation,
+          ),
+        ).thenAnswer(
+          (_) async => const FederationRegisterResponse(
+            token: 'aB7c9Dz4EfGh5iJkLm3nOp==',
+          ),
+        );
 
         const hashDetails = FederationHashDetailsResponse(
           algorithms: {'sha256'},
@@ -1246,42 +1398,52 @@ void main() {
           altLookupPeppers: {'pepper1', 'pepper2'},
         );
 
-        when(mockIdentityLookupManager.getHashDetails(
-          federationUrl: anyNamed('federationUrl'),
-          registeredToken: anyNamed('registeredToken'),
-        ),).thenAnswer((_) async => hashDetails);
+        when(
+          mockIdentityLookupManager.getHashDetails(
+            federationUrl: anyNamed('federationUrl'),
+            registeredToken: anyNamed('registeredToken'),
+          ),
+        ).thenAnswer((_) async => hashDetails);
 
         int callCount = 0;
-        when(mockIdentityLookupManager.lookupMxid(
-          federationUrl: anyNamed('federationUrl'),
-          request: anyNamed('request'),
-          registeredToken: anyNamed('registeredToken'),
-        ),).thenAnswer((_) async {
-          callCount++;
-          if (callCount == 1) {
-            return const FederationLookupMxidResponse(
-              mappings: {},
-              thirdPartyMappings: {
-                'tom.domain.com': {
-                  'lWcTz7CJ9a9OqxlYWsl2MibzKep0abdGl6g3I3t7BPM',
+        when(
+          mockIdentityLookupManager.lookupMxid(
+            federationUrl: anyNamed('federationUrl'),
+            request: anyNamed('request'),
+            registeredToken: anyNamed('registeredToken'),
+          ),
+        ).thenAnswer(
+          (_) async {
+            callCount++;
+            if (callCount == 1) {
+              return const FederationLookupMxidResponse(
+                mappings: {},
+                thirdPartyMappings: {
+                  'tom.domain.com': {
+                    'lWcTz7CJ9a9OqxlYWsl2MibzKep0abdGl6g3I3t7BPM',
+                  },
                 },
-              },
-            );
-          } else {
-            throw exception;
-          }
-        },);
+              );
+            } else {
+              throw exception;
+            }
+          },
+        );
 
         // Setup the third party lookup manager to fail
-        when(mockRequestTokenManager.execute(
-          federationTokenRequest: FederationTokenRequest(
-            homeserverUrl: homeserverUrl,
-            mxid: matrixId,
-            accessToken: accessToken,
+        when(
+          mockRequestTokenManager.execute(
+            federationTokenRequest: FederationTokenRequest(
+              homeserverUrl: homeserverUrl,
+              mxid: matrixId,
+              accessToken: accessToken,
+            ),
           ),
-        ),).thenAnswer((_) async => const Left<Failure, Success>(
-              RequestTokenFailure(exception: 'Third party token request failed'),
-            ),);
+        ).thenAnswer(
+          (_) async => const Left<Failure, Success>(
+            RequestTokenFailure(exception: 'Third party token request failed'),
+          ),
+        );
 
         final result = interactor.execute(argument: testArgument);
 
@@ -1291,14 +1453,18 @@ void main() {
           result,
           emitsInOrder(<dynamic>[
             const Right<Failure, Success>(GetPhonebookContactsLoading()),
-            Right<Failure, Success>(GetPhonebookContactsSuccess(
-              progress: 100,
-              contacts: contacts,
-            ),),
-            Right<Failure, Success>(GetPhonebookContactsSuccess(
-              progress: 100,
-              contacts: contacts,
-            ),),
+            Right<Failure, Success>(
+              GetPhonebookContactsSuccess(
+                progress: 100,
+                contacts: contacts,
+              ),
+            ),
+            Right<Failure, Success>(
+              GetPhonebookContactsSuccess(
+                progress: 100,
+                contacts: contacts,
+              ),
+            ),
           ]),
         );
       });
@@ -1315,21 +1481,30 @@ void main() {
 
         final exception = Exception('Error');
 
-        when(mockRepository.fetchContacts())
-            .thenAnswer((_) async => contacts);
+        when(mockRepository.fetchContacts()).thenAnswer((_) async => contacts);
 
-        when(mockRequestTokenManager.execute(
-          federationTokenRequest: testTokenRequest,),)
-            .thenAnswer((_) async => const Right<Failure, Success>(
-          FederationIdentityRequestTokenSuccess(
-            tokenInformation: tokenInformation,),
-        ),);
+        when(
+          mockRequestTokenManager.execute(
+            federationTokenRequest: testTokenRequest,
+          ),
+        ).thenAnswer(
+          (_) async => const Right<Failure, Success>(
+            FederationIdentityRequestTokenSuccess(
+              tokenInformation: tokenInformation,
+            ),
+          ),
+        );
 
-        when(mockIdentityLookupManager.register(
-          federationUrl: federationUrl,
-          tokenInformation: tokenInformation,
-        ),).thenAnswer((_) async => const FederationRegisterResponse(
-          token: 'aB7c9Dz4EfGh5iJkLm3nOp==',),);
+        when(
+          mockIdentityLookupManager.register(
+            federationUrl: federationUrl,
+            tokenInformation: tokenInformation,
+          ),
+        ).thenAnswer(
+          (_) async => const FederationRegisterResponse(
+            token: 'aB7c9Dz4EfGh5iJkLm3nOp==',
+          ),
+        );
 
         const hashDetails = FederationHashDetailsResponse(
           algorithms: {'sha256'},
@@ -1337,20 +1512,26 @@ void main() {
           altLookupPeppers: {'pepper1', 'pepper2'},
         );
 
-        when(mockIdentityLookupManager.getHashDetails(
-          federationUrl: anyNamed('federationUrl'),
-          registeredToken: anyNamed('registeredToken'),
-        ),).thenAnswer((_) async => hashDetails);
+        when(
+          mockIdentityLookupManager.getHashDetails(
+            federationUrl: anyNamed('federationUrl'),
+            registeredToken: anyNamed('registeredToken'),
+          ),
+        ).thenAnswer((_) async => hashDetails);
 
         int callCount = 0;
-        when(mockIdentityLookupManager.lookupMxid(
-          federationUrl: anyNamed('federationUrl'),
-          request: anyNamed('request'),
-          registeredToken: anyNamed('registeredToken'),
-        ),).thenAnswer((_) async => const FederationLookupMxidResponse(
-          mappings: {},
-          thirdPartyMappings: {},
-        ),);
+        when(
+          mockIdentityLookupManager.lookupMxid(
+            federationUrl: anyNamed('federationUrl'),
+            request: anyNamed('request'),
+            registeredToken: anyNamed('registeredToken'),
+          ),
+        ).thenAnswer(
+          (_) async => const FederationLookupMxidResponse(
+            mappings: {},
+            thirdPartyMappings: {},
+          ),
+        );
 
         final result = interactor.execute(argument: testArgument);
 
@@ -1359,14 +1540,18 @@ void main() {
           result,
           emitsInOrder(<dynamic>[
             const Right<Failure, Success>(GetPhonebookContactsLoading()),
-            Right<Failure, Success>(GetPhonebookContactsSuccess(
-              progress: 100,
-              contacts: contacts,
-            ),),
-            Right<Failure, Success>(GetPhonebookContactsSuccess(
-              progress: 100,
-              contacts: contacts,
-            ),),
+            Right<Failure, Success>(
+              GetPhonebookContactsSuccess(
+                progress: 100,
+                contacts: contacts,
+              ),
+            ),
+            Right<Failure, Success>(
+              GetPhonebookContactsSuccess(
+                progress: 100,
+                contacts: contacts,
+              ),
+            ),
           ]),
         );
       });
