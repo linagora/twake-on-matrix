@@ -1,20 +1,20 @@
 import 'package:dartz/dartz.dart';
+import 'package:fluffychat/app_state/failure.dart';
+import 'package:fluffychat/app_state/success.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
+import 'package:fluffychat/domain/app_state/contact/get_phonebook_contact_state.dart';
 import 'package:fluffychat/domain/exception/contacts/twake_lookup_exceptions.dart';
 import 'package:fluffychat/domain/model/contact/contact.dart';
+import 'package:fluffychat/domain/repository/phonebook_contact_repository.dart';
+import 'package:fluffychat/domain/usecase/contacts/twake_look_up_argument.dart';
+import 'package:fluffychat/domain/usecase/contacts/twake_look_up_phonebook_contact_interactor.dart';
+import 'package:fluffychat/modules/federation_identity_lookup/domain/models/federation_hash_details_response.dart';
 import 'package:fluffychat/modules/federation_identity_lookup/domain/models/federation_lookup_mxid_response.dart';
+import 'package:fluffychat/modules/federation_identity_lookup/manager/identity_lookup_manager.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get_it/get_it.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
-import 'package:fluffychat/app_state/failure.dart';
-import 'package:fluffychat/app_state/success.dart';
-import 'package:fluffychat/domain/app_state/contact/get_phonebook_contact_state.dart';
-import 'package:fluffychat/domain/repository/phonebook_contact_repository.dart';
-import 'package:fluffychat/domain/usecase/contacts/twake_look_up_argument.dart';
-import 'package:fluffychat/modules/federation_identity_lookup/domain/models/federation_hash_details_response.dart';
-import 'package:fluffychat/modules/federation_identity_lookup/manager/identity_lookup_manager.dart';
-import 'package:fluffychat/domain/usecase/contacts/twake_look_up_phonebook_contact_interactor.dart';
 
 import '../../../fixtures/contact_fixtures.dart';
 import 'twake_look_up_phonebook_contact_interactor_test.mocks.dart';
@@ -64,21 +64,11 @@ void main() {
             PhoneNumber(
               number: '(212)555-6789',
               matrixId: '@alice:matrix.org',
-              thirdPartyIdToHashMap: {
-                "(212)555-6789": [
-                  "6mWe5lBps9Rqabkqc_QIh0-jsdFogvcBi9EWs523fok",
-                ],
-              },
             ),
           },
           emails: {
             Email(
               address: 'alice@gmail.com',
-              thirdPartyIdToHashMap: {
-                "alice@gmail.com": [
-                  "0OWxtHmcUFS0KCHxRc2E8SrcU28Q-5EuRT5MJxnDdkg",
-                ],
-              },
             ),
           },
         ),
@@ -89,21 +79,11 @@ void main() {
             PhoneNumber(
               number: '(212)555-1234',
               matrixId: '@bob:matrix.org',
-              thirdPartyIdToHashMap: {
-                "(212)555-1234": [
-                  "WYOGPQyKEyY0iTxQoPTfk58eQvGi0_hpP2hI0S8cQeM",
-                ],
-              },
             ),
           },
           emails: {
             Email(
               address: 'bob@gmail.com',
-              thirdPartyIdToHashMap: {
-                "bob@gmail.com": [
-                  "vd5fBacH_IoS6u1BuTJW5NYNdplO8pRrNBbUjCUiQ6M",
-                ],
-              },
             ),
           },
         ),
@@ -184,21 +164,11 @@ void main() {
             PhoneNumber(
               number: '(212)555-6789',
               matrixId: '@alice:matrix.org',
-              thirdPartyIdToHashMap: {
-                "(212)555-6789": [
-                  "6mWe5lBps9Rqabkqc_QIh0-jsdFogvcBi9EWs523fok",
-                ],
-              },
             ),
           },
           emails: {
             Email(
               address: 'alice@gmail.com',
-              thirdPartyIdToHashMap: {
-                "alice@gmail.com": [
-                  "0OWxtHmcUFS0KCHxRc2E8SrcU28Q-5EuRT5MJxnDdkg",
-                ],
-              },
             ),
           },
         ),
@@ -209,21 +179,11 @@ void main() {
             PhoneNumber(
               number: '(212)555-1234',
               matrixId: '@bob:matrix.org',
-              thirdPartyIdToHashMap: {
-                "(212)555-1234": [
-                  "WYOGPQyKEyY0iTxQoPTfk58eQvGi0_hpP2hI0S8cQeM",
-                ],
-              },
             ),
           },
           emails: {
             Email(
               address: 'bob@gmail.com',
-              thirdPartyIdToHashMap: {
-                "bob@gmail.com": [
-                  "vd5fBacH_IoS6u1BuTJW5NYNdplO8pRrNBbUjCUiQ6M",
-                ],
-              },
             ),
           },
         ),
@@ -238,11 +198,6 @@ void main() {
             PhoneNumber(
               number: '(212)555-2345',
               matrixId: '@charlie:matrix.org',
-              thirdPartyIdToHashMap: {
-                '(212)555-2345': [
-                  'fIlWJrJ7CeAiqVEtt2ySsyNyv-22zGa5TclJcmKBWeo',
-                ],
-              },
             ),
           },
           emails: const {},
@@ -253,11 +208,6 @@ void main() {
           emails: {
             Email(
               address: 'diana@gmail.com',
-              thirdPartyIdToHashMap: {
-                'diana@gmail.com': [
-                  'UlFCGNN0GkdVtlrZRdhZpDx0vg_omO0PFvD6CB41zPc',
-                ],
-              },
             ),
           },
           phoneNumbers: const {},
@@ -272,11 +222,6 @@ void main() {
           phoneNumbers: {
             PhoneNumber(
               number: '(212)555-4567',
-              thirdPartyIdToHashMap: {
-                '(212)555-4567': [
-                  'q9J3Pr4wv-Am63H6tb_pYhv9E3IurefKDZerkpVd6cQ',
-                ],
-              },
             ),
           },
           emails: const {},
@@ -289,11 +234,6 @@ void main() {
             Email(
               address: 'frank@gmail.com',
               matrixId: '@frank:matrix.org',
-              thirdPartyIdToHashMap: {
-                'frank@gmail.com': [
-                  'irZfJc6e_28cwWqEi-gCODlx2FpZqiyTdbl-PNHTDr4',
-                ],
-              },
             ),
           },
         ),
@@ -658,21 +598,11 @@ void main() {
             PhoneNumber(
               number: '(212)555-6789',
               matrixId: '@alice:matrix.org',
-              thirdPartyIdToHashMap: {
-                "(212)555-6789": [
-                  "6mWe5lBps9Rqabkqc_QIh0-jsdFogvcBi9EWs523fok",
-                ],
-              },
             ),
           },
           emails: {
             Email(
               address: 'alice@gmail.com',
-              thirdPartyIdToHashMap: {
-                "alice@gmail.com": [
-                  "0OWxtHmcUFS0KCHxRc2E8SrcU28Q-5EuRT5MJxnDdkg",
-                ],
-              },
             ),
           },
         ),
@@ -683,21 +613,11 @@ void main() {
             PhoneNumber(
               number: '(212)555-1234',
               matrixId: '@bob:matrix.org',
-              thirdPartyIdToHashMap: {
-                "(212)555-1234": [
-                  "WYOGPQyKEyY0iTxQoPTfk58eQvGi0_hpP2hI0S8cQeM",
-                ],
-              },
             ),
           },
           emails: {
             Email(
               address: 'bob@gmail.com',
-              thirdPartyIdToHashMap: {
-                "bob@gmail.com": [
-                  "vd5fBacH_IoS6u1BuTJW5NYNdplO8pRrNBbUjCUiQ6M",
-                ],
-              },
             ),
           },
         ),
