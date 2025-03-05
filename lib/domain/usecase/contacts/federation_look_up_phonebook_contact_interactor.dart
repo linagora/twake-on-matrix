@@ -29,7 +29,8 @@ class FederationLookUpPhonebookContactInteractor {
       getIt.get<PhonebookContactRepository>();
   final IdentityLookupManager _identityLookupManager =
       getIt.get<IdentityLookupManager>();
-  final FederationIdentityRequestTokenManager _federationIdentityRequestTokenManager =
+  final FederationIdentityRequestTokenManager
+      _federationIdentityRequestTokenManager =
       getIt.get<FederationIdentityRequestTokenManager>();
 
   Stream<Either<Failure, Success>> execute({
@@ -177,8 +178,8 @@ class FederationLookUpPhonebookContactInteractor {
               hashToContactIdMappings
                   .putIfAbsent(chunkContact.id, () => [])
                   .addAll(
-                phoneToHashMap.values.expand((hash) => hash),
-              );
+                    phoneToHashMap.values.expand((hash) => hash),
+                  );
             }
 
             if (chunkContact.emails != null &&
@@ -192,8 +193,8 @@ class FederationLookUpPhonebookContactInteractor {
               hashToContactIdMappings
                   .putIfAbsent(chunkContact.id, () => [])
                   .addAll(
-                emailToHashMap.values.expand((hash) => hash),
-              );
+                    emailToHashMap.values.expand((hash) => hash),
+                  );
             }
 
             final updatedContact = chunkContact.updateContactWithHashes(
@@ -206,7 +207,7 @@ class FederationLookUpPhonebookContactInteractor {
 
           final request = FederationLookupMxidRequest(
             addresses:
-            hashToContactIdMappings.values.expand((hash) => hash).toSet(),
+                hashToContactIdMappings.values.expand((hash) => hash).toSet(),
             algorithm: hashDetails.algorithms?.firstOrNull,
             pepper: hashDetails.lookupPepper,
           );
@@ -224,15 +225,16 @@ class FederationLookUpPhonebookContactInteractor {
           try {
             if (response.mappings != null && response.mappings!.isNotEmpty) {
               final updatedContact =
-              contactIdToHashMap.values.toSet().handleLookupMappings(
-                mappings: response.mappings ?? {},
-                hashToContactIdMappings: hashToContactIdMappings,
-              );
+                  contactIdToHashMap.values.toSet().handleLookupMappings(
+                        mappings: response.mappings ?? {},
+                        hashToContactIdMappings: hashToContactIdMappings,
+                      );
 
               contactsFromMappings.addAll(updatedContact);
             }
-          } catch(e) {
-            Logs().d('FederationLookUpPhonebookContactInteractor::execute(): handle mappings failed');
+          } catch (e) {
+            Logs().d(
+                'FederationLookUpPhonebookContactInteractor::execute(): handle mappings failed');
           }
 
           print("DATPH prepare thirdparty");
@@ -253,13 +255,14 @@ class FederationLookUpPhonebookContactInteractor {
               contactsFromThirdParty.addAll(newContactsThirdParty);
             }
           } catch (e) {
-            Logs().d('FederationLookUpPhonebookContactInteractor::execute(): handle third party mappings failed');
+            Logs().d(
+                'FederationLookUpPhonebookContactInteractor::execute(): handle third party mappings failed');
           }
 
           final combinedContacts = chunkContacts.toSet().combineContacts(
-            contactsFromMappings: contactsFromMappings,
-            contactsFromThirdParty: contactsFromThirdParty,
-          );
+                contactsFromMappings: contactsFromMappings,
+                contactsFromThirdParty: contactsFromThirdParty,
+              );
 
           updatedContact.addAll(combinedContacts);
 
@@ -274,7 +277,8 @@ class FederationLookUpPhonebookContactInteractor {
             ),
           );
         } catch (e) {
-          Logs().e('FederationLookUpPhonebookContactInteractor::execute(): one chunk exception $e');
+          Logs().e(
+              'FederationLookUpPhonebookContactInteractor::execute(): one chunk exception $e');
           progress++;
           updatedContact.addAll(chunkContacts);
           chunkError = TwakeLookupChunkException(e.toString());
