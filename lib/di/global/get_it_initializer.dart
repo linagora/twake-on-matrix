@@ -53,13 +53,13 @@ import 'package:fluffychat/domain/repository/server_config_repository.dart';
 import 'package:fluffychat/domain/repository/server_search_repository.dart';
 import 'package:fluffychat/domain/repository/tom_configurations_repository.dart';
 import 'package:fluffychat/domain/usecase/app_grid/get_app_grid_configuration_interactor.dart';
-import 'package:fluffychat/domain/usecase/contacts/lookup_match_contact_interactor.dart';
 import 'package:fluffychat/domain/usecase/contacts/federation_look_up_phonebook_contact_interactor.dart';
+import 'package:fluffychat/domain/usecase/contacts/get_tom_contacts_interactor.dart';
+import 'package:fluffychat/domain/usecase/contacts/lookup_match_contact_interactor.dart';
 import 'package:fluffychat/domain/usecase/contacts/twake_look_up_phonebook_contact_interactor.dart';
 import 'package:fluffychat/domain/usecase/create_direct_chat_interactor.dart';
 import 'package:fluffychat/domain/usecase/download_file_for_preview_interactor.dart';
 import 'package:fluffychat/domain/usecase/forward/forward_message_interactor.dart';
-import 'package:fluffychat/domain/usecase/contacts/get_tom_contacts_interactor.dart';
 import 'package:fluffychat/domain/usecase/generate_thumbnails_media_interactor.dart';
 import 'package:fluffychat/domain/usecase/preview_url/get_preview_url_interactor.dart';
 import 'package:fluffychat/domain/usecase/recovery/delete_recovery_words_interactor.dart';
@@ -72,8 +72,8 @@ import 'package:fluffychat/domain/usecase/room/download_media_file_interactor.da
 import 'package:fluffychat/domain/usecase/room/timeline_search_event_interactor.dart';
 import 'package:fluffychat/domain/usecase/room/update_group_chat_interactor.dart';
 import 'package:fluffychat/domain/usecase/room/update_pinned_messages_interactor.dart';
-import 'package:fluffychat/domain/usecase/room/upload_content_interactor.dart';
 import 'package:fluffychat/domain/usecase/room/upload_content_for_web_interactor.dart';
+import 'package:fluffychat/domain/usecase/room/upload_content_interactor.dart';
 import 'package:fluffychat/domain/usecase/search/pre_search_recent_contacts_interactor.dart';
 import 'package:fluffychat/domain/usecase/search/search_recent_chat_interactor.dart';
 import 'package:fluffychat/domain/usecase/search/server_search_interactor.dart';
@@ -82,6 +82,7 @@ import 'package:fluffychat/domain/usecase/settings/update_profile_interactor.dar
 import 'package:fluffychat/domain/usecase/verify_name_interactor.dart';
 import 'package:fluffychat/event/twake_event_dispatcher.dart';
 import 'package:fluffychat/modules/federation_identity_lookup/manager/identity_lookup_manager.dart';
+import 'package:fluffychat/modules/federation_identity_request_token/manager/federation_identity_request_token_manager.dart';
 import 'package:fluffychat/pages/chat/chat_pinned_events/pinned_events_controller.dart';
 import 'package:fluffychat/utils/famedlysdk_store.dart';
 import 'package:fluffychat/utils/manager/download_manager/download_manager.dart';
@@ -367,6 +368,9 @@ class GetItInitializer {
   void _bindingManagers() {
     getIt.registerFactory<IdentityLookupManager>(
       () => IdentityLookupManager(),
+    );
+    getIt.registerFactory<FederationIdentityRequestTokenManager>(
+      () => FederationIdentityRequestTokenManager(),
     );
   }
 }
