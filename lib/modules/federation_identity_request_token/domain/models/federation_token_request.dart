@@ -1,20 +1,20 @@
 import 'package:equatable/equatable.dart';
 
 class FederationTokenRequest with EquatableMixin {
-  final String federationUrl;
+  final String homeserverUrl;
   final String mxid;
-  final String token;
+  final String accessToken;
 
   FederationTokenRequest({
-    required this.federationUrl,
+    required this.homeserverUrl,
     required this.mxid,
-    required this.token,
+    required this.accessToken,
   });
 
   @override
   List<Object?> get props => [
-        federationUrl,
+        homeserverUrl,
         mxid,
-        token,
+        accessToken,
       ];
 }

@@ -22,12 +22,12 @@ class FederationIdentityRequestTokenManager {
           FederationIdentityRequestTokenEndpoint.acceptHeaderDefault,
       HttpHeaders.contentTypeHeader:
           FederationIdentityRequestTokenEndpoint.contentTypeHeaderDefault,
-      HttpHeaders.authorizationHeader: 'Bearer ${federationTokenRequest.token}',
+      HttpHeaders.authorizationHeader: 'Bearer ${federationTokenRequest.accessToken}',
     };
 
     final dio = Dio(
       BaseOptions(
-        baseUrl: federationTokenRequest.federationUrl,
+        baseUrl: federationTokenRequest.homeserverUrl,
         headers: headers,
       ),
     );
