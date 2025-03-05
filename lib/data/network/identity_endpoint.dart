@@ -7,6 +7,8 @@ class IdentityEndpoint {
   static const String twakeIdentityRootPath = '/_twake/identity';
   static const String twakeIdentityAPIVersion = 'v1';
 
+  static const String twakeRootPath = '/_twake';
+
   static final ServicePath matchUserIdServicePath = ServicePath(
     '/lookup/match',
   );
@@ -18,6 +20,9 @@ class IdentityEndpoint {
   );
   static final ServicePath accountRegisterServicePath = ServicePath(
     '/account/register',
+  );
+  static final ServicePath addressbookServicePath = ServicePath(
+    'addressbook',
   );
 }
 
@@ -34,5 +39,11 @@ extension ServicePathExtensions on ServicePath {
     String apiVersion = IdentityEndpoint.matrixIdentityAPIVersion,
   }) {
     return '$rootPath/$apiVersion$path';
+  }
+
+  String generateTwakeEndpointWithoutVersion({
+    String rootPath = IdentityEndpoint.twakeRootPath,
+  }) {
+    return '$rootPath/$path';
   }
 }

@@ -1,6 +1,8 @@
 import 'package:fluffychat/data/hive/dto/contact/contact_hive_obj.dart';
 import 'package:fluffychat/data/hive/dto/contact/third_party_contact_hive_obj.dart';
+import 'package:fluffychat/data/model/addressbook/address_book.dart';
 import 'package:fluffychat/domain/model/contact/contact.dart';
+import 'package:fluffychat/domain/model/contact/third_party_status.dart';
 import 'package:fluffychat/modules/federation_identity_lookup/domain/models/federation_contact.dart';
 import 'package:fluffychat/modules/federation_identity_lookup/domain/models/federation_hash_details_response.dart';
 import 'package:fluffychat/modules/federation_identity_lookup/domain/models/federation_third_party_contact.dart';
@@ -23,6 +25,32 @@ extension ContactExtension on Contact {
       emails: emails?.map((email) => email.toHiveObj()).toSet(),
       phoneNumbers: phoneNumbers?.map((phone) => phone.toHiveObj()).toSet(),
     );
+  }
+
+  Set<AddressBook> toAddressBook() {
+    return _addContactsToAddressBook(contacts: emails).union(
+      _addContactsToAddressBook(contacts: phoneNumbers),
+    );
+  }
+
+  Set<AddressBook> _addContactsToAddressBook({
+    Set<ThirdPartyContact>? contacts,
+  }) {
+    final Set<AddressBook> addressBooks = {};
+    if (contacts?.isNotEmpty == true) {
+      for (final contact in contacts!) {
+        if (contact.matrixId != null) {
+          addressBooks.add(
+            AddressBook(
+              displayName: displayName,
+              mxid: contact.matrixId,
+              active: contact.status == ThirdPartyStatus.active,
+            ),
+          );
+        }
+      }
+    }
+    return addressBooks;
   }
 
   Contact updateContactWithHashes({
@@ -285,6 +313,14 @@ extension SetContactExtension on Set<Contact> {
     }
 
     return uniqueContactsById.values.toSet();
+  }
+
+  Set<AddressBook> toAddressBooks() {
+    final Set<AddressBook> addressBooks = {};
+    for (final contact in this) {
+      addressBooks.addAll(contact.toAddressBook());
+    }
+    return addressBooks;
   }
 }
 

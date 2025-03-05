@@ -33,6 +33,16 @@ class GetPhonebookContactsSuccess extends Success {
       ];
 }
 
+class LookUpPhonebookContactPartialSuccess extends GetPhonebookContactsSuccess {
+  const LookUpPhonebookContactPartialSuccess({
+    super.progress = 100,
+    required super.contacts,
+  });
+
+  @override
+  List<Object?> get props => [progress, contacts];
+}
+
 class GetPhonebookContactsIsEmpty extends Success {
   const GetPhonebookContactsIsEmpty();
 
