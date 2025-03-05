@@ -29,7 +29,7 @@ class FederationIdentityLookupInteractor {
           await federationIdentityLookupRepository.register(
         tokenInformation: arguments.tokenInformation,
       );
-      if (registerResponse.token == null && registerResponse.token!.isEmpty) {
+      if (registerResponse.token == null || registerResponse.token!.isEmpty) {
         return Left(
           FederationIdentityRegisterAccountFailure(
             identityServer: arguments.federationUrl,
@@ -173,32 +173,36 @@ class FederationIdentityLookupInteractor {
     final updatedPhoneNumbers = <FederationPhone>{};
     final updatedEmails = <FederationEmail>{};
 
-    for (final phoneNumber in contact.phoneNumbers!) {
-      final phone = phoneToHashMap.keys.firstWhereOrNull(
-        (number) => number == phoneNumber.number,
-      );
-      if (phone != null) {
-        final phoneNumberUpdated = phoneNumber.copyWith(
-          thirdPartyIdToHashMap: {
-            phoneNumber.number: phoneToHashMap[phone]!,
-          },
+    if (contact.phoneNumbers != null) {
+      for (final phoneNumber in contact.phoneNumbers!) {
+        final phone = phoneToHashMap.keys.firstWhereOrNull(
+              (number) => number == phoneNumber.number,
         );
-        updatedPhoneNumbers.add(phoneNumberUpdated);
+        if (phone != null) {
+          final phoneNumberUpdated = phoneNumber.copyWith(
+            thirdPartyIdToHashMap: {
+              phoneNumber.number: phoneToHashMap[phone]!,
+            },
+          );
+          updatedPhoneNumbers.add(phoneNumberUpdated);
+        }
       }
     }
 
-    for (final email in contact.emails!) {
-      final address = emailToHashMap.keys.firstWhereOrNull(
-        (address) => address == email.address,
-      );
-
-      if (address != null) {
-        final emailUpdated = email.copyWith(
-          thirdPartyIdToHashMap: {
-            email.address: emailToHashMap[address]!,
-          },
+    if (contact.emails != null) {
+      for (final email in contact.emails!) {
+        final address = emailToHashMap.keys.firstWhereOrNull(
+              (address) => address == email.address,
         );
-        updatedEmails.add(emailUpdated);
+
+        if (address != null) {
+          final emailUpdated = email.copyWith(
+            thirdPartyIdToHashMap: {
+              email.address: emailToHashMap[address]!,
+            },
+          );
+          updatedEmails.add(emailUpdated);
+        }
       }
     }
 
