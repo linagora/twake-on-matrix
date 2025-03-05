@@ -4,6 +4,7 @@ import 'package:fluffychat/modules/federation_identity_lookup/domain/models/fede
 import 'package:fluffychat/modules/federation_identity_lookup/domain/models/federation_hash_details_response.dart';
 import 'package:fluffychat/modules/federation_identity_lookup/domain/models/federation_lookup_mxid_response.dart';
 import 'package:fluffychat/modules/federation_identity_lookup/domain/models/federation_register_response.dart';
+import 'package:fluffychat/modules/federation_identity_lookup/domain/models/federation_third_party_contact.dart';
 import 'package:fluffychat/modules/federation_identity_lookup/domain/repository/federation_identity_lookup_repository.dart';
 import 'package:fluffychat/modules/federation_identity_lookup/domain/state/federation_identity_lookup_state.dart';
 import 'package:fluffychat/modules/federation_identity_lookup/domain/usecase/federation_identity_lookup_interactor.dart';
@@ -176,6 +177,138 @@ void main() {
               ?.first
               .matrixId,
           '@alice_pepper2:matrix.com',);
+    });
+
+    test('should handle partial mapping matches with multiple phone number', () async {
+      when(mockRepository.register(
+        tokenInformation: testToken,),)
+          .thenAnswer((_) async => const FederationRegisterResponse(token: 'valid_token'));
+      when(mockRepository.getHashDetails(registeredToken: 'valid_token'))
+          .thenAnswer((_) async => const FederationHashDetailsResponse(
+        algorithms: {'sha256'},
+        lookupPepper: 'pepper',
+        altLookupPeppers: {'pepper1', 'pepper2'},
+      ),);
+      when(mockRepository.lookupMxid(
+        request: anyNamed('request'),
+        registeredToken: anyNamed('registeredToken'),
+      ),).thenAnswer((_) async => const FederationLookupMxidResponse(
+        mappings: {
+          'lWcTz7CJ9a9OqxlYWsl2MibzKep0abdGl6g3I3t7BPM': '@alice_pepper1:matrix.com',
+          'rJnCyQMaiAcZNw_qB5D5iCCjUdKUKF7Mzl18HMY6DjQ': '@alice_pepper2:matrix.com',
+        },),);
+
+      final contacts = {
+        FederationContactFixtures.contact1.id: FederationContactFixtures.contact1
+            .copyWith(phoneNumbers: {
+              FederationPhone(
+                number: '(212)555-6789',
+              ),
+              FederationPhone(
+                number: '(213)555-6789',
+              ),
+              FederationPhone(
+                number: '(214)555-6789',
+              ),
+            }
+        ,),
+      };
+
+      final result = await interactor.execute(
+        arguments: FederationArguments(
+          federationUrl: 'test.server',
+          tokenInformation: testToken,
+          contactMaps: contacts,
+        ),
+      );
+
+      expect(result.isRight(), true);
+      final success =
+      result.getOrElse(() => throw Exception('Expected Success'));
+      expect(
+        (success as FederationIdentityLookupSuccess)
+          .newContacts[FederationContactFixtures.contact1.id]
+          ?.phoneNumbers?.length, equals(3),);
+      expect(
+        (success)
+            .newContacts[FederationContactFixtures.contact1.id]
+            ?.phoneNumbers
+            ?.first
+            .matrixId,
+        '@alice_pepper1:matrix.com',);
+      expect(
+        (success)
+            .newContacts[FederationContactFixtures.contact1.id]
+            ?.emails
+            ?.first
+            .matrixId,
+        '@alice_pepper2:matrix.com',);
+    });
+
+    test('should handle partial mapping matches with multiple email', () async {
+      when(mockRepository.register(
+        tokenInformation: testToken,),)
+          .thenAnswer((_) async => const FederationRegisterResponse(token: 'valid_token'));
+      when(mockRepository.getHashDetails(registeredToken: 'valid_token'))
+          .thenAnswer((_) async => const FederationHashDetailsResponse(
+        algorithms: {'sha256'},
+        lookupPepper: 'pepper',
+        altLookupPeppers: {'pepper1', 'pepper2'},
+      ),);
+      when(mockRepository.lookupMxid(
+        request: anyNamed('request'),
+        registeredToken: anyNamed('registeredToken'),
+      ),).thenAnswer((_) async => const FederationLookupMxidResponse(
+        mappings: {
+          'lWcTz7CJ9a9OqxlYWsl2MibzKep0abdGl6g3I3t7BPM': '@alice_pepper1:matrix.com',
+          'pF6bycYytq3vJh73tKomRVIK4Npo72FKfemP8ShdMjw': '@alice_pepper2:matrix.com',
+        },),);
+
+      final contacts = {
+        FederationContactFixtures.contact1.id: FederationContactFixtures.contact1
+          .copyWith(emails: {
+            FederationEmail(
+              address: 'alice1@gmail.com',
+            ),
+            FederationEmail(
+              address: 'alice2@gmail.com',
+            ),
+            FederationEmail(
+              address: 'alice3@gmail.com',
+            ),
+          }
+        ,),
+      };
+
+      final result = await interactor.execute(
+        arguments: FederationArguments(
+          federationUrl: 'test.server',
+          tokenInformation: testToken,
+          contactMaps: contacts,
+        ),
+      );
+
+      expect(result.isRight(), true);
+      final success =
+      result.getOrElse(() => throw Exception('Expected Success'));
+      expect(
+        (success as FederationIdentityLookupSuccess)
+            .newContacts[FederationContactFixtures.contact1.id]
+            ?.emails?.length, equals(3),);
+      expect(
+        (success)
+            .newContacts[FederationContactFixtures.contact1.id]
+            ?.phoneNumbers
+            ?.first
+            .matrixId,
+        '@alice_pepper1:matrix.com',);
+      expect(
+        (success)
+            .newContacts[FederationContactFixtures.contact1.id]
+            ?.emails
+            ?.first
+            .matrixId,
+        '@alice_pepper2:matrix.com',);
     });
 
     test('should handle empty lookup response', () async {
