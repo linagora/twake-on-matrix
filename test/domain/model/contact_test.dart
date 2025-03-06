@@ -97,7 +97,7 @@ void main() {
 
     test('should create a PhoneNumber instance with all fields', () {
       final thirdPartyIdToHashMap = {
-        'phone': ['hash1', 'hash2']
+        'phone': ['hash1', 'hash2'],
       };
 
       final phoneNumber = PhoneNumber(
@@ -122,7 +122,7 @@ void main() {
         matrixId: '@user:example.com',
         status: ThirdPartyStatus.active,
         thirdPartyIdToHashMap: {
-          'phone': ['hash1', 'hash2']
+          'phone': ['hash1', 'hash2'],
         },
       );
 
@@ -130,7 +130,7 @@ void main() {
       expect(updatedPhoneNumber.matrixId, '@user:example.com');
       expect(updatedPhoneNumber.status, ThirdPartyStatus.active);
       expect(updatedPhoneNumber.thirdPartyIdToHashMap, {
-        'phone': ['hash1', 'hash2']
+        'phone': ['hash1', 'hash2'],
       });
 
       // Original phoneNumber should remain unchanged
@@ -186,7 +186,7 @@ void main() {
 
     test('should create an Email instance with all fields', () {
       final thirdPartyIdToHashMap = {
-        'email': ['hash1', 'hash2']
+        'email': ['hash1', 'hash2'],
       };
 
       final email = Email(
@@ -211,7 +211,7 @@ void main() {
         matrixId: '@user:example.com',
         status: ThirdPartyStatus.active,
         thirdPartyIdToHashMap: {
-          'email': ['hash1', 'hash2']
+          'email': ['hash1', 'hash2'],
         },
       );
 
@@ -219,7 +219,7 @@ void main() {
       expect(updatedEmail.matrixId, '@user:example.com');
       expect(updatedEmail.status, ThirdPartyStatus.active);
       expect(updatedEmail.thirdPartyIdToHashMap, {
-        'email': ['hash1', 'hash2']
+        'email': ['hash1', 'hash2'],
       });
 
       // Original email should remain unchanged
