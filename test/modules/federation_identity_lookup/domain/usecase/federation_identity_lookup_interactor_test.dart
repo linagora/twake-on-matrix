@@ -148,7 +148,8 @@ void main() {
           tokenInformation: testToken,
         ),
       ).thenAnswer(
-          (_) async => const FederationRegisterResponse(token: 'valid_token'));
+        (_) async => const FederationRegisterResponse(token: 'valid_token'),
+      );
       when(mockRepository.getHashDetails(registeredToken: 'valid_token'))
           .thenAnswer(
         (_) async => const FederationHashDetailsResponse(
@@ -214,7 +215,8 @@ void main() {
           tokenInformation: testToken,
         ),
       ).thenAnswer(
-          (_) async => const FederationRegisterResponse(token: 'valid_token'));
+        (_) async => const FederationRegisterResponse(token: 'valid_token'),
+      );
       when(mockRepository.getHashDetails(registeredToken: 'valid_token'))
           .thenAnswer(
         (_) async => const FederationHashDetailsResponse(
@@ -298,7 +300,8 @@ void main() {
           tokenInformation: testToken,
         ),
       ).thenAnswer(
-          (_) async => const FederationRegisterResponse(token: 'valid_token'));
+        (_) async => const FederationRegisterResponse(token: 'valid_token'),
+      );
       when(mockRepository.getHashDetails(registeredToken: 'valid_token'))
           .thenAnswer(
         (_) async => const FederationHashDetailsResponse(
@@ -382,7 +385,8 @@ void main() {
           tokenInformation: testToken,
         ),
       ).thenAnswer(
-          (_) async => const FederationRegisterResponse(token: 'valid_token'));
+        (_) async => const FederationRegisterResponse(token: 'valid_token'),
+      );
       when(mockRepository.getHashDetails(registeredToken: 'valid_token'))
           .thenAnswer(
         (_) async => const FederationHashDetailsResponse(
@@ -397,7 +401,8 @@ void main() {
           registeredToken: anyNamed('registeredToken'),
         ),
       ).thenAnswer(
-          (_) async => const FederationLookupMxidResponse(mappings: {}));
+        (_) async => const FederationLookupMxidResponse(mappings: {}),
+      );
 
       final contacts = {
         FederationContactFixtures.contact1.id:
@@ -439,15 +444,19 @@ void main() {
     });
 
     test('should handle invalid token information', () async {
-      when(mockRepository.register(
-              tokenInformation: anyNamed('tokenInformation')))
-          .thenThrow(Exception("Can not register"));
+      when(
+        mockRepository.register(
+          tokenInformation: anyNamed('tokenInformation'),
+        ),
+      ).thenThrow(Exception("Can not register"));
 
       final result = await interactor.execute(
         arguments: FederationArguments(
           federationUrl: 'test.server',
           tokenInformation: const FederationTokenInformation(
-              accessToken: 'test', tokenType: ''),
+            accessToken: 'test',
+            tokenType: '',
+          ),
           contactMaps: {},
         ),
       );
@@ -464,7 +473,8 @@ void main() {
           tokenInformation: testToken,
         ),
       ).thenAnswer(
-          (_) async => const FederationRegisterResponse(token: 'valid_token'));
+        (_) async => const FederationRegisterResponse(token: 'valid_token'),
+      );
       when(mockRepository.getHashDetails(registeredToken: 'valid_token'))
           .thenAnswer(
         (_) async => const FederationHashDetailsResponse(
@@ -479,7 +489,8 @@ void main() {
           registeredToken: anyNamed('registeredToken'),
         ),
       ).thenAnswer(
-          (_) async => const FederationLookupMxidResponse(mappings: {}));
+        (_) async => const FederationLookupMxidResponse(mappings: {}),
+      );
 
       final Map<String, FederationContact> contacts = {};
       final result = await interactor.execute(
@@ -507,7 +518,8 @@ void main() {
           tokenInformation: testToken,
         ),
       ).thenAnswer(
-          (_) async => const FederationRegisterResponse(token: 'valid_token'));
+        (_) async => const FederationRegisterResponse(token: 'valid_token'),
+      );
       when(mockRepository.getHashDetails(registeredToken: 'valid_token'))
           .thenAnswer(
         (_) async => const FederationHashDetailsResponse(
@@ -570,7 +582,8 @@ void main() {
           tokenInformation: testToken,
         ),
       ).thenAnswer(
-          (_) async => const FederationRegisterResponse(token: 'valid_token'));
+        (_) async => const FederationRegisterResponse(token: 'valid_token'),
+      );
       when(mockRepository.getHashDetails(registeredToken: 'valid_token'))
           .thenAnswer(
         (_) async => const FederationHashDetailsResponse(
@@ -604,7 +617,8 @@ void main() {
           tokenInformation: testToken,
         ),
       ).thenAnswer(
-          (_) async => const FederationRegisterResponse(token: 'valid_token'));
+        (_) async => const FederationRegisterResponse(token: 'valid_token'),
+      );
       when(mockRepository.getHashDetails(registeredToken: 'valid_token'))
           .thenAnswer(
         (_) async => const FederationHashDetailsResponse(
@@ -654,8 +668,9 @@ void main() {
           result.swap().getOrElse(() => throw Exception('Expected failure'));
       expect(failure, isA<FederationIdentityRegisterAccountFailure>());
       expect(
-          (failure as FederationIdentityRegisterAccountFailure).identityServer,
-          'test.server');
+        (failure as FederationIdentityRegisterAccountFailure).identityServer,
+        'test.server',
+      );
     });
 
     test('should handle null token in registration response', () async {
@@ -687,7 +702,8 @@ void main() {
           tokenInformation: testToken,
         ),
       ).thenAnswer(
-          (_) async => const FederationRegisterResponse(token: 'valid_token'));
+        (_) async => const FederationRegisterResponse(token: 'valid_token'),
+      );
       when(mockRepository.getHashDetails(registeredToken: 'valid_token'))
           .thenAnswer(
         (_) async => const FederationHashDetailsResponse(
@@ -703,7 +719,8 @@ void main() {
       ).thenAnswer(
         (_) async => const FederationLookupMxidResponse(
           mappings: {
-            'fIlWJrJ7CeAiqVEtt2ySsyNyv-22zGa5TclJcmKBWeo': '@phone_only:matrix.com',
+            'fIlWJrJ7CeAiqVEtt2ySsyNyv-22zGa5TclJcmKBWeo':
+                '@phone_only:matrix.com',
           },
         ),
       );
@@ -740,7 +757,8 @@ void main() {
           tokenInformation: testToken,
         ),
       ).thenAnswer(
-          (_) async => const FederationRegisterResponse(token: 'valid_token'));
+        (_) async => const FederationRegisterResponse(token: 'valid_token'),
+      );
       when(mockRepository.getHashDetails(registeredToken: 'valid_token'))
           .thenAnswer(
         (_) async => const FederationHashDetailsResponse(
@@ -756,7 +774,8 @@ void main() {
       ).thenAnswer(
         (_) async => const FederationLookupMxidResponse(
           mappings: {
-            'UlFCGNN0GkdVtlrZRdhZpDx0vg_omO0PFvD6CB41zPc': '@email_only:matrix.com',
+            'UlFCGNN0GkdVtlrZRdhZpDx0vg_omO0PFvD6CB41zPc':
+                '@email_only:matrix.com',
           },
         ),
       );
@@ -793,7 +812,8 @@ void main() {
           tokenInformation: testToken,
         ),
       ).thenAnswer(
-          (_) async => const FederationRegisterResponse(token: 'valid_token'));
+        (_) async => const FederationRegisterResponse(token: 'valid_token'),
+      );
       when(mockRepository.getHashDetails(registeredToken: 'valid_token'))
           .thenAnswer(
         (_) async => const FederationHashDetailsResponse(
@@ -845,7 +865,8 @@ void main() {
           tokenInformation: testToken,
         ),
       ).thenAnswer(
-          (_) async => const FederationRegisterResponse(token: 'valid_token'));
+        (_) async => const FederationRegisterResponse(token: 'valid_token'),
+      );
       when(mockRepository.getHashDetails(registeredToken: 'valid_token'))
           .thenAnswer(
         (_) async => const FederationHashDetailsResponse(
@@ -921,8 +942,10 @@ void main() {
       final result = interactor.replacePhoneNumber(original, updated);
 
       expect(result.length, 2);
-      expect(result.firstWhere((p) => p.number == '123').matrixId,
-          '@user:matrix.org');
+      expect(
+        result.firstWhere((p) => p.number == '123').matrixId,
+        '@user:matrix.org',
+      );
       expect(result.firstWhere((p) => p.number == '456').matrixId, isNull);
     });
 
@@ -944,11 +967,14 @@ void main() {
       final result = interactor.replaceEmail(original, updated);
 
       expect(result.length, 2);
-      expect(result.firstWhere((e) => e.address == 'test@example.com').matrixId,
-          '@user:matrix.org');
       expect(
-          result.firstWhere((e) => e.address == 'other@example.com').matrixId,
-          isNull);
+        result.firstWhere((e) => e.address == 'test@example.com').matrixId,
+        '@user:matrix.org',
+      );
+      expect(
+        result.firstWhere((e) => e.address == 'other@example.com').matrixId,
+        isNull,
+      );
     });
 
     test('updateContactWithHashes should correctly update contact', () async {
@@ -967,7 +993,9 @@ void main() {
       );
 
       expect(
-          updatedContact.phoneNumbers?.first.thirdPartyIdToHashMap, isNotNull);
+        updatedContact.phoneNumbers?.first.thirdPartyIdToHashMap,
+        isNotNull,
+      );
       expect(
         updatedContact
             .phoneNumbers?.first.thirdPartyIdToHashMap?['(212)555-6789'],
@@ -988,7 +1016,8 @@ void main() {
           tokenInformation: testToken,
         ),
       ).thenAnswer(
-          (_) async => const FederationRegisterResponse(token: 'valid_token'));
+        (_) async => const FederationRegisterResponse(token: 'valid_token'),
+      );
       when(mockRepository.getHashDetails(registeredToken: 'valid_token'))
           .thenThrow(Exception('Network error'));
 
@@ -1015,7 +1044,8 @@ void main() {
           tokenInformation: testToken,
         ),
       ).thenAnswer(
-          (_) async => const FederationRegisterResponse(token: 'valid_token'));
+        (_) async => const FederationRegisterResponse(token: 'valid_token'),
+      );
       when(mockRepository.getHashDetails(registeredToken: 'valid_token'))
           .thenAnswer(
         (_) async => const FederationHashDetailsResponse(
@@ -1053,7 +1083,8 @@ void main() {
           tokenInformation: testToken,
         ),
       ).thenAnswer(
-          (_) async => const FederationRegisterResponse(token: 'valid_token'));
+        (_) async => const FederationRegisterResponse(token: 'valid_token'),
+      );
       when(mockRepository.getHashDetails(registeredToken: 'valid_token'))
           .thenAnswer(
         (_) async => const FederationHashDetailsResponse(
@@ -1089,7 +1120,8 @@ void main() {
           tokenInformation: testToken,
         ),
       ).thenAnswer(
-          (_) async => const FederationRegisterResponse(token: 'valid_token'));
+        (_) async => const FederationRegisterResponse(token: 'valid_token'),
+      );
       when(mockRepository.getHashDetails(registeredToken: 'valid_token'))
           .thenAnswer(
         (_) async => const FederationHashDetailsResponse(

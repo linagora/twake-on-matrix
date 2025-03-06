@@ -81,6 +81,7 @@ import 'package:fluffychat/domain/usecase/settings/save_language_interactor.dart
 import 'package:fluffychat/domain/usecase/settings/update_profile_interactor.dart';
 import 'package:fluffychat/domain/usecase/verify_name_interactor.dart';
 import 'package:fluffychat/event/twake_event_dispatcher.dart';
+import 'package:fluffychat/modules/federation_identity_lookup/manager/federation_identity_lookup_manager.dart';
 import 'package:fluffychat/modules/federation_identity_lookup/manager/identity_lookup_manager.dart';
 import 'package:fluffychat/modules/federation_identity_request_token/manager/federation_identity_request_token_manager.dart';
 import 'package:fluffychat/pages/chat/chat_pinned_events/pinned_events_controller.dart';
@@ -371,6 +372,9 @@ class GetItInitializer {
     );
     getIt.registerFactory<FederationIdentityRequestTokenManager>(
       () => FederationIdentityRequestTokenManager(),
+    );
+    getIt.registerFactory<FederationIdentityLookupManager>(
+      () => FederationIdentityLookupManager(),
     );
   }
 }

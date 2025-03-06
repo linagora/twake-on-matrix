@@ -296,7 +296,7 @@ void main() {
             tokenInformation: tokenInformation,
           ),
         ).thenAnswer(
-              (_) async => const FederationRegisterResponse(
+          (_) async => const FederationRegisterResponse(
             token: 'aB7c9Dz4EfGh5iJkLm3nOp==',
           ),
         );
@@ -1284,22 +1284,6 @@ void main() {
 
         final exception = Exception('Error');
 
-        final expectedContacts = [
-          ContactFixtures.contact1.copyWith(
-            phoneNumbers: {
-              PhoneNumber(
-                number: '(212)555-6789',
-                matrixId: '@alice:matrix.org',
-              ),
-            },
-          ),
-          ContactFixtures.contact2,
-          ContactFixtures.contact3,
-          ContactFixtures.contact4,
-          ContactFixtures.contact5,
-          ContactFixtures.contact6,
-        ];
-
         when(mockRepository.fetchContacts()).thenAnswer((_) async => contacts);
 
         when(
@@ -1490,8 +1474,6 @@ void main() {
           ContactFixtures.contact6,
         ];
 
-        final exception = Exception('Error');
-
         when(mockRepository.fetchContacts()).thenAnswer((_) async => contacts);
 
         when(
@@ -1530,7 +1512,6 @@ void main() {
           ),
         ).thenAnswer((_) async => hashDetails);
 
-        int callCount = 0;
         when(
           mockIdentityLookupManager.lookupMxid(
             federationUrl: anyNamed('federationUrl'),

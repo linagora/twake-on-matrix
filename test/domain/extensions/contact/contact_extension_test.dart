@@ -101,8 +101,10 @@ void main() {
       final combinedContact = contact1.combine(contact2);
 
       expect(combinedContact.id, 'contact1');
-      expect(combinedContact.displayName,
-          'Contact 1'); // Should keep contact1's name
+      expect(
+        combinedContact.displayName,
+        'Contact 1',
+      ); // Should keep contact1's name
 
       // Should have merged emails
       expect(combinedContact.emails?.length, 2);
@@ -427,7 +429,9 @@ void main() {
 
       expect(emailToHashMap.keys.contains('test@example.com'), true);
       expect(
-          emailToHashMap['test@example.com']?.length, 3); // One for each pepper
+        emailToHashMap['test@example.com']?.length,
+        3,
+      ); // One for each pepper
     });
   });
 
