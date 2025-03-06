@@ -75,7 +75,9 @@ extension ContactExtension on Contact {
 
   // Merge two sets of phone numbers, combining properties
   Set<PhoneNumber> _mergePhoneNumbers(
-      Set<PhoneNumber>? phones1, Set<PhoneNumber>? phones2) {
+    Set<PhoneNumber>? phones1,
+    Set<PhoneNumber>? phones2,
+  ) {
     final mergedPhones = <PhoneNumber>{};
     final allPhones = [...?phones1, ...?phones2];
 
@@ -257,7 +259,7 @@ extension SetContactExtension on Set<Contact> {
     final allContacts = [
       ...this,
       ...contactsFromMappings,
-      ...contactsFromThirdParty
+      ...contactsFromThirdParty,
     ];
 
     for (final contact in allContacts) {

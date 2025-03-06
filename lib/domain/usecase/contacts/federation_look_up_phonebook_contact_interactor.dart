@@ -233,11 +233,12 @@ class FederationLookUpPhonebookContactInteractor {
               contactsFromMappings.addAll(updatedContact);
             }
           } catch (e) {
-            Logs().d(
-                'FederationLookUpPhonebookContactInteractor::execute(): handle mappings failed');
+            Logs().e(
+              'FederationLookUpPhonebookContactInteractor::execute(): handle mappings failed',
+              e,
+            );
           }
 
-          print("DATPH prepare thirdparty");
           try {
             if (response.thirdPartyMappings != null &&
                 response.thirdPartyMappings!.isNotEmpty) {
@@ -256,7 +257,8 @@ class FederationLookUpPhonebookContactInteractor {
             }
           } catch (e) {
             Logs().d(
-                'FederationLookUpPhonebookContactInteractor::execute(): handle third party mappings failed');
+              'FederationLookUpPhonebookContactInteractor::execute(): handle third party mappings failed',
+            );
           }
 
           final combinedContacts = chunkContacts.toSet().combineContacts(
@@ -278,7 +280,8 @@ class FederationLookUpPhonebookContactInteractor {
           );
         } catch (e) {
           Logs().e(
-              'FederationLookUpPhonebookContactInteractor::execute(): one chunk exception $e');
+            'FederationLookUpPhonebookContactInteractor::execute(): one chunk exception $e',
+          );
           progress++;
           updatedContact.addAll(chunkContacts);
           chunkError = TwakeLookupChunkException(e.toString());
@@ -314,7 +317,6 @@ class FederationLookUpPhonebookContactInteractor {
     required List<Contact> newContacts,
     required FederationLookUpArgument argument,
   }) async {
-    print('DATPH start_handleThirdPartyMappings');
     final List<Contact> updatedContact = [];
     for (final server in thirdPartyToHashes.keys) {
       final hashes = thirdPartyToHashes[server]!;
@@ -363,9 +365,7 @@ class FederationLookUpPhonebookContactInteractor {
         contactMaps: contactsNeedToCalculate.toFederationContactMap(),
       );
       final manager = getIt.get<FederationIdentityLookupManager>();
-      print('datph dcmmdd');
       final result = await manager.execute(arguments: arguments);
-      print('dcmmmay');
       result.fold(
         (failure) {
           Logs().e(
