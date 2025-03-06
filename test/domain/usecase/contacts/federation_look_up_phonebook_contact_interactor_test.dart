@@ -290,6 +290,17 @@ void main() {
           ),
         );
 
+        when(
+          mockIdentityLookupManager.register(
+            federationUrl: federationUrl,
+            tokenInformation: tokenInformation,
+          ),
+        ).thenAnswer(
+              (_) async => const FederationRegisterResponse(
+            token: 'aB7c9Dz4EfGh5iJkLm3nOp==',
+          ),
+        );
+
         expectLater(
           interactor.execute(argument: testArgument),
           emitsInOrder([

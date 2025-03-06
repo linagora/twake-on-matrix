@@ -176,7 +176,7 @@ class FederationIdentityLookupInteractor {
     if (contact.phoneNumbers != null) {
       for (final phoneNumber in contact.phoneNumbers!) {
         final phone = phoneToHashMap.keys.firstWhereOrNull(
-              (number) => number == phoneNumber.number,
+          (number) => number == phoneNumber.number,
         );
         if (phone != null) {
           final phoneNumberUpdated = phoneNumber.copyWith(
@@ -192,7 +192,7 @@ class FederationIdentityLookupInteractor {
     if (contact.emails != null) {
       for (final email in contact.emails!) {
         final address = emailToHashMap.keys.firstWhereOrNull(
-              (address) => address == email.address,
+          (address) => address == email.address,
         );
 
         if (address != null) {

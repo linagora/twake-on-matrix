@@ -108,6 +108,11 @@ extension ContactExtension on Contact {
 
   Set<Email> updateEmails(Map<String, String> mappings) {
     final updatedEmails = <Email>{};
+
+    if (emails == null || emails!.isEmpty) {
+      return updatedEmails;
+    }
+
     for (final email in emails!) {
       final thirdPartyIdToHashMap = email.thirdPartyIdToHashMap ?? {};
       if (thirdPartyIdToHashMap.values
@@ -129,6 +134,11 @@ extension ContactExtension on Contact {
     Map<String, String> mappings,
   ) {
     final updatedPhoneNumbers = <PhoneNumber>{};
+
+    if (phoneNumbers == null || phoneNumbers!.isEmpty) {
+      return updatedPhoneNumbers;
+    }
+
     for (final phoneNumber in phoneNumbers!) {
       final thirdPartyIdToHashMap = phoneNumber.thirdPartyIdToHashMap ?? {};
 
