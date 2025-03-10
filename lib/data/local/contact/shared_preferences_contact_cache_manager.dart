@@ -54,6 +54,10 @@ class SharedPreferencesContactCacheManager {
     );
   }
 
+  Future<void> deteleContactsVaultError() async {
+    await pres.deleteItem(keyContactsVaultError);
+  }
+
   Future<void> storeTimeLastSyncedVault(DateTime time) async {
     await pres.setItem(keyTimeLastSyncedVault, time.toIso8601String());
   }
@@ -81,5 +85,9 @@ class SharedPreferencesContactCacheManager {
     return ChunkFederationContactErrorEnum.values.firstWhereOrNull(
       (element) => element.message == error,
     );
+  }
+
+  Future<void> deleteChunkFederationLookUpError() async {
+    await pres.deleteItem(keyChunkFederationLookUpError);
   }
 }

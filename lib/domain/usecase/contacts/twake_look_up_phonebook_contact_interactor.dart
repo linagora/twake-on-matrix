@@ -212,7 +212,8 @@ class TwakeLookupPhonebookContactInteractor {
 
     // finalize the process
     if (chunkError != null) {
-      _sharedPreferencesContactCacheManager.storeChunkFederationLookUpError(
+      await _sharedPreferencesContactCacheManager
+          .storeChunkFederationLookUpError(
         ChunkFederationContactErrorEnum.chunkError,
       );
       yield Left(
@@ -223,6 +224,8 @@ class TwakeLookupPhonebookContactInteractor {
       );
       return;
     } else {
+      await _sharedPreferencesContactCacheManager
+          .deleteChunkFederationLookUpError();
       yield Right(
         LookUpPhonebookContactPartialSuccess(
           contacts: updatedContact.toList(),
@@ -261,8 +264,9 @@ class TwakeLookupPhonebookContactInteractor {
         userId,
         contacts.toList(),
       );
+      await _sharedPreferencesContactCacheManager.deleteContactsHiveError();
     } catch (e) {
-      _sharedPreferencesContactCacheManager.storeContactsHiveError(
+      await _sharedPreferencesContactCacheManager.storeContactsHiveError(
         ContactsHiveErrorEnum.storeError,
       );
       Logs().e(

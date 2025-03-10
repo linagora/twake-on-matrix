@@ -150,8 +150,7 @@ class _ContactsInvitationViewState extends State<ContactsInvitationView> {
                                                           ),
                                                     ),
                                                     Text(
-                                                      phoneNumber.phoneNumber ??
-                                                          '',
+                                                      phoneNumber.phoneNumber,
                                                       style: Theme.of(context)
                                                           .textTheme
                                                           .labelLarge

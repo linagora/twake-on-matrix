@@ -39,7 +39,7 @@ extension ContactExtension on Contact {
     final Set<AddressBook> addressBooks = {};
     if (contacts?.isNotEmpty == true) {
       for (final contact in contacts!) {
-        if (contact.matrixId != null) {
+        if (contact.matrixId != null && contact.matrixId!.isNotEmpty) {
           addressBooks.add(
             AddressBook(
               displayName: displayName,

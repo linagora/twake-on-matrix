@@ -32,16 +32,18 @@ class PostAddressBookInteractor {
       );
 
       if (response.addressBooks == null) {
-        _sharedPreferencesContactCacheManager.storeContactsVaultError(
+        await _sharedPreferencesContactCacheManager.storeContactsVaultError(
           ContactsVaultErrorEnum.responseIsNull,
         );
         yield const Left(PostAddressBookEmptyState());
         return;
       }
 
-      _sharedPreferencesContactCacheManager.storeTimeLastSyncedVault(
+      await _sharedPreferencesContactCacheManager.storeTimeLastSyncedVault(
         DateTime.now(),
       );
+
+      await _sharedPreferencesContactCacheManager.deteleContactsVaultError();
 
       yield Right(
         PostAddressBookSuccessState(
