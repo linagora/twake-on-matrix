@@ -260,6 +260,158 @@ void main() {
     );
 
     test(
+      'Give list contact with multiple phone and email\n'
+      'When store list contact is called\n'
+      'Then all contact is stored in the database',
+      () async {
+        final repository = getIt.get<HiveContactRepository>();
+        final contacts = [
+          Contact(
+            id: 'id_1',
+            displayName: 'Alice',
+            phoneNumbers: {
+              PhoneNumber(
+                number: '(212)555-6789',
+                matrixId: '@david:matrix.org',
+              ),
+              PhoneNumber(
+                number: '(212)555-5555',
+                matrixId: '@david2:matrix.org',
+              ),
+              PhoneNumber(
+                number: '(212)555-5444',
+                matrixId: '@david3:matrix.org',
+              ),
+            },
+            emails: {
+              Email(
+                address: 'david_x@gmail.com',
+                matrixId: '@david.x:matrix.org',
+              ),
+              Email(
+                address: 'david_x1@gmail.com',
+                matrixId: '@david.x1:matrix.org',
+              ),
+              Email(
+                address: 'david_x2@gmail.com',
+                matrixId: '@david.x2:matrix.org',
+              ),
+            },
+          ),
+          Contact(
+            id: 'id_2',
+            displayName: 'Bob',
+            phoneNumbers: {
+              PhoneNumber(
+                number: '(212)444-6789',
+                matrixId: '@bob:matrix.org',
+              ),
+              PhoneNumber(
+                number: '(212)444-1234',
+                matrixId: '@bob1:matrix.org',
+              ),
+              PhoneNumber(
+                number: '(212)444-3214',
+                matrixId: '@bob2:matrix.org',
+              ),
+            },
+            emails: {
+              Email(
+                address: 'bob_x@gmail.com',
+                matrixId: '@bob.x:matrix.org',
+              ),
+              Email(
+                address: 'bob_x1@gmail.com',
+                matrixId: '@bob.x1:matrix.org',
+              ),
+              Email(
+                address: 'bob_x2@gmail.com',
+                matrixId: '@bob.x2:matrix.org',
+              ),
+            },
+          ),
+        ];
+        await repository.saveThirdPartyContactsForUser(
+          '12345678910',
+          contacts,
+        );
+
+        final hiveContacts =
+            await repository.getThirdPartyContactByUserId('12345678910');
+
+        expect(hiveContacts.length == 2, true);
+
+        expect(
+          hiveContacts.first.id,
+          contacts.first.id,
+        );
+
+        expect(
+          hiveContacts.first.displayName,
+          contacts.first.displayName,
+        );
+
+        for (var index = 0;
+            index < hiveContacts.first.phoneNumbers!.length;
+            index++) {
+          expect(
+            hiveContacts.first.phoneNumbers!.toList()[index].number,
+            contacts.first.phoneNumbers!.toList()[index].number,
+          );
+
+          expect(
+            hiveContacts.first.phoneNumbers!.toList()[index].matrixId,
+            contacts.first.phoneNumbers!.toList()[index].matrixId,
+          );
+
+          expect(
+            hiveContacts.first.emails!.toList()[index].address,
+            contacts.first.emails!.toList()[index].address,
+          );
+
+          expect(
+            hiveContacts.first.emails!.toList()[index].matrixId,
+            contacts.first.emails!.toList()[index].matrixId,
+          );
+        }
+
+        expect(
+          hiveContacts.last.id,
+          contacts.last.id,
+        );
+
+        expect(
+          hiveContacts.last.displayName,
+          contacts.last.displayName,
+        );
+
+        for (var index = 0;
+            index < hiveContacts.last.phoneNumbers!.length;
+            index++) {
+          expect(
+            hiveContacts.last.phoneNumbers!.toList()[index].number,
+            contacts.last.phoneNumbers!.toList()[index].number,
+          );
+
+          expect(
+            hiveContacts.last.phoneNumbers!.toList()[index].matrixId,
+            contacts.last.phoneNumbers!.toList()[index].matrixId,
+          );
+
+          expect(
+            hiveContacts.last.emails!.toList()[index].address,
+            contacts.last.emails!.toList()[index].address,
+          );
+
+          expect(
+            hiveContacts.last.emails!.toList()[index].matrixId,
+            contacts.last.emails!.toList()[index].matrixId,
+          );
+        }
+      },
+    );
+
+    test(
       'Give list contact have 2 contact duplicated\n'
       'When store contact is called\n'
       'Then only one contact is stored in the database',
