@@ -210,24 +210,8 @@ class ContactsManager {
         (state) {
           _phonebookContactsNotifier.value = state;
           state.fold(
-            (failure) {
-              if (failure is LookUpPhonebookContactPartialFailed) {
-                if (PlatformInfos.isMobile) {
-                  _postAddressBookOnMobile(
-                    contacts: failure.contacts,
-                  );
-                }
-              }
-            },
-            (success) {
-              if (success is LookUpPhonebookContactPartialSuccess) {
-                if (PlatformInfos.isMobile) {
-                  _postAddressBookOnMobile(
-                    contacts: success.contacts,
-                  );
-                }
-              }
-            },
+            (failure) => _handleLookUpFailureState(failure),
+            (success) => _handleLookUpSuccessState(success),
           );
         },
       );
@@ -255,32 +239,35 @@ class ContactsManager {
       (state) {
         _phonebookContactsNotifier.value = state;
         state.fold(
-          (failure) {
-            if (failure is LookUpPhonebookContactPartialFailed) {
-              if (PlatformInfos.isMobile) {
-                _postAddressBookOnMobile(
-                  contacts: failure.contacts,
-                );
-              }
-            }
-          },
-          (success) {
-            if (success is LookUpPhonebookContactPartialSuccess) {
-              if (PlatformInfos.isMobile) {
-                _postAddressBookOnMobile(
-                  contacts: success.contacts,
-                );
-              }
-            }
-          },
+          (failure) => _handleLookUpFailureState(failure),
+          (success) => _handleLookUpSuccessState(success),
         );
       },
     );
   }
 
+  void _handleLookUpFailureState(Failure failure) {
+    if (failure is LookUpPhonebookContactPartialFailed) {
+      _postAddressBookOnMobile(
+        contacts: failure.contacts,
+      );
+    }
+  }
+
+  void _handleLookUpSuccessState(Success success) {
+    if (success is LookUpPhonebookContactPartialSuccess) {
+      _postAddressBookOnMobile(
+        contacts: success.contacts,
+      );
+    }
+  }
+
   void _postAddressBookOnMobile({
     required List<Contact> contacts,
   }) {
+    if (!PlatformInfos.isMobile) {
+      return;
+    }
     postAddressBookInteractor
         .execute(
       addressBooks: contacts.toSet().toAddressBooks().toList(),
