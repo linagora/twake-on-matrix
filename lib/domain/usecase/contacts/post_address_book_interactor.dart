@@ -35,7 +35,7 @@ class PostAddressBookInteractor {
         await _sharedPreferencesContactCacheManager.storeContactsVaultError(
           ContactsVaultErrorEnum.responseIsNull,
         );
-        yield const Left(PostAddressBookEmptyState());
+        yield const Left(PostAddressBookResponseIsNullState());
         return;
       }
 

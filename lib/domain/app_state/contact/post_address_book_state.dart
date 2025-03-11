@@ -24,6 +24,13 @@ class PostAddressBookEmptyState extends Failure {
   List<Object?> get props => [];
 }
 
+class PostAddressBookResponseIsNullState extends Failure {
+  const PostAddressBookResponseIsNullState();
+
+  @override
+  List<Object?> get props => [];
+}
+
 class PostAddressBookSuccessState extends Success {
   final List<AddressBook> updatedAddressBooks;
 
