@@ -54,6 +54,24 @@ class _ContactsInvitationViewState extends State<ContactsInvitationView> {
     Navigator.pop(context);
   }
 
+  void _onSelectContactDefault(PresentationContact contact) {
+    if (contact.phoneNumbers != null && contact.phoneNumbers!.isNotEmpty) {
+      _onSelectContact(contact.phoneNumbers!.first);
+      return;
+    }
+
+    if (contact.emails != null && contact.emails!.isNotEmpty) {
+      _onSelectContact(contact.emails!.first);
+      return;
+    }
+  }
+
+  @override
+  void initState() {
+    _onSelectContactDefault(widget.contact);
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     return SizedBox(
@@ -77,16 +95,6 @@ class _ContactsInvitationViewState extends State<ContactsInvitationView> {
                     color: LinagoraSysColors.material().onSurface,
                   ),
               textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 8),
-            Text(
-              widget.contact.displayName ?? '',
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: LinagoraSysColors.material().tertiary,
-                  ),
-              textAlign: TextAlign.center,
-              maxLines: 3,
-              overflow: TextOverflow.ellipsis,
             ),
             const SizedBox(height: 16),
             Expanded(
@@ -150,8 +158,7 @@ class _ContactsInvitationViewState extends State<ContactsInvitationView> {
                                                           ),
                                                     ),
                                                     Text(
-                                                      phoneNumber.phoneNumber ??
-                                                          '',
+                                                      phoneNumber.phoneNumber,
                                                       style: Theme.of(context)
                                                           .textTheme
                                                           .labelLarge
