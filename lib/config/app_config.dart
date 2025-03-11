@@ -106,8 +106,13 @@ abstract class AppConfig {
           ? "app.twake.ios.chat"
           : "app.twake.ios.chat.sandbox"
       : "app.twake.android.chat";
-  static const String pushNotificationsGatewayUrl =
-      'https://sygnal.lin-saas.dev/_matrix/push/v1/notify';
+
+  static const String _pushNotificationsGatewayUrlEnv = String.fromEnvironment(
+    'PUSH_NOTIFICATIONS_GATEWAY_URL',
+    defaultValue: 'https://sygnal.lin-saas.dev/_matrix/push/v1/notify',
+  );
+
+  static String pushNotificationsGatewayUrl = _pushNotificationsGatewayUrlEnv;
   static const String pushNotificationsPusherFormat = 'event_id_only';
   static const String emojiFontName = 'Noto Emoji';
   static const String emojiFontUrl =
