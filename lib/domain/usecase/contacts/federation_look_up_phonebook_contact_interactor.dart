@@ -310,7 +310,8 @@ class FederationLookUpPhonebookContactInteractor {
 
     // finalize the process
     if (chunkError != null) {
-      await _sharedPreferencesContactCacheManager.storeChunkFederationLookUpError(
+      await _sharedPreferencesContactCacheManager
+          .storeChunkFederationLookUpError(
         ChunkLookUpContactErrorEnum.chunkError,
       );
       yield Left(
@@ -321,7 +322,8 @@ class FederationLookUpPhonebookContactInteractor {
       );
       return;
     } else {
-      await _sharedPreferencesContactCacheManager.deleteChunkFederationLookUpError();
+      await _sharedPreferencesContactCacheManager
+          .deleteChunkFederationLookUpError();
       yield Right(
         LookUpPhonebookContactPartialSuccess(
           contacts: updatedContact.toList(),
