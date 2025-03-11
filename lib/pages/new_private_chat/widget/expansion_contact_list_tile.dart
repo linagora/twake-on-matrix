@@ -110,28 +110,29 @@ class ExpansionContactListTile extends StatelessWidget {
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
-                      ],
-                      if (contact.primaryEmail.isNotEmpty) ...[
-                        const SizedBox(height: 4.0),
-                        HighlightText(
-                          text: contact.primaryEmail,
-                          searchWord: highlightKeyword,
-                          style: ListItemStyle.subtitleTextStyle(
-                            fontFamily: 'Inter',
+                      ] else ...[
+                        if (contact.primaryPhoneNumber.isNotEmpty) ...[
+                          const SizedBox(height: 4.0),
+                          HighlightText(
+                            text: contact.primaryPhoneNumber,
+                            searchWord: highlightKeyword,
+                            style: ListItemStyle.subtitleTextStyle(
+                              fontFamily: 'Inter',
+                            ),
                           ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ],
-                      if (contact.primaryPhoneNumber.isNotEmpty) ...[
-                        const SizedBox(height: 4.0),
-                        HighlightText(
-                          text: contact.primaryPhoneNumber,
-                          searchWord: highlightKeyword,
-                          style: ListItemStyle.subtitleTextStyle(
-                            fontFamily: 'Inter',
+                        ],
+                        if (contact.primaryEmail.isNotEmpty) ...[
+                          const SizedBox(height: 4.0),
+                          HighlightText(
+                            text: contact.primaryEmail,
+                            searchWord: highlightKeyword,
+                            style: ListItemStyle.subtitleTextStyle(
+                              fontFamily: 'Inter',
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                           ),
-                        ),
+                        ],
                       ],
                     ],
                   ),

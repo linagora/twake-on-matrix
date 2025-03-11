@@ -71,7 +71,7 @@ class SharedPreferencesContactCacheManager {
   }
 
   Future<void> storeChunkFederationLookUpError(
-    ChunkFederationContactErrorEnum chunkFederationContactErrorEnum,
+    ChunkLookUpContactErrorEnum chunkFederationContactErrorEnum,
   ) async {
     await pres.setItem(
       keyChunkFederationLookUpError,
@@ -79,10 +79,10 @@ class SharedPreferencesContactCacheManager {
     );
   }
 
-  Future<ChunkFederationContactErrorEnum?>
+  Future<ChunkLookUpContactErrorEnum?>
       getChunkFederationLookUpError() async {
     final error = await pres.getItem(keyChunkFederationLookUpError);
-    return ChunkFederationContactErrorEnum.values.firstWhereOrNull(
+    return ChunkLookUpContactErrorEnum.values.firstWhereOrNull(
       (element) => element.message == error,
     );
   }

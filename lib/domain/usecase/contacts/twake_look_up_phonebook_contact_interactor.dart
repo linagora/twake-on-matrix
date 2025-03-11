@@ -214,7 +214,7 @@ class TwakeLookupPhonebookContactInteractor {
     if (chunkError != null) {
       await _sharedPreferencesContactCacheManager
           .storeChunkFederationLookUpError(
-        ChunkFederationContactErrorEnum.chunkError,
+        ChunkLookUpContactErrorEnum.chunkError,
       );
       yield Left(
         LookUpPhonebookContactPartialFailed(
