@@ -15,6 +15,7 @@ import 'package:fluffychat/presentation/model/contact/presentation_contact_succe
 import 'package:fluffychat/presentation/model/search/presentation_search.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/widgets/contacts_warning_banner/contacts_warning_banner_view.dart';
+import 'package:fluffychat/widgets/phone_book_loading/phone_book_loading_view.dart';
 import 'package:fluffychat/widgets/sliver_expandable_list.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
@@ -452,7 +453,7 @@ class _SliverPhonebookLoading extends StatelessWidget {
           (success) {
             if (success is GetPhonebookContactsLoading) {
               return const SliverToBoxAdapter(
-                child: _PhonebookLoading(progress: 0),
+                child: PhoneBookLoadingView(progress: 0),
               );
             }
             if (success is GetPhonebookContactsSuccess) {
@@ -462,7 +463,7 @@ class _SliverPhonebookLoading extends StatelessWidget {
                 );
               }
               return SliverToBoxAdapter(
-                child: _PhonebookLoading(progress: success.progress),
+                child: PhoneBookLoadingView(progress: success.progress),
               );
             }
             return const SliverToBoxAdapter(
@@ -548,36 +549,6 @@ class _SliverWarningBanner extends StatelessWidget {
         closeContactsWarningBanner: controller.closeContactsWarningBanner,
         goToSettingsForPermissionActions: () =>
             controller.displayContactPermissionDialog(context),
-      ),
-    );
-  }
-}
-
-class _PhonebookLoading extends StatelessWidget {
-  final int progress;
-
-  const _PhonebookLoading({
-    required this.progress,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: ContactsTabViewStyle.loadingPadding,
-      child: Column(
-        children: [
-          Text(
-            L10n.of(context)!.fetchingPhonebookContacts(progress),
-            style: Theme.of(context)
-                .textTheme
-                .bodyMedium
-                ?.copyWith(color: LinagoraRefColors.material().tertiary[20]),
-          ),
-          const SizedBox(height: ContactsTabViewStyle.loadingSpacer),
-          LinearProgressIndicator(
-            value: progress / 100,
-          ),
-        ],
       ),
     );
   }
