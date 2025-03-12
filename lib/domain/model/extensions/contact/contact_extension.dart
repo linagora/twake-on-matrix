@@ -7,6 +7,7 @@ import 'package:fluffychat/modules/federation_identity_lookup/domain/models/fede
 import 'package:fluffychat/modules/federation_identity_lookup/domain/models/federation_hash_details_response.dart';
 import 'package:fluffychat/modules/federation_identity_lookup/domain/models/federation_third_party_contact.dart';
 import 'package:fluffychat/utils/string_extension.dart';
+import 'package:collection/collection.dart';
 
 extension ContactExtension on Contact {
   FederationContact toFederationContact() {
@@ -347,9 +348,26 @@ extension IterableContactsExtension on Iterable<Contact> {
             (email) => email.address.contains(keyword),
           ) ??
           false;
+
+      final emailMatrixIdContains = contact.emails
+              ?.firstWhereOrNull(
+                (email) => email.matrixId?.contains(keyword) == true,
+              )
+              ?.matrixId !=
+          null;
+
+      final phoneMatrixIdContains = contact.phoneNumbers
+              ?.firstWhereOrNull(
+                (phone) => phone.matrixId?.contains(keyword) == true,
+              )
+              ?.matrixId !=
+          null;
+
       return plainTextContains ||
           phoneNumberContains ||
           emailContains ||
+          emailMatrixIdContains ||
+          phoneMatrixIdContains ||
           contact.id.contains(keyword);
     });
     return contactsMatched;
