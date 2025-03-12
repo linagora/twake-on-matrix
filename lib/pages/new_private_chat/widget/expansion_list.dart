@@ -5,23 +5,27 @@ import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/domain/app_state/contact/get_contacts_state.dart';
 import 'package:fluffychat/pages/new_private_chat/widget/loading_contact_widget.dart';
 import 'package:fluffychat/presentation/enum/contacts/warning_contacts_banner_enum.dart';
+import 'package:fluffychat/presentation/extensions/value_notifier_custom.dart';
 import 'package:fluffychat/presentation/model/contact/get_presentation_contacts_empty.dart';
 import 'package:fluffychat/presentation/model/contact/get_presentation_contacts_failure.dart';
 import 'package:fluffychat/presentation/model/contact/presentation_contact.dart';
 import 'package:fluffychat/presentation/model/contact/presentation_contact_success.dart';
+import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/utils/responsive/responsive_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:fluffychat/pages/new_private_chat/widget/expansion_contact_list_tile.dart';
 import 'package:fluffychat/pages/new_private_chat/widget/no_contacts_found.dart';
-import 'package:fluffychat/widgets/twake_components/twake_icon_button.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 
 class ExpansionList extends StatelessWidget {
-  final ValueNotifier<Either<Failure, Success>> presentationContactsNotifier;
-  final ValueNotifier<bool> isShowContactsNotifier;
+  final ValueNotifierCustom<Either<Failure, Success>>
+      presentationContactsNotifier;
+  final ValueNotifierCustom<Either<Failure, Success>>
+      presentationPhonebookContactNotifier;
+  final ValueNotifierCustom<Either<Failure, Success>>
+      presentationAddressBookNotifier;
   final Function() goToNewGroupChat;
-  final Function() toggleContactsList;
   final Function(BuildContext context, PresentationContact contact)
       onExternalContactTap;
   final Function(BuildContext context, PresentationContact contact)
@@ -34,139 +38,107 @@ class ExpansionList extends StatelessWidget {
   const ExpansionList({
     super.key,
     required this.presentationContactsNotifier,
-    required this.isShowContactsNotifier,
     required this.goToNewGroupChat,
-    required this.toggleContactsList,
     required this.onExternalContactTap,
     required this.onContactTap,
     required this.textEditingController,
     required this.warningBannerNotifier,
     this.closeContactsWarningBanner,
     this.goToSettingsForPermissionActions,
+    required this.presentationPhonebookContactNotifier,
+    required this.presentationAddressBookNotifier,
   });
 
   @override
   Widget build(BuildContext context) {
+    return Column(
+      children: [
+        ..._buildResponsiveButtons(context),
+        _sliverContactsList(),
+        _sliverPhonebookList(),
+        if (PlatformInfos.isWeb) _sliverAddressBookListOnWeb(),
+      ],
+    );
+  }
+
+  Widget _sliverContactsList() {
     return ValueListenableBuilder(
       valueListenable: presentationContactsNotifier,
       builder: (context, state, child) {
         return state.fold(
           (failure) {
-            final textControllerIsEmpty = textEditingController.text.isEmpty;
-            if (failure is GetPresentationContactsEmpty ||
-                failure is GetPresentationContactsFailure) {
-              return Column(
-                children: [
-                  ..._buildResponsiveButtons(context),
-                  const SizedBox(
-                    height: 12,
-                  ),
-                  NoContactsFound(
-                    keyword: textControllerIsEmpty
-                        ? null
-                        : textEditingController.text,
-                  ),
-                ],
-              );
-            }
-            return child!;
-          },
-          (success) {
-            if (success is ContactsLoading) {
-              return Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  ..._buildResponsiveButtons(context),
-                  const LoadingContactWidget(),
-                ],
-              );
-            }
-
-            if (success is PresentationExternalContactSuccess) {
-              return Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  ..._buildResponsiveButtons(context),
-                  TwakeInkWell(
-                    onTap: () {
-                      onContactTap(
-                        context,
-                        success.contact,
-                      );
-                    },
-                    child: ExpansionContactListTile(
-                      contact: success.contact,
-                      highlightKeyword: textEditingController.text,
-                    ),
-                  ),
-                ],
-              );
-            }
-
-            if (success is PresentationContactsSuccess) {
+            if (presentationPhonebookContactNotifier.value.isLeft() ||
+                presentationAddressBookNotifier.value.isLeft()) {
               final textControllerIsEmpty = textEditingController.text.isEmpty;
-              final contacts = success.contacts;
-              if (!textControllerIsEmpty && contacts.isEmpty) {
+              if (failure is GetPresentationContactsEmpty ||
+                  failure is GetPresentationContactsFailure) {
                 return Column(
                   children: [
                     const SizedBox(
                       height: 12,
                     ),
                     NoContactsFound(
-                      keyword: textEditingController.text,
+                      keyword: textControllerIsEmpty
+                          ? null
+                          : textEditingController.text,
                     ),
-                    ..._buildResponsiveButtons(context),
                   ],
                 );
               }
+            }
+            return child!;
+          },
+          (success) {
+            if (success is ContactsLoading) {
+              return const LoadingContactWidget();
+            }
 
-              final expansionList = [
-                const SizedBox(
-                  height: 4,
+            if (success is PresentationExternalContactSuccess) {
+              return TwakeInkWell(
+                onTap: () {
+                  onContactTap(
+                    context,
+                    success.contact,
+                  );
+                },
+                child: ExpansionContactListTile(
+                  contact: success.contact,
+                  highlightKeyword: textEditingController.text,
                 ),
-                _buildTitle(context, contacts.length),
-                ValueListenableBuilder<bool>(
-                  valueListenable: isShowContactsNotifier,
-                  builder: ((context, isShow, child) {
-                    if (!isShow) {
-                      return const SizedBox.shrink();
-                    }
-                    return ListView.builder(
-                      shrinkWrap: true,
-                      physics: const NeverScrollableScrollPhysics(),
-                      itemCount: contacts.length,
-                      itemBuilder: (context, index) {
-                        return TwakeInkWell(
-                          onTap: () {
-                            onContactTap(
-                              context,
-                              contacts[index],
-                            );
-                          },
-                          child: ExpansionContactListTile(
-                            contact: contacts[index],
-                            highlightKeyword: textEditingController.text,
-                          ),
+              );
+            }
+
+            if (success is PresentationContactsSuccess) {
+              final contacts = success.contacts;
+              if (contacts.isEmpty && textEditingController.text.isNotEmpty) {
+                return NoContactsFound(
+                  keyword: textEditingController.text.isEmpty
+                      ? null
+                      : textEditingController.text,
+                );
+              }
+              return ListView.builder(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                itemCount: contacts.length,
+                itemBuilder: (context, index) {
+                  if (contacts[index].matrixId != null &&
+                      contacts[index].matrixId!.isNotEmpty) {
+                    return TwakeInkWell(
+                      onTap: () {
+                        onContactTap(
+                          context,
+                          contacts[index],
                         );
                       },
+                      child: ExpansionContactListTile(
+                        contact: contacts[index],
+                        highlightKeyword: textEditingController.text,
+                      ),
                     );
-                  }),
-                ),
-              ];
-
-              return Column(
-                children: [
-                  if (textControllerIsEmpty) ...[
-                    const SizedBox(
-                      height: 12,
-                    ),
-                    ..._buildResponsiveButtons(context),
-                    for (final child in expansionList) ...[child],
-                  ] else ...[
-                    for (final child in expansionList) ...[child],
-                    ..._buildResponsiveButtons(context),
-                  ],
-                ],
+                  }
+                  return child!;
+                },
               );
             }
 
@@ -174,55 +146,93 @@ class ExpansionList extends StatelessWidget {
           },
         );
       },
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          ..._buildResponsiveButtons(context),
-        ],
-      ),
+      child: const SizedBox(),
     );
   }
 
-  Widget _buildTitle(BuildContext context, int countContacts) {
-    return Padding(
-      padding: const EdgeInsets.only(left: 8.0),
-      child: Row(
-        children: [
-          Text(
-            L10n.of(context)!.twakeUsers,
-            style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                  color: LinagoraRefColors.material().neutral[40],
-                ),
-          ),
-          Expanded(
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                ValueListenableBuilder<bool>(
-                  valueListenable: isShowContactsNotifier,
-                  builder: (context, isShow, child) {
-                    return TwakeIconButton(
-                      paddingAll: 6.0,
-                      buttonDecoration: BoxDecoration(
-                        color: Theme.of(context)
-                            .colorScheme
-                            .onSurface
-                            .withOpacity(0.12),
-                        shape: BoxShape.circle,
+  Widget _sliverPhonebookList() {
+    return ValueListenableBuilder(
+      valueListenable: presentationPhonebookContactNotifier,
+      builder: (context, phonebookContactState, child) {
+        return phonebookContactState.fold(
+          (failure) {
+            return child!;
+          },
+          (success) {
+            if (success is PresentationContactsSuccess) {
+              final contacts = success.contacts;
+              return ListView.builder(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                itemCount: contacts.length,
+                itemBuilder: (context, index) {
+                  if (contacts[index].matrixId != null &&
+                      contacts[index].matrixId!.isNotEmpty) {
+                    return TwakeInkWell(
+                      onTap: () {
+                        onContactTap(
+                          context,
+                          contacts[index],
+                        );
+                      },
+                      child: ExpansionContactListTile(
+                        contact: contacts[index],
+                        highlightKeyword: textEditingController.text,
                       ),
-                      icon: isShow ? Icons.expand_less : Icons.expand_more,
-                      onTap: toggleContactsList,
-                      tooltip: isShow
-                          ? L10n.of(context)!.shrink
-                          : L10n.of(context)!.expand,
                     );
-                  },
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
+                  }
+                  return child!;
+                },
+              );
+            }
+            return child!;
+          },
+        );
+      },
+      child: const SizedBox(),
+    );
+  }
+
+  Widget _sliverAddressBookListOnWeb() {
+    return ValueListenableBuilder(
+      valueListenable: presentationAddressBookNotifier,
+      builder: (context, phonebookContactState, child) {
+        return phonebookContactState.fold(
+          (failure) {
+            return child!;
+          },
+          (success) {
+            if (success is PresentationContactsSuccess) {
+              final contacts = success.contacts;
+              return ListView.builder(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                itemCount: contacts.length,
+                itemBuilder: (context, index) {
+                  if (contacts[index].matrixId != null &&
+                      contacts[index].matrixId!.isNotEmpty) {
+                    return TwakeInkWell(
+                      onTap: () {
+                        onContactTap(
+                          context,
+                          contacts[index],
+                        );
+                      },
+                      child: ExpansionContactListTile(
+                        contact: contacts[index],
+                        highlightKeyword: textEditingController.text,
+                      ),
+                    );
+                  }
+                  return child!;
+                },
+              );
+            }
+            return child!;
+          },
+        );
+      },
+      child: const SizedBox(),
     );
   }
 
