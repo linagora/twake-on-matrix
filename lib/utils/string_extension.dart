@@ -411,4 +411,8 @@ extension StringCasingExtension on String {
     }
     return null;
   }
+
+  bool isPhoneNumberFormatted() {
+    return RegExp(r'^\+?$|^\+?\d+$').hasMatch(replaceAll(' ', ''));
+  }
 }

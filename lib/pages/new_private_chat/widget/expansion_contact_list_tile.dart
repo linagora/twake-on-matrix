@@ -110,29 +110,16 @@ class ExpansionContactListTile extends StatelessWidget {
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
+                        if (highlightKeyword.isNotEmpty) ...[
+                          if (highlightKeyword.isPhoneNumberFormatted()) ...[
+                            _displayPhoneNumber(),
+                          ] else ...[
+                            _displayEmail(),
+                          ],
+                        ],
                       ] else ...[
-                        if (contact.primaryPhoneNumber.isNotEmpty) ...[
-                          const SizedBox(height: 4.0),
-                          HighlightText(
-                            text: contact.primaryPhoneNumber,
-                            searchWord: highlightKeyword,
-                            style: ListItemStyle.subtitleTextStyle(
-                              fontFamily: 'Inter',
-                            ),
-                          ),
-                        ],
-                        if (contact.primaryEmail.isNotEmpty) ...[
-                          const SizedBox(height: 4.0),
-                          HighlightText(
-                            text: contact.primaryEmail,
-                            searchWord: highlightKeyword,
-                            style: ListItemStyle.subtitleTextStyle(
-                              fontFamily: 'Inter',
-                            ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ],
+                        _displayPhoneNumber(),
+                        _displayEmail(),
                       ],
                     ],
                   ),
@@ -156,6 +143,44 @@ class ExpansionContactListTile extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  Widget _displayPhoneNumber() {
+    if (contact.primaryPhoneNumber.isNotEmpty) {
+      return Column(
+        children: [
+          const SizedBox(height: 4.0),
+          HighlightText(
+            text: contact.primaryPhoneNumber,
+            searchWord: highlightKeyword,
+            style: ListItemStyle.subtitleTextStyle(
+              fontFamily: 'Inter',
+            ),
+          ),
+        ],
+      );
+    }
+    return const SizedBox();
+  }
+
+  Widget _displayEmail() {
+    if (contact.primaryEmail.isNotEmpty) {
+      return Column(
+        children: [
+          const SizedBox(height: 4.0),
+          HighlightText(
+            text: contact.primaryEmail,
+            searchWord: highlightKeyword,
+            style: ListItemStyle.subtitleTextStyle(
+              fontFamily: 'Inter',
+            ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ],
+      );
+    }
+    return const SizedBox();
   }
 
   Future<Profile?> getProfile(BuildContext context) async {
