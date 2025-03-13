@@ -3,25 +3,43 @@ import 'package:fluffychat/domain/model/search/contact_search_model.dart';
 import 'package:fluffychat/domain/model/search/recent_chat_model.dart';
 import 'package:fluffychat/presentation/model/contact/presentation_contact.dart';
 import 'package:matrix/matrix.dart';
+import 'package:collection/collection.dart';
 
 abstract class PresentationSearch extends Equatable {
   final String? displayName;
   final String? directChatMatrixID;
+  final Set<PresentationEmail>? emails;
+  final Set<PresentationPhoneNumber>? phoneNumbers;
 
   String get id;
 
   @override
   bool? get stringify => true;
 
+  String get primaryEmail =>
+      emails?.firstWhereOrNull((email) => email.email.isNotEmpty)?.email ?? '';
+
+  String get primaryPhoneNumber =>
+      phoneNumbers
+          ?.firstWhereOrNull(
+            (phoneNumber) => phoneNumber.phoneNumber.isNotEmpty,
+          )
+          ?.phoneNumber ??
+      '';
+
   const PresentationSearch({
     this.displayName,
     this.directChatMatrixID,
+    this.emails,
+    this.phoneNumbers,
   });
 
   @override
   List<Object?> get props => [
         displayName,
         directChatMatrixID,
+        emails,
+        phoneNumbers,
       ];
 }
 
@@ -31,13 +49,20 @@ class ContactPresentationSearch extends PresentationSearch {
   const ContactPresentationSearch({
     this.matrixId,
     super.displayName,
+    super.emails,
+    super.phoneNumbers,
   });
 
   @override
   String get id => matrixId ?? '';
 
   @override
-  List<Object?> get props => [matrixId, displayName];
+  List<Object?> get props => [
+        matrixId,
+        displayName,
+        emails,
+        phoneNumbers,
+      ];
 }
 
 class RecentChatPresentationSearch extends PresentationSearch {

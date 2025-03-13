@@ -28,7 +28,6 @@ class NewPrivateChatController extends State<NewPrivateChat>
         WidgetsBindingObserver,
         InviteExternalContactMixin,
         GoToGroupChatMixin {
-  final isShowContactsNotifier = ValueNotifier(true);
   final scrollController = ScrollController();
 
   @override
@@ -48,10 +47,6 @@ class NewPrivateChatController extends State<NewPrivateChat>
     // searchContactsController.onSearchKeywordChanged = (searchKey) {
     //   disableLoadMoreInSearch();
     // };
-  }
-
-  void toggleContactsList() {
-    isShowContactsNotifier.value = !isShowContactsNotifier.value;
   }
 
   void onContactAction(
@@ -98,7 +93,6 @@ class NewPrivateChatController extends State<NewPrivateChat>
   void dispose() {
     super.dispose();
     WidgetsBinding.instance.removeObserver(this);
-    isShowContactsNotifier.dispose();
     disposeContactsMixin();
     scrollController.dispose();
   }

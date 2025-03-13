@@ -276,20 +276,45 @@ class _ContactInformation extends StatelessWidget {
                       ),
                       searchWord: searchKeyword,
                     ),
-                  // if (contactPresentationSearch.email != null)
-                  //   _SearchHighlightText(
-                  //     text: contactPresentationSearch.email ?? "",
-                  //     style: ListItemStyle.subtitleTextStyle(
-                  //       fontFamily: 'Inter',
-                  //     ),
-                  //     searchWord: searchKeyword,
-                  //   ),
+                  if (searchKeyword?.isNotEmpty == true) ...[
+                    if (searchKeyword?.isPhoneNumberFormatted() == true) ...[
+                      _displayPrimaryPhoneNumber(),
+                    ] else ...[
+                      _displayPrimaryEmail(),
+                    ],
+                  ],
                 ],
               ),
             ],
           ),
         ),
       ],
+    );
+  }
+
+  Widget _displayPrimaryEmail() {
+    if (contactPresentationSearch.primaryEmail.isEmpty) {
+      return const SizedBox();
+    }
+    return _SearchHighlightText(
+      text: contactPresentationSearch.primaryEmail,
+      style: ListItemStyle.subtitleTextStyle(
+        fontFamily: 'Inter',
+      ),
+      searchWord: searchKeyword,
+    );
+  }
+
+  Widget _displayPrimaryPhoneNumber() {
+    if (contactPresentationSearch.primaryPhoneNumber.isEmpty) {
+      return const SizedBox();
+    }
+    return _SearchHighlightText(
+      text: contactPresentationSearch.primaryPhoneNumber,
+      style: ListItemStyle.subtitleTextStyle(
+        fontFamily: 'Inter',
+      ),
+      searchWord: searchKeyword,
     );
   }
 }

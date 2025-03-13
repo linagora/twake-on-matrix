@@ -1,5 +1,6 @@
 import 'package:fluffychat/domain/model/contact/contact.dart';
 import 'package:fluffychat/domain/model/contact/third_party_status.dart';
+import 'package:fluffychat/domain/model/extensions/contact/contact_extension.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -267,4 +268,198 @@ void main() {
       expect(ThirdPartyIdType.msisdn.toString(), 'msisdn');
     });
   });
+
+  group(
+    'toAddressBooks test',
+    () {
+      test('should return empty when contact is empty', () {
+        final Set<Contact> contacts = {};
+
+        final result = contacts.toAddressBooks();
+
+        expect(result, contacts);
+      });
+
+      test('should return empty when contact has no matrix id', () {
+        final contacts = {
+          Contact(
+            id: 'contact1',
+            displayName: 'Alice',
+            emails: {Email(address: 'alice@mail.com')},
+            phoneNumbers: {PhoneNumber(number: '+1234567890')},
+          ),
+        };
+
+        final result = contacts.toAddressBooks();
+
+        expect(result, []);
+      });
+
+      test('should return empty when contact matrix id is empty', () {
+        final contacts = {
+          Contact(
+            id: 'contact1',
+            displayName: 'Alice',
+            emails: {
+              Email(
+                address: 'alice@mail.com',
+                matrixId: '',
+              ),
+            },
+            phoneNumbers: {
+              PhoneNumber(
+                number: '+1234567890',
+                matrixId: '',
+              ),
+            },
+          ),
+        };
+
+        final result = contacts.toAddressBooks();
+
+        expect(result, []);
+      });
+
+      test('should return address books when contact has matrix id', () {
+        final contacts = {
+          Contact(
+            id: 'contact1',
+            displayName: 'Alice',
+            emails: {
+              Email(
+                address: 'alice@mail.com',
+                matrixId: '@alice:example.com',
+              ),
+            },
+            phoneNumbers: {
+              PhoneNumber(
+                number: '+1234567890',
+                matrixId: '@alice_phone:example.com',
+              ),
+            },
+          ),
+        };
+
+        final result = contacts.toAddressBooks();
+
+        expect(result.length, 2);
+      });
+
+      test('should return address books for multiple contacts with matrix ids',
+          () {
+        final contacts = {
+          Contact(
+            id: 'contact1',
+            displayName: 'Alice',
+            emails: {
+              Email(
+                address: 'alice@mail.com',
+                matrixId: '@alice:example.com',
+              ),
+            },
+            phoneNumbers: {
+              PhoneNumber(
+                number: '+1234567890',
+                matrixId: '@alice_phone:example.com',
+              ),
+            },
+          ),
+          Contact(
+            id: 'contact2',
+            displayName: 'Bob',
+            emails: {
+              Email(
+                address: 'bob@mail.com',
+                matrixId: '@bob:example.com',
+              ),
+            },
+            phoneNumbers: {
+              PhoneNumber(
+                number: '+0987654321',
+                matrixId: '@bob_phone:example.com',
+              ),
+            },
+          ),
+        };
+
+        final result = contacts.toAddressBooks();
+
+        expect(result.length, 4);
+      });
+
+      test(
+          'should return address books for contacts with mixed valid and invalid matrix ids',
+          () {
+        final contacts = {
+          Contact(
+            id: 'contact1',
+            displayName: 'Alice',
+            emails: {
+              Email(
+                address: 'alice@mail.com',
+                matrixId: '@alice:example.com',
+              ),
+            },
+            phoneNumbers: {
+              PhoneNumber(
+                number: '+1234567890',
+                matrixId: '',
+              ),
+            },
+          ),
+          Contact(
+            id: 'contact2',
+            displayName: 'Bob',
+            emails: {
+              Email(
+                address: 'bob@mail.com',
+                matrixId: '',
+              ),
+            },
+            phoneNumbers: {
+              PhoneNumber(
+                number: '+0987654321',
+                matrixId: '@bob_phone:example.com',
+              ),
+            },
+          ),
+        };
+
+        final result = contacts.toAddressBooks();
+
+        expect(result.length, 2);
+      });
+
+      test(
+          'should return address books for contacts with only email or phone number matrix ids',
+          () {
+        final contacts = {
+          Contact(
+            id: 'contact1',
+            displayName: 'Alice',
+            emails: {
+              Email(
+                address: 'alice@mail.com',
+                matrixId: '@alice:example.com',
+              ),
+            },
+          ),
+          Contact(
+            id: 'contact2',
+            displayName: 'Bob',
+            phoneNumbers: {
+              PhoneNumber(
+                number: '+0987654321',
+                matrixId: '@bob_phone:example.com',
+              ),
+            },
+          ),
+        };
+
+        final result = contacts.toAddressBooks();
+
+        expect(result.length, 2);
+      });
+    },
+  );
 }
