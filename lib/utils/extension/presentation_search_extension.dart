@@ -24,7 +24,8 @@ extension PresentationSearchExtension on PresentationSearch {
 
   bool _matchedPhoneNumber(String keyword) {
     return phoneNumbers?.firstWhereOrNull(
-          (phone) => phone.phoneNumber.contains(keyword) == true,
+          (phone) =>
+              phone.phoneNumber.replaceAll(" ", "").contains(keyword) == true,
         ) !=
         null;
   }

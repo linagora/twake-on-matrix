@@ -30,7 +30,7 @@ class Search extends StatefulWidget {
   State<Search> createState() => SearchController();
 }
 
-class SearchController extends State<Search> {
+class SearchController extends State<Search> with WidgetsBindingObserver {
   static const int limitPrefetchedRecentChats = 3;
   static const int limitPrefetchedRecentContacts = 5;
   static const _prefixLengthHighlight = 20;
@@ -195,6 +195,12 @@ class SearchController extends State<Search> {
 
   void clearSearchBar() {
     textEditingController.clear();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) async {
+    await searchContactAndRecentChatController
+        ?.handleDidChangeAppLifecycleState(state, client: client);
   }
 
   @override

@@ -3,6 +3,7 @@ import 'package:fluffychat/domain/model/search/contact_search_model.dart';
 import 'package:fluffychat/domain/model/search/recent_chat_model.dart';
 import 'package:fluffychat/presentation/model/contact/presentation_contact.dart';
 import 'package:matrix/matrix.dart';
+import 'package:collection/collection.dart';
 
 abstract class PresentationSearch extends Equatable {
   final String? displayName;
@@ -14,6 +15,17 @@ abstract class PresentationSearch extends Equatable {
 
   @override
   bool? get stringify => true;
+
+  String get primaryEmail =>
+      emails?.firstWhereOrNull((email) => email.email.isNotEmpty)?.email ?? '';
+
+  String get primaryPhoneNumber =>
+      phoneNumbers
+          ?.firstWhereOrNull(
+            (phoneNumber) => phoneNumber.phoneNumber.isNotEmpty,
+          )
+          ?.phoneNumber ??
+      '';
 
   const PresentationSearch({
     this.displayName,
