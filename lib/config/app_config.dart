@@ -109,7 +109,7 @@ abstract class AppConfig {
 
   static const String _pushNotificationsGatewayUrlEnv = String.fromEnvironment(
     'PUSH_NOTIFICATIONS_GATEWAY_URL',
-    defaultValue: 'https://sygnal.lin-saas.dev/_matrix/push/v1/notify',
+    defaultValue: 'https://push.twake.app/_matrix/push/v1/notify',
   );
 
   static String pushNotificationsGatewayUrl = _pushNotificationsGatewayUrlEnv;
