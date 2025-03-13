@@ -340,7 +340,8 @@ extension IterableContactsExtension on Iterable<Contact> {
             field?.toLowerCase().contains(keyword.toLowerCase()) ?? false,
       );
       final phoneNumberContains = contact.phoneNumbers?.any(
-            (phoneNumber) => phoneNumber.number.contains(keyword),
+            (phoneNumber) =>
+                phoneNumber.number.replaceAll(" ", "").contains(keyword),
           ) ??
           false;
 
