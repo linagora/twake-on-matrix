@@ -479,7 +479,7 @@ void main() {
         result,
         emitsInOrder(<dynamic>[
           const Right<Failure, Success>(GetPhonebookContactsLoading()),
-          const Right<Failure, Success>(GetPhonebookContactsIsEmpty()),
+          const Left<Failure, Success>(GetPhonebookContactsIsEmpty()),
         ]),
       );
     });

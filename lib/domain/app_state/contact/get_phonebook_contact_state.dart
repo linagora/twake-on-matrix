@@ -33,7 +33,7 @@ class GetPhonebookContactsSuccess extends Success {
       ];
 }
 
-class GetPhonebookContactsIsEmpty extends Success {
+class GetPhonebookContactsIsEmpty extends Failure {
   const GetPhonebookContactsIsEmpty();
 
   @override

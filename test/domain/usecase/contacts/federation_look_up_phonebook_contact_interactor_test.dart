@@ -321,7 +321,7 @@ void main() {
           interactor.execute(argument: testArgument),
           emitsInOrder([
             const Right(GetPhonebookContactsLoading()),
-            const Right(GetPhonebookContactsIsEmpty()),
+            const Left(GetPhonebookContactsIsEmpty()),
           ]),
         );
       });
