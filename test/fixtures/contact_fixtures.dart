@@ -1,3 +1,4 @@
+import 'package:fluffychat/data/model/addressbook/address_book.dart';
 import 'package:fluffychat/domain/model/contact/contact.dart';
 
 class ContactFixtures {
@@ -70,4 +71,9 @@ class ContactFixtures {
       ),
     },
   );
+
+  static List<AddressBook> addressBooks = [
+    AddressBook(displayName: 'Alice', mxid: '@alice123.com'),
+    AddressBook(displayName: 'Bob', mxid: '@bob456.com'),
+  ];
 }

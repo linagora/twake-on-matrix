@@ -353,11 +353,7 @@ class GetItInitializer {
       () => ChatGetPinnedEventsInteractor(),
     );
     getIt.registerSingleton<ContactsManager>(
-      ContactsManager(
-        getTomContactsInteractor: getIt.get<GetTomContactsInteractor>(),
-        phonebookContactInteractor:
-            getIt.get<FederationLookUpPhonebookContactInteractor>(),
-      ),
+      ContactsManager(),
     );
     getIt.registerLazySingleton<SaveLanguageInteractor>(
       () => SaveLanguageInteractor(
