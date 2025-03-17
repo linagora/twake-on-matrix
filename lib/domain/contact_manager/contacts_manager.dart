@@ -263,7 +263,7 @@ class ContactsManager {
   void _postAddressBookOnMobile({
     required List<Contact> contacts,
   }) {
-    if (!PlatformInfos.isMobile) {
+    if (PlatformInfos.isWeb) {
       return;
     }
     postAddressBookInteractor

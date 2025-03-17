@@ -116,7 +116,7 @@ class FederationLookUpPhonebookContactInteractor {
         final res = await _phonebookContactRepository.fetchContacts();
 
         if (res.isEmpty) {
-          yield const Right(GetPhonebookContactsIsEmpty());
+          yield const Left(GetPhonebookContactsIsEmpty());
           return;
         }
 
