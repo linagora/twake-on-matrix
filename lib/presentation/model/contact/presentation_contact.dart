@@ -42,7 +42,9 @@ class PresentationContact extends Equatable {
 
   String get primaryPhoneNumber =>
       phoneNumbers
-          ?.firstWhereOrNull((phoneNumber) => phoneNumber.phoneNumber != null)
+          ?.firstWhereOrNull(
+            (phoneNumber) => phoneNumber.phoneNumber.isNotEmpty,
+          )
           ?.phoneNumber ??
       '';
 
@@ -97,10 +99,10 @@ class PresentationEmail extends PresentationThirdPartyContact {
 }
 
 class PresentationPhoneNumber extends PresentationThirdPartyContact {
-  final String? phoneNumber;
+  final String phoneNumber;
 
   PresentationPhoneNumber({
-    this.phoneNumber,
+    required this.phoneNumber,
     super.matrixId,
     required super.thirdPartyId,
     required super.thirdPartyIdType,

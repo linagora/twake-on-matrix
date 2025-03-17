@@ -9,6 +9,8 @@ extension PresentaionContactExtension on PresentationContact {
       ContactPresentationSearch(
         matrixId: matrixId,
         displayName: displayName,
+        emails: emails,
+        phoneNumbers: phoneNumbers,
       ),
     };
     return listContacts;
@@ -18,11 +20,12 @@ extension PresentaionContactExtension on PresentationContact {
 extension ContactExtensionInPresentation on Contact {
   Set<PresentationContact> toPresentationContacts() {
     final phoneNumberHasMatrixId = phoneNumbers?.firstWhereOrNull(
-      (phoneNumber) => phoneNumber.matrixId != null,
+      (phoneNumber) =>
+          phoneNumber.matrixId != null && phoneNumber.matrixId!.isNotEmpty,
     );
 
     final emailHasMatrixId = emails?.firstWhereOrNull(
-      (email) => email.matrixId != null,
+      (email) => email.matrixId != null && email.matrixId!.isNotEmpty,
     );
 
     final displayName = (this.displayName?.isNotEmpty == true)

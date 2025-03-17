@@ -2,11 +2,15 @@ import 'package:collection/collection.dart';
 import 'package:dartz/dartz.dart';
 import 'package:fluffychat/app_state/failure.dart';
 import 'package:fluffychat/app_state/success.dart';
+import 'package:fluffychat/data/local/contact/enum/chunk_federation_contact_error_enum.dart';
+import 'package:fluffychat/data/local/contact/enum/contacts_hive_error_enum.dart';
+import 'package:fluffychat/data/local/contact/shared_preferences_contact_cache_manager.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/domain/app_state/contact/get_phonebook_contact_state.dart';
 import 'package:fluffychat/domain/exception/contacts/twake_lookup_exceptions.dart';
 import 'package:fluffychat/domain/model/contact/contact.dart';
 import 'package:fluffychat/domain/model/extensions/contact/contact_extension.dart';
+import 'package:fluffychat/domain/repository/contact/hive_contact_repository.dart';
 import 'package:fluffychat/domain/repository/phonebook_contact_repository.dart';
 import 'package:fluffychat/domain/usecase/contacts/twake_look_up_argument.dart';
 import 'package:fluffychat/modules/federation_identity_lookup/domain/models/federation_hash_details_response.dart';
@@ -20,6 +24,13 @@ class TwakeLookupPhonebookContactInteractor {
       getIt.get<PhonebookContactRepository>();
   final IdentityLookupManager _identityLookupManager =
       getIt.get<IdentityLookupManager>();
+
+  final HiveContactRepository _hiveContactRepository =
+      getIt.get<HiveContactRepository>();
+
+  final SharedPreferencesContactCacheManager
+      _sharedPreferencesContactCacheManager =
+      getIt.get<SharedPreferencesContactCacheManager>();
 
   Stream<Either<Failure, Success>> execute({
     int lookupChunkSize = 10,
@@ -172,6 +183,11 @@ class TwakeLookupPhonebookContactInteractor {
           contactsFromThirdParty: {},
         );
 
+        _storeContactsInHive(
+          contacts: combinedContacts,
+          userId: argument.withAccessToken,
+        );
+
         updatedContact.addAll(combinedContacts);
 
         progress++;
@@ -196,6 +212,10 @@ class TwakeLookupPhonebookContactInteractor {
 
     // finalize the process
     if (chunkError != null) {
+      await _sharedPreferencesContactCacheManager
+          .storeChunkFederationLookUpError(
+        ChunkLookUpContactErrorEnum.chunkError,
+      );
       yield Left(
         LookUpPhonebookContactPartialFailed(
           exception: chunkError,
@@ -204,6 +224,8 @@ class TwakeLookupPhonebookContactInteractor {
       );
       return;
     } else {
+      await _sharedPreferencesContactCacheManager
+          .deleteChunkFederationLookUpError();
       yield Right(
         GetPhonebookContactsSuccess(
           progress: 100,
@@ -231,6 +253,26 @@ class TwakeLookupPhonebookContactInteractor {
         'TwakeLookupPhonebookContactInteractor::handleMappings: $e',
       );
       return {};
+    }
+  }
+
+  Future<void> _storeContactsInHive({
+    required Set<Contact> contacts,
+    required String userId,
+  }) async {
+    try {
+      await _hiveContactRepository.saveThirdPartyContactsForUser(
+        userId,
+        contacts.toList(),
+      );
+      await _sharedPreferencesContactCacheManager.deleteContactsHiveError();
+    } catch (e) {
+      await _sharedPreferencesContactCacheManager.storeContactsHiveError(
+        ContactsHiveErrorEnum.storeError,
+      );
+      Logs().e(
+        'TwakeLookupPhonebookContactInteractor::storeContactsInHive: $e',
+      );
     }
   }
 }
