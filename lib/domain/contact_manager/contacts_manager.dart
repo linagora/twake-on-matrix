@@ -255,7 +255,7 @@ class ContactsManager {
   }
 
   void _handleLookUpSuccessState(Success success) {
-    if (success is LookUpPhonebookContactPartialSuccess) {
+    if (success is GetPhonebookContactsSuccess && success.progress == 100) {
       _postAddressBookOnMobile(
         contacts: success.contacts,
       );

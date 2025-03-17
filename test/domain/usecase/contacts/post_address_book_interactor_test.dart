@@ -1,4 +1,5 @@
 import 'package:dartz/dartz.dart';
+import 'package:fluffychat/data/local/contact/enum/contacts_vault_error_enum.dart';
 import 'package:fluffychat/data/local/contact/shared_preferences_contact_cache_manager.dart';
 import 'package:fluffychat/data/model/addressbook/address_book.dart';
 import 'package:fluffychat/data/model/addressbook/address_book_request.dart';
@@ -56,7 +57,7 @@ void main() {
       );
     });
 
-    test('should emit failure when post address book fails', () {
+    test('should emit failure when post address book fails', () async {
       final List<AddressBook> addressBooks = [
         AddressBook(
           id: 'id_1',
@@ -79,16 +80,22 @@ void main() {
       final result =
           postAddressBookInteractor.execute(addressBooks: addressBooks);
 
-      expect(
+      await expectLater(
         result,
         emitsInOrder([
           const Right(PostAddressBookLoading()),
           Left(PostAddressBookFailureState(exception: exception)),
         ]),
       );
+
+      verify(
+        sharedPreferencesContactCacheManager.storeContactsVaultError(
+          ContactsVaultErrorEnum.uploadError,
+        ),
+      ).called(1);
     });
 
-    test('should emit failure when response is null', () {
+    test('should emit failure when response is null', () async {
       final List<AddressBook> addressBooks = [
         AddressBook(
           id: 'id_1',
@@ -111,16 +118,22 @@ void main() {
       final result =
           postAddressBookInteractor.execute(addressBooks: addressBooks);
 
-      expect(
+      await expectLater(
         result,
         emitsInOrder([
           const Right(PostAddressBookLoading()),
           const Left(PostAddressBookResponseIsNullState()),
         ]),
       );
+
+      verify(
+        sharedPreferencesContactCacheManager.storeContactsVaultError(
+          ContactsVaultErrorEnum.responseIsNull,
+        ),
+      ).called(1);
     });
 
-    test('should emit success when post address book success', () {
+    test('should emit success when post address book success', () async {
       final List<AddressBook> addressBooks = [
         AddressBook(
           id: 'id_1',
@@ -150,13 +163,20 @@ void main() {
       final result =
           postAddressBookInteractor.execute(addressBooks: addressBooks);
 
-      expect(
+      await expectLater(
         result,
         emitsInOrder([
           const Right(PostAddressBookLoading()),
           Right(PostAddressBookSuccessState(updatedAddressBooks: addressBooks)),
         ]),
       );
+
+      verify(sharedPreferencesContactCacheManager.storeTimeLastSyncedVault(any))
+          .called(1);
+
+      verify(
+        sharedPreferencesContactCacheManager.deteleContactsVaultError(),
+      ).called(1);
     });
   });
 }

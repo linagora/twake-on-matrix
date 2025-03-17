@@ -227,7 +227,8 @@ class TwakeLookupPhonebookContactInteractor {
       await _sharedPreferencesContactCacheManager
           .deleteChunkFederationLookUpError();
       yield Right(
-        LookUpPhonebookContactPartialSuccess(
+        GetPhonebookContactsSuccess(
+          progress: 100,
           contacts: updatedContact.toList(),
         ),
       );
