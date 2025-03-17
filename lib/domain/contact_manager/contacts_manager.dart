@@ -29,9 +29,12 @@ import 'package:matrix/matrix.dart';
 class ContactsManager {
   static const int _lookupChunkSize = 10;
 
-  final GetTomContactsInteractor getTomContactsInteractor;
+  final GetTomContactsInteractor getTomContactsInteractor =
+      getIt.get<GetTomContactsInteractor>();
 
-  final FederationLookUpPhonebookContactInteractor phonebookContactInteractor;
+  final FederationLookUpPhonebookContactInteractor
+      federationLookUpPhonebookContactInteractor =
+      getIt.get<FederationLookUpPhonebookContactInteractor>();
 
   final TwakeLookupPhonebookContactInteractor
       twakeLookupPhonebookContactInteractor =
@@ -63,11 +66,6 @@ class ContactsManager {
 
   final ValueNotifierCustom<Either<Failure, Success>> _postAddressBookNotifier =
       ValueNotifierCustom(const Right(PostAddressBookInitial()));
-
-  ContactsManager({
-    required this.getTomContactsInteractor,
-    required this.phonebookContactInteractor,
-  });
 
   ValueNotifierCustom<Either<Failure, Success>> getContactsNotifier() =>
       _contactsNotifier;
@@ -222,7 +220,7 @@ class ContactsManager {
       instanceName: NetworkDI.homeServerUrlInterceptorName,
     );
 
-    phonebookContactInteractor
+    federationLookUpPhonebookContactInteractor
         .execute(
       lookupChunkSize: _lookupChunkSize,
       argument: FederationLookUpArgument(
