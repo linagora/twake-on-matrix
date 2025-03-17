@@ -38,6 +38,8 @@ class ContactsTabBodyView extends StatelessWidget {
         _SliverRecentContacts(controller: controller),
         _SliverContactsList(controller: controller),
         _SliverPhonebookList(controller: controller),
+        if (PlatformInfos.isWeb)
+          _SliverAddressBookListOnWeb(controller: controller),
         const _SliverPadding(),
       ],
     );
@@ -68,6 +70,107 @@ class _SliverPhonebookList extends StatelessWidget {
   Widget build(BuildContext context) {
     return ValueListenableBuilder(
       valueListenable: controller.presentationPhonebookContactNotifier,
+      builder: (context, phonebookContactState, child) {
+        return phonebookContactState.fold(
+          (failure) {
+            if (!PlatformInfos.isMobile) {
+              return child!;
+            }
+            final presentationRecentContact =
+                controller.presentationRecentContactNotifier.value;
+            if (failure is GetPresentationContactsFailure) {
+              if (presentationRecentContact.isEmpty) {
+                return controller.presentationContactNotifier.value.fold(
+                  (failure) {
+                    if (failure is GetPresentationContactsFailure ||
+                        failure is GetPresentationContactsEmpty) {
+                      return SliverToBoxAdapter(
+                        child: Padding(
+                          padding: const EdgeInsets.only(
+                            left: ContactsTabViewStyle.padding,
+                            top: ContactsTabViewStyle.padding,
+                          ),
+                          child: NoContactsFound(
+                            keyword:
+                                controller.textEditingController.text.isEmpty
+                                    ? null
+                                    : controller.textEditingController.text,
+                          ),
+                        ),
+                      );
+                    }
+                    return child!;
+                  },
+                  (_) => child!,
+                );
+              }
+            }
+            if (failure is GetPresentationContactsEmpty) {
+              if (presentationRecentContact.isEmpty) {
+                return controller.presentationContactNotifier.value.fold(
+                  (failure) {
+                    if (failure is GetPresentationContactsFailure ||
+                        failure is GetPresentationContactsEmpty) {
+                      if (controller.textEditingController.text.isEmpty) {
+                        return const SliverToBoxAdapter(
+                          child: EmptyContactBody(),
+                        );
+                      } else {
+                        return SliverToBoxAdapter(
+                          child: Padding(
+                            padding: const EdgeInsets.only(
+                              left: ContactsTabViewStyle.padding,
+                              top: ContactsTabViewStyle.padding,
+                            ),
+                            child: NoContactsFound(
+                              keyword: controller.textEditingController.text,
+                            ),
+                          ),
+                        );
+                      }
+                    }
+                    return child!;
+                  },
+                  (_) => child!,
+                );
+              }
+            }
+            return child!;
+          },
+          (success) {
+            if (success is PresentationContactsSuccess) {
+              final contacts = success.contacts;
+              return SliverExpandableList(
+                title: L10n.of(context)!.contactsCount(contacts.length),
+                itemCount: contacts.length,
+                itemBuilder: (context, index) => _Contact(
+                  contact: contacts[index],
+                  controller: controller,
+                ),
+              );
+            }
+            return child!;
+          },
+        );
+      },
+      child: const SliverToBoxAdapter(
+        child: SizedBox(),
+      ),
+    );
+  }
+}
+
+class _SliverAddressBookListOnWeb extends StatelessWidget {
+  const _SliverAddressBookListOnWeb({
+    required this.controller,
+  });
+
+  final ContactsTabController controller;
+
+  @override
+  Widget build(BuildContext context) {
+    return ValueListenableBuilder(
+      valueListenable: controller.presentationAddressBookNotifier,
       builder: (context, phonebookContactState, child) {
         return phonebookContactState.fold(
           (failure) {
