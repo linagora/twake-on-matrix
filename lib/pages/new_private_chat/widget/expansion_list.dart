@@ -55,7 +55,7 @@ class ExpansionList extends StatelessWidget {
       children: [
         ..._buildResponsiveButtons(context),
         _sliverContactsList(),
-        _sliverPhonebookList(),
+        if (PlatformInfos.isMobile) _sliverPhonebookList(),
         if (PlatformInfos.isWeb) _sliverAddressBookListOnWeb(),
       ],
     );
@@ -94,6 +94,15 @@ class ExpansionList extends StatelessWidget {
             }
 
             if (success is PresentationExternalContactSuccess) {
+              if (PlatformInfos.isWeb) {
+                if (presentationAddressBookNotifier.value.isRight()) {
+                  return child!;
+                }
+              } else {
+                if (presentationPhonebookContactNotifier.value.isRight()) {
+                  return child!;
+                }
+              }
               return TwakeInkWell(
                 onTap: () {
                   onContactTap(
