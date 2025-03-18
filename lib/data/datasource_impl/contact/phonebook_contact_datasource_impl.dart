@@ -39,7 +39,7 @@ class PhonebookContactDatasourceImpl implements PhonebookContactDatasource {
       (pre, next) => (pre.displayName ?? '').compareTo(next.displayName ?? ''),
     );
     return contacts.where((contact) {
-      return contact.phoneNumbers?.isNotEmpty == true &&
+      return contact.phoneNumbers?.isNotEmpty == true ||
           contact.emails?.isNotEmpty == true;
     }).toList();
   }
