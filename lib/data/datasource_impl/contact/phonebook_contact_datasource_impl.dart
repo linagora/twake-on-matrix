@@ -38,7 +38,10 @@ class PhonebookContactDatasourceImpl implements PhonebookContactDatasource {
     contacts.sort(
       (pre, next) => (pre.displayName ?? '').compareTo(next.displayName ?? ''),
     );
-    return contacts;
+    return contacts.where((contact) {
+      return contact.phoneNumbers?.isNotEmpty == true &&
+          contact.emails?.isNotEmpty == true;
+    }).toList();
   }
 
   List<PhoneNumber> _removeDuplicatedPhoneNumbers(
