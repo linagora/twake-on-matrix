@@ -3,6 +3,7 @@ import 'package:fluffychat/app_state/failure.dart';
 import 'package:fluffychat/app_state/success.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/domain/app_state/contact/get_address_book_state.dart';
+import 'package:fluffychat/domain/model/extensions/contact/address_book_extension.dart';
 import 'package:fluffychat/domain/repository/contact/address_book_repository.dart';
 import 'package:matrix/matrix.dart';
 
@@ -17,7 +18,12 @@ class GetAddressBookInteractor {
         yield const Left(GetAddressBookIsEmptyState());
       } else {
         yield Right(
-          GetAddressBookSuccessState(addressBooks: response.addressBooks!),
+          GetAddressBookSuccessState(
+            addressBooks: response.addressBooks!
+                .toSet()
+                .combineDuplicateAddressBooks()
+                .toList(),
+          ),
         );
       }
     } catch (e) {
