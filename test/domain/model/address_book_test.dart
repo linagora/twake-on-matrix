@@ -183,12 +183,12 @@ void main() {
           AddressBook(
             id: null,
             addressbookId: 'addressbook_id_1',
-            mxid: '@mxid_1.com',
+            mxid: null,
           ),
           AddressBook(
             id: 'id_2',
             addressbookId: null,
-            mxid: '@mxid_2.com',
+            mxid: null,
           ),
           AddressBook(
             id: 'id_3',

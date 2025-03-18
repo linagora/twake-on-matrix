@@ -1,6 +1,5 @@
 import 'package:fluffychat/domain/app_state/contact/get_contacts_state.dart';
 import 'package:fluffychat/domain/app_state/contact/get_phonebook_contact_state.dart';
-import 'package:fluffychat/domain/model/contact/contact_type.dart';
 import 'package:fluffychat/pages/contacts_tab/contacts_tab.dart';
 import 'package:fluffychat/pages/contacts_tab/contacts_tab_view_style.dart';
 import 'package:fluffychat/pages/contacts_tab/empty_contacts_body.dart';
@@ -20,7 +19,6 @@ import 'package:fluffychat/widgets/sliver_expandable_list.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
-import 'package:matrix/matrix.dart';
 
 class ContactsTabBodyView extends StatelessWidget {
   final ContactsTabController controller;
@@ -38,7 +36,8 @@ class ContactsTabBodyView extends StatelessWidget {
         _SliverPhonebookLoading(controller: controller),
         _SliverRecentContacts(controller: controller),
         _SliverContactsList(controller: controller),
-        _SliverPhonebookList(controller: controller),
+        if (PlatformInfos.isMobile)
+          _SliverPhonebookList(controller: controller),
         if (PlatformInfos.isWeb)
           _SliverAddressBookListOnWeb(controller: controller),
         const _SliverPadding(),
@@ -281,12 +280,25 @@ class _SliverContactsList extends StatelessWidget {
             }
             final presentationRecentContact =
                 controller.presentationRecentContactNotifier.value;
-            if (failure is GetPresentationContactsFailure) {
-              if (presentationRecentContact.isEmpty) {
-                return controller.presentationContactNotifier.value.fold(
-                  (failure) {
-                    if (failure is GetPresentationContactsFailure ||
-                        failure is GetPresentationContactsEmpty) {
+
+            if (presentationRecentContact.isNotEmpty) {
+              return child!;
+            }
+            if (PlatformInfos.isWeb) {
+              return controller.presentationAddressBookNotifier.value.fold(
+                (_) {
+                  if (controller.presentationAddressBookNotifier.value
+                      .isRight()) {
+                    return child!;
+                  }
+                  if (failure is GetPresentationContactsFailure ||
+                      failure is GetPresentationContactsEmpty) {
+                    final keyword = controller.textEditingController.text;
+                    if (keyword.isEmpty) {
+                      return const SliverToBoxAdapter(
+                        child: EmptyContactBody(),
+                      );
+                    } else {
                       return SliverToBoxAdapter(
                         child: Padding(
                           padding: const EdgeInsets.only(
@@ -294,63 +306,49 @@ class _SliverContactsList extends StatelessWidget {
                             top: ContactsTabViewStyle.padding,
                           ),
                           child: NoContactsFound(
-                            keyword:
-                                controller.textEditingController.text.isEmpty
-                                    ? null
-                                    : controller.textEditingController.text,
+                            keyword: controller.textEditingController.text,
                           ),
                         ),
                       );
                     }
+                  }
+                  return child!;
+                },
+                (success) => child!,
+              );
+            } else {
+              return controller.presentationPhonebookContactNotifier.value.fold(
+                (_) {
+                  if (controller.presentationPhonebookContactNotifier.value
+                      .isRight()) {
                     return child!;
-                  },
-                  (_) => child!,
-                );
-              }
-            }
-            if (failure is GetPresentationContactsEmpty) {
-              if (presentationRecentContact.isEmpty) {
-                return controller.presentationContactNotifier.value.fold(
-                  (failure) {
-                    if (failure is GetPresentationContactsFailure ||
-                        failure is GetPresentationContactsEmpty) {
-                      final keyword = controller.textEditingController.text;
-                      if (keyword.isEmpty) {
-                        return const SliverToBoxAdapter(
-                          child: EmptyContactBody(),
-                        );
-                      } else if (keyword.isValidMatrixId &&
-                          keyword.startsWith("@")) {
-                        final externalContact = PresentationContact(
-                          matrixId: keyword,
-                          displayName: keyword.substring(1),
-                          type: ContactType.external,
-                        );
-                        return _SilverExternalContact(
-                          controller: controller,
-                          externalContact: externalContact,
-                        );
-                      } else {
-                        return SliverToBoxAdapter(
-                          child: Padding(
-                            padding: const EdgeInsets.only(
-                              left: ContactsTabViewStyle.padding,
-                              top: ContactsTabViewStyle.padding,
-                            ),
-                            child: NoContactsFound(
-                              keyword: controller.textEditingController.text,
-                            ),
+                  }
+                  if (failure is GetPresentationContactsFailure ||
+                      failure is GetPresentationContactsEmpty) {
+                    final keyword = controller.textEditingController.text;
+                    if (keyword.isEmpty) {
+                      return const SliverToBoxAdapter(
+                        child: EmptyContactBody(),
+                      );
+                    } else {
+                      return SliverToBoxAdapter(
+                        child: Padding(
+                          padding: const EdgeInsets.only(
+                            left: ContactsTabViewStyle.padding,
+                            top: ContactsTabViewStyle.padding,
                           ),
-                        );
-                      }
+                          child: NoContactsFound(
+                            keyword: controller.textEditingController.text,
+                          ),
+                        ),
+                      );
                     }
-                    return child!;
-                  },
-                  (_) => child!,
-                );
-              }
+                  }
+                  return child!;
+                },
+                (success) => child!,
+              );
             }
-            return child!;
           },
           (success) {
             if (success is ContactsLoading) {
@@ -360,6 +358,23 @@ class _SliverContactsList extends StatelessWidget {
             }
 
             if (success is PresentationExternalContactSuccess) {
+              if (controller
+                  .presentationRecentContactNotifier.value.isNotEmpty) {
+                return child!;
+              }
+
+              if (PlatformInfos.isWeb) {
+                if (controller.presentationAddressBookNotifier.value
+                    .isRight()) {
+                  return child!;
+                }
+              } else {
+                if (controller.presentationPhonebookContactNotifier.value
+                    .isRight()) {
+                  return child!;
+                }
+              }
+
               final externalContact = success.contact;
               return _SilverExternalContact(
                 controller: controller,
