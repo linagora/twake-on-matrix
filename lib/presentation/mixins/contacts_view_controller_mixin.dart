@@ -349,27 +349,6 @@ mixin class ContactsViewControllerMixin {
     presentationPhonebookContactNotifier.value =
         contactsManager.getPhonebookContactsNotifier().value.fold(
       (failure) {
-        if (failure is GetPhonebookContactsFailure) {
-          return _handleSearchExternalContact(
-            keyword,
-            otherResult: Left(
-              GetPresentationContactsFailure(
-                keyword: keyword,
-              ),
-            ),
-          );
-        }
-
-        if (failure is GetPhonebookContactsIsEmpty) {
-          return _handleSearchExternalContact(
-            keyword,
-            otherResult: Left(
-              GetPresentationContactsEmpty(
-                keyword: keyword,
-              ),
-            ),
-          );
-        }
         return Left(failure);
       },
       (success) {
@@ -403,27 +382,6 @@ mixin class ContactsViewControllerMixin {
     presentationAddressBookNotifier.value =
         contactsManager.getAddressBookNotifier().value.fold(
       (failure) {
-        if (failure is GetAddressBookFailureState) {
-          return _handleSearchExternalContact(
-            keyword,
-            otherResult: Left(
-              GetPresentationContactsFailure(
-                keyword: keyword,
-              ),
-            ),
-          );
-        }
-
-        if (failure is GetAddressBookIsEmptyState) {
-          return _handleSearchExternalContact(
-            keyword,
-            otherResult: Left(
-              GetPresentationContactsEmpty(
-                keyword: keyword,
-              ),
-            ),
-          );
-        }
         return Left(failure);
       },
       (success) {
