@@ -22,6 +22,26 @@ extension IterableAddressBookExtension on Iterable<AddressBook> {
   }
 }
 
+extension AddressBookListExtension on Set<AddressBook> {
+  Set<AddressBook> combineDuplicateAddressBooks() {
+    final Map<String, AddressBook> uniqueAddressBooks = {};
+
+    for (final addressBook in this) {
+      if (addressBook.id != null &&
+          addressBook.addressbookId != null &&
+          addressBook.mxid != null) {
+        final uniqueKey =
+            '${addressBook.id}_${addressBook.addressbookId}_${addressBook.mxid}';
+        if (uniqueKey.isNotEmpty) {
+          uniqueAddressBooks[uniqueKey] = addressBook;
+        }
+      }
+    }
+
+    return uniqueAddressBooks.values.toSet();
+  }
+}
+
 extension AddressBookExtension on AddressBook {
   Set<PresentationContact> toPresentationContact() {
     return {
