@@ -55,93 +55,139 @@ class ExpansionContactListTile extends StatelessWidget {
                   width: 8.0,
                 ),
                 Expanded(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      IntrinsicWidth(
-                        child: Row(
-                          children: [
-                            Expanded(
-                              child: Row(
-                                children: [
-                                  Flexible(
-                                    child: BuildDisplayName(
-                                      profileDisplayName:
-                                          snapshot.data?.displayName,
-                                      contactDisplayName: contact.displayName,
-                                      highlightKeyword: highlightKeyword,
-                                      style: ListItemStyle.titleTextStyle(
-                                        fontFamily: 'Inter',
+                  child: SizedBox(
+                    height: 64,
+                    child: Row(
+                      mainAxisSize: MainAxisSize.max,
+                      children: [
+                        Expanded(
+                          child: Column(
+                            mainAxisSize: MainAxisSize.max,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              IntrinsicWidth(
+                                child: Row(
+                                  children: [
+                                    Expanded(
+                                      child: Row(
+                                        children: [
+                                          Flexible(
+                                            child: BuildDisplayName(
+                                              profileDisplayName:
+                                                  snapshot.data?.displayName,
+                                              contactDisplayName:
+                                                  contact.displayName,
+                                              highlightKeyword:
+                                                  highlightKeyword,
+                                              style:
+                                                  ListItemStyle.titleTextStyle(
+                                                fontFamily: 'Inter',
+                                              ),
+                                            ),
+                                          ),
+                                        ],
                                       ),
                                     ),
+                                    if (contact.matrixId != null &&
+                                        contact.matrixId!
+                                            .isCurrentMatrixId(context)) ...[
+                                      const SizedBox(width: 8.0),
+                                      TwakeChip(
+                                        text: L10n.of(context)!.owner,
+                                        textColor: Theme.of(context)
+                                            .colorScheme
+                                            .primary,
+                                      ),
+                                    ],
+                                    const SizedBox(width: 8.0),
+                                    if (contact.status != null &&
+                                        contact.status ==
+                                            ContactStatus.inactive)
+                                      ContactStatusWidget(
+                                        status: contact.status!,
+                                      ),
+                                  ],
+                                ),
+                              ),
+                              if (contact.matrixId != null &&
+                                  contact.matrixId!.isNotEmpty) ...[
+                                HighlightText(
+                                  text: contact.matrixId!,
+                                  searchWord: highlightKeyword,
+                                  style: ListItemStyle.subtitleTextStyle(
+                                    fontFamily: 'Inter',
                                   ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                                if (highlightKeyword.isNotEmpty) ...[
+                                  if (highlightKeyword
+                                      .isPhoneNumberFormatted()) ...[
+                                    _displayPhoneNumber(),
+                                  ] else ...[
+                                    _displayEmail(),
+                                  ],
+                                ] else ...[
+                                  _displayInformationDefault(),
                                 ],
+                              ] else ...[
+                                _displayPhoneNumber(),
+                                _displayEmail(),
+                              ],
+                            ],
+                          ),
+                        ),
+                        if (contact.matrixId == null ||
+                            contact.matrixId!.isEmpty)
+                          InkWell(
+                            onTap: () {
+                              onExpansionInformation?.call(contact);
+                            },
+                            hoverColor: Colors.transparent,
+                            focusColor: Colors.transparent,
+                            highlightColor: Colors.transparent,
+                            splashColor: Colors.transparent,
+                            child: Padding(
+                              padding: const EdgeInsets.all(8),
+                              child: Icon(
+                                Icons.person_add_alt_rounded,
+                                color: LinagoraRefColors.material().primary,
                               ),
                             ),
-                            if (contact.matrixId != null &&
-                                contact.matrixId!
-                                    .isCurrentMatrixId(context)) ...[
-                              const SizedBox(width: 8.0),
-                              TwakeChip(
-                                text: L10n.of(context)!.owner,
-                                textColor:
-                                    Theme.of(context).colorScheme.primary,
-                              ),
-                            ],
-                            const SizedBox(width: 8.0),
-                            if (contact.status != null &&
-                                contact.status == ContactStatus.inactive)
-                              ContactStatusWidget(
-                                status: contact.status!,
-                              ),
-                          ],
-                        ),
-                      ),
-                      if (contact.matrixId != null &&
-                          contact.matrixId!.isNotEmpty) ...[
-                        HighlightText(
-                          text: contact.matrixId!,
-                          searchWord: highlightKeyword,
-                          style: ListItemStyle.subtitleTextStyle(
-                            fontFamily: 'Inter',
                           ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        if (highlightKeyword.isNotEmpty) ...[
-                          if (highlightKeyword.isPhoneNumberFormatted()) ...[
-                            _displayPhoneNumber(),
-                          ] else ...[
-                            _displayEmail(),
-                          ],
-                        ],
-                      ] else ...[
-                        _displayPhoneNumber(),
-                        _displayEmail(),
                       ],
-                    ],
-                  ),
-                ),
-                if (contact.matrixId == null || contact.matrixId!.isEmpty)
-                  InkWell(
-                    onTap: () {
-                      onExpansionInformation?.call(contact);
-                    },
-                    child: Padding(
-                      padding: const EdgeInsets.all(8),
-                      child: Icon(
-                        Icons.person_add_alt_rounded,
-                        color: LinagoraRefColors.material().primary,
-                      ),
                     ),
                   ),
+                ),
               ],
             );
           },
         ),
       ),
     );
+  }
+
+  Widget _displayInformationDefault() {
+    if (contact.primaryPhoneNumber.isNotEmpty) {
+      return HighlightText(
+        text: contact.primaryPhoneNumber,
+        searchWord: highlightKeyword,
+        style: ListItemStyle.subtitleTextStyle(
+          fontFamily: 'Inter',
+        ),
+      );
+    } else if (contact.primaryEmail.isNotEmpty) {
+      return HighlightText(
+        text: contact.primaryEmail,
+        searchWord: highlightKeyword,
+        style: ListItemStyle.subtitleTextStyle(
+          fontFamily: 'Inter',
+        ),
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+      );
+    }
+    return const SizedBox();
   }
 
   Widget _displayPhoneNumber() {
