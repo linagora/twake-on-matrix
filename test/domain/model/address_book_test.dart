@@ -201,6 +201,47 @@ void main() {
 
         expect(result.length, 0);
       });
+
+      test(
+        'SHOULD handle address books with same matrixId and different other fields',
+        () {
+          final addressBooks = {
+            AddressBook(
+              id: 'id_1',
+              addressbookId: 'addressbook_id_1',
+              mxid: 'mxid_1',
+            ),
+            AddressBook(
+              id: null,
+              addressbookId: 'addressbook_id_2',
+              mxid: 'mxid_1',
+            ),
+            AddressBook(
+              id: 'id_3',
+              addressbookId: 'addressbook_id_3',
+              mxid: 'mxid_1',
+            ),
+          };
+
+          final expected = {
+            AddressBook(
+              id: 'id_3',
+              addressbookId: 'addressbook_id_3',
+              mxid: 'mxid_1',
+            ),
+          };
+
+          final result = addressBooks.combineDuplicateAddressBooks();
+
+          expect(result.length, expected.length);
+
+          expect(result.first.id, expected.first.id);
+
+          expect(result.first.addressbookId, expected.first.addressbookId);
+
+          expect(result.first.mxid, expected.first.mxid);
+        },
+      );
     },
   );
 }
