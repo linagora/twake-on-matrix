@@ -26,3 +26,11 @@ extension TomContactExtension on TomContact {
     );
   }
 }
+
+extension TomContactsExtension on Set<TomContact> {
+  Set<TomContact> removeUnknownTomContact() {
+    return where(
+      (tomContact) => tomContact.mail != null || tomContact.phoneNumber != null,
+    ).map((contact) => contact).toSet();
+  }
+}

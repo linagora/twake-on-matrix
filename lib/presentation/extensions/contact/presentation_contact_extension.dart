@@ -74,3 +74,31 @@ extension PhoneNumberExtensionInPresentation on PhoneNumber {
     );
   }
 }
+
+extension ListPresentationContact on List<PresentationContact> {
+  List<PresentationContact> combineDuplicateContact({
+    required List<PresentationContact> contacts,
+  }) {
+    final Map<String, PresentationContact> distinctContactsAndChatsMap = {};
+
+    if (isEmpty) {
+      return contacts;
+    }
+
+    for (final contact in this) {
+      if (contact.matrixId != null) {
+        distinctContactsAndChatsMap[contact.matrixId!] = contact;
+      }
+    }
+
+    for (final contact in contacts) {
+      final existingContact = distinctContactsAndChatsMap[contact.matrixId];
+
+      if (existingContact == null) {
+        distinctContactsAndChatsMap[contact.matrixId!] = contact;
+      }
+    }
+
+    return distinctContactsAndChatsMap.values.toList();
+  }
+}
