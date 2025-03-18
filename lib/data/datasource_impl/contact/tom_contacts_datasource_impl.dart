@@ -25,11 +25,13 @@ class TomContactsDatasourceImpl implements TomContactsDatasource {
     );
 
     final contacts = response.contacts
+        .removeUnknownTomContact()
         .map((contact) => contact.toContact(ContactStatus.active))
         .toList();
 
     contacts.addAll(
       response.inactiveContacts
+          .removeUnknownTomContact()
           .map((contact) => contact.toContact(ContactStatus.inactive)),
     );
 
