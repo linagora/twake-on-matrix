@@ -49,10 +49,11 @@ class _ContactsInvitationViewState extends State<ContactsInvitationView> {
     }
   }
 
-  void _onSendInvitation(PresentationThirdPartyContact contact) {
-    widget.onSendInvitation?.call(contact);
-    Navigator.pop(context);
-  }
+  //TODO: Impl later with Invitation
+  // void _onSendInvitation(PresentationThirdPartyContact contact) {
+  //   widget.onSendInvitation?.call(contact);
+  //   Navigator.pop(context);
+  // }
 
   void _onSelectContactDefault(PresentationContact contact) {
     if (contact.phoneNumbers != null && contact.phoneNumbers!.isNotEmpty) {
@@ -293,47 +294,48 @@ class _ContactsInvitationViewState extends State<ContactsInvitationView> {
                 ),
               ),
             ),
-            ValueListenableBuilder(
-              valueListenable: _selectedContact,
-              builder: (context, selectedContact, child) {
-                if (selectedContact == null) {
-                  return const SizedBox.shrink();
-                }
-                return TwakeInkWell(
-                  onTap: () => _onSendInvitation(selectedContact),
-                  child: Padding(
-                    padding: ContactsInvitationStyle.verticalPadding,
-                    child: Container(
-                      width: double.infinity,
-                      height: ContactsInvitationStyle.heightSendButton,
-                      decoration: BoxDecoration(
-                        color: LinagoraSysColors.material().primary,
-                        borderRadius: ContactsInvitationStyle.borderRadius,
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text(
-                            L10n.of(context)!.sendInvitation,
-                            style: Theme.of(context)
-                                .textTheme
-                                .labelLarge
-                                ?.copyWith(
-                                  color: LinagoraSysColors.material().onPrimary,
-                                ),
-                          ),
-                          const SizedBox(width: 8),
-                          Icon(
-                            Icons.send_outlined,
-                            color: LinagoraSysColors.material().onPrimary,
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                );
-              },
-            ),
+            //TODO: Impl later with Invitation
+            // ValueListenableBuilder(
+            //   valueListenable: _selectedContact,
+            //   builder: (context, selectedContact, child) {
+            //     if (selectedContact == null) {
+            //       return const SizedBox.shrink();
+            //     }
+            //     return TwakeInkWell(
+            //       onTap: () => _onSendInvitation(selectedContact),
+            //       child: Padding(
+            //         padding: ContactsInvitationStyle.verticalPadding,
+            //         child: Container(
+            //           width: double.infinity,
+            //           height: ContactsInvitationStyle.heightSendButton,
+            //           decoration: BoxDecoration(
+            //             color: LinagoraSysColors.material().primary,
+            //             borderRadius: ContactsInvitationStyle.borderRadius,
+            //           ),
+            //           child: Row(
+            //             mainAxisAlignment: MainAxisAlignment.center,
+            //             children: [
+            //               Text(
+            //                 L10n.of(context)!.sendInvitation,
+            //                 style: Theme.of(context)
+            //                     .textTheme
+            //                     .labelLarge
+            //                     ?.copyWith(
+            //                       color: LinagoraSysColors.material().onPrimary,
+            //                     ),
+            //               ),
+            //               const SizedBox(width: 8),
+            //               Icon(
+            //                 Icons.send_outlined,
+            //                 color: LinagoraSysColors.material().onPrimary,
+            //               ),
+            //             ],
+            //           ),
+            //         ),
+            //       ),
+            //     );
+            //   },
+            // ),
           ],
         ),
       ),
