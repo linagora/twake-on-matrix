@@ -3249,5 +3249,11 @@
   "textCopiedToClipboard": "Текст скопирован",
   "@textCopiedToClipboard": {},
   "deleteAccountMessage": "Групповые чаты, которые вы создали, останутся неадминистрируемыми, если вы не предоставите другому пользователю права администратора. У пользователей по-прежнему будет доступ к истории сообщений – даже если вы удалите учетную запись.",
-  "@deleteAccountMessage": {}
+  "@deleteAccountMessage": {},
+  "selectAnEmailOrPhoneYouWantSendTheInvitationTo": "Выберите email или телефон, на который хотите отправить приглашение",
+  "@selectAnEmailOrPhoneYouWantSendTheInvitationTo": {},
+  "phoneNumber": "Номер телефона",
+  "@phoneNumber": {},
+  "sendInvitation": "Отправить приглашение",
+  "@sendInvitation": {}
 }
