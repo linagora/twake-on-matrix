@@ -3246,5 +3246,11 @@
   "deleteLater": "Supprimer plus tard",
   "@deleteLater": {},
   "deleteAccountMessage": "Les salons que vous avez créés continueront à exister sans administrateur, à moins que vous ayez donné à un autre utilisateur un droit d'administrateur. Les autres utilisateurs du salon auront toujours accès à l'historique des messages avec vous. La suppression du compte ne supprimera pas ces messages.",
-  "@deleteAccountMessage": {}
+  "@deleteAccountMessage": {},
+  "sendInvitation": "Envoyer une invitation",
+  "@sendInvitation": {},
+  "selectAnEmailOrPhoneYouWantSendTheInvitationTo": "Sélectionnez l'adresse e-mail ou le téléphone auquel vous souhaitez envoyer l'invitation",
+  "@selectAnEmailOrPhoneYouWantSendTheInvitationTo": {},
+  "phoneNumber": "Numéro de téléphone",
+  "@phoneNumber": {}
 }
