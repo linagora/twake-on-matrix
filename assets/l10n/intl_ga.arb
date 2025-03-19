@@ -732,12 +732,12 @@
     "type": "text",
     "placeholders": {}
   },
-  "compareNumbersMatch": "Déan comparáid idir na huimhreacha seo a leanas agus déan cinnte go bhfuil na huimhreacha seo a leanas ag teacht le huimhreacha an ghléis eile:",
+  "compareNumbersMatch": "Cuir na huimhreacha i gcomparáid le do thoil",
   "@compareNumbersMatch": {
     "type": "text",
     "placeholders": {}
   },
-  "compareEmojiMatch": "Déan comparáid agus déan cinnte go bhfuil an emoji seo a leanas comhoiriúnach le emoji an ghléis eile:",
+  "compareEmojiMatch": "Cuir na emojis i gcomparáid le do thoil",
   "@compareEmojiMatch": {
     "type": "text",
     "placeholders": {}
@@ -2168,7 +2168,7 @@
   "@addMembers": {},
   "loadingContacts": "Teagmhálacha á luchtú...",
   "@loadingContacts": {},
-  "enterCaption": "Iontráil fotheideal",
+  "enterCaption": "Cuir fotheideal leis...",
   "@enterCaption": {},
   "searchSuggestion": "Chun anois, cuardach a dhéanamh trí ainm duine nó seoladh freastalaí poiblí a chlóscríobh",
   "@searchSuggestion": {},
@@ -2425,7 +2425,7 @@
       "count": {}
     }
   },
-  "countPinnedMessage": "{count, plural, =0{Pinned Message} other{Pinned Message #{count}}}",
+  "countPinnedMessage": "{count, plural, =0{Teachtaireacht Pionnáilte} other{Teachtaireacht Phionnáilte #{count}}}",
   "@countPinnedMessage": {
     "type": "text",
     "placeholders": {
@@ -2503,7 +2503,7 @@
   },
   "commandHint_markasgroup": "Marcáil mar chomhrá",
   "@commandHint_markasgroup": {},
-  "descriptionHelper": "Is féidir leat cur síos roghnach a chur ar fáil do do ghrúpa.",
+  "descriptionHelper": "Is féidir leat cur síos roghnach a sholáthar le do ghrúpa.",
   "@descriptionHelper": {},
   "chatsAndContacts": "Comhráite agus Teagmhálacha",
   "@chatsAndContacts": {},
@@ -2529,7 +2529,7 @@
   "@recoveringYourEncryptedChats": {},
   "addDescription": "Cuir cur síos leis",
   "@addDescription": {},
-  "pinnedMessages": "{count, plural, =1{1 Pinned Message} other{{count} Pinned Messages}}",
+  "pinnedMessages": "{count, plural, =1{1 Teachtaireacht Pionáilte} other{{count} Teachtaireachtaí Pionáilte}}",
   "@pinnedMessages": {
     "type": "text",
     "placeholders": {
@@ -3047,7 +3047,7 @@
   "@blankChatTitle": {},
   "contacts": "Teagmhálacha",
   "@contacts": {},
-  "forwardTo": "Ar aghaidh go...",
+  "forwardTo": "Ar aghaidh go dtí...",
   "@forwardTo": {},
   "askToInvite": " ba mhaith leat a bheith páirteach sa chomhrá seo. Céard a deir tú?",
   "@askToInvite": {},
@@ -3224,5 +3224,21 @@
   "sActionStopRecordingHint": "Stop an taifeadadh",
   "@sActionStopRecordingHint": {},
   "noKeyForThisMessage": "Féadfaidh sé seo tarlú má seoladh an teachtaireacht sular shínigh tú isteach ar do chuntas ag an ngléas seo.\n\nIs féidir freisin gur chuir an seoltóir bac ar do ghléas nó go ndeachaigh rud éigin mícheart leis an nasc idirlín.\n\nAn bhfuil tú in ann an teachtaireacht a léamh ar sheisiún eile? Ansin is féidir leat an teachtaireacht a aistriú uaidh! Téigh go Socruithe > Gléasanna agus cinntigh go bhfuil do ghléasanna fíoraithe a chéile. Nuair a osclaíonn tú an seomra an chéad uair eile agus an dá sheisiún sa tulra, déanfar na heochracha a tharchur go huathoibríoch.\n\nNár mhaith leat na heochracha a scaoileadh agus tú ag logáil amach nó ag aistriú gléasanna? Déan cinnte go bhfuil an cúltaca comhrá cumasaithe agat sna socruithe.",
-  "@noKeyForThisMessage": {}
+  "@noKeyForThisMessage": {},
+  "deleteLater": "Scrios níos déanaí",
+  "@deleteLater": {},
+  "areYouSureYouWantToDeleteAccount": "An bhfuil tú cinnte gur mhaith leat an cuntas a scriosadh?",
+  "@areYouSureYouWantToDeleteAccount": {},
+  "selectAnEmailOrPhoneYouWantSendTheInvitationTo": "Roghnaigh ríomhphost nó guthán ar mhaith leat an cuireadh a sheoladh chuige",
+  "@selectAnEmailOrPhoneYouWantSendTheInvitationTo": {},
+  "phoneNumber": "Uimhir theileafóin",
+  "@phoneNumber": {},
+  "sendInvitation": "Seol cuireadh",
+  "@sendInvitation": {},
+  "phoneNumberCopiedToClipboard": "Cóipeáladh an uimhir theileafóin chuig an ngearrthaisce",
+  "@phoneNumberCopiedToClipboard": {},
+  "textCopiedToClipboard": "Cóipeáladh an téacs chuig an ngearrthaisce",
+  "@textCopiedToClipboard": {},
+  "deleteAccountMessage": "Fanfaidh comhráite grúpaí a chruthaigh tú gan riar ach amháin má thug tú cearta úsáideora eile do riarthóir. Beidh stair teachtaireachtaí fós ag úsáideoirí leat. Ní chuideoidh scriosadh an chuntais.",
+  "@deleteAccountMessage": {}
 }
