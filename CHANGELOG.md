@@ -1,3 +1,10 @@
+## [2.7.0+2330] - 2025-03-19
+### Added
+- Add default value for Sygnal
+- Configurable push gateway with `PUSH_NOTIFICATIONS_GATEWAY_URL`
+- Synchronize contact v2
+- Integration Vault contact
+
 ## [2.6.25+2330] - 2025-02-25
 ### Fixed
 - Translation vi, fr, ru
