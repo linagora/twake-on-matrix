@@ -585,7 +585,7 @@ void main() {
 
     test(
       'WHEN it is not available get Phonebook contact.\n'
-      'AND contactsNotifier return GetContactsIsEmpty.\n'
+      'AND contactsNotifier return GetContactsSuccess.\n'
       'AND getAddressBookNotifier return GetAddressBookSuccessState.\n'
       'THEN contactsNotifier in ContactsManager SHOULD have GetContactsIsEmpty state.\n'
       'THEN getAddressBookNotifier in ContactsManager SHOULD have GetAddressBookSuccessState state.\n'
@@ -703,7 +703,7 @@ void main() {
 
     test(
       'WHEN it is not available get Phonebook contact.\n'
-      'AND contactsNotifier return GetContactsIsEmpty.\n'
+      'AND contactsNotifier return GetContactsSuccess.\n'
       'AND getAddressBookNotifier return GetAddressBookFailureState.\n'
       'THEN contactsNotifier in ContactsManager SHOULD have GetContactsIsEmpty state.\n'
       'THEN getAddressBookNotifier in ContactsManager SHOULD have GetAddressBookFailureState state.\n'
