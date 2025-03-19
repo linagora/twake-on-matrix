@@ -31,11 +31,10 @@ class PhonebookContactDatasourceImpl implements PhonebookContactDatasource {
       );
     }).toList();
 
-    final listFilteredContacts = listAllContacts
-      ..where((contact) {
-        return contact.phoneNumbers?.isNotEmpty == true ||
-            contact.emails?.isNotEmpty == true;
-      }).toList();
+    final listFilteredContacts = listAllContacts.where((contact) {
+      return contact.phoneNumbers?.isNotEmpty == true ||
+          contact.emails?.isNotEmpty == true;
+    }).toList();
 
     return listFilteredContacts;
   }

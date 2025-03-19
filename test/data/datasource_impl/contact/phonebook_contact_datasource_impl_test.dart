@@ -142,6 +142,18 @@ void main() {
             'address': 'nina3@domain.com',
           }
         ],
+      },
+      {
+        'id': 'id_14',
+        'displayName': 'Nina',
+      },
+      {
+        'id': 'id_15',
+        'displayName': '222',
+      },
+      {
+        'id': 'id_16',
+        'displayName': '222',
       }
     ];
 
@@ -164,7 +176,8 @@ void main() {
     test(
         'Give a list of phonebook contacts'
         'When fetchContacts is called'
-        'Then it should return a list of contacts without duplicated phone number',
+        'Then it should return a list of contacts without unknown phone number and email'
+        'Then it should return a list of contacts without duplicated phone number and email',
         () async {
       final List<Contact> expectedListContact = [
         Contact(
