@@ -31,17 +31,20 @@ class PhonebookContactDatasourceImpl implements PhonebookContactDatasource {
       );
     }).toList();
 
-    return listAllContacts;
+    final listFilteredContacts = listAllContacts
+      ..where((contact) {
+        return contact.phoneNumbers?.isNotEmpty == true ||
+            contact.emails?.isNotEmpty == true;
+      }).toList();
+
+    return listFilteredContacts;
   }
 
   List<Contact> _sortContactsByDisplayName(List<Contact> contacts) {
     contacts.sort(
       (pre, next) => (pre.displayName ?? '').compareTo(next.displayName ?? ''),
     );
-    return contacts.where((contact) {
-      return contact.phoneNumbers?.isNotEmpty == true ||
-          contact.emails?.isNotEmpty == true;
-    }).toList();
+    return contacts;
   }
 
   List<PhoneNumber> _removeDuplicatedPhoneNumbers(
