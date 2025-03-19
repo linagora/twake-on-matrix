@@ -3231,5 +3231,11 @@
   "areYouSureYouWantToDeleteAccount": "Bạn có chắc chắn muốn xóa tài khoản không?",
   "@areYouSureYouWantToDeleteAccount": {},
   "textCopiedToClipboard": "Văn bản đã được sao chép",
-  "@textCopiedToClipboard": {}
+  "@textCopiedToClipboard": {},
+  "phoneNumber": "Số điện thoại",
+  "@phoneNumber": {},
+  "selectAnEmailOrPhoneYouWantSendTheInvitationTo": "Chọn một địa chỉ email hoặc một số điện thoại để gửi lời mời",
+  "@selectAnEmailOrPhoneYouWantSendTheInvitationTo": {},
+  "sendInvitation": "Gửi",
+  "@sendInvitation": {}
 }
