@@ -1725,7 +1725,7 @@ void main() {
     test(
       'WHEN it is available get Phonebook contact.\n'
       'AND contactsNotifier return GetContactsIsEmpty with contacts is empty.\n'
-      'AND tryGetSyncedPhoneBookContactInteractor return GetSyncedPhoneBookContactSuccessState state.\n'
+      'AND tryGetSyncedPhoneBookContactInteractor return GetSyncedPhoneBookContactFailure state.\n'
       'AND phonebookContactNotifier return RegisterTokenFailure state.\n'
       'THEN contactsNotifier in ContactsManager SHOULD have GetContactsIsEmpty state.\n'
       'THEN phonebookContactNotifier in ContactsManager SHOULD have RegisterTokenFailure state.\n'
@@ -1847,7 +1847,7 @@ void main() {
     test(
       'WHEN it is available get Phonebook contact.\n'
       'AND contactsNotifier return GetContactsIsEmpty with contacts is empty.\n'
-      'AND tryGetSyncedPhoneBookContactInteractor return GetSyncedPhoneBookContactSuccessState state.\n'
+      'AND tryGetSyncedPhoneBookContactInteractor return GetSyncedPhoneBookContactFailure state.\n'
       'AND phonebookContactNotifier return GetPhonebookContactsIsEmpty state.\n'
       'THEN contactsNotifier in ContactsManager SHOULD have GetContactsIsEmpty state.\n'
       'THEN phonebookContactNotifier in ContactsManager SHOULD have GetPhonebookContactsIsEmpty state.\n'
@@ -1969,7 +1969,7 @@ void main() {
     test(
       'WHEN it is available get Phonebook contact.\n'
       'AND contactsNotifier return GetContactsIsEmpty with contacts is empty.\n'
-      'AND tryGetSyncedPhoneBookContactInteractor return GetSyncedPhoneBookContactSuccessState state.\n'
+      'AND tryGetSyncedPhoneBookContactInteractor return GetSyncedPhoneBookContactFailure state.\n'
       'AND phonebookContactNotifier return GetPhoneBookContactFailure state.\n'
       'THEN contactsNotifier in ContactsManager SHOULD have GetContactsIsEmpty state.\n'
       'THEN phonebookContactNotifier in ContactsManager SHOULD have GetPhoneBookContactFailure state.\n'
@@ -2091,7 +2091,7 @@ void main() {
     test(
       'WHEN it is available get Phonebook contact.\n'
       'AND contactsNotifier return GetContactsIsEmpty with contacts is empty.\n'
-      'AND tryGetSyncedPhoneBookContactInteractor return GetSyncedPhoneBookContactSuccessState state.\n'
+      'AND tryGetSyncedPhoneBookContactInteractor return GetSyncedPhoneBookContactFailure state.\n'
       'AND phonebookContactNotifier return GetHashDetailsFailure state.\n'
       'THEN contactsNotifier in ContactsManager SHOULD have GetContactsIsEmpty state.\n'
       'THEN phonebookContactNotifier in ContactsManager SHOULD have GetHashDetailsFailure state.\n'
@@ -3220,6 +3220,18 @@ void main() {
             const GetPhonebookContactsIsEmpty(),
           ],
         );
+
+        verify(
+          mockTwakeLookupPhonebookContactInteractor.execute(
+            argument: anyNamed('argument'),
+          ),
+        ).called(1);
+
+        verifyNever(
+          mockFederationLookUpPhonebookContactInteractor.execute(
+            argument: anyNamed('argument'),
+          ),
+        );
       },
     );
 
@@ -3338,6 +3350,18 @@ void main() {
           [
             const GetHashDetailsFailure(exception: dynamic),
           ],
+        );
+
+        verify(
+          mockTwakeLookupPhonebookContactInteractor.execute(
+            argument: anyNamed('argument'),
+          ),
+        ).called(1);
+
+        verifyNever(
+          mockFederationLookUpPhonebookContactInteractor.execute(
+            argument: anyNamed('argument'),
+          ),
         );
       },
     );
@@ -3477,6 +3501,18 @@ void main() {
             const GetPhonebookContactsLoading(),
             GetPhonebookContactsSuccess(contacts: contacts, progress: 100),
           ],
+        );
+
+        verify(
+          mockTwakeLookupPhonebookContactInteractor.execute(
+            argument: anyNamed('argument'),
+          ),
+        ).called(1);
+
+        verifyNever(
+          mockFederationLookUpPhonebookContactInteractor.execute(
+            argument: anyNamed('argument'),
+          ),
         );
       },
     );
