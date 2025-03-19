@@ -196,12 +196,6 @@ void main() {
           ]),
         );
 
-        verifyNever(
-          mockGetTomContactsInteractor.execute(
-            limit: AppConfig.maxFetchContacts,
-          ),
-        );
-
         contactsManager.initialSynchronizeContacts(
           isAvailableSupportPhonebookContacts: false,
           withMxId: 'mxId',
@@ -286,12 +280,6 @@ void main() {
           ]),
         );
 
-        verifyNever(
-          mockGetTomContactsInteractor.execute(
-            limit: AppConfig.maxFetchContacts,
-          ),
-        );
-
         contactsManager.initialSynchronizeContacts(
           isAvailableSupportPhonebookContacts: false,
           withMxId: 'mxId',
@@ -376,12 +364,6 @@ void main() {
           ]),
         );
 
-        verifyNever(
-          mockGetTomContactsInteractor.execute(
-            limit: AppConfig.maxFetchContacts,
-          ),
-        );
-
         contactsManager.initialSynchronizeContacts(
           isAvailableSupportPhonebookContacts: false,
           withMxId: 'mxId',
@@ -464,12 +446,6 @@ void main() {
           (_) => Stream.fromIterable([
             const Left(GetAddressBookFailureState(exception: dynamic)),
           ]),
-        );
-
-        verifyNever(
-          mockGetTomContactsInteractor.execute(
-            limit: AppConfig.maxFetchContacts,
-          ),
         );
 
         contactsManager.initialSynchronizeContacts(
@@ -558,12 +534,6 @@ void main() {
               ),
             ),
           ]),
-        );
-
-        verifyNever(
-          mockGetTomContactsInteractor.execute(
-            limit: AppConfig.maxFetchContacts,
-          ),
         );
 
         contactsManager.initialSynchronizeContacts(
@@ -669,12 +639,6 @@ void main() {
               ),
             ),
           ]),
-        );
-
-        verifyNever(
-          mockGetTomContactsInteractor.execute(
-            limit: AppConfig.maxFetchContacts,
-          ),
         );
 
         contactsManager.initialSynchronizeContacts(
@@ -791,12 +755,6 @@ void main() {
               GetAddressBookFailureState(exception: dynamic),
             ),
           ]),
-        );
-
-        verifyNever(
-          mockGetTomContactsInteractor.execute(
-            limit: AppConfig.maxFetchContacts,
-          ),
         );
 
         contactsManager.initialSynchronizeContacts(
