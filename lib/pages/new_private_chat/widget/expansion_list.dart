@@ -67,26 +67,58 @@ class ExpansionList extends StatelessWidget {
       builder: (context, state, child) {
         return state.fold(
           (failure) {
-            if (presentationPhonebookContactNotifier.value.isLeft() ||
-                presentationAddressBookNotifier.value.isLeft()) {
-              final textControllerIsEmpty = textEditingController.text.isEmpty;
-              if (failure is GetPresentationContactsEmpty ||
-                  failure is GetPresentationContactsFailure) {
-                return Column(
-                  children: [
-                    const SizedBox(
-                      height: 12,
-                    ),
-                    NoContactsFound(
-                      keyword: textControllerIsEmpty
-                          ? null
-                          : textEditingController.text,
-                    ),
-                  ],
-                );
-              }
+            final textControllerIsEmpty = textEditingController.text.isEmpty;
+            if (PlatformInfos.isWeb) {
+              return presentationAddressBookNotifier.value.fold(
+                (_) {
+                  if (presentationAddressBookNotifier.value.isRight()) {
+                    return child!;
+                  }
+                  if (failure is GetPresentationContactsFailure ||
+                      failure is GetPresentationContactsEmpty) {
+                    return Column(
+                      children: [
+                        const SizedBox(
+                          height: 12,
+                        ),
+                        NoContactsFound(
+                          keyword: textControllerIsEmpty
+                              ? null
+                              : textEditingController.text,
+                        ),
+                      ],
+                    );
+                  }
+                  return child!;
+                },
+                (success) => child!,
+              );
+            } else {
+              return presentationPhonebookContactNotifier.value.fold(
+                (_) {
+                  if (presentationPhonebookContactNotifier.value.isRight()) {
+                    return child!;
+                  }
+                  if (failure is GetPresentationContactsFailure ||
+                      failure is GetPresentationContactsEmpty) {
+                    return Column(
+                      children: [
+                        const SizedBox(
+                          height: 12,
+                        ),
+                        NoContactsFound(
+                          keyword: textControllerIsEmpty
+                              ? null
+                              : textEditingController.text,
+                        ),
+                      ],
+                    );
+                  }
+                  return child!;
+                },
+                (success) => child!,
+              );
             }
-            return child!;
           },
           (success) {
             if (success is ContactsLoading) {
