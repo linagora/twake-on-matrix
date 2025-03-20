@@ -193,7 +193,7 @@ class ContactsManager {
     final federationConfigurations = await federationConfigurationRepository
         .getFederationConfigurations(withMxId);
 
-    if (federationConfigurations.fedServerInformation.baseUrls?.first == null) {
+    if (!federationConfigurations.fedServerInformation.hasBaseUrls) {
       final identityServerUrlInterceptor = getIt.get<DynamicUrlInterceptors>(
         instanceName: NetworkDI.identityServerUrlInterceptorName,
       );

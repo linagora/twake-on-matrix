@@ -693,8 +693,7 @@ class MatrixState extends State<Matrix>
       client.userID!,
     );
 
-    if (federationConfigurations.fedServerInformation.baseUrls != null ||
-        federationConfigurations.fedServerInformation.baseUrls!.isNotEmpty) {
+    if (federationConfigurations.fedServerInformation.hasBaseUrls) {
       Logs().d(
         'MatrixState::tryToGetFederationConfigurations: ${federationConfigurations.fedServerInformation}',
       );
