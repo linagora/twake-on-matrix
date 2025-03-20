@@ -1,5 +1,6 @@
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/pages/contacts_tab/contacts_invitation_view.dart';
+import 'package:fluffychat/presentation/mixins/address_book_mixin.dart';
 import 'package:fluffychat/presentation/mixins/comparable_presentation_contact_mixin.dart';
 import 'package:fluffychat/pages/contacts_tab/contacts_tab_view.dart';
 import 'package:fluffychat/presentation/mixins/contacts_view_controller_mixin.dart';
@@ -32,6 +33,7 @@ class ContactsTabController extends State<ContactsTab>
     with
         ComparablePresentationContactMixin,
         ContactsViewControllerMixin,
+        AddressBooksMixin,
         WidgetsBindingObserver {
   final responsive = getIt.get<ResponsiveUtils>();
 
@@ -42,6 +44,7 @@ class ContactsTabController extends State<ContactsTab>
     SchedulerBinding.instance.addPostFrameCallback((_) async {
       WidgetsBinding.instance.addObserver(this);
       if (mounted) {
+        listenAddressBookEvents(client);
         initialFetchContacts(
           context: context,
           client: Matrix.of(context).client,
