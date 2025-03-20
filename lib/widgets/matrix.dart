@@ -386,11 +386,14 @@ class MatrixState extends State<Matrix>
         if (deviceEvent.type == TwakeEventTypes.addressBookUpdatedEventType) {
           final senderId = deviceEvent.senderId;
           Logs().d(
-              '[MATRIX]: onToDeviceEvent:: addressBookUpdatedEventType: senderDevice = $senderId',);
+            '[MATRIX]: onToDeviceEvent:: addressBookUpdatedEventType: senderDevice = $senderId',
+          );
           if (currentClient.deviceID != senderId &&
               currentClient.userID != null) {
             _contactsManager.initialSynchronizeContacts(
-                withMxId: currentClient.userID!,);
+              withMxId: currentClient.userID!,
+              forceRun: true,
+            );
           }
         }
       });

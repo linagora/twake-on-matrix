@@ -81,6 +81,9 @@ class ContactsManager {
 
   bool _isSynchronizing = false;
 
+  bool get _isSynchronizedTomContacts =>
+      _contactsNotifier.value.getSuccessOrNull<ContactsInitial>() == null;
+
   bool get isDoNotShowWarningContactsBannerAgain =>
       _doNotShowWarningContactsBannerAgain;
 
@@ -101,15 +104,38 @@ class ContactsManager {
         const Right(GetPhonebookContactsInitial());
   }
 
+  /// This method performs the synchronization of all contacts.
+  ///
+  /// It fetches contacts from many sources: tom, federation or twake then
+  /// updates the related notifiers.
+  /// The synchronization will not proceed if it is already in progress
+  /// or was run before, even if the `forceRun` flag is true.
+  /// Otherwise, it checks the `forceRun` flag to determine whether to
+  /// start the process.
+  ///
+  /// Parameters:
+  /// - `isAvailableSupportPhonebookContacts`: Indicates whether access
+  ///   to phonebook contacts is available.
+  ///   For example, a mobile app has access to phonebook contacts,
+  ///   whereas a web app does not.
+  /// - `forceRun`: A boolean indicating whether to forcefully run
+  ///   the synchronization process.
+  /// - `withMxId`: A required string representing the Matrix ID to
+  ///   be used for synchronization.
   Future<void> initialSynchronizeContacts({
     bool isAvailableSupportPhonebookContacts = false,
+    bool forceRun = false,
     required String withMxId,
   }) async {
     Logs().d('ContactsManager::initialSynchronizeContacts');
     if (_isSynchronizing) {
       return;
     }
-    _isSynchronizing = true;
+
+    if (_isSynchronizedTomContacts && !forceRun) {
+      return;
+    }
+
     await _getAllContacts(
       isAvailableSupportPhonebookContacts: isAvailableSupportPhonebookContacts,
       withMxId: withMxId,
