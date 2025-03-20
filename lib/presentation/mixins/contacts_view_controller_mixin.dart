@@ -210,6 +210,10 @@ mixin class ContactsViewControllerMixin {
         matrixLocalizations: matrixLocalizations,
       );
     });
+
+    if (client.userID == null) {
+      return;
+    }
     await contactsManager.initialSynchronizeContacts(
       withMxId: client.userID!,
       isAvailableSupportPhonebookContacts: PlatformInfos.isMobile &&
