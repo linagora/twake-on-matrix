@@ -385,8 +385,12 @@ class MatrixState extends State<Matrix>
       currentClient.onToDeviceEvent.stream.listen((deviceEvent) {
         if (deviceEvent.type == TwakeEventTypes.addressBookUpdatedEventType) {
           final senderId = deviceEvent.senderId;
-          if (currentClient.deviceID != senderId && currentClient.userID != null) {
-            _contactsManager.initialSynchronizeContacts(withMxId: currentClient.userID!);
+          Logs().d(
+              '[MATRIX]: onToDeviceEvent:: addressBookUpdatedEventType: senderDevice = $senderId',);
+          if (currentClient.deviceID != senderId &&
+              currentClient.userID != null) {
+            _contactsManager.initialSynchronizeContacts(
+                withMxId: currentClient.userID!,);
           }
         }
       });

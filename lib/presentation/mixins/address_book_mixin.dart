@@ -8,6 +8,7 @@ import 'package:matrix/matrix.dart';
 
 mixin AddressBooksMixin {
   void listenAddressBookEvents(Client client) {
+    Logs().d('$runtimeType::listenAddressBookEvents');
     final contactsManager = getIt.get<ContactsManager>();
     contactsManager.postAddressBookNotifier().addListener(() {
       contactsManager.postAddressBookNotifier().value.map(
@@ -20,6 +21,7 @@ mixin AddressBooksMixin {
     final userId = client.userID;
     final deviceId = client.deviceID;
     if (successState is PostAddressBookSuccessState && userId != null && deviceId != null) {
+      Logs().d('$runtimeType::_handleAddressBookUpdatedEvent sendToDevice');
       client.sendToDevice(
         TwakeEventTypes.addressBookUpdatedEventType,
         client.generateUniqueTransactionId(),

@@ -79,8 +79,7 @@ class ContactsManager {
   ValueNotifierCustom<Either<Failure, Success>> postAddressBookNotifier() =>
       _postAddressBookNotifier;
 
-  bool get _isSynchronizedTomContacts =>
-      _contactsNotifier.value.getSuccessOrNull<ContactsInitial>() != null;
+  bool _isSynchronizing = false;
 
   bool get isDoNotShowWarningContactsBannerAgain =>
       _doNotShowWarningContactsBannerAgain;
@@ -106,9 +105,11 @@ class ContactsManager {
     bool isAvailableSupportPhonebookContacts = false,
     required String withMxId,
   }) async {
-    if (!_isSynchronizedTomContacts) {
+    Logs().d('ContactsManager::initialSynchronizeContacts');
+    if (_isSynchronizing) {
       return;
     }
+    _isSynchronizing = true;
     await _getAllContacts(
       isAvailableSupportPhonebookContacts: isAvailableSupportPhonebookContacts,
       withMxId: withMxId,
@@ -123,13 +124,27 @@ class ContactsManager {
       (event) {
         _contactsNotifier.value = event;
       },
-    ).onDone(
-      () async => await _lookUpPhonebookContacts(
-        isAvailableSupportPhonebookContacts:
-            isAvailableSupportPhonebookContacts,
-        withMxId: withMxId,
-      ),
-    );
+    )
+      ..onDone(() async {
+        Logs().d('ContactsManager::_getAllContacts: done');
+        await _lookUpPhonebookContacts(
+          isAvailableSupportPhonebookContacts:
+              isAvailableSupportPhonebookContacts,
+          withMxId: withMxId,
+        ).whenComplete(
+          () => _isSynchronizing = false,
+        );
+      })
+      ..onError((error) async {
+        Logs().d('ContactsManager::_getAllContacts: error - $error');
+        await _lookUpPhonebookContacts(
+          isAvailableSupportPhonebookContacts:
+              isAvailableSupportPhonebookContacts,
+          withMxId: withMxId,
+        ).whenComplete(
+          () => _isSynchronizing = false,
+        );
+      });
   }
 
   Future<void> _lookUpPhonebookContacts({
