@@ -1,4 +1,5 @@
 import 'package:fluffychat/domain/model/contact/contact_type.dart';
+import 'package:fluffychat/presentation/mixins/address_book_mixin.dart';
 import 'package:fluffychat/presentation/mixins/contacts_view_controller_mixin.dart';
 import 'package:fluffychat/presentation/mixins/invite_external_contact_mixin.dart';
 import 'package:fluffychat/pages/new_group/contacts_selection_view.dart';
@@ -16,6 +17,7 @@ abstract class ContactsSelectionController<T extends StatefulWidget>
     with
         InviteExternalContactMixin,
         ContactsViewControllerMixin,
+        AddressBooksMixin,
         WidgetsBindingObserver {
   final selectedContactsMapNotifier = SelectedContactsMapChangeNotifier();
 
@@ -42,6 +44,7 @@ abstract class ContactsSelectionController<T extends StatefulWidget>
     SchedulerBinding.instance.addPostFrameCallback((_) async {
       WidgetsBinding.instance.addObserver(this);
       if (mounted) {
+        listenAddressBookEvents(client);
         initialFetchContacts(
           context: context,
           client: client,
