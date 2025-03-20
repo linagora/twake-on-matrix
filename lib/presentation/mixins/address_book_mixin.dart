@@ -20,7 +20,9 @@ mixin AddressBooksMixin {
   void _handleAddressBookUpdatedEvent(Client client, Success successState) {
     final userId = client.userID;
     final deviceId = client.deviceID;
-    if (successState is PostAddressBookSuccessState && userId != null && deviceId != null) {
+    if (successState is PostAddressBookSuccessState &&
+        userId != null &&
+        deviceId != null) {
       Logs().d('$runtimeType::_handleAddressBookUpdatedEvent sendToDevice');
       client.sendToDevice(
         TwakeEventTypes.addressBookUpdatedEventType,
