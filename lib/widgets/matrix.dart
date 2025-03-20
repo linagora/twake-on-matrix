@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 import 'package:fluffychat/data/model/federation_server/federation_configuration.dart';
+import 'package:fluffychat/data/model/federation_server/federation_server_information.dart';
 import 'package:fluffychat/domain/contact_manager/contacts_manager.dart';
 import 'package:fluffychat/domain/repository/federation_configurations_repository.dart';
 import 'package:fluffychat/presentation/mixins/init_config_mixin.dart';
@@ -307,6 +308,7 @@ class MatrixState extends State<Matrix>
       }
       initMatrix();
       await initReceiveSharingIntent();
+      await tryToGetFederationConfigurations();
       if (PlatformInfos.isWeb) {
         initConfigWeb().then((_) => initSettings());
       } else {
@@ -680,6 +682,43 @@ class MatrixState extends State<Matrix>
         ),
       );
     }
+  }
+
+  Future<void> tryToGetFederationConfigurations() async {
+    if (client.userID == null) return;
+    final federationConfigurationRepository =
+        getIt.get<FederationConfigurationsRepository>();
+    final federationConfigurations =
+        await federationConfigurationRepository.getFederationConfigurations(
+      client.userID!,
+    );
+
+    if (federationConfigurations.fedServerInformation.baseUrls != null ||
+        federationConfigurations.fedServerInformation.baseUrls!.isNotEmpty) {
+      Logs().d(
+        'MatrixState::tryToGetFederationConfigurations: ${federationConfigurations.fedServerInformation}',
+      );
+      return;
+    }
+
+    final wellKnown = await client.getWellknown();
+
+    Logs().d(
+      'MatrixState::tryToGetFederationConfigurations: $wellKnown',
+    );
+
+    final fedServerJson = wellKnown
+        .additionalProperties[FederationServerInformation.fedServerKey];
+
+    if (fedServerJson == null) return;
+
+    await federationConfigurationRepository.saveFederationConfigurations(
+      client.userID!,
+      FederationConfigurations(
+        fedServerInformation:
+            FederationServerInformation.fromJson(fedServerJson),
+      ),
+    );
   }
 
   void setUpAuthorization(Client client) {
