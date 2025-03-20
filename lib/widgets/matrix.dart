@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:fluffychat/data/model/federation_server/federation_configuration.dart';
 import 'package:fluffychat/domain/contact_manager/contacts_manager.dart';
 import 'package:fluffychat/domain/repository/federation_configurations_repository.dart';
+import 'package:fluffychat/event/twake_event_types.dart';
 import 'package:fluffychat/presentation/mixins/init_config_mixin.dart';
 import 'package:fluffychat/presentation/model/client_login_state_event.dart';
 import 'package:fluffychat/widgets/layouts/agruments/logout_body_args.dart';
@@ -379,6 +380,15 @@ class MatrixState extends State<Matrix>
                   e.content['sender'] != currentClient.userID,
             )
             .listen(showLocalNotification);
+      });
+
+      currentClient.onToDeviceEvent.stream.listen((deviceEvent) {
+        if (deviceEvent.type == TwakeEventTypes.addressBookUpdatedEventType) {
+          final senderId = deviceEvent.senderId;
+          if (currentClient.deviceID != senderId && currentClient.userID != null) {
+            _contactsManager.initialSynchronizeContacts(withMxId: currentClient.userID!);
+          }
+        }
       });
     }
   }
