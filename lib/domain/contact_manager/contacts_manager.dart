@@ -137,6 +137,8 @@ class ContactsManager {
       return;
     }
 
+    _isSynchronizing = true;
+
     await _getAllContacts(
       isAvailableSupportPhonebookContacts: isAvailableSupportPhonebookContacts,
       withMxId: withMxId,
