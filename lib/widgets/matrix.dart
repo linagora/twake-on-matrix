@@ -425,6 +425,7 @@ class MatrixState extends State<Matrix>
     await _cancelSubs(currentClient.clientName);
     widget.clients.remove(currentClient);
     await ClientManager.removeClientNameFromStore(currentClient.clientName);
+    await matrixState.cancelListenSynchronizeContacts();
     matrixState.reSyncContacts();
     TwakeSnackBar.show(
       TwakeApp.routerKey.currentContext!,
@@ -484,6 +485,7 @@ class MatrixState extends State<Matrix>
     await setUpToMServicesInLogin(activeClient);
     await setUpFederationServicesInLogin(activeClient);
     final result = await setActiveClient(activeClient);
+    await matrixState.cancelListenSynchronizeContacts();
     matrixState.reSyncContacts();
     if (result.isSuccess) {
       onClientLoginStateChanged.add(
@@ -963,6 +965,7 @@ class MatrixState extends State<Matrix>
 
   Future<void> _handleLastLogout() async {
     matrixState.reSyncContacts();
+    await matrixState.cancelListenSynchronizeContacts();
     if (PlatformInfos.isMobile) {
       await _deletePersistActiveAccount();
       TwakeApp.router.go('/home/twakeWelcome');
@@ -974,6 +977,10 @@ class MatrixState extends State<Matrix>
 
   Future<void> reSyncContacts() async {
     _contactsManager.reSyncContacts();
+  }
+
+  Future<void> cancelListenSynchronizeContacts() async {
+    _contactsManager.cancelAllSubscriptions();
   }
 
   void markFirstLogin() {
