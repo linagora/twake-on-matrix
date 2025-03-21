@@ -1,3 +1,12 @@
+## [2.7.2+2330] - 2025-03-21
+### Fixed
+- Auto refresh in web-app when new addressBook updated
+- Resync contacts when new mobile app version upgrade
+
+## [2.7.1+2330] - 2025-03-19
+### Fixed
+- Add unit tests for ContactManager
+
 ## [2.7.0+2330] - 2025-03-19
 ### Added
 - Add default value for Sygnal
