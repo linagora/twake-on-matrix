@@ -1,7 +1,9 @@
 import 'dart:async';
 import 'dart:io';
 import 'package:fluffychat/data/model/federation_server/federation_configuration.dart';
+import 'package:fluffychat/data/model/federation_server/federation_server_information.dart';
 import 'package:fluffychat/domain/contact_manager/contacts_manager.dart';
+import 'package:fluffychat/domain/exception/federation_configuration_not_found.dart';
 import 'package:fluffychat/domain/repository/federation_configurations_repository.dart';
 import 'package:fluffychat/event/twake_event_types.dart';
 import 'package:fluffychat/presentation/mixins/init_config_mixin.dart';
@@ -308,6 +310,7 @@ class MatrixState extends State<Matrix>
       }
       initMatrix();
       await initReceiveSharingIntent();
+      await tryToGetFederationConfigurations();
       if (PlatformInfos.isWeb) {
         initConfigWeb().then((_) => initSettings());
       } else {
@@ -696,6 +699,65 @@ class MatrixState extends State<Matrix>
           identityServerInformation: identityServer,
         ),
       );
+    }
+  }
+
+  Future<void> tryToGetFederationConfigurations() async {
+    if (client.userID == null) return;
+    try {
+      final federationConfigurationRepository =
+          getIt.get<FederationConfigurationsRepository>();
+      final federationConfigurations =
+          await federationConfigurationRepository.getFederationConfigurations(
+        client.userID!,
+      );
+
+      if (federationConfigurations.fedServerInformation.hasBaseUrls) {
+        Logs().d(
+          'MatrixState::tryToGetFederationConfigurations: ${federationConfigurations.fedServerInformation}',
+        );
+        return;
+      }
+
+      await _tryStoreFederationConfiguration();
+    } catch (e) {
+      Logs().e('MatrixState::tryToGetFederationConfigurations: $e');
+
+      if (e is FederationConfigurationNotFound) {
+        Logs().e(
+          'MatrixState::tryToGetFederationConfigurations: FederationConfigurationNotFound',
+        );
+
+        await _tryStoreFederationConfiguration();
+      }
+    }
+  }
+
+  Future<void> _tryStoreFederationConfiguration() async {
+    try {
+      final wellKnown = await client.getWellknown();
+
+      Logs().d(
+        'MatrixState::_tryStoreFederationConfiguration: $wellKnown',
+      );
+
+      final fedServerJson = wellKnown
+          .additionalProperties[FederationServerInformation.fedServerKey];
+
+      if (fedServerJson == null) return;
+
+      final federationConfigurationRepository =
+          getIt.get<FederationConfigurationsRepository>();
+
+      await federationConfigurationRepository.saveFederationConfigurations(
+        client.userID!,
+        FederationConfigurations(
+          fedServerInformation:
+              FederationServerInformation.fromJson(fedServerJson),
+        ),
+      );
+    } catch (e) {
+      Logs().e('MatrixState::_tryStoreFederationConfiguration: $e');
     }
   }
 

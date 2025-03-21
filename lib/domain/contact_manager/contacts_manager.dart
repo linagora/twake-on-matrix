@@ -11,6 +11,7 @@ import 'package:fluffychat/domain/app_state/contact/get_contacts_state.dart';
 import 'package:fluffychat/domain/app_state/contact/get_phonebook_contact_state.dart';
 import 'package:fluffychat/domain/app_state/contact/post_address_book_state.dart';
 import 'package:fluffychat/domain/app_state/contact/try_get_synced_phone_book_contact_state.dart';
+import 'package:fluffychat/domain/exception/federation_configuration_not_found.dart';
 import 'package:fluffychat/domain/model/contact/contact.dart';
 import 'package:fluffychat/domain/model/extensions/contact/contact_extension.dart';
 import 'package:fluffychat/domain/repository/federation_configurations_repository.dart';
@@ -224,53 +225,16 @@ class ContactsManager {
     );
   }
 
-  Future<void> _handleLookUpPhonebookContacts({
-    required String withMxId,
-  }) async {
+  Future<void> _handleTwakeLookUpPhoneBookContacts() async {
     final authorizationInterceptor = getIt.get<AuthorizationInterceptor>();
 
-    final federationConfigurationRepository =
-        getIt.get<FederationConfigurationsRepository>();
-    final federationConfigurations = await federationConfigurationRepository
-        .getFederationConfigurations(withMxId);
-
-    if (federationConfigurations.fedServerInformation.baseUrls?.first == null) {
-      final identityServerUrlInterceptor = getIt.get<DynamicUrlInterceptors>(
-        instanceName: NetworkDI.identityServerUrlInterceptorName,
-      );
-      twakeLookupPhonebookContactInteractor
-          .execute(
-        argument: TwakeLookUpArgument(
-          homeServerUrl: identityServerUrlInterceptor.baseUrl ?? '',
-          withAccessToken: authorizationInterceptor.getAccessToken ?? '',
-        ),
-      )
-          .listen(
-        (state) {
-          _phonebookContactsNotifier.value = state;
-          state.fold(
-            (failure) => _handleLookUpFailureState(failure),
-            (success) => _handleLookUpSuccessState(success),
-          );
-        },
-      );
-      return;
-    }
-
-    final homeServerUrlInterceptor = getIt.get<DynamicUrlInterceptors>(
-      instanceName: NetworkDI.homeServerUrlInterceptorName,
+    final identityServerUrlInterceptor = getIt.get<DynamicUrlInterceptors>(
+      instanceName: NetworkDI.identityServerUrlInterceptorName,
     );
-
-    federationLookUpPhonebookContactInteractor
+    twakeLookupPhonebookContactInteractor
         .execute(
-      lookupChunkSize: _lookupChunkSize,
-      argument: FederationLookUpArgument(
-        homeServerUrl: homeServerUrlInterceptor.baseUrl ?? '',
-        federationUrl: federationConfigurations
-                .fedServerInformation.baseUrls?.first
-                .toString() ??
-            '',
-        withMxId: withMxId,
+      argument: TwakeLookUpArgument(
+        homeServerUrl: identityServerUrlInterceptor.baseUrl ?? '',
         withAccessToken: authorizationInterceptor.getAccessToken ?? '',
       ),
     )
@@ -283,6 +247,56 @@ class ContactsManager {
         );
       },
     );
+  }
+
+  Future<void> _handleLookUpPhonebookContacts({
+    required String withMxId,
+  }) async {
+    try {
+      final federationConfigurationRepository =
+          getIt.get<FederationConfigurationsRepository>();
+      final federationConfigurations = await federationConfigurationRepository
+          .getFederationConfigurations(withMxId);
+      if (!federationConfigurations.fedServerInformation.hasBaseUrls) {
+        await _handleTwakeLookUpPhoneBookContacts();
+        return;
+      }
+
+      final homeServerUrlInterceptor = getIt.get<DynamicUrlInterceptors>(
+        instanceName: NetworkDI.homeServerUrlInterceptorName,
+      );
+
+      final authorizationInterceptor = getIt.get<AuthorizationInterceptor>();
+
+      federationLookUpPhonebookContactInteractor
+          .execute(
+        lookupChunkSize: _lookupChunkSize,
+        argument: FederationLookUpArgument(
+          homeServerUrl: homeServerUrlInterceptor.baseUrl ?? '',
+          federationUrl: federationConfigurations
+                  .fedServerInformation.baseUrls?.first
+                  .toString() ??
+              '',
+          withMxId: withMxId,
+          withAccessToken: authorizationInterceptor.getAccessToken ?? '',
+        ),
+      )
+          .listen(
+        (state) {
+          _phonebookContactsNotifier.value = state;
+          state.fold(
+            (failure) => _handleLookUpFailureState(failure),
+            (success) => _handleLookUpSuccessState(success),
+          );
+        },
+      );
+    } catch (e) {
+      Logs().e('ContactsManager::_handleLookUpPhonebookContacts', e);
+
+      if (e is FederationConfigurationNotFound) {
+        await _handleTwakeLookUpPhoneBookContacts();
+      }
+    }
   }
 
   void _handleLookUpFailureState(Failure failure) {

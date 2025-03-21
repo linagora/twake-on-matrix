@@ -14,6 +14,8 @@ class FederationServerInformation with EquatableMixin {
     this.baseUrls,
   });
 
+  bool get hasBaseUrls => baseUrls != null && baseUrls!.isNotEmpty;
+
   factory FederationServerInformation.fromJson(Map<String, dynamic> json) =>
       _$FederationServerInformationFromJson(json);
 
