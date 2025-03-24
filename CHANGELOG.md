@@ -1,3 +1,7 @@
+## [2.7.4+2330] - 2025-03-24
+### Fixed 
+- Contact synchronization for multiple accounts
+
 ## [2.7.2+2330] - 2025-03-21
 ### Fixed
 - Auto refresh in web-app when new addressBook updated
