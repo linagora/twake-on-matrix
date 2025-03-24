@@ -368,6 +368,9 @@ class ContactsManager {
     if (postAddressBookSubscription != null) {
       await postAddressBookSubscription?.cancel();
     }
+    if (_isSynchronizing) {
+      _isSynchronizing = false;
+    }
   }
 
   void synchronizePhonebookContacts({
