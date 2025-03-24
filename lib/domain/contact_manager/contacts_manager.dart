@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:dartz/dartz.dart';
 import 'package:fluffychat/app_state/failure.dart';
 import 'package:fluffychat/app_state/success.dart';
@@ -50,6 +52,18 @@ class ContactsManager {
   final TryGetSyncedPhoneBookContactInteractor
       tryGetSyncedPhoneBookContactInteractor =
       getIt.get<TryGetSyncedPhoneBookContactInteractor>();
+
+  StreamSubscription<Either<Failure, Success>>? tomContactsSubscription;
+
+  StreamSubscription<Either<Failure, Success>>?
+      federationPhonebookContactsSubscription;
+
+  StreamSubscription<Either<Failure, Success>>?
+      twakePhonebookContactsSubscription;
+
+  StreamSubscription<Either<Failure, Success>>? getAddressBookSubscription;
+
+  StreamSubscription<Either<Failure, Success>>? postAddressBookSubscription;
 
   bool _doNotShowWarningContactsBannerAgain = false;
 
@@ -149,7 +163,9 @@ class ContactsManager {
     bool isAvailableSupportPhonebookContacts = false,
     required String withMxId,
   }) async {
-    getTomContactsInteractor.execute(limit: AppConfig.maxFetchContacts).listen(
+    tomContactsSubscription = getTomContactsInteractor
+        .execute(limit: AppConfig.maxFetchContacts)
+        .listen(
       (event) {
         _contactsNotifier.value = event;
       },
@@ -220,7 +236,7 @@ class ContactsManager {
   }
 
   void _getAddressBook() {
-    getAddressBookInteractor.execute().listen(
+    getAddressBookSubscription = getAddressBookInteractor.execute().listen(
       (state) {
         _getAddressBookNotifier.value = state;
       },
@@ -233,7 +249,7 @@ class ContactsManager {
     final identityServerUrlInterceptor = getIt.get<DynamicUrlInterceptors>(
       instanceName: NetworkDI.identityServerUrlInterceptorName,
     );
-    twakeLookupPhonebookContactInteractor
+    twakePhonebookContactsSubscription = twakeLookupPhonebookContactInteractor
         .execute(
       argument: TwakeLookUpArgument(
         homeServerUrl: identityServerUrlInterceptor.baseUrl ?? '',
@@ -270,8 +286,9 @@ class ContactsManager {
 
       final authorizationInterceptor = getIt.get<AuthorizationInterceptor>();
 
-      federationLookUpPhonebookContactInteractor
-          .execute(
+      federationPhonebookContactsSubscription =
+          federationLookUpPhonebookContactInteractor
+              .execute(
         lookupChunkSize: _lookupChunkSize,
         argument: FederationLookUpArgument(
           homeServerUrl: homeServerUrlInterceptor.baseUrl ?? '',
@@ -283,7 +300,7 @@ class ContactsManager {
           withAccessToken: authorizationInterceptor.getAccessToken ?? '',
         ),
       )
-          .listen(
+              .listen(
         (state) {
           _phonebookContactsNotifier.value = state;
           state.fold(
@@ -323,7 +340,7 @@ class ContactsManager {
     if (PlatformInfos.isWeb) {
       return;
     }
-    postAddressBookInteractor
+    postAddressBookSubscription = postAddressBookInteractor
         .execute(
       addressBooks: contacts.toSet().toAddressBooks().toList(),
     )
@@ -333,6 +350,27 @@ class ContactsManager {
         _postAddressBookNotifier.value = state;
       },
     );
+  }
+
+  Future<void> cancelAllSubscriptions() async {
+    if (tomContactsSubscription != null) {
+      await tomContactsSubscription?.cancel();
+    }
+    if (federationPhonebookContactsSubscription != null) {
+      await federationPhonebookContactsSubscription?.cancel();
+    }
+    if (twakePhonebookContactsSubscription != null) {
+      await twakePhonebookContactsSubscription?.cancel();
+    }
+    if (getAddressBookSubscription != null) {
+      await getAddressBookSubscription?.cancel();
+    }
+    if (postAddressBookSubscription != null) {
+      await postAddressBookSubscription?.cancel();
+    }
+    if (_isSynchronizing) {
+      _isSynchronizing = false;
+    }
   }
 
   void synchronizePhonebookContacts({

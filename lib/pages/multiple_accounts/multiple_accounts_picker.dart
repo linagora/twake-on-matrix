@@ -91,6 +91,7 @@ class MultipleAccountsPickerController {
   Future<void> _setActiveClient(Client newClient) async {
     final result = await _matrixState.setActiveClient(newClient);
     if (result.isSuccess) {
+      await _matrixState.cancelListenSynchronizeContacts();
       _matrixState.reSyncContacts();
       context.go(
         '/rooms',
