@@ -1,3 +1,7 @@
+## [2.7.5+2330] - 2025-03-26
+### Fixed
+- Disable invitation button 
+
 ## [2.7.4+2330] - 2025-03-24
 ### Fixed 
 - Contact synchronization for multiple accounts
