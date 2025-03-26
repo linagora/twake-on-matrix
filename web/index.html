@@ -39,10 +39,6 @@
       name="viewport"
     />
     <script src="splash/splash.js"></script>
-    <script>
-      // The value below is injected by flutter build, do not touch.
-      var serviceWorkerVersion = '{{flutter_service_worker_version}}';
-    </script>
     <!-- This script adds the flutter initialization JS code -->
     <script src="flutter.js" defer></script>
   </head>
@@ -81,21 +77,34 @@
         // Download main.dart.js
         {{flutter_js}}
         {{flutter_build_config}}
-        
-        _flutter.loader.load({
-          serviceWorker: {
-            serviceWorkerVersion: serviceWorkerVersion,
-          },
-          onEntrypointLoaded: function (engineInitializer) {
-            engineInitializer
-              .initializeEngine({
-                useColorEmoji: true,
-              })
-              .then(function (appRunner) {
-                appRunner.runApp();
+
+        if ('serviceWorker' in navigator) {
+          navigator
+            .serviceWorker
+            .getRegistrations()
+            .then(async function(registrations) {
+              try {
+                await Promise.all(registrations.map(function(registration) {
+                  return registration.unregister();
+                }));
+              } catch (error) {
+                console.log('[Twake Chat] Error unregistering service worker: ', error);
+              }
+              _flutter.loader.load({
+                onEntrypointLoaded: async function(engineInitializer) {
+                  const appRunner = await engineInitializer.initializeEngine({useColorEmoji: true});
+                  await appRunner.runApp();
+                }
               });
-          },
-        });
+            });
+        } else {
+          _flutter.loader.load({
+            onEntrypointLoaded: async function (engineInitializer) {
+              const appRunner = await engineInitializer.initializeEngine({useColorEmoji: true});
+              await appRunner.runApp();
+            },
+          });
+        }
       });
     </script>
     <script src="assets/assets/js/package/olm.js"></script>
