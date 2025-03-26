@@ -137,24 +137,6 @@ class ExpansionContactListTile extends StatelessWidget {
                             ],
                           ),
                         ),
-                        if (contact.matrixId == null ||
-                            contact.matrixId!.isEmpty)
-                          InkWell(
-                            onTap: () {
-                              onExpansionInformation?.call(contact);
-                            },
-                            hoverColor: Colors.transparent,
-                            focusColor: Colors.transparent,
-                            highlightColor: Colors.transparent,
-                            splashColor: Colors.transparent,
-                            child: Padding(
-                              padding: const EdgeInsets.all(8),
-                              child: Icon(
-                                Icons.person_add_alt_rounded,
-                                color: LinagoraRefColors.material().primary,
-                              ),
-                            ),
-                          ),
                       ],
                     ),
                   ),
