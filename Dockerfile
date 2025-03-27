@@ -26,9 +26,14 @@ FROM nginx:alpine AS final-image
 ARG TWAKECHAT_BASE_HREF
 ENV TWAKECHAT_BASE_HREF=${TWAKECHAT_BASE_HREF:-/web/}
 ENV TWAKECHAT_LISTEN_PORT="80"
+RUN apk add gzip
 RUN rm -rf /usr/share/nginx/html
+COPY --from=web-builder /app/server/nginx.conf /etc/nginx
 COPY --from=web-builder /app/build/web /usr/share/nginx/html${TWAKECHAT_BASE_HREF}
 COPY ./configurations/nginx.conf.template /etc/nginx/templates/default.conf.template
 
 # Specify the port
 EXPOSE 80
+
+# Before stating NGinx, re-zip all the content to ensure customizations are propagated
+CMD gzip -k -r -f /usr/share/nginx/html/ && nginx -g 'daemon off;'
