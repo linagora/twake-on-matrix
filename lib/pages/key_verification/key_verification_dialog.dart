@@ -112,7 +112,6 @@ class KeyVerificationPageState extends State<KeyVerificationDialog> {
     switch (widget.request.state) {
       case KeyVerificationState.showQRSuccess:
       case KeyVerificationState.confirmQRScan:
-      case KeyVerificationState.askChoice:
         throw 'Not implemented';
       case KeyVerificationState.askSSSS:
         // prompt the user for their ssss passphrase / key
@@ -201,6 +200,7 @@ class KeyVerificationPageState extends State<KeyVerificationDialog> {
           ),
         );
         break;
+      case KeyVerificationState.askChoice:
       case KeyVerificationState.waitingAccept:
         body = Center(
           child: Column(
