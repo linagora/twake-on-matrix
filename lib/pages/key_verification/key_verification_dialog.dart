@@ -1,13 +1,16 @@
 import 'dart:convert';
 import 'dart:ui';
 
+import 'package:fluffychat/pages/key_verification/key_verification_styles.dart';
 import 'package:fluffychat/utils/dialog/twake_dialog.dart';
 import 'package:fluffychat/widgets/avatar/avatar_style.dart';
+import 'package:fluffychat/widgets/twake_components/twake_text_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import 'package:adaptive_dialog/adaptive_dialog.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
+import 'package:linagora_design_flutter/colors/linagora_sys_colors.dart';
 
 import 'package:matrix/encryption.dart';
 import 'package:matrix/matrix.dart';
@@ -149,19 +152,37 @@ class KeyVerificationPageState extends State<KeyVerificationDialog> {
           ),
         );
         buttons.add(
-          TextButton(
-            child: Text(
-              L10n.of(context)!.submit,
+          TwakeTextButton(
+            onTap: () => checkInput(textEditingController.text),
+            message: L10n.of(context)!.submit,
+            borderHover: KeyVerificationStyles.borderHoverButtonWaningBanner,
+            styleMessage: Theme.of(context).textTheme.labelLarge?.copyWith(
+                  color: Theme.of(context).colorScheme.primary,
+                ),
+            margin: KeyVerificationStyles.marginButtonWarningBanner,
+            buttonDecoration: BoxDecoration(
+              color: LinagoraSysColors.material().onPrimary,
+              borderRadius: const BorderRadius.all(
+                Radius.circular(100),
+              ),
             ),
-            onPressed: () => checkInput(textEditingController.text),
           ),
         );
         buttons.add(
-          TextButton(
-            child: Text(
-              L10n.of(context)!.skip,
+          TwakeTextButton(
+            onTap: () => widget.request.openSSSS(skip: true),
+            message: L10n.of(context)!.skip,
+            borderHover: KeyVerificationStyles.borderHoverButtonWaningBanner,
+            styleMessage: Theme.of(context).textTheme.labelLarge?.copyWith(
+                  color: Theme.of(context).colorScheme.primary,
+                ),
+            margin: KeyVerificationStyles.marginButtonWarningBanner,
+            buttonDecoration: BoxDecoration(
+              color: LinagoraSysColors.material().onPrimary,
+              borderRadius: const BorderRadius.all(
+                Radius.circular(100),
+              ),
             ),
-            onPressed: () => widget.request.openSSSS(skip: true),
           ),
         );
         break;
@@ -183,20 +204,37 @@ class KeyVerificationPageState extends State<KeyVerificationDialog> {
           ],
         );
         buttons.add(
-          TextButton.icon(
-            icon: const Icon(Icons.close),
-            style: TextButton.styleFrom(foregroundColor: Colors.red),
-            label: Text(L10n.of(context)!.reject),
-            onPressed: () => widget.request
+          TwakeTextButton(
+            onTap: () => widget.request
                 .rejectVerification()
-                .then((_) => Navigator.of(context, rootNavigator: false).pop()),
+                .then((_) => Navigator.maybePop(context)),
+            message: L10n.of(context)!.reject,
+            borderHover: KeyVerificationStyles.borderHoverButtonWaningBanner,
+            styleMessage: Theme.of(context).textTheme.labelLarge?.copyWith(
+                  color: Theme.of(context).colorScheme.primary,
+                ),
+            margin: KeyVerificationStyles.marginButtonWarningBanner,
+            buttonDecoration: BoxDecoration(
+              color: LinagoraSysColors.material().onPrimary,
+              borderRadius: const BorderRadius.all(
+                Radius.circular(100),
+              ),
+            ),
           ),
         );
         buttons.add(
-          TextButton.icon(
-            icon: const Icon(Icons.check),
-            label: Text(L10n.of(context)!.accept),
-            onPressed: () => widget.request.acceptVerification(),
+          TwakeTextButton(
+            onTap: () => widget.request.acceptVerification(),
+            message: L10n.of(context)!.accept,
+            borderHover: KeyVerificationStyles.borderHoverButtonWaningBanner,
+            styleMessage: Theme.of(context).textTheme.labelLarge?.copyWith(
+                  color: LinagoraSysColors.material().onPrimary,
+                ),
+            margin: KeyVerificationStyles.marginButtonWarningBanner,
+            buttonDecoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.primary,
+              borderRadius: BorderRadius.circular(100),
+            ),
           ),
         );
         break;
@@ -262,20 +300,41 @@ class KeyVerificationPageState extends State<KeyVerificationDialog> {
           ],
         );
         buttons.add(
-          TextButton.icon(
-            icon: const Icon(Icons.close),
-            style: TextButton.styleFrom(
-              foregroundColor: Colors.red,
+          TwakeTextButton(
+            onTap: () => widget.request.rejectSas(),
+            message: L10n.of(context)!.theyDontMatch,
+            borderHover: KeyVerificationStyles.borderHoverButtonWaningBanner,
+            styleMessage: Theme.of(context).textTheme.labelLarge?.copyWith(
+                  color: Theme.of(context).colorScheme.primary,
+                ),
+            margin: KeyVerificationStyles.marginButtonWarningBanner,
+            buttonDecoration: BoxDecoration(
+              color: LinagoraSysColors.material().onPrimary,
+              borderRadius: const BorderRadius.all(
+                Radius.circular(100),
+              ),
             ),
-            label: Text(L10n.of(context)!.theyDontMatch),
-            onPressed: () => widget.request.rejectSas(),
+            constraints: BoxConstraints(
+              maxWidth: KeyVerificationStyles.maxWidthMatchButton(context),
+            ),
           ),
         );
         buttons.add(
-          TextButton.icon(
-            icon: const Icon(Icons.check_outlined),
-            label: Text(L10n.of(context)!.theyMatch),
-            onPressed: () => widget.request.acceptSas(),
+          TwakeTextButton(
+            onTap: () => widget.request.acceptSas(),
+            message: L10n.of(context)!.theyMatch,
+            borderHover: KeyVerificationStyles.borderHoverButtonWaningBanner,
+            styleMessage: Theme.of(context).textTheme.labelLarge?.copyWith(
+                  color: LinagoraSysColors.material().onPrimary,
+                ),
+            margin: KeyVerificationStyles.marginButtonWarningBanner,
+            buttonDecoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.primary,
+              borderRadius: BorderRadius.circular(100),
+            ),
+            constraints: BoxConstraints(
+              maxWidth: KeyVerificationStyles.maxWidthMatchButton(context),
+            ),
           ),
         );
         break;
@@ -312,11 +371,20 @@ class KeyVerificationPageState extends State<KeyVerificationDialog> {
           ],
         );
         buttons.add(
-          TextButton(
-            child: Text(
-              L10n.of(context)!.close,
+          TwakeTextButton(
+            onTap: () => Navigator.maybePop(context),
+            message: L10n.of(context)!.close,
+            borderHover: KeyVerificationStyles.borderHoverButtonWaningBanner,
+            styleMessage: Theme.of(context).textTheme.labelLarge?.copyWith(
+                  color: Theme.of(context).colorScheme.primary,
+                ),
+            margin: KeyVerificationStyles.marginButtonWarningBanner,
+            buttonDecoration: BoxDecoration(
+              color: LinagoraSysColors.material().onPrimary,
+              borderRadius: const BorderRadius.all(
+                Radius.circular(100),
+              ),
             ),
-            onPressed: () => Navigator.of(context, rootNavigator: false).pop(),
           ),
         );
         break;
@@ -333,11 +401,20 @@ class KeyVerificationPageState extends State<KeyVerificationDialog> {
           ],
         );
         buttons.add(
-          TextButton(
-            child: Text(
-              L10n.of(context)!.close,
+          TwakeTextButton(
+            onTap: () => Navigator.maybePop(context),
+            message: L10n.of(context)!.close,
+            borderHover: KeyVerificationStyles.borderHoverButtonWaningBanner,
+            styleMessage: Theme.of(context).textTheme.labelLarge?.copyWith(
+                  color: Theme.of(context).colorScheme.primary,
+                ),
+            margin: KeyVerificationStyles.marginButtonWarningBanner,
+            buttonDecoration: BoxDecoration(
+              color: LinagoraSysColors.material().onPrimary,
+              borderRadius: const BorderRadius.all(
+                Radius.circular(100),
+              ),
             ),
-            onPressed: () => Navigator.of(context, rootNavigator: false).pop(),
           ),
         );
         break;
