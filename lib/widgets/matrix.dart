@@ -365,7 +365,9 @@ class MatrixState extends State<Matrix>
       };
       request.onUpdate = null;
       hidPopup = true;
-      await KeyVerificationDialog(request: request).show(TwakeApp.router.routerDelegate.navigatorKey.currentContext ?? context);
+      await KeyVerificationDialog(request: request).show(
+        TwakeApp.router.routerDelegate.navigatorKey.currentContext ?? context,
+      );
     });
     onLoginStateChanged[name] ??= currentClient.onLoginStateChanged.stream
         .listen((state) => _listenLoginStateChanged(state, currentClient));
