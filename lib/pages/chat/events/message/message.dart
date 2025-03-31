@@ -209,7 +209,6 @@ class _MessageState extends State<Message> with MessageAvatarMixin {
               onMenuAction: widget.onMenuAction,
               menuChildren: widget.menuChildren,
               focusNode: widget.focusNode,
-              onLongPress: widget.onLongPress,
               listActions: widget.listAction,
             ),
           ),
