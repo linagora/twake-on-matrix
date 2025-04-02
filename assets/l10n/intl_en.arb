@@ -3107,5 +3107,7 @@
   "textCopiedToClipboard": "Text copied to clipboard",
   "selectAnEmailOrPhoneYouWantSendTheInvitationTo": "Select an email or phone you want send the invitation to",
   "phoneNumber": "Phone number",
-  "sendInvitation": "Send invitation"
+  "sendInvitation": "Send invitation",
+  "invitationHasBeenSuccessfullySent": "Invitation has been successfully sent!",
+  "failedToSendInvitation": "Failed to send invitation."
 }
