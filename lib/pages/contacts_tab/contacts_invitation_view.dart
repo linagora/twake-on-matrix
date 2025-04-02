@@ -43,7 +43,36 @@ class ContactsInvitationView extends StatelessWidget {
                       ),
                   textAlign: TextAlign.center,
                 ),
-                const SizedBox(height: 16),
+                InkWell(
+                  onTap: () => controller.onGenerateInvitationLink(),
+                  highlightColor: Colors.transparent,
+                  focusColor: Colors.transparent,
+                  splashColor: Colors.transparent,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 24,
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          L10n.of(context)!.copyInviteLink,
+                          style:
+                              Theme.of(context).textTheme.labelLarge?.copyWith(
+                                    color: LinagoraSysColors.material().primary,
+                                  ),
+                          textAlign: TextAlign.center,
+                        ),
+                        const SizedBox(width: 8),
+                        Icon(
+                          Icons.copy_outlined,
+                          color: LinagoraSysColors.material().primary,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
                 Expanded(
                   child: SingleChildScrollView(
                     physics: const ClampingScrollPhysics(),
