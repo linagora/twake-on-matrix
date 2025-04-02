@@ -3108,5 +3108,7 @@
   "selectAnEmailOrPhoneYouWantSendTheInvitationTo": "Select an email or phone you want send the invitation to",
   "phoneNumber": "Phone number",
   "sendInvitation": "Send invitation",
-  "verifyWithAnotherDevice": "Verify with another device"
+  "verifyWithAnotherDevice": "Verify with another device",
+  "invitationHasBeenSuccessfullySent": "Invitation has been successfully sent!",
+  "failedToSendInvitation": "Failed to send invitation."
 }

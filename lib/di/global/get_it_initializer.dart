@@ -79,6 +79,7 @@ import 'package:fluffychat/domain/usecase/create_direct_chat_interactor.dart';
 import 'package:fluffychat/domain/usecase/download_file_for_preview_interactor.dart';
 import 'package:fluffychat/domain/usecase/forward/forward_message_interactor.dart';
 import 'package:fluffychat/domain/usecase/generate_thumbnails_media_interactor.dart';
+import 'package:fluffychat/domain/usecase/invitation/send_invitation_interactor.dart';
 import 'package:fluffychat/domain/usecase/preview_url/get_preview_url_interactor.dart';
 import 'package:fluffychat/domain/usecase/recovery/delete_recovery_words_interactor.dart';
 import 'package:fluffychat/domain/usecase/recovery/get_recovery_words_interactor.dart';
@@ -399,6 +400,10 @@ class GetItInitializer {
 
     getIt.registerFactory<VerifyNameInteractor>(
       () => VerifyNameInteractor(),
+    );
+
+    getIt.registerFactory<SendInvitationInteractor>(
+      () => SendInvitationInteractor(),
     );
   }
 
