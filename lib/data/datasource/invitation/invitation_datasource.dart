@@ -10,8 +10,4 @@ abstract class InvitationDatasource {
   Future<GenerateInvitationLinkResponse> generateInvitationLink({
     required InvitationRequest request,
   });
-
-  Future<dynamic> getInvitationInformationById({
-    required String id,
-  });
 }

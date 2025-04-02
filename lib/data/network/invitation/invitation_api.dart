@@ -36,16 +36,4 @@ class InvitationAPI {
 
     return response;
   }
-
-  Future<dynamic> getInvitationInformationById({
-    required String id,
-  }) async {
-    final response = await _client
-        .get(
-          '${TomEndpoint.invitationServicePath.generateTomEndpoint()}/$id',
-        )
-        .onError((error, stackTrace) => throw Exception(error));
-
-    return response;
-  }
 }

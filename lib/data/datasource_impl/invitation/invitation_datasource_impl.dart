@@ -16,13 +16,6 @@ class InvitationDatasourceImpl implements InvitationDatasource {
   }
 
   @override
-  Future getInvitationInformationById({
-    required String id,
-  }) {
-    return _invitationAPI.getInvitationInformationById(id: id);
-  }
-
-  @override
   Future<SendInvitationResponse> sendInvitation({
     required InvitationRequest request,
   }) {
