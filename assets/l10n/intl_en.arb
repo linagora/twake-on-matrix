@@ -3109,5 +3109,5 @@
   "phoneNumber": "Phone number",
   "sendInvitation": "Send invitation",
   "invitationHasBeenSuccessfullySent": "Invitation has been successfully sent!",
-  "failedToSendInvitation": "Failed to send invitation."
+  "invitationFailedToSend": "Invitation failed to send!"
 }
