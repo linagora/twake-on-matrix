@@ -17,13 +17,6 @@ class InvitationRepositoryImpl implements InvitationRepository {
   }
 
   @override
-  Future getInvitationInformationById({
-    required String id,
-  }) {
-    return _invitationDatasource.getInvitationInformationById(id: id);
-  }
-
-  @override
   Future<SendInvitationResponse> sendInvitation({
     required InvitationRequest request,
   }) {

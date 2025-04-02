@@ -7,9 +7,12 @@ part 'send_invitation_response.g.dart';
 class SendInvitationResponse with EquatableMixin {
   @JsonKey(name: "message")
   final String? message;
+  @JsonKey(name: "id")
+  final String? id;
 
   SendInvitationResponse({
     this.message,
+    this.id,
   });
 
   factory SendInvitationResponse.fromJson(Map<String, dynamic> json) =>
@@ -20,5 +23,6 @@ class SendInvitationResponse with EquatableMixin {
   @override
   List<Object?> get props => [
         message,
+        id,
       ];
 }
