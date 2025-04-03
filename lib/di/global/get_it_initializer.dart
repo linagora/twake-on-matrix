@@ -5,6 +5,7 @@ import 'package:fluffychat/data/datasource/contact/address_book_datasource.dart'
 import 'package:fluffychat/data/datasource/contact/hive_third_party_contact_datasource.dart';
 import 'package:fluffychat/data/datasource/contact/phonebook_datasource.dart';
 import 'package:fluffychat/data/datasource/federation_configurations_datasource.dart';
+import 'package:fluffychat/data/datasource/invitation/hive_invitation_status_datasource.dart';
 import 'package:fluffychat/data/datasource/invitation/invitation_datasource.dart';
 import 'package:fluffychat/data/datasource/localizations/localizations_datasource.dart';
 import 'package:fluffychat/data/datasource/media/media_data_source.dart';
@@ -19,6 +20,7 @@ import 'package:fluffychat/data/datasource_impl/contact/hive_third_party_contact
 import 'package:fluffychat/data/datasource_impl/contact/phonebook_contact_datasource_impl.dart';
 import 'package:fluffychat/data/datasource_impl/contact/tom_contacts_datasource_impl.dart';
 import 'package:fluffychat/data/datasource_impl/federation_configurations_datasource_impl.dart';
+import 'package:fluffychat/data/datasource_impl/invitation/hive_invitation_status_datasource_impl.dart';
 import 'package:fluffychat/data/datasource_impl/invitation/invitation_datasource_impl.dart';
 import 'package:fluffychat/data/datasource_impl/localizations/localizations_datasource_impl.dart';
 import 'package:fluffychat/data/datasource_impl/media/media_data_source_impl.dart';
@@ -43,6 +45,7 @@ import 'package:fluffychat/data/repository/contact/hive_third_party_contact_repo
 import 'package:fluffychat/data/repository/contact/phonebook_contact_repository_impl.dart';
 import 'package:fluffychat/data/repository/contact/tom_contact_repository_impl.dart';
 import 'package:fluffychat/data/repository/federation_configurations_repository_impl.dart';
+import 'package:fluffychat/data/repository/invitation/hive_invitation_status_repository_impl.dart';
 import 'package:fluffychat/data/repository/invitation/invitation_repository_impl.dart';
 import 'package:fluffychat/data/repository/localizations/localizations_repository_impl.dart';
 import 'package:fluffychat/data/repository/media/media_repository_impl.dart';
@@ -59,6 +62,7 @@ import 'package:fluffychat/domain/repository/contact/address_book_repository.dar
 import 'package:fluffychat/domain/repository/contact/hive_contact_repository.dart';
 import 'package:fluffychat/domain/repository/contact_repository.dart';
 import 'package:fluffychat/domain/repository/federation_configurations_repository.dart';
+import 'package:fluffychat/domain/repository/invitation/hive_invitation_status_repository.dart';
 import 'package:fluffychat/domain/repository/invitation/invitation_repository.dart';
 import 'package:fluffychat/domain/repository/localizations/localizations_repository.dart';
 import 'package:fluffychat/domain/repository/multiple_account/multiple_account_repository.dart';
@@ -221,6 +225,9 @@ class GetItInitializer {
     getIt.registerFactory<MultipleAccountDatasource>(
       () => MultipleAccountDatasourceImpl(),
     );
+    getIt.registerFactory<HiveInvitationStatusDatasource>(
+      () => HiveInvitationStatusDatasourceImpl(),
+    );
   }
 
   void bindingDatasourceImpl() {
@@ -296,6 +303,9 @@ class GetItInitializer {
     );
     getIt.registerFactory<InvitationRepository>(
       () => InvitationRepositoryImpl(),
+    );
+    getIt.registerFactory<HiveInvitationStatusRepository>(
+      () => HiveInvitationStatusRepositoryImpl(),
     );
   }
 
