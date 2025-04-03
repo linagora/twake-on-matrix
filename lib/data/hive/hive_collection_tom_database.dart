@@ -24,11 +24,15 @@ class HiveCollectionToMDatabase {
 
   String get _thirdPartyContactsBox => 'third_party_contacts_box';
 
+  String get _nameBox => 'name_box';
+
   late CollectionBox<Map> tomConfigurationsBox;
 
   late CollectionBox<Map> federationConfigurationsBox;
 
   late CollectionBox<Map> thirdPartyContactsBox;
+
+  late CollectionBox<Map> nameBox;
 
   HiveCollectionToMDatabase(this.name, this.path, {this.key});
 
@@ -128,6 +132,7 @@ class HiveCollectionToMDatabase {
         _tomConfigurationsBoxName,
         _federationConfigurationsBoxName,
         _thirdPartyContactsBox,
+        _nameBox,
       },
       path: path,
       key: key,
@@ -144,12 +149,17 @@ class HiveCollectionToMDatabase {
       _thirdPartyContactsBox,
       preload: true,
     );
+    nameBox = await _collection.openBox(
+      _nameBox,
+      preload: true,
+    );
   }
 
   Future<void> clear() async {
     await tomConfigurationsBox.clear();
     await federationConfigurationsBox.clear();
     await thirdPartyContactsBox.clear();
+    await nameBox.clear();
     if (PlatformInfos.isMobile) {
       await _collection.deleteFromDisk();
     }
