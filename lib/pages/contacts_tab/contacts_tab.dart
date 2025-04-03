@@ -1,5 +1,5 @@
 import 'package:fluffychat/di/global/get_it_initializer.dart';
-import 'package:fluffychat/pages/contacts_tab/contacts_invitation_view.dart';
+import 'package:fluffychat/pages/contacts_tab/contacts_invitation.dart';
 import 'package:fluffychat/presentation/mixins/address_book_mixin.dart';
 import 'package:fluffychat/presentation/mixins/comparable_presentation_contact_mixin.dart';
 import 'package:fluffychat/pages/contacts_tab/contacts_tab_view.dart';
@@ -69,7 +69,7 @@ class ContactsTabController extends State<ContactsTab>
   }) {
     showAdaptiveBottomSheet(
       context: context,
-      builder: (context) => ContactsInvitationView(
+      builder: (context) => ContactsInvitation(
         contact: contact,
       ),
     );
