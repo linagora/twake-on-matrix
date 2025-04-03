@@ -25,9 +25,13 @@ class GenerateInvitationLinkInteractor {
           medium: medium.value,
         ),
       );
+
+      if (res.link.isEmpty == true) {
+        yield const Left(GenerateInvitationLinkIsEmptyState());
+      }
       yield Right(
         GenerateInvitationLinkSuccessState(
-          generateInvitationLinkResponse: res,
+          link: res.link,
         ),
       );
     } catch (e) {

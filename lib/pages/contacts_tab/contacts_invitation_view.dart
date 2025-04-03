@@ -57,7 +57,7 @@ class ContactsInvitationView extends StatelessWidget {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Text(
-                          L10n.of(context)!.copyInviteLink,
+                          L10n.of(context)!.shareInvitationLink,
                           style:
                               Theme.of(context).textTheme.labelLarge?.copyWith(
                                     color: LinagoraSysColors.material().primary,
@@ -66,7 +66,7 @@ class ContactsInvitationView extends StatelessWidget {
                         ),
                         const SizedBox(width: 8),
                         Icon(
-                          Icons.copy_outlined,
+                          Icons.share_outlined,
                           color: LinagoraSysColors.material().primary,
                         ),
                       ],

@@ -1,7 +1,6 @@
 import 'package:fluffychat/app_state/failure.dart';
 import 'package:fluffychat/app_state/initial.dart';
 import 'package:fluffychat/app_state/success.dart';
-import 'package:fluffychat/data/model/invitation/generate_invitation_link_response.dart';
 
 class GenerateInvitationLinkInitial extends Initial {
   const GenerateInvitationLinkInitial() : super();
@@ -18,14 +17,21 @@ class GenerateInvitationLinkLoadingState extends Success {
 }
 
 class GenerateInvitationLinkSuccessState extends Success {
-  final GenerateInvitationLinkResponse generateInvitationLinkResponse;
+  final String link;
 
   const GenerateInvitationLinkSuccessState({
-    required this.generateInvitationLinkResponse,
+    required this.link,
   });
 
   @override
-  List<Object?> get props => [generateInvitationLinkResponse];
+  List<Object?> get props => [link];
+}
+
+class GenerateInvitationLinkIsEmptyState extends Failure {
+  const GenerateInvitationLinkIsEmptyState() : super();
+
+  @override
+  List<Object?> get props => [];
 }
 
 class GenerateInvitationLinkFailureState extends Failure {

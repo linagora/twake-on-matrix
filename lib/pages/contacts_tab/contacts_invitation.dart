@@ -147,11 +147,20 @@ class ContactsInvitationController extends State<ContactsInvitation> {
   void _onGenerateInvitationLinkStateListener() {
     generateInvitationLinkNotifier.value.fold(
       (failure) {
+        TwakeDialog.hideLoadingDialog(context);
+
         if (failure is GenerateInvitationLinkFailureState) {
-          TwakeDialog.hideLoadingDialog(context);
           TwakeSnackBar.show(
             context,
-            failure.message ?? L10n.of(context)!.invitationFailedToSend,
+            failure.message ?? L10n.of(context)!.failedToSendFiles,
+          );
+          return;
+        }
+
+        if (failure is GenerateInvitationLinkIsEmptyState) {
+          TwakeSnackBar.show(
+            context,
+            L10n.of(context)!.invitationLinkIsEmpty,
           );
           return;
         }
@@ -164,7 +173,7 @@ class ContactsInvitationController extends State<ContactsInvitation> {
         if (success is GenerateInvitationLinkSuccessState) {
           TwakeDialog.hideLoadingDialog(context);
           Share.shareUri(
-            Uri.parse(success.generateInvitationLinkResponse.link ?? ''),
+            Uri.parse(success.link),
           );
           return;
         }

@@ -3109,6 +3109,7 @@
   "phoneNumber": "Phone number",
   "sendInvitation": "Send invitation",
   "invitationHasBeenSuccessfullySent": "Invitation has been successfully sent!",
-  "invitationFailedToSend": "Invitation failed to send!",
-  "copyInviteLink": "Copy invite link"
+  "failedToSendInvitation": "Failed to send invitation.",
+  "shareInvitationLink": "Share invitation link",
+  "invitationLinkIsEmpty": "Invitation link is empty"
 }
