@@ -3111,5 +3111,5 @@
   "invitationHasBeenSuccessfullySent": "Invitation has been successfully sent!",
   "failedToSendInvitation": "Failed to send invitation.",
   "shareInvitationLink": "Share invitation link",
-  "invitationLinkIsEmpty": "Invitation link is empty"
+  "failedToGenerateInvitationLink": "Failed to generate invitation link."
 }

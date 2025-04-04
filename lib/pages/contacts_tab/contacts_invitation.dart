@@ -153,7 +153,7 @@ class ContactsInvitationController extends State<ContactsInvitation> {
         if (failure is GenerateInvitationLinkIsEmptyState) {
           TwakeSnackBar.show(
             context,
-            L10n.of(context)!.invitationLinkIsEmpty,
+            L10n.of(context)!.failedToGenerateInvitationLink,
           );
           return;
         }
