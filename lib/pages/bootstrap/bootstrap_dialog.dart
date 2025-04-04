@@ -1,6 +1,7 @@
 import 'package:adaptive_dialog/adaptive_dialog.dart';
 import 'package:fluffychat/config/themes.dart';
 import 'package:fluffychat/pages/bootstrap/tom_bootstrap_dialog.dart';
+import 'package:fluffychat/pages/key_verification/key_verification_dialog.dart';
 import 'package:fluffychat/utils/dialog/twake_dialog.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/widgets/adaptive_flat_button.dart';
@@ -332,26 +333,25 @@ class BootstrapDialogState extends State<BootstrapDialog> {
                         const Expanded(child: Divider()),
                       ],
                     ),
-                    // TODO: TW-1766: temporary disable right now, because not supported yet
-                    // const SizedBox(height: 16),
-                    // ElevatedButton.icon(
-                    //   icon: const Icon(Icons.cast_connected_outlined),
-                    //   label: Text(L10n.of(context)!.transferFromAnotherDevice),
-                    //   onPressed: _recoveryKeyInputLoading
-                    //       ? null
-                    //       : () async {
-                    //           final req = await TwakeDialog
-                    //               .showFutureLoadingDialogFullScreen(
-                    //             future: () => widget.client
-                    //                 .userDeviceKeys[widget.client.userID!]!
-                    //                 .startVerification(),
-                    //           );
-                    //           if (req.error != null) return;
-                    //           await KeyVerificationDialog(request: req.result!)
-                    //               .show(context);
-                    //           Navigator.of(context, rootNavigator: false).pop();
-                    //         },
-                    // ),
+                    const SizedBox(height: 16),
+                    ElevatedButton.icon(
+                      icon: const Icon(Icons.cast_connected_outlined),
+                      label: Text(L10n.of(context)!.verifyWithAnotherDevice),
+                      onPressed: _recoveryKeyInputLoading
+                          ? null
+                          : () async {
+                              final req = await TwakeDialog
+                                  .showFutureLoadingDialogFullScreen(
+                                future: () => widget.client
+                                    .userDeviceKeys[widget.client.userID!]!
+                                    .startVerification(),
+                              );
+                              if (req.error != null) return;
+                              await KeyVerificationDialog(request: req.result!)
+                                  .show(context);
+                              Navigator.of(context, rootNavigator: false).pop();
+                            },
+                    ),
                     const SizedBox(height: 16),
                     ElevatedButton.icon(
                       style: ElevatedButton.styleFrom(
