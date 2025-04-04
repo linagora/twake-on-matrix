@@ -1,4 +1,5 @@
 import 'package:fluffychat/config/app_config.dart';
+import 'package:fluffychat/config/cozy_config.dart';
 import 'package:fluffychat/pages/app_grid/app_grid_dashboard_controller.dart';
 import 'package:fluffychat/resource/image_paths.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
@@ -15,6 +16,10 @@ class AdaptiveScaffoldAppBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (CozyConfig.instance.manager.isInsideCozy) {
+      return const SizedBox();
+    }
+
     return SlotLayout(
       config: <Breakpoint, SlotLayoutConfig>{
         const WidthPlatformBreakpoint(begin: ResponsiveUtils.minDesktopWidth):
