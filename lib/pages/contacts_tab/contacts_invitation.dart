@@ -120,27 +120,20 @@ class ContactsInvitationController extends State<ContactsInvitation> {
 
   void onGenerateInvitationLink() {
     final contact = selectedContact.value;
-    if (contact is PresentationPhoneNumber) {
-      _generateInvitationLinkInteractor
-          .execute(
-        contact: contact.phoneNumber,
-        medium: InvitationMediumEnum.phone,
-      )
-          .listen((state) {
-        generateInvitationLinkNotifier.value = state;
-      });
+    if (contact == null) {
       return;
     }
-    if (contact is PresentationEmail) {
+    final invitationData = _getInvitationData(contact);
+
+    if (invitationData != null) {
       _generateInvitationLinkInteractor
           .execute(
-        contact: contact.email,
-        medium: InvitationMediumEnum.email,
+        contact: invitationData.contact,
+        medium: invitationData.medium,
       )
           .listen((state) {
         generateInvitationLinkNotifier.value = state;
       });
-      return;
     }
   }
 
@@ -169,9 +162,10 @@ class ContactsInvitationController extends State<ContactsInvitation> {
         if (success is GenerateInvitationLinkLoadingState) {
           TwakeDialog.showLoadingDialog(context);
           return;
+        } else {
+          TwakeDialog.hideLoadingDialog(context);
         }
         if (success is GenerateInvitationLinkSuccessState) {
-          TwakeDialog.hideLoadingDialog(context);
           Share.shareUri(
             Uri.parse(success.link),
           );
