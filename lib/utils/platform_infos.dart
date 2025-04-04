@@ -24,6 +24,43 @@ abstract class PlatformInfos {
 
   static bool get isAndroid => !kIsWeb && Platform.isAndroid;
 
+  static String get browserName {
+    if (!kIsWeb) return '';
+    final userAgent = html.window.navigator.userAgent.toLowerCase();
+    if (userAgent.contains('chrome')) {
+      return 'Chrome';
+    } else if (userAgent.contains('safari') && !userAgent.contains('chrome')) {
+      return 'Safari';
+    } else if (userAgent.contains('firefox')) {
+      return 'Firefox';
+    } else if (userAgent.contains('edge')) {
+      return 'Edge';
+    } else if (userAgent.contains('opera')) {
+      return 'Opera';
+    } else {
+      return 'Unknown';
+    }
+  }
+
+  static String get webDomain {
+    if (!kIsWeb) return '';
+    try {
+      return html.window.location.hostname ?? '';
+    } catch (e) {
+      return '';
+    }
+  }
+
+  static String get operatingSystemName {
+    if (kIsWeb) return 'Web';
+    if (Platform.isLinux) return 'Linux';
+    if (Platform.isWindows) return 'Windows';
+    if (Platform.isMacOS) return 'macOS';
+    if (Platform.isIOS) return 'iOS';
+    if (Platform.isAndroid) return 'Android';
+    return 'Unknown';
+  }
+
   static bool get isCupertinoStyle => isIOS || isMacOS;
 
   static bool get isMobile => isAndroid || isIOS;
@@ -48,8 +85,10 @@ abstract class PlatformInfos {
       kIsWeb &&
       html.window.navigator.userAgent.toLowerCase().contains('firefox');
 
-  static String get clientName =>
-      '${AppConfig.applicationName} ${isWeb ? 'web' : Platform.operatingSystem}${kReleaseMode ? '' : 'Debug'}';
+  static String get clientName =>isWeb 
+    ? '$webDomain: $browserName on $operatingSystemName ${kReleaseMode ? '' : 'Debug'}'
+    : '${AppConfig.applicationName} ${Platform.operatingSystem} ${kReleaseMode ? '' : 'Debug'}';
+  
 
   static Future<String> getVersion() async {
     var version = kIsWeb ? 'Web' : 'Unknown';
