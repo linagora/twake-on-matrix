@@ -1,3 +1,4 @@
+import 'package:dio/dio.dart';
 import 'package:fluffychat/data/model/invitation/generate_invitation_link_response.dart';
 import 'package:fluffychat/data/model/invitation/invitation_request.dart';
 import 'package:fluffychat/data/model/invitation/send_invitation_response.dart';
@@ -16,10 +17,22 @@ class InvitationAPI {
   }) async {
     final response = await _client
         .postToGetBody(
-          TomEndpoint.invitationServicePath.generateTomEndpoint(),
-          data: request.toJson(),
-        )
-        .onError((error, stackTrace) => throw Exception(error));
+      TomEndpoint.invitationServicePath.generateTomEndpoint(),
+      data: request.toJson(),
+    )
+        .onError((error, stackTrace) {
+      if (error is DioException) {
+        throw DioException(
+          requestOptions: error.requestOptions,
+          response: error.response,
+          type: error.type,
+          error: error.error,
+          stackTrace: error.stackTrace,
+        );
+      } else {
+        throw Exception(error);
+      }
+    });
 
     return SendInvitationResponse.fromJson(response);
   }
@@ -29,11 +42,23 @@ class InvitationAPI {
   }) async {
     final response = await _client
         .postToGetBody(
-          TomEndpoint.generateInvitationServicePath.generateTomEndpoint(),
-          data: request.toJson(),
-        )
-        .onError((error, stackTrace) => throw Exception(error));
+      TomEndpoint.generateInvitationServicePath.generateTomEndpoint(),
+      data: request.toJson(),
+    )
+        .onError((error, stackTrace) {
+      if (error is DioException) {
+        throw DioException(
+          requestOptions: error.requestOptions,
+          response: error.response,
+          type: error.type,
+          error: error.error,
+          stackTrace: error.stackTrace,
+        );
+      } else {
+        throw Exception(error);
+      }
+    });
 
-    return response;
+    return GenerateInvitationLinkResponse.fromJson(response);
   }
 }
