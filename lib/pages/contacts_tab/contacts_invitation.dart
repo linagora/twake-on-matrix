@@ -2,14 +2,18 @@ import 'package:dartz/dartz.dart' hide State;
 import 'package:fluffychat/app_state/failure.dart';
 import 'package:fluffychat/app_state/success.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
+import 'package:fluffychat/domain/app_state/invitation/generate_invitation_link_state.dart';
 import 'package:fluffychat/domain/app_state/invitation/send_invitation_state.dart';
 import 'package:fluffychat/domain/model/invitation/invitation_medium_enum.dart';
+import 'package:fluffychat/domain/usecase/invitation/generate_invitation_link_interactor.dart';
 import 'package:fluffychat/domain/usecase/invitation/send_invitation_interactor.dart';
 import 'package:fluffychat/pages/contacts_tab/contacts_invitation_view.dart';
 import 'package:fluffychat/presentation/model/contact/presentation_contact.dart';
+import 'package:fluffychat/utils/dialog/twake_dialog.dart';
 import 'package:fluffychat/utils/twake_snackbar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
+import 'package:share_plus/share_plus.dart';
 
 class ContactsInvitation extends StatefulWidget {
   final PresentationContact contact;
@@ -24,11 +28,17 @@ class ContactsInvitationController extends State<ContactsInvitation> {
   final SendInvitationInteractor _sendInvitationInteractor =
       getIt.get<SendInvitationInteractor>();
 
+  final GenerateInvitationLinkInteractor _generateInvitationLinkInteractor =
+      getIt.get<GenerateInvitationLinkInteractor>();
+
   final ValueNotifier<PresentationThirdPartyContact?> selectedContact =
       ValueNotifier(null);
 
   final ValueNotifier<Either<Failure, Success>> sendInvitationNotifier =
       ValueNotifier(const Right(SendInvitationInitial()));
+
+  final ValueNotifier<Either<Failure, Success>> generateInvitationLinkNotifier =
+      ValueNotifier(const Right(GenerateInvitationLinkInitial()));
 
   void onSelectContact(PresentationThirdPartyContact contact) {
     if (selectedContact.value == null) {
@@ -108,11 +118,71 @@ class ContactsInvitationController extends State<ContactsInvitation> {
     );
   }
 
+  void onGenerateInvitationLink() {
+    final contact = selectedContact.value;
+    if (contact == null) {
+      return;
+    }
+    final invitationData = _getInvitationData(contact);
+
+    if (invitationData != null) {
+      _generateInvitationLinkInteractor
+          .execute(
+        contact: invitationData.contact,
+        medium: invitationData.medium,
+      )
+          .listen((state) {
+        generateInvitationLinkNotifier.value = state;
+      });
+    }
+  }
+
+  void _onGenerateInvitationLinkStateListener() {
+    generateInvitationLinkNotifier.value.fold(
+      (failure) {
+        TwakeDialog.hideLoadingDialog(context);
+
+        if (failure is GenerateInvitationLinkFailureState) {
+          TwakeSnackBar.show(
+            context,
+            failure.message ?? L10n.of(context)!.failedToSendFiles,
+          );
+          return;
+        }
+
+        if (failure is GenerateInvitationLinkIsEmptyState) {
+          TwakeSnackBar.show(
+            context,
+            L10n.of(context)!.failedToGenerateInvitationLink,
+          );
+          return;
+        }
+      },
+      (success) {
+        if (success is GenerateInvitationLinkLoadingState) {
+          TwakeDialog.showLoadingDialog(context);
+          return;
+        } else {
+          TwakeDialog.hideLoadingDialog(context);
+        }
+        if (success is GenerateInvitationLinkSuccessState) {
+          Share.shareUri(
+            Uri.parse(success.link),
+          );
+          return;
+        }
+      },
+    );
+  }
+
   @override
   void initState() {
     _onSelectContactDefault(widget.contact);
     sendInvitationNotifier.addListener(() {
       _onSendInvitationStateListener();
+    });
+    generateInvitationLinkNotifier.addListener(() {
+      _onGenerateInvitationLinkStateListener();
     });
     super.initState();
   }

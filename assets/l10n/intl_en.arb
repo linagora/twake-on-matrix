@@ -3110,5 +3110,7 @@
   "sendInvitation": "Send invitation",
   "verifyWithAnotherDevice": "Verify with another device",
   "invitationHasBeenSuccessfullySent": "Invitation has been successfully sent!",
-  "failedToSendInvitation": "Failed to send invitation."
+  "failedToSendInvitation": "Failed to send invitation.",
+  "shareInvitationLink": "Share invitation link",
+  "failedToGenerateInvitationLink": "Failed to generate invitation link."
 }

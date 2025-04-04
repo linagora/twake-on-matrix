@@ -4,12 +4,12 @@ import 'package:fluffychat/app_state/failure.dart';
 import 'package:fluffychat/app_state/success.dart';
 import 'package:fluffychat/data/model/invitation/invitation_request.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
-import 'package:fluffychat/domain/app_state/invitation/send_invitation_state.dart';
+import 'package:fluffychat/domain/app_state/invitation/generate_invitation_link_state.dart';
 import 'package:fluffychat/domain/model/invitation/invitation_medium_enum.dart';
 import 'package:fluffychat/domain/repository/invitation/invitation_repository.dart';
 import 'package:matrix/matrix.dart';
 
-class SendInvitationInteractor {
+class GenerateInvitationLinkInteractor {
   final InvitationRepository _invitationRepository =
       getIt.get<InvitationRepository>();
 
@@ -18,22 +18,27 @@ class SendInvitationInteractor {
     required InvitationMediumEnum medium,
   }) async* {
     try {
-      yield const Right(SendInvitationLoadingState());
-      final res = await _invitationRepository.sendInvitation(
+      yield const Right(GenerateInvitationLinkLoadingState());
+      final res = await _invitationRepository.generateInvitationLink(
         request: InvitationRequest(
           contact: contact,
           medium: medium.value,
         ),
       );
+
+      if (res.link.isEmpty == true) {
+        yield const Left(GenerateInvitationLinkIsEmptyState());
+      }
       yield Right(
-        SendInvitationSuccessState(
-          sendInvitationResponse: res,
+        GenerateInvitationLinkSuccessState(
+          link: res.link,
         ),
       );
     } catch (e) {
       Logs().e('SendInvitationInteractor::execute', e);
+
       yield Left(
-        SendInvitationFailureState(
+        GenerateInvitationLinkFailureState(
           exception: e,
           message: e is DioException ? e.response?.data['message'] ?? '' : null,
         ),
