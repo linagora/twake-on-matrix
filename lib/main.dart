@@ -1,5 +1,6 @@
 import 'package:collection/collection.dart';
 import 'package:fluffychat/config/app_config.dart';
+import 'package:fluffychat/config/cozy_config.dart';
 import 'package:fluffychat/config/setting_keys.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/utils/client_manager.dart';
@@ -53,6 +54,10 @@ void main() async {
       '${AppConfig.applicationName} started in background-fetch mode. No GUI will be created unless the app is no longer detached.',
     );
     return;
+  }
+
+  if (PlatformInfos.isWeb) {
+    CozyConfig.instance.injectCozyScript();
   }
 
   // Started in foreground mode.
