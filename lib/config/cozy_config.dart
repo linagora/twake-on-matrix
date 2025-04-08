@@ -5,6 +5,8 @@ class CozyConfig {
   static final CozyConfig instance = CozyConfig._internal();
   CozyConfig._internal();
 
+  static const cozyBridgeVersion = '0.7.0';
+
   final manager = CozyConfigManager();
 
   bool _isCozyScriptInjected = false;
@@ -16,7 +18,7 @@ class CozyConfig {
 
     final ScriptElement script = ScriptElement();
     script.src =
-        'https://cdn.jsdelivr.net/npm/cozy-external-bridge@0.6.0/dist/embedded/bundle.js';
+        'https://cdn.jsdelivr.net/npm/cozy-external-bridge@$cozyBridgeVersion/dist/embedded/bundle.js';
     document.head?.append(script);
     _isCozyScriptInjected = true;
   }

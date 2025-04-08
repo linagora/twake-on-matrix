@@ -16,11 +16,7 @@ class AdaptiveScaffoldAppBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (CozyConfig.instance.manager.isInsideCozy) {
-      return const SizedBox();
-    }
-
-    return SlotLayout(
+    final child = SlotLayout(
       config: <Breakpoint, SlotLayoutConfig>{
         const WidthPlatformBreakpoint(begin: ResponsiveUtils.minDesktopWidth):
             SlotLayout.from(
@@ -48,6 +44,15 @@ class AdaptiveScaffoldAppBar extends StatelessWidget {
             );
           },
         ),
+      },
+    );
+
+    return FutureBuilder(
+      future: CozyConfig.instance.manager.isInsideCozy,
+      builder: (context, snapshot) {
+        if (!snapshot.hasData || !snapshot.data!) return child;
+
+        return const SizedBox();
       },
     );
   }
