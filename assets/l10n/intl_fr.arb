@@ -2885,7 +2885,7 @@
   "@failedToUnpin": {},
   "descriptionWelcomeTo": "une messagerie open source basée sur\nle protocole matrix, qui permet de\ncrypter vos données",
   "@descriptionWelcomeTo": {},
-  "signIn": "S'inscrire",
+  "signIn": "Se Connecter",
   "@signIn": {},
   "descriptionTwakeId": "Un messager open source qui crypte\nvos données avec le protocole matrix",
   "@descriptionTwakeId": {},
