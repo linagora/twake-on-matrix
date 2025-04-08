@@ -11,8 +11,23 @@ import 'package:flutter_adaptive_scaffold/flutter_adaptive_scaffold.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 
-class AdaptiveScaffoldAppBar extends StatelessWidget {
+class AdaptiveScaffoldAppBar extends StatefulWidget {
   const AdaptiveScaffoldAppBar({super.key});
+
+  @override
+  State<AdaptiveScaffoldAppBar> createState() => _AdaptiveScaffoldAppBarState();
+}
+
+class _AdaptiveScaffoldAppBarState extends State<AdaptiveScaffoldAppBar> {
+  @override
+  void initState() {
+    super.initState();
+    CozyConfig.instance.manager.isInsideCozy.then((isInsideCozy) {
+      if (isInsideCozy) {
+        CozyConfig.instance.manager.initialize();
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
