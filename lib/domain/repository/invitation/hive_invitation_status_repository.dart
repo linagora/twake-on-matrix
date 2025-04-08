@@ -8,6 +8,7 @@ abstract class HiveInvitationStatusRepository {
 
   Future<InvitationStatus> getInvitationStatus({
     required String userId,
+    required String contactId,
   });
 
   Future<void> deleteInvitationStatusByContactId({

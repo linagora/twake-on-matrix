@@ -1,43 +1,42 @@
 import 'package:fluffychat/app_state/failure.dart';
 import 'package:fluffychat/app_state/initial.dart';
 import 'package:fluffychat/app_state/success.dart';
-import 'package:fluffychat/data/model/invitation/send_invitation_response.dart';
 
-class SendInvitationInitial extends Initial {
-  const SendInvitationInitial() : super();
-
-  @override
-  List<Object?> get props => [];
-}
-
-class SendInvitationLoadingState extends Success {
-  const SendInvitationLoadingState() : super();
+class HiveGetInvitationStatusInitial extends Initial {
+  const HiveGetInvitationStatusInitial() : super();
 
   @override
   List<Object?> get props => [];
 }
 
-class SendInvitationSuccessState extends Success {
-  final SendInvitationResponse sendInvitationResponse;
+class HiveGetInvitationStatusLoadingState extends Success {
+  const HiveGetInvitationStatusLoadingState() : super();
+
+  @override
+  List<Object?> get props => [];
+}
+
+class HiveGetInvitationStatusSuccessState extends Success {
   final String contactId;
+  final String invitationId;
 
-  const SendInvitationSuccessState({
-    required this.sendInvitationResponse,
+  const HiveGetInvitationStatusSuccessState({
     required this.contactId,
+    required this.invitationId,
   });
 
   @override
   List<Object?> get props => [
-        sendInvitationResponse,
         contactId,
+        invitationId,
       ];
 }
 
-class SendInvitationFailureState extends Failure {
+class HiveGetInvitationStatusFailureState extends Failure {
   final dynamic exception;
   final String? message;
 
-  const SendInvitationFailureState({
+  const HiveGetInvitationStatusFailureState({
     required this.exception,
     this.message,
   });

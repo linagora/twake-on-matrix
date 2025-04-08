@@ -26,7 +26,7 @@ class InvitationStatusResponse with EquatableMixin {
 @JsonSerializable()
 class Invitation with EquatableMixin {
   @JsonKey(name: "id")
-  final String? id;
+  final String id;
   @JsonKey(name: "sender")
   final String? sender;
   @JsonKey(name: "recepient")
@@ -34,14 +34,14 @@ class Invitation with EquatableMixin {
   @JsonKey(name: "medium")
   final String? medium;
   @JsonKey(name: "expiration")
-  final String? expiration;
+  final int? expiration;
   @JsonKey(name: "accessed")
   final bool? accessed;
   @JsonKey(name: "room_id")
   final dynamic roomId;
 
   Invitation({
-    this.id,
+    required this.id,
     this.sender,
     this.recepient,
     this.medium,
@@ -49,6 +49,14 @@ class Invitation with EquatableMixin {
     this.accessed,
     this.roomId,
   });
+
+  bool get expiredTimeToInvite {
+    if (expiration == null) {
+      return false;
+    }
+    final expirationDate = DateTime.fromMillisecondsSinceEpoch(expiration!);
+    return expirationDate.isBefore(DateTime.now());
+  }
 
   factory Invitation.fromJson(Map<String, dynamic> json) =>
       _$InvitationFromJson(json);

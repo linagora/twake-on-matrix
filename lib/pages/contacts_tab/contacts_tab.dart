@@ -1,12 +1,10 @@
 import 'package:fluffychat/di/global/get_it_initializer.dart';
-import 'package:fluffychat/pages/contacts_tab/contacts_invitation.dart';
 import 'package:fluffychat/presentation/mixins/address_book_mixin.dart';
 import 'package:fluffychat/presentation/mixins/comparable_presentation_contact_mixin.dart';
 import 'package:fluffychat/pages/contacts_tab/contacts_tab_view.dart';
 import 'package:fluffychat/presentation/mixins/contacts_view_controller_mixin.dart';
 import 'package:fluffychat/presentation/model/contact/presentation_contact.dart';
 import 'package:fluffychat/presentation/model/contact/presentation_contact_constant.dart';
-import 'package:fluffychat/utils/adaptive_bottom_sheet.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
 import 'package:fluffychat/utils/responsive/responsive_utils.dart';
 import 'package:fluffychat/utils/string_extension.dart';
@@ -63,41 +61,11 @@ class ContactsTabController extends State<ContactsTab>
     });
   }
 
-  void _handleMatrixIdNull({
-    required BuildContext context,
-    required PresentationContact contact,
-  }) {
-    showAdaptiveBottomSheet(
-      context: context,
-      builder: (context) => ContactsInvitation(
-        contact: contact,
-      ),
-    );
-  }
-
-  void onExpandInformation({
+  void onRecentContactTap({
     required BuildContext context,
     required String path,
     required PresentationContact contact,
   }) {
-    _handleMatrixIdNull(
-      context: context,
-      contact: contact,
-    );
-  }
-
-  void onContactTap({
-    required BuildContext context,
-    required String path,
-    required PresentationContact contact,
-  }) {
-    if (contact.matrixId == null || contact.matrixId!.isEmpty) {
-      _handleMatrixIdNull(
-        context: context,
-        contact: contact,
-      );
-      return;
-    }
     if (contact.matrixId?.isCurrentMatrixId(context) == true) {
       goToSettingsProfile();
       return;

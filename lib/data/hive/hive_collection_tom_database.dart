@@ -132,6 +132,7 @@ class HiveCollectionToMDatabase {
         _tomConfigurationsBoxName,
         _federationConfigurationsBoxName,
         _thirdPartyContactsBox,
+        _invitationStatusBox,
       },
       path: path,
       key: key,

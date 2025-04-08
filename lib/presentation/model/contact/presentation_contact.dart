@@ -20,7 +20,10 @@ class PresentationContact extends Equatable {
 
   final ContactType? type;
 
+  final String? id;
+
   const PresentationContact({
+    this.id,
     this.emails,
     this.phoneNumbers,
     this.displayName,
@@ -31,6 +34,7 @@ class PresentationContact extends Equatable {
   });
 
   PresentationContact get presentationContactEmpty => const PresentationContact(
+        id: '',
         emails: {},
         displayName: '',
         matrixId: '',
@@ -48,8 +52,23 @@ class PresentationContact extends Equatable {
           ?.phoneNumber ??
       '';
 
+  PresentationThirdPartyContact? get primaryContact {
+    if (primaryPhoneNumber.isNotEmpty) {
+      return phoneNumbers?.firstWhereOrNull(
+        (phoneNumber) => phoneNumber.phoneNumber == primaryPhoneNumber,
+      );
+    }
+    if (primaryEmail.isNotEmpty) {
+      return emails?.firstWhereOrNull(
+        (email) => email.email == primaryEmail,
+      );
+    }
+    return null;
+  }
+
   @override
   List<Object?> get props => [
+        id,
         emails,
         phoneNumbers,
         displayName,

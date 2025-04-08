@@ -13,11 +13,14 @@ class HiveInvitationStatusDatasourceImpl
   @override
   Future<InvitationStatus> getInvitationStatus({
     required String userId,
+    required String contactId,
   }) async {
     final hiveCollectionFederationDatabase =
         await getIt.getAsync<HiveCollectionToMDatabase>();
     final invitationStatus =
-        await hiveCollectionFederationDatabase.invitationStatus.get(userId);
+        await hiveCollectionFederationDatabase.invitationStatus.get(
+      TupleKey(userId, contactId).toString(),
+    );
 
     if (invitationStatus == null) {
       throw InvitationStatusNotFound();

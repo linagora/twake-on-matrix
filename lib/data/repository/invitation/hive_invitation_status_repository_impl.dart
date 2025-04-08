@@ -22,9 +22,11 @@ class HiveInvitationStatusRepositoryImpl
   @override
   Future<InvitationStatus> getInvitationStatus({
     required String userId,
+    required String contactId,
   }) {
     return _hiveInvitationStatusDatasource.getInvitationStatus(
       userId: userId,
+      contactId: contactId,
     );
   }
 
