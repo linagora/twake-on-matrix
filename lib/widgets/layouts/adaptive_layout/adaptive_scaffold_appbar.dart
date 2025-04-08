@@ -1,5 +1,4 @@
 import 'package:fluffychat/config/app_config.dart';
-import 'package:fluffychat/config/cozy_config.dart';
 import 'package:fluffychat/pages/app_grid/app_grid_dashboard_controller.dart';
 import 'package:fluffychat/resource/image_paths.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
@@ -22,9 +21,9 @@ class _AdaptiveScaffoldAppBarState extends State<AdaptiveScaffoldAppBar> {
   @override
   void initState() {
     super.initState();
-    CozyConfig.instance.manager.isInsideCozy.then((isInsideCozy) {
+    CozyConfigManager().isInsideCozy.then((isInsideCozy) {
       if (isInsideCozy) {
-        CozyConfig.instance.manager.initialize();
+        CozyConfigManager().initialize();
       }
     });
   }
@@ -63,7 +62,7 @@ class _AdaptiveScaffoldAppBarState extends State<AdaptiveScaffoldAppBar> {
     );
 
     return FutureBuilder(
-      future: CozyConfig.instance.manager.isInsideCozy,
+      future: CozyConfigManager().isInsideCozy,
       builder: (context, snapshot) {
         if (!snapshot.hasData || !snapshot.data!) return child;
 

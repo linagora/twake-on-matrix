@@ -1,6 +1,5 @@
 import 'package:collection/collection.dart';
 import 'package:fluffychat/config/app_config.dart';
-import 'package:fluffychat/config/cozy_config.dart';
 import 'package:fluffychat/config/setting_keys.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/utils/client_manager.dart';
@@ -10,6 +9,7 @@ import 'package:flutter_app_lock/flutter_app_lock.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:linagora_design_flutter/cozy_config_manager/cozy_config_manager.dart';
 import 'package:matrix/matrix.dart';
 import 'package:media_kit/media_kit.dart';
 import 'package:path_provider/path_provider.dart';
@@ -57,7 +57,7 @@ void main() async {
   }
 
   if (PlatformInfos.isWeb) {
-    CozyConfig.instance.injectCozyScript();
+    CozyConfigManager().injectCozyScript();
   }
 
   // Started in foreground mode.
