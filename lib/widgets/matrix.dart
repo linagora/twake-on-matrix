@@ -375,7 +375,6 @@ class MatrixState extends State<Matrix>
         currentClient.onUiaRequest.stream.listen(uiaRequestHandler);
     if (PlatformInfos.isWeb || PlatformInfos.isLinux) {
       currentClient.onSync.stream.first.then((s) {
-        html.Notification.requestPermission();
         onNotification[name] ??= currentClient.onEvent.stream
             .where(
               (e) =>
