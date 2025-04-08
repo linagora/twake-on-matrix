@@ -10,12 +10,27 @@ import 'package:flutter_adaptive_scaffold/flutter_adaptive_scaffold.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 
-class AdaptiveScaffoldAppBar extends StatelessWidget {
+class AdaptiveScaffoldAppBar extends StatefulWidget {
   const AdaptiveScaffoldAppBar({super.key});
 
   @override
+  State<AdaptiveScaffoldAppBar> createState() => _AdaptiveScaffoldAppBarState();
+}
+
+class _AdaptiveScaffoldAppBarState extends State<AdaptiveScaffoldAppBar> {
+  @override
+  void initState() {
+    super.initState();
+    CozyConfigManager().isInsideCozy.then((isInsideCozy) {
+      if (isInsideCozy) {
+        CozyConfigManager().initialize();
+      }
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return SlotLayout(
+    final child = SlotLayout(
       config: <Breakpoint, SlotLayoutConfig>{
         const WidthPlatformBreakpoint(begin: ResponsiveUtils.minDesktopWidth):
             SlotLayout.from(
@@ -43,6 +58,15 @@ class AdaptiveScaffoldAppBar extends StatelessWidget {
             );
           },
         ),
+      },
+    );
+
+    return FutureBuilder(
+      future: CozyConfigManager().isInsideCozy,
+      builder: (context, snapshot) {
+        if (!snapshot.hasData || !snapshot.data!) return child;
+
+        return const SizedBox();
       },
     );
   }
