@@ -1,3 +1,4 @@
+import 'package:fluffychat/config/app_emojis.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/pages/chat/events/message/display_name_widget.dart';
 import 'package:fluffychat/pages/chat/events/message/message.dart';
@@ -18,6 +19,7 @@ import 'package:flutter/material.dart';
 import 'package:linagora_design_flutter/colors/linagora_ref_colors.dart';
 import 'package:linagora_design_flutter/colors/linagora_sys_colors.dart';
 import 'package:matrix/matrix.dart';
+import 'package:super_context_menu/super_context_menu.dart';
 
 typedef ContextMenuBuilder = List<Widget> Function(BuildContext context);
 
@@ -92,124 +94,178 @@ class MessageContentWithTimestampBuilder extends StatelessWidget {
               event,
               selected,
             ),
-            child: MultiPlatformSelectionMode(
-              event: event,
-              isClickable: responsiveUtils.isMobileOrTablet(context),
-              onLongPress: event.status.isAvailable ? onLongPress : null,
-              child: Stack(
-                alignment: event.isOwnMessage
-                    ? AlignmentDirectional.bottomStart
-                    : AlignmentDirectional.bottomEnd,
-                children: [
-                  Column(
+            child: ContextMenuWidget(
+              hitTestBehavior: HitTestBehavior.translucent,
+              previewBuilder: (context, child) {
+                final emojis = List<String>.from(AppEmojis.emojis);
+                return Container(
+                  constraints: BoxConstraints(
+                    maxWidth: MediaQuery.sizeOf(context).width,
+                  ),
+                  child: Column(
+                    crossAxisAlignment: event.isOwnMessage
+                        ? CrossAxisAlignment.end
+                        : CrossAxisAlignment.start,
                     children: [
                       Container(
-                        decoration: BoxDecoration(
-                          borderRadius: MessageStyle.bubbleBorderRadius,
-                          color: event.isOwnMessage
-                              ? LinagoraRefColors.material().primary[95]
-                              : responsiveUtils.isMobile(context)
-                                  ? LinagoraSysColors.material().onPrimary
-                                  : Theme.of(context)
-                                      .colorScheme
-                                      .surfaceContainerHighest,
-                          border: !event.isOwnMessage &&
-                                  responsiveUtils.isMobile(context)
-                              ? Border.all(
-                                  color: MessageStyle.borderColorReceivedBubble,
-                                )
-                              : null,
-                        ),
-                        padding: noBubble
-                            ? const EdgeInsets.symmetric(
-                                horizontal: 16.0,
-                              )
-                            : MessageStyle.paddingMessageContentBuilder(event),
-                        constraints: BoxConstraints(
-                          maxWidth: MessageStyle.messageBubbleWidth(
-                            context,
+                        height: 56,
+                        width: MediaQuery.sizeOf(context).width,
+                        padding: const EdgeInsets.only(right: 1),
+                        child: ListView.builder(
+                          scrollDirection: Axis.horizontal,
+                          itemCount: emojis.length,
+                          itemBuilder: (c, i) => InkWell(
+                            borderRadius: BorderRadius.circular(8),
+                            onTap: () {
+                              debugPrint('Emoji: ${emojis[i]}');
+                            },
+                            child: Container(
+                              width: 56,
+                              height: 56,
+                              alignment: Alignment.center,
+                              child: Text(
+                                emojis[i],
+                                style: const TextStyle(fontSize: 30),
+                              ),
+                            ),
                           ),
                         ),
-                        child: LayoutBuilder(
-                          builder: (
-                            context,
-                            availableBubbleContraints,
-                          ) =>
-                              Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              event.hideDisplayName(
-                                nextEvent,
-                                responsiveUtils.isMobile(context),
-                              )
-                                  ? const SizedBox()
-                                  : DisplayNameWidget(
-                                      event: event,
-                                    ),
-                              IntrinsicHeight(
-                                child: Stack(
-                                  alignment: Alignment.bottomRight,
-                                  children: [
-                                    MessageContentBuilder(
-                                      event: event,
-                                      timeline: timeline,
-                                      availableBubbleContraints:
-                                          availableBubbleContraints,
-                                      onSelect: onSelect,
-                                      nextEvent: nextEvent,
-                                      scrollToEventId: scrollToEventId,
-                                      selectMode: selectMode,
-                                    ),
-                                    if (timelineText)
-                                      Positioned(
-                                        child: SelectionContainer.disabled(
-                                          child: Padding(
-                                            padding:
-                                                MessageStyle.paddingMessageTime,
-                                            child: Text.rich(
-                                              WidgetSpan(
-                                                child: MessageTime(
-                                                  timelineOverlayMessage: event
-                                                      .timelineOverlayMessage,
-                                                  room: event.room,
-                                                  event: event,
-                                                  ownMessage:
-                                                      event.isOwnMessage,
-                                                  timeline: timeline,
+                      ),
+                      child,
+                    ],
+                  ),
+                );
+              },
+              child: MultiPlatformSelectionMode(
+                event: event,
+                isClickable: responsiveUtils.isMobileOrTablet(context),
+                child: Stack(
+                  alignment: event.isOwnMessage
+                      ? AlignmentDirectional.bottomStart
+                      : AlignmentDirectional.bottomEnd,
+                  children: [
+                    Column(
+                      children: [
+                        Container(
+                          decoration: BoxDecoration(
+                            borderRadius: MessageStyle.bubbleBorderRadius,
+                            color: event.isOwnMessage
+                                ? LinagoraRefColors.material().primary[95]
+                                : responsiveUtils.isMobile(context)
+                                    ? LinagoraSysColors.material().onPrimary
+                                    : Theme.of(context)
+                                        .colorScheme
+                                        .surfaceContainerHighest,
+                            border: !event.isOwnMessage &&
+                                    responsiveUtils.isMobile(context)
+                                ? Border.all(
+                                    color:
+                                        MessageStyle.borderColorReceivedBubble,
+                                  )
+                                : null,
+                          ),
+                          padding: noBubble
+                              ? const EdgeInsets.symmetric(
+                                  horizontal: 16.0,
+                                )
+                              : MessageStyle.paddingMessageContentBuilder(
+                                  event,
+                                ),
+                          constraints: BoxConstraints(
+                            maxWidth: MessageStyle.messageBubbleWidth(
+                              context,
+                            ),
+                          ),
+                          child: LayoutBuilder(
+                            builder: (
+                              context,
+                              availableBubbleContraints,
+                            ) =>
+                                Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                event.hideDisplayName(
+                                  nextEvent,
+                                  responsiveUtils.isMobile(context),
+                                )
+                                    ? const SizedBox()
+                                    : DisplayNameWidget(
+                                        event: event,
+                                      ),
+                                IntrinsicHeight(
+                                  child: Stack(
+                                    alignment: Alignment.bottomRight,
+                                    children: [
+                                      MessageContentBuilder(
+                                        event: event,
+                                        timeline: timeline,
+                                        availableBubbleContraints:
+                                            availableBubbleContraints,
+                                        onSelect: onSelect,
+                                        nextEvent: nextEvent,
+                                        scrollToEventId: scrollToEventId,
+                                        selectMode: selectMode,
+                                      ),
+                                      if (timelineText)
+                                        Positioned(
+                                          child: SelectionContainer.disabled(
+                                            child: Padding(
+                                              padding: MessageStyle
+                                                  .paddingMessageTime,
+                                              child: Text.rich(
+                                                WidgetSpan(
+                                                  child: MessageTime(
+                                                    timelineOverlayMessage: event
+                                                        .timelineOverlayMessage,
+                                                    room: event.room,
+                                                    event: event,
+                                                    ownMessage:
+                                                        event.isOwnMessage,
+                                                    timeline: timeline,
+                                                  ),
                                                 ),
                                               ),
                                             ),
                                           ),
                                         ),
-                                      ),
-                                  ],
+                                    ],
+                                  ),
                                 ),
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
                         ),
-                      ),
-                      if (event.hasAggregatedEvents(
-                        timeline,
-                        RelationshipTypes.reaction,
-                      ))
-                        const SizedBox(height: 24),
-                    ],
-                  ),
-                  if (event.hasAggregatedEvents(
-                    timeline,
-                    RelationshipTypes.reaction,
-                  )) ...[
-                    Positioned(
-                      left: 8,
-                      right: 0,
-                      bottom: 0,
-                      child: MessageReactions(event, timeline),
+                        if (event.hasAggregatedEvents(
+                          timeline,
+                          RelationshipTypes.reaction,
+                        ))
+                          const SizedBox(height: 24),
+                      ],
                     ),
-                    const SizedBox(width: 4),
+                    if (event.hasAggregatedEvents(
+                      timeline,
+                      RelationshipTypes.reaction,
+                    )) ...[
+                      Positioned(
+                        left: 8,
+                        right: 0,
+                        bottom: 0,
+                        child: MessageReactions(event, timeline),
+                      ),
+                      const SizedBox(width: 4),
+                    ],
                   ],
-                ],
+                ),
               ),
+              menuProvider: (_) {
+                return Menu(
+                  children: [
+                    MenuAction(title: 'Select', callback: () {}),
+                    MenuAction(title: 'Forward', callback: () {}),
+                    MenuAction(title: 'Reply', callback: () {}),
+                  ],
+                );
+              },
             ),
           ),
         ),
