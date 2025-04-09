@@ -38,7 +38,9 @@ class Invitation with EquatableMixin {
   @JsonKey(name: "accessed")
   final bool? accessed;
   @JsonKey(name: "room_id")
-  final dynamic roomId;
+  final String? roomId;
+  @JsonKey(name: "matrix_id")
+  final String? matrixId;
 
   Invitation({
     required this.id,
@@ -48,7 +50,12 @@ class Invitation with EquatableMixin {
     this.expiration,
     this.accessed,
     this.roomId,
+    this.matrixId,
   });
+
+  bool get hasMatrixId {
+    return matrixId != null && matrixId!.isNotEmpty;
+  }
 
   bool get expiredTimeToInvite {
     if (expiration == null) {
@@ -72,5 +79,6 @@ class Invitation with EquatableMixin {
         expiration,
         accessed,
         roomId,
+        matrixId,
       ];
 }

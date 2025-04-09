@@ -424,6 +424,11 @@ class _SilverExternalContact extends StatelessWidget {
           contact: externalContact,
           highlightKeyword: controller.textEditingController.text,
           enableInvitation: true,
+          onContactTap: () => controller.onRecentContactTap(
+            context: context,
+            path: 'rooms',
+            contact: externalContact,
+          ),
         ),
       ),
     );
@@ -572,6 +577,11 @@ class _Contact extends StatelessWidget {
         contact: contact,
         highlightKeyword: controller.textEditingController.text,
         enableInvitation: true,
+        onContactTap: () => controller.onRecentContactTap(
+          context: context,
+          path: 'rooms',
+          contact: contact,
+        ),
       ),
     );
   }

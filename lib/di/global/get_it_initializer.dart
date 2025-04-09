@@ -85,6 +85,7 @@ import 'package:fluffychat/domain/usecase/forward/forward_message_interactor.dar
 import 'package:fluffychat/domain/usecase/generate_thumbnails_media_interactor.dart';
 import 'package:fluffychat/domain/usecase/invitation/generate_invitation_link_interactor.dart';
 import 'package:fluffychat/domain/usecase/invitation/get_invitation_status_interactor.dart';
+import 'package:fluffychat/domain/usecase/invitation/hive_delete_invitation_status_interactor.dart';
 import 'package:fluffychat/domain/usecase/invitation/hive_get_invitation_status_interactor.dart';
 import 'package:fluffychat/domain/usecase/invitation/send_invitation_interactor.dart';
 import 'package:fluffychat/domain/usecase/invitation/store_invitation_status_interactor.dart';
@@ -434,6 +435,10 @@ class GetItInitializer {
 
     getIt.registerFactory<HiveGetInvitationStatusInteractor>(
       () => HiveGetInvitationStatusInteractor(),
+    );
+
+    getIt.registerFactory<HiveDeleteInvitationStatusInteractor>(
+      () => HiveDeleteInvitationStatusInteractor(),
     );
   }
 
