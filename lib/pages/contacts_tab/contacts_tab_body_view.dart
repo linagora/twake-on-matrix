@@ -423,6 +423,7 @@ class _SilverExternalContact extends StatelessWidget {
         child: ExpansionContactListTile(
           contact: externalContact,
           highlightKeyword: controller.textEditingController.text,
+          enableInvitation: true,
         ),
       ),
     );
@@ -570,6 +571,7 @@ class _Contact extends StatelessWidget {
       child: ExpansionContactListTile(
         contact: contact,
         highlightKeyword: controller.textEditingController.text,
+        enableInvitation: true,
       ),
     );
   }

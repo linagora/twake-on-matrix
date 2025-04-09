@@ -23,11 +23,13 @@ typedef OnExpansionListTileTap = void Function();
 class ExpansionContactListTile extends StatefulWidget {
   final PresentationContact contact;
   final String highlightKeyword;
+  final bool enableInvitation;
 
   const ExpansionContactListTile({
     super.key,
     required this.contact,
     this.highlightKeyword = '',
+    this.enableInvitation = false,
   });
 
   @override
@@ -81,15 +83,17 @@ class _ExpansionContactListTileState extends State<ExpansionContactListTile>
   @override
   Widget build(BuildContext context) {
     return TwakeInkWell(
-      onTap: () {
-        _handleMatrixIdNull(
-          context: context,
-          contact: widget.contact,
-          invitationStatus: getInvitationStatusNotifier.value
-              .getSuccessOrNull<GetInvitationStatusSuccessState>()
-              ?.invitationStatusResponse,
-        );
-      },
+      onTap: (widget.enableInvitation)
+          ? () {
+              _handleMatrixIdNull(
+                context: context,
+                contact: widget.contact,
+                invitationStatus: getInvitationStatusNotifier.value
+                    .getSuccessOrNull<GetInvitationStatusSuccessState>()
+                    ?.invitationStatusResponse,
+              );
+            }
+          : null,
       child: TwakeListItem(
         child: Padding(
           padding: const EdgeInsetsDirectional.only(
