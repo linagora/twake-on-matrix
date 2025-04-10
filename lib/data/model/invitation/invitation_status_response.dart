@@ -52,7 +52,7 @@ class Invitation with EquatableMixin {
 
   bool get expiredTimeToInvite {
     if (expiration == null) {
-      return false;
+      return true;
     }
     final expirationDate = DateTime.fromMillisecondsSinceEpoch(expiration!);
     return expirationDate.isBefore(DateTime.now());

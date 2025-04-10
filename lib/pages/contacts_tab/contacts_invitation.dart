@@ -117,7 +117,7 @@ class ContactsInvitationController extends State<ContactsInvitation> {
         if (failure is SendInvitationFailureState) {
           TwakeSnackBar.show(
             context,
-            L10n.of(context)!.failedToSendInvitation,
+            failure.message ?? L10n.of(context)!.failedToSendInvitation,
           );
         }
       },

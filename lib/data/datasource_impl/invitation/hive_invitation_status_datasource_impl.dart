@@ -23,7 +23,10 @@ class HiveInvitationStatusDatasourceImpl
     );
 
     if (invitationStatus == null) {
-      throw InvitationStatusNotFound();
+      throw InvitationStatusNotFound(
+        userId: userId,
+        contactId: contactId,
+      );
     }
 
     return InvitationStatusHiveObj.fromJson(
