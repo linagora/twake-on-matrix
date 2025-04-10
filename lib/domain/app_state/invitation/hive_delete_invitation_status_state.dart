@@ -17,24 +17,39 @@ class HiveDeleteInvitationStatusLoadingState extends Success {
 }
 
 class HiveDeleteInvitationStatusSuccessState extends Success {
-  const HiveDeleteInvitationStatusSuccessState();
+  final String userId;
+  final String contactId;
+
+  const HiveDeleteInvitationStatusSuccessState({
+    required this.userId,
+    required this.contactId,
+  });
 
   @override
-  List<Object?> get props => [];
+  List<Object?> get props => [
+        userId,
+        contactId,
+      ];
 }
 
 class HiveDeleteInvitationStatusFailureState extends Failure {
   final dynamic exception;
   final String? message;
+  final String userId;
+  final String contactId;
 
   const HiveDeleteInvitationStatusFailureState({
     required this.exception,
     this.message,
+    required this.userId,
+    required this.contactId,
   });
 
   @override
   List<Object?> get props => [
         exception,
         message,
+        userId,
+        contactId,
       ];
 }

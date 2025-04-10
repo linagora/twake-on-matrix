@@ -22,14 +22,19 @@ class HiveDeleteInvitationStatusInteractor {
         contactId: contactId,
       );
 
-      yield const Right(
-        HiveDeleteInvitationStatusSuccessState(),
+      yield Right(
+        HiveDeleteInvitationStatusSuccessState(
+          userId: userId,
+          contactId: contactId,
+        ),
       );
     } catch (e) {
       Logs().e('HiveGetInvitationStatusInteractor::execute', e);
       yield Left(
         HiveDeleteInvitationStatusFailureState(
           exception: e,
+          userId: userId,
+          contactId: contactId,
         ),
       );
     }

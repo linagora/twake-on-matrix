@@ -61,7 +61,7 @@ class ContactsTabController extends State<ContactsTab>
     });
   }
 
-  void onRecentContactTap({
+  void onContactTap({
     required BuildContext context,
     required String path,
     required PresentationContact contact,

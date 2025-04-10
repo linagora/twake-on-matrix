@@ -6,6 +6,7 @@ import 'package:fluffychat/data/model/addressbook/address_book.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/domain/app_state/invitation/get_invitation_status_state.dart';
 import 'package:fluffychat/domain/app_state/invitation/hive_get_invitation_status_state.dart';
+import 'package:fluffychat/domain/usecase/contacts/delete_third_party_contact_box_interactor.dart';
 import 'package:fluffychat/domain/usecase/contacts/post_address_book_interactor.dart';
 import 'package:fluffychat/domain/usecase/invitation/get_invitation_status_interactor.dart';
 import 'package:fluffychat/domain/usecase/invitation/hive_delete_invitation_status_interactor.dart';
@@ -31,6 +32,10 @@ mixin InvitationStatusMixin {
   final HiveDeleteInvitationStatusInteractor
       _hiveDeleteInvitationStatusInteractor =
       getIt.get<HiveDeleteInvitationStatusInteractor>();
+
+  final DeleteThirdPartyContactBoxInteractor
+      _deleteThirdPartyContactBoxInteractor =
+      getIt.get<DeleteThirdPartyContactBoxInteractor>();
 
   void getInvitationStatus({
     required String userId,
@@ -177,7 +182,23 @@ mixin InvitationStatusMixin {
           },
           (success) {
             Logs().d('ContactsManager::_postAddressBook', success);
+            _onDeleteThirdPartyContactBox();
           },
+        );
+      },
+    );
+  }
+
+  void _onDeleteThirdPartyContactBox() {
+    _deleteThirdPartyContactBoxInteractor.execute().listen(
+      (state) {
+        state.fold(
+          (failure) => Logs().e(
+            'InvitationStatusMixin::_onDeleteThirdPartyContactBox $failure',
+          ),
+          (success) => Logs().d(
+            'InvitationStatusMixin::_onDeleteThirdPartyContactBox $success',
+          ),
         );
       },
     );
