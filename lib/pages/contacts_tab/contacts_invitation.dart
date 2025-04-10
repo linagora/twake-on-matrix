@@ -178,7 +178,7 @@ class ContactsInvitationController extends State<ContactsInvitation> {
           return;
         }
       },
-      (success) {
+      (success) async {
         if (success is GenerateInvitationLinkLoadingState) {
           TwakeDialog.showLoadingDialog(context);
           return;
@@ -186,9 +186,15 @@ class ContactsInvitationController extends State<ContactsInvitation> {
           TwakeDialog.hideLoadingDialog(context);
         }
         if (success is GenerateInvitationLinkSuccessState) {
-          Share.shareUri(
+          _onStoreInvitationStatusInteractor(
+            userId: widget.userId,
+            contactId: widget.contact.id ?? '',
+            invitationId: success.id,
+          );
+          await Share.shareUri(
             Uri.parse(success.link),
           );
+          Navigator.of(context).pop(success.id);
           return;
         }
       },
