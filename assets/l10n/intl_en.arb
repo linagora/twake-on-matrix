@@ -3109,6 +3109,7 @@
   "phoneNumber": "Phone number",
   "sendInvitation": "Send invitation",
   "verifyWithAnotherDevice": "Verify with another device",
+  "contactLookupFailed": "Contact lookup failed.",
   "invitationHasBeenSuccessfullySent": "Invitation has been successfully sent!",
   "failedToSendInvitation": "Failed to send invitation.",
   "shareInvitationLink": "Share invitation link",
