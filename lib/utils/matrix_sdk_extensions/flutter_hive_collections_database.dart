@@ -24,7 +24,7 @@ class FlutterHiveCollectionsDatabase extends HiveCollectionsDatabase {
   });
 
   @override
-  int get version => 7;
+  int get version => 8;
 
   static const String cipherStorageKey = 'hive_encryption_key';
 

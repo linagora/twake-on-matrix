@@ -15,6 +15,7 @@ class SendInvitationInteractor {
 
   Stream<Either<Failure, Success>> execute({
     required String contact,
+    required String contactId,
     required InvitationMediumEnum medium,
   }) async* {
     try {
@@ -28,14 +29,21 @@ class SendInvitationInteractor {
       yield Right(
         SendInvitationSuccessState(
           sendInvitationResponse: res,
+          contactId: contactId,
         ),
       );
     } catch (e) {
       Logs().e('SendInvitationInteractor::execute', e);
+      if (e is DioException &&
+          e.response?.statusCode == 400 &&
+          e.response?.data['message'] ==
+              'You already sent an invitation to this contact') {
+        yield const Left(InvitationAlreadySentState());
+        return;
+      }
       yield Left(
         SendInvitationFailureState(
           exception: e,
-          message: e is DioException ? e.response?.data['message'] ?? '' : null,
         ),
       );
     }

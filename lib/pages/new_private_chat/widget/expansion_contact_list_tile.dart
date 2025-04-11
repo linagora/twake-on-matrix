@@ -1,6 +1,12 @@
+import 'package:fluffychat/app_state/success.dart';
+import 'package:fluffychat/data/model/invitation/invitation_status_response.dart';
+import 'package:fluffychat/domain/app_state/invitation/get_invitation_status_state.dart';
 import 'package:fluffychat/domain/model/contact/contact_status.dart';
+import 'package:fluffychat/pages/contacts_tab/contacts_invitation.dart';
+import 'package:fluffychat/presentation/mixins/invitation_status_mixin.dart';
 import 'package:fluffychat/presentation/model/contact/presentation_contact.dart';
 import 'package:fluffychat/pages/new_private_chat/widget/contact_status_widget.dart';
+import 'package:fluffychat/utils/adaptive_bottom_sheet.dart';
 import 'package:fluffychat/utils/display_name_widget.dart';
 import 'package:fluffychat/widgets/avatar/avatar.dart';
 import 'package:fluffychat/widgets/highlight_text.dart';
@@ -13,173 +19,285 @@ import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:matrix/matrix.dart';
 
 typedef OnExpansionListTileTap = void Function();
-typedef OnExpansionInformation = void Function(PresentationContact);
 
-class ExpansionContactListTile extends StatelessWidget {
+class ExpansionContactListTile extends StatefulWidget {
   final PresentationContact contact;
   final String highlightKeyword;
-  final OnExpansionInformation? onExpansionInformation;
+  final bool enableInvitation;
 
   const ExpansionContactListTile({
     super.key,
     required this.contact,
     this.highlightKeyword = '',
-    this.onExpansionInformation,
+    this.enableInvitation = false,
   });
 
   @override
+  State<ExpansionContactListTile> createState() =>
+      _ExpansionContactListTileState();
+}
+
+class _ExpansionContactListTileState extends State<ExpansionContactListTile>
+    with InvitationStatusMixin {
+  @override
+  void initState() {
+    getInvitationStatus(
+      userId: client.userID ?? '',
+      contactId: widget.contact.id ?? '',
+    );
+    super.initState();
+  }
+
+  void _handleMatrixIdNull({
+    required BuildContext context,
+    required PresentationContact contact,
+    InvitationStatusResponse? invitationStatus,
+  }) async {
+    if (client.userID == null && client.userID?.isEmpty == true) return;
+    final result = await showAdaptiveBottomSheet<String?>(
+      context: context,
+      builder: (context) => ContactsInvitation(
+        contact: contact,
+        userId: client.userID!,
+        invitationStatus: invitationStatus,
+      ),
+    );
+
+    if (result != null) {
+      getInvitationNetworkStatus(
+        userId: client.userID ?? '',
+        contactId: widget.contact.id ?? '',
+        invitationId: result,
+      );
+    }
+  }
+
+  @override
+  void dispose() {
+    disposeInvitationStatus();
+    super.dispose();
+  }
+
+  Client get client => Matrix.of(context).client;
+
+  @override
   Widget build(BuildContext context) {
-    return TwakeListItem(
-      child: Padding(
-        padding:
-            const EdgeInsetsDirectional.only(start: 8.0, top: 8.0, bottom: 8.0),
-        child: FutureBuilder<Profile?>(
-          key: contact.matrixId != null ? Key(contact.matrixId!) : null,
-          future: contact.status == ContactStatus.active
-              ? getProfile(context)
-              : null,
-          builder: (context, snapshot) {
-            return Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 4),
-                  child: IgnorePointer(
-                    child: Avatar(
-                      mxContent: snapshot.data?.avatarUrl,
-                      name: contact.displayName,
+    return TwakeInkWell(
+      onTap: (widget.enableInvitation)
+          ? () {
+              _handleMatrixIdNull(
+                context: context,
+                contact: widget.contact,
+                invitationStatus: getInvitationStatusNotifier.value
+                    .getSuccessOrNull<GetInvitationStatusSuccessState>()
+                    ?.invitationStatusResponse,
+              );
+            }
+          : null,
+      child: TwakeListItem(
+        child: Padding(
+          padding: const EdgeInsetsDirectional.only(
+            start: 8.0,
+            top: 8.0,
+            bottom: 8.0,
+          ),
+          child: FutureBuilder<Profile?>(
+            key: widget.contact.matrixId != null
+                ? Key(widget.contact.matrixId!)
+                : null,
+            future: widget.contact.status == ContactStatus.active
+                ? getProfile(context)
+                : null,
+            builder: (context, snapshot) {
+              return Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 4),
+                    child: IgnorePointer(
+                      child: Avatar(
+                        mxContent: snapshot.data?.avatarUrl,
+                        name: widget.contact.displayName,
+                      ),
                     ),
                   ),
-                ),
-                const SizedBox(
-                  width: 8.0,
-                ),
-                Expanded(
-                  child: SizedBox(
-                    height: 64,
-                    child: Row(
-                      mainAxisSize: MainAxisSize.max,
-                      children: [
-                        Expanded(
-                          child: Column(
-                            mainAxisSize: MainAxisSize.max,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              IntrinsicWidth(
-                                child: Row(
-                                  children: [
-                                    Expanded(
-                                      child: Row(
-                                        children: [
-                                          Flexible(
-                                            child: BuildDisplayName(
-                                              profileDisplayName:
-                                                  snapshot.data?.displayName,
-                                              contactDisplayName:
-                                                  contact.displayName,
-                                              highlightKeyword:
-                                                  highlightKeyword,
-                                              style:
-                                                  ListItemStyle.titleTextStyle(
-                                                fontFamily: 'Inter',
+                  const SizedBox(
+                    width: 8.0,
+                  ),
+                  Expanded(
+                    child: SizedBox(
+                      height: 64,
+                      child: Row(
+                        mainAxisSize: MainAxisSize.max,
+                        children: [
+                          Expanded(
+                            child: Column(
+                              mainAxisSize: MainAxisSize.max,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                IntrinsicWidth(
+                                  child: Row(
+                                    children: [
+                                      Expanded(
+                                        child: Row(
+                                          children: [
+                                            Flexible(
+                                              child: BuildDisplayName(
+                                                profileDisplayName:
+                                                    snapshot.data?.displayName,
+                                                contactDisplayName:
+                                                    widget.contact.displayName,
+                                                highlightKeyword:
+                                                    widget.highlightKeyword,
+                                                style: ListItemStyle
+                                                    .titleTextStyle(
+                                                  fontFamily: 'Inter',
+                                                ),
                                               ),
                                             ),
-                                          ),
-                                        ],
+                                          ],
+                                        ),
                                       ),
-                                    ),
-                                    if (contact.matrixId != null &&
-                                        contact.matrixId!
-                                            .isCurrentMatrixId(context)) ...[
+                                      if (widget.contact.matrixId != null &&
+                                          widget.contact.matrixId!
+                                              .isCurrentMatrixId(context)) ...[
+                                        const SizedBox(width: 8.0),
+                                        TwakeChip(
+                                          text: L10n.of(context)!.owner,
+                                          textColor: Theme.of(context)
+                                              .colorScheme
+                                              .primary,
+                                        ),
+                                      ],
                                       const SizedBox(width: 8.0),
-                                      TwakeChip(
-                                        text: L10n.of(context)!.owner,
-                                        textColor: Theme.of(context)
-                                            .colorScheme
-                                            .primary,
-                                      ),
+                                      if (widget.contact.status != null &&
+                                          widget.contact.status ==
+                                              ContactStatus.inactive)
+                                        ContactStatusWidget(
+                                          status: widget.contact.status!,
+                                        ),
                                     ],
-                                    const SizedBox(width: 8.0),
-                                    if (contact.status != null &&
-                                        contact.status ==
-                                            ContactStatus.inactive)
-                                      ContactStatusWidget(
-                                        status: contact.status!,
-                                      ),
-                                  ],
-                                ),
-                              ),
-                              if (contact.matrixId != null &&
-                                  contact.matrixId!.isNotEmpty) ...[
-                                HighlightText(
-                                  text: contact.matrixId!,
-                                  searchWord: highlightKeyword,
-                                  style: ListItemStyle.subtitleTextStyle(
-                                    fontFamily: 'Inter',
                                   ),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
                                 ),
-                                if (highlightKeyword.isNotEmpty) ...[
-                                  if (highlightKeyword
-                                      .isPhoneNumberFormatted()) ...[
-                                    _displayPhoneNumber(),
+                                if (widget.contact.matrixId != null &&
+                                    widget.contact.matrixId!.isNotEmpty) ...[
+                                  HighlightText(
+                                    text: widget.contact.matrixId!,
+                                    searchWord: widget.highlightKeyword,
+                                    style: ListItemStyle.subtitleTextStyle(
+                                      fontFamily: 'Inter',
+                                    ),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                  if (widget.highlightKeyword.isNotEmpty) ...[
+                                    if (widget.highlightKeyword
+                                        .isPhoneNumberFormatted()) ...[
+                                      _displayPhoneNumber(),
+                                    ] else ...[
+                                      _displayEmail(),
+                                    ],
                                   ] else ...[
-                                    _displayEmail(),
+                                    _displayInformationDefault(),
                                   ],
                                 ] else ...[
-                                  _displayInformationDefault(),
+                                  _displayPhoneNumber(),
+                                  _displayEmail(),
                                 ],
-                              ] else ...[
-                                _displayPhoneNumber(),
-                                _displayEmail(),
                               ],
-                            ],
-                          ),
-                        ),
-                        if (contact.matrixId == null ||
-                            contact.matrixId!.isEmpty)
-                          InkWell(
-                            onTap: () {
-                              onExpansionInformation?.call(contact);
-                            },
-                            hoverColor: Colors.transparent,
-                            focusColor: Colors.transparent,
-                            highlightColor: Colors.transparent,
-                            splashColor: Colors.transparent,
-                            child: Padding(
-                              padding: const EdgeInsets.all(8),
-                              child: Icon(
-                                Icons.person_add_alt_rounded,
-                                color: LinagoraRefColors.material().primary,
-                              ),
                             ),
                           ),
-                      ],
+                          if (widget.contact.matrixId == null ||
+                              widget.contact.matrixId!.isEmpty)
+                            ValueListenableBuilder(
+                              valueListenable: getInvitationStatusNotifier,
+                              builder: (context, status, child) => status.fold(
+                                (failure) => child!,
+                                (success) {
+                                  if (success
+                                      is GetInvitationStatusLoadingState) {
+                                    return const Padding(
+                                      padding: EdgeInsets.all(8),
+                                      child: SizedBox(
+                                        width: 16,
+                                        height: 16,
+                                        child: CircularProgressIndicator(
+                                          strokeWidth: 2,
+                                        ),
+                                      ),
+                                    );
+                                  }
+
+                                  if (success
+                                      is GetInvitationStatusSuccessState) {
+                                    return _displayIconInvitation(
+                                      isExpired: success
+                                          .invitationStatusResponse
+                                          .invitation!
+                                          .expiredTimeToInvite,
+                                    );
+                                  }
+
+                                  return child!;
+                                },
+                              ),
+                              child: _displayIconInvitation(),
+                            ),
+                        ],
+                      ),
                     ),
                   ),
-                ),
-              ],
-            );
-          },
+                ],
+              );
+            },
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _displayIconInvitation({
+    bool isExpired = true,
+  }) {
+    return InkWell(
+      onTap: () {
+        _handleMatrixIdNull(
+          context: context,
+          contact: widget.contact,
+          invitationStatus: getInvitationStatusNotifier.value
+              .getSuccessOrNull<GetInvitationStatusSuccessState>()
+              ?.invitationStatusResponse,
+        );
+      },
+      hoverColor: Colors.transparent,
+      focusColor: Colors.transparent,
+      highlightColor: Colors.transparent,
+      splashColor: Colors.transparent,
+      child: Padding(
+        padding: const EdgeInsets.all(8),
+        child: Icon(
+          Icons.person_add_alt_rounded,
+          color: isExpired
+              ? LinagoraRefColors.material().primary
+              : const Color(0XFF00C853),
         ),
       ),
     );
   }
 
   Widget _displayInformationDefault() {
-    if (contact.primaryPhoneNumber.isNotEmpty) {
+    if (widget.contact.primaryPhoneNumber.isNotEmpty) {
       return HighlightText(
-        text: contact.primaryPhoneNumber,
-        searchWord: highlightKeyword,
+        text: widget.contact.primaryPhoneNumber,
+        searchWord: widget.highlightKeyword,
         style: ListItemStyle.subtitleTextStyle(
           fontFamily: 'Inter',
         ),
       );
-    } else if (contact.primaryEmail.isNotEmpty) {
+    } else if (widget.contact.primaryEmail.isNotEmpty) {
       return HighlightText(
-        text: contact.primaryEmail,
-        searchWord: highlightKeyword,
+        text: widget.contact.primaryEmail,
+        searchWord: widget.highlightKeyword,
         style: ListItemStyle.subtitleTextStyle(
           fontFamily: 'Inter',
         ),
@@ -191,10 +309,10 @@ class ExpansionContactListTile extends StatelessWidget {
   }
 
   Widget _displayPhoneNumber() {
-    if (contact.primaryPhoneNumber.isNotEmpty) {
+    if (widget.contact.primaryPhoneNumber.isNotEmpty) {
       return HighlightText(
-        text: contact.primaryPhoneNumber,
-        searchWord: highlightKeyword,
+        text: widget.contact.primaryPhoneNumber,
+        searchWord: widget.highlightKeyword,
         style: ListItemStyle.subtitleTextStyle(
           fontFamily: 'Inter',
         ),
@@ -204,10 +322,10 @@ class ExpansionContactListTile extends StatelessWidget {
   }
 
   Widget _displayEmail() {
-    if (contact.primaryEmail.isNotEmpty) {
+    if (widget.contact.primaryEmail.isNotEmpty) {
       return HighlightText(
-        text: contact.primaryEmail,
-        searchWord: highlightKeyword,
+        text: widget.contact.primaryEmail,
+        searchWord: widget.highlightKeyword,
         style: ListItemStyle.subtitleTextStyle(
           fontFamily: 'Inter',
         ),
@@ -220,12 +338,12 @@ class ExpansionContactListTile extends StatelessWidget {
 
   Future<Profile?> getProfile(BuildContext context) async {
     final client = Matrix.of(context).client;
-    if (contact.matrixId == null) {
+    if (widget.contact.matrixId == null) {
       return Future.error(Exception("MatrixId is null"));
     }
     try {
       final profile = await client.getProfileFromUserId(
-        contact.matrixId!,
+        widget.contact.matrixId!,
         getFromRooms: false,
       );
       Logs()
@@ -233,8 +351,8 @@ class ExpansionContactListTile extends StatelessWidget {
       return profile;
     } catch (e) {
       return Profile(
-        userId: contact.matrixId!,
-        displayName: contact.displayName,
+        userId: widget.contact.matrixId!,
+        displayName: widget.contact.displayName,
         avatarUrl: null,
       );
     }
