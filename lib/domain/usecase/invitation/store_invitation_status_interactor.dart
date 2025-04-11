@@ -27,14 +27,21 @@ class StoreInvitationStatusInteractor {
         ),
       );
 
-      yield const Right(
-        StoreInvitationStatusSuccessState(),
+      yield Right(
+        StoreInvitationStatusSuccessState(
+          contactId: contactId,
+          userId: userId,
+          invitationId: invitationId,
+        ),
       );
     } catch (e) {
       Logs().e('StoreInvitationStatusInteractor::execute', e);
       yield Left(
         StoreInvitationStatusFailureState(
           exception: e,
+          contactId: contactId,
+          userId: userId,
+          invitationId: invitationId,
         ),
       );
     }

@@ -23,7 +23,13 @@ class GetInvitationStatusInteractor {
       );
 
       if (res.invitation != null) {
-        yield const Left(GetInvitationStatusEmptyState());
+        yield Left(
+          GetInvitationStatusEmptyState(
+            contactId: contactId,
+            userId: userId,
+            invitationId: invitationId,
+          ),
+        );
       }
 
       yield Right(
@@ -36,6 +42,9 @@ class GetInvitationStatusInteractor {
       yield Left(
         GetInvitationStatusFailureState(
           exception: e,
+          contactId: contactId,
+          userId: userId,
+          invitationId: invitationId,
           message: e is DioException ? e.response?.data['message'] ?? '' : null,
         ),
       );

@@ -72,11 +72,10 @@ class InvitationAPI {
     final dioCacheCustomInterceptor = getIt.get<MatrixDioCacheInterceptor>(
       instanceName: NetworkDI.memCacheDioInterceptorName,
     );
-    if (!dioCacheCustomInterceptor.hasUriCached(uri)) {
-      dioCacheCustomInterceptor.addUriSupportsCache([
-        uri,
-      ]);
-    }
+
+    dioCacheCustomInterceptor.addUriSupportsCache([
+      uri,
+    ]);
 
     final response = await _client.get(uri).onError((error, stackTrace) {
       if (error is DioException) {

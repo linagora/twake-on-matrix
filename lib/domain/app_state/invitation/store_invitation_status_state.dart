@@ -17,24 +17,45 @@ class StoreInvitationStatusLoadingState extends Success {
 }
 
 class StoreInvitationStatusSuccessState extends Success {
-  const StoreInvitationStatusSuccessState();
+  final String contactId;
+  final String userId;
+  final String invitationId;
+
+  const StoreInvitationStatusSuccessState({
+    required this.contactId,
+    required this.userId,
+    required this.invitationId,
+  });
 
   @override
-  List<Object?> get props => [];
+  List<Object?> get props => [
+        contactId,
+        userId,
+        invitationId,
+      ];
 }
 
 class StoreInvitationStatusFailureState extends Failure {
   final dynamic exception;
   final String? message;
+  final String contactId;
+  final String userId;
+  final String invitationId;
 
   const StoreInvitationStatusFailureState({
     required this.exception,
     this.message,
+    required this.contactId,
+    required this.userId,
+    required this.invitationId,
   });
 
   @override
   List<Object?> get props => [
         exception,
         message,
+        contactId,
+        userId,
+        invitationId,
       ];
 }

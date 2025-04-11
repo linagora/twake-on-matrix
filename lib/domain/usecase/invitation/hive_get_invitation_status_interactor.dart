@@ -15,7 +15,12 @@ class HiveGetInvitationStatusInteractor {
     required String contactId,
   }) async* {
     try {
-      yield const Right(HiveGetInvitationStatusLoadingState());
+      yield Right(
+        HiveGetInvitationStatusLoadingState(
+          userId: userId,
+          contactId: contactId,
+        ),
+      );
 
       final res = await _hiveInvitationStatusRepository.getInvitationStatus(
         userId: userId,
@@ -33,6 +38,8 @@ class HiveGetInvitationStatusInteractor {
       yield Left(
         HiveGetInvitationStatusFailureState(
           exception: e,
+          contactId: contactId,
+          userId: userId,
         ),
       );
     }

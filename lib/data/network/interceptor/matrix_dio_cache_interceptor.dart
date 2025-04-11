@@ -21,10 +21,6 @@ class MatrixDioCacheInterceptor extends DioCacheInterceptor {
     );
   }
 
-  bool hasUriCached(String currentPath) {
-    return _uriSupportsCache.any((path) => path == currentPath);
-  }
-
   bool _cacheSupported(String currentPath) {
     return _uriSupportsCache.any((path) => path.contains(currentPath));
   }

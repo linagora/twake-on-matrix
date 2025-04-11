@@ -10,10 +10,19 @@ class HiveGetInvitationStatusInitial extends Initial {
 }
 
 class HiveGetInvitationStatusLoadingState extends Success {
-  const HiveGetInvitationStatusLoadingState() : super();
+  final String contactId;
+  final String userId;
+
+  const HiveGetInvitationStatusLoadingState({
+    required this.contactId,
+    required this.userId,
+  });
 
   @override
-  List<Object?> get props => [];
+  List<Object?> get props => [
+        contactId,
+        userId,
+      ];
 }
 
 class HiveGetInvitationStatusSuccessState extends Success {
@@ -34,16 +43,22 @@ class HiveGetInvitationStatusSuccessState extends Success {
 
 class HiveGetInvitationStatusFailureState extends Failure {
   final dynamic exception;
+  final String contactId;
+  final String userId;
   final String? message;
 
   const HiveGetInvitationStatusFailureState({
     required this.exception,
     this.message,
+    required this.contactId,
+    required this.userId,
   });
 
   @override
   List<Object?> get props => [
         exception,
         message,
+        contactId,
+        userId,
       ];
 }

@@ -18,10 +18,22 @@ class GetInvitationStatusLoadingState extends Success {
 }
 
 class GetInvitationStatusEmptyState extends Failure {
-  const GetInvitationStatusEmptyState() : super();
+  final String contactId;
+  final String userId;
+  final String invitationId;
+
+  const GetInvitationStatusEmptyState({
+    required this.contactId,
+    required this.userId,
+    required this.invitationId,
+  }) : super();
 
   @override
-  List<Object?> get props => [];
+  List<Object?> get props => [
+        contactId,
+        userId,
+        invitationId,
+      ];
 }
 
 class GetInvitationStatusSuccessState extends Success {
@@ -38,15 +50,24 @@ class GetInvitationStatusSuccessState extends Success {
 class GetInvitationStatusFailureState extends Failure {
   final dynamic exception;
   final String? message;
+  final String contactId;
+  final String userId;
+  final String invitationId;
 
   const GetInvitationStatusFailureState({
     required this.exception,
     this.message,
+    required this.contactId,
+    required this.userId,
+    required this.invitationId,
   });
 
   @override
   List<Object?> get props => [
         exception,
         message,
+        contactId,
+        userId,
+        invitationId,
       ];
 }
