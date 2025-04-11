@@ -1,5 +1,4 @@
 import 'package:fluffychat/domain/app_state/contact/get_contacts_state.dart';
-import 'package:fluffychat/domain/app_state/contact/get_phonebook_contact_state.dart';
 import 'package:fluffychat/pages/contacts_tab/empty_contacts_body.dart';
 import 'package:fluffychat/pages/new_group/contacts_selection.dart';
 import 'package:fluffychat/pages/new_group/contacts_selection_view_style.dart';
@@ -106,35 +105,15 @@ class ContactsSelectionView extends StatelessWidget {
 
   Widget _sliverPhonebookLoading() {
     return ValueListenableBuilder(
-      valueListenable:
-          controller.contactsManager.getPhonebookContactsNotifier(),
-      builder: (context, state, _) {
-        return state.fold(
-          (failure) {
-            return const SliverToBoxAdapter(
-              child: SizedBox(),
-            );
-          },
-          (success) {
-            if (success is GetPhonebookContactsLoading) {
-              return const SliverToBoxAdapter(
-                child: PhoneBookLoadingView(progress: 0),
-              );
-            }
-            if (success is GetPhonebookContactsSuccess) {
-              if (success.progress == 100) {
-                return const SliverToBoxAdapter(
-                  child: SizedBox(),
-                );
-              }
-              return SliverToBoxAdapter(
-                child: PhoneBookLoadingView(progress: success.progress),
-              );
-            }
-            return const SliverToBoxAdapter(
-              child: SizedBox(),
-            );
-          },
+      valueListenable: controller.contactsManager.progressPhoneBookState,
+      builder: (context, progressValue, _) {
+        if (progressValue != null) {
+          return SliverToBoxAdapter(
+            child: PhoneBookLoadingView(progress: progressValue),
+          );
+        }
+        return const SliverToBoxAdapter(
+          child: SizedBox.shrink(),
         );
       },
     );

@@ -456,8 +456,11 @@ extension FederationEmailExtension on FederationEmail {
 
 extension PhoneNumbersExtension on Set<PhoneNumber> {
   Map<String, List<String>> calculateHashesForPhoneNumbers(
-    FederationHashDetailsResponse hashDetails,
+    FederationHashDetailsResponse? hashDetails,
   ) {
+    if (hashDetails == null) {
+      return {};
+    }
     final Map<String, List<String>> phoneToHashMap = {};
     for (final phoneNumber in this) {
       final hashes = phoneNumber.calculateHashUsingAllPeppers(
@@ -474,8 +477,11 @@ extension PhoneNumbersExtension on Set<PhoneNumber> {
 
 extension EmailsExtension on Set<Email> {
   Map<String, List<String>> calculateHashesForEmails(
-    FederationHashDetailsResponse hashDetails,
+    FederationHashDetailsResponse? hashDetails,
   ) {
+    if (hashDetails == null) {
+      return {};
+    }
     final Map<String, List<String>> emailToHashMap = {};
     for (final email in this) {
       final hashes = email.calculateHashUsingAllPeppers(

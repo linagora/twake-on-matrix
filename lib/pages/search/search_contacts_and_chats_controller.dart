@@ -90,10 +90,16 @@ class SearchContactsAndChatsController
             .getSuccessOrNull<GetContactsSuccess>()
             ?.contacts ??
         [];
+
     final phoneBookContacts = contactManger
             .getPhonebookContactsNotifier()
             .value
             .getSuccessOrNull<GetPhonebookContactsSuccess>()
+            ?.contacts ??
+        contactManger
+            .getPhonebookContactsNotifier()
+            .value
+            .getFailureOrNull<LookUpPhonebookContactPartialFailed>()
             ?.contacts ??
         [];
     final tomPresentationSearchContacts = tomContacts

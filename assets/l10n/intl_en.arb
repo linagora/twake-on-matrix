@@ -3108,6 +3108,7 @@
   "selectAnEmailOrPhoneYouWantSendTheInvitationTo": "Select an email or phone you want send the invitation to",
   "phoneNumber": "Phone number",
   "sendInvitation": "Send invitation",
+  "contactLookupFailed": "Contact lookup failed.",
   "invitationHasBeenSuccessfullySent": "Invitation has been successfully sent!",
   "failedToSendInvitation": "Failed to send invitation.",
   "shareInvitationLink": "Share invitation link",
