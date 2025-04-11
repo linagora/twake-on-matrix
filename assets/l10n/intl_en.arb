@@ -3112,5 +3112,6 @@
   "invitationHasBeenSuccessfullySent": "Invitation has been successfully sent!",
   "failedToSendInvitation": "Failed to send invitation.",
   "shareInvitationLink": "Share invitation link",
-  "failedToGenerateInvitationLink": "Failed to generate invitation link."
+  "failedToGenerateInvitationLink": "Failed to generate invitation link.",
+  "youAlreadySentAnInvitationToThisContact": "You already sent an invitation to this contact"
 }

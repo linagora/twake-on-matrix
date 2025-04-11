@@ -187,7 +187,11 @@ class ContactsInvitationView extends StatelessWidget {
                         if (contact.emails != null &&
                             contact.emails!.isNotEmpty)
                           ...contact.emails!.map(
-                            (email) => TwakeInkWell(
+                            (email) => InkWell(
+                              hoverColor: Colors.transparent,
+                              highlightColor: Colors.transparent,
+                              focusColor: Colors.transparent,
+                              splashColor: Colors.transparent,
                               onTap: () => controller.onSelectContact(email),
                               child: ValueListenableBuilder(
                                 valueListenable: controller.selectedContact,

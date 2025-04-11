@@ -32,6 +32,7 @@ class GenerateInvitationLinkInteractor {
       yield Right(
         GenerateInvitationLinkSuccessState(
           link: res.link,
+          id: res.id,
         ),
       );
     } catch (e) {
