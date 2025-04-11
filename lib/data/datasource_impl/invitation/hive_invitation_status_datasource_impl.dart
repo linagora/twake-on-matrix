@@ -10,9 +10,6 @@ import 'package:matrix/matrix.dart';
 
 class HiveInvitationStatusDatasourceImpl
     extends HiveInvitationStatusDatasource {
-  final hiveCollectionFederationDatabase =
-      getIt.get<HiveCollectionToMDatabase>();
-
   @override
   Future<InvitationStatus> getInvitationStatus({
     required String userId,
@@ -43,7 +40,10 @@ class HiveInvitationStatusDatasourceImpl
   Future<void> storeInvitationStatus({
     required String userId,
     required InvitationStatus invitationStatus,
-  }) {
+  }) async {
+    final hiveCollectionFederationDatabase =
+        await getIt.getAsync<HiveCollectionToMDatabase>();
+
     return hiveCollectionFederationDatabase.invitationStatus.put(
       TupleKey(userId, invitationStatus.contactId).toString(),
       invitationStatus.toHiveObj().toJson(),
@@ -54,7 +54,10 @@ class HiveInvitationStatusDatasourceImpl
   Future<void> deleteInvitationStatusByContactId({
     required String userId,
     required String contactId,
-  }) {
+  }) async {
+    final hiveCollectionFederationDatabase =
+        await getIt.getAsync<HiveCollectionToMDatabase>();
+
     return hiveCollectionFederationDatabase.invitationStatus.delete(
       TupleKey(userId, contactId).toString(),
     );
