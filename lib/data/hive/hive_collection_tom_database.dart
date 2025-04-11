@@ -24,11 +24,15 @@ class HiveCollectionToMDatabase {
 
   String get _thirdPartyContactsBox => 'third_party_contacts_box';
 
+  String get _invitationStatusBox => 'invitation_status_box';
+
   late CollectionBox<Map> tomConfigurationsBox;
 
   late CollectionBox<Map> federationConfigurationsBox;
 
   late CollectionBox<Map> thirdPartyContactsBox;
+
+  late CollectionBox<Map> invitationStatus;
 
   HiveCollectionToMDatabase(this.name, this.path, {this.key});
 
@@ -128,6 +132,7 @@ class HiveCollectionToMDatabase {
         _tomConfigurationsBoxName,
         _federationConfigurationsBoxName,
         _thirdPartyContactsBox,
+        _invitationStatusBox,
       },
       path: path,
       key: key,
@@ -142,6 +147,10 @@ class HiveCollectionToMDatabase {
     );
     thirdPartyContactsBox = await _collection.openBox(
       _thirdPartyContactsBox,
+      preload: true,
+    );
+    invitationStatus = await _collection.openBox(
+      _invitationStatusBox,
       preload: true,
     );
   }

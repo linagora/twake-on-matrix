@@ -43,6 +43,7 @@ extension AddressBookExtension on AddressBook {
   Set<PresentationContact> toPresentationContact() {
     return {
       PresentationContact(
+        id: id ?? '',
         displayName: displayName,
         matrixId: mxid,
         status: addressBookIsActive()

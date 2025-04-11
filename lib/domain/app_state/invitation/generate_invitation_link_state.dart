@@ -18,13 +18,15 @@ class GenerateInvitationLinkLoadingState extends Success {
 
 class GenerateInvitationLinkSuccessState extends Success {
   final String link;
+  final String id;
 
   const GenerateInvitationLinkSuccessState({
     required this.link,
+    required this.id,
   });
 
   @override
-  List<Object?> get props => [link];
+  List<Object?> get props => [link, id];
 }
 
 class GenerateInvitationLinkIsEmptyState extends Failure {

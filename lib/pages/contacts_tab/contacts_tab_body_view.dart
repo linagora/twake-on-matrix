@@ -18,7 +18,6 @@ import 'package:fluffychat/widgets/phone_book_loading/phone_book_loading_view.da
 import 'package:fluffychat/widgets/sliver_expandable_list.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
-import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 
 class ContactsTabBodyView extends StatelessWidget {
   final ContactsTabController controller;
@@ -421,25 +420,10 @@ class _SilverExternalContact extends StatelessWidget {
         padding: const EdgeInsets.symmetric(
           horizontal: ContactsTabViewStyle.padding,
         ),
-        child: TwakeInkWell(
-          onTap: () {
-            controller.onContactTap(
-              context: context,
-              path: 'rooms',
-              contact: externalContact,
-            );
-          },
-          child: ExpansionContactListTile(
-            contact: externalContact,
-            highlightKeyword: controller.textEditingController.text,
-            onExpansionInformation: (contact) {
-              controller.onExpandInformation(
-                context: context,
-                path: 'rooms',
-                contact: contact,
-              );
-            },
-          ),
+        child: ExpansionContactListTile(
+          contact: externalContact,
+          highlightKeyword: controller.textEditingController.text,
+          enableInvitation: true,
         ),
       ),
     );
@@ -531,7 +515,7 @@ class _SliverRecentContacts extends StatelessWidget {
                 highlightKeyword: controller.textEditingController.text,
                 client: controller.client,
                 key: Key('contact_recent_${recentContacts[index].id}'),
-                onTap: () => controller.onContactTap(
+                onTap: () => controller.onRecentContactTap(
                   contact: recentContacts[index].toPresentationContact(),
                   context: context,
                   path: 'rooms',
@@ -584,25 +568,10 @@ class _Contact extends StatelessWidget {
       padding: const EdgeInsets.symmetric(
         horizontal: ContactsTabViewStyle.padding,
       ),
-      child: TwakeInkWell(
-        onTap: () {
-          controller.onContactTap(
-            context: context,
-            path: 'rooms',
-            contact: contact,
-          );
-        },
-        child: ExpansionContactListTile(
-          contact: contact,
-          highlightKeyword: controller.textEditingController.text,
-          onExpansionInformation: (contact) {
-            controller.onExpandInformation(
-              context: context,
-              path: 'rooms',
-              contact: contact,
-            );
-          },
-        ),
+      child: ExpansionContactListTile(
+        contact: contact,
+        highlightKeyword: controller.textEditingController.text,
+        enableInvitation: true,
       ),
     );
   }

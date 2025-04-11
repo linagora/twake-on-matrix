@@ -11,7 +11,11 @@ class MatrixDioCacheInterceptor extends DioCacheInterceptor {
     Logs().d(
       'DioCacheCustomInterceptor::setPathSupportsCache() Add uriSupportsCache: $uriSupportsCache',
     );
-    _uriSupportsCache.addAll(uriSupportsCache);
+    for (final uri in uriSupportsCache) {
+      if (!_uriSupportsCache.contains(uri)) {
+        _uriSupportsCache.add(uri);
+      }
+    }
     Logs().d(
       'DioCacheCustomInterceptor::setPathSupportsCache() _pathSupportsCache: $_uriSupportsCache',
     );

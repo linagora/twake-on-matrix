@@ -19,13 +19,25 @@ class SendInvitationLoadingState extends Success {
 
 class SendInvitationSuccessState extends Success {
   final SendInvitationResponse sendInvitationResponse;
+  final String contactId;
 
   const SendInvitationSuccessState({
     required this.sendInvitationResponse,
+    required this.contactId,
   });
 
   @override
-  List<Object?> get props => [sendInvitationResponse];
+  List<Object?> get props => [
+        sendInvitationResponse,
+        contactId,
+      ];
+}
+
+class InvitationAlreadySentState extends Failure {
+  const InvitationAlreadySentState() : super();
+
+  @override
+  List<Object?> get props => [];
 }
 
 class SendInvitationFailureState extends Failure {
