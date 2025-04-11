@@ -24,12 +24,14 @@ class ExpansionContactListTile extends StatefulWidget {
   final PresentationContact contact;
   final String highlightKeyword;
   final bool enableInvitation;
+  final void Function()? onContactTap;
 
   const ExpansionContactListTile({
     super.key,
     required this.contact,
     this.highlightKeyword = '',
     this.enableInvitation = false,
+    this.onContactTap,
   });
 
   @override
@@ -44,6 +46,7 @@ class _ExpansionContactListTileState extends State<ExpansionContactListTile>
     getInvitationStatus(
       userId: client.userID ?? '',
       contactId: widget.contact.id ?? '',
+      contact: widget.contact,
     );
     super.initState();
   }
@@ -53,6 +56,11 @@ class _ExpansionContactListTileState extends State<ExpansionContactListTile>
     required PresentationContact contact,
     InvitationStatusResponse? invitationStatus,
   }) async {
+    if (invitationStatus?.invitation != null &&
+        invitationStatus!.invitation?.hasMatrixId == true) {
+      widget.onContactTap?.call();
+      return;
+    }
     if (client.userID == null && client.userID?.isEmpty == true) return;
     final result = await showAdaptiveBottomSheet<String?>(
       context: context,
@@ -68,6 +76,7 @@ class _ExpansionContactListTileState extends State<ExpansionContactListTile>
         userId: client.userID ?? '',
         contactId: widget.contact.id ?? '',
         invitationId: result,
+        contact: widget.contact,
       );
     }
   }
@@ -230,6 +239,11 @@ class _ExpansionContactListTileState extends State<ExpansionContactListTile>
 
                                   if (success
                                       is GetInvitationStatusSuccessState) {
+                                    if (success.invitationStatusResponse
+                                            .invitation?.hasMatrixId ==
+                                        true) {
+                                      return const SizedBox();
+                                    }
                                     return _displayIconInvitation(
                                       isExpired: success
                                           .invitationStatusResponse
