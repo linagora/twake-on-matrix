@@ -149,7 +149,6 @@ class FederationLookUpPhonebookContactInteractor {
               exception: 'Hash details is empty',
             ),
           );
-          return;
         }
 
         hashDetails = res;
@@ -162,7 +161,6 @@ class FederationLookUpPhonebookContactInteractor {
             exception: e,
           ),
         );
-        return;
       }
 
       final contactIdToHashMap = {
@@ -219,8 +217,8 @@ class FederationLookUpPhonebookContactInteractor {
           final request = FederationLookupMxidRequest(
             addresses:
                 hashToContactIdMappings.values.expand((hash) => hash).toSet(),
-            algorithm: hashDetails.algorithms?.firstOrNull,
-            pepper: hashDetails.lookupPepper,
+            algorithm: hashDetails?.algorithms?.firstOrNull,
+            pepper: hashDetails?.lookupPepper,
           );
           FederationLookupMxidResponse? response;
           response = await _identityLookupManager.lookupMxid(

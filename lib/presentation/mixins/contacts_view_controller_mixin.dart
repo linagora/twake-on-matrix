@@ -353,6 +353,27 @@ mixin class ContactsViewControllerMixin {
     presentationPhonebookContactNotifier.value =
         contactsManager.getPhonebookContactsNotifier().value.fold(
       (failure) {
+        if (failure is LookUpPhonebookContactPartialFailed) {
+          final filteredContacts = failure.contacts
+              .searchContacts(keyword)
+              .expand((contact) => contact.toPresentationContacts())
+              .toList();
+          if (filteredContacts.isEmpty) {
+            return Left(
+              GetPresentationContactsEmpty(
+                keyword: keyword,
+              ),
+            );
+          } else {
+            return Right(
+              GetPresentationContactsSuccess(
+                contacts: filteredContacts,
+                keyword: keyword,
+              ),
+            );
+          }
+        }
+
         return Left(failure);
       },
       (success) {
