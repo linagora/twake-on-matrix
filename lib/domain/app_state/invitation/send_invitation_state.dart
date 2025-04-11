@@ -33,6 +33,13 @@ class SendInvitationSuccessState extends Success {
       ];
 }
 
+class InvitationAlreadySentState extends Failure {
+  const InvitationAlreadySentState() : super();
+
+  @override
+  List<Object?> get props => [];
+}
+
 class SendInvitationFailureState extends Failure {
   final dynamic exception;
   final String? message;

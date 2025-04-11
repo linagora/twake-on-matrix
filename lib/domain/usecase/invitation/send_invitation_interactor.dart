@@ -34,10 +34,16 @@ class SendInvitationInteractor {
       );
     } catch (e) {
       Logs().e('SendInvitationInteractor::execute', e);
+      if (e is DioException &&
+          e.response?.statusCode == 400 &&
+          e.response?.data['message'] ==
+              'You already sent an invitation to this contact') {
+        yield const Left(InvitationAlreadySentState());
+        return;
+      }
       yield Left(
         SendInvitationFailureState(
           exception: e,
-          message: e is DioException ? e.response?.data['message'] ?? '' : null,
         ),
       );
     }

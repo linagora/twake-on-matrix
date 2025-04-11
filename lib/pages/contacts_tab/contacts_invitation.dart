@@ -114,11 +114,19 @@ class ContactsInvitationController extends State<ContactsInvitation> {
   void _onSendInvitationStateListener() {
     sendInvitationNotifier.value.fold(
       (failure) {
+        if (failure is InvitationAlreadySentState) {
+          TwakeSnackBar.show(
+            context,
+            L10n.of(context)!.youAlreadySentAnInvitationToThisContact,
+          );
+          return;
+        }
         if (failure is SendInvitationFailureState) {
           TwakeSnackBar.show(
             context,
-            failure.message ?? L10n.of(context)!.failedToSendInvitation,
+            L10n.of(context)!.failedToSendInvitation,
           );
+          return;
         }
       },
       (success) {
@@ -133,6 +141,7 @@ class ContactsInvitationController extends State<ContactsInvitation> {
             L10n.of(context)!.invitationHasBeenSuccessfullySent,
           );
           Navigator.of(context).pop(success.sendInvitationResponse.id ?? '');
+          return;
         }
       },
     );

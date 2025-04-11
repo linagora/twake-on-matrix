@@ -4,6 +4,7 @@ import 'package:fluffychat/data/model/invitation/invitation_request.dart';
 import 'package:fluffychat/data/model/invitation/invitation_status_response.dart';
 import 'package:fluffychat/data/model/invitation/send_invitation_response.dart';
 import 'package:fluffychat/data/network/dio_client.dart';
+import 'package:fluffychat/data/network/interceptor/matrix_dio_cache_interceptor.dart';
 import 'package:fluffychat/data/network/tom_endpoint.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/di/global/network_di.dart';
@@ -66,11 +67,18 @@ class InvitationAPI {
   Future<InvitationStatusResponse> getInvitationStatus({
     required String invitationId,
   }) async {
-    final response = await _client
-        .get(
-      "${TomEndpoint.invitationServicePath.generateTomEndpoint()}/$invitationId/status",
-    )
-        .onError((error, stackTrace) {
+    final uri =
+        "${TomEndpoint.invitationServicePath.generateTomEndpoint()}/$invitationId/status";
+    final dioCacheCustomInterceptor = getIt.get<MatrixDioCacheInterceptor>(
+      instanceName: NetworkDI.memCacheDioInterceptorName,
+    );
+    if (!dioCacheCustomInterceptor.hasUriCached(uri)) {
+      dioCacheCustomInterceptor.addUriSupportsCache([
+        uri,
+      ]);
+    }
+
+    final response = await _client.get(uri).onError((error, stackTrace) {
       if (error is DioException) {
         throw DioException(
           requestOptions: error.requestOptions,
