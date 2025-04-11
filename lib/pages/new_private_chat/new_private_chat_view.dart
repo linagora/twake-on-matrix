@@ -1,4 +1,3 @@
-import 'package:fluffychat/domain/app_state/contact/get_phonebook_contact_state.dart';
 import 'package:fluffychat/pages/new_private_chat/new_private_chat.dart';
 import 'package:fluffychat/pages/new_private_chat/new_private_chat_style.dart';
 import 'package:fluffychat/pages/new_private_chat/widget/expansion_list.dart';
@@ -75,26 +74,12 @@ class NewPrivateChatView extends StatelessWidget {
 
   Widget _phonebookLoading() {
     return ValueListenableBuilder(
-      valueListenable:
-          controller.contactsManager.getPhonebookContactsNotifier(),
-      builder: (context, state, _) {
-        return state.fold(
-          (failure) {
-            return const SizedBox();
-          },
-          (success) {
-            if (success is GetPhonebookContactsLoading) {
-              return const PhoneBookLoadingView(progress: 0);
-            }
-            if (success is GetPhonebookContactsSuccess) {
-              if (success.progress == 100) {
-                return const SizedBox();
-              }
-              return PhoneBookLoadingView(progress: success.progress);
-            }
-            return const SizedBox();
-          },
-        );
+      valueListenable: controller.contactsManager.progressPhoneBookState,
+      builder: (context, progressValue, _) {
+        if (progressValue != null) {
+          return PhoneBookLoadingView(progress: progressValue);
+        }
+        return const SizedBox.shrink();
       },
     );
   }
