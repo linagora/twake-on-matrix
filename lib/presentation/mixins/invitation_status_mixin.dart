@@ -140,9 +140,8 @@ mixin InvitationStatusMixin {
             Logs().d(
               'InvitationStatusMixin::getInvitationNetworkStatus - contactID ${success.invitationStatusResponse.invitation?.id} expired',
             );
+            _onHiveDeleteInvitationStatus(userId: userId, contactId: contactId);
           }
-
-          _onHiveDeleteInvitationStatus(userId: userId, contactId: contactId);
         }
       },
     );
