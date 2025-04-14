@@ -133,6 +133,16 @@ mixin InvitationStatusMixin {
               contactId: contactId,
             );
           }
+
+          if (success
+                  .invitationStatusResponse.invitation?.expiredTimeToInvite ==
+              true) {
+            Logs().d(
+              'InvitationStatusMixin::getInvitationNetworkStatus - contactID ${success.invitationStatusResponse.invitation?.id} expired',
+            );
+          }
+
+          _onHiveDeleteInvitationStatus(userId: userId, contactId: contactId);
         }
       },
     );
