@@ -115,6 +115,11 @@ class NetworkDI extends BaseDI {
       () => DioClient(get.get<Dio>(instanceName: tomServerDioName)),
       instanceName: tomDioClientName,
     );
+    dio.interceptors.add(
+      get.get<MatrixDioCacheInterceptor>(
+        instanceName: memCacheDioInterceptorName,
+      ),
+    );
   }
 
   void _bindDioForIdentityServer(GetIt get) {

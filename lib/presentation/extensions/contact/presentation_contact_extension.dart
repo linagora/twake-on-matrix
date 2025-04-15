@@ -44,6 +44,7 @@ extension ContactExtensionInPresentation on Contact {
             .toSet(),
         displayName: displayName,
         matrixId: contactMatrix?.matrixId ?? '',
+        id: id,
       ),
     };
 

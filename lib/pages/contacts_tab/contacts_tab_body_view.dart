@@ -1,5 +1,4 @@
 import 'package:fluffychat/domain/app_state/contact/get_contacts_state.dart';
-import 'package:fluffychat/domain/app_state/contact/get_phonebook_contact_state.dart';
 import 'package:fluffychat/pages/contacts_tab/contacts_tab.dart';
 import 'package:fluffychat/pages/contacts_tab/contacts_tab_view_style.dart';
 import 'package:fluffychat/pages/contacts_tab/empty_contacts_body.dart';
@@ -18,7 +17,6 @@ import 'package:fluffychat/widgets/phone_book_loading/phone_book_loading_view.da
 import 'package:fluffychat/widgets/sliver_expandable_list.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
-import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 
 class ContactsTabBodyView extends StatelessWidget {
   final ContactsTabController controller;
@@ -421,24 +419,14 @@ class _SilverExternalContact extends StatelessWidget {
         padding: const EdgeInsets.symmetric(
           horizontal: ContactsTabViewStyle.padding,
         ),
-        child: TwakeInkWell(
-          onTap: () {
-            controller.onContactTap(
-              context: context,
-              path: 'rooms',
-              contact: externalContact,
-            );
-          },
-          child: ExpansionContactListTile(
+        child: ExpansionContactListTile(
+          contact: externalContact,
+          highlightKeyword: controller.textEditingController.text,
+          enableInvitation: true,
+          onContactTap: () => controller.onContactTap(
+            context: context,
+            path: 'rooms',
             contact: externalContact,
-            highlightKeyword: controller.textEditingController.text,
-            onExpansionInformation: (contact) {
-              controller.onExpandInformation(
-                context: context,
-                path: 'rooms',
-                contact: contact,
-              );
-            },
           ),
         ),
       ),
@@ -456,35 +444,15 @@ class _SliverPhonebookLoading extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ValueListenableBuilder(
-      valueListenable:
-          controller.contactsManager.getPhonebookContactsNotifier(),
-      builder: (context, state, _) {
-        return state.fold(
-          (failure) {
-            return const SliverToBoxAdapter(
-              child: SizedBox(),
-            );
-          },
-          (success) {
-            if (success is GetPhonebookContactsLoading) {
-              return const SliverToBoxAdapter(
-                child: PhoneBookLoadingView(progress: 0),
-              );
-            }
-            if (success is GetPhonebookContactsSuccess) {
-              if (success.progress == 100) {
-                return const SliverToBoxAdapter(
-                  child: SizedBox(),
-                );
-              }
-              return SliverToBoxAdapter(
-                child: PhoneBookLoadingView(progress: success.progress),
-              );
-            }
-            return const SliverToBoxAdapter(
-              child: SizedBox(),
-            );
-          },
+      valueListenable: controller.contactsManager.progressPhoneBookState,
+      builder: (context, progressValue, _) {
+        if (progressValue != null) {
+          return SliverToBoxAdapter(
+            child: PhoneBookLoadingView(progress: progressValue),
+          );
+        }
+        return const SliverToBoxAdapter(
+          child: SizedBox.shrink(),
         );
       },
     );
@@ -584,24 +552,14 @@ class _Contact extends StatelessWidget {
       padding: const EdgeInsets.symmetric(
         horizontal: ContactsTabViewStyle.padding,
       ),
-      child: TwakeInkWell(
-        onTap: () {
-          controller.onContactTap(
-            context: context,
-            path: 'rooms',
-            contact: contact,
-          );
-        },
-        child: ExpansionContactListTile(
+      child: ExpansionContactListTile(
+        contact: contact,
+        highlightKeyword: controller.textEditingController.text,
+        enableInvitation: true,
+        onContactTap: () => controller.onContactTap(
+          context: context,
+          path: 'rooms',
           contact: contact,
-          highlightKeyword: controller.textEditingController.text,
-          onExpansionInformation: (contact) {
-            controller.onExpandInformation(
-              context: context,
-              path: 'rooms',
-              contact: contact,
-            );
-          },
         ),
       ),
     );

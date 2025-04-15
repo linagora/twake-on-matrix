@@ -27,7 +27,10 @@ import 'package:fluffychat/domain/usecase/contacts/twake_look_up_argument.dart';
 import 'package:fluffychat/domain/usecase/contacts/twake_look_up_phonebook_contact_interactor.dart';
 import 'package:fluffychat/presentation/extensions/value_notifier_custom.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
+import 'package:fluffychat/utils/twake_snackbar.dart';
+import 'package:fluffychat/widgets/twake_app.dart';
 import 'package:matrix/matrix.dart';
+import 'package:flutter_gen/gen_l10n/l10n.dart';
 
 class ContactsManager {
   static const int _lookupChunkSize = 10;
@@ -82,6 +85,9 @@ class ContactsManager {
   final ValueNotifierCustom<Either<Failure, Success>> _postAddressBookNotifier =
       ValueNotifierCustom(const Right(PostAddressBookInitial()));
 
+  final ValueNotifierCustom<int?> _progressPhoneBookState =
+      ValueNotifierCustom(null);
+
   ValueNotifierCustom<Either<Failure, Success>> getContactsNotifier() =>
       _contactsNotifier;
 
@@ -93,6 +99,9 @@ class ContactsManager {
 
   ValueNotifierCustom<Either<Failure, Success>> postAddressBookNotifier() =>
       _postAddressBookNotifier;
+
+  ValueNotifierCustom<int?> get progressPhoneBookState =>
+      _progressPhoneBookState;
 
   bool _isSynchronizing = false;
 
@@ -319,7 +328,17 @@ class ContactsManager {
   }
 
   void _handleLookUpFailureState(Failure failure) {
+    Logs().e('ContactsManager::_handleLookUpFailureState', failure);
     if (failure is LookUpPhonebookContactPartialFailed) {
+      _progressPhoneBookState.value = null;
+      if (TwakeApp.router.routerDelegate.navigatorKey.currentContext != null) {
+        TwakeSnackBar.show(
+          TwakeApp.router.routerDelegate.navigatorKey.currentContext!,
+          L10n.of(TwakeApp.router.routerDelegate.navigatorKey.currentContext!)!
+              .contactLookupFailed,
+        );
+      }
+
       _postAddressBookOnMobile(
         contacts: failure.contacts,
       );
@@ -327,10 +346,18 @@ class ContactsManager {
   }
 
   void _handleLookUpSuccessState(Success success) {
-    if (success is GetPhonebookContactsSuccess && success.progress == 100) {
-      _postAddressBookOnMobile(
-        contacts: success.contacts,
-      );
+    Logs().e('ContactsManager::_handleLookUpSuccessState', success);
+    if (success is GetPhonebookContactsLoading) {
+      _progressPhoneBookState.value = 0;
+    }
+    if (success is GetPhonebookContactsSuccess) {
+      _progressPhoneBookState.value = success.progress;
+      if (success.progress == 100) {
+        _postAddressBookOnMobile(
+          contacts: success.contacts,
+        );
+        _progressPhoneBookState.value = null;
+      }
     }
   }
 
