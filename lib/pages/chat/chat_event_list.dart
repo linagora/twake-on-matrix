@@ -187,7 +187,9 @@ class ChatEventList extends StatelessWidget {
                                 event.originServerTs,
                               );
                             },
-                            onLongPress: controller.onSelectMessage,
+                            onDisplayEmojiReaction:
+                                controller.onDisplayEmojiReaction,
+                            onHideEmojiReaction: controller.onHideEmojiReaction,
                             listAction: controller
                                 .listHorizontalActionMenuBuilder(event)
                                 .map((action) {
@@ -195,6 +197,23 @@ class ChatEventList extends StatelessWidget {
                                 name: action.action.name,
                               );
                             }).toList(),
+                            onPickEmojiReaction: () {},
+                            onSelectEmojiReaction: (emoji, event) {
+                              controller.sendEmojiAction(
+                                emoji: emoji,
+                                event: event,
+                              );
+                            },
+                            onForward: (event) {
+                              controller.forwardEventsAction(event: event);
+                            },
+                            onReply: (event) {
+                              controller.replyAction(replyTo: event);
+                            },
+                            onCopy: controller.copyEventsAction,
+                            onPin: (event) {
+                              controller.pinEventAction(event);
+                            },
                           )
                         : const SizedBox(),
                   );

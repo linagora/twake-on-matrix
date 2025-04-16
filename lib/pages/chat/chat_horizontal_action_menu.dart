@@ -4,12 +4,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 
 enum ChatHorizontalActionMenu {
+  reaction,
   reply,
   forward,
   more;
 
   String getTitle(BuildContext context) {
     switch (this) {
+      case ChatHorizontalActionMenu.reaction:
+        return L10n.of(context)!.reaction;
       case ChatHorizontalActionMenu.reply:
         return L10n.of(context)!.reply;
       case ChatHorizontalActionMenu.forward:
@@ -21,6 +24,8 @@ enum ChatHorizontalActionMenu {
 
   IconData? getIcon() {
     switch (this) {
+      case ChatHorizontalActionMenu.reaction:
+        return Icons.add_reaction_outlined;
       case ChatHorizontalActionMenu.reply:
         return null;
       case ChatHorizontalActionMenu.forward:
@@ -36,6 +41,7 @@ enum ChatHorizontalActionMenu {
         return ImagePaths.icReply;
       case ChatHorizontalActionMenu.more:
       case ChatHorizontalActionMenu.forward:
+      case ChatHorizontalActionMenu.reaction:
         return null;
     }
   }
@@ -45,6 +51,7 @@ enum ChatHorizontalActionMenu {
       case ChatHorizontalActionMenu.reply:
       case ChatHorizontalActionMenu.more:
       case ChatHorizontalActionMenu.forward:
+      case ChatHorizontalActionMenu.reaction:
         return ContextMenuItemState.activated;
     }
   }

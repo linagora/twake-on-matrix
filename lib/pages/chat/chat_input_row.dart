@@ -103,11 +103,19 @@ class ChatInputRow extends StatelessWidget {
 
   ChatInputRowMobile _buildMobileInputRow(BuildContext context) {
     return ChatInputRowMobile(
-      inputBar: Column(
-        children: [
-          ReplyDisplay(controller),
-          _buildInputBar(context),
-        ],
+      inputBar: ValueListenableBuilder(
+        valueListenable: controller.showEmojiPickerNotifier,
+        builder: (context, value, _) {
+          return Column(
+            children: [
+              ReplyDisplay(controller),
+              Offstage(
+                offstage: value,
+                child: _buildInputBar(context),
+              ),
+            ],
+          );
+        },
       ),
       emojiPickerNotifier: controller.showEmojiPickerNotifier,
       onEmojiAction: controller.onEmojiAction,
@@ -130,7 +138,7 @@ class ChatInputRow extends StatelessWidget {
     );
   }
 
-  InputBar _buildInputBar(BuildContext context) {
+  Widget _buildInputBar(BuildContext context) {
     return InputBar(
       typeAheadKey: controller.chatComposerTypeAheadKey,
       rawKeyboardFocusNode: controller.rawKeyboardListenerFocusNode,

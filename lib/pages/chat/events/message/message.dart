@@ -31,6 +31,18 @@ typedef OnMenuAction = Function(
   TapDownDetails,
 );
 
+typedef OnSendEmojiReactionAction = void Function(
+  String emoji,
+  Event event,
+);
+
+typedef OnRemoveEmojiReactionAction = void Function(
+  String emoji,
+  Event event,
+);
+
+typedef OnPickEmojiReactionAction = void Function();
+
 typedef OnSwipe = void Function(SwipeDirection);
 
 typedef OnHover = void Function(bool, Event);
@@ -61,8 +73,16 @@ class Message extends StatefulWidget {
   final ContextMenuBuilder? menuChildren;
   final FocusNode? focusNode;
   final void Function(Event)? timestampCallback;
-  final void Function(Event)? onLongPress;
+  final void Function(Event)? onLongPressMessage;
+  final void Function()? onDisplayEmojiReaction;
+  final void Function()? onHideEmojiReaction;
   final List<ContextMenuAction> listAction;
+  final OnSendEmojiReactionAction? onSelectEmojiReaction;
+  final OnPickEmojiReactionAction? onPickEmojiReaction;
+  final void Function(Event)? onReply;
+  final void Function(Event)? onForward;
+  final void Function(Event)? onCopy;
+  final void Function(Event)? onPin;
 
   const Message(
     this.event, {
@@ -85,8 +105,16 @@ class Message extends StatefulWidget {
     this.markedUnreadLocation,
     this.focusNode,
     this.timestampCallback,
-    this.onLongPress,
+    this.onDisplayEmojiReaction,
+    this.onHideEmojiReaction,
+    this.onLongPressMessage,
     required this.listAction,
+    this.onSelectEmojiReaction,
+    this.onPickEmojiReaction,
+    this.onReply,
+    this.onForward,
+    this.onCopy,
+    this.onPin,
   });
 
   /// Indicates wheither the user may use a mouse instead
@@ -209,8 +237,16 @@ class _MessageState extends State<Message> with MessageAvatarMixin {
               onMenuAction: widget.onMenuAction,
               menuChildren: widget.menuChildren,
               focusNode: widget.focusNode,
-              onLongPress: widget.onLongPress,
+              onDisplayEmojiReaction: widget.onDisplayEmojiReaction,
+              onHideEmojiReaction: widget.onHideEmojiReaction,
               listActions: widget.listAction,
+              onSendEmojiReaction: widget.onSelectEmojiReaction,
+              onPickEmojiReaction: widget.onPickEmojiReaction,
+              onReply: widget.onReply,
+              onForward: widget.onForward,
+              onCopy: widget.onCopy,
+              onLongPressMessage: widget.onLongPressMessage,
+              onPin: widget.onPin,
             ),
           ),
         ];

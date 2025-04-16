@@ -19,6 +19,9 @@ import 'package:fluffychat/widgets/mixins/popup_menu_widget_style.dart';
 import 'package:fluffychat/widgets/mixins/twake_context_menu_mixin.dart';
 import 'package:flutter_typeahead/flutter_typeahead.dart';
 import 'package:fluffychat/utils/extension/global_key_extension.dart';
+import 'package:linagora_design_flutter/linagora_design_flutter.dart'
+    hide ImagePicker;
+import 'package:linagora_design_flutter/reaction/reaction_picker.dart';
 import 'package:universal_html/html.dart' as html;
 
 import 'package:adaptive_dialog/adaptive_dialog.dart';
@@ -123,6 +126,8 @@ class ChatController extends State<Chat>
   static const Duration _delayHideStickyTimestampHeader = Duration(seconds: 2);
 
   static const int _defaultEventCountDisplay = 30;
+
+  static const double _defaultMaxWidthReactionPicker = 296;
 
   final GlobalKey stickyTimestampKey =
       GlobalKey(debugLabel: 'stickyTimestampKey');
@@ -712,7 +717,7 @@ class ChatController extends State<Chat>
     }
   }
 
-  void copyEventsAction(Event event, {String? copiedText}) async {
+  void copyEventsAction(Event event) async {
     await event.copyTextEvent(context, timeline!);
 
     showEmojiPickerNotifier.value = false;
@@ -1048,7 +1053,6 @@ class ChatController extends State<Chat>
           relatedTo.containsKey('key') &&
           relatedTo['key'] == emoji.emoji;
     })) return;
-    return sendEmojiAction(emoji.emoji);
   }
 
   void forgetRoom() async {
@@ -1102,15 +1106,14 @@ class ChatController extends State<Chat>
     showEmojiPickerNotifier.value = true;
   }
 
-  void sendEmojiAction(String? emoji) async {
-    final events = selectedEvents;
-    _clearSelectEvent();
-    for (final event in events) {
-      await room!.sendReaction(
-        event.eventId,
-        emoji!,
-      );
-    }
+  void sendEmojiAction({
+    String? emoji,
+    required Event event,
+  }) async {
+    await room!.sendReaction(
+      event.eventId,
+      emoji!,
+    );
   }
 
   void clearSelectedEvents() {
@@ -1433,6 +1436,7 @@ class ChatController extends State<Chat>
     Event event,
   ) {
     final listAction = [
+      ChatHorizontalActionMenu.reaction,
       if (event.status.isAvailable) ChatHorizontalActionMenu.reply,
       ChatHorizontalActionMenu.more,
     ];
@@ -1453,6 +1457,13 @@ class ChatController extends State<Chat>
     TapDownDetails tapDownDetails,
   ) {
     switch (actions) {
+      case ChatHorizontalActionMenu.reaction:
+        handleReactionEmojiAction(
+          context,
+          event,
+          tapDownDetails,
+        );
+        break;
       case ChatHorizontalActionMenu.reply:
         replyAction(replyTo: event);
         break;
@@ -1557,9 +1568,105 @@ class ChatController extends State<Chat>
     }
   }
 
+  void handleReactionEmojiAction(
+    BuildContext context,
+    Event event,
+    TapDownDetails tapDownDetails,
+  ) async {
+    final offset = tapDownDetails.globalPosition;
+    final double positionLeftTap = offset.dx;
+    final double screenWidth = MediaQuery.sizeOf(context).width;
+    final double availableRightSpace = screenWidth - positionLeftTap;
+    double? positionLeft;
+    double? positionRight;
+    Alignment alignment = Alignment.topLeft;
+
+    if (availableRightSpace < _defaultMaxWidthReactionPicker) {
+      positionRight = screenWidth - positionLeftTap;
+      alignment = Alignment.topRight;
+    } else {
+      positionLeft = positionLeftTap;
+    }
+    _handleStateContextMenu();
+    final myReaction = event
+        .aggregatedEvents(
+          timeline!,
+          RelationshipTypes.reaction,
+        )
+        .where(
+          (event) =>
+              event.senderId == event.room.client.userID &&
+              event.type == 'm.reaction',
+        )
+        .firstOrNull;
+    final relatesTo =
+        (myReaction?.content as Map<String, dynamic>?)?['m.relates_to'];
+    await showDialog(
+      context: context,
+      barrierColor: Colors.transparent,
+      barrierDismissible: false,
+      builder: (dialogContext) => GestureDetector(
+        onTap: Navigator.of(dialogContext).pop,
+        child: Material(
+          type: MaterialType.transparency,
+          child: Container(
+            height: 56,
+            width: double.infinity,
+            color: Colors.transparent,
+            child: Stack(
+              children: [
+                Positioned(
+                  left: positionLeft,
+                  top: offset.dy,
+                  right: positionRight,
+                  child: Align(
+                    alignment: alignment,
+                    child: ReactionsPicker(
+                      enableMoreEmojiWidget: false,
+                      myEmojiReacted: relatesTo?['key'] ?? '',
+                      emojiSize: 40,
+                      onClickEmojiReactionAction: (emoji) async {
+                        final isSelected = emoji == (relatesTo?['key'] ?? '');
+                        if (myReaction == null) {
+                          sendEmojiAction(
+                            emoji: emoji,
+                            event: event,
+                          );
+                          return;
+                        }
+
+                        if (isSelected) {
+                          Navigator.of(context).pop();
+                          await myReaction.redactEvent();
+                          return;
+                        }
+
+                        if (!isSelected) {
+                          await myReaction.redactEvent();
+                          sendEmojiAction(
+                            emoji: emoji,
+                            event: event,
+                          );
+                          return;
+                        }
+                      },
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    ).then((_) {
+      openingPopupMenu.value = false;
+    });
+  }
+
   void hideKeyboardChatScreen() {
     if (keyboardVisibilityController.isVisible || inputFocus.hasFocus) {
       inputFocus.unfocus();
+      rawKeyboardListenerFocusNode.unfocus();
     }
   }
 
@@ -1989,6 +2096,17 @@ class ChatController extends State<Chat>
         break;
       default:
         break;
+    }
+  }
+
+  void onDisplayEmojiReaction() {
+    showEmojiPickerNotifier.value = true;
+  }
+
+  void onHideEmojiReaction() {
+    showEmojiPickerNotifier.value = false;
+    if (inputFocus.hasFocus) {
+      FocusScope.of(context).requestFocus(inputFocus);
     }
   }
 
