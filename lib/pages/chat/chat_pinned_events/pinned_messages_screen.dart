@@ -104,7 +104,7 @@ class PinnedMessagesScreen extends StatelessWidget {
                                 controller.getPinnedMessagesActionsList(event),
                                 event,
                               ),
-                              onLongPress: (event) =>
+                              onLongPressMessage: (event) =>
                                   controller.onLongPressMessage(
                                 context,
                                 event,
