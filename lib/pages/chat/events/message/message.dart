@@ -9,6 +9,7 @@ import 'package:fluffychat/pages/chat/events/message/multi_platform_message_cont
 import 'package:fluffychat/pages/chat/events/message/swipeable_message.dart';
 import 'package:fluffychat/pages/chat/events/state_message.dart';
 import 'package:fluffychat/pages/chat/events/verification_request_content.dart';
+import 'package:fluffychat/pages/chat/reactions_picker.dart';
 import 'package:fluffychat/pages/chat/sticky_timestamp_widget.dart';
 import 'package:fluffychat/utils/date_time_extension.dart';
 import 'package:fluffychat/utils/extension/event_status_custom_extension.dart';
@@ -63,6 +64,8 @@ class Message extends StatefulWidget {
   final void Function(Event)? timestampCallback;
   final void Function(Event)? onLongPress;
   final List<ContextMenuAction> listAction;
+  final OnSendEmojiReactionAction? onSendEmojiReaction;
+  final OnPickEmojiReactionAction? onPickEmojiReaction;
 
   const Message(
     this.event, {
@@ -87,6 +90,8 @@ class Message extends StatefulWidget {
     this.timestampCallback,
     this.onLongPress,
     required this.listAction,
+    this.onSendEmojiReaction,
+    this.onPickEmojiReaction,
   });
 
   /// Indicates wheither the user may use a mouse instead
@@ -211,6 +216,8 @@ class _MessageState extends State<Message> with MessageAvatarMixin {
               focusNode: widget.focusNode,
               onLongPress: widget.onLongPress,
               listActions: widget.listAction,
+              onSendEmojiReaction: widget.onSendEmojiReaction,
+              onPickEmojiReaction: widget.onPickEmojiReaction,
             ),
           ),
         ];

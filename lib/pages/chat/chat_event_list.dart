@@ -195,6 +195,13 @@ class ChatEventList extends StatelessWidget {
                                 name: action.action.name,
                               );
                             }).toList(),
+                            onPickEmojiReaction: () {},
+                            onSendEmojiReaction: (emoji, event) {
+                              controller.sendEmojiAction(
+                                emoji: emoji,
+                                event: event,
+                              );
+                            },
                           )
                         : const SizedBox(),
                   );
