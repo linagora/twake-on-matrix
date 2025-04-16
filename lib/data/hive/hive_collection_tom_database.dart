@@ -143,15 +143,12 @@ class HiveCollectionToMDatabase {
     );
     federationConfigurationsBox = await _collection.openBox(
       _federationConfigurationsBoxName,
-      preload: true,
     );
     thirdPartyContactsBox = await _collection.openBox(
       _thirdPartyContactsBox,
-      preload: true,
     );
     invitationStatus = await _collection.openBox(
       _invitationStatusBox,
-      preload: true,
     );
   }
 
