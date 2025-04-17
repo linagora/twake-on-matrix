@@ -1,11 +1,8 @@
 import 'package:dartz/dartz.dart';
-import 'package:fluffychat/domain/repository/invitation/invitation_repository.dart';
-import 'package:flutter_test/flutter_test.dart';
-import 'package:fluffychat/app_state/failure.dart';
-import 'package:fluffychat/app_state/success.dart';
 import 'package:fluffychat/domain/app_state/invitation/hive_delete_invitation_status_state.dart';
 import 'package:fluffychat/domain/repository/invitation/hive_invitation_status_repository.dart';
 import 'package:fluffychat/domain/usecase/invitation/hive_delete_invitation_status_interactor.dart';
+import 'package:flutter_test/flutter_test.dart';
 import 'package:get_it/get_it.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';

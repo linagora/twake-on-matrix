@@ -54,14 +54,18 @@ void main() {
       result,
       emitsInOrder([
         const Right(GetInvitationStatusLoadingState()),
-        Left(GetInvitationStatusEmptyState(
-          contactId: testContactId,
-          userId: testUserId,
-          invitationId: testInvitationId,
-        )),
-        Right(GetInvitationStatusSuccessState(
-          invitationStatusResponse: response,
-        )),
+        const Left(
+          GetInvitationStatusEmptyState(
+            contactId: testContactId,
+            userId: testUserId,
+            invitationId: testInvitationId,
+          ),
+        ),
+        Right(
+          GetInvitationStatusSuccessState(
+            invitationStatusResponse: response,
+          ),
+        ),
       ]),
     );
   });
@@ -96,9 +100,11 @@ void main() {
       result,
       emitsInOrder([
         const Right(GetInvitationStatusLoadingState()),
-        Right(GetInvitationStatusSuccessState(
-          invitationStatusResponse: response,
-        )),
+        Right(
+          GetInvitationStatusSuccessState(
+            invitationStatusResponse: response,
+          ),
+        ),
       ]),
     );
   });
