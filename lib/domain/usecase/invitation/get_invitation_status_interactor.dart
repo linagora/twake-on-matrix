@@ -22,7 +22,7 @@ class GetInvitationStatusInteractor {
         invitationId: invitationId,
       );
 
-      if (res.invitation != null) {
+      if (res.invitation == null) {
         yield Left(
           GetInvitationStatusEmptyState(
             contactId: contactId,
