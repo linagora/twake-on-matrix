@@ -12,7 +12,10 @@ import 'package:universal_html/html.dart' as html;
 import '../config/app_config.dart';
 
 abstract class PlatformInfos {
-  static bool get isWeb => kIsWeb;
+  @visibleForTesting
+  static bool isTestingForWeb = false;
+
+  static bool get isWeb => kIsWeb || isTestingForWeb;
 
   static bool get isLinux => !kIsWeb && Platform.isLinux;
 
