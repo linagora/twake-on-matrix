@@ -713,7 +713,7 @@ class ChatController extends State<Chat>
     }
   }
 
-  void copyEventsAction(Event event, {String? copiedText}) async {
+  void copyEventsAction(Event event) async {
     await event.copyTextEvent(context, timeline!);
 
     showEmojiPickerNotifier.value = false;

@@ -69,6 +69,7 @@ class Message extends StatefulWidget {
   final OnPickEmojiReactionAction? onPickEmojiReaction;
   final void Function(Event)? onReply;
   final void Function(Event)? onForward;
+  final void Function(Event)? onCopy;
 
   const Message(
     this.event, {
@@ -98,6 +99,7 @@ class Message extends StatefulWidget {
     this.onPickEmojiReaction,
     this.onReply,
     this.onForward,
+    this.onCopy,
   });
 
   /// Indicates wheither the user may use a mouse instead
@@ -227,6 +229,7 @@ class _MessageState extends State<Message> with MessageAvatarMixin {
               onPickEmojiReaction: widget.onPickEmojiReaction,
               onReply: widget.onReply,
               onForward: widget.onForward,
+              onCopy: widget.onCopy,
             ),
           ),
         ];

@@ -210,6 +210,7 @@ class ChatEventList extends StatelessWidget {
                             onReply: (event) {
                               controller.replyAction(replyTo: event);
                             },
+                            onCopy: controller.copyEventsAction,
                           )
                         : const SizedBox(),
                   );

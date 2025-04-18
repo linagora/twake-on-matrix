@@ -44,6 +44,7 @@ class MessageContentWithTimestampBuilder extends StatelessWidget {
   final OnPickEmojiReactionAction? onPickEmojiReaction;
   final void Function(Event)? onReply;
   final void Function(Event)? onForward;
+  final void Function(Event)? onCopy;
 
   static final responsiveUtils = getIt.get<ResponsiveUtils>();
 
@@ -68,6 +69,7 @@ class MessageContentWithTimestampBuilder extends StatelessWidget {
     this.onPickEmojiReaction,
     this.onReply,
     this.onForward,
+    this.onCopy,
   });
 
   @override
@@ -162,13 +164,13 @@ class MessageContentWithTimestampBuilder extends StatelessWidget {
                                   child: PullDownMenu(
                                     items: [
                                       PullDownMenuItem(
-                                        title: L10n.of(context)!.select,
-                                        icon:
-                                            CupertinoIcons.checkmark_alt_circle,
+                                        title: L10n.of(context)!.reply,
                                         onTap: () {
                                           Navigator.of(context).pop();
-                                          onSelect?.call(event);
+                                          onReply?.call(event);
                                         },
+                                        icon: CupertinoIcons
+                                            .arrowshape_turn_up_left,
                                       ),
                                       PullDownMenuItem(
                                         title: L10n.of(context)!.forward,
@@ -177,16 +179,24 @@ class MessageContentWithTimestampBuilder extends StatelessWidget {
                                           onForward?.call(event);
                                         },
                                         icon: CupertinoIcons
-                                            .arrowshape_turn_up_right_fill,
+                                            .arrowshape_turn_up_right,
                                       ),
                                       PullDownMenuItem(
-                                        title: L10n.of(context)!.reply,
+                                        title: L10n.of(context)!.copy,
                                         onTap: () {
                                           Navigator.of(context).pop();
-                                          onReply?.call(event);
+                                          onCopy?.call(event);
                                         },
-                                        icon: CupertinoIcons
-                                            .arrowshape_turn_up_left_fill,
+                                        icon: CupertinoIcons.doc_on_doc,
+                                      ),
+                                      PullDownMenuItem(
+                                        title: L10n.of(context)!.select,
+                                        icon:
+                                            CupertinoIcons.checkmark_alt_circle,
+                                        onTap: () {
+                                          Navigator.of(context).pop();
+                                          onSelect?.call(event);
+                                        },
                                       ),
                                     ],
                                   ),
