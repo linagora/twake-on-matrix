@@ -1559,6 +1559,7 @@ class ChatController extends State<Chat>
   void hideKeyboardChatScreen() {
     if (keyboardVisibilityController.isVisible || inputFocus.hasFocus) {
       inputFocus.unfocus();
+      rawKeyboardListenerFocusNode.unfocus();
     }
   }
 
@@ -1989,6 +1990,15 @@ class ChatController extends State<Chat>
       default:
         break;
     }
+  }
+
+  void onDisplayEmojiReaction() {
+    hideKeyboardChatScreen();
+    showEmojiPickerNotifier.value = true;
+  }
+
+  void onHideEmojiReaction() {
+    showEmojiPickerNotifier.value = false;
   }
 
   StreamSubscription? keyboardVisibilitySubscription;

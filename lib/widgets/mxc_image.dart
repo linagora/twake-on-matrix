@@ -275,10 +275,7 @@ class _MxcImageState extends State<MxcImage> {
         : _buildImageWidget();
 
     if (widget.event?.eventId != null && widget.enableHeroAnimation) {
-      imageWidget = Hero(
-        tag: widget.event!.eventId,
-        child: imageWidget,
-      );
+      imageWidget = imageWidget;
     }
 
     if (widget.isPreview) {

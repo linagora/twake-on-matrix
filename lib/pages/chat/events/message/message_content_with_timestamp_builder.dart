@@ -29,7 +29,8 @@ class MessageContentWithTimestampBuilder extends StatelessWidget {
   final Event? nextEvent;
   final void Function(Event)? onSelect;
   final void Function(String)? scrollToEventId;
-  final void Function(Event)? onLongPress;
+  final void Function()? onDisplayEmojiReaction;
+  final void Function()? onHideEmojiReaction;
   final ValueNotifier<String?> isHoverNotifier;
   final bool selected;
   final Timeline timeline;
@@ -41,6 +42,8 @@ class MessageContentWithTimestampBuilder extends StatelessWidget {
   final List<ContextMenuAction> listActions;
   final OnSendEmojiReactionAction? onSendEmojiReaction;
   final OnPickEmojiReactionAction? onPickEmojiReaction;
+  final void Function(Event)? onReply;
+  final void Function(Event)? onForward;
 
   static final responsiveUtils = getIt.get<ResponsiveUtils>();
 
@@ -50,7 +53,8 @@ class MessageContentWithTimestampBuilder extends StatelessWidget {
     this.nextEvent,
     this.onSelect,
     this.scrollToEventId,
-    this.onLongPress,
+    this.onDisplayEmojiReaction,
+    this.onHideEmojiReaction,
     this.selected = false,
     this.selectMode = true,
     required this.timeline,
@@ -62,6 +66,8 @@ class MessageContentWithTimestampBuilder extends StatelessWidget {
     required this.listActions,
     this.onSendEmojiReaction,
     this.onPickEmojiReaction,
+    this.onReply,
+    this.onForward,
   });
 
   @override
@@ -104,87 +110,97 @@ class MessageContentWithTimestampBuilder extends StatelessWidget {
               isClickable: responsiveUtils.isMobileOrTablet(context),
               onLongPress: event.status.isAvailable
                   ? (event) {
+                      onDisplayEmojiReaction?.call();
                       Navigator.of(context).push(
                         HeroDialogRoute(
                           builder: (context) {
-                            return ReactionsDialogWidget(
-                              id: event.eventId,
-                              messageWidget: Material(
-                                color: Colors.transparent,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: MessageStyle.bubbleBorderRadius,
-                                ),
-                                child: Container(
-                                  decoration: BoxDecoration(
+                            return SafeArea(
+                              child: ReactionsDialogWidget(
+                                id: event.eventId,
+                                messageWidget: Material(
+                                  color: Colors.transparent,
+                                  shape: RoundedRectangleBorder(
                                     borderRadius:
                                         MessageStyle.bubbleBorderRadius,
                                   ),
-                                  child: SingleChildScrollView(
-                                    primary: true,
-                                    physics: const ClampingScrollPhysics(),
-                                    child: _messageBuilder(
-                                      mainAxisSize: MainAxisSize.min,
-                                      context: context,
-                                      timelineText: timelineText,
-                                      noBubble: noBubble,
-                                      displayTime: displayTime,
+                                  child: Container(
+                                    decoration: BoxDecoration(
+                                      borderRadius:
+                                          MessageStyle.bubbleBorderRadius,
+                                    ),
+                                    child: SingleChildScrollView(
+                                      primary: true,
+                                      physics: const ClampingScrollPhysics(),
+                                      child: _messageBuilder(
+                                        mainAxisSize: MainAxisSize.min,
+                                        context: context,
+                                        timelineText: timelineText,
+                                        noBubble: noBubble,
+                                        displayTime: displayTime,
+                                      ),
                                     ),
                                   ),
                                 ),
-                              ),
-                              isOwnMessage: event.isOwnMessage,
-                              reactionWidget: ReactionsPicker(
-                                selectedEvent: event,
-                                timeline: timeline,
-                                onSendEmojiReaction: (emoji, event) {
-                                  onSendEmojiReaction?.call(
-                                    emoji,
-                                    event,
-                                  );
-                                  Navigator.of(context).pop();
-                                },
-                                onPickEmojiReaction: () {
-                                  onPickEmojiReaction?.call();
-                                  Navigator.of(context).pop();
-                                },
-                              ),
-                              contextMenuWidget: Padding(
-                                padding: const EdgeInsets.only(top: 16),
-                                child: PullDownMenu(
-                                  items: [
-                                    PullDownMenuItem(
-                                      title: L10n.of(context)!.select,
-                                      icon: CupertinoIcons.checkmark_alt_circle,
-                                      onTap: () {
-                                        Navigator.of(context).pop();
-                                      },
-                                    ),
-                                    PullDownMenuItem(
-                                      title: L10n.of(context)!.forward,
-                                      onTap: () {
-                                        Navigator.of(context).pop();
-                                      },
-                                      icon: CupertinoIcons
-                                          .arrowshape_turn_up_right_fill,
-                                    ),
-                                    PullDownMenuItem(
-                                      title: L10n.of(context)!.reply,
-                                      onTap: () {
-                                        Navigator.of(context).pop();
-                                      },
-                                      icon: CupertinoIcons
-                                          .arrowshape_turn_up_left_fill,
-                                    ),
-                                  ],
+                                isOwnMessage: event.isOwnMessage,
+                                reactionWidget: ReactionsPicker(
+                                  selectedEvent: event,
+                                  timeline: timeline,
+                                  onSendEmojiReaction: (emoji, event) {
+                                    onSendEmojiReaction?.call(
+                                      emoji,
+                                      event,
+                                    );
+                                    Navigator.of(context).pop();
+                                  },
+                                  onPickEmojiReaction: () {
+                                    onPickEmojiReaction?.call();
+                                    Navigator.of(context).pop();
+                                  },
                                 ),
+                                contextMenuWidget: Padding(
+                                  padding: const EdgeInsets.only(top: 16),
+                                  child: PullDownMenu(
+                                    items: [
+                                      PullDownMenuItem(
+                                        title: L10n.of(context)!.select,
+                                        icon:
+                                            CupertinoIcons.checkmark_alt_circle,
+                                        onTap: () {
+                                          Navigator.of(context).pop();
+                                          onSelect?.call(event);
+                                        },
+                                      ),
+                                      PullDownMenuItem(
+                                        title: L10n.of(context)!.forward,
+                                        onTap: () {
+                                          Navigator.of(context).pop();
+                                          onForward?.call(event);
+                                        },
+                                        icon: CupertinoIcons
+                                            .arrowshape_turn_up_right_fill,
+                                      ),
+                                      PullDownMenuItem(
+                                        title: L10n.of(context)!.reply,
+                                        onTap: () {
+                                          Navigator.of(context).pop();
+                                          onReply?.call(event);
+                                        },
+                                        icon: CupertinoIcons
+                                            .arrowshape_turn_up_left_fill,
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                widgetAlignment: event.isOwnMessage
+                                    ? Alignment.centerRight
+                                    : Alignment.centerLeft,
                               ),
-                              widgetAlignment: event.isOwnMessage
-                                  ? Alignment.centerRight
-                                  : Alignment.centerLeft,
                             );
                           },
                         ),
-                      );
+                      ).then((_) {
+                        onHideEmojiReaction?.call();
+                      });
                     }
                   : null,
               child: _messageBuilder(

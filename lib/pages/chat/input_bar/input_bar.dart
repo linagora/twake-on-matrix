@@ -43,6 +43,7 @@ class InputBar extends StatefulWidget {
   final ValueNotifier<bool>? showEmojiPickerNotifier;
   final SuggestionsController<Map<String, String?>>? suggestionsController;
   final bool isDraftChat;
+  final bool disableTypeAhead;
 
   const InputBar({
     this.room,
@@ -63,6 +64,7 @@ class InputBar extends StatefulWidget {
     this.suggestionsController,
     this.showEmojiPickerNotifier,
     this.isDraftChat = false,
+    this.disableTypeAhead = false,
     super.key,
   });
 
@@ -418,79 +420,115 @@ class _InputBarState extends State<InputBar> with PasteImageMixin {
         onKey: (event) {
           onRawKeyEvent(event);
         },
-        child: TypeAheadField<Map<String, String?>>(
-          direction: VerticalDirection.up,
-          hideOnEmpty: true,
-          hideOnLoading: true,
-          hideOnSelect: false,
-          debounceDuration: InputBar.debounceDuration,
-          autoFlipDirection: true,
-          scrollController: widget.suggestionScrollController,
-          suggestionsController: widget.suggestionsController,
-          controller: widget.controller,
-          focusNode: widget.typeAheadFocusNode,
-          builder: (context, controller, focusNode) => TextField(
-            minLines: widget.minLines,
-            maxLines: widget.maxLines,
-            keyboardType: widget.keyboardType,
-            textInputAction: widget.textInputAction,
-            scrollController: textFieldScrollController,
-            autofocus: widget.autofocus,
-            style: InputBarStyle.getTypeAheadTextStyle(context),
-            controller: controller,
-            decoration: widget.decoration,
-            focusNode: focusNode,
-            onChanged: (text) {
-              widget.suggestionsController?.open();
-              if (widget.onChanged != null) {
-                widget.onChanged!(text);
-              }
-            },
-            contextMenuBuilder:
-                PlatformInfos.isWeb ? null : mobileTwakeContextMenuBuilder,
-            onTap: () async {
-              await Future.delayed(InputBar.debounceDurationTap);
-              FocusScope.of(context).requestFocus(focusNode);
-            },
-            onSubmitted: PlatformInfos.isMobile
-                ? (text) {
-                    if (widget.onSubmitted != null) {
-                      widget.onSubmitted!(text);
-                    }
+        child: widget.disableTypeAhead
+            ? TextField(
+                minLines: widget.minLines,
+                maxLines: widget.maxLines,
+                keyboardType: widget.keyboardType,
+                textInputAction: widget.textInputAction,
+                scrollController: textFieldScrollController,
+                autofocus: widget.autofocus,
+                style: InputBarStyle.getTypeAheadTextStyle(context),
+                decoration: widget.decoration,
+                controller: widget.controller,
+                focusNode: widget.typeAheadFocusNode,
+                onChanged: (text) {
+                  widget.suggestionsController?.open();
+                  if (widget.onChanged != null) {
+                    widget.onChanged!(text);
                   }
-                : null,
-            textCapitalization: TextCapitalization.sentences,
-          ),
-          suggestionsCallback: (text) {
-            if (widget.room!.isDirectChat) return [];
-            final suggestions = getSuggestions(text);
-            if (PlatformInfos.isMobile) {
-              _handleSuggestionsCallbackMobile();
-            }
+                },
+                contextMenuBuilder:
+                    PlatformInfos.isWeb ? null : mobileTwakeContextMenuBuilder,
+                onTap: () async {
+                  await Future.delayed(InputBar.debounceDurationTap);
+                  FocusScope.of(context)
+                      .requestFocus(widget.typeAheadFocusNode);
+                },
+                onSubmitted: PlatformInfos.isMobile
+                    ? (text) {
+                        if (widget.onSubmitted != null) {
+                          widget.onSubmitted!(text);
+                        }
+                      }
+                    : null,
+                textCapitalization: TextCapitalization.sentences,
+              )
+            : TypeAheadField<Map<String, String?>>(
+                direction: VerticalDirection.up,
+                hideOnEmpty: true,
+                hideOnLoading: true,
+                hideOnSelect: false,
+                debounceDuration: InputBar.debounceDuration,
+                autoFlipDirection: true,
+                scrollController: widget.suggestionScrollController,
+                suggestionsController: widget.suggestionsController,
+                controller: widget.controller,
+                focusNode: widget.typeAheadFocusNode,
+                builder: (context, controller, focusNode) => TextField(
+                  minLines: widget.minLines,
+                  maxLines: widget.maxLines,
+                  keyboardType: widget.keyboardType,
+                  textInputAction: widget.textInputAction,
+                  scrollController: textFieldScrollController,
+                  autofocus: widget.autofocus,
+                  style: InputBarStyle.getTypeAheadTextStyle(context),
+                  controller: controller,
+                  decoration: widget.decoration,
+                  focusNode: focusNode,
+                  onChanged: (text) {
+                    widget.suggestionsController?.open();
+                    if (widget.onChanged != null) {
+                      widget.onChanged!(text);
+                    }
+                  },
+                  contextMenuBuilder: PlatformInfos.isWeb
+                      ? null
+                      : mobileTwakeContextMenuBuilder,
+                  onTap: () async {
+                    await Future.delayed(InputBar.debounceDurationTap);
+                    FocusScope.of(context).requestFocus(focusNode);
+                  },
+                  onSubmitted: PlatformInfos.isMobile
+                      ? (text) {
+                          if (widget.onSubmitted != null) {
+                            widget.onSubmitted!(text);
+                          }
+                        }
+                      : null,
+                  textCapitalization: TextCapitalization.sentences,
+                ),
+                suggestionsCallback: (text) {
+                  if (widget.room!.isDirectChat) return [];
+                  final suggestions = getSuggestions(text);
+                  if (PlatformInfos.isMobile) {
+                    _handleSuggestionsCallbackMobile();
+                  }
 
-            if (PlatformInfos.isWeb) {
-              _handleSuggestionsCallbackWeb(suggestions);
-            }
-            widget.focusSuggestionController.suggestions = suggestions;
-            return suggestions;
-          },
-          itemBuilder: (context, suggestion) => SuggestionTile(
-            suggestion: suggestion,
-            client: Matrix.of(context).client,
-          ),
-          onSelected: insertSuggestion,
-          errorBuilder: (BuildContext context, Object? error) =>
-              const SizedBox.shrink(),
-          loadingBuilder: (BuildContext context) => const SizedBox.shrink(),
-          // fix loading briefly flickering a dark box
-          emptyBuilder: (BuildContext context) => const SizedBox.shrink(),
-          // fix loading briefly showing no suggestions
-          listBuilder: (context, widgets) => FocusSuggestionList(
-            items: widgets,
-            scrollController: widget.suggestionScrollController,
-            focusSuggestionController: widget.focusSuggestionController,
-          ),
-        ),
+                  if (PlatformInfos.isWeb) {
+                    _handleSuggestionsCallbackWeb(suggestions);
+                  }
+                  widget.focusSuggestionController.suggestions = suggestions;
+                  return suggestions;
+                },
+                itemBuilder: (context, suggestion) => SuggestionTile(
+                  suggestion: suggestion,
+                  client: Matrix.of(context).client,
+                ),
+                onSelected: insertSuggestion,
+                errorBuilder: (BuildContext context, Object? error) =>
+                    const SizedBox.shrink(),
+                loadingBuilder: (BuildContext context) =>
+                    const SizedBox.shrink(),
+                // fix loading briefly flickering a dark box
+                emptyBuilder: (BuildContext context) => const SizedBox.shrink(),
+                // fix loading briefly showing no suggestions
+                listBuilder: (context, widgets) => FocusSuggestionList(
+                  items: widgets,
+                  scrollController: widget.suggestionScrollController,
+                  focusSuggestionController: widget.focusSuggestionController,
+                ),
+              ),
       ),
     );
   }

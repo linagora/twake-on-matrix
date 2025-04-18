@@ -1,5 +1,4 @@
 import 'package:fluffychat/pages/chat/events/message_reactions_style.dart';
-import 'package:fluffychat/utils/dialog/twake_dialog.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
@@ -96,9 +95,9 @@ class ReactionsList extends StatelessWidget {
         ...reactionList.map(
           (r) => _Reaction(
             reactionKey: r.key,
-            count: r.count,
+            count: event.room.isDirectChat ? null : r.count,
             reacted: r.reacted,
-            onTap: () {
+            onTap: () async {
               if (r.reacted) {
                 final evt = allReactionEvents.firstWhereOrNull((e) {
                   final relatedTo = e.content['m.relates_to'];
@@ -107,9 +106,7 @@ class ReactionsList extends StatelessWidget {
                       relatedTo['key'] == r.key;
                 });
                 if (evt != null) {
-                  TwakeDialog.showFutureLoadingDialogFullScreen(
-                    future: () => evt.redactEvent(),
-                  );
+                  await evt.redactEvent();
                 }
               } else {
                 event.room.sendReaction(event.eventId, r.key!);
@@ -121,15 +118,6 @@ class ReactionsList extends StatelessWidget {
             ).show(context),
           ),
         ),
-        if (allReactionEvents.any((e) => e.status.isSending))
-          SizedBox(
-            width: MessageReactionsStyle.loadingReactionSize,
-            height: MessageReactionsStyle.loadingReactionSize,
-            child: const Padding(
-              padding: EdgeInsets.all(4.0),
-              child: CircularProgressIndicator.adaptive(strokeWidth: 1),
-            ),
-          ),
       ],
     );
   }
@@ -164,14 +152,16 @@ class _Reaction extends StatelessWidget {
             width: 9999,
             height: fontSize,
           ),
-          const SizedBox(width: 4),
-          Text(
-            count.toString(),
-            style: TextStyle(
-              color: Theme.of(context).colorScheme.onSurface,
-              fontSize: DefaultTextStyle.of(context).style.fontSize,
+          if (count != null && count! > 0) ...[
+            const SizedBox(width: 4),
+            Text(
+              count.toString(),
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.onSurface,
+                fontSize: DefaultTextStyle.of(context).style.fontSize,
+              ),
             ),
-          ),
+          ],
         ],
       );
     } else {
@@ -206,15 +196,17 @@ class _Reaction extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             content,
-            const SizedBox(
-              width: 4,
-            ),
-            Text(
-              '$count',
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurface,
-                  ),
-            ),
+            if (count != null && count! > 0) ...[
+              const SizedBox(
+                width: 4,
+              ),
+              Text(
+                '$count',
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: Theme.of(context).colorScheme.onSurface,
+                    ),
+              ),
+            ],
           ],
         ),
       ),
