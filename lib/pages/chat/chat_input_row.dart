@@ -130,8 +130,9 @@ class ChatInputRow extends StatelessWidget {
     );
   }
 
-  InputBar _buildInputBar(BuildContext context) {
+  Widget _buildInputBar(BuildContext context) {
     return InputBar(
+      disableTypeAhead: controller.showEmojiPickerNotifier.value,
       typeAheadKey: controller.chatComposerTypeAheadKey,
       rawKeyboardFocusNode: controller.rawKeyboardListenerFocusNode,
       room: controller.room!,

@@ -17,6 +17,7 @@ import 'package:fluffychat/utils/room_status_extension.dart';
 import 'package:fluffychat/widgets/context_menu/context_menu_action.dart';
 import 'package:fluffychat/widgets/mixins/popup_menu_widget_style.dart';
 import 'package:fluffychat/widgets/mixins/twake_context_menu_mixin.dart';
+import 'package:flutter_portal/flutter_portal.dart';
 import 'package:flutter_typeahead/flutter_typeahead.dart';
 import 'package:fluffychat/utils/extension/global_key_extension.dart';
 import 'package:universal_html/html.dart' as html;
@@ -712,7 +713,7 @@ class ChatController extends State<Chat>
     }
   }
 
-  void copyEventsAction(Event event, {String? copiedText}) async {
+  void copyEventsAction(Event event) async {
     await event.copyTextEvent(context, timeline!);
 
     showEmojiPickerNotifier.value = false;
@@ -1048,7 +1049,6 @@ class ChatController extends State<Chat>
           relatedTo.containsKey('key') &&
           relatedTo['key'] == emoji.emoji;
     })) return;
-    return sendEmojiAction(emoji.emoji);
   }
 
   void forgetRoom() async {
@@ -1102,15 +1102,14 @@ class ChatController extends State<Chat>
     showEmojiPickerNotifier.value = true;
   }
 
-  void sendEmojiAction(String? emoji) async {
-    final events = selectedEvents;
-    _clearSelectEvent();
-    for (final event in events) {
-      await room!.sendReaction(
-        event.eventId,
-        emoji!,
-      );
-    }
+  void sendEmojiAction({
+    String? emoji,
+    required Event event,
+  }) async {
+    await room!.sendReaction(
+      event.eventId,
+      emoji!,
+    );
   }
 
   void clearSelectedEvents() {
@@ -1560,6 +1559,7 @@ class ChatController extends State<Chat>
   void hideKeyboardChatScreen() {
     if (keyboardVisibilityController.isVisible || inputFocus.hasFocus) {
       inputFocus.unfocus();
+      rawKeyboardListenerFocusNode.unfocus();
     }
   }
 
@@ -1992,6 +1992,15 @@ class ChatController extends State<Chat>
     }
   }
 
+  void onDisplayEmojiReaction() {
+    hideKeyboardChatScreen();
+    showEmojiPickerNotifier.value = true;
+  }
+
+  void onHideEmojiReaction() {
+    showEmojiPickerNotifier.value = false;
+  }
+
   StreamSubscription? keyboardVisibilitySubscription;
 
   @override
@@ -2072,7 +2081,9 @@ class ChatController extends State<Chat>
   Widget build(BuildContext context) {
     return MouseRegion(
       onHover: (_) => _resetLocationPath(),
-      child: ChatView(this, key: widget.key),
+      child: Portal(
+        child: ChatView(this, key: widget.key),
+      ),
     );
   }
 }

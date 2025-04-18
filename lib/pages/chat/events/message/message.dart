@@ -9,6 +9,7 @@ import 'package:fluffychat/pages/chat/events/message/multi_platform_message_cont
 import 'package:fluffychat/pages/chat/events/message/swipeable_message.dart';
 import 'package:fluffychat/pages/chat/events/state_message.dart';
 import 'package:fluffychat/pages/chat/events/verification_request_content.dart';
+import 'package:fluffychat/pages/chat/reactions_picker.dart';
 import 'package:fluffychat/pages/chat/sticky_timestamp_widget.dart';
 import 'package:fluffychat/utils/date_time_extension.dart';
 import 'package:fluffychat/utils/extension/event_status_custom_extension.dart';
@@ -61,8 +62,14 @@ class Message extends StatefulWidget {
   final ContextMenuBuilder? menuChildren;
   final FocusNode? focusNode;
   final void Function(Event)? timestampCallback;
-  final void Function(Event)? onLongPress;
+  final void Function()? onDisplayEmojiReaction;
+  final void Function()? onHideEmojiReaction;
   final List<ContextMenuAction> listAction;
+  final OnSendEmojiReactionAction? onSendEmojiReaction;
+  final OnPickEmojiReactionAction? onPickEmojiReaction;
+  final void Function(Event)? onReply;
+  final void Function(Event)? onForward;
+  final void Function(Event)? onCopy;
 
   const Message(
     this.event, {
@@ -85,8 +92,14 @@ class Message extends StatefulWidget {
     this.markedUnreadLocation,
     this.focusNode,
     this.timestampCallback,
-    this.onLongPress,
+    this.onDisplayEmojiReaction,
+    this.onHideEmojiReaction,
     required this.listAction,
+    this.onSendEmojiReaction,
+    this.onPickEmojiReaction,
+    this.onReply,
+    this.onForward,
+    this.onCopy,
   });
 
   /// Indicates wheither the user may use a mouse instead
@@ -209,8 +222,14 @@ class _MessageState extends State<Message> with MessageAvatarMixin {
               onMenuAction: widget.onMenuAction,
               menuChildren: widget.menuChildren,
               focusNode: widget.focusNode,
-              onLongPress: widget.onLongPress,
+              onDisplayEmojiReaction: widget.onDisplayEmojiReaction,
+              onHideEmojiReaction: widget.onHideEmojiReaction,
               listActions: widget.listAction,
+              onSendEmojiReaction: widget.onSendEmojiReaction,
+              onPickEmojiReaction: widget.onPickEmojiReaction,
+              onReply: widget.onReply,
+              onForward: widget.onForward,
+              onCopy: widget.onCopy,
             ),
           ),
         ];
