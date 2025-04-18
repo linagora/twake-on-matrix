@@ -24,6 +24,7 @@ class ReactionsPicker extends StatelessWidget {
   final Timeline timeline;
   final OnSendEmojiReactionAction? onSendEmojiReaction;
   final OnPickEmojiReactionAction? onPickEmojiReaction;
+  final Color? backgroundColor;
 
   const ReactionsPicker({
     super.key,
@@ -31,6 +32,7 @@ class ReactionsPicker extends StatelessWidget {
     required this.timeline,
     this.onSendEmojiReaction,
     this.onPickEmojiReaction,
+    this.backgroundColor,
   });
 
   @override
@@ -49,7 +51,8 @@ class ReactionsPicker extends StatelessWidget {
               children: [
                 Container(
                   decoration: BoxDecoration(
-                    color: LinagoraSysColors.material().onPrimary,
+                    color: backgroundColor ??
+                        LinagoraSysColors.material().onPrimary,
                     borderRadius: const BorderRadius.all(
                       Radius.circular(AppConfig.borderRadius),
                     ),

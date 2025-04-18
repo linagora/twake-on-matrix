@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 import 'package:fluffychat/pages/chat/chat_actions.dart';
 import 'package:fluffychat/pages/chat/events/message_content_mixin.dart';
+import 'package:fluffychat/pages/chat/reactions_picker.dart';
 import 'package:fluffychat/presentation/extensions/event_update_extension.dart';
 import 'package:fluffychat/presentation/mixins/handle_clipboard_action_mixin.dart';
 import 'package:fluffychat/presentation/mixins/leave_chat_mixin.dart';
@@ -20,6 +21,8 @@ import 'package:fluffychat/widgets/mixins/twake_context_menu_mixin.dart';
 import 'package:flutter_portal/flutter_portal.dart';
 import 'package:flutter_typeahead/flutter_typeahead.dart';
 import 'package:fluffychat/utils/extension/global_key_extension.dart';
+import 'package:linagora_design_flutter/linagora_design_flutter.dart'
+    hide ImagePicker;
 import 'package:universal_html/html.dart' as html;
 
 import 'package:adaptive_dialog/adaptive_dialog.dart';
@@ -1432,6 +1435,7 @@ class ChatController extends State<Chat>
     Event event,
   ) {
     final listAction = [
+      ChatHorizontalActionMenu.reaction,
       if (event.status.isAvailable) ChatHorizontalActionMenu.reply,
       ChatHorizontalActionMenu.more,
     ];
@@ -1452,6 +1456,13 @@ class ChatController extends State<Chat>
     TapDownDetails tapDownDetails,
   ) {
     switch (actions) {
+      case ChatHorizontalActionMenu.reaction:
+        handleReactionEmojiAction(
+          context,
+          event,
+          tapDownDetails,
+        );
+        break;
       case ChatHorizontalActionMenu.reply:
         replyAction(replyTo: event);
         break;
@@ -1554,6 +1565,50 @@ class ChatController extends State<Chat>
         event,
       );
     }
+  }
+
+  void handleReactionEmojiAction(
+    BuildContext context,
+    Event event,
+    TapDownDetails tapDownDetails,
+  ) async {
+    final offset = tapDownDetails.globalPosition;
+    _handleStateContextMenu();
+    await showDialog(
+      context: context,
+      barrierColor: Colors.transparent,
+      barrierDismissible: false,
+      builder: (dialogContext) => GestureDetector(
+        onTap: Navigator.of(dialogContext).pop,
+        child: Material(
+          type: MaterialType.transparency,
+          child: Container(
+            height: double.infinity,
+            width: double.infinity,
+            color: Colors.transparent,
+            child: Stack(
+              children: [
+                Positioned(
+                  left: offset.dx,
+                  top: offset.dy,
+                  child: ReactionsPicker(
+                    selectedEvent: event,
+                    backgroundColor: Theme.of(context).colorScheme.surface,
+                    timeline: timeline!,
+                    onSendEmojiReaction: (emoji, event) {
+                      Navigator.of(dialogContext).pop();
+                      sendEmojiAction(event: event, emoji: emoji);
+                    },
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    ).then((_) {
+      openingPopupMenu.value = false;
+    });
   }
 
   void hideKeyboardChatScreen() {
