@@ -1,3 +1,14 @@
+## [2.8.0+2330] - 2025-04-18
+### Added
+- #2270, #2271, #2272 Invitation
+
+### Fixed
+- Delegate cache to browser
+- Add gzip and etag headers
+- Change client name for web
+- Enable device verification
+- Fix cache problem make wrong API baseUrl
+
 ## [2.7.5+2330] - 2025-03-26
 ### Fixed
 - Disable invitation button 
