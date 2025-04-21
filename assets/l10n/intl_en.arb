@@ -3114,5 +3114,7 @@
   "failedToSendInvitation": "Failed to send invitation.",
   "shareInvitationLink": "Share invitation link",
   "failedToGenerateInvitationLink": "Failed to generate invitation link.",
-  "youAlreadySentAnInvitationToThisContact": "You already sent an invitation to this contact"
+  "youAlreadySentAnInvitationToThisContact": "You already sent an invitation to this contact",
+  "selectedEmailWillReceiveAnInvitationLinkAndInstructions": "Selected email will receive an invitation link and instructions.",
+  "selectedNumberWillGetAnSMSWithAnInvitationLinkAndInstructions": "Selected number will get an SMS with an invitation link and instructions."
 }
