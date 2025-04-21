@@ -1787,7 +1787,7 @@ packages:
     description:
       path: "."
       ref: cozy-integration
-      resolved-ref: "3815684d6de2e8c5c9c069c5985214a0cab002d4"
+      resolved-ref: "59f30e4c5d21fbab49670a81bbe0d37804795d1b"
       url: "git@github.com:linagora/linagora-design-flutter.git"
     source: git
     version: "0.0.1"
