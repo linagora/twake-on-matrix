@@ -97,9 +97,8 @@ class ContactsInvitationView extends StatelessWidget {
                                           contact.phoneNumber ==
                                               phoneNumber.phoneNumber;
                                   return Padding(
-                                    padding: EdgeInsets.symmetric(
+                                    padding: const EdgeInsets.symmetric(
                                       vertical: 8,
-                                      horizontal: isSelectedContact ? 8 : 0,
                                     ),
                                     child: Row(
                                       crossAxisAlignment:
@@ -112,7 +111,7 @@ class ContactsInvitationView extends StatelessWidget {
                                             Icons.call_outlined,
                                             size: 24,
                                             color: LinagoraSysColors.material()
-                                                .onSurface,
+                                                .tertiary,
                                           ),
                                         ),
                                         const SizedBox(width: 16),
@@ -137,9 +136,9 @@ class ContactsInvitationView extends StatelessWidget {
                                                                   .textTheme
                                                                   .labelMedium
                                                                   ?.copyWith(
-                                                                    color: LinagoraSysColors
+                                                                    color: LinagoraRefColors
                                                                             .material()
-                                                                        .onSurface,
+                                                                        .neutral[50],
                                                                   ),
                                                         ),
                                                         Text(
@@ -148,11 +147,13 @@ class ContactsInvitationView extends StatelessWidget {
                                                           style:
                                                               Theme.of(context)
                                                                   .textTheme
-                                                                  .labelLarge
+                                                                  .bodyLarge
                                                                   ?.copyWith(
-                                                                    color: LinagoraRefColors
-                                                                            .material()
-                                                                        .neutral[50],
+                                                                    color: isSelectedContact
+                                                                        ? LinagoraSysColors.material()
+                                                                            .primary
+                                                                        : LinagoraSysColors.material()
+                                                                            .onSurface,
                                                                   ),
                                                         ),
                                                       ],
@@ -167,6 +168,25 @@ class ContactsInvitationView extends StatelessWidget {
                                                     ),
                                                 ],
                                               ),
+                                              if (isSelectedContact) ...[
+                                                const SizedBox(
+                                                  height: 4,
+                                                ),
+                                                Text(
+                                                  L10n.of(context)!
+                                                      .selectedNumberWillGetAnSMSWithAnInvitationLinkAndInstructions,
+                                                  style: Theme.of(
+                                                    context,
+                                                  )
+                                                      .textTheme
+                                                      .labelSmall
+                                                      ?.copyWith(
+                                                        color: LinagoraRefColors
+                                                                .material()
+                                                            .tertiary[30],
+                                                      ),
+                                                ),
+                                              ],
                                               const SizedBox(height: 12),
                                               Divider(
                                                 color: LinagoraStateLayer(
@@ -200,9 +220,8 @@ class ContactsInvitationView extends StatelessWidget {
                                       contact is PresentationEmail &&
                                           contact.email == email.email;
                                   return Padding(
-                                    padding: EdgeInsets.symmetric(
+                                    padding: const EdgeInsets.symmetric(
                                       vertical: 8,
-                                      horizontal: isSelectedContact ? 8 : 0,
                                     ),
                                     child: Row(
                                       crossAxisAlignment:
@@ -214,7 +233,7 @@ class ContactsInvitationView extends StatelessWidget {
                                           child: Icon(
                                             Icons.email_outlined,
                                             color: LinagoraSysColors.material()
-                                                .onSurface,
+                                                .tertiary,
                                           ),
                                         ),
                                         const SizedBox(width: 16),
@@ -239,9 +258,9 @@ class ContactsInvitationView extends StatelessWidget {
                                                                   .textTheme
                                                                   .labelMedium
                                                                   ?.copyWith(
-                                                                    color: LinagoraSysColors
+                                                                    color: LinagoraRefColors
                                                                             .material()
-                                                                        .onSurface,
+                                                                        .neutral[50],
                                                                   ),
                                                         ),
                                                         Text(
@@ -249,11 +268,13 @@ class ContactsInvitationView extends StatelessWidget {
                                                           style:
                                                               Theme.of(context)
                                                                   .textTheme
-                                                                  .labelLarge
+                                                                  .bodyLarge
                                                                   ?.copyWith(
-                                                                    color: LinagoraRefColors
-                                                                            .material()
-                                                                        .neutral[50],
+                                                                    color: isSelectedContact
+                                                                        ? LinagoraSysColors.material()
+                                                                            .primary
+                                                                        : LinagoraSysColors.material()
+                                                                            .onSurface,
                                                                   ),
                                                         ),
                                                       ],
@@ -268,6 +289,25 @@ class ContactsInvitationView extends StatelessWidget {
                                                     ),
                                                 ],
                                               ),
+                                              if (isSelectedContact) ...[
+                                                const SizedBox(
+                                                  height: 4,
+                                                ),
+                                                Text(
+                                                  L10n.of(context)!
+                                                      .selectedEmailWillReceiveAnInvitationLinkAndInstructions,
+                                                  style: Theme.of(
+                                                    context,
+                                                  )
+                                                      .textTheme
+                                                      .labelSmall
+                                                      ?.copyWith(
+                                                        color: LinagoraRefColors
+                                                                .material()
+                                                            .tertiary[30],
+                                                      ),
+                                                ),
+                                              ],
                                               const SizedBox(height: 12),
                                               Divider(
                                                 color: LinagoraStateLayer(
