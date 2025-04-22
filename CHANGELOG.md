@@ -1,3 +1,8 @@
+## [2.8.1+2330] - 2025-04-18
+### Fixed
+- Style for Invitation layout
+- Hanlde click for contact item
+
 ## [2.8.0+2330] - 2025-04-18
 ### Added
 - #2270, #2271, #2272 Invitation
