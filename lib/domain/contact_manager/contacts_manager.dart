@@ -234,9 +234,7 @@ class ContactsManager {
                   ),
                 );
                 if (success.timeAvailableForSyncVault) {
-                  _postAddressBookOnMobile(
-                    contacts: success.contacts,
-                  );
+                  _handleLookUpPhonebookContacts(withMxId: withMxId);
                 }
               }
             },
