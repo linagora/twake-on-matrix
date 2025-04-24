@@ -155,12 +155,7 @@ class ContactsInvitationController extends State<ContactsInvitation> {
     final invitationData = _getInvitationData(contact);
 
     if (invitationData != null) {
-      _generateInvitationLinkInteractor
-          .execute(
-        contact: invitationData.contact,
-        medium: invitationData.medium,
-      )
-          .listen((state) {
+      _generateInvitationLinkInteractor.execute().listen((state) {
         generateInvitationLinkNotifier.value = state;
       });
     }

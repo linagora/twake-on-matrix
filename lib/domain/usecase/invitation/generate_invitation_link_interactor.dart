@@ -14,15 +14,15 @@ class GenerateInvitationLinkInteractor {
       getIt.get<InvitationRepository>();
 
   Stream<Either<Failure, Success>> execute({
-    required String contact,
-    required InvitationMediumEnum medium,
+    String? contact,
+    InvitationMediumEnum? medium,
   }) async* {
     try {
       yield const Right(GenerateInvitationLinkLoadingState());
       final res = await _invitationRepository.generateInvitationLink(
         request: InvitationRequest(
           contact: contact,
-          medium: medium.value,
+          medium: medium?.value,
         ),
       );
 
