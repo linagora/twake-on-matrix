@@ -1074,7 +1074,6 @@ void main() {
       'AND contactsNotifier return GetContactsIsEmpty with contacts is empty.\n'
       'AND tryGetSyncedPhoneBookContactInteractor return GetSyncedPhoneBookContactSuccessState state.\n'
       'AND timeAvailableForSyncVault is true.\n'
-      'AND phonebookContactNotifier return RequestTokenFailure state.\n'
       'THEN contactsNotifier in ContactsManager SHOULD have GetContactsIsEmpty state.\n'
       'THEN phonebookContactNotifier in ContactsManager SHOULD have RequestTokenFailure state.\n'
       'THEN list ToM contact SHOULD is empty.\n'
@@ -1100,8 +1099,11 @@ void main() {
             userId: mxId,
           ),
         ).thenAnswer(
-          (_) async => const Left(
-            GetSyncedPhoneBookContactFailure(exception: dynamic),
+          (_) async => Right(
+            GetSyncedPhoneBookContactSuccessState(
+              contacts: contacts,
+              timeAvailableForSyncVault: true,
+            ),
           ),
         );
 
@@ -1221,12 +1223,12 @@ void main() {
       'AND tryGetSyncedPhoneBookContactInteractor return GetSyncedPhoneBookContactSuccessState state.\n'
       'AND timeAvailableForSyncVault is true.\n'
       'AND phonebookContactNotifier return GetPhonebookContactsSuccess state.\n'
-      'THEN contactsNotifier in ContactsManager SHOULD have GetContactsSuccess state.\n'
+      'THEN contactsNotifier in ContactsManager SHOULD have GetContactsIsEmpty state.\n'
       'THEN phonebookContactNotifier in ContactsManager SHOULD have GetPhonebookContactsSuccess state.\n'
-      'THEN list ToM contact SHOULD is not empty.\n'
+      'THEN list ToM contact SHOULD is empty.\n'
       'THEN list Phonebook contact SHOULD is not empty.\n',
       () async {
-        final List<Success> listTomContactsSuccessState = [];
+        final List<Failure> listTomContactsFailureState = [];
 
         final List<Success> listPhonebookContactsSuccessState = [];
 
@@ -1239,7 +1241,7 @@ void main() {
         ).thenAnswer(
           (_) => Stream.fromIterable([
             const Right(ContactsLoading()),
-            Right(GetContactsSuccess(contacts: contacts)),
+            const Left(GetContactsIsEmpty()),
           ]),
         );
 
@@ -1308,8 +1310,8 @@ void main() {
 
         contactsManager.getContactsNotifier().addListener(() {
           contactsManager.getContactsNotifier().value.fold(
-                (failure) => null,
-                (success) => listTomContactsSuccessState.add(success),
+                (failure) => listTomContactsFailureState.add(failure),
+                (success) => null,
               );
         });
 
@@ -1362,11 +1364,13 @@ void main() {
           ),
         ).called(1);
 
-        expectLater(listTomContactsSuccessState.length, 2);
+        expectLater(listTomContactsFailureState.length, 1);
 
         expectLater(
-          listTomContactsSuccessState,
-          [const ContactsLoading(), GetContactsSuccess(contacts: contacts)],
+          listTomContactsFailureState,
+          [
+            const GetContactsIsEmpty(),
+          ],
         );
 
         expectLater(listPhonebookContactsSuccessState.length, 2);
@@ -1385,7 +1389,7 @@ void main() {
       'WHEN it is available get Phonebook contact.\n'
       'AND contactsNotifier return GetContactsSuccess with contacts not empty.\n'
       'AND tryGetSyncedPhoneBookContactInteractor return GetSyncedPhoneBookContactSuccessState state.\n'
-      'AND timeAvailableForSyncVault is false.\n'
+      'AND timeAvailableForSyncVault is true.\n'
       'THEN contactsNotifier in ContactsManager SHOULD have GetContactsSuccess state.\n'
       'THEN phonebookContactNotifier in ContactsManager SHOULD have GetPhonebookContactsSuccess state.\n'
       'THEN list ToM contact SHOULD is empty.\n'
