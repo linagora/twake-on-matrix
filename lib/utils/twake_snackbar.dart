@@ -1,6 +1,7 @@
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/utils/responsive/responsive_utils.dart';
 import 'package:flutter/material.dart';
+import 'package:linagora_design_flutter/colors/linagora_sys_colors.dart';
 
 const Duration _snackBarDefaultDisplayDuration = Duration(milliseconds: 4000);
 
@@ -35,13 +36,32 @@ class TwakeSnackBar {
         width: TwakeSnackBarStyle.widthSnackBar(context),
         padding: TwakeSnackBarStyle.snackBarPadding,
         duration: duration,
-        content: Text(
-          message,
-          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                // TODO: change to colorSurface when its approved
-                // ignore: deprecated_member_use
-                color: Theme.of(context).colorScheme.background,
+        content: Row(
+          children: [
+            Expanded(
+              child: Text(
+                message,
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      // TODO: change to colorSurface when its approved
+                      // ignore: deprecated_member_use
+                      color: Theme.of(context).colorScheme.background,
+                    ),
               ),
+            ),
+            InkWell(
+              hoverColor: Colors.transparent,
+              focusColor: Colors.transparent,
+              highlightColor: Colors.transparent,
+              splashColor: Colors.transparent,
+              onTap: () {
+                ScaffoldMessenger.of(context).hideCurrentSnackBar();
+              },
+              child: Icon(
+                Icons.close,
+                color: LinagoraSysColors.material().onInverseSurface,
+              ),
+            ),
+          ],
         ),
       ),
     );
