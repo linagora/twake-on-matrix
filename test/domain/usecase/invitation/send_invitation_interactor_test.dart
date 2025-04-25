@@ -131,4 +131,231 @@ void main() {
       ]),
     );
   });
+
+  test(
+      'execute calls repository with normalized phone number when medium is phone',
+      () async {
+    const unnormalizedPhoneNumber = '+1 (123) 456-7890';
+    const normalizedPhoneNumber = '+11234567890';
+    const phoneContactId = 'phoneContact456';
+    const phoneMedium = InvitationMediumEnum.phone;
+
+    final response = SendInvitationResponse(
+      id: 'inv456',
+      message: 'Invitation sent successfully via phone',
+    );
+
+    when(
+      mockRepository.sendInvitation(
+        request: InvitationRequest(
+          contact: normalizedPhoneNumber, // Expect normalized number
+          medium: phoneMedium.value,
+        ),
+      ),
+    ).thenAnswer((_) async => response);
+
+    final result = interactor.execute(
+      contact: unnormalizedPhoneNumber, // Use unnormalized number here
+      contactId: phoneContactId,
+      medium: phoneMedium,
+    );
+
+    // Wait for the stream to complete
+    await result.last;
+
+    // Verify that sendInvitation was called with the normalized number
+    verify(
+      mockRepository.sendInvitation(
+        request: InvitationRequest(
+          contact: normalizedPhoneNumber,
+          medium: phoneMedium.value,
+        ),
+      ),
+    ).called(1);
+  });
+
+  test(
+      'execute calls repository with original contact when medium is not phone',
+      () async {
+    const emailContact = 'user@domain.com';
+    const emailContactId = 'emailContact789';
+    const emailMedium = InvitationMediumEnum.email; // Not phone
+
+    final response = SendInvitationResponse(
+      id: 'inv789',
+      message: 'Invitation sent successfully via email',
+    );
+
+    when(
+      mockRepository.sendInvitation(
+        request: InvitationRequest(
+          contact: emailContact, // Expect original email
+          medium: emailMedium.value,
+        ),
+      ),
+    ).thenAnswer((_) async => response);
+
+    final result = interactor.execute(
+      contact: emailContact,
+      contactId: emailContactId,
+      medium: emailMedium,
+    );
+
+    await result.last; // Wait for completion
+
+    verify(
+      mockRepository.sendInvitation(
+        request: InvitationRequest(
+          contact: emailContact,
+          medium: emailMedium.value,
+        ),
+      ),
+    ).called(1);
+  });
+
+  test(
+      'execute calls repository with already normalized phone number when medium is phone',
+      () async {
+    const alreadyNormalized = '+19876543210';
+    const phoneContactId = 'phoneContactAlreadyNorm';
+    const phoneMedium = InvitationMediumEnum.phone;
+
+    final response =
+        SendInvitationResponse(id: 'invAlreadyNorm', message: 'Sent');
+
+    when(
+      mockRepository.sendInvitation(
+        request: InvitationRequest(
+          contact: alreadyNormalized, // Expect the same normalized number
+          medium: phoneMedium.value,
+        ),
+      ),
+    ).thenAnswer((_) async => response);
+
+    final result = interactor.execute(
+      contact: alreadyNormalized,
+      contactId: phoneContactId,
+      medium: phoneMedium,
+    );
+
+    await result.last; // Wait for completion
+
+    verify(
+      mockRepository.sendInvitation(
+        request: InvitationRequest(
+          contact: alreadyNormalized,
+          medium: phoneMedium.value,
+        ),
+      ),
+    ).called(1);
+  });
+
+  test('execute calls repository with empty string when phone number is empty',
+      () async {
+    const emptyContact = '';
+    const phoneContactId = 'phoneContactEmpty';
+    const phoneMedium = InvitationMediumEnum.phone;
+
+    final response = SendInvitationResponse(id: 'invEmpty', message: 'Sent');
+
+    when(
+      mockRepository.sendInvitation(
+        request: InvitationRequest(
+          contact: emptyContact, // Expect empty string
+          medium: phoneMedium.value,
+        ),
+      ),
+    ).thenAnswer((_) async => response);
+
+    final result = interactor.execute(
+      contact: emptyContact,
+      contactId: phoneContactId,
+      medium: phoneMedium,
+    );
+
+    await result.last; // Wait for completion
+
+    verify(
+      mockRepository.sendInvitation(
+        request: InvitationRequest(
+          contact: emptyContact,
+          medium: phoneMedium.value,
+        ),
+      ),
+    ).called(1);
+  });
+
+  test(
+      'execute calls repository with empty string for non-normalizable phone number',
+      () async {
+    const nonNormalizable = 'abc-() .';
+    const expectedContact = ''; // Normalization should result in empty
+    const phoneContactId = 'phoneContactNonNorm';
+    const phoneMedium = InvitationMediumEnum.phone;
+
+    final response = SendInvitationResponse(id: 'invNonNorm', message: 'Sent');
+
+    when(
+      mockRepository.sendInvitation(
+        request: InvitationRequest(
+          contact: expectedContact, // Expect empty string
+          medium: phoneMedium.value,
+        ),
+      ),
+    ).thenAnswer((_) async => response);
+
+    final result = interactor.execute(
+      contact: nonNormalizable,
+      contactId: phoneContactId,
+      medium: phoneMedium,
+    );
+
+    await result.last; // Wait for completion
+
+    verify(
+      mockRepository.sendInvitation(
+        request: InvitationRequest(
+          contact: expectedContact,
+          medium: phoneMedium.value,
+        ),
+      ),
+    ).called(1);
+  });
+
+  test(
+      'execute calls repository with plus sign only for phone number with only plus',
+      () async {
+    const plusOnly = '+';
+    const expectedContact = '+'; // Normalization should result in '+'
+    const phoneContactId = 'phoneContactPlusOnly';
+    const phoneMedium = InvitationMediumEnum.phone;
+
+    final response = SendInvitationResponse(id: 'invPlusOnly', message: 'Sent');
+
+    when(
+      mockRepository.sendInvitation(
+        request: InvitationRequest(
+          contact: expectedContact, // Expect '+'
+          medium: phoneMedium.value,
+        ),
+      ),
+    ).thenAnswer((_) async => response);
+
+    final result = interactor.execute(
+      contact: plusOnly,
+      contactId: phoneContactId,
+      medium: phoneMedium,
+    );
+
+    await result.last; // Wait for completion
+
+    verify(
+      mockRepository.sendInvitation(
+        request: InvitationRequest(
+          contact: expectedContact,
+          medium: phoneMedium.value,
+        ),
+      ),
+    ).called(1);
+  });
 }

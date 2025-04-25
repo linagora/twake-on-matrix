@@ -50,7 +50,10 @@ class SendInvitationInteractor {
     }
   }
 
-  String _tryToNormalizePhoneNumber(String contact, InvitationMediumEnum medium) {
+  String _tryToNormalizePhoneNumber(
+    String contact,
+    InvitationMediumEnum medium,
+  ) {
     if (medium != InvitationMediumEnum.phone) {
       return contact;
     }
@@ -61,6 +64,6 @@ class SendInvitationInteractor {
     } catch (e) {
       Logs().e('SendInvitationInteractor::_tryToNormalizePhoneNumber', e);
     }
-    return normalizedPhoneNumber;      
+    return normalizedPhoneNumber;
   }
 }
