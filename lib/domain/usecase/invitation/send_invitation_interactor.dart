@@ -7,6 +7,7 @@ import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/domain/app_state/invitation/send_invitation_state.dart';
 import 'package:fluffychat/domain/model/invitation/invitation_medium_enum.dart';
 import 'package:fluffychat/domain/repository/invitation/invitation_repository.dart';
+import 'package:fluffychat/domain/usecase/invitation/constants.dart';
 import 'package:fluffychat/utils/string_extension.dart';
 import 'package:matrix/matrix.dart';
 
@@ -35,15 +36,21 @@ class SendInvitationInteractor {
       );
     } catch (e) {
       Logs().e('SendInvitationInteractor::execute', e);
-      if (e is DioException && e.response?.statusCode == 400) {
-        if (e.response?.data ==
-            'You already sent an invitation to this contact') {
+      if (e is DioException &&
+          e.response?.statusCode == 400 &&
+          e.response?.data is Map<String, dynamic>) {
+        if (e.response?.data['message'] ==
+            Constants.alreadySentInvitationMessage) {
           yield const Left(InvitationAlreadySentState());
           return;
-        } else if (e.response?.data.contains('Invalid phone number')) {
+        } else if (e.response?.data['message']
+                ?.contains(Constants.invalidPhoneNumberMessage) ==
+            true) {
           yield const Left(InvalidPhoneNumberFailureState());
           return;
-        } else if (e.response?.data.contains('Invalid email')) {
+        } else if (e.response?.data['message']
+                ?.contains(Constants.invalidEmailMessage) ==
+            true) {
           yield const Left(InvalidEmailFailureState());
           return;
         }
@@ -53,6 +60,7 @@ class SendInvitationInteractor {
           exception: e,
         ),
       );
+      return;
     }
   }
 

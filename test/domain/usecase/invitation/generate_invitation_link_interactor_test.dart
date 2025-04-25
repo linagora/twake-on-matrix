@@ -1,6 +1,8 @@
 import 'package:dartz/dartz.dart';
 import 'package:dio/dio.dart';
 import 'package:fluffychat/data/model/invitation/generate_invitation_link_response.dart';
+import 'package:fluffychat/domain/app_state/invitation/send_invitation_state.dart';
+import 'package:fluffychat/domain/usecase/invitation/constants.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fluffychat/data/model/invitation/invitation_request.dart';
 import 'package:fluffychat/domain/app_state/invitation/generate_invitation_link_state.dart';
@@ -182,6 +184,152 @@ void main() {
       medium: testMedium,
     );
 
+    await expectLater(
+      result,
+      emitsInOrder([
+        const Right(GenerateInvitationLinkLoadingState()),
+        predicate(
+          (dynamic value) =>
+              value is Left &&
+              value.value is GenerateInvitationLinkFailureState,
+        ),
+      ]),
+    );
+  });
+
+  test(
+      'execute returns InvitationAlreadySentState when invitation already sent',
+      () async {
+    when(
+      mockRepository.generateInvitationLink(
+        request: InvitationRequest(contact: null, medium: null),
+      ),
+    ).thenThrow(
+      DioException(
+        requestOptions: RequestOptions(),
+        response: Response(
+          requestOptions: RequestOptions(),
+          data: {'message': Constants.alreadySentInvitationMessage},
+          statusCode: 400,
+        ),
+      ),
+    );
+
+    final result = interactor.execute();
+    await expectLater(
+      result,
+      emitsInOrder([
+        const Right(GenerateInvitationLinkLoadingState()),
+        const Left(InvitationAlreadySentState()),
+      ]),
+    );
+  });
+
+  test(
+      'execute returns InvalidPhoneNumberFailureState when invalid phone number',
+      () async {
+    when(
+      mockRepository.generateInvitationLink(
+        request: InvitationRequest(contact: null, medium: null),
+      ),
+    ).thenThrow(
+      DioException(
+        requestOptions: RequestOptions(),
+        response: Response(
+          requestOptions: RequestOptions(),
+          data: {'message': Constants.invalidPhoneNumberMessage},
+          statusCode: 400,
+        ),
+      ),
+    );
+
+    final result = interactor.execute();
+    await expectLater(
+      result,
+      emitsInOrder([
+        const Right(GenerateInvitationLinkLoadingState()),
+        const Left(InvalidPhoneNumberFailureState()),
+      ]),
+    );
+  });
+
+  test('execute returns InvalidEmailFailureState when invalid email', () async {
+    when(
+      mockRepository.generateInvitationLink(
+        request: InvitationRequest(contact: null, medium: null),
+      ),
+    ).thenThrow(
+      DioException(
+        requestOptions: RequestOptions(),
+        response: Response(
+          requestOptions: RequestOptions(),
+          data: {'message': Constants.invalidEmailMessage},
+          statusCode: 400,
+        ),
+      ),
+    );
+
+    final result = interactor.execute();
+    await expectLater(
+      result,
+      emitsInOrder([
+        const Right(GenerateInvitationLinkLoadingState()),
+        const Left(InvalidEmailFailureState()),
+      ]),
+    );
+  });
+
+  test(
+      'execute returns GenerateInvitationLinkFailureState when response data is not a map',
+      () async {
+    when(
+      mockRepository.generateInvitationLink(
+        request: InvitationRequest(contact: null, medium: null),
+      ),
+    ).thenThrow(
+      DioException(
+        requestOptions: RequestOptions(),
+        response: Response(
+          requestOptions: RequestOptions(),
+          data: Constants.invalidEmailMessage,
+          statusCode: 400,
+        ),
+      ),
+    );
+
+    final result = interactor.execute();
+    await expectLater(
+      result,
+      emitsInOrder([
+        const Right(GenerateInvitationLinkLoadingState()),
+        predicate(
+          (dynamic value) =>
+              value is Left &&
+              value.value is GenerateInvitationLinkFailureState,
+        ),
+      ]),
+    );
+  });
+
+  test(
+      'execute returns GenerateInvitationLinkFailureState when response data is a map but not contain message',
+      () async {
+    when(
+      mockRepository.generateInvitationLink(
+        request: InvitationRequest(contact: null, medium: null),
+      ),
+    ).thenThrow(
+      DioException(
+        requestOptions: RequestOptions(),
+        response: Response(
+          requestOptions: RequestOptions(),
+          data: {'error': Constants.invalidEmailMessage},
+          statusCode: 400,
+        ),
+      ),
+    );
+
+    final result = interactor.execute();
     await expectLater(
       result,
       emitsInOrder([

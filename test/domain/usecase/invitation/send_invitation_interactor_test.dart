@@ -358,4 +358,153 @@ void main() {
       ),
     ).called(1);
   });
+
+  // New test cases added
+  test('execute returns failure state when invalid phone number is provided',
+      () async {
+    when(
+      mockRepository.sendInvitation(
+        request: InvitationRequest(
+          contact: testContact,
+          medium: testMedium.value,
+        ),
+      ),
+    ).thenThrow(
+      DioException(
+        requestOptions: RequestOptions(),
+        response: Response(
+          requestOptions: RequestOptions(),
+          statusCode: 400,
+          data: {'message': 'Invalid phone number'},
+        ),
+      ),
+    );
+
+    final result = interactor.execute(
+      contact: testContact,
+      contactId: testContactId,
+      medium: testMedium,
+    );
+
+    await expectLater(
+      result,
+      emitsInOrder([
+        const Right(SendInvitationLoadingState()),
+        const Left(InvalidPhoneNumberFailureState()),
+      ]),
+    );
+  });
+
+  test('execute returns failure state when invalid email is provided',
+      () async {
+    when(
+      mockRepository.sendInvitation(
+        request: InvitationRequest(
+          contact: testContact,
+          medium: testMedium.value,
+        ),
+      ),
+    ).thenThrow(
+      DioException(
+        requestOptions: RequestOptions(),
+        response: Response(
+          requestOptions: RequestOptions(),
+          statusCode: 400,
+          data: {'message': 'Invalid email address'},
+        ),
+      ),
+    );
+
+    final result = interactor.execute(
+      contact: testContact,
+      contactId: testContactId,
+      medium: testMedium,
+    );
+
+    await expectLater(
+      result,
+      emitsInOrder([
+        const Right(SendInvitationLoadingState()),
+        const Left(InvalidEmailFailureState()),
+      ]),
+    );
+  });
+
+  test(
+      'execute returns failure state when response is not a map or missing message',
+      () async {
+    when(
+      mockRepository.sendInvitation(
+        request: InvitationRequest(
+          contact: testContact,
+          medium: testMedium.value,
+        ),
+      ),
+    ).thenThrow(
+      DioException(
+        requestOptions: RequestOptions(),
+        response: Response(
+          requestOptions: RequestOptions(),
+          statusCode: 400,
+          data: 'Invalid response format', // Not a map
+        ),
+      ),
+    );
+
+    final result = interactor.execute(
+      contact: testContact,
+      contactId: testContactId,
+      medium: testMedium,
+    );
+
+    await expectLater(
+      result,
+      emitsInOrder([
+        const Right(SendInvitationLoadingState()),
+        predicate(
+          (dynamic value) =>
+              value is Left && value.value is SendInvitationFailureState,
+        ),
+      ]),
+    );
+  });
+
+  test(
+      'execute returns failure state when response is a map but missing message',
+      () async {
+    when(
+      mockRepository.sendInvitation(
+        request: InvitationRequest(
+          contact: testContact,
+          medium: testMedium.value,
+        ),
+      ),
+    ).thenThrow(
+      DioException(
+        requestOptions: RequestOptions(),
+        response: Response(
+          requestOptions: RequestOptions(),
+          statusCode: 400,
+          data: {'error': 'Invalid response format'},
+        ),
+      ),
+    );
+
+    final result = interactor.execute(
+      contact: testContact,
+      contactId: testContactId,
+      medium: testMedium,
+    );
+
+    await expectLater(
+      result,
+      emitsInOrder([
+        const Right(SendInvitationLoadingState()),
+        predicate(
+          (dynamic value) =>
+              value is Left && value.value is SendInvitationFailureState,
+        ),
+      ]),
+    );
+  });
 }
