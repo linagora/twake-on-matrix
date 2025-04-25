@@ -733,7 +733,7 @@ void main() {
       expect(phoneNumber.normalizePhoneNumberToInvite(), equals(expected));
     });
 
-     test('should handle string with only plus sign', () {
+    test('should handle string with only plus sign', () {
       const phoneNumber = '+';
       const expected = '+';
       expect(phoneNumber.normalizePhoneNumberToInvite(), equals(expected));
