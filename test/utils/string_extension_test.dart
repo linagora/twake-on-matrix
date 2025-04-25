@@ -695,4 +695,48 @@ void main() {
       );
     });
   });
+
+  group('[normalizePhoneNumberToInvite]', () {
+    test('should keep digits and plus sign, remove others', () {
+      const phoneNumber = '+1 (234)-567.89 0';
+      const expected = '+1234567890';
+      expect(phoneNumber.normalizePhoneNumberToInvite(), equals(expected));
+    });
+
+    test('should handle number with only digits', () {
+      const phoneNumber = '1234567890';
+      const expected = '1234567890';
+      expect(phoneNumber.normalizePhoneNumberToInvite(), equals(expected));
+    });
+
+    test('should handle number with only plus and digits', () {
+      const phoneNumber = '+1234567890';
+      const expected = '+1234567890';
+      expect(phoneNumber.normalizePhoneNumberToInvite(), equals(expected));
+    });
+
+    test('should handle number with spaces', () {
+      const phoneNumber = '+1 234 567 890';
+      const expected = '+1234567890';
+      expect(phoneNumber.normalizePhoneNumberToInvite(), equals(expected));
+    });
+
+    test('should handle empty string', () {
+      const phoneNumber = '';
+      const expected = '';
+      expect(phoneNumber.normalizePhoneNumberToInvite(), equals(expected));
+    });
+
+    test('should handle string with only non-digit, non-plus characters', () {
+      const phoneNumber = 'abc-() .';
+      const expected = '';
+      expect(phoneNumber.normalizePhoneNumberToInvite(), equals(expected));
+    });
+
+     test('should handle string with only plus sign', () {
+      const phoneNumber = '+';
+      const expected = '+';
+      expect(phoneNumber.normalizePhoneNumberToInvite(), equals(expected));
+    });
+  });
 }

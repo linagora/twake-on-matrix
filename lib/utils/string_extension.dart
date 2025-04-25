@@ -345,6 +345,10 @@ extension StringCasingExtension on String {
     return replaceAll(RegExp(r'\D'), '');
   }
 
+  String normalizePhoneNumberToInvite() {
+    return replaceAll(RegExp(r'[^\d+]'), '');
+  }
+
   bool isContainsUrlSeparator() {
     final separatorRegExp = RegExp(r'://');
     return separatorRegExp.hasMatch(this);

@@ -7,6 +7,7 @@ import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/domain/app_state/invitation/send_invitation_state.dart';
 import 'package:fluffychat/domain/model/invitation/invitation_medium_enum.dart';
 import 'package:fluffychat/domain/repository/invitation/invitation_repository.dart';
+import 'package:fluffychat/utils/string_extension.dart';
 import 'package:matrix/matrix.dart';
 
 class SendInvitationInteractor {
@@ -22,7 +23,7 @@ class SendInvitationInteractor {
       yield const Right(SendInvitationLoadingState());
       final res = await _invitationRepository.sendInvitation(
         request: InvitationRequest(
-          contact: contact,
+          contact: _tryToNormalizePhoneNumber(contact, medium),
           medium: medium.value,
         ),
       );
@@ -47,5 +48,19 @@ class SendInvitationInteractor {
         ),
       );
     }
+  }
+
+  String _tryToNormalizePhoneNumber(String contact, InvitationMediumEnum medium) {
+    if (medium != InvitationMediumEnum.phone) {
+      return contact;
+    }
+
+    String normalizedPhoneNumber = contact;
+    try {
+      normalizedPhoneNumber = contact.normalizePhoneNumberToInvite();
+    } catch (e) {
+      Logs().e('SendInvitationInteractor::_tryToNormalizePhoneNumber', e);
+    }
+    return normalizedPhoneNumber;      
   }
 }
