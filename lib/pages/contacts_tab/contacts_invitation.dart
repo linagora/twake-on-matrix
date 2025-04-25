@@ -187,7 +187,20 @@ class ContactsInvitationController extends State<ContactsInvitation> {
           );
           return;
         }
-
+        if (failure is InvalidPhoneNumberFailureState) {
+          TwakeSnackBar.show(
+            context,
+            L10n.of(context)!.invalidPhoneNumber,
+          );
+          return;
+        }
+        if (failure is InvalidEmailFailureState) {
+          TwakeSnackBar.show(
+            context,
+            L10n.of(context)!.invalidEmail,
+          );
+          return;
+        }
         if (failure is GenerateInvitationLinkIsEmptyState) {
           TwakeSnackBar.show(
             context,
