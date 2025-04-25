@@ -35,12 +35,18 @@ class SendInvitationInteractor {
       );
     } catch (e) {
       Logs().e('SendInvitationInteractor::execute', e);
-      if (e is DioException &&
-          e.response?.statusCode == 400 &&
-          e.response?.data['message'] ==
-              'You already sent an invitation to this contact') {
-        yield const Left(InvitationAlreadySentState());
-        return;
+      if (e is DioException && e.response?.statusCode == 400) {
+        if (e.response?.data ==
+            'You already sent an invitation to this contact') {
+          yield const Left(InvitationAlreadySentState());
+          return;
+        } else if (e.response?.data.contains('Invalid phone number')) {
+          yield const Left(InvalidPhoneNumberFailureState());
+          return;
+        } else if (e.response?.data.contains('Invalid email')) {
+          yield const Left(InvalidEmailFailureState());
+          return;
+        }
       }
       yield Left(
         SendInvitationFailureState(
