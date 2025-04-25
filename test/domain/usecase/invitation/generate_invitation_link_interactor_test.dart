@@ -69,6 +69,39 @@ void main() {
     );
   });
 
+  test(
+      'execute returns success state when link is generated successfully with null contact',
+      () async {
+    final response = GenerateInvitationLinkResponse(
+      id: 'inv123',
+      link: 'https://test.link',
+    );
+
+    when(
+      mockRepository.generateInvitationLink(
+        request: InvitationRequest(contact: null, medium: null),
+      ),
+    ).thenAnswer((_) async => response);
+
+    final result = interactor.execute(
+      contact: null,
+      medium: null,
+    );
+
+    await expectLater(
+      result,
+      emitsInOrder([
+        const Right(GenerateInvitationLinkLoadingState()),
+        const Right(
+          GenerateInvitationLinkSuccessState(
+            link: 'https://test.link',
+            id: 'inv123',
+          ),
+        ),
+      ]),
+    );
+  });
+
   test('execute returns failure state when link is empty', () async {
     final response = GenerateInvitationLinkResponse(
       id: 'inv123',
