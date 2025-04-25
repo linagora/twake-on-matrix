@@ -1,3 +1,12 @@
+## [2.8.2+2330] - 2025-04-25
+### Fixed
+- (Mobile) Normalize phone number #2308 #2310
+- Generating invitation link not depend on phone number or email
+- Changing toast: bottom with close button
+
+### Added
+- Emoji picker
+
 ## [2.8.1+2330] - 2025-04-18
 ### Fixed
 - Style for Invitation layout
