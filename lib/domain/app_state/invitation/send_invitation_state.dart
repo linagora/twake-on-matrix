@@ -55,3 +55,17 @@ class SendInvitationFailureState extends Failure {
         message,
       ];
 }
+
+class InvalidPhoneNumberFailureState extends Failure {
+  const InvalidPhoneNumberFailureState() : super();
+
+  @override
+  List<Object?> get props => [];
+}
+
+class InvalidEmailFailureState extends Failure {
+  const InvalidEmailFailureState() : super();
+
+  @override
+  List<Object?> get props => [];
+}
