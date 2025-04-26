@@ -1,3 +1,7 @@
+## [2.8.3+2330] - 2025-04-26
+### Changed
+- Upgrade to xcode 16.0
+
 ## [2.8.2+2330] - 2025-04-25
 ### Fixed
 - (Mobile) Normalize phone number #2308 #2310
