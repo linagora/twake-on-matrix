@@ -7,7 +7,7 @@ name: Build
 
 env:
   FLUTTER_VERSION: 3.24.0
-  XCODE_VERSION: ^15.0.1
+  XCODE_VERSION: 16.0
 
 jobs:
   build_debug_mobile:
@@ -19,7 +19,7 @@ jobs:
           - os: android
             runner: ubuntu-latest
           - os: ios
-            runner: macos-latest
+            runner: macos-14
       fail-fast: false
     steps:
       - name: Checkout repository
