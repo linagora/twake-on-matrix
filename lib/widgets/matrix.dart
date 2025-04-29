@@ -127,7 +127,7 @@ class MatrixState extends State<Matrix>
   // TODO: 28Dec2023 Disable until support voip
   bool get webrtcIsSupported => false;
 
-  VoipPlugin? voipPlugin;
+  // VoipPlugin? voipPlugin;
 
   bool get isMultiAccount => widget.clients.length > 1;
 
@@ -587,11 +587,11 @@ class MatrixState extends State<Matrix>
   }
 
   void createVoipPlugin() async {
-    if (await store.getItemBool(SettingKeys.experimentalVoip) == false) {
-      voipPlugin = null;
-      return;
-    }
-    voipPlugin = webrtcIsSupported ? VoipPlugin(client) : null;
+    // if (await store.getItemBool(SettingKeys.experimentalVoip) == false) {
+    //   voipPlugin = null;
+    //   return;
+    // }
+    // voipPlugin = webrtcIsSupported ? VoipPlugin(client) : null;
   }
 
   Future<ToMConfigurations?> getTomConfigurations(String userID) async {

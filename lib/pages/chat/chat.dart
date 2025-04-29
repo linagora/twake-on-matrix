@@ -1307,58 +1307,58 @@ class ChatController extends State<Chat>
 
   void onPhoneButtonTap() async {
     // VoIP required Android SDK 21
-    if (PlatformInfos.isAndroid) {
-      DeviceInfoPlugin().androidInfo.then((value) {
-        if (value.version.sdkInt < 21) {
-          Navigator.pop(context);
-          showOkAlertDialog(
-            context: context,
-            title: L10n.of(context)!.unsupportedAndroidVersion,
-            message: L10n.of(context)!.unsupportedAndroidVersionLong,
-            okLabel: L10n.of(context)!.close,
-          );
-        }
-      });
-    }
-    final callType = await showModalActionSheet<CallType>(
-      context: context,
-      title: L10n.of(context)!.warning,
-      message: L10n.of(context)!.videoCallsBetaWarning,
-      cancelLabel: L10n.of(context)!.cancel,
-      actions: [
-        SheetAction(
-          label: L10n.of(context)!.voiceCall,
-          icon: Icons.phone_outlined,
-          key: CallType.kVoice,
-        ),
-        SheetAction(
-          label: L10n.of(context)!.videoCall,
-          icon: Icons.video_call_outlined,
-          key: CallType.kVideo,
-        ),
-      ],
-    );
-    if (callType == null) return;
+    // if (PlatformInfos.isAndroid) {
+    //   DeviceInfoPlugin().androidInfo.then((value) {
+    //     if (value.version.sdkInt < 21) {
+    //       Navigator.pop(context);
+    //       showOkAlertDialog(
+    //         context: context,
+    //         title: L10n.of(context)!.unsupportedAndroidVersion,
+    //         message: L10n.of(context)!.unsupportedAndroidVersionLong,
+    //         okLabel: L10n.of(context)!.close,
+    //       );
+    //     }
+    //   });
+    // }
+    // final callType = await showModalActionSheet<CallType>(
+    //   context: context,
+    //   title: L10n.of(context)!.warning,
+    //   message: L10n.of(context)!.videoCallsBetaWarning,
+    //   cancelLabel: L10n.of(context)!.cancel,
+    //   actions: [
+    //     SheetAction(
+    //       label: L10n.of(context)!.voiceCall,
+    //       icon: Icons.phone_outlined,
+    //       key: CallType.kVoice,
+    //     ),
+    //     SheetAction(
+    //       label: L10n.of(context)!.videoCall,
+    //       icon: Icons.video_call_outlined,
+    //       key: CallType.kVideo,
+    //     ),
+    //   ],
+    // );
+    // if (callType == null) return;
 
-    final success = await TwakeDialog.showFutureLoadingDialogFullScreen(
-      future: () =>
-          Matrix.of(context).voipPlugin!.voip.requestTurnServerCredentials(),
-    );
-    if (success.result != null) {
-      final voipPlugin = Matrix.of(context).voipPlugin;
-      try {
-        await voipPlugin!.voip.inviteToCall(room!.id, callType);
-      } catch (e) {
-        TwakeSnackBar.show(context, e.toLocalizedString(context));
-      }
-    } else {
-      await showOkAlertDialog(
-        context: context,
-        title: L10n.of(context)!.unavailable,
-        okLabel: L10n.of(context)!.next,
-        useRootNavigator: false,
-      );
-    }
+    // final success = await TwakeDialog.showFutureLoadingDialogFullScreen(
+    //   future: () =>
+    //       Matrix.of(context).voipPlugin!.voip.requestTurnServerCredentials(),
+    // );
+    // if (success.result != null) {
+    //   final voipPlugin = Matrix.of(context).voipPlugin;
+    //   try {
+    //     await voipPlugin!.voip.inviteToCall(room!.id, callType);
+    //   } catch (e) {
+    //     TwakeSnackBar.show(context, e.toLocalizedString(context));
+    //   }
+    // } else {
+    //   await showOkAlertDialog(
+    //     context: context,
+    //     title: L10n.of(context)!.unavailable,
+    //     okLabel: L10n.of(context)!.next,
+    //     useRootNavigator: false,
+    //   );
+    // }
   }
 
   void cancelReplyEventAction() => setState(() {
