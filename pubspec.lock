@@ -454,10 +454,10 @@ packages:
     dependency: transitive
     description:
       name: dbus
-      sha256: "365c771ac3b0e58845f39ec6deebc76e3276aa9922b0cc60840712094d9047ac"
+      sha256: "79e0c23480ff85dc68de79e2cd6334add97e48f7f4865d17686dd6ea81a47e8c"
       url: "https://pub.dev"
     source: hosted
-    version: "0.7.10"
+    version: "0.7.11"
   debounce_throttle:
     dependency: "direct main"
     description:
@@ -3222,13 +3222,13 @@ packages:
     source: hosted
     version: "0.3.0"
   wakelock_plus:
-    dependency: transitive
+    dependency: "direct overridden"
     description:
       name: wakelock_plus
-      sha256: "775c50f226ab43ff859b479acc73f11c0744bf345a782e83355c4d25df758803"
+      sha256: a474e314c3e8fb5adef1f9ae2d247e57467ad557fa7483a2b895bc1b421c5678
       url: "https://pub.dev"
     source: hosted
-    version: "1.3.0"
+    version: "1.3.2"
   wakelock_plus_platform_interface:
     dependency: transitive
     description:
@@ -3314,10 +3314,10 @@ packages:
     dependency: transitive
     description:
       name: win32
-      sha256: a79dbe579cb51ecd6d30b17e0cae4e0ea15e2c0e66f69ad4198f22a6789e94f4
+      sha256: daf97c9d80197ed7b619040e86c8ab9a9dad285e7671ee7390f9180cc828a51e
       url: "https://pub.dev"
     source: hosted
-    version: "5.5.1"
+    version: "5.10.1"
   win32_registry:
     dependency: transitive
     description:
