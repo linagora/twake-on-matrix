@@ -227,15 +227,14 @@ class ContactsManager {
             },
             (success) {
               if (success is GetSyncedPhoneBookContactSuccessState) {
-                _phonebookContactsNotifier.value = Right(
-                  GetPhonebookContactsSuccess(
-                    progress: 100,
-                    contacts: success.contacts,
-                  ),
-                );
                 if (success.timeAvailableForSyncVault) {
-                  _postAddressBookOnMobile(
-                    contacts: success.contacts,
+                  _handleLookUpPhonebookContacts(withMxId: withMxId);
+                } else {
+                  _phonebookContactsNotifier.value = Right(
+                    GetPhonebookContactsSuccess(
+                      progress: 100,
+                      contacts: success.contacts,
+                    ),
                   );
                 }
               }
