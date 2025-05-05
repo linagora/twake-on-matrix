@@ -32,7 +32,6 @@ import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/utils/twake_snackbar.dart';
 import 'package:fluffychat/utils/uia_request_manager.dart';
 import 'package:fluffychat/utils/url_launcher.dart';
-import 'package:fluffychat/utils/voip_plugin.dart';
 import 'package:fluffychat/widgets/set_active_client_state.dart';
 import 'package:fluffychat/widgets/twake_app.dart';
 import 'package:flutter/foundation.dart';
@@ -127,7 +126,7 @@ class MatrixState extends State<Matrix>
   // TODO: 28Dec2023 Disable until support voip
   bool get webrtcIsSupported => false;
 
-  VoipPlugin? voipPlugin;
+  // VoipPlugin? voipPlugin;
 
   bool get isMultiAccount => widget.clients.length > 1;
 
@@ -587,11 +586,11 @@ class MatrixState extends State<Matrix>
   }
 
   void createVoipPlugin() async {
-    if (await store.getItemBool(SettingKeys.experimentalVoip) == false) {
-      voipPlugin = null;
-      return;
-    }
-    voipPlugin = webrtcIsSupported ? VoipPlugin(client) : null;
+    // if (await store.getItemBool(SettingKeys.experimentalVoip) == false) {
+    //   voipPlugin = null;
+    //   return;
+    // }
+    // voipPlugin = webrtcIsSupported ? VoipPlugin(client) : null;
   }
 
   Future<ToMConfigurations?> getTomConfigurations(String userID) async {

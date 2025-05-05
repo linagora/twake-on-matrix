@@ -13,7 +13,7 @@ list(APPEND FLUTTER_PLUGIN_LIST
   file_selector_windows
   firebase_core
   flutter_avif_windows
-  flutter_webrtc
+  flutter_inappwebview_windows
   gal
   irondash_engine_context
   media_kit_libs_windows_video
