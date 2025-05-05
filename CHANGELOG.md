@@ -1,3 +1,7 @@
+## [2.9.0+2330] - 2025-05-05
+### Added
+- Integrate with Cozy
+
 ## [2.8.2+2330] - 2025-04-25
 ### Fixed
 - (Mobile) Normalize phone number #2308 #2310
