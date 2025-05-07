@@ -1,3 +1,5 @@
+import 'package:dartz/dartz.dart' as dartz;
+import 'package:fluffychat/app_state/failure.dart';
 import 'package:fluffychat/app_state/success.dart';
 import 'package:fluffychat/data/model/invitation/invitation_status_response.dart';
 import 'package:fluffychat/domain/app_state/invitation/get_invitation_status_state.dart';
@@ -8,13 +10,13 @@ import 'package:fluffychat/presentation/model/contact/presentation_contact.dart'
 import 'package:fluffychat/pages/new_private_chat/widget/contact_status_widget.dart';
 import 'package:fluffychat/utils/adaptive_bottom_sheet.dart';
 import 'package:fluffychat/utils/display_name_widget.dart';
+import 'package:fluffychat/utils/string_extension.dart';
 import 'package:fluffychat/widgets/avatar/avatar.dart';
 import 'package:fluffychat/widgets/highlight_text.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:fluffychat/widgets/twake_components/twake_chip.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
-import 'package:fluffychat/utils/string_extension.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:matrix/matrix.dart';
 
@@ -225,41 +227,7 @@ class _ExpansionContactListTileState extends State<ExpansionContactListTile>
                               widget.contact.matrixId!.isEmpty)
                             ValueListenableBuilder(
                               valueListenable: getInvitationStatusNotifier,
-                              builder: (context, status, child) => status.fold(
-                                (failure) => child!,
-                                (success) {
-                                  if (success
-                                      is GetInvitationStatusLoadingState) {
-                                    return const Padding(
-                                      padding: EdgeInsets.all(8),
-                                      child: SizedBox(
-                                        width: 16,
-                                        height: 16,
-                                        child: CircularProgressIndicator(
-                                          strokeWidth: 2,
-                                        ),
-                                      ),
-                                    );
-                                  }
-
-                                  if (success
-                                      is GetInvitationStatusSuccessState) {
-                                    if (success.invitationStatusResponse
-                                            .invitation?.hasMatrixId ==
-                                        true) {
-                                      return const SizedBox();
-                                    }
-                                    return _displayIconInvitation(
-                                      isExpired: success
-                                          .invitationStatusResponse
-                                          .invitation!
-                                          .expiredTimeToInvite,
-                                    );
-                                  }
-
-                                  return child!;
-                                },
-                              ),
+                              builder: _invitationIconBuilder,
                               child: _displayIconInvitation(),
                             ),
                         ],
@@ -272,6 +240,47 @@ class _ExpansionContactListTileState extends State<ExpansionContactListTile>
           ),
         ),
       ),
+    );
+  }
+
+  Widget _invitationIconBuilder(
+    BuildContext context,
+    dartz.Either<Failure, Success> status,
+    Widget? child,
+  ) {
+    if (!widget.enableInvitation) {
+      return const SizedBox();
+    }
+
+    return status.fold(
+      (failure) => child!,
+      (success) {
+        if (success is GetInvitationStatusLoadingState) {
+          return const Padding(
+            padding: EdgeInsets.all(8),
+            child: SizedBox(
+              width: 16,
+              height: 16,
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+              ),
+            ),
+          );
+        }
+
+        if (success is GetInvitationStatusSuccessState) {
+          if (success.invitationStatusResponse.invitation?.hasMatrixId ==
+              true) {
+            return const SizedBox();
+          }
+          return _displayIconInvitation(
+            isExpired: success
+                .invitationStatusResponse.invitation!.expiredTimeToInvite,
+          );
+        }
+
+        return child!;
+      },
     );
   }
 

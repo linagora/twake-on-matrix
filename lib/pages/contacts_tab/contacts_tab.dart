@@ -3,6 +3,7 @@ import 'package:fluffychat/presentation/mixins/address_book_mixin.dart';
 import 'package:fluffychat/presentation/mixins/comparable_presentation_contact_mixin.dart';
 import 'package:fluffychat/pages/contacts_tab/contacts_tab_view.dart';
 import 'package:fluffychat/presentation/mixins/contacts_view_controller_mixin.dart';
+import 'package:fluffychat/presentation/mixins/wellknown_mixin.dart';
 import 'package:fluffychat/presentation/model/contact/presentation_contact.dart';
 import 'package:fluffychat/presentation/model/contact/presentation_contact_constant.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
@@ -29,6 +30,7 @@ class ContactsTab extends StatefulWidget {
 
 class ContactsTabController extends State<ContactsTab>
     with
+        WellKnownMixin,
         ComparablePresentationContactMixin,
         ContactsViewControllerMixin,
         AddressBooksMixin,
@@ -43,6 +45,7 @@ class ContactsTabController extends State<ContactsTab>
       WidgetsBinding.instance.addObserver(this);
       if (mounted) {
         listenAddressBookEvents(client);
+        getWellKnownInformation(client);
         initialFetchContacts(
           context: context,
           client: Matrix.of(context).client,
