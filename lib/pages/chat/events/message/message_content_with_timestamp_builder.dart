@@ -561,105 +561,110 @@ class _MessageContentWithTimestampBuilderState
           ? AlignmentDirectional.bottomStart
           : AlignmentDirectional.bottomEnd,
       children: [
-        Column(
-          mainAxisSize: mainAxisSize,
-          children: [
-            Container(
-              decoration: BoxDecoration(
-                borderRadius: MessageStyle.bubbleBorderRadius,
-                color: widget.event.isOwnMessage
-                    ? LinagoraRefColors.material().primary[95]
-                    : MessageContentWithTimestampBuilder.responsiveUtils
-                            .isMobile(context)
-                        ? LinagoraSysColors.material().onPrimary
-                        : Theme.of(context).colorScheme.surfaceContainerHighest,
-                border: enableBorder
-                    ? (!widget.event.isOwnMessage &&
-                            MessageContentWithTimestampBuilder.responsiveUtils
-                                .isMobile(context)
-                        ? Border.all(
-                            color: MessageStyle.borderColorReceivedBubble,
-                          )
-                        : null)
-                    : null,
-              ),
-              padding: paddingBubble ??
-                  (noBubble
-                      ? const EdgeInsets.symmetric(
-                          horizontal: 16.0,
-                        )
-                      : MessageStyle.paddingMessageContentBuilder(
-                          widget.event,
-                        )),
-              constraints: BoxConstraints(
-                maxWidth: MessageStyle.messageBubbleWidth(
-                  context,
+        SingleChildScrollView(
+          physics: const ClampingScrollPhysics(),
+          child: Column(
+            mainAxisSize: mainAxisSize,
+            children: [
+              Container(
+                decoration: BoxDecoration(
+                  borderRadius: MessageStyle.bubbleBorderRadius,
+                  color: widget.event.isOwnMessage
+                      ? LinagoraRefColors.material().primary[95]
+                      : MessageContentWithTimestampBuilder.responsiveUtils
+                              .isMobile(context)
+                          ? LinagoraSysColors.material().onPrimary
+                          : Theme.of(context)
+                              .colorScheme
+                              .surfaceContainerHighest,
+                  border: enableBorder
+                      ? (!widget.event.isOwnMessage &&
+                              MessageContentWithTimestampBuilder.responsiveUtils
+                                  .isMobile(context)
+                          ? Border.all(
+                              color: MessageStyle.borderColorReceivedBubble,
+                            )
+                          : null)
+                      : null,
                 ),
-              ),
-              child: LayoutBuilder(
-                builder: (
-                  context,
-                  availableBubbleContraints,
-                ) =>
-                    Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    widget.event.hideDisplayName(
-                      widget.nextEvent,
-                      MessageContentWithTimestampBuilder.responsiveUtils
-                          .isMobile(context),
-                    )
-                        ? const SizedBox()
-                        : DisplayNameWidget(
-                            event: widget.event,
-                          ),
-                    IntrinsicHeight(
-                      child: Stack(
-                        alignment: Alignment.bottomRight,
-                        children: [
-                          MessageContentBuilder(
-                            event: widget.event,
-                            timeline: widget.timeline,
-                            availableBubbleContraints:
-                                availableBubbleContraints,
-                            onSelect: widget.onSelect,
-                            nextEvent: widget.nextEvent,
-                            scrollToEventId: widget.scrollToEventId,
-                            selectMode: widget.selectMode,
-                          ),
-                          if (timelineText)
-                            Positioned(
-                              child: SelectionContainer.disabled(
-                                child: Padding(
-                                  padding: MessageStyle.paddingMessageTime,
-                                  child: Text.rich(
-                                    WidgetSpan(
-                                      child: MessageTime(
-                                        timelineOverlayMessage:
-                                            widget.event.timelineOverlayMessage,
-                                        room: widget.event.room,
-                                        event: widget.event,
-                                        ownMessage: widget.event.isOwnMessage,
-                                        timeline: widget.timeline,
+                padding: paddingBubble ??
+                    (noBubble
+                        ? const EdgeInsets.symmetric(
+                            horizontal: 16.0,
+                          )
+                        : MessageStyle.paddingMessageContentBuilder(
+                            widget.event,
+                          )),
+                constraints: BoxConstraints(
+                  maxWidth: MessageStyle.messageBubbleWidth(
+                    context,
+                  ),
+                ),
+                child: LayoutBuilder(
+                  builder: (
+                    context,
+                    availableBubbleContraints,
+                  ) =>
+                      Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      widget.event.hideDisplayName(
+                        widget.nextEvent,
+                        MessageContentWithTimestampBuilder.responsiveUtils
+                            .isMobile(context),
+                      )
+                          ? const SizedBox()
+                          : DisplayNameWidget(
+                              event: widget.event,
+                            ),
+                      IntrinsicHeight(
+                        child: Stack(
+                          alignment: Alignment.bottomRight,
+                          children: [
+                            MessageContentBuilder(
+                              event: widget.event,
+                              timeline: widget.timeline,
+                              availableBubbleContraints:
+                                  availableBubbleContraints,
+                              onSelect: widget.onSelect,
+                              nextEvent: widget.nextEvent,
+                              scrollToEventId: widget.scrollToEventId,
+                              selectMode: widget.selectMode,
+                            ),
+                            if (timelineText)
+                              Positioned(
+                                child: SelectionContainer.disabled(
+                                  child: Padding(
+                                    padding: MessageStyle.paddingMessageTime,
+                                    child: Text.rich(
+                                      WidgetSpan(
+                                        child: MessageTime(
+                                          timelineOverlayMessage: widget
+                                              .event.timelineOverlayMessage,
+                                          room: widget.event.room,
+                                          event: widget.event,
+                                          ownMessage: widget.event.isOwnMessage,
+                                          timeline: widget.timeline,
+                                        ),
                                       ),
                                     ),
                                   ),
                                 ),
                               ),
-                            ),
-                        ],
+                          ],
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
-            ),
-            if (widget.event.hasAggregatedEvents(
-              widget.timeline,
-              RelationshipTypes.reaction,
-            ))
-              const SizedBox(height: 24),
-          ],
+              if (widget.event.hasAggregatedEvents(
+                widget.timeline,
+                RelationshipTypes.reaction,
+              ))
+                const SizedBox(height: 24),
+            ],
+          ),
         ),
         if (widget.event.hasAggregatedEvents(
           widget.timeline,
