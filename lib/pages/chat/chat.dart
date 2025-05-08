@@ -1662,8 +1662,34 @@ class ChatController extends State<Chat>
                                     onEmojiSelected: (
                                       emojiId,
                                       emoji,
-                                    ) =>
-                                        {},
+                                    ) async {
+                                      final isSelected =
+                                          emoji == (relatesTo?['key'] ?? '');
+                                      if (myReaction == null) {
+                                        Navigator.of(context).pop();
+                                        sendEmojiAction(
+                                          emoji: emoji,
+                                          event: event,
+                                        );
+                                        return;
+                                      }
+
+                                      if (isSelected) {
+                                        Navigator.of(context).pop();
+                                        await myReaction.redactEvent();
+                                        return;
+                                      }
+
+                                      if (!isSelected) {
+                                        Navigator.of(context).pop();
+                                        await myReaction.redactEvent();
+                                        sendEmojiAction(
+                                          emoji: emoji,
+                                          event: event,
+                                        );
+                                        return;
+                                      }
+                                    },
                                   ),
                                 ),
                               )
