@@ -1593,6 +1593,8 @@ class ChatController extends State<Chat>
                         child: showFullEmojiPickerOnWeb
                             ? Container(
                                 padding: const EdgeInsets.all(12),
+                                width: 326,
+                                height: 360,
                                 decoration: BoxDecoration(
                                   color:
                                       LinagoraRefColors.material().primary[100],
@@ -1616,81 +1618,77 @@ class ChatController extends State<Chat>
                                     ),
                                   ],
                                 ),
-                                child: SizedBox(
-                                  width: 326,
-                                  height: 360,
-                                  child: EmojiPicker(
-                                    emojiData: Matrix.of(context).emojiData,
-                                    configuration: EmojiPickerConfiguration(
-                                      emojiStyle: Theme.of(context)
-                                          .textTheme
-                                          .headlineLarge!,
-                                      searchEmptyTextStyle: Theme.of(context)
-                                          .textTheme
-                                          .labelMedium!
-                                          .copyWith(
-                                            color: LinagoraRefColors.material()
-                                                .tertiary[30],
-                                          ),
-                                      searchEmptyWidget: SvgPicture.asset(
-                                        ImagePaths.icSearchEmojiEmpty,
-                                      ),
-                                      searchFocusNode: FocusNode(),
+                                child: EmojiPicker(
+                                  emojiData: Matrix.of(context).emojiData,
+                                  configuration: EmojiPickerConfiguration(
+                                    emojiStyle: const TextStyle(
+                                      fontSize: 40,
                                     ),
-                                    itemBuilder: (
-                                      context,
-                                      emojiId,
-                                      emoji,
-                                      callback,
-                                    ) {
-                                      return MouseRegion(
-                                        onHover: (_) {},
-                                        child: EmojiItem(
-                                          textStyle: Theme.of(
-                                            context,
-                                          ).textTheme.headlineLarge!,
-                                          onTap: () {
-                                            callback(
-                                              emojiId,
-                                              emoji,
-                                            );
-                                          },
-                                          emoji: emoji,
+                                    searchEmptyTextStyle: Theme.of(context)
+                                        .textTheme
+                                        .labelMedium!
+                                        .copyWith(
+                                          color: LinagoraRefColors.material()
+                                              .tertiary[30],
                                         ),
-                                      );
-                                    },
-                                    onEmojiSelected: (
-                                      emojiId,
-                                      emoji,
-                                    ) async {
-                                      final isSelected =
-                                          emoji == (relatesTo?['key'] ?? '');
-                                      if (myReaction == null) {
-                                        Navigator.of(context).pop();
-                                        sendEmojiAction(
-                                          emoji: emoji,
-                                          event: event,
-                                        );
-                                        return;
-                                      }
-
-                                      if (isSelected) {
-                                        Navigator.of(context).pop();
-                                        await myReaction.redactEvent();
-                                        return;
-                                      }
-
-                                      if (!isSelected) {
-                                        Navigator.of(context).pop();
-                                        await myReaction.redactEvent();
-                                        sendEmojiAction(
-                                          emoji: emoji,
-                                          event: event,
-                                        );
-                                        return;
-                                      }
-                                    },
+                                    searchEmptyWidget: SvgPicture.asset(
+                                      ImagePaths.icSearchEmojiEmpty,
+                                    ),
+                                    searchFocusNode: FocusNode(),
                                   ),
+                                  itemBuilder: (
+                                    context,
+                                    emojiId,
+                                    emoji,
+                                    callback,
+                                  ) {
+                                    return MouseRegion(
+                                      onHover: (_) {},
+                                      child: EmojiItem(
+                                        textStyle: const TextStyle(
+                                          fontSize: 40,
+                                        ),
+                                        onTap: () {
+                                          callback(
+                                            emojiId,
+                                            emoji,
+                                          );
+                                        },
+                                        emoji: emoji,
+                                      ),
+                                    );
+                                  },
+                                  onEmojiSelected: (
+                                    emojiId,
+                                    emoji,
+                                  ) async {
+                                    final isSelected =
+                                        emoji == (relatesTo?['key'] ?? '');
+                                    if (myReaction == null) {
+                                      Navigator.of(context).pop();
+                                      sendEmojiAction(
+                                        emoji: emoji,
+                                        event: event,
+                                      );
+                                      return;
+                                    }
+
+                                    if (isSelected) {
+                                      Navigator.of(context).pop();
+                                      await myReaction.redactEvent();
+                                      return;
+                                    }
+
+                                    if (!isSelected) {
+                                      Navigator.of(context).pop();
+                                      await myReaction.redactEvent();
+                                      sendEmojiAction(
+                                        emoji: emoji,
+                                        event: event,
+                                      );
+                                      return;
+                                    }
+                                  },
                                 ),
                               )
                             : ReactionsPicker(
