@@ -48,11 +48,14 @@ class MessageReactions extends StatelessWidget {
 
     final reactionList = reactionMap.values.toList();
     reactionList.sort((a, b) => b.count - a.count > 0 ? 1 : -1);
-    return ReactionsList(
-      reactionList: reactionList,
-      allReactionEvents: allReactionEvents,
-      event: event,
-      client: client,
+    return Material(
+      color: Colors.transparent,
+      child: ReactionsList(
+        reactionList: reactionList,
+        allReactionEvents: allReactionEvents,
+        event: event,
+        client: client,
+      ),
     );
   }
 }

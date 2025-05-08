@@ -39,22 +39,19 @@ class UnencryptedImageBuilderWeb extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Hero(
-      tag: event.eventId,
-      child: Material(
-        child: InkWell(
-          mouseCursor: SystemMouseCursors.click,
-          borderRadius: MessageContentStyle.borderRadiusBubble,
-          onTap: onTapPreview != null || onTapSelectMode != null
-              ? () => _onTap(context)
-              : null,
-          child: UnencryptedImageWidget(
-            event: event,
-            isThumbnail: isThumbnail,
-            width: width,
-            height: height,
-            fit: fit,
-          ),
+    return Material(
+      child: InkWell(
+        mouseCursor: SystemMouseCursors.click,
+        borderRadius: MessageContentStyle.borderRadiusBubble,
+        onTap: onTapPreview != null || onTapSelectMode != null
+            ? () => _onTap(context)
+            : null,
+        child: UnencryptedImageWidget(
+          event: event,
+          isThumbnail: isThumbnail,
+          width: width,
+          height: height,
+          fit: fit,
         ),
       ),
     );
