@@ -73,89 +73,93 @@ class _SendingImageInfoWidgetState extends State<SendingImageInfoWidget>
       sendingFileProgressNotifier.value = 1;
     }
 
-    return ValueListenableBuilder<double>(
-      key: ValueKey(widget.event.eventId),
-      valueListenable: sendingFileProgressNotifier,
-      builder: (context, value, child) {
-        return Stack(
-          alignment: Alignment.center,
-          children: [
-            child!,
-            if (sendingFileProgressNotifier.value != 1) ...[
-              CircularProgressIndicator(
-                strokeWidth: 2,
-                color: LinagoraRefColors.material().primary[100],
-              ),
-              ValueListenableBuilder(
-                valueListenable: uploadFileStateNotifier,
-                builder: (context, state, child) {
-                  if (state is UploadFileSuccessUIState) {
-                    return child!;
-                  }
-                  return InkWell(
-                    child: Icon(
-                      Icons.close,
-                      color: LinagoraRefColors.material().primary[100],
-                    ),
-                    onTap: () {
-                      uploadManager.cancelUpload(widget.event);
-                    },
-                  );
-                },
-                child: const SizedBox.shrink(),
-              ),
-            ],
-          ],
-        );
-      },
-      child: Material(
-        borderRadius: MessageContentStyle.borderRadiusBubble,
-        child: InkWell(
-          onTap: () => _onTap(context),
-          child: ClipRRect(
-            borderRadius: MessageContentStyle.borderRadiusBubble,
-            child: Stack(
-              alignment: Alignment.center,
-              children: [
-                if (widget.matrixFile.bytes?.isNotEmpty != true ||
-                    widget.matrixFile.filePath == null)
-                  SizedBox(
-                    width: MessageContentStyle.imageBubbleWidth(
-                      widget.displayImageInfo.size.width,
-                    ),
-                    height: MessageContentStyle.imageBubbleHeight(
-                      widget.displayImageInfo.size.height,
-                    ),
-                    child: BlurHash(
-                      hash: widget.event.blurHash ??
-                          AppConfig.defaultImageBlurHash,
-                    ),
-                  ),
-                if (!PlatformInfos.isWeb && widget.matrixFile.filePath != null)
-                  Image.file(
-                    File(widget.matrixFile.filePath!),
-                    width: widget.displayImageInfo.size.width,
-                    height: widget.displayImageInfo.size.height,
-                    cacheHeight: context
-                        .getCacheSize(widget.displayImageInfo.size.height),
-                    cacheWidth: context
-                        .getCacheSize(widget.displayImageInfo.size.width),
-                    fit: BoxFit.cover,
-                    filterQuality: FilterQuality.low,
-                  ),
-                if (widget.matrixFile.bytes?.isNotEmpty == true)
-                  Image.memory(
-                    widget.matrixFile.bytes!,
-                    width: widget.displayImageInfo.size.width,
-                    height: widget.displayImageInfo.size.height,
-                    cacheHeight: context
-                        .getCacheSize(widget.displayImageInfo.size.height),
-                    cacheWidth: context
-                        .getCacheSize(widget.displayImageInfo.size.width),
-                    fit: BoxFit.cover,
-                    filterQuality: FilterQuality.none,
-                  ),
+    return Hero(
+      tag: widget.event.eventId,
+      child: ValueListenableBuilder<double>(
+        key: ValueKey(widget.event.eventId),
+        valueListenable: sendingFileProgressNotifier,
+        builder: (context, value, child) {
+          return Stack(
+            alignment: Alignment.center,
+            children: [
+              child!,
+              if (sendingFileProgressNotifier.value != 1) ...[
+                CircularProgressIndicator(
+                  strokeWidth: 2,
+                  color: LinagoraRefColors.material().primary[100],
+                ),
+                ValueListenableBuilder(
+                  valueListenable: uploadFileStateNotifier,
+                  builder: (context, state, child) {
+                    if (state is UploadFileSuccessUIState) {
+                      return child!;
+                    }
+                    return InkWell(
+                      child: Icon(
+                        Icons.close,
+                        color: LinagoraRefColors.material().primary[100],
+                      ),
+                      onTap: () {
+                        uploadManager.cancelUpload(widget.event);
+                      },
+                    );
+                  },
+                  child: const SizedBox.shrink(),
+                ),
               ],
+            ],
+          );
+        },
+        child: Material(
+          borderRadius: MessageContentStyle.borderRadiusBubble,
+          child: InkWell(
+            onTap: () => _onTap(context),
+            child: ClipRRect(
+              borderRadius: MessageContentStyle.borderRadiusBubble,
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
+                  if (widget.matrixFile.bytes?.isNotEmpty != true ||
+                      widget.matrixFile.filePath == null)
+                    SizedBox(
+                      width: MessageContentStyle.imageBubbleWidth(
+                        widget.displayImageInfo.size.width,
+                      ),
+                      height: MessageContentStyle.imageBubbleHeight(
+                        widget.displayImageInfo.size.height,
+                      ),
+                      child: BlurHash(
+                        hash: widget.event.blurHash ??
+                            AppConfig.defaultImageBlurHash,
+                      ),
+                    ),
+                  if (!PlatformInfos.isWeb &&
+                      widget.matrixFile.filePath != null)
+                    Image.file(
+                      File(widget.matrixFile.filePath!),
+                      width: widget.displayImageInfo.size.width,
+                      height: widget.displayImageInfo.size.height,
+                      cacheHeight: context
+                          .getCacheSize(widget.displayImageInfo.size.height),
+                      cacheWidth: context
+                          .getCacheSize(widget.displayImageInfo.size.width),
+                      fit: BoxFit.cover,
+                      filterQuality: FilterQuality.low,
+                    ),
+                  if (widget.matrixFile.bytes?.isNotEmpty == true)
+                    Image.memory(
+                      widget.matrixFile.bytes!,
+                      width: widget.displayImageInfo.size.width,
+                      height: widget.displayImageInfo.size.height,
+                      cacheHeight: context
+                          .getCacheSize(widget.displayImageInfo.size.height),
+                      cacheWidth: context
+                          .getCacheSize(widget.displayImageInfo.size.width),
+                      fit: BoxFit.cover,
+                      filterQuality: FilterQuality.none,
+                    ),
+                ],
+              ),
             ),
           ),
         ),

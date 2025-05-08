@@ -159,7 +159,6 @@ class _MessageContentWithTimestampBuilderState
                                 valueListenable: _displayEmojiPicker,
                                 builder: (context, display, child) {
                                   return ReactionsDialogWidget(
-                                    id: widget.event.eventId,
                                     messageWidget: Material(
                                       color: widget.event.isOwnMessage
                                           ? LinagoraRefColors.material()
@@ -428,17 +427,14 @@ class _MessageContentWithTimestampBuilderState
                       });
                     }
                   : null,
-              child: Hero(
-                tag: widget.event.eventId,
-                child: _messageBuilder(
-                  key: ValueKey(
-                    'MessageContentWithTimestampBuilder%${DateTime.now().millisecondsSinceEpoch}',
-                  ),
-                  context: context,
-                  timelineText: timelineText,
-                  noBubble: noBubble,
-                  displayTime: displayTime,
+              child: _messageBuilder(
+                key: ValueKey(
+                  'MessageContentWithTimestampBuilder%${DateTime.now().millisecondsSinceEpoch}',
                 ),
+                context: context,
+                timelineText: timelineText,
+                noBubble: noBubble,
+                displayTime: displayTime,
               ),
             ),
           ),

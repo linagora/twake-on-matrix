@@ -101,11 +101,14 @@ class _SendingVideoWidgetState extends State<SendingVideoWidget>
           ),
         );
       }),
-      child: VideoWidget(
-        imageHeight: widget.displayImageInfo.size.height,
-        imageWidth: widget.displayImageInfo.size.width,
-        matrixFile: widget.matrixFile,
-        event: widget.event,
+      child: Hero(
+        tag: widget.event.eventId,
+        child: VideoWidget(
+          imageHeight: widget.displayImageInfo.size.height,
+          imageWidth: widget.displayImageInfo.size.width,
+          matrixFile: widget.matrixFile,
+          event: widget.event,
+        ),
       ),
     );
   }
