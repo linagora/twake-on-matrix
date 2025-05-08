@@ -188,6 +188,7 @@ class _Reaction extends StatelessWidget {
       onLongPress: () => onLongPress != null ? onLongPress!() : null,
       borderRadius: BorderRadius.circular(AppConfig.borderRadius),
       child: Container(
+        height: 34,
         decoration: BoxDecoration(
           color: color,
           border: Border.all(color: MessageReactionsStyle.reactionBorderColor),
