@@ -58,6 +58,8 @@ class ImagePaths {
   static String get googlePlay => _getImagePath('google_play.svg');
   static String get icTwakeSupport =>
       getConfigurationImagePath('ic_twake_support.svg');
+  static String get icSearchEmojiEmpty =>
+      _getImagePath('search_emoji_empty.svg');
 
   static String _getImagePath(String imageName) {
     return AssetsPaths.images + imageName;

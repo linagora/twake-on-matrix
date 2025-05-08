@@ -433,11 +433,7 @@ class ChatController extends State<Chat>
     }
   }
 
-  void _keyboardListener(bool isKeyboardVisible) {
-    if (isKeyboardVisible && showEmojiPickerNotifier.value == true) {
-      showEmojiPickerNotifier.value = false;
-    }
-  }
+  void _keyboardListener(bool isKeyboardVisible) {}
 
   void handleDragDone(DropDoneDetails details) async {
     final matrixFiles = await onDragDone(details);

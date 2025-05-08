@@ -9,6 +9,7 @@ import 'package:fluffychat/event/twake_event_types.dart';
 import 'package:fluffychat/presentation/mixins/init_config_mixin.dart';
 import 'package:fluffychat/presentation/model/client_login_state_event.dart';
 import 'package:fluffychat/widgets/layouts/agruments/logout_body_args.dart';
+import 'package:flutter_emoji_mart/flutter_emoji_mart.dart';
 import 'package:universal_html/html.dart' as html hide File;
 
 import 'package:adaptive_dialog/adaptive_dialog.dart';
@@ -90,6 +91,7 @@ class MatrixState extends State<Matrix>
   String? loginUsername;
   LoginType? loginType;
   bool? loginRegistrationSupported;
+  late EmojiData emojiData;
 
   bool waitForFirstSync = false;
 
@@ -308,6 +310,7 @@ class MatrixState extends State<Matrix>
         html.window.addEventListener('blur', onWindowBlur);
       }
       initMatrix();
+      emojiData = await EmojiData.builtIn();
       await initReceiveSharingIntent();
       await tryToGetFederationConfigurations();
       if (PlatformInfos.isWeb) {
