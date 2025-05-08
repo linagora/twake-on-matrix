@@ -8,15 +8,17 @@ import 'package:fluffychat/pages/chat/events/message_reactions.dart';
 import 'package:fluffychat/pages/chat/events/message_time.dart';
 import 'package:fluffychat/resource/image_paths.dart';
 import 'package:fluffychat/utils/date_time_extension.dart';
+import 'package:fluffychat/utils/extension/build_context_extension.dart';
 import 'package:fluffychat/utils/extension/event_status_custom_extension.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
 import 'package:fluffychat/utils/responsive/responsive_utils.dart';
 import 'package:fluffychat/widgets/context_menu/context_menu_action.dart';
 import 'package:fluffychat/widgets/context_menu/context_menu_action_item.dart';
 import 'package:fluffychat/widgets/context_menu/twake_context_menu_area.dart';
+import 'package:fluffychat/widgets/matrix.dart';
 import 'package:fluffychat/widgets/twake_components/twake_icon_button.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_emoji_mart/flutter_emoji_mart.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:matrix/matrix.dart';
@@ -25,7 +27,7 @@ import 'package:flutter_gen/gen_l10n/l10n.dart';
 
 typedef ContextMenuBuilder = List<Widget> Function(BuildContext context);
 
-class MessageContentWithTimestampBuilder extends StatelessWidget {
+class MessageContentWithTimestampBuilder extends StatefulWidget {
   final Event event;
   final Event? nextEvent;
   final void Function(Event)? onSelect;
@@ -78,56 +80,69 @@ class MessageContentWithTimestampBuilder extends StatelessWidget {
   });
 
   @override
+  State<MessageContentWithTimestampBuilder> createState() =>
+      _MessageContentWithTimestampBuilderState();
+}
+
+class _MessageContentWithTimestampBuilderState
+    extends State<MessageContentWithTimestampBuilder> {
+  final ValueNotifier<bool> _displayEmojiPicker = ValueNotifier(false);
+
+  @override
   Widget build(BuildContext context) {
-    final displayTime = event.type == EventTypes.RoomCreate ||
-        nextEvent == null ||
-        !event.originServerTs.sameEnvironment(nextEvent!.originServerTs);
+    final displayTime = widget.event.type == EventTypes.RoomCreate ||
+        widget.nextEvent == null ||
+        !widget.event.originServerTs
+            .sameEnvironment(widget.nextEvent!.originServerTs);
     final noBubble = {
           MessageTypes.Sticker,
-        }.contains(event.messageType) &&
-        !event.redacted;
+        }.contains(widget.event.messageType) &&
+        !widget.event.redacted;
 
     final timelineText = {
       MessageTypes.Text,
       MessageTypes.BadEncrypted,
-    }.contains(event.messageType);
+    }.contains(widget.event.messageType);
 
     return Row(
       mainAxisSize: MainAxisSize.min,
-      mainAxisAlignment: MessageStyle.messageAlignment(event, context),
+      mainAxisAlignment: MessageStyle.messageAlignment(widget.event, context),
       crossAxisAlignment: CrossAxisAlignment.end,
       children: [
         TwakeContextMenuArea(
-          builder: menuChildren != null
-              ? (context) => menuChildren!.call(context)
+          builder: widget.menuChildren != null
+              ? (context) => widget.menuChildren!.call(context)
               : null,
-          listActions: listActions,
+          listActions: widget.listActions,
           child: Container(
-            alignment:
-                event.isOwnMessage ? Alignment.topRight : Alignment.topLeft,
+            alignment: widget.event.isOwnMessage
+                ? Alignment.topRight
+                : Alignment.topLeft,
             padding: MessageStyle.paddingMessageContainer(
               displayTime,
               context,
-              nextEvent,
-              event,
-              selected,
+              widget.nextEvent,
+              widget.event,
+              widget.selected,
             ),
             child: MultiPlatformSelectionMode(
-              event: event,
-              isClickable: responsiveUtils.isMobileOrTablet(context),
-              onLongPress: event.status.isAvailable
+              event: widget.event,
+              isClickable: MessageContentWithTimestampBuilder.responsiveUtils
+                  .isMobileOrTablet(context),
+              onLongPress: widget.event.status.isAvailable
                   ? (event) async {
-                      if (onLongPressMessage != null) {
-                        onLongPressMessage?.call(event);
+                      if (widget.onLongPressMessage != null) {
+                        widget.onLongPressMessage?.call(event);
                         return;
                       }
-                      onDisplayEmojiReaction?.call();
+                      widget.onDisplayEmojiReaction?.call();
+                      _displayEmojiPicker.value = false;
                       await Navigator.of(context).push(
                         HeroDialogRoute(
                           builder: (context) {
                             final myReaction = event
                                 .aggregatedEvents(
-                                  timeline,
+                                  widget.timeline,
                                   RelationshipTypes.reaction,
                                 )
                                 .where(
@@ -140,127 +155,269 @@ class MessageContentWithTimestampBuilder extends StatelessWidget {
                             final relatesTo = (myReaction?.content
                                 as Map<String, dynamic>?)?['m.relates_to'];
                             return SafeArea(
-                              child: ReactionsDialogWidget(
-                                id: event.eventId,
-                                messageWidget: Material(
-                                  color: Colors.transparent,
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius:
-                                        MessageStyle.bubbleBorderRadius,
-                                  ),
-                                  child: Container(
-                                    decoration: BoxDecoration(
-                                      borderRadius:
-                                          MessageStyle.bubbleBorderRadius,
-                                    ),
-                                    child: SingleChildScrollView(
-                                      primary: true,
-                                      physics: const ClampingScrollPhysics(),
-                                      child: _messageBuilder(
-                                        key: ValueKey(
-                                          'PreviewReactionWidgetKey%${DateTime.now().millisecondsSinceEpoch}',
+                              child: ValueListenableBuilder(
+                                valueListenable: _displayEmojiPicker,
+                                builder: (context, display, child) {
+                                  return ReactionsDialogWidget(
+                                    id: event.eventId,
+                                    messageWidget: Material(
+                                      color: widget.event.isOwnMessage
+                                          ? LinagoraRefColors.material()
+                                              .primary[95]
+                                          : MessageContentWithTimestampBuilder
+                                                  .responsiveUtils
+                                                  .isMobile(context)
+                                              ? LinagoraSysColors.material()
+                                                  .onPrimary
+                                              : Theme.of(context)
+                                                  .colorScheme
+                                                  .surfaceContainerHighest,
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius:
+                                            MessageStyle.bubbleBorderRadius,
+                                      ),
+                                      child: Container(
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 4,
+                                          vertical: 4,
                                         ),
-                                        mainAxisSize: MainAxisSize.min,
-                                        context: context,
-                                        timelineText: timelineText,
-                                        noBubble: noBubble,
-                                        displayTime: displayTime,
+                                        decoration: BoxDecoration(
+                                          borderRadius:
+                                              MessageStyle.bubbleBorderRadius,
+                                          border: !widget.event.isOwnMessage &&
+                                                  MessageContentWithTimestampBuilder
+                                                      .responsiveUtils
+                                                      .isMobile(context)
+                                              ? Border.all(
+                                                  color: MessageStyle
+                                                      .borderColorReceivedBubble,
+                                                )
+                                              : null,
+                                        ),
+                                        child: SingleChildScrollView(
+                                          primary: true,
+                                          physics:
+                                              const ClampingScrollPhysics(),
+                                          child: _messageBuilder(
+                                            key: ValueKey(
+                                              'PreviewReactionWidgetKey%${DateTime.now().millisecondsSinceEpoch}',
+                                            ),
+                                            mainAxisSize: MainAxisSize.min,
+                                            context: context,
+                                            timelineText: timelineText,
+                                            noBubble: noBubble,
+                                            displayTime: displayTime,
+                                            paddingBubble: EdgeInsets.zero,
+                                          ),
+                                        ),
                                       ),
                                     ),
-                                  ),
-                                ),
-                                isOwnMessage: event.isOwnMessage,
-                                enableMoreEmojiWidget: false,
-                                myEmojiReacted: relatesTo?['key'] ?? '',
-                                onClickEmojiReactionAction: (emoji) async {
-                                  final isSelected =
-                                      emoji == (relatesTo?['key'] ?? '');
-                                  if (myReaction == null) {
-                                    onSendEmojiReaction?.call(emoji, event);
-                                    return;
-                                  }
+                                    reactionWidget: display
+                                        ? _emojiPickerBuilder(
+                                            emojiData:
+                                                Matrix.of(context).emojiData,
+                                            myReaction: myReaction,
+                                            event: event,
+                                            relatesTo: relatesTo,
+                                          )
+                                        : null,
+                                    isOwnMessage: event.isOwnMessage,
+                                    enableMoreEmojiWidget: true,
+                                    onPickEmojiReactionAction: () {
+                                      _displayEmojiPicker.value = true;
+                                    },
+                                    myEmojiReacted: relatesTo?['key'] ?? '',
+                                    onClickEmojiReactionAction: (emoji) async {
+                                      final isSelected =
+                                          emoji == (relatesTo?['key'] ?? '');
+                                      if (myReaction == null) {
+                                        widget.onSendEmojiReaction
+                                            ?.call(emoji, event);
+                                        return;
+                                      }
 
-                                  if (isSelected) {
-                                    Navigator.of(context).pop();
-                                    await myReaction.redactEvent();
-                                    return;
-                                  }
+                                      if (isSelected) {
+                                        Navigator.of(context).pop();
+                                        await myReaction.redactEvent();
+                                        return;
+                                      }
 
-                                  if (!isSelected) {
-                                    await myReaction.redactEvent();
-                                    onSendEmojiReaction?.call(emoji, event);
-                                    return;
-                                  }
-                                },
-                                contextMenuWidget: Padding(
-                                  padding: const EdgeInsets.only(top: 16),
-                                  child: PullDownMenu(
-                                    items: [
-                                      PullDownMenuItem(
-                                        title: L10n.of(context)!.reply,
-                                        onTap: () {
-                                          Navigator.of(context).pop('reply');
-                                        },
-                                        icon: CupertinoIcons
-                                            .arrowshape_turn_up_left,
-                                      ),
-                                      PullDownMenuItem(
-                                        title: L10n.of(context)!.forward,
-                                        onTap: () {
-                                          Navigator.of(context).pop('forward');
-                                        },
-                                        icon: CupertinoIcons
-                                            .arrowshape_turn_up_right,
-                                      ),
-                                      PullDownMenuItem(
-                                        title: L10n.of(context)!.copy,
-                                        onTap: () {
-                                          Navigator.of(context).pop('copy');
-                                        },
-                                        icon: CupertinoIcons.doc_on_doc,
-                                      ),
-                                      PullDownMenuItem(
-                                        title: L10n.of(context)!.select,
-                                        icon:
-                                            CupertinoIcons.checkmark_alt_circle,
-                                        onTap: () {
-                                          Navigator.of(context).pop('select');
-                                        },
-                                      ),
-                                      PullDownMenuItem(
-                                        title: event.isPinned
-                                            ? L10n.of(context)!.unpin
-                                            : L10n.of(context)!.pin,
-                                        icon: event.isPinned
-                                            ? null
-                                            : Icons.push_pin_outlined,
-                                        iconWidget: event.isPinned
-                                            ? SvgPicture.asset(
-                                                ImagePaths.icUnpin,
-                                                colorFilter: ColorFilter.mode(
-                                                  LinagoraSysColors.material()
-                                                      .onBackground,
-                                                  BlendMode.srcIn,
+                                      if (!isSelected) {
+                                        await myReaction.redactEvent();
+                                        widget.onSendEmojiReaction
+                                            ?.call(emoji, event);
+                                        return;
+                                      }
+                                    },
+                                    contextMenuWidget: display
+                                        ? const SizedBox()
+                                        : Padding(
+                                            padding:
+                                                const EdgeInsets.only(top: 16),
+                                            child: PullDownMenu(
+                                              items: [
+                                                PullDownMenuItem(
+                                                  title:
+                                                      L10n.of(context)!.reply,
+                                                  itemTheme:
+                                                      PullDownMenuItemTheme(
+                                                    textStyle: context
+                                                        .textTheme.bodyLarge!
+                                                        .copyWith(
+                                                      color: LinagoraRefColors
+                                                              .material()
+                                                          .neutral[30],
+                                                    ),
+                                                  ),
+                                                  onTap: () {
+                                                    Navigator.of(context)
+                                                        .pop('reply');
+                                                  },
+                                                  iconWidget: SvgPicture.asset(
+                                                    ImagePaths.icReply,
+                                                    colorFilter:
+                                                        ColorFilter.mode(
+                                                      LinagoraRefColors
+                                                              .material()
+                                                          .neutral[30]!,
+                                                      BlendMode.srcIn,
+                                                    ),
+                                                  ),
                                                 ),
-                                              )
-                                            : null,
-                                        onTap: () {
-                                          Navigator.of(context).pop('pin');
-                                        },
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                widgetAlignment: event.isOwnMessage
-                                    ? Alignment.centerRight
-                                    : Alignment.centerLeft,
+                                                PullDownMenuItem(
+                                                  title:
+                                                      L10n.of(context)!.forward,
+                                                  itemTheme:
+                                                      PullDownMenuItemTheme(
+                                                    textStyle: context
+                                                        .textTheme.bodyLarge!
+                                                        .copyWith(
+                                                      color: LinagoraRefColors
+                                                              .material()
+                                                          .neutral[30],
+                                                    ),
+                                                    iconActionTextStyle: context
+                                                        .textTheme.bodyLarge!
+                                                        .copyWith(
+                                                      color: LinagoraRefColors
+                                                              .material()
+                                                          .neutral[30],
+                                                    ),
+                                                  ),
+                                                  onTap: () {
+                                                    Navigator.of(context)
+                                                        .pop('forward');
+                                                  },
+                                                  icon: Icons.shortcut,
+                                                ),
+                                                PullDownMenuItem(
+                                                  title: L10n.of(context)!.copy,
+                                                  itemTheme:
+                                                      PullDownMenuItemTheme(
+                                                    textStyle: context
+                                                        .textTheme.bodyLarge!
+                                                        .copyWith(
+                                                      color: LinagoraRefColors
+                                                              .material()
+                                                          .neutral[30],
+                                                    ),
+                                                    iconActionTextStyle: context
+                                                        .textTheme.bodyLarge!
+                                                        .copyWith(
+                                                      color: LinagoraRefColors
+                                                              .material()
+                                                          .neutral[30],
+                                                    ),
+                                                  ),
+                                                  onTap: () {
+                                                    Navigator.of(context)
+                                                        .pop('copy');
+                                                  },
+                                                  icon: Icons.content_copy,
+                                                ),
+                                                PullDownMenuItem(
+                                                  title:
+                                                      L10n.of(context)!.select,
+                                                  itemTheme:
+                                                      PullDownMenuItemTheme(
+                                                    textStyle: context
+                                                        .textTheme.bodyLarge!
+                                                        .copyWith(
+                                                      color: LinagoraRefColors
+                                                              .material()
+                                                          .neutral[30],
+                                                    ),
+                                                    iconActionTextStyle: context
+                                                        .textTheme.bodyLarge!
+                                                        .copyWith(
+                                                      color: LinagoraRefColors
+                                                              .material()
+                                                          .neutral[30],
+                                                    ),
+                                                  ),
+                                                  icon: Icons
+                                                      .check_circle_outline_outlined,
+                                                  onTap: () {
+                                                    Navigator.of(context)
+                                                        .pop('select');
+                                                  },
+                                                ),
+                                                PullDownMenuItem(
+                                                  title: event.isPinned
+                                                      ? L10n.of(context)!.unpin
+                                                      : L10n.of(context)!.pin,
+                                                  itemTheme:
+                                                      PullDownMenuItemTheme(
+                                                    textStyle: context
+                                                        .textTheme.bodyLarge!
+                                                        .copyWith(
+                                                      color: LinagoraRefColors
+                                                              .material()
+                                                          .neutral[30],
+                                                    ),
+                                                    iconActionTextStyle: context
+                                                        .textTheme.bodyLarge!
+                                                        .copyWith(
+                                                      color: LinagoraRefColors
+                                                              .material()
+                                                          .neutral[30],
+                                                    ),
+                                                  ),
+                                                  icon: event.isPinned
+                                                      ? null
+                                                      : Icons.push_pin_outlined,
+                                                  iconWidget: event.isPinned
+                                                      ? SvgPicture.asset(
+                                                          ImagePaths.icUnpin,
+                                                          colorFilter:
+                                                              ColorFilter.mode(
+                                                            LinagoraSysColors
+                                                                    .material()
+                                                                .onBackground,
+                                                            BlendMode.srcIn,
+                                                          ),
+                                                        )
+                                                      : null,
+                                                  onTap: () {
+                                                    Navigator.of(context)
+                                                        .pop('pin');
+                                                  },
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                    widgetAlignment: event.isOwnMessage
+                                        ? Alignment.centerRight
+                                        : Alignment.centerLeft,
+                                  );
+                                },
                               ),
                             );
                           },
                         ),
                       ).then((result) {
                         _handleResultFromHeroPage(result);
-                        onHideEmojiReaction?.call();
+                        widget.onHideEmojiReaction?.call();
                       });
                     }
                   : null,
@@ -276,7 +433,7 @@ class MessageContentWithTimestampBuilder extends StatelessWidget {
             ),
           ),
         ),
-        if (event.status.isAvailable) _menuActionsRowBuilder(context),
+        if (widget.event.status.isAvailable) _menuActionsRowBuilder(context),
       ],
     );
   }
@@ -287,23 +444,95 @@ class MessageContentWithTimestampBuilder extends StatelessWidget {
     if (result is String) {
       switch (result) {
         case 'reply':
-          onReply?.call(event);
+          widget.onReply?.call(widget.event);
           break;
         case 'forward':
-          onForward?.call(event);
+          widget.onForward?.call(widget.event);
           break;
         case 'copy':
-          onCopy?.call(event);
+          widget.onCopy?.call(widget.event);
           break;
         case 'select':
-          onSelect?.call(event);
+          widget.onSelect?.call(widget.event);
           break;
         case 'pin':
-          onPin?.call(event);
+          widget.onPin?.call(widget.event);
           break;
       }
     }
-    onHideEmojiReaction?.call();
+    widget.onHideEmojiReaction?.call();
+  }
+
+  Widget _emojiPickerBuilder({
+    required EmojiData emojiData,
+    required Event? myReaction,
+    required Event event,
+    required dynamic relatesTo,
+  }) {
+    return AnimatedOpacity(
+      opacity: 1.0,
+      duration: const Duration(milliseconds: 300),
+      curve: Curves.easeInOut,
+      child: Container(
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: LinagoraRefColors.material().primary[100],
+          borderRadius: BorderRadius.circular(
+            24,
+          ),
+        ),
+        child: SizedBox(
+          width: 326,
+          height: 360,
+          child: EmojiPicker(
+            emojiData: emojiData,
+            configuration: EmojiPickerConfiguration(
+              emojiStyle: Theme.of(context).textTheme.headlineLarge!,
+              searchEmptyTextStyle:
+                  Theme.of(context).textTheme.labelMedium!.copyWith(
+                        color: LinagoraRefColors.material().tertiary[30],
+                      ),
+              searchEmptyWidget: SvgPicture.asset(
+                ImagePaths.icSearchEmojiEmpty,
+              ),
+              searchFocusNode: FocusNode(),
+            ),
+            itemBuilder: (
+              context,
+              emojiId,
+              emoji,
+              callback,
+            ) {
+              return MouseRegion(
+                onHover: (_) {},
+                child: EmojiItem(
+                  textStyle: Theme.of(
+                    context,
+                  ).textTheme.headlineLarge!,
+                  onTap: () {
+                    callback(
+                      emojiId,
+                      emoji,
+                    );
+                  },
+                  emoji: emoji,
+                ),
+              );
+            },
+            onEmojiSelected: (
+              emojiId,
+              emoji,
+            ) =>
+                _handleEmojiSelectionFromEmojiPicker(
+              emoji: emoji,
+              myReaction: myReaction,
+              event: event,
+              relatesTo: relatesTo,
+            ),
+          ),
+        ),
+      ),
+    );
   }
 
   Widget _messageBuilder({
@@ -312,11 +541,12 @@ class MessageContentWithTimestampBuilder extends StatelessWidget {
     required bool timelineText,
     required bool noBubble,
     required bool displayTime,
+    EdgeInsets? paddingBubble,
     MainAxisSize mainAxisSize = MainAxisSize.max,
   }) {
     return Stack(
       key: key,
-      alignment: event.isOwnMessage
+      alignment: widget.event.isOwnMessage
           ? AlignmentDirectional.bottomStart
           : AlignmentDirectional.bottomEnd,
       children: [
@@ -326,22 +556,28 @@ class MessageContentWithTimestampBuilder extends StatelessWidget {
             Container(
               decoration: BoxDecoration(
                 borderRadius: MessageStyle.bubbleBorderRadius,
-                color: event.isOwnMessage
+                color: widget.event.isOwnMessage
                     ? LinagoraRefColors.material().primary[95]
-                    : responsiveUtils.isMobile(context)
+                    : MessageContentWithTimestampBuilder.responsiveUtils
+                            .isMobile(context)
                         ? LinagoraSysColors.material().onPrimary
                         : Theme.of(context).colorScheme.surfaceContainerHighest,
-                border: !event.isOwnMessage && responsiveUtils.isMobile(context)
+                border: !widget.event.isOwnMessage &&
+                        MessageContentWithTimestampBuilder.responsiveUtils
+                            .isMobile(context)
                     ? Border.all(
                         color: MessageStyle.borderColorReceivedBubble,
                       )
                     : null,
               ),
-              padding: noBubble
-                  ? const EdgeInsets.symmetric(
-                      horizontal: 16.0,
-                    )
-                  : MessageStyle.paddingMessageContentBuilder(event),
+              padding: paddingBubble ??
+                  (noBubble
+                      ? const EdgeInsets.symmetric(
+                          horizontal: 16.0,
+                        )
+                      : MessageStyle.paddingMessageContentBuilder(
+                          widget.event,
+                        )),
               constraints: BoxConstraints(
                 maxWidth: MessageStyle.messageBubbleWidth(
                   context,
@@ -355,27 +591,28 @@ class MessageContentWithTimestampBuilder extends StatelessWidget {
                     Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    event.hideDisplayName(
-                      nextEvent,
-                      responsiveUtils.isMobile(context),
+                    widget.event.hideDisplayName(
+                      widget.nextEvent,
+                      MessageContentWithTimestampBuilder.responsiveUtils
+                          .isMobile(context),
                     )
                         ? const SizedBox()
                         : DisplayNameWidget(
-                            event: event,
+                            event: widget.event,
                           ),
                     IntrinsicHeight(
                       child: Stack(
                         alignment: Alignment.bottomRight,
                         children: [
                           MessageContentBuilder(
-                            event: event,
-                            timeline: timeline,
+                            event: widget.event,
+                            timeline: widget.timeline,
                             availableBubbleContraints:
                                 availableBubbleContraints,
-                            onSelect: onSelect,
-                            nextEvent: nextEvent,
-                            scrollToEventId: scrollToEventId,
-                            selectMode: selectMode,
+                            onSelect: widget.onSelect,
+                            nextEvent: widget.nextEvent,
+                            scrollToEventId: widget.scrollToEventId,
+                            selectMode: widget.selectMode,
                           ),
                           if (timelineText)
                             Positioned(
@@ -386,11 +623,11 @@ class MessageContentWithTimestampBuilder extends StatelessWidget {
                                     WidgetSpan(
                                       child: MessageTime(
                                         timelineOverlayMessage:
-                                            event.timelineOverlayMessage,
-                                        room: event.room,
-                                        event: event,
-                                        ownMessage: event.isOwnMessage,
-                                        timeline: timeline,
+                                            widget.event.timelineOverlayMessage,
+                                        room: widget.event.room,
+                                        event: widget.event,
+                                        ownMessage: widget.event.isOwnMessage,
+                                        timeline: widget.timeline,
                                       ),
                                     ),
                                   ),
@@ -404,22 +641,22 @@ class MessageContentWithTimestampBuilder extends StatelessWidget {
                 ),
               ),
             ),
-            if (event.hasAggregatedEvents(
-              timeline,
+            if (widget.event.hasAggregatedEvents(
+              widget.timeline,
               RelationshipTypes.reaction,
             ))
               const SizedBox(height: 24),
           ],
         ),
-        if (event.hasAggregatedEvents(
-          timeline,
+        if (widget.event.hasAggregatedEvents(
+          widget.timeline,
           RelationshipTypes.reaction,
         )) ...[
           Positioned(
             left: 8,
             right: 0,
             bottom: 0,
-            child: MessageReactions(event, timeline),
+            child: MessageReactions(widget.event, widget.timeline),
           ),
           const SizedBox(width: 4),
         ],
@@ -427,11 +664,41 @@ class MessageContentWithTimestampBuilder extends StatelessWidget {
     );
   }
 
+  Future<void> _handleEmojiSelectionFromEmojiPicker({
+    required String emoji,
+    required Event? myReaction,
+    required Event event,
+    required dynamic relatesTo,
+  }) async {
+    final isSelected = emoji == (relatesTo?['key'] ?? '');
+    if (myReaction == null) {
+      Navigator.of(context).pop();
+      widget.onSendEmojiReaction?.call(
+        emoji,
+        event,
+      );
+      return;
+    }
+
+    if (isSelected) {
+      Navigator.of(context).pop();
+      await myReaction.redactEvent();
+      return;
+    }
+
+    if (!isSelected) {
+      Navigator.of(context).pop();
+      await myReaction.redactEvent();
+      widget.onSendEmojiReaction?.call(emoji, event);
+      return;
+    }
+  }
+
   Widget _menuActionsRowBuilder(BuildContext context) {
     return ValueListenableBuilder(
-      valueListenable: isHoverNotifier,
+      valueListenable: widget.isHoverNotifier,
       builder: (context, isHover, child) {
-        if (isHover != null && isHover.contains(event.eventId)) {
+        if (isHover != null && isHover.contains(widget.event.eventId)) {
           return child!;
         }
         return const SizedBox();
@@ -443,14 +710,14 @@ class MessageContentWithTimestampBuilder extends StatelessWidget {
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
-          children: listHorizontalActionMenu.map((item) {
+          children: widget.listHorizontalActionMenu.map((item) {
             return Padding(
               padding: const EdgeInsetsDirectional.symmetric(horizontal: 4),
               child: TwakeIconButton(
-                onTapDown: (tapDownDetails) => onMenuAction?.call(
+                onTapDown: (tapDownDetails) => widget.onMenuAction?.call(
                   context,
                   item.action,
-                  event,
+                  widget.event,
                   tapDownDetails,
                 ),
                 icon: item.action.getIcon(),

@@ -29,7 +29,7 @@ dependencies:
   linagora_design_flutter:
     git:
       url: git@github.com:linagora/linagora-design-flutter.git
-      ref: master
+      ref: update-overlay-when-keyboard-open
   flutter_matrix_html:
     git:
       url: https://github.com/linagora/flutter_matrix_html.git
@@ -64,6 +64,11 @@ dependencies:
     git:
       url: git@github.com:linagora/linkfy_text.git
       ref: main
+
+  flutter_emoji_mart:
+    git:
+      url: git@github.com:linagora/emoji_mart.git
+      ref: custom-style-for-twake-chat
 
   adaptive_dialog: ^1.8.0+1
   flutter_adaptive_scaffold: ^0.1.4
@@ -301,8 +306,8 @@ dependency_overrides:
   # Upstream pull request: https://github.com/AntoineMarcel/keyboard_shortcuts/pull/13
   keyboard_shortcuts:
     git:
-      url: https://github.com/TheOneWithTheBraid/keyboard_shortcuts.git
-      ref: null-safety
+      url: git@github.com:zhouzhuo810/keyboard_shortcuts.git
+      ref: master
   # blocked upgrade of package_info_plus for null safety
   # https://github.com/creativecreatorormaybenot/wakelock/pull/203
   wakelock_windows:
