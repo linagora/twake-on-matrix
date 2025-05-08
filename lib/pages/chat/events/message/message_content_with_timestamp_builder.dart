@@ -159,7 +159,7 @@ class _MessageContentWithTimestampBuilderState
                                 valueListenable: _displayEmojiPicker,
                                 builder: (context, display, child) {
                                   return ReactionsDialogWidget(
-                                    id: event.eventId,
+                                    id: widget.event.eventId,
                                     messageWidget: Material(
                                       color: widget.event.isOwnMessage
                                           ? LinagoraRefColors.material()
@@ -208,6 +208,7 @@ class _MessageContentWithTimestampBuilderState
                                             noBubble: noBubble,
                                             displayTime: displayTime,
                                             paddingBubble: EdgeInsets.zero,
+                                            enableBorder: false,
                                           ),
                                         ),
                                       ),
@@ -255,6 +256,12 @@ class _MessageContentWithTimestampBuilderState
                                             padding:
                                                 const EdgeInsets.only(top: 16),
                                             child: PullDownMenu(
+                                              routeTheme:
+                                                  PullDownMenuRouteTheme(
+                                                backgroundColor:
+                                                    LinagoraRefColors.material()
+                                                        .primary[100],
+                                              ),
                                               items: [
                                                 PullDownMenuItem(
                                                   title:
@@ -421,14 +428,17 @@ class _MessageContentWithTimestampBuilderState
                       });
                     }
                   : null,
-              child: _messageBuilder(
-                key: ValueKey(
-                  'MessageContentWithTimestampBuilder%${DateTime.now().millisecondsSinceEpoch}',
+              child: Hero(
+                tag: widget.event.eventId,
+                child: _messageBuilder(
+                  key: ValueKey(
+                    'MessageContentWithTimestampBuilder%${DateTime.now().millisecondsSinceEpoch}',
+                  ),
+                  context: context,
+                  timelineText: timelineText,
+                  noBubble: noBubble,
+                  displayTime: displayTime,
                 ),
-                context: context,
-                timelineText: timelineText,
-                noBubble: noBubble,
-                displayTime: displayTime,
               ),
             ),
           ),
@@ -542,6 +552,7 @@ class _MessageContentWithTimestampBuilderState
     required bool noBubble,
     required bool displayTime,
     EdgeInsets? paddingBubble,
+    bool enableBorder = true,
     MainAxisSize mainAxisSize = MainAxisSize.max,
   }) {
     return Stack(
@@ -562,12 +573,14 @@ class _MessageContentWithTimestampBuilderState
                             .isMobile(context)
                         ? LinagoraSysColors.material().onPrimary
                         : Theme.of(context).colorScheme.surfaceContainerHighest,
-                border: !widget.event.isOwnMessage &&
-                        MessageContentWithTimestampBuilder.responsiveUtils
-                            .isMobile(context)
-                    ? Border.all(
-                        color: MessageStyle.borderColorReceivedBubble,
-                      )
+                border: enableBorder
+                    ? (!widget.event.isOwnMessage &&
+                            MessageContentWithTimestampBuilder.responsiveUtils
+                                .isMobile(context)
+                        ? Border.all(
+                            color: MessageStyle.borderColorReceivedBubble,
+                          )
+                        : null)
                     : null,
               ),
               padding: paddingBubble ??

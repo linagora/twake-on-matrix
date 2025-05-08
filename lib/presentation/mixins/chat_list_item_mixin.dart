@@ -189,7 +189,6 @@ mixin ChatListItemMixin {
                   fit: SubtitleImagePreviewStyle.fit,
                 ),
                 fit: SubtitleImagePreviewStyle.fit,
-                enableHeroAnimation: false,
               ),
             ),
           ),

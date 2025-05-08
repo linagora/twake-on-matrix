@@ -9,6 +9,7 @@ import 'package:fluffychat/presentation/mixins/paste_image_mixin.dart';
 import 'package:fluffychat/presentation/mixins/save_media_to_gallery_android_mixin.dart';
 import 'package:fluffychat/presentation/mixins/save_file_to_twake_downloads_folder_mixin.dart';
 import 'package:fluffychat/presentation/model/chat/view_event_list_ui_state.dart';
+import 'package:fluffychat/resource/image_paths.dart';
 import 'package:fluffychat/utils/extension/basic_event_extension.dart';
 import 'package:fluffychat/utils/extension/event_status_custom_extension.dart';
 import 'package:fluffychat/utils/manager/upload_manager/upload_manager.dart';
@@ -17,6 +18,8 @@ import 'package:fluffychat/utils/room_status_extension.dart';
 import 'package:fluffychat/widgets/context_menu/context_menu_action.dart';
 import 'package:fluffychat/widgets/mixins/popup_menu_widget_style.dart';
 import 'package:fluffychat/widgets/mixins/twake_context_menu_mixin.dart';
+import 'package:flutter_emoji_mart/flutter_emoji_mart.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_typeahead/flutter_typeahead.dart';
 import 'package:fluffychat/utils/extension/global_key_extension.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart'
@@ -29,7 +32,6 @@ import 'package:collection/collection.dart';
 import 'package:debounce_throttle/debounce_throttle.dart';
 import 'package:desktop_drop/desktop_drop.dart';
 import 'package:device_info_plus/device_info_plus.dart';
-import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/domain/usecase/room/chat_get_pinned_events_interactor.dart';
 import 'package:fluffychat/pages/chat/chat_context_menu_actions.dart';
@@ -71,7 +73,6 @@ import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:linagora_design_flutter/images_picker/asset_counter.dart';
-import 'package:linagora_design_flutter/images_picker/images_picker_grid.dart';
 import 'package:matrix/matrix.dart';
 import 'package:record/record.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
@@ -128,6 +129,8 @@ class ChatController extends State<Chat>
   static const int _defaultEventCountDisplay = 30;
 
   static const double _defaultMaxWidthReactionPicker = 296;
+
+  static const double _defaultMaxHeightReactionPicker = 360;
 
   final GlobalKey stickyTimestampKey =
       GlobalKey(debugLabel: 'stickyTimestampKey');
@@ -195,6 +198,9 @@ class ChatController extends State<Chat>
   final ValueNotifier<bool> showEmojiPickerNotifier = ValueNotifier(false);
 
   final ValueNotifier<DateTime?> stickyTimestampNotifier = ValueNotifier(null);
+
+  final ValueNotifier<bool> showFullEmojiPickerOnWebNotifier =
+      ValueNotifier(false);
 
   final ValueNotifier<ViewEventListUIState> openingChatViewStateNotifier =
       ValueNotifier(ViewEventListInitial());
@@ -1027,30 +1033,6 @@ class ChatController extends State<Chat>
     setState(() {});
   }
 
-  void onEmojiSelected(Emoji? emoji) {
-    switch (emojiPickerType) {
-      case EmojiPickerType.reaction:
-        senEmojiReaction(emoji);
-        break;
-      case EmojiPickerType.keyboard:
-        typeEmoji(emoji);
-        onInputBarChanged(sendController.text);
-        break;
-    }
-  }
-
-  void senEmojiReaction(Emoji? emoji) {
-    showEmojiPickerNotifier.value = false;
-    if (emoji == null) return;
-    // make sure we don't send the same emoji twice
-    if (_allReactionEvents.any((e) {
-      final relatedTo = e.content['m.relates_to'];
-      return relatedTo is Map &&
-          relatedTo.containsKey('key') &&
-          relatedTo['key'] == emoji.emoji;
-    })) return;
-  }
-
   void forgetRoom() async {
     final result = await TwakeDialog.showFutureLoadingDialogFullScreen(
       future: room!.forget,
@@ -1058,24 +1040,6 @@ class ChatController extends State<Chat>
     if (result.error != null) return;
     context.go('/archive');
   }
-
-  void typeEmoji(Emoji? emoji) {
-    if (emoji == null) return;
-    final text = sendController.text;
-    final selection = sendController.selection;
-    final newText = sendController.text.isEmpty
-        ? emoji.emoji
-        : text.replaceRange(selection.start, selection.end, emoji.emoji);
-    sendController.value = TextEditingValue(
-      text: newText,
-      selection: TextSelection.collapsed(
-        // don't forget an UTF-8 combined emoji might have a length > 1
-        offset: selection.baseOffset + emoji.emoji.length,
-      ),
-    );
-  }
-
-  late Iterable<Event> _allReactionEvents;
 
   void emojiPickerBackspace() {
     switch (emojiPickerType) {
@@ -1094,12 +1058,6 @@ class ChatController extends State<Chat>
         }
         break;
     }
-  }
-
-  void pickEmojiReactionAction(Iterable<Event> allReactionEvents) async {
-    _allReactionEvents = allReactionEvents;
-    emojiPickerType = EmojiPickerType.reaction;
-    showEmojiPickerNotifier.value = true;
   }
 
   void sendEmojiAction({
@@ -1573,8 +1531,13 @@ class ChatController extends State<Chat>
     final double positionLeftTap = offset.dx;
     final double screenWidth = MediaQuery.sizeOf(context).width;
     final double availableRightSpace = screenWidth - positionLeftTap;
+    final double positionBottomTap = offset.dy;
+    final double heightScreen = MediaQuery.sizeOf(context).height;
+    final double availableBottomSpace = heightScreen - positionBottomTap;
     double? positionLeft;
     double? positionRight;
+    double? positionTop;
+    double? positionBottom;
     Alignment alignment = Alignment.topLeft;
 
     if (availableRightSpace < _defaultMaxWidthReactionPicker) {
@@ -1582,6 +1545,12 @@ class ChatController extends State<Chat>
       alignment = Alignment.topRight;
     } else {
       positionLeft = positionLeftTap;
+    }
+
+    if (availableBottomSpace < _defaultMaxHeightReactionPicker) {
+      positionBottom = availableBottomSpace;
+    } else {
+      positionTop = positionBottomTap;
     }
     _handleStateContextMenu();
     final myReaction = event
@@ -1611,43 +1580,129 @@ class ChatController extends State<Chat>
             color: Colors.transparent,
             child: Stack(
               children: [
-                Positioned(
-                  left: positionLeft,
-                  top: offset.dy,
-                  right: positionRight,
-                  child: Align(
-                    alignment: alignment,
-                    child: ReactionsPicker(
-                      enableMoreEmojiWidget: false,
-                      myEmojiReacted: relatesTo?['key'] ?? '',
-                      emojiSize: 40,
-                      onClickEmojiReactionAction: (emoji) async {
-                        final isSelected = emoji == (relatesTo?['key'] ?? '');
-                        if (myReaction == null) {
-                          sendEmojiAction(
-                            emoji: emoji,
-                            event: event,
-                          );
-                          return;
-                        }
+                ValueListenableBuilder(
+                  valueListenable: showFullEmojiPickerOnWebNotifier,
+                  builder: (context, showFullEmojiPickerOnWeb, child) {
+                    return Positioned(
+                      left: positionLeft,
+                      top: positionTop,
+                      bottom: positionBottom,
+                      right: positionRight,
+                      child: Align(
+                        alignment: alignment,
+                        child: showFullEmojiPickerOnWeb
+                            ? Container(
+                                padding: const EdgeInsets.all(12),
+                                decoration: BoxDecoration(
+                                  color:
+                                      LinagoraRefColors.material().primary[100],
+                                  borderRadius: BorderRadius.circular(
+                                    24,
+                                  ),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: const Color(0x0000004D)
+                                          .withOpacity(0.15),
+                                      offset: const Offset(0, 4),
+                                      blurRadius: 8,
+                                      spreadRadius: 3,
+                                    ),
+                                    BoxShadow(
+                                      color: const Color(0x00000026)
+                                          .withOpacity(0.3),
+                                      offset: const Offset(0, 1),
+                                      blurRadius: 3,
+                                      spreadRadius: 0,
+                                    ),
+                                  ],
+                                ),
+                                child: SizedBox(
+                                  width: 326,
+                                  height: 360,
+                                  child: EmojiPicker(
+                                    emojiData: Matrix.of(context).emojiData,
+                                    configuration: EmojiPickerConfiguration(
+                                      emojiStyle: Theme.of(context)
+                                          .textTheme
+                                          .headlineLarge!,
+                                      searchEmptyTextStyle: Theme.of(context)
+                                          .textTheme
+                                          .labelMedium!
+                                          .copyWith(
+                                            color: LinagoraRefColors.material()
+                                                .tertiary[30],
+                                          ),
+                                      searchEmptyWidget: SvgPicture.asset(
+                                        ImagePaths.icSearchEmojiEmpty,
+                                      ),
+                                      searchFocusNode: FocusNode(),
+                                    ),
+                                    itemBuilder: (
+                                      context,
+                                      emojiId,
+                                      emoji,
+                                      callback,
+                                    ) {
+                                      return MouseRegion(
+                                        onHover: (_) {},
+                                        child: EmojiItem(
+                                          textStyle: Theme.of(
+                                            context,
+                                          ).textTheme.headlineLarge!,
+                                          onTap: () {
+                                            callback(
+                                              emojiId,
+                                              emoji,
+                                            );
+                                          },
+                                          emoji: emoji,
+                                        ),
+                                      );
+                                    },
+                                    onEmojiSelected: (
+                                      emojiId,
+                                      emoji,
+                                    ) =>
+                                        {},
+                                  ),
+                                ),
+                              )
+                            : ReactionsPicker(
+                                myEmojiReacted: relatesTo?['key'] ?? '',
+                                emojiSize: 40,
+                                onPickEmojiReactionAction: () {
+                                  showFullEmojiPickerOnWebNotifier.value = true;
+                                },
+                                onClickEmojiReactionAction: (emoji) async {
+                                  final isSelected =
+                                      emoji == (relatesTo?['key'] ?? '');
+                                  if (myReaction == null) {
+                                    sendEmojiAction(
+                                      emoji: emoji,
+                                      event: event,
+                                    );
+                                    return;
+                                  }
 
-                        if (isSelected) {
-                          Navigator.of(context).pop();
-                          await myReaction.redactEvent();
-                          return;
-                        }
+                                  if (isSelected) {
+                                    Navigator.of(context).pop();
+                                    await myReaction.redactEvent();
+                                    return;
+                                  }
 
-                        if (!isSelected) {
-                          await myReaction.redactEvent();
-                          sendEmojiAction(
-                            emoji: emoji,
-                            event: event,
-                          );
-                          return;
-                        }
-                      },
-                    ),
-                  ),
+                                  if (!isSelected) {
+                                    await myReaction.redactEvent();
+                                    sendEmojiAction(
+                                      emoji: emoji,
+                                      event: event,
+                                    );
+                                    return;
+                                  }
+                                },
+                              ),
+                      ),
+                    );
+                  },
                 ),
               ],
             ),
@@ -1656,6 +1711,7 @@ class ChatController extends State<Chat>
       ),
     ).then((_) {
       openingPopupMenu.value = false;
+      showFullEmojiPickerOnWebNotifier.value = false;
     });
   }
 
@@ -2176,6 +2232,7 @@ class ChatController extends State<Chat>
     replyEventNotifier.dispose();
     cachedPresenceStreamController.close();
     cachedPresenceNotifier.dispose();
+    showFullEmojiPickerOnWebNotifier.dispose();
     super.dispose();
   }
 
