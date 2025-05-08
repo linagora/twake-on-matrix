@@ -899,7 +899,7 @@ packages:
     description:
       path: "."
       ref: custom-style-for-twake-chat
-      resolved-ref: c453a92d232a78930df82ea99728b5b41a871f12
+      resolved-ref: "5998e9ddccc4e53b87af4b0c52c06c0087f5dba9"
       url: "git@github.com:linagora/emoji_mart.git"
     source: git
     version: "1.0.2"
@@ -1771,7 +1771,7 @@ packages:
     description:
       path: "."
       ref: update-overlay-when-keyboard-open
-      resolved-ref: "923e021da65ac91be29bf7dc73a1d469d44153d6"
+      resolved-ref: "48b228066dd0a5f468316bcf0ed02e0141c753e8"
       url: "git@github.com:linagora/linagora-design-flutter.git"
     source: git
     version: "0.0.1"

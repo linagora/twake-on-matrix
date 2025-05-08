@@ -195,7 +195,7 @@ mixin LinkifyMixin {
     }
   }
 
-  void dispose() {
+  void linkifyDispose() {
     openingPopupMenu.dispose();
   }
 }
