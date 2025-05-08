@@ -260,6 +260,8 @@ class _MessageContentWithTimestampBuilderState
                                                 backgroundColor:
                                                     LinagoraRefColors.material()
                                                         .primary[100],
+                                                borderRadius:
+                                                    BorderRadius.circular(20),
                                               ),
                                               items: [
                                                 PullDownMenuItem(
@@ -281,6 +283,8 @@ class _MessageContentWithTimestampBuilderState
                                                   },
                                                   iconWidget: SvgPicture.asset(
                                                     ImagePaths.icReply,
+                                                    width: 24,
+                                                    height: 24,
                                                     colorFilter:
                                                         ColorFilter.mode(
                                                       LinagoraRefColors
@@ -480,6 +484,8 @@ class _MessageContentWithTimestampBuilderState
       duration: const Duration(milliseconds: 300),
       curve: Curves.easeInOut,
       child: Container(
+        width: 326,
+        height: 360,
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
           color: LinagoraRefColors.material().primary[100],
@@ -487,54 +493,49 @@ class _MessageContentWithTimestampBuilderState
             24,
           ),
         ),
-        child: SizedBox(
-          width: 326,
-          height: 360,
-          child: EmojiPicker(
-            emojiData: emojiData,
-            configuration: EmojiPickerConfiguration(
-              emojiStyle: Theme.of(context).textTheme.headlineLarge!,
-              searchEmptyTextStyle:
-                  Theme.of(context).textTheme.labelMedium!.copyWith(
-                        color: LinagoraRefColors.material().tertiary[30],
-                      ),
-              searchEmptyWidget: SvgPicture.asset(
-                ImagePaths.icSearchEmojiEmpty,
-              ),
-              searchFocusNode: FocusNode(),
+        child: EmojiPicker(
+          emojiData: emojiData,
+          configuration: EmojiPickerConfiguration(
+            emojiStyle: const TextStyle(
+              fontSize: 40,
             ),
-            itemBuilder: (
-              context,
-              emojiId,
-              emoji,
-              callback,
-            ) {
-              return MouseRegion(
-                onHover: (_) {},
-                child: EmojiItem(
-                  textStyle: Theme.of(
-                    context,
-                  ).textTheme.headlineLarge!,
-                  onTap: () {
-                    callback(
-                      emojiId,
-                      emoji,
-                    );
-                  },
-                  emoji: emoji,
+            searchEmptyTextStyle:
+                Theme.of(context).textTheme.labelMedium!.copyWith(
+                      color: LinagoraRefColors.material().tertiary[30],
+                    ),
+            searchEmptyWidget: SvgPicture.asset(
+              ImagePaths.icSearchEmojiEmpty,
+            ),
+            searchFocusNode: FocusNode(),
+          ),
+          itemBuilder: (
+            context,
+            emojiId,
+            emoji,
+            callback,
+          ) {
+            return MouseRegion(
+              onHover: (_) {},
+              child: EmojiItem(
+                onTap: () {
+                  callback(emojiId, emoji);
+                },
+                emoji: emoji,
+                textStyle: const TextStyle(
+                  fontSize: 40,
                 ),
-              );
-            },
-            onEmojiSelected: (
-              emojiId,
-              emoji,
-            ) =>
-                _handleEmojiSelectionFromEmojiPicker(
-              emoji: emoji,
-              myReaction: myReaction,
-              event: event,
-              relatesTo: relatesTo,
-            ),
+              ),
+            );
+          },
+          onEmojiSelected: (
+            emojiId,
+            emoji,
+          ) =>
+              _handleEmojiSelectionFromEmojiPicker(
+            emoji: emoji,
+            myReaction: myReaction,
+            event: event,
+            relatesTo: relatesTo,
           ),
         ),
       ),
