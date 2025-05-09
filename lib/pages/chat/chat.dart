@@ -1566,6 +1566,7 @@ class ChatController extends State<Chat>
         .firstOrNull;
     final relatesTo =
         (myReaction?.content as Map<String, dynamic>?)?['m.relates_to'];
+    showFullEmojiPickerOnWebNotifier.value = false;
     await showDialog(
       context: context,
       barrierColor: Colors.transparent,
@@ -1621,9 +1622,9 @@ class ChatController extends State<Chat>
                                 child: EmojiPicker(
                                   emojiData: Matrix.of(context).emojiData,
                                   configuration: EmojiPickerConfiguration(
-                                    emojiStyle: const TextStyle(
-                                      fontSize: 40,
-                                    ),
+                                    emojiStyle: Theme.of(context)
+                                        .textTheme
+                                        .headlineLarge!,
                                     searchEmptyTextStyle: Theme.of(context)
                                         .textTheme
                                         .labelMedium!
@@ -1645,9 +1646,9 @@ class ChatController extends State<Chat>
                                     return MouseRegion(
                                       onHover: (_) {},
                                       child: EmojiItem(
-                                        textStyle: const TextStyle(
-                                          fontSize: 40,
-                                        ),
+                                        textStyle: Theme.of(context)
+                                            .textTheme
+                                            .headlineLarge!,
                                         onTap: () {
                                           callback(
                                             emojiId,
@@ -1696,6 +1697,7 @@ class ChatController extends State<Chat>
                                 emojiSize: 40,
                                 onPickEmojiReactionAction: () {
                                   showFullEmojiPickerOnWebNotifier.value = true;
+                                  openingPopupMenu.value = false;
                                 },
                                 onClickEmojiReactionAction: (emoji) async {
                                   final isSelected =
@@ -1735,7 +1737,6 @@ class ChatController extends State<Chat>
       ),
     ).then((_) {
       openingPopupMenu.value = false;
-      showFullEmojiPickerOnWebNotifier.value = false;
     });
   }
 
