@@ -496,9 +496,7 @@ class _MessageContentWithTimestampBuilderState
         child: EmojiPicker(
           emojiData: emojiData,
           configuration: EmojiPickerConfiguration(
-            emojiStyle: const TextStyle(
-              fontSize: 40,
-            ),
+            emojiStyle: Theme.of(context).textTheme.headlineLarge!,
             searchEmptyTextStyle:
                 Theme.of(context).textTheme.labelMedium!.copyWith(
                       color: LinagoraRefColors.material().tertiary[30],
@@ -521,9 +519,7 @@ class _MessageContentWithTimestampBuilderState
                   callback(emojiId, emoji);
                 },
                 emoji: emoji,
-                textStyle: const TextStyle(
-                  fontSize: 40,
-                ),
+                textStyle: Theme.of(context).textTheme.headlineLarge!,
               ),
             );
           },
