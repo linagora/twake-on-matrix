@@ -18,7 +18,7 @@ import 'package:fluffychat/utils/room_status_extension.dart';
 import 'package:fluffychat/widgets/context_menu/context_menu_action.dart';
 import 'package:fluffychat/widgets/mixins/popup_menu_widget_style.dart';
 import 'package:fluffychat/widgets/mixins/twake_context_menu_mixin.dart';
-import 'package:flutter_emoji_mart/flutter_emoji_mart.dart';
+import 'package:flutter_emoji_mart/flutter_emoji_mart.dart' as emoji_mart;
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_typeahead/flutter_typeahead.dart';
 import 'package:fluffychat/utils/extension/global_key_extension.dart';
@@ -32,6 +32,7 @@ import 'package:collection/collection.dart';
 import 'package:debounce_throttle/debounce_throttle.dart';
 import 'package:desktop_drop/desktop_drop.dart';
 import 'package:device_info_plus/device_info_plus.dart';
+import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/domain/usecase/room/chat_get_pinned_events_interactor.dart';
 import 'package:fluffychat/pages/chat/chat_context_menu_actions.dart';
@@ -1033,6 +1034,30 @@ class ChatController extends State<Chat>
     setState(() {});
   }
 
+  void onEmojiSelected(Emoji? emoji) {
+    switch (emojiPickerType) {
+      case EmojiPickerType.reaction:
+        senEmojiReaction(emoji);
+        break;
+      case EmojiPickerType.keyboard:
+        typeEmoji(emoji);
+        onInputBarChanged(sendController.text);
+        break;
+    }
+  }
+
+  void senEmojiReaction(Emoji? emoji) {
+    showEmojiPickerNotifier.value = false;
+    if (emoji == null) return;
+    // make sure we don't send the same emoji twice
+    if (_allReactionEvents.any((e) {
+      final relatedTo = e.content['m.relates_to'];
+      return relatedTo is Map &&
+          relatedTo.containsKey('key') &&
+          relatedTo['key'] == emoji.emoji;
+    })) return;
+  }
+
   void forgetRoom() async {
     final result = await TwakeDialog.showFutureLoadingDialogFullScreen(
       future: room!.forget,
@@ -1040,6 +1065,24 @@ class ChatController extends State<Chat>
     if (result.error != null) return;
     context.go('/archive');
   }
+
+  void typeEmoji(Emoji? emoji) {
+    if (emoji == null) return;
+    final text = sendController.text;
+    final selection = sendController.selection;
+    final newText = sendController.text.isEmpty
+        ? emoji.emoji
+        : text.replaceRange(selection.start, selection.end, emoji.emoji);
+    sendController.value = TextEditingValue(
+      text: newText,
+      selection: TextSelection.collapsed(
+        // don't forget an UTF-8 combined emoji might have a length > 1
+        offset: selection.baseOffset + emoji.emoji.length,
+      ),
+    );
+  }
+
+  late Iterable<Event> _allReactionEvents;
 
   void emojiPickerBackspace() {
     switch (emojiPickerType) {
@@ -1058,6 +1101,12 @@ class ChatController extends State<Chat>
         }
         break;
     }
+  }
+
+  void pickEmojiReactionAction(Iterable<Event> allReactionEvents) async {
+    _allReactionEvents = allReactionEvents;
+    emojiPickerType = EmojiPickerType.reaction;
+    showEmojiPickerNotifier.value = true;
   }
 
   void sendEmojiAction({
@@ -1619,9 +1668,10 @@ class ChatController extends State<Chat>
                                     ),
                                   ],
                                 ),
-                                child: EmojiPicker(
+                                child: emoji_mart.EmojiPicker(
                                   emojiData: Matrix.of(context).emojiData,
-                                  configuration: EmojiPickerConfiguration(
+                                  configuration:
+                                      emoji_mart.EmojiPickerConfiguration(
                                     emojiStyle: Theme.of(context)
                                         .textTheme
                                         .headlineLarge!,
@@ -1645,7 +1695,7 @@ class ChatController extends State<Chat>
                                   ) {
                                     return MouseRegion(
                                       onHover: (_) {},
-                                      child: EmojiItem(
+                                      child: emoji_mart.EmojiItem(
                                         textStyle: Theme.of(context)
                                             .textTheme
                                             .headlineLarge!,
