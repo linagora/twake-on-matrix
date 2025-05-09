@@ -16,6 +16,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:matrix/matrix.dart';
+import 'chat_emoji_picker.dart';
 import 'chat_input_row.dart';
 
 class ChatViewBody extends StatelessWidget with MessageContentMixin {
@@ -223,12 +224,12 @@ class ChatViewBody extends StatelessWidget with MessageContentMixin {
           ].map(
             (widget) => widget,
           ),
-          // if (!controller.responsive.isMobile(context))
-          // ChatEmojiPicker(
-          //   showEmojiPickerNotifier: controller.showEmojiPickerNotifier,
-          //   onEmojiSelected: controller.onEmojiSelected,
-          //   emojiPickerBackspace: controller.emojiPickerBackspace,
-          // ),
+          if (!controller.responsive.isMobile(context))
+            ChatEmojiPicker(
+              showEmojiPickerNotifier: controller.showEmojiPickerNotifier,
+              onEmojiSelected: controller.onEmojiSelected,
+              emojiPickerBackspace: controller.emojiPickerBackspace,
+            ),
         ],
       ),
     );
