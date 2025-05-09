@@ -898,8 +898,8 @@ packages:
     dependency: "direct main"
     description:
       path: "."
-      ref: custom-style-for-twake-chat
-      resolved-ref: "456eb51d5cab1eed968acf2583213ec91bd9e4d8"
+      ref: master
+      resolved-ref: ec0b562d774c57501eb6e8e393c8a56083f9f88d
       url: "git@github.com:linagora/emoji_mart.git"
     source: git
     version: "1.0.2"
