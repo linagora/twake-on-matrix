@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 class MessageReactionsStyle {
-  static double get moreReactionContainer => 28.0;
+  static double get moreReactionContainer => 34.0;
   static double get moreReactionIconSize => 20.0;
   static double get loadingReactionSize => 28.0;
 

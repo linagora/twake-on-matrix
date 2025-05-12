@@ -1761,7 +1761,6 @@ class ChatController extends State<Chat>
                                   }
 
                                   if (isSelected) {
-                                    Navigator.of(context).pop();
                                     await myReaction.redactEvent();
                                     return;
                                   }
