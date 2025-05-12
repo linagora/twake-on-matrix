@@ -51,6 +51,9 @@ extension DownloadFileExtension on Event {
       ),
     );
     final downloadLink = mxcUrl.getDownloadLink(room.client);
+    Logs().d(
+      'DownloadFileExtension::downloadOrRetrieveAttachment(): downloadLink = $downloadLink',
+    );
 
     if (await attachment.exists()) {
       if (await attachment.length() ==
@@ -82,10 +85,10 @@ extension DownloadFileExtension on Event {
         },
         cancelToken: cancelToken,
       );
-      if (downloadResponse.statusCode == 200 &&
-          await File(savePath).exists() &&
-          await File(savePath).length() ==
-              getFileSize(getThumbnail: getThumbnail)) {
+      Logs().d(
+        'DownloadFileExtension::downloadOrRetrieveAttachment(): downloadResponse = ${downloadResponse.statusCode}',
+      );
+      if (downloadResponse.statusCode == 200 && await File(savePath).exists()) {
         final fileInfo = FileInfo(
           filename,
           savePath,
@@ -127,6 +130,7 @@ extension DownloadFileExtension on Event {
     getThumbnail = false,
     StreamController<Either<Failure, Success>>? streamController,
   }) async {
+    Logs().i('DownloadFileExtension::_handleDownloadFileDone(): $mxcUrl');
     if (isAttachmentEncrypted) {
       await _handleEncryptedFileEvent(
         mxcUrl: mxcUrl,
