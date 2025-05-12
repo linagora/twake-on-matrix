@@ -432,9 +432,6 @@ class _MessageContentWithTimestampBuilderState
                     }
                   : null,
               child: _messageBuilder(
-                key: ValueKey(
-                  'MessageContentWithTimestampBuilder%${DateTime.now().millisecondsSinceEpoch}',
-                ),
                 context: context,
                 timelineText: timelineText,
                 noBubble: noBubble,
