@@ -14,6 +14,43 @@ import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:file_saver/file_saver.dart';
 
 extension MatrixFileExtension on MatrixFile {
+  bool isImage() {
+    // List of common image MIME types
+    const imageMimeTypes = [
+      'image/jpeg',
+      'image/png',
+      'image/gif',
+      'image/bmp',
+      'image/webp',
+      'image/tiff',
+    ];
+
+    // List of common image file extensions
+    const imageExtensions = [
+      '.jpg',
+      '.jpeg',
+      '.png',
+      '.gif',
+      '.bmp',
+      '.webp',
+      '.tiff',
+    ];
+
+    // Check if the MIME type is in the list, considering null
+    if (imageMimeTypes.contains(mimeType)) {
+      return true;
+    }
+
+    // Check if the file name ends with an image extension
+    for (final ext in imageExtensions) {
+      if (name.toLowerCase().endsWith(ext)) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
   Future<String?> downloadFile(BuildContext context) async {
     if (PlatformInfos.isWeb) {
       return await downloadFileInWeb(context);
