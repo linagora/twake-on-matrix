@@ -7,6 +7,7 @@ import 'package:fluffychat/utils/extension/mime_type_extension.dart';
 import 'package:fluffychat/utils/interactive_viewer_gallery.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/download_file_extension.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
+import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_file_extension.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/widgets/hero_page_route.dart';
 import 'package:flutter/material.dart';
@@ -189,6 +190,7 @@ class _MxcImageState extends State<MxcImage> {
           final fileInfo = await event.getFileInfo(
             getThumbnail: widget.isThumbnail,
           );
+          Logs().d('MxcImage::Downloaded get file info = $fileInfo');
           if (fileInfo != null && fileInfo.filePath.isNotEmpty) {
             filePath = fileInfo.filePath;
             return;
@@ -198,7 +200,11 @@ class _MxcImageState extends State<MxcImage> {
         final matrixFile = await event.downloadAndDecryptAttachment(
           getThumbnail: widget.isThumbnail,
         );
+        Logs().d(
+          'MxcImage::Downloaded attachment name = ${matrixFile.name} - mimeType = ${matrixFile.mimeType} - bytes = ${matrixFile.bytes?.length}',
+        );
         if (!mounted) return;
+        if (!matrixFile.isImage()) return;
         _imageData = matrixFile.bytes;
         return;
       } catch (e) {
