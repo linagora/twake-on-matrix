@@ -32,7 +32,6 @@ import 'package:collection/collection.dart';
 import 'package:debounce_throttle/debounce_throttle.dart';
 import 'package:desktop_drop/desktop_drop.dart';
 import 'package:device_info_plus/device_info_plus.dart';
-import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/domain/usecase/room/chat_get_pinned_events_interactor.dart';
 import 'package:fluffychat/pages/chat/chat_context_menu_actions.dart';
@@ -129,7 +128,7 @@ class ChatController extends State<Chat>
 
   static const int _defaultEventCountDisplay = 30;
 
-  static const double _defaultMaxWidthReactionPicker = 296;
+  static const double _defaultMaxWidthReactionPicker = 326;
 
   static const double _defaultMaxHeightReactionPicker = 360;
 
@@ -374,8 +373,6 @@ class ChatController extends State<Chat>
     if (roomId == null) return;
     context.go('/rooms/$roomId');
   }
-
-  EmojiPickerType emojiPickerType = EmojiPickerType.keyboard;
 
   Future<void> requestHistory({
     int? historyCount,
@@ -697,22 +694,139 @@ class ChatController extends State<Chat>
     _updateReplyEvent();
   }
 
-  void onEmojiAction() {
-    emojiPickerType = EmojiPickerType.keyboard;
-    showEmojiPickerNotifier.toggle();
-    if (PlatformInfos.isMobile) {
-      hideKeyboardChatScreen();
+  void onEmojiAction(TapDownDetails tapDownDetails) {
+    if (PlatformInfos.isMobile) return;
+
+    _requestInputFocus();
+
+    final offset = tapDownDetails.globalPosition;
+    final double positionLeftTap = offset.dx;
+    final double screenWidth = MediaQuery.sizeOf(context).width;
+    final double availableRightSpace = screenWidth - positionLeftTap;
+    final double positionBottomTap = offset.dy;
+    final double heightScreen = MediaQuery.sizeOf(context).height;
+    final double availableBottomSpace = heightScreen - positionBottomTap;
+    double? positionLeft;
+    double? positionRight;
+    double? positionTop;
+    double? positionBottom;
+    Alignment alignment = Alignment.topLeft;
+
+    if (availableRightSpace < _defaultMaxWidthReactionPicker) {
+      positionRight = screenWidth - positionLeftTap;
+      alignment = Alignment.topRight;
     } else {
-      _requestInputFocus();
+      positionLeft = positionLeftTap;
     }
+
+    if (availableBottomSpace < _defaultMaxHeightReactionPicker) {
+      positionBottom = availableBottomSpace;
+    } else {
+      positionTop = positionBottomTap;
+    }
+
+    showDialog(
+      context: context,
+      barrierColor: Colors.transparent,
+      barrierDismissible: false,
+      builder: (dialogContext) => GestureDetector(
+        onTap: Navigator.of(dialogContext).pop,
+        child: Material(
+          type: MaterialType.transparency,
+          child: Container(
+            height: 56,
+            width: double.infinity,
+            color: Colors.transparent,
+            child: Stack(
+              children: [
+                Positioned(
+                  left: positionLeft,
+                  top: positionTop,
+                  bottom: positionBottom,
+                  right: positionRight,
+                  child: Align(
+                    alignment: alignment,
+                    child: Container(
+                      padding: const EdgeInsets.all(12),
+                      width: _defaultMaxWidthReactionPicker,
+                      height: _defaultMaxHeightReactionPicker,
+                      decoration: BoxDecoration(
+                        color: LinagoraRefColors.material().primary[100],
+                        borderRadius: BorderRadius.circular(
+                          24,
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: const Color(0x0000004D).withOpacity(0.15),
+                            offset: const Offset(0, 4),
+                            blurRadius: 8,
+                            spreadRadius: 3,
+                          ),
+                          BoxShadow(
+                            color: const Color(0x00000026).withOpacity(0.3),
+                            offset: const Offset(0, 1),
+                            blurRadius: 3,
+                            spreadRadius: 0,
+                          ),
+                        ],
+                      ),
+                      child: emoji_mart.EmojiPicker(
+                        emojiData: Matrix.of(context).emojiData,
+                        configuration: emoji_mart.EmojiPickerConfiguration(
+                          emojiStyle:
+                              Theme.of(context).textTheme.headlineLarge!,
+                          searchEmptyTextStyle: Theme.of(context)
+                              .textTheme
+                              .labelMedium!
+                              .copyWith(
+                                color:
+                                    LinagoraRefColors.material().tertiary[30],
+                              ),
+                          searchEmptyWidget: SvgPicture.asset(
+                            ImagePaths.icSearchEmojiEmpty,
+                          ),
+                          searchFocusNode: FocusNode(),
+                        ),
+                        itemBuilder: (
+                          context,
+                          emojiId,
+                          emoji,
+                          callback,
+                        ) {
+                          return MouseRegion(
+                            onHover: (_) {},
+                            child: emoji_mart.EmojiItem(
+                              textStyle:
+                                  Theme.of(context).textTheme.headlineLarge!,
+                              onTap: () {
+                                callback(
+                                  emojiId,
+                                  emoji,
+                                );
+                              },
+                              emoji: emoji,
+                            ),
+                          );
+                        },
+                        onEmojiSelected: (
+                          emojiId,
+                          emoji,
+                        ) {
+                          typeEmoji(emoji);
+                        },
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
   }
 
-  void _inputFocusListener() {
-    if (showEmojiPickerNotifier.value && inputFocus.hasFocus) {
-      emojiPickerType = EmojiPickerType.keyboard;
-      showEmojiPickerNotifier.value = true;
-    }
-  }
+  void _inputFocusListener() {}
 
   void copySingleEventAction() async {
     if (selectedEvents.length == 1) {
@@ -1034,30 +1148,6 @@ class ChatController extends State<Chat>
     setState(() {});
   }
 
-  void onEmojiSelected(Emoji? emoji) {
-    switch (emojiPickerType) {
-      case EmojiPickerType.reaction:
-        senEmojiReaction(emoji);
-        break;
-      case EmojiPickerType.keyboard:
-        typeEmoji(emoji);
-        onInputBarChanged(sendController.text);
-        break;
-    }
-  }
-
-  void senEmojiReaction(Emoji? emoji) {
-    showEmojiPickerNotifier.value = false;
-    if (emoji == null) return;
-    // make sure we don't send the same emoji twice
-    if (_allReactionEvents.any((e) {
-      final relatedTo = e.content['m.relates_to'];
-      return relatedTo is Map &&
-          relatedTo.containsKey('key') &&
-          relatedTo['key'] == emoji.emoji;
-    })) return;
-  }
-
   void forgetRoom() async {
     final result = await TwakeDialog.showFutureLoadingDialogFullScreen(
       future: room!.forget,
@@ -1066,47 +1156,20 @@ class ChatController extends State<Chat>
     context.go('/archive');
   }
 
-  void typeEmoji(Emoji? emoji) {
-    if (emoji == null) return;
+  void typeEmoji(String emoji) {
+    if (emoji.isEmpty) return;
     final text = sendController.text;
     final selection = sendController.selection;
     final newText = sendController.text.isEmpty
-        ? emoji.emoji
-        : text.replaceRange(selection.start, selection.end, emoji.emoji);
+        ? emoji
+        : text.replaceRange(selection.start, selection.end, emoji);
     sendController.value = TextEditingValue(
       text: newText,
       selection: TextSelection.collapsed(
         // don't forget an UTF-8 combined emoji might have a length > 1
-        offset: selection.baseOffset + emoji.emoji.length,
+        offset: selection.baseOffset + emoji.length,
       ),
     );
-  }
-
-  late Iterable<Event> _allReactionEvents;
-
-  void emojiPickerBackspace() {
-    switch (emojiPickerType) {
-      case EmojiPickerType.reaction:
-        showEmojiPickerNotifier.value = false;
-        break;
-      case EmojiPickerType.keyboard:
-        sendController
-          ..text = sendController.text.characters.skipLast(1).toString()
-          ..selection = TextSelection.fromPosition(
-            TextPosition(offset: sendController.text.length),
-          );
-
-        if (PlatformInfos.isWeb) {
-          _requestInputFocus();
-        }
-        break;
-    }
-  }
-
-  void pickEmojiReactionAction(Iterable<Event> allReactionEvents) async {
-    _allReactionEvents = allReactionEvents;
-    emojiPickerType = EmojiPickerType.reaction;
-    showEmojiPickerNotifier.value = true;
   }
 
   void sendEmojiAction({
@@ -1643,8 +1706,8 @@ class ChatController extends State<Chat>
                         child: showFullEmojiPickerOnWeb
                             ? Container(
                                 padding: const EdgeInsets.all(12),
-                                width: 326,
-                                height: 360,
+                                width: _defaultMaxWidthReactionPicker,
+                                height: _defaultMaxHeightReactionPicker,
                                 decoration: BoxDecoration(
                                   color:
                                       LinagoraRefColors.material().primary[100],

@@ -18,7 +18,6 @@ class DraftChatInputRow extends StatelessWidget {
   final ValueNotifier<String> inputText;
   final OnInputBarSubmitted onInputBarSubmitted;
   final ValueNotifier<bool> isSendingNotifier;
-  final ValueNotifier<bool> emojiPickerNotifier;
   final OnEmojiAction onEmojiAction;
   final OnKeyboardAction onKeyboardAction;
   final ValueKey typeAheadKey;
@@ -33,7 +32,6 @@ class DraftChatInputRow extends StatelessWidget {
     required this.inputText,
     required this.onInputBarSubmitted,
     required this.isSendingNotifier,
-    required this.emojiPickerNotifier,
     required this.onEmojiAction,
     required this.onKeyboardAction,
     required this.typeAheadKey,
@@ -90,8 +88,6 @@ class DraftChatInputRow extends StatelessWidget {
   ChatInputRowMobile _buildMobileInputRow(BuildContext context) {
     return ChatInputRowMobile(
       inputBar: _buildInputBar(context),
-      emojiPickerNotifier: emojiPickerNotifier,
-      onEmojiAction: onEmojiAction,
       onKeyboardAction: onKeyboardAction,
     );
   }
@@ -99,7 +95,6 @@ class DraftChatInputRow extends StatelessWidget {
   ChatInputRowWeb _buildWebInputRow(BuildContext context) {
     return ChatInputRowWeb(
       inputBar: _buildInputBar(context),
-      emojiPickerNotifier: emojiPickerNotifier,
       onTapMoreBtn: () => onSendFileClick(context),
       onEmojiAction: onEmojiAction,
       onKeyboardAction: onKeyboardAction,

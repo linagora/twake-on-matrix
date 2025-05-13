@@ -33,6 +33,10 @@ abstract class AppConfig {
 
   static const double messagePadding = 16.0;
 
+  static const double defaultMaxWidthReactionPicker = 400;
+
+  static const double defaultMaxHeightReactionPicker = 400;
+
   static String sampleValue = 'sampleValue';
 
   ///`REGISTRATION_URL`: Registration URL for public platform, sample is `https://example.com`

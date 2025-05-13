@@ -170,8 +170,6 @@ class ReactionsList extends StatelessWidget {
     required BuildContext context,
     required TapDownDetails tapDownDetails,
   }) {
-    const double defaultMaxWidthReactionPicker = 400;
-    const double defaultMaxHeightReactionPicker = 400;
     final offset = tapDownDetails.globalPosition;
     final double positionLeftTap = offset.dx;
     final double screenWidth = MediaQuery.sizeOf(context).width;
@@ -185,14 +183,14 @@ class ReactionsList extends StatelessWidget {
     double? positionBottom;
     Alignment alignment = Alignment.topLeft;
 
-    if (availableRightSpace < defaultMaxWidthReactionPicker) {
+    if (availableRightSpace < AppConfig.defaultMaxWidthReactionPicker) {
       positionRight = screenWidth - positionLeftTap;
       alignment = Alignment.topRight;
     } else {
       positionLeft = positionLeftTap;
     }
 
-    if (availableBottomSpace < defaultMaxHeightReactionPicker) {
+    if (availableBottomSpace < AppConfig.defaultMaxHeightReactionPicker) {
       positionBottom = availableBottomSpace;
     } else {
       positionTop = positionBottomTap;
@@ -220,8 +218,8 @@ class ReactionsList extends StatelessWidget {
                   child: Align(
                     alignment: alignment,
                     child: Container(
-                      width: defaultMaxWidthReactionPicker,
-                      height: defaultMaxHeightReactionPicker,
+                      width: AppConfig.defaultMaxWidthReactionPicker,
+                      height: AppConfig.defaultMaxHeightReactionPicker,
                       decoration: BoxDecoration(
                         color: LinagoraRefColors.material().primary[100],
                         borderRadius: BorderRadius.circular(

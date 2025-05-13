@@ -25,10 +25,6 @@ class ChatInputRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (controller.showEmojiPickerNotifier.value &&
-        controller.emojiPickerType == EmojiPickerType.reaction) {
-      return Container();
-    }
     return KeyboardVisibilityBuilder(
       builder: (context, isKeyboardVisible) {
         return Padding(
@@ -117,8 +113,6 @@ class ChatInputRow extends StatelessWidget {
           );
         },
       ),
-      emojiPickerNotifier: controller.showEmojiPickerNotifier,
-      onEmojiAction: controller.onEmojiAction,
       onKeyboardAction: controller.onKeyboardAction,
     );
   }
@@ -131,7 +125,6 @@ class ChatInputRow extends StatelessWidget {
           _buildInputBar(context),
         ],
       ),
-      emojiPickerNotifier: controller.showEmojiPickerNotifier,
       onTapMoreBtn: () => controller.onSendFileClick(context),
       onEmojiAction: controller.onEmojiAction,
       onKeyboardAction: controller.onKeyboardAction,
