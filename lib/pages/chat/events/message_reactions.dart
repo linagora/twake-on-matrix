@@ -284,8 +284,11 @@ class ReactionsList extends StatelessWidget {
     }
     showModalBottomSheet(
       context: context,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16.0),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(16),
+          topRight: Radius.circular(16),
+        ),
       ),
       isScrollControlled: true,
       builder: (context) => Container(
@@ -336,6 +339,7 @@ class Reaction extends StatelessWidget {
   final void Function()? onTap;
   final void Function()? onLongPress;
   final bool enableDecoration;
+  final TextStyle? countStyle;
 
   const Reaction({
     super.key,
@@ -345,6 +349,7 @@ class Reaction extends StatelessWidget {
     this.onTap,
     this.onLongPress,
     this.enableDecoration = true,
+    this.countStyle,
   });
 
   @override
@@ -382,6 +387,7 @@ class Reaction extends StatelessWidget {
         style: TextStyle(
           fontSize: MessageReactionsStyle.renderKeyFontSize,
         ),
+        textAlign: TextAlign.center,
       );
     }
     return InkWell(
@@ -389,7 +395,7 @@ class Reaction extends StatelessWidget {
       onLongPress: () => onLongPress != null ? onLongPress!() : null,
       borderRadius: BorderRadius.circular(AppConfig.borderRadius),
       child: Container(
-        height: 34,
+        height: 28,
         decoration: enableDecoration
             ? BoxDecoration(
                 color: color,
@@ -402,25 +408,26 @@ class Reaction extends StatelessWidget {
               )
             : null,
         padding: const EdgeInsets.only(
-          top: 8,
-          left: 6,
-          right: 6,
-          bottom: 4,
+          left: 4,
+          right: 4,
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
-          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            content,
+            Padding(
+              padding: const EdgeInsets.only(top: 4),
+              child: content,
+            ),
             if (count != null && count! > 1) ...[
               const SizedBox(
                 width: 4,
               ),
               Text(
                 '$count',
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                style: countStyle ?? Theme.of(context).textTheme.bodyMedium?.copyWith(
                       color: LinagoraRefColors.material().neutral[50],
                     ),
+                textAlign: TextAlign.center,
               ),
             ],
           ],
