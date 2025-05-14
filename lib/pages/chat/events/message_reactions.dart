@@ -424,9 +424,10 @@ class Reaction extends StatelessWidget {
               ),
               Text(
                 '$count',
-                style: countStyle ?? Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: LinagoraRefColors.material().neutral[50],
-                    ),
+                style: countStyle ??
+                    Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          color: LinagoraRefColors.material().neutral[50],
+                        ),
                 textAlign: TextAlign.center,
               ),
             ],
