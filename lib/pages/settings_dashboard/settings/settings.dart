@@ -124,7 +124,6 @@ class SettingsController extends State<Settings> with ConnectPageMixin {
       await tryLogoutSso(context);
     } catch (e) {
       Logs().e('SettingsController()::_logoutActionsOnMobile - error: $e');
-      return;
     }
     await TwakeDialog.showFutureLoadingDialogFullScreen(
       future: () async {
