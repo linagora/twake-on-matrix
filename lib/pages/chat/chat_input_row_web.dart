@@ -8,7 +8,6 @@ import 'package:linagora_design_flutter/colors/linagora_sys_colors.dart';
 
 typedef OnTapMoreBtnAction = void Function();
 typedef OnTapEmojiAction = void Function(TapDownDetails details);
-typedef OnTapKeyboardAction = void Function();
 
 class ChatInputRowWeb extends StatelessWidget {
   const ChatInputRowWeb({
@@ -16,13 +15,11 @@ class ChatInputRowWeb extends StatelessWidget {
     required this.inputBar,
     required this.onTapMoreBtn,
     required this.onEmojiAction,
-    required this.onKeyboardAction,
   });
 
   final Widget inputBar;
   final OnTapMoreBtnAction onTapMoreBtn;
   final OnTapEmojiAction onEmojiAction;
-  final OnTapKeyboardAction onKeyboardAction;
 
   @override
   Widget build(BuildContext context) {

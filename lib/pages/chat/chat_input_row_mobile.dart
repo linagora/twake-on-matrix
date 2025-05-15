@@ -3,17 +3,14 @@ import 'package:flutter/material.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 
 typedef OnTapEmojiAction = void Function();
-typedef OnTapKeyboardAction = void Function();
 
 class ChatInputRowMobile extends StatelessWidget {
   const ChatInputRowMobile({
     super.key,
     required this.inputBar,
-    required this.onKeyboardAction,
   });
 
   final Widget inputBar;
-  final OnTapKeyboardAction onKeyboardAction;
 
   @override
   Widget build(BuildContext context) {

@@ -128,9 +128,9 @@ class ChatController extends State<Chat>
 
   static const int _defaultEventCountDisplay = 30;
 
-  static const double _defaultMaxWidthReactionPicker = 326;
+  static const double defaultMaxWidthReactionPicker = 326;
 
-  static const double _defaultMaxHeightReactionPicker = 360;
+  static const double defaultMaxHeightReactionPicker = 360;
 
   final GlobalKey stickyTimestampKey =
       GlobalKey(debugLabel: 'stickyTimestampKey');
@@ -699,131 +699,7 @@ class ChatController extends State<Chat>
 
     _requestInputFocus();
 
-    final offset = tapDownDetails.globalPosition;
-    final double positionLeftTap = offset.dx;
-    final double screenWidth = MediaQuery.sizeOf(context).width;
-    final double availableRightSpace = screenWidth - positionLeftTap;
-    final double positionBottomTap = offset.dy;
-    final double heightScreen = MediaQuery.sizeOf(context).height;
-    final double availableBottomSpace = heightScreen - positionBottomTap;
-    double? positionLeft;
-    double? positionRight;
-    double? positionTop;
-    double? positionBottom;
-    Alignment alignment = Alignment.topLeft;
-
-    if (availableRightSpace < _defaultMaxWidthReactionPicker) {
-      positionRight = screenWidth - positionLeftTap;
-      alignment = Alignment.topRight;
-    } else {
-      positionLeft = positionLeftTap;
-    }
-
-    if (availableBottomSpace < _defaultMaxHeightReactionPicker) {
-      positionBottom = availableBottomSpace;
-    } else {
-      positionTop = positionBottomTap;
-    }
-
-    showDialog(
-      context: context,
-      barrierColor: Colors.transparent,
-      barrierDismissible: false,
-      builder: (dialogContext) => GestureDetector(
-        onTap: Navigator.of(dialogContext).pop,
-        child: Material(
-          type: MaterialType.transparency,
-          child: Container(
-            height: 56,
-            width: double.infinity,
-            color: Colors.transparent,
-            child: Stack(
-              children: [
-                Positioned(
-                  left: positionLeft,
-                  top: positionTop,
-                  bottom: positionBottom,
-                  right: positionRight,
-                  child: Align(
-                    alignment: alignment,
-                    child: Container(
-                      padding: const EdgeInsets.all(12),
-                      width: _defaultMaxWidthReactionPicker,
-                      height: _defaultMaxHeightReactionPicker,
-                      decoration: BoxDecoration(
-                        color: LinagoraRefColors.material().primary[100],
-                        borderRadius: BorderRadius.circular(
-                          24,
-                        ),
-                        boxShadow: [
-                          BoxShadow(
-                            color: const Color(0x0000004D).withOpacity(0.15),
-                            offset: const Offset(0, 4),
-                            blurRadius: 8,
-                            spreadRadius: 3,
-                          ),
-                          BoxShadow(
-                            color: const Color(0x00000026).withOpacity(0.3),
-                            offset: const Offset(0, 1),
-                            blurRadius: 3,
-                            spreadRadius: 0,
-                          ),
-                        ],
-                      ),
-                      child: emoji_mart.EmojiPicker(
-                        emojiData: Matrix.of(context).emojiData,
-                        configuration: emoji_mart.EmojiPickerConfiguration(
-                          emojiStyle:
-                              Theme.of(context).textTheme.headlineLarge!,
-                          searchEmptyTextStyle: Theme.of(context)
-                              .textTheme
-                              .labelMedium!
-                              .copyWith(
-                                color:
-                                    LinagoraRefColors.material().tertiary[30],
-                              ),
-                          searchEmptyWidget: SvgPicture.asset(
-                            ImagePaths.icSearchEmojiEmpty,
-                          ),
-                          searchFocusNode: FocusNode(),
-                        ),
-                        itemBuilder: (
-                          context,
-                          emojiId,
-                          emoji,
-                          callback,
-                        ) {
-                          return MouseRegion(
-                            onHover: (_) {},
-                            child: emoji_mart.EmojiItem(
-                              textStyle:
-                                  Theme.of(context).textTheme.headlineLarge!,
-                              onTap: () {
-                                callback(
-                                  emojiId,
-                                  emoji,
-                                );
-                              },
-                              emoji: emoji,
-                            ),
-                          );
-                        },
-                        onEmojiSelected: (
-                          emojiId,
-                          emoji,
-                        ) {
-                          typeEmoji(emoji);
-                        },
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
+    showFullEmojiPickerOnWebNotifier.value = true;
   }
 
   void _inputFocusListener() {}
@@ -1170,6 +1046,7 @@ class ChatController extends State<Chat>
         offset: selection.baseOffset + emoji.length,
       ),
     );
+    _requestInputFocus();
   }
 
   void sendEmojiAction({
@@ -1652,14 +1529,14 @@ class ChatController extends State<Chat>
     double? positionBottom;
     Alignment alignment = Alignment.topLeft;
 
-    if (availableRightSpace < _defaultMaxWidthReactionPicker) {
+    if (availableRightSpace < defaultMaxWidthReactionPicker) {
       positionRight = screenWidth - positionLeftTap;
       alignment = Alignment.topRight;
     } else {
       positionLeft = positionLeftTap;
     }
 
-    if (availableBottomSpace < _defaultMaxHeightReactionPicker) {
+    if (availableBottomSpace < defaultMaxHeightReactionPicker) {
       positionBottom = availableBottomSpace;
     } else {
       positionTop = positionBottomTap;
@@ -1706,8 +1583,8 @@ class ChatController extends State<Chat>
                         child: showFullEmojiPickerOnWeb
                             ? Container(
                                 padding: const EdgeInsets.all(12),
-                                width: _defaultMaxWidthReactionPicker,
-                                height: _defaultMaxHeightReactionPicker,
+                                width: defaultMaxWidthReactionPicker,
+                                height: defaultMaxHeightReactionPicker,
                                 decoration: BoxDecoration(
                                   color:
                                       LinagoraRefColors.material().primary[100],
@@ -1864,11 +1741,6 @@ class ChatController extends State<Chat>
     if (!PlatformInfos.isWeb) {
       showEmojiPickerNotifier.value = false;
     }
-  }
-
-  void onKeyboardAction() {
-    showEmojiPickerNotifier.toggle();
-    _requestInputFocus();
   }
 
   void onPushDetails() async {

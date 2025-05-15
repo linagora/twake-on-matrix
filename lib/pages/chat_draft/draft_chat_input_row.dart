@@ -52,12 +52,12 @@ class DraftChatInputRow extends StatelessWidget {
           ),
           child: Row(
             crossAxisAlignment:
-                ChatInputRowStyle.responsiveUtils.isMobileOrTablet(context)
+                ChatInputRowStyle.responsiveUtils.isMobile(context)
                     ? CrossAxisAlignment.end
                     : CrossAxisAlignment.center,
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              if (ChatInputRowStyle.responsiveUtils.isMobileOrTablet(context))
+              if (ChatInputRowStyle.responsiveUtils.isMobile(context))
                 SizedBox(
                   height: ChatInputRowStyle.chatInputRowHeight,
                   child: TwakeIconButton(
@@ -68,10 +68,9 @@ class DraftChatInputRow extends StatelessWidget {
                   ),
                 ),
               Expanded(
-                child:
-                    ChatInputRowStyle.responsiveUtils.isMobileOrTablet(context)
-                        ? _buildMobileInputRow(context)
-                        : _buildWebInputRow(context),
+                child: ChatInputRowStyle.responsiveUtils.isMobile(context)
+                    ? _buildMobileInputRow(context)
+                    : _buildWebInputRow(context),
               ),
               ChatInputRowSendBtn(
                 inputText: inputText,
@@ -88,7 +87,6 @@ class DraftChatInputRow extends StatelessWidget {
   ChatInputRowMobile _buildMobileInputRow(BuildContext context) {
     return ChatInputRowMobile(
       inputBar: _buildInputBar(context),
-      onKeyboardAction: onKeyboardAction,
     );
   }
 
@@ -97,7 +95,6 @@ class DraftChatInputRow extends StatelessWidget {
       inputBar: _buildInputBar(context),
       onTapMoreBtn: () => onSendFileClick(context),
       onEmojiAction: onEmojiAction,
-      onKeyboardAction: onKeyboardAction,
     );
   }
 

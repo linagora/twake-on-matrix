@@ -34,7 +34,7 @@ class ChatInputRow extends StatelessWidget {
           ),
           child: Row(
             crossAxisAlignment:
-                ChatInputRowStyle.responsiveUtils.isMobileOrTablet(context)
+                ChatInputRowStyle.responsiveUtils.isMobile(context)
                     ? CrossAxisAlignment.end
                     : CrossAxisAlignment.center,
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -45,8 +45,7 @@ class ChatInputRow extends StatelessWidget {
                     ),
                   ]
                 : <Widget>[
-                    if (ChatInputRowStyle.responsiveUtils
-                        .isMobileOrTablet(context))
+                    if (ChatInputRowStyle.responsiveUtils.isMobile(context))
                       SizedBox(
                         height: ChatInputRowStyle.chatInputRowHeight,
                         child: TwakeIconButton(
@@ -65,8 +64,7 @@ class ChatInputRow extends StatelessWidget {
                         child: ChatAccountPicker(controller),
                       ),
                     Expanded(
-                      child: ChatInputRowStyle.responsiveUtils
-                              .isMobileOrTablet(context)
+                      child: ChatInputRowStyle.responsiveUtils.isMobile(context)
                           ? _buildMobileInputRow(context)
                           : _buildWebInputRow(context),
                     ),
@@ -85,7 +83,7 @@ class ChatInputRow extends StatelessWidget {
     required BuildContext context,
     required bool isKeyboardVisible,
   }) {
-    if (!ChatInputRowStyle.responsiveUtils.isMobileOrTablet(context)) {
+    if (!ChatInputRowStyle.responsiveUtils.isMobile(context)) {
       return EdgeInsets.zero;
     }
 
@@ -113,7 +111,6 @@ class ChatInputRow extends StatelessWidget {
           );
         },
       ),
-      onKeyboardAction: controller.onKeyboardAction,
     );
   }
 
@@ -127,7 +124,6 @@ class ChatInputRow extends StatelessWidget {
       ),
       onTapMoreBtn: () => controller.onSendFileClick(context),
       onEmojiAction: controller.onEmojiAction,
-      onKeyboardAction: controller.onKeyboardAction,
     );
   }
 
