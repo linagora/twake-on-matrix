@@ -93,15 +93,18 @@ class _MessageReactionsBottomSheetState
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.end,
                         children: [
-                          Text(
-                            "${L10n.of(context)!.all} ${widget.allReactionEvents.length}",
-                            style: Theme.of(context)
-                                .textTheme
-                                .titleMedium
-                                ?.copyWith(
-                                  color: LinagoraSysColors.material()
-                                      .onSurfaceVariant,
-                                ),
+                          SizedBox(
+                            height: 24,
+                            child: Text(
+                              "${L10n.of(context)!.all} ${widget.allReactionEvents.length}",
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .titleMedium
+                                  ?.copyWith(
+                                    color: LinagoraSysColors.material()
+                                        .onSurfaceVariant,
+                                  ),
+                            ),
                           ),
                           ValueListenableBuilder(
                             valueListenable: _selectedReactionKeyNotifier,
@@ -133,22 +136,26 @@ class _MessageReactionsBottomSheetState
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.end,
                         children: [
-                          Reaction(
-                            reactionKey: r.key,
-                            enableDecoration: false,
-                            count:
-                                widget.event.room.isDirectChat ? null : r.count,
-                            reacted: r.reacted,
-                            onTap: () async {
-                              onSelectedReaction(r.key);
-                            },
-                            countStyle: Theme.of(context)
-                                .textTheme
-                                .titleMedium
-                                ?.copyWith(
-                                  color: LinagoraSysColors.material()
-                                      .onSurfaceVariant,
-                                ),
+                          SizedBox(
+                            height: 24,
+                            child: Reaction(
+                              reactionKey: r.key,
+                              enableDecoration: false,
+                              count: widget.event.room.isDirectChat
+                                  ? null
+                                  : r.count,
+                              reacted: r.reacted,
+                              onTap: () async {
+                                onSelectedReaction(r.key);
+                              },
+                              countStyle: Theme.of(context)
+                                  .textTheme
+                                  .titleMedium
+                                  ?.copyWith(
+                                    color: LinagoraSysColors.material()
+                                        .onSurfaceVariant,
+                                  ),
+                            ),
                           ),
                           ValueListenableBuilder(
                             valueListenable: _selectedReactionKeyNotifier,
@@ -156,7 +163,7 @@ class _MessageReactionsBottomSheetState
                               return Container(
                                 height: 3,
                                 width: 32,
-                                margin: const EdgeInsets.only(top: 6),
+                                margin: const EdgeInsets.only(top: 11),
                                 decoration: selectedReactionKey != null &&
                                         selectedReactionKey == r.key
                                     ? BoxDecoration(
