@@ -6,6 +6,7 @@ import 'package:fluffychat/domain/contact_manager/contacts_manager.dart';
 import 'package:fluffychat/domain/exception/federation_configuration_not_found.dart';
 import 'package:fluffychat/domain/repository/federation_configurations_repository.dart';
 import 'package:fluffychat/event/twake_event_types.dart';
+import 'package:fluffychat/presentation/mixins/deep_link_intent_mixin.dart';
 import 'package:fluffychat/presentation/mixins/init_config_mixin.dart';
 import 'package:fluffychat/presentation/model/client_login_state_event.dart';
 import 'package:fluffychat/widgets/layouts/agruments/logout_body_args.dart';
@@ -79,7 +80,11 @@ class Matrix extends StatefulWidget {
 }
 
 class MatrixState extends State<Matrix>
-    with WidgetsBindingObserver, ReceiveSharingIntentMixin, InitConfigMixin {
+    with
+        WidgetsBindingObserver,
+        ReceiveSharingIntentMixin,
+        InitConfigMixin,
+        DeepLinkIntentMixin {
   final _contactsManager = getIt.get<ContactsManager>();
 
   int _activeClient = -1;
@@ -312,6 +317,9 @@ class MatrixState extends State<Matrix>
       initMatrix();
       emojiData = await EmojiData.builtIn();
       await initReceiveSharingIntent();
+      if (PlatformInfos.isMobile) {
+        await initDeepLinkIntent();
+      }
       await tryToGetFederationConfigurations();
       if (PlatformInfos.isWeb) {
         initConfigWeb().then((_) => initSettings());
@@ -1086,6 +1094,9 @@ class MatrixState extends State<Matrix>
     showToMBootstrap.dispose();
     linuxNotifications?.close();
     showQrCodeDownload.dispose();
+    if (PlatformInfos.isMobile) {
+      disposeDeepLink();
+    }
     super.dispose();
   }
 
