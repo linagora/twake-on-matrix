@@ -268,7 +268,7 @@ class ProgressDialog extends StatelessWidget {
           ),
           const SizedBox(height: 24),
           Text(
-            L10n.of(context)!.loading,
+            L10n.of(context)?.loading ?? '',
             style: PlatformInfos.isWeb
                 ? Theme.of(context).textTheme.titleLarge
                 : Theme.of(context).textTheme.titleMedium,
