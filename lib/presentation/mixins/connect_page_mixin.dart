@@ -83,14 +83,11 @@ mixin ConnectPageMixin {
     return '${AppConfig.registrationUrl}?$redirectPublicPlatformOnWeb=$redirectUrlEncode&app=${AppConfig.appParameter}';
   }
 
-  String? _getLogoutUrl(
-    BuildContext context, {
-    required String redirectUrl,
-  }) {
+  String? _getLogoutUrl(BuildContext context) {
     final authUrl = Matrix.of(context).authUrl;
     if (authUrl == null) return null;
-    final redirectUrlEncode = base64Url.encode(utf8.encode(redirectUrl));
-    return '$authUrl?logout=1&url=$redirectUrlEncode';
+
+    return '$authUrl?logout=1';
   }
 
   Future<String> authenticateWithWebAuth({
@@ -161,7 +158,7 @@ mixin ConnectPageMixin {
   Future<void> tryLogoutSso(BuildContext context) async {
     if (Matrix.of(context).loginType != LoginType.mLoginToken) return;
     final redirectUrl = _generatePostLogoutRedirectUrl();
-    final url = _getLogoutUrl(context, redirectUrl: redirectUrl);
+    final url = _getLogoutUrl(context);
     if (url == null) return Future.value();
 
     final urlScheme = _getRedirectUrlScheme(redirectUrl);
