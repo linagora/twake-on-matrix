@@ -15,6 +15,7 @@ import 'package:fluffychat/widgets/avatar/avatar.dart';
 import 'package:fluffychat/widgets/highlight_text.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:fluffychat/widgets/twake_components/twake_chip.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
@@ -261,9 +262,7 @@ class _ExpansionContactListTileState extends State<ExpansionContactListTile>
             child: SizedBox(
               width: 16,
               height: 16,
-              child: CircularProgressIndicator(
-                strokeWidth: 2,
-              ),
+              child: CupertinoActivityIndicator(),
             ),
           );
         }
