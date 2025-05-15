@@ -50,7 +50,7 @@ extension DownloadFileExtension on Event {
         fileName: filename,
       ),
     );
-    final downloadLink = mxcUrl.getDownloadLink(room.client);
+    final downloadLink = await mxcUrl.getDownloadUri(room.client);
     Logs().d(
       'DownloadFileExtension::downloadOrRetrieveAttachment(): downloadLink = $downloadLink',
     );
