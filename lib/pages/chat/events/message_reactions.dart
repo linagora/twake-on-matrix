@@ -1,5 +1,8 @@
+import 'package:equatable/equatable.dart';
+import 'package:fluffychat/di/global/get_it_initializer.dart';
+import 'package:fluffychat/pages/chat/events/message_reactions_bottom_sheet.dart';
 import 'package:fluffychat/pages/chat/events/message_reactions_style.dart';
-import 'package:flutter/cupertino.dart';
+import 'package:fluffychat/utils/responsive/responsive_utils.dart';
 import 'package:flutter/material.dart';
 
 import 'package:collection/collection.dart' show IterableExtension;
@@ -8,8 +11,6 @@ import 'package:linagora_design_flutter/colors/linagora_sys_colors.dart';
 import 'package:matrix/matrix.dart';
 
 import 'package:fluffychat/config/app_config.dart';
-import 'package:fluffychat/utils/platform_infos.dart';
-import 'package:fluffychat/widgets/avatar/avatar.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:fluffychat/widgets/mxc_image.dart';
 import 'package:overflow_view/overflow_view.dart';
@@ -79,7 +80,20 @@ class ReactionsList extends StatelessWidget {
     return OverflowView.flexible(
       spacing: 4.0,
       builder: (context, index) {
+        if (event.room.isDirectChat) {
+          return const SizedBox.shrink();
+        }
         return InkWell(
+          hoverColor: Colors.transparent,
+          focusColor: Colors.transparent,
+          highlightColor: Colors.transparent,
+          splashColor: Colors.transparent,
+          onTapDown: (details) {
+            _handleDisplayReactionsInfo(
+              context: context,
+              tapDownDetails: details,
+            );
+          },
           child: Container(
             width: MessageReactionsStyle.moreReactionContainer,
             height: MessageReactionsStyle.moreReactionContainer,
@@ -88,17 +102,18 @@ class ReactionsList extends StatelessWidget {
               border: Border.all(color: MessageReactionsStyle.borderColor),
               shape: BoxShape.circle,
             ),
-            padding: const EdgeInsets.only(top: 1.0, bottom: 4.0),
-            child: Icon(
-              Icons.more_horiz_rounded,
-              size: MessageReactionsStyle.moreReactionIconSize,
+            child: Center(
+              child: Icon(
+                Icons.more_horiz_rounded,
+                size: MessageReactionsStyle.moreReactionIconSize,
+              ),
             ),
           ),
         );
       },
       children: [
         ...reactionList.map(
-          (r) => _Reaction(
+          (r) => Reaction(
             reactionKey: r.key,
             count: event.room.isDirectChat ? null : r.count,
             reacted: r.reacted,
@@ -117,30 +132,224 @@ class ReactionsList extends StatelessWidget {
                 event.room.sendReaction(event.eventId, r.key!);
               }
             },
-            onLongPress: () async => await _AdaptableReactorsDialog(
-              client: client,
-              reactionEntry: r,
-            ).show(context),
           ),
         ),
+        if (!event.room.isDirectChat && reactionList.isNotEmpty)
+          InkWell(
+            hoverColor: Colors.transparent,
+            focusColor: Colors.transparent,
+            highlightColor: Colors.transparent,
+            splashColor: Colors.transparent,
+            onTapDown: (details) {
+              _handleDisplayReactionsInfo(
+                context: context,
+                tapDownDetails: details,
+              );
+            },
+            child: Container(
+              width: MessageReactionsStyle.moreReactionContainer,
+              height: MessageReactionsStyle.moreReactionContainer,
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.surface,
+                border: Border.all(color: MessageReactionsStyle.borderColor),
+                shape: BoxShape.circle,
+              ),
+              child: Center(
+                child: Icon(
+                  Icons.more_horiz_rounded,
+                  size: MessageReactionsStyle.moreReactionIconSize,
+                ),
+              ),
+            ),
+          ),
       ],
+    );
+  }
+
+  void _handleDisplayReactionInfoWeb({
+    required BuildContext context,
+    required TapDownDetails tapDownDetails,
+  }) {
+    const double defaultMaxWidthReactionPicker = 400;
+    const double defaultMaxHeightReactionPicker = 400;
+    final offset = tapDownDetails.globalPosition;
+    final double positionLeftTap = offset.dx;
+    final double screenWidth = MediaQuery.sizeOf(context).width;
+    final double availableRightSpace = screenWidth - positionLeftTap;
+    final double positionBottomTap = offset.dy;
+    final double heightScreen = MediaQuery.sizeOf(context).height;
+    final double availableBottomSpace = heightScreen - positionBottomTap;
+    double? positionLeft;
+    double? positionRight;
+    double? positionTop;
+    double? positionBottom;
+    Alignment alignment = Alignment.topLeft;
+
+    if (availableRightSpace < defaultMaxWidthReactionPicker) {
+      positionRight = screenWidth - positionLeftTap;
+      alignment = Alignment.topRight;
+    } else {
+      positionLeft = positionLeftTap;
+    }
+
+    if (availableBottomSpace < defaultMaxHeightReactionPicker) {
+      positionBottom = availableBottomSpace;
+    } else {
+      positionTop = positionBottomTap;
+    }
+
+    showDialog(
+      context: context,
+      barrierColor: Colors.transparent,
+      barrierDismissible: false,
+      builder: (dialogContext) => GestureDetector(
+        onTap: Navigator.of(dialogContext).pop,
+        child: Material(
+          type: MaterialType.transparency,
+          child: Container(
+            height: 56,
+            width: double.infinity,
+            color: Colors.transparent,
+            child: Stack(
+              children: [
+                Positioned(
+                  left: positionLeft,
+                  top: positionTop,
+                  bottom: positionBottom,
+                  right: positionRight,
+                  child: Align(
+                    alignment: alignment,
+                    child: Container(
+                      width: defaultMaxWidthReactionPicker,
+                      height: defaultMaxHeightReactionPicker,
+                      decoration: BoxDecoration(
+                        color: LinagoraRefColors.material().primary[100],
+                        borderRadius: BorderRadius.circular(
+                          24,
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: const Color(0x0000004D).withOpacity(0.15),
+                            offset: const Offset(0, 4),
+                            blurRadius: 8,
+                            spreadRadius: 3,
+                          ),
+                          BoxShadow(
+                            color: const Color(0x00000026).withOpacity(0.3),
+                            offset: const Offset(0, 1),
+                            blurRadius: 3,
+                            spreadRadius: 0,
+                          ),
+                        ],
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 16,
+                        ),
+                        child: MessageReactionsBottomSheet(
+                          event: event,
+                          allReactionEvents: allReactionEvents,
+                          client: client,
+                          reactionList: reactionList,
+                          scrollController: ScrollController(),
+                          reactionHeaderPadding:
+                              const EdgeInsets.symmetric(horizontal: 8),
+                          reactionListPadding:
+                              const EdgeInsets.symmetric(horizontal: 8),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _handleDisplayReactionsInfo({
+    required BuildContext context,
+    required TapDownDetails tapDownDetails,
+  }) async {
+    final responsive = getIt.get<ResponsiveUtils>();
+    if (responsive.isDesktop(context)) {
+      _handleDisplayReactionInfoWeb(
+        context: context,
+        tapDownDetails: tapDownDetails,
+      );
+      return;
+    }
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(16),
+          topRight: Radius.circular(16),
+        ),
+      ),
+      isScrollControlled: true,
+      builder: (context) => Container(
+        width: double.infinity,
+        padding: MediaQuery.viewInsetsOf(context),
+        child: DraggableScrollableSheet(
+          initialChildSize: 0.5,
+          minChildSize: 0.5,
+          maxChildSize: 0.8,
+          expand: false,
+          builder: (BuildContext context, ScrollController scrollController) {
+            return Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Column(
+                children: [
+                  Container(
+                    height: 4,
+                    width: 32,
+                    margin: const EdgeInsets.symmetric(vertical: 16),
+                    decoration: BoxDecoration(
+                      color: LinagoraSysColors.material().outline,
+                      borderRadius: BorderRadius.circular(100),
+                    ),
+                  ),
+                  Expanded(
+                    child: MessageReactionsBottomSheet(
+                      event: event,
+                      allReactionEvents: allReactionEvents,
+                      client: client,
+                      reactionList: reactionList,
+                      scrollController: scrollController,
+                    ),
+                  ),
+                ],
+              ),
+            );
+          },
+        ),
+      ),
     );
   }
 }
 
-class _Reaction extends StatelessWidget {
+class Reaction extends StatelessWidget {
   final String? reactionKey;
   final int? count;
   final bool? reacted;
   final void Function()? onTap;
   final void Function()? onLongPress;
+  final bool enableDecoration;
+  final TextStyle? countStyle;
 
-  const _Reaction({
+  const Reaction({
+    super.key,
     this.reactionKey,
     this.count,
     this.reacted,
     this.onTap,
     this.onLongPress,
+    this.enableDecoration = true,
+    this.countStyle,
   });
 
   @override
@@ -169,10 +378,7 @@ class _Reaction extends StatelessWidget {
         ],
       );
     } else {
-      var renderKey = Characters(reactionKey!);
-      if (renderKey.length > 10) {
-        renderKey = renderKey.getRange(0, 9) + Characters('…');
-      }
+      final renderKey = Characters(reactionKey!);
       content = Text(
         '$renderKey',
         strutStyle: const StrutStyle(
@@ -181,6 +387,7 @@ class _Reaction extends StatelessWidget {
         style: TextStyle(
           fontSize: MessageReactionsStyle.renderKeyFontSize,
         ),
+        textAlign: TextAlign.center,
       );
     }
     return InkWell(
@@ -188,33 +395,40 @@ class _Reaction extends StatelessWidget {
       onLongPress: () => onLongPress != null ? onLongPress!() : null,
       borderRadius: BorderRadius.circular(AppConfig.borderRadius),
       child: Container(
-        height: 34,
-        decoration: BoxDecoration(
-          color: color,
-          border: Border.all(color: MessageReactionsStyle.reactionBorderColor),
-          borderRadius:
-              BorderRadius.circular(MessageReactionsStyle.reactionBorderRadius),
-        ),
+        height: 28,
+        decoration: enableDecoration
+            ? BoxDecoration(
+                color: color,
+                border: Border.all(
+                  color: MessageReactionsStyle.reactionBorderColor,
+                ),
+                borderRadius: BorderRadius.circular(
+                  MessageReactionsStyle.reactionBorderRadius,
+                ),
+              )
+            : null,
         padding: const EdgeInsets.only(
-          top: 8,
-          left: 6,
-          right: 6,
-          bottom: 4,
+          left: 4,
+          right: 4,
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
-          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            content,
+            Padding(
+              padding: const EdgeInsets.only(top: 4),
+              child: content,
+            ),
             if (count != null && count! > 1) ...[
               const SizedBox(
                 width: 4,
               ),
               Text(
                 '$count',
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: LinagoraRefColors.material().neutral[50],
-                    ),
+                style: countStyle ??
+                    Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          color: LinagoraRefColors.material().neutral[50],
+                        ),
+                textAlign: TextAlign.center,
               ),
             ],
           ],
@@ -224,7 +438,7 @@ class _Reaction extends StatelessWidget {
   }
 }
 
-class ReactionEntry {
+class ReactionEntry with EquatableMixin {
   String? key;
   int count;
   bool reacted;
@@ -236,62 +450,12 @@ class ReactionEntry {
     required this.reacted,
     this.reactors,
   });
-}
-
-class _AdaptableReactorsDialog extends StatelessWidget {
-  final Client? client;
-  final ReactionEntry? reactionEntry;
-
-  const _AdaptableReactorsDialog({
-    this.client,
-    this.reactionEntry,
-  });
-
-  Future<bool?> show(BuildContext context) => PlatformInfos.isCupertinoStyle
-      ? showCupertinoDialog(
-          context: context,
-          builder: (context) => this,
-          barrierDismissible: true,
-          useRootNavigator: false,
-        )
-      : showDialog(
-          context: context,
-          builder: (context) => this,
-          barrierDismissible: true,
-          useRootNavigator: false,
-        );
 
   @override
-  Widget build(BuildContext context) {
-    final body = SingleChildScrollView(
-      child: Wrap(
-        spacing: 8.0,
-        runSpacing: 4.0,
-        alignment: WrapAlignment.center,
-        children: <Widget>[
-          for (final reactor in reactionEntry!.reactors!)
-            Chip(
-              avatar: Avatar(
-                mxContent: reactor.avatarUrl,
-                name: reactor.displayName,
-                client: client,
-              ),
-              label: Text(reactor.displayName!),
-            ),
-        ],
-      ),
-    );
-
-    final title = Center(child: Text(reactionEntry!.key!));
-
-    return PlatformInfos.isCupertinoStyle
-        ? CupertinoAlertDialog(
-            title: title,
-            content: body,
-          )
-        : AlertDialog(
-            title: title,
-            content: body,
-          );
-  }
+  List<Object?> get props => [
+        key,
+        count,
+        reacted,
+        reactors,
+      ];
 }

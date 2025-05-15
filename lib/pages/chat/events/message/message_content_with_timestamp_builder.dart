@@ -237,7 +237,6 @@ class _MessageContentWithTimestampBuilderState
                                       }
 
                                       if (isSelected) {
-                                        Navigator.of(context).pop();
                                         await myReaction.redactEvent();
                                         return;
                                       }
