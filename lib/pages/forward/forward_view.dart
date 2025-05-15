@@ -9,6 +9,7 @@ import 'package:fluffychat/pages/forward/forward_view_style.dart';
 import 'package:fluffychat/widgets/app_bars/searchable_app_bar.dart';
 import 'package:fluffychat/widgets/twake_components/twake_fab.dart';
 import 'package:fluffychat/widgets/twake_components/twake_text_button.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:fluffychat/resource/image_paths.dart';
 import 'package:fluffychat/widgets/twake_components/twake_icon_button.dart';
@@ -131,7 +132,7 @@ class _WebActionsButton extends StatelessWidget {
                         alignment: Alignment.centerRight,
                         child: TwakeFloatingActionButton(
                           customIcon:
-                              SizedBox(child: CircularProgressIndicator()),
+                              SizedBox(child: CupertinoActivityIndicator()),
                         ),
                       ),
                     );
@@ -230,7 +231,7 @@ class _ForwardButton extends StatelessWidget {
                   child: Align(
                     alignment: Alignment.centerRight,
                     child: TwakeFloatingActionButton(
-                      customIcon: SizedBox(child: CircularProgressIndicator()),
+                      customIcon: SizedBox(child: CupertinoActivityIndicator()),
                     ),
                   ),
                 );

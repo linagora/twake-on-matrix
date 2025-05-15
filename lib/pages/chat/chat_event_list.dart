@@ -5,6 +5,7 @@ import 'package:fluffychat/pages/chat_draft/draft_chat_empty_widget.dart';
 import 'package:fluffychat/presentation/model/search/presentation_search.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/widgets/context_menu/context_menu_action.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 import 'package:flutter_gen/gen_l10n/l10n.dart';
@@ -97,8 +98,7 @@ class ChatEventList extends StatelessWidget {
                   if (index == 0) {
                     if (controller.timeline!.isRequestingFuture) {
                       return const Center(
-                        child:
-                            CircularProgressIndicator.adaptive(strokeWidth: 2),
+                        child: CupertinoActivityIndicator(),
                       );
                     }
                     if (controller.timeline!.canRequestFuture) {
@@ -119,8 +119,7 @@ class ChatEventList extends StatelessWidget {
                   if (index == events.length + 1) {
                     if (controller.timeline!.isRequestingHistory) {
                       return const Center(
-                        child:
-                            CircularProgressIndicator.adaptive(strokeWidth: 2),
+                        child: CupertinoActivityIndicator(),
                       );
                     }
                     if (controller.timeline!.canRequestHistory) {

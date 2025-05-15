@@ -10,6 +10,7 @@ import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_file_extension.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/widgets/hero_page_route.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_avif/flutter_avif.dart';
 import 'package:http/http.dart' as http;
@@ -268,7 +269,7 @@ class _MxcImageState extends State<MxcImage> {
       widget.placeholder?.call(context) ??
       const Center(
         key: Key(placeholderKey),
-        child: CircularProgressIndicator.adaptive(),
+        child: CupertinoActivityIndicator(),
       );
 
   @override
