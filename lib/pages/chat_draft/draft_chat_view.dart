@@ -99,7 +99,8 @@ class DraftChatView extends StatelessWidget {
                         Expanded(
                           child: Container(
                             color: ChatViewBodyStyle.chatViewBackgroundColor(
-                                context),
+                              context,
+                            ),
                             child: Center(
                               child: DropTarget(
                                 onDragDone: (details) =>
