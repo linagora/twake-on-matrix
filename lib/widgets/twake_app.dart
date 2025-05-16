@@ -32,6 +32,8 @@ class TwakeApp extends StatefulWidget {
   /// in with qr code or magic link.
   static bool gotInitialLink = false;
 
+  static bool gotInitialDeepLink = false;
+
   // Router must be outside of build method so that hot reload does not reset
   // the current path.
   static final GoRouter router = GoRouter(
