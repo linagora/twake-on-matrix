@@ -7,6 +7,7 @@ enum ChatContextMenuActions {
   copyMessage,
   pinChat,
   forward,
+  reply,
   downloadFile,
   jumpToMessage;
 
@@ -20,6 +21,8 @@ enum ChatContextMenuActions {
         return isSelected
             ? L10n.of(context)!.unselect
             : L10n.of(context)!.select;
+      case ChatContextMenuActions.reply:
+        return L10n.of(context)!.reply;
       case ChatContextMenuActions.copyMessage:
         return L10n.of(context)!.copyMessageText;
       case ChatContextMenuActions.pinChat:
@@ -57,6 +60,8 @@ enum ChatContextMenuActions {
     bool unpin = false,
   }) {
     switch (this) {
+      case ChatContextMenuActions.reply:
+        return ImagePaths.icReply;
       case ChatContextMenuActions.jumpToMessage:
         return ImagePaths.icGoTo;
       case ChatContextMenuActions.pinChat:

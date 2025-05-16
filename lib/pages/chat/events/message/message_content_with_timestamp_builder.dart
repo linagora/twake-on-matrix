@@ -19,11 +19,12 @@ import 'package:fluffychat/widgets/matrix.dart';
 import 'package:fluffychat/widgets/twake_components/twake_icon_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_emoji_mart/flutter_emoji_mart.dart';
+import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:matrix/matrix.dart';
+import 'package:overflow_view/overflow_view.dart';
 import 'package:pull_down_button/pull_down_button.dart';
-import 'package:flutter_gen/gen_l10n/l10n.dart';
 
 typedef ContextMenuBuilder = List<Widget> Function(BuildContext context);
 
@@ -50,6 +51,8 @@ class MessageContentWithTimestampBuilder extends StatefulWidget {
   final void Function(Event)? onForward;
   final void Function(Event)? onCopy;
   final void Function(Event)? onPin;
+  final void Function(BuildContext context, Event, TapDownDetails)?
+      onTapMoreButton;
 
   static final responsiveUtils = getIt.get<ResponsiveUtils>();
 
@@ -77,6 +80,7 @@ class MessageContentWithTimestampBuilder extends StatefulWidget {
     this.onCopy,
     this.onLongPressMessage,
     this.onPin,
+    this.onTapMoreButton,
   });
 
   @override
@@ -104,6 +108,34 @@ class _MessageContentWithTimestampBuilderState
       MessageTypes.BadEncrypted,
     }.contains(widget.event.messageType);
 
+    return OverflowView.flexible(
+      builder: (context, index) {
+        return _messageContentWithTimestampBuilder(
+          context: context,
+          displayTime: displayTime,
+          noBubble: noBubble,
+          timelineText: timelineText,
+          overlayContextMenu: true,
+        );
+      },
+      children: [
+        _messageContentWithTimestampBuilder(
+          context: context,
+          displayTime: displayTime,
+          noBubble: noBubble,
+          timelineText: timelineText,
+        ),
+      ],
+    );
+  }
+
+  Widget _messageContentWithTimestampBuilder({
+    required BuildContext context,
+    required bool displayTime,
+    required bool noBubble,
+    required bool timelineText,
+    bool overlayContextMenu = false,
+  }) {
     return Row(
       mainAxisSize: MainAxisSize.min,
       mainAxisAlignment: MessageStyle.messageAlignment(widget.event, context),
@@ -439,7 +471,28 @@ class _MessageContentWithTimestampBuilderState
             ),
           ),
         ),
-        if (widget.event.status.isAvailable) _menuActionsRowBuilder(context),
+        if (widget.event.status.isAvailable) ...[
+          if (overlayContextMenu) ...[
+            Container(
+              padding: const EdgeInsets.only(left: 8),
+              decoration: BoxDecoration(
+                color: Colors.transparent,
+                borderRadius: BorderRadius.circular(24),
+              ),
+              child: TwakeIconButton(
+                onTapDown: (tapDownDetails) => widget.onTapMoreButton?.call(
+                  context,
+                  widget.event,
+                  tapDownDetails,
+                ),
+                icon: Icons.more_horiz,
+                tooltip: L10n.of(context)!.more,
+                preferBelow: false,
+              ),
+            ),
+          ] else
+            _menuActionsRowBuilder(context),
+        ],
       ],
     );
   }
