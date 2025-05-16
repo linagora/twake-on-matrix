@@ -171,6 +171,7 @@ mixin DeepLinkIntentMixin<T extends StatefulWidget> on State<T> {
     final confirmResult = await _showConfirmSwitchAccountDialog(
       userIdExisted: matrixState.activatedUserId,
       userId: openAppDeepLink.qualifiedUserId,
+      onlySwitchAccount: true,
     );
 
     if (confirmResult == ConfirmResult.cancel) {
@@ -179,6 +180,7 @@ mixin DeepLinkIntentMixin<T extends StatefulWidget> on State<T> {
     }
 
     await _switchActiveClient(clientExisted: clientExisted);
+    TwakeDialog.hideLoadingDialog(context);
   }
 
   Future<void> _handleSignInWithDifferentActiveClient({
@@ -226,6 +228,7 @@ mixin DeepLinkIntentMixin<T extends StatefulWidget> on State<T> {
   Future<ConfirmResult> _showConfirmSwitchAccountDialog({
     required String userIdExisted,
     required String userId,
+    bool onlySwitchAccount = false,
   }) async {
     final l10n = L10n.of(context);
 
@@ -244,7 +247,11 @@ mixin DeepLinkIntentMixin<T extends StatefulWidget> on State<T> {
               ),
         ),
         const TextSpan(text: '. '),
-        TextSpan(text: l10n?.doYouWantToLogOutAndSwitchTo),
+        TextSpan(
+          text: onlySwitchAccount
+              ? l10n?.doYouWantToSwitchTo
+              : l10n?.doYouWantToLogOutAndSwitchTo,
+        ),
         TextSpan(
           text: ' $userId',
           style: Theme.of(context).textTheme.bodyMedium?.copyWith(

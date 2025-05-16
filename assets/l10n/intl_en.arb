@@ -3122,5 +3122,6 @@
   "reaction": "Reaction",
   "switchAccountConfirmation": "Switch Account Confirmation",
   "youAreCurrentlyLoggedInWith": "You are currently logged in with",
-  "doYouWantToLogOutAndSwitchTo": "Do you want to log out and switch to"
+  "doYouWantToLogOutAndSwitchTo": "Do you want to log out and switch to",
+  "doYouWantToSwitchTo": "Do you want to switch to"
 }

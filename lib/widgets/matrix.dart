@@ -467,15 +467,7 @@ class MatrixState extends State<Matrix>
             Logs().v(
               '[MATRIX]:_listenLoginStateChanged:: Last Log out successful',
             );
-            await _handleLastLogout(
-              onCallbackAction: () {
-                if (PlatformInfos.isMobile) {
-                  TwakeApp.router.go('/home/twakeWelcome');
-                } else {
-                  TwakeApp.router.go('/home', extra: true);
-                }
-              },
-            );
+            await _handleLastLogout();
           }
         }
         break;
@@ -1012,13 +1004,17 @@ class MatrixState extends State<Matrix>
     );
   }
 
-  Future<void> _handleLastLogout({VoidCallback? onCallbackAction}) async {
+  Future<void> _handleLastLogout() async {
     matrixState.reSyncContacts();
     await matrixState.cancelListenSynchronizeContacts();
     if (PlatformInfos.isMobile) {
       await _deletePersistActiveAccount();
     }
-    onCallbackAction?.call();
+    if (PlatformInfos.isMobile) {
+      TwakeApp.router.go('/home/twakeWelcome');
+    } else {
+      TwakeApp.router.go('/home', extra: true);
+    }
     await _deleteAllTomConfigurations();
   }
 
