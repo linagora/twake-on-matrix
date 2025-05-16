@@ -2193,14 +2193,14 @@ class ChatController extends State<Chat>
     double? positionBottom;
     Alignment alignment = Alignment.topLeft;
 
-    if (availableRightSpace < _defaultMaxWidthReactionPicker) {
+    if (availableRightSpace < defaultMaxWidthReactionPicker) {
       positionRight = screenWidth - positionLeftTap;
       alignment = Alignment.topRight;
     } else {
       positionLeft = positionLeftTap;
     }
 
-    if (availableBottomSpace < _defaultMaxHeightReactionPicker) {
+    if (availableBottomSpace < defaultMaxHeightReactionPicker) {
       positionBottom = availableBottomSpace;
     } else {
       positionTop = positionBottomTap;
@@ -2440,13 +2440,14 @@ class ChatController extends State<Chat>
                                                     action: action,
                                                     closeMenuAction: () {
                                                       Navigator.of(
-                                                              dialogContext)
-                                                          .pop();
+                                                        dialogContext,
+                                                      ).pop();
                                                       _handleClickOnContextMenuItem(
                                                         listPopupMenuActions[
                                                             listContextMenuActions
                                                                 .indexOf(
-                                                                    action)],
+                                                          action,
+                                                        )],
                                                         event,
                                                       );
                                                     },
