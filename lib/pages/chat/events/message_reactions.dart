@@ -183,14 +183,14 @@ class ReactionsList extends StatelessWidget {
     double? positionBottom;
     Alignment alignment = Alignment.topLeft;
 
-    if (availableRightSpace < AppConfig.defaultMaxWidthReactionPicker) {
+    if (availableRightSpace < AppConfig.defaultMaxWidthReactionsView) {
       positionRight = screenWidth - positionLeftTap;
       alignment = Alignment.topRight;
     } else {
       positionLeft = positionLeftTap;
     }
 
-    if (availableBottomSpace < AppConfig.defaultMaxHeightReactionPicker) {
+    if (availableBottomSpace < AppConfig.defaultMaxHeightReactionsView) {
       positionBottom = availableBottomSpace;
     } else {
       positionTop = positionBottomTap;
@@ -218,8 +218,8 @@ class ReactionsList extends StatelessWidget {
                   child: Align(
                     alignment: alignment,
                     child: Container(
-                      width: AppConfig.defaultMaxWidthReactionPicker,
-                      height: AppConfig.defaultMaxHeightReactionPicker,
+                      width: AppConfig.defaultMaxWidthReactionsView,
+                      height: AppConfig.defaultMaxHeightReactionsView,
                       decoration: BoxDecoration(
                         color: LinagoraRefColors.material().primary[100],
                         borderRadius: BorderRadius.circular(

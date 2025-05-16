@@ -33,9 +33,9 @@ abstract class AppConfig {
 
   static const double messagePadding = 16.0;
 
-  static const double defaultMaxWidthReactionPicker = 400;
+  static const double defaultMaxWidthReactionsView = 400;
 
-  static const double defaultMaxHeightReactionPicker = 400;
+  static const double defaultMaxHeightReactionsView = 400;
 
   static String sampleValue = 'sampleValue';
 
