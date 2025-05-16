@@ -38,7 +38,7 @@ typedef OnRoomCreatedSuccess = FutureOr<void> Function(Room room)?;
 typedef OnRoomCreatedFailed = FutureOr<void> Function()?;
 typedef OnSendFileClick = void Function(BuildContext context);
 typedef OnInputBarSubmitted = void Function();
-typedef OnEmojiAction = void Function();
+typedef OnEmojiAction = void Function(TapDownDetails details);
 typedef OnKeyboardAction = void Function();
 typedef OnInputBarChanged = void Function(String text);
 
@@ -244,7 +244,7 @@ class DraftChatController extends State<DraftChat>
     inputFocus.requestFocus();
   }
 
-  void onEmojiAction() {
+  void onEmojiAction(TapDownDetails details) {
     emojiPickerType = EmojiPickerType.keyboard;
     showEmojiPickerNotifier.value = true;
     if (PlatformInfos.isMobile) {

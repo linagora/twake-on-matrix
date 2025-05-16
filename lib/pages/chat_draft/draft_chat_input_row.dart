@@ -18,7 +18,6 @@ class DraftChatInputRow extends StatelessWidget {
   final ValueNotifier<String> inputText;
   final OnInputBarSubmitted onInputBarSubmitted;
   final ValueNotifier<bool> isSendingNotifier;
-  final ValueNotifier<bool> emojiPickerNotifier;
   final OnEmojiAction onEmojiAction;
   final OnKeyboardAction onKeyboardAction;
   final ValueKey typeAheadKey;
@@ -33,7 +32,6 @@ class DraftChatInputRow extends StatelessWidget {
     required this.inputText,
     required this.onInputBarSubmitted,
     required this.isSendingNotifier,
-    required this.emojiPickerNotifier,
     required this.onEmojiAction,
     required this.onKeyboardAction,
     required this.typeAheadKey,
@@ -54,12 +52,12 @@ class DraftChatInputRow extends StatelessWidget {
           ),
           child: Row(
             crossAxisAlignment:
-                ChatInputRowStyle.responsiveUtils.isMobileOrTablet(context)
+                ChatInputRowStyle.responsiveUtils.isMobile(context)
                     ? CrossAxisAlignment.end
                     : CrossAxisAlignment.center,
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              if (ChatInputRowStyle.responsiveUtils.isMobileOrTablet(context))
+              if (ChatInputRowStyle.responsiveUtils.isMobile(context))
                 SizedBox(
                   height: ChatInputRowStyle.chatInputRowHeight,
                   child: TwakeIconButton(
@@ -70,10 +68,9 @@ class DraftChatInputRow extends StatelessWidget {
                   ),
                 ),
               Expanded(
-                child:
-                    ChatInputRowStyle.responsiveUtils.isMobileOrTablet(context)
-                        ? _buildMobileInputRow(context)
-                        : _buildWebInputRow(context),
+                child: ChatInputRowStyle.responsiveUtils.isMobile(context)
+                    ? _buildMobileInputRow(context)
+                    : _buildWebInputRow(context),
               ),
               ChatInputRowSendBtn(
                 inputText: inputText,
@@ -90,19 +87,14 @@ class DraftChatInputRow extends StatelessWidget {
   ChatInputRowMobile _buildMobileInputRow(BuildContext context) {
     return ChatInputRowMobile(
       inputBar: _buildInputBar(context),
-      emojiPickerNotifier: emojiPickerNotifier,
-      onEmojiAction: onEmojiAction,
-      onKeyboardAction: onKeyboardAction,
     );
   }
 
   ChatInputRowWeb _buildWebInputRow(BuildContext context) {
     return ChatInputRowWeb(
       inputBar: _buildInputBar(context),
-      emojiPickerNotifier: emojiPickerNotifier,
       onTapMoreBtn: () => onSendFileClick(context),
       onEmojiAction: onEmojiAction,
-      onKeyboardAction: onKeyboardAction,
     );
   }
 

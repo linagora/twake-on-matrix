@@ -32,7 +32,6 @@ import 'package:collection/collection.dart';
 import 'package:debounce_throttle/debounce_throttle.dart';
 import 'package:desktop_drop/desktop_drop.dart';
 import 'package:device_info_plus/device_info_plus.dart';
-import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/domain/usecase/room/chat_get_pinned_events_interactor.dart';
 import 'package:fluffychat/pages/chat/chat_context_menu_actions.dart';
@@ -129,9 +128,9 @@ class ChatController extends State<Chat>
 
   static const int _defaultEventCountDisplay = 30;
 
-  static const double _defaultMaxWidthReactionPicker = 296;
+  static const double defaultMaxWidthReactionPicker = 326;
 
-  static const double _defaultMaxHeightReactionPicker = 360;
+  static const double defaultMaxHeightReactionPicker = 360;
 
   final GlobalKey stickyTimestampKey =
       GlobalKey(debugLabel: 'stickyTimestampKey');
@@ -374,8 +373,6 @@ class ChatController extends State<Chat>
     if (roomId == null) return;
     context.go('/rooms/$roomId');
   }
-
-  EmojiPickerType emojiPickerType = EmojiPickerType.keyboard;
 
   Future<void> requestHistory({
     int? historyCount,
@@ -697,22 +694,15 @@ class ChatController extends State<Chat>
     _updateReplyEvent();
   }
 
-  void onEmojiAction() {
-    emojiPickerType = EmojiPickerType.keyboard;
-    showEmojiPickerNotifier.toggle();
-    if (PlatformInfos.isMobile) {
-      hideKeyboardChatScreen();
-    } else {
-      _requestInputFocus();
-    }
+  void onEmojiAction(TapDownDetails tapDownDetails) {
+    if (PlatformInfos.isMobile) return;
+
+    _requestInputFocus();
+
+    showFullEmojiPickerOnWebNotifier.value = true;
   }
 
-  void _inputFocusListener() {
-    if (showEmojiPickerNotifier.value && inputFocus.hasFocus) {
-      emojiPickerType = EmojiPickerType.keyboard;
-      showEmojiPickerNotifier.value = true;
-    }
-  }
+  void _inputFocusListener() {}
 
   void copySingleEventAction() async {
     if (selectedEvents.length == 1) {
@@ -1034,30 +1024,6 @@ class ChatController extends State<Chat>
     setState(() {});
   }
 
-  void onEmojiSelected(Emoji? emoji) {
-    switch (emojiPickerType) {
-      case EmojiPickerType.reaction:
-        senEmojiReaction(emoji);
-        break;
-      case EmojiPickerType.keyboard:
-        typeEmoji(emoji);
-        onInputBarChanged(sendController.text);
-        break;
-    }
-  }
-
-  void senEmojiReaction(Emoji? emoji) {
-    showEmojiPickerNotifier.value = false;
-    if (emoji == null) return;
-    // make sure we don't send the same emoji twice
-    if (_allReactionEvents.any((e) {
-      final relatedTo = e.content['m.relates_to'];
-      return relatedTo is Map &&
-          relatedTo.containsKey('key') &&
-          relatedTo['key'] == emoji.emoji;
-    })) return;
-  }
-
   void forgetRoom() async {
     final result = await TwakeDialog.showFutureLoadingDialogFullScreen(
       future: room!.forget,
@@ -1066,47 +1032,21 @@ class ChatController extends State<Chat>
     context.go('/archive');
   }
 
-  void typeEmoji(Emoji? emoji) {
-    if (emoji == null) return;
+  void typeEmoji(String emoji) {
+    if (emoji.isEmpty) return;
     final text = sendController.text;
     final selection = sendController.selection;
     final newText = sendController.text.isEmpty
-        ? emoji.emoji
-        : text.replaceRange(selection.start, selection.end, emoji.emoji);
+        ? emoji
+        : text.replaceRange(selection.start, selection.end, emoji);
     sendController.value = TextEditingValue(
       text: newText,
       selection: TextSelection.collapsed(
         // don't forget an UTF-8 combined emoji might have a length > 1
-        offset: selection.baseOffset + emoji.emoji.length,
+        offset: selection.baseOffset + emoji.length,
       ),
     );
-  }
-
-  late Iterable<Event> _allReactionEvents;
-
-  void emojiPickerBackspace() {
-    switch (emojiPickerType) {
-      case EmojiPickerType.reaction:
-        showEmojiPickerNotifier.value = false;
-        break;
-      case EmojiPickerType.keyboard:
-        sendController
-          ..text = sendController.text.characters.skipLast(1).toString()
-          ..selection = TextSelection.fromPosition(
-            TextPosition(offset: sendController.text.length),
-          );
-
-        if (PlatformInfos.isWeb) {
-          _requestInputFocus();
-        }
-        break;
-    }
-  }
-
-  void pickEmojiReactionAction(Iterable<Event> allReactionEvents) async {
-    _allReactionEvents = allReactionEvents;
-    emojiPickerType = EmojiPickerType.reaction;
-    showEmojiPickerNotifier.value = true;
+    _requestInputFocus();
   }
 
   void sendEmojiAction({
@@ -1589,14 +1529,14 @@ class ChatController extends State<Chat>
     double? positionBottom;
     Alignment alignment = Alignment.topLeft;
 
-    if (availableRightSpace < _defaultMaxWidthReactionPicker) {
+    if (availableRightSpace < defaultMaxWidthReactionPicker) {
       positionRight = screenWidth - positionLeftTap;
       alignment = Alignment.topRight;
     } else {
       positionLeft = positionLeftTap;
     }
 
-    if (availableBottomSpace < _defaultMaxHeightReactionPicker) {
+    if (availableBottomSpace < defaultMaxHeightReactionPicker) {
       positionBottom = availableBottomSpace;
     } else {
       positionTop = positionBottomTap;
@@ -1643,8 +1583,8 @@ class ChatController extends State<Chat>
                         child: showFullEmojiPickerOnWeb
                             ? Container(
                                 padding: const EdgeInsets.all(12),
-                                width: 326,
-                                height: 360,
+                                width: defaultMaxWidthReactionPicker,
+                                height: defaultMaxHeightReactionPicker,
                                 decoration: BoxDecoration(
                                   color:
                                       LinagoraRefColors.material().primary[100],
@@ -1801,11 +1741,6 @@ class ChatController extends State<Chat>
     if (!PlatformInfos.isWeb) {
       showEmojiPickerNotifier.value = false;
     }
-  }
-
-  void onKeyboardAction() {
-    showEmojiPickerNotifier.toggle();
-    _requestInputFocus();
   }
 
   void onPushDetails() async {

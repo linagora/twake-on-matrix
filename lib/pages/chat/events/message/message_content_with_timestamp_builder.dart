@@ -128,7 +128,7 @@ class _MessageContentWithTimestampBuilderState
             child: MultiPlatformSelectionMode(
               event: widget.event,
               isClickable: MessageContentWithTimestampBuilder.responsiveUtils
-                  .isMobileOrTablet(context),
+                  .isMobile(context),
               onLongPress: widget.event.status.isAvailable
                   ? (event) async {
                       if (widget.onLongPressMessage != null) {

@@ -9,14 +9,16 @@ import 'package:fluffychat/pages/chat/chat_pinned_events/pinned_events_view.dart
 import 'package:fluffychat/pages/chat/sticky_timestamp_widget.dart';
 import 'package:fluffychat/pages/chat/tombstone_display.dart';
 import 'package:fluffychat/presentation/model/chat/view_event_list_ui_state.dart';
+import 'package:fluffychat/resource/image_paths.dart';
 import 'package:fluffychat/utils/date_time_extension.dart';
 import 'package:fluffychat/widgets/connection_status_header.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_emoji_mart/flutter_emoji_mart.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:matrix/matrix.dart';
-import 'chat_emoji_picker.dart';
 import 'chat_input_row.dart';
 
 class ChatViewBody extends StatelessWidget with MessageContentMixin {
@@ -186,6 +188,95 @@ class ChatViewBody extends StatelessWidget with MessageContentMixin {
                 );
               },
             ),
+            ValueListenableBuilder(
+              valueListenable: controller.showFullEmojiPickerOnWebNotifier,
+              builder: (context, display, _) {
+                if (!display) return const SizedBox.shrink();
+                return Positioned(
+                  bottom: 72,
+                  right: 64,
+                  child: MouseRegion(
+                    onHover: (_) {
+                      controller.showFullEmojiPickerOnWebNotifier.value = true;
+                    },
+                    onExit: (_) async {
+                      await Future.delayed(const Duration(seconds: 1));
+                      controller.showFullEmojiPickerOnWebNotifier.value = false;
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.all(12),
+                      width: ChatController.defaultMaxWidthReactionPicker,
+                      height: ChatController.defaultMaxHeightReactionPicker,
+                      decoration: BoxDecoration(
+                        color: LinagoraRefColors.material().primary[100],
+                        borderRadius: BorderRadius.circular(
+                          24,
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: const Color(0x0000004D).withOpacity(0.15),
+                            offset: const Offset(0, 4),
+                            blurRadius: 8,
+                            spreadRadius: 3,
+                          ),
+                          BoxShadow(
+                            color: const Color(0x00000026).withOpacity(0.3),
+                            offset: const Offset(0, 1),
+                            blurRadius: 3,
+                            spreadRadius: 0,
+                          ),
+                        ],
+                      ),
+                      child: EmojiPicker(
+                        emojiData: Matrix.of(context).emojiData,
+                        configuration: EmojiPickerConfiguration(
+                          emojiStyle:
+                              Theme.of(context).textTheme.headlineLarge!,
+                          searchEmptyTextStyle: Theme.of(context)
+                              .textTheme
+                              .labelMedium!
+                              .copyWith(
+                                color:
+                                    LinagoraRefColors.material().tertiary[30],
+                              ),
+                          searchEmptyWidget: SvgPicture.asset(
+                            ImagePaths.icSearchEmojiEmpty,
+                          ),
+                          searchFocusNode: FocusNode(),
+                        ),
+                        itemBuilder: (
+                          context,
+                          emojiId,
+                          emoji,
+                          callback,
+                        ) {
+                          return MouseRegion(
+                            onHover: (_) {},
+                            child: EmojiItem(
+                              textStyle:
+                                  Theme.of(context).textTheme.headlineLarge!,
+                              onTap: () {
+                                callback(
+                                  emojiId,
+                                  emoji,
+                                );
+                              },
+                              emoji: emoji,
+                            ),
+                          );
+                        },
+                        onEmojiSelected: (
+                          emojiId,
+                          emoji,
+                        ) {
+                          controller.typeEmoji(emoji);
+                        },
+                      ),
+                    ),
+                  ),
+                );
+              },
+            ),
           ],
         ),
       ),
@@ -224,12 +315,6 @@ class ChatViewBody extends StatelessWidget with MessageContentMixin {
           ].map(
             (widget) => widget,
           ),
-          if (!controller.responsive.isMobile(context))
-            ChatEmojiPicker(
-              showEmojiPickerNotifier: controller.showEmojiPickerNotifier,
-              onEmojiSelected: controller.onEmojiSelected,
-              emojiPickerBackspace: controller.emojiPickerBackspace,
-            ),
         ],
       ),
     );
