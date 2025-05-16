@@ -19,7 +19,6 @@ class DraftChatInputRow extends StatelessWidget {
   final OnInputBarSubmitted onInputBarSubmitted;
   final ValueNotifier<bool> isSendingNotifier;
   final OnEmojiAction onEmojiAction;
-  final OnKeyboardAction onKeyboardAction;
   final ValueKey typeAheadKey;
   final OnInputBarChanged onInputBarChanged;
   final FocusNode? typeAheadFocusNode;
@@ -33,7 +32,6 @@ class DraftChatInputRow extends StatelessWidget {
     required this.onInputBarSubmitted,
     required this.isSendingNotifier,
     required this.onEmojiAction,
-    required this.onKeyboardAction,
     required this.typeAheadKey,
     required this.onInputBarChanged,
     this.typeAheadFocusNode,

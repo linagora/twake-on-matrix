@@ -198,6 +198,9 @@ class ChatController extends State<Chat>
 
   final ValueNotifier<bool> showEmojiPickerNotifier = ValueNotifier(false);
 
+  final ValueNotifier<bool> showEmojiPickerComposerNotifier =
+      ValueNotifier(false);
+
   final ValueNotifier<DateTime?> stickyTimestampNotifier = ValueNotifier(null);
 
   final ValueNotifier<bool> showFullEmojiPickerOnWebNotifier =
@@ -700,7 +703,7 @@ class ChatController extends State<Chat>
 
     _requestInputFocus();
 
-    showFullEmojiPickerOnWebNotifier.value = true;
+    showEmojiPickerComposerNotifier.value = true;
   }
 
   void _inputFocusListener() {}
@@ -2549,6 +2552,7 @@ class ChatController extends State<Chat>
     cachedPresenceStreamController.close();
     cachedPresenceNotifier.dispose();
     showFullEmojiPickerOnWebNotifier.dispose();
+    showEmojiPickerComposerNotifier.dispose();
     super.dispose();
   }
 
