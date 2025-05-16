@@ -42,22 +42,25 @@ mixin ReceiveSharingIntentMixin<T extends StatefulWidget> on State<T> {
         return;
       }
     }
-    matrixState.shareContentList = files.map(
-      (sharedMediaFile) {
-        final file = sharedMediaFile.toMatrixFile();
-        if (file == null) return null;
-        Logs().d(
-          'ReceiveSharingIntentMixin::_processIncomingSharedFiles: Path ${file.filePath}',
-        );
-        Logs().d(
-          'ReceiveSharingIntentMixin::_processIncomingSharedFiles: Size ${file.size}',
-        );
-        return {
-          'msgtype': TwakeEventTypes.shareFileEventType,
-          'file': file,
-        };
-      },
-    ).whereNotNull().toList();
+    matrixState.shareContentList = files
+        .map(
+          (sharedMediaFile) {
+            final file = sharedMediaFile.toMatrixFile();
+            if (file == null) return null;
+            Logs().d(
+              'ReceiveSharingIntentMixin::_processIncomingSharedFiles: Path ${file.filePath}',
+            );
+            Logs().d(
+              'ReceiveSharingIntentMixin::_processIncomingSharedFiles: Size ${file.size}',
+            );
+            return {
+              'msgtype': TwakeEventTypes.shareFileEventType,
+              'file': file,
+            };
+          },
+        )
+        .whereNotNull()
+        .toList();
     openSharePage();
   }
 

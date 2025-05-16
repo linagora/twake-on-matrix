@@ -7,14 +7,18 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   group('DeepLinkUtils.parseDeepLink', () {
     test('returns DeepLink when url is valid', () {
-      const url = 'twake.chat://openapp?loginToken=abc123&data={"homeServer":"example.com","userId":"userA"}';
+      const url =
+          'twake.chat://openapp?loginToken=abc123&data={"homeServer":"example.com","userId":"userA"}';
       final result = DeepLinkUtils.parseDeepLink(url);
 
       expect(result, isA<DeepLink>());
       expect(result?.scheme, 'twake.chat');
       expect(result?.host, 'openapp');
       expect(result?.queryParameters!['loginToken'], 'abc123');
-      expect(result?.queryParameters!['data'], '{"homeServer":"example.com","userId":"userA"}');
+      expect(
+        result?.queryParameters!['data'],
+        '{"homeServer":"example.com","userId":"userA"}',
+      );
     });
 
     test('returns null when url is malformed', () {

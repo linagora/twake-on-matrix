@@ -3119,5 +3119,8 @@
   "youAlreadySentAnInvitationToThisContact": "You already sent an invitation to this contact",
   "selectedEmailWillReceiveAnInvitationLinkAndInstructions": "Selected email will receive an invitation link and instructions.",
   "selectedNumberWillGetAnSMSWithAnInvitationLinkAndInstructions": "Selected number will get an SMS with an invitation link and instructions.",
-  "reaction": "Reaction"
+  "reaction": "Reaction",
+  "switchAccountConfirmation": "Switch Account Confirmation",
+  "youAreCurrentlyLoggedInWith": "You are currently logged in with",
+  "doYouWantToLogOutAndSwitchTo": "Do you want to log out and switch to"
 }

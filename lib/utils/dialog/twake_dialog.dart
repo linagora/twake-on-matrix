@@ -304,7 +304,13 @@ Future<ConfirmResult> showConfirmAlertDialog({
   Color? cancelTextColor,
   double? maxWidthOkButton,
   double? maxWidthCancelButton,
+  List<TextSpan>? textSpanMessages,
 }) async {
+  assert(
+    textSpanMessages == null || message == null,
+    'Only one of textSpanMessages or message can be provided at a time.',
+  );
+
   final result = await showModal<ConfirmResult>(
     context: context,
     configuration: FadeScaleTransitionConfiguration(
@@ -407,6 +413,30 @@ Future<ConfirmResult> showConfirmAlertDialog({
                           if (message != null)
                             Text(
                               message,
+                              style: responsiveUtils.isMobile(context)
+                                  ? Theme.of(context)
+                                      .textTheme
+                                      .bodyMedium
+                                      ?.copyWith(
+                                        color: LinagoraSysColors.material()
+                                            .onSurfaceVariant,
+                                      )
+                                  : Theme.of(context)
+                                      .textTheme
+                                      .titleSmall
+                                      ?.copyWith(
+                                        color: LinagoraSysColors.material()
+                                            .onSurfaceVariant,
+                                      ),
+                              maxLines: maxLinesMessage ??
+                                  TwakeDialog.defaultMaxLinesMessage,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          if (textSpanMessages != null)
+                            Text.rich(
+                              TextSpan(
+                                children: textSpanMessages,
+                              ),
                               style: responsiveUtils.isMobile(context)
                                   ? Theme.of(context)
                                       .textTheme

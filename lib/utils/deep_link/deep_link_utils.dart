@@ -30,7 +30,8 @@ class DeepLinkUtils {
   }
 
   static OpenAppDeepLink? parseOpenAppDeepLink(
-      Map<String, String>? queryParameters) {
+    Map<String, String>? queryParameters,
+  ) {
     try {
       if (queryParameters == null || queryParameters.isEmpty) return null;
 

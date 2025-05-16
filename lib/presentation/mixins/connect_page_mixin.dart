@@ -1,6 +1,12 @@
+import 'dart:convert';
+
 import 'package:fluffychat/config/app_config.dart';
+import 'package:fluffychat/di/global/get_it_initializer.dart';
+import 'package:fluffychat/domain/repository/federation_configurations_repository.dart';
+import 'package:fluffychat/domain/repository/tom_configurations_repository.dart';
 import 'package:fluffychat/pages/connect/connect_page.dart';
 import 'package:fluffychat/pages/connect/sso_login_state.dart';
+import 'package:fluffychat/utils/client_manager.dart';
 import 'package:fluffychat/utils/dialog/twake_dialog.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/utils/string_extension.dart';
@@ -81,11 +87,16 @@ mixin ConnectPageMixin {
     return '${AppConfig.registrationUrl}?$redirectPublicPlatformOnWeb=$redirectUrlEncode&app=${AppConfig.appParameter}';
   }
 
-  String? _getLogoutUrl(BuildContext context) {
-    final authUrl = Matrix.of(context).authUrl;
-    if (authUrl == null) return null;
-
-    return '$authUrl?logout=1';
+  String _getLogoutUrl({
+    required String authUrl,
+    String? redirectUrl,
+  }) {
+    if (redirectUrl != null) {
+      final redirectUrlEncode = base64Url.encode(utf8.encode(redirectUrl));
+      return '$authUrl?logout=1&url=$redirectUrlEncode';
+    } else {
+      return '$authUrl?logout=1';
+    }
   }
 
   Future<String> authenticateWithWebAuth({
@@ -153,25 +164,28 @@ mixin ConnectPageMixin {
     }
   }
 
-  Future<void> tryLogoutSso(BuildContext context) async {
-    if (Matrix.of(context).loginType != LoginType.mLoginToken) return;
-    final redirectUrl = _generatePostLogoutRedirectUrl();
-    final url = _getLogoutUrl(context);
-    if (url == null) return Future.value();
-
-    final urlScheme = _getRedirectUrlScheme(redirectUrl);
+  Future<void> tryLogoutSso({required MatrixState matrix}) async {
     try {
+      final authUrl = matrix.authUrl;
+      final loginType = matrix.loginType;
+
+      if (authUrl == null || loginType != LoginType.mLoginToken) return;
+
+      final redirectUrl = _generatePostLogoutRedirectUrl();
+      final url = _getLogoutUrl(
+        authUrl: authUrl,
+        redirectUrl: PlatformInfos.isMobile ? redirectUrl : null,
+      );
+      final urlScheme = _getRedirectUrlScheme(redirectUrl);
+
       final result = await FlutterWebAuth2.authenticate(
         url: url,
         callbackUrlScheme: urlScheme,
-        options: const FlutterWebAuth2Options(
-          windowName: windowNameValue,
-        ),
+        options: const FlutterWebAuth2Options(windowName: windowNameValue),
       );
-      Logs().d('tryLogoutSso::result: $result');
+      Logs().d('ConnectPageMixin::tryLogoutSso::Result: $result');
     } catch (e) {
-      Logs().d('tryLogoutSso::error: $e');
-      rethrow;
+      Logs().e('ConnectPageMixin::tryLogoutSso::Error: $e');
     }
   }
 
@@ -285,5 +299,141 @@ mixin ConnectPageMixin {
       '',
       '${html.window.location.href.getBaseUrlBeforeHash()}#/${route ?? 'rooms'}',
     );
+  }
+
+  Future<bool> validateHomeServerExisted({required String homeServer}) async {
+    try {
+      final clients = await ClientManager.getClients();
+      Logs().d(
+        'ConnectPageMixin::validateHomeServerExisted:Clients = ${clients.map((client) => client.homeserver).toString()}',
+      );
+
+      final loggedInHomeServers = clients
+          .map((client) => client.homeserver?.toString())
+          .whereType<String>()
+          .toSet();
+
+      Logs().d(
+        'ConnectPageMixin::validateHomeServerExisted: All HomeServers: $loggedInHomeServers',
+      );
+
+      final exists = loggedInHomeServers.any(
+        (existingServer) => existingServer.contains(homeServer),
+      );
+
+      return exists && !AppConfig.supportMultipleAccountsInTheSameHomeserver;
+    } catch (e) {
+      Logs().e(
+        'ConnectPageMixin::validateHomeServerExisted: Exception: $e',
+      );
+      return false;
+    }
+  }
+
+  Future<void> logoutAction({required MatrixState matrix}) async {
+    Logs().d('ConnectPageMixin::logoutAction');
+    await _tryToUploadKeyBackup(matrix: matrix);
+
+    if (PlatformInfos.isMobile) {
+      await _logoutActionsOnMobile(matrix: matrix);
+    } else {
+      await _logoutActionOnOtherPlatform(matrix: matrix);
+    }
+  }
+
+  Future<void> _tryToUploadKeyBackup({required MatrixState matrix}) async {
+    Logs().d('ConnectPageMixin::_tryToUploadKeyBackup');
+    await TwakeDialog.showFutureLoadingDialogFullScreen(
+      future: () async {
+        await matrix.client.encryption?.keyManager.uploadInboundGroupSessions();
+      },
+    );
+  }
+
+  Future<void> _logoutActionsOnMobile({required MatrixState matrix}) async {
+    await tryLogoutSso(matrix: matrix);
+
+    await TwakeDialog.showFutureLoadingDialogFullScreen(
+      future: () async {
+        try {
+          await _clearAndSignOut(matrix: matrix);
+        } catch (e) {
+          Logs().e('ConnectPageMixin()::_logoutActionsOnMobile - error: $e');
+        }
+      },
+    );
+  }
+
+  Future<void> _deleteTomConfigurations({required MatrixState matrix}) async {
+    try {
+      final userId = matrix.activatedUserId;
+      Logs().d(
+        'ConnectPageMixin::_deleteTomConfigurations - Client ID: $userId',
+      );
+      if (matrix.twakeSupported) {
+        await getIt
+            .get<ToMConfigurationsRepository>()
+            .deleteTomConfigurations(userId);
+      }
+      Logs().d(
+        'ConnectPageMixin::_deleteTomConfigurations - Success',
+      );
+    } catch (e) {
+      Logs().e(
+        'ConnectPageMixin::_deleteTomConfigurations - error: $e',
+      );
+    }
+  }
+
+  Future<void> _deleteFederationConfigurations({
+    required MatrixState matrix,
+  }) async {
+    try {
+      final userId = matrix.activatedUserId;
+      Logs().d(
+        'ConnectPageMixin::_deleteFederationConfigurations - Client ID: $userId',
+      );
+      await getIt
+          .get<FederationConfigurationsRepository>()
+          .deleteFederationConfigurations(userId);
+      Logs().d(
+        'ConnectPageMixin::_deleteFederationConfigurations - Success',
+      );
+    } catch (e) {
+      Logs().e(
+        'ConnectPageMixin::_deleteFederationConfigurations - error: $e',
+      );
+    }
+  }
+
+  Future<void> _logoutActionOnOtherPlatform({
+    required MatrixState matrix,
+  }) async {
+    await TwakeDialog.showFutureLoadingDialogFullScreen(
+      future: () async {
+        try {
+          await _clearAndSignOut(matrix: matrix);
+        } catch (e) {
+          Logs().e(
+            'ConnectPageMixin()::_logoutActionOnOtherPlatform - error: $e',
+          );
+        } finally {
+          await tryLogoutSso(matrix: matrix);
+        }
+      },
+    );
+  }
+
+  Future<void> _clearAndSignOut({required MatrixState matrix}) async {
+    Logs().d('ConnectPageMixin::_clearAndSignOut');
+    if (matrix.backgroundPush != null) {
+      await matrix.backgroundPush!.removeCurrentPusher();
+    }
+
+    await Future.wait([
+      matrix.client.logout(),
+      _deleteTomConfigurations(matrix: matrix),
+      _deleteFederationConfigurations(matrix: matrix),
+    ]);
   }
 }

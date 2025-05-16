@@ -6,6 +6,7 @@ import 'package:fluffychat/domain/contact_manager/contacts_manager.dart';
 import 'package:fluffychat/domain/exception/federation_configuration_not_found.dart';
 import 'package:fluffychat/domain/repository/federation_configurations_repository.dart';
 import 'package:fluffychat/event/twake_event_types.dart';
+import 'package:fluffychat/presentation/mixins/connect_page_mixin.dart';
 import 'package:fluffychat/presentation/mixins/deep_link_intent_mixin.dart';
 import 'package:fluffychat/presentation/mixins/init_config_mixin.dart';
 import 'package:fluffychat/presentation/model/client_login_state_event.dart';
@@ -84,7 +85,8 @@ class MatrixState extends State<Matrix>
         WidgetsBindingObserver,
         ReceiveSharingIntentMixin,
         InitConfigMixin,
-        DeepLinkIntentMixin {
+        DeepLinkIntentMixin,
+        ConnectPageMixin {
   final _contactsManager = getIt.get<ContactsManager>();
 
   int _activeClient = -1;
@@ -305,6 +307,8 @@ class MatrixState extends State<Matrix>
       PlatformInfos.isLinux ? NotificationsClient() : null;
   final Map<String, int> linuxNotificationIds = {};
 
+  String get activatedUserId => client.userID ?? '';
+
   @override
   void initState() {
     super.initState();
@@ -416,45 +420,78 @@ class MatrixState extends State<Matrix>
   }
 
   void _listenLoginStateChanged(LoginState state, Client client) async {
-    final loggedInWithMultipleClients = widget.clients.length > 1;
-    if (loggedInWithMultipleClients && state != LoginState.loggedIn) {
-      _handleLogoutWithMultipleAccount(state, client);
-    } else {
-      if (state == LoginState.loggedIn) {
+    Logs().d(
+      'MatrixState::__listenLoginStateChanged: Count of clients = ${widget.clients.length}',
+    );
+
+    switch (state) {
+      case LoginState.loggedIn:
         Logs().v('[MATRIX]:_listenLoginStateChanged:: First Log in successful');
         _handleFirstLoggedIn(client, state);
-      } else {
-        Logs().v('[MATRIX]:_listenLoginStateChanged:: Last Log out successful');
-        await _handleLastLogout();
-      }
+        break;
+      case LoginState.loggedOut:
+        Logs().d(
+          'MatrixState::__listenLoginStateChanged: DeepLink = ${processingDeepLink.toString()}',
+        );
+        if (processingDeepLink != null) {
+          await _handleLogoutWithMultipleAccount(currentClient: client);
+          await autoSignInWithLoginToken(
+            loginToken: processingDeepLink!.loginToken,
+            homeServerUrl: processingDeepLink!.homeServerUrl,
+          );
+        } else {
+          final loggedInWithMultipleClients = widget.clients.length > 1;
+          if (loggedInWithMultipleClients) {
+            await _handleLogoutWithMultipleAccount(
+              currentClient: client,
+              onCallbackAction: () async {
+                TwakeSnackBar.show(
+                  TwakeApp.routerKey.currentContext!,
+                  L10n.of(context)!.oneClientLoggedOut,
+                );
+                final result = await setActiveClient(widget.clients.first);
+                Logs().v(
+                  '[MATRIX]:_handleLogoutWithMultipleAccount:: Log out Client ${client.clientName} successful',
+                );
+                if (state != LoginState.loggedIn && result.isSuccess) {
+                  TwakeApp.router.go(
+                    '/rooms',
+                    extra: LogoutBodyArgs(
+                      newActiveClient: widget.clients.first,
+                    ),
+                  );
+                }
+              },
+            );
+          } else {
+            Logs().v(
+              '[MATRIX]:_listenLoginStateChanged:: Last Log out successful',
+            );
+            await _handleLastLogout(
+              onCallbackAction: () {
+                if (PlatformInfos.isMobile) {
+                  TwakeApp.router.go('/home/twakeWelcome');
+                } else {
+                  TwakeApp.router.go('/home', extra: true);
+                }
+              },
+            );
+          }
+        }
+        break;
     }
   }
 
-  void _handleLogoutWithMultipleAccount(
-    LoginState state,
-    Client currentClient,
-  ) async {
+  Future<void> _handleLogoutWithMultipleAccount({
+    required Client currentClient,
+    VoidCallback? onCallbackAction,
+  }) async {
     await _cancelSubs(currentClient.clientName);
     widget.clients.remove(currentClient);
     await ClientManager.removeClientNameFromStore(currentClient.clientName);
     await matrixState.cancelListenSynchronizeContacts();
     matrixState.reSyncContacts();
-    TwakeSnackBar.show(
-      TwakeApp.routerKey.currentContext!,
-      L10n.of(context)!.oneClientLoggedOut,
-    );
-    final result = await setActiveClient(widget.clients.first);
-    Logs().v(
-      '[MATRIX]:_handleLogoutWithMultipleAccount:: Log out Client ${currentClient.clientName} successful',
-    );
-    if (state != LoginState.loggedIn && result.isSuccess) {
-      TwakeApp.router.go(
-        '/rooms',
-        extra: LogoutBodyArgs(
-          newActiveClient: widget.clients.first,
-        ),
-      );
-    }
+    onCallbackAction?.call();
   }
 
   Future<void> _handleFirstLoggedIn(
@@ -517,11 +554,11 @@ class MatrixState extends State<Matrix>
       final multipleAccountRepository = getIt.get<MultipleAccountRepository>();
       await multipleAccountRepository.deletePersistActiveAccount();
       Logs().d(
-        'MatrixState::_handleLogoutWithMultipleAccount: Delete persist active account success',
+        'MatrixState::_deletePersistActiveAccount: Delete persist active account success',
       );
     } catch (e) {
       Logs().e(
-        'MatrixState::_handleLogoutWithMultipleAccount: Error - $e',
+        'MatrixState::_deletePersistActiveAccount: Error - $e',
       );
     }
   }
@@ -975,15 +1012,13 @@ class MatrixState extends State<Matrix>
     );
   }
 
-  Future<void> _handleLastLogout() async {
+  Future<void> _handleLastLogout({VoidCallback? onCallbackAction}) async {
     matrixState.reSyncContacts();
     await matrixState.cancelListenSynchronizeContacts();
     if (PlatformInfos.isMobile) {
       await _deletePersistActiveAccount();
-      TwakeApp.router.go('/home/twakeWelcome');
-    } else {
-      TwakeApp.router.go('/home', extra: true);
     }
+    onCallbackAction?.call();
     await _deleteAllTomConfigurations();
   }
 

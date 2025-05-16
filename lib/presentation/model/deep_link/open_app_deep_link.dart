@@ -16,9 +16,13 @@ class OpenAppDeepLink extends DeepLink {
           host: DeepLinkUtils.openAppHost,
         );
 
-  String get homeServerUrl => homeServer.startsWith('https://')
-      ? homeServer
-      : 'https://$homeServer';
+  String get homeServerUrl =>
+      homeServer.startsWith('https://') ? homeServer : 'https://$homeServer';
+
+  String get qualifiedUserId =>
+      userId.startsWith('@') && userId.endsWith(':$homeServer')
+          ? userId
+          : '@$userId:$homeServer';
 
   @override
   List<Object?> get props => [
