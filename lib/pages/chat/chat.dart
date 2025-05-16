@@ -2187,7 +2187,6 @@ class ChatController extends State<Chat>
     final double positionBottomTap = offset.dy;
     final double heightScreen = MediaQuery.sizeOf(context).height;
     final double availableBottomSpace = heightScreen - positionBottomTap;
-    const double maxHeightOfContextMenu = 240;
     double? positionLeft;
     double? positionRight;
     double? positionTop;
@@ -2201,8 +2200,7 @@ class ChatController extends State<Chat>
       positionLeft = positionLeftTap;
     }
 
-    if (availableBottomSpace <
-        _defaultMaxHeightReactionPicker + maxHeightOfContextMenu) {
+    if (availableBottomSpace < _defaultMaxHeightReactionPicker) {
       positionBottom = availableBottomSpace;
     } else {
       positionTop = positionBottomTap;
@@ -2400,56 +2398,62 @@ class ChatController extends State<Chat>
                                     },
                                   ),
                             const SizedBox(height: 8),
-                            Card(
-                              elevation: TwakeContextMenuStyle.menuElevation,
-                              margin: EdgeInsets.zero,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(
-                                  TwakeContextMenuStyle.menuBorderRadius,
-                                ),
-                              ),
-                              child: ClipRRect(
-                                borderRadius: BorderRadius.circular(
-                                  TwakeContextMenuStyle.menuBorderRadius,
-                                ),
-                                child: Material(
-                                  color: TwakeContextMenuStyle.defaultMenuColor(
-                                    context,
+                            Offstage(
+                              offstage: showFullEmojiPickerOnWeb,
+                              child: Card(
+                                elevation: TwakeContextMenuStyle.menuElevation,
+                                margin: EdgeInsets.zero,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(
+                                    TwakeContextMenuStyle.menuBorderRadius,
                                   ),
-                                  child: ConstrainedBox(
-                                    constraints: const BoxConstraints(
-                                      minWidth:
-                                          TwakeContextMenuStyle.menuMinWidth,
-                                      maxWidth:
-                                          TwakeContextMenuStyle.menuMaxWidth,
+                                ),
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(
+                                    TwakeContextMenuStyle.menuBorderRadius,
+                                  ),
+                                  child: Material(
+                                    color:
+                                        TwakeContextMenuStyle.defaultMenuColor(
+                                      context,
                                     ),
-                                    child: IntrinsicWidth(
-                                      child: Padding(
-                                        padding: const EdgeInsets.symmetric(
-                                          vertical: TwakeContextMenuStyle
-                                              .defaultVerticalPadding,
-                                        ),
-                                        child: Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: listContextMenuActions
-                                              .map(
-                                                (action) =>
-                                                    ContextMenuActionItemWidget(
-                                                  action: action,
-                                                  closeMenuAction: () {
-                                                    Navigator.of(dialogContext)
-                                                        .pop();
-                                                    _handleClickOnContextMenuItem(
-                                                      listPopupMenuActions[
-                                                          listContextMenuActions
-                                                              .indexOf(action)],
-                                                      event,
-                                                    );
-                                                  },
-                                                ),
-                                              )
-                                              .toList(),
+                                    child: ConstrainedBox(
+                                      constraints: const BoxConstraints(
+                                        minWidth:
+                                            TwakeContextMenuStyle.menuMinWidth,
+                                        maxWidth:
+                                            TwakeContextMenuStyle.menuMaxWidth,
+                                      ),
+                                      child: IntrinsicWidth(
+                                        child: Padding(
+                                          padding: const EdgeInsets.symmetric(
+                                            vertical: TwakeContextMenuStyle
+                                                .defaultVerticalPadding,
+                                          ),
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: listContextMenuActions
+                                                .map(
+                                                  (action) =>
+                                                      ContextMenuActionItemWidget(
+                                                    action: action,
+                                                    closeMenuAction: () {
+                                                      Navigator.of(
+                                                              dialogContext)
+                                                          .pop();
+                                                      _handleClickOnContextMenuItem(
+                                                        listPopupMenuActions[
+                                                            listContextMenuActions
+                                                                .indexOf(
+                                                                    action)],
+                                                        event,
+                                                      );
+                                                    },
+                                                  ),
+                                                )
+                                                .toList(),
+                                          ),
                                         ),
                                       ),
                                     ),
