@@ -453,7 +453,7 @@ class MatrixState extends State<Matrix>
                 Logs().v(
                   '[MATRIX]:_handleLogoutWithMultipleAccount:: Log out Client ${client.clientName} successful',
                 );
-                if (state != LoginState.loggedIn && result.isSuccess) {
+                if (result.isSuccess) {
                   TwakeApp.router.go(
                     '/rooms',
                     extra: LogoutBodyArgs(

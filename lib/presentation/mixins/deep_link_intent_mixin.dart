@@ -8,6 +8,7 @@ import 'package:fluffychat/utils/deep_link/deep_link_utils.dart';
 import 'package:fluffychat/utils/dialog/twake_dialog.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/utils/responsive/responsive_utils.dart';
+import 'package:fluffychat/widgets/layouts/agruments/logout_body_args.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:fluffychat/widgets/twake_app.dart';
 import 'package:flutter/material.dart';
@@ -58,13 +59,16 @@ mixin DeepLinkIntentMixin<T extends StatefulWidget> on State<T> {
     try {
       TwakeDialog.showLoadingTwakeWelcomeDialog(context);
 
-      final homeServerExisted = await matrixState.validateHomeServerExisted(
+      final clientExisted = await matrixState.getClientExisted(
         homeServer: openAppDeepLink.homeServer,
       );
-      Logs().d("DeepLinkIntentMixin::homeServerExisted: $homeServerExisted");
-      if (homeServerExisted) {
+      Logs().d(
+        "DeepLinkIntentMixin::clientExisted: UserID =${clientExisted?.userID}",
+      );
+      if (clientExisted != null) {
         await _handleSignInWithSameHomeServer(
           openAppDeepLink: openAppDeepLink,
+          clientExisted: clientExisted,
         );
         return;
       }
@@ -114,32 +118,113 @@ mixin DeepLinkIntentMixin<T extends StatefulWidget> on State<T> {
 
   Future<void> _handleSignInWithSameHomeServer({
     required OpenAppDeepLink openAppDeepLink,
+    required Client clientExisted,
   }) async {
-    final isSameAccount =
-        matrixState.activatedUserId == openAppDeepLink.qualifiedUserId;
-    Logs().d(
-      'DeepLinkIntentMixin::_handleSignInWithSameHomeServer():activatedUserId = ${matrixState.activatedUserId}, userId = ${openAppDeepLink.qualifiedUserId}, loginToken = ${openAppDeepLink.loginToken}, isSameAccount = $isSameAccount',
-    );
-    if (!isSameAccount) {
-      final confirmResult = await _showConfirmSwitchAccountDialog(
-        activeUserId: matrixState.activatedUserId,
-        userId: openAppDeepLink.qualifiedUserId,
-      );
-
-      if (confirmResult == ConfirmResult.cancel) {
-        TwakeDialog.hideLoadingDialog(context);
-        return;
-      }
-
-      processingDeepLink = openAppDeepLink;
-      await _autoLogoutActiveAccount();
-    } else {
+    if (clientExisted.userID == null) {
       TwakeDialog.hideLoadingDialog(context);
+      return;
+    }
+
+    final isSameClient =
+        clientExisted.userID == openAppDeepLink.qualifiedUserId;
+    final isActiveClient = matrixState.activatedUserId == clientExisted.userID;
+    Logs().d(
+      'DeepLinkIntentMixin::_handleSignInWithSameHomeServer(): isSameClient = $isSameClient, isActiveClient = $isActiveClient',
+    );
+    if (isSameClient && isActiveClient) {
+      TwakeDialog.hideLoadingDialog(context);
+    } else if (isSameClient && !isActiveClient) {
+      await _handleSignInWithSameInactiveClient(
+        openAppDeepLink: openAppDeepLink,
+        clientExisted: clientExisted,
+      );
+    } else if (!isSameClient && isActiveClient) {
+      await _handleSignInWithDifferentActiveClient(
+        openAppDeepLink: openAppDeepLink,
+        userIdExisted: clientExisted.userID!,
+      );
+    } else {
+      await _handleSignInWithDifferentInactiveClient(
+        openAppDeepLink: openAppDeepLink,
+        clientExisted: clientExisted,
+      );
     }
   }
 
+  Future<void> _switchActiveClient({required Client clientExisted}) async {
+    final activeClientState = await matrixState.setActiveClient(clientExisted);
+    if (activeClientState.isSuccess) {
+      TwakeApp.router.go(
+        '/rooms',
+        extra: LogoutBodyArgs(newActiveClient: clientExisted),
+      );
+    }
+  }
+
+  Future<void> _handleSignInWithSameInactiveClient({
+    required OpenAppDeepLink openAppDeepLink,
+    required Client clientExisted,
+  }) async {
+    Logs().d(
+      'DeepLinkIntentMixin::_handleSignInWithSameInactiveClient():',
+    );
+    final confirmResult = await _showConfirmSwitchAccountDialog(
+      userIdExisted: clientExisted.userID!,
+      userId: openAppDeepLink.qualifiedUserId,
+    );
+
+    if (confirmResult == ConfirmResult.cancel) {
+      TwakeDialog.hideLoadingDialog(context);
+      return;
+    }
+
+    await _switchActiveClient(clientExisted: clientExisted);
+  }
+
+  Future<void> _handleSignInWithDifferentActiveClient({
+    required OpenAppDeepLink openAppDeepLink,
+    required String userIdExisted,
+  }) async {
+    Logs().d(
+      'DeepLinkIntentMixin::_handleSignInWithDifferentActiveClient(): userIdExisted = $userIdExisted',
+    );
+    final confirmResult = await _showConfirmSwitchAccountDialog(
+      userIdExisted: userIdExisted,
+      userId: openAppDeepLink.qualifiedUserId,
+    );
+
+    if (confirmResult == ConfirmResult.cancel) {
+      TwakeDialog.hideLoadingDialog(context);
+      return;
+    }
+
+    processingDeepLink = openAppDeepLink;
+    await _autoLogoutActiveClient();
+  }
+
+  Future<void> _handleSignInWithDifferentInactiveClient({
+    required OpenAppDeepLink openAppDeepLink,
+    required Client clientExisted,
+  }) async {
+    Logs().d(
+      'DeepLinkIntentMixin::_handleSignInWithDifferentInactiveClient(): UserID = ${clientExisted.userID}',
+    );
+    final confirmResult = await _showConfirmSwitchAccountDialog(
+      userIdExisted: clientExisted.userID!,
+      userId: openAppDeepLink.qualifiedUserId,
+    );
+
+    if (confirmResult == ConfirmResult.cancel) {
+      TwakeDialog.hideLoadingDialog(context);
+      return;
+    }
+
+    processingDeepLink = openAppDeepLink;
+    await _autoLogoutInactiveClient(client: clientExisted);
+  }
+
   Future<ConfirmResult> _showConfirmSwitchAccountDialog({
-    required String activeUserId,
+    required String userIdExisted,
     required String userId,
   }) async {
     final l10n = L10n.of(context);
@@ -152,7 +237,7 @@ mixin DeepLinkIntentMixin<T extends StatefulWidget> on State<T> {
       textSpanMessages: [
         TextSpan(text: l10n?.youAreCurrentlyLoggedInWith),
         TextSpan(
-          text: ' $activeUserId',
+          text: ' $userIdExisted',
           style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                 color: Colors.black,
                 fontWeight: FontWeight.bold,
@@ -175,8 +260,21 @@ mixin DeepLinkIntentMixin<T extends StatefulWidget> on State<T> {
     );
   }
 
-  Future<void> _autoLogoutActiveAccount() async {
+  Future<void> _autoLogoutActiveClient() async {
+    Logs().d('DeepLinkIntentMixin::_autoLogoutActiveClient');
     await matrixState.logoutAction(matrix: matrixState);
+  }
+
+  Future<void> _autoLogoutInactiveClient({required Client client}) async {
+    Logs().d('DeepLinkIntentMixin::_autoLogoutInactiveClient');
+    final activeClientState = await matrixState.setActiveClient(client);
+
+    if (activeClientState.isSuccess) {
+      await matrixState.logoutAction(matrix: matrixState);
+    } else {
+      processingDeepLink = null;
+      TwakeDialog.hideLoadingDialog(context);
+    }
   }
 
   void disposeDeepLink() {

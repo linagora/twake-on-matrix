@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:collection/collection.dart';
 import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/domain/repository/federation_configurations_repository.dart';
@@ -301,32 +302,29 @@ mixin ConnectPageMixin {
     );
   }
 
-  Future<bool> validateHomeServerExisted({required String homeServer}) async {
+  Future<Client?> getClientExisted({required String homeServer}) async {
     try {
       final clients = await ClientManager.getClients();
       Logs().d(
-        'ConnectPageMixin::validateHomeServerExisted:Clients = ${clients.map((client) => client.homeserver).toString()}',
+        'ConnectPageMixin::getClientExisted:Clients = ${clients.map((client) => client.homeserver).toString()}',
       );
-
-      final loggedInHomeServers = clients
-          .map((client) => client.homeserver?.toString())
-          .whereType<String>()
-          .toSet();
-
+      final clientExisted = clients.firstWhereOrNull(
+        (client) => client.homeserver?.toString().contains(homeServer) == true,
+      );
       Logs().d(
-        'ConnectPageMixin::validateHomeServerExisted: All HomeServers: $loggedInHomeServers',
+        'ConnectPageMixin::getClientExisted: $clientExisted',
       );
-
-      final exists = loggedInHomeServers.any(
-        (existingServer) => existingServer.contains(homeServer),
-      );
-
-      return exists && !AppConfig.supportMultipleAccountsInTheSameHomeserver;
+      if (clientExisted != null &&
+          !AppConfig.supportMultipleAccountsInTheSameHomeserver) {
+        return clientExisted;
+      } else {
+        return null;
+      }
     } catch (e) {
       Logs().e(
-        'ConnectPageMixin::validateHomeServerExisted: Exception: $e',
+        'ConnectPageMixin::getClientExisted: Exception: $e',
       );
-      return false;
+      return null;
     }
   }
 
