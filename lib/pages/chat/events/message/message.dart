@@ -10,11 +10,11 @@ import 'package:fluffychat/pages/chat/events/message/swipeable_message.dart';
 import 'package:fluffychat/pages/chat/events/state_message.dart';
 import 'package:fluffychat/pages/chat/events/verification_request_content.dart';
 import 'package:fluffychat/pages/chat/sticky_timestamp_widget.dart';
+import 'package:fluffychat/presentation/mixins/message_avatar_mixin.dart';
 import 'package:fluffychat/utils/date_time_extension.dart';
 import 'package:fluffychat/utils/extension/event_status_custom_extension.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/filtered_timeline_extension.dart';
-import 'package:fluffychat/presentation/mixins/message_avatar_mixin.dart';
 import 'package:fluffychat/utils/responsive/responsive_utils.dart';
 import 'package:fluffychat/widgets/context_menu/context_menu_action.dart';
 import 'package:fluffychat/widgets/swipeable.dart';
@@ -83,6 +83,8 @@ class Message extends StatefulWidget {
   final void Function(Event)? onForward;
   final void Function(Event)? onCopy;
   final void Function(Event)? onPin;
+  final void Function(BuildContext context, Event, TapDownDetails)?
+      onTapMoreButton;
 
   const Message(
     this.event, {
@@ -115,6 +117,7 @@ class Message extends StatefulWidget {
     this.onForward,
     this.onCopy,
     this.onPin,
+    this.onTapMoreButton,
   });
 
   /// Indicates wheither the user may use a mouse instead
@@ -247,6 +250,7 @@ class _MessageState extends State<Message> with MessageAvatarMixin {
               onCopy: widget.onCopy,
               onLongPressMessage: widget.onLongPressMessage,
               onPin: widget.onPin,
+              onTapMoreButton: widget.onTapMoreButton,
             ),
           ),
         ];

@@ -112,28 +112,50 @@ class ReactionsList extends StatelessWidget {
         );
       },
       children: [
-        ...reactionList.map(
-          (r) => Reaction(
-            reactionKey: r.key,
-            count: event.room.isDirectChat ? null : r.count,
-            reacted: r.reacted,
-            onTap: () async {
-              if (r.reacted) {
-                final evt = allReactionEvents.firstWhereOrNull((e) {
-                  final relatedTo = e.content['m.relates_to'];
-                  return e.senderId == e.room.client.userID &&
-                      relatedTo is Map &&
-                      relatedTo['key'] == r.key;
-                });
-                if (evt != null) {
-                  await evt.redactEvent();
-                }
-              } else {
-                event.room.sendReaction(event.eventId, r.key!);
-              }
-            },
+        ...reactionList.take(3).map(
+              (r) => Reaction(
+                reactionKey: r.key,
+                count: event.room.isDirectChat ? null : r.count,
+                reacted: r.reacted,
+                onTap: () async {
+                  if (r.reacted) {
+                    final evt = allReactionEvents.firstWhereOrNull((e) {
+                      final relatedTo = e.content['m.relates_to'];
+                      return e.senderId == e.room.client.userID &&
+                          relatedTo is Map &&
+                          relatedTo['key'] == r.key;
+                    });
+                    if (evt != null) {
+                      await evt.redactEvent();
+                    }
+                  } else {
+                    event.room.sendReaction(event.eventId, r.key!);
+                  }
+                },
+              ),
+            ),
+        if (reactionList.length > 3)
+          Container(
+            width: MessageReactionsStyle.moreReactionContainer,
+            height: MessageReactionsStyle.moreReactionContainer,
+            decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.surface,
+              border: Border.all(color: MessageReactionsStyle.borderColor),
+              shape: BoxShape.circle,
+            ),
+            padding: const EdgeInsets.only(
+              left: 4,
+              right: 4,
+            ),
+            child: Center(
+              child: Text(
+                '+${reactionList.length - 3}',
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: LinagoraRefColors.material().neutral[50],
+                    ),
+              ),
+            ),
           ),
-        ),
         if (!event.room.isDirectChat && reactionList.isNotEmpty)
           InkWell(
             hoverColor: Colors.transparent,
@@ -273,7 +295,7 @@ class ReactionsList extends StatelessWidget {
     required TapDownDetails tapDownDetails,
   }) async {
     final responsive = getIt.get<ResponsiveUtils>();
-    if (responsive.isDesktop(context)) {
+    if (!responsive.isMobile(context)) {
       _handleDisplayReactionInfoWeb(
         context: context,
         tapDownDetails: tapDownDetails,

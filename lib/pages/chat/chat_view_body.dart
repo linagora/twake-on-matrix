@@ -189,7 +189,7 @@ class ChatViewBody extends StatelessWidget with MessageContentMixin {
               },
             ),
             ValueListenableBuilder(
-              valueListenable: controller.showFullEmojiPickerOnWebNotifier,
+              valueListenable: controller.showEmojiPickerComposerNotifier,
               builder: (context, display, _) {
                 if (!display) return const SizedBox.shrink();
                 return Positioned(
@@ -197,11 +197,11 @@ class ChatViewBody extends StatelessWidget with MessageContentMixin {
                   right: 64,
                   child: MouseRegion(
                     onHover: (_) {
-                      controller.showFullEmojiPickerOnWebNotifier.value = true;
+                      controller.showEmojiPickerComposerNotifier.value = true;
                     },
                     onExit: (_) async {
                       await Future.delayed(const Duration(seconds: 1));
-                      controller.showFullEmojiPickerOnWebNotifier.value = false;
+                      controller.showEmojiPickerComposerNotifier.value = false;
                     },
                     child: Container(
                       padding: const EdgeInsets.all(12),

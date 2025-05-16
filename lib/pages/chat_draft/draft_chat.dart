@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:desktop_drop/desktop_drop.dart';
-import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/domain/app_state/direct_chat/create_direct_chat_success.dart';
@@ -91,7 +90,7 @@ class DraftChatController extends State<DraftChat>
 
   ValueNotifier<String> inputText = ValueNotifier('');
 
-  ValueNotifier<bool> showEmojiPickerNotifier = ValueNotifier(false);
+  ValueNotifier<bool> showEmojiPickerComposerNotifier = ValueNotifier(false);
 
   final ValueNotifier<Profile?> _userProfile = ValueNotifier(null);
 
@@ -156,7 +155,7 @@ class DraftChatController extends State<DraftChat>
     _createRoomSubscription?.cancel();
     focusSuggestionController.dispose();
     inputText.dispose();
-    showEmojiPickerNotifier.dispose();
+    showEmojiPickerComposerNotifier.dispose();
     _userProfile.dispose();
     super.dispose();
   }
@@ -239,19 +238,12 @@ class DraftChatController extends State<DraftChat>
     });
   }
 
-  void onKeyboardAction() {
-    showEmojiPickerNotifier.value = false;
-    inputFocus.requestFocus();
-  }
-
   void onEmojiAction(TapDownDetails details) {
-    emojiPickerType = EmojiPickerType.keyboard;
-    showEmojiPickerNotifier.value = true;
-    if (PlatformInfos.isMobile) {
-      hideKeyboardChatScreen();
-    } else {
-      inputFocus.requestFocus();
-    }
+    if (PlatformInfos.isMobile) return;
+
+    inputFocus.requestFocus();
+
+    showEmojiPickerComposerNotifier.value = true;
   }
 
   void scrollDown() {
@@ -260,28 +252,21 @@ class DraftChatController extends State<DraftChat>
     }
   }
 
-  void onEmojiBottomSheetSelected(Emoji? emoji) {
-    typeEmoji(emoji);
-    onInputBarChanged(sendController.text);
-    if (PlatformInfos.isWeb) {
-      inputFocus.requestFocus();
-    }
-  }
-
-  void typeEmoji(Emoji? emoji) {
-    if (emoji == null) return;
+  void typeEmoji(String emoji) {
+    if (emoji.isEmpty) return;
     final text = sendController.text;
     final selection = sendController.selection;
     final newText = sendController.text.isEmpty
-        ? emoji.emoji
-        : text.replaceRange(selection.start, selection.end, emoji.emoji);
+        ? emoji
+        : text.replaceRange(selection.start, selection.end, emoji);
     sendController.value = TextEditingValue(
       text: newText,
       selection: TextSelection.collapsed(
         // don't forget an UTF-8 combined emoji might have a length > 1
-        offset: selection.baseOffset + emoji.emoji.length,
+        offset: selection.baseOffset + emoji.length,
       ),
     );
+    inputFocus.requestFocus();
   }
 
   void emojiPickerBackspace() {
@@ -440,11 +425,7 @@ class DraftChatController extends State<DraftChat>
     }
   }
 
-  void _keyboardListener(bool isKeyboardVisible) {
-    if (isKeyboardVisible && showEmojiPickerNotifier.value == true) {
-      showEmojiPickerNotifier.value = false;
-    }
-  }
+  void _keyboardListener(bool isKeyboardVisible) {}
 
   @override
   Widget build(BuildContext context) {

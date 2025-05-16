@@ -1,31 +1,5 @@
 import 'dart:async';
 import 'dart:io';
-import 'package:fluffychat/pages/chat/chat_actions.dart';
-import 'package:fluffychat/pages/chat/events/message_content_mixin.dart';
-import 'package:fluffychat/presentation/extensions/event_update_extension.dart';
-import 'package:fluffychat/presentation/mixins/handle_clipboard_action_mixin.dart';
-import 'package:fluffychat/presentation/mixins/leave_chat_mixin.dart';
-import 'package:fluffychat/presentation/mixins/paste_image_mixin.dart';
-import 'package:fluffychat/presentation/mixins/save_media_to_gallery_android_mixin.dart';
-import 'package:fluffychat/presentation/mixins/save_file_to_twake_downloads_folder_mixin.dart';
-import 'package:fluffychat/presentation/model/chat/view_event_list_ui_state.dart';
-import 'package:fluffychat/resource/image_paths.dart';
-import 'package:fluffychat/utils/extension/basic_event_extension.dart';
-import 'package:fluffychat/utils/extension/event_status_custom_extension.dart';
-import 'package:fluffychat/utils/manager/upload_manager/upload_manager.dart';
-import 'package:fluffychat/utils/matrix_sdk_extensions/filtered_timeline_extension.dart';
-import 'package:fluffychat/utils/room_status_extension.dart';
-import 'package:fluffychat/widgets/context_menu/context_menu_action.dart';
-import 'package:fluffychat/widgets/mixins/popup_menu_widget_style.dart';
-import 'package:fluffychat/widgets/mixins/twake_context_menu_mixin.dart';
-import 'package:flutter_emoji_mart/flutter_emoji_mart.dart' as emoji_mart;
-import 'package:flutter_svg/flutter_svg.dart';
-import 'package:flutter_typeahead/flutter_typeahead.dart';
-import 'package:fluffychat/utils/extension/global_key_extension.dart';
-import 'package:linagora_design_flutter/linagora_design_flutter.dart'
-    hide ImagePicker;
-import 'package:linagora_design_flutter/reaction/reaction_picker.dart';
-import 'package:universal_html/html.dart' as html;
 
 import 'package:adaptive_dialog/adaptive_dialog.dart';
 import 'package:collection/collection.dart';
@@ -34,50 +8,77 @@ import 'package:desktop_drop/desktop_drop.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/domain/usecase/room/chat_get_pinned_events_interactor.dart';
+import 'package:fluffychat/pages/chat/chat_actions.dart';
 import 'package:fluffychat/pages/chat/chat_context_menu_actions.dart';
 import 'package:fluffychat/pages/chat/chat_horizontal_action_menu.dart';
 import 'package:fluffychat/pages/chat/chat_pinned_events/pinned_events_controller.dart';
 import 'package:fluffychat/pages/chat/chat_view.dart';
 import 'package:fluffychat/pages/chat/context_item_chat_action.dart';
 import 'package:fluffychat/pages/chat/dialog_reject_invite_widget.dart';
+import 'package:fluffychat/pages/chat/events/message_content_mixin.dart';
 import 'package:fluffychat/pages/chat/input_bar/focus_suggestion_controller.dart';
 import 'package:fluffychat/pages/chat/recording_dialog.dart';
 import 'package:fluffychat/presentation/enum/chat/right_column_type_enum.dart';
+import 'package:fluffychat/presentation/extensions/event_update_extension.dart';
 import 'package:fluffychat/presentation/mixins/common_media_picker_mixin.dart';
 import 'package:fluffychat/presentation/mixins/go_to_direct_chat_mixin.dart';
+import 'package:fluffychat/presentation/mixins/handle_clipboard_action_mixin.dart';
+import 'package:fluffychat/presentation/mixins/leave_chat_mixin.dart';
 import 'package:fluffychat/presentation/mixins/media_picker_mixin.dart';
+import 'package:fluffychat/presentation/mixins/paste_image_mixin.dart';
+import 'package:fluffychat/presentation/mixins/save_file_to_twake_downloads_folder_mixin.dart';
+import 'package:fluffychat/presentation/mixins/save_media_to_gallery_android_mixin.dart';
 import 'package:fluffychat/presentation/mixins/send_files_mixin.dart';
 import 'package:fluffychat/presentation/mixins/send_files_with_caption_web_mixin.dart';
+import 'package:fluffychat/presentation/model/chat/view_event_list_ui_state.dart';
 import 'package:fluffychat/presentation/model/forward/forward_argument.dart';
+import 'package:fluffychat/resource/image_paths.dart';
 import 'package:fluffychat/utils/account_bundles.dart';
 import 'package:fluffychat/utils/adaptive_bottom_sheet.dart';
 import 'package:fluffychat/utils/dialog/twake_dialog.dart';
+import 'package:fluffychat/utils/extension/basic_event_extension.dart';
+import 'package:fluffychat/utils/extension/event_status_custom_extension.dart';
+import 'package:fluffychat/utils/extension/global_key_extension.dart';
 import 'package:fluffychat/utils/extension/value_notifier_extension.dart';
 import 'package:fluffychat/utils/localized_exception_extension.dart';
+import 'package:fluffychat/utils/manager/upload_manager/upload_manager.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
+import 'package:fluffychat/utils/matrix_sdk_extensions/filtered_timeline_extension.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
 import 'package:fluffychat/utils/network_connection_service.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/utils/responsive/responsive_utils.dart';
+import 'package:fluffychat/utils/room_status_extension.dart';
 import 'package:fluffychat/utils/twake_snackbar.dart';
+import 'package:fluffychat/widgets/context_menu/context_menu_action.dart';
+import 'package:fluffychat/widgets/context_menu/context_menu_action_item_widget.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:fluffychat/widgets/mixins/drag_drog_file_mixin.dart';
 import 'package:fluffychat/widgets/mixins/popup_context_menu_action_mixin.dart';
 import 'package:fluffychat/widgets/mixins/popup_menu_widget_mixin.dart';
+import 'package:fluffychat/widgets/mixins/popup_menu_widget_style.dart';
+import 'package:fluffychat/widgets/mixins/twake_context_menu_mixin.dart';
+import 'package:fluffychat/widgets/mixins/twake_context_menu_style.dart';
 import 'package:fluffychat/widgets/mxc_image.dart';
 import 'package:fluffychat/widgets/twake_app.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:flutter_emoji_mart/flutter_emoji_mart.dart' as emoji_mart;
+import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
-
+import 'package:flutter_svg/flutter_svg.dart';
+import 'package:flutter_typeahead/flutter_typeahead.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:linagora_design_flutter/images_picker/asset_counter.dart';
+import 'package:linagora_design_flutter/linagora_design_flutter.dart'
+    hide ImagePicker;
+import 'package:linagora_design_flutter/reaction/reaction_picker.dart';
 import 'package:matrix/matrix.dart';
 import 'package:record/record.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:flutter_gen/gen_l10n/l10n.dart';
+import 'package:universal_html/html.dart' as html;
 
 import 'send_file_dialog/send_file_dialog.dart';
 import 'sticker_picker_dialog.dart';
@@ -196,6 +197,9 @@ class ChatController extends State<Chat>
   final ValueNotifier<bool> showScrollDownButtonNotifier = ValueNotifier(false);
 
   final ValueNotifier<bool> showEmojiPickerNotifier = ValueNotifier(false);
+
+  final ValueNotifier<bool> showEmojiPickerComposerNotifier =
+      ValueNotifier(false);
 
   final ValueNotifier<DateTime?> stickyTimestampNotifier = ValueNotifier(null);
 
@@ -699,7 +703,7 @@ class ChatController extends State<Chat>
 
     _requestInputFocus();
 
-    showFullEmojiPickerOnWebNotifier.value = true;
+    showEmojiPickerComposerNotifier.value = true;
   }
 
   void _inputFocusListener() {}
@@ -1364,7 +1368,7 @@ class ChatController extends State<Chat>
   void onHover(bool isHovered, int index, Event event) {
     if (index > 0 &&
         timeline!.events[index - 1].eventId == event.eventId &&
-        responsive.isDesktop(context) &&
+        !responsive.isMobile(context) &&
         !selectMode &&
         !openingPopupMenu.value) {
       focusHover.value = isHovered ? event.eventId : null;
@@ -1475,6 +1479,9 @@ class ChatController extends State<Chat>
         break;
       case ChatContextMenuActions.downloadFile:
         downloadFileAction(context, event);
+        break;
+      case ChatContextMenuActions.reply:
+        replyAction(replyTo: event);
         break;
       default:
         break;
@@ -2171,6 +2178,309 @@ class ChatController extends State<Chat>
     }
   }
 
+  void handleOnTapMoreButtonOnWeb(
+    BuildContext context,
+    Event event,
+    TapDownDetails tapDownDetails,
+  ) async {
+    final offset = tapDownDetails.globalPosition;
+    final double positionLeftTap = offset.dx;
+    final double screenWidth = MediaQuery.sizeOf(context).width;
+    final double availableRightSpace = screenWidth - positionLeftTap;
+    final double positionBottomTap = offset.dy;
+    final double heightScreen = MediaQuery.sizeOf(context).height;
+    final double availableBottomSpace = heightScreen - positionBottomTap;
+    double? positionLeft;
+    double? positionRight;
+    double? positionTop;
+    double? positionBottom;
+    Alignment alignment = Alignment.topLeft;
+
+    if (availableRightSpace < defaultMaxWidthReactionPicker) {
+      positionRight = screenWidth - positionLeftTap;
+      alignment = Alignment.topRight;
+    } else {
+      positionLeft = positionLeftTap;
+    }
+
+    if (availableBottomSpace < defaultMaxHeightReactionPicker) {
+      positionBottom = availableBottomSpace;
+    } else {
+      positionTop = positionBottomTap;
+    }
+    _handleStateContextMenu();
+    final myReaction = event
+        .aggregatedEvents(
+          timeline!,
+          RelationshipTypes.reaction,
+        )
+        .where(
+          (event) =>
+              event.senderId == event.room.client.userID &&
+              event.type == 'm.reaction',
+        )
+        .firstOrNull;
+    final relatesTo =
+        (myReaction?.content as Map<String, dynamic>?)?['m.relates_to'];
+    showFullEmojiPickerOnWebNotifier.value = false;
+    final listPopupMenuActions = [
+      ChatContextMenuActions.select,
+      if (event.isCopyable) ChatContextMenuActions.copyMessage,
+      ChatContextMenuActions.pinChat,
+      if (event.status.isAvailable) ChatContextMenuActions.forward,
+      ChatContextMenuActions.reply,
+      if (PlatformInfos.isWeb && event.hasAttachment)
+        ChatContextMenuActions.downloadFile,
+    ];
+    final listContextMenuActions = _mapPopupMenuActionsToContextMenuActions(
+      listPopupMenuActions,
+      event,
+    );
+    await showDialog(
+      context: context,
+      barrierColor: Colors.transparent,
+      barrierDismissible: false,
+      builder: (dialogContext) => GestureDetector(
+        onTap: Navigator.of(dialogContext).pop,
+        child: Material(
+          type: MaterialType.transparency,
+          child: Container(
+            height: 56,
+            width: double.infinity,
+            color: Colors.transparent,
+            child: Stack(
+              children: [
+                ValueListenableBuilder(
+                  valueListenable: showFullEmojiPickerOnWebNotifier,
+                  builder: (context, showFullEmojiPickerOnWeb, child) {
+                    return Positioned(
+                      left: positionLeft,
+                      top: positionTop,
+                      bottom: positionBottom,
+                      right: positionRight,
+                      child: Align(
+                        alignment: alignment,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: [
+                            showFullEmojiPickerOnWeb
+                                ? Container(
+                                    padding: const EdgeInsets.all(12),
+                                    width: 326,
+                                    height: 360,
+                                    decoration: BoxDecoration(
+                                      color: LinagoraRefColors.material()
+                                          .primary[100],
+                                      borderRadius: BorderRadius.circular(
+                                        24,
+                                      ),
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: const Color(0x0000004D)
+                                              .withOpacity(0.15),
+                                          offset: const Offset(0, 4),
+                                          blurRadius: 8,
+                                          spreadRadius: 3,
+                                        ),
+                                        BoxShadow(
+                                          color: const Color(0x00000026)
+                                              .withOpacity(0.3),
+                                          offset: const Offset(0, 1),
+                                          blurRadius: 3,
+                                          spreadRadius: 0,
+                                        ),
+                                      ],
+                                    ),
+                                    child: emoji_mart.EmojiPicker(
+                                      emojiData: Matrix.of(context).emojiData,
+                                      configuration:
+                                          emoji_mart.EmojiPickerConfiguration(
+                                        emojiStyle: Theme.of(context)
+                                            .textTheme
+                                            .headlineLarge!,
+                                        searchEmptyTextStyle: Theme.of(context)
+                                            .textTheme
+                                            .labelMedium!
+                                            .copyWith(
+                                              color:
+                                                  LinagoraRefColors.material()
+                                                      .tertiary[30],
+                                            ),
+                                        searchEmptyWidget: SvgPicture.asset(
+                                          ImagePaths.icSearchEmojiEmpty,
+                                        ),
+                                        searchFocusNode: FocusNode(),
+                                      ),
+                                      itemBuilder: (
+                                        context,
+                                        emojiId,
+                                        emoji,
+                                        callback,
+                                      ) {
+                                        return MouseRegion(
+                                          onHover: (_) {},
+                                          child: emoji_mart.EmojiItem(
+                                            textStyle: Theme.of(context)
+                                                .textTheme
+                                                .headlineLarge!,
+                                            onTap: () {
+                                              callback(
+                                                emojiId,
+                                                emoji,
+                                              );
+                                            },
+                                            emoji: emoji,
+                                          ),
+                                        );
+                                      },
+                                      onEmojiSelected: (
+                                        emojiId,
+                                        emoji,
+                                      ) async {
+                                        final isSelected =
+                                            emoji == (relatesTo?['key'] ?? '');
+                                        if (myReaction == null) {
+                                          Navigator.of(context).pop();
+                                          sendEmojiAction(
+                                            emoji: emoji,
+                                            event: event,
+                                          );
+                                          return;
+                                        }
+
+                                        if (isSelected) {
+                                          Navigator.of(context).pop();
+                                          await myReaction.redactEvent();
+                                          return;
+                                        }
+
+                                        if (!isSelected) {
+                                          Navigator.of(context).pop();
+                                          await myReaction.redactEvent();
+                                          sendEmojiAction(
+                                            emoji: emoji,
+                                            event: event,
+                                          );
+                                          return;
+                                        }
+                                      },
+                                    ),
+                                  )
+                                : ReactionsPicker(
+                                    myEmojiReacted: relatesTo?['key'] ?? '',
+                                    emojiSize: 40,
+                                    onPickEmojiReactionAction: () {
+                                      showFullEmojiPickerOnWebNotifier.value =
+                                          true;
+                                      openingPopupMenu.value = false;
+                                    },
+                                    onClickEmojiReactionAction: (emoji) async {
+                                      final isSelected =
+                                          emoji == (relatesTo?['key'] ?? '');
+                                      if (myReaction == null) {
+                                        sendEmojiAction(
+                                          emoji: emoji,
+                                          event: event,
+                                        );
+                                        return;
+                                      }
+
+                                      if (isSelected) {
+                                        await myReaction.redactEvent();
+                                        return;
+                                      }
+
+                                      if (!isSelected) {
+                                        await myReaction.redactEvent();
+                                        sendEmojiAction(
+                                          emoji: emoji,
+                                          event: event,
+                                        );
+                                        return;
+                                      }
+                                    },
+                                  ),
+                            const SizedBox(height: 8),
+                            Offstage(
+                              offstage: showFullEmojiPickerOnWeb,
+                              child: Card(
+                                elevation: TwakeContextMenuStyle.menuElevation,
+                                margin: EdgeInsets.zero,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(
+                                    TwakeContextMenuStyle.menuBorderRadius,
+                                  ),
+                                ),
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(
+                                    TwakeContextMenuStyle.menuBorderRadius,
+                                  ),
+                                  child: Material(
+                                    color:
+                                        TwakeContextMenuStyle.defaultMenuColor(
+                                      context,
+                                    ),
+                                    child: ConstrainedBox(
+                                      constraints: const BoxConstraints(
+                                        minWidth:
+                                            TwakeContextMenuStyle.menuMinWidth,
+                                        maxWidth:
+                                            TwakeContextMenuStyle.menuMaxWidth,
+                                      ),
+                                      child: IntrinsicWidth(
+                                        child: Padding(
+                                          padding: const EdgeInsets.symmetric(
+                                            vertical: TwakeContextMenuStyle
+                                                .defaultVerticalPadding,
+                                          ),
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: listContextMenuActions
+                                                .map(
+                                                  (action) =>
+                                                      ContextMenuActionItemWidget(
+                                                    action: action,
+                                                    closeMenuAction: () {
+                                                      Navigator.of(
+                                                        dialogContext,
+                                                      ).pop();
+                                                      _handleClickOnContextMenuItem(
+                                                        listPopupMenuActions[
+                                                            listContextMenuActions
+                                                                .indexOf(
+                                                          action,
+                                                        )],
+                                                        event,
+                                                      );
+                                                    },
+                                                  ),
+                                                )
+                                                .toList(),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    ).then((_) {
+      openingPopupMenu.value = false;
+    });
+  }
+
   StreamSubscription? keyboardVisibilitySubscription;
 
   @override
@@ -2242,6 +2552,7 @@ class ChatController extends State<Chat>
     cachedPresenceStreamController.close();
     cachedPresenceNotifier.dispose();
     showFullEmojiPickerOnWebNotifier.dispose();
+    showEmojiPickerComposerNotifier.dispose();
     super.dispose();
   }
 
