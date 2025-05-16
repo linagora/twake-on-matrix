@@ -169,7 +169,7 @@ mixin DeepLinkIntentMixin<T extends StatefulWidget> on State<T> {
       'DeepLinkIntentMixin::_handleSignInWithSameInactiveClient():',
     );
     final confirmResult = await _showConfirmSwitchAccountDialog(
-      userIdExisted: clientExisted.userID!,
+      userIdExisted: matrixState.activatedUserId,
       userId: openAppDeepLink.qualifiedUserId,
     );
 
