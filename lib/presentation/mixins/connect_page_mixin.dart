@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:collection/collection.dart';
 import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
@@ -88,17 +86,7 @@ mixin ConnectPageMixin {
     return '${AppConfig.registrationUrl}?$redirectPublicPlatformOnWeb=$redirectUrlEncode&app=${AppConfig.appParameter}';
   }
 
-  String _getLogoutUrl({
-    required String authUrl,
-    String? redirectUrl,
-  }) {
-    if (redirectUrl != null) {
-      final redirectUrlEncode = base64Url.encode(utf8.encode(redirectUrl));
-      return '$authUrl?logout=1&url=$redirectUrlEncode';
-    } else {
-      return '$authUrl?logout=1';
-    }
-  }
+  String _getLogoutUrl({required String authUrl}) => '$authUrl?logout=1';
 
   Future<String> authenticateWithWebAuth({
     required BuildContext context,
@@ -173,10 +161,7 @@ mixin ConnectPageMixin {
       if (authUrl == null || loginType != LoginType.mLoginToken) return;
 
       final redirectUrl = _generatePostLogoutRedirectUrl();
-      final url = _getLogoutUrl(
-        authUrl: authUrl,
-        redirectUrl: PlatformInfos.isMobile ? redirectUrl : null,
-      );
+      final url = _getLogoutUrl(authUrl: authUrl);
       final urlScheme = _getRedirectUrlScheme(redirectUrl);
 
       final result = await FlutterWebAuth2.authenticate(
@@ -349,8 +334,6 @@ mixin ConnectPageMixin {
   }
 
   Future<void> _logoutActionsOnMobile({required MatrixState matrix}) async {
-    await tryLogoutSso(matrix: matrix);
-
     await TwakeDialog.showFutureLoadingDialogFullScreen(
       future: () async {
         try {
