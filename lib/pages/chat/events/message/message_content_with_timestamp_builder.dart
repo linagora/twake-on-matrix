@@ -108,24 +108,30 @@ class _MessageContentWithTimestampBuilderState
       MessageTypes.BadEncrypted,
     }.contains(widget.event.messageType);
 
-    return OverflowView.flexible(
-      builder: (context, index) {
-        return _messageContentWithTimestampBuilder(
-          context: context,
-          displayTime: displayTime,
-          noBubble: noBubble,
-          timelineText: timelineText,
-          overlayContextMenu: true,
-        );
-      },
-      children: [
-        _messageContentWithTimestampBuilder(
-          context: context,
-          displayTime: displayTime,
-          noBubble: noBubble,
-          timelineText: timelineText,
-        ),
-      ],
+    return Align(
+      alignment: MessageStyle.messageAlignmentGeometry(
+        widget.event,
+        context,
+      ),
+      child: OverflowView.flexible(
+        builder: (context, index) {
+          return _messageContentWithTimestampBuilder(
+            context: context,
+            displayTime: displayTime,
+            noBubble: noBubble,
+            timelineText: timelineText,
+            overlayContextMenu: true,
+          );
+        },
+        children: [
+          _messageContentWithTimestampBuilder(
+            context: context,
+            displayTime: displayTime,
+            noBubble: noBubble,
+            timelineText: timelineText,
+          ),
+        ],
+      ),
     );
   }
 
