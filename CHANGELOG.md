@@ -1,3 +1,7 @@
+## [2.9.2+2330] - 2025-05-20
+### Fixed
+- Hot fix position of message bubble on mobile
+
 ## [2.9.1+2330] - 2025-05-19
 
 ### Added
