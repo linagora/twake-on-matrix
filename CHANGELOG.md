@@ -1,3 +1,28 @@
+## [2.9.1+2330] - 2025-05-19
+
+### Added
+
+- #2325 Show full emoji picker
+- #2329 Display emoji reaction for message
+- #2332 Emoji picker for message compose
+- #2338 Improve context menu in tablet
+
+### Changed
+
+- Upgrade xcode to v16
+- Update dependencies to build with iOS 18
+- Update xcode 16 in github work flow
+- Upgrade dependencies: remove web rtc, wakelock, http, inappwebview
+
+### Fixed
+
+- #2327 Disable/Enable invitation base on well-known properties
+- Prevent rebuild when listen new event
+- #2333 Try to logout in mobile in case of Bad URL
+- #2334 Remove soft logout logic for mobile
+- #2337 Fix SSO logout for web
+- #2331 Fix crash when video display in chat with wrong thumbnail information
+
 ## [2.9.0+2330] - 2025-05-05
 ### Added
 - Integrate with Cozy
