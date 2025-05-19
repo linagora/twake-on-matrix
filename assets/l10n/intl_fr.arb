@@ -3252,5 +3252,11 @@
   "selectAnEmailOrPhoneYouWantSendTheInvitationTo": "Sélectionnez l'adresse e-mail ou le téléphone auquel vous souhaitez envoyer l'invitation",
   "@selectAnEmailOrPhoneYouWantSendTheInvitationTo": {},
   "phoneNumber": "Numéro de téléphone",
-  "@phoneNumber": {}
+  "@phoneNumber": {},
+  "contactLookupFailed": "Échec de la recherche du contact.",
+  "@contactLookupFailed": {},
+  "verifyWithAnotherDevice": "Vérifier avec un autre appareil",
+  "@verifyWithAnotherDevice": {},
+  "invitationHasBeenSuccessfullySent": "L'invitation a bien été envoyée !",
+  "@invitationHasBeenSuccessfullySent": {}
 }
