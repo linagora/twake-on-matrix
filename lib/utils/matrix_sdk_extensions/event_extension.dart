@@ -5,17 +5,16 @@ import 'package:fluffychat/domain/model/extensions/string_extension.dart';
 import 'package:fluffychat/utils/clipboard.dart';
 import 'package:fluffychat/utils/dialog/twake_dialog.dart';
 import 'package:fluffychat/utils/extension/event_info_extension.dart';
+import 'package:fluffychat/utils/extension/mime_type_extension.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
-import 'package:fluffychat/utils/extension/mime_type_extension.dart';
 import 'package:fluffychat/utils/size_string.dart';
 import 'package:fluffychat/utils/string_extension.dart';
 import 'package:fluffychat/utils/twake_snackbar.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:future_loading_dialog/future_loading_dialog.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
-
+import 'package:future_loading_dialog/future_loading_dialog.dart';
 import 'package:matrix/matrix.dart';
 
 import 'matrix_file_extension.dart';
@@ -233,5 +232,48 @@ extension LocalizedBody on Event {
       return hasThumbnail ? isThumbnailEncrypted : isAttachmentEncrypted;
     }
     return isAttachmentEncrypted;
+  }
+
+  bool isDisplayOnlyEmoji() {
+    return onlyEmotes && numberEmotes < 7;
+  }
+
+  TextStyle? textStyleForOnlyEmoji(BuildContext context) {
+    switch (numberEmotes) {
+      case 1:
+        return Theme.of(context).textTheme.bodyLarge?.copyWith(
+              fontSize: 79.5,
+              color: Theme.of(context).colorScheme.onSurface,
+            );
+      case 2:
+        return Theme.of(context).textTheme.bodyLarge?.copyWith(
+              fontSize: 63.24,
+              color: Theme.of(context).colorScheme.onSurface,
+            );
+      case 3:
+        return Theme.of(context).textTheme.bodyLarge?.copyWith(
+              fontSize: 54.2,
+              color: Theme.of(context).colorScheme.onSurface,
+            );
+      case 4:
+        return Theme.of(context).textTheme.bodyLarge?.copyWith(
+              fontSize: 45.17,
+              color: Theme.of(context).colorScheme.onSurface,
+            );
+      case 5:
+        return Theme.of(context).textTheme.bodyLarge?.copyWith(
+              fontSize: 36.14,
+              color: Theme.of(context).colorScheme.onSurface,
+            );
+      case 6:
+        return Theme.of(context).textTheme.bodyLarge?.copyWith(
+              fontSize: 18.07,
+              color: Theme.of(context).colorScheme.onSurface,
+            );
+      default:
+        return Theme.of(context).textTheme.bodyLarge?.copyWith(
+              color: Theme.of(context).colorScheme.onSurface,
+            );
+    }
   }
 }
