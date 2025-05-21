@@ -1,14 +1,15 @@
 import 'dart:math';
+
 import 'package:fluffychat/config/app_config.dart';
+import 'package:fluffychat/pages/chat/events/message/display_name_widget.dart';
 import 'package:fluffychat/pages/chat/events/message/message_style.dart';
 import 'package:fluffychat/pages/chat/events/message_time_style.dart';
-import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
-import 'package:fluffychat/utils/string_extension.dart';
-import 'package:flutter_gen/gen_l10n/l10n.dart';
-import 'package:fluffychat/pages/chat/events/message/display_name_widget.dart';
 import 'package:fluffychat/presentation/model/chat/events/message/message_metrics.dart';
+import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
+import 'package:fluffychat/utils/string_extension.dart';
 import 'package:flutter/material.dart' hide Visibility;
+import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:intl/intl.dart' hide TextDirection;
 import 'package:linagora_design_flutter/colors/linagora_ref_colors.dart';
 import 'package:matrix/matrix.dart';
@@ -103,11 +104,13 @@ mixin MessageContentBuilderMixin {
           hideReply: true,
           plaintextBody: true,
         ),
-        style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-              color: Theme.of(
-                context,
-              ).colorScheme.onSurface,
-            ),
+        style: event.isDisplayOnlyEmoji()
+            ? event.textStyleForOnlyEmoji(context)
+            : Theme.of(context).textTheme.bodyLarge?.copyWith(
+                  color: Theme.of(
+                    context,
+                  ).colorScheme.onSurface,
+                ),
       ),
       textDirection: TextDirection.ltr,
     )..layout(minWidth: 0, maxWidth: messageMaxWidth);
