@@ -83,6 +83,8 @@ class Message extends StatefulWidget {
   final void Function(Event)? onForward;
   final void Function(Event)? onCopy;
   final void Function(Event)? onPin;
+  final void Function(Event)? onSaveToDownload;
+  final void Function(Event)? onSaveToGallery;
   final void Function(BuildContext context, Event, TapDownDetails)?
       onTapMoreButton;
 
@@ -117,6 +119,8 @@ class Message extends StatefulWidget {
     this.onForward,
     this.onCopy,
     this.onPin,
+    this.onSaveToDownload,
+    this.onSaveToGallery,
     this.onTapMoreButton,
   });
 
@@ -250,6 +254,8 @@ class _MessageState extends State<Message> with MessageAvatarMixin {
               onCopy: widget.onCopy,
               onLongPressMessage: widget.onLongPressMessage,
               onPin: widget.onPin,
+              saveToDownload: widget.onSaveToDownload,
+              saveToGallery: widget.onSaveToGallery,
               onTapMoreButton: widget.onTapMoreButton,
             ),
           ),
