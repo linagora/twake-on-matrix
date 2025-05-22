@@ -2,6 +2,7 @@ import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/pages/chat/events/message/display_name_widget.dart';
 import 'package:fluffychat/pages/chat/events/message/message.dart';
 import 'package:fluffychat/pages/chat/events/message/message_content_builder.dart';
+import 'package:fluffychat/pages/chat/events/message/message_context_menu_action.dart';
 import 'package:fluffychat/pages/chat/events/message/message_style.dart';
 import 'package:fluffychat/pages/chat/events/message/multi_platform_message_container.dart';
 import 'package:fluffychat/pages/chat/events/message_reactions.dart';
@@ -11,6 +12,7 @@ import 'package:fluffychat/utils/date_time_extension.dart';
 import 'package:fluffychat/utils/extension/build_context_extension.dart';
 import 'package:fluffychat/utils/extension/event_status_custom_extension.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
+import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/utils/responsive/responsive_utils.dart';
 import 'package:fluffychat/widgets/context_menu/context_menu_action.dart';
 import 'package:fluffychat/widgets/context_menu/context_menu_action_item.dart';
@@ -51,6 +53,8 @@ class MessageContentWithTimestampBuilder extends StatefulWidget {
   final void Function(Event)? onForward;
   final void Function(Event)? onCopy;
   final void Function(Event)? onPin;
+  final void Function(Event)? saveToDownload;
+  final void Function(Event)? saveToGallery;
   final void Function(BuildContext context, Event, TapDownDetails)?
       onTapMoreButton;
 
@@ -80,6 +84,8 @@ class MessageContentWithTimestampBuilder extends StatefulWidget {
     this.onCopy,
     this.onLongPressMessage,
     this.onPin,
+    this.saveToDownload,
+    this.saveToGallery,
     this.onTapMoreButton,
   });
 
@@ -91,6 +97,20 @@ class MessageContentWithTimestampBuilder extends StatefulWidget {
 class _MessageContentWithTimestampBuilderState
     extends State<MessageContentWithTimestampBuilder> {
   final ValueNotifier<bool> _displayEmojiPicker = ValueNotifier(false);
+
+  List<MessageContextMenuAction> _messageContextMenu(Event event) => [
+        MessageContextMenuAction.reply,
+        MessageContextMenuAction.forward,
+        MessageContextMenuAction.copy,
+        MessageContextMenuAction.select,
+        MessageContextMenuAction.pin,
+        if (PlatformInfos.isAndroid) ...[
+          if (event.hasAttachment && !event.isVideoOrImage)
+            MessageContextMenuAction.saveToDownload,
+        ],
+        if (event.isVideoOrImage && !PlatformInfos.isWeb)
+          MessageContextMenuAction.saveToGallery,
+      ];
 
   @override
   Widget build(BuildContext context) {
@@ -300,157 +320,53 @@ class _MessageContentWithTimestampBuilderState
                                                 borderRadius:
                                                     BorderRadius.circular(20),
                                               ),
-                                              items: [
-                                                PullDownMenuItem(
-                                                  title:
-                                                      L10n.of(context)!.reply,
-                                                  itemTheme:
-                                                      PullDownMenuItemTheme(
-                                                    textStyle: context
-                                                        .textTheme.bodyLarge!
-                                                        .copyWith(
-                                                      color: LinagoraRefColors
-                                                              .material()
-                                                          .neutral[30],
+                                              items: _messageContextMenu(event)
+                                                  .map(
+                                                    (item) => PullDownMenuItem(
+                                                      title: item.getTitle(
+                                                        context,
+                                                        event,
+                                                      ),
+                                                      itemTheme:
+                                                          PullDownMenuItemTheme(
+                                                        textStyle: context
+                                                            .textTheme
+                                                            .bodyLarge!
+                                                            .copyWith(
+                                                          color:
+                                                              LinagoraRefColors
+                                                                      .material()
+                                                                  .neutral[30],
+                                                        ),
+                                                      ),
+                                                      icon: item.getIcon(event),
+                                                      onTap: () =>
+                                                          item.onTap(context),
+                                                      iconWidget: item
+                                                                  .imagePath(
+                                                                event,
+                                                              ) !=
+                                                              null
+                                                          ? SvgPicture.asset(
+                                                              item.imagePath(
+                                                                    event,
+                                                                  ) ??
+                                                                  '',
+                                                              width: 24,
+                                                              height: 24,
+                                                              colorFilter:
+                                                                  ColorFilter
+                                                                      .mode(
+                                                                LinagoraRefColors
+                                                                        .material()
+                                                                    .neutral[30]!,
+                                                                BlendMode.srcIn,
+                                                              ),
+                                                            )
+                                                          : null,
                                                     ),
-                                                  ),
-                                                  onTap: () {
-                                                    Navigator.of(context)
-                                                        .pop('reply');
-                                                  },
-                                                  iconWidget: SvgPicture.asset(
-                                                    ImagePaths.icReply,
-                                                    width: 24,
-                                                    height: 24,
-                                                    colorFilter:
-                                                        ColorFilter.mode(
-                                                      LinagoraRefColors
-                                                              .material()
-                                                          .neutral[30]!,
-                                                      BlendMode.srcIn,
-                                                    ),
-                                                  ),
-                                                ),
-                                                PullDownMenuItem(
-                                                  title:
-                                                      L10n.of(context)!.forward,
-                                                  itemTheme:
-                                                      PullDownMenuItemTheme(
-                                                    textStyle: context
-                                                        .textTheme.bodyLarge!
-                                                        .copyWith(
-                                                      color: LinagoraRefColors
-                                                              .material()
-                                                          .neutral[30],
-                                                    ),
-                                                    iconActionTextStyle: context
-                                                        .textTheme.bodyLarge!
-                                                        .copyWith(
-                                                      color: LinagoraRefColors
-                                                              .material()
-                                                          .neutral[30],
-                                                    ),
-                                                  ),
-                                                  onTap: () {
-                                                    Navigator.of(context)
-                                                        .pop('forward');
-                                                  },
-                                                  icon: Icons.shortcut,
-                                                ),
-                                                PullDownMenuItem(
-                                                  title: L10n.of(context)!.copy,
-                                                  itemTheme:
-                                                      PullDownMenuItemTheme(
-                                                    textStyle: context
-                                                        .textTheme.bodyLarge!
-                                                        .copyWith(
-                                                      color: LinagoraRefColors
-                                                              .material()
-                                                          .neutral[30],
-                                                    ),
-                                                    iconActionTextStyle: context
-                                                        .textTheme.bodyLarge!
-                                                        .copyWith(
-                                                      color: LinagoraRefColors
-                                                              .material()
-                                                          .neutral[30],
-                                                    ),
-                                                  ),
-                                                  onTap: () {
-                                                    Navigator.of(context)
-                                                        .pop('copy');
-                                                  },
-                                                  icon: Icons.content_copy,
-                                                ),
-                                                PullDownMenuItem(
-                                                  title:
-                                                      L10n.of(context)!.select,
-                                                  itemTheme:
-                                                      PullDownMenuItemTheme(
-                                                    textStyle: context
-                                                        .textTheme.bodyLarge!
-                                                        .copyWith(
-                                                      color: LinagoraRefColors
-                                                              .material()
-                                                          .neutral[30],
-                                                    ),
-                                                    iconActionTextStyle: context
-                                                        .textTheme.bodyLarge!
-                                                        .copyWith(
-                                                      color: LinagoraRefColors
-                                                              .material()
-                                                          .neutral[30],
-                                                    ),
-                                                  ),
-                                                  icon: Icons
-                                                      .check_circle_outline_outlined,
-                                                  onTap: () {
-                                                    Navigator.of(context)
-                                                        .pop('select');
-                                                  },
-                                                ),
-                                                PullDownMenuItem(
-                                                  title: event.isPinned
-                                                      ? L10n.of(context)!.unpin
-                                                      : L10n.of(context)!.pin,
-                                                  itemTheme:
-                                                      PullDownMenuItemTheme(
-                                                    textStyle: context
-                                                        .textTheme.bodyLarge!
-                                                        .copyWith(
-                                                      color: LinagoraRefColors
-                                                              .material()
-                                                          .neutral[30],
-                                                    ),
-                                                    iconActionTextStyle: context
-                                                        .textTheme.bodyLarge!
-                                                        .copyWith(
-                                                      color: LinagoraRefColors
-                                                              .material()
-                                                          .neutral[30],
-                                                    ),
-                                                  ),
-                                                  icon: event.isPinned
-                                                      ? null
-                                                      : Icons.push_pin_outlined,
-                                                  iconWidget: event.isPinned
-                                                      ? SvgPicture.asset(
-                                                          ImagePaths.icUnpin,
-                                                          colorFilter:
-                                                              ColorFilter.mode(
-                                                            LinagoraSysColors
-                                                                    .material()
-                                                                .onBackground,
-                                                            BlendMode.srcIn,
-                                                          ),
-                                                        )
-                                                      : null,
-                                                  onTap: () {
-                                                    Navigator.of(context)
-                                                        .pop('pin');
-                                                  },
-                                                ),
-                                              ],
+                                                  )
+                                                  .toList(),
                                             ),
                                           ),
                                     widgetAlignment: event.isOwnMessage
@@ -522,6 +438,12 @@ class _MessageContentWithTimestampBuilderState
           break;
         case 'pin':
           widget.onPin?.call(widget.event);
+          break;
+        case 'saveToDownload':
+          widget.saveToDownload?.call(widget.event);
+          break;
+        case 'saveToGallery':
+          widget.saveToGallery?.call(widget.event);
           break;
       }
     }

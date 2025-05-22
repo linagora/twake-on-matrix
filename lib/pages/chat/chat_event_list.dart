@@ -211,6 +211,13 @@ class ChatEventList extends StatelessWidget {
                             onPin: (event) {
                               controller.pinEventAction(event);
                             },
+                            onSaveToDownload: (event) =>
+                                controller.saveSelectedEventToDownloadAndroid(
+                              context,
+                              event,
+                            ),
+                            onSaveToGallery: (event) => controller
+                                .saveSelectedEventToGallery(context, event),
                             onTapMoreButton:
                                 controller.handleOnTapMoreButtonOnWeb,
                           )
