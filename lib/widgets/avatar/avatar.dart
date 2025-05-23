@@ -33,6 +33,9 @@ class Avatar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
+      color: Colors.transparent,
+      type: MaterialType.transparency,
+      shadowColor: Colors.transparent,
       child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(size / 2),
