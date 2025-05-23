@@ -1,3 +1,10 @@
+## [2.9.3+2330] - 2025-05-20
+### Fixed
+- #2356 Add download action in context menu mobile
+- #2053 Fix redirect after create chat in mobile
+- #2322 Bigger in emoji message
+- Translation
+
 ## [2.9.2+2330] - 2025-05-20
 ### Fixed
 - Hot fix position of message bubble on mobile
