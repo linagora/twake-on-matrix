@@ -87,14 +87,19 @@ class MediaAPI {
     CancelToken? cancelToken,
     ProgressCallback? onReceiveProgress,
   }) async {
-    final response = await _client
-        .download(
+    final response = await _client.download(
       uriPath,
       savePath: savePath,
-      onReceiveProgress: onReceiveProgress,
+      options: Options(
+        headers: {HttpHeaders.acceptEncodingHeader: '*'}, // Disable gzip
+      ),
+      onReceiveProgress: (receive, total) {
+        if (onReceiveProgress != null) {
+          onReceiveProgress(receive, total);
+        }
+      },
       cancelToken: cancelToken,
-    )
-        .onError((error, stackTrace) {
+    ).onError((error, stackTrace) {
       if (error is DioException && error.type == DioExceptionType.cancel) {
         throw CancelRequestException();
       } else if (error is DioDuplicateDownloadException) {
