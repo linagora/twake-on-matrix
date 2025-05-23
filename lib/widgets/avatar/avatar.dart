@@ -32,21 +32,23 @@ class Avatar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(size / 2),
-      child: ClipRRect(
+    return Material(
+      child: InkWell(
+        onTap: onTap,
         borderRadius: BorderRadius.circular(size / 2),
-        child: MxcImage(
-          key: Key(mxContent.toString()),
-          uri: mxContent,
-          fit: BoxFit.cover,
-          width: size,
-          height: size,
-          cacheWidth: (size * MediaQuery.devicePixelRatioOf(context)).round(),
-          cacheKey: mxContent.toString(),
-          animated: true,
-          placeholder: (context) => _fallbackAvatar(),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(size / 2),
+          child: MxcImage(
+            key: Key(mxContent.toString()),
+            uri: mxContent,
+            fit: BoxFit.cover,
+            width: size,
+            height: size,
+            cacheWidth: (size * MediaQuery.devicePixelRatioOf(context)).round(),
+            cacheKey: mxContent.toString(),
+            animated: true,
+            placeholder: (context) => _fallbackAvatar(),
+          ),
         ),
       ),
     );

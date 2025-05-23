@@ -1,9 +1,9 @@
 import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
+import 'package:fluffychat/utils/extension/build_context_extension.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
 import 'package:fluffychat/utils/responsive/responsive_utils.dart';
 import 'package:flutter/material.dart';
-import 'package:fluffychat/utils/extension/build_context_extension.dart';
 import 'package:matrix/matrix.dart';
 
 class MessageStyle {
@@ -150,6 +150,7 @@ class MessageStyle {
 
   static const double paddingAllPushpin = 0;
   static const Color borderColorReceivedBubble = Color(0xFFEBEDF0);
+
   static MainAxisAlignment messageAlignment(
     Event event,
     BuildContext context,
@@ -157,4 +158,12 @@ class MessageStyle {
       responsiveUtils.isMobile(context) && event.isOwnMessage
           ? MainAxisAlignment.end
           : MainAxisAlignment.start;
+
+  static AlignmentGeometry messageAlignmentGeometry(
+    Event event,
+    BuildContext context,
+  ) =>
+      responsiveUtils.isMobile(context) && event.isOwnMessage
+          ? Alignment.topRight
+          : Alignment.topLeft;
 }

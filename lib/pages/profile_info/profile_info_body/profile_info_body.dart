@@ -17,10 +17,9 @@ import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/utils/twake_snackbar.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
+import 'package:go_router/go_router.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
-
 import 'package:matrix/matrix.dart';
 
 class ProfileInfoBody extends StatefulWidget {
@@ -102,27 +101,16 @@ class ProfileInfoBodyController extends State<ProfileInfoBody> {
         Matrix.of(context).client.userID) {
       Router.neglect(
         context,
-        () => PlatformInfos.isMobile
-            ? context.push(
-                '/$path/draftChat',
-                extra: {
-                  PresentationContactConstant.receiverId:
-                      contactPresentationSearch.matrixId ?? '',
-                  PresentationContactConstant.displayName:
-                      contactPresentationSearch.displayName ?? '',
-                  PresentationContactConstant.status: '',
-                },
-              )
-            : context.go(
-                '/$path/draftChat',
-                extra: {
-                  PresentationContactConstant.receiverId:
-                      contactPresentationSearch.matrixId ?? '',
-                  PresentationContactConstant.displayName:
-                      contactPresentationSearch.displayName ?? '',
-                  PresentationContactConstant.status: '',
-                },
-              ),
+        () => context.go(
+          '/$path/draftChat',
+          extra: {
+            PresentationContactConstant.receiverId:
+                contactPresentationSearch.matrixId ?? '',
+            PresentationContactConstant.displayName:
+                contactPresentationSearch.displayName ?? '',
+            PresentationContactConstant.status: '',
+          },
+        ),
       );
     }
   }
