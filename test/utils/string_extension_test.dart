@@ -739,4 +739,59 @@ void main() {
       expect(phoneNumber.normalizePhoneNumberToInvite(), equals(expected));
     });
   });
+
+  group('ListStringExtension.combineRecentReactions', () {
+    test('adds new emoji to the front', () {
+      final reactions = ['😀', '😂'];
+      final result = reactions.combineRecentReactions(emojiId: '😍');
+      expect(result, ['😍', '😀', '😂']);
+    });
+
+    test('moves existing emoji to the front', () {
+      final reactions = ['😀', '😂', '😍'];
+      final result = reactions.combineRecentReactions(emojiId: '😂');
+      expect(result, ['😂', '😀', '😍']);
+    });
+
+    test('removes oldest emoji if over max size', () {
+      final reactions =
+          List.generate(12, (i) => String.fromCharCode(0x1F600 + i));
+      final result = reactions.combineRecentReactions(emojiId: '😎');
+      expect(result.first, '😎');
+      expect(result.length, 12);
+      expect(result.contains(reactions.last), isFalse);
+    });
+
+    test('does not duplicate emoji', () {
+      final reactions =
+          List.generate(12, (i) => String.fromCharCode(0x1F600 + i));
+      final result = reactions.combineRecentReactions(emojiId: reactions.first);
+      expect(result, reactions);
+      expect(result.length, 12);
+    });
+
+    test('handles empty list', () {
+      final reactions = <String>[];
+      final result = reactions.combineRecentReactions(emojiId: '😀');
+      expect(result, ['😀']);
+    });
+
+    test('handles adding same emoji repeatedly', () {
+      var reactions = <String>[];
+      for (int i = 0; i < 5; i++) {
+        reactions = reactions.combineRecentReactions(emojiId: '😀');
+      }
+      expect(reactions, ['😀']);
+    });
+
+    test('keeps only maxRecentReactionsSize items', () {
+      final emojis = List.generate(20, (i) => String.fromCharCode(0x1F600 + i));
+      List<String> reactions = [];
+      for (final emoji in emojis) {
+        reactions = reactions.combineRecentReactions(emojiId: emoji);
+      }
+      expect(reactions.length, 12);
+      expect(reactions, emojis.reversed.take(12).toList());
+    });
+  });
 }

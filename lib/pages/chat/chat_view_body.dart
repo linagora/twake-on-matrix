@@ -277,6 +277,7 @@ class ChatViewBody extends StatelessWidget with MessageContentMixin {
                           emoji,
                         ) {
                           controller.typeEmoji(emoji);
+                          controller.handleStoreRecentReactions(emoji);
                         },
                       ),
                     ),

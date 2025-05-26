@@ -1048,7 +1048,6 @@ class ChatController extends State<Chat>
 
   void typeEmoji(String emoji) {
     if (emoji.isEmpty) return;
-    _handleStoreRecentReactions(emoji);
     final text = sendController.text;
     final selection = sendController.selection;
     final newText = sendController.text.isEmpty
@@ -1064,7 +1063,7 @@ class ChatController extends State<Chat>
     _requestInputFocus();
   }
 
-  void _handleStoreRecentReactions(String? emoji) async {
+  void handleStoreRecentReactions(String? emoji) async {
     final emojiId = Matrix.of(context).emojiData.getIdByEmoji(emoji ?? '');
 
     if (emojiId.isNotEmpty) {
@@ -1078,7 +1077,7 @@ class ChatController extends State<Chat>
     String? emoji,
     required Event event,
   }) async {
-    _handleStoreRecentReactions(emoji);
+    handleStoreRecentReactions(emoji);
     await room!.sendReaction(
       event.eventId,
       emoji!,
