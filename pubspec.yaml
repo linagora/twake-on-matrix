@@ -68,7 +68,7 @@ dependencies:
   flutter_emoji_mart:
     git:
       url: git@github.com:linagora/emoji_mart.git
-      ref: master
+      ref: add-recent-emoji
 
   adaptive_dialog: ^1.8.0+1
   flutter_adaptive_scaffold: ^0.1.4

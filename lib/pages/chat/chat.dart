@@ -8,6 +8,8 @@ import 'package:desktop_drop/desktop_drop.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
+import 'package:fluffychat/domain/usecase/reactions/get_recent_reactions_interactor.dart';
+import 'package:fluffychat/domain/usecase/reactions/store_recent_reactions_interactor.dart';
 import 'package:fluffychat/domain/usecase/room/chat_get_pinned_events_interactor.dart';
 import 'package:fluffychat/pages/chat/chat_actions.dart';
 import 'package:fluffychat/pages/chat/chat_context_menu_actions.dart';
@@ -143,6 +145,12 @@ class ChatController extends State<Chat>
   final getPinnedMessageInteractor = getIt.get<ChatGetPinnedEventsInteractor>();
 
   final pinnedEventsController = getIt.get<PinnedEventsController>();
+
+  final getRecentReactionsInteractor =
+      getIt.get<GetRecentReactionsInteractor>();
+
+  final storeRecentReactionsInteractor =
+      getIt.get<StoreRecentReactionsInteractor>();
 
   final ValueKey chatComposerTypeAheadKey =
       const ValueKey('chatComposerTypeAheadKey');
@@ -1040,6 +1048,7 @@ class ChatController extends State<Chat>
 
   void typeEmoji(String emoji) {
     if (emoji.isEmpty) return;
+    _handleStoreRecentReactions(emoji);
     final text = sendController.text;
     final selection = sendController.selection;
     final newText = sendController.text.isEmpty
@@ -1055,10 +1064,21 @@ class ChatController extends State<Chat>
     _requestInputFocus();
   }
 
+  void _handleStoreRecentReactions(String? emoji) async {
+    final emojiId = Matrix.of(context).emojiData.getIdByEmoji(emoji ?? '');
+
+    if (emojiId.isNotEmpty) {
+      await storeRecentReactionsInteractor.execute(
+        emojiId: emojiId,
+      );
+    }
+  }
+
   void sendEmojiAction({
     String? emoji,
     required Event event,
   }) async {
+    _handleStoreRecentReactions(emoji);
     await room!.sendReaction(
       event.eventId,
       emoji!,
@@ -1620,8 +1640,11 @@ class ChatController extends State<Chat>
                                 ),
                                 child: emoji_mart.EmojiPicker(
                                   emojiData: Matrix.of(context).emojiData,
+                                  recentEmoji:
+                                      getRecentReactionsInteractor.execute(),
                                   configuration:
                                       emoji_mart.EmojiPickerConfiguration(
+                                    showRecentTab: true,
                                     emojiStyle: Theme.of(context)
                                         .textTheme
                                         .headlineLarge!,
@@ -2297,8 +2320,11 @@ class ChatController extends State<Chat>
                                     ),
                                     child: emoji_mart.EmojiPicker(
                                       emojiData: Matrix.of(context).emojiData,
+                                      recentEmoji: getRecentReactionsInteractor
+                                          .execute(),
                                       configuration:
                                           emoji_mart.EmojiPickerConfiguration(
+                                        showRecentTab: true,
                                         emojiStyle: Theme.of(context)
                                             .textTheme
                                             .headlineLarge!,

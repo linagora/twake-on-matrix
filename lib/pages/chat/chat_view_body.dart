@@ -233,7 +233,10 @@ class ChatViewBody extends StatelessWidget with MessageContentMixin {
                       ),
                       child: EmojiPicker(
                         emojiData: Matrix.of(context).emojiData,
+                        recentEmoji:
+                            controller.getRecentReactionsInteractor.execute(),
                         configuration: EmojiPickerConfiguration(
+                          showRecentTab: true,
                           emojiStyle:
                               Theme.of(context).textTheme.headlineLarge!,
                           searchEmptyTextStyle: Theme.of(context)

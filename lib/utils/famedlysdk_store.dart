@@ -50,4 +50,14 @@ class Store {
     await _setupLocalStorage();
     return _prefs!.setInt(key, value);
   }
+
+  Future<bool> setItems(String key, List<String> values) async {
+    await _setupLocalStorage();
+    return _prefs!.setStringList(key, values);
+  }
+
+  Future<List<String>?> getItems(String key) async {
+    await _setupLocalStorage();
+    return _prefs!.getStringList(key);
+  }
 }

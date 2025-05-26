@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:collection/collection.dart';
 import 'package:file_saver/file_saver.dart';
+import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -418,5 +419,25 @@ extension StringCasingExtension on String {
 
   bool isPhoneNumberFormatted() {
     return RegExp(r'^\+?$|^\+?\d+$').hasMatch(replaceAll(' ', ''));
+  }
+}
+
+extension ListStringExtension on List<String> {
+  List<String> combineRecentReactions({
+    required String emojiId,
+  }) {
+    final updatedReactions = List<String>.from(this);
+    final emojiExisted = updatedReactions.contains(emojiId);
+    if (emojiExisted) {
+      updatedReactions.remove(emojiId);
+    }
+    updatedReactions.insert(0, emojiId);
+    if (updatedReactions.length > AppConfig.maxRecentReactionsSize) {
+      updatedReactions.removeRange(
+        AppConfig.maxRecentReactionsSize,
+        updatedReactions.length,
+      );
+    }
+    return updatedReactions;
   }
 }

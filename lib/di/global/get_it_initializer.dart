@@ -10,6 +10,7 @@ import 'package:fluffychat/data/datasource/invitation/invitation_datasource.dart
 import 'package:fluffychat/data/datasource/localizations/localizations_datasource.dart';
 import 'package:fluffychat/data/datasource/media/media_data_source.dart';
 import 'package:fluffychat/data/datasource/multiple_account/multiple_account_datasource.dart';
+import 'package:fluffychat/data/datasource/reactions/reactions_datasource.dart';
 import 'package:fluffychat/data/datasource/recovery_words_data_source.dart';
 import 'package:fluffychat/data/datasource/server_config_datasource.dart';
 import 'package:fluffychat/data/datasource/server_search_datasource.dart';
@@ -25,6 +26,7 @@ import 'package:fluffychat/data/datasource_impl/invitation/invitation_datasource
 import 'package:fluffychat/data/datasource_impl/localizations/localizations_datasource_impl.dart';
 import 'package:fluffychat/data/datasource_impl/media/media_data_source_impl.dart';
 import 'package:fluffychat/data/datasource_impl/multiple_account/multiple_account_datasource_impl.dart';
+import 'package:fluffychat/data/datasource_impl/reactions/reactions_datasource_impl.dart';
 import 'package:fluffychat/data/datasource_impl/recovery_words_data_source_impl.dart';
 import 'package:fluffychat/data/datasource_impl/server_config_datasource_impl.dart';
 import 'package:fluffychat/data/datasource_impl/server_search_datasource_impl.dart';
@@ -32,6 +34,7 @@ import 'package:fluffychat/data/datasource_impl/tom_configurations_datasource_im
 import 'package:fluffychat/data/local/contact/shared_preferences_contact_cache_manager.dart';
 import 'package:fluffychat/data/local/localizations/language_cache_manager.dart';
 import 'package:fluffychat/data/local/multiple_account/multiple_account_cache_manager.dart';
+import 'package:fluffychat/data/local/reaction/reaction_cache_manager.dart';
 import 'package:fluffychat/data/network/contact/address_book_api.dart';
 import 'package:fluffychat/data/network/contact/tom_contact_api.dart';
 import 'package:fluffychat/data/network/dio_cache_option.dart';
@@ -50,6 +53,7 @@ import 'package:fluffychat/data/repository/invitation/invitation_repository_impl
 import 'package:fluffychat/data/repository/localizations/localizations_repository_impl.dart';
 import 'package:fluffychat/data/repository/media/media_repository_impl.dart';
 import 'package:fluffychat/data/repository/multiple_account/multiple_account_repository_impl.dart';
+import 'package:fluffychat/data/repository/reactions/reactions_repository_impl.dart';
 import 'package:fluffychat/data/repository/recovery_words_repository_impl.dart';
 import 'package:fluffychat/data/repository/server_config_repository_impl.dart';
 import 'package:fluffychat/data/repository/server_search_repository_impl.dart';
@@ -67,6 +71,7 @@ import 'package:fluffychat/domain/repository/invitation/invitation_repository.da
 import 'package:fluffychat/domain/repository/localizations/localizations_repository.dart';
 import 'package:fluffychat/domain/repository/multiple_account/multiple_account_repository.dart';
 import 'package:fluffychat/domain/repository/phonebook_contact_repository.dart';
+import 'package:fluffychat/domain/repository/reactions/reactions_repository.dart';
 import 'package:fluffychat/domain/repository/recovery_words_repository.dart';
 import 'package:fluffychat/domain/repository/server_config_repository.dart';
 import 'package:fluffychat/domain/repository/server_search_repository.dart';
@@ -91,6 +96,8 @@ import 'package:fluffychat/domain/usecase/invitation/hive_get_invitation_status_
 import 'package:fluffychat/domain/usecase/invitation/send_invitation_interactor.dart';
 import 'package:fluffychat/domain/usecase/invitation/store_invitation_status_interactor.dart';
 import 'package:fluffychat/domain/usecase/preview_url/get_preview_url_interactor.dart';
+import 'package:fluffychat/domain/usecase/reactions/get_recent_reactions_interactor.dart';
+import 'package:fluffychat/domain/usecase/reactions/store_recent_reactions_interactor.dart';
 import 'package:fluffychat/domain/usecase/recovery/delete_recovery_words_interactor.dart';
 import 'package:fluffychat/domain/usecase/recovery/get_recovery_words_interactor.dart';
 import 'package:fluffychat/domain/usecase/recovery/save_recovery_words_interactor.dart';
@@ -168,6 +175,9 @@ class GetItInitializer {
     );
     getIt.registerFactory<LanguageCacheManager>(
       () => LanguageCacheManager(),
+    );
+    getIt.registerFactory<ReactionsCacheManager>(
+      () => ReactionsCacheManager(),
     );
   }
 
@@ -265,6 +275,9 @@ class GetItInitializer {
     getIt.registerFactory<InvitationDatasource>(
       () => InvitationDatasourceImpl(),
     );
+    getIt.registerFactory<ReactionsDatasource>(
+      () => ReactionsDatasourceImpl(),
+    );
   }
 
   void bindingRepositories() {
@@ -311,6 +324,9 @@ class GetItInitializer {
     );
     getIt.registerFactory<HiveInvitationStatusRepository>(
       () => HiveInvitationStatusRepositoryImpl(),
+    );
+    getIt.registerFactory<ReactionsRepository>(
+      () => ReactionsRepositoryImpl(),
     );
   }
 
@@ -444,6 +460,14 @@ class GetItInitializer {
 
     getIt.registerFactory<DeleteThirdPartyContactBoxInteractor>(
       () => DeleteThirdPartyContactBoxInteractor(),
+    );
+
+    getIt.registerFactory<StoreRecentReactionsInteractor>(
+      () => StoreRecentReactionsInteractor(),
+    );
+
+    getIt.registerFactory<GetRecentReactionsInteractor>(
+      () => GetRecentReactionsInteractor(),
     );
   }
 
