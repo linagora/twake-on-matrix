@@ -6,6 +6,8 @@ import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/domain/app_state/direct_chat/create_direct_chat_success.dart';
 import 'package:fluffychat/domain/model/extensions/platform_file/platform_file_extension.dart';
 import 'package:fluffychat/domain/usecase/create_direct_chat_interactor.dart';
+import 'package:fluffychat/domain/usecase/reactions/get_recent_reactions_interactor.dart';
+import 'package:fluffychat/domain/usecase/reactions/store_recent_reactions_interactor.dart';
 import 'package:fluffychat/pages/chat/chat.dart';
 import 'package:fluffychat/pages/chat/input_bar/focus_suggestion_controller.dart';
 import 'package:fluffychat/pages/chat_draft/draft_chat_view.dart';
@@ -63,6 +65,12 @@ class DraftChatController extends State<DraftChat>
         SendFilesMixin,
         DragDrogFileMixin {
   final createDirectChatInteractor = getIt.get<CreateDirectChatInteractor>();
+
+  final getRecentReactionsInteractor =
+      getIt.get<GetRecentReactionsInteractor>();
+
+  final storeRecentReactionsInteractor =
+      getIt.get<StoreRecentReactionsInteractor>();
 
   final NetworkConnectionService networkConnectionService =
       getIt.get<NetworkConnectionService>();
@@ -254,6 +262,11 @@ class DraftChatController extends State<DraftChat>
 
   void typeEmoji(String emoji) {
     if (emoji.isEmpty) return;
+    final emojiId = Matrix.of(context).emojiData.getIdByEmoji(emoji);
+
+    if (emojiId.isNotEmpty) {
+      storeRecentReactionsInteractor.execute(emojiId: emojiId);
+    }
     final text = sendController.text;
     final selection = sendController.selection;
     final newText = sendController.text.isEmpty

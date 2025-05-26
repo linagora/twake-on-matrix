@@ -898,8 +898,8 @@ packages:
     dependency: "direct main"
     description:
       path: "."
-      ref: master
-      resolved-ref: ec0b562d774c57501eb6e8e393c8a56083f9f88d
+      ref: add-recent-emoji
+      resolved-ref: f67a2a0e6fca8f249480e813d5abd80210e831c7
       url: "git@github.com:linagora/emoji_mart.git"
     source: git
     version: "1.0.2"

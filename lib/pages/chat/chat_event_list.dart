@@ -220,6 +220,9 @@ class ChatEventList extends StatelessWidget {
                                 .saveSelectedEventToGallery(context, event),
                             onTapMoreButton:
                                 controller.handleOnTapMoreButtonOnWeb,
+                            recentEmojiFuture: controller
+                                .getRecentReactionsInteractor
+                                .execute(),
                           )
                         : const SizedBox(),
                   );

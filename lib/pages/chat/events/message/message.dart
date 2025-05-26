@@ -19,6 +19,7 @@ import 'package:fluffychat/utils/responsive/responsive_utils.dart';
 import 'package:fluffychat/widgets/context_menu/context_menu_action.dart';
 import 'package:fluffychat/widgets/swipeable.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_emoji_mart/flutter_emoji_mart.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:inview_notifier_list/inview_notifier_list.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
@@ -87,6 +88,7 @@ class Message extends StatefulWidget {
   final void Function(Event)? onSaveToGallery;
   final void Function(BuildContext context, Event, TapDownDetails)?
       onTapMoreButton;
+  final Future<Category?>? recentEmojiFuture;
 
   const Message(
     this.event, {
@@ -122,6 +124,7 @@ class Message extends StatefulWidget {
     this.onSaveToDownload,
     this.onSaveToGallery,
     this.onTapMoreButton,
+    this.recentEmojiFuture,
   });
 
   /// Indicates wheither the user may use a mouse instead
@@ -257,6 +260,7 @@ class _MessageState extends State<Message> with MessageAvatarMixin {
               saveToDownload: widget.onSaveToDownload,
               saveToGallery: widget.onSaveToGallery,
               onTapMoreButton: widget.onTapMoreButton,
+              recentEmojiFuture: widget.recentEmojiFuture,
             ),
           ),
         ];

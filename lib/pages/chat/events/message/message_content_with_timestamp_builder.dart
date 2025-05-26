@@ -59,6 +59,7 @@ class MessageContentWithTimestampBuilder extends StatefulWidget {
   final void Function(Event)? saveToGallery;
   final void Function(BuildContext context, Event, TapDownDetails)?
       onTapMoreButton;
+  final Future<Category?>? recentEmojiFuture;
 
   static final responsiveUtils = getIt.get<ResponsiveUtils>();
 
@@ -89,6 +90,7 @@ class MessageContentWithTimestampBuilder extends StatefulWidget {
     this.saveToDownload,
     this.saveToGallery,
     this.onTapMoreButton,
+    this.recentEmojiFuture,
   });
 
   @override
@@ -481,6 +483,7 @@ class _MessageContentWithTimestampBuilderState
         ),
         child: EmojiPicker(
           emojiData: emojiData,
+          recentEmoji: widget.recentEmojiFuture,
           configuration: EmojiPickerConfiguration(
             emojiStyle: Theme.of(context).textTheme.headlineLarge!,
             searchEmptyTextStyle:
@@ -491,6 +494,7 @@ class _MessageContentWithTimestampBuilderState
               ImagePaths.icSearchEmojiEmpty,
             ),
             searchFocusNode: FocusNode(),
+            showRecentTab: true,
           ),
           itemBuilder: (
             context,
