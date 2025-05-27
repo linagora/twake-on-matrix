@@ -54,7 +54,7 @@ class ContactsInvitationController extends State<ContactsInvitation> {
       ValueNotifier(const Right(GenerateInvitationLinkInitial()));
 
   void onSelectContact(PresentationThirdPartyContact contact) {
-    if (widget.invitationStatus != null) return;
+    if (widget.invitationStatus?.invitation?.medium != null) return;
     if (selectedContact.value == null) {
       selectedContact.value = contact;
     } else {
@@ -217,15 +217,10 @@ class ContactsInvitationController extends State<ContactsInvitation> {
           TwakeDialog.hideLoadingDialog(context);
         }
         if (success is GenerateInvitationLinkSuccessState) {
-          _onStoreInvitationStatusInteractor(
-            userId: widget.userId,
-            contactId: widget.contact.id ?? '',
-            invitationId: success.id,
-          );
           await Share.shareUri(
             Uri.parse(success.link),
           );
-          Navigator.of(context).pop(success.id);
+          Navigator.of(context).pop();
           return;
         }
       },

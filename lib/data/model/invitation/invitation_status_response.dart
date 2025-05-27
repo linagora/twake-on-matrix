@@ -58,6 +58,9 @@ class Invitation with EquatableMixin {
   }
 
   bool get expiredTimeToInvite {
+    if (medium == null || medium!.isEmpty) {
+      return true;
+    }
     if (expiration == null) {
       return true;
     }
