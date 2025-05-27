@@ -1,4 +1,8 @@
-## [2.9.3+2330] - 2025-05-20
+## [2.9.3+2330] - 2025-05-27
+### Fixed
+- #2314 Only change invitation status when send by mail or phone number
+
+## [2.9.3+2330] - 2025-05-23
 ### Fixed
 - #2356 Add download action in context menu mobile
 - #2053 Fix redirect after create chat in mobile
