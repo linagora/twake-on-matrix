@@ -75,6 +75,15 @@ abstract class AppConfig {
   static const Color primaryColorLight = Color(0xFFCCBDEA);
   static const Color secondaryColor = Color(0xFF41a2bc);
 
+  static const List<String> emojisDefault = [
+    '💜',
+    '👍',
+    '👎',
+    '😂',
+    '😮',
+    '🥲',
+  ];
+
   static String get privacyUrl => _appPolicy;
   static const String enablePushTutorial =
       'https://gitlab.com/famedly/fluffychat/-/wikis/Push-Notifications-without-Google-Services';

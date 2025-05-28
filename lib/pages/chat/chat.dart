@@ -6,6 +6,7 @@ import 'package:collection/collection.dart';
 import 'package:debounce_throttle/debounce_throttle.dart';
 import 'package:desktop_drop/desktop_drop.dart';
 import 'package:device_info_plus/device_info_plus.dart';
+import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/domain/usecase/room/chat_get_pinned_events_interactor.dart';
 import 'package:fluffychat/pages/chat/chat_actions.dart';
@@ -1690,6 +1691,7 @@ class ChatController extends State<Chat>
                                 ),
                               )
                             : ReactionsPicker(
+                                emojis: AppConfig.emojisDefault,
                                 myEmojiReacted: relatesTo?['key'] ?? '',
                                 emojiSize: 40,
                                 onPickEmojiReactionAction: () {
@@ -2367,6 +2369,7 @@ class ChatController extends State<Chat>
                                     ),
                                   )
                                 : ReactionsPicker(
+                                    emojis: AppConfig.emojisDefault,
                                     myEmojiReacted: relatesTo?['key'] ?? '',
                                     emojiSize: 40,
                                     onPickEmojiReactionAction: () {

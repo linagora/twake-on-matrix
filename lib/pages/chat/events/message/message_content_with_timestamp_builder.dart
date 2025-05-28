@@ -1,3 +1,4 @@
+import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/pages/chat/events/message/display_name_widget.dart';
 import 'package:fluffychat/pages/chat/events/message/message.dart';
@@ -280,6 +281,7 @@ class _MessageContentWithTimestampBuilderState
                                           )
                                         : null,
                                     isOwnMessage: event.isOwnMessage,
+                                    emojis: AppConfig.emojisDefault,
                                     enableMoreEmojiWidget: true,
                                     onPickEmojiReactionAction: () {
                                       _displayEmojiPicker.value = true;
