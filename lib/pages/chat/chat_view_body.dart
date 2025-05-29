@@ -1,9 +1,11 @@
 import 'package:desktop_drop/desktop_drop.dart';
 import 'package:fluffychat/pages/chat/chat.dart';
 import 'package:fluffychat/pages/chat/chat_event_list.dart';
+import 'package:fluffychat/pages/chat/chat_invitation_body.dart';
 import 'package:fluffychat/pages/chat/chat_loading_view.dart';
 import 'package:fluffychat/pages/chat/chat_view_body_style.dart';
 import 'package:fluffychat/pages/chat/chat_view_style.dart';
+import 'package:fluffychat/pages/chat/disabled_chat_input_row.dart';
 import 'package:fluffychat/pages/chat/events/message_content_mixin.dart';
 import 'package:fluffychat/pages/chat/chat_pinned_events/pinned_events_view.dart';
 import 'package:fluffychat/pages/chat/sticky_timestamp_widget.dart';
@@ -84,7 +86,7 @@ class ChatViewBody extends StatelessWidget with MessageContentMixin {
                       ),
                     ),
                     if (controller.room!.canSendDefaultMessages &&
-                        controller.room!.membership == Membership.join)
+                        controller.room!.membership == Membership.join) ...[
                       Center(
                         child: Container(
                           alignment: Alignment.center,
@@ -142,6 +144,9 @@ class ChatViewBody extends StatelessWidget with MessageContentMixin {
                               : _inputMessageWidget(context),
                         ),
                       ),
+                    ] else ...[
+                      const DisabledChatInputRow(),
+                    ],
                   ],
                 ),
                 TombstoneDisplay(controller),
@@ -300,20 +305,14 @@ class ChatViewBody extends StatelessWidget with MessageContentMixin {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          ...[
-            const ConnectionStatusHeader(),
-            // Currently we can't support reactions
-            // ReactionsPicker(controller),
-            const SizedBox(height: 8.0),
-            Padding(
-              padding: ChatViewBodyStyle.inputBarPadding(context),
-              child: ChatInputRow(controller),
-            ),
-            SizedBox(
-              height: controller.responsive.isMobile(context) ? 8.0 : 8.0,
-            ),
-          ].map(
-            (widget) => widget,
+          const ConnectionStatusHeader(),
+          const SizedBox(height: 8.0),
+          Padding(
+            padding: ChatViewBodyStyle.inputBarPadding(context),
+            child: ChatInputRow(controller),
+          ),
+          SizedBox(
+            height: controller.responsive.isMobile(context) ? 8.0 : 8.0,
           ),
         ],
       ),
