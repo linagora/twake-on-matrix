@@ -65,4 +65,14 @@ extension RoomExtension on Room {
   bool get isInvitation {
     return membership == Membership.invite;
   }
+
+  bool get canSendReactions {
+    final currentPowerLevelsMap = getState(EventTypes.RoomPowerLevels)?.content;
+    if (currentPowerLevelsMap == null) return 0 <= ownPowerLevel;
+    return (currentPowerLevelsMap
+                .tryGetMap<String, Object?>('events')
+                ?.tryGet<int>(EventTypes.Reaction) ??
+            0) <=
+        ownPowerLevel;
+  }
 }

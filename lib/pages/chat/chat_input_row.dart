@@ -194,9 +194,11 @@ class ActionSelectModeWidget extends StatelessWidget {
             ),
           if (controller.selectedEvents.length == 1) ...[
             if (controller.selectedEvents.first
-                .getDisplayEvent(controller.timeline!)
-                .status
-                .isSent) ...[
+                    .getDisplayEvent(controller.timeline!)
+                    .status
+                    .isSent &&
+                controller
+                    .selectedEvents.first.room.canSendDefaultMessages) ...[
               SizedBox(
                 height: ChatInputRowStyle.chatInputRowHeight,
                 child: TextButton(
@@ -209,26 +211,28 @@ class ActionSelectModeWidget extends StatelessWidget {
                   ),
                 ),
               ),
-            ] else if (controller.selectedEvents.first
-                .getDisplayEvent(controller.timeline!)
-                .status
-                .isError) ...[
-              SizedBox(
-                height: ChatInputRowStyle.chatInputRowHeight,
-                child: TextButton(
-                  onPressed: controller.sendAgainAction,
-                  child: Row(
-                    children: <Widget>[
-                      Text(L10n.of(context)!.tryToSendAgain),
-                      const SizedBox(width: 4),
-                      SvgPicture.asset(ImagePaths.icSend),
-                    ],
-                  ),
-                ),
-              ),
             ] else ...[
               const SizedBox.shrink(),
             ],
+          ] else if (controller.selectedEvents.first
+              .getDisplayEvent(controller.timeline!)
+              .status
+              .isError) ...[
+            SizedBox(
+              height: ChatInputRowStyle.chatInputRowHeight,
+              child: TextButton(
+                onPressed: controller.sendAgainAction,
+                child: Row(
+                  children: <Widget>[
+                    Text(L10n.of(context)!.tryToSendAgain),
+                    const SizedBox(width: 4),
+                    SvgPicture.asset(ImagePaths.icSend),
+                  ],
+                ),
+              ),
+            ),
+          ] else ...[
+            const SizedBox.shrink(),
           ],
         ],
       ),
