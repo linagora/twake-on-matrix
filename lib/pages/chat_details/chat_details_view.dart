@@ -12,6 +12,7 @@ import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:matrix/matrix.dart';
 import 'package:fluffychat/pages/chat_details/chat_details.dart';
 import 'package:fluffychat/utils/string_extension.dart';
+import 'package:fluffychat/domain/model/room/room_extension.dart';
 
 class ChatDetailsView extends StatelessWidget {
   final ChatDetailsController controller;
@@ -53,13 +54,17 @@ class ChatDetailsView extends StatelessWidget {
             centerTitle: true,
             withDivider: true,
             actions: [
-              IconButton(
-                splashColor: Colors.transparent,
-                hoverColor: Colors.transparent,
-                highlightColor: Colors.transparent,
-                onPressed: controller.onTapEditButton,
-                icon: const Icon(Icons.edit_outlined),
-              ),
+              if (controller.room?.canEditChatDetails == true) ...[
+                IconButton(
+                  splashColor: Colors.transparent,
+                  hoverColor: Colors.transparent,
+                  highlightColor: Colors.transparent,
+                  onPressed: controller.onTapEditButton,
+                  icon: const Icon(Icons.edit_outlined),
+                ),
+              ] else ...[
+                const SizedBox.shrink(),
+              ],
             ],
             context: context,
           ),
