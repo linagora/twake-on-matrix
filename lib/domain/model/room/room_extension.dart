@@ -72,7 +72,55 @@ extension RoomExtension on Room {
     return (currentPowerLevelsMap
                 .tryGetMap<String, Object?>('events')
                 ?.tryGet<int>(EventTypes.Reaction) ??
-            0) <=
+            getDefaultPowerLevel(currentPowerLevelsMap)) <=
         ownPowerLevel;
+  }
+
+  bool get canChangeRoomName {
+    final currentPowerLevelsMap = getState(EventTypes.RoomPowerLevels)?.content;
+    if (currentPowerLevelsMap == null) return 0 <= ownPowerLevel;
+    return (currentPowerLevelsMap
+                .tryGetMap<String, Object?>('events')
+                ?.tryGet<int>(EventTypes.RoomName) ??
+            getDefaultPowerLevel(currentPowerLevelsMap)) <=
+        ownPowerLevel;
+  }
+
+  bool get canChangeTopic {
+    final currentPowerLevelsMap = getState(EventTypes.RoomPowerLevels)?.content;
+    if (currentPowerLevelsMap == null) return 0 <= ownPowerLevel;
+    return (currentPowerLevelsMap
+                .tryGetMap<String, Object?>('events')
+                ?.tryGet<int>(EventTypes.RoomTopic) ??
+            getDefaultPowerLevel(currentPowerLevelsMap)) <=
+        ownPowerLevel;
+  }
+
+  bool get canChangeRoomAvatar {
+    final currentPowerLevelsMap = getState(EventTypes.RoomPowerLevels)?.content;
+    if (currentPowerLevelsMap == null) return 0 <= ownPowerLevel;
+    return (currentPowerLevelsMap
+                .tryGetMap<String, Object?>('events')
+                ?.tryGet<int>(EventTypes.RoomAvatar) ??
+            getDefaultPowerLevel(currentPowerLevelsMap)) <=
+        ownPowerLevel;
+  }
+
+  bool get canEnableEncryption {
+    final currentPowerLevelsMap = getState(EventTypes.RoomPowerLevels)?.content;
+    if (currentPowerLevelsMap == null) return 0 <= ownPowerLevel;
+    return (currentPowerLevelsMap
+                .tryGetMap<String, Object?>('events')
+                ?.tryGet<int>(EventTypes.Encryption) ??
+            getDefaultPowerLevel(currentPowerLevelsMap)) <=
+        ownPowerLevel;
+  }
+
+  bool get canEditChatDetails {
+    return canChangeRoomName ||
+        canChangeTopic ||
+        canChangeRoomAvatar ||
+        canEnableEncryption ||
+        canChangePowerLevel;
   }
 }
