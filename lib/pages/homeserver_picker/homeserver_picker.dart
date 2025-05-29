@@ -151,8 +151,21 @@ class HomeserverPickerController extends State<HomeserverPicker>
           .map((client) => client.homeserver.toString())
           .toList();
       Logs().i('All homeservers: $allHomeserverLoggedIn');
+
+      final homeserverSummary =
+          await matrix.getLoginClient().checkHomeserver(homeserver);
+
+      final homeserverFromSummary = homeserverSummary
+              .discoveryInformation?.mHomeserver.baseUrl
+              .toString() ??
+          '';
+
+      final cleanHomeserver = homeserverFromSummary.endsWith('/')
+          ? homeserverFromSummary.substring(0, homeserverFromSummary.length - 1)
+          : homeserverFromSummary;
+
       final homeserverExists =
-          allHomeserverLoggedIn.contains(homeserver.toString());
+          allHomeserverLoggedIn.contains(cleanHomeserver.toString());
 
       if (homeserverExists &&
           !AppConfig.supportMultipleAccountsInTheSameHomeserver) {
