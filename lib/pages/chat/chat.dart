@@ -80,6 +80,7 @@ import 'package:record/record.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:universal_html/html.dart' as html;
+import 'package:fluffychat/domain/model/room/room_extension.dart';
 
 import 'send_file_dialog/send_file_dialog.dart';
 import 'sticker_picker_dialog.dart';
@@ -1384,8 +1385,9 @@ class ChatController extends State<Chat>
     Event event,
   ) {
     final listAction = [
-      ChatHorizontalActionMenu.reaction,
-      if (event.status.isAvailable) ChatHorizontalActionMenu.reply,
+      if (event.room.canSendReactions) ChatHorizontalActionMenu.reaction,
+      if (event.status.isAvailable && event.room.canSendDefaultMessages)
+        ChatHorizontalActionMenu.reply,
       ChatHorizontalActionMenu.more,
     ];
     return listAction

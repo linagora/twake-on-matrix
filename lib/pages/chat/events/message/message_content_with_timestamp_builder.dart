@@ -1,5 +1,6 @@
 import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
+import 'package:fluffychat/domain/model/room/room_extension.dart';
 import 'package:fluffychat/pages/chat/events/message/display_name_widget.dart';
 import 'package:fluffychat/pages/chat/events/message/message.dart';
 import 'package:fluffychat/pages/chat/events/message/message_content_builder.dart';
@@ -100,7 +101,9 @@ class _MessageContentWithTimestampBuilderState
   final ValueNotifier<bool> _displayEmojiPicker = ValueNotifier(false);
 
   List<MessageContextMenuAction> _messageContextMenu(Event event) => [
-        MessageContextMenuAction.reply,
+        if (event.room.canSendDefaultMessages) ...[
+          MessageContextMenuAction.reply,
+        ],
         MessageContextMenuAction.forward,
         MessageContextMenuAction.copy,
         MessageContextMenuAction.select,
@@ -190,10 +193,12 @@ class _MessageContentWithTimestampBuilderState
                   .isMobile(context),
               onLongPress: widget.event.status.isAvailable
                   ? (event) async {
+                      // for pin screen
                       if (widget.onLongPressMessage != null) {
                         widget.onLongPressMessage?.call(event);
                         return;
                       }
+                      // for chat screen
                       widget.onDisplayEmojiReaction?.call();
                       _displayEmojiPicker.value = false;
                       await Navigator.of(context).push(
@@ -271,15 +276,17 @@ class _MessageContentWithTimestampBuilderState
                                         ),
                                       ),
                                     ),
-                                    reactionWidget: display
-                                        ? _emojiPickerBuilder(
-                                            emojiData:
-                                                Matrix.of(context).emojiData,
-                                            myReaction: myReaction,
-                                            event: event,
-                                            relatesTo: relatesTo,
-                                          )
-                                        : null,
+                                    reactionWidget: !event.room.canSendReactions
+                                        ? const SizedBox.shrink()
+                                        : display
+                                            ? _emojiPickerBuilder(
+                                                emojiData: Matrix.of(context)
+                                                    .emojiData,
+                                                myReaction: myReaction,
+                                                event: event,
+                                                relatesTo: relatesTo,
+                                              )
+                                            : null,
                                     isOwnMessage: event.isOwnMessage,
                                     emojis: AppConfig.emojisDefault,
                                     enableMoreEmojiWidget: true,
