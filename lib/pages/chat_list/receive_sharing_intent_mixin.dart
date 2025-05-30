@@ -1,4 +1,5 @@
 import 'package:app_links/app_links.dart';
+import 'package:collection/collection.dart';
 import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/event/twake_event_types.dart';
 import 'package:fluffychat/pages/share/share.dart';
@@ -31,26 +32,35 @@ mixin ReceiveSharingIntentMixin<T extends StatefulWidget> on State<T> {
   Future<void> _processIncomingSharedFiles(List<SharedMediaFile> files) async {
     Logs().d('ReceiveSharingIntentMixin::_processIncomingSharedFiles: $files');
     if (files.isEmpty) return;
-    if (files.length == 1 && files.first.type == SharedMediaType.text) {
-      Logs().d('Received text: ${files.first.path}');
-      _processIncomingSharedText(files.first.path);
-      return;
+    if (files.length == 1) {
+      final file = files.first;
+      Logs().d('Received text:path = ${file.path} | type = ${file.type}');
+      if (file.type == SharedMediaType.text ||
+          file.type == SharedMediaType.url ||
+          file.type == SharedMediaType.mailto) {
+        _processIncomingSharedText(files.first.path);
+        return;
+      }
     }
-    matrixState.shareContentList = files.map(
-      (sharedMediaFile) {
-        final file = sharedMediaFile.toMatrixFile();
-        Logs().d(
-          'ReceiveSharingIntentMixin::_processIncomingSharedFiles: Path ${file.filePath}',
-        );
-        Logs().d(
-          'ReceiveSharingIntentMixin::_processIncomingSharedFiles: Size ${file.size}',
-        );
-        return {
-          'msgtype': TwakeEventTypes.shareFileEventType,
-          'file': file,
-        };
-      },
-    ).toList();
+    matrixState.shareContentList = files
+        .map(
+          (sharedMediaFile) {
+            final file = sharedMediaFile.toMatrixFile();
+            if (file == null) return null;
+            Logs().d(
+              'ReceiveSharingIntentMixin::_processIncomingSharedFiles: Path ${file.filePath}',
+            );
+            Logs().d(
+              'ReceiveSharingIntentMixin::_processIncomingSharedFiles: Size ${file.size}',
+            );
+            return {
+              'msgtype': TwakeEventTypes.shareFileEventType,
+              'file': file,
+            };
+          },
+        )
+        .whereNotNull()
+        .toList();
     openSharePage();
   }
 

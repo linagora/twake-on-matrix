@@ -2,8 +2,6 @@ import 'dart:async';
 
 import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
-import 'package:fluffychat/domain/repository/federation_configurations_repository.dart';
-import 'package:fluffychat/domain/repository/tom_configurations_repository.dart';
 import 'package:fluffychat/event/twake_inapp_event_types.dart';
 import 'package:fluffychat/pages/bootstrap/bootstrap_dialog.dart';
 import 'package:fluffychat/pages/settings_dashboard/settings/settings_view_style.dart';
@@ -44,9 +42,6 @@ class SettingsController extends State<Settings> with ConnectPageMixin {
   final ValueNotifier<Uri?> avatarUriNotifier = ValueNotifier(Uri());
   final ValueNotifier<String?> displayNameNotifier = ValueNotifier('');
 
-  final tomConfigurationRepository = getIt.get<ToMConfigurationsRepository>();
-  final federationConfigurationsRepository =
-      getIt.get<FederationConfigurationsRepository>();
   final _responsiveUtils = getIt.get<ResponsiveUtils>();
 
   static const String generateEmailSubject =
@@ -80,7 +75,7 @@ class SettingsController extends State<Settings> with ConnectPageMixin {
   bool optionSelected(SettingEnum settingEnum) =>
       settingEnum == optionsSelectNotifier.value;
 
-  void logoutAction() async {
+  void handleLogoutAction() async {
     final twakeContext = TwakeApp.routerKey.currentContext;
     if (twakeContext == null) {
       Logs().e(
@@ -100,68 +95,7 @@ class SettingsController extends State<Settings> with ConnectPageMixin {
       return;
     }
 
-    await _tryToUploadKeyBackup();
-
-    if (PlatformInfos.isMobile) {
-      await _logoutActionsOnMobile();
-    } else {
-      await _logoutActions();
-    }
-  }
-
-  Future<void> _tryToUploadKeyBackup() async {
-    await TwakeDialog.showFutureLoadingDialogFullScreen(
-      future: () async {
-        await matrix.client.encryption?.keyManager.uploadInboundGroupSessions();
-      },
-    );
-
-    return;
-  }
-
-  Future<void> _logoutActionsOnMobile() async {
-    await TwakeDialog.showFutureLoadingDialogFullScreen(
-      future: () async {
-        try {
-          if (matrix.backgroundPush != null) {
-            await matrix.backgroundPush!.removeCurrentPusher();
-          }
-          await Future.wait([
-            matrix.client.logout(),
-            _deleteTomConfigurations(matrix.client),
-            _deleteFederationConfigurations(matrix.client),
-          ]);
-        } catch (e) {
-          Logs().e('SettingsController()::_logoutActionsOnMobile - error: $e');
-        }
-      },
-    );
-  }
-
-  Future<void> _logoutActions() async {
-    await TwakeDialog.showFutureLoadingDialogFullScreen(
-      future: () async {
-        try {
-          if (matrix.backgroundPush != null) {
-            await matrix.backgroundPush!.removeCurrentPusher();
-          }
-          await Future.wait([
-            matrix.client.logout(),
-            _deleteTomConfigurations(matrix.client),
-            _deleteFederationConfigurations(matrix.client),
-          ]);
-        } catch (e) {
-          Logs().e('SettingsController()::_logoutActions - error: $e');
-        } finally {
-          try {
-            await tryLogoutSso(context);
-          } catch (e) {
-            Logs().e('SettingsController()::_logoutActions - error: $e');
-            return;
-          }
-        }
-      },
-    );
+    await logoutAction(matrix: Matrix.of(context));
   }
 
   Client get client => Matrix.of(context).client;
@@ -275,7 +209,7 @@ class SettingsController extends State<Settings> with ConnectPageMixin {
       case SettingEnum.about:
         PlatformInfos.showAboutDialogFullScreen();
       case SettingEnum.logout:
-        logoutAction();
+        handleLogoutAction();
         break;
       case SettingEnum.deleteAccount:
         if (await showConfirmAlertDialog(
@@ -322,42 +256,6 @@ class SettingsController extends State<Settings> with ConnectPageMixin {
         }
       }
     });
-  }
-
-  Future<void> _deleteTomConfigurations(Client currentClient) async {
-    try {
-      Logs().d(
-        'SettingsController::_deleteTomConfigurations - Client ID: ${currentClient.userID}',
-      );
-      if (matrix.twakeSupported) {
-        await tomConfigurationRepository
-            .deleteTomConfigurations(currentClient.userID!);
-      }
-      Logs().d(
-        'SettingsController::_deleteTomConfigurations - Success',
-      );
-    } catch (e) {
-      Logs().e(
-        'SettingsController::_deleteTomConfigurations - error: $e',
-      );
-    }
-  }
-
-  Future<void> _deleteFederationConfigurations(Client currentClient) async {
-    try {
-      Logs().d(
-        'SettingsController::_deleteFederationConfigurations - Client ID: ${currentClient.userID}',
-      );
-      await federationConfigurationsRepository
-          .deleteFederationConfigurations(currentClient.userID!);
-      Logs().d(
-        'SettingsController::_deleteFederationConfigurations - Success',
-      );
-    } catch (e) {
-      Logs().e(
-        'SettingsController::_deleteFederationConfigurations - error: $e',
-      );
-    }
   }
 
   @override
