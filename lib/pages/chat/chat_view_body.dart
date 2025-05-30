@@ -1,7 +1,6 @@
 import 'package:desktop_drop/desktop_drop.dart';
 import 'package:fluffychat/pages/chat/chat.dart';
 import 'package:fluffychat/pages/chat/chat_event_list.dart';
-import 'package:fluffychat/pages/chat/chat_invitation_body.dart';
 import 'package:fluffychat/pages/chat/chat_loading_view.dart';
 import 'package:fluffychat/pages/chat/chat_view_body_style.dart';
 import 'package:fluffychat/pages/chat/chat_view_style.dart';
