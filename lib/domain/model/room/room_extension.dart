@@ -66,6 +66,16 @@ extension RoomExtension on Room {
     return membership == Membership.invite;
   }
 
+  bool get canPinMessage {
+    final currentPowerLevelsMap = getState(EventTypes.RoomPowerLevels)?.content;
+    if (currentPowerLevelsMap == null) return 0 <= ownPowerLevel;
+    return (currentPowerLevelsMap
+                .tryGetMap<String, Object?>('events')
+                ?.tryGet<int>(EventTypes.RoomPinnedEvents) ??
+            getDefaultPowerLevel(currentPowerLevelsMap)) <=
+        ownPowerLevel;
+  }
+
   bool get canSendReactions {
     final currentPowerLevelsMap = getState(EventTypes.RoomPowerLevels)?.content;
     if (currentPowerLevelsMap == null) return 0 <= ownPowerLevel;

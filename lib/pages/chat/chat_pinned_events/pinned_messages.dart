@@ -6,6 +6,7 @@ import 'package:fluffychat/app_state/success.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/domain/app_state/room/update_pinned_events_state.dart';
 import 'package:fluffychat/domain/enums/pinned_messages_action_enum.dart';
+import 'package:fluffychat/domain/model/room/room_extension.dart';
 import 'package:fluffychat/domain/usecase/room/update_pinned_messages_interactor.dart';
 import 'package:fluffychat/pages/chat/chat_context_menu_actions.dart';
 import 'package:fluffychat/pages/chat/chat_horizontal_action_menu.dart';
@@ -332,7 +333,7 @@ class PinnedMessagesController extends State<PinnedMessages>
 
   List<ChatContextMenuActions> getPinnedMessagesActionsList(Event event) {
     final listAction = [
-      ChatContextMenuActions.pinChat,
+      if (event.room.canPinMessage) ChatContextMenuActions.pinChat,
       ChatContextMenuActions.select,
       ChatContextMenuActions.jumpToMessage,
       ChatContextMenuActions.copyMessage,
