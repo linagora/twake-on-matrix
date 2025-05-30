@@ -1433,7 +1433,7 @@ class ChatController extends State<Chat>
     final listAction = [
       ChatContextMenuActions.select,
       if (event.isCopyable) ChatContextMenuActions.copyMessage,
-      ChatContextMenuActions.pinChat,
+      if (event.room.canPinMessage) ChatContextMenuActions.pinChat,
       if (event.status.isAvailable) ChatContextMenuActions.forward,
       if (PlatformInfos.isWeb && event.hasAttachment)
         ChatContextMenuActions.downloadFile,

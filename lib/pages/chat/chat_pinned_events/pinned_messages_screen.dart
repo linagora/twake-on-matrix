@@ -11,6 +11,7 @@ import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:matrix/matrix.dart';
 import 'package:linagora_design_flutter/colors/linagora_sys_colors.dart';
+import 'package:fluffychat/domain/model/room/room_extension.dart';
 
 class PinnedMessagesScreen extends StatelessWidget {
   final PinnedMessagesController controller;
@@ -125,17 +126,21 @@ class PinnedMessagesScreen extends StatelessWidget {
               ),
             ),
           ),
-          responsiveUtils.isMobile(context)
-              ? BottomMenuMobile(
-                  selectedEvents: controller.selectedEvents,
-                  onUnpinAll: controller.unpinAll,
-                  onUnpinSelectedEvents: controller.unpinSelectedEvents,
-                )
-              : BottomMenuWeb(
-                  selectedEvents: controller.selectedEvents,
-                  onCloseSelectionMode: controller.closeSelectionMode,
-                  onUnpinSelectedEvents: controller.unpinSelectedEvents,
-                ),
+          if (controller.room?.canPinMessage == true) ...[
+            responsiveUtils.isMobile(context)
+                ? BottomMenuMobile(
+                    selectedEvents: controller.selectedEvents,
+                    onUnpinAll: controller.unpinAll,
+                    onUnpinSelectedEvents: controller.unpinSelectedEvents,
+                  )
+                : BottomMenuWeb(
+                    selectedEvents: controller.selectedEvents,
+                    onCloseSelectionMode: controller.closeSelectionMode,
+                    onUnpinSelectedEvents: controller.unpinSelectedEvents,
+                  ),
+          ] else ...[
+            const SizedBox.shrink(),
+          ],
         ],
       ),
     );
