@@ -39,38 +39,6 @@ mixin PopupMenuWidgetMixin {
     );
   }
 
-  Widget popupItemByNavigator(
-    BuildContext context,
-    String nameAction, {
-    IconData? iconAction,
-    String? imagePath,
-    Color? colorIcon,
-    double? iconSize,
-    TextStyle? styleName,
-    EdgeInsets? padding,
-    OnTapIconButtonCallbackAction? onCallbackAction,
-    bool isClearCurrentPage = true,
-  }) {
-    return InkWell(
-      onTap: () {
-        if (isClearCurrentPage) {
-          Navigator.pop(context);
-        }
-        onCallbackAction!.call();
-      },
-      child: _popupItemBuilder(
-        context,
-        nameAction,
-        iconAction: iconAction,
-        imagePath: imagePath,
-        colorIcon: colorIcon,
-        iconSize: iconSize,
-        styleName: styleName,
-        padding: padding,
-      ),
-    );
-  }
-
   Widget _popupItemBuilder(
     BuildContext context,
     String nameAction, {
@@ -113,8 +81,6 @@ mixin PopupMenuWidgetMixin {
       child: SizedBox(
         child: Row(
           children: [
-            buildIcon(),
-            const SizedBox(width: PopupMenuWidgetStyle.defaultItemElementsGap),
             Expanded(
               child: Text(
                 nameAction,
@@ -122,6 +88,8 @@ mixin PopupMenuWidgetMixin {
                     PopupMenuWidgetStyle.defaultItemTextStyle(context),
               ),
             ),
+            const SizedBox(width: PopupMenuWidgetStyle.defaultItemElementsGap),
+            buildIcon(),
           ],
         ),
       ),

@@ -163,8 +163,18 @@ class SettingsProfileViewMobile extends StatelessWidget {
                     child: MenuAnchor(
                       controller: menuController,
                       style: MenuStyle(
+                        padding: const WidgetStatePropertyAll(
+                          EdgeInsets.zero,
+                        ),
                         backgroundColor: WidgetStatePropertyAll(
                           PopupMenuWidgetStyle.defaultMenuColor(context),
+                        ),
+                        shape: WidgetStatePropertyAll(
+                          RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(
+                              PopupMenuWidgetStyle.menuBorderRadius,
+                            ),
+                          ),
                         ),
                       ),
                       builder: (
