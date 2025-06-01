@@ -28,6 +28,7 @@ import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/utils/twake_snackbar.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:fluffychat/widgets/mixins/popup_menu_widget_mixin.dart';
+import 'package:fluffychat/widgets/mixins/popup_menu_widget_style.dart';
 import 'package:flutter/material.dart';
 import 'package:linagora_design_flutter/images_picker/asset_counter.dart';
 import 'package:linagora_design_flutter/images_picker/images_picker_grid.dart';
@@ -101,28 +102,37 @@ class ChatDetailsEditController extends State<ChatDetailsEdit>
     Navigator.of(context).pop();
   }
 
-  List<PopupMenuItem> listContextMenuBuilder(
+  List<Widget> listContextMenuBuilder(
     BuildContext context,
   ) {
     final listAction = [
       EditChatAvatarContextMenuActions.edit,
       if (_enableDeleteAvatarButton) EditChatAvatarContextMenuActions.delete,
     ];
-    return listAction.map((action) {
-      return PopupMenuItem(
-        padding: EdgeInsets.zero,
-        child: popupItemByTwakeAppRouter(
-          context,
-          action.getTitle(context),
-          iconAction: action.getIcon(),
-          isClearCurrentPage: false,
-          onCallbackAction: () {
-            menuController.close();
-            _handleActionContextMenu(action);
-          },
-        ),
+    final items = listAction.map((action) {
+      return popupItemByTwakeAppRouter(
+        context,
+        action.getTitle(context),
+        iconAction: action.getIcon(),
+        isClearCurrentPage: false,
+        onCallbackAction: () {
+          menuController.close();
+          _handleActionContextMenu(action);
+        },
       );
     }).toList();
+
+    return [
+      for (final item in items) ...[
+        item,
+        if (item != items.last)
+          Divider(
+            height: PopupMenuWidgetStyle.dividerHeight,
+            thickness: PopupMenuWidgetStyle.dividerThickness,
+            color: PopupMenuWidgetStyle.defaultDividerColor(context),
+          ),
+      ],
+    ];
   }
 
   void _handleActionContextMenu(EditChatAvatarContextMenuActions action) {

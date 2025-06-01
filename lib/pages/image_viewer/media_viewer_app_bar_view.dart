@@ -87,7 +87,16 @@ class MediaViewerAppbarView extends StatelessWidget {
                                 textDirection: TextDirection.rtl,
                                 child: MenuAnchor(
                                   style: MenuStyle(
-                                    alignment: Alignment.bottomRight,
+                                    padding: const WidgetStatePropertyAll(
+                                      EdgeInsets.zero,
+                                    ),
+                                    shape: WidgetStatePropertyAll(
+                                      RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(
+                                          PopupMenuWidgetStyle.menuBorderRadius,
+                                        ),
+                                      ),
+                                    ),
                                     backgroundColor: WidgetStatePropertyAll(
                                       PopupMenuWidgetStyle.defaultMenuColor(
                                         context,

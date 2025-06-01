@@ -3,6 +3,7 @@ import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/widgets/context_menu/context_menu_action.dart';
 import 'package:fluffychat/widgets/context_menu/context_menu_action_item_widget.dart';
 import 'package:fluffychat/widgets/context_menu/context_menu_position.dart';
+import 'package:fluffychat/widgets/mixins/popup_menu_widget_style.dart';
 import 'package:fluffychat/widgets/mixins/twake_context_menu_style.dart';
 import 'package:flutter/material.dart';
 import 'package:after_layout/after_layout.dart';
@@ -73,7 +74,23 @@ class TwakeContextMenuState extends State<TwakeContextMenu>
   @override
   Widget build(BuildContext context) {
     final contextMenuPosition = _calculatePosition(widget.listActions);
-
+    final items = widget.listActions
+        .map(
+          (action) => _GrowingWidget(
+            child: action,
+            closeMenuAction: () {
+              closeContextMenu(
+                popResult: widget.listActions.indexOf(action),
+              );
+            },
+            onHeightChange: (height) {
+              setState(() {
+                _heights[ValueKey(action)] = height;
+              });
+            },
+          ),
+        )
+        .toList();
     return GestureDetector(
       onTap: () => closeContextMenu(),
       child: Material(
@@ -128,26 +145,32 @@ class TwakeContextMenuState extends State<TwakeContextMenu>
                                     TwakeContextMenuStyle
                                         .defaultVerticalPadding,
                               ),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: widget.listActions
-                                    .map(
-                                      (action) => _GrowingWidget(
-                                        child: action,
-                                        closeMenuAction: () {
-                                          closeContextMenu(
-                                            popResult: widget.listActions
-                                                .indexOf(action),
-                                          );
-                                        },
-                                        onHeightChange: (height) {
-                                          setState(() {
-                                            _heights[ValueKey(action)] = height;
-                                          });
-                                        },
-                                      ),
-                                    )
-                                    .toList(),
+                              child: ScrollConfiguration(
+                                behavior: ScrollConfiguration.of(context)
+                                    .copyWith(scrollbars: false),
+                                child: SingleChildScrollView(
+                                  physics: const NeverScrollableScrollPhysics(),
+                                  primary: false,
+                                  clipBehavior: Clip.none,
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      for (final item in items) ...[
+                                        item,
+                                        if (item != items.last)
+                                          Divider(
+                                            height: PopupMenuWidgetStyle
+                                                .dividerHeight,
+                                            thickness: PopupMenuWidgetStyle
+                                                .dividerThickness,
+                                            color: PopupMenuWidgetStyle
+                                                .defaultDividerColor(context),
+                                          ),
+                                      ],
+                                    ],
+                                  ),
+                                ),
                               ),
                             ),
                           ),

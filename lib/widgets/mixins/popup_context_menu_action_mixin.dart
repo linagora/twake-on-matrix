@@ -14,10 +14,11 @@ mixin PopupContextMenuActionMixin {
         minWidth: PopupMenuWidgetStyle.menuMaxWidth,
         maxWidth: PopupMenuWidgetStyle.menuMaxWidth,
       ),
-      surfaceTintColor: PopupMenuWidgetStyle.defaultMenuColor(context),
+      color: PopupMenuWidgetStyle.defaultMenuColor(context),
       context: context,
       position: position ?? const RelativeRect.fromLTRB(16, 40, 16, 16),
       elevation: PopupMenuWidgetStyle.menuElevation,
+      menuPadding: EdgeInsets.zero,
       shape: RoundedRectangleBorder(
         borderRadius:
             BorderRadius.circular(PopupMenuWidgetStyle.menuBorderRadius),

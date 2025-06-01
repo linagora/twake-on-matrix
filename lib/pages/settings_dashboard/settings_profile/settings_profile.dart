@@ -35,6 +35,7 @@ import 'package:fluffychat/widgets/matrix.dart';
 import 'package:fluffychat/widgets/mixins/on_account_data_listen_mixin.dart';
 import 'package:fluffychat/widgets/mixins/popup_context_menu_action_mixin.dart';
 import 'package:fluffychat/widgets/mixins/popup_menu_widget_mixin.dart';
+import 'package:fluffychat/widgets/mixins/popup_menu_widget_style.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
@@ -224,28 +225,37 @@ class SettingsProfileController extends State<SettingsProfile>
     _showImagesPickerAction();
   }
 
-  List<PopupMenuItem> listContextMenuBuilder(
+  List<Widget> listContextMenuBuilder(
     BuildContext context,
   ) {
     final listAction = [
       SettingsProfileContextMenuActions.edit,
       SettingsProfileContextMenuActions.delete,
     ];
-    return listAction.map((action) {
-      return PopupMenuItem(
-        padding: EdgeInsets.zero,
-        child: popupItemByTwakeAppRouter(
-          context,
-          action.getTitle(context),
-          iconAction: action.getIcon(),
-          isClearCurrentPage: false,
-          onCallbackAction: () {
-            menuController.close();
-            _handleActionContextMenu(action);
-          },
-        ),
+    final items = listAction.map((action) {
+      return popupItemByTwakeAppRouter(
+        context,
+        action.getTitle(context),
+        iconAction: action.getIcon(),
+        isClearCurrentPage: false,
+        onCallbackAction: () {
+          menuController.close();
+          _handleActionContextMenu(action);
+        },
       );
     }).toList();
+
+    return [
+      for (final item in items) ...[
+        item,
+        if (item != items.last)
+          Divider(
+            height: PopupMenuWidgetStyle.dividerHeight,
+            thickness: PopupMenuWidgetStyle.dividerThickness,
+            color: PopupMenuWidgetStyle.defaultDividerColor(context),
+          ),
+      ],
+    ];
   }
 
   void _handleActionContextMenu(SettingsProfileContextMenuActions action) {

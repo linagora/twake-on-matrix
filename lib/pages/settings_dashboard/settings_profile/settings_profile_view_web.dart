@@ -155,6 +155,16 @@ class SettingsProfileViewWeb extends StatelessWidget {
                                 child: MenuAnchor(
                                   controller: menuController,
                                   style: MenuStyle(
+                                    padding: const WidgetStatePropertyAll(
+                                      EdgeInsets.zero,
+                                    ),
+                                    shape: WidgetStatePropertyAll(
+                                      RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(
+                                          PopupMenuWidgetStyle.menuBorderRadius,
+                                        ),
+                                      ),
+                                    ),
                                     backgroundColor: WidgetStatePropertyAll(
                                       PopupMenuWidgetStyle.defaultMenuColor(
                                         context,

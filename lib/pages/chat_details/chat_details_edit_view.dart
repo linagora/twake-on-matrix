@@ -128,8 +128,20 @@ class ChatDetailsEditView extends StatelessWidget {
                           return MenuAnchor(
                             controller: controller.menuController,
                             style: MenuStyle(
+                              padding: const WidgetStatePropertyAll(
+                                EdgeInsets.zero,
+                              ),
+                              shape: WidgetStatePropertyAll(
+                                RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(
+                                    PopupMenuWidgetStyle.menuBorderRadius,
+                                  ),
+                                ),
+                              ),
                               backgroundColor: WidgetStatePropertyAll(
-                                PopupMenuWidgetStyle.defaultMenuColor(context),
+                                PopupMenuWidgetStyle.defaultMenuColor(
+                                  context,
+                                ),
                               ),
                             ),
                             alignmentOffset: ChatDetailEditViewStyle
