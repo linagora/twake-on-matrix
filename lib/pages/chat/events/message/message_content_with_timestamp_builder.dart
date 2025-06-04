@@ -36,6 +36,7 @@ typedef ContextMenuBuilder = List<Widget> Function(BuildContext context);
 
 class MessageContentWithTimestampBuilder extends StatefulWidget {
   final Event event;
+  final MatrixState? matrixState;
   final Event? nextEvent;
   final void Function(Event)? onSelect;
   final void Function(String)? scrollToEventId;
@@ -54,6 +55,7 @@ class MessageContentWithTimestampBuilder extends StatefulWidget {
   final OnPickEmojiReactionAction? onPickEmojiReaction;
   final void Function(Event)? onLongPressMessage;
   final void Function(Event)? onReply;
+  final void Function(Event)? onEdit;
   final void Function(Event)? onForward;
   final void Function(Event)? onCopy;
   final void Function(Event)? onPin;
@@ -68,6 +70,7 @@ class MessageContentWithTimestampBuilder extends StatefulWidget {
   const MessageContentWithTimestampBuilder({
     super.key,
     required this.event,
+    this.matrixState,
     this.nextEvent,
     this.onSelect,
     this.scrollToEventId,
@@ -85,6 +88,7 @@ class MessageContentWithTimestampBuilder extends StatefulWidget {
     this.onSendEmojiReaction,
     this.onPickEmojiReaction,
     this.onReply,
+    this.onEdit,
     this.onForward,
     this.onCopy,
     this.onLongPressMessage,
@@ -110,6 +114,9 @@ class _MessageContentWithTimestampBuilderState
         ],
         MessageContextMenuAction.forward,
         MessageContextMenuAction.copy,
+        if (event.canEditEvents(widget.matrixState)) ...[
+          MessageContextMenuAction.edit,
+        ],
         MessageContextMenuAction.select,
         MessageContextMenuAction.pin,
         if (PlatformInfos.isAndroid) ...[
@@ -491,6 +498,9 @@ class _MessageContentWithTimestampBuilderState
           break;
         case 'saveToGallery':
           widget.saveToGallery?.call(widget.event);
+          break;
+        case 'edit':
+          widget.onEdit?.call(widget.event);
           break;
       }
     }

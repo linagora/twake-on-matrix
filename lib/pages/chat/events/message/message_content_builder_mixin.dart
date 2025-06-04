@@ -21,6 +21,7 @@ mixin MessageContentBuilderMixin {
     required double maxWidth,
     bool ownMessage = false,
     bool hideDisplayName = false,
+    bool isEditable = false,
   }) {
     final isNotSupportCalcSize = {
       MessageTypes.File,
@@ -38,11 +39,8 @@ mixin MessageContentBuilderMixin {
       maxWidth,
     ).width;
 
-    final messageMetrics = _getMessageMetrics(
-      context,
-      event,
-      maxWidth,
-    );
+    final messageMetrics =
+        _getMessageMetrics(context, event, maxWidth, isEdited: isEditable);
 
     if (ownMessage || hideDisplayName) {
       return MessageMetrics(
@@ -162,9 +160,12 @@ mixin MessageContentBuilderMixin {
   MessageMetrics _getMessageMetrics(
     BuildContext context,
     Event event,
-    double maxWidth,
-  ) {
+    double maxWidth, {
+    bool isEdited = false,
+  }) {
     const spaceMessageAndTime = 4.0;
+    final spaceHasEdited = isEdited ? 50.0 : 0.0;
+    final spaceHasPinned = event.isPinned ? MessageStyle.pushpinIconSize : 0.0;
     const paddingMessage = AppConfig.messagePadding;
 
     final paintedMessageText = _paintMessageText(
@@ -177,7 +178,8 @@ mixin MessageContentBuilderMixin {
       event,
       maxWidth,
     );
-    final messageTimeAndPaddingWidth = sizeMessageTime + spaceMessageAndTime;
+    final messageTimeAndPaddingWidth =
+        sizeMessageTime + spaceMessageAndTime + spaceHasEdited + spaceHasPinned;
     final messageTextWidth = paintedMessageText.width;
     final TextRange lastLineRange = paintedMessageText.getLineBoundary(
       paintedMessageText.getPositionForOffset(
