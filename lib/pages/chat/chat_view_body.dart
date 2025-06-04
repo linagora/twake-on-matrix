@@ -5,6 +5,7 @@ import 'package:fluffychat/pages/chat/chat_loading_view.dart';
 import 'package:fluffychat/pages/chat/chat_view_body_style.dart';
 import 'package:fluffychat/pages/chat/chat_view_style.dart';
 import 'package:fluffychat/pages/chat/disabled_chat_input_row.dart';
+import 'package:fluffychat/pages/chat/events/edit_display.dart';
 import 'package:fluffychat/pages/chat/events/message_content_mixin.dart';
 import 'package:fluffychat/pages/chat/chat_pinned_events/pinned_events_view.dart';
 import 'package:fluffychat/pages/chat/sticky_timestamp_widget.dart';
@@ -309,6 +310,24 @@ class ChatViewBody extends StatelessWidget with MessageContentMixin {
         mainAxisSize: MainAxisSize.min,
         children: [
           const ConnectionStatusHeader(),
+          ValueListenableBuilder(
+            valueListenable: controller.editEventNotifier,
+            builder: (context, editEvent, _) {
+              if (!controller.responsive.isMobile(context)) {
+                return const SizedBox.shrink();
+              }
+
+              if (editEvent == null) return const SizedBox.shrink();
+              return Padding(
+                padding: ChatViewBodyStyle.inputBarPadding(context),
+                child: EditDisplay(
+                  editEventNotifier: controller.editEventNotifier,
+                  onCloseEditAction: controller.cancelEditEventAction,
+                  timeline: controller.timeline,
+                ),
+              );
+            },
+          ),
           const SizedBox(height: 8.0),
           Padding(
             padding: ChatViewBodyStyle.inputBarPadding(context),

@@ -1,7 +1,6 @@
 import 'package:fluffychat/pages/chat/events/message/message_content_builder_mixin.dart';
 import 'package:fluffychat/pages/chat/events/message/message_style.dart';
 import 'package:fluffychat/pages/chat/events/message_time.dart';
-import 'package:fluffychat/utils/date_time_extension.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
 import 'package:flutter/material.dart';
 import 'package:fluffychat/pages/chat/events/message/reply_content_widget.dart';
@@ -49,9 +48,14 @@ class MessageContentBuilder extends StatelessWidget
         nextEvent,
         Message.responsiveUtils.isMobile(context),
       ),
+      isEdited: event.hasAggregatedEvents(
+        timeline,
+        RelationshipTypes.edit,
+      ),
     );
     final stepWidth = sizeMessageBubble?.totalMessageWidth;
     final isNeedAddNewLine = sizeMessageBubble?.isNeedAddNewLine ?? false;
+
     return Padding(
       padding: EdgeInsets.only(
         bottom: noPadding || event.timelineOverlayMessage ? 0 : 8,
@@ -144,34 +148,6 @@ class MessageContentBuilder extends StatelessWidget
                       ),
                     ),
                   ),
-                ),
-              ),
-            if (event.hasAggregatedEvents(
-              timeline,
-              RelationshipTypes.edit,
-            ))
-              Padding(
-                padding: MessageStyle.paddingEditButton,
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(
-                      Icons.edit_outlined,
-                      color: textColor.withAlpha(
-                        164,
-                      ),
-                      size: 14,
-                    ),
-                    Text(
-                      ' - ${displayEvent.originServerTs.localizedTimeShort(context)}',
-                      style: TextStyle(
-                        color: textColor.withAlpha(
-                          164,
-                        ),
-                        fontSize: 12,
-                      ),
-                    ),
-                  ],
                 ),
               ),
           ],

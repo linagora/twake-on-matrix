@@ -21,6 +21,7 @@ mixin MessageContentBuilderMixin {
     required double maxWidth,
     bool ownMessage = false,
     bool hideDisplayName = false,
+    bool isEdited = false,
   }) {
     final isNotSupportCalcSize = {
       MessageTypes.File,
@@ -38,11 +39,8 @@ mixin MessageContentBuilderMixin {
       maxWidth,
     ).width;
 
-    final messageMetrics = _getMessageMetrics(
-      context,
-      event,
-      maxWidth,
-    );
+    final messageMetrics =
+        _getMessageMetrics(context, event, maxWidth, isEdited: isEdited);
 
     if (ownMessage || hideDisplayName) {
       return MessageMetrics(
@@ -162,9 +160,12 @@ mixin MessageContentBuilderMixin {
   MessageMetrics _getMessageMetrics(
     BuildContext context,
     Event event,
-    double maxWidth,
-  ) {
+    double maxWidth, {
+    bool isEdited = false,
+  }) {
     const spaceMessageAndTime = 4.0;
+    final spaceHasEdited = isEdited ? 56.0 : 0.0;
+    final spaceHasPinned = event.isPinned ? MessageStyle.pushpinIconSize : 0.0;
     const paddingMessage = AppConfig.messagePadding;
 
     final paintedMessageText = _paintMessageText(
@@ -177,7 +178,8 @@ mixin MessageContentBuilderMixin {
       event,
       maxWidth,
     );
-    final messageTimeAndPaddingWidth = sizeMessageTime + spaceMessageAndTime;
+    final messageTimeAndPaddingWidth =
+        sizeMessageTime + spaceMessageAndTime + spaceHasEdited + spaceHasPinned;
     final messageTextWidth = paintedMessageText.width;
     final TextRange lastLineRange = paintedMessageText.getLineBoundary(
       paintedMessageText.getPositionForOffset(
@@ -211,7 +213,11 @@ mixin MessageContentBuilderMixin {
         maxWidth,
       );
 
-      isNeedAddNewLine = _checkNeedAddNewLine(totalMessageWidth, maxWidth);
+      isNeedAddNewLine = _checkNeedAddNewLine(
+        totalMessageWidth,
+        maxWidth,
+        isEdited: isEdited,
+      );
     }
 
     final metrics = MessageMetrics(
@@ -238,8 +244,23 @@ mixin MessageContentBuilderMixin {
     }
   }
 
-  bool _checkNeedAddNewLine(double totalMessageWidth, double maxWidth) {
-    return totalMessageWidth == maxWidth;
+  bool _checkNeedAddNewLine(
+    double totalMessageWidth,
+    double maxWidth, {
+    bool isEdited = false,
+  }) {
+    if (totalMessageWidth == maxWidth) {
+      return true;
+    } else {
+      if (isEdited) {
+        // If the message is edited, we need to add a new line
+        // to avoid the text being cut off.
+        return true;
+      } else {
+        // If the message is not edited, we can fit it in one line.
+        return false;
+      }
+    }
   }
 
   bool isContainsTagName(Event event) {

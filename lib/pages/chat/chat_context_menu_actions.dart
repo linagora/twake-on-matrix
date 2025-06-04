@@ -8,6 +8,7 @@ import 'package:matrix/matrix.dart';
 enum ChatContextMenuActions {
   select,
   copyMessage,
+  edit,
   pinChat,
   forward,
   reply,
@@ -37,6 +38,8 @@ enum ChatContextMenuActions {
         return L10n.of(context)!.download;
       case ChatContextMenuActions.jumpToMessage:
         return L10n.of(context)!.jumpToMessage;
+      case ChatContextMenuActions.edit:
+        return L10n.of(context)!.edit;
       case ChatContextMenuActions.delete:
         return L10n.of(context)!.delete;
     }
@@ -57,6 +60,8 @@ enum ChatContextMenuActions {
         return Icons.shortcut;
       case ChatContextMenuActions.downloadFile:
         return Icons.download;
+      case ChatContextMenuActions.edit:
+        return Icons.edit_outlined;
       case ChatContextMenuActions.delete:
         return Icons.delete_outlined;
       default:

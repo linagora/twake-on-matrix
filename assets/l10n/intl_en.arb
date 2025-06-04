@@ -3124,5 +3124,7 @@
   "administration": "Administration",
   "yourDataIsEncryptedForSecurity": "Your data is encrypted for security",
   "failedToDeleteMessage": "Failed to delete message.",
-  "noDeletePermissionMessage": "You don't have permission to delete this message."
+  "noDeletePermissionMessage": "You don't have permission to delete this message.",
+  "edited": "edited",
+  "editMessage": "Edit message"
 }
