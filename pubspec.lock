@@ -899,7 +899,7 @@ packages:
     description:
       path: "."
       ref: master
-      resolved-ref: "69f6f3aaa47591c32ffb59903d682c2e3cbd519a"
+      resolved-ref: "6068c82c2062548056e6146820dbc985f71263af"
       url: "git@github.com:linagora/emoji_mart.git"
     source: git
     version: "1.0.2"
