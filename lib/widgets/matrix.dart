@@ -310,7 +310,8 @@ class MatrixState extends State<Matrix>
         html.window.addEventListener('blur', onWindowBlur);
       }
       initMatrix();
-      emojiData = await EmojiData.builtIn();
+      final emojiRawData = await EmojiData.builtIn();
+      emojiData = emojiRawData.filterByVersion(13.5);
       await initReceiveSharingIntent();
       await tryToGetFederationConfigurations();
       if (PlatformInfos.isWeb) {
