@@ -164,7 +164,7 @@ mixin MessageContentBuilderMixin {
     bool isEdited = false,
   }) {
     const spaceMessageAndTime = 4.0;
-    final spaceHasEdited = isEdited ? 50.0 : 0.0;
+    final spaceHasEdited = isEdited ? 56.0 : 0.0;
     final spaceHasPinned = event.isPinned ? MessageStyle.pushpinIconSize : 0.0;
     const paddingMessage = AppConfig.messagePadding;
 
@@ -213,7 +213,11 @@ mixin MessageContentBuilderMixin {
         maxWidth,
       );
 
-      isNeedAddNewLine = _checkNeedAddNewLine(totalMessageWidth, maxWidth);
+      isNeedAddNewLine = _checkNeedAddNewLine(
+        totalMessageWidth,
+        maxWidth,
+        isEdited: isEdited,
+      );
     }
 
     final metrics = MessageMetrics(
@@ -240,8 +244,23 @@ mixin MessageContentBuilderMixin {
     }
   }
 
-  bool _checkNeedAddNewLine(double totalMessageWidth, double maxWidth) {
-    return totalMessageWidth == maxWidth;
+  bool _checkNeedAddNewLine(
+    double totalMessageWidth,
+    double maxWidth, {
+    bool isEdited = false,
+  }) {
+    if (totalMessageWidth == maxWidth) {
+      return true;
+    } else {
+      if (isEdited) {
+        // If the message is edited, we need to add a new line
+        // to avoid the text being cut off.
+        return true;
+      } else {
+        // If the message is not edited, we can fit it in one line.
+        return false;
+      }
+    }
   }
 
   bool isContainsTagName(Event event) {

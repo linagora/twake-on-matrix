@@ -55,6 +55,14 @@ class MessageContentBuilder extends StatelessWidget
     );
     final stepWidth = sizeMessageBubble?.totalMessageWidth;
     final isNeedAddNewLine = sizeMessageBubble?.isNeedAddNewLine ?? false;
+
+    print(
+      'MessageContentBuilder: '
+      'body: ${event.body}, '
+      'messageType: ${event.messageType}, '
+      'stepWidth: $stepWidth, '
+      'isNeedAddNewLine: $isNeedAddNewLine',
+    );
     return Padding(
       padding: EdgeInsets.only(
         bottom: noPadding || event.timelineOverlayMessage ? 0 : 8,
