@@ -10,35 +10,44 @@ import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:matrix/matrix.dart';
 
 mixin ChatListItemMixin {
-  FutureBuilder<String> textContentWidget(
+  Widget textContentWidget(
     Room room,
+    Event? lastEvent,
     BuildContext context,
     bool isGroup,
     bool unread,
   ) {
+    return _textContentFutureBuilder(context, room, isGroup, lastEvent);
+  }
+
+  Widget _textContentFutureBuilder(
+    BuildContext context,
+    Room room,
+    bool isGroup,
+    Event? event,
+  ) {
+    if (event == null) return const SizedBox.shrink();
     return FutureBuilder<String>(
-      future: room.lastEvent?.calcLocalizedBody(
-            MatrixLocals(L10n.of(context)!),
-            hideReply: true,
-            hideEdit: true,
-            plaintextBody: true,
-            removeMarkdown: true,
-            removeBreakLine: true,
-          ) ??
-          Future.value(L10n.of(context)!.emptyChat),
+      future: event.calcLocalizedBody(
+        MatrixLocals(L10n.of(context)!),
+        hideReply: true,
+        hideEdit: true,
+        plaintextBody: true,
+        removeMarkdown: true,
+        removeBreakLine: true,
+      ),
       builder: (context, snapshot) {
         return Text(
           room.membership == Membership.invite
               ? L10n.of(context)!.youAreInvitedToThisChat
               : snapshot.data ??
-                  room.lastEvent?.calcLocalizedBodyFallback(
+                  event.calcLocalizedBodyFallback(
                     MatrixLocals(L10n.of(context)!),
                     hideReply: true,
                     hideEdit: true,
                     plaintextBody: true,
                     removeMarkdown: true,
-                  ) ??
-                  L10n.of(context)!.emptyChat,
+                  ),
           softWrap: false,
           maxLines: isGroup ? 1 : 2,
           overflow: TextOverflow.ellipsis,
@@ -62,35 +71,10 @@ mixin ChatListItemMixin {
     );
   }
 
-  RenderObjectWidget lastSenderWidget(Room room, bool isGroup) {
-    return isGroup
-        ? Row(
-            children: [
-              Expanded(
-                child: FutureBuilder<User?>(
-                  future: room.lastEvent?.fetchSenderUser(),
-                  builder: (context, snapshot) {
-                    if (snapshot.data == null) return const SizedBox.shrink();
-                    return Text(
-                      snapshot.data!.calcDisplayname(),
-                      overflow: TextOverflow.ellipsis,
-                      maxLines: 1,
-                      softWrap: false,
-                      style: ChatLitSubSubtitleTextStyleView.textStyle
-                          .textStyle(room, context),
-                    );
-                  },
-                ),
-              ),
-              const Spacer(),
-            ],
-          )
-        : const SizedBox.shrink();
-  }
-
   Widget chatListItemSubtitleForGroup({
     required BuildContext context,
     required Room room,
+    Event? event,
   }) {
     if (room.membership == Membership.invite) {
       return Text(
@@ -104,72 +88,84 @@ mixin ChatListItemMixin {
     }
 
     return FutureBuilder<User?>(
-      future: room.lastEvent?.fetchSenderUser(),
-      builder: (context, snapshot) {
-        if (snapshot.data == null) return const SizedBox.shrink();
-        final subscriptions = room.lastEvent?.calcLocalizedBodyFallback(
-              MatrixLocals(L10n.of(context)!),
-              hideReply: true,
-              hideEdit: true,
-              plaintextBody: true,
-              removeMarkdown: true,
-              removeBreakLine: true,
-            ) ??
-            L10n.of(context)!.emptyChat;
-        if (room.lastEvent?.isAFile == true) {
-          return Text(
-            "${snapshot.data!.calcDisplayname()}: ${room.lastEvent?.filename ?? subscriptions}",
-            softWrap: false,
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-            style: ChatLitSubSubtitleTextStyleView.textStyle
-                .textStyle(room, context),
-          );
-        }
+      future: event?.fetchSenderUser(),
+      builder: (context, snapshot) => _subTitleFutureBuilder(
+        context,
+        room,
+        event,
+        snapshot.data,
+      ),
+    );
+  }
 
-        return Column(
-          mainAxisAlignment: MainAxisAlignment.start,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              snapshot.data!.calcDisplayname(),
-              overflow: TextOverflow.ellipsis,
-              maxLines: 1,
-              softWrap: false,
-              style: ListItemStyle.subtitleTextStyle(
-                fontFamily: 'Inter',
-              ).copyWith(
-                color: LinagoraSysColors.material().onSurface,
+  Widget _subTitleFutureBuilder(
+    BuildContext context,
+    Room room,
+    Event? event,
+    User? user,
+  ) {
+    if (user == null || event == null) return const SizedBox.shrink();
+
+    final subscriptions = event.calcLocalizedBodyFallback(
+      MatrixLocals(L10n.of(context)!),
+      hideReply: true,
+      hideEdit: true,
+      plaintextBody: true,
+      removeMarkdown: true,
+      removeBreakLine: true,
+    );
+    if (event.isAFile == true) {
+      return Text(
+        "${user.calcDisplayname()}: ${event.filename}",
+        softWrap: false,
+        maxLines: 2,
+        overflow: TextOverflow.ellipsis,
+        style:
+            ChatLitSubSubtitleTextStyleView.textStyle.textStyle(room, context),
+      );
+    }
+
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          user.calcDisplayname(),
+          overflow: TextOverflow.ellipsis,
+          maxLines: 1,
+          softWrap: false,
+          style: ListItemStyle.subtitleTextStyle(
+            fontFamily: 'Inter',
+          ).copyWith(
+            color: LinagoraSysColors.material().onSurface,
+          ),
+        ),
+        event.messageType == MessageTypes.Image ||
+                event.messageType == MessageTypes.Video
+            ? chatListItemMediaPreviewSubTitle(
+                context,
+                event,
+              )
+            : Text(
+                subscriptions,
+                softWrap: false,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: ListItemStyle.subtitleTextStyle(
+                  fontFamily: 'Inter',
+                ),
               ),
-            ),
-            room.lastEvent?.messageType == MessageTypes.Image ||
-                    room.lastEvent?.messageType == MessageTypes.Video
-                ? chatListItemMediaPreviewSubTitle(
-                    context,
-                    room,
-                  )
-                : Text(
-                    subscriptions,
-                    softWrap: false,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: ListItemStyle.subtitleTextStyle(
-                      fontFamily: 'Inter',
-                    ),
-                  ),
-          ],
-        );
-      },
+      ],
     );
   }
 
   Widget chatListItemMediaPreviewSubTitle(
     BuildContext context,
-    Room room,
+    Event? event,
   ) {
     return Row(
       children: [
-        if (room.lastEvent?.status != EventStatus.synced)
+        if (event == null || event.status != EventStatus.synced)
           const SizedBox.shrink()
         else
           SizedBox(
@@ -179,11 +175,11 @@ mixin ChatListItemMixin {
               borderRadius:
                   BorderRadius.circular(SubtitleImagePreviewStyle.borderRadius),
               child: MxcImage(
-                key: ValueKey(room.lastEvent!.eventId),
-                cacheKey: room.lastEvent!.eventId,
-                event: room.lastEvent!,
+                key: ValueKey(event.eventId),
+                cacheKey: event.eventId,
+                event: event,
                 placeholder: (context) => ImagePlaceholder(
-                  event: room.lastEvent!,
+                  event: event,
                   width: SubtitleImagePreviewStyle.width,
                   height: SubtitleImagePreviewStyle.height,
                   fit: SubtitleImagePreviewStyle.fit,
@@ -196,7 +192,7 @@ mixin ChatListItemMixin {
         Padding(
           padding: SubtitleImagePreviewStyle.labelPadding,
           child: Text(
-            room.lastEvent!.messageType == MessageTypes.Image
+            event?.messageType == MessageTypes.Image
                 ? L10n.of(context)!.photo
                 : L10n.of(context)!.video,
             style: ListItemStyle.subtitleTextStyle(

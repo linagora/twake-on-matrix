@@ -1,6 +1,9 @@
 import 'package:fluffychat/resource/image_paths.dart';
+import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
+import 'package:linagora_design_flutter/colors/linagora_sys_colors.dart';
+import 'package:matrix/matrix.dart';
 
 enum ChatContextMenuActions {
   select,
@@ -9,6 +12,7 @@ enum ChatContextMenuActions {
   forward,
   reply,
   downloadFile,
+  delete,
   jumpToMessage;
 
   String getTitle(
@@ -33,6 +37,8 @@ enum ChatContextMenuActions {
         return L10n.of(context)!.download;
       case ChatContextMenuActions.jumpToMessage:
         return L10n.of(context)!.jumpToMessage;
+      case ChatContextMenuActions.delete:
+        return L10n.of(context)!.delete;
     }
   }
 
@@ -51,6 +57,8 @@ enum ChatContextMenuActions {
         return Icons.shortcut;
       case ChatContextMenuActions.downloadFile:
         return Icons.download;
+      case ChatContextMenuActions.delete:
+        return Icons.delete_outlined;
       default:
         return null;
     }
@@ -69,5 +77,19 @@ enum ChatContextMenuActions {
       default:
         return null;
     }
+  }
+
+  Color? getIconColor(
+    BuildContext context,
+    Event event,
+    ChatContextMenuActions action,
+  ) {
+    if (action == ChatContextMenuActions.pinChat && event.isPinned) {
+      return Theme.of(context).colorScheme.onSurface;
+    }
+    if (action == ChatContextMenuActions.delete) {
+      return LinagoraSysColors.material().error;
+    }
+    return null;
   }
 }

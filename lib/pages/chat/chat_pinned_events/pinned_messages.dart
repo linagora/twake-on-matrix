@@ -14,6 +14,7 @@ import 'package:fluffychat/pages/chat/chat_pinned_events/pinned_messages_screen.
 import 'package:fluffychat/pages/chat/chat_pinned_events/pinned_messages_style.dart';
 import 'package:fluffychat/pages/chat/context_item_chat_action.dart';
 import 'package:fluffychat/presentation/extensions/event_update_extension.dart';
+import 'package:fluffychat/presentation/mixins/delete_event_mixin.dart';
 import 'package:fluffychat/presentation/model/forward/forward_argument.dart';
 import 'package:fluffychat/resource/image_paths.dart';
 import 'package:fluffychat/utils/adaptive_bottom_sheet.dart';
@@ -27,10 +28,12 @@ import 'package:fluffychat/widgets/context_menu/context_menu_action.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:fluffychat/widgets/mixins/popup_context_menu_action_mixin.dart';
 import 'package:fluffychat/widgets/mixins/popup_menu_widget_mixin.dart';
+import 'package:fluffychat/widgets/mixins/popup_menu_widget_style.dart';
 import 'package:fluffychat/widgets/mixins/twake_context_menu_mixin.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:go_router/go_router.dart';
+import 'package:linagora_design_flutter/colors/linagora_sys_colors.dart';
 import 'package:matrix/matrix.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 
@@ -49,7 +52,8 @@ class PinnedMessagesController extends State<PinnedMessages>
     with
         PopupContextMenuActionMixin,
         PopupMenuWidgetMixin,
-        TwakeContextMenuMixin {
+        TwakeContextMenuMixin,
+        DeleteEventMixin {
   ValueNotifier<List<Event?>> eventsNotifier = ValueNotifier([]);
 
   final ValueNotifier<String?> isHoverNotifier = ValueNotifier(null);
@@ -228,14 +232,18 @@ class PinnedMessagesController extends State<PinnedMessages>
               ),
               iconAction: action.getIconData(unpin: event.isPinned),
               imagePath: action.getImagePath(unpin: event.isPinned),
-              colorIcon:
-                  action == ChatContextMenuActions.pinChat && event.isPinned
-                      ? Theme.of(context).colorScheme.onSurface
-                      : null,
+              colorIcon: action.getIconColor(context, event, action),
               onCallbackAction: () => _handleClickOnContextMenuItem(
                 action,
                 event,
               ),
+              styleName: action == ChatContextMenuActions.delete
+                  ? PopupMenuWidgetStyle.defaultItemTextStyle(context)?.merge(
+                      TextStyle(
+                        color: LinagoraSysColors.material().error,
+                      ),
+                    )
+                  : null,
             );
           }).toList(),
         );
@@ -320,26 +328,32 @@ class PinnedMessagesController extends State<PinnedMessages>
         ),
         iconAction: action.getIconData(unpin: event.isPinned),
         imagePath: action.getImagePath(unpin: event.isPinned),
-        colorIcon: action == ChatContextMenuActions.pinChat && event.isPinned
-            ? Theme.of(context).colorScheme.onSurface
-            : null,
+        colorIcon: action.getIconColor(context, event, action),
         onCallbackAction: () => _handleClickOnContextMenuItem(
           action,
           event,
         ),
+        styleName: action == ChatContextMenuActions.delete
+            ? PopupMenuWidgetStyle.defaultItemTextStyle(context)?.merge(
+                TextStyle(
+                  color: LinagoraSysColors.material().error,
+                ),
+              )
+            : null,
       );
     }).toList();
   }
 
   List<ChatContextMenuActions> getPinnedMessagesActionsList(Event event) {
     final listAction = [
-      if (event.room.canPinMessage) ChatContextMenuActions.pinChat,
-      ChatContextMenuActions.select,
-      ChatContextMenuActions.jumpToMessage,
-      ChatContextMenuActions.copyMessage,
       ChatContextMenuActions.forward,
+      ChatContextMenuActions.copyMessage,
+      if (event.room.canPinMessage) ChatContextMenuActions.pinChat,
+      ChatContextMenuActions.jumpToMessage,
+      ChatContextMenuActions.select,
       if (PlatformInfos.isWeb && event.hasAttachment)
         ChatContextMenuActions.downloadFile,
+      if (event.canDelete) ChatContextMenuActions.delete,
     ];
     return listAction;
   }
@@ -357,8 +371,13 @@ class PinnedMessagesController extends State<PinnedMessages>
         ),
         icon: action.getIconData(unpin: event.isPinned),
         imagePath: action.getImagePath(unpin: event.isPinned),
-        colorIcon: action == ChatContextMenuActions.pinChat && event.isPinned
-            ? Theme.of(context).colorScheme.onSurface
+        colorIcon: action.getIconColor(context, event, action),
+        styleName: action == ChatContextMenuActions.delete
+            ? PopupMenuWidgetStyle.defaultItemTextStyle(context)?.merge(
+                TextStyle(
+                  color: LinagoraSysColors.material().error,
+                ),
+              )
             : null,
       );
     }).toList();
@@ -387,6 +406,9 @@ class PinnedMessagesController extends State<PinnedMessages>
         break;
       case ChatContextMenuActions.jumpToMessage:
         jumpToMessage(context, event);
+        break;
+      case ChatContextMenuActions.delete:
+        deleteEventAction(context, event);
         break;
       default:
         break;
@@ -502,6 +524,7 @@ class PinnedMessagesController extends State<PinnedMessages>
       unpinSelectedEventsStreamSubcription?.cancel() ?? Future.value(),
       onEventStreamSubscription?.cancel() ?? Future.value(),
     ]).whenComplete(() => eventsNotifier.dispose());
+    disposeDeleteEventMixin();
     super.dispose();
   }
 
