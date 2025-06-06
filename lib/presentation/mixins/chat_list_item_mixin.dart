@@ -27,24 +27,37 @@ mixin ChatListItemMixin {
           ) ??
           Future.value(L10n.of(context)!.emptyChat),
       builder: (context, snapshot) {
-        return Text(
-          room.membership == Membership.invite
-              ? L10n.of(context)!.youAreInvitedToThisChat
-              : snapshot.data ??
-                  room.lastEvent?.calcLocalizedBodyFallback(
-                    MatrixLocals(L10n.of(context)!),
-                    hideReply: true,
-                    hideEdit: true,
-                    plaintextBody: true,
-                    removeMarkdown: true,
-                  ) ??
-                  L10n.of(context)!.emptyChat,
-          softWrap: false,
-          maxLines: isGroup ? 1 : 2,
-          overflow: TextOverflow.ellipsis,
-          style: ListItemStyle.subtitleTextStyle(
-            fontFamily: 'Inter',
-          ),
+        return FutureBuilder(
+          future: room.lastEvent?.calcLocalizedBody(
+                MatrixLocals(L10n.of(context)!),
+                hideReply: true,
+                hideEdit: true,
+                plaintextBody: true,
+                removeMarkdown: true,
+                removeBreakLine: true,
+              ) ??
+              Future.value(L10n.of(context)!.emptyChat),
+          builder: (context, snap) {
+            return Text(
+              room.membership == Membership.invite
+                  ? L10n.of(context)!.youAreInvitedToThisChat
+                  : snapshot.data ??
+                      room.lastEvent?.calcLocalizedBodyFallback(
+                        MatrixLocals(L10n.of(context)!),
+                        hideReply: true,
+                        hideEdit: true,
+                        plaintextBody: true,
+                        removeMarkdown: true,
+                      ) ??
+                      L10n.of(context)!.emptyChat,
+              softWrap: false,
+              maxLines: isGroup ? 1 : 2,
+              overflow: TextOverflow.ellipsis,
+              style: ListItemStyle.subtitleTextStyle(
+                fontFamily: 'Inter',
+              ),
+            );
+          },
         );
       },
     );

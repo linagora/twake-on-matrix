@@ -1,10 +1,12 @@
 import 'package:dartz/dartz.dart';
 import 'package:fluffychat/app_state/failure.dart';
 import 'package:fluffychat/app_state/success.dart';
+import 'package:fluffychat/domain/model/room/room_extension.dart';
 import 'package:fluffychat/pages/chat_details/chat_details_edit.dart';
 import 'package:fluffychat/pages/chat_details/chat_details_edit_option.dart';
 import 'package:fluffychat/pages/chat_details/chat_details_edit_view_style.dart';
 import 'package:fluffychat/presentation/model/pick_avatar_state.dart';
+import 'package:fluffychat/resource/image_paths.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/widgets/avatar/avatar.dart';
@@ -13,7 +15,8 @@ import 'package:fluffychat/widgets/mixins/popup_menu_widget_style.dart';
 import 'package:fluffychat/widgets/stream_image_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
-import 'package:linagora_design_flutter/colors/linagora_sys_colors.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:matrix/matrix.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:photo_manager_image_provider/photo_manager_image_provider.dart';
@@ -119,80 +122,82 @@ class ChatDetailsEditView extends StatelessWidget {
                         ),
                       ),
                     ),
-                    Positioned(
-                      bottom: 0,
-                      right: 0,
-                      child: ValueListenableBuilder(
-                        valueListenable: controller.isEditedGroupInfoNotifier,
-                        builder: (context, _, __) {
-                          return MenuAnchor(
-                            controller: controller.menuController,
-                            style: MenuStyle(
-                              padding: const WidgetStatePropertyAll(
-                                EdgeInsets.zero,
-                              ),
-                              shape: WidgetStatePropertyAll(
-                                RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(
-                                    PopupMenuWidgetStyle.menuBorderRadius,
+                    if (controller.room?.canChangeRoomAvatar == true)
+                      Positioned(
+                        bottom: 0,
+                        right: 0,
+                        child: ValueListenableBuilder(
+                          valueListenable: controller.isEditedGroupInfoNotifier,
+                          builder: (context, _, __) {
+                            return MenuAnchor(
+                              controller: controller.menuController,
+                              style: MenuStyle(
+                                padding: const WidgetStatePropertyAll(
+                                  EdgeInsets.zero,
+                                ),
+                                shape: WidgetStatePropertyAll(
+                                  RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(
+                                      PopupMenuWidgetStyle.menuBorderRadius,
+                                    ),
+                                  ),
+                                ),
+                                backgroundColor: WidgetStatePropertyAll(
+                                  PopupMenuWidgetStyle.defaultMenuColor(
+                                    context,
                                   ),
                                 ),
                               ),
-                              backgroundColor: WidgetStatePropertyAll(
-                                PopupMenuWidgetStyle.defaultMenuColor(
-                                  context,
-                                ),
-                              ),
-                            ),
-                            alignmentOffset: ChatDetailEditViewStyle
-                                .contextMenuAlignmentOffset(context),
-                            builder: (
-                              BuildContext context,
-                              MenuController menuController,
-                              Widget? child,
-                            ) {
-                              return Container(
-                                decoration: BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  color:
-                                      Theme.of(context).colorScheme.onPrimary,
-                                ),
-                                padding:
-                                    ChatDetailEditViewStyle.editIconPadding,
-                                child: ElevatedButton(
-                                  onPressed: () => {
-                                    menuController.isOpen
-                                        ? menuController.close()
-                                        : menuController.open(),
-                                  },
-                                  style: ButtonStyle(
-                                    shape: WidgetStateProperty.all(
-                                      const CircleBorder(),
+                              alignmentOffset: ChatDetailEditViewStyle
+                                  .contextMenuAlignmentOffset(context),
+                              builder: (
+                                BuildContext context,
+                                MenuController menuController,
+                                Widget? child,
+                              ) {
+                                return Container(
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    color:
+                                        Theme.of(context).colorScheme.onPrimary,
+                                  ),
+                                  padding:
+                                      ChatDetailEditViewStyle.editIconPadding,
+                                  child: ElevatedButton(
+                                    onPressed: () => {
+                                      menuController.isOpen
+                                          ? menuController.close()
+                                          : menuController.open(),
+                                    },
+                                    style: ButtonStyle(
+                                      shape: WidgetStateProperty.all(
+                                        const CircleBorder(),
+                                      ),
+                                      padding: WidgetStateProperty.all(
+                                        ChatDetailEditViewStyle
+                                            .editIconMaterialPadding,
+                                      ),
+                                      iconColor: WidgetStateProperty.all(
+                                        Theme.of(context).colorScheme.onPrimary,
+                                      ),
+                                      backgroundColor: WidgetStateProperty.all(
+                                        Theme.of(context).colorScheme.primary,
+                                      ),
                                     ),
-                                    padding: WidgetStateProperty.all(
-                                      ChatDetailEditViewStyle
-                                          .editIconMaterialPadding,
-                                    ),
-                                    iconColor: WidgetStateProperty.all(
-                                      Theme.of(context).colorScheme.onPrimary,
-                                    ),
-                                    backgroundColor: WidgetStateProperty.all(
-                                      Theme.of(context).colorScheme.primary,
+                                    child: const Icon(
+                                      Icons.edit_outlined,
+                                      size:
+                                          ChatDetailEditViewStyle.editIconSize,
                                     ),
                                   ),
-                                  child: const Icon(
-                                    Icons.edit_outlined,
-                                    size: ChatDetailEditViewStyle.editIconSize,
-                                  ),
-                                ),
-                              );
-                            },
-                            menuChildren:
-                                controller.listContextMenuBuilder(context),
-                          );
-                        },
+                                );
+                              },
+                              menuChildren:
+                                  controller.listContextMenuBuilder(context),
+                            );
+                          },
+                        ),
                       ),
-                    ),
                   ],
                 ),
               ),
@@ -209,6 +214,71 @@ class ChatDetailsEditView extends StatelessWidget {
                     height: ChatDetailEditViewStyle.textFieldsGap,
                   ),
                   _DescriptionField(controller: controller),
+                  const SizedBox(height: 20),
+                  ValueListenableBuilder(
+                    valueListenable: controller.isRoomEnabledEncryptionNotifier,
+                    builder: (context, isRoomEnabledEncryption, child) {
+                      return ListTile(
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                        ),
+                        leading: SvgPicture.asset(
+                          ImagePaths.icShieldLockFill,
+                          width: 24,
+                          height: 24,
+                          colorFilter: ColorFilter.mode(
+                            Theme.of(context).colorScheme.onSurfaceVariant,
+                            BlendMode.srcIn,
+                          ),
+                        ),
+                        title: Text(
+                          L10n.of(context)!.encryption,
+                          style: Theme.of(context)
+                              .textTheme
+                              .bodyLarge
+                              ?.copyWith(
+                                color: Theme.of(context).colorScheme.onSurface,
+                              ),
+                        ),
+                        subtitle: Text(
+                          L10n.of(context)!.yourDataIsEncryptedForSecurity,
+                          style: Theme.of(context)
+                              .textTheme
+                              .bodySmall
+                              ?.copyWith(
+                                color: LinagoraSysColors.material().tertiary,
+                              ),
+                        ),
+                        trailing: SizedBox(
+                          width: 38,
+                          height: 24,
+                          child: FittedBox(
+                            fit: BoxFit.fill,
+                            child: Switch(
+                              activeTrackColor: controller
+                                              .room?.canEnableEncryption !=
+                                          true ||
+                                      controller.room?.encrypted == true
+                                  ? LinagoraStateLayer(
+                                      LinagoraSysColors.material().onSurface,
+                                    ).opacityLayer3
+                                  : Theme.of(context).colorScheme.primary,
+                              value: isRoomEnabledEncryption,
+                              onChanged: controller.room?.encrypted == false &&
+                                      controller.room?.canEnableEncryption ==
+                                          true
+                                  ? (value) {
+                                      if (!value) return;
+                                      controller.enableEncryption(context);
+                                    }
+                                  : null,
+                            ),
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                  const SizedBox(height: 16),
                 ],
               ),
             ),
@@ -367,10 +437,14 @@ class _GroupNameField extends StatelessWidget {
         valueListenable: controller.isValidGroupNameNotifier,
         builder: (context, value, _) {
           return TextField(
+            enabled: controller.room?.canChangeRoomName ?? false,
             style: ChatDetailEditViewStyle.textFieldStyle(context),
             controller: controller.groupNameTextEditingController,
             contextMenuBuilder: mobileTwakeContextMenuBuilder,
             focusNode: controller.groupNameFocusNode,
+            onTapOutside: (_) {
+              controller.groupNameFocusNode.unfocus();
+            },
             decoration: InputDecoration(
               border: OutlineInputBorder(
                 borderSide:
@@ -387,6 +461,9 @@ class _GroupNameField extends StatelessWidget {
               suffixIcon: ValueListenableBuilder<bool>(
                 valueListenable: controller.groupNameEmptyNotifier,
                 builder: (context, isGroupNameEmpty, child) {
+                  if (controller.room?.canChangeRoomName == false) {
+                    return child!;
+                  }
                   if (isGroupNameEmpty) {
                     return child!;
                   }
@@ -424,10 +501,14 @@ class _DescriptionField extends StatelessWidget {
       child: Column(
         children: [
           TextField(
+            enabled: controller.room?.canChangeTopic ?? false,
             style: ChatDetailEditViewStyle.textFieldStyle(context),
             controller: controller.descriptionTextEditingController,
             contextMenuBuilder: mobileTwakeContextMenuBuilder,
             focusNode: controller.descriptionFocusNode,
+            onTapOutside: (_) {
+              controller.descriptionFocusNode.unfocus();
+            },
             decoration: InputDecoration(
               border: OutlineInputBorder(
                 borderSide:
@@ -441,6 +522,10 @@ class _DescriptionField extends StatelessWidget {
               suffixIcon: ValueListenableBuilder<bool>(
                 valueListenable: controller.descriptionEmptyNotifier,
                 builder: (context, isDescriptionEmpty, child) {
+                  if (controller.room?.canChangeTopic == false) {
+                    return child!;
+                  }
+
                   if (isDescriptionEmpty) {
                     return child!;
                   }

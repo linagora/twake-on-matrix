@@ -1,3 +1,4 @@
+import 'package:adaptive_dialog/adaptive_dialog.dart';
 import 'package:dartz/dartz.dart' hide State;
 import 'package:fluffychat/app_state/failure.dart';
 import 'package:fluffychat/app_state/success.dart';
@@ -81,6 +82,7 @@ class ChatDetailsEditController extends State<ChatDetailsEdit>
 
   final isEditedGroupInfoNotifier = ValueNotifier<bool>(false);
   final isValidGroupNameNotifier = ValueNotifier<bool>(true);
+  final isRoomEnabledEncryptionNotifier = ValueNotifier<bool>(false);
 
   Client get client => Matrix.of(context).client;
 
@@ -476,6 +478,29 @@ class ChatDetailsEditController extends State<ChatDetailsEdit>
     );
   }
 
+  void enableEncryption(_) async {
+    if (room == null) return;
+    if (room!.encrypted == true) {
+      showOkAlertDialog(
+        context: context,
+        title: L10n.of(context)!.sorryThatsNotPossible,
+        message: L10n.of(context)!.disableEncryptionWarning,
+      );
+      return;
+    }
+    final consent = await showOkCancelAlertDialog(
+      context: context,
+      title: L10n.of(context)!.areYouSure,
+      message: L10n.of(context)!.enableEncryptionWarning,
+      okLabel: L10n.of(context)!.yes,
+      cancelLabel: L10n.of(context)!.cancel,
+    );
+    if (consent != OkCancelResult.ok) return;
+    await TwakeDialog.showFutureLoadingDialogFullScreen(
+      future: () => room!.enableEncryption(),
+    ).then((_) => isRoomEnabledEncryptionNotifier.value = true);
+  }
+
   @override
   void dispose() {
     _clearImageInMemory();
@@ -485,6 +510,10 @@ class ChatDetailsEditController extends State<ChatDetailsEdit>
     isEditedGroupInfoNotifier.dispose();
     descriptionFocusNode.dispose();
     groupNameFocusNode.dispose();
+    isRoomEnabledEncryptionNotifier.dispose();
+    isValidGroupNameNotifier.dispose();
+    groupNameEmptyNotifier.dispose();
+    descriptionEmptyNotifier.dispose();
     super.dispose();
   }
 
@@ -525,6 +554,7 @@ class ChatDetailsEditController extends State<ChatDetailsEdit>
   @override
   void initState() {
     room = Matrix.of(context).client.getRoomById(widget.roomId);
+    isRoomEnabledEncryptionNotifier.value = room?.encrypted ?? false;
     _setupGroupNameTextEditingController();
     _setupDescriptionTextEditingController();
     listenToPickAvatarUIState(context);
