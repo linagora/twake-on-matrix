@@ -4,6 +4,7 @@ import 'package:dartz/dartz.dart';
 import 'package:fluffychat/app_state/failure.dart';
 import 'package:fluffychat/app_state/success.dart';
 import 'package:fluffychat/domain/app_state/room/chat_get_pinned_events_state.dart';
+import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
 import 'package:matrix/matrix.dart';
 
 class ChatGetPinnedEventsInteractor {
@@ -45,15 +46,19 @@ class ChatGetPinnedEventsInteractor {
         yield Left(ChatGetPinnedEventsNoResult());
         return;
       } else {
-        Logs().d(
-          "ChatGetPinnedEventsInteractor()::execute()::result: ${result.length}",
-        );
-        result.sort((currentEvent, nextEvent) {
+        final filteredEvents =
+            result.where((event) => !event.shouldHideRedactedEvent()).toList();
+
+        filteredEvents.sort((currentEvent, nextEvent) {
           final currentPinnedTime = currentEvent.originServerTs;
           final nextPinnedTime = nextEvent.originServerTs;
           return currentPinnedTime.compareTo(nextPinnedTime);
         });
-        yield Right(ChatGetPinnedEventsSuccess(pinnedEvents: result));
+        if (filteredEvents.isEmpty) {
+          yield Left(ChatGetPinnedEventsNoResult());
+          return;
+        }
+        yield Right(ChatGetPinnedEventsSuccess(pinnedEvents: filteredEvents));
         return;
       }
     } on MatrixException catch (exception) {
