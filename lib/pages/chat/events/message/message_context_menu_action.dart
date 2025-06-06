@@ -8,6 +8,7 @@ enum MessageContextMenuAction {
   reply,
   forward,
   copy,
+  edit,
   select,
   pin,
   saveToDownload,
@@ -38,6 +39,9 @@ enum MessageContextMenuAction {
       case MessageContextMenuAction.saveToGallery:
         Navigator.of(context).pop('saveToGallery');
         break;
+      case MessageContextMenuAction.edit:
+        Navigator.of(context).pop('edit');
+        break;
     }
   }
 
@@ -60,6 +64,8 @@ enum MessageContextMenuAction {
         return L10n.of(context)!.saveToDownloads;
       case MessageContextMenuAction.saveToGallery:
         return L10n.of(context)!.saveToGallery;
+      case MessageContextMenuAction.edit:
+        return L10n.of(context)!.edit;
     }
   }
 
@@ -79,6 +85,8 @@ enum MessageContextMenuAction {
         return Icons.download_outlined;
       case MessageContextMenuAction.saveToGallery:
         return Icons.save_outlined;
+      case MessageContextMenuAction.edit:
+        return Icons.edit_outlined;
       default:
         return null;
     }
@@ -91,6 +99,7 @@ enum MessageContextMenuAction {
       case MessageContextMenuAction.reply:
         return ImagePaths.icReply;
       case MessageContextMenuAction.forward:
+      case MessageContextMenuAction.edit:
       case MessageContextMenuAction.copy:
       case MessageContextMenuAction.select:
       case MessageContextMenuAction.saveToDownload:

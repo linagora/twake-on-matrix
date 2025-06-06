@@ -17,6 +17,7 @@ import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/filtered_timeline_extension.dart';
 import 'package:fluffychat/utils/responsive/responsive_utils.dart';
 import 'package:fluffychat/widgets/context_menu/context_menu_action.dart';
+import 'package:fluffychat/widgets/matrix.dart';
 import 'package:fluffychat/widgets/swipeable.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_emoji_mart/flutter_emoji_mart.dart';
@@ -56,6 +57,7 @@ typedef OnScrollToEventId = void Function(String);
 
 class Message extends StatefulWidget {
   final Event event;
+  final MatrixState? matrixState;
   final Event? previousEvent;
   final Event? nextEvent;
   final String? markedUnreadLocation;
@@ -81,6 +83,7 @@ class Message extends StatefulWidget {
   final OnSendEmojiReactionAction? onSelectEmojiReaction;
   final OnPickEmojiReactionAction? onPickEmojiReaction;
   final void Function(Event)? onReply;
+  final void Function(Event)? onEdit;
   final void Function(Event)? onForward;
   final void Function(Event)? onCopy;
   final void Function(Event)? onPin;
@@ -92,6 +95,7 @@ class Message extends StatefulWidget {
 
   const Message(
     this.event, {
+    this.matrixState,
     this.previousEvent,
     this.nextEvent,
     this.onSelect,
@@ -118,6 +122,7 @@ class Message extends StatefulWidget {
     this.onSelectEmojiReaction,
     this.onPickEmojiReaction,
     this.onReply,
+    this.onEdit,
     this.onForward,
     this.onCopy,
     this.onPin,
@@ -236,6 +241,7 @@ class _MessageState extends State<Message> with MessageAvatarMixin {
           Expanded(
             child: MessageContentWithTimestampBuilder(
               event: widget.event,
+              matrixState: widget.matrixState,
               nextEvent: widget.nextEvent,
               onSelect: widget.onSelect,
               scrollToEventId: widget.scrollToEventId,
@@ -253,6 +259,7 @@ class _MessageState extends State<Message> with MessageAvatarMixin {
               onSendEmojiReaction: widget.onSelectEmojiReaction,
               onPickEmojiReaction: widget.onPickEmojiReaction,
               onReply: widget.onReply,
+              onEdit: widget.onEdit,
               onForward: widget.onForward,
               onCopy: widget.onCopy,
               onLongPressMessage: widget.onLongPressMessage,

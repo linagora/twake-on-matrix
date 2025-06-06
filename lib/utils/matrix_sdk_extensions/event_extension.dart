@@ -11,6 +11,7 @@ import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/utils/size_string.dart';
 import 'package:fluffychat/utils/string_extension.dart';
 import 'package:fluffychat/utils/twake_snackbar.dart';
+import 'package:fluffychat/widgets/matrix.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
@@ -275,5 +276,22 @@ extension LocalizedBody on Event {
               color: Theme.of(context).colorScheme.onSurface,
             );
     }
+  }
+
+  List<Client?> currentRoomBundle(MatrixState? matrix) {
+    if (matrix == null || matrix.currentBundle == null) {
+      return [];
+    }
+    final clients = matrix.currentBundle!;
+    clients.removeWhere((c) => c!.getRoomById(roomId!) == null);
+    return clients;
+  }
+
+  bool canEditEvents(MatrixState? matrix) {
+    if (isVideoOrImage || hasAttachment) {
+      return false;
+    }
+
+    return currentRoomBundle(matrix).any((cl) => senderId == cl!.userID);
   }
 }

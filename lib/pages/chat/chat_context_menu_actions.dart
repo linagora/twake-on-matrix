@@ -5,6 +5,7 @@ import 'package:flutter_gen/gen_l10n/l10n.dart';
 enum ChatContextMenuActions {
   select,
   copyMessage,
+  edit,
   pinChat,
   forward,
   reply,
@@ -33,6 +34,8 @@ enum ChatContextMenuActions {
         return L10n.of(context)!.download;
       case ChatContextMenuActions.jumpToMessage:
         return L10n.of(context)!.jumpToMessage;
+      case ChatContextMenuActions.edit:
+        return L10n.of(context)!.edit;
     }
   }
 
@@ -51,6 +54,8 @@ enum ChatContextMenuActions {
         return Icons.shortcut;
       case ChatContextMenuActions.downloadFile:
         return Icons.download;
+      case ChatContextMenuActions.edit:
+        return Icons.edit_outlined;
       default:
         return null;
     }

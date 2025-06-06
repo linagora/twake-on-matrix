@@ -60,6 +60,22 @@ class MessageTime extends StatelessWidget {
             ),
             const SizedBox(width: 4.0),
           ],
+          if (event.hasAggregatedEvents(
+            timeline,
+            RelationshipTypes.edit,
+          ))
+            Text(
+              '${L10n.of(context)!.edited} ',
+              textScaler: const TextScaler.linear(1.0),
+              style: Theme.of(context).textTheme.bodySmall?.merge(
+                    TextStyle(
+                      color: timelineOverlayMessage
+                          ? Colors.white
+                          : LinagoraRefColors.material().tertiary[30],
+                      letterSpacing: 0.4,
+                    ),
+                  ),
+            ),
           Text(
             DateFormat("HH:mm").format(event.originServerTs),
             textScaler: const TextScaler.linear(1.0),
