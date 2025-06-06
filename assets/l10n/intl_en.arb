@@ -3122,5 +3122,7 @@
   "reaction": "Reaction",
   "noChatPermissionMessage": "You do not have permission to send messages in this chat.",
   "administration": "Administration",
-  "yourDataIsEncryptedForSecurity": "Your data is encrypted for security"
+  "yourDataIsEncryptedForSecurity": "Your data is encrypted for security",
+  "failedToDeleteMessage": "Failed to delete message.",
+  "noDeletePermissionMessage": "You don't have permission to delete this message."
 }

@@ -24,6 +24,7 @@ import 'package:fluffychat/pages/chat/recording_dialog.dart';
 import 'package:fluffychat/presentation/enum/chat/right_column_type_enum.dart';
 import 'package:fluffychat/presentation/extensions/event_update_extension.dart';
 import 'package:fluffychat/presentation/mixins/common_media_picker_mixin.dart';
+import 'package:fluffychat/presentation/mixins/delete_event_mixin.dart';
 import 'package:fluffychat/presentation/mixins/go_to_direct_chat_mixin.dart';
 import 'package:fluffychat/presentation/mixins/handle_clipboard_action_mixin.dart';
 import 'package:fluffychat/presentation/mixins/leave_chat_mixin.dart';
@@ -123,7 +124,8 @@ class ChatController extends State<Chat>
         MessageContentMixin,
         SaveFileToTwakeAndroidDownloadsFolderMixin,
         SaveMediaToGalleryAndroidMixin,
-        LeaveChatMixin {
+        LeaveChatMixin,
+        DeleteEventMixin {
   final NetworkConnectionService networkConnectionService =
       getIt.get<NetworkConnectionService>();
 
@@ -1451,12 +1453,13 @@ class ChatController extends State<Chat>
 
   List<ChatContextMenuActions> _getListPopupMenuActions(Event event) {
     final listAction = [
-      ChatContextMenuActions.select,
+      if (event.status.isAvailable) ChatContextMenuActions.forward,
       if (event.isCopyable) ChatContextMenuActions.copyMessage,
       if (event.room.canPinMessage) ChatContextMenuActions.pinChat,
-      if (event.status.isAvailable) ChatContextMenuActions.forward,
       if (PlatformInfos.isWeb && event.hasAttachment)
         ChatContextMenuActions.downloadFile,
+      ChatContextMenuActions.select,
+      if (event.canDelete) ChatContextMenuActions.delete,
     ];
     return listAction;
   }
@@ -1478,6 +1481,14 @@ class ChatController extends State<Chat>
         imagePath: action.getImagePath(
           unpin: isUnpinEvent(event),
         ),
+        colorIcon: action.getIconColor(context, event, action),
+        styleName: action == ChatContextMenuActions.delete
+            ? PopupMenuWidgetStyle.defaultItemTextStyle(context)?.merge(
+                TextStyle(
+                  color: LinagoraSysColors.material().error,
+                ),
+              )
+            : null,
       );
     }).toList();
   }
@@ -1504,6 +1515,9 @@ class ChatController extends State<Chat>
         break;
       case ChatContextMenuActions.reply:
         replyAction(replyTo: event);
+        break;
+      case ChatContextMenuActions.delete:
+        deleteEventAction(context, event);
         break;
       default:
         break;
@@ -2250,13 +2264,14 @@ class ChatController extends State<Chat>
         (myReaction?.content as Map<String, dynamic>?)?['m.relates_to'];
     showFullEmojiPickerOnWebNotifier.value = false;
     final listPopupMenuActions = [
-      ChatContextMenuActions.select,
+      ChatContextMenuActions.reply,
+      if (event.status.isAvailable) ChatContextMenuActions.forward,
       if (event.isCopyable) ChatContextMenuActions.copyMessage,
       ChatContextMenuActions.pinChat,
-      if (event.status.isAvailable) ChatContextMenuActions.forward,
-      ChatContextMenuActions.reply,
       if (PlatformInfos.isWeb && event.hasAttachment)
         ChatContextMenuActions.downloadFile,
+      ChatContextMenuActions.select,
+      if (event.canRedact) ChatContextMenuActions.delete,
     ];
     final listContextMenuActions = _mapPopupMenuActionsToContextMenuActions(
       listPopupMenuActions,
@@ -2583,6 +2598,7 @@ class ChatController extends State<Chat>
     cachedPresenceNotifier.dispose();
     showFullEmojiPickerOnWebNotifier.dispose();
     showEmojiPickerComposerNotifier.dispose();
+    disposeDeleteEventMixin();
     super.dispose();
   }
 
