@@ -97,7 +97,7 @@ abstract class AppConfig {
       'https://github.com/linagora/twake-on-matrix';
   static String supportUrl = 'https://twake.app/support';
   static bool renderHtml = true;
-  static bool hideRedactedEvents = false;
+  static bool hideRedactedEvents = true;
   static bool hideUnknownEvents = true;
   static bool hideUnimportantStateEvents = true;
   static bool showDirectChatsInSpaces = true;
