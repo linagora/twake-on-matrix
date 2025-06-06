@@ -126,6 +126,10 @@ extension RoomExtension on Room {
         ownPowerLevel;
   }
 
+  bool get isRoomPublic {
+    return joinRules == JoinRules.public;
+  }
+
   bool get canEditChatDetails {
     return canChangeRoomName ||
         canChangeTopic ||
