@@ -3120,5 +3120,9 @@
   "selectedEmailWillReceiveAnInvitationLinkAndInstructions": "Selected email will receive an invitation link and instructions.",
   "selectedNumberWillGetAnSMSWithAnInvitationLinkAndInstructions": "Selected number will get an SMS with an invitation link and instructions.",
   "reaction": "Reaction",
-  "noChatPermissionMessage": "You do not have permission to send messages in this chat."
+  "noChatPermissionMessage": "You do not have permission to send messages in this chat.",
+  "administration": "Administration",
+  "makeThisGroupPublic": "Make this group public",
+  "yourDataIsEncryptedForSecurity": "Your data is encrypted for security",
+  "thisGroupWillVisibleByEveryone" : "This group will visible by everyone"
 }

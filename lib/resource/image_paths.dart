@@ -61,6 +61,9 @@ class ImagePaths {
   static String get icSearchEmojiEmpty =>
       _getImagePath('search_emoji_empty.svg');
 
+  static String get icShieldLockFill =>
+      _getImagePath('ic_shield_lock_fill.svg');
+
   static String _getImagePath(String imageName) {
     return AssetsPaths.images + imageName;
   }
