@@ -2,7 +2,6 @@ import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/domain/model/search/recent_chat_model.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/client_stories_extension.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
-import 'package:flutter/material.dart';
 import 'package:matrix/matrix.dart';
 
 extension RoomExtension on Room {
