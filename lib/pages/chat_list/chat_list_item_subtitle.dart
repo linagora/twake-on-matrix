@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/config/themes.dart';
 import 'package:fluffychat/domain/model/room/room_extension.dart';
