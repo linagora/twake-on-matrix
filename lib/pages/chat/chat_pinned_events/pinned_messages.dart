@@ -371,8 +371,13 @@ class PinnedMessagesController extends State<PinnedMessages>
         ),
         icon: action.getIconData(unpin: event.isPinned),
         imagePath: action.getImagePath(unpin: event.isPinned),
-        colorIcon: action == ChatContextMenuActions.pinChat && event.isPinned
-            ? Theme.of(context).colorScheme.onSurface
+        colorIcon: action.getIconColor(context, event, action),
+        styleName: action == ChatContextMenuActions.delete
+            ? PopupMenuWidgetStyle.defaultItemTextStyle(context)?.merge(
+                TextStyle(
+                  color: LinagoraSysColors.material().error,
+                ),
+              )
             : null,
       );
     }).toList();

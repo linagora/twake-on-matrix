@@ -18,7 +18,9 @@ mixin DeleteEventMixin {
         (failure) {
           if (failure is NoPermissionToDeleteEvent) {
             TwakeSnackBar.show(
-                context, L10n.of(context)!.noDeletePermissionMessage);
+              context,
+              L10n.of(context)!.noDeletePermissionMessage,
+            );
             return;
           }
           TwakeSnackBar.show(

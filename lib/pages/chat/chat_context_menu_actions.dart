@@ -80,7 +80,10 @@ enum ChatContextMenuActions {
   }
 
   Color? getIconColor(
-      BuildContext context, Event event, ChatContextMenuActions action) {
+    BuildContext context,
+    Event event,
+    ChatContextMenuActions action,
+  ) {
     if (action == ChatContextMenuActions.pinChat && event.isPinned) {
       return Theme.of(context).colorScheme.onSurface;
     }
