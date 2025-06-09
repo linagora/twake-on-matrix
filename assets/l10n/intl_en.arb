@@ -3122,7 +3122,5 @@
   "reaction": "Reaction",
   "noChatPermissionMessage": "You do not have permission to send messages in this chat.",
   "administration": "Administration",
-  "makeThisGroupPublic": "Make this group public",
-  "yourDataIsEncryptedForSecurity": "Your data is encrypted for security",
-  "thisGroupWillVisibleByEveryone" : "This group will visible by everyone"
+  "yourDataIsEncryptedForSecurity": "Your data is encrypted for security"
 }

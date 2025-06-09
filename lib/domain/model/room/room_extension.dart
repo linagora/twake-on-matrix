@@ -92,7 +92,8 @@ extension RoomExtension on Room {
     return (currentPowerLevelsMap
                 .tryGetMap<String, Object?>('events')
                 ?.tryGet<int>(EventTypes.RoomName) ??
-            getDefaultPowerLevel(currentPowerLevelsMap)) <=
+            currentPowerLevelsMap.tryGet<int>('state_default') ??
+            80) <=
         ownPowerLevel;
   }
 
@@ -102,7 +103,8 @@ extension RoomExtension on Room {
     return (currentPowerLevelsMap
                 .tryGetMap<String, Object?>('events')
                 ?.tryGet<int>(EventTypes.RoomTopic) ??
-            getDefaultPowerLevel(currentPowerLevelsMap)) <=
+            currentPowerLevelsMap.tryGet<int>('state_default') ??
+            80) <=
         ownPowerLevel;
   }
 
@@ -112,7 +114,8 @@ extension RoomExtension on Room {
     return (currentPowerLevelsMap
                 .tryGetMap<String, Object?>('events')
                 ?.tryGet<int>(EventTypes.RoomAvatar) ??
-            getDefaultPowerLevel(currentPowerLevelsMap)) <=
+            currentPowerLevelsMap.tryGet<int>('state_default') ??
+            80) <=
         ownPowerLevel;
   }
 
@@ -122,12 +125,9 @@ extension RoomExtension on Room {
     return (currentPowerLevelsMap
                 .tryGetMap<String, Object?>('events')
                 ?.tryGet<int>(EventTypes.Encryption) ??
-            getDefaultPowerLevel(currentPowerLevelsMap)) <=
+            currentPowerLevelsMap.tryGet<int>('state_default') ??
+            80) <=
         ownPowerLevel;
-  }
-
-  bool get isRoomPublic {
-    return joinRules == JoinRules.public;
   }
 
   bool get canEditChatDetails {

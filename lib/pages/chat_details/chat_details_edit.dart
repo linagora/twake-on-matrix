@@ -498,7 +498,9 @@ class ChatDetailsEditController extends State<ChatDetailsEdit>
     if (consent != OkCancelResult.ok) return;
     await TwakeDialog.showFutureLoadingDialogFullScreen(
       future: () => room!.enableEncryption(),
-    ).then((_) => isRoomEnabledEncryptionNotifier.value = true);
+    )
+        .then((_) => isRoomEnabledEncryptionNotifier.value = true)
+        .onError((_, __) => isRoomEnabledEncryptionNotifier.value = false);
   }
 
   @override
