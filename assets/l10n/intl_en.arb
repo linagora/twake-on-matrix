@@ -3124,5 +3124,15 @@
   "administration": "Administration",
   "yourDataIsEncryptedForSecurity": "Your data is encrypted for security",
   "failedToDeleteMessage": "Failed to delete message.",
-  "noDeletePermissionMessage": "You don't have permission to delete this message."
+  "noDeletePermissionMessage": "You don't have permission to delete this message.",
+  "assignRoles": "Assign roles",
+  "permissions": "Permissions",
+  "adminsOfTheGroup": "ADMINS OF THE GROUP ({number})",
+  "@adminsOfTheGroup": {
+    "type": "text",
+    "placeholders": {
+      "number": {}
+    }
+  },
+  "addAdminsOrModerators": "Add Admins/moderators"
 }

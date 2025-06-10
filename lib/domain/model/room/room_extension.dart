@@ -1,4 +1,5 @@
 import 'package:fluffychat/config/app_config.dart';
+import 'package:fluffychat/config/default_power_level_member.dart';
 import 'package:fluffychat/domain/model/search/recent_chat_model.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/client_stories_extension.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
@@ -231,5 +232,30 @@ extension RoomExtension on Room {
       }
     });
     return lastState;
+  }
+
+  bool get canSeeAssignRoles {
+    return ownPowerLevel >= DefaultPowerLevelMember.admin.powerLevel;
+  }
+
+  bool get canChangePowerLevel {
+    final currentPowerLevelsMap = getState(EventTypes.RoomPowerLevels)?.content;
+    if (currentPowerLevelsMap == null) return 0 <= ownPowerLevel;
+    return (currentPowerLevelsMap
+                    .tryGetMap<String, Object?>('events')
+                    ?.tryGet<int>(EventTypes.RoomPowerLevels) ??
+                getDefaultPowerLevel(currentPowerLevelsMap)) ==
+            ownPowerLevel &&
+        ownPowerLevel == DefaultPowerLevelMember.owner.powerLevel;
+  }
+
+  List<User> getAssignRolesMember() {
+    final members = getParticipants();
+    if (members.isEmpty) return [];
+    return members.where((final User member) {
+      final powerLevel = member.powerLevel;
+      return powerLevel >= DefaultPowerLevelMember.admin.powerLevel &&
+          member.membership == Membership.join;
+    }).toList();
   }
 }
