@@ -9,10 +9,12 @@ import 'package:fluffychat/presentation/model/pick_avatar_state.dart';
 import 'package:fluffychat/resource/image_paths.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
+import 'package:fluffychat/widgets/app_bars/twake_app_bar.dart';
 import 'package:fluffychat/widgets/avatar/avatar.dart';
 import 'package:fluffychat/widgets/context_menu_builder_ios_paste_without_permission.dart';
 import 'package:fluffychat/widgets/mixins/popup_menu_widget_style.dart';
 import 'package:fluffychat/widgets/stream_image_view.dart';
+import 'package:fluffychat/widgets/twake_components/twake_icon_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -47,54 +49,45 @@ class ChatDetailsEditView extends StatelessWidget {
     return Scaffold(
       backgroundColor: LinagoraSysColors.material().onPrimary,
       resizeToAvoidBottomInset: false,
-      appBar: AppBar(
-        automaticallyImplyLeading: false,
-        backgroundColor: LinagoraSysColors.material().onPrimary,
-        title: Row(
-          children: [
-            Padding(
-              padding: ChatDetailEditViewStyle.backIconPadding,
-              child: IconButton(
-                highlightColor: Colors.transparent,
-                hoverColor: Colors.transparent,
-                splashColor: Colors.transparent,
-                onPressed: controller.onBack,
-                icon: const Icon(
-                  Icons.chevron_left_outlined,
-                ),
-              ),
-            ),
-            Text(
-              L10n.of(context)!.edit,
-              style: Theme.of(context).textTheme.titleLarge,
-            ),
-            const Spacer(),
-            ValueListenableBuilder(
-              valueListenable: controller.isValidGroupNameNotifier,
-              builder: (context, isValid, child) {
-                return ValueListenableBuilder(
-                  valueListenable: controller.isEditedGroupInfoNotifier,
-                  builder: (context, value, child) {
-                    if (!value || !isValid) {
-                      return const SizedBox.shrink();
-                    }
-                    return child!;
-                  },
-                  child: Padding(
-                    padding: ChatDetailEditViewStyle.doneIconPadding,
-                    child: IconButton(
-                      highlightColor: Colors.transparent,
-                      hoverColor: Colors.transparent,
-                      splashColor: Colors.transparent,
-                      onPressed: () => controller.handleSaveAction(context),
-                      icon: const Icon(Icons.done),
-                    ),
-                  ),
-                );
-              },
-            ),
-          ],
+      appBar: TwakeAppBar(
+        title: L10n.of(context)!.edit,
+        leading: TwakeIconButton(
+          paddingAll: 8,
+          splashColor: Colors.transparent,
+          hoverColor: Colors.transparent,
+          highlightColor: Colors.transparent,
+          onTap: controller.onBack,
+          icon: Icons.arrow_back_ios,
         ),
+        centerTitle: true,
+        withDivider: true,
+        actions: [
+          ValueListenableBuilder(
+            valueListenable: controller.isValidGroupNameNotifier,
+            builder: (context, isValid, child) {
+              return ValueListenableBuilder(
+                valueListenable: controller.isEditedGroupInfoNotifier,
+                builder: (context, value, child) {
+                  if (!value || !isValid) {
+                    return const SizedBox.shrink();
+                  }
+                  return child!;
+                },
+                child: Padding(
+                  padding: ChatDetailEditViewStyle.doneIconPadding,
+                  child: IconButton(
+                    highlightColor: Colors.transparent,
+                    hoverColor: Colors.transparent,
+                    splashColor: Colors.transparent,
+                    onPressed: () => controller.handleSaveAction(context),
+                    icon: const Icon(Icons.done),
+                  ),
+                ),
+              );
+            },
+          ),
+        ],
+        context: context,
       ),
       body: SingleChildScrollView(
         physics: const ClampingScrollPhysics(),
@@ -282,6 +275,29 @@ class ChatDetailsEditView extends StatelessWidget {
                 ],
               ),
             ),
+            if (controller.room?.canAssignRoles == true) ...[
+              Container(
+                color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                alignment: Alignment.centerLeft,
+                padding: const EdgeInsets.all(8.0),
+                child: Text(
+                  L10n.of(context)!.administration,
+                  style:
+                      ChatDetailEditViewStyle.textChatDetailsEditCategoryStyle(
+                    context,
+                  ),
+                ),
+              ),
+              ChatDetailsEditOption(
+                title: L10n.of(context)!.assignRoles,
+                subtitle: '${controller.room?.getAssignRolesMember().length}',
+                subtitleColor: LinagoraRefColors.material().tertiary[30],
+                leading: Icons.admin_panel_settings_outlined,
+                titleColor: Theme.of(context).colorScheme.onSurface,
+                leadingIconColor: Theme.of(context).colorScheme.onSurface,
+                onTap: controller.openAssignRolesPage,
+              ),
+            ],
             Container(
               color: Theme.of(context).colorScheme.surfaceContainerHighest,
               alignment: Alignment.centerLeft,
