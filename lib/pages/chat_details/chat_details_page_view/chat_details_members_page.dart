@@ -44,9 +44,12 @@ class ChatDetailsMembersPage extends StatelessWidget {
                     return _listMemberInfoMobileAndTablet(context);
                   }
                   if (index - addMemberItemCount < members!.length) {
-                    return ParticipantListItem(
-                      members[index - addMemberItemCount],
-                      onUpdatedMembers: onUpdatedMembers,
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 12),
+                      child: ParticipantListItem(
+                        members[index - addMemberItemCount],
+                        onUpdatedMembers: onUpdatedMembers,
+                      ),
                     );
                   }
                   final haveMoreMembers = actualMembersCount > members.length;

@@ -245,81 +245,84 @@ class AssignRolesView extends StatelessWidget {
           },
           (success) {
             if (success is AssignRolesSearchSuccessState) {
-              ListView.builder(
+              return ListView.builder(
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
                 itemCount: success.assignRolesMember.length,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12.0,
+                ),
                 itemBuilder: (context, index) {
                   final member = success.assignRolesMember[index];
                   final role = member.getDefaultPowerLevelMember.displayName;
-                  return TwakeListItem(
-                    padding: const EdgeInsets.all(8),
-                    margin: const EdgeInsets.symmetric(
-                      horizontal: 12.0,
-                    ),
-                    child: Row(
-                      children: [
-                        Avatar(
-                          mxContent: member.avatarUrl,
-                          name: member.calcDisplayname(),
-                        ),
-                        const SizedBox(width: 8.0),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
-                                children: [
-                                  Text(
-                                    member.calcDisplayname(),
-                                    style: LinagoraTextStyle.material()
-                                        .bodyMedium2
-                                        .copyWith(
-                                          color: LinagoraSysColors.material()
-                                              .onSurface,
-                                        ),
-                                    overflow: TextOverflow.ellipsis,
-                                    maxLines: 1,
-                                  ),
-                                  const Spacer(),
-                                  Row(
-                                    children: [
-                                      Text(
-                                        role,
-                                        style: Theme.of(context)
-                                            .textTheme
-                                            .labelMedium
-                                            ?.copyWith(
-                                              color:
-                                                  LinagoraRefColors.material()
-                                                      .tertiary[30],
-                                            ),
-                                        overflow: TextOverflow.ellipsis,
-                                        maxLines: 1,
-                                      ),
-                                      const SizedBox(
-                                        width: 4,
-                                      ),
-                                    ],
-                                  ),
-                                ],
-                              ),
-                              Text(
-                                member.id,
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .bodyMedium
-                                    ?.copyWith(
-                                      color: LinagoraRefColors.material()
-                                          .tertiary[30],
-                                    ),
-                                overflow: TextOverflow.ellipsis,
-                                maxLines: 1,
-                              ),
-                            ],
+                  return TwakeInkWell(
+                    onTap: () {},
+                    child: TwakeListItem(
+                      padding: const EdgeInsets.all(8),
+                      child: Row(
+                        children: [
+                          Avatar(
+                            mxContent: member.avatarUrl,
+                            name: member.calcDisplayname(),
                           ),
-                        ),
-                      ],
+                          const SizedBox(width: 8.0),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  children: [
+                                    Text(
+                                      member.calcDisplayname(),
+                                      style: LinagoraTextStyle.material()
+                                          .bodyMedium2
+                                          .copyWith(
+                                            color: LinagoraSysColors.material()
+                                                .onSurface,
+                                          ),
+                                      overflow: TextOverflow.ellipsis,
+                                      maxLines: 1,
+                                    ),
+                                    const Spacer(),
+                                    Row(
+                                      children: [
+                                        Text(
+                                          role,
+                                          style: Theme.of(context)
+                                              .textTheme
+                                              .labelMedium
+                                              ?.copyWith(
+                                                color:
+                                                    LinagoraRefColors.material()
+                                                        .tertiary[30],
+                                              ),
+                                          overflow: TextOverflow.ellipsis,
+                                          maxLines: 1,
+                                        ),
+                                        const SizedBox(
+                                          width: 4,
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                                Text(
+                                  member.id,
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .bodyMedium
+                                      ?.copyWith(
+                                        color: LinagoraRefColors.material()
+                                            .tertiary[30],
+                                      ),
+                                  overflow: TextOverflow.ellipsis,
+                                  maxLines: 1,
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   );
                 },

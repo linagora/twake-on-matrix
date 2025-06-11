@@ -9,8 +9,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 import 'package:flutter_gen/gen_l10n/l10n.dart';
-import 'package:linagora_design_flutter/colors/linagora_ref_colors.dart';
-import 'package:linagora_design_flutter/colors/linagora_sys_colors.dart';
+import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:matrix/matrix.dart';
 
 class ParticipantListItem extends StatelessWidget {
@@ -40,56 +39,93 @@ class ParticipantListItem extends StatelessWidget {
 
     return Opacity(
       opacity: member.membership == Membership.join ? 1 : 0.5,
-      child: ListTile(
+      child: TwakeInkWell(
         onTap: () async => await _onItemTap(context),
-        title: Row(
-          children: <Widget>[
-            Flexible(
-              child: Text(
-                member.calcDisplayname(),
-                overflow: TextOverflow.ellipsis,
-                maxLines: 1,
+        child: TwakeListItem(
+          padding: const EdgeInsets.all(8),
+          child: Row(
+            children: [
+              Avatar(
+                mxContent: member.avatarUrl,
+                name: member.calcDisplayname(),
               ),
-            ),
-            if (permissionBatch.isNotEmpty)
-              Container(
-                padding: ParticipantListItemStyle.permissionBatchTextPadding,
-                margin: ParticipantListItemStyle.permissionBatchMargin,
-                decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.primaryContainer,
-                  borderRadius: ParticipantListItemStyle.permissionBatchRadius,
-                  border: Border.all(
-                    color: Theme.of(context).colorScheme.primary,
-                  ),
-                ),
-                child: Text(
-                  permissionBatch,
-                  style: TextStyle(
-                    fontSize:
-                        ParticipantListItemStyle.permissionBatchTextFontSize,
-                    color: Theme.of(context).colorScheme.primary,
-                  ),
+              const SizedBox(width: 8.0),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: <Widget>[
+                        Flexible(
+                          child: Text(
+                            member.calcDisplayname(),
+                            overflow: TextOverflow.ellipsis,
+                            maxLines: 1,
+                            style: LinagoraTextStyle.material()
+                                .bodyMedium2
+                                .copyWith(
+                                  color: LinagoraSysColors.material().onSurface,
+                                ),
+                          ),
+                        ),
+                        if (permissionBatch.isNotEmpty)
+                          Container(
+                            padding: ParticipantListItemStyle
+                                .permissionBatchTextPadding,
+                            margin:
+                                ParticipantListItemStyle.permissionBatchMargin,
+                            decoration: BoxDecoration(
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .primaryContainer,
+                              borderRadius: ParticipantListItemStyle
+                                  .permissionBatchRadius,
+                              border: Border.all(
+                                color: Theme.of(context).colorScheme.primary,
+                              ),
+                            ),
+                            child: Text(
+                              permissionBatch,
+                              style: TextStyle(
+                                fontSize: ParticipantListItemStyle
+                                    .permissionBatchTextFontSize,
+                                color: Theme.of(context).colorScheme.primary,
+                              ),
+                            ),
+                          ),
+                        membershipBatch[member.membership]!.isEmpty
+                            ? Container()
+                            : Container(
+                                padding: ParticipantListItemStyle
+                                    .membershipBatchPadding,
+                                margin: ParticipantListItemStyle
+                                    .membershipBatchMargin,
+                                decoration: BoxDecoration(
+                                  color: Theme.of(context).secondaryHeaderColor,
+                                  borderRadius: ParticipantListItemStyle
+                                      .membershipBatchRadius,
+                                ),
+                                child: Center(
+                                  child:
+                                      Text(membershipBatch[member.membership]!),
+                                ),
+                              ),
+                      ],
+                    ),
+                    Text(
+                      member.id,
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                            color: LinagoraRefColors.material().tertiary[30],
+                          ),
+                      overflow: TextOverflow.ellipsis,
+                      maxLines: 1,
+                    ),
+                  ],
                 ),
               ),
-            membershipBatch[member.membership]!.isEmpty
-                ? Container()
-                : Container(
-                    padding: ParticipantListItemStyle.membershipBatchPadding,
-                    margin: ParticipantListItemStyle.membershipBatchMargin,
-                    decoration: BoxDecoration(
-                      color: Theme.of(context).secondaryHeaderColor,
-                      borderRadius:
-                          ParticipantListItemStyle.membershipBatchRadius,
-                    ),
-                    child: Center(
-                      child: Text(membershipBatch[member.membership]!),
-                    ),
-                  ),
-          ],
+            ],
+          ),
         ),
-        subtitle: Text(member.id),
-        leading:
-            Avatar(mxContent: member.avatarUrl, name: member.calcDisplayname()),
       ),
     );
   }
