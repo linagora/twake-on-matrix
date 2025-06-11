@@ -29,9 +29,8 @@ class ChatDetailsEditOptionStyle {
     BuildContext context,
     Color? subtitleColor,
   ) {
-    return Theme.of(context).textTheme.bodySmall?.copyWith(
+    return Theme.of(context).textTheme.bodyMedium?.copyWith(
           color: subtitleColor ?? LinagoraRefColors.material().neutral[40],
-          fontSize: 12.0,
         );
   }
 }

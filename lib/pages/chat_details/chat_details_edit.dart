@@ -14,6 +14,8 @@ import 'package:fluffychat/domain/usecase/room/update_group_chat_interactor.dart
 import 'package:fluffychat/domain/usecase/room/upload_content_for_web_interactor.dart';
 import 'package:fluffychat/domain/usecase/room/upload_content_interactor.dart';
 import 'package:fluffychat/domain/usecase/verify_name_interactor.dart';
+import 'package:fluffychat/domain/model/room/room_extension.dart';
+import 'package:fluffychat/pages/chat_details/assign_roles/assign_roles.dart';
 import 'package:fluffychat/pages/chat_details/chat_details_edit_context_menu_actions.dart';
 import 'package:fluffychat/pages/chat_details/chat_details_edit_view.dart';
 import 'package:fluffychat/pages/chat_details/chat_details_edit_view_style.dart';
@@ -30,6 +32,7 @@ import 'package:fluffychat/utils/twake_snackbar.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:fluffychat/widgets/mixins/popup_menu_widget_mixin.dart';
 import 'package:fluffychat/widgets/mixins/popup_menu_widget_style.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:linagora_design_flutter/images_picker/asset_counter.dart';
 import 'package:linagora_design_flutter/images_picker/images_picker_grid.dart';
@@ -501,6 +504,22 @@ class ChatDetailsEditController extends State<ChatDetailsEdit>
     )
         .then((_) => isRoomEnabledEncryptionNotifier.value = true)
         .onError((_, __) => isRoomEnabledEncryptionNotifier.value = false);
+  }
+
+  void openAssignRolesPage() {
+    if (room == null) return;
+    if (room!.getAssignRolesMember().isEmpty) {
+      return;
+    }
+    Navigator.of(context).push(
+      CupertinoPageRoute(
+        builder: (context) {
+          return AssignRoles(
+            room: room!,
+          );
+        },
+      ),
+    );
   }
 
   @override
