@@ -147,6 +147,7 @@ class ChatEventList extends StatelessWidget {
                         ? Message(
                             key: ValueKey(event.eventId),
                             event,
+                            matrixState: controller.matrix!,
                             onSwipe: (direction) =>
                                 controller.replyAction(replyTo: event),
                             onAvatarTap: (Event event) =>
@@ -220,6 +221,9 @@ class ChatEventList extends StatelessWidget {
                                 .saveSelectedEventToGallery(context, event),
                             onTapMoreButton:
                                 controller.handleOnTapMoreButtonOnWeb,
+                            onEdit: (event) {
+                              controller.editAction(editEvent: event);
+                            },
                             recentEmojiFuture: controller
                                 .getRecentReactionsInteractor
                                 .execute(),

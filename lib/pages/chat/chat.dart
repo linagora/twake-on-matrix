@@ -264,7 +264,7 @@ class ChatController extends State<Chat>
 
   final replyEventNotifier = ValueNotifier<Event?>(null);
 
-  Event? editEvent;
+  final editEventNotifier = ValueNotifier<Event?>(null);
 
   bool get selectMode => selectedEvents.isNotEmpty;
 
@@ -598,7 +598,7 @@ class ChatController extends State<Chat>
     room!.sendTextEvent(
       sendController.text.trim(),
       inReplyTo: replyEventNotifier.value,
-      editEventId: editEvent?.eventId,
+      editEventId: editEventNotifier.value?.eventId,
       parseCommands: parseCommands,
     );
     sendController.value = TextEditingValue(
@@ -609,7 +609,7 @@ class ChatController extends State<Chat>
     inputText.value = pendingText;
     _updateReplyEvent();
     setState(() {
-      editEvent = null;
+      editEventNotifier.value = null;
       pendingText = '';
     });
   }
@@ -887,9 +887,36 @@ class ChatController extends State<Chat>
     _clearSelectEvent();
   }
 
+  void editAction({
+    Event? editEvent,
+  }) {
+    if (replyEventNotifier.value != null) {
+      cancelReplyEventAction();
+    }
+    final eventToEdit = editEvent ?? selectedEvents.first;
+
+    if (!eventToEdit.status.isAvailable) {
+      return;
+    }
+    pendingText = sendController.text;
+    editEventNotifier.value = eventToEdit;
+    sendController.text =
+        editEvent!.getDisplayEvent(timeline!).calcLocalizedBodyFallback(
+              MatrixLocals(L10n.of(context)!),
+              withSenderNamePrefix: false,
+              hideReply: true,
+            );
+
+    _clearSelectEvent();
+    _requestInputFocus();
+  }
+
   void replyAction({
     Event? replyTo,
   }) {
+    if (editEventNotifier.value != null) {
+      cancelEditEventAction();
+    }
     if (replyTo?.status.isAvailable == false) {
       return;
     }
@@ -1109,14 +1136,15 @@ class ChatController extends State<Chat>
     setSendingClient(client);
     setState(() {
       pendingText = sendController.text;
-      editEvent = selectedEvents.first;
+      editEventNotifier.value = selectedEvents.first;
     });
-    inputText.value = sendController.text =
-        editEvent!.getDisplayEvent(timeline!).calcLocalizedBodyFallback(
-              MatrixLocals(L10n.of(context)!),
-              withSenderNamePrefix: false,
-              hideReply: true,
-            );
+    inputText.value = sendController.text = editEventNotifier.value!
+        .getDisplayEvent(timeline!)
+        .calcLocalizedBodyFallback(
+          MatrixLocals(L10n.of(context)!),
+          withSenderNamePrefix: false,
+          hideReply: true,
+        );
     _clearSelectEvent();
 
     _requestInputFocus();
@@ -1332,12 +1360,15 @@ class ChatController extends State<Chat>
   }
 
   void cancelReplyEventAction() => setState(() {
-        if (editEvent != null) {
+        _updateReplyEvent();
+      });
+
+  void cancelEditEventAction() => setState(() {
+        if (editEventNotifier.value != null) {
           inputText.value = sendController.text = pendingText;
           pendingText = '';
         }
-        _updateReplyEvent();
-        editEvent = null;
+        editEventNotifier.value = null;
       });
 
   void onSendFileClick(BuildContext context) async {
@@ -1455,6 +1486,9 @@ class ChatController extends State<Chat>
     final listAction = [
       if (event.status.isAvailable) ChatContextMenuActions.forward,
       if (event.isCopyable) ChatContextMenuActions.copyMessage,
+      if (event.canEditEvents(matrix)) ...[
+        ChatContextMenuActions.edit,
+      ],
       if (event.room.canPinMessage) ChatContextMenuActions.pinChat,
       if (PlatformInfos.isWeb && event.hasAttachment)
         ChatContextMenuActions.downloadFile,
@@ -1518,6 +1552,9 @@ class ChatController extends State<Chat>
         break;
       case ChatContextMenuActions.delete:
         deleteEventAction(context, event);
+        break;
+      case ChatContextMenuActions.edit:
+        editAction(editEvent: event);
         break;
       default:
         break;
@@ -2264,13 +2301,14 @@ class ChatController extends State<Chat>
         (myReaction?.content as Map<String, dynamic>?)?['m.relates_to'];
     showFullEmojiPickerOnWebNotifier.value = false;
     final listPopupMenuActions = [
+      ChatContextMenuActions.select,
       ChatContextMenuActions.reply,
       if (event.status.isAvailable) ChatContextMenuActions.forward,
+      if (event.canEditEvents(matrix)) ChatContextMenuActions.edit,
       if (event.isCopyable) ChatContextMenuActions.copyMessage,
       ChatContextMenuActions.pinChat,
       if (PlatformInfos.isWeb && event.hasAttachment)
         ChatContextMenuActions.downloadFile,
-      ChatContextMenuActions.select,
       if (event.canRedact) ChatContextMenuActions.delete,
     ];
     final listContextMenuActions = _mapPopupMenuActionsToContextMenuActions(
@@ -2598,7 +2636,6 @@ class ChatController extends State<Chat>
     cachedPresenceNotifier.dispose();
     showFullEmojiPickerOnWebNotifier.dispose();
     showEmojiPickerComposerNotifier.dispose();
-    disposeDeleteEventMixin();
     super.dispose();
   }
 

@@ -116,6 +116,8 @@ class ChatInputRow extends StatelessWidget {
 
   ChatInputRowWeb _buildWebInputRow(BuildContext context) {
     return ChatInputRowWeb(
+      editEventNotifier: controller.editEventNotifier,
+      onCloseEditAction: controller.cancelEditEventAction,
       inputBar: Column(
         children: [
           ReplyDisplay(controller),
