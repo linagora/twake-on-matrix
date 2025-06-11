@@ -2,6 +2,7 @@ import 'package:fluffychat/resource/image_paths.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
+import 'package:linagora_design_flutter/colors/linagora_sys_colors.dart';
 import 'package:matrix/matrix.dart';
 
 enum MessageContextMenuAction {
@@ -9,6 +10,7 @@ enum MessageContextMenuAction {
   forward,
   copy,
   edit,
+  delete,
   select,
   pin,
   saveToDownload,
@@ -42,6 +44,11 @@ enum MessageContextMenuAction {
       case MessageContextMenuAction.edit:
         Navigator.of(context).pop('edit');
         break;
+      case MessageContextMenuAction.delete:
+        Navigator.of(context).pop('delete');
+        break;
+      default:
+        break;
     }
   }
 
@@ -66,7 +73,19 @@ enum MessageContextMenuAction {
         return L10n.of(context)!.saveToGallery;
       case MessageContextMenuAction.edit:
         return L10n.of(context)!.edit;
+      case MessageContextMenuAction.delete:
+        return L10n.of(context)!.delete;
     }
+  }
+
+  Color? getIconColor(
+    BuildContext context,
+    Event event,
+  ) {
+    if (this == MessageContextMenuAction.delete) {
+      return LinagoraSysColors.material().error;
+    }
+    return null;
   }
 
   IconData? getIcon(Event event) {
@@ -87,6 +106,8 @@ enum MessageContextMenuAction {
         return Icons.save_outlined;
       case MessageContextMenuAction.edit:
         return Icons.edit_outlined;
+      case MessageContextMenuAction.delete:
+        return Icons.delete_outlined;
       default:
         return null;
     }
@@ -104,6 +125,7 @@ enum MessageContextMenuAction {
       case MessageContextMenuAction.select:
       case MessageContextMenuAction.saveToDownload:
       case MessageContextMenuAction.saveToGallery:
+      case MessageContextMenuAction.delete:
         return null;
     }
   }
