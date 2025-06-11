@@ -1,4 +1,3 @@
-import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/pages/chat_details/chat_details_edit_option_style.dart';
 import 'package:flutter/material.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
@@ -29,77 +28,71 @@ class ChatDetailsEditOption extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      borderRadius: BorderRadius.circular(AppConfig.borderRadius),
-      clipBehavior: Clip.hardEdge,
-      color: LinagoraSysColors.material().onPrimary,
-      child: InkWell(
-        onTap: onTap,
-        child: Padding(
-          padding: ChatDetailsEditOptionStyle.itemBuilderPadding,
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Padding(
-                padding: ChatDetailsEditOptionStyle.leadingIconPadding,
-                child: Icon(
-                  leading,
-                  size: leadingIconSize ??
-                      ChatDetailsEditOptionStyle.defaultLeadingIconSize,
-                  color: leadingIconColor ??
-                      ChatDetailsEditOptionStyle.defaultLeadingIconColor(
-                        context,
-                      ),
-                ),
+    return TwakeInkWell(
+      onTap: onTap,
+      child: Padding(
+        padding: ChatDetailsEditOptionStyle.itemBuilderPadding,
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+              padding: ChatDetailsEditOptionStyle.leadingIconPadding,
+              child: Icon(
+                leading,
+                size: leadingIconSize ??
+                    ChatDetailsEditOptionStyle.defaultLeadingIconSize,
+                color: leadingIconColor ??
+                    ChatDetailsEditOptionStyle.defaultLeadingIconColor(
+                      context,
+                    ),
               ),
-              Expanded(
-                child: Row(
-                  crossAxisAlignment: subtitle.isEmpty
-                      ? CrossAxisAlignment.start
-                      : CrossAxisAlignment.center,
-                  children: [
-                    Expanded(
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            title,
-                            style: ChatDetailsEditOptionStyle.titleTextStyle(
+            ),
+            Expanded(
+              child: Row(
+                crossAxisAlignment: subtitle.isEmpty
+                    ? CrossAxisAlignment.start
+                    : CrossAxisAlignment.center,
+                children: [
+                  Expanded(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          title,
+                          style: ChatDetailsEditOptionStyle.titleTextStyle(
+                            context,
+                            titleColor,
+                          ),
+                          maxLines: ChatDetailsEditOptionStyle.titleMaxLines,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        Padding(
+                          padding: ChatDetailsEditOptionStyle
+                              .subtitleItemBuilderPadding,
+                          child: Text(
+                            subtitle,
+                            style: ChatDetailsEditOptionStyle.subtitleTextStyle(
                               context,
-                              titleColor,
+                              subtitleColor,
                             ),
-                            maxLines: ChatDetailsEditOptionStyle.titleMaxLines,
+                            maxLines:
+                                ChatDetailsEditOptionStyle.subtitleMaxLines,
                             overflow: TextOverflow.ellipsis,
                           ),
-                          Padding(
-                            padding: ChatDetailsEditOptionStyle
-                                .subtitleItemBuilderPadding,
-                            child: Text(
-                              subtitle,
-                              style:
-                                  ChatDetailsEditOptionStyle.subtitleTextStyle(
-                                context,
-                                subtitleColor,
-                              ),
-                              maxLines:
-                                  ChatDetailsEditOptionStyle.subtitleMaxLines,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
-                    Icon(
-                      Icons.chevron_right_outlined,
-                      size: trailingIconSize ??
-                          ChatDetailsEditOptionStyle.defaultTrailingIconSize,
-                    ),
-                  ],
-                ),
+                  ),
+                  Icon(
+                    Icons.chevron_right_outlined,
+                    size: trailingIconSize ??
+                        ChatDetailsEditOptionStyle.defaultTrailingIconSize,
+                  ),
+                ],
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );

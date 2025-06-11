@@ -234,19 +234,15 @@ extension RoomExtension on Room {
     return lastState;
   }
 
-  bool get canSeeAssignRoles {
-    return ownPowerLevel >= DefaultPowerLevelMember.admin.powerLevel;
-  }
-
-  bool get canChangePowerLevel {
+  bool get canAssignRoles {
     final currentPowerLevelsMap = getState(EventTypes.RoomPowerLevels)?.content;
     if (currentPowerLevelsMap == null) return 0 <= ownPowerLevel;
     return (currentPowerLevelsMap
-                    .tryGetMap<String, Object?>('events')
-                    ?.tryGet<int>(EventTypes.RoomPowerLevels) ??
-                getDefaultPowerLevel(currentPowerLevelsMap)) ==
-            ownPowerLevel &&
-        ownPowerLevel == DefaultPowerLevelMember.owner.powerLevel;
+                .tryGetMap<String, Object?>('events')
+                ?.tryGet<int>(EventTypes.RoomPowerLevels) ??
+            currentPowerLevelsMap.tryGet<int>('state_default') ??
+            DefaultPowerLevelMember.admin.powerLevel) <=
+        ownPowerLevel;
   }
 
   List<User> getAssignRolesMember() {

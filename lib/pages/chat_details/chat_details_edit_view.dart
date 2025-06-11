@@ -275,7 +275,7 @@ class ChatDetailsEditView extends StatelessWidget {
                 ],
               ),
             ),
-            if (controller.room?.canSeeAssignRoles == true) ...[
+            if (controller.room?.canAssignRoles == true) ...[
               Container(
                 color: Theme.of(context).colorScheme.surfaceContainerHighest,
                 alignment: Alignment.centerLeft,

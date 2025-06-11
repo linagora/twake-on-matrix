@@ -1,5 +1,9 @@
+import 'package:dartz/dartz.dart' hide State;
+import 'package:fluffychat/app_state/failure.dart';
+import 'package:fluffychat/app_state/success.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/domain/model/room/room_extension.dart';
+import 'package:fluffychat/pages/chat_details/assign_roles/assign_roles_search_state.dart';
 import 'package:fluffychat/pages/chat_details/assign_roles/assign_roles_view.dart';
 import 'package:fluffychat/pages/chat_details/chat_details_edit_view_style.dart';
 import 'package:fluffychat/pages/search/search_debouncer_mixin.dart';
@@ -27,8 +31,12 @@ class AssignRolesController extends State<AssignRoles>
 
   final inputFocus = FocusNode();
 
-  final ValueNotifier<List<User>> searchUserResults =
-      ValueNotifier<List<User>>([]);
+  final ValueNotifier<Either<Failure, Success>> searchUserResults =
+      ValueNotifier<Either<Failure, Success>>(
+    Right(
+      AssignRolesSearchInitialState(),
+    ),
+  );
 
   void onBack() {
     Navigator.of(context).pop();
@@ -36,9 +44,23 @@ class AssignRolesController extends State<AssignRoles>
 
   List<User> get assignRolesMember => widget.room.getAssignRolesMember();
 
+  void initialAssignRoles() {
+    searchUserResults.value = Right(
+      AssignRolesSearchSuccessState(
+        assignRolesMember: assignRolesMember,
+        keyword: '',
+      ),
+    );
+  }
+
   void handleSearchResults(String searchTerm) {
     if (searchTerm.isEmpty) {
-      searchUserResults.value = [];
+      searchUserResults.value = Right(
+        AssignRolesSearchSuccessState(
+          assignRolesMember: assignRolesMember,
+          keyword: '',
+        ),
+      );
       return;
     }
 
@@ -56,15 +78,23 @@ class AssignRolesController extends State<AssignRoles>
     );
 
     if (searchResults.isEmpty) {
-      searchUserResults.value = [];
+      searchUserResults.value = Left(
+        AssignRolesSearchEmptyState(keyword: searchTerm),
+      );
       return;
     }
 
-    searchUserResults.value = searchResults;
+    searchUserResults.value = Right(
+      AssignRolesSearchSuccessState(
+        assignRolesMember: searchResults,
+        keyword: searchTerm,
+      ),
+    );
   }
 
   @override
   void initState() {
+    initialAssignRoles();
     textEditingController.addListener(
       () => setDebouncerValue(textEditingController.text),
     );

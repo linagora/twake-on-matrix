@@ -1,9 +1,11 @@
 import 'package:fluffychat/pages/chat_details/assign_roles/assign_roles.dart';
+import 'package:fluffychat/pages/chat_details/assign_roles/assign_roles_search_state.dart';
 import 'package:fluffychat/pages/chat_list/chat_list_header_style.dart';
 import 'package:fluffychat/utils/user_extension.dart';
 import 'package:fluffychat/widgets/app_bars/twake_app_bar.dart';
 import 'package:fluffychat/widgets/avatar/avatar.dart';
 import 'package:fluffychat/widgets/context_menu_builder_ios_paste_without_permission.dart';
+import 'package:fluffychat/widgets/search/empty_search_widget.dart';
 import 'package:fluffychat/widgets/twake_components/twake_icon_button.dart';
 import 'package:flutter/material.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
@@ -20,9 +22,7 @@ class AssignRolesView extends StatelessWidget {
       backgroundColor: LinagoraSysColors.material().onPrimary,
       resizeToAvoidBottomInset: false,
       appBar: TwakeAppBar(
-        title: controller.responsive.isMobile(context)
-            ? L10n.of(context)!.assignRoles
-            : L10n.of(context)!.permissions,
+        title: L10n.of(context)!.permissions,
         leading: TwakeIconButton(
           paddingAll: 8,
           splashColor: Colors.transparent,
@@ -35,33 +35,35 @@ class AssignRolesView extends StatelessWidget {
         withDivider: true,
         context: context,
       ),
-      floatingActionButton: Container(
-        padding: const EdgeInsets.symmetric(
-          horizontal: 24.0,
-          vertical: 12.0,
-        ),
-        decoration: BoxDecoration(
-          color: LinagoraSysColors.material().secondaryContainer,
-          borderRadius: BorderRadius.circular(100),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              Icons.person_add_outlined,
-              size: 18.0,
-              color: LinagoraSysColors.material().onSecondaryContainer,
-            ),
-            const SizedBox(width: 8.0),
-            Text(
-              L10n.of(context)!.addAdminsOrModerators,
-              style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                    color: LinagoraSysColors.material().onSecondaryContainer,
-                  ),
-            ),
-          ],
-        ),
-      ),
+
+      /// Implement later
+      // floatingActionButton: Container(
+      //   padding: const EdgeInsets.symmetric(
+      //     horizontal: 24.0,
+      //     vertical: 12.0,
+      //   ),
+      //   decoration: BoxDecoration(
+      //     color: LinagoraSysColors.material().secondaryContainer,
+      //     borderRadius: BorderRadius.circular(100),
+      //   ),
+      //   child: Row(
+      //     mainAxisSize: MainAxisSize.min,
+      //     children: [
+      //       Icon(
+      //         Icons.person_add_outlined,
+      //         size: 18.0,
+      //         color: LinagoraSysColors.material().onSecondaryContainer,
+      //       ),
+      //       const SizedBox(width: 8.0),
+      //       Text(
+      //         L10n.of(context)!.addAdminsOrModerators,
+      //         style: Theme.of(context).textTheme.labelLarge?.copyWith(
+      //               color: LinagoraSysColors.material().onSecondaryContainer,
+      //             ),
+      //       ),
+      //     ],
+      //   ),
+      // ),
       body: SingleChildScrollView(
         child: Column(
           children: [
@@ -127,51 +129,80 @@ class AssignRolesView extends StatelessWidget {
     return ValueListenableBuilder(
       valueListenable: controller.searchUserResults,
       builder: (context, searchResults, child) {
-        return ListView.builder(
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          itemCount: searchResults.isEmpty
-              ? controller.assignRolesMember.length
-              : searchResults.length,
-          itemBuilder: (context, index) {
-            final member = searchResults.isEmpty
-                ? controller.assignRolesMember[index]
-                : searchResults[index];
-            final role = member.getDefaultPowerLevelMember.displayName;
-            return TwakeListItem(
-              padding: const EdgeInsets.all(8),
-              child: Row(
-                children: [
-                  Avatar(
-                    mxContent: member.avatarUrl,
-                    name: member.calcDisplayname(),
-                  ),
-                  const SizedBox(width: 8.0),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            Text(
-                              member.calcDisplayname(),
-                              style: LinagoraTextStyle.material()
-                                  .bodyMedium2
-                                  .copyWith(
-                                    color:
-                                        LinagoraSysColors.material().onSurface,
-                                  ),
-                              overflow: TextOverflow.ellipsis,
-                              maxLines: 1,
-                            ),
-                            const Spacer(),
-                            Row(
+        return searchResults.fold(
+          (failure) {
+            if (failure is AssignRolesSearchEmptyState) {
+              return const Center(
+                child: EmptySearchWidget(),
+              );
+            }
+            return const SizedBox.shrink();
+          },
+          (success) {
+            if (success is AssignRolesSearchSuccessState) {
+              return ListView.builder(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                itemCount: success.assignRolesMember.length,
+                itemBuilder: (context, index) {
+                  final member = success.assignRolesMember[index];
+                  final role = member.getDefaultPowerLevelMember.displayName;
+                  return TwakeInkWell(
+                    onTap: () {},
+                    child: TwakeListItem(
+                      padding: const EdgeInsets.all(8),
+                      child: Row(
+                        children: [
+                          Avatar(
+                            mxContent: member.avatarUrl,
+                            name: member.calcDisplayname(),
+                          ),
+                          const SizedBox(width: 8.0),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
+                                Row(
+                                  children: [
+                                    Text(
+                                      member.calcDisplayname(),
+                                      style: LinagoraTextStyle.material()
+                                          .bodyMedium2
+                                          .copyWith(
+                                            color: LinagoraSysColors.material()
+                                                .onSurface,
+                                          ),
+                                      overflow: TextOverflow.ellipsis,
+                                      maxLines: 1,
+                                    ),
+                                    const Spacer(),
+                                    Row(
+                                      children: [
+                                        Text(
+                                          role,
+                                          style: Theme.of(context)
+                                              .textTheme
+                                              .labelMedium
+                                              ?.copyWith(
+                                                color:
+                                                    LinagoraRefColors.material()
+                                                        .tertiary[30],
+                                              ),
+                                          overflow: TextOverflow.ellipsis,
+                                          maxLines: 1,
+                                        ),
+                                        const SizedBox(
+                                          width: 4,
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                ),
                                 Text(
-                                  role,
+                                  member.id,
                                   style: Theme.of(context)
                                       .textTheme
-                                      .labelMedium
+                                      .bodyMedium
                                       ?.copyWith(
                                         color: LinagoraRefColors.material()
                                             .tertiary[30],
@@ -179,39 +210,17 @@ class AssignRolesView extends StatelessWidget {
                                   overflow: TextOverflow.ellipsis,
                                   maxLines: 1,
                                 ),
-                                if (controller
-                                    .widget.room.canChangePowerLevel) ...[
-                                  Icon(
-                                    Icons.arrow_drop_down_outlined,
-                                    color: LinagoraRefColors.material()
-                                        .tertiary[30],
-                                  ),
-                                ] else
-                                  const SizedBox(
-                                    width: 4,
-                                  ),
                               ],
                             ),
-                          ],
-                        ),
-                        Text(
-                          member.id,
-                          style: Theme.of(context)
-                              .textTheme
-                              .bodyMedium
-                              ?.copyWith(
-                                color:
-                                    LinagoraRefColors.material().tertiary[30],
-                              ),
-                          overflow: TextOverflow.ellipsis,
-                          maxLines: 1,
-                        ),
-                      ],
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
-                ],
-              ),
-            );
+                  );
+                },
+              );
+            }
+            return const SizedBox.shrink();
           },
         );
       },
@@ -225,94 +234,98 @@ class AssignRolesView extends StatelessWidget {
     return ValueListenableBuilder(
       valueListenable: controller.searchUserResults,
       builder: (context, searchResults, child) {
-        return ListView.builder(
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          itemCount: searchResults.isEmpty
-              ? controller.assignRolesMember.length
-              : searchResults.length,
-          itemBuilder: (context, index) {
-            final member = searchResults.isEmpty
-                ? controller.assignRolesMember[index]
-                : searchResults[index];
-            final role = member.getDefaultPowerLevelMember.displayName;
-            return TwakeListItem(
-              padding: const EdgeInsets.all(8),
-              margin: const EdgeInsets.symmetric(
-                horizontal: 12.0,
-              ),
-              child: Row(
-                children: [
-                  Avatar(
-                    mxContent: member.avatarUrl,
-                    name: member.calcDisplayname(),
-                  ),
-                  const SizedBox(width: 8.0),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+        return searchResults.fold(
+          (failure) {
+            if (failure is AssignRolesSearchEmptyState) {
+              return const Center(
+                child: EmptySearchWidget(),
+              );
+            }
+            return const SizedBox.shrink();
+          },
+          (success) {
+            if (success is AssignRolesSearchSuccessState) {
+              ListView.builder(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                itemCount: success.assignRolesMember.length,
+                itemBuilder: (context, index) {
+                  final member = success.assignRolesMember[index];
+                  final role = member.getDefaultPowerLevelMember.displayName;
+                  return TwakeListItem(
+                    padding: const EdgeInsets.all(8),
+                    margin: const EdgeInsets.symmetric(
+                      horizontal: 12.0,
+                    ),
+                    child: Row(
                       children: [
-                        Row(
-                          children: [
-                            Text(
-                              member.calcDisplayname(),
-                              style: LinagoraTextStyle.material()
-                                  .bodyMedium2
-                                  .copyWith(
-                                    color:
-                                        LinagoraSysColors.material().onSurface,
-                                  ),
-                              overflow: TextOverflow.ellipsis,
-                              maxLines: 1,
-                            ),
-                            const Spacer(),
-                            Row(
-                              children: [
-                                Text(
-                                  role,
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .labelMedium
-                                      ?.copyWith(
-                                        color: LinagoraRefColors.material()
-                                            .tertiary[30],
-                                      ),
-                                  overflow: TextOverflow.ellipsis,
-                                  maxLines: 1,
-                                ),
-                                if (controller
-                                    .widget.room.canChangePowerLevel) ...[
-                                  Icon(
-                                    Icons.arrow_drop_down_outlined,
-                                    color: LinagoraRefColors.material()
-                                        .tertiary[30],
-                                  ),
-                                ] else
-                                  const SizedBox(
-                                    width: 4,
-                                  ),
-                              ],
-                            ),
-                          ],
+                        Avatar(
+                          mxContent: member.avatarUrl,
+                          name: member.calcDisplayname(),
                         ),
-                        Text(
-                          member.id,
-                          style: Theme.of(context)
-                              .textTheme
-                              .bodyMedium
-                              ?.copyWith(
-                                color:
-                                    LinagoraRefColors.material().tertiary[30],
+                        const SizedBox(width: 8.0),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                children: [
+                                  Text(
+                                    member.calcDisplayname(),
+                                    style: LinagoraTextStyle.material()
+                                        .bodyMedium2
+                                        .copyWith(
+                                          color: LinagoraSysColors.material()
+                                              .onSurface,
+                                        ),
+                                    overflow: TextOverflow.ellipsis,
+                                    maxLines: 1,
+                                  ),
+                                  const Spacer(),
+                                  Row(
+                                    children: [
+                                      Text(
+                                        role,
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .labelMedium
+                                            ?.copyWith(
+                                              color:
+                                                  LinagoraRefColors.material()
+                                                      .tertiary[30],
+                                            ),
+                                        overflow: TextOverflow.ellipsis,
+                                        maxLines: 1,
+                                      ),
+                                      const SizedBox(
+                                        width: 4,
+                                      ),
+                                    ],
+                                  ),
+                                ],
                               ),
-                          overflow: TextOverflow.ellipsis,
-                          maxLines: 1,
+                              Text(
+                                member.id,
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .bodyMedium
+                                    ?.copyWith(
+                                      color: LinagoraRefColors.material()
+                                          .tertiary[30],
+                                    ),
+                                overflow: TextOverflow.ellipsis,
+                                maxLines: 1,
+                              ),
+                            ],
+                          ),
                         ),
                       ],
                     ),
-                  ),
-                ],
-              ),
-            );
+                  );
+                },
+              );
+            }
+            return const SizedBox.shrink();
           },
         );
       },
