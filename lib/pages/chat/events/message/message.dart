@@ -84,6 +84,7 @@ class Message extends StatefulWidget {
   final OnPickEmojiReactionAction? onPickEmojiReaction;
   final void Function(Event)? onReply;
   final void Function(Event)? onEdit;
+  final void Function(BuildContext, Event)? onDelete;
   final void Function(Event)? onForward;
   final void Function(Event)? onCopy;
   final void Function(Event)? onPin;
@@ -123,6 +124,7 @@ class Message extends StatefulWidget {
     this.onPickEmojiReaction,
     this.onReply,
     this.onEdit,
+    this.onDelete,
     this.onForward,
     this.onCopy,
     this.onPin,
@@ -260,6 +262,7 @@ class _MessageState extends State<Message> with MessageAvatarMixin {
               onPickEmojiReaction: widget.onPickEmojiReaction,
               onReply: widget.onReply,
               onEdit: widget.onEdit,
+              onDelete: widget.onDelete,
               onForward: widget.onForward,
               onCopy: widget.onCopy,
               onLongPressMessage: widget.onLongPressMessage,
