@@ -12,7 +12,7 @@ void main() {
     });
 
     test('should return correct power levels for each event type', () {
-      final userPowerLevel = DefaultPowerLevelMember.user.powerLevel;
+      final userPowerLevel = DefaultPowerLevelMember.member.powerLevel;
       final adminPowerLevel = DefaultPowerLevelMember.admin.powerLevel;
       final result = powerLevelManager.getDefaultPowerLevelEventForMember();
 

@@ -138,7 +138,8 @@ extension RoomExtension on Room {
         canChangeTopic ||
         canChangeRoomAvatar ||
         canEnableEncryption ||
-        canChangePowerLevel;
+        canChangePowerLevel ||
+        canAssignRoles;
   }
 
   bool get canSendRedactEvent {
@@ -253,5 +254,23 @@ extension RoomExtension on Room {
       return powerLevel >= DefaultPowerLevelMember.admin.powerLevel &&
           member.membership == Membership.join;
     }).toList();
+  }
+
+  List<User> getExceptionsMember() {
+    final members = getParticipants();
+    if (members.isEmpty) return [];
+    return members.where((final User member) {
+      final powerLevel = member.powerLevel;
+      return powerLevel < DefaultPowerLevelMember.member.powerLevel &&
+          member.membership == Membership.join;
+    }).toList();
+  }
+
+  List<User> getBannedMembers() {
+    final members = getParticipants(
+      membershipFilter: [Membership.ban],
+    );
+    if (members.isEmpty) return [];
+    return members;
   }
 }
