@@ -13,6 +13,7 @@ import 'package:flutter/scheduler.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:matrix/matrix.dart';
 
 class NewPrivateChat extends StatefulWidget {
   const NewPrivateChat({super.key});
@@ -57,6 +58,10 @@ class NewPrivateChatController extends State<NewPrivateChat>
     BuildContext context,
     PresentationContact contact,
   ) async {
+    if (contact.matrixId == null || contact.matrixId?.isEmpty == true) {
+      Logs().e('NewPrivateChatController::onContactAction: no MatrixId');
+      return;
+    }
     final roomId =
         Matrix.of(context).client.getDirectChatFromUserId(contact.matrixId!);
     if (roomId == null) {

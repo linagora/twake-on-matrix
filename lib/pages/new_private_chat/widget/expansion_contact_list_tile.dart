@@ -46,11 +46,13 @@ class _ExpansionContactListTileState extends State<ExpansionContactListTile>
     with InvitationStatusMixin {
   @override
   void initState() {
-    getInvitationStatus(
-      userId: client.userID ?? '',
-      contactId: widget.contact.id ?? '',
-      contact: widget.contact,
-    );
+    if (widget.enableInvitation == true) {
+      getInvitationStatus(
+        userId: client.userID ?? '',
+        contactId: widget.contact.id ?? '',
+        contact: widget.contact,
+      );
+    }
     super.initState();
   }
 
@@ -100,17 +102,13 @@ class _ExpansionContactListTileState extends State<ExpansionContactListTile>
   @override
   Widget build(BuildContext context) {
     return TwakeInkWell(
-      onTap: (widget.enableInvitation)
-          ? () {
-              _handleMatrixIdNull(
-                context: context,
-                contact: widget.contact,
-                invitationStatus: getInvitationStatusNotifier.value
-                    .getSuccessOrNull<GetInvitationStatusSuccessState>()
-                    ?.invitationStatusResponse,
-              );
-            }
-          : null,
+      onTap: _onContactTapHandler(
+        context,
+        widget.contact,
+        getInvitationStatusNotifier.value
+            .getSuccessOrNull<GetInvitationStatusSuccessState>()
+            ?.invitationStatusResponse,
+      ),
       child: TwakeListItem(
         child: Padding(
           padding: const EdgeInsetsDirectional.only(
@@ -383,5 +381,25 @@ class _ExpansionContactListTileState extends State<ExpansionContactListTile>
         avatarUrl: null,
       );
     }
+  }
+
+  dynamic Function()? _onContactTapHandler(
+    BuildContext context,
+    PresentationContact contact,
+    InvitationStatusResponse? invitationStatus,
+  ) {
+    if (widget.enableInvitation) {
+      return () => _handleMatrixIdNull(
+            context: context,
+            contact: contact,
+            invitationStatus: invitationStatus,
+          );
+    }
+
+    if (widget.onContactTap != null) {
+      return () => widget.onContactTap!.call();
+    }
+
+    return null;
   }
 }
