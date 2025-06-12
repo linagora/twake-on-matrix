@@ -297,6 +297,16 @@ class ChatDetailsEditView extends StatelessWidget {
                 leadingIconColor: Theme.of(context).colorScheme.onSurface,
                 onTap: controller.openAssignRolesPage,
               ),
+              if (controller.room?.getExceptionsMember().isNotEmpty == true)
+                ChatDetailsEditOption(
+                  title: L10n.of(context)!.exceptions,
+                  subtitle: '${controller.room?.getExceptionsMember().length}',
+                  subtitleColor: LinagoraRefColors.material().tertiary[30],
+                  leading: Icons.people_outlined,
+                  titleColor: Theme.of(context).colorScheme.onSurface,
+                  leadingIconColor: Theme.of(context).colorScheme.onSurface,
+                  onTap: controller.openExceptionsPage,
+                ),
             ],
             Container(
               color: Theme.of(context).colorScheme.surfaceContainerHighest,

@@ -5,7 +5,7 @@ extension UserExtension on User {
   DefaultPowerLevelMember get getDefaultPowerLevelMember {
     switch (powerLevel) {
       case 0:
-        return DefaultPowerLevelMember.user;
+        return DefaultPowerLevelMember.member;
       case 50:
         return DefaultPowerLevelMember.moderator;
       case 80:
@@ -13,7 +13,7 @@ extension UserExtension on User {
       case 100:
         return DefaultPowerLevelMember.owner;
       default:
-        return DefaultPowerLevelMember.user;
+        return DefaultPowerLevelMember.member;
     }
   }
 
