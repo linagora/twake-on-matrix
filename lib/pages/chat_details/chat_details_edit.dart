@@ -20,6 +20,7 @@ import 'package:fluffychat/pages/chat_details/chat_details_edit_context_menu_act
 import 'package:fluffychat/pages/chat_details/chat_details_edit_view.dart';
 import 'package:fluffychat/pages/chat_details/chat_details_edit_view_style.dart';
 import 'package:fluffychat/pages/chat_details/exceptions/exceptions.dart';
+import 'package:fluffychat/pages/chat_details/removed/removed.dart';
 import 'package:fluffychat/presentation/mixins/common_media_picker_mixin.dart';
 import 'package:fluffychat/presentation/mixins/leave_chat_mixin.dart';
 import 'package:fluffychat/presentation/mixins/pick_avatar_mixin.dart';
@@ -532,6 +533,22 @@ class ChatDetailsEditController extends State<ChatDetailsEdit>
       CupertinoPageRoute(
         builder: (context) {
           return Exceptions(
+            room: room!,
+          );
+        },
+      ),
+    );
+  }
+
+  void openRemovedPage() {
+    if (room == null) return;
+    if (room!.getBannedMembers().isEmpty) {
+      return;
+    }
+    Navigator.of(context).push(
+      CupertinoPageRoute(
+        builder: (context) {
+          return Removed(
             room: room!,
           );
         },
