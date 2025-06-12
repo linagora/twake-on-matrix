@@ -69,6 +69,11 @@ class ContactsTabController extends State<ContactsTab>
     required String path,
     required PresentationContact contact,
   }) {
+    if (contact.matrixId == null || contact.matrixId?.isEmpty == true) {
+      Logs().e('ContactsTabController::onContactTap: no MatrixId');
+      return;
+    }
+
     if (contact.matrixId?.isCurrentMatrixId(context) == true) {
       goToSettingsProfile();
       return;

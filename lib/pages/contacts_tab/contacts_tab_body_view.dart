@@ -422,7 +422,7 @@ class _SilverExternalContact extends StatelessWidget {
         child: ExpansionContactListTile(
           contact: externalContact,
           highlightKeyword: controller.textEditingController.text,
-          enableInvitation: true,
+          enableInvitation: controller.supportInvitation(),
           onContactTap: () => controller.onContactTap(
             context: context,
             path: 'rooms',
