@@ -95,6 +95,7 @@ class _MessageVideoDownloadContentState
             context,
             downloadState.filePath,
             isReplacement: false,
+            event: event,
           );
         }
       },
