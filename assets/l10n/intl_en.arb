@@ -3136,5 +3136,17 @@
       "number": {}
     }
   },
-  "addAdminsOrModerators": "Add Admins/moderators"
+  "addAdminsOrModerators": "Add Admins/moderators",
+  "member": "Member",
+  "guest": "Guest",
+  "exceptions": "Exceptions",
+  "readOnly": "Read only",
+  "readOnlyCount": "READ ONLY ({number})",
+  "@readOnlyCount": {
+    "type": "text",
+    "placeholders": {
+      "number": {}
+    }
+  },
+  "removedUsers": "Removed Users"
 }

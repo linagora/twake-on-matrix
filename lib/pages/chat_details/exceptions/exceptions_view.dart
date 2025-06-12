@@ -1,5 +1,5 @@
-import 'package:fluffychat/pages/chat_details/assign_roles/assign_roles.dart';
-import 'package:fluffychat/pages/chat_details/assign_roles/assign_roles_search_state.dart';
+import 'package:fluffychat/pages/chat_details/exceptions/exceptions.dart';
+import 'package:fluffychat/pages/chat_details/exceptions/exceptions_search_state.dart';
 import 'package:fluffychat/pages/chat_list/chat_list_header_style.dart';
 import 'package:fluffychat/utils/user_extension.dart';
 import 'package:fluffychat/widgets/app_bars/twake_app_bar.dart';
@@ -11,10 +11,13 @@ import 'package:flutter/material.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 
-class AssignRolesView extends StatelessWidget {
-  final AssignRolesController controller;
+class ExceptionsView extends StatelessWidget {
+  final ExceptionsController controller;
 
-  const AssignRolesView({super.key, required this.controller});
+  const ExceptionsView({
+    super.key,
+    required this.controller,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -22,7 +25,7 @@ class AssignRolesView extends StatelessWidget {
       backgroundColor: LinagoraSysColors.material().onPrimary,
       resizeToAvoidBottomInset: false,
       appBar: TwakeAppBar(
-        title: L10n.of(context)!.permissions,
+        title: L10n.of(context)!.exceptions,
         leading: TwakeIconButton(
           paddingAll: 8,
           splashColor: Colors.transparent,
@@ -35,35 +38,6 @@ class AssignRolesView extends StatelessWidget {
         withDivider: true,
         context: context,
       ),
-
-      /// Implement later
-      // floatingActionButton: Container(
-      //   padding: const EdgeInsets.symmetric(
-      //     horizontal: 24.0,
-      //     vertical: 12.0,
-      //   ),
-      //   decoration: BoxDecoration(
-      //     color: LinagoraSysColors.material().secondaryContainer,
-      //     borderRadius: BorderRadius.circular(100),
-      //   ),
-      //   child: Row(
-      //     mainAxisSize: MainAxisSize.min,
-      //     children: [
-      //       Icon(
-      //         Icons.person_add_outlined,
-      //         size: 18.0,
-      //         color: LinagoraSysColors.material().onSecondaryContainer,
-      //       ),
-      //       const SizedBox(width: 8.0),
-      //       Text(
-      //         L10n.of(context)!.addAdminsOrModerators,
-      //         style: Theme.of(context).textTheme.labelLarge?.copyWith(
-      //               color: LinagoraSysColors.material().onSecondaryContainer,
-      //             ),
-      //       ),
-      //     ],
-      //   ),
-      // ),
       body: SingleChildScrollView(
         child: Column(
           children: [
@@ -105,8 +79,8 @@ class AssignRolesView extends StatelessWidget {
                 vertical: 8.0,
               ),
               child: Text(
-                L10n.of(context)!.adminsOfTheGroup(
-                  controller.assignRolesMember.length,
+                L10n.of(context)!.readOnlyCount(
+                  controller.exceptionsMember.length,
                 ),
                 style: Theme.of(context).textTheme.labelLarge?.copyWith(
                       color: LinagoraRefColors.material().neutral[40],
@@ -114,15 +88,15 @@ class AssignRolesView extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 8.0),
-            buildAssignRolesListMobile(context),
-            buildAssignRolesListWeb(context),
+            buildExceptionsListMobile(context),
+            buildExceptionsListWeb(context),
           ],
         ),
       ),
     );
   }
 
-  Widget buildAssignRolesListMobile(BuildContext context) {
+  Widget buildExceptionsListMobile(BuildContext context) {
     if (!controller.responsive.isMobile(context)) {
       return const SizedBox.shrink();
     }
@@ -131,7 +105,7 @@ class AssignRolesView extends StatelessWidget {
       builder: (context, searchResults, child) {
         return searchResults.fold(
           (failure) {
-            if (failure is AssignRolesSearchEmptyState) {
+            if (failure is ExceptionsSearchEmptyState) {
               return const Center(
                 child: EmptySearchWidget(),
               );
@@ -139,13 +113,13 @@ class AssignRolesView extends StatelessWidget {
             return const SizedBox.shrink();
           },
           (success) {
-            if (success is AssignRolesSearchSuccessState) {
+            if (success is ExceptionsSearchSuccessState) {
               return ListView.builder(
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
-                itemCount: success.assignRolesMember.length,
+                itemCount: success.exceptionsMember.length,
                 itemBuilder: (context, index) {
-                  final member = success.assignRolesMember[index];
+                  final member = success.exceptionsMember[index];
                   final role =
                       member.getDefaultPowerLevelMember.displayName(context);
                   return TwakeInkWell(
@@ -228,7 +202,7 @@ class AssignRolesView extends StatelessWidget {
     );
   }
 
-  Widget buildAssignRolesListWeb(BuildContext context) {
+  Widget buildExceptionsListWeb(BuildContext context) {
     if (controller.responsive.isMobile(context)) {
       return const SizedBox.shrink();
     }
@@ -237,7 +211,7 @@ class AssignRolesView extends StatelessWidget {
       builder: (context, searchResults, child) {
         return searchResults.fold(
           (failure) {
-            if (failure is AssignRolesSearchEmptyState) {
+            if (failure is ExceptionsSearchEmptyState) {
               return const Center(
                 child: EmptySearchWidget(),
               );
@@ -245,16 +219,16 @@ class AssignRolesView extends StatelessWidget {
             return const SizedBox.shrink();
           },
           (success) {
-            if (success is AssignRolesSearchSuccessState) {
+            if (success is ExceptionsSearchSuccessState) {
               return ListView.builder(
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
-                itemCount: success.assignRolesMember.length,
+                itemCount: success.exceptionsMember.length,
                 padding: const EdgeInsets.symmetric(
                   horizontal: 12.0,
                 ),
                 itemBuilder: (context, index) {
-                  final member = success.assignRolesMember[index];
+                  final member = success.exceptionsMember[index];
                   final role =
                       member.getDefaultPowerLevelMember.displayName(context);
                   return TwakeInkWell(

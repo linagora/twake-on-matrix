@@ -11,7 +11,7 @@ class PowerLevelManager {
   }
 
   int getUserPowerLevel() {
-    return DefaultPowerLevelMember.user.powerLevel;
+    return DefaultPowerLevelMember.member.powerLevel;
   }
 
   int getAdminPowerLevel() => DefaultPowerLevelMember.admin.powerLevel;
