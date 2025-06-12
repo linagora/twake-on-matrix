@@ -265,4 +265,12 @@ extension RoomExtension on Room {
           member.membership == Membership.join;
     }).toList();
   }
+
+  List<User> getBannedMembers() {
+    final members = getParticipants(
+      membershipFilter: [Membership.ban],
+    );
+    if (members.isEmpty) return [];
+    return members;
+  }
 }
