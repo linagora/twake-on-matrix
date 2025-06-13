@@ -134,13 +134,13 @@ class ChatListController extends State<ChatList>
 
   bool get isSelectMode => selectModeNotifier.value == SelectMode.select;
 
-  bool get anySelectedRoomNotMarkedUnread =>
-      conversationSelectionNotifier.value.any(
-        (conversation) => !Matrix.of(context)
-            .client
-            .getRoomById(conversation.roomId)!
-            .isUnreadOrInvited,
-      );
+  bool get anySelectedRoomNotMarkedUnread => conversationSelectionNotifier.value
+      .any((conversation) => !_containUnreadMessage(conversation));
+
+  bool _containUnreadMessage(ConversationSelectionPresentation conversation) {
+    final room = Matrix.of(context).client.getRoomById(conversation.roomId);
+    return room != null && (room.isUnreadOrInvited || room.hasNewMessages);
+  }
 
   bool get anySelectedRoomNotFavorite =>
       conversationSelectionNotifier.value.any(
@@ -270,19 +270,23 @@ class ChatListController extends State<ChatList>
         final markUnreadAction = anySelectedRoomNotMarkedUnread;
         for (final conversation in conversationSelectionNotifier.value) {
           final room = activeClient.getRoomById(conversation.roomId)!;
-          if (room.markedUnread == markUnreadAction) {
-            if (room.isUnread) {
-              await room.setReadMarker(
-                room.lastEvent!.eventId,
-                mRead: room.lastEvent!.eventId,
-              );
-            }
+          if (!markUnreadAction) {
+            await _markAsRead(room);
           }
 
           await room.markUnread(markUnreadAction);
         }
       },
     );
+  }
+
+  Future<void> _markAsRead(Room room) async {
+    if (room.isUnread || room.hasNewMessages) {
+      await room.setReadMarker(
+        room.lastEvent!.eventId,
+        mRead: room.lastEvent!.eventId,
+      );
+    }
   }
 
   Future<void> toggleFavouriteRoom() async {
