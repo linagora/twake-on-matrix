@@ -1,5 +1,6 @@
 import 'package:fluffychat/pages/chat_details/assign_roles/assign_roles.dart';
 import 'package:fluffychat/pages/chat_details/assign_roles/assign_roles_search_state.dart';
+import 'package:fluffychat/pages/chat_details/chat_details_edit_view_style.dart';
 import 'package:fluffychat/pages/chat_list/chat_list_header_style.dart';
 import 'package:fluffychat/utils/user_extension.dart';
 import 'package:fluffychat/widgets/app_bars/twake_app_bar.dart';
@@ -21,20 +22,45 @@ class AssignRolesView extends StatelessWidget {
     return Scaffold(
       backgroundColor: LinagoraSysColors.material().onPrimary,
       resizeToAvoidBottomInset: false,
-      appBar: TwakeAppBar(
-        title: L10n.of(context)!.permissions,
-        leading: TwakeIconButton(
-          paddingAll: 8,
-          splashColor: Colors.transparent,
-          hoverColor: Colors.transparent,
-          highlightColor: Colors.transparent,
-          onTap: controller.onBack,
-          icon: Icons.arrow_back_ios,
-        ),
-        centerTitle: true,
-        withDivider: true,
-        context: context,
-      ),
+      appBar: controller.responsive.isMobile(context)
+          ? TwakeAppBar(
+              title: L10n.of(context)!.permissions,
+              leading: TwakeIconButton(
+                paddingAll: 8,
+                splashColor: Colors.transparent,
+                hoverColor: Colors.transparent,
+                highlightColor: Colors.transparent,
+                onTap: controller.onBack,
+                icon: Icons.arrow_back_ios,
+              ),
+              centerTitle: true,
+              withDivider: true,
+              context: context,
+            )
+          : AppBar(
+              automaticallyImplyLeading: false,
+              backgroundColor: LinagoraSysColors.material().onPrimary,
+              title: Row(
+                children: [
+                  Padding(
+                    padding: ChatDetailEditViewStyle.backIconPadding,
+                    child: IconButton(
+                      highlightColor: Colors.transparent,
+                      hoverColor: Colors.transparent,
+                      splashColor: Colors.transparent,
+                      onPressed: controller.onBack,
+                      icon: const Icon(
+                        Icons.chevron_left_outlined,
+                      ),
+                    ),
+                  ),
+                  Text(
+                    L10n.of(context)!.permissions,
+                    style: Theme.of(context).textTheme.titleLarge,
+                  ),
+                ],
+              ),
+            ),
 
       /// Implement later
       // floatingActionButton: Container(
