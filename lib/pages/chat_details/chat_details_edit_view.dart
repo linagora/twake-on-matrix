@@ -282,7 +282,8 @@ class ChatDetailsEditView extends StatelessWidget {
               ),
               ChatDetailsEditOption(
                 title: L10n.of(context)!.assignRoles,
-                counterText: '${controller.room?.getAssignRolesMember().length}',
+                counterText:
+                    '${controller.room?.getAssignRolesMember().length}',
                 subtitleColor: LinagoraRefColors.material().tertiary[30],
                 leading: Icons.admin_panel_settings_outlined,
                 titleColor: Theme.of(context).colorScheme.onSurface,
@@ -292,7 +293,8 @@ class ChatDetailsEditView extends StatelessWidget {
               if (controller.room?.getExceptionsMember().isNotEmpty == true)
                 ChatDetailsEditOption(
                   title: L10n.of(context)!.exceptions,
-                  counterText: '${controller.room?.getExceptionsMember().length}',
+                  counterText:
+                      '${controller.room?.getExceptionsMember().length}',
                   subtitleColor: LinagoraRefColors.material().tertiary[30],
                   leading: Icons.people_outlined,
                   titleColor: Theme.of(context).colorScheme.onSurface,
