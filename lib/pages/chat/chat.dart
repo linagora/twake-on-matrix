@@ -1897,7 +1897,7 @@ class ChatController extends State<Chat>
         ? currentLocation.substring(0, queryIndex)
         : currentLocation;
     Logs().d("Chat::_resetLocationPath: New - $newLocation");
-    html.window.location.href = newLocation;
+    html.window.history.replaceState(null, '', newLocation);
   }
 
   void handlePopBackFromPinnedScreen(Object? popResult) async {
