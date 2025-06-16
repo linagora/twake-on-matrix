@@ -52,7 +52,7 @@ class RemovedView extends StatelessWidget {
                       splashColor: Colors.transparent,
                       onPressed: controller.onBack,
                       icon: const Icon(
-                        Icons.chevron_left_outlined,
+                        Icons.arrow_back_ios,
                       ),
                     ),
                   ),
