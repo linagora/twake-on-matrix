@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:linagora_design_flutter/colors/linagora_ref_colors.dart';
+import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 
 class ChatDetailsEditOptionStyle {
   static const double defaultLeadingIconSize = 24.0;
@@ -17,11 +17,12 @@ class ChatDetailsEditOptionStyle {
       EdgeInsetsDirectional.only(end: 8.0);
   static const EdgeInsetsDirectional subtitleItemBuilderPadding =
       EdgeInsetsDirectional.only(top: 4.0);
+  static const EdgeInsetsDirectional itemOptionPadding =
+      EdgeInsetsDirectional.symmetric(horizontal: 8.0);
 
   static TextStyle? titleTextStyle(BuildContext context, Color? titleColor) {
-    return Theme.of(context).textTheme.titleMedium?.copyWith(
+    return LinagoraTextStyle.material().bodyMedium2.copyWith(
           color: titleColor ?? Theme.of(context).colorScheme.onSurface,
-          fontSize: 16.0,
         );
   }
 
