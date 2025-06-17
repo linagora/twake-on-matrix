@@ -1,9 +1,11 @@
+import 'package:fluffychat/config/default_power_level_member.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/pages/chat_details/participant_list_item/participant_list_item_style.dart';
 import 'package:fluffychat/pages/profile_info/profile_info_body/profile_info_body.dart';
 import 'package:fluffychat/pages/profile_info/profile_info_page.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/utils/responsive/responsive_utils.dart';
+import 'package:fluffychat/utils/user_extension.dart';
 import 'package:fluffychat/widgets/avatar/avatar.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -25,23 +27,12 @@ class ParticipantListItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final membershipBatch = <Membership, String>{
-      Membership.join: '',
-      Membership.ban: L10n.of(context)!.banned,
-      Membership.invite: L10n.of(context)!.invited,
-      Membership.leave: L10n.of(context)!.leftTheChat,
-    };
-    final permissionBatch = member.powerLevel == 100
-        ? L10n.of(context)!.admin
-        : member.powerLevel >= 50
-            ? L10n.of(context)!.moderator
-            : '';
-
     return Opacity(
       opacity: member.membership == Membership.join ? 1 : 0.5,
       child: TwakeInkWell(
         onTap: () async => await _onItemTap(context),
         child: TwakeListItem(
+          height: 72,
           padding: const EdgeInsets.all(8),
           child: Row(
             children: [
@@ -53,8 +44,10 @@ class ParticipantListItem extends StatelessWidget {
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: <Widget>[
                         Flexible(
                           child: Text(
@@ -68,50 +61,23 @@ class ParticipantListItem extends StatelessWidget {
                                 ),
                           ),
                         ),
-                        if (permissionBatch.isNotEmpty)
-                          Container(
-                            padding: ParticipantListItemStyle
-                                .permissionBatchTextPadding,
-                            margin:
-                                ParticipantListItemStyle.permissionBatchMargin,
-                            decoration: BoxDecoration(
-                              color: Theme.of(context)
-                                  .colorScheme
-                                  .primaryContainer,
-                              borderRadius: ParticipantListItemStyle
-                                  .permissionBatchRadius,
-                              border: Border.all(
-                                color: Theme.of(context).colorScheme.primary,
-                              ),
-                            ),
-                            child: Text(
-                              permissionBatch,
-                              style: TextStyle(
-                                fontSize: ParticipantListItemStyle
-                                    .permissionBatchTextFontSize,
-                                color: Theme.of(context).colorScheme.primary,
-                              ),
-                            ),
+                        if (member.getDefaultPowerLevelMember.powerLevel >=
+                            DefaultPowerLevelMember.owner.powerLevel) ...[
+                          Text(
+                            member.getDefaultPowerLevelMember
+                                .displayName(context),
+                            style: Theme.of(context)
+                                .textTheme
+                                .labelMedium
+                                ?.copyWith(
+                                  color:
+                                      LinagoraRefColors.material().tertiary[30],
+                                ),
                           ),
-                        membershipBatch[member.membership]!.isEmpty
-                            ? Container()
-                            : Container(
-                                padding: ParticipantListItemStyle
-                                    .membershipBatchPadding,
-                                margin: ParticipantListItemStyle
-                                    .membershipBatchMargin,
-                                decoration: BoxDecoration(
-                                  color: Theme.of(context).secondaryHeaderColor,
-                                  borderRadius: ParticipantListItemStyle
-                                      .membershipBatchRadius,
-                                ),
-                                child: Center(
-                                  child:
-                                      Text(membershipBatch[member.membership]!),
-                                ),
-                              ),
+                        ],
                       ],
                     ),
+                    const SizedBox(height: 4.0),
                     Text(
                       member.id,
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(

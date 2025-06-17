@@ -1,12 +1,9 @@
 import 'package:fluffychat/pages/chat_details/participant_list_item/participant_list_item.dart';
 import 'package:flutter/material.dart';
-import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:matrix/matrix.dart';
 
 class ChatDetailsMembersPage extends StatelessWidget {
-  static const int addMemberItemCount = 1;
-
   final ValueNotifier<List<User>?> displayMembersNotifier;
   final int actualMembersCount;
   final VoidCallback openDialogInvite;
@@ -36,18 +33,13 @@ class ChatDetailsMembersPage extends StatelessWidget {
             Expanded(
               child: ListView.builder(
                 shrinkWrap: true,
-                itemCount: members.length +
-                    (canRequestMoreMembers ? 1 : 0) +
-                    addMemberItemCount,
+                itemCount: members.length + (canRequestMoreMembers ? 1 : 0),
                 itemBuilder: (BuildContext context, int index) {
-                  if (index == 0) {
-                    return _listMemberInfoMobileAndTablet(context);
-                  }
-                  if (index - addMemberItemCount < members!.length) {
+                  if (index < members!.length) {
                     return Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 12),
                       child: ParticipantListItem(
-                        members[index - addMemberItemCount],
+                        members[index],
                         onUpdatedMembers: onUpdatedMembers,
                       ),
                     );
@@ -78,63 +70,6 @@ class ChatDetailsMembersPage extends StatelessWidget {
           ],
         );
       },
-    );
-  }
-
-  Widget _listMemberInfoMobileAndTablet(BuildContext context) {
-    if (!isMobileAndTablet) return const SizedBox.shrink();
-    return Column(
-      children: [
-        Container(
-          padding: const EdgeInsetsDirectional.all(16),
-          color: LinagoraSysColors.material().surface,
-          child: Align(
-            alignment: Alignment.centerLeft,
-            child: Text(
-              L10n.of(context)!.membersInfo(
-                actualMembersCount.toString(),
-              ),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                    color: LinagoraRefColors.material().neutral[40],
-                  ),
-            ),
-          ),
-        ),
-        InkWell(
-          onTap: openDialogInvite,
-          child: Container(
-            padding: const EdgeInsetsDirectional.only(
-              start: 16.0,
-              top: 8.0,
-              bottom: 8.0,
-            ),
-            margin: const EdgeInsetsDirectional.symmetric(
-              horizontal: 16.0,
-              vertical: 10.0,
-            ),
-            child: Row(
-              children: [
-                Icon(
-                  Icons.person_add,
-                  size: 18,
-                  color: LinagoraSysColors.material().primary,
-                ),
-                const SizedBox(width: 8),
-                Text(
-                  L10n.of(context)!.addMembers,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                        color: LinagoraSysColors.material().primary,
-                      ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ],
     );
   }
 }
