@@ -14,6 +14,9 @@ class TwakeAppBar extends StatelessWidget implements PreferredSizeWidget {
   final bool? centerTitle;
   final List<Widget>? actions;
   final Color? backgroundColor;
+  final double? leadingWidth;
+  final VoidCallback? onBack;
+  final bool enableLeftTitle;
 
   const TwakeAppBar({
     super.key,
@@ -24,6 +27,9 @@ class TwakeAppBar extends StatelessWidget implements PreferredSizeWidget {
     this.centerTitle,
     this.actions,
     this.backgroundColor,
+    this.leadingWidth,
+    this.onBack,
+    this.enableLeftTitle = false,
   });
 
   @override
@@ -36,19 +42,34 @@ class TwakeAppBar extends StatelessWidget implements PreferredSizeWidget {
           centerTitle ?? TwakeAppBarStyle.responsiveUtils.isMobile(context),
       automaticallyImplyLeading: false,
       leading: leading,
-      title: Column(
-        children: [
-          Padding(
-            padding: centerTitle == true
-                ? EdgeInsets.zero
-                : ContactsAppbarStyle.titlePadding(context),
-            child: Text(
-              title,
-              style: TwakeAppBarStyle.titleTextStyle(context),
+      leadingWidth: leadingWidth,
+      title: TwakeAppBarStyle.responsiveUtils.isMobile(context)
+          ? Column(
+              children: [
+                Padding(
+                  padding: centerTitle == true
+                      ? EdgeInsets.zero
+                      : ContactsAppbarStyle.titlePadding(context),
+                  child: Text(
+                    title,
+                    style: TwakeAppBarStyle.titleTextStyle(context),
+                  ),
+                ),
+              ],
+            )
+          : Row(
+              children: [
+                Padding(
+                  padding: enableLeftTitle
+                      ? EdgeInsets.zero
+                      : const EdgeInsets.only(left: 16),
+                  child: Text(
+                    title,
+                    style: TwakeAppBarStyle.titleTextStyle(context),
+                  ),
+                ),
+              ],
             ),
-          ),
-        ],
-      ),
       actions: actions,
       bottom: withDivider
           ? PreferredSize(

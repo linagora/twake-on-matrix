@@ -59,6 +59,8 @@ class ChatDetailsEditView extends StatelessWidget {
           onTap: controller.onBack,
           icon: Icons.arrow_back_ios,
         ),
+        onBack: controller.onBack,
+        enableLeftTitle: true,
         centerTitle: true,
         withDivider: true,
         actions: [
@@ -290,7 +292,8 @@ class ChatDetailsEditView extends StatelessWidget {
               ),
               ChatDetailsEditOption(
                 title: L10n.of(context)!.assignRoles,
-                subtitle: '${controller.room?.getAssignRolesMember().length}',
+                counterText:
+                    '${controller.room?.getAssignRolesMember().length}',
                 subtitleColor: LinagoraRefColors.material().tertiary[30],
                 leading: Icons.admin_panel_settings_outlined,
                 titleColor: Theme.of(context).colorScheme.onSurface,
@@ -300,12 +303,23 @@ class ChatDetailsEditView extends StatelessWidget {
               if (controller.room?.getExceptionsMember().isNotEmpty == true)
                 ChatDetailsEditOption(
                   title: L10n.of(context)!.exceptions,
-                  subtitle: '${controller.room?.getExceptionsMember().length}',
+                  counterText:
+                      '${controller.room?.getExceptionsMember().length}',
                   subtitleColor: LinagoraRefColors.material().tertiary[30],
                   leading: Icons.people_outlined,
                   titleColor: Theme.of(context).colorScheme.onSurface,
                   leadingIconColor: Theme.of(context).colorScheme.onSurface,
                   onTap: controller.openExceptionsPage,
+                ),
+              if (controller.room?.getBannedMembers().isNotEmpty == true)
+                ChatDetailsEditOption(
+                  title: L10n.of(context)!.removedUsers,
+                  counterText: '${controller.room?.getBannedMembers().length}',
+                  subtitleColor: LinagoraRefColors.material().tertiary[30],
+                  leading: Icons.block,
+                  titleColor: Theme.of(context).colorScheme.onSurface,
+                  leadingIconColor: Theme.of(context).colorScheme.onSurface,
+                  onTap: controller.openRemovedPage,
                 ),
             ],
             Container(
@@ -457,58 +471,55 @@ class _GroupNameField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: ChatDetailEditViewStyle.textFieldPadding,
-      child: ValueListenableBuilder(
-        valueListenable: controller.isValidGroupNameNotifier,
-        builder: (context, value, _) {
-          return TextField(
-            enabled: controller.room?.canChangeRoomName ?? false,
-            style: ChatDetailEditViewStyle.textFieldStyle(context),
-            controller: controller.groupNameTextEditingController,
-            contextMenuBuilder: mobileTwakeContextMenuBuilder,
-            focusNode: controller.groupNameFocusNode,
-            onTapOutside: (_) {
-              controller.groupNameFocusNode.unfocus();
-            },
-            decoration: InputDecoration(
-              border: OutlineInputBorder(
-                borderSide:
-                    BorderSide(color: Theme.of(context).colorScheme.shadow),
-              ),
-              labelText: L10n.of(context)!.widgetName,
-              labelStyle: ChatDetailEditViewStyle.textFieldLabelStyle(context),
-              hintText: L10n.of(context)!.enterGroupName,
-              hintStyle: ChatDetailEditViewStyle.textFieldHintStyle(context),
-              contentPadding: ChatDetailEditViewStyle.contentPadding,
-              errorText: controller.getErrorMessage(
-                controller.groupNameTextEditingController.text,
-              ),
-              suffixIcon: ValueListenableBuilder<bool>(
-                valueListenable: controller.groupNameEmptyNotifier,
-                builder: (context, isGroupNameEmpty, child) {
-                  if (controller.room?.canChangeRoomName == false) {
-                    return child!;
-                  }
-                  if (isGroupNameEmpty) {
-                    return child!;
-                  }
-                  return IconButton(
-                    onPressed: () =>
-                        controller.groupNameTextEditingController.clear(),
-                    icon: Icon(
-                      Icons.cancel_outlined,
-                      size: ChatDetailEditViewStyle.clearIconSize,
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
-                    ),
-                  );
-                },
-                child: const SizedBox.shrink(),
-              ),
+    return ValueListenableBuilder(
+      valueListenable: controller.isValidGroupNameNotifier,
+      builder: (context, value, _) {
+        return TextField(
+          enabled: controller.room?.canChangeRoomName ?? false,
+          style: ChatDetailEditViewStyle.textFieldStyle(context),
+          controller: controller.groupNameTextEditingController,
+          contextMenuBuilder: mobileTwakeContextMenuBuilder,
+          focusNode: controller.groupNameFocusNode,
+          onTapOutside: (_) {
+            controller.groupNameFocusNode.unfocus();
+          },
+          decoration: InputDecoration(
+            border: OutlineInputBorder(
+              borderSide:
+                  BorderSide(color: Theme.of(context).colorScheme.shadow),
             ),
-          );
-        },
-      ),
+            labelText: L10n.of(context)!.groupName,
+            labelStyle: ChatDetailEditViewStyle.textFieldLabelStyle(context),
+            hintText: L10n.of(context)!.enterGroupName,
+            hintStyle: ChatDetailEditViewStyle.textFieldHintStyle(context),
+            contentPadding: ChatDetailEditViewStyle.contentPadding,
+            errorText: controller.getErrorMessage(
+              controller.groupNameTextEditingController.text,
+            ),
+            suffixIcon: ValueListenableBuilder<bool>(
+              valueListenable: controller.groupNameEmptyNotifier,
+              builder: (context, isGroupNameEmpty, child) {
+                if (controller.room?.canChangeRoomName == false) {
+                  return child!;
+                }
+                if (isGroupNameEmpty) {
+                  return child!;
+                }
+                return IconButton(
+                  onPressed: () =>
+                      controller.groupNameTextEditingController.clear(),
+                  icon: Icon(
+                    Icons.cancel_outlined,
+                    size: ChatDetailEditViewStyle.clearIconSize,
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
+                );
+              },
+              child: const SizedBox.shrink(),
+            ),
+          ),
+        );
+      },
     );
   }
 }
@@ -522,65 +533,66 @@ class _DescriptionField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: ChatDetailEditViewStyle.textFieldPadding,
-      child: Column(
-        children: [
-          TextField(
-            enabled: controller.room?.canChangeTopic ?? false,
-            style: ChatDetailEditViewStyle.textFieldStyle(context),
-            controller: controller.descriptionTextEditingController,
-            contextMenuBuilder: mobileTwakeContextMenuBuilder,
-            focusNode: controller.descriptionFocusNode,
-            onTapOutside: (_) {
-              controller.descriptionFocusNode.unfocus();
-            },
-            decoration: InputDecoration(
-              border: OutlineInputBorder(
-                borderSide:
-                    BorderSide(color: Theme.of(context).colorScheme.shadow),
-              ),
-              labelText: L10n.of(context)!.description,
-              labelStyle: ChatDetailEditViewStyle.textFieldLabelStyle(context),
-              hintText: L10n.of(context)!.description,
-              hintStyle: ChatDetailEditViewStyle.textFieldHintStyle(context),
-              contentPadding: ChatDetailEditViewStyle.contentPadding,
-              suffixIcon: ValueListenableBuilder<bool>(
-                valueListenable: controller.descriptionEmptyNotifier,
-                builder: (context, isDescriptionEmpty, child) {
-                  if (controller.room?.canChangeTopic == false) {
-                    return child!;
-                  }
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        TextField(
+          enabled: controller.room?.canChangeTopic ?? false,
+          style: ChatDetailEditViewStyle.textFieldStyle(context),
+          controller: controller.descriptionTextEditingController,
+          contextMenuBuilder: mobileTwakeContextMenuBuilder,
+          focusNode: controller.descriptionFocusNode,
+          onTapOutside: (_) {
+            controller.descriptionFocusNode.unfocus();
+          },
+          decoration: InputDecoration(
+            border: OutlineInputBorder(
+              borderSide:
+                  BorderSide(color: Theme.of(context).colorScheme.shadow),
+            ),
+            labelText: L10n.of(context)!.description,
+            labelStyle: ChatDetailEditViewStyle.textFieldLabelStyle(context),
+            hintText: L10n.of(context)!.description,
+            hintStyle: ChatDetailEditViewStyle.textFieldHintStyle(context),
+            contentPadding: ChatDetailEditViewStyle.contentPadding,
+            suffixIcon: ValueListenableBuilder<bool>(
+              valueListenable: controller.descriptionEmptyNotifier,
+              builder: (context, isDescriptionEmpty, child) {
+                if (controller.room?.canChangeTopic == false) {
+                  return child!;
+                }
 
-                  if (isDescriptionEmpty) {
-                    return child!;
-                  }
+                if (isDescriptionEmpty) {
+                  return child!;
+                }
 
-                  return IconButton(
-                    onPressed: () =>
-                        controller.descriptionTextEditingController.clear(),
-                    icon: Icon(
-                      Icons.cancel_outlined,
-                      size: ChatDetailEditViewStyle.clearIconSize,
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
-                    ),
-                  );
-                },
-                child: const SizedBox.shrink(),
-              ),
+                return IconButton(
+                  onPressed: () =>
+                      controller.descriptionTextEditingController.clear(),
+                  icon: Icon(
+                    Icons.cancel_outlined,
+                    size: ChatDetailEditViewStyle.clearIconSize,
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
+                );
+              },
+              child: const SizedBox.shrink(),
             ),
           ),
-          const SizedBox(
-            height: 2.0,
-          ),
-          Text(
+        ),
+        const SizedBox(
+          height: 2.0,
+        ),
+        Padding(
+          padding: const EdgeInsets.only(left: 16),
+          child: Text(
             L10n.of(context)!.descriptionHelper,
             style: Theme.of(context).textTheme.labelSmall?.copyWith(
                   color: Theme.of(context).colorScheme.onSurfaceVariant,
                 ),
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }

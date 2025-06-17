@@ -23,6 +23,10 @@ class AssignRolesView extends StatelessWidget {
       resizeToAvoidBottomInset: false,
       appBar: TwakeAppBar(
         title: L10n.of(context)!.permissions,
+        centerTitle: true,
+        withDivider: true,
+        context: context,
+        enableLeftTitle: true,
         leading: TwakeIconButton(
           paddingAll: 8,
           splashColor: Colors.transparent,
@@ -31,9 +35,7 @@ class AssignRolesView extends StatelessWidget {
           onTap: controller.onBack,
           icon: Icons.arrow_back_ios,
         ),
-        centerTitle: true,
-        withDivider: true,
-        context: context,
+        onBack: controller.onBack,
       ),
 
       /// Implement later

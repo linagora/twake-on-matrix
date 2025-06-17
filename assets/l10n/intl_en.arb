@@ -3148,5 +3148,12 @@
       "number": {}
     }
   },
-  "removedUsers": "Removed Users"
+  "removedUsers": "Removed Users",
+  "bannedUsersCount": "BANNED USERS ({number})",
+  "@bannedUsersCount": {
+    "type": "text",
+    "placeholders": {
+      "number": {}
+    }
+  }
 }

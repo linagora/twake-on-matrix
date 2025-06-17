@@ -1,7 +1,6 @@
-import 'package:fluffychat/pages/chat_details/exceptions/exceptions.dart';
-import 'package:fluffychat/pages/chat_details/exceptions/exceptions_search_state.dart';
+import 'package:fluffychat/pages/chat_details/removed/removed.dart';
+import 'package:fluffychat/pages/chat_details/removed/removed_search_state.dart';
 import 'package:fluffychat/pages/chat_list/chat_list_header_style.dart';
-import 'package:fluffychat/utils/user_extension.dart';
 import 'package:fluffychat/widgets/app_bars/twake_app_bar.dart';
 import 'package:fluffychat/widgets/avatar/avatar.dart';
 import 'package:fluffychat/widgets/context_menu_builder_ios_paste_without_permission.dart';
@@ -11,10 +10,10 @@ import 'package:flutter/material.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 
-class ExceptionsView extends StatelessWidget {
-  final ExceptionsController controller;
+class RemovedView extends StatelessWidget {
+  final RemovedController controller;
 
-  const ExceptionsView({
+  const RemovedView({
     super.key,
     required this.controller,
   });
@@ -25,12 +24,8 @@ class ExceptionsView extends StatelessWidget {
       backgroundColor: LinagoraSysColors.material().onPrimary,
       resizeToAvoidBottomInset: false,
       appBar: TwakeAppBar(
-        title: L10n.of(context)!.exceptions,
-        centerTitle: true,
-        withDivider: true,
-        context: context,
+        title: L10n.of(context)!.removedUsers,
         enableLeftTitle: true,
-        onBack: controller.onBack,
         leading: TwakeIconButton(
           paddingAll: 8,
           splashColor: Colors.transparent,
@@ -39,6 +34,10 @@ class ExceptionsView extends StatelessWidget {
           onTap: controller.onBack,
           icon: Icons.arrow_back_ios,
         ),
+        centerTitle: true,
+        withDivider: true,
+        context: context,
+        onBack: controller.onBack,
       ),
       body: SingleChildScrollView(
         child: Column(
@@ -81,8 +80,8 @@ class ExceptionsView extends StatelessWidget {
                 vertical: 8.0,
               ),
               child: Text(
-                L10n.of(context)!.readOnlyCount(
-                  controller.exceptionsMember.length,
+                L10n.of(context)!.bannedUsersCount(
+                  controller.removedMember.length,
                 ),
                 style: Theme.of(context).textTheme.labelLarge?.copyWith(
                       color: LinagoraRefColors.material().neutral[40],
@@ -107,7 +106,7 @@ class ExceptionsView extends StatelessWidget {
       builder: (context, searchResults, child) {
         return searchResults.fold(
           (failure) {
-            if (failure is ExceptionsSearchEmptyState) {
+            if (failure is RemovedSearchEmptyState) {
               return const Center(
                 child: EmptySearchWidget(),
               );
@@ -115,16 +114,13 @@ class ExceptionsView extends StatelessWidget {
             return const SizedBox.shrink();
           },
           (success) {
-            if (success is ExceptionsSearchSuccessState) {
+            if (success is RemovedSearchSuccessState) {
               return ListView.builder(
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
-                itemCount: success.exceptionsMember.length,
+                itemCount: success.removedMember.length,
                 itemBuilder: (context, index) {
-                  final member = success.exceptionsMember[index];
-                  final role =
-                      member.getDefaultPowerLevelMember.displayName(context);
-
+                  final member = success.removedMember[index];
                   return TwakeInkWell(
                     onTap: () {},
                     child: TwakeListItem(
@@ -152,27 +148,6 @@ class ExceptionsView extends StatelessWidget {
                                           ),
                                       overflow: TextOverflow.ellipsis,
                                       maxLines: 1,
-                                    ),
-                                    const Spacer(),
-                                    Row(
-                                      children: [
-                                        Text(
-                                          role,
-                                          style: Theme.of(context)
-                                              .textTheme
-                                              .labelMedium
-                                              ?.copyWith(
-                                                color:
-                                                    LinagoraRefColors.material()
-                                                        .tertiary[30],
-                                              ),
-                                          overflow: TextOverflow.ellipsis,
-                                          maxLines: 1,
-                                        ),
-                                        const SizedBox(
-                                          width: 4,
-                                        ),
-                                      ],
                                     ),
                                   ],
                                 ),
@@ -214,7 +189,7 @@ class ExceptionsView extends StatelessWidget {
       builder: (context, searchResults, child) {
         return searchResults.fold(
           (failure) {
-            if (failure is ExceptionsSearchEmptyState) {
+            if (failure is RemovedSearchEmptyState) {
               return const Center(
                 child: EmptySearchWidget(),
               );
@@ -222,18 +197,16 @@ class ExceptionsView extends StatelessWidget {
             return const SizedBox.shrink();
           },
           (success) {
-            if (success is ExceptionsSearchSuccessState) {
+            if (success is RemovedSearchSuccessState) {
               return ListView.builder(
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
-                itemCount: success.exceptionsMember.length,
+                itemCount: success.removedMember.length,
                 padding: const EdgeInsets.symmetric(
                   horizontal: 12.0,
                 ),
                 itemBuilder: (context, index) {
-                  final member = success.exceptionsMember[index];
-                  final role =
-                      member.getDefaultPowerLevelMember.displayName(context);
+                  final member = success.removedMember[index];
                   return TwakeInkWell(
                     onTap: () {},
                     child: TwakeListItem(
@@ -261,27 +234,6 @@ class ExceptionsView extends StatelessWidget {
                                           ),
                                       overflow: TextOverflow.ellipsis,
                                       maxLines: 1,
-                                    ),
-                                    const Spacer(),
-                                    Row(
-                                      children: [
-                                        Text(
-                                          role,
-                                          style: Theme.of(context)
-                                              .textTheme
-                                              .labelMedium
-                                              ?.copyWith(
-                                                color:
-                                                    LinagoraRefColors.material()
-                                                        .tertiary[30],
-                                              ),
-                                          overflow: TextOverflow.ellipsis,
-                                          maxLines: 1,
-                                        ),
-                                        const SizedBox(
-                                          width: 4,
-                                        ),
-                                      ],
                                     ),
                                   ],
                                 ),

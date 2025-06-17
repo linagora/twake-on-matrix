@@ -6,12 +6,14 @@ import 'package:linagora_design_flutter/style/linagora_text_style.dart';
 
 class TwakeAppBarStyle {
   static ResponsiveUtils responsiveUtils = getIt.get<ResponsiveUtils>();
+
   bool isMobile(BuildContext context) => responsiveUtils.isMobile(context);
 
   static Color appBarBackgroundColor(BuildContext context) =>
       responsiveUtils.isMobile(context)
           ? LinagoraSysColors.material().background
           : LinagoraSysColors.material().onPrimary;
+
   static TextStyle? titleTextStyle(BuildContext context) =>
       responsiveUtils.isMobile(context)
           ? LinagoraTextStyle.material().bodyLarge1.copyWith(
@@ -27,4 +29,7 @@ class TwakeAppBarStyle {
   static const double dividerthickness = 1.0;
   static const EdgeInsets leadingIconPadding = EdgeInsets.only(left: 12);
   static const double leadingIconSize = 24;
+
+  static const EdgeInsetsGeometry backIconPadding =
+      EdgeInsets.symmetric(vertical: 8, horizontal: 4);
 }

@@ -48,9 +48,10 @@ class ChatDetailsView extends StatelessWidget {
               highlightColor: Colors.transparent,
               onTap: controller.widget.closeRightColumn,
               icon: controller.widget.isInStack
-                  ? Icons.chevron_left_outlined
+                  ? Icons.arrow_back_ios
                   : Icons.close,
             ),
+            enableLeftTitle: true,
             centerTitle: true,
             withDivider: true,
             actions: [
