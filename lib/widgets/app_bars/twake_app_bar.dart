@@ -1,6 +1,5 @@
 import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/widgets/app_bars/twake_app_bar_style.dart';
-import 'package:fluffychat/widgets/twake_components/twake_icon_button.dart';
 import 'package:flutter/material.dart';
 import 'package:linagora_design_flutter/colors/linagora_state_layer.dart';
 import 'package:linagora_design_flutter/colors/linagora_sys_colors.dart';
@@ -40,15 +39,7 @@ class TwakeAppBar extends StatelessWidget implements PreferredSizeWidget {
       centerTitle:
           centerTitle ?? TwakeAppBarStyle.responsiveUtils.isMobile(context),
       automaticallyImplyLeading: false,
-      leading: leading ??
-          TwakeIconButton(
-            paddingAll: 8,
-            splashColor: Colors.transparent,
-            hoverColor: Colors.transparent,
-            highlightColor: Colors.transparent,
-            onTap: onBack,
-            icon: Icons.arrow_back_ios,
-          ),
+      leading: leading,
       leadingWidth: leadingWidth,
       title: TwakeAppBarStyle.responsiveUtils.isMobile(context)
           ? Column(

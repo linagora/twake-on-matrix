@@ -6,6 +6,7 @@ import 'package:fluffychat/widgets/app_bars/twake_app_bar.dart';
 import 'package:fluffychat/widgets/avatar/avatar.dart';
 import 'package:fluffychat/widgets/context_menu_builder_ios_paste_without_permission.dart';
 import 'package:fluffychat/widgets/search/empty_search_widget.dart';
+import 'package:fluffychat/widgets/twake_components/twake_icon_button.dart';
 import 'package:flutter/material.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
@@ -25,6 +26,14 @@ class AssignRolesView extends StatelessWidget {
         centerTitle: true,
         withDivider: true,
         context: context,
+        leading: TwakeIconButton(
+          paddingAll: 8,
+          splashColor: Colors.transparent,
+          hoverColor: Colors.transparent,
+          highlightColor: Colors.transparent,
+          onTap: controller.onBack,
+          icon: Icons.arrow_back_ios,
+        ),
         onBack: controller.onBack,
       ),
 

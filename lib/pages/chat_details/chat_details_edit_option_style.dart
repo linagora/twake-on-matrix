@@ -12,7 +12,12 @@ class ChatDetailsEditOptionStyle {
   }
 
   static const EdgeInsetsDirectional itemBuilderPadding =
-      EdgeInsetsDirectional.all(16.0);
+      EdgeInsetsDirectional.only(
+    top: 16,
+    bottom: 16,
+    start: 16,
+    end: 8,
+  );
   static const EdgeInsetsDirectional leadingIconPadding =
       EdgeInsetsDirectional.only(end: 8.0);
   static const EdgeInsetsDirectional subtitleItemBuilderPadding =

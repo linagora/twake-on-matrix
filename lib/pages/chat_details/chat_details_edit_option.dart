@@ -38,6 +38,7 @@ class ChatDetailsEditOption extends StatelessWidget {
           padding: ChatDetailsEditOptionStyle.itemBuilderPadding,
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
             children: [
               Padding(
                 padding: ChatDetailsEditOptionStyle.leadingIconPadding,
@@ -53,9 +54,7 @@ class ChatDetailsEditOption extends StatelessWidget {
               ),
               Expanded(
                 child: Row(
-                  crossAxisAlignment: subtitle?.isEmpty == true
-                      ? CrossAxisAlignment.start
-                      : CrossAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     Expanded(
                       child: Column(
@@ -93,21 +92,22 @@ class ChatDetailsEditOption extends StatelessWidget {
                                 ),
                             ],
                           ),
-                          Padding(
-                            padding: ChatDetailsEditOptionStyle
-                                .subtitleItemBuilderPadding,
-                            child: Text(
-                              subtitle ?? '',
-                              style:
-                                  ChatDetailsEditOptionStyle.subtitleTextStyle(
-                                context,
-                                subtitleColor,
+                          if (subtitle != null && subtitle!.isNotEmpty)
+                            Padding(
+                              padding: ChatDetailsEditOptionStyle
+                                  .subtitleItemBuilderPadding,
+                              child: Text(
+                                subtitle!,
+                                style: ChatDetailsEditOptionStyle
+                                    .subtitleTextStyle(
+                                  context,
+                                  subtitleColor,
+                                ),
+                                maxLines:
+                                    ChatDetailsEditOptionStyle.subtitleMaxLines,
+                                overflow: TextOverflow.ellipsis,
                               ),
-                              maxLines:
-                                  ChatDetailsEditOptionStyle.subtitleMaxLines,
-                              overflow: TextOverflow.ellipsis,
                             ),
-                          ),
                         ],
                       ),
                     ),

@@ -14,6 +14,7 @@ import 'package:fluffychat/widgets/avatar/avatar.dart';
 import 'package:fluffychat/widgets/context_menu_builder_ios_paste_without_permission.dart';
 import 'package:fluffychat/widgets/mixins/popup_menu_widget_style.dart';
 import 'package:fluffychat/widgets/stream_image_view.dart';
+import 'package:fluffychat/widgets/twake_components/twake_icon_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -50,6 +51,14 @@ class ChatDetailsEditView extends StatelessWidget {
       resizeToAvoidBottomInset: false,
       appBar: TwakeAppBar(
         title: L10n.of(context)!.edit,
+        leading: TwakeIconButton(
+          paddingAll: 8,
+          splashColor: Colors.transparent,
+          hoverColor: Colors.transparent,
+          highlightColor: Colors.transparent,
+          onTap: controller.onBack,
+          icon: Icons.arrow_back_ios,
+        ),
         onBack: controller.onBack,
         centerTitle: true,
         withDivider: true,
