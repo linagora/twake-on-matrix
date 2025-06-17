@@ -25,6 +25,7 @@ class RemovedView extends StatelessWidget {
       resizeToAvoidBottomInset: false,
       appBar: TwakeAppBar(
         title: L10n.of(context)!.removedUsers,
+        enableLeftTitle: true,
         leading: TwakeIconButton(
           paddingAll: 8,
           splashColor: Colors.transparent,

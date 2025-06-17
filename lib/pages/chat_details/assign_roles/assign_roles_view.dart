@@ -26,6 +26,7 @@ class AssignRolesView extends StatelessWidget {
         centerTitle: true,
         withDivider: true,
         context: context,
+        enableLeftTitle: true,
         leading: TwakeIconButton(
           paddingAll: 8,
           splashColor: Colors.transparent,

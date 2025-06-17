@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:fluffychat/pages/chat_details/exceptions/exceptions.dart';
 import 'package:fluffychat/pages/chat_details/exceptions/exceptions_search_state.dart';
 import 'package:fluffychat/pages/chat_list/chat_list_header_style.dart';
@@ -31,6 +29,7 @@ class ExceptionsView extends StatelessWidget {
         centerTitle: true,
         withDivider: true,
         context: context,
+        enableLeftTitle: true,
         onBack: controller.onBack,
         leading: TwakeIconButton(
           paddingAll: 8,
@@ -126,7 +125,6 @@ class ExceptionsView extends StatelessWidget {
                   final role =
                       member.getDefaultPowerLevelMember.displayName(context);
 
-                  print('Member: ${jsonEncode(member)}');
                   return TwakeInkWell(
                     onTap: () {},
                     child: TwakeListItem(

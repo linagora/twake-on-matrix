@@ -16,6 +16,7 @@ class TwakeAppBar extends StatelessWidget implements PreferredSizeWidget {
   final Color? backgroundColor;
   final double? leadingWidth;
   final VoidCallback? onBack;
+  final bool enableLeftTitle;
 
   const TwakeAppBar({
     super.key,
@@ -28,6 +29,7 @@ class TwakeAppBar extends StatelessWidget implements PreferredSizeWidget {
     this.backgroundColor,
     this.leadingWidth,
     this.onBack,
+    this.enableLeftTitle = false,
   });
 
   @override
@@ -58,20 +60,13 @@ class TwakeAppBar extends StatelessWidget implements PreferredSizeWidget {
           : Row(
               children: [
                 Padding(
-                  padding: TwakeAppBarStyle.backIconPadding,
-                  child: IconButton(
-                    highlightColor: Colors.transparent,
-                    hoverColor: Colors.transparent,
-                    splashColor: Colors.transparent,
-                    onPressed: onBack,
-                    icon: const Icon(
-                      Icons.arrow_back_ios,
-                    ),
+                  padding: enableLeftTitle
+                      ? EdgeInsets.zero
+                      : const EdgeInsets.only(left: 16),
+                  child: Text(
+                    title,
+                    style: TwakeAppBarStyle.titleTextStyle(context),
                   ),
-                ),
-                Text(
-                  title,
-                  style: TwakeAppBarStyle.titleTextStyle(context),
                 ),
               ],
             ),

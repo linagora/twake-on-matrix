@@ -60,6 +60,7 @@ class ChatDetailsEditView extends StatelessWidget {
           icon: Icons.arrow_back_ios,
         ),
         onBack: controller.onBack,
+        enableLeftTitle: true,
         centerTitle: true,
         withDivider: true,
         actions: [
