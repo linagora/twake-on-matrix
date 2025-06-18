@@ -899,7 +899,7 @@ packages:
     description:
       path: "."
       ref: master
-      resolved-ref: "6068c82c2062548056e6146820dbc985f71263af"
+      resolved-ref: "8273a15de70a33e79837fd4d9da08e474fcc53c3"
       url: "git@github.com:linagora/emoji_mart.git"
     source: git
     version: "1.0.2"
@@ -1771,7 +1771,7 @@ packages:
     description:
       path: "."
       ref: master
-      resolved-ref: "083cbf597cce8bedcc7ccda76a0c49eb06a71e9e"
+      resolved-ref: cdc2599658feaee761b5a6eda0a8d457052176fa
       url: "git@github.com:linagora/linagora-design-flutter.git"
     source: git
     version: "0.0.1"
