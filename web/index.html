@@ -34,44 +34,20 @@
     <title>Twake Chat</title>
     <link rel="manifest" href="manifest.json" />
     <link rel="stylesheet" type="text/css" href="style.css" />
+    <link rel="stylesheet" type="text/css" href="splash/style.css">
     <meta
       content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
       name="viewport"
     />
-    <script src="splash/splash.js"></script>
     <!-- This script adds the flutter initialization JS code -->
     <script src="flutter.js" defer></script>
+    <script src="https://unpkg.com/@dotlottie/player-component@2.7.12/dist/dotlottie-player.mjs" type="module"></script>
   </head>
 
   <body>
-    <picture id="splash-branding">
-      <img
-        class="bottom"
-        aria-hidden="true"
-        srcset="
-          splash/img/branding-1x.png 1x,
-          splash/img/branding-2x.png 2x,
-          splash/img/branding-3x.png 3x,
-          splash/img/branding-4x.png 4x
-        "
-        src="splash/img/branding-1x.png"
-        alt=""
-      />
-    </picture>
-    <picture id="splash">
-      <img
-              class="center"
-              aria-hidden="true"
-              srcset="
-          splash/img/dark-1x.png 1x,
-          splash/img/dark-2x.png 2x,
-          splash/img/dark-3x.png 3x,
-          splash/img/dark-4x.png 4x
-        "
-              src="splash/img/dark-1x.png"
-              alt=""
-      />
-    </picture>
+    <dotlottie-player class="center" src="splash/lottie-chat.json" background="transparent" speed="1" style="width: 176px; height: 176px" direction="1" playmode="forward" autoplay=""></dotlottie-player>
+    <img src="splash/img/icon_twp.png" alt="Twake Workplace logo" class="bottom-image">
+
     <script>
       window.addEventListener("load", function (ev) {
         // Download main.dart.js
@@ -93,7 +69,9 @@
               _flutter.loader.load({
                 onEntrypointLoaded: async function(engineInitializer) {
                   const appRunner = await engineInitializer.initializeEngine({useColorEmoji: true});
-                  await appRunner.runApp();
+                  await setTimeout( async function () {
+                    await appRunner.runApp();
+                  }, 2000);
                 }
               });
             });
@@ -101,7 +79,9 @@
           _flutter.loader.load({
             onEntrypointLoaded: async function (engineInitializer) {
               const appRunner = await engineInitializer.initializeEngine({useColorEmoji: true});
-              await appRunner.runApp();
+              await setTimeout( async function () {
+                await appRunner.runApp();
+              }, 2000);
             },
           });
         }

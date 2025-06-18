@@ -245,9 +245,10 @@ flutter_launcher_icons:
   adaptive_icon_foreground: "assets/icons/icon_launcher.png"
 
 flutter_native_splash:
-  color: "#000000"
-  image: "assets/logo.png"
-  branding: "assets/branding.png"
+  color_ios: "#ffffff"
+  image_ios: "assets/logo_ios.png"
+  branding_ios: "assets/branding.png"
+  color_android: "#ffffff"
 
 flutter:
   generate: true
