@@ -10,7 +10,6 @@ import 'package:fluffychat/widgets/avatar/avatar.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
-import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:matrix/matrix.dart';
 
@@ -100,7 +99,7 @@ class ParticipantListItem extends StatelessWidget {
     final responsive = getIt.get<ResponsiveUtils>();
 
     if (responsive.isMobile(context)) {
-      await _openProfileMenu(context);
+      await _openDialogInvite(context);
     } else {
       await _openProfileDialog(context);
     }
@@ -136,80 +135,6 @@ class ParticipantListItem extends StatelessWidget {
       },
     );
   }
-
-  Future _openProfileMenu(BuildContext context) => showModalBottomSheet(
-        context: context,
-        shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.only(
-            topLeft: ParticipantListItemStyle.bottomSheetTopRadius,
-            topRight: ParticipantListItemStyle.bottomSheetTopRadius,
-          ),
-        ),
-        builder: (bottomSheetContext) {
-          return Container(
-            padding: ParticipantListItemStyle.bottomSheetContentPadding,
-            decoration: BoxDecoration(
-              color: LinagoraRefColors.material().primary[100],
-              borderRadius: const BorderRadius.only(
-                topLeft: ParticipantListItemStyle.bottomSheetTopRadius,
-                topRight: ParticipantListItemStyle.bottomSheetTopRadius,
-              ),
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Row(
-                  mainAxisSize: MainAxisSize.min,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Container(
-                      height: ParticipantListItemStyle.dragHandleHeight,
-                      width: ParticipantListItemStyle.dragHandleWidth,
-                      decoration: BoxDecoration(
-                        borderRadius:
-                            ParticipantListItemStyle.dragHandleBorderRadius,
-                        color: LinagoraSysColors.material().outline,
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(
-                  height: ParticipantListItemStyle.spacerHeight,
-                ),
-                Row(
-                  children: [
-                    Expanded(
-                      child: TextButton.icon(
-                        onPressed: () async {
-                          Navigator.of(bottomSheetContext).pop();
-                          await _openDialogInvite(context);
-                        },
-                        icon: Icon(
-                          Icons.person_search,
-                          color: LinagoraSysColors.material().onSurface,
-                        ),
-                        label: L10n.of(bottomSheetContext)?.viewProfile != null
-                            ? Row(
-                                children: [
-                                  Text(
-                                    L10n.of(bottomSheetContext)!.viewProfile,
-                                    style: TextStyle(
-                                      color: LinagoraSysColors.material()
-                                          .onSurface,
-                                    ),
-                                  ),
-                                ],
-                              )
-                            : const SizedBox.shrink(),
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          );
-        },
-      );
 
   Future _openProfileDialog(BuildContext context) => showDialog(
         context: context,
