@@ -107,7 +107,10 @@ mixin ChatDetailsTabMixin<T extends StatefulWidget>
     _onRoomEventChangedSubscription =
         Matrix.of(context).client.onEvent.stream.listen((event) {
       if (event.isMemberChangedEvent && room?.id == event.roomID) {
-        _membersNotifier.value = room?.getParticipants();
+        _membersNotifier.value = room?.getParticipants().toList()
+          ?..sort(
+            (small, great) => great.powerLevel.compareTo(small.powerLevel),
+          );
       }
     });
   }
@@ -216,7 +219,10 @@ mixin ChatDetailsTabMixin<T extends StatefulWidget>
 
   void _initMembers() {
     if (chatType == ChatDetailsScreenEnum.group) {
-      _membersNotifier.value ??= room?.getParticipants();
+      _membersNotifier.value = room?.getParticipants().toList()
+        ?..sort(
+          (small, great) => great.powerLevel.compareTo(small.powerLevel),
+        );
       _initDisplayMembers();
     }
   }
