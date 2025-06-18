@@ -1,3 +1,7 @@
+## [2.9.6+2330] - 2025-06-18
+### Fixed
+- Update fastlane to build iOS
+
 ## [2.9.5+2330] - 2025-06-18
 ### Added
 - #2361 Handle actions in chat base on Permission
