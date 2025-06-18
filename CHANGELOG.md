@@ -1,3 +1,31 @@
+## [2.9.5+2330] - 2025-06-18
+### Added
+- #2361 Handle actions in chat base on Permission
+- #2348 Recent category for emoji picker
+- #2366 Only Admin can Edit group chat
+- #2349 Delete message
+- #2350 Edit message
+- #2367 Asign role list
+- #2384 Exception list
+- #2393 Removed list
+- Translation
+
+### Fixed
+- #2735 Violet heart
+- #2432 Prevent add the same account in app 
+- #2374 Darker in blur screen
+- #2377 Filter not support emojies
+- #2353 Unifying context menu
+- #2345 share media from gallery
+- #2357 Mark as read for mute and unmute room
+- #2401 Click on internal contact
+- #2402 Prevent automatically jump in search message
+
+## [2.9.4+2330] - 2025-05-28
+### Fixed
+- #2314 Improve generate and share link invitation
+- Remove background in avatar
+
 ## [2.9.3+2330] - 2025-05-27
 ### Fixed
 - #2314 Only change invitation status when send by mail or phone number
