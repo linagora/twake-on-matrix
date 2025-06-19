@@ -17,6 +17,7 @@ import 'package:fluffychat/pages/login/on_auth_redirect.dart';
 import 'package:fluffychat/pages/new_group/new_group_chat_info.dart';
 import 'package:fluffychat/pages/settings_dashboard/settings_app_language/settings_app_language.dart';
 import 'package:fluffychat/pages/settings_dashboard/settings_profile/settings_profile.dart';
+import 'package:fluffychat/pages/splash/splash.dart';
 import 'package:fluffychat/pages/story/story_page.dart';
 import 'package:fluffychat/pages/twake_welcome/twake_welcome.dart';
 import 'package:fluffychat/presentation/model/chat/chat_router_input_argument.dart';
@@ -68,6 +69,13 @@ abstract class AppRoutes {
   static final _responsive = getIt.get<ResponsiveUtils>();
 
   static final List<RouteBase> routes = [
+    GoRoute(
+      path: '/splash',
+      pageBuilder: (context, state) => defaultPageBuilder(
+        context,
+        const Splash(),
+      ),
+    ),
     GoRoute(
       path: '/',
       redirect: (context, state) =>
