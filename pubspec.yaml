@@ -183,7 +183,7 @@ dependencies:
   flutter_inappwebview: 6.1.0
   tuple: ^2.0.2
   lottie: ^3.0.0
-  lottie_native: 0.1.1
+  lottie_native: 0.1.2
   wechat_camera_picker: 4.2.2
   open_file: ^3.3.2
   mime: ^1.0.4
