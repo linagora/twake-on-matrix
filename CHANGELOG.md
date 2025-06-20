@@ -1,3 +1,7 @@
+## [2.9.7+2330] - 2025-06-20
+### Added
+- #2411 New splash screens
+
 ## [2.9.6+2330] - 2025-06-18
 ### Fixed
 - Update fastlane to build iOS
