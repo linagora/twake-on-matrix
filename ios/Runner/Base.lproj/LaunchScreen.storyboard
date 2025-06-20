@@ -19,7 +19,7 @@
                             <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleToFill" image="LaunchBackground" translatesAutoresizingMaskIntoConstraints="NO" id="tWc-Dq-wcI">
                                 <rect key="frame" x="0.0" y="0.0" width="393" height="852"/>
                             </imageView>
-                            <imageView opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleAspectFit" image="LaunchImage" translatesAutoresizingMaskIntoConstraints="NO" id="YRO-k0-Ey4">
+                            <imageView opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" image="LaunchImage" translatesAutoresizingMaskIntoConstraints="NO" id="YRO-k0-Ey4">
                                 <rect key="frame" x="157.66666666666666" y="387" width="78" height="78"/>
                                 <constraints>
                                     <constraint firstAttribute="height" constant="78" id="Zj1-g1-e6S"/>
@@ -56,6 +56,6 @@
     <resources>
         <image name="BrandingImage" width="178.66667175292969" height="26.666666030883789"/>
         <image name="LaunchBackground" width="1" height="1"/>
-        <image name="LaunchImage" width="58.666667938232422" height="58.666667938232422"/>
+        <image name="LaunchImage" width="78.333335876464844" height="78.333335876464844"/>
     </resources>
 </document>
