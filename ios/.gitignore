@@ -25,7 +25,6 @@ Flutter/flutter_export_environment.sh
 ServiceDefinitions.json
 Runner/GeneratedPluginRegistrant.*
 build/
-Runner.xcodeproj/project.pbxproj
 
 # Exceptions to above rules.
 !default.mode1v3
