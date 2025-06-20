@@ -3261,5 +3261,56 @@
   "failedToSendInvitation": "Không gửi được lời mời.",
   "@failedToSendInvitation": {},
   "verifyWithAnotherDevice": "Xác thực với thiết bị khác",
-  "@verifyWithAnotherDevice": {}
+  "@verifyWithAnotherDevice": {},
+  "noChatPermissionMessage": "Bạn không có quyền gửi tin nhắn.",
+  "@noChatPermissionMessage": {},
+  "editMessage": "Sửa tin nhắn",
+  "@editMessage": {},
+  "exceptions": "Ngoại lệ",
+  "@exceptions": {},
+  "administration": "Quản trị viên",
+  "@administration": {},
+  "yourDataIsEncryptedForSecurity": "Tin nhắn của bạn đã được mã hoá",
+  "@yourDataIsEncryptedForSecurity": {},
+  "failedToDeleteMessage": "Xoá tin nhắn thất bại.",
+  "@failedToDeleteMessage": {},
+  "noDeletePermissionMessage": "Bạn không có quyền xoá tin nhắn này.",
+  "@noDeletePermissionMessage": {},
+  "edited": "đã sửa",
+  "@edited": {},
+  "assignRoles": "Phân quyền",
+  "@assignRoles": {},
+  "permissions": "Quyền",
+  "@permissions": {},
+  "adminsOfTheGroup": "QUẢN TRỊ VIÊN CỦA NHÓM ({number})",
+  "@adminsOfTheGroup": {
+    "type": "text",
+    "placeholders": {
+      "number": {}
+    }
+  },
+  "addAdminsOrModerators": "Thêm Quản trị viên/Người điều hành",
+  "@addAdminsOrModerators": {},
+  "member": "Thành viên",
+  "@member": {},
+  "guest": "Khách",
+  "@guest": {},
+  "readOnly": "Chỉ đọc",
+  "@readOnly": {},
+  "removedUsers": "Người dùng bị cấm",
+  "@removedUsers": {},
+  "bannedUsersCount": "NGƯỜI DÙNG BỊ CẤM ({number})",
+  "@bannedUsersCount": {
+    "type": "text",
+    "placeholders": {
+      "number": {}
+    }
+  },
+  "readOnlyCount": "Chỉ đọc ({number})",
+  "@readOnlyCount": {
+    "type": "text",
+    "placeholders": {
+      "number": {}
+    }
+  }
 }
