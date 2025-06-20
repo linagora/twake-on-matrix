@@ -3276,5 +3276,56 @@
   "invalidEmail": "Email invalide",
   "@invalidEmail": {},
   "selectedEmailWillReceiveAnInvitationLinkAndInstructions": "L'email sélectionné recevra un lien d'invitation et des instructions.",
-  "@selectedEmailWillReceiveAnInvitationLinkAndInstructions": {}
+  "@selectedEmailWillReceiveAnInvitationLinkAndInstructions": {},
+  "removedUsers": "Utilisateurs supprimés",
+  "@removedUsers": {},
+  "readOnlyCount": "LECTURE SEULE ({number})",
+  "@readOnlyCount": {
+    "type": "text",
+    "placeholders": {
+      "number": {}
+    }
+  },
+  "exceptions": "Exceptions",
+  "@exceptions": {},
+  "readOnly": "Lecture seule",
+  "@readOnly": {},
+  "adminsOfTheGroup": "ADMINISTRATEURS DU GROUPE ({number})",
+  "@adminsOfTheGroup": {
+    "type": "text",
+    "placeholders": {
+      "number": {}
+    }
+  },
+  "member": "Membre",
+  "@member": {},
+  "noChatPermissionMessage": "Vous n'avez pas l'autorisation d'écrire dans cette discussion.",
+  "@noChatPermissionMessage": {},
+  "administration": "Administration",
+  "@administration": {},
+  "yourDataIsEncryptedForSecurity": "Vos données sont cryptées par sécurité",
+  "@yourDataIsEncryptedForSecurity": {},
+  "noDeletePermissionMessage": "Vous n'avez pas l’autorisation de supprimer ce message.",
+  "@noDeletePermissionMessage": {},
+  "edited": "modifié",
+  "@edited": {},
+  "failedToDeleteMessage": "Échec de la suppression du message.",
+  "@failedToDeleteMessage": {},
+  "editMessage": "Modifier le message",
+  "@editMessage": {},
+  "assignRoles": "Assigner des rôles",
+  "@assignRoles": {},
+  "permissions": "Autorisations",
+  "@permissions": {},
+  "addAdminsOrModerators": "Ajouter des administrateurs/modérateurs",
+  "@addAdminsOrModerators": {},
+  "guest": "Invité",
+  "@guest": {},
+  "bannedUsersCount": "UTILISATEURS BANNIS ({number})",
+  "@bannedUsersCount": {
+    "type": "text",
+    "placeholders": {
+      "number": {}
+    }
+  }
 }
