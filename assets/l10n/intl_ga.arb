@@ -3264,5 +3264,49 @@
   "selectedNumberWillGetAnSMSWithAnInvitationLinkAndInstructions": "Gheobhaidh an uimhir roghnaithe SMS le nasc cuireadh agus treoracha.",
   "@selectedNumberWillGetAnSMSWithAnInvitationLinkAndInstructions": {},
   "reaction": "Imoibriú",
-  "@reaction": {}
+  "@reaction": {},
+  "editMessage": "Cuir teachtaireacht in eagar",
+  "@editMessage": {},
+  "failedToDeleteMessage": "Theip ar an teachtaireacht a scriosadh.",
+  "@failedToDeleteMessage": {},
+  "member": "Ball",
+  "@member": {},
+  "adminsOfTheGroup": "RIARTHÓIRÍ AN GHRÚPA ({number})",
+  "@adminsOfTheGroup": {
+    "type": "text",
+    "placeholders": {
+      "number": {}
+    }
+  },
+  "addAdminsOrModerators": "Cuir Riarthóirí/Modhnóirí leis",
+  "@addAdminsOrModerators": {},
+  "noChatPermissionMessage": "Níl cead agat teachtaireachtaí a sheoladh sa chomhrá seo.",
+  "@noChatPermissionMessage": {},
+  "readOnlyCount": "LÉIGH AMHÁIN ({number})",
+  "@readOnlyCount": {
+    "type": "text",
+    "placeholders": {
+      "number": {}
+    }
+  },
+  "yourDataIsEncryptedForSecurity": "Tá do shonraí criptithe ar mhaithe le slándáil",
+  "@yourDataIsEncryptedForSecurity": {},
+  "administration": "Riarachán",
+  "@administration": {},
+  "noDeletePermissionMessage": "Níl cead agat an teachtaireacht seo a scriosadh.",
+  "@noDeletePermissionMessage": {},
+  "assignRoles": "Sannadh róil",
+  "@assignRoles": {},
+  "permissions": "Ceadanna",
+  "@permissions": {},
+  "guest": "Aoi",
+  "@guest": {},
+  "exceptions": "Eisceachtaí",
+  "@exceptions": {},
+  "readOnly": "Léamh amháin",
+  "@readOnly": {},
+  "removedUsers": "Úsáideoirí Bainte",
+  "@removedUsers": {},
+  "edited": "curtha in eagar",
+  "@edited": {}
 }
