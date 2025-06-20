@@ -585,6 +585,7 @@
 				C1005C4D261071B5002F4F32 /* Embed App Extensions */,
 				3B06AD1E1E4923F5004D2608 /* Thin Binary */,
 				45812F265E8BA3B1FEFFAED5 /* [CP] Embed Pods Frameworks */,
+				D6971550136716CDAC001AEC /* [CP] Copy Pods Resources */,
 			);
 			buildRules = (
 			);
@@ -678,7 +679,7 @@
 				06EA9CA02B21CFC000351529 /* XCRemoteSwiftPackageReference "DTCoreText" */,
 				06EA9CA32B21D09D00351529 /* XCRemoteSwiftPackageReference "DeviceKit" */,
 				06EA9CA62B21D13300351529 /* XCRemoteSwiftPackageReference "matrix-rust-components-swift" */,
-				06EA9CA92B21D17200351529 /* XCLocalSwiftPackageReference "DesignKit" */,
+				06EA9CA92B21D17200351529 /* XCLocalSwiftPackageReference "NSE/DesignKit" */,
 				06EA9CAC2B21D2CA00351529 /* XCRemoteSwiftPackageReference "LRUCache" */,
 				06EA9CAF2B21D2FE00351529 /* XCRemoteSwiftPackageReference "KeychainAccess" */,
 				06EA9CB22B21D33700351529 /* XCRemoteSwiftPackageReference "Kingfisher" */,
@@ -819,6 +820,23 @@
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
 			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
+		D6971550136716CDAC001AEC /* [CP] Copy Pods Resources */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-Runner/Pods-Runner-resources-${CONFIGURATION}-input-files.xcfilelist",
+			);
+			name = "[CP] Copy Pods Resources";
+			outputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-Runner/Pods-Runner-resources-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-Runner/Pods-Runner-resources.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
 /* End PBXShellScriptBuildPhase section */
@@ -1634,7 +1652,7 @@
 /* End XCConfigurationList section */
 
 /* Begin XCLocalSwiftPackageReference section */
-		06EA9CA92B21D17200351529 /* XCLocalSwiftPackageReference "DesignKit" */ = {
+		06EA9CA92B21D17200351529 /* XCLocalSwiftPackageReference "NSE/DesignKit" */ = {
 			isa = XCLocalSwiftPackageReference;
 			relativePath = NSE/DesignKit;
 		};
