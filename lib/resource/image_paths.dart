@@ -64,6 +64,9 @@ class ImagePaths {
   static String get icShieldLockFill =>
       _getImagePath('ic_shield_lock_fill.svg');
 
+  static String get icBrandingPng => _getAssetPath('branding.png');
+  static String get lottieChat => _getAssetPath('lottie-chat.json');
+
   static String _getImagePath(String imageName) {
     return AssetsPaths.images + imageName;
   }
