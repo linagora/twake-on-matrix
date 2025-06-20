@@ -3279,5 +3279,56 @@
   "selectedNumberWillGetAnSMSWithAnInvitationLinkAndInstructions": "На выбранный номер будет отправлено SMS с пригласительной ссылкой и инструкциями.",
   "@selectedNumberWillGetAnSMSWithAnInvitationLinkAndInstructions": {},
   "reaction": "Реакция",
-  "@reaction": {}
+  "@reaction": {},
+  "edited": "изменено",
+  "@edited": {},
+  "readOnly": "Только чтение",
+  "@readOnly": {},
+  "yourDataIsEncryptedForSecurity": "Ваши данные зашифрованы для безопасности",
+  "@yourDataIsEncryptedForSecurity": {},
+  "readOnlyCount": "ТОЛЬКО ЧТЕНИЕ ({number})",
+  "@readOnlyCount": {
+    "type": "text",
+    "placeholders": {
+      "number": {}
+    }
+  },
+  "bannedUsersCount": "ЧЕРНЫЙ СПИСОК ({number})",
+  "@bannedUsersCount": {
+    "type": "text",
+    "placeholders": {
+      "number": {}
+    }
+  },
+  "administration": "Администрирование",
+  "@administration": {},
+  "failedToDeleteMessage": "Не удалось удалить сообщение.",
+  "@failedToDeleteMessage": {},
+  "noDeletePermissionMessage": "У вас нет разрешения на удаление этого сообщения.",
+  "@noDeletePermissionMessage": {},
+  "adminsOfTheGroup": "АДМИНИСТРАТОРЫ ГРУППЫ ({number})",
+  "@adminsOfTheGroup": {
+    "type": "text",
+    "placeholders": {
+      "number": {}
+    }
+  },
+  "member": "Участник",
+  "@member": {},
+  "removedUsers": "Удаленные пользователи",
+  "@removedUsers": {},
+  "assignRoles": "Назначить роли",
+  "@assignRoles": {},
+  "permissions": "Разрешения",
+  "@permissions": {},
+  "editMessage": "Изменить сообщение",
+  "@editMessage": {},
+  "exceptions": "Исключения",
+  "@exceptions": {},
+  "noChatPermissionMessage": "У вас не хватает прав, чтобы отправлять сообщения в этом чате.",
+  "@noChatPermissionMessage": {},
+  "addAdminsOrModerators": "Добавить администраторов/модераторов",
+  "@addAdminsOrModerators": {},
+  "guest": "Гость",
+  "@guest": {}
 }
