@@ -24,12 +24,14 @@ class FormattedTextWidget extends StatelessWidget {
     final bigEmotes =
         event.onlyEmotes && event.numberEmotes > 0 && event.numberEmotes <= 10;
 
-    return HtmlMessage(
-      html: html,
-      defaultTextStyle: Theme.of(context).textTheme.bodyLarge,
-      linkStyle: linkStyle,
-      room: event.room,
-      emoteSize: bigEmotes ? fontSize * 3 : fontSize * 1.5,
+    return SelectionArea(
+      child: HtmlMessage(
+        html: html,
+        defaultTextStyle: Theme.of(context).textTheme.bodyLarge,
+        linkStyle: linkStyle,
+        room: event.room,
+        emoteSize: bigEmotes ? fontSize * 3 : fontSize * 1.5,
+      ),
     );
   }
 }

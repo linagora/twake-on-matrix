@@ -40,7 +40,9 @@ class TwakeLinkView extends StatelessWidget {
   Widget _buildMessageBody() {
     return Padding(
       padding: TwakeLinkViewStyle.paddingMessageBody,
-      child: body,
+      child: SelectionArea(
+        child: body,
+      ),
     );
   }
 }
