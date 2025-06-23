@@ -233,8 +233,6 @@ class ChatController extends State<Chat>
 
   FocusNode keyboardFocus = FocusNode();
 
-  FocusNode selectionFocusNode = FocusNode();
-
   @override
   FocusNode chatFocusNode = FocusNode();
 
@@ -2616,7 +2614,6 @@ class ChatController extends State<Chat>
     _captionsController.dispose();
     scrollController.removeListener(_updateScrollController);
     scrollController.dispose();
-    selectionFocusNode.dispose();
     keyboardFocus.dispose();
     chatFocusNode.dispose();
     rawKeyboardListenerFocusNode.dispose();
