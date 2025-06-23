@@ -347,3 +347,6 @@ patrol:
   app_name: Twake Chat
   android:
     package_name: app.twake.android.chat
+  ios:
+    bundle_id: app.twake.ios.chat
+    app_name: Twake Chat
