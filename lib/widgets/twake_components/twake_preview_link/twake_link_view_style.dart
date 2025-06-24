@@ -1,6 +1,10 @@
+import 'package:fluffychat/di/global/get_it_initializer.dart';
+import 'package:fluffychat/utils/responsive/responsive_utils.dart';
 import 'package:flutter/material.dart';
 
 class TwakeLinkViewStyle {
+  static ResponsiveUtils responsiveUtils = getIt.get<ResponsiveUtils>();
+
   static const EdgeInsetsDirectional paddingMessageBody =
       EdgeInsetsDirectional.symmetric(horizontal: 8.0);
 
