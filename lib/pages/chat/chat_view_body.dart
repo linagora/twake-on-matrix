@@ -33,6 +33,7 @@ class ChatViewBody extends StatelessWidget with MessageContentMixin {
     return DropTarget(
       onDragDone: (details) => controller.handleDragDone(details),
       onDragEntered: controller.onDragEntered,
+      onDragUpdated: controller.onDragUpdated,
       onDragExited: controller.onDragExited,
       child: Container(
         color: controller.responsive.isMobile(context)

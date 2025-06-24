@@ -10,9 +10,23 @@ import 'package:matrix/matrix.dart';
 mixin DragDrogFileMixin {
   final ValueNotifier<bool> draggingNotifier = ValueNotifier(false);
 
-  void onDragEntered(_) => draggingNotifier.value = true;
+  void onDragEntered(details) {
+    if (details != null &&
+        (details as dynamic).files != null &&
+        (details as dynamic).files.isNotEmpty) {
+      draggingNotifier.value = true;
+    }
+  }
 
   void onDragExited(_) => draggingNotifier.value = false;
+
+  void onDragUpdated(details) {
+    if (details != null &&
+        (details as dynamic).files != null &&
+        (details as dynamic).files.isNotEmpty) {
+      draggingNotifier.value = true;
+    }
+  }
 
   Future<List<MatrixFile>> onDragDone(DropDoneDetails details) async {
     draggingNotifier.value = false;
