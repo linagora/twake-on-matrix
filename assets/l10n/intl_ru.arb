@@ -870,7 +870,7 @@
     "type": "text",
     "placeholders": {}
   },
-  "hideRedactedEvents": "Скрыть отредактированные события",
+  "hideRedactedEvents": "Скрыть удаленные сообщения",
   "@hideRedactedEvents": {
     "type": "text",
     "placeholders": {}
@@ -1411,7 +1411,7 @@
     "type": "text",
     "placeholders": {}
   },
-  "redactedAnEvent": "{username} отредактировал(а) событие",
+  "redactedAnEvent": "{username} удалил сообщение",
   "@redactedAnEvent": {
     "type": "text",
     "placeholders": {
@@ -2223,7 +2223,7 @@
   "@experimentalVideoCalls": {},
   "emailOrUsername": "Адрес электронной почты или имя пользователя",
   "@emailOrUsername": {},
-  "confirmEventUnpin": "Вы уверены, что хотите навсегда открепить событие?",
+  "confirmEventUnpin": "Вы уверены, что хотите навсегда открепить сообщение?",
   "@confirmEventUnpin": {},
   "switchToAccount": "Переключиться на учётную запись {number}",
   "@switchToAccount": {
