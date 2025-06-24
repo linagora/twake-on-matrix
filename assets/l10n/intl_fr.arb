@@ -879,7 +879,7 @@
     "type": "text",
     "placeholders": {}
   },
-  "hideRedactedEvents": "Masquer les événements supprimés",
+  "hideRedactedEvents": "Masquer les messages supprimés",
   "@hideRedactedEvents": {
     "type": "text",
     "placeholders": {}
@@ -1425,7 +1425,7 @@
     "type": "text",
     "placeholders": {}
   },
-  "redactedAnEvent": "{username} a supprimé un évènement",
+  "redactedAnEvent": "{username} a supprimé un message",
   "@redactedAnEvent": {
     "type": "text",
     "placeholders": {
@@ -2231,7 +2231,7 @@
   "@unsupportedAndroidVersionLong": {},
   "pinChat": "Épingler",
   "@pinChat": {},
-  "confirmEventUnpin": "Voulez-vous vraiment désépingler définitivement l'événement ?",
+  "confirmEventUnpin": "Voulez-vous vraiment désépingler définitivement le message ?",
   "@confirmEventUnpin": {},
   "videoCallsBetaWarning": "Veuillez noter que les appels vidéo sont actuellement en version bêta. Ils peuvent ne pas fonctionner comme prévu ou ne oas fonctionner du tout sur toutes les plateformes.",
   "@videoCallsBetaWarning": {},
