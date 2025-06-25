@@ -165,40 +165,54 @@ class ProfileInfoBodyController extends State<ProfileInfoBody> {
 
   Widget buildProfileInfoActions(BuildContext context) {
     return Column(
-      children: profileInfoActions().map((action) {
-        return Column(
-          children: [
-            Divider(
-              thickness: ProfileInfoBodyViewStyle.bigDividerThickness,
-              color: LinagoraSysColors.material().surface,
-            ),
-            Padding(
-              padding: ProfileInfoBodyViewStyle.actionItemPadding,
-              child: Row(
-                children: [
-                  Expanded(
-                    child: TextButton.icon(
-                      onPressed: () => handleActions(action),
-                      icon: action.icon(),
-                      label: Row(
-                        children: [
-                          Expanded(
-                            child: Text(
-                              action.label(context),
-                              style: action.textStyle(context),
-                              overflow: TextOverflow.ellipsis,
-                            ),
+      children: [
+        Divider(
+          thickness: ProfileInfoBodyViewStyle.bigDividerThickness,
+          color: LinagoraStateLayer(
+            LinagoraSysColors.material().surfaceTint,
+          ).opacityLayer3,
+        ),
+        Column(
+          children: profileInfoActions().map((action) {
+            return Column(
+              children: [
+                if (action.divider(context) != null) action.divider(context)!,
+                TwakeInkWell(
+                  onTap: () => handleActions(action),
+                  child: Padding(
+                    padding: action.padding(context),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            vertical: 10,
+                            horizontal: 60,
                           ),
-                        ],
-                      ),
+                          decoration: action.decoration(context),
+                          child: Row(
+                            children: [
+                              if (action.icon() != null)
+                                Padding(
+                                  padding: const EdgeInsets.only(right: 8),
+                                  child: action.icon()!,
+                                ),
+                              Text(
+                                action.label(context),
+                                style: action.textStyle(context),
+                              )
+                            ],
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                ],
-              ),
-            ),
-          ],
-        );
-      }).toList(),
+                ),
+              ],
+            );
+          }).toList(),
+        ),
+      ],
     );
   }
 

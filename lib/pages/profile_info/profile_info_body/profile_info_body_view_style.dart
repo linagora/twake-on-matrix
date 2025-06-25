@@ -12,7 +12,7 @@ class ProfileInfoBodyViewStyle {
     right: 16.0,
   );
 
-  static const double bigDividerThickness = 4;
+  static const double bigDividerThickness = 1;
 
   static const EdgeInsetsGeometry actionItemPadding = EdgeInsets.only(
     left: 16.0,
