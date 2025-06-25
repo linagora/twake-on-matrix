@@ -1,3 +1,10 @@
+## [2.9.8+2330] - 2025-06-25
+### Added
+- Translation en, ru, fr, vi
+
+### Fixed
+- Text selection in web app
+
 ## [2.9.7+2330] - 2025-06-20
 ### Added
 - #2411 New splash screens
