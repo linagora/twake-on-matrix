@@ -200,7 +200,7 @@ class ProfileInfoBodyController extends State<ProfileInfoBody> {
                               Text(
                                 action.label(context),
                                 style: action.textStyle(context),
-                              )
+                              ),
                             ],
                           ),
                         ),

@@ -68,7 +68,8 @@ class CopiableProfileRow extends StatelessWidget {
                   Text(
                     caption,
                     style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                        color: LinagoraRefColors.material().neutral[40]),
+                          color: LinagoraRefColors.material().neutral[40],
+                        ),
                   ),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
