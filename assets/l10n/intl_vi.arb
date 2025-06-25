@@ -1267,7 +1267,7 @@
     "type": "text",
     "placeholders": {}
   },
-  "hideRedactedEvents": "Ẩn sự kiện đã được xử lý lại",
+  "hideRedactedEvents": "Ẩn tin nhắn đã xoá",
   "@hideRedactedEvents": {
     "type": "text",
     "placeholders": {}
@@ -1739,7 +1739,7 @@
       "reaction": {}
     }
   },
-  "confirmEventUnpin": "Bạn có chắc chắn bỏ ghim sự kiện này vĩnh viễn không?",
+  "confirmEventUnpin": "Bạn có chắc chắn bỏ ghim tin nhắn này?",
   "@confirmEventUnpin": {},
   "emojis": "Biểu tượng cảm xúc",
   "@emojis": {},
@@ -1850,7 +1850,7 @@
       "username": {}
     }
   },
-  "redactedAnEvent": "{username} đã biên tập lại một sự kiện",
+  "redactedAnEvent": "{username} đã xoá một tin nhắn",
   "@redactedAnEvent": {
     "type": "text",
     "placeholders": {
