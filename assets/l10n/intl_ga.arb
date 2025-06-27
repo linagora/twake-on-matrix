@@ -645,7 +645,7 @@
       "targetName": {}
     }
   },
-  "hideRedactedEvents": "Folaigh imeachtaí athdhéanta",
+  "hideRedactedEvents": "Folaigh teachtaireachtaí scriosta",
   "@hideRedactedEvents": {
     "type": "text",
     "placeholders": {}
@@ -1848,7 +1848,7 @@
       "username": {}
     }
   },
-  "redactedAnEvent": "Rinne {username} cinsire imeacht",
+  "redactedAnEvent": "Scrios {username} teachtaireacht",
   "@redactedAnEvent": {
     "type": "text",
     "placeholders": {
@@ -2567,7 +2567,7 @@
   "@editBundlesForAccount": {},
   "failedToUnpin": "Níorbh fhéidir teachtaireacht a dhíphionnáil",
   "@failedToUnpin": {},
-  "confirmEventUnpin": "An bhfuil tú cinnte an ócáid a dhíphionnáil go buan?",
+  "confirmEventUnpin": "An bhfuil tú cinnte an teachtaireacht a dhíphionáil go buan?",
   "@confirmEventUnpin": {},
   "notificationAndSounds": "Fógra & Fuaimeanna",
   "@notificationAndSounds": {},
