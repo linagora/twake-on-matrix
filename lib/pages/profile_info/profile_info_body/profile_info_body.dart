@@ -189,6 +189,7 @@ class ProfileInfoBodyController extends State<ProfileInfoBody> {
                             vertical: 10,
                             horizontal: 60,
                           ),
+                          height: ProfileInfoBodyViewStyle.actionHeight,
                           decoration: action.decoration(context),
                           child: Row(
                             children: [

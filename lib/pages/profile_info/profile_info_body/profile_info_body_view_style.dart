@@ -30,4 +30,6 @@ class ProfileInfoBodyViewStyle {
 
   static const EdgeInsetsGeometry avatarPadding =
       EdgeInsets.symmetric(vertical: 16.0);
+
+  static const double actionHeight = 40.0;
 }
