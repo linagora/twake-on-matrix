@@ -52,6 +52,7 @@ class ProfileInfoContactRows extends StatelessWidget {
                           caption: L10n.of(context)!.phone,
                           copiableText:
                               success.contact.phoneNumbers?.first.number ?? '',
+                          enableDividerTop: true,
                         ),
                     ],
                   );

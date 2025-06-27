@@ -94,7 +94,7 @@ enum ProfileInfoActions {
         );
       case ProfileInfoActions.removeFromGroup:
         return Icon(
-          Icons.logout_outlined,
+          Icons.delete_outline_outlined,
           color: LinagoraSysColors.material().error,
         );
       case ProfileInfoActions.downgradeToReadOnly:

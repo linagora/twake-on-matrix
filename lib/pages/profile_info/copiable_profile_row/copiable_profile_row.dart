@@ -13,11 +13,13 @@ class CopiableProfileRow extends StatelessWidget {
   final String caption;
   final String copiableText;
   final Widget leadingIcon;
+  final bool enableDividerTop;
 
   const CopiableProfileRow({
     required this.leadingIcon,
     required this.caption,
     required this.copiableText,
+    this.enableDividerTop = false,
     super.key,
   });
 
@@ -25,7 +27,11 @@ class CopiableProfileRow extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: CopiableProfileRowStyle.copiableRowPadding,
-      child: TwakeInkWell(
+      child: InkWell(
+        highlightColor: Colors.transparent,
+        splashColor: Colors.transparent,
+        focusColor: Colors.transparent,
+        hoverColor: Colors.transparent,
         onTap: () {
           TwakeClipboard.instance.copyText(copiableText);
           TwakeSnackBar.show(
@@ -51,13 +57,17 @@ class CopiableProfileRow extends StatelessWidget {
               child: Container(
                 height: 64,
                 decoration: BoxDecoration(
-                  border: Border(
-                    bottom: BorderSide(
-                      color: LinagoraSysColors.material()
-                          .surfaceTint
-                          .withOpacity(CopiableProfileRowStyle.borderOpacity),
-                    ),
-                  ),
+                  border: enableDividerTop
+                      ? Border(
+                          top: BorderSide(
+                            color: LinagoraSysColors.material()
+                                .surfaceTint
+                                .withOpacity(
+                                  CopiableProfileRowStyle.borderOpacity,
+                                ),
+                          ),
+                        )
+                      : null,
                 ),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,

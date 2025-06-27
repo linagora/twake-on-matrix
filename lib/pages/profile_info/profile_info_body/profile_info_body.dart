@@ -177,7 +177,11 @@ class ProfileInfoBodyController extends State<ProfileInfoBody> {
             return Column(
               children: [
                 if (action.divider(context) != null) action.divider(context)!,
-                TwakeInkWell(
+                InkWell(
+                  highlightColor: Colors.transparent,
+                  splashColor: Colors.transparent,
+                  focusColor: Colors.transparent,
+                  hoverColor: Colors.transparent,
                   onTap: () => handleActions(action),
                   child: Padding(
                     padding: action.padding(context),

@@ -10,6 +10,7 @@ class IconCopiableProfileRow extends CopiableProfileRow {
     required super.caption,
     required super.copiableText,
     super.key,
+    super.enableDividerTop,
   }) : super(
           leadingIcon: Icon(
             icon,
