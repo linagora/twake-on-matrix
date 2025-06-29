@@ -191,8 +191,17 @@ mixin ChatDetailsTabMixin<T extends StatefulWidget>
   }
 
   Future<void> _onUpdateMembers() async {
-    final members = await room!.requestParticipantsFromServer();
+    final members = await room!.requestParticipantsFromServer(
+      membershipFilter: [
+        Membership.join,
+        Membership.invite,
+      ],
+    )
+      ..sort(
+        (small, great) => great.powerLevel.compareTo(small.powerLevel),
+      );
     _membersNotifier.value = members;
+    _displayMembersNotifier.value = members;
   }
 
   void _initControllers() {
@@ -277,7 +286,7 @@ mixin ChatDetailsTabMixin<T extends StatefulWidget>
                 requestMoreMembersAction: _requestMoreMembersAction,
                 openDialogInvite: _openDialogInvite,
                 isMobileAndTablet: isMobileAndTablet,
-                onUpdatedMembers: _onUpdateMembers,
+                onUpdatedMembers: () async => await _onUpdateMembers(),
               ),
             );
           }
