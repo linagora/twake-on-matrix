@@ -88,8 +88,7 @@ class MessageContentBuilder extends StatelessWidget
                       endOfBubbleWidget: Padding(
                         padding: MessageStyle.paddingTimestamp,
                         child: MessageTime(
-                          timelineOverlayMessage:
-                              event.timelineOverlayMessage,
+                          timelineOverlayMessage: event.timelineOverlayMessage,
                           event: event,
                           ownMessage: event.isOwnMessage,
                           timeline: timeline,
