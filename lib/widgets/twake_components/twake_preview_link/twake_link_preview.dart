@@ -17,7 +17,6 @@ class TwakeLinkPreview extends StatefulWidget {
   final Event event;
   final String localizedBody;
   final bool ownMessage;
-  final Widget endOfBubbleWidget;
   final double fontSize;
   final TextStyle? linkStyle;
   final TextStyle? richTextStyle;
@@ -26,7 +25,6 @@ class TwakeLinkPreview extends StatefulWidget {
     super.key,
     required this.event,
     required this.localizedBody,
-    required this.endOfBubbleWidget,
     required this.ownMessage,
     required this.fontSize,
     this.linkStyle,
