@@ -1,4 +1,6 @@
 import 'package:fluffychat/domain/model/contact/contact.dart';
+import 'package:fluffychat/domain/model/contact/contact_status.dart';
+import 'package:fluffychat/domain/model/contact/third_party_status.dart';
 import 'package:fluffychat/presentation/model/contact/presentation_contact.dart';
 import 'package:fluffychat/presentation/model/search/presentation_search.dart';
 import 'package:collection/collection.dart';
@@ -28,6 +30,10 @@ extension ContactExtensionInPresentation on Contact {
       (email) => email.matrixId != null && email.matrixId!.isNotEmpty,
     );
 
+    final status = phoneNumberHasMatrixId?.status ??
+        emailHasMatrixId?.status ??
+        ThirdPartyStatus.inactive;
+
     final displayName = (this.displayName?.isNotEmpty == true)
         ? this.displayName
         : phoneNumberHasMatrixId?.number ??
@@ -45,6 +51,9 @@ extension ContactExtensionInPresentation on Contact {
         displayName: displayName,
         matrixId: contactMatrix?.matrixId ?? '',
         id: id,
+        status: status == ThirdPartyStatus.inactive
+            ? ContactStatus.inactive
+            : ContactStatus.active,
       ),
     };
 
