@@ -10,6 +10,7 @@ class MessageContentStyle {
 
   static const int maxLengthTextInline = 180;
   static const double appBarFontSize = 16.0;
+  static const double messageBoxMaxWidth = 600.0;
   static Duration animationSwitcherDuration = const Duration(milliseconds: 300);
 
   static double imageWidth(BuildContext context) {

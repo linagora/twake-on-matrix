@@ -26,7 +26,7 @@ mixin MessageAvatarMixin {
   }) {
     if (selectMode ||
         (event.room.isDirectChat && responsive.isMobile(context))) {
-      return const SizedBox();
+      return const SizedBox.shrink();
     }
 
     if (_shouldDisplayAvatar(sameSender, ownMessage, context)) {

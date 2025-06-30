@@ -125,7 +125,8 @@ class _MxcImageState extends State<MxcImage> {
 
   bool? _isCached;
 
-  Future<void> _load() async {
+  Future<void> _load(BuildContext context) async {
+    if (!context.mounted) return;
     final client = Matrix.of(context).client;
     final uri = widget.uri;
     final event = widget.event;
@@ -215,21 +216,21 @@ class _MxcImageState extends State<MxcImage> {
     }
   }
 
-  void _tryLoad(_) async {
+  void _tryLoad(BuildContext context) async {
     _imageData = widget.imageData;
     if (_imageData != null) {
-      setState(() {
-        isLoadDone = true;
-      });
+      if (mounted) {
+        setState(() => isLoadDone = true);
+      }
       return;
     }
     try {
-      await _load();
-      setState(() {
-        isLoadDone = true;
-      });
-    } catch (_) {
-      if (!mounted) return;
+      await _load(context);
+      if (mounted) {
+        setState(() => isLoadDone = true);
+      }
+    } catch (e) {
+      Logs().e('MxcImage::_tryLoad::Exception: $e');
     }
   }
 
@@ -262,7 +263,7 @@ class _MxcImageState extends State<MxcImage> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback(_tryLoad);
+    WidgetsBinding.instance.addPostFrameCallback((_) => _tryLoad(context));
   }
 
   Widget placeholder(BuildContext context) =>
@@ -328,7 +329,9 @@ class _MxcImageState extends State<MxcImage> {
               imageErrorWidgetBuilder: (context, __, ___) {
                 _isCached = false;
                 _imageData = null;
-                WidgetsBinding.instance.addPostFrameCallback(_tryLoad);
+                WidgetsBinding.instance.addPostFrameCallback(
+                  (_) => _tryLoad(context),
+                );
                 return placeholder(context);
               },
             ),
