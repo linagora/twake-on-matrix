@@ -1,5 +1,6 @@
 import 'package:fluffychat/domain/model/contact/contact.dart';
 import 'package:fluffychat/domain/model/contact/contact_status.dart';
+import 'package:fluffychat/domain/model/contact/third_party_status.dart';
 import 'package:fluffychat/domain/model/contact/tom_contact.dart';
 
 extension TomContactExtension on TomContact {
@@ -10,6 +11,9 @@ extension TomContactExtension on TomContact {
               Email(
                 address: mail ?? '',
                 matrixId: address,
+                status: status == ContactStatus.inactive
+                    ? ThirdPartyStatus.inactive
+                    : ThirdPartyStatus.active,
               ),
             }
           : {},
@@ -19,6 +23,9 @@ extension TomContactExtension on TomContact {
               PhoneNumber(
                 number: phoneNumber ?? '',
                 matrixId: address,
+                status: status == ContactStatus.inactive
+                    ? ThirdPartyStatus.inactive
+                    : ThirdPartyStatus.active,
               ),
             }
           : {},
