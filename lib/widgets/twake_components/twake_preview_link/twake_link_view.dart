@@ -38,17 +38,9 @@ class TwakeLinkView extends StatelessWidget {
   }
 
   Widget _buildMessageBody(BuildContext context) {
-    if (TwakeLinkViewStyle.responsiveUtils.isMobile(context)) {
-      return Padding(
-        padding: TwakeLinkViewStyle.paddingMessageBody,
-        child: body,
-      );
-    }
     return Padding(
       padding: TwakeLinkViewStyle.paddingMessageBody,
-      child: SelectionArea(
-        child: body,
-      ),
+      child: body,
     );
   }
 }
