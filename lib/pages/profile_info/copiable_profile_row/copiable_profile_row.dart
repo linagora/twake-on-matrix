@@ -94,9 +94,25 @@ class CopiableProfileRow extends StatelessWidget {
                                 ),
                           ),
                         ),
-                        const Icon(
-                          Icons.content_copy,
-                          size: ChatProfileInfoStyle.copyIconSize,
+                        InkWell(
+                          borderRadius: BorderRadius.circular(38),
+                          splashColor: LinagoraHoverStyle.material().hoverColor,
+                          onTap: () {
+                            TwakeClipboard.instance.copyText(copiableText);
+                            TwakeSnackBar.show(
+                              duration: snackBarDuration,
+                              context,
+                              L10n.of(context)!.copiedToClipboard,
+                            );
+                          },
+                          child: const SizedBox(
+                            width: 32,
+                            height: 32,
+                            child: Icon(
+                              Icons.content_copy,
+                              size: ChatProfileInfoStyle.copyIconSize,
+                            ),
+                          ),
                         ),
                       ],
                     ),
