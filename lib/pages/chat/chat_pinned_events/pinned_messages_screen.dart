@@ -93,8 +93,8 @@ class PinnedMessagesScreen extends StatelessWidget {
                                   timeline: controller.widget.timeline!,
                                   maxWidth: constraints.maxWidth,
                                   isHoverNotifier: controller.isHoverNotifier,
-                                  listHorizontalActionMenu:
-                                      controller.listHorizontalActionMenuBuilder(),
+                                  listHorizontalActionMenu: controller
+                                      .listHorizontalActionMenuBuilder(),
                                   onMenuAction:
                                       controller.handleHorizontalActionMenu,
                                   onHover: (isHover, event) =>
@@ -105,7 +105,8 @@ class PinnedMessagesScreen extends StatelessWidget {
                                   menuChildren: (context) =>
                                       controller.pinnedMessagesActionsList(
                                     context,
-                                    controller.getPinnedMessagesActionsList(event),
+                                    controller
+                                        .getPinnedMessagesActionsList(event),
                                     event,
                                   ),
                                   onLongPressMessage: (event) =>
