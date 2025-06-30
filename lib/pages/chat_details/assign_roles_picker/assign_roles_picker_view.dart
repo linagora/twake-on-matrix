@@ -1,20 +1,25 @@
-import 'package:fluffychat/pages/chat_details/assign_roles/assign_roles.dart';
-import 'package:fluffychat/pages/chat_details/assign_roles/assign_roles_search_state.dart';
+import 'package:fluffychat/pages/chat_details/assign_roles_picker/assign_roles_picker.dart';
+import 'package:fluffychat/pages/chat_details/assign_roles_picker/assign_roles_picker_search_state.dart';
+import 'package:fluffychat/pages/chat_details/assign_roles_picker/assign_roles_picker_style.dart';
 import 'package:fluffychat/pages/chat_list/chat_list_header_style.dart';
 import 'package:fluffychat/utils/user_extension.dart';
 import 'package:fluffychat/widgets/app_bars/twake_app_bar.dart';
 import 'package:fluffychat/widgets/avatar/avatar.dart';
 import 'package:fluffychat/widgets/context_menu_builder_ios_paste_without_permission.dart';
 import 'package:fluffychat/widgets/search/empty_search_widget.dart';
+import 'package:fluffychat/widgets/twake_components/twake_fab.dart';
 import 'package:fluffychat/widgets/twake_components/twake_icon_button.dart';
 import 'package:flutter/material.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 
-class AssignRolesView extends StatelessWidget {
-  final AssignRolesController controller;
+class AssignRolesPickerView extends StatelessWidget {
+  final AssignRolesPickerController controller;
 
-  const AssignRolesView({super.key, required this.controller});
+  const AssignRolesPickerView({
+    super.key,
+    required this.controller,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -22,7 +27,7 @@ class AssignRolesView extends StatelessWidget {
       backgroundColor: LinagoraSysColors.material().onPrimary,
       resizeToAvoidBottomInset: false,
       appBar: TwakeAppBar(
-        title: L10n.of(context)!.permissions,
+        title: L10n.of(context)!.assignRoles,
         centerTitle: true,
         withDivider: true,
         context: context,
@@ -32,45 +37,28 @@ class AssignRolesView extends StatelessWidget {
           splashColor: Colors.transparent,
           hoverColor: Colors.transparent,
           highlightColor: Colors.transparent,
-          onTap: controller.onBack,
+          onTap: () => Navigator.of(context).pop(),
           icon: Icons.arrow_back_ios,
         ),
-        onBack: controller.onBack,
       ),
-
-      /// Implement later
-      floatingActionButton: TwakeInkWell(
-        onTap: () {
-          controller.goToAssignRolesPicker();
-        },
-        child: Container(
-          padding: const EdgeInsets.symmetric(
-            horizontal: 24.0,
-            vertical: 12.0,
-          ),
-          decoration: BoxDecoration(
-            color: LinagoraSysColors.material().secondaryContainer,
-            borderRadius: BorderRadius.circular(100),
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(
-                Icons.person_add_outlined,
-                size: 18.0,
-                color: LinagoraSysColors.material().onSecondaryContainer,
+      floatingActionButton: controller.responsive.isMobile(context)
+          ? ValueListenableBuilder<bool>(
+              valueListenable: controller
+                  .selectedUsersMapChangeNotifier.haveSelectedUsersNotifier,
+              builder: (context, haveSelectedContacts, child) {
+                if (!haveSelectedContacts) {
+                  return const SizedBox.shrink();
+                }
+                return child!;
+              },
+              child: TwakeFloatingActionButton(
+                icon: Icons.arrow_forward,
+                onTap: () {
+                  controller.navigateToAssignRolesEditor(context);
+                },
               ),
-              const SizedBox(width: 8.0),
-              Text(
-                L10n.of(context)!.addAdminsOrModerators,
-                style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                      color: LinagoraSysColors.material().onSecondaryContainer,
-                    ),
-              ),
-            ],
-          ),
-        ),
-      ),
+            )
+          : null,
       body: SingleChildScrollView(
         child: Column(
           children: [
@@ -104,6 +92,7 @@ class AssignRolesView extends StatelessWidget {
                 ),
               ),
             ),
+            selectedUsersListMobile(context),
             Container(
               color: Theme.of(context).colorScheme.surfaceContainerHighest,
               alignment: Alignment.centerLeft,
@@ -112,8 +101,8 @@ class AssignRolesView extends StatelessWidget {
                 vertical: 8.0,
               ),
               child: Text(
-                L10n.of(context)!.adminsOfTheGroup(
-                  controller.assignRolesMember.length,
+                L10n.of(context)!.memberOfTheGroup(
+                  controller.members.length,
                 ),
                 style: Theme.of(context).textTheme.labelLarge?.copyWith(
                       color: LinagoraRefColors.material().neutral[40],
@@ -129,6 +118,77 @@ class AssignRolesView extends StatelessWidget {
     );
   }
 
+  Widget selectedUsersListMobile(BuildContext context) {
+    if (!controller.responsive.isMobile(context)) {
+      return const SizedBox.shrink();
+    }
+    final usersNotifier = controller.selectedUsersMapChangeNotifier;
+
+    return AnimatedSize(
+      curve: Curves.easeIn,
+      alignment: Alignment.bottomCenter,
+      duration: const Duration(milliseconds: 250),
+      child: SizedBox(
+        width: MediaQuery.sizeOf(context).width,
+        child: ListenableBuilder(
+          listenable: usersNotifier,
+          builder: (context, Widget? child) {
+            if (usersNotifier.usersList.isEmpty) {
+              return const SizedBox.shrink();
+            }
+            return Padding(
+              padding: const EdgeInsets.only(
+                left: 24,
+                bottom: 16,
+              ),
+              child: Wrap(
+                spacing: 8.0,
+                children: usersNotifier.usersList.map((member) {
+                  return Container(
+                    decoration: BoxDecoration(
+                      color: LinagoraStateLayer(
+                        LinagoraSysColors.material().surfaceTint,
+                      ).opacityLayer3,
+                      borderRadius: BorderRadius.circular(
+                        AssignRolesPickerStyle.avatarChipSize,
+                      ),
+                    ),
+                    margin: AssignRolesPickerStyle.chipMargin,
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Avatar(
+                          mxContent: member.avatarUrl,
+                          name: member.calcDisplayname(),
+                          size: AssignRolesPickerStyle.avatarChipSize,
+                        ),
+                        const SizedBox(width: 4.0),
+                        Padding(
+                          padding: AssignRolesPickerStyle.textChipPadding,
+                          child: Text(
+                            member.calcDisplayname(),
+                            style: Theme.of(context)
+                                .textTheme
+                                .titleSmall
+                                ?.copyWith(
+                                  color: LinagoraSysColors.material().onSurface,
+                                ),
+                            overflow: TextOverflow.ellipsis,
+                            maxLines: 1,
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                }).toList(),
+              ),
+            );
+          },
+        ),
+      ),
+    );
+  }
+
   Widget buildAssignRolesListMobile(BuildContext context) {
     if (!controller.responsive.isMobile(context)) {
       return const SizedBox.shrink();
@@ -138,7 +198,7 @@ class AssignRolesView extends StatelessWidget {
       builder: (context, searchResults, child) {
         return searchResults.fold(
           (failure) {
-            if (failure is AssignRolesSearchEmptyState) {
+            if (failure is AssignRolesPickerSearchEmptyState) {
               return const Center(
                 child: EmptySearchWidget(),
               );
@@ -146,21 +206,50 @@ class AssignRolesView extends StatelessWidget {
             return const SizedBox.shrink();
           },
           (success) {
-            if (success is AssignRolesSearchSuccessState) {
+            if (success is AssignRolesPickerSearchSuccessState) {
               return ListView.builder(
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
-                itemCount: success.assignRolesMember.length,
+                itemCount: success.members.length,
                 itemBuilder: (context, index) {
-                  final member = success.assignRolesMember[index];
+                  final member = success.members[index];
                   final role =
                       member.getDefaultPowerLevelMember.displayName(context);
                   return TwakeInkWell(
-                    onTap: () {},
+                    onTap: member.isOwnerRole
+                        ? null
+                        : () {
+                            controller.selectedUsersMapChangeNotifier
+                                .onUserTileTap(
+                              context,
+                              member,
+                            );
+                          },
                     child: TwakeListItem(
                       padding: const EdgeInsets.all(8),
                       child: Row(
                         children: [
+                          ValueListenableBuilder<bool>(
+                            valueListenable: controller
+                                .selectedUsersMapChangeNotifier
+                                .getNotifierAtUser(member),
+                            builder: (context, isCurrentSelected, child) {
+                              return Checkbox(
+                                value: member.isOwnerRole || isCurrentSelected,
+                                onChanged: member.isOwnerRole
+                                    ? null
+                                    : (newValue) {
+                                        controller
+                                            .selectedUsersMapChangeNotifier
+                                            .onUserTileTap(
+                                          context,
+                                          member,
+                                        );
+                                      },
+                              );
+                            },
+                          ),
+                          const SizedBox(width: 8.0),
                           Avatar(
                             mxContent: member.avatarUrl,
                             name: member.calcDisplayname(),
@@ -184,26 +273,27 @@ class AssignRolesView extends StatelessWidget {
                                       maxLines: 1,
                                     ),
                                     const Spacer(),
-                                    Row(
-                                      children: [
-                                        Text(
-                                          role,
-                                          style: Theme.of(context)
-                                              .textTheme
-                                              .labelMedium
-                                              ?.copyWith(
-                                                color:
-                                                    LinagoraRefColors.material()
-                                                        .tertiary[30],
-                                              ),
-                                          overflow: TextOverflow.ellipsis,
-                                          maxLines: 1,
-                                        ),
-                                        const SizedBox(
-                                          width: 4,
-                                        ),
-                                      ],
-                                    ),
+                                    if (member.isOwnerRole)
+                                      Row(
+                                        children: [
+                                          Text(
+                                            role,
+                                            style: Theme.of(context)
+                                                .textTheme
+                                                .labelMedium
+                                                ?.copyWith(
+                                                  color: LinagoraRefColors
+                                                          .material()
+                                                      .tertiary[30],
+                                                ),
+                                            overflow: TextOverflow.ellipsis,
+                                            maxLines: 1,
+                                          ),
+                                          const SizedBox(
+                                            width: 4,
+                                          ),
+                                        ],
+                                      ),
                                   ],
                                 ),
                                 Text(
@@ -244,7 +334,7 @@ class AssignRolesView extends StatelessWidget {
       builder: (context, searchResults, child) {
         return searchResults.fold(
           (failure) {
-            if (failure is AssignRolesSearchEmptyState) {
+            if (failure is AssignRolesPickerSearchEmptyState) {
               return const Center(
                 child: EmptySearchWidget(),
               );
@@ -252,24 +342,53 @@ class AssignRolesView extends StatelessWidget {
             return const SizedBox.shrink();
           },
           (success) {
-            if (success is AssignRolesSearchSuccessState) {
+            if (success is AssignRolesPickerSearchSuccessState) {
               return ListView.builder(
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
-                itemCount: success.assignRolesMember.length,
+                itemCount: success.members.length,
                 padding: const EdgeInsets.symmetric(
                   horizontal: 12.0,
                 ),
                 itemBuilder: (context, index) {
-                  final member = success.assignRolesMember[index];
+                  final member = success.members[index];
                   final role =
                       member.getDefaultPowerLevelMember.displayName(context);
                   return TwakeInkWell(
-                    onTap: () {},
+                    onTap: member.isOwnerRole
+                        ? null
+                        : () {
+                            controller.selectedUsersMapChangeNotifier
+                                .onUserTileTap(
+                              context,
+                              member,
+                            );
+                          },
                     child: TwakeListItem(
                       padding: const EdgeInsets.all(8),
                       child: Row(
                         children: [
+                          ValueListenableBuilder<bool>(
+                            valueListenable: controller
+                                .selectedUsersMapChangeNotifier
+                                .getNotifierAtUser(member),
+                            builder: (context, isCurrentSelected, child) {
+                              return Checkbox(
+                                value: member.isOwnerRole || isCurrentSelected,
+                                onChanged: member.isOwnerRole
+                                    ? null
+                                    : (newValue) {
+                                        controller
+                                            .selectedUsersMapChangeNotifier
+                                            .onUserTileTap(
+                                          context,
+                                          member,
+                                        );
+                                      },
+                              );
+                            },
+                          ),
+                          const SizedBox(width: 8.0),
                           Avatar(
                             mxContent: member.avatarUrl,
                             name: member.calcDisplayname(),
@@ -293,26 +412,27 @@ class AssignRolesView extends StatelessWidget {
                                       maxLines: 1,
                                     ),
                                     const Spacer(),
-                                    Row(
-                                      children: [
-                                        Text(
-                                          role,
-                                          style: Theme.of(context)
-                                              .textTheme
-                                              .labelMedium
-                                              ?.copyWith(
-                                                color:
-                                                    LinagoraRefColors.material()
-                                                        .tertiary[30],
-                                              ),
-                                          overflow: TextOverflow.ellipsis,
-                                          maxLines: 1,
-                                        ),
-                                        const SizedBox(
-                                          width: 4,
-                                        ),
-                                      ],
-                                    ),
+                                    if (member.isOwnerRole)
+                                      Row(
+                                        children: [
+                                          Text(
+                                            role,
+                                            style: Theme.of(context)
+                                                .textTheme
+                                                .labelMedium
+                                                ?.copyWith(
+                                                  color: LinagoraRefColors
+                                                          .material()
+                                                      .tertiary[30],
+                                                ),
+                                            overflow: TextOverflow.ellipsis,
+                                            maxLines: 1,
+                                          ),
+                                          const SizedBox(
+                                            width: 4,
+                                          ),
+                                        ],
+                                      ),
                                   ],
                                 ),
                                 Text(

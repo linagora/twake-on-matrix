@@ -273,4 +273,15 @@ extension RoomExtension on Room {
     if (members.isEmpty) return [];
     return members;
   }
+
+  List<User> getCurrentMembers() {
+    final members = getParticipants(
+      membershipFilter: [
+        Membership.invite,
+        Membership.join,
+      ],
+    );
+    if (members.isEmpty) return [];
+    return members;
+  }
 }

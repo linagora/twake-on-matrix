@@ -66,6 +66,7 @@ class ImagePaths {
 
   static String get icBrandingPng => _getAssetPath('branding.png');
   static String get lottieChat => _getAssetPath('lottie-chat.json');
+  static String get icGhost => _getImagePath('ic_ghost.svg');
 
   static String _getImagePath(String imageName) {
     return AssetsPaths.images + imageName;
