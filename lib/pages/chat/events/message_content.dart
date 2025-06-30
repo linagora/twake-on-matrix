@@ -254,7 +254,10 @@ class MessageContent extends StatelessWidget
             if (event.redacted) {
               return OptionalSelectionContainerDisabled(
                 isEnabled: PlatformInfos.isWeb,
-                child: RedactedContent(event: event),
+                child: Padding(
+                  padding: const EdgeInsets.only(bottom: 8),
+                  child: RedactedContent(event: event),
+                ),
               );
             }
 
