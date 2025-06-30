@@ -9,12 +9,16 @@ import 'package:fluffychat/pages/chat/events/message/multi_platform_message_cont
 import 'package:fluffychat/pages/chat/events/message/swipeable_message.dart';
 import 'package:fluffychat/pages/chat/events/state_message.dart';
 import 'package:fluffychat/pages/chat/events/verification_request_content.dart';
+import 'package:fluffychat/pages/chat/optional_gesture_detector.dart';
+import 'package:fluffychat/pages/chat/optional_padding.dart';
+import 'package:fluffychat/pages/chat/optional_selection_container_disabled.dart';
 import 'package:fluffychat/pages/chat/sticky_timestamp_widget.dart';
 import 'package:fluffychat/presentation/mixins/message_avatar_mixin.dart';
 import 'package:fluffychat/utils/date_time_extension.dart';
 import 'package:fluffychat/utils/extension/event_status_custom_extension.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/filtered_timeline_extension.dart';
+import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/utils/responsive/responsive_utils.dart';
 import 'package:fluffychat/widgets/context_menu/context_menu_action.dart';
 import 'package:fluffychat/widgets/matrix.dart';
@@ -75,6 +79,7 @@ class Message extends StatefulWidget {
   final VoidCallback? hideKeyboardChatScreen;
   final ContextMenuBuilder? menuChildren;
   final FocusNode? focusNode;
+  final double maxWidth;
   final void Function(Event)? timestampCallback;
   final void Function(Event)? onLongPressMessage;
   final void Function()? onDisplayEmojiReaction;
@@ -110,6 +115,7 @@ class Message extends StatefulWidget {
     required this.timeline,
     required this.isHoverNotifier,
     required this.listHorizontalActionMenu,
+    required this.maxWidth,
     this.menuChildren,
     super.key,
     this.onMenuAction,
@@ -198,179 +204,174 @@ class _MessageState extends State<Message> with MessageAvatarMixin {
 
   @override
   Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        if (!{
-          EventTypes.Message,
-          EventTypes.Sticker,
-          EventTypes.Encrypted,
-          EventTypes.CallInvite,
-        }.contains(widget.event.type)) {
-          if (widget.event.type.startsWith('m.call.')) {
-            return const SizedBox();
-          }
-          if (widget.event.isJoinedByRoomCreator()) {
-            return const SizedBox();
-          }
-          return StateMessage(widget.event);
-        }
+    if (!{
+      EventTypes.Message,
+      EventTypes.Sticker,
+      EventTypes.Encrypted,
+      EventTypes.CallInvite,
+    }.contains(widget.event.type)) {
+      if (widget.event.type.startsWith('m.call.')) {
+        return const SizedBox.shrink();
+      }
+      if (widget.event.isJoinedByRoomCreator()) {
+        return const SizedBox.shrink();
+      }
+      return OptionalSelectionContainerDisabled(
+        isEnabled: PlatformInfos.isWeb,
+        child: StateMessage(widget.event),
+      );
+    }
 
-        if (widget.event.type == EventTypes.Message &&
-            widget.event.messageType == EventTypes.KeyVerificationRequest) {
-          return VerificationRequestContent(
-            event: widget.event,
-            timeline: widget.timeline,
-          );
-        }
+    if (widget.event.type == EventTypes.Message &&
+        widget.event.messageType == EventTypes.KeyVerificationRequest) {
+      return OptionalSelectionContainerDisabled(
+        isEnabled: PlatformInfos.isWeb,
+        child: VerificationRequestContent(
+          event: widget.event,
+          timeline: widget.timeline,
+        ),
+      );
+    }
 
-        final displayTime = widget.event.type == EventTypes.RoomCreate ||
-            widget.nextEvent == null ||
-            !widget.event.originServerTs
-                .sameEnvironment(widget.nextEvent!.originServerTs);
-        final rowMainAxisAlignment = widget.event.isOwnMessage
-            ? MainAxisAlignment.end
-            : MainAxisAlignment.start;
+    final displayTime = widget.event.type == EventTypes.RoomCreate ||
+        widget.nextEvent == null ||
+        !widget.event.originServerTs
+            .sameEnvironment(widget.nextEvent!.originServerTs);
+    final rowMainAxisAlignment = widget.event.isOwnMessage
+        ? MainAxisAlignment.end
+        : MainAxisAlignment.start;
 
-        final rowChildren = <Widget>[
-          placeHolderWidget(
-            widget.onAvatarTap,
-            event: widget.event,
-            sameSender: widget.event.isSameSenderWith(widget.previousEvent),
-            ownMessage: widget.event.isOwnMessage,
-            context: context,
-            selectMode: widget.selectMode,
+    final rowChildren = <Widget>[
+      OptionalSelectionContainerDisabled(
+        isEnabled: PlatformInfos.isWeb,
+        child: placeHolderWidget(
+          widget.onAvatarTap,
+          event: widget.event,
+          sameSender: widget.event.isSameSenderWith(widget.previousEvent),
+          ownMessage: widget.event.isOwnMessage,
+          context: context,
+          selectMode: widget.selectMode,
+        ),
+      ),
+      Expanded(
+        child: MessageContentWithTimestampBuilder(
+          event: widget.event,
+          matrixState: widget.matrixState,
+          nextEvent: widget.nextEvent,
+          onSelect: widget.onSelect,
+          scrollToEventId: widget.scrollToEventId,
+          selected: widget.selected,
+          selectMode: widget.selectMode,
+          timeline: widget.timeline,
+          isHoverNotifier: widget.isHoverNotifier,
+          listHorizontalActionMenu: widget.listHorizontalActionMenu,
+          onMenuAction: widget.onMenuAction,
+          menuChildren: widget.menuChildren,
+          focusNode: widget.focusNode,
+          maxWidth: widget.maxWidth,
+          onDisplayEmojiReaction: widget.onDisplayEmojiReaction,
+          onHideEmojiReaction: widget.onHideEmojiReaction,
+          listActions: widget.listAction,
+          onSendEmojiReaction: widget.onSelectEmojiReaction,
+          onPickEmojiReaction: widget.onPickEmojiReaction,
+          onReply: widget.onReply,
+          onEdit: widget.onEdit,
+          onDelete: widget.onDelete,
+          onForward: widget.onForward,
+          onCopy: widget.onCopy,
+          onLongPressMessage: widget.onLongPressMessage,
+          onPin: widget.onPin,
+          saveToDownload: widget.onSaveToDownload,
+          saveToGallery: widget.onSaveToGallery,
+          onTapMoreButton: widget.onTapMoreButton,
+          recentEmojiFuture: widget.recentEmojiFuture,
+        ),
+      ),
+    ];
+    final row = Row(
+      crossAxisAlignment: CrossAxisAlignment.end,
+      mainAxisAlignment: rowMainAxisAlignment,
+      children: rowChildren,
+    );
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        if (displayTime)
+          ValueListenableBuilder(
+            valueListenable: inviewNotifier,
+            builder: (context, inView, _) {
+              return OptionalSelectionContainerDisabled(
+                isEnabled: PlatformInfos.isWeb,
+                child: StickyTimestampWidget(
+                  content: !inView
+                      ? widget.event.originServerTs.relativeTime(context)
+                      : '',
+                ),
+              );
+            },
           ),
-          Expanded(
-            child: MessageContentWithTimestampBuilder(
-              event: widget.event,
-              matrixState: widget.matrixState,
-              nextEvent: widget.nextEvent,
-              onSelect: widget.onSelect,
-              scrollToEventId: widget.scrollToEventId,
-              selected: widget.selected,
-              selectMode: widget.selectMode,
-              timeline: widget.timeline,
-              isHoverNotifier: widget.isHoverNotifier,
-              listHorizontalActionMenu: widget.listHorizontalActionMenu,
-              onMenuAction: widget.onMenuAction,
-              menuChildren: widget.menuChildren,
-              focusNode: widget.focusNode,
-              onDisplayEmojiReaction: widget.onDisplayEmojiReaction,
-              onHideEmojiReaction: widget.onHideEmojiReaction,
-              listActions: widget.listAction,
-              onSendEmojiReaction: widget.onSelectEmojiReaction,
-              onPickEmojiReaction: widget.onPickEmojiReaction,
-              onReply: widget.onReply,
-              onEdit: widget.onEdit,
-              onDelete: widget.onDelete,
-              onForward: widget.onForward,
-              onCopy: widget.onCopy,
-              onLongPressMessage: widget.onLongPressMessage,
-              onPin: widget.onPin,
-              saveToDownload: widget.onSaveToDownload,
-              saveToGallery: widget.onSaveToGallery,
-              onTapMoreButton: widget.onTapMoreButton,
-              recentEmojiFuture: widget.recentEmojiFuture,
+        if (widget.markedUnreadLocation != null &&
+            widget.markedUnreadLocation == widget.event.eventId) ...[
+          Padding(
+            padding: MessageStyle.paddingDividerUnreadMessage,
+            child: Divider(
+              height: MessageStyle.heightDivider,
+              color: LinagoraStateLayer(
+                LinagoraSysColors.material().surfaceTint,
+              ).opacityLayer3,
             ),
           ),
-        ];
-        final row = Row(
-          crossAxisAlignment: CrossAxisAlignment.end,
-          mainAxisAlignment: rowMainAxisAlignment,
-          children: rowChildren,
-        );
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            if (displayTime)
-              ValueListenableBuilder(
-                valueListenable: inviewNotifier,
-                builder: (context, inView, _) {
-                  return StickyTimestampWidget(
-                    content: !inView
-                        ? widget.event.originServerTs.relativeTime(context)
-                        : '',
-                  );
-                },
-              ),
-            if (widget.markedUnreadLocation != null &&
-                widget.markedUnreadLocation == widget.event.eventId) ...[
-              Padding(
-                padding: MessageStyle.paddingDividerUnreadMessage,
-                child: Divider(
-                  height: MessageStyle.heightDivider,
-                  color: LinagoraStateLayer(
-                    LinagoraSysColors.material().surfaceTint,
-                  ).opacityLayer3,
-                ),
-              ),
-              StickyTimestampWidget(
-                content: L10n.of(context)!.unreadMessages,
-              ),
-            ],
-            MultiPlatformsMessageContainer(
-              onTap: widget.hideKeyboardChatScreen,
-              onHover: (hover) {
-                if (!widget.event.status.isAvailable) {
-                  return;
-                }
-                if (widget.onHover != null) {
-                  widget.onHover!(hover, widget.event);
-                }
-              },
-              child: Container(
-                constraints: BoxConstraints(
-                  maxWidth: ChatViewBodyStyle.chatScreenMaxWidth,
-                ),
-                padding: MessageStyle.paddingMessage,
-                alignment: Alignment.bottomCenter,
-                child: SwipeableMessage(
-                  event: widget.event,
-                  onSwipe: widget.onSwipe,
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: widget.event.isOwnMessage
-                        ? CrossAxisAlignment.end
-                        : CrossAxisAlignment.start,
-                    children: [
-                      GestureDetector(
-                        onLongPress: () =>
-                            widget.selectMode && widget.event.status.isAvailable
-                                ? widget.onSelect!(widget.event)
-                                : null,
-                        onTap: () =>
-                            widget.selectMode && widget.event.status.isAvailable
-                                ? widget.onSelect!(widget.event)
-                                : widget.hideKeyboardChatScreen?.call(),
-                        child: Center(
-                          child: Container(
-                            padding: EdgeInsets.only(
-                              right: widget.selected
-                                  ? 0
-                                  : widget.event.isOwnMessage ||
-                                          Message.responsiveUtils
-                                              .isDesktop(context)
-                                      ? 8.0
-                                      : 16.0,
-                              top: widget.selected ? 0 : 1.0,
-                              bottom: widget.selected ? 0 : 1.0,
-                            ),
-                            child: _messageSelectedWidget(
-                              context,
-                              row,
-                              widget.event,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
+          OptionalSelectionContainerDisabled(
+            isEnabled: PlatformInfos.isWeb,
+            child: StickyTimestampWidget(
+              content: L10n.of(context)!.unreadMessages,
+            ),
+          ),
+        ],
+        MultiPlatformsMessageContainer(
+          onTap: widget.hideKeyboardChatScreen,
+          onHover: (hover) {
+            if (!widget.event.status.isAvailable) {
+              return;
+            }
+            if (widget.onHover != null) {
+              widget.onHover!(hover, widget.event);
+            }
+          },
+          child: Container(
+            constraints: BoxConstraints(
+              maxWidth: ChatViewBodyStyle.chatScreenMaxWidth,
+            ),
+            padding: MessageStyle.paddingMessage,
+            alignment: Alignment.bottomCenter,
+            child: SwipeableMessage(
+              event: widget.event,
+              onSwipe: widget.onSwipe,
+              child: OptionalGestureDetector(
+                onLongPress: () => widget.onSelect!(widget.event),
+                onTap: () => widget.onSelect!(widget.event),
+                isEnabled: widget.selectMode && widget.event.status.isAvailable,
+                child: OptionalPadding(
+                  padding: EdgeInsetsDirectional.only(
+                    end: widget.event.isOwnMessage ||
+                            Message.responsiveUtils.isDesktop(context)
+                        ? 8.0
+                        : 16.0,
+                    top: 1.0,
+                    bottom: 1.0,
+                  ),
+                  isEnabled: !widget.selected,
+                  child: _messageSelectedWidget(
+                    context,
+                    row,
+                    widget.event,
                   ),
                 ),
               ),
             ),
-          ],
-        );
-      },
+          ),
+        ),
+      ],
     );
   }
 
