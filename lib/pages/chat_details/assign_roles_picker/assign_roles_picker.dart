@@ -3,28 +3,28 @@ import 'package:fluffychat/app_state/failure.dart';
 import 'package:fluffychat/app_state/success.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/domain/model/room/room_extension.dart';
-import 'package:fluffychat/pages/chat_details/assign_roles/assign_roles_search_state.dart';
-import 'package:fluffychat/pages/chat_details/assign_roles/assign_roles_view.dart';
-import 'package:fluffychat/pages/chat_details/assign_roles_picker/assign_roles_picker.dart';
-import 'package:fluffychat/pages/chat_details/chat_details_edit_view_style.dart';
+import 'package:fluffychat/pages/chat_details/assign_roles_editor/assign_roles_editor.dart';
+import 'package:fluffychat/pages/chat_details/assign_roles_picker/assign_roles_picker_search_state.dart';
+import 'package:fluffychat/pages/chat_details/assign_roles_picker/assign_roles_picker_view.dart';
+import 'package:fluffychat/pages/chat_details/assign_roles_picker/selected_user_notifier.dart';
 import 'package:fluffychat/pages/search/search_debouncer_mixin.dart';
 import 'package:fluffychat/utils/responsive/responsive_utils.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:matrix/matrix.dart';
 
-class AssignRoles extends StatefulWidget {
+class AssignRolesPicker extends StatefulWidget {
   final Room room;
 
-  const AssignRoles({
+  const AssignRolesPicker({
     super.key,
     required this.room,
   });
 
   @override
-  AssignRolesController createState() => AssignRolesController();
+  AssignRolesPickerController createState() => AssignRolesPickerController();
 }
 
-class AssignRolesController extends State<AssignRoles>
+class AssignRolesPickerController extends State<AssignRolesPicker>
     with SearchDebouncerMixin {
   final responsive = getIt.get<ResponsiveUtils>();
 
@@ -32,35 +32,22 @@ class AssignRolesController extends State<AssignRoles>
 
   final inputFocus = FocusNode();
 
+  final SelectedUsersMapChangeNotifier selectedUsersMapChangeNotifier =
+      SelectedUsersMapChangeNotifier();
+
   final ValueNotifier<Either<Failure, Success>> searchUserResults =
       ValueNotifier<Either<Failure, Success>>(
     Right(
-      AssignRolesSearchInitialState(),
+      AssignRolesPickerSearchInitialState(),
     ),
   );
 
-  void onBack() {
-    Navigator.of(context).pop();
-  }
-
-  void goToAssignRolesPicker() {
-    Navigator.of(context).push(
-      CupertinoPageRoute(
-        builder: (context) {
-          return AssignRolesPicker(
-            room: widget.room,
-          );
-        },
-      ),
-    );
-  }
-
-  List<User> get assignRolesMember => widget.room.getAssignRolesMember();
+  List<User> get members => widget.room.getCurrentMembers();
 
   void initialAssignRoles() {
     searchUserResults.value = Right(
-      AssignRolesSearchSuccessState(
-        assignRolesMember: assignRolesMember,
+      AssignRolesPickerSearchSuccessState(
+        members: members,
         keyword: '',
       ),
     );
@@ -69,15 +56,15 @@ class AssignRolesController extends State<AssignRoles>
   void handleSearchResults(String searchTerm) {
     if (searchTerm.isEmpty) {
       searchUserResults.value = Right(
-        AssignRolesSearchSuccessState(
-          assignRolesMember: assignRolesMember,
+        AssignRolesPickerSearchSuccessState(
+          members: members,
           keyword: '',
         ),
       );
       return;
     }
 
-    final assignedUsers = assignRolesMember;
+    final assignedUsers = members;
 
     final searchResults = assignedUsers.where((user) {
       return (user.displayName ?? '')
@@ -92,17 +79,37 @@ class AssignRolesController extends State<AssignRoles>
 
     if (searchResults.isEmpty) {
       searchUserResults.value = Left(
-        AssignRolesSearchEmptyState(keyword: searchTerm),
+        AssignRolesPickerSearchEmptyState(keyword: searchTerm),
       );
       return;
     }
 
     searchUserResults.value = Right(
-      AssignRolesSearchSuccessState(
-        assignRolesMember: searchResults,
+      AssignRolesPickerSearchSuccessState(
+        members: searchResults,
         keyword: searchTerm,
       ),
     );
+  }
+
+  void navigateToAssignRolesEditor(BuildContext context) {
+    if (selectedUsersMapChangeNotifier.usersList.isEmpty) {
+      return;
+    }
+
+    if (responsive.isMobile(context)) {
+      Navigator.of(context).push(
+        CupertinoPageRoute(
+          builder: (context) {
+            return AssignRolesEditor(
+              room: widget.room,
+              assignedUsers: selectedUsersMapChangeNotifier.usersList.toList(),
+            );
+          },
+        ),
+      );
+      return;
+    }
   }
 
   @override
@@ -119,12 +126,18 @@ class AssignRolesController extends State<AssignRoles>
   }
 
   @override
+  void dispose() {
+    textEditingController.dispose();
+    inputFocus.dispose();
+    searchUserResults.dispose();
+    selectedUsersMapChangeNotifier.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      width: ChatDetailEditViewStyle.fixedWidth,
-      child: AssignRolesView(
-        controller: this,
-      ),
+    return AssignRolesPickerView(
+      controller: this,
     );
   }
 }
