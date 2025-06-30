@@ -3306,5 +3306,30 @@
       "number": {}
     }
   },
-  "downgradeToReadOnly": "Downgrade to read only"
+  "downgradeToReadOnly": "Downgrade to read only",
+  "memberOfTheGroup": "MEMBERS OF THE GROUP ({number})",
+  "@memberOfTheGroup": {
+    "type": "text",
+    "placeholders": {
+      "number": {}
+    }
+  },
+  "selectRole": "Select role",
+  "canReadMessages": "Can read messages",
+  "canWriteMessagesSendReacts": "Can write messages, send reacts...",
+  "canRemoveUsersDeleteMessages": "Can remove users, delete messages...",
+  "canAccessAllFeaturesAndSettings": "Can access all features and settings",
+  "invitePeopleToTheRoom": "Invite people to the room",
+  "sendReactions": "Send reactions",
+  "deleteMessagesSentByMe": "Delete messages sent by me",
+  "notifyEveryoneUsingRoom": "Notify everyone using @room",
+  "joinCall": "Join Call",
+  "removeMembers": "Remove members",
+  "removeMessagesSentByOthers": "Remove messages sent by others",
+  "pinMessageForEveryone": "Pin a message (for everyone)",
+  "startCall": "Start Call",
+  "changeGroupName": "Change group name",
+  "changeGroupDescription": "Change group description",
+  "changeGroupAvatar": "Change group avatar",
+  "changeGroupHistoryVisibility": "Change group history visibility"
 }
