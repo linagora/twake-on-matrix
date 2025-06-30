@@ -251,7 +251,7 @@ extension RoomExtension on Room {
     if (members.isEmpty) return [];
     return members.where((final User member) {
       final powerLevel = member.powerLevel;
-      return powerLevel >= DefaultPowerLevelMember.admin.powerLevel &&
+      return powerLevel >= DefaultPowerLevelMember.moderator.powerLevel &&
           member.membership == Membership.join;
     }).toList();
   }
@@ -272,5 +272,13 @@ extension RoomExtension on Room {
     );
     if (members.isEmpty) return [];
     return members;
+  }
+}
+
+extension SortByPowerLevel on List<User> {
+  List<User> sortByPowerLevel() {
+    final newList = [...this];
+    newList.sort((a, b) => b.powerLevel.compareTo(a.powerLevel));
+    return newList;
   }
 }
