@@ -8,7 +8,9 @@ class ExpandableWidget extends StatefulWidget {
   final bool enableExpand;
   final bool isExpanded;
   final void Function()? onTap;
-  final EdgeInsets padding;
+  final EdgeInsets? padding;
+  final EdgeInsets? margin;
+  final EdgeInsets? dividerPadding;
 
   const ExpandableWidget({
     super.key,
@@ -17,9 +19,9 @@ class ExpandableWidget extends StatefulWidget {
     this.enableExpand = true,
     this.isExpanded = true,
     this.onTap,
-    this.padding = const EdgeInsets.symmetric(
-      vertical: 16.0,
-    ),
+    this.padding,
+    this.margin,
+    this.dividerPadding,
   });
 
   @override
@@ -36,6 +38,14 @@ class _ExpandableWidgetState extends State<ExpandableWidget> {
   }
 
   @override
+  void didUpdateWidget(covariant ExpandableWidget oldWidget) {
+    if (oldWidget.isExpanded != widget.isExpanded) {
+      isExpandedNotifier.value = widget.isExpanded;
+    }
+    super.didUpdateWidget(oldWidget);
+  }
+
+  @override
   Widget build(BuildContext context) {
     return ValueListenableBuilder(
       valueListenable: isExpandedNotifier,
@@ -45,14 +55,30 @@ class _ExpandableWidgetState extends State<ExpandableWidget> {
             TwakeInkWell(
               onTap: () {
                 widget.onTap?.call();
+                if (!widget.enableExpand) return;
                 isExpandedNotifier.toggle();
               },
-              child: Padding(
-                padding: widget.padding,
+              child: Container(
+                padding: widget.padding ??
+                    const EdgeInsets.symmetric(
+                      vertical: 13.0,
+                      horizontal: 16.0,
+                    ),
+                margin: widget.margin,
                 child: widget.parentWidget,
               ),
             ),
-            if (widget.enableExpand) child!,
+            if (isExpanded) child!,
+            Padding(
+              padding: widget.dividerPadding ?? EdgeInsets.zero,
+              child: Divider(
+                color: LinagoraStateLayer(
+                  LinagoraSysColors.material().surfaceTint,
+                ).opacityLayer3,
+                height: 1,
+                thickness: 1,
+              ),
+            ),
           ],
         );
       },

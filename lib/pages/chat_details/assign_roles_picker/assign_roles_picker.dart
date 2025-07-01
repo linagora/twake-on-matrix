@@ -4,20 +4,25 @@ import 'package:fluffychat/app_state/success.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/domain/model/room/room_extension.dart';
 import 'package:fluffychat/pages/chat_details/assign_roles_editor/assign_roles_editor.dart';
+import 'package:fluffychat/pages/chat_details/assign_roles_editor/assign_roles_editor_style.dart';
 import 'package:fluffychat/pages/chat_details/assign_roles_picker/assign_roles_picker_search_state.dart';
 import 'package:fluffychat/pages/chat_details/assign_roles_picker/assign_roles_picker_view.dart';
 import 'package:fluffychat/pages/chat_details/assign_roles_picker/selected_user_notifier.dart';
 import 'package:fluffychat/pages/search/search_debouncer_mixin.dart';
 import 'package:fluffychat/utils/responsive/responsive_utils.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
+import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:matrix/matrix.dart';
 
 class AssignRolesPicker extends StatefulWidget {
   final Room room;
+  final bool isDialog;
 
   const AssignRolesPicker({
     super.key,
     required this.room,
+    this.isDialog = false,
   });
 
   @override
@@ -110,6 +115,28 @@ class AssignRolesPickerController extends State<AssignRolesPicker>
       );
       return;
     }
+
+    showDialog(
+      context: context,
+      barrierColor: Colors.transparent,
+      builder: (dialogContext) => AlertDialog(
+        contentPadding: const EdgeInsets.all(0),
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.all(
+            Radius.circular(16.0),
+          ),
+        ),
+        content: SizedBox(
+          width: AssignRolesEditorStyle.fixedDialogWidth,
+          height: AssignRolesEditorStyle.fixedDialogHeight,
+          child: AssignRolesEditor(
+            room: widget.room,
+            assignedUsers: selectedUsersMapChangeNotifier.usersList.toList(),
+            isDialog: true,
+          ),
+        ),
+      ),
+    );
   }
 
   @override
@@ -136,8 +163,17 @@ class AssignRolesPickerController extends State<AssignRolesPicker>
 
   @override
   Widget build(BuildContext context) {
-    return AssignRolesPickerView(
-      controller: this,
+    return Material(
+      color: LinagoraSysColors.material().onPrimary,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.all(
+          Radius.circular(16.0),
+        ),
+      ),
+      child: AssignRolesPickerView(
+        controller: this,
+        isDialog: widget.isDialog,
+      ),
     );
   }
 }
