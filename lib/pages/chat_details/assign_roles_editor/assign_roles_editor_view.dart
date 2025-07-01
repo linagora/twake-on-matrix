@@ -1,25 +1,32 @@
 import 'package:fluffychat/pages/chat_details/assign_roles_editor/assign_roles_editor.dart';
 import 'package:fluffychat/pages/chat_details/assign_roles_editor/assign_roles_editor_style.dart';
+import 'package:fluffychat/resource/image_paths.dart';
 import 'package:fluffychat/widgets/app_bars/twake_app_bar.dart';
 import 'package:fluffychat/widgets/avatar/avatar.dart';
 import 'package:fluffychat/widgets/expandable_widget.dart';
 import 'package:fluffychat/widgets/twake_components/twake_icon_button.dart';
+import 'package:fluffychat/widgets/twake_components/twake_text_button.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 
 class AssignRolesEditorView extends StatelessWidget {
   final AssignRolesEditorController controller;
+  final bool isDialog;
 
   const AssignRolesEditorView({
     super.key,
     required this.controller,
+    this.isDialog = false,
   });
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: LinagoraSysColors.material().onPrimary,
+      backgroundColor: isDialog
+          ? Colors.transparent
+          : LinagoraSysColors.material().onPrimary,
       resizeToAvoidBottomInset: false,
       appBar: TwakeAppBar(
         title: L10n.of(context)!.assignRoles,
@@ -27,6 +34,8 @@ class AssignRolesEditorView extends StatelessWidget {
         withDivider: true,
         context: context,
         enableLeftTitle: true,
+        isDialog: isDialog,
+        backgroundColor: isDialog ? Colors.transparent : null,
         leading: TwakeIconButton(
           paddingAll: 8,
           splashColor: Colors.transparent,
@@ -35,6 +44,20 @@ class AssignRolesEditorView extends StatelessWidget {
           onTap: () => Navigator.of(context).pop(),
           icon: Icons.arrow_back_ios,
         ),
+        actions: isDialog
+            ? [
+                TwakeIconButton(
+                  paddingAll: 8,
+                  splashColor: Colors.transparent,
+                  hoverColor: Colors.transparent,
+                  highlightColor: Colors.transparent,
+                  onTap: () => Navigator.of(context).popUntil(
+                    (route) => route.isFirst,
+                  ),
+                  icon: Icons.close,
+                ),
+              ]
+            : null,
       ),
       body: SizedBox(
         height: double.infinity,
@@ -42,9 +65,12 @@ class AssignRolesEditorView extends StatelessWidget {
           children: [
             Expanded(
               child: SingleChildScrollView(
+                padding: const EdgeInsets.only(
+                  bottom: 56,
+                ),
                 child: Column(
                   children: [
-                    selectedUsersListMobile(context),
+                    selectedUsersList(context),
                     Container(
                       color:
                           Theme.of(context).colorScheme.surfaceContainerHighest,
@@ -53,6 +79,9 @@ class AssignRolesEditorView extends StatelessWidget {
                         horizontal: 16.0,
                         vertical: 8.0,
                       ),
+                      margin: isDialog
+                          ? const EdgeInsets.symmetric(horizontal: 16)
+                          : null,
                       child: Text(
                         L10n.of(context)!.selectRole,
                         style: Theme.of(context).textTheme.labelLarge?.copyWith(
@@ -63,69 +92,105 @@ class AssignRolesEditorView extends StatelessWidget {
                     ListView.builder(
                       shrinkWrap: true,
                       physics: const NeverScrollableScrollPhysics(),
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      padding: EdgeInsets.zero,
                       itemBuilder: (context, index) {
-                        return ExpandableWidget(
-                          parentWidget: Row(
-                            children: [
-                              Container(
-                                width:
-                                    AssignRolesEditorStyle.assignRoleIconSize,
-                                height:
-                                    AssignRolesEditorStyle.assignRoleIconSize,
-                                decoration: BoxDecoration(
-                                  color: controller.colorBackgroundForRoles(
-                                    controller.assignRoles[index],
-                                  ),
-                                  borderRadius: BorderRadius.circular(
-                                    AssignRolesEditorStyle.assignRoleIconSize /
-                                        2,
-                                  ),
-                                ),
-                                child: Center(
-                                  child: controller.iconForRoles(
-                                    controller.assignRoles[index],
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(width: 8.0),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      controller.assignRoles[index]
-                                          .displayName(context),
-                                      style: Theme.of(context)
-                                          .textTheme
-                                          .bodyLarge
-                                          ?.copyWith(
-                                            color: LinagoraSysColors.material()
-                                                .onSurface,
-                                          ),
-                                    ),
-                                    Text(
-                                      controller.subtitleForRoles(
+                        return ValueListenableBuilder(
+                          valueListenable: controller.roleSelectedNotifier,
+                          builder: (context, isSelected, child) {
+                            return ExpandableWidget(
+                              dividerPadding: isDialog
+                                  ? const EdgeInsets.symmetric(horizontal: 16)
+                                  : null,
+                              isExpanded:
+                                  isSelected == controller.assignRoles[index],
+                              parentWidget: Row(
+                                children: [
+                                  Container(
+                                    width: AssignRolesEditorStyle
+                                        .assignRoleIconSize,
+                                    height: AssignRolesEditorStyle
+                                        .assignRoleIconSize,
+                                    decoration: BoxDecoration(
+                                      color: controller.colorBackgroundForRoles(
                                         controller.assignRoles[index],
                                       ),
-                                      style: Theme.of(context)
-                                          .textTheme
-                                          .bodyMedium
-                                          ?.copyWith(
-                                            color: LinagoraRefColors.material()
-                                                .tertiary[20],
-                                          ),
+                                      borderRadius: BorderRadius.circular(
+                                        AssignRolesEditorStyle
+                                                .assignRoleIconSize /
+                                            2,
+                                      ),
                                     ),
-                                  ],
-                                ),
+                                    child: Center(
+                                      child: controller.iconForRoles(
+                                        controller.assignRoles[index],
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 8.0),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          controller.assignRoles[index]
+                                              .displayName(context),
+                                          style: Theme.of(context)
+                                              .textTheme
+                                              .bodyLarge
+                                              ?.copyWith(
+                                                color:
+                                                    LinagoraSysColors.material()
+                                                        .onSurface,
+                                              ),
+                                        ),
+                                        Text(
+                                          controller.subtitleForRoles(
+                                            controller.assignRoles[index],
+                                          ),
+                                          style: Theme.of(context)
+                                              .textTheme
+                                              .bodyMedium
+                                              ?.copyWith(
+                                                color:
+                                                    LinagoraRefColors.material()
+                                                        .tertiary[20],
+                                              ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  AnimatedSwitcher(
+                                    duration: const Duration(milliseconds: 200),
+                                    switchOutCurve: Curves.easeInOut,
+                                    transitionBuilder: (child, animation) =>
+                                        ScaleTransition(
+                                      scale: animation,
+                                      child: child,
+                                    ),
+                                    child: SizedBox(
+                                      width: 24,
+                                      height: 24,
+                                      child: SvgPicture.asset(
+                                        isSelected ==
+                                                controller.assignRoles[index]
+                                            ? ImagePaths.icRadioChecked
+                                            : ImagePaths.icRadioUnchecked,
+                                      ),
+                                    ),
+                                  ),
+                                ],
                               ),
-                              Checkbox(
-                                shape: const CircleBorder(),
-                                value: false,
-                                onChanged: (value) {},
+                              childWidget: controller.permissionsWidgetForRoles(
+                                controller.assignRoles[index],
                               ),
-                            ],
-                          ),
+                              onTap: () {
+                                controller.onSelectedRole(
+                                  controller.assignRoles[index],
+                                );
+                              },
+                            );
+                          },
                         );
                       },
                       itemCount: controller.assignRoles.length,
@@ -134,21 +199,120 @@ class AssignRolesEditorView extends StatelessWidget {
                 ),
               ),
             ),
+            ValueListenableBuilder(
+              valueListenable: controller.roleSelectedNotifier,
+              builder: (context, roleSelected, child) {
+                if (roleSelected == null) {
+                  return const SizedBox.shrink();
+                }
+                return Container(
+                  padding: EdgeInsets.only(
+                    bottom: 24,
+                    left: 16,
+                    right: isDialog ? 36 : 16,
+                    top: isDialog ? 36 : 16,
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.only(right: 32),
+                        child: TwakeTextButton(
+                          onTap: () {
+                            Navigator.of(context).pop();
+                          },
+                          message: L10n.of(context)!.cancel,
+                          borderHover: 100,
+                          buttonDecoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(100),
+                            border: Border.all(
+                              color: Theme.of(context).colorScheme.primary,
+                            ),
+                          ),
+                          styleMessage: Theme.of(context)
+                              .textTheme
+                              .labelLarge
+                              ?.copyWith(
+                                color: Theme.of(context).colorScheme.primary,
+                              ),
+                        ),
+                      ),
+                      TwakeTextButton(
+                        message: L10n.of(context)!.done,
+                        onTap: () {},
+                        styleMessage: Theme.of(context)
+                            .textTheme
+                            .labelLarge
+                            ?.copyWith(
+                              color: Theme.of(context).colorScheme.onPrimary,
+                            ),
+                        borderHover: 100,
+                        buttonDecoration: BoxDecoration(
+                          color: Theme.of(context).colorScheme.primary,
+                          borderRadius: BorderRadius.circular(100),
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              },
+            ),
           ],
         ),
       ),
     );
   }
 
-  Widget selectedUsersListMobile(BuildContext context) {
-    if (!controller.responsive.isMobile(context)) {
-      return const SizedBox.shrink();
-    }
-
+  Widget selectedUsersList(BuildContext context) {
     final users = controller.widget.assignedUsers;
 
     if (users.isEmpty) {
       return const SizedBox.shrink();
+    }
+    if (users.length == 1) {
+      return TwakeListItem(
+        padding: const EdgeInsets.all(8),
+        margin: EdgeInsets.symmetric(
+          horizontal: isDialog ? 16 : 0,
+        ),
+        child: Row(
+          children: [
+            Avatar(
+              mxContent: users.first.avatarUrl,
+              name: users.first.calcDisplayname(),
+            ),
+            const SizedBox(width: 8.0),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Text(
+                        users.first.calcDisplayname(),
+                        style:
+                            LinagoraTextStyle.material().bodyMedium2.copyWith(
+                                  color: LinagoraSysColors.material().onSurface,
+                                ),
+                        overflow: TextOverflow.ellipsis,
+                        maxLines: 1,
+                      ),
+                    ],
+                  ),
+                  Text(
+                    users.first.id,
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          color: LinagoraRefColors.material().tertiary[30],
+                        ),
+                    overflow: TextOverflow.ellipsis,
+                    maxLines: 1,
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      );
     }
     return AnimatedSize(
       curve: Curves.easeIn,
@@ -157,8 +321,8 @@ class AssignRolesEditorView extends StatelessWidget {
       child: SizedBox(
         width: MediaQuery.sizeOf(context).width,
         child: Padding(
-          padding: const EdgeInsets.only(
-            left: 8,
+          padding: EdgeInsets.only(
+            left: isDialog ? 16 : 8,
             bottom: 8,
           ),
           child: Wrap(

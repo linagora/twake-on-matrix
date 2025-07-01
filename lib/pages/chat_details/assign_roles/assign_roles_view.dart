@@ -39,7 +39,9 @@ class AssignRolesView extends StatelessWidget {
       ),
 
       /// Implement later
-      floatingActionButton: TwakeInkWell(
+      floatingActionButton: InkWell(
+        borderRadius: BorderRadius.circular(100),
+        splashColor: LinagoraHoverStyle.material().hoverColor,
         onTap: () {
           controller.goToAssignRolesPicker();
         },
@@ -89,7 +91,7 @@ class AssignRolesView extends StatelessWidget {
                   hintStyle: Theme.of(context).textTheme.titleMedium?.copyWith(
                         color: LinagoraSysColors.material().tertiary,
                       ),
-                  hintText: L10n.of(context)!.enterAnEmailAddress,
+                  hintText: L10n.of(context)!.searchContacts,
                   suffixIcon: ValueListenableBuilder(
                     valueListenable: controller.textEditingController,
                     builder: (context, value, child) => value.text.isNotEmpty

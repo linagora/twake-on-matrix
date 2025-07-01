@@ -7,24 +7,28 @@ import 'package:fluffychat/widgets/app_bars/twake_app_bar.dart';
 import 'package:fluffychat/widgets/avatar/avatar.dart';
 import 'package:fluffychat/widgets/context_menu_builder_ios_paste_without_permission.dart';
 import 'package:fluffychat/widgets/search/empty_search_widget.dart';
-import 'package:fluffychat/widgets/twake_components/twake_fab.dart';
 import 'package:fluffychat/widgets/twake_components/twake_icon_button.dart';
+import 'package:fluffychat/widgets/twake_components/twake_text_button.dart';
 import 'package:flutter/material.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 
 class AssignRolesPickerView extends StatelessWidget {
   final AssignRolesPickerController controller;
+  final bool isDialog;
 
   const AssignRolesPickerView({
     super.key,
     required this.controller,
+    this.isDialog = false,
   });
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: LinagoraSysColors.material().onPrimary,
+      backgroundColor: isDialog
+          ? Colors.transparent
+          : LinagoraSysColors.material().onPrimary,
       resizeToAvoidBottomInset: false,
       appBar: TwakeAppBar(
         title: L10n.of(context)!.assignRoles,
@@ -32,6 +36,8 @@ class AssignRolesPickerView extends StatelessWidget {
         withDivider: true,
         context: context,
         enableLeftTitle: true,
+        isDialog: isDialog,
+        backgroundColor: isDialog ? Colors.transparent : null,
         leading: TwakeIconButton(
           paddingAll: 8,
           splashColor: Colors.transparent,
@@ -40,9 +46,98 @@ class AssignRolesPickerView extends StatelessWidget {
           onTap: () => Navigator.of(context).pop(),
           icon: Icons.arrow_back_ios,
         ),
+        actions: isDialog
+            ? [
+                TwakeIconButton(
+                  paddingAll: 8,
+                  splashColor: Colors.transparent,
+                  hoverColor: Colors.transparent,
+                  highlightColor: Colors.transparent,
+                  onTap: () => Navigator.of(context).pop(),
+                  icon: Icons.close,
+                ),
+              ]
+            : null,
       ),
-      floatingActionButton: controller.responsive.isMobile(context)
-          ? ValueListenableBuilder<bool>(
+      body: SizedBox(
+        height: double.infinity,
+        child: Column(
+          children: [
+            Expanded(
+              child: SingleChildScrollView(
+                child: Column(
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: TextField(
+                        controller: controller.textEditingController,
+                        contextMenuBuilder: mobileTwakeContextMenuBuilder,
+                        focusNode: controller.inputFocus,
+                        textInputAction: TextInputAction.search,
+                        autofocus: true,
+                        decoration: ChatListHeaderStyle.searchInputDecoration(
+                          context,
+                          prefixIconColor:
+                              LinagoraSysColors.material().tertiary,
+                        ).copyWith(
+                          hintStyle: Theme.of(context)
+                              .textTheme
+                              .titleMedium
+                              ?.copyWith(
+                                color: LinagoraSysColors.material().tertiary,
+                              ),
+                          hintText: L10n.of(context)!.searchGroupMembers,
+                          suffixIcon: ValueListenableBuilder(
+                            valueListenable: controller.textEditingController,
+                            builder: (context, value, child) => value
+                                    .text.isNotEmpty
+                                ? IconButton(
+                                    onPressed: () {
+                                      controller.textEditingController.clear();
+                                    },
+                                    icon: const Icon(Icons.close),
+                                  )
+                                : const SizedBox.shrink(),
+                          ),
+                        ),
+                      ),
+                    ),
+                    Divider(
+                      height: 1,
+                      thickness: 1,
+                      color: LinagoraStateLayer(
+                        LinagoraSysColors.material().surfaceTint,
+                      ).opacityLayer3,
+                    ),
+                    selectedUsersList(context),
+                    Container(
+                      color:
+                          Theme.of(context).colorScheme.surfaceContainerHighest,
+                      alignment: Alignment.centerLeft,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16.0,
+                        vertical: 8.0,
+                      ),
+                      margin: EdgeInsets.symmetric(
+                        horizontal: isDialog ? 16.0 : 0,
+                      ),
+                      child: Text(
+                        L10n.of(context)!.memberOfTheGroup(
+                          controller.members.length,
+                        ),
+                        style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                              color: LinagoraRefColors.material().neutral[40],
+                            ),
+                      ),
+                    ),
+                    const SizedBox(height: 8.0),
+                    buildAssignRolesListMobile(context),
+                    buildAssignRolesListWeb(context),
+                  ],
+                ),
+              ),
+            ),
+            ValueListenableBuilder<bool>(
               valueListenable: controller
                   .selectedUsersMapChangeNotifier.haveSelectedUsersNotifier,
               builder: (context, haveSelectedContacts, child) {
@@ -51,77 +146,62 @@ class AssignRolesPickerView extends StatelessWidget {
                 }
                 return child!;
               },
-              child: TwakeFloatingActionButton(
-                icon: Icons.arrow_forward,
-                onTap: () {
-                  controller.navigateToAssignRolesEditor(context);
-                },
-              ),
-            )
-          : null,
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
-            Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: TextField(
-                controller: controller.textEditingController,
-                contextMenuBuilder: mobileTwakeContextMenuBuilder,
-                focusNode: controller.inputFocus,
-                textInputAction: TextInputAction.search,
-                autofocus: true,
-                decoration: ChatListHeaderStyle.searchInputDecoration(
-                  context,
-                  prefixIconColor: LinagoraSysColors.material().tertiary,
-                ).copyWith(
-                  hintStyle: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        color: LinagoraSysColors.material().tertiary,
+              child: Container(
+                padding: EdgeInsets.only(
+                  bottom: 24,
+                  left: 16,
+                  right: isDialog ? 36 : 16,
+                  top: isDialog ? 36 : 16,
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.only(right: 32),
+                      child: TwakeTextButton(
+                        onTap: () {
+                          Navigator.of(context).pop();
+                        },
+                        message: L10n.of(context)!.cancel,
+                        borderHover: 100,
+                        buttonDecoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(100),
+                          border: Border.all(
+                            color: Theme.of(context).colorScheme.primary,
+                          ),
+                        ),
+                        styleMessage:
+                            Theme.of(context).textTheme.labelLarge?.copyWith(
+                                  color: Theme.of(context).colorScheme.primary,
+                                ),
                       ),
-                  hintText: L10n.of(context)!.enterAnEmailAddress,
-                  suffixIcon: ValueListenableBuilder(
-                    valueListenable: controller.textEditingController,
-                    builder: (context, value, child) => value.text.isNotEmpty
-                        ? IconButton(
-                            onPressed: () {
-                              controller.textEditingController.clear();
-                            },
-                            icon: const Icon(Icons.close),
-                          )
-                        : const SizedBox.shrink(),
-                  ),
-                ),
-              ),
-            ),
-            selectedUsersListMobile(context),
-            Container(
-              color: Theme.of(context).colorScheme.surfaceContainerHighest,
-              alignment: Alignment.centerLeft,
-              padding: const EdgeInsets.symmetric(
-                horizontal: 16.0,
-                vertical: 8.0,
-              ),
-              child: Text(
-                L10n.of(context)!.memberOfTheGroup(
-                  controller.members.length,
-                ),
-                style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                      color: LinagoraRefColors.material().neutral[40],
                     ),
+                    TwakeTextButton(
+                      message: L10n.of(context)!.next,
+                      onTap: () {
+                        controller.navigateToAssignRolesEditor(context);
+                      },
+                      styleMessage:
+                          Theme.of(context).textTheme.labelLarge?.copyWith(
+                                color: Theme.of(context).colorScheme.onPrimary,
+                              ),
+                      borderHover: 100,
+                      buttonDecoration: BoxDecoration(
+                        color: Theme.of(context).colorScheme.primary,
+                        borderRadius: BorderRadius.circular(100),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
-            const SizedBox(height: 8.0),
-            buildAssignRolesListMobile(context),
-            buildAssignRolesListWeb(context),
           ],
         ),
       ),
     );
   }
 
-  Widget selectedUsersListMobile(BuildContext context) {
-    if (!controller.responsive.isMobile(context)) {
-      return const SizedBox.shrink();
-    }
+  Widget selectedUsersList(BuildContext context) {
     final usersNotifier = controller.selectedUsersMapChangeNotifier;
 
     return AnimatedSize(
@@ -137,9 +217,9 @@ class AssignRolesPickerView extends StatelessWidget {
               return const SizedBox.shrink();
             }
             return Padding(
-              padding: const EdgeInsets.only(
+              padding: EdgeInsets.only(
                 left: 24,
-                bottom: 16,
+                bottom: isDialog ? 8 : 16,
               ),
               child: Wrap(
                 spacing: 8.0,
@@ -236,6 +316,15 @@ class AssignRolesPickerView extends StatelessWidget {
                             builder: (context, isCurrentSelected, child) {
                               return Checkbox(
                                 value: member.isOwnerRole || isCurrentSelected,
+                                fillColor:
+                                    MaterialStateProperty.all(Colors.black),
+                                side: BorderSide(
+                                  color: isCurrentSelected
+                                      ? Theme.of(context).colorScheme.primary
+                                      : LinagoraRefColors.material()
+                                          .tertiary[30]!,
+                                  width: 2,
+                                ),
                                 onChanged: member.isOwnerRole
                                     ? null
                                     : (newValue) {
@@ -375,6 +464,13 @@ class AssignRolesPickerView extends StatelessWidget {
                             builder: (context, isCurrentSelected, child) {
                               return Checkbox(
                                 value: member.isOwnerRole || isCurrentSelected,
+                                side: BorderSide(
+                                  color: isCurrentSelected
+                                      ? Theme.of(context).colorScheme.primary
+                                      : LinagoraRefColors.material()
+                                          .tertiary[30]!,
+                                  width: 2,
+                                ),
                                 onChanged: member.isOwnerRole
                                     ? null
                                     : (newValue) {
