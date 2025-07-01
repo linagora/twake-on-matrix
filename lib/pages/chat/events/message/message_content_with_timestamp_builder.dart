@@ -159,7 +159,7 @@ class _MessageContentWithTimestampBuilderState
         displayTime: displayTime,
         noBubble: noBubble,
         timelineText: timelineText,
-        overlayContextMenu:
+        overlayContextMenu: PlatformInfos.isWeb &&
             widget.maxWidth < MessageContentStyle.messageBoxMaxWidth,
       ),
     );
