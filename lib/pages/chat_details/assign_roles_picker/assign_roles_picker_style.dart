@@ -5,7 +5,6 @@ class AssignRolesPickerStyle {
 
   static const EdgeInsetsDirectional chipMargin = EdgeInsetsDirectional.only(
     top: 8,
-    end: 9.0,
   );
 
   static const EdgeInsetsDirectional textChipPadding =
@@ -14,4 +13,8 @@ class AssignRolesPickerStyle {
     top: 4.0,
     bottom: 4.0,
   );
+
+  static const double fixedDialogWidth = 448;
+  static const double fixedDialogHeight = 725;
+  static const EdgeInsets closeButtonPadding = EdgeInsets.all(16);
 }

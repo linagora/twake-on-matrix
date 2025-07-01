@@ -13,11 +13,13 @@ import 'package:flutter_gen/gen_l10n/l10n.dart';
 class AssignRolesEditor extends StatefulWidget {
   final Room room;
   final List<User> assignedUsers;
+  final bool isDialog;
 
   const AssignRolesEditor({
     super.key,
     required this.room,
     required this.assignedUsers,
+    this.isDialog = false,
   });
 
   @override
@@ -26,6 +28,9 @@ class AssignRolesEditor extends StatefulWidget {
 
 class AssignRolesEditorController extends State<AssignRolesEditor> {
   final responsive = getIt.get<ResponsiveUtils>();
+
+  final ValueNotifier<DefaultPowerLevelMember?> roleSelectedNotifier =
+      ValueNotifier<DefaultPowerLevelMember?>(null);
 
   final List<DefaultPowerLevelMember> assignRoles = [
     DefaultPowerLevelMember.guest,
@@ -103,10 +108,76 @@ class AssignRolesEditorController extends State<AssignRolesEditor> {
     }
   }
 
+  Widget permissionsWidgetForRoles(DefaultPowerLevelMember role) {
+    switch (role) {
+      case DefaultPowerLevelMember.guest:
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: role
+              .permissionForGuest(context)
+              .map((permission) => permission.permissionViewWidget(context))
+              .toList(),
+        );
+      case DefaultPowerLevelMember.member:
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: role
+              .permissionForMember(context)
+              .map((permission) => permission.permissionViewWidget(context))
+              .toList(),
+        );
+      case DefaultPowerLevelMember.moderator:
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: role
+              .permissionForModerator(context)
+              .map((permission) => permission.permissionViewWidget(context))
+              .toList(),
+        );
+      case DefaultPowerLevelMember.admin:
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: role
+              .permissionForAdmin(context)
+              .map((permission) => permission.permissionViewWidget(context))
+              .toList(),
+        );
+      default:
+        return const SizedBox.shrink();
+    }
+  }
+
+  void onSelectedRole(DefaultPowerLevelMember role) {
+    if (role == roleSelectedNotifier.value) {
+      roleSelectedNotifier.value = null;
+    } else {
+      if (role != DefaultPowerLevelMember.none) {
+        roleSelectedNotifier.value = role;
+      } else {
+        roleSelectedNotifier.value = null;
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    roleSelectedNotifier.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
-    return AssignRolesEditorView(
-      controller: this,
+    return Material(
+      color: LinagoraSysColors.material().onPrimary,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.all(
+          Radius.circular(16.0),
+        ),
+      ),
+      child: AssignRolesEditorView(
+        controller: this,
+        isDialog: widget.isDialog,
+      ),
     );
   }
 }

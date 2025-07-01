@@ -282,7 +282,10 @@ extension RoomExtension on Room {
       ],
     );
     if (members.isEmpty) return [];
-    return members;
+    return members
+      ..sort(
+        (small, great) => great.powerLevel.compareTo(small.powerLevel),
+      );
   }
 }
 
