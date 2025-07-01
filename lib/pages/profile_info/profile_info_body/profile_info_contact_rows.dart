@@ -20,6 +20,7 @@ class ProfileInfoContactRows extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const SizedBox(height: 16),
         SvgCopiableProfileRow(
@@ -51,6 +52,7 @@ class ProfileInfoContactRows extends StatelessWidget {
                           caption: L10n.of(context)!.phone,
                           copiableText:
                               success.contact.phoneNumbers?.first.number ?? '',
+                          enableDividerTop: true,
                         ),
                     ],
                   );

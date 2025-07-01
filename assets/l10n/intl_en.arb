@@ -3060,7 +3060,7 @@
   "@phone": {},
   "viewProfile": "View profile",
   "@viewProfile": {},
-  "profileInfo": "Profile info",
+  "profileInfo": "Profile informations",
   "@profileInfo": {},
   "saveToDownloads": "Save to Downloads",
   "@saveToDownloads": {},
@@ -3305,5 +3305,6 @@
     "placeholders": {
       "number": {}
     }
-  }
+  },
+  "downgradeToReadOnly": "Downgrade to read only"
 }

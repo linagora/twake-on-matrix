@@ -3,11 +3,13 @@ import 'package:fluffychat/utils/matrix_sdk_extensions/presence_extension.dart';
 import 'package:fluffychat/widgets/avatar/avatar.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:flutter/material.dart';
+import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 
 import 'package:matrix/matrix.dart';
 
 class ProfileInfoHeader extends StatelessWidget {
   const ProfileInfoHeader(this.user, {super.key});
+
   final User user;
 
   @override
@@ -23,12 +25,16 @@ class ProfileInfoHeader extends StatelessWidget {
           child: Avatar(
             mxContent: user.avatarUrl,
             name: user.calcDisplayname(),
+            size: 160,
           ),
         ),
         Text(
           user.calcDisplayname(),
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
+          style: LinagoraTextStyle.material().bodyMedium2.copyWith(
+                color: LinagoraSysColors.material().onSurface,
+              ),
         ),
         if (presence != null) ...[
           const SizedBox(height: 8),
