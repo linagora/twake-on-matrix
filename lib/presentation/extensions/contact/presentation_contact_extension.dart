@@ -32,7 +32,7 @@ extension ContactExtensionInPresentation on Contact {
 
     final status = phoneNumberHasMatrixId?.status ??
         emailHasMatrixId?.status ??
-        ThirdPartyStatus.inactive;
+        ThirdPartyStatus.active;
 
     final displayName = (this.displayName?.isNotEmpty == true)
         ? this.displayName
