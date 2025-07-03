@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-class AssignRolesPickerStyle {
+class AssignRolesMemberPickerStyle {
   static const double avatarChipSize = 28;
 
   static const EdgeInsetsDirectional chipMargin = EdgeInsetsDirectional.only(

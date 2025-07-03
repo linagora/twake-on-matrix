@@ -141,7 +141,7 @@ enum DefaultPermissionLevelMember {
   ) {
     return Container(
       height: 48,
-      padding: const EdgeInsets.only(left: 72, right: 22),
+      padding: const EdgeInsets.only(left: 72, right: 16),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -156,7 +156,10 @@ enum DefaultPermissionLevelMember {
               permission.imagePath()!,
               width: 24,
               height: 24,
-              color: LinagoraSysColors.material().onSurface,
+              colorFilter: ColorFilter.mode(
+                LinagoraSysColors.material().onSurface,
+                BlendMode.srcIn,
+              ),
             ),
           const SizedBox(width: 8),
           Expanded(

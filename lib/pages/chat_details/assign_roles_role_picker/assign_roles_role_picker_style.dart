@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-class AssignRolesEditorStyle {
+class AssignRolesRolePickerStyle {
   static const double avatarChipSize = 28;
 
   static const double roleIconSize = 24;
