@@ -1,5 +1,5 @@
-import 'package:fluffychat/pages/chat_details/assign_roles_editor/assign_roles_editor.dart';
-import 'package:fluffychat/pages/chat_details/assign_roles_editor/assign_roles_editor_style.dart';
+import 'package:fluffychat/pages/chat_details/assign_roles_role_picker/assign_roles_role_picker.dart';
+import 'package:fluffychat/pages/chat_details/assign_roles_role_picker/assign_roles_role_picker_style.dart';
 import 'package:fluffychat/resource/image_paths.dart';
 import 'package:fluffychat/widgets/app_bars/twake_app_bar.dart';
 import 'package:fluffychat/widgets/avatar/avatar.dart';
@@ -11,11 +11,11 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 
-class AssignRolesEditorView extends StatelessWidget {
+class AssignRolesRolePickerView extends StatelessWidget {
   final AssignRolesEditorController controller;
   final bool isDialog;
 
-  const AssignRolesEditorView({
+  const AssignRolesRolePickerView({
     super.key,
     required this.controller,
     this.isDialog = false,
@@ -106,16 +106,16 @@ class AssignRolesEditorView extends StatelessWidget {
                               parentWidget: Row(
                                 children: [
                                   Container(
-                                    width: AssignRolesEditorStyle
+                                    width: AssignRolesRolePickerStyle
                                         .assignRoleIconSize,
-                                    height: AssignRolesEditorStyle
+                                    height: AssignRolesRolePickerStyle
                                         .assignRoleIconSize,
                                     decoration: BoxDecoration(
                                       color: controller.colorBackgroundForRoles(
                                         controller.assignRoles[index],
                                       ),
                                       borderRadius: BorderRadius.circular(
-                                        AssignRolesEditorStyle
+                                        AssignRolesRolePickerStyle
                                                 .assignRoleIconSize /
                                             2,
                                       ),
@@ -334,21 +334,21 @@ class AssignRolesEditorView extends StatelessWidget {
                     LinagoraSysColors.material().surfaceTint,
                   ).opacityLayer3,
                   borderRadius: BorderRadius.circular(
-                    AssignRolesEditorStyle.avatarChipSize,
+                    AssignRolesRolePickerStyle.avatarChipSize,
                   ),
                 ),
-                margin: AssignRolesEditorStyle.chipMargin,
+                margin: AssignRolesRolePickerStyle.chipMargin,
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Avatar(
                       mxContent: member.avatarUrl,
                       name: member.calcDisplayname(),
-                      size: AssignRolesEditorStyle.avatarChipSize,
+                      size: AssignRolesRolePickerStyle.avatarChipSize,
                     ),
                     const SizedBox(width: 4.0),
                     Padding(
-                      padding: AssignRolesEditorStyle.textChipPadding,
+                      padding: AssignRolesRolePickerStyle.textChipPadding,
                       child: Text(
                         member.calcDisplayname(),
                         style: Theme.of(context).textTheme.titleSmall?.copyWith(

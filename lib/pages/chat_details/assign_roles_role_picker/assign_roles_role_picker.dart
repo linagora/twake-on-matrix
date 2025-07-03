@@ -1,7 +1,7 @@
 import 'package:fluffychat/config/default_power_level_member.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
-import 'package:fluffychat/pages/chat_details/assign_roles_editor/assign_roles_editor_style.dart';
-import 'package:fluffychat/pages/chat_details/assign_roles_editor/assign_roles_editor_view.dart';
+import 'package:fluffychat/pages/chat_details/assign_roles_role_picker/assign_roles_role_picker_style.dart';
+import 'package:fluffychat/pages/chat_details/assign_roles_role_picker/assign_roles_role_picker_view.dart';
 import 'package:fluffychat/resource/image_paths.dart';
 import 'package:fluffychat/utils/responsive/responsive_utils.dart';
 import 'package:flutter/material.dart';
@@ -10,12 +10,12 @@ import 'package:linagora_design_flutter/colors/linagora_sys_colors.dart';
 import 'package:matrix/matrix.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 
-class AssignRolesEditor extends StatefulWidget {
+class AssignRolesRolePicker extends StatefulWidget {
   final Room room;
   final List<User> assignedUsers;
   final bool isDialog;
 
-  const AssignRolesEditor({
+  const AssignRolesRolePicker({
     super.key,
     required this.room,
     required this.assignedUsers,
@@ -26,7 +26,7 @@ class AssignRolesEditor extends StatefulWidget {
   AssignRolesEditorController createState() => AssignRolesEditorController();
 }
 
-class AssignRolesEditorController extends State<AssignRolesEditor> {
+class AssignRolesEditorController extends State<AssignRolesRolePicker> {
   final responsive = getIt.get<ResponsiveUtils>();
 
   final ValueNotifier<DefaultPowerLevelMember?> roleSelectedNotifier =
@@ -74,8 +74,8 @@ class AssignRolesEditorController extends State<AssignRolesEditor> {
       case DefaultPowerLevelMember.guest:
         return SvgPicture.asset(
           ImagePaths.icGhost,
-          width: AssignRolesEditorStyle.roleIconSize,
-          height: AssignRolesEditorStyle.roleIconSize,
+          width: AssignRolesRolePickerStyle.roleIconSize,
+          height: AssignRolesRolePickerStyle.roleIconSize,
           colorFilter: ColorFilter.mode(
             LinagoraSysColors.material().onPrimary,
             BlendMode.srcIn,
@@ -84,14 +84,14 @@ class AssignRolesEditorController extends State<AssignRolesEditor> {
       case DefaultPowerLevelMember.member:
         return Icon(
           Icons.person_outline,
-          size: AssignRolesEditorStyle.roleIconSize,
+          size: AssignRolesRolePickerStyle.roleIconSize,
           color: LinagoraSysColors.material().onPrimary,
         );
       case DefaultPowerLevelMember.moderator:
         return SvgPicture.asset(
           ImagePaths.icShieldLockFill,
-          width: AssignRolesEditorStyle.roleIconSize,
-          height: AssignRolesEditorStyle.roleIconSize,
+          width: AssignRolesRolePickerStyle.roleIconSize,
+          height: AssignRolesRolePickerStyle.roleIconSize,
           colorFilter: ColorFilter.mode(
             LinagoraSysColors.material().onPrimary,
             BlendMode.srcIn,
@@ -100,7 +100,7 @@ class AssignRolesEditorController extends State<AssignRolesEditor> {
       case DefaultPowerLevelMember.admin:
         return Icon(
           Icons.star_outline,
-          size: AssignRolesEditorStyle.roleIconSize,
+          size: AssignRolesRolePickerStyle.roleIconSize,
           color: LinagoraSysColors.material().onPrimary,
         );
       default:
@@ -174,7 +174,7 @@ class AssignRolesEditorController extends State<AssignRolesEditor> {
           Radius.circular(16.0),
         ),
       ),
-      child: AssignRolesEditorView(
+      child: AssignRolesRolePickerView(
         controller: this,
         isDialog: widget.isDialog,
       ),

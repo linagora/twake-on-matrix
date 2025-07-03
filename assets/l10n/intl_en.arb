@@ -3331,5 +3331,6 @@
   "changeGroupName": "Change group name",
   "changeGroupDescription": "Change group description",
   "changeGroupAvatar": "Change group avatar",
-  "changeGroupHistoryVisibility": "Change group history visibility"
+  "changeGroupHistoryVisibility": "Change group history visibility",
+  "searchGroupMembers": "Search group members"
 }

@@ -3,16 +3,16 @@ import 'package:fluffychat/app_state/initial.dart';
 import 'package:fluffychat/app_state/success.dart';
 import 'package:matrix/matrix.dart';
 
-class AssignRolesPickerSearchInitialState extends Initial {
+class AssignRolesMemberPickerSearchInitialState extends Initial {
   @override
   List<Object?> get props => [];
 }
 
-class AssignRolesPickerSearchSuccessState extends Success {
+class AssignRolesMemberPickerSearchSuccessState extends Success {
   final List<User> members;
   final String keyword;
 
-  const AssignRolesPickerSearchSuccessState({
+  const AssignRolesMemberPickerSearchSuccessState({
     required this.members,
     required this.keyword,
   });
@@ -24,10 +24,10 @@ class AssignRolesPickerSearchSuccessState extends Success {
       ];
 }
 
-class AssignRolesPickerSearchEmptyState extends Failure {
+class AssignRolesMemberPickerSearchEmptyState extends Failure {
   final String keyword;
 
-  const AssignRolesPickerSearchEmptyState({
+  const AssignRolesMemberPickerSearchEmptyState({
     required this.keyword,
   });
 

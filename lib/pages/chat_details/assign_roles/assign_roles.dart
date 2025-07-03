@@ -5,8 +5,8 @@ import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/domain/model/room/room_extension.dart';
 import 'package:fluffychat/pages/chat_details/assign_roles/assign_roles_search_state.dart';
 import 'package:fluffychat/pages/chat_details/assign_roles/assign_roles_view.dart';
-import 'package:fluffychat/pages/chat_details/assign_roles_picker/assign_roles_picker.dart';
-import 'package:fluffychat/pages/chat_details/assign_roles_picker/assign_roles_picker_style.dart';
+import 'package:fluffychat/pages/chat_details/assign_roles_member_picker/assign_roles_member_picker.dart';
+import 'package:fluffychat/pages/chat_details/assign_roles_member_picker/assign_roles_member_picker_style.dart';
 import 'package:fluffychat/pages/chat_details/chat_details_edit_view_style.dart';
 import 'package:fluffychat/pages/search/search_debouncer_mixin.dart';
 import 'package:fluffychat/utils/responsive/responsive_utils.dart';
@@ -50,7 +50,7 @@ class AssignRolesController extends State<AssignRoles>
       Navigator.of(context).push(
         CupertinoPageRoute(
           builder: (context) {
-            return AssignRolesPicker(
+            return AssignRolesMemberPicker(
               room: widget.room,
             );
           },
@@ -69,9 +69,9 @@ class AssignRolesController extends State<AssignRoles>
         ),
         contentPadding: const EdgeInsets.all(0),
         content: SizedBox(
-          width: AssignRolesPickerStyle.fixedDialogWidth,
-          height: AssignRolesPickerStyle.fixedDialogHeight,
-          child: AssignRolesPicker(
+          width: AssignRolesMemberPickerStyle.fixedDialogWidth,
+          height: AssignRolesMemberPickerStyle.fixedDialogHeight,
+          child: AssignRolesMemberPicker(
             room: widget.room,
             isDialog: true,
           ),

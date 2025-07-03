@@ -3,11 +3,11 @@ import 'package:fluffychat/app_state/failure.dart';
 import 'package:fluffychat/app_state/success.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/domain/model/room/room_extension.dart';
-import 'package:fluffychat/pages/chat_details/assign_roles_editor/assign_roles_editor.dart';
-import 'package:fluffychat/pages/chat_details/assign_roles_editor/assign_roles_editor_style.dart';
-import 'package:fluffychat/pages/chat_details/assign_roles_picker/assign_roles_picker_search_state.dart';
-import 'package:fluffychat/pages/chat_details/assign_roles_picker/assign_roles_picker_view.dart';
-import 'package:fluffychat/pages/chat_details/assign_roles_picker/selected_user_notifier.dart';
+import 'package:fluffychat/pages/chat_details/assign_roles_role_picker/assign_roles_role_picker.dart';
+import 'package:fluffychat/pages/chat_details/assign_roles_role_picker/assign_roles_role_picker_style.dart';
+import 'package:fluffychat/pages/chat_details/assign_roles_member_picker/assign_roles_member_picker_search_state.dart';
+import 'package:fluffychat/pages/chat_details/assign_roles_member_picker/assign_roles_member_picker_view.dart';
+import 'package:fluffychat/pages/chat_details/assign_roles_member_picker/selected_user_notifier.dart';
 import 'package:fluffychat/pages/search/search_debouncer_mixin.dart';
 import 'package:fluffychat/utils/responsive/responsive_utils.dart';
 import 'package:flutter/cupertino.dart';
@@ -15,11 +15,11 @@ import 'package:flutter/material.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:matrix/matrix.dart';
 
-class AssignRolesPicker extends StatefulWidget {
+class AssignRolesMemberPicker extends StatefulWidget {
   final Room room;
   final bool isDialog;
 
-  const AssignRolesPicker({
+  const AssignRolesMemberPicker({
     super.key,
     required this.room,
     this.isDialog = false,
@@ -29,7 +29,7 @@ class AssignRolesPicker extends StatefulWidget {
   AssignRolesPickerController createState() => AssignRolesPickerController();
 }
 
-class AssignRolesPickerController extends State<AssignRolesPicker>
+class AssignRolesPickerController extends State<AssignRolesMemberPicker>
     with SearchDebouncerMixin {
   final responsive = getIt.get<ResponsiveUtils>();
 
@@ -43,7 +43,7 @@ class AssignRolesPickerController extends State<AssignRolesPicker>
   final ValueNotifier<Either<Failure, Success>> searchUserResults =
       ValueNotifier<Either<Failure, Success>>(
     Right(
-      AssignRolesPickerSearchInitialState(),
+      AssignRolesMemberPickerSearchInitialState(),
     ),
   );
 
@@ -51,7 +51,7 @@ class AssignRolesPickerController extends State<AssignRolesPicker>
 
   void initialAssignRoles() {
     searchUserResults.value = Right(
-      AssignRolesPickerSearchSuccessState(
+      AssignRolesMemberPickerSearchSuccessState(
         members: members,
         keyword: '',
       ),
@@ -61,7 +61,7 @@ class AssignRolesPickerController extends State<AssignRolesPicker>
   void handleSearchResults(String searchTerm) {
     if (searchTerm.isEmpty) {
       searchUserResults.value = Right(
-        AssignRolesPickerSearchSuccessState(
+        AssignRolesMemberPickerSearchSuccessState(
           members: members,
           keyword: '',
         ),
@@ -84,13 +84,13 @@ class AssignRolesPickerController extends State<AssignRolesPicker>
 
     if (searchResults.isEmpty) {
       searchUserResults.value = Left(
-        AssignRolesPickerSearchEmptyState(keyword: searchTerm),
+        AssignRolesMemberPickerSearchEmptyState(keyword: searchTerm),
       );
       return;
     }
 
     searchUserResults.value = Right(
-      AssignRolesPickerSearchSuccessState(
+      AssignRolesMemberPickerSearchSuccessState(
         members: searchResults,
         keyword: searchTerm,
       ),
@@ -106,7 +106,7 @@ class AssignRolesPickerController extends State<AssignRolesPicker>
       Navigator.of(context).push(
         CupertinoPageRoute(
           builder: (context) {
-            return AssignRolesEditor(
+            return AssignRolesRolePicker(
               room: widget.room,
               assignedUsers: selectedUsersMapChangeNotifier.usersList.toList(),
             );
@@ -127,9 +127,9 @@ class AssignRolesPickerController extends State<AssignRolesPicker>
           ),
         ),
         content: SizedBox(
-          width: AssignRolesEditorStyle.fixedDialogWidth,
-          height: AssignRolesEditorStyle.fixedDialogHeight,
-          child: AssignRolesEditor(
+          width: AssignRolesRolePickerStyle.fixedDialogWidth,
+          height: AssignRolesRolePickerStyle.fixedDialogHeight,
+          child: AssignRolesRolePicker(
             room: widget.room,
             assignedUsers: selectedUsersMapChangeNotifier.usersList.toList(),
             isDialog: true,
@@ -170,7 +170,7 @@ class AssignRolesPickerController extends State<AssignRolesPicker>
           Radius.circular(16.0),
         ),
       ),
-      child: AssignRolesPickerView(
+      child: AssignRolesMemberPickerView(
         controller: this,
         isDialog: widget.isDialog,
       ),

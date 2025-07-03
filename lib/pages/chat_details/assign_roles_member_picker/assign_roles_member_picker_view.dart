@@ -1,6 +1,6 @@
-import 'package:fluffychat/pages/chat_details/assign_roles_picker/assign_roles_picker.dart';
-import 'package:fluffychat/pages/chat_details/assign_roles_picker/assign_roles_picker_search_state.dart';
-import 'package:fluffychat/pages/chat_details/assign_roles_picker/assign_roles_picker_style.dart';
+import 'package:fluffychat/pages/chat_details/assign_roles_member_picker/assign_roles_member_picker.dart';
+import 'package:fluffychat/pages/chat_details/assign_roles_member_picker/assign_roles_member_picker_search_state.dart';
+import 'package:fluffychat/pages/chat_details/assign_roles_member_picker/assign_roles_member_picker_style.dart';
 import 'package:fluffychat/pages/chat_list/chat_list_header_style.dart';
 import 'package:fluffychat/utils/user_extension.dart';
 import 'package:fluffychat/widgets/app_bars/twake_app_bar.dart';
@@ -13,11 +13,11 @@ import 'package:flutter/material.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 
-class AssignRolesPickerView extends StatelessWidget {
+class AssignRolesMemberPickerView extends StatelessWidget {
   final AssignRolesPickerController controller;
   final bool isDialog;
 
-  const AssignRolesPickerView({
+  const AssignRolesMemberPickerView({
     super.key,
     required this.controller,
     this.isDialog = false,
@@ -230,21 +230,21 @@ class AssignRolesPickerView extends StatelessWidget {
                         LinagoraSysColors.material().surfaceTint,
                       ).opacityLayer3,
                       borderRadius: BorderRadius.circular(
-                        AssignRolesPickerStyle.avatarChipSize,
+                        AssignRolesMemberPickerStyle.avatarChipSize,
                       ),
                     ),
-                    margin: AssignRolesPickerStyle.chipMargin,
+                    margin: AssignRolesMemberPickerStyle.chipMargin,
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Avatar(
                           mxContent: member.avatarUrl,
                           name: member.calcDisplayname(),
-                          size: AssignRolesPickerStyle.avatarChipSize,
+                          size: AssignRolesMemberPickerStyle.avatarChipSize,
                         ),
                         const SizedBox(width: 4.0),
                         Padding(
-                          padding: AssignRolesPickerStyle.textChipPadding,
+                          padding: AssignRolesMemberPickerStyle.textChipPadding,
                           child: Text(
                             member.calcDisplayname(),
                             style: Theme.of(context)
@@ -278,7 +278,7 @@ class AssignRolesPickerView extends StatelessWidget {
       builder: (context, searchResults, child) {
         return searchResults.fold(
           (failure) {
-            if (failure is AssignRolesPickerSearchEmptyState) {
+            if (failure is AssignRolesMemberPickerSearchEmptyState) {
               return const Center(
                 child: EmptySearchWidget(),
               );
@@ -286,7 +286,7 @@ class AssignRolesPickerView extends StatelessWidget {
             return const SizedBox.shrink();
           },
           (success) {
-            if (success is AssignRolesPickerSearchSuccessState) {
+            if (success is AssignRolesMemberPickerSearchSuccessState) {
               return ListView.builder(
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
@@ -316,8 +316,6 @@ class AssignRolesPickerView extends StatelessWidget {
                             builder: (context, isCurrentSelected, child) {
                               return Checkbox(
                                 value: member.isOwnerRole || isCurrentSelected,
-                                fillColor:
-                                    MaterialStateProperty.all(Colors.black),
                                 side: BorderSide(
                                   color: isCurrentSelected
                                       ? Theme.of(context).colorScheme.primary
@@ -423,7 +421,7 @@ class AssignRolesPickerView extends StatelessWidget {
       builder: (context, searchResults, child) {
         return searchResults.fold(
           (failure) {
-            if (failure is AssignRolesPickerSearchEmptyState) {
+            if (failure is AssignRolesMemberPickerSearchEmptyState) {
               return const Center(
                 child: EmptySearchWidget(),
               );
@@ -431,7 +429,7 @@ class AssignRolesPickerView extends StatelessWidget {
             return const SizedBox.shrink();
           },
           (success) {
-            if (success is AssignRolesPickerSearchSuccessState) {
+            if (success is AssignRolesMemberPickerSearchSuccessState) {
               return ListView.builder(
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
