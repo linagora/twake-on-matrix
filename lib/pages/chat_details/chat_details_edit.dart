@@ -515,6 +515,7 @@ class ChatDetailsEditController extends State<ChatDetailsEdit>
     }
     Navigator.of(context).push(
       CupertinoPageRoute(
+        settings: const RouteSettings(name: '/assign_roles'),
         builder: (context) {
           return AssignRoles(
             room: room!,

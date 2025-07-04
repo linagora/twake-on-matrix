@@ -239,7 +239,9 @@ class AssignRolesRolePickerView extends StatelessWidget {
                       ),
                       TwakeTextButton(
                         message: L10n.of(context)!.done,
-                        onTap: () {},
+                        onTap: () {
+                          controller.onTapToDoneButton();
+                        },
                         styleMessage: Theme.of(context)
                             .textTheme
                             .labelLarge

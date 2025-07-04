@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:dartz/dartz.dart' hide State;
 import 'package:fluffychat/app_state/failure.dart';
 import 'package:fluffychat/app_state/success.dart';
@@ -30,9 +32,22 @@ class AssignRolesController extends State<AssignRoles>
     with SearchDebouncerMixin {
   final responsive = getIt.get<ResponsiveUtils>();
 
+  StreamSubscription? _powerLevelsSubscription;
+
+  final ValueNotifier<List<User>> membersNotifier =
+      ValueNotifier<List<User>>([]);
+
   final textEditingController = TextEditingController();
 
   final inputFocus = FocusNode();
+
+  Stream get powerLevelsChanged => widget.room.client.onSync.stream.where(
+        (e) =>
+            (e.rooms?.join?.containsKey(widget.room.id) ?? false) &&
+            (e.rooms!.join![widget.room.id]?.timeline?.events
+                    ?.any((s) => s.type == EventTypes.RoomPowerLevels) ??
+                false),
+      );
 
   final ValueNotifier<Either<Failure, Success>> searchUserResults =
       ValueNotifier<Either<Failure, Success>>(
@@ -49,6 +64,7 @@ class AssignRolesController extends State<AssignRoles>
     if (responsive.isMobile(context)) {
       Navigator.of(context).push(
         CupertinoPageRoute(
+          settings: const RouteSettings(name: '/assign-roles-member-picker'),
           builder: (context) {
             return AssignRolesMemberPicker(
               room: widget.room,
@@ -83,6 +99,7 @@ class AssignRolesController extends State<AssignRoles>
   List<User> get assignRolesMember => widget.room.getAssignRolesMember();
 
   void initialAssignRoles() {
+    membersNotifier.value = assignRolesMember;
     searchUserResults.value = Right(
       AssignRolesSearchSuccessState(
         assignRolesMember: assignRolesMember,
@@ -132,6 +149,12 @@ class AssignRolesController extends State<AssignRoles>
 
   @override
   void initState() {
+    _powerLevelsSubscription = powerLevelsChanged.listen((event) {
+      Logs().d(
+        "AssignRolesController::initState: powerLevelsChanged event: $event",
+      );
+      initialAssignRoles();
+    });
     initialAssignRoles();
     textEditingController.addListener(
       () => setDebouncerValue(textEditingController.text),
@@ -141,6 +164,16 @@ class AssignRolesController extends State<AssignRoles>
       handleSearchResults(searchTerm);
     });
     super.initState();
+  }
+
+  @override
+  void dispose() {
+    textEditingController.dispose();
+    inputFocus.dispose();
+    membersNotifier.dispose();
+    searchUserResults.dispose();
+    _powerLevelsSubscription?.cancel();
+    super.dispose();
   }
 
   @override

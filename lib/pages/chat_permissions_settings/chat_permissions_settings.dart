@@ -23,6 +23,7 @@ class ChatPermissionsSettings extends StatefulWidget {
 
 class ChatPermissionsSettingsController extends State<ChatPermissionsSettings> {
   String? get roomId => GoRouterState.of(context).pathParameters['roomid'];
+
   void editPowerLevel(
     BuildContext context,
     String key,
