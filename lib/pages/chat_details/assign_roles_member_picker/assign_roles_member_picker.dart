@@ -105,6 +105,7 @@ class AssignRolesPickerController extends State<AssignRolesMemberPicker>
     if (responsive.isMobile(context)) {
       Navigator.of(context).push(
         CupertinoPageRoute(
+          settings: const RouteSettings(name: '/assign_roles_role_picker'),
           builder: (context) {
             return AssignRolesRolePicker(
               room: widget.room,

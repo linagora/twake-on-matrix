@@ -54,7 +54,10 @@ class TwakeAppBar extends StatelessWidget implements PreferredSizeWidget {
                       : ContactsAppbarStyle.titlePadding(context),
                   child: Text(
                     title,
-                    style: TwakeAppBarStyle.titleTextStyle(context),
+                    style: TwakeAppBarStyle.titleTextStyle(
+                      context,
+                      isDialog: isDialog,
+                    ),
                   ),
                 ),
               ],
@@ -67,7 +70,10 @@ class TwakeAppBar extends StatelessWidget implements PreferredSizeWidget {
                       : const EdgeInsets.only(left: 16),
                   child: Text(
                     title,
-                    style: TwakeAppBarStyle.titleTextStyle(context),
+                    style: TwakeAppBarStyle.titleTextStyle(
+                      context,
+                      isDialog: isDialog,
+                    ),
                   ),
                 ),
               ],

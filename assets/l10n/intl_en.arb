@@ -3332,5 +3332,6 @@
   "changeGroupDescription": "Change group description",
   "changeGroupAvatar": "Change group avatar",
   "changeGroupHistoryVisibility": "Change group history visibility",
-  "searchGroupMembers": "Search group members"
+  "searchGroupMembers": "Search group members",
+  "permissionErrorChangeRole": "You don’t have the rights to change roles. Please reach out to your admin for help"
 }
