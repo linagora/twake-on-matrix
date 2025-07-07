@@ -6,13 +6,11 @@ import 'package:fluffychat/domain/repository/federation_configurations_repositor
 import 'package:fluffychat/domain/repository/tom_configurations_repository.dart';
 import 'package:fluffychat/event/twake_inapp_event_types.dart';
 import 'package:fluffychat/pages/bootstrap/bootstrap_dialog.dart';
-import 'package:fluffychat/pages/settings_dashboard/settings/settings_view_style.dart';
 import 'package:fluffychat/presentation/mixins/connect_page_mixin.dart';
 import 'package:fluffychat/presentation/enum/settings/settings_enum.dart';
 import 'package:fluffychat/presentation/extensions/client_extension.dart';
 import 'package:fluffychat/utils/dialog/twake_dialog.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
-import 'package:fluffychat/utils/responsive/responsive_utils.dart';
 import 'package:fluffychat/utils/url_launcher.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:fluffychat/widgets/twake_app.dart';
@@ -47,7 +45,6 @@ class SettingsController extends State<Settings> with ConnectPageMixin {
   final tomConfigurationRepository = getIt.get<ToMConfigurationsRepository>();
   final federationConfigurationsRepository =
       getIt.get<FederationConfigurationsRepository>();
-  final _responsiveUtils = getIt.get<ResponsiveUtils>();
 
   static const String generateEmailSubject =
       'Request for Deletion of Twake Chat Account';
@@ -90,7 +87,6 @@ class SettingsController extends State<Settings> with ConnectPageMixin {
     if (await showConfirmAlertDialog(
           useRootNavigator: false,
           context: twakeContext!,
-          responsiveUtils: _responsiveUtils,
           title: L10n.of(context)!.areYouSureYouWantToLogout,
           message: L10n.of(context)!.logoutDialogWarning,
           okLabel: L10n.of(context)!.logout,
@@ -281,7 +277,6 @@ class SettingsController extends State<Settings> with ConnectPageMixin {
         if (await showConfirmAlertDialog(
               useRootNavigator: false,
               context: context,
-              responsiveUtils: _responsiveUtils,
               title: L10n.of(context)!.areYouSureYouWantToDeleteAccount,
               message: L10n.of(context)!.deleteAccountMessage,
               okLabel: L10n.of(context)!.continueProcess,
@@ -290,8 +285,6 @@ class SettingsController extends State<Settings> with ConnectPageMixin {
               cancelLabel: L10n.of(context)!.deleteLater,
               cancelLabelButtonColor: LinagoraSysColors.material().primary,
               cancelTextColor: LinagoraSysColors.material().onPrimary,
-              maxWidthCancelButton: SettingsViewStyle.maxWidthCancelButton,
-              maxLinesMessage: 7,
             ) ==
             ConfirmResult.cancel) {
           return;
