@@ -3,18 +3,27 @@ import 'dart:async';
 import 'package:dartz/dartz.dart' hide State;
 import 'package:fluffychat/app_state/failure.dart';
 import 'package:fluffychat/app_state/success.dart';
+import 'package:fluffychat/config/default_power_level_member.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
+import 'package:fluffychat/domain/app_state/room/set_permission_level_state.dart';
 import 'package:fluffychat/domain/model/room/room_extension.dart';
+import 'package:fluffychat/domain/usecase/room/set_permission_level_interactor.dart';
 import 'package:fluffychat/pages/chat_details/assign_roles/assign_roles_search_state.dart';
 import 'package:fluffychat/pages/chat_details/assign_roles/assign_roles_view.dart';
 import 'package:fluffychat/pages/chat_details/assign_roles_member_picker/assign_roles_member_picker.dart';
 import 'package:fluffychat/pages/chat_details/assign_roles_member_picker/assign_roles_member_picker_style.dart';
 import 'package:fluffychat/pages/chat_details/chat_details_edit_view_style.dart';
 import 'package:fluffychat/pages/search/search_debouncer_mixin.dart';
+import 'package:fluffychat/utils/dialog/twake_dialog.dart';
 import 'package:fluffychat/utils/responsive/responsive_utils.dart';
+import 'package:fluffychat/utils/twake_snackbar.dart';
+import 'package:fluffychat/widgets/context_menu/context_menu_action.dart';
+import 'package:fluffychat/widgets/mixins/twake_context_menu_mixin.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:matrix/matrix.dart';
+import 'package:flutter_gen/gen_l10n/l10n.dart';
 
 class AssignRoles extends StatefulWidget {
   final Room room;
@@ -29,8 +38,11 @@ class AssignRoles extends StatefulWidget {
 }
 
 class AssignRolesController extends State<AssignRoles>
-    with SearchDebouncerMixin {
+    with SearchDebouncerMixin, TwakeContextMenuMixin {
   final responsive = getIt.get<ResponsiveUtils>();
+
+  final setPermissionLevelInteractor =
+      getIt.get<SetPermissionLevelInteractor>();
 
   StreamSubscription? _powerLevelsSubscription;
 
@@ -95,6 +107,97 @@ class AssignRolesController extends State<AssignRoles>
       ),
     );
   }
+
+  void handleOnTapQuickRolePicker({
+    required BuildContext context,
+    required TapDownDetails tapDownDetails,
+    required User user,
+  }) async {
+    final offset = tapDownDetails.globalPosition;
+
+    final selectedActionIndex = await showTwakeContextMenu(
+      offset: offset,
+      context: context,
+      listActions: _mapPopupRolesToContextMenuActions(
+        user: user,
+      ),
+    );
+
+    if (selectedActionIndex != null && selectedActionIndex is int) {
+      _handleClickOnContextMenuItem(
+        role: quickRolePicker[selectedActionIndex],
+        user: user,
+      );
+    }
+  }
+
+  void _handleClickOnContextMenuItem({
+    required DefaultPowerLevelMember role,
+    required User user,
+  }) {
+    setPermissionLevelInteractor.execute(
+      userPermissionLevels: {
+        user: role.powerLevel,
+      },
+    ).listen((result) {
+      _handleAssignRolesResult(result);
+    });
+  }
+
+  void _handleAssignRolesResult(Either<Failure, Success> result) {
+    result.fold(
+      (failure) {
+        if (failure is SetPermissionLevelFailure) {
+          TwakeDialog.hideLoadingDialog(context);
+          TwakeSnackBar.show(
+            context,
+            failure.exception.toString(),
+          );
+          return;
+        }
+
+        if (failure is NoPermissionFailure) {
+          TwakeDialog.hideLoadingDialog(context);
+          TwakeSnackBar.show(
+            context,
+            L10n.of(context)!.permissionErrorChangeRole,
+          );
+          return;
+        }
+      },
+      (success) {
+        if (success is SetPermissionLevelLoading) {
+          TwakeDialog.showLoadingDialog(context);
+          return;
+        }
+
+        if (success is SetPermissionLevelSuccess) {
+          TwakeDialog.hideLoadingDialog(context);
+
+          return;
+        }
+      },
+    );
+  }
+
+  List<ContextMenuAction> _mapPopupRolesToContextMenuActions({
+    required User user,
+  }) {
+    return quickRolePicker.map((action) {
+      return ContextMenuAction(
+        name: action.displayName(context),
+        icon: action.powerLevel == user.powerLevel ? Icons.check : null,
+        colorIcon: LinagoraRefColors.material().neutral[30],
+      );
+    }).toList();
+  }
+
+  final List<DefaultPowerLevelMember> quickRolePicker = [
+    DefaultPowerLevelMember.admin,
+    DefaultPowerLevelMember.moderator,
+    DefaultPowerLevelMember.member,
+    DefaultPowerLevelMember.guest,
+  ];
 
   List<User> get assignRolesMember => widget.room.getAssignRolesMember();
 

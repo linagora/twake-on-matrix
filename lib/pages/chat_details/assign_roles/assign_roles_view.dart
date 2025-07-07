@@ -272,8 +272,6 @@ class AssignRolesView extends StatelessWidget {
                 ),
                 itemBuilder: (context, index) {
                   final member = success.assignRolesMember[index];
-                  final role =
-                      member.getDefaultPowerLevelMember.displayName(context);
                   return TwakeInkWell(
                     onTap: () {},
                     child: TwakeListItem(
@@ -303,25 +301,52 @@ class AssignRolesView extends StatelessWidget {
                                       maxLines: 1,
                                     ),
                                     const Spacer(),
-                                    Row(
-                                      children: [
-                                        Text(
-                                          role,
-                                          style: Theme.of(context)
-                                              .textTheme
-                                              .labelMedium
-                                              ?.copyWith(
-                                                color:
-                                                    LinagoraRefColors.material()
-                                                        .tertiary[30],
+                                    InkWell(
+                                      hoverColor: Colors.transparent,
+                                      highlightColor: Colors.transparent,
+                                      focusColor: Colors.transparent,
+                                      onTapDown: (details) {
+                                        if (member.isOwnerRole) return;
+                                        controller.handleOnTapQuickRolePicker(
+                                          context: context,
+                                          tapDownDetails: details,
+                                          user: member,
+                                        );
+                                      },
+                                      child: StreamBuilder(
+                                        stream: controller.powerLevelsChanged,
+                                        builder: (context, date) {
+                                          return Row(
+                                            children: [
+                                              Text(
+                                                member
+                                                    .getDefaultPowerLevelMember
+                                                    .displayName(context),
+                                                style: Theme.of(context)
+                                                    .textTheme
+                                                    .labelMedium
+                                                    ?.copyWith(
+                                                      color: LinagoraRefColors
+                                                              .material()
+                                                          .tertiary[30],
+                                                    ),
+                                                overflow: TextOverflow.ellipsis,
+                                                maxLines: 1,
                                               ),
-                                          overflow: TextOverflow.ellipsis,
-                                          maxLines: 1,
-                                        ),
-                                        const SizedBox(
-                                          width: 4,
-                                        ),
-                                      ],
+                                              const SizedBox(
+                                                width: 4,
+                                              ),
+                                              if (!member.isOwnerRole)
+                                                Icon(
+                                                  Icons.arrow_drop_down,
+                                                  color: LinagoraRefColors
+                                                          .material()
+                                                      .tertiary[30],
+                                                ),
+                                            ],
+                                          );
+                                        },
+                                      ),
                                     ),
                                   ],
                                 ),
