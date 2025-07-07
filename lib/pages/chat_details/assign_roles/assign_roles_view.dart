@@ -83,7 +83,10 @@ class AssignRolesView extends StatelessWidget {
                 contextMenuBuilder: mobileTwakeContextMenuBuilder,
                 focusNode: controller.inputFocus,
                 textInputAction: TextInputAction.search,
-                autofocus: true,
+                autofocus: false,
+                onTapOutside: (_) {
+                  controller.inputFocus.unfocus();
+                },
                 decoration: ChatListHeaderStyle.searchInputDecoration(
                   context,
                   prefixIconColor: LinagoraSysColors.material().tertiary,
@@ -113,13 +116,18 @@ class AssignRolesView extends StatelessWidget {
                 horizontal: 16.0,
                 vertical: 8.0,
               ),
-              child: Text(
-                L10n.of(context)!.adminsOfTheGroup(
-                  controller.assignRolesMember.length,
-                ),
-                style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                      color: LinagoraRefColors.material().neutral[40],
+              child: ValueListenableBuilder(
+                valueListenable: controller.membersNotifier,
+                builder: (context, members, child) {
+                  return Text(
+                    L10n.of(context)!.adminsOfTheGroup(
+                      members.length,
                     ),
+                    style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                          color: LinagoraRefColors.material().neutral[40],
+                        ),
+                  );
+                },
               ),
             ),
             const SizedBox(height: 8.0),
