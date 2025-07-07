@@ -90,7 +90,7 @@ class MessageContentBuilder extends StatelessWidget
                         child: MessageTime(
                           timelineOverlayMessage: event.timelineOverlayMessage,
                           event: event,
-                          ownMessage: event.isOwnMessage,
+                          showSeenIcon: event.isOwnMessage,
                           timeline: timeline,
                           room: event.room,
                         ),
@@ -102,6 +102,7 @@ class MessageContentBuilder extends StatelessWidget
                           : null,
                       onTapPreview: !selectMode ? () {} : null,
                       ownMessage: event.isOwnMessage,
+                      timeline: timeline,
                     ),
                     PositionedDirectional(
                       end: 8,
@@ -114,7 +115,7 @@ class MessageContentBuilder extends StatelessWidget
                               timelineOverlayMessage:
                                   event.timelineOverlayMessage,
                               event: event,
-                              ownMessage: event.isOwnMessage,
+                              showSeenIcon: event.isOwnMessage,
                               timeline: timeline,
                               room: event.room,
                             ),
@@ -140,7 +141,7 @@ class MessageContentBuilder extends StatelessWidget
                             timelineOverlayMessage:
                                 event.timelineOverlayMessage,
                             event: event,
-                            ownMessage: event.isOwnMessage,
+                            showSeenIcon: event.isOwnMessage,
                             timeline: timeline,
                             room: event.room,
                           ),
