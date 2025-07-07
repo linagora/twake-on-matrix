@@ -181,6 +181,7 @@ extension LocalizedBody on Event {
   bool hideDisplayName(Event? nextEvent, bool isMobile) =>
       isMobile && (isOwnMessage || room.isDirectChat) ||
       !isSameSenderWith(nextEvent) ||
+      (isOwnMessage && redacted) ||
       type == EventTypes.Encrypted;
 
   bool get isPinned => room.pinnedEventIds.contains(eventId);

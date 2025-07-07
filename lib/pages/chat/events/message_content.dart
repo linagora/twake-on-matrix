@@ -43,6 +43,7 @@ class MessageContent extends StatelessWidget
   final void Function()? onTapPreview;
   final void Function()? onTapSelectMode;
   final bool ownMessage;
+  final Timeline timeline;
 
   const MessageContent(
     this.event, {
@@ -52,6 +53,7 @@ class MessageContent extends StatelessWidget
     this.onTapPreview,
     this.onTapSelectMode,
     required this.ownMessage,
+    required this.timeline,
   });
 
   @override
@@ -256,7 +258,7 @@ class MessageContent extends StatelessWidget
                 isEnabled: PlatformInfos.isWeb,
                 child: Padding(
                   padding: const EdgeInsets.only(bottom: 8),
-                  child: RedactedContent(event: event),
+                  child: RedactedContent(event: event, timeline: timeline),
                 ),
               );
             }

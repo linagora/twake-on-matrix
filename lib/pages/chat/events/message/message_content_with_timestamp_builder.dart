@@ -624,26 +624,27 @@ class _MessageContentWithTimestampBuilderState
                     scrollToEventId: widget.scrollToEventId,
                     selectMode: widget.selectMode,
                   ),
-                  Positioned(
-                    child: OptionalSelectionContainerDisabled(
-                      isEnabled: PlatformInfos.isWeb,
-                      child: Padding(
-                        padding: MessageStyle.paddingMessageTime,
-                        child: Text.rich(
-                          WidgetSpan(
-                            child: MessageTime(
-                              timelineOverlayMessage:
-                                  widget.event.timelineOverlayMessage,
-                              room: widget.event.room,
-                              event: widget.event,
-                              ownMessage: widget.event.isOwnMessage,
-                              timeline: widget.timeline,
+                  if (!widget.event.redacted)
+                    Positioned(
+                      child: OptionalSelectionContainerDisabled(
+                        isEnabled: PlatformInfos.isWeb,
+                        child: Padding(
+                          padding: MessageStyle.paddingMessageTime,
+                          child: Text.rich(
+                            WidgetSpan(
+                              child: MessageTime(
+                                timelineOverlayMessage:
+                                    widget.event.timelineOverlayMessage,
+                                room: widget.event.room,
+                                event: widget.event,
+                                showSeenIcon: widget.event.isOwnMessage,
+                                timeline: widget.timeline,
+                              ),
                             ),
                           ),
                         ),
                       ),
                     ),
-                  ),
                 ],
               ),
             ],
@@ -704,7 +705,9 @@ class _MessageContentWithTimestampBuilderState
     return ValueListenableBuilder(
       valueListenable: widget.isHoverNotifier,
       builder: (context, isHover, child) {
-        if (isHover != null && isHover.contains(widget.event.eventId)) {
+        if (isHover != null &&
+            isHover.contains(widget.event.eventId) &&
+            !widget.event.redacted) {
           return child!;
         }
         return const SizedBox.shrink();
