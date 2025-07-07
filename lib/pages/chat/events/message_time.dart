@@ -15,14 +15,14 @@ class MessageTime extends StatelessWidget {
   const MessageTime({
     super.key,
     required this.event,
-    required this.ownMessage,
+    required this.showSeenIcon,
     required this.timeline,
     required this.timelineOverlayMessage,
     required this.room,
   });
 
   final Event event;
-  final bool ownMessage;
+  final bool showSeenIcon;
   final bool timelineOverlayMessage;
   final Timeline timeline;
   final Room room;
@@ -88,7 +88,7 @@ class MessageTime extends StatelessWidget {
                   ),
                 ),
           ),
-          if (ownMessage) ...[
+          if (showSeenIcon) ...[
             SizedBox(width: MessageTimeStyle.paddingTimeAndIcon),
             SeenByRow(
               timelineOverlayMessage: timelineOverlayMessage,
