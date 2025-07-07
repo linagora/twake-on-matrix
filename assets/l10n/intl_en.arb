@@ -3342,5 +3342,7 @@
   "@removeMember": {},
   "removeMemberSelectionError": "You cannot delete a member with a role equal to or greater than yours.",
   "@removeMemberSelectionError": {},
-  "downgrade": "Downgrade"
+  "downgrade": "Downgrade",
+  "deletedMessage": "Deleted message",
+  "@deletedMessage": {}
 }
