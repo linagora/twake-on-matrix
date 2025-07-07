@@ -74,7 +74,10 @@ class AssignRolesMemberPickerView extends StatelessWidget {
                         contextMenuBuilder: mobileTwakeContextMenuBuilder,
                         focusNode: controller.inputFocus,
                         textInputAction: TextInputAction.search,
-                        autofocus: true,
+                        autofocus: false,
+                        onTapOutside: (_) {
+                          controller.inputFocus.unfocus();
+                        },
                         decoration: ChatListHeaderStyle.searchInputDecoration(
                           context,
                           prefixIconColor:

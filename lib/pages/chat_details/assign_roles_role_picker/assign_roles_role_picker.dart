@@ -1,9 +1,16 @@
+import 'package:dartz/dartz.dart' hide State;
+import 'package:fluffychat/app_state/failure.dart';
+import 'package:fluffychat/app_state/success.dart';
 import 'package:fluffychat/config/default_power_level_member.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
+import 'package:fluffychat/domain/app_state/room/set_permission_level_state.dart';
+import 'package:fluffychat/domain/usecase/room/set_permission_level_interactor.dart';
 import 'package:fluffychat/pages/chat_details/assign_roles_role_picker/assign_roles_role_picker_style.dart';
 import 'package:fluffychat/pages/chat_details/assign_roles_role_picker/assign_roles_role_picker_view.dart';
 import 'package:fluffychat/resource/image_paths.dart';
+import 'package:fluffychat/utils/dialog/twake_dialog.dart';
 import 'package:fluffychat/utils/responsive/responsive_utils.dart';
+import 'package:fluffychat/utils/twake_snackbar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:linagora_design_flutter/colors/linagora_sys_colors.dart';
@@ -31,6 +38,9 @@ class AssignRolesEditorController extends State<AssignRolesRolePicker> {
 
   final ValueNotifier<DefaultPowerLevelMember?> roleSelectedNotifier =
       ValueNotifier<DefaultPowerLevelMember?>(null);
+
+  final setPermissionLevelInteractor =
+      getIt.get<SetPermissionLevelInteractor>();
 
   final List<DefaultPowerLevelMember> assignRoles = [
     DefaultPowerLevelMember.guest,
@@ -157,6 +167,71 @@ class AssignRolesEditorController extends State<AssignRolesRolePicker> {
         roleSelectedNotifier.value = null;
       }
     }
+  }
+
+  void onTapToDoneButton() {
+    if (roleSelectedNotifier.value == null) {
+      return;
+    }
+
+    final Map<User, int> userPermissionLevels = {};
+
+    for (final user in widget.assignedUsers) {
+      userPermissionLevels[user] = roleSelectedNotifier.value!.powerLevel;
+    }
+
+    setPermissionLevelInteractor
+        .execute(
+      userPermissionLevels: userPermissionLevels,
+    )
+        .listen((result) {
+      _handleAssignRolesResult(result);
+    });
+  }
+
+  void _handleAssignRolesResult(Either<Failure, Success> result) {
+    result.fold(
+      (failure) {
+        if (failure is SetPermissionLevelFailure) {
+          TwakeDialog.hideLoadingDialog(context);
+          TwakeSnackBar.show(
+            context,
+            failure.exception.toString(),
+          );
+          return;
+        }
+
+        if (failure is NoPermissionFailure) {
+          TwakeDialog.hideLoadingDialog(context);
+          TwakeSnackBar.show(
+            context,
+            L10n.of(context)!.permissionErrorChangeRole,
+          );
+          return;
+        }
+      },
+      (success) {
+        if (success is SetPermissionLevelLoading) {
+          TwakeDialog.showLoadingDialog(context);
+          return;
+        }
+
+        if (success is SetPermissionLevelSuccess) {
+          TwakeDialog.hideLoadingDialog(context);
+          if (responsive.isMobile(context)) {
+            Navigator.of(context).popUntil(
+              (route) => route.settings.name == '/assign_roles',
+            );
+          } else {
+            Navigator.of(context).popUntil(
+              (route) => route.isFirst,
+            );
+          }
+
+          return;
+        }
+      },
+    );
   }
 
   @override
