@@ -12,10 +12,12 @@ import 'package:fluffychat/pages/chat_details/assign_roles/assign_roles_search_s
 import 'package:fluffychat/pages/chat_details/assign_roles/assign_roles_view.dart';
 import 'package:fluffychat/pages/chat_details/assign_roles_member_picker/assign_roles_member_picker.dart';
 import 'package:fluffychat/pages/chat_details/assign_roles_member_picker/assign_roles_member_picker_style.dart';
+import 'package:fluffychat/pages/chat_details/assign_roles_member_picker/selected_user_notifier.dart';
 import 'package:fluffychat/pages/chat_details/chat_details_edit_view_style.dart';
 import 'package:fluffychat/pages/search/search_debouncer_mixin.dart';
 import 'package:fluffychat/utils/dialog/twake_dialog.dart';
 import 'package:fluffychat/utils/extension/build_context_extension.dart';
+import 'package:fluffychat/utils/extension/value_notifier_extension.dart';
 import 'package:fluffychat/utils/responsive/responsive_utils.dart';
 import 'package:fluffychat/utils/twake_snackbar.dart';
 import 'package:fluffychat/widgets/context_menu/context_menu_action.dart';
@@ -44,6 +46,12 @@ class AssignRolesController extends State<AssignRoles>
 
   final setPermissionLevelInteractor =
       getIt.get<SetPermissionLevelInteractor>();
+
+  final SelectedUsersMapChangeNotifier selectedUsersMapChangeNotifier =
+      SelectedUsersMapChangeNotifier();
+
+  final ValueNotifier<bool> enableSelectMembersMobileNotifier =
+      ValueNotifier<bool>(false);
 
   StreamSubscription? _powerLevelsSubscription;
 
@@ -351,6 +359,51 @@ class AssignRolesController extends State<AssignRoles>
     );
   }
 
+  void _listenToSelectedUsersMapChange() {
+    selectedUsersMapChangeNotifier.addListener(() {
+      Logs().d(
+        "AssignRolesController::initState: selectedUsersMapChangeNotifier: ${selectedUsersMapChangeNotifier.usersList.length}",
+      );
+      if (responsive.isMobile(context)) {
+        enableSelectMembersMobileNotifier.value =
+            selectedUsersMapChangeNotifier.usersList.isNotEmpty;
+      }
+    });
+  }
+
+  void handleOnLongPressMobile() {
+    if (!responsive.isMobile(context)) {
+      return;
+    }
+
+    if (!widget.room.canAssignRoles) {
+      return;
+    }
+    enableSelectMembersMobileNotifier.toggle();
+  }
+
+  void handleRemoveMultiAdminsAndModeratorsMobile() {
+    if (!responsive.isMobile(context)) {
+      return;
+    }
+    if (!widget.room.canAssignRoles) {
+      return;
+    }
+    if (selectedUsersMapChangeNotifier.usersList.isEmpty) {
+      return;
+    }
+
+    setPermissionLevelInteractor.execute(
+      userPermissionLevels: {
+        for (final user in selectedUsersMapChangeNotifier.usersList)
+          user: DefaultPowerLevelMember.member.powerLevel,
+      },
+    ).listen((result) {
+      selectedUsersMapChangeNotifier.unselectAllUsers();
+      _handleAssignRolesResult(result);
+    });
+  }
+
   @override
   void initState() {
     _powerLevelsSubscription = powerLevelsChanged.listen((event) {
@@ -363,6 +416,7 @@ class AssignRolesController extends State<AssignRoles>
     textEditingController.addListener(
       () => setDebouncerValue(textEditingController.text),
     );
+    _listenToSelectedUsersMapChange();
     initializeDebouncer((searchTerm) {
       Logs().d("AssignRolesController::initState: $searchTerm");
       handleSearchResults(searchTerm);
@@ -377,6 +431,9 @@ class AssignRolesController extends State<AssignRoles>
     membersNotifier.dispose();
     searchUserResults.dispose();
     _powerLevelsSubscription?.cancel();
+    disposeDebouncer();
+    selectedUsersMapChangeNotifier.dispose();
+    enableSelectMembersMobileNotifier.dispose();
     super.dispose();
   }
 
