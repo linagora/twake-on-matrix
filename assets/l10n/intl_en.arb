@@ -3339,5 +3339,9 @@
   "removeUserConfirmationTitle": "Are you sure you want to remove this user from group?",
   "@removeUserConfirmationTitle": {},
   "removeUserConfirmationMessage": "This user will no longer be able to interact with the group chat.",
-  "@removeUserConfirmationMessage": {}
+  "@removeUserConfirmationMessage": {},
+  "removeMember": "Remove member",
+  "@removeMember": {},
+  "removeMemberSelectionError": "You cannot delete a member with a role equal to or greater than yours.",
+  "@removeMemberSelectionError": {}
 }
