@@ -3,18 +3,30 @@ import 'dart:async';
 import 'package:dartz/dartz.dart' hide State;
 import 'package:fluffychat/app_state/failure.dart';
 import 'package:fluffychat/app_state/success.dart';
+import 'package:fluffychat/config/default_power_level_member.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
+import 'package:fluffychat/domain/app_state/room/set_permission_level_state.dart';
 import 'package:fluffychat/domain/model/room/room_extension.dart';
+import 'package:fluffychat/domain/usecase/room/set_permission_level_interactor.dart';
 import 'package:fluffychat/pages/chat_details/assign_roles/assign_roles_search_state.dart';
 import 'package:fluffychat/pages/chat_details/assign_roles/assign_roles_view.dart';
 import 'package:fluffychat/pages/chat_details/assign_roles_member_picker/assign_roles_member_picker.dart';
 import 'package:fluffychat/pages/chat_details/assign_roles_member_picker/assign_roles_member_picker_style.dart';
+import 'package:fluffychat/pages/chat_details/assign_roles_member_picker/selected_user_notifier.dart';
 import 'package:fluffychat/pages/chat_details/chat_details_edit_view_style.dart';
 import 'package:fluffychat/pages/search/search_debouncer_mixin.dart';
+import 'package:fluffychat/utils/dialog/twake_dialog.dart';
+import 'package:fluffychat/utils/extension/build_context_extension.dart';
+import 'package:fluffychat/utils/extension/value_notifier_extension.dart';
 import 'package:fluffychat/utils/responsive/responsive_utils.dart';
+import 'package:fluffychat/utils/twake_snackbar.dart';
+import 'package:fluffychat/widgets/context_menu/context_menu_action.dart';
+import 'package:fluffychat/widgets/mixins/twake_context_menu_mixin.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:matrix/matrix.dart';
+import 'package:flutter_gen/gen_l10n/l10n.dart';
 
 class AssignRoles extends StatefulWidget {
   final Room room;
@@ -29,8 +41,17 @@ class AssignRoles extends StatefulWidget {
 }
 
 class AssignRolesController extends State<AssignRoles>
-    with SearchDebouncerMixin {
+    with SearchDebouncerMixin, TwakeContextMenuMixin {
   final responsive = getIt.get<ResponsiveUtils>();
+
+  final setPermissionLevelInteractor =
+      getIt.get<SetPermissionLevelInteractor>();
+
+  final SelectedUsersMapChangeNotifier selectedUsersMapChangeNotifier =
+      SelectedUsersMapChangeNotifier();
+
+  final ValueNotifier<bool> enableSelectMembersMobileNotifier =
+      ValueNotifier<bool>(false);
 
   StreamSubscription? _powerLevelsSubscription;
 
@@ -96,6 +117,197 @@ class AssignRolesController extends State<AssignRoles>
     );
   }
 
+  void handleOnTapQuickRolePickerMobile({
+    required BuildContext context,
+    required User user,
+  }) async {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(16),
+          topRight: Radius.circular(16),
+        ),
+      ),
+      isScrollControlled: true,
+      builder: (context) => Container(
+        width: double.infinity,
+        padding: MediaQuery.viewInsetsOf(context),
+        child: DraggableScrollableSheet(
+          initialChildSize: 0.3,
+          minChildSize: 0.3,
+          maxChildSize: 0.5,
+          expand: false,
+          builder: (BuildContext context, ScrollController scrollController) {
+            return Padding(
+              padding: const EdgeInsets.only(
+                top: 16,
+                bottom: 12,
+              ),
+              child: Column(
+                children: [
+                  Container(
+                    height: 4,
+                    width: 32,
+                    margin: const EdgeInsets.symmetric(vertical: 16),
+                    decoration: BoxDecoration(
+                      color: LinagoraSysColors.material().outline,
+                      borderRadius: BorderRadius.circular(100),
+                    ),
+                  ),
+                  Expanded(
+                    child: Column(
+                      children: quickRolePicker
+                          .map(
+                            (role) => InkWell(
+                              hoverColor: Colors.transparent,
+                              highlightColor: Colors.transparent,
+                              focusColor: Colors.transparent,
+                              splashColor: Colors.transparent,
+                              onTap: () {
+                                Navigator.of(context).pop();
+                                _handleClickOnContextMenuItem(
+                                  role: role,
+                                  user: user,
+                                );
+                              },
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 32,
+                                ),
+                                margin: const EdgeInsets.only(bottom: 8),
+                                height: 36,
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Expanded(
+                                      child: Text(
+                                        role.displayName(context),
+                                        style: context.textTheme.bodyLarge
+                                            ?.copyWith(
+                                          color: LinagoraSysColors.material()
+                                              .onSurface,
+                                        ),
+                                      ),
+                                    ),
+                                    if (role.powerLevel == user.powerLevel)
+                                      SizedBox(
+                                        width: 36,
+                                        height: 36,
+                                        child: Icon(
+                                          Icons.check,
+                                          color: LinagoraSysColors.material()
+                                              .onSurface,
+                                        ),
+                                      ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          )
+                          .toList(),
+                    ),
+                  ),
+                ],
+              ),
+            );
+          },
+        ),
+      ),
+    );
+  }
+
+  void handleOnTapQuickRolePickerWeb({
+    required BuildContext context,
+    required TapDownDetails tapDownDetails,
+    required User user,
+  }) async {
+    final offset = tapDownDetails.globalPosition;
+
+    final selectedActionIndex = await showTwakeContextMenu(
+      offset: offset,
+      context: context,
+      listActions: _mapPopupRolesToContextMenuActions(
+        user: user,
+      ),
+    );
+
+    if (selectedActionIndex != null && selectedActionIndex is int) {
+      _handleClickOnContextMenuItem(
+        role: quickRolePicker[selectedActionIndex],
+        user: user,
+      );
+    }
+  }
+
+  void _handleClickOnContextMenuItem({
+    required DefaultPowerLevelMember role,
+    required User user,
+  }) {
+    setPermissionLevelInteractor.execute(
+      userPermissionLevels: {
+        user: role.powerLevel,
+      },
+    ).listen((result) {
+      _handleAssignRolesResult(result);
+    });
+  }
+
+  void _handleAssignRolesResult(Either<Failure, Success> result) {
+    result.fold(
+      (failure) {
+        if (failure is SetPermissionLevelFailure) {
+          TwakeDialog.hideLoadingDialog(context);
+          TwakeSnackBar.show(
+            context,
+            failure.exception.toString(),
+          );
+          return;
+        }
+
+        if (failure is NoPermissionFailure) {
+          TwakeDialog.hideLoadingDialog(context);
+          TwakeSnackBar.show(
+            context,
+            L10n.of(context)!.permissionErrorChangeRole,
+          );
+          return;
+        }
+      },
+      (success) {
+        if (success is SetPermissionLevelLoading) {
+          TwakeDialog.showLoadingDialog(context);
+          return;
+        }
+
+        if (success is SetPermissionLevelSuccess) {
+          TwakeDialog.hideLoadingDialog(context);
+
+          return;
+        }
+      },
+    );
+  }
+
+  List<ContextMenuAction> _mapPopupRolesToContextMenuActions({
+    required User user,
+  }) {
+    return quickRolePicker.map((action) {
+      return ContextMenuAction(
+        name: action.displayName(context),
+        icon: action.powerLevel == user.powerLevel ? Icons.check : null,
+        colorIcon: LinagoraRefColors.material().neutral[30],
+      );
+    }).toList();
+  }
+
+  final List<DefaultPowerLevelMember> quickRolePicker = [
+    DefaultPowerLevelMember.admin,
+    DefaultPowerLevelMember.moderator,
+    DefaultPowerLevelMember.member,
+    DefaultPowerLevelMember.guest,
+  ];
+
   List<User> get assignRolesMember => widget.room.getAssignRolesMember();
 
   void initialAssignRoles() {
@@ -147,6 +359,51 @@ class AssignRolesController extends State<AssignRoles>
     );
   }
 
+  void _listenToSelectedUsersMapChange() {
+    selectedUsersMapChangeNotifier.addListener(() {
+      Logs().d(
+        "AssignRolesController::initState: selectedUsersMapChangeNotifier: ${selectedUsersMapChangeNotifier.usersList.length}",
+      );
+      if (responsive.isMobile(context)) {
+        enableSelectMembersMobileNotifier.value =
+            selectedUsersMapChangeNotifier.usersList.isNotEmpty;
+      }
+    });
+  }
+
+  void handleOnLongPressMobile() {
+    if (!responsive.isMobile(context)) {
+      return;
+    }
+
+    if (!widget.room.canAssignRoles) {
+      return;
+    }
+    enableSelectMembersMobileNotifier.toggle();
+  }
+
+  void handleRemoveMultiAdminsAndModeratorsMobile() {
+    if (!responsive.isMobile(context)) {
+      return;
+    }
+    if (!widget.room.canAssignRoles) {
+      return;
+    }
+    if (selectedUsersMapChangeNotifier.usersList.isEmpty) {
+      return;
+    }
+
+    setPermissionLevelInteractor.execute(
+      userPermissionLevels: {
+        for (final user in selectedUsersMapChangeNotifier.usersList)
+          user: DefaultPowerLevelMember.member.powerLevel,
+      },
+    ).listen((result) {
+      selectedUsersMapChangeNotifier.unselectAllUsers();
+      _handleAssignRolesResult(result);
+    });
+  }
+
   @override
   void initState() {
     _powerLevelsSubscription = powerLevelsChanged.listen((event) {
@@ -159,6 +416,7 @@ class AssignRolesController extends State<AssignRoles>
     textEditingController.addListener(
       () => setDebouncerValue(textEditingController.text),
     );
+    _listenToSelectedUsersMapChange();
     initializeDebouncer((searchTerm) {
       Logs().d("AssignRolesController::initState: $searchTerm");
       handleSearchResults(searchTerm);
@@ -173,6 +431,9 @@ class AssignRolesController extends State<AssignRoles>
     membersNotifier.dispose();
     searchUserResults.dispose();
     _powerLevelsSubscription?.cancel();
+    disposeDebouncer();
+    selectedUsersMapChangeNotifier.dispose();
+    enableSelectMembersMobileNotifier.dispose();
     super.dispose();
   }
 
