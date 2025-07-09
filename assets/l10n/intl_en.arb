@@ -3335,5 +3335,9 @@
   "searchGroupMembers": "Search group members",
   "permissionErrorChangeRole": "You don’t have the rights to change roles. Please reach out to your admin for help",
   "deleteMessageConfirmationTitle": "Are you sure you want to delete this message?",
-  "@deleteMessageConfirmationTitle": {}
+  "@deleteMessageConfirmationTitle": {},
+  "removeUserConfirmationTitle": "Are you sure you want to remove this user from group?",
+  "@removeUserConfirmationTitle": {},
+  "removeUserConfirmationMessage": "This user will no longer be able to interact with the group chat.",
+  "@removeUserConfirmationMessage": {}
 }

@@ -12,7 +12,6 @@ import 'package:fluffychat/presentation/enum/profile_info/profile_info_body_enum
 import 'package:fluffychat/presentation/model/contact/presentation_contact_constant.dart';
 import 'package:fluffychat/presentation/model/search/presentation_search.dart';
 import 'package:fluffychat/utils/dialog/twake_dialog.dart';
-import 'package:fluffychat/utils/dialog/warning_dialog.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/utils/twake_snackbar.dart';
 import 'package:fluffychat/widgets/matrix.dart';
@@ -117,30 +116,29 @@ class ProfileInfoBodyController extends State<ProfileInfoBody> {
 
   Future<void> removeFromGroupChat() async {
     if (user == null) return;
-    WarningDialog.showCancelable(
-      context,
-      message: L10n.of(context)!.removeReason(
-        user?.displayName ?? '',
-      ),
-      title: L10n.of(context)!.removeUser,
-      acceptText: L10n.of(context)!.remove,
-      cancelText: L10n.of(context)!.cancel,
-      acceptTextColor: LinagoraSysColors.material().error,
-      onAccept: () async {
-        WarningDialog.hideWarningDialog(context);
-        final result = await TwakeDialog.showFutureLoadingDialogFullScreen(
-          future: () => user!.kick(),
-        );
-        if (result.error != null) {
-          TwakeSnackBar.show(
-            context,
-            result.error!.message,
-          );
-          return;
-        }
-        widget.onUpdatedMembers?.call();
-      },
+    final confirmResult = await showConfirmAlertDialog(
+      context: context,
+      title: L10n.of(context)!.removeUserConfirmationTitle,
+      message: L10n.of(context)!.removeUserConfirmationMessage,
+      okLabel: L10n.of(context)!.removeUser,
+      cancelLabel: L10n.of(context)!.cancel,
+      okLabelButtonColor: LinagoraSysColors.material().error,
+      showCloseButton: true,
     );
+    if (confirmResult == ConfirmResult.cancel) return;
+
+    Navigator.pop(context);
+    final result = await TwakeDialog.showFutureLoadingDialogFullScreen(
+      future: () => user!.kick(),
+    );
+    if (result.error != null) {
+      TwakeSnackBar.show(
+        context,
+        result.error!.message,
+      );
+      return;
+    }
+    widget.onUpdatedMembers?.call();
   }
 
   List<ProfileInfoActions> profileInfoActions() {
