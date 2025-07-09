@@ -1,3 +1,4 @@
+import 'package:fluffychat/pages/chat_details/assign_roles_member_picker/selected_user_notifier.dart';
 import 'package:fluffychat/pages/chat_details/participant_list_item/participant_list_item.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
@@ -9,7 +10,9 @@ class ChatDetailsMembersPage extends StatelessWidget {
   final VoidCallback openDialogInvite;
   final VoidCallback requestMoreMembersAction;
   final VoidCallback? onUpdatedMembers;
+  final SelectedUsersMapChangeNotifier selectedUsersMapChangeNotifier;
   final bool isMobileAndTablet;
+  final void Function(User member)? onSelectMember;
 
   const ChatDetailsMembersPage({
     super.key,
@@ -18,7 +21,9 @@ class ChatDetailsMembersPage extends StatelessWidget {
     required this.openDialogInvite,
     required this.requestMoreMembersAction,
     required this.isMobileAndTablet,
+    required this.selectedUsersMapChangeNotifier,
     this.onUpdatedMembers,
+    this.onSelectMember,
   });
 
   @override
@@ -36,12 +41,17 @@ class ChatDetailsMembersPage extends StatelessWidget {
                 itemCount: members.length + (canRequestMoreMembers ? 1 : 0),
                 itemBuilder: (BuildContext context, int index) {
                   if (index < members!.length) {
-                    return Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 12),
-                      child: ParticipantListItem(
-                        members[index],
-                        onUpdatedMembers: onUpdatedMembers,
-                      ),
+                    return ListenableBuilder(
+                      listenable: selectedUsersMapChangeNotifier,
+                      builder: (context, child) {
+                        return ParticipantListItem(
+                          members![index],
+                          onUpdatedMembers: onUpdatedMembers,
+                          selectionMode: selectedUsersMapChangeNotifier
+                              .getSelectionModeForUser(members[index]),
+                          onSelectMember: onSelectMember,
+                        );
+                      },
                     );
                   }
                   final haveMoreMembers = actualMembersCount > members.length;
