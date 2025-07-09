@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/pages/chat_details/chat_details_page_view/chat_details_members_page.dart';
 import 'package:fluffychat/pages/chat_details/chat_details_page_view/chat_details_page_enum.dart';
@@ -117,24 +118,15 @@ mixin ChatDetailsTabMixin<T extends StatefulWidget>
 
   void _requestMoreMembersAction() async {
     final currentMembersCount = _displayMembersNotifier.value?.length ?? 0;
-    _currentMembersCount += _membersPerPage;
-
     final members = _membersNotifier.value;
-    if (members != null && currentMembersCount < members.length) {
-      final endIndex = _currentMembersCount > members.length
-          ? members.length
-          : _currentMembersCount;
-      final newMembers = members.sublist(currentMembersCount, endIndex);
-      _displayMembersNotifier.value = [
-        ...?_displayMembersNotifier.value,
-        ...newMembers,
-      ];
-    } else {
-      _displayMembersNotifier.value = [
-        ...?_displayMembersNotifier.value,
-        ...?members,
-      ];
+    if (members == null || currentMembersCount >= members.length) return;
+
+    if (_currentMembersCount < members.length) {
+      _currentMembersCount += _membersPerPage;
     }
+
+    final endIndex = min(_currentMembersCount, members.length);
+    _displayMembersNotifier.value = members.sublist(0, endIndex);
   }
 
   void _initDisplayMembers() {
