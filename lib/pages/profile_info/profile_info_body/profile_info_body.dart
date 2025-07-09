@@ -129,7 +129,7 @@ class ProfileInfoBodyController extends State<ProfileInfoBody> {
       onAccept: () async {
         WarningDialog.hideWarningDialog(context);
         final result = await TwakeDialog.showFutureLoadingDialogFullScreen(
-          future: () => user!.kick(),
+          future: () => user!.ban(),
         );
         if (result.error != null) {
           TwakeSnackBar.show(

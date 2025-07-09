@@ -1,3 +1,4 @@
+import 'package:fluffychat/domain/enums/selection_mode_enum.dart';
 import 'package:flutter/widgets.dart';
 import 'package:matrix/matrix.dart';
 
@@ -46,9 +47,21 @@ class SelectedUsersMapChangeNotifier extends ChangeNotifier {
     notifyListeners();
   }
 
+  SelectionModeEnum getSelectionModeForUser(User user) {
+    if (!user.canBan || !haveSelectedUsersNotifier.value) {
+      return SelectionModeEnum.unavailable;
+    }
+
+    return selectedUsersMap[user]?.value == true
+        ? SelectionModeEnum.selected
+        : SelectionModeEnum.unselected;
+  }
+
   @override
   void dispose() {
     super.dispose();
+    selectedUsersMap.clear();
+    _selectedUsersList.clear();
     haveSelectedUsersNotifier.dispose();
   }
 }
