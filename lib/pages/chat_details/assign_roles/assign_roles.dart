@@ -5,8 +5,10 @@ import 'package:fluffychat/app_state/failure.dart';
 import 'package:fluffychat/app_state/success.dart';
 import 'package:fluffychat/config/default_power_level_member.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
+import 'package:fluffychat/domain/app_state/room/ban_user_state.dart';
 import 'package:fluffychat/domain/app_state/room/set_permission_level_state.dart';
 import 'package:fluffychat/domain/model/room/room_extension.dart';
+import 'package:fluffychat/domain/usecase/room/ban_user_interactor.dart';
 import 'package:fluffychat/domain/usecase/room/set_permission_level_interactor.dart';
 import 'package:fluffychat/pages/chat_details/assign_roles/assign_roles_search_state.dart';
 import 'package:fluffychat/pages/chat_details/assign_roles/assign_roles_view.dart';
@@ -14,6 +16,7 @@ import 'package:fluffychat/pages/chat_details/assign_roles_member_picker/assign_
 import 'package:fluffychat/pages/chat_details/assign_roles_member_picker/assign_roles_member_picker_style.dart';
 import 'package:fluffychat/pages/chat_details/assign_roles_member_picker/selected_user_notifier.dart';
 import 'package:fluffychat/pages/chat_details/chat_details_edit_view_style.dart';
+import 'package:fluffychat/pages/chat_list/chat_custom_slidable_action.dart';
 import 'package:fluffychat/pages/search/search_debouncer_mixin.dart';
 import 'package:fluffychat/utils/dialog/twake_dialog.dart';
 import 'package:fluffychat/utils/extension/build_context_extension.dart';
@@ -47,6 +50,8 @@ class AssignRolesController extends State<AssignRoles>
   final setPermissionLevelInteractor =
       getIt.get<SetPermissionLevelInteractor>();
 
+  final banUserInteractor = getIt.get<BanUserInteractor>();
+
   StreamSubscription? _setPermissionLevelSubscription;
 
   final SelectedUsersMapChangeNotifier selectedUsersMapChangeNotifier =
@@ -67,9 +72,12 @@ class AssignRolesController extends State<AssignRoles>
   Stream get powerLevelsChanged => widget.room.client.onSync.stream.where(
         (e) =>
             (e.rooms?.join?.containsKey(widget.room.id) ?? false) &&
-            (e.rooms!.join![widget.room.id]?.timeline?.events
-                    ?.any((s) => s.type == EventTypes.RoomPowerLevels) ??
-                false),
+            ((e.rooms!.join![widget.room.id]?.timeline?.events
+                        ?.any((s) => s.type == EventTypes.RoomPowerLevels) ??
+                    false) ||
+                (e.rooms!.join![widget.room.id]?.timeline?.events
+                        ?.any((s) => s.type == EventTypes.RoomMember) ??
+                    false)),
       );
 
   final ValueNotifier<Either<Failure, Success>> searchUserResults =
@@ -430,6 +438,64 @@ class AssignRolesController extends State<AssignRoles>
           user: DefaultPowerLevelMember.member.powerLevel,
       },
     );
+  }
+
+  List<Widget> getSlidables({
+    required BuildContext context,
+    required User user,
+  }) {
+    return [
+      if (widget.room.canBan)
+        ChatCustomSlidableAction(
+          label: L10n.of(context)!.remove,
+          icon: Icon(
+            Icons.person_remove_outlined,
+            color: LinagoraSysColors.material().onPrimary,
+          ),
+          onPressed: (_) => _handleOnTapRemoveUser(user: user),
+          foregroundColor: Theme.of(context).colorScheme.onPrimary,
+          backgroundColor: LinagoraSysColors.material().error,
+        ),
+    ];
+  }
+
+  void _handleOnTapRemoveUser({
+    required User user,
+  }) {
+    banUserInteractor.execute(user: user).listen((result) {
+      result.fold(
+        (failure) {
+          if (failure is BanUserFailure) {
+            TwakeDialog.hideLoadingDialog(context);
+            TwakeSnackBar.show(
+              context,
+              failure.exception.toString(),
+            );
+            return;
+          }
+
+          if (failure is NoPermissionForBanFailure) {
+            TwakeDialog.hideLoadingDialog(context);
+            TwakeSnackBar.show(
+              context,
+              L10n.of(context)!.permissionErrorBanUser,
+            );
+            return;
+          }
+        },
+        (success) async {
+          if (success is BanUserLoading) {
+            TwakeDialog.showLoadingDialog(context);
+            return;
+          }
+
+          if (success is BanUserSuccess) {
+            TwakeDialog.hideLoadingDialog(context);
+            return;
+          }
+        },
+      );
+    });
   }
 
   @override
