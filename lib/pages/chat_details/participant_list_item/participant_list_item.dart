@@ -1,5 +1,6 @@
 import 'package:fluffychat/config/default_power_level_member.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
+import 'package:fluffychat/domain/enums/selection_mode_enum.dart';
 import 'package:fluffychat/pages/chat_details/participant_list_item/participant_list_item_style.dart';
 import 'package:fluffychat/pages/profile_info/profile_info_body/profile_info_body.dart';
 import 'package:fluffychat/pages/profile_info/profile_info_page.dart';
@@ -17,11 +18,15 @@ class ParticipantListItem extends StatelessWidget {
   final User member;
 
   final VoidCallback? onUpdatedMembers;
+  final SelectionModeEnum selectionMode;
+  final void Function(User member)? onSelectMember;
 
   const ParticipantListItem(
     this.member, {
     super.key,
     this.onUpdatedMembers,
+    this.selectionMode = SelectionModeEnum.unavailable,
+    this.onSelectMember,
   });
 
   @override
@@ -30,11 +35,16 @@ class ParticipantListItem extends StatelessWidget {
       opacity: member.membership == Membership.join ? 1 : 0.5,
       child: TwakeInkWell(
         onTap: () async => await _onItemTap(context),
+        onLongPress: () => onSelectMember?.call(member),
         child: TwakeListItem(
           height: 72,
           padding: const EdgeInsets.all(8),
           child: Row(
             children: [
+              _ParticipantSelectionToggleButton(
+                selectionMode: selectionMode,
+                onTap: () => onSelectMember?.call(member),
+              ),
               Avatar(
                 mxContent: member.avatarUrl,
                 name: member.calcDisplayname(),
@@ -96,6 +106,12 @@ class ParticipantListItem extends StatelessWidget {
   }
 
   Future _onItemTap(BuildContext context) async {
+    if (PlatformInfos.isMobile &&
+        selectionMode != SelectionModeEnum.unavailable) {
+      onSelectMember?.call(member);
+      return;
+    }
+
     final responsive = getIt.get<ResponsiveUtils>();
 
     if (responsive.isMobile(context)) {
@@ -173,4 +189,35 @@ class ParticipantListItem extends StatelessWidget {
           ),
         ),
       );
+}
+
+class _ParticipantSelectionToggleButton extends StatelessWidget {
+  const _ParticipantSelectionToggleButton({
+    required this.selectionMode,
+    required this.onTap,
+  });
+
+  final SelectionModeEnum selectionMode;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    if (selectionMode == SelectionModeEnum.unavailable) {
+      return const SizedBox();
+    }
+
+    return Padding(
+      padding: const EdgeInsetsDirectional.only(end: 8.0),
+      child: Checkbox(
+        value: selectionMode == SelectionModeEnum.selected,
+        side: BorderSide(
+          color: selectionMode == SelectionModeEnum.selected
+              ? Theme.of(context).colorScheme.primary
+              : LinagoraRefColors.material().tertiary[30]!,
+          width: 2,
+        ),
+        onChanged: (_) => onTap(),
+      ),
+    );
+  }
 }
