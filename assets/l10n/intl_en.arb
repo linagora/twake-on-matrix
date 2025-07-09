@@ -3334,5 +3334,6 @@
   "changeGroupHistoryVisibility": "Change group history visibility",
   "searchGroupMembers": "Search group members",
   "permissionErrorChangeRole": "You don’t have the rights to change roles. Please reach out to your admin for help",
-  "removeAdminsModerators": "Remove Admins/Moderators"
+  "removeAdminsModerators": "Remove Admins/Moderators",
+  "permissionErrorBanUser": "You don’t have the rights to ban users. Please reach out to your admin for help"
 }

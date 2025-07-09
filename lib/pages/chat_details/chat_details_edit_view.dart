@@ -277,51 +277,70 @@ class ChatDetailsEditView extends StatelessWidget {
                 ],
               ),
             ),
-            if (controller.room?.canAssignRoles == true) ...[
-              Container(
-                color: Theme.of(context).colorScheme.surfaceContainerHighest,
-                alignment: Alignment.centerLeft,
-                padding: const EdgeInsets.all(8.0),
-                child: Text(
-                  L10n.of(context)!.administration,
-                  style:
-                      ChatDetailEditViewStyle.textChatDetailsEditCategoryStyle(
-                    context,
-                  ),
-                ),
+            if (controller.room?.canAssignRoles == true)
+              StreamBuilder(
+                stream: controller.powerLevelsChanged,
+                builder: (context, snapshot) {
+                  return Column(
+                    children: [
+                      Container(
+                        color: Theme.of(context)
+                            .colorScheme
+                            .surfaceContainerHighest,
+                        alignment: Alignment.centerLeft,
+                        padding: const EdgeInsets.all(8.0),
+                        child: Text(
+                          L10n.of(context)!.administration,
+                          style: ChatDetailEditViewStyle
+                              .textChatDetailsEditCategoryStyle(
+                            context,
+                          ),
+                        ),
+                      ),
+                      ChatDetailsEditOption(
+                        title: L10n.of(context)!.assignRoles,
+                        counterText:
+                            '${controller.room?.getAssignRolesMember().length}',
+                        subtitleColor:
+                            LinagoraRefColors.material().tertiary[30],
+                        leading: Icons.admin_panel_settings_outlined,
+                        titleColor: Theme.of(context).colorScheme.onSurface,
+                        leadingIconColor:
+                            Theme.of(context).colorScheme.onSurface,
+                        onTap: controller.openAssignRolesPage,
+                      ),
+                      if (controller.room?.getExceptionsMember().isNotEmpty ==
+                          true)
+                        ChatDetailsEditOption(
+                          title: L10n.of(context)!.exceptions,
+                          counterText:
+                              '${controller.room?.getExceptionsMember().length}',
+                          subtitleColor:
+                              LinagoraRefColors.material().tertiary[30],
+                          leading: Icons.people_outlined,
+                          titleColor: Theme.of(context).colorScheme.onSurface,
+                          leadingIconColor:
+                              Theme.of(context).colorScheme.onSurface,
+                          onTap: controller.openExceptionsPage,
+                        ),
+                      if (controller.room?.getBannedMembers().isNotEmpty ==
+                          true)
+                        ChatDetailsEditOption(
+                          title: L10n.of(context)!.removedUsers,
+                          counterText:
+                              '${controller.room?.getBannedMembers().length}',
+                          subtitleColor:
+                              LinagoraRefColors.material().tertiary[30],
+                          leading: Icons.block,
+                          titleColor: Theme.of(context).colorScheme.onSurface,
+                          leadingIconColor:
+                              Theme.of(context).colorScheme.onSurface,
+                          onTap: controller.openRemovedPage,
+                        ),
+                    ],
+                  );
+                },
               ),
-              ChatDetailsEditOption(
-                title: L10n.of(context)!.assignRoles,
-                counterText:
-                    '${controller.room?.getAssignRolesMember().length}',
-                subtitleColor: LinagoraRefColors.material().tertiary[30],
-                leading: Icons.admin_panel_settings_outlined,
-                titleColor: Theme.of(context).colorScheme.onSurface,
-                leadingIconColor: Theme.of(context).colorScheme.onSurface,
-                onTap: controller.openAssignRolesPage,
-              ),
-              if (controller.room?.getExceptionsMember().isNotEmpty == true)
-                ChatDetailsEditOption(
-                  title: L10n.of(context)!.exceptions,
-                  counterText:
-                      '${controller.room?.getExceptionsMember().length}',
-                  subtitleColor: LinagoraRefColors.material().tertiary[30],
-                  leading: Icons.people_outlined,
-                  titleColor: Theme.of(context).colorScheme.onSurface,
-                  leadingIconColor: Theme.of(context).colorScheme.onSurface,
-                  onTap: controller.openExceptionsPage,
-                ),
-              if (controller.room?.getBannedMembers().isNotEmpty == true)
-                ChatDetailsEditOption(
-                  title: L10n.of(context)!.removedUsers,
-                  counterText: '${controller.room?.getBannedMembers().length}',
-                  subtitleColor: LinagoraRefColors.material().tertiary[30],
-                  leading: Icons.block,
-                  titleColor: Theme.of(context).colorScheme.onSurface,
-                  leadingIconColor: Theme.of(context).colorScheme.onSurface,
-                  onTap: controller.openRemovedPage,
-                ),
-            ],
             Container(
               color: Theme.of(context).colorScheme.surfaceContainerHighest,
               alignment: Alignment.centerLeft,

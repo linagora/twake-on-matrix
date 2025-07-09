@@ -101,6 +101,7 @@ import 'package:fluffychat/domain/usecase/reactions/store_recent_reactions_inter
 import 'package:fluffychat/domain/usecase/recovery/delete_recovery_words_interactor.dart';
 import 'package:fluffychat/domain/usecase/recovery/get_recovery_words_interactor.dart';
 import 'package:fluffychat/domain/usecase/recovery/save_recovery_words_interactor.dart';
+import 'package:fluffychat/domain/usecase/room/ban_user_interactor.dart';
 import 'package:fluffychat/domain/usecase/room/chat_get_pinned_events_interactor.dart';
 import 'package:fluffychat/domain/usecase/room/chat_room_search_interactor.dart';
 import 'package:fluffychat/domain/usecase/room/create_new_group_chat_interactor.dart';
@@ -478,6 +479,10 @@ class GetItInitializer {
 
     getIt.registerFactory<SetPermissionLevelInteractor>(
       () => SetPermissionLevelInteractor(),
+    );
+
+    getIt.registerFactory<BanUserInteractor>(
+      () => BanUserInteractor(),
     );
   }
 

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:adaptive_dialog/adaptive_dialog.dart';
 import 'package:dartz/dartz.dart' hide State;
 import 'package:fluffychat/app_state/failure.dart';
@@ -61,6 +63,19 @@ class ChatDetailsEditController extends State<ChatDetailsEdit>
         SingleImagePickerMixin,
         LeaveChatMixin,
         PickAvatarMixin {
+  StreamSubscription? _powerLevelsSubscription;
+
+  Stream get powerLevelsChanged => room!.client.onSync.stream.where(
+        (e) =>
+            (e.rooms?.join?.containsKey(room!.id) ?? false) &&
+            ((e.rooms!.join![room!.id]?.timeline?.events
+                        ?.any((s) => s.type == EventTypes.RoomPowerLevels) ??
+                    false) ||
+                (e.rooms!.join![room!.id]?.timeline?.events
+                        ?.any((s) => s.type == EventTypes.RoomMember) ??
+                    false)),
+      );
+
   final updateGroupChatInteractor = getIt.get<UpdateGroupChatInteractor>();
 
   final uploadContentInteractor = getIt.get<UploadContentInteractor>();
@@ -570,6 +585,7 @@ class ChatDetailsEditController extends State<ChatDetailsEdit>
     isValidGroupNameNotifier.dispose();
     groupNameEmptyNotifier.dispose();
     descriptionEmptyNotifier.dispose();
+    _powerLevelsSubscription?.cancel();
     super.dispose();
   }
 
@@ -611,6 +627,11 @@ class ChatDetailsEditController extends State<ChatDetailsEdit>
   void initState() {
     room = Matrix.of(context).client.getRoomById(widget.roomId);
     isRoomEnabledEncryptionNotifier.value = room?.encrypted ?? false;
+    _powerLevelsSubscription = powerLevelsChanged.listen((_) {
+      Logs().d(
+        'ChatDetailsEdit::_powerLevelsSubscription - power levels changed',
+      );
+    });
     _setupGroupNameTextEditingController();
     _setupDescriptionTextEditingController();
     listenToPickAvatarUIState(context);
