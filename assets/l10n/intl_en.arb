@@ -3337,6 +3337,7 @@
   "demoteAdminsModerators": "Demote Admins/Moderators",
   "deleteMessageConfirmationTitle": "Are you sure you want to delete this message?",
   "@deleteMessageConfirmationTitle": {},
+  "permissionErrorBanUser": "You don’t have the rights to ban users. Please reach out to your admin for help",
   "removeMember": "Remove member",
   "@removeMember": {},
   "removeMemberSelectionError": "You cannot delete a member with a role equal to or greater than yours.",

@@ -42,6 +42,19 @@ mixin ChatDetailsTabMixin<T extends StatefulWidget>
   final ValueNotifier<List<User>?> _displayMembersNotifier =
       ValueNotifier(null);
 
+  StreamSubscription? _powerLevelsSubscription;
+
+  Stream get powerLevelsChanged => room!.client.onSync.stream.where(
+        (e) =>
+            (e.rooms?.join?.containsKey(room!.id) ?? false) &&
+            ((e.rooms!.join![room!.id]?.timeline?.events
+                        ?.any((s) => s.type == EventTypes.RoomPowerLevels) ??
+                    false) ||
+                (e.rooms!.join![room!.id]?.timeline?.events
+                        ?.any((s) => s.type == EventTypes.RoomMember) ??
+                    false)),
+      );
+
   late final List<ChatDetailsPage> tabList;
 
   final removeUsersChangeNotifier = SelectedUsersMapChangeNotifier();
@@ -349,6 +362,9 @@ mixin ChatDetailsTabMixin<T extends StatefulWidget>
     _initMembers();
     _initControllers();
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      _powerLevelsSubscription = powerLevelsChanged.listen((event) {
+        _initMembers();
+      });
       nestedScrollViewState.currentState?.innerController.addListener(
         () => _listenerInnerController(),
       );
@@ -364,6 +380,11 @@ mixin ChatDetailsTabMixin<T extends StatefulWidget>
     _displayMembersNotifier.dispose();
     _onRoomEventChangedSubscription?.cancel();
     nestedScrollViewState.currentState?.innerController.dispose();
+    _powerLevelsSubscription?.cancel();
+    _mediaListController?.dispose();
+    _linksListController?.dispose();
+    _filesListController?.dispose();
+    _onRoomEventChangedSubscription?.cancel();
     removeUsersChangeNotifier.dispose();
     super.dispose();
   }
