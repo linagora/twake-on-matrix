@@ -27,6 +27,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:flutter_adaptive_scaffold/flutter_adaptive_scaffold.dart';
 import 'package:matrix/matrix.dart';
+import 'package:fluffychat/domain/model/room/room_extension.dart';
 
 mixin ChatDetailsTabMixin<T extends StatefulWidget>
     on
@@ -43,17 +44,6 @@ mixin ChatDetailsTabMixin<T extends StatefulWidget>
       ValueNotifier(null);
 
   StreamSubscription? _powerLevelsSubscription;
-
-  Stream get powerLevelsChanged => room!.client.onSync.stream.where(
-        (e) =>
-            (e.rooms?.join?.containsKey(room!.id) ?? false) &&
-            ((e.rooms!.join![room!.id]?.timeline?.events
-                        ?.any((s) => s.type == EventTypes.RoomPowerLevels) ??
-                    false) ||
-                (e.rooms!.join![room!.id]?.timeline?.events
-                        ?.any((s) => s.type == EventTypes.RoomMember) ??
-                    false)),
-      );
 
   late final List<ChatDetailsPage> tabList;
 
@@ -362,7 +352,7 @@ mixin ChatDetailsTabMixin<T extends StatefulWidget>
     _initMembers();
     _initControllers();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      _powerLevelsSubscription = powerLevelsChanged.listen((event) {
+      _powerLevelsSubscription = room?.powerLevelsChanged.listen((event) {
         _initMembers();
       });
       nestedScrollViewState.currentState?.innerController.addListener(

@@ -241,6 +241,7 @@ class AssignRolesView extends StatelessWidget {
                     builder: (context, enableSelectMembers, child) {
                       return Slidable(
                         groupTag: 'slidable_list',
+                        enabled: slidables.isNotEmpty,
                         endActionPane: ActionPane(
                           motion: const ScrollMotion(),
                           extentRatio: AssignRolesStyle.slidableExtentRatio(
@@ -492,7 +493,7 @@ class AssignRolesView extends StatelessWidget {
     required User member,
   }) {
     return StreamBuilder(
-      stream: controller.powerLevelsChanged,
+      stream: controller.widget.room.powerLevelsChanged,
       builder: (context, date) {
         return Row(
           children: [
