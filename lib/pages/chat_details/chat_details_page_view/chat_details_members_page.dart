@@ -52,6 +52,8 @@ class ChatDetailsMembersPage extends StatelessWidget {
                             selectionMode: selectedUsersMapChangeNotifier
                                 .getSelectionModeForUser(members[index]),
                             onSelectMember: onSelectMember,
+                            isMembersSelecting: selectedUsersMapChangeNotifier
+                                .haveSelectedUsersNotifier.value,
                           );
                         },
                       ),
