@@ -3335,5 +3335,6 @@
   "searchGroupMembers": "Search group members",
   "permissionErrorChangeRole": "You don’t have the rights to change roles. Please reach out to your admin for help",
   "removeAdminsModerators": "Remove Admins/Moderators",
-  "permissionErrorBanUser": "You don’t have the rights to ban users. Please reach out to your admin for help"
+  "permissionErrorBanUser": "You don’t have the rights to ban users. Please reach out to your admin for help",
+  "downgrade": "Downgrade"
 }

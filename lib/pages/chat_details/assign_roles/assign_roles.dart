@@ -417,6 +417,18 @@ class AssignRolesController extends State<AssignRoles>
     required User user,
   }) {
     return [
+      if (widget.room.canAssignRoles &&
+          widget.room.ownPowerLevel > user.powerLevel)
+        ChatCustomSlidableAction(
+          label: L10n.of(context)!.downgrade,
+          icon: Icon(
+            Icons.admin_panel_settings_outlined,
+            color: LinagoraSysColors.material().onPrimary,
+          ),
+          onPressed: (_) => _handleOnTapDowngradeUser(user: user),
+          foregroundColor: Theme.of(context).colorScheme.onPrimary,
+          backgroundColor: const Color(0xFF8F9498),
+        ),
       if (widget.room.canBan)
         ChatCustomSlidableAction(
           label: L10n.of(context)!.remove,
@@ -467,6 +479,18 @@ class AssignRolesController extends State<AssignRoles>
           }
         },
       );
+    });
+  }
+
+  void _handleOnTapDowngradeUser({
+    required User user,
+  }) {
+    setPermissionLevelInteractor.execute(
+      userPermissionLevels: {
+        user: DefaultPowerLevelMember.member.powerLevel,
+      },
+    ).listen((result) {
+      _handleAssignRolesResult(result);
     });
   }
 
