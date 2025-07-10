@@ -4,12 +4,15 @@ import 'package:fluffychat/domain/enums/selection_mode_enum.dart';
 import 'package:fluffychat/pages/chat_details/participant_list_item/participant_list_item_style.dart';
 import 'package:fluffychat/pages/profile_info/profile_info_body/profile_info_body.dart';
 import 'package:fluffychat/pages/profile_info/profile_info_page.dart';
+import 'package:fluffychat/utils/dialog/twake_dialog.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/utils/responsive/responsive_utils.dart';
+import 'package:fluffychat/utils/twake_snackbar.dart';
 import 'package:fluffychat/utils/user_extension.dart';
 import 'package:fluffychat/widgets/avatar/avatar.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/l10n.dart';
 
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:matrix/matrix.dart';
@@ -20,6 +23,7 @@ class ParticipantListItem extends StatelessWidget {
   final VoidCallback? onUpdatedMembers;
   final SelectionModeEnum selectionMode;
   final void Function(User member)? onSelectMember;
+  final bool isMembersSelecting;
 
   const ParticipantListItem(
     this.member, {
@@ -27,11 +31,12 @@ class ParticipantListItem extends StatelessWidget {
     this.onUpdatedMembers,
     this.selectionMode = SelectionModeEnum.unavailable,
     this.onSelectMember,
+    this.isMembersSelecting = false,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Opacity(
+    final child = Opacity(
       opacity: member.membership == Membership.join ? 1 : 0.5,
       child: TwakeInkWell(
         onTap: () async => await _onItemTap(context),
@@ -102,6 +107,14 @@ class ParticipantListItem extends StatelessWidget {
           ),
         ),
       ),
+    );
+
+    if (isMembersSelecting) return child;
+
+    return _ParticipantDismissible(
+      member: member,
+      onDismissed: () => onUpdatedMembers?.call(),
+      child: child,
     );
   }
 
@@ -218,6 +231,87 @@ class _ParticipantSelectionToggleButton extends StatelessWidget {
         ),
         onChanged: (_) => onTap(),
       ),
+    );
+  }
+}
+
+class _ParticipantDismissible extends StatelessWidget {
+  const _ParticipantDismissible({
+    required this.member,
+    required this.onDismissed,
+    required this.child,
+  });
+
+  final User member;
+  final VoidCallback onDismissed;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Dismissible(
+      key: ValueKey(member.id),
+      direction: DismissDirection.endToStart,
+      background: Container(
+        constraints: const BoxConstraints(maxWidth: 72),
+        padding: const EdgeInsets.symmetric(horizontal: 8),
+        color: LinagoraRefColors.material().error[40],
+        alignment: Alignment.centerRight,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.person_remove_outlined,
+              size: 24,
+              color: LinagoraRefColors.material().primary[100],
+            ),
+            const SizedBox(height: 4),
+            Text(
+              L10n.of(context)!.remove,
+              style: theme.textTheme.labelMedium?.copyWith(
+                fontSize: 12,
+                height: 16 / 12,
+                fontWeight: FontWeight.w500,
+                letterSpacing: 0.5,
+                color: LinagoraRefColors.material().primary[100],
+              ),
+            ),
+          ],
+        ),
+      ),
+      confirmDismiss: (_) async {
+        if (!member.canKick) {
+          TwakeSnackBar.show(
+            context,
+            L10n.of(context)!.removeMemberSelectionError,
+          );
+          return false;
+        }
+
+        final confirmResult = await showConfirmAlertDialog(
+          context: context,
+          title: L10n.of(context)!.removeUserConfirmationTitle,
+          message: L10n.of(context)!.removeUserConfirmationMessage,
+          okLabel: L10n.of(context)!.removeUser,
+          cancelLabel: L10n.of(context)!.cancel,
+          okLabelButtonColor: LinagoraSysColors.material().error,
+          showCloseButton: true,
+        );
+        if (confirmResult == ConfirmResult.cancel) return false;
+
+        final result = await TwakeDialog.showFutureLoadingDialogFullScreen(
+          future: () => member.kick(),
+        );
+        if (result.error != null) {
+          TwakeSnackBar.show(context, result.error!.message);
+          return false;
+        }
+
+        return true;
+      },
+      onDismissed: (_) => onDismissed(),
+      child: child,
     );
   }
 }
