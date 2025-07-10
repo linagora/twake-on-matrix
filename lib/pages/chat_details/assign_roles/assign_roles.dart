@@ -54,13 +54,15 @@ class AssignRolesController extends State<AssignRoles>
 
   StreamSubscription? _setPermissionLevelSubscription;
 
+  StreamSubscription? _powerLevelsSubscription;
+
+  StreamSubscription? _banUserSubscription;
+
   final SelectedUsersMapChangeNotifier selectedUsersMapChangeNotifier =
       SelectedUsersMapChangeNotifier();
 
   final ValueNotifier<bool> enableSelectMembersMobileNotifier =
       ValueNotifier<bool>(false);
-
-  StreamSubscription? _powerLevelsSubscription;
 
   final ValueNotifier<List<User>> membersNotifier =
       ValueNotifier<List<User>>([]);
@@ -68,17 +70,6 @@ class AssignRolesController extends State<AssignRoles>
   final textEditingController = TextEditingController();
 
   final inputFocus = FocusNode();
-
-  Stream get powerLevelsChanged => widget.room.client.onSync.stream.where(
-        (e) =>
-            (e.rooms?.join?.containsKey(widget.room.id) ?? false) &&
-            ((e.rooms!.join![widget.room.id]?.timeline?.events
-                        ?.any((s) => s.type == EventTypes.RoomPowerLevels) ??
-                    false) ||
-                (e.rooms!.join![widget.room.id]?.timeline?.events
-                        ?.any((s) => s.type == EventTypes.RoomMember) ??
-                    false)),
-      );
 
   final ValueNotifier<Either<Failure, Success>> searchUserResults =
       ValueNotifier<Either<Failure, Success>>(
@@ -445,7 +436,22 @@ class AssignRolesController extends State<AssignRoles>
     required User user,
   }) {
     return [
-      if (widget.room.canBan)
+      if (widget.room.canUpdateRoleInRoom(user))
+        ChatCustomSlidableAction(
+          label: L10n.of(context)!.downgrade,
+          icon: Icon(
+            Icons.admin_panel_settings_outlined,
+            color: LinagoraSysColors.material().onPrimary,
+          ),
+          onPressed: (_) => _handleClickOnContextMenuItem(
+            userPermissionLevels: {
+              user: DefaultPowerLevelMember.member.powerLevel,
+            },
+          ),
+          foregroundColor: Theme.of(context).colorScheme.onPrimary,
+          backgroundColor: const Color(0xFF8F9498),
+        ),
+      if (widget.room.canBanMemberInRoom(user))
         ChatCustomSlidableAction(
           label: L10n.of(context)!.remove,
           icon: Icon(
@@ -462,7 +468,8 @@ class AssignRolesController extends State<AssignRoles>
   void _handleOnTapRemoveUser({
     required User user,
   }) {
-    banUserInteractor.execute(user: user).listen((result) {
+    _banUserSubscription =
+        banUserInteractor.execute(user: user).listen((result) {
       result.fold(
         (failure) {
           if (failure is BanUserFailure) {
@@ -500,7 +507,7 @@ class AssignRolesController extends State<AssignRoles>
 
   @override
   void initState() {
-    _powerLevelsSubscription = powerLevelsChanged.listen((event) {
+    _powerLevelsSubscription = widget.room.powerLevelsChanged.listen((event) {
       Logs().d(
         "AssignRolesController::initState: powerLevelsChanged event: $event",
       );
@@ -529,6 +536,7 @@ class AssignRolesController extends State<AssignRoles>
     disposeDebouncer();
     selectedUsersMapChangeNotifier.dispose();
     enableSelectMembersMobileNotifier.dispose();
+    _banUserSubscription?.cancel();
     super.dispose();
   }
 

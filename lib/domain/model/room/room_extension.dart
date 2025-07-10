@@ -291,4 +291,19 @@ extension RoomExtension on Room {
   bool canUpdateRoleInRoom(User user) {
     return ownPowerLevel > user.powerLevel && canAssignRoles;
   }
+
+  bool canBanMemberInRoom(User user) {
+    return ownPowerLevel > user.powerLevel && canBan;
+  }
+
+  Stream get powerLevelsChanged => client.onSync.stream.where(
+        (e) =>
+            (e.rooms?.join?.containsKey(id) ?? false) &&
+            ((e.rooms!.join![id]?.timeline?.events
+                        ?.any((s) => s.type == EventTypes.RoomPowerLevels) ??
+                    false) ||
+                (e.rooms!.join![id]?.timeline?.events
+                        ?.any((s) => s.type == EventTypes.RoomMember) ??
+                    false)),
+      );
 }
