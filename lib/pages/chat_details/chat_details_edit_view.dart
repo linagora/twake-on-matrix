@@ -279,7 +279,7 @@ class ChatDetailsEditView extends StatelessWidget {
             ),
             if (controller.room?.canAssignRoles == true)
               StreamBuilder(
-                stream: controller.powerLevelsChanged,
+                stream: controller.room?.powerLevelsChanged,
                 builder: (context, snapshot) {
                   return Column(
                     children: [
