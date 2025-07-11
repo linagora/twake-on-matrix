@@ -66,6 +66,9 @@ class AppAdaptiveScaffoldBodyController extends State<AppAdaptiveScaffoldBody>
     activeNavigationBarNotifier.value = destinationType;
     pageController.jumpToPage(index);
     clearNavigatorScreen();
+    if (destinationType == AdaptiveDestinationEnum.contacts) {
+      matrix.reSyncContacts();
+    }
   }
 
   void clearNavigatorScreen() {
