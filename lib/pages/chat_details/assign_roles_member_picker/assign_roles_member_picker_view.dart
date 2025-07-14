@@ -488,7 +488,8 @@ class AssignRolesMemberPickerView extends StatelessWidget {
                             role,
                             style:
                                 AssignRolesMemberPickerStyle.roleNameTextStyle(
-                                    context),
+                              context,
+                            ),
                             overflow: TextOverflow.ellipsis,
                             maxLines: 1,
                           ),
