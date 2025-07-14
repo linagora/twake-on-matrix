@@ -1,3 +1,4 @@
+import 'package:fluffychat/domain/model/room/room_extension.dart';
 import 'package:fluffychat/pages/chat_details/assign_roles/assign_roles.dart';
 import 'package:fluffychat/pages/chat_details/assign_roles/assign_roles_search_state.dart';
 import 'package:fluffychat/pages/chat_list/chat_list_header_style.dart';
@@ -10,6 +11,7 @@ import 'package:fluffychat/widgets/twake_components/twake_icon_button.dart';
 import 'package:flutter/material.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
+import 'package:matrix/matrix.dart';
 
 class AssignRolesView extends StatelessWidget {
   final AssignRolesController controller;
@@ -180,64 +182,34 @@ class AssignRolesView extends StatelessWidget {
                               children: [
                                 Row(
                                   children: [
-                                    Text(
-                                      member.calcDisplayname(),
-                                      style: LinagoraTextStyle.material()
-                                          .bodyMedium2
-                                          .copyWith(
-                                            color: LinagoraSysColors.material()
-                                                .onSurface,
-                                          ),
-                                      overflow: TextOverflow.ellipsis,
-                                      maxLines: 1,
+                                    Expanded(
+                                      child: Text(
+                                        member.calcDisplayname(),
+                                        style: LinagoraTextStyle.material()
+                                            .bodyMedium2
+                                            .copyWith(
+                                              color:
+                                                  LinagoraSysColors.material()
+                                                      .onSurface,
+                                            ),
+                                        overflow: TextOverflow.ellipsis,
+                                        maxLines: 1,
+                                      ),
                                     ),
-                                    const Spacer(),
+                                    const SizedBox(width: 8.0),
                                     InkWell(
                                       hoverColor: Colors.transparent,
                                       highlightColor: Colors.transparent,
                                       focusColor: Colors.transparent,
                                       splashColor: Colors.transparent,
-                                      onTap: () {
-                                        if (member.isOwnerRole) return;
-                                        controller
-                                            .handleOnTapQuickRolePickerMobile(
-                                          context: context,
-                                          user: member,
-                                        );
-                                      },
-                                      child: StreamBuilder(
-                                        stream: controller.powerLevelsChanged,
-                                        builder: (context, date) {
-                                          return Row(
-                                            children: [
-                                              Text(
-                                                member
-                                                    .getDefaultPowerLevelMember
-                                                    .displayName(context),
-                                                style: Theme.of(context)
-                                                    .textTheme
-                                                    .labelMedium
-                                                    ?.copyWith(
-                                                      color: LinagoraRefColors
-                                                              .material()
-                                                          .tertiary[30],
-                                                    ),
-                                                overflow: TextOverflow.ellipsis,
-                                                maxLines: 1,
-                                              ),
-                                              const SizedBox(
-                                                width: 4,
-                                              ),
-                                              if (!member.isOwnerRole)
-                                                Icon(
-                                                  Icons.arrow_drop_down,
-                                                  color: LinagoraRefColors
-                                                          .material()
-                                                      .tertiary[30],
-                                                ),
-                                            ],
-                                          );
-                                        },
+                                      onTap: () => controller
+                                          .handleOnTapQuickRolePickerMobile(
+                                        context: context,
+                                        user: member,
+                                      ),
+                                      child: _assignRoleItemStreamBuilder(
+                                        context: context,
+                                        member: member,
                                       ),
                                     ),
                                   ],
@@ -315,65 +287,35 @@ class AssignRolesView extends StatelessWidget {
                               children: [
                                 Row(
                                   children: [
-                                    Text(
-                                      member.calcDisplayname(),
-                                      style: LinagoraTextStyle.material()
-                                          .bodyMedium2
-                                          .copyWith(
-                                            color: LinagoraSysColors.material()
-                                                .onSurface,
-                                          ),
-                                      overflow: TextOverflow.ellipsis,
-                                      maxLines: 1,
+                                    Expanded(
+                                      child: Text(
+                                        member.calcDisplayname(),
+                                        style: LinagoraTextStyle.material()
+                                            .bodyMedium2
+                                            .copyWith(
+                                              color:
+                                                  LinagoraSysColors.material()
+                                                      .onSurface,
+                                            ),
+                                        overflow: TextOverflow.ellipsis,
+                                        maxLines: 1,
+                                      ),
                                     ),
-                                    const Spacer(),
+                                    const SizedBox(width: 8.0),
                                     InkWell(
                                       hoverColor: Colors.transparent,
                                       highlightColor: Colors.transparent,
                                       focusColor: Colors.transparent,
                                       splashColor: Colors.transparent,
-                                      onTapDown: (details) {
-                                        if (member.isOwnerRole) return;
-                                        controller
-                                            .handleOnTapQuickRolePickerWeb(
-                                          context: context,
-                                          tapDownDetails: details,
-                                          user: member,
-                                        );
-                                      },
-                                      child: StreamBuilder(
-                                        stream: controller.powerLevelsChanged,
-                                        builder: (context, date) {
-                                          return Row(
-                                            children: [
-                                              Text(
-                                                member
-                                                    .getDefaultPowerLevelMember
-                                                    .displayName(context),
-                                                style: Theme.of(context)
-                                                    .textTheme
-                                                    .labelMedium
-                                                    ?.copyWith(
-                                                      color: LinagoraRefColors
-                                                              .material()
-                                                          .tertiary[30],
-                                                    ),
-                                                overflow: TextOverflow.ellipsis,
-                                                maxLines: 1,
-                                              ),
-                                              const SizedBox(
-                                                width: 4,
-                                              ),
-                                              if (!member.isOwnerRole)
-                                                Icon(
-                                                  Icons.arrow_drop_down,
-                                                  color: LinagoraRefColors
-                                                          .material()
-                                                      .tertiary[30],
-                                                ),
-                                            ],
-                                          );
-                                        },
+                                      onTapDown: (details) => controller
+                                          .handleOnTapQuickRolePickerWeb(
+                                        context: context,
+                                        tapDownDetails: details,
+                                        user: member,
+                                      ),
+                                      child: _assignRoleItemStreamBuilder(
+                                        context: context,
+                                        member: member,
                                       ),
                                     ),
                                   ],
@@ -402,6 +344,37 @@ class AssignRolesView extends StatelessWidget {
             }
             return const SizedBox.shrink();
           },
+        );
+      },
+    );
+  }
+
+  Widget _assignRoleItemStreamBuilder({
+    required BuildContext context,
+    required User member,
+  }) {
+    return StreamBuilder(
+      stream: controller.powerLevelsChanged,
+      builder: (context, date) {
+        return Row(
+          children: [
+            Text(
+              member.getDefaultPowerLevelMember.displayName(context),
+              style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                    color: LinagoraRefColors.material().tertiary[30],
+                  ),
+              overflow: TextOverflow.ellipsis,
+              maxLines: 1,
+            ),
+            const SizedBox(
+              width: 4,
+            ),
+            if (controller.widget.room.canUpdateRoleInRoom(member))
+              Icon(
+                Icons.arrow_drop_down,
+                color: LinagoraRefColors.material().tertiary[30],
+              ),
+          ],
         );
       },
     );

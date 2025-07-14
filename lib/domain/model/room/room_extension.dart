@@ -287,4 +287,8 @@ extension RoomExtension on Room {
         (small, great) => great.powerLevel.compareTo(small.powerLevel),
       );
   }
+
+  bool canUpdateRoleInRoom(User user) {
+    return ownPowerLevel > user.powerLevel;
+  }
 }

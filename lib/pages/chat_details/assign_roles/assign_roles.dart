@@ -45,6 +45,8 @@ class AssignRolesController extends State<AssignRoles>
   final setPermissionLevelInteractor =
       getIt.get<SetPermissionLevelInteractor>();
 
+  StreamSubscription? _setPermissionLevelSubscription;
+
   StreamSubscription? _powerLevelsSubscription;
 
   final ValueNotifier<List<User>> membersNotifier =
@@ -113,6 +115,9 @@ class AssignRolesController extends State<AssignRoles>
     required BuildContext context,
     required User user,
   }) async {
+    if (!widget.room.canUpdateRoleInRoom(user)) {
+      return;
+    }
     showModalBottomSheet(
       context: context,
       shape: const RoundedRectangleBorder(
@@ -151,50 +156,10 @@ class AssignRolesController extends State<AssignRoles>
                     child: Column(
                       children: quickRolePicker
                           .map(
-                            (role) => InkWell(
-                              hoverColor: Colors.transparent,
-                              highlightColor: Colors.transparent,
-                              focusColor: Colors.transparent,
-                              splashColor: Colors.transparent,
-                              onTap: () {
-                                Navigator.of(context).pop();
-                                _handleClickOnContextMenuItem(
-                                  role: role,
-                                  user: user,
-                                );
-                              },
-                              child: Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 32,
-                                ),
-                                margin: const EdgeInsets.only(bottom: 8),
-                                height: 36,
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Expanded(
-                                      child: Text(
-                                        role.displayName(context),
-                                        style: context.textTheme.bodyLarge
-                                            ?.copyWith(
-                                          color: LinagoraSysColors.material()
-                                              .onSurface,
-                                        ),
-                                      ),
-                                    ),
-                                    if (role.powerLevel == user.powerLevel)
-                                      SizedBox(
-                                        width: 36,
-                                        height: 36,
-                                        child: Icon(
-                                          Icons.check,
-                                          color: LinagoraSysColors.material()
-                                              .onSurface,
-                                        ),
-                                      ),
-                                  ],
-                                ),
-                              ),
+                            (role) => _quickRolePickerItem(
+                              context: context,
+                              role: role,
+                              user: user,
                             ),
                           )
                           .toList(),
@@ -209,11 +174,63 @@ class AssignRolesController extends State<AssignRoles>
     );
   }
 
+  Widget _quickRolePickerItem({
+    required BuildContext context,
+    required DefaultPowerLevelMember role,
+    required User user,
+  }) {
+    return InkWell(
+      hoverColor: Colors.transparent,
+      highlightColor: Colors.transparent,
+      focusColor: Colors.transparent,
+      splashColor: Colors.transparent,
+      onTap: () {
+        Navigator.of(context).pop();
+        _handleClickOnContextMenuItem(
+          role: role,
+          user: user,
+        );
+      },
+      child: Container(
+        padding: const EdgeInsets.symmetric(
+          horizontal: 32,
+        ),
+        margin: const EdgeInsets.only(bottom: 8),
+        height: 36,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Expanded(
+              child: Text(
+                role.displayName(context),
+                style: context.textTheme.bodyLarge?.copyWith(
+                  color: LinagoraSysColors.material().onSurface,
+                ),
+              ),
+            ),
+            if (role.powerLevel == user.powerLevel)
+              SizedBox(
+                width: 36,
+                height: 36,
+                child: Icon(
+                  Icons.check,
+                  color: LinagoraSysColors.material().onSurface,
+                ),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+
   void handleOnTapQuickRolePickerWeb({
     required BuildContext context,
     required TapDownDetails tapDownDetails,
     required User user,
   }) async {
+    if (!widget.room.canUpdateRoleInRoom(user)) {
+      return;
+    }
     final offset = tapDownDetails.globalPosition;
 
     final selectedActionIndex = await showTwakeContextMenu(
@@ -236,7 +253,7 @@ class AssignRolesController extends State<AssignRoles>
     required DefaultPowerLevelMember role,
     required User user,
   }) {
-    setPermissionLevelInteractor.execute(
+    _setPermissionLevelSubscription = setPermissionLevelInteractor.execute(
       userPermissionLevels: {
         user: role.powerLevel,
       },
@@ -377,6 +394,7 @@ class AssignRolesController extends State<AssignRoles>
     membersNotifier.dispose();
     searchUserResults.dispose();
     _powerLevelsSubscription?.cancel();
+    _setPermissionLevelSubscription?.cancel();
     super.dispose();
   }
 
