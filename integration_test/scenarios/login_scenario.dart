@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:fluffychat/pages/chat_list/chat_list.dart';
 import 'package:fluffychat/pages/homeserver_picker/homeserver_picker_view.dart';
 import 'package:fluffychat/pages/twake_welcome/twake_welcome.dart';
@@ -28,12 +30,11 @@ class LoginScenario extends BaseScenario {
     await _handleWaitUntilVisibleHomeServerPickerView(loginRobot);
     await loginRobot.enterServerUrl(serverUrl);
     await loginRobot.confirmServerUrl();
-    await _handleFirebaseTestLab(loginRobot);
-    await loginRobot.enterUsernameSsoLogin(username);
-    await loginRobot.enterPasswordSsoLogin(password);
-    await loginRobot.pressSignInSsoLogin();
-    await _handleWaitUntilVisibleHomeServerPickerView(loginRobot);
-    await loginRobot.grantNotificationPermission($.nativeAutomator);
+    await loginRobot.confirmShareInformation();
+    await loginRobot.grantNotificationPermission();
+    await loginRobot.enterWebCredentialsWhenVisible(username: username,
+  password: password,);
+    await loginRobot.grantNotificationPermission();
     await expectViewVisible($(ChatList));
   }
 
