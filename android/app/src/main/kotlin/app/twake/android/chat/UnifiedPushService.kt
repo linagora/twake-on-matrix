@@ -2,11 +2,11 @@ package app.twake.android.chat
 
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.embedding.engine.dart.DartExecutor
-import org.unifiedpush.flutter.connector.UnifiedPushReceiver
+import org.unifiedpush.flutter.connector.UnifiedPushService
 
 import android.content.Context
 
-class UnifiedPushReceiver : UnifiedPushReceiver() {
+class UnifiedPushReceiver : UnifiedPushService() {
     override fun getEngine(context: Context): FlutterEngine {
         var engine = MainActivity.engine
         if (engine == null) {
