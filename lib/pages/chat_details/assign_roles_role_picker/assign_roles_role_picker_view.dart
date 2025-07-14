@@ -1,3 +1,4 @@
+import 'package:fluffychat/config/default_power_level_member.dart';
 import 'package:fluffychat/pages/chat_details/assign_roles_role_picker/assign_roles_role_picker.dart';
 import 'package:fluffychat/pages/chat_details/assign_roles_role_picker/assign_roles_role_picker_style.dart';
 import 'package:fluffychat/resource/image_paths.dart';
@@ -97,98 +98,10 @@ class AssignRolesRolePickerView extends StatelessWidget {
                         return ValueListenableBuilder(
                           valueListenable: controller.roleSelectedNotifier,
                           builder: (context, isSelected, child) {
-                            return ExpandableWidget(
-                              dividerPadding: isDialog
-                                  ? const EdgeInsets.symmetric(horizontal: 16)
-                                  : null,
-                              isExpanded:
-                                  isSelected == controller.assignRoles[index],
-                              parentWidget: Row(
-                                children: [
-                                  Container(
-                                    width: AssignRolesRolePickerStyle
-                                        .assignRoleIconSize,
-                                    height: AssignRolesRolePickerStyle
-                                        .assignRoleIconSize,
-                                    decoration: BoxDecoration(
-                                      color: controller.colorBackgroundForRoles(
-                                        controller.assignRoles[index],
-                                      ),
-                                      borderRadius: BorderRadius.circular(
-                                        AssignRolesRolePickerStyle
-                                                .assignRoleIconSize /
-                                            2,
-                                      ),
-                                    ),
-                                    child: Center(
-                                      child: controller.iconForRoles(
-                                        controller.assignRoles[index],
-                                      ),
-                                    ),
-                                  ),
-                                  const SizedBox(width: 8.0),
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          controller.assignRoles[index]
-                                              .displayName(context),
-                                          style: Theme.of(context)
-                                              .textTheme
-                                              .bodyLarge
-                                              ?.copyWith(
-                                                color:
-                                                    LinagoraSysColors.material()
-                                                        .onSurface,
-                                              ),
-                                        ),
-                                        Text(
-                                          controller.subtitleForRoles(
-                                            controller.assignRoles[index],
-                                          ),
-                                          style: Theme.of(context)
-                                              .textTheme
-                                              .bodyMedium
-                                              ?.copyWith(
-                                                color:
-                                                    LinagoraRefColors.material()
-                                                        .tertiary[20],
-                                              ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                  AnimatedSwitcher(
-                                    duration: const Duration(milliseconds: 200),
-                                    switchOutCurve: Curves.easeInOut,
-                                    transitionBuilder: (child, animation) =>
-                                        ScaleTransition(
-                                      scale: animation,
-                                      child: child,
-                                    ),
-                                    child: SizedBox(
-                                      width: 24,
-                                      height: 24,
-                                      child: SvgPicture.asset(
-                                        isSelected ==
-                                                controller.assignRoles[index]
-                                            ? ImagePaths.icRadioChecked
-                                            : ImagePaths.icRadioUnchecked,
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              childWidget: controller.permissionsWidgetForRoles(
-                                controller.assignRoles[index],
-                              ),
-                              onTap: () {
-                                controller.onSelectedRole(
-                                  controller.assignRoles[index],
-                                );
-                              },
+                            return _expandableItemWidget(
+                              context: context,
+                              index: index,
+                              isSelected: isSelected,
                             );
                           },
                         );
@@ -265,6 +178,86 @@ class AssignRolesRolePickerView extends StatelessWidget {
     );
   }
 
+  Widget _expandableItemWidget({
+    required BuildContext context,
+    required int index,
+    DefaultPowerLevelMember? isSelected,
+  }) {
+    return ExpandableWidget(
+      dividerPadding:
+          isDialog ? const EdgeInsets.symmetric(horizontal: 16) : null,
+      isExpanded: isSelected == controller.assignRoles[index],
+      parentWidget: Row(
+        children: [
+          Container(
+            width: AssignRolesRolePickerStyle.assignRoleIconSize,
+            height: AssignRolesRolePickerStyle.assignRoleIconSize,
+            decoration: BoxDecoration(
+              color: controller.colorBackgroundForRoles(
+                controller.assignRoles[index],
+              ),
+              borderRadius: BorderRadius.circular(
+                AssignRolesRolePickerStyle.assignRoleIconSize / 2,
+              ),
+            ),
+            child: Center(
+              child: controller.iconForRoles(
+                controller.assignRoles[index],
+              ),
+            ),
+          ),
+          const SizedBox(width: 8.0),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  controller.assignRoles[index].displayName(context),
+                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                        color: LinagoraSysColors.material().onSurface,
+                      ),
+                ),
+                Text(
+                  controller.subtitleForRoles(
+                    controller.assignRoles[index],
+                  ),
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: LinagoraRefColors.material().tertiary[20],
+                      ),
+                ),
+              ],
+            ),
+          ),
+          AnimatedSwitcher(
+            duration: const Duration(milliseconds: 200),
+            switchOutCurve: Curves.easeInOut,
+            transitionBuilder: (child, animation) => ScaleTransition(
+              scale: animation,
+              child: child,
+            ),
+            child: SizedBox(
+              width: 24,
+              height: 24,
+              child: SvgPicture.asset(
+                isSelected == controller.assignRoles[index]
+                    ? ImagePaths.icRadioChecked
+                    : ImagePaths.icRadioUnchecked,
+              ),
+            ),
+          ),
+        ],
+      ),
+      childWidget: controller.permissionsWidgetForRoles(
+        controller.assignRoles[index],
+      ),
+      onTap: () {
+        controller.onSelectedRole(
+          controller.assignRoles[index],
+        );
+      },
+    );
+  }
+
   Widget selectedUsersList(BuildContext context) {
     final users = controller.widget.assignedUsers;
 
@@ -290,14 +283,17 @@ class AssignRolesRolePickerView extends StatelessWidget {
                 children: [
                   Row(
                     children: [
-                      Text(
-                        users.first.calcDisplayname(),
-                        style:
-                            LinagoraTextStyle.material().bodyMedium2.copyWith(
-                                  color: LinagoraSysColors.material().onSurface,
-                                ),
-                        overflow: TextOverflow.ellipsis,
-                        maxLines: 1,
+                      Expanded(
+                        child: Text(
+                          users.first.calcDisplayname(),
+                          style: LinagoraTextStyle.material()
+                              .bodyMedium2
+                              .copyWith(
+                                color: LinagoraSysColors.material().onSurface,
+                              ),
+                          overflow: TextOverflow.ellipsis,
+                          maxLines: 1,
+                        ),
                       ),
                     ],
                   ),
