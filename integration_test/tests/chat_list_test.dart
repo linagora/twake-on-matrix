@@ -13,7 +13,7 @@ void main() {
         const searchPharse = 'thhoang';
         await ChatListRobot($).enterSearchText(searchPharse);
         //verifyAll group are list contains searchPharse
-        await ChatListScenario($).verifyGroupsContain(searchPharse);
+        await ChatListScenario($).verifySearchResultContains(searchPharse);
       });
     },
   );

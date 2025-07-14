@@ -1,8 +1,10 @@
+import 'package:fluffychat/pages/chat_list/chat_list.dart';
 import 'package:fluffychat/pages/chat_list/chat_list_body_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:linagora_design_flutter/list_item/twake_inkwell.dart';
 import 'package:patrol/patrol.dart';
+import 'dart:developer';
 
 import '../base/core_robot.dart';
 import 'chat_group_detail_robot.dart';
@@ -10,6 +12,16 @@ import 'chat_group_detail_robot.dart';
 class ChatListRobot extends CoreRobot {
   ChatListRobot(super.$);
   
+   Future<bool> isVisible() async {
+    final chatListSelector = $(ChatList);
+    try {
+      await chatListSelector.waitUntilVisible(timeout: const Duration(seconds: 10));
+      return true;
+    } catch (_) {
+      return false;
+    }
+  }
+
   Future<void> enterSearchText(String searchText) async {
     await $(TextField).at(0).waitUntilVisible();
     await $(TextField).at(0).tap();
@@ -20,7 +32,7 @@ class ChatListRobot extends CoreRobot {
       await $.native.tap(nextButton);
       await grantNotificationPermission();
     } catch (e) {
-      print('Next button not found: $e');
+      log('Next button not found: $e');
     }
     await $(TextField).enterText(searchText);
 
