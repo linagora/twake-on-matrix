@@ -1,4 +1,3 @@
-
 import 'package:fluffychat/pages/homeserver_picker/homeserver_picker_view.dart';
 import 'package:patrol/patrol.dart';
 
@@ -28,32 +27,22 @@ class LoginRobot extends CoreRobot {
     }
   }
   Future<void> enterWebCredentialsWhenVisible({required String username,required String password,}) async {
+    await enterUsernameSsoLogin(username);
     await enterPasswordSsoLogin(password);
-    // await enterUsernameSsoLogin(username);
     await pressSignInSsoLogin();
   }
 
   Future<void> enterUsernameSsoLogin(String username) async {
     try {
-      // final usernameSelector = Selector(text: 'Phone number / Username / Email');
-      // await $.native.waitUntilVisible(usernameSelector,timeout: const Duration(seconds: 3));
-      // await $.native.enterText(usernameSelector, text: username);
-
-      await $.native.enterTextByIndex(
-        username,
-        index: 0,
-      );
-    } catch (e) {
-      ignoreException();
-    }
+      await $.native.enterText(Selector(text: 'login'),text: username,);
+      } catch (e) {
+        ignoreException();
+      }
   }
 
   Future<void> enterPasswordSsoLogin(String password) async {
     try {
-      await $.native.waitUntilVisible(Selector(text: 'Password'),timeout: const Duration(seconds: 3));
-      await $.native.enterText(
-        Selector(text: 'Password'),
-        text: password,
+      await $.native.enterText(Selector(text: 'Password'),text: password,
       );
     } catch (e) {
       ignoreException();
