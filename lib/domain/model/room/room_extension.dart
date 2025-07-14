@@ -251,7 +251,7 @@ extension RoomExtension on Room {
     if (members.isEmpty) return [];
     return members.where((final User member) {
       final powerLevel = member.powerLevel;
-      return powerLevel >= DefaultPowerLevelMember.admin.powerLevel &&
+      return powerLevel >= DefaultPowerLevelMember.moderator.powerLevel &&
           member.membership == Membership.join;
     }).toList();
   }
@@ -286,5 +286,9 @@ extension RoomExtension on Room {
       ..sort(
         (small, great) => great.powerLevel.compareTo(small.powerLevel),
       );
+  }
+
+  bool canUpdateRoleInRoom(User user) {
+    return ownPowerLevel > user.powerLevel;
   }
 }
