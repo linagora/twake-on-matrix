@@ -12,6 +12,7 @@ import 'package:fluffychat/widgets/twake_components/twake_text_button.dart';
 import 'package:flutter/material.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
+import 'package:matrix/matrix.dart';
 
 class AssignRolesMemberPickerView extends StatelessWidget {
   final AssignRolesPickerController controller;
@@ -340,66 +341,10 @@ class AssignRolesMemberPickerView extends StatelessWidget {
                             },
                           ),
                           const SizedBox(width: 8.0),
-                          Avatar(
-                            mxContent: member.avatarUrl,
-                            name: member.calcDisplayname(),
-                          ),
-                          const SizedBox(width: 8.0),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Row(
-                                  children: [
-                                    Text(
-                                      member.calcDisplayname(),
-                                      style: LinagoraTextStyle.material()
-                                          .bodyMedium2
-                                          .copyWith(
-                                            color: LinagoraSysColors.material()
-                                                .onSurface,
-                                          ),
-                                      overflow: TextOverflow.ellipsis,
-                                      maxLines: 1,
-                                    ),
-                                    const Spacer(),
-                                    if (member.isOwnerRole)
-                                      Row(
-                                        children: [
-                                          Text(
-                                            role,
-                                            style: Theme.of(context)
-                                                .textTheme
-                                                .labelMedium
-                                                ?.copyWith(
-                                                  color: LinagoraRefColors
-                                                          .material()
-                                                      .tertiary[30],
-                                                ),
-                                            overflow: TextOverflow.ellipsis,
-                                            maxLines: 1,
-                                          ),
-                                          const SizedBox(
-                                            width: 4,
-                                          ),
-                                        ],
-                                      ),
-                                  ],
-                                ),
-                                Text(
-                                  member.id,
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .bodyMedium
-                                      ?.copyWith(
-                                        color: LinagoraRefColors.material()
-                                            .tertiary[30],
-                                      ),
-                                  overflow: TextOverflow.ellipsis,
-                                  maxLines: 1,
-                                ),
-                              ],
-                            ),
+                          _informationItemBuilder(
+                            context: context,
+                            member: member,
+                            role: role,
                           ),
                         ],
                       ),
@@ -486,66 +431,10 @@ class AssignRolesMemberPickerView extends StatelessWidget {
                             },
                           ),
                           const SizedBox(width: 8.0),
-                          Avatar(
-                            mxContent: member.avatarUrl,
-                            name: member.calcDisplayname(),
-                          ),
-                          const SizedBox(width: 8.0),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Row(
-                                  children: [
-                                    Text(
-                                      member.calcDisplayname(),
-                                      style: LinagoraTextStyle.material()
-                                          .bodyMedium2
-                                          .copyWith(
-                                            color: LinagoraSysColors.material()
-                                                .onSurface,
-                                          ),
-                                      overflow: TextOverflow.ellipsis,
-                                      maxLines: 1,
-                                    ),
-                                    const Spacer(),
-                                    if (member.isOwnerRole)
-                                      Row(
-                                        children: [
-                                          Text(
-                                            role,
-                                            style: Theme.of(context)
-                                                .textTheme
-                                                .labelMedium
-                                                ?.copyWith(
-                                                  color: LinagoraRefColors
-                                                          .material()
-                                                      .tertiary[30],
-                                                ),
-                                            overflow: TextOverflow.ellipsis,
-                                            maxLines: 1,
-                                          ),
-                                          const SizedBox(
-                                            width: 4,
-                                          ),
-                                        ],
-                                      ),
-                                  ],
-                                ),
-                                Text(
-                                  member.id,
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .bodyMedium
-                                      ?.copyWith(
-                                        color: LinagoraRefColors.material()
-                                            .tertiary[30],
-                                      ),
-                                  overflow: TextOverflow.ellipsis,
-                                  maxLines: 1,
-                                ),
-                              ],
-                            ),
+                          _informationItemBuilder(
+                            context: context,
+                            member: member,
+                            role: role,
                           ),
                         ],
                       ),
@@ -558,6 +447,72 @@ class AssignRolesMemberPickerView extends StatelessWidget {
           },
         );
       },
+    );
+  }
+
+  Widget _informationItemBuilder({
+    required BuildContext context,
+    required User member,
+    required String role,
+  }) {
+    return Expanded(
+      child: Row(
+        children: [
+          Avatar(
+            mxContent: member.avatarUrl,
+            name: member.calcDisplayname(),
+          ),
+          const SizedBox(width: 8.0),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        member.calcDisplayname(),
+                        style:
+                            LinagoraTextStyle.material().bodyMedium2.copyWith(
+                                  color: LinagoraSysColors.material().onSurface,
+                                ),
+                        overflow: TextOverflow.ellipsis,
+                        maxLines: 1,
+                      ),
+                    ),
+                    const SizedBox(width: 8.0),
+                    if (member.isOwnerRole)
+                      Row(
+                        children: [
+                          Text(
+                            role,
+                            style:
+                                AssignRolesMemberPickerStyle.roleNameTextStyle(
+                              context,
+                            ),
+                            overflow: TextOverflow.ellipsis,
+                            maxLines: 1,
+                          ),
+                          const SizedBox(
+                            width: 4,
+                          ),
+                        ],
+                      ),
+                  ],
+                ),
+                Text(
+                  member.id,
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: LinagoraRefColors.material().tertiary[30],
+                      ),
+                  overflow: TextOverflow.ellipsis,
+                  maxLines: 1,
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
