@@ -1,3 +1,4 @@
+
 import 'package:fluffychat/pages/homeserver_picker/homeserver_picker_view.dart';
 import 'package:patrol/patrol.dart';
 
@@ -5,16 +6,6 @@ import '../base/core_robot.dart';
 
 class LoginRobot extends CoreRobot {
   LoginRobot(super.$);
-
-  Future<void> grantNotificationPermission(
-    NativeAutomator nativeAutomator,
-  ) async {
-    if (await nativeAutomator.isPermissionDialogVisible(
-      timeout: const Duration(seconds: 15),
-    )) {
-      await nativeAutomator.grantPermissionWhenInUse();
-    }
-  }
 
   Future<void> tapOnUseYourCompanyServer() async {
     await $('Use your company server').tap();
@@ -28,11 +19,29 @@ class LoginRobot extends CoreRobot {
     await $.tap($('Continue'));
   }
 
+  Future<void> confirmShareInformation() async {
+    try {
+      await $.native.waitUntilVisible(Selector(textContains: 'Continue'), appId:'com.apple.springboard',);
+      await $.native.tap(Selector(textContains: 'Continue'), appId:'com.apple.springboard',);
+    } catch (e) {
+      ignoreException();
+    }
+  }
+  Future<void> enterWebCredentialsWhenVisible({required String username,required String password,}) async {
+    await enterPasswordSsoLogin(password);
+    // await enterUsernameSsoLogin(username);
+    await pressSignInSsoLogin();
+  }
+
   Future<void> enterUsernameSsoLogin(String username) async {
     try {
-      await $.native.enterText(
-        Selector(resourceId: 'login'),
-        text: username,
+      // final usernameSelector = Selector(text: 'Phone number / Username / Email');
+      // await $.native.waitUntilVisible(usernameSelector,timeout: const Duration(seconds: 3));
+      // await $.native.enterText(usernameSelector, text: username);
+
+      await $.native.enterTextByIndex(
+        username,
+        index: 0,
       );
     } catch (e) {
       ignoreException();
@@ -41,8 +50,9 @@ class LoginRobot extends CoreRobot {
 
   Future<void> enterPasswordSsoLogin(String password) async {
     try {
+      await $.native.waitUntilVisible(Selector(text: 'Password'),timeout: const Duration(seconds: 3));
       await $.native.enterText(
-        Selector(resourceId: 'password'),
+        Selector(text: 'Password'),
         text: password,
       );
     } catch (e) {
