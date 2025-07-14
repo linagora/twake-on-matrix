@@ -365,10 +365,10 @@ packages:
     dependency: "direct main"
     description:
       name: connectivity_plus
-      sha256: b74247fad72c171381dbe700ca17da24deac637ab6d43c343b42867acb95c991
+      sha256: "77a180d6938f78ca7d2382d2240eb626c0f6a735d0bfdce227d8ffb80f95c48b"
       url: "https://pub.dev"
     source: hosted
-    version: "3.0.6"
+    version: "4.0.2"
   connectivity_plus_platform_interface:
     dependency: transitive
     description:
@@ -466,14 +466,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.0.0"
-  dependency_validator:
-    dependency: transitive
-    description:
-      name: dependency_validator
-      sha256: f727a5627aa405965fab4aef4f468e50a9b632ba0737fd2f98c932fec6d712b9
-      url: "https://pub.dev"
-    source: hosted
-    version: "3.2.3"
   desktop_drop:
     dependency: "direct main"
     description:
@@ -1169,18 +1161,18 @@ packages:
     dependency: "direct main"
     description:
       name: flutter_olm
-      sha256: f98cafb434b3858d46446a93eb269a8e97eb38ccc5f8e0281b167d66d95c15dc
+      sha256: "5e6211af8cba1abf7d1f92e543f6d573dfe6017fe4742e0d04ba84beab47f940"
       url: "https://pub.dev"
     source: hosted
-    version: "1.4.1"
+    version: "2.0.0"
   flutter_openssl_crypto:
     dependency: "direct main"
     description:
       name: flutter_openssl_crypto
-      sha256: "6dcecf6f7c1804ae6f5d73ee05df8af72ea8133bf2447d25979d739503186c96"
+      sha256: "293b4fcda13ab0710645a16e82f3d5b7de19bfc0ab2d06bcdb87637222eda5e1"
       url: "https://pub.dev"
     source: hosted
-    version: "0.3.0"
+    version: "0.5.0"
   flutter_plugin_android_lifecycle:
     dependency: transitive
     description:
@@ -2959,26 +2951,26 @@ packages:
     dependency: "direct main"
     description:
       name: unifiedpush
-      sha256: ef7f3ae6139d27169604e3844379ef7929af573a2be21d9e82187f44ab7b9a32
+      sha256: "1418375efb580af9640de4eaf4209cb6481f9a48792648ced3051f30e67d9568"
       url: "https://pub.dev"
     source: hosted
-    version: "5.0.1"
+    version: "6.0.2"
   unifiedpush_android:
     dependency: transitive
     description:
       name: unifiedpush_android
-      sha256: "610ad746294541f56d632adf9afba5d1c164c44e23ec0dd2162a41a6ff00a00e"
+      sha256: "2f25db8eb2fc3183bf2e43db89fff20b2587adc1c361e1d1e06b223a0d45b50a"
       url: "https://pub.dev"
     source: hosted
-    version: "2.2.3"
+    version: "3.1.1"
   unifiedpush_platform_interface:
     dependency: transitive
     description:
       name: unifiedpush_platform_interface
-      sha256: "7782b18a15d22bb184fa766ef1e0c675eef862055ff815453df7041dfd026146"
+      sha256: bb49d2748211520e35e0374ab816faa8a2c635267e71909d334ad868d532eba5
       url: "https://pub.dev"
     source: hosted
-    version: "2.0.1"
+    version: "3.0.1"
   universal_html:
     dependency: "direct main"
     description:
