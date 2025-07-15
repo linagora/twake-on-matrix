@@ -10,6 +10,7 @@ import 'package:fluffychat/widgets/twake_components/twake_icon_button.dart';
 import 'package:flutter/material.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
+import 'package:matrix/matrix.dart';
 
 class ExceptionsView extends StatelessWidget {
   final ExceptionsController controller;
@@ -127,72 +128,10 @@ class ExceptionsView extends StatelessWidget {
 
                   return TwakeInkWell(
                     onTap: () {},
-                    child: TwakeListItem(
-                      padding: const EdgeInsets.all(8),
-                      child: Row(
-                        children: [
-                          Avatar(
-                            mxContent: member.avatarUrl,
-                            name: member.calcDisplayname(),
-                          ),
-                          const SizedBox(width: 8.0),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Row(
-                                  children: [
-                                    Text(
-                                      member.calcDisplayname(),
-                                      style: LinagoraTextStyle.material()
-                                          .bodyMedium2
-                                          .copyWith(
-                                            color: LinagoraSysColors.material()
-                                                .onSurface,
-                                          ),
-                                      overflow: TextOverflow.ellipsis,
-                                      maxLines: 1,
-                                    ),
-                                    const Spacer(),
-                                    Row(
-                                      children: [
-                                        Text(
-                                          role,
-                                          style: Theme.of(context)
-                                              .textTheme
-                                              .labelMedium
-                                              ?.copyWith(
-                                                color:
-                                                    LinagoraRefColors.material()
-                                                        .tertiary[30],
-                                              ),
-                                          overflow: TextOverflow.ellipsis,
-                                          maxLines: 1,
-                                        ),
-                                        const SizedBox(
-                                          width: 4,
-                                        ),
-                                      ],
-                                    ),
-                                  ],
-                                ),
-                                Text(
-                                  member.id,
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .bodyMedium
-                                      ?.copyWith(
-                                        color: LinagoraRefColors.material()
-                                            .tertiary[30],
-                                      ),
-                                  overflow: TextOverflow.ellipsis,
-                                  maxLines: 1,
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
+                    child: _itemMemberBuilder(
+                      context: context,
+                      member: member,
+                      role: role,
                     ),
                   );
                 },
@@ -236,72 +175,10 @@ class ExceptionsView extends StatelessWidget {
                       member.getDefaultPowerLevelMember.displayName(context);
                   return TwakeInkWell(
                     onTap: () {},
-                    child: TwakeListItem(
-                      padding: const EdgeInsets.all(8),
-                      child: Row(
-                        children: [
-                          Avatar(
-                            mxContent: member.avatarUrl,
-                            name: member.calcDisplayname(),
-                          ),
-                          const SizedBox(width: 8.0),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Row(
-                                  children: [
-                                    Text(
-                                      member.calcDisplayname(),
-                                      style: LinagoraTextStyle.material()
-                                          .bodyMedium2
-                                          .copyWith(
-                                            color: LinagoraSysColors.material()
-                                                .onSurface,
-                                          ),
-                                      overflow: TextOverflow.ellipsis,
-                                      maxLines: 1,
-                                    ),
-                                    const Spacer(),
-                                    Row(
-                                      children: [
-                                        Text(
-                                          role,
-                                          style: Theme.of(context)
-                                              .textTheme
-                                              .labelMedium
-                                              ?.copyWith(
-                                                color:
-                                                    LinagoraRefColors.material()
-                                                        .tertiary[30],
-                                              ),
-                                          overflow: TextOverflow.ellipsis,
-                                          maxLines: 1,
-                                        ),
-                                        const SizedBox(
-                                          width: 4,
-                                        ),
-                                      ],
-                                    ),
-                                  ],
-                                ),
-                                Text(
-                                  member.id,
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .bodyMedium
-                                      ?.copyWith(
-                                        color: LinagoraRefColors.material()
-                                            .tertiary[30],
-                                      ),
-                                  overflow: TextOverflow.ellipsis,
-                                  maxLines: 1,
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
+                    child: _itemMemberBuilder(
+                      context: context,
+                      member: member,
+                      role: role,
                     ),
                   );
                 },
@@ -311,6 +188,76 @@ class ExceptionsView extends StatelessWidget {
           },
         );
       },
+    );
+  }
+
+  Widget _itemMemberBuilder({
+    required BuildContext context,
+    required User member,
+    required String role,
+  }) {
+    return TwakeInkWell(
+      onTap: () {},
+      child: TwakeListItem(
+        padding: const EdgeInsets.all(8),
+        child: Row(
+          children: [
+            Avatar(
+              mxContent: member.avatarUrl,
+              name: member.calcDisplayname(),
+            ),
+            const SizedBox(width: 8.0),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Text(
+                        member.calcDisplayname(),
+                        style:
+                            LinagoraTextStyle.material().bodyMedium2.copyWith(
+                                  color: LinagoraSysColors.material().onSurface,
+                                ),
+                        overflow: TextOverflow.ellipsis,
+                        maxLines: 1,
+                      ),
+                      const Spacer(),
+                      Row(
+                        children: [
+                          Text(
+                            role,
+                            style: Theme.of(context)
+                                .textTheme
+                                .labelMedium
+                                ?.copyWith(
+                                  color:
+                                      LinagoraRefColors.material().tertiary[30],
+                                ),
+                            overflow: TextOverflow.ellipsis,
+                            maxLines: 1,
+                          ),
+                          const SizedBox(
+                            width: 4,
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                  Text(
+                    member.id,
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          color: LinagoraRefColors.material().tertiary[30],
+                        ),
+                    overflow: TextOverflow.ellipsis,
+                    maxLines: 1,
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

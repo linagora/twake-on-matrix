@@ -322,6 +322,7 @@ class AssignRolesRolePickerView extends StatelessWidget {
           padding: EdgeInsets.only(
             left: isDialog ? 16 : 8,
             bottom: 8,
+            right: isDialog ? 16 : 8,
           ),
           child: Wrap(
             spacing: 8.0,
@@ -345,15 +346,20 @@ class AssignRolesRolePickerView extends StatelessWidget {
                       size: AssignRolesRolePickerStyle.avatarChipSize,
                     ),
                     const SizedBox(width: 4.0),
-                    Padding(
-                      padding: AssignRolesRolePickerStyle.textChipPadding,
-                      child: Text(
-                        member.calcDisplayname(),
-                        style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                              color: LinagoraSysColors.material().onSurface,
-                            ),
-                        overflow: TextOverflow.ellipsis,
-                        maxLines: 1,
+                    Flexible(
+                      child: Padding(
+                        padding: AssignRolesRolePickerStyle.textChipPadding,
+                        child: Text(
+                          member.calcDisplayname(),
+                          style: Theme.of(context)
+                              .textTheme
+                              .titleSmall
+                              ?.copyWith(
+                                color: LinagoraSysColors.material().onSurface,
+                              ),
+                          overflow: TextOverflow.ellipsis,
+                          maxLines: 1,
+                        ),
                       ),
                     ),
                   ],
