@@ -289,6 +289,6 @@ extension RoomExtension on Room {
   }
 
   bool canUpdateRoleInRoom(User user) {
-    return ownPowerLevel > user.powerLevel;
+    return ownPowerLevel > user.powerLevel && canAssignRoles;
   }
 }

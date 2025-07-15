@@ -41,37 +41,90 @@ class AssignRolesView extends StatelessWidget {
       ),
 
       /// Implement later
-      floatingActionButton: InkWell(
-        borderRadius: BorderRadius.circular(100),
-        splashColor: LinagoraHoverStyle.material().hoverColor,
-        onTap: () {
-          controller.goToAssignRolesPicker();
-        },
-        child: Container(
-          padding: const EdgeInsets.symmetric(
-            horizontal: 24.0,
-            vertical: 12.0,
-          ),
-          decoration: BoxDecoration(
-            color: LinagoraSysColors.material().secondaryContainer,
-            borderRadius: BorderRadius.circular(100),
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(
-                Icons.person_add_outlined,
-                size: 18.0,
-                color: LinagoraSysColors.material().onSecondaryContainer,
-              ),
-              const SizedBox(width: 8.0),
-              Text(
-                L10n.of(context)!.addAdminsOrModerators,
-                style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                      color: LinagoraSysColors.material().onSecondaryContainer,
+      floatingActionButton: ValueListenableBuilder(
+        valueListenable: controller.enableSelectMembersMobileNotifier,
+        builder: (context, enableSelectMembers, child) {
+          if (enableSelectMembers) {
+            return ValueListenableBuilder<bool>(
+              valueListenable: controller
+                  .selectedUsersMapChangeNotifier.haveSelectedUsersNotifier,
+              builder: (context, hasSelectedUsers, _) {
+                if (!hasSelectedUsers) {
+                  return child!;
+                }
+                return InkWell(
+                  borderRadius: BorderRadius.circular(100),
+                  splashColor: LinagoraHoverStyle.material().hoverColor,
+                  onTap: controller.handleDemoteMultiAdminsAndModeratorsMobile,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 24.0,
+                      vertical: 12.0,
                     ),
-              ),
-            ],
+                    decoration: BoxDecoration(
+                      color: LinagoraSysColors.material().errorContainer,
+                      borderRadius: BorderRadius.circular(100),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          Icons.person_remove_outlined,
+                          size: 18.0,
+                          color:
+                              LinagoraSysColors.material().onSecondaryContainer,
+                        ),
+                        const SizedBox(width: 8.0),
+                        Text(
+                          L10n.of(context)!.demoteAdminsModerators,
+                          style:
+                              Theme.of(context).textTheme.labelLarge?.copyWith(
+                                    color: LinagoraSysColors.material()
+                                        .onSecondaryContainer,
+                                  ),
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              },
+            );
+          }
+          return child!;
+        },
+        child: InkWell(
+          borderRadius: BorderRadius.circular(100),
+          splashColor: LinagoraHoverStyle.material().hoverColor,
+          onTap: () {
+            controller.goToAssignRolesPicker();
+          },
+          child: Container(
+            padding: const EdgeInsets.symmetric(
+              horizontal: 24.0,
+              vertical: 12.0,
+            ),
+            decoration: BoxDecoration(
+              color: LinagoraSysColors.material().secondaryContainer,
+              borderRadius: BorderRadius.circular(100),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  Icons.person_add_outlined,
+                  size: 18.0,
+                  color: LinagoraSysColors.material().onSecondaryContainer,
+                ),
+                const SizedBox(width: 8.0),
+                Text(
+                  L10n.of(context)!.addAdminsOrModerators,
+                  style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                        color:
+                            LinagoraSysColors.material().onSecondaryContainer,
+                      ),
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -165,73 +218,129 @@ class AssignRolesView extends StatelessWidget {
                 itemCount: success.assignRolesMember.length,
                 itemBuilder: (context, index) {
                   final member = success.assignRolesMember[index];
-                  return TwakeInkWell(
-                    onTap: () {},
-                    child: TwakeListItem(
-                      padding: const EdgeInsets.all(8),
-                      child: Row(
-                        children: [
-                          Avatar(
-                            mxContent: member.avatarUrl,
-                            name: member.calcDisplayname(),
-                          ),
-                          const SizedBox(width: 8.0),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Row(
+                  final canUpdateRole =
+                      controller.widget.room.canUpdateRoleInRoom(member);
+                  return ValueListenableBuilder(
+                    valueListenable:
+                        controller.enableSelectMembersMobileNotifier,
+                    builder: (context, enableSelectMembers, child) {
+                      return TwakeInkWell(
+                        onLongPress: () => controller.handleOnLongPressMobile(
+                          member: member,
+                        ),
+                        onTap: !canUpdateRole
+                            ? null
+                            : enableSelectMembers
+                                ? () {
+                                    controller.selectedUsersMapChangeNotifier
+                                        .onUserTileTap(
+                                      context,
+                                      member,
+                                    );
+                                  }
+                                : null,
+                        child: TwakeListItem(
+                          padding: const EdgeInsets.all(8),
+                          child: Row(
+                            children: [
+                              if (enableSelectMembers)
+                                ValueListenableBuilder<bool>(
+                                  valueListenable: controller
+                                      .selectedUsersMapChangeNotifier
+                                      .getNotifierAtUser(member),
+                                  builder: (context, isCurrentSelected, child) {
+                                    if (!canUpdateRole) {
+                                      return const SizedBox.shrink();
+                                    }
+                                    return Checkbox(
+                                      value:
+                                          !canUpdateRole || isCurrentSelected,
+                                      side: BorderSide(
+                                        color: isCurrentSelected
+                                            ? Theme.of(context)
+                                                .colorScheme
+                                                .primary
+                                            : LinagoraRefColors.material()
+                                                .tertiary[30]!,
+                                        width: 2,
+                                      ),
+                                      onChanged: !canUpdateRole
+                                          ? null
+                                          : (newValue) {
+                                              controller
+                                                  .selectedUsersMapChangeNotifier
+                                                  .onUserTileTap(
+                                                context,
+                                                member,
+                                              );
+                                            },
+                                    );
+                                  },
+                                ),
+                              const SizedBox(width: 8.0),
+                              Avatar(
+                                mxContent: member.avatarUrl,
+                                name: member.calcDisplayname(),
+                              ),
+                              const SizedBox(width: 8.0),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    Expanded(
-                                      child: Text(
-                                        member.calcDisplayname(),
-                                        style: LinagoraTextStyle.material()
-                                            .bodyMedium2
-                                            .copyWith(
-                                              color:
-                                                  LinagoraSysColors.material()
+                                    Row(
+                                      children: [
+                                        Expanded(
+                                          child: Text(
+                                            member.calcDisplayname(),
+                                            style: LinagoraTextStyle.material()
+                                                .bodyMedium2
+                                                .copyWith(
+                                                  color: LinagoraSysColors
+                                                          .material()
                                                       .onSurface,
-                                            ),
-                                        overflow: TextOverflow.ellipsis,
-                                        maxLines: 1,
-                                      ),
+                                                ),
+                                            overflow: TextOverflow.ellipsis,
+                                            maxLines: 1,
+                                          ),
+                                        ),
+                                        const SizedBox(width: 8.0),
+                                        InkWell(
+                                          hoverColor: Colors.transparent,
+                                          highlightColor: Colors.transparent,
+                                          focusColor: Colors.transparent,
+                                          splashColor: Colors.transparent,
+                                          onTap: () => controller
+                                              .handleOnTapQuickRolePickerMobile(
+                                            context: context,
+                                            user: member,
+                                          ),
+                                          child: _assignRoleItemStreamBuilder(
+                                            context: context,
+                                            member: member,
+                                          ),
+                                        ),
+                                      ],
                                     ),
-                                    const SizedBox(width: 8.0),
-                                    InkWell(
-                                      hoverColor: Colors.transparent,
-                                      highlightColor: Colors.transparent,
-                                      focusColor: Colors.transparent,
-                                      splashColor: Colors.transparent,
-                                      onTap: () => controller
-                                          .handleOnTapQuickRolePickerMobile(
-                                        context: context,
-                                        user: member,
-                                      ),
-                                      child: _assignRoleItemStreamBuilder(
-                                        context: context,
-                                        member: member,
-                                      ),
+                                    Text(
+                                      member.id,
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .bodyMedium
+                                          ?.copyWith(
+                                            color: LinagoraRefColors.material()
+                                                .tertiary[30],
+                                          ),
+                                      overflow: TextOverflow.ellipsis,
+                                      maxLines: 1,
                                     ),
                                   ],
                                 ),
-                                Text(
-                                  member.id,
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .bodyMedium
-                                      ?.copyWith(
-                                        color: LinagoraRefColors.material()
-                                            .tertiary[30],
-                                      ),
-                                  overflow: TextOverflow.ellipsis,
-                                  maxLines: 1,
-                                ),
-                              ],
-                            ),
+                              ),
+                            ],
                           ),
-                        ],
-                      ),
-                    ),
+                        ),
+                      );
+                    },
                   );
                 },
               );

@@ -12,10 +12,12 @@ import 'package:fluffychat/pages/chat_details/assign_roles/assign_roles_search_s
 import 'package:fluffychat/pages/chat_details/assign_roles/assign_roles_view.dart';
 import 'package:fluffychat/pages/chat_details/assign_roles_member_picker/assign_roles_member_picker.dart';
 import 'package:fluffychat/pages/chat_details/assign_roles_member_picker/assign_roles_member_picker_style.dart';
+import 'package:fluffychat/pages/chat_details/assign_roles_member_picker/selected_user_notifier.dart';
 import 'package:fluffychat/pages/chat_details/chat_details_edit_view_style.dart';
 import 'package:fluffychat/pages/search/search_debouncer_mixin.dart';
 import 'package:fluffychat/utils/dialog/twake_dialog.dart';
 import 'package:fluffychat/utils/extension/build_context_extension.dart';
+import 'package:fluffychat/utils/extension/value_notifier_extension.dart';
 import 'package:fluffychat/utils/responsive/responsive_utils.dart';
 import 'package:fluffychat/utils/twake_snackbar.dart';
 import 'package:fluffychat/widgets/context_menu/context_menu_action.dart';
@@ -46,6 +48,12 @@ class AssignRolesController extends State<AssignRoles>
       getIt.get<SetPermissionLevelInteractor>();
 
   StreamSubscription? _setPermissionLevelSubscription;
+
+  final SelectedUsersMapChangeNotifier selectedUsersMapChangeNotifier =
+      SelectedUsersMapChangeNotifier();
+
+  final ValueNotifier<bool> enableSelectMembersMobileNotifier =
+      ValueNotifier<bool>(false);
 
   StreamSubscription? _powerLevelsSubscription;
 
@@ -111,14 +119,14 @@ class AssignRolesController extends State<AssignRoles>
     );
   }
 
-  void handleOnTapQuickRolePickerMobile({
+  Future<void> handleOnTapQuickRolePickerMobile({
     required BuildContext context,
     required User user,
   }) async {
     if (!widget.room.canUpdateRoleInRoom(user)) {
       return;
     }
-    showModalBottomSheet(
+    await showModalBottomSheet(
       context: context,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.only(
@@ -187,8 +195,9 @@ class AssignRolesController extends State<AssignRoles>
       onTap: () {
         Navigator.of(context).pop();
         _handleClickOnContextMenuItem(
-          role: role,
-          user: user,
+          userPermissionLevels: {
+            user: role.powerLevel,
+          },
         );
       },
       child: Container(
@@ -223,7 +232,7 @@ class AssignRolesController extends State<AssignRoles>
     );
   }
 
-  void handleOnTapQuickRolePickerWeb({
+  Future<void> handleOnTapQuickRolePickerWeb({
     required BuildContext context,
     required TapDownDetails tapDownDetails,
     required User user,
@@ -243,21 +252,19 @@ class AssignRolesController extends State<AssignRoles>
 
     if (selectedActionIndex != null && selectedActionIndex is int) {
       _handleClickOnContextMenuItem(
-        role: quickRolePicker[selectedActionIndex],
-        user: user,
+        userPermissionLevels: {
+          user: quickRolePicker[selectedActionIndex].powerLevel,
+        },
       );
     }
   }
 
   void _handleClickOnContextMenuItem({
-    required DefaultPowerLevelMember role,
-    required User user,
+    required Map<User, int> userPermissionLevels,
   }) {
-    _setPermissionLevelSubscription = setPermissionLevelInteractor.execute(
-      userPermissionLevels: {
-        user: role.powerLevel,
-      },
-    ).listen((result) {
+    _setPermissionLevelSubscription = setPermissionLevelInteractor
+        .execute(userPermissionLevels: userPermissionLevels)
+        .listen((result) {
       _handleAssignRolesResult(result);
     });
   }
@@ -271,6 +278,7 @@ class AssignRolesController extends State<AssignRoles>
             context,
             failure.exception.toString(),
           );
+          selectedUsersMapChangeNotifier.unselectAllUsers();
           return;
         }
 
@@ -280,17 +288,20 @@ class AssignRolesController extends State<AssignRoles>
             context,
             L10n.of(context)!.permissionErrorChangeRole,
           );
+          selectedUsersMapChangeNotifier.unselectAllUsers();
           return;
         }
       },
       (success) {
         if (success is SetPermissionLevelLoading) {
           TwakeDialog.showLoadingDialog(context);
+          selectedUsersMapChangeNotifier.unselectAllUsers();
           return;
         }
 
         if (success is SetPermissionLevelSuccess) {
           TwakeDialog.hideLoadingDialog(context);
+          selectedUsersMapChangeNotifier.unselectAllUsers();
 
           return;
         }
@@ -368,6 +379,59 @@ class AssignRolesController extends State<AssignRoles>
     );
   }
 
+  void _listenToSelectedUsersMapChange() {
+    selectedUsersMapChangeNotifier.addListener(() {
+      Logs().d(
+        "AssignRolesController::initState: selectedUsersMapChangeNotifier: ${selectedUsersMapChangeNotifier.usersList.length}",
+      );
+      if (responsive.isMobile(context)) {
+        enableSelectMembersMobileNotifier.value =
+            selectedUsersMapChangeNotifier.usersList.isNotEmpty;
+      }
+    });
+  }
+
+  void handleOnLongPressMobile({
+    required User member,
+  }) {
+    if (!responsive.isMobile(context)) {
+      return;
+    }
+
+    if (!widget.room.canAssignRoles) {
+      return;
+    }
+
+    if (!widget.room.canUpdateRoleInRoom(member)) {
+      return;
+    }
+
+    enableSelectMembersMobileNotifier.toggle();
+    selectedUsersMapChangeNotifier.onUserTileTap(
+      context,
+      member,
+    );
+  }
+
+  void handleDemoteMultiAdminsAndModeratorsMobile() {
+    if (!responsive.isMobile(context)) {
+      return;
+    }
+    if (!widget.room.canAssignRoles) {
+      return;
+    }
+    if (selectedUsersMapChangeNotifier.usersList.isEmpty) {
+      return;
+    }
+
+    _handleClickOnContextMenuItem(
+      userPermissionLevels: {
+        for (final user in selectedUsersMapChangeNotifier.usersList)
+          user: DefaultPowerLevelMember.member.powerLevel,
+      },
+    );
+  }
+
   @override
   void initState() {
     _powerLevelsSubscription = powerLevelsChanged.listen((event) {
@@ -380,6 +444,7 @@ class AssignRolesController extends State<AssignRoles>
     textEditingController.addListener(
       () => setDebouncerValue(textEditingController.text),
     );
+    _listenToSelectedUsersMapChange();
     initializeDebouncer((searchTerm) {
       Logs().d("AssignRolesController::initState: $searchTerm");
       handleSearchResults(searchTerm);
@@ -395,6 +460,9 @@ class AssignRolesController extends State<AssignRoles>
     searchUserResults.dispose();
     _powerLevelsSubscription?.cancel();
     _setPermissionLevelSubscription?.cancel();
+    disposeDebouncer();
+    selectedUsersMapChangeNotifier.dispose();
+    enableSelectMembersMobileNotifier.dispose();
     super.dispose();
   }
 
