@@ -3334,6 +3334,7 @@
   "changeGroupHistoryVisibility": "Change group history visibility",
   "searchGroupMembers": "Search group members",
   "permissionErrorChangeRole": "You don’t have the rights to change roles. Please reach out to your admin for help",
+  "demoteAdminsModerators": "Demote Admins/Moderators",
   "deleteMessageConfirmationTitle": "Are you sure you want to delete this message?",
   "@deleteMessageConfirmationTitle": {}
 }
