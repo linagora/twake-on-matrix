@@ -1,3 +1,4 @@
+import 'package:fluffychat/domain/model/room/room_extension.dart';
 import 'package:fluffychat/pages/chat_details/assign_roles_member_picker/assign_roles_member_picker.dart';
 import 'package:fluffychat/pages/chat_details/assign_roles_member_picker/assign_roles_member_picker_search_state.dart';
 import 'package:fluffychat/pages/chat_details/assign_roles_member_picker/assign_roles_member_picker_style.dart';
@@ -299,8 +300,10 @@ class AssignRolesMemberPickerView extends StatelessWidget {
                   final member = success.members[index];
                   final role =
                       member.getDefaultPowerLevelMember.displayName(context);
+                  final canUpdateRole =
+                      controller.widget.room.canUpdateRoleInRoom(member);
                   return TwakeInkWell(
-                    onTap: member.isOwnerRole
+                    onTap: !canUpdateRole
                         ? null
                         : () {
                             controller.selectedUsersMapChangeNotifier
@@ -319,7 +322,7 @@ class AssignRolesMemberPickerView extends StatelessWidget {
                                 .getNotifierAtUser(member),
                             builder: (context, isCurrentSelected, child) {
                               return Checkbox(
-                                value: member.isOwnerRole || isCurrentSelected,
+                                value: !canUpdateRole || isCurrentSelected,
                                 side: BorderSide(
                                   color: isCurrentSelected
                                       ? Theme.of(context).colorScheme.primary
@@ -327,7 +330,7 @@ class AssignRolesMemberPickerView extends StatelessWidget {
                                           .tertiary[30]!,
                                   width: 2,
                                 ),
-                                onChanged: member.isOwnerRole
+                                onChanged: !canUpdateRole
                                     ? null
                                     : (newValue) {
                                         controller
@@ -389,8 +392,10 @@ class AssignRolesMemberPickerView extends StatelessWidget {
                   final member = success.members[index];
                   final role =
                       member.getDefaultPowerLevelMember.displayName(context);
+                  final canUpdateRole =
+                      controller.widget.room.canUpdateRoleInRoom(member);
                   return TwakeInkWell(
-                    onTap: member.isOwnerRole
+                    onTap: !canUpdateRole
                         ? null
                         : () {
                             controller.selectedUsersMapChangeNotifier
@@ -409,7 +414,7 @@ class AssignRolesMemberPickerView extends StatelessWidget {
                                 .getNotifierAtUser(member),
                             builder: (context, isCurrentSelected, child) {
                               return Checkbox(
-                                value: member.isOwnerRole || isCurrentSelected,
+                                value: !canUpdateRole || isCurrentSelected,
                                 side: BorderSide(
                                   color: isCurrentSelected
                                       ? Theme.of(context).colorScheme.primary
@@ -417,7 +422,7 @@ class AssignRolesMemberPickerView extends StatelessWidget {
                                           .tertiary[30]!,
                                   width: 2,
                                 ),
-                                onChanged: member.isOwnerRole
+                                onChanged: !canUpdateRole
                                     ? null
                                     : (newValue) {
                                         controller
