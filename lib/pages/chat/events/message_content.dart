@@ -9,7 +9,6 @@ import 'package:fluffychat/pages/chat/events/message_upload_content.dart';
 import 'package:fluffychat/pages/chat/events/message_video_download_content.dart';
 import 'package:fluffychat/pages/chat/events/message_video_download_content_web.dart';
 import 'package:fluffychat/pages/chat/events/message_video_upload_content.dart';
-import 'package:fluffychat/pages/chat/events/redacted_content.dart';
 import 'package:fluffychat/pages/chat/events/sending_video_widget.dart';
 import 'package:fluffychat/pages/chat/events/unknown_content.dart';
 import 'package:fluffychat/pages/chat/optional_selection_container_disabled.dart';
@@ -253,16 +252,6 @@ class MessageContent extends StatelessWidget
           case MessageTypes.None:
           textmessage:
           default:
-            if (event.redacted) {
-              return OptionalSelectionContainerDisabled(
-                isEnabled: PlatformInfos.isWeb,
-                child: Padding(
-                  padding: const EdgeInsets.only(bottom: 8),
-                  child: RedactedContent(event: event, timeline: timeline),
-                ),
-              );
-            }
-
             return FutureBuilder<String>(
               future: event.calcLocalizedBody(
                 MatrixLocals(L10n.of(context)!),
@@ -282,11 +271,7 @@ class MessageContent extends StatelessWidget
                   fontSize: fontSize,
                   linkStyle:
                       MessageContentStyle.linkStyleMessageContent(context),
-                  richTextStyle: event.isDisplayOnlyEmoji()
-                      ? event.textStyleForOnlyEmoji(context)
-                      : Theme.of(context).textTheme.bodyLarge?.copyWith(
-                            color: Theme.of(context).colorScheme.onSurface,
-                          ),
+                  richTextStyle: event.getMessageTextStyle(context),
                 );
               },
             );

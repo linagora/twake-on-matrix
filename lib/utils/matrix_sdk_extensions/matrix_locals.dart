@@ -193,7 +193,7 @@ class MatrixLocals extends MatrixLocalizations {
 
   @override
   String removedBy(String displayName) {
-    return l10n.removedBy(displayName);
+    return l10n.deletedMessage;
   }
 
   @override

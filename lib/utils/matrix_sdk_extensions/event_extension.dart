@@ -18,6 +18,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:future_loading_dialog/future_loading_dialog.dart';
+import 'package:linagora_design_flutter/colors/linagora_ref_colors.dart';
 import 'package:matrix/matrix.dart';
 
 import 'matrix_file_extension.dart';
@@ -279,6 +280,26 @@ extension LocalizedBody on Event {
               color: Theme.of(context).colorScheme.onSurface,
             );
     }
+  }
+
+  TextStyle? getMessageTextStyle(BuildContext context) {
+    if (redacted) {
+      return Theme.of(context).textTheme.bodyLarge?.copyWith(
+            fontSize: 17,
+            height: 24 / 17,
+            color: LinagoraRefColors.material().tertiary[30],
+          );
+    }
+
+    if (isDisplayOnlyEmoji()) {
+      return textStyleForOnlyEmoji(context);
+    }
+
+    return Theme.of(context).textTheme.bodyLarge?.copyWith(
+          color: Theme.of(
+            context,
+          ).colorScheme.onSurface,
+        );
   }
 
   List<Client?> currentRoomBundle(MatrixState? matrix) {
