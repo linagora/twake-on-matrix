@@ -120,20 +120,22 @@ class AssignRolesPickerController extends State<AssignRolesMemberPicker>
     showDialog(
       context: context,
       barrierColor: Colors.transparent,
-      builder: (dialogContext) => AlertDialog(
-        contentPadding: const EdgeInsets.all(0),
-        shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.all(
-            Radius.circular(16.0),
+      builder: (dialogContext) => ScaffoldMessenger(
+        child: AlertDialog(
+          contentPadding: const EdgeInsets.all(0),
+          shape: const RoundedRectangleBorder(
+            borderRadius: BorderRadius.all(
+              Radius.circular(16.0),
+            ),
           ),
-        ),
-        content: SizedBox(
-          width: AssignRolesRolePickerStyle.fixedDialogWidth,
-          height: AssignRolesRolePickerStyle.fixedDialogHeight,
-          child: AssignRolesRolePicker(
-            room: widget.room,
-            assignedUsers: selectedUsersMapChangeNotifier.usersList.toList(),
-            isDialog: true,
+          content: SizedBox(
+            width: AssignRolesRolePickerStyle.fixedDialogWidth,
+            height: AssignRolesRolePickerStyle.fixedDialogHeight,
+            child: AssignRolesRolePicker(
+              room: widget.room,
+              assignedUsers: selectedUsersMapChangeNotifier.usersList.toList(),
+              isDialog: true,
+            ),
           ),
         ),
       ),
