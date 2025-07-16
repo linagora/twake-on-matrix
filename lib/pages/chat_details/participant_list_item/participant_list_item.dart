@@ -1,9 +1,7 @@
 import 'package:fluffychat/config/default_power_level_member.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/domain/enums/selection_mode_enum.dart';
-import 'package:fluffychat/pages/chat_details/participant_list_item/participant_list_item_style.dart';
 import 'package:fluffychat/pages/chat_list/chat_custom_slidable_action.dart';
-import 'package:fluffychat/pages/profile_info/profile_info_body/profile_info_body.dart';
 import 'package:fluffychat/pages/profile_info/profile_info_page.dart';
 import 'package:fluffychat/utils/dialog/twake_dialog.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
@@ -136,7 +134,10 @@ class ParticipantListItem extends StatelessWidget {
     if (responsive.isMobile(context)) {
       await _openDialogInvite(context);
     } else {
-      await _openProfileDialog(context);
+      await member.openProfileDialog(
+        context: context,
+        onUpdatedMembers: onUpdatedMembers,
+      );
     }
   }
 
@@ -170,44 +171,6 @@ class ParticipantListItem extends StatelessWidget {
       },
     );
   }
-
-  Future _openProfileDialog(BuildContext context) => showDialog(
-        context: context,
-        builder: (dialogContext) => AlertDialog(
-          contentPadding: const EdgeInsets.all(0),
-          backgroundColor: LinagoraRefColors.material().primary[100],
-          surfaceTintColor: Colors.transparent,
-          content: SizedBox(
-            width: ParticipantListItemStyle.fixedDialogWidth,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Stack(
-                  children: [
-                    Align(
-                      alignment: Alignment.topRight,
-                      child: Padding(
-                        padding: ParticipantListItemStyle.closeButtonPadding,
-                        child: IconButton(
-                          onPressed: () => Navigator.of(dialogContext).pop(),
-                          icon: const Icon(Icons.close),
-                        ),
-                      ),
-                    ),
-                    ProfileInfoBody(
-                      user: member,
-                      onNewChatOpen: () {
-                        Navigator.of(dialogContext).pop();
-                      },
-                      onUpdatedMembers: onUpdatedMembers,
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-        ),
-      );
 }
 
 class _ParticipantSelectionToggleButton extends StatelessWidget {

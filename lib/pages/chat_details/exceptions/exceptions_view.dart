@@ -174,7 +174,9 @@ class ExceptionsView extends StatelessWidget {
                   final role =
                       member.getDefaultPowerLevelMember.displayName(context);
                   return TwakeInkWell(
-                    onTap: () {},
+                    onTap: () {
+                      member.openProfileDialog(context: context);
+                    },
                     child: _itemMemberBuilder(
                       context: context,
                       member: member,
@@ -197,7 +199,9 @@ class ExceptionsView extends StatelessWidget {
     required String role,
   }) {
     return TwakeInkWell(
-      onTap: () {},
+      onTap: () {
+        member.openProfileDialog(context: context);
+      },
       child: TwakeListItem(
         padding: const EdgeInsets.all(8),
         child: Row(
