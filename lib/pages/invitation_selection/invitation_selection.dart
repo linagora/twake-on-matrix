@@ -4,10 +4,8 @@ import 'package:fluffychat/utils/dialog/twake_dialog.dart';
 import 'package:fluffychat/utils/twake_snackbar.dart';
 import 'package:flutter/material.dart';
 
-import 'package:adaptive_dialog/adaptive_dialog.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 
-import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:matrix/matrix.dart';
 
@@ -59,19 +57,17 @@ class InvitationSelectionController
       performInvite();
       return;
     }
-    if (OkCancelResult.ok ==
-        await showOkCancelAlertDialog(
-          context: context,
-          title: L10n.of(context)!.inviteContactToGroup(
-            _room.getLocalizedDisplayname(
-              MatrixLocals(L10n.of(context)!),
-            ),
-          ),
-          okLabel: L10n.of(context)!.yes,
-          cancelLabel: L10n.of(context)!.cancel,
-        )) {
-      performInvite();
-    }
+    await showConfirmAlertDialog(
+      context: context,
+      title: L10n.of(context)?.externalContactTitle,
+      message: L10n.of(context)?.externalContactMessage,
+      okLabel: L10n.of(context)?.invite,
+      cancelLabel: L10n.of(context)?.skip,
+    ).then((result) {
+      if (result == ConfirmResult.ok) {
+        performInvite();
+      }
+    });
   }
 
   void performInvite() async {
@@ -89,6 +85,7 @@ class InvitationSelectionController
         L10n.of(context)!.contactHasBeenInvitedToTheGroup,
       );
       inviteSuccessAction();
+      return;
     }
   }
 
