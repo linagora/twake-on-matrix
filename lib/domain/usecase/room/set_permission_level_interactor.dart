@@ -6,17 +6,28 @@ import 'package:matrix/matrix.dart';
 
 class SetPermissionLevelInteractor {
   Stream<Either<Failure, Success>> execute({
+    required Room room,
     required Map<User, int> userPermissionLevels,
   }) async* {
     try {
       yield Right(SetPermissionLevelLoading());
 
-      for (final entry in userPermissionLevels.entries) {
-        final user = entry.key;
-        final level = entry.value;
-
-        await user.setPower(level);
+      var powerMap = room.getState(EventTypes.RoomPowerLevels)?.content;
+      if (powerMap is! Map<String, dynamic>) {
+        powerMap = <String, dynamic>{};
       }
+      final usersMap = powerMap['users'] ??= {};
+
+      userPermissionLevels.forEach((user, level) {
+        usersMap[user.id] = level;
+      });
+
+      await room.client.setRoomStateWithKey(
+        room.id,
+        EventTypes.RoomPowerLevels,
+        '',
+        powerMap,
+      );
 
       yield const Right(SetPermissionLevelSuccess());
     } on MatrixException catch (e) {

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:dartz/dartz.dart' hide State;
 import 'package:fluffychat/app_state/failure.dart';
 import 'package:fluffychat/app_state/success.dart';
@@ -29,6 +31,8 @@ class ExceptionsController extends State<Exceptions> with SearchDebouncerMixin {
   final textEditingController = TextEditingController();
 
   final inputFocus = FocusNode();
+
+  StreamSubscription? _powerLevelsSubscription;
 
   final ValueNotifier<Either<Failure, Success>> searchUserResults =
       ValueNotifier<Either<Failure, Success>>(
@@ -93,6 +97,9 @@ class ExceptionsController extends State<Exceptions> with SearchDebouncerMixin {
 
   @override
   void initState() {
+    _powerLevelsSubscription = widget.room.powerLevelsChanged.listen((_) {
+      initialExceptions();
+    });
     initialExceptions();
     textEditingController.addListener(
       () => setDebouncerValue(textEditingController.text),
@@ -102,6 +109,15 @@ class ExceptionsController extends State<Exceptions> with SearchDebouncerMixin {
       handleSearchResults(searchTerm);
     });
     super.initState();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    _powerLevelsSubscription?.cancel();
+    textEditingController.dispose();
+    inputFocus.dispose();
+    searchUserResults.dispose();
   }
 
   @override
