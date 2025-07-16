@@ -624,27 +624,26 @@ class _MessageContentWithTimestampBuilderState
                     scrollToEventId: widget.scrollToEventId,
                     selectMode: widget.selectMode,
                   ),
-                  if (!widget.event.redacted)
-                    Positioned(
-                      child: OptionalSelectionContainerDisabled(
-                        isEnabled: PlatformInfos.isWeb,
-                        child: Padding(
-                          padding: MessageStyle.paddingMessageTime,
-                          child: Text.rich(
-                            WidgetSpan(
-                              child: MessageTime(
-                                timelineOverlayMessage:
-                                    widget.event.timelineOverlayMessage,
-                                room: widget.event.room,
-                                event: widget.event,
-                                showSeenIcon: widget.event.isOwnMessage,
-                                timeline: widget.timeline,
-                              ),
+                  Positioned(
+                    child: OptionalSelectionContainerDisabled(
+                      isEnabled: PlatformInfos.isWeb,
+                      child: Padding(
+                        padding: MessageStyle.paddingMessageTime,
+                        child: Text.rich(
+                          WidgetSpan(
+                            child: MessageTime(
+                              timelineOverlayMessage:
+                                  widget.event.timelineOverlayMessage,
+                              room: widget.event.room,
+                              event: widget.event,
+                              showSeenIcon: widget.event.isOwnMessage,
+                              timeline: widget.timeline,
                             ),
                           ),
                         ),
                       ),
                     ),
+                  ),
                 ],
               ),
             ],
