@@ -17,7 +17,6 @@ import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/utils/twake_snackbar.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:go_router/go_router.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:matrix/matrix.dart';
@@ -117,30 +116,18 @@ class ProfileInfoBodyController extends State<ProfileInfoBody> {
 
   Future<void> removeFromGroupChat() async {
     if (user == null) return;
-    WarningDialog.showCancelable(
-      context,
-      message: L10n.of(context)!.removeReason(
-        user?.displayName ?? '',
-      ),
-      title: L10n.of(context)!.removeUser,
-      acceptText: L10n.of(context)!.remove,
-      cancelText: L10n.of(context)!.cancel,
-      acceptTextColor: LinagoraSysColors.material().error,
-      onAccept: () async {
-        WarningDialog.hideWarningDialog(context);
-        final result = await TwakeDialog.showFutureLoadingDialogFullScreen(
-          future: () => user!.ban(),
-        );
-        if (result.error != null) {
-          TwakeSnackBar.show(
-            context,
-            result.error!.message,
-          );
-          return;
-        }
-        widget.onUpdatedMembers?.call();
-      },
+    WarningDialog.hideWarningDialog(context);
+    final result = await TwakeDialog.showFutureLoadingDialogFullScreen(
+      future: () => user!.ban(),
     );
+    if (result.error != null) {
+      TwakeSnackBar.show(
+        context,
+        result.error!.message,
+      );
+      return;
+    }
+    widget.onUpdatedMembers?.call();
   }
 
   List<ProfileInfoActions> profileInfoActions() {
