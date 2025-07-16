@@ -253,17 +253,17 @@ class AssignRolesView extends StatelessWidget {
                           onLongPress: () => controller.handleOnLongPressMobile(
                             member: member,
                           ),
-                          onTap: !canUpdateRole
-                              ? null
-                              : enableSelectMembers
-                                  ? () {
-                                      controller.selectedUsersMapChangeNotifier
-                                          .onUserTileTap(
-                                        context,
-                                        member,
-                                      );
-                                    }
-                                  : null,
+                          onTap: () {
+                            if (enableSelectMembers && canUpdateRole) {
+                              controller.selectedUsersMapChangeNotifier
+                                  .onUserTileTap(
+                                context,
+                                member,
+                              );
+                            } else {
+                              member.openProfileDialog(context: context);
+                            }
+                          },
                           child: TwakeListItem(
                             padding: const EdgeInsets.all(8),
                             child: Row(
@@ -410,7 +410,9 @@ class AssignRolesView extends StatelessWidget {
                 itemBuilder: (context, index) {
                   final member = success.assignRolesMember[index];
                   return TwakeInkWell(
-                    onTap: () {},
+                    onTap: () {
+                      member.openProfileDialog(context: context);
+                    },
                     child: TwakeListItem(
                       padding: const EdgeInsets.all(8),
                       child: Row(

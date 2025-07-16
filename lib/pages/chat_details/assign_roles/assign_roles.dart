@@ -262,7 +262,7 @@ class AssignRolesController extends State<AssignRoles>
     required Map<User, int> userPermissionLevels,
   }) {
     _setPermissionLevelSubscription = setPermissionLevelInteractor
-        .execute(userPermissionLevels: userPermissionLevels)
+        .execute(room: widget.room, userPermissionLevels: userPermissionLevels)
         .listen((result) {
       _handleAssignRolesResult(result);
     });

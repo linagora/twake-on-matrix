@@ -182,6 +182,7 @@ class AssignRolesEditorController extends State<AssignRolesRolePicker> {
 
     setPermissionLevelInteractor
         .execute(
+      room: widget.room,
       userPermissionLevels: userPermissionLevels,
     )
         .listen((result) {

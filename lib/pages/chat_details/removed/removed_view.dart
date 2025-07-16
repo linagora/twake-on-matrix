@@ -1,6 +1,7 @@
 import 'package:fluffychat/pages/chat_details/removed/removed.dart';
 import 'package:fluffychat/pages/chat_details/removed/removed_search_state.dart';
 import 'package:fluffychat/pages/chat_list/chat_list_header_style.dart';
+import 'package:fluffychat/utils/user_extension.dart';
 import 'package:fluffychat/widgets/app_bars/twake_app_bar.dart';
 import 'package:fluffychat/widgets/avatar/avatar.dart';
 import 'package:fluffychat/widgets/context_menu_builder_ios_paste_without_permission.dart';
@@ -123,7 +124,9 @@ class RemovedView extends StatelessWidget {
                 itemBuilder: (context, index) {
                   final member = success.removedMember[index];
                   return TwakeInkWell(
-                    onTap: () {},
+                    onTap: () {
+                      member.openProfileDialog(context: context);
+                    },
                     child: _itemMemberBuilder(
                       context: context,
                       member: member,
@@ -188,7 +191,9 @@ class RemovedView extends StatelessWidget {
     required User member,
   }) {
     return TwakeInkWell(
-      onTap: () {},
+      onTap: () {
+        member.openProfileDialog(context: context);
+      },
       child: TwakeListItem(
         padding: const EdgeInsets.all(8),
         child: Row(
