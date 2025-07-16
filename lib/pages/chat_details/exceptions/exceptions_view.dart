@@ -175,7 +175,7 @@ class ExceptionsView extends StatelessWidget {
                       member.getDefaultPowerLevelMember.displayName(context);
                   return TwakeInkWell(
                     onTap: () {
-                      member.openProfileDialog(context: context);
+                      member.openProfileView(context: context);
                     },
                     child: _itemMemberBuilder(
                       context: context,
@@ -200,7 +200,7 @@ class ExceptionsView extends StatelessWidget {
   }) {
     return TwakeInkWell(
       onTap: () {
-        member.openProfileDialog(context: context);
+        member.openProfileView(context: context);
       },
       child: TwakeListItem(
         padding: const EdgeInsets.all(8),

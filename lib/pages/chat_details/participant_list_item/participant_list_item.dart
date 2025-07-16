@@ -134,7 +134,7 @@ class ParticipantListItem extends StatelessWidget {
     if (responsive.isMobile(context)) {
       await _openDialogInvite(context);
     } else {
-      await member.openProfileDialog(
+      await member.openProfileView(
         context: context,
         onUpdatedMembers: onUpdatedMembers,
       );

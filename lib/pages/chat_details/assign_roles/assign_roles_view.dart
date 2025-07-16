@@ -261,7 +261,7 @@ class AssignRolesView extends StatelessWidget {
                                 member,
                               );
                             } else {
-                              member.openProfileDialog(context: context);
+                              member.openProfileView(context: context);
                             }
                           },
                           child: TwakeListItem(
@@ -411,7 +411,7 @@ class AssignRolesView extends StatelessWidget {
                   final member = success.assignRolesMember[index];
                   return TwakeInkWell(
                     onTap: () {
-                      member.openProfileDialog(context: context);
+                      member.openProfileView(context: context);
                     },
                     child: TwakeListItem(
                       padding: const EdgeInsets.all(8),
