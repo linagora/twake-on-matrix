@@ -38,26 +38,29 @@ class ParticipantListItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final child = Opacity(
-      opacity: member.membership == Membership.join ? 1 : 0.5,
-      child: TwakeInkWell(
-        onTap: () async => await _onItemTap(context),
-        onLongPress: () => onSelectMember?.call(member),
-        child: TwakeListItem(
-          height: 72,
-          padding: const EdgeInsets.all(8),
-          child: Row(
-            children: [
-              _ParticipantSelectionToggleButton(
-                selectionMode: selectionMode,
-                onTap: () => onSelectMember?.call(member),
-              ),
-              Avatar(
+    final child = TwakeInkWell(
+      onTap: () async => await _onItemTap(context),
+      onLongPress: () => onSelectMember?.call(member),
+      child: TwakeListItem(
+        height: 72,
+        padding: const EdgeInsets.all(8),
+        child: Row(
+          children: [
+            _ParticipantSelectionToggleButton(
+              selectionMode: selectionMode,
+              onTap: () => onSelectMember?.call(member),
+            ),
+            Opacity(
+              opacity: member.membership == Membership.join ? 1 : 0.5,
+              child: Avatar(
                 mxContent: member.avatarUrl,
                 name: member.calcDisplayname(),
               ),
-              const SizedBox(width: 8.0),
-              Expanded(
+            ),
+            const SizedBox(width: 8.0),
+            Expanded(
+              child: Opacity(
+                opacity: member.membership == Membership.join ? 1 : 0.5,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -105,8 +108,8 @@ class ParticipantListItem extends StatelessWidget {
                   ],
                 ),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
