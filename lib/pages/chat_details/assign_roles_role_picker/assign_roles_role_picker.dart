@@ -4,9 +4,11 @@ import 'package:fluffychat/app_state/success.dart';
 import 'package:fluffychat/config/default_power_level_member.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/domain/app_state/room/set_permission_level_state.dart';
+import 'package:fluffychat/domain/model/room/room_extension.dart';
 import 'package:fluffychat/domain/usecase/room/set_permission_level_interactor.dart';
 import 'package:fluffychat/pages/chat_details/assign_roles_role_picker/assign_roles_role_picker_style.dart';
 import 'package:fluffychat/pages/chat_details/assign_roles_role_picker/assign_roles_role_picker_view.dart';
+import 'package:fluffychat/pages/chat_details/assign_roles_role_picker/role_picker_type_enum.dart';
 import 'package:fluffychat/resource/image_paths.dart';
 import 'package:fluffychat/utils/dialog/twake_dialog.dart';
 import 'package:fluffychat/utils/responsive/responsive_utils.dart';
@@ -21,12 +23,14 @@ class AssignRolesRolePicker extends StatefulWidget {
   final Room room;
   final List<User> assignedUsers;
   final bool isDialog;
+  final RolePickerTypeEnum rolePickerType;
 
   const AssignRolesRolePicker({
     super.key,
     required this.room,
     required this.assignedUsers,
     this.isDialog = false,
+    this.rolePickerType = RolePickerTypeEnum.none,
   });
 
   @override
@@ -41,13 +45,6 @@ class AssignRolesEditorController extends State<AssignRolesRolePicker> {
 
   final setPermissionLevelInteractor =
       getIt.get<SetPermissionLevelInteractor>();
-
-  final List<DefaultPowerLevelMember> assignRoles = [
-    DefaultPowerLevelMember.guest,
-    DefaultPowerLevelMember.member,
-    DefaultPowerLevelMember.moderator,
-    DefaultPowerLevelMember.admin,
-  ];
 
   Color colorBackgroundForRoles(DefaultPowerLevelMember role) {
     switch (role) {
@@ -233,6 +230,23 @@ class AssignRolesEditorController extends State<AssignRolesRolePicker> {
         }
       },
     );
+  }
+
+  void _handleGetDefaultPowerLevelSelected() {
+    if (widget.rolePickerType == RolePickerTypeEnum.addAdminOrModerator) {
+      roleSelectedNotifier.value = DefaultPowerLevelMember.moderator;
+    } else {
+      roleSelectedNotifier.value =
+          DefaultPowerLevelMember.getDefaultPowerLevelByUsersDefault(
+        usersDefault: widget.room.getUserDefaultLevel(),
+      );
+    }
+  }
+
+  @override
+  void initState() {
+    _handleGetDefaultPowerLevelSelected();
+    super.initState();
   }
 
   @override

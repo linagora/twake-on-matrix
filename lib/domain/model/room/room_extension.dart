@@ -306,6 +306,13 @@ extension RoomExtension on Room {
                         ?.any((s) => s.type == EventTypes.RoomMember) ??
                     false)),
       );
+
+  int getUserDefaultLevel() {
+    return getState(EventTypes.RoomPowerLevels)!
+            .content
+            .tryGet<int>('users_default') ??
+        0;
+  }
 }
 
 extension SortByPowerLevel on List<User> {

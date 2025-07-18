@@ -21,7 +21,7 @@ Future<Client> getClient() async {
   );
   await client.init(
     newToken: 'abcd',
-    newUserID: '@test:fakeServer.notExisting',
+    newUserID: '@admin:fakeServer',
     newHomeserver: client.homeserver,
     newDeviceName: 'Text Matrix Client',
     newDeviceID: 'GHTYAJCE',
