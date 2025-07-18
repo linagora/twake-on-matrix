@@ -67,7 +67,7 @@ class AppAdaptiveScaffoldBodyController extends State<AppAdaptiveScaffoldBody>
     pageController.jumpToPage(index);
     clearNavigatorScreen();
     if (destinationType == AdaptiveDestinationEnum.contacts) {
-      matrix.reSyncContacts();
+      matrix.forceRunSynchronizeContacts();
     }
   }
 
