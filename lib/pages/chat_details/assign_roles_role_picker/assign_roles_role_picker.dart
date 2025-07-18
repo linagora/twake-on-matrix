@@ -46,11 +46,6 @@ class AssignRolesEditorController extends State<AssignRolesRolePicker> {
   final setPermissionLevelInteractor =
       getIt.get<SetPermissionLevelInteractor>();
 
-  final List<DefaultPowerLevelMember> assignRoles = [
-    DefaultPowerLevelMember.moderator,
-    DefaultPowerLevelMember.admin,
-  ];
-
   Color colorBackgroundForRoles(DefaultPowerLevelMember role) {
     switch (role) {
       case DefaultPowerLevelMember.guest:
@@ -122,6 +117,22 @@ class AssignRolesEditorController extends State<AssignRolesRolePicker> {
 
   Widget permissionsWidgetForRoles(DefaultPowerLevelMember role) {
     switch (role) {
+      case DefaultPowerLevelMember.guest:
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: role
+              .permissionForGuest(context)
+              .map((permission) => permission.permissionViewWidget(context))
+              .toList(),
+        );
+      case DefaultPowerLevelMember.member:
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: role
+              .permissionForMember(context)
+              .map((permission) => permission.permissionViewWidget(context))
+              .toList(),
+        );
       case DefaultPowerLevelMember.moderator:
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,

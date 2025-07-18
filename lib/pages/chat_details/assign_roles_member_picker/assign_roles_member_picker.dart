@@ -1,7 +1,6 @@
 import 'package:dartz/dartz.dart' hide State;
 import 'package:fluffychat/app_state/failure.dart';
 import 'package:fluffychat/app_state/success.dart';
-import 'package:fluffychat/config/default_power_level_member.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/domain/model/room/room_extension.dart';
 import 'package:fluffychat/pages/chat_details/assign_roles_role_picker/assign_roles_role_picker.dart';
@@ -50,9 +49,7 @@ class AssignRolesPickerController extends State<AssignRolesMemberPicker>
   );
 
   List<User> get members => widget.room.getCurrentMembers().where((member) {
-        return member.powerLevel <
-                DefaultPowerLevelMember.moderator.powerLevel &&
-            widget.room.canAssignRoles;
+        return widget.room.canUpdateRoleInRoom(member);
       }).toList();
 
   void initialAssignRoles() {
@@ -142,6 +139,7 @@ class AssignRolesPickerController extends State<AssignRolesMemberPicker>
               room: widget.room,
               assignedUsers: selectedUsersMapChangeNotifier.usersList.toList(),
               isDialog: true,
+              rolePickerType: RolePickerTypeEnum.addAdminOrModerator,
             ),
           ),
         ),
