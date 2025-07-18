@@ -8,6 +8,7 @@ import 'package:fluffychat/pages/chat_details/assign_roles_role_picker/assign_ro
 import 'package:fluffychat/pages/chat_details/assign_roles_member_picker/assign_roles_member_picker_search_state.dart';
 import 'package:fluffychat/pages/chat_details/assign_roles_member_picker/assign_roles_member_picker_view.dart';
 import 'package:fluffychat/pages/chat_details/assign_roles_member_picker/selected_user_notifier.dart';
+import 'package:fluffychat/pages/chat_details/assign_roles_role_picker/role_picker_type_enum.dart';
 import 'package:fluffychat/pages/search/search_debouncer_mixin.dart';
 import 'package:fluffychat/utils/responsive/responsive_utils.dart';
 import 'package:flutter/cupertino.dart';
@@ -47,7 +48,9 @@ class AssignRolesPickerController extends State<AssignRolesMemberPicker>
     ),
   );
 
-  List<User> get members => widget.room.getCurrentMembers();
+  List<User> get members => widget.room.getCurrentMembers().where((member) {
+        return widget.room.canUpdateRoleInRoom(member);
+      }).toList();
 
   void initialAssignRoles() {
     searchUserResults.value = Right(
@@ -110,6 +113,7 @@ class AssignRolesPickerController extends State<AssignRolesMemberPicker>
             return AssignRolesRolePicker(
               room: widget.room,
               assignedUsers: selectedUsersMapChangeNotifier.usersList.toList(),
+              rolePickerType: RolePickerTypeEnum.addAdminOrModerator,
             );
           },
         ),
@@ -135,6 +139,7 @@ class AssignRolesPickerController extends State<AssignRolesMemberPicker>
               room: widget.room,
               assignedUsers: selectedUsersMapChangeNotifier.usersList.toList(),
               isDialog: true,
+              rolePickerType: RolePickerTypeEnum.addAdminOrModerator,
             ),
           ),
         ),
