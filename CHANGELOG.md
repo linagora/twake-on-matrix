@@ -1,3 +1,15 @@
+## [2.10.0+2330] - 2025-07-18
+### Added
+- #2460 Features assign roles
+
+### Updated
+- Display contact status
+- #2384 Impl Exceptions tab
+- #2454 Upgrade Android API 35
+
+### Fixed:
+- #2060 Fix unable to select text in message bubble with mouse on web
+
 ## [2.9.8+2330] - 2025-06-25
 ### Added
 - Translation en, ru, fr, vi
