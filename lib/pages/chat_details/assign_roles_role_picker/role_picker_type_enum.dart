@@ -1,0 +1,4 @@
+enum RolePickerTypeEnum {
+  addAdminOrModerator,
+  none;
+}

@@ -10,6 +10,33 @@ enum DefaultPowerLevelMember {
   owner,
   none;
 
+  static List<int> powerLevelAvailable() => [
+        DefaultPowerLevelMember.guest.powerLevel,
+        DefaultPowerLevelMember.member.powerLevel,
+        DefaultPowerLevelMember.moderator.powerLevel,
+        DefaultPowerLevelMember.admin.powerLevel,
+        DefaultPowerLevelMember.owner.powerLevel,
+      ];
+
+  static DefaultPowerLevelMember getDefaultPowerLevelByUsersDefault({
+    required int usersDefault,
+  }) {
+    int result = powerLevelAvailable().first;
+
+    for (final int level in powerLevelAvailable()) {
+      if (usersDefault >= level) {
+        result = level;
+      } else {
+        break;
+      }
+    }
+
+    return DefaultPowerLevelMember.values.firstWhere(
+      (element) => element.powerLevel == result,
+      orElse: () => DefaultPowerLevelMember.none,
+    );
+  }
+
   int get powerLevel {
     switch (this) {
       case DefaultPowerLevelMember.guest:
