@@ -984,6 +984,13 @@ class MatrixState extends State<Matrix>
     _contactsManager.reSyncContacts();
   }
 
+  Future<void> forceRunSynchronizeContacts() async {
+    _contactsManager.initialSynchronizeContacts(
+      withMxId: client.userID!,
+      forceRun: true,
+    );
+  }
+
   Future<void> cancelListenSynchronizeContacts() async {
     _contactsManager.cancelAllSubscriptions();
   }
