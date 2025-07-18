@@ -6,16 +6,6 @@ import '../base/core_robot.dart';
 class LoginRobot extends CoreRobot {
   LoginRobot(super.$);
 
-  Future<void> grantNotificationPermission(
-    NativeAutomator nativeAutomator,
-  ) async {
-    if (await nativeAutomator.isPermissionDialogVisible(
-      timeout: const Duration(seconds: 15),
-    )) {
-      await nativeAutomator.grantPermissionWhenInUse();
-    }
-  }
-
   Future<void> tapOnUseYourCompanyServer() async {
     await $('Use your company server').tap();
   }
@@ -28,22 +18,31 @@ class LoginRobot extends CoreRobot {
     await $.tap($('Continue'));
   }
 
-  Future<void> enterUsernameSsoLogin(String username) async {
+  Future<void> confirmShareInformation() async {
     try {
-      await $.native.enterText(
-        Selector(resourceId: 'login'),
-        text: username,
-      );
+      await $.native.waitUntilVisible(Selector(textContains: 'Continue'), appId:'com.apple.springboard',);
+      await $.native.tap(Selector(textContains: 'Continue'), appId:'com.apple.springboard',);
     } catch (e) {
       ignoreException();
     }
   }
+  Future<void> enterWebCredentialsWhenVisible({required String username,required String password,}) async {
+    await enterUsernameSsoLogin(username);
+    await enterPasswordSsoLogin(password);
+    await pressSignInSsoLogin();
+  }
+
+  Future<void> enterUsernameSsoLogin(String username) async {
+    try {
+      await $.native.enterText(Selector(text: 'login'),text: username,);
+      } catch (e) {
+        ignoreException();
+      }
+  }
 
   Future<void> enterPasswordSsoLogin(String password) async {
     try {
-      await $.native.enterText(
-        Selector(resourceId: 'password'),
-        text: password,
+      await $.native.enterText(Selector(text: 'Password'),text: password,
       );
     } catch (e) {
       ignoreException();
