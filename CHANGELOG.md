@@ -1,3 +1,7 @@
+## [2.10.1+2330] - 2025-07-20
+### Fixed
+- Hot fix for unifiedPush dependency
+
 ## [2.10.0+2330] - 2025-07-18
 ### Added
 - #2460 Features assign roles
