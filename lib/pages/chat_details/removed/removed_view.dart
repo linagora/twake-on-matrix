@@ -221,6 +221,35 @@ class RemovedView extends StatelessWidget {
                           maxLines: 1,
                         ),
                       ),
+                      InkWell(
+                        splashColor: Colors.transparent,
+                        hoverColor: Colors.transparent,
+                        highlightColor: Colors.transparent,
+                        focusColor: Colors.transparent,
+                        onTap: () => controller.handleOnTapUnbanUser(member),
+                        child: Padding(
+                          padding: const EdgeInsets.only(right: 24),
+                          child: Row(
+                            children: [
+                              Icon(
+                                Icons.block,
+                                color: LinagoraSysColors.material().primary,
+                              ),
+                              const SizedBox(width: 8.0),
+                              Text(
+                                L10n.of(context)!.unban,
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .labelLarge
+                                    ?.copyWith(
+                                      color:
+                                          LinagoraSysColors.material().primary,
+                                    ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
                     ],
                   ),
                   Text(

@@ -3344,5 +3344,7 @@
   "@removeMemberSelectionError": {},
   "downgrade": "Downgrade",
   "deletedMessage": "Deleted message",
-  "@deletedMessage": {}
+  "@deletedMessage": {},
+  "unban": "Unban",
+  "permissionErrorUnbanUser": "You don’t have the rights to unban users. Please reach out to your admin for help"
 }
