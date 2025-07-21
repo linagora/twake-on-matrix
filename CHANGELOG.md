@@ -1,3 +1,7 @@
+## [2.10.2+2330] - 2025-07-21
+### Fixed
+- Enable forced syn contacts
+
 ## [2.10.1+2330] - 2025-07-20
 ### Fixed
 - Hot fix for unifiedPush dependency
