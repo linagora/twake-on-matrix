@@ -1,5 +1,7 @@
 import 'package:fluffychat/pages/chat_details/chat_details_view_style.dart';
 import 'package:fluffychat/presentation/extensions/room_summary_extension.dart';
+import 'package:fluffychat/utils/dialog/twake_dialog.dart';
+import 'package:fluffychat/utils/twake_snackbar.dart';
 import 'package:fluffychat/widgets/app_bars/twake_app_bar.dart';
 import 'package:fluffychat/widgets/avatar/avatar.dart';
 import 'package:fluffychat/widgets/avatar/avatar_style.dart';
@@ -37,7 +39,17 @@ class ChatDetailsView extends StatelessWidget {
       stream: controller.room?.onUpdate.stream,
       builder: (context, snapshot) {
         return Scaffold(
-          floatingActionButton: _AddMembersButton(controller: controller),
+          floatingActionButton: ListenableBuilder(
+            listenable: controller.removeUsersChangeNotifier,
+            builder: (context, child) {
+              if (!controller
+                  .removeUsersChangeNotifier.haveSelectedUsersNotifier.value) {
+                return child ?? const SizedBox();
+              }
+              return _RemoveMembersButton(controller: controller);
+            },
+            child: _AddMembersButton(controller: controller),
+          ),
           backgroundColor: LinagoraSysColors.material().onPrimary,
           appBar: TwakeAppBar(
             title: L10n.of(context)!.groupInformation,
@@ -272,6 +284,66 @@ class _AddMembersButton extends StatelessWidget {
               ],
             ),
           ),
+        ),
+      ),
+    );
+  }
+}
+
+class _RemoveMembersButton extends StatelessWidget {
+  const _RemoveMembersButton({
+    required this.controller,
+  });
+
+  final ChatDetailsController controller;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return InkWell(
+      onTap: () async {
+        final result = await TwakeDialog.showFutureLoadingDialogFullScreen(
+          future: () => Future.wait(
+            controller.removeUsersChangeNotifier.usersList.map(
+              (user) => user.ban(),
+            ),
+          ),
+        );
+        if (result.error != null) {
+          TwakeSnackBar.show(context, result.error!.message);
+        }
+
+        await controller.onUpdateMembers();
+        controller.removeUsersChangeNotifier.unselectAllUsers();
+      },
+      borderRadius: ChatDetailViewStyle.borderRadiusButton,
+      child: Container(
+        decoration: BoxDecoration(
+          color: const Color(0xffffd2d7),
+          borderRadius: ChatDetailViewStyle.borderRadiusButton,
+        ),
+        padding: const EdgeInsetsDirectional.fromSTEB(16, 12, 24, 12),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              Icons.person_remove_outlined,
+              size: 18.0,
+              color: theme.colorScheme.onSecondaryContainer,
+            ),
+            const SizedBox(width: 8),
+            Flexible(
+              child: Text(
+                L10n.of(context)!.removeMember,
+                style: theme.textTheme.labelLarge?.copyWith(
+                  color: theme.colorScheme.onSecondaryContainer,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+          ],
         ),
       ),
     );

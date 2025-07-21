@@ -1,10 +1,9 @@
 import 'package:fluffychat/pages/profile_info/profile_info_page.dart';
 import 'package:fluffychat/pages/profile_info/profile_info_body/profile_info_body.dart';
-import 'package:fluffychat/pages/profile_info/profile_info_view_style.dart';
+import 'package:fluffychat/widgets/app_bars/twake_app_bar.dart';
+import 'package:fluffychat/widgets/twake_components/twake_icon_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
-import 'package:linagora_design_flutter/colors/linagora_state_layer.dart';
-import 'package:linagora_design_flutter/colors/linagora_sys_colors.dart';
 
 class ProfileInfoView extends StatelessWidget {
   const ProfileInfoView(
@@ -20,44 +19,20 @@ class ProfileInfoView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: LinagoraSysColors.material().onPrimary,
-        automaticallyImplyLeading: false,
-        bottom: PreferredSize(
-          preferredSize: const Size(double.infinity, 1),
-          child: Container(
-            color: LinagoraStateLayer(
-              LinagoraSysColors.material().surfaceTint,
-            ).opacityLayer1,
-            height: 1,
-          ),
+      appBar: TwakeAppBar(
+        title: L10n.of(context)?.profileInfo ?? "",
+        leading: TwakeIconButton(
+          paddingAll: 8,
+          splashColor: Colors.transparent,
+          hoverColor: Colors.transparent,
+          highlightColor: Colors.transparent,
+          onTap: () => Navigator.of(context).pop(),
+          icon: Icons.arrow_back_ios,
         ),
-        title: Padding(
-          padding: ProfileInfoViewStyle.navigationAppBarPadding,
-          child: Row(
-            children: [
-              Padding(
-                padding: ProfileInfoViewStyle.backIconPadding,
-                child: IconButton(
-                  splashColor: Colors.transparent,
-                  hoverColor: Colors.transparent,
-                  highlightColor: Colors.transparent,
-                  onPressed: () => Navigator.of(context).pop(),
-                  icon: const Icon(
-                    Icons.chevron_left_outlined,
-                  ),
-                ),
-              ),
-              Flexible(
-                child: Text(
-                  L10n.of(context)?.profileInfo ?? "",
-                  style: Theme.of(context).textTheme.titleLarge,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
-            ],
-          ),
-        ),
+        enableLeftTitle: true,
+        centerTitle: true,
+        withDivider: true,
+        context: context,
       ),
       body: ProfileInfoBody(
         user: controller.user,

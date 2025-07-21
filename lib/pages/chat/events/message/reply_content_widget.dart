@@ -1,5 +1,6 @@
 import 'package:fluffychat/pages/chat/events/reply_content.dart';
 import 'package:fluffychat/pages/chat/events/reply_content_style.dart';
+import 'package:fluffychat/pages/chat/optional_ink_well.dart';
 import 'package:flutter/material.dart';
 import 'package:matrix/matrix.dart';
 
@@ -20,13 +21,8 @@ class ReplyContentWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return FutureBuilder<Event?>(
-      future: event.getReplyEvent(
-        timeline,
-      ),
-      builder: (
-        BuildContext context,
-        snapshot,
-      ) {
+      future: event.getReplyEvent(timeline),
+      builder: (context, snapshot) {
         final replyEvent = snapshot.data ??
             Event(
               eventId: event.relationshipEventId!,
@@ -40,22 +36,15 @@ class ReplyContentWidget extends StatelessWidget {
               status: EventStatus.sent,
               originServerTs: DateTime.now(),
             );
-        return InkWell(
-          onTap: () {
-            if (scrollToEventId != null) {
-              scrollToEventId!(
-                replyEvent.eventId,
-              );
-            }
-          },
-          child: AbsorbPointer(
-            child: Container(
-              margin: ReplyContentStyle.marginReplyContent,
-              child: ReplyContent(
-                replyEvent,
-                ownMessage: ownMessage,
-                timeline: timeline,
-              ),
+        return OptionalInkWell(
+          onTap: () => scrollToEventId?.call(replyEvent.eventId),
+          isEnabled: scrollToEventId != null,
+          child: Padding(
+            padding: ReplyContentStyle.marginReplyContent,
+            child: ReplyContent(
+              replyEvent,
+              ownMessage: ownMessage,
+              timeline: timeline,
             ),
           ),
         );

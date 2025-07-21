@@ -14,16 +14,24 @@ class TwakeAppBarStyle {
           ? LinagoraSysColors.material().background
           : LinagoraSysColors.material().onPrimary;
 
-  static TextStyle? titleTextStyle(BuildContext context) =>
-      responsiveUtils.isMobile(context)
-          ? LinagoraTextStyle.material().bodyLarge1.copyWith(
-                color: Theme.of(context).colorScheme.onSurface,
-                height: 24 / 17,
-              )
-          : Theme.of(context).textTheme.headlineSmall?.copyWith(
+  static TextStyle? titleTextStyle(
+    BuildContext context, {
+    bool isDialog = false,
+  }) =>
+      isDialog
+          ? Theme.of(context).textTheme.headlineSmall?.copyWith(
                 color: Theme.of(context).colorScheme.onSurface,
                 height: 32 / 24,
-              );
+              )
+          : responsiveUtils.isMobile(context)
+              ? LinagoraTextStyle.material().bodyLarge1.copyWith(
+                    color: Theme.of(context).colorScheme.onSurface,
+                    height: 24 / 17,
+                  )
+              : Theme.of(context).textTheme.titleLarge?.copyWith(
+                    color: Theme.of(context).colorScheme.onSurface,
+                    height: 28 / 22,
+                  );
 
   static const double dividerHeight = 1.0;
   static const double dividerthickness = 1.0;

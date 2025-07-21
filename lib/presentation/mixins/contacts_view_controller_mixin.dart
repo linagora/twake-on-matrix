@@ -182,6 +182,7 @@ mixin class ContactsViewControllerMixin {
     required BuildContext context,
     required Client client,
     required MatrixLocalizations matrixLocalizations,
+    bool forceRun = false,
   }) async {
     if (PlatformInfos.isMobile &&
         !contactsManager.isDoNotShowWarningContactsDialogAgain) {
@@ -219,6 +220,7 @@ mixin class ContactsViewControllerMixin {
       isAvailableSupportPhonebookContacts: PlatformInfos.isMobile &&
           contactsPermissionStatus != null &&
           contactsPermissionStatus == PermissionStatus.granted,
+      forceRun: forceRun,
     );
   }
 

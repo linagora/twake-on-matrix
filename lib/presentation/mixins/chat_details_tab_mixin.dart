@@ -1,5 +1,7 @@
 import 'dart:async';
+import 'dart:math';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
+import 'package:fluffychat/pages/chat_details/assign_roles_member_picker/selected_user_notifier.dart';
 import 'package:fluffychat/pages/chat_details/chat_details_page_view/chat_details_members_page.dart';
 import 'package:fluffychat/pages/chat_details/chat_details_page_view/chat_details_page_enum.dart';
 import 'package:fluffychat/pages/chat_details/chat_details_page_view/files/chat_details_files_page.dart';
@@ -18,11 +20,14 @@ import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/utils/responsive/responsive_utils.dart';
 import 'package:fluffychat/utils/scroll_controller_extension.dart';
+import 'package:fluffychat/utils/twake_snackbar.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:flutter_adaptive_scaffold/flutter_adaptive_scaffold.dart';
 import 'package:matrix/matrix.dart';
+import 'package:fluffychat/domain/model/room/room_extension.dart';
 
 mixin ChatDetailsTabMixin<T extends StatefulWidget>
     on
@@ -38,7 +43,11 @@ mixin ChatDetailsTabMixin<T extends StatefulWidget>
   final ValueNotifier<List<User>?> _displayMembersNotifier =
       ValueNotifier(null);
 
+  StreamSubscription? _powerLevelsSubscription;
+
   late final List<ChatDetailsPage> tabList;
+
+  final removeUsersChangeNotifier = SelectedUsersMapChangeNotifier();
 
   Room? get room;
 
@@ -117,24 +126,15 @@ mixin ChatDetailsTabMixin<T extends StatefulWidget>
 
   void _requestMoreMembersAction() async {
     final currentMembersCount = _displayMembersNotifier.value?.length ?? 0;
-    _currentMembersCount += _membersPerPage;
-
     final members = _membersNotifier.value;
-    if (members != null && currentMembersCount < members.length) {
-      final endIndex = _currentMembersCount > members.length
-          ? members.length
-          : _currentMembersCount;
-      final newMembers = members.sublist(currentMembersCount, endIndex);
-      _displayMembersNotifier.value = [
-        ...?_displayMembersNotifier.value,
-        ...newMembers,
-      ];
-    } else {
-      _displayMembersNotifier.value = [
-        ...?_displayMembersNotifier.value,
-        ...?members,
-      ];
+    if (members == null || currentMembersCount >= members.length) return;
+
+    if (_currentMembersCount < members.length) {
+      _currentMembersCount += _membersPerPage;
     }
+
+    final endIndex = min(_currentMembersCount, members.length);
+    _displayMembersNotifier.value = members.sublist(0, endIndex);
   }
 
   void _initDisplayMembers() {
@@ -190,9 +190,18 @@ mixin ChatDetailsTabMixin<T extends StatefulWidget>
     );
   }
 
-  Future<void> _onUpdateMembers() async {
-    final members = await room!.requestParticipantsFromServer();
+  Future<void> onUpdateMembers() async {
+    final members = await room!.requestParticipantsFromServer(
+      membershipFilter: [
+        Membership.join,
+        Membership.invite,
+      ],
+    )
+      ..sort(
+        (small, great) => great.powerLevel.compareTo(small.powerLevel),
+      );
     _membersNotifier.value = members;
+    _displayMembersNotifier.value = members;
   }
 
   void _initControllers() {
@@ -277,7 +286,9 @@ mixin ChatDetailsTabMixin<T extends StatefulWidget>
                 requestMoreMembersAction: _requestMoreMembersAction,
                 openDialogInvite: _openDialogInvite,
                 isMobileAndTablet: isMobileAndTablet,
-                onUpdatedMembers: _onUpdateMembers,
+                onUpdatedMembers: () async => await onUpdateMembers(),
+                selectedUsersMapChangeNotifier: removeUsersChangeNotifier,
+                onSelectMember: _onSelectMember,
               ),
             );
           }
@@ -323,6 +334,17 @@ mixin ChatDetailsTabMixin<T extends StatefulWidget>
         },
       ).toList();
 
+  void _onSelectMember(User user) {
+    if (!PlatformInfos.isMobile) return;
+
+    if (!user.canBan) {
+      TwakeSnackBar.show(context, L10n.of(context)!.removeMemberSelectionError);
+      return;
+    }
+
+    removeUsersChangeNotifier.onUserTileTap(context, user);
+  }
+
   @override
   void initState() {
     super.initState();
@@ -330,6 +352,9 @@ mixin ChatDetailsTabMixin<T extends StatefulWidget>
     _initMembers();
     _initControllers();
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      _powerLevelsSubscription = room?.powerLevelsChanged.listen((event) {
+        _initMembers();
+      });
       nestedScrollViewState.currentState?.innerController.addListener(
         () => _listenerInnerController(),
       );
@@ -345,6 +370,12 @@ mixin ChatDetailsTabMixin<T extends StatefulWidget>
     _displayMembersNotifier.dispose();
     _onRoomEventChangedSubscription?.cancel();
     nestedScrollViewState.currentState?.innerController.dispose();
+    _powerLevelsSubscription?.cancel();
+    _mediaListController?.dispose();
+    _linksListController?.dispose();
+    _filesListController?.dispose();
+    _onRoomEventChangedSubscription?.cancel();
+    removeUsersChangeNotifier.dispose();
     super.dispose();
   }
 }

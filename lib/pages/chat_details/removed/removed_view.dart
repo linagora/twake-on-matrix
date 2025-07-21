@@ -1,6 +1,7 @@
 import 'package:fluffychat/pages/chat_details/removed/removed.dart';
 import 'package:fluffychat/pages/chat_details/removed/removed_search_state.dart';
 import 'package:fluffychat/pages/chat_list/chat_list_header_style.dart';
+import 'package:fluffychat/utils/user_extension.dart';
 import 'package:fluffychat/widgets/app_bars/twake_app_bar.dart';
 import 'package:fluffychat/widgets/avatar/avatar.dart';
 import 'package:fluffychat/widgets/context_menu_builder_ios_paste_without_permission.dart';
@@ -9,6 +10,7 @@ import 'package:fluffychat/widgets/twake_components/twake_icon_button.dart';
 import 'package:flutter/material.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
+import 'package:matrix/matrix.dart';
 
 class RemovedView extends StatelessWidget {
   final RemovedController controller;
@@ -122,52 +124,12 @@ class RemovedView extends StatelessWidget {
                 itemBuilder: (context, index) {
                   final member = success.removedMember[index];
                   return TwakeInkWell(
-                    onTap: () {},
-                    child: TwakeListItem(
-                      padding: const EdgeInsets.all(8),
-                      child: Row(
-                        children: [
-                          Avatar(
-                            mxContent: member.avatarUrl,
-                            name: member.calcDisplayname(),
-                          ),
-                          const SizedBox(width: 8.0),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Row(
-                                  children: [
-                                    Text(
-                                      member.calcDisplayname(),
-                                      style: LinagoraTextStyle.material()
-                                          .bodyMedium2
-                                          .copyWith(
-                                            color: LinagoraSysColors.material()
-                                                .onSurface,
-                                          ),
-                                      overflow: TextOverflow.ellipsis,
-                                      maxLines: 1,
-                                    ),
-                                  ],
-                                ),
-                                Text(
-                                  member.id,
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .bodyMedium
-                                      ?.copyWith(
-                                        color: LinagoraRefColors.material()
-                                            .tertiary[30],
-                                      ),
-                                  overflow: TextOverflow.ellipsis,
-                                  maxLines: 1,
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
+                    onTap: () {
+                      member.openProfileView(context: context);
+                    },
+                    child: _itemMemberBuilder(
+                      context: context,
+                      member: member,
                     ),
                   );
                 },
@@ -209,51 +171,9 @@ class RemovedView extends StatelessWidget {
                   final member = success.removedMember[index];
                   return TwakeInkWell(
                     onTap: () {},
-                    child: TwakeListItem(
-                      padding: const EdgeInsets.all(8),
-                      child: Row(
-                        children: [
-                          Avatar(
-                            mxContent: member.avatarUrl,
-                            name: member.calcDisplayname(),
-                          ),
-                          const SizedBox(width: 8.0),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Row(
-                                  children: [
-                                    Text(
-                                      member.calcDisplayname(),
-                                      style: LinagoraTextStyle.material()
-                                          .bodyMedium2
-                                          .copyWith(
-                                            color: LinagoraSysColors.material()
-                                                .onSurface,
-                                          ),
-                                      overflow: TextOverflow.ellipsis,
-                                      maxLines: 1,
-                                    ),
-                                  ],
-                                ),
-                                Text(
-                                  member.id,
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .bodyMedium
-                                      ?.copyWith(
-                                        color: LinagoraRefColors.material()
-                                            .tertiary[30],
-                                      ),
-                                  overflow: TextOverflow.ellipsis,
-                                  maxLines: 1,
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
+                    child: _itemMemberBuilder(
+                      context: context,
+                      member: member,
                     ),
                   );
                 },
@@ -263,6 +183,60 @@ class RemovedView extends StatelessWidget {
           },
         );
       },
+    );
+  }
+
+  Widget _itemMemberBuilder({
+    required BuildContext context,
+    required User member,
+  }) {
+    return TwakeInkWell(
+      onTap: () {
+        member.openProfileView(context: context);
+      },
+      child: TwakeListItem(
+        padding: const EdgeInsets.all(8),
+        child: Row(
+          children: [
+            Avatar(
+              mxContent: member.avatarUrl,
+              name: member.calcDisplayname(),
+            ),
+            const SizedBox(width: 8.0),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          member.calcDisplayname(),
+                          style: LinagoraTextStyle.material()
+                              .bodyMedium2
+                              .copyWith(
+                                color: LinagoraSysColors.material().onSurface,
+                              ),
+                          overflow: TextOverflow.ellipsis,
+                          maxLines: 1,
+                        ),
+                      ),
+                    ],
+                  ),
+                  Text(
+                    member.id,
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          color: LinagoraRefColors.material().tertiary[30],
+                        ),
+                    overflow: TextOverflow.ellipsis,
+                    maxLines: 1,
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

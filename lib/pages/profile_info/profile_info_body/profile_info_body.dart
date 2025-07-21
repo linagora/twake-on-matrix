@@ -17,7 +17,6 @@ import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/utils/twake_snackbar.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:go_router/go_router.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:matrix/matrix.dart';
@@ -117,30 +116,18 @@ class ProfileInfoBodyController extends State<ProfileInfoBody> {
 
   Future<void> removeFromGroupChat() async {
     if (user == null) return;
-    WarningDialog.showCancelable(
-      context,
-      message: L10n.of(context)!.removeReason(
-        user?.displayName ?? '',
-      ),
-      title: L10n.of(context)!.removeUser,
-      acceptText: L10n.of(context)!.remove,
-      cancelText: L10n.of(context)!.cancel,
-      acceptTextColor: LinagoraSysColors.material().error,
-      onAccept: () async {
-        WarningDialog.hideWarningDialog(context);
-        final result = await TwakeDialog.showFutureLoadingDialogFullScreen(
-          future: () => user!.kick(),
-        );
-        if (result.error != null) {
-          TwakeSnackBar.show(
-            context,
-            result.error!.message,
-          );
-          return;
-        }
-        widget.onUpdatedMembers?.call();
-      },
+    WarningDialog.hideWarningDialog(context);
+    final result = await TwakeDialog.showFutureLoadingDialogFullScreen(
+      future: () => user!.ban(),
     );
+    if (result.error != null) {
+      TwakeSnackBar.show(
+        context,
+        result.error!.message,
+      );
+      return;
+    }
+    widget.onUpdatedMembers?.call();
   }
 
   List<ProfileInfoActions> profileInfoActions() {
@@ -165,40 +152,59 @@ class ProfileInfoBodyController extends State<ProfileInfoBody> {
 
   Widget buildProfileInfoActions(BuildContext context) {
     return Column(
-      children: profileInfoActions().map((action) {
-        return Column(
-          children: [
-            Divider(
-              thickness: ProfileInfoBodyViewStyle.bigDividerThickness,
-              color: LinagoraSysColors.material().surface,
-            ),
-            Padding(
-              padding: ProfileInfoBodyViewStyle.actionItemPadding,
-              child: Row(
-                children: [
-                  Expanded(
-                    child: TextButton.icon(
-                      onPressed: () => handleActions(action),
-                      icon: action.icon(),
-                      label: Row(
-                        children: [
-                          Expanded(
-                            child: Text(
-                              action.label(context),
-                              style: action.textStyle(context),
-                              overflow: TextOverflow.ellipsis,
-                            ),
+      children: [
+        Divider(
+          thickness: ProfileInfoBodyViewStyle.bigDividerThickness,
+          color: LinagoraStateLayer(
+            LinagoraSysColors.material().surfaceTint,
+          ).opacityLayer3,
+        ),
+        Column(
+          children: profileInfoActions().map((action) {
+            return Column(
+              children: [
+                if (action.divider(context) != null) action.divider(context)!,
+                InkWell(
+                  highlightColor: Colors.transparent,
+                  splashColor: Colors.transparent,
+                  focusColor: Colors.transparent,
+                  hoverColor: Colors.transparent,
+                  onTap: () => handleActions(action),
+                  child: Padding(
+                    padding: action.padding(context),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            vertical: 10,
+                            horizontal: 60,
                           ),
-                        ],
-                      ),
+                          height: ProfileInfoBodyViewStyle.actionHeight,
+                          decoration: action.decoration(context),
+                          child: Row(
+                            children: [
+                              if (action.icon() != null)
+                                Padding(
+                                  padding: const EdgeInsets.only(right: 8),
+                                  child: action.icon()!,
+                                ),
+                              Text(
+                                action.label(context),
+                                style: action.textStyle(context),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                ],
-              ),
-            ),
-          ],
-        );
-      }).toList(),
+                ),
+              ],
+            );
+          }).toList(),
+        ),
+      ],
     );
   }
 

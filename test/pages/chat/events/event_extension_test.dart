@@ -86,7 +86,7 @@ void main() {
               'notifications': {'room': 20},
               'redact': 50,
               'state_default': 50,
-              'users': {'@test:fakeServer.notExisting': 100},
+              'users': {'@admin:fakeServer': 100},
               'users_default': 10,
             },
             originServerTs: DateTime.now(),

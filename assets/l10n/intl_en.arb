@@ -3060,7 +3060,7 @@
   "@phone": {},
   "viewProfile": "View profile",
   "@viewProfile": {},
-  "profileInfo": "Profile info",
+  "profileInfo": "Profile informations",
   "@profileInfo": {},
   "saveToDownloads": "Save to Downloads",
   "@saveToDownloads": {},
@@ -3305,5 +3305,44 @@
     "placeholders": {
       "number": {}
     }
-  }
+  },
+  "downgradeToReadOnly": "Downgrade to read only",
+  "memberOfTheGroup": "MEMBERS OF THE GROUP ({number})",
+  "@memberOfTheGroup": {
+    "type": "text",
+    "placeholders": {
+      "number": {}
+    }
+  },
+  "selectRole": "Select role",
+  "canReadMessages": "Can read messages",
+  "canWriteMessagesSendReacts": "Can write messages, send reacts...",
+  "canRemoveUsersDeleteMessages": "Can remove users, delete messages...",
+  "canAccessAllFeaturesAndSettings": "Can access all features and settings",
+  "invitePeopleToTheRoom": "Invite people to the room",
+  "sendReactions": "Send reactions",
+  "deleteMessagesSentByMe": "Delete messages sent by me",
+  "notifyEveryoneUsingRoom": "Notify everyone using @room",
+  "joinCall": "Join Call",
+  "removeMembers": "Remove a members",
+  "deleteMessagesSentByOthers": "Delete messages sent by others",
+  "pinMessageForEveryone": "Pin a message (for everyone)",
+  "startCall": "Start Call",
+  "changeGroupName": "Change group name",
+  "changeGroupDescription": "Change group description",
+  "changeGroupAvatar": "Change group avatar",
+  "changeGroupHistoryVisibility": "Change group history visibility",
+  "searchGroupMembers": "Search group members",
+  "permissionErrorChangeRole": "You don’t have the rights to change roles. Please reach out to your admin for help",
+  "demoteAdminsModerators": "Demote Admins/Moderators",
+  "deleteMessageConfirmationTitle": "Are you sure you want to delete this message?",
+  "@deleteMessageConfirmationTitle": {},
+  "permissionErrorBanUser": "You don’t have the rights to ban users. Please reach out to your admin for help",
+  "removeMember": "Remove member",
+  "@removeMember": {},
+  "removeMemberSelectionError": "You cannot delete a member with a role equal to or greater than yours.",
+  "@removeMemberSelectionError": {},
+  "downgrade": "Downgrade",
+  "deletedMessage": "Deleted message",
+  "@deletedMessage": {}
 }

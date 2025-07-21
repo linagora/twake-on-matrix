@@ -9,6 +9,7 @@ class ProfileInfoBodyView extends StatelessWidget {
     required this.controller,
     super.key,
   });
+
   final ProfileInfoBodyController controller;
 
   @override

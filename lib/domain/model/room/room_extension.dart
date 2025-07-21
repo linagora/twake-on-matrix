@@ -251,7 +251,7 @@ extension RoomExtension on Room {
     if (members.isEmpty) return [];
     return members.where((final User member) {
       final powerLevel = member.powerLevel;
-      return powerLevel >= DefaultPowerLevelMember.admin.powerLevel &&
+      return powerLevel >= DefaultPowerLevelMember.moderator.powerLevel &&
           member.membership == Membership.join;
     }).toList();
   }
@@ -272,5 +272,53 @@ extension RoomExtension on Room {
     );
     if (members.isEmpty) return [];
     return members;
+  }
+
+  List<User> getCurrentMembers() {
+    final members = getParticipants(
+      membershipFilter: [
+        Membership.invite,
+        Membership.join,
+      ],
+    );
+    if (members.isEmpty) return [];
+    return members
+      ..sort(
+        (small, great) => great.powerLevel.compareTo(small.powerLevel),
+      );
+  }
+
+  bool canUpdateRoleInRoom(User user) {
+    return ownPowerLevel > user.powerLevel && canAssignRoles;
+  }
+
+  bool canBanMemberInRoom(User user) {
+    return ownPowerLevel > user.powerLevel && canBan;
+  }
+
+  Stream get powerLevelsChanged => client.onSync.stream.where(
+        (e) =>
+            (e.rooms?.join?.containsKey(id) ?? false) &&
+            ((e.rooms!.join![id]?.timeline?.events
+                        ?.any((s) => s.type == EventTypes.RoomPowerLevels) ??
+                    false) ||
+                (e.rooms!.join![id]?.timeline?.events
+                        ?.any((s) => s.type == EventTypes.RoomMember) ??
+                    false)),
+      );
+
+  int getUserDefaultLevel() {
+    return getState(EventTypes.RoomPowerLevels)!
+            .content
+            .tryGet<int>('users_default') ??
+        0;
+  }
+}
+
+extension SortByPowerLevel on List<User> {
+  List<User> sortByPowerLevel() {
+    final newList = [...this];
+    newList.sort((a, b) => b.powerLevel.compareTo(a.powerLevel));
+    return newList;
   }
 }

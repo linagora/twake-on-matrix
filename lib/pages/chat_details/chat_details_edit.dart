@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:adaptive_dialog/adaptive_dialog.dart';
 import 'package:dartz/dartz.dart' hide State;
 import 'package:fluffychat/app_state/failure.dart';
@@ -515,6 +517,7 @@ class ChatDetailsEditController extends State<ChatDetailsEdit>
     }
     Navigator.of(context).push(
       CupertinoPageRoute(
+        settings: const RouteSettings(name: '/assign_roles'),
         builder: (context) {
           return AssignRoles(
             room: room!,

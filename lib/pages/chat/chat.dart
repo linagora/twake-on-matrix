@@ -238,8 +238,6 @@ class ChatController extends State<Chat>
 
   final FocusNode rawKeyboardListenerFocusNode = FocusNode();
 
-  String selectionText = "";
-
   Timer? typingCoolDown;
   Timer? typingTimeout;
   bool currentlyTyping = false;

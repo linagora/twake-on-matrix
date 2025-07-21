@@ -6,12 +6,11 @@ import 'package:fluffychat/resource/image_paths.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/utils/responsive/responsive_utils.dart';
 import 'package:fluffychat/widgets/twake_app.dart';
-import 'package:fluffychat/widgets/twake_components/twake_icon_button.dart';
-import 'package:fluffychat/widgets/twake_components/twake_text_button.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:future_loading_dialog/future_loading_dialog.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
+import 'package:linagora_design_flutter/dialog/confirmation_dialog_builder.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:lottie/lottie.dart';
 import 'package:matrix/matrix.dart';
@@ -287,23 +286,18 @@ enum ConfirmResult {
 
 Future<ConfirmResult> showConfirmAlertDialog({
   required BuildContext context,
-  required ResponsiveUtils responsiveUtils,
   bool useRootNavigator = true,
   bool barrierDismissible = true,
-  bool isDestructiveAction = false,
   String? title,
-  Color? titleColor,
   String? message,
   String? okLabel,
   String? cancelLabel,
-  int? maxLinesMessage,
   void Function()? onClose,
   Color? okLabelButtonColor,
   Color? cancelLabelButtonColor,
   Color? okTextColor,
   Color? cancelTextColor,
-  double? maxWidthOkButton,
-  double? maxWidthCancelButton,
+  bool showCloseButton = false,
 }) async {
   final result = await showModal<ConfirmResult>(
     context: context,
@@ -312,211 +306,27 @@ Future<ConfirmResult> showConfirmAlertDialog({
     ),
     useRootNavigator: useRootNavigator,
     builder: (context) {
-      return GestureDetector(
-        onTap: () => Navigator.of(context).pop(ConfirmResult.cancel),
-        child: Material(
-          type: MaterialType.transparency,
-          child: Container(
-            height: double.infinity,
-            width: double.infinity,
-            color: Colors.transparent,
-            child: Center(
-              child: Container(
-                width:
-                    responsiveUtils.isMobile(context) ? double.infinity : 448,
-                margin: EdgeInsets.symmetric(
-                  horizontal: responsiveUtils.isMobile(context) ? 24.0 : 36,
-                ),
-                decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.surface,
-                  borderRadius: const BorderRadius.all(Radius.circular(16)),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.15),
-                      blurRadius: 8,
-                      offset: const Offset(0, 4),
-                      spreadRadius: 3,
-                    ),
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.3),
-                      blurRadius: 3,
-                      offset: const Offset(0, 1),
-                    ),
-                  ],
-                ),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    if (responsiveUtils.isMobile(context)) ...[
-                      const SizedBox(height: 24),
-                    ] else
-                      Padding(
-                        padding: const EdgeInsets.only(
-                          top: 8,
-                          right: 8,
-                        ),
-                        child: Align(
-                          alignment: Alignment.topRight,
-                          child: TwakeIconButton(
-                            icon: Icons.close,
-                            iconColor: isDestructiveAction
-                                ? CupertinoColors.destructiveRed
-                                : LinagoraSysColors.material().onSurfaceVariant,
-                            onTap: () {
-                              Navigator.of(context).pop(ConfirmResult.cancel);
-                              onClose?.call();
-                            },
-                          ),
-                        ),
-                      ),
-                    Padding(
-                      padding: EdgeInsets.symmetric(
-                        horizontal:
-                            responsiveUtils.isMobile(context) ? 24.0 : 36,
-                      ),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          if (title != null)
-                            Text(
-                              title,
-                              style: responsiveUtils.isMobile(context)
-                                  ? Theme.of(context)
-                                      .textTheme
-                                      .headlineSmall
-                                      ?.copyWith(
-                                        color: titleColor ??
-                                            LinagoraSysColors.material()
-                                                .onSurfaceVariant,
-                                      )
-                                  : Theme.of(context)
-                                      .textTheme
-                                      .titleLarge
-                                      ?.copyWith(
-                                        color: titleColor ??
-                                            LinagoraSysColors.material()
-                                                .onSurfaceVariant,
-                                      ),
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          SizedBox(
-                            height: responsiveUtils.isMobile(context) ? 16 : 27,
-                          ),
-                          if (message != null)
-                            Text(
-                              message,
-                              style: responsiveUtils.isMobile(context)
-                                  ? Theme.of(context)
-                                      .textTheme
-                                      .bodyMedium
-                                      ?.copyWith(
-                                        color: LinagoraSysColors.material()
-                                            .onSurfaceVariant,
-                                      )
-                                  : Theme.of(context)
-                                      .textTheme
-                                      .titleSmall
-                                      ?.copyWith(
-                                        color: LinagoraSysColors.material()
-                                            .onSurfaceVariant,
-                                      ),
-                              maxLines: maxLinesMessage ??
-                                  TwakeDialog.defaultMaxLinesMessage,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          SizedBox(
-                            height: responsiveUtils.isMobile(context) ? 24 : 65,
-                          ),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.end,
-                            children: [
-                              TwakeTextButton(
-                                margin: const EdgeInsetsDirectional.symmetric(
-                                  horizontal: 24.0,
-                                ),
-                                buttonDecoration: BoxDecoration(
-                                  color: cancelLabelButtonColor ??
-                                      LinagoraSysColors.material().onPrimary,
-                                  borderRadius: const BorderRadius.all(
-                                    Radius.circular(100),
-                                  ),
-                                ),
-                                message:
-                                    cancelLabel ?? L10n.of(context)!.cancel,
-                                constraints: BoxConstraints(
-                                  maxWidth: maxWidthCancelButton ??
-                                      (responsiveUtils.isMobile(context)
-                                          ? TwakeDialog
-                                              .maxWidthDialogButtonMobile
-                                          : TwakeDialog
-                                              .maxWidthDialogButtonWeb),
-                                ),
-                                styleMessage: Theme.of(context)
-                                    .textTheme
-                                    .labelLarge
-                                    ?.copyWith(
-                                      color: cancelTextColor ??
-                                          Theme.of(context).colorScheme.primary,
-                                    ),
-                                hoverColor: Colors.transparent,
-                                onTap: () {
-                                  Navigator.of(context)
-                                      .pop(ConfirmResult.cancel);
-                                  onClose?.call();
-                                },
-                              ),
-                              const SizedBox(width: 8),
-                              TwakeTextButton(
-                                buttonDecoration: BoxDecoration(
-                                  color: okLabelButtonColor ??
-                                      LinagoraSysColors.material().primary,
-                                  borderRadius: const BorderRadius.all(
-                                    Radius.circular(100),
-                                  ),
-                                ),
-                                constraints: BoxConstraints(
-                                  maxWidth: maxWidthOkButton ??
-                                      (responsiveUtils.isMobile(context)
-                                          ? TwakeDialog
-                                              .maxWidthDialogButtonMobile
-                                          : TwakeDialog
-                                              .maxWidthDialogButtonWeb),
-                                ),
-                                margin: const EdgeInsetsDirectional.symmetric(
-                                  horizontal: 24.0,
-                                ),
-                                message: okLabel ?? L10n.of(context)!.ok,
-                                styleMessage: Theme.of(context)
-                                    .textTheme
-                                    .labelLarge
-                                    ?.copyWith(
-                                      color: okTextColor ??
-                                          LinagoraSysColors.material()
-                                              .onPrimary,
-                                    ),
-                                hoverColor: Colors.transparent,
-                                onTap: () {
-                                  Navigator.of(context).pop(ConfirmResult.ok);
-                                  onClose?.call();
-                                },
-                              ),
-                            ],
-                          ),
-                          SizedBox(
-                            height:
-                                responsiveUtils.isMobile(context) ? 24.0 : 36,
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-        ),
+      return ConfirmationDialogBuilder(
+        title: title ?? '',
+        textContent: message ?? '',
+        confirmText: okLabel ?? '',
+        cancelText: cancelLabel ?? '',
+        confirmLabelButtonColor: okTextColor,
+        cancelLabelButtonColor: cancelTextColor,
+        confirmBackgroundButtonColor: okLabelButtonColor,
+        cancelBackgroundButtonColor: cancelLabelButtonColor,
+        onConfirmButtonAction: () {
+          Navigator.of(context).pop(ConfirmResult.ok);
+          onClose?.call();
+        },
+        onCancelButtonAction: () {
+          Navigator.of(context).pop(ConfirmResult.cancel);
+          onClose?.call();
+        },
+        onCloseButtonAction: () {
+          Navigator.of(context).pop(ConfirmResult.cancel);
+          onClose?.call();
+        },
       );
     },
   );

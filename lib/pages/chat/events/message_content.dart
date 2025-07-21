@@ -9,9 +9,9 @@ import 'package:fluffychat/pages/chat/events/message_upload_content.dart';
 import 'package:fluffychat/pages/chat/events/message_video_download_content.dart';
 import 'package:fluffychat/pages/chat/events/message_video_download_content_web.dart';
 import 'package:fluffychat/pages/chat/events/message_video_upload_content.dart';
-import 'package:fluffychat/pages/chat/events/redacted_content.dart';
 import 'package:fluffychat/pages/chat/events/sending_video_widget.dart';
 import 'package:fluffychat/pages/chat/events/unknown_content.dart';
+import 'package:fluffychat/pages/chat/optional_selection_container_disabled.dart';
 import 'package:fluffychat/presentation/model/file/display_image_info.dart';
 import 'package:fluffychat/utils/extension/event_info_extension.dart';
 import 'package:fluffychat/utils/extension/image_size_extension.dart';
@@ -39,20 +39,20 @@ class MessageContent extends StatelessWidget
   final Event event;
   final Color textColor;
   final Widget endOfBubbleWidget;
-  final Color backgroundColor;
   final void Function()? onTapPreview;
   final void Function()? onTapSelectMode;
   final bool ownMessage;
+  final Timeline timeline;
 
   const MessageContent(
     this.event, {
     super.key,
     required this.textColor,
     required this.endOfBubbleWidget,
-    required this.backgroundColor,
     this.onTapPreview,
     this.onTapSelectMode,
     required this.ownMessage,
+    required this.timeline,
   });
 
   @override
@@ -65,14 +65,20 @@ class MessageContent extends StatelessWidget
       case EventTypes.Sticker:
         switch (event.messageType) {
           case MessageTypes.Image:
-            return MessageImageBuilder(
-              event: event,
-              onTapPreview: onTapPreview,
-              onTapSelectMode: onTapSelectMode,
+            return OptionalSelectionContainerDisabled(
+              isEnabled: PlatformInfos.isWeb,
+              child: MessageImageBuilder(
+                event: event,
+                onTapPreview: onTapPreview,
+                onTapSelectMode: onTapSelectMode,
+              ),
             );
           case MessageTypes.Sticker:
             if (event.redacted) continue textmessage;
-            return Sticker(event);
+            return OptionalSelectionContainerDisabled(
+              isEnabled: PlatformInfos.isWeb,
+              child: Sticker(event),
+            );
           case CuteEventContent.eventType:
             return CuteContent(event);
           case MessageTypes.Audio:
@@ -83,21 +89,30 @@ class MessageContent extends StatelessWidget
                 // is fixed
                 //   || PlatformInfos.isLinux
                 ) {
-              return AudioPlayerWidget(
-                event,
-                color: textColor,
+              return OptionalSelectionContainerDisabled(
+                isEnabled: PlatformInfos.isWeb,
+                child: AudioPlayerWidget(
+                  event,
+                  color: textColor,
+                ),
               );
             }
-            return MessageDownloadContent(
-              event,
+            return OptionalSelectionContainerDisabled(
+              isEnabled: PlatformInfos.isWeb,
+              child: MessageDownloadContent(
+                event,
+              ),
             );
           case MessageTypes.Video:
             if (event.isVideoAvailable) {
-              return _MessageVideoBuilder(
-                event: event,
-                onFileTapped: (event) => onFileTapped(
-                  context: context,
+              return OptionalSelectionContainerDisabled(
+                isEnabled: PlatformInfos.isWeb,
+                child: _MessageVideoBuilder(
                   event: event,
+                  onFileTapped: (event) => onFileTapped(
+                    context: context,
+                    event: event,
+                  ),
                 ),
               );
             } else {
@@ -109,15 +124,21 @@ class MessageContent extends StatelessWidget
                       event,
                     ),
                   ] else ...[
-                    MessageDownloadContentWeb(
-                      event,
+                    OptionalSelectionContainerDisabled(
+                      isEnabled: PlatformInfos.isWeb,
+                      child: MessageDownloadContentWeb(
+                        event,
+                      ),
                     ),
                   ],
                   Padding(
                     padding: MessageContentStyle.endOfBubbleWidgetPadding,
-                    child: Text.rich(
-                      WidgetSpan(
-                        child: endOfBubbleWidget,
+                    child: OptionalSelectionContainerDisabled(
+                      isEnabled: PlatformInfos.isWeb,
+                      child: Text.rich(
+                        WidgetSpan(
+                          child: endOfBubbleWidget,
+                        ),
                       ),
                     ),
                   ),
@@ -141,20 +162,29 @@ class MessageContent extends StatelessWidget
                     ),
                 ] else ...[
                   if (event.isSending()) ...[
-                    MessageUploadingContent(
-                      event: event,
-                      style: const MessageFileTileStyle(),
+                    OptionalSelectionContainerDisabled(
+                      isEnabled: PlatformInfos.isWeb,
+                      child: MessageUploadingContent(
+                        event: event,
+                        style: const MessageFileTileStyle(),
+                      ),
                     ),
                   ] else
-                    MessageDownloadContentWeb(
-                      event,
+                    OptionalSelectionContainerDisabled(
+                      isEnabled: PlatformInfos.isWeb,
+                      child: MessageDownloadContentWeb(
+                        event,
+                      ),
                     ),
                 ],
                 Padding(
                   padding: MessageContentStyle.endOfBubbleWidgetPadding,
-                  child: Text.rich(
-                    WidgetSpan(
-                      child: endOfBubbleWidget,
+                  child: OptionalSelectionContainerDisabled(
+                    isEnabled: PlatformInfos.isWeb,
+                    child: Text.rich(
+                      WidgetSpan(
+                        child: endOfBubbleWidget,
+                      ),
                     ),
                   ),
                 ),
@@ -222,10 +252,6 @@ class MessageContent extends StatelessWidget
           case MessageTypes.None:
           textmessage:
           default:
-            if (event.redacted) {
-              return RedactedContent(event: event);
-            }
-
             return FutureBuilder<String>(
               future: event.calcLocalizedBody(
                 MatrixLocals(L10n.of(context)!),
@@ -242,23 +268,24 @@ class MessageContent extends StatelessWidget
                   event: event,
                   localizedBody: localizedBody,
                   ownMessage: ownMessage,
-                  endOfBubbleWidget: endOfBubbleWidget,
                   fontSize: fontSize,
                   linkStyle:
                       MessageContentStyle.linkStyleMessageContent(context),
-                  richTextStyle: event.isDisplayOnlyEmoji()
-                      ? event.textStyleForOnlyEmoji(context)
-                      : Theme.of(context).textTheme.bodyLarge?.copyWith(
-                            color: Theme.of(context).colorScheme.onSurface,
-                          ),
+                  richTextStyle: event.getMessageTextStyle(context),
                 );
               },
             );
         }
       case EventTypes.CallInvite:
-        return CallInviteContent(event: event);
+        return OptionalSelectionContainerDisabled(
+          isEnabled: PlatformInfos.isWeb,
+          child: CallInviteContent(event: event),
+        );
       default:
-        return UnknownContent(event: event);
+        return OptionalSelectionContainerDisabled(
+          isEnabled: PlatformInfos.isWeb,
+          child: UnknownContent(event: event),
+        );
     }
   }
 }

@@ -1,9 +1,11 @@
 import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/pages/chat/events/reply_content_style.dart';
+import 'package:fluffychat/pages/chat/optional_selection_container_disabled.dart';
 import 'package:fluffychat/resource/image_paths.dart';
 import 'package:fluffychat/utils/extension/event_info_extension.dart';
 import 'package:fluffychat/utils/extension/mime_type_extension.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
+import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/widgets/mxc_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_blurhash/flutter_blurhash.dart';
@@ -81,23 +83,24 @@ class ReplyContent extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
-            Padding(
-              padding: const EdgeInsets.symmetric(
+            Container(
+              constraints: const BoxConstraints(
+                minHeight: ReplyContentStyle.replyContentSize,
+              ),
+              width: ReplyContentStyle.prefixBarWidth,
+              margin: const EdgeInsets.symmetric(
                 vertical: ReplyContentStyle.prefixBarVerticalPadding,
               ),
-              child: Container(
-                constraints: const BoxConstraints(
-                  minHeight: ReplyContentStyle.replyContentSize,
-                ),
-                width: ReplyContentStyle.prefixBarWidth,
-                decoration: ReplyContentStyle.prefixBarDecoration(context),
-              ),
+              decoration: ReplyContentStyle.prefixBarDecoration(context),
             ),
             const SizedBox(width: ReplyContentStyle.contentSpacing),
             if (displayEvent.hasAttachment)
               Center(
-                child: ReplyPreviewIconBuilder(
-                  event: displayEvent,
+                child: OptionalSelectionContainerDisabled(
+                  isEnabled: PlatformInfos.isWeb,
+                  child: ReplyPreviewIconBuilder(
+                    event: displayEvent,
+                  ),
                 ),
               ),
             const SizedBox(

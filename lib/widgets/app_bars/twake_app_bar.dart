@@ -17,6 +17,7 @@ class TwakeAppBar extends StatelessWidget implements PreferredSizeWidget {
   final double? leadingWidth;
   final VoidCallback? onBack;
   final bool enableLeftTitle;
+  final bool isDialog;
 
   const TwakeAppBar({
     super.key,
@@ -30,6 +31,7 @@ class TwakeAppBar extends StatelessWidget implements PreferredSizeWidget {
     this.leadingWidth,
     this.onBack,
     this.enableLeftTitle = false,
+    this.isDialog = false,
   });
 
   @override
@@ -43,7 +45,7 @@ class TwakeAppBar extends StatelessWidget implements PreferredSizeWidget {
       automaticallyImplyLeading: false,
       leading: leading,
       leadingWidth: leadingWidth,
-      title: TwakeAppBarStyle.responsiveUtils.isMobile(context)
+      title: isDialog || TwakeAppBarStyle.responsiveUtils.isMobile(context)
           ? Column(
               children: [
                 Padding(
@@ -52,7 +54,10 @@ class TwakeAppBar extends StatelessWidget implements PreferredSizeWidget {
                       : ContactsAppbarStyle.titlePadding(context),
                   child: Text(
                     title,
-                    style: TwakeAppBarStyle.titleTextStyle(context),
+                    style: TwakeAppBarStyle.titleTextStyle(
+                      context,
+                      isDialog: isDialog,
+                    ),
                   ),
                 ),
               ],
@@ -65,7 +70,10 @@ class TwakeAppBar extends StatelessWidget implements PreferredSizeWidget {
                       : const EdgeInsets.only(left: 16),
                   child: Text(
                     title,
-                    style: TwakeAppBarStyle.titleTextStyle(context),
+                    style: TwakeAppBarStyle.titleTextStyle(
+                      context,
+                      isDialog: isDialog,
+                    ),
                   ),
                 ),
               ],

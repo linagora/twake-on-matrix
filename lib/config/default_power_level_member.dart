@@ -1,3 +1,4 @@
+import 'package:fluffychat/config/default_permission_level_member.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 
@@ -8,6 +9,33 @@ enum DefaultPowerLevelMember {
   admin,
   owner,
   none;
+
+  static List<int> powerLevelAvailable() => [
+        DefaultPowerLevelMember.guest.powerLevel,
+        DefaultPowerLevelMember.member.powerLevel,
+        DefaultPowerLevelMember.moderator.powerLevel,
+        DefaultPowerLevelMember.admin.powerLevel,
+        DefaultPowerLevelMember.owner.powerLevel,
+      ];
+
+  static DefaultPowerLevelMember getDefaultPowerLevelByUsersDefault({
+    required int usersDefault,
+  }) {
+    int result = powerLevelAvailable().first;
+
+    for (final int level in powerLevelAvailable()) {
+      if (usersDefault >= level) {
+        result = level;
+      } else {
+        break;
+      }
+    }
+
+    return DefaultPowerLevelMember.values.firstWhere(
+      (element) => element.powerLevel == result,
+      orElse: () => DefaultPowerLevelMember.none,
+    );
+  }
 
   int get powerLevel {
     switch (this) {
@@ -45,5 +73,42 @@ enum DefaultPowerLevelMember {
       default:
         return '';
     }
+  }
+
+  List<DefaultPermissionLevelMember> permissionForGuest(BuildContext context) {
+    return [
+      DefaultPermissionLevelMember.invitePeopleToTheRoom,
+    ];
+  }
+
+  List<DefaultPermissionLevelMember> permissionForMember(BuildContext context) {
+    return [
+      DefaultPermissionLevelMember.sendMessages,
+      DefaultPermissionLevelMember.sendReactions,
+      DefaultPermissionLevelMember.deleteMessagesSentByMe,
+      DefaultPermissionLevelMember.notifyEveryoneUsingRoom,
+      DefaultPermissionLevelMember.joinCall,
+    ];
+  }
+
+  List<DefaultPermissionLevelMember> permissionForModerator(
+    BuildContext context,
+  ) {
+    return [
+      DefaultPermissionLevelMember.removeMembers,
+      DefaultPermissionLevelMember.deleteMessagesSentByOthers,
+      DefaultPermissionLevelMember.pinMessageForEveryone,
+      DefaultPermissionLevelMember.startCall,
+    ];
+  }
+
+  List<DefaultPermissionLevelMember> permissionForAdmin(BuildContext context) {
+    return [
+      DefaultPermissionLevelMember.changeGroupName,
+      DefaultPermissionLevelMember.changeGroupDescription,
+      DefaultPermissionLevelMember.changeGroupAvatar,
+      DefaultPermissionLevelMember.changeGroupHistoryVisibility,
+      DefaultPermissionLevelMember.assignRoles,
+    ];
   }
 }

@@ -87,10 +87,10 @@ class BackgroundPush {
         .listen((s) => _onClearingPush(getFromServer: false));
     if (Platform.isAndroid) {
       UnifiedPush.initialize(
-        onNewEndpoint: _newUpEndpoint,
-        onRegistrationFailed: _upUnregistered,
+        onNewEndpoint: (endpoint, i) => _newUpEndpoint(endpoint.url, i),
+        onRegistrationFailed: (_, i) => _upUnregistered(i),
         onUnregistered: _upUnregistered,
-        onMessage: _onUpMessage,
+        onMessage: (message, i) => _onUpMessage(message.content, i),
       );
       fcmSharedIsolate?.setListeners(
         onMessage: (message) {
@@ -413,7 +413,7 @@ class BackgroundPush {
   }
 
   Future<void> setupUp() async {
-    await UnifiedPush.registerAppWithDialog(_matrixState!.context);
+    await UnifiedPush.register();
   }
 
   Future<void> _newUpEndpoint(String newEndpoint, String i) async {

@@ -29,7 +29,11 @@ mixin MessageContentBuilderMixin {
       MessageTypes.Video,
     }.contains(event.messageType);
 
-    if (isNotSupportCalcSize || event.text.isEmpty) {
+    if (isNotSupportCalcSize) {
+      return null;
+    }
+
+    if (event.text.isEmpty && !event.redacted) {
       return null;
     }
 
@@ -102,13 +106,7 @@ mixin MessageContentBuilderMixin {
           hideReply: true,
           plaintextBody: true,
         ),
-        style: event.isDisplayOnlyEmoji()
-            ? event.textStyleForOnlyEmoji(context)
-            : Theme.of(context).textTheme.bodyLarge?.copyWith(
-                  color: Theme.of(
-                    context,
-                  ).colorScheme.onSurface,
-                ),
+        style: event.getMessageTextStyle(context),
       ),
       textDirection: TextDirection.ltr,
     )..layout(minWidth: 0, maxWidth: messageMaxWidth);
