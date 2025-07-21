@@ -1,15 +1,22 @@
+import 'dart:async';
+
 import 'package:dartz/dartz.dart' hide State;
 import 'package:fluffychat/app_state/failure.dart';
 import 'package:fluffychat/app_state/success.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
+import 'package:fluffychat/domain/app_state/room/unban_user_state.dart';
 import 'package:fluffychat/domain/model/room/room_extension.dart';
+import 'package:fluffychat/domain/usecase/room/unban_user_interactor.dart';
 import 'package:fluffychat/pages/chat_details/chat_details_edit_view_style.dart';
 import 'package:fluffychat/pages/chat_details/removed/removed_search_state.dart';
 import 'package:fluffychat/pages/chat_details/removed/removed_view.dart';
 import 'package:fluffychat/pages/search/search_debouncer_mixin.dart';
+import 'package:fluffychat/utils/dialog/twake_dialog.dart';
 import 'package:fluffychat/utils/responsive/responsive_utils.dart';
+import 'package:fluffychat/utils/twake_snackbar.dart';
 import 'package:flutter/material.dart';
 import 'package:matrix/matrix.dart';
+import 'package:flutter_gen/gen_l10n/l10n.dart';
 
 class Removed extends StatefulWidget {
   final Room room;
@@ -22,6 +29,10 @@ class Removed extends StatefulWidget {
 
 class RemovedController extends State<Removed> with SearchDebouncerMixin {
   final responsive = getIt.get<ResponsiveUtils>();
+
+  final _unbanUserInteractor = getIt.get<UnbanUserInteractor>();
+
+  StreamSubscription? _unbanUserSubscription;
 
   final textEditingController = TextEditingController();
 
@@ -86,6 +97,51 @@ class RemovedController extends State<Removed> with SearchDebouncerMixin {
     );
   }
 
+  void handleOnTapUnbanUser(User user) async {
+    Logs().d("RemovedController::handleOnTapUnbanUser");
+    _unbanUserSubscription = _unbanUserInteractor.execute(user: user).listen(
+          (result) => handleUnbanState(result),
+        );
+  }
+
+  void handleUnbanState(
+    Either<Failure, Success> state,
+  ) {
+    state.fold(
+      (failure) {
+        if (failure is UnbanUserFailure) {
+          TwakeDialog.hideLoadingDialog(context);
+          TwakeSnackBar.show(
+            context,
+            failure.exception.toString(),
+          );
+          return;
+        }
+
+        if (failure is NoPermissionForUnbanFailure) {
+          TwakeDialog.hideLoadingDialog(context);
+          TwakeSnackBar.show(
+            context,
+            L10n.of(context)!.permissionErrorUnbanUser,
+          );
+          return;
+        }
+      },
+      (success) {
+        if (success is UnbanUserLoading) {
+          TwakeDialog.showLoadingDialog(context);
+          return;
+        }
+
+        if (success is UnbanUserSuccess) {
+          TwakeDialog.hideLoadingDialog(context);
+          Navigator.of(context).pop();
+          return;
+        }
+      },
+    );
+  }
+
   @override
   void initState() {
     initialRemoved();
@@ -97,6 +153,15 @@ class RemovedController extends State<Removed> with SearchDebouncerMixin {
       handleSearchResults(searchTerm);
     });
     super.initState();
+  }
+
+  @override
+  void dispose() {
+    _unbanUserSubscription?.cancel();
+    textEditingController.dispose();
+    inputFocus.dispose();
+    searchUserResults.dispose();
+    super.dispose();
   }
 
   @override
