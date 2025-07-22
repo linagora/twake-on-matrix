@@ -10,12 +10,14 @@ class ProfileInfoPage extends StatefulWidget {
     required this.userId,
     this.onNewChatOpen,
     this.onUpdatedMembers,
+    this.onTransferOwnershipSuccess,
   });
 
   final String roomId;
   final String userId;
   final void Function()? onNewChatOpen;
   final VoidCallback? onUpdatedMembers;
+  final VoidCallback? onTransferOwnershipSuccess;
 
   @override
   State<ProfileInfoPage> createState() => ProfileInfoPageState();
@@ -30,5 +32,6 @@ class ProfileInfoPageState extends State<ProfileInfoPage> {
   Widget build(BuildContext context) => ProfileInfoView(
         this,
         onUpdatedMembers: widget.onUpdatedMembers,
+        onTransferOwnershipSuccess: widget.onTransferOwnershipSuccess,
       );
 }

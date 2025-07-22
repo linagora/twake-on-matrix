@@ -125,7 +125,12 @@ class RemovedView extends StatelessWidget {
                   final member = success.removedMember[index];
                   return TwakeInkWell(
                     onTap: () {
-                      member.openProfileView(context: context);
+                      member.openProfileView(
+                        context: context,
+                        onTransferOwnershipSuccess: () {
+                          controller.onBack();
+                        },
+                      );
                     },
                     child: _itemMemberBuilder(
                       context: context,
@@ -192,7 +197,12 @@ class RemovedView extends StatelessWidget {
   }) {
     return TwakeInkWell(
       onTap: () {
-        member.openProfileView(context: context);
+        member.openProfileView(
+          context: context,
+          onTransferOwnershipSuccess: () {
+            controller.onBack();
+          },
+        );
       },
       child: TwakeListItem(
         padding: const EdgeInsets.all(8),

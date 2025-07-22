@@ -14,29 +14,23 @@ extension UserExtension on User {
   static const EdgeInsets closeButtonPadding = EdgeInsets.all(16);
 
   DefaultPowerLevelMember get getDefaultPowerLevelMember {
-    switch (powerLevel) {
-      case 0:
-        return DefaultPowerLevelMember.guest;
-      case 10:
-        return DefaultPowerLevelMember.member;
-      case 50:
-        return DefaultPowerLevelMember.moderator;
-      case 80:
-        return DefaultPowerLevelMember.admin;
-      case 100:
-        return DefaultPowerLevelMember.owner;
-      default:
-        return DefaultPowerLevelMember.guest;
-    }
+    return DefaultPowerLevelMember.getDefaultPowerLevelByUsersDefault(
+      usersDefault: powerLevel,
+    );
   }
 
   bool get isOwnerRole {
     return getDefaultPowerLevelMember == DefaultPowerLevelMember.owner;
   }
 
+  bool get isBanned {
+    return membership == Membership.ban;
+  }
+
   Future openProfileView({
     required BuildContext context,
     VoidCallback? onUpdatedMembers,
+    VoidCallback? onTransferOwnershipSuccess,
   }) {
     final responsive = getIt.get<ResponsiveUtils>();
 
@@ -47,6 +41,10 @@ extension UserExtension on User {
             roomId: room.id,
             userId: id,
             onUpdatedMembers: onUpdatedMembers,
+            onTransferOwnershipSuccess: () {
+              Navigator.of(ctx).pop();
+              onTransferOwnershipSuccess?.call();
+            },
           ),
         ),
       );
@@ -79,6 +77,10 @@ extension UserExtension on User {
                     user: this,
                     onNewChatOpen: () {
                       Navigator.of(dialogContext).pop();
+                    },
+                    onTransferOwnershipSuccess: () {
+                      Navigator.of(dialogContext).pop();
+                      onTransferOwnershipSuccess?.call();
                     },
                     onUpdatedMembers: onUpdatedMembers,
                   ),

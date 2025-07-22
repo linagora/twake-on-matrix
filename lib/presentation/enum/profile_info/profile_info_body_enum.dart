@@ -6,7 +6,8 @@ import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 enum ProfileInfoActions {
   sendMessage,
   downgradeToReadOnly,
-  removeFromGroup;
+  removeFromGroup,
+  transferOwnership;
 
   String label(BuildContext context) {
     switch (this) {
@@ -16,6 +17,8 @@ enum ProfileInfoActions {
         return L10n.of(context)!.removeFromGroup;
       case ProfileInfoActions.downgradeToReadOnly:
         return L10n.of(context)!.downgradeToReadOnly;
+      case ProfileInfoActions.transferOwnership:
+        return L10n.of(context)!.transferOwnership;
     }
   }
 
@@ -33,6 +36,10 @@ enum ProfileInfoActions {
         return Theme.of(context).textTheme.labelLarge!.copyWith(
               color: LinagoraSysColors.material().primary,
             );
+      case ProfileInfoActions.transferOwnership:
+        return Theme.of(context).textTheme.labelLarge!.copyWith(
+              color: LinagoraSysColors.material().primary,
+            );
     }
   }
 
@@ -45,6 +52,7 @@ enum ProfileInfoActions {
         );
       case ProfileInfoActions.removeFromGroup:
       case ProfileInfoActions.downgradeToReadOnly:
+      case ProfileInfoActions.transferOwnership:
       default:
         return null;
     }
@@ -59,10 +67,11 @@ enum ProfileInfoActions {
         );
       case ProfileInfoActions.removeFromGroup:
         return const EdgeInsets.only(
-          top: 16,
+          top: 8,
           bottom: 8,
         );
       case ProfileInfoActions.downgradeToReadOnly:
+      case ProfileInfoActions.transferOwnership:
         return const EdgeInsets.only(
           bottom: 8,
         );
@@ -72,6 +81,7 @@ enum ProfileInfoActions {
   Divider? divider(BuildContext context) {
     switch (this) {
       case ProfileInfoActions.removeFromGroup:
+      case ProfileInfoActions.transferOwnership:
         return Divider(
           thickness: ProfileInfoBodyViewStyle.bigDividerThickness,
           color: LinagoraStateLayer(
@@ -98,6 +108,7 @@ enum ProfileInfoActions {
           color: LinagoraSysColors.material().error,
         );
       case ProfileInfoActions.downgradeToReadOnly:
+      case ProfileInfoActions.transferOwnership:
         return null;
     }
   }

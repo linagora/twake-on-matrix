@@ -253,7 +253,10 @@ extension RoomExtension on Room {
       final powerLevel = member.powerLevel;
       return powerLevel >= DefaultPowerLevelMember.moderator.powerLevel &&
           member.membership == Membership.join;
-    }).toList();
+    }).toList()
+      ..sort(
+        (small, great) => great.powerLevel.compareTo(small.powerLevel),
+      );
   }
 
   List<User> getExceptionsMember() {
@@ -263,7 +266,10 @@ extension RoomExtension on Room {
       final powerLevel = member.powerLevel;
       return powerLevel < DefaultPowerLevelMember.member.powerLevel &&
           member.membership == Membership.join;
-    }).toList();
+    }).toList()
+      ..sort(
+        (small, great) => great.powerLevel.compareTo(small.powerLevel),
+      );
   }
 
   List<User> getBannedMembers() {
@@ -271,7 +277,10 @@ extension RoomExtension on Room {
       membershipFilter: [Membership.ban],
     );
     if (members.isEmpty) return [];
-    return members;
+    return members
+      ..sort(
+        (small, great) => great.powerLevel.compareTo(small.powerLevel),
+      );
   }
 
   List<User> getCurrentMembers() {
@@ -312,6 +321,17 @@ extension RoomExtension on Room {
             .content
             .tryGet<int>('users_default') ??
         0;
+  }
+
+  bool get canTransferOwnership {
+    return ownPowerLevel >= DefaultPowerLevelMember.owner.powerLevel &&
+        canAssignRoles;
+  }
+
+  User get ownUser {
+    return getParticipants().firstWhere(
+      (user) => user.id == client.userID,
+    );
   }
 }
 
