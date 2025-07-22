@@ -3,9 +3,13 @@ import 'dart:async';
 import 'package:dartz/dartz.dart' hide State;
 import 'package:fluffychat/app_state/failure.dart';
 import 'package:fluffychat/app_state/success.dart';
+import 'package:fluffychat/config/default_power_level_member.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/domain/app_state/contact/lookup_match_contact_state.dart';
+import 'package:fluffychat/domain/app_state/room/set_permission_level_state.dart';
+import 'package:fluffychat/domain/model/room/room_extension.dart';
 import 'package:fluffychat/domain/usecase/contacts/lookup_match_contact_interactor.dart';
+import 'package:fluffychat/domain/usecase/room/set_permission_level_interactor.dart';
 import 'package:fluffychat/pages/profile_info/profile_info_body/profile_info_body_view.dart';
 import 'package:fluffychat/pages/profile_info/profile_info_body/profile_info_body_view_style.dart';
 import 'package:fluffychat/presentation/enum/profile_info/profile_info_body_enum.dart';
@@ -15,17 +19,20 @@ import 'package:fluffychat/utils/dialog/twake_dialog.dart';
 import 'package:fluffychat/utils/dialog/warning_dialog.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/utils/twake_snackbar.dart';
+import 'package:fluffychat/utils/user_extension.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:matrix/matrix.dart';
+import 'package:flutter_gen/gen_l10n/l10n.dart';
 
 class ProfileInfoBody extends StatefulWidget {
   const ProfileInfoBody({
     required this.user,
     this.onNewChatOpen,
     this.onUpdatedMembers,
+    this.onTransferOwnershipSuccess,
     super.key,
   });
 
@@ -35,6 +42,8 @@ class ProfileInfoBody extends StatefulWidget {
 
   final VoidCallback? onUpdatedMembers;
 
+  final VoidCallback? onTransferOwnershipSuccess;
+
   @override
   State<ProfileInfoBody> createState() => ProfileInfoBodyController();
 }
@@ -42,6 +51,11 @@ class ProfileInfoBody extends StatefulWidget {
 class ProfileInfoBodyController extends State<ProfileInfoBody> {
   final _lookupMatchContactInteractor =
       getIt.get<LookupMatchContactInteractor>();
+
+  final _setPermissionLevelInteractor =
+      getIt.get<SetPermissionLevelInteractor>();
+
+  StreamSubscription? _setPermissionLevelSubscription;
 
   StreamSubscription? lookupContactNotifierSub;
 
@@ -133,7 +147,9 @@ class ProfileInfoBodyController extends State<ProfileInfoBody> {
   List<ProfileInfoActions> profileInfoActions() {
     return [
       ProfileInfoActions.sendMessage,
-      if (user!.canKick) ProfileInfoActions.removeFromGroup,
+      if (user?.canKick == true) ProfileInfoActions.removeFromGroup,
+      if (user?.room.canTransferOwnership == true && user?.isBanned == false)
+        ProfileInfoActions.transferOwnership,
     ];
   }
 
@@ -144,6 +160,9 @@ class ProfileInfoBodyController extends State<ProfileInfoBody> {
         break;
       case ProfileInfoActions.removeFromGroup:
         removeFromGroupChat();
+        break;
+      case ProfileInfoActions.transferOwnership:
+        transferOwnership();
         break;
       default:
         break;
@@ -208,6 +227,68 @@ class ProfileInfoBodyController extends State<ProfileInfoBody> {
     );
   }
 
+  Future<void> transferOwnership() async {
+    if (user == null) return;
+    if (user?.room == null) return;
+    await showConfirmAlertDialog(
+      context: context,
+      title: L10n.of(context)?.confirmTransferOwnership(
+        user?.displayName ?? '',
+      ),
+      message: L10n.of(context)?.transferOwnershipDescription,
+      okLabel: L10n.of(context)?.confirm,
+      cancelLabel: L10n.of(context)?.cancel,
+    ).then((result) {
+      if (result == ConfirmResult.ok) {
+        _setPermissionLevelSubscription = _setPermissionLevelInteractor.execute(
+          room: user!.room,
+          userPermissionLevels: {
+            user!: DefaultPowerLevelMember.owner.powerLevel,
+            user!.room.ownUser: DefaultPowerLevelMember.admin.powerLevel,
+          },
+        ).listen((state) => _handleSetPermissionState(state));
+      }
+    });
+  }
+
+  void _handleSetPermissionState(
+    Either<Failure, Success> state,
+  ) {
+    state.fold(
+      (failure) {
+        if (failure is SetPermissionLevelFailure) {
+          TwakeDialog.hideLoadingDialog(context);
+          TwakeSnackBar.show(
+            context,
+            failure.exception.toString(),
+          );
+          return;
+        }
+
+        if (failure is NoPermissionFailure) {
+          TwakeDialog.hideLoadingDialog(context);
+          TwakeSnackBar.show(
+            context,
+            L10n.of(context)!.permissionErrorChangeRole,
+          );
+          return;
+        }
+      },
+      (success) {
+        if (success is SetPermissionLevelLoading) {
+          TwakeDialog.showLoadingDialog(context);
+          return;
+        }
+
+        if (success is SetPermissionLevelSuccess) {
+          TwakeDialog.hideLoadingDialog(context);
+          widget.onTransferOwnershipSuccess?.call();
+          return;
+        }
+      },
+    );
+  }
+
   @override
   void initState() {
     lookupMatchContactAction();
@@ -218,6 +299,7 @@ class ProfileInfoBodyController extends State<ProfileInfoBody> {
   void dispose() {
     lookupContactNotifier.dispose();
     lookupContactNotifierSub?.cancel();
+    _setPermissionLevelSubscription?.cancel();
     super.dispose();
   }
 

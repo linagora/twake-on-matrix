@@ -137,6 +137,9 @@ class ParticipantListItem extends StatelessWidget {
       await member.openProfileView(
         context: context,
         onUpdatedMembers: onUpdatedMembers,
+        onTransferOwnershipSuccess: () {
+          Navigator.of(context).pop();
+        },
       );
     }
   }
@@ -149,6 +152,9 @@ class ParticipantListItem extends StatelessWidget {
             roomId: member.room.id,
             userId: member.id,
             onUpdatedMembers: onUpdatedMembers,
+            onTransferOwnershipSuccess: () {
+              Navigator.of(ctx).pop();
+            },
           ),
         ),
       );
@@ -165,6 +171,9 @@ class ParticipantListItem extends StatelessWidget {
           userId: member.id,
           onUpdatedMembers: onUpdatedMembers,
           onNewChatOpen: () {
+            Navigator.of(dialogContext).pop();
+          },
+          onTransferOwnershipSuccess: () {
             Navigator.of(dialogContext).pop();
           },
         );

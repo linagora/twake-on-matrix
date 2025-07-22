@@ -3346,5 +3346,15 @@
   "deletedMessage": "Deleted message",
   "@deletedMessage": {},
   "unban": "Unban",
-  "permissionErrorUnbanUser": "You don’t have the rights to unban users. Please reach out to your admin for help"
+  "permissionErrorUnbanUser": "You don’t have the rights to unban users. Please reach out to your admin for help",
+  "transferOwnership": "Transfer ownership",
+  "confirmTransferOwnership": "Are you sure you want to transfer ownership of this group to {name}?",
+  "@confirmTransferOwnership": {
+    "type": "text",
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "transferOwnershipDescription": "This user will gain full control over the group and you will no longer have total management rights. This action is irreversible.",
+  "confirmTransfer": "Confirm Transfer"
 }

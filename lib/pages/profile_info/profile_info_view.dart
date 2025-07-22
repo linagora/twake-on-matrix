@@ -10,11 +10,14 @@ class ProfileInfoView extends StatelessWidget {
     this.controller, {
     super.key,
     this.onUpdatedMembers,
+    this.onTransferOwnershipSuccess,
   });
 
   final ProfileInfoPageState controller;
 
   final VoidCallback? onUpdatedMembers;
+
+  final VoidCallback? onTransferOwnershipSuccess;
 
   @override
   Widget build(BuildContext context) {
@@ -38,6 +41,7 @@ class ProfileInfoView extends StatelessWidget {
         user: controller.user,
         onNewChatOpen: controller.widget.onNewChatOpen,
         onUpdatedMembers: onUpdatedMembers,
+        onTransferOwnershipSuccess: onTransferOwnershipSuccess,
       ),
     );
   }
