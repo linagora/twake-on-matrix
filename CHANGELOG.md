@@ -1,3 +1,7 @@
+## [2.10.3+2330] - 2025-07-22
+### Added
+- Add unban user functionality with interactor and UI integration
+
 ## [2.10.2+2330] - 2025-07-21
 ### Fixed
 - Enable forced syn contacts
