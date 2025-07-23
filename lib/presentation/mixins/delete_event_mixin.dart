@@ -18,7 +18,7 @@ mixin DeleteEventMixin {
     final confirmResult = await showConfirmAlertDialog(
       context: context,
       title: L10n.of(context)!.deleteMessageConfirmationTitle,
-      okLabel: L10n.of(context)!.deleteMessage,
+      okLabel: L10n.of(context)!.delete,
       cancelLabel: L10n.of(context)!.cancel,
       showCloseButton: PlatformInfos.isWeb,
     );
