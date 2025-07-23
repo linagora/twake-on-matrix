@@ -1,3 +1,4 @@
+import 'package:byte_converter/byte_converter.dart';
 import 'package:dartz/dartz.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:fluffychat/app_state/failure.dart';
@@ -6,7 +7,6 @@ import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/domain/model/extensions/platform_file/platform_file_extension.dart';
 import 'package:fluffychat/presentation/extensions/value_notifier_custom.dart';
 import 'package:fluffychat/presentation/model/pick_avatar_state.dart';
-import 'package:fluffychat/utils/matrix_sdk_extensions/int_extension.dart';
 import 'package:fluffychat/utils/twake_snackbar.dart';
 import 'package:flutter/material.dart';
 import 'package:matrix/matrix.dart';
@@ -20,9 +20,7 @@ mixin PickAvatarMixin {
 
   void handlePickAvatarOnWeb(FilePickerResult filePickerResult) {
     final matrixFile = filePickerResult.files.single.toMatrixFileOnWeb();
-    Logs().d(
-      'PickAvatarMixin::handlePickAvatarOnWeb(): AvatarWebNotifier - ${matrixFile.size}',
-    );
+
     if (matrixFile.size > AppConfig.defaultMaxUploadAvtarSizeInBytes) {
       pickAvatarUIState.value = const Left<Failure, Success>(
         GetAvatarBigSizeUIStateFailure(),
@@ -61,7 +59,8 @@ mixin PickAvatarMixin {
             TwakeSnackBar.show(
               context,
               L10n.of(context)!.fileTooBig(
-                AppConfig.defaultMaxUploadAvtarSizeInBytes.bytesToMBInt(),
+                AppConfig.defaultMaxUploadAvtarSizeInBytes.bytes.megaBytes
+                    .toInt(),
               ),
             );
           }

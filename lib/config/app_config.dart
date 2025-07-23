@@ -156,7 +156,7 @@ abstract class AppConfig {
 
   static String? issueId;
 
-  static int defaultMaxUploadAvtarSizeInBytes = 10 * (1024 * 1024);
+  static int defaultMaxUploadAvtarSizeInBytes = 10000000;
 
   static bool devMode = false;
 

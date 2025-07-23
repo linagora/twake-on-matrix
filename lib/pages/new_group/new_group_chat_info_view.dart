@@ -1,3 +1,4 @@
+import 'package:byte_converter/byte_converter.dart';
 import 'package:dartz/dartz.dart';
 import 'package:fluffychat/app_state/failure.dart';
 import 'package:fluffychat/app_state/success.dart';
@@ -7,7 +8,6 @@ import 'package:fluffychat/pages/new_group/new_group_chat_info_style.dart';
 import 'package:fluffychat/pages/new_group/new_group_info_controller.dart';
 import 'package:fluffychat/pages/new_group/widget/expansion_participants_list.dart';
 import 'package:fluffychat/presentation/model/pick_avatar_state.dart';
-import 'package:fluffychat/utils/matrix_sdk_extensions/int_extension.dart';
 import 'package:fluffychat/widgets/context_menu_builder_ios_paste_without_permission.dart';
 import 'package:fluffychat/widgets/stream_image_view.dart';
 import 'package:fluffychat/widgets/twake_components/twake_fab.dart';
@@ -53,8 +53,9 @@ class NewGroupChatInfoView extends StatelessWidget {
                     ),
                     Text(
                       L10n.of(context)!.maxImageSize(
-                        AppConfig.defaultMaxUploadAvtarSizeInBytes
-                            .bytesToMBInt(),
+                        AppConfig
+                            .defaultMaxUploadAvtarSizeInBytes.bytes.megaBytes
+                            .toInt(),
                       ),
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
                             color: LinagoraRefColors.material().neutral[40],
