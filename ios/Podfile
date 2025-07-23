@@ -36,6 +36,10 @@ target 'Runner' do
   target 'TwakeShareExtension' do
     inherit! :search_paths
   end
+
+  target 'RunnerUITests' do
+    inherit! :complete
+  end
 end
 
 post_install do |installer|
