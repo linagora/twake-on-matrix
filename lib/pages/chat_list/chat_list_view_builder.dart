@@ -30,21 +30,17 @@ class ChatListViewBuilder extends StatelessWidget {
           valueListenable: controller.selectModeNotifier,
           builder: (context, selectMode, _) {
             final slidables = controller.getSlidables(context, rooms[index]);
-            if (ChatListViewStyle.responsiveUtils.isMobileOrTablet(context) &&
-                !selectMode.isSelectMode &&
-                slidables.isNotEmpty) {
-              return SlidableChatListItem(
-                controller: controller,
-                slidables: slidables,
-                chatListItem: CommonChatListItem(
-                  controller: controller,
-                  room: rooms[index],
-                ),
-              );
-            }
-            return CommonChatListItem(
+            return SlidableChatListItem(
               controller: controller,
-              room: rooms[index],
+              slidables: slidables,
+              enabled:
+                  ChatListViewStyle.responsiveUtils.isMobileOrTablet(context) &&
+                      !selectMode.isSelectMode &&
+                      slidables.isNotEmpty,
+              chatListItem: CommonChatListItem(
+                controller: controller,
+                room: rooms[index],
+              ),
             );
           },
         );
