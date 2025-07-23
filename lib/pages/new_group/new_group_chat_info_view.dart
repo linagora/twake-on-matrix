@@ -1,3 +1,4 @@
+import 'package:byte_converter/byte_converter.dart';
 import 'package:dartz/dartz.dart';
 import 'package:fluffychat/app_state/failure.dart';
 import 'package:fluffychat/app_state/success.dart';
@@ -52,7 +53,9 @@ class NewGroupChatInfoView extends StatelessWidget {
                     ),
                     Text(
                       L10n.of(context)!.maxImageSize(
-                        AppConfig.defaultMaxUploadAvtarSizeInBytes.toInt(),
+                        AppConfig
+                            .defaultMaxUploadAvtarSizeInBytes.bytes.megaBytes
+                            .toInt(),
                       ),
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
                             color: LinagoraRefColors.material().neutral[40],

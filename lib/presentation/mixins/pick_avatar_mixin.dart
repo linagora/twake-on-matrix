@@ -21,8 +21,7 @@ mixin PickAvatarMixin {
   void handlePickAvatarOnWeb(FilePickerResult filePickerResult) {
     final matrixFile = filePickerResult.files.single.toMatrixFileOnWeb();
 
-    if (matrixFile.size.bytes.megaBytes >
-        AppConfig.defaultMaxUploadAvtarSizeInBytes) {
+    if (matrixFile.size > AppConfig.defaultMaxUploadAvtarSizeInBytes) {
       pickAvatarUIState.value = const Left<Failure, Success>(
         GetAvatarBigSizeUIStateFailure(),
       );
@@ -60,7 +59,8 @@ mixin PickAvatarMixin {
             TwakeSnackBar.show(
               context,
               L10n.of(context)!.fileTooBig(
-                AppConfig.defaultMaxUploadAvtarSizeInBytes.toInt(),
+                AppConfig.defaultMaxUploadAvtarSizeInBytes.bytes.megaBytes
+                    .toInt(),
               ),
             );
           }
