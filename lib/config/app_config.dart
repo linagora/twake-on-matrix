@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:byte_converter/byte_converter.dart';
 import 'package:fluffychat/config/config_saas/config_saas.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/utils/responsive/responsive_utils.dart';
@@ -156,7 +157,7 @@ abstract class AppConfig {
 
   static String? issueId;
 
-  static int defaultMaxUploadAvtarSizeInBytes = 10 * (1024 * 1024);
+  static double defaultMaxUploadAvtarSizeInBytes = 10.megaBytes.megaBytes;
 
   static bool devMode = false;
 
@@ -279,7 +280,9 @@ abstract class AppConfig {
     }
     if (json['default_max_upload_avatar_size_in_bytes'] is int) {
       defaultMaxUploadAvtarSizeInBytes =
-          json['default_max_upload_avatar_size_in_bytes'];
+          (json['default_max_upload_avatar_size_in_bytes'] as int)
+              .kiloBytes
+              .megaBytes;
     }
     if (json['dev_mode'] is bool) {
       devMode = json['dev_mode'];
