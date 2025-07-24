@@ -10,6 +10,7 @@ import 'package:fluffychat/presentation/mixins/init_config_mixin.dart';
 import 'package:fluffychat/presentation/model/client_login_state_event.dart';
 import 'package:fluffychat/widgets/layouts/agruments/logout_body_args.dart';
 import 'package:flutter_emoji_mart/flutter_emoji_mart.dart';
+import 'package:linagora_design_flutter/cozy_config_manager/cozy_config_manager.dart';
 import 'package:universal_html/html.dart' as html hide File;
 
 import 'package:adaptive_dialog/adaptive_dialog.dart';
@@ -377,8 +378,17 @@ class MatrixState extends State<Matrix>
     onUiaRequest[name] ??=
         currentClient.onUiaRequest.stream.listen(uiaRequestHandler);
     if (PlatformInfos.isWeb || PlatformInfos.isLinux) {
-      currentClient.onSync.stream.first.then((s) {
-        html.Notification.requestPermission();
+      currentClient.onSync.stream.first.then((s) async {
+        try {
+          final isInsideCozy = await CozyConfigManager().isInsideCozy;
+          if (isInsideCozy) {
+            CozyConfigManager().requestNotificationPermission();
+          } else {
+            html.Notification.requestPermission();
+          }
+        } catch (e) {
+          html.Notification.requestPermission();
+        }
         onNotification[name] ??= currentClient.onEvent.stream
             .where(
               (e) =>

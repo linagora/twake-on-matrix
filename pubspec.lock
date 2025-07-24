@@ -1770,8 +1770,8 @@ packages:
     dependency: "direct main"
     description:
       path: "."
-      ref: master
-      resolved-ref: "15f87b642969b711f3b1a47c0b317ce714e1d63a"
+      ref: "feature/support-cozy-notification"
+      resolved-ref: cc3bb0e9e9e1c642deeb3cff7f25ab069312bbb1
       url: "git@github.com:linagora/linagora-design-flutter.git"
     source: git
     version: "0.0.1"
