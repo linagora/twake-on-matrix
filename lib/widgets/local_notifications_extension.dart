@@ -8,6 +8,7 @@ import 'package:desktop_notifications/desktop_notifications.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:go_router/go_router.dart';
 import 'package:http/http.dart' as http;
+import 'package:linagora_design_flutter/cozy_config_manager/cozy_config_manager.dart';
 import 'package:matrix/matrix.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:universal_html/html.dart' as html;
@@ -65,7 +66,12 @@ extension LocalNotificationsExtension on MatrixState {
           method: ThumbnailMethod.crop,
         );
     if (kIsWeb) {
+      final isInsideCozy = await CozyConfigManager().isInsideCozy;
       _audioPlayer.play();
+      if (isInsideCozy) {
+        CozyConfigManager().sendNotification(title, body);
+        return;
+      }
       js.context.callMethod("handleNotifications", [
         title,
         body,
