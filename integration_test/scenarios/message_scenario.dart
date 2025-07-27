@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:developer';
 import 'package:fluffychat/pages/chat/chat_input_row_send_btn.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -41,9 +42,9 @@ class MessageScenario extends BaseScenario {
         event['content']?['body']?.toString().toLowerCase() == 'hay nhi');
 
     if (containsHayNhi) {
-      print('✅ Message "Hay nhi" is found!');
+      log('✅ Message "Hay nhi" is found!');
     } else {
-      print('❌ Message "Hay nhi" not found.');
+      log('❌ Message "Hay nhi" not found.');
     }
   }
 
