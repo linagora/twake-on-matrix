@@ -1,6 +1,5 @@
 import 'package:fluffychat/pages/chat_list/chat_list.dart';
 import 'package:fluffychat/pages/homeserver_picker/homeserver_picker_view.dart';
-import 'package:fluffychat/pages/twake_welcome/twake_welcome.dart';
 import 'package:flutter_test/flutter_test.dart';
 import '../base/base_scenario.dart';
 import '../robots/chat_list_robot.dart';
@@ -23,17 +22,16 @@ class LoginScenario extends BaseScenario {
   @override
   Future<void> execute() async {
     final loginRobot = LoginRobot($);
-    await $.waitUntilVisible($(TwakeWelcome));
-    await loginRobot.tapOnUseYourCompanyServer();
-    await _handleWaitUntilVisibleHomeServerPickerView(loginRobot);
-    await loginRobot.enterServerUrl(serverUrl);
-    await loginRobot.confirmServerUrl();
-    await loginRobot.confirmShareInformation();
-    await loginRobot.grantNotificationPermission();
-    final chatListRobot = ChatListRobot($);
-    final alreadyLoggedIn = await chatListRobot.isVisible();
-    if (!alreadyLoggedIn) {
-    await loginRobot.enterWebCredentialsWhenVisible(username: username, password: password,);
+    if(await loginRobot.isWelComePageVisible()){
+      await loginRobot.tapOnUseYourCompanyServer();
+      await _handleWaitUntilVisibleHomeServerPickerView(loginRobot);
+      await loginRobot.enterServerUrl(serverUrl);
+      await loginRobot.confirmServerUrl();
+      await loginRobot.confirmShareInformation();
+      await loginRobot.grantNotificationPermission();
+    }
+    if (!await ChatListRobot($).isVisible()) {
+      await loginRobot.enterWebCredentialsWhenVisible(username: username, password: password,);
     }
     await loginRobot.grantNotificationPermission();
     await expectViewVisible($(ChatList));
