@@ -353,13 +353,8 @@ Future<String> getAllSentMessage(HttpClient client, String accessToken) async {
         'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36')
     ..set('Sec-Fetch-Dest', 'empty');
 
-  // 👇 Send request
   final response = await request.close();
-
-  // 👇 Print response
-  print('Status: ${response.statusCode}');
   final body = await response.transform(const Utf8Decoder()).join();
-  print('Body: $body');
   return body;
 }
 
