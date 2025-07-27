@@ -1,9 +1,7 @@
-import 'dart:developer';
 import 'dart:convert';
 import 'dart:io';
 import 'package:html/parser.dart';
 import 'package:patrol/patrol.dart';
-import 'package:http/http.dart' as http;
 
 abstract class CoreRobot {
   final PatrolIntegrationTester $;
@@ -70,16 +68,16 @@ Future<List<dynamic>> loginByAPI(HttpClient client) async {
     ..set(HttpHeaders.acceptLanguageHeader, 'en-US,en;q=0.9,vi;q=0.8')
     ..set(
         HttpHeaders.acceptHeader,
-        'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7')
+        'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',)
     ..set('sec-ch-ua',
-        '"Not)A;Brand";v="8", "Chromium";v="138", "Google Chrome";v="138"')
+        '"Not)A;Brand";v="8", "Chromium";v="138", "Google Chrome";v="138"',)
     ..set('sec-ch-ua-mobile', '?0')
     ..set('sec-ch-ua-platform', '"macOS"')
     ..set(HttpHeaders.hostHeader, 'matrix.linagora.com')
     ..set('Upgrade-Insecure-Requests', '1')
     ..set(HttpHeaders.acceptEncodingHeader, 'gzip, deflate, br, zstd')
     ..set(HttpHeaders.userAgentHeader,
-        'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36')
+        'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36',)
     ..set('Sec-Fetch-Dest', 'document');
 
   final firstResponse = await request.close();
@@ -134,16 +132,16 @@ Future<List<dynamic>> loginByAPI(HttpClient client) async {
     ..set(HttpHeaders.acceptLanguageHeader, 'en-US,en;q=0.9,vi;q=0.8')
     ..set(
         HttpHeaders.acceptHeader,
-        'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7')
+        'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',)
     ..set('sec-ch-ua',
-        '"Not)A;Brand";v="8", "Chromium";v="138", "Google Chrome";v="138"')
+        '"Not)A;Brand";v="8", "Chromium";v="138", "Google Chrome";v="138"',)
     ..set('sec-ch-ua-mobile', '?0')
     ..set('sec-ch-ua-platform', '"macOS"')
     ..set(HttpHeaders.hostHeader, 'matrix.linagora.com')
     ..set('Upgrade-Insecure-Requests', '1')
     ..set(HttpHeaders.acceptEncodingHeader, 'gzip, deflate, br, zstd')
     ..set(HttpHeaders.userAgentHeader,
-        'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36')
+        'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36',)
     ..set('Sec-Fetch-Dest', 'document');
 
   final secondResponse = await secondRequest.close();
@@ -194,9 +192,9 @@ Future<List<dynamic>> loginByAPI(HttpClient client) async {
     ..set('Origin', 'https://sso.linagora.com')
     ..set('Sec-Fetch-User', '?1')
     ..set(HttpHeaders.acceptHeader,
-        'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7')
+        'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',)
     ..set('sec-ch-ua',
-        '"Not)A;Brand";v="8", "Chromium";v="138", "Google Chrome";v="138"')
+        '"Not)A;Brand";v="8", "Chromium";v="138", "Google Chrome";v="138"',)
     ..set('sec-ch-ua-mobile', '?0')
     ..set('sec-ch-ua-platform', '"macOS"')
     ..set('Upgrade-Insecure-Requests', '1')
@@ -204,7 +202,7 @@ Future<List<dynamic>> loginByAPI(HttpClient client) async {
     ..set(HttpHeaders.cacheControlHeader, 'max-age=0')
     ..set(HttpHeaders.acceptEncodingHeader, 'gzip, deflate, br, zstd')
     ..set(HttpHeaders.userAgentHeader,
-        'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36')
+        'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36',)
     ..set('Sec-Fetch-Dest', 'document');
 
   final thirdBody = {
@@ -213,7 +211,7 @@ Future<List<dynamic>> loginByAPI(HttpClient client) async {
     'skin': 'twake',
     'token': token,
     'user': 'thhoang@linagora.com',
-    'password': 'lynic123'
+    'password': 'lynic123',
   };
   thirdRequest.write(Uri(queryParameters: thirdBody).query);
 
@@ -247,9 +245,9 @@ Future<List<dynamic>> loginByAPI(HttpClient client) async {
 
   fourthRequest.headers
   ..set(HttpHeaders.userAgentHeader,
-      'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36')
+      'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36',)
   ..set(HttpHeaders.acceptHeader,
-      'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7')
+      'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',)
   ..set(HttpHeaders.acceptLanguageHeader, 'en-US,en;q=0.9,vi;q=0.8')
   ..set(HttpHeaders.refererHeader, 'https://sso.linagora.com/')
   ..set(HttpHeaders.cacheControlHeader, 'max-age=0')
@@ -259,12 +257,12 @@ Future<List<dynamic>> loginByAPI(HttpClient client) async {
   ..set('Sec-Fetch-User', '?1')
   ..set('Sec-Fetch-Dest', 'document')
   ..set('sec-ch-ua',
-      '"Not)A;Brand";v="8", "Chromium";v="138", "Google Chrome";v="138"')
+      '"Not)A;Brand";v="8", "Chromium";v="138", "Google Chrome";v="138"',)
   ..set('sec-ch-ua-mobile', '?0')
   ..set('sec-ch-ua-platform', '"macOS"')
   ..set('Upgrade-Insecure-Requests', '1')
   ..set(HttpHeaders.cookieHeader,
-      'oidc_session=$oidcSession; oidc_session_no_samesite=$oidcSession; lemonldap=$lemonldap');
+      'oidc_session=$oidcSession; oidc_session_no_samesite=$oidcSession; lemonldap=$lemonldap',);
 
   final fourthResponse = await fourthRequest.close();
 
@@ -292,22 +290,22 @@ Future<List<dynamic>> loginByAPI(HttpClient client) async {
   ..set('Origin', 'https://chat.linagora.com')
   ..set(HttpHeaders.acceptHeader, '*/*')
   ..set('sec-ch-ua',
-      '"Not)A;Brand";v="8", "Chromium";v="138", "Google Chrome";v="138"')
+      '"Not)A;Brand";v="8", "Chromium";v="138", "Google Chrome";v="138"',)
   ..set('sec-ch-ua-mobile', '?0')
   ..set('sec-ch-ua-platform', '"macOS"')
   ..set(HttpHeaders.contentTypeHeader, 'application/json')
   ..set(HttpHeaders.acceptEncodingHeader, 'gzip, deflate, br, zstd')
   ..set(HttpHeaders.userAgentHeader,
-      'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36')
+      'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36',)
   ..set('Sec-Fetch-Dest', 'empty')
   ..set(HttpHeaders.cookieHeader,
-      'lemonldap=$lemonldap');
+      'lemonldap=$lemonldap',);
 
   fifthRequest.write(jsonEncode({
     "initial_device_display_name": "chat.linagora.com: Chrome on Web",
     "token": loginToken,
     "type": "m.login.token",
-  }));
+  }),);
 
   final fifthResponse = await fifthRequest.close();
   final fifthBody = await fifthResponse.transform(utf8.decoder).join();
@@ -342,15 +340,15 @@ Future<String> getAllSentMessage(HttpClient client, String accessToken) async {
     ..set('Origin', 'https://chat.linagora.com')
     ..set(HttpHeaders.acceptHeader, '*/*')
     ..set(HttpHeaders.authorizationHeader,
-        'Bearer $accessToken')
+        'Bearer $accessToken',)
     ..set('sec-ch-ua',
-        '"Not)A;Brand";v="8", "Chromium";v="138", "Google Chrome";v="138"')
+        '"Not)A;Brand";v="8", "Chromium";v="138", "Google Chrome";v="138"',)
     ..set('sec-ch-ua-mobile', '?0')
     ..set('sec-ch-ua-platform', '"macOS"')
     ..set(HttpHeaders.hostHeader, 'matrix.linagora.com')
     ..set(HttpHeaders.acceptEncodingHeader, 'gzip, deflate, br, zstd')
     ..set(HttpHeaders.userAgentHeader,
-        'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36')
+        'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36',)
     ..set('Sec-Fetch-Dest', 'empty');
 
   final response = await request.close();
@@ -375,22 +373,22 @@ final sixthUri = Uri.https(
     ..set(HttpHeaders.acceptHeader, '*/*')
     ..set(HttpHeaders.authorizationHeader, 'Bearer $accessToken')
     ..set('sec-ch-ua',
-        '"Not)A;Brand";v="8", "Chromium";v="138", "Google Chrome";v="138"')
+        '"Not)A;Brand";v="8", "Chromium";v="138", "Google Chrome";v="138"',)
     ..set('sec-ch-ua-mobile', '?0')
     ..set('sec-ch-ua-platform', '"macOS"')
     ..set(HttpHeaders.contentTypeHeader, 'application/json')
     ..set(HttpHeaders.acceptEncodingHeader, 'gzip, deflate, br, zstd')
     ..set(HttpHeaders.userAgentHeader,
-        'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36')
+        'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36',)
     ..set('Sec-Fetch-Dest', 'empty')
     ..set(HttpHeaders.cookieHeader,
-      'lemonldap=$lemonldap');
+      'lemonldap=$lemonldap',);
 
 
   sixthRequest.write(jsonEncode({
     'msgtype': 'm.text',
-    'body': message
-  }));
+    'body': message,
+  }),);
 
   await sixthRequest.close();
 }

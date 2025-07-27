@@ -39,7 +39,7 @@ class MessageScenario extends BaseScenario {
 
     final containsHayNhi = events.any((event) =>
         event['type'] == 'm.room.message' &&
-        event['content']?['body']?.toString().toLowerCase() == 'hay nhi');
+        event['content']?['body']?.toString().toLowerCase() == 'hay nhi',);
 
     if (containsHayNhi) {
       log('✅ Message "Hay nhi" is found!');
