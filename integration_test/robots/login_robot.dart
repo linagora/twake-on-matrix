@@ -1,10 +1,20 @@
 import 'package:fluffychat/pages/homeserver_picker/homeserver_picker_view.dart';
+import 'package:fluffychat/pages/twake_welcome/twake_welcome.dart';
 import 'package:patrol/patrol.dart';
-
 import '../base/core_robot.dart';
 
 class LoginRobot extends CoreRobot {
   LoginRobot(super.$);
+
+  Future<bool> isWelComePageVisible() async {
+    final welcomePage = $(TwakeWelcome);
+    try {
+      await welcomePage.waitUntilVisible(timeout: const Duration(seconds: 5));
+      return true;
+    } catch (_) {
+      return false;
+    }
+  }
 
   Future<void> tapOnUseYourCompanyServer() async {
     await $('Use your company server').tap();
