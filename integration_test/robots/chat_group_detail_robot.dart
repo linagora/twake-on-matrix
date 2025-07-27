@@ -1,5 +1,4 @@
 import 'package:fluffychat/pages/chat/chat_event_list.dart';
-import 'package:flutter/widgets.dart';
 import 'package:linkfy_text/linkfy_text.dart';
 import 'package:patrol/patrol.dart';
 
