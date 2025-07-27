@@ -20,9 +20,10 @@ void main() {
         final messageOfReceiver = "receiver sent at ${now.year}${now.month}${now.day}${now.hour}${now.minute}";
         await MessageScenario($).sendAMesage(messageOfSender);
 
-        // // check message is sent
-        // await MessageScenario($).verifyMessageIsSentByAPI(message);
-        // receiver read message
+        // check message is sent
+        await MessageScenario($).verifyMessageIsShown(messageOfSender);
+        //// receiver read message
+        //
         //// check sender see message is read
         //...
         // send message by API
