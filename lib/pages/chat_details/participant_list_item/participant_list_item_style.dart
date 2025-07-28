@@ -1,6 +1,10 @@
+import 'package:fluffychat/di/global/get_it_initializer.dart';
+import 'package:fluffychat/utils/responsive/responsive_utils.dart';
 import 'package:flutter/widgets.dart';
 
 class ParticipantListItemStyle {
+  static final ResponsiveUtils responsiveUtils = getIt.get<ResponsiveUtils>();
+
   // Bottom Sheet
   static const Radius bottomSheetTopRadius = Radius.circular(16);
   static const Radius bottomSheetContentTopRadius = Radius.circular(16);

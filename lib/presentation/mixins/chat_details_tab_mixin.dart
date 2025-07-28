@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'dart:math';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
+import 'package:fluffychat/domain/app_state/room/ban_user_state.dart';
+import 'package:fluffychat/domain/usecase/room/ban_user_interactor.dart';
 import 'package:fluffychat/pages/chat_details/assign_roles_member_picker/selected_user_notifier.dart';
 import 'package:fluffychat/pages/chat_details/chat_details_page_view/chat_details_members_page.dart';
 import 'package:fluffychat/pages/chat_details/chat_details_page_view/chat_details_page_enum.dart';
@@ -16,6 +18,7 @@ import 'package:fluffychat/presentation/mixins/handle_video_download_mixin.dart'
 import 'package:fluffychat/presentation/mixins/play_video_action_mixin.dart';
 import 'package:fluffychat/presentation/model/chat_details/chat_details_page_model.dart';
 import 'package:fluffychat/presentation/same_type_events_builder/same_type_events_controller.dart';
+import 'package:fluffychat/utils/dialog/twake_dialog.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/utils/responsive/responsive_utils.dart';
@@ -37,6 +40,10 @@ mixin ChatDetailsTabMixin<T extends StatefulWidget>
   final GlobalKey<NestedScrollViewState> nestedScrollViewState = GlobalKey();
 
   final responsive = getIt.get<ResponsiveUtils>();
+
+  final banUserInteractor = getIt.get<BanUserInteractor>();
+
+  StreamSubscription? _banUserSubscription;
 
   final ValueNotifier<List<User>?> _membersNotifier = ValueNotifier(null);
 
@@ -289,6 +296,7 @@ mixin ChatDetailsTabMixin<T extends StatefulWidget>
                 onUpdatedMembers: () async => await onUpdateMembers(),
                 selectedUsersMapChangeNotifier: removeUsersChangeNotifier,
                 onSelectMember: _onSelectMember,
+                onRemoveMember: _handleOnRemoveMember,
               ),
             );
           }
@@ -345,6 +353,44 @@ mixin ChatDetailsTabMixin<T extends StatefulWidget>
     removeUsersChangeNotifier.onUserTileTap(context, user);
   }
 
+  void _handleOnRemoveMember(User user) {
+    _banUserSubscription =
+        banUserInteractor.execute(user: user).listen((result) {
+      result.fold(
+        (failure) {
+          if (failure is BanUserFailure) {
+            TwakeDialog.hideLoadingDialog(context);
+            TwakeSnackBar.show(
+              context,
+              failure.exception.toString(),
+            );
+            return;
+          }
+
+          if (failure is NoPermissionForBanFailure) {
+            TwakeDialog.hideLoadingDialog(context);
+            TwakeSnackBar.show(
+              context,
+              L10n.of(context)!.permissionErrorBanUser,
+            );
+            return;
+          }
+        },
+        (success) async {
+          if (success is BanUserLoading) {
+            TwakeDialog.showLoadingDialog(context);
+            return;
+          }
+
+          if (success is BanUserSuccess) {
+            TwakeDialog.hideLoadingDialog(context);
+            return;
+          }
+        },
+      );
+    });
+  }
+
   @override
   void initState() {
     super.initState();
@@ -376,6 +422,7 @@ mixin ChatDetailsTabMixin<T extends StatefulWidget>
     _filesListController?.dispose();
     _onRoomEventChangedSubscription?.cancel();
     removeUsersChangeNotifier.dispose();
+    _banUserSubscription?.cancel();
     super.dispose();
   }
 }

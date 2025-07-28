@@ -13,6 +13,7 @@ class ChatDetailsMembersPage extends StatelessWidget {
   final SelectedUsersMapChangeNotifier selectedUsersMapChangeNotifier;
   final bool isMobileAndTablet;
   final void Function(User member)? onSelectMember;
+  final void Function(User member)? onRemoveMember;
 
   const ChatDetailsMembersPage({
     super.key,
@@ -24,6 +25,7 @@ class ChatDetailsMembersPage extends StatelessWidget {
     required this.selectedUsersMapChangeNotifier,
     this.onUpdatedMembers,
     this.onSelectMember,
+    this.onRemoveMember,
   });
 
   @override
@@ -50,6 +52,7 @@ class ChatDetailsMembersPage extends StatelessWidget {
                           selectionMode: selectedUsersMapChangeNotifier
                               .getSelectionModeForUser(members[index]),
                           onSelectMember: onSelectMember,
+                          onRemoveMember: onRemoveMember,
                         );
                       },
                     );
