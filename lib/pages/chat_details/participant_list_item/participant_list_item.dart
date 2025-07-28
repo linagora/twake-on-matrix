@@ -1,6 +1,8 @@
 import 'package:fluffychat/config/default_power_level_member.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/domain/enums/selection_mode_enum.dart';
+import 'package:fluffychat/domain/model/room/room_extension.dart';
+import 'package:fluffychat/pages/chat_details/participant_list_item/participant_list_item_style.dart';
 import 'package:fluffychat/pages/chat_list/chat_custom_slidable_action.dart';
 import 'package:fluffychat/pages/profile_info/profile_info_page.dart';
 import 'package:fluffychat/utils/dialog/twake_dialog.dart';
@@ -17,13 +19,14 @@ import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:matrix/matrix.dart';
 
-class ParticipantListItem extends StatelessWidget {
+class ParticipantListItem extends StatefulWidget {
   final User member;
 
   final VoidCallback? onUpdatedMembers;
   final SelectionModeEnum selectionMode;
   final void Function(User member)? onSelectMember;
   final bool isMembersSelecting;
+  final void Function(User member)? onRemoveMember;
 
   const ParticipantListItem(
     this.member, {
@@ -32,76 +35,148 @@ class ParticipantListItem extends StatelessWidget {
     this.selectionMode = SelectionModeEnum.unavailable,
     this.onSelectMember,
     this.isMembersSelecting = false,
+    this.onRemoveMember,
   });
+
+  @override
+  State<ParticipantListItem> createState() => _ParticipantListItemState();
+}
+
+class _ParticipantListItemState extends State<ParticipantListItem> {
+  final ValueNotifier<bool> isHoverParticipantItemNotifier =
+      ValueNotifier(false);
+
+  @override
+  void dispose() {
+    isHoverParticipantItemNotifier.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     final child = TwakeInkWell(
       onTap: () async => await _onItemTap(context),
-      onLongPress: () => onSelectMember?.call(member),
+      onLongPress: () => widget.onSelectMember?.call(widget.member),
+      onHover: (hover) {
+        if (widget.member.room.canBanMemberInRoom(widget.member) &&
+            !ParticipantListItemStyle.responsiveUtils.isMobile(context)) {
+          isHoverParticipantItemNotifier.value = hover;
+        }
+      },
       child: TwakeListItem(
         height: 72,
         padding: const EdgeInsets.all(8),
         child: Row(
           children: [
             _ParticipantSelectionToggleButton(
-              selectionMode: selectionMode,
-              onTap: () => onSelectMember?.call(member),
+              selectionMode: widget.selectionMode,
+              onTap: () => widget.onSelectMember?.call(widget.member),
             ),
             Opacity(
-              opacity: member.membership == Membership.join ? 1 : 0.5,
+              opacity: widget.member.membership == Membership.join ? 1 : 0.5,
               child: Avatar(
-                mxContent: member.avatarUrl,
-                name: member.calcDisplayname(),
+                mxContent: widget.member.avatarUrl,
+                name: widget.member.calcDisplayname(),
               ),
             ),
             const SizedBox(width: 8.0),
             Expanded(
               child: Opacity(
-                opacity: member.membership == Membership.join ? 1 : 0.5,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.center,
+                opacity: widget.member.membership == Membership.join ? 1 : 0.5,
+                child: Row(
                   children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: <Widget>[
-                        Flexible(
-                          child: Text(
-                            member.calcDisplayname(),
-                            overflow: TextOverflow.ellipsis,
-                            maxLines: 1,
-                            style: LinagoraTextStyle.material()
-                                .bodyMedium2
-                                .copyWith(
-                                  color: LinagoraSysColors.material().onSurface,
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: <Widget>[
+                              Flexible(
+                                child: Text(
+                                  widget.member.calcDisplayname(),
+                                  overflow: TextOverflow.ellipsis,
+                                  maxLines: 1,
+                                  style: LinagoraTextStyle.material()
+                                      .bodyMedium2
+                                      .copyWith(
+                                        color: LinagoraSysColors.material()
+                                            .onSurface,
+                                      ),
                                 ),
+                              ),
+                              if (widget.member.getDefaultPowerLevelMember
+                                      .powerLevel >=
+                                  DefaultPowerLevelMember.owner.powerLevel) ...[
+                                Padding(
+                                  padding: const EdgeInsets.only(right: 16),
+                                  child: Text(
+                                    widget.member.getDefaultPowerLevelMember
+                                        .displayName(context),
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .labelMedium
+                                        ?.copyWith(
+                                          color: LinagoraRefColors.material()
+                                              .tertiary[30],
+                                        ),
+                                  ),
+                                ),
+                              ],
+                            ],
                           ),
-                        ),
-                        if (member.getDefaultPowerLevelMember.powerLevel >=
-                            DefaultPowerLevelMember.owner.powerLevel) ...[
+                          const SizedBox(height: 4.0),
                           Text(
-                            member.getDefaultPowerLevelMember
-                                .displayName(context),
+                            widget.member.id,
                             style: Theme.of(context)
                                 .textTheme
-                                .labelMedium
+                                .bodyMedium
                                 ?.copyWith(
                                   color:
                                       LinagoraRefColors.material().tertiary[30],
                                 ),
+                            overflow: TextOverflow.ellipsis,
+                            maxLines: 1,
                           ),
                         ],
-                      ],
+                      ),
                     ),
-                    const SizedBox(height: 4.0),
-                    Text(
-                      member.id,
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            color: LinagoraRefColors.material().tertiary[30],
+                    ValueListenableBuilder(
+                      valueListenable: isHoverParticipantItemNotifier,
+                      builder: (context, isHover, _) {
+                        if (!isHover) {
+                          return const SizedBox.shrink();
+                        }
+                        return Padding(
+                          padding: const EdgeInsets.only(right: 20),
+                          child: InkWell(
+                            splashColor:
+                                LinagoraHoverStyle.material().hoverColor,
+                            borderRadius: const BorderRadius.all(
+                              Radius.circular(32),
+                            ),
+                            onTap: () {
+                              widget.onRemoveMember?.call(widget.member);
+                            },
+                            child: Container(
+                              decoration: const BoxDecoration(
+                                borderRadius: BorderRadius.all(
+                                  Radius.circular(32),
+                                ),
+                              ),
+                              width: 32,
+                              height: 32,
+                              child: Icon(
+                                Icons.delete_outlined,
+                                size: 18,
+                                color:
+                                    LinagoraRefColors.material().tertiary[30],
+                              ),
+                            ),
                           ),
-                      overflow: TextOverflow.ellipsis,
-                      maxLines: 1,
+                        );
+                      },
                     ),
                   ],
                 ),
@@ -112,11 +187,11 @@ class ParticipantListItem extends StatelessWidget {
       ),
     );
 
-    if (isMembersSelecting) return child;
+    if (widget.isMembersSelecting) return child;
 
     return _ParticipantSlidable(
       slideActions: [
-        _ParticipantBanAction(member, onDone: onUpdatedMembers),
+        _ParticipantBanAction(widget.member, onDone: widget.onUpdatedMembers),
       ],
       child: child,
     );
@@ -124,8 +199,8 @@ class ParticipantListItem extends StatelessWidget {
 
   Future _onItemTap(BuildContext context) async {
     if (PlatformInfos.isMobile &&
-        selectionMode != SelectionModeEnum.unavailable) {
-      onSelectMember?.call(member);
+        widget.selectionMode != SelectionModeEnum.unavailable) {
+      widget.onSelectMember?.call(widget.member);
       return;
     }
 
@@ -134,9 +209,9 @@ class ParticipantListItem extends StatelessWidget {
     if (responsive.isMobile(context)) {
       await _openDialogInvite(context);
     } else {
-      await member.openProfileView(
+      await widget.member.openProfileView(
         context: context,
-        onUpdatedMembers: onUpdatedMembers,
+        onUpdatedMembers: widget.onUpdatedMembers,
         onTransferOwnershipSuccess: () {
           Navigator.of(context).pop();
         },
@@ -149,9 +224,9 @@ class ParticipantListItem extends StatelessWidget {
       Navigator.of(context).push(
         CupertinoPageRoute(
           builder: (ctx) => ProfileInfoPage(
-            roomId: member.room.id,
-            userId: member.id,
-            onUpdatedMembers: onUpdatedMembers,
+            roomId: widget.member.room.id,
+            userId: widget.member.id,
+            onUpdatedMembers: widget.onUpdatedMembers,
             onTransferOwnershipSuccess: () {
               Navigator.of(ctx).pop();
             },
@@ -167,9 +242,9 @@ class ParticipantListItem extends StatelessWidget {
       useRootNavigator: !PlatformInfos.isMobile,
       builder: (dialogContext) {
         return ProfileInfoPage(
-          roomId: member.room.id,
-          userId: member.id,
-          onUpdatedMembers: onUpdatedMembers,
+          roomId: widget.member.room.id,
+          userId: widget.member.id,
+          onUpdatedMembers: widget.onUpdatedMembers,
           onNewChatOpen: () {
             Navigator.of(dialogContext).pop();
           },
