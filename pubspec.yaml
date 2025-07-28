@@ -240,6 +240,7 @@ dev_dependencies:
   translations_cleaner: ^0.0.5
   mockito: 5.4.4
   patrol:  3.13.1
+  html: ^0.15.4
 
 
 flutter_launcher_icons:

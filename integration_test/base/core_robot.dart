@@ -43,10 +43,6 @@ Future<HttpClient> initialRedirectRequest() async {
 }
 
 Future<List<dynamic>> loginByAPI(HttpClient client) async {
-  // // Step 1: Initial redirect request (NO REDIRECT FOLLOW)
-  // final client = HttpClient();
-  // client.autoUncompress = true;
-
   // Step 1: Prepare the first request (no redirect)
   final uri = Uri.https(
     'matrix.linagora.com',
