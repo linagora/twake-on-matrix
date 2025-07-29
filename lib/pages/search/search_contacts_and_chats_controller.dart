@@ -139,29 +139,11 @@ class SearchContactsAndChatsController
             .getSuccessOrNull<GetContactsSuccess>()
             ?.contacts ??
         [];
-    final addressBook = contactManger
-            .getAddressBookNotifier()
-            .value
-            .getSuccessOrNull<GetAddressBookSuccessState>()
-            ?.addressBooks ??
-        [];
+
     final tomPresentationSearchContacts = tomContacts
         .expand((contact) => contact.toPresentationContacts())
         .toList();
 
-    final addressBookPresentationSearchContacts = addressBook
-        .expand((contact) => contact.toPresentationContact())
-        .toList();
-
-    final addressBookPresentationSearchMatched =
-        addressBookPresentationSearchContacts
-            .expand((contact) => contact.toPresentationSearch())
-            .where((contact) {
-      final matrixId = (contact as ContactPresentationSearch).matrixId;
-      return matrixId != null &&
-          matrixId.isNotEmpty &&
-          contact.doesMatchKeyword(keyword);
-    }).toList();
     final tomContactPresentationSearchMatched = tomPresentationSearchContacts
         .expand((contact) => contact.toPresentationSearch())
         .where((contact) => contact.doesMatchKeyword(keyword))
@@ -169,7 +151,7 @@ class SearchContactsAndChatsController
 
     return combineDuplicateContactAndChat(
       recentChat: tomContactPresentationSearchMatched,
-      contacts: addressBookPresentationSearchMatched,
+      contacts: [],
     );
   }
 
