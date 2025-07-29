@@ -447,22 +447,25 @@ abstract class AppRoutes {
                   final extra = state.extra as ChatRouterInputArgument;
                   switch (extra.type) {
                     case ChatRouterInputArgumentType.draft:
-                      if (extra.data is String?) {
+                      if (_responsive.isMobile(context)) {
                         return CupertinoPage(
                           key: ValueKey(
-                            'DraftCupertinoPage_${state.pathParameters['roomid']!}_${DateTime.now().millisecondsSinceEpoch}_${extra.data}',
+                            'DraftCupertinoPage_${state.pathParameters['roomid']!}_${DateTime.now().millisecondsSinceEpoch}',
                           ),
                           name: '/rooms/room',
                           child: ChatAdaptiveScaffold(
                             roomId: state.pathParameters['roomid']!,
                             key: Key(
-                              'Draft_${state.pathParameters['roomid']!}_${DateTime.now().millisecondsSinceEpoch}_${extra.data}',
+                              'Draft_${state.pathParameters['roomid']!}_${DateTime.now().millisecondsSinceEpoch}',
                             ),
-                            roomName: extra.data as String?,
+                            roomName: extra.data is String
+                                ? extra.data as String?
+                                : null,
                           ),
                         );
                       }
-                      return CupertinoPage(
+
+                      return NoTransitionPage(
                         key: ValueKey(
                           'DraftCupertinoPage_${state.pathParameters['roomid']!}_${DateTime.now().millisecondsSinceEpoch}',
                         ),
@@ -472,10 +475,29 @@ abstract class AppRoutes {
                           key: Key(
                             'Draft_${state.pathParameters['roomid']!}_${DateTime.now().millisecondsSinceEpoch}',
                           ),
+                          roomName: extra.data is String
+                              ? extra.data as String?
+                              : null,
                         ),
                       );
                     case ChatRouterInputArgumentType.share:
-                      return CupertinoPage(
+                      if (_responsive.isMobile(context)) {
+                        return CupertinoPage(
+                          name: '/rooms/room',
+                          key: ValueKey(
+                            'ShareCupertinoPage_${state.pathParameters['roomid']!}_${DateTime.now().millisecondsSinceEpoch}',
+                          ),
+                          child: ChatAdaptiveScaffold(
+                            roomId: state.pathParameters['roomid']!,
+                            key: Key(
+                              'Share_${state.pathParameters['roomid']!}_${DateTime.now().millisecondsSinceEpoch}',
+                            ),
+                            shareFiles: extra.data as List<MatrixFile?>?,
+                          ),
+                        );
+                      }
+
+                      return NoTransitionPage(
                         name: '/rooms/room',
                         key: ValueKey(
                           'ShareCupertinoPage_${state.pathParameters['roomid']!}_${DateTime.now().millisecondsSinceEpoch}',
@@ -490,7 +512,22 @@ abstract class AppRoutes {
                       );
                   }
                 }
-                return CupertinoPage(
+                if (_responsive.isMobile(context)) {
+                  return CupertinoPage(
+                    name: '/rooms/room',
+                    key: ValueKey(
+                      'DefaultCupertinoPage_${state.pathParameters['roomid']!}_${DateTime.now().millisecondsSinceEpoch}',
+                    ),
+                    child: ChatAdaptiveScaffold(
+                      roomId: state.pathParameters['roomid']!,
+                      key: Key(
+                        'Default_${state.pathParameters['roomid']!}_${DateTime.now().millisecondsSinceEpoch}',
+                      ),
+                    ),
+                  );
+                }
+
+                return NoTransitionPage(
                   name: '/rooms/room',
                   key: ValueKey(
                     'DefaultCupertinoPage_${state.pathParameters['roomid']!}_${DateTime.now().millisecondsSinceEpoch}',

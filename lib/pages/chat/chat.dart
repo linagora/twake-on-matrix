@@ -980,7 +980,11 @@ class ChatController extends State<Chat>
     // "load more" button is visible on the screen
     SchedulerBinding.instance.addPostFrameCallback((_) async {
       if (mounted) {
-        final event = GoRouterState.of(context).uri.queryParameters['event'];
+        final currentLocation = html.window.location.href;
+
+        final event =
+            Uri.tryParse(Uri.tryParse(currentLocation)?.fragment ?? '')
+                ?.queryParameters['event'];
         if (event != null) {
           onJumpToMessage?.call(event);
         }
@@ -1882,11 +1886,11 @@ class ChatController extends State<Chat>
   }
 
   void _resetLocationPath() {
-    final queryParameters =
-        GoRouterState.of(context).uri.queryParameters['event'];
-    Logs().d("Chat::_resetLocationPath: QueryParameters - $queryParameters");
-    if (queryParameters == null) return;
     final currentLocation = html.window.location.href;
+
+    final event = Uri.tryParse(Uri.tryParse(currentLocation)?.fragment ?? '')
+        ?.queryParameters['event'];
+    if (event == null) return;
     Logs().d("Chat::_resetLocationPath: CurrentLocation - $currentLocation");
     final queryIndex = currentLocation.indexOf('?');
     final newLocation = queryIndex != -1
@@ -2588,8 +2592,11 @@ class ChatController extends State<Chat>
   @override
   void didUpdateWidget(covariant Chat oldWidget) {
     super.didUpdateWidget(oldWidget);
+    final currentLocation = html.window.location.href;
+
     final highlightEventId =
-        GoRouterState.of(context).uri.queryParameters['event'];
+        Uri.tryParse(Uri.tryParse(currentLocation)?.fragment ?? '')
+            ?.queryParameters['event'];
     if (highlightEventId != null) {
       scrollToEventId(highlightEventId, highlight: true);
     }
