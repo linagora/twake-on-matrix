@@ -23,8 +23,6 @@ class ExpansionList extends StatelessWidget {
       presentationContactsNotifier;
   final ValueNotifierCustom<Either<Failure, Success>>
       presentationPhonebookContactNotifier;
-  final ValueNotifierCustom<Either<Failure, Success>>
-      presentationAddressBookNotifier;
   final Function() goToNewGroupChat;
   final Function(BuildContext context, PresentationContact contact)
       onExternalContactTap;
@@ -46,7 +44,6 @@ class ExpansionList extends StatelessWidget {
     this.closeContactsWarningBanner,
     this.goToSettingsForPermissionActions,
     required this.presentationPhonebookContactNotifier,
-    required this.presentationAddressBookNotifier,
   });
 
   @override
@@ -56,7 +53,6 @@ class ExpansionList extends StatelessWidget {
         ..._buildResponsiveButtons(context),
         _sliverContactsList(),
         if (PlatformInfos.isMobile) _sliverPhonebookList(),
-        if (PlatformInfos.isWeb) _sliverAddressBookListOnWeb(),
       ],
     );
   }
@@ -69,30 +65,22 @@ class ExpansionList extends StatelessWidget {
           (failure) {
             final textControllerIsEmpty = textEditingController.text.isEmpty;
             if (PlatformInfos.isWeb) {
-              return presentationAddressBookNotifier.value.fold(
-                (_) {
-                  if (presentationAddressBookNotifier.value.isRight()) {
-                    return child!;
-                  }
-                  if (failure is GetPresentationContactsFailure ||
-                      failure is GetPresentationContactsEmpty) {
-                    return Column(
-                      children: [
-                        const SizedBox(
-                          height: 12,
-                        ),
-                        NoContactsFound(
-                          keyword: textControllerIsEmpty
-                              ? null
-                              : textEditingController.text,
-                        ),
-                      ],
-                    );
-                  }
-                  return child!;
-                },
-                (success) => child!,
-              );
+              if (failure is GetPresentationContactsFailure ||
+                  failure is GetPresentationContactsEmpty) {
+                return Column(
+                  children: [
+                    const SizedBox(
+                      height: 12,
+                    ),
+                    NoContactsFound(
+                      keyword: textControllerIsEmpty
+                          ? null
+                          : textEditingController.text,
+                    ),
+                  ],
+                );
+              }
+              return child!;
             } else {
               return presentationPhonebookContactNotifier.value.fold(
                 (_) {
@@ -126,11 +114,7 @@ class ExpansionList extends StatelessWidget {
             }
 
             if (success is PresentationExternalContactSuccess) {
-              if (PlatformInfos.isWeb) {
-                if (presentationAddressBookNotifier.value.isRight()) {
-                  return child!;
-                }
-              } else {
+              if (!PlatformInfos.isWeb) {
                 if (presentationPhonebookContactNotifier.value.isRight()) {
                   return child!;
                 }
@@ -194,49 +178,6 @@ class ExpansionList extends StatelessWidget {
   Widget _sliverPhonebookList() {
     return ValueListenableBuilder(
       valueListenable: presentationPhonebookContactNotifier,
-      builder: (context, phonebookContactState, child) {
-        return phonebookContactState.fold(
-          (failure) {
-            return child!;
-          },
-          (success) {
-            if (success is PresentationContactsSuccess) {
-              final contacts = success.contacts;
-              return ListView.builder(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                itemCount: contacts.length,
-                itemBuilder: (context, index) {
-                  if (contacts[index].matrixId != null &&
-                      contacts[index].matrixId!.isNotEmpty) {
-                    return TwakeInkWell(
-                      onTap: () {
-                        onContactTap(
-                          context,
-                          contacts[index],
-                        );
-                      },
-                      child: ExpansionContactListTile(
-                        contact: contacts[index],
-                        highlightKeyword: textEditingController.text,
-                      ),
-                    );
-                  }
-                  return child!;
-                },
-              );
-            }
-            return child!;
-          },
-        );
-      },
-      child: const SizedBox(),
-    );
-  }
-
-  Widget _sliverAddressBookListOnWeb() {
-    return ValueListenableBuilder(
-      valueListenable: presentationAddressBookNotifier,
       builder: (context, phonebookContactState, child) {
         return phonebookContactState.fold(
           (failure) {

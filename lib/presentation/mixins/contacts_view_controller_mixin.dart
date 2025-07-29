@@ -64,10 +64,6 @@ mixin class ContactsViewControllerMixin {
     const Right(GetPhonebookContactsInitial()),
   );
 
-  final ValueNotifierCustom<Either<Failure, Success>>
-      presentationAddressBookNotifier =
-      ValueNotifierCustom(const Right(GetAddressBookInitial()));
-
   final FocusNode searchFocusNode = FocusNode();
 
   final Debouncer<String> _debouncer = Debouncer(
@@ -268,7 +264,7 @@ mixin class ContactsViewControllerMixin {
     final keyword = _debouncer.value;
     _refreshContacts(keyword);
     _refreshPhoneBookContacts(keyword);
-    _refreshAddressBooks(keyword);
+    // _refreshAddressBooks(keyword);
     _refreshRecentContacts(
       context: context,
       client: client,
@@ -404,38 +400,38 @@ mixin class ContactsViewControllerMixin {
     );
   }
 
-  Future<void> _refreshAddressBooks(String keyword) async {
-    if (presentationAddressBookNotifier.isDisposed) return;
-    presentationAddressBookNotifier.value =
-        contactsManager.getAddressBookNotifier().value.fold(
-      (failure) {
-        return Left(failure);
-      },
-      (success) {
-        if (success is GetAddressBookSuccessState) {
-          final filteredContacts = success.addressBooks
-              .searchAddressBooks(keyword)
-              .expand((addressBook) => addressBook.toPresentationContact())
-              .toList();
-          if (filteredContacts.isEmpty) {
-            return Left(
-              GetPresentationContactsEmpty(
-                keyword: keyword,
-              ),
-            );
-          } else {
-            return Right(
-              GetPresentationContactsSuccess(
-                contacts: filteredContacts,
-                keyword: keyword,
-              ),
-            );
-          }
-        }
-        return Right(success);
-      },
-    );
-  }
+  // Future<void> _refreshAddressBooks(String keyword) async {
+  //   if (presentationAddressBookNotifier.isDisposed) return;
+  //   presentationAddressBookNotifier.value =
+  //       contactsManager.getAddressBookNotifier().value.fold(
+  //     (failure) {
+  //       return Left(failure);
+  //     },
+  //     (success) {
+  //       if (success is GetAddressBookSuccessState) {
+  //         final filteredContacts = success.addressBooks
+  //             .searchAddressBooks(keyword)
+  //             .expand((addressBook) => addressBook.toPresentationContact())
+  //             .toList();
+  //         if (filteredContacts.isEmpty) {
+  //           return Left(
+  //             GetPresentationContactsEmpty(
+  //               keyword: keyword,
+  //             ),
+  //           );
+  //         } else {
+  //           return Right(
+  //             GetPresentationContactsSuccess(
+  //               contacts: filteredContacts,
+  //               keyword: keyword,
+  //             ),
+  //           );
+  //         }
+  //       }
+  //       return Right(success);
+  //     },
+  //   );
+  // }
 
   Either<Failure, Success> _handleSearchExternalContact(
     String keyword, {
@@ -595,7 +591,6 @@ mixin class ContactsViewControllerMixin {
     presentationRecentContactNotifier.dispose();
     presentationContactNotifier.dispose();
     presentationPhonebookContactNotifier.dispose();
-    presentationAddressBookNotifier.dispose();
   }
 
   @visibleForTesting
