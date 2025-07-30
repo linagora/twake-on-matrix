@@ -47,8 +47,6 @@ enum MessageContextMenuAction {
       case MessageContextMenuAction.delete:
         Navigator.of(context).pop('delete');
         break;
-      default:
-        break;
     }
   }
 
@@ -108,8 +106,6 @@ enum MessageContextMenuAction {
         return Icons.edit_outlined;
       case MessageContextMenuAction.delete:
         return Icons.delete_outlined;
-      default:
-        return null;
     }
   }
 

@@ -38,7 +38,9 @@ extension LocalNotificationsExtension on MatrixState {
       return;
     }
     if (room.notificationCount == 0 ||
-        (room.isMuted && room.highlightCount == 0)) return;
+        (room.isMuted && room.highlightCount == 0)) {
+      return;
+    }
     final event = Event.fromJson(eventUpdate.content, room);
     final title = room.getLocalizedDisplayname(MatrixLocals(L10n.of(context)!));
     final body = await event.calcLocalizedBody(

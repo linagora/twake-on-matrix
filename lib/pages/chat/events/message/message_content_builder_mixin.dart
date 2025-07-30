@@ -277,7 +277,9 @@ mixin MessageContentBuilderMixin {
       final hrefLower = href.toLowerCase();
 
       if (!hrefLower.startsWith(matrixToScheme) &&
-          !hrefLower.startsWith(matrixScheme)) continue;
+          !hrefLower.startsWith(matrixScheme)) {
+        continue;
+      }
 
       var isPill = true;
 

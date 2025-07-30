@@ -40,7 +40,9 @@ class DevicesSettingsController extends State<DevicesSettings> {
           okLabel: L10n.of(context)!.yes,
           cancelLabel: L10n.of(context)!.cancel,
         ) ==
-        OkCancelResult.cancel) return;
+        OkCancelResult.cancel) {
+      return;
+    }
     final matrix = Matrix.of(context);
     final deviceIds = <String>[];
     for (final userDevice in devices) {

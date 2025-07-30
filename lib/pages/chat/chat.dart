@@ -2235,8 +2235,6 @@ class ChatController extends State<Chat>
       case ChatAppBarActions.leaveGroup:
         leaveChat(context, room);
         break;
-      default:
-        break;
     }
   }
 

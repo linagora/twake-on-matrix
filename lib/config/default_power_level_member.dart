@@ -51,8 +51,6 @@ enum DefaultPowerLevelMember {
         return 90;
       case DefaultPowerLevelMember.none:
         return 100;
-      default:
-        return 0;
     }
   }
 
@@ -69,8 +67,6 @@ enum DefaultPowerLevelMember {
       case DefaultPowerLevelMember.guest:
         return L10n.of(context)!.readOnly;
       case DefaultPowerLevelMember.none:
-        return '';
-      default:
         return '';
     }
   }

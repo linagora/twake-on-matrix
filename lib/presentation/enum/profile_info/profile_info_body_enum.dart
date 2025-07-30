@@ -53,7 +53,6 @@ enum ProfileInfoActions {
       case ProfileInfoActions.removeFromGroup:
       case ProfileInfoActions.downgradeToReadOnly:
       case ProfileInfoActions.transferOwnership:
-      default:
         return null;
     }
   }

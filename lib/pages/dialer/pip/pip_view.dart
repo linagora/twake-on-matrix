@@ -327,8 +327,6 @@ Map<PIPViewCorner, Offset> _calculateOffsets({
         return Offset(left, bottom);
       case PIPViewCorner.bottomRight:
         return Offset(right, bottom);
-      default:
-        throw Exception('Not implemented.');
     }
   }
 

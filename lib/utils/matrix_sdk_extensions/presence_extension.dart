@@ -39,7 +39,6 @@ extension PresenceExtension on CachedPresence {
       case PresenceType.offline:
         return Colors.grey;
       case PresenceType.unavailable:
-      default:
         return Colors.red;
     }
   }
