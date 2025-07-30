@@ -104,8 +104,6 @@ mixin HandleDownloadAndPreviewFileMixin {
       case PermissionStatus.limited:
       case PermissionStatus.provisional:
         break;
-      default:
-        break;
     }
   }
 

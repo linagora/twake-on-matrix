@@ -365,10 +365,10 @@ packages:
     dependency: "direct main"
     description:
       name: collection
-      sha256: ee67cb0715911d28db6bf4af1026078bd6f0128b07a5f66fb2ed94ec6783c09a
+      sha256: a1ace0a119f20aabc852d165077c036cd864315bd99b7eaa10a60100341941bf
       url: "https://pub.dev"
     source: hosted
-    version: "1.18.0"
+    version: "1.19.0"
   connectivity_plus:
     dependency: "direct main"
     description:
@@ -899,7 +899,7 @@ packages:
     description:
       path: "."
       ref: master
-      resolved-ref: "8273a15de70a33e79837fd4d9da08e474fcc53c3"
+      resolved-ref: b67d10bcdf3ed9062429dd2b52016af9279e9951
       url: "git@github.com:linagora/emoji_mart.git"
     source: git
     version: "1.0.2"
@@ -1143,17 +1143,18 @@ packages:
   flutter_math_fork:
     dependency: transitive
     description:
-      name: flutter_math_fork
-      sha256: "94bee4642892a94939af0748c6a7de0ff8318feee588379dcdfea7dc5cba06c8"
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.7.2"
+      path: "."
+      ref: main
+      resolved-ref: bd30a5faca93fe1279f1d39d347f9dbe8472877b
+      url: "https://github.com/dakshatsuraasa/flutter_math.git"
+    source: git
+    version: "0.7.4"
   flutter_matrix_html:
     dependency: "direct main"
     description:
       path: "."
       ref: master
-      resolved-ref: "1cb28dfcc9536e200b3f74ab1c5d48386b8524d3"
+      resolved-ref: adc18ad8eec201a356069fbd511616a36b699a82
       url: "https://github.com/linagora/flutter_matrix_html.git"
     source: git
     version: "1.2.0"
@@ -1217,26 +1218,26 @@ packages:
     dependency: "direct main"
     description:
       name: flutter_secure_storage
-      sha256: "8496a89eea74e23f92581885f876455d9d460e71201405dffe5f55dfe1155864"
+      sha256: "9cad52d75ebc511adfae3d447d5d13da15a55a92c9410e50f67335b6d21d16ea"
       url: "https://pub.dev"
     source: hosted
-    version: "9.2.1"
+    version: "9.2.4"
   flutter_secure_storage_linux:
     dependency: transitive
     description:
       name: flutter_secure_storage_linux
-      sha256: "4d91bfc23047422cbcd73ac684bc169859ee766482517c22172c86596bf1464b"
+      sha256: be76c1d24a97d0b98f8b54bce6b481a380a6590df992d0098f868ad54dc8f688
       url: "https://pub.dev"
     source: hosted
-    version: "1.2.1"
+    version: "1.2.3"
   flutter_secure_storage_macos:
     dependency: transitive
     description:
       name: flutter_secure_storage_macos
-      sha256: b768a7dab26d6186b68e2831b3104f8968154f0f4fdbf66e7c2dd7bdf299daaf
+      sha256: "6c0a2795a2d1de26ae202a0d78527d163f4acbb11cde4c75c670f3a0fc064247"
       url: "https://pub.dev"
     source: hosted
-    version: "3.1.1"
+    version: "3.1.3"
   flutter_secure_storage_platform_interface:
     dependency: transitive
     description:
@@ -1254,30 +1255,29 @@ packages:
     source: hosted
     version: "1.2.1"
   flutter_secure_storage_windows:
-    dependency: "direct overridden"
+    dependency: transitive
     description:
-      path: "."
-      ref: main
-      resolved-ref: "3751da0df5eede20d64816ceb79ca78ace7389b3"
-      url: "https://gitlab.com/TheOneWithTheBraid/flutter_secure_storage_windows.git"
-    source: git
-    version: "1.1.2"
+      name: flutter_secure_storage_windows
+      sha256: b20b07cb5ed4ed74fc567b78a72936203f587eba460af1df11281c9326cd3709
+      url: "https://pub.dev"
+    source: hosted
+    version: "3.1.2"
   flutter_slidable:
     dependency: "direct main"
     description:
       name: flutter_slidable
-      sha256: "673403d2eeef1f9e8483bd6d8d92aae73b1d8bd71f382bc3930f699c731bc27c"
+      sha256: ab7dbb16f783307c9d7762ede2593ce32c220ba2ba0fd540a3db8e9a3acba71a
       url: "https://pub.dev"
     source: hosted
-    version: "3.1.0"
+    version: "4.0.0"
   flutter_sticky_header:
     dependency: transitive
     description:
       name: flutter_sticky_header
-      sha256: "017f398fbb45a589e01491861ca20eb6570a763fd9f3888165a978e11248c709"
+      sha256: "7f76d24d119424ca0c95c146b8627a457e8de8169b0d584f766c2c545db8f8be"
       url: "https://pub.dev"
     source: hosted
-    version: "0.6.5"
+    version: "0.7.0"
   flutter_svg:
     dependency: "direct main"
     description:
@@ -1746,18 +1746,18 @@ packages:
     dependency: transitive
     description:
       name: leak_tracker
-      sha256: "3f87a60e8c63aecc975dda1ceedbc8f24de75f09e4856ea27daf8958f2f0ce05"
+      sha256: "7bb2830ebd849694d1ec25bf1f44582d6ac531a57a365a803a6034ff751d2d06"
       url: "https://pub.dev"
     source: hosted
-    version: "10.0.5"
+    version: "10.0.7"
   leak_tracker_flutter_testing:
     dependency: transitive
     description:
       name: leak_tracker_flutter_testing
-      sha256: "932549fb305594d82d7183ecd9fa93463e9914e1b67cacc34bc40906594a1806"
+      sha256: "9491a714cca3667b60b5c420da8217e6de0d1ba7a5ec322fab01758f6998f379"
       url: "https://pub.dev"
     source: hosted
-    version: "3.0.5"
+    version: "3.0.8"
   leak_tracker_testing:
     dependency: transitive
     description:
@@ -2072,10 +2072,10 @@ packages:
     dependency: "direct main"
     description:
       name: overflow_view
-      sha256: "46741be6ccc3d10ac4e14907c1a0e1799857ac4bbea8a485ac803e32637cc326"
+      sha256: e75e834cd93f7abe9d4edc371a17ee92373147b9e973fdc05373ec3d3f163075
       url: "https://pub.dev"
     source: hosted
-    version: "0.3.1"
+    version: "0.4.0"
   package_config:
     dependency: transitive
     description:
@@ -2746,7 +2746,7 @@ packages:
     dependency: transitive
     description: flutter
     source: sdk
-    version: "0.0.99"
+    version: "0.0.0"
   sliver_tools:
     dependency: transitive
     description:
@@ -2815,10 +2815,10 @@ packages:
     dependency: transitive
     description:
       name: stack_trace
-      sha256: "73713990125a6d93122541237550ee3352a2d84baad52d375a4cad2eb9b7ce0b"
+      sha256: "9f47fd3630d76be3ab26f0ee06d213679aa425996925ff3feffdec504931c377"
       url: "https://pub.dev"
     source: hosted
-    version: "1.11.1"
+    version: "1.12.0"
   stream_channel:
     dependency: transitive
     description:
@@ -2839,10 +2839,10 @@ packages:
     dependency: transitive
     description:
       name: string_scanner
-      sha256: "556692adab6cfa87322a115640c11f13cb77b3f076ddcc5d6ae3c20242bedcde"
+      sha256: "688af5ed3402a4bde5b3a6c15fd768dbf2621a614950b17f04626c431ab3c4c3"
       url: "https://pub.dev"
     source: hosted
-    version: "1.2.0"
+    version: "1.3.0"
   super_clipboard:
     dependency: "direct main"
     description:
@@ -2887,10 +2887,10 @@ packages:
     dependency: transitive
     description:
       name: test_api
-      sha256: "5b8a98dafc4d5c4c9c72d8b31ab2b23fc13422348d2997120294d3bac86b4ddb"
+      sha256: "664d3a9a64782fcdeb83ce9c6b39e78fd2971d4e37827b9b06c3aa1edc5e760c"
       url: "https://pub.dev"
     source: hosted
-    version: "0.7.2"
+    version: "0.7.3"
   timezone:
     dependency: transitive
     description:
@@ -3095,10 +3095,10 @@ packages:
     dependency: transitive
     description:
       name: value_layout_builder
-      sha256: "98202ec1807e94ac72725b7f0d15027afde513c55c69ff3f41bcfccb950831bc"
+      sha256: c02511ea91ca5c643b514a33a38fa52536f74aa939ec367d02938b5ede6807fa
       url: "https://pub.dev"
     source: hosted
-    version: "0.3.1"
+    version: "0.4.0"
   vector_graphics:
     dependency: transitive
     description:
@@ -3235,10 +3235,10 @@ packages:
     dependency: transitive
     description:
       name: vm_service
-      sha256: "5c5f338a667b4c644744b661f309fb8080bb94b18a7e91ef1dbd343bed00ed6d"
+      sha256: f6be3ed8bd01289b34d679c2b62226f63c0e69f9fd2e50a6b3c1c729a961041b
       url: "https://pub.dev"
     source: hosted
-    version: "14.2.5"
+    version: "14.3.0"
   volume_controller:
     dependency: transitive
     description:
@@ -3247,32 +3247,8 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.0.7"
-  wakelock:
-    dependency: "direct main"
-    description:
-      name: wakelock
-      sha256: "769ecf42eb2d07128407b50cb93d7c10bd2ee48f0276ef0119db1d25cc2f87db"
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.6.2"
-  wakelock_macos:
-    dependency: transitive
-    description:
-      name: wakelock_macos
-      sha256: "047c6be2f88cb6b76d02553bca5a3a3b95323b15d30867eca53a19a0a319d4cd"
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.4.0"
-  wakelock_platform_interface:
-    dependency: transitive
-    description:
-      name: wakelock_platform_interface
-      sha256: "1f4aeb81fb592b863da83d2d0f7b8196067451e4df91046c26b54a403f9de621"
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.3.0"
   wakelock_plus:
-    dependency: "direct overridden"
+    dependency: "direct main"
     description:
       name: wakelock_plus
       sha256: a474e314c3e8fb5adef1f9ae2d247e57467ad557fa7483a2b895bc1b421c5678
@@ -3287,23 +3263,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.2.3"
-  wakelock_web:
-    dependency: transitive
-    description:
-      name: wakelock_web
-      sha256: "1b256b811ee3f0834888efddfe03da8d18d0819317f20f6193e2922b41a501b5"
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.4.0"
-  wakelock_windows:
-    dependency: "direct overridden"
-    description:
-      path: wakelock_windows
-      ref: main
-      resolved-ref: f3610d6c246098fee74463de09434ed81fc2a7c8
-      url: "https://github.com/chandrabezzo/wakelock.git"
-    source: git
-    version: "0.2.2"
   watcher:
     dependency: transitive
     description:
@@ -3332,10 +3291,10 @@ packages:
     dependency: transitive
     description:
       name: webdriver
-      sha256: "003d7da9519e1e5f329422b36c4dcdf18d7d2978d1ba099ea4e45ba490ed845e"
+      sha256: "3d773670966f02a646319410766d3b5e1037efb7f07cc68f844d5e06cd4d61c8"
       url: "https://pub.dev"
     source: hosted
-    version: "3.0.3"
+    version: "3.0.4"
   webrtc_interface:
     dependency: "direct main"
     description:
@@ -3417,5 +3376,5 @@ packages:
     source: hosted
     version: "3.1.2"
 sdks:
-  dart: ">=3.5.0 <4.0.0"
-  flutter: ">=3.24.0"
+  dart: ">=3.6.0 <4.0.0"
+  flutter: ">=3.27.0"

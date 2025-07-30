@@ -8,8 +8,6 @@ enum InvitationMediumEnum {
         return 'email';
       case InvitationMediumEnum.phone:
         return 'phone';
-      default:
-        throw Exception('Unknown InvitationMediumEnum value');
     }
   }
 }

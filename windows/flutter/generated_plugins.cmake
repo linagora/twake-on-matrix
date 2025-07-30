@@ -14,6 +14,7 @@ list(APPEND FLUTTER_PLUGIN_LIST
   firebase_core
   flutter_avif_windows
   flutter_inappwebview_windows
+  flutter_secure_storage_windows
   gal
   irondash_engine_context
   media_kit_libs_windows_video

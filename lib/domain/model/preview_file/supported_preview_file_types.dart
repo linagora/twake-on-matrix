@@ -31,7 +31,6 @@ enum SupportedIconFileTypesEnum {
       case SupportedIconFileTypesEnum.audio:
         return ImagePaths.icFileAudio;
       case SupportedIconFileTypesEnum.unknown:
-      default:
         return ImagePaths.icFileUnknown;
     }
   }

@@ -53,13 +53,6 @@ enum AdaptiveDestinationEnum {
           ),
           label: L10n.of(context)!.settings,
         );
-      default:
-        return NavigationDestination(
-          icon: UnreadRoomsBadge(
-            filter: (room) => !room.isSpace && !room.isStoryRoom,
-          ),
-          label: L10n.of(context)!.chats,
-        );
     }
   }
 
@@ -103,13 +96,6 @@ enum AdaptiveDestinationEnum {
             isSelected: true,
           ),
           label: L10n.of(context)!.settings,
-        );
-      default:
-        return BottomNavigationBarItem(
-          icon: UnreadRoomsBadge(
-            filter: (room) => !room.isSpace && !room.isStoryRoom,
-          ),
-          label: L10n.of(context)!.chats,
         );
     }
   }

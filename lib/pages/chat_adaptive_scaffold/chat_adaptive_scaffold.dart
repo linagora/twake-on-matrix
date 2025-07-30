@@ -86,8 +86,6 @@ class _RightColumnNavigator extends StatelessWidget {
           roomId: roomId,
           isInStack: isInStack,
         );
-      default:
-        return const SizedBox.shrink();
     }
   }
 }

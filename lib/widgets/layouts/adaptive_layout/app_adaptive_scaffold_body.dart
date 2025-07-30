@@ -92,9 +92,6 @@ class AppAdaptiveScaffoldBodyController extends State<AppAdaptiveScaffoldBody>
         case SettingsAction.newSpace:
         case SettingsAction.invite:
           break;
-
-        default:
-          break;
       }
     }
   }

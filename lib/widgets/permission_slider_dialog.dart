@@ -21,7 +21,6 @@ extension on PermissionLevel {
       case PermissionLevel.admin:
         return L10n.of(context)!.admin;
       case PermissionLevel.custom:
-      default:
         return L10n.of(context)!.custom;
     }
   }
