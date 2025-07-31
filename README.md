@@ -73,19 +73,8 @@ flutter doctor -v
 
 If you only plan to work on the `web` target we recommend installing Google Chrome as it is the default supported target *(Flutter being developped by Google)*.
 
-It is also **required** to have a web ready version of libolm available in the `assets/js/package` folder. You can build a version using:
+It is also **required** to have a web ready version of libolm available in the `assets/js/package` folder. You can download it [here](https://gitlab.matrix.org/matrix-org/olm/-/packages/2190) and copy olm.js and olm.wasm in `assets/js/package`.
 
-```bash
-docker run -v ./assets/js/package:/package nixos/nix:2.22.1
-
-# within the docker
-nix build -v --extra-experimental-features flakes --extra-experimental-features nix-command gitlab:matrix-org/olm/3.2.16?host=gitlab.matrix.org\#javascript
-cp /result/javascript/* /package/. -v
-exit
-
-# back on your host
-sudo chown $(id -u):$(id -g) ./assets/js/package -Rv
-```
 #### Android
 
 - [ ] An implementation of JDK 17 *(tested with openjdk-17.0.13+11)*
