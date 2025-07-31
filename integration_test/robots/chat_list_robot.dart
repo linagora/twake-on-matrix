@@ -5,10 +5,10 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:linagora_design_flutter/list_item/twake_list_item.dart';
 import 'package:patrol/patrol.dart';
 import 'dart:developer';
-import '../base/core_robot.dart';
 import 'chat_group_detail_robot.dart';
+import 'home_robot.dart';
 
-class ChatListRobot extends CoreRobot {
+class ChatListRobot extends HomeRobot {
   ChatListRobot(super.$);
   
    Future<bool> isVisible() async {
