@@ -1555,7 +1555,7 @@
     "type": "text",
     "placeholders": {}
   },
-  "youHaveBeenBannedFromThisChat": "Has sido vetado de este chat",
+  "youHaveBeenBannedFromThisChat": "Le han vetado de esta conversación",
   "@youHaveBeenBannedFromThisChat": {
     "type": "text",
     "placeholders": {}
@@ -1690,7 +1690,7 @@
   },
   "chatHasBeenAddedToThisSpace": "El chat se ha agregado a este espacio",
   "@chatHasBeenAddedToThisSpace": {},
-  "commandInvalid": "Comando inválido",
+  "commandInvalid": "Orden no válida",
   "@commandInvalid": {
     "type": "text"
   },
@@ -1919,7 +1919,7 @@
     "type": "text",
     "description": "Usage hint for the command /unban"
   },
-  "commandMissing": "{command} no es un comando.",
+  "commandMissing": "{command} no es una orden.",
   "@commandMissing": {
     "type": "text",
     "placeholders": {
