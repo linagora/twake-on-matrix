@@ -9,11 +9,6 @@ class AddressBookRepositoryImpl extends AddressBookRepository {
       getIt.get<AddressBookDatasource>();
 
   @override
-  Future<AddressbookResponse> getAddressBook() {
-    return _addressBookDataSource.getAddressBook();
-  }
-
-  @override
   Future<AddressbookResponse> updateAddressBook({
     required AddressBookRequest request,
   }) {

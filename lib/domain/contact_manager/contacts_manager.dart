@@ -18,7 +18,6 @@ import 'package:fluffychat/domain/model/contact/contact.dart';
 import 'package:fluffychat/domain/model/extensions/contact/contact_extension.dart';
 import 'package:fluffychat/domain/repository/federation_configurations_repository.dart';
 import 'package:fluffychat/domain/usecase/contacts/federation_look_up_argument.dart';
-import 'package:fluffychat/domain/usecase/contacts/get_address_book_interactor.dart';
 import 'package:fluffychat/domain/usecase/contacts/get_tom_contacts_interactor.dart';
 import 'package:fluffychat/domain/usecase/contacts/federation_look_up_phonebook_contact_interactor.dart';
 import 'package:fluffychat/domain/usecase/contacts/post_address_book_interactor.dart';
@@ -49,9 +48,6 @@ class ContactsManager {
   final PostAddressBookInteractor postAddressBookInteractor =
       getIt.get<PostAddressBookInteractor>();
 
-  final GetAddressBookInteractor getAddressBookInteractor =
-      getIt.get<GetAddressBookInteractor>();
-
   final TryGetSyncedPhoneBookContactInteractor
       tryGetSyncedPhoneBookContactInteractor =
       getIt.get<TryGetSyncedPhoneBookContactInteractor>();
@@ -63,8 +59,6 @@ class ContactsManager {
 
   StreamSubscription<Either<Failure, Success>>?
       twakePhonebookContactsSubscription;
-
-  StreamSubscription<Either<Failure, Success>>? getAddressBookSubscription;
 
   StreamSubscription<Either<Failure, Success>>? postAddressBookSubscription;
 
@@ -206,7 +200,6 @@ class ContactsManager {
     required String withMxId,
   }) async {
     if (!isAvailableSupportPhonebookContacts) {
-      _getAddressBook();
       return;
     }
 
@@ -243,13 +236,13 @@ class ContactsManager {
         );
   }
 
-  void _getAddressBook() {
-    getAddressBookSubscription = getAddressBookInteractor.execute().listen(
-      (state) {
-        _getAddressBookNotifier.value = state;
-      },
-    );
-  }
+  // void _getAddressBook() {
+  //   getAddressBookSubscription = getAddressBookInteractor.execute().listen(
+  //     (state) {
+  //       _getAddressBookNotifier.value = state;
+  //     },
+  //   );
+  // }
 
   Future<void> _handleTwakeLookUpPhoneBookContacts() async {
     final authorizationInterceptor = getIt.get<AuthorizationInterceptor>();
@@ -387,9 +380,6 @@ class ContactsManager {
     }
     if (twakePhonebookContactsSubscription != null) {
       await twakePhonebookContactsSubscription?.cancel();
-    }
-    if (getAddressBookSubscription != null) {
-      await getAddressBookSubscription?.cancel();
     }
     if (postAddressBookSubscription != null) {
       await postAddressBookSubscription?.cancel();
