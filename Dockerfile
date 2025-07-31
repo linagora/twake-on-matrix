@@ -10,7 +10,8 @@ ARG OLM_VERSION
 RUN nix build -v --extra-experimental-features flakes --extra-experimental-features nix-command gitlab:matrix-org/olm/${OLM_VERSION}?host=gitlab.matrix.org\#javascript
 
 # Building Twake for the web
-FROM --platform=linux/amd64 ghcr.io/cirruslabs/flutter:${FLUTTER_VERSION} AS web-builder
+# Todo: Because cirrusci still missing 3.27.4 image, so change to use instrumentisto, change back when upgrade new flutter
+FROM --platform=linux/amd64 ghcr.io/instrumentisto/flutter:${FLUTTER_VERSION} AS web-builder
 ARG TWAKECHAT_BASE_HREF="/web/"
 COPY . /app
 WORKDIR /app
