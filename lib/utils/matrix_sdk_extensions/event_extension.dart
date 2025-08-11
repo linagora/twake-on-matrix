@@ -4,6 +4,7 @@ import 'package:collection/collection.dart';
 import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/domain/model/extensions/string_extension.dart';
 import 'package:fluffychat/domain/model/room/room_extension.dart';
+import 'package:fluffychat/pages/chat/events/message_reactions.dart';
 import 'package:fluffychat/utils/clipboard.dart';
 import 'package:fluffychat/utils/dialog/twake_dialog.dart';
 import 'package:fluffychat/utils/extension/event_info_extension.dart';
@@ -342,5 +343,34 @@ extension LocalizedBody on Event {
 
   bool shouldHideRedactedEvent() {
     return AppConfig.hideRedactedEvents && redacted;
+  }
+
+  bool hasReactionEvent({
+    required Timeline timeline,
+  }) {
+    final allReactionEvents =
+        aggregatedEvents(timeline, RelationshipTypes.reaction);
+    final reactionMap = <String, ReactionEntry>{};
+
+    for (final e in allReactionEvents) {
+      final key = e.content
+          .tryGetMap<String, dynamic>('m.relates_to')
+          ?.tryGet<String>('key');
+      if (key != null) {
+        if (!reactionMap.containsKey(key)) {
+          reactionMap[key] = ReactionEntry(
+            key: key,
+            count: 0,
+            reacted: false,
+            reactors: [],
+          );
+        }
+        reactionMap[key]!.count++;
+        reactionMap[key]!.reactors!.add(e.senderFromMemoryOrFallback);
+        reactionMap[key]!.reacted |= e.senderId == e.room.client.userID;
+      }
+    }
+
+    return reactionMap.isNotEmpty;
   }
 }
