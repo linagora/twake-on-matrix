@@ -81,13 +81,18 @@ class RemovedView extends StatelessWidget {
                 horizontal: 16.0,
                 vertical: 8.0,
               ),
-              child: Text(
-                L10n.of(context)!.bannedUsersCount(
-                  controller.removedMember.length,
-                ),
-                style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                      color: LinagoraRefColors.material().neutral[40],
+              child: ValueListenableBuilder(
+                valueListenable: controller.searchUserResults,
+                builder: (context, _, __) {
+                  return Text(
+                    L10n.of(context)!.bannedUsersCount(
+                      controller.removedMember.length,
                     ),
+                    style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                          color: LinagoraRefColors.material().neutral[40],
+                        ),
+                  );
+                },
               ),
             ),
             const SizedBox(height: 8.0),

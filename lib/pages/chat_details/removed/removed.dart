@@ -134,12 +134,23 @@ class RemovedController extends State<Removed> with SearchDebouncerMixin {
         }
 
         if (success is UnbanUserSuccess) {
-          TwakeDialog.hideLoadingDialog(context);
-          Navigator.of(context).pop();
+          refreshRemoved();
           return;
         }
       },
     );
+  }
+
+  void refreshRemoved() {
+    Future.delayed(const Duration(milliseconds: 300)).then((_) {
+      TwakeDialog.hideLoadingDialog(context);
+
+      if (removedMember.isEmpty) {
+        Navigator.pop(context);
+        return;
+      }
+      initialRemoved();
+    });
   }
 
   @override
