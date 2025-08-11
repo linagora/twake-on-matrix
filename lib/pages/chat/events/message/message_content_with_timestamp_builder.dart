@@ -558,9 +558,8 @@ class _MessageContentWithTimestampBuilderState
     bool enableBorder = true,
     MainAxisSize mainAxisSize = MainAxisSize.max,
   }) {
-    final hasAggregatedEvents = widget.event.hasAggregatedEvents(
-      widget.timeline,
-      RelationshipTypes.reaction,
+    final hasReactionEvent = widget.event.hasReactionEvent(
+      timeline: widget.timeline,
     );
 
     return OptionalStack(
@@ -568,7 +567,7 @@ class _MessageContentWithTimestampBuilderState
       alignment: widget.event.isOwnMessage
           ? AlignmentDirectional.bottomStart
           : AlignmentDirectional.bottomEnd,
-      isEnabled: hasAggregatedEvents,
+      isEnabled: hasReactionEvent,
       children: [
         Container(
           decoration: widget.event.isDisplayOnlyEmoji()
@@ -602,8 +601,7 @@ class _MessageContentWithTimestampBuilderState
           constraints: BoxConstraints(
             maxWidth: MessageStyle.messageBubbleWidth(context),
           ),
-          margin:
-              hasAggregatedEvents ? const EdgeInsets.only(bottom: 24) : null,
+          margin: hasReactionEvent ? const EdgeInsets.only(bottom: 24) : null,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
