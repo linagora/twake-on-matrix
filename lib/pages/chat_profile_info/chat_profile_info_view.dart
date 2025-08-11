@@ -94,6 +94,9 @@ class ChatProfileInfoView extends StatelessWidget {
                                 lookupContactNotifier:
                                     controller.lookupContactNotifier,
                                 isDraftInfo: controller.widget.isDraftInfo,
+                                isBlockedUser: controller.isBlockedUser,
+                                onUnblockUser: controller.onUnblockUser,
+                                onBlockUser: controller.onBlockUser,
                               ),
                             );
                           }
@@ -104,6 +107,9 @@ class ChatProfileInfoView extends StatelessWidget {
                               lookupContactNotifier:
                                   controller.lookupContactNotifier,
                               isDraftInfo: controller.widget.isDraftInfo,
+                              isBlockedUser: controller.isBlockedUser,
+                              onUnblockUser: controller.onUnblockUser,
+                              onBlockUser: controller.onBlockUser,
                             );
                           }
                           return _Information(
@@ -113,6 +119,9 @@ class ChatProfileInfoView extends StatelessWidget {
                             lookupContactNotifier:
                                 controller.lookupContactNotifier,
                             isDraftInfo: controller.widget.isDraftInfo,
+                            isBlockedUser: controller.isBlockedUser,
+                            onUnblockUser: controller.onUnblockUser,
+                            onBlockUser: controller.onBlockUser,
                           );
                         },
                       ),
@@ -207,6 +216,9 @@ class _Information extends StatelessWidget {
     this.matrixId,
     required this.lookupContactNotifier,
     required this.isDraftInfo,
+    this.isBlockedUser = false,
+    this.onUnblockUser,
+    this.onBlockUser,
   });
 
   final Uri? avatarUri;
@@ -214,6 +226,9 @@ class _Information extends StatelessWidget {
   final String? matrixId;
   final ValueNotifier<Either<Failure, Success>> lookupContactNotifier;
   final bool isDraftInfo;
+  final bool isBlockedUser;
+  final void Function()? onUnblockUser;
+  final void Function()? onBlockUser;
 
   @override
   Widget build(BuildContext context) {
@@ -332,6 +347,29 @@ class _Information extends StatelessWidget {
                       },
                       child: const SizedBox.shrink(),
                     ),
+                    const SizedBox(
+                      height: ChatProfileInfoStyle.textSpacing,
+                    ),
+                    InkWell(
+                      hoverColor: Colors.transparent,
+                      highlightColor: Colors.transparent,
+                      focusColor: Colors.transparent,
+                      splashColor: Colors.transparent,
+                      onTap: isBlockedUser ? onUnblockUser : onBlockUser,
+                      child: _CopiableRowWithSvgIcon(
+                        iconPath: ImagePaths.icFrontHand,
+                        enableCopyIcon: false,
+                        text: isBlockedUser
+                            ? L10n.of(context)!.unblockUser
+                            : L10n.of(context)!.blockUser,
+                        iconColor: isBlockedUser
+                            ? LinagoraSysColors.material().error
+                            : LinagoraSysColors.material().primary,
+                        textColor: isBlockedUser
+                            ? LinagoraSysColors.material().error
+                            : LinagoraSysColors.material().primary,
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -397,10 +435,16 @@ class _CopiableRowWithSvgIcon extends StatelessWidget {
   const _CopiableRowWithSvgIcon({
     required this.iconPath,
     required this.text,
+    this.textColor,
+    this.iconColor,
+    this.enableCopyIcon = true,
   });
 
   final String iconPath;
   final String text;
+  final Color? textColor;
+  final Color? iconColor;
+  final bool enableCopyIcon;
 
   @override
   Widget build(BuildContext context) {
@@ -413,7 +457,7 @@ class _CopiableRowWithSvgIcon extends StatelessWidget {
             width: ChatProfileInfoStyle.iconSize,
             height: ChatProfileInfoStyle.iconSize,
             colorFilter: ColorFilter.mode(
-              LinagoraSysColors.material().onSurface,
+              iconColor ?? LinagoraSysColors.material().onSurface,
               BlendMode.srcIn,
             ),
           ),
@@ -424,25 +468,26 @@ class _CopiableRowWithSvgIcon extends StatelessWidget {
             child: Text(
               text,
               style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                    color: LinagoraSysColors.material().onSurface,
+                    color: textColor ?? LinagoraSysColors.material().onSurface,
                   ),
               overflow: TextOverflow.ellipsis,
             ),
           ),
         ),
-        IconButton(
-          icon: Icon(
-            Icons.content_copy,
-            size: ChatProfileInfoStyle.copyIconSize,
+        if (enableCopyIcon)
+          IconButton(
+            icon: Icon(
+              Icons.content_copy,
+              size: ChatProfileInfoStyle.copyIconSize,
+              color: LinagoraRefColors.material().tertiary[40],
+            ),
             color: LinagoraRefColors.material().tertiary[40],
+            focusColor: Theme.of(context).primaryColor,
+            onPressed: () {
+              TwakeClipboard.instance.copyText(text);
+              TwakeSnackBar.show(context, L10n.of(context)!.copiedToClipboard);
+            },
           ),
-          color: LinagoraRefColors.material().tertiary[40],
-          focusColor: Theme.of(context).primaryColor,
-          onPressed: () {
-            TwakeClipboard.instance.copyText(text);
-            TwakeSnackBar.show(context, L10n.of(context)!.copiedToClipboard);
-          },
-        ),
       ],
     );
   }

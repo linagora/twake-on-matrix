@@ -70,6 +70,7 @@ class ImagePaths {
   static String get icChatError => _getImagePath('ic_chat_error.svg');
   static String get icRadioChecked => _getImagePath('ic_radio_checked.svg');
   static String get icRadioUnchecked => _getImagePath('ic_radio_unchecked.svg');
+  static String get icFrontHand => _getImagePath('ic_front_hand.svg');
 
   static String _getImagePath(String imageName) {
     return AssetsPaths.images + imageName;
