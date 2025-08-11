@@ -101,6 +101,7 @@ import 'package:fluffychat/domain/usecase/recovery/delete_recovery_words_interac
 import 'package:fluffychat/domain/usecase/recovery/get_recovery_words_interactor.dart';
 import 'package:fluffychat/domain/usecase/recovery/save_recovery_words_interactor.dart';
 import 'package:fluffychat/domain/usecase/room/ban_user_interactor.dart';
+import 'package:fluffychat/domain/usecase/room/block_user_interactor.dart';
 import 'package:fluffychat/domain/usecase/room/chat_get_pinned_events_interactor.dart';
 import 'package:fluffychat/domain/usecase/room/chat_room_search_interactor.dart';
 import 'package:fluffychat/domain/usecase/room/create_new_group_chat_interactor.dart';
@@ -109,6 +110,7 @@ import 'package:fluffychat/domain/usecase/room/download_media_file_interactor.da
 import 'package:fluffychat/domain/usecase/room/set_permission_level_interactor.dart';
 import 'package:fluffychat/domain/usecase/room/timeline_search_event_interactor.dart';
 import 'package:fluffychat/domain/usecase/room/unban_user_interactor.dart';
+import 'package:fluffychat/domain/usecase/room/unblock_user_interactor.dart';
 import 'package:fluffychat/domain/usecase/room/update_group_chat_interactor.dart';
 import 'package:fluffychat/domain/usecase/room/update_pinned_messages_interactor.dart';
 import 'package:fluffychat/domain/usecase/room/upload_content_for_web_interactor.dart';
@@ -484,6 +486,14 @@ class GetItInitializer {
 
     getIt.registerFactory<UnbanUserInteractor>(
       () => UnbanUserInteractor(),
+    );
+
+    getIt.registerFactory<UnblockUserInteractor>(
+      () => UnblockUserInteractor(),
+    );
+
+    getIt.registerFactory<BlockUserInteractor>(
+      () => BlockUserInteractor(),
     );
   }
 
