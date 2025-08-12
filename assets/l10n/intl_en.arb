@@ -3358,5 +3358,6 @@
   "transferOwnershipDescription": "This user will gain full control over the group and you will no longer have total management rights. This action is irreversible.",
   "confirmTransfer": "Confirm Transfer",
   "unblockUser": "Unblock User",
-  "blockUser": "Block User"
+  "blockUser": "Block User",
+  "permissionErrorUnblockUser": "You don’t have the rights to unblock users. Please reach out to your admin for help"
 }

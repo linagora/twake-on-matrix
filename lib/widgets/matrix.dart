@@ -76,6 +76,8 @@ class Matrix extends StatefulWidget {
   /// Returns the (nearest) Client instance of your application.
   static MatrixState of(BuildContext context) =>
       Provider.of<MatrixState>(context, listen: false);
+
+  static MatrixState read(BuildContext context) => context.read<MatrixState>();
 }
 
 class MatrixState extends State<Matrix>

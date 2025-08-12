@@ -11,11 +11,11 @@ import 'package:fluffychat/domain/usecase/room/block_user_interactor.dart';
 import 'package:fluffychat/domain/usecase/room/unblock_user_interactor.dart';
 import 'package:fluffychat/pages/chat_profile_info/chat_profile_info_view.dart';
 import 'package:fluffychat/presentation/enum/chat/chat_details_screen_enum.dart';
+import 'package:fluffychat/presentation/extensions/client_extension.dart';
 import 'package:fluffychat/presentation/mixins/chat_details_tab_mixin.dart';
 import 'package:fluffychat/presentation/mixins/handle_video_download_mixin.dart';
 import 'package:fluffychat/presentation/mixins/play_video_action_mixin.dart';
 import 'package:fluffychat/presentation/model/contact/presentation_contact.dart';
-import 'package:fluffychat/utils/dialog/twake_dialog.dart';
 import 'package:fluffychat/utils/twake_snackbar.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:flutter/material.dart';
@@ -53,15 +53,21 @@ class ChatProfileInfoController extends State<ChatProfileInfo>
 
   StreamSubscription? lookupContactNotifierSub;
 
+  StreamSubscription? ignoredUsersStreamSub;
+
   final ValueNotifier<Either<Failure, Success>> lookupContactNotifier =
       ValueNotifier<Either<Failure, Success>>(
     const Right(LookupContactsInitial()),
   );
 
+  final ValueNotifier<bool> blockUserLoadingNotifier =
+      ValueNotifier<bool>(false);
+
+  final ValueNotifier<bool> isBlockedUser = ValueNotifier<bool>(false);
+
   @override
-  Room? get room => widget.roomId != null
-      ? Matrix.of(context).client.getRoomById(widget.roomId!)
-      : null;
+  Room? get room =>
+      widget.roomId != null ? client.getRoomById(widget.roomId!) : null;
 
   @override
   ChatDetailsScreenEnum get chatType => ChatDetailsScreenEnum.direct;
@@ -73,9 +79,7 @@ class ChatProfileInfoController extends State<ChatProfileInfo>
   User? get user =>
       room?.unsafeGetUserFromMemoryOrFallback(room?.directChatMatrixID ?? '');
 
-  bool get isBlockedUser => Matrix.of(context).client.ignoredUsers.contains(
-        widget.contact?.matrixId ?? user?.id ?? '',
-      );
+  Client get client => Matrix.read(context).client;
 
   void lookupMatchContactAction() {
     lookupContactNotifierSub = _lookupMatchContactInteractor
@@ -107,7 +111,7 @@ class ChatProfileInfoController extends State<ChatProfileInfo>
           (event) => event.fold(
             (failure) {
               if (failure is UnblockUserFailure) {
-                TwakeDialog.hideLoadingDialog(context);
+                blockUserLoadingNotifier.value = false;
                 TwakeSnackBar.show(
                   context,
                   failure.exception.toString(),
@@ -116,7 +120,7 @@ class ChatProfileInfoController extends State<ChatProfileInfo>
               }
 
               if (failure is NoPermissionForUnblockFailure) {
-                TwakeDialog.hideLoadingDialog(context);
+                blockUserLoadingNotifier.value = false;
                 TwakeSnackBar.show(
                   context,
                   L10n.of(context)!.permissionErrorUnbanUser,
@@ -126,12 +130,7 @@ class ChatProfileInfoController extends State<ChatProfileInfo>
             },
             (success) {
               if (success is UnblockUserLoading) {
-                TwakeDialog.showLoadingDialog(context);
-                return;
-              }
-
-              if (success is UnblockUserSuccess) {
-                TwakeDialog.hideLoadingDialog(context);
+                blockUserLoadingNotifier.value = true;
                 return;
               }
             },
@@ -151,7 +150,7 @@ class ChatProfileInfoController extends State<ChatProfileInfo>
           (event) => event.fold(
             (failure) {
               if (failure is BlockUserFailure) {
-                TwakeDialog.hideLoadingDialog(context);
+                blockUserLoadingNotifier.value = false;
                 TwakeSnackBar.show(
                   context,
                   failure.exception.toString(),
@@ -160,7 +159,7 @@ class ChatProfileInfoController extends State<ChatProfileInfo>
               }
 
               if (failure is NoPermissionForBlockFailure) {
-                TwakeDialog.hideLoadingDialog(context);
+                blockUserLoadingNotifier.value = false;
                 TwakeSnackBar.show(
                   context,
                   L10n.of(context)!.permissionErrorUnbanUser,
@@ -170,12 +169,7 @@ class ChatProfileInfoController extends State<ChatProfileInfo>
             },
             (success) {
               if (success is BlockUserLoading) {
-                TwakeDialog.showLoadingDialog(context);
-                return;
-              }
-
-              if (success is BlockUserSuccess) {
-                TwakeDialog.hideLoadingDialog(context);
+                blockUserLoadingNotifier.value = true;
                 return;
               }
             },
@@ -183,16 +177,32 @@ class ChatProfileInfoController extends State<ChatProfileInfo>
         );
   }
 
+  void listenIgnoredUser() {
+    isBlockedUser.value = client.ignoredUsers
+        .contains(widget.contact?.matrixId ?? user?.id ?? '');
+    ignoredUsersStreamSub = client.ignoredUsersStream.listen((value) {
+      final userBlocked = client.ignoredUsers
+          .contains(widget.contact?.matrixId ?? user?.id ?? '');
+      blockUserLoadingNotifier.value = false;
+      isBlockedUser.value = userBlocked;
+      refreshDataInTabViewInit();
+    });
+  }
+
   @override
   void initState() {
     super.initState();
     lookupMatchContactAction();
+    listenIgnoredUser();
   }
 
   @override
   void dispose() {
     lookupContactNotifier.dispose();
     lookupContactNotifierSub?.cancel();
+    ignoredUsersStreamSub?.cancel();
+    blockUserLoadingNotifier.dispose();
+    isBlockedUser.dispose();
     super.dispose();
   }
 

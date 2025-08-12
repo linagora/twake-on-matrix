@@ -27,4 +27,14 @@ extension ClientExtension on Client {
   String mxid(BuildContext context) => userID ?? L10n.of(context)!.user;
 
   String? get pusherNotificationClientIdentifier => userID?.sha256Hash;
+
+  Stream get ignoredUsersStream {
+    return onSync.stream.where(
+      (syncUpdate) =>
+          syncUpdate.accountData?.any(
+            (accountData) => accountData.type == 'm.ignored_user_list',
+          ) ??
+          false,
+    );
+  }
 }
