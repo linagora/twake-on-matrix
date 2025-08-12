@@ -1,4 +1,4 @@
-# 25. Improve tag suggestion and display members in group chat detail
+# 28. Improve tag suggestion and display members in group chat detail
 
 **Date:** 2024-12-30
 
