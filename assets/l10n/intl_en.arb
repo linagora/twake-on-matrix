@@ -3359,5 +3359,6 @@
   "confirmTransfer": "Confirm Transfer",
   "unblockUser": "Unblock User",
   "blockUser": "Block User",
-  "permissionErrorUnblockUser": "You don’t have the rights to unblock users. Please reach out to your admin for help"
+  "permissionErrorUnblockUser": "You don’t have the rights to unblock user. Please reach out to your admin for help",
+  "permissionErrorBlockUser": "You don’t have the rights to block user. Please reach out to your admin for help"
 }

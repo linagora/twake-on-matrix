@@ -123,7 +123,7 @@ class ChatProfileInfoController extends State<ChatProfileInfo>
                 blockUserLoadingNotifier.value = false;
                 TwakeSnackBar.show(
                   context,
-                  L10n.of(context)!.permissionErrorUnbanUser,
+                  L10n.of(context)!.permissionErrorUnblockUser,
                 );
                 return;
               }
@@ -162,7 +162,7 @@ class ChatProfileInfoController extends State<ChatProfileInfo>
                 blockUserLoadingNotifier.value = false;
                 TwakeSnackBar.show(
                   context,
-                  L10n.of(context)!.permissionErrorUnbanUser,
+                  L10n.of(context)!.permissionErrorBlockUser,
                 );
                 return;
               }
