@@ -55,8 +55,6 @@ class NewPrivateChatView extends StatelessWidget {
                   controller.presentationContactNotifier,
               presentationPhonebookContactNotifier:
                   controller.presentationPhonebookContactNotifier,
-              presentationAddressBookNotifier:
-                  controller.presentationAddressBookNotifier,
               goToNewGroupChat: () => controller.goToNewGroupChat(context),
               onContactTap: controller.onContactAction,
               onExternalContactTap: controller.onExternalContactAction,
