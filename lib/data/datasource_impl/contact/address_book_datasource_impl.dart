@@ -8,11 +8,6 @@ class AddressBookDatasourceImpl extends AddressBookDatasource {
   final AddressBookApi _addressBookApi = getIt.get<AddressBookApi>();
 
   @override
-  Future<AddressbookResponse> getAddressBook() {
-    return _addressBookApi.getAddressBook();
-  }
-
-  @override
   Future<AddressbookResponse> updateAddressBook({
     required AddressBookRequest request,
   }) {
