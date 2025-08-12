@@ -78,7 +78,6 @@ import 'package:fluffychat/domain/repository/server_search_repository.dart';
 import 'package:fluffychat/domain/repository/tom_configurations_repository.dart';
 import 'package:fluffychat/domain/usecase/app_grid/get_app_grid_configuration_interactor.dart';
 import 'package:fluffychat/domain/usecase/contacts/delete_third_party_contact_box_interactor.dart';
-import 'package:fluffychat/domain/usecase/contacts/get_address_book_interactor.dart';
 import 'package:fluffychat/domain/usecase/contacts/get_tom_contacts_interactor.dart';
 import 'package:fluffychat/domain/usecase/contacts/lookup_match_contact_interactor.dart';
 import 'package:fluffychat/domain/usecase/contacts/federation_look_up_phonebook_contact_interactor.dart';
@@ -346,9 +345,6 @@ class GetItInitializer {
     );
     getIt.registerFactory<GetTomContactsInteractor>(
       () => GetTomContactsInteractor(),
-    );
-    getIt.registerFactory<GetAddressBookInteractor>(
-      () => GetAddressBookInteractor(),
     );
     getIt.registerFactory<PostAddressBookInteractor>(
       () => PostAddressBookInteractor(),

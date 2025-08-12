@@ -8,7 +8,6 @@ import 'package:fluffychat/data/network/interceptor/authorization_interceptor.da
 import 'package:fluffychat/data/network/interceptor/dynamic_url_interceptor.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/di/global/network_di.dart';
-import 'package:fluffychat/domain/app_state/contact/get_address_book_state.dart';
 import 'package:fluffychat/domain/app_state/contact/get_contacts_state.dart';
 import 'package:fluffychat/domain/app_state/contact/get_phonebook_contact_state.dart';
 import 'package:fluffychat/domain/app_state/contact/post_address_book_state.dart';
@@ -18,7 +17,6 @@ import 'package:fluffychat/domain/model/contact/contact.dart';
 import 'package:fluffychat/domain/model/extensions/contact/contact_extension.dart';
 import 'package:fluffychat/domain/repository/federation_configurations_repository.dart';
 import 'package:fluffychat/domain/usecase/contacts/federation_look_up_argument.dart';
-import 'package:fluffychat/domain/usecase/contacts/get_address_book_interactor.dart';
 import 'package:fluffychat/domain/usecase/contacts/get_tom_contacts_interactor.dart';
 import 'package:fluffychat/domain/usecase/contacts/federation_look_up_phonebook_contact_interactor.dart';
 import 'package:fluffychat/domain/usecase/contacts/post_address_book_interactor.dart';
@@ -49,9 +47,6 @@ class ContactsManager {
   final PostAddressBookInteractor postAddressBookInteractor =
       getIt.get<PostAddressBookInteractor>();
 
-  final GetAddressBookInteractor getAddressBookInteractor =
-      getIt.get<GetAddressBookInteractor>();
-
   final TryGetSyncedPhoneBookContactInteractor
       tryGetSyncedPhoneBookContactInteractor =
       getIt.get<TryGetSyncedPhoneBookContactInteractor>();
@@ -63,8 +58,6 @@ class ContactsManager {
 
   StreamSubscription<Either<Failure, Success>>?
       twakePhonebookContactsSubscription;
-
-  StreamSubscription<Either<Failure, Success>>? getAddressBookSubscription;
 
   StreamSubscription<Either<Failure, Success>>? postAddressBookSubscription;
 
@@ -79,9 +72,6 @@ class ContactsManager {
       _phonebookContactsNotifier =
       ValueNotifierCustom(const Right(GetPhonebookContactsInitial()));
 
-  final ValueNotifierCustom<Either<Failure, Success>> _getAddressBookNotifier =
-      ValueNotifierCustom(const Right(GetAddressBookInitial()));
-
   final ValueNotifierCustom<Either<Failure, Success>> _postAddressBookNotifier =
       ValueNotifierCustom(const Right(PostAddressBookInitial()));
 
@@ -93,9 +83,6 @@ class ContactsManager {
 
   ValueNotifierCustom<Either<Failure, Success>>
       getPhonebookContactsNotifier() => _phonebookContactsNotifier;
-
-  ValueNotifierCustom<Either<Failure, Success>> getAddressBookNotifier() =>
-      _getAddressBookNotifier;
 
   ValueNotifierCustom<Either<Failure, Success>> postAddressBookNotifier() =>
       _postAddressBookNotifier;
@@ -206,7 +193,6 @@ class ContactsManager {
     required String withMxId,
   }) async {
     if (!isAvailableSupportPhonebookContacts) {
-      _getAddressBook();
       return;
     }
 
@@ -241,14 +227,6 @@ class ContactsManager {
             },
           ),
         );
-  }
-
-  void _getAddressBook() {
-    getAddressBookSubscription = getAddressBookInteractor.execute().listen(
-      (state) {
-        _getAddressBookNotifier.value = state;
-      },
-    );
   }
 
   Future<void> _handleTwakeLookUpPhoneBookContacts() async {
@@ -387,9 +365,6 @@ class ContactsManager {
     }
     if (twakePhonebookContactsSubscription != null) {
       await twakePhonebookContactsSubscription?.cancel();
-    }
-    if (getAddressBookSubscription != null) {
-      await getAddressBookSubscription?.cancel();
     }
     if (postAddressBookSubscription != null) {
       await postAddressBookSubscription?.cancel();

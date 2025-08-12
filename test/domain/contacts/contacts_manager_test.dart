@@ -12,7 +12,6 @@ import 'package:fluffychat/data/model/federation_server/federation_server_inform
 import 'package:fluffychat/data/network/interceptor/authorization_interceptor.dart';
 import 'package:fluffychat/data/network/interceptor/dynamic_url_interceptor.dart';
 import 'package:fluffychat/di/global/network_di.dart';
-import 'package:fluffychat/domain/app_state/contact/get_address_book_state.dart';
 import 'package:fluffychat/domain/app_state/contact/get_contacts_state.dart';
 import 'package:fluffychat/domain/app_state/contact/get_phonebook_contact_state.dart';
 import 'package:fluffychat/domain/app_state/contact/post_address_book_state.dart';
@@ -22,7 +21,6 @@ import 'package:fluffychat/domain/model/extensions/contact/contact_extension.dar
 import 'package:fluffychat/domain/repository/contact/hive_contact_repository.dart';
 import 'package:fluffychat/domain/repository/federation_configurations_repository.dart';
 import 'package:fluffychat/domain/usecase/contacts/federation_look_up_argument.dart';
-import 'package:fluffychat/domain/usecase/contacts/get_address_book_interactor.dart';
 import 'package:fluffychat/domain/usecase/contacts/get_tom_contacts_interactor.dart';
 import 'package:fluffychat/domain/usecase/contacts/federation_look_up_phonebook_contact_interactor.dart';
 import 'package:fluffychat/domain/usecase/contacts/post_address_book_interactor.dart';
@@ -47,7 +45,6 @@ import 'contacts_manager_test.mocks.dart';
   TryGetSyncedPhoneBookContactInteractor,
   TwakeLookupPhonebookContactInteractor,
   PostAddressBookInteractor,
-  GetAddressBookInteractor,
   SharedPreferencesContactCacheManager,
   HiveContactRepository,
 ])
@@ -62,7 +59,6 @@ void main() {
   late MockTwakeLookupPhonebookContactInteractor
       mockTwakeLookupPhonebookContactInteractor;
   late MockPostAddressBookInteractor mockPostAddressBookInteractor;
-  late MockGetAddressBookInteractor mockGetAddressBookInteractor;
   late MockAuthorizationInterceptor mockAuthorizationInterceptor;
   late MockDynamicUrlInterceptors mockHomeServerDynamicUrlInterceptors;
   late MockDynamicUrlInterceptors mockIdentityServerDynamicUrlInterceptors;
@@ -85,7 +81,6 @@ void main() {
     mockTwakeLookupPhonebookContactInteractor =
         MockTwakeLookupPhonebookContactInteractor();
     mockPostAddressBookInteractor = MockPostAddressBookInteractor();
-    mockGetAddressBookInteractor = MockGetAddressBookInteractor();
     mockAuthorizationInterceptor = MockAuthorizationInterceptor();
     mockHomeServerDynamicUrlInterceptors = MockDynamicUrlInterceptors();
     mockFederationConfigurationsRepository =
@@ -128,10 +123,6 @@ void main() {
     getIt.registerFactory<PostAddressBookInteractor>(
       () => mockPostAddressBookInteractor,
     );
-    getIt.registerFactory<GetAddressBookInteractor>(
-      () => mockGetAddressBookInteractor,
-    );
-
     getIt.registerFactory<HiveContactRepository>(
       () => mockHiveContactRepository,
     );
@@ -151,9 +142,7 @@ void main() {
     test(
       'WHEN it is not available get Phonebook contact.\n'
       'AND contactsNotifier return GetContactsIsEmpty.\n'
-      'AND getAddressBookNotifier return GetAddressBookIsEmptyState.\n'
       'THEN contactsNotifier in ContactsManager SHOULD have GetContactsIsEmpty state.\n'
-      'THEN getAddressBookNotifier in ContactsManager SHOULD have GetAddressBookIsEmptyState state.\n'
       'THEN list ToM contact SHOULD is empty.\n'
       'THEN list address book contact SHOULD is empty\n'
       'THEN federationLookUpPhonebookContactInteractor SHOULD not call\n'
@@ -161,18 +150,9 @@ void main() {
       () async {
         final List<Failure> listTomContactsFailureState = [];
 
-        final List<Failure> listAddressBookFailureState = [];
-
         contactsManager.getContactsNotifier().addListener(() {
           contactsManager.getContactsNotifier().value.fold(
                 (failure) => listTomContactsFailureState.add(failure),
-                (success) => null,
-              );
-        });
-
-        contactsManager.getAddressBookNotifier().addListener(() {
-          contactsManager.getAddressBookNotifier().value.fold(
-                (failure) => listAddressBookFailureState.add(failure),
                 (success) => null,
               );
         });
@@ -185,14 +165,6 @@ void main() {
           (_) => Stream.fromIterable([
             const Right(ContactsLoading()),
             const Left(GetContactsIsEmpty()),
-          ]),
-        );
-
-        when(
-          mockGetAddressBookInteractor.execute(),
-        ).thenAnswer(
-          (_) => Stream.fromIterable([
-            const Left(GetAddressBookIsEmptyState()),
           ]),
         );
 
@@ -212,14 +184,6 @@ void main() {
           ],
         );
 
-        expectLater(listAddressBookFailureState.length, 1);
-
-        expectLater(
-          listAddressBookFailureState,
-          [
-            const GetAddressBookIsEmptyState(),
-          ],
-        );
         verifyNever(
           mockFederationLookUpPhonebookContactInteractor.execute(
             argument: null,
@@ -235,28 +199,16 @@ void main() {
     test(
       'WHEN it is not available get Phonebook contact.\n'
       'AND contactsNotifier return GetContactsFailure.\n'
-      'AND getAddressBookNotifier return GetAddressBookIsEmptyState.\n'
       'THEN contactsNotifier in ContactsManager SHOULD have GetContactsFailure state.\n'
-      'THEN getAddressBookNotifier in ContactsManager SHOULD have GetAddressBookIsEmptyState state.\n'
       'THEN list ToM contact SHOULD is empty.\n'
-      'THEN list address book contact SHOULD is empty\n'
       'THEN federationLookUpPhonebookContactInteractor SHOULD not call\n'
       'THEN twakeLookupPhonebookContactInteractor SHOULD not call.\n',
       () async {
         final List<Failure> listTomContactsFailureState = [];
 
-        final List<Failure> listAddressBookFailureState = [];
-
         contactsManager.getContactsNotifier().addListener(() {
           contactsManager.getContactsNotifier().value.fold(
                 (failure) => listTomContactsFailureState.add(failure),
-                (success) => null,
-              );
-        });
-
-        contactsManager.getAddressBookNotifier().addListener(() {
-          contactsManager.getAddressBookNotifier().value.fold(
-                (failure) => listAddressBookFailureState.add(failure),
                 (success) => null,
               );
         });
@@ -269,14 +221,6 @@ void main() {
           (_) => Stream.fromIterable([
             const Right(ContactsLoading()),
             const Left(GetContactsFailure(keyword: '', exception: dynamic)),
-          ]),
-        );
-
-        when(
-          mockGetAddressBookInteractor.execute(),
-        ).thenAnswer(
-          (_) => Stream.fromIterable([
-            const Left(GetAddressBookIsEmptyState()),
           ]),
         );
 
@@ -295,281 +239,6 @@ void main() {
             const GetContactsFailure(keyword: '', exception: dynamic),
           ],
         );
-
-        expectLater(listAddressBookFailureState.length, 1);
-
-        expectLater(
-          listAddressBookFailureState,
-          [
-            const GetAddressBookIsEmptyState(),
-          ],
-        );
-        verifyNever(
-          mockFederationLookUpPhonebookContactInteractor.execute(
-            argument: null,
-          ),
-        );
-
-        verifyNever(
-          mockTwakeLookupPhonebookContactInteractor.execute(argument: null),
-        );
-      },
-    );
-
-    test(
-      'WHEN it is not available get Phonebook contact.\n'
-      'AND contactsNotifier return GetContactsFailure.\n'
-      'AND getAddressBookNotifier return GetAddressBookFailureState.\n'
-      'THEN contactsNotifier in ContactsManager SHOULD have GetContactsFailure state.\n'
-      'THEN getAddressBookNotifier in ContactsManager SHOULD have GetAddressBookFailureState state.\n'
-      'THEN list ToM contact SHOULD is empty.\n'
-      'THEN list address book contact SHOULD is empty\n'
-      'THEN federationLookUpPhonebookContactInteractor SHOULD not call\n'
-      'THEN twakeLookupPhonebookContactInteractor SHOULD not call.\n',
-      () async {
-        final List<Failure> listTomContactsFailureState = [];
-
-        final List<Failure> listAddressBookFailureState = [];
-
-        contactsManager.getContactsNotifier().addListener(() {
-          contactsManager.getContactsNotifier().value.fold(
-                (failure) => listTomContactsFailureState.add(failure),
-                (success) => null,
-              );
-        });
-
-        contactsManager.getAddressBookNotifier().addListener(() {
-          contactsManager.getAddressBookNotifier().value.fold(
-                (failure) => listAddressBookFailureState.add(failure),
-                (success) => null,
-              );
-        });
-
-        when(
-          mockGetTomContactsInteractor.execute(
-            limit: AppConfig.maxFetchContacts,
-          ),
-        ).thenAnswer(
-          (_) => Stream.fromIterable([
-            const Right(ContactsLoading()),
-            const Left(GetContactsFailure(keyword: '', exception: dynamic)),
-          ]),
-        );
-
-        when(
-          mockGetAddressBookInteractor.execute(),
-        ).thenAnswer(
-          (_) => Stream.fromIterable([
-            const Left(GetAddressBookFailureState(exception: dynamic)),
-          ]),
-        );
-
-        contactsManager.initialSynchronizeContacts(
-          isAvailableSupportPhonebookContacts: false,
-          withMxId: 'mxId',
-        );
-
-        await Future.delayed(const Duration(seconds: 2));
-
-        expectLater(listTomContactsFailureState.length, 1);
-
-        expectLater(
-          listTomContactsFailureState,
-          [
-            const GetContactsFailure(keyword: '', exception: dynamic),
-          ],
-        );
-
-        expectLater(listAddressBookFailureState.length, 1);
-
-        expectLater(
-          listAddressBookFailureState,
-          [
-            const GetAddressBookFailureState(exception: dynamic),
-          ],
-        );
-        verifyNever(
-          mockFederationLookUpPhonebookContactInteractor.execute(
-            argument: null,
-          ),
-        );
-
-        verifyNever(
-          mockTwakeLookupPhonebookContactInteractor.execute(argument: null),
-        );
-      },
-    );
-
-    test(
-      'WHEN it is not available get Phonebook contact.\n'
-      'AND contactsNotifier return GetContactsIsEmpty.\n'
-      'AND getAddressBookNotifier return GetAddressBookFailureState.\n'
-      'THEN contactsNotifier in ContactsManager SHOULD have GetContactsIsEmpty state.\n'
-      'THEN getAddressBookNotifier in ContactsManager SHOULD have GetAddressBookFailureState state.\n'
-      'THEN list ToM contact SHOULD is empty.\n'
-      'THEN list address book contact SHOULD is empty\n'
-      'THEN federationLookUpPhonebookContactInteractor SHOULD not call\n'
-      'THEN twakeLookupPhonebookContactInteractor SHOULD not call.\n',
-      () async {
-        final List<Failure> listTomContactsFailureState = [];
-
-        final List<Failure> listAddressBookFailureState = [];
-
-        contactsManager.getContactsNotifier().addListener(() {
-          contactsManager.getContactsNotifier().value.fold(
-                (failure) => listTomContactsFailureState.add(failure),
-                (success) => null,
-              );
-        });
-
-        contactsManager.getAddressBookNotifier().addListener(() {
-          contactsManager.getAddressBookNotifier().value.fold(
-                (failure) => listAddressBookFailureState.add(failure),
-                (success) => null,
-              );
-        });
-
-        when(
-          mockGetTomContactsInteractor.execute(
-            limit: AppConfig.maxFetchContacts,
-          ),
-        ).thenAnswer(
-          (_) => Stream.fromIterable([
-            const Right(ContactsLoading()),
-            const Left(GetContactsIsEmpty()),
-          ]),
-        );
-
-        when(
-          mockGetAddressBookInteractor.execute(),
-        ).thenAnswer(
-          (_) => Stream.fromIterable([
-            const Left(GetAddressBookFailureState(exception: dynamic)),
-          ]),
-        );
-
-        contactsManager.initialSynchronizeContacts(
-          isAvailableSupportPhonebookContacts: false,
-          withMxId: 'mxId',
-        );
-
-        await Future.delayed(const Duration(seconds: 2));
-
-        expectLater(listTomContactsFailureState.length, 1);
-
-        expectLater(
-          listTomContactsFailureState,
-          [
-            const GetContactsIsEmpty(),
-          ],
-        );
-
-        expectLater(listAddressBookFailureState.length, 1);
-
-        expectLater(
-          listAddressBookFailureState,
-          [
-            const GetAddressBookFailureState(exception: dynamic),
-          ],
-        );
-        verifyNever(
-          mockFederationLookUpPhonebookContactInteractor.execute(
-            argument: null,
-          ),
-        );
-
-        verifyNever(
-          mockTwakeLookupPhonebookContactInteractor.execute(argument: null),
-        );
-      },
-    );
-
-    test(
-      'WHEN it is not available get Phonebook contact.\n'
-      'AND contactsNotifier return GetContactsIsEmpty.\n'
-      'AND getAddressBookNotifier return GetAddressBookSuccessState.\n'
-      'THEN contactsNotifier in ContactsManager SHOULD have GetContactsIsEmpty state.\n'
-      'THEN getAddressBookNotifier in ContactsManager SHOULD have GetAddressBookSuccessState state.\n'
-      'THEN list ToM contact SHOULD is empty.\n'
-      'THEN list address book contact SHOULD not empty\n'
-      'THEN federationLookUpPhonebookContactInteractor SHOULD not call\n'
-      'THEN twakeLookupPhonebookContactInteractor SHOULD not call.\n',
-      () async {
-        final List<Failure> listTomContactsFailureState = [];
-
-        final List<Success> listAddressBookSuccessState = [];
-
-        contactsManager.getContactsNotifier().addListener(() {
-          contactsManager.getContactsNotifier().value.fold(
-                (failure) => listTomContactsFailureState.add(failure),
-                (success) => null,
-              );
-        });
-
-        contactsManager.getAddressBookNotifier().addListener(() {
-          contactsManager.getAddressBookNotifier().value.fold(
-                (failure) => null,
-                (success) => listAddressBookSuccessState.add(success),
-              );
-        });
-
-        when(
-          mockGetTomContactsInteractor.execute(
-            limit: AppConfig.maxFetchContacts,
-          ),
-        ).thenAnswer(
-          (_) => Stream.fromIterable([
-            const Right(ContactsLoading()),
-            const Left(GetContactsIsEmpty()),
-          ]),
-        );
-
-        when(
-          mockGetAddressBookInteractor.execute(),
-        ).thenAnswer(
-          (_) => Stream.fromIterable([
-            Right(
-              GetAddressBookSuccessState(
-                addressBooks: ContactFixtures.addressBooks,
-              ),
-            ),
-          ]),
-        );
-
-        contactsManager.initialSynchronizeContacts(
-          isAvailableSupportPhonebookContacts: false,
-          withMxId: 'mxId',
-        );
-
-        await Future.delayed(const Duration(seconds: 2));
-
-        expectLater(listTomContactsFailureState.length, 1);
-
-        expectLater(
-          listTomContactsFailureState,
-          [
-            const GetContactsIsEmpty(),
-          ],
-        );
-
-        expectLater(listAddressBookSuccessState.length, 1);
-
-        expectLater(
-          listAddressBookSuccessState,
-          [
-            GetAddressBookSuccessState(
-              addressBooks: ContactFixtures.addressBooks,
-            ),
-          ],
-        );
-
-        final addressBook = contactsManager
-            .getAddressBookNotifier()
-            .value
-            .getSuccessOrNull<GetAddressBookSuccessState>()
-            ?.addressBooks;
-
-        expect(addressBook?.length, ContactFixtures.addressBooks.length);
 
         verifyNever(
           mockFederationLookUpPhonebookContactInteractor.execute(
@@ -587,28 +256,17 @@ void main() {
       'WHEN it is not available get Phonebook contact.\n'
       'AND contactsNotifier return GetContactsSuccess.\n'
       'AND getAddressBookNotifier return GetAddressBookSuccessState.\n'
-      'THEN contactsNotifier in ContactsManager SHOULD have GetContactsIsEmpty state.\n'
-      'THEN getAddressBookNotifier in ContactsManager SHOULD have GetAddressBookSuccessState state.\n'
+      'THEN contactsNotifier in ContactsManager SHOULD have GetContactsSuccess state.\n'
       'THEN list ToM contact SHOULD not empty.\n'
-      'THEN list address book contact SHOULD not empty\n'
       'THEN federationLookUpPhonebookContactInteractor SHOULD not call\n'
       'THEN twakeLookupPhonebookContactInteractor SHOULD not call.\n',
       () async {
         final List<Success> listTomContactsSuccessState = [];
 
-        final List<Success> listAddressBookSuccessState = [];
-
         contactsManager.getContactsNotifier().addListener(() {
           contactsManager.getContactsNotifier().value.fold(
                 (failure) => null,
                 (success) => listTomContactsSuccessState.add(success),
-              );
-        });
-
-        contactsManager.getAddressBookNotifier().addListener(() {
-          contactsManager.getAddressBookNotifier().value.fold(
-                (failure) => null,
-                (success) => listAddressBookSuccessState.add(success),
               );
         });
 
@@ -623,19 +281,8 @@ void main() {
               GetContactsSuccess(
                 contacts: [
                   ContactFixtures.contact1,
+                  ContactFixtures.contact2,
                 ],
-              ),
-            ),
-          ]),
-        );
-
-        when(
-          mockGetAddressBookInteractor.execute(),
-        ).thenAnswer(
-          (_) => Stream.fromIterable([
-            Right(
-              GetAddressBookSuccessState(
-                addressBooks: ContactFixtures.addressBooks,
               ),
             ),
           ]),
@@ -657,133 +304,9 @@ void main() {
             GetContactsSuccess(
               contacts: [
                 ContactFixtures.contact1,
+                ContactFixtures.contact2,
               ],
             ),
-          ],
-        );
-
-        expectLater(listAddressBookSuccessState.length, 1);
-
-        expectLater(
-          listAddressBookSuccessState,
-          [
-            GetAddressBookSuccessState(
-              addressBooks: ContactFixtures.addressBooks,
-            ),
-          ],
-        );
-
-        final addressBook = contactsManager
-            .getAddressBookNotifier()
-            .value
-            .getSuccessOrNull<GetAddressBookSuccessState>()
-            ?.addressBooks;
-
-        final tomContact = contactsManager
-            .getContactsNotifier()
-            .value
-            .getSuccessOrNull<GetContactsSuccess>()
-            ?.contacts;
-
-        expect(tomContact?.length, 1);
-
-        expect(addressBook?.length, ContactFixtures.addressBooks.length);
-
-        verifyNever(
-          mockFederationLookUpPhonebookContactInteractor.execute(
-            argument: null,
-          ),
-        );
-
-        verifyNever(
-          mockTwakeLookupPhonebookContactInteractor.execute(argument: null),
-        );
-      },
-    );
-
-    test(
-      'WHEN it is not available get Phonebook contact.\n'
-      'AND contactsNotifier return GetContactsSuccess.\n'
-      'AND getAddressBookNotifier return GetAddressBookFailureState.\n'
-      'THEN contactsNotifier in ContactsManager SHOULD have GetContactsIsEmpty state.\n'
-      'THEN getAddressBookNotifier in ContactsManager SHOULD have GetAddressBookFailureState state.\n'
-      'THEN list ToM contact SHOULD not empty.\n'
-      'THEN list address book contact SHOULD is empty\n'
-      'THEN federationLookUpPhonebookContactInteractor SHOULD not call\n'
-      'THEN twakeLookupPhonebookContactInteractor SHOULD not call.\n',
-      () async {
-        final List<Success> listTomContactsSuccessState = [];
-
-        final List<Failure> listAddressBookFailureState = [];
-
-        contactsManager.getContactsNotifier().addListener(() {
-          contactsManager.getContactsNotifier().value.fold(
-                (failure) => null,
-                (success) => listTomContactsSuccessState.add(success),
-              );
-        });
-
-        contactsManager.getAddressBookNotifier().addListener(() {
-          contactsManager.getAddressBookNotifier().value.fold(
-                (failure) => listAddressBookFailureState.add(failure),
-                (success) => null,
-              );
-        });
-
-        when(
-          mockGetTomContactsInteractor.execute(
-            limit: AppConfig.maxFetchContacts,
-          ),
-        ).thenAnswer(
-          (_) => Stream.fromIterable([
-            const Right(ContactsLoading()),
-            Right(
-              GetContactsSuccess(
-                contacts: [
-                  ContactFixtures.contact1,
-                ],
-              ),
-            ),
-          ]),
-        );
-
-        when(
-          mockGetAddressBookInteractor.execute(),
-        ).thenAnswer(
-          (_) => Stream.fromIterable([
-            const Left(
-              GetAddressBookFailureState(exception: dynamic),
-            ),
-          ]),
-        );
-
-        contactsManager.initialSynchronizeContacts(
-          isAvailableSupportPhonebookContacts: false,
-          withMxId: 'mxId',
-        );
-
-        await Future.delayed(const Duration(seconds: 2));
-
-        expectLater(listTomContactsSuccessState.length, 2);
-
-        expectLater(
-          listTomContactsSuccessState,
-          [
-            const ContactsLoading(),
-            GetContactsSuccess(
-              contacts: [
-                ContactFixtures.contact1,
-              ],
-            ),
-          ],
-        );
-
-        expectLater(listAddressBookFailureState.length, 1);
-
-        expectLater(
-          listAddressBookFailureState,
-          [
-            const GetAddressBookFailureState(exception: dynamic),
           ],
         );
 
@@ -793,7 +316,7 @@ void main() {
             .getSuccessOrNull<GetContactsSuccess>()
             ?.contacts;
 
-        expect(tomContact?.length, 1);
+        expect(tomContact?.length, 2);
 
         verifyNever(
           mockFederationLookUpPhonebookContactInteractor.execute(
