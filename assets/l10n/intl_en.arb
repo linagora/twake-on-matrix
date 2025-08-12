@@ -3359,6 +3359,20 @@
   "confirmTransfer": "Confirm Transfer",
   "unblockUser": "Unblock User",
   "blockUser": "Block User",
-  "permissionErrorUnblockUser": "You don’t have the rights to unblock user. Please reach out to your admin for help",
-  "permissionErrorBlockUser": "You don’t have the rights to block user. Please reach out to your admin for help"
+  "permissionErrorUnblockUser": "You don’t have the rights to unblock user.",
+  "permissionErrorBlockUser": "You don’t have the rights to block user.",
+  "userIsNotAValidMxid": "{mxid} is not a valid Matrix ID",
+  "@userIsNotAValidMxid": {
+    "type": "text",
+    "placeholders": {
+      "mxid": {}
+    }
+  },
+  "userNotFoundInIgnoreList": "{mxid} is not found in your ignore list",
+  "@userNotFoundInIgnoreList": {
+    "type": "text",
+    "placeholders": {
+      "mxid": {}
+    }
+  }
 }

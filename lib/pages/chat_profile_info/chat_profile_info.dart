@@ -127,6 +127,28 @@ class ChatProfileInfoController extends State<ChatProfileInfo>
                 );
                 return;
               }
+
+              if (failure is NotValidMxidFailure) {
+                blockUserLoadingNotifier.value = false;
+                TwakeSnackBar.show(
+                  context,
+                  L10n.of(context)!.userIsNotAValidMxid(
+                    user?.id ?? '',
+                  ),
+                );
+                return;
+              }
+
+              if (failure is NotInTheIgnoreListFailure) {
+                blockUserLoadingNotifier.value = false;
+                TwakeSnackBar.show(
+                  context,
+                  L10n.of(context)!.userNotFoundInIgnoreList(
+                    user?.id ?? '',
+                  ),
+                );
+                return;
+              }
             },
             (success) {
               if (success is UnblockUserLoading) {
@@ -166,6 +188,17 @@ class ChatProfileInfoController extends State<ChatProfileInfo>
                 );
                 return;
               }
+
+              if (failure is NotValidMxidFailure) {
+                blockUserLoadingNotifier.value = false;
+                TwakeSnackBar.show(
+                  context,
+                  L10n.of(context)!.userIsNotAValidMxid(
+                    user?.id ?? '',
+                  ),
+                );
+                return;
+              }
             },
             (success) {
               if (success is BlockUserLoading) {
@@ -185,7 +218,6 @@ class ChatProfileInfoController extends State<ChatProfileInfo>
           .contains(widget.contact?.matrixId ?? user?.id ?? '');
       blockUserLoadingNotifier.value = false;
       isBlockedUser.value = userBlocked;
-      refreshDataInTabViewInit();
     });
   }
 
