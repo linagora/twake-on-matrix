@@ -263,7 +263,7 @@ mixin ChatDetailsTabMixin<T extends StatefulWidget>
     }
   }
 
-  void _refreshDataInTabViewInit() {
+  void refreshDataInTabViewInit() {
     _linksListController?.refresh();
     _mediaListController?.refresh();
     _filesListController?.refresh();
@@ -404,7 +404,7 @@ mixin ChatDetailsTabMixin<T extends StatefulWidget>
       nestedScrollViewState.currentState?.innerController.addListener(
         () => _listenerInnerController(),
       );
-      _refreshDataInTabViewInit();
+      refreshDataInTabViewInit();
     });
     _listenForRoomMembersChanged();
   }

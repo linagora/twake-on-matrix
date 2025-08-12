@@ -9,6 +9,7 @@ import 'package:fluffychat/utils/string_extension.dart';
 import 'package:fluffychat/utils/twake_snackbar.dart';
 import 'package:fluffychat/widgets/avatar/avatar.dart';
 import 'package:fluffychat/widgets/avatar/avatar_style.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -97,6 +98,8 @@ class ChatProfileInfoView extends StatelessWidget {
                                 isBlockedUser: controller.isBlockedUser,
                                 onUnblockUser: controller.onUnblockUser,
                                 onBlockUser: controller.onBlockUser,
+                                blockUserLoadingNotifier:
+                                    controller.blockUserLoadingNotifier,
                               ),
                             );
                           }
@@ -110,6 +113,8 @@ class ChatProfileInfoView extends StatelessWidget {
                               isBlockedUser: controller.isBlockedUser,
                               onUnblockUser: controller.onUnblockUser,
                               onBlockUser: controller.onBlockUser,
+                              blockUserLoadingNotifier:
+                                  controller.blockUserLoadingNotifier,
                             );
                           }
                           return _Information(
@@ -122,6 +127,8 @@ class ChatProfileInfoView extends StatelessWidget {
                             isBlockedUser: controller.isBlockedUser,
                             onUnblockUser: controller.onUnblockUser,
                             onBlockUser: controller.onBlockUser,
+                            blockUserLoadingNotifier:
+                                controller.blockUserLoadingNotifier,
                           );
                         },
                       ),
@@ -216,9 +223,10 @@ class _Information extends StatelessWidget {
     this.matrixId,
     required this.lookupContactNotifier,
     required this.isDraftInfo,
-    this.isBlockedUser = false,
+    required this.isBlockedUser,
     this.onUnblockUser,
     this.onBlockUser,
+    required this.blockUserLoadingNotifier,
   });
 
   final Uri? avatarUri;
@@ -226,9 +234,10 @@ class _Information extends StatelessWidget {
   final String? matrixId;
   final ValueNotifier<Either<Failure, Success>> lookupContactNotifier;
   final bool isDraftInfo;
-  final bool isBlockedUser;
+  final ValueNotifier<bool> isBlockedUser;
   final void Function()? onUnblockUser;
   final void Function()? onBlockUser;
+  final ValueNotifier<bool> blockUserLoadingNotifier;
 
   @override
   Widget build(BuildContext context) {
@@ -350,25 +359,47 @@ class _Information extends StatelessWidget {
                     const SizedBox(
                       height: ChatProfileInfoStyle.textSpacing,
                     ),
-                    InkWell(
-                      hoverColor: Colors.transparent,
-                      highlightColor: Colors.transparent,
-                      focusColor: Colors.transparent,
-                      splashColor: Colors.transparent,
-                      onTap: isBlockedUser ? onUnblockUser : onBlockUser,
-                      child: _CopiableRowWithSvgIcon(
-                        iconPath: ImagePaths.icFrontHand,
-                        enableCopyIcon: false,
-                        text: isBlockedUser
-                            ? L10n.of(context)!.unblockUser
-                            : L10n.of(context)!.blockUser,
-                        iconColor: isBlockedUser
-                            ? LinagoraSysColors.material().error
-                            : LinagoraSysColors.material().primary,
-                        textColor: isBlockedUser
-                            ? LinagoraSysColors.material().error
-                            : LinagoraSysColors.material().primary,
-                      ),
+                    ValueListenableBuilder(
+                      valueListenable: blockUserLoadingNotifier,
+                      builder: (context, isLoading, child) {
+                        return InkWell(
+                          hoverColor: Colors.transparent,
+                          highlightColor: Colors.transparent,
+                          focusColor: Colors.transparent,
+                          splashColor: Colors.transparent,
+                          onTap: isLoading
+                              ? null
+                              : isBlockedUser.value
+                                  ? onUnblockUser
+                                  : onBlockUser,
+                          child: _CopiableRowWithSvgIcon(
+                            iconPath: ImagePaths.icFrontHand,
+                            enableCopyIcon: false,
+                            text: isBlockedUser.value
+                                ? L10n.of(context)!.unblockUser
+                                : L10n.of(context)!.blockUser,
+                            iconColor: isBlockedUser.value
+                                ? LinagoraSysColors.material().error
+                                : LinagoraSysColors.material().primary,
+                            textColor: isBlockedUser.value
+                                ? LinagoraSysColors.material().error
+                                : LinagoraSysColors.material().primary,
+                            actionIcon: isLoading
+                                ? IconButton(
+                                    icon: CupertinoActivityIndicator(
+                                      animating: true,
+                                      color: LinagoraSysColors.material()
+                                          .onSurfaceVariant,
+                                    ),
+                                    color: LinagoraRefColors.material()
+                                        .tertiary[40],
+                                    focusColor: Theme.of(context).primaryColor,
+                                    onPressed: () {},
+                                  )
+                                : null,
+                          ),
+                        );
+                      },
                     ),
                   ],
                 ),
@@ -438,6 +469,7 @@ class _CopiableRowWithSvgIcon extends StatelessWidget {
     this.textColor,
     this.iconColor,
     this.enableCopyIcon = true,
+    this.actionIcon,
   });
 
   final String iconPath;
@@ -445,6 +477,7 @@ class _CopiableRowWithSvgIcon extends StatelessWidget {
   final Color? textColor;
   final Color? iconColor;
   final bool enableCopyIcon;
+  final Widget? actionIcon;
 
   @override
   Widget build(BuildContext context) {
@@ -474,6 +507,7 @@ class _CopiableRowWithSvgIcon extends StatelessWidget {
             ),
           ),
         ),
+        actionIcon ?? const SizedBox.shrink(),
         if (enableCopyIcon)
           IconButton(
             icon: Icon(
