@@ -3,13 +3,11 @@ import 'package:debounce_throttle/debounce_throttle.dart';
 import 'package:fluffychat/app_state/failure.dart';
 import 'package:fluffychat/app_state/success.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
-import 'package:fluffychat/domain/app_state/contact/get_address_book_state.dart';
 import 'package:fluffychat/domain/app_state/contact/get_contacts_state.dart';
 import 'package:fluffychat/domain/app_state/contact/get_phonebook_contact_state.dart';
 import 'package:fluffychat/domain/app_state/search/search_state.dart';
 import 'package:fluffychat/domain/contact_manager/contacts_manager.dart';
 import 'package:fluffychat/domain/model/contact/contact_type.dart';
-import 'package:fluffychat/domain/model/extensions/contact/address_book_extension.dart';
 import 'package:fluffychat/domain/model/extensions/contact/contact_extension.dart';
 import 'package:fluffychat/domain/usecase/search/search_recent_chat_interactor.dart';
 import 'package:fluffychat/presentation/enum/contacts/warning_contacts_banner_enum.dart';
@@ -63,10 +61,6 @@ mixin class ContactsViewControllerMixin {
       ValueNotifierCustom<Either<Failure, Success>>(
     const Right(GetPhonebookContactsInitial()),
   );
-
-  final ValueNotifierCustom<Either<Failure, Success>>
-      presentationAddressBookNotifier =
-      ValueNotifierCustom(const Right(GetAddressBookInitial()));
 
   final FocusNode searchFocusNode = FocusNode();
 
@@ -243,21 +237,6 @@ mixin class ContactsViewControllerMixin {
             matrixLocalizations: matrixLocalizations,
           ),
         );
-
-    contactsManager.getPhonebookContactsNotifier().addListener(
-          () => _refreshAllContacts(
-            context: context,
-            client: client,
-            matrixLocalizations: matrixLocalizations,
-          ),
-        );
-    contactsManager.getAddressBookNotifier().addListener(
-          () => _refreshAllContacts(
-            context: context,
-            client: client,
-            matrixLocalizations: matrixLocalizations,
-          ),
-        );
   }
 
   void _refreshAllContacts({
@@ -268,7 +247,6 @@ mixin class ContactsViewControllerMixin {
     final keyword = _debouncer.value;
     _refreshContacts(keyword);
     _refreshPhoneBookContacts(keyword);
-    _refreshAddressBooks(keyword);
     _refreshRecentContacts(
       context: context,
       client: client,
@@ -279,6 +257,7 @@ mixin class ContactsViewControllerMixin {
 
   Future<void> _refreshContacts(String keyword) async {
     if (presentationContactNotifier.isDisposed) return;
+
     presentationContactNotifier.value =
         contactsManager.getContactsNotifier().value.fold(
       (failure) {
@@ -311,7 +290,10 @@ mixin class ContactsViewControllerMixin {
               .searchContacts(keyword)
               .expand((contact) => contact.toPresentationContacts())
               .toList();
-          if (filteredContacts.isEmpty) {
+
+          final combinedContacts = _combineTomContacts(filteredContacts);
+
+          if (combinedContacts.isEmpty) {
             if (presentationRecentContactNotifier.value.isNotEmpty) {
               return Left(
                 GetPresentationContactsEmpty(
@@ -339,7 +321,7 @@ mixin class ContactsViewControllerMixin {
           } else {
             return Right(
               GetPresentationContactsSuccess(
-                contacts: filteredContacts,
+                contacts: combinedContacts,
                 keyword: keyword,
               ),
             );
@@ -384,39 +366,7 @@ mixin class ContactsViewControllerMixin {
               .searchContacts(keyword)
               .expand((contact) => contact.toPresentationContacts())
               .toList();
-          if (filteredContacts.isEmpty) {
-            return Left(
-              GetPresentationContactsEmpty(
-                keyword: keyword,
-              ),
-            );
-          } else {
-            return Right(
-              GetPresentationContactsSuccess(
-                contacts: filteredContacts,
-                keyword: keyword,
-              ),
-            );
-          }
-        }
-        return Right(success);
-      },
-    );
-  }
-
-  Future<void> _refreshAddressBooks(String keyword) async {
-    if (presentationAddressBookNotifier.isDisposed) return;
-    presentationAddressBookNotifier.value =
-        contactsManager.getAddressBookNotifier().value.fold(
-      (failure) {
-        return Left(failure);
-      },
-      (success) {
-        if (success is GetAddressBookSuccessState) {
-          final filteredContacts = success.addressBooks
-              .searchAddressBooks(keyword)
-              .expand((addressBook) => addressBook.toPresentationContact())
-              .toList();
+          _refreshContacts(keyword);
           if (filteredContacts.isEmpty) {
             return Left(
               GetPresentationContactsEmpty(
@@ -586,6 +536,45 @@ mixin class ContactsViewControllerMixin {
     _permissionHandlerService.goToSettingsForPermissionActions();
   }
 
+  List<PresentationContact> _combineTomContacts(
+    List<PresentationContact> filteredTomContacts,
+  ) {
+    final foundMatrixIdsInPhonebook = _flatMatrixIdsFromPhonebookContacts();
+
+    return filteredTomContacts.where((contact) {
+      if (contact.matrixId == null) return true;
+      return !foundMatrixIdsInPhonebook.contains(contact.matrixId);
+    }).toList();
+  }
+
+  List<String> _flatMatrixIdsFromPhonebookContacts() {
+    final phonebookContacts = contactsManager
+            .getPhonebookContactsNotifier()
+            .value
+            .getSuccessOrNull<GetPhonebookContactsSuccess>()
+            ?.contacts ??
+        [];
+
+    final Set<String> matrixIds = {};
+
+    for (final contact in phonebookContacts) {
+      final emailMatrixIds = contact.emails
+              ?.where((email) => email.matrixId != null)
+              .map((email) => email.matrixId!) ??
+          [];
+
+      final phoneMatrixIds = contact.phoneNumbers
+              ?.where((phone) => phone.matrixId != null)
+              .map((phone) => phone.matrixId!) ??
+          [];
+
+      matrixIds.addAll(emailMatrixIds);
+      matrixIds.addAll(phoneMatrixIds);
+    }
+
+    return matrixIds.toList();
+  }
+
   void disposeContactsMixin() {
     textEditingController.clear();
     searchFocusNode.dispose();
@@ -595,7 +584,6 @@ mixin class ContactsViewControllerMixin {
     presentationRecentContactNotifier.dispose();
     presentationContactNotifier.dispose();
     presentationPhonebookContactNotifier.dispose();
-    presentationAddressBookNotifier.dispose();
   }
 
   @visibleForTesting

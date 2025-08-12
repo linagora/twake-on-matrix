@@ -1,10 +1,8 @@
 import 'package:fluffychat/app_state/success.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
-import 'package:fluffychat/domain/app_state/contact/get_address_book_state.dart';
 import 'package:fluffychat/domain/app_state/contact/get_contacts_state.dart';
 import 'package:fluffychat/domain/app_state/contact/get_phonebook_contact_state.dart';
 import 'package:fluffychat/domain/app_state/search/search_state.dart';
-import 'package:fluffychat/domain/model/extensions/contact/address_book_extension.dart';
 import 'package:fluffychat/domain/usecase/search/search_recent_chat_interactor.dart';
 import 'package:fluffychat/domain/contact_manager/contacts_manager.dart';
 import 'package:fluffychat/pages/search/search_debouncer_mixin.dart';
@@ -139,29 +137,11 @@ class SearchContactsAndChatsController
             .getSuccessOrNull<GetContactsSuccess>()
             ?.contacts ??
         [];
-    final addressBook = contactManger
-            .getAddressBookNotifier()
-            .value
-            .getSuccessOrNull<GetAddressBookSuccessState>()
-            ?.addressBooks ??
-        [];
+
     final tomPresentationSearchContacts = tomContacts
         .expand((contact) => contact.toPresentationContacts())
         .toList();
 
-    final addressBookPresentationSearchContacts = addressBook
-        .expand((contact) => contact.toPresentationContact())
-        .toList();
-
-    final addressBookPresentationSearchMatched =
-        addressBookPresentationSearchContacts
-            .expand((contact) => contact.toPresentationSearch())
-            .where((contact) {
-      final matrixId = (contact as ContactPresentationSearch).matrixId;
-      return matrixId != null &&
-          matrixId.isNotEmpty &&
-          contact.doesMatchKeyword(keyword);
-    }).toList();
     final tomContactPresentationSearchMatched = tomPresentationSearchContacts
         .expand((contact) => contact.toPresentationSearch())
         .where((contact) => contact.doesMatchKeyword(keyword))
@@ -169,7 +149,7 @@ class SearchContactsAndChatsController
 
     return combineDuplicateContactAndChat(
       recentChat: tomContactPresentationSearchMatched,
-      contacts: addressBookPresentationSearchMatched,
+      contacts: [],
     );
   }
 
