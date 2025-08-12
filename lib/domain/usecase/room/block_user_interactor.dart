@@ -1,6 +1,7 @@
 import 'package:dartz/dartz.dart';
 import 'package:fluffychat/app_state/failure.dart';
 import 'package:fluffychat/app_state/success.dart';
+import 'package:fluffychat/data/network/exception/ignore_user_exceptions.dart';
 import 'package:fluffychat/domain/app_state/room/block_user_state.dart';
 import 'package:matrix/matrix.dart';
 
@@ -11,8 +12,18 @@ class BlockUserInteractor {
   }) async* {
     try {
       yield Right(BlockUserLoading());
-
-      await client.ignoreUser(userId);
+      if (!userId.isValidMatrixId) {
+        throw NotValidMxidException();
+      }
+      await client.setAccountData(
+        client.userID!,
+        'm.ignored_user_list',
+        {
+          'ignored_users': Map.fromEntries(
+            (client.ignoredUsers..add(userId)).map((key) => MapEntry(key, {})),
+          ),
+        },
+      );
 
       yield const Right(BlockUserSuccess());
     } on MatrixException catch (e) {
@@ -22,6 +33,9 @@ class BlockUserInteractor {
         );
       }
     } catch (error) {
+      if (error is NotValidMxidException) {
+        yield const Left(NotValidMxidFailure());
+      }
       yield Left(
         BlockUserFailure(
           exception: error,

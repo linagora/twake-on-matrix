@@ -385,16 +385,15 @@ class _Information extends StatelessWidget {
                                 ? LinagoraSysColors.material().error
                                 : LinagoraSysColors.material().primary,
                             actionIcon: isLoading
-                                ? IconButton(
-                                    icon: CupertinoActivityIndicator(
+                                ? Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 16,
+                                    ),
+                                    child: CupertinoActivityIndicator(
                                       animating: true,
                                       color: LinagoraSysColors.material()
                                           .onSurfaceVariant,
                                     ),
-                                    color: LinagoraRefColors.material()
-                                        .tertiary[40],
-                                    focusColor: Theme.of(context).primaryColor,
-                                    onPressed: () {},
                                   )
                                 : null,
                           ),
