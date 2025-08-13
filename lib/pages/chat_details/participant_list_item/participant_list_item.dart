@@ -1,4 +1,3 @@
-import 'package:fluffychat/config/default_power_level_member.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/domain/enums/selection_mode_enum.dart';
 import 'package:fluffychat/domain/model/room/room_extension.dart';
@@ -106,24 +105,29 @@ class _ParticipantListItemState extends State<ParticipantListItem> {
                                       ),
                                 ),
                               ),
-                              if (widget.member.getDefaultPowerLevelMember
-                                      .powerLevel >=
-                                  DefaultPowerLevelMember.owner.powerLevel) ...[
-                                Padding(
-                                  padding: const EdgeInsets.only(right: 16),
-                                  child: Text(
-                                    widget.member.getDefaultPowerLevelMember
-                                        .displayName(context),
-                                    style: Theme.of(context)
-                                        .textTheme
-                                        .labelMedium
-                                        ?.copyWith(
-                                          color: LinagoraRefColors.material()
-                                              .tertiary[30],
-                                        ),
-                                  ),
-                                ),
-                              ],
+                              ValueListenableBuilder(
+                                valueListenable: isHoverParticipantItemNotifier,
+                                builder: (context, isHover, _) {
+                                  if (!isHover) {
+                                    return Padding(
+                                      padding: const EdgeInsets.only(right: 16),
+                                      child: Text(
+                                        widget.member.getDefaultPowerLevelMember
+                                            .displayName(context),
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .labelMedium
+                                            ?.copyWith(
+                                              color:
+                                                  LinagoraRefColors.material()
+                                                      .tertiary[30],
+                                            ),
+                                      ),
+                                    );
+                                  }
+                                  return const SizedBox.shrink();
+                                },
+                              ),
                             ],
                           ),
                           const SizedBox(height: 4.0),
