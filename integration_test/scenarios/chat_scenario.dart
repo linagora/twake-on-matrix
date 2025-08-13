@@ -1,19 +1,40 @@
 import 'dart:developer';
 import 'package:fluffychat/pages/chat/chat_input_row_send_btn.dart';
+import 'package:fluffychat/pages/chat_list/chat_list_body_view.dart';
 import 'package:flutter_test/flutter_test.dart';
 import '../base/base_scenario.dart';
 import '../base/core_robot.dart';
+import '../help/soft_assertion_helper.dart';
 import '../robots/chat_group_detail_robot.dart';
 import '../robots/chat_list_robot.dart';
 import 'package:flutter/material.dart';
 import 'dart:convert';
+import '../robots/search_robot.dart';
 
 class ChatScenario extends BaseScenario {
   ChatScenario(super.$);
 
+  Future<void> enterSearchText(String searchText) async {
+    await SearchRobot($).enterSearchText(searchText);
+    await SearchRobot($).waitForEitherVisible($: $, first: ChatListRobot($).showLessLabel(),second: ChatListRobot($).noResultLabel(), timeout: const Duration(seconds: 30));
+    // await $.pumpAndSettle();
+  }
+
   Future<void> verifySearchResultViewIsShown() async {
     expect(ChatListRobot($).showLessLabel().visible || ChatListRobot($).noResultLabel().visible, isTrue);
     await Future.delayed(const Duration(seconds: 5)); 
+  }
+
+  Future<void> verifyDisplayOfContactListScreen(SoftAssertHelper s) async {    
+    s.softAssertEquals( (await SearchRobot($).getSearchTextField()).exists, true, 'Search Text Field is not visible');
+
+    // // title (avoid hard-coded text if localized)
+    // final appBarCtx = $.tester.element(find.byType(TwakeAppBar));
+    // final title = L10n.of(appBarCtx)!.chats; // or 'Chats' if not localized
+    // s.softAssertEquals($(TwakeAppBar).containing($(Text(title))).exists,true,'Contact title is wrong',);
+
+    s.softAssertEquals($(ChatListBodyView).visible, true, 'Chats tab is not visible');
+    s.softAssertEquals($(BottomNavigationBar).visible, true, 'Bottom navigator bar is not visible');
   }
 
   Future<void> verifySearchResultContains(String keyword) async {
@@ -40,7 +61,14 @@ class ChatScenario extends BaseScenario {
     }
     log("✅ All visible chat groups contain '$keyword'");
   }
-  
+  Future<ChatGroupDetailRobot> openChatGroup(String title) async {
+    await enterSearchText(title);
+    await (await ChatListRobot($).getListOfChatGroup())[0].root.tap();
+    final chatGroupDetailRobot = ChatGroupDetailRobot($);
+    await chatGroupDetailRobot.confimrAccessMedia();
+    await $.pumpAndSettle();
+    return chatGroupDetailRobot;
+  }
   Future<void> openAGroupChatByAPI(String groupID) async {
     final client = await CoreRobot($).initialRedirectRequest();
     await CoreRobot($).loginByAPI(client);
@@ -89,15 +117,8 @@ class ChatScenario extends BaseScenario {
   }
 
   Future<void> sendAMesage(String message) async {
-    // Find the TextField using its type or placeholder text
-    final messageField = $(TextField); // Or use $(#input_message_id) if it has a key
-
-    // Tap to focus the field
-    await messageField.tap();
-
-    // Enter the message
-    await messageField.enterText(message);
-
+    await ChatGroupDetailRobot($).inputMessage(message);
+  
     // tab on send button
     final sendBtn = $(ChatInputRowSendBtn);
     await sendBtn.tap();
@@ -106,9 +127,4 @@ class ChatScenario extends BaseScenario {
     await Future.delayed(const Duration(seconds: 2)); 
   }
 
-  @override
-  Future<void> execute() {
-    // TODO: implement execute
-    throw UnimplementedError();
-  }
 }

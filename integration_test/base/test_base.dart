@@ -44,7 +44,7 @@ class TestBase {
       password: const String.fromEnvironment('PASSWORD'),
     );
 
-    await loginScenario.execute();
+    await loginScenario.login();
     final chatListRobot = ChatListRobot($);
     await testBody(chatListRobot);
   }

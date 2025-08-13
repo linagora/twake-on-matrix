@@ -1,32 +1,78 @@
 import 'package:flutter_test/flutter_test.dart';
 import '../base/test_base.dart';
-import '../robots/chat_group_detail_robot.dart';
+import '../help/soft_assertion_helper.dart';
 import '../robots/chat_list_robot.dart';
 import '../scenarios/chat_scenario.dart';
-import '../scenarios/message_scenario.dart';
+import 'package:flutter/material.dart';
+import '../base/core_robot.dart';
+import '../robots/home_robot.dart';
+import '../robots/search_robot.dart';
 
 void main() {
   TestBase().runPatrolTest(
-    description: 'Search for chat group after login',
+    description: 'working with chat screen tab',
     test: ($) async {
-      await TestBase().loginAndRun($, (_) async {
-        const searchPharse = 'thhoang stg change';
-        await ChatListRobot($).enterSearchText(searchPharse);
-        //verifyAll group are list contains searchPharse
-        await ChatScenario($).verifySearchResultViewIsShown();
-        await ChatScenario($).verifySearchResultContains(searchPharse);
-      });
-    },
-  );
+      final s = SoftAssertHelper();
+      
+      // login by UI
+      await TestBase().loginAndRun($, (_) async {});
+      //to close popup
+      await HomeRobot($).gotoContactListScreen();
+      // goto contact screen
+      await HomeRobot($).gotoChatListScreen();
+      await ChatScenario($).verifyDisplayOfContactListScreen(s);
 
-  TestBase().runPatrolTest(
-    description: 'Open a chat group',
-    test: ($) async {
-      await TestBase().loginAndRun($, (_) async {
-      await ChatListRobot($).openChatGroupByIndex(5);
-      //verify chat group is opened
-      expect(await ChatGroupDetailRobot($).isVisible(),isTrue);
-      });
+      // scroll vuot contact
+      await CoreRobot($).scrollToBottom($, root: $(SingleChildScrollView));
+      await CoreRobot($).scrollToTop($,root: $(SingleChildScrollView),);
+
+      //enter a non-existed contact
+      await ChatScenario($).enterSearchText("noexist");
+      // show no result
+      s.softAssertEquals((await SearchRobot($).getNoResultIcon()).visible, true, 'lable "No Results" is not shown');
+
+      await SearchRobot($).deleteSearchPhrase();
+      //enter searchky that return a list of results
+      await ChatScenario($).enterSearchText("th");
+      await ChatScenario($).verifySearchResultViewIsShown();
+      await ChatScenario($).verifySearchResultContains("th");
+      //return a list of result
+      // ignore: prefer_is_empty
+      s.softAssertEquals(((await ChatListRobot($).getListOfChatGroup()).length) >= 1, true, 'Expected at least 1 contact, but found 0');
+
+      await SearchRobot($).deleteSearchPhrase();
+      // search by address matrix
+      await ChatScenario($).enterSearchText("@thhoang:linagora.com");
+      // ignore: prefer_is_empty
+      s.softAssertEquals((await ChatListRobot($).getListOfChatGroup()).length == 1, true, 'Expected at least 1 contact, but found 0');
+
+
+      await SearchRobot($).deleteSearchPhrase();
+      // check case-sensitive
+      await ChatScenario($).enterSearchText("@thHoang:linagora.com");
+      // ignore: prefer_is_empty
+      s.softAssertEquals((await ChatListRobot($).getListOfChatGroup()).length == 1, true, 'Expected at least 1 contact, but found 0');
+
+
+      await SearchRobot($).deleteSearchPhrase();
+      // search by current account
+      await ChatScenario($).enterSearchText("@thhoang:stg.lin-saas.com");
+      //verify items displayed on the TwakeListItem
+      s.softAssertEquals((await ChatListRobot($).getListOfChatGroup()).length == 1, true, '>1');
+      s.softAssertEquals((await (await ChatListRobot($).getListOfChatGroup())[0].getOwnerLabel()).visible, true, 'Owner is missing!');
+      s.softAssertEquals((await (await ChatListRobot($).getListOfChatGroup())[0].getEmailLabel()).visible, true, 'Email field is not shown');
+
+      await SearchRobot($).deleteSearchPhrase();
+      final chatGroupDetailRobot = await ChatScenario($).openChatGroup("Thu Huyen HOANG");
+      expect(await chatGroupDetailRobot.isVisible(),isTrue);
+
+      //click back icon
+      await chatGroupDetailRobot.backToPreviousScreen();
+      await SearchRobot($).backToPreviousScreen();
+
+      //verify contact list screen is shown
+      await ChatScenario($).verifyDisplayOfContactListScreen(s);
+      s.verifyAll();
     },
   );
 
@@ -39,7 +85,7 @@ void main() {
 
       await TestBase().loginAndRun($, (_) async {
          // search to Open chat group
-        await ChatListRobot($).enterSearchText(searchPharse);
+        await ChatScenario($).enterSearchText(searchPharse);
         await ChatListRobot($).openChatGroupByIndex(0);
         // send a message
         final now = DateTime.now();
