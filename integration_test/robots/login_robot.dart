@@ -42,9 +42,24 @@ class LoginRobot extends CoreRobot {
     await pressSignInSsoLogin();
   }
 
+  Selector getLoginBtn() {
+    return  Selector(textContains: 'login');
+  }
+
+  Future<bool> isLoginBtnVisible({Duration timeout = const Duration(milliseconds: 10000)}) async {
+     try {
+      // A tiny settle helps after navigation/animation
+      await Future<void>.delayed(timeout);
+      await $.native.enterText(getLoginBtn(),text: "",);
+      return true; // If tap didn’t throw, it’s interactable enough
+    } catch (_) {
+      return false;
+    }
+  }
+
   Future<void> enterUsernameSsoLogin(String username) async {
     try {
-      await $.native.enterText(Selector(text: 'login'),text: username,);
+      await $.native.enterText(getLoginBtn(),text: username,);
       } catch (e) {
         ignoreException();
       }
