@@ -157,17 +157,8 @@ class _ExpansionContactListTileState extends State<ExpansionContactListTile>
                                         child: Row(
                                           children: [
                                             Flexible(
-                                              child: BuildDisplayName(
-                                                profileDisplayName:
-                                                    snapshot.data?.displayName,
-                                                contactDisplayName:
-                                                    widget.contact.displayName,
-                                                highlightKeyword:
-                                                    widget.highlightKeyword,
-                                                style: ListItemStyle
-                                                    .titleTextStyle(
-                                                  fontFamily: 'Inter',
-                                                ),
+                                              child: _displayNameWidget(
+                                                snapshot.data?.displayName,
                                               ),
                                             ),
                                           ],
@@ -240,6 +231,23 @@ class _ExpansionContactListTileState extends State<ExpansionContactListTile>
         ),
       ),
     );
+  }
+
+  BuildDisplayName _displayNameWidget(String? snapshotDisplayName) {
+    return BuildDisplayName(
+      profileDisplayName:
+          _profileDisplayName(widget.contact, snapshotDisplayName),
+      contactDisplayName: widget.contact.displayName,
+      highlightKeyword: widget.highlightKeyword,
+      style: ListItemStyle.titleTextStyle(fontFamily: 'Inter'),
+    );
+  }
+
+  String? _profileDisplayName(
+    PresentationContact contact,
+    String? profileName,
+  ) {
+    return contact.displayName ?? profileName;
   }
 
   Widget _invitationIconBuilder(
