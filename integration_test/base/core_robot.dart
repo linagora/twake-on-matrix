@@ -402,64 +402,72 @@ class CoreRobot {
     await sendMessageByAPI(list[0], list[1], list[2], "", "");
   }
 
-  Future<void> scrollToBottom(PatrolIntegrationTester $, {Finder? scrollable}) async {
-    final target = scrollable ?? find.byType(Scrollable);
+  Future<void> scrollToBottom(PatrolIntegrationTester $,{PatrolFinder? root, int maxDrags = 30}) async {
+    // Find the Scrollable to act on
+    final PatrolFinder scrollable = root == null
+        ? $(Scrollable).first
+        : $(find.descendant(
+            of: root.finder,
+            matching: find.byType(Scrollable),
+          ),).first;
 
-    double lastOffset = -1;
-    while (true) {
-      final scrollableState = $.tester.state<ScrollableState>(target);
-      final position = scrollableState.position;
-      final currentOffset = position.pixels;
+    var lastPixels = -1.0;
+    for (var i = 0; i < maxDrags; i++) {
+      // drag up a bit
+      await $.tester.drag(scrollable, const Offset(0, -400));
+      await $.tester.pump(const Duration(milliseconds: 120));
 
-      if (currentOffset == lastOffset) break;
-      lastOffset = currentOffset;
+      final s = $.tester.state<ScrollableState>(scrollable);
+      final p = s.position.pixels;
 
-      await $.tester.drag(target, const Offset(0, -300)); // Vuốt lên
-      await $.tester.pumpAndSettle();
+      if (p == lastPixels) break; // no more movement → bottom reached
+      lastPixels = p;
     }
   }
 
+  Future<void> scrollToTop(PatrolIntegrationTester $,{PatrolFinder? root, int maxDrags = 30}) async {
+    // Find the Scrollable to act on
+    final PatrolFinder scrollable = root == null
+        ? $(Scrollable).first
+        : $(find.descendant(
+            of: root.finder,
+            matching: find.byType(Scrollable),
+          ),).first;
 
-  Future<void> scrollToTop(PatrolIntegrationTester $, {Finder? scrollable}) async {
-    final target = scrollable ?? find.byType(Scrollable);
+    for (var i = 0; i < maxDrags; i++) {
+      // drag down a bit
+      await $.tester.drag(scrollable, const Offset(0, 400));
+      await $.tester.pump(const Duration(milliseconds: 120));
 
-    double lastOffset = -1;
-    while (true) {
-      final scrollableState = $.tester.state<ScrollableState>(target);
-      final position = scrollableState.position;
-      final currentOffset = position.pixels;
+      final s = $.tester.state<ScrollableState>(scrollable);
+      final p = s.position.pixels;
 
-      if (currentOffset == lastOffset) break;
-      lastOffset = currentOffset;
-
-      await $.tester.drag(target, const Offset(0, 300)); // vuốt xuống
-      await $.tester.pumpAndSettle();
+      if (p <= 0.0) break; // reached top
     }
   }
-
 
   Future<void> scrollUntilVisible(
-    PatrolIntegrationTester $,
-    Finder target, {
-    Finder? scrollable,
-    int maxSwipes = 10,
-  }) async {
-    final container = scrollable ?? find.byType(Scrollable);
+      PatrolIntegrationTester $,
+      Finder target, {
+      Finder? scrollable,
+      int maxSwipes = 10,
+    }) async {
+      final container = scrollable ?? find.byType(Scrollable);
 
-    for (int i = 0; i < maxSwipes; i++) {
-      if ($.tester.any(target)) return;
-      await $.tester.drag(container, const Offset(0, -300)); // swipper up
-      await $.tester.pumpAndSettle();
-    }
+      for (int i = 0; i < maxSwipes; i++) {
+        if ($.tester.any(target)) return;
+        await $.tester.drag(container, const Offset(0, -300)); // swipper up
+        await $.tester.pumpAndSettle();
+      }
 
-    for (int i = 0; i < maxSwipes; i++) {
-      if ($.tester.any(target)) return;
-      await $.tester.drag(container, const Offset(0, 300)); // swipper down
-      await $.tester.pumpAndSettle();
-    }
+      for (int i = 0; i < maxSwipes; i++) {
+        if ($.tester.any(target)) return;
+        await $.tester.drag(container, const Offset(0, 300)); // swipper down
+        await $.tester.pumpAndSettle();
+      }
 
-    if (!$.tester.any(target)) {
-      throw Exception('can not found widget after scrolling');
+      if (!$.tester.any(target)) {
+        throw Exception('can not found widget after scrolling');
+      }
     }
   }
-}
