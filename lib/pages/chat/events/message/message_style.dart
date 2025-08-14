@@ -159,11 +159,22 @@ class MessageStyle {
           ? MainAxisAlignment.end
           : MainAxisAlignment.start;
 
+  static CrossAxisAlignment messageCrossAxisAlignment(
+    Event event,
+    BuildContext context,
+  ) {
+    return event.shouldAlignOwnMessageInDifferentSide
+        ? CrossAxisAlignment.end
+        : CrossAxisAlignment.start;
+  }
+
   static AlignmentGeometry messageAlignmentGeometry(
     Event event,
     BuildContext context,
-  ) =>
-      responsiveUtils.isMobile(context) && event.isOwnMessage
-          ? Alignment.topRight
-          : Alignment.topLeft;
+  ) {
+    if (responsiveUtils.enableRightAndLeftMessageAlignment(context)) {
+      return event.isOwnMessage ? Alignment.topRight : Alignment.topLeft;
+    }
+    return Alignment.topLeft;
+  }
 }

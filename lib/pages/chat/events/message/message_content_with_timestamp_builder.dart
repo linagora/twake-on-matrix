@@ -177,6 +177,29 @@ class _MessageContentWithTimestampBuilderState
       mainAxisAlignment: MessageStyle.messageAlignment(widget.event, context),
       crossAxisAlignment: CrossAxisAlignment.end,
       children: [
+        if (widget.event.shouldDisplayContextMenuInLeftBubble) ...[
+          if (widget.event.status.isAvailable)
+            if (overlayContextMenu)
+              Container(
+                padding: const EdgeInsets.only(left: 8),
+                decoration: BoxDecoration(
+                  color: Colors.transparent,
+                  borderRadius: BorderRadius.circular(24),
+                ),
+                child: TwakeIconButton(
+                  onTapDown: (tapDownDetails) => widget.onTapMoreButton?.call(
+                    context,
+                    widget.event,
+                    tapDownDetails,
+                  ),
+                  icon: Icons.more_horiz,
+                  tooltip: L10n.of(context)!.more,
+                  preferBelow: false,
+                ),
+              )
+            else
+              _menuActionsRowBuilder(context),
+        ],
         TwakeContextMenuArea(
           builder: widget.menuChildren != null
               ? (context) => widget.menuChildren!.call(context)
@@ -418,27 +441,29 @@ class _MessageContentWithTimestampBuilderState
             ),
           ),
         ),
-        if (widget.event.status.isAvailable)
-          if (overlayContextMenu)
-            Container(
-              padding: const EdgeInsets.only(left: 8),
-              decoration: BoxDecoration(
-                color: Colors.transparent,
-                borderRadius: BorderRadius.circular(24),
-              ),
-              child: TwakeIconButton(
-                onTapDown: (tapDownDetails) => widget.onTapMoreButton?.call(
-                  context,
-                  widget.event,
-                  tapDownDetails,
+        if (widget.event.shouldDisplayContextMenuInRightBubble) ...[
+          if (widget.event.status.isAvailable)
+            if (overlayContextMenu)
+              Container(
+                padding: const EdgeInsets.only(left: 8),
+                decoration: BoxDecoration(
+                  color: Colors.transparent,
+                  borderRadius: BorderRadius.circular(24),
                 ),
-                icon: Icons.more_horiz,
-                tooltip: L10n.of(context)!.more,
-                preferBelow: false,
-              ),
-            )
-          else
-            _menuActionsRowBuilder(context),
+                child: TwakeIconButton(
+                  onTapDown: (tapDownDetails) => widget.onTapMoreButton?.call(
+                    context,
+                    widget.event,
+                    tapDownDetails,
+                  ),
+                  icon: Icons.more_horiz,
+                  tooltip: L10n.of(context)!.more,
+                  preferBelow: false,
+                ),
+              )
+            else
+              _menuActionsRowBuilder(context),
+        ],
       ],
     );
   }
