@@ -184,7 +184,8 @@ extension LocalizedBody on Event {
       isMobile && (isOwnMessage || room.isDirectChat) ||
       !isSameSenderWith(nextEvent) ||
       (isOwnMessage && redacted) ||
-      type == EventTypes.Encrypted;
+      type == EventTypes.Encrypted ||
+      (AppConfig.enableRightAndLeftMessageAlignment && isOwnMessage);
 
   bool get isPinned => room.pinnedEventIds.contains(eventId);
 
