@@ -79,6 +79,14 @@ class SettingsChatView extends StatelessWidget {
                   storeKey: SettingKeys.autoplayImages,
                   defaultValue: AppConfig.autoplayImages,
                 ),
+              if (!responsive.isMobile(context))
+                SettingsSwitchListTile.adaptive(
+                  title: L10n.of(context)!.enableRightAndLeftMessageAlignment,
+                  onChanged: (value) =>
+                      AppConfig.enableRightAndLeftMessageAlignment = value,
+                  storeKey: SettingKeys.enableRightAndLeftMessageAlignment,
+                  defaultValue: AppConfig.enableRightAndLeftMessageAlignment,
+                ),
               const Divider(),
               if (Matrix.of(context).webrtcIsSupported)
                 SettingsSwitchListTile.adaptive(

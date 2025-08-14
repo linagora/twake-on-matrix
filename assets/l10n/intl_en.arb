@@ -3374,5 +3374,6 @@
     "placeholders": {
       "mxid": {}
     }
-  }
+  },
+  "enableRightAndLeftMessageAlignment": "Enable right/left message alignment"
 }
