@@ -167,6 +167,16 @@ extension LocalizedBody on Event {
 
   bool get isOwnMessage => senderId == room.client.userID;
 
+  bool get shouldAlignOwnMessageInDifferentSide =>
+      isOwnMessage && AppConfig.enableRightAndLeftMessageAlignmentOnWeb;
+
+  bool get shouldDisplayContextMenuInLeftBubble =>
+      AppConfig.enableRightAndLeftMessageAlignmentOnWeb && isOwnMessage;
+
+  bool get shouldDisplayContextMenuInRightBubble =>
+      AppConfig.enableRightAndLeftMessageAlignmentOnWeb == false &&
+      !isOwnMessage;
+
   bool get timelineOverlayMessage =>
       {
         MessageTypes.Video,
@@ -184,7 +194,8 @@ extension LocalizedBody on Event {
       isMobile && (isOwnMessage || room.isDirectChat) ||
       !isSameSenderWith(nextEvent) ||
       (isOwnMessage && redacted) ||
-      type == EventTypes.Encrypted;
+      type == EventTypes.Encrypted ||
+      shouldAlignOwnMessageInDifferentSide;
 
   bool get isPinned => room.pinnedEventIds.contains(eventId);
 

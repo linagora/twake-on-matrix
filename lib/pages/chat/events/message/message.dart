@@ -242,17 +242,18 @@ class _MessageState extends State<Message> with MessageAvatarMixin {
         : MainAxisAlignment.start;
 
     final rowChildren = <Widget>[
-      OptionalSelectionContainerDisabled(
-        isEnabled: PlatformInfos.isWeb,
-        child: placeHolderWidget(
-          widget.onAvatarTap,
-          event: widget.event,
-          sameSender: widget.event.isSameSenderWith(widget.previousEvent),
-          ownMessage: widget.event.isOwnMessage,
-          context: context,
-          selectMode: widget.selectMode,
+      if (!widget.event.shouldAlignOwnMessageInDifferentSide)
+        OptionalSelectionContainerDisabled(
+          isEnabled: PlatformInfos.isWeb,
+          child: placeHolderWidget(
+            widget.onAvatarTap,
+            event: widget.event,
+            sameSender: widget.event.isSameSenderWith(widget.previousEvent),
+            ownMessage: widget.event.isOwnMessage,
+            context: context,
+            selectMode: widget.selectMode,
+          ),
         ),
-      ),
       Expanded(
         child: MessageContentWithTimestampBuilder(
           event: widget.event,
@@ -294,7 +295,10 @@ class _MessageState extends State<Message> with MessageAvatarMixin {
       children: rowChildren,
     );
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+      crossAxisAlignment: MessageStyle.messageCrossAxisAlignment(
+        widget.event,
+        context,
+      ),
       children: [
         if (displayTime)
           ValueListenableBuilder(

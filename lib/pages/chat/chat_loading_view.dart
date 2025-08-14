@@ -1,7 +1,8 @@
 import 'dart:math';
 
+import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/pages/chat/chat_loading_view_style.dart';
-import 'package:fluffychat/pages/chat/chat_view_body_style.dart';
+import 'package:fluffychat/utils/responsive/responsive_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:skeletons/skeletons.dart';
 
@@ -12,10 +13,8 @@ class ChatLoadingView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final responsive = getIt.get<ResponsiveUtils>();
     return Container(
-      constraints: BoxConstraints(
-        maxWidth: ChatViewBodyStyle.chatScreenMaxWidth,
-      ),
       alignment: Alignment.bottomCenter,
       child: ListView.builder(
         shrinkWrap: true,
@@ -27,15 +26,24 @@ class ChatLoadingView extends StatelessWidget {
               padding: ChatLoadingViewStyle.padding(context),
               child: SkeletonItem(
                 child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.end,
+                  crossAxisAlignment: _crossAxisAlignment(
+                    context: context,
+                    responsive: responsive,
+                    index: index,
+                  ),
                   children: [
-                    const SkeletonAvatar(
-                      style: SkeletonAvatarStyle(
-                        shape: BoxShape.circle,
-                        width: 38,
-                        height: 38,
+                    if (_shouldDisplayAvatar(
+                      context: context,
+                      responsive: responsive,
+                      index: index,
+                    ))
+                      const SkeletonAvatar(
+                        style: SkeletonAvatarStyle(
+                          shape: BoxShape.circle,
+                          width: 38,
+                          height: 38,
+                        ),
                       ),
-                    ),
                     const SizedBox(width: 8),
                     Expanded(
                       child: SkeletonParagraph(
@@ -57,7 +65,21 @@ class ChatLoadingView extends StatelessWidget {
                         ),
                       ),
                     ),
-                    const SizedBox(width: 16),
+                    if (!_shouldDisplayAvatar(
+                      context: context,
+                      responsive: responsive,
+                      index: index,
+                    )) ...[
+                      const SizedBox(width: 8),
+                      const SkeletonAvatar(
+                        style: SkeletonAvatarStyle(
+                          shape: BoxShape.circle,
+                          width: 38,
+                          height: 38,
+                        ),
+                      ),
+                    ] else
+                      const SizedBox(width: 16),
                   ],
                 ),
               ),
@@ -67,13 +89,26 @@ class ChatLoadingView extends StatelessWidget {
               padding: ChatLoadingViewStyle.padding(context),
               child: SkeletonItem(
                 child: Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  crossAxisAlignment: CrossAxisAlignment.end,
+                  crossAxisAlignment: _crossAxisAlignment(
+                    context: context,
+                    responsive: responsive,
+                    index: index,
+                  ),
                   children: [
-                    const SizedBox(
-                      height: 46,
-                      width: 46,
-                    ),
+                    if (_shouldDisplayAvatar(
+                      context: context,
+                      responsive: responsive,
+                      index: index,
+                    )) ...[
+                      const SkeletonAvatar(
+                        style: SkeletonAvatarStyle(
+                          shape: BoxShape.circle,
+                          width: 38,
+                          height: 38,
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                    ],
                     Expanded(
                       child: SkeletonParagraph(
                         style: SkeletonParagraphStyle(
@@ -95,7 +130,21 @@ class ChatLoadingView extends StatelessWidget {
                         ),
                       ),
                     ),
-                    const SizedBox(width: 16),
+                    if (!_shouldDisplayAvatar(
+                      context: context,
+                      responsive: responsive,
+                      index: index,
+                    )) ...[
+                      const SizedBox(width: 8),
+                      const SkeletonAvatar(
+                        style: SkeletonAvatarStyle(
+                          shape: BoxShape.circle,
+                          width: 38,
+                          height: 38,
+                        ),
+                      ),
+                    ] else
+                      const SizedBox(width: 16),
                   ],
                 ),
               ),
@@ -104,6 +153,36 @@ class ChatLoadingView extends StatelessWidget {
         },
       ),
     );
+  }
+
+  CrossAxisAlignment _crossAxisAlignment({
+    required BuildContext context,
+    required ResponsiveUtils responsive,
+    required int index,
+  }) {
+    if (responsive.enableRightAndLeftMessageAlignment(context) == false) {
+      return CrossAxisAlignment.end;
+    }
+    if (responsive.enableRightAndLeftMessageAlignment(context)) {
+      return index % 2 == 0 ? CrossAxisAlignment.end : CrossAxisAlignment.start;
+    }
+
+    return CrossAxisAlignment.end;
+  }
+
+  bool _shouldDisplayAvatar({
+    required BuildContext context,
+    required ResponsiveUtils responsive,
+    required int index,
+  }) {
+    if (responsive.enableRightAndLeftMessageAlignment(context) == false) {
+      return true;
+    }
+    if (responsive.enableRightAndLeftMessageAlignment(context)) {
+      return index % 2 == 0 ? true : false;
+    }
+
+    return true;
   }
 
   int _random(int min, int max) {

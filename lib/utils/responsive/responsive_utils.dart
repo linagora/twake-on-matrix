@@ -1,3 +1,4 @@
+import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/utils/extension/build_context_extension.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:flutter/widgets.dart';
@@ -115,5 +116,10 @@ class ResponsiveUtils {
 
   bool isSingleColumnLayout(BuildContext context) {
     return isMobile(context);
+  }
+
+  bool enableRightAndLeftMessageAlignment(BuildContext context) {
+    return isMobile(context) ||
+        AppConfig.enableRightAndLeftMessageAlignmentOnWeb;
   }
 }

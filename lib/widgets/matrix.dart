@@ -1072,6 +1072,14 @@ class MatrixState extends State<Matrix>
     store
         .getItemBool(SettingKeys.experimentalVoip, AppConfig.experimentalVoip)
         .then((value) => AppConfig.experimentalVoip = value);
+    store
+        .getItemBool(
+          SettingKeys.enableRightAndLeftMessageAlignmentOnWeb,
+          AppConfig.enableRightAndLeftMessageAlignmentOnWeb,
+        )
+        .then(
+          (value) => AppConfig.enableRightAndLeftMessageAlignmentOnWeb = value,
+        );
   }
 
   @override
