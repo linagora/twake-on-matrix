@@ -3356,5 +3356,6 @@
     }
   },
   "transferOwnershipDescription": "This user will gain full control over the group and you will no longer have total management rights. This action is irreversible.",
-  "confirmTransfer": "Confirm Transfer"
+  "confirmTransfer": "Confirm Transfer",
+  "enableRightAndLeftMessageAlignment": "Enable right/left message alignment"
 }
