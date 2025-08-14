@@ -60,14 +60,15 @@ class ChatProfileInfoController extends State<ChatProfileInfo>
     const Right(LookupContactsInitial()),
   );
 
-  final ValueNotifier<bool> blockUserLoadingNotifier =
-      ValueNotifier<bool>(false);
+  final ValueNotifier<bool?> blockUserLoadingNotifier =
+      ValueNotifier<bool?>(null);
 
   final ValueNotifier<bool> isBlockedUser = ValueNotifier<bool>(false);
 
   @override
-  Room? get room =>
-      widget.roomId != null ? client.getRoomById(widget.roomId!) : null;
+  Room? get room => widget.roomId != null
+      ? Matrix.read(context).client.getRoomById(widget.roomId!)
+      : null;
 
   @override
   ChatDetailsScreenEnum get chatType => ChatDetailsScreenEnum.direct;
@@ -78,8 +79,6 @@ class ChatProfileInfoController extends State<ChatProfileInfo>
 
   User? get user =>
       room?.unsafeGetUserFromMemoryOrFallback(room?.directChatMatrixID ?? '');
-
-  Client get client => Matrix.read(context).client;
 
   void lookupMatchContactAction() {
     lookupContactNotifierSub = _lookupMatchContactInteractor
@@ -128,7 +127,7 @@ class ChatProfileInfoController extends State<ChatProfileInfo>
                 return;
               }
 
-              if (failure is NotValidMxidFailure) {
+              if (failure is NotValidMxidUnblockFailure) {
                 blockUserLoadingNotifier.value = false;
                 TwakeSnackBar.show(
                   context,
@@ -161,12 +160,10 @@ class ChatProfileInfoController extends State<ChatProfileInfo>
   }
 
   void onBlockUser() {
-    if (user == null) return;
-
     _blockUserInteractor
         .execute(
           client: Matrix.of(context).client,
-          userId: user!.id,
+          userId: user?.id ?? widget.contact?.matrixId ?? '',
         )
         .listen(
           (event) => event.fold(
@@ -189,12 +186,12 @@ class ChatProfileInfoController extends State<ChatProfileInfo>
                 return;
               }
 
-              if (failure is NotValidMxidFailure) {
+              if (failure is NotValidMxidBlockFailure) {
                 blockUserLoadingNotifier.value = false;
                 TwakeSnackBar.show(
                   context,
                   L10n.of(context)!.userIsNotAValidMxid(
-                    user?.id ?? '',
+                    user?.id ?? widget.contact?.matrixId ?? '',
                   ),
                 );
                 return;
@@ -211,10 +208,15 @@ class ChatProfileInfoController extends State<ChatProfileInfo>
   }
 
   void listenIgnoredUser() {
-    isBlockedUser.value = client.ignoredUsers
+    isBlockedUser.value = Matrix.read(context)
+        .client
+        .ignoredUsers
         .contains(widget.contact?.matrixId ?? user?.id ?? '');
-    ignoredUsersStreamSub = client.ignoredUsersStream.listen((value) {
-      final userBlocked = client.ignoredUsers
+    ignoredUsersStreamSub =
+        Matrix.read(context).client.ignoredUsersStream.listen((value) {
+      final userBlocked = Matrix.read(context)
+          .client
+          .ignoredUsers
           .contains(widget.contact?.matrixId ?? user?.id ?? '');
       blockUserLoadingNotifier.value = false;
       isBlockedUser.value = userBlocked;

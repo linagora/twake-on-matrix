@@ -14,6 +14,8 @@ class ChatViewBodyStyle {
 
   static double dividerSize = 1.0;
 
+  static double blockedUserBannerHeight = 40.0;
+
   static Color chatViewBackgroundColor(BuildContext context) =>
       responsive.isMobile(context)
           ? LinagoraSysColors.material().background

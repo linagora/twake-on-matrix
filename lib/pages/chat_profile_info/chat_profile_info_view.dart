@@ -95,7 +95,7 @@ class ChatProfileInfoView extends StatelessWidget {
                                 lookupContactNotifier:
                                     controller.lookupContactNotifier,
                                 isDraftInfo: controller.widget.isDraftInfo,
-                                isBlockedUser: controller.isBlockedUser,
+                                isBlockedUserNotifier: controller.isBlockedUser,
                                 onUnblockUser: controller.onUnblockUser,
                                 onBlockUser: controller.onBlockUser,
                                 blockUserLoadingNotifier:
@@ -110,7 +110,7 @@ class ChatProfileInfoView extends StatelessWidget {
                               lookupContactNotifier:
                                   controller.lookupContactNotifier,
                               isDraftInfo: controller.widget.isDraftInfo,
-                              isBlockedUser: controller.isBlockedUser,
+                              isBlockedUserNotifier: controller.isBlockedUser,
                               onUnblockUser: controller.onUnblockUser,
                               onBlockUser: controller.onBlockUser,
                               blockUserLoadingNotifier:
@@ -124,7 +124,7 @@ class ChatProfileInfoView extends StatelessWidget {
                             lookupContactNotifier:
                                 controller.lookupContactNotifier,
                             isDraftInfo: controller.widget.isDraftInfo,
-                            isBlockedUser: controller.isBlockedUser,
+                            isBlockedUserNotifier: controller.isBlockedUser,
                             onUnblockUser: controller.onUnblockUser,
                             onBlockUser: controller.onBlockUser,
                             blockUserLoadingNotifier:
@@ -223,7 +223,7 @@ class _Information extends StatelessWidget {
     this.matrixId,
     required this.lookupContactNotifier,
     required this.isDraftInfo,
-    required this.isBlockedUser,
+    required this.isBlockedUserNotifier,
     this.onUnblockUser,
     this.onBlockUser,
     required this.blockUserLoadingNotifier,
@@ -234,10 +234,10 @@ class _Information extends StatelessWidget {
   final String? matrixId;
   final ValueNotifier<Either<Failure, Success>> lookupContactNotifier;
   final bool isDraftInfo;
-  final ValueNotifier<bool> isBlockedUser;
+  final ValueNotifier<bool> isBlockedUserNotifier;
   final void Function()? onUnblockUser;
   final void Function()? onBlockUser;
-  final ValueNotifier<bool> blockUserLoadingNotifier;
+  final ValueNotifier<bool?> blockUserLoadingNotifier;
 
   @override
   Widget build(BuildContext context) {
@@ -295,7 +295,7 @@ class _Information extends StatelessWidget {
                 style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                       color: LinagoraSysColors.material().onSurface,
                     ),
-                maxLines: 2,
+                maxLines: 1,
               ),
               Container(
                 padding: ChatProfileInfoStyle.copiableContainerPadding,
@@ -362,41 +362,46 @@ class _Information extends StatelessWidget {
                     ValueListenableBuilder(
                       valueListenable: blockUserLoadingNotifier,
                       builder: (context, isLoading, child) {
-                        return InkWell(
-                          hoverColor: Colors.transparent,
-                          highlightColor: Colors.transparent,
-                          focusColor: Colors.transparent,
-                          splashColor: Colors.transparent,
-                          onTap: isLoading
-                              ? null
-                              : isBlockedUser.value
-                                  ? onUnblockUser
-                                  : onBlockUser,
-                          child: _CopiableRowWithSvgIcon(
-                            iconPath: ImagePaths.icFrontHand,
-                            enableCopyIcon: false,
-                            text: isBlockedUser.value
-                                ? L10n.of(context)!.unblockUser
-                                : L10n.of(context)!.blockUser,
-                            iconColor: isBlockedUser.value
-                                ? LinagoraSysColors.material().error
-                                : LinagoraSysColors.material().primary,
-                            textColor: isBlockedUser.value
-                                ? LinagoraSysColors.material().error
-                                : LinagoraSysColors.material().primary,
-                            actionIcon: isLoading
-                                ? Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 16,
-                                    ),
-                                    child: CupertinoActivityIndicator(
-                                      animating: true,
-                                      color: LinagoraSysColors.material()
-                                          .onSurfaceVariant,
-                                    ),
-                                  )
-                                : null,
-                          ),
+                        return ValueListenableBuilder(
+                          valueListenable: isBlockedUserNotifier,
+                          builder: (context, isBlockedUser, child) {
+                            return InkWell(
+                              hoverColor: Colors.transparent,
+                              highlightColor: Colors.transparent,
+                              focusColor: Colors.transparent,
+                              splashColor: Colors.transparent,
+                              onTap: isLoading == true
+                                  ? null
+                                  : isBlockedUser
+                                      ? onUnblockUser
+                                      : onBlockUser,
+                              child: _CopiableRowWithSvgIcon(
+                                iconPath: ImagePaths.icFrontHand,
+                                enableCopyIcon: false,
+                                text: isBlockedUser
+                                    ? L10n.of(context)!.unblockUser
+                                    : L10n.of(context)!.blockUser,
+                                iconColor: isBlockedUser
+                                    ? LinagoraSysColors.material().error
+                                    : LinagoraSysColors.material().primary,
+                                textColor: isBlockedUser
+                                    ? LinagoraSysColors.material().error
+                                    : LinagoraSysColors.material().primary,
+                                actionIcon: isLoading == true
+                                    ? Padding(
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 16,
+                                        ),
+                                        child: CupertinoActivityIndicator(
+                                          animating: true,
+                                          color: LinagoraSysColors.material()
+                                              .onSurfaceVariant,
+                                        ),
+                                      )
+                                    : null,
+                              ),
+                            );
+                          },
                         );
                       },
                     ),
@@ -440,6 +445,7 @@ class _CopiableRowWithMaterialIcon extends StatelessWidget {
               style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                     color: LinagoraSysColors.material().onSurface,
                   ),
+              maxLines: 1,
               overflow: TextOverflow.ellipsis,
             ),
           ),
@@ -502,6 +508,7 @@ class _CopiableRowWithSvgIcon extends StatelessWidget {
               style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                     color: textColor ?? LinagoraSysColors.material().onSurface,
                   ),
+              maxLines: 1,
               overflow: TextOverflow.ellipsis,
             ),
           ),

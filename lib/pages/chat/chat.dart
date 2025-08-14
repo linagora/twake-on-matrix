@@ -8,9 +8,11 @@ import 'package:desktop_drop/desktop_drop.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
+import 'package:fluffychat/domain/app_state/room/unblock_user_state.dart';
 import 'package:fluffychat/domain/usecase/reactions/get_recent_reactions_interactor.dart';
 import 'package:fluffychat/domain/usecase/reactions/store_recent_reactions_interactor.dart';
 import 'package:fluffychat/domain/usecase/room/chat_get_pinned_events_interactor.dart';
+import 'package:fluffychat/domain/usecase/room/unblock_user_interactor.dart';
 import 'package:fluffychat/pages/chat/chat_actions.dart';
 import 'package:fluffychat/pages/chat/chat_context_menu_actions.dart';
 import 'package:fluffychat/pages/chat/chat_horizontal_action_menu.dart';
@@ -22,6 +24,7 @@ import 'package:fluffychat/pages/chat/events/message_content_mixin.dart';
 import 'package:fluffychat/pages/chat/input_bar/focus_suggestion_controller.dart';
 import 'package:fluffychat/pages/chat/recording_dialog.dart';
 import 'package:fluffychat/presentation/enum/chat/right_column_type_enum.dart';
+import 'package:fluffychat/presentation/extensions/client_extension.dart';
 import 'package:fluffychat/presentation/extensions/event_update_extension.dart';
 import 'package:fluffychat/presentation/mixins/common_media_picker_mixin.dart';
 import 'package:fluffychat/presentation/mixins/delete_event_mixin.dart';
@@ -154,6 +157,8 @@ class ChatController extends State<Chat>
   final storeRecentReactionsInteractor =
       getIt.get<StoreRecentReactionsInteractor>();
 
+  final _unblockUserInteractor = getIt.get<UnblockUserInteractor>();
+
   final ValueKey chatComposerTypeAheadKey =
       const ValueKey('chatComposerTypeAheadKey');
 
@@ -161,6 +166,10 @@ class ChatController extends State<Chat>
       const ValueKey('chatMediaPickerTypeAheadKey');
 
   StreamSubscription? onUpdateEventStreamSubcription;
+
+  StreamSubscription? ignoredUsersStreamSub;
+
+  StreamSubscription? _unblockUserSubscription;
 
   @override
   Room? room;
@@ -182,6 +191,9 @@ class ChatController extends State<Chat>
   String? get roomName => widget.roomName;
 
   String? get roomId => widget.roomId;
+
+  User? get user =>
+      room?.unsafeGetUserFromMemoryOrFallback(room?.directChatMatrixID ?? '');
 
   final composerDebouncer =
       Debouncer<String>(const Duration(milliseconds: 100), initialValue: '');
@@ -220,6 +232,8 @@ class ChatController extends State<Chat>
 
   final ValueNotifier<ViewEventListUIState> openingChatViewStateNotifier =
       ValueNotifier(ViewEventListInitial());
+
+  final ValueNotifier<bool> isBlockedUserNotifier = ValueNotifier(false);
 
   final FocusSuggestionController _focusSuggestionController =
       FocusSuggestionController();
@@ -264,7 +278,7 @@ class ChatController extends State<Chat>
 
   bool get selectMode => selectedEvents.isNotEmpty;
 
-  Client get client => Matrix.of(context).client;
+  Client get client => Matrix.read(context).client;
 
   final int _loadHistoryCount = 100;
 
@@ -2562,6 +2576,84 @@ class ChatController extends State<Chat>
     });
   }
 
+  Future<void> onTapUnblockUser() async {
+    final confirmResult = await showConfirmAlertDialog(
+      context: context,
+      title: L10n.of(context)!.unblockUsername(user?.displayName ?? ''),
+      message: L10n.of(context)!.unblockDescriptionDialog,
+      okLabel: L10n.of(context)!.unblock,
+      cancelLabel: L10n.of(context)!.cancel,
+      showCloseButton: PlatformInfos.isWeb,
+    );
+    if (confirmResult == ConfirmResult.cancel) return;
+    _unblockUserSubscription = _unblockUserInteractor
+        .execute(client: client, userId: user?.id ?? '')
+        .listen(
+          (event) => event.fold(
+            (failure) {
+              if (failure is UnblockUserFailure) {
+                TwakeDialog.hideLoadingDialog(context);
+                TwakeSnackBar.show(
+                  context,
+                  failure.exception.toString(),
+                );
+                return;
+              }
+
+              if (failure is NoPermissionForUnblockFailure) {
+                TwakeDialog.hideLoadingDialog(context);
+                TwakeSnackBar.show(
+                  context,
+                  L10n.of(context)!.permissionErrorUnblockUser,
+                );
+                return;
+              }
+
+              if (failure is NotValidMxidUnblockFailure) {
+                TwakeDialog.hideLoadingDialog(context);
+                TwakeSnackBar.show(
+                  context,
+                  L10n.of(context)!.userIsNotAValidMxid(
+                    user?.id ?? '',
+                  ),
+                );
+                return;
+              }
+
+              if (failure is NotInTheIgnoreListFailure) {
+                TwakeDialog.hideLoadingDialog(context);
+                TwakeSnackBar.show(
+                  context,
+                  L10n.of(context)!.userNotFoundInIgnoreList(
+                    user?.id ?? '',
+                  ),
+                );
+                return;
+              }
+            },
+            (success) {
+              if (success is UnblockUserLoading) {
+                TwakeDialog.showLoadingDialog(context);
+                return;
+              }
+              if (success is UnblockUserSuccess) {
+                TwakeDialog.hideLoadingDialog(context);
+                return;
+              }
+            },
+          ),
+        );
+  }
+
+  void listenIgnoredUser() {
+    isBlockedUserNotifier.value = room?.isDirectChat == true &&
+        client.ignoredUsers.contains(user?.id ?? '');
+    ignoredUsersStreamSub = client.ignoredUsersStream.listen((value) {
+      isBlockedUserNotifier.value = room?.isDirectChat == true &&
+          client.ignoredUsers.contains(user?.id ?? '');
+    });
+  }
+
   StreamSubscription? keyboardVisibilitySubscription;
 
   @override
@@ -2586,6 +2678,7 @@ class ChatController extends State<Chat>
       _listenRoomUpdateEvent();
       initCachedPresence();
       await _requestParticipants();
+      listenIgnoredUser();
     });
   }
 
@@ -2636,6 +2729,9 @@ class ChatController extends State<Chat>
     cachedPresenceNotifier.dispose();
     showFullEmojiPickerOnWebNotifier.dispose();
     showEmojiPickerComposerNotifier.dispose();
+    _unblockUserSubscription?.cancel();
+    isBlockedUserNotifier.dispose();
+    ignoredUsersStreamSub?.cancel();
     super.dispose();
   }
 

@@ -37,7 +37,7 @@ class UnblockUserInteractor {
       }
     } catch (error) {
       if (error is NotValidMxidException) {
-        yield const Left(NotValidMxidState());
+        yield const Left(NotValidMxidUnblockFailure());
       }
       if (error is NotInTheIgnoreListException) {
         yield const Left(NotInTheIgnoreListFailure());
