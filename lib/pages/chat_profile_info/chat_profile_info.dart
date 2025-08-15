@@ -99,12 +99,10 @@ class ChatProfileInfoController extends State<ChatProfileInfo>
   }
 
   void onUnblockUser() {
-    if (user == null) return;
-
     _unblockUserInteractor
         .execute(
           client: Matrix.of(context).client,
-          userId: user!.id,
+          userId: user?.id ?? widget.contact?.matrixId ?? '',
         )
         .listen(
           (event) => event.fold(
@@ -132,7 +130,7 @@ class ChatProfileInfoController extends State<ChatProfileInfo>
                 TwakeSnackBar.show(
                   context,
                   L10n.of(context)!.userIsNotAValidMxid(
-                    user?.id ?? '',
+                    user?.id ?? widget.contact?.matrixId ?? '',
                   ),
                 );
                 return;
@@ -143,7 +141,7 @@ class ChatProfileInfoController extends State<ChatProfileInfo>
                 TwakeSnackBar.show(
                   context,
                   L10n.of(context)!.userNotFoundInIgnoreList(
-                    user?.id ?? '',
+                    user?.id ?? widget.contact?.matrixId ?? '',
                   ),
                 );
                 return;
