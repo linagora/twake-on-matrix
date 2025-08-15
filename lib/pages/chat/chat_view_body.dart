@@ -161,7 +161,12 @@ class ChatViewBody extends StatelessWidget with MessageContentMixin {
                         return Column(
                           children: [
                             TwakeInkWell(
-                              onTap: () async => controller.onTapUnblockUser(),
+                              onTap: () async => controller.onTapUnblockUser(
+                                context: context,
+                                client: controller.client,
+                                userID: controller.user?.id ?? '',
+                                displayName: controller.user?.displayName ?? '',
+                              ),
                               child: const BlockedUserBanner(),
                             ),
                             Divider(

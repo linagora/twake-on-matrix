@@ -271,7 +271,16 @@ class DraftChatView extends StatelessWidget {
                         return Column(
                           children: [
                             TwakeInkWell(
-                              onTap: () async => controller.onTapUnblockUser(),
+                              onTap: () async => controller.onTapUnblockUser(
+                                context: context,
+                                client: Matrix.of(context).client,
+                                displayName:
+                                    controller.presentationContact!.matrixId ??
+                                        '',
+                                userID:
+                                    controller.presentationContact!.matrixId ??
+                                        '',
+                              ),
                               child: const BlockedUserBanner(),
                             ),
                             Divider(

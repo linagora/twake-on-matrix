@@ -4,12 +4,10 @@ import 'package:desktop_drop/desktop_drop.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/domain/app_state/direct_chat/create_direct_chat_success.dart';
-import 'package:fluffychat/domain/app_state/room/unblock_user_state.dart';
 import 'package:fluffychat/domain/model/extensions/platform_file/platform_file_extension.dart';
 import 'package:fluffychat/domain/usecase/create_direct_chat_interactor.dart';
 import 'package:fluffychat/domain/usecase/reactions/get_recent_reactions_interactor.dart';
 import 'package:fluffychat/domain/usecase/reactions/store_recent_reactions_interactor.dart';
-import 'package:fluffychat/domain/usecase/room/unblock_user_interactor.dart';
 import 'package:fluffychat/pages/chat/chat.dart';
 import 'package:fluffychat/pages/chat/input_bar/focus_suggestion_controller.dart';
 import 'package:fluffychat/pages/chat_draft/draft_chat_view.dart';
@@ -19,9 +17,9 @@ import 'package:fluffychat/presentation/extensions/client_extension.dart';
 import 'package:fluffychat/presentation/mixins/common_media_picker_mixin.dart';
 import 'package:fluffychat/presentation/mixins/media_picker_mixin.dart';
 import 'package:fluffychat/presentation/mixins/send_files_mixin.dart';
+import 'package:fluffychat/presentation/mixins/unblock_user_mixin.dart';
 import 'package:fluffychat/presentation/model/chat/chat_router_input_argument.dart';
 import 'package:fluffychat/presentation/model/contact/presentation_contact.dart';
-import 'package:fluffychat/utils/dialog/twake_dialog.dart';
 import 'package:fluffychat/utils/manager/upload_manager/upload_manager.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_file_extension.dart';
 import 'package:fluffychat/utils/network_connection_service.dart';
@@ -67,7 +65,8 @@ class DraftChatController extends State<DraftChat>
         CommonMediaPickerMixin,
         MediaPickerMixin,
         SendFilesMixin,
-        DragDrogFileMixin {
+        DragDrogFileMixin,
+        UnblockUserMixin {
   final createDirectChatInteractor = getIt.get<CreateDirectChatInteractor>();
 
   final getRecentReactionsInteractor =
@@ -97,11 +96,7 @@ class DraftChatController extends State<DraftChat>
 
   final ValueNotifier<bool> isBlockedUserNotifier = ValueNotifier(false);
 
-  final _unblockUserInteractor = getIt.get<UnblockUserInteractor>();
-
   StreamSubscription? ignoredUsersStreamSub;
-
-  StreamSubscription? _unblockUserSubscription;
 
   FocusNode inputFocus = FocusNode();
   FocusNode keyboardFocus = FocusNode();
@@ -181,83 +176,10 @@ class DraftChatController extends State<DraftChat>
     isSendingNotifier.dispose();
     inputFocus.dispose();
     keyboardFocus.dispose();
-    _unblockUserSubscription?.cancel();
+    disposeUnblockUserSubscription();
     ignoredUsersStreamSub?.cancel();
     isBlockedUserNotifier.dispose();
     super.dispose();
-  }
-
-  Future<void> onTapUnblockUser() async {
-    final confirmResult = await showConfirmAlertDialog(
-      context: context,
-      title:
-          L10n.of(context)!.unblockUsername(widget.contact.displayName ?? ''),
-      message: L10n.of(context)!.unblockDescriptionDialog,
-      okLabel: L10n.of(context)!.unblock,
-      cancelLabel: L10n.of(context)!.cancel,
-      showCloseButton: PlatformInfos.isWeb,
-    );
-    if (confirmResult == ConfirmResult.cancel) return;
-    _unblockUserSubscription = _unblockUserInteractor
-        .execute(
-          client: Matrix.of(context).client,
-          userId: widget.contact.matrixId ?? '',
-        )
-        .listen(
-          (event) => event.fold(
-            (failure) {
-              if (failure is UnblockUserFailure) {
-                TwakeDialog.hideLoadingDialog(context);
-                TwakeSnackBar.show(
-                  context,
-                  failure.exception.toString(),
-                );
-                return;
-              }
-
-              if (failure is NoPermissionForUnblockFailure) {
-                TwakeDialog.hideLoadingDialog(context);
-                TwakeSnackBar.show(
-                  context,
-                  L10n.of(context)!.permissionErrorUnblockUser,
-                );
-                return;
-              }
-
-              if (failure is NotValidMxidUnblockFailure) {
-                TwakeDialog.hideLoadingDialog(context);
-                TwakeSnackBar.show(
-                  context,
-                  L10n.of(context)!.userIsNotAValidMxid(
-                    widget.contact.matrixId ?? '',
-                  ),
-                );
-                return;
-              }
-
-              if (failure is NotInTheIgnoreListFailure) {
-                TwakeDialog.hideLoadingDialog(context);
-                TwakeSnackBar.show(
-                  context,
-                  L10n.of(context)!.userNotFoundInIgnoreList(
-                    widget.contact.matrixId ?? '',
-                  ),
-                );
-                return;
-              }
-            },
-            (success) {
-              if (success is UnblockUserLoading) {
-                TwakeDialog.showLoadingDialog(context);
-                return;
-              }
-              if (success is UnblockUserSuccess) {
-                TwakeDialog.hideLoadingDialog(context);
-                return;
-              }
-            },
-          ),
-        );
   }
 
   bool get isBlockedUser => Matrix.of(context)
