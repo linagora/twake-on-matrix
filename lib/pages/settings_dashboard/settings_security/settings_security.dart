@@ -1,6 +1,8 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:fluffychat/pages/bootstrap/bootstrap_dialog.dart';
+import 'package:fluffychat/presentation/extensions/client_extension.dart';
 import 'package:fluffychat/utils/beautify_string_extension.dart';
 import 'package:fluffychat/utils/dialog/twake_dialog.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_file_extension.dart';
@@ -28,6 +30,13 @@ class SettingsSecurity extends StatefulWidget {
 }
 
 class SettingsSecurityController extends State<SettingsSecurity> {
+  StreamSubscription? ignoredUsersStreamSub;
+
+  ValueNotifier<List<String>> ignoredUsersNotifier =
+      ValueNotifier<List<String>>([]);
+
+  Client get client => Matrix.read(context).client;
+
   void changePasswordAccountAction() async {
     final input = await showTextInputDialog(
       useRootNavigator: false,
@@ -145,6 +154,26 @@ class SettingsSecurityController extends State<SettingsSecurity> {
       context,
       L10n.of(context)!.copiedPublicKeyToClipboard,
     );
+  }
+
+  void listenIgnoredUser() {
+    ignoredUsersNotifier.value = client.ignoredUsers;
+    ignoredUsersStreamSub = client.ignoredUsersStream.listen((value) {
+      ignoredUsersNotifier.value = client.ignoredUsers;
+    });
+  }
+
+  @override
+  void initState() {
+    listenIgnoredUser();
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    ignoredUsersStreamSub?.cancel();
+    ignoredUsersNotifier.dispose();
+    super.dispose();
   }
 
   @override

@@ -16,6 +16,7 @@ import 'package:fluffychat/pages/homeserver_picker/homeserver_picker.dart';
 import 'package:fluffychat/pages/login/on_auth_redirect.dart';
 import 'package:fluffychat/pages/new_group/new_group_chat_info.dart';
 import 'package:fluffychat/pages/settings_dashboard/settings_app_language/settings_app_language.dart';
+import 'package:fluffychat/pages/settings_dashboard/settings_blocked_users/settings_blocked_user.dart';
 import 'package:fluffychat/pages/settings_dashboard/settings_profile/settings_profile.dart';
 import 'package:fluffychat/pages/splash/splash.dart';
 import 'package:fluffychat/pages/story/story_page.dart';
@@ -37,7 +38,6 @@ import 'package:fluffychat/pages/new_private_chat/new_private_chat.dart';
 import 'package:fluffychat/pages/settings_dashboard/settings_3pid/settings_3pid.dart';
 import 'package:fluffychat/pages/settings_dashboard/settings_chat/settings_chat.dart';
 import 'package:fluffychat/pages/settings_dashboard/settings_emotes/settings_emotes.dart';
-import 'package:fluffychat/pages/settings_dashboard/settings_ignore_list/settings_ignore_list.dart';
 import 'package:fluffychat/pages/settings_dashboard/settings_notifications/settings_notifications.dart';
 import 'package:fluffychat/pages/settings_dashboard/settings_security/settings_security.dart';
 import 'package:fluffychat/pages/settings_dashboard/settings_stories/settings_stories.dart';
@@ -423,10 +423,10 @@ abstract class AppRoutes {
                   redirect: loggedOutRedirect,
                 ),
                 GoRoute(
-                  path: 'ignorelist',
+                  path: 'blockedUsers',
                   pageBuilder: (context, state) => defaultPageBuilder(
                     context,
-                    const SettingsIgnoreList(),
+                    const BlockedUsers(),
                   ),
                   redirect: loggedOutRedirect,
                 ),

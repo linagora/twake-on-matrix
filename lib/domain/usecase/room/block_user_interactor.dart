@@ -34,7 +34,7 @@ class BlockUserInteractor {
       }
     } catch (error) {
       if (error is NotValidMxidException) {
-        yield const Left(NotValidMxidFailure());
+        yield const Left(NotValidMxidBlockFailure());
       }
       yield Left(
         BlockUserFailure(

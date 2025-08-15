@@ -1,4 +1,7 @@
 import 'package:fluffychat/di/global/get_it_initializer.dart';
+import 'package:fluffychat/pages/settings_dashboard/settings/settings_item_builder.dart';
+import 'package:fluffychat/pages/settings_dashboard/settings/settings_view_style.dart';
+import 'package:fluffychat/resource/image_paths.dart';
 import 'package:fluffychat/utils/responsive/responsive_utils.dart';
 import 'package:fluffychat/widgets/app_bars/twake_app_bar.dart';
 import 'package:fluffychat/widgets/app_bars/twake_app_bar_style.dart';
@@ -8,6 +11,7 @@ import 'package:fluffychat/utils/beautify_string_extension.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/widgets/layouts/max_width_body.dart';
 import 'package:fluffychat/widgets/matrix.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'settings_security.dart';
@@ -54,12 +58,51 @@ class SettingsSecurityView extends StatelessWidget {
               //   title: Text(L10n.of(context)!.whoCanSeeMyStories),
               //   onTap: () => context.go('/stories'),
               // ),
-              // ListTile(
-              //   leading: const Icon(Icons.block_outlined),
-              //   trailing: const Icon(Icons.chevron_right_outlined),
-              //   title: Text(L10n.of(context)!.ignoredUsers),
-              //   onTap: () => context.go('/ignorelist'),
-              // ),
+              Column(
+                children: [
+                  Padding(
+                    padding: SettingsViewStyle.bodySettingsScreenPadding,
+                    child: ValueListenableBuilder(
+                      valueListenable: controller.ignoredUsersNotifier,
+                      builder: (context, ignoredUsers, _) {
+                        return SettingsItemBuilder(
+                          title: L10n.of(context)!.blockedUsers,
+                          titleColor:
+                              Theme.of(context).colorScheme.onBackground,
+                          subtitle: ignoredUsers.isEmpty
+                              ? null
+                              : ignoredUsers.length.toString(),
+                          leadingWidget: SvgPicture.asset(
+                            ImagePaths.icFrontHand,
+                            colorFilter: ColorFilter.mode(
+                              LinagoraRefColors.material().tertiary[30] ??
+                                  LinagoraSysColors.material().onSurface,
+                              BlendMode.srcIn,
+                            ),
+                          ),
+                          onTap: () {
+                            if (ignoredUsers.isNotEmpty) {
+                              context.push('/rooms/security/blockedUsers');
+                            }
+                          },
+                        );
+                      },
+                    ),
+                  ),
+                  Padding(
+                    padding: SettingsViewStyle.settingsItemDividerPadding(
+                      context,
+                    ),
+                    child: Divider(
+                      color: LinagoraStateLayer(
+                        LinagoraSysColors.material().surfaceTint,
+                      ).opacityLayer3,
+                      thickness: SettingsViewStyle.settingsItemDividerThikness,
+                      height: SettingsViewStyle.settingsItemDividerHeight,
+                    ),
+                  ),
+                ],
+              ),
               // ListTile(
               //   leading: const Icon(Icons.password_outlined),
               //   trailing: const Icon(Icons.chevron_right_outlined),
@@ -76,22 +119,55 @@ class SettingsSecurityView extends StatelessWidget {
               // ),
               if (Matrix.of(context).client.encryption != null) ...{
                 if (PlatformInfos.isMobile)
-                  ListTile(
-                    leading: const Icon(Icons.lock_outlined),
-                    trailing: const Icon(Icons.chevron_right_outlined),
-                    title: Text(L10n.of(context)!.appLock),
-                    onTap: controller.setAppLockAction,
+                  Column(
+                    children: [
+                      Padding(
+                        padding: SettingsViewStyle.bodySettingsScreenPadding,
+                        child: SettingsItemBuilder(
+                          title: L10n.of(context)!.appLock,
+                          titleColor:
+                              Theme.of(context).colorScheme.onBackground,
+                          leading: Icons.lock_outlined,
+                          onTap: controller.setAppLockAction,
+                          leadingIconColor:
+                              LinagoraRefColors.material().tertiary[30],
+                        ),
+                      ),
+                      Padding(
+                        padding: SettingsViewStyle.settingsItemDividerPadding(
+                          context,
+                        ),
+                        child: Divider(
+                          color: LinagoraStateLayer(
+                            LinagoraSysColors.material().surfaceTint,
+                          ).opacityLayer3,
+                          thickness:
+                              SettingsViewStyle.settingsItemDividerThikness,
+                          height: SettingsViewStyle.settingsItemDividerHeight,
+                        ),
+                      ),
+                    ],
                   ),
-                ListTile(
-                  title: Text(L10n.of(context)!.yourPublicKey),
-                  subtitle: Text(
-                    Matrix.of(context).client.fingerprintKey.beautified,
-                    style: const TextStyle(fontFamily: 'monospace'),
-                  ),
-                  leading: const Icon(Icons.vpn_key_outlined),
-                  trailing: InkWell(
+                Padding(
+                  padding: SettingsViewStyle.bodySettingsScreenPadding,
+                  child: SettingsItemBuilder(
+                    height: 116,
+                    title: L10n.of(context)!.yourPublicKey,
+                    titleColor: Theme.of(context).colorScheme.onBackground,
+                    subtitle:
+                        Matrix.of(context).client.fingerprintKey.beautified,
+                    subtitleStyle:
+                        LinagoraTextStyle.material().bodyMedium.copyWith(
+                              color: LinagoraRefColors.material().tertiary[30],
+                              fontFamily: 'monospace',
+                            ),
+                    leading: Icons.notifications_outlined,
                     onTap: controller.copyPublicKey,
-                    child: const Icon(Icons.content_copy),
+                    leadingIconColor: LinagoraRefColors.material().tertiary[30],
+                    trailingWidget: InkWell(
+                      onTap: controller.copyPublicKey,
+                      child: const Icon(Icons.content_copy),
+                    ),
                   ),
                 ),
               },

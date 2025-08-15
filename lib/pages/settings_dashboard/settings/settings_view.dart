@@ -186,7 +186,7 @@ class SettingsView extends StatelessWidget {
                         leading: item.iconLeading(),
                         onTap: () => controller.onClickToSettingsItem(item),
                         isHideTrailingIcon: item.isHideTrailingIcon,
-                        trailingIconColor: item.iconColor(context),
+                        leadingIconColor: item.iconColor(context),
                         isSelected: controller.optionSelected(item),
                       ),
                     ),

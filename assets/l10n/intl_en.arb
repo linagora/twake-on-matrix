@@ -3374,5 +3374,15 @@
     "placeholders": {
       "mxid": {}
     }
-  }
+  },
+  "blockedUsers": "Blocked Users",
+  "unblockUsername": "Unblock {name}",
+  "@unblockUsername": {
+    "type": "text",
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "unblock": "Unblock",
+  "unblockDescriptionDialog": "This person will be able to message you and see when you're online. They won't be notified that you unblocked them."
 }

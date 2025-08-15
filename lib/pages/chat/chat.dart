@@ -22,6 +22,7 @@ import 'package:fluffychat/pages/chat/events/message_content_mixin.dart';
 import 'package:fluffychat/pages/chat/input_bar/focus_suggestion_controller.dart';
 import 'package:fluffychat/pages/chat/recording_dialog.dart';
 import 'package:fluffychat/presentation/enum/chat/right_column_type_enum.dart';
+import 'package:fluffychat/presentation/extensions/client_extension.dart';
 import 'package:fluffychat/presentation/extensions/event_update_extension.dart';
 import 'package:fluffychat/presentation/mixins/common_media_picker_mixin.dart';
 import 'package:fluffychat/presentation/mixins/delete_event_mixin.dart';
@@ -34,6 +35,7 @@ import 'package:fluffychat/presentation/mixins/save_file_to_twake_downloads_fold
 import 'package:fluffychat/presentation/mixins/save_media_to_gallery_android_mixin.dart';
 import 'package:fluffychat/presentation/mixins/send_files_mixin.dart';
 import 'package:fluffychat/presentation/mixins/send_files_with_caption_web_mixin.dart';
+import 'package:fluffychat/presentation/mixins/unblock_user_mixin.dart';
 import 'package:fluffychat/presentation/model/chat/view_event_list_ui_state.dart';
 import 'package:fluffychat/presentation/model/forward/forward_argument.dart';
 import 'package:fluffychat/resource/image_paths.dart';
@@ -125,7 +127,8 @@ class ChatController extends State<Chat>
         SaveFileToTwakeAndroidDownloadsFolderMixin,
         SaveMediaToGalleryAndroidMixin,
         LeaveChatMixin,
-        DeleteEventMixin {
+        DeleteEventMixin,
+        UnblockUserMixin {
   final NetworkConnectionService networkConnectionService =
       getIt.get<NetworkConnectionService>();
 
@@ -162,6 +165,8 @@ class ChatController extends State<Chat>
 
   StreamSubscription? onUpdateEventStreamSubcription;
 
+  StreamSubscription? ignoredUsersStreamSub;
+
   @override
   Room? room;
 
@@ -182,6 +187,9 @@ class ChatController extends State<Chat>
   String? get roomName => widget.roomName;
 
   String? get roomId => widget.roomId;
+
+  User? get user =>
+      room?.unsafeGetUserFromMemoryOrFallback(room?.directChatMatrixID ?? '');
 
   final composerDebouncer =
       Debouncer<String>(const Duration(milliseconds: 100), initialValue: '');
@@ -220,6 +228,8 @@ class ChatController extends State<Chat>
 
   final ValueNotifier<ViewEventListUIState> openingChatViewStateNotifier =
       ValueNotifier(ViewEventListInitial());
+
+  final ValueNotifier<bool> isBlockedUserNotifier = ValueNotifier(false);
 
   final FocusSuggestionController _focusSuggestionController =
       FocusSuggestionController();
@@ -264,7 +274,7 @@ class ChatController extends State<Chat>
 
   bool get selectMode => selectedEvents.isNotEmpty;
 
-  Client get client => Matrix.of(context).client;
+  Client get client => Matrix.read(context).client;
 
   final int _loadHistoryCount = 100;
 
@@ -2562,6 +2572,15 @@ class ChatController extends State<Chat>
     });
   }
 
+  void listenIgnoredUser() {
+    isBlockedUserNotifier.value = room?.isDirectChat == true &&
+        client.ignoredUsers.contains(user?.id ?? '');
+    ignoredUsersStreamSub = client.ignoredUsersStream.listen((value) {
+      isBlockedUserNotifier.value = room?.isDirectChat == true &&
+          client.ignoredUsers.contains(user?.id ?? '');
+    });
+  }
+
   StreamSubscription? keyboardVisibilitySubscription;
 
   @override
@@ -2586,6 +2605,7 @@ class ChatController extends State<Chat>
       _listenRoomUpdateEvent();
       initCachedPresence();
       await _requestParticipants();
+      listenIgnoredUser();
     });
   }
 
@@ -2636,6 +2656,9 @@ class ChatController extends State<Chat>
     cachedPresenceNotifier.dispose();
     showFullEmojiPickerOnWebNotifier.dispose();
     showEmojiPickerComposerNotifier.dispose();
+    disposeUnblockUserSubscription();
+    isBlockedUserNotifier.dispose();
+    ignoredUsersStreamSub?.cancel();
     super.dispose();
   }
 

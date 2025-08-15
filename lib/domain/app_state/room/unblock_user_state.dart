@@ -35,8 +35,8 @@ class NoPermissionForUnblockFailure extends Failure {
   List<Object?> get props => [];
 }
 
-class NotValidMxidState extends Failure {
-  const NotValidMxidState();
+class NotValidMxidUnblockFailure extends Failure {
+  const NotValidMxidUnblockFailure();
 
   @override
   List<Object?> get props => [];

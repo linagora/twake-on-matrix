@@ -13,9 +13,11 @@ import 'package:fluffychat/pages/chat/input_bar/focus_suggestion_controller.dart
 import 'package:fluffychat/pages/chat_draft/draft_chat_view.dart';
 import 'package:fluffychat/presentation/enum/chat/right_column_type_enum.dart';
 import 'package:fluffychat/presentation/enum/chat/send_media_with_caption_status_enum.dart';
+import 'package:fluffychat/presentation/extensions/client_extension.dart';
 import 'package:fluffychat/presentation/mixins/common_media_picker_mixin.dart';
 import 'package:fluffychat/presentation/mixins/media_picker_mixin.dart';
 import 'package:fluffychat/presentation/mixins/send_files_mixin.dart';
+import 'package:fluffychat/presentation/mixins/unblock_user_mixin.dart';
 import 'package:fluffychat/presentation/model/chat/chat_router_input_argument.dart';
 import 'package:fluffychat/presentation/model/contact/presentation_contact.dart';
 import 'package:fluffychat/utils/manager/upload_manager/upload_manager.dart';
@@ -63,7 +65,8 @@ class DraftChatController extends State<DraftChat>
         CommonMediaPickerMixin,
         MediaPickerMixin,
         SendFilesMixin,
-        DragDrogFileMixin {
+        DragDrogFileMixin,
+        UnblockUserMixin {
   final createDirectChatInteractor = getIt.get<CreateDirectChatInteractor>();
 
   final getRecentReactionsInteractor =
@@ -90,6 +93,10 @@ class DraftChatController extends State<DraftChat>
 
   final ValueKey _draftChatMediaPickerTypeAheadKey =
       const ValueKey('draftChatMediaPickerTypeAheadKey');
+
+  final ValueNotifier<bool> isBlockedUserNotifier = ValueNotifier(false);
+
+  StreamSubscription? ignoredUsersStreamSub;
 
   FocusNode inputFocus = FocusNode();
   FocusNode keyboardFocus = FocusNode();
@@ -151,6 +158,7 @@ class DraftChatController extends State<DraftChat>
     keyboardVisibilityController.onChange.listen(_keyboardListener);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _getProfile();
+      listenIgnoredUser();
     });
     super.initState();
   }
@@ -165,7 +173,26 @@ class DraftChatController extends State<DraftChat>
     inputText.dispose();
     showEmojiPickerComposerNotifier.dispose();
     _userProfile.dispose();
+    isSendingNotifier.dispose();
+    inputFocus.dispose();
+    keyboardFocus.dispose();
+    disposeUnblockUserSubscription();
+    ignoredUsersStreamSub?.cancel();
+    isBlockedUserNotifier.dispose();
     super.dispose();
+  }
+
+  bool get isBlockedUser => Matrix.of(context)
+      .client
+      .ignoredUsers
+      .contains(widget.contact.matrixId ?? '');
+
+  void listenIgnoredUser() {
+    isBlockedUserNotifier.value = isBlockedUser;
+    ignoredUsersStreamSub =
+        Matrix.of(context).client.ignoredUsersStream.listen((value) {
+      isBlockedUserNotifier.value = isBlockedUser;
+    });
   }
 
   TextEditingController sendController = TextEditingController();
