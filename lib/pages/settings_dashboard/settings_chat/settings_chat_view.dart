@@ -83,9 +83,10 @@ class SettingsChatView extends StatelessWidget {
                 SettingsSwitchListTile.adaptive(
                   title: L10n.of(context)!.enableRightAndLeftMessageAlignment,
                   onChanged: (value) =>
-                      AppConfig.enableRightAndLeftMessageAlignment = value,
-                  storeKey: SettingKeys.enableRightAndLeftMessageAlignment,
-                  defaultValue: AppConfig.enableRightAndLeftMessageAlignment,
+                      AppConfig.enableRightAndLeftMessageAlignmentOnWeb = value,
+                  storeKey: SettingKeys.enableRightAndLeftMessageAlignmentOnWeb,
+                  defaultValue:
+                      AppConfig.enableRightAndLeftMessageAlignmentOnWeb,
                 ),
               const Divider(),
               if (Matrix.of(context).webrtcIsSupported)

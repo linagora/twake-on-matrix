@@ -1074,11 +1074,11 @@ class MatrixState extends State<Matrix>
         .then((value) => AppConfig.experimentalVoip = value);
     store
         .getItemBool(
-          SettingKeys.enableRightAndLeftMessageAlignment,
-          AppConfig.enableRightAndLeftMessageAlignment,
+          SettingKeys.enableRightAndLeftMessageAlignmentOnWeb,
+          AppConfig.enableRightAndLeftMessageAlignmentOnWeb,
         )
         .then(
-          (value) => AppConfig.enableRightAndLeftMessageAlignment = value,
+          (value) => AppConfig.enableRightAndLeftMessageAlignmentOnWeb = value,
         );
   }
 

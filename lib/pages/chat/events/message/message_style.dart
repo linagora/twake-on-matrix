@@ -151,29 +151,19 @@ class MessageStyle {
   static const double paddingAllPushpin = 0;
   static const Color borderColorReceivedBubble = Color(0xFFEBEDF0);
 
-  static bool displayAvatar(
-    Event event,
-  ) {
-    return event.isOwnMessage && AppConfig.enableRightAndLeftMessageAlignment;
-  }
-
   static MainAxisAlignment messageAlignment(
     Event event,
     BuildContext context,
-  ) {
-    if (responsiveUtils.isMobile(context)) {
-      return event.isOwnMessage
+  ) =>
+      responsiveUtils.isMobile(context) && event.isOwnMessage
           ? MainAxisAlignment.end
           : MainAxisAlignment.start;
-    }
-    return event.isOwnMessage ? MainAxisAlignment.end : MainAxisAlignment.start;
-  }
 
   static CrossAxisAlignment messageCrossAxisAlignment(
     Event event,
     BuildContext context,
   ) {
-    return event.isOwnMessage && AppConfig.enableRightAndLeftMessageAlignment
+    return event.shouldAlignMessageInDifferentSide
         ? CrossAxisAlignment.end
         : CrossAxisAlignment.start;
   }
@@ -185,7 +175,7 @@ class MessageStyle {
     if (responsiveUtils.isMobile(context)) {
       return event.isOwnMessage ? Alignment.topRight : Alignment.topLeft;
     }
-    return event.isOwnMessage && AppConfig.enableRightAndLeftMessageAlignment
+    return event.shouldAlignMessageInDifferentSide
         ? Alignment.topRight
         : Alignment.topLeft;
   }

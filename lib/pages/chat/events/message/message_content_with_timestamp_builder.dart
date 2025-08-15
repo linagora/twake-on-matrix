@@ -177,7 +177,7 @@ class _MessageContentWithTimestampBuilderState
       mainAxisAlignment: MessageStyle.messageAlignment(widget.event, context),
       crossAxisAlignment: CrossAxisAlignment.end,
       children: [
-        if (AppConfig.enableRightAndLeftMessageAlignment &&
+        if (AppConfig.enableRightAndLeftMessageAlignmentOnWeb &&
             widget.event.isOwnMessage) ...[
           if (widget.event.status.isAvailable)
             if (overlayContextMenu)
@@ -443,7 +443,7 @@ class _MessageContentWithTimestampBuilderState
           ),
         ),
         if (!widget.event.isOwnMessage ||
-            !AppConfig.enableRightAndLeftMessageAlignment) ...[
+            !AppConfig.enableRightAndLeftMessageAlignmentOnWeb) ...[
           if (widget.event.status.isAvailable)
             if (overlayContextMenu)
               Container(

@@ -242,7 +242,7 @@ class _MessageState extends State<Message> with MessageAvatarMixin {
         : MainAxisAlignment.start;
 
     final rowChildren = <Widget>[
-      if (!MessageStyle.displayAvatar(widget.event))
+      if (!widget.event.shouldAlignMessageInDifferentSide)
         OptionalSelectionContainerDisabled(
           isEnabled: PlatformInfos.isWeb,
           child: placeHolderWidget(
