@@ -26,7 +26,7 @@ in [config.sample.json](https://github.com/linagora/twake-on-matrix/blob/main/co
   "twake_workplace_homeserver": "https://example.com/",
   "app_grid_dashboard_available": true,
   "homeserver": "https://example.com/",
-  "platform": "platform"
+  "platform": "platform",
   "default_max_upload_avatar_size_in_bytes": 1000000,
   "dev_mode": false,
   "qr_code_download_url": "https://example.com/",
