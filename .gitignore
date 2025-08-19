@@ -51,7 +51,7 @@ docs/_site/
 # Exceptions to above rules.
 !/packages/flutter_tools/test/data/dart_dependencies_test/**/.packages
 
-
+local.properties
 /key.jks
 /android/key.properties
 **/android/app/.cxx
@@ -67,3 +67,14 @@ ios/Podfile.lock
 /macos/out
 .vs
 olm
+
+# Devenv
+.devenv*
+devenv.local.nix
+
+# direnv
+.direnv
+
+# pre-commit
+.pre-commit-config.yaml
+
