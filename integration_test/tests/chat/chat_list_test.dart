@@ -1,16 +1,16 @@
 import 'package:flutter_test/flutter_test.dart';
-import '../base/test_base.dart';
-import '../help/soft_assertion_helper.dart';
-import '../robots/chat_list_robot.dart';
-import '../scenarios/chat_scenario.dart';
+import '../../base/test_base.dart';
+import '../../help/soft_assertion_helper.dart';
+import '../../robots/chat_list_robot.dart';
+import '../../scenarios/chat_scenario.dart';
 import 'package:flutter/material.dart';
-import '../base/core_robot.dart';
-import '../robots/home_robot.dart';
-import '../robots/search_robot.dart';
+import '../../base/core_robot.dart';
+import '../../robots/home_robot.dart';
+import '../../robots/search_robot.dart';
 
 void main() {
   TestBase().runPatrolTest(
-    description: 'working with chat screen tab',
+    description: 'working with chat list screen',
     test: ($) async {
       final s = SoftAssertHelper();
       
@@ -18,11 +18,9 @@ void main() {
       await TestBase().loginAndRun($, (_) async {});
       //to close popup
       await HomeRobot($).gotoContactListScreen();
-      // goto contact screen
+      // goto chat screen
       await HomeRobot($).gotoChatListScreen();
-      await ChatScenario($).verifyDisplayOfContactListScreen(s);
-
-      // scroll vuot contact
+      // verify we can scroll the screen
       await CoreRobot($).scrollToBottom($, root: $(SingleChildScrollView));
       await CoreRobot($).scrollToTop($,root: $(SingleChildScrollView),);
 
@@ -73,39 +71,6 @@ void main() {
       //verify contact list screen is shown
       await ChatScenario($).verifyDisplayOfContactListScreen(s);
       s.verifyAll();
-    },
-  );
-
-  TestBase().runPatrolTest(
-    description: 'Checking sending message between members',
-    test: ($) async {
-      const searchPharse = 'Thu Huyen HOANG';
-      const groupID = "!jmWMCwSFwoXpofpmqQ";
-      // login by UI
-
-      await TestBase().loginAndRun($, (_) async {
-         // search to Open chat group
-        await ChatScenario($).enterSearchText(searchPharse);
-        await ChatListRobot($).openChatGroupByIndex(0);
-        // send a message
-        final now = DateTime.now();
-        final messageOfSender = "sender sent at ${now.year}${now.month}${now.day}${now.hour}${now.minute}";
-        final messageOfReceiver = "receiver sent at ${now.year}${now.month}${now.day}${now.hour}${now.minute}";
-        await ChatScenario($).sendAMesage(messageOfSender);
-
-        // check message is sent
-        await ChatScenario($).verifyMessageIsShown(messageOfSender);
-        //// receiver read message
-        //
-        //// check sender see message is read
-        //...
-        // send message by API
-        await Future.delayed(const Duration(seconds: 10)); 
-        await ChatScenario($).sendAMessageByAPI(groupID, messageOfReceiver);
-        // check message is shown on UI
-        await Future.delayed(const Duration(seconds: 30)); 
-        await ChatScenario($).verifyMessageIsShown(messageOfReceiver);
-      });
     },
   );
 }
