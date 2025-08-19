@@ -320,6 +320,12 @@ class ContactsManager {
         contacts: failure.contacts,
       );
     }
+
+    if (failure is GetPhonebookContactsFailure ||
+        failure is RequestTokenFailure ||
+        failure is RegisterTokenFailure) {
+      _progressPhoneBookState.value = null;
+    }
   }
 
   void _handleLookUpSuccessState(Success success) {

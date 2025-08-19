@@ -99,6 +99,21 @@ class SearchContactsAndChatsController
             .value
             .getFailureOrNull<LookUpPhonebookContactPartialFailed>()
             ?.contacts ??
+        contactManger
+            .getPhonebookContactsNotifier()
+            .value
+            .getFailureOrNull<GetPhonebookContactsFailure>()
+            ?.contacts ??
+        contactManger
+            .getPhonebookContactsNotifier()
+            .value
+            .getFailureOrNull<RequestTokenFailure>()
+            ?.contacts ??
+        contactManger
+            .getPhonebookContactsNotifier()
+            .value
+            .getFailureOrNull<RegisterTokenFailure>()
+            ?.contacts ??
         [];
     final tomPresentationSearchContacts = tomContacts
         .expand((contact) => contact.toPresentationContacts())

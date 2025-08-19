@@ -358,6 +358,69 @@ mixin class ContactsViewControllerMixin {
           }
         }
 
+        if (failure is GetPhonebookContactsFailure) {
+          final filteredContacts = failure.contacts
+              .searchContacts(keyword)
+              .expand((contact) => contact.toPresentationContacts())
+              .toList();
+          if (filteredContacts.isEmpty) {
+            return Left(
+              GetPresentationContactsEmpty(
+                keyword: keyword,
+              ),
+            );
+          } else {
+            return Right(
+              GetPresentationContactsSuccess(
+                contacts: filteredContacts,
+                keyword: keyword,
+              ),
+            );
+          }
+        }
+
+        if (failure is RequestTokenFailure) {
+          final filteredContacts = failure.contacts
+              .searchContacts(keyword)
+              .expand((contact) => contact.toPresentationContacts())
+              .toList();
+          if (filteredContacts.isEmpty) {
+            return Left(
+              GetPresentationContactsEmpty(
+                keyword: keyword,
+              ),
+            );
+          } else {
+            return Right(
+              GetPresentationContactsSuccess(
+                contacts: filteredContacts,
+                keyword: keyword,
+              ),
+            );
+          }
+        }
+
+        if (failure is RegisterTokenFailure) {
+          final filteredContacts = failure.contacts
+              .searchContacts(keyword)
+              .expand((contact) => contact.toPresentationContacts())
+              .toList();
+          if (filteredContacts.isEmpty) {
+            return Left(
+              GetPresentationContactsEmpty(
+                keyword: keyword,
+              ),
+            );
+          } else {
+            return Right(
+              GetPresentationContactsSuccess(
+                contacts: filteredContacts,
+                keyword: keyword,
+              ),
+            );
+          }
+        }
+
         return Left(failure);
       },
       (success) {

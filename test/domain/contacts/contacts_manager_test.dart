@@ -421,7 +421,12 @@ void main() {
         ).thenAnswer(
           (_) => Stream.fromIterable([
             const Right(GetPhonebookContactsLoading()),
-            const Left(RequestTokenFailure(exception: dynamic)),
+            Left(
+              RequestTokenFailure(
+                exception: dynamic,
+                contacts: contacts,
+              ),
+            ),
           ]),
         );
 
@@ -472,7 +477,10 @@ void main() {
         expectLater(
           listPhonebookContactsFailureState,
           [
-            const RequestTokenFailure(exception: dynamic),
+            RequestTokenFailure(
+              exception: dynamic,
+              contacts: contacts,
+            ),
           ],
         );
       },
@@ -660,7 +668,12 @@ void main() {
         ).thenAnswer(
           (_) => Stream.fromIterable([
             const Right(GetPhonebookContactsLoading()),
-            const Left(RequestTokenFailure(exception: dynamic)),
+            Left(
+              RequestTokenFailure(
+                exception: dynamic,
+                contacts: contacts,
+              ),
+            ),
           ]),
         );
 
@@ -734,7 +747,10 @@ void main() {
         expectLater(
           listPhonebookContactsFailureState,
           [
-            const RequestTokenFailure(exception: dynamic),
+            RequestTokenFailure(
+              exception: dynamic,
+              contacts: contacts,
+            ),
           ],
         );
       },
@@ -1139,7 +1155,12 @@ void main() {
         ).thenAnswer(
           (_) => Stream.fromIterable([
             const Right(GetPhonebookContactsLoading()),
-            const Left(RegisterTokenFailure(exception: dynamic)),
+            Left(
+              RegisterTokenFailure(
+                exception: dynamic,
+                contacts: contacts,
+              ),
+            ),
           ]),
         );
 
@@ -1190,7 +1211,10 @@ void main() {
         expectLater(
           listPhonebookContactsFailureState,
           [
-            const RegisterTokenFailure(exception: dynamic),
+            RegisterTokenFailure(
+              exception: dynamic,
+              contacts: contacts,
+            ),
           ],
         );
       },
@@ -1625,7 +1649,12 @@ void main() {
         ).thenAnswer(
           (_) => Stream.fromIterable([
             const Right(GetPhonebookContactsLoading()),
-            const Left(RequestTokenFailure(exception: dynamic)),
+            Left(
+              RequestTokenFailure(
+                exception: dynamic,
+                contacts: contacts,
+              ),
+            ),
           ]),
         );
 
@@ -1676,7 +1705,10 @@ void main() {
         expectLater(
           listPhonebookContactsFailureState,
           [
-            const RequestTokenFailure(exception: dynamic),
+            RequestTokenFailure(
+              exception: dynamic,
+              contacts: contacts,
+            ),
           ],
         );
 
@@ -1758,7 +1790,12 @@ void main() {
         ).thenAnswer(
           (_) => Stream.fromIterable([
             const Right(GetPhonebookContactsLoading()),
-            const Left(RequestTokenFailure(exception: dynamic)),
+            Left(
+              RequestTokenFailure(
+                exception: dynamic,
+                contacts: contacts,
+              ),
+            ),
           ]),
         );
 
@@ -1809,7 +1846,10 @@ void main() {
         expectLater(
           listPhonebookContactsFailureState,
           [
-            const RequestTokenFailure(exception: dynamic),
+            RequestTokenFailure(
+              exception: dynamic,
+              contacts: contacts,
+            ),
           ],
         );
 
