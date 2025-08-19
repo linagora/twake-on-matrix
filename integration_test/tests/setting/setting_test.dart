@@ -1,4 +1,4 @@
-import '../base/test_base.dart';
+import '../../base/test_base.dart';
 
 void main() {
   TestBase().runPatrolTest(

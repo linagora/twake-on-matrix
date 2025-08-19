@@ -1,12 +1,15 @@
+import 'package:fluffychat/pages/chat/chat_app_bar_title.dart';
 import 'package:fluffychat/pages/chat/chat_event_list.dart';
+import 'package:fluffychat/pages/chat/events/message_content.dart';
 import 'package:fluffychat/utils/permission_dialog.dart';
 import 'package:fluffychat/widgets/twake_components/twake_icon_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:linkfy_text/linkfy_text.dart';
 import 'package:patrol/patrol.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
+import 'package:pull_down_button/pull_down_button.dart';
 import '../base/core_robot.dart';
+import 'menu_robot.dart';
 
 class ChatGroupDetailRobot extends CoreRobot {
   ChatGroupDetailRobot(super.$);
@@ -43,7 +46,8 @@ class ChatGroupDetailRobot extends CoreRobot {
   }
 
   Future<PatrolFinder> getText(String text) async {
-    return $(MatrixLinkifyText).containing(text);
+    return $(MessageContent).containing(find.text(text));
+    // return $(MatrixLinkifyText).containing(text);
   }
 
   Future<PatrolFinder> getInputTextField() async {
@@ -51,11 +55,23 @@ class ChatGroupDetailRobot extends CoreRobot {
   }
 
   Future<void> inputMessage(String message) async {
-    await getInputTextField().tap();
-    await getInputTextField().enterText(message);
+    final text = await getInputTextField();
+    await text.tap();
+    await text.enterText(message);
   }
 
   Future<void> backToPreviousScreen() async{
     await getBackIcon().tap();
+  }
+
+  Future<PullDownMenuRobot> openPullDownMenu(String message) async{
+    await $(MessageContent).containing(find.text(message)).longPress();
+    await $.waitUntilVisible($(PullDownMenu));
+    await $.pump();
+    return PullDownMenuRobot($);
+  }
+
+  String? getTitle(){
+    return $(ChatAppBarTitle).$(Text).at(0).text;
   }
 }

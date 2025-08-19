@@ -5,7 +5,6 @@ import 'package:html/parser.dart';
 import 'package:patrol/patrol.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-
 class CoreRobot {
   final PatrolIntegrationTester $;
 
@@ -22,10 +21,10 @@ class CoreRobot {
   }
 
   Future<void> waitForEitherVisible({
-  required PatrolIntegrationTester $,
-  required PatrolFinder first,
-  required PatrolFinder second,
-  required Duration timeout ,
+    required PatrolIntegrationTester $,
+    required PatrolFinder first,
+    required PatrolFinder second,
+    required Duration timeout ,
   }) async {
     final end = DateTime.now().add(timeout);
     while (DateTime.now().isBefore(end)) {
