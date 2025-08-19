@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import '../base/core_robot.dart';
-import '../base/test_base.dart';
-import '../help/soft_assertion_helper.dart';
-import '../robots/contact_list_robot.dart';
-import '../robots/home_robot.dart';
-import '../robots/search_robot.dart';
-import '../scenarios/contact_scenario.dart';
+import '../../base/core_robot.dart';
+import '../../base/test_base.dart';
+import '../../help/soft_assertion_helper.dart';
+import '../../robots/contact_list_robot.dart';
+import '../../robots/home_robot.dart';
+import '../../robots/search_robot.dart';
+import '../../scenarios/contact_scenario.dart';
 
 void main() {
   TestBase().runPatrolTest(
@@ -19,8 +19,7 @@ void main() {
       // goto contact screen
       await HomeRobot($).gotoContactListScreen();
       await ContactScenario($).verifyDisplayOfContactListScreen(s);
-
-      // scroll vuot contact
+      // verify we can scroll the screen
       await CoreRobot($).scrollToBottom($, root: $(CustomScrollView));
       await CoreRobot($).scrollToTop($,root: $(CustomScrollView),);
 
