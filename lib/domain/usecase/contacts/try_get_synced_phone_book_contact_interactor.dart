@@ -17,6 +17,7 @@ class TryGetSyncedPhoneBookContactInteractor {
 
   Future<Either<Failure, Success>> execute({
     required String userId,
+    bool forceRun = false,
   }) async {
     try {
       final hiveContacts =
@@ -42,7 +43,8 @@ class TryGetSyncedPhoneBookContactInteractor {
           return Right(
             GetSyncedPhoneBookContactSuccessState(
               contacts: hiveContacts,
-              timeAvailableForSyncVault: timeAvailableForSyncVault,
+              timeAvailableForSyncVault:
+                  forceRun ? forceRun : timeAvailableForSyncVault,
             ),
           );
         } else if (errorHive != null) {
@@ -67,7 +69,8 @@ class TryGetSyncedPhoneBookContactInteractor {
         return Right(
           GetSyncedPhoneBookContactSuccessState(
             contacts: hiveContacts,
-            timeAvailableForSyncVault: timeAvailableForSyncVault,
+            timeAvailableForSyncVault:
+                forceRun ? forceRun : timeAvailableForSyncVault,
           ),
         );
       } else {

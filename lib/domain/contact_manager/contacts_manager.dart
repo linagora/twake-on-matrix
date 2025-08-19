@@ -152,12 +152,14 @@ class ContactsManager {
     await _getAllContacts(
       isAvailableSupportPhonebookContacts: isAvailableSupportPhonebookContacts,
       withMxId: withMxId,
+      forceRun: forceRun,
     );
   }
 
   Future<void> _getAllContacts({
     bool isAvailableSupportPhonebookContacts = false,
     required String withMxId,
+    bool forceRun = false,
   }) async {
     tomContactsSubscription = getTomContactsInteractor
         .execute(limit: AppConfig.maxFetchContacts)
@@ -172,6 +174,7 @@ class ContactsManager {
           isAvailableSupportPhonebookContacts:
               isAvailableSupportPhonebookContacts,
           withMxId: withMxId,
+          forceRun: forceRun,
         ).whenComplete(
           () => _isSynchronizing = false,
         );
@@ -182,6 +185,7 @@ class ContactsManager {
           isAvailableSupportPhonebookContacts:
               isAvailableSupportPhonebookContacts,
           withMxId: withMxId,
+          forceRun: forceRun,
         ).whenComplete(
           () => _isSynchronizing = false,
         );
@@ -191,20 +195,26 @@ class ContactsManager {
   Future<void> _lookUpPhonebookContacts({
     bool isAvailableSupportPhonebookContacts = false,
     required String withMxId,
+    bool forceRun = false,
   }) async {
     if (!isAvailableSupportPhonebookContacts) {
       return;
     }
 
-    await _tryGetSyncedPhoneBookContact(withMxId: withMxId);
+    await _tryGetSyncedPhoneBookContact(
+      withMxId: withMxId,
+      forceRun: forceRun,
+    );
   }
 
   Future<void> _tryGetSyncedPhoneBookContact({
     required String withMxId,
+    bool forceRun = false,
   }) async {
     await tryGetSyncedPhoneBookContactInteractor
         .execute(
           userId: withMxId,
+          forceRun: forceRun,
         )
         .then(
           (state) => state.fold(
