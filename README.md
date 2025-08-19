@@ -89,13 +89,12 @@ sudo chown $(id -u):$(id -g) ./assets/js/package -Rv
 #### Android
 
 - [ ] An implementation of JDK 17 *(tested with openjdk-17.0.13+11)*
-- [ ] An implementation of JDK 8 *(tested with openjdk-8u432-b06)*
 - [ ] (Optional) Android Studio
 - [ ] An Android SDK with:
-  - [ ] Android build tools: 30.0.3
-  - [ ] Android platform: 31, 32, 33, 34
-  - [ ] CMake: 3.18.1
-  - [ ] Android NDK: 23.1.7779620
+  - [ ] Android build tools: 34.0.0
+  - [ ] Android platform: 31, 32, 33, 34, 35
+  - [ ] CMake: 3.22.1
+  - [ ] Android NDK: 26.1.10909125
   - [ ] Google APIs: enabled
 
 *Note: Gradle will try to install the JDK 8. If for any reasons the operation failed, try to install your own and use [this method](https://github.com/pm-McFly/twake-on-matrix/issues/1#issuecomment-2581428804) to tell Gradle where to find it.*
@@ -130,18 +129,19 @@ In case you have Rust already installed, make sure to update it to latest versio
 rustup update
 ```
 
-#### `flake.nix`
+#### [`devenv.nix`](devenv.nix)
 
-A `flake.nix` is provided in order to ease the process of setting up your dev environment.
+A `devenv.nix` is provided in order to ease the process of setting up your dev environment. Check out the install instructions: https://devenv.sh/getting-started/
 
-It should be automatically loaded if you have `[nix-direnv](https://github.com/nix-community/nix-direnv/)` installed and correctly configured.
+Then you can use `devenv shell` to fire up your environment.
+*This can be automated thanks to: `[nix-direnv](https://github.com/nix-community/nix-direnv/)`*
 
 Supported platforms:
 
 - [x] Linux x86_64
 - [ ] MacOS aarch_64
 - [ ] MacOS x86_64
-- [ ] Windows
+- [ ] Windows WSL
 
 ### Configure the app
 
@@ -155,10 +155,10 @@ Here is an example working with `matrix.org`:
   "default_homeserver": "matrix.org",
   "privacy_url": "https://twake.app/en/privacy/",
   "render_html": true,
-  "hide_redacted_events": false,
-  "hide_unknown_events": false,
+  "hide_redacted_events": true,
+  "hide_unknown_events": true,
   "issue_id": "",
-  "app_grid_dashboard_available": true,
+  "app_grid_dashboard_available": false,
   "homeserver": "https://matrix.org/",
   "platform": "localDebug",
   "default_max_upload_avatar_size_in_bytes": 1000000,
