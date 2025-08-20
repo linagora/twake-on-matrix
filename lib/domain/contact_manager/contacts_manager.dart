@@ -175,8 +175,6 @@ class ContactsManager {
               isAvailableSupportPhonebookContacts,
           withMxId: withMxId,
           forceRun: forceRun,
-        ).whenComplete(
-          () => _isSynchronizing = false,
         );
       })
       ..onError((error) async {
@@ -186,8 +184,6 @@ class ContactsManager {
               isAvailableSupportPhonebookContacts,
           withMxId: withMxId,
           forceRun: forceRun,
-        ).whenComplete(
-          () => _isSynchronizing = false,
         );
       });
   }
@@ -226,6 +222,7 @@ class ContactsManager {
                 if (success.timeAvailableForSyncVault) {
                   _handleLookUpPhonebookContacts(withMxId: withMxId);
                 } else {
+                  _isSynchronizing = false;
                   _phonebookContactsNotifier.value = Right(
                     GetPhonebookContactsSuccess(
                       progress: 100,
@@ -318,6 +315,7 @@ class ContactsManager {
     Logs().e('ContactsManager::_handleLookUpFailureState', failure);
     if (failure is LookUpPhonebookContactPartialFailed) {
       _progressPhoneBookState.value = null;
+      _isSynchronizing = false;
       if (TwakeApp.router.routerDelegate.navigatorKey.currentContext != null) {
         TwakeSnackBar.show(
           TwakeApp.router.routerDelegate.navigatorKey.currentContext!,
@@ -335,6 +333,7 @@ class ContactsManager {
         failure is RequestTokenFailure ||
         failure is RegisterTokenFailure) {
       _progressPhoneBookState.value = null;
+      _isSynchronizing = false;
     }
   }
 
@@ -350,6 +349,7 @@ class ContactsManager {
           contacts: success.contacts,
         );
         _progressPhoneBookState.value = null;
+        _isSynchronizing = false;
       }
     }
   }
