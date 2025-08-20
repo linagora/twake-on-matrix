@@ -296,7 +296,8 @@ abstract class AppConfig {
     if (json['support_url'] is String) {
       supportUrl = json['support_url'];
     }
-    if (json['cozy_external_bridge_version'] is String && json['cozy_external_bridge_version'].isNotEmpty) {
+    if (json['cozy_external_bridge_version'] is String &&
+        json['cozy_external_bridge_version'].isNotEmpty) {
       cozyExternalBridgeVersion = json['cozy_external_bridge_version'];
     }
   }
