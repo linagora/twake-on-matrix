@@ -96,6 +96,7 @@ abstract class AppConfig {
   static const String sourceCodeUrl =
       'https://github.com/linagora/twake-on-matrix';
   static String supportUrl = 'https://twake.app/support';
+  static String cozyExternalBridgeVersion = '0.16.1';
   static bool renderHtml = true;
   static bool hideRedactedEvents = false;
   static bool hideUnknownEvents = true;
@@ -294,6 +295,10 @@ abstract class AppConfig {
     }
     if (json['support_url'] is String) {
       supportUrl = json['support_url'];
+    }
+    if (json['cozy_external_bridge_version'] is String &&
+        json['cozy_external_bridge_version'].isNotEmpty) {
+      cozyExternalBridgeVersion = json['cozy_external_bridge_version'];
     }
   }
 }

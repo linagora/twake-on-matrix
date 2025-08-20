@@ -165,7 +165,8 @@ Here is an example working with `matrix.org`:
   "dev_mode": true,
   "qr_code_download_url": "https://sign-up.twake.app/download/chat",
   "enable_logs": true,
-  "support_url": "https://twake.app/support"
+  "support_url": "https://twake.app/support",
+  "cozy_external_bridge_version": "0.16.1"
 }
 ```
 

@@ -31,7 +31,8 @@ in [config.sample.json](https://github.com/linagora/twake-on-matrix/blob/main/co
   "dev_mode": false,
   "qr_code_download_url": "https://example.com/",
   "enable_logs": true,
-  "support_url": "https://example.com/"
+  "support_url": "https://example.com/",
+  "cozy_external_bridge_version": "0.8.0"
 }
 ```
 
@@ -53,5 +54,6 @@ in [config.sample.json](https://github.com/linagora/twake-on-matrix/blob/main/co
 - `qr_code_download_url`: URL generate QR code to download app
 - `enable_logs`: Enable logs
 - `support_url`: Enable/Disable if you want to show support button with the URL. Default is `https://twake.app/support`
+- `cozy_external_bridge_version`: Cozy external bridge version
 
 If you want to disable it, please change the value or remove this from `config.sample.json`
