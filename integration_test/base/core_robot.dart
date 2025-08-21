@@ -11,7 +11,7 @@ class CoreRobot {
   CoreRobot(this.$);
 
   dynamic ignoreException() => $.tester.takeException();
-  
+
   Future<void> grantNotificationPermission() async {
     if (await $.native.isPermissionDialogVisible(
       timeout: const Duration(seconds: 15),
@@ -24,18 +24,18 @@ class CoreRobot {
     required PatrolIntegrationTester $,
     required PatrolFinder first,
     required PatrolFinder second,
-    required Duration timeout ,
+    required Duration timeout,
   }) async {
     final end = DateTime.now().add(timeout);
     while (DateTime.now().isBefore(end)) {
-      if ( first.exists || second.exists) {
+      if (first.exists || second.exists) {
         return;
       }
       await Future.delayed(const Duration(milliseconds: 100));
     }
-    throw Exception('Neither widget became visible within ${timeout.inSeconds} seconds');
+    throw Exception(
+        'Neither widget became visible within ${timeout.inSeconds} seconds',);
   }
-
 
   Future<HttpClient> initialRedirectRequest() async {
     // Step 1: Initial redirect request (NO REDIRECT FOLLOW)
@@ -45,13 +45,19 @@ class CoreRobot {
   }
 
   Future<List<dynamic>> loginByAPI(HttpClient client) async {
+    const chatURL  = String.fromEnvironment('CHAT_URL');
+    const matrixURL = String.fromEnvironment('MATRIX_URL');
+    const ssoURL = String.fromEnvironment('SSO_URL');
+    const receiver = String.fromEnvironment('Receiver');
+    const passOfReceiver = String.fromEnvironment('ReceiverPass');
+
     // Step 1: Prepare the first request (no redirect)
     final uri = Uri.https(
-      'matrix.linagora.com',
+      matrixURL,
       '/_matrix/client/r0/login/sso/redirect/oidc-twake',
       {
         'redirectUrl':
-            'https://chat.linagora.com/web/auth.html?homeserver=https://matrix.linagora.com',
+            'https://$chatURL/web/auth.html?homeserver=https://$matrixURL',
       },
     );
 
@@ -65,21 +71,26 @@ class CoreRobot {
       ..set('Sec-Fetch-Site', 'same-site')
       ..set(HttpHeaders.acceptLanguageHeader, 'en-US,en;q=0.9,vi;q=0.8')
       ..set(
-          HttpHeaders.acceptHeader,
-          'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',)
-      ..set('sec-ch-ua',
-          '"Not)A;Brand";v="8", "Chromium";v="138", "Google Chrome";v="138"',)
+        HttpHeaders.acceptHeader,
+        'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
+      )
+      ..set(
+        'sec-ch-ua',
+        '"Not)A;Brand";v="8", "Chromium";v="138", "Google Chrome";v="138"',
+      )
       ..set('sec-ch-ua-mobile', '?0')
       ..set('sec-ch-ua-platform', '"macOS"')
-      ..set(HttpHeaders.hostHeader, 'matrix.linagora.com')
+      ..set(HttpHeaders.hostHeader, matrixURL)
       ..set('Upgrade-Insecure-Requests', '1')
       ..set(HttpHeaders.acceptEncodingHeader, 'gzip, deflate, br, zstd')
-      ..set(HttpHeaders.userAgentHeader,
-          'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36',)
+      ..set(
+        HttpHeaders.userAgentHeader,
+        'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36',
+      )
       ..set('Sec-Fetch-Dest', 'document');
 
     final firstResponse = await request.close();
-    
+
     // Step 2: Extract redirect location and parse query params
     final redirectLocation = firstResponse.headers.value('location');
     if (redirectLocation == null) {
@@ -109,7 +120,7 @@ class CoreRobot {
     oidcSession = match?.group(1);
 
     // Step 3: Second request to SSO authorize
-    final secondUri = Uri.https('sso.linagora.com', '/oauth2/authorize', {
+    final secondUri = Uri.https(ssoURL, '/oauth2/authorize', {
       'response_type': responseType,
       'client_id': clientId,
       'redirect_uri': redirectUriValue,
@@ -129,17 +140,22 @@ class CoreRobot {
       ..set('Sec-Fetch-Site', 'same-site')
       ..set(HttpHeaders.acceptLanguageHeader, 'en-US,en;q=0.9,vi;q=0.8')
       ..set(
-          HttpHeaders.acceptHeader,
-          'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',)
-      ..set('sec-ch-ua',
-          '"Not)A;Brand";v="8", "Chromium";v="138", "Google Chrome";v="138"',)
+        HttpHeaders.acceptHeader,
+        'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
+      )
+      ..set(
+        'sec-ch-ua',
+        '"Not)A;Brand";v="8", "Chromium";v="138", "Google Chrome";v="138"',
+      )
       ..set('sec-ch-ua-mobile', '?0')
       ..set('sec-ch-ua-platform', '"macOS"')
-      ..set(HttpHeaders.hostHeader, 'matrix.linagora.com')
+      ..set(HttpHeaders.hostHeader, matrixURL)
       ..set('Upgrade-Insecure-Requests', '1')
       ..set(HttpHeaders.acceptEncodingHeader, 'gzip, deflate, br, zstd')
-      ..set(HttpHeaders.userAgentHeader,
-          'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36',)
+      ..set(
+        HttpHeaders.userAgentHeader,
+        'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36',
+      )
       ..set('Sec-Fetch-Dest', 'document');
 
     final secondResponse = await secondRequest.close();
@@ -159,10 +175,11 @@ class CoreRobot {
     }
 
     // Step 5: Submit login form to authorize (third request)
-    final thirdUri = Uri.https('sso.linagora.com', '/oauth2/authorize', {
+    final thirdUri = Uri.https(ssoURL, '/oauth2/authorize', {
       'response_type': 'code',
       'client_id': 'matrix1',
-      'redirect_uri': 'https://matrix.linagora.com/_synapse/client/oidc/callback',
+      'redirect_uri':
+          'https://$matrixURL/_synapse/client/oidc/callback',
       'scope': 'openid profile email',
       'state': state,
       'nonce': nonce,
@@ -170,14 +187,14 @@ class CoreRobot {
       'code_challenge': codeChallenge,
     });
 
-    
     final thirdRequest = await client.postUrl(thirdUri);
     thirdRequest.followRedirects = false;
 
     thirdRequest.headers
       ..set('Sec-Fetch-Mode', 'navigate')
-      ..set(HttpHeaders.refererHeader,
-          'https://sso.linagora.com/oauth2/authorize?response_type=code'
+      ..set(
+          HttpHeaders.refererHeader,
+          'https://$ssoURL/oauth2/authorize?response_type=code'
           '&client_id=$clientId'
           '&redirect_uri=$redirectUriValue'
           '&scope=$scope'
@@ -187,20 +204,26 @@ class CoreRobot {
           '&code_challenge=$codeChallenge')
       ..set('Sec-Fetch-Site', 'same-origin')
       ..set(HttpHeaders.acceptLanguageHeader, 'en-US,en;q=0.9,vi;q=0.8')
-      ..set('Origin', 'https://sso.linagora.com')
+      ..set('Origin', 'https://$ssoURL')
       ..set('Sec-Fetch-User', '?1')
-      ..set(HttpHeaders.acceptHeader,
-          'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',)
-      ..set('sec-ch-ua',
-          '"Not)A;Brand";v="8", "Chromium";v="138", "Google Chrome";v="138"',)
+      ..set(
+        HttpHeaders.acceptHeader,
+        'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
+      )
+      ..set(
+        'sec-ch-ua',
+        '"Not)A;Brand";v="8", "Chromium";v="138", "Google Chrome";v="138"',
+      )
       ..set('sec-ch-ua-mobile', '?0')
       ..set('sec-ch-ua-platform', '"macOS"')
       ..set('Upgrade-Insecure-Requests', '1')
       ..set(HttpHeaders.contentTypeHeader, 'application/x-www-form-urlencoded')
       ..set(HttpHeaders.cacheControlHeader, 'max-age=0')
       ..set(HttpHeaders.acceptEncodingHeader, 'gzip, deflate, br, zstd')
-      ..set(HttpHeaders.userAgentHeader,
-          'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36',)
+      ..set(
+        HttpHeaders.userAgentHeader,
+        'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36',
+      )
       ..set('Sec-Fetch-Dest', 'document');
 
     final thirdBody = {
@@ -208,8 +231,8 @@ class CoreRobot {
       'timezone': '7',
       'skin': 'twake',
       'token': token,
-      'user': 'thhoang@linagora.com',
-      'password': 'lynic123',
+      'user': receiver,
+      'password': passOfReceiver,
     };
     thirdRequest.write(Uri(queryParameters: thirdBody).query);
 
@@ -223,17 +246,20 @@ class CoreRobot {
     final code = thirdRedirectUri.queryParameters['code'];
     final sessionState = thirdRedirectUri.queryParameters['session_state'];
 
-    final allCookiesOfThirdResponse = thirdResponse.headers['set-cookie']; // List<String>?
+    final allCookiesOfThirdResponse =
+        thirdResponse.headers['set-cookie']; // List<String>?
     String? lemonldap;
     final oidcCookieOfThirdResponse = allCookiesOfThirdResponse!.firstWhere(
       (cookie) => cookie.contains('lemonldap='),
       orElse: () => '',
     );
-    final matchOfThirdResponse = RegExp(r'lemonldap=([^&;]+)').firstMatch(oidcCookieOfThirdResponse);
+    final matchOfThirdResponse =
+        RegExp(r'lemonldap=([^&;]+)').firstMatch(oidcCookieOfThirdResponse);
     lemonldap = matchOfThirdResponse?.group(1);
 
     // Step 7: Call OIDC callback to get loginToken
-    final fourthUri = Uri.https('matrix.linagora.com', '/_synapse/client/oidc/callback', {
+    final fourthUri =
+        Uri.https(matrixURL, '/_synapse/client/oidc/callback', {
       'code': code,
       'session_state': sessionState,
       'state': state,
@@ -242,25 +268,33 @@ class CoreRobot {
     fourthRequest.followRedirects = false;
 
     fourthRequest.headers
-    ..set(HttpHeaders.userAgentHeader,
-        'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36',)
-    ..set(HttpHeaders.acceptHeader,
-        'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',)
-    ..set(HttpHeaders.acceptLanguageHeader, 'en-US,en;q=0.9,vi;q=0.8')
-    ..set(HttpHeaders.refererHeader, 'https://sso.linagora.com/')
-    ..set(HttpHeaders.cacheControlHeader, 'max-age=0')
-    ..set(HttpHeaders.acceptEncodingHeader, 'gzip, deflate, br, zstd')
-    ..set('Sec-Fetch-Mode', 'navigate')
-    ..set('Sec-Fetch-Site', 'same-site')
-    ..set('Sec-Fetch-User', '?1')
-    ..set('Sec-Fetch-Dest', 'document')
-    ..set('sec-ch-ua',
-        '"Not)A;Brand";v="8", "Chromium";v="138", "Google Chrome";v="138"',)
-    ..set('sec-ch-ua-mobile', '?0')
-    ..set('sec-ch-ua-platform', '"macOS"')
-    ..set('Upgrade-Insecure-Requests', '1')
-    ..set(HttpHeaders.cookieHeader,
-        'oidc_session=$oidcSession; oidc_session_no_samesite=$oidcSession; lemonldap=$lemonldap',);
+      ..set(
+        HttpHeaders.userAgentHeader,
+        'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36',
+      )
+      ..set(
+        HttpHeaders.acceptHeader,
+        'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
+      )
+      ..set(HttpHeaders.acceptLanguageHeader, 'en-US,en;q=0.9,vi;q=0.8')
+      ..set(HttpHeaders.refererHeader, 'https://$ssoURL/')
+      ..set(HttpHeaders.cacheControlHeader, 'max-age=0')
+      ..set(HttpHeaders.acceptEncodingHeader, 'gzip, deflate, br, zstd')
+      ..set('Sec-Fetch-Mode', 'navigate')
+      ..set('Sec-Fetch-Site', 'same-site')
+      ..set('Sec-Fetch-User', '?1')
+      ..set('Sec-Fetch-Dest', 'document')
+      ..set(
+        'sec-ch-ua',
+        '"Not)A;Brand";v="8", "Chromium";v="138", "Google Chrome";v="138"',
+      )
+      ..set('sec-ch-ua-mobile', '?0')
+      ..set('sec-ch-ua-platform', '"macOS"')
+      ..set('Upgrade-Insecure-Requests', '1')
+      ..set(
+        HttpHeaders.cookieHeader,
+        'oidc_session=$oidcSession; oidc_session_no_samesite=$oidcSession; lemonldap=$lemonldap',
+      );
 
     final fourthResponse = await fourthRequest.close();
 
@@ -277,33 +311,42 @@ class CoreRobot {
     }
 
     // Step 8: Token login
-    final fifthUri = Uri.https('matrix.linagora.com', '/_matrix/client/v3/login');
+    final fifthUri =
+        Uri.https(matrixURL, '/_matrix/client/v3/login');
     final fifthRequest = await client.postUrl(fifthUri);
     fifthRequest.followRedirects = false;
     fifthRequest.headers
-    ..set('Sec-Fetch-Mode', 'cors')
-    ..set(HttpHeaders.refererHeader, 'https://chat.linagora.com/')
-    ..set('Sec-Fetch-Site', 'same-site')
-    ..set(HttpHeaders.acceptLanguageHeader, 'en-US,en;q=0.9,vi;q=0.8')
-    ..set('Origin', 'https://chat.linagora.com')
-    ..set(HttpHeaders.acceptHeader, '*/*')
-    ..set('sec-ch-ua',
-        '"Not)A;Brand";v="8", "Chromium";v="138", "Google Chrome";v="138"',)
-    ..set('sec-ch-ua-mobile', '?0')
-    ..set('sec-ch-ua-platform', '"macOS"')
-    ..set(HttpHeaders.contentTypeHeader, 'application/json')
-    ..set(HttpHeaders.acceptEncodingHeader, 'gzip, deflate, br, zstd')
-    ..set(HttpHeaders.userAgentHeader,
-        'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36',)
-    ..set('Sec-Fetch-Dest', 'empty')
-    ..set(HttpHeaders.cookieHeader,
-        'lemonldap=$lemonldap',);
+      ..set('Sec-Fetch-Mode', 'cors')
+      ..set(HttpHeaders.refererHeader, 'https://$chatURL/')
+      ..set('Sec-Fetch-Site', 'same-site')
+      ..set(HttpHeaders.acceptLanguageHeader, 'en-US,en;q=0.9,vi;q=0.8')
+      ..set('Origin', 'https://$chatURL')
+      ..set(HttpHeaders.acceptHeader, '*/*')
+      ..set(
+        'sec-ch-ua',
+        '"Not)A;Brand";v="8", "Chromium";v="138", "Google Chrome";v="138"',
+      )
+      ..set('sec-ch-ua-mobile', '?0')
+      ..set('sec-ch-ua-platform', '"macOS"')
+      ..set(HttpHeaders.contentTypeHeader, 'application/json')
+      ..set(HttpHeaders.acceptEncodingHeader, 'gzip, deflate, br, zstd')
+      ..set(
+        HttpHeaders.userAgentHeader,
+        'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36',
+      )
+      ..set('Sec-Fetch-Dest', 'empty')
+      ..set(
+        HttpHeaders.cookieHeader,
+        'lemonldap=$lemonldap',
+      );
 
-    fifthRequest.write(jsonEncode({
-      "initial_device_display_name": "chat.linagora.com: Chrome on Web",
-      "token": loginToken,
-      "type": "m.login.token",
-    }),);
+    fifthRequest.write(
+      jsonEncode({
+        "initial_device_display_name": "$chatURL: Chrome on Web",
+        "token": loginToken,
+        "type": "m.login.token",
+      }),
+    );
 
     final fifthResponse = await fifthRequest.close();
     final fifthBody = await fifthResponse.transform(utf8.decoder).join();
@@ -313,16 +356,16 @@ class CoreRobot {
     return [client, accessToken, lemonldap];
   }
 
-  Future<void> openGroupChatByAPI(HttpClient client, String groupID) async {}
-
-  Future<String> getAllSentMessage(HttpClient client, String accessToken) async {
+  Future<String> getAllSentMessage(
+      HttpClient client, String accessToken,) async {
+      const chatURL  = String.fromEnvironment('CHAT_URL');
+      const matrixURL = String.fromEnvironment('MATRIX_URL');
     // 👇 Query parameters
-    final syncUri = Uri.https('matrix.linagora.com', '/_matrix/client/v3/sync', {
+    final syncUri =
+        Uri.https(matrixURL, '/_matrix/client/v3/sync', {
       'filter': '0',
       'set_presence': 'unavailable',
       'timeout': '30000',
-      // 'since':
-      //     's563561_40005126_16900_645237_332605_1132109_848590_5456623_0_1363',
     });
 
     final request = await client.getUrl(syncUri);
@@ -332,21 +375,27 @@ class CoreRobot {
     request.headers
       ..set(HttpHeaders.connectionHeader, 'close')
       ..set('Sec-Fetch-Mode', 'cors')
-      ..set(HttpHeaders.refererHeader, 'https://chat.linagora.com/')
+      ..set(HttpHeaders.refererHeader, 'https://$chatURL/')
       ..set('Sec-Fetch-Site', 'same-site')
       ..set(HttpHeaders.acceptLanguageHeader, 'en-US,en;q=0.9,vi;q=0.8')
-      ..set('Origin', 'https://chat.linagora.com')
+      ..set('Origin', 'https://$chatURL')
       ..set(HttpHeaders.acceptHeader, '*/*')
-      ..set(HttpHeaders.authorizationHeader,
-          'Bearer $accessToken',)
-      ..set('sec-ch-ua',
-          '"Not)A;Brand";v="8", "Chromium";v="138", "Google Chrome";v="138"',)
+      ..set(
+        HttpHeaders.authorizationHeader,
+        'Bearer $accessToken',
+      )
+      ..set(
+        'sec-ch-ua',
+        '"Not)A;Brand";v="8", "Chromium";v="138", "Google Chrome";v="138"',
+      )
       ..set('sec-ch-ua-mobile', '?0')
       ..set('sec-ch-ua-platform', '"macOS"')
-      ..set(HttpHeaders.hostHeader, 'matrix.linagora.com')
+      ..set(HttpHeaders.hostHeader, matrixURL)
       ..set(HttpHeaders.acceptEncodingHeader, 'gzip, deflate, br, zstd')
-      ..set(HttpHeaders.userAgentHeader,
-          'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36',)
+      ..set(
+        HttpHeaders.userAgentHeader,
+        'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36',
+      )
       ..set('Sec-Fetch-Dest', 'empty');
 
     final response = await request.close();
@@ -354,39 +403,50 @@ class CoreRobot {
     return body;
   }
 
-  Future<void> sendMessageByAPI(HttpClient client, String accessToken, String lemonldap,String groupID, String message) async {
-  final sixthUri = Uri.https(
-      'matrix.linagora.com',
-      '/_matrix/client/v3/rooms/$groupID:linagora.com/send/m.room.message/chat.linagora.com%3A%20Chrome%20on%20Web%20-9-${DateTime.now().millisecondsSinceEpoch}',
+  Future<void> sendMessageByAPI(HttpClient client, String accessToken,
+      String lemonldap, String message,) async {
+      const chatURL  = String.fromEnvironment('CHAT_URL');
+      const matrixURL = String.fromEnvironment('MATRIX_URL');
+      const groupID = String.fromEnvironment('GroupID');
+    final sixthUri = Uri.https(
+      matrixURL,
+      '/_matrix/client/v3/rooms/$groupID:linagora.com/send/m.room.message/$chatURL%3A%20Chrome%20on%20Web%20-9-${DateTime.now().millisecondsSinceEpoch}',
     );
     final sixthRequest = await client.putUrl(sixthUri);
     sixthRequest.followRedirects = false;
     sixthRequest.headers
       ..set(HttpHeaders.connectionHeader, 'keep-alive')
       ..set('Sec-Fetch-Mode', 'cors')
-      ..set(HttpHeaders.refererHeader, 'https://chat.linagora.com/')
+      ..set(HttpHeaders.refererHeader, 'https://$chatURL/')
       ..set('Sec-Fetch-Site', 'same-site')
       ..set(HttpHeaders.acceptLanguageHeader, 'en-US,en;q=0.9,vi;q=0.8')
-      ..set('Origin', 'https://chat.linagora.com')
+      ..set('Origin', 'https://$chatURL')
       ..set(HttpHeaders.acceptHeader, '*/*')
       ..set(HttpHeaders.authorizationHeader, 'Bearer $accessToken')
-      ..set('sec-ch-ua',
-          '"Not)A;Brand";v="8", "Chromium";v="138", "Google Chrome";v="138"',)
+      ..set(
+        'sec-ch-ua',
+        '"Not)A;Brand";v="8", "Chromium";v="138", "Google Chrome";v="138"',
+      )
       ..set('sec-ch-ua-mobile', '?0')
       ..set('sec-ch-ua-platform', '"macOS"')
       ..set(HttpHeaders.contentTypeHeader, 'application/json')
       ..set(HttpHeaders.acceptEncodingHeader, 'gzip, deflate, br, zstd')
-      ..set(HttpHeaders.userAgentHeader,
-          'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36',)
+      ..set(
+        HttpHeaders.userAgentHeader,
+        'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36',
+      )
       ..set('Sec-Fetch-Dest', 'empty')
-      ..set(HttpHeaders.cookieHeader,
-        'lemonldap=$lemonldap',);
+      ..set(
+        HttpHeaders.cookieHeader,
+        'lemonldap=$lemonldap',
+      );
 
-
-    sixthRequest.write(jsonEncode({
-      'msgtype': 'm.text',
-      'body': message,
-    }),);
+    sixthRequest.write(
+      jsonEncode({
+        'msgtype': 'm.text',
+        'body': message,
+      }),
+    );
 
     await sixthRequest.close();
   }
@@ -395,20 +455,17 @@ class CoreRobot {
     client.close(force: true);
   }
 
-  Future<void> execute() async {
-    final client = await initialRedirectRequest();
-    final list = await loginByAPI(client);
-    await sendMessageByAPI(list[0], list[1], list[2], "", "");
-  }
-
-  Future<void> scrollToBottom(PatrolIntegrationTester $,{PatrolFinder? root, int maxDrags = 30}) async {
+  Future<void> scrollToBottom(PatrolIntegrationTester $,
+      {PatrolFinder? root, int maxDrags = 30,}) async {
     // Find the Scrollable to act on
     final PatrolFinder scrollable = root == null
         ? $(Scrollable).first
-        : $(find.descendant(
-            of: root.finder,
-            matching: find.byType(Scrollable),
-          ),).first;
+        : $(
+            find.descendant(
+              of: root.finder,
+              matching: find.byType(Scrollable),
+            ),
+          ).first;
 
     var lastPixels = -1.0;
     for (var i = 0; i < maxDrags; i++) {
@@ -424,14 +481,17 @@ class CoreRobot {
     }
   }
 
-  Future<void> scrollToTop(PatrolIntegrationTester $,{PatrolFinder? root, int maxDrags = 30}) async {
+  Future<void> scrollToTop(PatrolIntegrationTester $,
+      {PatrolFinder? root, int maxDrags = 30,}) async {
     // Find the Scrollable to act on
     final PatrolFinder scrollable = root == null
         ? $(Scrollable).first
-        : $(find.descendant(
-            of: root.finder,
-            matching: find.byType(Scrollable),
-          ),).first;
+        : $(
+            find.descendant(
+              of: root.finder,
+              matching: find.byType(Scrollable),
+            ),
+          ).first;
 
     for (var i = 0; i < maxDrags; i++) {
       // drag down a bit
@@ -446,27 +506,45 @@ class CoreRobot {
   }
 
   Future<void> scrollUntilVisible(
-      PatrolIntegrationTester $,
-      Finder target, {
-      Finder? scrollable,
-      int maxSwipes = 10,
-    }) async {
-      final container = scrollable ?? find.byType(Scrollable);
+    PatrolIntegrationTester $,
+    Finder target, {
+    Finder? scrollable,
+    int maxSwipes = 10,
+  }) async {
+    final container = scrollable ?? find.byType(Scrollable);
 
-      for (int i = 0; i < maxSwipes; i++) {
-        if ($.tester.any(target)) return;
-        await $.tester.drag(container, const Offset(0, -300)); // swipper up
-        await $.tester.pumpAndSettle();
-      }
+    for (int i = 0; i < maxSwipes; i++) {
+      if ($.tester.any(target)) return;
+      await $.tester.drag(container, const Offset(0, -300)); // swipper up
+      await $.tester.pumpAndSettle();
+    }
 
-      for (int i = 0; i < maxSwipes; i++) {
-        if ($.tester.any(target)) return;
-        await $.tester.drag(container, const Offset(0, 300)); // swipper down
-        await $.tester.pumpAndSettle();
-      }
+    for (int i = 0; i < maxSwipes; i++) {
+      if ($.tester.any(target)) return;
+      await $.tester.drag(container, const Offset(0, 300)); // swipper down
+      await $.tester.pumpAndSettle();
+    }
 
-      if (!$.tester.any(target)) {
-        throw Exception('can not found widget after scrolling');
-      }
+    if (!$.tester.any(target)) {
+      throw Exception('can not found widget after scrolling');
     }
   }
+  Future<bool> isActuallyScrollable(PatrolIntegrationTester $, {PatrolFinder? root,}) async {
+    final scrollableFinder = root == null
+        ? $(Scrollable)
+        : $(
+            find.descendant(
+              of: root.finder,
+              matching: find.byType(Scrollable),
+            ),
+          );
+// final PatrolFinder scrollableFinder = root == null
+//         ? $(Scrollable).first
+//         : $(find.descendant(
+//             of: root.finder,
+//             matching: find.byType(Scrollable),
+//           ),).first;
+
+    return scrollableFinder.exists;
+  }
+}
