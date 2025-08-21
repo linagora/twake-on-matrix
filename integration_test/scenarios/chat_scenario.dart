@@ -19,6 +19,7 @@ import '../robots/chat_group_detail_robot.dart';
 import '../robots/chat_list_robot.dart';
 import 'package:flutter/material.dart';
 import 'dart:convert';
+import '../robots/menu_robot.dart';
 import '../robots/search_robot.dart';
 
 class ChatScenario extends BaseScenario {
@@ -26,8 +27,7 @@ class ChatScenario extends BaseScenario {
 
   Future<void> enterSearchText(String searchText) async {
     await SearchRobot($).enterSearchText(searchText);
-    await SearchRobot($).waitForEitherVisible($: $, first: ChatListRobot($).showLessLabel(),second: ChatListRobot($).noResultLabel(), timeout: const Duration(seconds: 30));
-    // await $.pumpAndSettle();
+    await $.pump();
   }
 
   Future<ChatGroupDetailRobot> openChatGroupByTitle(String groupTitle) async {
@@ -37,35 +37,41 @@ class ChatScenario extends BaseScenario {
     return ChatGroupDetailRobot($);
   }
 
+  Future<void> backToChatLisFromChatGroupScreen(bool isOpenGroupFromSearchResult) async {
+    await ChatGroupDetailRobot($).backToPreviousScreen();
+    if(isOpenGroupFromSearchResult)
+      {await SearchRobot($).backToPreviousScreen();}
+  }
+
   Future<void> verifyTheDisplayOfPullDownMenu(String message) async {
-    final pullDownMenuRobot = await ChatGroupDetailRobot($).openPullDownMenu(message);
-    expect((await pullDownMenuRobot.getReplyItem()).exists, isTrue);
-    expect((await pullDownMenuRobot.getForwardItem()).exists, isTrue);
-    expect((await pullDownMenuRobot.getCopyItem()).exists, isTrue);
-    expect((await pullDownMenuRobot.getEditItem()).exists, isTrue);
-    expect((await pullDownMenuRobot.getSelectItem()).exists, isTrue);
-    expect((await pullDownMenuRobot.getPinItem()).exists, isTrue);
-    expect((await pullDownMenuRobot.getDeleteItem()).exists, isTrue);
-    expect((await pullDownMenuRobot.getHeartIcon()).exists, isTrue);
-    expect((await pullDownMenuRobot.getLikeIcon()).exists, isTrue);
-    expect((await pullDownMenuRobot.getDisLikeIcon()).exists, isTrue);
-    expect((await pullDownMenuRobot.getCryIcon()).exists, isTrue);
-    expect((await pullDownMenuRobot.getSadIcon()).exists, isTrue);
-    expect((await pullDownMenuRobot.getSuppriseIcon()).exists, isTrue);
-    expect((await pullDownMenuRobot.getExpandIcon()).exists, isTrue);
+    expect((PullDownMenuRobot($).getReplyItem()).exists, isTrue);
+    expect((PullDownMenuRobot($).getForwardItem()).exists, isTrue);
+    expect((PullDownMenuRobot($).getCopyItem()).exists, isTrue);
+    expect((PullDownMenuRobot($).getEditItem()).exists, isTrue);
+    expect((PullDownMenuRobot($).getSelectItem()).exists, isTrue);
+    expect((PullDownMenuRobot($).getPinItem()).exists, isTrue);
+    expect((PullDownMenuRobot($).getDeleteItem()).exists, isTrue);
+    expect((PullDownMenuRobot($).getHeartIcon()).exists, isTrue);
+    expect((PullDownMenuRobot($).getLikeIcon()).exists, isTrue);
+    expect((PullDownMenuRobot($).getDisLikeIcon()).exists, isTrue);
+    expect((PullDownMenuRobot($).getCryIcon()).exists, isTrue);
+    expect((PullDownMenuRobot($).getSadIcon()).exists, isTrue);
+    expect((PullDownMenuRobot($).getSuppriseIcon()).exists, isTrue);
+    expect((PullDownMenuRobot($).getExpandIcon()).exists, isTrue);
     expect(($(MessageContent).containing(find.text(message))).exists, isTrue);
-    await pullDownMenuRobot.close();
+    PullDownMenuRobot($).close();
   }
 
   Future<void> replyMessage(String message, String reply) async {
-    final pullDownMenuRobot = await ChatGroupDetailRobot($).openPullDownMenu(message);
-    await (await pullDownMenuRobot.getReplyItem()).tap();
+    await ChatGroupDetailRobot($).openPullDownMenu(message);
+    await (PullDownMenuRobot($).getReplyItem()).tap();
     await sendAMesage(reply);
   }
 
   Future<void> forwardMessage(String message, String receiver) async {
-    final pullDownMenuRobot = await ChatGroupDetailRobot($).openPullDownMenu(message);
-    final a =  pullDownMenuRobot.getForwardItem();
+    final pullDownMenuRobot =
+        await ChatGroupDetailRobot($).openPullDownMenu(message);
+    final a = pullDownMenuRobot.getForwardItem();
     await $.waitUntilVisible(a);
     await a.tap();
     await $.pump();
@@ -77,13 +83,23 @@ class ChatScenario extends BaseScenario {
     // // await ($(TwakeIconButton).containing(find.byTooltip('Send'))).tap();
     // // await $.pumpAndSettle();
   }
+  
+  Future<void> sendAMesage(String message) async {
+    await ChatGroupDetailRobot($).inputMessage(message);
+
+    // tab on send button
+    await $(ChatInputRowSendBtn).tap();
+
+    //xem co loaij text nao co  gia tri la kia dc hien len ko
+    await Future.delayed(const Duration(seconds: 2));
+  }
 
   Future<void> copyMessage(String message) async {
-    final pullDownMenuRobot = await ChatGroupDetailRobot($).openPullDownMenu(message);
-    await (await pullDownMenuRobot.getCopyItem()).tap();
+    await ChatGroupDetailRobot($).openPullDownMenu(message);
+    await (PullDownMenuRobot($).getCopyItem()).tap();
     await $.pumpAndSettle();
   }
-  
+
   Future<void> pasteFromClipBoard() async {
     // 1) Focus the input and open the context menu
     final input = await ChatGroupDetailRobot($).getInputTextField();
@@ -100,7 +116,8 @@ class ChatScenario extends BaseScenario {
     final flutterMenu = find.text(pasteLabel);
     final matches = flutterMenu.evaluate();
     if (matches.isNotEmpty) {
-      await $.tap(flutterMenu.first); // tap the first match to avoid "too many elements"
+      await $.tap(flutterMenu
+          .first,); // tap the first match to avoid "too many elements"
       return;
     }
 
@@ -112,7 +129,7 @@ class ChatScenario extends BaseScenario {
         return;
       } catch (_) {
         // last-resort fallback if localization text differs
-        await $.native.tap( Selector(text: 'Paste'));
+        await $.native.tap(Selector(text: 'Paste'));
         return;
       }
     }
@@ -122,54 +139,55 @@ class ChatScenario extends BaseScenario {
   }
 
   Future<void> editMessage(String message, String newMessage) async {
-    final pullDownMenuRobot = await ChatGroupDetailRobot($).openPullDownMenu(message);
-    await (await pullDownMenuRobot.getEditItem()).tap();
+    await ChatGroupDetailRobot($).openPullDownMenu(message);
+    await (PullDownMenuRobot($).getEditItem()).tap();
     await sendAMesage(newMessage);
     await $.pumpAndSettle();
   }
 
   Future<void> selectMessage(String message) async {
-    final pullDownMenuRobot = await ChatGroupDetailRobot($).openPullDownMenu(message);
-    await (await pullDownMenuRobot.getSelectItem()).tap();
+    await ChatGroupDetailRobot($).openPullDownMenu(message);
+    await (PullDownMenuRobot($).getSelectItem()).tap();
     await $.pumpAndSettle();
   }
 
-  Future<PatrolFinder> getPinExpandIcon() async{
-     return $(TwakeIconButton).containing(find.byTooltip('Pinned messages'));
+  Future<PatrolFinder> getPinExpandIcon() async {
+    return $(TwakeIconButton).containing(find.byTooltip('Pinned messages'));
   }
 
   Future<void> pinMessage(String message) async {
-    final pullDownMenuRobot = await ChatGroupDetailRobot($).openPullDownMenu(message);
-    await (await pullDownMenuRobot.getPinItem()).tap();
+    await ChatGroupDetailRobot($).openPullDownMenu(message);
+    await (PullDownMenuRobot($).getPinItem()).tap();
     await $.waitUntilVisible($(PinnedEventsView));
     await $.waitUntilVisible($(PinnedEventsView).$("Pinned Message"));
-    expect((await getPinExpandIcon()).exists ,isTrue);
+    expect((await getPinExpandIcon()).exists, isTrue);
   }
 
   Future<void> deleteMessage(String message) async {
-    final pullDownMenuRobot = await ChatGroupDetailRobot($).openPullDownMenu(message);
-    await (await pullDownMenuRobot.getDeleteItem()).tap();
+    await ChatGroupDetailRobot($).openPullDownMenu(message);
+    await (PullDownMenuRobot($).getDeleteItem()).tap();
     await $.pumpAndSettle();
   }
 
-  PatrolFinder _tileByText(String text){
-    final msg = $(MatrixLinkifyText).containing(text); //_richTextWithExact(text);
+  PatrolFinder _tileByText(String text) {
+    final msg =
+        $(MatrixLinkifyText).containing(text); //_richTextWithExact(text);
     final container = find.ancestor(
       of: msg,
       matching: find.byType(MultiPlatformsMessageContainer),
     );
     return $(container);
   }
-  
+
   Color? _effectiveIconColor(Finder iconFinder) {
     final icon = $.tester.widget<Icon>(iconFinder);
-    final ctx  = $.tester.element(iconFinder);     // BuildContext for Icon
-    return icon.color ?? IconTheme.of(ctx).color;  // resolved color
+    final ctx = $.tester.element(iconFinder); // BuildContext for Icon
+    return icon.color ?? IconTheme.of(ctx).color; // resolved color
   }
 
   Future<void> expectMessageTickSelected(
     String messageText, {
-    Color? expectedColor,        // e.g. const Color(0xFF0A84FF)
+    Color? expectedColor, // e.g. const Color(0xFF0A84FF)
   }) async {
     final tile = _tileByText(messageText);
     expect(tile.exists, true);
@@ -183,12 +201,12 @@ class ChatScenario extends BaseScenario {
 
     if (expectedColor != null) {
       expect(color, expectedColor);
-    } 
+    }
   }
 
   Future<void> expectMessageTickUnselected(
-  String messageText, {
-  Color? expectedColor,        // e.g. const Color(0x000000)
+    String messageText, {
+    Color? expectedColor, // e.g. const Color(0x000000)
   }) async {
     final tile = _tileByText(messageText);
     expect(tile.exists, true);
@@ -202,7 +220,7 @@ class ChatScenario extends BaseScenario {
 
     if (expectedColor != null) {
       expect(color, expectedColor);
-    } 
+    }
   }
 
   Future<void> verifyTheDisplayInSelectedTextMode(String message) async {
@@ -213,7 +231,8 @@ class ChatScenario extends BaseScenario {
       findsOneWidget,
     );
     expect(
-      find.descendant(of: $(ChatAppBarTitle).finder, matching: find.byTooltip('Copy')),
+      find.descendant(
+          of: $(ChatAppBarTitle).finder, matching: find.byTooltip('Copy'),),
       findsOneWidget,
     );
     expect(
@@ -221,11 +240,13 @@ class ChatScenario extends BaseScenario {
       findsOneWidget,
     );
     expect(
-      find.descendant(of: $(ChatAppBarTitle).finder, matching: find.byTooltip('Pin')),
+      find.descendant(
+          of: $(ChatAppBarTitle).finder, matching: find.byTooltip('Pin'),),
       findsOneWidget,
     );
     expect(
-      find.descendant(of: $(ChatAppBarTitle).finder, matching: find.byTooltip('More')),
+      find.descendant(
+          of: $(ChatAppBarTitle).finder, matching: find.byTooltip('More'),),
       findsOneWidget,
     );
     expect(
@@ -236,7 +257,10 @@ class ChatScenario extends BaseScenario {
       find.descendant(of: chatInputRow.finder, matching: find.text('Reply')),
       findsOneWidget,
     );
-    await expectMessageTickSelected(message, expectedColor: const Color(0xFF0A84FF),);
+    await expectMessageTickSelected(
+      message,
+      expectedColor: const Color(0xFF0A84FF),
+    );
   }
 
   Future<void> verifyMessageIsPinned(String message, bool isTrue) async {
@@ -244,30 +268,39 @@ class ChatScenario extends BaseScenario {
     await $.pumpAndSettle();
     await $.waitUntilVisible($(AppBar).containing($("Pinned Message")));
     await $.waitUntilVisible($(PinnedMessagesScreen).$("Unpin all messages"));
-    if(isTrue)
-      {expect($(MessageContent).$(message), isTrue);}
-    else
-      {expect($(MessageContent).$(message), isFalse);}
+    if (isTrue) {
+      expect($(MessageContent).$(message), isTrue);
+    } else {
+      expect($(MessageContent).$(message), isFalse);
+    }
 
-    await $(find.ancestor(of: find.byTooltip('Back'), matching:find.byType(TwakeIconButton))).tap();
+    await $(find.ancestor(
+            of: find.byTooltip('Back'), matching: find.byType(TwakeIconButton),),)
+        .tap();
     await $.pumpAndSettle();
   }
 
   Future<void> verifySearchResultViewIsShown() async {
-    expect(ChatListRobot($).showLessLabel().visible || ChatListRobot($).noResultLabel().visible, isTrue);
-    await Future.delayed(const Duration(seconds: 5)); 
+    expect(
+        ChatListRobot($).showLessLabel().visible ||
+            ChatListRobot($).noResultLabel().visible,
+        isTrue,);
+    await Future.delayed(const Duration(seconds: 5));
   }
 
-  Future<void> verifyDisplayOfContactListScreen(SoftAssertHelper s) async {    
-    s.softAssertEquals( (await SearchRobot($).getSearchTextField()).exists, true, 'Search Text Field is not visible');
+  Future<void> verifyDisplayOfGroupListScreen(SoftAssertHelper s) async {
+    s.softAssertEquals((await SearchRobot($).getSearchTextField()).exists, true,
+        'Search Text Field is not visible',);
 
     // // title (avoid hard-coded text if localized)
     // final appBarCtx = $.tester.element(find.byType(TwakeAppBar));
     // final title = L10n.of(appBarCtx)!.chats; // or 'Chats' if not localized
     // s.softAssertEquals($(TwakeAppBar).containing($(Text(title))).exists,true,'Contact title is wrong',);
 
-    s.softAssertEquals($(ChatListBodyView).visible, true, 'Chats tab is not visible');
-    s.softAssertEquals($(BottomNavigationBar).visible, true, 'Bottom navigator bar is not visible');
+    s.softAssertEquals(
+        $(ChatListBodyView).visible, true, 'Chats tab is not visible',);
+    s.softAssertEquals($(BottomNavigationBar).visible, true,
+        'Bottom navigator bar is not visible',);
   }
 
   Future<void> verifySearchResultContains(String keyword) async {
@@ -276,7 +309,7 @@ class ChatScenario extends BaseScenario {
     var i = 0;
 
     for (final item in items) {
-      i = i +1;
+      i = i + 1;
       final richTextFinder = item.$(RichText);
       final richTextElements = richTextFinder.evaluate();
 
@@ -304,17 +337,11 @@ class ChatScenario extends BaseScenario {
     return chatGroupDetailRobot;
   }
 
-  Future<void> openAGroupChatByAPI(String groupID) async {
-    final client = await CoreRobot($).initialRedirectRequest();
-    await CoreRobot($).loginByAPI(client);
-    await CoreRobot($).openGroupChatByAPI(client, groupID);
-    await CoreRobot($).closeClient(client);
-  }
-
-  Future<void> sendAMessageByAPI(String groupID, String message) async {
+  Future<void> sendAMessageByAPI(String message) async {
     final client = await CoreRobot($).initialRedirectRequest();
     final list = await CoreRobot($).loginByAPI(client);
-    await CoreRobot($).sendMessageByAPI(list[0], list[1], list[2], groupID, message);
+    await CoreRobot($)
+        .sendMessageByAPI(list[0], list[1], list[2], message);
     await CoreRobot($).closeClient(client);
   }
 
@@ -327,13 +354,16 @@ class ChatScenario extends BaseScenario {
     //verify response of that message contains expected message
     final jsonData = json.decode(responseBody);
 
-    final events = jsonData['rooms']?['join']?.values
+    final events = jsonData['rooms']?['join']
+        ?.values
         .expand((room) => room['timeline']?['events'] ?? [])
         .toList();
 
-    final containsMessage = events.any((event) =>
-        event['type'] == 'm.room.message' &&
-        event['content']?['body']?.toString().toLowerCase() == message,);
+    final containsMessage = events.any(
+      (event) =>
+          event['type'] == 'm.room.message' &&
+          event['content']?['body']?.toString().toLowerCase() == message,
+    );
 
     if (containsMessage) {
       log('✅ Message $message is found!');
@@ -342,29 +372,20 @@ class ChatScenario extends BaseScenario {
     }
   }
 
-  Future<void> verifyMessageIsReadByAPI(String message) async {
-    
-  }
+  Future<void> verifyMessageIsReadByAPI(String message) async {}
 
   Future<void> verifyMessageIsShown(String message, bool isTrue) async {
     final text = await ChatGroupDetailRobot($).getText(message);
-    if(isTrue)
-      {
-        await $.waitUntilVisible($(text));
-        expect(text, findsOneWidget);
-      }
-    else
-      { expect(text, findsNothing);}
+    if (isTrue) {
+      await $.waitUntilVisible($(text));
+      expect(text, findsOneWidget);
+    } else {
+      expect(text, findsNothing);
+    }
   }
 
-  Future<void> sendAMesage(String message) async {
-    await ChatGroupDetailRobot($).inputMessage(message);
-  
-    // tab on send button
-    await $(ChatInputRowSendBtn).tap();
-
-    //xem co loaij text nao co  gia tri la kia dc hien len ko
-     await Future.delayed(const Duration(seconds: 2)); 
+  Future<void> verifyChatListCanBeScrollable(SoftAssertHelper s) async {
+    s.softAssertEquals( await CoreRobot($).isActuallyScrollable($,root: $(SingleChildScrollView),), true,
+        'Chat list is not scrollable',);
   }
-
 }

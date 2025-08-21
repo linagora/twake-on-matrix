@@ -6,17 +6,18 @@ import 'twake_list_item_robot.dart';
 
 class ContactListRobot extends HomeRobot {
   ContactListRobot(super.$);
-  
+
   Future<List<TwakeListItemRobot>> getListOfContact() async {
     final List<TwakeListItemRobot> contactList = [];
 
-    // Evaluate once to find how many TwakeInkWell widgets exist
+    // Evaluate once to find how many TwakeListItem widgets exist
     final matches = $(TwakeListItem).evaluate();
 
-    for (int i = 0; i < matches.length; i++) {
-      final item = $(TwakeListItem).at(i);
-      contactList.add(TwakeListItemRobot($,item));
+    for (final element in matches) {
+      final finder = $(element.widget.runtimeType);
+      contactList.add(TwakeListItemRobot($, finder));
     }
+
     return contactList;
   }
 }

@@ -8,44 +8,58 @@ import '../base/core_robot.dart';
 class PullDownMenuRobot extends CoreRobot {
   PullDownMenuRobot(super.$);
 
-  Future<PatrolFinder> getHeartIcon() async {
-    return $(Overlay).$(ReactionsDialogWidget).$(InkWell).containing(find.text('💜'));
+  PatrolFinder getHeartIcon() {
+    return $(Overlay)
+        .$(ReactionsDialogWidget)
+        .$(InkWell)
+        .containing(find.text('💜'));
   }
-  Future<PatrolFinder> getLikeIcon() async {
-    return $(Overlay).$(ReactionsDialogWidget).$(InkWell).containing(find.text('👍'));
 
-  //     // 2) Wait for the overlay bar
-  // final bar = $(Overlay).$(ReactionsDialogWidget);   // note the plural: ReactionsDialogWidget
-  // await bar.waitUntilVisible();
+  PatrolFinder getLikeIcon() {
+    return $(Overlay)
+        .$(ReactionsDialogWidget)
+        .$(InkWell)
+        .containing(find.text('👍'));
+  }
 
-  // // 3a) Tap by emoji text (if the emoji is a Text child)
-  // await bar.$(InkWell).containing(find.text('👍')).tap();
+  PatrolFinder getDisLikeIcon() {
+    return $(Overlay)
+        .$(ReactionsDialogWidget)
+        .$(InkWell)
+        .containing(find.text('👎'));
+  }
 
-  // // 3b) Or tap by index (left → right)
-  // await bar.$(InkWell).at(0).tap();   // 0 = first reaction, adjust as needed
+  PatrolFinder getCryIcon() {
+    return $(Overlay)
+        .$(ReactionsDialogWidget)
+        .$(InkWell)
+        .containing(find.text('😂'));
+  }
 
-  // // 3c) Or tap by icon if your reaction uses Icons/CustomIcons
-  // // await bar.$(InkWell).containing(find.byIcon(TwakeIcons.thumbsUp)).tap();
+  PatrolFinder getSadIcon() {
+    return $(Overlay)
+        .$(ReactionsDialogWidget)
+        .$(InkWell)
+        .containing(find.text('🥲'));
   }
-  Future<PatrolFinder> getDisLikeIcon() async {
-    return $(Overlay).$(ReactionsDialogWidget).$(InkWell).containing(find.text('👎'));
+
+  PatrolFinder getSuppriseIcon() {
+    return $(Overlay)
+        .$(ReactionsDialogWidget)
+        .$(InkWell)
+        .containing(find.text('😮'));
   }
-  Future<PatrolFinder> getCryIcon() async {
-    return $(Overlay).$(ReactionsDialogWidget).$(InkWell).containing(find.text('😂'));
-  }
-  Future<PatrolFinder> getSadIcon() async {
-    return $(Overlay).$(ReactionsDialogWidget).$(InkWell).containing(find.text('🥲'));
-  }
-  Future<PatrolFinder> getSuppriseIcon() async {
-    return $(Overlay).$(ReactionsDialogWidget).$(InkWell).containing(find.text('😮'));
-  }
-  Future<PatrolFinder> getExpandIcon() async {
+
+  PatrolFinder getExpandIcon() {
     // return find.descendant(of: $(Overlay).$(ReactionsDialogWidget).finder, matching: find.byType(InkWell)).last;
     return $(Overlay).$(ReactionsDialogWidget).$(InkWell).containing(
-      find.byWidgetPredicate((w) => w is Icon && w.icon != null && w.icon!.codePoint == 0xF04FC,),);  
+          find.byWidgetPredicate(
+            (w) => w is Icon && w.icon != null && w.icon!.codePoint == 0xF04FC,
+          ),
+        );
   }
 
-  Future<PatrolFinder> getReplyItem() async {
+  PatrolFinder getReplyItem() {
     return $(PullDownMenuItem).containing(find.text("Reply"));
   }
 
@@ -53,26 +67,26 @@ class PullDownMenuRobot extends CoreRobot {
     return $(PullDownMenuItem).containing(find.text("Forward"));
   }
 
-  Future<PatrolFinder> getCopyItem() async {
+  PatrolFinder getCopyItem() {
     return $(PullDownMenuItem).containing(find.text("Copy"));
   }
 
-  Future<PatrolFinder> getEditItem() async {
+  PatrolFinder getEditItem() {
     return $(PullDownMenuItem).containing(find.text("Edit"));
   }
 
-  Future<PatrolFinder> getSelectItem() async {
+  PatrolFinder getSelectItem() {
     return $(PullDownMenuItem).containing(find.text("Select"));
   }
 
-  Future<PatrolFinder> getPinItem() async {
+  PatrolFinder getPinItem() {
     return $(PullDownMenuItem).containing(find.text("Pin"));
   }
 
-  Future<PatrolFinder> getDeleteItem() async {
+  PatrolFinder getDeleteItem() {
     return $(PullDownMenuItem).containing(find.text("Delete"));
   }
-  
+
   Future<List<PatrolFinder>> getListOfMenu() async {
     final List<PatrolFinder> items = [];
 
@@ -84,7 +98,6 @@ class PullDownMenuRobot extends CoreRobot {
       items.add(item);
     }
     return items;
-    
   }
 
   Future<void> reply() async {
@@ -114,9 +127,8 @@ class PullDownMenuRobot extends CoreRobot {
   Future<void> delete() async {
     await getReplyItem().tap();
   }
-  
 
-  Future<void> close() async{
+  Future<void> close() async {
     final view = $.tester.binding.platformDispatcher.implicitView!;
     final size = view.physicalSize / view.devicePixelRatio; // logical pixels
     await $.tester.tapAt(Offset(size.width - 8, size.height - 8));

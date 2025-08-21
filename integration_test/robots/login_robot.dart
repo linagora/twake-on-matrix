@@ -30,27 +30,42 @@ class LoginRobot extends CoreRobot {
 
   Future<void> confirmShareInformation() async {
     try {
-      await $.native.waitUntilVisible(Selector(textContains: 'Continue'), appId:'com.apple.springboard',);
-      await $.native.tap(Selector(textContains: 'Continue'), appId:'com.apple.springboard',);
+      await $.native.waitUntilVisible(
+        Selector(textContains: 'Continue'),
+        appId: 'com.apple.springboard',
+      );
+      await $.native.tap(
+        Selector(textContains: 'Continue'),
+        appId: 'com.apple.springboard',
+      );
     } catch (e) {
       ignoreException();
     }
   }
-  Future<void> enterWebCredentialsWhenVisible({required String username,required String password,}) async {
+
+  Future<void> enterWebCredentialsWhenVisible({
+    required String username,
+    required String password,
+  }) async {
     await enterUsernameSsoLogin(username);
     await enterPasswordSsoLogin(password);
-    await pressSignInSsoLogin();
+    //Still rerun without this step
+    // await pressSignInSsoLogin();
   }
 
   Selector getLoginBtn() {
-    return  Selector(textContains: 'login');
+    return Selector(textContains: 'login');
   }
 
-  Future<bool> isLoginBtnVisible({Duration timeout = const Duration(milliseconds: 10000)}) async {
-     try {
+  Future<bool> isLoginBtnVisible(
+      {Duration timeout = const Duration(milliseconds: 10000),}) async {
+    try {
       // A tiny settle helps after navigation/animation
       await Future<void>.delayed(timeout);
-      await $.native.enterText(getLoginBtn(),text: "",);
+      await $.native.enterText(
+        getLoginBtn(),
+        text: "",
+      );
       return true; // If tap didn’t throw, it’s interactable enough
     } catch (_) {
       return false;
@@ -59,15 +74,20 @@ class LoginRobot extends CoreRobot {
 
   Future<void> enterUsernameSsoLogin(String username) async {
     try {
-      await $.native.enterText(getLoginBtn(),text: username,);
-      } catch (e) {
-        ignoreException();
-      }
+      await $.native.enterText(
+        getLoginBtn(),
+        text: username,
+      );
+    } catch (e) {
+      ignoreException();
+    }
   }
 
   Future<void> enterPasswordSsoLogin(String password) async {
     try {
-      await $.native.enterText(Selector(text: 'Password'),text: password,
+      await $.native.enterText(
+        Selector(text: 'Password'),
+        text: password,
       );
     } catch (e) {
       ignoreException();

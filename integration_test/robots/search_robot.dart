@@ -10,10 +10,12 @@ class SearchRobot extends CoreRobot {
   Future<PatrolFinder> getBackIcon() async {
     return $(AppBar).$(TwakeIconButton).$(Icon);
   }
-  Future<void> backToPreviousScreen() async{
+
+  Future<void> backToPreviousScreen() async {
     await getBackIcon().tap();
     await $.waitUntilVisible($(BottomNavigationBar));
   }
+
   Future<PatrolFinder> getSearchTextField() async {
     // return $(TextField).containing(find.text('Search'));// problem when change language
     return $(TextField).hitTestable();
