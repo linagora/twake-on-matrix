@@ -6,7 +6,7 @@ import 'package:fluffychat/domain/model/contact/tom_contact.dart';
 extension TomContactExtension on TomContact {
   Contact toContact(ContactStatus status) {
     return Contact(
-      emails: mail != null
+      emails: mail != null || address != null
           ? {
               Email(
                 address: mail ?? '',
@@ -37,7 +37,10 @@ extension TomContactExtension on TomContact {
 extension TomContactsExtension on Set<TomContact> {
   Set<TomContact> removeUnknownTomContact() {
     return where(
-      (tomContact) => tomContact.mail != null || tomContact.phoneNumber != null,
+      (tomContact) =>
+          tomContact.mail != null ||
+          tomContact.phoneNumber != null ||
+          tomContact.address != null,
     ).map((contact) => contact).toSet();
   }
 }
