@@ -115,6 +115,28 @@ class ContactsManager {
         const Right(GetPhonebookContactsInitial());
   }
 
+  /// Synchronizes contacts when the contact tab is accessed.
+  ///
+  /// If synchronization is already in progress, the method returns early.
+  /// Otherwise, it sets the synchronizing flag and fetches all contacts
+  /// relevant to the contact tab, including phonebook contacts if supported.
+  Future<void> synchronizeContactsOnContactTab({
+    bool isAvailableSupportPhonebookContacts = false,
+    required String withMxId,
+  }) async {
+    Logs().d('ContactsManager::initialSynchronizeContacts');
+    if (_isSynchronizing) {
+      return;
+    }
+
+    _isSynchronizing = true;
+
+    await _getAllContactsOnContactTab(
+      isAvailableSupportPhonebookContacts: isAvailableSupportPhonebookContacts,
+      withMxId: withMxId,
+    );
+  }
+
   /// This method performs the synchronization of all contacts.
   ///
   /// It fetches contacts from many sources: tom, federation or twake then
@@ -188,6 +210,36 @@ class ContactsManager {
       });
   }
 
+  Future<void> _getAllContactsOnContactTab({
+    bool isAvailableSupportPhonebookContacts = false,
+    required String withMxId,
+  }) async {
+    tomContactsSubscription = getTomContactsInteractor
+        .execute(limit: AppConfig.maxFetchContacts)
+        .listen(
+      (event) {
+        _contactsNotifier.value = event;
+      },
+    )
+      ..onDone(() async {
+        Logs().d('ContactsManager::_getAllContactsOnContactTab: done');
+        await _lookUpPhonebookContactsInContact(
+          isAvailableSupportPhonebookContacts:
+              isAvailableSupportPhonebookContacts,
+          withMxId: withMxId,
+        );
+      })
+      ..onError((error) async {
+        Logs()
+            .d('ContactsManager::_getAllContactsOnContactTab: error - $error');
+        await _lookUpPhonebookContactsInContact(
+          isAvailableSupportPhonebookContacts:
+              isAvailableSupportPhonebookContacts,
+          withMxId: withMxId,
+        );
+      });
+  }
+
   Future<void> _lookUpPhonebookContacts({
     bool isAvailableSupportPhonebookContacts = false,
     required String withMxId,
@@ -197,6 +249,16 @@ class ContactsManager {
     }
 
     await _tryGetSyncedPhoneBookContact(withMxId: withMxId);
+  }
+
+  Future<void> _lookUpPhonebookContactsInContact({
+    bool isAvailableSupportPhonebookContacts = false,
+    required String withMxId,
+  }) async {
+    if (!isAvailableSupportPhonebookContacts) {
+      return;
+    }
+    await _handleLookUpPhonebookContacts(withMxId: withMxId);
   }
 
   Future<void> _tryGetSyncedPhoneBookContact({
@@ -250,7 +312,19 @@ class ContactsManager {
           (success) => _handleLookUpSuccessState(success),
         );
       },
-    );
+    )
+      ..onDone(() async {
+        Logs().d(
+          'ContactsManager::_handleTwakeLookUpPhoneBookContacts: onDone',
+        );
+        _isSynchronizing = false;
+      })
+      ..onError((error) async {
+        Logs().d(
+          'ContactsManager::_handleTwakeLookUpPhoneBookContacts: onError',
+        );
+        _isSynchronizing = false;
+      });
   }
 
   Future<void> _handleLookUpPhonebookContacts({
@@ -294,7 +368,19 @@ class ContactsManager {
             (success) => _handleLookUpSuccessState(success),
           );
         },
-      );
+      )
+            ..onDone(() async {
+              Logs().d(
+                'ContactsManager::_handleLookUpPhonebookContacts: onDone',
+              );
+              _isSynchronizing = false;
+            })
+            ..onError((error) async {
+              Logs().d(
+                'ContactsManager::_handleLookUpPhonebookContacts: onError',
+              );
+              _isSynchronizing = false;
+            });
     } catch (e) {
       Logs().e('ContactsManager::_handleLookUpPhonebookContacts', e);
 
