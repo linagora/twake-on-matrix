@@ -17,32 +17,27 @@ class ChatGroupDetailRobot extends CoreRobot {
   Future<PatrolFinder> getBackIcon() async {
     return $(AppBar).$(TwakeIconButton).$(Icon);
   }
-  
+
   Future<void> confimrAccessMedia() async {
     final dialog = $(PermissionDialog);
-    try{
+    try {
       await dialog.waitUntilVisible(timeout: const Duration(seconds: 3));
-      if ( dialog.exists) {    
-        final ctx = $.tester.element(dialog);          // BuildContext inside dialog
-        final nextLabel = L10n.of(ctx)!.next;          // whatever the app shows
+      if (dialog.exists) {
+        final ctx = $.tester.element(dialog); // BuildContext inside dialog
+        final nextLabel = L10n.of(ctx)!.next; // whatever the app shows
 
-        await $.tester.tap(find.descendant(of: dialog, matching: find.text(nextLabel)));
+        await $.tester
+            .tap(find.descendant(of: dialog, matching: find.text(nextLabel)));
         await $.tester.pumpAndSettle();
       }
-    }
-    catch (e) {
+    } catch (e) {
       ignoreException();
     }
   }
 
   Future<bool> isVisible() async {
-    final chatListSelector = $(ChatEventList);
-    try {
-      await chatListSelector.waitUntilVisible(timeout: const Duration(seconds: 120));
-      return true;
-    } catch (_) {
-      return false;
-    }
+    await $.waitUntilVisible($(ChatEventList));
+    return $(ChatEventList).exists;
   }
 
   Future<PatrolFinder> getText(String text) async {
@@ -60,18 +55,18 @@ class ChatGroupDetailRobot extends CoreRobot {
     await text.enterText(message);
   }
 
-  Future<void> backToPreviousScreen() async{
+  Future<void> backToPreviousScreen() async {
     await getBackIcon().tap();
   }
 
-  Future<PullDownMenuRobot> openPullDownMenu(String message) async{
+  Future<PullDownMenuRobot> openPullDownMenu(String message) async {
     await $(MessageContent).containing(find.text(message)).longPress();
     await $.waitUntilVisible($(PullDownMenu));
     await $.pump();
     return PullDownMenuRobot($);
   }
 
-  String? getTitle(){
+  String? getTitle() {
     return $(ChatAppBarTitle).$(Text).at(0).text;
   }
 }

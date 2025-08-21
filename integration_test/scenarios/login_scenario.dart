@@ -20,7 +20,7 @@ class LoginScenario extends BaseScenario {
 
   Future<void> login() async {
     final loginRobot = LoginRobot($);
-    if(await loginRobot.isWelComePageVisible()){
+    if (await loginRobot.isWelComePageVisible()) {
       await loginRobot.tapOnUseYourCompanyServer();
       await _handleWaitUntilVisibleHomeServerPickerView(loginRobot);
       await loginRobot.enterServerUrl(serverUrl);
@@ -28,7 +28,10 @@ class LoginScenario extends BaseScenario {
       await loginRobot.confirmShareInformation();
     }
     if (await loginRobot.isLoginBtnVisible()) {
-      await loginRobot.enterWebCredentialsWhenVisible(username: username, password: password,);
+      await loginRobot.enterWebCredentialsWhenVisible(
+        username: username,
+        password: password,
+      );
     }
     await loginRobot.grantNotificationPermission();
     await expectViewVisible($(ChatList));
