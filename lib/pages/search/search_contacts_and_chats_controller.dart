@@ -3,6 +3,7 @@ import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/domain/app_state/contact/get_contacts_state.dart';
 import 'package:fluffychat/domain/app_state/contact/get_phonebook_contact_state.dart';
 import 'package:fluffychat/domain/app_state/search/search_state.dart';
+import 'package:fluffychat/domain/model/contact/contact.dart';
 import 'package:fluffychat/domain/usecase/search/search_recent_chat_interactor.dart';
 import 'package:fluffychat/domain/contact_manager/contacts_manager.dart';
 import 'package:fluffychat/pages/search/search_debouncer_mixin.dart';
@@ -89,17 +90,7 @@ class SearchContactsAndChatsController
             ?.contacts ??
         [];
 
-    final phoneBookContacts = contactManger
-            .getPhonebookContactsNotifier()
-            .value
-            .getSuccessOrNull<GetPhonebookContactsSuccess>()
-            ?.contacts ??
-        contactManger
-            .getPhonebookContactsNotifier()
-            .value
-            .getFailureOrNull<LookUpPhonebookContactPartialFailed>()
-            ?.contacts ??
-        [];
+    final phoneBookContacts = _tryToGetPhonebookContacts();
     final tomPresentationSearchContacts = tomContacts
         .expand((contact) => contact.toPresentationContacts())
         .toList();
@@ -126,6 +117,36 @@ class SearchContactsAndChatsController
       recentChat: tomContactPresentationSearchMatched,
       contacts: phoneBookPresentationSearchMatched,
     );
+  }
+
+  List<Contact> _tryToGetPhonebookContacts() {
+    final phoneBookContacts = contactManger
+            .getPhonebookContactsNotifier()
+            .value
+            .getSuccessOrNull<GetPhonebookContactsSuccess>()
+            ?.contacts ??
+        contactManger
+            .getPhonebookContactsNotifier()
+            .value
+            .getFailureOrNull<LookUpPhonebookContactPartialFailed>()
+            ?.contacts ??
+        contactManger
+            .getPhonebookContactsNotifier()
+            .value
+            .getFailureOrNull<GetPhonebookContactsFailure>()
+            ?.contacts ??
+        contactManger
+            .getPhonebookContactsNotifier()
+            .value
+            .getFailureOrNull<RequestTokenFailure>()
+            ?.contacts ??
+        contactManger
+            .getPhonebookContactsNotifier()
+            .value
+            .getFailureOrNull<RegisterTokenFailure>()
+            ?.contacts ??
+        [];
+    return phoneBookContacts;
   }
 
   List<PresentationSearch> contactPresentationSearchMatchedOnWeb({

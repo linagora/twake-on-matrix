@@ -331,6 +331,7 @@ class ContactsManager {
     required String withMxId,
   }) async {
     try {
+      _isSynchronizing = true;
       final federationConfigurationRepository =
           getIt.get<FederationConfigurationsRepository>();
       final federationConfigurations = await federationConfigurationRepository
@@ -405,6 +406,12 @@ class ContactsManager {
       _postAddressBookOnMobile(
         contacts: failure.contacts,
       );
+    }
+
+    if (failure is GetPhonebookContactsFailure ||
+        failure is RequestTokenFailure ||
+        failure is RegisterTokenFailure) {
+      _progressPhoneBookState.value = null;
     }
   }
 

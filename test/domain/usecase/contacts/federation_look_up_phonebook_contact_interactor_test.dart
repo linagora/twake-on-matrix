@@ -141,7 +141,12 @@ void main() {
           interactor.execute(argument: testArgument),
           emitsInOrder([
             const Right(GetPhonebookContactsLoading()),
-            const Left(RegisterTokenFailure(exception: 'Register failed')),
+            Left(
+              RegisterTokenFailure(
+                exception: 'Register failed',
+                contacts: testContacts,
+              ),
+            ),
           ]),
         );
       });
@@ -335,8 +340,11 @@ void main() {
             federationTokenRequest: testTokenRequest,
           ),
         ).thenAnswer(
-          (_) async => const Left<Failure, Success>(
-            RequestTokenFailure(exception: 'Failed to get token'),
+          (_) async => Left<Failure, Success>(
+            RequestTokenFailure(
+              exception: 'Failed to get token',
+              contacts: testContacts,
+            ),
           ),
         );
 
@@ -344,7 +352,12 @@ void main() {
           interactor.execute(argument: testArgument),
           emitsInOrder([
             const Right(GetPhonebookContactsLoading()),
-            const Left(RequestTokenFailure(exception: 'Token is empty')),
+            Left(
+              RequestTokenFailure(
+                exception: 'Token is empty',
+                contacts: testContacts,
+              ),
+            ),
           ]),
         );
       });
@@ -1451,8 +1464,11 @@ void main() {
             ),
           ),
         ).thenAnswer(
-          (_) async => const Left<Failure, Success>(
-            RequestTokenFailure(exception: 'Third party token request failed'),
+          (_) async => Left<Failure, Success>(
+            RequestTokenFailure(
+              exception: 'Third party token request failed',
+              contacts: testContacts,
+            ),
           ),
         );
 

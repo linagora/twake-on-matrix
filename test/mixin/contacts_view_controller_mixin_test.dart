@@ -1733,7 +1733,12 @@ void main() {
           mockContactsViewControllerMixin.presentationPhonebookContactNotifier,
         ).thenReturn(
           ValueNotifierCustom(
-            const Left(GetPhonebookContactsFailure(exception: dynamic)),
+            const Left(
+              GetPhonebookContactsFailure(
+                exception: dynamic,
+                contacts: [],
+              ),
+            ),
           ),
         );
 
@@ -1775,7 +1780,12 @@ void main() {
         expect(
           mockContactsViewControllerMixin
               .presentationPhonebookContactNotifier.value,
-          const Left(GetPhonebookContactsFailure(exception: dynamic)),
+          const Left(
+            GetPhonebookContactsFailure(
+              exception: dynamic,
+              contacts: [],
+            ),
+          ),
         );
       },
     );
