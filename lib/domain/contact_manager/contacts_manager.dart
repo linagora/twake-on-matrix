@@ -257,7 +257,17 @@ class ContactsManager {
           (success) => _handleLookUpSuccessState(success),
         );
       },
-    );
+    )
+      ..onDone(() {
+        Logs().d('ContactsManager::_handleTwakeLookUpPhoneBookContacts: done');
+        _isSynchronizing = false;
+      })
+      ..onError((error) {
+        Logs().d(
+            'ContactsManager::_handleTwakeLookUpPhoneBookContacts: error - $error');
+        _isSynchronizing = false;
+      });
+    ;
   }
 
   Future<void> _handleLookUpPhonebookContacts({
@@ -301,7 +311,16 @@ class ContactsManager {
             (success) => _handleLookUpSuccessState(success),
           );
         },
-      );
+      )
+            ..onDone(() {
+              Logs().d('ContactsManager::_handleLookUpPhonebookContacts: done');
+              _isSynchronizing = false;
+            })
+            ..onError((error) {
+              Logs().d(
+                  'ContactsManager::_handleLookUpPhonebookContacts: error - $error');
+              _isSynchronizing = false;
+            });
     } catch (e) {
       Logs().e('ContactsManager::_handleLookUpPhonebookContacts', e);
 
@@ -315,7 +334,6 @@ class ContactsManager {
     Logs().e('ContactsManager::_handleLookUpFailureState', failure);
     if (failure is LookUpPhonebookContactPartialFailed) {
       _progressPhoneBookState.value = null;
-      _isSynchronizing = false;
       if (TwakeApp.router.routerDelegate.navigatorKey.currentContext != null) {
         TwakeSnackBar.show(
           TwakeApp.router.routerDelegate.navigatorKey.currentContext!,
@@ -333,7 +351,6 @@ class ContactsManager {
         failure is RequestTokenFailure ||
         failure is RegisterTokenFailure) {
       _progressPhoneBookState.value = null;
-      _isSynchronizing = false;
     }
   }
 
@@ -349,7 +366,6 @@ class ContactsManager {
           contacts: success.contacts,
         );
         _progressPhoneBookState.value = null;
-        _isSynchronizing = false;
       }
     }
   }

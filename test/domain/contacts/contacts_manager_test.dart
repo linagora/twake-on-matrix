@@ -2181,21 +2181,35 @@ void main() {
 
         await Future.delayed(const Duration(seconds: 1));
 
-        verifyNever(
+        verify(
           mockGetTomContactsInteractor.execute(
             limit: AppConfig.maxFetchContacts,
           ),
-        );
+        ).called(1);
 
-        verifyNever(
+        verify(
           mockTryGetSyncedPhoneBookContactInteractor.execute(
             userId: mxId,
           ),
+        ).called(1);
+
+        expectLater(listTomContactsFailureState.length, 1);
+
+        expectLater(
+          listTomContactsFailureState,
+          [
+            const GetContactsIsEmpty(),
+          ],
         );
 
-        expectLater(listTomContactsFailureState.length, 0);
+        expectLater(listPhonebookContactsFailureState.length, 1);
 
-        expectLater(listPhonebookContactsFailureState.length, 0);
+        expectLater(
+          listPhonebookContactsFailureState,
+          [
+            const GetHashDetailsFailure(exception: dynamic),
+          ],
+        );
       },
     );
 
@@ -2420,23 +2434,25 @@ void main() {
 
         await Future.delayed(const Duration(seconds: 1));
 
-        verifyNever(
+        verify(
           mockGetTomContactsInteractor.execute(
             limit: AppConfig.maxFetchContacts,
           ),
-        );
+        ).called(1);
 
-        verifyNever(
+        verify(
           mockTryGetSyncedPhoneBookContactInteractor.execute(
             userId: mxId,
           ),
-        );
+        ).called(1);
 
-        expectLater(listTomContactsFailureState.length, 0);
+        expectLater(listTomContactsFailureState.length, 1);
 
         expectLater(
           listTomContactsFailureState,
-          [],
+          [
+            const GetContactsIsEmpty(),
+          ],
         );
 
         expectLater(listPhonebookContactsFailureState.length, 0);
@@ -2448,13 +2464,22 @@ void main() {
 
         expectLater(
           listPhonebookContactsSuccessState.length,
-          0,
+          2,
         );
 
         expectLater(
           listPhonebookContactsSuccessState,
-          [],
+          [
+            const GetPhonebookContactsLoading(),
+            GetPhonebookContactsSuccess(contacts: contacts, progress: 100),
+          ],
         );
+
+        verify(
+          mockPostAddressBookInteractor.execute(
+            addressBooks: contacts.toSet().toAddressBooks().toList(),
+          ),
+        ).called(1);
       },
     );
   });
@@ -3111,30 +3136,34 @@ void main() {
 
         await Future.delayed(const Duration(seconds: 1));
 
-        verifyNever(
+        verify(
           mockGetTomContactsInteractor.execute(
             limit: AppConfig.maxFetchContacts,
           ),
-        );
+        ).called(1);
 
-        verifyNever(
+        verify(
           mockTryGetSyncedPhoneBookContactInteractor.execute(
             userId: mxId,
           ),
-        );
+        ).called(1);
 
-        expectLater(listTomContactsFailureState.length, 0);
+        expectLater(listTomContactsFailureState.length, 1);
 
         expectLater(
           listTomContactsFailureState,
-          [],
+          [
+            const GetContactsIsEmpty(),
+          ],
         );
 
-        expectLater(listPhonebookContactsFailureState.length, 0);
+        expectLater(listPhonebookContactsFailureState.length, 1);
 
         expectLater(
           listPhonebookContactsFailureState,
-          [],
+          [
+            const GetPhonebookContactsIsEmpty(),
+          ],
         );
       },
     );
@@ -3350,23 +3379,25 @@ void main() {
 
         await Future.delayed(const Duration(seconds: 1));
 
-        verifyNever(
+        verify(
           mockGetTomContactsInteractor.execute(
             limit: AppConfig.maxFetchContacts,
           ),
-        );
+        ).called(1);
 
-        verifyNever(
+        verify(
           mockTryGetSyncedPhoneBookContactInteractor.execute(
             userId: mxId,
           ),
-        );
+        ).called(1);
 
-        expectLater(listTomContactsFailureState.length, 0);
+        expectLater(listTomContactsFailureState.length, 1);
 
         expectLater(
           listTomContactsFailureState,
-          [],
+          [
+            const GetContactsIsEmpty(),
+          ],
         );
 
         expectLater(listPhonebookContactsFailureState.length, 0);
@@ -3378,19 +3409,22 @@ void main() {
 
         expectLater(
           listPhonebookContactsSuccessState.length,
-          0,
+          2,
         );
 
         expectLater(
           listPhonebookContactsSuccessState,
-          [],
+          [
+            const GetPhonebookContactsLoading(),
+            GetPhonebookContactsSuccess(contacts: contacts, progress: 100),
+          ],
         );
 
-        verifyNever(
+        verify(
           mockPostAddressBookInteractor.execute(
             addressBooks: contacts.toSet().toAddressBooks().toList(),
           ),
-        );
+        ).called(1);
       },
     );
 
