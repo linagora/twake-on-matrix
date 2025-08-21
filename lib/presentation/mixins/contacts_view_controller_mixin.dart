@@ -218,6 +218,50 @@ mixin class ContactsViewControllerMixin {
     );
   }
 
+  void synchronizeContactsOnContactTab({
+    required BuildContext context,
+    required Client client,
+    required MatrixLocalizations matrixLocalizations,
+  }) async {
+    if (PlatformInfos.isMobile &&
+        !contactsManager.isDoNotShowWarningContactsDialogAgain) {
+      await displayContactPermissionDialog(context);
+    } else {
+      await _initWarningBanner();
+    }
+    _refreshAllContacts(
+      context: context,
+      client: client,
+      matrixLocalizations: matrixLocalizations,
+    );
+    _listenContactsDataChange(
+      context: context,
+      client: client,
+      matrixLocalizations: matrixLocalizations,
+    );
+    textEditingController.addListener(() {
+      _debouncer.value = textEditingController.text;
+    });
+
+    _debouncer.values.listen((keyword) {
+      _refreshAllContacts(
+        context: context,
+        client: client,
+        matrixLocalizations: matrixLocalizations,
+      );
+    });
+
+    if (client.userID == null) {
+      return;
+    }
+    await contactsManager.synchronizeContactsOnContactTab(
+      withMxId: client.userID!,
+      isAvailableSupportPhonebookContacts: PlatformInfos.isMobile &&
+          contactsPermissionStatus != null &&
+          contactsPermissionStatus == PermissionStatus.granted,
+    );
+  }
+
   void _listenContactsDataChange({
     required BuildContext context,
     required Client client,

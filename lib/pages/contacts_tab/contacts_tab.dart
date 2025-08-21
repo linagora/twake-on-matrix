@@ -46,11 +46,10 @@ class ContactsTabController extends State<ContactsTab>
       if (mounted) {
         listenAddressBookEvents(client);
         getWellKnownInformation(client);
-        initialFetchContacts(
+        synchronizeContactsOnContactTab(
           context: context,
           client: Matrix.of(context).client,
           matrixLocalizations: MatrixLocals(L10n.of(context)!),
-          forceRun: true,
         );
       }
     });
