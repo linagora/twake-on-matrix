@@ -61,6 +61,25 @@ class FederationLookUpPhonebookContactInteractor {
 
       final List<Contact> contacts = [];
 
+      try {
+        final res = await _phonebookContactRepository.fetchContacts();
+
+        if (res.isEmpty) {
+          yield const Left(GetPhonebookContactsIsEmpty());
+          return;
+        }
+
+        contacts.addAll(res);
+      } catch (e) {
+        Logs().e(
+          'FederationLookUpPhonebookContactInteractor::execute: Register: $e',
+        );
+        yield Left(
+          GetPhoneBookContactFailure(exception: e),
+        );
+        return;
+      }
+
       await _federationIdentityRequestTokenManager
           .execute(
             federationTokenRequest: FederationTokenRequest(
@@ -85,7 +104,12 @@ class FederationLookUpPhonebookContactInteractor {
       );
 
       if (federationIdentityRequestTokenRes == null) {
-        yield const Left(RequestTokenFailure(exception: 'Token is empty'));
+        yield Left(
+          RequestTokenFailure(
+            exception: 'Token is empty',
+            contacts: contacts,
+          ),
+        );
         return;
       }
 
@@ -95,7 +119,12 @@ class FederationLookUpPhonebookContactInteractor {
           tokenInformation: federationIdentityRequestTokenRes!,
         );
         if (res.token == null || res.token!.isEmpty) {
-          yield const Left(RegisterTokenFailure(exception: 'Token is empty'));
+          yield Left(
+            RegisterTokenFailure(
+              exception: 'Token is empty',
+              contacts: contacts,
+            ),
+          );
           return;
         }
 
@@ -104,32 +133,18 @@ class FederationLookUpPhonebookContactInteractor {
         Logs().e(
           'FederationLookUpPhonebookContactInteractor::execute: Register: $e',
         );
-        yield const Left(RegisterTokenFailure(exception: 'Register failed'));
+        yield Left(
+          RegisterTokenFailure(
+            exception: 'Register failed',
+            contacts: contacts,
+          ),
+        );
         return;
       }
 
       Logs().d(
         'FederationLookUpPhonebookContactInteractor::execute: federationRegisterToken: $federationRegisterToken',
       );
-
-      try {
-        final res = await _phonebookContactRepository.fetchContacts();
-
-        if (res.isEmpty) {
-          yield const Left(GetPhonebookContactsIsEmpty());
-          return;
-        }
-
-        contacts.addAll(res);
-      } catch (e) {
-        Logs().e(
-          'FederationLookUpPhonebookContactInteractor::execute: Register: $e',
-        );
-        yield Left(
-          GetPhoneBookContactFailure(exception: e),
-        );
-        return;
-      }
 
       FederationHashDetailsResponse? hashDetails;
       try {
@@ -302,7 +317,12 @@ class FederationLookUpPhonebookContactInteractor {
         }
       }
     } catch (e) {
-      yield Left(GetPhonebookContactsFailure(exception: e));
+      yield Left(
+        GetPhonebookContactsFailure(
+          exception: e,
+          contacts: updatedContact.toList(),
+        ),
+      );
       return;
     }
 

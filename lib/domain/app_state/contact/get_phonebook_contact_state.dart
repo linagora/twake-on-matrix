@@ -41,43 +41,42 @@ class GetPhonebookContactsIsEmpty extends Failure {
 }
 
 class GetPhonebookContactsFailure extends Failure {
+  final List<Contact> contacts;
   final dynamic exception;
 
   const GetPhonebookContactsFailure({
     required this.exception,
+    required this.contacts,
   });
 
   @override
-  List<Object?> get props => [exception];
+  List<Object?> get props => [exception, contacts];
 }
 
 class RequestTokenFailure extends Failure {
+  final List<Contact> contacts;
   final dynamic exception;
 
   const RequestTokenFailure({
     required this.exception,
+    required this.contacts,
   });
 
   @override
-  List<Object?> get props => [exception];
+  List<Object?> get props => [exception, contacts];
 }
 
 class RegisterTokenFailure extends Failure {
+  final List<Contact> contacts;
   final dynamic exception;
 
   const RegisterTokenFailure({
+    required this.contacts,
     required this.exception,
   });
 
   @override
-  List<Object?> get props => [exception];
-}
-
-class GetPhoneBookContactEmpty extends Success {
-  const GetPhoneBookContactEmpty();
-
-  @override
-  List<Object?> get props => [];
+  List<Object?> get props => [exception, contacts];
 }
 
 class LookUpPhonebookContactPartialFailed extends Failure {
