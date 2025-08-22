@@ -21,7 +21,7 @@
 - #2496 Add Block list to Settings
 - #2501 Add missing comma in config_web_app_for_public_platform.md
 - #2376 Toggle bubble alignment left or left/right on web/desktop
-- #2500 Apply dynamic cozy bridge version
+- #2500 Handle notification on cozy web app 
 
 ## [2.10.3+2330] - 2025-07-22
 ### Added
