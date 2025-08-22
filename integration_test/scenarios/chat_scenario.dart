@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:developer';
 import 'dart:io';
 import 'package:fluffychat/pages/chat/chat_app_bar_title.dart';
@@ -59,7 +60,6 @@ class ChatScenario extends BaseScenario {
     expect((PullDownMenuRobot($).getSuppriseIcon()).exists, isTrue);
     expect((PullDownMenuRobot($).getExpandIcon()).exists, isTrue);
     expect(($(MessageContent).containing(find.text(message))).exists, isTrue);
-    PullDownMenuRobot($).close();
   }
 
   Future<void> replyMessage(String message, String reply) async {
@@ -69,19 +69,8 @@ class ChatScenario extends BaseScenario {
   }
 
   Future<void> forwardMessage(String message, String receiver) async {
-    final pullDownMenuRobot =
-        await ChatGroupDetailRobot($).openPullDownMenu(message);
-    final a = pullDownMenuRobot.getForwardItem();
-    await $.waitUntilVisible(a);
-    await a.tap();
-    await $.pump();
-    // await ($(TwakeIconButton).containing(find.byTooltip('Search'))).tap();
-    // await enterSearchText(receiver);
-    // await $.waitUntilVisible($(InkWell).at(0));
-    // await $(InkWell).at(0).tap();
-
-    // // await ($(TwakeIconButton).containing(find.byTooltip('Send'))).tap();
-    // // await $.pumpAndSettle();
+    await ChatGroupDetailRobot($).openPullDownMenu(message);
+    await PullDownMenuRobot($).getForwardItem().tap();
   }
   
   Future<void> sendAMesage(String message) async {
@@ -97,7 +86,6 @@ class ChatScenario extends BaseScenario {
   Future<void> copyMessage(String message) async {
     await ChatGroupDetailRobot($).openPullDownMenu(message);
     await (PullDownMenuRobot($).getCopyItem()).tap();
-    await $.pumpAndSettle();
   }
 
   Future<void> pasteFromClipBoard() async {
@@ -142,31 +130,30 @@ class ChatScenario extends BaseScenario {
     await ChatGroupDetailRobot($).openPullDownMenu(message);
     await (PullDownMenuRobot($).getEditItem()).tap();
     await sendAMesage(newMessage);
-    await $.pumpAndSettle();
   }
 
   Future<void> selectMessage(String message) async {
     await ChatGroupDetailRobot($).openPullDownMenu(message);
     await (PullDownMenuRobot($).getSelectItem()).tap();
-    await $.pumpAndSettle();
   }
 
-  Future<PatrolFinder> getPinExpandIcon() async {
-    return $(TwakeIconButton).containing(find.byTooltip('Pinned messages'));
+  PatrolFinder getPinExpandIcon() {
+    return $(PinnedEventsView).$(TwakeIconButton).first;
   }
 
   Future<void> pinMessage(String message) async {
     await ChatGroupDetailRobot($).openPullDownMenu(message);
     await (PullDownMenuRobot($).getPinItem()).tap();
-    await $.waitUntilVisible($(PinnedEventsView));
-    await $.waitUntilVisible($(PinnedEventsView).$("Pinned Message"));
-    expect((await getPinExpandIcon()).exists, isTrue);
+  }
+
+  Future<void> unpinMessage(String message) async {
+    await ChatGroupDetailRobot($).openPullDownMenu(message);
+    await (PullDownMenuRobot($).getUnpinItem()).tap();
   }
 
   Future<void> deleteMessage(String message) async {
     await ChatGroupDetailRobot($).openPullDownMenu(message);
     await (PullDownMenuRobot($).getDeleteItem()).tap();
-    await $.pumpAndSettle();
   }
 
   PatrolFinder _tileByText(String text) {
@@ -223,7 +210,22 @@ class ChatScenario extends BaseScenario {
     }
   }
 
-  Future<void> verifyTheDisplayInSelectedTextMode(String message) async {
+  Future<void> openPinnedPanel(PatrolIntegrationTester $) async {
+    final icon = getPinExpandIcon();
+    expect(icon.exists, isTrue, reason: 'Pin panel icon not found');
+
+    await icon.tap();
+    // wait for the pinned UI (a real widget on that screen)
+    await $.waitUntilVisible($(AppBar).containing(find.textContaining('Pinned message')),);
+    // await $.waitUntilVisible(
+    //   $(PinnedMessagesScreen).containing(find.text('Unpin all message')),
+    // );
+
+    await $.waitUntilVisible($(PinnedMessagesScreen), timeout: const Duration(seconds: 30));
+    await $.waitUntilVisible($(PinnedMessagesScreen).containing(find.textContaining('Unpin all message')),);
+  }
+
+  Future<void> verifyTheDisplayInSelectedTextMode(String message, int selectedNumber) async {
     final chatInputRow = $(ChatInputRow);
 
     expect(
@@ -236,25 +238,27 @@ class ChatScenario extends BaseScenario {
       findsOneWidget,
     );
     expect(
-      find.descendant(of: $(ChatAppBarTitle).finder, matching: find.text('1')),
+      find.descendant(of: $(ChatAppBarTitle).finder, matching: find.text(selectedNumber.toString())),
       findsOneWidget,
     );
-    expect(
-      find.descendant(
-          of: $(ChatAppBarTitle).finder, matching: find.byTooltip('Pin'),),
-      findsOneWidget,
-    );
-    expect(
-      find.descendant(
-          of: $(ChatAppBarTitle).finder, matching: find.byTooltip('More'),),
-      findsOneWidget,
-    );
+    if(selectedNumber == 1){
+      expect(
+        find.descendant(
+            of: $(ChatAppBarTitle).finder, matching: find.byTooltip('Pin'),),
+        findsOneWidget,
+      );
+      expect(
+        find.descendant(
+            of: $(ChatAppBarTitle).finder, matching: find.byTooltip('More'),),
+        findsOneWidget,
+      );
+      expect(
+        find.descendant(of: chatInputRow.finder, matching: find.text('Reply')),
+        findsOneWidget,
+      );
+    }
     expect(
       find.descendant(of: chatInputRow.finder, matching: find.text('Forward')),
-      findsOneWidget,
-    );
-    expect(
-      find.descendant(of: chatInputRow.finder, matching: find.text('Reply')),
       findsOneWidget,
     );
     await expectMessageTickSelected(
@@ -263,23 +267,29 @@ class ChatScenario extends BaseScenario {
     );
   }
 
-  Future<void> verifyMessageIsPinned(String message, bool isTrue) async {
-    await (await getPinExpandIcon()).tap();
-    await $.pumpAndSettle();
-    await $.waitUntilVisible($(AppBar).containing($("Pinned Message")));
-    await $.waitUntilVisible($(PinnedMessagesScreen).$("Unpin all messages"));
-    if (isTrue) {
-      expect($(MessageContent).$(message), isTrue);
-    } else {
-      expect($(MessageContent).$(message), isFalse);
+  Future<void> verifyMessageIsPinned(String message, {bool expected = true}) async {
+    final icon = getPinExpandIcon();
+
+    if (!icon.exists && !expected) return;
+
+    if (!icon.exists && expected) {
+      fail('Expected pinned message but pin panel icon not found.');
     }
 
-    await $(find.ancestor(
-            of: find.byTooltip('Back'), matching: find.byType(TwakeIconButton),),)
-        .tap();
-    await $.pumpAndSettle();
+    await openPinnedPanel($);
+
+    final pinnedMsg = $(MessageContent).containing(find.text(message));
+
+    if (expected) {
+      await $.waitUntilVisible(pinnedMsg);
+    } else {
+      expect(pinnedMsg.exists, isFalse, reason: 'Message is unexpectedly pinned: $message');
+    }
+    // click back
+    await ChatGroupDetailRobot($).backToPreviousScreen();
   }
 
+  
   Future<void> verifySearchResultViewIsShown() async {
     expect(
         ChatListRobot($).showLessLabel().visible ||
