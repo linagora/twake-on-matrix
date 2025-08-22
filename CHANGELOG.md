@@ -1,3 +1,28 @@
+## [2.11.0+2330] - 2025-08-22
+### Updated
+- Translation for en, ru, fr, vi
+- #2484 Upgrade flutter sdk to 3.27.4
+- #2483 Improve the chat view screen flickers when switching the responsive web browser
+- #2427 Improve spaces between messages remain after deleting emojis
+- #2489 Refactor unban user flow to refresh removed members
+- #2439 Add interactor for setting user permission levels and update role assignment logic
+- #2505 Refactor contact sync stuck when no federation available
+
+### Fixed
+- #2474 Update confirmation dialog button label for message deletion
+- #2469 Refactor avatar size handling to use `byte_converter` package for improved clarity
+- #2476 Fix chats with events as last messages blink
+
+### Changed
+- #2486 Change docker image to build web app
+
+### Added
+- #2491 Implement block and unblock user functionality
+- #2496 Add Block list to Settings
+- #2501 Add missing comma in config_web_app_for_public_platform.md
+- #2376 Toggle bubble alignment left or left/right on web/desktop
+- #2500 Handle notification on cozy web app 
+
 ## [2.10.3+2330] - 2025-07-22
 ### Added
 - Add unban user functionality with interactor and UI integration
