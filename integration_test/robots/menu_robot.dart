@@ -83,6 +83,10 @@ class PullDownMenuRobot extends CoreRobot {
     return $(PullDownMenuItem).containing(find.text("Pin"));
   }
 
+  PatrolFinder getUnpinItem() {
+    return $(PullDownMenuItem).containing(find.text("Unpin"));
+  }
+
   PatrolFinder getDeleteItem() {
     return $(PullDownMenuItem).containing(find.text("Delete"));
   }
@@ -132,6 +136,5 @@ class PullDownMenuRobot extends CoreRobot {
     final view = $.tester.binding.platformDispatcher.implicitView!;
     final size = view.physicalSize / view.devicePixelRatio; // logical pixels
     await $.tester.tapAt(Offset(size.width - 8, size.height - 8));
-    await $.pumpAndSettle();
   }
 }

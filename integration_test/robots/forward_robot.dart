@@ -15,7 +15,6 @@ class ForwardRobot extends CoreRobot {
   Future<List<TwakeListItemRobot>> getListOfRecentContacts() async {
     final List<TwakeListItemRobot> contactList = [];
 
-    // Evaluate once to find how many TwakeInkWell widgets exist
     final matches = $(Material).evaluate();
 
     for (int i = 0; i < matches.length; i++) {

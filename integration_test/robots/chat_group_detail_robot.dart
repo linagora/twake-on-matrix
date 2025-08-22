@@ -14,7 +14,7 @@ import 'menu_robot.dart';
 class ChatGroupDetailRobot extends CoreRobot {
   ChatGroupDetailRobot(super.$);
 
-  Future<PatrolFinder> getBackIcon() async {
+  PatrolFinder getBackIcon() {
     return $(AppBar).$(TwakeIconButton).$(Icon);
   }
 
@@ -64,6 +64,10 @@ class ChatGroupDetailRobot extends CoreRobot {
     await $.waitUntilVisible($(PullDownMenu));
     await $.pump();
     return PullDownMenuRobot($);
+  }
+
+  Future<void> closePullDownMenu() async {
+    await PullDownMenuRobot($).close();
   }
 
   String? getTitle() {
