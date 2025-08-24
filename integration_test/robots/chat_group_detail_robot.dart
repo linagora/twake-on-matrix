@@ -21,7 +21,9 @@ class ChatGroupDetailRobot extends CoreRobot {
   PatrolFinder getSearchIcon() {
     return $(AppBar).$(IconButton);
   }
-
+  PatrolFinder getMoreIconInAppBar() {
+    return $(AppBar).containing(find.byTooltip('More'));
+  } 
   PatrolFinder getMoreIcon() {
     return $(TwakeIconButton).containing(find.byTooltip('More'));
   }
@@ -33,6 +35,10 @@ class ChatGroupDetailRobot extends CoreRobot {
   String getTotalMemberLabel() {
     final a = $(ChatAppBarTitle).$(find.textContaining('member')).text;
     return a!.replaceFirst(RegExp(r'\s+m.*$', caseSensitive: false), '');
+  }
+
+  String? getTitle() {
+    return $(ChatAppBarTitle).$(Text).at(0).text;
   }
 
   Future<void> tapOnChatBarTitle() async {
@@ -72,9 +78,12 @@ class ChatGroupDetailRobot extends CoreRobot {
   }
 
   Future<void> inputMessage(String message) async {
-    final text = await getInputTextField();
-    await text.tap();
-    await text.enterText(message);
+    // catch exceptiom
+    final textField = await getInputTextField();
+    await CoreRobot($).captureAsyncError(() async {
+        await textField.tap();
+      });
+    await textField.enterText(message);
   }
 
   Future<void> clickOnBackIcon() async {
@@ -92,7 +101,17 @@ class ChatGroupDetailRobot extends CoreRobot {
     await PullDownMenuRobot($).close();
   }
 
-  String? getTitle() {
-    return $(ChatAppBarTitle).$(Text).at(0).text;
+  Future<void> expectSnackShown(
+    PatrolIntegrationTester $, {
+    String message = 'Room creation failed',
+    }) async {
+      final snackText =
+          $(find.textContaining(message, findRichText: true)).first;
+
+      // 1) Chờ xuất hiện (ngay sau hành động tạo room)
+      await $.waitUntilVisible(snackText, timeout: const Duration(seconds: 5));
+
+      // 2) (tuỳ chọn) Chờ nó biến mất để tránh flakiness cho bước sau
+      await waitUntilAbsent($, snackText);
   }
 }
