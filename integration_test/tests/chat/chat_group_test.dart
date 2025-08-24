@@ -41,126 +41,126 @@ Future<(String, String)> prepareTwoMessages(PatrolIntegrationTester $) async {
 }
 
 void main() {
-//   TestBase().runPatrolTest(
-//     description: 'verify the display of pull down menu',
-//     test: ($) async {
-//       final (senderMsg, receiverMsg) = await prepareTwoMessages($);
+  TestBase().runPatrolTest(
+    description: 'verify the display of pull down menu',
+    test: ($) async {
+      final (senderMsg, receiverMsg) = await prepareTwoMessages($);
 
-//       await ChatGroupDetailRobot($).openPullDownMenu(senderMsg);
-//       await ChatScenario($).verifyTheDisplayOfPullDownMenu(senderMsg);
-//       await ChatGroupDetailRobot($).closePullDownMenu();
+      await ChatGroupDetailRobot($).openPullDownMenu(senderMsg);
+      await ChatScenario($).verifyTheDisplayOfPullDownMenu(senderMsg);
+      await ChatGroupDetailRobot($).closePullDownMenu();
 
-//       await ChatGroupDetailRobot($).openPullDownMenu(receiverMsg);
-//       await ChatScenario($).verifyTheDisplayOfPullDownMenu(receiverMsg);
-//     },
-//   );
+      await ChatGroupDetailRobot($).openPullDownMenu(receiverMsg);
+      await ChatScenario($).verifyTheDisplayOfPullDownMenu(receiverMsg);
+    },
+  );
 
-//   TestBase().runPatrolTest(
-//     description: 'reply a message',
-//     test: ($) async {
-//       final (senderMsg, receiverMsg) = await prepareTwoMessages($);
+  TestBase().runPatrolTest(
+    description: 'reply a message',
+    test: ($) async {
+      final (senderMsg, receiverMsg) = await prepareTwoMessages($);
 
-//       final replySender = 'reply sender at ${uniqueId()}';
-//       final replyReceiver = 'reply receiver at ${uniqueId()}';
+      final replySender = 'reply sender at ${uniqueId()}';
+      final replyReceiver = 'reply receiver at ${uniqueId()}';
 
-//       await ChatScenario($).replyMessage(senderMsg, replySender);
-//       await ChatScenario($).verifyMessageIsShown(replySender, true);
+      await ChatScenario($).replyMessage(senderMsg, replySender);
+      await ChatScenario($).verifyMessageIsShown(replySender, true);
 
-//       await ChatScenario($).replyMessage(receiverMsg, replyReceiver);
-//       await ChatScenario($).verifyMessageIsShown(replyReceiver, true);
-//     },
-//   );
+      await ChatScenario($).replyMessage(receiverMsg, replyReceiver);
+      await ChatScenario($).verifyMessageIsShown(replyReceiver, true);
+    },
+  );
 
-//   TestBase().runPatrolTest(
-//     description: 'delete a message',
-//     test: ($) async {
-//       final (senderMsg, receiverMsg) = await prepareTwoMessages($);
+  TestBase().runPatrolTest(
+    description: 'delete a message',
+    test: ($) async {
+      final (senderMsg, receiverMsg) = await prepareTwoMessages($);
 
-//       await ChatScenario($).deleteMessage(senderMsg);
-//       await ChatScenario($).verifyMessageIsShown(senderMsg, false);
+      await ChatScenario($).deleteMessage(senderMsg);
+      await ChatScenario($).verifyMessageIsShown(senderMsg, false);
 
-//       await ChatScenario($).deleteMessage(receiverMsg);
-//       await ChatScenario($).verifyMessageIsShown(receiverMsg, false);
-//     },
-//   );
+      await ChatScenario($).deleteMessage(receiverMsg);
+      await ChatScenario($).verifyMessageIsShown(receiverMsg, false);
+    },
+  );
 
-//   TestBase().runPatrolTest(
-//     description: 'copy a message',
-//     test: ($) async {
-//       final (senderMsg, receiverMsg) = await prepareTwoMessages($);
+  TestBase().runPatrolTest(
+    description: 'copy a message',
+    test: ($) async {
+      final (senderMsg, receiverMsg) = await prepareTwoMessages($);
 
-//       // copy sender
-//       await ChatScenario($).copyMessage(senderMsg);
-//       const addedText = 'Copy';
-//       await ChatGroupDetailRobot($).inputMessage(addedText);
-//       await ChatScenario($).pasteFromClipBoard();
-//       await $(ChatInputRowSendBtn).tap();
-//       await ChatScenario($).verifyMessageIsShown('$addedText$senderMsg', true);
+      // copy sender
+      await ChatScenario($).copyMessage(senderMsg);
+      const addedText = 'Copy';
+      await ChatGroupDetailRobot($).inputMessage(addedText);
+      await ChatScenario($).pasteFromClipBoard();
+      await $(ChatInputRowSendBtn).tap();
+      await ChatScenario($).verifyMessageIsShown('$addedText$senderMsg', true);
 
-//       // copy receiver
-//       await ChatScenario($).copyMessage(receiverMsg);
-//       await ChatGroupDetailRobot($).inputMessage(addedText);
-//       await ChatScenario($).pasteFromClipBoard();
-//       await $(ChatInputRowSendBtn).tap();
-//       await ChatScenario($).verifyMessageIsShown('$addedText$receiverMsg', true);
-//     },
-//   );
+      // copy receiver
+      await ChatScenario($).copyMessage(receiverMsg);
+      await ChatGroupDetailRobot($).inputMessage(addedText);
+      await ChatScenario($).pasteFromClipBoard();
+      await $(ChatInputRowSendBtn).tap();
+      await ChatScenario($).verifyMessageIsShown('$addedText$receiverMsg', true);
+    },
+  );
 
-//   TestBase().runPatrolTest(
-//     description: 'edit a message',
-//     test: ($) async {
-//       final (senderMsg, receiverMsg) = await prepareTwoMessages($);
+  TestBase().runPatrolTest(
+    description: 'edit a message',
+    test: ($) async {
+      final (senderMsg, receiverMsg) = await prepareTwoMessages($);
 
-//       final editedSender = 'Edit$senderMsg';
-//       await ChatScenario($).editMessage(senderMsg, editedSender);
-//       await ChatScenario($).verifyMessageIsShown(editedSender, true);
-//       await ChatScenario($).verifyMessageIsShown(senderMsg, false);
+      final editedSender = 'Edit$senderMsg';
+      await ChatScenario($).editMessage(senderMsg, editedSender);
+      await ChatScenario($).verifyMessageIsShown(editedSender, true);
+      await ChatScenario($).verifyMessageIsShown(senderMsg, false);
 
-//       final editedReceiver = 'Edit$receiverMsg';
-//       await ChatScenario($).editMessage(receiverMsg, editedReceiver);
-//       await ChatScenario($).verifyMessageIsShown(editedReceiver, true);
-//       await ChatScenario($).verifyMessageIsShown(receiverMsg, false);
-//     },
-//   );
+      final editedReceiver = 'Edit$receiverMsg';
+      await ChatScenario($).editMessage(receiverMsg, editedReceiver);
+      await ChatScenario($).verifyMessageIsShown(editedReceiver, true);
+      await ChatScenario($).verifyMessageIsShown(receiverMsg, false);
+    },
+  );
 
-//   TestBase().runPatrolTest(
-//     description: 'select a message',
-//     test: ($) async {
-//       final (senderMsg, receiverMsg) = await prepareTwoMessages($);
+  TestBase().runPatrolTest(
+    description: 'select a message',
+    test: ($) async {
+      final (senderMsg, receiverMsg) = await prepareTwoMessages($);
 
-//       await ChatScenario($).selectMessage(senderMsg);
-//       await ChatScenario($).verifyTheDisplayInSelectedTextMode(senderMsg, 1);
+      await ChatScenario($).selectMessage(senderMsg);
+      await ChatScenario($).verifyTheDisplayInSelectedTextMode(senderMsg, 1);
 
-//       await ChatScenario($).selectMessage(receiverMsg);
-//       await ChatScenario($).verifyTheDisplayInSelectedTextMode(receiverMsg, 2);
-//     },
-//   );
+      await ChatScenario($).selectMessage(receiverMsg);
+      await ChatScenario($).verifyTheDisplayInSelectedTextMode(receiverMsg, 2);
+    },
+  );
 
-//   // TestBase().runPatrolTest(
-//   //   description: 'pin and unpin a message',
-//   //   test: ($) async {
-//   //     final (senderMsg, receiverMsg) = await prepareTwoMessages($);
+  // TestBase().runPatrolTest(
+  //   description: 'pin and unpin a message',
+  //   test: ($) async {
+  //     final (senderMsg, receiverMsg) = await prepareTwoMessages($);
 
-//   //     await ChatScenario($).pinMessage(senderMsg);
-//   //     await ChatScenario($).verifyMessageIsPinned(senderMsg);
-//   //     await ChatScenario($).unpinMessage(senderMsg);
-//   //     await ChatScenario($).verifyMessageIsPinned(senderMsg, expected: false);
+  //     await ChatScenario($).pinMessage(senderMsg);
+  //     await ChatScenario($).verifyMessageIsPinned(senderMsg);
+  //     await ChatScenario($).unpinMessage(senderMsg);
+  //     await ChatScenario($).verifyMessageIsPinned(senderMsg, expected: false);
 
-//   //     await ChatScenario($).pinMessage(receiverMsg);
-//   //     await ChatScenario($).verifyMessageIsPinned(receiverMsg);
-//   //     await ChatScenario($).unpinMessage(receiverMsg);
-//   //     await ChatScenario($).verifyMessageIsPinned(receiverMsg, expected: false);
-//   //   },
-//   // );
+  //     await ChatScenario($).pinMessage(receiverMsg);
+  //     await ChatScenario($).verifyMessageIsPinned(receiverMsg);
+  //     await ChatScenario($).unpinMessage(receiverMsg);
+  //     await ChatScenario($).verifyMessageIsPinned(receiverMsg, expected: false);
+  //   },
+  // );
 
-//   // TestBase().runPatrolTest(
-//   //   description: 'forward a message',
-//   //   test: ($) async {
-//   //     final (senderMsg, receiverMsg) = await prepareTwoMessages($);
+  // TestBase().runPatrolTest(
+  //   description: 'forward a message',
+  //   test: ($) async {
+  //     final (senderMsg, receiverMsg) = await prepareTwoMessages($);
 
-//   //     await ChatScenario($).forwardMessage(senderMsg, forwardReceiver);
-//   //   },
-//   // );
+  //     await ChatScenario($).forwardMessage(senderMsg, forwardReceiver);
+  //   },
+  // );
 
   TestBase().runPatrolTest(
     description: 'create a new direct message with existing account',
