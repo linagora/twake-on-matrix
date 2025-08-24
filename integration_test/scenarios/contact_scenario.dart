@@ -25,7 +25,7 @@ class ContactScenario extends BaseScenario {
     return chatGroupDetailRobot;
   }
   Future<void> backToContactLisFromChatGroupScreen() async {
-    await ChatGroupDetailRobot($).backToPreviousScreen();
+    await ChatGroupDetailRobot($).clickOnBackIcon();
   }
 
   Future<void> verifyDisplayOfContactListScreen(SoftAssertHelper s) async {
