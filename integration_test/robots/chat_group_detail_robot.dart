@@ -18,6 +18,28 @@ class ChatGroupDetailRobot extends CoreRobot {
     return $(AppBar).$(TwakeIconButton).$(Icon);
   }
 
+  PatrolFinder getSearchIcon() {
+    return $(AppBar).$(IconButton);
+  }
+
+  PatrolFinder getMoreIcon() {
+    return $(TwakeIconButton).containing(find.byTooltip('More'));
+  }
+
+  PatrolFinder getChatAppBarTitle() {
+    return $(ChatAppBarTitle);
+  }
+
+  String getTotalMemberLabel() {
+    final a = $(ChatAppBarTitle).$(find.textContaining('member')).text;
+    return a!.replaceFirst(RegExp(r'\s+m.*$', caseSensitive: false), '');
+  }
+
+  Future<void> tapOnChatBarTitle() async {
+    await getChatAppBarTitle().tap();
+    await $.waitUntilVisible($("Group information"));
+  }
+
   Future<void> confimrAccessMedia() async {
     final dialog = $(PermissionDialog);
     try {
@@ -55,7 +77,7 @@ class ChatGroupDetailRobot extends CoreRobot {
     await text.enterText(message);
   }
 
-  Future<void> backToPreviousScreen() async {
+  Future<void> clickOnBackIcon() async {
     await getBackIcon().tap();
   }
 

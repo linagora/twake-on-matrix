@@ -1,4 +1,3 @@
-import 'dart:async';
 import 'dart:developer';
 import 'dart:io';
 import 'package:fluffychat/pages/chat/chat_app_bar_title.dart';
@@ -6,6 +5,7 @@ import 'package:fluffychat/pages/chat/chat_input_row.dart';
 import 'package:fluffychat/pages/chat/chat_input_row_send_btn.dart';
 import 'package:fluffychat/pages/chat/chat_pinned_events/pinned_events_view.dart';
 import 'package:fluffychat/pages/chat/chat_pinned_events/pinned_messages_screen.dart';
+import 'package:fluffychat/pages/chat/chat_view.dart';
 import 'package:fluffychat/pages/chat/events/message/multi_platform_message_container.dart';
 import 'package:fluffychat/pages/chat/events/message_content.dart';
 import 'package:fluffychat/pages/chat_list/chat_list_body_view.dart';
@@ -16,12 +16,16 @@ import 'package:patrol/patrol.dart';
 import '../base/base_scenario.dart';
 import '../base/core_robot.dart';
 import '../help/soft_assertion_helper.dart';
+import '../robots/add_member_robot.dart';
 import '../robots/chat_group_detail_robot.dart';
 import '../robots/chat_list_robot.dart';
 import 'package:flutter/material.dart';
 import 'dart:convert';
+import '../robots/group_information_robot.dart';
 import '../robots/menu_robot.dart';
+import '../robots/new_chat_robot.dart';
 import '../robots/search_robot.dart';
+import '../robots/setting_for_new_group.dart';
 
 class ChatScenario extends BaseScenario {
   ChatScenario(super.$);
@@ -38,8 +42,37 @@ class ChatScenario extends BaseScenario {
     return ChatGroupDetailRobot($);
   }
 
-  Future<void> backToChatLisFromChatGroupScreen(bool isOpenGroupFromSearchResult) async {
-    await ChatGroupDetailRobot($).backToPreviousScreen();
+  Future<ChatGroupDetailRobot> openGroupChatInfo() async {
+    await (ChatGroupDetailRobot($).tapOnChatBarTitle());
+    return ChatGroupDetailRobot($);
+  }
+  
+  Future<int> addMembers(List<String> members) async {
+    await openGroupChatInfo();
+    await GroupInformationRobot($).clickOnAddMemberBtn();
+    for(final member in members){
+      await AddMemberRobot($).makeASearch(member);
+      await AddMemberRobot($).selectAllFilteredAccounts();
+    }
+    await AddMemberRobot($).getNextIcon().tap();
+    await AddMemberRobot($).getAgreeInviteMemberBtn().tap();
+    await $.waitUntilVisible($("Group information"));
+    return (await GroupInformationRobot($).getListOfMembers()).length;
+  }
+  
+  Future<int> removeMembers(List<String> members) async {
+    await openGroupChatInfo();
+    for(final member in members){
+      await GroupInformationRobot($).getMember(member).tap();
+      await GroupInformationRobot($).clickOnRemoveFromGroup();
+      await GroupInformationRobot($).clickOnAgreeIRemoveMemberBtn();
+    }
+    await $.waitUntilVisible($("Group information"));
+    return (await GroupInformationRobot($).getListOfMembers()).length;
+  }
+
+  Future<void> backToChatLisFromChatGroupScreen({bool isOpenGroupFromSearchResult = false}) async {
+    await ChatGroupDetailRobot($).clickOnBackIcon();
     if(isOpenGroupFromSearchResult)
       {await SearchRobot($).backToPreviousScreen();}
   }
@@ -154,6 +187,30 @@ class ChatScenario extends BaseScenario {
   Future<void> deleteMessage(String message) async {
     await ChatGroupDetailRobot($).openPullDownMenu(message);
     await (PullDownMenuRobot($).getDeleteItem()).tap();
+  }
+
+  Future<ChatGroupDetailRobot> createANewGroupChat(String groupName, List<String> memberAccounts, {String searchKey = ""}) async {
+    await ChatListRobot($).clickOnPenIcon();
+    await NewChatRobot($).clickOnNewGroupChatIcon();
+
+    if(searchKey != ""){
+      await AddMemberRobot($).makeASearch(searchKey);
+    }
+    await AddMemberRobot($).selectAllFilteredAccounts();
+    await AddMemberRobot($).clickOnNextIcon();
+    await SettingForNewGroupRobot($).settingForNewGroup(groupName);
+    await SettingForNewGroupRobot($).getConfirmIcon().tap();
+    await $.pump(const Duration(seconds: 10));
+    await $.waitUntilVisible($(ChatView));
+    return ChatGroupDetailRobot($);
+  }
+
+  Future<void> createANewDirectMessage(String groupName, String account) async {
+    await ChatListRobot($).clickOnPenIcon();
+    await NewChatRobot($).makeASearch(account);
+    await NewChatRobot($).getListOfAccount()[0].root.tap();
+    await $.pump(const Duration(seconds: 10));
+    await $.waitUntilVisible($(ChatView));
   }
 
   PatrolFinder _tileByText(String text) {
@@ -286,7 +343,7 @@ class ChatScenario extends BaseScenario {
       expect(pinnedMsg.exists, isFalse, reason: 'Message is unexpectedly pinned: $message');
     }
     // click back
-    await ChatGroupDetailRobot($).backToPreviousScreen();
+    await ChatGroupDetailRobot($).clickOnBackIcon();
   }
 
   

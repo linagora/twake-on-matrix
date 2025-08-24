@@ -58,7 +58,7 @@ void main() {
       expect(await chatGroupDetailRobot.isVisible(), isTrue);
 
       //back to chat list
-      await ChatScenario($).backToChatLisFromChatGroupScreen(true);
+      await ChatScenario($).backToChatLisFromChatGroupScreen(isOpenGroupFromSearchResult: true);
       //verify chat list screen is shown gain with correct display
       await ChatScenario($).verifyDisplayOfGroupListScreen(s);
 
