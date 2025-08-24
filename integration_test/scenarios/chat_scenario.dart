@@ -8,6 +8,7 @@ import 'package:fluffychat/pages/chat/chat_pinned_events/pinned_messages_screen.
 import 'package:fluffychat/pages/chat/chat_view.dart';
 import 'package:fluffychat/pages/chat/events/message/multi_platform_message_container.dart';
 import 'package:fluffychat/pages/chat/events/message_content.dart';
+import 'package:fluffychat/pages/chat_draft/draft_chat_view.dart';
 import 'package:fluffychat/pages/chat_list/chat_list_body_view.dart';
 import 'package:fluffychat/widgets/twake_components/twake_icon_button.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -205,12 +206,11 @@ class ChatScenario extends BaseScenario {
     return ChatGroupDetailRobot($);
   }
 
-  Future<void> createANewDirectMessage(String groupName, String account) async {
+  Future<void> createANewDirectMessage(String account) async {
     await ChatListRobot($).clickOnPenIcon();
     await NewChatRobot($).makeASearch(account);
     await NewChatRobot($).getListOfAccount()[0].root.tap();
-    await $.pump(const Duration(seconds: 10));
-    await $.waitUntilVisible($(ChatView));
+    await CoreRobot($).waitForEitherVisible($: $, first: $(ChatView), second: $(DraftChatView), timeout: const Duration(seconds: 10));
   }
 
   PatrolFinder _tileByText(String text) {
@@ -454,5 +454,20 @@ class ChatScenario extends BaseScenario {
   Future<void> verifyChatListCanBeScrollable(SoftAssertHelper s) async {
     s.softAssertEquals( await CoreRobot($).isActuallyScrollable($,root: $(SingleChildScrollView),), true,
         'Chat list is not scrollable',);
+  }
+
+  Future<void> expectCreationFailedAlert(
+    PatrolIntegrationTester $, {
+    String message = 'Room creation failed',
+    }) async {
+      // Finder linh hoạt: Text hoặc RichText, có thể là substring
+      final snackText =
+          $(find.textContaining(message, findRichText: true)).first;
+
+      // 1) Chờ xuất hiện (ngay sau hành động tạo room)
+      await $.waitUntilVisible(snackText, timeout: const Duration(seconds: 5));
+
+      // 2) (tuỳ chọn) Chờ nó biến mất để tránh flakiness cho bước sau
+      await CoreRobot($).waitUntilAbsent($, snackText);
   }
 }
