@@ -1,6 +1,8 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
-import 'package:flutter/widgets.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:html/parser.dart';
 import 'package:patrol/patrol.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -35,6 +37,29 @@ class CoreRobot {
     }
     throw Exception(
         'Neither widget became visible within ${timeout.inSeconds} seconds',);
+  }
+
+  Future<void> waitUntilAbsent(
+    PatrolIntegrationTester $, 
+    PatrolFinder finder, {
+    Duration timeout = const Duration(seconds: 10),
+  }) async {
+    final end = DateTime.now().add(timeout);
+    while (finder.exists) {
+      if (DateTime.now().isAfter(end)) {
+        throw TimeoutException('Widget $finder still exists after $timeout');
+      }
+      await $.pump(const Duration(milliseconds: 200));
+    }
+  }
+  
+  Future<void> waitSnackGone(PatrolIntegrationTester $,
+      {Duration timeout = const Duration(seconds: 8),}) async {
+    final end = DateTime.now().add(timeout);
+    while ($(SnackBar).exists || $(CupertinoPopupSurface).exists) {
+      if (DateTime.now().isAfter(end)) break;
+      await $.pump(const Duration(milliseconds: 150));
+    }
   }
 
   Future<HttpClient> initialRedirectRequest() async {
