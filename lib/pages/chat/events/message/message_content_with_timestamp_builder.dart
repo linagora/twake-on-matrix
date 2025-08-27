@@ -462,7 +462,7 @@ class _MessageContentWithTimestampBuilderState
                 ),
               )
             else
-              _menuActionsRowBuilder(context),
+              _menuActionsRowBuilder(context, isReversed: true),
         ],
       ],
     );
@@ -723,7 +723,13 @@ class _MessageContentWithTimestampBuilderState
     }
   }
 
-  Widget _menuActionsRowBuilder(BuildContext context) {
+  Widget _menuActionsRowBuilder(
+    BuildContext context, {
+    bool isReversed = false,
+  }) {
+    final listHorizontalActionMenu = isReversed
+        ? widget.listHorizontalActionMenu.reversed.toList()
+        : widget.listHorizontalActionMenu;
     return ValueListenableBuilder(
       valueListenable: widget.isHoverNotifier,
       builder: (context, isHover, child) {
@@ -741,7 +747,7 @@ class _MessageContentWithTimestampBuilderState
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
-          children: widget.listHorizontalActionMenu.map((item) {
+          children: listHorizontalActionMenu.map((item) {
             return Padding(
               padding: const EdgeInsetsDirectional.symmetric(horizontal: 4),
               child: TwakeIconButton(

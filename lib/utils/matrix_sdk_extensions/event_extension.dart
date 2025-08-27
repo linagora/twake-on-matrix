@@ -170,12 +170,21 @@ extension LocalizedBody on Event {
   bool get shouldAlignOwnMessageInDifferentSide =>
       isOwnMessage && AppConfig.enableRightAndLeftMessageAlignmentOnWeb;
 
-  bool get shouldDisplayContextMenuInLeftBubble =>
-      AppConfig.enableRightAndLeftMessageAlignmentOnWeb && isOwnMessage;
+  bool get shouldDisplayContextMenuInLeftBubble {
+    return AppConfig.enableRightAndLeftMessageAlignmentOnWeb
+        ? _isLeftBubbleContextMenu()
+        : false;
+  }
 
-  bool get shouldDisplayContextMenuInRightBubble =>
-      AppConfig.enableRightAndLeftMessageAlignmentOnWeb == false &&
-      !isOwnMessage;
+  bool get shouldDisplayContextMenuInRightBubble {
+    return AppConfig.enableRightAndLeftMessageAlignmentOnWeb
+        ? _isRightBubbleContextMenu()
+        : true;
+  }
+
+  bool _isLeftBubbleContextMenu() => isOwnMessage;
+
+  bool _isRightBubbleContextMenu() => !isOwnMessage;
 
   bool get timelineOverlayMessage =>
       {
