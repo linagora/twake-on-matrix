@@ -198,7 +198,7 @@ class _MessageContentWithTimestampBuilderState
                 ),
               )
             else
-              _menuActionsRowBuilder(context),
+              _menuActionsRowBuilder(context, isReversed: true),
         ],
         TwakeContextMenuArea(
           builder: widget.menuChildren != null
@@ -462,7 +462,7 @@ class _MessageContentWithTimestampBuilderState
                 ),
               )
             else
-              _menuActionsRowBuilder(context, isReversed: true),
+              _menuActionsRowBuilder(context),
         ],
       ],
     );
