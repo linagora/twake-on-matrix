@@ -172,19 +172,19 @@ extension LocalizedBody on Event {
 
   bool get shouldDisplayContextMenuInLeftBubble {
     return AppConfig.enableRightAndLeftMessageAlignmentOnWeb
-        ? _isLeftBubbleContextMenu()
+        ? _isContextMenuForLeftAlignedMessage()
         : false;
   }
 
   bool get shouldDisplayContextMenuInRightBubble {
     return AppConfig.enableRightAndLeftMessageAlignmentOnWeb
-        ? _isRightBubbleContextMenu()
+        ? _isContextMenuForRightAlignedMessage()
         : true;
   }
 
-  bool _isLeftBubbleContextMenu() => isOwnMessage;
+  bool _isContextMenuForLeftAlignedMessage() => isOwnMessage;
 
-  bool _isRightBubbleContextMenu() => !isOwnMessage;
+  bool _isContextMenuForRightAlignedMessage() => !isOwnMessage;
 
   bool get timelineOverlayMessage =>
       {
