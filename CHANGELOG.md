@@ -1,3 +1,8 @@
+## [2.11.1+2330] - 2025-08-28
+### Fixed
+- Paste matrixId in creating chat
+- Context menu in web app with alignment enabled
+
 ## [2.11.0+2330] - 2025-08-22
 ### Updated
 - Translation for en, ru, fr, vi
