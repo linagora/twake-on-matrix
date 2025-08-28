@@ -22,7 +22,7 @@ class LoginScenario extends BaseScenario {
   @override
   Future<void> execute() async {
     final loginRobot = LoginRobot($);
-    if(await loginRobot.isWelComePageVisible()){
+    if (await loginRobot.isWelComePageVisible()) {
       await loginRobot.tapOnUseYourCompanyServer();
       await _handleWaitUntilVisibleHomeServerPickerView(loginRobot);
       await loginRobot.enterServerUrl(serverUrl);
@@ -31,20 +31,14 @@ class LoginScenario extends BaseScenario {
       await loginRobot.grantNotificationPermission();
     }
     if (!await ChatListRobot($).isVisible()) {
-      await loginRobot.enterWebCredentialsWhenVisible(username: username, password: password,);
+      await loginRobot.enterWebCredentialsWhenVisible(
+        username: username,
+        password: password,
+      );
     }
     await loginRobot.grantNotificationPermission();
     await expectViewVisible($(ChatList));
   }
-
-  // Future<void> _handleFirebaseTestLab(LoginRobot loginRobot) async {
-  //   try {
-  //     await $.native.tap(Selector(text: "Use without an account"));
-  //     await $.native.waitUntilVisible(Selector(resourceId: 'login'));
-  //   } catch (e) {
-  //     loginRobot.ignoreException();
-  //   }
-  // }
 
   Future<void> _handleWaitUntilVisibleHomeServerPickerView(
     LoginRobot loginRobot,

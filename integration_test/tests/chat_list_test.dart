@@ -22,11 +22,10 @@ void main() {
     description: 'Open a chat group',
     test: ($) async {
       await TestBase().loginAndRun($, (_) async {
-      await ChatListRobot($).openChatGroupByIndex(5);
-      //verify chat group is opened
-      expect(await ChatGroupDetailRobot($).isVisible(),isTrue);
+        await ChatListRobot($).openChatGroupByIndex(5);
+        //verify chat group is opened
+        expect(await ChatGroupDetailRobot($).isVisible(), isTrue);
       });
     },
   );
 }
-

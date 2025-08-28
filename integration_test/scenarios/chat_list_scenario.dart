@@ -8,8 +8,11 @@ class ChatListScenario extends BaseScenario {
   ChatListScenario(super.$);
 
   Future<void> verifySearchResultViewIsShown() async {
-    expect(ChatListRobot($).showLessLabel().visible || ChatListRobot($).noResultLabel().visible, isTrue);
-    await Future.delayed(const Duration(seconds: 5)); 
+    expect(
+        ChatListRobot($).showLessLabel().visible ||
+            ChatListRobot($).noResultLabel().visible,
+        isTrue,);
+    await Future.delayed(const Duration(seconds: 5));
   }
 
   Future<void> verifySearchResultContains(String keyword) async {
@@ -18,25 +21,17 @@ class ChatListScenario extends BaseScenario {
     var i = 0;
 
     for (final item in items) {
-      i = i +1;
+      i = i + 1;
       final richTextFinder = item.$(RichText);
       final richTextElements = richTextFinder.evaluate();
 
       if (richTextElements.isEmpty) {
         throw Exception("❌ No RichText found in item $i of $length");
       }
-
-      // final richTextWidget = richTextElements.first.widget as RichText;
-      // final text = richTextWidget.text.toPlainText();
-      // log("✅ '$i' groups text '$text'");
-
-      // if (!text.contains(keyword)) {
-      //   throw Exception("❌ Group $i/$length does not contain '$keyword' -- '$text'");
-      // }
     }
     log("✅ All visible chat groups contain '$keyword'");
   }
-  
+
   @override
   Future<void> execute() {
     // TODO: implement execute
