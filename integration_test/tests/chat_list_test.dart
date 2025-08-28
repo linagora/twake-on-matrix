@@ -1,3 +1,4 @@
+import 'package:fluffychat/pages/chat/chat_event_list.dart';
 import 'package:flutter_test/flutter_test.dart';
 import '../base/test_base.dart';
 import '../robots/chat_group_detail_robot.dart';
@@ -24,7 +25,7 @@ void main() {
       await TestBase().loginAndRun($, (_) async {
         await ChatListRobot($).openChatGroupByIndex(5);
         //verify chat group is opened
-        expect(await ChatGroupDetailRobot($).isVisible(), isTrue);
+        expect($(ChatEventList).exists, isTrue);
       });
     },
   );
