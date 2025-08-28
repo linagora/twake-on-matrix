@@ -288,7 +288,7 @@ mixin class ContactsViewControllerMixin {
     required Client client,
     required MatrixLocalizations matrixLocalizations,
   }) {
-    final keyword = _debouncer.value;
+    final keyword = _debouncer.value.trim();
     _refreshContacts(keyword);
     _refreshPhoneBookContacts(keyword);
     _refreshRecentContacts(
@@ -338,13 +338,6 @@ mixin class ContactsViewControllerMixin {
           final combinedContacts = _combineTomContacts(filteredContacts);
 
           if (combinedContacts.isEmpty) {
-            if (presentationRecentContactNotifier.value.isNotEmpty) {
-              return Left(
-                GetPresentationContactsEmpty(
-                  keyword: keyword,
-                ),
-              );
-            }
             if (keyword.isValidMatrixId && keyword.startsWith("@")) {
               return Right(
                 PresentationExternalContactSuccess(
