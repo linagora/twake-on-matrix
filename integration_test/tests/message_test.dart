@@ -11,25 +11,22 @@ void main() {
       // login by UI
 
       await TestBase().loginAndRun($, (_) async {
-         // search to Open chat group
+        // in chat screen, we make a search by group title
         await ChatListRobot($).enterSearchText(searchPharse);
+        // open the group
         await ChatListRobot($).openChatGroupByIndex(0);
-        // send a message
+        // user send a message
         final now = DateTime.now();
         final messageOfSender = "sender sent at ${now.year}${now.month}${now.day}${now.hour}${now.minute}";
         final messageOfReceiver = "receiver sent at ${now.year}${now.month}${now.day}${now.hour}${now.minute}";
         await MessageScenario($).sendAMesage(messageOfSender);
 
-        // check message is sent
+        // verify message is sent
         await MessageScenario($).verifyMessageIsShown(messageOfSender);
-        //// receiver read message
-        //
-        //// check sender see message is read
-        //...
-        // send message by API
+        // simulate other member in group send a message
         await Future.delayed(const Duration(seconds: 10)); 
         await MessageScenario($).sendAMessageByAPI(groupID, messageOfReceiver);
-        // check message is shown on UI
+        // verify the message sent by other member is displayed on screen
         await Future.delayed(const Duration(seconds: 30)); 
         await MessageScenario($).verifyMessageIsShown(messageOfReceiver);
       });
