@@ -27,7 +27,7 @@ class ChatInputRow extends StatelessWidget {
   Widget build(BuildContext context) {
     return KeyboardVisibilityBuilder(
       builder: (context, isKeyboardVisible) {
-        return Padding(
+        final child = Padding(
           padding: _paddingInputRow(
             context: context,
             isKeyboardVisible: isKeyboardVisible,
@@ -75,8 +75,19 @@ class ChatInputRow extends StatelessWidget {
                   ],
           ),
         );
+
+        if (isAndroidNavigationButtonsEnabled(context)) {
+          return SafeArea(child: child);
+        }
+
+        return child;
       },
     );
+  }
+
+  bool isAndroidNavigationButtonsEnabled(BuildContext context) {
+    return PlatformInfos.isAndroid &&
+        MediaQuery.systemGestureInsetsOf(context).left == 0;
   }
 
   EdgeInsetsGeometry _paddingInputRow({
@@ -87,7 +98,7 @@ class ChatInputRow extends StatelessWidget {
       return EdgeInsets.zero;
     }
 
-    if (isKeyboardVisible) {
+    if (isKeyboardVisible || isAndroidNavigationButtonsEnabled(context)) {
       return EdgeInsets.zero;
     }
     return const EdgeInsets.only(
