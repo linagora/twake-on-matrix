@@ -133,6 +133,12 @@ class DraftChatController extends State<DraftChat>
 
   List<IndexedAssetEntity> sortedSelectedAssets = [];
 
+  void onHoverAudioMessageInMobile() {
+    handleHoverAudioMessageInMobile(
+      context: context,
+    );
+  }
+
   @override
   Future<void> sendMedia(
     ImagePickerGridController imagePickerController, {

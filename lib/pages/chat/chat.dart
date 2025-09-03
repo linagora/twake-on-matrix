@@ -2583,6 +2583,12 @@ class ChatController extends State<Chat>
 
   StreamSubscription? keyboardVisibilitySubscription;
 
+  void onHoverAudioMessageInMobile() {
+    handleHoverAudioMessageInMobile(
+      context: context,
+    );
+  }
+
   @override
   void initState() {
     _initializePinnedEvents();

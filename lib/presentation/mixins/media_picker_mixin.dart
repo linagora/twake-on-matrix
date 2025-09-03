@@ -339,7 +339,8 @@ mixin MediaPickerMixin on CommonMediaPickerMixin {
     ImagePickerGridController imagePickerController,
     OnCameraPicked? onCameraPicked,
   ) async {
-    final currentPermissionMicro = await getCurrentMicroPermission();
+    final currentPermissionMicro =
+        await getCurrentMicroPermission(context: context);
     final currentPermissionCamera = await getCurrentCameraPermission();
     if (currentPermissionMicro == PermissionStatus.granted &&
         currentPermissionCamera == PermissionStatus.granted) {
@@ -382,6 +383,19 @@ mixin MediaPickerMixin on CommonMediaPickerMixin {
       if (onCameraPicked != null) {
         onCameraPicked(assetEntity);
       }
+    }
+  }
+
+  void handleHoverAudioMessageInMobile({
+    required BuildContext context,
+  }) async {
+    final currentPermissionMicro = await getCurrentMicroPermission(
+      context: context,
+      isAudioMessage: true,
+    );
+    if (currentPermissionMicro == PermissionStatus.permanentlyDenied) {
+      goToMicroSettings(context);
+      return;
     }
   }
 }

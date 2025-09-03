@@ -3,6 +3,7 @@ import 'package:device_info_plus/device_info_plus.dart';
 import 'package:fluffychat/utils/permission_dialog.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:flutter/material.dart';
+import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 class PermissionHandlerService {
@@ -50,13 +51,103 @@ class PermissionHandlerService {
     }
   }
 
-  Future<PermissionStatus> requestPermissionForMicroActions() async {
+  Future<PermissionStatus> requestPermissionForMicroActions({
+    required BuildContext context,
+    bool isAudioMessage = false,
+  }) async {
     final currentStatus = await Permission.microphone.status;
     if (currentStatus == PermissionStatus.denied ||
         currentStatus == PermissionStatus.permanentlyDenied) {
-      return await Permission.microphone.request();
+      if (isAudioMessage) {
+        return _handleMicroPermissionAction(
+          context,
+          currentStatus,
+        );
+      } else {
+        return await Permission.microphone.request();
+      }
     } else {
       return currentStatus;
+    }
+  }
+
+  Future<PermissionStatus> _handleMicroPermissionAction(
+    BuildContext context,
+    PermissionStatus currentStatus,
+  ) async {
+    if (currentStatus == PermissionStatus.permanentlyDenied) {
+      return currentStatus;
+    }
+    final result = await showDialog<bool>(
+      useRootNavigator: false,
+      context: context,
+      barrierDismissible: false,
+      builder: (dialogContext) {
+        return PermissionDialog(
+          icon: Icon(
+            Icons.keyboard_voice_outlined,
+            color: LinagoraSysColors.material().primary,
+          ),
+          permission: Permission.microphone,
+          explainTextRequestPermission: Text(
+            L10n.of(context)!.explainPermissionToAccessMicrophone,
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: Theme.of(context).colorScheme.onSurface,
+                ),
+          ),
+          titleTextRequestPermission: Text(
+            L10n.of(context)!.allowMicrophoneAccess,
+            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                  color: Theme.of(context).colorScheme.onSurface,
+                ),
+          ),
+          customButtonRow: Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              PermissionTextButton(
+                context: context,
+                text: L10n.of(context)!.later,
+                textStyle: Theme.of(context).textTheme.labelLarge?.copyWith(
+                      color: Theme.of(context).colorScheme.primary,
+                    ),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24.0,
+                  vertical: 10.0,
+                ),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+              ),
+              const SizedBox(width: 8.0),
+              PermissionTextButton(
+                context: context,
+                text: L10n.of(context)!.continueProcess,
+                textStyle: Theme.of(context).textTheme.labelLarge?.copyWith(
+                      color: Theme.of(context).colorScheme.onPrimary,
+                    ),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24.0,
+                  vertical: 10.0,
+                ),
+                decoration: BoxDecoration(
+                  color: LinagoraSysColors.material().primary,
+                  borderRadius: BorderRadius.circular(100.0),
+                ),
+                onPressed: () async {
+                  Navigator.of(context).pop(true);
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
+
+    if (result != null && result) {
+      final newStatus = await Permission.microphone.request();
+      return newStatus;
+    } else {
+      return await Permission.microphone.status;
     }
   }
 
