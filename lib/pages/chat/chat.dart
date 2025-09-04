@@ -2583,8 +2583,8 @@ class ChatController extends State<Chat>
 
   StreamSubscription? keyboardVisibilitySubscription;
 
-  void onHoverAudioMessageInMobile() {
-    handleHoverAudioMessageInMobile(
+  void onLongPressAudioRecordInMobile() {
+    handleLongPressAudioRecordInMobile(
       context: context,
     );
   }

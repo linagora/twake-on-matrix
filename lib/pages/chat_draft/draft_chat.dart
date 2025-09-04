@@ -133,8 +133,8 @@ class DraftChatController extends State<DraftChat>
 
   List<IndexedAssetEntity> sortedSelectedAssets = [];
 
-  void onHoverAudioMessageInMobile() {
-    handleHoverAudioMessageInMobile(
+  void onLongPressAudioRecordInMobile() {
+    handleLongPressAudioRecordInMobile(
       context: context,
     );
   }

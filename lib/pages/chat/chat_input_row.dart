@@ -111,7 +111,7 @@ class ChatInputRow extends StatelessWidget {
           );
         },
       ),
-      onLongPress: controller.onHoverAudioMessageInMobile,
+      onLongPressAudioRecord: controller.onLongPressAudioRecordInMobile,
     );
   }
 

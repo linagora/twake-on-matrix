@@ -1,4 +1,5 @@
 import 'package:fluffychat/config/localizations/localization_service.dart';
+import 'package:fluffychat/presentation/enum/chat/audio_type_enum.dart';
 import 'package:fluffychat/utils/localized_camera_picker_text_delegate.dart';
 import 'package:fluffychat/utils/permission_dialog.dart';
 import 'package:fluffychat/utils/permission_service.dart';
@@ -26,10 +27,10 @@ mixin CommonMediaPickerMixin {
 
   Future<PermissionStatus>? getCurrentMicroPermission({
     required BuildContext context,
-    bool isAudioMessage = false,
+    required AudioTypeEnum audioTypeEnum,
   }) {
     return _permissionHandlerService.requestPermissionForMicroActions(
-      isAudioMessage: isAudioMessage,
+      audioTypeEnum: audioTypeEnum,
       context: context,
     );
   }

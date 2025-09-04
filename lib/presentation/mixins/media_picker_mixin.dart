@@ -4,6 +4,7 @@ import 'package:fluffychat/pages/chat/input_bar/focus_suggestion_controller.dart
 import 'package:fluffychat/pages/chat/input_bar/input_bar.dart';
 import 'package:fluffychat/pages/chat/item_actions_bottom_widget.dart';
 import 'package:fluffychat/pages/chat/send_file_dialog/send_file_dialog_style.dart';
+import 'package:fluffychat/presentation/enum/chat/audio_type_enum.dart';
 import 'package:fluffychat/presentation/style/media_picker_style.dart';
 import 'package:fluffychat/resource/image_paths.dart';
 import 'package:fluffychat/utils/permission_service.dart';
@@ -339,8 +340,10 @@ mixin MediaPickerMixin on CommonMediaPickerMixin {
     ImagePickerGridController imagePickerController,
     OnCameraPicked? onCameraPicked,
   ) async {
-    final currentPermissionMicro =
-        await getCurrentMicroPermission(context: context);
+    final currentPermissionMicro = await getCurrentMicroPermission(
+      context: context,
+      audioTypeEnum: AudioTypeEnum.camera,
+    );
     final currentPermissionCamera = await getCurrentCameraPermission();
     if (currentPermissionMicro == PermissionStatus.granted &&
         currentPermissionCamera == PermissionStatus.granted) {
@@ -386,12 +389,12 @@ mixin MediaPickerMixin on CommonMediaPickerMixin {
     }
   }
 
-  void handleHoverAudioMessageInMobile({
+  void handleLongPressAudioRecordInMobile({
     required BuildContext context,
   }) async {
     final currentPermissionMicro = await getCurrentMicroPermission(
       context: context,
-      isAudioMessage: true,
+      audioTypeEnum: AudioTypeEnum.record,
     );
     if (currentPermissionMicro == PermissionStatus.permanentlyDenied) {
       goToMicroSettings(context);

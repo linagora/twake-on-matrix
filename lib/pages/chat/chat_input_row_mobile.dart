@@ -10,12 +10,12 @@ class ChatInputRowMobile extends StatelessWidget {
   const ChatInputRowMobile({
     super.key,
     required this.inputBar,
-    this.onLongPress,
+    this.onLongPressAudioRecord,
   });
 
   final Widget inputBar;
 
-  final void Function()? onLongPress;
+  final void Function()? onLongPressAudioRecord;
 
   @override
   Widget build(BuildContext context) {
@@ -44,7 +44,7 @@ class ChatInputRowMobile extends StatelessWidget {
               tooltip: L10n.of(context)!.holdToRecordAudio,
               icon: Icons.keyboard_voice_outlined,
               tooltipTriggerMode: TooltipTriggerMode.tap,
-              onLongPress: onLongPress,
+              onLongPress: onLongPressAudioRecord,
             ),
           ],
         ),

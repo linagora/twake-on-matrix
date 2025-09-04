@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:device_info_plus/device_info_plus.dart';
+import 'package:fluffychat/presentation/enum/chat/audio_type_enum.dart';
 import 'package:fluffychat/utils/permission_dialog.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:flutter/material.dart';
@@ -53,12 +54,12 @@ class PermissionHandlerService {
 
   Future<PermissionStatus> requestPermissionForMicroActions({
     required BuildContext context,
-    bool isAudioMessage = false,
+    required AudioTypeEnum audioTypeEnum,
   }) async {
     final currentStatus = await Permission.microphone.status;
     if (currentStatus == PermissionStatus.denied ||
         currentStatus == PermissionStatus.permanentlyDenied) {
-      if (isAudioMessage) {
+      if (audioTypeEnum == AudioTypeEnum.record) {
         return _handleMicroPermissionAction(
           context,
           currentStatus,

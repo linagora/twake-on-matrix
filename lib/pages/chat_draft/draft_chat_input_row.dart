@@ -24,7 +24,7 @@ class DraftChatInputRow extends StatelessWidget {
   final FocusNode? typeAheadFocusNode;
   final TextEditingController? textEditingController;
   final FocusSuggestionController focusSuggestionController;
-  final void Function()? onLongPressAudioMessage;
+  final void Function()? onLongPressAudioRecord;
 
   const DraftChatInputRow({
     super.key,
@@ -38,7 +38,7 @@ class DraftChatInputRow extends StatelessWidget {
     this.typeAheadFocusNode,
     this.textEditingController,
     required this.focusSuggestionController,
-    this.onLongPressAudioMessage,
+    this.onLongPressAudioRecord,
   });
 
   @override
@@ -87,7 +87,7 @@ class DraftChatInputRow extends StatelessWidget {
   ChatInputRowMobile _buildMobileInputRow(BuildContext context) {
     return ChatInputRowMobile(
       inputBar: _buildInputBar(context),
-      onLongPress: onLongPressAudioMessage,
+      onLongPressAudioRecord: onLongPressAudioRecord,
     );
   }
 
