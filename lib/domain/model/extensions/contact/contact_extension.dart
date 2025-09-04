@@ -1,7 +1,7 @@
 import 'package:fluffychat/data/hive/dto/contact/contact_hive_obj.dart';
 import 'package:fluffychat/data/hive/dto/contact/third_party_contact_hive_obj.dart';
 import 'package:fluffychat/data/model/addressbook/address_book.dart';
-import 'package:fluffychat/domain/model/contact/contact.dart';
+import 'package:fluffychat/domain/model/contact/contact.dart' as twp;
 import 'package:fluffychat/domain/model/contact/third_party_status.dart';
 import 'package:fluffychat/modules/federation_identity_lookup/domain/models/federation_contact.dart';
 import 'package:fluffychat/modules/federation_identity_lookup/domain/models/federation_hash_details_response.dart';
@@ -9,7 +9,7 @@ import 'package:fluffychat/modules/federation_identity_lookup/domain/models/fede
 import 'package:fluffychat/utils/string_extension.dart';
 import 'package:collection/collection.dart';
 
-extension ContactExtension on Contact {
+extension ContactExtension on twp.Contact {
   FederationContact toFederationContact() {
     return FederationContact(
       id: id,
@@ -35,7 +35,7 @@ extension ContactExtension on Contact {
   }
 
   Set<AddressBook> _addContactsToAddressBook({
-    Set<ThirdPartyContact>? contacts,
+    Set<twp.ThirdPartyContact>? contacts,
   }) {
     final Set<AddressBook> addressBooks = {};
     if (contacts?.isNotEmpty == true) {
@@ -54,12 +54,12 @@ extension ContactExtension on Contact {
     return addressBooks;
   }
 
-  Contact updateContactWithHashes({
+  twp.Contact updateContactWithHashes({
     required Map<String, List<String>> phoneToHashMap,
     required Map<String, List<String>> emailToHashMap,
   }) {
-    final updatedPhoneNumbers = <PhoneNumber>{};
-    final updatedEmails = <Email>{};
+    final updatedPhoneNumbers = <twp.PhoneNumber>{};
+    final updatedEmails = <twp.Email>{};
 
     if (phoneNumbers != null && phoneNumbers!.isNotEmpty) {
       for (final phoneNumber in phoneNumbers!) {
@@ -91,11 +91,11 @@ extension ContactExtension on Contact {
     );
   }
 
-  Set<Email> _mergeEmails(Set<Email>? emails1, Set<Email>? emails2) {
-    final mergedEmails = <Email>{};
+  Set<twp.Email> _mergeEmails(Set<twp.Email>? emails1, Set<twp.Email>? emails2) {
+    final mergedEmails = <twp.Email>{};
     final allEmails = [...?emails1, ...?emails2];
 
-    final emailMap = <String, Email>{};
+    final emailMap = <String, twp.Email>{};
     for (final email in allEmails) {
       if (emailMap.containsKey(email.address)) {
         // Merge with the existing email
@@ -114,14 +114,14 @@ extension ContactExtension on Contact {
   }
 
   // Merge two sets of phone numbers, combining properties
-  Set<PhoneNumber> _mergePhoneNumbers(
-    Set<PhoneNumber>? phones1,
-    Set<PhoneNumber>? phones2,
+  Set<twp.PhoneNumber> _mergePhoneNumbers(
+    Set<twp.PhoneNumber>? phones1,
+    Set<twp.PhoneNumber>? phones2,
   ) {
-    final mergedPhones = <PhoneNumber>{};
+    final mergedPhones = <twp.PhoneNumber>{};
     final allPhones = [...?phones1, ...?phones2];
 
-    final phoneMap = <String, PhoneNumber>{};
+    final phoneMap = <String, twp.PhoneNumber>{};
     for (final phone in allPhones) {
       if (phoneMap.containsKey(phone.number)) {
         // Merge with the existing phone number
@@ -139,8 +139,8 @@ extension ContactExtension on Contact {
     return mergedPhones;
   }
 
-  Contact combine(Contact other) {
-    return Contact(
+  twp.Contact combine(twp.Contact other) {
+    return twp.Contact(
       id: id,
       displayName: displayName ?? other.displayName,
       emails: _mergeEmails(emails, other.emails),
@@ -148,8 +148,8 @@ extension ContactExtension on Contact {
     );
   }
 
-  Set<Email> updateEmails(Map<String, String> mappings) {
-    final updatedEmails = <Email>{};
+  Set<twp.Email> updateEmails(Map<String, String> mappings) {
+    final updatedEmails = <twp.Email>{};
 
     if (emails == null || emails!.isEmpty) {
       return updatedEmails;
@@ -172,10 +172,10 @@ extension ContactExtension on Contact {
     return updatedEmails.isEmpty ? emails ?? {} : updatedEmails;
   }
 
-  Set<PhoneNumber> updatePhoneNumbers(
+  Set<twp.PhoneNumber> updatePhoneNumbers(
     Map<String, String> mappings,
   ) {
-    final updatedPhoneNumbers = <PhoneNumber>{};
+    final updatedPhoneNumbers = <twp.PhoneNumber>{};
 
     if (phoneNumbers == null || phoneNumbers!.isEmpty) {
       return updatedPhoneNumbers;
@@ -202,9 +202,9 @@ extension ContactExtension on Contact {
         : updatedPhoneNumbers;
   }
 
-  Contact updateContact(
-    Set<PhoneNumber> updatedPhoneNumbers,
-    Set<Email> updatedEmails,
+  twp.Contact updateContact(
+    Set<twp.PhoneNumber> updatedPhoneNumbers,
+    Set<twp.Email> updatedEmails,
   ) {
     return copyWith(
       phoneNumbers: updatedPhoneNumbers,
@@ -213,8 +213,8 @@ extension ContactExtension on Contact {
   }
 }
 
-extension SetContactExtension on Set<Contact> {
-  Contact? findContactWithHash({
+extension SetContactExtension on Set<twp.Contact> {
+  twp.Contact? findContactWithHash({
     required String hash,
     required Map<String, List<String>> hashToContactIdMappings,
   }) {
@@ -230,11 +230,11 @@ extension SetContactExtension on Set<Contact> {
     return contact;
   }
 
-  Set<Contact> findContacts(
+  Set<twp.Contact> findContacts(
     Map<String, String> mappings,
     Map<String, List<String>> hashToContactIdMappings,
   ) {
-    final Set<Contact> foundContact = {};
+    final Set<twp.Contact> foundContact = {};
     for (final entry in mappings.entries) {
       final hash = entry.key;
       final contactIds = hash.findContactIdByHash(
@@ -252,10 +252,10 @@ extension SetContactExtension on Set<Contact> {
     return foundContact;
   }
 
-  Set<Contact> updateContacts({
+  Set<twp.Contact> updateContacts({
     required Map<String, String> mappings,
   }) {
-    final Set<Contact> updatedContacts = {};
+    final Set<twp.Contact> updatedContacts = {};
     for (final contact in this) {
       final updatedPhoneNumbers = contact.updatePhoneNumbers(mappings);
       final updatedEmails = contact.updateEmails(mappings);
@@ -268,13 +268,13 @@ extension SetContactExtension on Set<Contact> {
     return updatedContacts;
   }
 
-  Set<Contact> handleLookupMappings({
+  Set<twp.Contact> handleLookupMappings({
     required Map<String, String> mappings,
     required Map<String, List<String>> hashToContactIdMappings,
   }) {
-    final Set<Contact> currentContacts = this;
+    final Set<twp.Contact> currentContacts = this;
 
-    final Set<Contact> foundContact = findContacts(
+    final Set<twp.Contact> foundContact = findContacts(
       mappings,
       hashToContactIdMappings,
     );
@@ -289,11 +289,11 @@ extension SetContactExtension on Set<Contact> {
     return currentContacts;
   }
 
-  Set<Contact> combineContacts({
-    required Set<Contact> contactsFromMappings,
-    required Set<Contact> contactsFromThirdParty,
+  Set<twp.Contact> combineContacts({
+    required Set<twp.Contact> contactsFromMappings,
+    required Set<twp.Contact> contactsFromThirdParty,
   }) {
-    final Map<String, Contact> uniqueContactsById = {};
+    final Map<String, twp.Contact> uniqueContactsById = {};
 
     // Combine all contacts into a single list
     final allContacts = [
@@ -325,8 +325,8 @@ extension SetContactExtension on Set<Contact> {
   }
 }
 
-extension IterableContactsExtension on Iterable<Contact> {
-  Iterable<Contact> searchContacts(String keyword) {
+extension IterableContactsExtension on Iterable<twp.Contact> {
+  Iterable<twp.Contact> searchContacts(String keyword) {
     if (keyword.isEmpty) {
       return this;
     }
@@ -375,7 +375,7 @@ extension IterableContactsExtension on Iterable<Contact> {
   }
 }
 
-extension ContactsExtension on Map<String, Contact> {
+extension ContactsExtension on Map<String, twp.Contact> {
   Map<String, FederationContact> toFederationContactMap() {
     return map(
       (key, value) => MapEntry(key, value.toFederationContact()),
@@ -383,7 +383,7 @@ extension ContactsExtension on Map<String, Contact> {
   }
 }
 
-extension PhoneNumberExtension on PhoneNumber {
+extension PhoneNumberExtension on twp.PhoneNumber {
   FederationPhone toFedPhone() {
     return FederationPhone(
       number: number,
@@ -398,7 +398,7 @@ extension PhoneNumberExtension on PhoneNumber {
   }
 }
 
-extension EmailExtension on Email {
+extension EmailExtension on twp.Email {
   FederationEmail toFedEmail() {
     return FederationEmail(
       address: address,
@@ -414,8 +414,8 @@ extension EmailExtension on Email {
 }
 
 extension FederationContactExtension on FederationContact {
-  Contact toContact() {
-    return Contact(
+  twp.Contact toContact() {
+    return twp.Contact(
       id: id,
       displayName: name,
       phoneNumbers: phoneNumbers?.map((phone) => phone.toPhoneNumber()).toSet(),
@@ -425,20 +425,20 @@ extension FederationContactExtension on FederationContact {
 }
 
 extension FederationContactsMapExtension on Map<String, FederationContact> {
-  List<Contact> toContacts() {
+  List<twp.Contact> toContacts() {
     return values.map((contact) => contact.toContact()).toList();
   }
 }
 
 extension FederationContactsExtension on List<FederationContact> {
-  List<Contact> toContacts() {
+  List<twp.Contact> toContacts() {
     return map((contact) => contact.toContact()).toList();
   }
 }
 
 extension FederationPhoneExtension on FederationPhone {
-  PhoneNumber toPhoneNumber() {
-    return PhoneNumber(
+  twp.PhoneNumber toPhoneNumber() {
+    return twp.PhoneNumber(
       number: number,
       matrixId: matrixId,
     );
@@ -446,15 +446,15 @@ extension FederationPhoneExtension on FederationPhone {
 }
 
 extension FederationEmailExtension on FederationEmail {
-  Email toEmail() {
-    return Email(
+  twp.Email toEmail() {
+    return twp.Email(
       address: address,
       matrixId: matrixId,
     );
   }
 }
 
-extension PhoneNumbersExtension on Set<PhoneNumber> {
+extension PhoneNumbersExtension on Set<twp.PhoneNumber> {
   Map<String, List<String>> calculateHashesForPhoneNumbers(
     FederationHashDetailsResponse? hashDetails,
   ) {
@@ -475,7 +475,7 @@ extension PhoneNumbersExtension on Set<PhoneNumber> {
   }
 }
 
-extension EmailsExtension on Set<Email> {
+extension EmailsExtension on Set<twp.Email> {
   Map<String, List<String>> calculateHashesForEmails(
     FederationHashDetailsResponse? hashDetails,
   ) {

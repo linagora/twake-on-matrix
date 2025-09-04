@@ -4,7 +4,7 @@ publish_to: none
 version: 2.11.1+2330
 
 environment:
-  sdk: ">=3.3.0 <4.0.0"
+  sdk: ">=3.6.0 <4.0.0"
 
 dependencies:
 
@@ -12,7 +12,7 @@ dependencies:
   matrix:
     git:
       url: git@github.com:linagora/matrix-dart-sdk.git
-      ref: twake-supported-0.22.6
+      ref: twake-supported-1.1.0
 
   receive_sharing_intent:
     git:
@@ -214,7 +214,7 @@ dependencies:
   external_path: 1.0.3
   gal: 2.3.0
   auto_size_text: 3.0.0
-  flutter_avif: 2.4.1
+  flutter_avif: ^3.0.0
   heif_converter: 1.0.0
   pull_down_button: 0.10.2
   pretty_qr_code: 3.3.0
@@ -324,6 +324,8 @@ dependency_overrides:
       url: https://github.com/linagora/dart_matrix_api_lite.git
       ref: main
   
+  test_api: 0.7.7
+
   # Fixes a compile error when comforming UIApplication to Launcher in iOS 18.
   url_launcher_ios: 6.3.1
   # Fixes a compile error when comforming missing header to Launcher in iOS 18.

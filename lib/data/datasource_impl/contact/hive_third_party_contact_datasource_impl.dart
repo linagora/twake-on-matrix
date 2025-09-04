@@ -3,17 +3,17 @@ import 'package:fluffychat/data/hive/dto/contact/contact_hive_obj.dart';
 import 'package:fluffychat/data/hive/extension/contact_hive_obj_extension.dart';
 import 'package:fluffychat/data/hive/hive_collection_tom_database.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
-import 'package:fluffychat/domain/model/contact/contact.dart';
+import 'package:fluffychat/domain/model/contact/contact.dart' as twp;
 import 'package:fluffychat/domain/model/extensions/contact/contact_extension.dart';
 import 'package:matrix/matrix.dart';
 
 class HiveThirdPartyContactDatasourceImpl
     extends HiveThirdPartyContactDatasource {
   @override
-  Future<List<Contact>> getThirdPartyContactByUserId(
+  Future<List<twp.Contact>> getThirdPartyContactByUserId(
     String userId,
   ) async {
-    final updateContacts = <Contact>[];
+    final updateContacts = <twp.Contact>[];
     final hiveCollectionFederationDatabase =
         await getIt.getAsync<HiveCollectionToMDatabase>();
     final keys = (await hiveCollectionFederationDatabase.thirdPartyContactsBox
@@ -36,7 +36,7 @@ class HiveThirdPartyContactDatasourceImpl
   @override
   Future<void> saveThirdPartyContactsForUser(
     String userId,
-    List<Contact> contacts,
+    List<twp.Contact> contacts,
   ) async {
     final hiveCollectionFederationDatabase =
         await getIt.getAsync<HiveCollectionToMDatabase>();

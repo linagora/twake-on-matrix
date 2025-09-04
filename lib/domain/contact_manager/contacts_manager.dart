@@ -13,7 +13,7 @@ import 'package:fluffychat/domain/app_state/contact/get_phonebook_contact_state.
 import 'package:fluffychat/domain/app_state/contact/post_address_book_state.dart';
 import 'package:fluffychat/domain/app_state/contact/try_get_synced_phone_book_contact_state.dart';
 import 'package:fluffychat/domain/exception/federation_configuration_not_found.dart';
-import 'package:fluffychat/domain/model/contact/contact.dart';
+import 'package:fluffychat/domain/model/contact/contact.dart' as twp;
 import 'package:fluffychat/domain/model/extensions/contact/contact_extension.dart';
 import 'package:fluffychat/domain/repository/federation_configurations_repository.dart';
 import 'package:fluffychat/domain/usecase/contacts/federation_look_up_argument.dart';
@@ -432,7 +432,7 @@ class ContactsManager {
   }
 
   void _postAddressBookOnMobile({
-    required List<Contact> contacts,
+    required List<twp.Contact> contacts,
   }) {
     if (PlatformInfos.isWeb) {
       return;
