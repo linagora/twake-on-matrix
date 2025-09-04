@@ -3,6 +3,7 @@ import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/pages/chat_list/chat_list.dart';
 import 'package:fluffychat/pages/contacts_tab/contacts_tab.dart';
 import 'package:fluffychat/pages/settings_dashboard/settings/settings.dart';
+import 'package:fluffychat/utils/android_utils.dart';
 import 'package:fluffychat/utils/responsive/responsive_utils.dart';
 import 'package:fluffychat/widgets/layouts/adaptive_layout/adaptive_scaffold_primary_navigation.dart';
 import 'package:fluffychat/widgets/layouts/adaptive_layout/adaptive_scaffold_view_style.dart';
@@ -216,7 +217,7 @@ class _ColumnPageView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return PageView(
+    final child = PageView(
       controller: pageController,
       physics: const NeverScrollableScrollPhysics(),
       children: [
@@ -243,6 +244,14 @@ class _ColumnPageView extends StatelessWidget {
         ),
       ],
     );
+
+    if (AndroidUtils.isNavigationButtonsEnabled(
+      systemGestureInsets: MediaQuery.systemGestureInsetsOf(context),
+    )) {
+      return SafeArea(child: child);
+    }
+
+    return child;
   }
 
   Widget _triggerPageViewBuilder({
@@ -270,7 +279,9 @@ class _ColumnPageView extends StatelessWidget {
           builder: (_) {
             return Container(
               decoration: AppAdaptiveScaffoldBodyViewStyle.navBarBorder,
-              height: ResponsiveUtils.heightBottomNavigation,
+              height: _bottomNavBarHeight(
+                MediaQuery.systemGestureInsetsOf(context),
+              ),
               padding: AppAdaptiveScaffoldBodyViewStyle.paddingBottomNavigation,
               child: ListView(
                 physics: const NeverScrollableScrollPhysics(),
@@ -294,6 +305,16 @@ class _ColumnPageView extends StatelessWidget {
         ),
       },
     );
+  }
+
+  double _bottomNavBarHeight(EdgeInsets systemGestureInsets) {
+    if (AndroidUtils.isNavigationButtonsEnabled(
+      systemGestureInsets: systemGestureInsets,
+    )) {
+      return ResponsiveUtils
+          .heightBottomNavigationWhenAndroidNavigationButtonsEnabled;
+    }
+    return ResponsiveUtils.heightBottomNavigation;
   }
 
   List<NavigationDestination> getNavigationDestinations(BuildContext context) {

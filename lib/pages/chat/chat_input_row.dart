@@ -4,6 +4,7 @@ import 'package:fluffychat/pages/chat/chat_input_row_style.dart';
 import 'package:fluffychat/pages/chat/chat_input_row_web.dart';
 import 'package:fluffychat/pages/chat/reply_display.dart';
 import 'package:fluffychat/resource/image_paths.dart';
+import 'package:fluffychat/utils/android_utils.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/widgets/avatar/avatar.dart';
 import 'package:fluffychat/widgets/matrix.dart';
@@ -76,18 +77,15 @@ class ChatInputRow extends StatelessWidget {
           ),
         );
 
-        if (isAndroidNavigationButtonsEnabled(context)) {
+        if (AndroidUtils.isNavigationButtonsEnabled(
+          systemGestureInsets: MediaQuery.systemGestureInsetsOf(context),
+        )) {
           return SafeArea(child: child);
         }
 
         return child;
       },
     );
-  }
-
-  bool isAndroidNavigationButtonsEnabled(BuildContext context) {
-    return PlatformInfos.isAndroid &&
-        MediaQuery.systemGestureInsetsOf(context).left == 0;
   }
 
   EdgeInsetsGeometry _paddingInputRow({
@@ -98,7 +96,10 @@ class ChatInputRow extends StatelessWidget {
       return EdgeInsets.zero;
     }
 
-    if (isKeyboardVisible || isAndroidNavigationButtonsEnabled(context)) {
+    if (isKeyboardVisible ||
+        AndroidUtils.isNavigationButtonsEnabled(
+          systemGestureInsets: MediaQuery.systemGestureInsetsOf(context),
+        )) {
       return EdgeInsets.zero;
     }
     return const EdgeInsets.only(
