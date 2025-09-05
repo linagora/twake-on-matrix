@@ -4,6 +4,7 @@ import 'package:fluffychat/pages/chat/chat_input_row_style.dart';
 import 'package:fluffychat/pages/chat/chat_input_row_web.dart';
 import 'package:fluffychat/pages/chat/reply_display.dart';
 import 'package:fluffychat/resource/image_paths.dart';
+import 'package:fluffychat/utils/android_utils.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/widgets/avatar/avatar.dart';
 import 'package:fluffychat/widgets/matrix.dart';
@@ -27,7 +28,7 @@ class ChatInputRow extends StatelessWidget {
   Widget build(BuildContext context) {
     return KeyboardVisibilityBuilder(
       builder: (context, isKeyboardVisible) {
-        return Padding(
+        final child = Padding(
           padding: _paddingInputRow(
             context: context,
             isKeyboardVisible: isKeyboardVisible,
@@ -75,6 +76,14 @@ class ChatInputRow extends StatelessWidget {
                   ],
           ),
         );
+
+        if (AndroidUtils.isNavigationButtonsEnabled(
+          systemGestureInsets: MediaQuery.systemGestureInsetsOf(context),
+        )) {
+          return SafeArea(child: child);
+        }
+
+        return child;
       },
     );
   }
@@ -87,7 +96,10 @@ class ChatInputRow extends StatelessWidget {
       return EdgeInsets.zero;
     }
 
-    if (isKeyboardVisible) {
+    if (isKeyboardVisible ||
+        AndroidUtils.isNavigationButtonsEnabled(
+          systemGestureInsets: MediaQuery.systemGestureInsetsOf(context),
+        )) {
       return EdgeInsets.zero;
     }
     return const EdgeInsets.only(
