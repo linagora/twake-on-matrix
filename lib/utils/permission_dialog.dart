@@ -11,6 +11,10 @@ class PermissionDialog extends StatefulWidget {
 
   final Widget explainTextRequestPermission;
 
+  final Widget? titleTextRequestPermission;
+
+  final Widget? customButtonRow;
+
   final Widget? icon;
 
   final OnAcceptButton onAcceptButton;
@@ -24,6 +28,8 @@ class PermissionDialog extends StatefulWidget {
     this.icon,
     this.onAcceptButton,
     this.onRefuseTap,
+    this.titleTextRequestPermission,
+    this.customButtonRow,
   });
 
   @override
@@ -66,38 +72,45 @@ class _PermissionDialogState extends State<PermissionDialog>
                   ),
                   widget.icon!,
                 ],
+                if (widget.titleTextRequestPermission != null) ...[
+                  const SizedBox(
+                    height: 16.0,
+                  ),
+                  widget.titleTextRequestPermission!,
+                ],
                 const SizedBox(
                   height: 16.0,
                 ),
                 widget.explainTextRequestPermission,
                 const SizedBox(height: 24.0),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    if (!PlatformInfos.isIOS)
-                      _PermissionTextButton(
-                        context: context,
-                        text: L10n.of(context)!.deny,
-                        onPressed: () {
-                          widget.onRefuseTap?.call();
-                          Navigator.of(context).pop();
-                        },
-                      ),
-                    _PermissionTextButton(
-                      context: context,
-                      text: L10n.of(context)!.next,
-                      onPressed: () async {
-                        if (widget.onAcceptButton != null) {
-                          widget.onAcceptButton!.call();
-                        } else {
-                          await widget.permission.request().then(
-                                (value) => Navigator.of(context).pop(),
-                              );
-                        }
-                      },
+                widget.customButtonRow ??
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        if (!PlatformInfos.isIOS)
+                          PermissionTextButton(
+                            context: context,
+                            text: L10n.of(context)!.deny,
+                            onPressed: () {
+                              widget.onRefuseTap?.call();
+                              Navigator.of(context).pop();
+                            },
+                          ),
+                        PermissionTextButton(
+                          context: context,
+                          text: L10n.of(context)!.next,
+                          onPressed: () async {
+                            if (widget.onAcceptButton != null) {
+                              widget.onAcceptButton!.call();
+                            } else {
+                              await widget.permission.request().then(
+                                    (value) => Navigator.of(context).pop(),
+                                  );
+                            }
+                          },
+                        ),
+                      ],
                     ),
-                  ],
-                ),
                 const SizedBox(height: 24.0),
               ],
             ),
@@ -108,16 +121,23 @@ class _PermissionDialogState extends State<PermissionDialog>
   }
 }
 
-class _PermissionTextButton extends StatelessWidget {
-  const _PermissionTextButton({
+class PermissionTextButton extends StatelessWidget {
+  const PermissionTextButton({
+    super.key,
     required this.text,
     required this.onPressed,
     required this.context,
+    this.decoration,
+    this.textStyle,
+    this.padding,
   });
 
   final String text;
   final VoidCallback? onPressed;
   final BuildContext context;
+  final Decoration? decoration;
+  final TextStyle? textStyle;
+  final EdgeInsetsGeometry? padding;
 
   @override
   Widget build(BuildContext context) {
@@ -126,13 +146,16 @@ class _PermissionTextButton extends StatelessWidget {
       child: InkWell(
         borderRadius: BorderRadius.circular(100.0),
         onTap: onPressed,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 10.0),
+        child: Container(
+          padding: padding ??
+              const EdgeInsets.symmetric(horizontal: 12.0, vertical: 10.0),
+          decoration: decoration,
           child: Text(
             text,
-            style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                  color: Theme.of(context).colorScheme.primary,
-                ),
+            style: textStyle ??
+                Theme.of(context).textTheme.labelLarge?.copyWith(
+                      color: Theme.of(context).colorScheme.primary,
+                    ),
           ),
         ),
       ),
