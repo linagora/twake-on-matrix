@@ -3385,5 +3385,16 @@
   },
   "unblock": "Unblock",
   "unblockDescriptionDialog": "This person will be able to message you and see when you're online. They won't be notified that you unblocked them.",
+  "report": "Report",
+  "reportDesc": "What’s the issue with this message?",
+  "sendReport": "Send Report",
+  "addComment": "Add comment",
+  "spam": "Spam",
+  "violence": "Violence",
+  "childAbuse": "Child abuse",
+  "pornography": "Pornography",
+  "copyrightInfringement": "Copyright infringement",
+  "terrorism": "Terrorism",
+  "other": "Other",
   "enableRightAndLeftMessageAlignment": "Enable right/left message alignment"
 }

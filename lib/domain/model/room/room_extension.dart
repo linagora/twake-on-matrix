@@ -333,6 +333,8 @@ extension RoomExtension on Room {
       (user) => user.id == client.userID,
     );
   }
+
+  bool get canReportContent => membership.isJoin;
 }
 
 extension SortByPowerLevel on List<User> {

@@ -217,6 +217,7 @@ class ChatEventList extends StatelessWidget {
                                   controller.replyAction(replyTo: event);
                                 },
                                 onCopy: controller.copyEventsAction,
+                                onReport: controller.reportEventAction,
                                 onPin: (event) {
                                   controller.pinEventAction(event);
                                 },

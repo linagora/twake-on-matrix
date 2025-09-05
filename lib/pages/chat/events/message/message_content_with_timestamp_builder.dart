@@ -62,6 +62,7 @@ class MessageContentWithTimestampBuilder extends StatefulWidget {
   final void Function(BuildContext, Event)? onDelete;
   final void Function(Event)? onForward;
   final void Function(Event)? onCopy;
+  final void Function(Event)? onReport;
   final void Function(Event)? onPin;
   final void Function(Event)? saveToDownload;
   final void Function(Event)? saveToGallery;
@@ -95,6 +96,7 @@ class MessageContentWithTimestampBuilder extends StatefulWidget {
     this.onDelete,
     this.onForward,
     this.onCopy,
+    this.onReport,
     this.onLongPressMessage,
     this.onPin,
     this.saveToDownload,
@@ -119,6 +121,7 @@ class _MessageContentWithTimestampBuilderState
         ],
         MessageContextMenuAction.forward,
         MessageContextMenuAction.copy,
+        if (event.room.canReportContent) MessageContextMenuAction.report,
         if (event.canEditEvents(widget.matrixState)) ...[
           MessageContextMenuAction.edit,
         ],
@@ -482,6 +485,9 @@ class _MessageContentWithTimestampBuilderState
           break;
         case 'copy':
           widget.onCopy?.call(widget.event);
+          break;
+        case 'report':
+          widget.onReport?.call(widget.event);
           break;
         case 'select':
           widget.onSelect?.call(widget.event);

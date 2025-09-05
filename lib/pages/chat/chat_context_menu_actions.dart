@@ -10,6 +10,7 @@ enum ChatContextMenuActions {
   copyMessage,
   edit,
   pinChat,
+  report,
   forward,
   reply,
   downloadFile,
@@ -32,6 +33,8 @@ enum ChatContextMenuActions {
         return L10n.of(context)!.copyMessageText;
       case ChatContextMenuActions.pinChat:
         return unpin ? L10n.of(context)!.unpin : L10n.of(context)!.pinChat;
+      case ChatContextMenuActions.report:
+        return L10n.of(context)!.report;
       case ChatContextMenuActions.forward:
         return L10n.of(context)!.forward;
       case ChatContextMenuActions.downloadFile:
@@ -56,6 +59,8 @@ enum ChatContextMenuActions {
         return Icons.content_copy;
       case ChatContextMenuActions.pinChat:
         return !unpin ? Icons.push_pin_outlined : null;
+      case ChatContextMenuActions.report:
+        return Icons.flag_outlined;
       case ChatContextMenuActions.forward:
         return Icons.shortcut;
       case ChatContextMenuActions.downloadFile:

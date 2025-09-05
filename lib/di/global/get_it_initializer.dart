@@ -78,9 +78,9 @@ import 'package:fluffychat/domain/repository/server_search_repository.dart';
 import 'package:fluffychat/domain/repository/tom_configurations_repository.dart';
 import 'package:fluffychat/domain/usecase/app_grid/get_app_grid_configuration_interactor.dart';
 import 'package:fluffychat/domain/usecase/contacts/delete_third_party_contact_box_interactor.dart';
+import 'package:fluffychat/domain/usecase/contacts/federation_look_up_phonebook_contact_interactor.dart';
 import 'package:fluffychat/domain/usecase/contacts/get_tom_contacts_interactor.dart';
 import 'package:fluffychat/domain/usecase/contacts/lookup_match_contact_interactor.dart';
-import 'package:fluffychat/domain/usecase/contacts/federation_look_up_phonebook_contact_interactor.dart';
 import 'package:fluffychat/domain/usecase/contacts/post_address_book_interactor.dart';
 import 'package:fluffychat/domain/usecase/contacts/try_get_synced_phone_book_contact_interactor.dart';
 import 'package:fluffychat/domain/usecase/contacts/twake_look_up_phonebook_contact_interactor.dart';
@@ -107,6 +107,7 @@ import 'package:fluffychat/domain/usecase/room/chat_room_search_interactor.dart'
 import 'package:fluffychat/domain/usecase/room/create_new_group_chat_interactor.dart';
 import 'package:fluffychat/domain/usecase/room/delete_event_interactor.dart';
 import 'package:fluffychat/domain/usecase/room/download_media_file_interactor.dart';
+import 'package:fluffychat/domain/usecase/room/report_content_interactor.dart';
 import 'package:fluffychat/domain/usecase/room/set_permission_level_interactor.dart';
 import 'package:fluffychat/domain/usecase/room/timeline_search_event_interactor.dart';
 import 'package:fluffychat/domain/usecase/room/unban_user_interactor.dart';
@@ -494,6 +495,10 @@ class GetItInitializer {
 
     getIt.registerFactory<BlockUserInteractor>(
       () => BlockUserInteractor(),
+    );
+
+    getIt.registerFactory<ReportContentInteractor>(
+      () => ReportContentInteractor(),
     );
   }
 
