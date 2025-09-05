@@ -41,6 +41,10 @@ class TwakeIconButton extends StatelessWidget {
 
   final Color? splashColor;
 
+  final TooltipTriggerMode? tooltipTriggerMode;
+
+  final void Function()? onLongPress;
+
   const TwakeIconButton({
     super.key,
     this.tooltip,
@@ -60,6 +64,8 @@ class TwakeIconButton extends StatelessWidget {
     this.iconColor,
     this.highlightColor,
     this.splashColor,
+    this.tooltipTriggerMode,
+    this.onLongPress,
   });
 
   @override
@@ -76,6 +82,7 @@ class TwakeIconButton extends StatelessWidget {
           onTapDown: onTapDown != null
               ? (tapDownDetails) => onTapDown!.call(tapDownDetails)
               : null,
+          onLongPress: onLongPress,
           customBorder: const CircleBorder(),
           radius: paddingAll,
           hoverColor: hoverColor,
@@ -88,6 +95,7 @@ class TwakeIconButton extends StatelessWidget {
               waitDuration: const Duration(seconds: 1),
               preferBelow: preferBelow,
               message: tooltip ?? "",
+              triggerMode: tooltipTriggerMode,
               child: Padding(
                 padding: EdgeInsets.all(paddingAll ?? 8.0),
                 child: icon != null
