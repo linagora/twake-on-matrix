@@ -122,13 +122,6 @@ mixin ReceiveSharingIntentMixin<T extends StatefulWidget> on State<T> {
       onError: print,
     );
 
-    // For sharing images coming from outside the app while the app is closed
-    ReceiveSharingIntent.instance.getInitialMedia().then((value) {
-      _clearPendingSharedFiles();
-      _processIncomingSharedFiles(value);
-      ReceiveSharingIntent.instance.reset();
-    });
-
     // For receiving shared Uris
     final appLinks = AppLinks();
     intentUriStreamSubscription =
@@ -138,5 +131,16 @@ mixin ReceiveSharingIntentMixin<T extends StatefulWidget> on State<T> {
       TwakeApp.gotInitialLink = true;
       appLinks.getInitialLinkString().then(_processIncomingUris);
     }
+  }
+
+  Future<void> checkInitialSharingMedia() async {
+    if (!PlatformInfos.isMobile) return;
+
+    // For sharing images coming from outside the app while the app is closed
+    await ReceiveSharingIntent.instance.getInitialMedia().then((value) {
+      _clearPendingSharedFiles();
+      _processIncomingSharedFiles(value);
+      ReceiveSharingIntent.instance.reset();
+    });
   }
 }
