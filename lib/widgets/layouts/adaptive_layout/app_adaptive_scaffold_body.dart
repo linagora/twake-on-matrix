@@ -164,6 +164,7 @@ class AppAdaptiveScaffoldBodyController extends State<AppAdaptiveScaffoldBody>
     super.initState();
     activeRoomIdNotifier.value = widget.activeRoomId;
     resetLocationPathWithLoginToken();
+    matrix.checkInitialSharingMedia();
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       if (mounted) {
         await matrix.retrievePersistedActiveClient();
