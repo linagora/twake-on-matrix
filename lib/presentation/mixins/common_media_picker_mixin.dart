@@ -1,4 +1,5 @@
 import 'package:fluffychat/config/localizations/localization_service.dart';
+import 'package:fluffychat/presentation/enum/chat/audio_type_enum.dart';
 import 'package:fluffychat/utils/localized_camera_picker_text_delegate.dart';
 import 'package:fluffychat/utils/permission_dialog.dart';
 import 'package:fluffychat/utils/permission_service.dart';
@@ -24,8 +25,14 @@ mixin CommonMediaPickerMixin {
     return _permissionHandlerService.requestPermissionForCameraActions();
   }
 
-  Future<PermissionStatus>? getCurrentMicroPermission() {
-    return _permissionHandlerService.requestPermissionForMicroActions();
+  Future<PermissionStatus>? getCurrentMicroPermission({
+    required BuildContext context,
+    required AudioTypeEnum audioTypeEnum,
+  }) {
+    return _permissionHandlerService.requestPermissionForMicroActions(
+      audioTypeEnum: audioTypeEnum,
+      context: context,
+    );
   }
 
   void goToSettings(
@@ -113,5 +120,34 @@ mixin CommonMediaPickerMixin {
           LocalizationService.currentLocale.value,
         );
     }
+  }
+
+  void goToMicroSettings(BuildContext context) {
+    showDialog<bool?>(
+      context: context,
+      useRootNavigator: false,
+      builder: (c) => PermissionDialog(
+        permission: Permission.microphone,
+        explainTextRequestPermission: RichText(
+          text: TextSpan(
+            text: L10n.of(context)!.tapToAllowAccessToYourMicrophone,
+            style: Theme.of(context).textTheme.bodyMedium,
+            children: <TextSpan>[
+              TextSpan(
+                text: ' ${L10n.of(context)!.twake}.',
+                style: Theme.of(context).textTheme.bodyMedium!.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+              ),
+            ],
+          ),
+        ),
+        icon: const Icon(Icons.keyboard_voice_outlined),
+        onAcceptButton: () {
+          Navigator.of(context).pop();
+          PermissionHandlerService().goToSettingsForPermissionActions();
+        },
+      ),
+    );
   }
 }

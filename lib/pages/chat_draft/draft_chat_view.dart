@@ -149,6 +149,8 @@ class DraftChatView extends StatelessWidget {
                                     controller.focusSuggestionController,
                                 inputText: controller.inputText,
                                 isSendingNotifier: controller.isSendingNotifier,
+                                onLongPressAudioRecord:
+                                    controller.onLongPressAudioRecordInMobile,
                               ),
                               SizedBox(
                                 height:

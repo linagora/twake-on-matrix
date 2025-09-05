@@ -1,0 +1,4 @@
+enum AudioTypeEnum {
+  record,
+  camera;
+}

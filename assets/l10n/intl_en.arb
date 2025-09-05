@@ -3396,5 +3396,9 @@
   "copyrightInfringement": "Copyright infringement",
   "terrorism": "Terrorism",
   "other": "Other",
-  "enableRightAndLeftMessageAlignment": "Enable right/left message alignment"
+  "enableRightAndLeftMessageAlignment": "Enable right/left message alignment",
+  "holdToRecordAudio": "Hold to record audio.",
+  "explainPermissionToAccessMicrophone": "To send voice messages, allow Twake Chat to access the microphone.",
+  "allowMicrophoneAccess": "Allow microphone access",
+  "later": "Later"
 }

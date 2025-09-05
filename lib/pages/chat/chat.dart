@@ -2641,6 +2641,12 @@ class ChatController extends State<Chat>
 
   StreamSubscription? keyboardVisibilitySubscription;
 
+  void onLongPressAudioRecordInMobile() {
+    handleLongPressAudioRecordInMobile(
+      context: context,
+    );
+  }
+
   @override
   void onSendFileCallback() => scrollDown();
 
