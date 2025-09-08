@@ -16,7 +16,7 @@ void main() {
       const currentAccount  = String.fromEnvironment('CurrentAccount');
 
       // goto contact screen
-      await HomeRobot($).gotoContactListScreen();
+      await HomeRobot($).gotoContactListAndGrantContactPermission();
       // verify we can scroll the screen to find a contact
       await ContactScenario($).verifyContactListCanBeScrollable(s);
 
@@ -28,20 +28,17 @@ void main() {
       //searching by a text that included in some contacts
       await ContactScenario($).enterSearchText(currentAccount.substring(1,3));
       //verify there is more than test result
-      // ignore: prefer_is_empty
-      s.softAssertEquals(((await ContactListRobot($).getListOfContact()).length) >= 1, true, 'Search by $currentAccount.substring(1,3) Expected at least 1 contact, but found 0');
+      s.softAssertEquals((await ContactListRobot($).getListOfContact()).isNotEmpty, true, 'Search by $currentAccount.substring(1,3) Expected at least 1 contact, but found 0');
 
       // search by full an address matrix
       await ContactScenario($).enterSearchText(searchByMatrixAddress);
       //verify there is one result
-      // ignore: prefer_is_empty
-      s.softAssertEquals(((await ContactListRobot($).getListOfContact()).length) == 1, true, 'Search by $searchByMatrixAddress Expected at least 1 contact, but found 0');
+      s.softAssertEquals(((await ContactListRobot($).getListOfContact()).length) == 1, true, 'Search by $searchByMatrixAddress Expected number of group is 1 , but found != 1');
 
       // search by full an address matrix but make it in case-sensitive format
       await ContactScenario($).enterSearchText(searchByMatrixAddress.toUpperCase());
       //verify there is one result
-      // ignore: prefer_is_empty
-      s.softAssertEquals(((await ContactListRobot($).getListOfContact()).length) == 1, true, 'Search by $searchByMatrixAddress.toUpperCase() Expected at least 1 contact, but found 0');
+      s.softAssertEquals(((await ContactListRobot($).getListOfContact()).length) == 1, true, 'Search by $searchByMatrixAddress.toUpperCase() Expected number of group is 1 , but found != 1');
       s.softAssertEquals((await (await ContactListRobot($).getListOfContact())[0].getOwnerLabel()).visible, false, 'Owner is missing!');
       s.softAssertEquals((await (await ContactListRobot($).getListOfContact())[0].getEmailLabel()).visible, true, 'Email field is not shown');
 

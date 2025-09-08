@@ -30,20 +30,17 @@ void main() {
       await ChatScenario($).verifySearchResultViewIsShown();
       await ChatScenario($).verifySearchResultContains(currentAccount.substring(1,3));
       //return a list of result
-      // ignore: prefer_is_empty
-      s.softAssertEquals(((await ChatListRobot($).getListOfChatGroup()).length) >= 1, true, 'Searchby $currentAccount.substring(1,3) Expected at least 1 group, but found 0',);
+      s.softAssertEquals((await ChatListRobot($).getListOfChatGroup()).isNotEmpty, true, 'Searchby $currentAccount.substring(1,3) Expected at least 1 group, but found 0',);
 
       // search by full an address matrix
       await ChatScenario($).enterSearchText(searchByMatrixAddress);
       //verify there is one result
-      // ignore: prefer_is_empty
-      s.softAssertEquals((await ChatListRobot($).getListOfChatGroup()).length == 1, true, 'Search by $searchByMatrixAddress Expected at least 1 group, but found 0');
+      s.softAssertEquals((await ChatListRobot($).getListOfChatGroup()).length == 1, true, 'Search by $searchByMatrixAddress Expected number of group is 1 , but found != 1');
 
       // search by full an address matrix but make it in case-sensitive format
       await ChatScenario($).enterSearchText(searchByMatrixAddress.toUpperCase());
       //verify there is one result
-      // ignore: prefer_is_empty
-      s.softAssertEquals((await ChatListRobot($).getListOfChatGroup()).length == 1, true, 'Searhc by $searchByMatrixAddress.toUpperCase() Expected at least 1 group, but found 0');
+      s.softAssertEquals((await ChatListRobot($).getListOfChatGroup()).length == 1, true, 'Searhc by $searchByMatrixAddress.toUpperCase() Expected number of group is 1 , but found != 1');
 
       // search by current account
       await ChatScenario($).enterSearchText(currentAccount);
