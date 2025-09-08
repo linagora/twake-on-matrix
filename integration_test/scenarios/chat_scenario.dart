@@ -409,7 +409,7 @@ class ChatScenario extends BaseScenario {
     final list = await CoreRobot($).loginByAPI(client);
     await CoreRobot($)
         .sendMessageByAPI(list[0], list[1], list[2], message);
-    await CoreRobot($).closeClient(client);
+    await CoreRobot($).closeHTTPClient(client);
   }
 
   Future<void> verifyMessageIsShown(String message, bool isTrue) async {
