@@ -50,7 +50,7 @@ class HomeRobot extends CoreRobot {
     }
   }
 
-  Future<ContactListRobot> gotoContactListScreen() async {
+  Future<ContactListRobot> gotoContactListAndGrantContactPermission() async {
     await (await getContactTab()).tap();
     await confirmShareContactInformation();
     await confirmAccessContact();
