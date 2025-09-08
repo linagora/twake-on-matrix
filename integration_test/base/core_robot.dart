@@ -136,7 +136,7 @@ class CoreRobot {
 
     final allCookies = firstResponse.headers['set-cookie']; // List<String>?
     String? oidcSession;
-    // Lấy cookie đầu tiên chứa "oidc_session="
+    // get cookie that contains "oidc_session="
     final oidcCookie = allCookies!.firstWhere(
       (cookie) => cookie.contains('oidc_session='),
       orElse: () => '',
