@@ -516,12 +516,6 @@ class CoreRobot {
               matching: find.byType(Scrollable),
             ),
           );
-// final PatrolFinder scrollableFinder = root == null
-//         ? $(Scrollable).first
-//         : $(find.descendant(
-//             of: root.finder,
-//             matching: find.byType(Scrollable),
-//           ),).first;
 
     return scrollableFinder.exists;
   }
