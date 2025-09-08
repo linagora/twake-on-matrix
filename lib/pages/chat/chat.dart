@@ -791,35 +791,41 @@ class ChatController extends State<Chat>
       if (comment == null) return;
       additionalReason = comment;
     }
-    final state = await getIt
-        .get<ReportContentInteractor>()
-        .execute(
-          client: client,
-          roomId: event.roomId!,
-          eventId: event.eventId,
-          reason: selectedOption.value == MessageReportReason.other
-              ? '${selectedOption.value.getReason(l10n)}: $additionalReason'
-              : selectedOption.value.getReason(l10n),
-          score: selectedOption.value.score,
-        )
-        .last;
-    showEmojiPickerNotifier.value = false;
-    _clearSelectEvent();
-    state.fold(
-      (failure) {
-        if (failure is ReportContentFailure) {
-          TwakeSnackBar.show(
-            context,
-            failure.exception.toLocalizedString(context),
-          );
-        }
-      },
-      (success) {
-        if (success is ReportContentSuccess) {
-          TwakeSnackBar.show(context, l10n.contentHasBeenReported);
-        }
+    final result = await TwakeDialog.showFutureLoadingDialogFullScreen(
+      future: () async {
+        final state = await getIt
+            .get<ReportContentInteractor>()
+            .execute(
+              client: client,
+              roomId: event.roomId!,
+              eventId: event.eventId,
+              reason: selectedOption.value == MessageReportReason.other
+                  ? '${selectedOption.value.getReason(l10n)}: $additionalReason'
+                  : selectedOption.value.getReason(l10n),
+              score: selectedOption.value.score,
+            )
+            .last;
+        return state.fold(
+          (failure) {
+            if (failure is ReportContentFailure) {
+              throw failure.exception;
+            }
+            return failure;
+          },
+          (success) => success,
+        );
       },
     );
+    showEmojiPickerNotifier.value = false;
+    _clearSelectEvent();
+    if (result.error != null) {
+      TwakeSnackBar.show(
+        context,
+        result.error.toLocalizedString(context),
+      );
+      return;
+    }
+    TwakeSnackBar.show(context, l10n.contentHasBeenReported);
   }
 
   void redactEventsAction() async {

@@ -112,7 +112,7 @@ enum ChatAppBarActions {
       case ChatAppBarActions.info:
         return Icons.info_outlined;
       case ChatAppBarActions.report:
-        return Icons.shield_outlined;
+        return Icons.flag_outlined;
       case ChatAppBarActions.saveToDownload:
         return Icons.download_outlined;
       case ChatAppBarActions.saveToGallery:
@@ -127,9 +127,8 @@ enum ChatAppBarActions {
       case ChatAppBarActions.info:
       case ChatAppBarActions.saveToDownload:
       case ChatAppBarActions.saveToGallery:
-        return Theme.of(context).colorScheme.onSurface;
       case ChatAppBarActions.report:
-        return LinagoraSysColors.material().errorDark;
+        return Theme.of(context).colorScheme.onSurface;
       case ChatAppBarActions.leaveGroup:
         return Theme.of(context).colorScheme.error;
     }
