@@ -10,6 +10,7 @@ import 'package:fluffychat/presentation/mixins/init_config_mixin.dart';
 import 'package:fluffychat/presentation/model/client_login_state_event.dart';
 import 'package:fluffychat/widgets/layouts/agruments/logout_body_args.dart';
 import 'package:flutter_emoji_mart/flutter_emoji_mart.dart';
+import 'package:just_audio/just_audio.dart';
 import 'package:linagora_design_flutter/cozy_config_manager/cozy_config_manager.dart';
 import 'package:universal_html/html.dart' as html hide File;
 
@@ -84,6 +85,9 @@ class Matrix extends StatefulWidget {
 class MatrixState extends State<Matrix>
     with WidgetsBindingObserver, ReceiveSharingIntentMixin, InitConfigMixin {
   final _contactsManager = getIt.get<ContactsManager>();
+
+  AudioPlayer audioPlayer = AudioPlayer();
+  final ValueNotifier<String?> voiceMessageEventId = ValueNotifier(null);
 
   int _activeClient = -1;
   String? activeBundle;

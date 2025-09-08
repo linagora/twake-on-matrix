@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 class CircularLoadingDownloadWidget extends StatefulWidget {
   const CircularLoadingDownloadWidget({
     super.key,
-    required this.downloadProgress,
+    this.downloadProgress,
     this.style = const MessageFileTileStyle(),
   });
 

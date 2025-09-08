@@ -28,7 +28,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:matrix/matrix.dart' hide Visibility;
 
-import 'audio_player.dart';
+import 'audio_message/audio_player.dart';
 import 'cute_events.dart';
 import 'map_bubble.dart';
 import 'message_download_content.dart';
@@ -94,6 +94,7 @@ class MessageContent extends StatelessWidget
                 child: AudioPlayerWidget(
                   event,
                   color: textColor,
+                  timeline: timeline,
                 ),
               );
             }
