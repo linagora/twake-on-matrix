@@ -130,8 +130,8 @@ dependencies:
   image: ^4.0.15
   image_picker: ^1.0.4
   intl: any
-  just_audio: ^0.9.30
-  just_audio_mpv: ^0.1.6
+  just_audio: 0.10.5
+  opus_caf_converter_dart: ^1.0.1
   keyboard_shortcuts: ^0.1.4
   latlong2: ^0.8.1
   matrix_homeserver_recommendations: ^0.3.0

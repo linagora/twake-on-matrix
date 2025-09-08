@@ -117,10 +117,10 @@ packages:
     dependency: transitive
     description:
       name: audio_session
-      sha256: a49af9981eec5d7cd73b37bacb6ee73f8143a6a9f9bd5b6021e6c346b9b6cf4e
+      sha256: "8f96a7fecbb718cb093070f868b4cdcb8a9b1053dce342ff8ab2fde10eb9afb7"
       url: "https://pub.dev"
     source: hosted
-    version: "0.1.19"
+    version: "0.2.2"
   auto_size_text:
     dependency: "direct main"
     description:
@@ -602,14 +602,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.0.5"
-  eventify:
-    dependency: transitive
-    description:
-      name: eventify
-      sha256: b829429f08586cc2001c628e7499e3e3c2493a1d895fd73b00ecb23351aa5a66
-      url: "https://pub.dev"
-    source: hosted
-    version: "1.0.1"
   exif:
     dependency: transitive
     description:
@@ -1697,34 +1689,26 @@ packages:
     dependency: "direct main"
     description:
       name: just_audio
-      sha256: "5abfab1d199e01ab5beffa61b3e782350df5dad036cb8c83b79fa45fc656614e"
+      sha256: "9694e4734f515f2a052493d1d7e0d6de219ee0427c7c29492e246ff32a219908"
       url: "https://pub.dev"
     source: hosted
-    version: "0.9.38"
-  just_audio_mpv:
-    dependency: "direct main"
-    description:
-      name: just_audio_mpv
-      sha256: d6e4e9fd20bfb9d2fd5e3dcd7906c90ed07f83d1d2f44f31204160821ab62fed
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.1.7"
+    version: "0.10.5"
   just_audio_platform_interface:
     dependency: transitive
     description:
       name: just_audio_platform_interface
-      sha256: "0243828cce503c8366cc2090cefb2b3c871aa8ed2f520670d76fd47aa1ab2790"
+      sha256: "2532c8d6702528824445921c5ff10548b518b13f808c2e34c2fd54793b999a6a"
       url: "https://pub.dev"
     source: hosted
-    version: "4.3.0"
+    version: "4.6.0"
   just_audio_web:
     dependency: transitive
     description:
       name: just_audio_web
-      sha256: "9a98035b8b24b40749507687520ec5ab404e291d2b0937823ff45d92cb18d448"
+      sha256: "6ba8a2a7e87d57d32f0f7b42856ade3d6a9fbe0f1a11fabae0a4f00bb73f0663"
       url: "https://pub.dev"
     source: hosted
-    version: "0.4.13"
+    version: "0.4.16"
   keyboard_shortcuts:
     dependency: "direct main"
     description:
@@ -2003,14 +1987,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "5.4.4"
-  mpv_dart:
-    dependency: transitive
-    description:
-      name: mpv_dart
-      sha256: a33bd9a68439b496b7a5f36fecd3aa3cf6cbf0176ae15b9b60b12ae96e58f5a4
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.0.1"
   msix:
     dependency: "direct dev"
     description:
@@ -2068,6 +2044,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.3.2"
+  opus_caf_converter_dart:
+    dependency: "direct main"
+    description:
+      name: opus_caf_converter_dart
+      sha256: e08156066916f790a54df305e103d6dec4d853ec23147e6a02eda3c06f67ba1a
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.0.1"
   overflow_view:
     dependency: "direct main"
     description:
@@ -2871,10 +2855,10 @@ packages:
     dependency: transitive
     description:
       name: synchronized
-      sha256: "539ef412b170d65ecdafd780f924e5be3f60032a1128df156adad6c5b373d558"
+      sha256: "69fe30f3a8b04a0be0c15ae6490fc859a78ef4c43ae2dd5e8a623d45bfcf9225"
       url: "https://pub.dev"
     source: hosted
-    version: "3.1.0+1"
+    version: "3.3.0+3"
   term_glyph:
     dependency: transitive
     description:
