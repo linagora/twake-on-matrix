@@ -97,6 +97,7 @@ class Chat extends StatefulWidget {
   final List<MatrixFile?>? shareFiles;
   final String? roomName;
   final void Function(RightColumnType)? onChangeRightColumnType;
+  final String? initialEventId;
 
   const Chat({
     super.key,
@@ -104,6 +105,7 @@ class Chat extends StatefulWidget {
     this.shareFiles,
     this.roomName,
     this.onChangeRightColumnType,
+    this.initialEventId,
   });
 
   @override
@@ -500,6 +502,10 @@ class ChatController extends State<Chat>
     try {
       await loadTimelineFuture;
       await _tryRequestHistory();
+      if (widget.initialEventId != null) {
+        scrollToEventId(widget.initialEventId!);
+        return;
+      }
       final fullyRead = room?.fullyRead;
       if (fullyRead == null || fullyRead.isEmpty || fullyRead == '') {
         setReadMarker();

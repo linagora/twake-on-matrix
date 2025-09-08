@@ -12,12 +12,14 @@ class ChatAdaptiveScaffold extends StatefulWidget {
   final String roomId;
   final List<MatrixFile?>? shareFiles;
   final String? roomName;
+  final String? eventId;
 
   const ChatAdaptiveScaffold({
     super.key,
     required this.roomId,
     this.shareFiles,
     this.roomName,
+    this.eventId,
   });
 
   @override
@@ -34,6 +36,7 @@ class ChatAdaptiveScaffoldController extends State<ChatAdaptiveScaffold> {
           shareFiles: widget.shareFiles,
           roomName: widget.roomName,
           onChangeRightColumnType: controller.setRightColumnType,
+          initialEventId: widget.eventId,
         ),
         rightBuilder: (
           controller, {

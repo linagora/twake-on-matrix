@@ -523,6 +523,7 @@ abstract class AppRoutes {
                       key: Key(
                         'Default_${state.pathParameters['roomid']!}_${DateTime.now().millisecondsSinceEpoch}',
                       ),
+                      eventId: state.uri.queryParameters['event'],
                     ),
                   );
                 }
