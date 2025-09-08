@@ -412,35 +412,6 @@ class ChatScenario extends BaseScenario {
     await CoreRobot($).closeClient(client);
   }
 
-  Future<void> verifyMessageIsSentByAPI(String message) async {
-    //get all message
-    final client = await CoreRobot($).initialRedirectRequest();
-    final list = await CoreRobot($).loginByAPI(client);
-    final responseBody = await CoreRobot($).getAllSentMessage(client, list[1]);
-    await CoreRobot($).closeClient(client);
-    //verify response of that message contains expected message
-    final jsonData = json.decode(responseBody);
-
-    final events = jsonData['rooms']?['join']
-        ?.values
-        .expand((room) => room['timeline']?['events'] ?? [])
-        .toList();
-
-    final containsMessage = events.any(
-      (event) =>
-          event['type'] == 'm.room.message' &&
-          event['content']?['body']?.toString().toLowerCase() == message,
-    );
-
-    if (containsMessage) {
-      log('✅ Message $message is found!');
-    } else {
-      log('❌ Message $message not found.');
-    }
-  }
-
-  Future<void> verifyMessageIsReadByAPI(String message) async {}
-
   Future<void> verifyMessageIsShown(String message, bool isTrue) async {
     final text = await ChatGroupDetailRobot($).getText(message);
     if (isTrue) {

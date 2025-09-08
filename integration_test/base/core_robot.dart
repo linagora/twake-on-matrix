@@ -381,53 +381,6 @@ class CoreRobot {
     return [client, accessToken, lemonldap];
   }
 
-  Future<String> getAllSentMessage(
-      HttpClient client, String accessToken,) async {
-      const chatURL  = String.fromEnvironment('CHAT_URL');
-      const matrixURL = String.fromEnvironment('MATRIX_URL');
-    // 👇 Query parameters
-    final syncUri =
-        Uri.https(matrixURL, '/_matrix/client/v3/sync', {
-      'filter': '0',
-      'set_presence': 'unavailable',
-      'timeout': '30000',
-    });
-
-    final request = await client.getUrl(syncUri);
-    request.followRedirects = false;
-
-    // 👇 Headers
-    request.headers
-      ..set(HttpHeaders.connectionHeader, 'close')
-      ..set('Sec-Fetch-Mode', 'cors')
-      ..set(HttpHeaders.refererHeader, 'https://$chatURL/')
-      ..set('Sec-Fetch-Site', 'same-site')
-      ..set(HttpHeaders.acceptLanguageHeader, 'en-US,en;q=0.9,vi;q=0.8')
-      ..set('Origin', 'https://$chatURL')
-      ..set(HttpHeaders.acceptHeader, '*/*')
-      ..set(
-        HttpHeaders.authorizationHeader,
-        'Bearer $accessToken',
-      )
-      ..set(
-        'sec-ch-ua',
-        '"Not)A;Brand";v="8", "Chromium";v="138", "Google Chrome";v="138"',
-      )
-      ..set('sec-ch-ua-mobile', '?0')
-      ..set('sec-ch-ua-platform', '"macOS"')
-      ..set(HttpHeaders.hostHeader, matrixURL)
-      ..set(HttpHeaders.acceptEncodingHeader, 'gzip, deflate, br, zstd')
-      ..set(
-        HttpHeaders.userAgentHeader,
-        'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36',
-      )
-      ..set('Sec-Fetch-Dest', 'empty');
-
-    final response = await request.close();
-    final body = await response.transform(const Utf8Decoder()).join();
-    return body;
-  }
-
   Future<void> sendMessageByAPI(HttpClient client, String accessToken,
       String lemonldap, String message,) async {
       const chatURL  = String.fromEnvironment('CHAT_URL');
