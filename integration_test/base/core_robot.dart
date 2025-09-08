@@ -145,7 +145,7 @@ class CoreRobot {
     oidcSession = match?.group(1);
 
     // Step 3: Second request to SSO authorize
-    final secondUri = Uri.https(ssoURL, '/oauth2/authorize', {
+    final requestToSSOAuthorize = Uri.https(ssoURL, '/oauth2/authorize', {
       'response_type': responseType,
       'client_id': clientId,
       'redirect_uri': redirectUriValue,
@@ -156,7 +156,7 @@ class CoreRobot {
       'code_challenge': codeChallenge,
     });
 
-    final secondRequest = await client.getUrl(secondUri);
+    final secondRequest = await client.getUrl(requestToSSOAuthorize);
     secondRequest.followRedirects = false;
 
     secondRequest.headers
@@ -386,11 +386,11 @@ class CoreRobot {
       const chatURL  = String.fromEnvironment('CHAT_URL');
       const matrixURL = String.fromEnvironment('MATRIX_URL');
       const groupID = String.fromEnvironment('GroupID');
-    final sixthUri = Uri.https(
+    final sendMessageEndpoint = Uri.https(
       matrixURL,
       '/_matrix/client/v3/rooms/$groupID:linagora.com/send/m.room.message/$chatURL%3A%20Chrome%20on%20Web%20-9-${DateTime.now().millisecondsSinceEpoch}',
     );
-    final sixthRequest = await client.putUrl(sixthUri);
+    final sixthRequest = await client.putUrl(sendMessageEndpoint);
     sixthRequest.followRedirects = false;
     sixthRequest.headers
       ..set(HttpHeaders.connectionHeader, 'keep-alive')
@@ -429,7 +429,7 @@ class CoreRobot {
     await sixthRequest.close();
   }
 
-  Future<void> closeClient(HttpClient client) async {
+  Future<void> closeHTTPClient(HttpClient client) async {
     client.close(force: true);
   }
 
