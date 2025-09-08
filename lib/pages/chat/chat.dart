@@ -8,13 +8,18 @@ import 'package:desktop_drop/desktop_drop.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
+import 'package:fluffychat/domain/app_state/room/report_content_state.dart';
+import 'package:fluffychat/domain/model/chat/message_report_reason.dart';
+import 'package:fluffychat/domain/model/room/room_extension.dart';
 import 'package:fluffychat/domain/usecase/reactions/get_recent_reactions_interactor.dart';
 import 'package:fluffychat/domain/usecase/reactions/store_recent_reactions_interactor.dart';
 import 'package:fluffychat/domain/usecase/room/chat_get_pinned_events_interactor.dart';
+import 'package:fluffychat/domain/usecase/room/report_content_interactor.dart';
 import 'package:fluffychat/pages/chat/chat_actions.dart';
 import 'package:fluffychat/pages/chat/chat_context_menu_actions.dart';
 import 'package:fluffychat/pages/chat/chat_horizontal_action_menu.dart';
 import 'package:fluffychat/pages/chat/chat_pinned_events/pinned_events_controller.dart';
+import 'package:fluffychat/pages/chat/chat_report_message_additional_reason_dialog.dart';
 import 'package:fluffychat/pages/chat/chat_view.dart';
 import 'package:fluffychat/pages/chat/context_item_chat_action.dart';
 import 'package:fluffychat/pages/chat/dialog_reject_invite_widget.dart';
@@ -76,6 +81,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_typeahead/flutter_typeahead.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:linagora_design_flutter/dialog/options_dialog.dart';
 import 'package:linagora_design_flutter/images_picker/asset_counter.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart'
     hide ImagePicker;
@@ -85,7 +91,6 @@ import 'package:record/record.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:universal_html/html.dart' as html;
-import 'package:fluffychat/domain/model/room/room_extension.dart';
 
 import 'send_file_dialog/send_file_dialog.dart';
 import 'sticker_picker_dialog.dart';
@@ -739,51 +744,88 @@ class ChatController extends State<Chat>
     _clearSelectEvent();
   }
 
-  void reportEventAction() async {
-    final event = selectedEvents.single;
-    final score = await showConfirmationDialog<int>(
+  void reportEventAction(Event event) async {
+    final l10n = L10n.of(context)!;
+    final options = MessageReportReason.values.map((reportReason) {
+      return LinagoraDialogOption(
+        name: reportReason.getReason(l10n),
+        value: reportReason,
+        trailingIcon: reportReason.getTrailingIcon(),
+      );
+    }).toList();
+    final selectedOption =
+        await showDialog<LinagoraDialogOption<MessageReportReason>>(
       context: context,
-      title: L10n.of(context)!.reportMessage,
-      message: L10n.of(context)!.howOffensiveIsThisContent,
-      cancelLabel: L10n.of(context)!.cancel,
-      okLabel: L10n.of(context)!.ok,
-      actions: [
-        AlertDialogAction(
-          key: -100,
-          label: L10n.of(context)!.extremeOffensive,
-        ),
-        AlertDialogAction(
-          key: -50,
-          label: L10n.of(context)!.offensive,
-        ),
-        AlertDialogAction(
-          key: 0,
-          label: L10n.of(context)!.inoffensive,
-        ),
-      ],
+      builder: (context) {
+        return OptionsDialog(
+          title: l10n.report,
+          description: l10n.reportDesc,
+          isBottomSheet: MediaQuery.sizeOf(context).width < 600,
+          availableOptions: options,
+          onSelected: (selected) => Navigator.pop(context, selected),
+        );
+      },
     );
-    if (score == null) return;
-    final reason = await showTextInputDialog(
-      useRootNavigator: false,
-      context: context,
-      title: L10n.of(context)!.whyDoYouWantToReportThis,
-      okLabel: L10n.of(context)!.ok,
-      cancelLabel: L10n.of(context)!.cancel,
-      textFields: [DialogTextField(hintText: L10n.of(context)!.reason)],
-    );
-    if (reason == null || reason.single.isEmpty) return;
+    if (selectedOption == null) return;
+    String additionalReason = '';
+    if (selectedOption.value == MessageReportReason.other) {
+      bool isBacked = false;
+      final comment = await showDialog<String>(
+        context: context,
+        builder: (context) {
+          return ChatReportMessageAdditionalReasonDialog(
+            l10n: l10n,
+            isMobile: responsive.isMobile(context),
+            onCommentReport: (comment) => Navigator.pop(context, comment),
+            onBack: () {
+              isBacked = true;
+              Navigator.pop(context);
+            },
+          );
+        },
+      );
+      if (isBacked) {
+        reportEventAction(event);
+        return;
+      }
+      if (comment == null) return;
+      additionalReason = comment;
+    }
     final result = await TwakeDialog.showFutureLoadingDialogFullScreen(
-      future: () => Matrix.of(context).client.reportContent(
-            event.roomId!,
-            event.eventId,
-            reason: reason.single,
-            score: score,
-          ),
+      future: () async {
+        final state = await getIt
+            .get<ReportContentInteractor>()
+            .execute(
+              client: client,
+              roomId: event.roomId!,
+              eventId: event.eventId,
+              reason: selectedOption.value == MessageReportReason.other
+                  ? '${selectedOption.value.getReason(l10n)}: $additionalReason'
+                  : selectedOption.value.getReason(l10n),
+              score: selectedOption.value.score,
+            )
+            .last;
+        return state.fold(
+          (failure) {
+            if (failure is ReportContentFailure) {
+              throw failure.exception;
+            }
+            return failure;
+          },
+          (success) => success,
+        );
+      },
     );
-    if (result.error != null) return;
     showEmojiPickerNotifier.value = false;
     _clearSelectEvent();
-    TwakeSnackBar.show(context, L10n.of(context)!.contentHasBeenReported);
+    if (result.error != null) {
+      TwakeSnackBar.show(
+        context,
+        result.error.toLocalizedString(context),
+      );
+      return;
+    }
+    TwakeSnackBar.show(context, l10n.contentHasBeenReported);
   }
 
   void redactEventsAction() async {
@@ -1499,6 +1541,7 @@ class ChatController extends State<Chat>
       if (event.canEditEvents(matrix)) ...[
         ChatContextMenuActions.edit,
       ],
+      if (event.room.canReportContent) ChatContextMenuActions.report,
       if (event.room.canPinMessage) ChatContextMenuActions.pinChat,
       if (PlatformInfos.isWeb && event.hasAttachment)
         ChatContextMenuActions.downloadFile,
@@ -1550,6 +1593,9 @@ class ChatController extends State<Chat>
         break;
       case ChatContextMenuActions.pinChat:
         pinEventAction(event);
+        break;
+      case ChatContextMenuActions.report:
+        reportEventAction(event);
         break;
       case ChatContextMenuActions.forward:
         forwardEventsAction(event: event);
@@ -2243,7 +2289,7 @@ class ChatController extends State<Chat>
         break;
       case ChatAppBarActions.report:
         actionWithClearSelections(
-          reportEventAction,
+          () => reportEventAction(selectedEvents.single),
         );
         break;
       case ChatAppBarActions.leaveGroup:
@@ -2314,6 +2360,7 @@ class ChatController extends State<Chat>
       if (event.status.isAvailable) ChatContextMenuActions.forward,
       if (event.canEditEvents(matrix)) ChatContextMenuActions.edit,
       if (event.isCopyable) ChatContextMenuActions.copyMessage,
+      if (event.room.canReportContent) ChatContextMenuActions.report,
       ChatContextMenuActions.pinChat,
       if (PlatformInfos.isWeb && event.hasAttachment)
         ChatContextMenuActions.downloadFile,

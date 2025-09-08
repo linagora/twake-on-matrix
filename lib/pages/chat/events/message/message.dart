@@ -92,6 +92,7 @@ class Message extends StatefulWidget {
   final void Function(BuildContext, Event)? onDelete;
   final void Function(Event)? onForward;
   final void Function(Event)? onCopy;
+  final void Function(Event)? onReport;
   final void Function(Event)? onPin;
   final void Function(Event)? onSaveToDownload;
   final void Function(Event)? onSaveToGallery;
@@ -133,6 +134,7 @@ class Message extends StatefulWidget {
     this.onDelete,
     this.onForward,
     this.onCopy,
+    this.onReport,
     this.onPin,
     this.onSaveToDownload,
     this.onSaveToGallery,
@@ -280,6 +282,7 @@ class _MessageState extends State<Message> with MessageAvatarMixin {
           onDelete: widget.onDelete,
           onForward: widget.onForward,
           onCopy: widget.onCopy,
+          onReport: widget.onReport,
           onLongPressMessage: widget.onLongPressMessage,
           onPin: widget.onPin,
           saveToDownload: widget.onSaveToDownload,
