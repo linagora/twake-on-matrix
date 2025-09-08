@@ -8,6 +8,7 @@ import 'package:fluffychat/pages/chat/chat_pinned_events/pinned_messages_screen.
 import 'package:fluffychat/pages/chat/chat_view.dart';
 import 'package:fluffychat/pages/chat/events/message/multi_platform_message_container.dart';
 import 'package:fluffychat/pages/chat/events/message_content.dart';
+import 'package:fluffychat/pages/chat/seen_by_row.dart';
 import 'package:fluffychat/pages/chat_draft/draft_chat_view.dart';
 import 'package:fluffychat/pages/chat_list/chat_list_body_view.dart';
 import 'package:fluffychat/widgets/twake_components/twake_icon_button.dart';
@@ -21,7 +22,6 @@ import '../robots/add_member_robot.dart';
 import '../robots/chat_group_detail_robot.dart';
 import '../robots/chat_list_robot.dart';
 import 'package:flutter/material.dart';
-import 'dart:convert';
 import '../robots/group_information_robot.dart';
 import '../robots/menu_robot.dart';
 import '../robots/new_chat_robot.dart';
@@ -419,6 +419,41 @@ class ChatScenario extends BaseScenario {
       expect(text, findsOneWidget);
     } else {
       expect(text, findsNothing);
+    }
+  }
+
+  Future<void> verifyMessageIsSent(String message, bool isTrue) async {
+     // 1) wait display of the message
+    final text = await ChatGroupDetailRobot($).getText(message);
+    await text.waitUntilVisible();
+
+    // 2) get ancestor that contains message and Stack
+    final bubbleStack = $(find.ancestor(
+    of: text.finder,
+    matching: find.byType(Stack),),);
+
+    // 3) Find SelectionContainer
+    final selection = $(find.descendant(
+      of: bubbleStack.finder,
+      matching: find.byType(SelectionContainer, skipOffstage: false),),);
+
+    // 4) find SeenByRow và Icon
+    final seenBy = $(find.descendant(
+      of: selection.finder,
+      matching: find.byType(SeenByRow),),);
+    
+    // 5) find seenIcon
+    final seenIcon = $(find.descendant(
+    of: seenBy.finder,
+    matching: find.byType(Icon, skipOffstage: false),),);
+
+    if (isTrue) {
+      await seenIcon.waitUntilVisible();
+      expect( seenIcon.exists, isTrue);
+    }
+    else {
+      await Future<void>.delayed(const Duration(milliseconds: 300));
+      expect( seenIcon.exists, isFalse);
     }
   }
 
