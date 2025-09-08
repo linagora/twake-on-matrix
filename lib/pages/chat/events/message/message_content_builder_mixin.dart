@@ -27,6 +27,7 @@ mixin MessageContentBuilderMixin {
       MessageTypes.File,
       MessageTypes.Image,
       MessageTypes.Video,
+      MessageTypes.Audio,
     }.contains(event.messageType);
 
     if (isNotSupportCalcSize) {

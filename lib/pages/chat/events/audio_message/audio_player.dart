@@ -1,0 +1,572 @@
+import 'dart:async';
+import 'dart:io';
+import 'package:async/async.dart';
+import 'package:fluffychat/pages/chat/events/audio_message/audio_play_extension.dart';
+import 'package:fluffychat/pages/chat/events/audio_message/audio_player_style.dart';
+import 'package:fluffychat/pages/chat/events/message/message_style.dart';
+import 'package:fluffychat/pages/chat/seen_by_row.dart';
+import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
+import 'package:fluffychat/utils/room_status_extension.dart';
+import 'package:fluffychat/widgets/file_widget/circular_loading_download_widget.dart';
+import 'package:fluffychat/widgets/file_widget/message_file_tile_style.dart';
+import 'package:fluffychat/widgets/matrix.dart';
+import 'package:fluffychat/widgets/twake_components/twake_icon_button.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+import 'package:just_audio/just_audio.dart';
+import 'package:linagora_design_flutter/linagora_design_flutter.dart';
+import 'package:matrix/matrix.dart';
+import 'package:path_provider/path_provider.dart';
+
+import 'package:fluffychat/utils/localized_exception_extension.dart';
+import 'package:opus_caf_converter_dart/opus_caf_converter_dart.dart';
+import 'package:flutter_gen/gen_l10n/l10n.dart';
+
+class AudioPlayerWidget extends StatefulWidget {
+  final Color color;
+  final Event event;
+  final Timeline timeline;
+
+  static const int wavesCount = 80;
+
+  const AudioPlayerWidget(
+    this.event, {
+    this.color = Colors.black,
+    super.key,
+    required this.timeline,
+  });
+
+  @override
+  AudioPlayerState createState() => AudioPlayerState();
+}
+
+enum AudioPlayerStatus { notDownloaded, downloading, downloaded }
+
+class AudioPlayerState extends State<AudioPlayerWidget> {
+  final ValueNotifier<AudioPlayerStatus> audioStatus =
+      ValueNotifier(AudioPlayerStatus.notDownloaded);
+
+  final ValueNotifier<List<int>> _waveformNotifier = ValueNotifier([]);
+
+  final ValueNotifier<Duration> _durationNotifier =
+      ValueNotifier(Duration.zero);
+
+  late final MatrixState matrix;
+
+  @override
+  void dispose() {
+    super.dispose();
+    // TODO: This is playing audio message in background when closing the chat
+
+    // final audioPlayer = matrix.voiceMessageEventId.value != widget.event.eventId
+    //     ? null
+    //     : matrix.audioPlayer;
+    // if (audioPlayer != null) {
+    //   if (audioPlayer.playing && !audioPlayer.isAtEndPosition) {
+    //     WidgetsBinding.instance.addPostFrameCallback((_) {
+    //       ScaffoldMessenger.of(matrix.context).showMaterialBanner(
+    //         MaterialBanner(
+    //           padding: EdgeInsets.zero,
+    //           leading: StreamBuilder(
+    //             stream: audioPlayer.playerStateStream.asBroadcastStream(),
+    //             builder: (context, _) => IconButton(
+    //               onPressed: () {
+    //                 if (audioPlayer.isAtEndPosition) {
+    //                   audioPlayer.seek(Duration.zero);
+    //                 } else if (audioPlayer.playing) {
+    //                   audioPlayer.pause();
+    //                 } else {
+    //                   audioPlayer.play();
+    //                 }
+    //               },
+    //               icon: audioPlayer.playing && !audioPlayer.isAtEndPosition
+    //                   ? const Icon(Icons.pause_outlined)
+    //                   : const Icon(Icons.play_arrow_outlined),
+    //             ),
+    //           ),
+    //           content: StreamBuilder(
+    //             stream: audioPlayer.positionStream.asBroadcastStream(),
+    //             builder: (context, _) => GestureDetector(
+    //               onTap: () => context.go(
+    //                 '/rooms/${widget.event.room.id}?event=${widget.event.eventId}',
+    //               ),
+    //               child: Text(
+    //                 '🎙️ ${audioPlayer.position.minuteSecondString} / ${audioPlayer.duration?.minuteSecondString} - ${widget.event.senderFromMemoryOrFallback.calcDisplayname()}',
+    //                 maxLines: 1,
+    //                 overflow: TextOverflow.ellipsis,
+    //               ),
+    //             ),
+    //           ),
+    //           actions: [
+    //             IconButton(
+    //               onPressed: () {
+    //                 audioPlayer.pause();
+    //                 audioPlayer.dispose();
+    //                 matrix.voiceMessageEventId.value = null;
+    //
+    //                 WidgetsBinding.instance.addPostFrameCallback((_) {
+    //                   ScaffoldMessenger.of(matrix.context)
+    //                       .clearMaterialBanners();
+    //                 });
+    //               },
+    //               icon: const Icon(Icons.close_outlined),
+    //             ),
+    //           ],
+    //         ),
+    //       );
+    //     });
+    //     return;
+    //   }
+    //   WidgetsBinding.instance.addPostFrameCallback((_) {
+    //     audioPlayer.pause();
+    //     audioPlayer.dispose();
+    //     matrix.voiceMessageEventId.value = null;
+    //   });
+    // }
+  }
+
+  void _onButtonTap() async {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ScaffoldMessenger.of(matrix.context).clearMaterialBanners();
+    });
+    if (matrix.voiceMessageEventId.value == widget.event.eventId) {
+      if (matrix.audioPlayer.isAtEndPosition == true) {
+        matrix.audioPlayer.seek(Duration.zero);
+      } else if (matrix.audioPlayer.playing == true) {
+        matrix.audioPlayer.pause();
+      } else {
+        matrix.audioPlayer.play();
+      }
+      return;
+    }
+
+    matrix.voiceMessageEventId.value = widget.event.eventId;
+    matrix.audioPlayer
+      ..stop()
+      ..dispose();
+    File? file;
+    MatrixFile? matrixFile;
+
+    audioStatus.value = AudioPlayerStatus.downloading;
+    try {
+      matrixFile = await widget.event.downloadAndDecryptAttachment();
+
+      if (!kIsWeb) {
+        final tempDir = await getTemporaryDirectory();
+        final fileName = Uri.encodeComponent(
+          widget.event.attachmentOrThumbnailMxcUrl()!.pathSegments.last,
+        );
+        file = File('${tempDir.path}/${fileName}_${matrixFile.name}');
+
+        await file.writeAsBytes(matrixFile.bytes ?? []);
+
+        if (Platform.isIOS &&
+            matrixFile.mimeType.toLowerCase() == 'audio/ogg') {
+          Logs().v('Convert ogg audio file for iOS...');
+          final convertedFile = File('${file.path}.caf');
+          if (await convertedFile.exists() == false) {
+            OpusCaf().convertOpusToCaf(file.path, convertedFile.path);
+          }
+          file = convertedFile;
+        }
+      }
+
+      audioStatus.value = AudioPlayerStatus.downloaded;
+    } catch (e, s) {
+      Logs().v('Could not download audio file', e, s);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(e.toLocalizedString(context)),
+        ),
+      );
+      rethrow;
+    }
+    if (!context.mounted) return;
+    if (matrix.voiceMessageEventId.value != widget.event.eventId) return;
+    final audioPlayer = matrix.audioPlayer = AudioPlayer();
+
+    if (file != null) {
+      audioPlayer.setFilePath(file.path);
+    } else {
+      await audioPlayer.setAudioSource(MatrixFileAudioSource(matrixFile));
+    }
+
+    matrix.audioPlayer.play().onError((e, s) {
+      Logs().e('Could not play audio file', e, s);
+    });
+  }
+
+  int boundedValueFromSeed({
+    required int seed,
+    required int min,
+    required int max,
+  }) {
+    final range = max - min + 1;
+    final mod = ((seed % range) + range) % range;
+    return min + mod;
+  }
+
+  List<int>? _getWaveform() {
+    final eventWaveForm = widget.event.content
+        .tryGetMap<String, dynamic>('org.matrix.msc1767.audio')
+        ?.tryGetList<int>('waveform');
+    if (eventWaveForm == null ||
+        eventWaveForm.isEmpty ||
+        eventWaveForm.every((v) => v == 0)) {
+      return List.generate(AudioPlayerStyle.minWaveCount, (i) => 100);
+    }
+
+    if (_durationNotifier.value < const Duration(seconds: 15)) {
+      return _calculateWaveCount(
+        eventWaveForm: eventWaveForm,
+        waveCount: AudioPlayerStyle.minWaveCount,
+      );
+    }
+
+    final maxWaveCount = AudioPlayerStyle.maxWaveCount(context);
+
+    if (_durationNotifier.value > const Duration(seconds: 30)) {
+      return _calculateWaveCount(
+        eventWaveForm: eventWaveForm,
+        waveCount: maxWaveCount,
+      );
+    }
+
+    if (_durationNotifier.value >= const Duration(seconds: 15) &&
+        _durationNotifier.value <= const Duration(seconds: 30)) {
+      return _calculateWaveCount(
+        eventWaveForm: eventWaveForm,
+        waveCount: boundedValueFromSeed(
+          seed: eventWaveForm.length,
+          min: AudioPlayerStyle.minWaveCount,
+          max: maxWaveCount,
+        ),
+      );
+    }
+    return null;
+  }
+
+  List<int>? _calculateWaveCount({
+    required List<int> eventWaveForm,
+    required int waveCount,
+  }) {
+    while (eventWaveForm.length < waveCount) {
+      for (var i = 0; i < eventWaveForm.length; i = i + 2) {
+        eventWaveForm.insert(i, eventWaveForm[i]);
+      }
+    }
+    var i = 0;
+    final step = (eventWaveForm.length / waveCount).round();
+    while (eventWaveForm.length > waveCount) {
+      eventWaveForm.removeAt(i);
+      i = (i + step) % waveCount;
+    }
+    return eventWaveForm
+        .map((i) => i == 0 ? 100 : (i > 1024 ? 1024 : i))
+        .toList();
+  }
+
+  int get waveCount {
+    final eventWaveForm = widget.event.content
+        .tryGetMap<String, dynamic>('org.matrix.msc1767.audio')
+        ?.tryGetList<int>('waveform');
+    if (eventWaveForm == null ||
+        eventWaveForm.isEmpty ||
+        eventWaveForm.every((v) => v == 0)) {
+      return AudioPlayerStyle.minWaveCount;
+    }
+    if (_durationNotifier.value < const Duration(seconds: 15)) {
+      return AudioPlayerStyle.minWaveCount;
+    }
+
+    if (_durationNotifier.value > const Duration(seconds: 30)) {
+      return AudioPlayerStyle.maxWaveCount(context);
+    }
+
+    if (_durationNotifier.value >= const Duration(seconds: 15) &&
+        _durationNotifier.value <= const Duration(seconds: 30)) {
+      return boundedValueFromSeed(
+        seed: eventWaveForm.length,
+        min: AudioPlayerStyle.minWaveCount,
+        max: AudioPlayerStyle.maxWaveCount(context),
+      );
+    }
+
+    return AudioPlayerStyle.minWaveCount;
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    matrix = Matrix.of(context);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final durationInt = widget.event.content
+          .tryGetMap<String, dynamic>('org.matrix.msc1767.audio')
+          ?.tryGet<int>('duration');
+      if (durationInt != null) {
+        _durationNotifier.value = Duration(milliseconds: durationInt);
+      }
+      _waveformNotifier.value = _getWaveform() ?? [];
+      audioStatus.value = AudioPlayerStatus.downloaded;
+      if (matrix.voiceMessageEventId.value == widget.event.eventId) {
+        ScaffoldMessenger.of(matrix.context).clearMaterialBanners();
+      }
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return ValueListenableBuilder(
+      valueListenable: audioStatus,
+      builder: (context, status, _) {
+        return ValueListenableBuilder(
+          valueListenable: matrix.voiceMessageEventId,
+          builder: (context, eventId, _) {
+            final audioPlayer =
+                eventId != widget.event.eventId ? null : matrix.audioPlayer;
+
+            return StreamBuilder<Object>(
+              stream: audioPlayer == null
+                  ? null
+                  : StreamGroup.merge([
+                      audioPlayer.positionStream.asBroadcastStream(),
+                      audioPlayer.playerStateStream.asBroadcastStream(),
+                    ]),
+              builder: (context, snapshot) {
+                final maxPosition =
+                    audioPlayer?.duration?.inMilliseconds.toDouble() ?? 1.0;
+                var currentPosition =
+                    audioPlayer?.position.inMilliseconds.toDouble() ?? 0.0;
+                if (currentPosition > maxPosition) {
+                  currentPosition = maxPosition;
+                }
+
+                final wavePosition =
+                    (currentPosition / maxPosition) * waveCount;
+
+                final statusText = audioPlayer == null
+                    ? _durationNotifier.value.minuteSecondString
+                    : audioPlayer.position.minuteSecondString;
+                return Padding(
+                  padding: const EdgeInsets.only(
+                    top: 8.0,
+                    bottom: 16.0,
+                    left: 8.0,
+                    right: 8.0,
+                  ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      ConstrainedBox(
+                        constraints: BoxConstraints(
+                          maxWidth: MessageStyle.messageBubbleWidth(context),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: <Widget>[
+                            _playButtonBuilder(
+                              status: status,
+                              audioPlayer: audioPlayer,
+                            ),
+                            const SizedBox(width: 4),
+                            Expanded(
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  ValueListenableBuilder(
+                                    valueListenable: _waveformNotifier,
+                                    builder: (context, waveform, _) {
+                                      return Row(
+                                        children: List.generate(
+                                          waveCount,
+                                          (index) {
+                                            final waveHeight = waveform.isEmpty
+                                                ? 4.0
+                                                : 26 * (waveform[index] / 1024);
+                                            return _waveItemBuilder(
+                                              index: index,
+                                              waveHeight: waveHeight,
+                                              wavePosition: wavePosition,
+                                            );
+                                          },
+                                        ),
+                                      );
+                                    },
+                                  ),
+                                  const SizedBox(height: 8),
+                                  _audioMessageTimeBuilder(
+                                    statusText: statusText,
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              },
+            );
+          },
+        );
+      },
+    );
+  }
+
+  Widget _audioMessageTimeBuilder({
+    required String statusText,
+  }) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      mainAxisAlignment: MainAxisAlignment.start,
+      children: [
+        Text(
+          statusText,
+          style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                color: LinagoraRefColors.material().tertiary[30],
+              ),
+        ),
+        const SizedBox(width: 8),
+        Expanded(
+          child: Align(
+            alignment: Alignment.centerRight,
+            child: Text.rich(
+              WidgetSpan(
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    if (widget.event.isPinned) ...[
+                      TwakeIconButton(
+                        tooltip: L10n.of(context)!.pin,
+                        icon: Icons.push_pin_outlined,
+                        size: MessageStyle.pushpinIconSize,
+                        paddingAll: MessageStyle.paddingAllPushpin,
+                        margin: EdgeInsets.zero,
+                        iconColor: LinagoraRefColors.material().neutral[50],
+                      ),
+                      const SizedBox(width: 4.0),
+                    ],
+                    Text(
+                      DateFormat("HH:mm").format(
+                        widget.event.originServerTs,
+                      ),
+                      textScaler: const TextScaler.linear(
+                        1.0,
+                      ),
+                      style: Theme.of(context).textTheme.bodySmall?.merge(
+                            TextStyle(
+                              color: LinagoraRefColors.material().tertiary[30],
+                              letterSpacing: 0.4,
+                            ),
+                          ),
+                    ),
+                    const SizedBox(width: 4),
+                    SeenByRow(
+                      timelineOverlayMessage:
+                          widget.event.timelineOverlayMessage,
+                      participants: widget.timeline.room.getParticipants(),
+                      getSeenByUsers: widget.event.room.getSeenByUsers(
+                        widget.timeline,
+                        eventId: widget.event.eventId,
+                      ),
+                      eventStatus: widget.event.status,
+                      event: widget.event,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _waveItemBuilder({
+    required int index,
+    required double waveHeight,
+    required double wavePosition,
+  }) {
+    return Container(
+      height: waveHeight,
+      width: 2,
+      alignment: Alignment.center,
+      margin: const EdgeInsets.symmetric(
+        horizontal: 1,
+      ),
+      decoration: BoxDecoration(
+        color: index < wavePosition
+            ? LinagoraSysColors.material().primary
+            : LinagoraSysColors.material().primary.withAlpha(70),
+        borderRadius: BorderRadius.circular(
+          64,
+        ),
+      ),
+    );
+  }
+
+  Widget _playButtonBuilder({
+    required AudioPlayerStatus status,
+    required AudioPlayer? audioPlayer,
+  }) {
+    return InkWell(
+      onTap: _onButtonTap,
+      child: status == AudioPlayerStatus.downloading
+          ? Stack(
+              alignment: Alignment.center,
+              children: [
+                Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.primary,
+                    shape: BoxShape.circle,
+                  ),
+                ),
+                const SizedBox(
+                  width: 32,
+                  height: 32,
+                  child: CircularLoadingDownloadWidget(
+                    style: MessageFileTileStyle(),
+                  ),
+                ),
+                Container(
+                  width: 40,
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.primary,
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    status == AudioPlayerStatus.downloaded
+                        ? Icons.arrow_downward
+                        : Icons.play_arrow,
+                    color: Theme.of(context).colorScheme.surface,
+                    size: 24,
+                  ),
+                ),
+              ],
+            )
+          : Container(
+              height: 40,
+              width: 40,
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.primary,
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                audioPlayer?.playing == true &&
+                        audioPlayer?.isAtEndPosition == false
+                    ? Icons.pause_outlined
+                    : Icons.play_arrow,
+                color: Theme.of(context).colorScheme.onPrimary,
+              ),
+            ),
+    );
+  }
+}
