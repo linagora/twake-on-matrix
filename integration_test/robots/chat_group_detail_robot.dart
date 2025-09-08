@@ -78,11 +78,7 @@ class ChatGroupDetailRobot extends CoreRobot {
   }
 
   Future<void> inputMessage(String message) async {
-    // catch exceptiom
     final textField = await getInputTextField();
-    await CoreRobot($).captureAsyncError(() async {
-        await textField.tap();
-      });
     await textField.enterText(message);
   }
 
