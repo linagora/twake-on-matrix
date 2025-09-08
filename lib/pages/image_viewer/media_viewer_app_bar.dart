@@ -30,7 +30,8 @@ class MediaViewerAppBarController extends State<MediaViewerAppBar>
         SaveFileToTwakeAndroidDownloadsFolderMixin,
         SaveMediaToGalleryAndroidMixin,
         MediaViewerAppBarMixin {
-  ValueNotifier<bool>? get showAppbarPreview => widget.showAppbarPreviewNotifier;
+  ValueNotifier<bool>? get showAppbarPreview =>
+      widget.showAppbarPreviewNotifier;
 
   @override
   Widget build(BuildContext context) {
