@@ -35,7 +35,7 @@ class HomeRobot extends CoreRobot {
     }
   }
 
-  Future<void> confirmAccessContact() async {
+  Future<void> confirmAccessContactIOS() async {
     try {
       await $.native.waitUntilVisible(
         Selector(textContains: 'OK'),
@@ -53,7 +53,7 @@ class HomeRobot extends CoreRobot {
   Future<ContactListRobot> gotoContactListAndGrantContactPermission() async {
     await (await getContactTab()).tap();
     await confirmShareContactInformation();
-    await confirmAccessContact();
+    await confirmAccessContactIOS();
 
     await $.pumpAndSettle();
     return ContactListRobot($);
