@@ -1,4 +1,4 @@
-// Use this helper when you have multiple verifications in a test
+// Use SoftAssertHelper when you have multiple verifications in a test
 // and you don’t want the script to stop at the first failure.
 // Instead, all verification failures will be collected and reported
 // after all steps of the script have been executed.
