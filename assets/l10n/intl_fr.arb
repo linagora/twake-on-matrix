@@ -2685,7 +2685,7 @@
   "@errorPreviewingFile": {},
   "youAreUploadingPhotosDoYouWantToCancelOrContinue": "Erreur de téléchargement d'image ! Voulez-vous toujours continuer à créer un salon ?",
   "@youAreUploadingPhotosDoYouWantToCancelOrContinue": {},
-  "unread": "Ne pas lire",
+  "unread": "Marquer comme non lu",
   "@unread": {},
   "company": "Entreprise",
   "@company": {},
