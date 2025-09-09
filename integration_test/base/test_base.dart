@@ -47,6 +47,6 @@ class TestBase {
     await loginScenario.login();
     //because permission to share contact and share media popup always display at contactScreen
     //, so that I go to contactListScreen to close them
-    await HomeRobot($).gotoContactListScreen();
+    await HomeRobot($).gotoContactListAndGrantContactPermission();
   }
 }
