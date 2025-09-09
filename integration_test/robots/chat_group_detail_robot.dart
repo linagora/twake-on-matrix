@@ -79,6 +79,10 @@ class ChatGroupDetailRobot extends CoreRobot {
 
   Future<void> inputMessage(String message) async {
     final textField = await getInputTextField();
+    // catch exception when trying to chat with non-existing account
+    await CoreRobot($).captureAsyncError(() async {
+        await textField.tap();
+      });
     await textField.enterText(message);
   }
 
