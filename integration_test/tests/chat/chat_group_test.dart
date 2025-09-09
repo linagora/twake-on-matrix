@@ -1,9 +1,6 @@
 import 'package:fluffychat/pages/chat/chat_input_row_send_btn.dart';
-import 'package:fluffychat/pages/chat/chat_view.dart';
-import 'package:fluffychat/pages/chat_draft/draft_chat_empty_widget.dart';
 import 'package:flutter_test/flutter_test.dart';
 import '../../base/test_base.dart';
-import '../../help/soft_assertion_helper.dart';
 import '../../robots/chat_group_detail_robot.dart';
 import '../../scenarios/chat_scenario.dart';
 import '../../robots/home_robot.dart';
@@ -40,21 +37,21 @@ Future<(String, String)> prepareTwoMessages(PatrolIntegrationTester $) async {
 
 void main() {
   TestBase().runPatrolTest(
-    description: 'verify the display of pull down menu',
+    description: 'verify the display of pull down menu in a direct chat',
     test: ($) async {
       final (senderMsg, receiverMsg) = await prepareTwoMessages($);
 
       await ChatGroupDetailRobot($).openPullDownMenu(senderMsg);
-      await ChatScenario($).verifyTheDisplayOfPullDownMenu(senderMsg);
+      await ChatScenario($).verifyTheDisplayOfPullDownMenu(senderMsg, level:UserLevel.owner);
       await ChatGroupDetailRobot($).closePullDownMenu();
 
       await ChatGroupDetailRobot($).openPullDownMenu(receiverMsg);
-      await ChatScenario($).verifyTheDisplayOfPullDownMenu(receiverMsg);
+      await ChatScenario($).verifyTheDisplayOfPullDownMenu(receiverMsg, level:UserLevel.member);
     },
   );
 
   TestBase().runPatrolTest(
-    description: 'reply a message',
+    description: 'reply a message in a direct chat',
     test: ($) async {
       final (senderMsg, receiverMsg) = await prepareTwoMessages($);
 
@@ -70,7 +67,7 @@ void main() {
   );
 
   TestBase().runPatrolTest(
-    description: 'delete a message',
+    description: 'delete a message in a direct chat',
     test: ($) async {
       final (senderMsg, receiverMsg) = await prepareTwoMessages($);
 
@@ -83,7 +80,7 @@ void main() {
   );
 
   TestBase().runPatrolTest(
-    description: 'copy a message',
+    description: 'copy a message in a direct chat',
     test: ($) async {
       final (senderMsg, receiverMsg) = await prepareTwoMessages($);
 
@@ -105,7 +102,7 @@ void main() {
   );
 
   TestBase().runPatrolTest(
-    description: 'edit a message',
+    description: 'edit a message with owner level',
     test: ($) async {
       final (senderMsg, receiverMsg) = await prepareTwoMessages($);
 
@@ -113,16 +110,11 @@ void main() {
       await ChatScenario($).editMessage(senderMsg, editedSender);
       await ChatScenario($).verifyMessageIsShown(editedSender, true);
       await ChatScenario($).verifyMessageIsShown(senderMsg, false);
-
-      final editedReceiver = 'Edit$receiverMsg';
-      await ChatScenario($).editMessage(receiverMsg, editedReceiver);
-      await ChatScenario($).verifyMessageIsShown(editedReceiver, true);
-      await ChatScenario($).verifyMessageIsShown(receiverMsg, false);
     },
   );
 
   TestBase().runPatrolTest(
-    description: 'select a message',
+    description: 'select a message in direct chat',
     test: ($) async {
       final (senderMsg, receiverMsg) = await prepareTwoMessages($);
 

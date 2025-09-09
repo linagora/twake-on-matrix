@@ -28,6 +28,7 @@ import '../robots/new_chat_robot.dart';
 import '../robots/search_robot.dart';
 import '../robots/setting_for_new_group.dart';
 
+enum UserLevel { member, admin, owner, moderator }
 class ChatScenario extends BaseScenario {
   ChatScenario(super.$);
 
@@ -78,11 +79,15 @@ class ChatScenario extends BaseScenario {
       {await SearchRobot($).backToPreviousScreen();}
   }
 
-  Future<void> verifyTheDisplayOfPullDownMenu(String message) async {
+  Future<void> verifyTheDisplayOfPullDownMenu(String message, {
+    UserLevel level = UserLevel.member,}) async {
     expect((PullDownMenuRobot($).getReplyItem()).exists, isTrue);
     expect((PullDownMenuRobot($).getForwardItem()).exists, isTrue);
     expect((PullDownMenuRobot($).getCopyItem()).exists, isTrue);
-    expect((PullDownMenuRobot($).getEditItem()).exists, isTrue);
+    if(level ==UserLevel.owner || level ==UserLevel.admin || level ==UserLevel.moderator)
+      {expect((PullDownMenuRobot($).getEditItem()).exists, isTrue);}
+    else
+      {expect((PullDownMenuRobot($).getEditItem()).exists, isFalse);}
     expect((PullDownMenuRobot($).getSelectItem()).exists, isTrue);
     expect((PullDownMenuRobot($).getPinItem()).exists, isTrue);
     expect((PullDownMenuRobot($).getDeleteItem()).exists, isTrue);
