@@ -62,6 +62,24 @@ class CoreRobot {
     }
   }
 
+  Future<String?> captureAsyncError(Future<void> Function() body) async {
+    Object? err;
+    final done = Completer<void>();
+
+    runZonedGuarded(() async {
+      try {
+        await body();
+      } finally {
+        done.complete();
+      }
+    }, (e, _) {
+      err ??= e; // store the first error
+    });
+
+    await done.future;
+    return err?.toString();
+  }
+  
   Future<HttpClient> initialRedirectRequest() async {
     // Step 1: Initial redirect request (NO REDIRECT FOLLOW)
     final client = HttpClient();
