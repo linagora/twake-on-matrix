@@ -1122,6 +1122,7 @@ class MatrixState extends State<Matrix>
     showToMBootstrap.dispose();
     linuxNotifications?.close();
     showQrCodeDownload.dispose();
+    audioPlayer.dispose();
     super.dispose();
   }
 

@@ -3389,5 +3389,6 @@
   "holdToRecordAudio": "Hold to record audio.",
   "explainPermissionToAccessMicrophone": "To send voice messages, allow Twake Chat to access the microphone.",
   "allowMicrophoneAccess": "Allow microphone access",
-  "later": "Later"
+  "later": "Later",
+  "couldNotPlayAudioFile": "Could not play audio file"
 }
