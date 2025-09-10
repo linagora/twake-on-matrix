@@ -1,7 +1,8 @@
 #!/bin/bash
 # Run patrol chat list test with env variables
 
+ENV_FILE=integration_test/.env.local.do-not-commit
 patrol test \
-  -t integration_test/tests/chat/chat_group_test.dart \
-  --dart-define-from-file=.env.local.do-not-commit \
-  --device "$(grep -E '^DEVICE=' .env | cut -d= -f2-)"
+  -t integration_test/tests/chat/chat_list_test.dart \
+  --dart-define-from-file="$ENV_FILE" \
+  --device "$(grep -E '^DEVICE=' "$ENV_FILE" | cut -d= -f2-)"
