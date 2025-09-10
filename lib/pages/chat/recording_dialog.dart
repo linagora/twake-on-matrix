@@ -10,7 +10,7 @@ import 'package:record/record.dart';
 import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
-import 'events/audio_message/audio_player.dart';
+import 'events/audio_message/audio_player_widget.dart';
 
 class RecordingDialog extends StatefulWidget {
   static const String recordingFileType = 'm4a';

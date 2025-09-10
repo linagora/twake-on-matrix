@@ -5,6 +5,7 @@ import 'package:fluffychat/pages/chat/events/audio_message/audio_play_extension.
 import 'package:fluffychat/pages/chat/events/audio_message/audio_player_style.dart';
 import 'package:fluffychat/pages/chat/events/message/message_style.dart';
 import 'package:fluffychat/pages/chat/seen_by_row.dart';
+import 'package:fluffychat/presentation/mixins/audio_mixin.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
 import 'package:fluffychat/utils/room_status_extension.dart';
 import 'package:fluffychat/widgets/file_widget/circular_loading_download_widget.dart';
@@ -17,11 +18,11 @@ import 'package:intl/intl.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:matrix/matrix.dart';
+import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:path_provider/path_provider.dart';
 
 import 'package:fluffychat/utils/localized_exception_extension.dart';
 import 'package:opus_caf_converter_dart/opus_caf_converter_dart.dart';
-import 'package:flutter_gen/gen_l10n/l10n.dart';
 
 class AudioPlayerWidget extends StatefulWidget {
   final Color color;
@@ -43,88 +44,17 @@ class AudioPlayerWidget extends StatefulWidget {
 
 enum AudioPlayerStatus { notDownloaded, downloading, downloaded }
 
-class AudioPlayerState extends State<AudioPlayerWidget> {
+class AudioPlayerState extends State<AudioPlayerWidget>
+    with AudioMixin, AutomaticKeepAliveClientMixin {
   final ValueNotifier<AudioPlayerStatus> audioStatus =
       ValueNotifier(AudioPlayerStatus.notDownloaded);
 
-  final ValueNotifier<List<int>> _waveformNotifier = ValueNotifier([]);
+  final ValueNotifier<List<double>> _waveformNotifier = ValueNotifier([]);
 
   final ValueNotifier<Duration> _durationNotifier =
       ValueNotifier(Duration.zero);
 
   late final MatrixState matrix;
-
-  @override
-  void dispose() {
-    super.dispose();
-    // TODO: This is playing audio message in background when closing the chat
-
-    // final audioPlayer = matrix.voiceMessageEventId.value != widget.event.eventId
-    //     ? null
-    //     : matrix.audioPlayer;
-    // if (audioPlayer != null) {
-    //   if (audioPlayer.playing && !audioPlayer.isAtEndPosition) {
-    //     WidgetsBinding.instance.addPostFrameCallback((_) {
-    //       ScaffoldMessenger.of(matrix.context).showMaterialBanner(
-    //         MaterialBanner(
-    //           padding: EdgeInsets.zero,
-    //           leading: StreamBuilder(
-    //             stream: audioPlayer.playerStateStream.asBroadcastStream(),
-    //             builder: (context, _) => IconButton(
-    //               onPressed: () {
-    //                 if (audioPlayer.isAtEndPosition) {
-    //                   audioPlayer.seek(Duration.zero);
-    //                 } else if (audioPlayer.playing) {
-    //                   audioPlayer.pause();
-    //                 } else {
-    //                   audioPlayer.play();
-    //                 }
-    //               },
-    //               icon: audioPlayer.playing && !audioPlayer.isAtEndPosition
-    //                   ? const Icon(Icons.pause_outlined)
-    //                   : const Icon(Icons.play_arrow_outlined),
-    //             ),
-    //           ),
-    //           content: StreamBuilder(
-    //             stream: audioPlayer.positionStream.asBroadcastStream(),
-    //             builder: (context, _) => GestureDetector(
-    //               onTap: () => context.go(
-    //                 '/rooms/${widget.event.room.id}?event=${widget.event.eventId}',
-    //               ),
-    //               child: Text(
-    //                 '🎙️ ${audioPlayer.position.minuteSecondString} / ${audioPlayer.duration?.minuteSecondString} - ${widget.event.senderFromMemoryOrFallback.calcDisplayname()}',
-    //                 maxLines: 1,
-    //                 overflow: TextOverflow.ellipsis,
-    //               ),
-    //             ),
-    //           ),
-    //           actions: [
-    //             IconButton(
-    //               onPressed: () {
-    //                 audioPlayer.pause();
-    //                 audioPlayer.dispose();
-    //                 matrix.voiceMessageEventId.value = null;
-    //
-    //                 WidgetsBinding.instance.addPostFrameCallback((_) {
-    //                   ScaffoldMessenger.of(matrix.context)
-    //                       .clearMaterialBanners();
-    //                 });
-    //               },
-    //               icon: const Icon(Icons.close_outlined),
-    //             ),
-    //           ],
-    //         ),
-    //       );
-    //     });
-    //     return;
-    //   }
-    //   WidgetsBinding.instance.addPostFrameCallback((_) {
-    //     audioPlayer.pause();
-    //     audioPlayer.dispose();
-    //     matrix.voiceMessageEventId.value = null;
-    //   });
-    // }
-  }
 
   void _onButtonTap() async {
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -163,12 +93,7 @@ class AudioPlayerState extends State<AudioPlayerWidget> {
 
         if (Platform.isIOS &&
             matrixFile.mimeType.toLowerCase() == 'audio/ogg') {
-          Logs().v('Convert ogg audio file for iOS...');
-          final convertedFile = File('${file.path}.caf');
-          if (await convertedFile.exists() == false) {
-            OpusCaf().convertOpusToCaf(file.path, convertedFile.path);
-          }
-          file = convertedFile;
+          file = await handleOggAudioFileIniOS(file);
         }
       }
 
@@ -194,106 +119,24 @@ class AudioPlayerState extends State<AudioPlayerWidget> {
 
     matrix.audioPlayer.play().onError((e, s) {
       Logs().e('Could not play audio file', e, s);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            e?.toLocalizedString(context) ??
+                L10n.of(context)!.couldNotPlayAudioFile,
+          ),
+        ),
+      );
     });
   }
 
-  int boundedValueFromSeed({
-    required int seed,
-    required int min,
-    required int max,
-  }) {
-    final range = max - min + 1;
-    final mod = ((seed % range) + range) % range;
-    return min + mod;
-  }
-
-  List<int>? _getWaveform() {
-    final eventWaveForm = widget.event.content
-        .tryGetMap<String, dynamic>('org.matrix.msc1767.audio')
-        ?.tryGetList<int>('waveform');
-    if (eventWaveForm == null ||
-        eventWaveForm.isEmpty ||
-        eventWaveForm.every((v) => v == 0)) {
-      return List.generate(AudioPlayerStyle.minWaveCount, (i) => 100);
+  Future<File> handleOggAudioFileIniOS(File file) async {
+    Logs().v('Convert ogg audio file for iOS...');
+    final convertedFile = File('${file.path}.caf');
+    if (await convertedFile.exists() == false) {
+      OpusCaf().convertOpusToCaf(file.path, convertedFile.path);
     }
-
-    if (_durationNotifier.value < const Duration(seconds: 15)) {
-      return _calculateWaveCount(
-        eventWaveForm: eventWaveForm,
-        waveCount: AudioPlayerStyle.minWaveCount,
-      );
-    }
-
-    final maxWaveCount = AudioPlayerStyle.maxWaveCount(context);
-
-    if (_durationNotifier.value > const Duration(seconds: 30)) {
-      return _calculateWaveCount(
-        eventWaveForm: eventWaveForm,
-        waveCount: maxWaveCount,
-      );
-    }
-
-    if (_durationNotifier.value >= const Duration(seconds: 15) &&
-        _durationNotifier.value <= const Duration(seconds: 30)) {
-      return _calculateWaveCount(
-        eventWaveForm: eventWaveForm,
-        waveCount: boundedValueFromSeed(
-          seed: eventWaveForm.length,
-          min: AudioPlayerStyle.minWaveCount,
-          max: maxWaveCount,
-        ),
-      );
-    }
-    return null;
-  }
-
-  List<int>? _calculateWaveCount({
-    required List<int> eventWaveForm,
-    required int waveCount,
-  }) {
-    while (eventWaveForm.length < waveCount) {
-      for (var i = 0; i < eventWaveForm.length; i = i + 2) {
-        eventWaveForm.insert(i, eventWaveForm[i]);
-      }
-    }
-    var i = 0;
-    final step = (eventWaveForm.length / waveCount).round();
-    while (eventWaveForm.length > waveCount) {
-      eventWaveForm.removeAt(i);
-      i = (i + step) % waveCount;
-    }
-    return eventWaveForm
-        .map((i) => i == 0 ? 100 : (i > 1024 ? 1024 : i))
-        .toList();
-  }
-
-  int get waveCount {
-    final eventWaveForm = widget.event.content
-        .tryGetMap<String, dynamic>('org.matrix.msc1767.audio')
-        ?.tryGetList<int>('waveform');
-    if (eventWaveForm == null ||
-        eventWaveForm.isEmpty ||
-        eventWaveForm.every((v) => v == 0)) {
-      return AudioPlayerStyle.minWaveCount;
-    }
-    if (_durationNotifier.value < const Duration(seconds: 15)) {
-      return AudioPlayerStyle.minWaveCount;
-    }
-
-    if (_durationNotifier.value > const Duration(seconds: 30)) {
-      return AudioPlayerStyle.maxWaveCount(context);
-    }
-
-    if (_durationNotifier.value >= const Duration(seconds: 15) &&
-        _durationNotifier.value <= const Duration(seconds: 30)) {
-      return boundedValueFromSeed(
-        seed: eventWaveForm.length,
-        min: AudioPlayerStyle.minWaveCount,
-        max: AudioPlayerStyle.maxWaveCount(context),
-      );
-    }
-
-    return AudioPlayerStyle.minWaveCount;
+    return convertedFile;
   }
 
   @override
@@ -307,7 +150,25 @@ class AudioPlayerState extends State<AudioPlayerWidget> {
       if (durationInt != null) {
         _durationNotifier.value = Duration(milliseconds: durationInt);
       }
-      _waveformNotifier.value = _getWaveform() ?? [];
+      final waveForm = calculateWaveForm(
+            eventWaveForm: widget.event.content
+                .tryGetMap<String, dynamic>('org.matrix.msc1767.audio')
+                ?.tryGetList<int>('waveform'),
+            waveCount: calculateWaveCountAuto(
+              minWaves: AudioPlayerStyle.minWaveCount,
+              maxWaves: AudioPlayerStyle.maxWaveCount(
+                context,
+              ),
+              durationInSeconds: _durationNotifier.value.inSeconds,
+            ),
+          ) ??
+          [];
+
+      _waveformNotifier.value = calculateWaveHeight(
+        waveform: waveForm,
+        minHeight: AudioPlayerStyle.minWaveHeight,
+        maxHeight: AudioPlayerStyle.maxWaveHeight,
+      );
       audioStatus.value = AudioPlayerStatus.downloaded;
       if (matrix.voiceMessageEventId.value == widget.event.eventId) {
         ScaffoldMessenger.of(matrix.context).clearMaterialBanners();
@@ -317,6 +178,7 @@ class AudioPlayerState extends State<AudioPlayerWidget> {
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     return ValueListenableBuilder(
       valueListenable: audioStatus,
       builder: (context, status, _) {
@@ -342,8 +204,12 @@ class AudioPlayerState extends State<AudioPlayerWidget> {
                   currentPosition = maxPosition;
                 }
 
-                final wavePosition =
-                    (currentPosition / maxPosition) * waveCount;
+                final wavePosition = (currentPosition / maxPosition) *
+                    calculateWaveCountAuto(
+                      minWaves: AudioPlayerStyle.minWaveCount,
+                      maxWaves: AudioPlayerStyle.maxWaveCount(context),
+                      durationInSeconds: _durationNotifier.value.inSeconds,
+                    );
 
                 final statusText = audioPlayer == null
                     ? _durationNotifier.value.minuteSecondString
@@ -379,16 +245,16 @@ class AudioPlayerState extends State<AudioPlayerWidget> {
                                   ValueListenableBuilder(
                                     valueListenable: _waveformNotifier,
                                     builder: (context, waveform, _) {
+                                      if (waveform.isEmpty) {
+                                        return const SizedBox.shrink();
+                                      }
                                       return Row(
                                         children: List.generate(
-                                          waveCount,
+                                          waveform.length,
                                           (index) {
-                                            final waveHeight = waveform.isEmpty
-                                                ? 4.0
-                                                : 26 * (waveform[index] / 1024);
                                             return _waveItemBuilder(
                                               index: index,
-                                              waveHeight: waveHeight,
+                                              waveHeight: waveform[index],
                                               wavePosition: wavePosition,
                                             );
                                           },
@@ -434,53 +300,48 @@ class AudioPlayerState extends State<AudioPlayerWidget> {
         Expanded(
           child: Align(
             alignment: Alignment.centerRight,
-            child: Text.rich(
-              WidgetSpan(
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    if (widget.event.isPinned) ...[
-                      TwakeIconButton(
-                        tooltip: L10n.of(context)!.pin,
-                        icon: Icons.push_pin_outlined,
-                        size: MessageStyle.pushpinIconSize,
-                        paddingAll: MessageStyle.paddingAllPushpin,
-                        margin: EdgeInsets.zero,
-                        iconColor: LinagoraRefColors.material().neutral[50],
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                if (widget.event.isPinned) ...[
+                  TwakeIconButton(
+                    tooltip: L10n.of(context)!.pin,
+                    icon: Icons.push_pin_outlined,
+                    size: MessageStyle.pushpinIconSize,
+                    paddingAll: MessageStyle.paddingAllPushpin,
+                    margin: EdgeInsets.zero,
+                    iconColor: LinagoraRefColors.material().neutral[50],
+                  ),
+                  const SizedBox(width: 4.0),
+                ],
+                Text(
+                  DateFormat("HH:mm").format(
+                    widget.event.originServerTs,
+                  ),
+                  textScaler: const TextScaler.linear(
+                    1.0,
+                  ),
+                  style: Theme.of(context).textTheme.bodySmall?.merge(
+                        TextStyle(
+                          color: LinagoraRefColors.material().tertiary[30],
+                          letterSpacing: 0.4,
+                        ),
                       ),
-                      const SizedBox(width: 4.0),
-                    ],
-                    Text(
-                      DateFormat("HH:mm").format(
-                        widget.event.originServerTs,
-                      ),
-                      textScaler: const TextScaler.linear(
-                        1.0,
-                      ),
-                      style: Theme.of(context).textTheme.bodySmall?.merge(
-                            TextStyle(
-                              color: LinagoraRefColors.material().tertiary[30],
-                              letterSpacing: 0.4,
-                            ),
-                          ),
-                    ),
-                    const SizedBox(width: 4),
-                    SeenByRow(
-                      timelineOverlayMessage:
-                          widget.event.timelineOverlayMessage,
-                      participants: widget.timeline.room.getParticipants(),
-                      getSeenByUsers: widget.event.room.getSeenByUsers(
-                        widget.timeline,
-                        eventId: widget.event.eventId,
-                      ),
-                      eventStatus: widget.event.status,
-                      event: widget.event,
-                    ),
-                  ],
                 ),
-              ),
+                const SizedBox(width: 4),
+                SeenByRow(
+                  timelineOverlayMessage: widget.event.timelineOverlayMessage,
+                  participants: widget.timeline.room.getParticipants(),
+                  getSeenByUsers: widget.event.room.getSeenByUsers(
+                    widget.timeline,
+                    eventId: widget.event.eventId,
+                  ),
+                  eventStatus: widget.event.status,
+                  event: widget.event,
+                ),
+              ],
             ),
           ),
         ),
@@ -569,4 +430,7 @@ class AudioPlayerState extends State<AudioPlayerWidget> {
             ),
     );
   }
+
+  @override
+  bool get wantKeepAlive => true;
 }
