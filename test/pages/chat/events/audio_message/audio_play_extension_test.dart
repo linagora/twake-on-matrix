@@ -3,7 +3,8 @@ import 'package:fluffychat/pages/chat/events/audio_message/audio_play_extension.
 
 void main() {
   group('DurationExtension', () {
-    test('minuteSecondString returns correct format for less than 1 minute', () {
+    test('minuteSecondString returns correct format for less than 1 minute',
+        () {
       const duration = Duration(seconds: 30);
       expect(duration.minuteSecondString, '00:30');
     });
@@ -13,7 +14,9 @@ void main() {
       expect(duration.minuteSecondString, '01:00');
     });
 
-    test('minuteSecondString returns correct format for multiple minutes and seconds', () {
+    test(
+        'minuteSecondString returns correct format for multiple minutes and seconds',
+        () {
       const duration = Duration(minutes: 2, seconds: 5);
       expect(duration.minuteSecondString, '02:05');
     });
@@ -23,7 +26,8 @@ void main() {
       expect(duration.minuteSecondString, '00:00');
     });
 
-    test('minuteSecondString returns correct format for duration over an hour', () {
+    test('minuteSecondString returns correct format for duration over an hour',
+        () {
       const duration = Duration(hours: 1, minutes: 5, seconds: 10);
       expect(duration.minuteSecondString, '65:10'); // inMinutes will be 65
     });
