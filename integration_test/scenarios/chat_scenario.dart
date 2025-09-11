@@ -468,19 +468,4 @@ class ChatScenario extends BaseScenario {
     s.softAssertEquals( await CoreRobot($).isActuallyScrollable($,root: $(SingleChildScrollView),), true,
         'Chat list is not scrollable',);
   }
-
-  Future<void> expectCreationFailedAlert(
-    PatrolIntegrationTester $, {
-    String message = 'Room creation failed',
-    }) async {
-      // Finder linh hoạt: Text hoặc RichText, có thể là substring
-      final snackText =
-          $(find.textContaining(message, findRichText: true)).first;
-
-      // 1) Chờ xuất hiện (ngay sau hành động tạo room)
-      await $.waitUntilVisible(snackText, timeout: const Duration(seconds: 5));
-
-      // 2) (tuỳ chọn) Chờ nó biến mất để tránh flakiness cho bước sau
-      await CoreRobot($).waitUntilAbsent($, snackText);
-  }
 }
