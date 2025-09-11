@@ -123,10 +123,15 @@ class MediaViewerAppbarView extends StatelessWidget {
                                     ContextMenuItemImageViewer(
                                       title: L10n.of(context)!.showInChat,
                                       imagePath: ImagePaths.icShowInChat,
-                                      onTap: () => controller.showInChat(
-                                        context,
-                                        controller.widget.event,
-                                      ),
+                                      onTap: () {
+                                        controller.toggleShowMoreActions(
+                                          controller.menuController,
+                                        );
+                                        controller.showInChat(
+                                          context,
+                                          controller.widget.event,
+                                        );
+                                      },
                                       haveDivider: false,
                                     ),
                                   ],

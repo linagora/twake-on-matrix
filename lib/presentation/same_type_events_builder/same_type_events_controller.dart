@@ -28,6 +28,7 @@ class SameTypeEventsBuilderController {
   StreamSubscription? _loadMoreSubscription;
   UniqueKey? _refreshKey;
   UniqueKey? _loadMoreKey;
+  bool _isDisposed = false;
 
   final _searchInteractor = getIt.get<TimelineSearchEventInteractor>();
   var _isEnd = true;
@@ -146,6 +147,8 @@ class SameTypeEventsBuilderController {
   }
 
   void dispose() {
+    if (_isDisposed) return;
+    _isDisposed = true;
     eventsNotifier.dispose();
     refreshing.dispose();
     loadingMore.dispose();
