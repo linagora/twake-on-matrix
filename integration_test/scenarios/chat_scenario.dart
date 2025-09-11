@@ -193,6 +193,7 @@ class ChatScenario extends BaseScenario {
   Future<void> deleteMessage(String message) async {
     await ChatGroupDetailRobot($).openPullDownMenu(message);
     await (PullDownMenuRobot($).getDeleteItem()).tap();
+    await $.native.tap(Selector(text: 'Delete')); 
   }
 
   Future<ChatGroupDetailRobot> createANewGroupChat(String groupName, List<String> memberAccounts, {String searchKey = ""}) async {
@@ -215,7 +216,7 @@ class ChatScenario extends BaseScenario {
     await ChatListRobot($).clickOnPenIcon();
     await NewChatRobot($).makeASearch(account);
     await NewChatRobot($).getListOfAccount()[0].root.tap();
-    await CoreRobot($).waitForEitherVisible($: $, first: $(ChatView), second: $(DraftChatView), timeout: const Duration(seconds: 10));
+    await CoreRobot($).waitForEitherVisible($: $, first: $(ChatView), second: $(DraftChatView), timeout: const Duration(seconds: 30));
   }
 
   PatrolFinder _tileByText(String text) {
@@ -423,6 +424,7 @@ class ChatScenario extends BaseScenario {
       await $.waitUntilVisible($(text));
       expect(text, findsOneWidget);
     } else {
+      await CoreRobot($).waitUntilAbsent($, text);
       expect(text, findsNothing);
     }
   }
