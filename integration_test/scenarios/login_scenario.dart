@@ -33,8 +33,8 @@ class LoginScenario extends BaseScenario {
         password: password,
       );
     }
-    await loginRobot.grantNotificationPermission();
     await expectViewVisible($(ChatList));
+    await loginRobot.grantNotificationPermission();
   }
 
   // Future<void> _handleFirebaseTestLab(LoginRobot loginRobot) async {
