@@ -10,7 +10,7 @@ import 'package:record/record.dart';
 import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
-import 'events/audio_player.dart';
+import 'events/audio_message/audio_player_widget.dart';
 
 class RecordingDialog extends StatefulWidget {
   static const String recordingFileType = 'm4a';
@@ -28,7 +28,7 @@ class RecordingDialogState extends State<RecordingDialog> {
 
   bool error = false;
   String? _recordedPath;
-  final _audioRecorder = Record();
+  final _audioRecorder = AudioRecorder();
   final List<double> amplitudeTimeline = [];
 
   static const int bitRate = 64000;
@@ -46,11 +46,11 @@ class RecordingDialogState extends State<RecordingDialog> {
         return;
       }
       await WakelockPlus.enable();
-      await _audioRecorder.start(
-        path: _recordedPath,
-        bitRate: bitRate,
-        samplingRate: samplingRate,
-      );
+      // await _audioRecorder.start(
+      //   path: _recordedPath,
+      //   bitRate: bitRate,
+      //   samplingRate: samplingRate,
+      // );
       setState(() => _duration = Duration.zero);
       _recorderSubscription?.cancel();
       _recorderSubscription =
