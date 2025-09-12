@@ -115,12 +115,9 @@ class ChatScenario extends BaseScenario {
   
   Future<void> sendAMesage(String message) async {
     await ChatGroupDetailRobot($).inputMessage(message);
-
     // tab on send button
     await $(ChatInputRowSendBtn).tap();
-
-    //xem co loaij text nao co  gia tri la kia dc hien len ko
-    await Future.delayed(const Duration(seconds: 2));
+    await $.pump(const Duration(milliseconds: 300));
   }
 
   Future<void> copyMessage(String message) async {
