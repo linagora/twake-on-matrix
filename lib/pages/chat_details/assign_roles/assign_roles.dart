@@ -6,24 +6,21 @@ import 'package:fluffychat/app_state/success.dart';
 import 'package:fluffychat/config/default_power_level_member.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/domain/app_state/room/ban_user_state.dart';
-import 'package:fluffychat/domain/app_state/room/set_permission_level_state.dart';
 import 'package:fluffychat/domain/model/room/room_extension.dart';
 import 'package:fluffychat/domain/usecase/room/ban_user_interactor.dart';
-import 'package:fluffychat/domain/usecase/room/set_permission_level_interactor.dart';
 import 'package:fluffychat/pages/chat_details/assign_roles/assign_roles_search_state.dart';
 import 'package:fluffychat/pages/chat_details/assign_roles/assign_roles_view.dart';
 import 'package:fluffychat/pages/chat_details/assign_roles_member_picker/assign_roles_member_picker.dart';
 import 'package:fluffychat/pages/chat_details/assign_roles_member_picker/assign_roles_member_picker_style.dart';
 import 'package:fluffychat/pages/chat_details/assign_roles_member_picker/selected_user_notifier.dart';
+import 'package:fluffychat/pages/chat_details/assign_roles_role_picker/quick_role_picker_mixin.dart';
 import 'package:fluffychat/pages/chat_details/chat_details_edit_view_style.dart';
 import 'package:fluffychat/pages/chat_list/chat_custom_slidable_action.dart';
 import 'package:fluffychat/pages/search/search_debouncer_mixin.dart';
 import 'package:fluffychat/utils/dialog/twake_dialog.dart';
-import 'package:fluffychat/utils/extension/build_context_extension.dart';
 import 'package:fluffychat/utils/extension/value_notifier_extension.dart';
 import 'package:fluffychat/utils/responsive/responsive_utils.dart';
 import 'package:fluffychat/utils/twake_snackbar.dart';
-import 'package:fluffychat/widgets/context_menu/context_menu_action.dart';
 import 'package:fluffychat/widgets/mixins/twake_context_menu_mixin.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -44,15 +41,10 @@ class AssignRoles extends StatefulWidget {
 }
 
 class AssignRolesController extends State<AssignRoles>
-    with SearchDebouncerMixin, TwakeContextMenuMixin {
+    with SearchDebouncerMixin, TwakeContextMenuMixin, QuickRolePickerMixin {
   final responsive = getIt.get<ResponsiveUtils>();
 
-  final setPermissionLevelInteractor =
-      getIt.get<SetPermissionLevelInteractor>();
-
   final banUserInteractor = getIt.get<BanUserInteractor>();
-
-  StreamSubscription? _setPermissionLevelSubscription;
 
   StreamSubscription? _powerLevelsSubscription;
 
@@ -119,215 +111,6 @@ class AssignRolesController extends State<AssignRoles>
       ),
     );
   }
-
-  Future<void> handleOnTapQuickRolePickerMobile({
-    required BuildContext context,
-    required User user,
-  }) async {
-    if (!widget.room.canUpdateRoleInRoom(user)) {
-      return;
-    }
-    await showModalBottomSheet(
-      context: context,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.only(
-          topLeft: Radius.circular(16),
-          topRight: Radius.circular(16),
-        ),
-      ),
-      isScrollControlled: true,
-      builder: (context) => Container(
-        width: double.infinity,
-        padding: MediaQuery.viewInsetsOf(context),
-        child: DraggableScrollableSheet(
-          initialChildSize: 0.3,
-          minChildSize: 0.3,
-          maxChildSize: 0.5,
-          expand: false,
-          builder: (BuildContext context, ScrollController scrollController) {
-            return Padding(
-              padding: const EdgeInsets.only(
-                top: 16,
-                bottom: 12,
-              ),
-              child: Column(
-                children: [
-                  Container(
-                    height: 4,
-                    width: 32,
-                    margin: const EdgeInsets.symmetric(vertical: 16),
-                    decoration: BoxDecoration(
-                      color: LinagoraSysColors.material().outline,
-                      borderRadius: BorderRadius.circular(100),
-                    ),
-                  ),
-                  Expanded(
-                    child: Column(
-                      children: quickRolePicker
-                          .map(
-                            (role) => _quickRolePickerItem(
-                              context: context,
-                              role: role,
-                              user: user,
-                            ),
-                          )
-                          .toList(),
-                    ),
-                  ),
-                ],
-              ),
-            );
-          },
-        ),
-      ),
-    );
-  }
-
-  Widget _quickRolePickerItem({
-    required BuildContext context,
-    required DefaultPowerLevelMember role,
-    required User user,
-  }) {
-    return InkWell(
-      hoverColor: Colors.transparent,
-      highlightColor: Colors.transparent,
-      focusColor: Colors.transparent,
-      splashColor: Colors.transparent,
-      onTap: () {
-        Navigator.of(context).pop();
-        _handleClickOnContextMenuItem(
-          userPermissionLevels: {
-            user: role.powerLevel,
-          },
-        );
-      },
-      child: Container(
-        padding: const EdgeInsets.symmetric(
-          horizontal: 32,
-        ),
-        margin: const EdgeInsets.only(bottom: 8),
-        height: 36,
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Expanded(
-              child: Text(
-                role.displayName(context),
-                style: context.textTheme.bodyLarge?.copyWith(
-                  color: LinagoraSysColors.material().onSurface,
-                ),
-              ),
-            ),
-            if (role.powerLevel == user.powerLevel)
-              SizedBox(
-                width: 36,
-                height: 36,
-                child: Icon(
-                  Icons.check,
-                  color: LinagoraSysColors.material().onSurface,
-                ),
-              ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Future<void> handleOnTapQuickRolePickerWeb({
-    required BuildContext context,
-    required TapDownDetails tapDownDetails,
-    required User user,
-  }) async {
-    if (!widget.room.canUpdateRoleInRoom(user)) {
-      return;
-    }
-    final offset = tapDownDetails.globalPosition;
-
-    final selectedActionIndex = await showTwakeContextMenu(
-      offset: offset,
-      context: context,
-      listActions: _mapPopupRolesToContextMenuActions(
-        user: user,
-      ),
-    );
-
-    if (selectedActionIndex != null && selectedActionIndex is int) {
-      _handleClickOnContextMenuItem(
-        userPermissionLevels: {
-          user: quickRolePicker[selectedActionIndex].powerLevel,
-        },
-      );
-    }
-  }
-
-  void _handleClickOnContextMenuItem({
-    required Map<User, int> userPermissionLevels,
-  }) {
-    _setPermissionLevelSubscription = setPermissionLevelInteractor
-        .execute(room: widget.room, userPermissionLevels: userPermissionLevels)
-        .listen((result) {
-      _handleAssignRolesResult(result);
-    });
-  }
-
-  void _handleAssignRolesResult(Either<Failure, Success> result) {
-    result.fold(
-      (failure) {
-        if (failure is SetPermissionLevelFailure) {
-          TwakeDialog.hideLoadingDialog(context);
-          TwakeSnackBar.show(
-            context,
-            failure.exception.toString(),
-          );
-          selectedUsersMapChangeNotifier.unselectAllUsers();
-          return;
-        }
-
-        if (failure is NoPermissionFailure) {
-          TwakeDialog.hideLoadingDialog(context);
-          TwakeSnackBar.show(
-            context,
-            L10n.of(context)!.permissionErrorChangeRole,
-          );
-          selectedUsersMapChangeNotifier.unselectAllUsers();
-          return;
-        }
-      },
-      (success) {
-        if (success is SetPermissionLevelLoading) {
-          TwakeDialog.showLoadingDialog(context);
-          selectedUsersMapChangeNotifier.unselectAllUsers();
-          return;
-        }
-
-        if (success is SetPermissionLevelSuccess) {
-          TwakeDialog.hideLoadingDialog(context);
-          selectedUsersMapChangeNotifier.unselectAllUsers();
-
-          return;
-        }
-      },
-    );
-  }
-
-  List<ContextMenuAction> _mapPopupRolesToContextMenuActions({
-    required User user,
-  }) {
-    return quickRolePicker.map((action) {
-      return ContextMenuAction(
-        name: action.displayName(context),
-        icon: action.powerLevel == user.powerLevel ? Icons.check : null,
-        colorIcon: LinagoraRefColors.material().neutral[30],
-      );
-    }).toList();
-  }
-
-  final List<DefaultPowerLevelMember> quickRolePicker = [
-    DefaultPowerLevelMember.admin,
-    DefaultPowerLevelMember.moderator,
-    DefaultPowerLevelMember.member,
-    DefaultPowerLevelMember.guest,
-  ];
 
   List<User> get assignRolesMember => widget.room.getAssignRolesMember();
 
@@ -425,11 +208,14 @@ class AssignRolesController extends State<AssignRoles>
       return;
     }
 
-    _handleClickOnContextMenuItem(
+    handleClickOnContextMenuItem(
       userPermissionLevels: {
         for (final user in selectedUsersMapChangeNotifier.usersList)
           user: DefaultPowerLevelMember.member.powerLevel,
       },
+      context,
+      room: widget.room,
+      onHandledResult: selectedUsersMapChangeNotifier.unselectAllUsers,
     );
   }
 
@@ -445,10 +231,13 @@ class AssignRolesController extends State<AssignRoles>
             Icons.admin_panel_settings_outlined,
             color: LinagoraSysColors.material().onPrimary,
           ),
-          onPressed: (_) => _handleClickOnContextMenuItem(
+          onPressed: (_) => handleClickOnContextMenuItem(
             userPermissionLevels: {
               user: DefaultPowerLevelMember.member.powerLevel,
             },
+            context,
+            room: widget.room,
+            onHandledResult: selectedUsersMapChangeNotifier.unselectAllUsers,
           ),
           foregroundColor: Theme.of(context).colorScheme.onPrimary,
           backgroundColor: const Color(0xFF8F9498),
@@ -534,7 +323,6 @@ class AssignRolesController extends State<AssignRoles>
     membersNotifier.dispose();
     searchUserResults.dispose();
     _powerLevelsSubscription?.cancel();
-    _setPermissionLevelSubscription?.cancel();
     disposeDebouncer();
     selectedUsersMapChangeNotifier.dispose();
     enableSelectMembersMobileNotifier.dispose();
