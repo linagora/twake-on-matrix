@@ -137,6 +137,12 @@ class _MessageContentWithTimestampBuilderState
       ];
 
   @override
+  void dispose() {
+    _displayEmojiPicker.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final displayTime = widget.event.type == EventTypes.RoomCreate ||
         widget.nextEvent == null ||
