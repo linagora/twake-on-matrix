@@ -7,6 +7,7 @@ import 'package:fluffychat/pages/chat/input_bar/input_bar.dart';
 import 'package:fluffychat/pages/chat_draft/draft_chat.dart';
 import 'package:fluffychat/pages/chat_draft/draft_chat_input_row_style.dart';
 import 'package:fluffychat/pages/chat_draft/draft_chat_view_style.dart';
+import 'package:fluffychat/presentation/mixins/audio_mixin.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/widgets/twake_components/twake_icon_button.dart';
 import 'package:flutter/material.dart';
@@ -25,6 +26,9 @@ class DraftChatInputRow extends StatelessWidget {
   final TextEditingController? textEditingController;
   final FocusSuggestionController focusSuggestionController;
   final void Function()? onLongPressAudioRecord;
+  final ValueNotifier<AudioRecordState> audioRecordStateNotifier;
+  final Function()? startRecording;
+  final Function()? stopRecording;
 
   const DraftChatInputRow({
     super.key,
@@ -39,6 +43,9 @@ class DraftChatInputRow extends StatelessWidget {
     this.textEditingController,
     required this.focusSuggestionController,
     this.onLongPressAudioRecord,
+    required this.audioRecordStateNotifier,
+    this.startRecording,
+    this.stopRecording,
   });
 
   @override
@@ -88,6 +95,10 @@ class DraftChatInputRow extends StatelessWidget {
     return ChatInputRowMobile(
       inputBar: _buildInputBar(context),
       onLongPressAudioRecord: onLongPressAudioRecord,
+      inputTextNotifier: inputText,
+      audioRecordStateNotifier: audioRecordStateNotifier,
+      startRecording: startRecording,
+      stopRecording: stopRecording,
     );
   }
 
