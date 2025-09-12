@@ -1,18 +1,18 @@
 import 'package:fluffychat/pages/homeserver_picker/homeserver_picker_view.dart';
+import 'package:fluffychat/pages/twake_welcome/twake_welcome.dart';
 import 'package:patrol/patrol.dart';
-
 import '../base/core_robot.dart';
 
 class LoginRobot extends CoreRobot {
   LoginRobot(super.$);
 
-  Future<void> grantNotificationPermission(
-    NativeAutomator nativeAutomator,
-  ) async {
-    if (await nativeAutomator.isPermissionDialogVisible(
-      timeout: const Duration(seconds: 15),
-    )) {
-      await nativeAutomator.grantPermissionWhenInUse();
+  Future<bool> isWelComePageVisible() async {
+    final welcomePage = $(TwakeWelcome);
+    try {
+      await welcomePage.waitUntilVisible(timeout: const Duration(seconds: 5));
+      return true;
+    } catch (_) {
+      return false;
     }
   }
 
@@ -28,10 +28,54 @@ class LoginRobot extends CoreRobot {
     await $.tap($('Continue'));
   }
 
+  Future<void> confirmShareInformation() async {
+    try {
+      await $.native.waitUntilVisible(
+        Selector(textContains: 'Continue'),
+        appId: 'com.apple.springboard',
+      );
+      await $.native.tap(
+        Selector(textContains: 'Continue'),
+        appId: 'com.apple.springboard',
+      );
+    } catch (e) {
+      ignoreException();
+    }
+  }
+
+  Future<void> enterWebCredentialsWhenVisible({
+    required String username,
+    required String password,
+  }) async {
+    await enterUsernameSsoLogin(username);
+    await enterPasswordSsoLogin(password);
+    //Still rerun without this step
+    // await pressSignInSsoLogin();
+  }
+
+  Selector getLoginBtn() {
+    return Selector(textContains: 'login');
+  }
+
+  Future<bool> isLoginBtnVisible(
+      {Duration timeout = const Duration(milliseconds: 10000),}) async {
+    try {
+      // A tiny settle helps after navigation/animation
+      await Future<void>.delayed(timeout);
+      await $.native.enterText(
+        getLoginBtn(),
+        text: "",
+      );
+      return true; // If tap didn’t throw, it’s interactable enough
+    } catch (_) {
+      return false;
+    }
+  }
+
   Future<void> enterUsernameSsoLogin(String username) async {
     try {
       await $.native.enterText(
-        Selector(resourceId: 'login'),
+        getLoginBtn(),
         text: username,
       );
     } catch (e) {
@@ -42,7 +86,7 @@ class LoginRobot extends CoreRobot {
   Future<void> enterPasswordSsoLogin(String password) async {
     try {
       await $.native.enterText(
-        Selector(resourceId: 'password'),
+        Selector(text: 'Password'),
         text: password,
       );
     } catch (e) {

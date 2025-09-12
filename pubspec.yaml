@@ -235,7 +235,8 @@ dev_dependencies:
   msix: ^3.6.2
   translations_cleaner: ^0.0.5
   mockito: 5.4.4
-  patrol:  3.13.1
+  patrol: 3.13.1
+  html: ^0.15.4
 
 
 flutter_launcher_icons:
@@ -338,3 +339,6 @@ patrol:
   app_name: Twake Chat
   android:
     package_name: app.twake.android.chat
+  ios:
+    bundle_id: app.twake.ios.chat
+    app_name: Twake Chat
