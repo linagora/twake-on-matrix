@@ -8,6 +8,7 @@ import 'package:fluffychat/pages/chat/chat_pinned_events/pinned_messages_screen.
 import 'package:fluffychat/pages/chat/chat_view.dart';
 import 'package:fluffychat/pages/chat/events/message/multi_platform_message_container.dart';
 import 'package:fluffychat/pages/chat/events/message_content.dart';
+import 'package:fluffychat/pages/chat/events/message_time.dart';
 import 'package:fluffychat/pages/chat/seen_by_row.dart';
 import 'package:fluffychat/pages/chat_draft/draft_chat_view.dart';
 import 'package:fluffychat/pages/chat_list/chat_list_body_view.dart';
@@ -442,7 +443,7 @@ class ChatScenario extends BaseScenario {
     // 3) Find SelectionContainer
     final selection = $(find.descendant(
       of: bubbleStack.finder,
-      matching: find.byType(SelectionContainer, skipOffstage: false),),);
+      matching: find.byType(MessageTime, skipOffstage: false),),);
 
     // 4) find SeenByRow và Icon
     final seenBy = $(find.descendant(
