@@ -62,6 +62,25 @@ class CoreRobot {
     }
   }
 
+  Future<void> typeSlowlyWithPatrol(
+    PatrolIntegrationTester $,
+    Finder field,
+    String text, {
+    Duration perChar = const Duration(milliseconds: 500),
+  }) async {
+    await $.tap(field);
+
+    final buffer = StringBuffer();
+    buffer.write(text.characters.characterAt(0));
+    await $.enterText(field, buffer.toString());
+    await $.pump();                  
+    await Future.delayed(perChar);
+    buffer.write(text.characters.getRange(1, text.characters.length));
+    await $.enterText(field, buffer.toString());
+    await $.pump();                  
+    await Future.delayed(perChar);
+  }
+
   Future<String?> captureAsyncError(Future<void> Function() body) async {
     Object? err;
     final done = Completer<void>();
