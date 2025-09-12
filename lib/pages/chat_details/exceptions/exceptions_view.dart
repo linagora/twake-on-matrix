@@ -1,3 +1,4 @@
+import 'package:fluffychat/domain/model/room/room_extension.dart';
 import 'package:fluffychat/pages/chat_details/exceptions/exceptions.dart';
 import 'package:fluffychat/pages/chat_details/exceptions/exceptions_search_state.dart';
 import 'package:fluffychat/pages/chat_list/chat_list_header_style.dart';
@@ -8,8 +9,8 @@ import 'package:fluffychat/widgets/context_menu_builder_ios_paste_without_permis
 import 'package:fluffychat/widgets/search/empty_search_widget.dart';
 import 'package:fluffychat/widgets/twake_components/twake_icon_button.dart';
 import 'package:flutter/material.dart';
-import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
+import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:matrix/matrix.dart';
 
 class ExceptionsView extends StatelessWidget {
@@ -126,13 +127,10 @@ class ExceptionsView extends StatelessWidget {
                   final role =
                       member.getDefaultPowerLevelMember.displayName(context);
 
-                  return TwakeInkWell(
-                    onTap: () {},
-                    child: _itemMemberBuilder(
-                      context: context,
-                      member: member,
-                      role: role,
-                    ),
+                  return _itemMemberBuilder(
+                    context: context,
+                    member: member,
+                    role: role,
                   );
                 },
               );
@@ -173,20 +171,10 @@ class ExceptionsView extends StatelessWidget {
                   final member = success.exceptionsMember[index];
                   final role =
                       member.getDefaultPowerLevelMember.displayName(context);
-                  return TwakeInkWell(
-                    onTap: () {
-                      member.openProfileView(
-                        context: context,
-                        onTransferOwnershipSuccess: () {
-                          controller.onBack();
-                        },
-                      );
-                    },
-                    child: _itemMemberBuilder(
-                      context: context,
-                      member: member,
-                      role: role,
-                    ),
+                  return _itemMemberBuilder(
+                    context: context,
+                    member: member,
+                    role: role,
                   );
                 },
               );
@@ -227,35 +215,20 @@ class ExceptionsView extends StatelessWidget {
                 children: [
                   Row(
                     children: [
-                      Text(
-                        member.calcDisplayname(),
-                        style:
-                            LinagoraTextStyle.material().bodyMedium2.copyWith(
-                                  color: LinagoraSysColors.material().onSurface,
-                                ),
-                        overflow: TextOverflow.ellipsis,
-                        maxLines: 1,
+                      Expanded(
+                        child: Text(
+                          member.calcDisplayname(),
+                          style: LinagoraTextStyle.material()
+                              .bodyMedium2
+                              .copyWith(
+                                color: LinagoraSysColors.material().onSurface,
+                              ),
+                          overflow: TextOverflow.ellipsis,
+                          maxLines: 1,
+                        ),
                       ),
-                      const Spacer(),
-                      Row(
-                        children: [
-                          Text(
-                            role,
-                            style: Theme.of(context)
-                                .textTheme
-                                .labelMedium
-                                ?.copyWith(
-                                  color:
-                                      LinagoraRefColors.material().tertiary[30],
-                                ),
-                            overflow: TextOverflow.ellipsis,
-                            maxLines: 1,
-                          ),
-                          const SizedBox(
-                            width: 4,
-                          ),
-                        ],
-                      ),
+                      const SizedBox(width: 8.0),
+                      _rolePicker(context, member: member, role: role),
                     ],
                   ),
                   Text(
@@ -273,5 +246,69 @@ class ExceptionsView extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  Widget _rolePicker(
+    BuildContext context, {
+    required User member,
+    required String role,
+  }) =>
+      InkWell(
+        hoverColor: Colors.transparent,
+        highlightColor: Colors.transparent,
+        focusColor: Colors.transparent,
+        splashColor: Colors.transparent,
+        onTapDown: !controller.widget.room.canUpdateRoleInRoom(member)
+            ? null
+            : (details) => handleOnTapQuickRolePicker(
+                  context,
+                  room: controller.widget.room,
+                  member: member,
+                  tapDownDetails: details,
+                  onHandledResult: controller.refreshView,
+                ),
+        child: Row(
+          children: [
+            Text(
+              role,
+              style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                    color: LinagoraRefColors.material().tertiary[30],
+                  ),
+              overflow: TextOverflow.ellipsis,
+              maxLines: 1,
+            ),
+            const SizedBox(width: 4),
+            if (controller.widget.room.canUpdateRoleInRoom(member))
+              Icon(
+                Icons.arrow_drop_down,
+                color: LinagoraRefColors.material().tertiary[30],
+              ),
+          ],
+        ),
+      );
+
+  void handleOnTapQuickRolePicker(
+    BuildContext context, {
+    required User member,
+    required Room room,
+    required TapDownDetails tapDownDetails,
+    VoidCallback? onHandledResult,
+  }) {
+    if (controller.responsive.isMobile(context)) {
+      controller.handleOnTapQuickRolePickerMobile(
+        rootContext: context,
+        room: room,
+        user: member,
+        onHandledResult: onHandledResult,
+      );
+    } else {
+      controller.handleOnTapQuickRolePickerWeb(
+        context: context,
+        room: room,
+        user: member,
+        tapDownDetails: tapDownDetails,
+        onHandledResult: onHandledResult,
+      );
+    }
   }
 }
