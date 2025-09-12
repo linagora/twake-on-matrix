@@ -1,6 +1,31 @@
 import 'dart:math';
 
+import 'package:flutter/cupertino.dart';
+
+enum AudioRecordState {
+  initial,
+  recording,
+  recorded,
+  playing,
+  paused,
+}
+
 mixin AudioMixin {
+  final ValueNotifier<AudioRecordState> audioRecordStateNotifier =
+      ValueNotifier<AudioRecordState>(AudioRecordState.initial);
+
+  void disposeAudioMixin() {
+    audioRecordStateNotifier.dispose();
+  }
+
+  void startRecording() {
+    audioRecordStateNotifier.value = AudioRecordState.recording;
+  }
+
+  void stopRecording() {
+    audioRecordStateNotifier.value = AudioRecordState.initial;
+  }
+
   int calculateWaveCountAuto({
     required int minWaves,
     required int maxWaves,

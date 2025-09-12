@@ -112,6 +112,16 @@ class ChatInputRow extends StatelessWidget {
         },
       ),
       onLongPressAudioRecord: controller.onLongPressAudioRecordInMobile,
+      sendVoiceMessageAction: (soundFile, time, waveform) async =>
+          await controller.sendVoiceMessageAction(
+        audioFile: soundFile,
+        time: time,
+        waveform: waveform,
+      ),
+      inputTextNotifier: controller.inputText,
+      audioRecordStateNotifier: controller.audioRecordStateNotifier,
+      startRecording: controller.startRecording,
+      stopRecording: controller.stopRecording,
     );
   }
 
