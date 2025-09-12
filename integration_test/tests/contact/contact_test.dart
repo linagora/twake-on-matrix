@@ -40,14 +40,14 @@ void main() {
       //verify there is one result
       s.softAssertEquals(((await ContactListRobot($).getListOfContact()).length) == 1, true, 'Search by $searchByMatrixAddress.toUpperCase() Expected number of group is 1 , but found != 1');
       s.softAssertEquals((await (await ContactListRobot($).getListOfContact())[0].getOwnerLabel()).visible, false, 'Owner is missing!');
-      s.softAssertEquals((await (await ContactListRobot($).getListOfContact())[0].getEmailLabel()).visible, true, 'Email field is not shown');
+      s.softAssertEquals((await (await ContactListRobot($).getListOfContact())[0].getEmailLabelIncaseSearching()).visible, true, 'Email field is not shown');
 
       // search by current account
       await ContactScenario($).enterSearchText(currentAccount);
       //verify componen displayed on the TwakeListItem
       s.softAssertEquals((await ContactListRobot($).getListOfContact()).length == 1, true, '>1');
       s.softAssertEquals((await (await ContactListRobot($).getListOfContact())[0].getOwnerLabel()).visible, true, 'Owner is missing!');
-      s.softAssertEquals((await (await ContactListRobot($).getListOfContact())[0].getEmailLabel()).visible, true, 'Email field is not shown');
+      s.softAssertEquals((await (await ContactListRobot($).getListOfContact())[0].getEmailLabelIncaseSearching()).visible, true, 'Email field is not shown');
 
       // after searching, open a chat by clicking on a result
       final chatGroupDetailRobot = await ContactScenario($).openChatWithContact(searchByTitle);

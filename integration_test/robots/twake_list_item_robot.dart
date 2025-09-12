@@ -1,5 +1,6 @@
 import 'package:fluffychat/pages/chat_list/chat_list_item_subtitle.dart';
 import 'package:fluffychat/pages/chat_list/chat_list_item_title.dart';
+import 'package:fluffychat/widgets/highlight_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:patrol/patrol.dart';
@@ -23,6 +24,10 @@ class TwakeListItemRobot extends CoreRobot {
 
   Future<PatrolFinder> getOwnerLabel() async {
     return root.$(Text).containing('Owner');
+  }
+
+  Future<PatrolFinder> getEmailLabelIncaseSearching() async {
+    return root.$(HighlightText).$(Text).at(0);
   }
 
   Future<PatrolFinder> getEmailLabel() async {
