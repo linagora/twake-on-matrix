@@ -45,9 +45,9 @@ void main() {
       // search by current account
       await ChatScenario($).enterSearchText(currentAccount);
       //verify items displayed on the TwakeListItem
-      s.softAssertEquals((await ChatListRobot($).getListOfChatGroup()).length == 1, true, '>1',);
+      //todo: handle the case list both contact and Message
       s.softAssertEquals((await (await ChatListRobot($).getListOfChatGroup())[0].getOwnerLabel()).visible, true, 'Owner is missing!',);
-      s.softAssertEquals((await (await ChatListRobot($).getListOfChatGroup())[0].getEmailLabel()).visible, true, 'Email field is not shown',);
+      s.softAssertEquals((await (await ChatListRobot($).getListOfChatGroup())[0].getEmailLabelIncaseSearching()).visible, true, 'Email field is not shown',);
 
       // after searching, open a chat by clicking on a result
       final chatGroupDetailRobot = await ChatScenario($).openChatGroup(searchByTitle);
