@@ -54,7 +54,7 @@ class AddMemberRobot extends CoreRobot {
 
   Future<void> makeASearch(String searchKey) async {
     await getSearchIcon().tap();
-    await getSearchField().enterText(searchKey);
+    await typeSlowlyWithPatrol($, getSearchField(), searchKey);
     await waitForEitherVisible($: $, first: $(ContactItem), second: $("No Results"), timeout: const Duration(seconds: 10));
   }
 
