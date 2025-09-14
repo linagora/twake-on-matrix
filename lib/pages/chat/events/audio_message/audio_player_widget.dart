@@ -8,7 +8,9 @@ import 'package:fluffychat/pages/chat/seen_by_row.dart';
 import 'package:fluffychat/presentation/mixins/audio_mixin.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
 import 'package:fluffychat/utils/room_status_extension.dart';
+import 'package:fluffychat/utils/size_string.dart';
 import 'package:fluffychat/widgets/file_widget/circular_loading_download_widget.dart';
+import 'package:fluffychat/widgets/file_widget/file_tile_widget.dart';
 import 'package:fluffychat/widgets/file_widget/message_file_tile_style.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:fluffychat/widgets/twake_components/twake_icon_button.dart';
@@ -55,6 +57,30 @@ class AudioPlayerState extends State<AudioPlayerWidget>
       ValueNotifier(Duration.zero);
 
   late final MatrixState matrix;
+
+  String get fileName {
+    return widget.event.content.tryGet<String>('body') ?? '';
+  }
+
+  String? get fileSize {
+    final size = widget.event.content
+        .tryGetMap<String, dynamic>('info')
+        ?.tryGet<int>('size');
+    return size?.sizeString;
+  }
+
+  String get mimeType {
+    return widget.event.content
+            .tryGetMap<String, dynamic>('info')
+            ?.tryGet<String>('mimeType') ??
+        '';
+  }
+
+  bool get isAudio {
+    return widget.event.content
+            .tryGetMap<String, dynamic>('org.matrix.msc1767.audio') !=
+        null;
+  }
 
   void _onButtonTap() async {
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -211,9 +237,6 @@ class AudioPlayerState extends State<AudioPlayerWidget>
                       durationInSeconds: _durationNotifier.value.inSeconds,
                     );
 
-                final statusText = audioPlayer == null
-                    ? _durationNotifier.value.minuteSecondString
-                    : audioPlayer.position.minuteSecondString;
                 return Padding(
                   padding: const EdgeInsets.only(
                     top: 8.0,
@@ -246,7 +269,17 @@ class AudioPlayerState extends State<AudioPlayerWidget>
                                     valueListenable: _waveformNotifier,
                                     builder: (context, waveform, _) {
                                       if (waveform.isEmpty) {
-                                        return const SizedBox.shrink();
+                                        return Text(
+                                          fileName,
+                                          style: Theme.of(context)
+                                              .textTheme
+                                              .bodySmall
+                                              ?.copyWith(
+                                                color: Theme.of(context)
+                                                    .colorScheme
+                                                    .onSurface,
+                                              ),
+                                        );
                                       }
                                       return Row(
                                         children: List.generate(
@@ -264,7 +297,11 @@ class AudioPlayerState extends State<AudioPlayerWidget>
                                   ),
                                   const SizedBox(height: 8),
                                   _audioMessageTimeBuilder(
-                                    statusText: statusText,
+                                    duration: audioPlayer == null
+                                        ? _durationNotifier
+                                            .value.minuteSecondString
+                                        : audioPlayer
+                                            .position.minuteSecondString,
                                   ),
                                 ],
                               ),
@@ -284,18 +321,26 @@ class AudioPlayerState extends State<AudioPlayerWidget>
   }
 
   Widget _audioMessageTimeBuilder({
-    required String statusText,
+    required String duration,
   }) {
     return Row(
       mainAxisSize: MainAxisSize.min,
       mainAxisAlignment: MainAxisAlignment.start,
       children: [
-        Text(
-          statusText,
-          style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                color: LinagoraRefColors.material().tertiary[30],
-              ),
-        ),
+        if (isAudio) ...[
+          Text(
+            duration,
+            style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                  color: LinagoraRefColors.material().tertiary[30],
+                ),
+          ),
+        ] else ...[
+          if (fileSize != null)
+            TextInformationOfFile(
+              value: fileSize!,
+              style: AudioPlayerStyle.textInformationStyle(context),
+            ),
+        ],
         const SizedBox(width: 8),
         Expanded(
           child: Align(
