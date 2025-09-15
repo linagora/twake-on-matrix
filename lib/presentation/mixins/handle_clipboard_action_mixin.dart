@@ -35,9 +35,7 @@ mixin HandleClipboardActionMixin on PasteImageMixin {
   void onSendFileCallback();
 
   Future<void> pasteClipboardImage(ClipboardReader? clipboardReader) async {
-    if (chatFocusNode.hasFocus != true) return;
-
-    if (room == null) return Future.value();
+    if (chatFocusNode.hasFocus != true || room == null) return Future.value();
 
     return pasteImage(
       context,
@@ -50,6 +48,6 @@ mixin HandleClipboardActionMixin on PasteImageMixin {
   Future<void> pasteClipboardText(ClipboardReader? clipboardReader) async {
     if (chatFocusNode.hasFocus != true) return;
 
-    sendController.pasteText(clipboardReader: clipboardReader);
+    await sendController.pasteText(clipboardReader: clipboardReader);
   }
 }

@@ -76,6 +76,7 @@ class SendFileDialogController extends State<SendFileDialog> {
     maxMediaSizeNotifier.dispose();
     haveErrorFilesNotifier.dispose();
     _thumbnailsForMediaSubscription?.cancel();
+    PaintingBinding.instance.imageCache.clear();
     super.dispose();
   }
 

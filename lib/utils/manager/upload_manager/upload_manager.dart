@@ -469,7 +469,10 @@ class UploadManager {
             );
           }
         },
-        onTaskCompleted: () => _clearFileTask(txid),
+        onTaskCompleted: () {
+          room.sendingFilePlaceholders.remove(txid);
+          _clearFileTask(txid);
+        },
       ),
     );
   }
