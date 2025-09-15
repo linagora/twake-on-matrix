@@ -2776,7 +2776,7 @@ packages:
     description:
       path: "."
       ref: imple_new_ui_for_twake
-      resolved-ref: dc76749b5c3d7b134ae6da8539c348fdcc59e17b
+      resolved-ref: "602000f425175387437289d915a89ee63ec516b2"
       url: "git@github.com:linagora/social_media_recorder.git"
     source: git
     version: "1.2.1"

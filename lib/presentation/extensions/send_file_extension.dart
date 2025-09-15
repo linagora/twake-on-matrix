@@ -548,6 +548,7 @@ extension SendFileExtension on Room {
                     'info': {
                       ...fileInfo.metadata,
                     },
+                    if (extraContent != null) ...extraContent,
                   },
                   type: EventTypes.Message,
                   eventId: txid,

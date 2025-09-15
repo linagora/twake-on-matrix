@@ -672,11 +672,26 @@ class ChatController extends State<Chat>
 
     final txid = client.generateUniqueTransactionId();
 
+    room?.sendingFilePlaceholders[txid] = audioFile;
+
+    final extraContent = {
+      'info': {
+        ...audioFile.info,
+        'duration': time.inMilliseconds,
+      },
+      'org.matrix.msc3245.voice': {},
+      'org.matrix.msc1767.audio': {
+        'duration': time.inMilliseconds,
+        'waveform': waveform,
+      },
+    };
+
     final fakeImageEvent = await room?.sendFakeImagePickerFileEvent(
       fileInfo,
       txid: txid,
       messageType: MessageTypes.Audio,
       inReplyTo: replyEventNotifier.value,
+      extraContent: extraContent,
     );
 
     if (fakeImageEvent == null) {
@@ -684,24 +699,16 @@ class ChatController extends State<Chat>
       return;
     }
 
-    await room!.sendFileEventMobile(
+    await room!
+        .sendFileEventMobile(
       fileInfo,
       txid: txid,
       msgType: MessageTypes.Audio,
       fakeImageEvent: fakeImageEvent,
       inReplyTo: replyEventNotifier.value,
-      extraContent: {
-        'info': {
-          ...audioFile.info,
-          'duration': time.inMilliseconds,
-        },
-        'org.matrix.msc3245.voice': {},
-        'org.matrix.msc1767.audio': {
-          'duration': time.inMilliseconds,
-          'waveform': waveform,
-        },
-      },
-    ).catchError((e) {
+      extraContent: extraContent,
+    )
+        .catchError((e) {
       Logs().e('Failed to send voice message', e);
       return null;
     });

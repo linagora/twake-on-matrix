@@ -13,6 +13,10 @@ import 'package:fluffychat/widgets/twake_components/twake_icon_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
+import 'package:linagora_design_flutter/linagora_design_flutter.dart';
+import 'package:matrix/matrix.dart';
+import 'package:social_media_recorder/audio_encoder_type.dart';
+import 'package:social_media_recorder/screen/social_media_recorder.dart';
 
 class DraftChatInputRow extends StatelessWidget {
   final OnSendFileClick onSendFileClick;
@@ -29,6 +33,8 @@ class DraftChatInputRow extends StatelessWidget {
   final ValueNotifier<AudioRecordState> audioRecordStateNotifier;
   final Function()? startRecording;
   final Function()? stopRecording;
+  final void Function(MatrixAudioFile, Duration, List<int>)?
+      sendVoiceMessageAction;
 
   const DraftChatInputRow({
     super.key,
@@ -46,46 +52,146 @@ class DraftChatInputRow extends StatelessWidget {
     required this.audioRecordStateNotifier,
     this.startRecording,
     this.stopRecording,
+    this.sendVoiceMessageAction,
   });
 
   @override
   Widget build(BuildContext context) {
     return KeyboardVisibilityBuilder(
       builder: (context, isKeyboardVisible) {
-        return Padding(
-          padding: DraftChatInputRowStyle.inputBarPadding(
-            context: context,
-            isKeyboardVisible: isKeyboardVisible,
-          ),
-          child: Row(
-            crossAxisAlignment:
-                ChatInputRowStyle.responsiveUtils.isMobile(context)
-                    ? CrossAxisAlignment.end
-                    : CrossAxisAlignment.center,
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              if (ChatInputRowStyle.responsiveUtils.isMobile(context))
-                SizedBox(
-                  height: ChatInputRowStyle.chatInputRowHeight,
-                  child: TwakeIconButton(
-                    size: ChatInputRowStyle.chatInputRowMoreBtnSize,
-                    tooltip: L10n.of(context)!.more,
-                    icon: Icons.add_circle_outline,
-                    onTap: () => onSendFileClick(context),
+        return Stack(
+          alignment: Alignment.center,
+          children: [
+            Padding(
+              padding: DraftChatInputRowStyle.inputBarPadding(
+                context: context,
+                isKeyboardVisible: isKeyboardVisible,
+              ),
+              child: Row(
+                crossAxisAlignment:
+                    ChatInputRowStyle.responsiveUtils.isMobile(context)
+                        ? CrossAxisAlignment.end
+                        : CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  if (ChatInputRowStyle.responsiveUtils.isMobile(context))
+                    SizedBox(
+                      height: ChatInputRowStyle.chatInputRowHeight,
+                      child: TwakeIconButton(
+                        size: ChatInputRowStyle.chatInputRowMoreBtnSize,
+                        tooltip: L10n.of(context)!.more,
+                        icon: Icons.add_circle_outline,
+                        onTap: () => onSendFileClick(context),
+                      ),
+                    ),
+                  Expanded(
+                    child: ChatInputRowStyle.responsiveUtils.isMobile(context)
+                        ? _buildMobileInputRow(context)
+                        : _buildWebInputRow(context),
                   ),
-                ),
-              Expanded(
-                child: ChatInputRowStyle.responsiveUtils.isMobile(context)
-                    ? _buildMobileInputRow(context)
-                    : _buildWebInputRow(context),
+                  ChatInputRowSendBtn(
+                    inputText: inputText,
+                    onTap: onInputBarSubmitted,
+                    sendingNotifier: isSendingNotifier,
+                  ),
+                ],
               ),
-              ChatInputRowSendBtn(
-                inputText: inputText,
-                onTap: onInputBarSubmitted,
-                sendingNotifier: isSendingNotifier,
+            ),
+            if (PlatformInfos.isMobile)
+              ValueListenableBuilder(
+                valueListenable: inputText,
+                builder: (context, text, _) {
+                  if (text.isNotEmpty) {
+                    return const SizedBox.shrink();
+                  }
+                  return Padding(
+                    padding: DraftChatInputRowStyle.inputBarPadding(
+                      context: context,
+                      isKeyboardVisible: isKeyboardVisible,
+                    ),
+                    child: SocialMediaRecorder(
+                      radius: BorderRadius.circular(24),
+                      soundRecorderWhenLockedDecoration: BoxDecoration(
+                        borderRadius:
+                            ChatInputRowStyle.chatInputRowBorderRadius,
+                        color: LinagoraSysColors.material().onPrimary,
+                        border: Border.all(
+                          color: LinagoraRefColors.material().tertiary,
+                          width: 1,
+                        ),
+                      ),
+                      decoration: BoxDecoration(
+                        borderRadius:
+                            ChatInputRowStyle.chatInputRowBorderRadius,
+                        color: LinagoraSysColors.material().onPrimary,
+                        border: Border.all(
+                          color: LinagoraRefColors.material().tertiary,
+                          width: 1,
+                        ),
+                      ),
+                      microphoneRequestPermission: onLongPressAudioRecord,
+                      startRecording: () {
+                        Logs().d('ChatInputRowMobile:: startRecording');
+                        startRecording?.call();
+                      },
+                      stopRecording: (_) {
+                        Logs().d('ChatInputRowMobile:: stopRecording');
+                        stopRecording?.call();
+                      },
+                      sendRequestFunction: (soundFile, time, waveFrom) {
+                        Logs().d(
+                          'ChatInputRowMobile:: sendRequestFunction $soundFile',
+                        );
+                        stopRecording?.call();
+
+                        final file = MatrixAudioFile(
+                          bytes: soundFile.readAsBytesSync(),
+                          name: soundFile.path,
+                          filePath: soundFile.path,
+                          readStream: soundFile.openRead(),
+                          duration: time.inMilliseconds,
+                        );
+                        sendVoiceMessageAction?.call(file, time, waveFrom);
+                      },
+                      encode: AudioEncoderType.AAC,
+                      fullRecordPackageHeight: 50,
+                      initRecordPackageWidth: 50,
+                      cancelTextBackGroundColor: Colors.transparent,
+                      cancelText: L10n.of(context)!.cancel,
+                      cancelTextStyle:
+                          Theme.of(context).textTheme.bodySmall?.copyWith(
+                                color: LinagoraSysColors.material().primary,
+                              ),
+                      slideToCancelText: L10n.of(context)!.slideToCancel,
+                      slideToCancelTextStyle:
+                          Theme.of(context).textTheme.bodySmall?.copyWith(
+                                color: LinagoraRefColors.material().neutral[30],
+                              ),
+                      counterTextStyle:
+                          Theme.of(context).textTheme.bodySmall?.copyWith(
+                                color: LinagoraRefColors.material().neutral[50],
+                              ),
+                      slideToCancelPadding: const EdgeInsets.only(right: 24),
+                      recordIcon: Icon(
+                        Icons.keyboard_voice_outlined,
+                        color: LinagoraSysColors.material().tertiary,
+                      ),
+                      soundRecorderWhenLockedWidth:
+                          MediaQuery.of(context).size.width - 16,
+                      counterPadding: const EdgeInsets.only(left: 16),
+                      micCounterWidget: Container(
+                        width: 12,
+                        height: 12,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: LinagoraSysColors.material().error,
+                        ),
+                      ),
+                    ),
+                  );
+                },
               ),
-            ],
-          ),
+          ],
         );
       },
     );
@@ -94,11 +200,6 @@ class DraftChatInputRow extends StatelessWidget {
   ChatInputRowMobile _buildMobileInputRow(BuildContext context) {
     return ChatInputRowMobile(
       inputBar: _buildInputBar(context),
-      onLongPressAudioRecord: onLongPressAudioRecord,
-      inputTextNotifier: inputText,
-      audioRecordStateNotifier: audioRecordStateNotifier,
-      startRecording: startRecording,
-      stopRecording: stopRecording,
     );
   }
 
