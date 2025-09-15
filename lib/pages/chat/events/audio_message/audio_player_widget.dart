@@ -254,6 +254,7 @@ class AudioPlayerState extends State<AudioPlayerWidget>
                         ),
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: <Widget>[
                             _playButtonBuilder(
                               status: status,
@@ -279,6 +280,8 @@ class AudioPlayerState extends State<AudioPlayerWidget>
                                                     .colorScheme
                                                     .onSurface,
                                               ),
+                                          maxLines: 2,
+                                          overflow: TextOverflow.ellipsis,
                                         );
                                       }
                                       return Row(
