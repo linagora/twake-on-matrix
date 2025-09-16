@@ -51,7 +51,7 @@ class AudioPlayerState extends State<AudioPlayerWidget>
   final ValueNotifier<AudioPlayerStatus> audioStatus =
       ValueNotifier(AudioPlayerStatus.notDownloaded);
 
-  final ValueNotifier<List<double>> _waveformNotifier = ValueNotifier([]);
+  final List<double> _calculatedWaveform = [];
 
   final ValueNotifier<Duration> _durationNotifier =
       ValueNotifier(Duration.zero);
@@ -190,12 +190,17 @@ class AudioPlayerState extends State<AudioPlayerWidget>
           ) ??
           [];
 
-      _waveformNotifier.value = calculateWaveHeight(
+      final waveFromHeight = calculateWaveHeight(
         waveform: waveForm,
         minHeight: AudioPlayerStyle.minWaveHeight,
         maxHeight: AudioPlayerStyle.maxWaveHeight,
       );
-      audioStatus.value = AudioPlayerStatus.downloaded;
+
+      if (_calculatedWaveform.isEmpty) {
+        _calculatedWaveform.addAll(waveFromHeight);
+        audioStatus.value = AudioPlayerStatus.downloaded;
+      }
+
       if (matrix.voiceMessageEventId.value == widget.event.eventId) {
         ScaffoldMessenger.of(matrix.context).clearMaterialBanners();
       }
@@ -204,6 +209,7 @@ class AudioPlayerState extends State<AudioPlayerWidget>
 
   @override
   Widget build(BuildContext context) {
+    print('Rebuild AudioPlayerWidget');
     super.build(context);
     return ValueListenableBuilder(
       valueListenable: audioStatus,
@@ -266,38 +272,34 @@ class AudioPlayerState extends State<AudioPlayerWidget>
                                 mainAxisSize: MainAxisSize.min,
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  ValueListenableBuilder(
-                                    valueListenable: _waveformNotifier,
-                                    builder: (context, waveform, _) {
-                                      if (waveform.isEmpty) {
-                                        return Text(
-                                          fileName,
-                                          style: Theme.of(context)
-                                              .textTheme
-                                              .bodySmall
-                                              ?.copyWith(
-                                                color: Theme.of(context)
-                                                    .colorScheme
-                                                    .onSurface,
-                                              ),
-                                          maxLines: 2,
-                                          overflow: TextOverflow.ellipsis,
-                                        );
-                                      }
-                                      return Row(
-                                        children: List.generate(
-                                          waveform.length,
-                                          (index) {
-                                            return _waveItemBuilder(
-                                              index: index,
-                                              waveHeight: waveform[index],
-                                              wavePosition: wavePosition,
-                                            );
-                                          },
-                                        ),
-                                      );
-                                    },
-                                  ),
+                                  if (fileName.isEmpty) ...[
+                                    Text(
+                                      fileName,
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .bodySmall
+                                          ?.copyWith(
+                                            color: Theme.of(context)
+                                                .colorScheme
+                                                .onSurface,
+                                          ),
+                                      maxLines: 2,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ] else
+                                    Row(
+                                      children: List.generate(
+                                        _calculatedWaveform.length,
+                                        (index) {
+                                          return _waveItemBuilder(
+                                            index: index,
+                                            waveHeight:
+                                                _calculatedWaveform[index],
+                                            wavePosition: wavePosition,
+                                          );
+                                        },
+                                      ),
+                                    ),
                                   const SizedBox(height: 8),
                                   _audioMessageTimeBuilder(
                                     duration: audioPlayer == null
