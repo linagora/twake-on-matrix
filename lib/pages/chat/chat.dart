@@ -342,6 +342,9 @@ class ChatController extends State<Chat>
       null;
 
   void updateInputTextNotifier() {
+    if (audioRecordStateNotifier.value == AudioRecordState.recording) {
+      return;
+    }
     inputText.value = sendController.text;
   }
 
@@ -1270,6 +1273,9 @@ class ChatController extends State<Chat>
   static const Duration _storeInputTimeout = Duration(milliseconds: 500);
 
   void onInputBarChanged(String text) {
+    if (audioRecordStateNotifier.value == AudioRecordState.recording) {
+      return;
+    }
     setReadMarker();
     _storeInputTimeoutTimer?.cancel();
     _storeInputTimeoutTimer = Timer(_storeInputTimeout, () async {
