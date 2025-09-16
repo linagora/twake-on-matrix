@@ -245,7 +245,7 @@ class DraftChatController extends State<DraftChat>
 
         final txid = client.generateUniqueTransactionId();
 
-        final fakeImageEvent = await room.sendFakeImagePickerFileEvent(
+        final fakeImageEvent = await room.sendFakeFileInfoEvent(
           fileInfo,
           txid: txid,
           messageType: MessageTypes.Audio,

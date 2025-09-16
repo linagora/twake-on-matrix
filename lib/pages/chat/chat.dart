@@ -686,7 +686,7 @@ class ChatController extends State<Chat>
       },
     };
 
-    final fakeImageEvent = await room?.sendFakeImagePickerFileEvent(
+    final fakeImageEvent = await room?.sendFakeFileInfoEvent(
       fileInfo,
       txid: txid,
       messageType: MessageTypes.Audio,
