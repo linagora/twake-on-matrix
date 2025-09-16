@@ -209,7 +209,6 @@ class AudioPlayerState extends State<AudioPlayerWidget>
 
   @override
   Widget build(BuildContext context) {
-    print('Rebuild AudioPlayerWidget');
     super.build(context);
     return ValueListenableBuilder(
       valueListenable: audioStatus,
