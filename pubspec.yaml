@@ -329,6 +329,11 @@ dependency_overrides:
   # TODO: Remove this part when depends of wakelock_plus update
   wakelock_plus: 1.3.2
 
+  linagora_design_flutter:
+    git:
+      url: git@github.com:linagora/linagora-design-flutter.git
+      ref: enhancement/image-picker-memory-leak
+
 cider:
   link_template:
     tag: https://github.com/linagora/twake-on-matrix/releases/tag/%tag% # initial release link template

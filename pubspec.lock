@@ -1770,8 +1770,8 @@ packages:
     dependency: "direct main"
     description:
       path: "."
-      ref: master
-      resolved-ref: "35a6ea9ef7fee9470a8181762efdd5f43b8bdd36"
+      ref: "enhancement/image-picker-memory-leak"
+      resolved-ref: "7a67579c0f56a04b40ee059c73e03f30b01eae8f"
       url: "git@github.com:linagora/linagora-design-flutter.git"
     source: git
     version: "0.0.1"

@@ -62,6 +62,7 @@ class BackgroundPush {
   Store? _store;
 
   Store get store => _store ??= Store();
+  Timer? clearingPushTimer;
 
   Future<void> loadLocale() async {
     final context = _matrixState?.context;
@@ -82,9 +83,12 @@ class BackgroundPush {
   bool upAction = false;
 
   BackgroundPush._(this.client) {
-    onRoomSync ??= client.onSync.stream
-        .where((s) => s.hasRoomUpdate)
-        .listen((s) => _onClearingPush(getFromServer: false));
+    clearingPushTimer ??= Timer.periodic(
+      const Duration(seconds: 20),
+      (_) {
+        _onClearingPush(getFromServer: false);
+      },
+    );
     if (Platform.isAndroid) {
       UnifiedPush.initialize(
         onNewEndpoint: (endpoint, i) => _newUpEndpoint(endpoint.url, i),
@@ -127,8 +131,6 @@ class BackgroundPush {
     instance.onFcmError = onFcmError;
     return instance;
   }
-
-  StreamSubscription<SyncUpdate>? onRoomSync;
 
   Future<void> cancelNotification(String roomId) async {
     Logs().v('Cancel notification for room', roomId);
