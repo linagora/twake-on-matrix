@@ -1,8 +1,15 @@
+import 'dart:async';
 import 'dart:math';
+import 'dart:typed_data';
 
+import 'package:fluffychat/utils/platform_infos.dart';
+import 'package:flutter/foundation.dart';
+import 'package:matrix/matrix.dart';
+import 'package:record/record.dart';
+import 'package:flutter/material.dart';
 import 'package:fluffychat/utils/dialog/twake_dialog.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
+import 'package:universal_html/html.dart' as html;
 
 enum AudioRecordState {
   initial,
@@ -13,11 +20,26 @@ enum AudioRecordState {
 }
 
 mixin AudioMixin {
+  static const waveCount = 40;
+
+  final ValueNotifier<int> recordDurationWebNotifier = ValueNotifier<int>(0);
+
+  Timer? _timerWeb;
+
+  late final AudioRecorder _audioRecorder;
+
+  StreamSubscription<RecordState>? _recordSubWeb;
+
+  StreamSubscription<Amplitude>? _amplitudeSubWeb;
+
+  final List<double> _amplitudeTimelineWeb = [];
+
   final ValueNotifier<AudioRecordState> audioRecordStateNotifier =
       ValueNotifier<AudioRecordState>(AudioRecordState.initial);
 
   void disposeAudioMixin() {
     audioRecordStateNotifier.dispose();
+    _disposeAudioRecorderWeb();
   }
 
   void startRecording() {
@@ -26,6 +48,263 @@ mixin AudioMixin {
 
   void stopRecording() {
     audioRecordStateNotifier.value = AudioRecordState.initial;
+  }
+
+  void initAudioRecorderWeb() {
+    if (!PlatformInfos.isWeb) return;
+    _audioRecorder = AudioRecorder();
+
+    _recordSubWeb = _audioRecorder.onStateChanged().listen((recordState) {
+      _updateRecordStateWeb(recordState);
+    });
+
+    _amplitudeSubWeb = _audioRecorder
+        .onAmplitudeChanged(const Duration(milliseconds: 100))
+        .listen((amp) {
+      var value = 100 + amp.current * 2;
+      value = value < 1 ? 1 : value;
+      _amplitudeTimelineWeb.add(value);
+    });
+  }
+
+  void _disposeAudioRecorderWeb() {
+    if (!PlatformInfos.isWeb) return;
+    stopRecordWeb();
+    _timerWeb?.cancel();
+    _recordSubWeb?.cancel();
+    _amplitudeSubWeb?.cancel();
+    _audioRecorder.dispose();
+    _amplitudeTimelineWeb.clear();
+    recordDurationWebNotifier.dispose();
+  }
+
+  void _updateRecordStateWeb(RecordState recordState) {
+    switch (recordState) {
+      case RecordState.pause:
+        _timerWeb?.cancel();
+        break;
+      case RecordState.record:
+        _startTimerWeb();
+        startRecording();
+        break;
+      case RecordState.stop:
+        stopRecording();
+        _timerWeb?.cancel();
+        recordDurationWebNotifier.value = 0;
+        break;
+    }
+  }
+
+  void _startTimerWeb() {
+    _timerWeb?.cancel();
+
+    _timerWeb = Timer.periodic(const Duration(seconds: 1), (Timer t) {
+      recordDurationWebNotifier.value++;
+    });
+  }
+
+  Future<void> onTapRecorderWeb() async {
+    try {
+      if (await _audioRecorder.hasPermission()) {
+        const encoder = AudioEncoder.opus;
+
+        if (!await _isEncoderSupported(encoder)) {
+          return;
+        }
+
+        final devs = await _audioRecorder.listInputDevices();
+        debugPrint(devs.toString());
+
+        const config = RecordConfig(encoder: encoder, numChannels: 1);
+
+        // Record to file
+        await recordFile(_audioRecorder, config);
+
+        recordDurationWebNotifier.value = 0;
+
+        _startTimerWeb();
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print(e);
+      }
+    }
+  }
+
+  Future<void> recordFile(AudioRecorder recorder, RecordConfig config) {
+    return recorder.start(config, path: '');
+  }
+
+  Future<bool> _isEncoderSupported(AudioEncoder encoder) async {
+    final isSupported = await _audioRecorder.isEncoderSupported(
+      encoder,
+    );
+
+    if (!isSupported) {
+      Logs()
+          .d('AudioMixin: ${encoder.name} is not supported on this platform.');
+
+      for (final e in AudioEncoder.values) {
+        if (await _audioRecorder.isEncoderSupported(e)) {
+          Logs().d('AudioMixin: - ${e.name}');
+        }
+      }
+    }
+
+    return isSupported;
+  }
+
+  Future<String?> stopRecordWeb() async {
+    try {
+      final value = await _audioRecorder.isRecording();
+
+      if (value == true) {
+        return await _audioRecorder.stop();
+      }
+    } catch (e) {
+      debugPrint('Error checking recording status: $e');
+    }
+    return null;
+  }
+
+  Future<Uint8List> readWebFileAsBytes(html.File file) async {
+    final completer = Completer<Uint8List>();
+    final reader = html.FileReader();
+
+    // Set up error handling
+    reader.onError.listen((event) {
+      final error = reader.error ?? 'Unknown FileReader error';
+      completer.completeError('FileReader failed: $error');
+    });
+
+    // Set up success handling with type safety
+    reader.onLoad.listen((event) {
+      try {
+        final result = reader.result;
+
+        // Handle different result types safely
+        if (result is ByteBuffer) {
+          completer.complete(Uint8List.view(result));
+        } else if (result is Uint8List) {
+          completer.complete(result);
+        } else if (result != null) {
+          // Try to convert whatever we got
+          try {
+            final list = List<int>.from(result as Iterable);
+            completer.complete(Uint8List.fromList(list));
+          } catch (e) {
+            completer.completeError('Cannot convert result to Uint8List: $e');
+          }
+        } else {
+          completer.completeError('FileReader result is null');
+        }
+      } catch (e) {
+        completer.completeError('Error processing FileReader result: $e');
+      }
+    });
+
+    // Start reading
+    reader.readAsArrayBuffer(file);
+
+    // Add timeout protection
+    return completer.future.timeout(
+      const Duration(seconds: 30),
+      onTimeout: () => throw TimeoutException('File reading timed out'),
+    );
+  }
+
+  Future<html.File?> recordToFileOnWeb({
+    String? blobUrl,
+  }) async {
+    try {
+      if (blobUrl != null) {
+        Logs()
+            .d('AudioMixin::recordToFileOnWeb: Processing blob URL: $blobUrl');
+
+        // Fetch the actual blob data with timeout
+        final response = await html.window
+            .fetch(blobUrl)
+            .timeout(const Duration(seconds: 10));
+
+        final blob = await response.blob();
+
+        // Create File with correct type
+        final file = html.File([blob], 'Voice Message', {'type': 'audio/ogg'});
+
+        // Clean up the blob URL
+        html.Url.revokeObjectUrl(blobUrl);
+
+        Logs().d(
+          'AudioMixin::recordToFileOnWeb: ✅ Created file: ${file.name} with type: ${file.type}, size: ${file.size} bytes',
+        );
+        return file;
+      } else {
+        Logs().w('AudioMixin::recordToFileOnWeb: No blob URL provided');
+      }
+    } catch (e, stackTrace) {
+      Logs().e('AudioMixin::recordToFileOnWeb: Recording failed: $e');
+      Logs().e('AudioMixin::recordToFileOnWeb: Stack trace: $stackTrace');
+
+      // Clean up blob URL on error if it exists
+      if (blobUrl != null) {
+        try {
+          html.Url.revokeObjectUrl(blobUrl);
+        } catch (_) {
+          // Ignore cleanup errors
+        }
+      }
+    }
+
+    return null;
+  }
+
+// Optional: Helper function to create MatrixAudioFile from the web file
+  Future<MatrixAudioFile?> createMatrixAudioFileFromWebFile({
+    required html.File file,
+    required Duration duration,
+  }) async {
+    try {
+      Logs().d(
+        'AudioMixin::createMatrixAudioFileFromWebFile: Processing ${file.name}',
+      );
+
+      // Read file as bytes using the updated function
+      final bytes = await readWebFileAsBytes(file);
+
+      Logs().d(
+        'AudioMixin::createMatrixAudioFileFromWebFile: Read ${bytes.length} bytes',
+      );
+
+      return MatrixAudioFile(
+        bytes: bytes,
+        name: 'Voice Message',
+        readStream: Stream.value(bytes),
+        // Single chunk stream for
+        mimeType: 'audio/ogg',
+        // web
+        duration: duration.inMilliseconds,
+      );
+    } catch (e, stackTrace) {
+      Logs().e(
+        'AudioMixin::createMatrixAudioFileFromWebFile: Failed to create MatrixAudioFile: $e',
+      );
+      Logs().e(
+        'AudioMixin::createMatrixAudioFileFromWebFile: Stack trace: $stackTrace',
+      );
+      return null;
+    }
+  }
+
+  List<int> convertWaveformWeb() {
+    final step = _amplitudeTimelineWeb.length < waveCount
+        ? 1
+        : (_amplitudeTimelineWeb.length / waveCount).round();
+    final waveform = <int>[];
+    for (var i = 0; i < _amplitudeTimelineWeb.length; i += step) {
+      waveform.add((_amplitudeTimelineWeb[i] / 100 * 1024).round());
+    }
+
+    return waveform;
   }
 
   int calculateWaveCountAuto({

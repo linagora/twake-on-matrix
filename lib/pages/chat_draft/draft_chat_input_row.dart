@@ -36,6 +36,7 @@ class DraftChatInputRow extends StatelessWidget {
   final Function()? stopRecording;
   final void Function(TwakeAudioFile, Duration, List<int>)?
       sendVoiceMessageAction;
+  final Function()? onTapRecorderWeb;
 
   const DraftChatInputRow({
     super.key,
@@ -54,6 +55,7 @@ class DraftChatInputRow extends StatelessWidget {
     this.startRecording,
     this.stopRecording,
     this.sendVoiceMessageAction,
+    this.onTapRecorderWeb,
   });
 
   @override
@@ -94,6 +96,8 @@ class DraftChatInputRow extends StatelessWidget {
                     inputText: inputText,
                     onTap: onInputBarSubmitted,
                     sendingNotifier: isSendingNotifier,
+                    onTapRecorderWeb: onTapRecorderWeb,
+                    audioRecordStateNotifier: audioRecordStateNotifier,
                   ),
                 ],
               ),

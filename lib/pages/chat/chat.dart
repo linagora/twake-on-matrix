@@ -27,6 +27,7 @@ import 'package:fluffychat/presentation/enum/chat/right_column_type_enum.dart';
 import 'package:fluffychat/presentation/extensions/client_extension.dart';
 import 'package:fluffychat/presentation/extensions/event_update_extension.dart';
 import 'package:fluffychat/presentation/extensions/send_file_extension.dart';
+import 'package:fluffychat/presentation/extensions/send_file_web_extension.dart';
 import 'package:fluffychat/presentation/mixins/audio_mixin.dart';
 import 'package:fluffychat/presentation/mixins/common_media_picker_mixin.dart';
 import 'package:fluffychat/presentation/mixins/delete_event_mixin.dart';
@@ -670,6 +671,73 @@ class ChatController extends State<Chat>
       eventContent,
       type: EventTypes.Sticker,
     );
+  }
+
+  Future<void> sendVoiceMessageWeb() async {
+    final duration = Duration(seconds: recordDurationWebNotifier.value);
+    final path = await stopRecordWeb();
+    final file = await recordToFileOnWeb(
+      blobUrl: path,
+    );
+
+    if (file == null) return;
+
+    final matrixFile = await createMatrixAudioFileFromWebFile(
+      file: file,
+      duration: duration,
+    );
+
+    if (matrixFile == null) return;
+
+    final fileInfo = FileInfo(
+      matrixFile.name,
+      matrixFile.filePath ?? '',
+      matrixFile.size,
+      readStream: matrixFile.readStream,
+    );
+
+    final txid = client.generateUniqueTransactionId();
+
+    room?.sendingFilePlaceholders[txid] = matrixFile;
+
+    final extraContent = {
+      'info': {
+        ...matrixFile.info,
+        'duration': duration.inMilliseconds,
+      },
+      'org.matrix.msc3245.voice': {},
+      'org.matrix.msc1767.audio': {
+        'duration': duration.inMilliseconds,
+        'waveform': convertWaveformWeb(),
+      },
+    };
+
+    final fakeImageEvent = await room?.sendFakeFileInfoEvent(
+      fileInfo,
+      txid: txid,
+      messageType: MessageTypes.Audio,
+      inReplyTo: replyEventNotifier.value,
+      extraContent: extraContent,
+    );
+
+    if (fakeImageEvent == null) {
+      Logs().e('Failed to create fake image event for voice message');
+      return;
+    }
+
+    await room!
+        .sendFileOnWebEvent(
+      matrixFile,
+      txid: txid,
+      fakeImageEvent: fakeImageEvent,
+      inReplyTo: replyEventNotifier.value,
+      extraContent: extraContent,
+    )
+        .catchError((e) {
+      Logs().e('Failed to send voice message', e);
+      return null;
+    });
+    _updateReplyEvent();
   }
 
   Future<void> sendVoiceMessageAction({
@@ -2721,6 +2789,9 @@ class ChatController extends State<Chat>
       initCachedPresence();
       await _requestParticipants();
       listenIgnoredUser();
+      if (PlatformInfos.isWeb) {
+        initAudioRecorderWeb();
+      }
     });
   }
 
