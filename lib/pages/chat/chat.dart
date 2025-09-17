@@ -49,6 +49,7 @@ import 'package:fluffychat/utils/localized_exception_extension.dart';
 import 'package:fluffychat/utils/manager/upload_manager/upload_manager.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/filtered_timeline_extension.dart';
+import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_file_extension.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
 import 'package:fluffychat/utils/network_connection_service.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
@@ -662,7 +663,7 @@ class ChatController extends State<Chat>
   }
 
   Future<void> sendVoiceMessageAction({
-    required MatrixAudioFile audioFile,
+    required MatrixAudioFileCustom audioFile,
     required Duration time,
     required List<int> waveform,
   }) async {
@@ -711,7 +712,9 @@ class ChatController extends State<Chat>
       inReplyTo: replyEventNotifier.value,
       extraContent: extraContent,
     )
-        .catchError((e) {
+        .then((_) {
+      room?.sendingFilePlaceholders.remove(txid);
+    }).catchError((e) {
       Logs().e('Failed to send voice message', e);
       return null;
     });

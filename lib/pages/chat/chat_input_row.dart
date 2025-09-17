@@ -4,6 +4,7 @@ import 'package:fluffychat/pages/chat/chat_input_row_style.dart';
 import 'package:fluffychat/pages/chat/chat_input_row_web.dart';
 import 'package:fluffychat/pages/chat/reply_display.dart';
 import 'package:fluffychat/resource/image_paths.dart';
+import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_file_extension.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/widgets/avatar/avatar.dart';
 import 'package:fluffychat/widgets/matrix.dart';
@@ -132,8 +133,7 @@ class ChatInputRow extends StatelessWidget {
                         );
                         controller.stopRecording.call();
 
-                        final file = MatrixAudioFile(
-                          bytes: soundFile.readAsBytesSync(),
+                        final file = MatrixAudioFileCustom(
                           name: soundFile.path,
                           filePath: soundFile.path,
                           readStream: soundFile.openRead(),
