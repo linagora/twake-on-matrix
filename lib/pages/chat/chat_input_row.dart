@@ -5,6 +5,7 @@ import 'package:fluffychat/pages/chat/chat_input_row_web.dart';
 import 'package:fluffychat/pages/chat/reply_display.dart';
 import 'package:fluffychat/presentation/mixins/audio_mixin.dart';
 import 'package:fluffychat/resource/image_paths.dart';
+import 'package:fluffychat/utils/matrix_sdk_extensions/int_extension.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/widgets/avatar/avatar.dart';
 import 'package:fluffychat/widgets/matrix.dart';
@@ -52,14 +53,27 @@ class ChatInputRow extends StatelessWidget {
                       ]
                     : <Widget>[
                         if (ChatInputRowStyle.responsiveUtils.isMobile(context))
-                          SizedBox(
-                            height: ChatInputRowStyle.chatInputRowHeight,
-                            child: TwakeIconButton(
-                              size: ChatInputRowStyle.chatInputRowMoreBtnSize,
-                              tooltip: L10n.of(context)!.more,
-                              icon: Icons.add_circle_outline,
-                              onTap: () => controller.onSendFileClick(context),
-                            ),
+                          ValueListenableBuilder(
+                            valueListenable:
+                                controller.audioRecordStateNotifier,
+                            builder: (context, audioState, _) {
+                              if (PlatformInfos.isWeb &&
+                                  audioState == AudioRecordState.recording) {
+                                return const SizedBox.shrink();
+                              }
+
+                              return SizedBox(
+                                height: ChatInputRowStyle.chatInputRowHeight,
+                                child: TwakeIconButton(
+                                  size:
+                                      ChatInputRowStyle.chatInputRowMoreBtnSize,
+                                  tooltip: L10n.of(context)!.more,
+                                  icon: Icons.add_circle_outline,
+                                  onTap: () =>
+                                      controller.onSendFileClick(context),
+                                ),
+                              );
+                            },
                           ),
                         if (controller.matrix!.isMultiAccount &&
                             controller.matrix!.hasComplexBundles &&
@@ -259,7 +273,7 @@ class ChatInputRow extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 Text(
-                  _formatNumberAudioDuration(duration ~/ 60),
+                  (duration ~/ 60).formatNumberAudioDuration(),
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
                         color: LinagoraRefColors.material().neutral[50],
                       ),
@@ -271,7 +285,7 @@ class ChatInputRow extends StatelessWidget {
                       ),
                 ),
                 Text(
-                  _formatNumberAudioDuration(duration % 60),
+                  (duration % 60).formatNumberAudioDuration(),
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
                         color: LinagoraRefColors.material().neutral[50],
                       ),
@@ -282,15 +296,6 @@ class ChatInputRow extends StatelessWidget {
         );
       },
     );
-  }
-
-  String _formatNumberAudioDuration(int number) {
-    String numberStr = number.toString();
-    if (number < 10) {
-      numberStr = '0$numberStr';
-    }
-
-    return numberStr;
   }
 
   EdgeInsetsGeometry _paddingInputRow({
