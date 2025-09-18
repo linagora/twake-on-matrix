@@ -300,11 +300,16 @@ class ChatController extends State<Chat>
 
   StreamController<CachedPresence> cachedPresenceStreamController =
       StreamController.broadcast();
+  StreamSubscription<CachedPresence>? cachedPresenceStreamSubscription;
 
   Future<void> initCachedPresence() async {
     cachedPresenceNotifier.value = room?.directChatPresence;
     if (room?.directChatMatrixID != null) {
-      Matrix.of(context).client.onlatestPresenceChanged.stream.listen((event) {
+      cachedPresenceStreamSubscription = Matrix.of(context)
+          .client
+          .onlatestPresenceChanged
+          .stream
+          .listen((event) {
         if (event.userid == room!.directChatMatrixID) {
           Logs().v(
             'onlatestPresenceChanged: ${event.presence}, ${event.lastActiveTimestamp}',
@@ -2637,11 +2642,12 @@ class ChatController extends State<Chat>
   StreamSubscription? keyboardVisibilitySubscription;
 
   @override
+  void onSendFileCallback() => scrollDown();
+
+  @override
   void initState() {
     _initializePinnedEvents();
-    registerPasteShortcutListeners(
-      onSendFileCallback: scrollDown,
-    );
+    registerPasteShortcutListeners();
     keyboardVisibilitySubscription =
         keyboardVisibilityController.onChange.listen(_keyboardListener);
     scrollController.addListener(_updateScrollController);
@@ -2712,6 +2718,11 @@ class ChatController extends State<Chat>
     disposeUnblockUserSubscription();
     isBlockedUserNotifier.dispose();
     ignoredUsersStreamSub?.cancel();
+    cachedPresenceStreamSubscription?.cancel();
+    sendingClient = null;
+    showScrollDownButtonNotifier.dispose();
+    editEventNotifier.dispose();
+    focusHover.dispose();
     super.dispose();
   }
 

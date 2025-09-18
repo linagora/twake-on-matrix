@@ -294,6 +294,9 @@ extension SendFileWebExtension on Room {
       editEventId: editEventId,
       sentDate: sentDate,
     );
+
+    sendingFilePlaceholders.remove(txid);
+
     return eventId;
   }
 

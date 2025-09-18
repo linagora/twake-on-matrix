@@ -27,6 +27,8 @@ class MediaPageViewWidget extends StatelessWidget {
     return ValueListenableBuilder(
       valueListenable: filesNotifier,
       builder: (context, files, _) {
+        final firstFile = files.first;
+
         return InkWell(
           onTap: () {
             Navigator.of(context, rootNavigator: PlatformInfos.isWeb).push(
@@ -48,25 +50,17 @@ class MediaPageViewWidget extends StatelessWidget {
               borderRadius: BorderRadius.circular(
                 SendFileDialogStyle.imageBorderRadius,
               ),
-              child: ValueListenableBuilder(
-                valueListenable: filesNotifier,
-                builder: (context, files, _) {
-                  final firstFile = files.first;
-                  if (thumbnails[firstFile] == null &&
-                      firstFile.bytes == null) {
-                    return const TwakeLoadingIndicator();
-                  }
-                  return Image.memory(
-                    firstFile.bytes ??
-                        thumbnails[firstFile]?.bytes ??
-                        Uint8List(0),
-                    fit: BoxFit.cover,
-                    cacheWidth: (SendFileDialogStyle.imageSize *
-                            MediaQuery.devicePixelRatioOf(context))
-                        .round(),
-                  );
-                },
-              ),
+              child: thumbnails[firstFile] == null && firstFile.bytes == null
+                  ? const TwakeLoadingIndicator()
+                  : Image.memory(
+                      firstFile.bytes ??
+                          thumbnails[firstFile]?.bytes ??
+                          Uint8List(0),
+                      fit: BoxFit.cover,
+                      cacheWidth: (SendFileDialogStyle.imageSize *
+                              MediaQuery.devicePixelRatioOf(context))
+                          .round(),
+                    ),
             ),
           ),
         );

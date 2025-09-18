@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'dart:typed_data';
+import 'package:fluffychat/data/memory/mxc_image_cache_manager.dart';
 import 'package:fluffychat/pages/image_viewer/image_viewer.dart';
 import 'package:fluffychat/presentation/enum/chat/media_viewer_popup_result_enum.dart';
 import 'package:fluffychat/utils/extension/build_context_extension.dart';
@@ -88,10 +89,8 @@ class MxcImage extends StatefulWidget {
 
 class _MxcImageState extends State<MxcImage> {
   static const String placeholderKey = 'placeholder';
-  static final Map<EventId, ImageData> _imageDataCache = {};
   ImageData? _imageDataNoCache;
   bool isLoadDone = false;
-  String? filePath;
 
   ImageData? get _imageData {
     final cacheKey = widget.cacheKey;
@@ -108,8 +107,9 @@ class _MxcImageState extends State<MxcImage> {
           ? widget.cacheMap![widget.cacheKey]
           : null;
 
-  ImageData? get _imageDataFromGlobalCache =>
-      widget.cacheKey != null ? _imageDataCache[widget.cacheKey] : null;
+  ImageData? get _imageDataFromGlobalCache => widget.cacheKey != null
+      ? MxcImageCacheManager.instance.getImage(widget.cacheKey!)
+      : null;
 
   set _imageData(ImageData? data) {
     if (data == null) return;
@@ -119,14 +119,16 @@ class _MxcImageState extends State<MxcImage> {
     } else if (widget.cacheMap != null) {
       widget.cacheMap![cacheKey] = data;
     } else {
-      _imageDataCache[cacheKey] = data;
+      MxcImageCacheManager.instance.cacheImage(cacheKey, data);
     }
   }
 
   bool? _isCached;
 
-  Future<void> _load(BuildContext context) async {
-    if (!context.mounted) return;
+  Future<({Uint8List? imageData, String? filePath})> _load(
+    BuildContext context,
+  ) async {
+    if (!context.mounted) return (imageData: null, filePath: null);
     final client = Matrix.of(context).client;
     final uri = widget.uri;
     final event = widget.event;
@@ -153,12 +155,8 @@ class _MxcImageState extends State<MxcImage> {
           widget.isThumbnail ? event.thumbnailFilename : event.filename,
         );
         if (cachedData != null) {
-          if (!mounted) return;
-          setState(() {
-            _imageData = cachedData;
-            _isCached = true;
-          });
-          return;
+          _isCached = true;
+          return (imageData: cachedData, filePath: null);
         }
         _isCached = false;
       }
@@ -166,16 +164,12 @@ class _MxcImageState extends State<MxcImage> {
       final response = await http.get(httpUri);
       if (response.statusCode != 200) {
         if (response.statusCode == 404) {
-          return;
+          return (imageData: null, filePath: null);
         }
         throw Exception();
       }
       final remoteData = response.bodyBytes;
 
-      if (!mounted) return;
-      setState(() {
-        _imageData = remoteData;
-      });
       if (widget.event != null) {
         await client.database?.storeEventFile(
           widget.event!.eventId,
@@ -184,6 +178,7 @@ class _MxcImageState extends State<MxcImage> {
           0,
         );
       }
+      return (imageData: remoteData, filePath: null);
     }
 
     if (event != null) {
@@ -194,8 +189,7 @@ class _MxcImageState extends State<MxcImage> {
           );
           Logs().d('MxcImage::Downloaded get file info = $fileInfo');
           if (fileInfo != null && fileInfo.filePath.isNotEmpty) {
-            filePath = fileInfo.filePath;
-            return;
+            return (imageData: null, filePath: fileInfo.filePath);
           }
         }
 
@@ -205,32 +199,32 @@ class _MxcImageState extends State<MxcImage> {
         Logs().d(
           'MxcImage::Downloaded attachment name = ${matrixFile.name} - mimeType = ${matrixFile.mimeType} - bytes = ${matrixFile.bytes?.length}',
         );
-        if (!mounted) return;
-        if (!matrixFile.isImage()) return;
-        _imageData = matrixFile.bytes;
-        return;
+        if (!matrixFile.isImage()) return (imageData: null, filePath: null);
+        return (imageData: matrixFile.bytes, filePath: matrixFile.filePath);
       } catch (e) {
         Logs().e('MxcImage::Error while downloading image: $e');
       }
-      if (!mounted) return;
     }
+
+    return (imageData: null, filePath: null);
   }
 
-  void _tryLoad(BuildContext context) async {
+  Future<({Uint8List? imageData, String? filePath})> _tryLoad(
+    BuildContext context,
+  ) async {
     _imageData = widget.imageData;
     if (_imageData != null) {
-      if (mounted) {
-        setState(() => isLoadDone = true);
-      }
-      return;
+      isLoadDone = true;
+      return (imageData: _imageData, filePath: null);
     }
     try {
-      await _load(context);
-      if (mounted) {
-        setState(() => isLoadDone = true);
-      }
+      final loadResult = await _load(context);
+      isLoadDone = true;
+      _imageData = loadResult.imageData;
+      return loadResult;
     } catch (e) {
       Logs().e('MxcImage::_tryLoad::Exception: $e');
+      return (imageData: null, filePath: null);
     }
   }
 
@@ -260,12 +254,6 @@ class _MxcImageState extends State<MxcImage> {
     }
   }
 
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) => _tryLoad(context));
-  }
-
   Widget placeholder(BuildContext context) =>
       widget.placeholder?.call(context) ??
       const Center(
@@ -274,13 +262,19 @@ class _MxcImageState extends State<MxcImage> {
       );
 
   @override
+  void dispose() {
+    _imageDataNoCache = null;
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     Widget imageWidget = widget.animated
         ? AnimatedSwitcher(
             duration: widget.animationDuration,
-            child: _buildImageWidget(),
+            child: _buildImageWidget(context),
           )
-        : _buildImageWidget();
+        : _buildImageWidget(context);
 
     if (widget.event?.eventId != null && widget.enableHeroAnimation) {
       imageWidget = Hero(
@@ -306,36 +300,39 @@ class _MxcImageState extends State<MxcImage> {
     }
   }
 
-  Widget _buildImageWidget() {
-    final data = _imageData;
+  Widget _buildImageWidget(BuildContext context) {
     final needResize = widget.event != null && !widget.noResize;
-    return filePath == null && data == null
-        ? placeholder(context)
-        : ClipRRect(
-            key: Key('${data.hashCode}'),
-            borderRadius: widget.rounded
-                ? BorderRadius.circular(12.0)
-                : BorderRadius.zero,
-            child: _ImageWidget(
-              filePath: filePath,
-              event: widget.event,
-              data: data,
-              width: widget.width,
-              height: widget.height,
-              fit: widget.fit,
-              needResize: needResize,
-              cacheWidth: widget.cacheWidth,
-              cacheHeight: widget.cacheHeight,
-              imageErrorWidgetBuilder: (context, __, ___) {
-                _isCached = false;
-                _imageData = null;
-                WidgetsBinding.instance.addPostFrameCallback(
-                  (_) => _tryLoad(context),
-                );
-                return placeholder(context);
-              },
-            ),
-          );
+    return FutureBuilder(
+      future: _tryLoad(context),
+      builder: (context, snapshot) {
+        if (snapshot.data?.imageData == null &&
+            snapshot.data?.filePath == null) {
+          return placeholder(context);
+        }
+
+        return ClipRRect(
+          key: Key('${snapshot.data!.imageData.hashCode}'),
+          borderRadius:
+              widget.rounded ? BorderRadius.circular(12.0) : BorderRadius.zero,
+          child: _ImageWidget(
+            filePath: snapshot.data?.filePath,
+            event: widget.event,
+            data: snapshot.data?.imageData,
+            width: widget.width,
+            height: widget.height,
+            fit: widget.fit,
+            needResize: needResize,
+            cacheWidth: widget.cacheWidth,
+            cacheHeight: widget.cacheHeight,
+            imageErrorWidgetBuilder: (context, error, ___) {
+              _isCached = false;
+              _imageData = null;
+              return placeholder(context);
+            },
+          ),
+        );
+      },
+    );
   }
 }
 

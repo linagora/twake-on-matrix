@@ -1114,7 +1114,7 @@ class MatrixState extends State<Matrix>
     client.httpClient.close();
     onFocusSub?.cancel();
     onBlurSub?.cancel();
-    backgroundPush?.onRoomSync?.cancel();
+    backgroundPush?.clearingPushTimer?.cancel();
     showToMBootstrap.dispose();
     linuxNotifications?.close();
     showQrCodeDownload.dispose();

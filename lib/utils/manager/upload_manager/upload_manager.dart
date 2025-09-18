@@ -261,23 +261,26 @@ class UploadManager {
         ),
       );
 
-      _addFileTaskToWorkerQueueWeb(
-        txid: txid,
-        fakeImageEvent: fakeFileEvent,
-        room: room,
-        matrixFile: fileInfo,
-        streamController: streamController,
-        cancelToken: cancelToken,
-        thumbnail: thumbnails?[fileInfo],
-        sentDate: sentDate,
-      );
-      if (_eventIdMapUploadFileInfo[txid]?.captionInfo != null) {
-        _addCaptionTaskToWorkerQueue(
+      await Future.wait([
+        _addFileTaskToWorkerQueueWeb(
+          txid: txid,
+          fakeImageEvent: fakeFileEvent,
           room: room,
-          messageTxid: _eventIdMapUploadFileInfo[txid]?.captionInfo?.txid ?? '',
-          caption: _eventIdMapUploadFileInfo[txid]?.captionInfo?.caption ?? '',
-        );
-      }
+          matrixFile: fileInfo,
+          streamController: streamController,
+          cancelToken: cancelToken,
+          thumbnail: thumbnails?[fileInfo],
+          sentDate: sentDate,
+        ),
+        if (_eventIdMapUploadFileInfo[txid]?.captionInfo != null)
+          _addCaptionTaskToWorkerQueue(
+            room: room,
+            messageTxid:
+                _eventIdMapUploadFileInfo[txid]?.captionInfo?.txid ?? '',
+            caption:
+                _eventIdMapUploadFileInfo[txid]?.captionInfo?.caption ?? '',
+          ),
+      ]);
     }
   }
 
@@ -437,7 +440,7 @@ class UploadManager {
     );
   }
 
-  void _addFileTaskToWorkerQueueWeb({
+  Future<void> _addFileTaskToWorkerQueueWeb({
     required String txid,
     required SyncUpdate fakeImageEvent,
     required Room room,
@@ -447,7 +450,7 @@ class UploadManager {
     MatrixImageFile? thumbnail,
     DateTime? sentDate,
   }) {
-    uploadWorkerQueue.addTask(
+    return uploadWorkerQueue.addTask(
       Task(
         id: txid,
         runnable: () async {
@@ -469,7 +472,10 @@ class UploadManager {
             );
           }
         },
-        onTaskCompleted: () => _clearFileTask(txid),
+        onTaskCompleted: () {
+          room.sendingFilePlaceholders.remove(txid);
+          _clearFileTask(txid);
+        },
       ),
     );
   }

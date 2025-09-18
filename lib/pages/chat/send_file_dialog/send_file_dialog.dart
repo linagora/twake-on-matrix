@@ -62,9 +62,7 @@ class SendFileDialogController extends State<SendFileDialog> {
       widget.room,
     );
     requestFocusCaptions();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      loadThumbnailsForMedia(filesNotifier.value);
-    });
+    loadThumbnailsForMedia(filesNotifier.value);
   }
 
   @override
@@ -85,7 +83,7 @@ class SendFileDialogController extends State<SendFileDialog> {
     );
   }
 
-  Future<void> loadThumbnailsForMedia(List<MatrixFile> files) async {
+  void loadThumbnailsForMedia(List<MatrixFile> files) {
     if (widget.room == null) {
       return;
     }
@@ -127,15 +125,17 @@ class SendFileDialogController extends State<SendFileDialog> {
     if (filesNotifier.value.isEmpty) {
       return;
     }
-    uploadManager.uploadFilesWeb(
-      room: widget.room!,
-      files: [filesNotifier.value.first],
-      caption: textEditingController.text,
-    );
+    uploadManager
+        .uploadFilesWeb(
+          room: widget.room!,
+          files: [filesNotifier.value.first],
+          caption: textEditingController.text,
+        )
+        .then((_) => PaintingBinding.instance.imageCache.clear());
     Navigator.of(context).pop(SendMediaWithCaptionStatus.done);
   }
 
-  Future<List<MatrixFile>> getFilesNotError() async {
+  List<MatrixFile> getFilesNotError() {
     return filesNotifier.value
         .where((file) => !file.isFileHaveError(maxMediaSizeNotifier.value))
         .toList();
@@ -161,12 +161,14 @@ class SendFileDialogController extends State<SendFileDialog> {
       Navigator.of(context).pop(SendMediaWithCaptionStatus.emptyRoom);
       return;
     }
-    uploadManager.uploadFilesWeb(
-      room: widget.room!,
-      files: await getFilesNotError(),
-      caption: textEditingController.text,
-      thumbnails: thumbnails,
-    );
+    uploadManager
+        .uploadFilesWeb(
+          room: widget.room!,
+          files: getFilesNotError(),
+          caption: textEditingController.text,
+          thumbnails: thumbnails,
+        )
+        .then((_) => PaintingBinding.instance.imageCache.clear());
     Navigator.of(context).pop(SendMediaWithCaptionStatus.done);
   }
 

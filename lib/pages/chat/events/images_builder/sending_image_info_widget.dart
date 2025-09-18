@@ -44,14 +44,15 @@ class _SendingImageInfoWidgetState extends State<SendingImageInfoWidget>
   @override
   void dispose() {
     sendingFileProgressNotifier.dispose();
+    uploadFileStateNotifier.dispose();
     super.dispose();
   }
 
   final ValueNotifier<double> sendingFileProgressNotifier = ValueNotifier(0);
 
-  void _onTap(BuildContext context) async {
+  Future<void> _onTap(BuildContext context) async {
     if (widget.onTapPreview != null) {
-      Navigator.of(context, rootNavigator: PlatformInfos.isWeb).push(
+      await Navigator.of(context, rootNavigator: PlatformInfos.isWeb).push(
         HeroPageRoute(
           builder: (context) {
             return InteractiveViewerGallery(
