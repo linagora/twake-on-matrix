@@ -12,4 +12,13 @@ extension IntExtension on int {
   }
 
   static const oneKB = 1024 * 1024;
+
+  String formatNumberAudioDuration() {
+    String numberStr = toString();
+    if (this < 10) {
+      numberStr = '0$numberStr';
+    }
+
+    return numberStr;
+  }
 }

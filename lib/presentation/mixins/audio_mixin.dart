@@ -4,6 +4,7 @@ import 'dart:typed_data';
 
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:flutter/foundation.dart';
+import 'package:intl/intl.dart';
 import 'package:matrix/matrix.dart';
 import 'package:record/record.dart';
 import 'package:flutter/material.dart';
@@ -275,9 +276,12 @@ mixin AudioMixin {
         'AudioMixin::createMatrixAudioFileFromWebFile: Read ${bytes.length} bytes',
       );
 
+      final formatDate =
+          DateFormat("yyyy-MM-dd-HHmmss.").format(DateTime.now());
+
       return MatrixAudioFile(
         bytes: bytes,
-        name: 'Voice Message',
+        name: 'voice_message_$formatDate.ogg',
         readStream: Stream.value(bytes),
         // Single chunk stream for
         mimeType: 'audio/ogg',
