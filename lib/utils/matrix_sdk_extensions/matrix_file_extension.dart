@@ -166,10 +166,10 @@ extension MatrixFileExtension on MatrixFile {
   bool isFileHaveError(double maxSize) => size > maxSize;
 }
 
-class MatrixAudioFileCustom extends MatrixFile {
+class TwakeAudioFile extends MatrixFile {
   final int? duration;
 
-  MatrixAudioFileCustom({
+  TwakeAudioFile({
     required super.name,
     super.mimeType,
     super.filePath,

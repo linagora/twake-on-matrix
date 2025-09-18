@@ -133,10 +133,9 @@ class ChatInputRow extends StatelessWidget {
                         );
                         controller.stopRecording.call();
 
-                        final file = MatrixAudioFileCustom(
+                        final file = TwakeAudioFile(
                           name: soundFile.path,
                           filePath: soundFile.path,
-                          readStream: soundFile.openRead(),
                           duration: time.inMilliseconds,
                         );
                         controller.sendVoiceMessageAction(

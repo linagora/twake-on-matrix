@@ -663,7 +663,7 @@ class ChatController extends State<Chat>
   }
 
   Future<void> sendVoiceMessageAction({
-    required MatrixAudioFileCustom audioFile,
+    required TwakeAudioFile audioFile,
     required Duration time,
     required List<int> waveform,
   }) async {
