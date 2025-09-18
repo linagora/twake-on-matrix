@@ -86,8 +86,7 @@ class ChatInputRow extends StatelessWidget {
               ValueListenableBuilder(
                 valueListenable: controller.inputText,
                 builder: (context, text, _) {
-                  if (text.isNotEmpty &&
-                      controller.replyEventNotifier.value != null) {
+                  if (text.isNotEmpty) {
                     return const SizedBox.shrink();
                   }
                   return ValueListenableBuilder(
