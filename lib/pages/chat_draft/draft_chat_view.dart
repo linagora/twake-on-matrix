@@ -151,6 +151,31 @@ class DraftChatView extends StatelessWidget {
                                 isSendingNotifier: controller.isSendingNotifier,
                                 onLongPressAudioRecord:
                                     controller.onLongPressAudioRecordInMobile,
+                                audioRecordStateNotifier:
+                                    controller.audioRecordStateNotifier,
+                                startRecording: () {
+                                  controller.startRecording();
+                                },
+                                stopRecording: () {
+                                  if (controller
+                                      .sendController.text.isNotEmpty) {
+                                    controller.sendController.clear();
+                                  }
+                                  controller.stopRecording();
+                                },
+                                sendVoiceMessageAction:
+                                    (audioFile, duration, waveform) =>
+                                        controller.sendVoiceMessageAction(
+                                  audioFile: audioFile,
+                                  time: duration,
+                                  waveform: waveform,
+                                ),
+                                onTapRecorderWeb: controller.onTapRecorderWeb,
+                                onFinishRecorderWeb:
+                                    controller.sendVoiceMessageWeb,
+                                onDeleteRecorderWeb: controller.stopRecordWeb,
+                                recordDurationWebNotifier:
+                                    controller.recordDurationWebNotifier,
                               ),
                               SizedBox(
                                 height:

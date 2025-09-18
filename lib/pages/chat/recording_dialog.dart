@@ -28,7 +28,7 @@ class RecordingDialogState extends State<RecordingDialog> {
 
   bool error = false;
   String? _recordedPath;
-  final _audioRecorder = Record();
+  final _audioRecorder = AudioRecorder();
   final List<double> amplitudeTimeline = [];
 
   static const int bitRate = 64000;
@@ -46,11 +46,11 @@ class RecordingDialogState extends State<RecordingDialog> {
         return;
       }
       await WakelockPlus.enable();
-      await _audioRecorder.start(
-        path: _recordedPath,
-        bitRate: bitRate,
-        samplingRate: samplingRate,
-      );
+      // await _audioRecorder.start(
+      //   path: _recordedPath,
+      //   bitRate: bitRate,
+      //   samplingRate: samplingRate,
+      // );
       setState(() => _duration = Duration.zero);
       _recorderSubscription?.cancel();
       _recorderSubscription =

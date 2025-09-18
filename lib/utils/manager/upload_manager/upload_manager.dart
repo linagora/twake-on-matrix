@@ -152,7 +152,7 @@ class UploadManager {
 
       final sentDate = _eventIdMapUploadFileInfo[txidKey]?.createdAt;
 
-      final fakeImageEvent = await room.sendFakeImagePickerFileEvent(
+      final fakeImageEvent = await room.sendFakeFileInfoEvent(
         fakeSendingFileInfo.fileInfo,
         txid: txidKey,
         messageType: fakeSendingFileInfo.messageType,
@@ -304,7 +304,7 @@ class UploadManager {
 
       final sentDate = _eventIdMapUploadFileInfo[txid]?.createdAt;
 
-      final fakeEvent = await room.sendFakeImagePickerFileEvent(
+      final fakeEvent = await room.sendFakeFileInfoEvent(
         fileValue,
         txid: txid,
         messageType: fileValue.msgType,
