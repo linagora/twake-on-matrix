@@ -161,12 +161,14 @@ class SendFileDialogController extends State<SendFileDialog> {
       Navigator.of(context).pop(SendMediaWithCaptionStatus.emptyRoom);
       return;
     }
-    uploadManager.uploadFilesWeb(
-      room: widget.room!,
-      files: getFilesNotError(),
-      caption: textEditingController.text,
-      thumbnails: thumbnails,
-    );
+    uploadManager
+        .uploadFilesWeb(
+          room: widget.room!,
+          files: getFilesNotError(),
+          caption: textEditingController.text,
+          thumbnails: thumbnails,
+        )
+        .then((_) => PaintingBinding.instance.imageCache.clear());
     Navigator.of(context).pop(SendMediaWithCaptionStatus.done);
   }
 
