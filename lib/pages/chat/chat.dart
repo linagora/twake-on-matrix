@@ -671,7 +671,6 @@ class ChatController extends State<Chat>
       audioFile.name,
       audioFile.filePath ?? '',
       audioFile.size,
-      readStream: audioFile.readStream,
     );
 
     final txid = client.generateUniqueTransactionId();
@@ -857,6 +856,10 @@ class ChatController extends State<Chat>
   }
 
   void forwardEventsAction({Event? event}) async {
+    if (audioRecordStateNotifier.value == AudioRecordState.recording) {
+      preventActionWhileRecordingMobile(context: context);
+      return;
+    }
     if (event != null && !event.status.isAvailable) {
       return;
     }
@@ -901,6 +904,10 @@ class ChatController extends State<Chat>
   void editAction({
     Event? editEvent,
   }) {
+    if (audioRecordStateNotifier.value == AudioRecordState.recording) {
+      preventActionWhileRecordingMobile(context: context);
+      return;
+    }
     if (replyEventNotifier.value != null) {
       cancelReplyEventAction();
     }
@@ -925,6 +932,10 @@ class ChatController extends State<Chat>
   void replyAction({
     Event? replyTo,
   }) {
+    if (audioRecordStateNotifier.value == AudioRecordState.recording) {
+      preventActionWhileRecordingMobile(context: context);
+      return;
+    }
     if (editEventNotifier.value != null) {
       cancelEditEventAction();
     }
@@ -1197,6 +1208,10 @@ class ChatController extends State<Chat>
   }
 
   void onSelectMessage(Event event) {
+    if (audioRecordStateNotifier.value == AudioRecordState.recording) {
+      preventActionWhileRecordingMobile(context: context);
+      return;
+    }
     if (!event.redacted) {
       if (selectedEvents.contains(event)) {
         _removeSelectEvent(event);
@@ -1579,8 +1594,13 @@ class ChatController extends State<Chat>
     }
   }
 
-  Future<String?> downloadFileAction(BuildContext context, Event event) async =>
-      await event.saveFile(context);
+  Future<String?> downloadFileAction(BuildContext context, Event event) async {
+    if (audioRecordStateNotifier.value == AudioRecordState.recording) {
+      preventActionWhileRecordingMobile(context: context);
+      return null;
+    }
+    return await event.saveFile(context);
+  }
 
   void handleContextMenuAction(
     BuildContext context,
@@ -1846,6 +1866,10 @@ class ChatController extends State<Chat>
   }
 
   void onPushDetails() async {
+    if (audioRecordStateNotifier.value == AudioRecordState.recording) {
+      preventActionWhileRecordingMobile(context: context);
+      return null;
+    }
     if (room?.isDirectChat == true) {
       return widget.onChangeRightColumnType?.call(RightColumnType.profileInfo);
     } else {
@@ -1855,6 +1879,10 @@ class ChatController extends State<Chat>
   }
 
   void toggleSearch() {
+    if (audioRecordStateNotifier.value == AudioRecordState.recording) {
+      preventActionWhileRecordingMobile(context: context);
+      return;
+    }
     widget.onChangeRightColumnType?.call(RightColumnType.search);
   }
 
@@ -2163,6 +2191,10 @@ class ChatController extends State<Chat>
     BuildContext context,
     TapDownDetails tapDownDetails,
   ) async {
+    if (audioRecordStateNotifier.value == AudioRecordState.recording) {
+      preventActionWhileRecordingMobile(context: context);
+      return null;
+    }
     final offset = tapDownDetails.globalPosition;
     final listAppBarActions = _getListActionAppBarMenu();
     final listContextMenuActions =

@@ -173,6 +173,9 @@ class ReplyPreviewIconBuilder extends StatelessWidget {
         height: ReplyContentStyle.replyContentSize,
       );
     }
+    if (event.messageType == MessageTypes.Audio) {
+      return const SizedBox.shrink();
+    }
     return ClipRRect(
       borderRadius: ReplyContentStyle.previewedImageBorderRadius,
       child: MxcImage(

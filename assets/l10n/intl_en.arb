@@ -3391,5 +3391,7 @@
   "allowMicrophoneAccess": "Allow microphone access",
   "later": "Later",
   "couldNotPlayAudioFile": "Could not play audio file",
-  "slideToCancel": "Slide to cancel"
+  "slideToCancel": "Slide to cancel",
+  "recordingInProgress": "Recording in progress",
+  "pleaseFinishOrStopTheRecording": "Please finish or stop the recording before performing other actions."
 }

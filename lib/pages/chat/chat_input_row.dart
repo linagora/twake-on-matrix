@@ -86,99 +86,113 @@ class ChatInputRow extends StatelessWidget {
               ValueListenableBuilder(
                 valueListenable: controller.inputText,
                 builder: (context, text, _) {
-                  if (text.isNotEmpty) {
+                  if (text.isNotEmpty &&
+                      controller.replyEventNotifier.value != null) {
                     return const SizedBox.shrink();
                   }
-                  return Padding(
-                    padding: _paddingAudioRow(
-                      context: context,
-                      isKeyboardVisible: isKeyboardVisible,
-                    ),
-                    child: SocialMediaRecorder(
-                      radius: BorderRadius.circular(24),
-                      soundRecorderWhenLockedDecoration: BoxDecoration(
-                        borderRadius:
-                            ChatInputRowStyle.chatInputRowBorderRadius,
-                        color: LinagoraSysColors.material().onPrimary,
-                        border: Border.all(
-                          color: LinagoraRefColors.material().tertiary,
-                          width: 1,
+                  return ValueListenableBuilder(
+                    valueListenable: controller.replyEventNotifier,
+                    builder: (context, reply, _) {
+                      if (reply != null) {
+                        return const SizedBox.shrink();
+                      }
+                      return Padding(
+                        padding: _paddingAudioRow(
+                          context: context,
+                          isKeyboardVisible: isKeyboardVisible,
                         ),
-                      ),
-                      decoration: BoxDecoration(
-                        borderRadius:
-                            ChatInputRowStyle.chatInputRowBorderRadius,
-                        color: LinagoraSysColors.material().onPrimary,
-                        border: Border.all(
-                          color: LinagoraRefColors.material().tertiary,
-                          width: 1,
-                        ),
-                      ),
-                      microphoneRequestPermission:
-                          controller.onLongPressAudioRecordInMobile,
-                      startRecording: () {
-                        Logs().d('ChatInputRowMobile:: startRecording');
-                        controller.startRecording.call();
-                      },
-                      stopRecording: (_) {
-                        Logs().d('ChatInputRowMobile:: stopRecording');
-                        if (controller.sendController.text.isNotEmpty) {
-                          controller.sendController.clear();
-                        }
-                        controller.stopRecording.call();
-                      },
-                      sendRequestFunction: (soundFile, time, waveFrom) {
-                        Logs().d(
-                          'ChatInputRowMobile:: sendRequestFunction $soundFile',
-                        );
-                        controller.stopRecording.call();
+                        child: SocialMediaRecorder(
+                          radius: BorderRadius.circular(24),
+                          soundRecorderWhenLockedDecoration: BoxDecoration(
+                            borderRadius:
+                                ChatInputRowStyle.chatInputRowBorderRadius,
+                            color: LinagoraSysColors.material().onPrimary,
+                            border: Border.all(
+                              color: LinagoraRefColors.material().tertiary,
+                              width: 1,
+                            ),
+                          ),
+                          decoration: BoxDecoration(
+                            borderRadius:
+                                ChatInputRowStyle.chatInputRowBorderRadius,
+                            color: LinagoraSysColors.material().onPrimary,
+                            border: Border.all(
+                              color: LinagoraRefColors.material().tertiary,
+                              width: 1,
+                            ),
+                          ),
+                          microphoneRequestPermission:
+                              controller.onLongPressAudioRecordInMobile,
+                          startRecording: () {
+                            Logs().d('ChatInputRowMobile:: startRecording');
+                            controller.startRecording.call();
+                          },
+                          stopRecording: (_) {
+                            Logs().d('ChatInputRowMobile:: stopRecording');
+                            if (controller.sendController.text.isNotEmpty) {
+                              controller.sendController.clear();
+                            }
+                            controller.stopRecording.call();
+                          },
+                          sendRequestFunction: (soundFile, time, waveFrom) {
+                            Logs().d(
+                              'ChatInputRowMobile:: sendRequestFunction $soundFile',
+                            );
+                            controller.stopRecording.call();
 
-                        final file = TwakeAudioFile(
-                          name: soundFile.path,
-                          filePath: soundFile.path,
-                          duration: time.inMilliseconds,
-                        );
-                        controller.sendVoiceMessageAction(
-                          audioFile: file,
-                          time: time,
-                          waveform: waveFrom,
-                        );
-                      },
-                      encode: AudioEncoderType.AAC,
-                      fullRecordPackageHeight: 50,
-                      initRecordPackageWidth: 50,
-                      cancelTextBackGroundColor: Colors.transparent,
-                      cancelText: L10n.of(context)!.cancel,
-                      cancelTextStyle:
-                          Theme.of(context).textTheme.bodySmall?.copyWith(
-                                color: LinagoraSysColors.material().primary,
-                              ),
-                      slideToCancelText: L10n.of(context)!.slideToCancel,
-                      slideToCancelTextStyle:
-                          Theme.of(context).textTheme.bodySmall?.copyWith(
+                            final file = TwakeAudioFile(
+                              name: soundFile.path,
+                              filePath: soundFile.path,
+                              duration: time.inMilliseconds,
+                            );
+                            controller.sendVoiceMessageAction(
+                              audioFile: file,
+                              time: time,
+                              waveform: waveFrom,
+                            );
+                          },
+                          encode: AudioEncoderType.AAC,
+                          fullRecordPackageHeight: 50,
+                          initRecordPackageWidth: 50,
+                          cancelTextBackGroundColor: Colors.transparent,
+                          cancelText: L10n.of(context)!.cancel,
+                          cancelTextStyle:
+                              Theme.of(context).textTheme.bodySmall?.copyWith(
+                                    color: LinagoraSysColors.material().primary,
+                                  ),
+                          slideToCancelText: L10n.of(context)!.slideToCancel,
+                          slideToCancelTextStyle: Theme.of(context)
+                              .textTheme
+                              .bodySmall
+                              ?.copyWith(
                                 color: LinagoraRefColors.material().neutral[30],
                               ),
-                      counterTextStyle:
-                          Theme.of(context).textTheme.bodySmall?.copyWith(
+                          counterTextStyle: Theme.of(context)
+                              .textTheme
+                              .bodySmall
+                              ?.copyWith(
                                 color: LinagoraRefColors.material().neutral[50],
                               ),
-                      slideToCancelPadding: const EdgeInsets.only(right: 24),
-                      recordIcon: Icon(
-                        Icons.keyboard_voice_outlined,
-                        color: LinagoraSysColors.material().tertiary,
-                      ),
-                      soundRecorderWhenLockedWidth:
-                          MediaQuery.of(context).size.width - 16,
-                      counterPadding: const EdgeInsets.only(left: 16),
-                      micCounterWidget: Container(
-                        width: 12,
-                        height: 12,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: LinagoraSysColors.material().error,
+                          slideToCancelPadding:
+                              const EdgeInsets.only(right: 24),
+                          recordIcon: Icon(
+                            Icons.keyboard_voice_outlined,
+                            color: LinagoraSysColors.material().tertiary,
+                          ),
+                          soundRecorderWhenLockedWidth:
+                              MediaQuery.of(context).size.width - 16,
+                          counterPadding: const EdgeInsets.only(left: 16),
+                          micCounterWidget: Container(
+                            width: 12,
+                            height: 12,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: LinagoraSysColors.material().error,
+                            ),
+                          ),
                         ),
-                      ),
-                    ),
+                      );
+                    },
                   );
                 },
               ),
