@@ -73,7 +73,7 @@ dependencies:
   social_media_recorder:
     git:
       url: git@github.com:linagora/social_media_recorder.git
-      ref: imple_new_ui_for_twake
+      ref: twake_supported
 
   adaptive_dialog: ^1.8.0+1
   flutter_adaptive_scaffold: ^0.1.4
