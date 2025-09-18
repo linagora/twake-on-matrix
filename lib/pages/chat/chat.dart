@@ -667,6 +667,10 @@ class ChatController extends State<Chat>
     required Duration time,
     required List<int> waveform,
   }) async {
+    if (audioFile.filePath == null || audioFile.filePath?.isEmpty == true) {
+      TwakeSnackBar.show(context, L10n.of(context)!.audioMessageFailedToSend);
+      return;
+    }
     final fileInfo = FileInfo(
       audioFile.name,
       audioFile.filePath ?? '',
@@ -698,7 +702,8 @@ class ChatController extends State<Chat>
     );
 
     if (fakeImageEvent == null) {
-      Logs().e('Failed to create fake image event for voice message');
+      TwakeSnackBar.show(context, L10n.of(context)!.audioMessageFailedToSend);
+      Logs().e('Failed to create fake event for voice message');
       return;
     }
 
@@ -714,6 +719,7 @@ class ChatController extends State<Chat>
         .then((_) {
       room?.sendingFilePlaceholders.remove(txid);
     }).catchError((e) {
+      TwakeSnackBar.show(context, L10n.of(context)!.audioMessageFailedToSend);
       Logs().e('Failed to send voice message', e);
       return null;
     });
