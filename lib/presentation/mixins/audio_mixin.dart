@@ -1,6 +1,33 @@
 import 'dart:math';
 
+import 'package:fluffychat/utils/dialog/twake_dialog.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:flutter_gen/gen_l10n/l10n.dart';
+
+enum AudioRecordState {
+  initial,
+  recording,
+  recorded,
+  playing,
+  paused,
+}
+
 mixin AudioMixin {
+  final ValueNotifier<AudioRecordState> audioRecordStateNotifier =
+      ValueNotifier<AudioRecordState>(AudioRecordState.initial);
+
+  void disposeAudioMixin() {
+    audioRecordStateNotifier.dispose();
+  }
+
+  void startRecording() {
+    audioRecordStateNotifier.value = AudioRecordState.recording;
+  }
+
+  void stopRecording() {
+    audioRecordStateNotifier.value = AudioRecordState.initial;
+  }
+
   int calculateWaveCountAuto({
     required int minWaves,
     required int maxWaves,
@@ -102,5 +129,16 @@ mixin AudioMixin {
       final t = (x - rawMin) / (rawMax - rawMin);
       return minHeight + t * (maxHeight - minHeight);
     }).toList();
+  }
+
+  Future<void> preventActionWhileRecordingMobile({
+    required BuildContext context,
+  }) async {
+    await showConfirmAlertDialog(
+      context: context,
+      title: L10n.of(context)!.recordingInProgress,
+      message: L10n.of(context)!.pleaseFinishOrStopTheRecording,
+      isArrangeActionButtonsVertical: true,
+    );
   }
 }

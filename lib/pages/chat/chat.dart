@@ -1,11 +1,9 @@
 import 'dart:async';
-import 'dart:io';
 
 import 'package:adaptive_dialog/adaptive_dialog.dart';
 import 'package:collection/collection.dart';
 import 'package:debounce_throttle/debounce_throttle.dart';
 import 'package:desktop_drop/desktop_drop.dart';
-import 'package:device_info_plus/device_info_plus.dart';
 import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/domain/app_state/room/report_content_state.dart';
@@ -25,10 +23,11 @@ import 'package:fluffychat/pages/chat/context_item_chat_action.dart';
 import 'package:fluffychat/pages/chat/dialog_reject_invite_widget.dart';
 import 'package:fluffychat/pages/chat/events/message_content_mixin.dart';
 import 'package:fluffychat/pages/chat/input_bar/focus_suggestion_controller.dart';
-import 'package:fluffychat/pages/chat/recording_dialog.dart';
 import 'package:fluffychat/presentation/enum/chat/right_column_type_enum.dart';
 import 'package:fluffychat/presentation/extensions/client_extension.dart';
 import 'package:fluffychat/presentation/extensions/event_update_extension.dart';
+import 'package:fluffychat/presentation/extensions/send_file_extension.dart';
+import 'package:fluffychat/presentation/mixins/audio_mixin.dart';
 import 'package:fluffychat/presentation/mixins/common_media_picker_mixin.dart';
 import 'package:fluffychat/presentation/mixins/delete_event_mixin.dart';
 import 'package:fluffychat/presentation/mixins/go_to_direct_chat_mixin.dart';
@@ -55,6 +54,7 @@ import 'package:fluffychat/utils/localized_exception_extension.dart';
 import 'package:fluffychat/utils/manager/upload_manager/upload_manager.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/filtered_timeline_extension.dart';
+import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_file_extension.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
 import 'package:fluffychat/utils/network_connection_service.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
@@ -87,7 +87,6 @@ import 'package:linagora_design_flutter/linagora_design_flutter.dart'
     hide ImagePicker;
 import 'package:linagora_design_flutter/reaction/reaction_picker.dart';
 import 'package:matrix/matrix.dart';
-import 'package:record/record.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:universal_html/html.dart' as html;
@@ -133,7 +132,8 @@ class ChatController extends State<Chat>
         SaveMediaToGalleryAndroidMixin,
         LeaveChatMixin,
         DeleteEventMixin,
-        UnblockUserMixin {
+        UnblockUserMixin,
+        AudioMixin {
   final NetworkConnectionService networkConnectionService =
       getIt.get<NetworkConnectionService>();
 
@@ -353,6 +353,9 @@ class ChatController extends State<Chat>
       null;
 
   void updateInputTextNotifier() {
+    if (audioRecordStateNotifier.value == AudioRecordState.recording) {
+      return;
+    }
     inputText.value = sendController.text;
   }
 
@@ -669,60 +672,67 @@ class ChatController extends State<Chat>
     );
   }
 
-  void voiceMessageAction() async {
-    // ignore: unused_local_variable
-    final scaffoldMessenger = ScaffoldMessenger.of(context);
-    if (PlatformInfos.isAndroid) {
-      final info = await DeviceInfoPlugin().androidInfo;
-      if (info.version.sdkInt < 19) {
-        showOkAlertDialog(
-          context: context,
-          title: L10n.of(context)!.unsupportedAndroidVersion,
-          message: L10n.of(context)!.unsupportedAndroidVersionLong,
-          okLabel: L10n.of(context)!.close,
-        );
-        return;
-      }
+  Future<void> sendVoiceMessageAction({
+    required TwakeAudioFile audioFile,
+    required Duration time,
+    required List<int> waveform,
+  }) async {
+    if (audioFile.filePath == null || audioFile.filePath?.isEmpty == true) {
+      TwakeSnackBar.show(context, L10n.of(context)!.audioMessageFailedToSend);
+      return;
+    }
+    final fileInfo = FileInfo(
+      audioFile.name,
+      audioFile.filePath ?? '',
+      audioFile.size,
+    );
+
+    final txid = client.generateUniqueTransactionId();
+
+    room?.sendingFilePlaceholders[txid] = audioFile;
+
+    final extraContent = {
+      'info': {
+        ...audioFile.info,
+        'duration': time.inMilliseconds,
+      },
+      'org.matrix.msc3245.voice': {},
+      'org.matrix.msc1767.audio': {
+        'duration': time.inMilliseconds,
+        'waveform': waveform,
+      },
+    };
+
+    final fakeImageEvent = await room?.sendFakeFileInfoEvent(
+      fileInfo,
+      txid: txid,
+      messageType: MessageTypes.Audio,
+      inReplyTo: replyEventNotifier.value,
+      extraContent: extraContent,
+    );
+
+    if (fakeImageEvent == null) {
+      TwakeSnackBar.show(context, L10n.of(context)!.audioMessageFailedToSend);
+      Logs().e('Failed to create fake event for voice message');
+      return;
     }
 
-    if (await Record().hasPermission() == false) return;
-    final result = await showDialog<RecordingResult>(
-      context: context,
-      useRootNavigator: false,
-      barrierDismissible: false,
-      builder: (c) => const RecordingDialog(),
-    );
-    if (result == null) return;
-    final audioFile = File(result.path);
-    // ignore: unused_local_variable
-    final file = MatrixAudioFile(
-      bytes: audioFile.readAsBytesSync(),
-      name: audioFile.path,
-    );
-    // await room!.sendFileEvent(
-    //   file,
-    //   inReplyTo: replyEvent,
-    //   extraContent: {
-    //     'info': {
-    //       ...file.info,
-    //       'duration': result.duration,
-    //     },
-    //     'org.matrix.msc3245.voice': {},
-    //     'org.matrix.msc1767.audio': {
-    //       'duration': result.duration,
-    //       'waveform': result.waveform,
-    //     },
-    //   },
-    // ).catchError((e) {
-    //   scaffoldMessenger.showSnackBar(
-    //     SnackBar(
-    //       content: Text(
-    //         (e as Object).toLocalizedString(context),
-    //       ),
-    //     ),
-    //   );
-    //   return null;
-    // });
+    await room!
+        .sendFileEventMobile(
+      fileInfo,
+      txid: txid,
+      msgType: MessageTypes.Audio,
+      fakeImageEvent: fakeImageEvent,
+      inReplyTo: replyEventNotifier.value,
+      extraContent: extraContent,
+    )
+        .then((_) {
+      room?.sendingFilePlaceholders.remove(txid);
+    }).catchError((e) {
+      TwakeSnackBar.show(context, L10n.of(context)!.audioMessageFailedToSend);
+      Logs().e('Failed to send voice message', e);
+      return null;
+    });
     _updateReplyEvent();
   }
 
@@ -899,6 +909,10 @@ class ChatController extends State<Chat>
   }
 
   void forwardEventsAction({Event? event}) async {
+    if (audioRecordStateNotifier.value == AudioRecordState.recording) {
+      preventActionWhileRecordingMobile(context: context);
+      return;
+    }
     if (event != null && !event.status.isAvailable) {
       return;
     }
@@ -943,6 +957,10 @@ class ChatController extends State<Chat>
   void editAction({
     Event? editEvent,
   }) {
+    if (audioRecordStateNotifier.value == AudioRecordState.recording) {
+      preventActionWhileRecordingMobile(context: context);
+      return;
+    }
     if (replyEventNotifier.value != null) {
       cancelReplyEventAction();
     }
@@ -967,6 +985,10 @@ class ChatController extends State<Chat>
   void replyAction({
     Event? replyTo,
   }) {
+    if (audioRecordStateNotifier.value == AudioRecordState.recording) {
+      preventActionWhileRecordingMobile(context: context);
+      return;
+    }
     if (editEventNotifier.value != null) {
       cancelEditEventAction();
     }
@@ -1245,6 +1267,10 @@ class ChatController extends State<Chat>
   }
 
   void onSelectMessage(Event event) {
+    if (audioRecordStateNotifier.value == AudioRecordState.recording) {
+      preventActionWhileRecordingMobile(context: context);
+      return;
+    }
     if (!event.redacted) {
       if (selectedEvents.contains(event)) {
         _removeSelectEvent(event);
@@ -1324,6 +1350,9 @@ class ChatController extends State<Chat>
   static const Duration _storeInputTimeout = Duration(milliseconds: 500);
 
   void onInputBarChanged(String text) {
+    if (audioRecordStateNotifier.value == AudioRecordState.recording) {
+      return;
+    }
     setReadMarker();
     _storeInputTimeoutTimer?.cancel();
     _storeInputTimeoutTimer = Timer(_storeInputTimeout, () async {
@@ -1628,8 +1657,13 @@ class ChatController extends State<Chat>
     }
   }
 
-  Future<String?> downloadFileAction(BuildContext context, Event event) async =>
-      await event.saveFile(context);
+  Future<String?> downloadFileAction(BuildContext context, Event event) async {
+    if (audioRecordStateNotifier.value == AudioRecordState.recording) {
+      preventActionWhileRecordingMobile(context: context);
+      return null;
+    }
+    return await event.saveFile(context);
+  }
 
   void handleContextMenuAction(
     BuildContext context,
@@ -1895,6 +1929,10 @@ class ChatController extends State<Chat>
   }
 
   void onPushDetails() async {
+    if (audioRecordStateNotifier.value == AudioRecordState.recording) {
+      preventActionWhileRecordingMobile(context: context);
+      return null;
+    }
     if (room?.isDirectChat == true) {
       return widget.onChangeRightColumnType?.call(RightColumnType.profileInfo);
     } else {
@@ -1904,6 +1942,10 @@ class ChatController extends State<Chat>
   }
 
   void toggleSearch() {
+    if (audioRecordStateNotifier.value == AudioRecordState.recording) {
+      preventActionWhileRecordingMobile(context: context);
+      return;
+    }
     widget.onChangeRightColumnType?.call(RightColumnType.search);
   }
 
@@ -2212,6 +2254,10 @@ class ChatController extends State<Chat>
     BuildContext context,
     TapDownDetails tapDownDetails,
   ) async {
+    if (audioRecordStateNotifier.value == AudioRecordState.recording) {
+      preventActionWhileRecordingMobile(context: context);
+      return null;
+    }
     final offset = tapDownDetails.globalPosition;
     final listAppBarActions = _getListActionAppBarMenu();
     final listContextMenuActions =
@@ -2729,6 +2775,7 @@ class ChatController extends State<Chat>
     showScrollDownButtonNotifier.dispose();
     editEventNotifier.dispose();
     focusHover.dispose();
+    disposeAudioMixin();
     super.dispose();
   }
 

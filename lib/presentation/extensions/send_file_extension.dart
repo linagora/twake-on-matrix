@@ -162,7 +162,7 @@ extension SendFileExtension on Room {
         fileInfo: fileInfo,
         txid: txid,
       );
-      fakeImageEvent = await sendFakeImagePickerFileEvent(
+      fakeImageEvent = await sendFakeFileInfoEvent(
         fileInfo,
         txid: txid,
         messageType: msgType,
@@ -217,7 +217,7 @@ extension SendFileExtension on Room {
           );
         }
 
-        fakeImageEvent = await sendFakeImagePickerFileEvent(
+        fakeImageEvent = await sendFakeFileInfoEvent(
           fileInfo,
           txid: txid,
           messageType: msgType,
@@ -522,7 +522,7 @@ extension SendFileExtension on Room {
     }
   }
 
-  Future<SyncUpdate> sendFakeImagePickerFileEvent(
+  Future<SyncUpdate> sendFakeFileInfoEvent(
     FileInfo fileInfo, {
     String messageType = MessageTypes.Image,
     required String txid,
@@ -548,6 +548,7 @@ extension SendFileExtension on Room {
                     'info': {
                       ...fileInfo.metadata,
                     },
+                    if (extraContent != null) ...extraContent,
                   },
                   type: EventTypes.Message,
                   eventId: txid,
@@ -614,7 +615,7 @@ extension SendFileExtension on Room {
           assetEntity: entity,
         );
 
-        final fakeImageEvent = await sendFakeImagePickerFileEvent(
+        final fakeImageEvent = await sendFakeFileInfoEvent(
           fileInfo,
           txid: txid,
           messageType: entity.messageType,

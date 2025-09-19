@@ -298,6 +298,7 @@ Future<ConfirmResult> showConfirmAlertDialog({
   Color? okTextColor,
   Color? cancelTextColor,
   bool showCloseButton = false,
+  bool isArrangeActionButtonsVertical = false,
 }) async {
   final result = await showModal<ConfirmResult>(
     context: context,
@@ -315,6 +316,7 @@ Future<ConfirmResult> showConfirmAlertDialog({
         cancelLabelButtonColor: cancelTextColor,
         confirmBackgroundButtonColor: okLabelButtonColor,
         cancelBackgroundButtonColor: cancelLabelButtonColor,
+        isArrangeActionButtonsVertical: isArrangeActionButtonsVertical,
         onConfirmButtonAction: () {
           Navigator.of(context).pop(ConfirmResult.ok);
           onClose?.call();

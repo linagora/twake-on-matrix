@@ -165,3 +165,31 @@ extension MatrixFileExtension on MatrixFile {
 
   bool isFileHaveError(double maxSize) => size > maxSize;
 }
+
+class TwakeAudioFile extends MatrixFile {
+  final int? duration;
+
+  TwakeAudioFile({
+    required super.name,
+    super.mimeType,
+    super.filePath,
+    super.readStream,
+    super.sizeInBytes,
+    this.duration,
+  });
+
+  @override
+  String get msgType => 'm.audio';
+
+  @override
+  Map<String, dynamic> get info => ({
+        ...super.info,
+        if (duration != null) 'duration': duration,
+      });
+
+  @override
+  List<Object?> get props => [
+        ...super.props,
+        duration,
+      ];
+}
