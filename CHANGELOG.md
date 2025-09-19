@@ -1,3 +1,23 @@
+## [2.12.0+2330] - 2025-09-19
+### Added
+- TW-2530: Create new voice recorder UI in input bar for mobile
+- TW-2524: Implement voice bubble recorder and enhance audio player with file info
+- TW-2520: New UI for report content
+- TW-2518: Handle request permission for Audio on mobile
+
+### Changed
+- TW-2541: Apply capabilities settings to profile page
+- TW-2533: Apply role picker for exception list
+- TW-2524: Adjust layout of audio player widget for improved message display
+- Update French wording
+
+### Fixed
+- TW-2531: Reduce memory leak
+- TW-2525: Fix jump to image issue
+- TW-2522: Fix receiving shared media when app terminated
+- TW-2516: Handle Android navigation buttons covering chat input
+- Fix avatar sometimes not showing
+
 ## [2.11.1+2330] - 2025-08-28
 ### Fixed
 - Paste matrixId in creating chat
