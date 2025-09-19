@@ -514,7 +514,7 @@ class GetItInitializer {
       () => ReportContentInteractor(),
     );
 
-    getIt.registerLazySingleton(() => const GetServerCapabilitiesInteractor());
+    getIt.registerFactory(() => const GetServerCapabilitiesInteractor());
   }
 
   void _bindingControllers() {
