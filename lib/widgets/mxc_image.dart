@@ -91,6 +91,7 @@ class _MxcImageState extends State<MxcImage> {
   static const String placeholderKey = 'placeholder';
   ImageData? _imageDataNoCache;
   bool isLoadDone = false;
+  final ValueNotifier<String?> filePathNotifier = ValueNotifier<String?>(null);
 
   ImageData? get _imageData {
     final cacheKey = widget.cacheKey;
@@ -215,15 +216,16 @@ class _MxcImageState extends State<MxcImage> {
     _imageData = widget.imageData;
     if (_imageData != null) {
       isLoadDone = true;
+      filePathNotifier.value = null;
       return (imageData: _imageData, filePath: null);
     }
     try {
       final loadResult = await _load(context);
       isLoadDone = true;
       _imageData = loadResult.imageData;
+      filePathNotifier.value = loadResult.filePath;
       return loadResult;
     } catch (e) {
-      Logs().e('MxcImage::_tryLoad::Exception: $e');
       return (imageData: null, filePath: null);
     }
   }
@@ -262,8 +264,15 @@ class _MxcImageState extends State<MxcImage> {
       );
 
   @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) => _tryLoad(context));
+  }
+
+  @override
   void dispose() {
     _imageDataNoCache = null;
+    filePathNotifier.dispose();
     super.dispose();
   }
 
@@ -302,22 +311,20 @@ class _MxcImageState extends State<MxcImage> {
 
   Widget _buildImageWidget(BuildContext context) {
     final needResize = widget.event != null && !widget.noResize;
-    return FutureBuilder(
-      future: _tryLoad(context),
-      builder: (context, snapshot) {
-        if (snapshot.data?.imageData == null &&
-            snapshot.data?.filePath == null) {
+    return ValueListenableBuilder(
+      valueListenable: filePathNotifier,
+      builder: (context, filePath, child) {
+        if (_imageData == null && filePath == null) {
           return placeholder(context);
         }
-
         return ClipRRect(
-          key: Key('${snapshot.data!.imageData.hashCode}'),
+          key: Key('${_imageData.hashCode}'),
           borderRadius:
               widget.rounded ? BorderRadius.circular(12.0) : BorderRadius.zero,
           child: _ImageWidget(
-            filePath: snapshot.data?.filePath,
+            filePath: filePath,
             event: widget.event,
-            data: snapshot.data?.imageData,
+            data: _imageData,
             width: widget.width,
             height: widget.height,
             fit: widget.fit,
