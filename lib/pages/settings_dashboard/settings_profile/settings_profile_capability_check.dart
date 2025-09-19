@@ -1,4 +1,3 @@
-import 'package:dartz/dartz.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/domain/app_state/capabilities/get_server_capabilities_state.dart';
 import 'package:fluffychat/domain/usecase/capabilities/get_server_capabilities_interactor.dart';
@@ -20,7 +19,10 @@ class SettingsProfileCapabilityCheck extends StatelessWidget {
     return StreamBuilder(
       stream: getIt.get<GetServerCapabilitiesInteractor>().execute(),
       builder: (context, snapshot) {
-        final data = snapshot.data?.fold(id, id);
+        final data = snapshot.data?.fold(
+          (failure) => failure,
+          (success) => success,
+        );
         return builder(
           data is GetServerCapabilitiesSuccess ? data.capabilities : null,
           child,
