@@ -115,86 +115,86 @@ class DraftChatInputRow extends StatelessWidget {
     return ValueListenableBuilder(
       valueListenable: inputText,
       builder: (context, text, _) {
-        if (text.isNotEmpty) {
-          return const SizedBox.shrink();
-        }
-        return Padding(
-          padding: DraftChatInputRowStyle.inputBarPadding(
-            context: context,
-            isKeyboardVisible: isKeyboardVisible,
-          ),
-          child: SocialMediaRecorder(
-            radius: BorderRadius.circular(24),
-            soundRecorderWhenLockedDecoration: BoxDecoration(
-              borderRadius: ChatInputRowStyle.chatInputRowBorderRadius,
-              color: LinagoraSysColors.material().onPrimary,
-              border: Border.all(
-                color: LinagoraRefColors.material().tertiary,
-                width: 1,
-              ),
+        return Offstage(
+          offstage: text.isNotEmpty,
+          child: Padding(
+            padding: DraftChatInputRowStyle.inputBarPadding(
+              context: context,
+              isKeyboardVisible: isKeyboardVisible,
             ),
-            decoration: BoxDecoration(
-              borderRadius: ChatInputRowStyle.chatInputRowBorderRadius,
-              color: LinagoraSysColors.material().onPrimary,
-              border: Border.all(
-                color: LinagoraRefColors.material().tertiary,
-                width: 1,
-              ),
-            ),
-            microphoneRequestPermission: onLongPressAudioRecord,
-            startRecording: () {
-              Logs().d('ChatInputRowMobile:: startRecording');
-              startRecording?.call();
-            },
-            stopRecording: (_) {
-              Logs().d('ChatInputRowMobile:: stopRecording');
-              stopRecording?.call();
-            },
-            sendRequestFunction: (soundFile, time, waveFrom) {
-              Logs().d(
-                'ChatInputRowMobile:: sendRequestFunction $soundFile',
-              );
-              stopRecording?.call();
-
-              final file = MatrixAudioFile(
-                bytes: soundFile.readAsBytesSync(),
-                name: soundFile.path,
-                filePath: soundFile.path,
-                readStream: soundFile.openRead(),
-                duration: time.inMilliseconds,
-              );
-              sendVoiceMessageAction?.call(file, time, waveFrom);
-            },
-            encode: AudioEncoderType.AAC,
-            fullRecordPackageHeight: 50,
-            initRecordPackageWidth: 50,
-            cancelTextBackGroundColor: Colors.transparent,
-            cancelText: L10n.of(context)!.cancel,
-            cancelTextStyle: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: LinagoraSysColors.material().primary,
+            child: SocialMediaRecorder(
+              radius: BorderRadius.circular(24),
+              soundRecorderWhenLockedDecoration: BoxDecoration(
+                borderRadius: ChatInputRowStyle.chatInputRowBorderRadius,
+                color: LinagoraSysColors.material().onPrimary,
+                border: Border.all(
+                  color: LinagoraRefColors.material().tertiary,
+                  width: 1,
                 ),
-            slideToCancelText: L10n.of(context)!.slideToCancel,
-            slideToCancelTextStyle:
-                Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: LinagoraRefColors.material().neutral[30],
-                    ),
-            counterTextStyle: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: LinagoraRefColors.material().neutral[50],
-                ),
-            slideToCancelPadding: const EdgeInsets.only(right: 24),
-            recordIcon: Icon(
-              Icons.keyboard_voice_outlined,
-              color: LinagoraSysColors.material().tertiary,
-            ),
-            soundRecorderWhenLockedWidth:
-                MediaQuery.of(context).size.width - 16,
-            counterPadding: const EdgeInsets.only(left: 16),
-            micCounterWidget: Container(
-              width: 12,
-              height: 12,
+              ),
               decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: LinagoraSysColors.material().error,
+                borderRadius: ChatInputRowStyle.chatInputRowBorderRadius,
+                color: LinagoraSysColors.material().onPrimary,
+                border: Border.all(
+                  color: LinagoraRefColors.material().tertiary,
+                  width: 1,
+                ),
+              ),
+              microphoneRequestPermission: onLongPressAudioRecord,
+              startRecording: () {
+                Logs().d('ChatInputRowMobile:: startRecording');
+                startRecording?.call();
+              },
+              stopRecording: (_) {
+                Logs().d('ChatInputRowMobile:: stopRecording');
+                stopRecording?.call();
+              },
+              sendRequestFunction: (soundFile, time, waveFrom) {
+                Logs().d(
+                  'ChatInputRowMobile:: sendRequestFunction $soundFile',
+                );
+                stopRecording?.call();
+
+                final file = MatrixAudioFile(
+                  bytes: soundFile.readAsBytesSync(),
+                  name: soundFile.path,
+                  filePath: soundFile.path,
+                  readStream: soundFile.openRead(),
+                  duration: time.inMilliseconds,
+                );
+                sendVoiceMessageAction?.call(file, time, waveFrom);
+              },
+              encode: AudioEncoderType.AAC,
+              fullRecordPackageHeight: 50,
+              initRecordPackageWidth: 50,
+              cancelTextBackGroundColor: Colors.transparent,
+              cancelText: L10n.of(context)!.cancel,
+              cancelTextStyle: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: LinagoraSysColors.material().primary,
+                  ),
+              slideToCancelText: L10n.of(context)!.slideToCancel,
+              slideToCancelTextStyle:
+                  Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: LinagoraRefColors.material().neutral[30],
+                      ),
+              counterTextStyle: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: LinagoraRefColors.material().neutral[50],
+                  ),
+              slideToCancelPadding: const EdgeInsets.only(right: 24),
+              recordIcon: Icon(
+                Icons.keyboard_voice_outlined,
+                color: LinagoraSysColors.material().tertiary,
+              ),
+              soundRecorderWhenLockedWidth:
+                  MediaQuery.of(context).size.width - 16,
+              counterPadding: const EdgeInsets.only(left: 16),
+              micCounterWidget: Container(
+                width: 12,
+                height: 12,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: LinagoraSysColors.material().error,
+                ),
               ),
             ),
           ),
