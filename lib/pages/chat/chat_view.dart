@@ -4,6 +4,7 @@ import 'package:fluffychat/pages/chat/chat_invitation_body.dart';
 import 'package:fluffychat/pages/chat/chat_view_body.dart';
 import 'package:fluffychat/pages/chat/chat_view_style.dart';
 import 'package:fluffychat/pages/chat/events/message_content_mixin.dart';
+import 'package:fluffychat/presentation/mixins/audio_mixin.dart';
 import 'package:fluffychat/resource/image_paths.dart';
 import 'package:fluffychat/utils/stream_extension.dart';
 import 'package:fluffychat/widgets/matrix.dart';
@@ -194,13 +195,21 @@ class ChatView extends StatelessWidget with MessageContentMixin {
                     if (showScrollDownButton &&
                         controller.selectedEvents.isEmpty &&
                         controller.replyEventNotifier.value == null) {
-                      return Padding(
-                        padding: const EdgeInsets.only(bottom: 56.0),
-                        child: FloatingActionButton(
-                          onPressed: controller.scrollDown,
-                          mini: true,
-                          child: const Icon(Icons.arrow_downward_outlined),
-                        ),
+                      return ValueListenableBuilder(
+                        valueListenable: controller.audioRecordStateNotifier,
+                        builder: (context, audioRecordState, _) {
+                          if (audioRecordState == AudioRecordState.recording) {
+                            return const SizedBox.shrink();
+                          }
+                          return Padding(
+                            padding: const EdgeInsets.only(bottom: 56.0),
+                            child: FloatingActionButton(
+                              onPressed: controller.scrollDown,
+                              mini: true,
+                              child: const Icon(Icons.arrow_downward_outlined),
+                            ),
+                          );
+                        },
                       );
                     }
                     return const SizedBox();

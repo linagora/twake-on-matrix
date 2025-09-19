@@ -3401,5 +3401,9 @@
   "explainPermissionToAccessMicrophone": "To send voice messages, allow Twake Chat to access the microphone.",
   "allowMicrophoneAccess": "Allow microphone access",
   "later": "Later",
-  "couldNotPlayAudioFile": "Could not play audio file"
+  "couldNotPlayAudioFile": "Could not play audio file",
+  "slideToCancel": "Slide to cancel",
+  "recordingInProgress": "Recording in progress",
+  "pleaseFinishOrStopTheRecording": "Please finish or stop the recording before performing other actions.",
+  "audioMessageFailedToSend": "Audio message failed to send."
 }
