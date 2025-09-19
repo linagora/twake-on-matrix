@@ -275,13 +275,10 @@ class DraftChatController extends State<DraftChat>
             },
           },
         ).catchError((e) {
-          if (audioFile.filePath == null ||
-              audioFile.filePath?.isEmpty == true) {
-            TwakeSnackBar.show(
-              context,
-              L10n.of(context)!.audioMessageFailedToSend,
-            );
-          }
+          TwakeSnackBar.show(
+            context,
+            L10n.of(context)!.audioMessageFailedToSend,
+          );
           Logs().e('Failed to send voice message', e);
           return null;
         });
