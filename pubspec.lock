@@ -2775,8 +2775,8 @@ packages:
     dependency: "direct main"
     description:
       path: "."
-      ref: hot-fix-call-back-after-stop-recording
-      resolved-ref: "9ceabbd94dc7b611ec50dfbabf6338e2a2794a41"
+      ref: twake_supported
+      resolved-ref: "2394c84d327bab78fd9cb2839cf0779c75d0ff9a"
       url: "git@github.com:linagora/social_media_recorder.git"
     source: git
     version: "1.2.1"

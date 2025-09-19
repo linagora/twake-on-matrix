@@ -8,6 +8,7 @@ import 'package:fluffychat/pages/chat_draft/draft_chat.dart';
 import 'package:fluffychat/pages/chat_draft/draft_chat_input_row_style.dart';
 import 'package:fluffychat/pages/chat_draft/draft_chat_view_style.dart';
 import 'package:fluffychat/presentation/mixins/audio_mixin.dart';
+import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_file_extension.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/widgets/twake_components/twake_icon_button.dart';
 import 'package:flutter/material.dart';
@@ -33,7 +34,7 @@ class DraftChatInputRow extends StatelessWidget {
   final ValueNotifier<AudioRecordState> audioRecordStateNotifier;
   final Function()? startRecording;
   final Function()? stopRecording;
-  final void Function(MatrixAudioFile, Duration, List<int>)?
+  final void Function(TwakeAudioFile, Duration, List<int>)?
       sendVoiceMessageAction;
 
   const DraftChatInputRow({
@@ -155,11 +156,9 @@ class DraftChatInputRow extends StatelessWidget {
                 );
                 stopRecording?.call();
 
-                final file = MatrixAudioFile(
-                  bytes: soundFile.readAsBytesSync(),
+                final file = TwakeAudioFile(
                   name: soundFile.path,
                   filePath: soundFile.path,
-                  readStream: soundFile.openRead(),
                   duration: time.inMilliseconds,
                 );
                 sendVoiceMessageAction?.call(file, time, waveFrom);

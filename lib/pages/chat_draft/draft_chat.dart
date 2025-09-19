@@ -230,17 +230,24 @@ class DraftChatController extends State<DraftChat>
   }
 
   Future<void> sendVoiceMessageAction({
-    required MatrixAudioFile audioFile,
+    required TwakeAudioFile audioFile,
     required Duration time,
     required List<int> waveform,
   }) async {
     _createRoom(
       onRoomCreatedSuccess: (room) async {
+        if (audioFile.filePath == null || audioFile.filePath?.isEmpty == true) {
+          TwakeSnackBar.show(
+            context,
+            L10n.of(context)!.audioMessageFailedToSend,
+          );
+          return;
+        }
+
         final fileInfo = FileInfo(
           audioFile.name,
           audioFile.filePath ?? '',
           audioFile.size,
-          readStream: audioFile.readStream,
         );
 
         final txid = client.generateUniqueTransactionId();
@@ -268,6 +275,13 @@ class DraftChatController extends State<DraftChat>
             },
           },
         ).catchError((e) {
+          if (audioFile.filePath == null ||
+              audioFile.filePath?.isEmpty == true) {
+            TwakeSnackBar.show(
+              context,
+              L10n.of(context)!.audioMessageFailedToSend,
+            );
+          }
           Logs().e('Failed to send voice message', e);
           return null;
         });
