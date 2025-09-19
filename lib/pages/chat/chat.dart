@@ -760,6 +760,10 @@ class ChatController extends State<Chat>
   }
 
   void reportEventAction(Event event) async {
+    if (audioRecordStateNotifier.value == AudioRecordState.recording) {
+      preventActionWhileRecordingMobile(context: context);
+      return;
+    }
     final l10n = L10n.of(context)!;
     final options = MessageReportReason.values.map((reportReason) {
       return LinagoraDialogOption(
