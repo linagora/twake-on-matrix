@@ -31,6 +31,7 @@ class SettingsProfileViewMobile extends StatelessWidget {
   final Client client;
   final Function(MatrixFile) onImageLoaded;
   final ValueNotifier<Profile?> currentProfile;
+  final bool canEditAvatar;
 
   const SettingsProfileViewMobile({
     super.key,
@@ -42,6 +43,7 @@ class SettingsProfileViewMobile extends StatelessWidget {
     required this.onTapMultipleAccountsButton,
     required this.settingsMultiAccountsUIState,
     required this.onImageLoaded,
+    required this.canEditAvatar,
     this.menuChildren,
     this.menuController,
   });
@@ -157,66 +159,70 @@ class SettingsProfileViewMobile extends StatelessWidget {
                       },
                     ),
                   ),
-                  Positioned(
-                    bottom: SettingsProfileViewMobileStyle.positionedBottomSize,
-                    right: SettingsProfileViewMobileStyle.positionedRightSize,
-                    child: MenuAnchor(
-                      controller: menuController,
-                      style: MenuStyle(
-                        padding: const WidgetStatePropertyAll(
-                          EdgeInsets.zero,
-                        ),
-                        backgroundColor: WidgetStatePropertyAll(
-                          PopupMenuWidgetStyle.defaultMenuColor(context),
-                        ),
-                        shape: WidgetStatePropertyAll(
-                          RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(
-                              PopupMenuWidgetStyle.menuBorderRadius,
-                            ),
+                  if (canEditAvatar)
+                    Positioned(
+                      bottom:
+                          SettingsProfileViewMobileStyle.positionedBottomSize,
+                      right: SettingsProfileViewMobileStyle.positionedRightSize,
+                      child: MenuAnchor(
+                        controller: menuController,
+                        style: MenuStyle(
+                          padding: const WidgetStatePropertyAll(
+                            EdgeInsets.zero,
                           ),
-                        ),
-                      ),
-                      builder: (
-                        BuildContext context,
-                        MenuController menuController,
-                        Widget? child,
-                      ) {
-                        return GestureDetector(
-                          onTap: () {
-                            if (PlatformInfos.isWeb) {
-                              menuController.isOpen
-                                  ? menuController.close()
-                                  : menuController.open();
-                            } else {
-                              onTapAvatar?.call();
-                            }
-                          },
-                          child: Container(
-                            decoration: BoxDecoration(
-                              color: Theme.of(context).colorScheme.primary,
+                          backgroundColor: WidgetStatePropertyAll(
+                            PopupMenuWidgetStyle.defaultMenuColor(context),
+                          ),
+                          shape: WidgetStatePropertyAll(
+                            RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(
-                                SettingsProfileViewMobileStyle.avatarSize,
+                                PopupMenuWidgetStyle.menuBorderRadius,
                               ),
-                              border: Border.all(
-                                color: Theme.of(context).colorScheme.onPrimary,
-                                width: SettingsProfileViewMobileStyle
-                                    .iconEditBorderWidth,
-                              ),
-                            ),
-                            padding:
-                                SettingsProfileViewMobileStyle.editIconPadding,
-                            child: Icon(
-                              Icons.edit,
-                              size: SettingsProfileViewMobileStyle.iconEditSize,
-                              color: Theme.of(context).colorScheme.onPrimary,
                             ),
                           ),
-                        );
-                      },
-                      menuChildren: menuChildren ?? [],
+                        ),
+                        builder: (
+                          BuildContext context,
+                          MenuController menuController,
+                          Widget? child,
+                        ) {
+                          return GestureDetector(
+                            onTap: () {
+                              if (PlatformInfos.isWeb) {
+                                menuController.isOpen
+                                    ? menuController.close()
+                                    : menuController.open();
+                              } else {
+                                onTapAvatar?.call();
+                              }
+                            },
+                            child: Container(
+                              decoration: BoxDecoration(
+                                color: Theme.of(context).colorScheme.primary,
+                                borderRadius: BorderRadius.circular(
+                                  SettingsProfileViewMobileStyle.avatarSize,
+                                ),
+                                border: Border.all(
+                                  color:
+                                      Theme.of(context).colorScheme.onPrimary,
+                                  width: SettingsProfileViewMobileStyle
+                                      .iconEditBorderWidth,
+                                ),
+                              ),
+                              padding: SettingsProfileViewMobileStyle
+                                  .editIconPadding,
+                              child: Icon(
+                                Icons.edit,
+                                size:
+                                    SettingsProfileViewMobileStyle.iconEditSize,
+                                color: Theme.of(context).colorScheme.onPrimary,
+                              ),
+                            ),
+                          );
+                        },
+                        menuChildren: menuChildren ?? [],
+                      ),
                     ),
-                  ),
                 ],
               ),
             ),

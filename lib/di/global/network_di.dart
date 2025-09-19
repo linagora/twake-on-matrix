@@ -172,6 +172,11 @@ class NetworkDI extends BaseDI {
         instanceName: hiveCacheDioInterceptorName,
       ),
     );
+    dio.interceptors.add(
+      get.get<MatrixDioCacheInterceptor>(
+        instanceName: memCacheDioInterceptorName,
+      ),
+    );
   }
 
   void _bindMemCache(GetIt get) {
@@ -194,6 +199,7 @@ class NetworkDI extends BaseDI {
     );
     dioCacheCustomInterceptor.addUriSupportsCache([
       IdentityEndpoint.hashDetailsServicePath.generateTwakeIdentityEndpoint(),
+      HomeserverEndpoint.capabilitiesPath.generateHomeserverCapabilitiesPath(),
     ]);
   }
 }

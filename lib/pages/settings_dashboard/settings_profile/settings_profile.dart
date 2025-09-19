@@ -14,6 +14,7 @@ import 'package:fluffychat/domain/usecase/settings/update_profile_interactor.dar
 import 'package:fluffychat/event/twake_event_dispatcher.dart';
 import 'package:fluffychat/event/twake_inapp_event_types.dart';
 import 'package:fluffychat/pages/multiple_accounts/multiple_accounts_picker.dart';
+import 'package:fluffychat/pages/settings_dashboard/settings_profile/settings_profile_capability_check.dart';
 import 'package:fluffychat/pages/settings_dashboard/settings_profile/settings_profile_context_menu_actions.dart';
 import 'package:fluffychat/pages/settings_dashboard/settings_profile/settings_profile_state/get_clients_ui_state.dart';
 import 'package:fluffychat/pages/settings_dashboard/settings_profile/settings_profile_view.dart';
@@ -731,8 +732,13 @@ class SettingsProfileController extends State<SettingsProfile>
 
   @override
   Widget build(BuildContext context) {
-    return SettingsProfileView(
-      controller: this,
+    return SettingsProfileCapabilityCheck(
+      builder: (capabilities, _) {
+        return SettingsProfileView(
+          controller: this,
+          capabilities: capabilities,
+        );
+      },
     );
   }
 }

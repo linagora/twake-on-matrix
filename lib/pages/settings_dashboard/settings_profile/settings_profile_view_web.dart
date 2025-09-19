@@ -22,6 +22,7 @@ class SettingsProfileViewWeb extends StatelessWidget {
   final MenuController? menuController;
   final Function(MatrixFile) onImageLoaded;
   final ValueNotifier<Profile?> currentProfile;
+  final bool canEditAvatar;
 
   const SettingsProfileViewWeb({
     super.key,
@@ -31,6 +32,7 @@ class SettingsProfileViewWeb extends StatelessWidget {
     required this.client,
     required this.settingsProfileUIState,
     required this.onImageLoaded,
+    required this.canEditAvatar,
     this.menuController,
     this.menuChildren,
   });
@@ -147,72 +149,74 @@ class SettingsProfileViewWeb extends StatelessWidget {
                                   },
                                 ),
                               ),
-                              Positioned(
-                                bottom: SettingsProfileViewWebStyle
-                                    .positionedBottomSize,
-                                right: SettingsProfileViewWebStyle
-                                    .positionedRightSize,
-                                child: MenuAnchor(
-                                  controller: menuController,
-                                  style: MenuStyle(
-                                    padding: const WidgetStatePropertyAll(
-                                      EdgeInsets.zero,
-                                    ),
-                                    shape: WidgetStatePropertyAll(
-                                      RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(
-                                          PopupMenuWidgetStyle.menuBorderRadius,
+                              if (canEditAvatar)
+                                Positioned(
+                                  bottom: SettingsProfileViewWebStyle
+                                      .positionedBottomSize,
+                                  right: SettingsProfileViewWebStyle
+                                      .positionedRightSize,
+                                  child: MenuAnchor(
+                                    controller: menuController,
+                                    style: MenuStyle(
+                                      padding: const WidgetStatePropertyAll(
+                                        EdgeInsets.zero,
+                                      ),
+                                      shape: WidgetStatePropertyAll(
+                                        RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.circular(
+                                            PopupMenuWidgetStyle
+                                                .menuBorderRadius,
+                                          ),
+                                        ),
+                                      ),
+                                      backgroundColor: WidgetStatePropertyAll(
+                                        PopupMenuWidgetStyle.defaultMenuColor(
+                                          context,
                                         ),
                                       ),
                                     ),
-                                    backgroundColor: WidgetStatePropertyAll(
-                                      PopupMenuWidgetStyle.defaultMenuColor(
-                                        context,
-                                      ),
-                                    ),
-                                  ),
-                                  builder: (
-                                    BuildContext context,
-                                    MenuController menuController,
-                                    Widget? child,
-                                  ) {
-                                    return GestureDetector(
-                                      onTap: () => menuController.isOpen
-                                          ? menuController.close()
-                                          : menuController.open(),
-                                      child: Container(
-                                        decoration: BoxDecoration(
-                                          color: Theme.of(context)
-                                              .colorScheme
-                                              .primary,
-                                          borderRadius: BorderRadius.circular(
-                                            SettingsProfileViewWebStyle
-                                                .avatarSize,
+                                    builder: (
+                                      BuildContext context,
+                                      MenuController menuController,
+                                      Widget? child,
+                                    ) {
+                                      return GestureDetector(
+                                        onTap: () => menuController.isOpen
+                                            ? menuController.close()
+                                            : menuController.open(),
+                                        child: Container(
+                                          decoration: BoxDecoration(
+                                            color: Theme.of(context)
+                                                .colorScheme
+                                                .primary,
+                                            borderRadius: BorderRadius.circular(
+                                              SettingsProfileViewWebStyle
+                                                  .avatarSize,
+                                            ),
+                                            border: Border.all(
+                                              color: Theme.of(context)
+                                                  .colorScheme
+                                                  .onPrimary,
+                                              width: SettingsProfileViewWebStyle
+                                                  .iconEditBorderWidth,
+                                            ),
                                           ),
-                                          border: Border.all(
+                                          padding: SettingsProfileViewWebStyle
+                                              .paddingEditIcon,
+                                          child: Icon(
+                                            Icons.edit,
+                                            size: SettingsProfileViewWebStyle
+                                                .iconEditSize,
                                             color: Theme.of(context)
                                                 .colorScheme
                                                 .onPrimary,
-                                            width: SettingsProfileViewWebStyle
-                                                .iconEditBorderWidth,
                                           ),
                                         ),
-                                        padding: SettingsProfileViewWebStyle
-                                            .paddingEditIcon,
-                                        child: Icon(
-                                          Icons.edit,
-                                          size: SettingsProfileViewWebStyle
-                                              .iconEditSize,
-                                          color: Theme.of(context)
-                                              .colorScheme
-                                              .onPrimary,
-                                        ),
-                                      ),
-                                    );
-                                  },
-                                  menuChildren: menuChildren ?? [],
+                                      );
+                                    },
+                                    menuChildren: menuChildren ?? [],
+                                  ),
                                 ),
-                              ),
                             ],
                           ),
                         ),

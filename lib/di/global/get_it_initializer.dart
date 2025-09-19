@@ -1,6 +1,7 @@
 import 'dart:collection';
 
 import 'package:fluffychat/config/app_grid_config/app_config_loader.dart';
+import 'package:fluffychat/data/datasource/capabilities/server_capabilities_datasource.dart';
 import 'package:fluffychat/data/datasource/contact/address_book_datasource.dart';
 import 'package:fluffychat/data/datasource/contact/hive_third_party_contact_datasource.dart';
 import 'package:fluffychat/data/datasource/contact/phonebook_datasource.dart';
@@ -16,6 +17,7 @@ import 'package:fluffychat/data/datasource/server_config_datasource.dart';
 import 'package:fluffychat/data/datasource/server_search_datasource.dart';
 import 'package:fluffychat/data/datasource/tom_configurations_datasource.dart';
 import 'package:fluffychat/data/datasource/tom_contacts_datasource.dart';
+import 'package:fluffychat/data/datasource_impl/capabilities/server_capabilities_datasource_impl.dart';
 import 'package:fluffychat/data/datasource_impl/contact/address_book_datasource_impl.dart';
 import 'package:fluffychat/data/datasource_impl/contact/hive_third_party_contact_datasource_impl.dart';
 import 'package:fluffychat/data/datasource_impl/contact/phonebook_contact_datasource_impl.dart';
@@ -35,6 +37,7 @@ import 'package:fluffychat/data/local/contact/shared_preferences_contact_cache_m
 import 'package:fluffychat/data/local/localizations/language_cache_manager.dart';
 import 'package:fluffychat/data/local/multiple_account/multiple_account_cache_manager.dart';
 import 'package:fluffychat/data/local/reaction/reaction_cache_manager.dart';
+import 'package:fluffychat/data/network/capabilities/server_capabilities_api.dart';
 import 'package:fluffychat/data/network/contact/address_book_api.dart';
 import 'package:fluffychat/data/network/contact/tom_contact_api.dart';
 import 'package:fluffychat/data/network/dio_cache_option.dart';
@@ -43,6 +46,7 @@ import 'package:fluffychat/data/network/media/media_api.dart';
 import 'package:fluffychat/data/network/recovery_words/recovery_words_api.dart';
 import 'package:fluffychat/data/network/search/server_search_api.dart';
 import 'package:fluffychat/data/network/server_config_api.dart';
+import 'package:fluffychat/data/repository/capabilities/server_capabilities_repository_impl.dart';
 import 'package:fluffychat/data/repository/contact/address_book_repository_impl.dart';
 import 'package:fluffychat/data/repository/contact/hive_third_party_contact_repository_impl.dart';
 import 'package:fluffychat/data/repository/contact/phonebook_contact_repository_impl.dart';
@@ -62,6 +66,7 @@ import 'package:fluffychat/di/global/hive_di.dart';
 import 'package:fluffychat/di/global/network_connectivity_di.dart';
 import 'package:fluffychat/di/global/network_di.dart';
 import 'package:fluffychat/domain/contact_manager/contacts_manager.dart';
+import 'package:fluffychat/domain/repository/capabilities/server_capabilities_repository.dart';
 import 'package:fluffychat/domain/repository/contact/address_book_repository.dart';
 import 'package:fluffychat/domain/repository/contact/hive_contact_repository.dart';
 import 'package:fluffychat/domain/repository/contact_repository.dart';
@@ -77,6 +82,7 @@ import 'package:fluffychat/domain/repository/server_config_repository.dart';
 import 'package:fluffychat/domain/repository/server_search_repository.dart';
 import 'package:fluffychat/domain/repository/tom_configurations_repository.dart';
 import 'package:fluffychat/domain/usecase/app_grid/get_app_grid_configuration_interactor.dart';
+import 'package:fluffychat/domain/usecase/capabilities/get_server_capabilities_interactor.dart';
 import 'package:fluffychat/domain/usecase/contacts/delete_third_party_contact_box_interactor.dart';
 import 'package:fluffychat/domain/usecase/contacts/federation_look_up_phonebook_contact_interactor.dart';
 import 'package:fluffychat/domain/usecase/contacts/get_tom_contacts_interactor.dart';
@@ -202,6 +208,7 @@ class GetItInitializer {
     getIt.registerSingleton<ServerSearchAPI>(ServerSearchAPI());
     getIt.registerSingleton<ServerConfigAPI>(ServerConfigAPI());
     getIt.registerFactory<InvitationAPI>(() => InvitationAPI());
+    getIt.registerSingleton(const ServerCapabilitiesAPI());
   }
 
   void bindingManager() {
@@ -248,6 +255,9 @@ class GetItInitializer {
     );
     getIt.registerFactory<HiveInvitationStatusDatasource>(
       () => HiveInvitationStatusDatasourceImpl(),
+    );
+    getIt.registerFactory<ServerCapabilitiesDatasource>(
+      () => const ServerCapabilitiesDatasourceImpl(),
     );
   }
 
@@ -333,6 +343,9 @@ class GetItInitializer {
     );
     getIt.registerFactory<ReactionsRepository>(
       () => ReactionsRepositoryImpl(),
+    );
+    getIt.registerFactory<ServerCapabilitiesRepository>(
+      () => const ServerCapabilitiesRepositoryImpl(),
     );
   }
 
@@ -500,6 +513,8 @@ class GetItInitializer {
     getIt.registerFactory<ReportContentInteractor>(
       () => ReportContentInteractor(),
     );
+
+    getIt.registerLazySingleton(() => const GetServerCapabilitiesInteractor());
   }
 
   void _bindingControllers() {
