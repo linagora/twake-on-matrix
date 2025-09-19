@@ -19,6 +19,7 @@ class SettingsProfileItemBuilder extends StatelessWidget {
   final void Function(String, SettingsProfileEnum)? onChange;
   final VoidCallback? onCopyAction;
   final ValueNotifier<Either<Failure, Success>> settingsProfileUIState;
+  final bool canEditDisplayName;
 
   const SettingsProfileItemBuilder({
     super.key,
@@ -32,6 +33,7 @@ class SettingsProfileItemBuilder extends StatelessWidget {
     this.onChange,
     this.onCopyAction,
     required this.settingsProfileUIState,
+    required this.canEditDisplayName,
   });
 
   @override
@@ -69,26 +71,27 @@ class SettingsProfileItemBuilder extends StatelessWidget {
                         return TextField(
                           onChanged: (value) =>
                               onChange!(value, settingsProfileEnum),
-                          readOnly: !settingsProfilePresentation.isEditable,
+                          readOnly: isReadOnly,
                           autofocus: false,
                           contextMenuBuilder: mobileTwakeContextMenuBuilder,
                           focusNode: focusNode,
                           controller: textEditingController,
                           decoration: InputDecoration(
-                            suffixIcon: IconButton(
-                              onPressed: settingsProfilePresentation.isEditable
-                                  ? () {
-                                      focusNode?.requestFocus();
-                                    }
-                                  : onCopyAction,
-                              icon: Icon(
-                                suffixIcon,
-                                size: SettingsProfileItemStyle.iconSize,
-                                color: Theme.of(context)
-                                    .colorScheme
-                                    .onSurfaceVariant,
-                              ),
-                            ),
+                            suffixIcon: hasSuffixIcon
+                                ? IconButton(
+                                    onPressed:
+                                        settingsProfilePresentation.isEditable
+                                            ? focusNode?.requestFocus
+                                            : onCopyAction,
+                                    icon: Icon(
+                                      suffixIcon,
+                                      size: SettingsProfileItemStyle.iconSize,
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .onSurfaceVariant,
+                                    ),
+                                  )
+                                : null,
                             hintText: textEditingController?.text,
                           ),
                         );
@@ -108,5 +111,21 @@ class SettingsProfileItemBuilder extends StatelessWidget {
         ),
       ],
     );
+  }
+
+  bool get isReadOnly {
+    if (!settingsProfilePresentation.isEditable) return true;
+
+    return switch (settingsProfileEnum) {
+      SettingsProfileEnum.displayName => !canEditDisplayName,
+      _ => false,
+    };
+  }
+
+  bool get hasSuffixIcon {
+    return switch (settingsProfileEnum) {
+      SettingsProfileEnum.displayName => canEditDisplayName,
+      _ => true,
+    };
   }
 }

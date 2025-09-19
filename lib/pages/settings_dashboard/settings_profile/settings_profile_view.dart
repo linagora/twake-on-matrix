@@ -1,4 +1,5 @@
 import 'package:fluffychat/di/global/get_it_initializer.dart';
+import 'package:fluffychat/domain/model/capabilities/capabilities_extension.dart';
 import 'package:fluffychat/pages/settings_dashboard/settings_profile/settings_profile.dart';
 import 'package:fluffychat/pages/settings_dashboard/settings_profile/settings_profile_item.dart';
 import 'package:fluffychat/pages/settings_dashboard/settings_profile/settings_profile_view_mobile.dart';
@@ -12,9 +13,11 @@ import 'package:flutter_adaptive_scaffold/flutter_adaptive_scaffold.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:go_router/go_router.dart';
 import 'package:linagora_design_flutter/colors/linagora_sys_colors.dart';
+import 'package:matrix/matrix.dart';
 
 class SettingsProfileView extends StatelessWidget {
   final SettingsProfileController controller;
+  final Capabilities? capabilities;
 
   static const ValueKey settingsProfileViewMobileKey =
       ValueKey('settingsProfileViewMobile');
@@ -25,6 +28,7 @@ class SettingsProfileView extends StatelessWidget {
   const SettingsProfileView({
     super.key,
     required this.controller,
+    required this.capabilities,
   });
 
   @override
@@ -129,6 +133,8 @@ class SettingsProfileView extends StatelessWidget {
                         onCopyAction: () => controller.copyEventsAction(
                           controller.getListProfileMobile[index],
                         ),
+                        canEditDisplayName:
+                            capabilities?.canEditDisplayName == true,
                       );
                     },
                     separatorBuilder: (context, index) {
@@ -138,6 +144,7 @@ class SettingsProfileView extends StatelessWidget {
                   ),
                   onImageLoaded: controller.updateMatrixFile,
                   currentProfile: controller.currentProfile,
+                  canEditAvatar: capabilities?.canEditAvatar == true,
                 );
               },
             ),
@@ -180,6 +187,8 @@ class SettingsProfileView extends StatelessWidget {
                           controller
                               .handleTextEditOnChange(settingsProfileEnum);
                         },
+                        canEditDisplayName:
+                            capabilities?.canEditDisplayName == true,
                       );
                     },
                     separatorBuilder: (context, index) {
@@ -221,6 +230,8 @@ class SettingsProfileView extends StatelessWidget {
                         onCopyAction: () => controller.copyEventsAction(
                           controller.getListProfileWorkIdentitiesInfo[index],
                         ),
+                        canEditDisplayName:
+                            capabilities?.canEditDisplayName == true,
                       );
                     },
                     separatorBuilder: (context, index) {
@@ -228,6 +239,7 @@ class SettingsProfileView extends StatelessWidget {
                     },
                     itemCount: controller.getListProfileBasicInfo.length,
                   ),
+                  canEditAvatar: capabilities?.canEditAvatar == true,
                 );
               },
             ),
