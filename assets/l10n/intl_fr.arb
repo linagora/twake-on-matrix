@@ -2358,7 +2358,7 @@
   "@storeInSecureStorageDescription": {},
   "indexedDbErrorTitle": "Problèmes relatifs au mode privé",
   "@indexedDbErrorTitle": {},
-  "stories": "Histoires",
+  "stories": "Stories",
   "@stories": {},
   "noEmailWarning": "Veuillez saisir une adresse e-mail valide. Sinon, vous ne pourrez pas réinitialiser votre mot de passe. Si vous ne voulez pas le faire, appuyez à nouveau sur le bouton pour continuer.",
   "@noEmailWarning": {},
@@ -2858,7 +2858,7 @@
   "@noResultsFound": {},
   "muteThisChat": "Mettre ce salon en sourdine",
   "@muteThisChat": {},
-  "clearAllSelected": "Effacer",
+  "clearAllSelected": "Tout désélectionner",
   "@clearAllSelected": {},
   "encryptionMessage": "Cette fonction protège vos messages contre la lecture par d'autres personnes, mais les empêche également d'être sauvegardés sur nos serveurs. Vous ne pouvez pas désactiver cette fonction ultérieurement.",
   "@encryptionMessage": {},
@@ -3286,7 +3286,7 @@
       "number": {}
     }
   },
-  "exceptions": "Exceptions",
+  "exceptions": "Cas particuliers",
   "@exceptions": {},
   "readOnly": "Lecture seule",
   "@readOnly": {},
@@ -3328,7 +3328,7 @@
       "number": {}
     }
   },
-  "memberOfTheGroup": "Membres du groupe",
+  "memberOfTheGroup": "Membres du groupe ({number})",
   "@memberOfTheGroup": {
     "type": "text",
     "placeholders": {
@@ -3399,6 +3399,90 @@
   "@confirmTransfer": {},
   "unblockUser": "Débloquer un membre",
   "@unblockUser": {},
-  "blockUser": "Bloquer  cette utilisateurs",
-  "@blockUser": {}
+  "blockUser": "Bloquer cet utilisateur",
+  "@blockUser": {},
+  "audioMessageFailedToSend": "Erreur lors de l'envoie du vocal.",
+  "@audioMessageFailedToSend": {},
+  "downgradeToReadOnly": "Passer en lecture seul",
+  "@downgradeToReadOnly": {},
+  "transferOwnership": "Définir comme nouveau propriétaire",
+  "@transferOwnership": {},
+  "confirmTransferOwnership": "Êtes-vous sûr de vouloir définir {name} en tant que propriétaire ?",
+  "@confirmTransferOwnership": {
+    "type": "text",
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "permissionErrorUnblockUser": "Vous n'êtes pas autorisé à débloquer cet utilisateur.",
+  "@permissionErrorUnblockUser": {},
+  "permissionErrorBlockUser": "Vous n'êtes pas autorisé à bloquer cet utilisateur.",
+  "@permissionErrorBlockUser": {},
+  "userIsNotAValidMxid": "Le Matrix ID suivant n'est pas valide : {mxid}",
+  "@userIsNotAValidMxid": {
+    "type": "text",
+    "placeholders": {
+      "mxid": {}
+    }
+  },
+  "userNotFoundInIgnoreList": "{mxid} ne fait pas partie de votre liste d'utilisateurs bloqués",
+  "@userNotFoundInIgnoreList": {
+    "type": "text",
+    "placeholders": {
+      "mxid": {}
+    }
+  },
+  "blockedUsers": "Utilisateurs bloqués",
+  "@blockedUsers": {},
+  "unblockUsername": "Débloquer : {name}",
+  "@unblockUsername": {
+    "type": "text",
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "unblock": "Débloquer",
+  "@unblock": {},
+  "unblockDescriptionDialog": "Vous recevrez à nouveau des messages de cette personne. Elle ne sera pas informée que vous l'aviez bloquée et que vous la débloquez.",
+  "@unblockDescriptionDialog": {},
+  "report": "Repporter",
+  "@report": {},
+  "sendReport": "Reporter",
+  "@sendReport": {},
+  "addComment": "Ajouter un commentaire",
+  "@addComment": {},
+  "spam": "Spam",
+  "@spam": {},
+  "reportDesc": "Pourquoi ce message est-il inapproprié ?",
+  "@reportDesc": {},
+  "violence": "Violence",
+  "@violence": {},
+  "pornography": "Pornographie",
+  "@pornography": {},
+  "childAbuse": "Maltraitance infantile",
+  "@childAbuse": {},
+  "copyrightInfringement": "Violation du droit d'auteur",
+  "@copyrightInfringement": {},
+  "terrorism": "Terrorisme",
+  "@terrorism": {},
+  "other": "Autre",
+  "@other": {},
+  "enableRightAndLeftMessageAlignment": "Activer l'alignement alterné des messages",
+  "@enableRightAndLeftMessageAlignment": {},
+  "holdToRecordAudio": "Maintenir pour enregistrer.",
+  "@holdToRecordAudio": {},
+  "explainPermissionToAccessMicrophone": "Autoriser Twake Chat à accéder au microphone, pour envoyer des messages vocaux.",
+  "@explainPermissionToAccessMicrophone": {},
+  "allowMicrophoneAccess": "Autoriser l'accès au microphone",
+  "@allowMicrophoneAccess": {},
+  "slideToCancel": "Glisser pour annuler",
+  "@slideToCancel": {},
+  "recordingInProgress": "Enregistrement en cours",
+  "@recordingInProgress": {},
+  "later": "Plus tard",
+  "@later": {},
+  "couldNotPlayAudioFile": "Lecture du fichier audio impossible",
+  "@couldNotPlayAudioFile": {},
+  "pleaseFinishOrStopTheRecording": "Terminez l'enregistrement avant d'effectuer d'autres actions.",
+  "@pleaseFinishOrStopTheRecording": {}
 }
