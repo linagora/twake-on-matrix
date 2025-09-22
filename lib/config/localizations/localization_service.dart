@@ -18,7 +18,10 @@ class LocalizationService {
     Locale(LanguageCodeConstants.russian),
   ];
 
-  static void changeLocale(BuildContext context, String langCode) async {
+  static Future<void> changeLocale(
+    BuildContext context,
+    String langCode,
+  ) async {
     Logs().d('LocalizationService::changeLocale():langCode: $langCode');
     final newLocale =
         await getLocaleFromLanguage(langCode: langCode, context: context);
@@ -39,18 +42,45 @@ class LocalizationService {
     Logs().d(
       'LocalizationService::_getLocaleFromLanguage():localeStored: $localeStored',
     );
-    if (localeStored != null) {
+    final localeSelected = supportedLocales.firstWhereOrNull(
+      (locale) => locale.languageCode == langCode,
+    );
+    if (localeSelected != null) {
+      return localeSelected;
+    } else if (localeStored != null) {
       return localeStored;
     } else {
-      final languageCodeCurrent =
-          langCode ?? View.of(context).platformDispatcher.locale.languageCode;
-      Logs().d(
-        'LocalizationService::_getLocaleFromLanguage():languageCodeCurrent: $languageCodeCurrent',
-      );
-      final localeSelected = supportedLocales.firstWhereOrNull(
-        (locale) => locale.languageCode == languageCodeCurrent,
-      );
-      return localeSelected ?? View.of(context).platformDispatcher.locale;
+      return View.of(context).platformDispatcher.locale;
     }
+  }
+
+  static Future<void> initializeLanguage(
+    BuildContext context, {
+    String? serverLanguage,
+  }) async {
+    if (serverLanguage != null && _isLanguageSupported(serverLanguage)) {
+      await changeLocale(context, serverLanguage);
+      return;
+    }
+
+    final storedLanguage =
+        await getIt.get<LanguageCacheManager>().getStoredLanguage();
+    if (storedLanguage != null &&
+        _isLanguageSupported(storedLanguage.languageCode)) {
+      await changeLocale(context, storedLanguage.languageCode);
+      return;
+    }
+
+    final deviceLanguage = View.of(context).platformDispatcher.locale;
+    if (_isLanguageSupported(deviceLanguage.languageCode)) {
+      await changeLocale(context, deviceLanguage.languageCode);
+      return;
+    }
+
+    await changeLocale(context, LanguageCodeConstants.english);
+  }
+
+  static bool _isLanguageSupported(String langCode) {
+    return supportedLocales.any((locale) => locale.languageCode == langCode);
   }
 }

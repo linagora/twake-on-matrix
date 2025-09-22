@@ -17,6 +17,7 @@ import 'package:fluffychat/data/datasource/server_config_datasource.dart';
 import 'package:fluffychat/data/datasource/server_search_datasource.dart';
 import 'package:fluffychat/data/datasource/tom_configurations_datasource.dart';
 import 'package:fluffychat/data/datasource/tom_contacts_datasource.dart';
+import 'package:fluffychat/data/datasource/user_info/user_info_datasource.dart';
 import 'package:fluffychat/data/datasource_impl/capabilities/server_capabilities_datasource_impl.dart';
 import 'package:fluffychat/data/datasource_impl/contact/address_book_datasource_impl.dart';
 import 'package:fluffychat/data/datasource_impl/contact/hive_third_party_contact_datasource_impl.dart';
@@ -33,6 +34,7 @@ import 'package:fluffychat/data/datasource_impl/recovery_words_data_source_impl.
 import 'package:fluffychat/data/datasource_impl/server_config_datasource_impl.dart';
 import 'package:fluffychat/data/datasource_impl/server_search_datasource_impl.dart';
 import 'package:fluffychat/data/datasource_impl/tom_configurations_datasource_impl.dart';
+import 'package:fluffychat/data/datasource_impl/user_info/user_info_datasource_impl.dart';
 import 'package:fluffychat/data/local/contact/shared_preferences_contact_cache_manager.dart';
 import 'package:fluffychat/data/local/localizations/language_cache_manager.dart';
 import 'package:fluffychat/data/local/multiple_account/multiple_account_cache_manager.dart';
@@ -46,6 +48,7 @@ import 'package:fluffychat/data/network/media/media_api.dart';
 import 'package:fluffychat/data/network/recovery_words/recovery_words_api.dart';
 import 'package:fluffychat/data/network/search/server_search_api.dart';
 import 'package:fluffychat/data/network/server_config_api.dart';
+import 'package:fluffychat/data/network/user_info/user_info_api.dart';
 import 'package:fluffychat/data/repository/capabilities/server_capabilities_repository_impl.dart';
 import 'package:fluffychat/data/repository/contact/address_book_repository_impl.dart';
 import 'package:fluffychat/data/repository/contact/hive_third_party_contact_repository_impl.dart';
@@ -62,6 +65,7 @@ import 'package:fluffychat/data/repository/recovery_words_repository_impl.dart';
 import 'package:fluffychat/data/repository/server_config_repository_impl.dart';
 import 'package:fluffychat/data/repository/server_search_repository_impl.dart';
 import 'package:fluffychat/data/repository/tom_configurations_repository_impl.dart';
+import 'package:fluffychat/data/repository/user_info_repository_impl.dart';
 import 'package:fluffychat/di/global/hive_di.dart';
 import 'package:fluffychat/di/global/network_connectivity_di.dart';
 import 'package:fluffychat/di/global/network_di.dart';
@@ -81,6 +85,7 @@ import 'package:fluffychat/domain/repository/recovery_words_repository.dart';
 import 'package:fluffychat/domain/repository/server_config_repository.dart';
 import 'package:fluffychat/domain/repository/server_search_repository.dart';
 import 'package:fluffychat/domain/repository/tom_configurations_repository.dart';
+import 'package:fluffychat/domain/repository/user_info/user_info_repository.dart';
 import 'package:fluffychat/domain/usecase/app_grid/get_app_grid_configuration_interactor.dart';
 import 'package:fluffychat/domain/usecase/capabilities/get_server_capabilities_interactor.dart';
 import 'package:fluffychat/domain/usecase/contacts/delete_third_party_contact_box_interactor.dart';
@@ -127,6 +132,7 @@ import 'package:fluffychat/domain/usecase/search/search_recent_chat_interactor.d
 import 'package:fluffychat/domain/usecase/search/server_search_interactor.dart';
 import 'package:fluffychat/domain/usecase/settings/save_language_interactor.dart';
 import 'package:fluffychat/domain/usecase/settings/update_profile_interactor.dart';
+import 'package:fluffychat/domain/usecase/user_info/get_user_info_interactor.dart';
 import 'package:fluffychat/domain/usecase/verify_name_interactor.dart';
 import 'package:fluffychat/event/twake_event_dispatcher.dart';
 import 'package:fluffychat/modules/federation_identity_lookup/manager/federation_identity_lookup_manager.dart';
@@ -209,6 +215,7 @@ class GetItInitializer {
     getIt.registerSingleton<ServerConfigAPI>(ServerConfigAPI());
     getIt.registerFactory<InvitationAPI>(() => InvitationAPI());
     getIt.registerSingleton(const ServerCapabilitiesAPI());
+    getIt.registerSingleton(const UserInfoApi());
   }
 
   void bindingManager() {
@@ -258,6 +265,9 @@ class GetItInitializer {
     );
     getIt.registerFactory<ServerCapabilitiesDatasource>(
       () => const ServerCapabilitiesDatasourceImpl(),
+    );
+    getIt.registerFactory<UserInfoDatasource>(
+      () => const UserInfoDatasourceImpl(),
     );
   }
 
@@ -346,6 +356,9 @@ class GetItInitializer {
     );
     getIt.registerFactory<ServerCapabilitiesRepository>(
       () => const ServerCapabilitiesRepositoryImpl(),
+    );
+    getIt.registerFactory<UserInfoRepository>(
+      () => const UserInfoRepositoryImpl(),
     );
   }
 
@@ -515,6 +528,7 @@ class GetItInitializer {
     );
 
     getIt.registerFactory(() => const GetServerCapabilitiesInteractor());
+    getIt.registerFactory(() => const GetUserInfoInteractor());
   }
 
   void _bindingControllers() {
