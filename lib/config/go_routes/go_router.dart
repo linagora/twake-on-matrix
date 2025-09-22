@@ -61,7 +61,7 @@ abstract class AppRoutes {
 
     if (!matrix.client.isLogged()) return null;
 
-    if (matrix.userInfoState == null) return '/userInfoLoading';
+    // if (matrix.userInfoState == null) return '/userInfoLoading';
 
     return '/rooms';
   }
@@ -74,7 +74,7 @@ abstract class AppRoutes {
 
     if (!matrix.client.isLogged()) return '/home/twakeWelcome';
 
-    if (matrix.userInfoState == null) return '/userInfoLoading';
+    // if (matrix.userInfoState == null) return '/userInfoLoading';
 
     return null;
   }
