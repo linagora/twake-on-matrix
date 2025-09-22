@@ -13,7 +13,9 @@ class GetUserInfoInteractor {
       yield Right(GettingUserInfo());
       if (userId == null) throw Exception('No user id');
 
-      final result = await getIt.get<UserInfoRepository>().getUserInfo(userId);
+      final result = await getIt
+          .get<UserInfoRepository>()
+          .getUserInfo(Uri.encodeComponent(userId));
       yield Right(GetUserInfoSuccess(result));
     } catch (e) {
       yield Left(GetUserInfoFailure(exception: e));
