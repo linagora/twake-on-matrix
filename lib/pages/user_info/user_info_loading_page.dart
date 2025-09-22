@@ -10,10 +10,12 @@ import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/di/global/network_di.dart';
 import 'package:fluffychat/domain/app_state/user_info/get_user_info_state.dart';
 import 'package:fluffychat/domain/usecase/user_info/get_user_info_interactor.dart';
+import 'package:fluffychat/utils/dialog/twake_dialog.dart';
+import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/widgets/matrix.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:linagora_design_flutter/colors/linagora_sys_colors.dart';
 
 class UserInfoLoadingPage extends StatefulWidget {
   const UserInfoLoadingPage({super.key, required this.userId});
@@ -73,9 +75,12 @@ class _UserInfoLoadingPageState extends State<UserInfoLoadingPage> {
 
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(
-      body: Center(
-        child: CupertinoActivityIndicator(),
+    return Scaffold(
+      backgroundColor: LinagoraSysColors.material().onPrimary,
+      body: ProgressDialog(
+        lottieSize: PlatformInfos.isWeb
+            ? TwakeDialog.lottieSizeWeb
+            : TwakeDialog.lottieSizeMobile,
       ),
     );
   }
