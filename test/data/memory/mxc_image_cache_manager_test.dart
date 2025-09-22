@@ -36,13 +36,13 @@ void main() {
     });
 
     test('cache size limit', () {
-      for (int i = 0; i < 35; i++) {
+      for (int i = 0; i < 105; i++) {
         final eventId = 'test_event_id_$i';
         final imageData = Uint8List.fromList([i, i + 1, i + 2, i + 3, i + 4]);
         manager.cacheImage(eventId, imageData);
       }
 
-      // The cache should only keep the last 30 items
+      // The cache should only keep the last 100 items
       expect(manager.getImage('test_event_id_0'), isNull);
       expect(manager.getImage('test_event_id_34'), isNotNull);
     });
@@ -87,19 +87,19 @@ void main() {
 
     test('cache eviction order', () {
       // Fill the cache to its capacity
-      for (int i = 0; i < 30; i++) {
+      for (int i = 0; i < 100; i++) {
         final eventId = 'test_event_id_$i';
         final imageData = Uint8List.fromList([i]);
         manager.cacheImage(eventId, imageData);
       }
 
       // Verify all items are in the cache
-      for (int i = 0; i < 30; i++) {
+      for (int i = 0; i < 100; i++) {
         expect(manager.getImage('test_event_id_$i'), isNotNull);
       }
 
       // Add 5 more items to trigger eviction of the oldest items
-      for (int i = 30; i < 35; i++) {
+      for (int i = 100; i < 105; i++) {
         final eventId = 'test_event_id_$i';
         final imageData = Uint8List.fromList([i]);
         manager.cacheImage(eventId, imageData);
@@ -111,12 +111,12 @@ void main() {
       }
 
       // Verify the 25 items that were not evicted are still in the cache
-      for (int i = 5; i < 30; i++) {
+      for (int i = 5; i < 100; i++) {
         expect(manager.getImage('test_event_id_$i'), isNotNull);
       }
 
       // Verify the 5 new items are in the cache
-      for (int i = 30; i < 35; i++) {
+      for (int i = 100; i < 105; i++) {
         expect(manager.getImage('test_event_id_$i'), isNotNull);
       }
     });
