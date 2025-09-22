@@ -5,7 +5,7 @@ class MxcImageCacheManager {
   static MxcImageCacheManager get instance => _instance;
   MxcImageCacheManager._();
 
-  static const _size = 30;
+  static const _size = 100;
   final Map<EventId, ImageData> _imageCache = {};
 
   void cacheImage(EventId eventId, ImageData imageData) {
