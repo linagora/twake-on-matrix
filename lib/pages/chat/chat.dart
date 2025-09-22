@@ -680,14 +680,20 @@ class ChatController extends State<Chat>
       blobUrl: path,
     );
 
-    if (file == null) return;
+    if (file == null) {
+      TwakeSnackBar.show(context, L10n.of(context)!.audioMessageFailedToSend);
+      return;
+    }
 
     final matrixFile = await createMatrixAudioFileFromWebFile(
       file: file,
       duration: duration,
     );
 
-    if (matrixFile == null) return;
+    if (matrixFile == null) {
+      TwakeSnackBar.show(context, L10n.of(context)!.audioMessageFailedToSend);
+      return;
+    }
 
     final fileInfo = FileInfo(
       matrixFile.name,
@@ -721,6 +727,7 @@ class ChatController extends State<Chat>
     );
 
     if (fakeImageEvent == null) {
+      TwakeSnackBar.show(context, L10n.of(context)!.audioMessageFailedToSend);
       Logs().e('Failed to create fake image event for voice message');
       return;
     }
@@ -734,6 +741,7 @@ class ChatController extends State<Chat>
       extraContent: extraContent,
     )
         .catchError((e) {
+      TwakeSnackBar.show(context, L10n.of(context)!.audioMessageFailedToSend);
       Logs().e('Failed to send voice message', e);
       return null;
     });

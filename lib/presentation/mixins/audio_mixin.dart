@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:math';
 import 'dart:typed_data';
 
+import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_file_extension.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:flutter/foundation.dart';
 import 'package:intl/intl.dart';
@@ -168,50 +169,44 @@ mixin AudioMixin {
     return null;
   }
 
-  Future<Uint8List> readWebFileAsBytes(html.File file) async {
-    final completer = Completer<Uint8List>();
+  Stream<Uint8List> readWebFileAsStream(
+    html.File file, {
+    int chunkSize = 64 * 1024,
+  }) async* {
     final reader = html.FileReader();
+    var offset = 0;
 
-    // Set up error handling
-    reader.onError.listen((event) {
-      final error = reader.error ?? 'Unknown FileReader error';
-      completer.completeError('FileReader failed: $error');
-    });
+    while (offset < file.size) {
+      final end =
+          (offset + chunkSize) > file.size ? file.size : offset + chunkSize;
+      final blob = file.slice(offset, end);
 
-    // Set up success handling with type safety
-    reader.onLoad.listen((event) {
-      try {
+      final completer = Completer<Uint8List>();
+
+      reader.onLoad.listen((_) {
         final result = reader.result;
-
-        // Handle different result types safely
-        if (result is ByteBuffer) {
-          completer.complete(Uint8List.view(result));
-        } else if (result is Uint8List) {
+        if (result is Uint8List) {
           completer.complete(result);
-        } else if (result != null) {
-          // Try to convert whatever we got
-          try {
-            final list = List<int>.from(result as Iterable);
-            completer.complete(Uint8List.fromList(list));
-          } catch (e) {
-            completer.completeError('Cannot convert result to Uint8List: $e');
-          }
+        } else if (result is ByteBuffer) {
+          completer.complete(result.asUint8List());
         } else {
-          completer.completeError('FileReader result is null');
+          completer.completeError('Unexpected result type');
         }
-      } catch (e) {
-        completer.completeError('Error processing FileReader result: $e');
-      }
-    });
+      });
 
-    // Start reading
-    reader.readAsArrayBuffer(file);
+      reader.onError.listen((event) {
+        completer.completeError('FileReader failed: ${reader.error}');
+      });
 
-    // Add timeout protection
-    return completer.future.timeout(
-      const Duration(seconds: 30),
-      onTimeout: () => throw TimeoutException('File reading timed out'),
-    );
+      reader.readAsArrayBuffer(blob);
+
+      yield await completer.future.timeout(
+        const Duration(seconds: 30),
+        onTimeout: () => throw TimeoutException('Chunk reading timed out'),
+      );
+
+      offset = end;
+    }
   }
 
   Future<html.File?> recordToFileOnWeb({
@@ -260,7 +255,7 @@ mixin AudioMixin {
   }
 
 // Optional: Helper function to create MatrixAudioFile from the web file
-  Future<MatrixAudioFile?> createMatrixAudioFileFromWebFile({
+  Future<TwakeAudioFile?> createMatrixAudioFileFromWebFile({
     required html.File file,
     required Duration duration,
   }) async {
@@ -269,20 +264,12 @@ mixin AudioMixin {
         'AudioMixin::createMatrixAudioFileFromWebFile: Processing ${file.name}',
       );
 
-      // Read file as bytes using the updated function
-      final bytes = await readWebFileAsBytes(file);
-
-      Logs().d(
-        'AudioMixin::createMatrixAudioFileFromWebFile: Read ${bytes.length} bytes',
-      );
-
       final formatDate =
           DateFormat("yyyy-MM-dd-HHmmss.").format(DateTime.now());
 
-      return MatrixAudioFile(
-        bytes: bytes,
+      return TwakeAudioFile(
         name: 'voice_message_$formatDate.ogg',
-        readStream: Stream.value(bytes),
+        readStream: readWebFileAsStream(file),
         // Single chunk stream for
         mimeType: 'audio/ogg',
         // web
