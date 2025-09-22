@@ -91,7 +91,7 @@ class _MxcImageState extends State<MxcImage> {
   static const String placeholderKey = 'placeholder';
   ImageData? _imageDataNoCache;
   bool isLoadDone = false;
-  final ValueNotifier<String?> filePathNotifier = ValueNotifier<String?>(null);
+  String? filePath;
 
   ImageData? get _imageData {
     final cacheKey = widget.cacheKey;
@@ -179,6 +179,7 @@ class _MxcImageState extends State<MxcImage> {
           0,
         );
       }
+
       return (imageData: remoteData, filePath: null);
     }
 
@@ -204,29 +205,33 @@ class _MxcImageState extends State<MxcImage> {
         return (imageData: matrixFile.bytes, filePath: matrixFile.filePath);
       } catch (e) {
         Logs().e('MxcImage::Error while downloading image: $e');
+        rethrow;
       }
     }
 
     return (imageData: null, filePath: null);
   }
 
-  Future<({Uint8List? imageData, String? filePath})> _tryLoad(
+  Future<void> _tryLoad(
     BuildContext context,
   ) async {
     _imageData = widget.imageData;
     if (_imageData != null) {
       isLoadDone = true;
-      filePathNotifier.value = null;
-      return (imageData: _imageData, filePath: null);
+      filePath = null;
+      setState(() {});
     }
     try {
       final loadResult = await _load(context);
       isLoadDone = true;
       _imageData = loadResult.imageData;
-      filePathNotifier.value = loadResult.filePath;
-      return loadResult;
+      filePath = loadResult.filePath;
+      setState(() {});
     } catch (e) {
-      return (imageData: null, filePath: null);
+      if (mounted && !isLoadDone) {
+        isLoadDone = true;
+        _tryLoad(context);
+      }
     }
   }
 
@@ -266,13 +271,16 @@ class _MxcImageState extends State<MxcImage> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) => _tryLoad(context));
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        _tryLoad(context);
+      }
+    });
   }
 
   @override
   void dispose() {
     _imageDataNoCache = null;
-    filePathNotifier.dispose();
     super.dispose();
   }
 
@@ -311,34 +319,29 @@ class _MxcImageState extends State<MxcImage> {
 
   Widget _buildImageWidget(BuildContext context) {
     final needResize = widget.event != null && !widget.noResize;
-    return ValueListenableBuilder(
-      valueListenable: filePathNotifier,
-      builder: (context, filePath, child) {
-        if (_imageData == null && filePath == null) {
+    if (_imageData == null && filePath == null) {
+      return placeholder(context);
+    }
+    return ClipRRect(
+      key: Key('${_imageData.hashCode}'),
+      borderRadius:
+          widget.rounded ? BorderRadius.circular(12.0) : BorderRadius.zero,
+      child: _ImageWidget(
+        filePath: filePath,
+        event: widget.event,
+        data: _imageData,
+        width: widget.width,
+        height: widget.height,
+        fit: widget.fit,
+        needResize: needResize,
+        cacheWidth: widget.cacheWidth,
+        cacheHeight: widget.cacheHeight,
+        imageErrorWidgetBuilder: (context, error, ___) {
+          _isCached = false;
+          _imageData = null;
           return placeholder(context);
-        }
-        return ClipRRect(
-          key: Key('${_imageData.hashCode}'),
-          borderRadius:
-              widget.rounded ? BorderRadius.circular(12.0) : BorderRadius.zero,
-          child: _ImageWidget(
-            filePath: filePath,
-            event: widget.event,
-            data: _imageData,
-            width: widget.width,
-            height: widget.height,
-            fit: widget.fit,
-            needResize: needResize,
-            cacheWidth: widget.cacheWidth,
-            cacheHeight: widget.cacheHeight,
-            imageErrorWidgetBuilder: (context, error, ___) {
-              _isCached = false;
-              _imageData = null;
-              return placeholder(context);
-            },
-          ),
-        );
-      },
+        },
+      ),
     );
   }
 }
