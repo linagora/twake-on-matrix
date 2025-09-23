@@ -21,7 +21,6 @@ import 'package:fluffychat/pages/settings_dashboard/settings_profile/settings_pr
 import 'package:fluffychat/pages/splash/splash.dart';
 import 'package:fluffychat/pages/story/story_page.dart';
 import 'package:fluffychat/pages/twake_welcome/twake_welcome.dart';
-import 'package:fluffychat/pages/user_info/user_info_loading_page.dart';
 import 'package:fluffychat/presentation/model/chat/chat_router_input_argument.dart';
 import 'package:fluffychat/presentation/model/forward/forward_argument.dart';
 import 'package:fluffychat/presentation/model/contact/presentation_contact.dart';
@@ -56,28 +55,14 @@ abstract class AppRoutes {
   static FutureOr<String?> loggedInRedirect(
     BuildContext context,
     GoRouterState state,
-  ) {
-    final matrix = Matrix.of(context);
-
-    if (!matrix.client.isLogged()) return null;
-
-    // if (matrix.userInfoState == null) return '/userInfoLoading';
-
-    return '/rooms';
-  }
+  ) =>
+      Matrix.of(context).client.isLogged() ? '/rooms' : null;
 
   static FutureOr<String?> loggedOutRedirect(
     BuildContext context,
     GoRouterState state,
-  ) {
-    final matrix = Matrix.of(context);
-
-    if (!matrix.client.isLogged()) return '/home/twakeWelcome';
-
-    // if (matrix.userInfoState == null) return '/userInfoLoading';
-
-    return null;
-  }
+  ) =>
+      Matrix.of(context).client.isLogged() ? null : '/home/twakeWelcome';
 
   AppRoutes();
 
@@ -89,13 +74,6 @@ abstract class AppRoutes {
       pageBuilder: (context, state) => defaultPageBuilder(
         context,
         const Splash(),
-      ),
-    ),
-    GoRoute(
-      path: '/userInfoLoading',
-      pageBuilder: (context, state) => defaultPageBuilder(
-        context,
-        UserInfoLoadingPage(userId: Matrix.of(context).client.userID),
       ),
     ),
     GoRoute(

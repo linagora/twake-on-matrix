@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'dart:io';
-import 'package:dartz/dartz.dart' as dartz;
+import 'package:dartz/dartz.dart' hide State;
 import 'package:fluffychat/config/localizations/localization_service.dart';
 import 'package:fluffychat/data/model/federation_server/federation_configuration.dart';
 import 'package:fluffychat/data/model/federation_server/federation_server_information.dart';
@@ -103,7 +103,7 @@ class MatrixState extends State<Matrix>
   LoginType? loginType;
   bool? loginRegistrationSupported;
   late EmojiData emojiData;
-  dartz.Either<GetUserInfoFailure, GetUserInfoSuccess>? userInfoState;
+  Either<GetUserInfoFailure, GetUserInfoSuccess>? userInfoState;
 
   bool waitForFirstSync = false;
 
