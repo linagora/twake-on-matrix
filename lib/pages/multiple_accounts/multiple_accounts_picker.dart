@@ -76,7 +76,6 @@ class MultipleAccountsPickerController {
         )
         ?.clientAccount;
     if (client == null || client == _matrixState.client) return;
-    _matrixState.userInfoState = null;
     await _setActiveClient(client);
   }
 

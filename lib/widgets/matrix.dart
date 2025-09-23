@@ -1,10 +1,8 @@
 import 'dart:async';
 import 'dart:io';
-import 'package:dartz/dartz.dart' hide State;
 import 'package:fluffychat/config/localizations/localization_service.dart';
 import 'package:fluffychat/data/model/federation_server/federation_configuration.dart';
 import 'package:fluffychat/data/model/federation_server/federation_server_information.dart';
-import 'package:fluffychat/domain/app_state/user_info/get_user_info_state.dart';
 import 'package:fluffychat/domain/contact_manager/contacts_manager.dart';
 import 'package:fluffychat/domain/exception/federation_configuration_not_found.dart';
 import 'package:fluffychat/domain/repository/federation_configurations_repository.dart';
@@ -103,7 +101,6 @@ class MatrixState extends State<Matrix>
   LoginType? loginType;
   bool? loginRegistrationSupported;
   late EmojiData emojiData;
-  Either<GetUserInfoFailure, GetUserInfoSuccess>? userInfoState;
 
   bool waitForFirstSync = false;
 
@@ -462,7 +459,6 @@ class MatrixState extends State<Matrix>
       TwakeApp.routerKey.currentContext!,
       L10n.of(context)!.oneClientLoggedOut,
     );
-    userInfoState = null;
     final result = await setActiveClient(widget.clients.first);
     Logs().v(
       '[MATRIX]:_handleLogoutWithMultipleAccount:: Log out Client ${currentClient.clientName} successful',
@@ -517,7 +513,6 @@ class MatrixState extends State<Matrix>
     waitForFirstSync = false;
     await setUpToMServicesInLogin(activeClient);
     await setUpFederationServicesInLogin(activeClient);
-    userInfoState = null;
     final result = await setActiveClient(activeClient);
     await matrixState.cancelListenSynchronizeContacts();
     matrixState.reSyncContacts();
