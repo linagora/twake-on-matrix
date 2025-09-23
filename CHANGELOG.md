@@ -1,3 +1,11 @@
+## [2.12.1+2330] - 2025-09-23
+### Added
+- #2546: Change language when user_info change
+
+### Changed
+- Handle avatar blink when open the app
+- Increase cache limit to 100
+
 ## [2.12.0+2330] - 2025-09-19
 ### Added
 - TW-2530: Create new voice recorder UI in input bar for mobile
