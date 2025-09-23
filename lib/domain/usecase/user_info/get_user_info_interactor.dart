@@ -11,7 +11,10 @@ class GetUserInfoInteractor {
   Stream<Either<Failure, Success>> execute(String? userId) async* {
     try {
       yield Right(GettingUserInfo());
-      if (userId == null) throw Exception('No user id');
+      if (userId == null) {
+        yield const Left(NoUserIdFailure());
+        return;
+      }
 
       final result = await getIt
           .get<UserInfoRepository>()

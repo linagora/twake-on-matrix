@@ -16,3 +16,7 @@ class GetUserInfoSuccess extends ViewState {
 class GetUserInfoFailure extends FeatureFailure {
   const GetUserInfoFailure({super.exception});
 }
+
+class NoUserIdFailure extends FeatureFailure {
+  const NoUserIdFailure({super.exception});
+}
