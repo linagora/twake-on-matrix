@@ -16,9 +16,7 @@ class GetUserInfoInteractor {
         return;
       }
 
-      final result = await getIt
-          .get<UserInfoRepository>()
-          .getUserInfo(Uri.encodeComponent(userId));
+      final result = await getIt.get<UserInfoRepository>().getUserInfo(userId);
       yield Right(GetUserInfoSuccess(result));
     } catch (e) {
       yield Left(GetUserInfoFailure(exception: e));
