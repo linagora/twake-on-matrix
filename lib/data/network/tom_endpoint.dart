@@ -17,6 +17,10 @@ class TomEndpoint {
     '/invite/generate',
   );
 
+  static final ServicePath userInfoServicePath = ServicePath(
+    '/user_info',
+  );
+
   static const String twakeRootPath = '/_twake';
 
   static const String twakeAPIVersion = 'v1';
@@ -28,5 +32,13 @@ extension ServicePathTom on ServicePath {
     String apiVersion = TomEndpoint.twakeAPIVersion,
   }) {
     return '$rootPath/$apiVersion$path';
+  }
+
+  String generateTomUserInfoEndpoint(
+    String userId, {
+    String rootPath = TomEndpoint.twakeRootPath,
+    String apiVersion = TomEndpoint.twakeAPIVersion,
+  }) {
+    return '$rootPath/$apiVersion$path/$userId';
   }
 }

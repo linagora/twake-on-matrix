@@ -1,10 +1,12 @@
 import 'dart:async';
 import 'dart:io';
+import 'package:fluffychat/config/localizations/localization_service.dart';
 import 'package:fluffychat/data/model/federation_server/federation_configuration.dart';
 import 'package:fluffychat/data/model/federation_server/federation_server_information.dart';
 import 'package:fluffychat/domain/contact_manager/contacts_manager.dart';
 import 'package:fluffychat/domain/exception/federation_configuration_not_found.dart';
 import 'package:fluffychat/domain/repository/federation_configurations_repository.dart';
+import 'package:fluffychat/domain/repository/user_info/user_info_repository.dart';
 import 'package:fluffychat/event/twake_event_types.dart';
 import 'package:fluffychat/presentation/mixins/init_config_mixin.dart';
 import 'package:fluffychat/presentation/model/client_login_state_event.dart';
@@ -155,6 +157,7 @@ class MatrixState extends State<Matrix>
       createVoipPlugin();
       await _setUpToMServicesWhenChangingActiveClient(newClient);
       await _storePersistActiveAccount(newClient!);
+      await _getUserInfoWithActiveClient(newClient);
       return SetActiveClientState.success;
     } else {
       Logs().w('Tried to set an unknown client ${newClient!.userID} as active');
@@ -479,6 +482,7 @@ class MatrixState extends State<Matrix>
     await setUpToMServicesInLogin(newActiveClient);
     await setUpFederationServicesInLogin(newActiveClient);
     await _storePersistActiveAccount(newActiveClient);
+    await _getUserInfoWithActiveClient(newActiveClient);
     matrixState.reSyncContacts();
     onClientLoginStateChanged.add(
       ClientLoginStateEvent(
@@ -919,6 +923,7 @@ class MatrixState extends State<Matrix>
           await multipleAccountRepository.getPersistActiveAccount();
       if (persistActiveAccount == null) {
         await _storePersistActiveAccount(client);
+        await _getUserInfoWithActiveClient(client);
         return;
       } else {
         final newActiveClient = getClientByUserId(persistActiveAccount);
@@ -929,6 +934,27 @@ class MatrixState extends State<Matrix>
     } catch (e) {
       Logs().e(
         'Matrix::_retrievePersistedActiveAccount(): Error - $e',
+      );
+    }
+  }
+
+  Future<void> _getUserInfoWithActiveClient(Client newClient) async {
+    if (newClient.userID == null) return;
+    try {
+      final result = await getIt
+          .get<UserInfoRepository>()
+          .getUserInfo(Uri.encodeComponent(newClient.userID!));
+
+      await LocalizationService.initializeLanguage(
+        context,
+        serverLanguage: result.language,
+      );
+    } catch (e) {
+      Logs().e(
+        'Matrix::_getUserInfoWithActiveClient(): Error - $e',
+      );
+      await LocalizationService.initializeLanguage(
+        context,
       );
     }
   }
@@ -962,9 +988,9 @@ class MatrixState extends State<Matrix>
     didChangeAppLifecycleState(AppLifecycleState.paused);
   }
 
-  Future<void> _setupAuthUrl({
+  void _setupAuthUrl({
     String? url,
-  }) async {
+  }) {
     if (url != null) {
       Logs().e(
         'Matrix::_setupAuthUrl: newAuthUrl - $url',
