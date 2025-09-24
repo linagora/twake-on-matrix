@@ -15,7 +15,10 @@ class TestBase {
           visibleTimeout: Duration(minutes: 1),
         ),
         nativeAutomatorConfig:
-            nativeAutomatorConfig ?? const NativeAutomatorConfig(),
+            nativeAutomatorConfig ??
+            const NativeAutomatorConfig(
+              keyboardBehavior: KeyboardBehavior.alternative,
+            ),
         framePolicy: LiveTestWidgetsFlutterBindingFramePolicy.fullyLive,
         ($) async {
       await initTwakeChat();
