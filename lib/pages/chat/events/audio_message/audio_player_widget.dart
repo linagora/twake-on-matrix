@@ -90,7 +90,7 @@ class AudioPlayerState extends State<AudioPlayerWidget>
       if (matrix.audioPlayer.playing == true) {
         matrix.audioPlayer.pause();
       } else {
-        matrix.audioPlayer.play().then((_) {}).onError((e, s) {
+        matrix.audioPlayer.play().onError((e, s) {
           Logs().e('Could not play audio file', e, s);
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
@@ -152,7 +152,7 @@ class AudioPlayerState extends State<AudioPlayerWidget>
           .setAudioSource(MatrixFileAudioSource(matrixFile));
     }
 
-    matrix.audioPlayer.play().then((_) {}).onError((e, s) {
+    matrix.audioPlayer.play().onError((e, s) {
       Logs().e('Could not play audio file', e, s);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(

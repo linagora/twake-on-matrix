@@ -111,9 +111,7 @@ class ChatInputRow extends StatelessWidget {
                                         width: 1,
                                       ),
                                     ),
-                                    child: Expanded(
-                                      child: _counterAudioWeb(context: context),
-                                    ),
+                                    child: _counterAudioWeb(context: context),
                                   ),
                                 ),
                               );
