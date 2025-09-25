@@ -1,3 +1,8 @@
+## [2.12.2+2330] - 2025-09-25
+### Fixed
+- #2523 clipboard handling for past event
+- #2550 prevent play audio when sending
+
 ## [2.12.1+2330] - 2025-09-23
 ### Added
 - #2546: Change language when user_info change
