@@ -7,6 +7,7 @@ list(APPEND FLUTTER_PLUGIN_LIST
   connectivity_plus
   desktop_drop
   desktop_lifecycle
+  desktop_webview_window
   dynamic_color
   emoji_picker_flutter
   file_saver

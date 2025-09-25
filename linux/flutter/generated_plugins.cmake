@@ -5,6 +5,7 @@
 list(APPEND FLUTTER_PLUGIN_LIST
   desktop_drop
   desktop_lifecycle
+  desktop_webview_window
   dynamic_color
   emoji_picker_flutter
   file_saver

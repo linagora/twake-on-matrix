@@ -19,12 +19,7 @@ dependencies:
       url: https://github.com/linagora/receive_sharing_intent.git
       ref: main
 
-  # TODO: Android native lib build error: https://github.com/jonataslaw/VideoCompress/issues/240
-  # video_compress: ^3.1.1
-  video_compress:
-    git:
-      url: git@github.com:SpectoraSoftware/VideoCompress.git
-      ref: master
+  video_compress: ^3.1.4
 
   linagora_design_flutter:
     git:
@@ -33,12 +28,12 @@ dependencies:
   flutter_matrix_html:
     git:
       url: https://github.com/linagora/flutter_matrix_html.git
-      ref: master
+      ref: update/flutter-3.32.8
 
   contacts_service:
     git:
       url: git@github.com:linagora/flutter_contacts.git
-      ref: master
+      ref: update/flutter-3.32.8
 
   # TODO: Remove it after this PR merged
   # https://github.com/justsoft/video_thumbnail/pull/135
@@ -68,12 +63,12 @@ dependencies:
   flutter_emoji_mart:
     git:
       url: git@github.com:linagora/emoji_mart.git
-      ref: master
+      ref: update/flutter-3.32.8
 
   social_media_recorder:
     git:
       url: git@github.com:linagora/social_media_recorder.git
-      ref: twake_supported
+      ref: update/flutter-3.32.8
 
   adaptive_dialog: ^1.8.0+1
   flutter_adaptive_scaffold: ^0.1.4
@@ -117,14 +112,12 @@ dependencies:
   flutter_localizations:
     sdk: flutter
   flutter_map: ^4.0.0
-  #  flutter_matrix_html: ^1.1.0
-  flutter_olm: ^2.0.0
   flutter_openssl_crypto: ^0.5.0
-  flutter_ringtone_player: 4.0.0+3
+  flutter_ringtone_player: 4.0.0+4
   flutter_secure_storage: 9.2.4
   flutter_svg: ^0.22.0
   flutter_typeahead: ^5.1.0
-  flutter_web_auth_2: ^3.1.1
+  flutter_web_auth_2: ^4.1.0
   # flutter_webrtc: # Until https://github.com/flutter-webrtc/flutter-webrtc/issues/1212 is fixed
   #   git: https://github.com/radzio-it/flutter-webrtc.git
   # flutter_webrtc: ^0.10.6
@@ -133,7 +126,7 @@ dependencies:
   hive_flutter: ^1.1.0
   http: ^0.13.4
   image: ^4.0.15
-  image_picker: ^1.0.4
+  image_picker: ^1.2.0
   intl: any
   just_audio: 0.10.5
   opus_caf_converter_dart: ^1.0.1
@@ -141,14 +134,10 @@ dependencies:
   latlong2: ^0.8.1
   matrix_homeserver_recommendations: ^0.3.0
   matrix_link_text: ^2.0.0
-  # TODO: remove this after this PR is merged https://gitlab.com/famedly/company/frontend/libraries/native_imaging/-/merge_requests/22
-  native_imaging: 
-    git:
-      url: https://github.com/famedly/dart_native_imaging
-      ref: main
+  native_imaging: 0.2.0
   package_info_plus: ^8.0.0
-  path_provider: ^2.0.15
-  permission_handler: ^11.0.1
+  path_provider: ^2.1.5
+  permission_handler: ^12.0.1
   pin_code_text_field: ^1.8.0
   provider: ^6.0.2
   punycode: ^1.0.0
@@ -157,7 +146,7 @@ dependencies:
   record: 6.1.1
   scroll_to_index: ^3.0.1
   share_plus: 10.0.2
-  shared_preferences: ^2.2.3
+  shared_preferences: ^2.5.3
   slugify: ^2.0.0
   skeletons:
     # TODO: Remove when https://github.com/badjio/skeletons/pull/9 is merged
@@ -168,12 +157,12 @@ dependencies:
   app_links: ^6.2.0
   unifiedpush: ^6.0.2
   universal_html: ^2.0.8
-  url_launcher: 6.3.1
+  url_launcher: 6.3.2
   vibration: 3.1.3
   go_router: ^14.1.2
   wakelock_plus: 1.3.2
   webrtc_interface: ^1.0.10
-  overflow_view: 0.4.0
+  overflow_view: 0.5.0
   json_annotation: 4.9.0
   equatable: ^2.0.5
   get_it: ^7.2.0
@@ -182,43 +171,42 @@ dependencies:
   dio_cache_interceptor_hive_store: ^3.2.1
   dartz: ^0.10.1
   debounce_throttle: ^2.0.0
-  fluttertoast: ^8.2.2
+  fluttertoast: ^9.0.0
   rxdart: ^0.27.7
   photo_manager: ^3.0.0-dev.5
   flutter_inappwebview: 6.1.0
   tuple: ^2.0.2
   lottie: ^3.0.0
   lottie_native: 0.1.2
-  wechat_camera_picker: 4.2.2
+  wechat_camera_picker: 4.4.0
   open_file: ^3.3.2
   mime: ^1.0.4
   async: ^2.11.0
   flutter_image_compress: ^2.0.4
-  # TODO: remove when https://github.com/hui-z/image_gallery_saver/pull/310 is merged
   image_gallery_saver:
     git:
-      url: https://github.com/FlutterStudioIst/image_gallery_saver.git
-      ref: master
+      url: https://github.com/linagora/image_gallery_saver.git
+      ref: update/flutter-3.32.8
   file_saver: ^0.2.12
   flutter_keyboard_visibility: ^6.0.0
   media_kit: ^1.1.7
   media_kit_video: ^1.1.8
   media_kit_libs_video: ^1.0.1
-  video_player: ^2.7.2
+  video_player: ^2.10.0
   js: ^0.6.7
-  super_clipboard: 0.8.15
+  super_clipboard: 0.9.1
   crypto: ^3.0.3
   flutter_contacts: ^1.1.7+1
   flutter_localized_locales: ^2.0.5
   after_layout: ^1.2.0
   photo_manager_image_provider: ^2.1.0
   flutter_slidable: 4.0.0
-  skeletonizer: 1.1.2+1
+  skeletonizer: ^2.1.0+1
   flutter_portal: 1.1.4
-  external_path: 1.0.3
+  external_path: 2.2.0
   gal: 2.3.0
   auto_size_text: 3.0.0
-  flutter_avif: 2.4.1
+  flutter_avif: 3.1.0
   heif_converter: 1.0.0
   pull_down_button: 0.10.2
   pretty_qr_code: 3.3.0
@@ -309,7 +297,6 @@ dependency_overrides:
 #    git:
 #      url: https://gitlab.com/TheOneWithTheBraid/flutter_secure_storage_windows.git
 #      ref: main
-  geolocator_android: 4.6.1
   # waiting for null safety
   # Upstream pull request: https://github.com/AntoineMarcel/keyboard_shortcuts/pull/13
   keyboard_shortcuts:
@@ -338,7 +325,7 @@ dependency_overrides:
   linagora_design_flutter:
     git:
       url: git@github.com:linagora/linagora-design-flutter.git
-      ref: enhancement/image-picker-memory-leak
+      ref: update/flutter-3.32.8
 
 cider:
   link_template:

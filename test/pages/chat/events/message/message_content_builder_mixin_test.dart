@@ -14,7 +14,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:get_it/get_it.dart';
 import 'package:matrix/matrix.dart';
 import 'package:matrix_api_lite/fake_matrix_api.dart';
-import 'package:flutter_gen/gen_l10n/l10n.dart';
+import 'package:fluffychat/generated/l10n/app_localizations.dart';
 
 class MockUpMessageContentBuilder with MessageContentBuilderMixin {}
 

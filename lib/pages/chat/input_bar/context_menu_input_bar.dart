@@ -3,7 +3,7 @@ import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:fluffychat/presentation/extensions/text_editting_controller_extension.dart';
-import 'package:flutter_gen/gen_l10n/l10n.dart';
+import 'package:fluffychat/generated/l10n/app_localizations.dart';
 import 'package:matrix/matrix.dart';
 
 class ContextMenuInputBar extends StatelessWidget {
