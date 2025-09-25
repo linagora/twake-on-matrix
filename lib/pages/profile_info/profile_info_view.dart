@@ -3,7 +3,7 @@ import 'package:fluffychat/pages/profile_info/profile_info_body/profile_info_bod
 import 'package:fluffychat/widgets/app_bars/twake_app_bar.dart';
 import 'package:fluffychat/widgets/twake_components/twake_icon_button.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/l10n.dart';
+import 'package:fluffychat/generated/l10n/app_localizations.dart';
 
 class ProfileInfoView extends StatelessWidget {
   const ProfileInfoView(

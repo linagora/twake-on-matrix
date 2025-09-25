@@ -8,7 +8,7 @@ import 'package:fluffychat/widgets/adaptive_flat_button.dart';
 import 'package:fluffychat/widgets/context_menu_builder_ios_paste_without_permission.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/l10n.dart';
+import 'package:fluffychat/generated/l10n/app_localizations.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 import 'package:matrix/encryption.dart';

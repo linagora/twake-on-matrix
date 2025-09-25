@@ -4,7 +4,7 @@ import 'package:fluffychat/pages/contacts_tab/contacts_invitation_style.dart';
 import 'package:fluffychat/presentation/model/contact/presentation_contact.dart';
 import 'package:flutter/material.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
-import 'package:flutter_gen/gen_l10n/l10n.dart';
+import 'package:fluffychat/generated/l10n/app_localizations.dart';
 
 class ContactsInvitationView extends StatelessWidget {
   final PresentationContact contact;
