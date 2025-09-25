@@ -23,6 +23,7 @@ mixin HandleClipboardActionMixin on PasteImageMixin {
   }
 
   void _onPasteEvent(ClipboardReadEvent event) async {
+    if (chatFocusNode.hasFocus != true || room == null) return Future.value();
     final clipboardReader = await event.getClipboardReader();
     if (await TwakeClipboard.instance
         .isReadableImageFormat(clipboardReader: clipboardReader)) {
@@ -35,8 +36,6 @@ mixin HandleClipboardActionMixin on PasteImageMixin {
   void onSendFileCallback();
 
   Future<void> pasteClipboardImage(ClipboardReader? clipboardReader) async {
-    if (chatFocusNode.hasFocus != true || room == null) return Future.value();
-
     return pasteImage(
       context,
       room!,
@@ -46,8 +45,6 @@ mixin HandleClipboardActionMixin on PasteImageMixin {
   }
 
   Future<void> pasteClipboardText(ClipboardReader? clipboardReader) async {
-    if (chatFocusNode.hasFocus != true) return;
-
     await sendController.pasteText(clipboardReader: clipboardReader);
   }
 }
