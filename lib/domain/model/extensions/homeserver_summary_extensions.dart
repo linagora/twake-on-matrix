@@ -1,4 +1,5 @@
 import 'package:fluffychat/data/model/federation_server/federation_server_information.dart';
+import 'package:fluffychat/domain/model/app_twake_information.dart';
 import 'package:fluffychat/domain/model/tom_server_information.dart';
 import 'package:matrix/matrix.dart';
 
@@ -16,6 +17,23 @@ extension HomeserverSummaryExtensions on HomeserverSummary {
       return ToMServerInformation.fromJson(tomServerJson);
     } catch (e) {
       Logs().e('Failed to parse t.server from homeserver summary', e);
+      return null;
+    }
+  }
+
+  AppTwakeInformation? get appTwakeInformation {
+    if (discoveryInformation?.additionalProperties == null) {
+      return null;
+    }
+    final appTwakeJson = discoveryInformation
+        ?.additionalProperties[AppTwakeInformation.appTwakeInformationKey];
+    if (appTwakeJson == null) {
+      return null;
+    }
+    try {
+      return AppTwakeInformation.fromJson(appTwakeJson);
+    } catch (e) {
+      Logs().e('Failed to parse app.twake.chat from homeserver summary', e);
       return null;
     }
   }
