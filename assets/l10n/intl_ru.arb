@@ -114,7 +114,7 @@
       "username": {}
     }
   },
-  "autoplayImages": "Автоматически воспроизводить анимированные стикеры и эмодзи",
+  "autoplayImages": "Автовоспроизведение стикеров и эмодзи",
   "@autoplayImages": {
     "type": "text",
     "placeholder": {}
@@ -391,7 +391,7 @@
     "type": "text",
     "description": "Usage hint for the command /kick"
   },
-  "commandHint_leave": "Покинуть эту комнату",
+  "commandHint_leave": "Выйти из чата",
   "@commandHint_leave": {
     "type": "text",
     "description": "Usage hint for the command /leave"
@@ -820,12 +820,12 @@
     "type": "text",
     "placeholders": {}
   },
-  "groupDescription": "Описание группового чата",
+  "groupDescription": "Описание",
   "@groupDescription": {
     "type": "text",
     "placeholders": {}
   },
-  "groupDescriptionHasBeenChanged": "Описание группового чата изменено",
+  "groupDescriptionHasBeenChanged": "Описание изменено",
   "@groupDescriptionHasBeenChanged": {
     "type": "text",
     "placeholders": {}
@@ -870,12 +870,12 @@
     "type": "text",
     "placeholders": {}
   },
-  "hideRedactedEvents": "Скрыть удаленные сообщения",
+  "hideRedactedEvents": "Скрывать удаленные сообщения",
   "@hideRedactedEvents": {
     "type": "text",
     "placeholders": {}
   },
-  "hideUnknownEvents": "Скрыть неизвестные события",
+  "hideUnknownEvents": "Скрывать неизвестные события",
   "@hideUnknownEvents": {
     "type": "text",
     "placeholders": {}
@@ -1341,7 +1341,7 @@
     "type": "text",
     "placeholders": {}
   },
-  "pleaseChooseAPasscode": "Пожалуйста, выберите код доступа",
+  "pleaseChooseAPasscode": "Код блокировки",
   "@pleaseChooseAPasscode": {
     "type": "text",
     "placeholders": {}
@@ -1356,7 +1356,7 @@
     "type": "text",
     "placeholders": {}
   },
-  "pleaseEnter4Digits": "Введите 4 цифры или оставьте поле пустым, чтобы отключить блокировку приложения.",
+  "pleaseEnter4Digits": "Установите 4-значный PIN. Чтобы убрать блокировку, удалите код.",
   "@pleaseEnter4Digits": {
     "type": "text",
     "placeholders": {}
@@ -1477,7 +1477,7 @@
     "type": "text",
     "placeholders": {}
   },
-  "renderRichContent": "Показывать текст с форматированием",
+  "renderRichContent": "Показывать форматированный текст",
   "@renderRichContent": {
     "type": "text",
     "placeholders": {}
@@ -2459,7 +2459,7 @@
   "@noSearchResult": {},
   "startFirstChat": "Создайте свой первый чат",
   "@startFirstChat": {},
-  "hideUnimportantStateEvents": "Скрыть неважные события",
+  "hideUnimportantStateEvents": "Скрывать системные события",
   "@hideUnimportantStateEvents": {},
   "doNotShowAgain": "Больше не показывать",
   "@doNotShowAgain": {},
@@ -2844,7 +2844,7 @@
   "@muteThisChat": {},
   "youNeedToAcceptTheInvitation": "Примите приглашение, чтобы начать общение",
   "@youNeedToAcceptTheInvitation": {},
-  "fetchingPhonebookContacts": "Получение контактов с устройства...({progress}% выполнено)",
+  "fetchingPhonebookContacts": "Контакты синхронизируются...({progress}%)",
   "@fetchingPhonebookContacts": {},
   "changeProfileAvatar": "Изменить аватар",
   "@changeProfileAvatar": {},
@@ -2965,11 +2965,11 @@
   "@sendFiles": {},
   "failedToSendFiles": "Ошибка отправки файлов",
   "@failedToSendFiles": {},
-  "groupInformation": "Подробнее о чате",
+  "groupInformation": "Информация о чате",
   "@groupInformation": {},
   "linkInvite": "Приглашение по ссылке",
   "@linkInvite": {},
-  "noDescription": "Описания нет",
+  "noDescription": "Нет описания",
   "@noDescription": {},
   "description": "Описание",
   "@description": {},
@@ -3282,11 +3282,11 @@
   "@reaction": {},
   "edited": "изменено",
   "@edited": {},
-  "readOnly": "Только чтение",
+  "readOnly": "Чтение",
   "@readOnly": {},
   "yourDataIsEncryptedForSecurity": "Ваши данные зашифрованы для безопасности",
   "@yourDataIsEncryptedForSecurity": {},
-  "readOnlyCount": "ТОЛЬКО ЧТЕНИЕ ({number})",
+  "readOnlyCount": "ЧТЕНИЕ ({number})",
   "@readOnlyCount": {
     "type": "text",
     "placeholders": {
