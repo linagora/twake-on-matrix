@@ -6,6 +6,7 @@ import 'package:fluffychat/pages/chat/events/audio_message/audio_player_style.da
 import 'package:fluffychat/pages/chat/events/message/message_style.dart';
 import 'package:fluffychat/pages/chat/seen_by_row.dart';
 import 'package:fluffychat/presentation/mixins/audio_mixin.dart';
+import 'package:fluffychat/utils/matrix_sdk_extensions/download_file_extension.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
 import 'package:fluffychat/utils/room_status_extension.dart';
 import 'package:fluffychat/utils/size_string.dart';
@@ -83,6 +84,9 @@ class AudioPlayerState extends State<AudioPlayerWidget>
   }
 
   void _onButtonTap() async {
+    if (widget.event.isSending()) {
+      return;
+    }
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ScaffoldMessenger.of(matrix.context).clearMaterialBanners();
     });
