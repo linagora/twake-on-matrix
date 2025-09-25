@@ -3,7 +3,7 @@ import 'package:fluffychat/widgets/context_menu_builder_ios_paste_without_permis
 import 'package:fluffychat/widgets/twake_components/twake_icon_button.dart';
 import 'package:flutter/material.dart';
 import 'package:fluffychat/pages/dialer/pip/dismiss_keyboard.dart';
-import 'package:flutter_gen/gen_l10n/l10n.dart';
+import 'package:fluffychat/generated/l10n/app_localizations.dart';
 import 'package:linagora_design_flutter/colors/linagora_ref_colors.dart';
 
 class SearchTextField extends StatelessWidget {

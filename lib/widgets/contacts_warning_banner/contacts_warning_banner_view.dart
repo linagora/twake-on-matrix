@@ -1,7 +1,7 @@
 import 'package:fluffychat/presentation/enum/contacts/warning_contacts_banner_enum.dart';
 import 'package:fluffychat/widgets/contacts_warning_banner/contacts_warning_banner_style.dart';
 import 'package:fluffychat/widgets/twake_components/twake_text_button.dart';
-import 'package:flutter_gen/gen_l10n/l10n.dart';
+import 'package:fluffychat/generated/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 
 class ContactsWarningBannerView extends StatelessWidget {

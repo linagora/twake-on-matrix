@@ -3,7 +3,7 @@ import 'package:fluffychat/widgets/avatar/bottom_navigation_avatar.dart';
 import 'package:fluffychat/widgets/twake_components/twake_navigation_icon/twake_navigation_icon.dart';
 import 'package:fluffychat/widgets/unread_rooms_badge.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/l10n.dart';
+import 'package:fluffychat/generated/l10n/app_localizations.dart';
 import 'package:linagora_design_flutter/colors/linagora_sys_colors.dart';
 import 'package:matrix/matrix.dart';
 

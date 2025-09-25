@@ -5,6 +5,7 @@
 list(APPEND FLUTTER_PLUGIN_LIST
   desktop_drop
   desktop_lifecycle
+  desktop_webview_window
   dynamic_color
   emoji_picker_flutter
   file_saver
@@ -19,11 +20,12 @@ list(APPEND FLUTTER_PLUGIN_LIST
   record_linux
   super_native_extensions
   url_launcher_linux
+  volume_controller
   window_to_front
 )
 
 list(APPEND FLUTTER_FFI_PLUGIN_LIST
-  media_kit_native_event_loop
+  flutter_vodozemac
 )
 
 set(PLUGIN_BUNDLED_LIBRARIES)
