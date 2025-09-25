@@ -157,8 +157,16 @@ extension LocalizedBody on Event {
       EventTypes.Redaction,
     }.contains(comparedEvent.type);
 
+    final isPreviousOrNextEventRedacted = {
+      RelationshipTypes.edit,
+    }.contains(comparedEvent.relationshipType);
+
     // Ignoring events that are not messages, stickers, encrypted or redaction.
     if (!isPreviousOrNextEventMessage) {
+      return true;
+    }
+
+    if (isPreviousOrNextEventRedacted) {
       return true;
     }
 
