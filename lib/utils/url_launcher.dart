@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 
 import 'package:adaptive_dialog/adaptive_dialog.dart';
 import 'package:collection/collection.dart' show IterableExtension;
-import 'package:flutter_gen/gen_l10n/l10n.dart';
+import 'package:fluffychat/generated/l10n/app_localizations.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:go_router/go_router.dart';
 import 'package:matrix/matrix.dart';

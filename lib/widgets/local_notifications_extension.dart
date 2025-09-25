@@ -5,7 +5,7 @@ import 'package:flutter/foundation.dart';
 
 import 'package:desktop_lifecycle/desktop_lifecycle.dart';
 import 'package:desktop_notifications/desktop_notifications.dart';
-import 'package:flutter_gen/gen_l10n/l10n.dart';
+import 'package:fluffychat/generated/l10n/app_localizations.dart';
 import 'package:go_router/go_router.dart';
 import 'package:http/http.dart' as http;
 import 'package:linagora_design_flutter/cozy_config_manager/cozy_config_manager.dart';

@@ -8,7 +8,7 @@ import 'package:fluffychat/utils/room_status_extension.dart';
 import 'package:fluffychat/utils/string_extension.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/l10n.dart';
+import 'package:fluffychat/generated/l10n/app_localizations.dart';
 import 'package:linagora_design_flutter/colors/linagora_ref_colors.dart';
 import 'package:linagora_design_flutter/colors/linagora_sys_colors.dart';
 import 'package:matrix/matrix.dart';

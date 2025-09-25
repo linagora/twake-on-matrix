@@ -32,7 +32,7 @@ import 'package:fluffychat/domain/usecase/room/upload_content_for_web_interactor
 import 'package:fluffychat/presentation/model/chat/chat_router_input_argument.dart';
 import 'package:fluffychat/utils/dialog/warning_dialog.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
-import 'package:flutter_gen/gen_l10n/l10n.dart';
+import 'package:fluffychat/generated/l10n/app_localizations.dart';
 import 'package:go_router/go_router.dart';
 import 'package:linagora_design_flutter/images_picker/asset_counter.dart';
 import 'package:linagora_design_flutter/images_picker/images_picker.dart';

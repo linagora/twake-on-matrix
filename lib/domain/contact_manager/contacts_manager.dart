@@ -28,7 +28,7 @@ import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/utils/twake_snackbar.dart';
 import 'package:fluffychat/widgets/twake_app.dart';
 import 'package:matrix/matrix.dart';
-import 'package:flutter_gen/gen_l10n/l10n.dart';
+import 'package:fluffychat/generated/l10n/app_localizations.dart';
 
 class ContactsManager {
   static const int _lookupChunkSize = 10;

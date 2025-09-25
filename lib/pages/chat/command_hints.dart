@@ -1,6 +1,6 @@
 // This file is auto-generated using scripts/generate_command_hints_glue.sh.
 
-import 'package:flutter_gen/gen_l10n/l10n.dart';
+import 'package:fluffychat/generated/l10n/app_localizations.dart';
 
 String commandHint(L10n l10n, String command) {
   switch (command) {

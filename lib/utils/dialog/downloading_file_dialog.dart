@@ -2,7 +2,7 @@ import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/utils/dialog/downloading_file_dialog_style.dart';
 import 'package:fluffychat/utils/manager/download_manager/download_manager.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/l10n.dart';
+import 'package:fluffychat/generated/l10n/app_localizations.dart';
 
 class DownloadingFileDialog extends StatelessWidget {
   const DownloadingFileDialog({

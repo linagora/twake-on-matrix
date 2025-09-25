@@ -6,7 +6,6 @@ import app.twake.android.chat.MainActivity
 
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
-import io.flutter.view.FlutterMain
 import io.flutter.embedding.engine.dart.DartExecutor.DartEntrypoint
 
 import android.content.Context

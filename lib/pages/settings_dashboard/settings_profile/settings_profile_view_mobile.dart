@@ -14,7 +14,7 @@ import 'package:fluffychat/widgets/stream_image_view.dart';
 import 'package:flutter/material.dart';
 import 'package:matrix/matrix.dart';
 import 'package:wechat_camera_picker/wechat_camera_picker.dart';
-import 'package:flutter_gen/gen_l10n/l10n.dart';
+import 'package:fluffychat/generated/l10n/app_localizations.dart';
 
 typedef OnTapMultipleAccountsButton = void Function(
   List<TwakeChatPresentationAccount> multipleAccounts,
