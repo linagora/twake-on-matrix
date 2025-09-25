@@ -17,7 +17,7 @@ import 'package:fluffychat/widgets/contacts_warning_banner/contacts_warning_bann
 import 'package:fluffychat/widgets/phone_book_loading/phone_book_loading_view.dart';
 import 'package:fluffychat/widgets/sliver_expandable_list.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/l10n.dart';
+import 'package:fluffychat/generated/l10n/app_localizations.dart';
 
 class ContactsTabBodyView extends StatelessWidget {
   final ContactsTabController controller;

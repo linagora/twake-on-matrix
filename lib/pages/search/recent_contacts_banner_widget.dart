@@ -6,7 +6,7 @@ import 'package:fluffychat/widgets/avatar/avatar.dart';
 import 'package:flutter/material.dart' hide SearchController;
 import 'package:go_router/go_router.dart';
 import 'package:matrix/matrix.dart';
-import 'package:flutter_gen/gen_l10n/l10n.dart';
+import 'package:fluffychat/generated/l10n/app_localizations.dart';
 
 class PreSearchRecentContactsContainer extends StatelessWidget {
   final SearchController searchController;

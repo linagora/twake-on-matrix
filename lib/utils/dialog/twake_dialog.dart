@@ -9,7 +9,7 @@ import 'package:fluffychat/widgets/twake_app.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:future_loading_dialog/future_loading_dialog.dart';
-import 'package:flutter_gen/gen_l10n/l10n.dart';
+import 'package:fluffychat/generated/l10n/app_localizations.dart';
 import 'package:linagora_design_flutter/dialog/confirmation_dialog_builder.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:lottie/lottie.dart';

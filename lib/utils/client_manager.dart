@@ -1,14 +1,14 @@
 import 'dart:convert';
 
-import 'package:flutter/foundation.dart';
-
-import 'package:matrix/encryption/utils/key_verification.dart';
-import 'package:matrix/matrix.dart';
-
 import 'package:fluffychat/utils/custom_http_client.dart';
 import 'package:fluffychat/utils/custom_image_resizer.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/flutter_hive_collections_database.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter_vodozemac/flutter_vodozemac.dart' as vod;
+import 'package:matrix/encryption/utils/key_verification.dart';
+import 'package:matrix/matrix.dart';
+
 import 'famedlysdk_store.dart';
 
 abstract class ClientManager {
@@ -83,7 +83,10 @@ abstract class ClientManager {
 
   static NativeImplementations get nativeImplementations => kIsWeb
       ? const NativeImplementationsDummy()
-      : NativeImplementationsIsolate(compute);
+      : NativeImplementationsIsolate(
+          compute,
+          vodozemacInit: () => vod.init(),
+        );
 
   static Client createClient(String clientName) {
     return Client(

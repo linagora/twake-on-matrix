@@ -13,7 +13,7 @@ import 'package:fluffychat/presentation/model/contact/presentation_contact_succe
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/utils/responsive/responsive_utils.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/l10n.dart';
+import 'package:fluffychat/generated/l10n/app_localizations.dart';
 import 'package:fluffychat/pages/new_private_chat/widget/expansion_contact_list_tile.dart';
 import 'package:fluffychat/pages/new_private_chat/widget/no_contacts_found.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';

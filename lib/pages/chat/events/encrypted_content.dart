@@ -4,7 +4,7 @@ import 'package:fluffychat/pages/chat/optional_selection_container_disabled.dart
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:flutter/material.dart';
 import 'package:matrix/matrix.dart';
-import 'package:flutter_gen/gen_l10n/l10n.dart';
+import 'package:fluffychat/generated/l10n/app_localizations.dart';
 
 class EncryptedContent extends StatelessWidget with EncryptedMixin {
   final Event event;

@@ -4,7 +4,7 @@ import 'package:fluffychat/widgets/app_bars/twake_app_bar.dart';
 import 'package:fluffychat/widgets/app_bars/twake_app_bar_style.dart';
 import 'package:flutter/material.dart';
 
-import 'package:flutter_gen/gen_l10n/l10n.dart';
+import 'package:fluffychat/generated/l10n/app_localizations.dart';
 
 import 'package:fluffychat/pages/device_settings/device_settings.dart';
 import 'package:fluffychat/widgets/layouts/max_width_body.dart';

@@ -25,7 +25,7 @@ import 'package:fluffychat/widgets/file_widget/message_file_tile_style.dart';
 import 'package:fluffychat/widgets/mixins/handle_download_and_preview_file_mixin.dart';
 import 'package:fluffychat/widgets/twake_components/twake_preview_link/twake_link_preview.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/l10n.dart';
+import 'package:fluffychat/generated/l10n/app_localizations.dart';
 import 'package:matrix/matrix.dart' hide Visibility;
 
 import 'audio_message/audio_player_widget.dart';

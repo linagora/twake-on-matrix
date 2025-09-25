@@ -4,7 +4,7 @@ import 'package:fluffychat/pages/search/search_text_field.dart';
 import 'package:fluffychat/utils/responsive/responsive_utils.dart';
 import 'package:fluffychat/widgets/app_bars/twake_app_bar.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/l10n.dart';
+import 'package:fluffychat/generated/l10n/app_localizations.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 
 class ContactsAppBar extends StatelessWidget {

@@ -11,7 +11,7 @@ import 'package:fluffychat/presentation/model/search/presentation_server_side_se
 import 'package:fluffychat/widgets/twake_components/twake_icon_button.dart';
 import 'package:fluffychat/widgets/twake_components/twake_loading/center_loading_indicator.dart';
 import 'package:flutter/material.dart' hide SearchController;
-import 'package:flutter_gen/gen_l10n/l10n.dart';
+import 'package:fluffychat/generated/l10n/app_localizations.dart';
 import 'package:linagora_design_flutter/colors/linagora_sys_colors.dart';
 
 class SearchView extends StatelessWidget {
