@@ -53,21 +53,7 @@ class InvitationSelectionController
 
   @override
   void onSubmit() async {
-    if (isContainsExternal) {
-      performInvite();
-      return;
-    }
-    await showConfirmAlertDialog(
-      context: context,
-      title: L10n.of(context)?.externalContactTitle,
-      message: L10n.of(context)?.externalContactMessage,
-      okLabel: L10n.of(context)?.invite,
-      cancelLabel: L10n.of(context)?.skip,
-    ).then((result) {
-      if (result == ConfirmResult.ok) {
-        performInvite();
-      }
-    });
+    performInvite();
   }
 
   void performInvite() async {
