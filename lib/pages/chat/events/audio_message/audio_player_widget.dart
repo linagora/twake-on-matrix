@@ -91,12 +91,20 @@ class AudioPlayerState extends State<AudioPlayerWidget>
       ScaffoldMessenger.of(matrix.context).clearMaterialBanners();
     });
     if (matrix.voiceMessageEventId.value == widget.event.eventId) {
-      if (matrix.audioPlayer.isAtEndPosition == true) {
-        matrix.audioPlayer.seek(Duration.zero);
-      } else if (matrix.audioPlayer.playing == true) {
+      if (matrix.audioPlayer.playing == true) {
         matrix.audioPlayer.pause();
       } else {
-        matrix.audioPlayer.play();
+        matrix.audioPlayer.play().onError((e, s) {
+          Logs().e('Could not play audio file', e, s);
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                e?.toLocalizedString(context) ??
+                    L10n.of(context)!.couldNotPlayAudioFile,
+              ),
+            ),
+          );
+        });
       }
       return;
     }
@@ -139,12 +147,13 @@ class AudioPlayerState extends State<AudioPlayerWidget>
     }
     if (!context.mounted) return;
     if (matrix.voiceMessageEventId.value != widget.event.eventId) return;
-    final audioPlayer = matrix.audioPlayer = AudioPlayer();
+    matrix.audioPlayer = AudioPlayer();
 
     if (file != null) {
-      audioPlayer.setFilePath(file.path);
+      matrix.audioPlayer.setFilePath(file.path);
     } else {
-      await audioPlayer.setAudioSource(MatrixFileAudioSource(matrixFile));
+      await matrix.audioPlayer
+          .setAudioSource(MatrixFileAudioSource(matrixFile));
     }
 
     matrix.audioPlayer.play().onError((e, s) {

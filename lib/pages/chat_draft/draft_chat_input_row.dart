@@ -9,6 +9,7 @@ import 'package:fluffychat/pages/chat_draft/draft_chat_input_row_style.dart';
 import 'package:fluffychat/pages/chat_draft/draft_chat_view_style.dart';
 import 'package:fluffychat/presentation/mixins/audio_mixin.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_file_extension.dart';
+import 'package:fluffychat/utils/matrix_sdk_extensions/int_extension.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/widgets/twake_components/twake_icon_button.dart';
 import 'package:flutter/material.dart';
@@ -36,6 +37,10 @@ class DraftChatInputRow extends StatelessWidget {
   final Function()? stopRecording;
   final void Function(TwakeAudioFile, Duration, List<int>)?
       sendVoiceMessageAction;
+  final Function()? onTapRecorderWeb;
+  final void Function()? onFinishRecorderWeb;
+  final void Function()? onDeleteRecorderWeb;
+  final ValueNotifier<int> recordDurationWebNotifier;
 
   const DraftChatInputRow({
     super.key,
@@ -54,6 +59,10 @@ class DraftChatInputRow extends StatelessWidget {
     this.startRecording,
     this.stopRecording,
     this.sendVoiceMessageAction,
+    this.onTapRecorderWeb,
+    this.onFinishRecorderWeb,
+    this.onDeleteRecorderWeb,
+    required this.recordDurationWebNotifier,
   });
 
   @override
@@ -76,24 +85,68 @@ class DraftChatInputRow extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   if (ChatInputRowStyle.responsiveUtils.isMobile(context))
-                    SizedBox(
-                      height: ChatInputRowStyle.chatInputRowHeight,
-                      child: TwakeIconButton(
-                        size: ChatInputRowStyle.chatInputRowMoreBtnSize,
-                        tooltip: L10n.of(context)!.more,
-                        icon: Icons.add_circle_outline,
-                        onTap: () => onSendFileClick(context),
-                      ),
+                    ValueListenableBuilder(
+                      valueListenable: audioRecordStateNotifier,
+                      builder: (context, audioState, _) {
+                        if (PlatformInfos.isWeb &&
+                            audioState == AudioRecordState.recording) {
+                          return const SizedBox.shrink();
+                        }
+                        return SizedBox(
+                          height: ChatInputRowStyle.chatInputRowHeight,
+                          child: TwakeIconButton(
+                            size: ChatInputRowStyle.chatInputRowMoreBtnSize,
+                            tooltip: L10n.of(context)!.more,
+                            icon: Icons.add_circle_outline,
+                            onTap: () => onSendFileClick(context),
+                          ),
+                        );
+                      },
                     ),
-                  Expanded(
-                    child: ChatInputRowStyle.responsiveUtils.isMobile(context)
-                        ? _buildMobileInputRow(context)
-                        : _buildWebInputRow(context),
+                  ValueListenableBuilder(
+                    valueListenable: audioRecordStateNotifier,
+                    builder: (context, audioState, _) {
+                      if (PlatformInfos.isWeb &&
+                          audioState == AudioRecordState.recording) {
+                        return Expanded(
+                          child: ConstrainedBox(
+                            constraints: const BoxConstraints(
+                              minHeight: ChatInputRowStyle.chatInputRowHeight,
+                            ),
+                            child: Container(
+                              alignment: Alignment.center,
+                              padding:
+                                  ChatInputRowStyle.chatInputRowPaddingMobile,
+                              decoration: BoxDecoration(
+                                borderRadius:
+                                    ChatInputRowStyle.chatInputRowBorderRadius,
+                                color: LinagoraSysColors.material().onPrimary,
+                                border: Border.all(
+                                  color: LinagoraRefColors.material().tertiary,
+                                  width: 1,
+                                ),
+                              ),
+                              child: _counterAudioWeb(context: context),
+                            ),
+                          ),
+                        );
+                      }
+                      return Expanded(
+                        child:
+                            ChatInputRowStyle.responsiveUtils.isMobile(context)
+                                ? _buildMobileInputRow(context)
+                                : _buildWebInputRow(context),
+                      );
+                    },
                   ),
                   ChatInputRowSendBtn(
                     inputText: inputText,
                     onTap: onInputBarSubmitted,
                     sendingNotifier: isSendingNotifier,
+                    onTapRecorderWeb: onTapRecorderWeb,
+                    audioRecordStateNotifier: audioRecordStateNotifier,
+                    onFinishRecorderWeb: onFinishRecorderWeb,
+                    onDeleteRecorderWeb: onDeleteRecorderWeb,
                   ),
                 ],
               ),
@@ -213,6 +266,60 @@ class DraftChatInputRow extends StatelessWidget {
       inputBar: _buildInputBar(context),
       onTapMoreBtn: () => onSendFileClick(context),
       onEmojiAction: onEmojiAction,
+    );
+  }
+
+  Widget _counterAudioWeb({
+    required BuildContext context,
+  }) {
+    return ValueListenableBuilder(
+      valueListenable: recordDurationWebNotifier,
+      builder: (context, duration, _) {
+        return Row(
+          mainAxisAlignment: MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            const SizedBox(width: 8),
+            AnimatedOpacity(
+              duration: const Duration(seconds: 1),
+              opacity: (duration % 60) % 2 == 0 ? 1 : 0,
+              child: Container(
+                width: 12,
+                height: 12,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: LinagoraSysColors.material().error,
+                ),
+              ),
+            ),
+            const SizedBox(width: 8),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Text(
+                  (duration ~/ 60).formatNumberAudioDuration(),
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: LinagoraRefColors.material().neutral[50],
+                      ),
+                ),
+                Text(
+                  " : ",
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: LinagoraRefColors.material().neutral[50],
+                      ),
+                ),
+                Text(
+                  (duration % 60).formatNumberAudioDuration(),
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: LinagoraRefColors.material().neutral[50],
+                      ),
+                ),
+              ],
+            ),
+          ],
+        );
+      },
     );
   }
 
