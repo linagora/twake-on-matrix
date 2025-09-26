@@ -29,6 +29,7 @@ class SettingsProfileRedirectionEditButton extends StatelessWidget {
 
     if (capabilities?.canEditAvatar == true ||
         capabilities?.canEditDisplayName == true ||
+        commonSettingsInformation?.enabled == false ||
         redirectUrl == null) {
       return const SizedBox();
     }
