@@ -56,19 +56,19 @@ void main() {
       expect(contact.isContainsExternal(client), isTrue);
     });
 
-    test('returns true if type is external and matrixId is null', () {
+    test('returns false if type is external and matrixId is null', () {
       final contact = makeContact(type: ContactType.external, matrixId: null);
       final client = MockClient();
       when(client.userID).thenReturn('@me:domain.com');
-      expect(contact.isContainsExternal(client), isTrue);
+      expect(contact.isContainsExternal(client), isFalse);
     });
 
-    test('returns true if type is external and userID is null', () {
+    test('returns false if type is external and userID is null', () {
       final contact =
           makeContact(type: ContactType.external, matrixId: '@user:domain.com');
       final client = MockClient();
       when(client.userID).thenReturn(null);
-      expect(contact.isContainsExternal(client), isTrue);
+      expect(contact.isContainsExternal(client), isFalse);
     });
 
     test('returns false if type is local, matrixId is null, userID is null',
@@ -80,12 +80,12 @@ void main() {
     });
 
     test(
-        'returns true if type is local, matrixId is empty, userID matches empty',
+        'returns false if type is local, matrixId is empty, userID matches empty',
         () {
       final contact = makeContact(matrixId: '');
       final client = MockClient();
       when(client.userID).thenReturn('');
-      expect(contact.isContainsExternal(client), isTrue);
+      expect(contact.isContainsExternal(client), isFalse);
     });
 
     test(
@@ -97,19 +97,19 @@ void main() {
       expect(contact.isContainsExternal(client), isFalse);
     });
 
-    test('returns true if type is external, matrixId is empty', () {
+    test('returns false if type is external, matrixId is empty', () {
       final contact = makeContact(type: ContactType.external, matrixId: '');
       final client = MockClient();
       when(client.userID).thenReturn('@me:domain.com');
-      expect(contact.isContainsExternal(client), isTrue);
+      expect(contact.isContainsExternal(client), isFalse);
     });
 
-    test('returns true if type is external, userID is empty', () {
+    test('returns false if type is external, userID is empty', () {
       final contact =
           makeContact(type: ContactType.external, matrixId: '@user:domain.com');
       final client = MockClient();
       when(client.userID).thenReturn('');
-      expect(contact.isContainsExternal(client), isTrue);
+      expect(contact.isContainsExternal(client), isFalse);
     });
 
     test('returns false if type is local, matrixId is null, userID is not null',
@@ -128,14 +128,15 @@ void main() {
       expect(contact.isContainsExternal(client), isFalse);
     });
 
-    test('returns true if type is external, matrixId and userID are null', () {
+    test('returns false if type is external, matrixId and userID are null', () {
       final contact = makeContact(type: ContactType.external, matrixId: null);
       final client = MockClient();
       when(client.userID).thenReturn(null);
-      expect(contact.isContainsExternal(client), isTrue);
+      expect(contact.isContainsExternal(client), isFalse);
     });
 
-    test('returns true if type is external, matrixId and userID are empty', () {
+    test('returns false if type is external, matrixId and userID are empty',
+        () {
       final contact = makeContact(type: ContactType.external, matrixId: '');
       final client = MockClient();
       when(client.userID).thenReturn('');
@@ -161,18 +162,18 @@ void main() {
       );
     });
 
-    test('returns true if type is external, matrixId is whitespace', () {
+    test('returns false if type is external, matrixId is whitespace', () {
       final contact = makeContact(type: ContactType.external, matrixId: '   ');
       final client = MockClient();
       when(client.userID).thenReturn('@me:domain.com');
       expect(contact.isContainsExternal(client), isFalse);
     });
 
-    test('returns false if type is local, matrixId is invalid format', () {
+    test('returns true if type is local, matrixId is invalid format', () {
       final contact = makeContact(matrixId: 'invalid');
       final client = MockClient();
       when(client.userID).thenReturn('@me:domain.com');
-      expect(contact.isContainsExternal(client), isFalse);
+      expect(contact.isContainsExternal(client), isTrue);
     });
 
     test('returns true if type is external, matrixId is invalid format', () {

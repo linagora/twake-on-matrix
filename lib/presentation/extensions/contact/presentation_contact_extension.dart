@@ -26,13 +26,14 @@ extension PresentaionContactExtension on PresentationContact {
       return false;
     }
 
-    if (type != null && type == ContactType.external) {
-      return true;
-    }
     final currentUserId = currentClient.userID;
     if (currentUserId?.trim().isEmpty == true ||
         matrixId?.trim().isEmpty == true) {
       return false;
+    }
+
+    if (type != null && type == ContactType.external) {
+      return true;
     }
 
     return !(currentUserId ?? '').isTheSameDomain(matrixId: matrixId ?? '');
