@@ -964,7 +964,8 @@ class MatrixState extends State<Matrix>
 
   Future<void> _getHomeserverInformation(Client newClient) async {
     Logs().d(
-        'Matrix::_getHomeserverInformation: client homeserver = ${newClient.homeserver}');
+      'Matrix::_getHomeserverInformation: client homeserver = ${newClient.homeserver}',
+    );
     if (newClient.homeserver == null) return;
     loginHomeserverSummary =
         await newClient.checkHomeserver(newClient.homeserver!);
