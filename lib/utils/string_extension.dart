@@ -420,6 +420,25 @@ extension StringCasingExtension on String {
   bool isPhoneNumberFormatted() {
     return RegExp(r'^\+?$|^\+?\d+$').hasMatch(replaceAll(' ', ''));
   }
+
+  String getDomain() {
+    final parts = split(':');
+    if (parts.length != 2) return '';
+    return parts.last.toLowerCase().trim();
+  }
+
+  bool isTheSameDomain({
+    required String matrixId,
+  }) {
+    final contactDomain = matrixId.getDomain();
+    final currentUserDomain = getDomain();
+
+    if (contactDomain.isEmpty || currentUserDomain.isEmpty) {
+      return false;
+    }
+
+    return contactDomain == currentUserDomain;
+  }
 }
 
 extension ListStringExtension on List<String> {

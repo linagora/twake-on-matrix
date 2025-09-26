@@ -1,9 +1,12 @@
 import 'package:fluffychat/domain/model/contact/contact.dart';
 import 'package:fluffychat/domain/model/contact/contact_status.dart';
+import 'package:fluffychat/domain/model/contact/contact_type.dart';
 import 'package:fluffychat/domain/model/contact/third_party_status.dart';
 import 'package:fluffychat/presentation/model/contact/presentation_contact.dart';
 import 'package:fluffychat/presentation/model/search/presentation_search.dart';
 import 'package:collection/collection.dart';
+import 'package:fluffychat/utils/string_extension.dart';
+import 'package:matrix/matrix.dart';
 
 extension PresentaionContactExtension on PresentationContact {
   Set<PresentationSearch> toPresentationSearch() {
@@ -16,6 +19,23 @@ extension PresentaionContactExtension on PresentationContact {
       ),
     };
     return listContacts;
+  }
+
+  bool isContainsExternal(Client currentClient) {
+    if (currentClient.userID == null || matrixId == null) {
+      return false;
+    }
+
+    if (type != null && type == ContactType.external) {
+      return true;
+    }
+    final currentUserId = currentClient.userID;
+    if (currentUserId?.trim().isEmpty == true ||
+        matrixId?.trim().isEmpty == true) {
+      return false;
+    }
+
+    return !(currentUserId ?? '').isTheSameDomain(matrixId: matrixId ?? '');
   }
 }
 

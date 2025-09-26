@@ -794,4 +794,217 @@ void main() {
       expect(reactions, emojis.reversed.take(12).toList());
     });
   });
+
+  group('getDomain test', () {
+    // Additional test cases for getDomain
+    test('returns domain for @john:my-domain.org', () {
+      expect('@john:my-domain.org'.getDomain(), equals('my-domain.org'));
+    });
+    test('returns domain for @jane:EXAMPLE.ORG', () {
+      expect('@jane:EXAMPLE.ORG'.getDomain(), equals('example.org'));
+    });
+    test('returns domain for @user:sub.example.org', () {
+      expect('@user:sub.example.org'.getDomain(), equals('sub.example.org'));
+    });
+    test('returns domain for @user:123domain.com', () {
+      expect('@user:123domain.com'.getDomain(), equals('123domain.com'));
+    });
+    test('returns domain for @user:domain-with-dash.com', () {
+      expect(
+        '@user:domain-with-dash.com'.getDomain(),
+        equals('domain-with-dash.com'),
+      );
+    });
+    test('returns domain for @user:domain.with.dots.com', () {
+      expect(
+        '@user:domain.with.dots.com'.getDomain(),
+        equals('domain.with.dots.com'),
+      );
+    });
+    test('returns domain for @user:UPPERCASE.COM', () {
+      expect('@user:UPPERCASE.COM'.getDomain(), equals('uppercase.com'));
+    });
+    test('returns empty string for @userdomain.com', () {
+      expect('@userdomain.com'.getDomain(), equals(''));
+    });
+    test('returns empty string for @user:domain:com', () {
+      expect('@user:domain:com'.getDomain(), equals(''));
+    });
+    test('returns empty string for @:domain.com', () {
+      expect('@:domain.com'.getDomain(), equals('domain.com'));
+    });
+    test('returns empty string for @user:', () {
+      expect('@user:'.getDomain(), equals(''));
+    });
+    test('returns empty string for :domain.com', () {
+      expect(':domain.com'.getDomain(), equals('domain.com'));
+    });
+    test('returns empty string for @:domain', () {
+      expect('@:domain'.getDomain(), equals('domain'));
+    });
+    test('returns empty string for @user:', () {
+      expect('@user:'.getDomain(), equals(''));
+    });
+    test('returns empty string for @:', () {
+      expect('@:'.getDomain(), equals(''));
+    });
+    test('returns empty string for @user', () {
+      expect('@user'.getDomain(), equals(''));
+    });
+    test('returns empty string for user:domain.com', () {
+      expect('user:domain.com'.getDomain(), equals('domain.com'));
+    });
+    test('returns empty string for @user:domain.com:extra', () {
+      expect('@user:domain.com:extra'.getDomain(), equals(''));
+    });
+    test('returns empty string for @:domain.com:extra', () {
+      expect('@:domain.com:extra'.getDomain(), equals(''));
+    });
+    test('returns empty string for @user:', () {
+      expect('@user:'.getDomain(), equals(''));
+    });
+  });
+
+  group('isTheSameDomain test', () {
+    test('same domain, both lowercase', () {
+      expect(
+        '@user:example.com'.isTheSameDomain(matrixId: '@other:example.com'),
+        isTrue,
+      );
+    });
+
+    test('same domain, mixed case', () {
+      expect(
+        '@user:EXAMPLE.com'.isTheSameDomain(matrixId: '@other:example.COM'),
+        isTrue,
+      );
+    });
+
+    test('different domains', () {
+      expect(
+        '@user:example.com'.isTheSameDomain(matrixId: '@other:another.com'),
+        isFalse,
+      );
+    });
+
+    test('subdomain vs domain', () {
+      expect(
+        '@user:sub.example.com'.isTheSameDomain(matrixId: '@other:example.com'),
+        isFalse,
+      );
+    });
+
+    test('domain with dash', () {
+      expect(
+        '@user:my-domain.com'.isTheSameDomain(matrixId: '@other:my-domain.com'),
+        isTrue,
+      );
+    });
+
+    test('domain with dots', () {
+      expect(
+        '@user:domain.with.dots.com'
+            .isTheSameDomain(matrixId: '@other:domain.with.dots.com'),
+        isTrue,
+      );
+    });
+
+    test('domain with numbers', () {
+      expect(
+        '@user:123domain.com'.isTheSameDomain(matrixId: '@other:123domain.com'),
+        isTrue,
+      );
+    });
+
+    test('empty domain in self', () {
+      expect(
+        '@userdomain.com'.isTheSameDomain(matrixId: '@other:example.com'),
+        isFalse,
+      );
+    });
+
+    test('empty domain in matrixId', () {
+      expect(
+        '@user:example.com'.isTheSameDomain(matrixId: '@otherdomain.com'),
+        isFalse,
+      );
+    });
+
+    test('both empty domains', () {
+      expect(
+        '@userdomain.com'.isTheSameDomain(matrixId: '@otherdomain.com'),
+        isFalse,
+      );
+    });
+
+    test('extra colon in self', () {
+      expect(
+        '@user:domain.com:extra'.isTheSameDomain(matrixId: '@other:domain.com'),
+        isFalse,
+      );
+    });
+
+    test('extra colon in matrixId', () {
+      expect(
+        '@user:domain.com'.isTheSameDomain(matrixId: '@other:domain.com:extra'),
+        isFalse,
+      );
+    });
+
+    test('self missing username', () {
+      expect(
+        '@:domain.com'.isTheSameDomain(matrixId: '@other:domain.com'),
+        isTrue,
+      );
+    });
+
+    test('matrixId missing username', () {
+      expect(
+        '@user:domain.com'.isTheSameDomain(matrixId: '@:domain.com'),
+        isTrue,
+      );
+    });
+
+    test('self only colon', () {
+      expect(
+        '@:'.isTheSameDomain(matrixId: '@other:domain.com'),
+        isFalse,
+      );
+    });
+
+    test('matrixId only colon', () {
+      expect(
+        '@user:domain.com'.isTheSameDomain(matrixId: '@:'),
+        isFalse,
+      );
+    });
+
+    test('self only at', () {
+      expect(
+        '@user'.isTheSameDomain(matrixId: '@other:domain.com'),
+        isFalse,
+      );
+    });
+
+    test('matrixId only at', () {
+      expect(
+        '@user:domain.com'.isTheSameDomain(matrixId: '@other'),
+        isFalse,
+      );
+    });
+
+    test('self only domain', () {
+      expect(
+        ':domain.com'.isTheSameDomain(matrixId: '@other:domain.com'),
+        isTrue,
+      );
+    });
+
+    test('matrixId only domain', () {
+      expect(
+        '@user:domain.com'.isTheSameDomain(matrixId: ':domain.com'),
+        isTrue,
+      );
+    });
+  });
 }

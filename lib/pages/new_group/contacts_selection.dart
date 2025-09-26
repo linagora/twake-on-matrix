@@ -1,4 +1,4 @@
-import 'package:fluffychat/domain/model/contact/contact_type.dart';
+import 'package:fluffychat/presentation/extensions/contact/presentation_contact_extension.dart';
 import 'package:fluffychat/presentation/mixins/address_book_mixin.dart';
 import 'package:fluffychat/presentation/mixins/contacts_view_controller_mixin.dart';
 import 'package:fluffychat/presentation/mixins/invite_external_contact_mixin.dart';
@@ -33,7 +33,7 @@ abstract class ContactsSelectionController<T extends StatefulWidget>
       selectedContactsMapNotifier.contactsList;
 
   bool get isContainsExternal =>
-      contactsList.any((contact) => contact.type == ContactType.external);
+      contactsList.any((contact) => contact.isContainsExternal(client));
 
   bool get isFullScreen => true;
 
