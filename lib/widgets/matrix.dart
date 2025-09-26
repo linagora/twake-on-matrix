@@ -158,6 +158,7 @@ class MatrixState extends State<Matrix>
       await _setUpToMServicesWhenChangingActiveClient(newClient);
       await _storePersistActiveAccount(newClient!);
       await _getUserInfoWithActiveClient(newClient);
+      await _getHomeserverInformation(newClient);
       return SetActiveClientState.success;
     } else {
       Logs().w('Tried to set an unknown client ${newClient!.userID} as active');
@@ -483,6 +484,7 @@ class MatrixState extends State<Matrix>
     await setUpFederationServicesInLogin(newActiveClient);
     await _storePersistActiveAccount(newActiveClient);
     await _getUserInfoWithActiveClient(newActiveClient);
+    await _getHomeserverInformation(newActiveClient);
     matrixState.reSyncContacts();
     onClientLoginStateChanged.add(
       ClientLoginStateEvent(
@@ -924,6 +926,7 @@ class MatrixState extends State<Matrix>
       if (persistActiveAccount == null) {
         await _storePersistActiveAccount(client);
         await _getUserInfoWithActiveClient(client);
+        await _getHomeserverInformation(client);
         return;
       } else {
         final newActiveClient = getClientByUserId(persistActiveAccount);
@@ -957,6 +960,18 @@ class MatrixState extends State<Matrix>
         context,
       );
     }
+  }
+
+  Future<void> _getHomeserverInformation(Client newClient) async {
+    Logs().d(
+      'Matrix::_getHomeserverInformation: client homeserver = ${newClient.homeserver}',
+    );
+    if (newClient.homeserver == null) return;
+    loginHomeserverSummary =
+        await newClient.checkHomeserver(newClient.homeserver!);
+    Logs().d(
+      'Matrix::_getHomeserverInformation: appTwakeInformation ${loginHomeserverSummary?.appTwakeInformation}',
+    );
   }
 
   Future<void> _storePersistActiveAccount(Client newClient) async {
