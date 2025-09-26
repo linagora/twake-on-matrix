@@ -1,3 +1,8 @@
+## [2.12.3+2330] - 2025-09-26
+### Added
+- #2560 remove invitation dialog
+- #2557 fetch common_settings in homeserver well-known
+
 ## [2.12.2+2330] - 2025-09-25
 ### Fixed
 - #2523 clipboard handling for past event
