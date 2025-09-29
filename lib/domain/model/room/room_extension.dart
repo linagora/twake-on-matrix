@@ -189,7 +189,8 @@ extension RoomExtension on Room {
             });
 
       if (lastEventAvailableInPreview == null ||
-          lastEventAvailableInPreview.shouldHideRedactedEvent()) {
+          lastEventAvailableInPreview.shouldHideRedactedEvent() ||
+          lastEventAvailableInPreview.shouldHideBannedEvent()) {
         final lastState = _getLastestRoomState();
 
         if (lastState == null) return null;
@@ -203,6 +204,7 @@ extension RoomExtension on Room {
 
         for (final messageEvent in messageEvents) {
           if (messageEvent.shouldHideRedactedEvent()) continue;
+          if (messageEvent.shouldHideBannedEvent()) continue;
 
           if (messageEvent.originServerTs.millisecondsSinceEpoch >
               lastState.originServerTs.millisecondsSinceEpoch) {
@@ -226,6 +228,7 @@ extension RoomExtension on Room {
       final state = entry[''];
       if (state == null) return;
       if (state.shouldHideRedactedEvent()) return;
+      if (state.shouldHideBannedEvent()) return;
       if (state.originServerTs.millisecondsSinceEpoch >
           lastTime.millisecondsSinceEpoch) {
         lastTime = state.originServerTs;
