@@ -373,6 +373,10 @@ extension LocalizedBody on Event {
     return AppConfig.hideRedactedEvents && redacted;
   }
 
+  bool shouldHideBannedEvent() {
+    return type == EventTypes.RoomMember && content['membership'] == 'ban';
+  }
+
   bool hasReactionEvent({
     required Timeline timeline,
   }) {
