@@ -1,3 +1,7 @@
+## [2.12.4+2330] - 2025-09-30
+### Fixed
+- Filter out banned event in chat list
+
 ## [2.12.3+2330] - 2025-09-26
 ### Added
 - #2560 remove invitation dialog
