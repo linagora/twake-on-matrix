@@ -148,6 +148,10 @@ class DraftChatInputRow extends StatelessWidget {
               },
               stopRecording: (_) {
                 Logs().d('ChatInputRowMobile:: stopRecording');
+                if (audioRecordStateNotifier.value !=
+                    AudioRecordState.recording) {
+                  return;
+                }
                 stopRecording?.call();
               },
               sendRequestFunction: (soundFile, time, waveFrom) {
