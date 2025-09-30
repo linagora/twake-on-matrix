@@ -2213,15 +2213,26 @@ class ChatController extends State<Chat>
       Logs().d(
         'Chat::_listenRoomUpdateEvent():: Event Update Content ${eventUpdate.content}',
       );
-      if (eventUpdate.isPinnedEventsHasChanged &&
-          room?.id == eventUpdate.roomID) {
-        WidgetsBinding.instance.addPostFrameCallback((_) async {
-          eventUpdate.updatePinnedMessage(
-            onPinnedMessageUpdated: _handlePinnedMessageCallBack,
+      if (room?.id != eventUpdate.roomID) return;
+      if (eventUpdate.isPinnedEventsHasChanged) {
+        eventUpdate.updatePinnedMessage(
+          onPinnedMessageUpdated: _handlePinnedMessageCallBack,
+        );
+      } else if (isPinnedEventDeleted(eventUpdate)) {
+        final events = room!.pinnedEventIds
+          ..removeWhere(
+            (oldEvent) => oldEvent == eventUpdate.content['redacts'],
           );
-        });
+        TwakeDialog.showFutureLoadingDialogFullScreen(
+          future: () => room!.setPinnedEvents(events),
+        );
       }
     });
+  }
+
+  bool isPinnedEventDeleted(EventUpdate eventUpdate) {
+    return eventUpdate.content['type'] == EventTypes.Redaction &&
+        room?.pinnedEventIds.contains(eventUpdate.content['redacts']) == true;
   }
 
   void _handlePinnedMessageCallBack({
