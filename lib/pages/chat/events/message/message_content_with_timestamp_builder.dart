@@ -230,6 +230,8 @@ class _MessageContentWithTimestampBuilderState
               isClickable: _responsiveUtils.isMobile(context),
               onLongPress: widget.event.status.isAvailable
                   ? (event) async {
+                      if (event.redacted) return;
+
                       // for pin screen
                       if (widget.onLongPressMessage != null) {
                         widget.onLongPressMessage?.call(event);
