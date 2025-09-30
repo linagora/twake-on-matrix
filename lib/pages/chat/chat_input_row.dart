@@ -3,6 +3,7 @@ import 'package:fluffychat/pages/chat/chat_input_row_send_btn.dart';
 import 'package:fluffychat/pages/chat/chat_input_row_style.dart';
 import 'package:fluffychat/pages/chat/chat_input_row_web.dart';
 import 'package:fluffychat/pages/chat/reply_display.dart';
+import 'package:fluffychat/presentation/mixins/audio_mixin.dart';
 import 'package:fluffychat/resource/image_paths.dart';
 import 'package:fluffychat/utils/android_utils.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_file_extension.dart';
@@ -125,6 +126,10 @@ class ChatInputRow extends StatelessWidget {
                             },
                             stopRecording: (_) {
                               Logs().d('ChatInputRowMobile:: stopRecording');
+                              if (controller.audioRecordStateNotifier.value !=
+                                  AudioRecordState.recording) {
+                                return;
+                              }
                               if (controller.sendController.text.isNotEmpty) {
                                 controller.sendController.clear();
                               }
