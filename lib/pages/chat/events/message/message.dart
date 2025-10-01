@@ -399,7 +399,9 @@ class _MessageState extends State<Message> with MessageAvatarMixin {
       child: Row(
         mainAxisSize: MainAxisSize.max,
         children: [
-          if (widget.selectMode && event.status.isAvailable)
+          if (widget.selectMode && event.redacted)
+            const SizedBox(width: 20)
+          else if (widget.selectMode && event.status.isAvailable)
             Align(
               alignment: AlignmentDirectional.centerStart,
               child: Icon(
