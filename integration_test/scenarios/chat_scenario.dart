@@ -6,12 +6,14 @@ import 'package:fluffychat/pages/chat/chat_input_row_send_btn.dart';
 import 'package:fluffychat/pages/chat/chat_pinned_events/pinned_events_view.dart';
 import 'package:fluffychat/pages/chat/chat_pinned_events/pinned_messages_screen.dart';
 import 'package:fluffychat/pages/chat/chat_view.dart';
+import 'package:fluffychat/pages/chat/event_info_dialog.dart';
 import 'package:fluffychat/pages/chat/events/message/multi_platform_message_container.dart';
 import 'package:fluffychat/pages/chat/events/message_content.dart';
 import 'package:fluffychat/pages/chat/events/message_time.dart';
 import 'package:fluffychat/pages/chat/seen_by_row.dart';
 import 'package:fluffychat/pages/chat_draft/draft_chat_view.dart';
 import 'package:fluffychat/pages/chat_list/chat_list_body_view.dart';
+import 'package:fluffychat/widgets/context_menu/context_menu_action_item_widget.dart';
 import 'package:fluffychat/widgets/twake_components/twake_icon_button.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:linkfy_text/linkfy_text.dart';
@@ -172,6 +174,19 @@ class ChatScenario extends BaseScenario {
   Future<void> selectMessage(String message) async {
     await ChatGroupDetailRobot($).openPullDownMenu(message);
     await (PullDownMenuRobot($).getSelectItem()).tap();
+  }
+
+  Future<void> watchMessageInfo(String message) async {
+    await selectMessage(message);
+    await ChatGroupDetailRobot($).getMoreIcon().tap();
+    await $.waitUntilVisible($(ContextMenuActionItemWidget).at(0));
+    await ($(ContextMenuActionItemWidget).at(0)).tap();
+    await $.waitUntilVisible($(EventInfoDialog));
+  }
+
+  Future<void> closeMessageInfo() async {
+    await $(EventInfoDialog).$(AppBar).$(IconButton).tap();
+    await $.pump();
   }
 
   PatrolFinder getPinExpandIcon() {
