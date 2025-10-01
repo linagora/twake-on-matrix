@@ -210,6 +210,8 @@ class PinnedMessagesController extends State<PinnedMessages>
   }
 
   void onLongPressMessage(BuildContext context, Event event) {
+    if (event.redacted) return;
+
     if (PinnedMessagesStyle.responsiveUtils.isMobile(context)) {
       _showMessageBottomSheet(event);
     }
