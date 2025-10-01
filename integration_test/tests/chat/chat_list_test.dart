@@ -62,4 +62,26 @@ void main() {
       s.verifyAll();
     },
   );
+
+  TestBase().runPatrolTest(
+    description: 'Count unread messages',
+    test: ($) async {
+      final now = DateTime.now();
+      const groupTest = String.fromEnvironment('TitleOfGroupTest');
+      // goto chat screen
+      await HomeRobot($).gotoChatListScreen();
+      //send a message by API to groupTest
+      await ChatScenario($).sendAMessageByAPI("${now.month}${now.day}${now.hour}${now.minute}");  
+      //get current unread message of groupTest
+      final numberOfUnreadMessage1 = ChatListRobot($).getUnreadMessage(groupTest) ;
+
+      //send the ome more message by API
+      await ChatScenario($).sendAMessageByAPI("${now.month}${now.day}${now.hour}${now.minute}");  
+      //get current unread message of groupTest
+      final numberOfUnreadMessage2 = ChatListRobot($).getUnreadMessage(groupTest) ;
+
+      expect((numberOfUnreadMessage2 - numberOfUnreadMessage1) ==1, isTrue,
+        reason: "expect the different is 1 but the second is $numberOfUnreadMessage2 and the first is $numberOfUnreadMessage1",);
+    },
+  );
 }
