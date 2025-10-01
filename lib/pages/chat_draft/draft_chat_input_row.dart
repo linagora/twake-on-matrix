@@ -34,6 +34,8 @@ class DraftChatInputRow extends StatelessWidget {
   final ValueNotifier<AudioRecordState> audioRecordStateNotifier;
   final Function()? startRecording;
   final Function()? stopRecording;
+  final Function()? pauseRecording;
+  final Function()? resumeRecording;
   final void Function(TwakeAudioFile, Duration, List<int>)?
       sendVoiceMessageAction;
 
@@ -54,6 +56,8 @@ class DraftChatInputRow extends StatelessWidget {
     this.startRecording,
     this.stopRecording,
     this.sendVoiceMessageAction,
+    this.pauseRecording,
+    this.resumeRecording,
   });
 
   @override
@@ -116,6 +120,9 @@ class DraftChatInputRow extends StatelessWidget {
     return ValueListenableBuilder(
       valueListenable: inputText,
       builder: (context, text, _) {
+        final view = View.maybeOf(context);
+        final bottomInset =
+            (view?.viewInsets.bottom ?? 0) / (view?.devicePixelRatio ?? 0);
         return Offstage(
           offstage: text.isNotEmpty,
           child: Padding(
@@ -125,6 +132,12 @@ class DraftChatInputRow extends StatelessWidget {
             ),
             child: SocialMediaRecorder(
               radius: BorderRadius.circular(24),
+              pauseBottomPositioned:
+                  102 + (isKeyboardVisible ? bottomInset : 16),
+              pauseRightPositioned: 16,
+              resumeDecoration: BoxDecoration(
+                color: LinagoraSysColors.material().surface,
+              ),
               soundRecorderWhenLockedDecoration: BoxDecoration(
                 borderRadius: ChatInputRowStyle.chatInputRowBorderRadius,
                 color: LinagoraSysColors.material().onPrimary,
@@ -143,16 +156,24 @@ class DraftChatInputRow extends StatelessWidget {
               ),
               microphoneRequestPermission: onLongPressAudioRecord,
               startRecording: () {
-                Logs().d('ChatInputRowMobile:: startRecording');
+                Logs().d('DraftChatInputRow:: startRecording');
                 startRecording?.call();
               },
               stopRecording: (_) {
-                Logs().d('ChatInputRowMobile:: stopRecording');
+                Logs().d('DraftChatInputRow:: stopRecording');
                 stopRecording?.call();
+              },
+              pauseRecording: () {
+                Logs().d('DraftChatInputRow:: pauseRecording');
+                pauseRecording?.call();
+              },
+              resumeRecording: () {
+                Logs().d('DraftChatInputRow:: resumeRecording');
+                resumeRecording?.call();
               },
               sendRequestFunction: (soundFile, time, waveFrom) {
                 Logs().d(
-                  'ChatInputRowMobile:: sendRequestFunction $soundFile',
+                  'DraftChatInputRow:: sendRequestFunction $soundFile',
                 );
                 stopRecording?.call();
 
