@@ -34,7 +34,7 @@ class ChatInputRow extends StatelessWidget {
     return KeyboardVisibilityBuilder(
       builder: (context, isKeyboardVisible) {
         final child = Stack(
-          alignment: Alignment.center,
+          alignment: Alignment.centerRight,
           children: [
             Padding(
               padding: _paddingInputRow(
@@ -145,6 +145,9 @@ class ChatInputRow extends StatelessWidget {
                   return ValueListenableBuilder(
                     valueListenable: controller.replyEventNotifier,
                     builder: (context, reply, _) {
+                      final view = View.maybeOf(context);
+                      final bottomInset = (view?.viewInsets.bottom ?? 0) /
+                          (view?.devicePixelRatio ?? 0);
                       return Offstage(
                         offstage: text.isNotEmpty || reply != null,
                         child: Padding(
@@ -154,6 +157,12 @@ class ChatInputRow extends StatelessWidget {
                           ),
                           child: SocialMediaRecorder(
                             radius: BorderRadius.circular(24),
+                            pauseBottomPositioned:
+                                102 + (isKeyboardVisible ? bottomInset : 16),
+                            pauseRightPositioned: 16,
+                            resumeDecoration: BoxDecoration(
+                              color: LinagoraSysColors.material().surface,
+                            ),
                             soundRecorderWhenLockedDecoration: BoxDecoration(
                               borderRadius:
                                   ChatInputRowStyle.chatInputRowBorderRadius,
@@ -184,6 +193,14 @@ class ChatInputRow extends StatelessWidget {
                                 controller.sendController.clear();
                               }
                               controller.stopRecording.call();
+                            },
+                            pauseRecording: () {
+                              Logs().d('ChatInputRowMobile:: pauseRecording');
+                              controller.pauseRecording.call();
+                            },
+                            resumeRecording: () {
+                              Logs().d('ChatInputRowMobile:: resumeRecording');
+                              controller.resumeRecording.call();
                             },
                             sendRequestFunction: (soundFile, time, waveFrom) {
                               Logs().d(
