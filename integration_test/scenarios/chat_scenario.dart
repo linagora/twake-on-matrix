@@ -33,7 +33,6 @@ import '../robots/search_robot.dart';
 import '../robots/setting_for_new_group.dart';
 import '../robots/twake_list_item_robot.dart';
 
-enum UserLevel { member, admin, owner, moderator }
 class ChatScenario extends BaseScenario {
   ChatScenario(super.$);
 
