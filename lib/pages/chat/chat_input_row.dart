@@ -84,7 +84,7 @@ class ChatInputRow extends StatelessWidget {
                       ],
               ),
             ),
-            if (PlatformInfos.isMobile)
+            if (PlatformInfos.isMobile && controller.selectMode == false)
               ValueListenableBuilder(
                 valueListenable: controller.inputText,
                 builder: (context, text, _) {
