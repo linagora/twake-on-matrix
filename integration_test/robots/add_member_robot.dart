@@ -66,7 +66,7 @@ class AddMemberRobot extends CoreRobot {
   Future<void> selectAllFilteredAccounts() async {
     final accounts = getListOfChatGroup();
     for( final account in accounts){
-        await account.getCheckBox().tap();
+      account.getCheckBox().tap();
     }
   }
 
