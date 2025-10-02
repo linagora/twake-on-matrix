@@ -6,6 +6,8 @@ import 'package:flutter_test/flutter_test.dart';
 import '../../base/test_base.dart';
 import '../../help/soft_assertion_helper.dart';
 import '../../robots/chat_group_detail_robot.dart';
+import '../../robots/chat_search_view_robot.dart';
+import '../../scenarios/chat_detail_scenario.dart';
 import '../../scenarios/chat_scenario.dart';
 import '../../robots/home_robot.dart';
 import 'package:patrol/patrol.dart';
@@ -177,6 +179,21 @@ void main() {
 
       s.verifyAll();
 
+    },
+  );
+
+  TestBase().runPatrolTest(
+    description: 'Search for messages inside a chat',
+    test: ($) async {
+      //open chat and make some messages
+      final receiveMessage = (await prepareTwoMessages($)).$2;
+      final searchPharse = receiveMessage.substring(receiveMessage.indexOf("sent"), receiveMessage.length);
+
+      //open a chat
+      await ChatDetailScenario($).makeASearch(searchPharse);
+      // verify info dialog is shown
+      final numberOfResult = (await ChatSearchViewRobot($).getListOfChatSeach()).length;
+      expect(numberOfResult == 2, isTrue, reason: "expect is 2 but got: $numberOfResult");
     },
   );
 }
