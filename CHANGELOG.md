@@ -1,3 +1,7 @@
+## [2.12.5+2330] - 2025-10-02
+### Fixed
+- Hanlde composer lost input when lost focus
+
 ## [2.12.4+2330] - 2025-09-30
 ### Fixed
 - Filter out banned event in chat list
