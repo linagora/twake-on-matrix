@@ -14,7 +14,7 @@ class TwakeListItemRobot extends CoreRobot {
     return root.$(Radio).at(0);
   }
 
-  Future<PatrolFinder> getCheckBox() async {
+  PatrolFinder getCheckBox() {
     return root.$(Checkbox).at(0);
   }
   
