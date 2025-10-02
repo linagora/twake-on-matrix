@@ -2,6 +2,8 @@ import 'dart:async';
 
 import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
+import 'package:fluffychat/domain/model/extensions/common_settings/common_settings_extensions.dart';
+import 'package:fluffychat/domain/model/extensions/homeserver_summary_extensions.dart';
 import 'package:fluffychat/domain/repository/federation_configurations_repository.dart';
 import 'package:fluffychat/domain/repository/tom_configurations_repository.dart';
 import 'package:fluffychat/event/twake_inapp_event_types.dart';
@@ -60,7 +62,7 @@ class SettingsController extends State<Settings> with ConnectPageMixin {
     SettingEnum.help,
     SettingEnum.about,
     SettingEnum.logout,
-    if (PlatformInfos.isIOS) SettingEnum.deleteAccount,
+    if (PlatformInfos.isMobile) SettingEnum.deleteAccount,
   ];
 
   final ValueNotifier<SettingEnum?> optionsSelectNotifier = ValueNotifier(null);
@@ -274,6 +276,20 @@ class SettingsController extends State<Settings> with ConnectPageMixin {
         logoutAction();
         break;
       case SettingEnum.deleteAccount:
+        final matrix = Matrix.of(context);
+        final userId = matrix.client.userID;
+        final commonSettingsInformation = matrix.loginHomeserverSummary
+            ?.appTwakeInformation?.commonSettingsInformation;
+        final commonSettingsUrl = userId == null
+            ? null
+            : commonSettingsInformation?.completedApplicationUrl(userId);
+        if (commonSettingsUrl != null) {
+          launchUrl(
+            Uri.parse(commonSettingsUrl),
+            webOnlyWindowName: '_blank',
+          );
+          return;
+        }
         if (await showConfirmAlertDialog(
               useRootNavigator: false,
               context: context,
