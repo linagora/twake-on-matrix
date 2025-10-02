@@ -73,7 +73,7 @@ dependencies:
   social_media_recorder:
     git:
       url: git@github.com:linagora/social_media_recorder.git
-      ref: twake_supported
+      ref: support-pause-and-resume
 
   adaptive_dialog: ^1.8.0+1
   flutter_adaptive_scaffold: ^0.1.4
@@ -223,6 +223,7 @@ dependencies:
   pull_down_button: 0.10.2
   pretty_qr_code: 3.3.0
   byte_converter: 2.0.0
+  defer_pointer: 0.0.2
 
 dev_dependencies:
   build_runner: 2.4.12

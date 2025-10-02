@@ -28,6 +28,14 @@ mixin AudioMixin {
     audioRecordStateNotifier.value = AudioRecordState.initial;
   }
 
+  void pauseRecording() {
+    audioRecordStateNotifier.value = AudioRecordState.paused;
+  }
+
+  void resumeRecording() {
+    audioRecordStateNotifier.value = AudioRecordState.recording;
+  }
+
   int calculateWaveCountAuto({
     required int minWaves,
     required int maxWaves,
