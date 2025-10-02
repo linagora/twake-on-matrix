@@ -262,6 +262,23 @@ class ChatInputRow extends StatelessWidget {
                                 color: LinagoraSysColors.material().error,
                               ),
                             ),
+                            pauseWidget: Container(
+                              width: 32,
+                              height: 32,
+                              decoration: BoxDecoration(
+                                color: LinagoraSysColors.material().surface,
+                                borderRadius: BorderRadius.circular(32),
+                                border: Border.all(
+                                  color: LinagoraSysColors.material().onPrimary,
+                                  width: 1,
+                                ),
+                              ),
+                              child: Icon(
+                                Icons.pause,
+                                size: 20,
+                                color: LinagoraRefColors.material().neutral[50],
+                              ),
+                            ),
                           ),
                         ),
                       );
