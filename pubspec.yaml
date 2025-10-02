@@ -7,12 +7,11 @@ environment:
   sdk: ">=3.3.0 <4.0.0"
 
 dependencies:
-
   ### Dependencies from git ###
   matrix:
     git:
       url: git@github.com:linagora/matrix-dart-sdk.git
-      ref: twake-supported-0.22.6
+      ref: update/flutter-3.32.8
 
   receive_sharing_intent:
     git:
@@ -75,7 +74,7 @@ dependencies:
   animations: ^2.0.7
   blurhash_dart: ^1.1.0
   # TODO: remove it after it release a new version, the PR is merged to master
-  # callkeep: 
+  # callkeep:
   #   git:
   #     url: https://github.com/flutter-webrtc/callkeep
   #     ref: master
@@ -211,6 +210,7 @@ dependencies:
   pull_down_button: 0.10.2
   pretty_qr_code: 3.3.0
   byte_converter: 2.0.0
+  flutter_vodozemac: ^0.3.0
 
 dev_dependencies:
   build_runner: 2.4.12
@@ -229,7 +229,6 @@ dev_dependencies:
   mockito: 5.4.4
   patrol: 3.13.1
   html: ^0.15.4
-
 
 flutter_launcher_icons:
   android: false
@@ -291,12 +290,12 @@ dependency_overrides:
   file_selector: ^0.9.2+2
   file_selector_linux: ^0.9.1
   flutter_svg: ^2.0.4
-#  # fake secure storage plugin for Windows
-#  # See: https://gitlab.com/gitlab-com/gl-infra/reliability/-/issues/15161
-#  flutter_secure_storage_windows:
-#    git:
-#      url: https://gitlab.com/TheOneWithTheBraid/flutter_secure_storage_windows.git
-#      ref: main
+  #  # fake secure storage plugin for Windows
+  #  # See: https://gitlab.com/gitlab-com/gl-infra/reliability/-/issues/15161
+  #  flutter_secure_storage_windows:
+  #    git:
+  #      url: https://gitlab.com/TheOneWithTheBraid/flutter_secure_storage_windows.git
+  #      ref: main
   # waiting for null safety
   # Upstream pull request: https://github.com/AntoineMarcel/keyboard_shortcuts/pull/13
   keyboard_shortcuts:
@@ -315,7 +314,7 @@ dependency_overrides:
     git:
       url: https://github.com/linagora/dart_matrix_api_lite.git
       ref: main
-  
+
   # Fixes a compile error when comforming UIApplication to Launcher in iOS 18.
   url_launcher_ios: 6.3.1
   # Fixes a compile error when comforming missing header to Launcher in iOS 18.
