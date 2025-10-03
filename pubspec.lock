@@ -2014,10 +2014,11 @@ packages:
   native_imaging:
     dependency: "direct main"
     description:
-      name: native_imaging
-      sha256: "93573afdcab070011d78a40fc1f69b61967f1f8485d2b81a7a2ee585a85f4c04"
-      url: "https://pub.dev"
-    source: hosted
+      path: "."
+      ref: "update/flutter-3.32.8"
+      resolved-ref: "2fee70f361e80e5b6c61b127dd812ca63c07faf6"
+      url: "https://github.com/linagora/dart_native_imaging.git"
+    source: git
     version: "0.2.0"
   nested:
     dependency: transitive
