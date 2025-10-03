@@ -1,6 +1,6 @@
 import 'package:fluffychat/pages/chat/chat_view.dart';
+import 'package:fluffychat/pages/chat_details/chat_details_edit_view.dart';
 import 'package:fluffychat/pages/new_group/contacts_selection_view.dart';
-import 'package:fluffychat/utils/warning_dialog.dart';
 import 'package:fluffychat/widgets/twake_components/twake_icon_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -20,7 +20,7 @@ class GroupInformationRobot extends CoreRobot {
     return $(AppBar).$(Text);
   }
 
-  PatrolFinder getEditTitleIcon() {
+  PatrolFinder getEditGroupIcon() {
     return $(AppBar).$(IconButton);
   }
 
@@ -87,7 +87,7 @@ class GroupInformationRobot extends CoreRobot {
 
   Future<void> clickOnRemoveFromGroup() async{
     await getcRemoveFromGroup().tap();
-    await $.waitUntilVisible($(WarningDialogWidget));
+    await $.waitUntilVisible(getMemberTab());
   }
 
   Future<void> clickOnAgreeIRemoveMemberBtn() async{
@@ -98,6 +98,11 @@ class GroupInformationRobot extends CoreRobot {
   Future<void> clickOnAddMemberBtn() async{
     await getAddMembersBtn().tap();
     await $.waitUntilVisible($(ContactsSelectionView));
+  }
+
+  Future<void> openEditGroupScreen() async{
+    await getEditGroupIcon().tap();
+    await $.waitUntilVisible($(ChatDetailsEditView));
   }
 
   Future<List<TwakeListItemRobot>> getListOfMembers() async{
