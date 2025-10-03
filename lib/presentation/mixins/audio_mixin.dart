@@ -108,7 +108,7 @@ mixin AudioMixin {
   Future<void> onTapRecorderWeb() async {
     try {
       if (await _audioRecorder.hasPermission()) {
-        const encoder = AudioEncoder.opus;
+        const encoder = AudioEncoder.wav;
 
         if (!await _isEncoderSupported(encoder)) {
           return;
@@ -264,15 +264,12 @@ mixin AudioMixin {
         'AudioMixin::createMatrixAudioFileFromWebFile: Processing ${file.name}',
       );
 
-      final formatDate =
-          DateFormat("yyyy-MM-dd-HHmmss.").format(DateTime.now());
+      final formatDate = DateFormat("yyyy-MM-dd-HHmmss").format(DateTime.now());
 
       return TwakeAudioFile(
-        name: 'voice_message_$formatDate.ogg',
+        name: 'voice_message_$formatDate.wav',
         readStream: readWebFileAsStream(file),
-        // Single chunk stream for
-        mimeType: 'audio/ogg',
-        // web
+        mimeType: 'audio/wav',
         duration: duration.inMilliseconds,
       );
     } catch (e, stackTrace) {
