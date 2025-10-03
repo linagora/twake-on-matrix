@@ -4,7 +4,7 @@ on:
 name: Tests
 
 env:
-  FLUTTER_VERSION: 3.27.4
+  FLUTTER_VERSION: 3.32.8
 
 jobs:
   code_analyze:
@@ -37,7 +37,7 @@ jobs:
 
   widget_test:
     name: Widget test
-    runs-on: ubuntu-latest
+    runs-on: macos-latest
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4

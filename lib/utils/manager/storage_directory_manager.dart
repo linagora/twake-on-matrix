@@ -37,7 +37,7 @@ class StorageDirectoryManager {
   Future<String?> getTwakeDownloadsFolderInDevice() async {
     try {
       final downloadPath = await ExternalPath.getExternalStoragePublicDirectory(
-        ExternalPath.DIRECTORY_DOWNLOADS,
+        ExternalPath.DIRECTORY_DOWNLOAD,
       );
       if (downloadPath.isNotEmpty == true) {
         return '$downloadPath/${AppConfig.applicationName}';

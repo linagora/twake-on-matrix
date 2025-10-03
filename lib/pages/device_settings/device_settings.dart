@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 
 import 'package:adaptive_dialog/adaptive_dialog.dart';
 import 'package:collection/collection.dart' show IterableExtension;
-import 'package:flutter_gen/gen_l10n/l10n.dart';
+import 'package:fluffychat/generated/l10n/app_localizations.dart';
 
 import 'package:matrix/encryption/utils/key_verification.dart';
 import 'package:matrix/matrix.dart';
@@ -94,7 +94,7 @@ class DevicesSettingsController extends State<DevicesSettings> {
   }
 
   void verifyDeviceAction(Device device) async {
-    final req = Matrix.of(context)
+    final req = await Matrix.of(context)
         .client
         .userDeviceKeys[Matrix.of(context).client.userID!]!
         .deviceKeys[device.deviceId]!

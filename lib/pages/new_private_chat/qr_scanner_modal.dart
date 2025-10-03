@@ -3,7 +3,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 
-import 'package:flutter_gen/gen_l10n/l10n.dart';
+import 'package:fluffychat/generated/l10n/app_localizations.dart';
 import 'package:qr_code_scanner/qr_code_scanner.dart';
 
 import 'package:fluffychat/utils/url_launcher.dart';
