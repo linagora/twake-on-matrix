@@ -11,6 +11,8 @@ import 'package:fluffychat/pages/chat/events/message/multi_platform_message_cont
 import 'package:fluffychat/pages/chat/events/message_content.dart';
 import 'package:fluffychat/pages/chat/events/message_time.dart';
 import 'package:fluffychat/pages/chat/seen_by_row.dart';
+import 'package:fluffychat/pages/chat_details/chat_details_edit_view.dart';
+import 'package:fluffychat/pages/chat_details/removed/removed_view.dart';
 import 'package:fluffychat/pages/chat_draft/draft_chat_view.dart';
 import 'package:fluffychat/pages/chat_list/chat_list_body_view.dart';
 import 'package:fluffychat/pages/chat_list/chat_list_item_title.dart';
@@ -26,9 +28,11 @@ import '../robots/add_member_robot.dart';
 import '../robots/chat_group_detail_robot.dart';
 import '../robots/chat_list_robot.dart';
 import 'package:flutter/material.dart';
+import '../robots/edit_group_information_robot.dart';
 import '../robots/group_information_robot.dart';
 import '../robots/menu_robot.dart';
 import '../robots/new_chat_robot.dart';
+import '../robots/removed_users_robot.dart';
 import '../robots/search_robot.dart';
 import '../robots/setting_for_new_group.dart';
 import '../robots/twake_list_item_robot.dart';
@@ -61,7 +65,7 @@ class ChatScenario extends BaseScenario {
       await AddMemberRobot($).selectAllFilteredAccounts();
     }
     await AddMemberRobot($).getNextIcon().tap();
-    await AddMemberRobot($).getAgreeInviteMemberBtn().tap();
+    // await AddMemberRobot($).getAgreeInviteMemberBtn().tap();
     await $.waitUntilVisible($("Group information"));
     return (await GroupInformationRobot($).getListOfMembers()).length;
   }
@@ -71,10 +75,26 @@ class ChatScenario extends BaseScenario {
     for(final member in members){
       await GroupInformationRobot($).getMember(member).tap();
       await GroupInformationRobot($).clickOnRemoveFromGroup();
-      await GroupInformationRobot($).clickOnAgreeIRemoveMemberBtn();
+      // await GroupInformationRobot($).clickOnAgreeIRemoveMemberBtn();
     }
     await $.waitUntilVisible($("Group information"));
     return (await GroupInformationRobot($).getListOfMembers()).length;
+  }
+
+  Future<void> unbanUser(List<String> matrixAddreses) async {
+    await openGroupChatInfo();
+    await GroupInformationRobot($).getEditGroupIcon().tap();
+    await EditGroupInformationRobot($).openBannedUserList();
+
+    for(final matrixAddres in matrixAddreses){
+      await RemovedUsersRobot($).getUnBanIconUser(matrixAddres).tap();
+      await RemovedUsersRobot($).waitUntilAbsent($, RemovedUsersRobot($).getBanedUser(matrixAddres));
+    }
+    if($(RemovedView).exists)
+    {
+      await RemovedUsersRobot($).getBackIcon().tap();
+    }
+    await $.waitUntilVisible($(ChatDetailsEditView));
   }
 
   Future<void> backToChatLisFromChatGroupScreen({bool isOpenGroupFromSearchResult = false}) async {
