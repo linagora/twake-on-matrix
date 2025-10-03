@@ -5,7 +5,7 @@ import 'package:patrol/patrol.dart';
 import '../base/core_robot.dart';
 import 'chat_list_robot.dart';
 import 'contact_list_robot.dart';
-import 'setting_robot.dart';
+import 'setting/setting_robot.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 
 class HomeRobot extends CoreRobot {
