@@ -170,6 +170,12 @@ class DraftChatView extends StatelessWidget {
                                   time: duration,
                                   waveform: waveform,
                                 ),
+                                onTapRecorderWeb: controller.onTapRecorderWeb,
+                                onFinishRecorderWeb:
+                                    controller.sendVoiceMessageWeb,
+                                onDeleteRecorderWeb: controller.stopRecordWeb,
+                                recordDurationWebNotifier:
+                                    controller.recordDurationWebNotifier,
                               ),
                               SizedBox(
                                 height:
