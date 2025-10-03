@@ -164,7 +164,7 @@ class TomBootstrapDialogState extends State<TomBootstrapDialog>
 
   void _createBootstrap() {
     bootstrap =
-        widget.client.encryption!.bootstrap(onUpdate: (_) => setState(() {}));
+        widget.client.encryption?.bootstrap(onUpdate: (_) => setState(() {}));
   }
 
   bool get isDataLoadingState =>

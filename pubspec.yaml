@@ -111,7 +111,10 @@ dependencies:
   flutter_localizations:
     sdk: flutter
   flutter_map: ^4.0.0
-  flutter_openssl_crypto: ^0.5.0
+  flutter_openssl_crypto:
+    git:
+      url: https://github.com/linagora/flutter_openssl_crypto.git
+      ref: update/flutter-3.32.8
   flutter_ringtone_player: 4.0.0+4
   flutter_secure_storage: 9.2.4
   flutter_svg: ^0.22.0

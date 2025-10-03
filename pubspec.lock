@@ -1192,10 +1192,11 @@ packages:
   flutter_openssl_crypto:
     dependency: "direct main"
     description:
-      name: flutter_openssl_crypto
-      sha256: "293b4fcda13ab0710645a16e82f3d5b7de19bfc0ab2d06bcdb87637222eda5e1"
-      url: "https://pub.dev"
-    source: hosted
+      path: "."
+      ref: "update/flutter-3.32.8"
+      resolved-ref: "7db104f147bf077d00e40b6af4c0ee969d28552a"
+      url: "https://github.com/linagora/flutter_openssl_crypto.git"
+    source: git
     version: "0.5.0"
   flutter_plugin_android_lifecycle:
     dependency: transitive
@@ -1868,7 +1869,7 @@ packages:
     description:
       path: "."
       ref: "update/flutter-3.32.8"
-      resolved-ref: aa39dc3309176bcddc8370948beafca3ffc87877
+      resolved-ref: afcf26b63d152e39bf258874d5ce4615a218977c
       url: "git@github.com:linagora/matrix-dart-sdk.git"
     source: git
     version: "0.22.6"
