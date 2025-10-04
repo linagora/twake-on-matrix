@@ -132,4 +132,22 @@ void main() {
       await ChatScenario($).verifyAChatIsMarkAsUnRead(groupTest, true);
     },
   );
+
+  TestBase().runPatrolTest(
+    description: 'Mute/unmute a chat',
+    test: ($) async {
+      const groupTest = String.fromEnvironment('TitleOfGroupTest');
+      // goto chat screen
+      await HomeRobot($).gotoChatListScreen();
+      // mute a chat
+      await ChatScenario($).muteAChat(groupTest);  
+      // verify the chat is pin
+      await ChatScenario($).verifyAChatIsMuted(groupTest, true);
+      
+      // unmute a chat
+      await ChatScenario($).unmuteAChat(groupTest);  
+      // verify the chat is unPin
+      await ChatScenario($).verifyAChatIsMuted(groupTest, false);
+    },
+  );
 }
