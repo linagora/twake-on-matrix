@@ -516,6 +516,11 @@ class ChatScenario extends BaseScenario {
     return unread.visible;
   }
 
+  bool isMutedAChat(TwakeListItemRobot takeListItem) {
+    final muted = takeListItem.getMutedIcon();
+    return muted.visible;
+  }
+
   Future<void> pinAChat(String title) async {
     final twakeListItem = ChatListRobot($).getChatGroupByTitle(title);
     if(!isPinAChat(twakeListItem))
@@ -563,6 +568,29 @@ class ChatScenario extends BaseScenario {
     }
   }
 
+  Future<void> muteAChat(String title) async {
+    final twakeListItem = ChatListRobot($).getChatGroupByTitle(title);
+    if(!isMutedAChat(twakeListItem))
+    {
+      await twakeListItem.root.longPress();
+      await $.waitUntilVisible(twakeListItem.getCheckBox());
+      await ChatListRobot($).getMuteIcon().tap();
+      await ChatListRobot($).waitUntilAbsent($, ChatListRobot($).getMuteIcon());
+      await ChatListRobot($).waitUntilAbsent($, ChatListRobot($).getChatGroupByTitle(title).getCheckBox());
+    }
+  }
+
+  Future<void> unmuteAChat(String title) async {
+    final twakeListItem = ChatListRobot($).getChatGroupByTitle(title);
+    if(isMutedAChat(twakeListItem))
+    {
+      await twakeListItem.root.longPress();
+      await $.waitUntilVisible(twakeListItem.getCheckBox());
+      await ChatListRobot($).getUnmuteIcon().tap();
+      await ChatListRobot($).waitUntilAbsent($, ChatListRobot($).getUnmuteIcon());
+      await ChatListRobot($).waitUntilAbsent($, ChatListRobot($).getChatGroupByTitle(title).getCheckBox());
+    }
+  }
   Future<void> verifyAChatIsPin(String title, bool isPin) async {
     final twakeListItem = ChatListRobot($).getChatGroupByTitle(title);
     final exists = isPinAChat(twakeListItem);
@@ -573,6 +601,12 @@ class ChatScenario extends BaseScenario {
     final twakeListItem = ChatListRobot($).getChatGroupByTitle(title);
     final exists = isMarkAsUnRead(twakeListItem);
     expect(exists, isMarkAsUnread, reason: 'Expected pin=$isMarkAsUnread but got $exists for "$title"');
+  }
+  
+  Future<void> verifyAChatIsMuted(String title, bool isMuted) async {
+    final twakeListItem = ChatListRobot($).getChatGroupByTitle(title);
+    final exists = isMutedAChat(twakeListItem);
+    expect(exists, isMuted, reason: 'Expected pin=$isMuted but got $exists for "$title"');
   }
   
 }
