@@ -40,6 +40,14 @@ class ChatListRobot extends HomeRobot {
     return $(ChatListBottomNavigator).$(InkWell).containing($("Unread"));
   }
 
+  PatrolFinder getMuteIcon(){
+    return $(ChatListBottomNavigator).$(InkWell).containing($("Mute"));
+  }
+
+  PatrolFinder getUnmuteIcon(){
+    return $(ChatListBottomNavigator).$(InkWell).containing($("Unmute"));
+  }
+
   Future<void> clickOnPenIcon() async{
     await getPenIcon().tap();
     await $.waitUntilVisible($(AppBar).$("New chat"));
