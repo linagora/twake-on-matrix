@@ -102,6 +102,12 @@ class TwakeListItemRobot extends CoreRobot {
     );
   }
 
+  PatrolFinder getMutedIcon(){
+    final title = root.$(ChatListItemTitle);
+    const pinData = IconData(0xF4A7, fontFamily: 'MaterialIcons');
+    return $(find.descendant(of: title, matching: find.byIcon(pinData)));
+  }
+
   Future<PatrolFinder> getEmailLabelIncaseSearching() async {
     return root.$(HighlightText).$(Text).at(0);
   }
