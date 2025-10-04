@@ -511,6 +511,11 @@ class ChatScenario extends BaseScenario {
     return pin.exists;
   }
 
+  bool isMarkAsUnRead(TwakeListItemRobot takeListItem) {
+    final unread = takeListItem.getUnReadIcon();
+    return unread.visible;
+  }
+
   Future<void> pinAChat(String title) async {
     final twakeListItem = ChatListRobot($).getChatGroupByTitle(title);
     if(!isPinAChat(twakeListItem))
@@ -533,10 +538,41 @@ class ChatScenario extends BaseScenario {
     }
   }
 
+  Future<void> markAChatAsRead(String title) async {
+    final twakeListItem = ChatListRobot($).getChatGroupByTitle(title);
+    if(isMarkAsUnRead(twakeListItem))
+    {
+      await twakeListItem.root.longPress();
+      await $.waitUntilVisible(twakeListItem.getCheckBox());
+      await ChatListRobot($).getMarkAsReadIcon().tap();
+      await ChatListRobot($).waitUntilAbsent($, ChatListRobot($).getMarkAsReadIcon());
+      await ChatListRobot($).waitUntilAbsent($, ChatListRobot($).getChatGroupByTitle(title).getCheckBox());
+    }
+  }
+
+  Future<void> markAChatAsUnread(String title) async {
+    final twakeListItem = ChatListRobot($).getChatGroupByTitle(title);
+    if(!isMarkAsUnRead(twakeListItem))
+    {
+      await twakeListItem.root.longPress();
+      await $.waitUntilVisible(twakeListItem.getCheckBox());
+      await ChatListRobot($).getMarkAsUnReadIcon().tap();
+      await ChatListRobot($).waitUntilAbsent($, ChatListRobot($).getMarkAsUnReadIcon());
+      await $.waitUntilVisible(ChatListRobot($).getChatGroupByTitle(title).getUnReadIcon());
+      await ChatListRobot($).waitUntilAbsent($, ChatListRobot($).getChatGroupByTitle(title).getCheckBox());
+    }
+  }
+
   Future<void> verifyAChatIsPin(String title, bool isPin) async {
     final twakeListItem = ChatListRobot($).getChatGroupByTitle(title);
     final exists = isPinAChat(twakeListItem);
     expect(exists, isPin, reason: 'Expected pin=$isPin but got $exists for "$title"');
+  }
+
+  Future<void> verifyAChatIsMarkAsUnRead(String title, bool isMarkAsUnread) async {
+    final twakeListItem = ChatListRobot($).getChatGroupByTitle(title);
+    final exists = isMarkAsUnRead(twakeListItem);
+    expect(exists, isMarkAsUnread, reason: 'Expected pin=$isMarkAsUnread but got $exists for "$title"');
   }
   
 }
