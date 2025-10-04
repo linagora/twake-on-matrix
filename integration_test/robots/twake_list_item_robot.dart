@@ -15,7 +15,7 @@ class TwakeListItemRobot extends CoreRobot {
   }
 
   PatrolFinder getCheckBox() {
-    return root.$(Checkbox).at(0);
+    return root.$(Checkbox);
   }
   
   PatrolFinder getTitle() {
@@ -24,6 +24,82 @@ class TwakeListItemRobot extends CoreRobot {
 
   Future<PatrolFinder> getOwnerLabel() async {
     return root.$(Text).containing('Owner');
+  }
+
+  PatrolFinder getNumberUnReadIcon() {
+    return root.$(ChatListItemSubtitle).$(AnimatedContainer).containing($(Text));
+  }
+
+  PatrolFinder getHaveNotReadMessageReadIcon() {
+
+    const iconData = IconData(0xE1F7, fontFamily: 'MaterialIcons');
+    const wantColor  = Color(0xFF5C9CE6); // #5c9ce6
+
+    final finder = find.descendant(
+      of: root.$(ChatListItemSubtitle),
+      matching: find.byElementPredicate(
+        (el) {
+          final w = el.widget;
+          if (w is Icon && w.icon == iconData) {
+            // Get actual color: priority to w.color, if null then get color from IconTheme
+            final Color? actual =
+                w.color ?? IconTheme.of(el).color;
+            return actual?.value == wantColor.value;
+          }
+          return false;
+        },
+        description:
+            'Icon U+E1F7 có màu #5c9ce6 trong ChatListItemSubtitle',
+      ),
+    );
+    return $(finder);  
+  }
+
+  PatrolFinder getAlreadyReadMessageReadIcon() {
+    const iconData = IconData(0xE1F7, fontFamily: 'MaterialIcons');
+    const wantColor  = Color(0xFF99A0A9); // #99A0A9
+
+    final finder = find.descendant(
+      of: root.$(ChatListItemSubtitle),
+      matching: find.byElementPredicate(
+        (el) {
+          final w = el.widget;
+          if (w is Icon && w.icon == iconData) {
+            // Get actual color: priority to w.color, if null then get color from IconTheme
+            final Color? actual =
+                w.color ?? IconTheme.of(el).color;
+            return actual?.value == wantColor.value;
+          }
+          return false;
+        },
+        description:
+            'Icon U+E1F7 có màu #99A0A9 trong ChatListItemSubtitle',
+      ),
+    );
+    return $(finder);
+  }
+  
+  PatrolFinder getUnReadIcon() {
+    // if(root.$(AnimatedContainer).evaluate().length >1)
+    // {return root.$(AnimatedContainer).last;}
+    
+    // return getNumberUnReadIcon();  
+    const target = Color(0xFF0A84FF); // #0a84ff, viết hoa/thường đều OK
+
+    return root.$(ChatListItemSubtitle).$(
+      find.byWidgetPredicate(
+        (w) {
+          // AnimatedContainer: màu nằm trong decoration
+          if (w is AnimatedContainer) {
+            final d = w.decoration;
+            if (d is BoxDecoration && d.color?.value == target.value) return true;
+          }
+
+          return false;
+        },
+        description: 'Any box with background #0A48FF',
+      ),
+    );
   }
 
   Future<PatrolFinder> getEmailLabelIncaseSearching() async {
@@ -45,7 +121,7 @@ class TwakeListItemRobot extends CoreRobot {
     );
     if(animated.evaluate().isNotEmpty) 
       { 
-        final raw = root.$(ChatListItemSubtitle).$(Text).last.text; // String?
+        final raw = getNumberUnReadIcon().$(Text).text; // String?
         final s = (raw ?? '').trim();
         final n = int.tryParse(s);
         return n ?? 0;
