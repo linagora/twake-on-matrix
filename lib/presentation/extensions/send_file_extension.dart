@@ -49,6 +49,7 @@ extension SendFileExtension on Room {
     StreamController<Either<Failure, Success>>? uploadStreamController,
     CancelToken? cancelToken,
     DateTime? sentDate,
+    String? captionInfo,
   }) async {
     // Check media config of the server before sending the file. Stop if the
     // Media config is unreachable or the file is bigger than the given maxsize.
@@ -170,6 +171,7 @@ extension SendFileExtension on Room {
         editEventId: editEventId,
         shrinkImageMaxDimension: shrinkImageMaxDimension,
         extraContent: extraContent,
+        captionInfo: captionInfo,
       );
 
       if (thumbnail != null &&
@@ -225,6 +227,7 @@ extension SendFileExtension on Room {
           editEventId: editEventId,
           shrinkImageMaxDimension: shrinkImageMaxDimension,
           extraContent: extraContent,
+          captionInfo: captionInfo,
         );
       }
     }
@@ -411,7 +414,7 @@ extension SendFileExtension on Room {
     // Send event
     final content = <String, dynamic>{
       'msgtype': msgType,
-      'body': fileInfo.fileName,
+      'body':captionInfo ?? '',
       'filename': fileInfo.fileName,
       'url': uploadResp.toString(),
       if (encryptedFileInfo != null) 'file': encryptedFileInfo.toJson(),
@@ -531,6 +534,7 @@ extension SendFileExtension on Room {
     int? shrinkImageMaxDimension,
     Map<String, dynamic>? extraContent,
     DateTime? sentDate,
+    String? captionInfo,
   }) async {
     // Create a fake Event object as a placeholder for the uploading file:
     final fakeImageEvent = SyncUpdate(
@@ -543,7 +547,7 @@ extension SendFileExtension on Room {
                 MatrixEvent(
                   content: {
                     'msgtype': messageType,
-                    'body': fileInfo.fileName,
+                    'body': captionInfo ?? '',
                     'filename': fileInfo.fileName,
                     'info': {
                       ...fileInfo.metadata,
@@ -603,6 +607,7 @@ extension SendFileExtension on Room {
   Future<Map<TransactionId, FakeSendingFileInfo>>
       sendPlaceholdersForImagePickerFiles({
     required List<FileAssetEntity> entities,
+    String? captionInfo,
   }) async {
     final txIdMapToImageFile = <TransactionId, FakeSendingFileInfo>{};
     for (final entity in entities) {
@@ -619,6 +624,7 @@ extension SendFileExtension on Room {
           fileInfo,
           txid: txid,
           messageType: entity.messageType,
+          captionInfo: captionInfo,
         );
         txIdMapToImageFile[txid] = FakeSendingFileInfo(
           fileInfo: fileInfo,

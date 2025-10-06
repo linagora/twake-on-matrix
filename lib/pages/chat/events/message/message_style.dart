@@ -1,6 +1,9 @@
 import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
+import 'package:fluffychat/pages/chat/events/message_content_style.dart';
+import 'package:fluffychat/presentation/model/file/display_image_info.dart';
 import 'package:fluffychat/utils/extension/build_context_extension.dart';
+import 'package:fluffychat/utils/extension/image_size_extension.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
 import 'package:fluffychat/utils/responsive/responsive_utils.dart';
 import 'package:flutter/material.dart';
@@ -63,13 +66,45 @@ class MessageStyle {
   static const double messageBubbleMobileRatioMaxWidth = 0.80;
   static const double messageBubbleTabletRatioMaxWidth = 0.30;
 
-  static double messageBubbleWidth(BuildContext context) {
+  static double defaultMessageBubbleWidth(BuildContext context) {
     return context.responsiveValue<double>(
       desktop: messageBubbleDesktopMaxWidth,
       tablet: context.width * messageBubbleTabletRatioMaxWidth,
       mobile:
           MediaQuery.sizeOf(context).width * messageBubbleMobileRatioMaxWidth,
     );
+  }
+
+  static double messageBubbleWidth(
+    BuildContext context, {
+    Event? event,
+  }) {
+    final defaultWidth = defaultMessageBubbleWidth(context);
+    if (event != null && event.isImageWithCaption() == true) {
+      final mediaCaptionWidth = messageBubbleWidthMediaCaption(
+        context: context,
+        event: event,
+      );
+
+      return mediaCaptionWidth > defaultWidth
+          ? defaultWidth
+          : mediaCaptionWidth;
+    }
+    return defaultWidth;
+  }
+
+  static double messageBubbleWidthMediaCaption({
+    required BuildContext context,
+    required Event event,
+  }) {
+    final DisplayImageInfo? displayImageInfo =
+        event.getOriginalResolution()?.getDisplayImageInfo(context);
+
+    if (displayImageInfo != null) {
+      return displayImageInfo.size.width;
+    }
+
+    return MessageContentStyle.imageWidth(context);
   }
 
   static double messageSpacing(

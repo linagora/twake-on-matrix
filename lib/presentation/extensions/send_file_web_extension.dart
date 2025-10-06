@@ -36,6 +36,7 @@ extension SendFileWebExtension on Room {
     StreamController<Either<Failure, Success>>? uploadStreamController,
     CancelToken? cancelToken,
     DateTime? sentDate,
+    String? captionInfo,
   }) async {
     UniversalImageBitmap? imageBitmap;
     MatrixFile? file;
@@ -244,7 +245,7 @@ extension SendFileWebExtension on Room {
     // Send event
     final content = <String, dynamic>{
       'msgtype': file.msgType,
-      'body': file.name,
+      'body': captionInfo ?? '',
       'filename': file.name,
       if (encryptedFile == null) 'url': uploadResp.toString(),
       if (encryptedFile != null)
@@ -308,6 +309,7 @@ extension SendFileWebExtension on Room {
     int? shrinkImageMaxDimension,
     Map<String, dynamic>? extraContent,
     DateTime? sentDate,
+    String? captionInfo,
   }) async {
     // sendingFileThumbnails[txid] =  MatrixImageFile(bytes: file.bytes, name: file.name);
 
@@ -322,7 +324,7 @@ extension SendFileWebExtension on Room {
                 MatrixEvent(
                   content: {
                     'msgtype': file.msgType,
-                    'body': file.name,
+                    'body': captionInfo ?? '',
                     'filename': file.name,
                     'info': file.info,
                   },

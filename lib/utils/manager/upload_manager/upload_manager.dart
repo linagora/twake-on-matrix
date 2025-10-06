@@ -28,39 +28,15 @@ class UploadManager {
 
   final Map<String, UploadFileInfo> _eventIdMapUploadFileInfo = {};
 
-  final Map<String, UploadCaptionInfo> _eventIdMapUploadCaptionInfo = {};
-
   static const int _shrinkImageMaxDimension = 1600;
 
   Future<void> cancelUpload(Event event) async {
     final cancelToken = _eventIdMapUploadFileInfo[event.eventId]?.cancelToken;
-    final captionInfo = _eventIdMapUploadFileInfo[event.eventId]?.captionInfo;
     if (cancelToken != null) {
       Logs().d('Remove eventid: ${event.eventId}');
       _clearFileTask(event.eventId);
       event.remove();
       cancelToken.cancel();
-      if (captionInfo != null) {
-        _handleCancelCaptionEvent(
-          txid: captionInfo.txid,
-          room: event.room,
-        );
-      }
-    }
-  }
-
-  Future<void> _handleCancelCaptionEvent({
-    required String txid,
-    required Room room,
-  }) async {
-    try {
-      _clearCaptionTask(txid);
-      final captionEvent = await room.getEventById(txid);
-      captionEvent?.remove();
-    } catch (e) {
-      Logs().e(
-        'UploadManager::_handleCancelCaptionEvent(): $e',
-      );
     }
   }
 
@@ -82,24 +58,6 @@ class UploadManager {
     }
   }
 
-  Future<void> _clearCaptionTask(String eventId) async {
-    _eventIdMapUploadCaptionInfo.remove(eventId);
-    uploadWorkerQueue.clearTaskInQueue(eventId);
-    Logs().i(
-      'UploadManager:: Clear with $eventId successfully',
-    );
-  }
-
-  void _initUploadCaptionInfo({
-    required String txid,
-    required String caption,
-  }) {
-    _eventIdMapUploadCaptionInfo[txid] = UploadCaptionInfo(
-      txid: txid,
-      caption: caption,
-    );
-  }
-
   void _initUploadFileInfo({
     required String txid,
     required Room room,
@@ -115,7 +73,6 @@ class UploadManager {
       createdAt: DateTime.now(),
       captionInfo: captionInfo != null && captionInfo.isNotEmpty
           ? UploadCaptionInfo(
-              txid: room.client.generateUniqueTransactionId(),
               caption: captionInfo,
             )
           : null,
@@ -133,6 +90,7 @@ class UploadManager {
   }) async {
     final txids = await room.sendPlaceholdersForImagePickerFiles(
       entities: entities,
+      captionInfo: caption,
     );
 
     for (final txid in txids.entries) {
@@ -157,6 +115,7 @@ class UploadManager {
         txid: txidKey,
         messageType: fakeSendingFileInfo.messageType,
         sentDate: sentDate,
+        captionInfo: _eventIdMapUploadFileInfo[txidKey]?.captionInfo?.caption,
       );
 
       final streamController =
@@ -195,17 +154,8 @@ class UploadManager {
         cancelToken: cancelToken,
         sentDate: sentDate,
         shrinkImageMaxDimension: _shrinkImageMaxDimension,
+        captionInfo: _eventIdMapUploadFileInfo[txidKey]?.captionInfo?.caption,
       );
-
-      if (_eventIdMapUploadFileInfo[txidKey]?.captionInfo != null) {
-        _addCaptionTaskToWorkerQueue(
-          room: room,
-          messageTxid:
-              _eventIdMapUploadFileInfo[txidKey]?.captionInfo?.txid ?? '',
-          caption:
-              _eventIdMapUploadFileInfo[txidKey]?.captionInfo?.caption ?? '',
-        );
-      }
     }
   }
 
@@ -230,6 +180,7 @@ class UploadManager {
       final fakeFileEvent = await room.sendFakeFileEvent(
         fileInfo,
         txid: txid,
+        captionInfo: _eventIdMapUploadFileInfo[txid]?.captionInfo?.caption,
       );
 
       final streamController =
@@ -271,15 +222,8 @@ class UploadManager {
           cancelToken: cancelToken,
           thumbnail: thumbnails?[fileInfo],
           sentDate: sentDate,
+          captionInfo: _eventIdMapUploadFileInfo[txid]?.captionInfo?.caption,
         ),
-        if (_eventIdMapUploadFileInfo[txid]?.captionInfo != null)
-          _addCaptionTaskToWorkerQueue(
-            room: room,
-            messageTxid:
-                _eventIdMapUploadFileInfo[txid]?.captionInfo?.txid ?? '',
-            caption:
-                _eventIdMapUploadFileInfo[txid]?.captionInfo?.caption ?? '',
-          ),
       ]);
     }
   }
@@ -312,6 +256,7 @@ class UploadManager {
         txid: txid,
         messageType: fileValue.msgType,
         sentDate: sentDate,
+        captionInfo: _eventIdMapUploadFileInfo[txid]?.captionInfo?.caption,
       );
 
       final streamController =
@@ -349,57 +294,9 @@ class UploadManager {
         streamController: streamController,
         cancelToken: cancelToken,
         sentDate: sentDate,
+        captionInfo: _eventIdMapUploadFileInfo[txid]?.captionInfo?.caption,
       );
-      if (_eventIdMapUploadFileInfo[txid]?.captionInfo != null) {
-        _addCaptionTaskToWorkerQueue(
-          room: room,
-          messageTxid: _eventIdMapUploadFileInfo[txid]?.captionInfo?.txid ?? '',
-          caption: _eventIdMapUploadFileInfo[txid]?.captionInfo?.caption ?? '',
-        );
-      }
     }
-  }
-
-  Future<void> _addCaptionTaskToWorkerQueue({
-    required Room room,
-    String? messageTxid,
-    String? caption,
-  }) async {
-    if ((messageTxid == null && messageTxid!.isEmpty) ||
-        (caption == null && caption!.isEmpty)) {
-      return;
-    }
-    final messageContent = room.getEventContentFromMsgText(message: caption);
-
-    _initUploadCaptionInfo(
-      txid: messageTxid,
-      caption: caption,
-    );
-
-    await room.sendFakeMessage(
-      content: messageContent,
-      messageId: messageTxid,
-    );
-
-    uploadWorkerQueue.addTask(
-      Task(
-        id: messageTxid,
-        runnable: () async {
-          try {
-            await room.sendMessageContent(
-              EventTypes.Message,
-              messageContent,
-              txid: messageTxid,
-            );
-          } catch (e) {
-            Logs().e(
-              'UploadManager::_addCaptionTaskToWorkerQueueMobile(): $e',
-            );
-          }
-        },
-        onTaskCompleted: () => _clearCaptionTask(messageTxid),
-      ),
-    );
   }
 
   void _addFileTaskToWorkerQueueMobile({
@@ -411,6 +308,7 @@ class UploadManager {
     required CancelToken cancelToken,
     DateTime? sentDate,
     int? shrinkImageMaxDimension,
+    String? captionInfo,
   }) {
     uploadWorkerQueue.addTask(
       Task(
@@ -426,6 +324,7 @@ class UploadManager {
               uploadStreamController: streamController,
               cancelToken: cancelToken,
               sentDate: sentDate,
+              captionInfo: captionInfo,
             );
           } catch (e) {
             streamController.add(
@@ -449,6 +348,7 @@ class UploadManager {
     required CancelToken cancelToken,
     MatrixImageFile? thumbnail,
     DateTime? sentDate,
+    String? captionInfo,
   }) {
     return uploadWorkerQueue.addTask(
       Task(
@@ -463,6 +363,7 @@ class UploadManager {
               uploadStreamController: streamController,
               cancelToken: cancelToken,
               sentDate: sentDate,
+              captionInfo: captionInfo,
             );
           } catch (e) {
             streamController.add(
