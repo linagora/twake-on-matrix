@@ -453,7 +453,7 @@ class _MessageContentWithTimestampBuilderState
           ),
         ),
         if (widget.event.shouldDisplayContextMenuInRightBubble) ...[
-          if (widget.event.status.isAvailable)
+          if (widget.event.status.isAvailable && !widget.event.redacted)
             if (overlayContextMenu)
               Container(
                 padding: const EdgeInsets.only(left: 8),
