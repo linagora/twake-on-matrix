@@ -6,10 +6,9 @@ import 'package:fluffychat/pages/settings_dashboard/settings_security/settings_s
 import 'package:flutter/material.dart';
 import 'package:linagora_design_flutter/dialog/confirmation_dialog_builder.dart';
 import 'package:patrol/patrol.dart';
+import '../../base/core_robot.dart';
 
-import '../home_robot.dart';
-
-class SettingRobot extends HomeRobot {
+class SettingRobot extends CoreRobot {
   SettingRobot(super.$);
 
   PatrolFinder title() {
