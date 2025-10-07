@@ -225,7 +225,7 @@ mixin AudioMixin {
         final blob = await response.blob();
 
         // Create File with correct type
-        final file = html.File([blob], 'Voice Message', {'type': 'audio/ogg'});
+        final file = html.File([blob], 'Voice Message');
 
         // Clean up the blob URL
         html.Url.revokeObjectUrl(blobUrl);

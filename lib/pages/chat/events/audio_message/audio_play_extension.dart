@@ -15,7 +15,7 @@ class MatrixFileAudioSource extends StreamAudioSource {
       contentLength: end - start,
       offset: start,
       stream: Stream.value(file.bytes?.sublist(start, end) ?? []),
-      contentType: 'audio/ogg',
+      contentType: file.mimeType,
     );
   }
 }
