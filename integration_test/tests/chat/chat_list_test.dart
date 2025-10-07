@@ -5,6 +5,7 @@ import '../../robots/chat_list_robot.dart';
 import '../../scenarios/chat_scenario.dart';
 import '../../robots/home_robot.dart';
 import '../../robots/search_robot.dart';
+import '../../scenarios/setting_scenario.dart';
 
 void main() {
   TestBase().runPatrolTest(
@@ -148,6 +149,28 @@ void main() {
       await ChatScenario($).unmuteAChat(groupTest);  
       // verify the chat is unPin
       await ChatScenario($).verifyAChatIsMuted(groupTest, false);
+    },
+  );
+
+  TestBase().runPatrolTest(
+    description: 'checking behavior when we turn on/off notification for a direct chat',
+    test: ($) async {
+      const groupTest = String.fromEnvironment('TitleOfGroupTest');
+      // goto setting screen
+      await HomeRobot($).gotoSettingScreen();
+      // turn on notification for direct chat
+      await SettingScenario($).turnOnNotificationForDirectChat();
+
+      // send a message to the chat
+      await ChatScenario($).sendAMessageByAPI(groupTest);  
+
+      // turn on notification for direct chat
+      await SettingScenario($).turnOffNotificationForDirectChat();
+      // send a message to the chat
+      await ChatScenario($).sendAMessageByAPI(groupTest);  
+      // todd: verify the notification is shown
+      // await SettingScenario($).verifyNotificationIsShown(true);      
+
     },
   );
 }
