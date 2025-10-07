@@ -62,6 +62,14 @@ class CoreRobot {
     }
   }
 
+  Future<void> waitUntil(bool Function() cond, {Duration timeout = const Duration(seconds: 5)}) async {
+    final end = DateTime.now().add(timeout);
+    while (!cond()) {
+      if (DateTime.now().isAfter(end)) throw TimeoutException('Condition not met in $timeout');
+      await Future.delayed(const Duration(milliseconds: 100));
+    }
+  }
+
   Future<void> typeSlowlyWithPatrol(
     PatrolIntegrationTester $,
     Finder field,
