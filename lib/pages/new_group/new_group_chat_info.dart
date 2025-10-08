@@ -6,6 +6,7 @@ import 'package:fluffychat/app_state/success.dart';
 import 'package:fluffychat/domain/app_state/room/create_new_group_chat_state.dart';
 import 'package:fluffychat/domain/app_state/room/upload_content_state.dart';
 import 'package:fluffychat/domain/app_state/validator/verify_name_view_state.dart';
+import 'package:fluffychat/domain/exception/room/can_not_create_new_group_chat_exception.dart';
 import 'package:fluffychat/domain/model/extensions/validator_failure_extension.dart';
 import 'package:fluffychat/domain/model/verification/name_with_space_only_validator.dart';
 import 'package:fluffychat/domain/usecase/verify_name_interactor.dart';
@@ -15,6 +16,7 @@ import 'package:fluffychat/presentation/mixins/common_media_picker_mixin.dart';
 import 'package:fluffychat/presentation/mixins/pick_avatar_mixin.dart';
 import 'package:fluffychat/presentation/mixins/single_image_picker_mixin.dart';
 import 'package:fluffychat/presentation/model/contact/presentation_contact.dart';
+import 'package:fluffychat/utils/dialog/twake_dialog.dart';
 import 'package:fluffychat/utils/extension/build_context_extension.dart';
 import 'package:fluffychat/utils/power_level_manager.dart';
 import 'package:fluffychat/utils/responsive/responsive_utils.dart';
@@ -174,10 +176,32 @@ class NewGroupChatInfoController extends State<NewGroupChatInfo>
     Logs().d('NewGroupController::_handleCreateNewGroupChatChatOnData()');
     createRoomStateNotifier.value = event;
     event.fold(
-      (failure) {
+      (failure) async {
         Logs().e(
           'NewGroupController::_handleCreateNewGroupChatChatOnData() - failure: $failure',
         );
+
+        if (failure is CreateNewGroupChatFailed) {
+          if (failure.exception
+              is CannotCreateNewGroupChatWithLimitedPermissionsException) {
+            await showConfirmAlertDialog(
+              context: context,
+              message:
+                  L10n.of(context)!.forNowWeCanOnlyCreateAChatWithUpToTenPeople,
+              isArrangeActionButtonsVertical: true,
+              okLabel: L10n.of(context)!.gotIt,
+            );
+            return;
+          }
+
+          await showConfirmAlertDialog(
+            context: context,
+            message: L10n.of(context)!.oopsSomethingWentWrong,
+            isArrangeActionButtonsVertical: true,
+            okLabel: L10n.of(context)!.gotIt,
+          );
+          return;
+        }
       },
       (success) {
         Logs().d(

@@ -3469,5 +3469,9 @@
   "pleaseFinishOrStopTheRecording": "Vui lòng hoàn tất hoặc dừng ghi âm trước khi thực hiện các hành động khác.",
   "@pleaseFinishOrStopTheRecording": {},
   "audioMessageFailedToSend": "Không gửi được tin nhắn âm thanh.",
-  "@audioMessageFailedToSend": {}
+  "@audioMessageFailedToSend": {},
+  "forNowWeCanOnlyCreateAChatWithUpToTenPeople": "Hiện tại không thể tạo cuộc trò chuyện với hơn 10 người. Vui lòng bỏ chọn một số khách mời. Bạn có thể mời họ sau khi cuộc trò chuyện đã được tạo.",
+  "@forNowWeCanOnlyCreateAChatWithUpToTenPeople": {},
+  "gotIt": "Đã hiểu",
+  "@gotIt": {}
 }

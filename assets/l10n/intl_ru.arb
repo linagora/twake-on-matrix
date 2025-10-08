@@ -3487,5 +3487,9 @@
   "pleaseFinishOrStopTheRecording": "Завершите или остановите запись, прежде чем выполнять другие действия.",
   "@pleaseFinishOrStopTheRecording": {},
   "audioMessageFailedToSend": "Не удалось отправить аудиосообщение.",
-  "@audioMessageFailedToSend": {}
+  "@audioMessageFailedToSend": {},
+  "forNowWeCanOnlyCreateAChatWithUpToTenPeople": "Сейчас можно создать чат не более чем с 10 участниками. Удалите лишних пользователей и попробуйте ещё раз.",
+  "@forNowWeCanOnlyCreateAChatWithUpToTenPeople": {},
+  "gotIt": "Понятно",
+  "@gotIt": {}
 }

@@ -56,6 +56,15 @@ class CreateNewGroupChatInteractor {
         );
       }
     } catch (exception) {
+      if (exception.toString().contains('M_UNKNOWN')) {
+        yield Left(
+          CreateNewGroupChatFailed(
+            exception:
+                CannotCreateNewGroupChatWithLimitedPermissionsException(),
+          ),
+        );
+        return;
+      }
       yield Left(CreateNewGroupChatFailed(exception: exception));
     }
   }
