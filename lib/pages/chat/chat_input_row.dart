@@ -127,7 +127,9 @@ class ChatInputRow extends StatelessWidget {
                         ChatInputRowSendBtn(
                           inputText: controller.inputText,
                           onTap: controller.onInputBarSubmitted,
-                          onTapRecorderWeb: controller.onTapRecorderWeb,
+                          onTapRecorderWeb: () => controller.onTapRecorderWeb(
+                            context: context,
+                          ),
                           audioRecordStateNotifier:
                               controller.audioRecordStateNotifier,
                           onDeleteRecorderWeb: controller.stopRecordWeb,

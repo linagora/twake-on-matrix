@@ -3405,5 +3405,6 @@
   "slideToCancel": "Slide to cancel",
   "recordingInProgress": "Recording in progress",
   "pleaseFinishOrStopTheRecording": "Please finish or stop the recording before performing other actions.",
-  "audioMessageFailedToSend": "Audio message failed to send."
+  "audioMessageFailedToSend": "Audio message failed to send.",
+  "audioEncoderNotSupportedMessage": "The audio encoder is not supported on this device. Please try using a different browser or device."
 }

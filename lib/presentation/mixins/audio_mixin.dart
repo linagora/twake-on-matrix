@@ -23,6 +23,7 @@ enum AudioRecordState {
 
 mixin AudioMixin {
   static const waveCount = 40;
+  static const maxRecordDurationInSeconds = 1800; // 30 minutes
 
   final ValueNotifier<int> recordDurationWebNotifier = ValueNotifier<int>(0);
 
@@ -102,20 +103,32 @@ mixin AudioMixin {
 
     _timerWeb = Timer.periodic(const Duration(seconds: 1), (Timer t) {
       recordDurationWebNotifier.value++;
+
+      // Auto-stop recording when reaching max duration (30 minutes)
+      if (recordDurationWebNotifier.value >= maxRecordDurationInSeconds) {
+        stopRecordWeb();
+        t.cancel();
+      }
     });
   }
 
-  Future<void> onTapRecorderWeb() async {
+  Future<void> onTapRecorderWeb({
+    required BuildContext context,
+  }) async {
     try {
       if (await _audioRecorder.hasPermission()) {
         const encoder = AudioEncoder.wav;
 
         if (!await _isEncoderSupported(encoder)) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                L10n.of(context)!.audioEncoderNotSupportedMessage,
+              ),
+            ),
+          );
           return;
         }
-
-        final devs = await _audioRecorder.listInputDevices();
-        debugPrint(devs.toString());
 
         const config = RecordConfig(encoder: encoder, numChannels: 1);
 
@@ -127,9 +140,14 @@ mixin AudioMixin {
         _startTimerWeb();
       }
     } catch (e) {
-      if (kDebugMode) {
-        print(e);
-      }
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            L10n.of(context)!.audioEncoderNotSupportedMessage,
+          ),
+        ),
+      );
+      return;
     }
   }
 
@@ -173,6 +191,10 @@ mixin AudioMixin {
     html.File file, {
     int chunkSize = 64 * 1024,
   }) async* {
+    if (file.size <= 0) {
+      throw Exception('File size must be greater than 0');
+    }
+
     final reader = html.FileReader();
     var offset = 0;
 
@@ -279,7 +301,7 @@ mixin AudioMixin {
       Logs().e(
         'AudioMixin::createMatrixAudioFileFromWebFile: Stack trace: $stackTrace',
       );
-      return null;
+      rethrow;
     }
   }
 
