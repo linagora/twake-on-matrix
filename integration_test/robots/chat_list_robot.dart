@@ -1,5 +1,6 @@
 import 'package:fluffychat/pages/chat_list/chat_list_bottom_navigator.dart';
 import 'package:fluffychat/pages/chat_list/chat_list_item_title.dart';
+import 'package:fluffychat/pages/chat_list/slidable_chat_list_item.dart';
 import 'package:fluffychat/widgets/twake_components/twake_fab.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -72,7 +73,7 @@ class ChatListRobot extends HomeRobot {
   }
 
   TwakeListItemRobot getChatGroupByTitle(String title){
-    final finder = $(TwakeListItem).containing($(ChatListItemTitle).containing($(title)));
+    final finder = $(SlidableChatListItem).containing($(ChatListItemTitle).containing($(title)));
     return TwakeListItemRobot($,finder);
   }
 
