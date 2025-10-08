@@ -138,6 +138,15 @@ mixin AudioMixin {
         recordDurationWebNotifier.value = 0;
 
         _startTimerWeb();
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              L10n.of(context)!.audioEncoderNotSupportedMessage,
+            ),
+          ),
+        );
+        return;
       }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
