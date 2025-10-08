@@ -3054,6 +3054,8 @@
   "@searchContacts": {},
   "tapToAllowAccessToYourMicrophone": "You can enable microphone access in the Settings app to make voice in",
   "@tapToAllowAccessToYourMicrophone": {},
+  "microphonePermissionDeniedOnWeb": "Microphone access required. Please enable it in your browser settings.",
+  "@microphonePermissionDeniedOnWeb": {},
   "showInChat": "Show in chat",
   "@showInChat": {},
   "phone": "Phone",

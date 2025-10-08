@@ -142,7 +142,7 @@ mixin AudioMixin {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              L10n.of(context)!.audioEncoderNotSupportedMessage,
+              L10n.of(context)!.microphonePermissionDeniedOnWeb,
             ),
           ),
         );
