@@ -2896,7 +2896,7 @@
   "@isSingleAccountOnHomeserver": {},
   "newDirectMessage": "Tin nhắn trực tiếp mới",
   "@newDirectMessage": {},
-  "contactInfo": "Thông tin liên hệ(",
+  "contactInfo": "Thông tin liên hệ",
   "@contactInfo": {},
   "countPinnedMessage": "{count, plural, =0{Tin nhắn được ghim} other{Tin nhắn được ghim #{count}}}",
   "@countPinnedMessage": {
