@@ -14,8 +14,8 @@ import 'package:fluffychat/pages/chat/seen_by_row.dart';
 import 'package:fluffychat/pages/chat_details/chat_details_edit_view.dart';
 import 'package:fluffychat/pages/chat_details/removed/removed_view.dart';
 import 'package:fluffychat/pages/chat_draft/draft_chat_view.dart';
+import 'package:fluffychat/pages/chat_list/chat_custom_slidable_action.dart';
 import 'package:fluffychat/pages/chat_list/chat_list_body_view.dart';
-import 'package:fluffychat/pages/chat_list/chat_list_item_title.dart';
 import 'package:fluffychat/widgets/context_menu/context_menu_action_item_widget.dart';
 import 'package:fluffychat/widgets/twake_components/twake_icon_button.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -504,11 +504,8 @@ class ChatScenario extends BaseScenario {
   }
 
   bool isPinAChat(TwakeListItemRobot takeListItem) {
-    final title = takeListItem.root.$(ChatListItemTitle);
-    const pinData = IconData(0xF2D7, fontFamily: 'MaterialIcons');
-    final pinFinder = find.descendant(of: title, matching: find.byIcon(pinData));
-    final pin = $(pinFinder);
-    return pin.exists;
+    final pin = takeListItem.getPinIcon();
+    return pin.visible;
   }
 
   bool isMarkAsUnRead(TwakeListItemRobot takeListItem) {
@@ -609,4 +606,43 @@ class ChatScenario extends BaseScenario {
     expect(exists, isMuted, reason: 'Expected pin=$isMuted but got $exists for "$title"');
   }
   
+  Future<void> leftSwipe(String title) async {
+     final twakeListItem = ChatListRobot($).getChatGroupByTitle(title);
+    final finder = twakeListItem.root;
+
+    // Make sure it's on-screen
+    await $.scrollUntilVisible(finder: finder);
+
+    // Measure and compute swipe
+    final size = $.tester.getSize(finder);
+    final center = $.tester.getCenter(finder);
+    final delta = Offset(-0.75 * size.width, 0); // swipe left by 75% width
+
+    // Perform gesture
+    await $.tester.dragFrom(center, delta);
+    await $.tester.pump(const Duration(milliseconds: 120));
+
+    // Verify the slidable actions appeared
+    await $.waitUntilVisible($(ChatCustomSlidableAction));
+  }
+
+  Future<void> rightSwipe(String title) async {
+     final twakeListItem = ChatListRobot($).getChatGroupByTitle(title);
+    final finder = twakeListItem.root;
+
+    // Make sure it's on-screen
+    await $.scrollUntilVisible(finder: finder);
+
+    // Measure and compute swipe
+    final size = $.tester.getSize(finder);
+    final center = $.tester.getCenter(finder);
+    final delta = Offset(0.5 * size.width, 0); // swipe right by 75% width
+
+    // Perform gesture
+    await $.tester.dragFrom(center, delta);
+    await $.tester.pump(const Duration(milliseconds: 120));
+
+    // Verify the slidable actions appeared
+    await ChatListRobot($).waitUntilAbsent($,$(ChatCustomSlidableAction));
+  }
 }
