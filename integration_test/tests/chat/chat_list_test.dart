@@ -150,4 +150,73 @@ void main() {
       await ChatScenario($).verifyAChatIsMuted(groupTest, false);
     },
   );
+
+  TestBase().runPatrolTest(
+    description: 'verify the display of context menu after swipe a chat',
+    test: ($) async {
+      final s = SoftAssertHelper();
+      const groupTest = String.fromEnvironment('TitleOfGroupTest');
+      // goto chat screen
+      await HomeRobot($).gotoChatListScreen();
+
+      final row = ChatListRobot($).getChatGroupByTitle(groupTest);
+      //make sure the chat is unmute
+      await ChatScenario($).unmuteAChat(groupTest);
+      //send a message to the group to make it has unread message
+      await ChatScenario($).sendAMessageByAPI(groupTest);
+      await $.waitUntilVisible(row.getNumberUnReadIcon());
+
+      // pin unmute
+      await ChatScenario($).pinAChat(groupTest);
+      await ChatScenario($).unmuteAChat(groupTest);
+      //swipe a chat co tin mơi
+      await ChatScenario($).leftSwipe(groupTest);
+      //verify the display of buttons
+      s.softAssertEquals((row.getReadBtn()).visible, true, 'there is no Read in case 1');
+      s.softAssertEquals((row.getMuteBtn()).visible, true, 'there is no Mute in case 1');
+      s.softAssertEquals((row.getUnpinBtn()).visible, true, 'there is no Unpin in case 1');
+      s.softAssertEquals((row.getUnreadBtn()).visible, false, 'there is UnRead in case 1');
+      s.softAssertEquals((row.getUnmuteBtn()).visible, false, 'there is Unmute in case 1');
+      s.softAssertEquals((row.getPinBtn()).visible, false, 'there is Pin in case 1');
+
+      // pin mute
+      //swipe a chat co tin mơi
+      await row.mute();
+      await ChatScenario($).leftSwipe(groupTest);
+      //verify the display of buttons
+      s.softAssertEquals((row.getReadBtn()).visible, true, 'there is no Read in case 2');
+      s.softAssertEquals((row.getUnmuteBtn()).visible, true, 'there is no unmute in case 2');
+      s.softAssertEquals((row.getUnpinBtn()).visible, true, 'there is no Unpin in case 2');
+      s.softAssertEquals((row.getUnreadBtn()).visible, false, 'there is UnRead in case 2');
+      s.softAssertEquals((row.getMuteBtn()).visible, false, 'there is mute in case 2');
+      s.softAssertEquals((row.getPinBtn()).visible, false, 'there is Pin in case 2');
+
+      // unpin mute
+      //swipe a chat co tin mơi
+      await row.unpin();
+      await ChatScenario($).leftSwipe(groupTest);
+      //verify the display of buttons
+      s.softAssertEquals((row.getReadBtn()).visible, true, 'there is no Read in case 3');
+      s.softAssertEquals((row.getUnmuteBtn()).visible, true, 'there is no unmute in case 3');
+      s.softAssertEquals((row.getPinBtn()).visible, true, 'there is no pin in case 3');
+      s.softAssertEquals((row.getUnreadBtn()).visible, false, 'there is UnRead in case 3');
+      s.softAssertEquals((row.getMuteBtn()).visible, false, 'there is mute in case 3');
+      s.softAssertEquals((row.getUnpinBtn()).visible, false, 'there is inpin in case 3');
+
+      // unpin unmute
+      //swipe a chat co tin mơi
+      await row.unmute();
+      await ChatScenario($).leftSwipe(groupTest);
+      //verify the display of buttons
+      s.softAssertEquals((row.getReadBtn()).visible, true, 'there is no Read in case 3');
+      s.softAssertEquals((row.getMuteBtn()).visible, true, 'there is no mute in case 3');
+      s.softAssertEquals((row.getPinBtn()).visible, true, 'there is no pin in case 3');
+      s.softAssertEquals((row.getUnreadBtn()).visible, false, 'there is UnRead in case 3');
+      s.softAssertEquals((row.getUnmuteBtn()).visible, false, 'there is unmute in case 3');
+      s.softAssertEquals((row.getUnpinBtn()).visible, false, 'there is inpin in case 3');
+
+      await ChatScenario($).rightSwipe(groupTest);
+      s.verifyAll();
+    },
+  );
 }
