@@ -1869,7 +1869,7 @@ packages:
     description:
       path: "."
       ref: "update/flutter-3.32.8"
-      resolved-ref: bb899528aa65f64ef7d69e1b0c3f8bbc03151725
+      resolved-ref: dbb0445011725a12723e12f896057e762ca6ad8c
       url: "git@github.com:linagora/matrix-dart-sdk.git"
     source: git
     version: "0.22.6"
