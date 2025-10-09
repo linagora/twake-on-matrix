@@ -1,3 +1,11 @@
+## [2.12.6+2330] - 2025-10-09
+### Added
+- E2E tests for change language
+
+### Fixed
+- #2548 Chat profile app bar
+- #2581 Error handling for create room with too much participants
+
 ## [2.12.5+2330] - 2025-10-02
 ### Fixed
 - Hanlde composer lost input when lost focus
