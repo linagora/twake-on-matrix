@@ -2209,7 +2209,7 @@ class ChatController extends State<Chat>
   void _listenRoomUpdateEvent() {
     if (room == null) return;
     onUpdateEventStreamSubcription =
-        client.onEvent.stream.listen((eventUpdate) {
+        client.onEvent.stream.listen((eventUpdate) async {
       Logs().d(
         'Chat::_listenRoomUpdateEvent():: Event Update Content ${eventUpdate.content}',
       );
@@ -2223,9 +2223,11 @@ class ChatController extends State<Chat>
           ..removeWhere(
             (oldEvent) => oldEvent == eventUpdate.content['redacts'],
           );
-        TwakeDialog.showFutureLoadingDialogFullScreen(
-          future: () => room!.setPinnedEvents(events),
-        );
+        try {
+          await room!.setPinnedEvents(events);
+        } catch (e) {
+          Logs().e('Chat::_listenRoomUpdateEvent():: Error - $e');
+        }
       }
     });
   }
