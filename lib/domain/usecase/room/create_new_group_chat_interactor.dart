@@ -58,7 +58,7 @@ class CreateNewGroupChatInteractor {
     } catch (exception) {
       if (exception
           .toString()
-          .contains('M_FORBIDDEN: Federation denied with matrix.org.')) {
+          .contains('M_FORBIDDEN: Federation denied')) {
         yield Left(
           CreateNewGroupChatFailed(
             exception: FederationDeniedWithMatrixOrgException(),
