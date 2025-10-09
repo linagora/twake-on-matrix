@@ -1,4 +1,5 @@
 import 'package:fluffychat/pages/chat/chat_input_row_style.dart';
+import 'package:fluffychat/presentation/mixins/audio_mixin.dart';
 import 'package:fluffychat/resource/image_paths.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/widgets/twake_components/twake_icon_button.dart';
@@ -11,12 +12,20 @@ class ChatInputRowSendBtn extends StatelessWidget {
   final ValueListenable<String> inputText;
   final ValueNotifier<bool>? sendingNotifier;
   final void Function() onTap;
+  final void Function()? onTapRecorderWeb;
+  final void Function()? onFinishRecorderWeb;
+  final void Function()? onDeleteRecorderWeb;
+  final ValueNotifier<AudioRecordState> audioRecordStateNotifier;
 
   const ChatInputRowSendBtn({
     super.key,
     required this.inputText,
     required this.onTap,
     this.sendingNotifier,
+    this.onTapRecorderWeb,
+    required this.audioRecordStateNotifier,
+    this.onFinishRecorderWeb,
+    this.onDeleteRecorderWeb,
   });
 
   @override
@@ -25,12 +34,49 @@ class ChatInputRowSendBtn extends StatelessWidget {
       valueListenable: inputText,
       builder: (context, textInput, child) {
         if (PlatformInfos.isWeb && textInput.isEmpty) {
-          return IgnorePointer(
-            ignoring: true,
-            child: Opacity(
-              opacity: ChatInputRowStyle.inputComposerOpacity,
-              child: child!,
-            ),
+          return ValueListenableBuilder(
+            valueListenable: audioRecordStateNotifier,
+            builder: (context, audioState, _) {
+              return Row(
+                children: [
+                  if (audioState == AudioRecordState.recording) ...[
+                    Padding(
+                      padding: ChatInputRowStyle.sendIconPadding,
+                      child: TwakeIconButton(
+                        hoverColor: Colors.transparent,
+                        splashColor: Colors.transparent,
+                        size: ChatInputRowStyle.sendIconBtnSize,
+                        imagePath: ImagePaths.icDeleteRecorderWeb,
+                        onTap: () => onDeleteRecorderWeb?.call(),
+                        paddingAll: 0,
+                      ),
+                    ),
+                    Padding(
+                      padding: ChatInputRowStyle.sendIconPadding,
+                      child: TwakeIconButton(
+                        hoverColor: Colors.transparent,
+                        splashColor: Colors.transparent,
+                        size: ChatInputRowStyle.sendIconBtnSize,
+                        imagePath: ImagePaths.icSend,
+                        onTap: () => onFinishRecorderWeb?.call(),
+                        paddingAll: 0,
+                      ),
+                    ),
+                  ] else
+                    Padding(
+                      padding: ChatInputRowStyle.sendIconPadding,
+                      child: TwakeIconButton(
+                        hoverColor: Colors.transparent,
+                        splashColor: Colors.transparent,
+                        size: ChatInputRowStyle.sendIconBtnSize,
+                        imagePath: ImagePaths.icRecorder,
+                        onTap: () => onTapRecorderWeb?.call(),
+                        paddingAll: 0,
+                      ),
+                    ),
+                ],
+              );
+            },
           );
         }
 

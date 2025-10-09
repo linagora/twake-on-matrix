@@ -3,9 +3,11 @@ import 'package:fluffychat/pages/chat/chat_input_row_send_btn.dart';
 import 'package:fluffychat/pages/chat/chat_input_row_style.dart';
 import 'package:fluffychat/pages/chat/chat_input_row_web.dart';
 import 'package:fluffychat/pages/chat/reply_display.dart';
+import 'package:fluffychat/presentation/mixins/audio_mixin.dart';
 import 'package:fluffychat/resource/image_paths.dart';
 import 'package:fluffychat/utils/android_utils.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_file_extension.dart';
+import 'package:fluffychat/utils/matrix_sdk_extensions/int_extension.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/widgets/avatar/avatar.dart';
 import 'package:fluffychat/widgets/matrix.dart';
@@ -53,14 +55,27 @@ class ChatInputRow extends StatelessWidget {
                       ]
                     : <Widget>[
                         if (ChatInputRowStyle.responsiveUtils.isMobile(context))
-                          SizedBox(
-                            height: ChatInputRowStyle.chatInputRowHeight,
-                            child: TwakeIconButton(
-                              size: ChatInputRowStyle.chatInputRowMoreBtnSize,
-                              tooltip: L10n.of(context)!.more,
-                              icon: Icons.add_circle_outline,
-                              onTap: () => controller.onSendFileClick(context),
-                            ),
+                          ValueListenableBuilder(
+                            valueListenable:
+                                controller.audioRecordStateNotifier,
+                            builder: (context, audioState, _) {
+                              if (PlatformInfos.isWeb &&
+                                  audioState == AudioRecordState.recording) {
+                                return const SizedBox.shrink();
+                              }
+
+                              return SizedBox(
+                                height: ChatInputRowStyle.chatInputRowHeight,
+                                child: TwakeIconButton(
+                                  size:
+                                      ChatInputRowStyle.chatInputRowMoreBtnSize,
+                                  tooltip: L10n.of(context)!.more,
+                                  icon: Icons.add_circle_outline,
+                                  onTap: () =>
+                                      controller.onSendFileClick(context),
+                                ),
+                              );
+                            },
                           ),
                         if (controller.matrix!.isMultiAccount &&
                             controller.matrix!.hasComplexBundles &&
@@ -70,15 +85,55 @@ class ChatInputRow extends StatelessWidget {
                             alignment: Alignment.center,
                             child: ChatAccountPicker(controller),
                           ),
-                        Expanded(
-                          child: ChatInputRowStyle.responsiveUtils
-                                  .isMobile(context)
-                              ? _buildMobileInputRow(context)
-                              : _buildWebInputRow(context),
+                        ValueListenableBuilder(
+                          valueListenable: controller.audioRecordStateNotifier,
+                          builder: (context, audioState, _) {
+                            if (PlatformInfos.isWeb &&
+                                audioState == AudioRecordState.recording) {
+                              return Expanded(
+                                child: ConstrainedBox(
+                                  constraints: const BoxConstraints(
+                                    minHeight:
+                                        ChatInputRowStyle.chatInputRowHeight,
+                                  ),
+                                  child: Container(
+                                    alignment: Alignment.center,
+                                    padding: ChatInputRowStyle
+                                        .chatInputRowPaddingMobile,
+                                    decoration: BoxDecoration(
+                                      borderRadius: ChatInputRowStyle
+                                          .chatInputRowBorderRadius,
+                                      color: LinagoraSysColors.material()
+                                          .onPrimary,
+                                      border: Border.all(
+                                        color: LinagoraRefColors.material()
+                                            .tertiary,
+                                        width: 1,
+                                      ),
+                                    ),
+                                    child: _counterAudioWeb(context: context),
+                                  ),
+                                ),
+                              );
+                            }
+                            return Expanded(
+                              child: ChatInputRowStyle.responsiveUtils
+                                      .isMobile(context)
+                                  ? _buildMobileInputRow(context)
+                                  : _buildWebInputRow(context),
+                            );
+                          },
                         ),
                         ChatInputRowSendBtn(
                           inputText: controller.inputText,
                           onTap: controller.onInputBarSubmitted,
+                          onTapRecorderWeb: () => controller.onTapRecorderWeb(
+                            context: context,
+                          ),
+                          audioRecordStateNotifier:
+                              controller.audioRecordStateNotifier,
+                          onDeleteRecorderWeb: controller.stopRecordWeb,
+                          onFinishRecorderWeb: controller.sendVoiceMessageWeb,
                         ),
                       ],
               ),
@@ -207,6 +262,60 @@ class ChatInputRow extends StatelessWidget {
         }
 
         return child;
+      },
+    );
+  }
+
+  Widget _counterAudioWeb({
+    required BuildContext context,
+  }) {
+    return ValueListenableBuilder(
+      valueListenable: controller.recordDurationWebNotifier,
+      builder: (context, duration, _) {
+        return Row(
+          mainAxisAlignment: MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            const SizedBox(width: 8),
+            AnimatedOpacity(
+              duration: const Duration(seconds: 1),
+              opacity: (duration % 60) % 2 == 0 ? 1 : 0,
+              child: Container(
+                width: 12,
+                height: 12,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: LinagoraSysColors.material().error,
+                ),
+              ),
+            ),
+            const SizedBox(width: 8),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Text(
+                  (duration ~/ 60).formatNumberAudioDuration(),
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: LinagoraRefColors.material().neutral[50],
+                      ),
+                ),
+                Text(
+                  " : ",
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: LinagoraRefColors.material().neutral[50],
+                      ),
+                ),
+                Text(
+                  (duration % 60).formatNumberAudioDuration(),
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: LinagoraRefColors.material().neutral[50],
+                      ),
+                ),
+              ],
+            ),
+          ],
+        );
       },
     );
   }
