@@ -37,4 +37,19 @@ class TwakeListItemRobot extends CoreRobot {
   Future<PatrolFinder> getContactLabel() async {
     return root.$(ChatListItemSubtitle).$(Text).at(1);
   }
+
+  int getUnreadMessage(){
+    final animated = find.descendant(
+      of: root,
+      matching: find.byType(AnimatedContainer),
+    );
+    if(animated.evaluate().isNotEmpty) 
+      { 
+        final raw = root.$(ChatListItemSubtitle).$(Text).last.text; // String?
+        final s = (raw ?? '').trim();
+        final n = int.tryParse(s);
+        return n ?? 0;
+      }
+    else {return 0;}
+  }
 }

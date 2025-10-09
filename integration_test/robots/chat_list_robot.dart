@@ -50,4 +50,8 @@ class ChatListRobot extends HomeRobot {
     final finder = $(TwakeListItem).containing($(ChatListItemTitle).containing($(title)));
     return TwakeListItemRobot($,finder);
   }
+
+  int getUnreadMessage(String title){
+    return getChatGroupByTitle(title).getUnreadMessage();
+  }
 }
