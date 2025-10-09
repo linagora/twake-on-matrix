@@ -3054,6 +3054,8 @@
   "@searchContacts": {},
   "tapToAllowAccessToYourMicrophone": "You can enable microphone access in the Settings app to make voice in",
   "@tapToAllowAccessToYourMicrophone": {},
+  "microphonePermissionDeniedOnWeb": "Microphone access required. Please enable it in your browser settings.",
+  "@microphonePermissionDeniedOnWeb": {},
   "showInChat": "Show in chat",
   "@showInChat": {},
   "phone": "Phone",
@@ -3410,4 +3412,5 @@
   "gotIt": "Got it",
   "weCouldNotCompleteYourRequestTryAgainShortly": "We couldn’t complete your request. Try again shortly",
   "groupChatCreatedSuccessfullyButWeCouldNotAddSomeParticipants": "Group chat created successfully, but failed to add several people. Please invite them again through \"Group chat info\""
+  "audioEncoderNotSupportedMessage": "The audio encoder is not supported on this device. Please try using a different browser or device."
 }

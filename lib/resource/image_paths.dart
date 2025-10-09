@@ -71,7 +71,11 @@ class ImagePaths {
   static String get icRadioChecked => _getImagePath('ic_radio_checked.svg');
   static String get icRadioUnchecked => _getImagePath('ic_radio_unchecked.svg');
   static String get icFrontHand => _getImagePath('ic_front_hand.svg');
-
+  static String get icRecorder => _getImagePath('ic_recorder.svg');
+  static String get icTimeRecorderWeb =>
+      _getImagePath('ic_time_recorder_web.svg');
+  static String get icDeleteRecorderWeb =>
+      _getImagePath('ic_delete_recorder_web.svg');
   static String _getImagePath(String imageName) {
     return AssetsPaths.images + imageName;
   }
