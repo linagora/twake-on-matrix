@@ -30,24 +30,24 @@ void main() {
       await ChatScenario($).verifySearchResultViewIsShown();
       await ChatScenario($).verifySearchResultContains(currentAccount.substring(1,3));
       //return a list of result
-      s.softAssertEquals((await ChatListRobot($).getListOfChatGroup()).isNotEmpty, true, 'Searchby $currentAccount.substring(1,3) Expected at least 1 group, but found 0',);
+      s.softAssertEquals(( ChatListRobot($).getListOfChatGroup()).isNotEmpty, true, 'Searchby $currentAccount.substring(1,3) Expected at least 1 group, but found 0',);
 
       // search by full an address matrix
       await ChatScenario($).enterSearchText(searchByMatrixAddress);
       //verify there is one result
-      s.softAssertEquals((await ChatListRobot($).getListOfChatGroup()).length == 1, true, 'Search by $searchByMatrixAddress Expected number of group is 1 , but found != 1');
+      s.softAssertEquals(( ChatListRobot($).getListOfChatGroup()).length == 1, true, 'Search by $searchByMatrixAddress Expected number of group is 1 , but found != 1');
 
       // search by full an address matrix but make it in case-sensitive format
       await ChatScenario($).enterSearchText(searchByMatrixAddress.toUpperCase());
       //verify there is one result
-      s.softAssertEquals((await ChatListRobot($).getListOfChatGroup()).length == 1, true, 'Searhc by $searchByMatrixAddress.toUpperCase() Expected number of group is 1 , but found != 1');
+      s.softAssertEquals(( ChatListRobot($).getListOfChatGroup()).length == 1, true, 'Searhc by $searchByMatrixAddress.toUpperCase() Expected number of group is 1 , but found != 1');
 
       // search by current account
       await ChatScenario($).enterSearchText(currentAccount);
       //verify items displayed on the TwakeListItem
       //todo: handle the case list both contact and Message
-      s.softAssertEquals((await (await ChatListRobot($).getListOfChatGroup())[0].getOwnerLabel()).visible, true, 'Owner is missing!',);
-      s.softAssertEquals((await (await ChatListRobot($).getListOfChatGroup())[0].getEmailLabelIncaseSearching()).visible, true, 'Email field is not shown',);
+      s.softAssertEquals((await ( ChatListRobot($).getListOfChatGroup())[0].getOwnerLabel()).visible, true, 'Owner is missing!',);
+      s.softAssertEquals((await ( ChatListRobot($).getListOfChatGroup())[0].getEmailLabelIncaseSearching()).visible, true, 'Email field is not shown',);
 
       // after searching, open a chat by clicking on a result
       final chatGroupDetailRobot = await ChatScenario($).openChatGroup(searchByTitle);
@@ -216,6 +216,79 @@ void main() {
       s.softAssertEquals((row.getUnpinBtn()).visible, false, 'there is inpin in case 3');
 
       await ChatScenario($).rightSwipe(groupTest);
+      s.verifyAll();
+    },
+  );
+
+  TestBase().runPatrolTest(
+    description: 'interact with multi chats',
+    test: ($) async {
+      final s = SoftAssertHelper();
+      // goto chat screen
+      await HomeRobot($).gotoChatListScreen();
+
+      final title = ChatScenario($).getTitleOfAChat(0);
+
+      await ChatListRobot($).getListOfChatGroup()[0].root.longPress();
+      await ChatScenario($).selectAChatByIndex(0);
+      //scroll to hidde first chat. This step to make sure the number of 
+      //selected checked box still encounted although it is hiddden by scrolling
+      await ChatScenario($).upSwipe(title);
+
+      //select 2 more chats 
+      final title2 = ChatScenario($).getTitleOfAChat(1);
+      final title3 = ChatScenario($).getTitleOfAChat(3);
+
+      await ChatScenario($).selectAChatByIndex(1);
+      await ChatScenario($).selectAChatByIndex(3);
+
+      s.softAssertEquals(ChatListRobot($).getNumberOfSelectedChatLable().text=="3", true, 'display wrong number of selected chat',);
+
+      //verify all checked chat is mark as read/unread after clicking on Read/Unread icon
+      if(ChatListRobot($).getMarkAsReadIcon().exists)
+      {
+        await ChatListRobot($).clickOnReadIcon();
+        await ChatScenario($).verifyAChatIsMarkAsUnRead(title, false);
+        await ChatScenario($).verifyAChatIsMarkAsUnRead(title2, false);
+        await ChatScenario($).verifyAChatIsMarkAsUnRead(title3, false);
+      }
+      else
+      {
+        await ChatListRobot($).clickOnUnreadIcon();
+        await ChatScenario($).verifyAChatIsMarkAsUnRead(title, true);
+        await ChatScenario($).verifyAChatIsMarkAsUnRead(title2, true);
+        await ChatScenario($).verifyAChatIsMarkAsUnRead(title3, true);
+      }
+      //verify all checked chat is mark as mute/unmute after clicking on mute/unmute icon
+      if(ChatListRobot($).getMuteIcon().exists)
+      {
+        await ChatListRobot($).clickOnMuteIcon();
+        await ChatScenario($).verifyAChatIsMuted(title, true);
+        await ChatScenario($).verifyAChatIsMuted(title2, true);
+        await ChatScenario($).verifyAChatIsMuted(title3, true);
+      }
+      else
+      {
+        await ChatListRobot($).clickOnUnMuteIcon();   
+        await ChatScenario($).verifyAChatIsMuted(title, false);
+        await ChatScenario($).verifyAChatIsMuted(title2, false);
+        await ChatScenario($).verifyAChatIsMuted(title3, false);
+      }
+      //verify all checked chat is mark as pin/unpin after clicking on pin/unpin icon
+      if(ChatListRobot($).getPinIcon().exists)
+      {
+        await ChatListRobot($).clickOnPinIcon();   
+        await ChatScenario($).verifyAChatIsPin(title, true);
+        await ChatScenario($).verifyAChatIsPin(title2, true);
+        await ChatScenario($).verifyAChatIsPin(title3, true);
+      }
+      else
+      {
+        await ChatListRobot($).clickOnUnPinIcon();   
+        await ChatScenario($).verifyAChatIsPin(title, false);
+        await ChatScenario($).verifyAChatIsPin(title2, false);
+        await ChatScenario($).verifyAChatIsPin(title3, false);
+      }
       s.verifyAll();
     },
   );
