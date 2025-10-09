@@ -56,7 +56,9 @@ class CreateNewGroupChatInteractor {
         );
       }
     } catch (exception) {
-      if (exception.toString().contains('M_UNKNOWN')) {
+      if (exception
+          .toString()
+          .contains('M_UNKNOWN: Cannot invite so many users at once')) {
         yield Left(
           CreateNewGroupChatFailed(
             exception:

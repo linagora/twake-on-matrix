@@ -196,7 +196,7 @@ class NewGroupChatInfoController extends State<NewGroupChatInfo>
 
           await showConfirmAlertDialog(
             context: context,
-            message: L10n.of(context)!.oopsSomethingWentWrong,
+            message: L10n.of(context)!.weCouldNotCompleteYourRequestTryAgainShortly,
             isArrangeActionButtonsVertical: true,
             okLabel: L10n.of(context)!.gotIt,
           );

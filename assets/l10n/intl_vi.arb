@@ -3473,5 +3473,7 @@
   "forNowWeCanOnlyCreateAChatWithUpToTenPeople": "Hiện tại không thể tạo cuộc trò chuyện với hơn 10 người. Vui lòng bỏ chọn một số khách mời. Bạn có thể mời họ sau khi cuộc trò chuyện đã được tạo.",
   "@forNowWeCanOnlyCreateAChatWithUpToTenPeople": {},
   "gotIt": "Đã hiểu",
-  "@gotIt": {}
+  "@gotIt": {},
+  "weCouldNotCompleteYourRequestTryAgainShortly": "Chúng tôi không thể hoàn thành yêu cầu của bạn. Vui lòng thử lại sau",
+  "@weCouldNotCompleteYourRequestTryAgainShortly": {}
 }

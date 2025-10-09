@@ -3491,5 +3491,7 @@
   "forNowWeCanOnlyCreateAChatWithUpToTenPeople": "Сейчас можно создать чат не более чем с 10 участниками. Удалите лишних пользователей и попробуйте ещё раз.",
   "@forNowWeCanOnlyCreateAChatWithUpToTenPeople": {},
   "gotIt": "Понятно",
-  "@gotIt": {}
+  "@gotIt": {},
+  "weCouldNotCompleteYourRequestTryAgainShortly": "Не удалось выполнить ваш запрос. Попробуйте еще раз позже",
+  "@weCouldNotCompleteYourRequestTryAgainShortly": {}
 }
