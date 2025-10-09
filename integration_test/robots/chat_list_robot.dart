@@ -1,4 +1,5 @@
 import 'package:fluffychat/pages/chat_list/chat_list_bottom_navigator.dart';
+import 'package:fluffychat/pages/chat_list/chat_list_header.dart';
 import 'package:fluffychat/pages/chat_list/chat_list_item_title.dart';
 import 'package:fluffychat/pages/chat_list/slidable_chat_list_item.dart';
 import 'package:fluffychat/widgets/twake_components/twake_fab.dart';
@@ -25,6 +26,11 @@ class ChatListRobot extends HomeRobot {
     return $(TwakeFloatingActionButton);
   }
 
+  PatrolFinder getNumberOfSelectedChatLable(){
+    $.waitUntilVisible($(ChatListHeader).$(ValueListenableBuilder).$(Text));
+    return $(ChatListHeader).$(ValueListenableBuilder).$(Text);
+  }
+
   PatrolFinder getPinIcon(){
     return $(ChatListBottomNavigator).$(InkWell).containing($("Pin"));
   }
@@ -49,27 +55,50 @@ class ChatListRobot extends HomeRobot {
     return $(ChatListBottomNavigator).$(InkWell).containing($("Unmute"));
   }
 
+  Future<void> clickOnPinIcon() async {
+    await getPinIcon().tap();
+    await ChatListRobot($).waitUntilAbsent($, ChatListRobot($).getPinIcon());
+  }
+
+  Future<void> clickOnUnPinIcon() async {
+    await getUnPinIcon().tap();
+    await ChatListRobot($).waitUntilAbsent($, ChatListRobot($).getUnPinIcon());
+  }
+
+  Future<void> clickOnReadIcon() async {
+    await getMarkAsReadIcon().tap();
+    await ChatListRobot($).waitUntilAbsent($, ChatListRobot($).getMarkAsReadIcon());
+  }
+
+  Future<void> clickOnUnreadIcon() async {
+    await getMarkAsUnReadIcon().tap();
+    await ChatListRobot($).waitUntilAbsent($, ChatListRobot($).getMarkAsUnReadIcon());
+  }
+
+  Future<void> clickOnMuteIcon() async {
+      await getMuteIcon().tap();
+      await ChatListRobot($).waitUntilAbsent($, ChatListRobot($).getMuteIcon());
+    }
+
+  Future<void> clickOnUnMuteIcon() async {
+      await getUnmuteIcon().tap();
+      await ChatListRobot($).waitUntilAbsent($, ChatListRobot($).getUnmuteIcon());
+  }
+
   Future<void> clickOnPenIcon() async{
     await getPenIcon().tap();
     await $.waitUntilVisible($(AppBar).$("New chat"));
   }
 
   Future<ChatGroupDetailRobot> openChatGroupByIndex(int index) async {
-    await (await getListOfChatGroup())[index].root.tap();
+    await ( getListOfChatGroup())[index].root.tap();
     await $.pumpAndSettle();
     return ChatGroupDetailRobot($);
   }
 
-  Future<List<TwakeListItemRobot>> getListOfChatGroup() async {
-    final List<TwakeListItemRobot> groupList = [];
-
-    // Evaluate once to find how many TwakeListItem widgets exist
-    final matches = $(TwakeListItem).evaluate();
-    for (final element in matches) {
-      final finder = $(element.widget.runtimeType);
-      groupList.add(TwakeListItemRobot($, finder));
-    }
-    return groupList;
+  List<TwakeListItemRobot> getListOfChatGroup() {
+    final count = $(SlidableChatListItem).evaluate().length;
+    return List.generate(count, (i) => TwakeListItemRobot($, $(SlidableChatListItem).at(i)));
   }
 
   TwakeListItemRobot getChatGroupByTitle(String title){
