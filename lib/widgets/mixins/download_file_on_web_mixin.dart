@@ -70,7 +70,6 @@ mixin DownloadFileOnWebMixin<T extends StatefulWidget> on State<T> {
       downloadFileStateNotifier.value = FileWebDownloadedPresentationState(
         matrixFile: success.matrixFile,
       );
-      downloadFileStateNotifier.dispose();
       handleDownloadMatrixFileSuccessDone(success: success);
       return;
     }
