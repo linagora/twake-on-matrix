@@ -15,6 +15,7 @@ import 'package:fluffychat/presentation/enum/chat/right_column_type_enum.dart';
 import 'package:fluffychat/presentation/enum/chat/send_media_with_caption_status_enum.dart';
 import 'package:fluffychat/presentation/extensions/client_extension.dart';
 import 'package:fluffychat/presentation/extensions/send_file_extension.dart';
+import 'package:fluffychat/presentation/extensions/send_file_web_extension.dart';
 import 'package:fluffychat/presentation/mixins/audio_mixin.dart';
 import 'package:fluffychat/presentation/mixins/common_media_picker_mixin.dart';
 import 'package:fluffychat/presentation/mixins/media_picker_mixin.dart';
@@ -170,6 +171,9 @@ class DraftChatController extends State<DraftChat>
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _getProfile();
       listenIgnoredUser();
+      if (PlatformInfos.isWeb) {
+        initAudioRecorderWeb();
+      }
     });
     super.initState();
   }
@@ -227,6 +231,69 @@ class DraftChatController extends State<DraftChat>
         return sendController.value.text;
       }
     }
+  }
+
+  Future<void> sendVoiceMessageWeb() async {
+    _createRoom(
+      onRoomCreatedSuccess: (room) async {
+        final duration = Duration(seconds: recordDurationWebNotifier.value);
+        final path = await stopRecordWeb();
+        final file = await recordToFileOnWeb(
+          blobUrl: path,
+        );
+
+        if (file == null) return;
+
+        final matrixFile = await createMatrixAudioFileFromWebFile(
+          file: file,
+          duration: duration,
+        );
+
+        if (matrixFile == null) return;
+
+        final fileInfo = FileInfo(
+          matrixFile.name,
+          matrixFile.filePath ?? '',
+          matrixFile.size,
+          readStream: matrixFile.readStream,
+        );
+
+        final txid = client.generateUniqueTransactionId();
+
+        room.sendingFilePlaceholders[txid] = matrixFile;
+
+        final extraContent = {
+          'info': {
+            ...matrixFile.info,
+            'duration': duration.inMilliseconds,
+          },
+          'org.matrix.msc3245.voice': {},
+          'org.matrix.msc1767.audio': {
+            'duration': duration.inMilliseconds,
+            'waveform': convertWaveformWeb(),
+          },
+        };
+
+        final fakeImageEvent = await room.sendFakeFileInfoEvent(
+          fileInfo,
+          txid: txid,
+          messageType: MessageTypes.Audio,
+          extraContent: extraContent,
+        );
+
+        await room
+            .sendFileOnWebEvent(
+          matrixFile,
+          txid: txid,
+          fakeImageEvent: fakeImageEvent,
+          extraContent: extraContent,
+        )
+            .catchError((e) {
+          Logs().e('Failed to send voice message', e);
+          return null;
+        });
+      },
+    );
   }
 
   Future<void> sendVoiceMessageAction({
