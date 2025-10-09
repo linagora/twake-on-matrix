@@ -5,7 +5,6 @@ import 'package:fluffychat/pages/chat_list/slidable_chat_list_item.dart';
 import 'package:fluffychat/widgets/twake_components/twake_fab.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:linagora_design_flutter/list_item/twake_list_item.dart';
 import 'package:patrol/patrol.dart';
 import 'chat_group_detail_robot.dart';
 import 'home_robot.dart';
