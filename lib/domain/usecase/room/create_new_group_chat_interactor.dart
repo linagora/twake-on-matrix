@@ -56,6 +56,25 @@ class CreateNewGroupChatInteractor {
         );
       }
     } catch (exception) {
+      if (exception.toString().contains('M_FORBIDDEN: Federation denied')) {
+        yield Left(
+          CreateNewGroupChatFailed(
+            exception: FederationDeniedWithMatrixOrgException(),
+          ),
+        );
+        return;
+      }
+      if (exception
+          .toString()
+          .contains('M_UNKNOWN: Cannot invite so many users at once')) {
+        yield Left(
+          CreateNewGroupChatFailed(
+            exception:
+                CannotCreateNewGroupChatWithLimitedPermissionsException(),
+          ),
+        );
+        return;
+      }
       yield Left(CreateNewGroupChatFailed(exception: exception));
     }
   }

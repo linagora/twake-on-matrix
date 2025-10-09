@@ -3484,5 +3484,13 @@
   "couldNotPlayAudioFile": "Lecture du fichier audio impossible",
   "@couldNotPlayAudioFile": {},
   "pleaseFinishOrStopTheRecording": "Terminez l'enregistrement avant d'effectuer d'autres actions.",
-  "@pleaseFinishOrStopTheRecording": {}
+  "@pleaseFinishOrStopTheRecording": {},
+  "forNowWeCanOnlyCreateAChatWithUpToTenPeople": "Il n'est pas possible pour le moment de réunir plus de 10 personnes lors de la création d'une discussion. Veuillez désélectionner certains invités. Vous pourrez les inviter une fois la discussion créée.",
+  "@forNowWeCanOnlyCreateAChatWithUpToTenPeople": {},
+  "gotIt": "D’accord",
+  "@gotIt": {},
+  "weCouldNotCompleteYourRequestTryAgainShortly": "Nous n’avons pas pu effectuer votre demande. Réessayez dans un instant",
+  "@weCouldNotCompleteYourRequestTryAgainShortly": {},
+  "groupChatCreatedSuccessfullyButWeCouldNotAddSomeParticipants": "Discussion de groupe créée avec succès, mais l’ajout de plusieurs personnes a échoué. Veuillez les inviter à nouveau via \"Informations du groupe\"",
+  "@groupChatCreatedSuccessfullyButWeCouldNotAddSomeParticipants": {}
 }
