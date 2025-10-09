@@ -194,9 +194,26 @@ class NewGroupChatInfoController extends State<NewGroupChatInfo>
             return;
           }
 
+          if (failure.exception is FederationDeniedWithMatrixOrgException) {
+            if (PlatformInfos.isWeb) {
+              context.popInnerAll();
+            } else {
+              context.go('/rooms');
+            }
+            await showConfirmAlertDialog(
+              context: context,
+              message: L10n.of(context)!
+                  .groupChatCreatedSuccessfullyButWeCouldNotAddSomeParticipants,
+              isArrangeActionButtonsVertical: true,
+              okLabel: L10n.of(context)!.gotIt,
+            );
+            return;
+          }
+
           await showConfirmAlertDialog(
             context: context,
-            message: L10n.of(context)!.weCouldNotCompleteYourRequestTryAgainShortly,
+            message:
+                L10n.of(context)!.weCouldNotCompleteYourRequestTryAgainShortly,
             isArrangeActionButtonsVertical: true,
             okLabel: L10n.of(context)!.gotIt,
           );

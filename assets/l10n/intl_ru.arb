@@ -3493,5 +3493,7 @@
   "gotIt": "Понятно",
   "@gotIt": {},
   "weCouldNotCompleteYourRequestTryAgainShortly": "Не удалось выполнить ваш запрос. Попробуйте еще раз позже",
-  "@weCouldNotCompleteYourRequestTryAgainShortly": {}
+  "@weCouldNotCompleteYourRequestTryAgainShortly": {},
+  "groupChatCreatedSuccessfullyButWeCouldNotAddSomeParticipants": "Чат успешно создан, но нам не удалось добавить нескольких участников. Пригласите их снова при помощи настроек информации чата",
+  "@groupChatCreatedSuccessfullyButWeCouldNotAddSomeParticipants": {}
 }

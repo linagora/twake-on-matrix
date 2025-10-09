@@ -58,6 +58,16 @@ class CreateNewGroupChatInteractor {
     } catch (exception) {
       if (exception
           .toString()
+          .contains('M_FORBIDDEN: Federation denied with matrix.org.')) {
+        yield Left(
+          CreateNewGroupChatFailed(
+            exception: FederationDeniedWithMatrixOrgException(),
+          ),
+        );
+        return;
+      }
+      if (exception
+          .toString()
           .contains('M_UNKNOWN: Cannot invite so many users at once')) {
         yield Left(
           CreateNewGroupChatFailed(

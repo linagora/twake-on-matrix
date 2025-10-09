@@ -3408,5 +3408,6 @@
   "audioMessageFailedToSend": "Audio message failed to send.",
   "forNowWeCanOnlyCreateAChatWithUpToTenPeople": "For now we can only create a chat with up to 10 people. Please remove extra users and try again",
   "gotIt": "Got it",
-  "weCouldNotCompleteYourRequestTryAgainShortly": "We couldn’t complete your request. Try again shortly"
+  "weCouldNotCompleteYourRequestTryAgainShortly": "We couldn’t complete your request. Try again shortly",
+  "groupChatCreatedSuccessfullyButWeCouldNotAddSomeParticipants": "Group chat created successfully, but failed to add several people. Please invite them again through \"Group chat info\""
 }

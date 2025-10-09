@@ -3475,5 +3475,7 @@
   "gotIt": "Đã hiểu",
   "@gotIt": {},
   "weCouldNotCompleteYourRequestTryAgainShortly": "Chúng tôi không thể hoàn thành yêu cầu của bạn. Vui lòng thử lại sau",
-  "@weCouldNotCompleteYourRequestTryAgainShortly": {}
+  "@weCouldNotCompleteYourRequestTryAgainShortly": {},
+  "groupChatCreatedSuccessfullyButWeCouldNotAddSomeParticipants": "Tạo nhóm trò chuyện thành công, nhưng không thể thêm một số người. Vui lòng mời lại họ qua \"Thông tin nhóm trò chuyện\"",
+  "@groupChatCreatedSuccessfullyButWeCouldNotAddSomeParticipants": {}
 }

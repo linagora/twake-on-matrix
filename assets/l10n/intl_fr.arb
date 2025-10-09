@@ -3490,5 +3490,7 @@
   "gotIt": "D’accord",
   "@gotIt": {},
   "weCouldNotCompleteYourRequestTryAgainShortly": "Nous n’avons pas pu effectuer votre demande. Réessayez dans un instant",
-  "@weCouldNotCompleteYourRequestTryAgainShortly": {}
+  "@weCouldNotCompleteYourRequestTryAgainShortly": {},
+  "groupChatCreatedSuccessfullyButWeCouldNotAddSomeParticipants": "Discussion de groupe créée avec succès, mais l’ajout de plusieurs personnes a échoué. Veuillez les inviter à nouveau via \"Informations du groupe\"",
+  "@groupChatCreatedSuccessfullyButWeCouldNotAddSomeParticipants": {}
 }
