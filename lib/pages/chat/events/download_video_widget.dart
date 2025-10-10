@@ -55,6 +55,7 @@ class _DownloadVideoWidgetState extends State<DownloadVideoWidget>
   }
 
   void _downloadAction() async {
+    if (!mounted) return;
     _downloadStateNotifier.value = DownloadVideoState.loading;
     try {
       path = await handleDownloadVideoEvent(

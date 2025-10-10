@@ -107,6 +107,7 @@ class MediaViewerView extends StatelessWidget {
                 width: 44,
                 height: 44,
                 fit: BoxFit.cover,
+                enableHeroAnimation: false,
               ),
             ),
           ),
@@ -120,10 +121,10 @@ class MediaViewerView extends StatelessWidget {
           child: Stack(
             children: [
               pageView,
-              appBar,
               Positioned.fill(
                 child: toggleAppBarOverlay,
               ),
+              appBar,
             ],
           ),
         ),
