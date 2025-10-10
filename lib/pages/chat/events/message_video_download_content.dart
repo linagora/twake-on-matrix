@@ -1,7 +1,10 @@
 import 'package:fluffychat/pages/chat/events/event_video_player.dart';
 import 'package:fluffychat/pages/chat/events/message_content_style.dart';
+import 'package:fluffychat/pages/media_viewer/media_viewer.dart';
 import 'package:fluffychat/presentation/mixins/play_video_action_mixin.dart';
 import 'package:fluffychat/presentation/model/chat/downloading_state_presentation_model.dart';
+import 'package:fluffychat/utils/interactive_viewer_gallery.dart';
+import 'package:fluffychat/widgets/hero_page_route.dart';
 import 'package:fluffychat/widgets/mixins/download_file_on_mobile_mixin.dart';
 import 'package:flutter/material.dart';
 import 'package:linagora_design_flutter/colors/linagora_ref_colors.dart';
@@ -84,20 +87,16 @@ class _MessageVideoDownloadContentState
           return const CenterVideoButton(icon: Icons.play_arrow);
         },
       ),
-      onVideoTapped: () {
-        final downloadState = downloadFileStateNotifier.value;
-        if (downloadState is DownloadingPresentationState) {
-          downloadManager.cancelDownload(widget.event.eventId);
-        } else if (downloadState is NotDownloadPresentationState) {
-          onDownloadFileTap();
-        } else if (downloadState is DownloadedPresentationState) {
-          playVideoAction(
-            context,
-            downloadState.filePath,
-            isReplacement: false,
-            event: event,
-          );
-        }
+      onVideoTapped: () async {
+        await Navigator.of(context).push(
+          HeroPageRoute(
+            builder: (context) {
+              return InteractiveViewerGallery(
+                itemBuilder: MediaViewer(event: event),
+              );
+            },
+          ),
+        );
       },
     );
   }
