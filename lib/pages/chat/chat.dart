@@ -2209,19 +2209,32 @@ class ChatController extends State<Chat>
   void _listenRoomUpdateEvent() {
     if (room == null) return;
     onUpdateEventStreamSubcription =
-        client.onEvent.stream.listen((eventUpdate) {
+        client.onEvent.stream.listen((eventUpdate) async {
       Logs().d(
         'Chat::_listenRoomUpdateEvent():: Event Update Content ${eventUpdate.content}',
       );
-      if (eventUpdate.isPinnedEventsHasChanged &&
-          room?.id == eventUpdate.roomID) {
-        WidgetsBinding.instance.addPostFrameCallback((_) async {
-          eventUpdate.updatePinnedMessage(
-            onPinnedMessageUpdated: _handlePinnedMessageCallBack,
+      if (room?.id != eventUpdate.roomID) return;
+      if (eventUpdate.isPinnedEventsHasChanged) {
+        eventUpdate.updatePinnedMessage(
+          onPinnedMessageUpdated: _handlePinnedMessageCallBack,
+        );
+      } else if (isPinnedEventDeleted(eventUpdate)) {
+        final events = room!.pinnedEventIds
+          ..removeWhere(
+            (oldEvent) => oldEvent == eventUpdate.content['redacts'],
           );
-        });
+        try {
+          await room!.setPinnedEvents(events);
+        } catch (e) {
+          Logs().e('Chat::_listenRoomUpdateEvent():: Error - $e');
+        }
       }
     });
+  }
+
+  bool isPinnedEventDeleted(EventUpdate eventUpdate) {
+    return eventUpdate.content['type'] == EventTypes.Redaction &&
+        room?.pinnedEventIds.contains(eventUpdate.content['redacts']) == true;
   }
 
   void _handlePinnedMessageCallBack({
