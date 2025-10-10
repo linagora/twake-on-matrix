@@ -7,8 +7,8 @@ const RESOURCES = {"flutter.js": "83d881c1dbb6d6bcd6b42e274605b69c",
 "icons/Icon-512.png": "8cb72d8ec7a7be72007869f008b36bfa",
 "icons/Icon-192.png": "c4a581a01d1e71f9a111bdb9daace08d",
 "manifest.json": "f3c8e18d38224185c23bbca2dc0e3f4a",
-"index.html": "fdabce692959b56baf5e12f19a618a8f",
-"/": "fdabce692959b56baf5e12f19a618a8f",
+"index.html": "80b5a7a701d9f2e1ac36a5b2e1906785",
+"/": "80b5a7a701d9f2e1ac36a5b2e1906785",
 "script.js": "96daaf53d6e724bb2168139b2f515f93",
 "auth.html": "753913b429e0217a2c870bdafd63d063",
 "style.css": "f70d0365df109f5c620005d49af5d7c0",
@@ -736,9 +736,9 @@ const RESOURCES = {"flutter.js": "83d881c1dbb6d6bcd6b42e274605b69c",
 "pkg/vodozemac_bindings_dart_bg.wasm": "3b98e98654d27f98fb57df6dfaab4b54",
 "pkg/vodozemac_bindings_dart.js": "b5bde3f81cd214e89aaa74876cbf76b6",
 "pkg/package.json": "5e17fd65e76b4fd073085bcc4a65de15",
-"flutter_bootstrap.js": "23865a59e1d32e56f0ff0dcb43d7d2dd",
-"version.json": "c7c1214d945696ce42fb7daaf9cfbbbd",
-"main.dart.js": "cba7c151461ddb18dd7885f9f1b05f17"};
+"flutter_bootstrap.js": "1f661806eaee88120796d5f03f8fd703",
+"version.json": "44342147afbc99f2a22d971fa419c1fe",
+"main.dart.js": "7bc22b7ba8fcd487a3ec7c2a9765407c"};
 // The application shell files that are downloaded before a service worker can
 // start.
 const CORE = ["main.dart.js",
