@@ -421,4 +421,17 @@ extension LocalizedBody on Event {
         text.isNotEmpty &&
         filename != text;
   }
+
+  String? imageBubbleId() {
+    // First try to get from main content (for actual sent events)
+    final groupId = content.tryGet<String>('image_bubble_id');
+    if (groupId != null) {
+      return groupId;
+    }
+
+    // Fallback to unsigned.extra_content (for fake/pending events)
+    return unsigned
+        ?.tryGetMap<String, dynamic>('extra_content')
+        ?.tryGet<String>('image_bubble_id');
+  }
 }
