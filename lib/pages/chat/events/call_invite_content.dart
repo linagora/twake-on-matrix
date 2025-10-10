@@ -2,7 +2,7 @@ import 'package:fluffychat/pages/chat/events/button_content.dart';
 import 'package:fluffychat/pages/chat/events/message_content_mixin.dart';
 import 'package:flutter/material.dart';
 import 'package:matrix/matrix.dart';
-import 'package:flutter_gen/gen_l10n/l10n.dart';
+import 'package:fluffychat/generated/l10n/app_localizations.dart';
 
 class CallInviteContent extends StatelessWidget with MessageContentMixin {
   final Event event;

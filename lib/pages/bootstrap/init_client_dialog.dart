@@ -10,7 +10,7 @@ import 'package:fluffychat/widgets/twake_app.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_adaptive_scaffold/flutter_adaptive_scaffold.dart';
 import 'package:matrix/matrix.dart';
-import 'package:flutter_gen/gen_l10n/l10n.dart';
+import 'package:fluffychat/generated/l10n/app_localizations.dart';
 
 class InitClientDialog extends StatefulWidget {
   final Future Function() future;

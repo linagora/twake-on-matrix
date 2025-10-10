@@ -4,7 +4,7 @@
 
 // import 'package:callkeep/callkeep.dart';
 // import 'package:flutter_foreground_task/flutter_foreground_task.dart';
-// import 'package:flutter_gen/gen_l10n/l10n.dart';
+// import 'package:fluffychat/generated/l10n/app_localizations.dart';
 // import 'package:matrix/matrix.dart';
 // import 'package:permission_handler/permission_handler.dart';
 

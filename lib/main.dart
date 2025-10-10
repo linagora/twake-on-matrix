@@ -16,6 +16,7 @@ import 'package:path_provider/path_provider.dart';
 import 'utils/background_push.dart';
 import 'widgets/twake_app.dart';
 import 'widgets/lock_screen.dart';
+import 'package:flutter_vodozemac/flutter_vodozemac.dart' as vod;
 
 void main() async {
   // Our background push shared isolate accesses flutter-internal things very early in the startup proccess
@@ -23,6 +24,7 @@ void main() async {
   // widget bindings are initialized already.
   WidgetsFlutterBinding.ensureInitialized();
   MediaKit.ensureInitialized();
+  await vod.init();
   GoRouter.optionURLReflectsImperativeAPIs = true;
   if (PlatformInfos.isLinux) {
     Hive.init((await getApplicationSupportDirectory()).path);

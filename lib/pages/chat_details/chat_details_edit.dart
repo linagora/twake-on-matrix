@@ -41,7 +41,7 @@ import 'package:flutter/material.dart';
 import 'package:linagora_design_flutter/images_picker/asset_counter.dart';
 import 'package:linagora_design_flutter/images_picker/images_picker_grid.dart';
 import 'package:matrix/matrix.dart';
-import 'package:flutter_gen/gen_l10n/l10n.dart';
+import 'package:fluffychat/generated/l10n/app_localizations.dart';
 import 'package:photo_manager/photo_manager.dart' as photo_manager;
 
 class ChatDetailsEdit extends StatefulWidget {

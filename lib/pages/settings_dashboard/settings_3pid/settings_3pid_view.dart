@@ -2,7 +2,7 @@ import 'package:fluffychat/pages/settings_dashboard/settings_3pid/settings_3pid.
 import 'package:fluffychat/widgets/app_bars/twake_app_bar.dart';
 import 'package:flutter/material.dart';
 
-import 'package:flutter_gen/gen_l10n/l10n.dart';
+import 'package:fluffychat/generated/l10n/app_localizations.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:matrix/matrix.dart';
 

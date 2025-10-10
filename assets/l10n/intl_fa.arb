@@ -224,14 +224,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "badServerLoginTypesException": "سرور می‌تواند این گونہ‌های ورود‮ را پشتیباتی کند:\n{serverVersions}\nولی این برنامہ می‌تواند فقط این‌ها را پشتیبانی کند:\n{supportedVersions}",
-  "@badServerLoginTypesException": {
-    "type": "text",
-    "placeholders": {
-      "serverVersions": {},
-      "supportedVersions": {}
-    }
-  },
   "badServerVersionsException": "سرور می‌تواند این نسخہ‌های مشخصات را پشتیبانی کند:\n{serverVersions}\nولی این برنامہ می‌تواند فقط این‌ها را پشتیبانی کند:\n{supportedVersions}",
   "@badServerVersionsException": {
     "type": "text",

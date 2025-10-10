@@ -1,16 +1,15 @@
 # Specify versions
-ARG FLUTTER_VERSION=3.27.4
+ARG FLUTTER_VERSION=3.32.8
 ARG OLM_VERSION=3.2.16
 ARG NIX_VERSION=2.22.1
 
 # Building libolm
 # libolm only has amd64
-FROM --platform=linux/amd64 nixos/nix:${NIX_VERSION} AS olm-builder
-ARG OLM_VERSION
-RUN nix build -v --extra-experimental-features flakes --extra-experimental-features nix-command gitlab:matrix-org/olm/${OLM_VERSION}?host=gitlab.matrix.org\#javascript
+# FROM --platform=linux/amd64 nixos/nix:${NIX_VERSION} AS olm-builder
+# ARG OLM_VERSION
+# RUN nix build -v --extra-experimental-features flakes --extra-experimental-features nix-command gitlab:matrix-org/olm/${OLM_VERSION}?host=gitlab.matrix.org\#javascript
 
 # Building Twake for the web
-# Todo: Because cirrusci still missing 3.27.4 image, so change to use instrumentisto, change back when upgrade new flutter
 FROM --platform=linux/amd64 ghcr.io/instrumentisto/flutter:${FLUTTER_VERSION} AS web-builder
 ARG TWAKECHAT_BASE_HREF="/web/"
 COPY . /app

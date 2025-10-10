@@ -5,7 +5,7 @@ import 'package:fluffychat/widgets/context_menu_builder_ios_paste_without_permis
 import 'package:fluffychat/widgets/layouts/login_scaffold.dart';
 import 'package:fluffychat/widgets/twake_components/twake_icon_button.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/l10n.dart';
+import 'package:fluffychat/generated/l10n/app_localizations.dart';
 import 'package:flutter_typeahead/flutter_typeahead.dart';
 import 'package:go_router/go_router.dart';
 import 'package:matrix_homeserver_recommendations/matrix_homeserver_recommendations.dart';

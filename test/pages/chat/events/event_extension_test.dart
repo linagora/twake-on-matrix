@@ -282,7 +282,7 @@ void main() {
         expect(room.canInvite, false);
         expect(room.canKick, false);
         expect(room.canRedact, false);
-        expect(room.canSendDefaultMessages, false);
+        expect(room.canSendDefaultMessages, true);
         expect(room.canChangePowerLevel, false);
         expect(room.canChangeStateEvent('m.room.name'), true);
         expect(room.canChangeStateEvent('m.room.power_levels'), false);
