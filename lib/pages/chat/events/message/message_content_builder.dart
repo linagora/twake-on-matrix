@@ -1,3 +1,4 @@
+import 'package:fluffychat/presentation/mixins/grouped_events_mixin.dart';
 import 'package:fluffychat/pages/chat/events/message/message_content_builder_mixin.dart';
 import 'package:fluffychat/pages/chat/events/message/message_style.dart';
 import 'package:fluffychat/pages/chat/events/message_time.dart';
@@ -20,6 +21,7 @@ class MessageContentBuilder extends StatelessWidget
   final void Function(Event)? onSelect;
   final Event? nextEvent;
   final bool selectMode;
+  final GroupedEvents? groupedEvents;
 
   const MessageContentBuilder({
     super.key,
@@ -29,6 +31,7 @@ class MessageContentBuilder extends StatelessWidget
     this.nextEvent,
     this.scrollToEventId,
     this.selectMode = true,
+    this.groupedEvents,
   });
 
   @override
@@ -104,6 +107,7 @@ class MessageContentBuilder extends StatelessWidget
                       onTapPreview: !selectMode ? () {} : null,
                       ownMessage: event.isOwnMessage,
                       timeline: timeline,
+                      groupedEvents: groupedEvents,
                     ),
                     PositionedDirectional(
                       end: 8,
