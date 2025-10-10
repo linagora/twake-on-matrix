@@ -230,6 +230,8 @@ class _MessageContentWithTimestampBuilderState
               isClickable: _responsiveUtils.isMobile(context),
               onLongPress: widget.event.status.isAvailable
                   ? (event) async {
+                      if (event.redacted) return;
+
                       // for pin screen
                       if (widget.onLongPressMessage != null) {
                         widget.onLongPressMessage?.call(event);
@@ -451,7 +453,7 @@ class _MessageContentWithTimestampBuilderState
           ),
         ),
         if (widget.event.shouldDisplayContextMenuInRightBubble) ...[
-          if (widget.event.status.isAvailable)
+          if (widget.event.status.isAvailable && !widget.event.redacted)
             if (overlayContextMenu)
               Container(
                 padding: const EdgeInsets.only(left: 8),
