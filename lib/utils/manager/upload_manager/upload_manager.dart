@@ -16,6 +16,7 @@ import 'package:fluffychat/utils/manager/upload_manager/upload_state.dart';
 import 'package:fluffychat/utils/manager/upload_manager/upload_worker_queue.dart';
 import 'package:fluffychat/utils/task_queue/task.dart';
 import 'package:matrix/matrix.dart';
+import 'package:uuid/uuid.dart';
 
 class UploadManager {
   UploadManager._();
@@ -83,14 +84,30 @@ class UploadManager {
     return _eventIdMapUploadFileInfo[txid]?.uploadStream;
   }
 
+  /// Generates a unique group ID for grouping multiple images together
+  /// This ID will be used to identify which images belong to the same group
+  String generateGroupId() {
+    return const Uuid().v1();
+  }
+
   Future<void> uploadMediaMobile({
     required Room room,
     required List<FileAssetEntity> entities,
     String? caption,
   }) async {
+    // Generate a unique group ID for this batch of images
+    final groupId = entities.length > 1 ? generateGroupId() : null;
+
+    Logs().d(
+      'UploadManager::uploadMediaMobile(): Uploading ${entities.length} files with groupId: $groupId',
+    );
+
     final txids = await room.sendPlaceholdersForImagePickerFiles(
       entities: entities,
       captionInfo: caption,
+      extraContent: {
+        if (groupId != null) 'image_bubble_id': groupId,
+      },
     );
 
     for (final txid in txids.entries) {
@@ -116,6 +133,9 @@ class UploadManager {
         messageType: fakeSendingFileInfo.messageType,
         sentDate: sentDate,
         captionInfo: _eventIdMapUploadFileInfo[txidKey]?.captionInfo?.caption,
+        extraContent: {
+          if (groupId != null) 'image_bubble_id': groupId,
+        },
       );
 
       final streamController =
@@ -155,6 +175,9 @@ class UploadManager {
         sentDate: sentDate,
         shrinkImageMaxDimension: _shrinkImageMaxDimension,
         captionInfo: _eventIdMapUploadFileInfo[txidKey]?.captionInfo?.caption,
+        extraContent: {
+          if (groupId != null) 'image_bubble_id': groupId,
+        },
       );
     }
   }
@@ -309,6 +332,7 @@ class UploadManager {
     DateTime? sentDate,
     int? shrinkImageMaxDimension,
     String? captionInfo,
+    Map<String, dynamic>? extraContent,
   }) {
     uploadWorkerQueue.addTask(
       Task(
@@ -325,6 +349,7 @@ class UploadManager {
               cancelToken: cancelToken,
               sentDate: sentDate,
               captionInfo: captionInfo,
+              extraContent: extraContent,
             );
           } catch (e) {
             streamController.add(

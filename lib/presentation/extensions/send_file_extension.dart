@@ -414,7 +414,7 @@ extension SendFileExtension on Room {
     // Send event
     final content = <String, dynamic>{
       'msgtype': msgType,
-      'body':captionInfo ?? '',
+      'body': captionInfo ?? '',
       'filename': fileInfo.fileName,
       'url': uploadResp.toString(),
       if (encryptedFileInfo != null) 'file': encryptedFileInfo.toJson(),
@@ -608,6 +608,7 @@ extension SendFileExtension on Room {
       sendPlaceholdersForImagePickerFiles({
     required List<FileAssetEntity> entities,
     String? captionInfo,
+    Map<String, dynamic>? extraContent,
   }) async {
     final txIdMapToImageFile = <TransactionId, FakeSendingFileInfo>{};
     for (final entity in entities) {
@@ -625,6 +626,7 @@ extension SendFileExtension on Room {
           txid: txid,
           messageType: entity.messageType,
           captionInfo: captionInfo,
+          extraContent: extraContent,
         );
         txIdMapToImageFile[txid] = FakeSendingFileInfo(
           fileInfo: fileInfo,

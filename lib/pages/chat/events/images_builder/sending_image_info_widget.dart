@@ -22,6 +22,7 @@ class SendingImageInfoWidget extends StatefulWidget {
     required this.event,
     required this.displayImageInfo,
     this.onTapPreview,
+    this.rounded = true,
   });
 
   final MatrixImageFile matrixFile;
@@ -31,6 +32,8 @@ class SendingImageInfoWidget extends StatefulWidget {
   final void Function()? onTapPreview;
 
   final DisplayImageInfo displayImageInfo;
+
+  final bool rounded;
 
   @override
   State<SendingImageInfoWidget> createState() => _SendingImageInfoWidgetState();
@@ -44,7 +47,6 @@ class _SendingImageInfoWidgetState extends State<SendingImageInfoWidget>
   @override
   void dispose() {
     sendingFileProgressNotifier.dispose();
-    uploadFileStateNotifier.dispose();
     super.dispose();
   }
 
@@ -112,11 +114,14 @@ class _SendingImageInfoWidgetState extends State<SendingImageInfoWidget>
           );
         },
         child: Material(
-          borderRadius: MessageContentStyle.borderRadiusBubble,
+          borderRadius:
+              widget.rounded ? MessageContentStyle.borderRadiusBubble : null,
           child: InkWell(
             onTap: () => _onTap(context),
             child: ClipRRect(
-              borderRadius: MessageContentStyle.borderRadiusBubble,
+              borderRadius: widget.rounded
+                  ? MessageContentStyle.borderRadiusBubble
+                  : BorderRadius.zero,
               child: Stack(
                 alignment: Alignment.center,
                 children: [

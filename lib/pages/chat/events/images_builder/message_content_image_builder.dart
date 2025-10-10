@@ -17,12 +17,15 @@ class MessageImageBuilder extends StatelessWidget {
 
   final double? maxWidth;
 
+  final bool rounded;
+
   const MessageImageBuilder({
     super.key,
     required this.event,
     this.onTapPreview,
     this.onTapSelectMode,
     this.maxWidth,
+    this.rounded = true,
   });
 
   @override
@@ -44,6 +47,7 @@ class MessageImageBuilder extends StatelessWidget {
         event: event,
         onTapPreview: onTapPreview,
         displayImageInfo: displayImageInfo,
+        rounded: rounded,
       );
     }
     displayImageInfo ??= DisplayImageInfo(
@@ -65,6 +69,7 @@ class MessageImageBuilder extends StatelessWidget {
         event: event,
         onTapPreview: onTapPreview,
         displayImageInfo: displayImageInfo,
+        rounded: rounded,
       );
     }
     return ImageBubble(
@@ -76,6 +81,8 @@ class MessageImageBuilder extends StatelessWidget {
       onTapPreview: onTapPreview,
       animated: true,
       thumbnailOnly: true,
+      thumbnailCacheKey: event.eventId,
+      rounded: rounded,
     );
   }
 }
