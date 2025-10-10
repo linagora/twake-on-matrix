@@ -3,7 +3,7 @@ import 'package:fluffychat/pages/chat/events/message_content_style.dart';
 import 'package:fluffychat/pages/chat/events/images_builder/sending_image_info_widget.dart';
 import 'package:fluffychat/presentation/model/file/display_image_info.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
-import 'package:fluffychat/utils/platform_infos.dart';
+import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_file_extension.dart';
 import 'package:flutter/material.dart';
 import 'package:matrix/matrix.dart';
 import 'package:fluffychat/utils/extension/image_size_extension.dart';
@@ -15,11 +15,14 @@ class MessageImageBuilder extends StatelessWidget {
 
   final void Function()? onTapSelectMode;
 
+  final double? maxWidth;
+
   const MessageImageBuilder({
     super.key,
     required this.event,
     this.onTapPreview,
     this.onTapSelectMode,
+    this.maxWidth,
   });
 
   @override
@@ -29,7 +32,7 @@ class MessageImageBuilder extends StatelessWidget {
     DisplayImageInfo? displayImageInfo =
         event.getOriginalResolution()?.getDisplayImageInfo(context);
 
-    if (isSendingImageInMobile(matrixFile)) {
+    if (matrixFile != null && matrixFile.isSendingImageInMobile()) {
       final file = matrixFile as MatrixImageFile;
       displayImageInfo = Size(
         file.width?.toDouble() ?? MessageContentStyle.imageWidth(context),
@@ -50,7 +53,7 @@ class MessageImageBuilder extends StatelessWidget {
       ),
       hasBlur: true,
     );
-    if (isSendingImageInWeb(matrixFile)) {
+    if (matrixFile != null && matrixFile.isSendingImageInWeb()) {
       final file = matrixFile as MatrixImageFile;
       displayImageInfo = Size(
         file.width?.toDouble() ?? MessageContentStyle.imageWidth(context),
@@ -74,18 +77,5 @@ class MessageImageBuilder extends StatelessWidget {
       animated: true,
       thumbnailOnly: true,
     );
-  }
-
-  bool isSendingImageInWeb(MatrixFile? matrixFile) {
-    return matrixFile != null &&
-        matrixFile.bytes != null &&
-        matrixFile is MatrixImageFile;
-  }
-
-  bool isSendingImageInMobile(MatrixFile? matrixFile) {
-    return matrixFile != null &&
-        matrixFile.filePath != null &&
-        matrixFile is MatrixImageFile &&
-        !PlatformInfos.isWeb;
   }
 }

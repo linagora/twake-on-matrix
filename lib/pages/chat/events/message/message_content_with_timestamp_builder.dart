@@ -154,9 +154,10 @@ class _MessageContentWithTimestampBuilderState
         !widget.event.redacted;
 
     final timelineText = {
-      MessageTypes.Text,
-      MessageTypes.BadEncrypted,
-    }.contains(widget.event.messageType);
+          MessageTypes.Text,
+          MessageTypes.BadEncrypted,
+        }.contains(widget.event.messageType) ||
+        widget.event.isImageWithCaption();
 
     return Align(
       alignment: MessageStyle.messageAlignmentGeometry(
@@ -636,7 +637,10 @@ class _MessageContentWithTimestampBuilderState
                       widget.event,
                     )),
           constraints: BoxConstraints(
-            maxWidth: MessageStyle.messageBubbleWidth(context),
+            maxWidth: MessageStyle.messageBubbleWidth(
+              context,
+              event: widget.event,
+            ),
           ),
           margin: hasReactionEvent ? const EdgeInsets.only(bottom: 24) : null,
           child: Column(
