@@ -1,3 +1,4 @@
+import 'package:fluffychat/pages/contacts_tab/widgets/add_contact/add_contact_dialog.dart';
 import 'package:fluffychat/pages/new_private_chat/new_private_chat.dart';
 import 'package:fluffychat/pages/new_private_chat/new_private_chat_style.dart';
 import 'package:fluffychat/pages/new_private_chat/widget/expansion_list.dart';
@@ -63,6 +64,7 @@ class NewPrivateChatView extends StatelessWidget {
               closeContactsWarningBanner: controller.closeContactsWarningBanner,
               goToSettingsForPermissionActions: () =>
                   controller.displayContactPermissionDialog(context),
+              goToCreateContact: () => showAddContactDialog(context),
             ),
           ],
         ),

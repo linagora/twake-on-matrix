@@ -1,4 +1,5 @@
 import 'package:desktop_drop/desktop_drop.dart';
+import 'package:fluffychat/pages/chat/add_contact_banner.dart';
 import 'package:fluffychat/pages/chat/blocked_user_banner.dart';
 import 'package:fluffychat/pages/chat/chat.dart';
 import 'package:fluffychat/pages/chat/chat_app_bar_title_style.dart';
@@ -8,6 +9,7 @@ import 'package:fluffychat/pages/chat_draft/draft_chat.dart';
 import 'package:fluffychat/pages/chat_draft/draft_chat_empty_widget.dart';
 import 'package:fluffychat/pages/chat_draft/draft_chat_input_row.dart';
 import 'package:fluffychat/pages/chat_draft/draft_chat_view_style.dart';
+import 'package:fluffychat/pages/contacts_tab/widgets/add_contact/add_contact_dialog.dart';
 import 'package:fluffychat/resource/image_paths.dart';
 import 'package:fluffychat/utils/string_extension.dart';
 import 'package:fluffychat/widgets/avatar/avatar.dart';
@@ -294,6 +296,15 @@ class DraftChatView extends StatelessWidget {
                         );
                       },
                     ),
+                    if (controller.isAddContactAvailable)
+                      AddContactBanner(
+                        onTap: () => showAddContactDialog(
+                          context,
+                          displayName: controller.widget.contact.displayName,
+                          matrixId: controller.widget.contact.matrixId,
+                        ),
+                        show: controller.showAddContactBanner,
+                      ),
                     ValueListenableBuilder(
                       valueListenable: controller.isBlockedUserNotifier,
                       builder: (context, isBlockedUser, _) {

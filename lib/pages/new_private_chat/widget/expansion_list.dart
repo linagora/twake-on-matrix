@@ -32,6 +32,7 @@ class ExpansionList extends StatelessWidget {
   final ValueNotifier<WarningContactsBannerState> warningBannerNotifier;
   final Function()? closeContactsWarningBanner;
   final Function()? goToSettingsForPermissionActions;
+  final VoidCallback? goToCreateContact;
 
   const ExpansionList({
     super.key,
@@ -44,6 +45,7 @@ class ExpansionList extends StatelessWidget {
     this.closeContactsWarningBanner,
     this.goToSettingsForPermissionActions,
     required this.presentationPhonebookContactNotifier,
+    this.goToCreateContact,
   });
 
   @override
@@ -225,6 +227,10 @@ class ExpansionList extends StatelessWidget {
       _NewGroupButton(
         onPressed: goToNewGroupChat,
       ),
+      if (PlatformInfos.isMobile)
+        _CreateContactButton(
+          onPressed: goToCreateContact,
+        ),
     ];
   }
 }
@@ -292,6 +298,24 @@ class _NewGroupButton extends StatelessWidget {
       onPressed: onPressed,
       iconData: Icons.supervisor_account_outlined,
       text: L10n.of(context)!.newGroupChat,
+    );
+  }
+}
+
+class _CreateContactButton extends StatelessWidget {
+  final VoidCallback? onPressed;
+
+  const _CreateContactButton({
+    required this.onPressed,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return _IconTextTileButton(
+      context: context,
+      onPressed: onPressed,
+      iconData: Icons.person_add_outlined,
+      text: L10n.of(context)!.createNewContact,
     );
   }
 }

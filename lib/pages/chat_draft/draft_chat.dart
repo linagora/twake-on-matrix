@@ -233,6 +233,11 @@ class DraftChatController extends State<DraftChat>
     }
   }
 
+  final showAddContactBanner = ValueNotifier(true);
+  bool get isAddContactAvailable {
+    return PlatformInfos.isMobile && showAddContactBanner.value;
+  }
+
   Future<void> sendVoiceMessageWeb() async {
     _createRoom(
       onRoomCreatedSuccess: (room) async {

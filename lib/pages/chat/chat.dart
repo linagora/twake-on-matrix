@@ -270,6 +270,18 @@ class ChatController extends State<Chat>
         MessageTypes.File,
       }.contains(selectedEvents.single.messageType);
 
+  final showAddContactBanner = ValueNotifier(true);
+  User? get contactToAdd => room?.isDirectChat == true
+      ? room?.getParticipants().firstWhereOrNull((user) {
+          return user.id != client.userID;
+        })
+      : null;
+  bool get isAddContactAvailable {
+    return PlatformInfos.isMobile &&
+        showAddContactBanner.value &&
+        contactToAdd != null;
+  }
+
   List<Event> selectedEvents = [];
 
   final Set<String> unfolded = {};

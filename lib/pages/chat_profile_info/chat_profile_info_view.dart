@@ -7,6 +7,7 @@ import 'package:fluffychat/resource/image_paths.dart';
 import 'package:fluffychat/utils/clipboard.dart';
 import 'package:fluffychat/utils/string_extension.dart';
 import 'package:fluffychat/utils/twake_snackbar.dart';
+import 'package:fluffychat/widgets/app_bars/twake_app_bar.dart';
 import 'package:fluffychat/widgets/avatar/avatar.dart';
 import 'package:fluffychat/widgets/avatar/avatar_style.dart';
 import 'package:flutter/cupertino.dart';
@@ -35,29 +36,17 @@ class ChatProfileInfoView extends StatelessWidget {
     final contact = controller.widget.contact;
     return Scaffold(
       backgroundColor: LinagoraSysColors.material().onPrimary,
-      appBar: AppBar(
-        backgroundColor: LinagoraSysColors.material().onPrimary,
-        automaticallyImplyLeading: false,
-        centerTitle: false,
-        title: Row(
-          children: [
-            Padding(
-              padding: ChatProfileInfoStyle.backIconPadding,
-              child: IconButton(
-                onPressed: controller.widget.onBack,
-                icon: controller.widget.isInStack
-                    ? const Icon(
-                        Icons.chevron_left_outlined,
-                      )
-                    : const Icon(Icons.close),
-              ),
-            ),
-            Text(
-              L10n.of(context)!.contactInfo,
-              style: Theme.of(context).textTheme.titleLarge,
-            ),
-          ],
+      appBar: TwakeAppBar(
+        title: L10n.of(context)!.contactInfo,
+        leading: IconButton(
+          onPressed: controller.widget.onBack,
+          icon: controller.widget.isInStack
+              ? const Icon(
+                  Icons.chevron_left_outlined,
+                )
+              : const Icon(Icons.close),
         ),
+        context: context,
       ),
       body: NestedScrollView(
         physics: controller.getScrollPhysics(),
