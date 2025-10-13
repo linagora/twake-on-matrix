@@ -171,7 +171,8 @@ mixin MessageContentBuilderMixin {
     const spaceMessageAndTime = 4.0;
     final spaceHasEdited = isEdited ? 56.0 : 0.0;
     final spaceHasPinned = event.isPinned ? MessageStyle.pushpinIconSize : 0.0;
-    const paddingMessage = AppConfig.messagePadding;
+    final paddingMessage =
+        event.isImageWithCaption() ? 0.0 : AppConfig.messagePadding;
 
     final paintedMessageText = _paintMessageText(
       context,

@@ -3,6 +3,7 @@ import 'package:fluffychat/pages/chat/events/call_invite_content.dart';
 import 'package:fluffychat/pages/chat/events/encrypted_content.dart';
 import 'package:fluffychat/pages/chat/events/formatted_text_widget.dart';
 import 'package:fluffychat/pages/chat/events/images_builder/message_content_image_builder.dart';
+import 'package:fluffychat/pages/chat/events/message/message_style.dart';
 import 'package:fluffychat/pages/chat/events/message_content_style.dart';
 import 'package:fluffychat/pages/chat/events/message_download_content_web.dart';
 import 'package:fluffychat/pages/chat/events/message_upload_content.dart';
@@ -77,16 +78,23 @@ class MessageContent extends StatelessWidget
                       onTapSelectMode: onTapSelectMode,
                     ),
                     const SizedBox(height: 8),
-                    TwakeLinkPreview(
-                      key: ValueKey('TwakeLinkPreview%${event.eventId}%'),
-                      event: event,
-                      localizedBody: event.body,
-                      ownMessage: ownMessage,
-                      fontSize: fontSize,
-                      linkStyle:
-                          MessageContentStyle.linkStyleMessageContent(context),
-                      richTextStyle: event.getMessageTextStyle(context),
-                      isCaption: event.isImageWithCaption(),
+                    SizedBox(
+                      width: MessageStyle.messageBubbleWidthMediaCaption(
+                        event: event,
+                        context: context,
+                      ),
+                      child: TwakeLinkPreview(
+                        key: ValueKey('TwakeLinkPreview%${event.eventId}%'),
+                        event: event,
+                        localizedBody: event.body,
+                        ownMessage: ownMessage,
+                        fontSize: fontSize,
+                        linkStyle: MessageContentStyle.linkStyleMessageContent(
+                          context,
+                        ),
+                        richTextStyle: event.getMessageTextStyle(context),
+                        isCaption: event.isImageWithCaption(),
+                      ),
                     ),
                   ],
                 ),
