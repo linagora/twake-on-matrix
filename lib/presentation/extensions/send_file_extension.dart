@@ -411,10 +411,24 @@ extension SendFileExtension on Room {
             () => _generateBlurHash(thumbnail!.filePath),
           )
         : null;
+
+    final contentFromCaption = getEventContentFromMsgText(
+      message: captionInfo ?? '',
+      msgtype: msgType,
+    );
+
+    final contentCaptionFormat = contentFromCaption['formatted_body'] != null
+        ? {
+            'format': contentFromCaption['format'],
+            'formatted_body': contentFromCaption['formatted_body'],
+          }
+        : null;
+
     // Send event
     final content = <String, dynamic>{
       'msgtype': msgType,
-      'body':captionInfo ?? '',
+      'body': captionInfo ?? '',
+      if (contentCaptionFormat != null) ...contentCaptionFormat,
       'filename': fileInfo.fileName,
       'url': uploadResp.toString(),
       if (encryptedFileInfo != null) 'file': encryptedFileInfo.toJson(),
@@ -536,6 +550,17 @@ extension SendFileExtension on Room {
     DateTime? sentDate,
     String? captionInfo,
   }) async {
+    final contentFromCaption = getEventContentFromMsgText(
+      message: captionInfo ?? '',
+      msgtype: messageType,
+    );
+
+    final contentCaptionFormat = contentFromCaption['formatted_body'] != null
+        ? {
+            'format': contentFromCaption['format'],
+            'formatted_body': contentFromCaption['formatted_body'],
+          }
+        : null;
     // Create a fake Event object as a placeholder for the uploading file:
     final fakeImageEvent = SyncUpdate(
       nextBatch: '',
@@ -552,6 +577,7 @@ extension SendFileExtension on Room {
                     'info': {
                       ...fileInfo.metadata,
                     },
+                    if (contentCaptionFormat != null) ...contentCaptionFormat,
                     if (extraContent != null) ...extraContent,
                   },
                   type: EventTypes.Message,

@@ -47,7 +47,12 @@ mixin GoToDraftChatMixin {
         future: () async {
           if (contactPresentationSearch.matrixId != null &&
               contactPresentationSearch.matrixId!.isNotEmpty) {
-            context.go('/$path/$roomId');
+            // Defer navigation to after the current frame to avoid
+            // calling setState during build
+            await Future.microtask(() {});
+            if (context.mounted) {
+              context.go('/$path/$roomId');
+            }
           }
         },
       );

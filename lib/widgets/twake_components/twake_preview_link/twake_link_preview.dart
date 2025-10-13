@@ -20,6 +20,7 @@ class TwakeLinkPreview extends StatefulWidget {
   final double fontSize;
   final TextStyle? linkStyle;
   final TextStyle? richTextStyle;
+  final bool isCaption;
 
   const TwakeLinkPreview({
     super.key,
@@ -29,6 +30,7 @@ class TwakeLinkPreview extends StatefulWidget {
     required this.fontSize,
     this.linkStyle,
     this.richTextStyle,
+    this.isCaption = false,
   });
 
   @override
@@ -62,6 +64,7 @@ class TwakeLinkPreviewController extends State<TwakeLinkPreview>
     return TwakeLinkView(
       key: twakeLinkViewKey,
       firstValidUrl: firstValidUrl,
+      isCaption: widget.isCaption,
       body: widget.event.formattedText.isNotEmpty
           ? FormattedTextWidget(
               event: widget.event,

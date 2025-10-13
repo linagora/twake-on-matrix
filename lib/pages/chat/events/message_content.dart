@@ -86,6 +86,7 @@ class MessageContent extends StatelessWidget
                       linkStyle:
                           MessageContentStyle.linkStyleMessageContent(context),
                       richTextStyle: event.getMessageTextStyle(context),
+                      isCaption: event.isImageWithCaption(),
                     ),
                   ],
                 ),
