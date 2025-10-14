@@ -1,3 +1,4 @@
+import 'package:fluffychat/generated/l10n/app_localizations.dart';
 import 'package:fluffychat/pages/chat/events/download_video_widget.dart';
 import 'package:fluffychat/pages/image_viewer/image_viewer.dart';
 import 'package:fluffychat/pages/image_viewer/media_viewer_app_bar.dart';
@@ -7,7 +8,6 @@ import 'package:fluffychat/widgets/mxc_image.dart';
 import 'package:flutter/material.dart';
 import 'package:linagora_design_flutter/colors/linagora_sys_colors.dart';
 import 'package:matrix/matrix.dart';
-import 'package:flutter_gen/gen_l10n/l10n.dart';
 
 class MediaViewerView extends StatelessWidget {
   const MediaViewerView({super.key, required this.controller});
@@ -18,6 +18,7 @@ class MediaViewerView extends StatelessWidget {
   Widget build(BuildContext context) {
     final pageView = PageView.builder(
       controller: controller.pageController,
+      physics: controller.scrollPhysics,
       onPageChanged: (value) {
         controller.currentPage.value = value;
       },
@@ -25,7 +26,11 @@ class MediaViewerView extends StatelessWidget {
       itemBuilder: (context, index) {
         final event = controller.mediaEvents[index];
         if (event.messageType == MessageTypes.Image) {
-          return ImageViewer(event: event, showAppBar: false);
+          return ImageViewer(
+            event: event,
+            showAppBar: false,
+            onZoomChanged: controller.togglePageViewScroll,
+          );
         }
 
         if (event.messageType == MessageTypes.Video) {
@@ -43,7 +48,7 @@ class MediaViewerView extends StatelessWidget {
     );
 
     final appBar = ValueListenableBuilder(
-      valueListenable: controller.showAppBar,
+      valueListenable: controller.showAppBarAndPreview,
       builder: (context, show, child) {
         if (!show) return const SizedBox();
 
@@ -62,75 +67,86 @@ class MediaViewerView extends StatelessWidget {
       ),
     );
 
-    final toggleAppBarOverlay = ValueListenableBuilder(
+    final toggleAppBarAndPreviewOverlay = ValueListenableBuilder(
       valueListenable: controller.currentPage,
       builder: (context, page, child) {
         return GestureDetector(
           behavior: HitTestBehavior.translucent,
           onTap: controller.mediaEvents[page].messageType == MessageTypes.Video
               ? null
-              : controller.showAppBar.toggle,
+              : controller.showAppBarAndPreview.toggle,
         );
       },
     );
 
-    final previewer = ListView.separated(
-      padding: const EdgeInsets.symmetric(horizontal: 20),
-      scrollDirection: Axis.horizontal,
-      itemCount: controller.mediaEvents.length,
-      separatorBuilder: (_, __) => const SizedBox(width: 2),
-      itemBuilder: (context, index) {
-        return ValueListenableBuilder(
-          valueListenable: controller.currentPage,
-          builder: (context, page, child) {
-            return DecoratedBox(
-              decoration: BoxDecoration(
-                border: Border.all(
-                  color: page == index
-                      ? LinagoraSysColors.material().primary
-                      : LinagoraSysColors.material().onPrimary,
-                  width: 2,
+    final previewer = ValueListenableBuilder(
+      valueListenable: controller.showAppBarAndPreview,
+      builder: (context, show, child) {
+        return IgnorePointer(
+          ignoring: !show,
+          child: Opacity(
+            opacity: show ? 1 : 0,
+            child: child,
+          ),
+        );
+      },
+      child: SizedBox(
+        height: 46,
+        child: ListView.separated(
+          padding: const EdgeInsets.symmetric(horizontal: 20),
+          scrollDirection: Axis.horizontal,
+          itemCount: controller.mediaEvents.length,
+          separatorBuilder: (_, __) => const SizedBox(width: 2),
+          itemBuilder: (context, index) {
+            return ValueListenableBuilder(
+              valueListenable: controller.currentPage,
+              builder: (context, page, child) {
+                return DecoratedBox(
+                  decoration: BoxDecoration(
+                    border: Border.all(
+                      color: page == index
+                          ? LinagoraSysColors.material().primary
+                          : LinagoraSysColors.material().onPrimary,
+                      width: 2,
+                    ),
+                  ),
+                  child: child,
+                );
+              },
+              child: GestureDetector(
+                onTap: () {
+                  controller.pageController.jumpToPage(index);
+                },
+                child: Padding(
+                  padding: const EdgeInsets.all(2),
+                  child: MxcImage(
+                    key: ValueKey(controller.mediaEvents[index].eventId),
+                    event: controller.mediaEvents[index],
+                    width: 44,
+                    height: 44,
+                    fit: BoxFit.cover,
+                    enableHeroAnimation: false,
+                  ),
                 ),
               ),
-              child: child,
             );
           },
-          child: GestureDetector(
-            onTap: () {
-              controller.pageController.jumpToPage(index);
-            },
-            child: Padding(
-              padding: const EdgeInsets.all(2),
-              child: MxcImage(
-                key: ValueKey(controller.mediaEvents[index].eventId),
-                event: controller.mediaEvents[index],
-                width: 44,
-                height: 44,
-                fit: BoxFit.cover,
-                enableHeroAnimation: false,
-              ),
-            ),
-          ),
-        );
-      },
+        ),
+      ),
     );
 
-    return Column(
+    return Stack(
       children: [
-        Expanded(
-          child: Stack(
-            children: [
-              pageView,
-              Positioned.fill(
-                child: toggleAppBarOverlay,
-              ),
-              appBar,
-            ],
-          ),
+        pageView,
+        Positioned.fill(
+          child: toggleAppBarAndPreviewOverlay,
         ),
-        SafeArea(
-          child: SizedBox(
-            height: 46,
+        appBar,
+        Positioned(
+          bottom: 0,
+          left: 0,
+          right: 0,
+          child: SafeArea(
             child: previewer,
           ),
         ),

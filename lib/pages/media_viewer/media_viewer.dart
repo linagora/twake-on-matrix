@@ -19,9 +19,10 @@ class MediaViewerController extends State<MediaViewer> {
   String? forwardToken;
   String? backwardToken;
   Direction? loadingMoreDirection;
+  ScrollPhysics? scrollPhysics;
   late final PageController pageController;
   final currentPage = ValueNotifier<int>(0);
-  final showAppBar = ValueNotifier<bool>(true);
+  final showAppBarAndPreview = ValueNotifier<bool>(true);
 
   Client? get client {
     if (!context.mounted) return null;
@@ -119,10 +120,7 @@ class MediaViewerController extends State<MediaViewer> {
               return event;
             }
 
-            return await client!.encryption!.decryptRoomEvent(
-              widget.event.room.id,
-              event,
-            );
+            return await client!.encryption!.decryptRoomEvent(event);
           } catch (e) {
             Logs().e('Error decrypting event id ${event.eventId}', e);
             return event;
@@ -222,7 +220,7 @@ class MediaViewerController extends State<MediaViewer> {
 
   void pageChangedListener() {
     if (mediaEvents[currentPage.value].messageType == MessageTypes.Video) {
-      showAppBar.value = true;
+      showAppBarAndPreview.value = true;
     }
 
     if (currentPage.value == 0) {
@@ -230,6 +228,12 @@ class MediaViewerController extends State<MediaViewer> {
     } else if (currentPage.value == mediaEvents.length - 1) {
       loadMore(Direction.b);
     }
+  }
+
+  void togglePageViewScroll(bool stopScroll) {
+    setState(() {
+      scrollPhysics = stopScroll ? const NeverScrollableScrollPhysics() : null;
+    });
   }
 
   @override
@@ -248,7 +252,7 @@ class MediaViewerController extends State<MediaViewer> {
     pageController.dispose();
     currentPage.removeListener(pageChangedListener);
     currentPage.dispose();
-    showAppBar.dispose();
+    showAppBarAndPreview.dispose();
     super.dispose();
   }
 
