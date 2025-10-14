@@ -20,7 +20,9 @@ import 'package:fluffychat/widgets/matrix.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:linagora_design_flutter/colors/linagora_ref_colors.dart';
 import 'package:linagora_design_flutter/colors/linagora_sys_colors.dart';
+import 'package:matrix/matrix.dart';
 
 class AddContactDialogView extends StatelessWidget {
   const AddContactDialogView({super.key, required this.controller});
@@ -30,6 +32,7 @@ class AddContactDialogView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final sysColor = LinagoraSysColors.material();
+    final refColor = LinagoraRefColors.material();
     final textTheme = Theme.of(context).textTheme;
     final l10n = L10n.of(context)!;
     final saveButton = ValueListenableBuilder(
@@ -41,6 +44,8 @@ class AddContactDialogView extends StatelessWidget {
 
         return TextButton(
           onPressed: () async {
+            if (!userName.isValidMatrixId) return;
+
             if (existedContact == null) {
               final result = await TwakeDialog
                   .showFutureLoadingDialogFullScreen<Either<Failure, Success>>(
@@ -109,7 +114,9 @@ class AddContactDialogView extends StatelessWidget {
             style: textTheme.labelLarge?.copyWith(
               fontSize: 14,
               height: 20 / 14,
-              color: sysColor.primary,
+              color: userName.isValidMatrixId
+                  ? sysColor.primary
+                  : refColor.neutral[70],
             ),
           ),
         );

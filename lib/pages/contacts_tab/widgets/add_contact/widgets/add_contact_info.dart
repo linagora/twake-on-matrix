@@ -95,9 +95,6 @@ class _AddContactInfoState extends State<AddContactInfo> {
         contentPadding: EdgeInsets.zero,
         isDense: true,
       ),
-      onTapOutside: (_) {
-        FocusManager.instance.primaryFocus?.unfocus();
-      },
     );
 
     final divider = Divider(
