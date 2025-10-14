@@ -24,11 +24,12 @@ mixin MessageContentBuilderMixin {
     bool isEdited = false,
   }) {
     final isNotSupportCalcSize = {
-      MessageTypes.File,
-      MessageTypes.Image,
-      MessageTypes.Video,
-      MessageTypes.Audio,
-    }.contains(event.messageType);
+          MessageTypes.File,
+          MessageTypes.Image,
+          MessageTypes.Video,
+          MessageTypes.Audio,
+        }.contains(event.messageType) &&
+        !event.isImageWithCaption();
 
     if (isNotSupportCalcSize) {
       return null;
@@ -77,11 +78,14 @@ mixin MessageContentBuilderMixin {
     return TextPainter(
       textScaler: MediaQuery.of(context).textScaler,
       text: TextSpan(
-        text: event.senderFromMemoryOrFallback
-            .calcDisplayname()
-            .shortenDisplayName(
-              maxCharacters: DisplayNameWidget.maxCharactersDisplayNameBubble,
-            ),
+        text: event.isImageWithCaption()
+            ? event.body
+            : event.senderFromMemoryOrFallback
+                .calcDisplayname()
+                .shortenDisplayName(
+                  maxCharacters:
+                      DisplayNameWidget.maxCharactersDisplayNameBubble,
+                ),
         style: Theme.of(context).textTheme.labelMedium?.copyWith(
               color: Theme.of(
                 context,
@@ -102,11 +106,13 @@ mixin MessageContentBuilderMixin {
     return TextPainter(
       textScaler: MediaQuery.of(context).textScaler,
       text: TextSpan(
-        text: event.calcLocalizedBodyFallback(
-          MatrixLocals(L10n.of(context)!),
-          hideReply: true,
-          plaintextBody: true,
-        ),
+        text: event.isImageWithCaption()
+            ? event.body
+            : event.calcLocalizedBodyFallback(
+                MatrixLocals(L10n.of(context)!),
+                hideReply: true,
+                plaintextBody: true,
+              ),
         style: event.getMessageTextStyle(context),
       ),
       textDirection: TextDirection.ltr,
@@ -165,7 +171,8 @@ mixin MessageContentBuilderMixin {
     const spaceMessageAndTime = 4.0;
     final spaceHasEdited = isEdited ? 56.0 : 0.0;
     final spaceHasPinned = event.isPinned ? MessageStyle.pushpinIconSize : 0.0;
-    const paddingMessage = AppConfig.messagePadding;
+    final paddingMessage =
+        event.isImageWithCaption() ? 0.0 : AppConfig.messagePadding;
 
     final paintedMessageText = _paintMessageText(
       context,
@@ -203,7 +210,7 @@ mixin MessageContentBuilderMixin {
         messageTextWidth - lastLineWidth >= messageTimeAndPaddingWidth &&
         messageTextWidth + paddingMessage < maxWidth) {
       totalMessageWidth = messageTextWidth + paddingMessage;
-      isNeedAddNewLine = false;
+      isNeedAddNewLine = event.isImageWithCaption();
     } else {
       totalMessageWidth = _calculateTotalMessageWidth(
         lastLineWidth,
@@ -216,6 +223,7 @@ mixin MessageContentBuilderMixin {
         totalMessageWidth,
         maxWidth,
         isEdited: isEdited,
+        event: event,
       );
     }
 
@@ -247,7 +255,11 @@ mixin MessageContentBuilderMixin {
     double totalMessageWidth,
     double maxWidth, {
     bool isEdited = false,
+    required Event event,
   }) {
+    if (event.isImageWithCaption()) {
+      return true;
+    }
     if (totalMessageWidth == maxWidth) {
       return true;
     } else {

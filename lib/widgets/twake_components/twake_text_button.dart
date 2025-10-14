@@ -49,6 +49,15 @@ class TwakeTextButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final textWidget = Text(
+      message,
+      style: styleMessage ??
+          Theme.of(context).textTheme.labelLarge?.copyWith(
+                color: LinagoraSysColors.material().onPrimary,
+              ),
+      overflow: TextOverflow.ellipsis,
+    );
+
     return Material(
       color: Colors.transparent,
       clipBehavior: Clip.hardEdge,
@@ -69,16 +78,10 @@ class TwakeTextButton extends StatelessWidget {
               buttonDecoration ?? const BoxDecoration(shape: BoxShape.circle),
           child: Center(
             child: Tooltip(
+              key: ValueKey('TwakeTextButtonTooltip_$message'),
               preferBelow: preferBelow,
               message: message,
-              child: Text(
-                message,
-                style: styleMessage ??
-                    Theme.of(context).textTheme.labelLarge?.copyWith(
-                          color: LinagoraSysColors.material().onPrimary,
-                        ),
-                overflow: TextOverflow.ellipsis,
-              ),
+              child: textWidget,
             ),
           ),
         ),

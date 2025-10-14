@@ -64,10 +64,11 @@ class MessageContentBuilder extends StatelessWidget
           padding: const EdgeInsets.only(bottom: 8),
           isEnabled: !noPadding && !event.timelineOverlayMessage,
           child: IntrinsicWidth(
-            stepWidth:
-                isContainsTagName(event) || isContainsSpecialHTMLTag(event)
-                    ? null
-                    : stepWidth,
+            stepWidth: isContainsTagName(event) ||
+                    isContainsSpecialHTMLTag(event) ||
+                    event.isImageWithCaption()
+                ? null
+                : stepWidth,
             child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
