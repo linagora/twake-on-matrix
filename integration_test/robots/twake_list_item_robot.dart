@@ -1,10 +1,17 @@
+import 'package:fluffychat/pages/chat/events/event_video_player.dart';
+import 'package:fluffychat/pages/chat/events/message_content.dart';
+import 'package:fluffychat/pages/chat/events/message_download_content.dart';
+import 'package:fluffychat/pages/chat/events/message_time.dart';
 import 'package:fluffychat/pages/chat_list/chat_custom_slidable_action.dart';
 import 'package:fluffychat/pages/chat_list/chat_list_item_subtitle.dart';
 import 'package:fluffychat/pages/chat_list/chat_list_item_title.dart';
+import 'package:fluffychat/widgets/file_widget/base_file_tile_widget.dart';
+import 'package:fluffychat/widgets/file_widget/file_tile_widget.dart';
 import 'package:fluffychat/widgets/highlight_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:linkfy_text/linkfy_text.dart';
 import 'package:patrol/patrol.dart';
 import '../base/core_robot.dart';
 
@@ -165,6 +172,35 @@ class TwakeListItemRobot extends CoreRobot {
 
   Future<PatrolFinder> getContactLabel() async {
     return root.$(ChatListItemSubtitle).$(Text).at(1);
+  }
+
+  PatrolFinder getMessageTime() {
+    return root.$(MessageTime).$(Text);
+  }
+
+  PatrolFinder getSentFileSize() {
+    return root.$(MessageDownloadContent).$(TextInformationOfFile).$(Text);
+  }
+
+  PatrolFinder getFileDownloadIcon() {
+    const icon = IconData(0xE097, fontFamily: 'MaterialIcons');
+    return $(InkWell).containing(find.byIcon(icon));
+  }
+
+  PatrolFinder getVideoDownloadIcon() {
+    return root.$(MessageContent).$(CenterVideoButton);
+  }
+
+  PatrolFinder getSentFileName() {
+    return root.$(MessageDownloadContent).$(FileNameText).$(RichText);
+  }
+
+  PatrolFinder getImage() {
+    return root.$(MessageContent).$(Image);
+  }
+
+  PatrolFinder getMessageContent() {
+    return root.$(MessageContent).$(MatrixLinkifyText).$(RichText);
   }
 
   int getUnreadMessage(){
