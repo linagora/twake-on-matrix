@@ -210,7 +210,7 @@ mixin MessageContentBuilderMixin {
         messageTextWidth - lastLineWidth >= messageTimeAndPaddingWidth &&
         messageTextWidth + paddingMessage < maxWidth) {
       totalMessageWidth = messageTextWidth + paddingMessage;
-      isNeedAddNewLine = false;
+      isNeedAddNewLine = event.isImageWithCaption();
     } else {
       totalMessageWidth = _calculateTotalMessageWidth(
         lastLineWidth,
@@ -223,6 +223,7 @@ mixin MessageContentBuilderMixin {
         totalMessageWidth,
         maxWidth,
         isEdited: isEdited,
+        event: event,
       );
     }
 
@@ -254,7 +255,11 @@ mixin MessageContentBuilderMixin {
     double totalMessageWidth,
     double maxWidth, {
     bool isEdited = false,
+    required Event event,
   }) {
+    if (event.isImageWithCaption()) {
+      return true;
+    }
     if (totalMessageWidth == maxWidth) {
       return true;
     } else {
