@@ -93,7 +93,7 @@ class DraftChatInputRow extends StatelessWidget {
                       valueListenable: audioRecordStateNotifier,
                       builder: (context, audioState, _) {
                         if (PlatformInfos.isWeb &&
-                            audioState == AudioRecordState.recording) {
+                            audioState != AudioRecordState.initial) {
                           return const SizedBox.shrink();
                         }
                         return SizedBox(
@@ -111,7 +111,7 @@ class DraftChatInputRow extends StatelessWidget {
                     valueListenable: audioRecordStateNotifier,
                     builder: (context, audioState, _) {
                       if (PlatformInfos.isWeb &&
-                          audioState == AudioRecordState.recording) {
+                          audioState != AudioRecordState.initial) {
                         return Expanded(
                           child: ConstrainedBox(
                             constraints: const BoxConstraints(
