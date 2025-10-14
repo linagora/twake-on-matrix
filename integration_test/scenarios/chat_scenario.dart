@@ -19,6 +19,7 @@ import 'package:fluffychat/pages/chat_list/chat_list_body_view.dart';
 import 'package:fluffychat/widgets/context_menu/context_menu_action_item_widget.dart';
 import 'package:fluffychat/widgets/twake_components/twake_icon_button.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:linagora_design_flutter/list_item/twake_list_item.dart';
 import 'package:linkfy_text/linkfy_text.dart';
 import 'package:patrol/patrol.dart';
 import '../base/base_scenario.dart';
@@ -47,8 +48,8 @@ class ChatScenario extends BaseScenario {
 
   Future<ChatGroupDetailRobot> openChatGroupByTitle(String groupTitle) async {
     await enterSearchText(groupTitle);
-    await (ChatListRobot($).getListOfChatGroup())[0].root.tap();
-    await $.pumpAndSettle();
+    await $(TwakeListItem).containing(groupTitle).at(0).tap();
+    await $.waitUntilVisible(ChatGroupDetailRobot($).getInputTextField());
     return ChatGroupDetailRobot($);
   }
 
@@ -150,7 +151,7 @@ class ChatScenario extends BaseScenario {
 
   Future<void> pasteFromClipBoard() async {
     // 1) Focus the input and open the context menu
-    final input = await ChatGroupDetailRobot($).getInputTextField();
+    final input = ChatGroupDetailRobot($).getInputTextField();
     await input.tap();
     await input.longPress();
     await $.pump(const Duration(milliseconds: 300)); // let the menu render
