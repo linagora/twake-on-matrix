@@ -57,6 +57,8 @@ class MediaViewerView extends StatelessWidget {
       child: ValueListenableBuilder(
         valueListenable: controller.currentPage,
         builder: (context, page, child) {
+          if (page == -1) return const SizedBox();
+
           return Material(
             type: MaterialType.transparency,
             child: MediaViewerAppBar(
@@ -70,6 +72,8 @@ class MediaViewerView extends StatelessWidget {
     final toggleAppBarAndPreviewOverlay = ValueListenableBuilder(
       valueListenable: controller.currentPage,
       builder: (context, page, child) {
+        if (page == -1) return const SizedBox();
+
         return GestureDetector(
           behavior: HitTestBehavior.translucent,
           onTap: controller.mediaEvents[page].messageType == MessageTypes.Video

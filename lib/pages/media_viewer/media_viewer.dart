@@ -115,8 +115,7 @@ class MediaViewerController extends State<MediaViewer> {
       events.map(
         (event) async {
           try {
-            if (event.type != EventTypes.Encrypted ||
-                !event.content.containsKey('can_request_session')) {
+            if (event.type != EventTypes.Encrypted) {
               return event;
             }
 
@@ -219,6 +218,8 @@ class MediaViewerController extends State<MediaViewer> {
   }
 
   void pageChangedListener() {
+    if (currentPage.value == -1) return;
+
     if (mediaEvents[currentPage.value].messageType == MessageTypes.Video) {
       showAppBarAndPreview.value = true;
     }
