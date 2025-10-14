@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import '../../base/base_scenario.dart';
 import '../../base/test_base.dart';
+import '../../help/attach_file_ios_test.dart';
 import '../../help/soft_assertion_helper.dart';
 import '../../robots/chat_group_detail_robot.dart';
 import '../../robots/chat_search_view_robot.dart';
@@ -216,6 +217,52 @@ void main() {
       await ChatDetailScenario($).verifyProfileInfoOfAllMember(s);
 
       s.verifyAll();
+    },
+  );
+
+  TestBase().runPatrolTest(
+  description: 'send a file',
+    test: ($) async {
+      final s = SoftAssertHelper();
+      const image  = String.fromEnvironment('Image1');
+      const file  = String.fromEnvironment('PfdFile1');
+      const video  = String.fromEnvironment('MovVideo1');
+
+      //goto chat
+      await HomeRobot($).gotoChatListScreen();
+
+      //open a group
+      const groupTest = String.fromEnvironment('GroupTest');
+      await ChatScenario($).openChatGroupByTitle(groupTest);
+
+      final now = DateTime.now();
+      final imageMsg ="image at ${now.year}${now.month}${now.day}${now.hour}${now.minute}";
+      final fileMsg ="file at ${now.year}${now.month}${now.day}${now.hour}${now.minute}";
+      final movieMsg ="movie at ${now.year}${now.month}${now.day}${now.hour}${now.minute}";
+
+      //sending message in order to helps verify the last message will be not text
+      await ChatScenario($).sendAMesage(imageMsg);
+      await ChatGroupDetailRobot($).openAttachDialog();
+      await pickFromFiles($, image);
+      await $.waitUntilVisible(ChatGroupDetailRobot($).getTheLastestMessage().getImage());
+      s.softAssertEquals(ChatGroupDetailRobot($).getTheLastestMessage().getImage().exists, true,'image has not been sent ');
+
+      //sending message in order to helps verify the last message will be not text
+      await ChatScenario($).sendAMesage(fileMsg);
+      // mở attach trong app của bạn
+      await ChatGroupDetailRobot($).openAttachDialog();
+      await pickFromFiles($, file);
+      await $.waitUntilVisible(ChatGroupDetailRobot($).getTheLastestMessage().getSentFileName());
+      s.softAssertEquals(ChatGroupDetailRobot($).getTheLastestMessage().getSentFileName().exists, true,'file has not been sent ');
+
+      //sending message in order to helps verify the last message will be not text
+      await ChatScenario($).sendAMesage(movieMsg);
+      // mở attach trong app của bạn
+      await ChatGroupDetailRobot($).openAttachDialog();
+      // await allowPhotosIfNeeded($);
+      await pickFromFiles($, video);
+      await $.waitUntilVisible(ChatGroupDetailRobot($).getTheLastestMessage().getVideoDownloadIcon());
+      s.softAssertEquals(ChatGroupDetailRobot($).getTheLastestMessage().getVideoDownloadIcon().exists, true,'video has not been sent ');
     },
   );
 }
