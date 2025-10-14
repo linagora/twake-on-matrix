@@ -5,12 +5,14 @@ class TwakeLinkView extends StatelessWidget {
   final Widget body;
   final Widget previewItemWidget;
   final String? firstValidUrl;
+  final bool isCaption;
 
   const TwakeLinkView({
     super.key,
     required this.body,
     required this.previewItemWidget,
     this.firstValidUrl,
+    this.isCaption = false,
   });
 
   @override
@@ -28,7 +30,9 @@ class TwakeLinkView extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         Padding(
-          padding: TwakeLinkViewStyle.previewItemPadding,
+          padding: isCaption
+              ? EdgeInsets.zero
+              : TwakeLinkViewStyle.previewItemPadding,
           child: previewItemWidget,
         ),
         const SizedBox(height: TwakeLinkViewStyle.previewToBodySpacing),
@@ -39,7 +43,8 @@ class TwakeLinkView extends StatelessWidget {
 
   Widget _buildMessageBody(BuildContext context) {
     return Padding(
-      padding: TwakeLinkViewStyle.paddingMessageBody,
+      padding:
+          isCaption ? EdgeInsets.zero : TwakeLinkViewStyle.paddingMessageBody,
       child: body,
     );
   }

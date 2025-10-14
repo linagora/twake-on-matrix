@@ -70,6 +70,28 @@ class TwakeIconButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final iconWidget = icon != null
+        ? Icon(
+            icon,
+            size: size,
+            fill: fill,
+            weight: weight,
+            color: iconColor,
+          )
+        : imagePath != null
+            ? SvgPicture.asset(
+                imagePath!,
+                height: imageSize,
+                width: imageSize,
+                colorFilter: iconColor != null
+                    ? ColorFilter.mode(
+                        iconColor!,
+                        BlendMode.srcIn,
+                      )
+                    : null,
+              )
+            : null;
+
     return Material(
       color: Colors.transparent,
       child: Container(
@@ -88,40 +110,25 @@ class TwakeIconButton extends StatelessWidget {
           hoverColor: hoverColor,
           highlightColor: highlightColor,
           splashColor: splashColor,
-          child: TooltipVisibility(
-            visible: tooltip != null ? true : false,
-            child: Tooltip(
-              showDuration: const Duration(seconds: 1),
-              waitDuration: const Duration(seconds: 1),
-              preferBelow: preferBelow,
-              message: tooltip ?? "",
-              triggerMode: tooltipTriggerMode,
-              child: Padding(
-                padding: EdgeInsets.all(paddingAll ?? 8.0),
-                child: icon != null
-                    ? Icon(
-                        icon,
-                        size: size,
-                        fill: fill,
-                        weight: weight,
-                        color: iconColor,
-                      )
-                    : imagePath != null
-                        ? SvgPicture.asset(
-                            imagePath!,
-                            height: imageSize,
-                            width: imageSize,
-                            colorFilter: iconColor != null
-                                ? ColorFilter.mode(
-                                    iconColor!,
-                                    BlendMode.srcIn,
-                                  )
-                                : null,
-                          )
-                        : null,
-              ),
-            ),
-          ),
+          child: tooltip != null
+              ? Tooltip(
+                  key: ValueKey(
+                    'TwakeIconButtonTooltip_${tooltip}_${icon ?? imagePath}',
+                  ),
+                  showDuration: const Duration(seconds: 1),
+                  waitDuration: const Duration(seconds: 1),
+                  preferBelow: preferBelow,
+                  message: tooltip!,
+                  triggerMode: tooltipTriggerMode,
+                  child: Padding(
+                    padding: EdgeInsets.all(paddingAll ?? 8.0),
+                    child: iconWidget,
+                  ),
+                )
+              : Padding(
+                  padding: EdgeInsets.all(paddingAll ?? 8.0),
+                  child: iconWidget,
+                ),
         ),
       ),
     );
