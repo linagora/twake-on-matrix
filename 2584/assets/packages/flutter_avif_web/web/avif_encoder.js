@@ -153,6 +153,23 @@ function passStringToWasm0(arg, malloc, realloc) {
     return ptr;
 }
 /**
+*/
+__exports.Tune = Object.freeze({ Psnr:0,"0":"Psnr",Psychovisual:1,"1":"Psychovisual", });
+/**
+* Allowed pixel value range
+*
+* C.f. `VideoFullRangeFlag` variable specified in ISO/IEC 23091-4/ITU-T H.273
+*/
+__exports.PixelRange = Object.freeze({
+/**
+* Studio swing representation
+*/
+Limited:0,"0":"Limited",
+/**
+* Full swing representation
+*/
+Full:1,"1":"Full", });
+/**
 * Sample position for subsampled chroma
 */
 __exports.ChromaSamplePosition = Object.freeze({
@@ -170,23 +187,6 @@ Vertical:1,"1":"Vertical",
 * Co-located with (0, 0) luma sample.
 */
 Colocated:2,"2":"Colocated", });
-/**
-*/
-__exports.Tune = Object.freeze({ Psnr:0,"0":"Psnr",Psychovisual:1,"1":"Psychovisual", });
-/**
-* Allowed pixel value range
-*
-* C.f. `VideoFullRangeFlag` variable specified in ISO/IEC 23091-4/ITU-T H.273
-*/
-__exports.PixelRange = Object.freeze({
-/**
-* Studio swing representation
-*/
-Limited:0,"0":"Limited",
-/**
-* Full swing representation
-*/
-Full:1,"1":"Full", });
 
 async function __wbg_load(module, imports) {
     if (typeof Response === 'function' && module instanceof Response) {
