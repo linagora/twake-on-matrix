@@ -1,5 +1,7 @@
 import 'package:fluffychat/pages/chat/chat_app_bar_title.dart';
 import 'package:fluffychat/pages/chat/chat_event_list.dart';
+import 'package:fluffychat/pages/chat/chat_input_row.dart';
+import 'package:fluffychat/pages/chat/events/message/swipeable_message.dart';
 import 'package:fluffychat/pages/chat/events/message_content.dart';
 import 'package:fluffychat/utils/permission_dialog.dart';
 import 'package:fluffychat/widgets/twake_components/twake_icon_button.dart';
@@ -9,7 +11,9 @@ import 'package:patrol/patrol.dart';
 import 'package:flutter_gen/gen_l10n/l10n.dart';
 import 'package:pull_down_button/pull_down_button.dart';
 import '../base/core_robot.dart';
+import '../help/attach_file_ios_test.dart';
 import 'menu_robot.dart';
+import 'twake_list_item_robot.dart';
 
 class ChatGroupDetailRobot extends CoreRobot {
   ChatGroupDetailRobot(super.$);
@@ -41,6 +45,32 @@ class ChatGroupDetailRobot extends CoreRobot {
     return $(ChatAppBarTitle).$(Text).at(0).text;
   }
 
+  PatrolFinder getMoreMessageIcon() {
+    return $(ChatInputRow).$(TwakeIconButton).containing(find.byTooltip('More'));
+  }
+
+
+  List<TwakeListItemRobot> getAllMessages() {
+    final count = $(SwipeableMessage).evaluate().length;
+    return List.generate(count, (i) => TwakeListItemRobot($, $(SwipeableMessage).at(i)));
+  }
+
+  TwakeListItemRobot getTheLastestMessage() {
+    final List<TwakeListItemRobot> messages = getAllMessages();
+    return messages.first;
+  }
+
+  Future<void> openAttachDialog() async {
+    await getMoreMessageIcon().tap();
+    if($(PermissionTextButton).containing('Next').exists)
+    {
+      await $.waitUntilVisible($(PermissionTextButton).containing('Next'));
+      await $(PermissionTextButton).containing('Next').tap();
+      await ChatGroupDetailRobot($).waitUntilAbsent($, $(PermissionTextButton).containing('Next'));
+    }    
+    await allowPhotosIfNeeded($);
+  }
+
   Future<void> tapOnChatBarTitle() async {
     await getChatAppBarTitle().tap();
     await $.waitUntilVisible($("Group information"));
@@ -70,15 +100,14 @@ class ChatGroupDetailRobot extends CoreRobot {
 
   Future<PatrolFinder> getText(String text) async {
     return $(MessageContent).containing(find.text(text));
-    // return $(MatrixLinkifyText).containing(text);
   }
 
-  Future<PatrolFinder> getInputTextField() async {
+  PatrolFinder getInputTextField() {
     return $(TextField);
   }
 
   Future<void> inputMessage(String message) async {
-    final textField = await getInputTextField();
+    final textField = getInputTextField();
     // catch exception when trying to chat with non-existing account
     await CoreRobot($).captureAsyncError(() async {
         await textField.tap();
@@ -108,10 +137,8 @@ class ChatGroupDetailRobot extends CoreRobot {
       final snackText =
           $(find.textContaining(message, findRichText: true)).first;
 
-      // 1) Chờ xuất hiện (ngay sau hành động tạo room)
       await $.waitUntilVisible(snackText, timeout: const Duration(seconds: 5));
 
-      // 2) (tuỳ chọn) Chờ nó biến mất để tránh flakiness cho bước sau
       await waitUntilAbsent($, snackText);
   }
 }
