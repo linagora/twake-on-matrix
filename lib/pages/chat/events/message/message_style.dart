@@ -1,7 +1,11 @@
 import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
+import 'package:fluffychat/pages/chat/events/message_content_style.dart';
+import 'package:fluffychat/presentation/model/file/display_image_info.dart';
 import 'package:fluffychat/utils/extension/build_context_extension.dart';
+import 'package:fluffychat/utils/extension/image_size_extension.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
+import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_file_extension.dart';
 import 'package:fluffychat/utils/responsive/responsive_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:matrix/matrix.dart';
@@ -63,13 +67,61 @@ class MessageStyle {
   static const double messageBubbleMobileRatioMaxWidth = 0.80;
   static const double messageBubbleTabletRatioMaxWidth = 0.30;
 
-  static double messageBubbleWidth(BuildContext context) {
+  static double defaultMessageBubbleWidth(BuildContext context) {
     return context.responsiveValue<double>(
       desktop: messageBubbleDesktopMaxWidth,
       tablet: context.width * messageBubbleTabletRatioMaxWidth,
       mobile:
           MediaQuery.sizeOf(context).width * messageBubbleMobileRatioMaxWidth,
     );
+  }
+
+  static double messageBubbleWidth(
+    BuildContext context, {
+    Event? event,
+  }) {
+    final defaultWidth = defaultMessageBubbleWidth(context);
+    return defaultWidth;
+  }
+
+  static double messageBubbleWidthMediaCaption({
+    required BuildContext context,
+    required Event event,
+  }) {
+    if (event.isImageWithCaption() == true) {
+      DisplayImageInfo? displayImageInfo =
+          event.getOriginalResolution()?.getDisplayImageInfo(context);
+
+      final matrixFile = event.getMatrixFile();
+
+      if (matrixFile != null && matrixFile.isSendingImageInMobile()) {
+        final file = matrixFile as MatrixImageFile;
+        displayImageInfo = Size(
+          file.width?.toDouble() ?? MessageContentStyle.imageWidth(context),
+          file.height?.toDouble() ?? MessageContentStyle.imageHeight(context),
+        ).getDisplayImageInfo(context);
+        return displayImageInfo.size.width;
+      }
+      displayImageInfo ??= DisplayImageInfo(
+        size: Size(
+          MessageContentStyle.imageWidth(context),
+          MessageContentStyle.imageHeight(context),
+        ),
+        hasBlur: true,
+      );
+      if (matrixFile != null && matrixFile.isSendingImageInWeb()) {
+        final file = matrixFile as MatrixImageFile;
+        displayImageInfo = Size(
+          file.width?.toDouble() ?? MessageContentStyle.imageWidth(context),
+          file.height?.toDouble() ?? MessageContentStyle.imageHeight(context),
+        ).getDisplayImageInfo(context);
+        return displayImageInfo.size.width;
+      }
+
+      return displayImageInfo.size.width;
+    }
+
+    return messageBubbleWidth(context, event: event);
   }
 
   static double messageSpacing(

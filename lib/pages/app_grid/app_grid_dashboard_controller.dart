@@ -51,6 +51,7 @@ class AppGridDashboardController extends State<AppGridDashboard> {
 
   void handleGetAppGridDashboardSuccess(LinagoraApplications linagoraApps) {
     try {
+      if (!mounted) return;
       Logs().d(
         'AppGridDashboardController::handleGetAppGridDashboardSuccess(): $linagoraApps',
       );
@@ -64,6 +65,7 @@ class AppGridDashboardController extends State<AppGridDashboard> {
 
   void hideAppGridDashboard() {
     try {
+      if (!mounted) return;
       if (isOpenAppGridDashboardNotifier.value == false) return;
       isOpenAppGridDashboardNotifier.value = false;
     } on FlutterError catch (e) {
@@ -77,6 +79,14 @@ class AppGridDashboardController extends State<AppGridDashboard> {
   void initState() {
     _getAppGridConfiguration();
     super.initState();
+  }
+
+  @override
+  void deactivate() {
+    // Close the portal before deactivation to prevent accessing
+    // the Overlay context after the widget is deactivated
+    hideAppGridDashboard();
+    super.deactivate();
   }
 
   @override

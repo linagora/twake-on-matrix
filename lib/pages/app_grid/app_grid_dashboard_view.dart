@@ -44,16 +44,17 @@ class AppGridDashboardView extends StatelessWidget {
                 onExit: (_) {
                   controller.hoverColorAppHelp.value = Colors.transparent;
                 },
-                child: ValueListenableBuilder(
-                  valueListenable: controller.hoverColorAppHelp,
-                  builder: (context, color, _) {
-                    return TooltipVisibility(
-                      visible: true,
-                      child: Tooltip(
-                        message: L10n.of(context)!.help,
-                        showDuration: const Duration(seconds: 1),
-                        waitDuration: const Duration(seconds: 1),
-                        child: Container(
+                child: TooltipVisibility(
+                  visible: true,
+                  child: Tooltip(
+                    key: const ValueKey('AppHelpTooltip'),
+                    message: L10n.of(context)!.help,
+                    showDuration: const Duration(seconds: 1),
+                    waitDuration: const Duration(seconds: 1),
+                    child: ValueListenableBuilder(
+                      valueListenable: controller.hoverColorAppHelp,
+                      builder: (context, color, _) {
+                        return Container(
                           decoration: BoxDecoration(
                             color: color,
                             borderRadius: AppGridDashboardViewStyle
@@ -67,10 +68,10 @@ class AppGridDashboardView extends StatelessWidget {
                             height:
                                 AppGridDashboardViewStyle.sizeIcSupportButton,
                           ),
-                        ),
-                      ),
-                    );
-                  },
+                        );
+                      },
+                    ),
+                  ),
                 ),
               ),
             ),
