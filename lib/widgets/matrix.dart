@@ -8,6 +8,7 @@ import 'package:fluffychat/domain/exception/federation_configuration_not_found.d
 import 'package:fluffychat/domain/repository/federation_configurations_repository.dart';
 import 'package:fluffychat/domain/repository/user_info/user_info_repository.dart';
 import 'package:fluffychat/event/twake_event_types.dart';
+import 'package:fluffychat/pages/chat/events/audio_message/audio_player_widget.dart';
 import 'package:fluffychat/presentation/mixins/init_config_mixin.dart';
 import 'package:fluffychat/presentation/model/client_login_state_event.dart';
 import 'package:fluffychat/widgets/layouts/agruments/logout_body_args.dart';
@@ -89,8 +90,10 @@ class MatrixState extends State<Matrix>
   final _contactsManager = getIt.get<ContactsManager>();
 
   AudioPlayer audioPlayer = AudioPlayer();
-  final ValueNotifier<String?> voiceMessageEventId = ValueNotifier(null);
+  final ValueNotifier<Event?> voiceMessageEvent = ValueNotifier(null);
 
+  final ValueNotifier<AudioPlayerStatus> currentAudioStatus =
+      ValueNotifier(AudioPlayerStatus.notDownloaded);
   int _activeClient = -1;
   String? activeBundle;
   Store store = Store();
@@ -1172,6 +1175,7 @@ class MatrixState extends State<Matrix>
     linuxNotifications?.close();
     showQrCodeDownload.dispose();
     audioPlayer.dispose();
+    voiceMessageEvent.dispose();
     super.dispose();
   }
 

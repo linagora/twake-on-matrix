@@ -1,3 +1,4 @@
+import 'package:async/async.dart';
 import 'package:desktop_drop/desktop_drop.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/domain/contact_manager/contacts_manager.dart';
@@ -9,7 +10,10 @@ import 'package:fluffychat/pages/chat/chat_loading_view.dart';
 import 'package:fluffychat/pages/chat/chat_view_body_style.dart';
 import 'package:fluffychat/pages/chat/chat_view_style.dart';
 import 'package:fluffychat/pages/chat/disabled_chat_input_row.dart';
+import 'package:fluffychat/pages/chat/events/audio_message/audio_play_extension.dart';
+import 'package:fluffychat/pages/chat/events/audio_message/audio_player_widget.dart';
 import 'package:fluffychat/pages/chat/events/edit_display.dart';
+import 'package:fluffychat/pages/chat/events/message/display_name_widget.dart';
 import 'package:fluffychat/pages/chat/events/message_content_mixin.dart';
 import 'package:fluffychat/pages/chat/chat_pinned_events/pinned_events_view.dart';
 import 'package:fluffychat/pages/chat/sticky_timestamp_widget.dart';
@@ -18,8 +22,10 @@ import 'package:fluffychat/pages/contacts_tab/widgets/add_contact/add_contact_di
 import 'package:fluffychat/presentation/model/chat/view_event_list_ui_state.dart';
 import 'package:fluffychat/resource/image_paths.dart';
 import 'package:fluffychat/utils/date_time_extension.dart';
+import 'package:fluffychat/utils/string_extension.dart';
 import 'package:fluffychat/widgets/connection_status_header.dart';
 import 'package:fluffychat/widgets/matrix.dart';
+import 'package:fluffychat/widgets/twake_components/twake_icon_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_emoji_mart/flutter_emoji_mart.dart';
 import 'package:fluffychat/generated/l10n/app_localizations.dart';
@@ -202,6 +208,7 @@ class ChatViewBody extends StatelessWidget with MessageContentMixin {
                       },
                     ),
                     PinnedEventsView(controller),
+                    _audioPlayerWidget(),
                     if (controller.room!.pinnedEventIds.isNotEmpty)
                       Divider(
                         height: ChatViewBodyStyle.dividerSize,
@@ -338,6 +345,152 @@ class ChatViewBody extends StatelessWidget with MessageContentMixin {
           ],
         ),
       ),
+    );
+  }
+
+  void _handleCloseAudioPlayer() {
+    controller.matrix?.voiceMessageEvent.value = null;
+    controller.matrix?.audioPlayer
+      ?..stop()
+      ..dispose();
+    controller.matrix?.currentAudioStatus.value =
+        AudioPlayerStatus.notDownloaded;
+  }
+
+  void _handlePlayOrPauseAudioPlayer() {
+    final audioPlayer = controller.matrix?.audioPlayer;
+    if (audioPlayer == null) return;
+    if (audioPlayer.isAtEndPosition) {
+      audioPlayer.seek(Duration.zero);
+      audioPlayer.play();
+      return;
+    }
+
+    if (audioPlayer.playing == true) {
+      audioPlayer.pause();
+    } else {
+      audioPlayer.play();
+    }
+  }
+
+  Widget _audioPlayerWidget() {
+    return ValueListenableBuilder(
+      valueListenable: controller.matrix?.currentAudioStatus ??
+          ValueNotifier<AudioPlayerStatus>(
+            AudioPlayerStatus.notDownloaded,
+          ),
+      builder: (context, status, _) {
+        return ValueListenableBuilder(
+          valueListenable: controller.matrix?.voiceMessageEvent ??
+              ValueNotifier<Event?>(null),
+          builder: (context, hasEvent, _) {
+            if (hasEvent == null) {
+              return const SizedBox.shrink();
+            }
+            final audioPlayer = controller.matrix?.audioPlayer;
+            return StreamBuilder<Object>(
+              stream: StreamGroup.merge([
+                controller.matrix?.audioPlayer.positionStream
+                        .asBroadcastStream() ??
+                    Stream.value(Duration.zero),
+                controller.matrix?.audioPlayer.playerStateStream
+                        .asBroadcastStream() ??
+                    Stream.value(Duration.zero),
+              ]),
+              builder: (context, snapshot) {
+                final maxPosition =
+                    audioPlayer?.duration?.inMilliseconds.toDouble() ?? 1.0;
+                final currentPosition = status == AudioPlayerStatus.downloading
+                    ? 0
+                    : audioPlayer?.position.inMilliseconds.toDouble() ?? 0.0;
+                final progress = maxPosition > 0
+                    ? (currentPosition / maxPosition).clamp(0.0, 1.0)
+                    : 0.0;
+                return Container(
+                  constraints: const BoxConstraints(maxHeight: 40),
+                  decoration: BoxDecoration(
+                    color: LinagoraSysColors.material().onPrimary,
+                    border: Border(
+                      top: BorderSide(
+                        color: LinagoraStateLayer(
+                          LinagoraSysColors.material().surfaceTint,
+                        ).opacityLayer3,
+                      ),
+                    ),
+                  ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Container(
+                        height: 37,
+                        padding: const EdgeInsets.symmetric(horizontal: 8),
+                        child: Row(
+                          children: [
+                            TwakeIconButton(
+                              size: 20,
+                              onTap: _handlePlayOrPauseAudioPlayer,
+                              iconColor: LinagoraSysColors.material().primary,
+                              icon: audioPlayer?.playing == true &&
+                                      audioPlayer?.isAtEndPosition == false
+                                  ? Icons.pause_outlined
+                                  : Icons.play_arrow,
+                            ),
+                            const SizedBox(width: 4),
+                            Expanded(
+                              child: _displaySenderNameWhenPlayingAudio(
+                                hasEvent,
+                                audioPlayer?.position.minuteSecondString ?? '',
+                              ),
+                            ),
+                            TwakeIconButton(
+                              onTap: _handleCloseAudioPlayer,
+                              icon: Icons.close,
+                            ),
+                          ],
+                        ),
+                      ),
+                      LinearProgressIndicator(
+                        value: progress,
+                        minHeight: 2,
+                        backgroundColor: LinagoraStateLayer(
+                          LinagoraSysColors.material().surfaceTint,
+                        ).opacityLayer3,
+                        valueColor: AlwaysStoppedAnimation<Color>(
+                          LinagoraSysColors.material().primary,
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              },
+            );
+          },
+        );
+      },
+    );
+  }
+
+  Widget _displaySenderNameWhenPlayingAudio(
+    Event event,
+    String duration,
+  ) {
+    return FutureBuilder<User?>(
+      future: event.fetchSenderUser(),
+      builder: (context, snapshot) {
+        final displayName = snapshot.data?.calcDisplayname() ??
+            event.senderFromMemoryOrFallback.calcDisplayname();
+        return Text(
+          "${displayName.shortenDisplayName(
+            maxCharacters: DisplayNameWidget.maxCharactersDisplayNameBubble,
+          )}  $duration",
+          style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                fontFamily: 'Inter',
+                color: LinagoraRefColors.material().neutral[50],
+              ),
+          maxLines: 1,
+          overflow: TextOverflow.clip,
+        );
+      },
     );
   }
 

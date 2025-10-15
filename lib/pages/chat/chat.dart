@@ -2799,6 +2799,12 @@ class ChatController extends State<Chat>
     );
   }
 
+  void disposeAudioPlayer() {
+    matrix?.audioPlayer.stop();
+    matrix?.audioPlayer.clearAudioSources();
+    matrix?.voiceMessageEvent.value = null;
+  }
+
   @override
   void onSendFileCallback() => scrollDown();
 
@@ -2885,6 +2891,7 @@ class ChatController extends State<Chat>
     editEventNotifier.dispose();
     focusHover.dispose();
     disposeAudioMixin();
+    disposeAudioPlayer();
     super.dispose();
   }
 
