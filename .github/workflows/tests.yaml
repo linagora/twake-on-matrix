@@ -50,13 +50,62 @@ jobs:
           cache: true
           cache-key: "flutter-:os:-:channel:-:version:-:arch:-:hash:-${{ hashFiles('**/pubspec.lock') }}"
 
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
+
       - uses: webfactory/ssh-agent@v0.9.0
         with:
           ssh-private-key: ${{ secrets.SSH_KEY }}
 
+      - name: Get Flutter dependencies
+        run: flutter pub get
+
+      - name: Set PUB_CACHE path manually
+        run: |
+          echo "PUB_CACHE=/home/runner/.pub-cache" >> $GITHUB_ENV
+          echo "✅ PUB_CACHE set to $PUB_CACHE"
+
+      # Explicitly search inside hosted/pub.dev/flutter_vodozemac-*/rust
+      - name: Find flutter_vodozemac rust directory
+        id: find-vodozemac
+        run: |
+          set -e
+          VODOZEMAC_PATH=$(find $PUB_CACHE/hosted/pub.dev -maxdepth 3 -type d -path "*/flutter_vodozemac-*/rust" | head -n 1)
+          if [ -z "$VODOZEMAC_PATH" ]; then
+            echo "❌ flutter_vodozemac-*/rust directory not found!"
+            echo "Contents of pub cache:"
+            find $PUB_CACHE/hosted/pub.dev -maxdepth 2 -type d
+            exit 1
+          fi
+          echo "✅ Found flutter_vodozemac path: $VODOZEMAC_PATH"
+          echo "VODOZEMAC_PATH=$VODOZEMAC_PATH" >> $GITHUB_ENV
+
+      - name: Cache Cargo
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            ${{ env.VODOZEMAC_PATH }}/target
+          key: ${{ runner.os }}-cargo-debug-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-debug-
+
+      - name: Build flutter_vodozemac Rust library (Debug)
+        run: |
+          cd $VODOZEMAC_PATH
+          cargo build
+
+      - name: Copy built "libvodozemac_bindings_dart.so" to existing directory
+        run: |
+          echo "Copying .so files into ./vodozemac/debug/..."
+          find $VODOZEMAC_PATH/target/debug -name "libvodozemac_bindings_dart.so" -exec cp -f {} ./vodozemac/debug/ \;
+          echo "✅ Contents of ./vodozemac/debug/:"
+          ls -l ./vodozemac/debug
+
       - name: Run widget test
         run: |
-          flutter pub get && flutter pub run build_runner build --delete-conflicting-outputs
+          flutter pub run build_runner build -d
           flutter test
 
   # integration_test:
