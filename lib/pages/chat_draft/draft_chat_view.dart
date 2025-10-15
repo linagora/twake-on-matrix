@@ -296,15 +296,6 @@ class DraftChatView extends StatelessWidget {
                         );
                       },
                     ),
-                    if (controller.isAddContactAvailable)
-                      AddContactBanner(
-                        onTap: () => showAddContactDialog(
-                          context,
-                          displayName: controller.widget.contact.displayName,
-                          matrixId: controller.widget.contact.matrixId,
-                        ),
-                        show: controller.showAddContactBanner,
-                      ),
                     ValueListenableBuilder(
                       valueListenable: controller.isBlockedUserNotifier,
                       builder: (context, isBlockedUser, _) {
@@ -333,6 +324,15 @@ class DraftChatView extends StatelessWidget {
                         );
                       },
                     ),
+                    if (controller.isAddContactAvailable)
+                      AddContactBanner(
+                        onTap: () => showAddContactDialog(
+                          context,
+                          displayName: controller.widget.contact.displayName,
+                          matrixId: controller.widget.contact.matrixId,
+                        ),
+                        show: controller.showAddContactBanner,
+                      ),
                   ],
                 ),
               ),

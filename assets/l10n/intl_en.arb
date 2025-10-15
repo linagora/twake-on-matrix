@@ -3414,5 +3414,6 @@
   "lastName": "Last name",
   "createNewContact": "Create new contact",
   "addToContacts": "Add to contacts",
+  "invalidUsername": "Invalid username",
   "audioEncoderNotSupportedMessage": "The audio encoder is not supported on this device. Please try using a different browser or device."
 }

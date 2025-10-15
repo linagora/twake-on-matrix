@@ -12,6 +12,10 @@ class AddContactInfo extends StatefulWidget {
     this.assetPath,
     this.iconData,
     this.additionalHorizontalPadding = 0,
+    this.errorMessage,
+    this.autoFocus = false,
+    this.textInputAction,
+    this.onSubmitted,
   });
 
   final String title;
@@ -20,6 +24,10 @@ class AddContactInfo extends StatefulWidget {
   final String? assetPath;
   final IconData? iconData;
   final double additionalHorizontalPadding;
+  final String? errorMessage;
+  final bool autoFocus;
+  final TextInputAction? textInputAction;
+  final void Function(String)? onSubmitted;
 
   @override
   State<AddContactInfo> createState() => _AddContactInfoState();
@@ -85,15 +93,19 @@ class _AddContactInfoState extends State<AddContactInfo> {
     final textField = TextField(
       controller: _textController,
       onChanged: widget.onChanged,
+      autofocus: widget.autoFocus,
+      onSubmitted: widget.onSubmitted,
+      textInputAction: widget.textInputAction,
       style: textTheme.bodyLarge?.copyWith(
         fontSize: 17,
         height: 24 / 17,
         color: LinagoraRefColors.material().neutral[10],
       ),
-      decoration: const InputDecoration(
+      decoration: InputDecoration(
         border: InputBorder.none,
         contentPadding: EdgeInsets.zero,
         isDense: true,
+        errorText: widget.errorMessage,
       ),
     );
 

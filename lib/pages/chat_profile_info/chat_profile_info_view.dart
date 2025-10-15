@@ -311,6 +311,7 @@ class _Information extends StatelessWidget {
                 Padding(
                   padding: const EdgeInsets.symmetric(vertical: 8),
                   child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       ChatProfileActionButton(
                         title: L10n.of(context)!.message,
