@@ -52,7 +52,7 @@ jobs:
           ssh-private-key: ${{ secrets.SSH_KEY }}
 
       - name: Prepare web vodozemac
-        run: ../scripts/prepare-web.sh
+        run: ./scripts/prepare-web.sh
 
       - name: Build Web version
         env:
