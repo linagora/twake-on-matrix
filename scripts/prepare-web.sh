@@ -1,3 +1,8 @@
+#!/usr/bin/env bash
+set -e
+
+rm -rf .vodozemac
+
 version=$(yq ".dependencies.flutter_vodozemac" < pubspec.yaml)
 version=$(expr "$version" : '\^*\(.*\)')
 git clone https://github.com/famedly/dart-vodozemac.git -b ${version} .vodozemac
