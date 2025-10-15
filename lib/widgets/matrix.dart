@@ -1083,9 +1083,17 @@ class MatrixState extends State<Matrix>
         state != AppLifecycleState.paused;
     client.backgroundSync = foreground;
     client.syncPresence = foreground ? null : PresenceType.unavailable;
-    client.sync(setPresence: client.syncPresence);
+    trySyncClient();
     client.requestHistoryOnLimitedTimeline = !foreground;
     backgroundPush?.clearAllNotifications();
+  }
+
+  Future<void> trySyncClient() async {
+    try {
+      await client.sync(setPresence: client.syncPresence);
+    } catch (e) {
+      Logs().e('MatrixState::trySyncClient: error - $e');
+    }
   }
 
   void initSettings() {

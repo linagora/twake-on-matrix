@@ -80,7 +80,7 @@ class ImageViewerView extends StatelessWidget {
           onTap: () {
             if (PlatformInfos.isWeb) {
               Navigator.of(context).pop();
-            } else {
+            } else if (controller.widget.showAppBar) {
               controller.showAppbarPreview.toggle();
             }
           },
@@ -162,11 +162,15 @@ class _ImageWidget extends StatelessWidget {
           fit: BoxFit.contain,
           filterQuality: FilterQuality.none,
           errorBuilder: (context, error, stackTrace) {
-            return Image.file(
-              File(controller.thumbnailFilePath!),
-              fit: BoxFit.contain,
-              filterQuality: FilterQuality.none,
-            );
+            if (controller.thumbnailFilePath != null) {
+              return Image.file(
+                File(controller.thumbnailFilePath!),
+                fit: BoxFit.contain,
+                filterQuality: FilterQuality.none,
+              );
+            } else {
+              return const SizedBox();
+            }
           },
         );
       } else {

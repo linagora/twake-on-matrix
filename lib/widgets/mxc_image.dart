@@ -2,6 +2,7 @@ import 'dart:io';
 import 'dart:typed_data';
 import 'package:fluffychat/data/memory/mxc_image_cache_manager.dart';
 import 'package:fluffychat/pages/image_viewer/image_viewer.dart';
+import 'package:fluffychat/pages/media_viewer/media_viewer.dart';
 import 'package:fluffychat/presentation/enum/chat/media_viewer_popup_result_enum.dart';
 import 'package:fluffychat/utils/extension/build_context_extension.dart';
 import 'package:fluffychat/utils/extension/mime_type_extension.dart';
@@ -243,9 +244,9 @@ class _MxcImageState extends State<MxcImage> {
         HeroPageRoute(
           builder: (context) {
             return InteractiveViewerGallery(
-              itemBuilder: ImageViewer(
-                event: widget.event!,
-              ),
+              itemBuilder: PlatformInfos.isMobile
+                  ? MediaViewer(event: widget.event!)
+                  : ImageViewer(event: widget.event!),
             );
           },
         ),
