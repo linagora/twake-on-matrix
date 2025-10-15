@@ -194,13 +194,16 @@ class ChatInputRow extends StatelessWidget {
                               }
                               controller.stopRecording.call();
                             },
+                            deleteRecording: () {
+                              Logs().d('ChatInputRowMobile:: deleteRecording');
+                              if (controller.sendController.text.isNotEmpty) {
+                                controller.sendController.clear();
+                              }
+                              controller.stopRecording.call();
+                            },
                             pauseRecording: () {
                               Logs().d('ChatInputRowMobile:: pauseRecording');
                               controller.pauseRecording.call();
-                            },
-                            resumeRecording: () {
-                              Logs().d('ChatInputRowMobile:: resumeRecording');
-                              controller.resumeRecording.call();
                             },
                             sendRequestFunction: (soundFile, time, waveFrom) {
                               Logs().d(

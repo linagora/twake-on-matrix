@@ -354,7 +354,8 @@ class ChatController extends State<Chat>
       null;
 
   void updateInputTextNotifier() {
-    if (audioRecordStateNotifier.value != AudioRecordState.initial) {
+    if (audioRecordStateNotifier.value == AudioRecordState.recording ||
+        audioRecordStateNotifier.value == AudioRecordState.paused) {
       return;
     }
     inputText.value = sendController.text;

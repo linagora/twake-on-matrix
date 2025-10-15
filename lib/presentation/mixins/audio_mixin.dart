@@ -57,8 +57,8 @@ mixin AudioMixin {
     audioRecordStateNotifier.value = AudioRecordState.paused;
   }
 
-  void resumeRecording() {
-    audioRecordStateNotifier.value = AudioRecordState.recording;
+  void deleteRecording() {
+    audioRecordStateNotifier.value = AudioRecordState.initial;
   }
 
   void initAudioRecorderWeb() {

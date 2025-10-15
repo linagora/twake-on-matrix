@@ -36,7 +36,7 @@ class DraftChatInputRow extends StatelessWidget {
   final Function()? startRecording;
   final Function()? stopRecording;
   final Function()? pauseRecording;
-  final Function()? resumeRecording;
+  final Function()? deleteRecording;
   final void Function(TwakeAudioFile, Duration, List<int>)?
       sendVoiceMessageAction;
   final Function()? onTapRecorderWeb;
@@ -66,7 +66,7 @@ class DraftChatInputRow extends StatelessWidget {
     this.onDeleteRecorderWeb,
     required this.recordDurationWebNotifier,
     this.pauseRecording,
-    this.resumeRecording,
+    this.deleteRecording,
   });
 
   @override
@@ -225,9 +225,9 @@ class DraftChatInputRow extends StatelessWidget {
                 Logs().d('DraftChatInputRow:: pauseRecording');
                 pauseRecording?.call();
               },
-              resumeRecording: () {
-                Logs().d('DraftChatInputRow:: resumeRecording');
-                resumeRecording?.call();
+              deleteRecording: () {
+                Logs().d('DraftChatInputRow:: deleteRecording');
+                deleteRecording?.call();
               },
               sendRequestFunction: (soundFile, time, waveFrom) {
                 Logs().d(
