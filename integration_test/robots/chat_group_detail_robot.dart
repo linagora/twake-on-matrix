@@ -60,6 +60,16 @@ class ChatGroupDetailRobot extends CoreRobot {
     return messages.first;
   }
 
+  List<TwakeListItemRobot> getAllImageMessages() {
+    final count = $(SwipeableMessage).containing($(Image)).evaluate().length;
+    return List.generate(count, (i) => TwakeListItemRobot($, $(SwipeableMessage).at(i)));
+  }
+
+  TwakeListItemRobot getTheLastestSentImage() {
+    final List<TwakeListItemRobot> messages = getAllImageMessages();
+    return messages.first;
+  }
+
   Future<void> openAttachDialog() async {
     await getMoreMessageIcon().tap();
     if($(PermissionTextButton).containing('Next').exists)
