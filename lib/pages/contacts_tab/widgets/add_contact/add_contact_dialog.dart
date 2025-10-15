@@ -13,10 +13,12 @@ import 'package:fluffychat/domain/usecase/contacts/post_address_book_interactor.
 import 'package:fluffychat/generated/l10n/app_localizations.dart';
 import 'package:fluffychat/pages/chat_profile_info/chat_profile_info_navigator.dart';
 import 'package:fluffychat/pages/contacts_tab/widgets/add_contact/add_contact_dialog_view.dart';
+import 'package:fluffychat/pages/contacts_tab/widgets/add_contact/add_contact_dialog_view_web.dart';
 import 'package:fluffychat/presentation/extensions/contact/presentation_contact_extension.dart';
 import 'package:fluffychat/presentation/model/contact/presentation_contact.dart';
 import 'package:fluffychat/presentation/model/contact/presentation_contact_constant.dart';
 import 'package:fluffychat/utils/dialog/twake_dialog.dart';
+import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/utils/twake_snackbar.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:flutter/cupertino.dart';
@@ -29,21 +31,40 @@ Future<void> showAddContactDialog(
   BuildContext context, {
   String? displayName,
   String? matrixId,
-}) async {
-  return showModalBottomSheet(
-    context: context,
-    backgroundColor: LinagoraSysColors.material().onPrimary,
-    shape: const RoundedRectangleBorder(
-      borderRadius: BorderRadius.vertical(
-        top: Radius.circular(20),
+}) {
+  if (PlatformInfos.isMobile) {
+    return showModalBottomSheet(
+      context: context,
+      backgroundColor: LinagoraSysColors.material().onPrimary,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(
+          top: Radius.circular(20),
+        ),
       ),
-    ),
-    useSafeArea: true,
-    scrollControlDisabledMaxHeightRatio: 0.8,
+      useSafeArea: true,
+      scrollControlDisabledMaxHeightRatio: 0.8,
+      builder: (context) {
+        return AddContactDialog(
+          displayName: displayName,
+          matrixId: matrixId,
+        );
+      },
+    );
+  }
+
+  return showDialog(
+    context: context,
     builder: (context) {
-      return AddContactDialog(
-        displayName: displayName,
-        matrixId: matrixId,
+      return Dialog(
+        backgroundColor: LinagoraSysColors.material().onPrimary,
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.all(Radius.circular(16)),
+        ),
+        insetPadding: const EdgeInsets.all(16),
+        child: AddContactDialog(
+          displayName: displayName,
+          matrixId: matrixId,
+        ),
       );
     },
   );
@@ -124,18 +145,20 @@ class AddContactDialogController extends State<AddContactDialog> {
         return;
       } else if (state is PostAddressBookSuccessState) {
         getIt.get<ContactsManager>().refreshTomContacts();
-        context.pop();
-        Navigator.of(context).push(
-          CupertinoPageRoute(
-            builder: (context) => ChatProfileInfoNavigator(
-              isInStack: true,
-              onBack: context.pop,
-              contact: state.updatedAddressBooks.firstOrNull
-                  ?.toPresentationContact()
-                  .firstOrNull,
+        Navigator.pop(context);
+        if (PlatformInfos.isMobile) {
+          Navigator.of(context).push(
+            CupertinoPageRoute(
+              builder: (context) => ChatProfileInfoNavigator(
+                isInStack: true,
+                onBack: context.pop,
+                contact: state.updatedAddressBooks.firstOrNull
+                    ?.toPresentationContact()
+                    .firstOrNull,
+              ),
             ),
-          ),
-        );
+          );
+        }
       }
       return;
     }
@@ -143,12 +166,12 @@ class AddContactDialogController extends State<AddContactDialog> {
     final existedRoomId =
         Matrix.of(context).client.getDirectChatFromUserId(userName.value);
     if (existedRoomId != null) {
-      context.pop();
+      Navigator.pop(context);
       context.go('/rooms/$existedRoomId');
       return;
     }
 
-    context.pop();
+    Navigator.pop(context);
     Router.neglect(
       context,
       () => context.go(
@@ -181,6 +204,8 @@ class AddContactDialogController extends State<AddContactDialog> {
 
   @override
   Widget build(BuildContext context) {
-    return AddContactDialogView(controller: this);
+    return PlatformInfos.isMobile
+        ? AddContactDialogView(controller: this)
+        : AddContactDialogViewWeb(controller: this);
   }
 }

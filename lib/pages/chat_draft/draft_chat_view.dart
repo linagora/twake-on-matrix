@@ -1,4 +1,6 @@
 import 'package:desktop_drop/desktop_drop.dart';
+import 'package:fluffychat/di/global/get_it_initializer.dart';
+import 'package:fluffychat/domain/contact_manager/contacts_manager.dart';
 import 'package:fluffychat/pages/chat/add_contact_banner.dart';
 import 'package:fluffychat/pages/chat/blocked_user_banner.dart';
 import 'package:fluffychat/pages/chat/chat.dart';
@@ -324,8 +326,17 @@ class DraftChatView extends StatelessWidget {
                         );
                       },
                     ),
-                    if (controller.isAddContactAvailable)
-                      AddContactBanner(
+                    ValueListenableBuilder(
+                      valueListenable:
+                          getIt.get<ContactsManager>().getContactsNotifier(),
+                      builder: (context, state, child) {
+                        if (controller.isInsideContactManager(state)) {
+                          return const SizedBox();
+                        }
+
+                        return child ?? const SizedBox();
+                      },
+                      child: AddContactBanner(
                         onTap: () => showAddContactDialog(
                           context,
                           displayName: controller.widget.contact.displayName,
@@ -333,6 +344,7 @@ class DraftChatView extends StatelessWidget {
                         ),
                         show: controller.showAddContactBanner,
                       ),
+                    ),
                   ],
                 ),
               ),

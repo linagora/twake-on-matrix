@@ -1,3 +1,4 @@
+import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:linagora_design_flutter/colors/linagora_ref_colors.dart';
@@ -68,20 +69,23 @@ class _AddContactInfoState extends State<AddContactInfo> {
       );
     }
     if (leadingIcon != null) {
-      leadingIcon = Padding(
-        padding: const EdgeInsetsDirectional.only(end: 8),
-        child: Container(
+      if (PlatformInfos.isMobile) {
+        leadingIcon = Container(
           width: 48,
           height: 48,
           alignment: Alignment.center,
           child: leadingIcon,
-        ),
+        );
+      }
+      leadingIcon = Padding(
+        padding: const EdgeInsetsDirectional.only(end: 8),
+        child: leadingIcon,
       );
     } else {
       leadingIcon = const SizedBox();
     }
 
-    final title = Text(
+    Widget title = Text(
       widget.title,
       style: textTheme.labelMedium?.copyWith(
         fontSize: 12,
@@ -89,6 +93,13 @@ class _AddContactInfoState extends State<AddContactInfo> {
         color: LinagoraRefColors.material().neutral,
       ),
     );
+
+    if (!PlatformInfos.isMobile) {
+      title = Padding(
+        padding: const EdgeInsetsDirectional.symmetric(vertical: 4),
+        child: title,
+      );
+    }
 
     final textField = TextField(
       controller: _textController,
@@ -120,16 +131,14 @@ class _AddContactInfoState extends State<AddContactInfo> {
     return Column(
       children: [
         Padding(
-          padding: EdgeInsets.symmetric(
-            horizontal: 8 + widget.additionalHorizontalPadding,
-            vertical: 8,
-          ),
+          padding: padding,
           child: Row(
+            crossAxisAlignment: leadingIconVerticalAlignment,
             children: [
               leadingIcon,
               Expanded(
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 4),
+                  padding: textfieldPadding,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -145,5 +154,32 @@ class _AddContactInfoState extends State<AddContactInfo> {
         divider,
       ],
     );
+  }
+
+  EdgeInsetsGeometry get padding {
+    if (PlatformInfos.isMobile) {
+      return EdgeInsets.symmetric(
+        horizontal: 8 + widget.additionalHorizontalPadding,
+        vertical: 8,
+      );
+    }
+
+    return const EdgeInsets.fromLTRB(16, 16, 16, 0);
+  }
+
+  CrossAxisAlignment get leadingIconVerticalAlignment {
+    if (PlatformInfos.isMobile) {
+      return CrossAxisAlignment.center;
+    }
+
+    return CrossAxisAlignment.start;
+  }
+
+  EdgeInsetsGeometry get textfieldPadding {
+    if (PlatformInfos.isMobile) {
+      return const EdgeInsets.symmetric(vertical: 4);
+    }
+
+    return const EdgeInsets.only(bottom: 16);
   }
 }

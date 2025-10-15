@@ -1,4 +1,6 @@
 import 'package:desktop_drop/desktop_drop.dart';
+import 'package:fluffychat/di/global/get_it_initializer.dart';
+import 'package:fluffychat/domain/contact_manager/contacts_manager.dart';
 import 'package:fluffychat/pages/chat/add_contact_banner.dart';
 import 'package:fluffychat/pages/chat/blocked_user_banner.dart';
 import 'package:fluffychat/pages/chat/chat.dart';
@@ -180,15 +182,25 @@ class ChatViewBody extends StatelessWidget with MessageContentMixin {
                         );
                       },
                     ),
-                    if (controller.isAddContactAvailable)
-                      AddContactBanner(
-                        onTap: () => showAddContactDialog(
-                          context,
-                          displayName: controller.contactToAdd?.displayName,
-                          matrixId: controller.contactToAdd?.id,
-                        ),
-                        show: controller.showAddContactBanner,
-                      ),
+                    ValueListenableBuilder(
+                      valueListenable:
+                          getIt.get<ContactsManager>().getContactsNotifier(),
+                      builder: (context, state, child) {
+                        final contactToAdd = controller.contactToAdd(state);
+                        if (contactToAdd == null) {
+                          return const SizedBox();
+                        }
+
+                        return AddContactBanner(
+                          onTap: () => showAddContactDialog(
+                            context,
+                            displayName: contactToAdd.displayName,
+                            matrixId: contactToAdd.id,
+                          ),
+                          show: controller.showAddContactBanner,
+                        );
+                      },
+                    ),
                     PinnedEventsView(controller),
                     if (controller.room!.pinnedEventIds.isNotEmpty)
                       Divider(
