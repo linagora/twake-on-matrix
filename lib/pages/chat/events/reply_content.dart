@@ -186,6 +186,7 @@ class ReplyPreviewIconBuilder extends StatelessWidget {
         height: ReplyContentStyle.replyContentSize,
         isThumbnail: true,
         fit: BoxFit.cover,
+        enableHeroAnimation: false,
         placeholder: (context) {
           return BlurHashPlaceHolder(
             event: event,

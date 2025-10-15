@@ -16,10 +16,12 @@ import 'package:matrix/matrix.dart';
 
 class DownloadVideoWidget extends StatefulWidget {
   final Event event;
+  final bool showAppBar;
 
   const DownloadVideoWidget({
     super.key,
     required this.event,
+    this.showAppBar = true,
   });
 
   @override
@@ -53,15 +55,18 @@ class _DownloadVideoWidgetState extends State<DownloadVideoWidget>
   }
 
   void _downloadAction() async {
+    if (!mounted) return;
     _downloadStateNotifier.value = DownloadVideoState.loading;
     try {
       path = await handleDownloadVideoEvent(
         event: widget.event,
-        playVideoAction: (path) => playVideoAction(
-          context,
-          path,
-          event: widget.event,
-        ),
+        playVideoAction: PlatformInfos.isWeb
+            ? (path) => playVideoAction(
+                  context,
+                  path,
+                  event: widget.event,
+                )
+            : null,
         progressCallback: (count, total) {
           downloadProgressNotifier.value = count / total;
         },
@@ -152,6 +157,7 @@ class _DownloadVideoWidgetState extends State<DownloadVideoWidget>
                               context,
                               path!,
                               event: widget.event,
+                              isReplacement: false,
                             );
                           }
                         },
@@ -175,16 +181,15 @@ class _DownloadVideoWidgetState extends State<DownloadVideoWidget>
               ),
             ],
           ),
-          if (PlatformInfos.isMobile) ...[
+          if (!PlatformInfos.isMobile)
+            MediaViewerAppBarWeb(
+              event: widget.event,
+            )
+          else if (widget.showAppBar)
             MediaViewerAppBar(
               showAppbarPreviewNotifier: showAppbarPreview,
               event: widget.event,
             ),
-          ] else ...[
-            MediaViewerAppBarWeb(
-              event: widget.event,
-            ),
-          ],
         ],
       ),
     );

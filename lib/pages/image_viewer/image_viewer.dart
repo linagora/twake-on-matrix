@@ -18,6 +18,8 @@ class ImageViewer extends StatefulWidget {
   final String? filePath;
   final double? width;
   final double? height;
+  final bool showAppBar;
+  final void Function(bool isZoomed)? onZoomChanged;
 
   const ImageViewer({
     super.key,
@@ -26,6 +28,8 @@ class ImageViewer extends StatefulWidget {
     this.filePath,
     this.width,
     this.height,
+    this.showAppBar = true,
+    this.onZoomChanged,
   });
 
   @override
@@ -38,7 +42,7 @@ class ImageViewerController extends State<ImageViewer> {
   TapDownDetails? tapDownDetails;
   final double zoomScale = 3;
 
-  final ValueNotifier<bool> showAppbarPreview = ValueNotifier(true);
+  late final ValueNotifier<bool> showAppbarPreview;
 
   String? filePath;
 
@@ -51,6 +55,7 @@ class ImageViewerController extends State<ImageViewer> {
   @override
   void initState() {
     super.initState();
+    showAppbarPreview = ValueNotifier(widget.showAppBar);
     if (!PlatformInfos.isWeb && widget.event != null) {
       handleDownloadFile(widget.event!);
       handleDownloadThumbnailFile(widget.event!);
@@ -156,6 +161,8 @@ class ImageViewerController extends State<ImageViewer> {
         ? zoomed
         : Matrix4.identity();
     transformationController.value = value;
+
+    widget.onZoomChanged?.call(!transformationController.value.isIdentity());
   }
 
   void onDoubleTapDown(TapDownDetails details) {
