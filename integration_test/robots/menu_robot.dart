@@ -87,6 +87,10 @@ class PullDownMenuRobot extends CoreRobot {
     return $(PullDownMenuItem).containing(find.text("Unpin"));
   }
 
+  PatrolFinder getSaveToGalleryItem() {
+    return $(PullDownMenuItem).containing(find.text("Unpin"));
+  }
+
   PatrolFinder getDeleteItem() {
     return $(PullDownMenuItem).containing(find.text("Delete"));
   }
