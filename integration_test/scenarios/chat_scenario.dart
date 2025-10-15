@@ -148,6 +148,20 @@ class ChatScenario extends BaseScenario {
     await ChatGroupDetailRobot($).openPullDownMenu(message);
     await (PullDownMenuRobot($).getCopyItem()).tap();
   }
+  
+  Future<void> downloadAnImage(PatrolFinder image) async {
+    await ($).waitUntilVisible(image);
+    await (PullDownMenuRobot($).getSaveToGalleryItem()).tap();  
+    await ChatGroupDetailRobot($).waitUntilAbsent($, PullDownMenuRobot($).getSaveToGalleryItem());
+    try {
+      await $.native.waitUntilVisible(
+        Selector(text: 'Allow'),
+        timeout: const Duration(seconds: 2),
+      );
+      await $.native.tap(Selector(text: 'Allow'));
+    } catch (_) {}
+    //wait for success
+  }
 
   Future<void> pasteFromClipBoard() async {
     // 1) Focus the input and open the context menu
