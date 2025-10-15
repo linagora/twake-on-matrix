@@ -4,6 +4,12 @@ ARG FLUTTER_VERSION=3.32.8
 # Building Twake for the web
 FROM --platform=linux/amd64 ghcr.io/cirruslabs/flutter:${FLUTTER_VERSION} AS web-builder
 ARG TWAKECHAT_BASE_HREF="/web/"
+
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends curl pkg-config libssl-dev && \
+    curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+ENV PATH="/root/.cargo/bin:${PATH}"
+
 COPY . /app
 WORKDIR /app
 RUN DEBIAN_FRONTEND=noninteractive apt update && \
