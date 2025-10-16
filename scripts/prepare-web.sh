@@ -3,12 +3,9 @@ set -e
 
 rm -rf .vodozemac
 
-# Get the version of flutter_vodozemac from pubspec.yaml using grep and jq
-# First extract the dependency line and value with grep and sed, then extract version
-version=$(grep "flutter_vodozemac:" -A 1 pubspec.yaml | tail -1 | sed 's/.*: *//')
-# Clean the version string to make it suitable for use as a Git branch or tag name.
+# Get the version of flutter_vodozemac from pubspec.yaml using grep and sed
+version=$(grep "flutter_vodozemac:" pubspec.yaml | sed 's/.*: *//')
 # This regex extracts the first occurrence of a semantic version number (MAJOR.MINOR.PATCH)
-# followed by any alphanumeric, dot, or hyphen characters (e.g., for pre-release identifiers).
 cleaned_version=$(echo "${version}" | grep -oE '[0-9]+\.[0-9]+\.[0-9]+([a-zA-Z0-9.-]*)?' | head -n 1)
 
 # Clone the dart-vodozemac repository using the cleaned version as a branch/tag.
