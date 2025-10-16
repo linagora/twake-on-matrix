@@ -110,13 +110,8 @@ class GroupInformationRobot extends CoreRobot {
       }
       await waitUntilAbsent($, getLoadParticipantsLabel());
     }
-    final List<TwakeListItemRobot> groupList = [];
 
-    final matches = $(TwakeListItem).evaluate();
-    for (final element in matches) {
-      final finder = $(element.widget.runtimeType);
-      groupList.add(TwakeListItemRobot($, finder));
-    }
-    return groupList;
+    final count = $(TwakeListItem).evaluate().length;
+    return List.generate(count, (i) => TwakeListItemRobot($, $(TwakeListItem).at(i)));
   }
 }
