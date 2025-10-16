@@ -98,7 +98,7 @@ const RESOURCES = {"flutter.js": "83d881c1dbb6d6bcd6b42e274605b69c",
 "assets/assets/sounds/phone.ogg": "5c8fb947eb92ca55229cb6bbf533c40f",
 "assets/assets/sas-emoji.json": "b9d99fc6dda6a3250af57af969b4a02d",
 "assets/assets/blur.png": "c9fbc0645941a7124459e5abf9974042",
-"assets/fonts/MaterialIcons-Regular.otf": "5ff3fc8e83bcc450be26d508e28abbe0",
+"assets/fonts/MaterialIcons-Regular.otf": "493ffb650d45ee3a0e5e9f88b7b0f006",
 "assets/configurations/icons/ic_twake_drive.svg": "809f74a4935d36d292419927eafa48d5",
 "assets/configurations/icons/ic_twake_support.svg": "f7e598768d1a5abe0e1385706ef48fa7",
 "assets/configurations/icons/ic_twake_contacts.svg": "0bb550b89450a8415bc2b91092147489",
@@ -738,9 +738,9 @@ const RESOURCES = {"flutter.js": "83d881c1dbb6d6bcd6b42e274605b69c",
 "pkg/vodozemac_bindings_dart_bg.wasm": "3b98e98654d27f98fb57df6dfaab4b54",
 "pkg/vodozemac_bindings_dart.js": "b5bde3f81cd214e89aaa74876cbf76b6",
 "pkg/package.json": "5e17fd65e76b4fd073085bcc4a65de15",
-"flutter_bootstrap.js": "d52af49deea856cec2d66b7cbf46948e",
+"flutter_bootstrap.js": "7fc97443cbdf79bc8b464ffb5b4c4bca",
 "version.json": "bbf2c76b5751d1ad2447a14856af32b7",
-"main.dart.js": "c9ca8b21173d3a70160b39192de95585"};
+"main.dart.js": "dd8fff27f207c3c061d1265bc66cbbbb"};
 // The application shell files that are downloaded before a service worker can
 // start.
 const CORE = ["main.dart.js",
