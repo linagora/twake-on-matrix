@@ -1,4 +1,7 @@
 import 'package:desktop_drop/desktop_drop.dart';
+import 'package:fluffychat/di/global/get_it_initializer.dart';
+import 'package:fluffychat/domain/contact_manager/contacts_manager.dart';
+import 'package:fluffychat/pages/chat/add_contact_banner.dart';
 import 'package:fluffychat/pages/chat/blocked_user_banner.dart';
 import 'package:fluffychat/pages/chat/chat.dart';
 import 'package:fluffychat/pages/chat/chat_app_bar_title_style.dart';
@@ -8,6 +11,7 @@ import 'package:fluffychat/pages/chat_draft/draft_chat.dart';
 import 'package:fluffychat/pages/chat_draft/draft_chat_empty_widget.dart';
 import 'package:fluffychat/pages/chat_draft/draft_chat_input_row.dart';
 import 'package:fluffychat/pages/chat_draft/draft_chat_view_style.dart';
+import 'package:fluffychat/pages/contacts_tab/widgets/add_contact/add_contact_dialog.dart';
 import 'package:fluffychat/resource/image_paths.dart';
 import 'package:fluffychat/utils/string_extension.dart';
 import 'package:fluffychat/widgets/avatar/avatar.dart';
@@ -327,6 +331,25 @@ class DraftChatView extends StatelessWidget {
                           ],
                         );
                       },
+                    ),
+                    ValueListenableBuilder(
+                      valueListenable:
+                          getIt.get<ContactsManager>().getContactsNotifier(),
+                      builder: (context, state, child) {
+                        if (controller.isInsideContactManager(state)) {
+                          return const SizedBox();
+                        }
+
+                        return child ?? const SizedBox();
+                      },
+                      child: AddContactBanner(
+                        onTap: () => showAddContactDialog(
+                          context,
+                          displayName: controller.widget.contact.displayName,
+                          matrixId: controller.widget.contact.matrixId,
+                        ),
+                        show: controller.showAddContactBanner,
+                      ),
                     ),
                   ],
                 ),

@@ -3411,6 +3411,13 @@
   "forNowWeCanOnlyCreateAChatWithUpToTenPeople": "For now we can only create a chat with up to 10 people. Please remove extra users and try again",
   "gotIt": "Got it",
   "weCouldNotCompleteYourRequestTryAgainShortly": "We couldn’t complete your request. Try again shortly",
-  "groupChatCreatedSuccessfullyButWeCouldNotAddSomeParticipants": "Group chat created successfully, but failed to add several people. Please invite them again through \"Group chat info\""
+  "groupChatCreatedSuccessfullyButWeCouldNotAddSomeParticipants": "Group chat created successfully, but failed to add several people. Please invite them again through \"Group chat info\"",
+  "save": "Save",
+  "newContact": "New contact",
+  "firstName": "First name",
+  "lastName": "Last name",
+  "createNewContact": "Create new contact",
+  "addToContacts": "Add to contacts",
+  "invalidUsername": "Invalid username",
   "audioEncoderNotSupportedMessage": "The audio encoder is not supported on this device. Please try using a different browser or device."
 }

@@ -10,7 +10,7 @@ import 'package:flutter/material.dart';
 import 'package:matrix/matrix.dart';
 
 class SameTypeEventsBuilderController {
-  final Future<Timeline> Function() getTimeline;
+  final Future<Timeline?> Function() getTimeline;
   final bool Function(Event) searchFunc;
   final int? limit;
 
@@ -42,8 +42,9 @@ class SameTypeEventsBuilderController {
   Future refresh({bool force = false}) async {
     if (refreshing.value && !force) return;
     emptyNotifier.value = false;
-    refreshing.value = true;
     final timeline = await getTimeline();
+    if (timeline == null) return;
+    refreshing.value = true;
     await _refreshSubscription?.cancel();
     final key = UniqueKey();
     _refreshKey = key;
@@ -71,8 +72,9 @@ class SameTypeEventsBuilderController {
       return;
     }
     emptyNotifier.value = false;
-    loadingMore.value = true;
     final timeline = await getTimeline();
+    if (timeline == null) return;
+    loadingMore.value = true;
     await _loadMoreSubscription?.cancel();
     final key = UniqueKey();
     _loadMoreKey = key;

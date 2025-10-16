@@ -90,9 +90,9 @@ mixin ChatDetailsTabMixin<T extends StatefulWidget>
   static const invitationSelectionWebAndDesktopKey =
       Key('InvitationSelectionWebAndDesktopKey');
 
-  Future<Timeline> _getTimeline() async {
-    _timeline ??= await room!.getTimeline();
-    return _timeline!;
+  Future<Timeline?> _getTimeline() async {
+    _timeline ??= await room?.getTimeline();
+    return _timeline;
   }
 
   Future<String> _handleDownloadAndPlayVideo(Event event) {
@@ -107,16 +107,12 @@ mixin ChatDetailsTabMixin<T extends StatefulWidget>
   }
 
   void _initTabList() {
-    if (room != null) {
-      tabList = [
-        if (chatType == ChatDetailsScreenEnum.group) ChatDetailsPage.members,
-        ChatDetailsPage.media,
-        ChatDetailsPage.links,
-        ChatDetailsPage.files,
-      ];
-    } else {
-      tabList = [];
-    }
+    tabList = [
+      if (chatType == ChatDetailsScreenEnum.group) ChatDetailsPage.members,
+      ChatDetailsPage.media,
+      ChatDetailsPage.links,
+      ChatDetailsPage.files,
+    ];
   }
 
   void _listenForRoomMembersChanged() {

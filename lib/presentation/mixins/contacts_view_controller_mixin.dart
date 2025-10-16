@@ -564,7 +564,10 @@ mixin class ContactsViewControllerMixin {
     required String keyword,
   }) {
     if (keyword.isEmpty) {
-      return recentChat.take(_defaultLimitRecentContacts).toList();
+      return _getRecentContactsExcludingContacts(
+        recentChat: recentChat,
+        contacts: contacts,
+      ).take(_defaultLimitRecentContacts).toList();
     } else {
       return _getRecentContactsExcludingContacts(
         recentChat: recentChat,

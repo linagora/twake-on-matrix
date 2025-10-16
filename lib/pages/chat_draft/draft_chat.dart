@@ -1,9 +1,14 @@
 import 'dart:async';
 
+import 'package:dartz/dartz.dart' hide State;
 import 'package:desktop_drop/desktop_drop.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:fluffychat/app_state/failure.dart';
+import 'package:fluffychat/app_state/success.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
+import 'package:fluffychat/domain/app_state/contact/get_contacts_state.dart';
 import 'package:fluffychat/domain/app_state/direct_chat/create_direct_chat_success.dart';
+import 'package:fluffychat/domain/model/extensions/contact/contact_extension.dart';
 import 'package:fluffychat/domain/model/extensions/platform_file/platform_file_extension.dart';
 import 'package:fluffychat/domain/usecase/create_direct_chat_interactor.dart';
 import 'package:fluffychat/domain/usecase/reactions/get_recent_reactions_interactor.dart';
@@ -232,6 +237,17 @@ class DraftChatController extends State<DraftChat>
       }
     }
   }
+
+  bool isInsideContactManager(Either<Failure, Success> state) => state.fold(
+        (failure) => false,
+        (success) => success is GetContactsSuccess
+            ? success.contacts.any(
+                (contact) => contact
+                    .inTomAddressBook(presentationContact?.matrixId ?? ""),
+              )
+            : false,
+      );
+  final showAddContactBanner = ValueNotifier(true);
 
   Future<void> sendVoiceMessageWeb() async {
     _createRoom(

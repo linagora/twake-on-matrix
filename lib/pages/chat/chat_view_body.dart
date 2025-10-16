@@ -1,4 +1,7 @@
 import 'package:desktop_drop/desktop_drop.dart';
+import 'package:fluffychat/di/global/get_it_initializer.dart';
+import 'package:fluffychat/domain/contact_manager/contacts_manager.dart';
+import 'package:fluffychat/pages/chat/add_contact_banner.dart';
 import 'package:fluffychat/pages/chat/blocked_user_banner.dart';
 import 'package:fluffychat/pages/chat/chat.dart';
 import 'package:fluffychat/pages/chat/chat_event_list.dart';
@@ -11,6 +14,7 @@ import 'package:fluffychat/pages/chat/events/message_content_mixin.dart';
 import 'package:fluffychat/pages/chat/chat_pinned_events/pinned_events_view.dart';
 import 'package:fluffychat/pages/chat/sticky_timestamp_widget.dart';
 import 'package:fluffychat/pages/chat/tombstone_display.dart';
+import 'package:fluffychat/pages/contacts_tab/widgets/add_contact/add_contact_dialog.dart';
 import 'package:fluffychat/presentation/model/chat/view_event_list_ui_state.dart';
 import 'package:fluffychat/resource/image_paths.dart';
 import 'package:fluffychat/utils/date_time_extension.dart';
@@ -175,6 +179,25 @@ class ChatViewBody extends StatelessWidget with MessageContentMixin {
                               color: Theme.of(context).dividerColor,
                             ),
                           ],
+                        );
+                      },
+                    ),
+                    ValueListenableBuilder(
+                      valueListenable:
+                          getIt.get<ContactsManager>().getContactsNotifier(),
+                      builder: (context, state, child) {
+                        final contactToAdd = controller.contactToAdd(state);
+                        if (contactToAdd == null) {
+                          return const SizedBox();
+                        }
+
+                        return AddContactBanner(
+                          onTap: () => showAddContactDialog(
+                            context,
+                            displayName: contactToAdd.displayName,
+                            matrixId: contactToAdd.id,
+                          ),
+                          show: controller.showAddContactBanner,
                         );
                       },
                     ),
