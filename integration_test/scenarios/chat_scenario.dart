@@ -67,6 +67,9 @@ class ChatScenario extends BaseScenario {
     await AddMemberRobot($).getNextIcon().tap();
     // await AddMemberRobot($).getAgreeInviteMemberBtn().tap();
     await $.waitUntilVisible($("Group information"));
+    for(final member in members){
+      await $.waitUntilVisible(GroupInformationRobot($).getMember(member));
+    }
     return (await GroupInformationRobot($).getListOfMembers()).length;
   }
   
@@ -78,6 +81,9 @@ class ChatScenario extends BaseScenario {
       // await GroupInformationRobot($).clickOnAgreeIRemoveMemberBtn();
     }
     await $.waitUntilVisible($("Group information"));
+    for(final member in members){
+      await GroupInformationRobot($).waitUntilAbsent($,(GroupInformationRobot($).getMember(member)));
+    }
     return (await GroupInformationRobot($).getListOfMembers()).length;
   }
 
@@ -87,6 +93,7 @@ class ChatScenario extends BaseScenario {
     await EditGroupInformationRobot($).openBannedUserList();
 
     for(final matrixAddres in matrixAddreses){
+      await $.waitUntilVisible(RemovedUsersRobot($).getUnBanIconUser(matrixAddres));
       await RemovedUsersRobot($).getUnBanIconUser(matrixAddres).tap();
       await RemovedUsersRobot($).waitUntilAbsent($, RemovedUsersRobot($).getBanedUser(matrixAddres));
     }
