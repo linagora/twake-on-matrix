@@ -202,9 +202,7 @@ extension RoomExtension on Room {
 
       if (lastEventAvailableInPreview == null ||
           lastEventAvailableInPreview.shouldHideRedactedEvent() ||
-          lastEventAvailableInPreview.shouldHideBannedEvent() ||
-          lastEventAvailableInPreview.shouldHideChangedAvatarEvent() ||
-          lastEventAvailableInPreview.shouldHideChangedDisplayNameEvent()) {
+          lastEventAvailableInPreview.shouldHideBannedEvent()) {
         final lastState = _getLastestRoomState();
 
         if (lastState == null) return null;
