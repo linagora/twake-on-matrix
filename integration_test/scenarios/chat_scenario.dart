@@ -11,8 +11,11 @@ import 'package:fluffychat/pages/chat/events/message/multi_platform_message_cont
 import 'package:fluffychat/pages/chat/events/message_content.dart';
 import 'package:fluffychat/pages/chat/events/message_time.dart';
 import 'package:fluffychat/pages/chat/seen_by_row.dart';
+import 'package:fluffychat/pages/chat_details/chat_details_edit_view.dart';
+import 'package:fluffychat/pages/chat_details/removed/removed_view.dart';
 import 'package:fluffychat/pages/chat_draft/draft_chat_view.dart';
 import 'package:fluffychat/pages/chat_list/chat_list_body_view.dart';
+import 'package:fluffychat/pages/chat_list/chat_list_item_title.dart';
 import 'package:fluffychat/widgets/context_menu/context_menu_action_item_widget.dart';
 import 'package:fluffychat/widgets/twake_components/twake_icon_button.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -25,13 +28,15 @@ import '../robots/add_member_robot.dart';
 import '../robots/chat_group_detail_robot.dart';
 import '../robots/chat_list_robot.dart';
 import 'package:flutter/material.dart';
+import '../robots/edit_group_information_robot.dart';
 import '../robots/group_information_robot.dart';
 import '../robots/menu_robot.dart';
 import '../robots/new_chat_robot.dart';
+import '../robots/removed_users_robot.dart';
 import '../robots/search_robot.dart';
 import '../robots/setting_for_new_group.dart';
+import '../robots/twake_list_item_robot.dart';
 
-enum UserLevel { member, admin, owner, moderator }
 class ChatScenario extends BaseScenario {
   ChatScenario(super.$);
 
@@ -60,8 +65,11 @@ class ChatScenario extends BaseScenario {
       await AddMemberRobot($).selectAllFilteredAccounts();
     }
     await AddMemberRobot($).getNextIcon().tap();
-    await AddMemberRobot($).getAgreeInviteMemberBtn().tap();
+    // await AddMemberRobot($).getAgreeInviteMemberBtn().tap();
     await $.waitUntilVisible($("Group information"));
+    for(final member in members){
+      await $.waitUntilVisible(GroupInformationRobot($).getMember(member));
+    }
     return (await GroupInformationRobot($).getListOfMembers()).length;
   }
   
@@ -70,10 +78,30 @@ class ChatScenario extends BaseScenario {
     for(final member in members){
       await GroupInformationRobot($).getMember(member).tap();
       await GroupInformationRobot($).clickOnRemoveFromGroup();
-      await GroupInformationRobot($).clickOnAgreeIRemoveMemberBtn();
+      // await GroupInformationRobot($).clickOnAgreeIRemoveMemberBtn();
     }
     await $.waitUntilVisible($("Group information"));
+    for(final member in members){
+      await GroupInformationRobot($).waitUntilAbsent($,(GroupInformationRobot($).getMember(member)));
+    }
     return (await GroupInformationRobot($).getListOfMembers()).length;
+  }
+
+  Future<void> unbanUser(List<String> matrixAddreses) async {
+    await openGroupChatInfo();
+    await GroupInformationRobot($).getEditGroupIcon().tap();
+    await EditGroupInformationRobot($).openBannedUserList();
+
+    for(final matrixAddres in matrixAddreses){
+      await $.waitUntilVisible(RemovedUsersRobot($).getUnBanIconUser(matrixAddres));
+      await RemovedUsersRobot($).getUnBanIconUser(matrixAddres).tap();
+      await RemovedUsersRobot($).waitUntilAbsent($, RemovedUsersRobot($).getBanedUser(matrixAddres));
+    }
+    if($(RemovedView).exists)
+    {
+      await RemovedUsersRobot($).getBackIcon().tap();
+    }
+    await $.waitUntilVisible($(ChatDetailsEditView));
   }
 
   Future<void> backToChatLisFromChatGroupScreen({bool isOpenGroupFromSearchResult = false}) async {
@@ -481,4 +509,41 @@ class ChatScenario extends BaseScenario {
     s.softAssertEquals( await CoreRobot($).isActuallyScrollable($,root: $(SingleChildScrollView),), true,
         'Chat list is not scrollable',);
   }
+
+  bool isPinAChat(TwakeListItemRobot takeListItem) {
+    final title = takeListItem.root.$(ChatListItemTitle);
+    const pinData = IconData(0xF2D7, fontFamily: 'MaterialIcons');
+    final pinFinder = find.descendant(of: title, matching: find.byIcon(pinData));
+    final pin = $(pinFinder);
+    return pin.exists;
+  }
+
+  Future<void> pinAChat(String title) async {
+    final twakeListItem = ChatListRobot($).getChatGroupByTitle(title);
+    if(!isPinAChat(twakeListItem))
+    {
+      await twakeListItem.root.longPress();
+      await $.waitUntilVisible(twakeListItem.getCheckBox());
+      await ChatListRobot($).getPinIcon().tap();
+      await ChatListRobot($).waitUntilAbsent($, ChatListRobot($).getPinIcon());
+    }
+  }
+
+  Future<void> unPinAChat(String title) async {
+    final twakeListItem = ChatListRobot($).getChatGroupByTitle(title);
+    if(isPinAChat(twakeListItem))
+    {
+      await twakeListItem.root.longPress();
+      await $.waitUntilVisible(twakeListItem.getCheckBox());
+      await ChatListRobot($).getUnPinIcon().tap();
+      await ChatListRobot($).waitUntilAbsent($, ChatListRobot($).getUnPinIcon());
+    }
+  }
+
+  Future<void> verifyAChatIsPin(String title, bool isPin) async {
+    final twakeListItem = ChatListRobot($).getChatGroupByTitle(title);
+    final exists = isPinAChat(twakeListItem);
+    expect(exists, isPin, reason: 'Expected pin=$isPin but got $exists for "$title"');
+  }
+  
 }
