@@ -3,6 +3,7 @@ import 'package:fluffychat/pages/chat/chat_event_list.dart';
 import 'package:fluffychat/pages/chat/chat_input_row.dart';
 import 'package:fluffychat/pages/chat/events/message/swipeable_message.dart';
 import 'package:fluffychat/pages/chat/events/message_content.dart';
+import 'package:fluffychat/pages/chat/events/message_video_download_content.dart';
 import 'package:fluffychat/utils/permission_dialog.dart';
 import 'package:fluffychat/widgets/twake_components/twake_icon_button.dart';
 import 'package:flutter/material.dart';
@@ -65,8 +66,18 @@ class ChatGroupDetailRobot extends CoreRobot {
     return List.generate(count, (i) => TwakeListItemRobot($, $(SwipeableMessage).at(i)));
   }
 
-  TwakeListItemRobot getTheLastestSentImage() {
+  TwakeListItemRobot getTheLastestImageMsg() {
     final List<TwakeListItemRobot> messages = getAllImageMessages();
+    return messages.first;
+  }
+
+  List<TwakeListItemRobot> getAllVideoMessages() {
+    final count = $(SwipeableMessage).containing($(MessageVideoDownloadContent)).evaluate().length;
+    return List.generate(count, (i) => TwakeListItemRobot($, $(SwipeableMessage).at(i)));
+  }
+
+  TwakeListItemRobot getTheLastestVideoMsg() {
+    final List<TwakeListItemRobot> messages = getAllVideoMessages();
     return messages.first;
   }
 
@@ -129,11 +140,16 @@ class ChatGroupDetailRobot extends CoreRobot {
     await getBackIcon().tap();
   }
 
-  Future<PullDownMenuRobot> openPullDownMenu(String message) async {
-    await $(MessageContent).containing(find.text(message)).longPress();
+  Future<PullDownMenuRobot> openPullDownMenuOfAPatrolFinder(PatrolFinder message) async {
+    await message.longPress();
     await $.waitUntilVisible($(PullDownMenu));
     await $.pump();
     return PullDownMenuRobot($);
+  }
+
+  Future<PullDownMenuRobot> openPullDownMenuOfAMessage(String message) async {
+    final patrFinder = $(MessageContent).containing(find.text(message));
+    return await openPullDownMenuOfAPatrolFinder(patrFinder);
   }
 
   Future<void> closePullDownMenu() async {
