@@ -176,14 +176,17 @@ extension RoomExtension on Room {
                 if (a.redacted) return b;
                 if (b.redacted) return a;
               }
-              if (a.roomMemberChangeType == RoomMemberChangeType.avatar ||
-                  b.roomMemberChangeType == RoomMemberChangeType.avatar) {
-                if (a.roomMemberChangeType == RoomMemberChangeType.avatar) {
-                  return b;
-                }
-                if (b.roomMemberChangeType == RoomMemberChangeType.avatar) {
-                  return a;
-                }
+              if (a.shouldHideChangedAvatarEvent()) {
+                return b;
+              }
+              if (b.shouldHideChangedAvatarEvent()) {
+                return a;
+              }
+              if (a.shouldHideChangedDisplayNameEvent()) {
+                return b;
+              }
+              if (b.shouldHideChangedDisplayNameEvent()) {
+                return a;
               }
               if (a.originServerTs == b.originServerTs) {
                 // if two events have the same sort order we want to give encrypted events a lower priority
@@ -199,7 +202,9 @@ extension RoomExtension on Room {
 
       if (lastEventAvailableInPreview == null ||
           lastEventAvailableInPreview.shouldHideRedactedEvent() ||
-          lastEventAvailableInPreview.shouldHideBannedEvent()) {
+          lastEventAvailableInPreview.shouldHideBannedEvent() ||
+          lastEventAvailableInPreview.shouldHideChangedAvatarEvent() ||
+          lastEventAvailableInPreview.shouldHideChangedDisplayNameEvent()) {
         final lastState = _getLastestRoomState();
 
         if (lastState == null) return null;
@@ -214,10 +219,8 @@ extension RoomExtension on Room {
         for (final messageEvent in messageEvents) {
           if (messageEvent.shouldHideRedactedEvent()) continue;
           if (messageEvent.shouldHideBannedEvent()) continue;
-          if (messageEvent.roomMemberChangeType ==
-              RoomMemberChangeType.avatar) {
-            continue;
-          }
+          if (messageEvent.shouldHideChangedAvatarEvent()) continue;
+          if (messageEvent.shouldHideChangedDisplayNameEvent()) continue;
 
           if (messageEvent.originServerTs.millisecondsSinceEpoch >
               lastState.originServerTs.millisecondsSinceEpoch) {
