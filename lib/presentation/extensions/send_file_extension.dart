@@ -427,7 +427,7 @@ extension SendFileExtension on Room {
     // Send event
     final content = <String, dynamic>{
       'msgtype': msgType,
-      'body': captionInfo ?? '',
+      'body': captionInfo ?? fileInfo.fileName,
       if (contentCaptionFormat != null) ...contentCaptionFormat,
       'filename': fileInfo.fileName,
       'url': uploadResp.toString(),
@@ -572,7 +572,7 @@ extension SendFileExtension on Room {
                 MatrixEvent(
                   content: {
                     'msgtype': messageType,
-                    'body': captionInfo ?? '',
+                    'body': captionInfo ?? fileInfo.fileName,
                     'filename': fileInfo.fileName,
                     'info': {
                       ...fileInfo.metadata,

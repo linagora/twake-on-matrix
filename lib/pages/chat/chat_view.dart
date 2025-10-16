@@ -198,7 +198,7 @@ class ChatView extends StatelessWidget with MessageContentMixin {
                       return ValueListenableBuilder(
                         valueListenable: controller.audioRecordStateNotifier,
                         builder: (context, audioRecordState, _) {
-                          if (audioRecordState == AudioRecordState.recording) {
+                          if (audioRecordState != AudioRecordState.initial) {
                             return const SizedBox.shrink();
                           }
                           return Padding(

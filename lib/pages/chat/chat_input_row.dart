@@ -34,7 +34,7 @@ class ChatInputRow extends StatelessWidget {
     return KeyboardVisibilityBuilder(
       builder: (context, isKeyboardVisible) {
         final child = Stack(
-          alignment: Alignment.center,
+          alignment: Alignment.centerRight,
           children: [
             Padding(
               padding: _paddingInputRow(
@@ -60,7 +60,7 @@ class ChatInputRow extends StatelessWidget {
                                 controller.audioRecordStateNotifier,
                             builder: (context, audioState, _) {
                               if (PlatformInfos.isWeb &&
-                                  audioState == AudioRecordState.recording) {
+                                  audioState != AudioRecordState.initial) {
                                 return const SizedBox.shrink();
                               }
 
@@ -89,7 +89,7 @@ class ChatInputRow extends StatelessWidget {
                           valueListenable: controller.audioRecordStateNotifier,
                           builder: (context, audioState, _) {
                             if (PlatformInfos.isWeb &&
-                                audioState == AudioRecordState.recording) {
+                                audioState != AudioRecordState.initial) {
                               return Expanded(
                                 child: ConstrainedBox(
                                   constraints: const BoxConstraints(
@@ -145,6 +145,9 @@ class ChatInputRow extends StatelessWidget {
                   return ValueListenableBuilder(
                     valueListenable: controller.replyEventNotifier,
                     builder: (context, reply, _) {
+                      final view = View.maybeOf(context);
+                      final bottomInset = (view?.viewInsets.bottom ?? 0) /
+                          (view?.devicePixelRatio ?? 0);
                       return Offstage(
                         offstage: text.isNotEmpty || reply != null,
                         child: Padding(
@@ -154,6 +157,12 @@ class ChatInputRow extends StatelessWidget {
                           ),
                           child: SocialMediaRecorder(
                             radius: BorderRadius.circular(24),
+                            pauseBottomPositioned:
+                                102 + (isKeyboardVisible ? bottomInset : 16),
+                            pauseRightPositioned: 16,
+                            resumeDecoration: BoxDecoration(
+                              color: LinagoraSysColors.material().surface,
+                            ),
                             soundRecorderWhenLockedDecoration: BoxDecoration(
                               borderRadius:
                                   ChatInputRowStyle.chatInputRowBorderRadius,
@@ -184,6 +193,17 @@ class ChatInputRow extends StatelessWidget {
                                 controller.sendController.clear();
                               }
                               controller.stopRecording.call();
+                            },
+                            deleteRecording: () {
+                              Logs().d('ChatInputRowMobile:: deleteRecording');
+                              if (controller.sendController.text.isNotEmpty) {
+                                controller.sendController.clear();
+                              }
+                              controller.stopRecording.call();
+                            },
+                            pauseRecording: () {
+                              Logs().d('ChatInputRowMobile:: pauseRecording');
+                              controller.pauseRecording.call();
                             },
                             sendRequestFunction: (soundFile, time, waveFrom) {
                               Logs().d(
@@ -245,6 +265,13 @@ class ChatInputRow extends StatelessWidget {
                                 color: LinagoraSysColors.material().error,
                               ),
                             ),
+                            pauseSplashColor: LinagoraSysColors.material()
+                                .primary
+                                .withOpacity(0.5),
+                            pauseHighlightColor: LinagoraSysColors.material()
+                                .primary
+                                .withOpacity(0.2),
+                            pauseWidget: const _AnimatedPauseButton(),
                           ),
                         ),
                       );
@@ -501,6 +528,96 @@ class ActionSelectModeWidget extends StatelessWidget {
           ],
         ],
       ),
+    );
+  }
+}
+
+class _AnimatedPauseButton extends StatefulWidget {
+  const _AnimatedPauseButton();
+
+  @override
+  State<_AnimatedPauseButton> createState() => _AnimatedPauseButtonState();
+}
+
+class _AnimatedPauseButtonState extends State<_AnimatedPauseButton>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _scaleAnimation;
+  late Animation<double> _opacityAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      duration: const Duration(milliseconds: 1500),
+      vsync: this,
+    )..repeat(reverse: true);
+
+    _scaleAnimation = Tween<double>(
+      begin: 0.9,
+      end: 1.0,
+    ).animate(
+      CurvedAnimation(
+        parent: _controller,
+        curve: Curves.easeInOut,
+      ),
+    );
+
+    _opacityAnimation = Tween<double>(
+      begin: 0.5,
+      end: 1.0,
+    ).animate(
+      CurvedAnimation(
+        parent: _controller,
+        curve: Curves.easeInOut,
+      ),
+    );
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _controller,
+      builder: (context, child) {
+        return Transform.scale(
+          scale: _scaleAnimation.value,
+          child: Opacity(
+            opacity: _opacityAnimation.value,
+            child: Container(
+              width: 32,
+              height: 32,
+              decoration: BoxDecoration(
+                color: LinagoraSysColors.material().surface,
+                borderRadius: BorderRadius.circular(32),
+                border: Border.all(
+                  color: LinagoraSysColors.material().onPrimary,
+                  width: 1,
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: LinagoraSysColors.material()
+                        .primary
+                        .withOpacity(0.3 * _opacityAnimation.value),
+                    blurRadius: 8 * _opacityAnimation.value,
+                    spreadRadius: 2 * _opacityAnimation.value,
+                  ),
+                ],
+              ),
+              child: Icon(
+                Icons.pause,
+                size: 20,
+                color: LinagoraRefColors.material().neutral[50],
+              ),
+            ),
+          ),
+        );
+      },
     );
   }
 }

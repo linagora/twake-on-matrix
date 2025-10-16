@@ -257,7 +257,7 @@ extension SendFileWebExtension on Room {
     // Send event
     final content = <String, dynamic>{
       'msgtype': file.msgType,
-      'body': captionInfo ?? '',
+      'body': captionInfo ?? file.name,
       if (contentCaptionFormat != null) ...contentCaptionFormat,
       'filename': file.name,
       if (encryptedFile == null) 'url': uploadResp.toString(),
@@ -349,7 +349,7 @@ extension SendFileWebExtension on Room {
                 MatrixEvent(
                   content: {
                     'msgtype': file.msgType,
-                    'body': captionInfo ?? '',
+                    'body': captionInfo ?? file.name,
                     if (contentCaptionFormat != null) ...contentCaptionFormat,
                     'filename': file.name,
                     'info': file.info,
