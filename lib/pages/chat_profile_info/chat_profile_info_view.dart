@@ -316,27 +316,7 @@ class _Information extends StatelessWidget {
                       ChatProfileActionButton(
                         title: L10n.of(context)!.message,
                         iconData: Icons.messenger_outline_rounded,
-                        onTap: () {
-                          if (matrixId == null) return;
-                          final roomId = Matrix.of(context)
-                              .client
-                              .getDirectChatFromUserId(matrixId!);
-                          context.pop();
-                          if (roomId == null) {
-                            context.go(
-                              '/rooms/draftChat',
-                              extra: {
-                                PresentationContactConstant.receiverId:
-                                    matrixId ?? '',
-                                PresentationContactConstant.displayName:
-                                    displayName ?? '',
-                                PresentationContactConstant.status: '',
-                              },
-                            );
-                          } else {
-                            context.go('/rooms/$roomId');
-                          }
-                        },
+                        onTap: () => _handleMessageTap(context),
                       ),
                     ],
                   ),
@@ -458,6 +438,24 @@ class _Information extends StatelessWidget {
         ),
       ],
     );
+  }
+
+  void _handleMessageTap(BuildContext context) {
+    if (matrixId == null) return;
+    final roomId = Matrix.of(context).client.getDirectChatFromUserId(matrixId!);
+    context.pop();
+    if (roomId == null) {
+      context.go(
+        '/rooms/draftChat',
+        extra: {
+          PresentationContactConstant.receiverId: matrixId ?? '',
+          PresentationContactConstant.displayName: displayName ?? '',
+          PresentationContactConstant.status: '',
+        },
+      );
+    } else {
+      context.go('/rooms/$roomId');
+    }
   }
 }
 

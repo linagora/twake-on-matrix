@@ -8,6 +8,7 @@ import 'package:fluffychat/app_state/success.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/domain/app_state/contact/get_contacts_state.dart';
 import 'package:fluffychat/domain/app_state/direct_chat/create_direct_chat_success.dart';
+import 'package:fluffychat/domain/model/extensions/contact/contact_extension.dart';
 import 'package:fluffychat/domain/model/extensions/platform_file/platform_file_extension.dart';
 import 'package:fluffychat/domain/usecase/create_direct_chat_interactor.dart';
 import 'package:fluffychat/domain/usecase/reactions/get_recent_reactions_interactor.dart';
@@ -241,11 +242,8 @@ class DraftChatController extends State<DraftChat>
         (failure) => false,
         (success) => success is GetContactsSuccess
             ? success.contacts.any(
-                (c) =>
-                    c.emails?.any(
-                      (e) => e.matrixId == presentationContact?.matrixId,
-                    ) ==
-                    true,
+                (contact) => contact
+                    .isMatrixIdRegistered(presentationContact?.matrixId ?? ""),
               )
             : false,
       );

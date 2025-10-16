@@ -211,6 +211,11 @@ extension ContactExtension on Contact {
       emails: updatedEmails,
     );
   }
+
+  bool isMatrixIdRegistered(String matrixId) {
+    return emails?.any((email) => email.matrixId == matrixId) == true ||
+        phoneNumbers?.any((phone) => phone.matrixId == matrixId) == true;
+  }
 }
 
 extension SetContactExtension on Set<Contact> {
