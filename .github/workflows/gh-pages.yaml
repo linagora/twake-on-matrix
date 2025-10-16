@@ -39,9 +39,6 @@ jobs:
       - name: Install rust-src component for nightly
         run: rustup component add rust-src --toolchain nightly
 
-      - name: Install yq
-        run: sudo apt-get update && sudo apt-get install -y yq
-
       - name: Cache Cargo
         uses: actions/cache@v4
         with:
@@ -70,7 +67,7 @@ jobs:
           flutter pub get
           flutter pub run build_runner build -d
           flutter build web --release --verbose --source-maps --base-href="/${GITHUB_REPOSITORY##*/}/$FOLDER/"
-          echo "$TWAKE_PREVIEW_CONFIG" | yq '.issue_id = strenv(FOLDER)' > ./build/web/config.json
+          echo "$TWAKE_PREVIEW_CONFIG" | jq '.issue_id = strenv(FOLDER)' > ./build/web/config.json
 
       - name: Configure environments
         id: configure

@@ -8,13 +8,10 @@ WORKDIR /app
 # Install build dependencies
 RUN apt-get update && apt-get install -y --no-install-recommends git curl ca-certificates && \
     rm -rf /var/lib/apt/lists/*
-# Install Flutter to ensure yq is available, and to get the flutter_vodozemac version
+# Install Flutter to ensure dependency tools are available
 RUN curl --proto '=https' --tlsv1.2 -sSf https://storage.googleapis.com/flutter_infra_release/releases/stable/linux/flutter_linux_${FLUTTER_VERSION}-stable.tar.xz \
     | tar -xJvf - --strip-components=1 -C /usr/local/
 ENV PATH="/usr/local/bin:${PATH}"
-# Install yq
-RUN wget https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 -O /usr/bin/yq &&\
-    chmod +x /usr/bin/yq
 # Copy only necessary files for vodozemac build
 COPY pubspec.yaml pubspec.yaml
 COPY pubspec.lock pubspec.lock # pubspec.lock is needed to extract sha256
