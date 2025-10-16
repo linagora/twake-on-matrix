@@ -1,6 +1,7 @@
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:patrol/patrol.dart';
+import 'package:photo_manager/photo_manager.dart';
 import '../robots/chat_group_detail_robot.dart';
 
 const _sb = 'com.apple.springboard';
@@ -109,3 +110,11 @@ Future<void> pickFromFiles(PatrolIntegrationTester $, String fileName) async {
   await selectFileInDownloads($, fileName);
   await $.waitUntilVisible(ChatGroupDetailRobot($).getInputTextField());
 }
+
+Future<int> countItemsInGallery(PatrolIntegrationTester $) async {
+    final albums = await PhotoManager.getAssetPathList(type: RequestType.image, onlyAll: true);
+    await allowPhotosIfNeeded($);
+    final recents = albums.first;
+    final total = await recents.assetCountAsync;
+    return total;
+  }
