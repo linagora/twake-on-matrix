@@ -354,7 +354,8 @@ class ChatController extends State<Chat>
       null;
 
   void updateInputTextNotifier() {
-    if (audioRecordStateNotifier.value == AudioRecordState.recording) {
+    if (audioRecordStateNotifier.value == AudioRecordState.recording ||
+        audioRecordStateNotifier.value == AudioRecordState.paused) {
       return;
     }
     inputText.value = sendController.text;
@@ -836,7 +837,7 @@ class ChatController extends State<Chat>
   }
 
   void reportEventAction(Event event) async {
-    if (audioRecordStateNotifier.value == AudioRecordState.recording) {
+    if (audioRecordStateNotifier.value != AudioRecordState.initial) {
       preventActionWhileRecordingMobile(context: context);
       return;
     }
@@ -989,7 +990,7 @@ class ChatController extends State<Chat>
   }
 
   void forwardEventsAction({Event? event}) async {
-    if (audioRecordStateNotifier.value == AudioRecordState.recording) {
+    if (audioRecordStateNotifier.value != AudioRecordState.initial) {
       preventActionWhileRecordingMobile(context: context);
       return;
     }
@@ -1037,7 +1038,7 @@ class ChatController extends State<Chat>
   void editAction({
     Event? editEvent,
   }) {
-    if (audioRecordStateNotifier.value == AudioRecordState.recording) {
+    if (audioRecordStateNotifier.value != AudioRecordState.initial) {
       preventActionWhileRecordingMobile(context: context);
       return;
     }
@@ -1065,7 +1066,7 @@ class ChatController extends State<Chat>
   void replyAction({
     Event? replyTo,
   }) {
-    if (audioRecordStateNotifier.value == AudioRecordState.recording) {
+    if (audioRecordStateNotifier.value != AudioRecordState.initial) {
       preventActionWhileRecordingMobile(context: context);
       return;
     }
@@ -1347,7 +1348,7 @@ class ChatController extends State<Chat>
   }
 
   void onSelectMessage(Event event) {
-    if (audioRecordStateNotifier.value == AudioRecordState.recording) {
+    if (audioRecordStateNotifier.value != AudioRecordState.initial) {
       preventActionWhileRecordingMobile(context: context);
       return;
     }
@@ -1430,7 +1431,7 @@ class ChatController extends State<Chat>
   static const Duration _storeInputTimeout = Duration(milliseconds: 500);
 
   void onInputBarChanged(String text) {
-    if (audioRecordStateNotifier.value == AudioRecordState.recording) {
+    if (audioRecordStateNotifier.value != AudioRecordState.initial) {
       return;
     }
     setReadMarker();
@@ -1738,7 +1739,7 @@ class ChatController extends State<Chat>
   }
 
   Future<String?> downloadFileAction(BuildContext context, Event event) async {
-    if (audioRecordStateNotifier.value == AudioRecordState.recording) {
+    if (audioRecordStateNotifier.value != AudioRecordState.initial) {
       preventActionWhileRecordingMobile(context: context);
       return null;
     }
@@ -2009,7 +2010,7 @@ class ChatController extends State<Chat>
   }
 
   void onPushDetails() async {
-    if (audioRecordStateNotifier.value == AudioRecordState.recording) {
+    if (audioRecordStateNotifier.value != AudioRecordState.initial) {
       preventActionWhileRecordingMobile(context: context);
       return null;
     }
@@ -2022,7 +2023,7 @@ class ChatController extends State<Chat>
   }
 
   void toggleSearch() {
-    if (audioRecordStateNotifier.value == AudioRecordState.recording) {
+    if (audioRecordStateNotifier.value != AudioRecordState.initial) {
       preventActionWhileRecordingMobile(context: context);
       return;
     }
@@ -2347,7 +2348,7 @@ class ChatController extends State<Chat>
     BuildContext context,
     TapDownDetails tapDownDetails,
   ) async {
-    if (audioRecordStateNotifier.value == AudioRecordState.recording) {
+    if (audioRecordStateNotifier.value != AudioRecordState.initial) {
       preventActionWhileRecordingMobile(context: context);
       return null;
     }

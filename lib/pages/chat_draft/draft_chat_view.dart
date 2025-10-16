@@ -163,6 +163,12 @@ class DraftChatView extends StatelessWidget {
                                   }
                                   controller.stopRecording();
                                 },
+                                pauseRecording: () {
+                                  controller.pauseRecording();
+                                },
+                                deleteRecording: () {
+                                  controller.deleteRecording();
+                                },
                                 sendVoiceMessageAction:
                                     (audioFile, duration, waveform) =>
                                         controller.sendVoiceMessageAction(
