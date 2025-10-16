@@ -2,6 +2,7 @@ import 'package:fluffychat/pages/chat/events/event_video_player.dart';
 import 'package:fluffychat/pages/chat/events/message_content.dart';
 import 'package:fluffychat/pages/chat/events/message_download_content.dart';
 import 'package:fluffychat/pages/chat/events/message_time.dart';
+import 'package:fluffychat/pages/chat/events/message_video_download_content.dart';
 import 'package:fluffychat/pages/chat_list/chat_custom_slidable_action.dart';
 import 'package:fluffychat/pages/chat_list/chat_list_item_subtitle.dart';
 import 'package:fluffychat/pages/chat_list/chat_list_item_title.dart';
@@ -185,6 +186,10 @@ class TwakeListItemRobot extends CoreRobot {
   PatrolFinder getFileDownloadIcon() {
     const icon = IconData(0xE097, fontFamily: 'MaterialIcons');
     return $(InkWell).containing(find.byIcon(icon));
+  }
+
+  PatrolFinder getMessageVideoDownloadContent() {
+    return root.$(MessageContent).$(MessageVideoDownloadContent);
   }
 
   PatrolFinder getVideoDownloadIcon() {
