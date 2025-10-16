@@ -127,13 +127,13 @@ class ChatScenario extends BaseScenario {
   }
 
   Future<void> replyMessage(String message, String reply) async {
-    await ChatGroupDetailRobot($).openPullDownMenu(message);
+    await ChatGroupDetailRobot($).openPullDownMenuOfAMessage(message);
     await (PullDownMenuRobot($).getReplyItem()).tap();
     await sendAMesage(reply);
   }
 
   Future<void> forwardMessage(String message, String receiver) async {
-    await ChatGroupDetailRobot($).openPullDownMenu(message);
+    await ChatGroupDetailRobot($).openPullDownMenuOfAMessage(message);
     await PullDownMenuRobot($).getForwardItem().tap();
   }
   
@@ -145,22 +145,24 @@ class ChatScenario extends BaseScenario {
   }
 
   Future<void> copyMessage(String message) async {
-    await ChatGroupDetailRobot($).openPullDownMenu(message);
+    await ChatGroupDetailRobot($).openPullDownMenuOfAMessage(message);
     await (PullDownMenuRobot($).getCopyItem()).tap();
   }
   
   Future<void> downloadAnImage(PatrolFinder image) async {
     await ($).waitUntilVisible(image);
+    await ChatGroupDetailRobot($).openPullDownMenuOfAPatrolFinder(image);
     await (PullDownMenuRobot($).getSaveToGalleryItem()).tap();  
     await ChatGroupDetailRobot($).waitUntilAbsent($, PullDownMenuRobot($).getSaveToGalleryItem());
     try {
       await $.native.waitUntilVisible(
-        Selector(text: 'Allow'),
-        timeout: const Duration(seconds: 2),
-      );
-      await $.native.tap(Selector(text: 'Allow'));
+      Selector(text: 'OK'), appId: 'com.apple.springboard',
+      timeout: const Duration(seconds: 8),
+    );
+    await $.native.tap(Selector(text: 'OK'), appId: 'com.apple.springboard');
     } catch (_) {}
-    //wait for success
+
+    await $.waitUntilVisible($("File saved to Gallery"), timeout: const Duration(seconds: 60));
   }
 
   Future<void> pasteFromClipBoard() async {
@@ -202,13 +204,13 @@ class ChatScenario extends BaseScenario {
   }
 
   Future<void> editMessage(String message, String newMessage) async {
-    await ChatGroupDetailRobot($).openPullDownMenu(message);
+    await ChatGroupDetailRobot($).openPullDownMenuOfAMessage(message);
     await (PullDownMenuRobot($).getEditItem()).tap();
     await sendAMesage(newMessage);
   }
 
   Future<void> selectMessage(String message) async {
-    await ChatGroupDetailRobot($).openPullDownMenu(message);
+    await ChatGroupDetailRobot($).openPullDownMenuOfAMessage(message);
     await (PullDownMenuRobot($).getSelectItem()).tap();
   }
 
@@ -230,17 +232,17 @@ class ChatScenario extends BaseScenario {
   }
 
   Future<void> pinMessage(String message) async {
-    await ChatGroupDetailRobot($).openPullDownMenu(message);
+    await ChatGroupDetailRobot($).openPullDownMenuOfAMessage(message);
     await (PullDownMenuRobot($).getPinItem()).tap();
   }
 
   Future<void> unpinMessage(String message) async {
-    await ChatGroupDetailRobot($).openPullDownMenu(message);
+    await ChatGroupDetailRobot($).openPullDownMenuOfAMessage(message);
     await (PullDownMenuRobot($).getUnpinItem()).tap();
   }
 
   Future<void> deleteMessage(String message) async {
-    await ChatGroupDetailRobot($).openPullDownMenu(message);
+    await ChatGroupDetailRobot($).openPullDownMenuOfAMessage(message);
     await (PullDownMenuRobot($).getDeleteItem()).tap();
     await $.native.tap(Selector(text: 'Delete')); 
   }
