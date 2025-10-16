@@ -265,4 +265,36 @@ void main() {
       s.softAssertEquals(ChatGroupDetailRobot($).getTheLastestMessage().getVideoDownloadIcon().exists, true,'video has not been sent ');
     },
   );
+
+  TestBase().runPatrolTest(
+    description: 'View profile of a members in a group',
+    test: ($) async {
+      final s = SoftAssertHelper();
+      //goto chat
+      await HomeRobot($).gotoChatListScreen();
+
+      //open a group
+      const groupTest = String.fromEnvironment('GroupForDownload');
+      await ChatScenario($).openChatGroupByTitle(groupTest);
+
+      final numberOfDownloadedItem = await countItemsInGallery($);
+      //dowwn load the lastest image
+      final image = ChatGroupDetailRobot($).getTheLastestImageMsg().getImage();
+      await ChatScenario($).downloadAnImage(image);
+
+      final numberOfDownloadedItemAfterDownloadImage = await countItemsInGallery($);
+      final expectNumber = numberOfDownloadedItemAfterDownloadImage - numberOfDownloadedItem;
+      s.softAssertEquals(expectNumber == 1, true, "image have not downloaded");
+      
+      //dowwn load the lastest video
+      final video = ChatGroupDetailRobot($).getTheLastestVideoMsg().getMessageVideoDownloadContent();
+      await ChatScenario($).downloadAnImage(video);
+
+      final numberOfDownloadedItemAfterDownloadVideo = await countItemsInGallery($);
+      final expectNumber2 = numberOfDownloadedItemAfterDownloadVideo - numberOfDownloadedItemAfterDownloadImage;
+      s.softAssertEquals(expectNumber2 == 1, true, "image have not downloaded -- $numberOfDownloadedItem -- $numberOfDownloadedItemAfterDownloadImage");
+    
+      s.verifyAll();
+    },
+  );
 }
