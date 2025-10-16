@@ -2,18 +2,18 @@
 ARG FLUTTER_VERSION=3.32.8
 
 # Build stage for vodozemac (Rust WebAssembly)
-FROM rust:nightly AS vodozemac-builder
+FROM rust:1.70-buster AS vodozemac-builder
 ARG FLUTTER_VERSION
 WORKDIR /app
-# Install build dependencies
+# Install build dependencies, ensuring minimal image size
 RUN apt-get update && apt-get install -y --no-install-recommends git curl ca-certificates && \
     rm -rf /var/lib/apt/lists/*
-# Install Flutter to ensure dependency tools are available
+# Install Flutter to ensure dependency tools are available (needed for pubspec.yaml parsing)
 RUN curl --proto '=https' --tlsv1.2 -sSf https://storage.googleapis.com/flutter_infra_release/releases/stable/linux/flutter_linux_${FLUTTER_VERSION}-stable.tar.xz \
     | tar -xJvf - --strip-components=1 -C /usr/local/
 ENV PATH="/usr/local/bin:${PATH}"
-# Ensure nightly toolchain and rust-src component are available
-RUN rustup toolchain install nightly && rustup component add rust-src --toolchain nightly
+# Install and set nightly toolchain as default, then add rust-src for it
+RUN rustup toolchain install nightly && rustup default nightly && rustup component add rust-src --toolchain nightly
 # Copy only necessary files for vodozemac build
 COPY pubspec.yaml pubspec.yaml
 COPY scripts/prepare-web.sh scripts/prepare-web.sh
