@@ -410,6 +410,7 @@ class _ImageWidget extends StatelessWidget {
                             ? context.getCacheSize(height!)
                             : null,
                     fit: fit,
+                    alignment: Alignment.center,
                     filterQuality: FilterQuality.medium,
                     errorBuilder: imageErrorWidgetBuilder,
                   )
@@ -467,6 +468,7 @@ class _ImageNativeBuilder extends StatelessWidget {
               : null,
       fit: fit,
       filterQuality: FilterQuality.medium,
+      alignment: Alignment.center,
       errorBuilder: imageErrorWidgetBuilder,
     );
   }
