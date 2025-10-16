@@ -16,9 +16,11 @@ import 'package:fluffychat/presentation/mixins/chat_details_tab_mixin.dart';
 import 'package:fluffychat/presentation/mixins/handle_video_download_mixin.dart';
 import 'package:fluffychat/presentation/mixins/play_video_action_mixin.dart';
 import 'package:fluffychat/presentation/model/contact/presentation_contact.dart';
+import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/utils/twake_snackbar.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:matrix/matrix.dart';
 import 'package:fluffychat/generated/l10n/app_localizations.dart';
 
@@ -219,6 +221,20 @@ class ChatProfileInfoController extends State<ChatProfileInfo>
       blockUserLoadingNotifier.value = false;
       isBlockedUser.value = userBlocked;
     });
+  }
+
+  bool isAlreadyInChat(BuildContext context) {
+    if (!PlatformInfos.isMobile) return true;
+
+    final router = GoRouter.of(context);
+    final RouteMatch lastMatch =
+        router.routerDelegate.currentConfiguration.last;
+    final RouteMatchList matchList = lastMatch is ImperativeRouteMatch
+        ? lastMatch.matches
+        : router.routerDelegate.currentConfiguration;
+    final String location = matchList.uri.toString();
+    final pathParameters = matchList.pathParameters;
+    return location.contains('/draftChat') || pathParameters['roomid'] != null;
   }
 
   @override

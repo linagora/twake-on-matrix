@@ -2,12 +2,18 @@ import 'dart:async';
 
 import 'package:adaptive_dialog/adaptive_dialog.dart';
 import 'package:collection/collection.dart';
+import 'package:dartz/dartz.dart' hide State;
 import 'package:debounce_throttle/debounce_throttle.dart';
 import 'package:desktop_drop/desktop_drop.dart';
+import 'package:fluffychat/app_state/failure.dart';
+import 'package:fluffychat/app_state/success.dart';
 import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
+import 'package:fluffychat/domain/app_state/contact/get_contacts_state.dart';
 import 'package:fluffychat/domain/app_state/room/report_content_state.dart';
 import 'package:fluffychat/domain/model/chat/message_report_reason.dart';
+import 'package:fluffychat/domain/model/contact/contact.dart';
+import 'package:fluffychat/domain/model/extensions/contact/contact_extension.dart';
 import 'package:fluffychat/domain/model/room/room_extension.dart';
 import 'package:fluffychat/domain/usecase/reactions/get_recent_reactions_interactor.dart';
 import 'package:fluffychat/domain/usecase/reactions/store_recent_reactions_interactor.dart';
@@ -269,6 +275,25 @@ class ChatController extends State<Chat>
         MessageTypes.Audio,
         MessageTypes.File,
       }.contains(selectedEvents.single.messageType);
+
+  final showAddContactBanner = ValueNotifier(true);
+
+  User? contactToAdd(Either<Failure, Success> state) {
+    final isDirectChat = room?.isDirectChat == true;
+    if (!isDirectChat) return null;
+
+    final List<Contact> contacts = state.fold(
+      (failure) => [],
+      (success) => success is GetContactsSuccess ? success.contacts : [],
+    );
+    return room?.getParticipants().firstWhereOrNull(
+          (user) =>
+              user.id != client.userID &&
+              contacts.none(
+                (contact) => contact.inTomAddressBook(user.id),
+              ),
+        );
+  }
 
   List<Event> selectedEvents = [];
 
