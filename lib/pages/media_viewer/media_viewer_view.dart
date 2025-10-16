@@ -121,13 +121,12 @@ class MediaViewerView extends StatelessWidget {
                 onTap: () {
                   controller.pageController.jumpToPage(index);
                 },
-                child: Padding(
+                child: Container(
+                  width: 44,
                   padding: const EdgeInsets.all(2),
                   child: MxcImage(
                     key: ValueKey(controller.mediaEvents[index].eventId),
                     event: controller.mediaEvents[index],
-                    width: 44,
-                    height: 44,
                     fit: BoxFit.cover,
                     enableHeroAnimation: false,
                   ),
