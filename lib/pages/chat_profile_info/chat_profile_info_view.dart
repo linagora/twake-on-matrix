@@ -3,16 +3,20 @@ import 'package:fluffychat/app_state/failure.dart';
 import 'package:fluffychat/app_state/success.dart';
 import 'package:fluffychat/domain/app_state/contact/lookup_match_contact_state.dart';
 import 'package:fluffychat/pages/chat_details/chat_details_view_style.dart';
+import 'package:fluffychat/pages/chat_profile_info/chat_profile_action_button.dart';
+import 'package:fluffychat/presentation/model/contact/presentation_contact_constant.dart';
 import 'package:fluffychat/resource/image_paths.dart';
 import 'package:fluffychat/utils/clipboard.dart';
 import 'package:fluffychat/utils/string_extension.dart';
 import 'package:fluffychat/utils/twake_snackbar.dart';
+import 'package:fluffychat/widgets/app_bars/twake_app_bar.dart';
 import 'package:fluffychat/widgets/avatar/avatar.dart';
 import 'package:fluffychat/widgets/avatar/avatar_style.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:fluffychat/generated/l10n/app_localizations.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:go_router/go_router.dart';
 import 'package:linagora_design_flutter/avatar/round_avatar_style.dart';
 import 'package:linagora_design_flutter/extensions/string_extension.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
@@ -34,30 +38,19 @@ class ChatProfileInfoView extends StatelessWidget {
     final user = controller.user;
     final contact = controller.widget.contact;
     return Scaffold(
-      backgroundColor: LinagoraSysColors.material().onPrimary,
-      appBar: AppBar(
-        backgroundColor: LinagoraSysColors.material().onPrimary,
-        automaticallyImplyLeading: false,
-        centerTitle: false,
-        title: Row(
-          children: [
-            Padding(
-              padding: ChatProfileInfoStyle.backIconPadding,
-              child: IconButton(
-                onPressed: controller.widget.onBack,
-                icon: controller.widget.isInStack
-                    ? const Icon(
-                        Icons.chevron_left_outlined,
-                      )
-                    : const Icon(Icons.close),
-              ),
-            ),
-            Text(
-              L10n.of(context)!.contactInfo,
-              style: Theme.of(context).textTheme.titleLarge,
-            ),
-          ],
+      backgroundColor: LinagoraSysColors.material().surfaceVariant,
+      appBar: TwakeAppBar(
+        backgroundColor: LinagoraSysColors.material().surfaceVariant,
+        title: L10n.of(context)!.contactInfo,
+        leading: IconButton(
+          onPressed: controller.widget.onBack,
+          icon: controller.widget.isInStack
+              ? const Icon(
+                  Icons.chevron_left_outlined,
+                )
+              : const Icon(Icons.close),
         ),
+        context: context,
       ),
       body: NestedScrollView(
         physics: controller.getScrollPhysics(),
@@ -70,12 +63,13 @@ class ChatProfileInfoView extends StatelessWidget {
                 valueListenable: controller.lookupContactNotifier,
                 builder: (context, lookupContact, child) {
                   return SliverAppBar(
-                    backgroundColor: LinagoraSysColors.material().onPrimary,
-                    toolbarHeight: getToolbarHeight(lookupContact),
+                    backgroundColor:
+                        LinagoraSysColors.material().surfaceVariant,
+                    toolbarHeight: getToolbarHeight(context, lookupContact),
                     title: ConstrainedBox(
                       constraints: BoxConstraints(
                         maxWidth: ChatProfileInfoStyle.maxWidth,
-                        maxHeight: getToolbarHeight(lookupContact),
+                        maxHeight: getToolbarHeight(context, lookupContact),
                       ),
                       child: Builder(
                         builder: (context) {
@@ -98,6 +92,8 @@ class ChatProfileInfoView extends StatelessWidget {
                                 isBlockedUserNotifier: controller.isBlockedUser,
                                 onUnblockUser: controller.onUnblockUser,
                                 onBlockUser: controller.onBlockUser,
+                                isAlreadyInChat:
+                                    controller.isAlreadyInChat(context),
                                 blockUserLoadingNotifier:
                                     controller.blockUserLoadingNotifier,
                               ),
@@ -113,6 +109,8 @@ class ChatProfileInfoView extends StatelessWidget {
                               isBlockedUserNotifier: controller.isBlockedUser,
                               onUnblockUser: controller.onUnblockUser,
                               onBlockUser: controller.onBlockUser,
+                              isAlreadyInChat:
+                                  controller.isAlreadyInChat(context),
                               blockUserLoadingNotifier:
                                   controller.blockUserLoadingNotifier,
                             );
@@ -127,6 +125,8 @@ class ChatProfileInfoView extends StatelessWidget {
                             isBlockedUserNotifier: controller.isBlockedUser,
                             onUnblockUser: controller.onUnblockUser,
                             onBlockUser: controller.onBlockUser,
+                            isAlreadyInChat:
+                                controller.isAlreadyInChat(context),
                             blockUserLoadingNotifier:
                                 controller.blockUserLoadingNotifier,
                           );
@@ -191,29 +191,37 @@ class ChatProfileInfoView extends StatelessWidget {
     );
   }
 
-  double getToolbarHeight(Either<Failure, Success> lookupContact) =>
-      lookupContact.fold(
-        (failure) => ChatDetailViewStyle.minToolbarHeightSliverAppBar,
-        (success) {
-          if (success is LookupContactsLoading) {
-            return ChatDetailViewStyle.mediumToolbarHeightSliverAppBar;
-          }
-          if (success is LookupMatchContactSuccess) {
-            if (success.contact.emails != null &&
-                success.contact.phoneNumbers != null) {
-              return ChatDetailViewStyle.maxToolbarHeightSliverAppBar;
-            }
-
-            if (success.contact.emails != null ||
-                success.contact.phoneNumbers != null) {
-              return ChatDetailViewStyle.mediumToolbarHeightSliverAppBar;
-            }
-
+  double getToolbarHeight(
+    BuildContext context,
+    Either<Failure, Success> lookupContact,
+  ) {
+    final height = lookupContact.fold(
+      (failure) => ChatDetailViewStyle.minToolbarHeightSliverAppBar,
+      (success) {
+        if (success is LookupContactsLoading) {
+          return ChatDetailViewStyle.mediumToolbarHeightSliverAppBar;
+        }
+        if (success is LookupMatchContactSuccess) {
+          if (success.contact.emails != null &&
+              success.contact.phoneNumbers != null) {
             return ChatDetailViewStyle.maxToolbarHeightSliverAppBar;
           }
-          return ChatDetailViewStyle.minToolbarHeightSliverAppBar;
-        },
-      );
+
+          if (success.contact.emails != null ||
+              success.contact.phoneNumbers != null) {
+            return ChatDetailViewStyle.mediumToolbarHeightSliverAppBar;
+          }
+
+          return ChatDetailViewStyle.maxToolbarHeightSliverAppBar;
+        }
+        return ChatDetailViewStyle.minToolbarHeightSliverAppBar;
+      },
+    );
+
+    if (controller.isAlreadyInChat(context)) return height;
+
+    return height + ChatDetailViewStyle.chatInfoActionHeight;
+  }
 }
 
 class _Information extends StatelessWidget {
@@ -227,6 +235,7 @@ class _Information extends StatelessWidget {
     this.onUnblockUser,
     this.onBlockUser,
     required this.blockUserLoadingNotifier,
+    required this.isAlreadyInChat,
   });
 
   final Uri? avatarUri;
@@ -238,6 +247,7 @@ class _Information extends StatelessWidget {
   final void Function()? onUnblockUser;
   final void Function()? onBlockUser;
   final ValueNotifier<bool?> blockUserLoadingNotifier;
+  final bool isAlreadyInChat;
 
   @override
   Widget build(BuildContext context) {
@@ -297,6 +307,20 @@ class _Information extends StatelessWidget {
                     ),
                 maxLines: 1,
               ),
+              if (!isAlreadyInChat)
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 8),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      ChatProfileActionButton(
+                        title: L10n.of(context)!.message,
+                        iconData: Icons.messenger_outline_rounded,
+                        onTap: () => _handleSendMessageTap(context),
+                      ),
+                    ],
+                  ),
+                ),
               Container(
                 padding: ChatProfileInfoStyle.copiableContainerPadding,
                 margin: ChatProfileInfoStyle.copiableContainerMargin,
@@ -307,6 +331,7 @@ class _Information extends StatelessWidget {
                   ),
                   borderRadius:
                       ChatProfileInfoStyle.copiableContainerBorderRadius,
+                  color: LinagoraSysColors.material().onPrimary,
                 ),
                 child: Column(
                   children: [
@@ -413,6 +438,24 @@ class _Information extends StatelessWidget {
         ),
       ],
     );
+  }
+
+  void _handleSendMessageTap(BuildContext context) {
+    if (matrixId == null) return;
+    final roomId = Matrix.of(context).client.getDirectChatFromUserId(matrixId!);
+    context.pop();
+    if (roomId == null) {
+      context.go(
+        '/rooms/draftChat',
+        extra: {
+          PresentationContactConstant.receiverId: matrixId ?? '',
+          PresentationContactConstant.displayName: displayName ?? '',
+          PresentationContactConstant.status: '',
+        },
+      );
+    } else {
+      context.go('/rooms/$roomId');
+    }
   }
 }
 

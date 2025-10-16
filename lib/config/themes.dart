@@ -43,6 +43,11 @@ abstract class TwakeThemes {
       fontWeight: FontWeight.w500,
       letterSpacing: 0.1,
     ),
+    labelMedium: TextStyle(
+      fontFamily: 'Inter',
+      fontWeight: FontWeight.w500,
+      letterSpacing: 0.5,
+    ),
     labelSmall: TextStyle(
       fontFamily: 'Inter',
       fontWeight: FontWeight.w500,

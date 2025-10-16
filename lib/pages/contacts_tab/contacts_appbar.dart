@@ -1,6 +1,8 @@
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/pages/contacts_tab/contacts_appbar_style.dart';
+import 'package:fluffychat/pages/contacts_tab/widgets/add_contact/add_contact_dialog.dart';
 import 'package:fluffychat/pages/search/search_text_field.dart';
+import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/utils/responsive/responsive_utils.dart';
 import 'package:fluffychat/widgets/app_bars/twake_app_bar.dart';
 import 'package:flutter/material.dart';
@@ -29,6 +31,18 @@ class ContactsAppBar extends StatelessWidget {
         TwakeAppBar(
           title: L10n.of(context)!.contacts,
           context: context,
+          actions: [
+            if (PlatformInfos.isMobile)
+              IconButton(
+                onPressed: () {
+                  showAddContactDialog(context);
+                },
+                icon: Icon(
+                  Icons.person_add_alt,
+                  color: LinagoraSysColors.material().primary,
+                ),
+              ),
+          ],
         ),
         ValueListenableBuilder<bool>(
           valueListenable: isSearchModeNotifier,

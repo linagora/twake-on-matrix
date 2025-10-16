@@ -3408,5 +3408,12 @@
   "recordingInProgress": "Recording in progress",
   "pleaseFinishOrStopTheRecording": "Please finish or stop the recording before performing other actions.",
   "audioMessageFailedToSend": "Audio message failed to send.",
+  "save": "Save",
+  "newContact": "New contact",
+  "firstName": "First name",
+  "lastName": "Last name",
+  "createNewContact": "Create new contact",
+  "addToContacts": "Add to contacts",
+  "invalidUsername": "Invalid username",
   "audioEncoderNotSupportedMessage": "The audio encoder is not supported on this device. Please try using a different browser or device."
 }
