@@ -114,10 +114,9 @@ void main() {
       final expectNumber = totalMemberAfterAdding - 1;
       s.softAssertEquals(totalMemberAfterRemoving == expectNumber.toString(), true, "number of member is not updated. Expect $totalMemberAfterRemoving but Actual is $expectNumber",);
 
-      s.verifyAll();
-
-      //below snipe code for remove user3 from urban list
+      //below snipe code for remove user3 from urban list. This is clean step for the next running
       await ChatScenario($).unbanUser([user3]);
+      s.verifyAll();
     },
   );
 }
