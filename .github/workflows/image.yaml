@@ -30,6 +30,14 @@ jobs:
         with:
           ssh-private-key: ${{ secrets.SSH_KEY }}
 
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Clean git working directory
+        run: git clean -fdx || echo "Warning git clean failed, but continuing with the build process..."
+
       - name: Docker metadata
         id: meta
         uses: docker/metadata-action@v5
@@ -52,14 +60,6 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Checkout repository
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0 # This ensures the entire Git history is fetched, which is necessary for cache key computation.
-
-      - name: Clean git working directory
-        run: git clean -fdx || echo "Warning git clean failed, but continuing with the build process..."
 
       - name: Build and push image
         uses: docker/build-push-action@v6
@@ -94,6 +94,14 @@ jobs:
         with:
           ssh-private-key: ${{ secrets.SSH_KEY }}
 
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Clean git working directory
+        run: git clean -fdx || echo "Warning git clean failed, but continuing with the build process..."
+
       - name: Docker metadata
         id: meta
         uses: docker/metadata-action@v5
@@ -117,14 +125,6 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Checkout repository
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0 # This ensures the entire Git history is fetched, which is necessary for cache key computation.
-      
-      - name: Clean git working directory
-        run: git clean -fdx || echo "Warning git clean failed, but continuing with the build process..."
 
       - name: Build and push image
         uses: docker/build-push-action@v6

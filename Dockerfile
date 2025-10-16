@@ -2,7 +2,7 @@
 ARG FLUTTER_VERSION=3.32.8
 
 # Build stage for vodozemac (Rust WebAssembly)
-FROM --platform=linux/amd64 rust:latest AS vodozemac-builder
+FROM rust:latest AS vodozemac-builder
 ARG FLUTTER_VERSION
 WORKDIR /app
 # Install build dependencies
@@ -20,7 +20,7 @@ COPY scripts/prepare-web.sh scripts/prepare-web.sh
 RUN ./scripts/prepare-web.sh
 
 # Building Twake for the web
-FROM --platform=linux/amd64 ghcr.io/cirruslabs/flutter:${FLUTTER_VERSION} AS web-builder
+FROM ghcr.io/cirruslabs/flutter:${FLUTTER_VERSION} AS web-builder
 ARG TWAKECHAT_BASE_HREF="/web/"
 
 COPY . /app
