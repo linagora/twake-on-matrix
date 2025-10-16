@@ -316,7 +316,7 @@ class _Information extends StatelessWidget {
                       ChatProfileActionButton(
                         title: L10n.of(context)!.message,
                         iconData: Icons.messenger_outline_rounded,
-                        onTap: () => _handleMessageTap(context),
+                        onTap: () => _handleSendMessageTap(context),
                       ),
                     ],
                   ),
@@ -440,7 +440,7 @@ class _Information extends StatelessWidget {
     );
   }
 
-  void _handleMessageTap(BuildContext context) {
+  void _handleSendMessageTap(BuildContext context) {
     if (matrixId == null) return;
     final roomId = Matrix.of(context).client.getDirectChatFromUserId(matrixId!);
     context.pop();

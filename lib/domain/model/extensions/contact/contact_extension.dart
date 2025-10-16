@@ -212,7 +212,7 @@ extension ContactExtension on Contact {
     );
   }
 
-  bool isMatrixIdRegistered(String matrixId) {
+  bool inTomAddressBook(String matrixId) {
     return emails?.any((email) => email.matrixId == matrixId) == true ||
         phoneNumbers?.any((phone) => phone.matrixId == matrixId) == true;
   }

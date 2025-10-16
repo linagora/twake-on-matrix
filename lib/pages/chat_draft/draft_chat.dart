@@ -243,7 +243,7 @@ class DraftChatController extends State<DraftChat>
         (success) => success is GetContactsSuccess
             ? success.contacts.any(
                 (contact) => contact
-                    .isMatrixIdRegistered(presentationContact?.matrixId ?? ""),
+                    .inTomAddressBook(presentationContact?.matrixId ?? ""),
               )
             : false,
       );

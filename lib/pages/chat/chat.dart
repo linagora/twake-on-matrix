@@ -290,7 +290,7 @@ class ChatController extends State<Chat>
           (user) =>
               user.id != client.userID &&
               contacts.none(
-                (contact) => contact.isMatrixIdRegistered(user.id),
+                (contact) => contact.inTomAddressBook(user.id),
               ),
         );
   }
