@@ -53,9 +53,14 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Clean git working directory
+        run: git clean -fdx
+
       - name: Build and push image
         uses: docker/build-push-action@v6
         with:
+          context: .
+          dockerfile: Dockerfile
           push: true
           platforms: "linux/amd64,linux/arm64"
           cache-from: |
@@ -108,9 +113,14 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Clean git working directory
+        run: git clean -fdx
+
       - name: Build and push image
         uses: docker/build-push-action@v6
         with:
+          context: .
+          dockerfile: Dockerfile
           push: true
           platforms: "linux/amd64,linux/arm64"
           cache-from: |
