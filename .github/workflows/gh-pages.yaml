@@ -67,7 +67,7 @@ jobs:
           flutter pub get
           flutter pub run build_runner build -d
           flutter build web --release --verbose --source-maps --base-href="/${GITHUB_REPOSITORY##*/}/$FOLDER/"
-          echo "$TWAKE_PREVIEW_CONFIG" | jq '.issue_id = strenv(FOLDER)' > ./build/web/config.json
+          echo "$TWAKE_PREVIEW_CONFIG" | jq --arg folder "$FOLDER" '.issue_id = $folder' > ./build/web/config.json
 
       - name: Configure environments
         id: configure
