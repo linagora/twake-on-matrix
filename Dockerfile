@@ -5,6 +5,9 @@ ARG FLUTTER_VERSION=3.32.8
 FROM --platform=linux/amd64 rust:latest AS vodozemac-builder
 ARG FLUTTER_VERSION
 WORKDIR /app
+# Install build dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends git curl ca-certificates && \
+    rm -rf /var/lib/apt/lists/*
 # Install Flutter to ensure yq is available, and to get the flutter_vodozemac version
 RUN curl --proto '=https' --tlsv1.2 -sSf https://storage.googleapis.com/flutter_infra_release/releases/stable/linux/flutter_linux_${FLUTTER_VERSION}-stable.tar.xz \
     | tar -xJvf - --strip-components=1 -C /usr/local/
@@ -14,6 +17,7 @@ RUN wget https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
     chmod +x /usr/bin/yq
 # Copy only necessary files for vodozemac build
 COPY pubspec.yaml pubspec.yaml
+COPY pubspec.lock pubspec.lock # pubspec.lock is needed to extract sha256
 COPY scripts/prepare-web.sh scripts/prepare-web.sh
 # Execute prepare-web.sh to build vodozemac WASM
 RUN ./scripts/prepare-web.sh
