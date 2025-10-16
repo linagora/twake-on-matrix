@@ -267,7 +267,7 @@ void main() {
   );
 
   TestBase().runPatrolTest(
-    description: 'View profile of a members in a group',
+    description: 'down load a file',
     test: ($) async {
       final s = SoftAssertHelper();
       //goto chat
