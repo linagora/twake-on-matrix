@@ -2735,8 +2735,8 @@ packages:
     dependency: "direct main"
     description:
       path: "."
-      ref: support-pause-and-resume
-      resolved-ref: c71383591fcb94c3ee430e7d36a23d9b80f1cf9b
+      ref: twake_supported
+      resolved-ref: "7652c3026d073f50e6e096bd1c0d467ae5e6c697"
       url: "git@github.com:linagora/social_media_recorder.git"
     source: git
     version: "1.2.1"

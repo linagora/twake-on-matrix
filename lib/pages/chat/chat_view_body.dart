@@ -30,6 +30,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_emoji_mart/flutter_emoji_mart.dart';
 import 'package:fluffychat/generated/l10n/app_localizations.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:just_audio/just_audio.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:matrix/matrix.dart';
 import 'chat_input_row.dart';
@@ -208,13 +209,13 @@ class ChatViewBody extends StatelessWidget with MessageContentMixin {
                       },
                     ),
                     PinnedEventsView(controller),
-                    _audioPlayerWidget(),
                     if (controller.room!.pinnedEventIds.isNotEmpty)
                       Divider(
                         height: ChatViewBodyStyle.dividerSize,
                         thickness: ChatViewBodyStyle.dividerSize,
                         color: Theme.of(context).dividerColor,
                       ),
+                    _audioPlayerWidget(),
                     SizedBox(
                       key: controller.stickyTimestampKey,
                       child: ValueListenableBuilder(
@@ -396,6 +397,9 @@ class ChatViewBody extends StatelessWidget with MessageContentMixin {
                 controller.matrix?.audioPlayer.playerStateStream
                         .asBroadcastStream() ??
                     Stream.value(Duration.zero),
+                controller.matrix?.audioPlayer.speedStream
+                        .asBroadcastStream() ??
+                    Stream.value(Duration.zero),
               ]),
               builder: (context, snapshot) {
                 final maxPosition =
@@ -442,9 +446,26 @@ class ChatViewBody extends StatelessWidget with MessageContentMixin {
                                 audioPlayer?.position.minuteSecondString ?? '',
                               ),
                             ),
-                            TwakeIconButton(
-                              onTap: _handleCloseAudioPlayer,
-                              icon: Icons.close,
+                            Row(
+                              children: [
+                                InkWell(
+                                  onTap: () => _toggleSpeed(audioPlayer),
+                                  child: Center(
+                                    child: SvgPicture.asset(
+                                      _displayAudioSpeed(
+                                        audioPlayer?.speed ?? 1.0,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(width: 8),
+                                TwakeIconButton(
+                                  onTap: _handleCloseAudioPlayer,
+                                  icon: Icons.close,
+                                  iconColor:
+                                      LinagoraRefColors.material().tertiary[30],
+                                ),
+                              ],
                             ),
                           ],
                         ),
@@ -468,6 +489,44 @@ class ChatViewBody extends StatelessWidget with MessageContentMixin {
         );
       },
     );
+  }
+
+  String _displayAudioSpeed(double int) {
+    switch (int) {
+      case 0.5:
+        return ImagePaths.icAudioSpeed0_5x;
+      case 1.0:
+        return ImagePaths.icAudioSpeed1x;
+      case 1.5:
+        return ImagePaths.icAudioSpeed1_5x;
+      case 2.0:
+        return ImagePaths.icAudioSpeed2x;
+      default:
+        return ImagePaths.icAudioSpeed1x;
+    }
+  }
+
+  void _toggleSpeed(AudioPlayer? audioPlayer) async {
+    if (audioPlayer == null) return;
+    switch (audioPlayer.speed) {
+      case 0.5:
+        await audioPlayer.setSpeed(0.75);
+        break;
+      case 0.75:
+        await audioPlayer.setSpeed(1.0);
+        break;
+      case 1.0:
+        await audioPlayer.setSpeed(1.5);
+        break;
+      case 1.5:
+        await audioPlayer.setSpeed(2);
+        break;
+      case 2.0:
+        await audioPlayer.setSpeed(0.5);
+      default:
+        await audioPlayer.setSpeed(1.0);
+        break;
+    }
   }
 
   Widget _displaySenderNameWhenPlayingAudio(
