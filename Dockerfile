@@ -14,7 +14,6 @@ RUN curl --proto '=https' --tlsv1.2 -sSf https://storage.googleapis.com/flutter_
 ENV PATH="/usr/local/bin:${PATH}"
 # Copy only necessary files for vodozemac build
 COPY pubspec.yaml pubspec.yaml
-COPY pubspec.lock pubspec.lock # pubspec.lock is needed to extract sha256
 COPY scripts/prepare-web.sh scripts/prepare-web.sh
 # Execute prepare-web.sh to build vodozemac WASM
 RUN ./scripts/prepare-web.sh
