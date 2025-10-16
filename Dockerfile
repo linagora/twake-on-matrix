@@ -2,7 +2,7 @@
 ARG FLUTTER_VERSION=3.32.8
 
 # Build stage for vodozemac (Rust WebAssembly)
-FROM rust:1.70-buster AS vodozemac-builder
+FROM rust:1.83-bookworm AS vodozemac-builder
 ARG FLUTTER_VERSION
 WORKDIR /app
 # Install build dependencies, ensuring minimal image size

@@ -65,7 +65,7 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: .
-          dockerfile: Dockerfile
+          file: Dockerfile
           push: true
           platforms: "linux/amd64,linux/arm64"
           cache-from: |
@@ -130,7 +130,7 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: .
-          dockerfile: Dockerfile
+          file: Dockerfile
           push: true
           platforms: "linux/amd64,linux/arm64"
           cache-from: |
