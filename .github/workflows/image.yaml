@@ -55,6 +55,8 @@ jobs:
 
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # This ensures the entire Git history is fetched, which is necessary for cache key computation.
 
       - name: Clean git working directory
         run: git clean -fdx || echo "Warning git clean failed, but continuing with the build process..."
@@ -118,6 +120,8 @@ jobs:
 
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # This ensures the entire Git history is fetched, which is necessary for cache key computation.
       
       - name: Clean git working directory
         run: git clean -fdx || echo "Warning git clean failed, but continuing with the build process..."
