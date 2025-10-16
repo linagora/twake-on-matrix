@@ -36,6 +36,9 @@ jobs:
       - name: Setup Rust
         uses: dtolnay/rust-toolchain@nightly
 
+      - name: Install rust-src component for nightly
+        run: rustup component add rust-src --toolchain nightly
+
       - name: Install yq
         run: sudo apt-get update && sudo apt-get install -y yq
 
