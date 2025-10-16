@@ -13,6 +13,7 @@ import 'package:fluffychat/pages/chat/events/message_time.dart';
 import 'package:fluffychat/pages/chat/seen_by_row.dart';
 import 'package:fluffychat/pages/chat_draft/draft_chat_view.dart';
 import 'package:fluffychat/pages/chat_list/chat_list_body_view.dart';
+import 'package:fluffychat/pages/chat_list/chat_list_item_title.dart';
 import 'package:fluffychat/widgets/context_menu/context_menu_action_item_widget.dart';
 import 'package:fluffychat/widgets/twake_components/twake_icon_button.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -30,6 +31,7 @@ import '../robots/menu_robot.dart';
 import '../robots/new_chat_robot.dart';
 import '../robots/search_robot.dart';
 import '../robots/setting_for_new_group.dart';
+import '../robots/twake_list_item_robot.dart';
 
 enum UserLevel { member, admin, owner, moderator }
 class ChatScenario extends BaseScenario {
@@ -481,4 +483,41 @@ class ChatScenario extends BaseScenario {
     s.softAssertEquals( await CoreRobot($).isActuallyScrollable($,root: $(SingleChildScrollView),), true,
         'Chat list is not scrollable',);
   }
+
+  bool isPinAChat(TwakeListItemRobot takeListItem) {
+    final title = takeListItem.root.$(ChatListItemTitle);
+    const pinData = IconData(0xF2D7, fontFamily: 'MaterialIcons');
+    final pinFinder = find.descendant(of: title, matching: find.byIcon(pinData));
+    final pin = $(pinFinder);
+    return pin.exists;
+  }
+
+  Future<void> pinAChat(String title) async {
+    final twakeListItem = ChatListRobot($).getChatGroupByTitle(title);
+    if(!isPinAChat(twakeListItem))
+    {
+      await twakeListItem.root.longPress();
+      await $.waitUntilVisible(twakeListItem.getCheckBox());
+      await ChatListRobot($).getPinIcon().tap();
+      await ChatListRobot($).waitUntilAbsent($, ChatListRobot($).getPinIcon());
+    }
+  }
+
+  Future<void> unPinAChat(String title) async {
+    final twakeListItem = ChatListRobot($).getChatGroupByTitle(title);
+    if(isPinAChat(twakeListItem))
+    {
+      await twakeListItem.root.longPress();
+      await $.waitUntilVisible(twakeListItem.getCheckBox());
+      await ChatListRobot($).getUnPinIcon().tap();
+      await ChatListRobot($).waitUntilAbsent($, ChatListRobot($).getUnPinIcon());
+    }
+  }
+
+  Future<void> verifyAChatIsPin(String title, bool isPin) async {
+    final twakeListItem = ChatListRobot($).getChatGroupByTitle(title);
+    final exists = isPinAChat(twakeListItem);
+    expect(exists, isPin, reason: 'Expected pin=$isPin but got $exists for "$title"');
+  }
+  
 }
