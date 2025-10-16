@@ -35,6 +35,8 @@ class DraftChatInputRow extends StatelessWidget {
   final ValueNotifier<AudioRecordState> audioRecordStateNotifier;
   final Function()? startRecording;
   final Function()? stopRecording;
+  final Function()? pauseRecording;
+  final Function()? deleteRecording;
   final void Function(TwakeAudioFile, Duration, List<int>)?
       sendVoiceMessageAction;
   final Function()? onTapRecorderWeb;
@@ -63,6 +65,8 @@ class DraftChatInputRow extends StatelessWidget {
     this.onFinishRecorderWeb,
     this.onDeleteRecorderWeb,
     required this.recordDurationWebNotifier,
+    this.pauseRecording,
+    this.deleteRecording,
   });
 
   @override
@@ -89,7 +93,7 @@ class DraftChatInputRow extends StatelessWidget {
                       valueListenable: audioRecordStateNotifier,
                       builder: (context, audioState, _) {
                         if (PlatformInfos.isWeb &&
-                            audioState == AudioRecordState.recording) {
+                            audioState != AudioRecordState.initial) {
                           return const SizedBox.shrink();
                         }
                         return SizedBox(
@@ -107,7 +111,7 @@ class DraftChatInputRow extends StatelessWidget {
                     valueListenable: audioRecordStateNotifier,
                     builder: (context, audioState, _) {
                       if (PlatformInfos.isWeb &&
-                          audioState == AudioRecordState.recording) {
+                          audioState != AudioRecordState.initial) {
                         return Expanded(
                           child: ConstrainedBox(
                             constraints: const BoxConstraints(
@@ -169,6 +173,9 @@ class DraftChatInputRow extends StatelessWidget {
     return ValueListenableBuilder(
       valueListenable: inputText,
       builder: (context, text, _) {
+        final view = View.maybeOf(context);
+        final bottomInset =
+            (view?.viewInsets.bottom ?? 0) / (view?.devicePixelRatio ?? 0);
         return Offstage(
           offstage: text.isNotEmpty,
           child: Padding(
@@ -178,6 +185,12 @@ class DraftChatInputRow extends StatelessWidget {
             ),
             child: SocialMediaRecorder(
               radius: BorderRadius.circular(24),
+              pauseBottomPositioned:
+                  102 + (isKeyboardVisible ? bottomInset : 16),
+              pauseRightPositioned: 16,
+              resumeDecoration: BoxDecoration(
+                color: LinagoraSysColors.material().surface,
+              ),
               soundRecorderWhenLockedDecoration: BoxDecoration(
                 borderRadius: ChatInputRowStyle.chatInputRowBorderRadius,
                 color: LinagoraSysColors.material().onPrimary,
@@ -196,7 +209,7 @@ class DraftChatInputRow extends StatelessWidget {
               ),
               microphoneRequestPermission: onLongPressAudioRecord,
               startRecording: () {
-                Logs().d('ChatInputRowMobile:: startRecording');
+                Logs().d('DraftChatInputRow:: startRecording');
                 startRecording?.call();
               },
               stopRecording: (_) {
@@ -205,11 +218,20 @@ class DraftChatInputRow extends StatelessWidget {
                     AudioRecordState.recording) {
                   return;
                 }
+                Logs().d('DraftChatInputRow:: stopRecording');
                 stopRecording?.call();
+              },
+              pauseRecording: () {
+                Logs().d('DraftChatInputRow:: pauseRecording');
+                pauseRecording?.call();
+              },
+              deleteRecording: () {
+                Logs().d('DraftChatInputRow:: deleteRecording');
+                deleteRecording?.call();
               },
               sendRequestFunction: (soundFile, time, waveFrom) {
                 Logs().d(
-                  'ChatInputRowMobile:: sendRequestFunction $soundFile',
+                  'DraftChatInputRow:: sendRequestFunction $soundFile',
                 );
                 stopRecording?.call();
 
