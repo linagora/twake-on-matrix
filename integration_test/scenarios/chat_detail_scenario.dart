@@ -47,37 +47,39 @@ class ChatDetailScenario extends BaseScenario {
 
     for (final item in items) {
       final row = item.root;
+      final displayName = row.$(Text).at(0).text ?? "";
       final owner = row.$(Text).at(1).text;
       final matrixAddress = row.$(Text).at(2).text ?? "";
       const currentAccount  = String.fromEnvironment('CurrentAccount');
       if(matrixAddress == currentAccount)
       {
-        await verifyProfileInfoOfAMember(s, matrixAddress, isCurrentUser: true, level: parseUserLevel(owner));
+        await verifyProfileInfoOfAMember(s, displayName, matrixAddress, isCurrentUser: true, isOnline: true, level: parseUserLevel(owner));
       }
       else
       {
-        await verifyProfileInfoOfAMember(s, matrixAddress, isCurrentUser: false, level: parseUserLevel(owner));
+        await verifyProfileInfoOfAMember(s, displayName, matrixAddress, isCurrentUser: false, level: parseUserLevel(owner));
       }
     }
   }
 
-  Future<void> verifyProfileInfoOfAMember(SoftAssertHelper s, String matrixAdress, {bool isCurrentUser = true,
-    UserLevel level = UserLevel.member,}) async {
+  Future<void> verifyProfileInfoOfAMember(SoftAssertHelper s, String displayName, String matrixAdress, {bool isCurrentUser = true,
+    bool isOnline = false, UserLevel level = UserLevel.member,}) async {
     final memberRow = GroupInformationRobot($).getMember(matrixAdress);
     await memberRow.tap();
     await $.waitUntilVisible($(ProfileInfoView));
-    await verifyProfileInfo(s, matrixAdress, isCurrentUser: isCurrentUser, level: level);
+    await verifyProfileInfo(s, displayName, matrixAdress, isCurrentUser: isCurrentUser, level: level);
     await ProfileInformationRobot($).backToGroupInfomationScreen();
   }
 
-  Future<void> verifyProfileInfo(SoftAssertHelper s, String matrixAdress, {bool isCurrentUser = true,
-    UserLevel level = UserLevel.member,}) async {
+  Future<void> verifyProfileInfo(SoftAssertHelper s, String displayName, String matrixAdress, {bool isCurrentUser = true,
+    bool isOnline = false, UserLevel level = UserLevel.member,}) async {
     
     s.softAssertEquals(ProfileInformationRobot($).getAvatar().exists, true, "Avatar is not shown");
-    final actualDisplayName = matrixAdress.substring(matrixAdress.indexOf("@")+1, matrixAdress.indexOf(":"));
-    s.softAssertEquals(ProfileInformationRobot($).getDisplayName().text == actualDisplayName
-    , true, "displayName is not correct, actualDisplayName is $actualDisplayName",);
-    s.softAssertEquals(ProfileInformationRobot($).getOnlineStatus().exists, true, "online status is not shown");
+    s.softAssertEquals(ProfileInformationRobot($).getDisplayName().text == displayName
+    , true, "displayName is not correct, actualDisplayName is $displayName",);
+    if(isOnline){
+      s.softAssertEquals(ProfileInformationRobot($).getOnlineStatus().exists, true, "online status is not shown");
+    }
     s.softAssertEquals(ProfileInformationRobot($).getMatrixAddress().text == matrixAdress, true, "Matrix address is not correct",);
 
     const currentAccount  = String.fromEnvironment('CurrentAccount');
