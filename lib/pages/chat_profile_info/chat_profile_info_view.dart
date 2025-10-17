@@ -7,6 +7,7 @@ import 'package:fluffychat/domain/app_state/contact/get_contacts_state.dart';
 import 'package:fluffychat/domain/app_state/contact/lookup_match_contact_state.dart';
 import 'package:fluffychat/domain/contact_manager/contacts_manager.dart';
 import 'package:fluffychat/domain/model/contact/contact.dart';
+import 'package:fluffychat/domain/model/extensions/contact/contact_extension.dart';
 import 'package:fluffychat/pages/chat_details/chat_details_view_style.dart';
 import 'package:fluffychat/pages/chat_profile_info/chat_profile_action_button.dart';
 import 'package:fluffychat/pages/contacts_tab/widgets/add_contact/add_contact_dialog.dart';
@@ -236,9 +237,7 @@ class _Information extends StatelessWidget {
       (failure) => [],
       (success) => success is GetContactsSuccess ? success.contacts : [],
     );
-    return contacts.none(
-      (c) => c.emails?.any((e) => e.matrixId == matrixId) == true,
-    );
+    return contacts.none((contact) => contact.inTomAddressBook(matrixId!));
   }
 
   @override
@@ -634,7 +633,7 @@ class _SizedAppBar extends StatelessWidget {
           (failure) => false,
           (success) => success is GetContactsSuccess
               ? success.contacts.none(
-                  (c) => c.emails?.any((e) => e.matrixId == matrixId) == true,
+                  (contact) => contact.inTomAddressBook(matrixId),
                 )
               : false,
         );
