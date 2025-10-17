@@ -176,6 +176,18 @@ extension RoomExtension on Room {
                 if (a.redacted) return b;
                 if (b.redacted) return a;
               }
+              if (a.shouldHideChangedAvatarEvent()) {
+                return b;
+              }
+              if (b.shouldHideChangedAvatarEvent()) {
+                return a;
+              }
+              if (a.shouldHideChangedDisplayNameEvent()) {
+                return b;
+              }
+              if (b.shouldHideChangedDisplayNameEvent()) {
+                return a;
+              }
               if (a.originServerTs == b.originServerTs) {
                 // if two events have the same sort order we want to give encrypted events a lower priority
                 // This is so that if the same event exists in the state both encrypted *and* unencrypted,
@@ -205,6 +217,8 @@ extension RoomExtension on Room {
         for (final messageEvent in messageEvents) {
           if (messageEvent.shouldHideRedactedEvent()) continue;
           if (messageEvent.shouldHideBannedEvent()) continue;
+          if (messageEvent.shouldHideChangedAvatarEvent()) continue;
+          if (messageEvent.shouldHideChangedDisplayNameEvent()) continue;
 
           if (messageEvent.originServerTs.millisecondsSinceEpoch >
               lastState.originServerTs.millisecondsSinceEpoch) {
