@@ -7,7 +7,9 @@ ARG TWAKECHAT_BASE_HREF="/web/"
 
 RUN apt-get update && \
     apt-get install -y --no-install-recommends curl pkg-config libssl-dev && \
-    curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+    curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y && \
+    curl -fsSL https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 -o /usr/local/bin/yq && \
+    chmod +x /usr/local/bin/yq
 ENV PATH="/root/.cargo/bin:${PATH}"
 
 COPY . /app
