@@ -378,6 +378,14 @@ extension LocalizedBody on Event {
     return type == EventTypes.RoomMember && content['membership'] == 'ban';
   }
 
+  bool shouldHideChangedAvatarEvent() {
+    return roomMemberChangeType == RoomMemberChangeType.avatar;
+  }
+
+  bool shouldHideChangedDisplayNameEvent() {
+    return roomMemberChangeType == RoomMemberChangeType.displayname;
+  }
+
   bool hasReactionEvent({
     required Timeline timeline,
   }) {
