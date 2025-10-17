@@ -49,9 +49,6 @@ enum AudioPlayerStatus { notDownloaded, downloading, downloaded }
 
 class AudioPlayerState extends State<AudioPlayerWidget>
     with AudioMixin, AutomaticKeepAliveClientMixin {
-  final ValueNotifier<AudioPlayerStatus> audioStatus =
-      ValueNotifier(AudioPlayerStatus.notDownloaded);
-
   final List<double> _calculatedWaveform = [];
 
   final ValueNotifier<Duration> _durationNotifier =
@@ -90,7 +87,12 @@ class AudioPlayerState extends State<AudioPlayerWidget>
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ScaffoldMessenger.of(matrix.context).clearMaterialBanners();
     });
-    if (matrix.voiceMessageEventId.value == widget.event.eventId) {
+    if (matrix.voiceMessageEvent.value?.eventId == widget.event.eventId) {
+      if (matrix.audioPlayer.isAtEndPosition) {
+        matrix.audioPlayer.seek(Duration.zero);
+        matrix.audioPlayer.play();
+        return;
+      }
       if (matrix.audioPlayer.playing == true) {
         matrix.audioPlayer.pause();
       } else {
@@ -109,14 +111,14 @@ class AudioPlayerState extends State<AudioPlayerWidget>
       return;
     }
 
-    matrix.voiceMessageEventId.value = widget.event.eventId;
+    matrix.voiceMessageEvent.value = widget.event;
     matrix.audioPlayer
       ..stop()
       ..dispose();
     File? file;
     MatrixFile? matrixFile;
 
-    audioStatus.value = AudioPlayerStatus.downloading;
+    matrix.currentAudioStatus.value = AudioPlayerStatus.downloading;
     try {
       matrixFile = await widget.event.downloadAndDecryptAttachment();
 
@@ -135,7 +137,7 @@ class AudioPlayerState extends State<AudioPlayerWidget>
         }
       }
 
-      audioStatus.value = AudioPlayerStatus.downloaded;
+      matrix.currentAudioStatus.value = AudioPlayerStatus.downloaded;
     } catch (e, s) {
       Logs().v('Could not download audio file', e, s);
       ScaffoldMessenger.of(context).showSnackBar(
@@ -146,8 +148,9 @@ class AudioPlayerState extends State<AudioPlayerWidget>
       rethrow;
     }
     if (!context.mounted) return;
-    if (matrix.voiceMessageEventId.value != widget.event.eventId) return;
+    if (matrix.voiceMessageEvent.value?.eventId != widget.event.eventId) return;
     matrix.audioPlayer = AudioPlayer();
+    matrix.voiceMessageEvent.value = widget.event;
 
     if (file != null) {
       matrix.audioPlayer.setFilePath(file.path);
@@ -211,26 +214,39 @@ class AudioPlayerState extends State<AudioPlayerWidget>
 
       if (_calculatedWaveform.isEmpty) {
         _calculatedWaveform.addAll(waveFromHeight);
-        audioStatus.value = AudioPlayerStatus.downloaded;
+        matrix.currentAudioStatus.value = AudioPlayerStatus.downloaded;
       }
 
-      if (matrix.voiceMessageEventId.value == widget.event.eventId) {
+      if (matrix.voiceMessageEvent.value?.eventId == widget.event.eventId) {
         ScaffoldMessenger.of(matrix.context).clearMaterialBanners();
       }
     });
   }
 
   @override
+  void dispose() {
+    matrix.audioPlayer
+      ..stop()
+      ..dispose();
+    matrix.currentAudioStatus.value = AudioPlayerStatus.notDownloaded;
+    if (matrix.voiceMessageEvent.value?.eventId == widget.event.eventId) {
+      matrix.voiceMessageEvent.value = null;
+    }
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     super.build(context);
     return ValueListenableBuilder(
-      valueListenable: audioStatus,
+      valueListenable: matrix.currentAudioStatus,
       builder: (context, status, _) {
         return ValueListenableBuilder(
-          valueListenable: matrix.voiceMessageEventId,
-          builder: (context, eventId, _) {
-            final audioPlayer =
-                eventId != widget.event.eventId ? null : matrix.audioPlayer;
+          valueListenable: matrix.voiceMessageEvent,
+          builder: (context, event, _) {
+            final audioPlayer = event?.eventId != widget.event.eventId
+                ? null
+                : matrix.audioPlayer;
 
             return StreamBuilder<Object>(
               stream: audioPlayer == null
@@ -242,8 +258,9 @@ class AudioPlayerState extends State<AudioPlayerWidget>
               builder: (context, snapshot) {
                 final maxPosition =
                     audioPlayer?.duration?.inMilliseconds.toDouble() ?? 1.0;
-                var currentPosition =
-                    audioPlayer?.position.inMilliseconds.toDouble() ?? 0.0;
+                var currentPosition = status == AudioPlayerStatus.downloading
+                    ? 0
+                    : audioPlayer?.position.inMilliseconds.toDouble() ?? 0.0;
                 if (currentPosition > maxPosition) {
                   currentPosition = maxPosition;
                 }
@@ -277,6 +294,8 @@ class AudioPlayerState extends State<AudioPlayerWidget>
                             _playButtonBuilder(
                               status: status,
                               audioPlayer: audioPlayer,
+                              isCurrentAudio:
+                                  event?.eventId == widget.event.eventId,
                             ),
                             const SizedBox(width: 4),
                             Expanded(
@@ -437,10 +456,11 @@ class AudioPlayerState extends State<AudioPlayerWidget>
   Widget _playButtonBuilder({
     required AudioPlayerStatus status,
     required AudioPlayer? audioPlayer,
+    bool isCurrentAudio = false,
   }) {
     return InkWell(
       onTap: _onButtonTap,
-      child: status == AudioPlayerStatus.downloading
+      child: status == AudioPlayerStatus.downloading && isCurrentAudio
           ? Stack(
               alignment: Alignment.center,
               children: [

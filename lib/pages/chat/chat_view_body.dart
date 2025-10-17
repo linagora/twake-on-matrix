@@ -1,3 +1,4 @@
+import 'package:async/async.dart';
 import 'package:desktop_drop/desktop_drop.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/domain/contact_manager/contacts_manager.dart';
@@ -9,7 +10,10 @@ import 'package:fluffychat/pages/chat/chat_loading_view.dart';
 import 'package:fluffychat/pages/chat/chat_view_body_style.dart';
 import 'package:fluffychat/pages/chat/chat_view_style.dart';
 import 'package:fluffychat/pages/chat/disabled_chat_input_row.dart';
+import 'package:fluffychat/pages/chat/events/audio_message/audio_play_extension.dart';
+import 'package:fluffychat/pages/chat/events/audio_message/audio_player_widget.dart';
 import 'package:fluffychat/pages/chat/events/edit_display.dart';
+import 'package:fluffychat/pages/chat/events/message/display_name_widget.dart';
 import 'package:fluffychat/pages/chat/events/message_content_mixin.dart';
 import 'package:fluffychat/pages/chat/chat_pinned_events/pinned_events_view.dart';
 import 'package:fluffychat/pages/chat/sticky_timestamp_widget.dart';
@@ -18,12 +22,15 @@ import 'package:fluffychat/pages/contacts_tab/widgets/add_contact/add_contact_di
 import 'package:fluffychat/presentation/model/chat/view_event_list_ui_state.dart';
 import 'package:fluffychat/resource/image_paths.dart';
 import 'package:fluffychat/utils/date_time_extension.dart';
+import 'package:fluffychat/utils/string_extension.dart';
 import 'package:fluffychat/widgets/connection_status_header.dart';
 import 'package:fluffychat/widgets/matrix.dart';
+import 'package:fluffychat/widgets/twake_components/twake_icon_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_emoji_mart/flutter_emoji_mart.dart';
 import 'package:fluffychat/generated/l10n/app_localizations.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:just_audio/just_audio.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:matrix/matrix.dart';
 import 'chat_input_row.dart';
@@ -208,6 +215,7 @@ class ChatViewBody extends StatelessWidget with MessageContentMixin {
                         thickness: ChatViewBodyStyle.dividerSize,
                         color: Theme.of(context).dividerColor,
                       ),
+                    _audioPlayerWidget(),
                     SizedBox(
                       key: controller.stickyTimestampKey,
                       child: ValueListenableBuilder(
@@ -338,6 +346,210 @@ class ChatViewBody extends StatelessWidget with MessageContentMixin {
           ],
         ),
       ),
+    );
+  }
+
+  void _handleCloseAudioPlayer() {
+    controller.matrix?.voiceMessageEvent.value = null;
+    controller.matrix?.audioPlayer
+      ?..stop()
+      ..dispose();
+    controller.matrix?.currentAudioStatus.value =
+        AudioPlayerStatus.notDownloaded;
+  }
+
+  void _handlePlayOrPauseAudioPlayer() {
+    final audioPlayer = controller.matrix?.audioPlayer;
+    if (audioPlayer == null) return;
+    if (audioPlayer.isAtEndPosition) {
+      audioPlayer.seek(Duration.zero);
+      audioPlayer.play();
+      return;
+    }
+
+    if (audioPlayer.playing == true) {
+      audioPlayer.pause();
+    } else {
+      audioPlayer.play();
+    }
+  }
+
+  Widget _audioPlayerWidget() {
+    return ValueListenableBuilder(
+      valueListenable: controller.matrix?.currentAudioStatus ??
+          ValueNotifier<AudioPlayerStatus>(
+            AudioPlayerStatus.notDownloaded,
+          ),
+      builder: (context, status, _) {
+        return ValueListenableBuilder(
+          valueListenable: controller.matrix?.voiceMessageEvent ??
+              ValueNotifier<Event?>(null),
+          builder: (context, hasEvent, _) {
+            if (hasEvent == null) {
+              return const SizedBox.shrink();
+            }
+            final audioPlayer = controller.matrix?.audioPlayer;
+            return StreamBuilder<Object>(
+              stream: StreamGroup.merge([
+                controller.matrix?.audioPlayer.positionStream
+                        .asBroadcastStream() ??
+                    Stream.value(Duration.zero),
+                controller.matrix?.audioPlayer.playerStateStream
+                        .asBroadcastStream() ??
+                    Stream.value(Duration.zero),
+                controller.matrix?.audioPlayer.speedStream
+                        .asBroadcastStream() ??
+                    Stream.value(Duration.zero),
+              ]),
+              builder: (context, snapshot) {
+                final maxPosition =
+                    audioPlayer?.duration?.inMilliseconds.toDouble() ?? 1.0;
+                final currentPosition = status == AudioPlayerStatus.downloading
+                    ? 0
+                    : audioPlayer?.position.inMilliseconds.toDouble() ?? 0.0;
+                final progress = maxPosition > 0
+                    ? (currentPosition / maxPosition).clamp(0.0, 1.0)
+                    : 0.0;
+                return Container(
+                  constraints: const BoxConstraints(maxHeight: 40),
+                  decoration: BoxDecoration(
+                    color: LinagoraSysColors.material().onPrimary,
+                    border: Border(
+                      top: BorderSide(
+                        color: LinagoraStateLayer(
+                          LinagoraSysColors.material().surfaceTint,
+                        ).opacityLayer3,
+                      ),
+                    ),
+                  ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Container(
+                        height: 37,
+                        padding: const EdgeInsets.symmetric(horizontal: 8),
+                        child: Row(
+                          children: [
+                            TwakeIconButton(
+                              size: 20,
+                              onTap: _handlePlayOrPauseAudioPlayer,
+                              iconColor: LinagoraSysColors.material().primary,
+                              icon: audioPlayer?.playing == true &&
+                                      audioPlayer?.isAtEndPosition == false
+                                  ? Icons.pause_outlined
+                                  : Icons.play_arrow,
+                            ),
+                            const SizedBox(width: 4),
+                            Expanded(
+                              child: _displaySenderNameWhenPlayingAudio(
+                                hasEvent,
+                                audioPlayer?.position.minuteSecondString ?? '',
+                              ),
+                            ),
+                            Row(
+                              children: [
+                                InkWell(
+                                  onTap: () => _toggleSpeed(audioPlayer),
+                                  child: Center(
+                                    child: SvgPicture.asset(
+                                      _displayAudioSpeed(
+                                        audioPlayer?.speed ?? 1.0,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(width: 8),
+                                TwakeIconButton(
+                                  onTap: _handleCloseAudioPlayer,
+                                  icon: Icons.close,
+                                  iconColor:
+                                      LinagoraRefColors.material().tertiary[30],
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                      LinearProgressIndicator(
+                        value: progress,
+                        minHeight: 2,
+                        backgroundColor: LinagoraStateLayer(
+                          LinagoraSysColors.material().surfaceTint,
+                        ).opacityLayer3,
+                        valueColor: AlwaysStoppedAnimation<Color>(
+                          LinagoraSysColors.material().primary,
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              },
+            );
+          },
+        );
+      },
+    );
+  }
+
+  String _displayAudioSpeed(double int) {
+    switch (int) {
+      case 0.5:
+        return ImagePaths.icAudioSpeed0_5x;
+      case 1.0:
+        return ImagePaths.icAudioSpeed1x;
+      case 1.5:
+        return ImagePaths.icAudioSpeed1_5x;
+      case 2.0:
+        return ImagePaths.icAudioSpeed2x;
+      default:
+        return ImagePaths.icAudioSpeed1x;
+    }
+  }
+
+  void _toggleSpeed(AudioPlayer? audioPlayer) async {
+    if (audioPlayer == null) return;
+    switch (audioPlayer.speed) {
+      case 0.5:
+        await audioPlayer.setSpeed(0.75);
+        break;
+      case 0.75:
+        await audioPlayer.setSpeed(1.0);
+        break;
+      case 1.0:
+        await audioPlayer.setSpeed(1.5);
+        break;
+      case 1.5:
+        await audioPlayer.setSpeed(2);
+        break;
+      case 2.0:
+        await audioPlayer.setSpeed(0.5);
+      default:
+        await audioPlayer.setSpeed(1.0);
+        break;
+    }
+  }
+
+  Widget _displaySenderNameWhenPlayingAudio(
+    Event event,
+    String duration,
+  ) {
+    return FutureBuilder<User?>(
+      future: event.fetchSenderUser(),
+      builder: (context, snapshot) {
+        final displayName = snapshot.data?.calcDisplayname() ??
+            event.senderFromMemoryOrFallback.calcDisplayname();
+        return Text(
+          "${displayName.shortenDisplayName(
+            maxCharacters: DisplayNameWidget.maxCharactersDisplayNameBubble,
+          )}  $duration",
+          style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                fontFamily: 'Inter',
+                color: LinagoraRefColors.material().neutral[50],
+              ),
+          maxLines: 1,
+          overflow: TextOverflow.clip,
+        );
+      },
     );
   }
 

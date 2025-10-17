@@ -98,6 +98,7 @@ import 'package:scroll_to_index/scroll_to_index.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:universal_html/html.dart' as html;
 
+import 'events/audio_message/audio_player_widget.dart';
 import 'send_file_dialog/send_file_dialog.dart';
 import 'sticker_picker_dialog.dart';
 
@@ -2812,6 +2813,27 @@ class ChatController extends State<Chat>
     );
   }
 
+  void disposeAudioPlayer() {
+    matrix?.audioPlayer.stop();
+    matrix?.audioPlayer.clearAudioSources();
+    matrix?.voiceMessageEvent.value = null;
+  }
+
+  void initAudioPlayer() {
+    if (matrix?.audioPlayer.playing == true) {
+      matrix?.audioPlayer
+        ?..stop()
+        ..dispose();
+    }
+    if (matrix?.voiceMessageEvent != null) {
+      matrix?.voiceMessageEvent.value = null;
+    }
+
+    if (matrix?.currentAudioStatus.value != AudioPlayerStatus.notDownloaded) {
+      matrix?.currentAudioStatus.value = AudioPlayerStatus.notDownloaded;
+    }
+  }
+
   @override
   void onSendFileCallback() => scrollDown();
 
@@ -2839,6 +2861,7 @@ class ChatController extends State<Chat>
       if (PlatformInfos.isWeb) {
         initAudioRecorderWeb();
       }
+      initAudioPlayer();
     });
   }
 
@@ -2898,6 +2921,7 @@ class ChatController extends State<Chat>
     editEventNotifier.dispose();
     focusHover.dispose();
     disposeAudioMixin();
+    disposeAudioPlayer();
     super.dispose();
   }
 
