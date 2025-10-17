@@ -32,7 +32,11 @@ flutter_rust_bridge_codegen build-web --dart-root dart --rust-root "$(readlink -
 cd ..
 # Remove target directory if it exists, to ensure fresh copy
 rm -rf ./web/pkg
-# Move the newly built WASM package to the correct location
-mv .vodozemac/dart/web/pkg ./web/pkg
+# Ensure the target directory for web assets exists
+mkdir -p ./web/pkg
+# Construct the absolute path to the generated wasm pkg
+SOURCE_PKG_PATH="$(pwd)/.vodozemac/dart/web/pkg"
+# Move the newly built WASM package to the correct location using its absolute path
+mv "${SOURCE_PKG_PATH}" ./web/pkg
 rm -rf .vodozemac
 # Ensure the file ends with a newline character.
