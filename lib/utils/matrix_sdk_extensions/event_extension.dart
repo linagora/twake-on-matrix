@@ -199,7 +199,8 @@ extension LocalizedBody on Event {
         MessageTypes.Video,
         MessageTypes.Image,
       }.contains(messageType) &&
-      isVideoAvailable;
+      isVideoAvailable &&
+      !isImageWithCaption();
 
   bool get hideDisplayNameInBubbleChat => {
         MessageTypes.Video,
@@ -404,5 +405,24 @@ extension LocalizedBody on Event {
     }
 
     return reactionMap.isNotEmpty;
+  }
+
+  bool isImageWithCaption() {
+    return messageType == MessageTypes.Image &&
+        text.isNotEmpty &&
+        filename != text;
+  }
+
+  String? imageBubbleId() {
+    // First try to get from main content (for actual sent events)
+    final groupId = content.tryGet<String>('image_bubble_id');
+    if (groupId != null) {
+      return groupId;
+    }
+
+    // Fallback to unsigned.extra_content (for fake/pending events)
+    return unsigned
+        ?.tryGetMap<String, dynamic>('extra_content')
+        ?.tryGet<String>('image_bubble_id');
   }
 }

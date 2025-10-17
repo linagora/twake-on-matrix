@@ -164,6 +164,14 @@ extension MatrixFileExtension on MatrixFile {
       this is MatrixImageFile || this is MatrixVideoFile;
 
   bool isFileHaveError(double maxSize) => size > maxSize;
+
+  bool isSendingImageInWeb() {
+    return bytes != null && this is MatrixImageFile;
+  }
+
+  bool isSendingImageInMobile() {
+    return filePath != null && this is MatrixImageFile && !PlatformInfos.isWeb;
+  }
 }
 
 class TwakeAudioFile extends MatrixFile {

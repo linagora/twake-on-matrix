@@ -1,13 +1,12 @@
-import 'package:fluffychat/utils/manager/upload_manager/models/upload_info.dart';
+import 'package:equatable/equatable.dart';
 
-class UploadCaptionInfo extends UploadInfo {
+class UploadCaptionInfo with EquatableMixin {
   final String caption;
 
   UploadCaptionInfo({
-    required super.txid,
     required this.caption,
   });
 
   @override
-  List<Object?> get props => [txid, caption];
+  List<Object?> get props => [caption];
 }

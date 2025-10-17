@@ -3,6 +3,7 @@ import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/pages/chat/chat_horizontal_action_menu.dart';
 import 'package:fluffychat/pages/chat/chat_view_body_style.dart';
 import 'package:fluffychat/pages/chat/context_item_chat_action.dart';
+import 'package:fluffychat/presentation/mixins/grouped_events_mixin.dart';
 import 'package:fluffychat/pages/chat/events/message/message_content_with_timestamp_builder.dart';
 import 'package:fluffychat/pages/chat/events/message/message_style.dart';
 import 'package:fluffychat/pages/chat/events/message/multi_platform_message_container.dart';
@@ -99,6 +100,7 @@ class Message extends StatefulWidget {
   final void Function(BuildContext context, Event, TapDownDetails)?
       onTapMoreButton;
   final Future<Category?>? recentEmojiFuture;
+  final GroupedEvents? groupedEvents;
 
   const Message(
     this.event, {
@@ -140,6 +142,7 @@ class Message extends StatefulWidget {
     this.onSaveToGallery,
     this.onTapMoreButton,
     this.recentEmojiFuture,
+    this.groupedEvents,
   });
 
   /// Indicates wheither the user may use a mouse instead
@@ -289,6 +292,7 @@ class _MessageState extends State<Message> with MessageAvatarMixin {
           saveToGallery: widget.onSaveToGallery,
           onTapMoreButton: widget.onTapMoreButton,
           recentEmojiFuture: widget.recentEmojiFuture,
+          groupedEvents: widget.groupedEvents,
         ),
       ),
     ];
