@@ -162,6 +162,7 @@ class MatrixState extends State<Matrix>
       await _storePersistActiveAccount(newClient!);
       await _getUserInfoWithActiveClient(newClient);
       await _getHomeserverInformation(newClient);
+      getIt.get<ContactsManager>().refreshTomContacts();
       return SetActiveClientState.success;
     } else {
       Logs().w('Tried to set an unknown client ${newClient!.userID} as active');

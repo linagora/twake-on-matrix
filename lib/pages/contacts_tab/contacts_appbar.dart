@@ -32,8 +32,11 @@ class ContactsAppBar extends StatelessWidget {
           title: L10n.of(context)!.contacts,
           context: context,
           actions: [
-            if (PlatformInfos.isMobile)
-              IconButton(
+            Padding(
+              padding: PlatformInfos.isMobile
+                  ? EdgeInsets.zero
+                  : const EdgeInsetsDirectional.only(end: 4),
+              child: IconButton(
                 onPressed: () {
                   showAddContactDialog(context);
                 },
@@ -41,7 +44,11 @@ class ContactsAppBar extends StatelessWidget {
                   Icons.person_add_alt,
                   color: LinagoraSysColors.material().primary,
                 ),
+                padding: PlatformInfos.isMobile
+                    ? EdgeInsets.zero
+                    : const EdgeInsets.all(12),
               ),
+            ),
           ],
         ),
         ValueListenableBuilder<bool>(

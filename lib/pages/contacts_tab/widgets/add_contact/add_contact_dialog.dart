@@ -145,41 +145,47 @@ class AddContactDialogController extends State<AddContactDialog> {
         return;
       } else if (state is PostAddressBookSuccessState) {
         getIt.get<ContactsManager>().refreshTomContacts();
-        Navigator.pop(context);
+        final createdContact = state.updatedAddressBooks.firstOrNull
+            ?.toPresentationContact()
+            .firstOrNull;
         if (PlatformInfos.isMobile) {
+          Navigator.pop(context);
           Navigator.of(context).push(
             CupertinoPageRoute(
               builder: (context) => ChatProfileInfoNavigator(
                 isInStack: true,
                 onBack: context.pop,
-                contact: state.updatedAddressBooks.firstOrNull
-                    ?.toPresentationContact()
-                    .firstOrNull,
+                contact: createdContact,
               ),
             ),
           );
+        } else {
+          chatWithUser(userName.value, contact: createdContact);
         }
       }
       return;
     }
 
+    chatWithUser(userName.value, contact: existedContact);
+  }
+
+  void chatWithUser(String matrixId, {PresentationContact? contact}) {
     final existedRoomId =
-        Matrix.of(context).client.getDirectChatFromUserId(userName.value);
-    if (existedRoomId != null) {
-      Navigator.pop(context);
-      context.go('/rooms/$existedRoomId');
-      return;
-    }
+        Matrix.of(context).client.getDirectChatFromUserId(matrixId);
 
     Navigator.pop(context);
+
+    if (existedRoomId != null) {
+      return context.go('/rooms/$existedRoomId');
+    }
+
     Router.neglect(
       context,
       () => context.go(
         '/rooms/draftChat',
         extra: {
-          PresentationContactConstant.receiverId: existedContact.id,
-          PresentationContactConstant.displayName:
-              existedContact.displayName ?? '',
+          PresentationContactConstant.receiverId: contact?.matrixId ?? '',
+          PresentationContactConstant.displayName: contact?.displayName ?? '',
           PresentationContactConstant.status: '',
         },
       ),
