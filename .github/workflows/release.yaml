@@ -104,7 +104,6 @@ jobs:
     name: Release on Github
     runs-on: ubuntu-latest
     needs:
-      - package_desktop
       - release_mobile
     environment: prod
     permissions:
