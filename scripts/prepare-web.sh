@@ -30,7 +30,9 @@ fi
 cargo install flutter_rust_bridge_codegen
 flutter_rust_bridge_codegen build-web --dart-root dart --rust-root "$(readlink -f rust)" --release --verbose
 cd ..
+# Remove target directory if it exists, to ensure fresh copy
 rm -rf ./web/pkg
-mv .vodozemac/dart/web/pkg ./web/
+# Move the newly built WASM package to the correct location
+mv .vodozemac/dart/web/pkg ./web/pkg
 rm -rf .vodozemac
 # Ensure the file ends with a newline character.
