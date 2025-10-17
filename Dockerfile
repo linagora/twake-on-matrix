@@ -1,24 +1,24 @@
 # Specify versions
 ARG FLUTTER_VERSION=3.32.8
-ARG OLM_VERSION=3.2.16
-ARG NIX_VERSION=2.22.1
-
-# Building libolm
-# libolm only has amd64
-# FROM --platform=linux/amd64 nixos/nix:${NIX_VERSION} AS olm-builder
-# ARG OLM_VERSION
-# RUN nix build -v --extra-experimental-features flakes --extra-experimental-features nix-command gitlab:matrix-org/olm/${OLM_VERSION}?host=gitlab.matrix.org\#javascript
 
 # Building Twake for the web
-FROM --platform=linux/amd64 ghcr.io/instrumentisto/flutter:${FLUTTER_VERSION} AS web-builder
+FROM --platform=linux/amd64 ghcr.io/cirruslabs/flutter:${FLUTTER_VERSION} AS web-builder
 ARG TWAKECHAT_BASE_HREF="/web/"
+
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends curl pkg-config libssl-dev && \
+    curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y && \
+    curl -fsSL https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 -o /usr/local/bin/yq && \
+    chmod +x /usr/local/bin/yq
+ENV PATH="/root/.cargo/bin:${PATH}"
+
 COPY . /app
 WORKDIR /app
 RUN DEBIAN_FRONTEND=noninteractive apt update && \
     apt install -y openssh-client && \
     rm -rf assets/js/* && \
     ssh-keyscan github.com >> ~/.ssh/known_hosts
-COPY --from=olm-builder /result/javascript assets/js/package
+RUN --mount=type=ssh,required=true ./scripts/prepare-web.sh
 RUN --mount=type=ssh,required=true ./scripts/build-web.sh
 
 # Final image
