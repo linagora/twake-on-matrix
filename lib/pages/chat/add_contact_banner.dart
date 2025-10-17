@@ -19,14 +19,14 @@ class AddContactBanner extends StatelessWidget {
       valueListenable: show,
       builder: (context, show, child) {
         if (!show) return const SizedBox();
-        return Container(
-          height: 40,
-          color: LinagoraSysColors.material().secondaryContainer,
-          child: Stack(
-            children: [
-              GestureDetector(
-                onTap: onTap,
-                child: Padding(
+        return GestureDetector(
+          onTap: onTap,
+          child: Container(
+            height: 40,
+            color: LinagoraSysColors.material().secondaryContainer,
+            child: Stack(
+              children: [
+                Padding(
                   padding: const EdgeInsets.symmetric(vertical: 10),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -48,22 +48,22 @@ class AddContactBanner extends StatelessWidget {
                     ],
                   ),
                 ),
-              ),
-              Align(
-                alignment: Alignment.centerRight,
-                child: Padding(
-                  padding: const EdgeInsetsDirectional.only(end: 8),
-                  child: IconButton(
-                    onPressed: this.show.toggle,
-                    icon: Icon(
-                      Icons.close,
-                      color: LinagoraSysColors.material().primary,
-                      size: 18,
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: Padding(
+                    padding: const EdgeInsetsDirectional.only(end: 8),
+                    child: IconButton(
+                      onPressed: this.show.toggle,
+                      icon: Icon(
+                        Icons.close,
+                        color: LinagoraSysColors.material().primary,
+                        size: 18,
+                      ),
                     ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         );
       },
