@@ -36,7 +36,7 @@ RUN DEBIAN_FRONTEND=noninteractive apt update && \
 
 # Copy vodozemac WASM artifacts from the vodozemac-builder stage
 COPY --from=vodozemac-builder /app/web/pkg /app/web/pkg
-RUN ./scripts/build-web.sh
+RUN --mount=type=ssh,required=true ./scripts/build-web.sh
 
 # Final image
 FROM nginx:alpine AS final-image
