@@ -7,6 +7,8 @@ ARG FLUTTER_VERSION
 WORKDIR /app
 # Install build dependencies, ensuring minimal image size
 RUN apt-get update && apt-get install -y --no-install-recommends git curl ca-certificates && \
+    apt-get autoremove -y && \
+    apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 # Install Flutter to ensure dependency tools are available (needed for pubspec.yaml parsing)
 RUN curl --proto '=https' --tlsv1.2 -sSf https://storage.googleapis.com/flutter_infra_release/releases/stable/linux/flutter_linux_${FLUTTER_VERSION}-stable.tar.xz \
@@ -15,7 +17,12 @@ ENV PATH="/usr/local/bin:${PATH}"
 # Add /usr/local to git's safe directory list to avoid dubious ownership errors
 RUN git config --global --add safe.directory /usr/local
 # Install and set nightly toolchain as default, then add rust-src for it
-RUN rustup toolchain install nightly && rustup default nightly && rustup component add rust-src --toolchain nightly
+RUN rustup toolchain install nightly && \
+    rustup default nightly && \
+    rustup component add rust-src --toolchain nightly && \
+    # Clean up rustup cache directories immediately to free up space
+    rm -rf "$(rustup show home)"/tmp && \
+    rm -rf "$(rustup show home)"/download
 # Copy only necessary files for vodozemac build
 COPY pubspec.yaml pubspec.yaml
 COPY scripts/prepare-web.sh scripts/prepare-web.sh
