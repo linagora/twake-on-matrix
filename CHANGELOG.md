@@ -1,3 +1,29 @@
+## [2.14.0+2330] - 2025-10-17
+### Added
+- TW-2588 Add contact button (#2589)
+- TW-2583 Add ability to swipe media when preview (#2584)
+- TW-2574: Pause/Resume audio (#2575)
+- TW #2578: Add support for sending images with captions in the same message bubble (#2579)
+- TW-2555 Support Android 16kb page size
+- TW-2562 Sync one-to-one notification setting
+- TW-2592: add player for voice messages (#2595)
+- TW-2588 Add contact button web (#2602)
+
+### Changed
+- TW-2593 Hide change avatar event (#2594)
+- TW-2572 Redirect to common settings when delete account
+- Change flutter image back to instrumentisto
+- Enhance event visibility logic to hide redacted and redaction events (#2601)
+
+### Fixed
+- TW-2568 Prevent actions for deleted messages (#2569)
+- Fix analyze failed for generated files
+- HOTFIX Build vodozemac on runner 2nd attempt (#2604)
+
+### Updated
+- Update alignment for media viewer (#2598)
+- Support Flutter 3.32.8
+
 ## [2.12.6+2330] - 2025-10-09
 ### Added
 - E2E tests for change language
