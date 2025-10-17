@@ -6,7 +6,7 @@ import '../base/core_robot.dart';
 import 'chat_list_robot.dart';
 import 'contact_list_robot.dart';
 import 'package:fluffychat/generated/l10n/app_localizations.dart';
-import 'setting_robot.dart';
+import 'setting/setting_robot.dart';
 
 class HomeRobot extends CoreRobot {
   HomeRobot(super.$);

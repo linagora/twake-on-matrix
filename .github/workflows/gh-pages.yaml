@@ -3,7 +3,6 @@ on:
 
 env:
   FLUTTER_VERSION: 3.32.8
-  LIBOLM_VERSION: 3.2.16
 
 name: Deploying on GitHub Pages
 
@@ -34,12 +33,26 @@ jobs:
           cache: true
           cache-key: "flutter-:os:-:channel:-:version:-:arch:-:hash:-${{ hashFiles('**/pubspec.lock') }}"
 
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Cache Cargo
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            ${{ env.VODOZEMAC_PATH }}/target
+          key: ${{ runner.os }}-cargo-debug-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-debug-
+
       - uses: webfactory/ssh-agent@v0.9.0
         with:
           ssh-private-key: ${{ secrets.SSH_KEY }}
 
-      - name: Setup Nix (to build libolm)
-        uses: cachix/install-nix-action@v26
+      - name: Prepare web vodozemac
+        run: ./scripts/prepare-web.sh
 
       - name: Build Web version
         env:
@@ -49,7 +62,7 @@ jobs:
           flutter config --enable-web
           flutter clean
           flutter pub get
-          flutter pub run build_runner build --delete-conflicting-outputs
+          flutter pub run build_runner build -d
           flutter build web --release --verbose --source-maps --base-href="/${GITHUB_REPOSITORY##*/}/$FOLDER/"
           echo "$TWAKE_PREVIEW_CONFIG" | yq '.issue_id = strenv(FOLDER)' > ./build/web/config.json
 

@@ -100,91 +100,10 @@ jobs:
           name: twake-release-${{ matrix.os }}
           path: twake-${{ github.ref_name }}*
 
-  package_desktop:
-    name: Package app on desktops
-    runs-on: ${{ matrix.runner }}
-    strategy:
-      matrix:
-        include:
-          - os: macos
-            runner: macos-latest
-          - os: windows
-            runner: windows-latest
-          - os: linux
-            runner: ubuntu-latest
-      fail-fast: false
-    environment: prod
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Setup Flutter
-        uses: subosito/flutter-action@v2
-        with:
-          flutter-version: ${{ env.FLUTTER_VERSION }}
-          channel: "stable"
-          cache: true
-          cache-key: "flutter-:os:-:channel:-:version:-:arch:-:hash:-${{ hashFiles('**/pubspec.lock') }}"
-
-      - uses: webfactory/ssh-agent@v0.9.0
-        with:
-          ssh-private-key: ${{ secrets.SSH_KEY }}
-
-      - name: Setup
-        run: |
-          ssh-keyscan github.com >> ~/.ssh/known_hosts
-          flutter pub global activate flutter_distributor
-        shell: bash
-
-      - name: Setup Fastlane (macOS only)
-        uses: ruby/setup-ruby@v1
-        if: matrix.os == 'macos'
-        with:
-          ruby-version: ruby
-          bundler-cache: true
-          working-directory: ${{ matrix.os }}
-
-      - name: Build
-        env:
-          APPLE_CERTIFICATES_SSH_KEY: ${{ secrets.APPLE_CERTIFICATES_SSH_KEY }}
-          MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
-        run: ./scripts/build-${{ matrix.os }}.sh
-        shell: bash
-
-      - name: Package
-        run: ./scripts/package-${{ matrix.os }}.sh
-        shell: bash
-
-      - name: Prepare files for release
-        env:
-          APPLE_KEY_ID: ${{ secrets.APPLE_KEY_ID }}
-          APPLE_ISSUER_ID: ${{ secrets.APPLE_ISSUER_ID }}
-          APPLE_KEY_CONTENT: ${{ secrets.APPLE_KEY_CONTENT }}
-        run: |
-          case "$RUNNER_OS" in
-            Linux)
-              cp dist/* "twake-$GITHUB_REF_NAME-linux-amd64.AppImage";;
-            macOS)
-              cp dist/*/* "twake-$GITHUB_REF_NAME-macos-amd64.dmg"
-              # Notarize the app
-              cd macos && bundle exec fastlane notarization
-              ;;
-            Windows)
-              cp dist/*/* "twake-$GITHUB_REF_NAME-windows-amd64.exe";;
-          esac
-        shell: bash
-
-      - uses: actions/upload-artifact@v4
-        with:
-          name: twake-release-${{ matrix.os }}
-          path: twake-${{ github.ref_name }}*
-
   release_github:
     name: Release on Github
     runs-on: ubuntu-latest
     needs:
-      - package_desktop
       - release_mobile
     environment: prod
     permissions:
