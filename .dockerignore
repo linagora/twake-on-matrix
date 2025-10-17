@@ -1,0 +1,122 @@
+# Build outputs and caches (HUGE - often 5-15GB)
+build/
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+.pub-cache/
+.pub/
+
+# Platform-specific build outputs (several GB each)
+android/build/
+android/.gradle/
+android/app/build/
+ios/build/
+ios/.symlinks/
+ios/Pods/
+ios/Flutter/Flutter.framework
+ios/Flutter/Flutter.podspec
+linux/build/
+macos/build/
+windows/build/
+winuwp/build/
+
+# Git (can be several GB)
+.git/
+.gitignore
+.gitattributes
+.gitmodules
+
+# GitHub workflows and configs (keep only in repo)
+.github/
+
+# Flutter Version Manager
+.fvm/
+
+# IDE and editor files
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.DS_Store
+*.iml
+
+# Generated files
+generated/
+*.g.dart.backup
+
+# Testing and coverage
+coverage/
+test_driver/
+integration_test/
+.test_coverage.dart
+
+# Documentation
+docs/
+README.md
+CHANGELOG.md
+LICENSE
+PRIVACY.md
+TRANSLATORS_GUIDE.md
+CONTRIBUTING.md
+
+# CI/CD configs (not needed in build)
+.gitlab-ci.yml
+.envrc
+devenv.lock
+devenv.nix
+devenv.yaml
+
+# AppImage build
+appimage/
+
+# FDroid
+fdroid/
+
+# Fastlane
+fastlane/report.xml
+fastlane/Preview.html
+fastlane/screenshots/
+fastlane/test_output/
+fastlane/Gemfile.lock
+
+# Temporary files and caches
+*.tmp
+*.temp
+*.log
+.vodozemac
+
+# Test Dockerfiles
+Dockerfile.test-dart
+
+# Node modules (if any)
+node_modules/
+npm-debug.log
+yarn-error.log
+
+# OS specific
+Thumbs.db
+Desktop.ini
+
+# Backup files
+*.bak
+*.backup
+*~
+
+# Don't ignore these - they ARE needed:
+# !lib/
+# !web/
+# !assets/
+# !pubspec.yaml
+# !pubspec.lock
+# !analysis_options.yaml
+# !l10n.yaml
+# !scripts/
+# !server/
+# !configurations/
+# !android/ (excluding build folder above)
+# !ios/ (excluding build folder above)
+# !linux/
+# !macos/
+# !windows/
