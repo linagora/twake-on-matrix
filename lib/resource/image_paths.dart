@@ -76,6 +76,14 @@ class ImagePaths {
       _getImagePath('ic_time_recorder_web.svg');
   static String get icDeleteRecorderWeb =>
       _getImagePath('ic_delete_recorder_web.svg');
+
+  static String get icAudioSpeed1x => _getImagePath('audio_speed_1x.svg');
+
+  static String get icAudioSpeed1_5x => _getImagePath('audio_speed_1_5x.svg');
+
+  static String get icAudioSpeed2x => _getImagePath('audio_speed_2x.svg');
+
+  static String get icAudioSpeed0_5x => _getImagePath('audio_speed_0_5x.svg');
   static String _getImagePath(String imageName) {
     return AssetsPaths.images + imageName;
   }
