@@ -1,12 +1,21 @@
+import 'package:collection/collection.dart';
 import 'package:dartz/dartz.dart';
 import 'package:fluffychat/app_state/failure.dart';
 import 'package:fluffychat/app_state/success.dart';
+import 'package:fluffychat/di/global/get_it_initializer.dart';
+import 'package:fluffychat/domain/app_state/contact/get_contacts_state.dart';
 import 'package:fluffychat/domain/app_state/contact/lookup_match_contact_state.dart';
+import 'package:fluffychat/domain/contact_manager/contacts_manager.dart';
+import 'package:fluffychat/domain/model/contact/contact.dart';
+import 'package:fluffychat/domain/model/extensions/contact/contact_extension.dart';
 import 'package:fluffychat/pages/chat_details/chat_details_view_style.dart';
 import 'package:fluffychat/pages/chat_profile_info/chat_profile_action_button.dart';
+import 'package:fluffychat/pages/contacts_tab/widgets/add_contact/add_contact_dialog.dart';
+import 'package:fluffychat/presentation/model/contact/presentation_contact.dart';
 import 'package:fluffychat/presentation/model/contact/presentation_contact_constant.dart';
 import 'package:fluffychat/resource/image_paths.dart';
 import 'package:fluffychat/utils/clipboard.dart';
+import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/utils/string_extension.dart';
 import 'package:fluffychat/utils/twake_snackbar.dart';
 import 'package:fluffychat/widgets/app_bars/twake_app_bar.dart';
@@ -24,6 +33,7 @@ import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:fluffychat/pages/chat_profile_info/chat_profile_info.dart';
 import 'package:fluffychat/pages/chat_profile_info/chat_profile_info_style.dart';
 import 'package:fluffychat/widgets/matrix.dart';
+import 'package:matrix/matrix.dart';
 
 class ChatProfileInfoView extends StatelessWidget {
   final ChatProfileInfoController controller;
@@ -59,17 +69,20 @@ class ChatProfileInfoView extends StatelessWidget {
           return [
             SliverOverlapAbsorber(
               handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context),
-              sliver: ValueListenableBuilder(
-                valueListenable: controller.lookupContactNotifier,
-                builder: (context, lookupContact, child) {
+              sliver: _SizedAppBar(
+                lookupContactNotifier: controller.lookupContactNotifier,
+                user: user,
+                contact: contact,
+                isAlreadyInChat: controller.isAlreadyInChat(context),
+                builder: (context, height) {
                   return SliverAppBar(
                     backgroundColor:
                         LinagoraSysColors.material().surfaceVariant,
-                    toolbarHeight: getToolbarHeight(context, lookupContact),
+                    toolbarHeight: height,
                     title: ConstrainedBox(
                       constraints: BoxConstraints(
                         maxWidth: ChatProfileInfoStyle.maxWidth,
-                        maxHeight: getToolbarHeight(context, lookupContact),
+                        maxHeight: height,
                       ),
                       child: Builder(
                         builder: (context) {
@@ -190,38 +203,6 @@ class ChatProfileInfoView extends StatelessWidget {
       ),
     );
   }
-
-  double getToolbarHeight(
-    BuildContext context,
-    Either<Failure, Success> lookupContact,
-  ) {
-    final height = lookupContact.fold(
-      (failure) => ChatDetailViewStyle.minToolbarHeightSliverAppBar,
-      (success) {
-        if (success is LookupContactsLoading) {
-          return ChatDetailViewStyle.mediumToolbarHeightSliverAppBar;
-        }
-        if (success is LookupMatchContactSuccess) {
-          if (success.contact.emails != null &&
-              success.contact.phoneNumbers != null) {
-            return ChatDetailViewStyle.maxToolbarHeightSliverAppBar;
-          }
-
-          if (success.contact.emails != null ||
-              success.contact.phoneNumbers != null) {
-            return ChatDetailViewStyle.mediumToolbarHeightSliverAppBar;
-          }
-
-          return ChatDetailViewStyle.maxToolbarHeightSliverAppBar;
-        }
-        return ChatDetailViewStyle.minToolbarHeightSliverAppBar;
-      },
-    );
-
-    if (controller.isAlreadyInChat(context)) return height;
-
-    return height + ChatDetailViewStyle.chatInfoActionHeight;
-  }
 }
 
 class _Information extends StatelessWidget {
@@ -248,6 +229,16 @@ class _Information extends StatelessWidget {
   final void Function()? onBlockUser;
   final ValueNotifier<bool?> blockUserLoadingNotifier;
   final bool isAlreadyInChat;
+
+  bool canAddContact(Either<Failure, Success> state) {
+    if (PlatformInfos.isMobile || matrixId == null) return false;
+
+    final List<Contact> contacts = state.fold(
+      (failure) => [],
+      (success) => success is GetContactsSuccess ? success.contacts : [],
+    );
+    return contacts.none((contact) => contact.inTomAddressBook(matrixId!));
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -380,6 +371,17 @@ class _Information extends StatelessWidget {
                         );
                       },
                       child: const SizedBox.shrink(),
+                    ),
+                    ValueListenableBuilder(
+                      valueListenable:
+                          getIt.get<ContactsManager>().getContactsNotifier(),
+                      builder: (context, state, child) {
+                        return _AddContactButton(
+                          canAddContact: canAddContact(state),
+                          matrixId: matrixId,
+                          displayName: displayName,
+                        );
+                      },
                     ),
                     const SizedBox(
                       height: ChatProfileInfoStyle.textSpacing,
@@ -572,6 +574,151 @@ class _CopiableRowWithSvgIcon extends StatelessWidget {
             },
           ),
       ],
+    );
+  }
+}
+
+class _SizedAppBar extends StatelessWidget {
+  const _SizedAppBar({
+    required this.lookupContactNotifier,
+    required this.user,
+    required this.contact,
+    required this.isAlreadyInChat,
+    required this.builder,
+  });
+
+  final ValueNotifier<Either<Failure, Success>> lookupContactNotifier;
+  final User? user;
+  final PresentationContact? contact;
+  final bool isAlreadyInChat;
+  final Widget Function(BuildContext context, double height) builder;
+
+  double getToolbarHeight(
+    BuildContext context,
+    Either<Failure, Success> lookupContact,
+    Either<Failure, Success> getContactState,
+  ) {
+    final height = lookupContact.fold(
+      (failure) => ChatDetailViewStyle.minToolbarHeightSliverAppBar,
+      (success) {
+        if (success is LookupContactsLoading) {
+          return ChatDetailViewStyle.mediumToolbarHeightSliverAppBar;
+        }
+        if (success is LookupMatchContactSuccess) {
+          if (success.contact.emails != null &&
+              success.contact.phoneNumbers != null) {
+            return ChatDetailViewStyle.maxToolbarHeightSliverAppBar;
+          }
+
+          if (success.contact.emails != null ||
+              success.contact.phoneNumbers != null) {
+            return ChatDetailViewStyle.mediumToolbarHeightSliverAppBar;
+          }
+
+          return ChatDetailViewStyle.maxToolbarHeightSliverAppBar;
+        }
+        return ChatDetailViewStyle.minToolbarHeightSliverAppBar;
+      },
+    );
+
+    double additionalHeight = 0;
+
+    if (!isAlreadyInChat) {
+      additionalHeight += ChatDetailViewStyle.chatInfoActionHeight;
+    }
+
+    final matrixId = contact?.matrixId ?? user?.id;
+    final canAddContact = matrixId != null &&
+        getContactState.fold(
+          (failure) => false,
+          (success) => success is GetContactsSuccess
+              ? success.contacts.none(
+                  (contact) => contact.inTomAddressBook(matrixId),
+                )
+              : false,
+        );
+    if (canAddContact) {
+      additionalHeight += ChatDetailViewStyle.chatInfoAddContactHeight;
+    }
+
+    return height + additionalHeight;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return ValueListenableBuilder(
+      valueListenable: lookupContactNotifier,
+      builder: (context, lookupContact, _) {
+        return ValueListenableBuilder(
+          valueListenable: getIt.get<ContactsManager>().getContactsNotifier(),
+          builder: (context, getContactState, child) {
+            return builder(
+              context,
+              getToolbarHeight(context, lookupContact, getContactState),
+            );
+          },
+        );
+      },
+    );
+  }
+}
+
+class _AddContactButton extends StatelessWidget {
+  const _AddContactButton({
+    required this.canAddContact,
+    this.matrixId,
+    this.displayName,
+  });
+
+  final bool canAddContact;
+  final String? matrixId;
+  final String? displayName;
+
+  @override
+  Widget build(BuildContext context) {
+    if (!canAddContact) {
+      return const SizedBox();
+    }
+    return Padding(
+      padding: const EdgeInsets.only(
+        top: ChatProfileInfoStyle.textSpacing,
+      ),
+      child: InkWell(
+        hoverColor: Colors.transparent,
+        highlightColor: Colors.transparent,
+        focusColor: Colors.transparent,
+        splashColor: Colors.transparent,
+        onTap: () => showAddContactDialog(
+          context,
+          matrixId: matrixId,
+          displayName: displayName,
+        ),
+        child: Row(
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(ChatProfileInfoStyle.iconPadding),
+              child: Icon(
+                Icons.person_add_outlined,
+                size: ChatProfileInfoStyle.iconSize,
+                color: LinagoraSysColors.material().primary,
+              ),
+            ),
+            Expanded(
+              child: Padding(
+                padding: ChatProfileInfoStyle.textPadding,
+                child: Text(
+                  L10n.of(context)!.addToContacts,
+                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                        color: LinagoraSysColors.material().primary,
+                      ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
