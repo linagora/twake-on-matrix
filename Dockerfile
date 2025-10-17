@@ -4,28 +4,19 @@ ARG DART_VERSION=3.6.2
 
 # Build stage for vodozemac (Rust WebAssembly)
 FROM rust:1.83-bookworm AS vodozemac-builder
-ARG DART_VERSION=3.6.2
+ARG DART_VERSION
 WORKDIR /app
 # Install build dependencies, ensuring minimal image size
-RUN apt-get update && apt-get install -y --no-install-recommends git curl ca-certificates apt-transport-https wget && \
+RUN apt-get update && apt-get install -y --no-install-recommends git curl ca-certificates apt-transport-https wget unzip && \
     apt-get autoremove -y && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
-
-# Install Dart SDK 3.6.2
-RUN wget -qO- https://dl-ssl.google.com/linux/linux_signing_key.pub | gpg --dearmor -o /usr/share/keyrings/dart.gpg && \
-    echo 'deb [signed-by=/usr/share/keyrings/dart.gpg arch=amd64] https://storage.googleapis.com/download.dartlang.org/linux/debian stable main' | tee /etc/apt/sources.list.d/dart_stable.list && \
-    apt-get update && \
-    apt-get install -y dart=2:${DART_VERSION}-1 && \
-    apt-get autoremove -y && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/*
-
-ENV PATH="/usr/lib/dart/bin:${PATH}"
-
-# Verify Dart installation
-RUN dart --version
-
+# Install Dart SDK 
+RUN wget -q https://storage.googleapis.com/dart-archive/channels/stable/release/${DART_VERSION}/sdk/dartsdk-linux-x64-release.zip && \
+    unzip -q dartsdk-linux-x64-release.zip -d /usr/lib && \
+    rm dartsdk-linux-x64-release.zip
+ENV PATH="/usr/lib/dart-sdk/bin:${PATH}"
+RUN git config --global --add safe.directory /usr/local
 # Install and set nightly toolchain as default, then add rust-src for it
 RUN rustup toolchain install nightly && \
     rustup default nightly && \
