@@ -9,6 +9,7 @@ import 'package:fluffychat/utils/clipboard.dart';
 import 'package:fluffychat/utils/dialog/twake_dialog.dart';
 import 'package:fluffychat/utils/extension/event_info_extension.dart';
 import 'package:fluffychat/utils/extension/mime_type_extension.dart';
+import 'package:fluffychat/utils/matrix_sdk_extensions/filtered_timeline_extension.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/utils/size_string.dart';
@@ -371,7 +372,8 @@ extension LocalizedBody on Event {
   }
 
   bool shouldHideRedactedEvent() {
-    return AppConfig.hideRedactedEvents && redacted;
+    return AppConfig.hideRedactedEvents &&
+        (redacted || type == EventTypes.Redaction);
   }
 
   bool shouldHideBannedEvent() {
@@ -379,11 +381,11 @@ extension LocalizedBody on Event {
   }
 
   bool shouldHideChangedAvatarEvent() {
-    return roomMemberChangeType == RoomMemberChangeType.avatar;
+    return isSomeoneChangeAvatar();
   }
 
   bool shouldHideChangedDisplayNameEvent() {
-    return roomMemberChangeType == RoomMemberChangeType.displayname;
+    return isSomeoneChangeDisplayName();
   }
 
   bool hasReactionEvent({
