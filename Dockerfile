@@ -12,6 +12,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends git curl ca-cer
 RUN curl --proto '=https' --tlsv1.2 -sSf https://storage.googleapis.com/flutter_infra_release/releases/stable/linux/flutter_linux_${FLUTTER_VERSION}-stable.tar.xz \
     | tar -xJvf - --strip-components=1 -C /usr/local/
 ENV PATH="/usr/local/bin:${PATH}"
+# Add /usr/local to git's safe directory list to avoid dubious ownership errors
+RUN git config --global --add safe.directory /usr/local
 # Install and set nightly toolchain as default, then add rust-src for it
 RUN rustup toolchain install nightly && rustup default nightly && rustup component add rust-src --toolchain nightly
 # Copy only necessary files for vodozemac build
