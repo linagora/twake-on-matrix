@@ -297,4 +297,44 @@ void main() {
       s.verifyAll();
     },
   );
+
+  TestBase().runPatrolTest(
+    description: 'down load a file',
+    test: ($) async {
+      final s = SoftAssertHelper();
+      final now = DateTime.now();
+      final newName = "${now.month}${now.day}${now.hour}${now.minute}";  
+      const fileName = String.fromEnvironment('PfdFile1');
+      //goto chat
+      await HomeRobot($).gotoChatListScreen();
+
+      //open a group
+      const groupTest = String.fromEnvironment('GroupForDownload');
+      await ChatScenario($).openChatGroupByTitle(groupTest);
+
+      final numberOfDownloadedItem = await countItemsInGallery($);
+      //dowwn load the lastest image
+      final image = ChatGroupDetailRobot($).getTheLastestImageMsg().getImage();
+      await ChatScenario($).downloadAnImage(image);
+
+      final numberOfDownloadedItemAfterDownloadImage = await countItemsInGallery($);
+      final expectNumber = numberOfDownloadedItemAfterDownloadImage - numberOfDownloadedItem;
+      s.softAssertEquals(expectNumber == 1, true, "image have not downloaded");
+      
+      //dowwn load the lastest video
+      final video = ChatGroupDetailRobot($).getTheLastestVideoMsg().getMessageVideoDownloadContent();
+      await ChatScenario($).downloadAnImage(video);
+
+      final numberOfDownloadedItemAfterDownloadVideo = await countItemsInGallery($);
+      final expectNumber2 = numberOfDownloadedItemAfterDownloadVideo - numberOfDownloadedItemAfterDownloadImage;
+      s.softAssertEquals(expectNumber2 == 1, true, "image have not downloaded -- $numberOfDownloadedItem -- $numberOfDownloadedItemAfterDownloadImage");
+    
+      //dowwn load a pdf file
+      await ChatScenario($).downloadAFile(fileName, newName);
+      //Verify the file availabe in the Downloads folder
+      await ChatScenario($).verifyFileInDownloads(newName);
+
+      s.verifyAll();
+    },
+  );
 }
