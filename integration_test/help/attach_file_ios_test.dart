@@ -90,7 +90,7 @@ Future<void> selectFileInDownloads(
 
 }
 
-Future<void> pickFromFiles(PatrolIntegrationTester $, String fileName) async {
+Future<void> openDownloadFolder(PatrolIntegrationTester $) async {
   // Tab "Documents"
   try {
     await $(Text).containing('Documents').tap();
@@ -99,12 +99,25 @@ Future<void> pickFromFiles(PatrolIntegrationTester $, String fileName) async {
   }
   await $.tester.pump(const Duration(milliseconds: 300));
 
-  // "Downloads"
-  await maybeTapFirstV1($, [
-    Selector(textContains: 'Downloads'),
-    Selector(textContains: 'Tải về'),
-  ]);
+// 1) Check the existence before clicking on "Downloads"
+  final downloadsTile = Selector(text: 'Downloads', instance: 1);
+  try {
+    await $.native.waitUntilVisible(downloadsTile, timeout: const Duration(seconds: 2));
+    // await $.native.tap(downloadsTile);
+    // "Downloads"
+    await maybeTapFirstV1($, [
+      Selector(textContains: 'Downloads'),
+      Selector(textContains: 'Tải về'),
+    ]);
   await $.tester.pump(const Duration(milliseconds: 400));
+  } catch (_) {
+  }
+
+  await $.native.waitUntilVisible(Selector(text: 'Search'), timeout: const Duration(seconds: 5));
+}
+
+Future<void> pickFromFiles(PatrolIntegrationTester $, String fileName) async {
+  await openDownloadFolder($);
 
   // Choose the file
   await selectFileInDownloads($, fileName);
@@ -118,3 +131,21 @@ Future<int> countItemsInGallery(PatrolIntegrationTester $) async {
     final total = await recents.assetCountAsync;
     return total;
   }
+
+Future<bool> isImageSaved(String fileName) async {
+  // get list of albums
+  final albums = await PhotoManager.getAssetPathList(
+    type: RequestType.image,
+    onlyAll: true,
+  );
+
+  final recents = albums.first;
+
+  // get all assets in album Recents (or All Photos)
+  final assets = await recents.getAssetListPaged(page: 0, size: 200);
+
+  // Check the existence of the fileName
+  final found = assets.any((asset) => asset.title?.contains(fileName) ?? false);
+
+  return found;
+}
