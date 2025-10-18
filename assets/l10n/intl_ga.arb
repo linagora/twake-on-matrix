@@ -2575,7 +2575,7 @@
   "@logoutDialogWarning": {},
   "location": "Suíomh",
   "@location": {},
-  "explainPermissionToAccessContacts": "NÍ Twake Comhrá a bhailiú do teagmhálacha. Ní sheolann Twake Chat ach hashes teagmhála chuig freastalaithe Comhrá Twake chun tuiscint a fháil ar cé ó do chairde a chuaigh isteach i Twake Chat cheana féin, rud a chumasaíonn nasc leo. NÍL do theagmhálaithe sioncronaithe lenár bhfreastalaí.",
+  "explainPermissionToAccessContacts": "Ní bhailíonn Twake Chat do theagmhálaithe. Seolann an aip ach haiseanna teagmhála chuig ár bhfreastalaithe chun tuiscint a fháil ar cé acu de do chairde atá ag úsáid na seirbhíse cheana féin. Níl do theagmhálaithe sioncrónaithe lenár bhfreastalaí.",
   "@explainPermissionToAccessContacts": {},
   "more": "Níos mó",
   "@more": {},
