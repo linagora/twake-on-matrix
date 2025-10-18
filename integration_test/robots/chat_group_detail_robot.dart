@@ -5,6 +5,7 @@ import 'package:fluffychat/pages/chat/events/message/swipeable_message.dart';
 import 'package:fluffychat/pages/chat/events/message_content.dart';
 import 'package:fluffychat/pages/chat/events/message_video_download_content.dart';
 import 'package:fluffychat/utils/permission_dialog.dart';
+import 'package:fluffychat/widgets/file_widget/downloading_file_tile_widget.dart';
 import 'package:fluffychat/widgets/twake_components/twake_icon_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -79,6 +80,35 @@ class ChatGroupDetailRobot extends CoreRobot {
   TwakeListItemRobot getTheLastestVideoMsg() {
     final List<TwakeListItemRobot> messages = getAllVideoMessages();
     return messages.first;
+  }
+
+  List<TwakeListItemRobot> getAllFileMessages() {
+    final list = $(SwipeableMessage).containing($(DownloadingFileTileWidget));
+    final n = list.evaluate().length;
+    // return List.generate(count, (i) => TwakeListItemRobot($, $(SwipeableMessage).at(i)));
+      return List.generate(n, (i) => TwakeListItemRobot($, list.at(i)));
+  }
+
+  TwakeListItemRobot getTheLastestFileMsg() {
+    final List<TwakeListItemRobot> messages = getAllFileMessages();
+    return messages.first;
+  }
+
+  TwakeListItemRobot getFileMsg(String fileName) {
+    final msgs = $(SwipeableMessage);
+    for (int i = msgs.evaluate().length - 1; i >= 0; i--) {
+      if (msgs.at(i).$(RichText).evaluate().any(
+        (e) => (e.widget as RichText).text.toPlainText().contains(fileName),
+      )) {
+        return TwakeListItemRobot($, msgs.at(i));
+      }
+    }
+    throw StateError('Không thấy message chứa "$fileName".');
+    // final containsInRichText = $(SwipeableMessage).containing(
+    // // predicate: lấy plainText từ TextSpan rồi .contains(fileName)
+    //   $(RichText, (w) => (w as RichText).text.toPlainText().contains(fileName)),);
+    // return containsInRichText as TwakeListItemRobot;
+    // // return $(SwipeableMessage).containing($(RichText)).withText(fileName) as TwakeListItemRobot;
   }
 
   Future<void> openAttachDialog() async {
