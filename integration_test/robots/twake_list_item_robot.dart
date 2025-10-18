@@ -185,7 +185,11 @@ class TwakeListItemRobot extends CoreRobot {
 
   PatrolFinder getFileDownloadIcon() {
     const icon = IconData(0xE097, fontFamily: 'MaterialIcons');
-    return $(InkWell).containing(find.byIcon(icon));
+    return root.$(InkWell).containing(find.byIcon(icon));
+  }
+
+  PatrolFinder getFileIcon() {
+    return root.$(MessageContent).$(SvgPicture);
   }
 
   PatrolFinder getMessageVideoDownloadContent() {
