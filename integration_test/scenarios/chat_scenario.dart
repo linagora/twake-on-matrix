@@ -24,6 +24,7 @@ import 'package:linkfy_text/linkfy_text.dart';
 import 'package:patrol/patrol.dart';
 import '../base/base_scenario.dart';
 import '../base/core_robot.dart';
+import '../help/attach_file_ios_test.dart';
 import '../help/soft_assertion_helper.dart';
 import '../robots/add_member_robot.dart';
 import '../robots/chat_group_detail_robot.dart';
@@ -163,6 +164,67 @@ class ChatScenario extends BaseScenario {
     } catch (_) {}
 
     await $.waitUntilVisible($("File saved to Gallery"), timeout: const Duration(seconds: 60));
+  }
+
+  Future<void> downloadAFile(String fileName, String newName) async {
+    final fileRow = ChatGroupDetailRobot($).getFileMsg(fileName);
+    if(fileRow.getFileDownloadIcon().visible){
+      await fileRow.getFileDownloadIcon().hitTestable().tap();
+      await CoreRobot($).waitUntilAbsent($, fileRow.getFileDownloadIcon());
+    }
+    await fileRow.getFileIcon().tap();
+
+    final share = Selector(text: 'Share');
+    await $.native.waitUntilVisible(share, timeout: const Duration(seconds: 10));
+
+    // 1. Open menu drop list (Share button)
+    await $.native.tap(Selector(text: 'Share'));
+
+    // 2. Chọn "Save to Files"
+    await $.native.tap(Selector(text: 'Save to Files'));
+
+    // 3. open "Downloads" folder
+    await openDownloadFolder($);
+
+    // 4) Rename and Save
+    Selector field;
+      try {
+        field = Selector(textStartsWith: fileName, enabled: true);
+        await $.native.waitUntilVisible(field, timeout: const Duration(seconds: 3));
+      } catch (_) {
+        field = Selector(text: '', enabled: true, instance: 0);
+        await $.native.waitUntilVisible(field, timeout: const Duration(seconds: 5));
+      }
+      
+      final clears = List.filled(80, '\b').join();
+      await $.native.enterText(
+        field,
+        tapLocation: const Offset(0.1, 0.5), // 👈 tap 10% from left
+        text: '$clears$newName',
+        timeout: const Duration(seconds: 5),
+      );
+    await $.native.tap(Selector(text: 'Save'));
+
+    // 5. back to app by clicking on Done button
+    await $.native.waitUntilVisible(Selector(textContains: 'Done'));
+
+    final candidates = <({Selector s, String? appId})>[
+      (s: Selector(text: 'Done'), appId: null),                             // in normal case
+      (s: Selector(text: 'Done', instance: 0), appId: null),                // incase alot of "Done"
+      (s: Selector(textStartsWith: 'Done'), appId: null),                   // incase having font/spacing
+      (s: Selector(text: 'Done'), appId: 'com.apple.DocumentsApp'),         // Files app
+      (s: Selector(text: 'Done', instance: 0), appId: 'com.apple.DocumentsApp'),
+      (s: Selector(text: 'Done'), appId: 'com.apple.QuickLook'),            // QuickLook
+    ];
+
+    for (final c in candidates) {
+      try {
+        await $.native.waitUntilVisible(c.s, timeout: const Duration(seconds: 2));
+        await $.native.tap(c.s, appId: c.appId);
+        return;
+      } catch (_) {
+      }
+    }
   }
 
   Future<void> pasteFromClipBoard() async {
@@ -664,6 +726,24 @@ class ChatScenario extends BaseScenario {
     expect(exists, isMuted, reason: 'Expected pin=$isMuted but got $exists for "$title"');
   }
   
+  Future<void> verifyFileInDownloads(String fileName) async {
+    await ChatGroupDetailRobot($).openAttachDialog();
+    await openDownloadFolder($);
+   
+    await maybeTapFirstV1($, [
+      Selector(textContains: 'More'),
+      Selector(textContains: '...'),
+    ]);
+    await maybeTapFirstV1($, [
+        Selector(textContains: 'List'),
+      ]);
+    // Chọn “Sort By Name”
+    await maybeTapFirstV1($, [
+        Selector(textContains: 'Date'),
+      ]);
+    await $.native.waitUntilVisible(Selector(textStartsWith: fileName), timeout: const Duration(seconds: 3));
+  }
+
   Future<void> leftSwipe(String title) async {
      final twakeListItem = ChatListRobot($).getChatGroupByTitle(title);
     final finder = twakeListItem.root;
