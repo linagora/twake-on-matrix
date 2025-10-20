@@ -155,7 +155,6 @@ extension LocalizedBody on Event {
       EventTypes.Message,
       EventTypes.Sticker,
       EventTypes.Encrypted,
-      EventTypes.Redaction,
     }.contains(comparedEvent.type);
 
     final isPreviousOrNextEventRedacted = {
