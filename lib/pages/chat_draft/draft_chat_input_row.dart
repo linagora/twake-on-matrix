@@ -1,3 +1,4 @@
+import 'package:fluffychat/pages/chat/animate_pause_button.dart';
 import 'package:fluffychat/pages/chat/chat_input_row_mobile.dart';
 import 'package:fluffychat/pages/chat/chat_input_row_send_btn.dart';
 import 'package:fluffychat/pages/chat/chat_input_row_style.dart';
@@ -74,7 +75,7 @@ class DraftChatInputRow extends StatelessWidget {
     return KeyboardVisibilityBuilder(
       builder: (context, isKeyboardVisible) {
         return Stack(
-          alignment: Alignment.center,
+          alignment: Alignment.centerRight,
           children: [
             Padding(
               padding: DraftChatInputRowStyle.inputBarPadding(
@@ -274,6 +275,11 @@ class DraftChatInputRow extends StatelessWidget {
                   color: LinagoraSysColors.material().error,
                 ),
               ),
+              pauseSplashColor:
+                  LinagoraSysColors.material().primary.withOpacity(0.5),
+              pauseHighlightColor:
+                  LinagoraSysColors.material().primary.withOpacity(0.2),
+              pauseWidget: const AnimatedPauseButton(),
             ),
           ),
         );
