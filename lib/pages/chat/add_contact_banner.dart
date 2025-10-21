@@ -19,11 +19,14 @@ class AddContactBanner extends StatelessWidget {
       valueListenable: show,
       builder: (context, show, child) {
         if (!show) return const SizedBox();
-        return GestureDetector(
+        return child ?? const SizedBox();
+      },
+      child: Material(
+        color: LinagoraSysColors.material().secondaryContainer,
+        child: InkWell(
           onTap: onTap,
-          child: Container(
+          child: SizedBox(
             height: 40,
-            color: LinagoraSysColors.material().secondaryContainer,
             child: Stack(
               children: [
                 Padding(
@@ -53,7 +56,7 @@ class AddContactBanner extends StatelessWidget {
                   child: Padding(
                     padding: const EdgeInsetsDirectional.only(end: 8),
                     child: IconButton(
-                      onPressed: this.show.toggle,
+                      onPressed: show.toggle,
                       icon: Icon(
                         Icons.close,
                         color: LinagoraSysColors.material().primary,
@@ -65,8 +68,8 @@ class AddContactBanner extends StatelessWidget {
               ],
             ),
           ),
-        );
-      },
+        ),
+      ),
     );
   }
 }
