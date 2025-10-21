@@ -1,3 +1,8 @@
+## [2.14.1+2330] - 2025-10-21
+### Fixed
+- #2608 Avatar of sender for deleted message
+- #2608 Microphone position in draft-chat
+
 ## [2.14.0+2330] - 2025-10-17
 ### Added
 - TW-2588 Add contact button (#2589)
