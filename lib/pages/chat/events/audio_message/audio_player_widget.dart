@@ -34,8 +34,7 @@ class AudioPlayerWidget extends StatefulWidget {
 
   static const int wavesCount = 80;
 
-  const AudioPlayerWidget(
-    this.event, {
+  const AudioPlayerWidget(this.event, {
     this.color = Colors.black,
     super.key,
     required this.timeline,
@@ -52,7 +51,7 @@ class AudioPlayerState extends State<AudioPlayerWidget>
   final List<double> _calculatedWaveform = [];
 
   final ValueNotifier<Duration> _durationNotifier =
-      ValueNotifier(Duration.zero);
+  ValueNotifier(Duration.zero);
 
   late final MatrixState matrix;
 
@@ -69,18 +68,18 @@ class AudioPlayerState extends State<AudioPlayerWidget>
 
   String get mimeType {
     return widget.event.content
-            .tryGetMap<String, dynamic>('info')
-            ?.tryGet<String>('mimeType') ??
+        .tryGetMap<String, dynamic>('info')
+        ?.tryGet<String>('mimeType') ??
         '';
   }
 
   bool get isAudio {
     return widget.event.content
-            .tryGetMap<String, dynamic>('org.matrix.msc1767.audio') !=
+        .tryGetMap<String, dynamic>('org.matrix.msc1767.audio') !=
         null;
   }
 
-  void _onButtonTap() async {
+  Future<void> _onButtonTap() async {
     if (widget.event.isSending()) {
       return;
     }
@@ -89,8 +88,12 @@ class AudioPlayerState extends State<AudioPlayerWidget>
     });
     if (matrix.voiceMessageEvent.value?.eventId == widget.event.eventId) {
       if (matrix.audioPlayer.isAtEndPosition) {
-        matrix.audioPlayer.seek(Duration.zero);
-        matrix.audioPlayer.play();
+        matrix.voiceMessageEvent.value = null;
+        matrix.audioPlayer
+          ..stop()
+          ..dispose();
+        matrix.currentAudioStatus.value = AudioPlayerStatus.notDownloaded;
+        _onButtonTap();
         return;
       }
       if (matrix.audioPlayer.playing == true) {
@@ -125,7 +128,10 @@ class AudioPlayerState extends State<AudioPlayerWidget>
       if (!kIsWeb) {
         final tempDir = await getTemporaryDirectory();
         final fileName = Uri.encodeComponent(
-          widget.event.attachmentOrThumbnailMxcUrl()!.pathSegments.last,
+          widget.event
+              .attachmentOrThumbnailMxcUrl()!
+              .pathSegments
+              .last,
         );
         file = File('${tempDir.path}/${fileName}_${matrixFile.name}');
 
@@ -193,17 +199,17 @@ class AudioPlayerState extends State<AudioPlayerWidget>
         _durationNotifier.value = Duration(milliseconds: durationInt);
       }
       final waveForm = calculateWaveForm(
-            eventWaveForm: widget.event.content
-                .tryGetMap<String, dynamic>('org.matrix.msc1767.audio')
-                ?.tryGetList<int>('waveform'),
-            waveCount: calculateWaveCountAuto(
-              minWaves: AudioPlayerStyle.minWaveCount,
-              maxWaves: AudioPlayerStyle.maxWaveCount(
-                context,
-              ),
-              durationInSeconds: _durationNotifier.value.inSeconds,
-            ),
-          ) ??
+        eventWaveForm: widget.event.content
+            .tryGetMap<String, dynamic>('org.matrix.msc1767.audio')
+            ?.tryGetList<int>('waveform'),
+        waveCount: calculateWaveCountAuto(
+          minWaves: AudioPlayerStyle.minWaveCount,
+          maxWaves: AudioPlayerStyle.maxWaveCount(
+            context,
+          ),
+          durationInSeconds: _durationNotifier.value.inSeconds,
+        ),
+      ) ??
           [];
 
       final waveFromHeight = calculateWaveHeight(
@@ -252,9 +258,9 @@ class AudioPlayerState extends State<AudioPlayerWidget>
               stream: audioPlayer == null
                   ? null
                   : StreamGroup.merge([
-                      audioPlayer.positionStream.asBroadcastStream(),
-                      audioPlayer.playerStateStream.asBroadcastStream(),
-                    ]),
+                audioPlayer.positionStream.asBroadcastStream(),
+                audioPlayer.playerStateStream.asBroadcastStream(),
+              ]),
               builder: (context, snapshot) {
                 final maxPosition =
                     audioPlayer?.duration?.inMilliseconds.toDouble() ?? 1.0;
@@ -295,7 +301,7 @@ class AudioPlayerState extends State<AudioPlayerWidget>
                               status: status,
                               audioPlayer: audioPlayer,
                               isCurrentAudio:
-                                  event?.eventId == widget.event.eventId,
+                              event?.eventId == widget.event.eventId,
                             ),
                             const SizedBox(width: 4),
                             Expanded(
@@ -306,14 +312,16 @@ class AudioPlayerState extends State<AudioPlayerWidget>
                                   if (fileName.isEmpty) ...[
                                     Text(
                                       fileName,
-                                      style: Theme.of(context)
+                                      style: Theme
+                                          .of(context)
                                           .textTheme
                                           .bodySmall
                                           ?.copyWith(
-                                            color: Theme.of(context)
-                                                .colorScheme
-                                                .onSurface,
-                                          ),
+                                        color: Theme
+                                            .of(context)
+                                            .colorScheme
+                                            .onSurface,
+                                      ),
                                       maxLines: 2,
                                       overflow: TextOverflow.ellipsis,
                                     ),
@@ -321,11 +329,11 @@ class AudioPlayerState extends State<AudioPlayerWidget>
                                     Row(
                                       children: List.generate(
                                         _calculatedWaveform.length,
-                                        (index) {
+                                            (index) {
                                           return _waveItemBuilder(
                                             index: index,
                                             waveHeight:
-                                                _calculatedWaveform[index],
+                                            _calculatedWaveform[index],
                                             wavePosition: wavePosition,
                                           );
                                         },
@@ -335,9 +343,9 @@ class AudioPlayerState extends State<AudioPlayerWidget>
                                   _audioMessageTimeBuilder(
                                     duration: audioPlayer == null
                                         ? _durationNotifier
-                                            .value.minuteSecondString
+                                        .value.minuteSecondString
                                         : audioPlayer
-                                            .position.minuteSecondString,
+                                        .position.minuteSecondString,
                                   ),
                                 ],
                               ),
@@ -366,17 +374,24 @@ class AudioPlayerState extends State<AudioPlayerWidget>
         if (isAudio) ...[
           Text(
             duration,
-            style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                  color: LinagoraRefColors.material().tertiary[30],
-                ),
-          ),
-        ] else ...[
-          if (fileSize != null)
-            TextInformationOfFile(
-              value: fileSize!,
-              style: AudioPlayerStyle.textInformationStyle(context),
+            style: Theme
+                .of(context)
+                .textTheme
+                .labelMedium
+                ?.copyWith(
+              color: LinagoraRefColors
+                  .material()
+                  .tertiary[30],
             ),
-        ],
+          ),
+        ] else
+          ...[
+            if (fileSize != null)
+              TextInformationOfFile(
+                value: fileSize!,
+                style: AudioPlayerStyle.textInformationStyle(context),
+              ),
+          ],
         const SizedBox(width: 8),
         Expanded(
           child: Align(
@@ -393,7 +408,9 @@ class AudioPlayerState extends State<AudioPlayerWidget>
                     size: MessageStyle.pushpinIconSize,
                     paddingAll: MessageStyle.paddingAllPushpin,
                     margin: EdgeInsets.zero,
-                    iconColor: LinagoraRefColors.material().neutral[50],
+                    iconColor: LinagoraRefColors
+                        .material()
+                        .neutral[50],
                   ),
                   const SizedBox(width: 4.0),
                 ],
@@ -404,12 +421,18 @@ class AudioPlayerState extends State<AudioPlayerWidget>
                   textScaler: const TextScaler.linear(
                     1.0,
                   ),
-                  style: Theme.of(context).textTheme.bodySmall?.merge(
-                        TextStyle(
-                          color: LinagoraRefColors.material().tertiary[30],
-                          letterSpacing: 0.4,
-                        ),
-                      ),
+                  style: Theme
+                      .of(context)
+                      .textTheme
+                      .bodySmall
+                      ?.merge(
+                    TextStyle(
+                      color: LinagoraRefColors
+                          .material()
+                          .tertiary[30],
+                      letterSpacing: 0.4,
+                    ),
+                  ),
                 ),
                 const SizedBox(width: 4),
                 SeenByRow(
@@ -444,8 +467,13 @@ class AudioPlayerState extends State<AudioPlayerWidget>
       ),
       decoration: BoxDecoration(
         color: index < wavePosition
-            ? LinagoraSysColors.material().primary
-            : LinagoraSysColors.material().primary.withAlpha(70),
+            ? LinagoraSysColors
+            .material()
+            .primary
+            : LinagoraSysColors
+            .material()
+            .primary
+            .withAlpha(70),
         borderRadius: BorderRadius.circular(
           64,
         ),
@@ -459,57 +487,72 @@ class AudioPlayerState extends State<AudioPlayerWidget>
     bool isCurrentAudio = false,
   }) {
     return InkWell(
-      onTap: _onButtonTap,
+      onTap: () async => _onButtonTap(),
       child: status == AudioPlayerStatus.downloading && isCurrentAudio
           ? Stack(
-              alignment: Alignment.center,
-              children: [
-                Container(
-                  width: 40,
-                  height: 40,
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.primary,
-                    shape: BoxShape.circle,
-                  ),
-                ),
-                const SizedBox(
-                  width: 32,
-                  height: 32,
-                  child: CircularLoadingDownloadWidget(
-                    style: MessageFileTileStyle(),
-                  ),
-                ),
-                Container(
-                  width: 40,
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.primary,
-                    shape: BoxShape.circle,
-                  ),
-                  child: Icon(
-                    status == AudioPlayerStatus.downloaded
-                        ? Icons.arrow_downward
-                        : Icons.play_arrow,
-                    color: Theme.of(context).colorScheme.surface,
-                    size: 24,
-                  ),
-                ),
-              ],
-            )
-          : Container(
-              height: 40,
-              width: 40,
-              decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.primary,
-                shape: BoxShape.circle,
-              ),
-              child: Icon(
-                audioPlayer?.playing == true &&
-                        audioPlayer?.isAtEndPosition == false
-                    ? Icons.pause_outlined
-                    : Icons.play_arrow,
-                color: Theme.of(context).colorScheme.onPrimary,
-              ),
+        alignment: Alignment.center,
+        children: [
+          Container(
+            width: 40,
+            height: 40,
+            decoration: BoxDecoration(
+              color: Theme
+                  .of(context)
+                  .colorScheme
+                  .primary,
+              shape: BoxShape.circle,
             ),
+          ),
+          const SizedBox(
+            width: 32,
+            height: 32,
+            child: CircularLoadingDownloadWidget(
+              style: MessageFileTileStyle(),
+            ),
+          ),
+          Container(
+            width: 40,
+            decoration: BoxDecoration(
+              color: Theme
+                  .of(context)
+                  .colorScheme
+                  .primary,
+              shape: BoxShape.circle,
+            ),
+            child: Icon(
+              status == AudioPlayerStatus.downloaded
+                  ? Icons.arrow_downward
+                  : Icons.play_arrow,
+              color: Theme
+                  .of(context)
+                  .colorScheme
+                  .surface,
+              size: 24,
+            ),
+          ),
+        ],
+      )
+          : Container(
+        height: 40,
+        width: 40,
+        decoration: BoxDecoration(
+          color: Theme
+              .of(context)
+              .colorScheme
+              .primary,
+          shape: BoxShape.circle,
+        ),
+        child: Icon(
+          audioPlayer?.playing == true &&
+              audioPlayer?.isAtEndPosition == false
+              ? Icons.pause_outlined
+              : Icons.play_arrow,
+          color: Theme
+              .of(context)
+              .colorScheme
+              .onPrimary,
+        ),
+      ),
     );
   }
 

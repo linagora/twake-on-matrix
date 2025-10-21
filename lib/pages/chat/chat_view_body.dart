@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:async/async.dart';
 import 'package:desktop_drop/desktop_drop.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
@@ -22,10 +24,12 @@ import 'package:fluffychat/pages/contacts_tab/widgets/add_contact/add_contact_di
 import 'package:fluffychat/presentation/model/chat/view_event_list_ui_state.dart';
 import 'package:fluffychat/resource/image_paths.dart';
 import 'package:fluffychat/utils/date_time_extension.dart';
+import 'package:fluffychat/utils/localized_exception_extension.dart';
 import 'package:fluffychat/utils/string_extension.dart';
 import 'package:fluffychat/widgets/connection_status_header.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:fluffychat/widgets/twake_components/twake_icon_button.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_emoji_mart/flutter_emoji_mart.dart';
 import 'package:fluffychat/generated/l10n/app_localizations.dart';
@@ -33,6 +37,8 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:matrix/matrix.dart';
+import 'package:opus_caf_converter_dart/opus_caf_converter_dart.dart';
+import 'package:path_provider/path_provider.dart';
 import 'chat_input_row.dart';
 
 class ChatViewBody extends StatelessWidget with MessageContentMixin {
@@ -351,19 +357,106 @@ class ChatViewBody extends StatelessWidget with MessageContentMixin {
 
   void _handleCloseAudioPlayer() {
     controller.matrix?.voiceMessageEvent.value = null;
-    controller.matrix?.audioPlayer
-      ?..stop()
-      ..dispose();
+    controller.matrix?.audioPlayer.stop();
+    controller.matrix?.audioPlayer.dispose();
     controller.matrix?.currentAudioStatus.value =
         AudioPlayerStatus.notDownloaded;
   }
 
-  void _handlePlayOrPauseAudioPlayer() {
+  Future<File> handleOggAudioFileIniOS(File file) async {
+    Logs().v('Convert ogg audio file for iOS...');
+    final convertedFile = File('${file.path}.caf');
+    if (await convertedFile.exists() == false) {
+      OpusCaf().convertOpusToCaf(file.path, convertedFile.path);
+    }
+    return convertedFile;
+  }
+
+  Future<void> _handlePlayAudioAgain(BuildContext context) async {
+    File? file;
+    MatrixFile? matrixFile;
+    controller.matrix?.audioPlayer.stop();
+    controller.matrix?.audioPlayer.dispose();
+    controller.matrix?.currentAudioStatus.value =
+        AudioPlayerStatus.notDownloaded;
+    final currentEvent = controller.matrix?.voiceMessageEvent.value;
+
+    controller.matrix?.currentAudioStatus.value = AudioPlayerStatus.downloading;
+
+    try {
+      matrixFile = await currentEvent?.downloadAndDecryptAttachment();
+
+      if (!kIsWeb) {
+        final tempDir = await getTemporaryDirectory();
+        final fileName = Uri.encodeComponent(
+          currentEvent?.attachmentOrThumbnailMxcUrl()!.pathSegments.last ?? '',
+        );
+        file = File('${tempDir.path}/${fileName}_${matrixFile?.name}');
+
+        await file.writeAsBytes(matrixFile?.bytes ?? []);
+
+        if (Platform.isIOS &&
+            matrixFile?.mimeType.toLowerCase() == 'audio/ogg') {
+          file = await handleOggAudioFileIniOS(file);
+        }
+      }
+
+      controller.matrix?.currentAudioStatus.value =
+          AudioPlayerStatus.downloaded;
+    } catch (e, s) {
+      Logs().v('Could not download audio file', e, s);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(e.toLocalizedString(context)),
+        ),
+      );
+      rethrow;
+    }
+    if (!context.mounted) return;
+
+    if (controller.matrix == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(L10n.of(context)!.couldNotPlayAudioFile),
+        ),
+      );
+      return;
+    }
+
+    controller.matrix!.audioPlayer = AudioPlayer();
+
+    if (file != null) {
+      await controller.matrix!.audioPlayer.setFilePath(file.path);
+    } else if (matrixFile != null) {
+      await controller.matrix!.audioPlayer
+          .setAudioSource(MatrixFileAudioSource(matrixFile));
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(L10n.of(context)!.couldNotPlayAudioFile),
+        ),
+      );
+      return;
+    }
+
+    controller.matrix!.audioPlayer.play().onError((e, s) {
+      Logs().e('Could not play audio file', e, s);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            e?.toLocalizedString(context) ??
+                L10n.of(context)!.couldNotPlayAudioFile,
+          ),
+        ),
+      );
+    });
+  }
+
+  Future<void> _handlePlayOrPauseAudioPlayer(BuildContext context) async {
     final audioPlayer = controller.matrix?.audioPlayer;
     if (audioPlayer == null) return;
     if (audioPlayer.isAtEndPosition) {
-      audioPlayer.seek(Duration.zero);
-      audioPlayer.play();
+      await _handlePlayAudioAgain(context);
       return;
     }
 
@@ -432,7 +525,8 @@ class ChatViewBody extends StatelessWidget with MessageContentMixin {
                           children: [
                             TwakeIconButton(
                               size: 20,
-                              onTap: _handlePlayOrPauseAudioPlayer,
+                              onTap: () async =>
+                                  _handlePlayOrPauseAudioPlayer(context),
                               iconColor: LinagoraSysColors.material().primary,
                               icon: audioPlayer?.playing == true &&
                                       audioPlayer?.isAtEndPosition == false
@@ -523,6 +617,7 @@ class ChatViewBody extends StatelessWidget with MessageContentMixin {
         break;
       case 2.0:
         await audioPlayer.setSpeed(0.5);
+        break;
       default:
         await audioPlayer.setSpeed(1.0);
         break;
