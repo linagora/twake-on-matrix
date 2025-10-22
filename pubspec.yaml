@@ -217,6 +217,7 @@ dependencies:
   pretty_qr_code: 3.3.0
   byte_converter: 2.0.0
   flutter_vodozemac: ^0.3.0
+  uuid: 4.5.1
 
 dev_dependencies:
   build_runner: 2.4.12

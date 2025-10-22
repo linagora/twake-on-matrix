@@ -3,6 +3,7 @@ import 'dart:ui';
 import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/domain/model/room/room_extension.dart';
+import 'package:fluffychat/presentation/mixins/grouped_events_mixin.dart';
 import 'package:fluffychat/pages/chat/events/message/display_name_widget.dart';
 import 'package:fluffychat/pages/chat/events/message/message.dart';
 import 'package:fluffychat/pages/chat/events/message/message_content_builder.dart';
@@ -69,6 +70,7 @@ class MessageContentWithTimestampBuilder extends StatefulWidget {
   final void Function(BuildContext context, Event, TapDownDetails)?
       onTapMoreButton;
   final Future<Category?>? recentEmojiFuture;
+  final GroupedEvents? groupedEvents;
 
   const MessageContentWithTimestampBuilder({
     super.key,
@@ -103,6 +105,7 @@ class MessageContentWithTimestampBuilder extends StatefulWidget {
     this.saveToGallery,
     this.onTapMoreButton,
     this.recentEmojiFuture,
+    this.groupedEvents,
   });
 
   @override
@@ -330,6 +333,8 @@ class _MessageContentWithTimestampBuilderState
                                                 displayTime: displayTime,
                                                 paddingBubble: EdgeInsets.zero,
                                                 enableBorder: false,
+                                                groupedEvents:
+                                                    widget.groupedEvents,
                                               ),
                                             ),
                                           ),
@@ -449,6 +454,7 @@ class _MessageContentWithTimestampBuilderState
                 timelineText: timelineText,
                 noBubble: noBubble,
                 displayTime: displayTime,
+                groupedEvents: widget.groupedEvents,
               ),
             ),
           ),
@@ -597,6 +603,7 @@ class _MessageContentWithTimestampBuilderState
     EdgeInsets? paddingBubble,
     bool enableBorder = true,
     MainAxisSize mainAxisSize = MainAxisSize.max,
+    GroupedEvents? groupedEvents,
   }) {
     final hasReactionEvent = widget.event.hasReactionEvent(
       timeline: widget.timeline,
@@ -664,6 +671,7 @@ class _MessageContentWithTimestampBuilderState
                     nextEvent: widget.nextEvent,
                     scrollToEventId: widget.scrollToEventId,
                     selectMode: widget.selectMode,
+                    groupedEvents: groupedEvents,
                   ),
                   Positioned(
                     child: OptionalSelectionContainerDisabled(

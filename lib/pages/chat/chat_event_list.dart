@@ -29,12 +29,20 @@ class ChatEventList extends StatelessWidget {
   Widget build(BuildContext context) {
     final horizontalPadding = TwakeThemes.isColumnMode(context) ? 16.0 : 0.0;
 
-    final events = controller.timeline!.events;
-    // create a map of eventId --> index to greatly improve performance of
+    // Group consecutive image events
+    final groupedEvents = controller.groupedEvents;
+
+    // create a map of eventId --> grouped index to greatly improve performance of
     // ListView's findChildIndexCallback
+    // This maps all event IDs (including those in groups) to their group's index
     final thisEventsKeyMap = <String, int>{};
-    for (var i = 0; i < events.length; i++) {
-      thisEventsKeyMap[events[i].eventId] = i;
+    for (var i = 0; i < groupedEvents.length; i++) {
+      final group = groupedEvents[i];
+      // Map the main event and all additional events to the same group index
+      for (final event in group.allEvents) {
+        // Add 1 to account for the first item (footer)
+        thisEventsKeyMap[event.eventId] = i + 1;
+      }
     }
 
     if (controller.hasNoMessageEvents) {
@@ -117,7 +125,7 @@ class ChatEventList extends StatelessWidget {
                         return const SizedBox.shrink();
                       }
                       // Request history button or progress indicator:
-                      if (index == events.length + 1) {
+                      if (index == groupedEvents.length + 1) {
                         if (controller.timeline!.isRequestingHistory) {
                           return const Center(
                             child: CupertinoActivityIndicator(),
@@ -133,14 +141,18 @@ class ChatEventList extends StatelessWidget {
                         }
                         return const SizedBox.shrink();
                       }
-                      final currentEventIndex = index - 1;
-                      final event = events[currentEventIndex];
-                      final previousEvent = currentEventIndex > 0
-                          ? events[currentEventIndex - 1]
+
+                      final currentGroupIndex = index - 1;
+                      final group = groupedEvents[currentGroupIndex];
+                      final event = group.mainEvent;
+
+                      final previousEvent = currentGroupIndex > 0
+                          ? groupedEvents[currentGroupIndex - 1].mainEvent
                           : null;
-                      final nextEvent = index < events.length
-                          ? events[currentEventIndex + 1]
-                          : null;
+                      final nextEvent =
+                          currentGroupIndex < groupedEvents.length - 1
+                              ? groupedEvents[currentGroupIndex + 1].mainEvent
+                              : null;
                       return event.isVisibleInGui
                           ? AutoScrollTag(
                               key: ValueKey(event.eventId),
@@ -237,11 +249,12 @@ class ChatEventList extends StatelessWidget {
                                     .getRecentReactionsInteractor
                                     .execute(),
                                 onReport: controller.reportEventAction,
+                                groupedEvents: group.isGrouped ? group : null,
                               ),
                             )
                           : const SizedBox.shrink();
                     },
-                    childCount: events.length + 2,
+                    childCount: groupedEvents.length + 2,
                     findChildIndexCallback: (key) => controller
                         .findChildIndexCallback(key, thisEventsKeyMap),
                   ),

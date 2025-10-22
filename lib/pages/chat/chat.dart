@@ -27,6 +27,7 @@ import 'package:fluffychat/pages/chat/chat_report_message_additional_reason_dial
 import 'package:fluffychat/pages/chat/chat_view.dart';
 import 'package:fluffychat/pages/chat/context_item_chat_action.dart';
 import 'package:fluffychat/pages/chat/dialog_reject_invite_widget.dart';
+import 'package:fluffychat/presentation/mixins/grouped_events_mixin.dart';
 import 'package:fluffychat/pages/chat/events/message_content_mixin.dart';
 import 'package:fluffychat/pages/chat/input_bar/focus_suggestion_controller.dart';
 import 'package:fluffychat/presentation/enum/chat/right_column_type_enum.dart';
@@ -141,7 +142,8 @@ class ChatController extends State<Chat>
         LeaveChatMixin,
         DeleteEventMixin,
         UnblockUserMixin,
-        AudioMixin {
+        AudioMixin,
+        EventGrouperMixin {
   final NetworkConnectionService networkConnectionService =
       getIt.get<NetworkConnectionService>();
 
@@ -1211,17 +1213,22 @@ class ChatController extends State<Chat>
     return eventIndex + addedHeadItemsInChat;
   }
 
+  List<GroupedEvents> get groupedEvents => groupEvents(timeline?.events ?? []);
+
   int _getEventIndex(String eventId) {
-    final foundEvent =
-        timeline!.events.firstWhereOrNull((event) => event.eventId == eventId);
+    // Find the group that contains the eventId (in main or additional events)
+    final foundGroup = groupedEvents.firstWhereOrNull(
+      (group) => group.allEvents.any((event) => event.eventId == eventId),
+    );
 
-    final eventIndex = foundEvent == null
-        ? -1
-        : timeline!.events.indexWhere(
-            (event) => event.eventId == foundEvent.eventId,
-          );
+    if (foundGroup == null) {
+      return -1;
+    }
 
-    return eventIndex;
+    // Return the index of the main event in the original timeline
+    return timeline!.events.indexWhere(
+      (event) => event.eventId == foundGroup.mainEvent.eventId,
+    );
   }
 
   Future<void> scrollToEventId(String eventId, {bool highlight = true}) async {

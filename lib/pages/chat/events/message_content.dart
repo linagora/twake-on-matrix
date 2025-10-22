@@ -2,8 +2,10 @@ import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/pages/chat/events/call_invite_content.dart';
 import 'package:fluffychat/pages/chat/events/encrypted_content.dart';
 import 'package:fluffychat/pages/chat/events/formatted_text_widget.dart';
+import 'package:fluffychat/presentation/mixins/grouped_events_mixin.dart';
 import 'package:fluffychat/pages/chat/events/images_builder/message_content_image_builder.dart';
 import 'package:fluffychat/pages/chat/events/message/message_style.dart';
+import 'package:fluffychat/pages/chat/events/message/grouped_image_message_widget.dart';
 import 'package:fluffychat/pages/chat/events/message_content_style.dart';
 import 'package:fluffychat/pages/chat/events/message_download_content_web.dart';
 import 'package:fluffychat/pages/chat/events/message_upload_content.dart';
@@ -44,6 +46,7 @@ class MessageContent extends StatelessWidget
   final void Function()? onTapSelectMode;
   final bool ownMessage;
   final Timeline timeline;
+  final GroupedEvents? groupedEvents;
 
   const MessageContent(
     this.event, {
@@ -54,6 +57,7 @@ class MessageContent extends StatelessWidget
     this.onTapSelectMode,
     required this.ownMessage,
     required this.timeline,
+    this.groupedEvents,
   });
 
   @override
@@ -66,6 +70,16 @@ class MessageContent extends StatelessWidget
       case EventTypes.Sticker:
         switch (event.messageType) {
           case MessageTypes.Image:
+            if (groupedEvents?.isGrouped == true) {
+              return OptionalSelectionContainerDisabled(
+                isEnabled: PlatformInfos.isWeb,
+                child: GroupedImageMessageWidget(
+                  groupedEvents: groupedEvents!,
+                  onTapPreview: (event) => onTapPreview?.call(),
+                  onTapSelectMode: onTapSelectMode,
+                ),
+              );
+            }
             if (event.isImageWithCaption()) {
               return OptionalSelectionContainerDisabled(
                 isEnabled: PlatformInfos.isWeb,
