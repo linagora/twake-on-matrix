@@ -80,7 +80,7 @@ class AudioPlayerState extends State<AudioPlayerWidget>
         null;
   }
 
-  void _onButtonTap() async {
+  Future<void> _onButtonTap() async {
     if (widget.event.isSending()) {
       return;
     }
@@ -89,8 +89,11 @@ class AudioPlayerState extends State<AudioPlayerWidget>
     });
     if (matrix.voiceMessageEvent.value?.eventId == widget.event.eventId) {
       if (matrix.audioPlayer.isAtEndPosition) {
-        matrix.audioPlayer.seek(Duration.zero);
-        matrix.audioPlayer.play();
+        matrix.voiceMessageEvent.value = null;
+        await matrix.audioPlayer.stop();
+        await matrix.audioPlayer.dispose();
+        matrix.currentAudioStatus.value = AudioPlayerStatus.notDownloaded;
+        await _onButtonTap();
         return;
       }
       if (matrix.audioPlayer.playing == true) {
@@ -112,9 +115,8 @@ class AudioPlayerState extends State<AudioPlayerWidget>
     }
 
     matrix.voiceMessageEvent.value = widget.event;
-    matrix.audioPlayer
-      ..stop()
-      ..dispose();
+    await matrix.audioPlayer.stop();
+    await matrix.audioPlayer.dispose();
     File? file;
     MatrixFile? matrixFile;
 
@@ -459,7 +461,7 @@ class AudioPlayerState extends State<AudioPlayerWidget>
     bool isCurrentAudio = false,
   }) {
     return InkWell(
-      onTap: _onButtonTap,
+      onTap: () async => _onButtonTap(),
       child: status == AudioPlayerStatus.downloading && isCurrentAudio
           ? Stack(
               alignment: Alignment.center,
