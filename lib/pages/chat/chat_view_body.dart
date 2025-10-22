@@ -355,10 +355,10 @@ class ChatViewBody extends StatelessWidget with MessageContentMixin {
     );
   }
 
-  void _handleCloseAudioPlayer() {
+  Future<void> _handleCloseAudioPlayer() async {
     controller.matrix?.voiceMessageEvent.value = null;
-    controller.matrix?.audioPlayer.stop();
-    controller.matrix?.audioPlayer.dispose();
+    await controller.matrix?.audioPlayer.stop();
+    await controller.matrix?.audioPlayer.dispose();
     controller.matrix?.currentAudioStatus.value =
         AudioPlayerStatus.notDownloaded;
   }
@@ -375,8 +375,8 @@ class ChatViewBody extends StatelessWidget with MessageContentMixin {
   Future<void> _handlePlayAudioAgain(BuildContext context) async {
     File? file;
     MatrixFile? matrixFile;
-    controller.matrix?.audioPlayer.stop();
-    controller.matrix?.audioPlayer.dispose();
+    await controller.matrix?.audioPlayer.stop();
+    await controller.matrix?.audioPlayer.dispose();
     controller.matrix?.currentAudioStatus.value =
         AudioPlayerStatus.notDownloaded;
     final currentEvent = controller.matrix?.voiceMessageEvent.value;
@@ -554,7 +554,7 @@ class ChatViewBody extends StatelessWidget with MessageContentMixin {
                                 ),
                                 const SizedBox(width: 8),
                                 TwakeIconButton(
-                                  onTap: _handleCloseAudioPlayer,
+                                  onTap: () async => _handleCloseAudioPlayer(),
                                   icon: Icons.close,
                                   iconColor:
                                       LinagoraRefColors.material().tertiary[30],
