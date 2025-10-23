@@ -28,7 +28,6 @@ class ChatEventList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final horizontalPadding = TwakeThemes.isColumnMode(context) ? 16.0 : 0.0;
-
     final events = controller.timeline!.events;
     // create a map of eventId --> index to greatly improve performance of
     // ListView's findChildIndexCallback
@@ -36,7 +35,6 @@ class ChatEventList extends StatelessWidget {
     for (var i = 0; i < events.length; i++) {
       thisEventsKeyMap[events[i].eventId] = i;
     }
-
     if (controller.hasNoMessageEvents) {
       return Column(
         mainAxisAlignment: MainAxisAlignment.center,

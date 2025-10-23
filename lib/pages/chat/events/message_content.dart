@@ -4,6 +4,7 @@ import 'package:fluffychat/pages/chat/events/encrypted_content.dart';
 import 'package:fluffychat/pages/chat/events/formatted_text_widget.dart';
 import 'package:fluffychat/pages/chat/events/images_builder/message_content_image_builder.dart';
 import 'package:fluffychat/pages/chat/events/message/message_style.dart';
+import 'package:fluffychat/pages/chat/events/message/grouped_image_message_widget.dart';
 import 'package:fluffychat/pages/chat/events/message_content_style.dart';
 import 'package:fluffychat/pages/chat/events/message_download_content_web.dart';
 import 'package:fluffychat/pages/chat/events/message_upload_content.dart';
@@ -66,6 +67,16 @@ class MessageContent extends StatelessWidget
       case EventTypes.Sticker:
         switch (event.messageType) {
           case MessageTypes.Image:
+            if (event.imageBubbleId() != null) {
+              return OptionalSelectionContainerDisabled(
+                isEnabled: PlatformInfos.isWeb,
+                child: GroupedImageMessageWidget(
+                  groupedEvents: timeline.getAllEventsFromGroupedEvent(event),
+                  onTapPreview: (event) => onTapPreview?.call(),
+                  onTapSelectMode: onTapSelectMode,
+                ),
+              );
+            }
             if (event.isImageWithCaption()) {
               return OptionalSelectionContainerDisabled(
                 isEnabled: PlatformInfos.isWeb,

@@ -1149,14 +1149,15 @@ class ChatController extends State<Chat>
       timeline!.cancelSubscriptions();
     }
     try {
-      timeline = await room?.getTimeline(
+      timeline = await room?.getGroupedImageBubbleTimeline(
         onUpdate: updateView,
         eventContextId: eventContextId,
       );
     } catch (e, s) {
       Logs().w('Unable to load timeline on event ID $eventContextId', e, s);
       if (!mounted) return;
-      timeline = await room?.getTimeline(onUpdate: updateView);
+      timeline =
+          await room?.getGroupedImageBubbleTimeline(onUpdate: updateView);
       if (!mounted) return;
     }
     timeline!.requestKeys(onlineKeyBackupOnly: false);
