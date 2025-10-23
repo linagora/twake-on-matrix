@@ -67,37 +67,34 @@ class MessageContent extends StatelessWidget
         switch (event.messageType) {
           case MessageTypes.Image:
             if (event.isImageWithCaption()) {
-              return OptionalSelectionContainerDisabled(
-                isEnabled: PlatformInfos.isWeb,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    MessageImageBuilder(
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  MessageImageBuilder(
+                    event: event,
+                    onTapPreview: onTapPreview,
+                    onTapSelectMode: onTapSelectMode,
+                  ),
+                  const SizedBox(height: 8),
+                  SizedBox(
+                    width: MessageStyle.messageBubbleWidthMediaCaption(
                       event: event,
-                      onTapPreview: onTapPreview,
-                      onTapSelectMode: onTapSelectMode,
+                      context: context,
                     ),
-                    const SizedBox(height: 8),
-                    SizedBox(
-                      width: MessageStyle.messageBubbleWidthMediaCaption(
-                        event: event,
-                        context: context,
+                    child: TwakeLinkPreview(
+                      key: ValueKey('TwakeLinkPreview%${event.eventId}%'),
+                      event: event,
+                      localizedBody: event.body,
+                      ownMessage: ownMessage,
+                      fontSize: fontSize,
+                      linkStyle: MessageContentStyle.linkStyleMessageContent(
+                        context,
                       ),
-                      child: TwakeLinkPreview(
-                        key: ValueKey('TwakeLinkPreview%${event.eventId}%'),
-                        event: event,
-                        localizedBody: event.body,
-                        ownMessage: ownMessage,
-                        fontSize: fontSize,
-                        linkStyle: MessageContentStyle.linkStyleMessageContent(
-                          context,
-                        ),
-                        richTextStyle: event.getMessageTextStyle(context),
-                        isCaption: event.isImageWithCaption(),
-                      ),
+                      richTextStyle: event.getMessageTextStyle(context),
+                      isCaption: event.isImageWithCaption(),
                     ),
-                  ],
-                ),
+                  ),
+                ],
               );
             }
             return OptionalSelectionContainerDisabled(
