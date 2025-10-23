@@ -19,16 +19,6 @@ class AdaptiveScaffoldAppBar extends StatefulWidget {
 
 class _AdaptiveScaffoldAppBarState extends State<AdaptiveScaffoldAppBar> {
   @override
-  void initState() {
-    super.initState();
-    CozyConfigManager().isInsideCozy.then((isInsideCozy) {
-      if (isInsideCozy) {
-        CozyConfigManager().initialize();
-      }
-    });
-  }
-
-  @override
   Widget build(BuildContext context) {
     final child = SlotLayout(
       config: <Breakpoint, SlotLayoutConfig>{
