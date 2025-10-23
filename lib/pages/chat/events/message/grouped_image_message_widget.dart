@@ -1,10 +1,9 @@
-import 'package:fluffychat/presentation/mixins/grouped_events_mixin.dart';
 import 'package:fluffychat/pages/chat/events/images_builder/message_content_image_builder.dart';
 import 'package:flutter/material.dart';
 import 'package:matrix/matrix.dart';
 
 class GroupedImageMessageWidget extends StatelessWidget {
-  final GroupedEvents groupedEvents;
+  final List<Event> groupedEvents;
   final void Function(Event)? onTapPreview;
   final void Function()? onTapSelectMode;
 
@@ -19,7 +18,11 @@ class GroupedImageMessageWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final images = groupedEvents.allEvents;
+    final images = groupedEvents;
+
+    if (images.isEmpty) {
+      return const SizedBox.shrink();
+    }
 
     return ClipRRect(
       borderRadius: BorderRadius.circular(8.0),
