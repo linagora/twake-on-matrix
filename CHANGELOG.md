@@ -1,3 +1,10 @@
+## [2.14.2+2330] - 2025-10-24
+### Fixed
+- #2617 Cannot copy text in caption
+
+### Added
+- Translation fr, ru, vi, Irish, uk
+
 ## [2.14.1+2330] - 2025-10-21
 ### Fixed
 - #2608 Avatar of sender for deleted message
