@@ -46,7 +46,7 @@ class ChatProfileInfoView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final user = controller.user;
-    final contact = controller.widget.contact;
+    final contact = controller.presentationContact;
     return Scaffold(
       backgroundColor: LinagoraSysColors.material().surfaceVariant,
       appBar: TwakeAppBar(

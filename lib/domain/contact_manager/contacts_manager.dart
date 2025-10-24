@@ -23,6 +23,8 @@ import 'package:fluffychat/domain/usecase/contacts/post_address_book_interactor.
 import 'package:fluffychat/domain/usecase/contacts/try_get_synced_phone_book_contact_interactor.dart';
 import 'package:fluffychat/domain/usecase/contacts/twake_look_up_argument.dart';
 import 'package:fluffychat/domain/usecase/contacts/twake_look_up_phonebook_contact_interactor.dart';
+import 'package:fluffychat/event/twake_event_messages.dart';
+import 'package:fluffychat/event/twake_event_types.dart';
 import 'package:fluffychat/presentation/extensions/value_notifier_custom.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/utils/twake_snackbar.dart';
@@ -109,6 +111,18 @@ class ContactsManager {
     _doNotShowWarningContactsDialogAgain = value;
   }
 
+  Future<void> syncContactsAcrossDevices(Client client) async {
+    final userId = client.userID;
+    final deviceId = client.deviceID;
+    if (userId == null || deviceId == null) return;
+
+    await client.sendToDevice(
+      TwakeEventTypes.addressBookUpdatedEventType,
+      client.generateUniqueTransactionId(),
+      TwakeEventMessages.updateAddressBookMessage(userId, deviceId),
+    );
+  }
+
   Future<void> reSyncContacts() async {
     _contactsNotifier.value = const Right(ContactsInitial());
     _phonebookContactsNotifier.value =
@@ -177,7 +191,7 @@ class ContactsManager {
     );
   }
 
-  void refreshTomContacts() {
+  void refreshTomContacts(Client client) {
     tomContactsSubscription = getTomContactsInteractor
         .execute(limit: AppConfig.maxFetchContacts)
         .listen(
@@ -185,6 +199,7 @@ class ContactsManager {
         _contactsNotifier.value = event;
       },
     );
+    syncContactsAcrossDevices(client);
   }
 
   Future<void> _getAllContacts({
@@ -266,6 +281,7 @@ class ContactsManager {
     required String withMxId,
   }) async {
     if (!isAvailableSupportPhonebookContacts) {
+      _isSynchronizing = false;
       return;
     }
     await _handleLookUpPhonebookContacts(withMxId: withMxId);

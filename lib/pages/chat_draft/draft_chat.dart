@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:collection/collection.dart';
 import 'package:dartz/dartz.dart' hide State;
 import 'package:desktop_drop/desktop_drop.dart';
 import 'package:file_picker/file_picker.dart';
@@ -8,6 +9,7 @@ import 'package:fluffychat/app_state/success.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/domain/app_state/contact/get_contacts_state.dart';
 import 'package:fluffychat/domain/app_state/direct_chat/create_direct_chat_success.dart';
+import 'package:fluffychat/domain/contact_manager/contacts_manager.dart';
 import 'package:fluffychat/domain/model/extensions/contact/contact_extension.dart';
 import 'package:fluffychat/domain/model/extensions/platform_file/platform_file_extension.dart';
 import 'package:fluffychat/domain/usecase/create_direct_chat_interactor.dart';
@@ -19,6 +21,7 @@ import 'package:fluffychat/pages/chat_draft/draft_chat_view.dart';
 import 'package:fluffychat/presentation/enum/chat/right_column_type_enum.dart';
 import 'package:fluffychat/presentation/enum/chat/send_media_with_caption_status_enum.dart';
 import 'package:fluffychat/presentation/extensions/client_extension.dart';
+import 'package:fluffychat/presentation/extensions/contact/presentation_contact_extension.dart';
 import 'package:fluffychat/presentation/extensions/send_file_extension.dart';
 import 'package:fluffychat/presentation/extensions/send_file_web_extension.dart';
 import 'package:fluffychat/presentation/mixins/audio_mixin.dart';
@@ -124,7 +127,7 @@ class DraftChatController extends State<DraftChat>
 
   final isSendingNotifier = ValueNotifier(false);
 
-  PresentationContact? get presentationContact => widget.contact;
+  late PresentationContact presentationContact;
 
   final KeyboardVisibilityController keyboardVisibilityController =
       KeyboardVisibilityController();
@@ -169,8 +172,36 @@ class DraftChatController extends State<DraftChat>
     _handleSendFileOnWeb(context, matrixFilesList);
   }
 
+  void _onTomContactsUpdateListener() {
+    final matrixId = presentationContact.matrixId;
+    final getContactsState = getIt.get<ContactsManager>().getContactsNotifier();
+    final updatedContact = getContactsState.value.fold(
+      (failure) => null,
+      (success) {
+        if (success is! GetContactsSuccess) return null;
+
+        return success.contacts
+            .firstWhereOrNull(
+              (c) => c.emails?.any((e) => e.matrixId == matrixId) == true,
+            )
+            ?.toPresentationContacts()
+            .firstOrNull;
+      },
+    );
+    if (mounted && updatedContact != null) {
+      setState(() {
+        presentationContact = updatedContact;
+      });
+    }
+  }
+
   @override
   void initState() {
+    super.initState();
+    presentationContact = widget.contact;
+    getIt.get<ContactsManager>().getContactsNotifier().addListener(
+          _onTomContactsUpdateListener,
+        );
     scrollController.addListener(_updateScrollController);
     keyboardVisibilityController.onChange.listen(_keyboardListener);
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -180,11 +211,13 @@ class DraftChatController extends State<DraftChat>
         initAudioRecorderWeb();
       }
     });
-    super.initState();
   }
 
   @override
   void dispose() {
+    getIt.get<ContactsManager>().getContactsNotifier().removeListener(
+          _onTomContactsUpdateListener,
+        );
     scrollController.dispose();
     sendController.dispose();
     forwardListController.dispose();
@@ -230,7 +263,7 @@ class DraftChatController extends State<DraftChat>
       if (sendController.value.text.contains(displayName ?? '') == true) {
         return sendController.value.text.replaceAll(
           "${displayName ?? ''}!",
-          presentationContact?.matrixId ?? '',
+          presentationContact.matrixId ?? '',
         );
       } else {
         return sendController.value.text;
@@ -243,7 +276,7 @@ class DraftChatController extends State<DraftChat>
         (success) => success is GetContactsSuccess
             ? success.contacts.any(
                 (contact) => contact
-                    .inTomAddressBook(presentationContact?.matrixId ?? ""),
+                    .inTomAddressBook(presentationContact.matrixId ?? ""),
               )
             : false,
       );
@@ -396,7 +429,7 @@ class DraftChatController extends State<DraftChat>
   }) async {
     _createRoomSubscription = createDirectChatInteractor
         .execute(
-      contactMxId: presentationContact!.matrixId!,
+      contactMxId: presentationContact.matrixId!,
       client: Matrix.of(context).client,
       enableEncryption: false,
     )
@@ -415,7 +448,7 @@ class DraftChatController extends State<DraftChat>
               extra: ChatRouterInputArgument(
                 type: ChatRouterInputArgumentType.draft,
                 data: _userProfile.value?.displayName ??
-                    presentationContact?.displayName ??
+                    presentationContact.displayName ??
                     room.name,
               ),
             );
@@ -591,7 +624,7 @@ class DraftChatController extends State<DraftChat>
     sendController.value = TextEditingValue(
       text: L10n.of(context)!.draftChatHookPhrase(
         _userProfile.value?.displayName ??
-            presentationContact?.displayName ??
+            presentationContact.displayName ??
             '',
       ),
     );
@@ -601,7 +634,7 @@ class DraftChatController extends State<DraftChat>
   Future<void> _getProfile() async {
     try {
       final profile = await Matrix.of(context).client.getProfileFromUserId(
-            presentationContact!.matrixId!,
+            presentationContact.matrixId!,
             getFromRooms: false,
           );
       _userProfile.value = profile;
