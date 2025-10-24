@@ -144,7 +144,9 @@ class AddContactDialogController extends State<AddContactDialog> {
         );
         return;
       } else if (state is PostAddressBookSuccessState) {
-        getIt.get<ContactsManager>().refreshTomContacts();
+        getIt.get<ContactsManager>().refreshTomContacts(
+              Matrix.of(context).client,
+            );
         final createdContact = state.updatedAddressBooks.firstOrNull
             ?.toPresentationContact()
             .firstOrNull;
