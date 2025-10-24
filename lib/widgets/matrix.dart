@@ -162,7 +162,7 @@ class MatrixState extends State<Matrix>
       await _storePersistActiveAccount(newClient!);
       await _getUserInfoWithActiveClient(newClient);
       await _getHomeserverInformation(newClient);
-      getIt.get<ContactsManager>().refreshTomContacts();
+      getIt.get<ContactsManager>().refreshTomContacts(client);
       return SetActiveClientState.success;
     } else {
       Logs().w('Tried to set an unknown client ${newClient!.userID} as active');
@@ -397,23 +397,22 @@ class MatrixState extends State<Matrix>
             )
             .listen(showLocalNotification);
       });
-
-      currentClient.onToDeviceEvent.stream.listen((deviceEvent) {
-        if (deviceEvent.type == TwakeEventTypes.addressBookUpdatedEventType) {
-          final senderId = deviceEvent.senderId;
-          Logs().d(
-            '[MATRIX]: onToDeviceEvent:: addressBookUpdatedEventType: senderDevice = $senderId',
-          );
-          if (currentClient.deviceID != senderId &&
-              currentClient.userID != null) {
-            _contactsManager.initialSynchronizeContacts(
-              withMxId: currentClient.userID!,
-              forceRun: true,
-            );
-          }
-        }
-      });
     }
+    currentClient.onToDeviceEvent.stream.listen((deviceEvent) {
+      if (deviceEvent.type == TwakeEventTypes.addressBookUpdatedEventType) {
+        final senderId = deviceEvent.senderId;
+        Logs().d(
+          '[MATRIX]: onToDeviceEvent:: addressBookUpdatedEventType: senderDevice = $senderId',
+        );
+        if (currentClient.deviceID != senderId &&
+            currentClient.userID != null) {
+          _contactsManager.initialSynchronizeContacts(
+            withMxId: currentClient.userID!,
+            forceRun: true,
+          );
+        }
+      }
+    });
   }
 
   Future<void> _requestNotificationPermission() async {
