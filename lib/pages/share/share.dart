@@ -110,17 +110,20 @@ class ShareController extends State<Share>
             TwakeEventTypes.shareFileEventType,
       )) {
         Navigator.pop(context);
-        context.go(
-          '/rooms/${room.id}',
-          extra: ChatRouterInputArgument(
-            type: ChatRouterInputArgumentType.share,
-            data: shareContentList
-                .map((content) => content?.tryGet<MatrixFile>('file'))
-                .toList(),
-          ),
-        );
+        SchedulerBinding.instance.addPostFrameCallback((_) {
+          final fileList = shareContentList
+              .map((content) => content?.tryGet<MatrixFile>('file'))
+              .toList();
+          Matrix.of(context).clearShareContentList();
+          context.go(
+            '/rooms/${room.id}',
+            extra: ChatRouterInputArgument(
+              type: ChatRouterInputArgumentType.share,
+              data: fileList,
+            ),
+          );
+        });
       }
-      Matrix.of(context).shareContentList = null;
     }
   }
 
