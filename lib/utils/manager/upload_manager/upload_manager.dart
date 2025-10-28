@@ -201,8 +201,7 @@ class UploadManager {
       );
 
       if (_eventIdMapUploadFileInfo[txidKey]?.captionInfo != null &&
-          (fakeSendingFileInfo.messageType == MessageTypes.File ||
-              fakeSendingFileInfo.messageType == MessageTypes.Video)) {
+          fakeSendingFileInfo.messageType != MessageTypes.Image) {
         _addCaptionTaskToWorkerQueue(
           room: room,
           messageTxid:
@@ -281,8 +280,7 @@ class UploadManager {
             captionInfo: _eventIdMapUploadFileInfo[txid]?.captionInfo?.caption,
           ),
           if (_eventIdMapUploadFileInfo[txid]?.captionInfo != null &&
-              (fileInfo.msgType == MessageTypes.File ||
-                  fileInfo.msgType == MessageTypes.Video))
+              fileInfo.msgType != MessageTypes.Image)
             _addCaptionTaskToWorkerQueue(
               room: room,
               messageTxid:
