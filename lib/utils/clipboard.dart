@@ -45,7 +45,7 @@ class TwakeClipboard {
   }
 
   Future<void> initReader() async {
-    _reader = await SystemClipboard.instance?.read();
+    _reader ??= await SystemClipboard.instance?.read();
   }
 
   Future<ClipboardImageInfo?> pasteImageUsingStream() async {
