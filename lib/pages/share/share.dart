@@ -109,7 +109,6 @@ class ShareController extends State<Share>
             content?.tryGet<String>('msgtype') ==
             TwakeEventTypes.shareFileEventType,
       )) {
-        Navigator.pop(context);
         SchedulerBinding.instance.addPostFrameCallback((_) {
           final fileList = shareContentList
               .map((content) => content?.tryGet<MatrixFile>('file'))

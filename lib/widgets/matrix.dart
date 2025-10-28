@@ -320,7 +320,7 @@ class MatrixState extends State<Matrix>
       initMatrix();
       final emojiRawData = await EmojiData.builtIn();
       emojiData = emojiRawData.filterByVersion(13.5);
-      await initReceiveSharingIntent();
+      initReceiveSharingIntent();
       await tryToGetFederationConfigurations();
       if (PlatformInfos.isWeb) {
         initConfigWeb().then((_) => initSettings());
