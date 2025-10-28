@@ -306,7 +306,7 @@ class ChatController extends State<Chat>
 
   bool get selectMode => selectedEvents.isNotEmpty;
 
-  Client get client => Matrix.read(context).client;
+  Client get client => matrix?.client ?? Matrix.read(context).client;
 
   final int _loadHistoryCount = 100;
 
@@ -512,7 +512,7 @@ class ChatController extends State<Chat>
     );
   }
 
-  Future<void> _handleReceivedShareFiles() async {
+  void _handleReceivedShareFiles() {
     if (shareFiles != null && room != null) {
       final filesIsNotNull = shareFiles!.whereNotNull();
       final uploadManger = getIt.get<UploadManager>();
@@ -2850,10 +2850,11 @@ class ChatController extends State<Chat>
     sendController.addListener(updateInputTextNotifier);
     super.initState();
     SchedulerBinding.instance.addPostFrameCallback((_) async {
+      if (!mounted) return;
       if (room == null) {
         return context.go("/error");
       }
-      await _handleReceivedShareFiles();
+      _handleReceivedShareFiles();
       _listenRoomUpdateEvent();
       initCachedPresence();
       await _requestParticipants();
@@ -2863,6 +2864,12 @@ class ChatController extends State<Chat>
       }
       initAudioPlayer();
     });
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    matrix = Matrix.of(context);
   }
 
   @override

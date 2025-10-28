@@ -1,6 +1,6 @@
-import 'package:equatable/equatable.dart';
+import 'package:fluffychat/widgets/layouts/agruments/app_adaptive_scaffold_body_args.dart';
 
-class ChatRouterInputArgument with EquatableMixin {
+class ChatRouterInputArgument extends AbsAppAdaptiveScaffoldBodyArgs {
   final ChatRouterInputArgumentType type;
 
   final Object? data;
@@ -8,10 +8,12 @@ class ChatRouterInputArgument with EquatableMixin {
   ChatRouterInputArgument({
     required this.type,
     this.data,
+    super.newActiveClient,
   });
 
   @override
   List<Object?> get props => [
+        newActiveClient,
         type,
         data,
       ];
