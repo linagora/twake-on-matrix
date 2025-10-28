@@ -564,6 +564,16 @@ class ChatController extends State<Chat>
   void updateView() {
     if (!mounted) return;
     setState(() {});
+    if (eventToTrack == null) return;
+    final index = timeline?.events.indexOf(eventToTrack!);
+    if (index == null || index <= 0) return;
+    SchedulerBinding.instance.endOfFrame.then((value) async {
+      await scrollController.scrollToIndex(
+        index,
+        preferPosition: AutoScrollPosition.begin,
+      );
+      eventToTrack = null;
+    });
   }
 
   void onBackPress() {
@@ -1115,12 +1125,14 @@ class ChatController extends State<Chat>
 
   Future<void>? loadTimelineFuture;
 
+  Event? eventToTrack;
   void requestFuture() async {
     final timeline = this.timeline;
     if (timeline == null) return;
     if (!timeline.canRequestFuture) return;
     Logs().v('Chat::requestFuture(): Requesting future...');
     try {
+      eventToTrack = timeline.events.first;
       await timeline.requestFuture(historyCount: _loadHistoryCount);
       setReadMarker(eventId: timeline.events.first.eventId);
     } catch (err) {
