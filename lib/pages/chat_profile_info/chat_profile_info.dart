@@ -48,7 +48,7 @@ class ChatProfileInfoController extends State<ChatProfileInfo>
     with
         HandleVideoDownloadMixin,
         PlayVideoActionMixin,
-        SingleTickerProviderStateMixin,
+        TickerProviderStateMixin,
         ChatDetailsTabMixin<ChatProfileInfo> {
   final _lookupMatchContactInteractor =
       getIt.get<LookupMatchContactInteractor>();
