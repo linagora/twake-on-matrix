@@ -1,3 +1,7 @@
+## [2.14.3+2330] - 2025-10-28
+### Fixed
+- #2626 Send caption with other file in separate message bubble 
+
 ## [2.14.2+2330] - 2025-10-24
 ### Fixed
 - #2617 Cannot copy text in caption
