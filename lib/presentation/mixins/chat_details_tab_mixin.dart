@@ -34,7 +34,7 @@ import 'package:fluffychat/domain/model/room/room_extension.dart';
 
 mixin ChatDetailsTabMixin<T extends StatefulWidget>
     on
-        SingleTickerProviderStateMixin<T>,
+        TickerProviderStateMixin<T>,
         HandleVideoDownloadMixin,
         PlayVideoActionMixin {
   final GlobalKey<NestedScrollViewState> nestedScrollViewState = GlobalKey();
