@@ -11,6 +11,7 @@ import 'package:fluffychat/domain/contact_manager/contacts_manager.dart';
 import 'package:fluffychat/pages/chat/chat_app_bar_title_style.dart';
 import 'package:fluffychat/presentation/extensions/contact/presentation_contact_extension.dart';
 import 'package:fluffychat/presentation/model/contact/presentation_contact.dart';
+import 'package:fluffychat/pages/chat/typing_timer_wrapper.dart';
 import 'package:fluffychat/resource/image_paths.dart';
 import 'package:fluffychat/utils/common_helper.dart';
 import 'package:fluffychat/utils/room_status_extension.dart';
@@ -252,19 +253,21 @@ class _DirectChatAppBarStatusContent extends StatelessWidget {
                     text: L10n.of(context)!.loadingStatus,
                   );
                 }
-                final typingText = room.getLocalizedTypingText(context);
-                if (typingText.isEmpty) {
-                  return ChatAppBarTitleText(
+                return TypingTimerWrapper(
+                  room: room,
+                  l10n: L10n.of(context)!,
+                  typingWidget: _ChatAppBarTitleTyping(
+                    typingText: room.getLocalizedTypingText(L10n.of(context)!),
+                  ),
+                  notTypingWidget: ChatAppBarTitleText(
                     text: room
                         .getLocalizedStatus(
                           context,
                           presence: directChatPresence,
                         )
                         .capitalize(context),
-                  );
-                } else {
-                  return _ChatAppBarTitleTyping(typingText: typingText);
-                }
+                  ),
+                );
               },
             );
           },
@@ -296,14 +299,16 @@ class _GroupChatAppBarStatusContent extends StatelessWidget {
         if (snapshot.hasData && connectivityResult == ConnectivityResult.none) {
           return ChatAppBarTitleText(text: L10n.of(context)!.noConnection);
         }
-        final typingText = room.getLocalizedTypingText(context);
-        if (typingText.isEmpty) {
-          return ChatAppBarTitleText(
+        return TypingTimerWrapper(
+          room: room,
+          l10n: L10n.of(context)!,
+          typingWidget: _ChatAppBarTitleTyping(
+            typingText: room.getLocalizedTypingText(L10n.of(context)!),
+          ),
+          notTypingWidget: ChatAppBarTitleText(
             text: room.getLocalizedStatus(context).capitalize(context),
-          );
-        } else {
-          return _ChatAppBarTitleTyping(typingText: typingText);
-        }
+          ),
+        );
       },
     );
   }

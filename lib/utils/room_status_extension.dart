@@ -22,30 +22,30 @@ extension RoomStatusExtension on Room {
     return _getLocalizedStatusGroupChat(context);
   }
 
-  String getLocalizedTypingText(BuildContext context) {
+  String getLocalizedTypingText(L10n l10n) {
     var typingText = '';
     final typingUsers = this.typingUsers;
     typingUsers.removeWhere((User u) => u.id == client.userID);
 
+    if (typingUsers.isEmpty) return '';
+
     if (AppConfig.hideTypingUsernames) {
-      typingText = L10n.of(context)!.isTyping;
+      typingText = l10n.isTyping;
       if (typingUsers.first.id != directChatMatrixID) {
-        typingText =
-            L10n.of(context)!.numUsersTyping(typingUsers.length.toString());
+        typingText = l10n.numUsersTyping(typingUsers.length.toString());
       }
     } else if (typingUsers.length == 1) {
-      typingText = L10n.of(context)!.isTyping;
+      typingText = l10n.isTyping;
       if (typingUsers.first.id != directChatMatrixID) {
-        typingText =
-            L10n.of(context)!.userIsTyping(typingUsers.first.calcDisplayname());
+        typingText = l10n.userIsTyping(typingUsers.first.calcDisplayname());
       }
     } else if (typingUsers.length == 2) {
-      typingText = L10n.of(context)!.userAndUserAreTyping(
+      typingText = l10n.userAndUserAreTyping(
         typingUsers.first.calcDisplayname(),
         typingUsers[1].calcDisplayname(),
       );
     } else if (typingUsers.length > 2) {
-      typingText = L10n.of(context)!.userAndOthersAreTyping(
+      typingText = l10n.userAndOthersAreTyping(
         typingUsers.first.calcDisplayname(),
         (typingUsers.length - 1).toString(),
       );
@@ -86,7 +86,7 @@ extension RoomStatusExtension on Room {
   }
 
   bool isTypingText(BuildContext context) {
-    return getLocalizedTypingText(context).isNotEmpty &&
+    return getLocalizedTypingText(L10n.of(context)!).isNotEmpty &&
         lastEvent?.senderId == client.userID &&
         lastEvent!.status.isSending;
   }
