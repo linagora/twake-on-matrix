@@ -1,4 +1,7 @@
+import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/utils/dialog/twake_dialog.dart';
+import 'package:fluffychat/utils/manager/twake_user_info_manager/twake_user_info_extension.dart';
+import 'package:fluffychat/utils/manager/twake_user_info_manager/twake_user_info_manager.dart';
 import 'package:fluffychat/widgets/avatar/avatar_style.dart';
 import 'package:flutter/material.dart';
 
@@ -35,7 +38,13 @@ class ProfileBottomSheet extends StatelessWidget {
   Widget build(BuildContext context) {
     return SafeArea(
       child: FutureBuilder<Profile>(
-        future: Matrix.of(context).client.getProfileFromUserId(userId),
+        future: getIt
+            .get<TwakeUserInfoManager>()
+            .getTwakeProfileFromUserId(
+              client: Matrix.of(outerContext).client,
+              userId: userId,
+            )
+            .then((twakeProfile) => twakeProfile.toMatrixProfile()),
         builder: (context, snapshot) {
           final profile = snapshot.data;
           return Scaffold(
