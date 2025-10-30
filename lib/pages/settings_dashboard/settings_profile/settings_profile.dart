@@ -30,6 +30,8 @@ import 'package:fluffychat/presentation/multiple_account/twake_chat_presentation
 import 'package:fluffychat/utils/client_manager.dart';
 import 'package:fluffychat/utils/dialog/twake_dialog.dart';
 import 'package:fluffychat/utils/extension/value_notifier_extension.dart';
+import 'package:fluffychat/utils/manager/twake_user_info_manager/twake_user_info_extension.dart';
+import 'package:fluffychat/utils/manager/twake_user_info_manager/twake_user_info_manager.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/utils/twake_snackbar.dart';
 import 'package:fluffychat/widgets/matrix.dart';
@@ -495,16 +497,17 @@ class SettingsProfileController extends State<SettingsProfile>
     Client client, {
     isUpdated = false,
   }) async {
-    final profile = await client.getProfileFromUserId(
-      client.userID!,
-      cache: !isUpdated,
-      getFromRooms: false,
-    );
+    final twakeProfile =
+        await getIt.get<TwakeUserInfoManager>().getTwakeProfileFromUserId(
+              client: client,
+              userId: client.userID!,
+              getFromRooms: false,
+            );
     Logs().d(
-      'SettingsProfileController::_getCurrentProfile() - currentProfile: $profile',
+      'SettingsProfileController::_getCurrentProfile() - currentProfile: $twakeProfile',
     );
-    currentProfile.value = profile;
-    if (profile.avatarUrl == null) {
+    currentProfile.value = twakeProfile.toMatrixProfile();
+    if (twakeProfile.toMatrixProfile().avatarUrl == null) {
       _clearImageInLocal();
     }
     displayNameEditingController.text = displayName;
