@@ -1,5 +1,8 @@
+import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/pages/new_group/contacts_selection.dart';
 import 'package:fluffychat/pages/new_group/widget/selected_participants_list_style.dart';
+import 'package:fluffychat/utils/manager/twake_user_info_manager/twake_user_info_extension.dart';
+import 'package:fluffychat/utils/manager/twake_user_info_manager/twake_user_info_manager.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/widgets/avatar/avatar.dart';
 import 'package:fluffychat/widgets/matrix.dart';
@@ -71,11 +74,16 @@ class _SelectedParticipantsListState extends State<SelectedParticipantsList> {
                         ),
                         avatar: contact.matrixId != null
                             ? FutureBuilder<Profile>(
-                                future: Matrix.of(context)
-                                    .client
-                                    .getProfileFromUserId(
-                                      contact.matrixId!,
+                                future: getIt
+                                    .get<TwakeUserInfoManager>()
+                                    .getTwakeProfileFromUserId(
+                                      client: Matrix.of(context).client,
+                                      userId: contact.matrixId!,
                                       getFromRooms: false,
+                                    )
+                                    .then(
+                                      (twakeProfile) =>
+                                          twakeProfile.toMatrixProfile(),
                                     ),
                                 builder: ((context, snapshot) {
                                   return Avatar(

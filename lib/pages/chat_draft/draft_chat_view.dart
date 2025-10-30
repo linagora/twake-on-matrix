@@ -15,6 +15,8 @@ import 'package:fluffychat/pages/chat_draft/draft_chat_view_style.dart';
 import 'package:fluffychat/pages/contacts_tab/widgets/add_contact/add_contact_dialog.dart';
 import 'package:fluffychat/resource/image_paths.dart';
 import 'package:fluffychat/utils/android_utils.dart';
+import 'package:fluffychat/utils/manager/twake_user_info_manager/twake_user_info_extension.dart';
+import 'package:fluffychat/utils/manager/twake_user_info_manager/twake_user_info_manager.dart';
 import 'package:fluffychat/utils/string_extension.dart';
 import 'package:fluffychat/widgets/avatar/avatar.dart';
 import 'package:fluffychat/widgets/matrix.dart';
@@ -416,9 +418,13 @@ class _EmptyChatTitle extends StatelessWidget {
     String receiverId,
   ) async {
     try {
-      return await Matrix.of(context)
-          .client
-          .getProfileFromUserId(receiverId, getFromRooms: false);
+      final twakeProfile =
+          await getIt.get<TwakeUserInfoManager>().getTwakeProfileFromUserId(
+                client: Matrix.of(context).client,
+                userId: receiverId,
+                getFromRooms: false,
+              );
+      return twakeProfile.toMatrixProfile();
     } catch (e) {
       return Profile(
         avatarUrl: null,

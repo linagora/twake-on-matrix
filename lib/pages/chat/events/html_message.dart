@@ -1,8 +1,10 @@
 import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/config/setting_keys.dart';
+import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/domain/model/extensions/string_extension.dart';
 import 'package:fluffychat/pages/image_viewer/image_viewer.dart';
 import 'package:fluffychat/presentation/mixins/linkify_mixin.dart';
+import 'package:fluffychat/utils/manager/twake_user_info_manager/twake_user_info_manager.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
 import 'package:fluffychat/utils/url_launcher.dart';
 import 'package:fluffychat/widgets/mentioned_user.dart';
@@ -143,11 +145,15 @@ class HtmlMessage extends StatelessWidget with LinkifyMixin {
                   return user.content;
                 }
                 // there might still be a profile...
-                final profile =
-                    await room.client.getProfileFromUserId(identifier);
+                final twakeProfile = await getIt
+                    .get<TwakeUserInfoManager>()
+                    .getTwakeProfileFromUserId(
+                      client: room.client,
+                      userId: identifier,
+                    );
                 return {
-                  'displayname': profile.displayName,
-                  'avatar_url': profile.avatarUrl.toString(),
+                  'displayname': twakeProfile.displayName,
+                  'avatar_url': twakeProfile.avatarUrl.toString(),
                 };
               }
               if (identifier.sigil == '#') {

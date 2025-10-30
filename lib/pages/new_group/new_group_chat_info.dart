@@ -19,6 +19,8 @@ import 'package:fluffychat/presentation/mixins/single_image_picker_mixin.dart';
 import 'package:fluffychat/presentation/model/contact/presentation_contact.dart';
 import 'package:fluffychat/utils/dialog/twake_dialog.dart';
 import 'package:fluffychat/utils/extension/build_context_extension.dart';
+import 'package:fluffychat/utils/manager/twake_user_info_manager/twake_user_info_extension.dart';
+import 'package:fluffychat/utils/manager/twake_user_info_manager/twake_user_info_manager.dart';
 import 'package:fluffychat/utils/power_level_manager.dart';
 import 'package:fluffychat/utils/responsive/responsive_utils.dart';
 import 'package:fluffychat/widgets/matrix.dart';
@@ -90,8 +92,12 @@ class NewGroupChatInfoController extends State<NewGroupChatInfo>
     bool isCustomDisplayName = true,
   }) async {
     final userId = Matrix.of(context).client.userID;
-    final profile =
-        await Matrix.of(context).client.getProfileFromUserId(userId ?? '');
+    final twakeProfile =
+        await getIt.get<TwakeUserInfoManager>().getTwakeProfileFromUserId(
+              client: Matrix.of(context).client,
+              userId: userId ?? '',
+            );
+    final profile = twakeProfile.toMatrixProfile();
     final newContactsList = {
       PresentationContact(
         displayName:

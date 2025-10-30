@@ -1,4 +1,7 @@
+import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/presentation/model/contact/presentation_contact.dart';
+import 'package:fluffychat/utils/manager/twake_user_info_manager/twake_user_info_extension.dart';
+import 'package:fluffychat/utils/manager/twake_user_info_manager/twake_user_info_manager.dart';
 import 'package:fluffychat/widgets/avatar/avatar.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:flutter/material.dart';
@@ -32,10 +35,14 @@ class AvatarWithBottomIconWidget extends StatelessWidget {
         children: [
           if (presentationContact.matrixId != null)
             FutureBuilder<Profile>(
-              future: Matrix.of(context).client.getProfileFromUserId(
-                    presentationContact.matrixId!,
+              future: getIt
+                  .get<TwakeUserInfoManager>()
+                  .getTwakeProfileFromUserId(
+                    client: Matrix.of(context).client,
+                    userId: presentationContact.matrixId!,
                     getFromRooms: false,
-                  ),
+                  )
+                  .then((twakeProfile) => twakeProfile.toMatrixProfile()),
               builder: ((context, snapshot) {
                 return Avatar(
                   mxContent: snapshot.data?.avatarUrl,

@@ -2,6 +2,7 @@ import 'package:dartz/dartz.dart' as dartz;
 import 'package:fluffychat/app_state/failure.dart';
 import 'package:fluffychat/app_state/success.dart';
 import 'package:fluffychat/data/model/invitation/invitation_status_response.dart';
+import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/domain/app_state/invitation/get_invitation_status_state.dart';
 import 'package:fluffychat/domain/model/contact/contact_status.dart';
 import 'package:fluffychat/pages/contacts_tab/contacts_invitation.dart';
@@ -10,6 +11,8 @@ import 'package:fluffychat/presentation/model/contact/presentation_contact.dart'
 import 'package:fluffychat/pages/new_private_chat/widget/contact_status_widget.dart';
 import 'package:fluffychat/utils/adaptive_bottom_sheet.dart';
 import 'package:fluffychat/utils/display_name_widget.dart';
+import 'package:fluffychat/utils/manager/twake_user_info_manager/twake_user_info_extension.dart';
+import 'package:fluffychat/utils/manager/twake_user_info_manager/twake_user_info_manager.dart';
 import 'package:fluffychat/utils/string_extension.dart';
 import 'package:fluffychat/widgets/avatar/avatar.dart';
 import 'package:fluffychat/widgets/highlight_text.dart';
@@ -368,10 +371,13 @@ class _ExpansionPhonebookContactListTileState
       return Future.error(Exception("MatrixId is null"));
     }
     try {
-      final profile = await client.getProfileFromUserId(
-        widget.contact.matrixId!,
-        getFromRooms: false,
-      );
+      final twakeProfile =
+          await getIt.get<TwakeUserInfoManager>().getTwakeProfileFromUserId(
+                client: client,
+                userId: widget.contact.matrixId!,
+                getFromRooms: false,
+              );
+      final profile = twakeProfile.toMatrixProfile();
       Logs()
           .d("ExpansionContactListTile()::getProfiles(): ${profile.avatarUrl}");
       return profile;

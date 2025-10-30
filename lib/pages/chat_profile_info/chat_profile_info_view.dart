@@ -17,6 +17,8 @@ import 'package:fluffychat/presentation/model/contact/presentation_contact.dart'
 import 'package:fluffychat/presentation/model/contact/presentation_contact_constant.dart';
 import 'package:fluffychat/resource/image_paths.dart';
 import 'package:fluffychat/utils/clipboard.dart';
+import 'package:fluffychat/utils/manager/twake_user_info_manager/twake_user_info_extension.dart';
+import 'package:fluffychat/utils/manager/twake_user_info_manager/twake_user_info_manager.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/utils/string_extension.dart';
 import 'package:fluffychat/utils/twake_snackbar.dart';
@@ -90,11 +92,15 @@ class ChatProfileInfoView extends StatelessWidget {
                         builder: (context) {
                           if (contact?.matrixId != null) {
                             return FutureBuilder(
-                              future: Matrix.of(context)
-                                  .client
-                                  .getProfileFromUserId(
-                                    contact!.matrixId!,
-                                    getFromRooms: false,
+                              future: getIt
+                                  .get<TwakeUserInfoManager>()
+                                  .getTwakeProfileFromUserId(
+                                    client: Matrix.of(context).client,
+                                    userId: contact!.matrixId!,
+                                  )
+                                  .then(
+                                    (twakeProfile) =>
+                                        twakeProfile.toMatrixProfile(),
                                   ),
                               builder: (context, snapshot) => _Information(
                                 avatarUri: snapshot.data?.avatarUrl,
