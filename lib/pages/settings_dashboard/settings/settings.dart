@@ -12,6 +12,8 @@ import 'package:fluffychat/presentation/mixins/connect_page_mixin.dart';
 import 'package:fluffychat/presentation/enum/settings/settings_enum.dart';
 import 'package:fluffychat/presentation/extensions/client_extension.dart';
 import 'package:fluffychat/utils/dialog/twake_dialog.dart';
+import 'package:fluffychat/utils/manager/twake_user_info_manager/twake_user_info_extension.dart';
+import 'package:fluffychat/utils/manager/twake_user_info_manager/twake_user_info_manager.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/utils/url_launcher.dart';
 import 'package:fluffychat/widgets/matrix.dart';
@@ -165,10 +167,13 @@ class SettingsController extends State<Settings> with ConnectPageMixin {
   Client get client => Matrix.of(context).client;
 
   void _getCurrentProfile(Client client) async {
-    final profile = await client.getProfileFromUserId(
-      client.userID!,
-      getFromRooms: false,
-    );
+    final twakeUser =
+        await getIt.get<TwakeUserInfoManager>().getTwakeProfileFromUserId(
+              client: client,
+              userId: client.userID!,
+              getFromRooms: false,
+            );
+    final profile = twakeUser.toMatrixProfile();
     Logs().d(
       'Settings::_getCurrentProfile() - currentProfile: $profile',
     );

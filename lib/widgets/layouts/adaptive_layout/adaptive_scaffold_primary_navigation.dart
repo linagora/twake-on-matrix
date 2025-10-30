@@ -1,6 +1,9 @@
 import 'dart:async';
 
+import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/event/twake_inapp_event_types.dart';
+import 'package:fluffychat/utils/manager/twake_user_info_manager/twake_user_info_extension.dart';
+import 'package:fluffychat/utils/manager/twake_user_info_manager/twake_user_info_manager.dart';
 import 'package:fluffychat/widgets/layouts/adaptive_layout/adaptive_scaffold_primary_navigation_view.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:flutter/material.dart';
@@ -34,14 +37,16 @@ class _AdaptiveScaffoldPrimaryNavigationState
   Client get client => Matrix.of(context).client;
 
   void _getCurrentProfile(Client client) async {
-    final profile = await client.getProfileFromUserId(
-      client.userID!,
-      getFromRooms: false,
-    );
+    final twakeProfile =
+        await getIt.get<TwakeUserInfoManager>().getTwakeProfileFromUserId(
+              client: client,
+              userId: client.userID!,
+              getFromRooms: false,
+            );
     Logs().d(
-      'AdaptiveScaffoldPrimaryNavigation::_getCurrentProfile() - currentProfile: $profile',
+      'AdaptiveScaffoldPrimaryNavigation::_getCurrentProfile() - currentProfile: ${twakeProfile.toMatrixProfile()}',
     );
-    profileNotifier.value = profile;
+    profileNotifier.value = twakeProfile.toMatrixProfile();
   }
 
   void _handleOnAccountDataSubscription() {
