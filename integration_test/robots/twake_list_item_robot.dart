@@ -120,12 +120,12 @@ class TwakeListItemRobot extends CoreRobot {
   }
   
   PatrolFinder getUnReadIcon() {
-    // if(root.$(AnimatedContainer).evaluate().length >1)
-    // {return root.$(AnimatedContainer).last;}
+    var target = const Color(0xFF0A84FF); // #0a84ff
     
-    // return getNumberUnReadIcon();  
-    const target = Color(0xFF0A84FF); // #0a84ff, viết hoa/thường đều OK
-
+    if(getMutedIcon().exists){
+      target = const Color(0xFF99A0A9); 
+    }
+    
     return root.$(ChatListItemSubtitle).$(
       find.byWidgetPredicate(
         (w) {
@@ -137,7 +137,7 @@ class TwakeListItemRobot extends CoreRobot {
 
           return false;
         },
-        description: 'Any box with background #0A48FF',
+        description: 'Any box with background #$target',
       ),
     );
   }
@@ -152,7 +152,8 @@ class TwakeListItemRobot extends CoreRobot {
   PatrolFinder getMutedIcon(){
     final title = root.$(ChatListItemTitle);
     const pinData = IconData(0xF4A7, fontFamily: 'MaterialIcons');
-    return $(find.descendant(of: title, matching: find.byIcon(pinData)));
+    final muteFinder = $(find.descendant(of: title, matching: find.byIcon(pinData)));
+    return muteFinder;
   }
 
   Future<PatrolFinder> getEmailLabelIncaseSearching() async {
@@ -194,7 +195,7 @@ class TwakeListItemRobot extends CoreRobot {
 
   Future<void> pin() async {
     await getPinBtn().tap();
-    await $.waitUntilVisible(getPinIcon());
+    await $.waitUntilVisible(await getPinIcon());
   }
 
   Future<void> unpin() async {
