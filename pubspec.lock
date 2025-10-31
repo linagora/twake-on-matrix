@@ -668,13 +668,13 @@ packages:
     source: git
     version: "0.1.0"
   ffi:
-    dependency: "direct overridden"
+    dependency: transitive
     description:
       name: ffi
-      sha256: "0396b3798d91e7330911407d0cebc6bcb776aff56da567deb1ef3f40a469e72a"
+      sha256: "289279317b4b16eb2bb7e271abccd4bf84ec9bdcbe999e278a94b804f5630418"
       url: "https://pub.dev"
     source: hosted
-    version: "2.0.0"
+    version: "2.1.4"
   file:
     dependency: transitive
     description:
@@ -1319,10 +1319,10 @@ packages:
     dependency: "direct main"
     description:
       name: flutter_vodozemac
-      sha256: "54cd3790b6dfdc1afce928f8c46f7eeea9e4f8326f077400894935926f202057"
+      sha256: "16d4b44dd338689441fe42a80d0184e5c864e9563823de9e7e6371620d2c0590"
       url: "https://pub.dev"
     source: hosted
-    version: "0.3.0"
+    version: "0.4.1"
   flutter_web_auth_2:
     dependency: "direct main"
     description:
@@ -1446,14 +1446,22 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.1.9"
-  heif_converter:
+  heic_to_png_jpg:
     dependency: "direct main"
     description:
-      name: heif_converter
-      sha256: "63ffc2a72026942de3fcb61450da197100759936085c8279aef35b995b3c1bb3"
+      name: heic_to_png_jpg
+      sha256: cd4038a1b194c70d0a665e85a8d32a7b7a0d554baa5f0fe833f8cafbb0c7b792
       url: "https://pub.dev"
     source: hosted
-    version: "1.0.0"
+    version: "0.0.5"
+  heif_converter:
+    dependency: transitive
+    description:
+      name: heif_converter
+      sha256: a2fbbf3f795b19753d84a52223c60d3bcf3cf2261d6c0d41857f0ec198e6eef3
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.0.1"
   highlight:
     dependency: transitive
     description:
@@ -1495,7 +1503,7 @@ packages:
     source: hosted
     version: "0.15.4"
   html_unescape:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: html_unescape
       sha256: "15362d7a18f19d7b742ef8dcb811f5fd2a2df98db9f80ea393c075189e0b61e3"
@@ -1867,12 +1875,11 @@ packages:
   matrix:
     dependency: "direct main"
     description:
-      path: "."
-      ref: "twake-supported-0.22.6"
-      resolved-ref: "9330b21237b690b358bbc09dada0f3667e559e34"
-      url: "git@github.com:linagora/matrix-dart-sdk.git"
-    source: git
-    version: "0.22.6"
+      name: matrix
+      sha256: "94f5284c4ee521ae9d61f30cbb7c299d02d820e35509c028090d3b1901f520a3"
+      url: "https://pub.dev"
+    source: hosted
+    version: "3.0.2"
   matrix_api_lite:
     dependency: "direct overridden"
     description:
@@ -2793,10 +2800,34 @@ packages:
     dependency: transitive
     description:
       name: sqflite_common
-      sha256: "3da423ce7baf868be70e2c0976c28a1bb2f73644268b7ffa7d2e08eab71f16a4"
+      sha256: "6ef422a4525ecc601db6c0a2233ff448c731307906e92cabc9ba292afaae16a6"
       url: "https://pub.dev"
     source: hosted
-    version: "2.5.4"
+    version: "2.5.6"
+  sqflite_common_ffi:
+    dependency: "direct main"
+    description:
+      name: sqflite_common_ffi
+      sha256: "9faa2fedc5385ef238ce772589f7718c24cdddd27419b609bb9c6f703ea27988"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.3.6"
+  sqlite3:
+    dependency: transitive
+    description:
+      name: sqlite3
+      sha256: f18fd9a72d7a1ad2920db61368f2a69368f1cc9b56b8233e9d83b47b0a8435aa
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.9.3"
+  sqlite3_flutter_libs:
+    dependency: "direct main"
+    description:
+      name: sqlite3_flutter_libs
+      sha256: "69c80d812ef2500202ebd22002cbfc1b6565e9ff56b2f971e757fac5d42294df"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.5.40"
   stack_trace:
     dependency: transitive
     description:
@@ -2857,10 +2888,10 @@ packages:
     dependency: transitive
     description:
       name: synchronized
-      sha256: "69fe30f3a8b04a0be0c15ae6490fc859a78ef4c43ae2dd5e8a623d45bfcf9225"
+      sha256: c254ade258ec8282947a0acbbc90b9575b4f19673533ee46f2f6e9b3aeefd7c0
       url: "https://pub.dev"
     source: hosted
-    version: "3.3.0+3"
+    version: "3.4.0"
   term_glyph:
     dependency: transitive
     description:
@@ -3236,10 +3267,10 @@ packages:
     dependency: transitive
     description:
       name: vodozemac
-      sha256: "95cac62ffab94db99e134c8f9aac198f8131a4eed0bed76a6cfc9c72add229b9"
+      sha256: "39144e20740807731871c9248d811ed5a037b21d0aa9ffcfa630954de74139d9"
       url: "https://pub.dev"
     source: hosted
-    version: "0.3.0"
+    version: "0.4.0"
   volume_controller:
     dependency: transitive
     description:

@@ -1,5 +1,6 @@
 import 'package:fluffychat/data/model/federation_server/federation_server_information.dart';
 import 'package:fluffychat/domain/model/app_twake_information.dart';
+import 'package:fluffychat/domain/model/homeserver_summary.dart';
 import 'package:fluffychat/domain/model/tom_server_information.dart';
 import 'package:matrix/matrix.dart';
 
@@ -9,7 +10,8 @@ extension HomeserverSummaryExtensions on HomeserverSummary {
       return null;
     }
     final tomServerJson = discoveryInformation
-        ?.additionalProperties[ToMServerInformation.tomServerKey];
+            ?.additionalProperties[ToMServerInformation.tomServerKey]
+        as Map<String, dynamic>?;
     if (tomServerJson == null) {
       return null;
     }
@@ -26,7 +28,8 @@ extension HomeserverSummaryExtensions on HomeserverSummary {
       return null;
     }
     final appTwakeJson = discoveryInformation
-        ?.additionalProperties[AppTwakeInformation.appTwakeInformationKey];
+            ?.additionalProperties[AppTwakeInformation.appTwakeInformationKey]
+        as Map<String, dynamic>?;
     if (appTwakeJson == null) {
       return null;
     }
@@ -43,7 +46,8 @@ extension HomeserverSummaryExtensions on HomeserverSummary {
       return null;
     }
     final fedServerJson = discoveryInformation
-        ?.additionalProperties[FederationServerInformation.fedServerKey];
+            ?.additionalProperties[FederationServerInformation.fedServerKey]
+        as Map<String, dynamic>?;
     if (fedServerJson == null) {
       return null;
     }

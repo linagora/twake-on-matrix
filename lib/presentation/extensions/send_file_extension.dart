@@ -1,15 +1,19 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:blurhash_dart/blurhash_dart.dart';
 import 'package:collection/collection.dart';
 import 'package:dartz/dartz.dart' hide id;
 import 'package:dio/dio.dart';
 import 'package:fluffychat/app_state/failure.dart';
 import 'package:fluffychat/app_state/success.dart';
+import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/data/network/media/cancel_exception.dart';
 import 'package:fluffychat/data/network/media/media_api.dart';
-import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
+import 'package:fluffychat/domain/model/file_info/file_info.dart';
+import 'package:fluffychat/domain/model/file_info/image_file_info.dart';
+import 'package:fluffychat/domain/model/file_info/video_file_info.dart';
 import 'package:fluffychat/domain/model/room/room_extension.dart';
 import 'package:fluffychat/presentation/extensions/image_extension.dart';
 import 'package:fluffychat/presentation/fake_sending_file_info.dart';
@@ -19,14 +23,15 @@ import 'package:fluffychat/utils/exception/upload_exception.dart';
 import 'package:fluffychat/utils/extension/mime_type_extension.dart';
 import 'package:fluffychat/utils/manager/storage_directory_manager.dart';
 import 'package:fluffychat/utils/manager/upload_manager/upload_state.dart';
-import 'package:flutter/widgets.dart';
-import 'package:heif_converter/heif_converter.dart';
-import 'package:image/image.dart' as img;
-import 'package:blurhash_dart/blurhash_dart.dart';
 import 'package:flutter/foundation.dart';
-import 'package:matrix/matrix.dart';
-import 'package:path_provider/path_provider.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
+import 'package:heic_to_png_jpg/heic_to_png_jpg.dart';
+import 'package:image/image.dart' as img;
+import 'package:matrix/matrix.dart';
+// ignore: implementation_imports
+import 'package:matrix/src/utils/run_benchmarked.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:video_thumbnail/video_thumbnail.dart';
 
 typedef TransactionId = String;
@@ -53,6 +58,13 @@ extension SendFileExtension on Room {
   }) async {
     // Check media config of the server before sending the file. Stop if the
     // Media config is unreachable or the file is bigger than the given maxsize.
+    Uint8List fileBytes = Uint8List(0);
+    Uint8List thumbnailBytes = Uint8List(0);
+    if (fileInfo.bytes != null) {
+      fileBytes = fileInfo.bytes!;
+    } else if (fileInfo.filePath != null) {
+      fileBytes = await File(fileInfo.filePath!).readAsBytes();
+    }
     try {
       final mediaConfig = await client.getConfig();
       final maxMediaSize = mediaConfig.mUploadSize;
@@ -60,7 +72,7 @@ extension SendFileExtension on Room {
         'SendImage::sendFileEvent(): FileSized ${fileInfo.fileSize} || maxMediaSize $maxMediaSize',
       );
       Logs().d(
-        'SendImage::sendFileEvent(): path ${fileInfo.filePath}',
+        'SendImage::sendFileEvent(): file ${fileInfo.fileName}',
       );
 
       Logs().d(
@@ -91,14 +103,12 @@ extension SendFileExtension on Room {
     final tempDir = await getTemporaryDirectory();
 
     Logs().d(
-      'sendFileEventMobile::File Path: ${fileInfo.filePath} - mimeType: ${fileInfo.mimeType}',
+      'sendFileEventMobile::File: ${fileInfo.fileName} - mimeType: ${fileInfo.mimeType}',
     );
     if (TwakeMimeTypeExtension.heicMimeTypes.contains(fileInfo.mimeType) &&
         fileInfo is ImageFileInfo) {
       try {
-        final oldFilePath = fileInfo.filePath;
-        fileInfo = await convertHeicToJpgImage(fileInfo);
-        File(oldFilePath).delete();
+        fileInfo = await convertHeicToJpgImage(fileInfo, tempDir);
       } catch (e) {
         Logs().e('sendFileEventMobile::Error while converting heic to jpg', e);
       }
@@ -109,33 +119,22 @@ extension SendFileExtension on Room {
       Logs().d(
         'sendFileEventMobile::Thumbnail target File Path: ${targetPath.path} - file name: $fileName',
       );
-      await _generateThumbnail(
+      final generatedThumbnail = await _generateThumbnail(
         fileInfo as ImageFileInfo,
-        targetPath: targetPath.path,
+        targetPath: targetPath,
         uploadStreamController: uploadStreamController,
       );
-      thumbnail = ImageFileInfo(
-        fileName,
-        targetPath.path,
-        await targetPath.length(),
-        width: fileInfo.width,
-        height: fileInfo.height,
-      );
+      if (generatedThumbnail != null) {
+        thumbnail = generatedThumbnail;
+      }
     }
 
-    final encryptedService = EncryptedService();
+    // Note: Encryption via EncryptedService - using matrix SDK's encrypt() method
     final formattedDateTime = DateTime.now().getFormattedCurrentDateTime();
-    final tempEncryptedFile =
-        await File('${tempDir.path}/$formattedDateTime${fileInfo.fileName}')
-            .create();
     File? tempThumbnailFile;
-    File? tempEncryptedThumbnailFile;
     if (msgType == MessageTypes.Image || msgType == MessageTypes.Video) {
       tempThumbnailFile = await File(
         '${tempDir.path}/${formattedDateTime}_${fileInfo.fileName}_thumbnail.jpg',
-      ).create();
-      tempEncryptedThumbnailFile = await File(
-        '${tempDir.path}/${formattedDateTime}_${fileInfo.fileName}_encrypted_thumbnail',
       ).create();
     }
 
@@ -149,16 +148,18 @@ extension SendFileExtension on Room {
       );
       thumbnail ??= await _generateThumbnail(
         fileInfo,
-        targetPath: tempThumbnailFile?.path ?? '',
+        targetPath: tempThumbnailFile ?? File(''),
         uploadStreamController: uploadStreamController,
       );
-      fileInfo = ImageFileInfo(
-        fileInfo.fileName,
-        fileInfo.filePath,
-        fileInfo.fileSize,
-        width: thumbnail?.width,
-        height: thumbnail?.height,
-      );
+      if (thumbnail != null) {
+        fileInfo = ImageFileInfo(
+          fileInfo.fileName,
+          filePath: fileInfo.filePath,
+          bytes: fileInfo.bytes,
+          width: thumbnail.width,
+          height: thumbnail.height,
+        );
+      }
       storePlaceholderFileInMem(
         fileInfo: fileInfo,
         txid: txid,
@@ -201,8 +202,8 @@ extension SendFileExtension on Room {
           fileInfo.height == 0) {
         fileInfo = VideoFileInfo(
           fileInfo.fileName,
-          fileInfo.filePath,
-          fileInfo.fileSize,
+          filePath: thumbnail.filePath,
+          bytes: fileInfo.bytes,
           imagePlaceholderBytes: fileInfo.imagePlaceholderBytes,
           width: thumbnail.width,
           height: thumbnail.height,
@@ -232,8 +233,8 @@ extension SendFileExtension on Room {
       }
     }
 
-    EncryptedFileInfo? encryptedFileInfo;
-    EncryptedFileInfo? encryptedThumbnail;
+    EncryptedFile? encryptedFileInfo;
+    EncryptedFile? encryptedThumbnail;
     if (isRoomEncrypted()) {
       await _updateFakeSync(
         fakeImageEvent,
@@ -245,10 +246,13 @@ extension SendFileExtension on Room {
         uploadStreamController?.add(
           const Right(EncryptingFileState()),
         );
-        encryptedFileInfo = await encryptedService.encryptFile(
-          fileInfo: fileInfo,
-          outputFile: tempEncryptedFile,
+        // Create a MatrixFile for encryption
+        final matrixFile = MatrixFile(
+          bytes: fileBytes,
+          name: fileInfo.fileName,
+          mimeType: fileInfo.mimeType,
         );
+        encryptedFileInfo = await matrixFile.encrypt();
         uploadStreamController?.add(
           const Right(EncryptedFileState()),
         );
@@ -260,10 +264,15 @@ extension SendFileExtension on Room {
 
       fileInfo = FileInfo(
         fileInfo.fileName,
-        tempEncryptedFile.path,
-        fileInfo.fileSize,
+        filePath: fileInfo.filePath,
+        bytes: encryptedFileInfo?.data ?? fileInfo.bytes,
       );
       if (thumbnail != null) {
+        if (thumbnail.bytes != null) {
+          thumbnailBytes = thumbnail.bytes!;
+        } else if (thumbnail.filePath != null) {
+          thumbnailBytes = await File(thumbnail.filePath!).readAsBytes();
+        }
         try {
           uploadStreamController?.add(
             const Right(
@@ -272,10 +281,13 @@ extension SendFileExtension on Room {
               ),
             ),
           );
-          encryptedThumbnail = await encryptedService.encryptFile(
-            fileInfo: thumbnail,
-            outputFile: tempEncryptedThumbnailFile ?? File(''),
+          // Create a MatrixFile for encryption
+          final thumbnailMatrixFile = MatrixFile(
+            bytes: thumbnailBytes,
+            name: thumbnail.fileName,
+            mimeType: thumbnail.mimeType,
           );
+          encryptedThumbnail = await thumbnailMatrixFile.encrypt();
           uploadStreamController?.add(
             const Right(
               EncryptedFileState(
@@ -323,10 +335,8 @@ extension SendFileExtension on Room {
           final thumbnailResponse = await mediaApi.uploadFileMobile(
             fileInfo: FileInfo(
               thumbnail.fileName,
-              isRoomEncrypted()
-                  ? tempEncryptedThumbnailFile?.path ?? ''
-                  : thumbnail.filePath,
-              thumbnail.fileSize,
+              filePath: thumbnail.filePath,
+              bytes: encryptedThumbnail?.data ?? thumbnail.bytes,
             ),
             cancelToken: cancelToken,
             onSendProgress: (receive, total) {
@@ -384,31 +394,29 @@ extension SendFileExtension on Room {
     }
 
     if (encryptedFileInfo != null) {
-      encryptedFileInfo = EncryptedFileInfo(
-        key: encryptedFileInfo.key,
-        version: encryptedFileInfo.version,
-        initialVector: encryptedFileInfo.initialVector,
-        hashes: encryptedFileInfo.hashes,
-        url: uploadResp.toString(),
+      encryptedFileInfo = EncryptedFile(
+        data: encryptedFileInfo.data,
+        iv: encryptedFileInfo.iv,
+        k: encryptedFileInfo.k,
+        sha256: encryptedFileInfo.sha256,
       );
-      Logs().d('RoomExtension::EncryptedFileInfo: $encryptedFileInfo');
+      Logs().d('RoomExtension::EncryptedFileInfo set with upload URL');
     }
 
     if (encryptedThumbnail != null) {
-      encryptedThumbnail = EncryptedFileInfo(
-        key: encryptedThumbnail.key,
-        version: encryptedThumbnail.version,
-        initialVector: encryptedThumbnail.initialVector,
-        hashes: encryptedThumbnail.hashes,
-        url: thumbnailUploadResp.toString(),
+      encryptedThumbnail = EncryptedFile(
+        data: encryptedThumbnail.data,
+        iv: encryptedThumbnail.iv,
+        k: encryptedThumbnail.k,
+        sha256: encryptedThumbnail.sha256,
       );
-      Logs().d('RoomExtension::EncryptedThumbnail: $encryptedThumbnail');
+      Logs().d('RoomExtension::EncryptedThumbnail set with upload URL');
     }
 
-    final blurHash = thumbnail?.filePath != null
+    final blurHash = thumbnail != null
         ? await runBenchmarked(
             '_generateBlurHash',
-            () => _generateBlurHash(thumbnail!.filePath),
+            () => _generateBlurHashFromBytes(thumbnailBytes),
           )
         : null;
 
@@ -431,14 +439,43 @@ extension SendFileExtension on Room {
       if (contentCaptionFormat != null) ...contentCaptionFormat,
       'filename': fileInfo.fileName,
       'url': uploadResp.toString(),
-      if (encryptedFileInfo != null) 'file': encryptedFileInfo.toJson(),
+      if (encryptedFileInfo != null)
+        'file': {
+          'url': uploadResp.toString(),
+          'v': 'v2',
+          'key': {
+            'kty': 'oct',
+            'key_ops': ['encrypt', 'decrypt'],
+            'alg': 'A256CTR',
+            'k': encryptedFileInfo.k,
+            'ext': true,
+          },
+          'iv': encryptedFileInfo.iv,
+          'hashes': {
+            'sha256': encryptedFileInfo.sha256,
+          },
+        },
       'info': {
         ...thumbnail?.metadata ?? {},
         ...fileInfo.metadata,
         if (thumbnail != null && encryptedThumbnail == null)
           'thumbnail_url': thumbnailUploadResp.toString(),
         if (thumbnail != null && encryptedThumbnail != null)
-          'thumbnail_file': encryptedThumbnail.toJson(),
+          'thumbnail_file': {
+            'url': thumbnailUploadResp.toString(),
+            'v': 'v2',
+            'key': {
+              'kty': 'oct',
+              'key_ops': ['encrypt', 'decrypt'],
+              'alg': 'A256CTR',
+              'k': encryptedThumbnail.k,
+              'ext': true,
+            },
+            'iv': encryptedThumbnail.iv,
+            'hashes': {
+              'sha256': encryptedThumbnail.sha256,
+            },
+          },
         if (thumbnail != null) 'thumbnail_info': thumbnail.metadata,
         if (blurHash != null) 'xyz.amorgan.blurhash': blurHash,
       },
@@ -449,7 +486,6 @@ extension SendFileExtension on Room {
       txid: txid,
       inReplyTo: inReplyTo,
       editEventId: editEventId,
-      sentDate: sentDate,
     );
     if (eventId != null) {
       await _copyFileInMemToAppDownloadsFolder(
@@ -459,10 +495,7 @@ extension SendFileExtension on Room {
       );
     }
     await Future.wait([
-      tempEncryptedFile.delete(),
       if (tempThumbnailFile != null) tempThumbnailFile.delete(),
-      if (tempEncryptedThumbnailFile != null)
-        tempEncryptedThumbnailFile.delete(),
     ]);
     return eventId;
   }
@@ -476,33 +509,34 @@ extension SendFileExtension on Room {
   ) =>
       '$formattedDateTime${fileInfo.fileName}.${AppConfig.imageCompressFormmat.name}';
 
-  Future<ImageFileInfo> convertHeicToJpgImage(ImageFileInfo fileInfo) async {
-    final convertedFilePath =
-        StorageDirectoryManager.instance.convertFileExtension(
-      fileInfo.filePath,
-      'jpg',
-    );
-    final newPath = await HeifConverter.convert(
-      fileInfo.filePath,
-      output: convertedFilePath,
-    );
-    Logs().d('sendFileEvent::Heic converted to jpg', newPath);
-    if (newPath != null) {
-      final newConvertedFile = File(convertedFilePath);
-      fileInfo = ImageFileInfo(
-        newConvertedFile.path.split("/").last,
-        newConvertedFile.path,
-        await newConvertedFile.length(),
+  Future<ImageFileInfo> convertHeicToJpgImage(
+    ImageFileInfo fileInfo,
+    Directory tempDir,
+  ) async {
+    try {
+      Logs().d('convertHeicToJpgImage: Starting HEIC conversion');
+      Uint8List bytes = Uint8List(0);
+      if (fileInfo.bytes != null) {
+        bytes = fileInfo.bytes!;
+      } else if (fileInfo.filePath != null) {
+        bytes = await File(fileInfo.filePath!).readAsBytes();
+      }
+
+      // Convert HEIC to JPG using heic_to_png_jpg package
+      final convertedBytes = await HeicConverter.convertToJPG(
+        heicData: bytes,
+      );
+
+      return ImageFileInfo(
+        fileInfo.fileName,
+        bytes: convertedBytes,
         width: fileInfo.width,
         height: fileInfo.height,
       );
-    } else {
-      Logs().e(
-        'sendFileEvent::Error while converting heic to jpg:newPath is null',
-      );
-      throw Exception('sendFileEvent::Error while converting heic to jpg');
+    } catch (e) {
+      Logs().e('convertHeicToJpgImage: Error during conversion', e);
+      rethrow;
     }
-    return fileInfo;
   }
 
   Future<void> _copyFileInMemToAppDownloadsFolder({
@@ -526,13 +560,13 @@ extension SendFileExtension on Room {
         );
       }
 
-      final sendingFilePath = sendingFilePlaceholders[sendingEventId]?.filePath;
+      final sendingFile = sendingFilePlaceholders[sendingEventId];
       final file = File(filePathInAppDownloads);
-      if (await file.exists() || sendingFilePath == null) {
+      if (await file.exists() || sendingFile == null) {
         return;
       }
       await file.create(recursive: true);
-      await File(sendingFilePath).copy(filePathInAppDownloads);
+      await file.writeAsBytes(sendingFile.bytes);
       Logs().d('File copied in app downloads folder', filePathInAppDownloads);
     } catch (e) {
       Logs().e('Error while copying file in app downloads folder', e);
@@ -574,7 +608,7 @@ extension SendFileExtension on Room {
                     'msgtype': messageType,
                     'body': captionInfo ?? fileInfo.fileName,
                     'filename': fileInfo.fileName,
-                    'info': {
+                    'info': <String, dynamic>{
                       ...fileInfo.metadata,
                     },
                     if (contentCaptionFormat != null) ...contentCaptionFormat,
@@ -609,13 +643,7 @@ extension SendFileExtension on Room {
     SyncUpdate fakeImageEvent, {
     Direction? direction,
   }) async {
-    if (client.database != null) {
-      await client.database?.transaction(() async {
-        await client.handleSync(fakeImageEvent, direction: direction);
-      });
-    } else {
-      await client.handleSync(fakeImageEvent, direction: direction);
-    }
+    await client.handleSync(fakeImageEvent, direction: direction);
   }
 
   Future<void> _storePlaceholderFile({
@@ -668,38 +696,43 @@ extension SendFileExtension on Room {
 
   Future<ImageFileInfo?> _generateThumbnail(
     ImageFileInfo originalFile, {
-    required String targetPath,
+    required File targetPath,
     required StreamController<Either<Failure, Success>>? uploadStreamController,
   }) async {
     try {
       Logs().d(
-        'SendFileExtension::_generateThumbnail originalFile: ${originalFile.filePath} - targetPath: $targetPath',
+        'SendFileExtension::_generateThumbnail originalFile: ${originalFile.fileName} - targetPath: ${targetPath.path}',
       );
       uploadStreamController?.add(const Right(GeneratingThumbnailState()));
+      Uint8List bytes = Uint8List(0);
+      if (originalFile.bytes != null) {
+        bytes = originalFile.bytes!;
+      } else if (originalFile.filePath != null) {
+        bytes = await File(originalFile.filePath!).readAsBytes();
+      }
 
-      final result = await FlutterImageCompress.compressAndGetFile(
-        originalFile.filePath,
-        targetPath,
+      final result = await FlutterImageCompress.compressWithList(
+        bytes,
         quality: AppConfig.thumbnailQuality,
         format: AppConfig.imageCompressFormmat,
       );
-      if (result == null) return null;
-      final size = await result.length();
+      if (result.isEmpty) return null;
+      await targetPath.writeAsBytes(result);
       var width = originalFile.width;
       var height = originalFile.height;
       if (width == null || height == null || width == 0 || height == 0) {
         final imageDimension = await runBenchmarked(
           '_calculateImageDimension',
-          () => _calculateImageDimension(result.path),
+          () => _calculateImageBytesDimension(result),
         );
         width = imageDimension.width.toInt();
         height = imageDimension.height.toInt();
       }
       uploadStreamController?.add(const Right(GenerateThumbnailSuccess()));
       return ImageFileInfo(
-        result.name,
-        result.path,
-        size,
+        targetPath.path.split('/').last,
+        filePath: targetPath.path,
+        bytes: result,
         width: width,
         height: height,
       );
@@ -715,10 +748,10 @@ extension SendFileExtension on Room {
     }
   }
 
-  Future<String?> _generateBlurHash(String filePath) async {
+  Future<String?> _generateBlurHashFromBytes(Uint8List bytes) async {
     try {
-      final result = await FlutterImageCompress.compressWithFile(
-        filePath,
+      final result = await FlutterImageCompress.compressWithList(
+        bytes,
         minHeight: AppConfig.blurHashSize,
         minWidth: AppConfig.blurHashSize,
       );
@@ -727,11 +760,11 @@ extension SendFileExtension on Room {
           final image = img.decodeJpg(imageData);
           return BlurHash.encode(image!);
         },
-        result!,
+        result,
       );
       return blurHash.hash;
     } catch (e) {
-      Logs().e('_generateBlurHash::error', e);
+      Logs().e('_generateBlurHashFromBytes::error', e);
       return null;
     }
   }
@@ -744,18 +777,15 @@ extension SendFileExtension on Room {
   }) async {
     Logs().d('Video thumbnail generation started', fileInfo);
     uploadStreamController?.add(const Right(GeneratingThumbnailState()));
-    final int fileSize;
     if (fileInfo.imagePlaceholderBytes.isNotEmpty) {
       await tempThumbnailFile.writeAsBytes(fileInfo.imagePlaceholderBytes);
-      fileSize = fileInfo.imagePlaceholderBytes.lengthInBytes;
-    } else {
+    } else if (fileInfo.filePath != null) {
       await VideoThumbnail.thumbnailFile(
-        video: fileInfo.filePath,
-        imageFormat: ImageFormat.JPEG,
+        video: fileInfo.filePath!,
+        imageFormat: AppConfig.videoThumbnailFormat,
         quality: AppConfig.thumbnailQuality,
         thumbnailPath: tempThumbnailFile.path,
       );
-      fileSize = await tempThumbnailFile.length();
     }
     var width = fileInfo.width;
     var height = fileInfo.height;
@@ -778,10 +808,11 @@ extension SendFileExtension on Room {
     }
     Logs().d('Video thumbnail generated', tempThumbnailFile.path);
     uploadStreamController?.add(const Right(GenerateThumbnailSuccess()));
+    final thumbnailBytes = await tempThumbnailFile.readAsBytes();
     final newThumbnail = ImageFileInfo(
-      tempThumbnailFile.path.split("/").last,
-      tempThumbnailFile.path,
-      fileSize,
+      tempThumbnailFile.path.split('/').last,
+      filePath: tempThumbnailFile.path,
+      bytes: thumbnailBytes,
       width: width,
       height: height,
     );
@@ -796,10 +827,6 @@ extension SendFileExtension on Room {
     fakeImageEvent.rooms!.join!.values.first.timeline!.events!.first
         .unsigned![key] = value;
     await handleFakeSync(fakeImageEvent);
-  }
-
-  Future<Size> _calculateImageDimension(String filePath) {
-    return Image.file(File(filePath)).calculateImageDimension();
   }
 
   Future<Size> _calculateImageBytesDimension(Uint8List bytes) {

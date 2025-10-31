@@ -1,5 +1,6 @@
 import 'package:fluffychat/app_state/failure.dart';
 import 'package:fluffychat/app_state/success.dart';
+import 'package:fluffychat/domain/model/file_info/file_info.dart';
 
 class DownloadMediaFileFailure extends Failure {
   final dynamic exception;
@@ -11,10 +12,10 @@ class DownloadMediaFileFailure extends Failure {
 }
 
 class DownloadMediaFileSuccess extends Success {
-  const DownloadMediaFileSuccess({required this.filePath});
+  const DownloadMediaFileSuccess({required this.fileInfo});
 
-  final String filePath;
+  final FileInfo fileInfo;
 
   @override
-  List<Object?> get props => [filePath];
+  List<Object?> get props => [fileInfo];
 }

@@ -305,9 +305,29 @@ mixin AudioMixin {
 
       final formatDate = DateFormat("yyyy-MM-dd-HHmmss").format(DateTime.now());
 
+      final reader = html.FileReader();
+      final completer = Completer<void>();
+
+      final loadListener = reader.onLoad.listen((_) => completer.complete());
+      final errorListener = reader.onError.listen(
+        (event) =>
+            completer.completeError('FileReader failed: ${reader.error}'),
+      );
+
+      reader.readAsArrayBuffer(file);
+      await completer.future.timeout(
+        const Duration(seconds: 30),
+        onTimeout: () => throw TimeoutException('File reading timed out'),
+      );
+
+      loadListener.cancel();
+      errorListener.cancel();
+
       return TwakeAudioFile(
         name: 'voice_message_$formatDate.wav',
-        readStream: readWebFileAsStream(file),
+        bytes: reader.result is Uint8List
+            ? reader.result as Uint8List
+            : (reader.result as ByteBuffer).asUint8List(),
         mimeType: 'audio/wav',
         duration: duration.inMilliseconds,
       );
