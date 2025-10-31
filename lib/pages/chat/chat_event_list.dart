@@ -91,6 +91,7 @@ class ChatEventList extends StatelessWidget {
                   ),
                   reverse: true,
                   controller: controller.scrollController,
+                  cacheExtent: 100000,
                   keyboardDismissBehavior:
                       ScrollViewKeyboardDismissBehavior.onDrag,
                   childrenDelegate: SliverChildBuilderDelegate(
