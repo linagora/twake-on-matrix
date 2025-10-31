@@ -17,7 +17,7 @@ extension ResizeImage on MatrixFile {
     final tmpDir = await getTemporaryDirectory();
     final tmpFile = File('${tmpDir.path}/$name');
     MediaInfo? mediaInfo;
-    await tmpFile.writeAsBytes(bytes ?? []);
+    await tmpFile.writeAsBytes(bytes);
     try {
       // will throw an error e.g. on Android SDK < 18
       mediaInfo = await VideoCompress.compressVideo(tmpFile.path);
@@ -25,7 +25,7 @@ extension ResizeImage on MatrixFile {
       Logs().w('Error while compressing video', e, s);
     }
     return MatrixVideoFile(
-      bytes: (await mediaInfo?.file?.readAsBytes()) ?? bytes ?? Uint8List(0),
+      bytes: (await mediaInfo?.file?.readAsBytes()) ?? bytes,
       name: name,
       mimeType: mimeType,
       width: mediaInfo?.width,
@@ -38,8 +38,8 @@ extension ResizeImage on MatrixFile {
     if (!PlatformInfos.isMobile) return null;
     final tmpDir = await getTemporaryDirectory();
     final tmpFile = File('${tmpDir.path}/$name');
-    if (await tmpFile.exists() == false && bytes != null) {
-      await tmpFile.writeAsBytes(bytes!);
+    if (await tmpFile.exists() == false) {
+      await tmpFile.writeAsBytes(bytes);
     }
     try {
       final bytes = await VideoCompress.getByteThumbnail(tmpFile.path);

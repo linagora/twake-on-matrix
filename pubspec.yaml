@@ -8,10 +8,7 @@ environment:
 
 dependencies:
   ### Dependencies from git ###
-  matrix:
-    git:
-      url: git@github.com:linagora/matrix-dart-sdk.git
-      ref: twake-supported-0.22.6
+  matrix: ^3.0.2
 
   receive_sharing_intent:
     git:
@@ -212,11 +209,15 @@ dependencies:
   gal: 2.3.0
   auto_size_text: 3.0.0
   flutter_avif: 3.1.0
-  heif_converter: 1.0.0
+  heic_to_png_jpg: 0.0.5
   pull_down_button: 0.10.2
   pretty_qr_code: 3.3.0
   byte_converter: 2.0.0
-  flutter_vodozemac: ^0.3.0
+  flutter_vodozemac: ^0.4.0
+  html_unescape: 2.0.0
+  sqflite_common_ffi: ^2.3.6
+  # https://github.com/tekartik/sqflite/blob/master/sqflite_common_ffi/doc/using_ffi_instead_of_sqflite.md#setup
+  sqlite3_flutter_libs: ^0.5.40
   visibility_detector: ^0.4.0+2
   path: ^1.8.0
 
@@ -291,8 +292,6 @@ msix_config:
   install_certificate: false
 
 dependency_overrides:
-  # Until all dependencies are compatible. Missing: file_picker_cross, flutter_matrix_html
-  ffi: 2.0.0
   http: 1.2.2
   # This otherwise breaks on linux with flutter 3.7.0, let's override it for now.
   file_selector: ^0.9.2+2

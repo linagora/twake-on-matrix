@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:collection/collection.dart';
 import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/domain/model/extensions/string_extension.dart';
@@ -59,6 +57,14 @@ extension LocalizedBody on Event {
         ?.tryGet<String>('mimetype');
   }
 
+  String get filename {
+    return content.tryGet<String>('filename') ?? body;
+  }
+
+  String get thumbnailFilename {
+    return 'thumbnail-$filename';
+  }
+
   String? get fileType {
     return (filename.contains('.')
         ? filename.split('.').last.toUpperCase()
@@ -94,11 +100,11 @@ extension LocalizedBody on Event {
 
   bool get isAttachmentSmallEnough =>
       infoMap['size'] is int &&
-      infoMap['size'] < room.client.database!.maxFileSize;
+      infoMap['size'] < room.client.database.maxFileSize;
 
   bool get isThumbnailSmallEnough =>
       thumbnailInfoMap['size'] is int &&
-      thumbnailInfoMap['size'] < room.client.database!.maxFileSize;
+      thumbnailInfoMap['size'] < room.client.database.maxFileSize;
 
   bool get showThumbnail =>
       [MessageTypes.Image, MessageTypes.Sticker, MessageTypes.Video]
@@ -122,11 +128,6 @@ extension LocalizedBody on Event {
   MatrixFile? getMatrixFile() {
     final txId = unsigned?['transaction_id'] ?? eventId;
     return room.sendingFilePlaceholders[txId];
-  }
-
-  String? getFilePathFromMem() {
-    final matrixFile = getMatrixFile();
-    return matrixFile?.filePath;
   }
 
   Size? getOriginalResolution() {
@@ -225,17 +226,10 @@ extension LocalizedBody on Event {
             getThumbnail: true,
           );
       try {
-        if (matrixFile.filePath != null) {
-          await TwakeClipboard.instance.copyImageAsStream(
-            File(matrixFile.filePath!),
-            mimeType: mimeType,
-          );
-        } else if (matrixFile.bytes != null) {
-          await TwakeClipboard.instance.copyImageAsBytes(
-            matrixFile.bytes!,
-            mimeType: mimeType,
-          );
-        }
+        await TwakeClipboard.instance.copyImageAsBytes(
+          matrixFile.bytes,
+          mimeType: mimeType,
+        );
       } catch (e) {
         TwakeSnackBar.show(context, L10n.of(context)!.copyImageFailed);
         Logs().e(
@@ -580,5 +574,38 @@ extension LocalizedBody on Event {
     }
 
     return false;
+  }
+
+  bool isFileStoreable({bool getThumbnail = false}) {
+    final database = room.client.database;
+    final thisInfoMap = getThumbnail ? thumbnailInfoMap : infoMap;
+    return thisInfoMap['size'] is int &&
+        thisInfoMap['size'] <= database.maxFileSize;
+  }
+}
+
+extension FutureEventExtension on Event {
+  Future<String> calcLocalizedBodyRemoveBreakLine(L10n l10n) async {
+    final body = await calcLocalizedBody(
+      MatrixLocals(l10n),
+      hideReply: true,
+      hideEdit: true,
+      plaintextBody: true,
+      removeMarkdown: true,
+    );
+
+    return body.replaceAll(RegExp(r'\n'), ' ');
+  }
+
+  String calcLocalizedBodyFallbackRemoveBreakLine(L10n l10n) {
+    final body = calcLocalizedBodyFallback(
+      MatrixLocals(l10n),
+      hideReply: true,
+      hideEdit: true,
+      plaintextBody: true,
+      removeMarkdown: true,
+    );
+
+    return body.replaceAll(RegExp(r'\n'), ' ');
   }
 }

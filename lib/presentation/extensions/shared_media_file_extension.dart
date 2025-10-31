@@ -9,9 +9,8 @@ extension SharedMediaFileExtension on SharedMediaFile {
   MatrixFile toMatrixFile() {
     if (type == SharedMediaType.image) {
       return MatrixImageFile(
-        bytes: null,
+        bytes: File(path).readAsBytesSync(),
         name: path.split("/").last,
-        filePath: path,
         mimeType: mimeType,
       );
     }
@@ -21,9 +20,8 @@ extension SharedMediaFileExtension on SharedMediaFile {
         thumbnailBytes = File(thumbnail!).readAsBytesSync();
       }
       return MatrixVideoFile(
-        bytes: thumbnailBytes,
+        bytes: thumbnailBytes ?? Uint8List(0),
         name: path.split("/").last,
-        filePath: path,
         duration: duration,
         mimeType: mimeType,
       );
@@ -31,7 +29,6 @@ extension SharedMediaFileExtension on SharedMediaFile {
     return MatrixFile(
       bytes: File(path).readAsBytesSync(),
       name: path.split("/").last,
-      filePath: path,
       mimeType: mimeType,
     );
   }

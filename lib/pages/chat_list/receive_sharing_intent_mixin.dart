@@ -51,9 +51,6 @@ mixin ReceiveSharingIntentMixin<T extends StatefulWidget> on State<T> {
       (sharedMediaFile) {
         final file = sharedMediaFile.toMatrixFile();
         Logs().d(
-          'ReceiveSharingIntentMixin::_processIncomingSharedFiles: Path ${file.filePath}',
-        );
-        Logs().d(
           'ReceiveSharingIntentMixin::_processIncomingSharedFiles: Size ${file.size}',
         );
         return {

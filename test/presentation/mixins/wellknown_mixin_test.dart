@@ -71,7 +71,7 @@ void main() {
         () {
       controller.discoveryInformationNotifier.value = DiscoveryInformation(
         additionalProperties: {
-          'app.twake.chat': {},
+          'app.twake.chat': <String, dynamic>{},
         },
         mHomeserver: HomeserverInformation(
           baseUrl: Uri.tryParse('https://matrix.domain.xyz')!,

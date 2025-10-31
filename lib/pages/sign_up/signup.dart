@@ -108,9 +108,10 @@ class SignupPageController extends State<SignupPage> {
       );
       // Set displayname
       if (displayname != localPart) {
-        await client.setDisplayName(
+        await client.setProfileField(
           client.userID!,
-          displayname,
+          'displayname',
+          {'displayname': displayname},
         );
       }
     } catch (e) {

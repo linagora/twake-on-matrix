@@ -43,10 +43,12 @@ class _ChatListSortRoomsState extends State<ChatListSortRooms> {
             a.notificationCount != b.notificationCount) {
           return b.notificationCount.compareTo(a.notificationCount);
         }
-        return (_lastEventByRoomId[b.id]?.originServerTs ?? b.timeCreated)
+        return (_lastEventByRoomId[b.id]?.originServerTs ??
+                b.latestEventReceivedTime)
             .millisecondsSinceEpoch
             .compareTo(
-              (_lastEventByRoomId[a.id]?.originServerTs ?? a.timeCreated)
+              (_lastEventByRoomId[a.id]?.originServerTs ??
+                      a.latestEventReceivedTime)
                   .millisecondsSinceEpoch,
             );
       };

@@ -11,6 +11,7 @@ import 'package:fluffychat/utils/exception/save_to_downloads_exception.dart';
 import 'package:fluffychat/utils/exception/storage_permission_exception.dart';
 import 'package:fluffychat/utils/manager/download_manager/download_file_state.dart';
 import 'package:fluffychat/utils/manager/download_manager/download_manager.dart';
+import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
 import 'package:fluffychat/utils/permission_dialog.dart';
 import 'package:fluffychat/utils/permission_service.dart';
 import 'package:fluffychat/utils/manager/storage_directory_manager.dart';

@@ -144,25 +144,21 @@ class SettingsNotificationsController extends State<SettingsNotifications> {
         if (item.key == PushRule.roomOneToOne.ruleKey) {
           return Future.wait([
             client.setPushRuleEnabled(
-              'global',
               item.type,
               item.key,
               true,
             ),
             client.setPushRuleEnabled(
-              'global',
               item.type,
               PushRule.roomEncryptedOneToOne.ruleKey,
               true,
             ),
             client.setPushRuleActions(
-              'global',
               item.type,
               item.key,
               enabled ? _oneToOneEnabledActions : [],
             ),
             client.setPushRuleActions(
-              'global',
               item.type,
               PushRule.roomEncryptedOneToOne.ruleKey,
               enabled ? _oneToOneEnabledActions : [],
@@ -171,7 +167,6 @@ class SettingsNotificationsController extends State<SettingsNotifications> {
         }
 
         return client.setPushRuleEnabled(
-          'global',
           item.type,
           item.key,
           enabled,
