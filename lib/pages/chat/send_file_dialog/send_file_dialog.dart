@@ -167,20 +167,6 @@ class SendFileDialogController extends State<SendFileDialog> {
         .toList();
   }
 
-  Future<List<MatrixFile>> convertFilesToBytes(List<MatrixFile> files) async {
-    final results = await Future.wait(
-      files
-          .map(
-            (file) => file.convertReadStreamToBytes(),
-          )
-          .toList(),
-    );
-    for (int i = 0; i < files.length; i++) {
-      filesNotifier.update(files[i], results[i]);
-    }
-    return results;
-  }
-
   void sendFilesWithCaption() async {
     if (widget.room == null) {
       Logs().e("sendFilesWithCaption:: room is null");

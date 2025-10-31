@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:fluffychat/di/global/get_it_initializer.dart';
@@ -44,9 +45,9 @@ class ImageViewerController extends State<ImageViewer> {
 
   late final ValueNotifier<bool> showAppbarPreview;
 
-  String? filePath;
+  Uint8List? bytes;
 
-  String? thumbnailFilePath;
+  Uint8List? thumbnailBytes;
 
   final downloadMediaFileInteractor = getIt.get<DownloadMediaFileInteractor>();
 
@@ -74,9 +75,19 @@ class ImageViewerController extends State<ImageViewer> {
           },
           (success) {
             if (success is DownloadMediaFileSuccess) {
-              setState(() {
-                filePath = success.filePath;
-              });
+              if (success.fileInfo.bytes != null) {
+                setState(() {
+                  bytes = success.fileInfo.bytes!;
+                });
+              } else if (success.fileInfo.filePath != null) {
+                File(success.fileInfo.filePath!).readAsBytes().then((data) {
+                  if (mounted) {
+                    setState(() {
+                      bytes = data;
+                    });
+                  }
+                });
+              }
             }
           },
         );
@@ -99,9 +110,19 @@ class ImageViewerController extends State<ImageViewer> {
           },
           (success) {
             if (success is DownloadMediaFileSuccess) {
-              setState(() {
-                thumbnailFilePath = success.filePath;
-              });
+              if (success.fileInfo.bytes != null) {
+                setState(() {
+                  thumbnailBytes = success.fileInfo.bytes!;
+                });
+              } else if (success.fileInfo.filePath != null) {
+                File(success.fileInfo.filePath!).readAsBytes().then((data) {
+                  if (mounted) {
+                    setState(() {
+                      thumbnailBytes = data;
+                    });
+                  }
+                });
+              }
             }
           },
         );

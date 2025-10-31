@@ -26,7 +26,7 @@ import 'package:fluffychat/modules/federation_identity_request_token/domain/mode
 import 'package:fluffychat/modules/federation_identity_request_token/domain/models/federation_token_request.dart';
 import 'package:fluffychat/modules/federation_identity_request_token/domain/state/federation_identity_request_token_state.dart';
 import 'package:fluffychat/modules/federation_identity_request_token/manager/federation_identity_request_token_manager.dart';
-import 'package:matrix/matrix.dart';
+import 'package:matrix/matrix.dart' hide Contact;
 
 class FederationLookUpPhonebookContactInteractor {
   final PhonebookContactRepository _phonebookContactRepository =

@@ -466,6 +466,6 @@ class _MessageVideoBuilder extends StatelessWidget {
   }
 
   bool isSendingVideo(MatrixFile? matrixFile) {
-    return matrixFile is MatrixVideoFile && matrixFile.bytes != null;
+    return matrixFile is MatrixVideoFile;
   }
 }

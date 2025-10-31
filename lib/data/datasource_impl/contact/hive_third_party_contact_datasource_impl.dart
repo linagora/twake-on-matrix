@@ -5,7 +5,8 @@ import 'package:fluffychat/data/hive/hive_collection_tom_database.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/domain/model/contact/contact.dart';
 import 'package:fluffychat/domain/model/extensions/contact/contact_extension.dart';
-import 'package:matrix/matrix.dart';
+import 'package:fluffychat/utils/copy_map.dart';
+import 'package:matrix/matrix.dart' hide Contact;
 
 class HiveThirdPartyContactDatasourceImpl
     extends HiveThirdPartyContactDatasource {

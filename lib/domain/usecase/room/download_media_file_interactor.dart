@@ -22,7 +22,7 @@ class DownloadMediaFileInteractor {
         );
         return;
       }
-      yield Right(DownloadMediaFileSuccess(filePath: fileInfo.filePath));
+      yield Right(DownloadMediaFileSuccess(fileInfo: fileInfo));
     } catch (error) {
       Logs().e('DownloadMediaFileInteractor: execute(): $error');
       yield Left(DownloadMediaFileFailure(exception: error));

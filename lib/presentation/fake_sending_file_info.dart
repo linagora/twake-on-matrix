@@ -1,6 +1,6 @@
 import 'package:equatable/equatable.dart';
+import 'package:fluffychat/domain/model/file_info/file_info.dart';
 import 'package:fluffychat/presentation/extensions/send_file_extension.dart';
-import 'package:matrix/matrix.dart';
 
 class FakeSendingFileInfo with EquatableMixin {
   final FileInfo fileInfo;

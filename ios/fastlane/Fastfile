@@ -34,7 +34,7 @@ platform :ios do
       xcodeproj: "Runner.xcodeproj",
       build_number: latest_testflight_build_number + 1
     )
-    version_name = last_git_tag.gsub("v", "")
+    version_name = (last_git_tag || "1.0.0").gsub("v", "")
     increment_version_number(version_number: version_name)
     build_app(
       scheme: "Runner",
