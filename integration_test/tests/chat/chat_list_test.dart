@@ -152,7 +152,7 @@ void main() {
   );
 
   TestBase().runPatrolTest(
-    description: 'verify the display of context menu after swipe a chat',
+    description: 'swipe a chat and check the display of Pin, Mute, MarkAsRead icon',
     test: ($) async {
       final s = SoftAssertHelper();
       const groupTest = String.fromEnvironment('TitleOfGroupTest');
@@ -242,7 +242,7 @@ void main() {
       await ChatScenario($).selectAChatByIndex(1);
       await ChatScenario($).selectAChatByIndex(3);
 
-      s.softAssertEquals(ChatListRobot($).getNumberOfSelectedChatLable().text=="3", true, 'display wrong number of selected chat',);
+      s.softAssertEquals((await ChatListRobot($).getNumberOfSelectedChatLable()).text=="3", true, 'display wrong number of selected chat',);
 
       //verify all checked chat is mark as read/unread after clicking on Read/Unread icon
       if(ChatListRobot($).getMarkAsReadIcon().exists)
@@ -260,6 +260,11 @@ void main() {
         await ChatScenario($).verifyAChatIsMarkAsUnRead(title3, true);
       }
       //verify all checked chat is mark as mute/unmute after clicking on mute/unmute icon
+      await ChatScenario($).longpressOnAChatByIndex(0);
+      await ChatScenario($).selectAChatByIndex(0);
+      await ChatScenario($).selectAChatByIndex(1);
+      await ChatScenario($).selectAChatByIndex(3);
+
       if(ChatListRobot($).getMuteIcon().exists)
       {
         await ChatListRobot($).clickOnMuteIcon();
@@ -275,6 +280,11 @@ void main() {
         await ChatScenario($).verifyAChatIsMuted(title3, false);
       }
       //verify all checked chat is mark as pin/unpin after clicking on pin/unpin icon
+      await ChatScenario($).longpressOnAChatByIndex(0);
+      await ChatScenario($).selectAChatByIndex(0);
+      await ChatScenario($).selectAChatByIndex(1);
+      await ChatScenario($).selectAChatByIndex(3);
+
       if(ChatListRobot($).getPinIcon().exists)
       {
         await ChatListRobot($).clickOnPinIcon();   
