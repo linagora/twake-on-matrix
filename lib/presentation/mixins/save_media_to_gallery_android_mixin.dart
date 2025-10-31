@@ -6,6 +6,7 @@ import 'package:fluffychat/presentation/mixins/save_file_to_twake_downloads_fold
 import 'package:fluffychat/utils/exception/save_to_gallery_exception.dart';
 import 'package:fluffychat/utils/exception/storage_permission_exception.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/download_file_extension.dart';
+import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
 import 'package:fluffychat/utils/permission_dialog.dart';
 import 'package:fluffychat/utils/permission_service.dart';
 import 'package:fluffychat/utils/platform_infos.dart';

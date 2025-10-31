@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:fluffychat/utils/interactive_viewer_gallery.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/widgets/hero_page_route.dart';
@@ -9,7 +11,7 @@ import 'package:matrix/matrix.dart';
 mixin PlayVideoActionMixin {
   void playVideoAction(
     BuildContext context,
-    String uriOrFilePath, {
+    Uint8List bytes, {
     Event? event,
     bool isReplacement = true,
   }) async {
@@ -18,11 +20,11 @@ mixin PlayVideoActionMixin {
         return InteractiveViewerGallery(
           itemBuilder: PlatformInfos.isMobile
               ? VideoViewerMobileTheme(
-                  path: uriOrFilePath,
+                  bytes: bytes,
                   event: event,
                 )
               : VideoViewerDesktopTheme(
-                  path: uriOrFilePath,
+                  bytes: bytes,
                   event: event,
                 ),
         );

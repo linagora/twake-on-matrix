@@ -9,15 +9,17 @@ import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/data/network/media/cancel_exception.dart';
 import 'package:fluffychat/data/network/media/media_api.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
+import 'package:fluffychat/domain/model/room/room_extension.dart';
 import 'package:fluffychat/utils/exception/upload_exception.dart';
 import 'package:fluffychat/utils/extension/web_url_creation_extension.dart';
 import 'package:fluffychat/utils/js_window/non_js_window.dart'
     if (dart.library.js) 'package:fluffychat/utils/js_window/js_window.dart';
 import 'package:fluffychat/utils/js_window/universal_image_bitmap.dart';
 import 'package:fluffychat/utils/manager/upload_manager/upload_state.dart';
-import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_file_extension.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:matrix/matrix.dart';
+// ignore: implementation_imports
+import 'package:matrix/src/utils/run_benchmarked.dart';
 import 'package:image/image.dart';
 import 'package:mime/mime.dart';
 import 'package:video_player/video_player.dart';
@@ -39,13 +41,12 @@ extension SendFileWebExtension on Room {
     String? captionInfo,
   }) async {
     UniversalImageBitmap? imageBitmap;
-    MatrixFile? file;
-    file = await matrixFile.convertReadStreamToBytes();
-    if (file.bytes != null && file is MatrixImageFile) {
+    MatrixFile file = matrixFile;
+    if (file is MatrixImageFile) {
       uploadStreamController?.add(
         const Right(ConvertingStreamToBytesState()),
       );
-      imageBitmap = await convertUint8ListToBitmap(file.bytes!);
+      imageBitmap = await convertUint8ListToBitmap(file.bytes);
       uploadStreamController?.add(
         const Right(ConvertedStreamToBytesState()),
       );
@@ -127,7 +128,7 @@ extension SendFileWebExtension on Room {
       await handleImageFakeSync(fakeImageEvent);
       encryptedFile = await file.encrypt();
       uploadFile =
-          MatrixFile.fromMimeType(bytes: encryptedFile!.data, name: 'crypt');
+          MatrixFile.fromMimeType(bytes: encryptedFile.data, name: 'crypt');
       uploadStreamController?.add(
         const Right(EncryptedFileState()),
       );
@@ -137,7 +138,7 @@ extension SendFileWebExtension on Room {
         );
         encryptedThumbnail = await thumbnail.encrypt();
         uploadThumbnail = MatrixFile.fromMimeType(
-          bytes: encryptedThumbnail?.data,
+          bytes: encryptedThumbnail.data,
           name: 'crypt',
         );
         uploadStreamController?.add(
@@ -149,7 +150,7 @@ extension SendFileWebExtension on Room {
 
     fakeImageEvent.rooms!.join!.values.first.timeline!.events!.first
         .unsigned![fileSendingStatusKey] = FileSendingStatus.uploading.name;
-    while (uploadResp == null && uploadFile.bytes != null) {
+    while (uploadResp == null) {
       try {
         final mediaApi = getIt.get<MediaAPI>();
         final uploadFileResponse = await mediaApi.uploadFileWeb(
@@ -169,7 +170,7 @@ extension SendFileWebExtension on Room {
         uploadResp = uploadFileResponse.contentUri != null
             ? Uri.tryParse(uploadFileResponse.contentUri!)
             : null;
-        if (uploadThumbnail != null && uploadThumbnail.bytes != null) {
+        if (uploadThumbnail != null) {
           final uploadThumbnailResponse = await mediaApi.uploadFileWeb(
             file: uploadThumbnail,
             cancelToken: cancelToken,
@@ -306,7 +307,6 @@ extension SendFileWebExtension on Room {
       txid: txid,
       inReplyTo: inReplyTo,
       editEventId: editEventId,
-      sentDate: sentDate,
     );
 
     sendingFilePlaceholders.remove(txid);
@@ -383,26 +383,21 @@ extension SendFileWebExtension on Room {
     SyncUpdate fakeImageEvent, {
     Direction? direction,
   }) async {
-    if (client.database != null) {
-      await client.database?.transaction(() async {
-        await client.handleSync(fakeImageEvent, direction: direction);
-      });
-    } else {
+    await client.database.transaction(() async {
       await client.handleSync(fakeImageEvent, direction: direction);
-    }
+    });
   }
 
   Future<MatrixImageFile?> generateThumbnail(
     MatrixImageFile originalFile, {
     StreamController<Either<Failure, Success>>? uploadStreamController,
   }) async {
-    if (originalFile.bytes == null) return null;
     try {
       uploadStreamController?.add(
         const Right(GeneratingThumbnailState()),
       );
       final result = await FlutterImageCompress.compressWithList(
-        originalFile.bytes!,
+        originalFile.bytes,
         quality: AppConfig.thumbnailQuality,
         format: AppConfig.imageCompressFormmat,
       );
@@ -441,23 +436,11 @@ extension SendFileWebExtension on Room {
     MatrixVideoFile originalFile, {
     StreamController<Either<Failure, Success>>? uploadStreamController,
   }) async {
-    if (originalFile.bytes == null) return null;
     try {
       uploadStreamController?.add(
         const Right(GeneratingThumbnailState()),
       );
-      final url = originalFile.bytes?.toWebUrl(mimeType: originalFile.mimeType);
-      if (url == null) {
-        final exception = Exception('Missing bytes in $originalFile');
-        uploadStreamController?.add(
-          Left(
-            GenerateThumbnailFailed(
-              exception: exception,
-            ),
-          ),
-        );
-        throw exception;
-      }
+      final url = originalFile.bytes.toWebUrl(mimeType: originalFile.mimeType);
 
       final result = await VideoThumbnail.thumbnailData(
         video: url,
@@ -503,14 +486,8 @@ extension SendFileWebExtension on Room {
   Future<int?> _getVideoDuration(
     MatrixVideoFile originalFile,
   ) async {
-    if (originalFile.bytes == null) {
-      return null;
-    }
     try {
-      final url = originalFile.bytes?.toWebUrl(mimeType: originalFile.mimeType);
-      if (url == null) {
-        throw Exception('$originalFile is empty');
-      }
+      final url = originalFile.bytes.toWebUrl(mimeType: originalFile.mimeType);
       final videoPlayerController =
           VideoPlayerController.networkUrl(Uri.parse(url));
       await videoPlayerController.initialize();

@@ -8,6 +8,7 @@ import 'package:fluffychat/domain/app_state/room/invite_user_state.dart';
 import 'package:fluffychat/domain/app_state/room/upload_content_state.dart';
 import 'package:fluffychat/domain/app_state/validator/verify_name_view_state.dart';
 import 'package:fluffychat/domain/model/extensions/validator_failure_extension.dart';
+import 'package:fluffychat/domain/model/server_config.dart';
 import 'package:fluffychat/domain/model/verification/name_with_space_only_validator.dart';
 import 'package:fluffychat/domain/usecase/room/invite_user_interactor.dart';
 import 'package:fluffychat/domain/usecase/verify_name_interactor.dart';
@@ -78,8 +79,10 @@ class NewGroupChatInfoController extends State<NewGroupChatInfo>
   Set<PresentationContact>? contactsList;
 
   Future<ServerConfig> getServerConfig() async {
-    final serverConfig = await Matrix.of(context).client.getConfig();
-    return serverConfig;
+    final mediaConfig = await Matrix.of(context).client.getConfig();
+    return ServerConfig(
+      mUploadSize: mediaConfig.mUploadSize,
+    );
   }
 
   void toggleEnableEncryption() {

@@ -11,9 +11,6 @@ extension RoomStatusExtension on Room {
   CachedPresence? get directChatPresence =>
       client.presences[directChatMatrixID];
 
-  Stream<CachedPresence> get directChatPresenceStream =>
-      client.onlatestPresenceChanged.stream;
-
   String getLocalizedStatus(BuildContext context, {CachedPresence? presence}) {
     if (isDirectChat) {
       return getLocalizedStatusDirectChat(presence, context);

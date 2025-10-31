@@ -14,6 +14,7 @@ import 'package:fluffychat/domain/app_state/room/report_content_state.dart';
 import 'package:fluffychat/domain/model/chat/message_report_reason.dart';
 import 'package:fluffychat/domain/model/contact/contact.dart';
 import 'package:fluffychat/domain/model/extensions/contact/contact_extension.dart';
+import 'package:fluffychat/domain/model/file_info/file_info.dart';
 import 'package:fluffychat/domain/model/room/room_extension.dart';
 import 'package:fluffychat/domain/usecase/reactions/get_recent_reactions_interactor.dart';
 import 'package:fluffychat/domain/usecase/reactions/store_recent_reactions_interactor.dart';
@@ -93,7 +94,7 @@ import 'package:linagora_design_flutter/images_picker/asset_counter.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart'
     hide ImagePicker;
 import 'package:linagora_design_flutter/reaction/reaction_picker.dart';
-import 'package:matrix/matrix.dart';
+import 'package:matrix/matrix.dart' hide Contact;
 import 'package:scroll_to_index/scroll_to_index.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:universal_html/html.dart' as html;
@@ -346,11 +347,8 @@ class ChatController extends State<Chat>
   Future<void> initCachedPresence() async {
     cachedPresenceNotifier.value = room?.directChatPresence;
     if (room?.directChatMatrixID != null) {
-      cachedPresenceStreamSubscription = Matrix.of(context)
-          .client
-          .onlatestPresenceChanged
-          .stream
-          .listen((event) {
+      cachedPresenceStreamSubscription =
+          Matrix.of(context).onlatestPresenceChanged.stream.listen((event) {
         if (event.userid == room!.directChatMatrixID) {
           Logs().v(
             'onlatestPresenceChanged: ${event.presence}, ${event.lastActiveTimestamp}',
@@ -379,8 +377,11 @@ class ChatController extends State<Chat>
     if (room == null) return;
     try {
       await room!.requestParticipants(
-        at: room!.prev_batch,
-        notMembership: Membership.leave,
+        Membership.values
+            .whereNot((membership) => membership == Membership.leave)
+            .toList(),
+        false,
+        true,
       );
     } catch (e) {
       Logs()
@@ -740,9 +741,7 @@ class ChatController extends State<Chat>
 
     final fileInfo = FileInfo(
       matrixFile.name,
-      matrixFile.filePath ?? '',
-      matrixFile.size,
-      readStream: matrixFile.readStream,
+      bytes: matrixFile.bytes,
     );
 
     final txid = client.generateUniqueTransactionId();
@@ -796,14 +795,9 @@ class ChatController extends State<Chat>
     required Duration time,
     required List<int> waveform,
   }) async {
-    if (audioFile.filePath == null || audioFile.filePath?.isEmpty == true) {
-      TwakeSnackBar.show(context, L10n.of(context)!.audioMessageFailedToSend);
-      return;
-    }
     final fileInfo = FileInfo(
       audioFile.name,
-      audioFile.filePath ?? '',
-      audioFile.size,
+      bytes: audioFile.bytes,
     );
 
     final txid = client.generateUniqueTransactionId();
