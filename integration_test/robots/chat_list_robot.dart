@@ -25,9 +25,9 @@ class ChatListRobot extends HomeRobot {
     return $(TwakeFloatingActionButton);
   }
 
-  PatrolFinder getNumberOfSelectedChatLable(){
-    $.waitUntilVisible($(ChatListHeader).$(ValueListenableBuilder).$(Text));
-    return $(ChatListHeader).$(ValueListenableBuilder).$(Text);
+  Future<PatrolFinder> getNumberOfSelectedChatLable() async{
+    await $.waitUntilVisible($(ChatListHeader).$(Text));
+    return $(ChatListHeader).$(Text);
   }
 
   PatrolFinder getPinIcon(){
@@ -101,7 +101,7 @@ class ChatListRobot extends HomeRobot {
   }
 
   TwakeListItemRobot getChatGroupByTitle(String title){
-    final finder = $(SlidableChatListItem).containing($(ChatListItemTitle).containing($(title)));
+    final finder = $(SlidableChatListItem).containing($(ChatListItemTitle).containing($(title))).first;
     return TwakeListItemRobot($,finder);
   }
 
