@@ -1,5 +1,3 @@
-import 'dart:typed_data';
-
 import 'package:fluffychat/pages/chat/send_file_dialog/send_file_dialog_style.dart';
 import 'package:fluffychat/pages/image_viewer/image_viewer.dart';
 import 'package:fluffychat/presentation/list_notifier.dart';
@@ -50,12 +48,10 @@ class MediaPageViewWidget extends StatelessWidget {
               borderRadius: BorderRadius.circular(
                 SendFileDialogStyle.imageBorderRadius,
               ),
-              child: thumbnails[firstFile] == null && firstFile.bytes == null
+              child: thumbnails[firstFile] == null
                   ? const TwakeLoadingIndicator()
                   : Image.memory(
-                      firstFile.bytes ??
-                          thumbnails[firstFile]?.bytes ??
-                          Uint8List(0),
+                      firstFile.bytes,
                       fit: BoxFit.cover,
                       cacheWidth: (SendFileDialogStyle.imageSize *
                               MediaQuery.devicePixelRatioOf(context))

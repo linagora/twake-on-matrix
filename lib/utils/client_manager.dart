@@ -2,12 +2,12 @@ import 'dart:convert';
 
 import 'package:fluffychat/utils/custom_http_client.dart';
 import 'package:fluffychat/utils/custom_image_resizer.dart';
-import 'package:fluffychat/utils/matrix_sdk_extensions/flutter_hive_collections_database.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_vodozemac/flutter_vodozemac.dart' as vod;
 import 'package:matrix/encryption/utils/key_verification.dart';
 import 'package:matrix/matrix.dart';
+import 'package:sqflite/sqflite.dart';
 
 import 'famedlysdk_store.dart';
 
@@ -30,7 +30,15 @@ abstract class ClientManager {
       clientNames.add(PlatformInfos.clientName);
       await Store().setItem(clientNamespace, jsonEncode(clientNames.toList()));
     }
-    final clients = clientNames.map(createClient).toList();
+    final clients = await Future.wait(
+      clientNames.map((name) async {
+        final database = await MatrixSdkDatabase.init(
+          name,
+          database: await openDatabase('./$name.db'),
+        );
+        return createClient(name, database: database);
+      }),
+    );
     if (initialize) {
       await Future.wait(
         clients.map(
@@ -88,7 +96,10 @@ abstract class ClientManager {
           vodozemacInit: () => vod.init(),
         );
 
-  static Client createClient(String clientName) {
+  static Client createClient(
+    String clientName, {
+    required DatabaseApi database,
+  }) {
     return Client(
       clientName,
       httpClient:
@@ -105,7 +116,7 @@ abstract class ClientManager {
         EventTypes.RoomPowerLevels,
       },
       logLevel: kReleaseMode ? Level.warning : Level.verbose,
-      databaseBuilder: FlutterHiveCollectionsDatabase.databaseBuilder,
+      database: database,
       supportedLoginTypes: {
         AuthenticationTypes.password,
         if (PlatformInfos.isMobile ||

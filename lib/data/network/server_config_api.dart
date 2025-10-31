@@ -2,7 +2,7 @@ import 'package:fluffychat/data/network/dio_client.dart';
 import 'package:fluffychat/data/network/homeserver_endpoint.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/di/global/network_di.dart';
-import 'package:matrix/matrix.dart';
+import 'package:fluffychat/domain/model/server_config.dart';
 
 class ServerConfigAPI {
   final DioClient _client =

@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:fluffychat/presentation/list_notifier.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:matrix/matrix.dart';
@@ -10,20 +12,17 @@ void main() {
       listNotifier = ListNotifier<MatrixFile>([
         MatrixFile(
           name: 'test1.png',
-          bytes: null,
-          readStream: Stream.value([0, 1, 2, 3, 4, 5, 6, 7, 8, 9]),
+          bytes: Uint8List.fromList([0, 1, 2, 3, 4, 5, 6, 7, 8, 9]),
           mimeType: 'image/png',
         ),
         MatrixFile(
           name: 'test2.png',
-          bytes: null,
-          readStream: Stream.value([10, 11, 12, 13, 14, 15, 16, 17, 18, 19]),
+          bytes: Uint8List.fromList([10, 11, 12, 13, 14, 15, 16, 17, 18, 19]),
           mimeType: 'image/pdf',
         ),
         MatrixFile(
           name: 'test3.png',
-          bytes: null,
-          readStream: Stream.value([20, 21, 22, 23, 24, 25, 26, 27, 28, 29]),
+          bytes: Uint8List.fromList([20, 21, 22, 23, 24, 25, 26, 27, 28, 29]),
           mimeType: 'image/png',
         ),
       ]);
@@ -47,8 +46,7 @@ void main() {
       final matrixFiles = List.from(listNotifier.value);
       final newFile = MatrixFile(
         name: 'test4.png',
-        bytes: null,
-        readStream: Stream.value([30, 31, 32, 33, 34, 35, 36, 37, 38, 39]),
+        bytes: Uint8List.fromList([30, 31, 32, 33, 34, 35, 36, 37, 38, 39]),
         mimeType: 'image/png',
       );
       listNotifier.add(newFile);
@@ -76,8 +74,7 @@ void main() {
       final matrixFile = listNotifier.value[2];
       final replaceFile = MatrixFile(
         name: 'test5.png',
-        bytes: null,
-        readStream: Stream.value([50, 51, 52, 53, 54, 55, 56, 57, 58, 59]),
+        bytes: Uint8List.fromList([40, 41, 42, 43, 44, 45, 46, 47, 48, 49]),
         mimeType: 'image/jpeg',
       );
 

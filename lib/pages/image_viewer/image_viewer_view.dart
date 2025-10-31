@@ -136,11 +136,11 @@ class _ImageWidget extends StatelessWidget {
           getThumbnail: true,
         ),
         builder: (context, snapshot) {
-          if (snapshot.data == null || snapshot.data!.bytes?.isEmpty != false) {
+          if (snapshot.data == null || snapshot.data!.bytes.isEmpty != false) {
             return const CircularProgressIndicator();
           }
           return Image.memory(
-            snapshot.data!.bytes!,
+            snapshot.data!.bytes,
             cacheWidth: width != null
                 ? (width! * MediaQuery.devicePixelRatioOf(context)).toInt()
                 : null,
@@ -148,23 +148,23 @@ class _ImageWidget extends StatelessWidget {
         },
       );
     } else {
-      if (controller.filePath != null) {
+      if (controller.bytes != null) {
         if (event.mimeType == TwakeMimeTypeExtension.avifMimeType) {
-          return AvifImage.file(
-            File(controller.filePath!),
+          return AvifImage.memory(
+            controller.bytes!,
             height: height,
             width: width,
             fit: BoxFit.cover,
           );
         }
-        return Image.file(
-          File(controller.filePath!),
+        return Image.memory(
+          controller.bytes!,
           fit: BoxFit.contain,
           filterQuality: FilterQuality.none,
           errorBuilder: (context, error, stackTrace) {
-            if (controller.thumbnailFilePath != null) {
-              return Image.file(
-                File(controller.thumbnailFilePath!),
+            if (controller.thumbnailBytes != null) {
+              return Image.memory(
+                controller.thumbnailBytes!,
                 fit: BoxFit.contain,
                 filterQuality: FilterQuality.none,
               );

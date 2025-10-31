@@ -11,6 +11,7 @@ import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/utils/exception/download_file_web_exception.dart';
 import 'package:fluffychat/utils/manager/download_manager/download_file_state.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/download_file_extension.dart';
+import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
 import 'package:fluffychat/utils/stream_list_int_extension.dart';
 import 'package:matrix/matrix.dart';
 
@@ -52,7 +53,7 @@ extension DownloadFileWebExtension on Event {
     Uint8List? uint8list;
 
     if (storeable) {
-      uint8list = await room.client.database?.getFile(eventId, filename);
+      uint8list = await room.client.database.getFile(mxcUrl);
     }
 
     if (uint8list != null) {
@@ -96,12 +97,9 @@ extension DownloadFileWebExtension on Event {
         cancelToken: cancelToken,
       );
       final uint8List = await stream.toUint8List();
-      if (database != null &&
-          storeable &&
-          uint8List.length < database.maxFileSize) {
-        await database.storeEventFile(
-          eventId,
-          filename,
+      if (storeable && uint8List.length < database.maxFileSize) {
+        await database.storeFile(
+          mxcUrl,
           uint8List,
           DateTime.now().millisecondsSinceEpoch,
         );
@@ -160,11 +158,6 @@ extension DownloadFileWebExtension on Event {
       final decryptedFile = await _decryptAttachmentWeb(
         uint8list: uint8list,
       );
-      if (decryptedFile == null) {
-        throw DownloadFileWebException(
-          error: '_handleDecryptedFileWeb:: decryptedFile is null',
-        );
-      }
       streamController.add(
         Right(
           DownloadMatrixFileSuccessState(
@@ -184,7 +177,7 @@ extension DownloadFileWebExtension on Event {
     }
   }
 
-  Future<Uint8List?> _decryptAttachmentWeb({
+  Future<Uint8List> _decryptAttachmentWeb({
     required Uint8List uint8list,
   }) async {
     final dynamic fileMap = content['file'];

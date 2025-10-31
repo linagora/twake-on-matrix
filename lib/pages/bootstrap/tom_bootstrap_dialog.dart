@@ -114,7 +114,6 @@ class TomBootstrapDialogState extends State<TomBootstrapDialog>
 
   Future<void> _getRecoveryKeyState() async {
     await widget.client.onSync.stream.first;
-    await widget.client.initCompleter?.future;
 
     // Display first login bootstrap if enabled
     if (widget.client.encryption?.keyManager.enabled == true) {

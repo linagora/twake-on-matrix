@@ -5,7 +5,6 @@ import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/domain/app_state/send_file_dialog/generate_thumbnails_media_state.dart';
 import 'package:fluffychat/domain/repository/server_config_repository.dart';
 import 'package:fluffychat/presentation/extensions/send_file_web_extension.dart';
-import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_file_extension.dart';
 import 'package:matrix/matrix.dart';
 
 typedef OnConvertReadStreamToBytesDone = void Function(
@@ -35,17 +34,14 @@ class GenerateThumbnailsMediaInteractor {
       final filesHaveThumbnail = files.whereType<MatrixImageFile>().toList();
       for (final file in filesHaveThumbnail) {
         MatrixImageFile? thumbnail;
-        final bytesFile = await file.convertReadStreamToBytes();
         yield Right(
-          ConvertReadStreamToBytesSuccess(oldFile: file, newFile: bytesFile),
+          ConvertReadStreamToBytesSuccess(oldFile: file, newFile: file),
         );
-        if (bytesFile is MatrixImageFile) {
-          thumbnail = await room.generateThumbnail(bytesFile);
-        }
+        thumbnail = await room.generateThumbnail(file);
         if (thumbnail != null) {
           yield Right(
             GenerateThumbnailsMediaSuccess(
-              file: bytesFile,
+              file: file,
               thumbnail: thumbnail,
             ),
           );

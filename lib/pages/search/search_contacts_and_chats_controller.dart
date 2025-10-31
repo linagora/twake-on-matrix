@@ -19,7 +19,7 @@ import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:fluffychat/generated/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
-import 'package:matrix/matrix.dart';
+import 'package:matrix/matrix.dart' hide Contact;
 
 class SearchContactsAndChatsController
     with SearchDebouncerMixin, SearchMixin, ContactsViewControllerMixin {

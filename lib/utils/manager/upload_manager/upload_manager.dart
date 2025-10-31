@@ -6,6 +6,7 @@ import 'package:fluffychat/app_state/failure.dart';
 import 'package:fluffychat/app_state/success.dart';
 import 'package:fluffychat/data/network/extensions/file_info_extension.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
+import 'package:fluffychat/domain/model/file_info/file_info.dart';
 import 'package:fluffychat/domain/model/room/room_extension.dart';
 import 'package:fluffychat/presentation/extensions/send_file_extension.dart';
 import 'package:fluffychat/presentation/extensions/send_file_web_extension.dart';
@@ -472,8 +473,7 @@ class UploadManager {
         id: messageTxid,
         runnable: () async {
           try {
-            await room.sendMessageContent(
-              EventTypes.Message,
+            await room.sendEvent(
               messageContent,
               txid: messageTxid,
             );

@@ -1,5 +1,7 @@
 import 'dart:typed_data';
 
+import 'package:fluffychat/domain/model/file_info/file_info.dart';
+import 'package:fluffychat/domain/model/file_info/image_file_info.dart';
 import 'package:fluffychat/presentation/model/file/file_asset_entity.dart';
 import 'package:matrix/matrix.dart';
 
@@ -16,8 +18,8 @@ class ImageAssetEntity extends FileAssetEntity {
     }
     return ImageFileInfo(
       file.path.split('/').last,
-      file.path,
       file.lengthSync(),
+      bytes: file.readAsBytesSync(),
       width: assetEntity.width,
       height: assetEntity.height,
     );
@@ -31,7 +33,7 @@ class ImageAssetEntity extends FileAssetEntity {
     }
     return MatrixImageFile(
       name: file.path.split('/').last,
-      filePath: file.path,
+      bytes: file.readAsBytesSync(),
       width: assetEntity.width,
       height: assetEntity.height,
     );

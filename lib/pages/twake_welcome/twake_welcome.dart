@@ -78,10 +78,12 @@ class TwakeWelcomeController extends State<TwakeWelcome> with ConnectPageMixin {
         TwakeDialog.hideLoadingDialog(context);
         return;
       }
-      matrix.loginHomeserverSummary =
-          await matrix.getLoginClient().checkHomeserver(
-                Uri.parse(AppConfig.twakeWorkplaceHomeserver),
-              );
+      matrix.loginHomeserverSummary = await matrix
+          .getLoginClient()
+          .checkHomeserver(
+            Uri.parse(AppConfig.twakeWorkplaceHomeserver),
+          )
+          .toHomeserverSummary();
       final uri = await FlutterWebAuth2.authenticate(
         url: url,
         callbackUrlScheme: AppConfig.appOpenUrlScheme,

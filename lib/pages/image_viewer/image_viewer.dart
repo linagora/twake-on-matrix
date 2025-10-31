@@ -44,9 +44,9 @@ class ImageViewerController extends State<ImageViewer> {
 
   late final ValueNotifier<bool> showAppbarPreview;
 
-  String? filePath;
+  Uint8List? bytes;
 
-  String? thumbnailFilePath;
+  Uint8List? thumbnailBytes;
 
   final downloadMediaFileInteractor = getIt.get<DownloadMediaFileInteractor>();
 
@@ -75,7 +75,7 @@ class ImageViewerController extends State<ImageViewer> {
           (success) {
             if (success is DownloadMediaFileSuccess) {
               setState(() {
-                filePath = success.filePath;
+                bytes = success.bytes;
               });
             }
           },
@@ -100,7 +100,7 @@ class ImageViewerController extends State<ImageViewer> {
           (success) {
             if (success is DownloadMediaFileSuccess) {
               setState(() {
-                thumbnailFilePath = success.filePath;
+                thumbnailBytes = success.bytes;
               });
             }
           },
