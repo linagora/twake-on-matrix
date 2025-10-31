@@ -1,6 +1,7 @@
 import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/config/themes.dart';
 import 'package:fluffychat/domain/model/room/room_extension.dart';
+import 'package:fluffychat/pages/chat/typing_timer_wrapper.dart';
 import 'package:fluffychat/presentation/mixins/chat_list_item_mixin.dart';
 import 'package:fluffychat/pages/chat_list/chat_list_item_style.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
@@ -20,7 +21,7 @@ class ChatListItemSubtitle extends StatelessWidget with ChatListItemMixin {
 
   @override
   Widget build(BuildContext context) {
-    final typingText = room.getLocalizedTypingText(context);
+    final typingText = room.getLocalizedTypingText(L10n.of(context)!);
     final isGroup = !room.isDirectChat;
     final unreadBadgeSize = ChatListItemStyle.unreadBadgeSize(
       room.isUnreadOrInvited,
@@ -166,25 +167,28 @@ class ChatListItemSubtitle extends StatelessWidget with ChatListItemMixin {
     bool isGroup,
     bool isMediaEvent,
   ) {
-    return typingText.isNotEmpty
-        ? typingTextWidget(typingText, context)
-        : isGroup
-            ? chatListItemSubtitleForGroup(
-                context: context,
-                room: room,
-                event: lastEvent,
-              )
-            : isMediaEvent
-                ? chatListItemMediaPreviewSubTitle(
-                    context,
-                    lastEvent,
-                  )
-                : textContentWidget(
-                    room,
-                    lastEvent,
-                    context,
-                    isGroup,
-                    room.isUnreadOrInvited,
-                  );
+    return TypingTimerWrapper(
+      room: room,
+      l10n: L10n.of(context)!,
+      typingWidget: typingTextWidget(typingText, context),
+      notTypingWidget: isGroup
+          ? chatListItemSubtitleForGroup(
+              context: context,
+              room: room,
+              event: lastEvent,
+            )
+          : isMediaEvent
+              ? chatListItemMediaPreviewSubTitle(
+                  context,
+                  lastEvent,
+                )
+              : textContentWidget(
+                  room,
+                  lastEvent,
+                  context,
+                  isGroup,
+                  room.isUnreadOrInvited,
+                ),
+    );
   }
 }
