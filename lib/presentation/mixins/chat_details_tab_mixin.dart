@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:math';
+import 'dart:typed_data';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/domain/app_state/room/ban_user_state.dart';
 import 'package:fluffychat/domain/usecase/room/ban_user_interactor.dart';
@@ -95,7 +96,7 @@ mixin ChatDetailsTabMixin<T extends StatefulWidget>
     return _timeline;
   }
 
-  Future<String> _handleDownloadAndPlayVideo(Event event) {
+  Future<Uint8List> _handleDownloadAndPlayVideo(Event event) {
     return handleDownloadVideoEvent(
       event: event,
       playVideoAction: (path) => playVideoAction(
@@ -194,13 +195,12 @@ mixin ChatDetailsTabMixin<T extends StatefulWidget>
   }
 
   Future<void> onUpdateMembers() async {
-    final members = await room!.requestParticipantsFromServer(
-      membershipFilter: [
+    final members = room!.getParticipants(
+      [
         Membership.join,
         Membership.invite,
       ],
-    )
-      ..sort(
+    )..sort(
         (small, great) => great.powerLevel.compareTo(small.powerLevel),
       );
     _membersNotifier.value = members;

@@ -17,7 +17,7 @@ import 'package:fluffychat/modules/federation_identity_lookup/domain/models/fede
 import 'package:fluffychat/modules/federation_identity_lookup/domain/models/federation_lookup_mxid_request.dart';
 import 'package:fluffychat/modules/federation_identity_lookup/domain/models/federation_lookup_mxid_response.dart';
 import 'package:fluffychat/modules/federation_identity_lookup/manager/identity_lookup_manager.dart';
-import 'package:matrix/matrix.dart';
+import 'package:matrix/matrix.dart' hide Contact;
 
 class TwakeLookupPhonebookContactInteractor {
   final PhonebookContactRepository _phonebookContactRepository =

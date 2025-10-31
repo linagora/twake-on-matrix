@@ -1,6 +1,7 @@
 import 'package:fluffychat/domain/model/app_twake_information.dart';
 import 'package:fluffychat/domain/model/common_settings_information.dart';
 import 'package:fluffychat/domain/model/extensions/homeserver_summary_extensions.dart';
+import 'package:fluffychat/domain/model/homeserver_summary.dart';
 import 'package:fluffychat/domain/model/tom_server_information.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:matrix/matrix.dart';

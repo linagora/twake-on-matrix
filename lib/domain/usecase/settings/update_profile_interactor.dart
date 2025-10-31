@@ -19,15 +19,17 @@ class UpdateProfileInteractor {
         'UploadProfileInteractor::execute(): Uri - $avatarUrl - displayName - $displayName',
       );
       if (avatarUrl != null || isDeleteAvatar) {
-        await client.setAvatarUrl(
+        await client.setProfileField(
           client.userID!,
-          avatarUrl ?? Uri.parse(''),
+          'avatar_url',
+          {'avatar_url': isDeleteAvatar ? null : avatarUrl?.toString()},
         );
       }
       if (displayName != null) {
-        await client.setDisplayName(
+        await client.setProfileField(
           client.userID!,
-          displayName,
+          'displayname',
+          {'displayname': displayName},
         );
       }
       if (isDeleteAvatar) {
