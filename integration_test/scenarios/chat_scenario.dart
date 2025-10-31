@@ -503,18 +503,18 @@ class ChatScenario extends BaseScenario {
         'Chat list is not scrollable',);
   }
 
-  bool isPinAChat(TwakeListItemRobot takeListItem) {
-    final pin = takeListItem.getPinIcon();
+  Future<bool> isPinAChat(TwakeListItemRobot takeListItem) async{
+    final pin = await $.waitUntilVisible(takeListItem.getPinIcon());
     return pin.visible;
   }
 
-  bool isMarkAsUnRead(TwakeListItemRobot takeListItem) {
-    final unread = takeListItem.getUnReadIcon();
+  Future<bool> isMarkAsUnRead(TwakeListItemRobot takeListItem) async{
+    final unread = await $.waitUntilVisible(takeListItem.getUnReadIcon());
     return unread.visible;
   }
 
-  bool isMutedAChat(TwakeListItemRobot takeListItem) {
-    final muted = takeListItem.getMutedIcon();
+  Future<bool> isMutedAChat(TwakeListItemRobot takeListItem) async{
+    final muted = await $.waitUntilVisible(takeListItem.getMutedIcon());
     return muted.visible;
   }
 
@@ -556,6 +556,11 @@ class ChatScenario extends BaseScenario {
     await selectAChat(twakeListItem);
   }
 
+  Future<void> longpressOnAChatByIndex(int index) async {
+    await $.tester.ensureVisible(ChatListRobot($).getListOfChatGroup()[index].root);
+    await ChatListRobot($).getListOfChatGroup()[index].root.longPress();
+  }
+
   Future<void> selectAChatByIndex(int index) async {
     final twakeListItem = ChatListRobot($).getListOfChatGroup()[index];
     await selectAChat(twakeListItem);
@@ -563,7 +568,7 @@ class ChatScenario extends BaseScenario {
 
   Future<void> pinAChat(String title) async {
     final twakeListItem = ChatListRobot($).getChatGroupByTitle(title);
-    if(!isPinAChat(twakeListItem))
+    if(!(await isPinAChat(twakeListItem)))
     {
       await twakeListItem.root.longPress();
       await $.waitUntilVisible(twakeListItem.getCheckBox());
@@ -573,7 +578,7 @@ class ChatScenario extends BaseScenario {
 
   Future<void> unPinAChat(String title) async {
     final twakeListItem = ChatListRobot($).getChatGroupByTitle(title);
-    if(isPinAChat(twakeListItem))
+    if(await isPinAChat(twakeListItem))
     {
       await twakeListItem.root.longPress();
       await $.waitUntilVisible(twakeListItem.getCheckBox());
@@ -583,7 +588,7 @@ class ChatScenario extends BaseScenario {
 
   Future<void> markAChatAsRead(String title) async {
     final twakeListItem = ChatListRobot($).getChatGroupByTitle(title);
-    if(isMarkAsUnRead(twakeListItem))
+    if(await isMarkAsUnRead(twakeListItem))
     {
       await twakeListItem.root.longPress();
       await $.waitUntilVisible(twakeListItem.getCheckBox());
@@ -594,7 +599,7 @@ class ChatScenario extends BaseScenario {
 
   Future<void> markAChatAsUnread(String title) async {
     final twakeListItem = ChatListRobot($).getChatGroupByTitle(title);
-    if(!isMarkAsUnRead(twakeListItem))
+    if(!(await isMarkAsUnRead(twakeListItem)))
     {
       await twakeListItem.root.longPress();
       await $.waitUntilVisible(twakeListItem.getCheckBox());
@@ -606,7 +611,7 @@ class ChatScenario extends BaseScenario {
 
   Future<void> muteAChat(String title) async {
     final twakeListItem = ChatListRobot($).getChatGroupByTitle(title);
-    if(!isMutedAChat(twakeListItem))
+    if(!(await isMutedAChat(twakeListItem)))
     {
       await twakeListItem.root.longPress();
       await $.waitUntilVisible(twakeListItem.getCheckBox());
@@ -617,7 +622,7 @@ class ChatScenario extends BaseScenario {
 
   Future<void> unmuteAChat(String title) async {
     final twakeListItem = ChatListRobot($).getChatGroupByTitle(title);
-    if(isMutedAChat(twakeListItem))
+    if(await isMutedAChat(twakeListItem))
     {
       await twakeListItem.root.longPress();
       await $.waitUntilVisible(twakeListItem.getCheckBox());
@@ -629,22 +634,22 @@ class ChatScenario extends BaseScenario {
   Future<void> verifyAChatIsPin(String title, bool isPin) async {
     final twakeListItem = ChatListRobot($).getChatGroupByTitle(title);
     await $.tester.ensureVisible(twakeListItem.root);
-    final exists = isPinAChat(twakeListItem);
+    final exists = await isPinAChat(twakeListItem);
     expect(exists, isPin, reason: 'Expected pin=$isPin but got $exists for "$title"');
   }
 
   Future<void> verifyAChatIsMarkAsUnRead(String title, bool isMarkAsUnread) async {
     final twakeListItem = ChatListRobot($).getChatGroupByTitle(title);
     await $.tester.ensureVisible(twakeListItem.root);
-    final exists = isMarkAsUnRead(twakeListItem);
-    expect(exists, isMarkAsUnread, reason: 'Expected pin=$isMarkAsUnread but got $exists for "$title"');
+    final exists = await isMarkAsUnRead(twakeListItem);
+    expect(exists, isMarkAsUnread, reason: 'Expected read =$isMarkAsUnread but got $exists for "$title"');
   }
   
   Future<void> verifyAChatIsMuted(String title, bool isMuted) async {
     final twakeListItem = ChatListRobot($).getChatGroupByTitle(title);
     await $.tester.ensureVisible(twakeListItem.root);
-    final exists = isMutedAChat(twakeListItem);
-    expect(exists, isMuted, reason: 'Expected pin=$isMuted but got $exists for "$title"');
+    final exists = await isMutedAChat(twakeListItem);
+    expect(exists, isMuted, reason: 'Expected mute=$isMuted but got $exists for "$title"');
   }
   
   Future<void> leftSwipe(String title) async {
