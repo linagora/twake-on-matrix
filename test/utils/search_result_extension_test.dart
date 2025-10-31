@@ -5,14 +5,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:matrix/matrix.dart';
 import 'package:mockito/annotations.dart';
-import 'package:matrix_api_lite/fake_matrix_api.dart';
+import '../fake_client.dart';
 import 'search_result_extension_test.mocks.dart';
 
 @GenerateNiceMocks([
   MockSpec<BuildContext>(),
 ])
-void main() {
-  final client = Client('client', httpClient: FakeMatrixApi());
+Future<void> main() async {
+  final client = await getClient();
   final room = Room(id: '!room:example.abc', client: client);
 
   group('Search result extension test\n', () {

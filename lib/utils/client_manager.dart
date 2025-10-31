@@ -8,6 +8,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_vodozemac/flutter_vodozemac.dart' as vod;
 import 'package:matrix/encryption/utils/key_verification.dart';
 import 'package:matrix/matrix.dart';
+import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
 import 'famedlysdk_store.dart';
 
@@ -30,7 +31,16 @@ abstract class ClientManager {
       clientNames.add(PlatformInfos.clientName);
       await Store().setItem(clientNamespace, jsonEncode(clientNames.toList()));
     }
-    final clients = clientNames.map(createClient).toList();
+    final clients = await Future.wait(
+      clientNames.map((name) async {
+        final database = await MatrixSdkDatabase.init(
+          name,
+          database:
+              !PlatformInfos.isWeb ? await openDatabase('./$name.db') : null,
+        );
+        return createClient(name, database: database);
+      }),
+    );
     if (initialize) {
       await Future.wait(
         clients.map(
@@ -88,7 +98,10 @@ abstract class ClientManager {
           vodozemacInit: () => vod.init(),
         );
 
-  static Client createClient(String clientName) {
+  static Client createClient(
+    String clientName, {
+    required DatabaseApi database,
+  }) {
     return Client(
       clientName,
       httpClient:
@@ -105,7 +118,8 @@ abstract class ClientManager {
         EventTypes.RoomPowerLevels,
       },
       logLevel: kReleaseMode ? Level.warning : Level.verbose,
-      databaseBuilder: FlutterHiveCollectionsDatabase.databaseBuilder,
+      database: database,
+      legacyDatabaseBuilder: FlutterHiveCollectionsDatabase.databaseBuilder,
       supportedLoginTypes: {
         AuthenticationTypes.password,
         if (PlatformInfos.isMobile ||

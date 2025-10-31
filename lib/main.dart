@@ -8,16 +8,20 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_app_lock/flutter_app_lock.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:flutter_vodozemac/flutter_vodozemac.dart' as vod;
 import 'package:go_router/go_router.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:linagora_design_flutter/cozy_config_manager/cozy_config_manager.dart';
 import 'package:matrix/matrix.dart';
 import 'package:media_kit/media_kit.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:sqflite_common_ffi/sqflite_ffi.dart';
+
 import 'utils/background_push.dart';
-import 'widgets/twake_app.dart';
 import 'widgets/lock_screen.dart';
-import 'package:flutter_vodozemac/flutter_vodozemac.dart' as vod;
+import 'widgets/twake_app.dart';
+
+late DatabaseApi fallbackDatabase;
 
 void main() async {
   // Our background push shared isolate accesses flutter-internal things very early in the startup proccess
@@ -27,6 +31,16 @@ void main() async {
   SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
   MediaKit.ensureInitialized();
   await vod.init();
+  if (PlatformInfos.isMobile) {
+    databaseFactory = databaseFactoryFfi;
+  }
+  fallbackDatabase = await MatrixSdkDatabase.init(
+    '${AppConfig.applicationName}-${DateTime.now().millisecondsSinceEpoch}',
+    database: !PlatformInfos.isWeb
+        ? await databaseFactory
+            .openDatabase('./${AppConfig.applicationName}.db')
+        : null,
+  );
   GoRouter.optionURLReflectsImperativeAPIs = true;
   if (PlatformInfos.isLinux) {
     Hive.init((await getApplicationSupportDirectory()).path);
@@ -40,7 +54,6 @@ void main() async {
   final clients = await ClientManager.getClients();
   // Preload first client
   final firstClient = clients.firstOrNull;
-  firstClient?.isSupportDeleteCollections = !PlatformInfos.isWeb;
   await firstClient?.roomsLoading;
   await firstClient?.accountDataLoading;
 

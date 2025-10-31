@@ -182,8 +182,10 @@ class MatrixLocals extends MatrixLocalizations {
   String get noPermission => l10n.noKeyForThisMessage;
 
   @override
-  String redactedAnEvent(String displayName) {
-    return l10n.redactedAnEvent(displayName);
+  String redactedAnEvent(Event redactedEvent) {
+    return l10n.redactedAnEvent(
+      redactedEvent.senderFromMemoryOrFallback.displayName ?? '',
+    );
   }
 
   @override
@@ -192,7 +194,7 @@ class MatrixLocals extends MatrixLocalizations {
   }
 
   @override
-  String removedBy(String displayName) {
+  String removedBy(Event redactedEvent) {
     return l10n.deletedMessage;
   }
 
@@ -316,5 +318,60 @@ class MatrixLocals extends MatrixLocalizations {
   String hasKnocked(String targetName) {
     // TODO: implement hasKnocked
     throw UnimplementedError();
+  }
+
+  @override
+  String acceptedKeyVerification(String senderName) {
+    // TODO: implement acceptedKeyVerification
+    throw UnimplementedError();
+  }
+
+  @override
+  String canceledKeyVerification(String senderName) {
+    // TODO: implement canceledKeyVerification
+    throw UnimplementedError();
+  }
+
+  @override
+  // TODO: implement cancelledSend
+  String get cancelledSend => throw UnimplementedError();
+
+  @override
+  String completedKeyVerification(String senderName) {
+    // TODO: implement completedKeyVerification
+    throw UnimplementedError();
+  }
+
+  @override
+  String invitedBy(String senderName) {
+    // TODO: implement invitedBy
+    throw UnimplementedError();
+  }
+
+  @override
+  String isReadyForKeyVerification(String senderName) {
+    // TODO: implement isReadyForKeyVerification
+    throw UnimplementedError();
+  }
+
+  @override
+  // TODO: implement refreshingLastEvent
+  String get refreshingLastEvent => throw UnimplementedError();
+
+  @override
+  String requestedKeyVerification(String senderName) {
+    // TODO: implement requestedKeyVerification
+    throw UnimplementedError();
+  }
+
+  @override
+  String startedKeyVerification(String senderName) {
+    // TODO: implement startedKeyVerification
+    throw UnimplementedError();
+  }
+
+  @override
+  String voiceMessage(String senderName, Duration? duration) {
+    return l10n.voiceMessage;
   }
 }

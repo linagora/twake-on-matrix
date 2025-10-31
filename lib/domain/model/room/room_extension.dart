@@ -1,9 +1,14 @@
 import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/config/default_power_level_member.dart';
+import 'package:fluffychat/data/network/extensions/file_info_extension.dart';
+import 'package:fluffychat/domain/model/file_info/file_info.dart';
 import 'package:fluffychat/domain/model/search/recent_chat_model.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/client_stories_extension.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
+import 'package:html_unescape/html_unescape.dart';
 import 'package:matrix/matrix.dart';
+// ignore: implementation_imports
+import 'package:matrix/src/utils/markdown.dart';
 
 extension RoomExtension on Room {
   RecentChatSearchModel toRecentChatSearchModel(
@@ -58,9 +63,7 @@ extension RoomExtension on Room {
     String? txid,
   }) {
     txid ??= client.generateUniqueTransactionId();
-    final matrixFile = MatrixFile.fromFileInfo(
-      fileInfo: fileInfo,
-    );
+    final matrixFile = fileInfo.toMatrixFile();
     sendingFilePlaceholders[txid] = matrixFile;
     return txid;
   }
@@ -209,8 +212,8 @@ extension RoomExtension on Room {
 
         lastEventAvailableInPreview = lastState;
         final messageEvents =
-            await client.database?.getEventList(this, limit: 30);
-        if (messageEvents == null || messageEvents.isEmpty) {
+            await client.database.getEventList(this, limit: 30);
+        if (messageEvents.isEmpty) {
           return lastState;
         }
 
@@ -240,7 +243,7 @@ extension RoomExtension on Room {
     Event? lastState;
     states.forEach((final String key, final entry) {
       final state = entry[''];
-      if (state == null) return;
+      if (state is! Event) return;
       if (state.shouldHideRedactedEvent()) return;
       if (state.shouldHideBannedEvent()) return;
       if (state.originServerTs.millisecondsSinceEpoch >
@@ -291,7 +294,7 @@ extension RoomExtension on Room {
 
   List<User> getBannedMembers() {
     final members = getParticipants(
-      membershipFilter: [Membership.ban],
+      [Membership.ban],
     );
     if (members.isEmpty) return [];
     return members
@@ -302,7 +305,7 @@ extension RoomExtension on Room {
 
   List<User> getCurrentMembers() {
     final members = getParticipants(
-      membershipFilter: [
+      [
         Membership.invite,
         Membership.join,
       ],
@@ -352,6 +355,39 @@ extension RoomExtension on Room {
   }
 
   bool get canReportContent => membership.isJoin;
+
+  Map<String, dynamic> getEventContentFromMsgText({
+    required String message,
+    bool parseMarkdown = true,
+    String msgtype = MessageTypes.Text,
+  }) {
+    final event = <String, dynamic>{
+      'msgtype': msgtype,
+      'body': message,
+    };
+    if (parseMarkdown) {
+      final html = markdown(
+        event['body'],
+        getEmotePacks: () => getImagePacksFlat(ImagePackUsage.emoticon),
+        getMention: getMention,
+      );
+
+      final formatText = event['body']
+          .toString()
+          .trim()
+          .replaceAll(RegExp(r'(<br />)+$'), '')
+          .convertLinebreaksToBr('pre')
+          .replaceAll(RegExp(r'<br />\n?'), '\n');
+
+      // if the decoded html is the same as the body, there is no need in sending a formatted message
+      if (HtmlUnescape().convert(html.replaceAll(RegExp(r'<br />\n?'), '\n')) !=
+          formatText) {
+        event['format'] = 'org.matrix.custom.html';
+        event['formatted_body'] = html;
+      }
+    }
+    return event;
+  }
 }
 
 extension SortByPowerLevel on List<User> {
@@ -359,5 +395,21 @@ extension SortByPowerLevel on List<User> {
     final newList = [...this];
     newList.sort((a, b) => b.powerLevel.compareTo(a.powerLevel));
     return newList;
+  }
+}
+
+extension on String {
+  String convertLinebreaksToBr(
+    String tagName, {
+    bool exclude = false,
+    String replaceWith = '<br/>',
+  }) {
+    final parts = split('$tagName>');
+    var convertLinebreaks = exclude;
+    for (var i = 0; i < parts.length; i++) {
+      if (convertLinebreaks) parts[i] = parts[i].replaceAll('\n', replaceWith);
+      convertLinebreaks = !convertLinebreaks;
+    }
+    return parts.join('$tagName>');
   }
 }

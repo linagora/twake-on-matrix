@@ -28,14 +28,7 @@ mixin ChatListItemMixin {
   ) {
     if (event == null) return const SizedBox.shrink();
     return FutureBuilder<String>(
-      future: event.calcLocalizedBody(
-        MatrixLocals(L10n.of(context)!),
-        hideReply: true,
-        hideEdit: true,
-        plaintextBody: true,
-        removeMarkdown: true,
-        removeBreakLine: true,
-      ),
+      future: event.calcLocalizedBodyRemoveBreakLine(L10n.of(context)!),
       builder: (context, snapshot) {
         return Text(
           room.membership == Membership.invite
@@ -106,13 +99,8 @@ mixin ChatListItemMixin {
   ) {
     if (user == null || event == null) return const SizedBox.shrink();
 
-    final subscriptions = event.calcLocalizedBodyFallback(
-      MatrixLocals(L10n.of(context)!),
-      hideReply: true,
-      hideEdit: true,
-      plaintextBody: true,
-      removeMarkdown: true,
-      removeBreakLine: true,
+    final subscriptions = event.calcLocalizedBodyFallbackRemoveBreakLine(
+      L10n.of(context)!,
     );
     if (event.isAFile == true) {
       return Text(

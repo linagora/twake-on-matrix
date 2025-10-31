@@ -29,15 +29,15 @@ void main() {
             'm.joined_member_count': 3,
           }),
           roomAccountData: {
-            'com.test.foo': BasicRoomEvent(
+            'com.test.foo': BasicEvent(
               type: 'com.test.foo',
               content: {'foo': 'bar'},
             ),
-            'm.fully_read': BasicRoomEvent(
+            'm.fully_read': BasicEvent(
               type: 'm.fully_read',
               content: {'event_id': '\$event_id:example.com'},
             ),
-            'm.room.member': BasicRoomEvent(
+            'm.room.member': BasicEvent(
               type: 'm.room.member',
               content: {
                 'membership': membership.toString(),

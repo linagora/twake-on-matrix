@@ -156,10 +156,7 @@ class _MxcImageState extends State<MxcImage>
           : uri.getDownloadLink(client);
 
       if (_isCached == null && widget.event != null) {
-        final cachedData = await client.database?.getFile(
-          event!.eventId,
-          widget.isThumbnail ? event.thumbnailFilename : event.filename,
-        );
+        final cachedData = await client.database.getFile(httpUri);
         if (cachedData != null) {
           _isCached = true;
           return (imageData: cachedData, filePath: null);
@@ -177,9 +174,8 @@ class _MxcImageState extends State<MxcImage>
       final remoteData = response.bodyBytes;
 
       if (widget.event != null) {
-        await client.database?.storeEventFile(
-          widget.event!.eventId,
-          event!.filename,
+        await client.database.storeFile(
+          httpUri,
           remoteData,
           0,
         );
@@ -195,8 +191,8 @@ class _MxcImageState extends State<MxcImage>
             getThumbnail: widget.isThumbnail,
           );
           Logs().d('MxcImage::Downloaded get file info = $fileInfo');
-          if (fileInfo != null && fileInfo.filePath.isNotEmpty) {
-            return (imageData: null, filePath: fileInfo.filePath);
+          if (fileInfo != null) {
+            return (imageData: fileInfo.bytes, filePath: null);
           }
         }
 
@@ -204,10 +200,10 @@ class _MxcImageState extends State<MxcImage>
           getThumbnail: widget.isThumbnail,
         );
         Logs().d(
-          'MxcImage::Downloaded attachment name = ${matrixFile.name} - mimeType = ${matrixFile.mimeType} - bytes = ${matrixFile.bytes?.length}',
+          'MxcImage::Downloaded attachment name = ${matrixFile.name} - mimeType = ${matrixFile.mimeType} - bytes = ${matrixFile.bytes.length}',
         );
         if (!matrixFile.isImage()) return (imageData: null, filePath: null);
-        return (imageData: matrixFile.bytes, filePath: matrixFile.filePath);
+        return (imageData: matrixFile.bytes, filePath: null);
       } catch (e) {
         Logs().e('MxcImage::Error while downloading image: $e');
         rethrow;

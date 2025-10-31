@@ -80,6 +80,7 @@ jobs:
           publish_dir: build/web
           keep_files: true
           destination_dir: "${{ github.event.pull_request.number }}"
+          force_orphan: true
 
       - name: Find deployment comment
         uses: peter-evans/find-comment@v3

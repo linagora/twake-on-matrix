@@ -5,9 +5,11 @@ import 'package:fluffychat/data/model/federation_server/federation_configuration
 import 'package:fluffychat/data/model/federation_server/federation_server_information.dart';
 import 'package:fluffychat/domain/contact_manager/contacts_manager.dart';
 import 'package:fluffychat/domain/exception/federation_configuration_not_found.dart';
+import 'package:fluffychat/domain/model/homeserver_summary.dart';
 import 'package:fluffychat/domain/repository/federation_configurations_repository.dart';
 import 'package:fluffychat/domain/repository/user_info/user_info_repository.dart';
 import 'package:fluffychat/event/twake_event_types.dart';
+import 'package:fluffychat/main.dart';
 import 'package:fluffychat/pages/chat/events/audio_message/audio_player_widget.dart';
 import 'package:fluffychat/presentation/mixins/init_config_mixin.dart';
 import 'package:fluffychat/presentation/model/client_login_state_event.dart';
@@ -49,6 +51,8 @@ import 'package:future_loading_dialog/future_loading_dialog.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:matrix/encryption.dart';
 import 'package:matrix/matrix.dart';
+// ignore: implementation_imports
+import 'package:matrix/src/utils/cached_stream_controller.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:universal_html/html.dart' as html;
@@ -101,7 +105,7 @@ class MatrixState extends State<Matrix>
   String? _authUrl;
   XFile? loginAvatar;
   String? loginUsername;
-  LoginType? loginType;
+  String? loginType;
   bool? loginRegistrationSupported;
   late EmojiData emojiData;
 
@@ -161,11 +165,38 @@ class MatrixState extends State<Matrix>
       await _getUserInfoWithActiveClient(newClient);
       await _getHomeserverInformation(newClient);
       getIt.get<ContactsManager>().refreshTomContacts(client);
+      _listenSyncPresence(newClient);
       return SetActiveClientState.success;
     } else {
       Logs().w('Tried to set an unknown client ${newClient!.userID} as active');
       return SetActiveClientState.unknownClient;
     }
+  }
+
+  /// Callback will be called on presence update and return latest value.
+  final CachedStreamController<CachedPresence> onlatestPresenceChanged =
+      CachedStreamController();
+  StreamSubscription? _presenceSubscription;
+  void _listenSyncPresence(Client client) {
+    _presenceSubscription?.cancel();
+    _presenceSubscription = client.onSync.stream.listen((sync) {
+      CachedPresence? lastActivePresence;
+
+      for (final newPresence in sync.presence ?? []) {
+        final cachedPresence = CachedPresence.fromMatrixEvent(newPresence);
+        if (lastActivePresence == null ||
+            (cachedPresence.lastActiveTimestamp != null &&
+                lastActivePresence.lastActiveTimestamp != null &&
+                cachedPresence.lastActiveTimestamp!
+                    .isAfter(lastActivePresence.lastActiveTimestamp!))) {
+          lastActivePresence = cachedPresence;
+        }
+      }
+
+      if (lastActivePresence != null) {
+        onlatestPresenceChanged.add(lastActivePresence);
+      }
+    });
   }
 
   List<Client?>? get currentBundle {
@@ -219,6 +250,7 @@ class MatrixState extends State<Matrix>
     }
     final candidate = _loginClientCandidate ??= ClientManager.createClient(
       '${AppConfig.applicationName}-${DateTime.now().millisecondsSinceEpoch}',
+      database: fallbackDatabase,
     )..onLoginStateChanged
         .stream
         .where((l) => l == LoginState.loggedIn)
@@ -769,7 +801,8 @@ class MatrixState extends State<Matrix>
       );
 
       final fedServerJson = wellKnown
-          .additionalProperties[FederationServerInformation.fedServerKey];
+              .additionalProperties[FederationServerInformation.fedServerKey]
+          as Map<String, dynamic>?;
 
       if (fedServerJson == null) return;
 
@@ -961,8 +994,9 @@ class MatrixState extends State<Matrix>
       'Matrix::_getHomeserverInformation: client homeserver = ${newClient.homeserver}',
     );
     if (newClient.homeserver == null) return;
-    loginHomeserverSummary =
-        await newClient.checkHomeserver(newClient.homeserver!);
+    loginHomeserverSummary = await newClient
+        .checkHomeserver(newClient.homeserver!)
+        .toHomeserverSummary();
     Logs().d(
       'Matrix::_getHomeserverInformation: appTwakeInformation ${loginHomeserverSummary?.appTwakeInformation}',
     );
@@ -1006,8 +1040,9 @@ class MatrixState extends State<Matrix>
       );
       _authUrl = url;
     } else {
-      final newAuthUrl = loginHomeserverSummary?.discoveryInformation
-          ?.additionalProperties["m.authentication"]?["issuer"];
+      final newAuthUrl = (loginHomeserverSummary
+              ?.discoveryInformation?.additionalProperties["m.authentication"]
+          as Map<String, dynamic>?)?["issuer"];
       Logs().e(
         'Matrix::_setupAuthUrl: newAuthUrl - $newAuthUrl',
       );
@@ -1212,4 +1247,16 @@ class _AccountBundleWithClient extends Equatable {
 
   @override
   List<Object?> get props => [client, bundle];
+}
+
+extension HomeserverSummaryConversion
+    on Future<(DiscoveryInformation?, GetVersionsResponse, List<LoginFlow>)> {
+  Future<HomeserverSummary> toHomeserverSummary() async {
+    final result = await this;
+    return HomeserverSummary(
+      discoveryInformation: result.$1,
+      versions: result.$2,
+      loginFlows: result.$3,
+    );
+  }
 }

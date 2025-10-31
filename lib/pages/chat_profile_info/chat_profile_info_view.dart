@@ -34,7 +34,7 @@ import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:fluffychat/pages/chat_profile_info/chat_profile_info.dart';
 import 'package:fluffychat/pages/chat_profile_info/chat_profile_info_style.dart';
 import 'package:fluffychat/widgets/matrix.dart';
-import 'package:matrix/matrix.dart';
+import 'package:matrix/matrix.dart' hide Contact;
 
 class ChatProfileInfoView extends StatelessWidget {
   final ChatProfileInfoController controller;

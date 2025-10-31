@@ -4,6 +4,7 @@ import 'package:fluffychat/data/hive/hive_collection_tom_database.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/domain/exception/tom_configuration_not_found.dart';
 import 'package:fluffychat/domain/model/tom_configurations.dart';
+import 'package:fluffychat/utils/copy_map.dart';
 import 'package:matrix/matrix.dart';
 
 class HiveToMConfigurationDatasource implements ToMConfigurationsDatasource {

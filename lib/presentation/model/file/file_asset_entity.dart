@@ -1,6 +1,7 @@
 import 'dart:typed_data';
 
 import 'package:equatable/equatable.dart';
+import 'package:fluffychat/domain/model/file_info/file_info.dart';
 import 'package:fluffychat/presentation/model/file/default_asset_entity.dart';
 import 'package:fluffychat/presentation/model/file/image_asset_entity.dart';
 import 'package:fluffychat/presentation/model/file/video_asset_entity.dart';

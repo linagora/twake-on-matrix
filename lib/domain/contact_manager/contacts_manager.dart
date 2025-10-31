@@ -29,7 +29,7 @@ import 'package:fluffychat/presentation/extensions/value_notifier_custom.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/utils/twake_snackbar.dart';
 import 'package:fluffychat/widgets/twake_app.dart';
-import 'package:matrix/matrix.dart';
+import 'package:matrix/matrix.dart' hide Contact;
 import 'package:fluffychat/generated/l10n/app_localizations.dart';
 
 class ContactsManager {

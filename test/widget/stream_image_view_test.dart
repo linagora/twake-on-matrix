@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:fluffychat/widgets/stream_image_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -234,9 +236,8 @@ void main() {
         (WidgetTester tester) async {
           final mockMatrixFile = MatrixFile(
             name: 'test1.png',
-            readStream: Stream.value(kBlueLandscapePng),
+            bytes: Uint8List.fromList(kBlueLandscapePng),
             mimeType: 'image/png',
-            sizeInBytes: kBlueLandscapePng.length,
           );
 
           MatrixFile? loadedFile;
@@ -262,7 +263,7 @@ void main() {
 
           expect(loadedFile?.bytes != null, true);
 
-          expect(loadedFile?.bytes?.length, kBlueLandscapePng.length);
+          expect(loadedFile?.bytes.length, kBlueLandscapePng.length);
         },
       );
     },

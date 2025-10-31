@@ -8,10 +8,7 @@ environment:
 
 dependencies:
   ### Dependencies from git ###
-  matrix:
-    git:
-      url: git@github.com:linagora/matrix-dart-sdk.git
-      ref: twake-supported-0.22.6
+  matrix: ^3.0.2
 
   receive_sharing_intent:
     git:
@@ -212,11 +209,13 @@ dependencies:
   gal: 2.3.0
   auto_size_text: 3.0.0
   flutter_avif: 3.1.0
-  heif_converter: 1.0.0
+  heic_to_png_jpg: 0.0.5
   pull_down_button: 0.10.2
   pretty_qr_code: 3.3.0
   byte_converter: 2.0.0
-  flutter_vodozemac: ^0.3.0
+  flutter_vodozemac: ^0.4.0
+  html_unescape: 2.0.0
+  sqflite_common_ffi: ^2.3.6
 
 dev_dependencies:
   build_runner: 2.4.12
