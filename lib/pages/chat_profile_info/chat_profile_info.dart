@@ -1,17 +1,21 @@
 import 'dart:async';
+import 'package:collection/collection.dart';
 import 'package:dartz/dartz.dart' hide State;
 import 'package:fluffychat/app_state/failure.dart';
 import 'package:fluffychat/app_state/success.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
+import 'package:fluffychat/domain/app_state/contact/get_contacts_state.dart';
 import 'package:fluffychat/domain/app_state/contact/lookup_match_contact_state.dart';
 import 'package:fluffychat/domain/app_state/room/block_user_state.dart';
 import 'package:fluffychat/domain/app_state/room/unblock_user_state.dart';
+import 'package:fluffychat/domain/contact_manager/contacts_manager.dart';
 import 'package:fluffychat/domain/usecase/contacts/lookup_match_contact_interactor.dart';
 import 'package:fluffychat/domain/usecase/room/block_user_interactor.dart';
 import 'package:fluffychat/domain/usecase/room/unblock_user_interactor.dart';
 import 'package:fluffychat/pages/chat_profile_info/chat_profile_info_view.dart';
 import 'package:fluffychat/presentation/enum/chat/chat_details_screen_enum.dart';
 import 'package:fluffychat/presentation/extensions/client_extension.dart';
+import 'package:fluffychat/presentation/extensions/contact/presentation_contact_extension.dart';
 import 'package:fluffychat/presentation/mixins/chat_details_tab_mixin.dart';
 import 'package:fluffychat/presentation/mixins/handle_video_download_mixin.dart';
 import 'package:fluffychat/presentation/mixins/play_video_action_mixin.dart';
@@ -85,7 +89,7 @@ class ChatProfileInfoController extends State<ChatProfileInfo>
   void lookupMatchContactAction() {
     lookupContactNotifierSub = _lookupMatchContactInteractor
         .execute(
-          val: widget.contact?.matrixId ?? user?.id ?? '',
+          val: presentationContact?.matrixId ?? user?.id ?? '',
         )
         .listen(
           (event) => lookupContactNotifier.value = event,
@@ -104,7 +108,7 @@ class ChatProfileInfoController extends State<ChatProfileInfo>
     _unblockUserInteractor
         .execute(
           client: Matrix.of(context).client,
-          userId: user?.id ?? widget.contact?.matrixId ?? '',
+          userId: user?.id ?? presentationContact?.matrixId ?? '',
         )
         .listen(
           (event) => event.fold(
@@ -132,7 +136,7 @@ class ChatProfileInfoController extends State<ChatProfileInfo>
                 TwakeSnackBar.show(
                   context,
                   L10n.of(context)!.userIsNotAValidMxid(
-                    user?.id ?? widget.contact?.matrixId ?? '',
+                    user?.id ?? presentationContact?.matrixId ?? '',
                   ),
                 );
                 return;
@@ -143,7 +147,7 @@ class ChatProfileInfoController extends State<ChatProfileInfo>
                 TwakeSnackBar.show(
                   context,
                   L10n.of(context)!.userNotFoundInIgnoreList(
-                    user?.id ?? widget.contact?.matrixId ?? '',
+                    user?.id ?? presentationContact?.matrixId ?? '',
                   ),
                 );
                 return;
@@ -163,7 +167,7 @@ class ChatProfileInfoController extends State<ChatProfileInfo>
     _blockUserInteractor
         .execute(
           client: Matrix.of(context).client,
-          userId: user?.id ?? widget.contact?.matrixId ?? '',
+          userId: user?.id ?? presentationContact?.matrixId ?? '',
         )
         .listen(
           (event) => event.fold(
@@ -191,7 +195,7 @@ class ChatProfileInfoController extends State<ChatProfileInfo>
                 TwakeSnackBar.show(
                   context,
                   L10n.of(context)!.userIsNotAValidMxid(
-                    user?.id ?? widget.contact?.matrixId ?? '',
+                    user?.id ?? presentationContact?.matrixId ?? '',
                   ),
                 );
                 return;
@@ -211,13 +215,13 @@ class ChatProfileInfoController extends State<ChatProfileInfo>
     isBlockedUser.value = Matrix.read(context)
         .client
         .ignoredUsers
-        .contains(widget.contact?.matrixId ?? user?.id ?? '');
+        .contains(presentationContact?.matrixId ?? user?.id ?? '');
     ignoredUsersStreamSub =
         Matrix.read(context).client.ignoredUsersStream.listen((value) {
       final userBlocked = Matrix.read(context)
           .client
           .ignoredUsers
-          .contains(widget.contact?.matrixId ?? user?.id ?? '');
+          .contains(presentationContact?.matrixId ?? user?.id ?? '');
       blockUserLoadingNotifier.value = false;
       isBlockedUser.value = userBlocked;
     });
@@ -237,15 +241,64 @@ class ChatProfileInfoController extends State<ChatProfileInfo>
     return location.contains('/draftChat') || pathParameters['roomid'] != null;
   }
 
+  PresentationContact? presentationContact;
+
+  PresentationContact? _getContactFromId(String matrixId) {
+    final getContactsState = getIt.get<ContactsManager>().getContactsNotifier();
+    return getContactsState.value.fold(
+      (failure) => null,
+      (success) => success is GetContactsSuccess
+          ? success.contacts
+              .firstWhereOrNull(
+                (c) => c.emails?.any((e) => e.matrixId == matrixId) == true,
+              )
+              ?.toPresentationContacts()
+              .firstOrNull
+          : null,
+    );
+  }
+
+  void _initPresentationContact() {
+    if (widget.contact != null) {
+      presentationContact = widget.contact;
+      return;
+    }
+
+    final matrixId = room?.directChatMatrixID;
+    if (matrixId == null) return;
+    final contact = _getContactFromId(matrixId);
+    if (contact != null) {
+      presentationContact = contact;
+    }
+  }
+
+  void _onTomContactsUpdateListener() {
+    final matrixId = presentationContact?.matrixId ?? room?.directChatMatrixID;
+    if (matrixId == null) return;
+    final updatedContact = _getContactFromId(matrixId);
+    if (mounted && updatedContact != null) {
+      setState(() {
+        presentationContact = updatedContact;
+      });
+    }
+  }
+
   @override
   void initState() {
     super.initState();
+    _initPresentationContact();
+    getIt.get<ContactsManager>().getContactsNotifier().addListener(
+          _onTomContactsUpdateListener,
+        );
     lookupMatchContactAction();
     listenIgnoredUser();
   }
 
   @override
   void dispose() {
+    getIt.get<ContactsManager>().getContactsNotifier().removeListener(
+          _onTomContactsUpdateListener,
+        );
     lookupContactNotifier.dispose();
     lookupContactNotifierSub?.cancel();
     ignoredUsersStreamSub?.cancel();

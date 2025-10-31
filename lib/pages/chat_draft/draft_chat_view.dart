@@ -74,8 +74,8 @@ class DraftChatView extends StatelessWidget {
                       : const SizedBox.shrink(),
                   Expanded(
                     child: _EmptyChatTitle(
-                      receiverId: controller.presentationContact!.matrixId!,
-                      displayName: controller.presentationContact!.displayName,
+                      receiverId: controller.presentationContact.matrixId!,
+                      displayName: controller.presentationContact.displayName,
                       onTap: controller.onPushDetails,
                     ),
                   ),
@@ -303,8 +303,8 @@ class DraftChatView extends StatelessWidget {
                       context: context,
                       client: Matrix.of(context).client,
                       displayName:
-                          controller.presentationContact!.matrixId ?? '',
-                      userID: controller.presentationContact!.matrixId ?? '',
+                          controller.presentationContact.matrixId ?? '',
+                      userID: controller.presentationContact.matrixId ?? '',
                     ),
                     child: const BlockedUserBanner(),
                   ),
