@@ -198,7 +198,7 @@ class AppAdaptiveScaffoldBodyController extends State<AppAdaptiveScaffoldBody>
       _handleSwitchAccount(oldWidget);
     }
 
-    if (widget.args is ReceiveContentArgs) {
+    if (oldWidget.args != widget.args && widget.args is ReceiveContentArgs) {
       _handleReceiveContent(widget.args as ReceiveContentArgs);
     }
     super.didUpdateWidget(oldWidget);

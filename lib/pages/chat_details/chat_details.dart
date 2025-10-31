@@ -35,7 +35,7 @@ class ChatDetailsController extends State<ChatDetails>
     with
         HandleVideoDownloadMixin,
         PlayVideoActionMixin,
-        SingleTickerProviderStateMixin,
+        TickerProviderStateMixin,
         ChatDetailsTabMixin<ChatDetails> {
   final actionsMobileAndTabletKey = const Key('ActionsMobileAndTabletKey');
 

@@ -18,6 +18,7 @@ import 'package:fluffychat/pages/new_group/new_group_chat_info.dart';
 import 'package:fluffychat/pages/settings_dashboard/settings_app_language/settings_app_language.dart';
 import 'package:fluffychat/pages/settings_dashboard/settings_blocked_users/settings_blocked_user.dart';
 import 'package:fluffychat/pages/settings_dashboard/settings_profile/settings_profile.dart';
+import 'package:fluffychat/pages/share/share.dart';
 import 'package:fluffychat/pages/splash/splash.dart';
 import 'package:fluffychat/pages/story/story_page.dart';
 import 'package:fluffychat/pages/twake_welcome/twake_welcome.dart';
@@ -322,6 +323,15 @@ abstract class AppRoutes {
               },
             ),
             GoRoute(
+              path: 'share',
+              pageBuilder: (context, state) {
+                return defaultPageBuilder(
+                  context,
+                  const Share(),
+                );
+              },
+            ),
+            GoRoute(
               path: 'profile',
               pageBuilder: (context, state) => defaultPageBuilder(
                 context,
@@ -449,10 +459,10 @@ abstract class AppRoutes {
                     case ChatRouterInputArgumentType.draft:
                       if (_responsive.isMobile(context)) {
                         return CupertinoPage(
-                          key: ValueKey(
-                            'DraftCupertinoPage_${state.pathParameters['roomid']!}_${DateTime.now().millisecondsSinceEpoch}',
-                          ),
-                          name: '/rooms/room',
+                          key: state.pageKey,
+                          name:
+                              '/rooms/room_${state.pathParameters['roomid']!}',
+                          restorationId: state.pageKey.value,
                           child: ChatAdaptiveScaffold(
                             roomId: state.pathParameters['roomid']!,
                             key: Key(
@@ -466,10 +476,9 @@ abstract class AppRoutes {
                       }
 
                       return NoTransitionPage(
-                        key: ValueKey(
-                          'DraftCupertinoPage_${state.pathParameters['roomid']!}_${DateTime.now().millisecondsSinceEpoch}',
-                        ),
-                        name: '/rooms/room',
+                        key: state.pageKey,
+                        restorationId: state.pageKey.value,
+                        name: '/rooms/room_${state.pathParameters['roomid']!}',
                         child: ChatAdaptiveScaffold(
                           roomId: state.pathParameters['roomid']!,
                           key: Key(
@@ -483,10 +492,10 @@ abstract class AppRoutes {
                     case ChatRouterInputArgumentType.share:
                       if (_responsive.isMobile(context)) {
                         return CupertinoPage(
-                          name: '/rooms/room',
-                          key: ValueKey(
-                            'ShareCupertinoPage_${state.pathParameters['roomid']!}_${DateTime.now().millisecondsSinceEpoch}',
-                          ),
+                          name:
+                              '/rooms/room_${state.pathParameters['roomid']!}',
+                          restorationId: state.pageKey.value,
+                          key: state.pageKey,
                           child: ChatAdaptiveScaffold(
                             roomId: state.pathParameters['roomid']!,
                             key: Key(
@@ -498,10 +507,9 @@ abstract class AppRoutes {
                       }
 
                       return NoTransitionPage(
-                        name: '/rooms/room',
-                        key: ValueKey(
-                          'ShareCupertinoPage_${state.pathParameters['roomid']!}_${DateTime.now().millisecondsSinceEpoch}',
-                        ),
+                        name: '/rooms/room_${state.pathParameters['roomid']!}',
+                        restorationId: state.pageKey.value,
+                        key: state.pageKey,
                         child: ChatAdaptiveScaffold(
                           roomId: state.pathParameters['roomid']!,
                           key: Key(
@@ -514,10 +522,9 @@ abstract class AppRoutes {
                 }
                 if (_responsive.isMobile(context)) {
                   return CupertinoPage(
-                    name: '/rooms/room',
-                    key: ValueKey(
-                      'DefaultCupertinoPage_${state.pathParameters['roomid']!}_${DateTime.now().millisecondsSinceEpoch}',
-                    ),
+                    name: '/rooms/room_${state.pathParameters['roomid']!}',
+                    restorationId: state.pageKey.value,
+                    key: state.pageKey,
                     child: ChatAdaptiveScaffold(
                       roomId: state.pathParameters['roomid']!,
                       key: Key(
@@ -528,10 +535,9 @@ abstract class AppRoutes {
                 }
 
                 return NoTransitionPage(
-                  name: '/rooms/room',
-                  key: ValueKey(
-                    'DefaultCupertinoPage_${state.pathParameters['roomid']!}_${DateTime.now().millisecondsSinceEpoch}',
-                  ),
+                  name: '/rooms/room_${state.pathParameters['roomid']!}',
+                  restorationId: state.pageKey.value,
+                  key: state.pageKey,
                   child: ChatAdaptiveScaffold(
                     roomId: state.pathParameters['roomid']!,
                     key: Key(

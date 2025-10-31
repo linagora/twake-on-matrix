@@ -235,26 +235,19 @@ class MatrixState extends State<Matrix>
   Client? getClientByName(String name) =>
       widget.clients.firstWhereOrNull((c) => c.clientName == name);
 
-  Map<String, dynamic>? get shareContent => _shareContent;
-
-  set shareContent(Map<String, dynamic>? content) {
-    _shareContent = content;
-    onShareContentChanged.add(_shareContent);
-  }
-
-  Map<String, dynamic>? _shareContent;
+  Map<String, dynamic>? shareContent;
 
   List<Map<String, dynamic>?> get shareContentList => _shareContentList ?? [];
 
   set shareContentList(List<Map<String, dynamic>?>? content) {
     _shareContentList = content;
-    onShareContentChanged.add(_shareContent);
+  }
+
+  void clearShareContentList() {
+    _shareContentList = null;
   }
 
   List<Map<String, dynamic>?>? _shareContentList;
-
-  final StreamController<Map<String, dynamic>?> onShareContentChanged =
-      StreamController.broadcast();
 
   File? wallpaper;
 
@@ -327,7 +320,7 @@ class MatrixState extends State<Matrix>
       initMatrix();
       final emojiRawData = await EmojiData.builtIn();
       emojiData = emojiRawData.filterByVersion(13.5);
-      await initReceiveSharingIntent();
+      initReceiveSharingIntent();
       await tryToGetFederationConfigurations();
       if (PlatformInfos.isWeb) {
         initConfigWeb().then((_) => initSettings());
