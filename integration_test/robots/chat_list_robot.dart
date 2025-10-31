@@ -1,3 +1,4 @@
+import 'package:fluffychat/pages/chat_list/chat_list_bottom_navigator.dart';
 import 'package:fluffychat/pages/chat_list/chat_list_item_title.dart';
 import 'package:fluffychat/widgets/twake_components/twake_fab.dart';
 import 'package:flutter/material.dart';
@@ -21,6 +22,14 @@ class ChatListRobot extends HomeRobot {
    
   PatrolFinder getPenIcon(){
     return $(TwakeFloatingActionButton);
+  }
+
+  PatrolFinder getPinIcon(){
+    return $(ChatListBottomNavigator).$(InkWell).containing($("Pin"));
+  }
+
+  PatrolFinder getUnPinIcon(){
+    return $(ChatListBottomNavigator).$(InkWell).containing($("Unpin"));
   }
 
   Future<void> clickOnPenIcon() async{
