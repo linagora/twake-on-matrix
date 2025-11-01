@@ -195,7 +195,7 @@ class TwakeListItemRobot extends CoreRobot {
 
   Future<void> pin() async {
     await getPinBtn().tap();
-    await $.waitUntilVisible(await getPinIcon());
+    await $.waitUntilVisible(getPinIcon());
   }
 
   Future<void> unpin() async {
