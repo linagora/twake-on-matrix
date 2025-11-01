@@ -31,9 +31,12 @@ void main() async {
   SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
   MediaKit.ensureInitialized();
   await vod.init();
+  databaseFactory = databaseFactorySqflitePlugin;
   fallbackDatabase = await MatrixSdkDatabase.init(
     '${AppConfig.applicationName}-${DateTime.now().millisecondsSinceEpoch}',
-    database: await openDatabase('./${AppConfig.applicationName}.db'),
+    database: !PlatformInfos.isWeb
+        ? await openDatabase('./${AppConfig.applicationName}.db')
+        : null,
   );
   GoRouter.optionURLReflectsImperativeAPIs = true;
   if (PlatformInfos.isLinux) {

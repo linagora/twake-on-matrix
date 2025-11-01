@@ -38,7 +38,7 @@ mixin SendFilesMixin {
     if (room == null) {}
     Navigator.pop(context);
     final result = await FilePicker.platform.pickFiles(
-      withReadStream: true,
+      withData: true,
       allowMultiple: true,
     );
     fileInfos ??= await Future.wait(
@@ -57,9 +57,8 @@ mixin SendFilesMixin {
 
   Future<List<MatrixFile>> pickFilesFromSystem() async {
     final result = await FilePicker.platform.pickFiles(
-      withData: false,
+      withData: true,
       allowMultiple: true,
-      withReadStream: true,
     );
     if (result == null || result.files.isEmpty) return [];
     return await Future.wait(

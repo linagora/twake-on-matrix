@@ -509,7 +509,7 @@ class DraftChatController extends State<DraftChat>
     Room? room,
   }) async {
     final result = await FilePicker.platform.pickFiles(
-      withReadStream: true,
+      withData: true,
       allowMultiple: true,
     );
     if (result == null || result.files.isEmpty) return;

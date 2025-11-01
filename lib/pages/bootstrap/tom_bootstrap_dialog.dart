@@ -92,6 +92,8 @@ class TomBootstrapDialogState extends State<TomBootstrapDialog>
   Future<void> _loadingData() async {
     _uploadRecoveryKeyState = UploadRecoveryKeyState.dataLoading;
     Logs().i('_loadingData: $_uploadRecoveryKeyState');
+    await widget.client.firstSyncReceived;
+    await widget.client.userDeviceKeysLoading;
     await widget.client.roomsLoading;
     await widget.client.accountDataLoading;
 

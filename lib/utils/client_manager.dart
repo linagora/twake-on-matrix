@@ -34,7 +34,8 @@ abstract class ClientManager {
       clientNames.map((name) async {
         final database = await MatrixSdkDatabase.init(
           name,
-          database: await openDatabase('./$name.db'),
+          database:
+              !PlatformInfos.isWeb ? await openDatabase('./$name.db') : null,
         );
         return createClient(name, database: database);
       }),

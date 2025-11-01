@@ -18,6 +18,7 @@ import 'package:fluffychat/utils/js_window/universal_image_bitmap.dart';
 import 'package:fluffychat/utils/manager/upload_manager/upload_state.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:matrix/matrix.dart';
+// ignore: implementation_imports
 import 'package:matrix/src/utils/run_benchmarked.dart';
 import 'package:image/image.dart';
 import 'package:mime/mime.dart';

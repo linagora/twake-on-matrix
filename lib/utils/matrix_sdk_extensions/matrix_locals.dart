@@ -372,7 +372,6 @@ class MatrixLocals extends MatrixLocalizations {
 
   @override
   String voiceMessage(String senderName, Duration? duration) {
-    // TODO: implement voiceMessage
-    throw UnimplementedError();
+    return l10n.voiceMessage;
   }
 }

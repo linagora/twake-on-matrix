@@ -7,6 +7,7 @@ import 'package:fluffychat/utils/matrix_sdk_extensions/client_stories_extension.
 import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
 import 'package:html_unescape/html_unescape.dart';
 import 'package:matrix/matrix.dart';
+// ignore: implementation_imports
 import 'package:matrix/src/utils/markdown.dart';
 
 extension RoomExtension on Room {
