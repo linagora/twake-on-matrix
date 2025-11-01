@@ -34,7 +34,6 @@ mixin ChatListItemMixin {
         hideEdit: true,
         plaintextBody: true,
         removeMarkdown: true,
-        removeBreakLine: true,
       ),
       builder: (context, snapshot) {
         return Text(
@@ -112,7 +111,6 @@ mixin ChatListItemMixin {
       hideEdit: true,
       plaintextBody: true,
       removeMarkdown: true,
-      removeBreakLine: true,
     );
     if (event.isAFile == true) {
       return Text(

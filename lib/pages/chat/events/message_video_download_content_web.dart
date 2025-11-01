@@ -2,7 +2,6 @@ import 'package:fluffychat/pages/chat/events/event_video_player.dart';
 import 'package:fluffychat/pages/chat/events/message_content_style.dart';
 import 'package:fluffychat/presentation/mixins/play_video_action_mixin.dart';
 import 'package:fluffychat/presentation/model/chat/downloading_state_presentation_model.dart';
-import 'package:fluffychat/utils/extension/web_url_creation_extension.dart';
 import 'package:fluffychat/utils/manager/download_manager/download_file_state.dart';
 import 'package:fluffychat/widgets/mixins/download_file_on_web_mixin.dart';
 import 'package:flutter/material.dart';
@@ -113,9 +112,7 @@ class _MessageVideoDownloadContentWebState
             if (downloadState is FileWebDownloadedPresentationState) {
               playVideoAction(
                 context,
-                downloadState.matrixFile.bytes!.toWebUrl(
-                  mimeType: downloadState.matrixFile.mimeType,
-                ),
+                downloadState.matrixFile.bytes,
                 isReplacement: false,
               );
             }

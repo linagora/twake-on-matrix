@@ -95,10 +95,6 @@ class SettingsProfileViewWeb extends StatelessWidget {
                                   (success) {
                                     if (success
                                         is GetAvatarOnWebUIStateSuccess) {
-                                      if (success.matrixFile?.readStream ==
-                                          null) {
-                                        return child!;
-                                      }
                                       return ClipOval(
                                         child: SizedBox.fromSize(
                                           size: const Size.fromRadius(

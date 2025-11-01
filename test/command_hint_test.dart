@@ -6,6 +6,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'utils/test_client.dart';
 
 void main() async {
+  TestWidgetsFlutterBinding.ensureInitialized();
   test('Check for missing /command hints', () async {
     final translated =
         jsonDecode(File('assets/l10n/intl_en.arb').readAsStringSync())

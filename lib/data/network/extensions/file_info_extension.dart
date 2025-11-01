@@ -1,10 +1,8 @@
-import 'package:fluffychat/utils/mime_type_uitls.dart';
+import 'package:fluffychat/domain/model/file_info/file_info.dart';
 import 'package:matrix/matrix.dart';
 
 extension FileInfoExtension on FileInfo {
   String get fileExtension => fileName.split('.').last;
-
-  String get mimeType => MimeTypeUitls.instance.getTwakeMimeType(filePath);
 
   Map<String, dynamic> get metadata => ({
         'mimetype': mimeType,
@@ -26,5 +24,13 @@ extension FileInfoExtension on FileInfo {
       return MessageTypes.Audio;
     }
     return MessageTypes.File;
+  }
+
+  MatrixFile toMatrixFile() {
+    return MatrixFile(
+      bytes: bytes,
+      name: fileName,
+      mimeType: mimeType,
+    );
   }
 }

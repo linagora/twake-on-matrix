@@ -6,7 +6,7 @@ class ToMConfigurations with EquatableMixin {
   final ToMServerInformation tomServerInformation;
   final IdentityServerInformation? identityServerInformation;
   final String? authUrl;
-  final LoginType? loginType;
+  final String? loginType;
 
   ToMConfigurations({
     required this.tomServerInformation,

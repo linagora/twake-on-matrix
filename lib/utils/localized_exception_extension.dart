@@ -22,24 +22,6 @@ extension LocalizedExceptionExtension on Object {
     if (this is FileTooBigMatrixException) {
       return L10n.of(context)!.fileIsTooBigForServer;
     }
-    if (this is BadServerVersionsException) {
-      final serverVersions = (this as BadServerVersionsException)
-          .serverVersions
-          .toString()
-          .replaceAll('{', '"')
-          .replaceAll('}', '"');
-      final supportedVersions = (this as BadServerVersionsException)
-          .supportedVersions
-          .toString()
-          .replaceAll('{', '"')
-          .replaceAll('}', '"');
-      return L10n.of(context)!.badServerVersionsException(
-        serverVersions,
-        supportedVersions,
-        serverVersions,
-        supportedVersions,
-      );
-    }
     if (this is BadServerLoginTypesException) {
       final serverVersions = (this as BadServerLoginTypesException)
           .serverLoginTypes
@@ -57,7 +39,7 @@ extension LocalizedExceptionExtension on Object {
         supportedVersions,
       );
     }
-    if (this is MatrixConnectionException || this is SocketException) {
+    if (this is SocketException) {
       return L10n.of(context)!.noConnectionToTheServer;
     }
     if (this is String) return toString();

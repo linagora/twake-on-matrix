@@ -92,6 +92,8 @@ class TomBootstrapDialogState extends State<TomBootstrapDialog>
   Future<void> _loadingData() async {
     _uploadRecoveryKeyState = UploadRecoveryKeyState.dataLoading;
     Logs().i('_loadingData: $_uploadRecoveryKeyState');
+    await widget.client.firstSyncReceived;
+    await widget.client.userDeviceKeysLoading;
     await widget.client.roomsLoading;
     await widget.client.accountDataLoading;
 
@@ -114,7 +116,6 @@ class TomBootstrapDialogState extends State<TomBootstrapDialog>
 
   Future<void> _getRecoveryKeyState() async {
     await widget.client.onSync.stream.first;
-    await widget.client.initCompleter?.future;
 
     // Display first login bootstrap if enabled
     if (widget.client.encryption?.keyManager.enabled == true) {

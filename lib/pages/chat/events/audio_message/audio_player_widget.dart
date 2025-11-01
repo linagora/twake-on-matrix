@@ -131,7 +131,7 @@ class AudioPlayerState extends State<AudioPlayerWidget>
         );
         file = File('${tempDir.path}/${fileName}_${matrixFile.name}');
 
-        await file.writeAsBytes(matrixFile.bytes ?? []);
+        await file.writeAsBytes(matrixFile.bytes);
 
         if (Platform.isIOS &&
             matrixFile.mimeType.toLowerCase() == 'audio/ogg') {

@@ -12,7 +12,7 @@ import 'package:fluffychat/presentation/model/search/presentation_search.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fluffychat/domain/model/contact/contact.dart';
-import 'package:matrix/matrix.dart';
+import 'package:matrix/matrix.dart' hide Contact;
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
 

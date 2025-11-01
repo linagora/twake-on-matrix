@@ -1,6 +1,4 @@
-import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_file_extension.dart';
 import 'package:flutter/material.dart';
-import 'dart:async';
 
 import 'package:matrix/matrix.dart';
 
@@ -19,58 +17,42 @@ class StreamImageViewer extends StatefulWidget {
 }
 
 class StreamImageViewerState extends State<StreamImageViewer> {
-  final ValueNotifier<MatrixFile?> imageBytes = ValueNotifier(null);
+  MatrixFile? imageFile;
 
-  Future<void> _loadImage() async {
-    final convertMatrix = await widget.matrixFile.convertReadStreamToBytes();
-    widget.onImageLoaded.call(convertMatrix);
-    imageBytes.value = convertMatrix;
+  void _loadImage() {
+    widget.onImageLoaded.call(widget.matrixFile);
+    imageFile = widget.matrixFile;
   }
 
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) async {
-      await _loadImage();
-    });
+    _loadImage();
   }
 
   @override
   void didUpdateWidget(covariant StreamImageViewer oldWidget) {
-    if (oldWidget.matrixFile != widget.matrixFile) {
-      WidgetsBinding.instance.addPostFrameCallback((_) async {
-        await _loadImage();
-      });
-    }
     super.didUpdateWidget(oldWidget);
-  }
-
-  @override
-  void dispose() {
-    imageBytes.dispose();
-    super.dispose();
+    if (oldWidget.matrixFile != widget.matrixFile) {
+      _loadImage();
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    return ValueListenableBuilder(
-      valueListenable: imageBytes,
-      builder: (_, bytes, __) {
-        if (bytes == null) {
-          return const Center(
-            child: CircularProgressIndicator(),
-          );
-        }
-        return InteractiveViewer(
-          minScale: 0.1,
-          maxScale: 5.0,
-          child: Image.memory(
-            bytes.bytes!,
-            fit: BoxFit.cover,
-            gaplessPlayback: true,
-          ),
-        );
-      },
+    if (imageFile == null) {
+      return const Center(
+        child: CircularProgressIndicator(),
+      );
+    }
+    return InteractiveViewer(
+      minScale: 0.1,
+      maxScale: 5.0,
+      child: Image.memory(
+        imageFile!.bytes,
+        fit: BoxFit.cover,
+        gaplessPlayback: true,
+      ),
     );
   }
 }

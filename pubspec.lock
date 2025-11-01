@@ -1319,10 +1319,10 @@ packages:
     dependency: "direct main"
     description:
       name: flutter_vodozemac
-      sha256: "54cd3790b6dfdc1afce928f8c46f7eeea9e4f8326f077400894935926f202057"
+      sha256: "16d4b44dd338689441fe42a80d0184e5c864e9563823de9e7e6371620d2c0590"
       url: "https://pub.dev"
     source: hosted
-    version: "0.3.0"
+    version: "0.4.1"
   flutter_web_auth_2:
     dependency: "direct main"
     description:
@@ -1446,14 +1446,22 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.1.9"
-  heif_converter:
+  heic_to_png_jpg:
     dependency: "direct main"
     description:
-      name: heif_converter
-      sha256: "63ffc2a72026942de3fcb61450da197100759936085c8279aef35b995b3c1bb3"
+      name: heic_to_png_jpg
+      sha256: cd4038a1b194c70d0a665e85a8d32a7b7a0d554baa5f0fe833f8cafbb0c7b792
       url: "https://pub.dev"
     source: hosted
-    version: "1.0.0"
+    version: "0.0.5"
+  heif_converter:
+    dependency: transitive
+    description:
+      name: heif_converter
+      sha256: a2fbbf3f795b19753d84a52223c60d3bcf3cf2261d6c0d41857f0ec198e6eef3
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.0.1"
   highlight:
     dependency: transitive
     description:
@@ -1495,7 +1503,7 @@ packages:
     source: hosted
     version: "0.15.4"
   html_unescape:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: html_unescape
       sha256: "15362d7a18f19d7b742ef8dcb811f5fd2a2df98db9f80ea393c075189e0b61e3"
@@ -1867,12 +1875,11 @@ packages:
   matrix:
     dependency: "direct main"
     description:
-      path: "."
-      ref: "twake-supported-0.22.6"
-      resolved-ref: aaf4b1719b387595c594329e3d9a6808dcaa37b9
-      url: "git@github.com:linagora/matrix-dart-sdk.git"
-    source: git
-    version: "0.22.6"
+      name: matrix
+      sha256: "94f5284c4ee521ae9d61f30cbb7c299d02d820e35509c028090d3b1901f520a3"
+      url: "https://pub.dev"
+    source: hosted
+    version: "3.0.2"
   matrix_api_lite:
     dependency: "direct overridden"
     description:
@@ -2789,7 +2796,7 @@ packages:
     source: hosted
     version: "7.0.0"
   sqflite:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: sqflite
       sha256: a43e5a27235518c03ca238e7b4732cf35eabe863a369ceba6cbefa537a66f16d
@@ -2804,6 +2811,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.5.4"
+  sqlite3:
+    dependency: transitive
+    description:
+      name: sqlite3
+      sha256: f18fd9a72d7a1ad2920db61368f2a69368f1cc9b56b8233e9d83b47b0a8435aa
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.9.3"
   stack_trace:
     dependency: transitive
     description:
@@ -3243,10 +3258,10 @@ packages:
     dependency: transitive
     description:
       name: vodozemac
-      sha256: "95cac62ffab94db99e134c8f9aac198f8131a4eed0bed76a6cfc9c72add229b9"
+      sha256: "39144e20740807731871c9248d811ed5a037b21d0aa9ffcfa630954de74139d9"
       url: "https://pub.dev"
     source: hosted
-    version: "0.3.0"
+    version: "0.4.0"
   volume_controller:
     dependency: transitive
     description:

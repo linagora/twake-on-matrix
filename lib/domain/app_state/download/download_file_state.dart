@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:fluffychat/app_state/failure.dart';
 import 'package:fluffychat/app_state/success.dart';
 
@@ -11,10 +13,10 @@ class DownloadMediaFileFailure extends Failure {
 }
 
 class DownloadMediaFileSuccess extends Success {
-  const DownloadMediaFileSuccess({required this.filePath});
+  const DownloadMediaFileSuccess({required this.bytes});
 
-  final String filePath;
+  final Uint8List bytes;
 
   @override
-  List<Object?> get props => [filePath];
+  List<Object?> get props => [bytes];
 }

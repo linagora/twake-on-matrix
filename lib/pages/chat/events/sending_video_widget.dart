@@ -114,12 +114,9 @@ class _SendingVideoWidgetState extends State<SendingVideoWidget>
   }
 
   void _onPlayVideo(BuildContext context) async {
-    if (widget.matrixFile.filePath == null) {
-      return;
-    }
     playVideoAction(
       context,
-      widget.matrixFile.filePath!,
+      widget.matrixFile.bytes,
       event: widget.event,
       isReplacement: false,
     );
@@ -152,9 +149,9 @@ class VideoWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return matrixFile.bytes != null && matrixFile.bytes!.isNotEmpty
+    return matrixFile.bytes.isNotEmpty
         ? Image.memory(
-            matrixFile.bytes!,
+            matrixFile.bytes,
             width: imageWidth,
             height: imageHeight,
             fit: BoxFit.cover,

@@ -69,11 +69,8 @@ extension MatrixFileExtension on MatrixFile {
     // Workaround for iPad from
     // https://github.com/fluttercommunity/plus_plugins/tree/main/packages/share_plus/share_plus#ipad
     final box = context.findRenderObject() as RenderBox?;
-    if (bytes == null) {
-      return;
-    }
     await Share.shareXFiles(
-      [XFile.fromData(bytes!, name: name, mimeType: mimeType)],
+      [XFile.fromData(bytes, name: name, mimeType: mimeType)],
       sharePositionOrigin:
           box == null ? null : box.localToGlobal(Offset.zero) & box.size,
     );
@@ -102,7 +99,7 @@ extension MatrixFileExtension on MatrixFile {
     );
 
     final result = await ImageGallerySaver.saveImage(
-      bytes ?? Uint8List(0),
+      bytes,
       name: name,
     );
 
@@ -124,17 +121,14 @@ extension MatrixFileExtension on MatrixFile {
   }
 
   MatrixFile get detectFileType {
-    if (bytes == null) {
-      return this;
-    }
     if (msgType == MessageTypes.Image) {
-      return MatrixImageFile(bytes: bytes!, name: name, filePath: filePath);
+      return MatrixImageFile(bytes: bytes, name: name, mimeType: mimeType);
     }
     if (msgType == MessageTypes.Video) {
-      return MatrixVideoFile(bytes: bytes!, name: name, filePath: filePath);
+      return MatrixVideoFile(bytes: bytes, name: name, mimeType: mimeType);
     }
     if (msgType == MessageTypes.Audio) {
-      return MatrixAudioFile(bytes: bytes!, name: name, filePath: filePath);
+      return MatrixAudioFile(bytes: bytes, name: name, mimeType: mimeType);
     }
     return this;
   }
@@ -143,18 +137,6 @@ extension MatrixFileExtension on MatrixFile {
 
   String? get fileExtension =>
       name.contains('.') ? name.split('.').last.toUpperCase() : null;
-
-  Future<MatrixFile> convertReadStreamToBytes() async {
-    if (bytes != null || readStream == null) {
-      return this;
-    }
-    return MatrixFile(
-      bytes: await streamToUint8List(readStream!),
-      name: name,
-      mimeType: mimeType,
-      filePath: filePath,
-    ).detectFileType;
-  }
 
   Future<Uint8List> streamToUint8List(Stream<List<int>> stream) async {
     return await stream.toBytes();
@@ -166,11 +148,11 @@ extension MatrixFileExtension on MatrixFile {
   bool isFileHaveError(double maxSize) => size > maxSize;
 
   bool isSendingImageInWeb() {
-    return bytes != null && this is MatrixImageFile;
+    return this is MatrixImageFile;
   }
 
   bool isSendingImageInMobile() {
-    return filePath != null && this is MatrixImageFile && !PlatformInfos.isWeb;
+    return this is MatrixImageFile && !PlatformInfos.isWeb;
   }
 }
 
@@ -180,9 +162,7 @@ class TwakeAudioFile extends MatrixFile {
   TwakeAudioFile({
     required super.name,
     super.mimeType,
-    super.filePath,
-    super.readStream,
-    super.sizeInBytes,
+    required super.bytes,
     this.duration,
   });
 
@@ -196,8 +176,16 @@ class TwakeAudioFile extends MatrixFile {
       });
 
   @override
-  List<Object?> get props => [
-        ...super.props,
-        duration,
-      ];
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is TwakeAudioFile &&
+          runtimeType == other.runtimeType &&
+          name == other.name &&
+          mimeType == other.mimeType &&
+          bytes == other.bytes &&
+          duration == other.duration;
+
+  @override
+  int get hashCode =>
+      name.hashCode ^ mimeType.hashCode ^ bytes.hashCode ^ duration.hashCode;
 }

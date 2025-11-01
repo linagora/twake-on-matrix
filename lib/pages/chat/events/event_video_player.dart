@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/pages/chat/events/message_content_style.dart';
 import 'package:fluffychat/pages/chat_details/chat_details_page_view/media/chat_details_media_style.dart';
@@ -12,7 +14,7 @@ import 'package:matrix/matrix.dart';
 import 'package:fluffychat/pages/chat/events/images_builder/image_bubble.dart';
 import 'package:linagora_design_flutter/extensions/duration_extension.dart';
 
-typedef DownloadVideoEventCallback = Future<String> Function(Event event);
+typedef DownloadVideoEventCallback = Future<Uint8List> Function(Event event);
 
 class EventVideoPlayer extends StatelessWidget {
   final Event event;

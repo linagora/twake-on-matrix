@@ -18,7 +18,7 @@ class SettingsStyleController extends State<SettingsStyle> {
   void setWallpaperAction() async {
     final picked = await FilePicker.platform.pickFiles(
       type: FileType.image,
-      withData: false,
+      withData: true,
     );
     final pickedFile = picked?.files.firstOrNull;
 
