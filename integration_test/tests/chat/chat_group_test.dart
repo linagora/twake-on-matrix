@@ -3,9 +3,12 @@ import 'package:fluffychat/pages/chat/event_info_dialog.dart';
 import 'package:fluffychat/widgets/avatar/avatar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import '../../base/base_scenario.dart';
 import '../../base/test_base.dart';
 import '../../help/soft_assertion_helper.dart';
 import '../../robots/chat_group_detail_robot.dart';
+import '../../robots/chat_search_view_robot.dart';
+import '../../scenarios/chat_detail_scenario.dart';
 import '../../scenarios/chat_scenario.dart';
 import '../../robots/home_robot.dart';
 import 'package:patrol/patrol.dart';
@@ -177,6 +180,42 @@ void main() {
 
       s.verifyAll();
 
+    },
+  );
+
+  TestBase().runPatrolTest(
+    description: 'Search for messages inside a chat',
+    test: ($) async {
+      //open chat and make some messages
+      final receiveMessage = (await prepareTwoMessages($)).$2;
+      final searchPharse = receiveMessage.substring(receiveMessage.indexOf("sent"), receiveMessage.length);
+
+      //open a chat
+      await ChatDetailScenario($).makeASearch(searchPharse);
+      // verify info dialog is shown
+      final numberOfResult = (await ChatSearchViewRobot($).getListOfChatSeach()).length;
+      expect(numberOfResult == 2, isTrue, reason: "expect is 2 but got: $numberOfResult");
+    },
+  );
+
+  TestBase().runPatrolTest(
+    description: 'View profile of a members in a group',
+    test: ($) async {
+      final s = SoftAssertHelper();
+      //goto chat
+      await HomeRobot($).gotoChatListScreen();
+
+      //open a group
+      const groupTest = String.fromEnvironment('GroupTest');
+      await ChatScenario($).openChatGroupByTitle(groupTest);
+
+      //open group Info
+      await ChatScenario($).openGroupChatInfo();
+
+      //Verify profile Info of all member
+      await ChatDetailScenario($).verifyProfileInfoOfAllMember(s);
+
+      s.verifyAll();
     },
   );
 }

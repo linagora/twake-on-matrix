@@ -11,7 +11,10 @@ import 'package:fluffychat/pages/chat/events/message/multi_platform_message_cont
 import 'package:fluffychat/pages/chat/events/message_content.dart';
 import 'package:fluffychat/pages/chat/events/message_time.dart';
 import 'package:fluffychat/pages/chat/seen_by_row.dart';
+import 'package:fluffychat/pages/chat_details/chat_details_edit_view.dart';
+import 'package:fluffychat/pages/chat_details/removed/removed_view.dart';
 import 'package:fluffychat/pages/chat_draft/draft_chat_view.dart';
+import 'package:fluffychat/pages/chat_list/chat_custom_slidable_action.dart';
 import 'package:fluffychat/pages/chat_list/chat_list_body_view.dart';
 import 'package:fluffychat/widgets/context_menu/context_menu_action_item_widget.dart';
 import 'package:fluffychat/widgets/twake_components/twake_icon_button.dart';
@@ -25,13 +28,15 @@ import '../robots/add_member_robot.dart';
 import '../robots/chat_group_detail_robot.dart';
 import '../robots/chat_list_robot.dart';
 import 'package:flutter/material.dart';
+import '../robots/edit_group_information_robot.dart';
 import '../robots/group_information_robot.dart';
 import '../robots/menu_robot.dart';
 import '../robots/new_chat_robot.dart';
+import '../robots/removed_users_robot.dart';
 import '../robots/search_robot.dart';
 import '../robots/setting_for_new_group.dart';
+import '../robots/twake_list_item_robot.dart';
 
-enum UserLevel { member, admin, owner, moderator }
 class ChatScenario extends BaseScenario {
   ChatScenario(super.$);
 
@@ -42,7 +47,7 @@ class ChatScenario extends BaseScenario {
 
   Future<ChatGroupDetailRobot> openChatGroupByTitle(String groupTitle) async {
     await enterSearchText(groupTitle);
-    await (await ChatListRobot($).getListOfChatGroup())[0].root.tap();
+    await (ChatListRobot($).getListOfChatGroup())[0].root.tap();
     await $.pumpAndSettle();
     return ChatGroupDetailRobot($);
   }
@@ -60,7 +65,7 @@ class ChatScenario extends BaseScenario {
       await AddMemberRobot($).selectAllFilteredAccounts();
     }
     await AddMemberRobot($).getNextIcon().tap();
-    await AddMemberRobot($).getAgreeInviteMemberBtn().tap();
+    // await AddMemberRobot($).getAgreeInviteMemberBtn().tap();
     await $.waitUntilVisible($("Group information"));
     return (await GroupInformationRobot($).getListOfMembers()).length;
   }
@@ -70,10 +75,26 @@ class ChatScenario extends BaseScenario {
     for(final member in members){
       await GroupInformationRobot($).getMember(member).tap();
       await GroupInformationRobot($).clickOnRemoveFromGroup();
-      await GroupInformationRobot($).clickOnAgreeIRemoveMemberBtn();
+      // await GroupInformationRobot($).clickOnAgreeIRemoveMemberBtn();
     }
     await $.waitUntilVisible($("Group information"));
     return (await GroupInformationRobot($).getListOfMembers()).length;
+  }
+
+  Future<void> unbanUser(List<String> matrixAddreses) async {
+    await openGroupChatInfo();
+    await GroupInformationRobot($).getEditGroupIcon().tap();
+    await EditGroupInformationRobot($).openBannedUserList();
+
+    for(final matrixAddres in matrixAddreses){
+      await RemovedUsersRobot($).getUnBanIconUser(matrixAddres).tap();
+      await RemovedUsersRobot($).waitUntilAbsent($, RemovedUsersRobot($).getBanedUser(matrixAddres));
+    }
+    if($(RemovedView).exists)
+    {
+      await RemovedUsersRobot($).getBackIcon().tap();
+    }
+    await $.waitUntilVisible($(ChatDetailsEditView));
   }
 
   Future<void> backToChatLisFromChatGroupScreen({bool isOpenGroupFromSearchResult = false}) async {
@@ -390,7 +411,7 @@ class ChatScenario extends BaseScenario {
   }
 
   Future<void> verifySearchResultContains(String keyword) async {
-    final items = await ChatListRobot($).getListOfChatGroup();
+    final items = ChatListRobot($).getListOfChatGroup();
     final length = items.length;
     var i = 0;
 
@@ -416,7 +437,7 @@ class ChatScenario extends BaseScenario {
 
   Future<ChatGroupDetailRobot> openChatGroup(String title) async {
     await enterSearchText(title);
-    await (await ChatListRobot($).getListOfChatGroup())[0].root.tap();
+    await ( ChatListRobot($).getListOfChatGroup())[0].root.tap();
     final chatGroupDetailRobot = ChatGroupDetailRobot($);
     await chatGroupDetailRobot.confimrAccessMedia();
     await $.pumpAndSettle();
@@ -480,5 +501,211 @@ class ChatScenario extends BaseScenario {
   Future<void> verifyChatListCanBeScrollable(SoftAssertHelper s) async {
     s.softAssertEquals( await CoreRobot($).isActuallyScrollable($,root: $(SingleChildScrollView),), true,
         'Chat list is not scrollable',);
+  }
+
+  Future<bool> isPinAChat(TwakeListItemRobot takeListItem) async{
+    final pin = await $.waitUntilVisible(takeListItem.getPinIcon());
+    return pin.visible;
+  }
+
+  Future<bool> isMarkAsUnRead(TwakeListItemRobot takeListItem) async{
+    final unread = await $.waitUntilVisible(takeListItem.getUnReadIcon());
+    return unread.visible;
+  }
+
+  Future<bool> isMutedAChat(TwakeListItemRobot takeListItem) async{
+    final muted = await $.waitUntilVisible(takeListItem.getMutedIcon());
+    return muted.visible;
+  }
+
+  String getTitleOfAChat(int index){
+    return  ChatListRobot($).getListOfChatGroup()[index].getTitle().text ?? "";
+  }
+
+  bool isSelectedAChat(TwakeListItemRobot twakeListItem) {
+    final checkBox= twakeListItem.getCheckBox();
+    if(!checkBox.exists) return false;
+    final match = checkBox.evaluate();
+    final w = match.single.widget;
+    if (w is Checkbox) return w.value ?? false;
+    throw StateError('Finder is not a Checkbox');
+  }
+
+  Future<void> selectAChat(TwakeListItemRobot twakeListItem) async {
+    await $.tester.ensureVisible(twakeListItem.root);
+    final checkBox= twakeListItem.getCheckBox();
+    if(!checkBox.exists)
+    {
+      await twakeListItem.root.longPress();
+      await $.waitUntilVisible(twakeListItem.getCheckBox());
+      await twakeListItem.getCheckBox().tap();
+    }
+    else
+    {
+      final match = checkBox.evaluate();
+      final w = match.single.widget;
+      if((w is Checkbox) && (w.value == false))
+      {
+        await twakeListItem.getCheckBox().tap();
+      }
+    }
+  }
+
+  Future<void> selectAChatByTitle(String title) async {
+    final twakeListItem = ChatListRobot($).getChatGroupByTitle(title);
+    await selectAChat(twakeListItem);
+  }
+
+  Future<void> longpressOnAChatByIndex(int index) async {
+    await $.tester.ensureVisible(ChatListRobot($).getListOfChatGroup()[index].root);
+    await ChatListRobot($).getListOfChatGroup()[index].root.longPress();
+  }
+
+  Future<void> selectAChatByIndex(int index) async {
+    final twakeListItem = ChatListRobot($).getListOfChatGroup()[index];
+    await selectAChat(twakeListItem);
+  }
+
+  Future<void> pinAChat(String title) async {
+    final twakeListItem = ChatListRobot($).getChatGroupByTitle(title);
+    if(!(await isPinAChat(twakeListItem)))
+    {
+      await twakeListItem.root.longPress();
+      await $.waitUntilVisible(twakeListItem.getCheckBox());
+      await ChatListRobot($).clickOnPinIcon();
+    }
+  }
+
+  Future<void> unPinAChat(String title) async {
+    final twakeListItem = ChatListRobot($).getChatGroupByTitle(title);
+    if(await isPinAChat(twakeListItem))
+    {
+      await twakeListItem.root.longPress();
+      await $.waitUntilVisible(twakeListItem.getCheckBox());
+      await ChatListRobot($).clickOnUnPinIcon();
+    }
+  }
+
+  Future<void> markAChatAsRead(String title) async {
+    final twakeListItem = ChatListRobot($).getChatGroupByTitle(title);
+    if(await isMarkAsUnRead(twakeListItem))
+    {
+      await twakeListItem.root.longPress();
+      await $.waitUntilVisible(twakeListItem.getCheckBox());
+      await ChatListRobot($).clickOnReadIcon();
+      await ChatListRobot($).waitUntilAbsent($, ChatListRobot($).getChatGroupByTitle(title).getCheckBox());
+    }
+  }
+
+  Future<void> markAChatAsUnread(String title) async {
+    final twakeListItem = ChatListRobot($).getChatGroupByTitle(title);
+    if(!(await isMarkAsUnRead(twakeListItem)))
+    {
+      await twakeListItem.root.longPress();
+      await $.waitUntilVisible(twakeListItem.getCheckBox());
+      await ChatListRobot($).getMarkAsUnReadIcon().tap();
+      await ChatListRobot($).clickOnUnreadIcon();
+      await ChatListRobot($).waitUntilAbsent($, ChatListRobot($).getChatGroupByTitle(title).getCheckBox());
+    }
+  }
+
+  Future<void> muteAChat(String title) async {
+    final twakeListItem = ChatListRobot($).getChatGroupByTitle(title);
+    if(!(await isMutedAChat(twakeListItem)))
+    {
+      await twakeListItem.root.longPress();
+      await $.waitUntilVisible(twakeListItem.getCheckBox());
+      await ChatListRobot($).clickOnMuteIcon();
+      await ChatListRobot($).waitUntilAbsent($, ChatListRobot($).getChatGroupByTitle(title).getCheckBox());
+    }
+  }
+
+  Future<void> unmuteAChat(String title) async {
+    final twakeListItem = ChatListRobot($).getChatGroupByTitle(title);
+    if(await isMutedAChat(twakeListItem))
+    {
+      await twakeListItem.root.longPress();
+      await $.waitUntilVisible(twakeListItem.getCheckBox());
+      await ChatListRobot($).clickOnUnPinIcon();
+      await ChatListRobot($).waitUntilAbsent($, ChatListRobot($).getChatGroupByTitle(title).getCheckBox());
+    }
+  }
+
+  Future<void> verifyAChatIsPin(String title, bool isPin) async {
+    final twakeListItem = ChatListRobot($).getChatGroupByTitle(title);
+    await $.tester.ensureVisible(twakeListItem.root);
+    final exists = await isPinAChat(twakeListItem);
+    expect(exists, isPin, reason: 'Expected pin=$isPin but got $exists for "$title"');
+  }
+
+  Future<void> verifyAChatIsMarkAsUnRead(String title, bool isMarkAsUnread) async {
+    final twakeListItem = ChatListRobot($).getChatGroupByTitle(title);
+    await $.tester.ensureVisible(twakeListItem.root);
+    final exists = await isMarkAsUnRead(twakeListItem);
+    expect(exists, isMarkAsUnread, reason: 'Expected read =$isMarkAsUnread but got $exists for "$title"');
+  }
+  
+  Future<void> verifyAChatIsMuted(String title, bool isMuted) async {
+    final twakeListItem = ChatListRobot($).getChatGroupByTitle(title);
+    await $.tester.ensureVisible(twakeListItem.root);
+    final exists = await isMutedAChat(twakeListItem);
+    expect(exists, isMuted, reason: 'Expected mute=$isMuted but got $exists for "$title"');
+  }
+  
+  Future<void> leftSwipe(String title) async {
+     final twakeListItem = ChatListRobot($).getChatGroupByTitle(title);
+    final finder = twakeListItem.root;
+
+    // Make sure it's on-screen
+    await $.scrollUntilVisible(finder: finder);
+
+    // Measure and compute swipe
+    final size = $.tester.getSize(finder);
+    final center = $.tester.getCenter(finder);
+    final delta = Offset(-0.75 * size.width, 0); // swipe left by 75% width
+
+    // Perform gesture
+    await $.tester.dragFrom(center, delta);
+    await $.tester.pump(const Duration(milliseconds: 120));
+
+    // Verify the slidable actions appeared
+    await $.waitUntilVisible($(ChatCustomSlidableAction));
+  }
+
+  Future<void> rightSwipe(String title) async {
+     final twakeListItem = ChatListRobot($).getChatGroupByTitle(title);
+    final finder = twakeListItem.root;
+
+    // Make sure it's on-screen
+    await $.scrollUntilVisible(finder: finder);
+
+    // Measure and compute swipe
+    final size = $.tester.getSize(finder);
+    final center = $.tester.getCenter(finder);
+    final delta = Offset(0.5 * size.width, 0); // swipe right by 75% width
+
+    // Perform gesture
+    await $.tester.dragFrom(center, delta);
+    await $.tester.pump(const Duration(milliseconds: 120));
+
+    // Verify the slidable actions appeared
+    await ChatListRobot($).waitUntilAbsent($,$(ChatCustomSlidableAction));
+  }
+
+  Future<void> upSwipe(String title) async {
+    final twakeListItem = ChatListRobot($).getChatGroupByTitle(title);
+    final finder = twakeListItem.root;
+
+    // Make sure it's on-screen
+    await $.scrollUntilVisible(finder: finder);
+
+    final size = $.tester.getSize(finder);
+    //drag at the parent level and just find by type, not pass Patrol Finder
+    await $.tester.drag(find.byType(SingleChildScrollView), Offset(0, -3*size.height)); 
+
+    // Verify the slidable actions appeared
+    await ChatListRobot($).waitUntil(() => !twakeListItem.root.visible,
+        timeout: const Duration(seconds: 10),);
+    //$.pumpAndSettle();
   }
 }
