@@ -113,14 +113,12 @@ class ChatListBodyView extends StatelessWidget {
                     ],
                   );
                 }
-                return SingleChildScrollView(
+                return CustomScrollView(
                   controller: controller.scrollController,
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const ConnectionStatusHeader(),
-                      AnimatedContainer(
+                  slivers: [
+                    const SliverToBoxAdapter(child: ConnectionStatusHeader()),
+                    SliverToBoxAdapter(
+                      child: AnimatedContainer(
                         height: ChatListBodyViewStyle.heightIsTorBrowser(
                           controller.isTorBrowser,
                         ),
@@ -139,36 +137,24 @@ class ChatListBodyView extends StatelessWidget {
                           ),
                         ),
                       ),
-                      if (!controller.filteredRoomsForPinIsEmpty)
-                        ValueListenableBuilder(
-                          valueListenable: controller.expandRoomsForPinNotifier,
-                          builder: (context, isExpanded, child) {
-                            return Column(
-                              mainAxisSize: MainAxisSize.min,
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                child!,
-                              ],
-                            );
-                          },
-                          child: ChatListViewBuilder(
-                            controller: controller,
-                            rooms: controller.filteredRoomsForPin,
-                          ),
+                    ),
+                    if (!controller.filteredRoomsForPinIsEmpty)
+                      ValueListenableBuilder(
+                        valueListenable: controller.expandRoomsForPinNotifier,
+                        builder: (context, isExpanded, child) {
+                          return child!;
+                        },
+                        child: ChatListViewBuilder(
+                          controller: controller,
+                          rooms: controller.filteredRoomsForPin,
                         ),
-                      if (!controller.filteredRoomsForAllIsEmpty)
-                        Column(
-                          mainAxisSize: MainAxisSize.min,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            ChatListViewBuilder(
-                              controller: controller,
-                              rooms: controller.filteredRoomsForAll,
-                            ),
-                          ],
-                        ),
-                    ],
-                  ),
+                      ),
+                    if (!controller.filteredRoomsForAllIsEmpty)
+                      ChatListViewBuilder(
+                        controller: controller,
+                        rooms: controller.filteredRoomsForAll,
+                      ),
+                  ],
                 );
               }
               if (controller.matrixState.waitForFirstSync) {

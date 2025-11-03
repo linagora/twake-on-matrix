@@ -157,13 +157,16 @@ extension RoomExtension on Room {
     return canRedact;
   }
 
-  Future<Event?> lastEventAvailableInPreview() async {
+  Future<Event?> lastEventAvailableInPreview(
+    Future<void> initSettingsCompleter,
+  ) async {
     // as lastEvent calculation is based on the state events we unfortunately cannot
     // use sortOrder here: With many state events we just know which ones are the
     // newest ones, without knowing in which order they actually happened. As such,
     // using the origin_server_ts is the best guess for this algorithm. While not
     // perfect, it is only used for the room preview in the room list and sorting
     // said room list, so it should be good enough.
+    await initSettingsCompleter;
     Event? lastEventAvailableInPreview;
     try {
       final lastEvents =

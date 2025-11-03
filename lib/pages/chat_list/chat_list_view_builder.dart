@@ -18,33 +18,34 @@ class ChatListViewBuilder extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ListView.builder(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      itemCount: rooms.length,
-      itemBuilder: (BuildContext context, int index) {
-        if (index == rooms.length) {
-          return const SizedBox.shrink();
-        }
-        return ValueListenableBuilder<SelectMode>(
-          valueListenable: controller.selectModeNotifier,
-          builder: (context, selectMode, _) {
-            final slidables = controller.getSlidables(context, rooms[index]);
-            return SlidableChatListItem(
-              controller: controller,
-              slidables: slidables,
-              enabled:
-                  ChatListViewStyle.responsiveUtils.isMobileOrTablet(context) &&
-                      !selectMode.isSelectMode &&
-                      slidables.isNotEmpty,
-              chatListItem: CommonChatListItem(
+    return SliverList(
+      delegate: SliverChildBuilderDelegate(
+        (context, index) {
+          return ValueListenableBuilder<SelectMode>(
+            key: ValueKey(rooms[index].id),
+            valueListenable: controller.selectModeNotifier,
+            builder: (context, selectMode, _) {
+              final slidables = controller.getSlidables(context, rooms[index]);
+              return SlidableChatListItem(
                 controller: controller,
-                room: rooms[index],
-              ),
-            );
-          },
-        );
-      },
+                slidables: slidables,
+                enabled: ChatListViewStyle.responsiveUtils
+                        .isMobileOrTablet(context) &&
+                    !selectMode.isSelectMode &&
+                    slidables.isNotEmpty,
+                chatListItem: CommonChatListItem(
+                  controller: controller,
+                  room: rooms[index],
+                ),
+              );
+            },
+          );
+        },
+        childCount: rooms.length,
+        findChildIndexCallback: (key) {
+          return rooms.indexWhere((room) => room.id == (key as ValueKey).value);
+        },
+      ),
     );
   }
 }
