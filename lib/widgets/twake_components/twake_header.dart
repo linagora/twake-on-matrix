@@ -1,7 +1,7 @@
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/presentation/enum/chat_list/chat_list_enum.dart';
 import 'package:fluffychat/presentation/model/chat_list/chat_selection_actions.dart';
-import 'package:fluffychat/utils/manager/twake_user_info_manager/twake_user_info_extension.dart';
+import 'package:fluffychat/presentation/extensions/user_info_extension.dart';
 import 'package:fluffychat/utils/manager/twake_user_info_manager/twake_user_info_manager.dart';
 import 'package:fluffychat/utils/responsive/responsive_utils.dart';
 import 'package:fluffychat/widgets/app_bars/twake_app_bar.dart';
@@ -55,10 +55,11 @@ class _TwakeHeaderState extends State<TwakeHeader>
               userId: widget.client.userID!,
               getFromRooms: false,
             );
+    final matrixProfile = twakeProfile.toMatrixProfile();
     Logs().d(
-      'ChatList::_getCurrentProfile() - currentProfile: ${twakeProfile.toMatrixProfile()}',
+      'ChatList::_getCurrentProfile() - currentProfile: $matrixProfile}',
     );
-    currentProfileNotifier.value = twakeProfile.toMatrixProfile();
+    currentProfileNotifier.value = matrixProfile;
   }
 
   @override

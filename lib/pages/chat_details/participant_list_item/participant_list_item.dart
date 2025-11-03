@@ -5,11 +5,13 @@ import 'package:fluffychat/pages/chat_details/participant_list_item/participant_
 import 'package:fluffychat/pages/chat_list/chat_custom_slidable_action.dart';
 import 'package:fluffychat/pages/profile_info/profile_info_page.dart';
 import 'package:fluffychat/utils/dialog/twake_dialog.dart';
+import 'package:fluffychat/utils/manager/twake_user_info_manager/twake_user_info_manager.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/utils/responsive/responsive_utils.dart';
 import 'package:fluffychat/utils/twake_snackbar.dart';
 import 'package:fluffychat/utils/user_extension.dart';
 import 'package:fluffychat/widgets/avatar/avatar.dart';
+import 'package:fluffychat/widgets/matrix.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:fluffychat/generated/l10n/app_localizations.dart';
@@ -94,16 +96,27 @@ class _ParticipantListItemState extends State<ParticipantListItem> {
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: <Widget>[
                               Flexible(
-                                child: Text(
-                                  widget.member.calcDisplayname(),
-                                  overflow: TextOverflow.ellipsis,
-                                  maxLines: 1,
-                                  style: LinagoraTextStyle.material()
-                                      .bodyMedium2
-                                      .copyWith(
-                                        color: LinagoraSysColors.material()
-                                            .onSurface,
+                                child: FutureBuilder(
+                                  future: getIt
+                                      .get<TwakeUserInfoManager>()
+                                      .getTwakeProfileFromUserId(
+                                        client: Matrix.of(context).client,
+                                        userId: widget.member.id,
                                       ),
+                                  builder: (context, asyncSnapshot) {
+                                    return Text(
+                                      asyncSnapshot.data?.displayName ??
+                                          widget.member.calcDisplayname(),
+                                      overflow: TextOverflow.ellipsis,
+                                      maxLines: 1,
+                                      style: LinagoraTextStyle.material()
+                                          .bodyMedium2
+                                          .copyWith(
+                                            color: LinagoraSysColors.material()
+                                                .onSurface,
+                                          ),
+                                    );
+                                  },
                                 ),
                               ),
                               ValueListenableBuilder(

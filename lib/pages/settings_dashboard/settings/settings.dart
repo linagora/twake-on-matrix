@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
@@ -12,7 +13,7 @@ import 'package:fluffychat/presentation/mixins/connect_page_mixin.dart';
 import 'package:fluffychat/presentation/enum/settings/settings_enum.dart';
 import 'package:fluffychat/presentation/extensions/client_extension.dart';
 import 'package:fluffychat/utils/dialog/twake_dialog.dart';
-import 'package:fluffychat/utils/manager/twake_user_info_manager/twake_user_info_extension.dart';
+import 'package:fluffychat/presentation/extensions/user_info_extension.dart';
 import 'package:fluffychat/utils/manager/twake_user_info_manager/twake_user_info_manager.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/utils/url_launcher.dart';
@@ -175,7 +176,7 @@ class SettingsController extends State<Settings> with ConnectPageMixin {
             );
     final profile = twakeUser.toMatrixProfile();
     Logs().d(
-      'Settings::_getCurrentProfile() - currentProfile: $profile',
+      'Settings::_getCurrentProfile() - currentProfile: ${jsonEncode(profile)}',
     );
     avatarUriNotifier.value = profile.avatarUrl;
     displayNameNotifier.value = profile.displayName;

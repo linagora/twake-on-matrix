@@ -1,6 +1,9 @@
+import 'package:fluffychat/di/global/get_it_initializer.dart';
+import 'package:fluffychat/domain/model/user_info/user_info.dart';
 import 'package:fluffychat/pages/chat/events/images_builder/image_placeholder.dart';
 import 'package:fluffychat/presentation/decorators/chat_list/subtitle_image_preview_style.dart';
 import 'package:fluffychat/presentation/decorators/chat_list/subtitle_text_style_decorator/subtitle_text_style_view.dart';
+import 'package:fluffychat/utils/manager/twake_user_info_manager/twake_user_info_manager.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
 import 'package:fluffychat/widgets/mxc_image.dart';
@@ -87,8 +90,12 @@ mixin ChatListItemMixin {
       );
     }
 
-    return FutureBuilder<User?>(
-      future: event?.fetchSenderUser(),
+    return FutureBuilder<UserInfo>(
+      future: getIt.get<TwakeUserInfoManager>().getTwakeProfileFromUserId(
+            client: room.client,
+            userId: event?.senderId ?? '',
+            getFromRooms: false,
+          ),
       builder: (context, snapshot) => _subTitleFutureBuilder(
         context,
         room,
@@ -102,7 +109,7 @@ mixin ChatListItemMixin {
     BuildContext context,
     Room room,
     Event? event,
-    User? user,
+    UserInfo? user,
   ) {
     if (user == null || event == null) return const SizedBox.shrink();
 
@@ -116,7 +123,7 @@ mixin ChatListItemMixin {
     );
     if (event.isAFile == true) {
       return Text(
-        "${user.calcDisplayname()}: ${event.filename}",
+        "${user.displayName}: ${event.filename}",
         softWrap: false,
         maxLines: 2,
         overflow: TextOverflow.ellipsis,
@@ -130,7 +137,7 @@ mixin ChatListItemMixin {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          user.calcDisplayname(),
+          user.displayName ?? '',
           overflow: TextOverflow.ellipsis,
           maxLines: 1,
           softWrap: false,
