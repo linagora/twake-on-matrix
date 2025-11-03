@@ -1,7 +1,10 @@
 import 'package:fluffychat/config/default_power_level_member.dart';
+import 'package:fluffychat/di/global/get_it_initializer.dart';
+import 'package:fluffychat/domain/model/user_info/user_info.dart';
 import 'package:fluffychat/pages/chat_details/assign_roles_role_picker/assign_roles_role_picker.dart';
 import 'package:fluffychat/pages/chat_details/assign_roles_role_picker/assign_roles_role_picker_style.dart';
 import 'package:fluffychat/resource/image_paths.dart';
+import 'package:fluffychat/utils/manager/twake_user_info_manager/twake_user_info_manager.dart';
 import 'package:fluffychat/widgets/app_bars/twake_app_bar.dart';
 import 'package:fluffychat/widgets/avatar/avatar.dart';
 import 'package:fluffychat/widgets/expandable_widget.dart';
@@ -274,45 +277,56 @@ class AssignRolesRolePickerView extends StatelessWidget {
         margin: EdgeInsets.symmetric(
           horizontal: isDialog ? 16 : 0,
         ),
-        child: Row(
-          children: [
-            Avatar(
-              mxContent: users.first.avatarUrl,
-              name: users.first.calcDisplayname(),
-            ),
-            const SizedBox(width: 8.0),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
+        child: FutureBuilder<UserInfo>(
+          future: getIt.get<TwakeUserInfoManager>().getTwakeProfileFromUserId(
+                client: controller.widget.room.client,
+                userId: users.first.senderId,
+              ),
+          builder: (context, asyncSnapshot) {
+            return Row(
+              children: [
+                Avatar(
+                  mxContent: users.first.avatarUrl,
+                  name: asyncSnapshot.data?.displayName ??
+                      users.first.calcDisplayname(),
+                ),
+                const SizedBox(width: 8.0),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Expanded(
-                        child: Text(
-                          users.first.calcDisplayname(),
-                          style: LinagoraTextStyle.material()
-                              .bodyMedium2
-                              .copyWith(
-                                color: LinagoraSysColors.material().onSurface,
-                              ),
-                          overflow: TextOverflow.ellipsis,
-                          maxLines: 1,
-                        ),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              asyncSnapshot.data?.displayName ??
+                                  users.first.calcDisplayname(),
+                              style: LinagoraTextStyle.material()
+                                  .bodyMedium2
+                                  .copyWith(
+                                    color:
+                                        LinagoraSysColors.material().onSurface,
+                                  ),
+                              overflow: TextOverflow.ellipsis,
+                              maxLines: 1,
+                            ),
+                          ),
+                        ],
+                      ),
+                      Text(
+                        users.first.id,
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                              color: LinagoraRefColors.material().tertiary[30],
+                            ),
+                        overflow: TextOverflow.ellipsis,
+                        maxLines: 1,
                       ),
                     ],
                   ),
-                  Text(
-                    users.first.id,
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: LinagoraRefColors.material().tertiary[30],
-                        ),
-                    overflow: TextOverflow.ellipsis,
-                    maxLines: 1,
-                  ),
-                ],
-              ),
-            ),
-          ],
+                ),
+              ],
+            );
+          },
         ),
       );
     }
@@ -341,32 +355,45 @@ class AssignRolesRolePickerView extends StatelessWidget {
                   ),
                 ),
                 margin: AssignRolesRolePickerStyle.chipMargin,
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Avatar(
-                      mxContent: member.avatarUrl,
-                      name: member.calcDisplayname(),
-                      size: AssignRolesRolePickerStyle.avatarChipSize,
-                    ),
-                    const SizedBox(width: 4.0),
-                    Flexible(
-                      child: Padding(
-                        padding: AssignRolesRolePickerStyle.textChipPadding,
-                        child: Text(
-                          member.calcDisplayname(),
-                          style: Theme.of(context)
-                              .textTheme
-                              .titleSmall
-                              ?.copyWith(
-                                color: LinagoraSysColors.material().onSurface,
-                              ),
-                          overflow: TextOverflow.ellipsis,
-                          maxLines: 1,
-                        ),
+                child: FutureBuilder<UserInfo>(
+                  future: getIt
+                      .get<TwakeUserInfoManager>()
+                      .getTwakeProfileFromUserId(
+                        client: controller.widget.room.client,
+                        userId: member.id,
                       ),
-                    ),
-                  ],
+                  builder: (context, asyncSnapshot) {
+                    return Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Avatar(
+                          mxContent: member.avatarUrl,
+                          name: asyncSnapshot.data?.displayName ??
+                              member.calcDisplayname(),
+                          size: AssignRolesRolePickerStyle.avatarChipSize,
+                        ),
+                        const SizedBox(width: 4.0),
+                        Flexible(
+                          child: Padding(
+                            padding: AssignRolesRolePickerStyle.textChipPadding,
+                            child: Text(
+                              asyncSnapshot.data?.displayName ??
+                                  member.calcDisplayname(),
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .titleSmall
+                                  ?.copyWith(
+                                    color:
+                                        LinagoraSysColors.material().onSurface,
+                                  ),
+                              overflow: TextOverflow.ellipsis,
+                              maxLines: 1,
+                            ),
+                          ),
+                        ),
+                      ],
+                    );
+                  },
                 ),
               );
             }).toList(),

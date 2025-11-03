@@ -1,9 +1,12 @@
+import 'package:fluffychat/di/global/get_it_initializer.dart';
+import 'package:fluffychat/domain/model/user_info/user_info.dart';
 import 'package:fluffychat/pages/chat/events/message/message_content_builder_mixin.dart';
 import 'package:fluffychat/pages/chat/events/message/message_style.dart';
 import 'package:fluffychat/pages/chat/events/message_time.dart';
 import 'package:fluffychat/pages/chat/optional_padding.dart';
 import 'package:fluffychat/pages/chat/optional_selection_container_disabled.dart';
 import 'package:fluffychat/pages/chat/optional_stack.dart';
+import 'package:fluffychat/utils/manager/twake_user_info_manager/twake_user_info_manager.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:flutter/material.dart';
@@ -33,86 +36,70 @@ class MessageContentBuilder extends StatelessWidget
 
   @override
   Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        // TODO: change to colorSurface when its approved
-        // ignore: deprecated_member_use
-        final textColor = Theme.of(context).colorScheme.onBackground;
-        final displayEvent = event.getDisplayEventWithoutEditEvent(timeline);
-        final noPadding = {
-          MessageTypes.File,
-          MessageTypes.Audio,
-        }.contains(event.messageType);
-        final sizeMessageBubble = getSizeMessageBubbleWidth(
-          context,
-          event: event,
-          maxWidth: constraints.maxWidth,
-          ownMessage: event.isOwnMessage,
-          hideDisplayName: event.hideDisplayName(
-            nextEvent,
-            Message.responsiveUtils.isMobile(context),
+    return FutureBuilder<UserInfo>(
+      future: getIt.get<TwakeUserInfoManager>().getTwakeProfileFromUserId(
+            client: event.room.client,
+            userId: event.senderId,
           ),
-          isEdited: event.hasAggregatedEvents(
-            timeline,
-            RelationshipTypes.edit,
-          ),
-        );
-        final stepWidth = sizeMessageBubble?.totalMessageWidth;
-        final isNeedAddNewLine = sizeMessageBubble?.isNeedAddNewLine ?? false;
+      builder: (context, asyncSnapshot) {
+        return LayoutBuilder(
+          builder: (context, constraints) {
+            // TODO: change to colorSurface when its approved
+            // ignore: deprecated_member_use
+            final textColor = Theme.of(context).colorScheme.onBackground;
+            final displayEvent =
+                event.getDisplayEventWithoutEditEvent(timeline);
+            final noPadding = {
+              MessageTypes.File,
+              MessageTypes.Audio,
+            }.contains(event.messageType);
+            final sizeMessageBubble = getSizeMessageBubbleWidth(
+              context,
+              event: event,
+              maxWidth: constraints.maxWidth,
+              ownMessage: event.isOwnMessage,
+              hideDisplayName: event.hideDisplayName(
+                nextEvent,
+                Message.responsiveUtils.isMobile(context),
+              ),
+              isEdited: event.hasAggregatedEvents(
+                timeline,
+                RelationshipTypes.edit,
+              ),
+              displayName: asyncSnapshot.data?.displayName,
+            );
+            final stepWidth = sizeMessageBubble?.totalMessageWidth;
+            final isNeedAddNewLine =
+                sizeMessageBubble?.isNeedAddNewLine ?? false;
 
-        return OptionalPadding(
-          padding: const EdgeInsets.only(bottom: 8),
-          isEnabled: !noPadding && !event.timelineOverlayMessage,
-          child: IntrinsicWidth(
-            stepWidth: isContainsTagName(event) ||
-                    isContainsSpecialHTMLTag(event) ||
-                    event.isMediaAndFilesWithCaption()
-                ? null
-                : stepWidth,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                if (event.relationshipType == RelationshipTypes.reply)
-                  ReplyContentWidget(
-                    event: event,
-                    timeline: timeline,
-                    scrollToEventId: scrollToEventId,
-                    ownMessage: event.isOwnMessage,
-                  ),
-                OptionalStack(
-                  isEnabled: event.timelineOverlayMessage,
-                  children: [
-                    MessageContent(
-                      displayEvent,
-                      textColor: textColor,
-                      textWidth: stepWidth,
-                      endOfBubbleWidget: Padding(
-                        padding: MessageStyle.paddingTimestamp,
-                        child: MessageTime(
-                          timelineOverlayMessage: event.timelineOverlayMessage,
-                          event: event,
-                          showSeenIcon: event.isOwnMessage,
-                          timeline: timeline,
-                          room: event.room,
-                        ),
+            return OptionalPadding(
+              padding: const EdgeInsets.only(bottom: 8),
+              isEnabled: !noPadding && !event.timelineOverlayMessage,
+              child: IntrinsicWidth(
+                stepWidth: isContainsTagName(event) ||
+                        isContainsSpecialHTMLTag(event) ||
+                        event.isMediaAndFilesWithCaption()
+                    ? null
+                    : stepWidth,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    if (event.relationshipType == RelationshipTypes.reply)
+                      ReplyContentWidget(
+                        event: event,
+                        timeline: timeline,
+                        scrollToEventId: scrollToEventId,
+                        ownMessage: event.isOwnMessage,
                       ),
-                      onTapSelectMode: () => selectMode
-                          ? onSelect!(
-                              event,
-                            )
-                          : null,
-                      onTapPreview: !selectMode ? () {} : null,
-                      ownMessage: event.isOwnMessage,
-                      timeline: timeline,
-                    ),
-                    PositionedDirectional(
-                      end: 8,
-                      bottom: 4.0,
-                      child: OptionalSelectionContainerDisabled(
-                        isEnabled: PlatformInfos.isWeb,
-                        child: Text.rich(
-                          WidgetSpan(
+                    OptionalStack(
+                      isEnabled: event.timelineOverlayMessage,
+                      children: [
+                        MessageContent(
+                          displayEvent,
+                          textColor: textColor,
+                          endOfBubbleWidget: Padding(
+                            padding: MessageStyle.paddingTimestamp,
                             child: MessageTime(
                               timelineOverlayMessage:
                                   event.timelineOverlayMessage,
@@ -122,38 +109,65 @@ class MessageContentBuilder extends StatelessWidget
                               room: event.room,
                             ),
                           ),
+                          onTapSelectMode: () => selectMode
+                              ? onSelect!(
+                                  event,
+                                )
+                              : null,
+                          onTapPreview: !selectMode ? () {} : null,
+                          ownMessage: event.isOwnMessage,
+                          timeline: timeline,
                         ),
-                      ),
+                        PositionedDirectional(
+                          end: 8,
+                          bottom: 4.0,
+                          child: OptionalSelectionContainerDisabled(
+                            isEnabled: PlatformInfos.isWeb,
+                            child: Text.rich(
+                              WidgetSpan(
+                                child: MessageTime(
+                                  timelineOverlayMessage:
+                                      event.timelineOverlayMessage,
+                                  event: event,
+                                  showSeenIcon: event.isOwnMessage,
+                                  timeline: timeline,
+                                  room: event.room,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
-                  ],
-                ),
-                if (isNeedAddNewLine ||
-                    isContainsTagName(event) ||
-                    isContainsSpecialHTMLTag(event))
-                  OptionalSelectionContainerDisabled(
-                    isEnabled: PlatformInfos.isWeb,
-                    child: Visibility(
-                      visible: false,
-                      maintainSize: true,
-                      maintainAnimation: true,
-                      maintainState: true,
-                      child: Text.rich(
-                        WidgetSpan(
-                          child: MessageTime(
-                            timelineOverlayMessage:
-                                event.timelineOverlayMessage,
-                            event: event,
-                            showSeenIcon: event.isOwnMessage,
-                            timeline: timeline,
-                            room: event.room,
+                    if (isNeedAddNewLine ||
+                        isContainsTagName(event) ||
+                        isContainsSpecialHTMLTag(event))
+                      OptionalSelectionContainerDisabled(
+                        isEnabled: PlatformInfos.isWeb,
+                        child: Visibility(
+                          visible: false,
+                          maintainSize: true,
+                          maintainAnimation: true,
+                          maintainState: true,
+                          child: Text.rich(
+                            WidgetSpan(
+                              child: MessageTime(
+                                timelineOverlayMessage:
+                                    event.timelineOverlayMessage,
+                                event: event,
+                                showSeenIcon: event.isOwnMessage,
+                                timeline: timeline,
+                                room: event.room,
+                              ),
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                  ),
-              ],
-            ),
-          ),
+                  ],
+                ),
+              ),
+            );
+          },
         );
       },
     );

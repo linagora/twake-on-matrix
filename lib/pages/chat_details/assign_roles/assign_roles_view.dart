@@ -1,8 +1,11 @@
+import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/domain/model/room/room_extension.dart';
+import 'package:fluffychat/domain/model/user_info/user_info.dart';
 import 'package:fluffychat/pages/chat_details/assign_roles/assign_roles.dart';
 import 'package:fluffychat/pages/chat_details/assign_roles/assign_roles_search_state.dart';
 import 'package:fluffychat/pages/chat_details/assign_roles/assign_roles_style.dart';
 import 'package:fluffychat/pages/chat_list/chat_list_header_style.dart';
+import 'package:fluffychat/utils/manager/twake_user_info_manager/twake_user_info_manager.dart';
 import 'package:fluffychat/utils/user_extension.dart';
 import 'package:fluffychat/widgets/app_bars/twake_app_bar.dart';
 import 'package:fluffychat/widgets/avatar/avatar.dart';
@@ -223,168 +226,182 @@ class AssignRolesView extends StatelessWidget {
           },
           (success) {
             if (success is AssignRolesSearchSuccessState) {
-              return ListView.builder(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                itemCount: success.assignRolesMember.length,
-                itemBuilder: (context, index) {
-                  final member = success.assignRolesMember[index];
-                  final canUpdateRole =
-                      controller.widget.room.canUpdateRoleInRoom(member);
-                  final slidables = controller.getSlidables(
-                    context: context,
-                    user: member,
-                  );
-                  return ValueListenableBuilder(
-                    valueListenable:
-                        controller.enableSelectMembersMobileNotifier,
-                    builder: (context, enableSelectMembers, child) {
-                      return Slidable(
-                        groupTag: 'slidable_list',
-                        enabled: slidables.isNotEmpty,
-                        endActionPane: ActionPane(
-                          motion: const ScrollMotion(),
-                          extentRatio: AssignRolesStyle.slidableExtentRatio(
-                            slidables.length,
-                          ),
-                          children: slidables,
+              return buildAssignRolesSearchView(context, success);
+            }
+            return const SizedBox.shrink();
+          },
+        );
+      },
+    );
+  }
+
+  Widget buildAssignRolesSearchView(
+    BuildContext context,
+    AssignRolesSearchSuccessState success,
+  ) {
+    return ListView.builder(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      itemCount: success.assignRolesMember.length,
+      itemBuilder: (context, index) {
+        final member = success.assignRolesMember[index];
+        final canUpdateRole =
+            controller.widget.room.canUpdateRoleInRoom(member);
+        final slidables = controller.getSlidables(
+          context: context,
+          user: member,
+        );
+        return ValueListenableBuilder(
+          valueListenable: controller.enableSelectMembersMobileNotifier,
+          builder: (context, enableSelectMembers, child) {
+            return Slidable(
+              groupTag: 'slidable_list',
+              enabled: slidables.isNotEmpty,
+              endActionPane: ActionPane(
+                motion: const ScrollMotion(),
+                extentRatio: AssignRolesStyle.slidableExtentRatio(
+                  slidables.length,
+                ),
+                children: slidables,
+              ),
+              child: TwakeInkWell(
+                onLongPress: () => controller.handleOnLongPressMobile(
+                  member: member,
+                ),
+                onTap: () {
+                  if (enableSelectMembers && canUpdateRole) {
+                    controller.selectedUsersMapChangeNotifier.onUserTileTap(
+                      context,
+                      member,
+                    );
+                  } else {
+                    member.openProfileView(
+                      context: context,
+                      onTransferOwnershipSuccess: () {
+                        controller.onBack();
+                      },
+                    );
+                  }
+                },
+                child: TwakeListItem(
+                  padding: const EdgeInsets.all(8),
+                  child: FutureBuilder<UserInfo>(
+                    future: getIt
+                        .get<TwakeUserInfoManager>()
+                        .getTwakeProfileFromUserId(
+                          client: controller.widget.room.client,
+                          userId: member.id,
                         ),
-                        child: TwakeInkWell(
-                          onLongPress: () => controller.handleOnLongPressMobile(
-                            member: member,
-                          ),
-                          onTap: () {
-                            if (enableSelectMembers && canUpdateRole) {
-                              controller.selectedUsersMapChangeNotifier
-                                  .onUserTileTap(
+                    builder: (context, asyncSnapshot) {
+                      return Row(
+                        children: [
+                          if (enableSelectMembers)
+                            ValueListenableBuilder<bool>(
+                              valueListenable: controller
+                                  .selectedUsersMapChangeNotifier
+                                  .getNotifierAtUser(member),
+                              builder: (
                                 context,
-                                member,
-                              );
-                            } else {
-                              member.openProfileView(
-                                context: context,
-                                onTransferOwnershipSuccess: () {
-                                  controller.onBack();
-                                },
-                              );
-                            }
-                          },
-                          child: TwakeListItem(
-                            padding: const EdgeInsets.all(8),
-                            child: Row(
-                              children: [
-                                if (enableSelectMembers)
-                                  ValueListenableBuilder<bool>(
-                                    valueListenable: controller
-                                        .selectedUsersMapChangeNotifier
-                                        .getNotifierAtUser(member),
-                                    builder:
-                                        (context, isCurrentSelected, child) {
-                                      if (!canUpdateRole) {
-                                        return const SizedBox.shrink();
-                                      }
-                                      return Checkbox(
-                                        value:
-                                            !canUpdateRole || isCurrentSelected,
-                                        side: BorderSide(
-                                          color: isCurrentSelected
-                                              ? Theme.of(context)
-                                                  .colorScheme
-                                                  .primary
-                                              : LinagoraRefColors.material()
-                                                  .tertiary[30]!,
-                                          width: 2,
-                                        ),
-                                        onChanged: !canUpdateRole
-                                            ? null
-                                            : (newValue) {
-                                                controller
-                                                    .selectedUsersMapChangeNotifier
-                                                    .onUserTileTap(
-                                                  context,
-                                                  member,
-                                                );
-                                              },
-                                      );
-                                    },
+                                isCurrentSelected,
+                                child,
+                              ) {
+                                if (!canUpdateRole) {
+                                  return const SizedBox.shrink();
+                                }
+                                return Checkbox(
+                                  value: !canUpdateRole || isCurrentSelected,
+                                  side: BorderSide(
+                                    color: isCurrentSelected
+                                        ? Theme.of(context).colorScheme.primary
+                                        : LinagoraRefColors.material()
+                                            .tertiary[30]!,
+                                    width: 2,
                                   ),
-                                const SizedBox(width: 8.0),
-                                Avatar(
-                                  mxContent: member.avatarUrl,
-                                  name: member.calcDisplayname(),
-                                ),
-                                const SizedBox(width: 8.0),
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Row(
-                                        children: [
-                                          Expanded(
-                                            child: Text(
-                                              member.calcDisplayname(),
-                                              style:
-                                                  LinagoraTextStyle.material()
-                                                      .bodyMedium2
-                                                      .copyWith(
-                                                        color: LinagoraSysColors
-                                                                .material()
-                                                            .onSurface,
-                                                      ),
-                                              overflow: TextOverflow.ellipsis,
-                                              maxLines: 1,
-                                            ),
-                                          ),
-                                          const SizedBox(width: 8.0),
-                                          InkWell(
-                                            hoverColor: Colors.transparent,
-                                            highlightColor: Colors.transparent,
-                                            focusColor: Colors.transparent,
-                                            splashColor: Colors.transparent,
-                                            onTap: () => controller
-                                                .handleOnTapQuickRolePickerMobile(
-                                              rootContext: context,
-                                              user: member,
-                                              room: controller.widget.room,
-                                              onHandledResult: controller
-                                                  .selectedUsersMapChangeNotifier
-                                                  .unselectAllUsers,
-                                            ),
-                                            child: _assignRoleItemStreamBuilder(
-                                              context: context,
-                                              member: member,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                      Text(
-                                        member.id,
-                                        style: Theme.of(context)
-                                            .textTheme
-                                            .bodyMedium
-                                            ?.copyWith(
+                                  onChanged: !canUpdateRole
+                                      ? null
+                                      : (newValue) {
+                                          controller
+                                              .selectedUsersMapChangeNotifier
+                                              .onUserTileTap(
+                                            context,
+                                            member,
+                                          );
+                                        },
+                                );
+                              },
+                            ),
+                          const SizedBox(width: 8.0),
+                          Avatar(
+                            mxContent: member.avatarUrl,
+                            name: asyncSnapshot.data?.displayName ??
+                                member.calcDisplayname(),
+                          ),
+                          const SizedBox(width: 8.0),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  children: [
+                                    Expanded(
+                                      child: Text(
+                                        asyncSnapshot.data?.displayName ??
+                                            member.calcDisplayname(),
+                                        style: LinagoraTextStyle.material()
+                                            .bodyMedium2
+                                            .copyWith(
                                               color:
-                                                  LinagoraRefColors.material()
-                                                      .tertiary[30],
+                                                  LinagoraSysColors.material()
+                                                      .onSurface,
                                             ),
                                         overflow: TextOverflow.ellipsis,
                                         maxLines: 1,
                                       ),
-                                    ],
-                                  ),
+                                    ),
+                                    const SizedBox(width: 8.0),
+                                    InkWell(
+                                      hoverColor: Colors.transparent,
+                                      highlightColor: Colors.transparent,
+                                      focusColor: Colors.transparent,
+                                      splashColor: Colors.transparent,
+                                      onTap: () => controller
+                                          .handleOnTapQuickRolePickerMobile(
+                                        rootContext: context,
+                                        user: member,
+                                        room: controller.widget.room,
+                                        onHandledResult: controller
+                                            .selectedUsersMapChangeNotifier
+                                            .unselectAllUsers,
+                                      ),
+                                      child: _assignRoleItemStreamBuilder(
+                                        context: context,
+                                        member: member,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                Text(
+                                  member.id,
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .bodyMedium
+                                      ?.copyWith(
+                                        color: LinagoraRefColors.material()
+                                            .tertiary[30],
+                                      ),
+                                  overflow: TextOverflow.ellipsis,
+                                  maxLines: 1,
                                 ),
                               ],
                             ),
                           ),
-                        ),
+                        ],
                       );
                     },
-                  );
-                },
-              );
-            }
-            return const SizedBox.shrink();
+                  ),
+                ),
+              ),
+            );
           },
         );
       },
@@ -429,72 +446,84 @@ class AssignRolesView extends StatelessWidget {
                     },
                     child: TwakeListItem(
                       padding: const EdgeInsets.all(8),
-                      child: Row(
-                        children: [
-                          Avatar(
-                            mxContent: member.avatarUrl,
-                            name: member.calcDisplayname(),
-                          ),
-                          const SizedBox(width: 8.0),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Row(
+                      child: FutureBuilder<UserInfo>(
+                        future: getIt
+                            .get<TwakeUserInfoManager>()
+                            .getTwakeProfileFromUserId(
+                              client: controller.widget.room.client,
+                              userId: member.id,
+                            ),
+                        builder: (context, asyncSnapshot) {
+                          return Row(
+                            children: [
+                              Avatar(
+                                mxContent: member.avatarUrl,
+                                name: asyncSnapshot.data?.displayName ??
+                                    member.calcDisplayname(),
+                              ),
+                              const SizedBox(width: 8.0),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    Expanded(
-                                      child: Text(
-                                        member.calcDisplayname(),
-                                        style: LinagoraTextStyle.material()
-                                            .bodyMedium2
-                                            .copyWith(
-                                              color:
-                                                  LinagoraSysColors.material()
+                                    Row(
+                                      children: [
+                                        Expanded(
+                                          child: Text(
+                                            asyncSnapshot.data?.displayName ??
+                                                member.calcDisplayname(),
+                                            style: LinagoraTextStyle.material()
+                                                .bodyMedium2
+                                                .copyWith(
+                                                  color: LinagoraSysColors
+                                                          .material()
                                                       .onSurface,
-                                            ),
-                                        overflow: TextOverflow.ellipsis,
-                                        maxLines: 1,
-                                      ),
+                                                ),
+                                            overflow: TextOverflow.ellipsis,
+                                            maxLines: 1,
+                                          ),
+                                        ),
+                                        const SizedBox(width: 8.0),
+                                        InkWell(
+                                          hoverColor: Colors.transparent,
+                                          highlightColor: Colors.transparent,
+                                          focusColor: Colors.transparent,
+                                          splashColor: Colors.transparent,
+                                          onTapDown: (details) => controller
+                                              .handleOnTapQuickRolePickerWeb(
+                                            context: context,
+                                            tapDownDetails: details,
+                                            user: member,
+                                            room: controller.widget.room,
+                                            onHandledResult: controller
+                                                .selectedUsersMapChangeNotifier
+                                                .unselectAllUsers,
+                                          ),
+                                          child: _assignRoleItemStreamBuilder(
+                                            context: context,
+                                            member: member,
+                                          ),
+                                        ),
+                                      ],
                                     ),
-                                    const SizedBox(width: 8.0),
-                                    InkWell(
-                                      hoverColor: Colors.transparent,
-                                      highlightColor: Colors.transparent,
-                                      focusColor: Colors.transparent,
-                                      splashColor: Colors.transparent,
-                                      onTapDown: (details) => controller
-                                          .handleOnTapQuickRolePickerWeb(
-                                        context: context,
-                                        tapDownDetails: details,
-                                        user: member,
-                                        room: controller.widget.room,
-                                        onHandledResult: controller
-                                            .selectedUsersMapChangeNotifier
-                                            .unselectAllUsers,
-                                      ),
-                                      child: _assignRoleItemStreamBuilder(
-                                        context: context,
-                                        member: member,
-                                      ),
+                                    Text(
+                                      member.id,
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .bodyMedium
+                                          ?.copyWith(
+                                            color: LinagoraRefColors.material()
+                                                .tertiary[30],
+                                          ),
+                                      overflow: TextOverflow.ellipsis,
+                                      maxLines: 1,
                                     ),
                                   ],
                                 ),
-                                Text(
-                                  member.id,
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .bodyMedium
-                                      ?.copyWith(
-                                        color: LinagoraRefColors.material()
-                                            .tertiary[30],
-                                      ),
-                                  overflow: TextOverflow.ellipsis,
-                                  maxLines: 1,
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
+                              ),
+                            ],
+                          );
+                        },
                       ),
                     ),
                   );

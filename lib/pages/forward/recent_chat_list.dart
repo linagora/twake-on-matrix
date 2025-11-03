@@ -1,6 +1,5 @@
 import 'package:fluffychat/pages/chat_list/chat_list_item_title.dart';
 import 'package:fluffychat/domain/model/room/room_extension.dart';
-import 'package:fluffychat/pages/chat_list/chat_list_item_subtitle.dart';
 import 'package:fluffychat/pages/forward/recent_chat_list_style.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
 import 'package:fluffychat/widgets/avatar/avatar.dart';

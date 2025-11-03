@@ -1,5 +1,7 @@
 import 'package:fluffychat/di/global/get_it_initializer.dart';
+import 'package:fluffychat/domain/model/user_info/user_info.dart';
 import 'package:fluffychat/pages/chat/events/message/message_style.dart';
+import 'package:fluffychat/utils/manager/twake_user_info_manager/twake_user_info_manager.dart';
 import 'package:fluffychat/utils/responsive/responsive_utils.dart';
 import 'package:fluffychat/widgets/avatar/avatar.dart';
 import 'package:flutter/material.dart';
@@ -32,15 +34,18 @@ mixin MessageAvatarMixin {
     if (_shouldDisplayAvatar(sameSender, ownMessage, context)) {
       return Padding(
         padding: MessageStyle.paddingAvatar,
-        child: FutureBuilder<User?>(
-          future: event.fetchSenderUser(),
+        child: FutureBuilder<UserInfo>(
+          future: getIt.get<TwakeUserInfoManager>().getTwakeProfileFromUserId(
+                client: event.room.client,
+                userId: event.senderId,
+              ),
           builder: (context, snapshot) {
-            final user = snapshot.data ?? event.senderFromMemoryOrFallback;
+            final user = snapshot.data;
             return Avatar(
               size: MessageStyle.avatarSize,
               fontSize: MessageStyle.fontSize,
-              mxContent: user.avatarUrl,
-              name: user.calcDisplayname(),
+              mxContent: Uri.parse(user?.avatarUrl ?? ''),
+              name: user?.displayName ?? '',
               onTap: () => onAvatarTap!(event),
             );
           },

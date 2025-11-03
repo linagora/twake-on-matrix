@@ -19,6 +19,7 @@ mixin MessageContentBuilderMixin {
     BuildContext context, {
     required Event event,
     required double maxWidth,
+    String? displayName,
     bool ownMessage = false,
     bool hideDisplayName = false,
     bool isEdited = false,
@@ -43,6 +44,7 @@ mixin MessageContentBuilderMixin {
       context,
       event,
       maxWidth,
+      displayName: displayName,
     ).width;
 
     final messageMetrics =
@@ -70,19 +72,24 @@ mixin MessageContentBuilderMixin {
   TextPainter _paintDisplayName(
     BuildContext context,
     Event event,
-    double maxWidth,
-  ) {
+    double maxWidth, {
+    String? displayName,
+  }) {
     return TextPainter(
       textScaler: MediaQuery.of(context).textScaler,
       text: TextSpan(
         text: event.isMediaAndFilesWithCaption()
             ? event.body
-            : event.senderFromMemoryOrFallback
-                .calcDisplayname()
-                .shortenDisplayName(
+            : displayName?.shortenDisplayName(
                   maxCharacters:
                       DisplayNameWidget.maxCharactersDisplayNameBubble,
-                ),
+                ) ??
+                event.senderFromMemoryOrFallback
+                    .calcDisplayname()
+                    .shortenDisplayName(
+                      maxCharacters:
+                          DisplayNameWidget.maxCharactersDisplayNameBubble,
+                    ),
         style: Theme.of(context).textTheme.labelMedium?.copyWith(
               color: Theme.of(
                 context,
