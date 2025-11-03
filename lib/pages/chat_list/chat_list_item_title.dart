@@ -4,10 +4,8 @@ import 'package:fluffychat/presentation/mixins/chat_list_item_mixin.dart';
 import 'package:fluffychat/pages/chat_list/chat_list_item_style.dart';
 import 'package:fluffychat/resource/image_paths.dart';
 import 'package:fluffychat/utils/date_time_extension.dart';
-import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
 import 'package:fluffychat/utils/room_status_extension.dart';
 import 'package:flutter/material.dart';
-import 'package:fluffychat/generated/l10n/app_localizations.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:matrix/matrix.dart';
@@ -17,17 +15,17 @@ class ChatListItemTitle extends StatelessWidget with ChatListItemMixin {
 
   final DateTime? originServerTs;
 
+  final String displayName;
+
   const ChatListItemTitle({
     super.key,
     required this.room,
     this.originServerTs,
+    required this.displayName,
   });
 
   @override
   Widget build(BuildContext context) {
-    final displayName = room.getLocalizedDisplayname(
-      MatrixLocals(L10n.of(context)!),
-    );
     return Row(
       children: <Widget>[
         Expanded(

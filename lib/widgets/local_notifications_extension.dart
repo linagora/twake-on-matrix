@@ -43,7 +43,10 @@ extension LocalNotificationsExtension on MatrixState {
       return;
     }
     final event = Event.fromJson(eventUpdate.content, room);
-    final title = room.getLocalizedDisplayname(MatrixLocals(L10n.of(context)!));
+    final title = await room.getUserDisplayName(
+      matrixId: event.senderId,
+      i18n: MatrixLocals(L10n.of(context)!),
+    );
     final body = await event.calcLocalizedBody(
       MatrixLocals(L10n.of(context)!),
       withSenderNamePrefix:

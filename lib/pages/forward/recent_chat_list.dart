@@ -1,4 +1,6 @@
 import 'package:fluffychat/pages/chat_list/chat_list_item_title.dart';
+import 'package:fluffychat/domain/model/room/room_extension.dart';
+import 'package:fluffychat/pages/chat_list/chat_list_item_subtitle.dart';
 import 'package:fluffychat/pages/forward/recent_chat_list_style.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
 import 'package:fluffychat/widgets/avatar/avatar.dart';
@@ -46,28 +48,38 @@ class RecentChatList extends StatelessWidget {
                 onTap: () => onSelectedChat(room.id),
                 child: Padding(
                   padding: RecentChatListStyle.paddingVerticalBetweenItem,
-                  child: Row(
-                    children: [
-                      Radio<String>(
-                        groupValue: room.id,
-                        value: selectedChat,
-                        onChanged: (value) => onSelectedChat(room.id),
-                      ),
-                      Avatar(
-                        mxContent: room.avatar,
-                        name: room.getLocalizedDisplayname(
-                          MatrixLocals(L10n.of(context)!),
-                        ),
-                        onTap: null,
-                      ),
-                      Expanded(
-                        child: Padding(
-                          padding:
-                              RecentChatListStyle.paddingHorizontalBetweenItem,
-                          child: ChatListItemTitle(room: room),
-                        ),
-                      ),
-                    ],
+                  child: FutureBuilder(
+                    future: room.getUserDisplayName(
+                      matrixId:
+                          room.isDirectChat ? room.directChatMatrixID : null,
+                      i18n: MatrixLocals(L10n.of(context)!),
+                    ),
+                    builder: (context, asyncSnapshot) {
+                      return Row(
+                        children: [
+                          Radio<String>(
+                            groupValue: room.id,
+                            value: selectedChat,
+                            onChanged: (value) => onSelectedChat(room.id),
+                          ),
+                          Avatar(
+                            mxContent: room.avatar,
+                            name: asyncSnapshot.data,
+                            onTap: null,
+                          ),
+                          Expanded(
+                            child: Padding(
+                              padding: RecentChatListStyle
+                                  .paddingHorizontalBetweenItem,
+                              child: ChatListItemTitle(
+                                room: room,
+                                displayName: asyncSnapshot.data ?? '',
+                              ),
+                            ),
+                          ),
+                        ],
+                      );
+                    },
                   ),
                 ),
               ),

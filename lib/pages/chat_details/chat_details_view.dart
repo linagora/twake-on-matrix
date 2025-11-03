@@ -99,12 +99,16 @@ class ChatDetailsView extends StatelessWidget {
                       mainAxisSize: MainAxisSize.min,
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        _GroupInformation(
-                          avatarUri: controller.room?.avatar,
-                          displayName:
-                              controller.room?.getLocalizedDisplayname(),
-                          membersCount:
-                              controller.room?.summary.actualMembersCount,
+                        FutureBuilder(
+                          future: controller.room?.getUserDisplayName(),
+                          builder: (context, asyncSnapshot) {
+                            return _GroupInformation(
+                              avatarUri: controller.room?.avatar,
+                              displayName: asyncSnapshot.data,
+                              membersCount:
+                                  controller.room?.summary.actualMembersCount,
+                            );
+                          },
                         ),
                         Padding(
                           padding: ChatDetailViewStyle

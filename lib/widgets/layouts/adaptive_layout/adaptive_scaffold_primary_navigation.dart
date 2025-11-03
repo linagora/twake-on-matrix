@@ -1,8 +1,9 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/event/twake_inapp_event_types.dart';
-import 'package:fluffychat/utils/manager/twake_user_info_manager/twake_user_info_extension.dart';
+import 'package:fluffychat/presentation/extensions/user_info_extension.dart';
 import 'package:fluffychat/utils/manager/twake_user_info_manager/twake_user_info_manager.dart';
 import 'package:fluffychat/widgets/layouts/adaptive_layout/adaptive_scaffold_primary_navigation_view.dart';
 import 'package:fluffychat/widgets/matrix.dart';
@@ -43,10 +44,11 @@ class _AdaptiveScaffoldPrimaryNavigationState
               userId: client.userID!,
               getFromRooms: false,
             );
+    final matrixProfile = twakeProfile.toMatrixProfile();
     Logs().d(
-      'AdaptiveScaffoldPrimaryNavigation::_getCurrentProfile() - currentProfile: ${twakeProfile.toMatrixProfile()}',
+      'AdaptiveScaffoldPrimaryNavigation::_getCurrentProfile() - currentProfile: ${jsonEncode(matrixProfile)}',
     );
-    profileNotifier.value = twakeProfile.toMatrixProfile();
+    profileNotifier.value = matrixProfile;
   }
 
   void _handleOnAccountDataSubscription() {

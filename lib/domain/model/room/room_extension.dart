@@ -1,6 +1,8 @@
 import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/config/default_power_level_member.dart';
+import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/domain/model/search/recent_chat_model.dart';
+import 'package:fluffychat/utils/manager/twake_user_info_manager/twake_user_info_manager.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/client_stories_extension.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
 import 'package:matrix/matrix.dart';
@@ -352,6 +354,22 @@ extension RoomExtension on Room {
   }
 
   bool get canReportContent => membership.isJoin;
+
+  Future<String> getUserDisplayName({
+    String? matrixId,
+    MatrixLocalizations i18n = const MatrixDefaultLocalizations(),
+  }) async {
+    if (matrixId != null) {
+      final userInfo =
+          await getIt.get<TwakeUserInfoManager>().getTwakeProfileFromUserId(
+                client: client,
+                userId: matrixId,
+              );
+      return userInfo.displayName ?? getLocalizedDisplayname(i18n);
+    }
+
+    return getLocalizedDisplayname(i18n);
+  }
 }
 
 extension SortByPowerLevel on List<User> {

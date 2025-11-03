@@ -2,12 +2,17 @@
 // TODO: When changing from RawKeyboardListener to KeyboardListener, the keyboard up and down not working anymore. We will dive deeper into this issue later.
 
 import 'package:emojis/emoji.dart';
+import 'package:fluffychat/di/global/get_it_initializer.dart';
+import 'package:fluffychat/domain/model/room/room_extension.dart';
 import 'package:fluffychat/pages/chat/command_hints.dart';
 import 'package:fluffychat/pages/chat/input_bar/focus_suggestion_controller.dart';
 import 'package:fluffychat/pages/chat/input_bar/focus_suggestion_list.dart';
 import 'package:fluffychat/pages/chat/input_bar/input_bar_shortcut.dart';
 import 'package:fluffychat/pages/chat/input_bar/input_bar_style.dart';
 import 'package:fluffychat/presentation/mixins/paste_image_mixin.dart';
+import 'package:fluffychat/utils/clipboard.dart';
+import 'package:fluffychat/utils/manager/twake_user_info_manager/twake_user_info_manager.dart';
+import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/widgets/avatar/avatar.dart';
 import 'package:fluffychat/widgets/context_menu_builder_ios_paste_without_permission.dart';
@@ -81,7 +86,7 @@ class _InputBarState extends State<InputBar> with PasteImageMixin {
     super.dispose();
   }
 
-  List<Map<String, String?>> getSuggestions(String text) {
+  Future<List<Map<String, String?>>> getSuggestions(String text) async {
     if (widget.controller!.selection.baseOffset !=
             widget.controller!.selection.extentOffset ||
         widget.controller!.selection.baseOffset < 0) {
@@ -246,10 +251,14 @@ class _InputBarState extends State<InputBar> with PasteImageMixin {
                                   .contains(roomSearch),
                         )))) ||
             (r.name.toLowerCase().contains(roomSearch))) {
+          final displayName = await r.getUserDisplayName(
+            matrixId: r.isDirectChat ? r.directChatMatrixID : null,
+            i18n: MatrixLocals(L10n.of(context)!),
+          );
           ret.add({
             'type': 'room',
             'mxid': (r.canonicalAlias.isNotEmpty) ? r.canonicalAlias : r.id,
-            'displayname': r.getLocalizedDisplayname(),
+            'displayname': displayName,
             'avatar_url': r.avatar?.toString(),
           });
         }
@@ -261,7 +270,7 @@ class _InputBarState extends State<InputBar> with PasteImageMixin {
     return ret;
   }
 
-  void insertSuggestion(Map<String, String?> suggestion) {
+  Future<void> insertSuggestion(Map<String, String?> suggestion) async {
     if (widget.room!.isDirectChat && !widget.isDraftChat) return;
     final replaceText = widget.controller!.text
         .substring(0, widget.controller!.selection.baseOffset);
@@ -450,9 +459,9 @@ class _InputBarState extends State<InputBar> with PasteImageMixin {
                 : null,
             textCapitalization: TextCapitalization.sentences,
           ),
-          suggestionsCallback: (text) {
+          suggestionsCallback: (text) async {
             if (widget.room!.isDirectChat) return [];
-            final suggestions = getSuggestions(text);
+            final suggestions = await getSuggestions(text);
             if (PlatformInfos.isMobile) {
               _handleSuggestionsCallbackMobile();
             }
@@ -467,7 +476,7 @@ class _InputBarState extends State<InputBar> with PasteImageMixin {
             suggestion: suggestion,
             client: Matrix.of(context).client,
           ),
-          onSelected: insertSuggestion,
+          onSelected: (value) async => await insertSuggestion(value),
           errorBuilder: (BuildContext context, Object? error) =>
               const SizedBox.shrink(),
           loadingBuilder: (BuildContext context) => const SizedBox.shrink(),
@@ -590,53 +599,69 @@ class SuggestionTile extends StatelessWidget {
     }
     if (suggestion['type'] == 'user' || suggestion['type'] == 'room') {
       final url = Uri.parse(suggestion['avatar_url'] ?? '');
-      return Container(
-        padding: const EdgeInsetsDirectional.all(8.0),
-        height: InputBarStyle.suggestionSize,
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: <Widget>[
-            Avatar(
-              mxContent: url,
-              name: suggestion.tryGet<String>('displayname') ??
-                  suggestion.tryGet<String>('mxid'),
-              size: InputBarStyle.suggestionAvatarSize,
-              fontSize: InputBarStyle.suggestionAvatarFontSize,
-              client: client,
+      return FutureBuilder(
+        future: getIt.get<TwakeUserInfoManager>().getTwakeProfileFromUserId(
+              client: client ?? Matrix.of(context).client,
+              userId: suggestion.tryGet<String>('mxid') ?? '',
             ),
-            const SizedBox(
-              width: InputBarStyle.suggestionTileAvatarTextGap,
-            ),
-            Expanded(
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Flexible(
-                    child: Text(
-                      suggestion['displayname'] ?? suggestion['mxid']!,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                            color: Theme.of(context).colorScheme.onSurface,
-                          ),
-                    ),
+        builder: (context, asyncSnapshot) {
+          return Container(
+            padding: const EdgeInsetsDirectional.all(8.0),
+            height: InputBarStyle.suggestionSize,
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: <Widget>[
+                Avatar(
+                  mxContent: url,
+                  name: asyncSnapshot.data?.displayName,
+                  size: InputBarStyle.suggestionAvatarSize,
+                  fontSize: InputBarStyle.suggestionAvatarFontSize,
+                  client: client,
+                ),
+                const SizedBox(
+                  width: InputBarStyle.suggestionTileAvatarTextGap,
+                ),
+                Expanded(
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Flexible(
+                        child: Text(
+                          asyncSnapshot.data?.displayName ??
+                              suggestion['displayname'] ??
+                              suggestion['mxid']!,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: Theme.of(context)
+                              .textTheme
+                              .bodyLarge
+                              ?.copyWith(
+                                color: Theme.of(context).colorScheme.onSurface,
+                              ),
+                        ),
+                      ),
+                      Flexible(
+                        child: Text(
+                          maxLines: 1,
+                          suggestion['mxid']!,
+                          overflow: TextOverflow.ellipsis,
+                          style: Theme.of(context)
+                              .textTheme
+                              .labelLarge
+                              ?.copyWith(
+                                color:
+                                    LinagoraRefColors.material().tertiary[30],
+                              ),
+                        ),
+                      ),
+                    ],
                   ),
-                  Flexible(
-                    child: Text(
-                      maxLines: 1,
-                      suggestion['mxid']!,
-                      overflow: TextOverflow.ellipsis,
-                      style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                            color: LinagoraRefColors.material().tertiary[30],
-                          ),
-                    ),
-                  ),
-                ],
-              ),
+                ),
+              ],
             ),
-          ],
-        ),
+          );
+        },
       );
     }
     return const SizedBox.shrink();
