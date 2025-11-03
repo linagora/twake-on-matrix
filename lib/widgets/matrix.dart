@@ -5,6 +5,7 @@ import 'package:fluffychat/data/model/federation_server/federation_configuration
 import 'package:fluffychat/data/model/federation_server/federation_server_information.dart';
 import 'package:fluffychat/domain/contact_manager/contacts_manager.dart';
 import 'package:fluffychat/domain/exception/federation_configuration_not_found.dart';
+import 'package:fluffychat/domain/model/room/room_extension.dart';
 import 'package:fluffychat/domain/repository/federation_configurations_repository.dart';
 import 'package:fluffychat/domain/repository/user_info/user_info_repository.dart';
 import 'package:fluffychat/event/twake_event_types.dart';
@@ -1073,10 +1074,17 @@ class MatrixState extends State<Matrix>
     showQrCodeDownload.value = show;
   }
 
+  void handleShowQrCodeIfNotHaveChat() {
+    final hasRoom =
+        client.rooms.map((room) => room.isShowInChatList()).toList();
+    handleShowQrCodeDownload(hasRoom.isEmpty);
+  }
+
   void listenShowToMBootstrap() {
     showToMBootstrap.addListener(() {
       handleShowQrCodeDownload(firstLogin);
     });
+    handleShowQrCodeIfNotHaveChat();
   }
 
   @override
