@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/config/themes.dart';
 import 'package:fluffychat/domain/model/room/room_extension.dart';
@@ -13,13 +15,43 @@ import 'package:linagora_design_flutter/colors/linagora_ref_colors.dart';
 import 'package:linagora_design_flutter/colors/linagora_sys_colors.dart';
 import 'package:matrix/matrix.dart';
 
-class ChatListItemSubtitle extends StatelessWidget with ChatListItemMixin {
+class ChatListItemSubtitle extends StatefulWidget {
   final Room room;
 
   const ChatListItemSubtitle({super.key, required this.room});
 
   @override
+  State<ChatListItemSubtitle> createState() => _ChatListItemSubtitleState();
+}
+
+class _ChatListItemSubtitleState extends State<ChatListItemSubtitle>
+    with
+        ChatListItemMixin,
+        AutomaticKeepAliveClientMixin<ChatListItemSubtitle> {
+  late final Room room;
+  Event? lastEvent;
+  StreamSubscription? _onRoomUpdate;
+
+  @override
+  void initState() {
+    super.initState();
+    room = widget.room;
+    _onRoomUpdate = room.onUpdate.stream.listen((event) {
+      if (event == room.id) {
+        lastEvent = null;
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _onRoomUpdate?.cancel();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    super.build(context);
     final typingText = room.getLocalizedTypingText(context);
     final isGroup = !room.isDirectChat;
     final unreadBadgeSize = ChatListItemStyle.unreadBadgeSize(
@@ -155,8 +187,11 @@ class ChatListItemSubtitle extends StatelessWidget with ChatListItemMixin {
     );
   }
 
-  Future<Event?> _getLastEvent() {
-    return room.lastEventAvailableInPreview();
+  Future<Event?> _getLastEvent() async {
+    lastEvent ??= await room.lastEventAvailableInPreview(
+      Matrix.of(context).initSettingsCompleter.future,
+    );
+    return lastEvent;
   }
 
   Widget _buildMainSubtitleContent(
@@ -187,4 +222,7 @@ class ChatListItemSubtitle extends StatelessWidget with ChatListItemMixin {
                     room.isUnreadOrInvited,
                   );
   }
+
+  @override
+  bool get wantKeepAlive => true;
 }

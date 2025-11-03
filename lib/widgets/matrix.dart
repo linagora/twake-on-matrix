@@ -278,6 +278,7 @@ class MatrixState extends State<Matrix>
       StreamController.broadcast();
   StreamSubscription<html.Event>? onFocusSub;
   StreamSubscription<html.Event>? onBlurSub;
+  final initSettingsCompleter = Completer<void>();
 
   String? _cachedPassword;
   Timer? _cachedPasswordClearTimer;
@@ -309,6 +310,7 @@ class MatrixState extends State<Matrix>
   @override
   void initState() {
     super.initState();
+    initSettings();
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       WidgetsBinding.instance.addObserver(this);
       if (PlatformInfos.isWeb) {
@@ -321,9 +323,9 @@ class MatrixState extends State<Matrix>
       initReceiveSharingIntent();
       await tryToGetFederationConfigurations();
       if (PlatformInfos.isWeb) {
-        initConfigWeb().then((_) => initSettings());
+        initConfigWeb();
       } else {
-        initConfigMobile().then((_) => initSettings());
+        initConfigMobile();
       }
     });
   }
@@ -1073,57 +1075,67 @@ class MatrixState extends State<Matrix>
     }
   }
 
-  void initSettings() {
-    store.getItem(SettingKeys.wallpaper).then((final path) async {
-      if (path == null) return;
-      final file = File(path);
-      if (await file.exists()) {
-        wallpaper = file;
-      }
-    });
-    store.getItem(SettingKeys.fontSizeFactor).then(
-          (value) => AppConfig.fontSizeFactor =
-              double.tryParse(value ?? '') ?? AppConfig.fontSizeFactor,
-        );
-    store.getItem(SettingKeys.bubbleSizeFactor).then(
-          (value) => AppConfig.bubbleSizeFactor =
-              double.tryParse(value ?? '') ?? AppConfig.bubbleSizeFactor,
-        );
-    store
-        .getItemBool(SettingKeys.renderHtml, AppConfig.renderHtml)
-        .then((value) => AppConfig.renderHtml = value);
-    store
-        .getItemBool(
-          SettingKeys.hideRedactedEvents,
-          AppConfig.hideRedactedEvents,
-        )
-        .then((value) => AppConfig.hideRedactedEvents = value);
-    store
-        .getItemBool(SettingKeys.hideUnknownEvents, AppConfig.hideUnknownEvents)
-        .then((value) => AppConfig.hideUnknownEvents = value);
-    store
-        .getItemBool(
-          SettingKeys.showDirectChatsInSpaces,
-          AppConfig.showDirectChatsInSpaces,
-        )
-        .then((value) => AppConfig.showDirectChatsInSpaces = value);
-    store
-        .getItemBool(SettingKeys.separateChatTypes, AppConfig.separateChatTypes)
-        .then((value) => AppConfig.separateChatTypes = value);
-    store
-        .getItemBool(SettingKeys.autoplayImages, AppConfig.autoplayImages)
-        .then((value) => AppConfig.autoplayImages = value);
-    store
-        .getItemBool(SettingKeys.experimentalVoip, AppConfig.experimentalVoip)
-        .then((value) => AppConfig.experimentalVoip = value);
-    store
-        .getItemBool(
-          SettingKeys.enableRightAndLeftMessageAlignmentOnWeb,
-          AppConfig.enableRightAndLeftMessageAlignmentOnWeb,
-        )
-        .then(
-          (value) => AppConfig.enableRightAndLeftMessageAlignmentOnWeb = value,
-        );
+  Future<void> initSettings() async {
+    await Future.wait([
+      store.getItem(SettingKeys.wallpaper).then((final path) async {
+        if (path == null) return;
+        final file = File(path);
+        if (await file.exists()) {
+          wallpaper = file;
+        }
+      }),
+      store.getItem(SettingKeys.fontSizeFactor).then(
+            (value) => AppConfig.fontSizeFactor =
+                double.tryParse(value ?? '') ?? AppConfig.fontSizeFactor,
+          ),
+      store.getItem(SettingKeys.bubbleSizeFactor).then(
+            (value) => AppConfig.bubbleSizeFactor =
+                double.tryParse(value ?? '') ?? AppConfig.bubbleSizeFactor,
+          ),
+      store
+          .getItemBool(SettingKeys.renderHtml, AppConfig.renderHtml)
+          .then((value) => AppConfig.renderHtml = value),
+      store
+          .getItemBool(
+            SettingKeys.hideRedactedEvents,
+            AppConfig.hideRedactedEvents,
+          )
+          .then((value) => AppConfig.hideRedactedEvents = value),
+      store
+          .getItemBool(
+            SettingKeys.hideUnknownEvents,
+            AppConfig.hideUnknownEvents,
+          )
+          .then((value) => AppConfig.hideUnknownEvents = value),
+      store
+          .getItemBool(
+            SettingKeys.showDirectChatsInSpaces,
+            AppConfig.showDirectChatsInSpaces,
+          )
+          .then((value) => AppConfig.showDirectChatsInSpaces = value),
+      store
+          .getItemBool(
+            SettingKeys.separateChatTypes,
+            AppConfig.separateChatTypes,
+          )
+          .then((value) => AppConfig.separateChatTypes = value),
+      store
+          .getItemBool(SettingKeys.autoplayImages, AppConfig.autoplayImages)
+          .then((value) => AppConfig.autoplayImages = value),
+      store
+          .getItemBool(SettingKeys.experimentalVoip, AppConfig.experimentalVoip)
+          .then((value) => AppConfig.experimentalVoip = value),
+      store
+          .getItemBool(
+            SettingKeys.enableRightAndLeftMessageAlignmentOnWeb,
+            AppConfig.enableRightAndLeftMessageAlignmentOnWeb,
+          )
+          .then(
+            (value) =>
+                AppConfig.enableRightAndLeftMessageAlignmentOnWeb = value,
+          ),
+    ]);
+    initSettingsCompleter.complete();
   }
 
   @override
