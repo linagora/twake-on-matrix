@@ -381,7 +381,7 @@ class _ExpansionContactListTileState extends State<ExpansionContactListTile>
       final twakeProfile =
           await getIt.get<TwakeUserInfoManager>().getTwakeProfileFromUserId(
                 client: client,
-                userId: client.userID!,
+                userId: widget.contact.matrixId!,
                 getFromRooms: false,
               );
       Logs().d(
