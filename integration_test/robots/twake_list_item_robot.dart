@@ -14,7 +14,7 @@ class TwakeListItemRobot extends CoreRobot {
     return root.$(Radio).at(0);
   }
 
-  Future<PatrolFinder> getCheckBox() async {
+  PatrolFinder getCheckBox() {
     return root.$(Checkbox).at(0);
   }
   
@@ -36,6 +36,13 @@ class TwakeListItemRobot extends CoreRobot {
 
   Future<PatrolFinder> getContactLabel() async {
     return root.$(ChatListItemSubtitle).$(Text).at(1);
+  }
+
+  PatrolFinder getPinIcon(){
+    final title = root.$(ChatListItemTitle);
+    const pinData = IconData(0xF2D7, fontFamily: 'MaterialIcons');
+    final pinFinder = find.descendant(of: title, matching: find.byIcon(pinData));
+    return $(pinFinder);
   }
 
   int getUnreadMessage(){
