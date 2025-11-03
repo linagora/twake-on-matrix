@@ -5,7 +5,7 @@ import 'package:fluffychat/pages/search/search_debouncer_mixin.dart';
 import 'package:fluffychat/pages/settings_dashboard/settings_blocked_users/settings_blocked_users_search_state.dart';
 import 'package:fluffychat/presentation/extensions/client_extension.dart';
 import 'package:fluffychat/utils/dialog/twake_dialog.dart';
-import 'package:fluffychat/utils/manager/twake_user_info_manager/twake_user_info_extension.dart';
+import 'package:fluffychat/presentation/extensions/user_info_extension.dart';
 import 'package:fluffychat/utils/manager/twake_user_info_manager/twake_user_info_manager.dart';
 import 'package:fluffychat/utils/responsive/responsive_utils.dart';
 import 'package:fluffychat/widgets/matrix.dart';

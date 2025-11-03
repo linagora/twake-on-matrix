@@ -1,7 +1,7 @@
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/pages/new_group/contacts_selection.dart';
 import 'package:fluffychat/pages/new_group/widget/selected_participants_list_style.dart';
-import 'package:fluffychat/utils/manager/twake_user_info_manager/twake_user_info_extension.dart';
+import 'package:fluffychat/presentation/extensions/user_info_extension.dart';
 import 'package:fluffychat/utils/manager/twake_user_info_manager/twake_user_info_manager.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/widgets/avatar/avatar.dart';

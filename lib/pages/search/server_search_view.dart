@@ -1,3 +1,4 @@
+import 'package:fluffychat/domain/model/room/room_extension.dart';
 import 'package:fluffychat/pages/search/search.dart';
 import 'package:fluffychat/pages/search/server_search_view_style.dart';
 import 'package:fluffychat/presentation/decorators/chat_list/subtitle_text_style_decorator/subtitle_text_style_view.dart';
@@ -62,39 +63,49 @@ class ServerSearchMessagesList extends StatelessWidget {
                   child: TwakeListItem(
                     child: Padding(
                       padding: ServerSearchViewStyle.paddingInsideListItem,
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Padding(
-                            padding: ServerSearchViewStyle.paddingAvatar,
-                            child: Avatar(
-                              mxContent: room.avatar,
-                              name: room.name,
-                            ),
-                          ),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                ChatListItemTitle(
-                                  room: room,
-                                  originServerTs: originServerTs,
+                      child: FutureBuilder(
+                        future: room.getUserDisplayName(
+                          matrixId: room.isDirectChat
+                              ? room.directChatMatrixID
+                              : null,
+                        ),
+                        builder: (context, asyncSnapshot) {
+                          return Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Padding(
+                                padding: ServerSearchViewStyle.paddingAvatar,
+                                child: Avatar(
+                                  mxContent: room.avatar,
+                                  name: asyncSnapshot.data,
                                 ),
-                                HighlightText(
-                                  text: searchController.getBodyText(
-                                    event,
-                                    searchWord,
-                                  ),
-                                  searchWord: searchWord,
-                                  maxLines: 2,
-                                  style: ChatLitSubSubtitleTextStyleView
-                                      .textStyle
-                                      .textStyle(room, context),
+                              ),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    ChatListItemTitle(
+                                      room: room,
+                                      originServerTs: originServerTs,
+                                      displayName: asyncSnapshot.data ?? '',
+                                    ),
+                                    HighlightText(
+                                      text: searchController.getBodyText(
+                                        event,
+                                        searchWord,
+                                      ),
+                                      searchWord: searchWord,
+                                      maxLines: 2,
+                                      style: ChatLitSubSubtitleTextStyleView
+                                          .textStyle
+                                          .textStyle(room, context),
+                                    ),
+                                  ],
                                 ),
-                              ],
-                            ),
-                          ),
-                        ],
+                              ),
+                            ],
+                          );
+                        },
                       ),
                     ),
                   ),

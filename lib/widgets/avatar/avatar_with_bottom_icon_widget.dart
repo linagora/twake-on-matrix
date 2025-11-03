@@ -1,6 +1,6 @@
 import 'package:fluffychat/di/global/get_it_initializer.dart';
+import 'package:fluffychat/presentation/extensions/user_info_extension.dart';
 import 'package:fluffychat/presentation/model/contact/presentation_contact.dart';
-import 'package:fluffychat/utils/manager/twake_user_info_manager/twake_user_info_extension.dart';
 import 'package:fluffychat/utils/manager/twake_user_info_manager/twake_user_info_manager.dart';
 import 'package:fluffychat/widgets/avatar/avatar.dart';
 import 'package:fluffychat/widgets/matrix.dart';
