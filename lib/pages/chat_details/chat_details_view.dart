@@ -1,6 +1,8 @@
+import 'package:fluffychat/pages/chat/optional_selection_area.dart';
 import 'package:fluffychat/pages/chat_details/chat_details_view_style.dart';
 import 'package:fluffychat/presentation/extensions/room_summary_extension.dart';
 import 'package:fluffychat/utils/dialog/twake_dialog.dart';
+import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/utils/twake_snackbar.dart';
 import 'package:fluffychat/widgets/app_bars/twake_app_bar.dart';
 import 'package:fluffychat/widgets/avatar/avatar.dart';
@@ -445,30 +447,33 @@ class _GroupInformation extends StatelessWidget {
             ),
           ),
         ),
-        Padding(
-          padding: ChatDetailViewStyle.chatInformationPadding,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(
-                displayName ?? '',
-                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                      color: LinagoraSysColors.material().onSurface,
-                    ),
-                maxLines: 2,
-                textAlign: TextAlign.center,
-              ),
-              Text(
-                membersCount != null
-                    ? L10n.of(context)!.countMembers(membersCount!)
-                    : '',
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: LinagoraRefColors.material().tertiary[30],
-                    ),
-                maxLines: 2,
-                textAlign: TextAlign.center,
-              ),
-            ],
+        OptionalSelectionArea(
+          isEnabled: PlatformInfos.isWeb,
+          child: Padding(
+            padding: ChatDetailViewStyle.chatInformationPadding,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  displayName ?? '',
+                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                        color: LinagoraSysColors.material().onSurface,
+                      ),
+                  maxLines: 2,
+                  textAlign: TextAlign.center,
+                ),
+                Text(
+                  membersCount != null
+                      ? L10n.of(context)!.countMembers(membersCount!)
+                      : '',
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: LinagoraRefColors.material().tertiary[30],
+                      ),
+                  maxLines: 2,
+                  textAlign: TextAlign.center,
+                ),
+              ],
+            ),
           ),
         ),
       ],
