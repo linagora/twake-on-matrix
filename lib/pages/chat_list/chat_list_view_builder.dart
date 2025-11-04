@@ -1,4 +1,5 @@
 import 'package:fluffychat/pages/chat_list/chat_list.dart';
+import 'package:fluffychat/pages/chat_list/chat_list_sort_rooms.dart';
 import 'package:fluffychat/pages/chat_list/chat_list_view_style.dart';
 import 'package:fluffychat/pages/chat_list/common_chat_list_item.dart';
 import 'package:fluffychat/pages/chat_list/slidable_chat_list_item.dart';
@@ -18,34 +19,66 @@ class ChatListViewBuilder extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SliverList(
-      delegate: SliverChildBuilderDelegate(
-        (context, index) {
-          return ValueListenableBuilder<SelectMode>(
-            key: ValueKey(rooms[index].id),
-            valueListenable: controller.selectModeNotifier,
-            builder: (context, selectMode, _) {
-              final slidables = controller.getSlidables(context, rooms[index]);
-              return SlidableChatListItem(
-                controller: controller,
-                slidables: slidables,
-                enabled: ChatListViewStyle.responsiveUtils
-                        .isMobileOrTablet(context) &&
-                    !selectMode.isSelectMode &&
-                    slidables.isNotEmpty,
-                chatListItem: CommonChatListItem(
-                  controller: controller,
-                  room: rooms[index],
-                ),
+    return ChatListSortRooms(
+      rooms: rooms,
+      builder: (sortedRooms, lastEventByRoomId) {
+        return SliverList(
+          delegate: SliverChildBuilderDelegate(
+            (context, index) {
+              return ValueListenableBuilder<SelectMode>(
+                key: ValueKey(sortedRooms[index].id),
+                valueListenable: controller.selectModeNotifier,
+                builder: (context, selectMode, _) {
+                  final slidables =
+                      controller.getSlidables(context, sortedRooms[index]);
+                  return SlidableChatListItem(
+                    controller: controller,
+                    slidables: slidables,
+                    enabled: ChatListViewStyle.responsiveUtils
+                            .isMobileOrTablet(context) &&
+                        !selectMode.isSelectMode &&
+                        slidables.isNotEmpty,
+                    chatListItem: CommonChatListItem(
+                      controller: controller,
+                      room: sortedRooms[index],
+                      lastEvent: lastEventByRoomId[sortedRooms[index].id],
+                    ),
+                  );
+                },
               );
             },
-          );
-        },
-        childCount: rooms.length,
-        findChildIndexCallback: (key) {
-          return rooms.indexWhere((room) => room.id == (key as ValueKey).value);
-        },
-      ),
+            childCount: sortedRooms.length,
+            findChildIndexCallback: (key) {
+              return sortedRooms
+                  .indexWhere((room) => room.id == (key as ValueKey).value);
+            },
+          ),
+          // delegate: SliverChildListDelegate(
+          //   sortedRooms.map((room) {
+          //     return ValueListenableBuilder<SelectMode>(
+          //       key: ValueKey(room.id),
+          //       valueListenable: controller.selectModeNotifier,
+          //       builder: (context, selectMode, _) {
+          //         final slidables = controller.getSlidables(context, room);
+          //         return SlidableChatListItem(
+          //           controller: controller,
+          //           slidables: slidables,
+          //           enabled: ChatListViewStyle.responsiveUtils
+          //                   .isMobileOrTablet(context) &&
+          //               !selectMode.isSelectMode &&
+          //               slidables.isNotEmpty,
+          //           chatListItem: CommonChatListItem(
+          //             controller: controller,
+          //             room: room,
+          //             lastEvent: lastEventByRoomId[room.id],
+          //           ),
+          //         );
+          //       },
+          //     );
+          //   }).toList(),
+          // ),
+        );
+      },
     );
   }
 }

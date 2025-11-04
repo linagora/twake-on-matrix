@@ -56,6 +56,8 @@ class MxcImage extends StatefulWidget {
 
   final int? cacheHeight;
 
+  final bool keepAlive;
+
   const MxcImage({
     this.uri,
     this.event,
@@ -81,6 +83,7 @@ class MxcImage extends StatefulWidget {
     this.cacheWidth,
     this.cacheHeight,
     this.enableHeroAnimation = true,
+    this.keepAlive = false,
     super.key,
   });
 
@@ -88,7 +91,8 @@ class MxcImage extends StatefulWidget {
   State<MxcImage> createState() => _MxcImageState();
 }
 
-class _MxcImageState extends State<MxcImage> {
+class _MxcImageState extends State<MxcImage>
+    with AutomaticKeepAliveClientMixin {
   static const String placeholderKey = 'placeholder';
   ImageData? _imageDataNoCache;
   bool isLoadDone = false;
@@ -287,6 +291,7 @@ class _MxcImageState extends State<MxcImage> {
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     Widget imageWidget = widget.animated
         ? AnimatedSwitcher(
             duration: widget.animationDuration,
@@ -345,6 +350,9 @@ class _MxcImageState extends State<MxcImage> {
       ),
     );
   }
+
+  @override
+  bool get wantKeepAlive => widget.keepAlive;
 }
 
 class _ImageWidget extends StatelessWidget {

@@ -53,6 +53,7 @@ class Avatar extends StatelessWidget {
             animated: true,
             isThumbnail: false,
             placeholder: (context) => _fallbackAvatar(),
+            keepAlive: true,
           ),
         ),
       ),
