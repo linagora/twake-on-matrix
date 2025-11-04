@@ -126,11 +126,15 @@ class ChatDetailsView extends StatelessWidget {
                                   title: _TileTitleText(
                                     title: L10n.of(context)!.groupDescription,
                                   ),
-                                  subtitle: _TileSubtitleText(
-                                    subtitle: controller.room?.topic == null ||
-                                            controller.room!.topic.isEmpty
-                                        ? L10n.of(context)!.noDescription
-                                        : controller.room!.topic,
+                                  subtitle: OptionalSelectionArea(
+                                    isEnabled: PlatformInfos.isWeb,
+                                    child: _TileSubtitleText(
+                                      subtitle:
+                                          controller.room?.topic == null ||
+                                                  controller.room!.topic.isEmpty
+                                              ? L10n.of(context)!.noDescription
+                                              : controller.room!.topic,
+                                    ),
                                   ),
                                 ),
                                 ValueListenableBuilder(

@@ -1,5 +1,7 @@
+import 'package:fluffychat/pages/chat/optional_selection_area.dart';
 import 'package:fluffychat/pages/profile_info/profile_info_body/profile_info_body_view_style.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/presence_extension.dart';
+import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/widgets/avatar/avatar.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:flutter/material.dart';
@@ -28,13 +30,16 @@ class ProfileInfoHeader extends StatelessWidget {
             size: 160,
           ),
         ),
-        Text(
-          user.calcDisplayname(),
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-          style: LinagoraTextStyle.material().bodyMedium2.copyWith(
-                color: LinagoraSysColors.material().onSurface,
-              ),
+        OptionalSelectionArea(
+          isEnabled: PlatformInfos.isWeb,
+          child: Text(
+            user.calcDisplayname(),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: LinagoraTextStyle.material().bodyMedium2.copyWith(
+                  color: LinagoraSysColors.material().onSurface,
+                ),
+          ),
         ),
         if (presence != null) ...[
           const SizedBox(height: 8),

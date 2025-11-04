@@ -2,10 +2,8 @@ import 'dart:async';
 
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:fluffychat/pages/chat/chat_app_bar_title_style.dart';
-import 'package:fluffychat/pages/chat/optional_selection_area.dart';
 import 'package:fluffychat/resource/image_paths.dart';
 import 'package:fluffychat/utils/common_helper.dart';
-import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/utils/room_status_extension.dart';
 import 'package:fluffychat/utils/string_extension.dart';
 import 'package:flutter/material.dart';
@@ -84,48 +82,45 @@ class ChatAppBarTitle extends StatelessWidget {
             ),
           ),
           Expanded(
-            child: OptionalSelectionArea(
-              isEnabled: PlatformInfos.isWeb,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: [
-                      if (room?.encrypted == true) ...[
-                        Padding(
-                          padding: const EdgeInsets.all(2.0),
-                          child: SvgPicture.asset(
-                            ImagePaths.icEncrypted,
-                            width: 16,
-                            height: 16,
-                          ),
-                        ),
-                        const SizedBox(width: 4),
-                      ],
-                      Flexible(
-                        child: Text(
-                          roomName ??
-                              room!.getLocalizedDisplayname(
-                                MatrixLocals(L10n.of(context)!),
-                              ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: ChatAppBarTitleStyle.appBarTitleStyle(context),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
+                    if (room?.encrypted == true) ...[
+                      Padding(
+                        padding: const EdgeInsets.all(2.0),
+                        child: SvgPicture.asset(
+                          ImagePaths.icEncrypted,
+                          width: 16,
+                          height: 16,
                         ),
                       ),
+                      const SizedBox(width: 4),
                     ],
-                  ),
-                  _ChatAppBarStatusContent(
-                    connectivityResultStream: connectivityResultStream,
-                    room: room!,
-                    cachedPresenceNotifier: cachedPresenceNotifier,
-                    cachedPresenceStreamController:
-                        cachedPresenceStreamController,
-                  ),
-                ],
-              ),
+                    Flexible(
+                      child: Text(
+                        roomName ??
+                            room!.getLocalizedDisplayname(
+                              MatrixLocals(L10n.of(context)!),
+                            ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: ChatAppBarTitleStyle.appBarTitleStyle(context),
+                      ),
+                    ),
+                  ],
+                ),
+                _ChatAppBarStatusContent(
+                  connectivityResultStream: connectivityResultStream,
+                  room: room!,
+                  cachedPresenceNotifier: cachedPresenceNotifier,
+                  cachedPresenceStreamController:
+                      cachedPresenceStreamController,
+                ),
+              ],
             ),
           ),
         ],
