@@ -114,6 +114,7 @@ class AddContactDialogView extends StatelessWidget {
                 initialValue: controller.userName.value,
                 onChanged: controller.onUsernameChanged,
                 assetPath: ImagePaths.icMatrixid,
+                additionalHorizontalPadding: 20,
                 errorMessage: errorMessage,
                 textInputAction: TextInputAction.done,
                 onSubmitted: (_) => controller.onSave(),
