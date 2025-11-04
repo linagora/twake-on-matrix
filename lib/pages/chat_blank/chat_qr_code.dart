@@ -2,7 +2,6 @@ import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/resource/image_paths.dart';
 import 'package:fluffychat/utils/responsive/responsive_utils.dart';
 import 'package:fluffychat/utils/url_launcher.dart';
-import 'package:fluffychat/widgets/matrix.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:linagora_design_flutter/colors/linagora_sys_colors.dart';
@@ -43,12 +42,6 @@ class _ChatQrCodeState extends State<ChatQrCode> {
         position: PrettyQrDecorationImagePosition.embedded,
       ),
     );
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
-    Matrix.of(context).resetFirstLogin();
   }
 
   @override
