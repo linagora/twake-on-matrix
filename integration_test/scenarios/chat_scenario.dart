@@ -42,7 +42,7 @@ class ChatScenario extends BaseScenario {
 
   Future<ChatGroupDetailRobot> openChatGroupByTitle(String groupTitle) async {
     await enterSearchText(groupTitle);
-    await (await ChatListRobot($).getListOfChatGroup())[0].root.tap();
+    await (ChatListRobot($).getListOfChatGroup())[0].root.tap();
     await $.pumpAndSettle();
     return ChatGroupDetailRobot($);
   }

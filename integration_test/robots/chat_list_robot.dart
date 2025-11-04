@@ -34,7 +34,7 @@ class ChatListRobot extends HomeRobot {
     return ChatGroupDetailRobot($);
   }
 
-  Future<List<TwakeListItemRobot>> getListOfChatGroup() async {
+  List<TwakeListItemRobot> getListOfChatGroup() {
     final List<TwakeListItemRobot> groupList = [];
 
     // Evaluate once to find how many TwakeListItem widgets exist
