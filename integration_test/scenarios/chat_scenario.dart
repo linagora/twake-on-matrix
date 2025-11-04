@@ -390,7 +390,7 @@ class ChatScenario extends BaseScenario {
   }
 
   Future<void> verifySearchResultContains(String keyword) async {
-    final items = await ChatListRobot($).getListOfChatGroup();
+    final items = ChatListRobot($).getListOfChatGroup();
     final length = items.length;
     var i = 0;
 
@@ -416,7 +416,7 @@ class ChatScenario extends BaseScenario {
 
   Future<ChatGroupDetailRobot> openChatGroup(String title) async {
     await enterSearchText(title);
-    await (await ChatListRobot($).getListOfChatGroup())[0].root.tap();
+    await (ChatListRobot($).getListOfChatGroup()[0].root).tap();
     final chatGroupDetailRobot = ChatGroupDetailRobot($);
     await chatGroupDetailRobot.confimrAccessMedia();
     await $.pumpAndSettle();

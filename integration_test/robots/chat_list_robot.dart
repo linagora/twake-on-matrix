@@ -29,7 +29,7 @@ class ChatListRobot extends HomeRobot {
   }
 
   Future<ChatGroupDetailRobot> openChatGroupByIndex(int index) async {
-    await (await getListOfChatGroup())[index].root.tap();
+    await (getListOfChatGroup()[index].root).tap();
     await $.pumpAndSettle();
     return ChatGroupDetailRobot($);
   }
