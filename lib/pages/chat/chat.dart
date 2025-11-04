@@ -392,6 +392,7 @@ class ChatController extends State<Chat>
       );
 
   String? _findUnreadReceivedMessageLocation() {
+    if (timeline == null) return null;
     final events = timeline!.events;
     if (_markerReadLocation != '' && _markerReadLocation.isNotEmpty) {
       final lastIndexReadEvent = events.indexWhere(
@@ -1159,7 +1160,7 @@ class ChatController extends State<Chat>
       timeline = await room?.getTimeline(onUpdate: updateView);
       if (!mounted) return;
     }
-    timeline!.requestKeys(onlineKeyBackupOnly: false);
+    timeline?.requestKeys(onlineKeyBackupOnly: false);
     if (room!.markedUnread) room?.markUnread(false);
     // when the scroll controller is attached we want to scroll to an event id, if specified
     // and update the scroll controller...which will trigger a request history, if the
@@ -1167,23 +1168,35 @@ class ChatController extends State<Chat>
     SchedulerBinding.instance.addPostFrameCallback((_) async {
       if (!mounted) return;
 
-      String? event;
+      String? eventId;
 
       if (PlatformInfos.isMobile) {
-        event = GoRouterState.of(context).uri.queryParameters['event'];
+        eventId = GoRouterState.of(context).uri.queryParameters['event'];
       } else {
         final currentLocation = html.window.location.href;
 
-        event = Uri.tryParse(Uri.tryParse(currentLocation)?.fragment ?? '')
+        eventId = Uri.tryParse(Uri.tryParse(currentLocation)?.fragment ?? '')
             ?.queryParameters['event'];
       }
 
-      if (event != null) {
-        onJumpToMessage?.call(event);
+      if (eventId != null) {
+        onJumpToMessage?.call(eventId);
       }
     });
 
     return;
+  }
+
+  bool verifyEventIdInTimeline(Timeline? timeline, String? eventId) {
+    if (eventId == null) return false;
+    if (timeline == null) return false;
+    if (timeline.events.isEmpty) return false;
+
+    final foundEvent = timeline.events
+        .where((e) => e.isVisibleInGui)
+        .firstWhereOrNull((e) => e.eventId == eventId);
+
+    return foundEvent != null;
   }
 
   void scrollDown() async {
@@ -1212,6 +1225,7 @@ class ChatController extends State<Chat>
   }
 
   int _getEventIndex(String eventId) {
+    if (timeline == null) return -1;
     final foundEvent =
         timeline!.events.firstWhereOrNull((event) => event.eventId == eventId);
 
@@ -1229,7 +1243,9 @@ class ChatController extends State<Chat>
     if (eventIndex == -1) {
       setState(() {
         timeline = null;
-        loadTimelineFuture = _getTimeline(eventContextId: eventId).onError(
+        loadTimelineFuture = _getTimeline(
+          eventContextId: eventId,
+        ).onError(
           (e, s) {
             Logs().e('Chat::scrollToEventId(): Unable to load timeline', e, s);
           },
@@ -1237,7 +1253,9 @@ class ChatController extends State<Chat>
       });
       await loadTimelineFuture;
       WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-        scrollToEventId(eventId, highlight: highlight);
+        if (verifyEventIdInTimeline(timeline, eventId)) {
+          scrollToEventId(eventId, highlight: highlight);
+        }
       });
       return;
     }
