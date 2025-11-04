@@ -26,6 +26,7 @@ class ChatListItem extends StatelessWidget with ChatListItemMixin {
   final void Function()? onTapAvatar;
   final void Function(TapDownDetails)? onSecondaryTapDown;
   final void Function()? onLongPress;
+  final Event? lastEvent;
 
   const ChatListItem(
     this.room, {
@@ -37,6 +38,7 @@ class ChatListItem extends StatelessWidget with ChatListItemMixin {
     this.onTapAvatar,
     this.onSecondaryTapDown,
     this.onLongPress,
+    this.lastEvent,
     super.key,
   });
 
@@ -142,8 +144,9 @@ class ChatListItem extends StatelessWidget with ChatListItemMixin {
                     children: [
                       ChatListItemTitle(
                         room: room,
+                        originServerTs: lastEvent?.originServerTs,
                       ),
-                      ChatListItemSubtitle(room: room),
+                      ChatListItemSubtitle(room: room, lastEvent: lastEvent),
                     ],
                   ),
                 ),

@@ -212,7 +212,7 @@ extension RoomExtension on Room {
 
         lastEventAvailableInPreview = lastState;
         final messageEvents =
-            await client.database?.getEventList(this, limit: 10);
+            await client.database?.getEventList(this, limit: 30);
         if (messageEvents == null || messageEvents.isEmpty) {
           return lastState;
         }
