@@ -94,6 +94,8 @@ class ChatListController extends State<ChatList>
 
   final StreamController<Client> _clientStream = StreamController.broadcast();
 
+  StreamSubscription? _roomUpdateSubscription;
+
   String? activeSpaceId;
 
   Future<QueryPublicRoomsResponse>? publicRoomsResponse;
@@ -435,11 +437,17 @@ class ChatListController extends State<ChatList>
       if (result == false) {
         await BootstrapDialog(client: activeClient).show();
       }
-    });
 
-    if (!mounted) return;
-    setState(() {
-      matrixState.waitForFirstSync = true;
+      await activeClient.roomsLoading;
+      await activeClient.accountDataLoading;
+      if (activeClient.userID != null) {
+        await setupAdditionalDioCacheOption(activeClient.userID!);
+      }
+      if (!mounted) return;
+      setState(() {
+        matrixState.waitForFirstSync = true;
+        matrixState.handleShowQrCodeDownload(_filteredRooms.isEmpty);
+      });
     });
   }
 
@@ -452,6 +460,7 @@ class ChatListController extends State<ChatList>
     if (!mounted) return;
     setState(() {
       matrixState.waitForFirstSync = true;
+      matrixState.handleShowQrCodeDownload(_filteredRooms.isEmpty);
     });
   }
 
@@ -781,6 +790,7 @@ class ChatListController extends State<ChatList>
   void initState() {
     activeRoomIdNotifier.value = widget.activeRoomIdNotifier.value;
     scrollController.addListener(_onScroll);
+    _listenToRoomUpdates();
     if (!matrixState.waitForFirstSync) {
       _trySync();
     }
@@ -856,9 +866,28 @@ class ChatListController extends State<ChatList>
     ];
   }
 
+  void _listenToRoomUpdates() {
+    _roomUpdateSubscription = activeClient.onSync.stream
+        .where((s) => s.hasRoomUpdate)
+        .listen((syncUpdated) {
+      if (syncUpdated.hasRoomUpdate) {
+        if (_filteredRooms.length > 2) return;
+        matrixState.handleShowQrCodeDownload(_filteredRooms.isEmpty);
+      }
+    });
+  }
+
   @override
   void dispose() {
     scrollController.removeListener(_onScroll);
+    _roomUpdateSubscription?.cancel();
+    expandRoomsForAllNotifier.dispose();
+    expandRoomsForPinNotifier.dispose();
+    selectModeNotifier.dispose();
+    conversationSelectionNotifier.dispose();
+    searchChatController.dispose();
+    scrollController.dispose();
+    _clientStream.close();
     super.dispose();
   }
 
