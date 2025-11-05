@@ -11,7 +11,6 @@ class ChatDetailScenario extends BaseScenario {
     await ChatGroupDetailRobot($).getSearchIcon().tap();
     await $.waitUntilVisible($(AppBar).$(TextField));
     await $(AppBar).$(TextField).enterText(searchText);
-    // await SearchRobot($).enterSearchText(searchText);
     await ChatGroupDetailRobot($).waitForEitherVisible($: $, first: $(TwakeListItem), second: $("No Results"), timeout: const Duration(seconds: 10));
     await Future.delayed(const Duration(seconds: 2));
   }
