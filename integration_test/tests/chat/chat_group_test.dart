@@ -187,12 +187,12 @@ void main() {
     test: ($) async {
       //open chat and make some messages
       final receiveMessage = (await prepareTwoMessages($)).$2;
-      final searchPharse = receiveMessage.substring(receiveMessage.indexOf("sent"), receiveMessage.length);
+      final searchPhrase = receiveMessage.substring(receiveMessage.indexOf("sent"), receiveMessage.length);
 
       //open a chat
-      await ChatDetailScenario($).makeASearch(searchPharse);
+      await ChatDetailScenario($).makeASearch(searchPhrase);
       // verify info dialog is shown
-      final numberOfResult = (await ChatSearchViewRobot($).getListOfChatSeach()).length;
+      final numberOfResult = (await ChatSearchViewRobot($).getListOfChatSearch()).length;
       expect(numberOfResult == 2, isTrue, reason: "expect is 2 but got: $numberOfResult");
     },
   );

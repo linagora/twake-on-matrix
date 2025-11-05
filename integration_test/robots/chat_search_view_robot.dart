@@ -27,7 +27,7 @@ class ChatSearchViewRobot extends CoreRobot {
     return getTextField().$(IconButton);
   }
 
-  Future<List<TwakeListItemRobot>> getListOfChatSeach() async {
+  Future<List<TwakeListItemRobot>> getListOfChatSearch() async {
     final List<TwakeListItemRobot> groupList = [];
 
     // Evaluate once to find how many TwakeListItem widgets exist
