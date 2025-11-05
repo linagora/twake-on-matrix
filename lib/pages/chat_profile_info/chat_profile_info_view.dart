@@ -8,6 +8,7 @@ import 'package:fluffychat/domain/app_state/contact/lookup_match_contact_state.d
 import 'package:fluffychat/domain/contact_manager/contacts_manager.dart';
 import 'package:fluffychat/domain/model/contact/contact.dart';
 import 'package:fluffychat/domain/model/extensions/contact/contact_extension.dart';
+import 'package:fluffychat/pages/chat/optional_selection_area.dart';
 import 'package:fluffychat/pages/chat_details/chat_details_view_style.dart';
 import 'package:fluffychat/pages/chat_profile_info/chat_profile_action_button.dart';
 import 'package:fluffychat/pages/contacts_tab/widgets/add_contact/add_contact_dialog.dart';
@@ -291,12 +292,15 @@ class _Information extends StatelessWidget {
           padding: ChatProfileInfoStyle.mainPadding,
           child: Column(
             children: [
-              Text(
-                displayName ?? '',
-                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                      color: LinagoraSysColors.material().onSurface,
-                    ),
-                maxLines: 1,
+              OptionalSelectionArea(
+                isEnabled: PlatformInfos.isWeb,
+                child: Text(
+                  displayName ?? '',
+                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                        color: LinagoraSysColors.material().onSurface,
+                      ),
+                  maxLines: 1,
+                ),
               ),
               if (!isAlreadyInChat)
                 Padding(

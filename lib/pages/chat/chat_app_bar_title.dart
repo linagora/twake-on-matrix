@@ -99,6 +99,7 @@ class ChatAppBarTitle extends StatelessWidget {
       splashColor: Colors.transparent,
       hoverColor: Colors.transparent,
       highlightColor: Colors.transparent,
+      focusColor: Colors.transparent,
       onTap: isArchived ? null : onPushDetails,
       child: Row(
         children: [
