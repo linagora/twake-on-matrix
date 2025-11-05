@@ -11,7 +11,8 @@ class ChatSearchViewRobot extends CoreRobot {
   ChatSearchViewRobot(super.$);
 
   PatrolFinder getBackIcon() {
-    return $(ChatSearchView).$(TwakeIconButton).containing(find.byTooltip('Back'));
+    const icon = IconData(0xEF4D, fontFamily: 'MaterialIcons');
+    return $(TwakeIconButton).containing(find.byIcon(icon));
   }
 
   PatrolFinder getTextField() {
