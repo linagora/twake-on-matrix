@@ -82,6 +82,8 @@ class ChatListController extends State<ChatList>
 
   final ValueNotifier<bool> expandRoomsForPinNotifier = ValueNotifier(true);
 
+  final ValueNotifier<bool> sortingRoomsNotifier = ValueNotifier(false);
+
   final ValueNotifier<SelectMode> selectModeNotifier =
       ValueNotifier(SelectMode.normal);
 

@@ -11,6 +11,7 @@ class ChatListSortRooms extends StatefulWidget {
     super.key,
     required this.rooms,
     required this.builder,
+    required this.sortingRoomsNotifier,
   });
 
   final List<Room> rooms;
@@ -18,6 +19,7 @@ class ChatListSortRooms extends StatefulWidget {
     List<Room> sortedRooms,
     Map<String, Event?> lastEventByRoomId,
   ) builder;
+  final ValueNotifier<bool> sortingRoomsNotifier;
 
   @override
   State<ChatListSortRooms> createState() => _ChatListSortRoomsState();
@@ -51,9 +53,9 @@ class _ChatListSortRoomsState extends State<ChatListSortRooms> {
       };
 
   Future<List<Room>> sortRooms() async {
-    final previousSyncStatus = Matrix.of(context).client.onSyncStatus.value;
-    const loadingSyncStatus = SyncStatusUpdate(SyncStatus.waitingForResponse);
-    Matrix.of(context).client.onSyncStatus.add(loadingSyncStatus);
+    if (_sortCache.isEmpty) {
+      widget.sortingRoomsNotifier.value = true;
+    }
     await Matrix.of(context).initSettingsCompleter.future;
     for (final room in widget.rooms) {
       if (_lastEventByRoomId[room.id] != null) continue;
@@ -61,11 +63,7 @@ class _ChatListSortRoomsState extends State<ChatListSortRooms> {
       final event = await room.lastEventAvailableInPreview();
       _lastEventByRoomId[room.id] = event;
     }
-    if (Matrix.of(context).client.onSyncStatus.value == loadingSyncStatus) {
-      Matrix.of(context).client.onSyncStatus.add(
-            previousSyncStatus ?? const SyncStatusUpdate(SyncStatus.finished),
-          );
-    }
+    widget.sortingRoomsNotifier.value = false;
     return List.from(widget.rooms)
       ..sort(sortRoomsBy(Matrix.of(context).client));
   }
