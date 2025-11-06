@@ -5,13 +5,13 @@ import 'package:fluffychat/app_state/failure.dart';
 import 'package:fluffychat/app_state/success.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/domain/app_state/contact/get_contacts_state.dart';
-import 'package:fluffychat/domain/app_state/contact/lookup_match_contact_state.dart';
 import 'package:fluffychat/domain/app_state/room/block_user_state.dart';
 import 'package:fluffychat/domain/app_state/room/unblock_user_state.dart';
+import 'package:fluffychat/domain/app_state/user_info/get_user_info_state.dart';
 import 'package:fluffychat/domain/contact_manager/contacts_manager.dart';
-import 'package:fluffychat/domain/usecase/contacts/lookup_match_contact_interactor.dart';
 import 'package:fluffychat/domain/usecase/room/block_user_interactor.dart';
 import 'package:fluffychat/domain/usecase/room/unblock_user_interactor.dart';
+import 'package:fluffychat/domain/usecase/user_info/get_user_info_interactor.dart';
 import 'package:fluffychat/pages/chat_profile_info/chat_profile_info_view.dart';
 import 'package:fluffychat/presentation/enum/chat/chat_details_screen_enum.dart';
 import 'package:fluffychat/presentation/extensions/client_extension.dart';
@@ -54,16 +54,15 @@ class ChatProfileInfoController extends State<ChatProfileInfo>
         PlayVideoActionMixin,
         TickerProviderStateMixin,
         ChatDetailsTabMixin<ChatProfileInfo> {
-  final _lookupMatchContactInteractor =
-      getIt.get<LookupMatchContactInteractor>();
+  final _getUserInfoInteractor = getIt.get<GetUserInfoInteractor>();
 
-  StreamSubscription? lookupContactNotifierSub;
+  StreamSubscription? userInfoNotifierSub;
 
   StreamSubscription? ignoredUsersStreamSub;
 
-  final ValueNotifier<Either<Failure, Success>> lookupContactNotifier =
+  final ValueNotifier<Either<Failure, Success>> userInfoNotifier =
       ValueNotifier<Either<Failure, Success>>(
-    const Right(LookupContactsInitial()),
+    Right(GettingUserInfo()),
   );
 
   final ValueNotifier<bool?> blockUserLoadingNotifier =
@@ -86,13 +85,13 @@ class ChatProfileInfoController extends State<ChatProfileInfo>
   User? get user =>
       room?.unsafeGetUserFromMemoryOrFallback(room?.directChatMatrixID ?? '');
 
-  void lookupMatchContactAction() {
-    lookupContactNotifierSub = _lookupMatchContactInteractor
+  void getUserInfoAction() {
+    userInfoNotifierSub = _getUserInfoInteractor
         .execute(
-          val: presentationContact?.matrixId ?? user?.id ?? '',
+          userId: presentationContact?.matrixId ?? user?.id ?? '',
         )
         .listen(
-          (event) => lookupContactNotifier.value = event,
+          (event) => userInfoNotifier.value = event,
         );
   }
 
@@ -290,7 +289,7 @@ class ChatProfileInfoController extends State<ChatProfileInfo>
     getIt.get<ContactsManager>().getContactsNotifier().addListener(
           _onTomContactsUpdateListener,
         );
-    lookupMatchContactAction();
+    getUserInfoAction();
     listenIgnoredUser();
   }
 
@@ -299,8 +298,8 @@ class ChatProfileInfoController extends State<ChatProfileInfo>
     getIt.get<ContactsManager>().getContactsNotifier().removeListener(
           _onTomContactsUpdateListener,
         );
-    lookupContactNotifier.dispose();
-    lookupContactNotifierSub?.cancel();
+    userInfoNotifier.dispose();
+    userInfoNotifierSub?.cancel();
     ignoredUsersStreamSub?.cancel();
     blockUserLoadingNotifier.dispose();
     isBlockedUser.dispose();

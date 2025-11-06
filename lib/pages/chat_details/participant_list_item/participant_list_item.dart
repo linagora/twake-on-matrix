@@ -63,6 +63,7 @@ class _ParticipantListItemState extends State<ParticipantListItem> {
         }
       },
       child: TwakeListItem(
+        key: ValueKey<String>(widget.member.id),
         height: 72,
         padding: const EdgeInsets.all(8),
         child: Row(

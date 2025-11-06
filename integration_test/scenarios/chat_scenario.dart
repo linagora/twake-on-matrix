@@ -18,7 +18,6 @@ import 'package:fluffychat/widgets/twake_components/twake_icon_button.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:linkfy_text/linkfy_text.dart';
 import 'package:patrol/patrol.dart';
-import '../base/base_scenario.dart';
 import '../base/core_robot.dart';
 import '../help/soft_assertion_helper.dart';
 import '../robots/add_member_robot.dart';
@@ -33,7 +32,8 @@ import '../robots/setting_for_new_group.dart';
 import '../robots/twake_list_item_robot.dart';
 
 enum UserLevel { member, admin, owner, moderator }
-class ChatScenario extends BaseScenario {
+
+class ChatScenario extends CoreRobot {
   ChatScenario(super.$);
 
   Future<void> enterSearchText(String searchText) async {
@@ -52,11 +52,11 @@ class ChatScenario extends BaseScenario {
     await (ChatGroupDetailRobot($).tapOnChatBarTitle());
     return ChatGroupDetailRobot($);
   }
-  
+
   Future<int> addMembers(List<String> members) async {
     await openGroupChatInfo();
     await GroupInformationRobot($).clickOnAddMemberBtn();
-    for(final member in members){
+    for (final member in members) {
       await AddMemberRobot($).makeASearch(member);
       await AddMemberRobot($).selectAllFilteredAccounts();
     }
@@ -65,10 +65,10 @@ class ChatScenario extends BaseScenario {
     await $.waitUntilVisible($("Group information"));
     return (await GroupInformationRobot($).getListOfMembers()).length;
   }
-  
+
   Future<int> removeMembers(List<String> members) async {
     await openGroupChatInfo();
-    for(final member in members){
+    for (final member in members) {
       await GroupInformationRobot($).getMember(member).tap();
       await GroupInformationRobot($).clickOnRemoveFromGroup();
       await GroupInformationRobot($).clickOnAgreeIRemoveMemberBtn();
@@ -77,21 +77,29 @@ class ChatScenario extends BaseScenario {
     return (await GroupInformationRobot($).getListOfMembers()).length;
   }
 
-  Future<void> backToChatLisFromChatGroupScreen({bool isOpenGroupFromSearchResult = false}) async {
+  Future<void> backToChatLisFromChatGroupScreen({
+    bool isOpenGroupFromSearchResult = false,
+  }) async {
     await ChatGroupDetailRobot($).clickOnBackIcon();
-    if(isOpenGroupFromSearchResult)
-      {await SearchRobot($).backToPreviousScreen();}
+    if (isOpenGroupFromSearchResult) {
+      await SearchRobot($).backToPreviousScreen();
+    }
   }
 
-  Future<void> verifyTheDisplayOfPullDownMenu(String message, {
-    UserLevel level = UserLevel.member,}) async {
+  Future<void> verifyTheDisplayOfPullDownMenu(
+    String message, {
+    UserLevel level = UserLevel.member,
+  }) async {
     expect((PullDownMenuRobot($).getReplyItem()).exists, isTrue);
     expect((PullDownMenuRobot($).getForwardItem()).exists, isTrue);
     expect((PullDownMenuRobot($).getCopyItem()).exists, isTrue);
-    if(level ==UserLevel.owner || level ==UserLevel.admin || level ==UserLevel.moderator)
-      {expect((PullDownMenuRobot($).getEditItem()).exists, isTrue);}
-    else
-      {expect((PullDownMenuRobot($).getEditItem()).exists, isFalse);}
+    if (level == UserLevel.owner ||
+        level == UserLevel.admin ||
+        level == UserLevel.moderator) {
+      expect((PullDownMenuRobot($).getEditItem()).exists, isTrue);
+    } else {
+      expect((PullDownMenuRobot($).getEditItem()).exists, isFalse);
+    }
     expect((PullDownMenuRobot($).getSelectItem()).exists, isTrue);
     expect((PullDownMenuRobot($).getPinItem()).exists, isTrue);
     expect((PullDownMenuRobot($).getDeleteItem()).exists, isTrue);
@@ -115,7 +123,7 @@ class ChatScenario extends BaseScenario {
     await ChatGroupDetailRobot($).openPullDownMenu(message);
     await PullDownMenuRobot($).getForwardItem().tap();
   }
-  
+
   Future<void> sendAMesage(String message) async {
     await ChatGroupDetailRobot($).inputMessage(message);
     // tab on send button
@@ -144,8 +152,9 @@ class ChatScenario extends BaseScenario {
     final flutterMenu = find.text(pasteLabel);
     final matches = flutterMenu.evaluate();
     if (matches.isNotEmpty) {
-      await $.tap(flutterMenu
-          .first,); // tap the first match to avoid "too many elements"
+      await $.tap(
+        flutterMenu.first,
+      ); // tap the first match to avoid "too many elements"
       return;
     }
 
@@ -207,14 +216,18 @@ class ChatScenario extends BaseScenario {
   Future<void> deleteMessage(String message) async {
     await ChatGroupDetailRobot($).openPullDownMenu(message);
     await (PullDownMenuRobot($).getDeleteItem()).tap();
-    await $.native.tap(Selector(text: 'Delete')); 
+    await $.native.tap(Selector(text: 'Delete'));
   }
 
-  Future<ChatGroupDetailRobot> createANewGroupChat(String groupName, List<String> memberAccounts, {String searchKey = ""}) async {
+  Future<ChatGroupDetailRobot> createANewGroupChat(
+    String groupName,
+    List<String> memberAccounts, {
+    String searchKey = "",
+  }) async {
     await ChatListRobot($).clickOnPenIcon();
     await NewChatRobot($).clickOnNewGroupChatIcon();
 
-    if(searchKey != ""){
+    if (searchKey != "") {
       await AddMemberRobot($).makeASearch(searchKey);
     }
     await AddMemberRobot($).selectAllFilteredAccounts();
@@ -230,7 +243,12 @@ class ChatScenario extends BaseScenario {
     await ChatListRobot($).clickOnPenIcon();
     await NewChatRobot($).makeASearch(account);
     await NewChatRobot($).getListOfAccount()[0].root.tap();
-    await CoreRobot($).waitForEitherVisible($: $, first: $(ChatView), second: $(DraftChatView), timeout: const Duration(seconds: 30));
+    await CoreRobot($).waitForEitherVisible(
+      $: $,
+      first: $(ChatView),
+      second: $(DraftChatView),
+      timeout: const Duration(seconds: 30),
+    );
   }
 
   PatrolFinder _tileByText(String text) {
@@ -293,16 +311,27 @@ class ChatScenario extends BaseScenario {
 
     await icon.tap();
     // wait for the pinned UI (a real widget on that screen)
-    await $.waitUntilVisible($(AppBar).containing(find.textContaining('Pinned message')),);
+    await $.waitUntilVisible(
+      $(AppBar).containing(find.textContaining('Pinned message')),
+    );
     // await $.waitUntilVisible(
     //   $(PinnedMessagesScreen).containing(find.text('Unpin all message')),
     // );
 
-    await $.waitUntilVisible($(PinnedMessagesScreen), timeout: const Duration(seconds: 30));
-    await $.waitUntilVisible($(PinnedMessagesScreen).containing(find.textContaining('Unpin all message')),);
+    await $.waitUntilVisible(
+      $(PinnedMessagesScreen),
+      timeout: const Duration(seconds: 30),
+    );
+    await $.waitUntilVisible(
+      $(PinnedMessagesScreen)
+          .containing(find.textContaining('Unpin all message')),
+    );
   }
 
-  Future<void> verifyTheDisplayInSelectedTextMode(String message, int selectedNumber) async {
+  Future<void> verifyTheDisplayInSelectedTextMode(
+    String message,
+    int selectedNumber,
+  ) async {
     final chatInputRow = $(ChatInputRow);
 
     expect(
@@ -311,22 +340,31 @@ class ChatScenario extends BaseScenario {
     );
     expect(
       find.descendant(
-          of: $(ChatAppBarTitle).finder, matching: find.byTooltip('Copy'),),
+        of: $(ChatAppBarTitle).finder,
+        matching: find.byTooltip('Copy'),
+      ),
       findsOneWidget,
     );
     expect(
-      find.descendant(of: $(ChatAppBarTitle).finder, matching: find.text(selectedNumber.toString())),
+      find.descendant(
+        of: $(ChatAppBarTitle).finder,
+        matching: find.text(selectedNumber.toString()),
+      ),
       findsOneWidget,
     );
-    if(selectedNumber == 1){
+    if (selectedNumber == 1) {
       expect(
         find.descendant(
-            of: $(ChatAppBarTitle).finder, matching: find.byTooltip('Pin'),),
+          of: $(ChatAppBarTitle).finder,
+          matching: find.byTooltip('Pin'),
+        ),
         findsOneWidget,
       );
       expect(
         find.descendant(
-            of: $(ChatAppBarTitle).finder, matching: find.byTooltip('More'),),
+          of: $(ChatAppBarTitle).finder,
+          matching: find.byTooltip('More'),
+        ),
         findsOneWidget,
       );
       expect(
@@ -344,7 +382,10 @@ class ChatScenario extends BaseScenario {
     );
   }
 
-  Future<void> verifyMessageIsPinned(String message, {bool expected = true}) async {
+  Future<void> verifyMessageIsPinned(
+    String message, {
+    bool expected = true,
+  }) async {
     final icon = getPinExpandIcon();
 
     if (!icon.exists && !expected) return;
@@ -360,24 +401,31 @@ class ChatScenario extends BaseScenario {
     if (expected) {
       await $.waitUntilVisible(pinnedMsg);
     } else {
-      expect(pinnedMsg.exists, isFalse, reason: 'Message is unexpectedly pinned: $message');
+      expect(
+        pinnedMsg.exists,
+        isFalse,
+        reason: 'Message is unexpectedly pinned: $message',
+      );
     }
     // click back
     await ChatGroupDetailRobot($).clickOnBackIcon();
   }
 
-  
   Future<void> verifySearchResultViewIsShown() async {
     expect(
-        ChatListRobot($).showLessLabel().visible ||
-            ChatListRobot($).noResultLabel().visible,
-        isTrue,);
+      ChatListRobot($).showLessLabel().visible ||
+          ChatListRobot($).noResultLabel().visible,
+      isTrue,
+    );
     await Future.delayed(const Duration(seconds: 5));
   }
 
   Future<void> verifyDisplayOfGroupListScreen(SoftAssertHelper s) async {
-    s.softAssertEquals((await SearchRobot($).getSearchTextField()).exists, true,
-        'Search Text Field is not visible',);
+    s.softAssertEquals(
+      (await SearchRobot($).getSearchTextField()).exists,
+      true,
+      'Search Text Field is not visible',
+    );
 
     // // title (avoid hard-coded text if localized)
     // final appBarCtx = $.tester.element(find.byType(TwakeAppBar));
@@ -385,9 +433,15 @@ class ChatScenario extends BaseScenario {
     // s.softAssertEquals($(TwakeAppBar).containing($(Text(title))).exists,true,'Contact title is wrong',);
 
     s.softAssertEquals(
-        $(ChatListBodyView).visible, true, 'Chats tab is not visible',);
-    s.softAssertEquals($(BottomNavigationBar).visible, true,
-        'Bottom navigator bar is not visible',);
+      $(ChatListBodyView).visible,
+      true,
+      'Chats tab is not visible',
+    );
+    s.softAssertEquals(
+      $(BottomNavigationBar).visible,
+      true,
+      'Bottom navigator bar is not visible',
+    );
   }
 
   Future<void> verifySearchResultContains(String keyword) async {
@@ -427,8 +481,7 @@ class ChatScenario extends BaseScenario {
   Future<void> sendAMessageByAPI(String message) async {
     final client = await CoreRobot($).initialRedirectRequest();
     final list = await CoreRobot($).loginByAPI(client);
-    await CoreRobot($)
-        .sendMessageByAPI(list[0], list[1], list[2], message);
+    await CoreRobot($).sendMessageByAPI(list[0], list[1], list[2], message);
     await CoreRobot($).closeHTTPClient(client);
   }
 
@@ -444,43 +497,60 @@ class ChatScenario extends BaseScenario {
   }
 
   Future<void> verifyMessageIsSent(String message, bool isTrue) async {
-     // 1) wait display of the message
+    // 1) wait display of the message
     final text = await ChatGroupDetailRobot($).getText(message);
     await text.waitUntilVisible();
 
     // 2) get ancestor that contains message and Stack
-    final bubbleStack = $(find.ancestor(
-    of: text.finder,
-    matching: find.byType(Stack),),);
+    final bubbleStack = $(
+      find.ancestor(
+        of: text.finder,
+        matching: find.byType(Stack),
+      ),
+    );
 
     // 3) Find SelectionContainer
-    final selection = $(find.descendant(
-      of: bubbleStack.finder,
-      matching: find.byType(MessageTime, skipOffstage: false),),);
+    final selection = $(
+      find.descendant(
+        of: bubbleStack.finder,
+        matching: find.byType(MessageTime, skipOffstage: false),
+      ),
+    );
 
     // 4) find SeenByRow và Icon
-    final seenBy = $(find.descendant(
-      of: selection.finder,
-      matching: find.byType(SeenByRow),),);
-    
+    final seenBy = $(
+      find.descendant(
+        of: selection.finder,
+        matching: find.byType(SeenByRow),
+      ),
+    );
+
     // 5) find seenIcon
-    final seenIcon = $(find.descendant(
-    of: seenBy.finder,
-    matching: find.byType(Icon, skipOffstage: false),),);
+    final seenIcon = $(
+      find.descendant(
+        of: seenBy.finder,
+        matching: find.byType(Icon, skipOffstage: false),
+      ),
+    );
 
     if (isTrue) {
       await seenIcon.waitUntilVisible();
-      expect( seenIcon.exists, isTrue);
-    }
-    else {
+      expect(seenIcon.exists, isTrue);
+    } else {
       await Future<void>.delayed(const Duration(milliseconds: 300));
-      expect( seenIcon.exists, isFalse);
+      expect(seenIcon.exists, isFalse);
     }
   }
 
   Future<void> verifyChatListCanBeScrollable(SoftAssertHelper s) async {
-    s.softAssertEquals( await CoreRobot($).isActuallyScrollable($,root: $(SingleChildScrollView),), true,
-        'Chat list is not scrollable',);
+    s.softAssertEquals(
+      await CoreRobot($).isActuallyScrollable(
+        $,
+        root: $(SingleChildScrollView),
+      ),
+      true,
+      'Chat list is not scrollable',
+    );
   }
 
   bool isPinAChat(TwakeListItemRobot takeListItem) {

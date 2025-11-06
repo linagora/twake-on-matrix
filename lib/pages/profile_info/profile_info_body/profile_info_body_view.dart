@@ -25,10 +25,13 @@ class ProfileInfoBodyView extends StatelessWidget {
           padding: ProfileInfoBodyViewStyle.profileInformationsTopPadding,
           child: Column(
             children: [
-              ProfileInfoHeader(controller.user!),
+              ProfileInfoHeader(
+                user: controller.user!,
+                userInfoNotifier: controller.userInfoNotifier,
+              ),
               ProfileInfoContactRows(
                 user: controller.user!,
-                lookupContactNotifier: controller.lookupContactNotifier,
+                userInfoNotifier: controller.userInfoNotifier,
               ),
             ],
           ),

@@ -49,4 +49,41 @@ class TestBase {
     //, so that I go to contactListScreen to close them
     await HomeRobot($).gotoContactListAndGrantContactPermission();
   }
+
+  void twakePatrolTest({
+    required String description,
+    required Function(PatrolIntegrationTester $) test,
+    NativeAutomatorConfig? nativeAutomatorConfig,
+  }) {
+    patrolTest(description,
+        config: const PatrolTesterConfig(
+          printLogs: true,
+          visibleTimeout: Duration(minutes: 1),
+        ),
+        nativeAutomatorConfig:
+            nativeAutomatorConfig ?? const NativeAutomatorConfig(),
+        framePolicy: LiveTestWidgetsFlutterBindingFramePolicy.fullyLive,
+        ($) async {
+      await initTwakeChat();
+      final originalOnError = FlutterError.onError!;
+      FlutterError.onError = (FlutterErrorDetails details) {
+        originalOnError(details);
+      };
+      await login($);
+      await test($);
+    });
+  }
+
+  Future<void> login(
+    PatrolIntegrationTester $,
+  ) async {
+    final loginScenario = LoginScenario(
+      $,
+      username: const String.fromEnvironment('USERNAME'),
+      serverUrl: const String.fromEnvironment('SERVER_URL'),
+      password: const String.fromEnvironment('PASSWORD'),
+    );
+
+    await loginScenario.login();
+  }
 }

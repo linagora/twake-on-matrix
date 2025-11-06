@@ -5,11 +5,11 @@ import 'package:fluffychat/app_state/failure.dart';
 import 'package:fluffychat/app_state/success.dart';
 import 'package:fluffychat/config/default_power_level_member.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
-import 'package:fluffychat/domain/app_state/contact/lookup_match_contact_state.dart';
 import 'package:fluffychat/domain/app_state/room/set_permission_level_state.dart';
+import 'package:fluffychat/domain/app_state/user_info/get_user_info_state.dart';
 import 'package:fluffychat/domain/model/room/room_extension.dart';
-import 'package:fluffychat/domain/usecase/contacts/lookup_match_contact_interactor.dart';
 import 'package:fluffychat/domain/usecase/room/set_permission_level_interactor.dart';
+import 'package:fluffychat/domain/usecase/user_info/get_user_info_interactor.dart';
 import 'package:fluffychat/pages/profile_info/profile_info_body/profile_info_body_view.dart';
 import 'package:fluffychat/pages/profile_info/profile_info_body/profile_info_body_view_style.dart';
 import 'package:fluffychat/presentation/enum/profile_info/profile_info_body_enum.dart';
@@ -49,33 +49,32 @@ class ProfileInfoBody extends StatefulWidget {
 }
 
 class ProfileInfoBodyController extends State<ProfileInfoBody> {
-  final _lookupMatchContactInteractor =
-      getIt.get<LookupMatchContactInteractor>();
+  final _getUserInfoInteractor = getIt.get<GetUserInfoInteractor>();
 
   final _setPermissionLevelInteractor =
       getIt.get<SetPermissionLevelInteractor>();
 
   StreamSubscription? _setPermissionLevelSubscription;
 
-  StreamSubscription? lookupContactNotifierSub;
+  StreamSubscription? userInfoNotifierSub;
 
-  final ValueNotifier<Either<Failure, Success>> lookupContactNotifier =
+  final ValueNotifier<Either<Failure, Success>> userInfoNotifier =
       ValueNotifier<Either<Failure, Success>>(
-    const Right(LookupContactsInitial()),
+    Right(GettingUserInfo()),
   );
 
   User? get user => widget.user;
 
   bool get isOwnProfile => user?.id == user?.room.client.userID;
 
-  void lookupMatchContactAction() {
+  void getUserInfoAction() {
     if (user == null) return;
-    lookupContactNotifierSub = _lookupMatchContactInteractor
+    userInfoNotifierSub = _getUserInfoInteractor
         .execute(
-          val: user!.id,
+          userId: user!.id,
         )
         .listen(
-          (event) => lookupContactNotifier.value = event,
+          (event) => userInfoNotifier.value = event,
         );
   }
 
@@ -291,14 +290,14 @@ class ProfileInfoBodyController extends State<ProfileInfoBody> {
 
   @override
   void initState() {
-    lookupMatchContactAction();
+    getUserInfoAction();
     super.initState();
   }
 
   @override
   void dispose() {
-    lookupContactNotifier.dispose();
-    lookupContactNotifierSub?.cancel();
+    userInfoNotifier.dispose();
+    userInfoNotifierSub?.cancel();
     _setPermissionLevelSubscription?.cancel();
     super.dispose();
   }

@@ -44,83 +44,92 @@ class CopiableProfileRow extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                leadingIcon,
-              ],
+            Padding(
+              padding: const EdgeInsetsGeometry.all(12),
+              child: leadingIcon,
             ),
             const SizedBox(
               width: CopiableProfileRowStyle.spacerBetweenLeadingIconAndContent,
             ),
             Expanded(
-              child: Container(
-                height: 64,
-                decoration: BoxDecoration(
-                  border: enableDividerTop
-                      ? Border(
-                          top: BorderSide(
-                            color: LinagoraSysColors.material()
-                                .surfaceTint
-                                .withOpacity(
-                                  CopiableProfileRowStyle.borderOpacity,
-                                ),
-                          ),
-                        )
-                      : null,
-                ),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  children: [
-                    Text(
-                      caption,
-                      style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                            color: LinagoraRefColors.material().neutral[40],
-                          ),
-                    ),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Expanded(
-                          child: Text(
-                            copiableText,
-                            style: Theme.of(context)
-                                .textTheme
-                                .bodyLarge
-                                ?.copyWith(
-                                  color: LinagoraSysColors.material().onSurface,
-                                ),
-                          ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: [
+                            Text(
+                              caption,
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .labelMedium
+                                  ?.copyWith(
+                                    color: LinagoraRefColors.material()
+                                        .neutral[40],
+                                  ),
+                            ),
+                            Text(
+                              copiableText,
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .bodyLarge
+                                  ?.copyWith(
+                                    color:
+                                        LinagoraSysColors.material().onSurface,
+                                  ),
+                            ),
+                          ],
                         ),
-                        InkWell(
-                          borderRadius: BorderRadius.circular(38),
-                          splashColor: LinagoraHoverStyle.material().hoverColor,
-                          onTap: () {
-                            TwakeClipboard.instance.copyText(copiableText);
-                            TwakeSnackBar.show(
-                              duration: snackBarDuration,
-                              context,
-                              L10n.of(context)!.copiedToClipboard,
-                            );
-                          },
-                          child: const SizedBox(
-                            width: 32,
-                            height: 32,
+                      ),
+                      InkWell(
+                        borderRadius: BorderRadius.circular(38),
+                        splashColor: LinagoraHoverStyle.material().hoverColor,
+                        onTap: () {
+                          TwakeClipboard.instance.copyText(copiableText);
+                          TwakeSnackBar.show(
+                            duration: snackBarDuration,
+                            context,
+                            L10n.of(context)!.copiedToClipboard,
+                          );
+                        },
+                        child: Padding(
+                          padding: const EdgeInsetsGeometry.all(12),
+                          child: SizedBox(
+                            width: 24,
+                            height: 24,
                             child: Icon(
                               Icons.content_copy,
                               size: ChatProfileInfoStyle.copyIconSize,
+                              color: LinagoraSysColors.material().tertiary,
                             ),
                           ),
                         ),
-                      ],
+                      ),
+                    ],
+                  ),
+                  if (enableDividerTop)
+                    Padding(
+                      padding: const EdgeInsets.only(
+                        top: 8,
+                        right: 16,
+                      ),
+                      child: Divider(
+                        height: 1,
+                        color: LinagoraSysColors.material()
+                            .surfaceTint
+                            .withOpacity(
+                              CopiableProfileRowStyle.borderOpacity,
+                            ),
+                      ),
                     ),
-                    const SizedBox(
-                      height: CopiableProfileRowStyle.textColumnBottomPadding,
-                    ),
-                  ],
-                ),
+                ],
               ),
             ),
           ],

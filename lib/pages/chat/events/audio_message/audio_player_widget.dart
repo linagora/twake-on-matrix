@@ -227,13 +227,22 @@ class AudioPlayerState extends State<AudioPlayerWidget>
 
   @override
   void dispose() {
-    matrix.audioPlayer
-      ..stop()
-      ..dispose();
-    matrix.currentAudioStatus.value = AudioPlayerStatus.notDownloaded;
-    if (matrix.voiceMessageEvent.value?.eventId == widget.event.eventId) {
-      matrix.voiceMessageEvent.value = null;
-    }
+    // Stop and dispose audio player asynchronously to avoid blocking dispose
+    matrix.audioPlayer.stop().then((_) {
+      matrix.audioPlayer.dispose();
+    }).catchError((error) {
+      Logs().e('Error disposing audio player', error);
+    });
+
+    // Schedule value updates for after the current frame to avoid
+    // setState() during widget tree lock
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (matrix.voiceMessageEvent.value?.eventId == widget.event.eventId) {
+        matrix.currentAudioStatus.value = AudioPlayerStatus.notDownloaded;
+        matrix.voiceMessageEvent.value = null;
+      }
+    });
+
     super.dispose();
   }
 

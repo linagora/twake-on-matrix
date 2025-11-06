@@ -15,7 +15,7 @@ class IconCopiableProfileRow extends CopiableProfileRow {
           leadingIcon: Icon(
             icon,
             size: ChatProfileInfoStyle.iconSize,
-            color: LinagoraSysColors.material().onSurface,
+            color: LinagoraSysColors.material().tertiary,
           ),
         );
 }
