@@ -16,6 +16,7 @@ class Avatar extends StatelessWidget {
   final List<BoxShadow>? boxShadows;
   final Color? textColor;
   final TextStyle? textStyle;
+  final bool keepAlive;
 
   const Avatar({
     this.mxContent,
@@ -27,6 +28,7 @@ class Avatar extends StatelessWidget {
     this.boxShadows,
     this.textStyle,
     this.textColor,
+    this.keepAlive = false,
     super.key,
   });
 
@@ -53,7 +55,7 @@ class Avatar extends StatelessWidget {
             animated: true,
             isThumbnail: false,
             placeholder: (context) => _fallbackAvatar(),
-            keepAlive: true,
+            keepAlive: keepAlive,
           ),
         ),
       ),

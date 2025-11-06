@@ -114,6 +114,7 @@ class ChatListItem extends StatelessWidget with ChatListItemMixin {
                         mxContent: room.avatar,
                         name: displayName,
                         onTap: onTapAvatar,
+                        keepAlive: true,
                       ),
                       if (_isGroupChat)
                         Positioned(
