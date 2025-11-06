@@ -1,5 +1,9 @@
+import 'package:fluffychat/pages/chat/events/event_video_player.dart';
+import 'package:fluffychat/pages/chat/events/message_content.dart';
+import 'package:fluffychat/pages/chat/events/message_download_content.dart';
 import 'package:fluffychat/pages/chat_list/chat_list_item_subtitle.dart';
 import 'package:fluffychat/pages/chat_list/chat_list_item_title.dart';
+import 'package:fluffychat/widgets/file_widget/base_file_tile_widget.dart';
 import 'package:fluffychat/widgets/highlight_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -38,6 +42,18 @@ class TwakeListItemRobot extends CoreRobot {
     return root.$(ChatListItemSubtitle).$(Text).at(1);
   }
 
+  PatrolFinder getSentFileName() {
+    return root.$(MessageDownloadContent).$(FileNameText).$(RichText);
+  }
+
+  PatrolFinder getImage() {
+    return root.$(MessageContent).$(Image);
+  }
+
+  PatrolFinder getVideoDownloadIcon() {
+    return root.$(MessageContent).$(CenterVideoButton);
+  }
+  
   int getUnreadMessage(){
     final animated = find.descendant(
       of: root,
