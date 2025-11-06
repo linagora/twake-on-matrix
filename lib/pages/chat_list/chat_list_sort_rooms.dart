@@ -51,13 +51,20 @@ class _ChatListSortRoomsState extends State<ChatListSortRooms> {
       };
 
   Future<List<Room>> sortRooms() async {
+    final previousSyncStatus = Matrix.of(context).client.onSyncStatus.value;
+    const loadingSyncStatus = SyncStatusUpdate(SyncStatus.waitingForResponse);
+    Matrix.of(context).client.onSyncStatus.add(loadingSyncStatus);
+    await Matrix.of(context).initSettingsCompleter.future;
     for (final room in widget.rooms) {
       if (_lastEventByRoomId[room.id] != null) continue;
 
-      final event = await room.lastEventAvailableInPreview(
-        Matrix.of(context).initSettingsCompleter.future,
-      );
+      final event = await room.lastEventAvailableInPreview();
       _lastEventByRoomId[room.id] = event;
+    }
+    if (Matrix.of(context).client.onSyncStatus.value == loadingSyncStatus) {
+      Matrix.of(context).client.onSyncStatus.add(
+            previousSyncStatus ?? const SyncStatusUpdate(SyncStatus.finished),
+          );
     }
     return List.from(widget.rooms)
       ..sort(sortRoomsBy(Matrix.of(context).client));
