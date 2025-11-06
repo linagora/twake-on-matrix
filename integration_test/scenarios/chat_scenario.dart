@@ -490,6 +490,8 @@ class ChatScenario extends BaseScenario {
   
   Future<void> pinAChat(String title) async {
     final twakeListItem = ChatListRobot($).getChatGroupByTitle(title);
+    ChatListRobot($).scrollUntilVisible($, twakeListItem.root);
+    
     if(!isPinAChat(twakeListItem))
     {
       await $.tester.ensureVisible(twakeListItem.root);
@@ -501,6 +503,8 @@ class ChatScenario extends BaseScenario {
 
   Future<void> unPinAChat(String title) async {
     final twakeListItem = ChatListRobot($).getChatGroupByTitle(title);
+    ChatListRobot($).scrollUntilVisible($, twakeListItem.root);
+
     if(isPinAChat(twakeListItem))
     {
       await $.tester.ensureVisible(twakeListItem.root);
