@@ -21,6 +21,7 @@ class ChatListViewBuilder extends StatelessWidget {
   Widget build(BuildContext context) {
     return ChatListSortRooms(
       rooms: rooms,
+      sortingRoomsNotifier: controller.sortingRoomsNotifier,
       builder: (sortedRooms, lastEventByRoomId) {
         return SliverList(
           delegate: SliverChildBuilderDelegate(

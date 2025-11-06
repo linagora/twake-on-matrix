@@ -116,7 +116,9 @@ class ChatListBodyView extends StatelessWidget {
                 return CustomScrollView(
                   controller: controller.scrollController,
                   slivers: [
-                    const SliverToBoxAdapter(child: ConnectionStatusHeader()),
+                    SliverToBoxAdapter(
+                      child: ConnectionStatusHeader(controller: controller),
+                    ),
                     SliverToBoxAdapter(
                       child: AnimatedContainer(
                         height: ChatListBodyViewStyle.heightIsTorBrowser(

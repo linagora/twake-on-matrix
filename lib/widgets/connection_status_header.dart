@@ -1,16 +1,19 @@
 import 'dart:async';
 
+import 'package:fluffychat/pages/chat_list/chat_list.dart';
+import 'package:fluffychat/widgets/chat_sort_loading.dart';
 import 'package:flutter/material.dart';
 
 import 'package:fluffychat/generated/l10n/app_localizations.dart';
 import 'package:matrix/matrix.dart';
 
-import '../config/themes.dart';
 import '../utils/localized_exception_extension.dart';
 import 'matrix.dart';
 
 class ConnectionStatusHeader extends StatefulWidget {
-  const ConnectionStatusHeader({super.key});
+  const ConnectionStatusHeader({super.key, this.controller});
+
+  final ChatListController? controller;
 
   @override
   ConnectionStatusHeaderState createState() => ConnectionStatusHeaderState();
@@ -42,10 +45,10 @@ class ConnectionStatusHeaderState extends State<ConnectionStatusHeader> {
         status.status != SyncStatus.error &&
         client.prevBatch != null;
 
-    return AnimatedContainer(
-      duration: TwakeThemes.animationDuration,
-      curve: TwakeThemes.animationCurve,
-      height: hide ? 0 : 36,
+    if (hide) return ChatSortLoading(controller: widget.controller);
+
+    return Container(
+      height: 36,
       clipBehavior: Clip.hardEdge,
       decoration: BoxDecoration(color: Theme.of(context).colorScheme.surface),
       padding: const EdgeInsets.symmetric(horizontal: 12),
