@@ -2736,7 +2736,7 @@ packages:
     description:
       path: "."
       ref: twake_supported
-      resolved-ref: "7652c3026d073f50e6e096bd1c0d467ae5e6c697"
+      resolved-ref: "4ec1f26e7f13b9d2558c3e48b2c5f1e5a4376049"
       url: "git@github.com:linagora/social_media_recorder.git"
     source: git
     version: "1.2.1"

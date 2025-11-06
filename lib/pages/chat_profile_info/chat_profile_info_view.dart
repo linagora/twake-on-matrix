@@ -4,10 +4,11 @@ import 'package:fluffychat/app_state/failure.dart';
 import 'package:fluffychat/app_state/success.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/domain/app_state/contact/get_contacts_state.dart';
-import 'package:fluffychat/domain/app_state/contact/lookup_match_contact_state.dart';
+import 'package:fluffychat/domain/app_state/user_info/get_user_info_state.dart';
 import 'package:fluffychat/domain/contact_manager/contacts_manager.dart';
 import 'package:fluffychat/domain/model/contact/contact.dart';
 import 'package:fluffychat/domain/model/extensions/contact/contact_extension.dart';
+import 'package:fluffychat/domain/model/user_info/user_info.dart';
 import 'package:fluffychat/pages/chat/optional_selection_area.dart';
 import 'package:fluffychat/pages/chat_details/chat_details_view_style.dart';
 import 'package:fluffychat/pages/chat_profile_info/chat_profile_action_button.dart';
@@ -71,7 +72,7 @@ class ChatProfileInfoView extends StatelessWidget {
             SliverOverlapAbsorber(
               handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context),
               sliver: _SizedAppBar(
-                lookupContactNotifier: controller.lookupContactNotifier,
+                userInfoNotifier: controller.userInfoNotifier,
                 user: user,
                 contact: contact,
                 isAlreadyInChat: controller.isAlreadyInChat(context),
@@ -100,8 +101,7 @@ class ChatProfileInfoView extends StatelessWidget {
                                 displayName: snapshot.data?.displayName ??
                                     contact.displayName,
                                 matrixId: contact.matrixId,
-                                lookupContactNotifier:
-                                    controller.lookupContactNotifier,
+                                userInfoNotifier: controller.userInfoNotifier,
                                 isDraftInfo: controller.widget.isDraftInfo,
                                 isBlockedUserNotifier: controller.isBlockedUser,
                                 onUnblockUser: controller.onUnblockUser,
@@ -117,8 +117,7 @@ class ChatProfileInfoView extends StatelessWidget {
                             return _Information(
                               displayName: contact.displayName,
                               matrixId: contact.matrixId,
-                              lookupContactNotifier:
-                                  controller.lookupContactNotifier,
+                              userInfoNotifier: controller.userInfoNotifier,
                               isDraftInfo: controller.widget.isDraftInfo,
                               isBlockedUserNotifier: controller.isBlockedUser,
                               onUnblockUser: controller.onUnblockUser,
@@ -133,8 +132,7 @@ class ChatProfileInfoView extends StatelessWidget {
                             avatarUri: user?.avatarUrl,
                             displayName: user?.calcDisplayname(),
                             matrixId: user?.id,
-                            lookupContactNotifier:
-                                controller.lookupContactNotifier,
+                            userInfoNotifier: controller.userInfoNotifier,
                             isDraftInfo: controller.widget.isDraftInfo,
                             isBlockedUserNotifier: controller.isBlockedUser,
                             onUnblockUser: controller.onUnblockUser,
@@ -211,7 +209,7 @@ class _Information extends StatelessWidget {
     this.avatarUri,
     this.displayName,
     this.matrixId,
-    required this.lookupContactNotifier,
+    required this.userInfoNotifier,
     required this.isDraftInfo,
     required this.isBlockedUserNotifier,
     this.onUnblockUser,
@@ -223,7 +221,7 @@ class _Information extends StatelessWidget {
   final Uri? avatarUri;
   final String? displayName;
   final String? matrixId;
-  final ValueNotifier<Either<Failure, Success>> lookupContactNotifier;
+  final ValueNotifier<Either<Failure, Success>> userInfoNotifier;
   final bool isDraftInfo;
   final ValueNotifier<bool> isBlockedUserNotifier;
   final void Function()? onUnblockUser;
@@ -243,126 +241,127 @@ class _Information extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Padding(
-          padding: ChatProfileInfoStyle.mainPadding,
-          child: LayoutBuilder(
-            builder: (context, constraints) => Builder(
-              builder: (context) {
-                final text = displayName?.getShortcutNameForAvatar() ?? '@';
-                final placeholder = Container(
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    gradient: LinearGradient(
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                      colors: text.avatarColors,
-                      stops: RoundAvatarStyle.defaultGradientStops,
-                    ),
-                  ),
-                  width: ChatProfileInfoStyle.avatarSize,
-                  height: ChatProfileInfoStyle.avatarSize,
-                  child: Center(
-                    child: Text(
-                      text,
-                      style: TextStyle(
-                        fontSize: ChatProfileInfoStyle.avatarFontSize,
-                        color: AvatarStyle.defaultTextColor(true),
-                        fontFamily: AvatarStyle.fontFamily,
-                        fontWeight: AvatarStyle.fontWeight,
+    return ValueListenableBuilder(
+      valueListenable: userInfoNotifier,
+      builder: (context, userInfo, child) {
+        final userInfoModel =
+            userInfo.getSuccessOrNull<GetUserInfoSuccess>()?.userInfo;
+        return Column(
+          children: [
+            Padding(
+              padding: ChatProfileInfoStyle.mainPadding,
+              child: LayoutBuilder(
+                builder: (context, constraints) => Builder(
+                  builder: (context) {
+                    final text = displayName?.getShortcutNameForAvatar() ?? '@';
+                    final placeholder = Container(
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        gradient: LinearGradient(
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                          colors: text.avatarColors,
+                          stops: RoundAvatarStyle.defaultGradientStops,
+                        ),
                       ),
-                    ),
-                  ),
-                );
-                if (avatarUri == null) {
-                  return placeholder;
-                }
-                return Avatar(
-                  mxContent: avatarUri,
-                  name: displayName,
-                  size: ChatProfileInfoStyle.avatarSize,
-                  fontSize: ChatProfileInfoStyle.avatarFontSize,
-                );
-              },
-            ),
-          ),
-        ),
-        Padding(
-          padding: ChatProfileInfoStyle.mainPadding,
-          child: Column(
-            children: [
-              OptionalSelectionArea(
-                isEnabled: PlatformInfos.isWeb,
-                child: Text(
-                  displayName ?? '',
-                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                        color: LinagoraSysColors.material().onSurface,
+                      width: ChatProfileInfoStyle.avatarSize,
+                      height: ChatProfileInfoStyle.avatarSize,
+                      child: Center(
+                        child: Text(
+                          text,
+                          style: TextStyle(
+                            fontSize: ChatProfileInfoStyle.avatarFontSize,
+                            color: AvatarStyle.defaultTextColor(true),
+                            fontFamily: AvatarStyle.fontFamily,
+                            fontWeight: AvatarStyle.fontWeight,
+                          ),
+                        ),
                       ),
-                  maxLines: 1,
+                    );
+                    if (avatarUri == null) {
+                      return placeholder;
+                    }
+                    return _buildAvatarWidget(
+                      context: context,
+                      userInfo: userInfo,
+                      userInfoModel: userInfoModel,
+                    );
+                  },
                 ),
               ),
-              if (!isAlreadyInChat)
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 8),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      ChatProfileActionButton(
-                        title: L10n.of(context)!.message,
-                        iconData: Icons.messenger_outline_rounded,
-                        onTap: () => _handleSendMessageTap(context),
-                      ),
-                    ],
+            ),
+            Padding(
+              padding: ChatProfileInfoStyle.mainPadding,
+              child: Column(
+                children: [
+                  OptionalSelectionArea(
+                    isEnabled: PlatformInfos.isWeb,
+                    child: _buildDisplayNameWidget(
+                      context: context,
+                      userInfo: userInfo,
+                      userInfoModel: userInfoModel,
+                    ),
                   ),
-                ),
-              Container(
-                padding: ChatProfileInfoStyle.copiableContainerPadding,
-                margin: ChatProfileInfoStyle.copiableContainerMargin,
-                decoration: BoxDecoration(
-                  border: Border.all(
-                    color: LinagoraRefColors.material().neutral[90] ??
-                        Colors.black,
-                  ),
-                  borderRadius:
-                      ChatProfileInfoStyle.copiableContainerBorderRadius,
-                  color: LinagoraSysColors.material().onPrimary,
-                ),
-                child: Column(
-                  children: [
-                    if (matrixId != null)
-                      _CopiableRowWithSvgIcon(
-                        iconPath: ImagePaths.icMatrixid,
-                        text: matrixId!,
+                  if (!isAlreadyInChat)
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 8),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          ChatProfileActionButton(
+                            title: L10n.of(context)!.message,
+                            iconData: Icons.messenger_outline_rounded,
+                            onTap: () => _handleSendMessageTap(context),
+                          ),
+                        ],
                       ),
-                    ValueListenableBuilder(
-                      valueListenable: lookupContactNotifier,
-                      builder: (context, contact, child) {
-                        return contact.fold(
+                    ),
+                  Container(
+                    padding: ChatProfileInfoStyle.copiableContainerPadding,
+                    margin: ChatProfileInfoStyle.copiableContainerMargin,
+                    decoration: BoxDecoration(
+                      border: Border.all(
+                        color: LinagoraRefColors.material().neutral[90] ??
+                            Colors.black,
+                      ),
+                      borderRadius:
+                          ChatProfileInfoStyle.copiableContainerBorderRadius,
+                      color: LinagoraSysColors.material().onPrimary,
+                    ),
+                    child: Column(
+                      children: [
+                        if (matrixId != null)
+                          _CopiableRowWithSvgIcon(
+                            iconPath: ImagePaths.icMatrixid,
+                            text: matrixId!,
+                          ),
+                        userInfo.fold(
                           (failure) => const SizedBox.shrink(),
                           (success) {
-                            if (success is LookupMatchContactSuccess) {
+                            if (success is GetUserInfoSuccess) {
                               return Column(
                                 children: [
-                                  if (success.contact.emails != null) ...{
+                                  if (success.userInfo.mails?.firstOrNull !=
+                                      null) ...{
                                     const SizedBox(
                                       height: ChatProfileInfoStyle.textSpacing,
                                     ),
                                     _CopiableRowWithMaterialIcon(
                                       icon: Icons.alternate_email,
-                                      text: success
-                                              .contact.emails?.first.address ??
-                                          '',
+                                      text:
+                                          success.userInfo.mails?.firstOrNull ??
+                                              '',
                                     ),
                                   },
-                                  if (success.contact.phoneNumbers != null) ...{
+                                  if (success.userInfo.phones?.firstOrNull !=
+                                      null) ...{
                                     const SizedBox(
                                       height: ChatProfileInfoStyle.textSpacing,
                                     ),
                                     _CopiableRowWithMaterialIcon(
                                       icon: Icons.call,
-                                      text: success.contact.phoneNumbers?.first
-                                              .number ??
+                                      text: success
+                                              .userInfo.phones?.firstOrNull ??
                                           '',
                                     ),
                                   },
@@ -372,77 +371,186 @@ class _Information extends StatelessWidget {
 
                             return const SizedBox.shrink();
                           },
-                        );
-                      },
-                      child: const SizedBox.shrink(),
-                    ),
-                    ValueListenableBuilder(
-                      valueListenable:
-                          getIt.get<ContactsManager>().getContactsNotifier(),
-                      builder: (context, state, child) {
-                        return _AddContactButton(
-                          canAddContact: canAddContact(state),
-                          matrixId: matrixId,
-                          displayName: displayName,
-                        );
-                      },
-                    ),
-                    const SizedBox(
-                      height: ChatProfileInfoStyle.textSpacing,
-                    ),
-                    ValueListenableBuilder(
-                      valueListenable: blockUserLoadingNotifier,
-                      builder: (context, isLoading, child) {
-                        return ValueListenableBuilder(
-                          valueListenable: isBlockedUserNotifier,
-                          builder: (context, isBlockedUser, child) {
-                            return InkWell(
-                              hoverColor: Colors.transparent,
-                              highlightColor: Colors.transparent,
-                              focusColor: Colors.transparent,
-                              splashColor: Colors.transparent,
-                              onTap: isLoading == true
-                                  ? null
-                                  : isBlockedUser
-                                      ? onUnblockUser
-                                      : onBlockUser,
-                              child: _CopiableRowWithSvgIcon(
-                                iconPath: ImagePaths.icFrontHand,
-                                enableCopyIcon: false,
-                                text: isBlockedUser
-                                    ? L10n.of(context)!.unblockUser
-                                    : L10n.of(context)!.blockUser,
-                                iconColor: isBlockedUser
-                                    ? LinagoraSysColors.material().error
-                                    : LinagoraSysColors.material().primary,
-                                textColor: isBlockedUser
-                                    ? LinagoraSysColors.material().error
-                                    : LinagoraSysColors.material().primary,
-                                actionIcon: isLoading == true
-                                    ? Padding(
-                                        padding: const EdgeInsets.symmetric(
-                                          horizontal: 16,
-                                        ),
-                                        child: CupertinoActivityIndicator(
-                                          animating: true,
-                                          color: LinagoraSysColors.material()
-                                              .onSurfaceVariant,
-                                        ),
-                                      )
-                                    : null,
-                              ),
+                        ),
+                        ValueListenableBuilder(
+                          valueListenable: getIt
+                              .get<ContactsManager>()
+                              .getContactsNotifier(),
+                          builder: (context, state, child) {
+                            return _AddContactButton(
+                              canAddContact: canAddContact(state),
+                              matrixId: matrixId,
+                              displayName: displayName,
                             );
                           },
-                        );
-                      },
+                        ),
+                        const SizedBox(
+                          height: ChatProfileInfoStyle.textSpacing,
+                        ),
+                        ValueListenableBuilder(
+                          valueListenable: blockUserLoadingNotifier,
+                          builder: (context, isLoading, child) {
+                            return ValueListenableBuilder(
+                              valueListenable: isBlockedUserNotifier,
+                              builder: (context, isBlockedUser, child) {
+                                return InkWell(
+                                  hoverColor: Colors.transparent,
+                                  highlightColor: Colors.transparent,
+                                  focusColor: Colors.transparent,
+                                  splashColor: Colors.transparent,
+                                  onTap: isLoading == true
+                                      ? null
+                                      : isBlockedUser
+                                          ? onUnblockUser
+                                          : onBlockUser,
+                                  child: _CopiableRowWithSvgIcon(
+                                    iconPath: ImagePaths.icFrontHand,
+                                    enableCopyIcon: false,
+                                    text: isBlockedUser
+                                        ? L10n.of(context)!.unblockUser
+                                        : L10n.of(context)!.blockUser,
+                                    iconColor: isBlockedUser
+                                        ? LinagoraSysColors.material().error
+                                        : LinagoraSysColors.material().primary,
+                                    textColor: isBlockedUser
+                                        ? LinagoraSysColors.material().error
+                                        : LinagoraSysColors.material().primary,
+                                    actionIcon: isLoading == true
+                                        ? Padding(
+                                            padding: const EdgeInsets.symmetric(
+                                              horizontal: 16,
+                                            ),
+                                            child: CupertinoActivityIndicator(
+                                              animating: true,
+                                              color:
+                                                  LinagoraSysColors.material()
+                                                      .onSurfaceVariant,
+                                            ),
+                                          )
+                                        : null,
+                                  ),
+                                );
+                              },
+                            );
+                          },
+                        ),
+                      ],
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
-            ],
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _buildAvatarWidget({
+    required BuildContext context,
+    required Either<Failure, Success> userInfo,
+    required UserInfo? userInfoModel,
+  }) {
+    return userInfo.fold(
+      (failure) {
+        return Avatar(
+          mxContent: avatarUri,
+          name: userInfoModel?.displayName ?? displayName,
+          size: ChatProfileInfoStyle.avatarSize,
+          fontSize: ChatProfileInfoStyle.avatarFontSize,
+        );
+      },
+      (success) {
+        if (success is GettingUserInfo) {
+          return SizedBox(
+            width: ChatProfileInfoStyle.avatarSize,
+            height: ChatProfileInfoStyle.avatarSize,
+            child: Center(
+              child: CupertinoActivityIndicator(
+                animating: true,
+                color: LinagoraSysColors.material().onSurfaceVariant,
+              ),
+            ),
+          );
+        }
+        if (success is GetUserInfoSuccess) {
+          Avatar(
+            mxContent: userInfoModel?.avatarUrl != null
+                ? Uri.parse(userInfoModel?.avatarUrl ?? '')
+                : avatarUri,
+            name: userInfoModel?.displayName ?? displayName,
+            size: ChatProfileInfoStyle.avatarSize,
+            fontSize: ChatProfileInfoStyle.avatarFontSize,
+          );
+        }
+        return Avatar(
+          mxContent: avatarUri,
+          name: userInfoModel?.displayName ?? displayName,
+          size: ChatProfileInfoStyle.avatarSize,
+          fontSize: ChatProfileInfoStyle.avatarFontSize,
+        );
+      },
+    );
+  }
+
+  Widget _buildDisplayNameWidget({
+    required BuildContext context,
+    required Either<Failure, Success> userInfo,
+    required UserInfo? userInfoModel,
+  }) {
+    return AnimatedSwitcher(
+      duration: const Duration(milliseconds: 300),
+      transitionBuilder: (child, animation) {
+        return FadeTransition(
+          opacity: animation,
+          child: SlideTransition(
+            position: Tween<Offset>(
+              begin: const Offset(0, 0.5),
+              end: Offset.zero,
+            ).animate(
+              CurvedAnimation(
+                parent: animation,
+                curve: Curves.easeOut,
+              ),
+            ),
+            child: child,
           ),
-        ),
-      ],
+        );
+      },
+      child: userInfo.fold(
+        (failure) {
+          return Text(
+            displayName ?? '',
+            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                  color: LinagoraSysColors.material().onSurface,
+                ),
+            maxLines: 1,
+          );
+        },
+        (success) {
+          if (success is GettingUserInfo) {
+            return SizedBox(
+              height: Theme.of(context).textTheme.headlineSmall?.height,
+            );
+          }
+          if (success is GetUserInfoSuccess) {
+            return Text(
+              userInfoModel?.displayName ?? displayName ?? '',
+              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                    color: LinagoraSysColors.material().onSurface,
+                  ),
+              maxLines: 1,
+            );
+          }
+          return Text(
+            displayName ?? '',
+            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                  color: LinagoraSysColors.material().onSurface,
+                ),
+            maxLines: 1,
+          );
+        },
+      ),
     );
   }
 
@@ -584,14 +692,14 @@ class _CopiableRowWithSvgIcon extends StatelessWidget {
 
 class _SizedAppBar extends StatelessWidget {
   const _SizedAppBar({
-    required this.lookupContactNotifier,
+    required this.userInfoNotifier,
     required this.user,
     required this.contact,
     required this.isAlreadyInChat,
     required this.builder,
   });
 
-  final ValueNotifier<Either<Failure, Success>> lookupContactNotifier;
+  final ValueNotifier<Either<Failure, Success>> userInfoNotifier;
   final User? user;
   final PresentationContact? contact;
   final bool isAlreadyInChat;
@@ -599,27 +707,27 @@ class _SizedAppBar extends StatelessWidget {
 
   double getToolbarHeight(
     BuildContext context,
-    Either<Failure, Success> lookupContact,
+    Either<Failure, Success> userInfoNotifier,
     Either<Failure, Success> getContactState,
   ) {
-    final height = lookupContact.fold(
+    final height = userInfoNotifier.fold(
       (failure) => ChatDetailViewStyle.minToolbarHeightSliverAppBar,
       (success) {
-        if (success is LookupContactsLoading) {
+        if (success is GettingUserInfo) {
           return ChatDetailViewStyle.mediumToolbarHeightSliverAppBar;
         }
-        if (success is LookupMatchContactSuccess) {
-          if (success.contact.emails != null &&
-              success.contact.phoneNumbers != null) {
+        if (success is GetUserInfoSuccess) {
+          if (success.userInfo.mails != null &&
+              success.userInfo.phones != null) {
             return ChatDetailViewStyle.maxToolbarHeightSliverAppBar;
           }
 
-          if (success.contact.emails != null ||
-              success.contact.phoneNumbers != null) {
+          if (success.userInfo.mails != null ||
+              success.userInfo.phones != null) {
             return ChatDetailViewStyle.mediumToolbarHeightSliverAppBar;
           }
 
-          return ChatDetailViewStyle.maxToolbarHeightSliverAppBar;
+          return ChatDetailViewStyle.minToolbarHeightSliverAppBar;
         }
         return ChatDetailViewStyle.minToolbarHeightSliverAppBar;
       },
@@ -651,7 +759,7 @@ class _SizedAppBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ValueListenableBuilder(
-      valueListenable: lookupContactNotifier,
+      valueListenable: userInfoNotifier,
       builder: (context, lookupContact, _) {
         return ValueListenableBuilder(
           valueListenable: getIt.get<ContactsManager>().getContactsNotifier(),

@@ -1,5 +1,6 @@
 import 'package:fluffychat/pages/chat_list/chat_list_bottom_navigator.dart';
 import 'package:fluffychat/pages/chat_list/chat_list_item_title.dart';
+import 'package:fluffychat/pages/search/search_view.dart';
 import 'package:fluffychat/pages/chat_list/slidable_chat_list_item.dart';
 import 'package:fluffychat/widgets/twake_components/twake_fab.dart';
 import 'package:flutter/material.dart';
@@ -20,20 +21,20 @@ class ChatListRobot extends HomeRobot {
   PatrolFinder noResultLabel() {
     return $("No Results");
   }
-   
-  PatrolFinder getPenIcon(){
+
+  PatrolFinder getPenIcon() {
     return $(TwakeFloatingActionButton);
   }
 
-  PatrolFinder getPinIcon(){
+  PatrolFinder getPinIcon() {
     return $(ChatListBottomNavigator).$(InkWell).containing($("Pin"));
   }
 
-  PatrolFinder getUnPinIcon(){
+  PatrolFinder getUnPinIcon() {
     return $(ChatListBottomNavigator).$(InkWell).containing($("Unpin"));
   }
 
-  Future<void> clickOnPenIcon() async{
+  Future<void> clickOnPenIcon() async {
     await getPenIcon().tap();
     await $.waitUntilVisible($(AppBar).$("New chat"));
   }
@@ -66,12 +67,24 @@ class ChatListRobot extends HomeRobot {
     return groupList;
   }
 
-  TwakeListItemRobot getChatGroupByTitle(String title){
-    final finder = $(SlidableChatListItem).containing($(ChatListItemTitle).containing($(title)));
-    return TwakeListItemRobot($,finder);
+  TwakeListItemRobot getChatGroupByTitle(String title) {
+    final finder = $(SlidableChatListItem)
+        .containing($(ChatListItemTitle).containing($(title)));
+    return TwakeListItemRobot($, finder);
   }
 
-  int getUnreadMessage(String title){
+  int getUnreadMessage(String title) {
     return getChatGroupByTitle(title).getUnreadMessage();
+  }
+
+  Future<void> openSearchScreen() async {
+    // Tap on the search TextField in the chat list to open search screen
+    await $(TextField).tap();
+    await $.pumpAndSettle();
+    // Verify SearchView is opened
+    await $.waitUntilVisible($(SearchView));
+
+    await confirmShareContactInformation();
+    await confirmAccessContactIOS();
   }
 }

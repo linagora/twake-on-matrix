@@ -6,25 +6,33 @@ part 'user_info.g.dart';
 @JsonSerializable(includeIfNull: false)
 class UserInfo extends Equatable {
   final String? uid;
+  @JsonKey(name: 'display_name')
   final String? displayName;
+  @JsonKey(name: 'avatar')
   final String? avatarUrl;
   final List<String>? phones;
-  final List<String>? mail;
+  final List<String>? mails;
   final String? sn;
   final String? givenName;
   final String? language;
   final String? timezone;
+  @JsonKey(name: 'first_name')
+  final String? firstName;
+  @JsonKey(name: 'last_name')
+  final String? lastName;
 
   const UserInfo({
     this.uid,
     this.displayName,
     this.avatarUrl,
     this.phones,
-    this.mail,
+    this.mails,
     this.sn,
     this.givenName,
     this.language,
     this.timezone,
+    this.firstName,
+    this.lastName,
   });
 
   factory UserInfo.fromJson(Map<String, dynamic> json) =>
@@ -38,10 +46,12 @@ class UserInfo extends Equatable {
         displayName,
         avatarUrl,
         phones,
-        mail,
+        mails,
         sn,
         givenName,
         language,
         timezone,
+        firstName,
+        lastName,
       ];
 }

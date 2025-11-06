@@ -1,5 +1,6 @@
 import 'package:fluffychat/pages/chat/chat_view.dart';
 import 'package:fluffychat/pages/new_group/contacts_selection_view.dart';
+import 'package:fluffychat/pages/profile_info/profile_info_view.dart';
 import 'package:fluffychat/utils/warning_dialog.dart';
 import 'package:fluffychat/widgets/twake_components/twake_icon_button.dart';
 import 'package:flutter/material.dart';
@@ -58,7 +59,8 @@ class GroupInformationRobot extends CoreRobot {
 
   PatrolFinder getLoadParticipantsLabel() {
     final loadMoreTextFinder = find.byWidgetPredicate(
-      (w) => w is Text &&
+      (w) =>
+          w is Text &&
           RegExp(r'^Load\s+\d+\s+more\s+participant(s)?$')
               .hasMatch(w.data ?? ''),
       description: 'Load N more participants text',
@@ -74,34 +76,34 @@ class GroupInformationRobot extends CoreRobot {
   PatrolFinder getCancelRemoveMemberBtn() {
     return $(InkWell).containing(find.text('Cancel'));
   }
-  
+
   String getTotalMemberLabel() {
     final a = $(find.textContaining('member')).text;
     return a!.replaceFirst(RegExp(r'\s+m.*$', caseSensitive: false), '');
   }
-  
-  Future<void> clickOnBackBtn() async{
+
+  Future<void> clickOnBackBtn() async {
     await getBackIcon().tap();
     await $.waitUntilVisible($(ChatView));
   }
 
-  Future<void> clickOnRemoveFromGroup() async{
+  Future<void> clickOnRemoveFromGroup() async {
     await getcRemoveFromGroup().tap();
     await $.waitUntilVisible($(WarningDialogWidget));
   }
 
-  Future<void> clickOnAgreeIRemoveMemberBtn() async{
+  Future<void> clickOnAgreeIRemoveMemberBtn() async {
     await getAgreeIRemoveMemberBtn().tap();
     await $.waitUntilVisible(getMemberTab());
   }
 
-  Future<void> clickOnAddMemberBtn() async{
+  Future<void> clickOnAddMemberBtn() async {
     await getAddMembersBtn().tap();
     await $.waitUntilVisible($(ContactsSelectionView));
   }
 
-  Future<List<TwakeListItemRobot>> getListOfMembers() async{
-    if(getLoadParticipantsLabel().exists){ 
+  Future<List<TwakeListItemRobot>> getListOfMembers() async {
+    if (getLoadParticipantsLabel().exists) {
       await waitSnackGone($);
       await getLoadParticipantsLabel().tap();
       if ($(CircularProgressIndicator).exists) {
@@ -118,5 +120,20 @@ class GroupInformationRobot extends CoreRobot {
       groupList.add(TwakeListItemRobot($, finder));
     }
     return groupList;
+  }
+
+  PatrolFinder getMemberByMatrixID(String matrixID) {
+    return $(find.byKey(ValueKey<String>(matrixID)));
+  }
+
+  Future<void> openMemberDetail({
+    required String matrixID,
+  }) async {
+    await $.scrollUntilVisible(finder: getMemberByMatrixID(matrixID));
+    await getMemberByMatrixID(matrixID).tap();
+
+    await $.waitUntilVisible($(ProfileInfoView));
+
+    return;
   }
 }

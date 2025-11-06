@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'package:fluffychat/generated/l10n/app_localizations.dart';
+import 'package:fluffychat/utils/permission_dialog.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:html/parser.dart';
@@ -13,6 +15,33 @@ class CoreRobot {
   CoreRobot(this.$);
 
   dynamic ignoreException() => $.tester.takeException();
+
+  Future<void> confirmShareContactInformation() async {
+    final dialog = $(PermissionDialog);
+    if (dialog.exists) {
+      final ctx = $.tester.element(dialog); // BuildContext inside dialog
+      final nextLabel = L10n.of(ctx)!.next; // whatever the app shows
+
+      await $.tester
+          .tap(find.descendant(of: dialog, matching: find.text(nextLabel)));
+      await $.tester.pumpAndSettle();
+    }
+  }
+
+  Future<void> confirmAccessContactIOS() async {
+    try {
+      await $.native.waitUntilVisible(
+        Selector(textContains: 'OK'),
+        appId: 'com.apple.springboard',
+      );
+      await $.native.tap(
+        Selector(textContains: 'OK'),
+        appId: 'com.apple.springboard',
+      );
+    } catch (e) {
+      ignoreException();
+    }
+  }
 
   Future<void> grantNotificationPermission() async {
     if (await $.native.isPermissionDialogVisible(

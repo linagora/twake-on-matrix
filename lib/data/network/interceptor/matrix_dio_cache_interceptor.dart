@@ -1,11 +1,16 @@
 import 'package:dio/dio.dart';
 import 'package:dio_cache_interceptor/dio_cache_interceptor.dart';
+import 'package:flutter/foundation.dart';
 import 'package:matrix/matrix.dart';
 
 class MatrixDioCacheInterceptor extends DioCacheInterceptor {
   MatrixDioCacheInterceptor({required super.options});
 
   final List<String> _uriSupportsCache = [];
+
+  /// Expose URI cache list for testing purposes only
+  @visibleForTesting
+  List<String> get uriSupportsCacheForTesting => _uriSupportsCache;
 
   void addUriSupportsCache(List<String> uriSupportsCache) {
     Logs().d(
