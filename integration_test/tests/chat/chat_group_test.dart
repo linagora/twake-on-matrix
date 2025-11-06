@@ -4,6 +4,7 @@ import 'package:fluffychat/widgets/avatar/avatar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import '../../base/test_base.dart';
+import '../../help/attach_file_ios_test.dart';
 import '../../help/soft_assertion_helper.dart';
 import '../../robots/chat_group_detail_robot.dart';
 import '../../scenarios/chat_scenario.dart';
@@ -177,6 +178,58 @@ void main() {
 
       s.verifyAll();
 
+    },
+  );
+
+  TestBase().runPatrolTest(
+    description: 'verify user can send a file, image, video',
+    test: ($) async {
+      final s = SoftAssertHelper();
+      const image  = String.fromEnvironment('Image1');
+      const file  = String.fromEnvironment('PfdFile1');
+      const video  = String.fromEnvironment('MovVideo1');
+
+      //goto chat
+      await HomeRobot($).gotoChatListScreen();
+
+      //open a group
+      const groupTest = String.fromEnvironment('GroupTest');
+      await ChatScenario($).openChatGroupByTitle(groupTest);
+
+      final now = DateTime.now();
+      final imageMsg ="image at ${now.year}${now.month}${now.day}${now.hour}${now.minute}";
+      final fileMsg ="file at ${now.year}${now.month}${now.day}${now.hour}${now.minute}";
+      final movieMsg ="movie at ${now.year}${now.month}${now.day}${now.hour}${now.minute}";
+
+      //The purpose of this step is to verify that the last message is not a text message after sending a file in the next step
+      await ChatScenario($).sendAMesage(imageMsg);
+
+      //open Attach dialog and choose an image for uploading
+      await ChatGroupDetailRobot($).openAttachDialog();
+      await pickFromFiles($, image);
+      //verify the image is uploaded successfully
+      await $.waitUntilVisible(ChatGroupDetailRobot($).getTheLastestMessage().getImage());
+      s.softAssertEquals(ChatGroupDetailRobot($).getTheLastestMessage().getImage().exists, true,'image has not been sent ');
+
+      //The purpose of this step is to verify that the last message is not a text message after sending a file in the next step
+      await ChatScenario($).sendAMesage(fileMsg);
+
+      //open Attach dialog and choose a file for uploading
+      await ChatGroupDetailRobot($).openAttachDialog();
+      await pickFromFiles($, file);
+      //verify the file is uploaded successfully
+      await $.waitUntilVisible(ChatGroupDetailRobot($).getTheLastestMessage().getSentFileName());
+      s.softAssertEquals(ChatGroupDetailRobot($).getTheLastestMessage().getSentFileName().exists, true,'file has not been sent ');
+
+      //The purpose of this step is to verify that the last message is not a text message after sending a video in the next step
+      await ChatScenario($).sendAMesage(movieMsg);
+      // open Attach dialog and choose a video for uploading
+      await ChatGroupDetailRobot($).openAttachDialog();
+      // await allowPhotosIfNeeded($);
+      await pickFromFiles($, video);
+      //verify the file is uploaded successfully
+      await $.waitUntilVisible(ChatGroupDetailRobot($).getTheLastestMessage().getVideoDownloadIcon());
+      s.softAssertEquals(ChatGroupDetailRobot($).getTheLastestMessage().getVideoDownloadIcon().exists, true,'video has not been sent ');
     },
   );
 }
