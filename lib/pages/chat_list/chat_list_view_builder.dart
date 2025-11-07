@@ -54,30 +54,6 @@ class ChatListViewBuilder extends StatelessWidget {
                   .indexWhere((room) => room.id == (key as ValueKey).value);
             },
           ),
-          // delegate: SliverChildListDelegate(
-          //   sortedRooms.map((room) {
-          //     return ValueListenableBuilder<SelectMode>(
-          //       key: ValueKey(room.id),
-          //       valueListenable: controller.selectModeNotifier,
-          //       builder: (context, selectMode, _) {
-          //         final slidables = controller.getSlidables(context, room);
-          //         return SlidableChatListItem(
-          //           controller: controller,
-          //           slidables: slidables,
-          //           enabled: ChatListViewStyle.responsiveUtils
-          //                   .isMobileOrTablet(context) &&
-          //               !selectMode.isSelectMode &&
-          //               slidables.isNotEmpty,
-          //           chatListItem: CommonChatListItem(
-          //             controller: controller,
-          //             room: room,
-          //             lastEvent: lastEventByRoomId[room.id],
-          //           ),
-          //         );
-          //       },
-          //     );
-          //   }).toList(),
-          // ),
         );
       },
     );
