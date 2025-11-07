@@ -30,6 +30,7 @@ import '../robots/menu_robot.dart';
 import '../robots/new_chat_robot.dart';
 import '../robots/search_robot.dart';
 import '../robots/setting_for_new_group.dart';
+import '../robots/twake_list_item_robot.dart';
 
 enum UserLevel { member, admin, owner, moderator }
 class ChatScenario extends BaseScenario {
@@ -480,5 +481,43 @@ class ChatScenario extends BaseScenario {
   Future<void> verifyChatListCanBeScrollable(SoftAssertHelper s) async {
     s.softAssertEquals( await CoreRobot($).isActuallyScrollable($,root: $(SingleChildScrollView),), true,
         'Chat list is not scrollable',);
+  }
+
+  bool isPinAChat(TwakeListItemRobot takeListItem) {
+    final pin = takeListItem.getPinIcon();
+    return pin.visible;
+  }
+  
+  Future<void> pinAChat(String title) async {
+    final twakeListItem = ChatListRobot($).getChatGroupByTitle(title);
+    ChatListRobot($).scrollUntilVisible($, twakeListItem.root);
+    
+    if(!isPinAChat(twakeListItem))
+    {
+      await $.tester.ensureVisible(twakeListItem.root);
+      await twakeListItem.root.longPress();
+      await $.waitUntilVisible(twakeListItem.getCheckBox());
+      await ChatListRobot($).clickOnPinIcon();
+    }
+  }
+
+  Future<void> unPinAChat(String title) async {
+    final twakeListItem = ChatListRobot($).getChatGroupByTitle(title);
+    ChatListRobot($).scrollUntilVisible($, twakeListItem.root);
+
+    if(isPinAChat(twakeListItem))
+    {
+      await $.tester.ensureVisible(twakeListItem.root);
+      await twakeListItem.root.longPress();
+      await $.waitUntilVisible(twakeListItem.getCheckBox());
+      await ChatListRobot($).clickOnUnPinIcon();
+    }
+  }
+
+  Future<void> verifyAChatIsPin(String title, bool isPin) async {
+    final twakeListItem = ChatListRobot($).getChatGroupByTitle(title);
+    await $.tester.ensureVisible(twakeListItem.root);
+    final exists = isPinAChat(twakeListItem);
+    expect(exists, isPin, reason: 'Expected pin=$isPin but got $exists for "$title"');
   }
 }

@@ -84,4 +84,21 @@ void main() {
         reason: "expect the different is 1 but the second is $numberOfUnreadMessage2 and the first is $numberOfUnreadMessage1",);
     },
   );
+  TestBase().runPatrolTest(
+    description: 'Pin/unpin a chat',
+    test: ($) async {
+      const groupTest = String.fromEnvironment('GroupTest');
+      // goto chat screen
+      await HomeRobot($).gotoChatListScreen();
+      // pin a chat
+      await ChatScenario($).pinAChat(groupTest);  
+      // verify the chat is pin
+      await ChatScenario($).verifyAChatIsPin(groupTest, true);
+      
+      // unpin a chat
+      await ChatScenario($).unPinAChat(groupTest);  
+      // verify the chat is unPin
+      await ChatScenario($).verifyAChatIsPin(groupTest, false);
+    },
+  );
 }
