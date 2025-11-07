@@ -129,7 +129,7 @@ class ChatScenario extends BaseScenario {
 
   Future<void> pasteFromClipBoard() async {
     // 1) Focus the input and open the context menu
-    final input = await ChatGroupDetailRobot($).getInputTextField();
+    final input = ChatGroupDetailRobot($).getInputTextField();
     await input.tap();
     await input.longPress();
     await $.pump(const Duration(milliseconds: 300)); // let the menu render
