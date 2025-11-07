@@ -29,7 +29,6 @@ class _ChatListSortRoomsState extends State<ChatListSortRooms> {
   Map<String, Event?> _lastEventByRoomId = {};
   List<Room> _sortCache = [];
   Map<String, StreamSubscription?> _roomSubscriptions = {};
-  List<Room> _roomsDiff = [];
 
   RoomSorter sortRoomsBy(Client client) => (a, b) {
         if (client.pinInvitedRooms &&
@@ -97,8 +96,9 @@ class _ChatListSortRoomsState extends State<ChatListSortRooms> {
         ),
       ),
     );
-    _roomsDiff = oldWidget.rooms.whereNot(widget.rooms.contains).toList();
-    for (final room in _roomsDiff) {
+    final removedRooms =
+        oldWidget.rooms.whereNot(widget.rooms.contains).toList();
+    for (final room in removedRooms) {
       _roomSubscriptions[room.id]?.cancel();
     }
     _roomSubscriptions = Map.fromEntries(
