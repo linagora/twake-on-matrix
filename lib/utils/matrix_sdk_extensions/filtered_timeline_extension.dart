@@ -1,3 +1,4 @@
+import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
 import 'package:matrix/matrix.dart';
 
 import '../../config/app_config.dart';
@@ -13,7 +14,7 @@ extension IsStateExtension on Event {
       // if a reaction has been redacted we also want it to be hidden in the timeline
       !{EventTypes.Reaction, EventTypes.Redaction}.contains(type) &&
       // if we enabled to hide all redacted events, don't show those
-      (!AppConfig.hideRedactedEvents || !redacted) &&
+      (!AppConfig.hideRedactedEvents || !shouldHideRedactedEvent()) &&
       // if we enabled to hide all unknown events, don't show those
       (!AppConfig.hideUnknownEvents || isEventTypeKnown) &&
       // remove state events that we don't want to render
