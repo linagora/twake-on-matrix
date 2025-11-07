@@ -134,6 +134,7 @@ class ChatGroupDetailRobot extends CoreRobot {
   }
 
   Future<void> openAttachDialog() async {
+    await $.waitUntilVisible(getMoreMessageIcon());
     await getMoreMessageIcon().tap();
     if($(PermissionTextButton).containing('Next').exists)
     {
