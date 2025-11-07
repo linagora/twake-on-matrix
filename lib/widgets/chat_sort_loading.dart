@@ -27,8 +27,8 @@ class ChatSortLoading extends StatelessWidget {
             const CircularProgressIndicator.adaptive(
               strokeWidth: 2,
               constraints: BoxConstraints(
-                maxWidth: 24,
-                maxHeight: 24,
+                minHeight: 24,
+                minWidth: 24,
               ),
             ),
             const SizedBox(width: 12),
