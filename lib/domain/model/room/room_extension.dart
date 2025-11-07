@@ -173,8 +173,8 @@ extension RoomExtension on Room {
           ? null
           : lastEvents.reduce((a, b) {
               if (AppConfig.hideRedactedEvents) {
-                if (a.redacted) return b;
-                if (b.redacted) return a;
+                if (a.shouldHideRedactedEvent()) return b;
+                if (b.shouldHideRedactedEvent()) return a;
               }
               if (a.shouldHideChangedAvatarEvent()) {
                 return b;
