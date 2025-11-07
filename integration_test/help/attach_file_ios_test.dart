@@ -135,11 +135,41 @@ Future<void> openDownloadFolder(PatrolIntegrationTester $) async {
   await $.native.waitUntilVisible(Selector(text: 'Search'), timeout: const Duration(seconds: 5));
 }
 
-Future<void> pickFromFiles(PatrolIntegrationTester $, String fileName) async {
+Future<void> pickItemFromDownloadFolder(PatrolIntegrationTester $, String fileName) async {
   await openDownloadFolder($);
 
   // Choose the file
   await selectFileInDownloads($, fileName);
+  await $.waitUntilVisible(ChatGroupDetailRobot($).getInputTextField());
+}
+
+Future<void> pickAnItemFromPhototGalaxy(PatrolIntegrationTester $, int index) async {
+  await $.native2.pickImageFromGallery(index: 0); 
+  await $.native.waitUntilVisible(Selector(text: '1 photo selected'));
+}
+
+Future<void> enterCaption(PatrolIntegrationTester $, String caption) async {
+  
+  await $.native.waitUntilVisible(
+    Selector(text: '1 photo selected'),
+    timeout: const Duration(seconds: 5),
+  );
+
+  await $.native.enterText(
+    Selector(text: 'Add a caption...'),
+    text: 'My caption for photo A',
+  );
+
+}
+
+Future<void> sendUploadItemWithCaption(PatrolIntegrationTester $, int index, String caption) async {
+  await pickAnItemFromPhototGalaxy($, index);
+  await enterCaption($, caption);
+
+  // click on Send button
+  await $.native.waitUntilVisible(Selector(text: 'Send'));
+  await $.native.tap(Selector(text: 'Send'));
+
   await $.waitUntilVisible(ChatGroupDetailRobot($).getInputTextField());
 }
 
