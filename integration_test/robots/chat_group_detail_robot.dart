@@ -88,7 +88,6 @@ class ChatGroupDetailRobot extends CoreRobot {
 
   Future<PatrolFinder> getText(String text) async {
     return $(MessageContent).containing(find.text(text));
-    // return $(MatrixLinkifyText).containing(text);
   }
 
   PatrolFinder getInputTextField() {
@@ -126,10 +125,8 @@ class ChatGroupDetailRobot extends CoreRobot {
       final snackText =
           $(find.textContaining(message, findRichText: true)).first;
 
-      // 1) Chờ xuất hiện (ngay sau hành động tạo room)
       await $.waitUntilVisible(snackText, timeout: const Duration(seconds: 5));
 
-      // 2) (tuỳ chọn) Chờ nó biến mất để tránh flakiness cho bước sau
       await waitUntilAbsent($, snackText);
   }
 
