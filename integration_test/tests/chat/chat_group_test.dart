@@ -230,6 +230,8 @@ void main() {
       //verify the file is uploaded successfully
       await $.waitUntilVisible(ChatGroupDetailRobot($).getTheLastestMessage().getVideoDownloadIcon());
       s.softAssertEquals(ChatGroupDetailRobot($).getTheLastestMessage().getVideoDownloadIcon().exists, true,'video has not been sent ');
+
+      s.verifyAll();
     },
   );
 }
