@@ -75,7 +75,7 @@ class ChatGroupDetailRobot extends CoreRobot {
     // return $(MatrixLinkifyText).containing(text);
   }
 
-  Future<PatrolFinder> getInputTextField() async {
+  PatrolFinder getInputTextField() {
     return $(TextField);
   }
 
