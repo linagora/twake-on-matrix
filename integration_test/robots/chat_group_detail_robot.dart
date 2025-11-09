@@ -72,7 +72,6 @@ class ChatGroupDetailRobot extends CoreRobot {
 
   Future<PatrolFinder> getText(String text) async {
     return $(MessageContent).containing(find.text(text));
-    // return $(MatrixLinkifyText).containing(text);
   }
 
   PatrolFinder getInputTextField() {
@@ -80,7 +79,7 @@ class ChatGroupDetailRobot extends CoreRobot {
   }
 
   Future<void> inputMessage(String message) async {
-    final textField = await getInputTextField();
+    final textField = getInputTextField();
     // catch exception when trying to chat with non-existing account
     await CoreRobot($).captureAsyncError(() async {
       await textField.tap();
