@@ -13,15 +13,17 @@ class CreateNewGroupChatLoading extends Success {
 
 class CreateNewGroupChatSuccess extends Success {
   final String roomId;
+  final List<String> userIds;
   final String? groupName;
 
   const CreateNewGroupChatSuccess({
     required this.roomId,
+    required this.userIds,
     this.groupName,
   });
 
   @override
-  List<Object?> get props => [roomId, groupName];
+  List<Object?> get props => [roomId, userIds, groupName];
 }
 
 class CreateNewGroupChatFailed extends Failure {

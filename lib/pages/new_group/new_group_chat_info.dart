@@ -4,11 +4,13 @@ import 'package:dartz/dartz.dart' hide State;
 import 'package:fluffychat/app_state/failure.dart';
 import 'package:fluffychat/app_state/success.dart';
 import 'package:fluffychat/domain/app_state/room/create_new_group_chat_state.dart';
+import 'package:fluffychat/domain/app_state/room/invite_user_state.dart';
 import 'package:fluffychat/domain/app_state/room/upload_content_state.dart';
 import 'package:fluffychat/domain/app_state/validator/verify_name_view_state.dart';
 import 'package:fluffychat/domain/exception/room/can_not_create_new_group_chat_exception.dart';
 import 'package:fluffychat/domain/model/extensions/validator_failure_extension.dart';
 import 'package:fluffychat/domain/model/verification/name_with_space_only_validator.dart';
+import 'package:fluffychat/domain/usecase/room/invite_user_interactor.dart';
 import 'package:fluffychat/domain/usecase/verify_name_interactor.dart';
 import 'package:fluffychat/pages/new_group/new_group_chat_info_view.dart';
 import 'package:fluffychat/pages/new_group/new_group_info_controller.dart';
@@ -53,11 +55,14 @@ class NewGroupChatInfoController extends State<NewGroupChatInfo>
   final haveGroupNameNotifier = ValueNotifier(false);
   final createRoomStateNotifier =
       ValueNotifier<Either<Failure, Success>>(Right(CreateNewGroupInitial()));
+  final inviteUserStateNotifier =
+      ValueNotifier<Either<Failure, Success>>(Right(InviteUserInitial()));
   final uploadContentInteractor = getIt.get<UploadContentInteractor>();
   final uploadContentWebInteractor =
       getIt.get<UploadContentInBytesInteractor>();
   final createNewGroupChatInteractor =
       getIt.get<CreateNewGroupChatInteractor>();
+  final inviteUserInteractor = getIt.get<InviteUserInteractor>();
   final groupNameTextEditingController = TextEditingController();
   final avatarAssetEntityNotifier = ValueNotifier<AssetEntity?>(null);
   final avatarFilePickerNotifier = ValueNotifier<MatrixFile?>(null);
@@ -225,10 +230,11 @@ class NewGroupChatInfoController extends State<NewGroupChatInfo>
           'NewGroupController::_handleCreateNewGroupChatChatOnData() - success: $success',
         );
         if (success is CreateNewGroupChatSuccess) {
-          if (!responsiveUtils.isSingleColumnLayout(context)) {
-            context.popInnerAll();
-          }
-          _goToRoom(success);
+          _handleInviteUsers(
+            userIds: success.userIds,
+            roomId: success.roomId,
+            groupName: success.groupName,
+          );
         }
       },
     );
@@ -293,12 +299,15 @@ class NewGroupChatInfoController extends State<NewGroupChatInfo>
             );
   }
 
-  void _goToRoom(CreateNewGroupChatSuccess success) {
+  void _goToRoom({
+    required String roomId,
+    String? groupName,
+  }) {
     context.go(
-      "/rooms/${success.roomId}",
+      "/rooms/$roomId",
       extra: ChatRouterInputArgument(
         type: ChatRouterInputArgumentType.draft,
-        data: success.groupName,
+        data: groupName,
       ),
     );
   }
@@ -350,11 +359,15 @@ class NewGroupChatInfoController extends State<NewGroupChatInfo>
 
   bool get isCreatingRoom {
     return createRoomStateNotifier.value.fold(
-      (failure) => false,
-      (success) =>
-          success is UploadContentLoading ||
-          success is CreateNewGroupChatLoading,
-    );
+          (failure) => false,
+          (success) =>
+              success is UploadContentLoading ||
+              success is CreateNewGroupChatLoading,
+        ) ||
+        inviteUserStateNotifier.value.fold(
+          (failure) => false,
+          (success) => success is InviteUserLoading,
+        );
   }
 
   String? getErrorMessage(String content) {
@@ -368,6 +381,84 @@ class NewGroupChatInfoController extends State<NewGroupChatInfo>
         }
       },
       (success) => null,
+    );
+  }
+
+  void _handleCreateGroupSuccess({
+    required String groundId,
+    String? groupName,
+  }) {
+    if (!responsiveUtils.isSingleColumnLayout(context)) {
+      context.popInnerAll();
+    }
+    _goToRoom(
+      roomId: groundId,
+      groupName: groupName,
+    );
+  }
+
+  void _handleInviteUsers({
+    required List<String> userIds,
+    required String roomId,
+    String? groupName,
+  }) {
+    if (userIds.isEmpty) {
+      _handleCreateGroupSuccess(
+        groundId: roomId,
+        groupName: groupName,
+      );
+      return;
+    }
+
+    inviteUserInteractor
+        .execute(
+          matrixClient: Matrix.of(context).client,
+          roomId: roomId,
+          groupName: groupName,
+          userIds: userIds,
+        )
+        .listen(
+          (event) => _handleInviteUsersOnEvent(
+            event: event,
+            roomId: roomId,
+            groupName: groupName,
+          ),
+        );
+  }
+
+  void _handleInviteUsersOnEvent({
+    required Either<Failure, Success> event,
+    required String roomId,
+    String? groupName,
+  }) {
+    inviteUserStateNotifier.value = event;
+    event.fold(
+      (failure) {
+        Logs().e(
+          'NewGroupController::_handleInviteUsersOnEvent - failure: $failure',
+        );
+        TwakeDialog.hideLoadingDialog(context);
+        _handleCreateGroupSuccess(
+          groundId: roomId,
+          groupName: groupName,
+        );
+      },
+      (success) {
+        Logs().d(
+          'NewGroupController::_handleInviteUsersOnEvent - success: $success',
+        );
+        if (success is InviteUserLoading) {
+          TwakeDialog.showLoadingDialog(context);
+          return;
+        }
+        if (success is InviteUserSuccess) {
+          TwakeDialog.hideLoadingDialog(context);
+          _handleCreateGroupSuccess(
+            groundId: success.roomId,
+            groupName: success.groupName,
+          );
+        }
+      },
     );
   }
 

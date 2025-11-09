@@ -33,7 +33,6 @@ class CreateNewGroupChatInteractor {
 
       final roomId = await matrixClient.createGroupChat(
         groupName: createNewGroupChatRequest.groupName,
-        invite: createNewGroupChatRequest.invite,
         enableEncryption: createNewGroupChatRequest.enableEncryption,
         preset: createNewGroupChatRequest.createRoomPreset,
         initialState: [addAvatarStateEvent, historyVisibilityStateEvent],
@@ -45,6 +44,7 @@ class CreateNewGroupChatInteractor {
         yield Right(
           CreateNewGroupChatSuccess(
             roomId: roomId,
+            userIds: createNewGroupChatRequest.invite ?? [],
             groupName: createNewGroupChatRequest.groupName,
           ),
         );
