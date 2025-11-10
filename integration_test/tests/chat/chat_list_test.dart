@@ -88,17 +88,25 @@ void main() {
     description: 'Pin/unpin a chat',
     test: ($) async {
       const groupTest = String.fromEnvironment('GroupTest');
-      // goto chat screen
       await HomeRobot($).gotoChatListScreen();
-      // pin a chat
       await ChatScenario($).pinAChat(groupTest);  
-      // verify the chat is pin
       await ChatScenario($).verifyAChatIsPin(groupTest, true);
-      
-      // unpin a chat
+
       await ChatScenario($).unPinAChat(groupTest);  
-      // verify the chat is unPin
       await ChatScenario($).verifyAChatIsPin(groupTest, false);
+    },
+  );
+
+  TestBase().runPatrolTest(
+    description: 'Mute/unmute a chat',
+    test: ($) async {
+      const groupTest = String.fromEnvironment('TitleOfGroupTest');
+      await HomeRobot($).gotoChatListScreen();
+      await ChatScenario($).muteAChat(groupTest);  
+      await ChatScenario($).verifyAChatIsMuted(groupTest, true);    
+        
+      await ChatScenario($).unmuteAChat(groupTest);  
+      await ChatScenario($).verifyAChatIsMuted(groupTest, false);
     },
   );
 }
