@@ -26,6 +26,7 @@ class ChatScrollView extends StatefulWidget {
 class _ChatScrollViewState extends State<ChatScrollView> {
   final _top = <Event>[], _bottom = <Event>[];
   ChatController get controller => widget.controller;
+  bool _wasRequestingFuture = false;
 
   @override
   void initState() {
@@ -67,6 +68,12 @@ class _ChatScrollViewState extends State<ChatScrollView> {
   void didUpdateWidget(ChatScrollView oldWidget) {
     super.didUpdateWidget(oldWidget);
 
+    // Track the previous requestingFuture state
+    final currentIsRequestingFuture =
+        controller.timeline?.isRequestingFuture ?? false;
+    final wasRequestingFutureBeforeUpdate = _wasRequestingFuture;
+    _wasRequestingFuture = currentIsRequestingFuture;
+
     if (widget.events == oldWidget.events) return;
 
     final oldEvents = oldWidget.events;
@@ -107,6 +114,13 @@ class _ChatScrollViewState extends State<ChatScrollView> {
     if (startDiff > 0) {
       final newStartItems = newEvents.sublist(0, startDiff);
       _top.addAll(newStartItems.reversed);
+
+      // If new events arrived at the start and it's not from requestFuture,
+      // scroll to the bottom to show the new events.
+      // We check if we were NOT requesting future before this update.
+      if (!wasRequestingFutureBeforeUpdate) {
+        _scrollToBottom();
+      }
     }
 
     // Add new items at the end to _bottom
@@ -138,6 +152,18 @@ class _ChatScrollViewState extends State<ChatScrollView> {
         _bottom[i] = matchingEvent;
       }
     }
+  }
+
+  /// Scrolls to the bottom of the chat to show new messages.
+  void _scrollToBottom() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      if (!controller.scrollController.hasClients) return;
+
+      controller.scrollController.jumpTo(
+        controller.scrollController.position.maxScrollExtent,
+      );
+    });
   }
 
   @override
