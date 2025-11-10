@@ -17,19 +17,14 @@ class ChatDetailScenario extends BaseScenario {
     await ChatGroupDetailRobot($).getSearchIcon().tap();
     await $.waitUntilVisible($(AppBar).$(TextField));
     await $(AppBar).$(TextField).enterText(searchText);
-    // await SearchRobot($).enterSearchText(searchText);
     await ChatGroupDetailRobot($).waitForEitherVisible($: $, first: $(TwakeListItem), second: $("No Results"), timeout: const Duration(seconds: 10));
     await Future.delayed(const Duration(seconds: 2));
   }
 
-  UserLevel parseUserLevel(String? s) {
-    final v = (s ?? '').trim().toLowerCase();
-    final head = v.split(RegExp(r'\s+|\(')).first;
-
-    return UserLevel.values.firstWhere(
-      (e) => e.name.toLowerCase() == head,
-      orElse: () => UserLevel.member,
-    );
+  UserLevel parseUserLevel(String? userlevel) {
+    final noSpaces = (userlevel ?? '').trim().replaceAll(RegExp(r'\s+'), ''); // remove all space
+    final level = noSpaces.toLowerCase();
+    return UserLevel.values.byName(level);
   }
   
   Future<void> verifyProfileInfoOfAllMember(SoftAssertHelper s) async {
@@ -41,16 +36,10 @@ class ChatDetailScenario extends BaseScenario {
       final displayName = row.$(Text).first.text ?? "";
       final matrixAddress = row.$(Text).last.text ?? "";
       const currentAccount  = String.fromEnvironment('CurrentAccount');
-      if(matrixAddress == currentAccount)
-      {
-        await verifyProfileInfoOfAMember(s, displayName, matrixAddress, isCurrentUser: true, level: parseUserLevel(owner));
-      }
-      else
-      {
-        await verifyProfileInfoOfAMember(s, displayName, matrixAddress, isCurrentUser: false, level: parseUserLevel(owner));
-      }
+      await verifyProfileInfoOfAMember(s, displayName, matrixAddress, isCurrentUser: matrixAddress == currentAccount, level: parseUserLevel(owner));
       await ProfileInformationRobot($).backToGroupInfomationScreen();
       await $.waitUntilVisible(item.root);
+      await $.tester.pump();
     }
   }
 
@@ -69,8 +58,8 @@ class ChatDetailScenario extends BaseScenario {
 
     // final expectedName = matrixAdress.substring(matrixAdress.indexOf("@")+1, matrixAdress.indexOf(":"));
     final actualName = ProfileInformationRobot($).getDisplayName().text;
-    s.softAssertEquals( actualName == displayName
-    , true, "displayName is not correct, expected name is $displayName while actual name is $actualName",);
+    s.softAssertEquals( actualName == displayName,
+     true, "displayName is not correct, expected name is $displayName while actual name is $actualName",);
         
     try{
       s.softAssertEquals(ProfileInformationRobot($).getOnlineStatus().exists, true, "online status is not shown");
