@@ -2353,24 +2353,22 @@ class ChatController extends State<Chat>
   }
 
   void handleDisplayStickyTimestamp(DateTime dateTime) {
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (_currentChatScrollState.isEndScroll) return;
-      _currentDateTimeEvent = dateTime;
-      if (scrollController.offset > 0) {
-        stickyTimestampNotifier.value ??= dateTime;
-        if (stickyTimestampNotifier.value?.day != dateTime.day) {
-          Logs().d(
-            'Chat::handleDisplayStickyTimestamp() StickyTimestampNotifier - ${stickyTimestampNotifier.value}',
-          );
-          Logs().d(
-            'Chat::handleDisplayStickyTimestamp() CurrentDateTimeEvent - $_currentDateTimeEvent',
-          );
-          _updateStickyTimestampNotifier(
-            dateTime: dateTime,
-          );
-        }
+    if (_currentChatScrollState.isEndScroll) return;
+    _currentDateTimeEvent = dateTime;
+    if (scrollController.offset < 0) {
+      stickyTimestampNotifier.value ??= dateTime;
+      if (stickyTimestampNotifier.value?.day != dateTime.day) {
+        Logs().d(
+          'Chat::handleDisplayStickyTimestamp() StickyTimestampNotifier - ${stickyTimestampNotifier.value}',
+        );
+        Logs().d(
+          'Chat::handleDisplayStickyTimestamp() CurrentDateTimeEvent - $_currentDateTimeEvent',
+        );
+        _updateStickyTimestampNotifier(
+          dateTime: dateTime,
+        );
       }
-    });
+    }
   }
 
   bool isInViewPortCondition(
@@ -2380,8 +2378,8 @@ class ChatController extends State<Chat>
   ) {
     final stickyTimestampHeight =
         stickyTimestampKey.globalPaintBoundsRect?.height ?? 0;
-    return deltaTopReversed < viewPortDimension - stickyTimestampHeight &&
-        deltaBottomReversed > viewPortDimension - stickyTimestampHeight;
+    return deltaTopReversed > -viewPortDimension - stickyTimestampHeight &&
+        deltaTopReversed < -viewPortDimension;
   }
 
   void _handleHideStickyTimestamp() {
