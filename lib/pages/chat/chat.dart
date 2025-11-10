@@ -2378,8 +2378,8 @@ class ChatController extends State<Chat>
   ) {
     final stickyTimestampHeight =
         stickyTimestampKey.globalPaintBoundsRect?.height ?? 0;
-    return deltaTopReversed > -viewPortDimension - stickyTimestampHeight &&
-        deltaTopReversed < -viewPortDimension;
+    return deltaTopReversed < -viewPortDimension + stickyTimestampHeight &&
+        deltaBottomReversed > -viewPortDimension + stickyTimestampHeight;
   }
 
   void _handleHideStickyTimestamp() {
