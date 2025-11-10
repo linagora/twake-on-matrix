@@ -39,6 +39,13 @@ class InviteUserInteractor {
           exception: failedUsers,
         ),
       );
+    } else {
+      yield Right(
+        InviteUserSuccess(
+          roomId: roomId,
+          groupName: groupName,
+        ),
+      );
     }
   }
 

@@ -22,6 +22,7 @@ import 'package:fluffychat/utils/dialog/twake_dialog.dart';
 import 'package:fluffychat/utils/extension/build_context_extension.dart';
 import 'package:fluffychat/utils/power_level_manager.dart';
 import 'package:fluffychat/utils/responsive/responsive_utils.dart';
+import 'package:fluffychat/utils/twake_snackbar.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:flutter/material.dart';
 import 'package:matrix/matrix.dart';
@@ -63,6 +64,7 @@ class NewGroupChatInfoController extends State<NewGroupChatInfo>
   final createNewGroupChatInteractor =
       getIt.get<CreateNewGroupChatInteractor>();
   final inviteUserInteractor = getIt.get<InviteUserInteractor>();
+  StreamSubscription? inviteUserInteractorStreamSubscription;
   final groupNameTextEditingController = TextEditingController();
   final avatarAssetEntityNotifier = ValueNotifier<AssetEntity?>(null);
   final avatarFilePickerNotifier = ValueNotifier<MatrixFile?>(null);
@@ -410,7 +412,7 @@ class NewGroupChatInfoController extends State<NewGroupChatInfo>
       return;
     }
 
-    inviteUserInteractor
+    inviteUserInteractorStreamSubscription = inviteUserInteractor
         .execute(
           matrixClient: Matrix.of(context).client,
           roomId: roomId,
@@ -442,6 +444,10 @@ class NewGroupChatInfoController extends State<NewGroupChatInfo>
           final failedUsers = failure.exception as Map<String, Exception>;
           Logs().e(
             'NewGroupController::_handleInviteUsersOnEvent - failed to invite users: ${failedUsers.keys.toList()}',
+          );
+          TwakeSnackBar.show(
+            context,
+            L10n.of(context)!.inviteUserErrorMessage,
           );
         }
         TwakeDialog.hideLoadingDialog(context);
@@ -488,6 +494,7 @@ class NewGroupChatInfoController extends State<NewGroupChatInfo>
     groupNameTextEditingController.dispose();
     groupNameFocusNode.dispose();
     avatarFilePickerNotifier.dispose();
+    inviteUserInteractorStreamSubscription?.cancel();
   }
 
   @override

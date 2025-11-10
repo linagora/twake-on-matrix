@@ -3474,5 +3474,6 @@
   "createNewContact": "Create new contact",
   "addToContacts": "Add to contacts",
   "invalidUsername": "Invalid username",
-  "audioEncoderNotSupportedMessage": "The audio encoder is not supported on this device. Please try using a different browser or device."
+  "audioEncoderNotSupportedMessage": "The audio encoder is not supported on this device. Please try using a different browser or device.",
+  "inviteUserErrorMessage": "We couldn’t complete all actions. Please review the group creation and invitations, then try again."
 }
