@@ -66,6 +66,7 @@ class ChatEventList extends StatelessWidget {
             child: OptionalSelectionArea(
               isEnabled: PlatformInfos.isWeb && !controller.selectMode,
               child: ChatScrollView(
+                key: PageStorageKey('ChatScrollView-${controller.room?.id}'),
                 events: events,
                 controller: controller,
                 constraints: constraints,
