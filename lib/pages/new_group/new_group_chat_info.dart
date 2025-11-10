@@ -437,6 +437,14 @@ class NewGroupChatInfoController extends State<NewGroupChatInfo>
         Logs().e(
           'NewGroupController::_handleInviteUsersOnEvent - failure: $failure',
         );
+
+        if (failure is InviteUserFailed) {
+          final failedUsers = failure.exception as Map<String, Exception>;
+          Logs().e(
+            'NewGroupController::_handleInviteUsersOnEvent - failed to invite users: ${failedUsers.keys.toList()}',
+          );
+          return;
+        }
         TwakeDialog.hideLoadingDialog(context);
         _handleCreateGroupSuccess(
           groundId: roomId,

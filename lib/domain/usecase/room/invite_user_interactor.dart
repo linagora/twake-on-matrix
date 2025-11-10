@@ -36,9 +36,7 @@ class InviteUserInteractor {
     if (failedUsers.isNotEmpty) {
       yield Left(
         InviteUserFailed(
-          exception: Exception(
-            'Failed to invite ${failedUsers.length} user(s): ${failedUsers.keys.join(", ")}',
-          ),
+          exception: failedUsers,
         ),
       );
     }
