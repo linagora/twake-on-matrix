@@ -443,7 +443,6 @@ class NewGroupChatInfoController extends State<NewGroupChatInfo>
           Logs().e(
             'NewGroupController::_handleInviteUsersOnEvent - failed to invite users: ${failedUsers.keys.toList()}',
           );
-          return;
         }
         TwakeDialog.hideLoadingDialog(context);
         _handleCreateGroupSuccess(
