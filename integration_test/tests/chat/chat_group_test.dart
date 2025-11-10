@@ -4,7 +4,7 @@ import 'package:fluffychat/widgets/avatar/avatar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import '../../base/test_base.dart';
-import '../../help/attach_file_ios_test.dart';
+import '../../help/attach_file_ios_helper.dart';
 import '../../help/soft_assertion_helper.dart';
 import '../../robots/chat_group_detail_robot.dart';
 import '../../scenarios/chat_scenario.dart';

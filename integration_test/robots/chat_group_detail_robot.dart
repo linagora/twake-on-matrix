@@ -11,7 +11,7 @@ import 'package:patrol/patrol.dart';
 import 'package:fluffychat/generated/l10n/app_localizations.dart';
 import 'package:pull_down_button/pull_down_button.dart';
 import '../base/core_robot.dart';
-import '../help/attach_file_ios_test.dart';
+import '../help/attach_file_ios_helper.dart';
 import 'menu_robot.dart';
 import 'twake_list_item_robot.dart';
 
