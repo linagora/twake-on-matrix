@@ -1,3 +1,6 @@
+import 'package:fluffychat/di/global/get_it_initializer.dart';
+import 'package:fluffychat/domain/app_state/room/invite_user_state.dart';
+import 'package:fluffychat/domain/usecase/room/invite_user_interactor.dart';
 import 'package:fluffychat/pages/new_group/contacts_selection.dart';
 import 'package:fluffychat/pages/new_group/contacts_selection_view.dart';
 import 'package:fluffychat/utils/dialog/twake_dialog.dart';
@@ -56,23 +59,59 @@ class InvitationSelectionController
     performInvite();
   }
 
-  void performInvite() async {
+  void performInvite() {
     final selectedContacts = selectedContactsMapNotifier.contactsList
         .map((contact) => contact.matrixId!)
         .toList();
-    final success = await TwakeDialog.showFutureLoadingDialogFullScreen(
-      future: () => Future.wait(
-        selectedContacts.map((id) => _room.invite(id)),
-      ),
+
+    final subscription = getIt
+        .get<InviteUserInteractor>()
+        .execute(
+          matrixClient: client,
+          roomId: _room.id,
+          userIds: selectedContacts,
+        )
+        .listen((event) async {
+      final state = event.fold((failure) => failure, (success) => success);
+
+      if (state is InviteUserLoading) {
+        TwakeDialog.showLoadingDialog(context);
+        return;
+      }
+
+      if (state is InviteUserSuccess) {
+        TwakeSnackBar.show(
+          context,
+          L10n.of(context)!.contactHasBeenInvitedToTheGroup,
+        );
+        inviteSuccessAction();
+        return;
+      }
+
+      if (state is InviteUserSomeFailed) {
+        final failedUsers = state.inviteUserPartialFailureException.failedUsers;
+        Logs().e(
+          'NewGroupController::_handleInviteUsersOnEvent - failed to invite users: ${failedUsers.keys.toList()}',
+        );
+        await showConfirmAlertDialog(
+          context: context,
+          message: L10n.of(context)!.failedToAddMembers(
+            failedUsers.keys.length,
+          ),
+          isArrangeActionButtonsVertical: true,
+          okLabel: L10n.of(context)!.gotIt,
+        );
+        inviteSuccessAction();
+        return;
+      }
+    });
+
+    subscription.onDone(
+      () {
+        TwakeDialog.hideLoadingDialog(context);
+        subscription.cancel();
+      },
     );
-    if (success.error == null) {
-      TwakeSnackBar.show(
-        context,
-        L10n.of(context)!.contactHasBeenInvitedToTheGroup,
-      );
-      inviteSuccessAction();
-      return;
-    }
   }
 
   void inviteSuccessAction() {
