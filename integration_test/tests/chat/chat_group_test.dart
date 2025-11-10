@@ -216,20 +216,11 @@ void main() {
     description: 'View profile of a members in a group',
     test: ($) async {
       final s = SoftAssertHelper();
-      //goto chat
       await HomeRobot($).gotoChatListScreen();
-
-      //open a group
       const groupTest = String.fromEnvironment('GroupTest');
       await ChatScenario($).openChatGroupByTitle(groupTest);
-
-      //open group Info
       await ChatScenario($).openGroupChatInfo();
-
-      //Verify profile Info of all member
       await ChatDetailScenario($).verifyProfileInfoOfAllMember(s);
-
       s.verifyAll();
-    },
-  );
+    },);
 }
