@@ -33,6 +33,14 @@ class ChatListRobot extends HomeRobot {
     return $(ChatListBottomNavigator).$(InkWell).containing($("Unpin"));
   }
 
+  PatrolFinder getMuteIcon(){
+    return $(ChatListBottomNavigator).$(InkWell).containing($("Mute"));
+  }
+
+  PatrolFinder getUnmuteIcon(){
+    return $(ChatListBottomNavigator).$(InkWell).containing($("Unmute"));
+  }
+
   Future<void> clickOnPenIcon() async{
     await getPenIcon().tap();
     await $.waitUntilVisible($(AppBar).$("New chat"));
@@ -46,6 +54,16 @@ class ChatListRobot extends HomeRobot {
   Future<void> clickOnUnPinIcon() async {
     await getUnPinIcon().tap();
     await ChatListRobot($).waitUntilAbsent($, ChatListRobot($).getUnPinIcon());
+  }
+
+  Future<void> clickOnMuteIcon() async {
+      await getMuteIcon().tap();
+      await ChatListRobot($).waitUntilAbsent($, ChatListRobot($).getMuteIcon());
+  }
+
+  Future<void> clickOnUnMuteIcon() async {
+      await getUnmuteIcon().tap();
+      await ChatListRobot($).waitUntilAbsent($, ChatListRobot($).getUnmuteIcon());
   }
 
   Future<ChatGroupDetailRobot> openChatGroupByIndex(int index) async {
