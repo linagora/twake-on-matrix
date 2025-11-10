@@ -2,6 +2,7 @@ import 'package:collection/collection.dart';
 import 'package:fluffychat/config/themes.dart';
 import 'package:fluffychat/pages/chat/chat.dart';
 import 'package:fluffychat/pages/chat/chat_event_list_item.dart';
+import 'package:fluffychat/utils/matrix_sdk_extensions/filtered_timeline_extension.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:inview_notifier_list/inview_notifier_list.dart';
@@ -118,7 +119,9 @@ class _ChatScrollViewState extends State<ChatScrollView> {
       // If new events arrived at the start and it's not from requestFuture,
       // scroll to the bottom to show the new events.
       // We check if we were NOT requesting future before this update.
-      if (!wasRequestingFutureBeforeUpdate) {
+      // Additionally, only scroll if at least one event in _top is visible in GUI.
+      if (!wasRequestingFutureBeforeUpdate &&
+          _top.any((event) => event.isVisibleInGui)) {
         _scrollToBottom();
       }
     }

@@ -1305,9 +1305,10 @@ class ChatController extends State<Chat>
 
   /// Centers an already-rendered message in the viewport.
   Future<void> _centerRenderedMessage(BuildContext itemContext) async {
-    final itemBox = itemContext.findRenderObject() as RenderBox;
-    final scrollBox = scrollController.position.context.notificationContext!
-        .findRenderObject() as RenderBox;
+    final itemBox = itemContext.findRenderObject() as RenderBox?;
+    final scrollBox = scrollController.position.context.notificationContext
+        ?.findRenderObject() as RenderBox?;
+    if (itemBox == null || scrollBox == null) return;
 
     final itemPosition =
         itemBox.localToGlobal(Offset.zero, ancestor: scrollBox);
@@ -2345,10 +2346,6 @@ class ChatController extends State<Chat>
       isInitial: isInitial,
       isUnpin: isUnpin,
       eventId: eventId,
-      jumpToPinnedMessageCallback: (_) {
-        if (eventId == null) return;
-        _scrollToMessageWithEventId(eventId);
-      },
     );
   }
 
