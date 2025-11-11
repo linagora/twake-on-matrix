@@ -101,4 +101,34 @@ void main() {
       await ChatScenario($).verifyAChatIsPin(groupTest, false);
     },
   );
+
+  TestBase().runPatrolTest(
+    description: 'mark read/unread for a chat',
+    test: ($) async {
+      final now = DateTime.now();
+      const groupTest = String.fromEnvironment('TitleOfGroupTest');
+      final receiverMsg ="receiver sent at ${now.year}${now.month}${now.day}${now.hour}${now.minute}";
+
+      // goto chat screen
+      await HomeRobot($).gotoChatListScreen();
+
+      // make sure there is unread message by sending an new message by API
+      await ChatScenario($).sendAMessageByAPI(receiverMsg);
+      await $.waitUntilVisible(ChatListRobot($).getChatGroupByTitle(groupTest).getNumberUnReadIcon());
+      //todo: improve hard wait here
+      //Sometime, the row is change it's order. It can lead a failure when try to take an long press
+      //So that, I make a wait here
+      await Future.delayed(const Duration(seconds: 3));
+
+      // mark as read for the chat
+      await ChatScenario($).markAChatAsRead(groupTest);  
+      // verify the chat is displayed as read
+      await ChatScenario($).verifyAChatIsMarkAsUnRead(groupTest, false);
+      
+      // mark as unread for the chat
+      await ChatScenario($).markAChatAsUnread(groupTest);  
+      // verify the chat is displayed as uread
+      await ChatScenario($).verifyAChatIsMarkAsUnRead(groupTest, true);
+    },
+  );
 }

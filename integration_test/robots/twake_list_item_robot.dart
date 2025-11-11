@@ -15,7 +15,7 @@ class TwakeListItemRobot extends CoreRobot {
   }
 
   PatrolFinder getCheckBox() {
-    return root.$(Checkbox).at(0);
+    return root.$(Checkbox);
   }
   
   PatrolFinder getTitle() {
@@ -24,6 +24,10 @@ class TwakeListItemRobot extends CoreRobot {
 
   Future<PatrolFinder> getOwnerLabel() async {
     return root.$(Text).containing('Owner');
+  }
+
+  PatrolFinder getNumberUnReadIcon() {
+    return root.$(ChatListItemSubtitle).$(AnimatedContainer).containing($(Text));
   }
 
   Future<PatrolFinder> getEmailLabelIncaseSearching() async {
@@ -43,6 +47,24 @@ class TwakeListItemRobot extends CoreRobot {
     const pinData = IconData(0xF2D7, fontFamily: 'MaterialIcons');
     final pinFinder = find.descendant(of: title, matching: find.byIcon(pinData));
     return $(pinFinder);
+  }
+
+  PatrolFinder getUnReadStatus() {
+    const target = Color(0xFF0A84FF);
+
+    return root.$(ChatListItemSubtitle).$(
+      find.byWidgetPredicate(
+        (w) {
+          if (w is AnimatedContainer) {
+            final d = w.decoration;
+            if (d is BoxDecoration && d.color?.value == target.value) return true;
+          }
+
+          return false;
+        },
+        description: 'Any box with background #0A48FF',
+      ),
+    );
   }
 
   int getUnreadMessage(){
