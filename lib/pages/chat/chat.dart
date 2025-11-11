@@ -2352,19 +2352,17 @@ class ChatController extends State<Chat>
   void handleDisplayStickyTimestamp(DateTime dateTime) {
     if (_currentChatScrollState.isEndScroll) return;
     _currentDateTimeEvent = dateTime;
-    if (scrollController.offset < 0) {
-      stickyTimestampNotifier.value ??= dateTime;
-      if (stickyTimestampNotifier.value?.day != dateTime.day) {
-        Logs().d(
-          'Chat::handleDisplayStickyTimestamp() StickyTimestampNotifier - ${stickyTimestampNotifier.value}',
-        );
-        Logs().d(
-          'Chat::handleDisplayStickyTimestamp() CurrentDateTimeEvent - $_currentDateTimeEvent',
-        );
-        _updateStickyTimestampNotifier(
-          dateTime: dateTime,
-        );
-      }
+    stickyTimestampNotifier.value ??= dateTime;
+    if (stickyTimestampNotifier.value?.day != dateTime.day) {
+      Logs().d(
+        'Chat::handleDisplayStickyTimestamp() StickyTimestampNotifier - ${stickyTimestampNotifier.value}',
+      );
+      Logs().d(
+        'Chat::handleDisplayStickyTimestamp() CurrentDateTimeEvent - $_currentDateTimeEvent',
+      );
+      _updateStickyTimestampNotifier(
+        dateTime: dateTime,
+      );
     }
   }
 
