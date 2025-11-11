@@ -469,11 +469,11 @@ class ChatController extends State<Chat>
       return;
     }
     if (!scrollController.hasClients) return;
-    if (timeline?.allowNewEvent == false ||
-        scrollController.position.pixels > 0) {
+    if (timeline?.allowNewEvent == false) {
       showScrollDownButtonNotifier.value = true;
-    } else if (scrollController.position.pixels <= 0) {
-      showScrollDownButtonNotifier.value = false;
+    } else {
+      showScrollDownButtonNotifier.value = scrollController.position.pixels !=
+          scrollController.position.maxScrollExtent;
     }
     if (scrollController.position.pixels ==
             scrollController.position.maxScrollExtent ||
@@ -1217,7 +1217,7 @@ class ChatController extends State<Chat>
       await loadTimelineFuture;
     }
     if (scrollController.positions.isNotEmpty) {
-      scrollController.jumpTo(0);
+      scrollController.jumpTo(scrollController.position.maxScrollExtent);
     }
     setReadMarker();
     _handleHideStickyTimestamp();
