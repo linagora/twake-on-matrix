@@ -101,15 +101,20 @@ class NewGroupChatInfoView extends StatelessWidget {
         },
         child: ValueListenableBuilder<Either<Failure, Success>?>(
           valueListenable: newGroupInfoController.createRoomStateNotifier,
-          builder: (context, value, child) {
-            if (newGroupInfoController.isCreatingRoom) {
-              return const TwakeFloatingActionButton(
-                customIcon: SizedBox(child: CircularProgressIndicator()),
-              );
-            }
-            return TwakeFloatingActionButton(
-              icon: Icons.done,
-              onTap: () => newGroupInfoController.moveToGroupChatScreen(),
+          builder: (context, _, __) {
+            return ValueListenableBuilder<Either<Failure, Success>?>(
+              valueListenable: newGroupInfoController.inviteUserStateNotifier,
+              builder: (context, _, ___) {
+                if (newGroupInfoController.isCreatingRoom) {
+                  return const TwakeFloatingActionButton(
+                    customIcon: SizedBox(child: CircularProgressIndicator()),
+                  );
+                }
+                return TwakeFloatingActionButton(
+                  icon: Icons.done,
+                  onTap: () => newGroupInfoController.moveToGroupChatScreen(),
+                );
+              },
             );
           },
         ),

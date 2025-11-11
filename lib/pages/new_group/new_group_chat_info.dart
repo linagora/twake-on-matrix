@@ -7,7 +7,6 @@ import 'package:fluffychat/domain/app_state/room/create_new_group_chat_state.dar
 import 'package:fluffychat/domain/app_state/room/invite_user_state.dart';
 import 'package:fluffychat/domain/app_state/room/upload_content_state.dart';
 import 'package:fluffychat/domain/app_state/validator/verify_name_view_state.dart';
-import 'package:fluffychat/domain/exception/room/can_not_create_new_group_chat_exception.dart';
 import 'package:fluffychat/domain/model/extensions/validator_failure_extension.dart';
 import 'package:fluffychat/domain/model/verification/name_with_space_only_validator.dart';
 import 'package:fluffychat/domain/usecase/room/invite_user_interactor.dart';
@@ -188,38 +187,9 @@ class NewGroupChatInfoController extends State<NewGroupChatInfo>
         );
 
         if (failure is CreateNewGroupChatFailed) {
-          if (failure.exception
-              is CannotCreateNewGroupChatWithLimitedPermissionsException) {
-            await showConfirmAlertDialog(
-              context: context,
-              message:
-                  L10n.of(context)!.forNowWeCanOnlyCreateAChatWithUpToTenPeople,
-              isArrangeActionButtonsVertical: true,
-              okLabel: L10n.of(context)!.gotIt,
-            );
-            return;
-          }
-
-          if (failure.exception is FederationDeniedWithMatrixOrgException) {
-            if (PlatformInfos.isWeb) {
-              context.popInnerAll();
-            } else {
-              context.go('/rooms');
-            }
-            await showConfirmAlertDialog(
-              context: context,
-              message: L10n.of(context)!
-                  .groupChatCreatedSuccessfullyButWeCouldNotAddSomeParticipants,
-              isArrangeActionButtonsVertical: true,
-              okLabel: L10n.of(context)!.gotIt,
-            );
-            return;
-          }
-
           await showConfirmAlertDialog(
             context: context,
-            message:
-                L10n.of(context)!.weCouldNotCompleteYourRequestTryAgainShortly,
+            message: L10n.of(context)!.inviteUserErrorMessage,
             isArrangeActionButtonsVertical: true,
             okLabel: L10n.of(context)!.gotIt,
           );
@@ -359,16 +329,19 @@ class NewGroupChatInfoController extends State<NewGroupChatInfo>
   }
 
   bool get isCreatingRoom {
-    return createRoomStateNotifier.value.fold(
-          (failure) => false,
-          (success) =>
-              success is UploadContentLoading ||
-              success is CreateNewGroupChatLoading,
-        ) ||
-        inviteUserStateNotifier.value.fold(
-          (failure) => false,
-          (success) => success is InviteUserLoading,
-        );
+    final createRoomCreating = createRoomStateNotifier.value.fold(
+      (failure) => false,
+      (success) =>
+          success is UploadContentLoading ||
+          success is CreateNewGroupChatLoading,
+    );
+
+    final inviteUserCreating = inviteUserStateNotifier.value.fold(
+      (failure) => false,
+      (success) => success is InviteUserLoading,
+    );
+
+    return createRoomCreating || inviteUserCreating;
   }
 
   String? getErrorMessage(String content) {
@@ -439,18 +412,6 @@ class NewGroupChatInfoController extends State<NewGroupChatInfo>
           'NewGroupController::_handleInviteUsersOnEvent - failure: $failure',
         );
 
-        if (failure is InviteUserAllFailed) {
-          Logs().e(
-            'NewGroupController::_handleInviteUsersOnEvent - all users failed to be invited',
-          );
-          await showConfirmAlertDialog(
-            context: context,
-            message: L10n.of(context)!.inviteUserErrorMessage,
-            isArrangeActionButtonsVertical: true,
-            okLabel: L10n.of(context)!.gotIt,
-          );
-        }
-
         if (failure is InviteUserSomeFailed) {
           final failedUsers = failure.exception as Map<String, Exception>;
           Logs().e(
@@ -465,7 +426,6 @@ class NewGroupChatInfoController extends State<NewGroupChatInfo>
             okLabel: L10n.of(context)!.gotIt,
           );
         }
-        TwakeDialog.hideLoadingDialog(context);
         _handleCreateGroupSuccess(
           groundId: roomId,
           groupName: groupName,
@@ -475,12 +435,7 @@ class NewGroupChatInfoController extends State<NewGroupChatInfo>
         Logs().d(
           'NewGroupController::_handleInviteUsersOnEvent - success: $success',
         );
-        if (success is InviteUserLoading) {
-          TwakeDialog.showLoadingDialog(context);
-          return;
-        }
         if (success is InviteUserSuccess) {
-          TwakeDialog.hideLoadingDialog(context);
           _handleCreateGroupSuccess(
             groundId: success.roomId,
             groupName: success.groupName,
