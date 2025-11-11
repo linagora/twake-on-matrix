@@ -52,9 +52,6 @@ class _ChatListSortRoomsState extends State<ChatListSortRooms> {
       };
 
   Future<List<Room>> sortRooms() async {
-    if (_sortCache.isEmpty) {
-      widget.sortingRoomsNotifier.value = true;
-    }
     await Matrix.of(context).initSettingsCompleter.future;
     for (final room in widget.rooms) {
       if (_lastEventByRoomId[room.id] != null) continue;
