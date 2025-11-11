@@ -24,10 +24,19 @@ class InviteUserSuccess extends Success {
   List<Object?> get props => [roomId, groupName];
 }
 
-class InviteUserFailed extends Failure {
+class InviteUserAllFailed extends Failure {
+  const InviteUserAllFailed();
+
+  @override
+  List<Object?> get props => [];
+}
+
+class InviteUserSomeFailed extends Failure {
   final dynamic exception;
 
-  const InviteUserFailed({required this.exception});
+  const InviteUserSomeFailed({
+    required this.exception,
+  });
 
   @override
   List<Object?> get props => [exception];

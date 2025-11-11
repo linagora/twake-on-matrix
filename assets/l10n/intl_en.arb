@@ -3475,5 +3475,12 @@
   "addToContacts": "Add to contacts",
   "invalidUsername": "Invalid username",
   "audioEncoderNotSupportedMessage": "The audio encoder is not supported on this device. Please try using a different browser or device.",
-  "inviteUserErrorMessage": "We couldn’t complete all actions. Please review the group creation and invitations, then try again."
+  "inviteUserErrorMessage": "We couldn’t complete all actions. Please review the group creation and invitations, then try again.",
+  "failedToAddMembers": "{count, plural, =1{1 member couldn't be added to the chat. Please check their settings or try again} other{{count} members couldn't be added to the chat. Please check their settings or try again}}",
+  "@failedToAddMembers": {
+    "type": "text",
+    "placeholders": {
+      "count": {}
+    }
+  }
 }

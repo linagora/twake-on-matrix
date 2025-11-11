@@ -22,7 +22,6 @@ import 'package:fluffychat/utils/dialog/twake_dialog.dart';
 import 'package:fluffychat/utils/extension/build_context_extension.dart';
 import 'package:fluffychat/utils/power_level_manager.dart';
 import 'package:fluffychat/utils/responsive/responsive_utils.dart';
-import 'package:fluffychat/utils/twake_snackbar.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:flutter/material.dart';
 import 'package:matrix/matrix.dart';
@@ -435,19 +434,35 @@ class NewGroupChatInfoController extends State<NewGroupChatInfo>
   }) {
     inviteUserStateNotifier.value = event;
     event.fold(
-      (failure) {
+      (failure) async {
         Logs().e(
           'NewGroupController::_handleInviteUsersOnEvent - failure: $failure',
         );
 
-        if (failure is InviteUserFailed) {
+        if (failure is InviteUserAllFailed) {
+          Logs().e(
+            'NewGroupController::_handleInviteUsersOnEvent - all users failed to be invited',
+          );
+          await showConfirmAlertDialog(
+            context: context,
+            message: L10n.of(context)!.inviteUserErrorMessage,
+            isArrangeActionButtonsVertical: true,
+            okLabel: L10n.of(context)!.gotIt,
+          );
+        }
+
+        if (failure is InviteUserSomeFailed) {
           final failedUsers = failure.exception as Map<String, Exception>;
           Logs().e(
             'NewGroupController::_handleInviteUsersOnEvent - failed to invite users: ${failedUsers.keys.toList()}',
           );
-          TwakeSnackBar.show(
-            context,
-            L10n.of(context)!.inviteUserErrorMessage,
+          await showConfirmAlertDialog(
+            context: context,
+            message: L10n.of(context)!.failedToAddMembers(
+              failedUsers.keys.length,
+            ),
+            isArrangeActionButtonsVertical: true,
+            okLabel: L10n.of(context)!.gotIt,
           );
         }
         TwakeDialog.hideLoadingDialog(context);

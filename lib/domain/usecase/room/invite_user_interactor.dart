@@ -34,11 +34,18 @@ class InviteUserInteractor {
     }
 
     if (failedUsers.isNotEmpty) {
-      yield Left(
-        InviteUserFailed(
-          exception: failedUsers,
-        ),
-      );
+      if (failedUsers.length == userIds.length) {
+        yield const Left(
+          InviteUserAllFailed(),
+        );
+        return;
+      } else {
+        yield Left(
+          InviteUserSomeFailed(
+            exception: failedUsers,
+          ),
+        );
+      }
     } else {
       yield Right(
         InviteUserSuccess(
