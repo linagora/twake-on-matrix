@@ -166,6 +166,7 @@ class _ChatScrollViewState extends State<ChatScrollView> {
       controller.scrollController.jumpTo(
         controller.scrollController.position.maxScrollExtent,
       );
+      controller.showScrollDownButtonNotifier.value = false;
     });
   }
 
