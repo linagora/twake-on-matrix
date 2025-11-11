@@ -488,29 +488,60 @@ class ChatScenario extends BaseScenario {
     return pin.visible;
   }
   
+  bool isMutedAChat(TwakeListItemRobot takeListItem) {
+    final muted = takeListItem.getMutedIcon();
+    return muted.visible;
+  }
+
   Future<void> pinAChat(String title) async {
     final twakeListItem = ChatListRobot($).getChatGroupByTitle(title);
-    ChatListRobot($).scrollUntilVisible($, twakeListItem.root);
+    await $.tester.ensureVisible(twakeListItem.root);
     
     if(!isPinAChat(twakeListItem))
     {
-      await $.tester.ensureVisible(twakeListItem.root);
       await twakeListItem.root.longPress();
       await $.waitUntilVisible(twakeListItem.getCheckBox());
       await ChatListRobot($).clickOnPinIcon();
+      await ChatListRobot($).waitUntilAbsent($, ChatListRobot($).getChatGroupByTitle(title).getCheckBox());
     }
   }
 
   Future<void> unPinAChat(String title) async {
     final twakeListItem = ChatListRobot($).getChatGroupByTitle(title);
-    ChatListRobot($).scrollUntilVisible($, twakeListItem.root);
+    await $.tester.ensureVisible(twakeListItem.root);
 
     if(isPinAChat(twakeListItem))
     {
-      await $.tester.ensureVisible(twakeListItem.root);
       await twakeListItem.root.longPress();
       await $.waitUntilVisible(twakeListItem.getCheckBox());
       await ChatListRobot($).clickOnUnPinIcon();
+      await ChatListRobot($).waitUntilAbsent($, ChatListRobot($).getChatGroupByTitle(title).getCheckBox());
+    }
+  }
+
+  Future<void> muteAChat(String title) async {
+    final twakeListItem = ChatListRobot($).getChatGroupByTitle(title);
+    await $.tester.ensureVisible(twakeListItem.root);
+
+    if(!isMutedAChat(twakeListItem))
+    {
+      await twakeListItem.root.longPress();
+      await $.waitUntilVisible(twakeListItem.getCheckBox());
+      await ChatListRobot($).clickOnMuteIcon();
+      await ChatListRobot($).waitUntilAbsent($, ChatListRobot($).getChatGroupByTitle(title).getCheckBox());
+    }
+  }
+
+  Future<void> unmuteAChat(String title) async {
+    final twakeListItem = ChatListRobot($).getChatGroupByTitle(title);
+    await $.tester.ensureVisible(twakeListItem.root);
+
+    if(isMutedAChat(twakeListItem))
+    {
+      await twakeListItem.root.longPress();
+      await $.waitUntilVisible(twakeListItem.getCheckBox());
+      await ChatListRobot($).clickOnUnMuteIcon();
+      await ChatListRobot($).waitUntilAbsent($, ChatListRobot($).getChatGroupByTitle(title).getCheckBox());
     }
   }
 
@@ -519,5 +550,12 @@ class ChatScenario extends BaseScenario {
     await $.tester.ensureVisible(twakeListItem.root);
     final exists = isPinAChat(twakeListItem);
     expect(exists, isPin, reason: 'Expected pin=$isPin but got $exists for "$title"');
+  }
+
+  Future<void> verifyAChatIsMuted(String title, bool isMuted) async {
+    final twakeListItem = ChatListRobot($).getChatGroupByTitle(title);
+    await $.tester.ensureVisible(twakeListItem.root);
+    final exists = isMutedAChat(twakeListItem);
+    expect(exists, isMuted, reason: 'Expected pin=$isMuted but got $exists for "$title"');
   }
 }
