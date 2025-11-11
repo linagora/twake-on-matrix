@@ -106,13 +106,13 @@ class ChatScenario extends BaseScenario {
   }
 
   Future<void> replyMessage(String message, String reply) async {
-    await ChatGroupDetailRobot($).openPullDownMenu(message);
+    await ChatGroupDetailRobot($).openPullDownMenuOfAMessage(message);
     await (PullDownMenuRobot($).getReplyItem()).tap();
     await sendAMesage(reply);
   }
 
   Future<void> forwardMessage(String message, String receiver) async {
-    await ChatGroupDetailRobot($).openPullDownMenu(message);
+    await ChatGroupDetailRobot($).openPullDownMenuOfAMessage(message);
     await PullDownMenuRobot($).getForwardItem().tap();
   }
   
@@ -124,13 +124,13 @@ class ChatScenario extends BaseScenario {
   }
 
   Future<void> copyMessage(String message) async {
-    await ChatGroupDetailRobot($).openPullDownMenu(message);
+    await ChatGroupDetailRobot($).openPullDownMenuOfAMessage(message);
     await (PullDownMenuRobot($).getCopyItem()).tap();
   }
 
   Future<void> pasteFromClipBoard() async {
     // 1) Focus the input and open the context menu
-    final input = await ChatGroupDetailRobot($).getInputTextField();
+    final input = ChatGroupDetailRobot($).getInputTextField();
     await input.tap();
     await input.longPress();
     await $.pump(const Duration(milliseconds: 300)); // let the menu render
@@ -167,13 +167,13 @@ class ChatScenario extends BaseScenario {
   }
 
   Future<void> editMessage(String message, String newMessage) async {
-    await ChatGroupDetailRobot($).openPullDownMenu(message);
+    await ChatGroupDetailRobot($).openPullDownMenuOfAMessage(message);
     await (PullDownMenuRobot($).getEditItem()).tap();
     await sendAMesage(newMessage);
   }
 
   Future<void> selectMessage(String message) async {
-    await ChatGroupDetailRobot($).openPullDownMenu(message);
+    await ChatGroupDetailRobot($).openPullDownMenuOfAMessage(message);
     await (PullDownMenuRobot($).getSelectItem()).tap();
   }
 
@@ -195,17 +195,17 @@ class ChatScenario extends BaseScenario {
   }
 
   Future<void> pinMessage(String message) async {
-    await ChatGroupDetailRobot($).openPullDownMenu(message);
+    await ChatGroupDetailRobot($).openPullDownMenuOfAMessage(message);
     await (PullDownMenuRobot($).getPinItem()).tap();
   }
 
   Future<void> unpinMessage(String message) async {
-    await ChatGroupDetailRobot($).openPullDownMenu(message);
+    await ChatGroupDetailRobot($).openPullDownMenuOfAMessage(message);
     await (PullDownMenuRobot($).getUnpinItem()).tap();
   }
 
   Future<void> deleteMessage(String message) async {
-    await ChatGroupDetailRobot($).openPullDownMenu(message);
+    await ChatGroupDetailRobot($).openPullDownMenuOfAMessage(message);
     await (PullDownMenuRobot($).getDeleteItem()).tap();
     await $.native.tap(Selector(text: 'Delete')); 
   }

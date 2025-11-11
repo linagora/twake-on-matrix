@@ -13,7 +13,7 @@ import 'package:patrol/patrol.dart';
 // --- Common config ---
 const defaultTime = Duration(seconds: 60);
 const searchPhrase =
-    String.fromEnvironment('SearchByTitle', defaultValue: 'My Default Group');
+    String.fromEnvironment('TitleOfGroupTest', defaultValue: 'My Default Group');
 const forwardReceiver =
     String.fromEnvironment('Receiver', defaultValue: 'Receiver Group');
 
@@ -45,11 +45,11 @@ void main() {
     test: ($) async {
       final (senderMsg, receiverMsg) = await prepareTwoMessages($);
 
-      await ChatGroupDetailRobot($).openPullDownMenu(senderMsg);
+      await ChatGroupDetailRobot($).openPullDownMenuOfAMessage(senderMsg);
       await ChatScenario($).verifyTheDisplayOfPullDownMenu(senderMsg, level:UserLevel.owner);
       await ChatGroupDetailRobot($).closePullDownMenu();
 
-      await ChatGroupDetailRobot($).openPullDownMenu(receiverMsg);
+      await ChatGroupDetailRobot($).openPullDownMenuOfAMessage(receiverMsg);
       await ChatScenario($).verifyTheDisplayOfPullDownMenu(receiverMsg, level:UserLevel.member);
     },
   );
