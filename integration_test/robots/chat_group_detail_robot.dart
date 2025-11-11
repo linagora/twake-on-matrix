@@ -91,6 +91,18 @@ class ChatGroupDetailRobot extends CoreRobot {
     await getBackIcon().tap();
   }
 
+  Future<PullDownMenuRobot> openPullDownMenuOfAPatrolFinder(PatrolFinder message) async {
+    await message.longPress();
+    await $.waitUntilVisible($(PullDownMenu));
+    await $.pump();
+    return PullDownMenuRobot($);
+  }
+
+  Future<PullDownMenuRobot> openPullDownMenuOfAMessage(String message) async {
+    final patrFinder = $(MessageContent).containing(find.text(message));
+    return await openPullDownMenuOfAPatrolFinder(patrFinder);
+  }
+
   Future<PullDownMenuRobot> openPullDownMenu(String message) async {
     await $(MessageContent).containing(find.text(message)).longPress();
     await $.waitUntilVisible($(PullDownMenu));
