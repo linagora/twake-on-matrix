@@ -73,6 +73,16 @@ class InviteUserInteractor {
           exception,
         );
 
+        // Only retry for MatrixException with M_LIMIT_EXCEEDED
+        // All other exceptions should be rethrown immediately
+        if (exception is! MatrixException ||
+            exception.errcode != 'M_LIMIT_EXCEEDED') {
+          Logs().e(
+            'InviteUserInteractor::_inviteUserWithRetry: Non-retryable error for user $userId',
+          );
+          rethrow;
+        }
+
         if (attempt >= _maxRetries) {
           Logs().e(
             'InviteUserInteractor::_inviteUserWithRetry: Max retries reached for user $userId',
@@ -81,15 +91,12 @@ class InviteUserInteractor {
         }
 
         // Handle rate limiting (M_LIMIT_EXCEEDED)
-        if (exception is MatrixException &&
-            exception.errcode == 'M_LIMIT_EXCEEDED') {
-          final retryAfterMs = exception.retryAfterMs;
-          if (retryAfterMs != null && retryAfterMs > 0) {
-            Logs().d(
-              'InviteUserInteractor::_inviteUserWithRetry: Rate limited. Waiting ${retryAfterMs}ms before retry',
-            );
-            await Future.delayed(Duration(milliseconds: retryAfterMs));
-          }
+        final retryAfterMs = exception.retryAfterMs;
+        if (retryAfterMs != null && retryAfterMs > 0) {
+          Logs().d(
+            'InviteUserInteractor::_inviteUserWithRetry: Rate limited. Waiting ${retryAfterMs}ms before retry',
+          );
+          await Future.delayed(Duration(milliseconds: retryAfterMs));
         }
       }
     }
