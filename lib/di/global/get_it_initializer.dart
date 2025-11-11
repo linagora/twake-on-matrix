@@ -531,9 +531,7 @@ class GetItInitializer {
     getIt.registerFactory(() => const GetServerCapabilitiesInteractor());
     getIt.registerFactory(() => const GetUserInfoInteractor());
 
-    getIt.registerSingleton<InviteUserInteractor>(
-      InviteUserInteractor(),
-    );
+    getIt.registerFactory(() => InviteUserInteractor());
   }
 
   void _bindingControllers() {
