@@ -220,6 +220,9 @@ class ChatController extends State<Chat>
 
   final AutoScrollController scrollController = AutoScrollController();
 
+  // Constant scroll speed in pixels per second for smooth, predictable scrolling
+  static const double _scrollSpeed = 2000.0;
+
   final KeyboardVisibilityController keyboardVisibilityController =
       KeyboardVisibilityController();
 
@@ -466,13 +469,14 @@ class ChatController extends State<Chat>
       return;
     }
     if (!scrollController.hasClients) return;
-    if (timeline?.allowNewEvent == false ||
-        scrollController.position.pixels > 0) {
+    if (timeline?.allowNewEvent == false) {
       showScrollDownButtonNotifier.value = true;
-    } else if (scrollController.position.pixels <= 0) {
-      showScrollDownButtonNotifier.value = false;
+    } else {
+      showScrollDownButtonNotifier.value = scrollController.position.pixels !=
+          scrollController.position.maxScrollExtent;
     }
-    if (scrollController.position.pixels == 0 ||
+    if (scrollController.position.pixels ==
+            scrollController.position.maxScrollExtent ||
         scrollController.position.pixels == _isPortionAvailableToScroll) {
       requestFuture();
     }
@@ -482,9 +486,9 @@ class ChatController extends State<Chat>
 
   void _handleRequestHistory() {
     if (scrollController.position.pixels ==
-            scrollController.position.maxScrollExtent ||
-        scrollController.position.pixels + _isPortionAvailableToScroll ==
-            scrollController.position.maxScrollExtent) {
+            scrollController.position.minScrollExtent ||
+        scrollController.position.pixels - _isPortionAvailableToScroll ==
+            scrollController.position.minScrollExtent) {
       if (timeline?.isRequestingHistory == true) return;
       if (timeline?.canRequestHistory == true) {
         requestHistory();
@@ -1213,7 +1217,10 @@ class ChatController extends State<Chat>
       await loadTimelineFuture;
     }
     if (scrollController.positions.isNotEmpty) {
-      scrollController.jumpTo(0);
+      while (scrollController.position.pixels !=
+          scrollController.position.maxScrollExtent) {
+        scrollController.jumpTo(scrollController.position.maxScrollExtent);
+      }
     }
     setReadMarker();
     _handleHideStickyTimestamp();
@@ -1259,22 +1266,194 @@ class ChatController extends State<Chat>
       });
       return;
     }
-
-    await scrollToIndex(getDisplayEventIndex(eventIndex), highlight: highlight);
+    await _scrollToMessageWithEventId(eventId);
+    if (highlight) {
+      await scrollController.highlight(
+        getDisplayEventIndex(eventIndex),
+      );
+    }
     _updateScrollController();
   }
 
-  Future scrollToIndex(int index, {bool highlight = true}) async {
-    await scrollController.scrollToIndex(
-      index,
-      preferPosition: AutoScrollPosition.middle,
+  /// Scrolls to a message with the given [eventId] and centers it in the viewport.
+  ///
+  /// This method handles two scenarios:
+  /// 1. If the message is already rendered, it centers it immediately
+  /// 2. If not rendered, it gradually scrolls towards it until found
+  ///
+  /// **Important**: Due to GlobalObjectKey behavior on mobile, we must create
+  /// fresh key instances from `timeline.events[index].eventId` rather than
+  /// reusing the passed [eventId] parameter to ensure reliable context lookups.
+  Future<void> _scrollToMessageWithEventId(String eventId) async {
+    if (timeline == null) return;
+
+    final targetIndex =
+        timeline!.events.indexWhere((event) => event.eventId == eventId);
+    if (targetIndex == -1) return;
+
+    // Check if target message is already rendered in viewport
+    // Use event from timeline to ensure reliable GlobalObjectKey lookup
+    final targetEventId = timeline!.events[targetIndex].eventId;
+    final itemContext = GlobalObjectKey(targetEventId).currentContext;
+
+    if (itemContext != null) {
+      // Message is rendered - center it in viewport
+      await _centerRenderedMessage(itemContext);
+      return;
+    }
+
+    // Message not rendered - scroll towards it
+    await _scrollTowardsMessage(eventId, targetIndex);
+  }
+
+  /// Centers an already-rendered message in the viewport.
+  Future<void> _centerRenderedMessage(BuildContext itemContext) async {
+    final itemBox = itemContext.findRenderObject() as RenderBox?;
+    final scrollBox = scrollController.position.context.notificationContext
+        ?.findRenderObject() as RenderBox?;
+    if (itemBox == null || scrollBox == null) return;
+
+    final itemPosition =
+        itemBox.localToGlobal(Offset.zero, ancestor: scrollBox);
+    final viewportHeight = scrollBox.size.height;
+    final itemHeight = itemBox.size.height;
+
+    // Calculate scroll adjustment to center the message
+    final scrollAdjustment =
+        itemPosition.dy - (viewportHeight / 2) + (itemHeight / 2);
+    final targetOffset = scrollController.offset + scrollAdjustment;
+
+    // Calculate duration based on distance and constant speed
+    final distance = scrollAdjustment.abs();
+    final duration = Duration(
+      milliseconds: (distance / _scrollSpeed * 1000).toInt(),
     );
-    if (highlight) {
-      await scrollController.highlight(
-        index,
+
+    await scrollController.animateTo(
+      targetOffset,
+      duration: duration,
+      curve: Curves.linear,
+    );
+  }
+
+  /// Gradually scrolls towards a message until it becomes rendered.
+  ///
+  /// Uses a continuous scroll animation with periodic checks, eliminating
+  /// the pause-between-steps that occurs with iterative scrolling.
+  ///
+  /// This method will retry scrolling if the target isn't found on the first attempt.
+  Future<void> _scrollTowardsMessage(
+    String eventId,
+    int targetIndex, {
+    int retryCount = 0,
+  }) async {
+    const checkIntervalMs = 50;
+    const maxRetries = 5;
+
+    final eventsCount = timeline!.events.length;
+    if (eventsCount == 0) return;
+
+    // Find nearest rendered message to determine scroll direction
+    final nearestRenderedIndex = _findNearestRenderedMessageIndex(targetIndex);
+    if (nearestRenderedIndex == null) return;
+
+    // Determine scroll direction and estimate distance
+    final shouldScrollDown = targetIndex < nearestRenderedIndex;
+    final messageDistance = (targetIndex - nearestRenderedIndex).abs();
+
+    // Use a more accurate estimate: 180 pixels per message with 50% safety margin
+    // Based on logs: 800px scrolled only 5 messages, so ~160px/message minimum
+    final estimatedDistance = messageDistance * 180.0 * 1.5;
+
+    // Calculate target offset for continuous scroll
+    final currentOffset = scrollController.offset;
+    final scrollDirection =
+        shouldScrollDown ? estimatedDistance : -estimatedDistance;
+    final estimatedTargetOffset = (currentOffset + scrollDirection).clamp(
+      scrollController.position.minScrollExtent,
+      scrollController.position.maxScrollExtent,
+    );
+
+    // Start continuous scroll animation
+    final scrollDuration = Duration(
+      milliseconds: (estimatedDistance / _scrollSpeed * 1000).toInt(),
+    );
+
+    // Start the animation (non-blocking)
+    final animationFuture = scrollController.animateTo(
+      estimatedTargetOffset,
+      duration: scrollDuration,
+      curve: Curves.linear,
+    );
+
+    // Periodically check if target is rendered while scrolling
+    final stopwatch = Stopwatch()..start();
+    bool reachedBoundary = false;
+
+    while (stopwatch.elapsedMilliseconds < scrollDuration.inMilliseconds) {
+      await Future.delayed(const Duration(milliseconds: checkIntervalMs));
+
+      final isRendered = _isMessageRendered(targetIndex);
+      final currentPos = scrollController.offset;
+
+      if (isRendered) {
+        // Found it! Stop the animation by jumping to current position
+        scrollController.jumpTo(currentPos);
+        stopwatch.stop();
+
+        // Center the message
+        await _scrollToMessageWithEventId(eventId);
+        return;
+      }
+
+      // Check if we've reached scroll boundary
+      if (currentPos == scrollController.position.minScrollExtent ||
+          currentPos == scrollController.position.maxScrollExtent) {
+        stopwatch.stop();
+        reachedBoundary = true;
+        break;
+      }
+    }
+
+    // Wait for animation to complete if message wasn't found
+    await animationFuture;
+    final finalRendered = _isMessageRendered(targetIndex);
+
+    // If target not found and we haven't hit boundary or max retries, continue scrolling
+    if (!finalRendered && !reachedBoundary && retryCount < maxRetries) {
+      await _scrollTowardsMessage(
+        eventId,
+        targetIndex,
+        retryCount: retryCount + 1,
       );
     }
-    setState(() {});
+  }
+
+  /// Finds the index of the nearest rendered message to [targetIndex].
+  int? _findNearestRenderedMessageIndex(int targetIndex) {
+    final eventsCount = timeline!.events.length;
+    int? nearestIndex;
+    int minDistance = eventsCount;
+
+    for (int i = 0; i < eventsCount; i++) {
+      final key = GlobalObjectKey(timeline!.events[i].eventId);
+      if (key.currentContext != null) {
+        final distance = (i - targetIndex).abs();
+        if (distance < minDistance) {
+          minDistance = distance;
+          nearestIndex = i;
+        }
+      }
+    }
+
+    return nearestIndex;
+  }
+
+  /// Checks if a message at [index] is currently rendered.
+  bool _isMessageRendered(int index) {
+    if (index < 0 || index >= timeline!.events.length) return false;
+    final key = GlobalObjectKey(timeline!.events[index].eventId);
+    return key.currentContext != null;
   }
 
   void forgetRoom() async {
@@ -2170,31 +2349,24 @@ class ChatController extends State<Chat>
       isInitial: isInitial,
       isUnpin: isUnpin,
       eventId: eventId,
-      jumpToPinnedMessageCallback: (index) {
-        pinnedMessageScrollController.scrollToIndex(index);
-      },
     );
   }
 
   void handleDisplayStickyTimestamp(DateTime dateTime) {
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (_currentChatScrollState.isEndScroll) return;
-      _currentDateTimeEvent = dateTime;
-      if (scrollController.offset > 0) {
-        stickyTimestampNotifier.value ??= dateTime;
-        if (stickyTimestampNotifier.value?.day != dateTime.day) {
-          Logs().d(
-            'Chat::handleDisplayStickyTimestamp() StickyTimestampNotifier - ${stickyTimestampNotifier.value}',
-          );
-          Logs().d(
-            'Chat::handleDisplayStickyTimestamp() CurrentDateTimeEvent - $_currentDateTimeEvent',
-          );
-          _updateStickyTimestampNotifier(
-            dateTime: dateTime,
-          );
-        }
-      }
-    });
+    if (_currentChatScrollState.isEndScroll) return;
+    _currentDateTimeEvent = dateTime;
+    stickyTimestampNotifier.value ??= dateTime;
+    if (stickyTimestampNotifier.value?.day != dateTime.day) {
+      Logs().d(
+        'Chat::handleDisplayStickyTimestamp() StickyTimestampNotifier - ${stickyTimestampNotifier.value}',
+      );
+      Logs().d(
+        'Chat::handleDisplayStickyTimestamp() CurrentDateTimeEvent - $_currentDateTimeEvent',
+      );
+      _updateStickyTimestampNotifier(
+        dateTime: dateTime,
+      );
+    }
   }
 
   bool isInViewPortCondition(
@@ -2204,8 +2376,8 @@ class ChatController extends State<Chat>
   ) {
     final stickyTimestampHeight =
         stickyTimestampKey.globalPaintBoundsRect?.height ?? 0;
-    return deltaTopReversed < viewPortDimension - stickyTimestampHeight &&
-        deltaBottomReversed > viewPortDimension - stickyTimestampHeight;
+    return deltaTopReversed < -viewPortDimension + stickyTimestampHeight &&
+        deltaBottomReversed > -viewPortDimension + stickyTimestampHeight;
   }
 
   void _handleHideStickyTimestamp() {
