@@ -182,7 +182,11 @@ class _MessageState extends State<Message> with MessageAvatarMixin {
 
   void _initialInviewState() {
     if (!mounted) return;
-    inViewState = InViewNotifierCustomScrollView.of(context);
+    try {
+      inViewState = InViewNotifierCustomScrollView.of(context);
+    } catch (e) {
+      Logs().e('_initialInviewState: exception:', e);
+    }
     inViewState?.addListener(_inviewStateListener);
     inViewState?.addContext(context: context, id: widget.event.eventId);
   }
