@@ -1,5 +1,6 @@
 import 'package:fluffychat/app_state/failure.dart';
 import 'package:fluffychat/app_state/success.dart';
+import 'package:fluffychat/domain/exception/room/invite_user_exception.dart';
 
 class InviteUserInitial extends Success {
   @override
@@ -25,12 +26,12 @@ class InviteUserSuccess extends Success {
 }
 
 class InviteUserSomeFailed extends Failure {
-  final dynamic exception;
+  final InviteUserPartialFailureException inviteUserPartialFailureException;
 
   const InviteUserSomeFailed({
-    required this.exception,
+    required this.inviteUserPartialFailureException,
   });
 
   @override
-  List<Object?> get props => [exception];
+  List<Object?> get props => [inviteUserPartialFailureException];
 }

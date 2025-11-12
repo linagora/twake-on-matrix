@@ -26,7 +26,9 @@ class InviteUserInteractor {
           userId: userId,
         );
       } catch (exception) {
-        failedUsers[userId] = exception as Exception;
+        failedUsers[userId] = exception is Exception
+            ? exception
+            : Exception(exception.toString());
         Logs().e(
           'InviteUserInteractor::execute: Failed to invite user $userId after all retries',
           exception,
@@ -37,7 +39,7 @@ class InviteUserInteractor {
     if (failedUsers.isNotEmpty) {
       yield Left(
         InviteUserSomeFailed(
-          exception: InviteUserPartialFailureException(
+          inviteUserPartialFailureException: InviteUserPartialFailureException(
             failedUsers: failedUsers,
           ),
         ),

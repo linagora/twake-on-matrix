@@ -7,7 +7,6 @@ import 'package:fluffychat/domain/app_state/room/create_new_group_chat_state.dar
 import 'package:fluffychat/domain/app_state/room/invite_user_state.dart';
 import 'package:fluffychat/domain/app_state/room/upload_content_state.dart';
 import 'package:fluffychat/domain/app_state/validator/verify_name_view_state.dart';
-import 'package:fluffychat/domain/exception/room/invite_user_exception.dart';
 import 'package:fluffychat/domain/model/extensions/validator_failure_extension.dart';
 import 'package:fluffychat/domain/model/verification/name_with_space_only_validator.dart';
 import 'package:fluffychat/domain/usecase/room/invite_user_interactor.dart';
@@ -414,22 +413,19 @@ class NewGroupChatInfoController extends State<NewGroupChatInfo>
         );
 
         if (failure is InviteUserSomeFailed) {
-          if (failure.exception is InviteUserPartialFailureException) {
-            final inviteUserPartialFailureException =
-                failure.exception as InviteUserPartialFailureException;
-            final failedUsers = inviteUserPartialFailureException.failedUsers;
-            Logs().e(
-              'NewGroupController::_handleInviteUsersOnEvent - failed to invite users: ${failedUsers.keys.toList()}',
-            );
-            await showConfirmAlertDialog(
-              context: context,
-              message: L10n.of(context)!.failedToAddMembers(
-                failedUsers.keys.length,
-              ),
-              isArrangeActionButtonsVertical: true,
-              okLabel: L10n.of(context)!.gotIt,
-            );
-          }
+          final failedUsers =
+              failure.inviteUserPartialFailureException.failedUsers;
+          Logs().e(
+            'NewGroupController::_handleInviteUsersOnEvent - failed to invite users: ${failedUsers.keys.toList()}',
+          );
+          await showConfirmAlertDialog(
+            context: context,
+            message: L10n.of(context)!.failedToAddMembers(
+              failedUsers.keys.length,
+            ),
+            isArrangeActionButtonsVertical: true,
+            okLabel: L10n.of(context)!.gotIt,
+          );
         }
         _completeGroupCreation(
           groundId: roomId,
