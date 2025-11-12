@@ -192,7 +192,7 @@ class _MxcImageState extends State<MxcImage>
           );
           Logs().d('MxcImage::Downloaded get file info = $fileInfo');
           if (fileInfo != null) {
-            return (imageData: fileInfo.bytes, filePath: null);
+            return (imageData: fileInfo.bytes, filePath: fileInfo.filePath);
           }
         }
 
