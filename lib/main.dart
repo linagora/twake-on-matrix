@@ -3,6 +3,7 @@ import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/config/setting_keys.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/utils/client_manager.dart';
+import 'package:fluffychat/utils/open_sqflite_db.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -15,7 +16,6 @@ import 'package:linagora_design_flutter/cozy_config_manager/cozy_config_manager.
 import 'package:matrix/matrix.dart';
 import 'package:media_kit/media_kit.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
 import 'utils/background_push.dart';
 import 'widgets/lock_screen.dart';
@@ -31,15 +31,9 @@ void main() async {
   SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
   MediaKit.ensureInitialized();
   await vod.init();
-  if (PlatformInfos.isMobile) {
-    databaseFactory = databaseFactoryFfi;
-  }
   fallbackDatabase = await MatrixSdkDatabase.init(
     '${AppConfig.applicationName}-${DateTime.now().millisecondsSinceEpoch}',
-    database: !PlatformInfos.isWeb
-        ? await databaseFactory
-            .openDatabase('./${AppConfig.applicationName}.db')
-        : null,
+    database: await openSqfliteDb(),
   );
   GoRouter.optionURLReflectsImperativeAPIs = true;
   if (PlatformInfos.isLinux) {
