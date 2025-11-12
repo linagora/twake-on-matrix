@@ -1217,7 +1217,10 @@ class ChatController extends State<Chat>
       await loadTimelineFuture;
     }
     if (scrollController.positions.isNotEmpty) {
-      scrollController.jumpTo(scrollController.position.maxScrollExtent);
+      while (scrollController.position.pixels !=
+          scrollController.position.maxScrollExtent) {
+        scrollController.jumpTo(scrollController.position.maxScrollExtent);
+      }
     }
     setReadMarker();
     _handleHideStickyTimestamp();
