@@ -63,8 +63,12 @@ jobs:
           flutter clean
           flutter pub get
           flutter pub run build_runner build -d
-          flutter build web --release --verbose --source-maps --base-href="/${GITHUB_REPOSITORY##*/}/$FOLDER/"
+          flutter build web --release --verbose --base-href="/${GITHUB_REPOSITORY##*/}/$FOLDER/"
           echo "$TWAKE_PREVIEW_CONFIG" | yq '.issue_id = strenv(FOLDER)' > ./build/web/config.json
+          # Remove source maps to save space (they can be large)
+          find ./build/web -name "*.map" -type f -delete
+          echo "Build size after cleanup:"
+          du -sh ./build/web
 
       - name: Configure environments
         id: configure
@@ -80,6 +84,7 @@ jobs:
           publish_dir: build/web
           keep_files: true
           destination_dir: "${{ github.event.pull_request.number }}"
+          force_orphan: true
 
       - name: Find deployment comment
         uses: peter-evans/find-comment@v3
