@@ -32,6 +32,7 @@ import 'package:fluffychat/generated/l10n/app_localizations.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:matrix/matrix.dart';
+import 'package:overflow_view/overflow_view.dart';
 import 'package:pull_down_button/pull_down_button.dart';
 
 typedef ContextMenuBuilder = List<Widget> Function(BuildContext context);
@@ -164,13 +165,28 @@ class _MessageContentWithTimestampBuilderState
         widget.event,
         context,
       ),
-      child: _messageContentWithTimestampBuilder(
-        context: context,
-        displayTime: displayTime,
-        noBubble: noBubble,
-        timelineText: timelineText,
-        overlayContextMenu: PlatformInfos.isWeb &&
-            widget.maxWidth < MessageContentStyle.messageBoxMaxWidth,
+      child: OverflowView.flexible(
+        builder: (context, index) {
+          return _messageContentWithTimestampBuilder(
+            context: context,
+            displayTime: displayTime,
+            noBubble: noBubble,
+            timelineText: timelineText,
+            overlayContextMenu: (PlatformInfos.isWeb &&
+                    widget.maxWidth < MessageContentStyle.messageBoxMaxWidth) ||
+                true,
+          );
+        },
+        children: [
+          _messageContentWithTimestampBuilder(
+            context: context,
+            displayTime: displayTime,
+            noBubble: noBubble,
+            timelineText: timelineText,
+            overlayContextMenu: PlatformInfos.isWeb &&
+                widget.maxWidth < MessageContentStyle.messageBoxMaxWidth,
+          ),
+        ],
       ),
     );
   }
@@ -191,7 +207,7 @@ class _MessageContentWithTimestampBuilderState
           if (widget.event.status.isAvailable)
             if (overlayContextMenu)
               Container(
-                padding: const EdgeInsets.only(left: 8),
+                padding: const EdgeInsets.only(right: 8),
                 decoration: BoxDecoration(
                   color: Colors.transparent,
                   borderRadius: BorderRadius.circular(24),
