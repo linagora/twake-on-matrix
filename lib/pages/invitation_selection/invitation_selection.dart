@@ -71,7 +71,7 @@ class InvitationSelectionController
           roomId: _room.id,
           userIds: selectedContacts,
         )
-        .listen((event) async {
+        .listen((event) {
       final state = event.fold((failure) => failure, (success) => success);
 
       if (state is InviteUserLoading) {
@@ -90,16 +90,17 @@ class InvitationSelectionController
 
       if (state is InviteUserSomeFailed) {
         final failedUsers = state.inviteUserPartialFailureException.failedUsers;
-        Logs().e(
-          'NewGroupController::_handleInviteUsersOnEvent - failed to invite users: ${failedUsers.keys.toList()}',
-        );
-        await showConfirmAlertDialog(
-          context: context,
-          message: L10n.of(context)!.failedToAddMembers(
-            failedUsers.keys.length,
-          ),
-          isArrangeActionButtonsVertical: true,
-          okLabel: L10n.of(context)!.gotIt,
+        WidgetsBinding.instance.addPostFrameCallback(
+          (_) async {
+            await showConfirmAlertDialog(
+              context: context,
+              message: L10n.of(context)!.failedToAddMembers(
+                failedUsers.keys.length,
+              ),
+              isArrangeActionButtonsVertical: true,
+              okLabel: L10n.of(context)!.gotIt,
+            );
+          },
         );
         inviteSuccessAction();
         return;
