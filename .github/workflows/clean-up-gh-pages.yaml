@@ -4,8 +4,8 @@ on:
   pull_request:
     types: [closed]
   schedule:
-    # Run weekly on Sunday at midnight UTC to clean up stale previews
-    - cron: '0 0 * * 0'
+    # Run weekly on Saturday at midnight UTC to clean up stale previews
+    - cron: '0 0 * * 6'
   workflow_dispatch:  # Allow manual trigger
 
 permissions:
@@ -31,14 +31,19 @@ jobs:
       - name: Remove closed PR preview folder
         if: github.event_name == 'pull_request'
         run: |
+          set -e
           PR_NUMBER="${{ github.event.pull_request.number }}"
           if [ -d "$PR_NUMBER" ]; then
             git config user.name "github-actions[bot]"
             git config user.email "github-actions[bot]@users.noreply.github.com"
             git rm -rf "$PR_NUMBER"
-            git commit -m "Remove preview for closed PR #$PR_NUMBER"
-            git push origin gh-pages
-            echo "✅ Removed preview folder: $PR_NUMBER"
+            if ! git diff-index --quiet HEAD --; then
+              git commit -m "Remove preview for closed PR #$PR_NUMBER"
+              git push origin gh-pages
+              echo "✅ Removed preview folder: $PR_NUMBER"
+            else
+              echo "ℹ️ No changes to commit for PR #$PR_NUMBER"
+            fi
           else
             echo "ℹ️ No preview folder found for PR #$PR_NUMBER"
           fi
@@ -48,12 +53,16 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
+          set -e
           cd main-repo
 
           echo "🔍 Checking for stale preview deployments..."
 
-          # Get list of open PRs
-          OPEN_PRS=$(gh pr list --state open --json number --jq '.[].number' | sort -n)
+          # Get list of open PRs with error handling
+          OPEN_PRS=$(gh pr list --state open --json number --jq '.[].number' | sort -n) || {
+            echo "❌ Failed to fetch open PRs"
+            exit 1
+          }
           echo "Open PRs: $OPEN_PRS"
 
           cd ..
@@ -61,6 +70,10 @@ jobs:
           # Get list of deployed preview folders (only numeric folders)
           DEPLOYED_FOLDERS=$(find . -maxdepth 1 -type d -name '[0-9]*' | sed 's|./||' | sort -n)
           echo "Deployed folders: $DEPLOYED_FOLDERS"
+
+          # Configure git once before the loop
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
 
           # Track if we made any changes
           CHANGES_MADE=false
@@ -70,8 +83,6 @@ jobs:
             # Check if this PR number exists in open PRs
             if ! echo "$OPEN_PRS" | grep -q "^${folder}$"; then
               echo "🗑️  Removing stale preview: $folder (PR is closed or merged)"
-              git config user.name "github-actions[bot]"
-              git config user.email "github-actions[bot]@users.noreply.github.com"
               git rm -rf "$folder"
               CHANGES_MADE=true
             else
@@ -81,9 +92,13 @@ jobs:
 
           # Commit and push if we made changes
           if [ "$CHANGES_MADE" = true ]; then
-            git commit -m "Clean up stale PR previews (scheduled cleanup)"
-            git push origin gh-pages
-            echo "✨ Cleanup completed successfully"
+            if ! git diff-index --quiet HEAD --; then
+              git commit -m "Clean up stale PR previews (scheduled cleanup)"
+              git push origin gh-pages
+              echo "✨ Cleanup completed successfully"
+            else
+              echo "ℹ️ No actual changes to commit"
+            fi
           else
             echo "✨ No stale previews found - nothing to clean up"
           fi
