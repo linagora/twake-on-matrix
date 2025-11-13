@@ -1,6 +1,5 @@
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/utils/dialog/twake_dialog.dart';
-import 'package:fluffychat/utils/localized_exception_extension.dart';
 import 'package:fluffychat/utils/responsive/responsive_utils.dart';
 import 'package:fluffychat/widgets/app_bars/twake_app_bar.dart';
 import 'package:fluffychat/widgets/app_bars/twake_app_bar_style.dart';
@@ -9,7 +8,6 @@ import 'package:flutter/material.dart';
 import 'package:fluffychat/generated/l10n/app_localizations.dart';
 import 'package:go_router/go_router.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
-import 'package:matrix/matrix.dart';
 import 'package:fluffychat/widgets/layouts/max_width_body.dart';
 import 'settings_notifications.dart';
 
@@ -57,6 +55,9 @@ class SettingsNotificationsView extends StatelessWidget {
                     Matrix.of(context).client.allPushNotificationsMuted
                         ? L10n.of(context)!.enable_notifications
                         : L10n.of(context)!.disable_notifications,
+                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                          color: Theme.of(context).colorScheme.onSurface,
+                        ),
                   ),
                   onChanged: (_) =>
                       TwakeDialog.showFutureLoadingDialogFullScreen(
@@ -72,61 +73,25 @@ class SettingsNotificationsView extends StatelessWidget {
                   ListTile(
                     title: Text(
                       L10n.of(context)!.pushRules,
-                      style: ListItemStyle.titleTextStyle(
-                        fontFamily: 'Inter',
-                      ),
+                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                            color: Theme.of(context).colorScheme.onSurface,
+                            fontWeight: FontWeight.w700,
+                          ),
                     ),
                   ),
                   for (final item in NotificationSettingsItem.items)
                     SwitchListTile.adaptive(
                       value: controller.getNotificationSetting(item) ?? true,
-                      title: Text(item.title(context)),
+                      title: Text(
+                        item.title(context),
+                        style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                              color: Theme.of(context).colorScheme.onSurface,
+                            ),
+                      ),
                       onChanged: (bool enabled) =>
                           controller.setNotificationSetting(item, enabled),
                     ),
                 },
-                const Divider(thickness: 1),
-                ListTile(
-                  title: Text(
-                    L10n.of(context)!.devices,
-                    style: ListItemStyle.titleTextStyle(
-                      fontFamily: 'Inter',
-                    ),
-                  ),
-                ),
-                FutureBuilder<List<Pusher>?>(
-                  future: controller.pusherFuture ??=
-                      Matrix.of(context).client.getPushers(),
-                  builder: (context, snapshot) {
-                    if (snapshot.hasError) {
-                      Center(
-                        child: Text(
-                          snapshot.error!.toLocalizedString(context),
-                        ),
-                      );
-                    }
-                    if (snapshot.connectionState != ConnectionState.done) {
-                      const Center(
-                        child: CircularProgressIndicator.adaptive(
-                          strokeWidth: 2,
-                        ),
-                      );
-                    }
-                    final pushers = snapshot.data ?? [];
-                    return ListView.builder(
-                      physics: const NeverScrollableScrollPhysics(),
-                      shrinkWrap: true,
-                      itemCount: pushers.length,
-                      itemBuilder: (_, i) => ListTile(
-                        title: Text(
-                          '${pushers[i].appDisplayName} - ${pushers[i].appId}',
-                        ),
-                        subtitle: Text(pushers[i].data.url.toString()),
-                        onTap: () => controller.onPusherTap(pushers[i]),
-                      ),
-                    );
-                  },
-                ),
               ],
             );
           },
