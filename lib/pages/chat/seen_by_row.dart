@@ -43,12 +43,12 @@ class SeenByRow extends StatelessWidget {
       return MessageStatus.sending;
     }
 
-    if (eventStatus == EventStatus.sent || seenByUsers.isEmpty) {
-      return MessageStatus.sent;
-    }
-
     if (eventStatus == EventStatus.error) {
       return MessageStatus.error;
+    }
+
+    if (eventStatus == EventStatus.sent || seenByUsers.isEmpty) {
+      return MessageStatus.sent;
     }
 
     return MessageStatus.hasBeenSeen;
