@@ -209,14 +209,7 @@ class ChatController extends State<Chat>
 
   bool get hasNoMessageEvents =>
       timeline != null &&
-      !timeline!.events.where((event) => event.isVisibleInGui).any(
-            (event) => {
-              EventTypes.Message,
-              EventTypes.Sticker,
-              EventTypes.Encrypted,
-              EventTypes.CallInvite,
-            }.contains(event.type),
-          );
+      timeline!.events.none((event) => event.isVisibleInGui);
 
   final AutoScrollController scrollController = AutoScrollController();
 
