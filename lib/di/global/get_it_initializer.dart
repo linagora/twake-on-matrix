@@ -118,6 +118,7 @@ import 'package:fluffychat/domain/usecase/room/chat_room_search_interactor.dart'
 import 'package:fluffychat/domain/usecase/room/create_new_group_chat_interactor.dart';
 import 'package:fluffychat/domain/usecase/room/delete_event_interactor.dart';
 import 'package:fluffychat/domain/usecase/room/download_media_file_interactor.dart';
+import 'package:fluffychat/domain/usecase/room/invite_user_interactor.dart';
 import 'package:fluffychat/domain/usecase/room/report_content_interactor.dart';
 import 'package:fluffychat/domain/usecase/room/set_permission_level_interactor.dart';
 import 'package:fluffychat/domain/usecase/room/timeline_search_event_interactor.dart';
@@ -529,6 +530,8 @@ class GetItInitializer {
 
     getIt.registerFactory(() => const GetServerCapabilitiesInteractor());
     getIt.registerFactory(() => const GetUserInfoInteractor());
+
+    getIt.registerFactory(() => InviteUserInteractor());
   }
 
   void _bindingControllers() {
