@@ -1,0 +1,89 @@
+name: Cleanup GitHub Pages Previews
+
+on:
+  pull_request:
+    types: [closed]
+  schedule:
+    # Run weekly on Sunday at midnight UTC to clean up stale previews
+    - cron: '0 0 * * 0'
+  workflow_dispatch:  # Allow manual trigger
+
+permissions:
+  contents: write
+  pull-requests: read
+
+jobs:
+  cleanup:
+    name: Remove preview deployment
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout gh-pages branch
+        uses: actions/checkout@v4
+        with:
+          ref: gh-pages
+
+      - name: Checkout main repository (for PR check)
+        uses: actions/checkout@v4
+        with:
+          path: main-repo
+
+      - name: Remove closed PR preview folder
+        if: github.event_name == 'pull_request'
+        run: |
+          PR_NUMBER="${{ github.event.pull_request.number }}"
+          if [ -d "$PR_NUMBER" ]; then
+            git config user.name "github-actions[bot]"
+            git config user.email "github-actions[bot]@users.noreply.github.com"
+            git rm -rf "$PR_NUMBER"
+            git commit -m "Remove preview for closed PR #$PR_NUMBER"
+            git push origin gh-pages
+            echo "✅ Removed preview folder: $PR_NUMBER"
+          else
+            echo "ℹ️ No preview folder found for PR #$PR_NUMBER"
+          fi
+
+      - name: Clean up stale previews (scheduled/manual)
+        if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          cd main-repo
+
+          echo "🔍 Checking for stale preview deployments..."
+
+          # Get list of open PRs
+          OPEN_PRS=$(gh pr list --state open --json number --jq '.[].number' | sort -n)
+          echo "Open PRs: $OPEN_PRS"
+
+          cd ..
+
+          # Get list of deployed preview folders (only numeric folders)
+          DEPLOYED_FOLDERS=$(find . -maxdepth 1 -type d -name '[0-9]*' | sed 's|./||' | sort -n)
+          echo "Deployed folders: $DEPLOYED_FOLDERS"
+
+          # Track if we made any changes
+          CHANGES_MADE=false
+
+          # Check each deployed folder
+          for folder in $DEPLOYED_FOLDERS; do
+            # Check if this PR number exists in open PRs
+            if ! echo "$OPEN_PRS" | grep -q "^${folder}$"; then
+              echo "🗑️  Removing stale preview: $folder (PR is closed or merged)"
+              git config user.name "github-actions[bot]"
+              git config user.email "github-actions[bot]@users.noreply.github.com"
+              git rm -rf "$folder"
+              CHANGES_MADE=true
+            else
+              echo "✅ Keeping active preview: $folder"
+            fi
+          done
+
+          # Commit and push if we made changes
+          if [ "$CHANGES_MADE" = true ]; then
+            git commit -m "Clean up stale PR previews (scheduled cleanup)"
+            git push origin gh-pages
+            echo "✨ Cleanup completed successfully"
+          else
+            echo "✨ No stale previews found - nothing to clean up"
+          fi
