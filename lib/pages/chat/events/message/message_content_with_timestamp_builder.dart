@@ -172,9 +172,7 @@ class _MessageContentWithTimestampBuilderState
             displayTime: displayTime,
             noBubble: noBubble,
             timelineText: timelineText,
-            overlayContextMenu: (PlatformInfos.isWeb &&
-                    widget.maxWidth < MessageContentStyle.messageBoxMaxWidth) ||
-                true,
+            overlayContextMenu: true,
           );
         },
         children: [
@@ -203,7 +201,8 @@ class _MessageContentWithTimestampBuilderState
       mainAxisAlignment: MessageStyle.messageAlignment(widget.event, context),
       crossAxisAlignment: CrossAxisAlignment.end,
       children: [
-        if (widget.event.shouldDisplayContextMenuInLeftBubble) ...[
+        if (widget.event.shouldDisplayContextMenuInLeftBubble &&
+            !_responsiveUtils.isMobile(context)) ...[
           if (widget.event.status.isAvailable)
             if (overlayContextMenu)
               Container(
@@ -470,7 +469,8 @@ class _MessageContentWithTimestampBuilderState
             ),
           ),
         ),
-        if (widget.event.shouldDisplayContextMenuInRightBubble) ...[
+        if (widget.event.shouldDisplayContextMenuInRightBubble &&
+            !_responsiveUtils.isMobile(context)) ...[
           if (widget.event.status.isAvailable && !widget.event.redacted)
             if (overlayContextMenu)
               Container(
