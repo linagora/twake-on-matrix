@@ -221,8 +221,10 @@ class ChatController extends State<Chat>
     final validEvents = visibleEvents.where((event) {
       final currentMembership = event.content.tryGet<String>('membership');
       final prevMembership = event.prevContent?.tryGet<String>('membership');
-      return validEventType.contains(event.type) ||
-          (currentMembership == 'join' && prevMembership == 'invite');
+      final isAcceptInviteEvent = event.type == EventTypes.RoomMember &&
+          currentMembership == 'join' &&
+          prevMembership == 'invite';
+      return validEventType.contains(event.type) || isAcceptInviteEvent;
     });
     return validEvents.isEmpty;
   }
