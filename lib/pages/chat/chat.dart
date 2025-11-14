@@ -207,9 +207,25 @@ class ChatController extends State<Chat>
   final composerDebouncer =
       Debouncer<String>(const Duration(milliseconds: 100), initialValue: '');
 
-  bool get hasNoMessageEvents =>
-      timeline != null &&
-      timeline!.events.none((event) => event.isVisibleInGui);
+  bool get hasNoMessageEvents {
+    if (timeline == null) return true;
+
+    final events = timeline!.events;
+    final visibleEvents = events.where((event) => event.isVisibleInGui);
+    final validEventType = [
+      EventTypes.Message,
+      EventTypes.Sticker,
+      EventTypes.Encrypted,
+      EventTypes.CallInvite,
+    ];
+    final validEvents = visibleEvents.where((event) {
+      final currentMembership = event.content.tryGet<String>('membership');
+      final prevMembership = event.prevContent?.tryGet<String>('membership');
+      return validEventType.contains(event.type) ||
+          (currentMembership == 'join' && prevMembership == 'invite');
+    });
+    return validEvents.isEmpty;
+  }
 
   final AutoScrollController scrollController = AutoScrollController();
 
