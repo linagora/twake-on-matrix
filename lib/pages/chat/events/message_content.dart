@@ -246,56 +246,11 @@ class MessageContent extends StatelessWidget
             }
 
           case MessageTypes.File:
-            if (event.isMediaAndFilesWithCaption()) {
-              return Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  if (!PlatformInfos.isWeb) ...[
-                    if (event.isSending()) ...[
-                      MessageUploadingContent(
-                        event: event,
-                        style: const MessageFileTileStyle(),
-                      ),
-                    ] else
-                      MessageDownloadContent(
-                        event,
-                      ),
-                  ] else ...[
-                    if (event.isSending()) ...[
-                      OptionalSelectionContainerDisabled(
-                        isEnabled: PlatformInfos.isWeb,
-                        child: MessageUploadingContent(
-                          event: event,
-                          style: const MessageFileTileStyle(),
-                        ),
-                      ),
-                    ] else
-                      OptionalSelectionContainerDisabled(
-                        isEnabled: PlatformInfos.isWeb,
-                        child: MessageDownloadContentWeb(
-                          event,
-                        ),
-                      ),
-                  ],
-                  const SizedBox(height: 8),
-                  TwakeLinkPreview(
-                    key: ValueKey('TwakeLinkPreview%${event.eventId}%'),
-                    event: event,
-                    localizedBody: event.body,
-                    ownMessage: ownMessage,
-                    fontSize: fontSize,
-                    linkStyle: MessageContentStyle.linkStyleMessageContent(
-                      context,
-                    ),
-                    richTextStyle: event.getMessageTextStyle(context),
-                    isCaption: event.isMediaAndFilesWithCaption(),
-                  ),
-                ],
-              );
-            }
             return Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
+              crossAxisAlignment: event.isMediaAndFilesWithCaption()
+                  ? CrossAxisAlignment.start
+                  : CrossAxisAlignment.end,
+              mainAxisSize: MainAxisSize.min,
               children: [
                 if (!PlatformInfos.isWeb) ...[
                   if (event.isSending()) ...[
@@ -324,17 +279,18 @@ class MessageContent extends StatelessWidget
                       ),
                     ),
                 ],
-                Padding(
-                  padding: MessageContentStyle.endOfBubbleWidgetPadding,
-                  child: OptionalSelectionContainerDisabled(
-                    isEnabled: PlatformInfos.isWeb,
-                    child: Text.rich(
-                      WidgetSpan(
-                        child: endOfBubbleWidget,
+                if (!event.isMediaAndFilesWithCaption())
+                  Padding(
+                    padding: MessageContentStyle.endOfBubbleWidgetPadding,
+                    child: OptionalSelectionContainerDisabled(
+                      isEnabled: PlatformInfos.isWeb,
+                      child: Text.rich(
+                        WidgetSpan(
+                          child: endOfBubbleWidget,
+                        ),
                       ),
                     ),
                   ),
-                ),
               ],
             );
 
