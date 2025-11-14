@@ -32,6 +32,7 @@ import 'package:fluffychat/generated/l10n/app_localizations.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:matrix/matrix.dart';
+import 'package:overflow_view/overflow_view.dart';
 import 'package:pull_down_button/pull_down_button.dart';
 
 typedef ContextMenuBuilder = List<Widget> Function(BuildContext context);
@@ -66,7 +67,7 @@ class MessageContentWithTimestampBuilder extends StatefulWidget {
   final void Function(Event)? onPin;
   final void Function(Event)? saveToDownload;
   final void Function(Event)? saveToGallery;
-  final void Function(BuildContext context, Event, TapDownDetails)?
+  final void Function(BuildContext context, Event, TapDownDetails, double)?
       onTapMoreButton;
   final Future<Category?>? recentEmojiFuture;
 
@@ -164,13 +165,26 @@ class _MessageContentWithTimestampBuilderState
         widget.event,
         context,
       ),
-      child: _messageContentWithTimestampBuilder(
-        context: context,
-        displayTime: displayTime,
-        noBubble: noBubble,
-        timelineText: timelineText,
-        overlayContextMenu: PlatformInfos.isWeb &&
-            widget.maxWidth < MessageContentStyle.messageBoxMaxWidth,
+      child: OverflowView.flexible(
+        builder: (context, index) {
+          return _messageContentWithTimestampBuilder(
+            context: context,
+            displayTime: displayTime,
+            noBubble: noBubble,
+            timelineText: timelineText,
+            overlayContextMenu: true,
+          );
+        },
+        children: [
+          _messageContentWithTimestampBuilder(
+            context: context,
+            displayTime: displayTime,
+            noBubble: noBubble,
+            timelineText: timelineText,
+            overlayContextMenu: PlatformInfos.isWeb &&
+                widget.maxWidth < MessageContentStyle.messageBoxMaxWidth,
+          ),
+        ],
       ),
     );
   }
@@ -187,11 +201,12 @@ class _MessageContentWithTimestampBuilderState
       mainAxisAlignment: MessageStyle.messageAlignment(widget.event, context),
       crossAxisAlignment: CrossAxisAlignment.end,
       children: [
-        if (widget.event.shouldDisplayContextMenuInLeftBubble) ...[
+        if (widget.event.shouldDisplayContextMenuInLeftBubble &&
+            !_responsiveUtils.isMobile(context)) ...[
           if (widget.event.status.isAvailable)
             if (overlayContextMenu)
               Container(
-                padding: const EdgeInsets.only(left: 8),
+                padding: const EdgeInsets.only(right: 8),
                 decoration: BoxDecoration(
                   color: Colors.transparent,
                   borderRadius: BorderRadius.circular(24),
@@ -201,6 +216,7 @@ class _MessageContentWithTimestampBuilderState
                     context,
                     widget.event,
                     tapDownDetails,
+                    widget.maxWidth,
                   ),
                   icon: Icons.more_horiz,
                   tooltip: L10n.of(context)!.more,
@@ -453,7 +469,8 @@ class _MessageContentWithTimestampBuilderState
             ),
           ),
         ),
-        if (widget.event.shouldDisplayContextMenuInRightBubble) ...[
+        if (widget.event.shouldDisplayContextMenuInRightBubble &&
+            !_responsiveUtils.isMobile(context)) ...[
           if (widget.event.status.isAvailable && !widget.event.redacted)
             if (overlayContextMenu)
               Container(
@@ -467,6 +484,7 @@ class _MessageContentWithTimestampBuilderState
                     context,
                     widget.event,
                     tapDownDetails,
+                    widget.maxWidth,
                   ),
                   icon: Icons.more_horiz,
                   tooltip: L10n.of(context)!.more,
@@ -642,6 +660,7 @@ class _MessageContentWithTimestampBuilderState
             maxWidth: MessageStyle.messageBubbleWidth(
               context,
               event: widget.event,
+              maxWidthScreen: widget.maxWidth,
             ),
           ),
           margin: hasReactionEvent ? const EdgeInsets.only(bottom: 24) : null,

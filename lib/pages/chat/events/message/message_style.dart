@@ -66,6 +66,7 @@ class MessageStyle {
   static const double messageBubbleDesktopMaxWidth = 520.0;
   static const double messageBubbleMobileRatioMaxWidth = 0.80;
   static const double messageBubbleTabletRatioMaxWidth = 0.30;
+  static const double iconContextMenuSize = 40;
 
   static double defaultMessageBubbleWidth(BuildContext context) {
     return context.responsiveValue<double>(
@@ -79,8 +80,15 @@ class MessageStyle {
   static double messageBubbleWidth(
     BuildContext context, {
     Event? event,
+    double? maxWidthScreen,
   }) {
     final defaultWidth = defaultMessageBubbleWidth(context);
+
+    if (maxWidthScreen != null) {
+      return maxWidthScreen - defaultWidth > 0
+          ? defaultWidth - iconContextMenuSize
+          : defaultWidth;
+    }
     return defaultWidth;
   }
 
