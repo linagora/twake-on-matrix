@@ -39,16 +39,16 @@ class SeenByRow extends StatelessWidget {
     List<User> seenByUsers, {
     EventStatus? eventStatus,
   }) {
+    if (eventStatus == EventStatus.error) {
+      return MessageStatus.error;
+    }
+
     if (eventStatus == null || eventStatus == EventStatus.sending) {
       return MessageStatus.sending;
     }
 
     if (eventStatus == EventStatus.sent || seenByUsers.isEmpty) {
       return MessageStatus.sent;
-    }
-
-    if (eventStatus == EventStatus.error) {
-      return MessageStatus.error;
     }
 
     return MessageStatus.hasBeenSeen;
