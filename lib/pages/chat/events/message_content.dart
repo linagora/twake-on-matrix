@@ -66,7 +66,7 @@ class MessageContent extends StatelessWidget
       case EventTypes.Sticker:
         switch (event.messageType) {
           case MessageTypes.Image:
-            if (event.isImageWithCaption()) {
+            if (event.isMediaAndFilesWithCaption()) {
               return Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -91,7 +91,7 @@ class MessageContent extends StatelessWidget
                         context,
                       ),
                       richTextStyle: event.getMessageTextStyle(context),
-                      isCaption: event.isImageWithCaption(),
+                      isCaption: event.isMediaAndFilesWithCaption(),
                     ),
                   ),
                 ],
@@ -136,7 +136,73 @@ class MessageContent extends StatelessWidget
                 event,
               ),
             );
+
           case MessageTypes.Video:
+            if (event.isMediaAndFilesWithCaption()) {
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  if (event.isVideoAvailable) ...[
+                    OptionalSelectionContainerDisabled(
+                      isEnabled: PlatformInfos.isWeb,
+                      child: _MessageVideoBuilder(
+                        event: event,
+                        onFileTapped: (event) => onFileTapped(
+                          context: context,
+                          event: event,
+                        ),
+                      ),
+                    ),
+                  ] else
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        if (!PlatformInfos.isWeb) ...[
+                          MessageDownloadContent(
+                            event,
+                          ),
+                        ] else ...[
+                          OptionalSelectionContainerDisabled(
+                            isEnabled: PlatformInfos.isWeb,
+                            child: MessageDownloadContentWeb(
+                              event,
+                            ),
+                          ),
+                        ],
+                        Padding(
+                          padding: MessageContentStyle.endOfBubbleWidgetPadding,
+                          child: OptionalSelectionContainerDisabled(
+                            isEnabled: PlatformInfos.isWeb,
+                            child: Text.rich(
+                              WidgetSpan(
+                                child: endOfBubbleWidget,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  SizedBox(
+                    width: MessageStyle.messageBubbleWidthMediaCaption(
+                      event: event,
+                      context: context,
+                    ),
+                    child: TwakeLinkPreview(
+                      key: ValueKey('TwakeLinkPreview%${event.eventId}%'),
+                      event: event,
+                      localizedBody: event.body,
+                      ownMessage: ownMessage,
+                      fontSize: fontSize,
+                      linkStyle: MessageContentStyle.linkStyleMessageContent(
+                        context,
+                      ),
+                      richTextStyle: event.getMessageTextStyle(context),
+                      isCaption: event.isMediaAndFilesWithCaption(),
+                    ),
+                  ),
+                ],
+              );
+            }
             if (event.isVideoAvailable) {
               return OptionalSelectionContainerDisabled(
                 isEnabled: PlatformInfos.isWeb,
@@ -181,7 +247,10 @@ class MessageContent extends StatelessWidget
 
           case MessageTypes.File:
             return Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
+              crossAxisAlignment: event.isMediaAndFilesWithCaption()
+                  ? CrossAxisAlignment.start
+                  : CrossAxisAlignment.end,
+              mainAxisSize: MainAxisSize.min,
               children: [
                 if (!PlatformInfos.isWeb) ...[
                   if (event.isSending()) ...[
@@ -210,17 +279,18 @@ class MessageContent extends StatelessWidget
                       ),
                     ),
                 ],
-                Padding(
-                  padding: MessageContentStyle.endOfBubbleWidgetPadding,
-                  child: OptionalSelectionContainerDisabled(
-                    isEnabled: PlatformInfos.isWeb,
-                    child: Text.rich(
-                      WidgetSpan(
-                        child: endOfBubbleWidget,
+                if (!event.isMediaAndFilesWithCaption())
+                  Padding(
+                    padding: MessageContentStyle.endOfBubbleWidgetPadding,
+                    child: OptionalSelectionContainerDisabled(
+                      isEnabled: PlatformInfos.isWeb,
+                      child: Text.rich(
+                        WidgetSpan(
+                          child: endOfBubbleWidget,
+                        ),
                       ),
                     ),
                   ),
-                ),
               ],
             );
 

@@ -11,7 +11,7 @@ dependencies:
   matrix:
     git:
       url: git@github.com:linagora/matrix-dart-sdk.git
-      ref: twake-supported-0.22.6
+      ref: update-download-file-name
 
   receive_sharing_intent:
     git:

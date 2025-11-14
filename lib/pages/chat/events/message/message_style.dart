@@ -96,7 +96,7 @@ class MessageStyle {
     required BuildContext context,
     required Event event,
   }) {
-    if (event.isImageWithCaption() == true) {
+    if (event.isMediaAndFilesWithCaption() == true) {
       DisplayImageInfo? displayImageInfo =
           event.getOriginalResolution()?.getDisplayImageInfo(context);
 

@@ -66,7 +66,7 @@ class MessageContentBuilder extends StatelessWidget
           child: IntrinsicWidth(
             stepWidth: isContainsTagName(event) ||
                     isContainsSpecialHTMLTag(event) ||
-                    event.isImageWithCaption()
+                    event.isMediaAndFilesWithCaption()
                 ? null
                 : stepWidth,
             child: Column(
