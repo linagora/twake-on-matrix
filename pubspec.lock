@@ -1869,7 +1869,7 @@ packages:
     description:
       path: "."
       ref: update-download-file-name
-      resolved-ref: "761ab0bfbd8eb5220bbcad0e65b9f3b2dab32e35"
+      resolved-ref: bc260bf3b2ca4702a451ad89dba337f84e5146c3
       url: "git@github.com:linagora/matrix-dart-sdk.git"
     source: git
     version: "0.22.6"
