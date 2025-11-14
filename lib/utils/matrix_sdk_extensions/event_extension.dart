@@ -200,7 +200,7 @@ extension LocalizedBody on Event {
         MessageTypes.Image,
       }.contains(messageType) &&
       isVideoAvailable &&
-      !isImageWithCaption();
+      !isMediaAndFilesWithCaption();
 
   bool get hideDisplayNameInBubbleChat => {
         MessageTypes.Video,
@@ -416,8 +416,10 @@ extension LocalizedBody on Event {
     return reactionMap.isNotEmpty;
   }
 
-  bool isImageWithCaption() {
-    return messageType == MessageTypes.Image &&
+  bool isMediaAndFilesWithCaption() {
+    return (messageType == MessageTypes.Image ||
+            messageType == MessageTypes.Video ||
+            messageType == MessageTypes.File) &&
         text.isNotEmpty &&
         filename != text;
   }
