@@ -2680,11 +2680,14 @@ class ChatController extends State<Chat>
     BuildContext context,
     Event event,
     TapDownDetails tapDownDetails,
+    double chatScreenWidth,
   ) async {
     final offset = tapDownDetails.globalPosition;
     final double positionLeftTap = offset.dx;
     final double screenWidth = MediaQuery.sizeOf(context).width;
     final double availableRightSpace = screenWidth - positionLeftTap;
+    final double availableRightSpaceWithChatScreenWidth =
+        chatScreenWidth - positionLeftTap;
     final double positionBottomTap = offset.dy;
     final double heightScreen = MediaQuery.sizeOf(context).height;
     final double availableBottomSpace = heightScreen - positionBottomTap;
@@ -2694,9 +2697,13 @@ class ChatController extends State<Chat>
     double? positionBottom;
     Alignment alignment = Alignment.topLeft;
 
-    if (availableRightSpace < defaultMaxWidthReactionPicker) {
+    if (availableRightSpace < defaultMaxWidthReactionPicker ||
+        availableRightSpaceWithChatScreenWidth < 0) {
       positionRight = screenWidth - positionLeftTap;
       alignment = Alignment.topRight;
+    } else if (availableRightSpace < defaultMaxWidthReactionPicker ||
+        availableRightSpaceWithChatScreenWidth > 0) {
+      positionRight = screenWidth - positionLeftTap;
     } else {
       positionLeft = positionLeftTap;
     }

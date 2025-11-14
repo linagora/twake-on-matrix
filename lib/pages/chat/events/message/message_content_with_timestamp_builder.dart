@@ -67,7 +67,7 @@ class MessageContentWithTimestampBuilder extends StatefulWidget {
   final void Function(Event)? onPin;
   final void Function(Event)? saveToDownload;
   final void Function(Event)? saveToGallery;
-  final void Function(BuildContext context, Event, TapDownDetails)?
+  final void Function(BuildContext context, Event, TapDownDetails, double)?
       onTapMoreButton;
   final Future<Category?>? recentEmojiFuture;
 
@@ -217,6 +217,7 @@ class _MessageContentWithTimestampBuilderState
                     context,
                     widget.event,
                     tapDownDetails,
+                    widget.maxWidth,
                   ),
                   icon: Icons.more_horiz,
                   tooltip: L10n.of(context)!.more,
@@ -483,6 +484,7 @@ class _MessageContentWithTimestampBuilderState
                     context,
                     widget.event,
                     tapDownDetails,
+                    widget.maxWidth,
                   ),
                   icon: Icons.more_horiz,
                   tooltip: L10n.of(context)!.more,
@@ -658,6 +660,7 @@ class _MessageContentWithTimestampBuilderState
             maxWidth: MessageStyle.messageBubbleWidth(
               context,
               event: widget.event,
+              maxWidthScreen: widget.maxWidth,
             ),
           ),
           margin: hasReactionEvent ? const EdgeInsets.only(bottom: 24) : null,

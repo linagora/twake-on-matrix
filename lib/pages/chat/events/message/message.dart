@@ -96,7 +96,7 @@ class Message extends StatefulWidget {
   final void Function(Event)? onPin;
   final void Function(Event)? onSaveToDownload;
   final void Function(Event)? onSaveToGallery;
-  final void Function(BuildContext context, Event, TapDownDetails)?
+  final void Function(BuildContext context, Event, TapDownDetails, double)?
       onTapMoreButton;
   final Future<Category?>? recentEmojiFuture;
 
