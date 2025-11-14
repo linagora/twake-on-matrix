@@ -1,6 +1,9 @@
+import 'package:fluffychat/di/global/get_it_initializer.dart';
+import 'package:fluffychat/domain/model/user_info/user_info.dart';
 import 'package:fluffychat/pages/chat_details/removed/removed.dart';
 import 'package:fluffychat/pages/chat_details/removed/removed_search_state.dart';
 import 'package:fluffychat/pages/chat_list/chat_list_header_style.dart';
+import 'package:fluffychat/utils/manager/twake_user_info_manager/twake_user_info_manager.dart';
 import 'package:fluffychat/utils/user_extension.dart';
 import 'package:fluffychat/widgets/app_bars/twake_app_bar.dart';
 import 'package:fluffychat/widgets/avatar/avatar.dart';
@@ -211,74 +214,86 @@ class RemovedView extends StatelessWidget {
       },
       child: TwakeListItem(
         padding: const EdgeInsets.all(8),
-        child: Row(
-          children: [
-            Avatar(
-              mxContent: member.avatarUrl,
-              name: member.calcDisplayname(),
-            ),
-            const SizedBox(width: 8.0),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
+        child: FutureBuilder<UserInfo>(
+          future: getIt.get<TwakeUserInfoManager>().getTwakeProfileFromUserId(
+                client: controller.widget.room.client,
+                userId: member.id,
+              ),
+          builder: (context, asyncSnapshot) {
+            return Row(
+              children: [
+                Avatar(
+                  mxContent: member.avatarUrl,
+                  name: asyncSnapshot.data?.displayName ??
+                      member.calcDisplayname(),
+                ),
+                const SizedBox(width: 8.0),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Expanded(
-                        child: Text(
-                          member.calcDisplayname(),
-                          style: LinagoraTextStyle.material()
-                              .bodyMedium2
-                              .copyWith(
-                                color: LinagoraSysColors.material().onSurface,
-                              ),
-                          overflow: TextOverflow.ellipsis,
-                          maxLines: 1,
-                        ),
-                      ),
-                      InkWell(
-                        splashColor: Colors.transparent,
-                        hoverColor: Colors.transparent,
-                        highlightColor: Colors.transparent,
-                        focusColor: Colors.transparent,
-                        onTap: () => controller.handleOnTapUnbanUser(member),
-                        child: Padding(
-                          padding: const EdgeInsets.only(right: 24),
-                          child: Row(
-                            children: [
-                              Icon(
-                                Icons.block,
-                                color: LinagoraSysColors.material().primary,
-                              ),
-                              const SizedBox(width: 8.0),
-                              Text(
-                                L10n.of(context)!.unban,
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .labelLarge
-                                    ?.copyWith(
-                                      color:
-                                          LinagoraSysColors.material().primary,
-                                    ),
-                              ),
-                            ],
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              asyncSnapshot.data?.displayName ??
+                                  member.calcDisplayname(),
+                              style: LinagoraTextStyle.material()
+                                  .bodyMedium2
+                                  .copyWith(
+                                    color:
+                                        LinagoraSysColors.material().onSurface,
+                                  ),
+                              overflow: TextOverflow.ellipsis,
+                              maxLines: 1,
+                            ),
                           ),
-                        ),
+                          InkWell(
+                            splashColor: Colors.transparent,
+                            hoverColor: Colors.transparent,
+                            highlightColor: Colors.transparent,
+                            focusColor: Colors.transparent,
+                            onTap: () =>
+                                controller.handleOnTapUnbanUser(member),
+                            child: Padding(
+                              padding: const EdgeInsets.only(right: 24),
+                              child: Row(
+                                children: [
+                                  Icon(
+                                    Icons.block,
+                                    color: LinagoraSysColors.material().primary,
+                                  ),
+                                  const SizedBox(width: 8.0),
+                                  Text(
+                                    L10n.of(context)!.unban,
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .labelLarge
+                                        ?.copyWith(
+                                          color: LinagoraSysColors.material()
+                                              .primary,
+                                        ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      Text(
+                        member.id,
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                              color: LinagoraRefColors.material().tertiary[30],
+                            ),
+                        overflow: TextOverflow.ellipsis,
+                        maxLines: 1,
                       ),
                     ],
                   ),
-                  Text(
-                    member.id,
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: LinagoraRefColors.material().tertiary[30],
-                        ),
-                    overflow: TextOverflow.ellipsis,
-                    maxLines: 1,
-                  ),
-                ],
-              ),
-            ),
-          ],
+                ),
+              ],
+            );
+          },
         ),
       ),
     );
