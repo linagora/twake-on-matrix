@@ -4,7 +4,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:fluffychat/app_state/failure.dart';
 import 'package:fluffychat/app_state/success.dart';
 import 'package:fluffychat/config/app_config.dart';
-import 'package:fluffychat/domain/model/extensions/platform_file/platform_file_extension.dart';
+import 'package:fluffychat/domain/model/extensions/xfile/xfile_extension.dart';
 import 'package:fluffychat/presentation/extensions/value_notifier_custom.dart';
 import 'package:fluffychat/presentation/model/pick_avatar_state.dart';
 import 'package:fluffychat/utils/twake_snackbar.dart';
@@ -18,8 +18,8 @@ mixin PickAvatarMixin {
     Right(GetAvatarInitialUIState()),
   );
 
-  void handlePickAvatarOnWeb(FilePickerResult filePickerResult) {
-    final matrixFile = filePickerResult.files.single.toMatrixFileOnWeb();
+  Future<void> handlePickAvatarOnWeb(FilePickerResult filePickerResult) async {
+    final matrixFile = await filePickerResult.xFiles.single.toMatrixFileOnWeb();
 
     if (matrixFile.size > AppConfig.defaultMaxUploadAvtarSizeInBytes) {
       pickAvatarUIState.value = const Left<Failure, Success>(

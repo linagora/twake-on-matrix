@@ -3,21 +3,25 @@ import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/config/setting_keys.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/utils/client_manager.dart';
+import 'package:fluffychat/utils/open_sqflite_db.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_app_lock/flutter_app_lock.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:flutter_vodozemac/flutter_vodozemac.dart' as vod;
 import 'package:go_router/go_router.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:linagora_design_flutter/cozy_config_manager/cozy_config_manager.dart';
 import 'package:matrix/matrix.dart';
 import 'package:media_kit/media_kit.dart';
 import 'package:path_provider/path_provider.dart';
+
 import 'utils/background_push.dart';
-import 'widgets/twake_app.dart';
 import 'widgets/lock_screen.dart';
-import 'package:flutter_vodozemac/flutter_vodozemac.dart' as vod;
+import 'widgets/twake_app.dart';
+
+late DatabaseApi fallbackDatabase;
 
 void main() async {
   // Our background push shared isolate accesses flutter-internal things very early in the startup proccess
@@ -27,6 +31,10 @@ void main() async {
   SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
   MediaKit.ensureInitialized();
   await vod.init();
+  fallbackDatabase = await MatrixSdkDatabase.init(
+    '${AppConfig.applicationName}-${DateTime.now().millisecondsSinceEpoch}',
+    database: await openSqfliteDb(),
+  );
   GoRouter.optionURLReflectsImperativeAPIs = true;
   if (PlatformInfos.isLinux) {
     Hive.init((await getApplicationSupportDirectory()).path);
@@ -40,7 +48,6 @@ void main() async {
   final clients = await ClientManager.getClients();
   // Preload first client
   final firstClient = clients.firstOrNull;
-  firstClient?.isSupportDeleteCollections = !PlatformInfos.isWeb;
   await firstClient?.roomsLoading;
   await firstClient?.accountDataLoading;
 

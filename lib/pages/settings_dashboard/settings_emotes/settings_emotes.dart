@@ -237,7 +237,7 @@ class EmotesSettingsController extends State<EmotesSettings> {
     }
     final uploadResp = await TwakeDialog.showFutureLoadingDialogFullScreen(
       future: () => Matrix.of(context).client.uploadContent(
-            file.bytes!,
+            file.bytes,
             filename: file.name,
             contentType: file.mimeType,
           ),

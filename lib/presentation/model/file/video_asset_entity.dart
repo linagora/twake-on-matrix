@@ -1,6 +1,8 @@
 import 'dart:typed_data';
 
 import 'package:fluffychat/config/app_config.dart';
+import 'package:fluffychat/domain/model/file_info/file_info.dart';
+import 'package:fluffychat/domain/model/file_info/video_file_info.dart';
 import 'package:fluffychat/presentation/model/file/file_asset_entity.dart';
 import 'package:matrix/matrix.dart';
 import 'package:photo_manager/photo_manager.dart';
@@ -18,8 +20,7 @@ class VideoAssetEntity extends FileAssetEntity {
     }
     return VideoFileInfo(
       file.path.split('/').last,
-      file.path,
-      file.lengthSync(),
+      filePath: file.path,
       width: assetEntity.width,
       height: assetEntity.height,
       duration: assetEntity.videoDuration,
@@ -39,11 +40,10 @@ class VideoAssetEntity extends FileAssetEntity {
     }
     return MatrixVideoFile(
       name: file.path.split('/').last,
-      filePath: file.path,
       width: assetEntity.orientatedWidth,
       height: assetEntity.orientatedHeight,
       duration: assetEntity.videoDuration.inSeconds,
-      bytes: await assetEntity.thumbnailData,
+      bytes: await assetEntity.thumbnailData ?? file.readAsBytesSync(),
     );
   }
 
