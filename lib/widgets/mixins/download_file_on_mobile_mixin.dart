@@ -5,6 +5,7 @@ import 'package:dartz/dartz.dart' hide State, OpenFile;
 import 'package:fluffychat/app_state/failure.dart';
 import 'package:fluffychat/app_state/success.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
+import 'package:fluffychat/presentation/extensions/value_notifier_custom.dart';
 import 'package:fluffychat/presentation/model/chat/downloading_state_presentation_model.dart';
 import 'package:fluffychat/utils/manager/download_manager/download_file_state.dart';
 import 'package:fluffychat/utils/manager/storage_directory_manager.dart';
@@ -17,7 +18,8 @@ import 'package:matrix/matrix.dart';
 mixin DownloadFileOnMobileMixin<T extends StatefulWidget> on State<T> {
   final downloadManager = getIt.get<DownloadManager>();
 
-  final downloadFileStateNotifier = ValueNotifier<DownloadPresentationState>(
+  final downloadFileStateNotifier =
+      ValueNotifierCustom<DownloadPresentationState>(
     const NotDownloadPresentationState(),
   );
 
@@ -45,6 +47,9 @@ mixin DownloadFileOnMobileMixin<T extends StatefulWidget> on State<T> {
   }
 
   void checkDownloadFileState() async {
+    if (downloadFileStateNotifier.isDisposed) {
+      return;
+    }
     checkFileExistInMemory();
     await checkFileInDownloadsInApp();
 
@@ -55,6 +60,9 @@ mixin DownloadFileOnMobileMixin<T extends StatefulWidget> on State<T> {
   }
 
   bool checkFileExistInMemory() {
+    if (downloadFileStateNotifier.isDisposed) {
+      return false;
+    }
     final filePathInMem = event.getFilePathFromMem();
     if (filePathInMem?.isNotEmpty == true) {
       downloadFileStateNotifier.value = DownloadedPresentationState(
@@ -66,6 +74,9 @@ mixin DownloadFileOnMobileMixin<T extends StatefulWidget> on State<T> {
   }
 
   Future<void> checkFileInDownloadsInApp() async {
+    if (downloadFileStateNotifier.isDisposed) {
+      return;
+    }
     final filePath =
         await StorageDirectoryManager.instance.getFilePathInAppDownloads(
       eventId: event.eventId,
@@ -73,6 +84,9 @@ mixin DownloadFileOnMobileMixin<T extends StatefulWidget> on State<T> {
     );
     final file = File(filePath);
     if (await file.exists() && await file.length() == event.getFileSize()) {
+      if (downloadFileStateNotifier.isDisposed) {
+        return;
+      }
       downloadFileStateNotifier.value = DownloadedPresentationState(
         filePath: filePath,
       );
@@ -112,6 +126,9 @@ mixin DownloadFileOnMobileMixin<T extends StatefulWidget> on State<T> {
   }
 
   void _downloadFile() async {
+    if (downloadFileStateNotifier.isDisposed) {
+      return;
+    }
     await checkFileInDownloadsInApp();
     if (downloadFileStateNotifier.value is DownloadedPresentationState) {
       return;

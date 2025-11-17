@@ -44,7 +44,6 @@ class _SendingImageInfoWidgetState extends State<SendingImageInfoWidget>
   @override
   void dispose() {
     sendingFileProgressNotifier.dispose();
-    uploadFileStateNotifier.dispose();
     super.dispose();
   }
 
