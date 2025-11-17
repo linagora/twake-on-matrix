@@ -1640,8 +1640,8 @@ packages:
     dependency: "direct main"
     description:
       path: "."
-      ref: update-SDK-constraints-and-dependencies-refactor-test-initialization
-      resolved-ref: "0d993c22015cf404a9d991d51071bcb62a3c9a53"
+      ref: master
+      resolved-ref: ef7d32491a2a934aadcb74f1555bace2af7d56aa
       url: "git@github.com:linagora/inview_notifier_list.git"
     source: git
     version: "3.0.0"
