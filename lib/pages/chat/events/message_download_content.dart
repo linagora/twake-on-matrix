@@ -56,6 +56,7 @@ class _MessageDownloadContentState extends State<MessageDownloadContent>
               sizeString: sizeString,
               style: const MessageFileTileStyle(),
               ownMessage: event.isOwnMessage,
+              event: event,
             ),
           );
         } else if (state is DownloadingPresentationState ||
@@ -75,6 +76,7 @@ class _MessageDownloadContentState extends State<MessageDownloadContent>
             },
             ownMessage: event.isOwnMessage,
             hasError: state is DownloadErrorPresentationState,
+            event: event,
           );
         }
 
@@ -89,6 +91,7 @@ class _MessageDownloadContentState extends State<MessageDownloadContent>
             downloadFileStateNotifier: downloadFileStateNotifier,
             ownMessage: event.isOwnMessage,
             style: const MessageFileTileStyle(),
+            event: event,
           ),
         );
       },

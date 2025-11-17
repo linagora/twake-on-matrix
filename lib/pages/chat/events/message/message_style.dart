@@ -92,11 +92,46 @@ class MessageStyle {
     return defaultWidth;
   }
 
+  static double messageBubbleWidthVideoCaption({
+    required BuildContext context,
+    required Event event,
+  }) {
+    if (event.isMediaAndFilesWithCaption() == true) {
+      DisplayImageInfo? displayImageInfo =
+          event.getOriginalResolution()?.getDisplayImageInfo(context);
+
+      final matrixFile = event.getMatrixFile();
+
+      if (matrixFile != null && matrixFile.isSendingImageInMobile()) {
+        final file = matrixFile as MatrixImageFile;
+        displayImageInfo = Size(
+          file.width?.toDouble() ?? MessageContentStyle.imageWidth(context),
+          file.height?.toDouble() ?? MessageContentStyle.imageHeight(context),
+        ).getDisplayImageInfo(context);
+        return displayImageInfo.size.width;
+      }
+      displayImageInfo ??= DisplayImageInfo(
+        size: Size(
+          MessageContentStyle.imageWidth(context),
+          MessageContentStyle.imageHeight(context),
+        ),
+        hasBlur: true,
+      );
+      if (matrixFile != null && matrixFile.isSendingImageInWeb()) {
+        return displayImageInfo.size.width;
+      }
+
+      return displayImageInfo.size.width;
+    }
+
+    return messageBubbleWidth(context, event: event);
+  }
+
   static double messageBubbleWidthMediaCaption({
     required BuildContext context,
     required Event event,
   }) {
-    if (event.isImageWithCaption() == true) {
+    if (event.isMediaAndFilesWithCaption() == true) {
       DisplayImageInfo? displayImageInfo =
           event.getOriginalResolution()?.getDisplayImageInfo(context);
 
