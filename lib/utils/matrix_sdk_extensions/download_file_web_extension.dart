@@ -58,7 +58,7 @@ extension DownloadFileWebExtension on Event {
     if (uint8list != null) {
       return MatrixFile(
         bytes: await _decryptAttachmentWeb(uint8list: uint8list),
-        name: body,
+        name: filename,
       );
     }
 
@@ -111,7 +111,7 @@ extension DownloadFileWebExtension on Event {
         uint8List,
         downloadStreamController,
       );
-      return MatrixFile(bytes: uint8List, name: body);
+      return MatrixFile(bytes: uint8List, name: filename);
     } catch (e) {
       if (e is CancelRequestException) {
         Logs().i("_handleDownloadFileWeb: user cancel the download");
@@ -139,7 +139,7 @@ extension DownloadFileWebExtension on Event {
       streamController.add(
         Right(
           DownloadMatrixFileSuccessState(
-            matrixFile: MatrixFile(bytes: uint8List, name: body),
+            matrixFile: MatrixFile(bytes: uint8List, name: filename),
           ),
         ),
       );
@@ -168,7 +168,7 @@ extension DownloadFileWebExtension on Event {
       streamController.add(
         Right(
           DownloadMatrixFileSuccessState(
-            matrixFile: MatrixFile(bytes: decryptedFile, name: body),
+            matrixFile: MatrixFile(bytes: decryptedFile, name: filename),
           ),
         ),
       );
