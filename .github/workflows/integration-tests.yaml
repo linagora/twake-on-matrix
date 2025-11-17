@@ -64,6 +64,8 @@ jobs:
       - name: Accept Android SDK licenses and pre-install required platforms
         timeout-minutes: 5
         run: |
+          export ANDROID_SDK_ROOT="${ANDROID_SDK_ROOT:-/usr/local/lib/android/sdk}"
+          export PATH="$ANDROID_SDK_ROOT/cmdline-tools/latest/bin:$ANDROID_SDK_ROOT/platform-tools:$PATH"
           yes | sdkmanager --licenses || echo "Warning: License acceptance failed, continuing anyway"
           sdkmanager "platforms;android-31" "platforms;android-33" "platforms;android-35" || echo "Warning: SDK platform installation failed (may be transient), Gradle will retry automatically"
           sdkmanager "ndk;25.2.9519653" || echo "Warning: NDK installation failed, continuing anyway"
