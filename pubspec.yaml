@@ -47,7 +47,7 @@ dependencies:
   inview_notifier_list:
     git:
       url: git@github.com:linagora/inview_notifier_list.git
-      ref: master
+      ref: update-SDK-constraints-and-dependencies-refactor-test-initialization
 
   future_loading_dialog:
     git:
