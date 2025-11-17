@@ -55,8 +55,9 @@ jobs:
         uses: dtolnay/rust-toolchain@stable
 
       - name: Accept Android SDK licenses and pre-install required platforms
+        timeout-minutes: 5
         run: |
-          flutter doctor --android-licenses || yes | sdkmanager --licenses || true
+          yes | sdkmanager --licenses || echo "Warning: License acceptance failed, continuing anyway"
           sdkmanager "platforms;android-31" "platforms;android-33" "platforms;android-35" || echo "Warning: SDK platform installation failed (may be transient), Gradle will retry automatically"
 
       - uses: webfactory/ssh-agent@v0.9.0
