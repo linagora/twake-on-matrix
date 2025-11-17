@@ -61,6 +61,13 @@ jobs:
           java-version: ${{ env.JAVA_VERSION }}
           distribution: "temurin"
 
+      - name: Accept Android SDK licenses and pre-install required platforms
+        timeout-minutes: 5
+        run: |
+          yes | sdkmanager --licenses || echo "Warning: License acceptance failed, continuing anyway"
+          sdkmanager "platforms;android-31" "platforms;android-33" "platforms;android-35" || echo "Warning: SDK platform installation failed (may be transient), Gradle will retry automatically"
+          sdkmanager "ndk;25.2.9519653" || echo "Warning: NDK installation failed, continuing anyway"
+
       - name: Setup Rust
         uses: dtolnay/rust-toolchain@stable
 
