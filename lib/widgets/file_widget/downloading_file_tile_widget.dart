@@ -66,7 +66,8 @@ class DownloadingFileTileWidget extends StatelessWidget {
                       downloadProgress =
                           downloadFileState.receive! / downloadFileState.total!;
                     }
-                  } else if (downloadFileState is NotDownloadPresentationState) {
+                  } else if (downloadFileState
+                      is NotDownloadPresentationState) {
                     downloadProgress = 0;
                   }
                   return Stack(
@@ -130,7 +131,8 @@ class DownloadingFileTileWidget extends StatelessWidget {
                           TextInformationOfFile(
                             value: sizeString!,
                             style: style.textInformationStyle(context),
-                            downloadFileStateNotifier: downloadFileStateNotifier,
+                            downloadFileStateNotifier:
+                                downloadFileStateNotifier,
                           ),
                         TextInformationOfFile(
                           value: " · ",

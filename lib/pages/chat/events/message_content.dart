@@ -69,6 +69,7 @@ class MessageContent extends StatelessWidget
             if (event.isMediaAndFilesWithCaption()) {
               return Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
                 children: [
                   MessageImageBuilder(
                     event: event,
@@ -141,6 +142,7 @@ class MessageContent extends StatelessWidget
             if (event.isMediaAndFilesWithCaption()) {
               return Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
                 children: [
                   if (event.isVideoAvailable) ...[
                     OptionalSelectionContainerDisabled(
@@ -183,7 +185,7 @@ class MessageContent extends StatelessWidget
                       ],
                     ),
                   SizedBox(
-                    width: MessageStyle.messageBubbleWidthMediaCaption(
+                    width: MessageStyle.messageBubbleWidthVideoCaption(
                       event: event,
                       context: context,
                     ),
@@ -406,23 +408,16 @@ class _MessageVideoBuilder extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final matrixFile = event.getMatrixFile();
-    DisplayImageInfo? displayImageInfo = Size(
-      MessageContentStyle.imageWidth(context),
-      MessageContentStyle.imageHeight(context),
-    ).getDisplayImageInfo(context);
 
-    final thumbnailSize = event.getOriginalResolution();
-    if (thumbnailSize != null) {
-      displayImageInfo = thumbnailSize.getDisplayImageInfo(context);
-    }
+    DisplayImageInfo? displayImageInfo =
+        event.getOriginalResolution()?.getDisplayImageInfo(context);
+
     if (isSendingVideo(matrixFile)) {
       final file = matrixFile as MatrixVideoFile;
-      if (file.width != null && file.height != null) {
-        displayImageInfo = Size(
-          file.width!.toDouble(),
-          file.height!.toDouble(),
-        ).getDisplayImageInfo(context);
-      }
+      displayImageInfo = Size(
+        file.width?.toDouble() ?? MessageContentStyle.imageWidth(context),
+        file.height?.toDouble() ?? MessageContentStyle.imageHeight(context),
+      ).getDisplayImageInfo(context);
       return SendingVideoWidget(
         key: ValueKey(event.eventId),
         event: event,
@@ -430,6 +425,15 @@ class _MessageVideoBuilder extends StatelessWidget {
         displayImageInfo: displayImageInfo,
       );
     }
+
+    displayImageInfo ??= DisplayImageInfo(
+      size: Size(
+        MessageContentStyle.imageWidth(context),
+        MessageContentStyle.imageHeight(context),
+      ),
+      hasBlur: true,
+    );
+
     if (PlatformInfos.isWeb) {
       if (event.isSending()) {
         return MessageVideoUploadContentWeb(
