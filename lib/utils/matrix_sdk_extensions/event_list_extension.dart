@@ -1,10 +1,11 @@
+import 'package:equatable/equatable.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/filtered_timeline_extension.dart';
 import 'package:matrix/matrix.dart';
 
 /// Result of syncing event lists between old and new states.
-class EventListSyncResult {
-  EventListSyncResult({
+class EventListSyncResult extends Equatable {
+  const EventListSyncResult({
     required this.top,
     required this.bottom,
     required this.shouldScrollToBottom,
@@ -13,6 +14,9 @@ class EventListSyncResult {
   final List<Event> top;
   final List<Event> bottom;
   final bool shouldScrollToBottom;
+
+  @override
+  List<Object?> get props => [top, bottom, shouldScrollToBottom];
 }
 
 /// Extension for managing and syncing lists of Matrix events.
@@ -61,7 +65,7 @@ extension EventListExtension on List<Event> {
     if (!hasCommonItems) {
       // Completely different list - clear top and set bottom to new items
       return EventListSyncResult(
-        top: [],
+        top: const [],
         bottom: List.from(newEvents),
         shouldScrollToBottom: false,
       );
