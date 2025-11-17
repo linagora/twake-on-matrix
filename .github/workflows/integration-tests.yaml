@@ -67,7 +67,7 @@ jobs:
           PASSWORD: ${{ secrets.PASSWORD }}
           SERVER_URL: ${{ secrets.SERVER_URL }}
         run: |
-          dart pub global activate patrol_cli
+          dart pub global activate patrol_cli 3.10.0
           flutter build apk --config-only
           patrol build android \
           -v \
