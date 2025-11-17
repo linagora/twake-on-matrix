@@ -1641,7 +1641,7 @@ packages:
     description:
       path: "."
       ref: master
-      resolved-ref: f7a29ac1c4de3ea26d749c38781a6f5e9b1b932d
+      resolved-ref: ef7d32491a2a934aadcb74f1555bace2af7d56aa
       url: "git@github.com:linagora/inview_notifier_list.git"
     source: git
     version: "3.0.0"
