@@ -83,6 +83,7 @@ class AddContactDialog extends StatefulWidget {
 class AddContactDialogController extends State<AddContactDialog> {
   String firstName = '';
   String lastName = '';
+  final matrixIdHintText = '@example:twake.app';
   late final ValueNotifier<String> userName;
   final usernameErrorMessage = ValueNotifier<String?>(null);
   late final validateUsernameDebouncer = Debouncer<String?>(

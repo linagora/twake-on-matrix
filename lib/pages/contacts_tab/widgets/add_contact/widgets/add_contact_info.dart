@@ -17,6 +17,7 @@ class AddContactInfo extends StatefulWidget {
     this.autoFocus = false,
     this.textInputAction,
     this.onSubmitted,
+    this.hintText,
   });
 
   final String title;
@@ -29,6 +30,7 @@ class AddContactInfo extends StatefulWidget {
   final bool autoFocus;
   final TextInputAction? textInputAction;
   final void Function(String)? onSubmitted;
+  final String? hintText;
 
   @override
   State<AddContactInfo> createState() => _AddContactInfoState();
@@ -117,6 +119,12 @@ class _AddContactInfoState extends State<AddContactInfo> {
         contentPadding: EdgeInsets.zero,
         isDense: true,
         errorText: widget.errorMessage,
+        hintText: widget.hintText,
+        hintStyle: textTheme.bodyLarge?.copyWith(
+          fontSize: 17,
+          height: 24 / 17,
+          color: LinagoraRefColors.material().tertiary[30],
+        ),
       ),
     );
 
