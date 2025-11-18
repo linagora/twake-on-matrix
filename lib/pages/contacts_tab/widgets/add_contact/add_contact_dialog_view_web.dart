@@ -76,13 +76,14 @@ class AddContactDialogViewWeb extends StatelessWidget {
               valueListenable: controller.usernameErrorMessage,
               builder: (context, errorMessage, child) {
                 return AddContactInfo(
-                  title: l10n.username,
+                  title: l10n.matrixId,
                   initialValue: controller.userName.value,
                   onChanged: controller.onUsernameChanged,
                   assetPath: ImagePaths.icMatrixid,
                   errorMessage: errorMessage,
                   textInputAction: TextInputAction.done,
                   onSubmitted: (_) => controller.onSave(),
+                  hintText: controller.matrixIdHintText,
                 );
               },
             ),
