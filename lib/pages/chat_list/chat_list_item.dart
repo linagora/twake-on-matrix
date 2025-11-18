@@ -154,7 +154,9 @@ class ChatListItem extends StatelessWidget with ChatListItemMixin {
                             originServerTs: lastEvent?.originServerTs,
                           ),
                           ChatListItemSubtitle(
-                              room: room, lastEvent: lastEvent),
+                            room: room,
+                            lastEvent: lastEvent,
+                          ),
                         ],
                       ),
                     ),

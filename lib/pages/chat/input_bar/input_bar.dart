@@ -10,7 +10,6 @@ import 'package:fluffychat/pages/chat/input_bar/focus_suggestion_list.dart';
 import 'package:fluffychat/pages/chat/input_bar/input_bar_shortcut.dart';
 import 'package:fluffychat/pages/chat/input_bar/input_bar_style.dart';
 import 'package:fluffychat/presentation/mixins/paste_image_mixin.dart';
-import 'package:fluffychat/utils/clipboard.dart';
 import 'package:fluffychat/utils/manager/twake_user_info_manager/twake_user_info_manager.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
