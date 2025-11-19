@@ -9,7 +9,8 @@ class TestBase {
   void runPatrolTest({
     required String description,
     required Function(PatrolIntegrationTester $) test,
-    NativeAutomatorConfig? nativeAutomatorConfig, dynamic tags = const [],
+    NativeAutomatorConfig? nativeAutomatorConfig,
+    dynamic tags = const [],
   }) {
     patrolTest(description,
         config: const PatrolTesterConfig(
