@@ -230,7 +230,21 @@ mixin ChatListItemMixin {
   }
 
   bool hasNewMessage(Room room) {
-    return room.notificationCount > 0 || room.hasNewMessages;
+    // If there's a notification count, definitely has new messages
+    if (room.notificationCount > 0) {
+      return true;
+    }
+
+    // For mentions-only rooms, check hasNewMessages
+    // This is important because they won't increment notificationCount for regular messages
+    if (room.pushRuleState == PushRuleState.mentionsOnly &&
+        room.hasNewMessages) {
+      return true;
+    }
+
+    // For notify rooms, only trust notificationCount to avoid race conditions
+    // Don't use hasNewMessages as it can lag behind the actual read state
+    return false;
   }
 
   Color? _handleNotificationColorHasNewMessage(
