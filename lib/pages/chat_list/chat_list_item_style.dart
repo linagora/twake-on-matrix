@@ -53,12 +53,26 @@ class ChatListItemStyle {
     bool hasNewMessages,
     int notificationCount,
   ) {
-    return notificationCount == 0 && !unread && !hasNewMessages
-        ? 0
-        : (unreadBadgeSize(unread, hasNewMessages, notificationCount > 0) -
-                    unreadBadgePaddingWhenMoreThanOne) *
-                notificationCount.toString().length +
-            unreadBadgePaddingWhenMoreThanOne;
+    // No badge if no new messages and not marked unread
+    if (!hasNewMessages && !unread) {
+      return 0;
+    }
+
+    // If there's a notification count, calculate badge size for the number
+    if (notificationCount > 0) {
+      return (unreadBadgeSize(unread, hasNewMessages, true) -
+                  unreadBadgePaddingWhenMoreThanOne) *
+              notificationCount.toString().length +
+          unreadBadgePaddingWhenMoreThanOne;
+    }
+
+    // If has new messages but no notification count (e.g., mentions-only room with regular messages)
+    // or marked unread, show small badge (14.0 size, no number)
+    if (hasNewMessages || unread) {
+      return unreadBadgeSize(unread, hasNewMessages, false);
+    }
+
+    return 0;
   }
 
   static const double letterSpaceDisplayName = 0.15;
