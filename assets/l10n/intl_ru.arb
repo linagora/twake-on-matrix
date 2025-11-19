@@ -599,7 +599,7 @@
     "type": "text",
     "placeholders": {}
   },
-  "deleteAccount": "Удалить аккаунт",
+  "deleteAccount": "Удалить",
   "@deleteAccount": {
     "type": "text",
     "placeholders": {}
