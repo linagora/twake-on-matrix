@@ -1,3 +1,4 @@
+import 'package:fluffychat/config/app_constants.dart';
 import 'package:fluffychat/presentation/mixins/go_to_direct_chat_mixin.dart';
 import 'package:fluffychat/presentation/model/search/presentation_search.dart';
 import 'package:fluffychat/utils/dialog/twake_dialog.dart';
@@ -40,6 +41,11 @@ class UrlLauncher with GoToDraftChatMixin {
     if (uri == null) {
       // we can't open this thing
       TwakeSnackBar.show(context, L10n.of(context)!.cantOpenUri(url!));
+      return;
+    }
+    if (uri.host == AppConstants.appLinkUniversalLinkDomain) {
+      final pathWithoutChatPrefix = uri.path.replaceFirst('/chat', '');
+      context.go(pathWithoutChatPrefix);
       return;
     }
     if (!{'https', 'http'}.contains(uri.scheme)) {

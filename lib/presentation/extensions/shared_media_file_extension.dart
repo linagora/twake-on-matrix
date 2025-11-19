@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'dart:typed_data';
 
+import 'package:fluffychat/config/app_constants.dart';
 import 'package:matrix/matrix.dart';
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 
@@ -39,5 +40,10 @@ extension SharedMediaFileExtension on SharedMediaFile {
     return File(
       path,
     );
+  }
+
+  bool isNotAFile() {
+    final uri = Uri.tryParse(path);
+    return uri?.host == AppConstants.appLinkUniversalLinkDomain;
   }
 }

@@ -1,4 +1,5 @@
 import 'package:app_links/app_links.dart';
+import 'package:collection/collection.dart';
 import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/event/twake_event_types.dart';
 import 'package:fluffychat/presentation/extensions/shared_media_file_extension.dart';
@@ -28,6 +29,7 @@ mixin ReceiveSharingIntentMixin<T extends StatefulWidget> on State<T> {
   }
 
   void _processIncomingSharedFiles(List<SharedMediaFile> files) {
+    files = files.whereNot((file) => file.isNotAFile()).toList();
     Logs().d('ReceiveSharingIntentMixin::_processIncomingSharedFiles: $files');
     if (files.isEmpty) return;
     if (files.length == 1 &&
@@ -79,6 +81,12 @@ mixin ReceiveSharingIntentMixin<T extends StatefulWidget> on State<T> {
     }
     if (text.toLowerCase().startsWith(AppConfig.deepLinkPrefix) ||
         text.toLowerCase().startsWith(AppConfig.inviteLinkPrefix) ||
+        text
+            .toLowerCase()
+            .startsWith(AppConfig.httpAppLinkUniversalLinkPrefix) ||
+        text
+            .toLowerCase()
+            .startsWith(AppConfig.httpsAppLinkUniversalLinkPrefix) ||
         (text.toLowerCase().startsWith(AppConfig.schemePrefix) &&
             !RegExp(r'\s').hasMatch(text))) {
       return _processIncomingUris(text);
@@ -97,8 +105,7 @@ mixin ReceiveSharingIntentMixin<T extends StatefulWidget> on State<T> {
       return;
     }
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      UrlLauncher(TwakeApp.routerKey.currentContext!, url: text)
-          .openMatrixToUrl();
+      UrlLauncher(TwakeApp.routerKey.currentContext!, url: text).launchUrl();
     });
   }
 
