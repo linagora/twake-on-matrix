@@ -41,7 +41,7 @@ Future<(String, String)> prepareTwoMessages(PatrolIntegrationTester $) async {
 
 void main() {
   TestBase().runPatrolTest(
-    tags: "chat_group_test_test01",
+    tags: ["chat_group_test_test01"],
     description: 'verify the display of pull down menu in a direct chat',
     test: ($) async {
       final (senderMsg, receiverMsg) = await prepareTwoMessages($);
@@ -56,6 +56,7 @@ void main() {
   );
 
   TestBase().runPatrolTest(
+    tags: ["chat_group_test_test02"],
     description: 'reply a message in a direct chat',
     test: ($) async {
       final (senderMsg, receiverMsg) = await prepareTwoMessages($);
@@ -72,6 +73,7 @@ void main() {
   );
 
   TestBase().runPatrolTest(
+    tags: ["chat_group_test_test03"],
     description: 'delete a message in a direct chat',
     test: ($) async {
       final (senderMsg, receiverMsg) = await prepareTwoMessages($);
@@ -85,6 +87,7 @@ void main() {
   );
 
   TestBase().runPatrolTest(
+    tags: ["chat_group_test_test04"],
     description: 'copy a message in a direct chat',
     test: ($) async {
       final (senderMsg, receiverMsg) = await prepareTwoMessages($);
@@ -107,6 +110,7 @@ void main() {
   );
 
   TestBase().runPatrolTest(
+    tags: ["chat_group_test_test05"],
     description: 'edit a message with owner level',
     test: ($) async {
       final (senderMsg, receiverMsg) = await prepareTwoMessages($);
@@ -119,6 +123,7 @@ void main() {
   );
 
   TestBase().runPatrolTest(
+    tags: ["chat_group_test_test06"],
     description: 'select a message in direct chat',
     test: ($) async {
       final (senderMsg, receiverMsg) = await prepareTwoMessages($);
@@ -132,6 +137,7 @@ void main() {
   );
 
   // TestBase().runPatrolTest(
+  //   tags: ["chat_group_test_test07"],
   //   description: 'pin and unpin a message',
   //   test: ($) async {
   //     final (senderMsg, receiverMsg) = await prepareTwoMessages($);
@@ -149,6 +155,7 @@ void main() {
   // );
 
   // TestBase().runPatrolTest(
+  //   tags: ["chat_group_test_test08"],
   //   description: 'forward a message',
   //   test: ($) async {
   //     final (senderMsg, receiverMsg) = await prepareTwoMessages($);
@@ -158,6 +165,7 @@ void main() {
   // );
 
   TestBase().runPatrolTest(
+    tags: ["chat_group_test_test09"],
     description: 'See message info',
     test: ($) async {
       final (senderMsg, receiverMsg) = await prepareTwoMessages($);
