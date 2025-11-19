@@ -1,4 +1,11 @@
-## [2.16.0+2330] - 2025-11-25
+## [2.16.3+2330] - 2025-11-20
+### Fixed
+- #2695 notification badge 
+- Contact modal: username -> Matrix Id
+- Init settings after init web config
+- Prevent loop in scrollToEventId
+
+## [2.16.0+2330] - 2025-11-18
 ### Added
 - #2679 Caption for files
 - #2667 Show events when create new chat (#2678)
