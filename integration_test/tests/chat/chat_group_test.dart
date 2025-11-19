@@ -41,6 +41,7 @@ Future<(String, String)> prepareTwoMessages(PatrolIntegrationTester $) async {
 
 void main() {
   TestBase().runPatrolTest(
+    tags: "chat_group_test_test01",
     description: 'verify the display of pull down menu in a direct chat',
     test: ($) async {
       final (senderMsg, receiverMsg) = await prepareTwoMessages($);
