@@ -47,6 +47,17 @@ patrol test \
 
 **Examples:**
 
+Run a **a specific test**:
+
+```bash
+ENV_FILE=integration_test/.env.local.do-not-commit
+patrol test \
+  -t integration_test/tests \
+  --dart-define-from-file="$ENV_FILE" \
+  --device "$(grep -E '^DEVICE=' "$ENV_FILE" | cut -d= -f2-)"\
+  --tags "chat_group_test_test01"
+```
+
 Run a **single test file**:
 
 ```bash

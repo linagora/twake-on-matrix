@@ -10,6 +10,7 @@ class TestBase {
     required String description,
     required Function(PatrolIntegrationTester $) test,
     NativeAutomatorConfig? nativeAutomatorConfig,
+    dynamic tags = const [],
   }) {
     patrolTest(description,
         config: const PatrolTesterConfig(
@@ -18,6 +19,7 @@ class TestBase {
         ),
         nativeAutomatorConfig:
             nativeAutomatorConfig ?? const NativeAutomatorConfig(),
+        tags: tags,
         framePolicy: LiveTestWidgetsFlutterBindingFramePolicy.fullyLive,
         ($) async {
       await initTwakeChat();
