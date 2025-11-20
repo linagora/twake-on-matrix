@@ -3500,5 +3500,14 @@
   "invalidUsername": "Недійсне ім'я користувача",
   "@invalidUsername": {},
   "audioEncoderNotSupportedMessage": "Аудіокодер не підтримується на цьому пристрої. Спробуйте скористатися іншим браузером або пристроєм.",
-  "@audioEncoderNotSupportedMessage": {}
+  "@audioEncoderNotSupportedMessage": {},
+  "inviteUserErrorMessage": "Не вдалося виконати всі дії. Перегляньте створення групи та запрошення, а потім спробуйте ще раз.",
+  "@inviteUserErrorMessage": {},
+  "failedToAddMembers": "{count, plural, =1{1 учасника не вдалося додати до чату. Будь ласка, перевірте його налаштування або спробуйте ще раз} other{{count} учасників не вдалося додати до чату. Будь ласка, перевірте його налаштування або спробуйте ще раз}}",
+  "@failedToAddMembers": {
+    "type": "text",
+    "placeholders": {
+      "count": {}
+    }
+  }
 }
