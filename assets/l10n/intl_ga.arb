@@ -3498,5 +3498,14 @@
   "invalidUsername": "Ainm úsáideora neamhbhailí",
   "@invalidUsername": {},
   "audioEncoderNotSupportedMessage": "Ní thacaítear leis an ionchódóir fuaime ar an ngléas seo. Bain triail as brabhsálaí nó gléas difriúil.",
-  "@audioEncoderNotSupportedMessage": {}
+  "@audioEncoderNotSupportedMessage": {},
+  "inviteUserErrorMessage": "Ní raibh muid in ann gach gníomh a chur i gcrích. Athbhreithnigh cruthú an ghrúpa agus na cuirí, agus déan iarracht arís.",
+  "@inviteUserErrorMessage": {},
+  "failedToAddMembers": "{count, plural, =1{Níorbh fhéidir 1 bhall a chur leis an gcomhrá. Seiceáil a socruithe nó déan iarracht arís} other{{count} baill eile a chur leis an gcomhrá. Seiceáil a socruithe nó déan iarracht arís}}",
+  "@failedToAddMembers": {
+    "type": "text",
+    "placeholders": {
+      "count": {}
+    }
+  }
 }
