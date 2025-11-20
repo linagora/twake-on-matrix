@@ -12,13 +12,39 @@ class TestBase {
     NativeAutomatorConfig? nativeAutomatorConfig,
     dynamic tags = const [],
   }) {
+    const visibleTimeoutMs = int.fromEnvironment(
+      'GLOBAL_VISIBLE_TIMEOUT_MS',
+      defaultValue: 10000,
+    );
+
+    const existsTimeoutMs = int.fromEnvironment(
+      'GLOBAL_EXISTS_TIMEOUT_MS',
+      defaultValue: 10000,
+    );
+
+    const settleTimeoutMs = int.fromEnvironment(
+      'GLOBAL_SETTLE_TIMEOUT_MS',
+      defaultValue: 10000,
+    );
+
+    const nativeFindTimeoutMs = int.fromEnvironment(
+      'GLOBAL_NATIVE_FIND_TIMEOUT_MS',
+      defaultValue: 10000,
+    );
+
+    const patrolConfig = PatrolTesterConfig(
+      printLogs: true,
+      visibleTimeout: Duration(milliseconds: visibleTimeoutMs),
+      existsTimeout: Duration(milliseconds: existsTimeoutMs),
+      settleTimeout: Duration(milliseconds: settleTimeoutMs),
+    );
+
+    const defaultNativeConfig = NativeAutomatorConfig(
+      findTimeout: Duration(milliseconds: nativeFindTimeoutMs),
+    );
     patrolTest(description,
-        config: const PatrolTesterConfig(
-          printLogs: true,
-          visibleTimeout: Duration(minutes: 1),
-        ),
-        nativeAutomatorConfig:
-            nativeAutomatorConfig ?? const NativeAutomatorConfig(),
+        config: patrolConfig,
+        nativeAutomatorConfig: nativeAutomatorConfig ?? defaultNativeConfig,
         tags: tags,
         framePolicy: LiveTestWidgetsFlutterBindingFramePolicy.fullyLive,
         ($) async {
