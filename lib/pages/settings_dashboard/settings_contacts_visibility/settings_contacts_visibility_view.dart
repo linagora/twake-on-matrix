@@ -1,0 +1,169 @@
+import 'package:fluffychat/pages/settings_dashboard/settings_contacts_visibility/settings_contacts_visibility.dart';
+import 'package:fluffychat/widgets/app_bars/twake_app_bar.dart';
+import 'package:fluffychat/widgets/layouts/max_width_body.dart';
+import 'package:fluffychat/generated/l10n/app_localizations.dart';
+import 'package:fluffychat/widgets/twake_components/twake_icon_button.dart';
+import 'package:flutter/material.dart';
+import 'package:linagora_design_flutter/linagora_design_flutter.dart';
+
+class SettingsContactsVisibilityView extends StatelessWidget {
+  final SettingsContactsVisibilityController controller;
+
+  const SettingsContactsVisibilityView({super.key, required this.controller});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: LinagoraSysColors.material().onPrimary,
+      resizeToAvoidBottomInset: false,
+      appBar: TwakeAppBar(
+        title: L10n.of(context)!.contactsVisibility,
+        centerTitle: true,
+        withDivider: true,
+        context: context,
+        enableLeftTitle: true,
+        onBack: controller.onBack,
+        leading: TwakeIconButton(
+          paddingAll: 8,
+          splashColor: Colors.transparent,
+          hoverColor: Colors.transparent,
+          highlightColor: Colors.transparent,
+          onTap: controller.onBack,
+          icon: Icons.arrow_back_ios,
+        ),
+      ),
+      body: MaxWidthBody(
+        withScrolling: true,
+        child: SingleChildScrollView(
+          physics: const ClampingScrollPhysics(),
+          child: SizedBox(
+            width: double.infinity,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Column(
+                mainAxisSize: MainAxisSize.max,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.only(
+                      left: 32,
+                      right: 32,
+                      top: 24,
+                      bottom: 16,
+                    ),
+                    child: Text(
+                      L10n.of(context)!.whoCanSeeMyPhoneEmail,
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                            color: LinagoraSysColors.material().tertiary,
+                          ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                  Container(
+                    width: double.infinity,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(
+                        color: LinagoraRefColors.material().neutral[90] ??
+                            Colors.transparent,
+                        width: 1,
+                      ),
+                    ),
+                    child: Column(
+                      children: controller.visibilityOptions
+                          .map(
+                            (option) => _buildOptionItem(
+                              context: context,
+                              title: option.title(context),
+                              enableDivider: option.enableDivider(),
+                              isSelected: true,
+                            ),
+                          )
+                          .toList(),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildOptionItem({
+    required BuildContext context,
+    required String title,
+    String? subtitle,
+    void Function()? onTap,
+    bool enableDivider = true,
+    bool isSelected = false,
+  }) {
+    return InkWell(
+      onTap: onTap,
+      child: Row(
+        children: [
+          Expanded(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    children: [
+                      Text(
+                        title,
+                        style:
+                            Theme.of(context).textTheme.titleMedium?.copyWith(
+                                  color: LinagoraSysColors.material().onSurface,
+                                ),
+                        overflow: TextOverflow.ellipsis,
+                        maxLines: 1,
+                        textAlign: TextAlign.center,
+                      ),
+                      if (subtitle != null)
+                        Text(
+                          subtitle,
+                          style: Theme.of(context)
+                              .textTheme
+                              .labelMedium
+                              ?.copyWith(
+                                color: LinagoraRefColors.material().tertiary,
+                              ),
+                          overflow: TextOverflow.ellipsis,
+                          maxLines: 1,
+                          textAlign: TextAlign.center,
+                        ),
+                    ],
+                  ),
+                ),
+                if (enableDivider)
+                  Divider(
+                    height: 1,
+                    color: LinagoraRefColors.material().neutral[90],
+                  ),
+              ],
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.only(
+              left: 8,
+              right: 16,
+            ),
+            child: SizedBox(
+              width: 24,
+              height: 24,
+              child: isSelected
+                  ? Icon(
+                      Icons.check,
+                      color: LinagoraSysColors.material().primary,
+                      size: 24,
+                    )
+                  : null,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}

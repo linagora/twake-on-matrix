@@ -62,6 +62,20 @@ class SettingsSecurityView extends StatelessWidget {
                 children: [
                   Padding(
                     padding: SettingsViewStyle.bodySettingsScreenPadding,
+                    child: SettingsItemBuilder(
+                      title: L10n.of(context)!.contactsVisibility,
+                      titleColor: Theme.of(context).colorScheme.onBackground,
+                      subtitle: L10n.of(context)!.whoCanFindMeByMyContacts,
+                      leading: Icons.phone_outlined,
+                      leadingIconColor:
+                          LinagoraRefColors.material().tertiary[30],
+                      onTap: () {
+                        context.push('/rooms/security/contactsVisibility');
+                      },
+                    ),
+                  ),
+                  Padding(
+                    padding: SettingsViewStyle.bodySettingsScreenPadding,
                     child: ValueListenableBuilder(
                       valueListenable: controller.ignoredUsersNotifier,
                       builder: (context, ignoredUsers, _) {
