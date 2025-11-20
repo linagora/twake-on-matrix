@@ -57,18 +57,18 @@ class LoginRobot extends CoreRobot {
     return Selector(textContains: 'login');
   }
 
-  Future<bool> isLoginBtnVisible({
-    Duration timeout = const Duration(milliseconds: 10000),
-  }) async {
-    try {
-      // A tiny settle helps after navigation/animation
-      await Future<void>.delayed(timeout);
-      await $.native.enterText(
-        getLoginBtn(),
-        text: "",
-      );
-      return true; // If tap didn’t throw, it’s interactable enough
-    } catch (_) {
+  Selector getSignIn() {
+    return Selector(text: 'Sign in');
+  }
+
+  Future<bool> isLoginBtnVisible() async {
+    if (await CoreRobot($).existsNiceToHaveNativeItems(
+      $,
+      getSignIn(),
+      timeout: const Duration(milliseconds: 10000),
+    )) {
+      return true;
+    } else {
       return false;
     }
   }
@@ -98,10 +98,7 @@ class LoginRobot extends CoreRobot {
   Future<void> pressSignInSsoLogin() async {
     try {
       await $.native.tap(
-        Selector(
-          text: 'Sign in',
-          instance: 1,
-        ),
+        getSignIn(),
       );
     } catch (e) {
       ignoreException();
