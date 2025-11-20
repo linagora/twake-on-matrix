@@ -3485,7 +3485,7 @@
   "@couldNotPlayAudioFile": {},
   "pleaseFinishOrStopTheRecording": "Terminez l'enregistrement avant d'effectuer d'autres actions.",
   "@pleaseFinishOrStopTheRecording": {},
-  "forNowWeCanOnlyCreateAChatWithUpToTenPeople": "Il n'est pas possible pour le moment de réunir plus de 10 personnes lors de la création d'une discussion. Veuillez désélectionner certains invités. Vous pourrez les inviter une fois la discussion créée.",
+  "forNowWeCanOnlyCreateAChatWithUpToTenPeople": "Il n'est pas possible pour le moment de réunir plus de 10 personnes lors de la création d'une discussion. Veuillez désélectionner certains invités. Vous pourrez les inviter une fois la discussion créée",
   "@forNowWeCanOnlyCreateAChatWithUpToTenPeople": {},
   "gotIt": "D’accord",
   "@gotIt": {},
@@ -3510,5 +3510,14 @@
   "invalidUsername": "Nom d'utilisateur invalide",
   "@invalidUsername": {},
   "audioEncoderNotSupportedMessage": "L'encodeur audio n'est pas pris en charge sur cette appareil. Essayez d'utiliser un navigateur ou appareil différent.",
-  "@audioEncoderNotSupportedMessage": {}
+  "@audioEncoderNotSupportedMessage": {},
+  "inviteUserErrorMessage": "Toutes les actions n'ont pas pu être effectuées. Veuillez vérifier la création du groupe et les invitations, puis réessayer.",
+  "@inviteUserErrorMessage": {},
+  "failedToAddMembers": "{count, plural, =1{1 membre n'a pas pu être ajouté à la conversation. Veuillez vérifier ses paramètres ou réessayer} other{{count} membres n'ont pas pu être ajoutés à la conversation. Veuillez vérifier leurs paramètres ou réessayer}}",
+  "@failedToAddMembers": {
+    "type": "text",
+    "placeholders": {
+      "count": {}
+    }
+  }
 }
