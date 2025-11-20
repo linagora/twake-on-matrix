@@ -143,6 +143,7 @@ import 'package:fluffychat/pages/chat/chat_pinned_events/pinned_events_controlle
 import 'package:fluffychat/utils/famedlysdk_store.dart';
 import 'package:fluffychat/utils/manager/download_manager/download_manager.dart';
 import 'package:fluffychat/utils/manager/download_manager/downloading_worker_queue.dart';
+import 'package:fluffychat/utils/manager/twake_user_info_manager/twake_user_info_manager.dart';
 import 'package:fluffychat/utils/manager/upload_manager/upload_manager.dart';
 import 'package:fluffychat/utils/manager/upload_manager/upload_worker_queue.dart';
 import 'package:fluffychat/utils/power_level_manager.dart';
@@ -532,6 +533,8 @@ class GetItInitializer {
     getIt.registerFactory(() => const GetUserInfoInteractor());
 
     getIt.registerFactory(() => InviteUserInteractor());
+
+    getIt.registerFactory(() => TwakeUserInfoManager());
   }
 
   void _bindingControllers() {
