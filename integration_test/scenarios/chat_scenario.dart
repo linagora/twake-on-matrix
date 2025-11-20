@@ -43,7 +43,7 @@ class ChatScenario extends CoreRobot {
 
   Future<ChatGroupDetailRobot> openChatGroupByTitle(String groupTitle) async {
     await enterSearchText(groupTitle);
-    await (await ChatListRobot($).getListOfChatGroup())[0].root.tap();
+    await (ChatListRobot($).getListOfChatGroup())[0].root.tap();
     await $.pumpAndSettle();
     return ChatGroupDetailRobot($);
   }
@@ -445,7 +445,7 @@ class ChatScenario extends CoreRobot {
   }
 
   Future<void> verifySearchResultContains(String keyword) async {
-    final items = await ChatListRobot($).getListOfChatGroup();
+    final items = ChatListRobot($).getListOfChatGroup();
     final length = items.length;
     var i = 0;
 
@@ -471,7 +471,7 @@ class ChatScenario extends CoreRobot {
 
   Future<ChatGroupDetailRobot> openChatGroup(String title) async {
     await enterSearchText(title);
-    await (await ChatListRobot($).getListOfChatGroup())[0].root.tap();
+    await (ChatListRobot($).getListOfChatGroup()[0].root).tap();
     final chatGroupDetailRobot = ChatGroupDetailRobot($);
     await chatGroupDetailRobot.confimrAccessMedia();
     await $.pumpAndSettle();
