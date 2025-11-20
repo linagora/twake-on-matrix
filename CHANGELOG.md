@@ -1,3 +1,7 @@
+## [2.16.4+2330] - 2025-11-21
+### Added
+- #2796 Add promotion banner for mobile browser app
+
 ## [2.16.3+2330] - 2025-11-20
 ### Fixed
 - #2695 notification badge 
