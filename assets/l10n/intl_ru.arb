@@ -3513,5 +3513,14 @@
   "invalidUsername": "Недействительный Matrix ID",
   "@invalidUsername": {},
   "audioEncoderNotSupportedMessage": "Аудиозапись не поддерживается. Попробуйте использовать другой браузер или устройство.",
-  "@audioEncoderNotSupportedMessage": {}
+  "@audioEncoderNotSupportedMessage": {},
+  "inviteUserErrorMessage": "Не удалось выполнить все действия. Проверьте данные чата и приглашения, а затем повторите попытку.",
+  "@inviteUserErrorMessage": {},
+  "failedToAddMembers": "{count, plural, =1{Не удалось добавить 1 участника в чат. Проверьте его настройки или повторите попытку} other{Не удалось добавить {count} участников в чат. Проверьте их настройки или повторите попытку}}",
+  "@failedToAddMembers": {
+    "type": "text",
+    "placeholders": {
+      "count": {}
+    }
+  }
 }
