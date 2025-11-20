@@ -3495,5 +3495,14 @@
   "invalidUsername": "Tên người dùng không hợp lệ",
   "@invalidUsername": {},
   "audioEncoderNotSupportedMessage": "Bộ mã hóa âm thanh không được hỗ trợ trên thiết bị hiện tại. Vui lòng sử dụng trình duyệt hoặc thiết bị khác để tiếp tục.",
-  "@audioEncoderNotSupportedMessage": {}
+  "@audioEncoderNotSupportedMessage": {},
+  "inviteUserErrorMessage": "Không thể thực hiện các tác vụ. Vui lòng xem lại tác vụ tạo nhóm và thêm thành viên, rồi hãy thử lại.",
+  "@inviteUserErrorMessage": {},
+  "failedToAddMembers": "{count, plural, =1{1 thành viên không thể thêm vào nhóm. Hãy thử lại} other{{count} thành viên không thể thêm vào nhóm. Hãy thử lại}}",
+  "@failedToAddMembers": {
+    "type": "text",
+    "placeholders": {
+      "count": {}
+    }
+  }
 }
