@@ -14,6 +14,7 @@ class TestBase {
   }) {
     const testTimeoutMs = int.fromEnvironment(
       'GLOBAL_TEST_TIMEOUT_MS',
+      defaultValue: 30000,
     );
 
     const visibleTimeoutMs = int.fromEnvironment(
