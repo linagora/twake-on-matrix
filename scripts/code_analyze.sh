@@ -3,5 +3,5 @@ flutter pub get && flutter pub run build_runner build --delete-conflicting-outpu
 # Format generated files without causing CI failure
 dart format lib/generated/l10n/
 # Format and check developer-written files for changes, failing CI if necessary
-dart format --set-exit-if-changed lib/ test/
+dart format --set-exit-if-changed lib/ test/ integration_test/
 flutter analyze

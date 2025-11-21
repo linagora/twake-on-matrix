@@ -30,7 +30,7 @@ class LanguageSettingRobot extends HomeRobot {
   PatrolFinder vietnamese() {
     return $(ListTile).containing(find.text('Tiếng Việt'));
   }
-  
+
   String? getEnglishInDisplay() {
     return english().$(Text).at(0).text;
   }
@@ -47,34 +47,34 @@ class LanguageSettingRobot extends HomeRobot {
     return vietnamese().$(Text).at(0).text;
   }
 
-  Future<void> chooseEnglish() async{
+  Future<void> chooseEnglish() async {
     await english().tap();
     await $.waitUntilVisible(english().$(Icon));
     await $.waitUntilVisible(english().$(Icon));
   }
 
-  Future<void> chooseFrench() async{
+  Future<void> chooseFrench() async {
     await french().tap();
     await $.waitUntilVisible(french().$(Icon));
   }
 
-  Future<void> chooseRussian() async{
+  Future<void> chooseRussian() async {
     await russian().tap();
     await $.waitUntilVisible(russian().$(Icon));
   }
 
-  Future<void> chooseVietnamese() async{
+  Future<void> chooseVietnamese() async {
     await vietnamese().tap();
     await $.waitUntilVisible(vietnamese().$(Icon));
-  }  
+  }
 
   String? getSelectedLanguage() {
     final selectedLanguage = $(ListTile).containing($(Icon));
     return selectedLanguage.$(Text).at(1).text;
-  }  
+  }
 
-  Future<void> backToSettingScreen() async{
+  Future<void> backToSettingScreen() async {
     await backIcon().tap();
     await $.waitUntilVisible($(SettingsView));
-  } 
+  }
 }
