@@ -91,6 +91,17 @@ class CoreRobot {
     }
   }
 
+  Future<bool> existsOptionalNativeItems(
+    PatrolIntegrationTester $,
+    Selector selector, {
+    Duration timeout = const Duration(seconds: 5),
+    Duration interval = const Duration(milliseconds: 500),
+  }) async {
+    await $.pumpAndTrySettle(duration: timeout);
+    final views = await $.native.getNativeViews(selector);
+    return views.isNotEmpty;
+  }
+
   Future<void> typeSlowlyWithPatrol(
     PatrolIntegrationTester $,
     Finder field,
