@@ -57,8 +57,9 @@ class LoginRobot extends CoreRobot {
     return Selector(textContains: 'login');
   }
 
-  Future<bool> isLoginBtnVisible(
-      {Duration timeout = const Duration(milliseconds: 10000),}) async {
+  Future<bool> isLoginBtnVisible({
+    Duration timeout = const Duration(milliseconds: 10000),
+  }) async {
     try {
       // A tiny settle helps after navigation/animation
       await Future<void>.delayed(timeout);

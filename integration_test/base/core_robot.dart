@@ -65,11 +65,12 @@ class CoreRobot {
       await Future.delayed(const Duration(milliseconds: 100));
     }
     throw Exception(
-        'Neither widget became visible within ${timeout.inSeconds} seconds',);
+      'Neither widget became visible within ${timeout.inSeconds} seconds',
+    );
   }
 
   Future<void> waitUntilAbsent(
-    PatrolIntegrationTester $, 
+    PatrolIntegrationTester $,
     PatrolFinder finder, {
     Duration timeout = const Duration(seconds: 10),
   }) async {
@@ -81,9 +82,11 @@ class CoreRobot {
       await $.pump(const Duration(milliseconds: 200));
     }
   }
-  
-  Future<void> waitSnackGone(PatrolIntegrationTester $,
-      {Duration timeout = const Duration(seconds: 8),}) async {
+
+  Future<void> waitSnackGone(
+    PatrolIntegrationTester $, {
+    Duration timeout = const Duration(seconds: 8),
+  }) async {
     final end = DateTime.now().add(timeout);
     while ($(SnackBar).exists || $(CupertinoPopupSurface).exists) {
       if (DateTime.now().isAfter(end)) break;
@@ -102,11 +105,11 @@ class CoreRobot {
     final buffer = StringBuffer();
     buffer.write(text.characters.characterAt(0));
     await $.enterText(field, buffer.toString());
-    await $.pump();                  
+    await $.pump();
     await Future.delayed(perChar);
     buffer.write(text.characters.getRange(1, text.characters.length));
     await $.enterText(field, buffer.toString());
-    await $.pump();                  
+    await $.pump();
     await Future.delayed(perChar);
   }
 
@@ -127,7 +130,7 @@ class CoreRobot {
     await done.future;
     return err?.toString();
   }
-  
+
   Future<HttpClient> initialRedirectRequest() async {
     // Step 1: Initial redirect request (NO REDIRECT FOLLOW)
     final client = HttpClient();
@@ -136,7 +139,7 @@ class CoreRobot {
   }
 
   Future<List<dynamic>> loginByAPI(HttpClient client) async {
-    const chatURL  = String.fromEnvironment('CHAT_URL');
+    const chatURL = String.fromEnvironment('CHAT_URL');
     const matrixURL = String.fromEnvironment('MATRIX_URL');
     const ssoURL = String.fromEnvironment('SSO_URL');
     const receiver = String.fromEnvironment('Receiver');
@@ -269,8 +272,7 @@ class CoreRobot {
     final thirdUri = Uri.https(ssoURL, '/oauth2/authorize', {
       'response_type': 'code',
       'client_id': 'matrix1',
-      'redirect_uri':
-          'https://$matrixURL/_synapse/client/oidc/callback',
+      'redirect_uri': 'https://$matrixURL/_synapse/client/oidc/callback',
       'scope': 'openid profile email',
       'state': state,
       'nonce': nonce,
@@ -349,8 +351,7 @@ class CoreRobot {
     lemonldap = matchOfThirdResponse?.group(1);
 
     // Step 7: Call OIDC callback to get loginToken
-    final fourthUri =
-        Uri.https(matrixURL, '/_synapse/client/oidc/callback', {
+    final fourthUri = Uri.https(matrixURL, '/_synapse/client/oidc/callback', {
       'code': code,
       'session_state': sessionState,
       'state': state,
@@ -402,8 +403,7 @@ class CoreRobot {
     }
 
     // Step 8: Token login
-    final fifthUri =
-        Uri.https(matrixURL, '/_matrix/client/v3/login');
+    final fifthUri = Uri.https(matrixURL, '/_matrix/client/v3/login');
     final fifthRequest = await client.postUrl(fifthUri);
     fifthRequest.followRedirects = false;
     fifthRequest.headers
@@ -447,11 +447,15 @@ class CoreRobot {
     return [client, accessToken, lemonldap];
   }
 
-  Future<void> sendMessageByAPI(HttpClient client, String accessToken,
-      String lemonldap, String message,) async {
-      const chatURL  = String.fromEnvironment('CHAT_URL');
-      const matrixURL = String.fromEnvironment('MATRIX_URL');
-      const groupID = String.fromEnvironment('GroupID');
+  Future<void> sendMessageByAPI(
+    HttpClient client,
+    String accessToken,
+    String lemonldap,
+    String message,
+  ) async {
+    const chatURL = String.fromEnvironment('CHAT_URL');
+    const matrixURL = String.fromEnvironment('MATRIX_URL');
+    const groupID = String.fromEnvironment('GroupID');
     final sendMessageEndpoint = Uri.https(
       matrixURL,
       '/_matrix/client/v3/rooms/$groupID:linagora.com/send/m.room.message/$chatURL%3A%20Chrome%20on%20Web%20-9-${DateTime.now().millisecondsSinceEpoch}',
@@ -499,8 +503,11 @@ class CoreRobot {
     client.close(force: true);
   }
 
-  Future<void> scrollToBottom(PatrolIntegrationTester $,
-      {PatrolFinder? root, int maxDrags = 30,}) async {
+  Future<void> scrollToBottom(
+    PatrolIntegrationTester $, {
+    PatrolFinder? root,
+    int maxDrags = 30,
+  }) async {
     // Find the Scrollable to act on
     final PatrolFinder scrollable = root == null
         ? $(Scrollable).first
@@ -525,8 +532,11 @@ class CoreRobot {
     }
   }
 
-  Future<void> scrollToTop(PatrolIntegrationTester $,
-      {PatrolFinder? root, int maxDrags = 30,}) async {
+  Future<void> scrollToTop(
+    PatrolIntegrationTester $, {
+    PatrolFinder? root,
+    int maxDrags = 30,
+  }) async {
     // Find the Scrollable to act on
     final PatrolFinder scrollable = root == null
         ? $(Scrollable).first
@@ -573,7 +583,11 @@ class CoreRobot {
       throw Exception('can not found widget after scrolling');
     }
   }
-  Future<bool> isActuallyScrollable(PatrolIntegrationTester $, {PatrolFinder? root,}) async {
+
+  Future<bool> isActuallyScrollable(
+    PatrolIntegrationTester $, {
+    PatrolFinder? root,
+  }) async {
     final scrollableFinder = root == null
         ? $(Scrollable)
         : $(

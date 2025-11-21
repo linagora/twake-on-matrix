@@ -21,9 +21,11 @@ class ChatGroupDetailRobot extends CoreRobot {
   PatrolFinder getSearchIcon() {
     return $(AppBar).$(IconButton);
   }
+
   PatrolFinder getMoreIconInAppBar() {
     return $(AppBar).containing(find.byTooltip('More'));
-  } 
+  }
+
   PatrolFinder getMoreIcon() {
     return $(TwakeIconButton).containing(find.byTooltip('More'));
   }
@@ -81,8 +83,8 @@ class ChatGroupDetailRobot extends CoreRobot {
     final textField = await getInputTextField();
     // catch exception when trying to chat with non-existing account
     await CoreRobot($).captureAsyncError(() async {
-        await textField.tap();
-      });
+      await textField.tap();
+    });
     await textField.enterText(message);
   }
 
@@ -104,14 +106,13 @@ class ChatGroupDetailRobot extends CoreRobot {
   Future<void> expectSnackShown(
     PatrolIntegrationTester $, {
     String message = 'Room creation failed',
-    }) async {
-      final snackText =
-          $(find.textContaining(message, findRichText: true)).first;
+  }) async {
+    final snackText = $(find.textContaining(message, findRichText: true)).first;
 
-      // 1) Chờ xuất hiện (ngay sau hành động tạo room)
-      await $.waitUntilVisible(snackText, timeout: const Duration(seconds: 5));
+    // 1) Chờ xuất hiện (ngay sau hành động tạo room)
+    await $.waitUntilVisible(snackText, timeout: const Duration(seconds: 5));
 
-      // 2) (tuỳ chọn) Chờ nó biến mất để tránh flakiness cho bước sau
-      await waitUntilAbsent($, snackText);
+    // 2) (tuỳ chọn) Chờ nó biến mất để tránh flakiness cho bước sau
+    await waitUntilAbsent($, snackText);
   }
 }

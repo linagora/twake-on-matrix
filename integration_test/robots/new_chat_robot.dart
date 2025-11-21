@@ -28,15 +28,19 @@ class NewChatRobot extends CoreRobot {
   Future<void> makeASearch(String searchKey) async {
     await getSearchIcon().tap();
     await typeSlowlyWithPatrol($, getSearchField(), searchKey);
-    await waitForEitherVisible($: $, first: $(TwakeListItem), second: $("No Results"), timeout: const Duration(seconds: 10));
+    await waitForEitherVisible(
+        $: $,
+        first: $(TwakeListItem),
+        second: $("No Results"),
+        timeout: const Duration(seconds: 10));
   }
 
-  Future<void> clickOnNewGroupChatIcon() async{
+  Future<void> clickOnNewGroupChatIcon() async {
     await getNewGroupChatIcon().tap();
     await $.waitUntilVisible($(AppBar).$("Add members"));
   }
 
-  List<TwakeListItemRobot> getListOfAccount() {   
+  List<TwakeListItemRobot> getListOfAccount() {
     final List<TwakeListItemRobot> groupList = [];
 
     final matches = $(TwakeListItem).evaluate();

@@ -35,7 +35,7 @@ class SettingRobot extends HomeRobot {
   PatrolFinder deviceSetting() {
     return $("Devices");
   }
-   
+
   PatrolFinder helpSetting() {
     return $("Help");
   }
@@ -47,38 +47,38 @@ class SettingRobot extends HomeRobot {
   PatrolFinder logout() {
     return $("Logout");
   }
-  
-  Future<void> openChatSetting() async{
+
+  Future<void> openChatSetting() async {
     await chatSetting().tap();
     await $.waitUntilVisible($(SettingsChatView));
   }
 
-  Future<void> openPrivacyAndSecuritySetting() async{
+  Future<void> openPrivacyAndSecuritySetting() async {
     await privateAndSecuritySetting().tap();
     await $.waitUntilVisible($(SettingsSecurityView));
   }
 
-  Future<void> openNotificationSetting() async{
+  Future<void> openNotificationSetting() async {
     await notificationsSetting().tap();
     await $.waitUntilVisible($(SettingsNotificationsView));
   }
 
-  Future<void> openAppLanguageSetting() async{
+  Future<void> openAppLanguageSetting() async {
     await appLanguageSetting().tap();
     await $.waitUntilVisible($(SettingsAppLanguage));
   }
 
-  Future<void> openDevicesSetting() async{
+  Future<void> openDevicesSetting() async {
     await deviceSetting().tap();
     await $.waitUntilVisible($(DevicesSettingsView));
   }
 
-  Future<void> viewAboutInfo() async{
+  Future<void> viewAboutInfo() async {
     await about().tap();
     await $.waitUntilVisible($(Text).containing('Version:'));
   }
 
-  Future<void> logoutOfApp() async{
+  Future<void> logoutOfApp() async {
     await logout().tap();
     await $.waitUntilVisible($(ConfirmationDialogBuilder));
   }
