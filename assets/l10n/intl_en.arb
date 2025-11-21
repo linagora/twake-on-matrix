@@ -3482,5 +3482,14 @@
     "placeholders": {
       "count": {}
     }
-  }
+  },
+  "contactsVisibility": "Contacts visibility",
+  "whoCanFindMeByMyContacts": "Who can find me by my contacts",
+  "whoCanSeeMyPhoneEmail": "WHO CAN SEE MY PHONE/EMAIL",
+  "everyOne": "Everyone",
+  "myContacts": "My Contacts",
+  "nobody": "Nobody",
+  "chooseWhichDetailsAreVisibleToOtherUsers": "CHOOSE WHICH DETAILS ARE VISIBLE TO OTHER USERS",
+  "youNumberIsVisibleAccordingToTheSettingAbove": "Your number is visible according to the setting above",
+  "youEmailIsVisibleAccordingToTheSettingAbove": "Your email is visible according to the setting above"
 }
