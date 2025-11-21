@@ -25,6 +25,7 @@ class LoginRobot extends CoreRobot {
   }
 
   Future<void> confirmServerUrl() async {
+    await $.waitUntilVisible($('Continue'));
     await $.tap($('Continue'));
   }
 
