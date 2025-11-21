@@ -12,6 +12,10 @@ class TestBase {
     NativeAutomatorConfig? nativeAutomatorConfig,
     dynamic tags = const [],
   }) {
+    const testTimeoutMs = int.fromEnvironment(
+      'GLOBAL_TEST_TIMEOUT_MS',
+    );
+
     const visibleTimeoutMs = int.fromEnvironment(
       'GLOBAL_VISIBLE_TIMEOUT_MS',
       defaultValue: 10000,
@@ -39,10 +43,13 @@ class TestBase {
       settleTimeout: Duration(milliseconds: settleTimeoutMs),
     );
 
+    const testTimeout = Timeout(Duration(milliseconds: testTimeoutMs));
+
     const defaultNativeConfig = NativeAutomatorConfig(
       findTimeout: Duration(milliseconds: nativeFindTimeoutMs),
     );
     patrolTest(description,
+        timeout: testTimeout,
         config: patrolConfig,
         nativeAutomatorConfig: nativeAutomatorConfig ?? defaultNativeConfig,
         tags: tags,
