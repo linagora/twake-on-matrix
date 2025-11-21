@@ -1,4 +1,6 @@
+import 'package:fluffychat/domain/model/user_info/user_info_visibility.dart';
 import 'package:fluffychat/pages/settings_dashboard/settings_contacts_visibility/settings_contacts_visibility.dart';
+import 'package:fluffychat/pages/settings_dashboard/settings_contacts_visibility/settings_contacts_visibility_enum.dart';
 import 'package:fluffychat/widgets/app_bars/twake_app_bar.dart';
 import 'package:fluffychat/widgets/layouts/max_width_body.dart';
 import 'package:fluffychat/generated/l10n/app_localizations.dart';
@@ -71,15 +73,102 @@ class SettingsContactsVisibilityView extends StatelessWidget {
                     child: Column(
                       children: controller.visibilityOptions
                           .map(
-                            (option) => _buildOptionItem(
-                              context: context,
-                              title: option.title(context),
-                              enableDivider: option.enableDivider(),
-                              isSelected: true,
+                            (option) => ValueListenableBuilder(
+                              valueListenable:
+                                  controller.getUserInfoVisibilityNotifier,
+                              builder: (context, state, _) {
+                                return ValueListenableBuilder(
+                                  valueListenable: controller
+                                      .selectedVisibilityOptionNotifier,
+                                  builder: (context, _, __) {
+                                    final isVisibilitySelected = controller
+                                            .selectedVisibilityOptionNotifier
+                                            .value ==
+                                        option;
+                                    return _buildVisibilityOptionItem(
+                                      context: context,
+                                      option: option,
+                                      enableDivider: option.enableDivider(),
+                                      isSelected: isVisibilitySelected,
+                                      onTap:
+                                          controller.onSelectVisibilityOption,
+                                    );
+                                  },
+                                );
+                              },
                             ),
                           )
                           .toList(),
                     ),
+                  ),
+                  ValueListenableBuilder(
+                    valueListenable:
+                        controller.selectedVisibilityOptionNotifier,
+                    builder: (context, selectedOption, _) {
+                      if (selectedOption !=
+                          SettingsContactsVisibilityEnum.contacts) {
+                        return const SizedBox.shrink();
+                      }
+                      return Column(
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.only(
+                              left: 32,
+                              right: 32,
+                              top: 32,
+                              bottom: 8,
+                            ),
+                            child: Text(
+                              L10n.of(context)!
+                                  .chooseWhichDetailsAreVisibleToOtherUsers,
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .bodyMedium
+                                  ?.copyWith(
+                                    color:
+                                        LinagoraSysColors.material().tertiary,
+                                  ),
+                              textAlign: TextAlign.center,
+                            ),
+                          ),
+                          Container(
+                            width: double.infinity,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(16),
+                              border: Border.all(
+                                color:
+                                    LinagoraRefColors.material().neutral[90] ??
+                                        Colors.transparent,
+                                width: 1,
+                              ),
+                            ),
+                            child: Column(
+                              children: controller.visibleFieldsOptions
+                                  .map(
+                                    (option) => ValueListenableBuilder(
+                                      valueListenable: controller
+                                          .getUserInfoVisibilityNotifier,
+                                      builder: (context, state, _) {
+                                        return _buildVisibleFieldIem(
+                                          context: context,
+                                          option: option,
+                                          enableDivider: option.enableDivider(),
+                                          isSelected: controller
+                                              .selectedVisibleFieldNotifier
+                                              .value
+                                              .contains(option),
+                                          onTap:
+                                              controller.onUpdateVisibleFields,
+                                        );
+                                      },
+                                    ),
+                                  )
+                                  .toList(),
+                            ),
+                          ),
+                        ],
+                      );
+                    },
                   ),
                 ],
               ),
@@ -90,16 +179,73 @@ class SettingsContactsVisibilityView extends StatelessWidget {
     );
   }
 
-  Widget _buildOptionItem({
+  Widget _buildVisibilityOptionItem({
     required BuildContext context,
-    required String title,
-    String? subtitle,
-    void Function()? onTap,
+    required SettingsContactsVisibilityEnum option,
+    void Function(SettingsContactsVisibilityEnum)? onTap,
     bool enableDivider = true,
     bool isSelected = false,
   }) {
     return InkWell(
-      onTap: onTap,
+      onTap: !isSelected ? () => onTap?.call(option) : null,
+      child: Row(
+        children: [
+          Expanded(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Text(
+                    option.title(context),
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                          color: LinagoraSysColors.material().onSurface,
+                        ),
+                    overflow: TextOverflow.ellipsis,
+                    maxLines: 1,
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+                if (enableDivider)
+                  Divider(
+                    height: 1,
+                    color: LinagoraRefColors.material().neutral[90],
+                  ),
+              ],
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.only(
+              left: 8,
+              right: 16,
+            ),
+            child: SizedBox(
+              width: 24,
+              height: 24,
+              child: isSelected
+                  ? Icon(
+                      Icons.check,
+                      color: LinagoraSysColors.material().primary,
+                      size: 24,
+                    )
+                  : null,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildVisibleFieldIem({
+    required BuildContext context,
+    required VisibleEnum option,
+    void Function(VisibleEnum)? onTap,
+    bool enableDivider = true,
+    bool isSelected = false,
+  }) {
+    return InkWell(
+      onTap: !isSelected ? () => onTap?.call(option) : null,
       child: Row(
         children: [
           Expanded(
@@ -110,9 +256,10 @@ class SettingsContactsVisibilityView extends StatelessWidget {
                 Padding(
                   padding: const EdgeInsets.all(16),
                   child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        title,
+                        option.title(context),
                         style:
                             Theme.of(context).textTheme.titleMedium?.copyWith(
                                   color: LinagoraSysColors.material().onSurface,
@@ -121,19 +268,16 @@ class SettingsContactsVisibilityView extends StatelessWidget {
                         maxLines: 1,
                         textAlign: TextAlign.center,
                       ),
-                      if (subtitle != null)
-                        Text(
-                          subtitle,
-                          style: Theme.of(context)
-                              .textTheme
-                              .labelMedium
-                              ?.copyWith(
-                                color: LinagoraRefColors.material().tertiary,
-                              ),
-                          overflow: TextOverflow.ellipsis,
-                          maxLines: 1,
-                          textAlign: TextAlign.center,
-                        ),
+                      Text(
+                        option.subtitle(context),
+                        style:
+                            Theme.of(context).textTheme.labelMedium?.copyWith(
+                                  color: LinagoraSysColors.material().tertiary,
+                                ),
+                        overflow: TextOverflow.ellipsis,
+                        maxLines: 2,
+                        textAlign: TextAlign.left,
+                      ),
                     ],
                   ),
                 ),
