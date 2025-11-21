@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:fluffychat/config/app_constants.dart';
 import 'package:fluffychat/config/config_saas/config_saas.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/utils/responsive/responsive_utils.dart';
@@ -111,6 +112,10 @@ abstract class AppConfig {
   static const bool hideAllStateEvents = false;
   static const String inviteLinkPrefix = 'https://matrix.to/#/';
   static const String deepLinkPrefix = 'im.fluffychat://chat/';
+  static const String httpAppLinkUniversalLinkPrefix =
+      'http://${AppConstants.appLinkUniversalLinkDomain}/';
+  static const String httpsAppLinkUniversalLinkPrefix =
+      'https://${AppConstants.appLinkUniversalLinkDomain}/';
   static const String schemePrefix = 'matrix:';
   static const String pushNotificationsChannelId = 'twake_push';
   static const String pushNotificationsChannelName = 'Twake Chat push channel';
