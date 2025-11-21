@@ -38,9 +38,10 @@ class UnencryptedImageWidget extends StatelessWidget {
     }
     return Image.network(
       event
-          .attachmentOrThumbnailMxcUrl(getThumbnail: isThumbnail)!
-          .getDownloadLink(event.room.client)
-          .toString(),
+              .attachmentOrThumbnailMxcUrl(getThumbnail: isThumbnail)
+              ?.getDownloadLink(event.room.client)
+              .toString() ??
+          '',
       frameBuilder: (context, child, frame, wasSynchronouslyLoaded) {
         if (wasSynchronouslyLoaded) {
           return child;
