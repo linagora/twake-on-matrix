@@ -3484,8 +3484,8 @@
     }
   },
   "contactsVisibility": "Contacts visibility",
-  "whoCanFindMeByMyContacts": "WHO CAN SEE MY PHONE/EMAIL",
-  "whoCanSeeMyPhoneEmail": "Who can SEE MY phone/email",
+  "whoCanFindMeByMyContacts": "Who can find me by my contacts",
+  "whoCanSeeMyPhoneEmail": "WHO CAN SEE MY PHONE/EMAIL",
   "everyOne": "Everyone",
   "myContacts": "My Contacts",
   "nobody": "Nobody",
