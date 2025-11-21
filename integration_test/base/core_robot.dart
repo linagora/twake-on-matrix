@@ -91,7 +91,7 @@ class CoreRobot {
     }
   }
 
-  Future<bool> existsNiceToHaveNativeItems(
+  Future<bool> existsOptionalNativeItems(
     PatrolIntegrationTester $,
     Selector selector, {
     Duration timeout = const Duration(seconds: 5),

@@ -62,7 +62,7 @@ class LoginRobot extends CoreRobot {
   }
 
   Future<bool> isLoginBtnVisible() async {
-    if (await CoreRobot($).existsNiceToHaveNativeItems(
+    if (await CoreRobot($).existsOptionalNativeItems(
       $,
       getSignIn(),
       timeout: const Duration(milliseconds: 10000),
