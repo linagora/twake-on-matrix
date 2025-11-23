@@ -6,6 +6,7 @@ import 'package:flutter_test/flutter_test.dart';
 import '../../base/test_base.dart';
 import '../../help/soft_assertion_helper.dart';
 import '../../robots/chat_group_detail_robot.dart';
+import '../../scenarios/chat_detail_scenario.dart';
 import '../../scenarios/chat_scenario.dart';
 import '../../robots/home_robot.dart';
 import 'package:patrol/patrol.dart';
@@ -188,4 +189,16 @@ void main() {
 
     },
   );
+
+  TestBase().runPatrolTest(
+    description: 'View profile of a members in a group',
+    test: ($) async {
+      final s = SoftAssertHelper();
+      await HomeRobot($).gotoChatListScreen();
+      const groupTest = String.fromEnvironment('GroupTest');
+      await ChatScenario($).openChatGroupByTitle(groupTest);
+      await ChatScenario($).openGroupChatInfo();
+      await ChatDetailScenario($).verifyProfileInfoOfAllMember(s);
+      s.verifyAll();
+    },);
 }
