@@ -1,5 +1,9 @@
+import 'package:fluffychat/di/global/get_it_initializer.dart';
+import 'package:fluffychat/domain/model/user_info/user_info.dart';
 import 'package:fluffychat/pages/chat/events/message/message_style.dart';
+import 'package:fluffychat/utils/manager/twake_user_info_manager/twake_user_info_manager.dart';
 import 'package:fluffychat/utils/string_extension.dart';
+import 'package:fluffychat/widgets/matrix.dart';
 import 'package:flutter/material.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:matrix/matrix.dart';
@@ -16,10 +20,14 @@ class DisplayNameWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<User?>(
-      future: event.fetchSenderUser(),
+    return FutureBuilder<UserInfo>(
+      future: getIt.get<TwakeUserInfoManager>().getTwakeProfileFromUserId(
+            client: Matrix.of(context).client,
+            userId: event.senderId,
+            getFromRooms: false,
+          ),
       builder: (context, snapshot) {
-        final displayName = snapshot.data?.calcDisplayname() ??
+        final displayName = snapshot.data?.displayName ??
             event.senderFromMemoryOrFallback.calcDisplayname();
         return Padding(
           padding: MessageStyle.paddingDisplayName(event),

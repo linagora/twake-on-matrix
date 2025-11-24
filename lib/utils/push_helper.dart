@@ -5,6 +5,7 @@ import 'dart:ui';
 import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/config/setting_keys.dart';
 import 'package:fluffychat/domain/model/extensions/push/push_notification_extension.dart';
+import 'package:fluffychat/domain/model/room/room_extension.dart';
 import 'package:fluffychat/utils/client_manager.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
@@ -206,8 +207,9 @@ Future<void> _tryPushHelper(
     styleInformation: messagingStyleInformation ??
         MessagingStyleInformation(
           Person(name: event.room.client.userID),
-          conversationTitle: event.room.getLocalizedDisplayname(
-            MatrixLocals(l10n),
+          conversationTitle: await event.room.getUserDisplayName(
+            matrixId: event.senderId,
+            i18n: MatrixLocals(l10n),
           ),
           groupConversation: !event.room.isDirectChat,
           messages: [newMessage],
@@ -225,8 +227,9 @@ Future<void> _tryPushHelper(
 
   await flutterLocalNotificationsPlugin.show(
     id,
-    event.room.getLocalizedDisplayname(
-      MatrixLocals(l10n),
+    await event.room.getUserDisplayName(
+      matrixId: event.senderId,
+      i18n: MatrixLocals(l10n),
     ),
     body,
     platformChannelSpecifics,
