@@ -422,7 +422,7 @@ class ChatScenario extends CoreRobot {
 
   Future<void> verifyDisplayOfGroupListScreen(SoftAssertHelper s) async {
     s.softAssertEquals(
-      (await SearchRobot($).getSearchTextField()).exists,
+      ( SearchRobot($).getSearchTextField()).exists,
       true,
       'Search Text Field is not visible',
     );

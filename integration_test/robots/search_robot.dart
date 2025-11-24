@@ -16,7 +16,7 @@ class SearchRobot extends CoreRobot {
     await $.waitUntilVisible($(BottomNavigationBar));
   }
 
-  Future<PatrolFinder> getSearchTextField() async {
+  PatrolFinder getSearchTextField() {
     // return $(TextField).containing(find.text('Search'));// problem when change language
     return $(TextField).hitTestable();
   }
@@ -26,16 +26,16 @@ class SearchRobot extends CoreRobot {
   }
 
   Future<PatrolFinder> getSearchingIcon() async {
-    return (await getSearchTextField()).$(Icon).at(0);
+    return ( getSearchTextField()).$(Icon).at(0);
   }
 
   Future<PatrolFinder> getDeleteSearchingIcon() async {
-    return (await getSearchTextField()).$(TwakeIconButton).$(Icon);
+    return ( getSearchTextField()).$(TwakeIconButton).$(Icon);
   }
 
   Future<void> enterSearchText(String searchText) async {
     await getSearchTextField().tap();
-    await getSearchTextField().enterText(searchText);
+    await typeSlowlyWithPatrol($, getSearchTextField(), searchText);
   }
 
   Future<void> deleteSearchPhrase() async {
