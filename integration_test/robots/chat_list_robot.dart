@@ -50,12 +50,12 @@ class ChatListRobot extends HomeRobot {
   }
 
   Future<ChatGroupDetailRobot> openChatGroupByIndex(int index) async {
-    await (await getListOfChatGroup())[index].root.tap();
+    await (getListOfChatGroup()[index].root).tap();
     await $.pumpAndSettle();
     return ChatGroupDetailRobot($);
   }
 
-  Future<List<TwakeListItemRobot>> getListOfChatGroup() async {
+  List<TwakeListItemRobot> getListOfChatGroup() {
     final List<TwakeListItemRobot> groupList = [];
 
     // Evaluate once to find how many TwakeListItem widgets exist

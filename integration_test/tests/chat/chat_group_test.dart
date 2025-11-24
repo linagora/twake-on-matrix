@@ -6,15 +6,17 @@ import 'package:flutter_test/flutter_test.dart';
 import '../../base/test_base.dart';
 import '../../help/soft_assertion_helper.dart';
 import '../../robots/chat_group_detail_robot.dart';
+import '../../robots/chat_search_view_robot.dart';
+import '../../scenarios/chat_detail_scenario.dart';
 import '../../scenarios/chat_scenario.dart';
 import '../../robots/home_robot.dart';
 import 'package:patrol/patrol.dart';
 
 // --- Common config ---
 const defaultTime = Duration(seconds: 60);
-const searchPhrase =
-    String.fromEnvironment('SearchByTitle', defaultValue: 'My Default Group');
-const forwardReceiver =
+const groupTest =
+    String.fromEnvironment('TitleOfGroupTest', defaultValue: 'My Default Group');
+const receiver =
     String.fromEnvironment('Receiver', defaultValue: 'Receiver Group');
 
 int uniqueId() => DateTime.now().microsecondsSinceEpoch;
@@ -25,7 +27,7 @@ Future<(String, String)> prepareTwoMessages(PatrolIntegrationTester $) async {
   final receiverMsg = 'receiver sent at $id';
 
   await HomeRobot($).gotoChatListScreen();
-  await ChatScenario($).openChatGroupByTitle(searchPhrase);
+  await ChatScenario($).openChatGroupByTitle(groupTest);
 
   await ChatScenario($)
       .sendAMesage(senderMsg); // NOTE: keep current helper name
@@ -186,6 +188,29 @@ void main() {
 
       s.verifyAll();
 
+    },
+  );
+
+  TestBase().runPatrolTest(
+    description: 'Search for messages inside a chat',
+    test: ($) async {
+      final s = SoftAssertHelper();
+      //open chat and make some messages
+      final receiveMessage = (await prepareTwoMessages($)).$2;
+      final searchPhrase = receiveMessage.substring(receiveMessage.indexOf("sent"), receiveMessage.length);
+
+      //search by the word that contained in the text that by sent by both sender and receiver
+      await ChatDetailScenario($).makeASearch(searchPhrase);
+      // verify info dialog is shown the search phrase is displayed in the 2 messages
+      var numberOfResult = (await ChatSearchViewRobot($).getListOfChatSearch()).length;
+      s.softAssertEquals(numberOfResult == 2, true, "expect is 2 but got: $numberOfResult");
+
+      //search by the word that not existed in the chat
+      await ChatDetailScenario($).makeASearch("$searchPhrase no existed");
+      //verify there is no result
+      numberOfResult = (await ChatSearchViewRobot($).getListOfChatSearch()).length;
+      s.softAssertEquals(numberOfResult, 0, "Expected empty result, but got $numberOfResult");
+      s.verifyAll();
     },
   );
 }
