@@ -4,6 +4,7 @@ import 'package:fluffychat/presentation/model/chat/upload_file_ui_state.dart';
 import 'package:fluffychat/widgets/mixins/upload_file_mixin.dart';
 import 'package:flutter/material.dart';
 import 'package:linagora_design_flutter/colors/linagora_ref_colors.dart';
+import 'package:linagora_design_flutter/colors/linagora_sys_colors.dart';
 import 'package:matrix/matrix.dart';
 
 class MessageVideoUploadContentWeb extends StatefulWidget {
@@ -32,10 +33,13 @@ class _MessageVideoUploadContentWebState
 
   @override
   Widget build(BuildContext context) {
+    final sysColor = LinagoraSysColors.material();
+
     return ValueListenableBuilder(
       valueListenable: uploadFileStateNotifier,
       builder: ((context, uploadState, child) {
         double? progress;
+        final hasError = uploadState is UploadFileFailedUIState;
 
         if (uploadState is UploadingFileUIState) {
           if (uploadState.total != null &&
@@ -52,7 +56,11 @@ class _MessageVideoUploadContentWebState
             if (uploadState is UploadFileSuccessUIState) {
               return;
             }
-            uploadManager.cancelUpload(event);
+            if (hasError) {
+              uploadManager.retryUpload(event.eventId);
+            } else {
+              uploadManager.cancelUpload(event);
+            }
           },
           centerWidget: Stack(
             alignment: Alignment.center,
@@ -63,20 +71,35 @@ class _MessageVideoUploadContentWebState
               ),
               if (uploadState is UploadFileSuccessUIState) ...[
                 const SizedBox.shrink(),
-              ] else
+              ] else if (hasError)
+                Container(
+                  padding: const EdgeInsets.all(4),
+                  decoration: const BoxDecoration(
+                    color: Colors.white,
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    Icons.refresh,
+                    color: sysColor.primary,
+                    size: 24,
+                  ),
+                )
+              else
                 const CenterVideoButton(
                   icon: Icons.close,
                   iconSize: MessageContentStyle.cancelButtonSize,
                 ),
-              SizedBox(
-                width: MessageContentStyle.iconInsideVideoButtonSize,
-                height: MessageContentStyle.iconInsideVideoButtonSize,
-                child: CircularProgressIndicator(
-                  value: uploadState is UploadingFileUIState ? progress : null,
-                  color: LinagoraRefColors.material().primary[100],
-                  strokeWidth: MessageContentStyle.strokeVideoWidth,
+              if (!hasError)
+                SizedBox(
+                  width: MessageContentStyle.iconInsideVideoButtonSize,
+                  height: MessageContentStyle.iconInsideVideoButtonSize,
+                  child: CircularProgressIndicator(
+                    value:
+                        uploadState is UploadingFileUIState ? progress : null,
+                    color: LinagoraRefColors.material().primary[100],
+                    strokeWidth: MessageContentStyle.strokeVideoWidth,
+                  ),
                 ),
-              ),
             ],
           ),
         );
