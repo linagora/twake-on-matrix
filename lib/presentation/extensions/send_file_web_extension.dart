@@ -75,6 +75,7 @@ extension SendFileWebExtension on Room {
           Left(
             UploadFileFailedState(
               exception: FileTooBigMatrixException(file.size, maxMediaSize),
+              txid: txid,
             ),
           ),
         );
@@ -86,6 +87,7 @@ extension SendFileWebExtension on Room {
         Left(
           UploadFileFailedState(
             exception: e,
+            txid: txid,
           ),
         ),
       );
@@ -207,6 +209,7 @@ extension SendFileWebExtension on Room {
           Left(
             UploadFileFailedState(
               exception: e,
+              txid: txid,
             ),
           ),
         );
@@ -219,6 +222,7 @@ extension SendFileWebExtension on Room {
             Left(
               UploadFileFailedState(
                 exception: CancelUploadException(),
+                txid: txid,
               ),
             ),
           );
@@ -231,6 +235,7 @@ extension SendFileWebExtension on Room {
           Left(
             UploadFileFailedState(
               exception: e,
+              txid: txid,
             ),
           ),
         );
