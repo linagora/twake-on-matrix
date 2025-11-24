@@ -11,6 +11,7 @@ import 'package:fluffychat/widgets/mixins/upload_file_mixin.dart';
 import 'package:fluffychat/widgets/twake_components/twake_preview_link/twake_link_preview.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:linagora_design_flutter/colors/linagora_sys_colors.dart';
 import 'package:matrix/matrix.dart';
 
 class MessageUploadingContent extends StatefulWidget {
@@ -32,6 +33,7 @@ class _MessageUploadingContentState extends State<MessageUploadingContent>
     with UploadFileMixin<MessageUploadingContent> {
   @override
   Widget build(BuildContext context) {
+    final sysColor = LinagoraSysColors.material();
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
@@ -64,66 +66,83 @@ class _MessageUploadingContentState extends State<MessageUploadingContent>
                   } else if (uploadFileState is UploadFileUISateInitial) {
                     uploadProgress = 0;
                   } else if (uploadFileState is UploadFileSuccessUIState) {
-                    return Row(
-                      crossAxisAlignment: widget.style.crossAxisAlignment,
-                      children: [
-                        SvgPicture.asset(
-                          widget.event.mimeType.getIcon(
-                            fileType: widget.event.fileType,
-                          ),
-                          width: widget.style.iconSize,
-                          height: widget.style.iconSize,
-                        ),
-                      ],
+                    return SvgPicture.asset(
+                      widget.event.mimeType.getIcon(
+                        fileType: widget.event.fileType,
+                      ),
+                      width: widget.style.iconSize,
+                      height: widget.style.iconSize,
                     );
                   }
                   return Stack(
                     alignment: Alignment.center,
                     children: [
-                      Container(
-                        margin: widget.style.marginDownloadIcon,
-                        width: widget.style.iconSize,
-                        height: widget.style.iconSize,
-                        decoration: BoxDecoration(
-                          color: widget.style.iconBackgroundColor(
-                            hasError: hasError,
-                            context: context,
+                      if (hasError)
+                        IconButton(
+                          onPressed: () {
+                            uploadManager.retryUpload(widget.event);
+                          },
+                          icon: Icon(
+                            Icons.refresh,
+                            color: sysColor.primary,
+                            size: 24,
                           ),
-                          shape: BoxShape.circle,
-                        ),
-                      ),
-                      if (uploadProgress != 0 && !hasError)
-                        SizedBox(
-                          width: widget.style.circularProgressLoadingSize,
-                          height: widget.style.circularProgressLoadingSize,
-                          child: CircularLoadingDownloadWidget(
-                            style: widget.style,
-                            downloadProgress:
-                                uploadProgress != 1 ? uploadProgress : null,
+                          padding: const EdgeInsets.all(4),
+                          style: IconButton.styleFrom(
+                            backgroundColor: sysColor.onPrimary,
+                            shape: const CircleBorder(),
+                          ),
+                        )
+                      else ...[
+                        Container(
+                          margin: widget.style.marginDownloadIcon,
+                          width: widget.style.iconSize,
+                          height: widget.style.iconSize,
+                          decoration: BoxDecoration(
+                            color: widget.style.iconBackgroundColor(
+                              hasError: false,
+                              context: context,
+                            ),
+                            shape: BoxShape.circle,
                           ),
                         ),
-                      Container(
-                        width: widget.style.downloadIconSize,
-                        decoration: BoxDecoration(
-                          color: widget.style.iconBackgroundColor(
-                            hasError: hasError,
-                            context: context,
+                        if (uploadProgress != 0)
+                          SizedBox(
+                            width: widget.style.circularProgressLoadingSize,
+                            height: widget.style.circularProgressLoadingSize,
+                            child: CircularLoadingDownloadWidget(
+                              style: widget.style,
+                              downloadProgress:
+                                  uploadProgress != 1 ? uploadProgress : null,
+                            ),
                           ),
-                          shape: BoxShape.circle,
+                        Container(
+                          width: widget.style.downloadIconSize,
+                          decoration: BoxDecoration(
+                            color: widget.style.iconBackgroundColor(
+                              hasError: false,
+                              context: context,
+                            ),
+                            shape: BoxShape.circle,
+                          ),
+                          child: Icon(
+                            Icons.close,
+                            key: ValueKey(uploadProgress),
+                            color: Theme.of(context).colorScheme.surface,
+                            size: widget.style.downloadIconSize,
+                          ),
                         ),
-                        child: Icon(
-                          hasError ? Icons.error_outline : Icons.close,
-                          key: ValueKey(uploadProgress),
-                          color: Theme.of(context).colorScheme.surface,
-                          size: widget.style.downloadIconSize,
-                        ),
-                      ),
+                      ],
                       InkWell(
                         onTap: () {
                           if (uploadFileState is UploadFileSuccessUIState) {
                             return;
                           }
-                          uploadManager.cancelUpload(event);
+                          if (hasError) {
+                            uploadManager.retryUpload(event);
+                          } else {
+                            uploadManager.cancelUpload(event);
+                          }
                         },
                         mouseCursor: SystemMouseCursors.click,
                         child: SizedBox(

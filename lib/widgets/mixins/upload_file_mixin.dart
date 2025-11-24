@@ -2,20 +2,21 @@ import 'dart:async';
 import 'package:dartz/dartz.dart' hide State, OpenFile;
 import 'package:fluffychat/app_state/failure.dart';
 import 'package:fluffychat/app_state/success.dart';
+import 'package:fluffychat/data/network/media/file_not_exist_exception.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
+import 'package:fluffychat/generated/l10n/app_localizations.dart';
 import 'package:fluffychat/presentation/model/chat/upload_file_ui_state.dart';
 import 'package:fluffychat/utils/exception/upload_exception.dart';
 import 'package:fluffychat/utils/manager/upload_manager/upload_manager.dart';
 import 'package:fluffychat/utils/manager/upload_manager/upload_state.dart';
+import 'package:fluffychat/utils/twake_snackbar.dart';
 import 'package:flutter/material.dart';
 import 'package:matrix/matrix.dart';
 
 mixin UploadFileMixin<T extends StatefulWidget> on State<T> {
   final uploadManager = getIt.get<UploadManager>();
 
-  final uploadFileStateNotifier = ValueNotifier<UploadFileUIState>(
-    const UploadFileUISateInitial(),
-  );
+  late final ValueNotifier<UploadFileUIState> uploadFileStateNotifier;
 
   StreamSubscription<Either<Failure, Success>>? streamSubscription;
 
@@ -35,6 +36,12 @@ mixin UploadFileMixin<T extends StatefulWidget> on State<T> {
         if (failure is UploadFileFailedState &&
             failure.exception is CancelUploadException) {
           return;
+        }
+        if (failure is UploadFileFailedState &&
+            failure.exception is FileNotExistException) {
+          if (mounted) {
+            TwakeSnackBar.show(context, L10n.of(context)!.fileNoLongerExist);
+          }
         }
         uploadFileStateNotifier.value = const UploadFileFailedUIState();
       },
@@ -58,11 +65,13 @@ mixin UploadFileMixin<T extends StatefulWidget> on State<T> {
 
   @override
   void initState() {
-    _trySetupUploadStreamSubcription();
-    if (streamSubscription != null) {
-      uploadFileStateNotifier.value = const UploadFileUISateInitial();
-    }
     super.initState();
+    if (event.status == EventStatus.error) {
+      uploadFileStateNotifier = ValueNotifier(const UploadFileFailedUIState());
+    } else {
+      uploadFileStateNotifier = ValueNotifier(const UploadFileUISateInitial());
+    }
+    _trySetupUploadStreamSubcription();
   }
 
   @override

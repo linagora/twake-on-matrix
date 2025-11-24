@@ -1,5 +1,4 @@
 import 'dart:async';
-
 import 'package:dartz/dartz.dart' hide Task;
 import 'package:dio/dio.dart';
 import 'package:fluffychat/app_state/failure.dart';
@@ -17,6 +16,7 @@ import 'package:fluffychat/utils/manager/upload_manager/upload_state.dart';
 import 'package:fluffychat/utils/manager/upload_manager/upload_worker_queue.dart';
 import 'package:fluffychat/utils/task_queue/task.dart';
 import 'package:matrix/matrix.dart';
+import 'package:rxdart/rxdart.dart';
 
 class UploadManager {
   UploadManager._();
@@ -27,9 +27,32 @@ class UploadManager {
 
   final uploadWorkerQueue = getIt.get<UploadWorkerQueue>();
 
-  final Map<String, UploadFileInfo> _eventIdMapUploadFileInfo = {};
+  static final Map<String, UploadFileInfo> _eventIdMapUploadFileInfo = {};
+
+  final Set<String> _retriesInProgress = {};
 
   static const int _shrinkImageMaxDimension = 1600;
+
+  Future<UploadFileInfo?> getUploadFileInfo(String eventId) async {
+    if (_eventIdMapUploadFileInfo.containsKey(eventId)) {
+      return _eventIdMapUploadFileInfo[eventId];
+    }
+
+    // Attempt to restore on-demand from the event's unsigned data
+    for (final room in getIt.get<Client>().rooms) {
+      final event = await room.getEventById(eventId);
+      if (event != null) {
+        final uploadInfoMap = event.unsigned?['upload_info'];
+        if (uploadInfoMap is Map<String, dynamic>) {
+          final info = UploadFileInfo.fromJson(uploadInfoMap);
+          _eventIdMapUploadFileInfo[eventId] = info;
+          return info;
+        }
+      }
+    }
+
+    return null;
+  }
 
   Future<void> cancelUpload(Event event) async {
     final cancelToken = _eventIdMapUploadFileInfo[event.eventId]?.cancelToken;
@@ -38,6 +61,116 @@ class UploadManager {
       _clearFileTask(event.eventId);
       event.remove();
       cancelToken.cancel();
+    }
+  }
+
+  /// Retries a failed upload
+  Future<void> retryUpload(Event event) async {
+    final txid = event.eventId;
+    if (_retriesInProgress.contains(txid)) {
+      Logs().w('Retry already in progress for txid $txid');
+      return;
+    }
+    _retriesInProgress.add(txid);
+    try {
+      final uploadInfo = await getUploadFileInfo(txid);
+
+      if (uploadInfo == null) {
+        throw Exception('Upload with txid $txid not found');
+      }
+
+      if (!uploadInfo.isFailed) {
+        throw Exception('Upload with txid $txid is not in failed state');
+      }
+
+      final room = event.room;
+      final fileInfo = uploadInfo.fileInfo;
+      final matrixFile = uploadInfo.matrixFile;
+      final caption = uploadInfo.captionInfo?.caption;
+      final inReplyTo = uploadInfo.inReplyToEventId == null
+          ? null
+          : await room.getEventById(uploadInfo.inReplyToEventId!);
+      uploadInfo.isFailed = false;
+      SyncUpdate? fakeImageEvent;
+      try {
+        if (fileInfo != null) {
+          fakeImageEvent = await room.sendFakeFileInfoEvent(
+            fileInfo,
+            txid: txid,
+            messageType: event.messageType,
+            captionInfo: caption,
+            uploadInfo: uploadInfo.toJson(),
+            inReplyTo: inReplyTo,
+          );
+        } else if (matrixFile != null) {
+          fakeImageEvent = await room.sendFakeFileEvent(
+            matrixFile,
+            txid: txid,
+            captionInfo: caption,
+            uploadInfo: uploadInfo.toJson(),
+            inReplyTo: inReplyTo,
+          );
+        }
+
+        if (fakeImageEvent == null) {
+          throw Exception('Missing required retry data for txid $txid');
+        }
+      } catch (e) {
+        uploadInfo.isFailed = true;
+        rethrow;
+      }
+
+      final streamController = uploadInfo.uploadStateStreamController;
+      final cancelToken = uploadInfo.cancelToken;
+
+      streamController.add(const Right(UploadFileInitial()));
+
+      try {
+        if (fileInfo != null) {
+          _addFileTaskToWorkerQueueMobile(
+            txid: txid,
+            fakeImageEvent: fakeImageEvent,
+            room: room,
+            fileInfo: fileInfo,
+            streamController: streamController,
+            cancelToken: cancelToken,
+            sentDate: uploadInfo.createdAt,
+            shrinkImageMaxDimension: uploadInfo.shrinkImageMaxDimension,
+            captionInfo: caption,
+            uploadInfo: uploadInfo.toJson(),
+            inReplyTo: inReplyTo,
+          );
+        } else if (matrixFile != null) {
+          await _addFileTaskToWorkerQueueWeb(
+            txid: txid,
+            fakeImageEvent: fakeImageEvent,
+            room: room,
+            matrixFile: matrixFile,
+            streamController: streamController,
+            cancelToken: cancelToken,
+            thumbnail: uploadInfo.thumbnail,
+            sentDate: uploadInfo.createdAt,
+            captionInfo: caption,
+            uploadInfo: uploadInfo.toJson(),
+            inReplyTo: inReplyTo,
+          );
+        } else {
+          throw Exception('No file data found for retry with txid $txid');
+        }
+      } catch (e) {
+        uploadInfo.isFailed = true;
+        streamController.add(
+          Left(
+            UploadFileFailedState(
+              exception: e is Exception ? e : Exception(e.toString()),
+              txid: txid,
+            ),
+          ),
+        );
+        rethrow;
+      }
+    } finally {
+      _retriesInProgress.remove(txid);
     }
   }
 
@@ -65,12 +198,11 @@ class UploadManager {
     String? captionInfo,
     Event? inReplyTo,
   }) {
-    final uploadController = StreamController<Either<Failure, Success>>();
+    final uploadController = BehaviorSubject<Either<Failure, Success>>();
 
     _eventIdMapUploadFileInfo[txid] = UploadFileInfo(
       txid: txid,
       uploadStateStreamController: uploadController,
-      uploadStream: uploadController.stream.asBroadcastStream(),
       cancelToken: CancelToken(),
       createdAt: DateTime.now(),
       captionInfo: captionInfo != null && captionInfo.isNotEmpty
@@ -79,12 +211,12 @@ class UploadManager {
               caption: captionInfo,
             )
           : null,
-      inReplyTo: inReplyTo,
+      inReplyToEventId: inReplyTo?.eventId,
     );
   }
 
   Stream<Either<Failure, Success>>? getUploadStateStream(String txid) {
-    return _eventIdMapUploadFileInfo[txid]?.uploadStream;
+    return _eventIdMapUploadFileInfo[txid]?.uploadStateStreamController.stream;
   }
 
   Future<void> uploadMediaMobile({
@@ -126,6 +258,7 @@ class UploadManager {
         sentDate: sentDate,
         captionInfo: _eventIdMapUploadFileInfo[txidKey]?.captionInfo?.caption,
         inReplyTo: isLastFile ? inReplyTo : null,
+        uploadInfo: _eventIdMapUploadFileInfo[txidKey]?.toJson(),
       );
 
       final streamController =
@@ -143,6 +276,7 @@ class UploadManager {
                   exception: Exception(
                     'streamController or cancelToken is null',
                   ),
+                  txid: txidKey,
                 ),
               ),
             );
@@ -166,6 +300,7 @@ class UploadManager {
         shrinkImageMaxDimension: _shrinkImageMaxDimension,
         captionInfo: _eventIdMapUploadFileInfo[txidKey]?.captionInfo?.caption,
         inReplyTo: isLastFile ? inReplyTo : null,
+        uploadInfo: _eventIdMapUploadFileInfo[txidKey]?.toJson(),
       );
     }
   }
@@ -197,6 +332,7 @@ class UploadManager {
         txid: txid,
         captionInfo: _eventIdMapUploadFileInfo[txid]?.captionInfo?.caption,
         inReplyTo: isLastFile ? inReplyTo : null,
+        uploadInfo: _eventIdMapUploadFileInfo[txid]?.toJson(),
       );
 
       final streamController =
@@ -216,6 +352,7 @@ class UploadManager {
                   exception: Exception(
                     'streamController or cancelToken is null',
                   ),
+                  txid: txid,
                 ),
               ),
             );
@@ -241,6 +378,7 @@ class UploadManager {
             sentDate: sentDate,
             captionInfo: _eventIdMapUploadFileInfo[txid]?.captionInfo?.caption,
             inReplyTo: isLastFile ? inReplyTo : null,
+            uploadInfo: _eventIdMapUploadFileInfo[txid]?.toJson(),
           ),
         ],
       );
@@ -298,6 +436,7 @@ class UploadManager {
                   exception: Exception(
                     'streamController or cancelToken is null',
                   ),
+                  txid: txid,
                 ),
               ),
             );
@@ -320,6 +459,7 @@ class UploadManager {
         sentDate: sentDate,
         captionInfo: _eventIdMapUploadFileInfo[txid]?.captionInfo?.caption,
         inReplyTo: isLastFile ? inReplyTo : null,
+        uploadInfo: _eventIdMapUploadFileInfo[txid]?.toJson(),
       );
     }
   }
@@ -335,13 +475,20 @@ class UploadManager {
     int? shrinkImageMaxDimension,
     String? captionInfo,
     Event? inReplyTo,
+    Map<String, dynamic>? uploadInfo,
   }) {
+    final info = _eventIdMapUploadFileInfo[txid];
+    if (info != null) {
+      info.fileInfo = fileInfo;
+      info.shrinkImageMaxDimension = shrinkImageMaxDimension;
+    }
+
     uploadWorkerQueue.addTask(
       Task(
         id: txid,
         runnable: () async {
           try {
-            await room.sendFileEventMobile(
+            final eventId = await room.sendFileEventMobile(
               fileInfo,
               msgType: fileInfo.msgType,
               txid: txid,
@@ -352,18 +499,28 @@ class UploadManager {
               sentDate: sentDate,
               captionInfo: captionInfo,
               inReplyTo: inReplyTo,
+              uploadInfo: uploadInfo,
             );
+            if (eventId == null) {
+              throw Exception('Failed to send file event');
+            }
           } catch (e) {
+            if (info != null) {
+              info.isFailed = true;
+              _updateEventUploadInfo(room, txid, info);
+            }
             streamController.add(
               Left(
-                UploadFileFailedState(exception: e),
+                UploadFileFailedState(exception: e, txid: txid),
               ),
             );
           }
         },
         onTaskCompleted: () async {
-          room.sendingFilePlaceholders.remove(txid);
-          await _clearFileTask(txid);
+          if (info?.isFailed != true) {
+            room.sendingFilePlaceholders.remove(txid);
+            await _clearFileTask(txid);
+          }
         },
       ),
     );
@@ -380,13 +537,20 @@ class UploadManager {
     MatrixImageFile? thumbnail,
     DateTime? sentDate,
     String? captionInfo,
+    Map<String, dynamic>? uploadInfo,
   }) {
+    final info = _eventIdMapUploadFileInfo[txid];
+    if (info != null) {
+      info.matrixFile = matrixFile;
+      info.thumbnail = thumbnail;
+    }
+
     return uploadWorkerQueue.addTask(
       Task(
         id: txid,
         runnable: () async {
           try {
-            await room.sendFileOnWebEvent(
+            final eventId = await room.sendFileOnWebEvent(
               matrixFile,
               fakeImageEvent: fakeImageEvent,
               txid: txid,
@@ -397,19 +561,66 @@ class UploadManager {
               captionInfo: captionInfo,
               inReplyTo: inReplyTo,
             );
+            if (eventId == null) {
+              throw Exception('File upload failed');
+            }
           } catch (e) {
+            if (info != null) {
+              info.isFailed = true;
+              _updateEventUploadInfo(room, txid, info);
+            }
             streamController.add(
               Left(
-                UploadFileFailedState(exception: e),
+                UploadFileFailedState(exception: e, txid: txid),
               ),
             );
           }
         },
         onTaskCompleted: () async {
-          room.sendingFilePlaceholders.remove(txid);
-          await _clearFileTask(txid);
+          if (info?.isFailed != true) {
+            room.sendingFilePlaceholders.remove(txid);
+            await _clearFileTask(txid);
+          }
         },
       ),
     );
+  }
+
+  Future<void> _updateEventUploadInfo(
+    Room room,
+    String eventId,
+    UploadFileInfo info,
+  ) async {
+    try {
+      final event = await room.getEventById(eventId);
+      if (event != null) {
+        final unsigned = Map<String, dynamic>.from(event.unsigned ?? {});
+        unsigned['upload_info'] = info.toJson();
+        final syncUpdate = SyncUpdate(
+          nextBatch: '',
+          rooms: RoomsUpdate(
+            join: {
+              room.id: JoinedRoomUpdate(
+                timeline: TimelineUpdate(
+                  events: [
+                    MatrixEvent(
+                      eventId: event.eventId,
+                      senderId: event.senderId,
+                      originServerTs: event.originServerTs,
+                      type: event.type,
+                      content: event.content,
+                      unsigned: unsigned,
+                    ),
+                  ],
+                ),
+              ),
+            },
+          ),
+        );
+        await room.client.handleSync(syncUpdate);
+      }
+    } catch (e) {
+      Logs().e('UploadManager::_updateEventUploadInfo(): $e');
+    }
   }
 }

@@ -11,7 +11,7 @@ import 'package:fluffychat/widgets/hero_page_route.dart';
 import 'package:fluffychat/widgets/mixins/upload_file_mixin.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_blurhash/flutter_blurhash.dart';
-import 'package:linagora_design_flutter/colors/linagora_ref_colors.dart';
+import 'package:linagora_design_flutter/colors/linagora_sys_colors.dart';
 import 'package:matrix/matrix.dart' hide Visibility;
 
 class SendingImageInfoWidget extends StatefulWidget {
@@ -69,6 +69,7 @@ class _SendingImageInfoWidgetState extends State<SendingImageInfoWidget>
 
   @override
   Widget build(BuildContext context) {
+    final sysColor = LinagoraSysColors.material();
     if (widget.event.status == EventStatus.sent ||
         widget.event.status == EventStatus.synced) {
       sendingFileProgressNotifier.value = 1;
@@ -76,37 +77,48 @@ class _SendingImageInfoWidgetState extends State<SendingImageInfoWidget>
 
     return Hero(
       tag: widget.event.eventId,
-      child: ValueListenableBuilder<double>(
-        key: ValueKey(widget.event.eventId),
-        valueListenable: sendingFileProgressNotifier,
-        builder: (context, value, child) {
+      child: _SendingImageInfoOverlay(
+        sendingFileProgressNotifier: sendingFileProgressNotifier,
+        uploadFileStateNotifier: uploadFileStateNotifier,
+        builder: (progress, uploadState, child) {
+          final hasError = uploadState is UploadFileFailedUIState;
           return Stack(
             alignment: Alignment.center,
             children: [
               child!,
-              if (sendingFileProgressNotifier.value != 1) ...[
-                CircularProgressIndicator(
-                  strokeWidth: 2,
-                  color: LinagoraRefColors.material().primary[100],
-                ),
-                ValueListenableBuilder(
-                  valueListenable: uploadFileStateNotifier,
-                  builder: (context, state, child) {
-                    if (state is UploadFileSuccessUIState) {
-                      return child!;
-                    }
-                    return InkWell(
-                      child: Icon(
-                        Icons.close,
-                        color: LinagoraRefColors.material().primary[100],
-                      ),
-                      onTap: () {
-                        uploadManager.cancelUpload(widget.event);
-                      },
-                    );
-                  },
-                  child: const SizedBox.shrink(),
-                ),
+              if (progress != 1 || hasError) ...[
+                if (!hasError && progress != 1)
+                  CircularProgressIndicator(
+                    strokeWidth: 2,
+                    color: sysColor.onPrimary,
+                  ),
+                if (hasError)
+                  IconButton(
+                    onPressed: () {
+                      uploadManager.retryUpload(widget.event);
+                    },
+                    icon: Icon(
+                      Icons.refresh,
+                      color: sysColor.primary,
+                      size: 24,
+                    ),
+                    padding: const EdgeInsets.all(4),
+                    style: IconButton.styleFrom(
+                      backgroundColor: sysColor.onPrimary,
+                      shape: const CircleBorder(),
+                    ),
+                  )
+                else if (uploadState is! UploadFileSuccessUIState &&
+                    progress != 1)
+                  InkWell(
+                    child: Icon(
+                      Icons.close,
+                      color: sysColor.onPrimary,
+                    ),
+                    onTap: () {
+                      uploadManager.cancelUpload(widget.event);
+                    },
+                  ),
               ],
             ],
           );
@@ -154,6 +166,40 @@ class _SendingImageInfoWidgetState extends State<SendingImageInfoWidget>
           ),
         ),
       ),
+    );
+  }
+}
+
+class _SendingImageInfoOverlay extends StatelessWidget {
+  const _SendingImageInfoOverlay({
+    required this.sendingFileProgressNotifier,
+    required this.uploadFileStateNotifier,
+    required this.builder,
+    required this.child,
+  });
+
+  final ValueNotifier<double> sendingFileProgressNotifier;
+  final ValueNotifier<UploadFileUIState> uploadFileStateNotifier;
+  final Widget Function(
+    double progress,
+    UploadFileUIState uploadState,
+    Widget? child,
+  ) builder;
+  final Widget? child;
+
+  @override
+  Widget build(BuildContext context) {
+    return ValueListenableBuilder(
+      valueListenable: sendingFileProgressNotifier,
+      builder: (context, progress, child) {
+        return ValueListenableBuilder(
+          valueListenable: uploadFileStateNotifier,
+          builder: (context, uploadState, child) {
+            return builder(progress, uploadState, child);
+          },
+          child: this.child,
+        );
+      },
     );
   }
 }

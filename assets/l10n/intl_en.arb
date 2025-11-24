@@ -3648,5 +3648,7 @@
   "changePermissions": "Change permissions",
   "@changePermissions": {
     "description": "Context menu action to open permission picker dialog"
-  }
+  },
+  "tapToRetry": "Tap to retry",
+  "fileNoLongerExist": "File no longer exist"
 }

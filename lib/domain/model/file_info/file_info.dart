@@ -4,12 +4,17 @@ import 'dart:typed_data';
 import 'package:equatable/equatable.dart';
 import 'package:fluffychat/domain/model/file_info/image_file_info.dart';
 import 'package:fluffychat/domain/model/file_info/video_file_info.dart';
+import 'package:json_annotation/json_annotation.dart';
 import 'package:matrix/matrix.dart';
 import 'package:mime/mime.dart';
 
+part 'file_info.g.dart';
+
+@JsonSerializable()
 class FileInfo with EquatableMixin {
   final String fileName;
   final String? filePath;
+  @JsonKey(includeToJson: false, includeFromJson: false)
   final Uint8List? bytes;
   final String? customMimeType;
 
@@ -73,6 +78,11 @@ class FileInfo with EquatableMixin {
       customMimeType: file.mimeType,
     );
   }
+
+  factory FileInfo.fromJson(Map<String, dynamic> json) =>
+      _$FileInfoFromJson(json);
+
+  Map<String, dynamic> toJson() => _$FileInfoToJson(this);
 
   @override
   List<Object?> get props => [fileName, filePath, customMimeType, bytes];
