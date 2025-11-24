@@ -35,16 +35,17 @@ class CoreRobot {
     }
   }
 
-  Future<void> confirmAccessContactIOS() async {
-    try {
-      await $.native.waitUntilVisible(
-        Selector(textContains: 'OK'),
-        appId: 'com.apple.springboard',
-      );
-      await $.native.tap(
-        Selector(textContains: 'OK'),
-        appId: 'com.apple.springboard',
-      );
+  Future<void> confirmAccessContact() async {
+    try {  
+      await $.native.grantPermissionWhenInUse();
+    } catch (e) {
+      ignoreException();
+    }
+  }
+
+  Future<void> confirmNotAllowAccessContact() async {
+    try {  
+      await $.native.denyPermission();
     } catch (e) {
       ignoreException();
     }
