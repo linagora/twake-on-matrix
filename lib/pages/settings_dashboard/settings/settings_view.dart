@@ -181,6 +181,7 @@ class SettingsView extends StatelessWidget {
                     Padding(
                       padding: SettingsViewStyle.bodySettingsScreenPadding,
                       child: SettingsItemBuilder(
+                        key: Key(item.name),
                         title: item.titleSettings(context),
                         titleColor: item.titleColor(context),
                         leading: item.iconLeading(),

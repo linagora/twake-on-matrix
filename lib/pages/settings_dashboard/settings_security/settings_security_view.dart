@@ -63,6 +63,7 @@ class SettingsSecurityView extends StatelessWidget {
                   Padding(
                     padding: SettingsViewStyle.bodySettingsScreenPadding,
                     child: SettingsItemBuilder(
+                      key: const Key('contacts_visibility_settings_item'),
                       title: L10n.of(context)!.contactsVisibility,
                       titleColor: Theme.of(context).colorScheme.onBackground,
                       subtitle: L10n.of(context)!.whoCanFindMeByMyContacts,

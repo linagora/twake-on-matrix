@@ -1,5 +1,5 @@
 import 'package:fluffychat/widgets/twake_components/twake_navigation_icon/twake_navigation_icon.dart';
-import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter/material.dart';
 import 'package:patrol/patrol.dart';
 import '../base/core_robot.dart';
 import 'chat_list_robot.dart';
@@ -18,7 +18,7 @@ class HomeRobot extends CoreRobot {
   }
 
   Future<PatrolFinder> getSettingTab() async {
-    return $('Settings');
+    return $(const Key('settings_navigation_destination'));
   }
 
   Future<ContactListRobot> gotoContactListAndGrantContactPermission() async {
@@ -37,7 +37,8 @@ class HomeRobot extends CoreRobot {
   }
 
   Future<SettingRobot> gotoSettingScreen() async {
-    await (await getSettingTab()).tap();
+    final settingTab = await getSettingTab();
+    await settingTab.tap();
     await $.pumpAndSettle();
     return SettingRobot($);
   }
