@@ -24,65 +24,76 @@ void main() {
       //enter a non-existed contact for searching
       await ContactScenario($).enterSearchText("noexist");
       //verify there is no result
-      s.softAssertEquals((await SearchRobot($).getNoResultIcon()).visible, true,
-          'lable "No Results" is not shown');
+      s.softAssertEquals(
+        (await SearchRobot($).getNoResultIcon()).visible,
+        true,
+        'lable "No Results" is not shown',
+      );
 
       //searching by a text that included in some contacts
       await ContactScenario($).enterSearchText(currentAccount.substring(1, 3));
       //verify there is more than test result
       s.softAssertEquals(
-          (await ContactListRobot($).getListOfContact()).isNotEmpty,
-          true,
-          'Search by $currentAccount.substring(1,3) Expected at least 1 contact, but found 0');
+        (await ContactListRobot($).getListOfContact()).isNotEmpty,
+        true,
+        'Search by $currentAccount.substring(1,3) Expected at least 1 contact, but found 0',
+      );
 
       // search by full an address matrix
       await ContactScenario($).enterSearchText(searchByMatrixAddress);
       //verify there is one result
       s.softAssertEquals(
-          ((await ContactListRobot($).getListOfContact()).length) == 1,
-          true,
-          'Search by $searchByMatrixAddress Expected number of group is 1 , but found != 1');
+        ((await ContactListRobot($).getListOfContact()).length) == 1,
+        true,
+        'Search by $searchByMatrixAddress Expected number of group is 1 , but found != 1',
+      );
 
       // search by full an address matrix but make it in case-sensitive format
       await ContactScenario($)
           .enterSearchText(searchByMatrixAddress.toUpperCase());
       //verify there is one result
       s.softAssertEquals(
-          ((await ContactListRobot($).getListOfContact()).length) == 1,
-          true,
-          'Search by $searchByMatrixAddress.toUpperCase() Expected number of group is 1 , but found != 1');
+        ((await ContactListRobot($).getListOfContact()).length) == 1,
+        true,
+        'Search by $searchByMatrixAddress.toUpperCase() Expected number of group is 1 , but found != 1',
+      );
       s.softAssertEquals(
-          (await (await ContactListRobot($).getListOfContact())[0]
-                  .getOwnerLabel())
-              .visible,
-          false,
-          'Owner is missing!');
+        (await (await ContactListRobot($).getListOfContact())[0]
+                .getOwnerLabel())
+            .visible,
+        false,
+        'Owner is missing!',
+      );
       s.softAssertEquals(
-          (await (await ContactListRobot($).getListOfContact())[0]
-                  .getEmailLabelIncaseSearching())
-              .visible,
-          true,
-          'Email field is not shown');
+        (await (await ContactListRobot($).getListOfContact())[0]
+                .getEmailLabelIncaseSearching())
+            .visible,
+        true,
+        'Email field is not shown',
+      );
 
       // search by current account
       await ContactScenario($).enterSearchText(currentAccount);
       //verify componen displayed on the TwakeListItem
       s.softAssertEquals(
-          (await ContactListRobot($).getListOfContact()).length == 1,
-          true,
-          '>1');
+        (await ContactListRobot($).getListOfContact()).length == 1,
+        true,
+        '>1',
+      );
       s.softAssertEquals(
-          (await (await ContactListRobot($).getListOfContact())[0]
-                  .getOwnerLabel())
-              .visible,
-          true,
-          'Owner is missing!');
+        (await (await ContactListRobot($).getListOfContact())[0]
+                .getOwnerLabel())
+            .visible,
+        true,
+        'Owner is missing!',
+      );
       s.softAssertEquals(
-          (await (await ContactListRobot($).getListOfContact())[0]
-                  .getEmailLabelIncaseSearching())
-              .visible,
-          true,
-          'Email field is not shown');
+        (await (await ContactListRobot($).getListOfContact())[0]
+                .getEmailLabelIncaseSearching())
+            .visible,
+        true,
+        'Email field is not shown',
+      );
 
       // after searching, open a chat by clicking on a result
       final chatGroupDetailRobot =

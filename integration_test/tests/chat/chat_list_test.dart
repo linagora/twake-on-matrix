@@ -24,8 +24,11 @@ void main() {
       //enter a non-existed group for searching
       await ChatScenario($).enterSearchText("noexist");
       //verify there is no result
-      s.softAssertEquals((await SearchRobot($).getNoResultIcon()).visible, true,
-          'lable "No Results" is not shown');
+      s.softAssertEquals(
+        (await SearchRobot($).getNoResultIcon()).visible,
+        true,
+        'lable "No Results" is not shown',
+      );
 
       //searching by a text that included in some groups
       await ChatScenario($).enterSearchText(currentAccount.substring(1, 3));
@@ -43,18 +46,20 @@ void main() {
       await ChatScenario($).enterSearchText(searchByMatrixAddress);
       //verify there is one result
       s.softAssertEquals(
-          (await ChatListRobot($).getListOfChatGroup()).length == 1,
-          true,
-          'Search by $searchByMatrixAddress Expected number of group is 1 , but found != 1');
+        (await ChatListRobot($).getListOfChatGroup()).length == 1,
+        true,
+        'Search by $searchByMatrixAddress Expected number of group is 1 , but found != 1',
+      );
 
       // search by full an address matrix but make it in case-sensitive format
       await ChatScenario($)
           .enterSearchText(searchByMatrixAddress.toUpperCase());
       //verify there is one result
       s.softAssertEquals(
-          (await ChatListRobot($).getListOfChatGroup()).length == 1,
-          true,
-          'Searhc by $searchByMatrixAddress.toUpperCase() Expected number of group is 1 , but found != 1');
+        (await ChatListRobot($).getListOfChatGroup()).length == 1,
+        true,
+        'Searhc by $searchByMatrixAddress.toUpperCase() Expected number of group is 1 , but found != 1',
+      );
 
       // search by current account
       await ChatScenario($).enterSearchText(currentAccount);

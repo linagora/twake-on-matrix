@@ -32,14 +32,26 @@ void main() {
       await ChatScenario($).createANewDirectMessage(user);
       // verify chat screen is shown
       s.softAssertEquals($(ChatView).exists, true, "Chat view is not shown");
-      s.softAssertEquals(ChatGroupDetailRobot($).getBackIcon().exists, true,
-          "Back icon is not shown");
-      s.softAssertEquals(ChatGroupDetailRobot($).getSearchIcon().exists, true,
-          "Seach icon is not shown");
-      s.softAssertEquals(ChatGroupDetailRobot($).getMoreIconInAppBar().exists,
-          false, "More icon is shown");
       s.softAssertEquals(
-          $(DraftChatEmpty).exists, false, "DraftChatEmpty view is shown");
+        ChatGroupDetailRobot($).getBackIcon().exists,
+        true,
+        "Back icon is not shown",
+      );
+      s.softAssertEquals(
+        ChatGroupDetailRobot($).getSearchIcon().exists,
+        true,
+        "Seach icon is not shown",
+      );
+      s.softAssertEquals(
+        ChatGroupDetailRobot($).getMoreIconInAppBar().exists,
+        false,
+        "More icon is shown",
+      );
+      s.softAssertEquals(
+        $(DraftChatEmpty).exists,
+        false,
+        "DraftChatEmpty view is shown",
+      );
 
       // try to send message
       await ChatScenario($).sendAMesage(message);
@@ -64,16 +76,23 @@ void main() {
       // click on Pen icon
       await ChatScenario($).createANewDirectMessage(account);
       // verify chat screen is shown
-      s.softAssertEquals($(DraftChatEmpty).$("No message here yet...").exists,
-          true, "No message here yet... is not shown");
       s.softAssertEquals(
-          $(DraftChatEmpty)
-              .$("Send a message or tap on the greeting below.")
-              .exists,
-          true,
-          "Send a message or tap on the greeting below is not shown");
+        $(DraftChatEmpty).$("No message here yet...").exists,
+        true,
+        "No message here yet... is not shown",
+      );
       s.softAssertEquals(
-          $(DraftChatEmpty).$("🤗").exists, true, "🤗... is not shown");
+        $(DraftChatEmpty)
+            .$("Send a message or tap on the greeting below.")
+            .exists,
+        true,
+        "Send a message or tap on the greeting below is not shown",
+      );
+      s.softAssertEquals(
+        $(DraftChatEmpty).$("🤗").exists,
+        true,
+        "🤗... is not shown",
+      );
       //try to send a message
       await ChatScenario($).sendAMesage(message);
       // verify the message is sent
@@ -97,16 +116,23 @@ void main() {
       // click on Pen icon
       await ChatScenario($).createANewDirectMessage(nonExisingAccount);
       // verify chat screen is shown
-      s.softAssertEquals($(DraftChatEmpty).$("No message here yet...").exists,
-          true, "No message here yet... is not shown");
       s.softAssertEquals(
-          $(DraftChatEmpty)
-              .$("Send a message or tap on the greeting below.")
-              .exists,
-          true,
-          "Send a message or tap on the greeting below is not shown");
+        $(DraftChatEmpty).$("No message here yet...").exists,
+        true,
+        "No message here yet... is not shown",
+      );
       s.softAssertEquals(
-          $(DraftChatEmpty).$("🤗").exists, true, "🤗... is not shown");
+        $(DraftChatEmpty)
+            .$("Send a message or tap on the greeting below.")
+            .exists,
+        true,
+        "Send a message or tap on the greeting below is not shown",
+      );
+      s.softAssertEquals(
+        $(DraftChatEmpty).$("🤗").exists,
+        true,
+        "🤗... is not shown",
+      );
 
       //try to send a message
       await ChatScenario($).sendAMesage(message);

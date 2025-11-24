@@ -586,7 +586,10 @@ class ChatScenario extends CoreRobot {
     final twakeListItem = ChatListRobot($).getChatGroupByTitle(title);
     await $.tester.ensureVisible(twakeListItem.root);
     final exists = isPinAChat(twakeListItem);
-    expect(exists, isPin,
-        reason: 'Expected pin=$isPin but got $exists for "$title"');
+    expect(
+      exists,
+      isPin,
+      reason: 'Expected pin=$isPin but got $exists for "$title"',
+    );
   }
 }

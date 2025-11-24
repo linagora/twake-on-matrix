@@ -19,8 +19,11 @@ void main() {
       await LanguageSettingRobot($).chooseVietnamese();
       //verify text is change to VietName
       String? language = LanguageSettingRobot($).getSelectedLanguage();
-      s.softAssertEquals(language == "Tiếng Việt", true,
-          'expected language is Tiếng Việt but it is $language');
+      s.softAssertEquals(
+        language == "Tiếng Việt",
+        true,
+        'expected language is Tiếng Việt but it is $language',
+      );
       s.softAssertEquals(
         LanguageSettingRobot($).getEnglishInDisplay() == "Tiếng anh",
         true,
@@ -46,8 +49,11 @@ void main() {
       await LanguageSettingRobot($).chooseFrench();
       //verify text is change to VietName
       language = LanguageSettingRobot($).getSelectedLanguage();
-      s.softAssertEquals(language == "Français", true,
-          'expected language is Français but it is $language');
+      s.softAssertEquals(
+        language == "Français",
+        true,
+        'expected language is Français but it is $language',
+      );
       s.softAssertEquals(
         LanguageSettingRobot($).getEnglishInDisplay() == "Anglais",
         true,
@@ -73,8 +79,11 @@ void main() {
       await LanguageSettingRobot($).chooseRussian();
       //verify text is change to VietName
       language = LanguageSettingRobot($).getSelectedLanguage();
-      s.softAssertEquals(language == "Русский", true,
-          'expected language is Русский but it is $language');
+      s.softAssertEquals(
+        language == "Русский",
+        true,
+        'expected language is Русский but it is $language',
+      );
       s.softAssertEquals(
         LanguageSettingRobot($).getEnglishInDisplay() == "Английский",
         true,
@@ -100,8 +109,11 @@ void main() {
       await LanguageSettingRobot($).chooseEnglish();
       //verify text is change to VietName
       language = LanguageSettingRobot($).getSelectedLanguage();
-      s.softAssertEquals(language == "English", true,
-          'expected language is English but it is $language');
+      s.softAssertEquals(
+        language == "English",
+        true,
+        'expected language is English but it is $language',
+      );
       s.softAssertEquals(
         LanguageSettingRobot($).getEnglishInDisplay() == "English",
         true,
@@ -126,7 +138,10 @@ void main() {
       //can back to Setting screen
       await LanguageSettingRobot($).backToSettingScreen();
       s.softAssertEquals(
-          $(SettingsView).exists, true, 'still back to Setting View');
+        $(SettingsView).exists,
+        true,
+        'still back to Setting View',
+      );
 
       s.verifyAll();
     },

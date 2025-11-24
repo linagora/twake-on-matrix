@@ -29,10 +29,11 @@ class NewChatRobot extends CoreRobot {
     await getSearchIcon().tap();
     await typeSlowlyWithPatrol($, getSearchField(), searchKey);
     await waitForEitherVisible(
-        $: $,
-        first: $(TwakeListItem),
-        second: $("No Results"),
-        timeout: const Duration(seconds: 10));
+      $: $,
+      first: $(TwakeListItem),
+      second: $("No Results"),
+      timeout: const Duration(seconds: 10),
+    );
   }
 
   Future<void> clickOnNewGroupChatIcon() async {

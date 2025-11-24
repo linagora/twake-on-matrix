@@ -19,8 +19,10 @@ class SettingForNewGroupRobot extends CoreRobot {
     return $(Checkbox).last;
   }
 
-  Future<void> settingForNewGroup(String name,
-      {bool encription = false}) async {
+  Future<void> settingForNewGroup(
+    String name, {
+    bool encription = false,
+  }) async {
     await getNameTextField().enterText(name);
     if (encription) {
       await getEncriptionCkb().tap();

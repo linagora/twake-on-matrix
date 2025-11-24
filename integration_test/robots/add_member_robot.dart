@@ -58,10 +58,11 @@ class AddMemberRobot extends CoreRobot {
     await getSearchIcon().tap();
     await typeSlowlyWithPatrol($, getSearchField(), searchKey);
     await waitForEitherVisible(
-        $: $,
-        first: $(ContactItem),
-        second: $("No Results"),
-        timeout: const Duration(seconds: 10));
+      $: $,
+      first: $(ContactItem),
+      second: $("No Results"),
+      timeout: const Duration(seconds: 10),
+    );
   }
 
   Future<void> clickOnNextIcon() async {
