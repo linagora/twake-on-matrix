@@ -17,7 +17,7 @@ void main() {
       const currentAccount = String.fromEnvironment('CurrentAccount');
 
       // goto contact screen
-      await HomeRobot($).gotoContactListAndGrantContactPermission();
+      await HomeRobot($).gotoContactListScreen();
       // verify we can scroll the screen to find a contact
       await ContactScenario($).verifyContactListCanBeScrollable(s);
 
