@@ -187,6 +187,7 @@ class SettingsContactsVisibilityView extends StatelessWidget {
     bool isSelected = false,
   }) {
     return InkWell(
+      key: Key('visibility_option_${option.name}'),
       onTap: !isSelected ? () => onTap?.call(option) : null,
       child: Row(
         children: [
@@ -225,6 +226,7 @@ class SettingsContactsVisibilityView extends StatelessWidget {
               height: 24,
               child: isSelected
                   ? Icon(
+                      key: Key('visibility_option_selected_${option.name}'),
                       Icons.check,
                       color: LinagoraSysColors.material().primary,
                       size: 24,
@@ -245,6 +247,7 @@ class SettingsContactsVisibilityView extends StatelessWidget {
     bool isSelected = false,
   }) {
     return InkWell(
+      key: Key('visible_field_option_${option.name}'),
       onTap: !isSelected ? () => onTap?.call(option) : null,
       child: Row(
         children: [
@@ -299,6 +302,7 @@ class SettingsContactsVisibilityView extends StatelessWidget {
               height: 24,
               child: isSelected
                   ? Icon(
+                      key: Key('visible_field_option_selected_${option.name}'),
                       Icons.check,
                       color: LinagoraSysColors.material().primary,
                       size: 24,
