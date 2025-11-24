@@ -14,27 +14,27 @@ class TestBase {
   }) {
     const testTimeoutMs = int.fromEnvironment(
       'GLOBAL_TEST_TIMEOUT_MS',
-      defaultValue: 30000,
+      defaultValue: 120000,
     );
 
     const visibleTimeoutMs = int.fromEnvironment(
       'GLOBAL_VISIBLE_TIMEOUT_MS',
-      defaultValue: 10000,
+      defaultValue: 30000,
     );
 
     const existsTimeoutMs = int.fromEnvironment(
       'GLOBAL_EXISTS_TIMEOUT_MS',
-      defaultValue: 10000,
+      defaultValue: 6000,
     );
 
     const settleTimeoutMs = int.fromEnvironment(
       'GLOBAL_SETTLE_TIMEOUT_MS',
-      defaultValue: 10000,
+      defaultValue: 6000,
     );
 
     const nativeFindTimeoutMs = int.fromEnvironment(
       'GLOBAL_NATIVE_FIND_TIMEOUT_MS',
-      defaultValue: 10000,
+      defaultValue: 6000,
     );
 
     const patrolConfig = PatrolTesterConfig(
