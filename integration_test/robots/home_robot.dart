@@ -21,10 +21,10 @@ class HomeRobot extends CoreRobot {
     return $('Settings');
   }
 
-  Future<ContactListRobot> gotoContactListAndGrantContactPermission() async {
+  Future<ContactListRobot> gotoContactListScreen() async {
     await (await getContactTab()).tap();
     await confirmShareContactInformation();
-    await confirmAccessContactIOS();
+    await confirmAccessContact();
 
     await $.pumpAndSettle();
     return ContactListRobot($);
