@@ -88,7 +88,7 @@ class _MessageDownloadContentWebState extends State<MessageDownloadContentWeb>
             event: event,
           );
         } else if (state is FileWebDownloadedPresentationState) {
-          return InkWell(
+          return FileTileWidget(
             onTap: () {
               handlePreviewWeb(
                 matrixFile: state.matrixFile,
@@ -96,22 +96,6 @@ class _MessageDownloadContentWebState extends State<MessageDownloadContentWeb>
                 context: context,
               );
             },
-            child: FileTileWidget(
-              mimeType: widget.event.mimeType,
-              fileType: filetype,
-              filename: filename,
-              highlightText: widget.highlightText,
-              sizeString: sizeString,
-              style: const MessageFileTileStyle(),
-              ownMessage: event.isOwnMessage,
-              event: event,
-            ),
-          );
-        }
-
-        return InkWell(
-          onTap: () => onDownloadFileTap(),
-          child: FileTileWidget(
             mimeType: widget.event.mimeType,
             fileType: filetype,
             filename: filename,
@@ -120,7 +104,19 @@ class _MessageDownloadContentWebState extends State<MessageDownloadContentWeb>
             style: const MessageFileTileStyle(),
             ownMessage: event.isOwnMessage,
             event: event,
-          ),
+          );
+        }
+
+        return FileTileWidget(
+          onTap: () => onDownloadFileTap(),
+          mimeType: widget.event.mimeType,
+          fileType: filetype,
+          filename: filename,
+          highlightText: widget.highlightText,
+          sizeString: sizeString,
+          style: const MessageFileTileStyle(),
+          ownMessage: event.isOwnMessage,
+          event: event,
         );
       },
     );
