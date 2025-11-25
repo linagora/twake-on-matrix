@@ -45,6 +45,7 @@ import 'package:fluffychat/presentation/mixins/handle_clipboard_action_mixin.dar
 import 'package:fluffychat/presentation/mixins/leave_chat_mixin.dart';
 import 'package:fluffychat/presentation/mixins/media_picker_mixin.dart';
 import 'package:fluffychat/presentation/mixins/paste_image_mixin.dart';
+import 'package:fluffychat/presentation/mixins/retry_text_message_mixin.dart';
 import 'package:fluffychat/presentation/mixins/save_file_to_twake_downloads_folder_mixin.dart';
 import 'package:fluffychat/presentation/mixins/save_media_to_gallery_android_mixin.dart';
 import 'package:fluffychat/presentation/mixins/send_files_mixin.dart';
@@ -144,6 +145,7 @@ class ChatController extends State<Chat>
         LeaveChatMixin,
         DeleteEventMixin,
         UnblockUserMixin,
+        RetryTextMessageMixin,
         AudioMixin,
         AutoMarkAsReadMixin {
   final NetworkConnectionService networkConnectionService =

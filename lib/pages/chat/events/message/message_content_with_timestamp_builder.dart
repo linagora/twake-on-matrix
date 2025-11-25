@@ -69,6 +69,7 @@ class MessageContentWithTimestampBuilder extends StatefulWidget {
   final void Function(BuildContext context, Event, TapDownDetails, double)?
       onTapMoreButton;
   final Future<Category?>? recentEmojiFuture;
+  final Future<void> Function(Event)? onRetryTextMessage;
 
   const MessageContentWithTimestampBuilder({
     super.key,
@@ -103,6 +104,7 @@ class MessageContentWithTimestampBuilder extends StatefulWidget {
     this.saveToGallery,
     this.onTapMoreButton,
     this.recentEmojiFuture,
+    this.onRetryTextMessage,
   });
 
   @override
@@ -627,23 +629,23 @@ class _MessageContentWithTimestampBuilderState
                     nextEvent: widget.nextEvent,
                     scrollToEventId: widget.scrollToEventId,
                     selectMode: widget.selectMode,
+                    onRetryTextMessage: widget.onRetryTextMessage,
                   ),
                   if (!widget.event.isReplyEventWithAudio())
-                    Positioned(
-                      child: OptionalSelectionContainerDisabled(
-                        isEnabled: PlatformInfos.isWeb,
-                        child: Padding(
-                          padding: MessageStyle.paddingMessageTime,
-                          child: Text.rich(
-                            WidgetSpan(
-                              child: MessageTime(
-                                timelineOverlayMessage:
-                                    widget.event.timelineOverlayMessage,
-                                room: widget.event.room,
-                                event: widget.event,
-                                showSeenIcon: widget.event.isOwnMessage,
-                                timeline: widget.timeline,
-                              ),
+                    OptionalSelectionContainerDisabled(
+                      isEnabled: PlatformInfos.isWeb,
+                      child: Padding(
+                        padding: MessageStyle.paddingMessageTime,
+                        child: Text.rich(
+                          WidgetSpan(
+                            child: MessageTime(
+                              timelineOverlayMessage:
+                                  widget.event.timelineOverlayMessage,
+                              room: widget.event.room,
+                              event: widget.event,
+                              showSeenIcon: widget.event.isOwnMessage,
+                              timeline: widget.timeline,
+                              onRetryTextMessage: widget.onRetryTextMessage,
                             ),
                           ),
                         ),

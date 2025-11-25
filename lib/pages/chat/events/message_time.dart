@@ -1,5 +1,6 @@
 import 'package:fluffychat/pages/chat/events/message/message_style.dart';
 import 'package:fluffychat/pages/chat/events/message_time_style.dart';
+import 'package:fluffychat/pages/chat/events/text_message_retry_button.dart';
 import 'package:fluffychat/pages/chat/seen_by_row.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
 import 'package:fluffychat/widgets/twake_components/twake_icon_button.dart';
@@ -19,6 +20,7 @@ class MessageTime extends StatelessWidget {
     required this.timeline,
     required this.timelineOverlayMessage,
     required this.room,
+    this.onRetryTextMessage,
   });
 
   final Event event;
@@ -26,6 +28,7 @@ class MessageTime extends StatelessWidget {
   final bool timelineOverlayMessage;
   final Timeline timeline;
   final Room room;
+  final Future<void> Function(Event)? onRetryTextMessage;
 
   @override
   Widget build(BuildContext context) {
@@ -87,6 +90,10 @@ class MessageTime extends StatelessWidget {
                     letterSpacing: 0.4,
                   ),
                 ),
+          ),
+          TextMessageRetryButton(
+            event: event,
+            onRetry: onRetryTextMessage,
           ),
           if (showSeenIcon) ...[
             SizedBox(width: MessageTimeStyle.paddingTimeAndIcon),
