@@ -13,7 +13,7 @@ name: Integration
 jobs:
   integration_test:
     name: Integration Test
-    runs-on: self-hosted   # Chạy trên runner của bạn
+    runs-on: self-hosted
     permissions:
       id-token: write
       contents: write
@@ -25,7 +25,7 @@ jobs:
       USERNAME: ${{ secrets.USERNAME }}
       PASSWORD: ${{ secrets.PASSWORD }}
       SERVER_URL: ${{ secrets.SERVER_URL }}
-      FLUTTER_VERSION: "3.38.2"   # Khớp với runner đã cài
+      FLUTTER_VERSION: "3.38.2"
       JAVA_VERSION: 17
 
     steps:
