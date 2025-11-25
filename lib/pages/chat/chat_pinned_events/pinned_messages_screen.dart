@@ -119,6 +119,8 @@ class PinnedMessagesScreen extends StatelessWidget {
                                     context,
                                     event,
                                   ),
+                                  onRetryTextMessage:
+                                      controller.retryTextMessage,
                                 );
                               },
                             );

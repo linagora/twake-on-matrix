@@ -20,6 +20,7 @@ class MessageContentBuilder extends StatelessWidget
   final void Function(Event)? onSelect;
   final Event? nextEvent;
   final bool selectMode;
+  final Future<void> Function(Event)? onRetryTextMessage;
 
   const MessageContentBuilder({
     super.key,
@@ -29,6 +30,7 @@ class MessageContentBuilder extends StatelessWidget
     this.nextEvent,
     this.scrollToEventId,
     this.selectMode = true,
+    this.onRetryTextMessage,
   });
 
   @override
@@ -94,6 +96,7 @@ class MessageContentBuilder extends StatelessWidget
                           showSeenIcon: event.isOwnMessage,
                           timeline: timeline,
                           room: event.room,
+                          onRetryTextMessage: onRetryTextMessage,
                         ),
                       ),
                       onTapSelectMode: () => selectMode
@@ -119,6 +122,7 @@ class MessageContentBuilder extends StatelessWidget
                               showSeenIcon: event.isOwnMessage,
                               timeline: timeline,
                               room: event.room,
+                              onRetryTextMessage: onRetryTextMessage,
                             ),
                           ),
                         ),
@@ -127,6 +131,7 @@ class MessageContentBuilder extends StatelessWidget
                   ],
                 ),
                 if (isNeedAddNewLine ||
+                    event.status.isError ||
                     isContainsTagName(event) ||
                     isContainsSpecialHTMLTag(event))
                   OptionalSelectionContainerDisabled(
@@ -145,6 +150,7 @@ class MessageContentBuilder extends StatelessWidget
                             showSeenIcon: event.isOwnMessage,
                             timeline: timeline,
                             room: event.room,
+                            onRetryTextMessage: onRetryTextMessage,
                           ),
                         ),
                       ),
