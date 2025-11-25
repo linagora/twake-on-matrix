@@ -145,14 +145,11 @@ class MessageContent extends StatelessWidget
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   if (event.isVideoAvailable) ...[
-                    OptionalSelectionContainerDisabled(
-                      isEnabled: PlatformInfos.isWeb,
-                      child: _MessageVideoBuilder(
+                    _MessageVideoBuilder(
+                      event: event,
+                      onFileTapped: (event) => onFileTapped(
+                        context: context,
                         event: event,
-                        onFileTapped: (event) => onFileTapped(
-                          context: context,
-                          event: event,
-                        ),
                       ),
                     ),
                   ] else
@@ -164,11 +161,8 @@ class MessageContent extends StatelessWidget
                             event,
                           ),
                         ] else ...[
-                          OptionalSelectionContainerDisabled(
-                            isEnabled: PlatformInfos.isWeb,
-                            child: MessageDownloadContentWeb(
-                              event,
-                            ),
+                          MessageDownloadContentWeb(
+                            event,
                           ),
                         ],
                         Padding(
@@ -267,7 +261,8 @@ class MessageContent extends StatelessWidget
                 ] else ...[
                   if (event.isSending()) ...[
                     OptionalSelectionContainerDisabled(
-                      isEnabled: PlatformInfos.isWeb,
+                      isEnabled: PlatformInfos.isWeb &&
+                          !event.isMediaAndFilesWithCaption(),
                       child: MessageUploadingContent(
                         event: event,
                         style: const MessageFileTileStyle(),
@@ -275,7 +270,8 @@ class MessageContent extends StatelessWidget
                     ),
                   ] else
                     OptionalSelectionContainerDisabled(
-                      isEnabled: PlatformInfos.isWeb,
+                      isEnabled: PlatformInfos.isWeb &&
+                          !event.isMediaAndFilesWithCaption(),
                       child: MessageDownloadContentWeb(
                         event,
                       ),

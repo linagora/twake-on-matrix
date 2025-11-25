@@ -173,17 +173,20 @@ class DownloadFileTileWidget extends StatelessWidget {
         ),
         if (event != null && event!.isMediaAndFilesWithCaption()) ...[
           const SizedBox(height: 8.0),
-          TwakeLinkPreview(
-            key: ValueKey('TwakeLinkPreview%${event!.eventId}%'),
-            event: event!,
-            localizedBody: event!.body,
-            ownMessage: ownMessage,
-            fontSize: AppConfig.messageFontSize * AppConfig.fontSizeFactor,
-            linkStyle: MessageContentStyle.linkStyleMessageContent(
-              context,
+          MouseRegion(
+            cursor: SystemMouseCursors.copy,
+            child: TwakeLinkPreview(
+              key: ValueKey('TwakeLinkPreview%${event!.eventId}%'),
+              event: event!,
+              localizedBody: event!.body,
+              ownMessage: ownMessage,
+              fontSize: AppConfig.messageFontSize * AppConfig.fontSizeFactor,
+              linkStyle: MessageContentStyle.linkStyleMessageContent(
+                context,
+              ),
+              richTextStyle: event!.getMessageTextStyle(context),
+              isCaption: event!.isMediaAndFilesWithCaption(),
             ),
-            richTextStyle: event!.getMessageTextStyle(context),
-            isCaption: event!.isMediaAndFilesWithCaption(),
           ),
         ],
       ],
