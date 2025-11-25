@@ -121,10 +121,6 @@ void main() {
       ) async {
         when(room.pushRuleState).thenReturn(PushRuleState.mentionsOnly);
         when(room.hasNewMessages).thenReturn(true);
-        when(room.notificationCount).thenReturn(0);
-        when(room.highlightCount).thenReturn(0);
-        when(room.markedUnread).thenReturn(false);
-        when(room.membership).thenReturn(Membership.join);
 
         final color = chatListItemMixinTest.notificationColor(
           context: context,
@@ -132,27 +128,6 @@ void main() {
         );
 
         expect(color, LinagoraRefColors.material().tertiary[30]);
-      });
-
-      testWidgets(
-          'WHEN has new message but no notification count\n'
-          'AND pushRuleState is notify\n'
-          'THEN color should be transparent (race condition)\n', (
-        WidgetTester tester,
-      ) async {
-        when(room.pushRuleState).thenReturn(PushRuleState.notify);
-        when(room.hasNewMessages).thenReturn(true);
-        when(room.notificationCount).thenReturn(0);
-        when(room.highlightCount).thenReturn(0);
-        when(room.markedUnread).thenReturn(false);
-        when(room.membership).thenReturn(Membership.join);
-
-        final color = chatListItemMixinTest.notificationColor(
-          context: context,
-          room: room,
-        );
-
-        expect(color, Colors.transparent);
       });
     });
 

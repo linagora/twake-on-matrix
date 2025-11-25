@@ -1256,20 +1256,9 @@ class ChatController extends State<Chat>
     return eventIndex;
   }
 
-  Future<void> scrollToEventId(
-    String eventId, {
-    bool highlight = true,
-    int maxAttempts = 3,
-    int currentAttempt = 0,
-  }) async {
+  Future<void> scrollToEventId(String eventId, {bool highlight = true}) async {
     final eventIndex = _getEventIndex(eventId);
     if (eventIndex == -1) {
-      if (currentAttempt >= maxAttempts) {
-        Logs().e(
-          'Chat::scrollToEventId(): Max attempts ($maxAttempts) reached for event $eventId',
-        );
-        return;
-      }
       setState(() {
         timeline = null;
         loadTimelineFuture = _getTimeline(
@@ -1283,12 +1272,7 @@ class ChatController extends State<Chat>
       await loadTimelineFuture;
       WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
         if (verifyEventIdInTimeline(timeline, eventId)) {
-          scrollToEventId(
-            eventId,
-            highlight: highlight,
-            maxAttempts: maxAttempts,
-            currentAttempt: currentAttempt + 1,
-          );
+          scrollToEventId(eventId, highlight: highlight);
         }
       });
       return;

@@ -310,6 +310,7 @@ class MatrixState extends State<Matrix>
   @override
   void initState() {
     super.initState();
+    initSettings();
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       WidgetsBinding.instance.addObserver(this);
       if (PlatformInfos.isWeb) {
@@ -322,9 +323,9 @@ class MatrixState extends State<Matrix>
       initReceiveSharingIntent();
       await tryToGetFederationConfigurations();
       if (PlatformInfos.isWeb) {
-        initConfigWeb().then((_) => initSettings());
+        initConfigWeb();
       } else {
-        initConfigMobile().then((_) => initSettings());
+        initConfigMobile();
       }
     });
   }

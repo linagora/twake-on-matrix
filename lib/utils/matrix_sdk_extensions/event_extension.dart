@@ -200,7 +200,7 @@ extension LocalizedBody on Event {
         MessageTypes.Image,
       }.contains(messageType) &&
       isVideoAvailable &&
-      !isMediaAndFilesWithCaption();
+      !isImageWithCaption();
 
   bool get hideDisplayNameInBubbleChat => {
         MessageTypes.Video,
@@ -416,57 +416,9 @@ extension LocalizedBody on Event {
     return reactionMap.isNotEmpty;
   }
 
-  bool isMediaAndFilesWithCaption() {
-    return (messageType == MessageTypes.Image ||
-            messageType == MessageTypes.Video ||
-            messageType == MessageTypes.File) &&
+  bool isImageWithCaption() {
+    return messageType == MessageTypes.Image &&
         text.isNotEmpty &&
         filename != text;
-  }
-
-  /// Checks if this event is the same as another event, considering both eventId and transaction_id.
-  /// Returns true if events match by eventId or by transaction_id (for sending/sent events).
-  bool isSameEvent(Event other) {
-    // Compare event IDs
-    if (eventId == other.eventId) {
-      return true;
-    }
-
-    // Get transaction IDs from unsigned field
-    final thisTransactionId = unsigned?['transaction_id'] as String?;
-    final otherTransactionId = other.unsigned?['transaction_id'] as String?;
-
-    // If both have transaction IDs, compare them
-    if (thisTransactionId != null && otherTransactionId != null) {
-      return thisTransactionId == otherTransactionId;
-    }
-
-    // Check if one event's eventId matches the other's transaction_id
-    // This handles the case where a sending event (with transaction_id) is replaced
-    // by a sent event (with eventId matching the transaction_id)
-    if (thisTransactionId != null && thisTransactionId == other.eventId) {
-      return true;
-    }
-    if (otherTransactionId != null && otherTransactionId == eventId) {
-      return true;
-    }
-
-    return false;
-  }
-
-  /// Finds this event in the map using the same logic as isSameEvent.
-  Event? findEventInMap(Map<String, Event> eventMap) {
-    // Try to find by eventId
-    final byEventId = eventMap[eventId];
-    if (byEventId != null) return byEventId;
-
-    // Try to find by transactionId
-    final transactionId = unsigned?['transaction_id'] as String?;
-    if (transactionId != null) {
-      final byTransactionId = eventMap[transactionId];
-      if (byTransactionId != null) return byTransactionId;
-    }
-
-    return null;
   }
 }

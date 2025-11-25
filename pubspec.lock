@@ -1641,7 +1641,7 @@ packages:
     description:
       path: "."
       ref: master
-      resolved-ref: ef7d32491a2a934aadcb74f1555bace2af7d56aa
+      resolved-ref: f7a29ac1c4de3ea26d749c38781a6f5e9b1b932d
       url: "git@github.com:linagora/inview_notifier_list.git"
     source: git
     version: "3.0.0"
@@ -1869,7 +1869,7 @@ packages:
     description:
       path: "."
       ref: "twake-supported-0.22.6"
-      resolved-ref: ff523818c22ed27745facf80863c503ad2ab6dc4
+      resolved-ref: aaf4b1719b387595c594329e3d9a6808dcaa37b9
       url: "git@github.com:linagora/matrix-dart-sdk.git"
     source: git
     version: "0.22.6"

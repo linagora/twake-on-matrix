@@ -66,10 +66,9 @@ class MessageContent extends StatelessWidget
       case EventTypes.Sticker:
         switch (event.messageType) {
           case MessageTypes.Image:
-            if (event.isMediaAndFilesWithCaption()) {
+            if (event.isImageWithCaption()) {
               return Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
                 children: [
                   MessageImageBuilder(
                     event: event,
@@ -92,7 +91,7 @@ class MessageContent extends StatelessWidget
                         context,
                       ),
                       richTextStyle: event.getMessageTextStyle(context),
-                      isCaption: event.isMediaAndFilesWithCaption(),
+                      isCaption: event.isImageWithCaption(),
                     ),
                   ),
                 ],
@@ -137,74 +136,7 @@ class MessageContent extends StatelessWidget
                 event,
               ),
             );
-
           case MessageTypes.Video:
-            if (event.isMediaAndFilesWithCaption()) {
-              return Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  if (event.isVideoAvailable) ...[
-                    OptionalSelectionContainerDisabled(
-                      isEnabled: PlatformInfos.isWeb,
-                      child: _MessageVideoBuilder(
-                        event: event,
-                        onFileTapped: (event) => onFileTapped(
-                          context: context,
-                          event: event,
-                        ),
-                      ),
-                    ),
-                  ] else
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      children: [
-                        if (!PlatformInfos.isWeb) ...[
-                          MessageDownloadContent(
-                            event,
-                          ),
-                        ] else ...[
-                          OptionalSelectionContainerDisabled(
-                            isEnabled: PlatformInfos.isWeb,
-                            child: MessageDownloadContentWeb(
-                              event,
-                            ),
-                          ),
-                        ],
-                        Padding(
-                          padding: MessageContentStyle.endOfBubbleWidgetPadding,
-                          child: OptionalSelectionContainerDisabled(
-                            isEnabled: PlatformInfos.isWeb,
-                            child: Text.rich(
-                              WidgetSpan(
-                                child: endOfBubbleWidget,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  SizedBox(
-                    width: MessageStyle.messageBubbleWidthVideoCaption(
-                      event: event,
-                      context: context,
-                    ),
-                    child: TwakeLinkPreview(
-                      key: ValueKey('TwakeLinkPreview%${event.eventId}%'),
-                      event: event,
-                      localizedBody: event.body,
-                      ownMessage: ownMessage,
-                      fontSize: fontSize,
-                      linkStyle: MessageContentStyle.linkStyleMessageContent(
-                        context,
-                      ),
-                      richTextStyle: event.getMessageTextStyle(context),
-                      isCaption: event.isMediaAndFilesWithCaption(),
-                    ),
-                  ),
-                ],
-              );
-            }
             if (event.isVideoAvailable) {
               return OptionalSelectionContainerDisabled(
                 isEnabled: PlatformInfos.isWeb,
@@ -249,10 +181,7 @@ class MessageContent extends StatelessWidget
 
           case MessageTypes.File:
             return Column(
-              crossAxisAlignment: event.isMediaAndFilesWithCaption()
-                  ? CrossAxisAlignment.start
-                  : CrossAxisAlignment.end,
-              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.end,
               children: [
                 if (!PlatformInfos.isWeb) ...[
                   if (event.isSending()) ...[
@@ -281,18 +210,17 @@ class MessageContent extends StatelessWidget
                       ),
                     ),
                 ],
-                if (!event.isMediaAndFilesWithCaption())
-                  Padding(
-                    padding: MessageContentStyle.endOfBubbleWidgetPadding,
-                    child: OptionalSelectionContainerDisabled(
-                      isEnabled: PlatformInfos.isWeb,
-                      child: Text.rich(
-                        WidgetSpan(
-                          child: endOfBubbleWidget,
-                        ),
+                Padding(
+                  padding: MessageContentStyle.endOfBubbleWidgetPadding,
+                  child: OptionalSelectionContainerDisabled(
+                    isEnabled: PlatformInfos.isWeb,
+                    child: Text.rich(
+                      WidgetSpan(
+                        child: endOfBubbleWidget,
                       ),
                     ),
                   ),
+                ),
               ],
             );
 
@@ -408,16 +336,23 @@ class _MessageVideoBuilder extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final matrixFile = event.getMatrixFile();
+    DisplayImageInfo? displayImageInfo = Size(
+      MessageContentStyle.imageWidth(context),
+      MessageContentStyle.imageHeight(context),
+    ).getDisplayImageInfo(context);
 
-    DisplayImageInfo? displayImageInfo =
-        event.getOriginalResolution()?.getDisplayImageInfo(context);
-
+    final thumbnailSize = event.getOriginalResolution();
+    if (thumbnailSize != null) {
+      displayImageInfo = thumbnailSize.getDisplayImageInfo(context);
+    }
     if (isSendingVideo(matrixFile)) {
       final file = matrixFile as MatrixVideoFile;
-      displayImageInfo = Size(
-        file.width?.toDouble() ?? MessageContentStyle.imageWidth(context),
-        file.height?.toDouble() ?? MessageContentStyle.imageHeight(context),
-      ).getDisplayImageInfo(context);
+      if (file.width != null && file.height != null) {
+        displayImageInfo = Size(
+          file.width!.toDouble(),
+          file.height!.toDouble(),
+        ).getDisplayImageInfo(context);
+      }
       return SendingVideoWidget(
         key: ValueKey(event.eventId),
         event: event,
@@ -425,15 +360,6 @@ class _MessageVideoBuilder extends StatelessWidget {
         displayImageInfo: displayImageInfo,
       );
     }
-
-    displayImageInfo ??= DisplayImageInfo(
-      size: Size(
-        MessageContentStyle.imageWidth(context),
-        MessageContentStyle.imageHeight(context),
-      ),
-      hasBlur: true,
-    );
-
     if (PlatformInfos.isWeb) {
       if (event.isSending()) {
         return MessageVideoUploadContentWeb(

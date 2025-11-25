@@ -152,8 +152,7 @@ class Message extends StatefulWidget {
   State<Message> createState() => _MessageState();
 }
 
-class _MessageState extends State<Message>
-    with MessageAvatarMixin, AutomaticKeepAliveClientMixin {
+class _MessageState extends State<Message> with MessageAvatarMixin {
   InViewState? inViewState;
 
   final inviewNotifier = ValueNotifier(false);
@@ -209,7 +208,6 @@ class _MessageState extends State<Message>
 
   @override
   Widget build(BuildContext context) {
-    super.build(context);
     if (!{
       EventTypes.Message,
       EventTypes.Sticker,
@@ -429,7 +427,4 @@ class _MessageState extends State<Message>
       ),
     );
   }
-
-  @override
-  bool get wantKeepAlive => true;
 }

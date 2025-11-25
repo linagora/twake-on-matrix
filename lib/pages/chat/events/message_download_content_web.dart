@@ -85,7 +85,6 @@ class _MessageDownloadContentWebState extends State<MessageDownloadContentWeb>
             },
             ownMessage: event.isOwnMessage,
             hasError: state is DownloadErrorPresentationState,
-            event: event,
           );
         } else if (state is FileWebDownloadedPresentationState) {
           return InkWell(
@@ -104,7 +103,6 @@ class _MessageDownloadContentWebState extends State<MessageDownloadContentWeb>
               sizeString: sizeString,
               style: const MessageFileTileStyle(),
               ownMessage: event.isOwnMessage,
-              event: event,
             ),
           );
         }
@@ -119,7 +117,6 @@ class _MessageDownloadContentWebState extends State<MessageDownloadContentWeb>
             sizeString: sizeString,
             style: const MessageFileTileStyle(),
             ownMessage: event.isOwnMessage,
-            event: event,
           ),
         );
       },

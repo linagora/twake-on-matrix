@@ -1,8 +1,8 @@
+import 'package:collection/collection.dart';
 import 'package:fluffychat/config/themes.dart';
 import 'package:fluffychat/pages/chat/chat.dart';
 import 'package:fluffychat/pages/chat/chat_event_list_item.dart';
-import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
-import 'package:fluffychat/utils/matrix_sdk_extensions/event_list_extension.dart';
+import 'package:fluffychat/utils/matrix_sdk_extensions/filtered_timeline_extension.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:inview_notifier_list/inview_notifier_list.dart';
@@ -35,6 +35,36 @@ class _ChatScrollViewState extends State<ChatScrollView> {
     _bottom.addAll(widget.events);
   }
 
+  /// Checks if two events are the same, considering both eventId and transaction_id.
+  /// Returns true if events match by eventId or by transaction_id (for sending/sent events).
+  bool _isSameEvent(Event a, Event b) {
+    // Compare event IDs
+    if (a.eventId == b.eventId) {
+      return true;
+    }
+
+    // Get transaction IDs from unsigned field
+    final aTransactionId = a.unsigned?['transaction_id'] as String?;
+    final bTransactionId = b.unsigned?['transaction_id'] as String?;
+
+    // If both have transaction IDs, compare them
+    if (aTransactionId != null && bTransactionId != null) {
+      return aTransactionId == bTransactionId;
+    }
+
+    // Check if one event's eventId matches the other's transaction_id
+    // This handles the case where a sending event (with transaction_id) is replaced
+    // by a sent event (with eventId matching the transaction_id)
+    if (aTransactionId != null && aTransactionId == b.eventId) {
+      return true;
+    }
+    if (bTransactionId != null && bTransactionId == a.eventId) {
+      return true;
+    }
+
+    return false;
+  }
+
   @override
   void didUpdateWidget(ChatScrollView oldWidget) {
     super.didUpdateWidget(oldWidget);
@@ -47,26 +77,83 @@ class _ChatScrollViewState extends State<ChatScrollView> {
 
     if (widget.events == oldWidget.events) return;
 
-    // Use the extension to sync event lists
-    final result = EventListExtension.syncEventLists(
-      oldEvents: oldWidget.events,
-      newEvents: widget.events,
-      currentTop: _top,
-      currentBottom: _bottom,
-      wasRequestingFuture: wasRequestingFutureBeforeUpdate,
-    );
+    final oldEvents = oldWidget.events;
+    final newEvents = widget.events;
 
-    // Update the lists
-    _top
-      ..clear()
-      ..addAll(result.top);
-    _bottom
-      ..clear()
-      ..addAll(result.bottom);
+    // Check if new items are completely different
+    final hasCommonItems = oldEvents.any((item) => newEvents.contains(item));
 
-    // Scroll to bottom if needed
-    if (result.shouldScrollToBottom) {
-      _scrollToBottom();
+    if (!hasCommonItems) {
+      // Completely different list - clear _top and set _bottom to new items
+      _top.clear();
+      _bottom.clear();
+      _bottom.addAll(newEvents);
+      return;
+    }
+
+    // First, update existing events that may have changed (e.g., sending -> sent)
+    _updateExistingEvents(newEvents);
+
+    // Find new items at the start
+    int startDiff = 0;
+    while (startDiff < newEvents.length &&
+        !_isSameEvent(newEvents[startDiff], oldEvents[0])) {
+      startDiff++;
+    }
+
+    // Find new items at the end
+    int endDiff = 0;
+    while (endDiff < newEvents.length &&
+        !_isSameEvent(
+          newEvents[newEvents.length - 1 - endDiff],
+          oldEvents[oldEvents.length - 1],
+        )) {
+      endDiff++;
+    }
+
+    // Add new items at the start to _top
+    if (startDiff > 0) {
+      final newStartItems = newEvents.sublist(0, startDiff);
+      _top.addAll(newStartItems.reversed);
+
+      // If new events arrived at the start and it's not from requestFuture,
+      // scroll to the bottom to show the new events.
+      // We check if we were NOT requesting future before this update.
+      // Additionally, only scroll if at least one event in _top is visible in GUI.
+      if (!wasRequestingFutureBeforeUpdate &&
+          _top.any((event) => event.isVisibleInGui)) {
+        _scrollToBottom();
+      }
+    }
+
+    // Add new items at the end to _bottom
+    if (endDiff > 0) {
+      final newEndItems = newEvents.sublist(newEvents.length - endDiff);
+      _bottom.addAll(newEndItems);
+    }
+  }
+
+  /// Updates existing events in _top and _bottom that have changed.
+  /// This handles cases like sending events becoming sent events.
+  void _updateExistingEvents(List<Event> newEvents) {
+    // Update events in _top
+    for (int i = 0; i < _top.length; i++) {
+      final matchingEvent = newEvents.firstWhereOrNull(
+        (newEvent) => _isSameEvent(_top[i], newEvent),
+      );
+      if (matchingEvent != null && matchingEvent != _top[i]) {
+        _top[i] = matchingEvent;
+      }
+    }
+
+    // Update events in _bottom
+    for (int i = 0; i < _bottom.length; i++) {
+      final matchingEvent = newEvents.firstWhereOrNull(
+        (newEvent) => _isSameEvent(_bottom[i], newEvent),
+      );
+      if (matchingEvent != null && matchingEvent != _bottom[i]) {
+        _bottom[i] = matchingEvent;
+      }
     }
   }
 
@@ -121,16 +208,7 @@ class _ChatScrollViewState extends State<ChatScrollView> {
                   }
                   return const SizedBox.shrink();
                 }
-                final currentEvent = _bottom[index];
-                final currentEventIndex = widget.events.indexWhere(
-                  (e) => e.isSameEvent(currentEvent),
-                );
-
-                // If event is not in widget.events anymore, skip rendering it
-                if (currentEventIndex == -1) {
-                  return const SizedBox.shrink();
-                }
-
+                final currentEventIndex = widget.events.indexOf(_bottom[index]);
                 final previousEvent = currentEventIndex > 0
                     ? widget.events[currentEventIndex - 1]
                     : null;
@@ -138,7 +216,7 @@ class _ChatScrollViewState extends State<ChatScrollView> {
                     ? widget.events[currentEventIndex + 1]
                     : null;
                 return ChatEventListItem(
-                  event: currentEvent,
+                  event: _bottom[index],
                   index: currentEventIndex + 1,
                   controller: controller,
                   constraints: widget.constraints,
@@ -169,16 +247,7 @@ class _ChatScrollViewState extends State<ChatScrollView> {
                   }
                   return const SizedBox.shrink();
                 }
-                final currentEvent = _top[index];
-                final currentEventIndex = widget.events.indexWhere(
-                  (e) => e.isSameEvent(currentEvent),
-                );
-
-                // If event is not in widget.events anymore, skip rendering it
-                if (currentEventIndex == -1) {
-                  return const SizedBox.shrink();
-                }
-
+                final currentEventIndex = widget.events.indexOf(_top[index]);
                 final previousEvent = currentEventIndex > 0
                     ? widget.events[currentEventIndex - 1]
                     : null;
@@ -186,7 +255,7 @@ class _ChatScrollViewState extends State<ChatScrollView> {
                     ? widget.events[currentEventIndex + 1]
                     : null;
                 return ChatEventListItem(
-                  event: currentEvent,
+                  event: _top[index],
                   index: currentEventIndex + 1,
                   controller: controller,
                   constraints: widget.constraints,
