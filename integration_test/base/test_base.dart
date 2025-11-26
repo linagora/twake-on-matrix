@@ -7,7 +7,7 @@ import '../scenarios/login_scenario.dart';
 
 class TestBase {
   void runPatrolTest({
-    required String description,
+    required String description, String? user, String? pass,
     required Function(PatrolIntegrationTester $) test,
     NativeAutomatorConfig? nativeAutomatorConfig,
     dynamic tags = const [],
@@ -27,7 +27,7 @@ class TestBase {
       FlutterError.onError = (FlutterErrorDetails details) {
         originalOnError(details);
       };
-      await loginAndRun($);
+      await loginAndRun($, user, pass);
       await test($);
     });
   }
@@ -37,13 +37,13 @@ class TestBase {
   }
 
   Future<void> loginAndRun(
-    PatrolIntegrationTester $,
+    PatrolIntegrationTester $, String? user , String? pass,
   ) async {
     final loginScenario = LoginScenario(
       $,
-      username: const String.fromEnvironment('USERNAME'),
+      username: user ?? const String.fromEnvironment('USERNAME'),
+      password: pass ?? const String.fromEnvironment('PASSWORD'),
       serverUrl: const String.fromEnvironment('SERVER_URL'),
-      password: const String.fromEnvironment('PASSWORD'),
     );
 
     await loginScenario.login();
