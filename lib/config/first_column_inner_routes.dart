@@ -25,8 +25,8 @@ class FirstColumnInnerRoutes {
   static Route<dynamic> routes(String? routerName, {Object? arguments}) {
     switch (routerName) {
       case 'innernavigator/search':
-        return _defaultPageRoute(
-          const Search(),
+        return PageRouteBuilder(
+          pageBuilder: (_, __, ___) => const Search(),
         );
       case 'innernavigator/newgroup':
         return _defaultPageRoute(
