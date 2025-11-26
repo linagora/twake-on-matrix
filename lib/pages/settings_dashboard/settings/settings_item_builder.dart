@@ -39,6 +39,7 @@ class SettingsItemBuilder extends StatelessWidget {
     return TwakeInkWell(
       isSelected: isSelected,
       onTap: onTap,
+      key: key,
       child: SizedBox(
         height: height ?? SettingsViewStyle.settingsItemHeight,
         child: Padding(
