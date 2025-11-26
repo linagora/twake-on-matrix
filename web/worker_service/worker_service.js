@@ -1,6 +1,4 @@
 // Constants
-const FALLBACK_TIMEOUT_MS = 1500;
-const HIDDEN_THRESHOLD_MS = 800;
 const BANNER_Z_INDEX = "9999999";
 const BANNER_SELECTOR = ".smart-banner";
 
@@ -8,7 +6,7 @@ const BANNER_SELECTOR = ".smart-banner";
 const platformConfig = {
   ios: {
     name: "iOS",
-    storeUrl: "https://apps.apple.com/app/twake-chat/id6473384641",
+    storeUrl: "https://apps.apple.com/cm/app/twake-chat/id6473384641",
     pattern: /iPhone|iPad|iPod/i,
   },
   android: {
@@ -18,7 +16,7 @@ const platformConfig = {
   },
 };
 
-const openAppDeepLink = "twake.chat://openapp";
+const universalLinkBase = "https://links.twake.app/chat";
 
 function getPlatform() {
   const ua = navigator.userAgent || navigator.vendor || window.opera;
@@ -33,54 +31,41 @@ function getStoreUrl(platform) {
   return null;
 }
 
+function getUniversalLink(platform) {
+  const storeUrl = getStoreUrl(platform);
+  if (!storeUrl) return null;
+  return `${universalLinkBase}?fallback=${encodeURIComponent(storeUrl)}`;
+}
+
 function openTwakeChatApp() {
   const platform = getPlatform();
-  const storeUrl = getStoreUrl(platform);
+  const universalLink = getUniversalLink(platform);
 
-  if (!storeUrl) {
+  if (!universalLink) {
     closeSmartBanner();
     return;
   }
 
-  let fallbackTimer = null;
-  let hiddenAt = null;
+  console.log('[Twake Banner] Opening universal link:', universalLink);
 
-  const onVisibility = () => {
-    if (document.hidden) {
-      hiddenAt = Date.now();
-      clearFallback();
-    }
-  };
+  // Try to open universal link in new tab
+  // Universal links will automatically:
+  // - Open the app if installed
+  // - Redirect to fallback URL if app not installed
+  const newWindow = window.open(universalLink, '_blank');
 
-  const onBlur = () => {
-    hiddenAt = Date.now();
-    clearFallback();
-  };
-
-  const onPageHide = () => clearFallback();
-
-  const clearFallback = () => {
-    if (fallbackTimer) {
-      clearTimeout(fallbackTimer);
-      fallbackTimer = null;
-    }
-    window.removeEventListener("blur", onBlur);
-    document.removeEventListener("visibilitychange", onVisibility);
-    window.removeEventListener("pagehide", onPageHide);
-  };
-
-  document.addEventListener("visibilitychange", onVisibility);
-  window.addEventListener("blur", onBlur);
-  window.addEventListener("pagehide", onPageHide);
-
-  window.location.href = openAppDeepLink;
-
-  fallbackTimer = setTimeout(() => {
-    const recentlyHidden = hiddenAt && (Date.now() - hiddenAt <= HIDDEN_THRESHOLD_MS);
-    if (!document.hidden && !recentlyHidden) {
-      window.location.href = storeUrl;
-    }
-  }, FALLBACK_TIMEOUT_MS);
+  // Check if popup was blocked (common in cross-origin iframes)
+  if (!newWindow || newWindow.closed || typeof newWindow.closed === 'undefined') {
+    console.warn('[Twake Banner] ⚠️ Popup blocked - likely in restrictive iframe');
+    console.log('[Twake Banner] Universal link:', universalLink);
+    console.log('[Twake Banner] Copy the link above to test manually');
+    // Popup was blocked - in a production environment, you might want to:
+    // - Show a message to the user
+    // - Try alternative approaches (e.g., navigate parent window if allowed)
+    // - Or silently fail (current behavior)
+  } else {
+    console.log('[Twake Banner] ✅ Universal link opened successfully');
+  }
 
   closeSmartBanner();
 }
