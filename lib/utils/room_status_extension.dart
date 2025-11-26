@@ -25,7 +25,10 @@ extension RoomStatusExtension on Room {
   String getLocalizedTypingText(L10n l10n) {
     var typingText = '';
     final typingUsers = this.typingUsers;
-    typingUsers.removeWhere((User u) => u.id == client.userID);
+    final ignoredUsers = client.ignoredUsers;
+    typingUsers.removeWhere(
+      (User u) => u.id == client.userID || ignoredUsers.contains(u.id),
+    );
 
     if (typingUsers.isEmpty) return '';
 

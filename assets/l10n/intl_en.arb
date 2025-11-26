@@ -3482,5 +3482,6 @@
     "placeholders": {
       "count": {}
     }
-  }
+  },
+  "unbanUserToSendMessages": "Unban user to send messages"
 }

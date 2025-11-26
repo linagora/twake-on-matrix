@@ -21,8 +21,8 @@ class ChatViewBodyStyle {
           ? LinagoraSysColors.material().background
           : LinagoraSysColors.material().onPrimary;
 
-  static EdgeInsets inputBarPadding(BuildContext context) => EdgeInsets.only(
-        left: responsive.isMobile(context) ? 8.0 : 16.0,
-        right: responsive.isMobile(context) ? 8.0 : 16.0,
+  static EdgeInsets inputBarPadding(BuildContext context) =>
+      EdgeInsets.symmetric(
+        horizontal: responsive.isMobile(context) ? 8.0 : 16.0,
       );
 }
