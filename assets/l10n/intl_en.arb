@@ -3491,5 +3491,7 @@
   "nobody": "Nobody",
   "chooseWhichDetailsAreVisibleToOtherUsers": "CHOOSE WHICH DETAILS ARE VISIBLE TO OTHER USERS",
   "youNumberIsVisibleAccordingToTheSettingAbove": "Your number is visible according to the setting above",
-  "youEmailIsVisibleAccordingToTheSettingAbove": "Your email is visible according to the setting above"
+  "youEmailIsVisibleAccordingToTheSettingAbove": "Your email is visible according to the setting above",
+  "failedToChangeContactsVisibility": "Failed to change contacts visibility",
+  "failedToGetContactsVisibility": "Failed to get contacts visibility"
 }

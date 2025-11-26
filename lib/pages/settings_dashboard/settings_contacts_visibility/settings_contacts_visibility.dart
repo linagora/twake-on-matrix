@@ -12,6 +12,8 @@ import 'package:fluffychat/domain/usecase/user_info/update_user_info_visibility_
 import 'package:fluffychat/pages/settings_dashboard/settings_contacts_visibility/settings_contacts_visibility_enum.dart';
 import 'package:fluffychat/pages/settings_dashboard/settings_contacts_visibility/settings_contacts_visibility_view.dart';
 import 'package:fluffychat/utils/dialog/twake_dialog.dart';
+import 'package:fluffychat/utils/twake_snackbar.dart';
+import 'package:fluffychat/generated/l10n/app_localizations.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -83,12 +85,20 @@ class SettingsContactsVisibilityController
         );
         break;
       case SettingsContactsVisibilityEnum.contacts:
-        selectedVisibilityOptionNotifier.value = option;
+        updateUserInfoVisibility(
+          userInfoVisibility: UserInfoVisibilityRequest(
+            visibility: option.name,
+            visibleFields: selectedVisibleFieldNotifier.value.isEmpty
+                ? visibleFieldsOptions
+                : selectedVisibleFieldNotifier.value,
+          ),
+        );
         break;
       case SettingsContactsVisibilityEnum.private:
         updateUserInfoVisibility(
           userInfoVisibility: UserInfoVisibilityRequest(
             visibility: option.name,
+            visibleFields: selectedVisibleFieldNotifier.value,
           ),
         );
         break;
@@ -102,7 +112,6 @@ class SettingsContactsVisibilityController
                 .where((field) => field != selectedField)
                 .toList()
             : [...selectedVisibleFieldNotifier.value, selectedField];
-    selectedVisibleFieldNotifier.value = currentVisibleFields;
     updateUserInfoVisibility(
       userInfoVisibility: UserInfoVisibilityRequest(
         visibility: SettingsContactsVisibilityEnum.contacts.name,
@@ -126,6 +135,10 @@ class SettingsContactsVisibilityController
         (failure) {
           if (failure is UpdateUserInfoVisibilityFailure) {
             TwakeDialog.hideLoadingDialog(context);
+            TwakeSnackBar.show(
+              context,
+              L10n.of(context)!.failedToChangeContactsVisibility,
+            );
           }
         },
         (success) {
@@ -159,6 +172,10 @@ class SettingsContactsVisibilityController
         (failure) {
           if (failure is GetUserInfoVisibilityFailure) {
             TwakeDialog.hideLoadingDialog(context);
+            TwakeSnackBar.show(
+              context,
+              L10n.of(context)!.failedToGetContactsVisibility,
+            );
           }
         },
         (success) {
