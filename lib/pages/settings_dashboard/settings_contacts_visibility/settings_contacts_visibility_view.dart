@@ -188,7 +188,7 @@ class SettingsContactsVisibilityView extends StatelessWidget {
   }) {
     return InkWell(
       key: Key('visibility_option_${option.name}'),
-      onTap: !isSelected ? () => onTap?.call(option) : null,
+      onTap: () => onTap?.call(option),
       child: Row(
         children: [
           Expanded(
@@ -248,7 +248,7 @@ class SettingsContactsVisibilityView extends StatelessWidget {
   }) {
     return InkWell(
       key: Key('visible_field_option_${option.name}'),
-      onTap: !isSelected ? () => onTap?.call(option) : null,
+      onTap: () => onTap?.call(option),
       child: Row(
         children: [
           Expanded(
