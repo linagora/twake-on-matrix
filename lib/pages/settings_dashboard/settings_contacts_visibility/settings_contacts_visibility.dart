@@ -75,6 +75,9 @@ class SettingsContactsVisibilityController
       ValueNotifier<List<VisibleEnum>>([]);
 
   void onSelectVisibilityOption(SettingsContactsVisibilityEnum option) {
+    if (option == selectedVisibilityOptionNotifier.value) {
+      return;
+    }
     switch (option) {
       case SettingsContactsVisibilityEnum.public:
         updateUserInfoVisibility(
