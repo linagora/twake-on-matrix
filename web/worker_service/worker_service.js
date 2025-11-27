@@ -73,12 +73,12 @@ function openTwakeChatApp() {
   window.addEventListener("blur", onBlur);
   window.addEventListener("pagehide", onPageHide);
 
-  window.open(openAppDeepLink, "_blank");
+  window.location.href = openAppDeepLink;
 
   fallbackTimer = setTimeout(() => {
     const recentlyHidden = hiddenAt && (Date.now() - hiddenAt <= HIDDEN_THRESHOLD_MS);
     if (!document.hidden && !recentlyHidden) {
-      window.open(storeUrl, "_blank");
+      window.open(storeUrl, '_top');
     }
   }, FALLBACK_TIMEOUT_MS);
 
