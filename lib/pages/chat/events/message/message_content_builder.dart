@@ -61,6 +61,8 @@ class MessageContentBuilder extends StatelessWidget
         );
         final stepWidth = sizeMessageBubble?.totalMessageWidth;
         final isNeedAddNewLine = sizeMessageBubble?.isNeedAddNewLine ?? false;
+        final isTextMessageError =
+            event.status.isError && event.messageType == MessageTypes.Text;
 
         return OptionalPadding(
           padding: const EdgeInsets.only(bottom: 8),
@@ -131,7 +133,7 @@ class MessageContentBuilder extends StatelessWidget
                   ],
                 ),
                 if (isNeedAddNewLine ||
-                    event.status.isError ||
+                    isTextMessageError ||
                     isContainsTagName(event) ||
                     isContainsSpecialHTMLTag(event))
                   OptionalSelectionContainerDisabled(
