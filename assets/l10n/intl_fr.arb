@@ -3445,7 +3445,7 @@
   "@unblock": {},
   "unblockDescriptionDialog": "Vous recevrez à nouveau des messages de cette personne. Elle ne sera pas informée que vous l'aviez bloquée et que vous la débloquez.",
   "@unblockDescriptionDialog": {},
-  "report": "Repporter",
+  "report": "Signaler",
   "@report": {},
   "sendReport": "Reporter",
   "@sendReport": {},
