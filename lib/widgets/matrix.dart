@@ -3,10 +3,12 @@ import 'dart:io';
 import 'package:fluffychat/config/localizations/localization_service.dart';
 import 'package:fluffychat/data/model/federation_server/federation_configuration.dart';
 import 'package:fluffychat/data/model/federation_server/federation_server_information.dart';
+import 'package:fluffychat/domain/app_state/room/create_support_chat_state.dart';
 import 'package:fluffychat/domain/contact_manager/contacts_manager.dart';
 import 'package:fluffychat/domain/exception/federation_configuration_not_found.dart';
 import 'package:fluffychat/domain/repository/federation_configurations_repository.dart';
 import 'package:fluffychat/domain/repository/user_info/user_info_repository.dart';
+import 'package:fluffychat/domain/usecase/room/create_support_chat_interactor.dart';
 import 'package:fluffychat/event/twake_event_types.dart';
 import 'package:fluffychat/pages/chat/events/audio_message/audio_player_widget.dart';
 import 'package:fluffychat/presentation/mixins/init_config_mixin.dart';
@@ -147,6 +149,7 @@ class MatrixState extends State<Matrix>
 
   late String currentClientSecret;
   RequestTokenResponse? currentThreepidCreds;
+  String? supportChatRoomId;
 
   Future<SetActiveClientState> setActiveClient(Client? newClient) async {
     final index = widget.clients.indexWhere(
@@ -161,11 +164,25 @@ class MatrixState extends State<Matrix>
       await _getUserInfoWithActiveClient(newClient);
       await _getHomeserverInformation(newClient);
       getIt.get<ContactsManager>().refreshTomContacts(client);
+      await _createSupportChat(newClient);
       return SetActiveClientState.success;
     } else {
       Logs().w('Tried to set an unknown client ${newClient!.userID} as active');
       return SetActiveClientState.unknownClient;
     }
+  }
+
+  Future<void> _createSupportChat(Client client) async {
+    final state =
+        await getIt.get<CreateSupportChatInteractor>().execute(client).last;
+    supportChatRoomId = state.fold(
+      (failure) => null,
+      (success) => switch (success) {
+        SupportChatExisted(:final roomId) => roomId,
+        SupportChatCreated(:final roomId) => roomId,
+        _ => null,
+      },
+    );
   }
 
   List<Client?>? get currentBundle {

@@ -22,6 +22,10 @@ class ChatEventList extends StatelessWidget {
   Widget build(BuildContext context) {
     final events = List<Event>.from(controller.timeline!.events);
 
+    // if (controller.isEmptySupportChat) {
+    //   return EmptySupportChatView(controller: controller);
+    // }
+
     if (controller.hasNoMessageEvents) {
       return Column(
         mainAxisAlignment: MainAxisAlignment.center,
