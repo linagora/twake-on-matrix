@@ -488,8 +488,8 @@ class UploadManager {
           }
         },
         onTaskCompleted: () {
-          room.sendingFilePlaceholders.remove(txid);
           if (uploadInfo?.isFailed != true) {
+            room.sendingFilePlaceholders.remove(txid);
             _clearFileTask(txid);
           }
         },

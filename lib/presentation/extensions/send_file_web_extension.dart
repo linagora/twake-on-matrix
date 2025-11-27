@@ -65,12 +65,17 @@ extension SendFileWebExtension on Room {
     // Check media config of the server before sending the file. Stop if the
     // Media config is unreachable or the file is bigger than the given maxsize.
     try {
-      final mediaConfig = await client.getConfig();
-      final maxMediaSize = mediaConfig.mUploadSize;
+      int maxMediaSize = 0;
+      try {
+        final mediaConfig = await client.getConfig();
+        maxMediaSize = mediaConfig.mUploadSize ?? 0;
+      } catch (e) {
+        Logs().e('Cannot get media config', e);
+      }
       Logs().d(
         'SendImage::sendImageFileEvent(): FileSized ${file.size} || maxMediaSize $maxMediaSize',
       );
-      if (maxMediaSize != null && maxMediaSize < file.size) {
+      if (maxMediaSize > 0 && maxMediaSize < file.size) {
         uploadStreamController?.add(
           Left(
             UploadFileFailedState(
