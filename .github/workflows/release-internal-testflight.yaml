@@ -1,0 +1,114 @@
+on:
+  # Option 1: Manual trigger with GitHub UI
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version number (e.g., 1.0.0) - leave empty to use latest git tag'
+        required: false
+        type: string
+      reason:
+        description: 'Reason for internal release'
+        required: false
+        type: string
+
+  # Option 2: Push to specific branch (e.g., internal/*)
+  push:
+    branches:
+      - 'internal/**'
+
+env:
+  FLUTTER_VERSION: 3.32.8
+  XCODE_VERSION: 16.0
+
+name: Release Internal TestFlight
+
+jobs:
+  release_internal_ios:
+    name: Release iOS Internal TestFlight
+    runs-on: macos-14
+    # No environment needed - uses repository-level secrets
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Fetch all history for tags
+
+      - name: Determine version number
+        id: version
+        run: |
+          if [ "${{ github.event_name }}" == "workflow_dispatch" ] && [ -n "${{ github.event.inputs.version }}" ]; then
+            # Use manually provided version
+            VERSION="${{ github.event.inputs.version }}"
+            echo "Using manual version: $VERSION"
+          else
+            # Use latest git tag, fallback to pubspec.yaml version
+            LATEST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
+            if [ -n "$LATEST_TAG" ]; then
+              VERSION=$(echo "$LATEST_TAG" | sed 's/^v//')
+              echo "Using latest tag version: $VERSION"
+            else
+              # Fallback: read from pubspec.yaml
+              VERSION=$(grep '^version:' pubspec.yaml | sed 's/version: //' | sed 's/+.*//')
+              echo "Using pubspec.yaml version: $VERSION"
+            fi
+          fi
+
+          # Validate version format (x.y.z)
+          if ! echo "$VERSION" | grep -E '^[0-9]+\.[0-9]+\.[0-9]+$'; then
+            echo "Error: Invalid version format. Must be x.y.z (e.g., 1.0.0)"
+            echo "Got: $VERSION"
+            exit 1
+          fi
+
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "✅ Version determined: $VERSION"
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: "stable"
+          cache: true
+          cache-key: "flutter-:os:-:channel:-:version:-:arch:-:hash:-${{ hashFiles('**/pubspec.lock') }}"
+
+      - uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.SSH_KEY }}
+
+      - name: Setup Fastlane
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "3.3"
+          bundler-cache: true
+          working-directory: ios
+
+      - name: Select Xcode version
+        uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: ${{ env.XCODE_VERSION }}
+
+      - name: Prepare iOS
+        run: ./scripts/prepare-ios.sh
+
+      - name: Release to Internal TestFlight
+        env:
+          APPLE_CERTIFICATES_SSH_KEY: ${{ secrets.APPLE_CERTIFICATES_SSH_KEY }}
+          APPLE_KEY_ID: ${{ secrets.APPLE_KEY_ID }}
+          APPLE_ISSUER_ID: ${{ secrets.APPLE_ISSUER_ID }}
+          APPLE_KEY_CONTENT: ${{ secrets.APPLE_KEY_CONTENT }}
+          MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
+          INTERNAL_VERSION: ${{ steps.version.outputs.version }}
+        run: ../scripts/release-ios-internal.sh
+        working-directory: ios
+
+      - name: Notify on success
+        if: success()
+        run: |
+          echo "✅ Internal TestFlight release successful"
+          echo "📱 Version: ${{ steps.version.outputs.version }}"
+          echo "👥 Distribution: Internal Testers group only"
+          echo "🔖 Branch: ${{ github.ref_name }}"
+          if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
+            echo "📝 Reason: ${{ github.event.inputs.reason || 'No reason provided' }}"
+          fi
