@@ -11,10 +11,10 @@ on:
         required: false
         type: string
 
-  # Option 2: Push to specific branch (e.g., internal/*)
+  # Option 2: Create tag on internal/* branches (e.g., git tag internal-1.0.0 && git push --tags)
   push:
-    branches:
-      - 'internal/**'
+    tags:
+      - 'internal-*'
 
 env:
   FLUTTER_VERSION: 3.32.8
@@ -26,7 +26,7 @@ jobs:
   release_internal_ios:
     name: Release iOS Internal TestFlight
     runs-on: macos-14
-    # No environment needed - uses repository-level secrets
+    environment: prod  # Use same environment as beta lane to access secrets
 
     steps:
       - name: Checkout repository
@@ -41,11 +41,16 @@ jobs:
             # Use manually provided version
             VERSION="${{ github.event.inputs.version }}"
             echo "Using manual version: $VERSION"
+          elif [ "${{ github.event_name }}" == "push" ] && [[ "${{ github.ref }}" == refs/tags/internal-* ]]; then
+            # Extract version from internal tag (e.g., internal-1.2.3 -> 1.2.3)
+            TAG_NAME="${{ github.ref_name }}"
+            VERSION=$(echo "$TAG_NAME" | sed 's/^internal-//')
+            echo "Using tag version from $TAG_NAME: $VERSION"
           else
             # Use latest git tag, fallback to pubspec.yaml version
             LATEST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
             if [ -n "$LATEST_TAG" ]; then
-              VERSION=$(echo "$LATEST_TAG" | sed 's/^v//')
+              VERSION=$(echo "$LATEST_TAG" | sed 's/^v//' | sed 's/^internal-//')
               echo "Using latest tag version: $VERSION"
             else
               # Fallback: read from pubspec.yaml
