@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:dio/dio.dart';
 import 'package:fluffychat/pages/chat/events/download_video_state.dart';
 import 'package:fluffychat/pages/chat/events/event_video_player.dart';
@@ -31,7 +33,7 @@ class DownloadVideoWidget extends StatefulWidget {
 class _DownloadVideoWidgetState extends State<DownloadVideoWidget>
     with HandleVideoDownloadMixin, PlayVideoActionMixin {
   final _downloadStateNotifier = ValueNotifier(DownloadVideoState.initial);
-  String? path;
+  Uint8List? bytes;
   final downloadProgressNotifier = ValueNotifier(0.0);
   final cancelToken = CancelToken();
 
@@ -58,7 +60,7 @@ class _DownloadVideoWidgetState extends State<DownloadVideoWidget>
     if (!mounted) return;
     _downloadStateNotifier.value = DownloadVideoState.loading;
     try {
-      path = await handleDownloadVideoEvent(
+      bytes = await handleDownloadVideoEvent(
         event: widget.event,
         playVideoAction: PlatformInfos.isWeb
             ? (path) => playVideoAction(
@@ -73,12 +75,6 @@ class _DownloadVideoWidgetState extends State<DownloadVideoWidget>
         cancelToken: cancelToken,
       );
       _downloadStateNotifier.value = DownloadVideoState.done;
-    } on MatrixConnectionException catch (e) {
-      _downloadStateNotifier.value = DownloadVideoState.failed;
-      TwakeSnackBar.show(
-        context,
-        e.toLocalizedString(context),
-      );
     } catch (e, s) {
       _downloadStateNotifier.value = DownloadVideoState.failed;
       TwakeSnackBar.show(
@@ -152,10 +148,10 @@ class _DownloadVideoWidgetState extends State<DownloadVideoWidget>
                     case DownloadVideoState.done:
                       return InkWell(
                         onTap: () {
-                          if (path != null) {
+                          if (bytes != null) {
                             playVideoAction(
                               context,
-                              path!,
+                              bytes!,
                               event: widget.event,
                               isReplacement: false,
                             );

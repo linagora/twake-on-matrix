@@ -50,27 +50,12 @@ mixin DownloadFileOnMobileMixin<T extends StatefulWidget> on State<T> {
     if (downloadFileStateNotifier.isDisposed) {
       return;
     }
-    checkFileExistInMemory();
     await checkFileInDownloadsInApp();
 
     _trySetupDownloadingStreamSubcription();
     if (streamSubscription != null) {
       downloadFileStateNotifier.value = const DownloadingPresentationState();
     }
-  }
-
-  bool checkFileExistInMemory() {
-    if (downloadFileStateNotifier.isDisposed) {
-      return false;
-    }
-    final filePathInMem = event.getFilePathFromMem();
-    if (filePathInMem?.isNotEmpty == true) {
-      downloadFileStateNotifier.value = DownloadedPresentationState(
-        filePath: filePathInMem!,
-      );
-      return true;
-    }
-    return false;
   }
 
   Future<void> checkFileInDownloadsInApp() async {

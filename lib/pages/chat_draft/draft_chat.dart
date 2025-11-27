@@ -11,7 +11,8 @@ import 'package:fluffychat/domain/app_state/contact/get_contacts_state.dart';
 import 'package:fluffychat/domain/app_state/direct_chat/create_direct_chat_success.dart';
 import 'package:fluffychat/domain/contact_manager/contacts_manager.dart';
 import 'package:fluffychat/domain/model/extensions/contact/contact_extension.dart';
-import 'package:fluffychat/domain/model/extensions/platform_file/platform_file_extension.dart';
+import 'package:fluffychat/domain/model/extensions/xfile/xfile_extension.dart';
+import 'package:fluffychat/domain/model/file_info/file_info.dart';
 import 'package:fluffychat/domain/usecase/create_direct_chat_interactor.dart';
 import 'package:fluffychat/domain/usecase/reactions/get_recent_reactions_interactor.dart';
 import 'package:fluffychat/domain/usecase/reactions/store_recent_reactions_interactor.dart';
@@ -302,9 +303,7 @@ class DraftChatController extends State<DraftChat>
 
         final fileInfo = FileInfo(
           matrixFile.name,
-          matrixFile.filePath ?? '',
-          matrixFile.size,
-          readStream: matrixFile.readStream,
+          bytes: matrixFile.bytes,
         );
 
         final txid = client.generateUniqueTransactionId();
@@ -352,18 +351,9 @@ class DraftChatController extends State<DraftChat>
   }) async {
     _createRoom(
       onRoomCreatedSuccess: (room) async {
-        if (audioFile.filePath == null || audioFile.filePath?.isEmpty == true) {
-          TwakeSnackBar.show(
-            context,
-            L10n.of(context)!.audioMessageFailedToSend,
-          );
-          return;
-        }
-
         final fileInfo = FileInfo(
           audioFile.name,
-          audioFile.filePath ?? '',
-          audioFile.size,
+          bytes: audioFile.bytes,
         );
 
         final txid = client.generateUniqueTransactionId();
@@ -550,16 +540,16 @@ class DraftChatController extends State<DraftChat>
     Room? room,
   }) async {
     final result = await FilePicker.platform.pickFiles(
-      withReadStream: true,
+      withData: true,
       allowMultiple: true,
     );
     if (result == null || result.files.isEmpty) return;
 
-    final matrixFilesList = result.files
-        .map(
-          (file) => file.toMatrixFileOnWeb().detectFileType,
-        )
-        .toList();
+    final matrixFilesList = await Future.wait(
+      result.xFiles.map(
+        (file) async => (await file.toMatrixFileOnWeb()).detectFileType,
+      ),
+    );
 
     _handleSendFileOnWeb(context, matrixFilesList);
   }

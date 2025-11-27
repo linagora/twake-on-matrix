@@ -155,10 +155,8 @@ class HomeserverPickerController extends State<HomeserverPicker>
       final homeserverSummary =
           await matrix.getLoginClient().checkHomeserver(homeserver);
 
-      final homeserverFromSummary = homeserverSummary
-              .discoveryInformation?.mHomeserver.baseUrl
-              .toString() ??
-          '';
+      final homeserverFromSummary =
+          homeserverSummary.$1?.mHomeserver.baseUrl.toString() ?? '';
 
       final cleanHomeserver = homeserverFromSummary.endsWith('/')
           ? homeserverFromSummary.substring(0, homeserverFromSummary.length - 1)
@@ -177,8 +175,10 @@ class HomeserverPickerController extends State<HomeserverPicker>
         return;
       }
 
-      matrix.loginHomeserverSummary =
-          await matrix.getLoginClient().checkHomeserver(homeserver);
+      matrix.loginHomeserverSummary = await matrix
+          .getLoginClient()
+          .checkHomeserver(homeserver)
+          .toHomeserverSummary();
       final ssoSupported = matrix.loginHomeserverSummary!.loginFlows
           .any((flow) => flow.type == 'm.login.sso');
 
