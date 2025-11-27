@@ -64,7 +64,7 @@ void main() {
             WellKnownMixin.supportContact: testSupportContactId,
           },
         });
-        when(mockClient.getAccountData(testUserId, 'm.history.support_room'))
+        when(mockClient.getAccountData(testUserId, 'app.twake.support_room'))
             .thenThrow(Exception('No account data found'));
         when(
           mockMediaAPI.uploadFileWeb(
@@ -90,7 +90,7 @@ void main() {
         when(
           mockClient.setAccountData(
             testUserId,
-            'm.history.support_room',
+            'app.twake.support_room',
             any,
           ),
         ).thenAnswer((_) async => {});
@@ -111,7 +111,7 @@ void main() {
         );
 
         verify(mockClient.getWellknown()).called(1);
-        verify(mockClient.getAccountData(testUserId, 'm.history.support_room'))
+        verify(mockClient.getAccountData(testUserId, 'app.twake.support_room'))
             .called(1);
         verify(
           mockClient.createGroupChat(
@@ -126,7 +126,7 @@ void main() {
         verify(
           mockClient.setAccountData(
             testUserId,
-            'm.history.support_room',
+            'app.twake.support_room',
             {'createdSupportChat': testRoomId},
           ),
         ).called(1);
@@ -141,7 +141,7 @@ void main() {
             WellKnownMixin.supportContact: testSupportContactId,
           },
         });
-        when(mockClient.getAccountData(testUserId, 'm.history.support_room'))
+        when(mockClient.getAccountData(testUserId, 'app.twake.support_room'))
             .thenAnswer(
           (_) async => {'createdSupportChat': testRoomId},
         );
@@ -163,16 +163,18 @@ void main() {
         );
 
         verify(mockClient.getWellknown()).called(1);
-        verify(mockClient.getAccountData(testUserId, 'm.history.support_room'))
+        verify(mockClient.getAccountData(testUserId, 'app.twake.support_room'))
             .called(1);
         verify(mockClient.getRoomById(testRoomId)).called(1);
-        verifyNever(mockClient.createGroupChat(
-          groupName: anyNamed('groupName'),
-          invite: anyNamed('invite'),
-          preset: anyNamed('preset'),
-          initialState: anyNamed('initialState'),
-          powerLevelContentOverride: anyNamed('powerLevelContentOverride'),
-        ),);
+        verifyNever(
+          mockClient.createGroupChat(
+            groupName: anyNamed('groupName'),
+            invite: anyNamed('invite'),
+            preset: anyNamed('preset'),
+            initialState: anyNamed('initialState'),
+            powerLevelContentOverride: anyNamed('powerLevelContentOverride'),
+          ),
+        );
       });
 
       test(
@@ -185,7 +187,7 @@ void main() {
             WellKnownMixin.supportContact: testSupportContactId,
           },
         });
-        when(mockClient.getAccountData(testUserId, 'm.history.support_room'))
+        when(mockClient.getAccountData(testUserId, 'app.twake.support_room'))
             .thenThrow(Exception('No account data'));
         when(
           mockMediaAPI.uploadFileWeb(
@@ -211,7 +213,7 @@ void main() {
         when(
           mockClient.setAccountData(
             testUserId,
-            'm.history.support_room',
+            'app.twake.support_room',
             any,
           ),
         ).thenAnswer((_) async => {});
@@ -231,15 +233,17 @@ void main() {
           ]),
         );
 
-        verify(mockClient.getAccountData(testUserId, 'm.history.support_room'))
+        verify(mockClient.getAccountData(testUserId, 'app.twake.support_room'))
             .called(1);
-        verify(mockClient.createGroupChat(
-          groupName: 'Support Twake Workplace',
-          invite: [testSupportContactId],
-          preset: CreateRoomPreset.trustedPrivateChat,
-          initialState: anyNamed('initialState'),
-          powerLevelContentOverride: anyNamed('powerLevelContentOverride'),
-        ),).called(1);
+        verify(
+          mockClient.createGroupChat(
+            groupName: 'Support Twake Workplace',
+            invite: [testSupportContactId],
+            preset: CreateRoomPreset.trustedPrivateChat,
+            initialState: anyNamed('initialState'),
+            powerLevelContentOverride: anyNamed('powerLevelContentOverride'),
+          ),
+        ).called(1);
       });
     });
 
@@ -268,13 +272,15 @@ void main() {
         );
 
         verify(mockClient.getWellknown()).called(1);
-        verifyNever(mockClient.createGroupChat(
-          groupName: anyNamed('groupName'),
-          invite: anyNamed('invite'),
-          preset: anyNamed('preset'),
-          initialState: anyNamed('initialState'),
-          powerLevelContentOverride: anyNamed('powerLevelContentOverride'),
-        ),);
+        verifyNever(
+          mockClient.createGroupChat(
+            groupName: anyNamed('groupName'),
+            invite: anyNamed('invite'),
+            preset: anyNamed('preset'),
+            initialState: anyNamed('initialState'),
+            powerLevelContentOverride: anyNamed('powerLevelContentOverride'),
+          ),
+        );
       });
 
       test('should fail when support contact is not a string', () async {
@@ -330,13 +336,15 @@ void main() {
         );
 
         verify(mockClient.getWellknown()).called(1);
-        verifyNever(mockClient.createGroupChat(
-          groupName: anyNamed('groupName'),
-          invite: anyNamed('invite'),
-          preset: anyNamed('preset'),
-          initialState: anyNamed('initialState'),
-          powerLevelContentOverride: anyNamed('powerLevelContentOverride'),
-        ),);
+        verifyNever(
+          mockClient.createGroupChat(
+            groupName: anyNamed('groupName'),
+            invite: anyNamed('invite'),
+            preset: anyNamed('preset'),
+            initialState: anyNamed('initialState'),
+            powerLevelContentOverride: anyNamed('powerLevelContentOverride'),
+          ),
+        );
       });
 
       test('should fail when avatar upload fails', () async {
@@ -347,7 +355,7 @@ void main() {
             WellKnownMixin.supportContact: testSupportContactId,
           },
         });
-        when(mockClient.getAccountData(testUserId, 'm.history.support_room'))
+        when(mockClient.getAccountData(testUserId, 'app.twake.support_room'))
             .thenThrow(Exception('No account data found'));
         when(
           mockMediaAPI.uploadFileWeb(
@@ -372,13 +380,15 @@ void main() {
         );
 
         verify(mockMediaAPI.uploadFileWeb(file: anyNamed('file'))).called(1);
-        verifyNever(mockClient.createGroupChat(
-          groupName: anyNamed('groupName'),
-          invite: anyNamed('invite'),
-          preset: anyNamed('preset'),
-          initialState: anyNamed('initialState'),
-          powerLevelContentOverride: anyNamed('powerLevelContentOverride'),
-        ),);
+        verifyNever(
+          mockClient.createGroupChat(
+            groupName: anyNamed('groupName'),
+            invite: anyNamed('invite'),
+            preset: anyNamed('preset'),
+            initialState: anyNamed('initialState'),
+            powerLevelContentOverride: anyNamed('powerLevelContentOverride'),
+          ),
+        );
       });
 
       test('should fail when room creation fails', () async {
@@ -389,7 +399,7 @@ void main() {
             WellKnownMixin.supportContact: testSupportContactId,
           },
         });
-        when(mockClient.getAccountData(testUserId, 'm.history.support_room'))
+        when(mockClient.getAccountData(testUserId, 'app.twake.support_room'))
             .thenThrow(Exception('No account data found'));
         when(
           mockMediaAPI.uploadFileWeb(
@@ -446,7 +456,7 @@ void main() {
             WellKnownMixin.supportContact: testSupportContactId,
           },
         });
-        when(mockClient.getAccountData(testUserId, 'm.history.support_room'))
+        when(mockClient.getAccountData(testUserId, 'app.twake.support_room'))
             .thenThrow(Exception('No account data found'));
         when(
           mockMediaAPI.uploadFileWeb(
@@ -496,7 +506,7 @@ void main() {
             WellKnownMixin.supportContact: testSupportContactId,
           },
         });
-        when(mockClient.getAccountData(testUserId, 'm.history.support_room'))
+        when(mockClient.getAccountData(testUserId, 'app.twake.support_room'))
             .thenThrow(Exception('No account data found'));
         when(
           mockMediaAPI.uploadFileWeb(
@@ -551,7 +561,7 @@ void main() {
             WellKnownMixin.supportContact: testSupportContactId,
           },
         });
-        when(mockClient.getAccountData(testUserId, 'm.history.support_room'))
+        when(mockClient.getAccountData(testUserId, 'app.twake.support_room'))
             .thenThrow(Exception('No account data found'));
         when(
           mockMediaAPI.uploadFileWeb(
@@ -579,7 +589,7 @@ void main() {
         when(
           mockClient.setAccountData(
             testUserId,
-            'm.history.support_room',
+            'app.twake.support_room',
             {'createdSupportChat': null},
           ),
         ).thenAnswer((_) async => {});
@@ -604,7 +614,7 @@ void main() {
         verify(
           mockClient.setAccountData(
             testUserId,
-            'm.history.support_room',
+            'app.twake.support_room',
             {'createdSupportChat': null},
           ),
         ).called(1);
@@ -618,7 +628,7 @@ void main() {
             WellKnownMixin.supportContact: testSupportContactId,
           },
         });
-        when(mockClient.getAccountData(testUserId, 'm.history.support_room'))
+        when(mockClient.getAccountData(testUserId, 'app.twake.support_room'))
             .thenThrow(Exception('No account data found'));
         when(
           mockMediaAPI.uploadFileWeb(
@@ -647,7 +657,7 @@ void main() {
         when(
           mockClient.setAccountData(
             testUserId,
-            'm.history.support_room',
+            'app.twake.support_room',
             {'createdSupportChat': null},
           ),
         ).thenThrow(Exception('Set account data failed'));
