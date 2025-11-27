@@ -33,7 +33,9 @@ class LoginScenario extends BaseScenario {
         password: password,
       );
     }
-    await $(ChatList).waitUntilVisible(timeout: const Duration(seconds: 120),);
+    await $(ChatList).waitUntilVisible(
+      timeout: const Duration(seconds: 120),
+    );
     await loginRobot.grantNotificationPermission();
   }
 

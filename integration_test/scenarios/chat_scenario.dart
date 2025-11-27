@@ -557,13 +557,12 @@ class ChatScenario extends CoreRobot {
     final pin = takeListItem.getPinIcon();
     return pin.visible;
   }
-  
+
   Future<void> pinAChat(String title) async {
     final twakeListItem = ChatListRobot($).getChatGroupByTitle(title);
     ChatListRobot($).scrollUntilVisible($, twakeListItem.root);
-    
-    if(!isPinAChat(twakeListItem))
-    {
+
+    if (!isPinAChat(twakeListItem)) {
       await $.tester.ensureVisible(twakeListItem.root);
       await twakeListItem.root.longPress();
       await $.waitUntilVisible(twakeListItem.getCheckBox());
@@ -575,8 +574,7 @@ class ChatScenario extends CoreRobot {
     final twakeListItem = ChatListRobot($).getChatGroupByTitle(title);
     ChatListRobot($).scrollUntilVisible($, twakeListItem.root);
 
-    if(isPinAChat(twakeListItem))
-    {
+    if (isPinAChat(twakeListItem)) {
       await $.tester.ensureVisible(twakeListItem.root);
       await twakeListItem.root.longPress();
       await $.waitUntilVisible(twakeListItem.getCheckBox());
@@ -588,6 +586,10 @@ class ChatScenario extends CoreRobot {
     final twakeListItem = ChatListRobot($).getChatGroupByTitle(title);
     await $.tester.ensureVisible(twakeListItem.root);
     final exists = isPinAChat(twakeListItem);
-    expect(exists, isPin, reason: 'Expected pin=$isPin but got $exists for "$title"');
+    expect(
+      exists,
+      isPin,
+      reason: 'Expected pin=$isPin but got $exists for "$title"',
+    );
   }
 }

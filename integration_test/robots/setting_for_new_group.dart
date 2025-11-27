@@ -18,12 +18,14 @@ class SettingForNewGroupRobot extends CoreRobot {
   PatrolFinder getEncriptionCkb() {
     return $(Checkbox).last;
   }
-  
-  Future<void> settingForNewGroup(String name, {bool encription = false}) async{
+
+  Future<void> settingForNewGroup(
+    String name, {
+    bool encription = false,
+  }) async {
     await getNameTextField().enterText(name);
-    if(encription){
+    if (encription) {
       await getEncriptionCkb().tap();
     }
   }
-
 }
