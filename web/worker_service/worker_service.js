@@ -73,12 +73,30 @@ function openTwakeChatApp() {
   window.addEventListener("blur", onBlur);
   window.addEventListener("pagehide", onPageHide);
 
-  window.location.href = openAppDeepLink;
+  console.log('[Twake Banner] Attempting to open app with deep link:', openAppDeepLink);
+
+  // Use a hidden iframe to try the deep link without breaking the main app
+  const deepLinkIframe = document.createElement("iframe");
+  deepLinkIframe.style.display = "none";
+  deepLinkIframe.src = openAppDeepLink;
+  document.body.appendChild(deepLinkIframe);
+
+  // Clean up the iframe after a short delay
+  setTimeout(() => {
+    if (document.body.contains(deepLinkIframe)) {
+      document.body.removeChild(deepLinkIframe);
+    }
+  }, 1000);
 
   fallbackTimer = setTimeout(() => {
     const recentlyHidden = hiddenAt && (Date.now() - hiddenAt <= HIDDEN_THRESHOLD_MS);
+    console.log('[Twake Banner] Fallback timer triggered. document.hidden:', document.hidden, 'recentlyHidden:', recentlyHidden);
+
     if (!document.hidden && !recentlyHidden) {
+      console.log('[Twake Banner] Redirecting to store:', storeUrl);
       window.open(storeUrl, '_top');
+    } else {
+      console.log('[Twake Banner] App likely opened, skipping store redirect');
     }
   }, FALLBACK_TIMEOUT_MS);
 
