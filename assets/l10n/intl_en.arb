@@ -3488,5 +3488,6 @@
     "placeholders": {
       "count": {}
     }
-  }
+  },
+  "refreshingLastEvent": "Refreshing last event"
 }

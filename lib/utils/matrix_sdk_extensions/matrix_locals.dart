@@ -355,8 +355,7 @@ class MatrixLocals extends MatrixLocalizations {
   }
 
   @override
-  // TODO: implement refreshingLastEvent
-  String get refreshingLastEvent => throw UnimplementedError();
+  String get refreshingLastEvent => l10n.refreshingLastEvent;
 
   @override
   String requestedKeyVerification(String senderName) {

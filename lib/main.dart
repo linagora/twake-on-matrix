@@ -16,6 +16,7 @@ import 'package:linagora_design_flutter/cozy_config_manager/cozy_config_manager.
 import 'package:matrix/matrix.dart';
 import 'package:media_kit/media_kit.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
 import 'utils/background_push.dart';
 import 'widgets/lock_screen.dart';
@@ -31,6 +32,9 @@ void main() async {
   SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
   MediaKit.ensureInitialized();
   await vod.init();
+  if (PlatformInfos.isMobile) {
+    databaseFactory = databaseFactoryFfi;
+  }
   fallbackDatabase = await MatrixSdkDatabase.init(
     '${AppConfig.applicationName}-${DateTime.now().millisecondsSinceEpoch}',
     database: await openSqfliteDb(),
