@@ -40,7 +40,7 @@ class PinnedMessagesScreen extends StatelessWidget {
         ),
         leading: TwakeIconButton(
           tooltip: L10n.of(context)!.back,
-          icon: Icons.chevron_left_outlined,
+          icon: Icons.arrow_back_ios,
           onTap: controller.onClickBackButton,
         ),
         actions: [

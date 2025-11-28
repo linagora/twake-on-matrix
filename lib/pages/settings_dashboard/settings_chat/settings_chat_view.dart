@@ -35,7 +35,7 @@ class SettingsChatView extends StatelessWidget {
                 padding: TwakeAppBarStyle.leadingIconPadding,
                 child: IconButton(
                   tooltip: L10n.of(context)!.back,
-                  icon: const Icon(Icons.chevron_left_outlined),
+                  icon: const Icon(Icons.arrow_back_ios),
                   onPressed: () => context.pop(),
                   iconSize: TwakeAppBarStyle.leadingIconSize,
                 ),

@@ -40,7 +40,7 @@ class MediaViewerAppbarView extends StatelessWidget {
                       IconButton(
                         icon: Icon(
                           MediaViewerAppBar.responsiveUtils.isMobile(context)
-                              ? Icons.chevron_left_outlined
+                              ? Icons.arrow_back_ios
                               : Icons.close,
                           color: LinagoraSysColors.material().onPrimary,
                         ),
