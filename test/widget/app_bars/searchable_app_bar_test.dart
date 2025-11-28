@@ -64,7 +64,7 @@ void main() {
       expect(find.byIcon(Icons.close), findsOneWidget);
       expect(
         find.byIcon(
-          Icons.chevron_left_outlined,
+          Icons.arrow_back_ios,
         ),
         findsNothing,
       );
@@ -110,7 +110,7 @@ void main() {
       expect(find.byIcon(Icons.search_outlined), findsNothing);
       expect(
         find.byIcon(
-          Icons.chevron_left_outlined,
+          Icons.arrow_back_ios,
         ),
         findsOneWidget,
       );
@@ -169,7 +169,7 @@ void main() {
       expect(find.byIcon(Icons.close), findsNothing);
       expect(
         find.byIcon(
-          Icons.chevron_left_outlined,
+          Icons.arrow_back_ios,
         ),
         findsOneWidget,
       );
@@ -187,7 +187,7 @@ void main() {
       expect(find.byIcon(Icons.search_outlined), findsNothing);
       expect(
         find.byIcon(
-          Icons.chevron_left_outlined,
+          Icons.arrow_back_ios,
         ),
         findsOneWidget,
       );

@@ -58,7 +58,7 @@ class ChatProfileInfoView extends StatelessWidget {
           onPressed: controller.widget.onBack,
           icon: controller.widget.isInStack
               ? const Icon(
-                  Icons.chevron_left_outlined,
+                  Icons.arrow_back_ios,
                 )
               : const Icon(Icons.close),
         ),
