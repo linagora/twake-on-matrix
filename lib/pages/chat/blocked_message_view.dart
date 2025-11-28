@@ -46,7 +46,7 @@ class BlockedMessageView extends StatelessWidget {
                 vertical: 6,
               ),
               child: Text(
-                L10n.of(context)!.unbanUserToSendMessages,
+                L10n.of(context)!.unblockUserToSendMessages,
                 style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                       fontSize: 17,
                       height: 24 / 17,
