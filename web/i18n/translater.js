@@ -45,7 +45,7 @@ function getUserLanguage() {
 async function loadLanguageResources() {
   const language = getUserLanguage();
   try {
-    const response = await fetch(`/i18n/${language}.json`);
+    const response = await fetch(`./i18n/${language}.json`);
     const data = await response.json();
     i18n[language] = data;
     console.info(
@@ -71,7 +71,8 @@ function setTextContent({ id, text }) {
   document.getElementById(id).textContent = text;
 }
 
-document.addEventListener("DOMContentLoaded", function () {
+document.addEventListener("DOMContentLoaded", async function () {
+  await loadLanguageResources();
   const language = getUserLanguage();
 
   let languageResources = defaultEngText;
