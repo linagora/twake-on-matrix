@@ -74,6 +74,7 @@ extension SendFileExtension on Room {
                 fileInfo.fileSize,
                 maxMediaSize,
               ),
+              txid: txid,
             ),
           ),
         );
@@ -367,6 +368,7 @@ extension SendFileExtension on Room {
             Left(
               UploadFileFailedState(
                 exception: CancelUploadException(),
+                txid: txid,
               ),
             ),
           );

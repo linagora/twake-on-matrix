@@ -3482,5 +3482,6 @@
     "placeholders": {
       "count": {}
     }
-  }
+  },
+  "tapToRetry": "Tap to retry"
 }

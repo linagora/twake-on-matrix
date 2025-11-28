@@ -448,6 +448,13 @@ class _MessageVideoBuilder extends StatelessWidget {
         height: displayImageInfo.size.height,
       );
     }
+    if (event.status == EventStatus.error) {
+      return MessageVideoUploadContentWeb(
+        event: event,
+        width: displayImageInfo.size.width,
+        height: displayImageInfo.size.height,
+      );
+    }
     return MessageVideoDownloadContent(
       event: event,
       width: displayImageInfo.size.width,

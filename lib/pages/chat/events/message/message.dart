@@ -99,6 +99,7 @@ class Message extends StatefulWidget {
   final void Function(BuildContext context, Event, TapDownDetails, double)?
       onTapMoreButton;
   final Future<Category?>? recentEmojiFuture;
+  final Future<void> Function(Event)? onRetryTextMessage;
 
   const Message(
     this.event, {
@@ -140,6 +141,7 @@ class Message extends StatefulWidget {
     this.onSaveToGallery,
     this.onTapMoreButton,
     this.recentEmojiFuture,
+    this.onRetryTextMessage,
   });
 
   /// Indicates wheither the user may use a mouse instead
@@ -293,6 +295,7 @@ class _MessageState extends State<Message>
           saveToGallery: widget.onSaveToGallery,
           onTapMoreButton: widget.onTapMoreButton,
           recentEmojiFuture: widget.recentEmojiFuture,
+          onRetryTextMessage: widget.onRetryTextMessage,
         ),
       ),
     ];
