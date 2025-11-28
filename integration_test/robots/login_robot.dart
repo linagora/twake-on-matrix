@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:fluffychat/pages/homeserver_picker/homeserver_picker_view.dart';
 import 'package:fluffychat/pages/twake_welcome/twake_welcome.dart';
 import 'package:patrol/patrol.dart';
@@ -9,7 +11,7 @@ class LoginRobot extends CoreRobot {
   Future<bool> isWelComePageVisible() async {
     final welcomePage = $(TwakeWelcome);
     try {
-      await welcomePage.waitUntilVisible(timeout: const Duration(seconds: 5));
+      await welcomePage.waitUntilVisible();
       return true;
     } catch (_) {
       return false;
@@ -24,23 +26,27 @@ class LoginRobot extends CoreRobot {
     await $.enterText($(HomeserverTextField), serverUrl);
   }
 
-  Future<void> confirmServerUrl() async {
-    await $.waitUntilVisible($('Continue'));
-    await $.tap($('Continue'));
+  Future<void> clickOnContinueBtn() async {
+    const label = 'Continue';
+    await $.waitUntilVisible($(label));
+    await $.tap($(label));
+    await Future.delayed(const Duration(seconds: 3));
   }
 
   Future<void> confirmShareInformation() async {
-    try {
-      await $.native.waitUntilVisible(
-        Selector(textContains: 'Continue'),
-        appId: 'com.apple.springboard',
-      );
-      await $.native.tap(
-        Selector(textContains: 'Continue'),
-        appId: 'com.apple.springboard',
-      );
-    } catch (e) {
-      ignoreException();
+    if (Platform.isIOS) {
+      const appId = 'com.apple.springboard';
+      const label = 'Continue';
+      if (await CoreRobot($).existsOptionalNativeItems(
+        $,
+        Selector(textContains: label),
+        appId: appId,
+      )) {
+        await $.native.tap(
+          Selector(textContains: label),
+          appId: appId,
+        );
+      }
     }
   }
 
@@ -50,24 +56,77 @@ class LoginRobot extends CoreRobot {
   }) async {
     await enterUsernameSsoLogin(username);
     await enterPasswordSsoLogin(password);
-    //Still rerun without this step
-    // await pressSignInSsoLogin();
+    await pressSignInSsoLogin();
   }
 
-  Selector getLoginBtn() {
-    return Selector(textContains: 'login');
+  Selector getSignInTab() {
+    const label = 'Email / Username';
+    if (Platform.isAndroid) {
+      return Selector(
+        className: 'android.widget.Button',
+        textContains: label,
+      );
+    } else {
+      return Selector(text: label);
+    }
   }
 
-  Selector getSignIn() {
-    return Selector(text: 'Sign in');
+  Selector getLoginTxt() {
+    if (Platform.isAndroid) {
+      return Selector(resourceId: 'email_username');
+    } else {
+      return Selector(
+        className: 'textField',
+        textContains: 'Email / Username',
+      );
+    }
+  }
+
+  Selector getPassTxt() {
+    if (Platform.isAndroid) {
+      return Selector(resourceId: 'password');
+    } else {
+      return Selector(
+        className: 'secureTextField',
+        textContains: 'Password',
+      );
+    }
+  }
+
+  Selector getSignInBtn() {
+    const label = 'Sign in';
+    if (Platform.isIOS) {
+      return Selector(text: label);
+    } else {
+      return Selector(
+        className: 'android.widget.Button',
+        textContains: label,
+      );
+    }
+  }
+
+  Selector getErrorMgs() {
+    return Selector(text: 'Invalid credentials');
+  }
+
+  String? getBrowserAppId() {
+    if (Platform.isAndroid) {
+      return 'com.android.chrome';
+    }
+    return null;
   }
 
   Future<bool> isLoginBtnVisible() async {
     if (await CoreRobot($).existsOptionalNativeItems(
       $,
-      getSignIn(),
-      timeout: const Duration(milliseconds: 10000),
+      getSignInTab(),
+      appId: getBrowserAppId(),
+      timeout: const Duration(seconds: 60),
     )) {
+      await $.native.tap(
+        getSignInTab(),
+        appId: getBrowserAppId(),
+      );
       return true;
     } else {
       return false;
@@ -77,8 +136,9 @@ class LoginRobot extends CoreRobot {
   Future<void> enterUsernameSsoLogin(String username) async {
     try {
       await $.native.enterText(
-        getLoginBtn(),
+        getLoginTxt(),
         text: username,
+        appId: getBrowserAppId(),
       );
     } catch (e) {
       ignoreException();
@@ -88,8 +148,9 @@ class LoginRobot extends CoreRobot {
   Future<void> enterPasswordSsoLogin(String password) async {
     try {
       await $.native.enterText(
-        Selector(text: 'Password'),
+        getPassTxt(),
         text: password,
+        appId: getBrowserAppId(),
       );
     } catch (e) {
       ignoreException();
@@ -98,8 +159,15 @@ class LoginRobot extends CoreRobot {
 
   Future<void> pressSignInSsoLogin() async {
     try {
+      await $.native.waitUntilVisible(
+        getSignInBtn(),
+        appId: getBrowserAppId(),
+        timeout: const Duration(seconds: 10),
+      );
+      await Future.delayed(const Duration(seconds: 10));
       await $.native.tap(
-        getSignIn(),
+        getSignInBtn(),
+        appId: getBrowserAppId(),
       );
     } catch (e) {
       ignoreException();
