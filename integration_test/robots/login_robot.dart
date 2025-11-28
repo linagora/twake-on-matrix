@@ -105,10 +105,6 @@ class LoginRobot extends CoreRobot {
     }
   }
 
-  Selector getErrorMgs() {
-    return Selector(text: 'Invalid credentials');
-  }
-
   String? getBrowserAppId() {
     if (Platform.isAndroid) {
       return 'com.android.chrome';
