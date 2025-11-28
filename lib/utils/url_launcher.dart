@@ -44,7 +44,8 @@ class UrlLauncher with GoToDraftChatMixin {
       return;
     }
     if (uri.host == AppConstants.appLinkUniversalLinkDomain) {
-      context.go(uri.path);
+      final pathWithoutChatPrefix = uri.path.replaceFirst('/chat', '');
+      context.go(pathWithoutChatPrefix);
       return;
     }
     if (!{'https', 'http'}.contains(uri.scheme)) {

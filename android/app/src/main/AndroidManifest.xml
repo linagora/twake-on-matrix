@@ -71,7 +71,7 @@
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
-                <data android:scheme="http" android:host="links.twake.app" />
+                <data android:scheme="http" android:host="links.twake.app" android:pathPrefix="/chat" />
                 <data android:scheme="https" />
             </intent-filter>
             <meta-data android:name="flutter_deeplinking_enabled" android:value="false" />
