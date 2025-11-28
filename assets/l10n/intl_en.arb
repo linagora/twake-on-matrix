@@ -3482,5 +3482,6 @@
     "placeholders": {
       "count": {}
     }
-  }
+  },
+  "unblockUserToSendMessages": "Unblock user to send messages"
 }
