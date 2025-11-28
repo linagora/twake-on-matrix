@@ -61,7 +61,6 @@ class CreateSupportChatInteractor {
       final powerLevelManager = getIt.get<PowerLevelManager>();
       roomId = await client.createGroupChat(
         groupName: 'Support Twake Workplace',
-        invite: [supportChatTwakeId],
         preset: CreateRoomPreset.trustedPrivateChat,
         initialState: [
           if (avatarUrl != null)
@@ -84,7 +83,12 @@ class CreateSupportChatInteractor {
         throw Exception('Failed to create support chat');
       }
 
+      await room.invite(supportChatTwakeId);
       await Future.wait([
+        room.setPower(
+          supportChatTwakeId,
+          powerLevelManager.getAdminPowerLevel(),
+        ),
         room.setFavourite(true),
         client.setAccountData(userId, type, {
           accountDataKey: roomId,

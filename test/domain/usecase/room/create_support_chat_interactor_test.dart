@@ -79,13 +79,16 @@ void main() {
         when(
           mockClient.createGroupChat(
             groupName: anyNamed('groupName'),
-            invite: anyNamed('invite'),
             preset: anyNamed('preset'),
             initialState: anyNamed('initialState'),
             powerLevelContentOverride: anyNamed('powerLevelContentOverride'),
           ),
         ).thenAnswer((_) async => testRoomId);
         when(mockClient.getRoomById(testRoomId)).thenReturn(mockRoom);
+        when(mockRoom.invite(testSupportContactId)).thenAnswer((_) async => {});
+        when(
+          mockRoom.setPower(testSupportContactId, 100),
+        ).thenAnswer((_) async => 'event_id');
         when(mockRoom.setFavourite(true)).thenAnswer((_) async => {});
         when(
           mockClient.setAccountData(
@@ -116,12 +119,13 @@ void main() {
         verify(
           mockClient.createGroupChat(
             groupName: 'Support Twake Workplace',
-            invite: [testSupportContactId],
             preset: CreateRoomPreset.trustedPrivateChat,
             initialState: anyNamed('initialState'),
             powerLevelContentOverride: anyNamed('powerLevelContentOverride'),
           ),
         ).called(1);
+        verify(mockRoom.invite(testSupportContactId)).called(1);
+        verify(mockRoom.setPower(testSupportContactId, 100)).called(1);
         verify(mockRoom.setFavourite(true)).called(1);
         verify(
           mockClient.setAccountData(
@@ -169,7 +173,6 @@ void main() {
         verifyNever(
           mockClient.createGroupChat(
             groupName: anyNamed('groupName'),
-            invite: anyNamed('invite'),
             preset: anyNamed('preset'),
             initialState: anyNamed('initialState'),
             powerLevelContentOverride: anyNamed('powerLevelContentOverride'),
@@ -202,13 +205,16 @@ void main() {
         when(
           mockClient.createGroupChat(
             groupName: anyNamed('groupName'),
-            invite: anyNamed('invite'),
             preset: anyNamed('preset'),
             initialState: anyNamed('initialState'),
             powerLevelContentOverride: anyNamed('powerLevelContentOverride'),
           ),
         ).thenAnswer((_) async => testRoomId);
         when(mockClient.getRoomById(testRoomId)).thenReturn(mockRoom);
+        when(mockRoom.invite(testSupportContactId)).thenAnswer((_) async => {});
+        when(
+          mockRoom.setPower(testSupportContactId, 100),
+        ).thenAnswer((_) async => 'event_id');
         when(mockRoom.setFavourite(true)).thenAnswer((_) async => {});
         when(
           mockClient.setAccountData(
@@ -238,12 +244,13 @@ void main() {
         verify(
           mockClient.createGroupChat(
             groupName: 'Support Twake Workplace',
-            invite: [testSupportContactId],
             preset: CreateRoomPreset.trustedPrivateChat,
             initialState: anyNamed('initialState'),
             powerLevelContentOverride: anyNamed('powerLevelContentOverride'),
           ),
         ).called(1);
+        verify(mockRoom.invite(testSupportContactId)).called(1);
+        verify(mockRoom.setPower(testSupportContactId, 100)).called(1);
       });
     });
 
@@ -275,7 +282,6 @@ void main() {
         verifyNever(
           mockClient.createGroupChat(
             groupName: anyNamed('groupName'),
-            invite: anyNamed('invite'),
             preset: anyNamed('preset'),
             initialState: anyNamed('initialState'),
             powerLevelContentOverride: anyNamed('powerLevelContentOverride'),
@@ -339,7 +345,6 @@ void main() {
         verifyNever(
           mockClient.createGroupChat(
             groupName: anyNamed('groupName'),
-            invite: anyNamed('invite'),
             preset: anyNamed('preset'),
             initialState: anyNamed('initialState'),
             powerLevelContentOverride: anyNamed('powerLevelContentOverride'),
@@ -383,7 +388,6 @@ void main() {
         verifyNever(
           mockClient.createGroupChat(
             groupName: anyNamed('groupName'),
-            invite: anyNamed('invite'),
             preset: anyNamed('preset'),
             initialState: anyNamed('initialState'),
             powerLevelContentOverride: anyNamed('powerLevelContentOverride'),
@@ -440,7 +444,6 @@ void main() {
         verify(
           mockClient.createGroupChat(
             groupName: 'Support Twake Workplace',
-            invite: [testSupportContactId],
             preset: CreateRoomPreset.trustedPrivateChat,
             initialState: anyNamed('initialState'),
             powerLevelContentOverride: anyNamed('powerLevelContentOverride'),
@@ -471,7 +474,6 @@ void main() {
         when(
           mockClient.createGroupChat(
             groupName: anyNamed('groupName'),
-            invite: anyNamed('invite'),
             preset: anyNamed('preset'),
             initialState: anyNamed('initialState'),
             powerLevelContentOverride: anyNamed('powerLevelContentOverride'),
@@ -521,13 +523,16 @@ void main() {
         when(
           mockClient.createGroupChat(
             groupName: anyNamed('groupName'),
-            invite: anyNamed('invite'),
             preset: anyNamed('preset'),
             initialState: anyNamed('initialState'),
             powerLevelContentOverride: anyNamed('powerLevelContentOverride'),
           ),
         ).thenAnswer((_) async => testRoomId);
         when(mockClient.getRoomById(testRoomId)).thenReturn(mockRoom);
+        when(mockRoom.invite(testSupportContactId)).thenAnswer((_) async => {});
+        when(
+          mockRoom.setPower(testSupportContactId, 100),
+        ).thenAnswer((_) async => 'event_id');
         when(mockRoom.setFavourite(true))
             .thenThrow(Exception('setFavourite failed'));
 
@@ -547,6 +552,8 @@ void main() {
           ]),
         );
 
+        verify(mockRoom.invite(testSupportContactId)).called(1);
+        verify(mockRoom.setPower(testSupportContactId, 100)).called(1);
         verify(mockRoom.setFavourite(true)).called(1);
       });
     });
@@ -576,13 +583,16 @@ void main() {
         when(
           mockClient.createGroupChat(
             groupName: anyNamed('groupName'),
-            invite: anyNamed('invite'),
             preset: anyNamed('preset'),
             initialState: anyNamed('initialState'),
             powerLevelContentOverride: anyNamed('powerLevelContentOverride'),
           ),
         ).thenAnswer((_) async => testRoomId);
         when(mockClient.getRoomById(testRoomId)).thenReturn(mockRoom);
+        when(mockRoom.invite(testSupportContactId)).thenAnswer((_) async => {});
+        when(
+          mockRoom.setPower(testSupportContactId, 100),
+        ).thenAnswer((_) async => 'event_id');
         when(mockRoom.setFavourite(true))
             .thenThrow(Exception('setFavourite failed'));
         when(mockClient.leaveRoom(testRoomId)).thenAnswer((_) async => {});
@@ -643,13 +653,16 @@ void main() {
         when(
           mockClient.createGroupChat(
             groupName: anyNamed('groupName'),
-            invite: anyNamed('invite'),
             preset: anyNamed('preset'),
             initialState: anyNamed('initialState'),
             powerLevelContentOverride: anyNamed('powerLevelContentOverride'),
           ),
         ).thenAnswer((_) async => testRoomId);
         when(mockClient.getRoomById(testRoomId)).thenReturn(mockRoom);
+        when(mockRoom.invite(testSupportContactId)).thenAnswer((_) async => {});
+        when(
+          mockRoom.setPower(testSupportContactId, 100),
+        ).thenAnswer((_) async => 'event_id');
         when(mockRoom.setFavourite(true))
             .thenThrow(Exception('setFavourite failed'));
         when(mockClient.leaveRoom(testRoomId))
