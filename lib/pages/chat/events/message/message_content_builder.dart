@@ -38,7 +38,7 @@ class MessageContentBuilder extends StatelessWidget
         // TODO: change to colorSurface when its approved
         // ignore: deprecated_member_use
         final textColor = Theme.of(context).colorScheme.onBackground;
-        final displayEvent = event.getDisplayEvent(timeline);
+        final displayEvent = event.getDisplayEventWithoutEditEvent(timeline);
         final noPadding = {
           MessageTypes.File,
           MessageTypes.Audio,

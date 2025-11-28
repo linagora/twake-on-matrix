@@ -425,7 +425,7 @@ class PinnedMessagesController extends State<PinnedMessages>
 
   void forwardEventAction(Event event) async {
     Matrix.of(context).shareContent =
-        event.getDisplayEvent(widget.timeline!).content;
+        event.getDisplayEventWithoutEditEvent(widget.timeline!).content;
     Logs().d(
       "forwardEventsAction():: shareContent: ${Matrix.of(context).shareContent}",
     );

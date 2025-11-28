@@ -1040,14 +1040,17 @@ class ChatController extends State<Chat>
       return;
     }
     if (selectedEvents.isEmpty && event != null) {
-      Matrix.of(context).shareContent =
-          event.getDisplayEvent(timeline!).formatContentForwards();
+      Matrix.of(context).shareContent = event
+          .getDisplayEventWithoutEditEvent(timeline!)
+          .formatContentForwards();
       Logs().d(
         "forwardEventsAction():: shareContent: ${Matrix.of(context).shareContent}",
       );
     } else {
       Matrix.of(context).shareContentList = selectedEvents.map((msg) {
-        final content = msg.getDisplayEvent(timeline!).formatContentForwards();
+        final content = msg
+            .getDisplayEventWithoutEditEvent(timeline!)
+            .formatContentForwards();
         return content;
       }).toList();
       Logs().d(
@@ -1094,8 +1097,11 @@ class ChatController extends State<Chat>
     }
     pendingText = sendController.text;
     editEventNotifier.value = eventToEdit;
-    sendController.text =
-        editEvent!.getDisplayEvent(timeline!).calcLocalizedBodyFallback(
+    sendController.text = eventToEdit.isMediaAndFilesWithCaption()
+        ? eventToEdit.body
+        : eventToEdit
+            .getDisplayEventWithoutEditEvent(timeline!)
+            .calcLocalizedBodyFallback(
               MatrixLocals(L10n.of(context)!),
               withSenderNamePrefix: false,
               hideReply: true,
@@ -1555,7 +1561,7 @@ class ChatController extends State<Chat>
       editEventNotifier.value = selectedEvents.first;
     });
     inputText.value = sendController.text = editEventNotifier.value!
-        .getDisplayEvent(timeline!)
+        .getDisplayEventWithoutEditEvent(timeline!)
         .calcLocalizedBodyFallback(
           MatrixLocals(L10n.of(context)!),
           withSenderNamePrefix: false,

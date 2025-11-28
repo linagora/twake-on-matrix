@@ -33,8 +33,9 @@ class ReplyContent extends StatelessWidget {
   Widget build(BuildContext context) {
     Widget replyBody;
     final timeline = this.timeline;
-    final displayEvent =
-        timeline != null ? replyEvent.getDisplayEvent(timeline) : replyEvent;
+    final displayEvent = timeline != null
+        ? replyEvent.getDisplayEventWithoutEditEvent(timeline)
+        : replyEvent;
     if (AppConfig.renderHtml &&
         [EventTypes.Message, EventTypes.Encrypted]
             .contains(displayEvent.type) &&
