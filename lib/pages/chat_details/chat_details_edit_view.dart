@@ -341,25 +341,28 @@ class ChatDetailsEditView extends StatelessWidget {
                   );
                 },
               ),
-            Container(
-              color: Theme.of(context).colorScheme.surfaceContainerHighest,
-              alignment: Alignment.centerLeft,
-              padding: const EdgeInsets.all(8.0),
-              child: Text(
-                L10n.of(context)!.dangerZone,
-                style: ChatDetailEditViewStyle.textChatDetailsEditCategoryStyle(
-                  context,
+            if (!controller.isSupportChat) ...[
+              Container(
+                color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                alignment: Alignment.centerLeft,
+                padding: const EdgeInsets.all(8.0),
+                child: Text(
+                  L10n.of(context)!.dangerZone,
+                  style:
+                      ChatDetailEditViewStyle.textChatDetailsEditCategoryStyle(
+                    context,
+                  ),
                 ),
               ),
-            ),
-            ChatDetailsEditOption(
-              title: L10n.of(context)!.commandHint_leave,
-              subtitle: L10n.of(context)!.leaveGroupSubtitle,
-              leading: Icons.logout_outlined,
-              titleColor: Theme.of(context).colorScheme.error,
-              leadingIconColor: Theme.of(context).colorScheme.error,
-              onTap: () => controller.leaveChat(context, controller.room),
-            ),
+              ChatDetailsEditOption(
+                title: L10n.of(context)!.commandHint_leave,
+                subtitle: L10n.of(context)!.leaveGroupSubtitle,
+                leading: Icons.logout_outlined,
+                titleColor: Theme.of(context).colorScheme.error,
+                leadingIconColor: Theme.of(context).colorScheme.error,
+                onTap: () => controller.leaveChat(context, controller.room),
+              ),
+            ],
           ],
         ),
       ),

@@ -107,6 +107,8 @@ class ChatDetailsEditController extends State<ChatDetailsEdit>
   bool get _enableDeleteAvatarButton =>
       (room?.avatar != null || _isEditAvatar) && !_isDeleteAvatar;
 
+  bool get isSupportChat => room?.id == Matrix.of(context).supportChatRoomId;
+
   void onBack() {
     Navigator.of(context).pop();
   }
