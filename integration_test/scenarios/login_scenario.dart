@@ -24,7 +24,7 @@ class LoginScenario extends BaseScenario {
       await loginRobot.tapOnUseYourCompanyServer();
       await _handleWaitUntilVisibleHomeServerPickerView(loginRobot);
       await loginRobot.enterServerUrl(serverUrl);
-      await loginRobot.confirmServerUrl();
+      await loginRobot.clickOnContinueBtn();
       await loginRobot.confirmShareInformation();
     }
     if (await loginRobot.isLoginBtnVisible()) {
