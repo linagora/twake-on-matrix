@@ -218,8 +218,8 @@ class ChatInputRow extends StatelessWidget {
 
                               final file = TwakeAudioFile(
                                 name: soundFile.path,
-                                filePath: soundFile.path,
                                 duration: time.inMilliseconds,
+                                bytes: soundFile.readAsBytesSync(),
                               );
                               controller.sendVoiceMessageAction(
                                 audioFile: file,

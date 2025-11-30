@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/pages/chat/events/message_content_style.dart';
 import 'package:fluffychat/pages/image_viewer/image_viewer.dart';
@@ -57,7 +56,7 @@ class _SendingImageInfoWidgetState extends State<SendingImageInfoWidget>
             return InteractiveViewerGallery(
               itemBuilder: ImageViewer(
                 event: widget.event,
-                filePath: widget.matrixFile.filePath,
+                imageData: widget.matrixFile.bytes,
               ),
             );
           },
@@ -119,8 +118,7 @@ class _SendingImageInfoWidgetState extends State<SendingImageInfoWidget>
               child: Stack(
                 alignment: Alignment.center,
                 children: [
-                  if (widget.matrixFile.bytes?.isNotEmpty != true ||
-                      widget.matrixFile.filePath == null)
+                  if (widget.matrixFile.bytes.isEmpty)
                     SizedBox(
                       width: MessageContentStyle.imageBubbleWidth(
                         widget.displayImageInfo.size.width,
@@ -132,23 +130,10 @@ class _SendingImageInfoWidgetState extends State<SendingImageInfoWidget>
                         hash: widget.event.blurHash ??
                             AppConfig.defaultImageBlurHash,
                       ),
-                    ),
-                  if (!PlatformInfos.isWeb &&
-                      widget.matrixFile.filePath != null)
-                    Image.file(
-                      File(widget.matrixFile.filePath!),
-                      width: widget.displayImageInfo.size.width,
-                      height: widget.displayImageInfo.size.height,
-                      cacheHeight: context
-                          .getCacheSize(widget.displayImageInfo.size.height),
-                      cacheWidth: context
-                          .getCacheSize(widget.displayImageInfo.size.width),
-                      fit: BoxFit.cover,
-                      filterQuality: FilterQuality.low,
-                    ),
-                  if (widget.matrixFile.bytes?.isNotEmpty == true)
+                    )
+                  else
                     Image.memory(
-                      widget.matrixFile.bytes!,
+                      widget.matrixFile.bytes,
                       width: widget.displayImageInfo.size.width,
                       height: widget.displayImageInfo.size.height,
                       cacheHeight: context

@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import 'package:matrix/matrix.dart';
 import 'package:media_kit/media_kit.dart';
@@ -6,11 +8,11 @@ import 'package:media_kit_video/media_kit_video.dart';
 class VideoPlayer extends StatefulWidget {
   const VideoPlayer({
     super.key,
-    required this.path,
+    required this.bytes,
     required this.event,
   });
 
-  final String path;
+  final Uint8List bytes;
 
   final Event? event;
 
@@ -24,7 +26,7 @@ class _VideoPlayerState extends State<VideoPlayer> {
   @override
   void initState() {
     super.initState();
-    videoController.player.open(Media(widget.path));
+    Media.memory(widget.bytes).then((v) => videoController.player.open(v));
   }
 
   @override

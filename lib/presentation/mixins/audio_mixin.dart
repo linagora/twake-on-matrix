@@ -305,9 +305,13 @@ mixin AudioMixin {
 
       final formatDate = DateFormat("yyyy-MM-dd-HHmmss").format(DateTime.now());
 
+      final reader = html.FileReader();
+      reader.readAsArrayBuffer(file);
+      await reader.onLoad.first;
+
       return TwakeAudioFile(
         name: 'voice_message_$formatDate.wav',
-        readStream: readWebFileAsStream(file),
+        bytes: reader.result as Uint8List,
         mimeType: 'audio/wav',
         duration: duration.inMilliseconds,
       );

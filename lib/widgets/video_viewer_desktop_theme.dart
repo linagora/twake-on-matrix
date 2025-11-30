@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:fluffychat/pages/image_viewer/media_viewer_app_bar_web.dart';
 import 'package:fluffychat/widgets/video_player.dart';
 import 'package:fluffychat/widgets/video_viewer_style.dart';
@@ -8,11 +10,11 @@ import 'package:media_kit_video/media_kit_video.dart';
 class VideoViewerDesktopTheme extends StatelessWidget {
   const VideoViewerDesktopTheme({
     super.key,
-    required this.path,
+    required this.bytes,
     this.event,
   });
 
-  final String path;
+  final Uint8List bytes;
 
   final Event? event;
 
@@ -36,7 +38,7 @@ class VideoViewerDesktopTheme extends StatelessWidget {
         seekBarThumbColor: Theme.of(context).colorScheme.primary,
       ),
       child: VideoPlayer(
-        path: path,
+        bytes: bytes,
         event: event,
       ),
     );

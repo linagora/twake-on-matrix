@@ -440,7 +440,7 @@ class _AvatarBuilder extends StatelessWidget {
 
           if (PlatformInfos.isWeb) {
             if (success is GetAvatarOnWebUIStateSuccess) {
-              if (success.matrixFile?.readStream == null) {
+              if (success.matrixFile == null) {
                 return child!;
               }
               return ClipOval(
