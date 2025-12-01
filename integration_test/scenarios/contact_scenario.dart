@@ -31,7 +31,7 @@ class ContactScenario extends BaseScenario {
 
   Future<void> verifyDisplayOfContactListScreen(SoftAssertHelper s) async {
     s.softAssertEquals(
-      (await SearchRobot($).getSearchTextField()).exists,
+      (SearchRobot($).getSearchTextField()).exists,
       true,
       'Search Text Field is not visible',
     );
