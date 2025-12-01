@@ -515,6 +515,16 @@ extension LocalizedBody on Event {
       final originalEventJson = toJson();
       originalEventJson['content']['m.new_content'] = newContent;
       originalEventJson['content']['body'] = newContent['body'];
+
+      // Update formatted_body if it exists in the new content
+      if (newContent['formatted_body'] != null) {
+        originalEventJson['content']['formatted_body'] =
+            newContent['formatted_body'];
+      } else {
+        originalEventJson['content'].remove('formatted_body');
+        originalEventJson['content'].remove('format');
+      }
+
       return Event.fromJson(originalEventJson, room);
     }
 
