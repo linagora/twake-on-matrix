@@ -2,7 +2,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:patrol/patrol.dart';
 import 'package:fluffychat/main.dart' as app;
-import '../robots/home_robot.dart';
 import '../scenarios/login_scenario.dart';
 
 class TestBase {
