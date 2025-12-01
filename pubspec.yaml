@@ -8,7 +8,10 @@ environment:
 
 dependencies:
   ### Dependencies from git ###
-  matrix: ^3.0.2
+  matrix:
+    git:
+      url: git@github.com:linagora/matrix-dart-sdk.git
+      ref: twake-supported-0.22.6
 
   receive_sharing_intent:
     git:
