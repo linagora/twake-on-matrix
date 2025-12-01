@@ -44,12 +44,13 @@ class CoreRobot {
   }
 
   Future<void> cancelSynchronzieContact() async {
-    try {
-      await $('Next').waitUntilVisible(timeout: const Duration(seconds: 10));
+    if (await CoreRobot($).existsOptionalFlutterItems(
+      $,
+      $('Next'),
+      timeout: const Duration(seconds: 3),
+    )) {
       await $('Next').tap();
       await $.native.denyPermission();
-    } catch (e) {
-      ignoreException();
     }
   }
 
@@ -123,6 +124,15 @@ class CoreRobot {
       if (DateTime.now().isAfter(end)) break;
       await $.pump(const Duration(milliseconds: 150));
     }
+  }
+
+  Future<bool> existsOptionalFlutterItems(
+    PatrolIntegrationTester $,
+    PatrolFinder finder, {
+    Duration timeout = const Duration(seconds: 5),
+  }) async {
+    await $.pumpAndTrySettle(duration: timeout);
+    return finder.exists;
   }
 
   Future<bool> existsOptionalNativeItems(

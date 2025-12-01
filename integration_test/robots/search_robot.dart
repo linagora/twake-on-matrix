@@ -37,9 +37,7 @@ class SearchRobot extends CoreRobot {
 
   Future<void> enterSearchText(String searchText) async {
     await getSearchTextField().tap();
-    if (Platform.isIOS) {
-      await cancelSynchronzieContact();
-    }
+    await cancelSynchronzieContact();
     await typeSlowlyWithPatrol($, getSearchTextField(), searchText);
   }
 
