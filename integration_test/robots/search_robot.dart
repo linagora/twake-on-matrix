@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:fluffychat/widgets/twake_components/twake_icon_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -26,16 +28,18 @@ class SearchRobot extends CoreRobot {
   }
 
   Future<PatrolFinder> getSearchingIcon() async {
-    return ( getSearchTextField()).$(Icon).at(0);
+    return (getSearchTextField()).$(Icon).at(0);
   }
 
   Future<PatrolFinder> getDeleteSearchingIcon() async {
-    return ( getSearchTextField()).$(TwakeIconButton).$(Icon);
+    return (getSearchTextField()).$(TwakeIconButton).$(Icon);
   }
 
   Future<void> enterSearchText(String searchText) async {
-    await getSearchTextField().tap(); 
-    await cancelSynchronzieContact();
+    await getSearchTextField().tap();
+    if (Platform.isIOS) {
+      await cancelSynchronzieContact();
+    }
     await typeSlowlyWithPatrol($, getSearchTextField(), searchText);
   }
 

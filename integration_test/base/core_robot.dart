@@ -36,7 +36,7 @@ class CoreRobot {
   }
 
   Future<void> confirmAccessContact() async {
-    try {  
+    try {
       await $.native.grantPermissionWhenInUse();
     } catch (e) {
       ignoreException();
@@ -44,9 +44,9 @@ class CoreRobot {
   }
 
   Future<void> cancelSynchronzieContact() async {
-    try {  
+    try {
       await $('Next').waitUntilVisible(timeout: const Duration(seconds: 10));
-      await $('Next').tap();  
+      await $('Next').tap();
       await $.native.denyPermission();
     } catch (e) {
       ignoreException();
