@@ -1,17 +1,14 @@
 name: fluffychat
 description: A convenient Matrix-based tool for personal and corporate communication.
 publish_to: none
-version: 2.17.4+2437
+version: 2.17.8+2437
 
 environment:
   sdk: ">=3.3.0 <4.0.0"
 
 dependencies:
   ### Dependencies from git ###
-  matrix:
-    git:
-      url: git@github.com:linagora/matrix-dart-sdk.git
-      ref: twake-supported-0.22.6
+  matrix: ^3.0.2
 
   receive_sharing_intent:
     git:
