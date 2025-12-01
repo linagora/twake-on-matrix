@@ -520,6 +520,7 @@ extension LocalizedBody on Event {
       if (newContent['formatted_body'] != null) {
         originalEventJson['content']['formatted_body'] =
             newContent['formatted_body'];
+        originalEventJson['content']['format'] = newContent['format'];
       } else {
         originalEventJson['content'].remove('formatted_body');
         originalEventJson['content'].remove('format');
