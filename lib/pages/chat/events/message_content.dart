@@ -184,6 +184,7 @@ class MessageContent extends StatelessWidget
                         ),
                       ],
                     ),
+                  const SizedBox(height: 8),
                   SizedBox(
                     width: MessageStyle.messageBubbleWidthVideoCaption(
                       event: event,
