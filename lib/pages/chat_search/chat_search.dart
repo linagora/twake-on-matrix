@@ -1,8 +1,9 @@
+import 'dart:async';
+
 import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/pages/chat_search/chat_search_view.dart';
 import 'package:fluffychat/pages/search/server_search_controller.dart';
 import 'package:fluffychat/presentation/same_type_events_builder/same_type_events_controller.dart';
-import 'package:fluffychat/utils/extension/build_context_extension.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
 import 'package:fluffychat/utils/scroll_controller_extension.dart';
 import 'package:fluffychat/widgets/matrix.dart';
@@ -13,12 +14,14 @@ class ChatSearch extends StatefulWidget {
   final VoidCallback? onBack;
   final String roomId;
   final bool isInStack;
+  final StreamController<String>? jumpToEventStreamController;
 
   const ChatSearch({
     super.key,
     this.onBack,
     required this.roomId,
     required this.isInStack,
+    this.jumpToEventStreamController,
   });
 
   @override
@@ -98,8 +101,10 @@ class ChatSearchController extends State<ChatSearch> {
   void onEventTap(Event event) async {
     if (widget.isInStack) {
       await onBack();
+      return;
     }
-    context.goToRoomWithEvent(event.room.id, event.eventId);
+
+    widget.jumpToEventStreamController?.add(event.eventId);
   }
 
   Future onBack() async {

@@ -109,6 +109,7 @@ class Chat extends StatefulWidget {
   final List<MatrixFile?>? shareFiles;
   final String? roomName;
   final void Function(RightColumnType)? onChangeRightColumnType;
+  final Stream<String>? jumpToEventStream;
 
   const Chat({
     super.key,
@@ -116,6 +117,7 @@ class Chat extends StatefulWidget {
     this.shareFiles,
     this.roomName,
     this.onChangeRightColumnType,
+    this.jumpToEventStream,
   });
 
   @override
@@ -280,6 +282,8 @@ class ChatController extends State<Chat>
   bool currentlyTyping = false;
 
   StreamSubscription<EventId>? _jumpToEventIdSubscription;
+
+  StreamSubscription<String>? _jumpToEventFromSearchSubscription;
 
   bool get canSaveSelectedEvent =>
       selectedEvents.length == 1 &&
@@ -3058,12 +3062,22 @@ class ChatController extends State<Chat>
     }
   }
 
+  void _listenOnJumpToEventFromSearch() {
+    _jumpToEventFromSearchSubscription = widget.jumpToEventStream?.listen((eventId) {
+      Logs().d(
+        'Chat::_listenOnJumpToEventFromSearch(): Jump to eventId from search: $eventId',
+      );
+      scrollToEventIdAndHighlight(eventId);
+    });
+  }
+
   @override
   void onSendFileCallback() => scrollDown();
 
   @override
   void initState() {
     _initializePinnedEvents();
+    _listenOnJumpToEventFromSearch();
     registerPasteShortcutListeners();
     keyboardVisibilitySubscription =
         keyboardVisibilityController.onChange.listen(_keyboardListener);
@@ -3120,6 +3134,7 @@ class ChatController extends State<Chat>
     focusSuggestionController.dispose();
     _focusSuggestionController.dispose();
     _jumpToEventIdSubscription?.cancel();
+    _jumpToEventFromSearchSubscription?.cancel();
     pinnedEventsController.dispose();
     _captionsController.dispose();
     scrollController.removeListener(_updateScrollController);
