@@ -101,7 +101,6 @@ class ChatSearchController extends State<ChatSearch> {
   void onEventTap(Event event) async {
     if (widget.isInStack) {
       await onBack();
-      return;
     }
 
     widget.jumpToEventStreamController?.add(event.eventId);
