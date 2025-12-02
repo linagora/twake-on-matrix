@@ -3063,7 +3063,8 @@ class ChatController extends State<Chat>
   }
 
   void _listenOnJumpToEventFromSearch() {
-    _jumpToEventFromSearchSubscription = widget.jumpToEventStream?.listen((eventId) {
+    _jumpToEventFromSearchSubscription =
+        widget.jumpToEventStream?.listen((eventId) {
       Logs().d(
         'Chat::_listenOnJumpToEventFromSearch(): Jump to eventId from search: $eventId',
       );
