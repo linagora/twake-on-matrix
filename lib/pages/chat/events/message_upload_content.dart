@@ -196,17 +196,20 @@ class _MessageUploadingContentState extends State<MessageUploadingContent>
         ),
         if (event.isMediaAndFilesWithCaption()) ...[
           const SizedBox(height: 8.0),
-          TwakeLinkPreview(
-            key: ValueKey('TwakeLinkPreview%${event.eventId}%'),
-            event: event,
-            localizedBody: event.body,
-            ownMessage: event.isOwnMessage,
-            fontSize: AppConfig.messageFontSize * AppConfig.fontSizeFactor,
-            linkStyle: MessageContentStyle.linkStyleMessageContent(
-              context,
+          MouseRegion(
+            cursor: SystemMouseCursors.copy,
+            child: TwakeLinkPreview(
+              key: ValueKey('TwakeLinkPreview%${event.eventId}%'),
+              event: event,
+              localizedBody: event.body,
+              ownMessage: event.isOwnMessage,
+              fontSize: AppConfig.messageFontSize * AppConfig.fontSizeFactor,
+              linkStyle: MessageContentStyle.linkStyleMessageContent(
+                context,
+              ),
+              richTextStyle: event.getMessageTextStyle(context),
+              isCaption: event.isMediaAndFilesWithCaption(),
             ),
-            richTextStyle: event.getMessageTextStyle(context),
-            isCaption: event.isMediaAndFilesWithCaption(),
           ),
         ],
       ],

@@ -256,6 +256,9 @@ extension LocalizedBody on Event {
   }
 
   String getSelectedEventString(BuildContext context, Timeline timeline) {
+    if (isMediaAndFilesWithCaption()) {
+      return body;
+    }
     return getDisplayEventWithoutEditEvent(timeline).calcLocalizedBodyFallback(
       MatrixLocals(L10n.of(context)!),
       hideReply: true,
