@@ -64,6 +64,7 @@ class ImageBubble extends StatelessWidget {
       constraints: maxSize
           ? BoxConstraints(
               maxWidth: bubbleWidth,
+              minWidth: MessageContentStyle.imageBubbleMinWidth,
               maxHeight: bubbleHeight,
             )
           : null,
@@ -88,8 +89,9 @@ class ImageBubble extends StatelessWidget {
                   SizedBox(
                     width: bubbleWidth,
                     height: bubbleHeight,
-                    child: const BlurHash(
-                      hash: MessageContentStyle.defaultBlurHash,
+                    child: BlurHash(
+                      hash:
+                          event.blurHash ?? MessageContentStyle.defaultBlurHash,
                     ),
                   ),
                   MxcImage(

@@ -143,7 +143,9 @@ class MessageStyle {
           file.width?.toDouble() ?? MessageContentStyle.imageWidth(context),
           file.height?.toDouble() ?? MessageContentStyle.imageHeight(context),
         ).getDisplayImageInfo(context);
-        return displayImageInfo.size.width;
+        return MessageContentStyle.imageBubbleWidth(
+          displayImageInfo.size.width,
+        );
       }
       displayImageInfo ??= DisplayImageInfo(
         size: Size(
@@ -158,10 +160,14 @@ class MessageStyle {
           file.width?.toDouble() ?? MessageContentStyle.imageWidth(context),
           file.height?.toDouble() ?? MessageContentStyle.imageHeight(context),
         ).getDisplayImageInfo(context);
-        return displayImageInfo.size.width;
+        return MessageContentStyle.imageBubbleWidth(
+          displayImageInfo.size.width,
+        );
       }
 
-      return displayImageInfo.size.width;
+      return MessageContentStyle.imageBubbleWidth(
+        displayImageInfo.size.width,
+      );
     }
 
     return messageBubbleWidth(context, event: event);

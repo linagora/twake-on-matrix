@@ -71,10 +71,13 @@ class MessageContent extends StatelessWidget
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  MessageImageBuilder(
-                    event: event,
-                    onTapPreview: onTapPreview,
-                    onTapSelectMode: onTapSelectMode,
+                  Align(
+                    alignment: Alignment.center,
+                    child: MessageImageBuilder(
+                      event: event,
+                      onTapPreview: onTapPreview,
+                      onTapSelectMode: onTapSelectMode,
+                    ),
                   ),
                   const SizedBox(height: 8),
                   SizedBox(
