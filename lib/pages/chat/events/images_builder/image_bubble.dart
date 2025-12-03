@@ -54,7 +54,7 @@ class ImageBubble extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final bubbleWidth = MessageContentStyle.imageBubbleWidth(width);
-    final bubbleHeight = MessageContentStyle.imageBubbleWidth(height);
+    final bubbleHeight = MessageContentStyle.imageBubbleHeight(height);
     return Container(
       decoration: BoxDecoration(
         borderRadius: rounded
