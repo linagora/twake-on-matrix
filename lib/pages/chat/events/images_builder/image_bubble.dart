@@ -55,6 +55,7 @@ class ImageBubble extends StatelessWidget {
   Widget build(BuildContext context) {
     final bubbleWidth = MessageContentStyle.imageBubbleWidth(width);
     final bubbleHeight = MessageContentStyle.imageBubbleHeight(height);
+    const bubbleMinWidth = MessageContentStyle.imageBubbleMinWidth;
     return Container(
       decoration: BoxDecoration(
         borderRadius: rounded
@@ -64,7 +65,7 @@ class ImageBubble extends StatelessWidget {
       constraints: maxSize
           ? BoxConstraints(
               maxWidth: bubbleWidth,
-              minWidth: MessageContentStyle.imageBubbleMinWidth,
+              minWidth: bubbleMinWidth,
               maxHeight: bubbleHeight,
             )
           : null,
