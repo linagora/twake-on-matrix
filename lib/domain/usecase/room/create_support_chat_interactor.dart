@@ -37,6 +37,7 @@ class CreateSupportChatInteractor {
 
       Map<String, dynamic> supportRoom = {};
       try {
+        await client.accountDataLoading;
         supportRoom = await client.getAccountData(userId, type);
       } catch (e) {
         Logs().e(
@@ -53,7 +54,9 @@ class CreateSupportChatInteractor {
       final avatarMatrixFile = MatrixFile.fromMimeType(
         name: 'logo.png',
         mimeType: 'image/png',
-        bytes: (await rootBundle.load(ImagePaths.logoPng)).buffer.asUint8List(),
+        bytes: (await rootBundle.load(ImagePaths.supportAvatarPng))
+            .buffer
+            .asUint8List(),
       );
       final avatarUrl =
           (await getIt.get<MediaAPI>().uploadFileWeb(file: avatarMatrixFile))

@@ -84,6 +84,9 @@ class ImagePaths {
   static String get icAudioSpeed2x => _getImagePath('audio_speed_2x.svg');
 
   static String get icAudioSpeed0_5x => _getImagePath('audio_speed_0_5x.svg');
+
+  static String get supportAvatarPng => _getAssetPath('support_avatar.png');
+  static String get supportWelcomePng => _getAssetPath('support_welcome.png');
   static String _getImagePath(String imageName) {
     return AssetsPaths.images + imageName;
   }

@@ -651,10 +651,6 @@ class ChatController extends State<Chat>
     setState(() => sendingClient = c);
   }
 
-  void setActiveClient(Client c) => setState(() {
-        Matrix.of(context).setActiveClient(c);
-      });
-
   Future<void> send() async {
     scrollDown();
     showEmojiPickerNotifier.value = false;
