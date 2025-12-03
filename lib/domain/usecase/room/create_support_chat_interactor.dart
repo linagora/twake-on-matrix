@@ -37,7 +37,6 @@ class CreateSupportChatInteractor {
 
       Map<String, dynamic> supportRoom = {};
       try {
-        await client.accountDataLoading;
         supportRoom = await client.getAccountData(userId, type);
       } catch (e) {
         Logs().e(

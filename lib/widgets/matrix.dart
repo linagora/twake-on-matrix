@@ -164,7 +164,7 @@ class MatrixState extends State<Matrix>
       await _getUserInfoWithActiveClient(newClient);
       await _getHomeserverInformation(newClient);
       getIt.get<ContactsManager>().refreshTomContacts(client);
-      await _createSupportChat(newClient);
+      _createSupportChat(newClient);
       return SetActiveClientState.success;
     } else {
       Logs().w('Tried to set an unknown client ${newClient!.userID} as active');
@@ -172,17 +172,33 @@ class MatrixState extends State<Matrix>
     }
   }
 
-  Future<void> _createSupportChat(Client client) async {
-    final state =
-        await getIt.get<CreateSupportChatInteractor>().execute(client).last;
-    supportChatRoomId = state.fold(
-      (failure) => null,
-      (success) => switch (success) {
-        SupportChatExisted(:final roomId) => roomId,
-        SupportChatCreated(:final roomId) => roomId,
-        _ => null,
-      },
-    );
+  void _createSupportChat(Client client) {
+    supportChatRoomId = null;
+    StreamSubscription? syncListener;
+    syncListener = client.onSync.stream.listen((_) {
+      StreamSubscription? createSupportChatListener;
+      createSupportChatListener = getIt
+          .get<CreateSupportChatInteractor>()
+          .execute(
+            client,
+          )
+          .listen(
+        (state) {
+          supportChatRoomId = state.fold(
+            (failure) => null,
+            (success) => switch (success) {
+              SupportChatExisted(:final roomId) => roomId,
+              SupportChatCreated(:final roomId) => roomId,
+              _ => null,
+            },
+          );
+        },
+        onDone: () {
+          createSupportChatListener?.cancel();
+          syncListener?.cancel();
+        },
+      );
+    });
   }
 
   List<Client?>? get currentBundle {
