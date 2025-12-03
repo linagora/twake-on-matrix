@@ -23,10 +23,16 @@ platform :android do
     last_version = versions[0].to_i
     version_name = last_git_tag.gsub("v", "")
     Dir.chdir("../..") do
-      re = /version:\s([0-9]*\.[0-9]*\.[0-9]*)\+[0-9]*/i
+      re = /version:\s([0-9]*\.[0-9]*\.[0-9]*)\+([0-9]*)/i
       config = File.read("./pubspec.yaml")
+      match = config.match(re)
+      current_version_code = match ? match[2].to_i : 0
 
-      subst = "version: #{version_name}+#{last_version+1}"
+      # Use the maximum of: version code from Google Play (internal track) and current pubspec.yaml
+      effective_last_version = [last_version, current_version_code].max
+      new_version_code = effective_last_version + 1
+
+      subst = "version: #{version_name}+#{new_version_code}"
       result = config.gsub(re, subst)
 
       File.open("./pubspec.yaml", 'w') { |file| file.write(result) }
