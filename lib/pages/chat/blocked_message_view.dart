@@ -11,13 +11,15 @@ class BlockedMessageView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isMobileResponsive = getIt.get<ResponsiveUtils>().isMobile(context);
+    final isTabletLargeResponsive =
+        getIt.get<ResponsiveUtils>().isTabletLarge(context);
     final refColor = LinagoraRefColors.material();
     final sysColor = LinagoraSysColors.material();
     return SafeArea(
       child: Container(
         padding: EdgeInsets.symmetric(
           horizontal: isMobileResponsive ? 33.5 : 25,
-          vertical: 12,
+          vertical: isTabletLargeResponsive ? 17.5 : 12,
         ),
         decoration: BoxDecoration(
           color: sysColor.surface,

@@ -466,7 +466,7 @@ abstract class AppRoutes {
                           child: ChatAdaptiveScaffold(
                             roomId: state.pathParameters['roomid']!,
                             key: Key(
-                              'Draft_${state.pathParameters['roomid']!}_${DateTime.now().millisecondsSinceEpoch}',
+                              'Draft_${state.pathParameters['roomid']!}',
                             ),
                             roomName: extra.data is String
                                 ? extra.data as String?
@@ -482,7 +482,7 @@ abstract class AppRoutes {
                         child: ChatAdaptiveScaffold(
                           roomId: state.pathParameters['roomid']!,
                           key: Key(
-                            'Draft_${state.pathParameters['roomid']!}_${DateTime.now().millisecondsSinceEpoch}',
+                            'Draft_${state.pathParameters['roomid']!}',
                           ),
                           roomName: extra.data is String
                               ? extra.data as String?
@@ -499,7 +499,7 @@ abstract class AppRoutes {
                           child: ChatAdaptiveScaffold(
                             roomId: state.pathParameters['roomid']!,
                             key: Key(
-                              'Share_${state.pathParameters['roomid']!}_${DateTime.now().millisecondsSinceEpoch}',
+                              'Share_${state.pathParameters['roomid']!}',
                             ),
                             shareFiles: extra.data as List<MatrixFile?>?,
                           ),
@@ -513,7 +513,7 @@ abstract class AppRoutes {
                         child: ChatAdaptiveScaffold(
                           roomId: state.pathParameters['roomid']!,
                           key: Key(
-                            'Share_${state.pathParameters['roomid']!}_${DateTime.now().millisecondsSinceEpoch}',
+                            'Share_${state.pathParameters['roomid']!}',
                           ),
                           shareFiles: extra.data as List<MatrixFile?>?,
                         ),
@@ -528,7 +528,7 @@ abstract class AppRoutes {
                     child: ChatAdaptiveScaffold(
                       roomId: state.pathParameters['roomid']!,
                       key: Key(
-                        'Default_${state.pathParameters['roomid']!}_${DateTime.now().millisecondsSinceEpoch}',
+                        'Default_${state.pathParameters['roomid']!}',
                       ),
                     ),
                   );
@@ -541,7 +541,7 @@ abstract class AppRoutes {
                   child: ChatAdaptiveScaffold(
                     roomId: state.pathParameters['roomid']!,
                     key: Key(
-                      'Default_${state.pathParameters['roomid']!}_${DateTime.now().millisecondsSinceEpoch}',
+                      'Default_${state.pathParameters['roomid']!}',
                     ),
                   ),
                 );
