@@ -4,6 +4,7 @@ import 'package:fluffychat/app_state/success.dart';
 import 'package:fluffychat/data/network/media/media_api.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/domain/app_state/room/create_support_chat_state.dart';
+import 'package:fluffychat/event/twake_event_types.dart';
 import 'package:fluffychat/presentation/mixins/wellknown_mixin.dart';
 import 'package:fluffychat/resource/image_paths.dart';
 import 'package:fluffychat/utils/power_level_manager.dart';
@@ -16,7 +17,7 @@ class CreateSupportChatInteractor {
   Stream<Either<Failure, Success>> execute(Client client) async* {
     yield Right(CreatingSupportChat());
 
-    const type = 'app.twake.support_room';
+    const type = TwakeEventTypes.supportChatCreatedEventType;
     const accountDataKey = 'createdSupportChat';
     String? roomId;
     String? userId;
