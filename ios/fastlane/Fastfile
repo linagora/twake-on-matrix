@@ -19,7 +19,7 @@ setup_ci if ENV['CI']
 # Sync both development and appstore certificates + provisioning profiles
 
 platform :ios do
-  desc "Push a new beta build to TestFlight"
+  desc "Push a new build to TestFlight (manual distribution to groups)"
   lane :beta do
     app_store_connect_api_key(
       key_id: ENV["APPLE_KEY_ID"],
@@ -34,8 +34,11 @@ platform :ios do
       xcodeproj: "Runner.xcodeproj",
       build_number: latest_testflight_build_number + 1
     )
-    version_name = last_git_tag.gsub("v", "")
+
+    # Use version from environment variable if available, otherwise use latest git tag
+    version_name = ENV["INTERNAL_VERSION"] || last_git_tag.gsub("v", "")
     increment_version_number(version_number: version_name)
+
     build_app(
       scheme: "Runner",
       configuration: "Release",
@@ -43,8 +46,12 @@ platform :ios do
       export_method: "app-store",
       xcodebuild_formatter: "xcbeautify"
     )
+
+    # Upload to TestFlight without auto-distribution
+    # Admin manually assigns builds to groups (internal or external) in App Store Connect
     upload_to_testflight(
-      ipa: "Runner.ipa"
+      ipa: "Runner.ipa",
+      skip_waiting_for_build_processing: false
     )
   end
 
