@@ -5,6 +5,7 @@ import 'package:desktop_drop/desktop_drop.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/domain/contact_manager/contacts_manager.dart';
 import 'package:fluffychat/pages/chat/add_contact_banner.dart';
+import 'package:fluffychat/pages/chat/blocked_message_view.dart';
 import 'package:fluffychat/pages/chat/blocked_user_banner.dart';
 import 'package:fluffychat/pages/chat/chat.dart';
 import 'package:fluffychat/pages/chat/chat_event_list.dart';
@@ -685,13 +686,20 @@ class ChatViewBody extends StatelessWidget with MessageContentMixin {
               );
             },
           ),
-          const SizedBox(height: 8.0),
-          Padding(
-            padding: ChatViewBodyStyle.inputBarPadding(context),
-            child: ChatInputRow(controller),
-          ),
-          SizedBox(
-            height: controller.responsive.isMobile(context) ? 8.0 : 8.0,
+          ValueListenableBuilder(
+            valueListenable: controller.isBlockedUserNotifier,
+            builder: (context, isBlocked, child) {
+              if (!isBlocked) {
+                return child ?? const SizedBox();
+              }
+
+              return const BlockedMessageView();
+            },
+            child: Padding(
+              padding: ChatViewBodyStyle.inputBarPadding(context)
+                  .add(const EdgeInsetsGeometry.symmetric(vertical: 8)),
+              child: ChatInputRow(controller),
+            ),
           ),
         ],
       ),

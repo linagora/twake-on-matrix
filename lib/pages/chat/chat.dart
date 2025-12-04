@@ -3207,7 +3207,7 @@ class ChatController extends State<Chat>
   Widget build(BuildContext context) {
     return MouseRegion(
       onHover: (_) => _resetLocationPath(),
-      child: ChatView(this, key: widget.key),
+      child: ChatView(this),
     );
   }
 }
