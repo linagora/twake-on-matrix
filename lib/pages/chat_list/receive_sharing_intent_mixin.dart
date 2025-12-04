@@ -31,8 +31,7 @@ mixin ReceiveSharingIntentMixin<T extends StatefulWidget> on State<T> {
     Logs().d('ReceiveSharingIntentMixin::_processIncomingSharedFiles: $files');
     if (files.isEmpty) return;
     if (files.length == 1 &&
-        {SharedMediaType.text, SharedMediaType.url}
-            .contains(files.first.type)) {
+        (files.first.isAndroidText() || files.first.isIOSTextAndUrl())) {
       Logs().d('Received text: ${files.first.path}');
       _processIncomingSharedText(files.first.path);
       return;
