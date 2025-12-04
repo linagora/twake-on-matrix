@@ -109,6 +109,7 @@ class Chat extends StatefulWidget {
   final List<MatrixFile?>? shareFiles;
   final String? roomName;
   final void Function(RightColumnType)? onChangeRightColumnType;
+  final Stream<String>? jumpToEventStream;
 
   const Chat({
     super.key,
@@ -116,6 +117,7 @@ class Chat extends StatefulWidget {
     this.shareFiles,
     this.roomName,
     this.onChangeRightColumnType,
+    this.jumpToEventStream,
   });
 
   @override
@@ -229,6 +231,30 @@ class ChatController extends State<Chat>
     return validEvents.isEmpty;
   }
 
+  bool get isSupportChat {
+    return roomId == Matrix.of(context).supportChatRoomId;
+  }
+
+  bool get isEmptySupportChat {
+    final supportChatRoomId = Matrix.of(context).supportChatRoomId;
+    if (supportChatRoomId == null) return false;
+
+    if (timeline == null) return true;
+
+    final events = timeline!.events;
+    final visibleEvents = events.where((event) => event.isVisibleInGui);
+    final validEventType = [
+      EventTypes.Message,
+      EventTypes.Sticker,
+      EventTypes.Encrypted,
+      EventTypes.CallInvite,
+    ];
+    final validEvents = visibleEvents.where((event) {
+      return validEventType.contains(event.type);
+    });
+    return validEvents.isEmpty && isSupportChat;
+  }
+
   final AutoScrollController scrollController = AutoScrollController();
 
   // Constant scroll speed in pixels per second for smooth, predictable scrolling
@@ -280,6 +306,8 @@ class ChatController extends State<Chat>
   bool currentlyTyping = false;
 
   StreamSubscription<EventId>? _jumpToEventIdSubscription;
+
+  StreamSubscription<String>? _jumpToEventFromSearchSubscription;
 
   bool get canSaveSelectedEvent =>
       selectedEvents.length == 1 &&
@@ -626,10 +654,6 @@ class ChatController extends State<Chat>
     // then set the new sending client
     setState(() => sendingClient = c);
   }
-
-  void setActiveClient(Client c) => setState(() {
-        Matrix.of(context).setActiveClient(c);
-      });
 
   Future<void> send() async {
     scrollDown();
@@ -1040,14 +1064,17 @@ class ChatController extends State<Chat>
       return;
     }
     if (selectedEvents.isEmpty && event != null) {
-      Matrix.of(context).shareContent =
-          event.getDisplayEvent(timeline!).formatContentForwards();
+      Matrix.of(context).shareContent = event
+          .getDisplayEventWithoutEditEvent(timeline!)
+          .formatContentForwards();
       Logs().d(
         "forwardEventsAction():: shareContent: ${Matrix.of(context).shareContent}",
       );
     } else {
       Matrix.of(context).shareContentList = selectedEvents.map((msg) {
-        final content = msg.getDisplayEvent(timeline!).formatContentForwards();
+        final content = msg
+            .getDisplayEventWithoutEditEvent(timeline!)
+            .formatContentForwards();
         return content;
       }).toList();
       Logs().d(
@@ -1094,8 +1121,11 @@ class ChatController extends State<Chat>
     }
     pendingText = sendController.text;
     editEventNotifier.value = eventToEdit;
-    sendController.text =
-        editEvent!.getDisplayEvent(timeline!).calcLocalizedBodyFallback(
+    sendController.text = eventToEdit.isMediaAndFilesWithCaption()
+        ? eventToEdit.body
+        : eventToEdit
+            .getDisplayEventWithoutEditEvent(timeline!)
+            .calcLocalizedBodyFallback(
               MatrixLocals(L10n.of(context)!),
               withSenderNamePrefix: false,
               hideReply: true,
@@ -1555,7 +1585,7 @@ class ChatController extends State<Chat>
       editEventNotifier.value = selectedEvents.first;
     });
     inputText.value = sendController.text = editEventNotifier.value!
-        .getDisplayEvent(timeline!)
+        .getDisplayEventWithoutEditEvent(timeline!)
         .calcLocalizedBodyFallback(
           MatrixLocals(L10n.of(context)!),
           withSenderNamePrefix: false,
@@ -2587,6 +2617,8 @@ class ChatController extends State<Chat>
     }
   }
 
+  bool get hasActionAppBarMenu => _getListActionAppBarMenu().isEmpty;
+
   void handleAppbarMenuAction(
     BuildContext context,
     TapDownDetails tapDownDetails,
@@ -2637,7 +2669,7 @@ class ChatController extends State<Chat>
 
   List<ChatAppBarActions> _getListActionAppbarMenuNormal() {
     return [
-      ChatAppBarActions.leaveGroup,
+      if (!isSupportChat) ChatAppBarActions.leaveGroup,
     ];
   }
 
@@ -3058,12 +3090,23 @@ class ChatController extends State<Chat>
     }
   }
 
+  void _listenOnJumpToEventFromSearch() {
+    _jumpToEventFromSearchSubscription =
+        widget.jumpToEventStream?.listen((eventId) {
+      Logs().d(
+        'Chat::_listenOnJumpToEventFromSearch(): Jump to eventId from search: $eventId',
+      );
+      scrollToEventIdAndHighlight(eventId);
+    });
+  }
+
   @override
   void onSendFileCallback() => scrollDown();
 
   @override
   void initState() {
     _initializePinnedEvents();
+    _listenOnJumpToEventFromSearch();
     registerPasteShortcutListeners();
     keyboardVisibilitySubscription =
         keyboardVisibilityController.onChange.listen(_keyboardListener);
@@ -3120,6 +3163,7 @@ class ChatController extends State<Chat>
     focusSuggestionController.dispose();
     _focusSuggestionController.dispose();
     _jumpToEventIdSubscription?.cancel();
+    _jumpToEventFromSearchSubscription?.cancel();
     pinnedEventsController.dispose();
     _captionsController.dispose();
     scrollController.removeListener(_updateScrollController);

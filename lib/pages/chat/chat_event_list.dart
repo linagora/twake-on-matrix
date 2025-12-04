@@ -2,6 +2,7 @@ import 'dart:ui';
 
 import 'package:fluffychat/pages/chat/chat.dart';
 import 'package:fluffychat/pages/chat/chat_scroll_view.dart';
+import 'package:fluffychat/pages/chat/empty_support_chat_view.dart';
 import 'package:fluffychat/pages/chat/group_chat_empty_view.dart';
 import 'package:fluffychat/pages/chat/optional_selection_area.dart';
 import 'package:fluffychat/pages/chat_draft/draft_chat_empty_widget.dart';
@@ -21,6 +22,10 @@ class ChatEventList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final events = List<Event>.from(controller.timeline!.events);
+
+    if (controller.isEmptySupportChat) {
+      return const EmptySupportChatView();
+    }
 
     if (controller.hasNoMessageEvents) {
       return Column(

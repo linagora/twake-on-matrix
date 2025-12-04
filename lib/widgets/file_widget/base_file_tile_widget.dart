@@ -26,6 +26,7 @@ class BaseFileTileWidget extends StatelessWidget {
     this.ownMessage = false,
     required this.subTitle,
     this.event,
+    this.onTap,
   });
 
   final TwakeMimeType mimeType;
@@ -40,6 +41,7 @@ class BaseFileTileWidget extends StatelessWidget {
   final Widget Function(BuildContext) subTitle;
   final bool ownMessage;
   final Event? event;
+  final void Function()? onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -47,70 +49,76 @@ class BaseFileTileWidget extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
       children: [
-        Container(
-          padding: style.paddingFileTileAll,
-          decoration: ShapeDecoration(
-            color: backgroundColor ??
-                style.backgroundColor(context, ownMessage: ownMessage),
-            shape: RoundedRectangleBorder(
-              borderRadius: style.borderRadius,
+        InkWell(
+          onTap: onTap,
+          child: Container(
+            padding: style.paddingFileTileAll,
+            decoration: ShapeDecoration(
+              color: backgroundColor ??
+                  style.backgroundColor(context, ownMessage: ownMessage),
+              shape: RoundedRectangleBorder(
+                borderRadius: style.borderRadius,
+              ),
             ),
-          ),
-          child: Row(
-            crossAxisAlignment: style.crossAxisAlignment,
-            children: [
-              if (imageBytes != null)
-                Padding(
-                  padding: style.imagePadding,
-                  child: ClipRRect(
-                    borderRadius: style.borderRadius,
-                    child: Image.memory(
-                      imageBytes!,
-                      width: style.imageSize,
-                      height: style.imageSize,
-                      fit: BoxFit.cover,
+            child: Row(
+              crossAxisAlignment: style.crossAxisAlignment,
+              children: [
+                if (imageBytes != null)
+                  Padding(
+                    padding: style.imagePadding,
+                    child: ClipRRect(
+                      borderRadius: style.borderRadius,
+                      child: Image.memory(
+                        imageBytes!,
+                        width: style.imageSize,
+                        height: style.imageSize,
+                        fit: BoxFit.cover,
+                      ),
                     ),
                   ),
+                if (imageBytes == null)
+                  SvgPicture.asset(
+                    fileTileIcon ?? mimeType.getIcon(fileType: fileType),
+                    width: style.iconSize,
+                    height: style.iconSize,
+                  ),
+                style.paddingRightIcon,
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.max,
+                    children: [
+                      const SizedBox(height: 4.0),
+                      FileNameText(
+                        filename: filename,
+                        highlightText: highlightText,
+                        style: style,
+                      ),
+                      subTitle(context),
+                      style.paddingBottomText,
+                    ],
+                  ),
                 ),
-              if (imageBytes == null)
-                SvgPicture.asset(
-                  fileTileIcon ?? mimeType.getIcon(fileType: fileType),
-                  width: style.iconSize,
-                  height: style.iconSize,
-                ),
-              style.paddingRightIcon,
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.max,
-                  children: [
-                    const SizedBox(height: 4.0),
-                    FileNameText(
-                      filename: filename,
-                      highlightText: highlightText,
-                      style: style,
-                    ),
-                    subTitle(context),
-                    style.paddingBottomText,
-                  ],
-                ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
         if (event != null && event!.isMediaAndFilesWithCaption()) ...[
           const SizedBox(height: 8.0),
-          TwakeLinkPreview(
-            key: ValueKey('TwakeLinkPreview%${event!.eventId}%'),
-            event: event!,
-            localizedBody: event!.body,
-            ownMessage: ownMessage,
-            fontSize: AppConfig.messageFontSize * AppConfig.fontSizeFactor,
-            linkStyle: MessageContentStyle.linkStyleMessageContent(
-              context,
+          MouseRegion(
+            cursor: SystemMouseCursors.copy,
+            child: TwakeLinkPreview(
+              key: ValueKey('TwakeLinkPreview%${event!.eventId}%'),
+              event: event!,
+              localizedBody: event!.body,
+              ownMessage: ownMessage,
+              fontSize: AppConfig.messageFontSize * AppConfig.fontSizeFactor,
+              linkStyle: MessageContentStyle.linkStyleMessageContent(
+                context,
+              ),
+              richTextStyle: event!.getMessageTextStyle(context),
+              isCaption: event!.isMediaAndFilesWithCaption(),
             ),
-            richTextStyle: event!.getMessageTextStyle(context),
-            isCaption: event!.isMediaAndFilesWithCaption(),
           ),
         ],
       ],

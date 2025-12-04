@@ -128,24 +128,25 @@ class ChatViewBody extends StatelessWidget with MessageContentMixin {
                                     mainAxisAlignment:
                                         MainAxisAlignment.spaceEvenly,
                                     children: [
-                                      TextButton.icon(
-                                        style: TextButton.styleFrom(
-                                          padding: const EdgeInsets.all(16),
-                                          foregroundColor: Theme.of(context)
-                                              .colorScheme
-                                              .error,
+                                      if (!controller.isSupportChat)
+                                        TextButton.icon(
+                                          style: TextButton.styleFrom(
+                                            padding: const EdgeInsets.all(16),
+                                            foregroundColor: Theme.of(context)
+                                                .colorScheme
+                                                .error,
+                                          ),
+                                          icon: const Icon(
+                                            Icons.archive_outlined,
+                                          ),
+                                          onPressed: () => controller.leaveChat(
+                                            context,
+                                            controller.room,
+                                          ),
+                                          label: Text(
+                                            L10n.of(context)!.leave,
+                                          ),
                                         ),
-                                        icon: const Icon(
-                                          Icons.archive_outlined,
-                                        ),
-                                        onPressed: () => controller.leaveChat(
-                                          context,
-                                          controller.room,
-                                        ),
-                                        label: Text(
-                                          L10n.of(context)!.leave,
-                                        ),
-                                      ),
                                       TextButton.icon(
                                         style: TextButton.styleFrom(
                                           padding: const EdgeInsets.all(16),

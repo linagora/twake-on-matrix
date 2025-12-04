@@ -1,5 +1,6 @@
 import 'package:fluffychat/config/first_column_inner_routes.dart';
 import 'package:fluffychat/pages/dialer/pip/dismiss_keyboard.dart';
+import 'package:fluffychat/widgets/app_bars/twake_app_bar_style.dart';
 import 'package:fluffychat/widgets/context_menu_builder_ios_paste_without_permission.dart';
 import 'package:fluffychat/widgets/twake_components/twake_icon_button.dart';
 import 'package:fluffychat/widgets/app_bars/searchable_app_bar_style.dart';
@@ -61,7 +62,7 @@ class SearchableAppBar extends StatelessWidget {
               children: [
                 if (isFullScreen) ...[
                   TwakeIconButton(
-                    icon: Icons.chevron_left_outlined,
+                    icon: Icons.arrow_back_ios,
                     onTap: () {
                       if (!FirstColumnInnerRoutes.instance
                           .goRouteAvailableInFirstColumn()) {
@@ -96,12 +97,9 @@ class SearchableAppBar extends StatelessWidget {
                         child: Text(
                           title,
                           textAlign: TextAlign.center,
-                          style: Theme.of(context)
-                              .textTheme
-                              .titleLarge
-                              ?.copyWith(
-                                color: Theme.of(context).colorScheme.onSurface,
-                              ),
+                          style: TwakeAppBarStyle.titleTextStyle(
+                            context,
+                          ),
                         ),
                       );
                     },

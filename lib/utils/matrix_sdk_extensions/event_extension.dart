@@ -256,7 +256,10 @@ extension LocalizedBody on Event {
   }
 
   String getSelectedEventString(BuildContext context, Timeline timeline) {
-    return getDisplayEvent(timeline).calcLocalizedBodyFallback(
+    if (isMediaAndFilesWithCaption()) {
+      return body;
+    }
+    return getDisplayEventWithoutEditEvent(timeline).calcLocalizedBodyFallback(
       MatrixLocals(L10n.of(context)!),
       hideReply: true,
     );
@@ -348,6 +351,10 @@ extension LocalizedBody on Event {
   }
 
   bool canEditEvents(MatrixState? matrix) {
+    if (isMediaAndFilesWithCaption()) {
+      return true;
+    }
+
     if (isVideoOrImage || hasAttachment) {
       return false;
     }
@@ -468,5 +475,65 @@ extension LocalizedBody on Event {
     }
 
     return null;
+  }
+
+  Event getDisplayEventWithoutEditEvent(Timeline timeline) {
+    if (redacted) {
+      return this;
+    }
+
+    if (!hasAggregatedEvents(timeline, RelationshipTypes.edit)) {
+      return this;
+    }
+
+    // Get all valid edit events from the original author
+    final editEvents = aggregatedEvents(timeline, RelationshipTypes.edit)
+        .where((e) => e.senderId == senderId && e.type == EventTypes.Message)
+        .toList();
+
+    if (editEvents.isEmpty) {
+      return this;
+    }
+
+    // Find the most recent edit event
+    final latestEdit = editEvents.reduce(
+      (latest, current) => current.originServerTs.millisecondsSinceEpoch >
+              latest.originServerTs.millisecondsSinceEpoch
+          ? current
+          : latest,
+    );
+
+    final editEventJson = latestEdit.toJson();
+    final newContent = editEventJson['content']['m.new_content'];
+
+    if (newContent is! Map) {
+      return this;
+    }
+
+    final hasCaption = isMediaAndFilesWithCaption();
+
+    if (hasCaption) {
+      // For media/files with caption, preserve original event structure
+      // and add the edited content
+      final originalEventJson = toJson();
+      originalEventJson['content']['m.new_content'] = newContent;
+      originalEventJson['content']['body'] = newContent['body'];
+
+      // Update formatted_body if it exists in the new content
+      if (newContent['formatted_body'] != null) {
+        originalEventJson['content']['formatted_body'] =
+            newContent['formatted_body'];
+        originalEventJson['content']['format'] = newContent['format'];
+      } else {
+        originalEventJson['content'].remove('formatted_body');
+        originalEventJson['content'].remove('format');
+      }
+
+      return Event.fromJson(originalEventJson, room);
+    }
+
+    // For regular text messages, use the edited event structure
+    editEventJson['content'] = newContent;
+    return Event.fromJson(editEventJson, room);
   }
 }

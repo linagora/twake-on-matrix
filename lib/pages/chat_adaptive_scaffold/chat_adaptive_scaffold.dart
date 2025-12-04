@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:fluffychat/pages/chat/chat.dart';
 import 'package:fluffychat/pages/chat_adaptive_scaffold/chat_adaptive_scaffold_builder.dart';
 import 'package:fluffychat/pages/chat_details/chat_details_navigator.dart';
@@ -25,6 +27,20 @@ class ChatAdaptiveScaffold extends StatefulWidget {
 }
 
 class ChatAdaptiveScaffoldController extends State<ChatAdaptiveScaffold> {
+  late StreamController<String> jumpToEventStreamController;
+
+  @override
+  void initState() {
+    jumpToEventStreamController = StreamController<String>.broadcast();
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    jumpToEventStreamController.close();
+  }
+
   @override
   Widget build(BuildContext context) {
     return KeyboardDismissOnTap(
@@ -34,6 +50,7 @@ class ChatAdaptiveScaffoldController extends State<ChatAdaptiveScaffold> {
           shareFiles: widget.shareFiles,
           roomName: widget.roomName,
           onChangeRightColumnType: controller.setRightColumnType,
+          jumpToEventStream: jumpToEventStreamController.stream,
         ),
         rightBuilder: (
           controller, {
@@ -45,6 +62,7 @@ class ChatAdaptiveScaffoldController extends State<ChatAdaptiveScaffold> {
             controller: controller,
             type: type,
             roomId: widget.roomId,
+            jumpToEventStreamController: jumpToEventStreamController,
           );
         },
       ),
@@ -57,12 +75,14 @@ class _RightColumnNavigator extends StatelessWidget {
   final bool isInStack;
   final RightColumnType type;
   final String roomId;
+  final StreamController<String> jumpToEventStreamController;
 
   const _RightColumnNavigator({
     required this.controller,
     required this.isInStack,
     required this.type,
     required this.roomId,
+    required this.jumpToEventStreamController,
   });
 
   @override
@@ -73,6 +93,7 @@ class _RightColumnNavigator extends StatelessWidget {
           roomId: roomId,
           onBack: controller.hideRightColumn,
           isInStack: isInStack,
+          jumpToEventStreamController: jumpToEventStreamController,
         );
       case RightColumnType.profileInfo:
         return ChatProfileInfoNavigator(

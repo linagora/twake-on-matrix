@@ -27,26 +27,52 @@ void main() {
     description: 'create a new group chat',
     test: ($) async {
       final s = SoftAssertHelper();
-      const searchByMatrixAddress  = String.fromEnvironment('SearchByMatrixAddress');
+      const searchByMatrixAddress =
+          String.fromEnvironment('SearchByMatrixAddress');
       final now = DateTime.now();
-      final groupName ="${now.year}${now.month}${now.day}${now.hour}${now.minute}";
+      final groupName =
+          "${now.year}${now.month}${now.day}${now.hour}${now.minute}";
 
       // goto chat screen
       await HomeRobot($).gotoChatListScreen();
       // click on Pen icon
-      await ChatScenario($).createANewGroupChat(groupName, [searchByMatrixAddress], searchKey: searchByMatrixAddress);
+      await ChatScenario($).createANewGroupChat(
+        groupName,
+        [searchByMatrixAddress],
+        searchKey: searchByMatrixAddress,
+      );
       // verify group is shown with correct name, back iocn, search icon and more icon
-      s.softAssertEquals(ChatGroupDetailRobot($).getBackIcon().exists, true, 'Back icon is missing');
-      s.softAssertEquals(ChatGroupDetailRobot($).getSearchIcon().exists, true, 'Search icon is missing');
-      s.softAssertEquals(ChatGroupDetailRobot($).getMoreIcon().exists, true, 'More icon is missing');
-      s.softAssertEquals($(ChatAppBarTitle).$(groupName).exists, true, 'Group name is not correct');
+      s.softAssertEquals(
+        ChatGroupDetailRobot($).getBackIcon().exists,
+        true,
+        'Back icon is missing',
+      );
+      s.softAssertEquals(
+        ChatGroupDetailRobot($).getSearchIcon().exists,
+        true,
+        'Search icon is missing',
+      );
+      s.softAssertEquals(
+        ChatGroupDetailRobot($).getMoreIcon().exists,
+        true,
+        'More icon is missing',
+      );
+      s.softAssertEquals(
+        $(ChatAppBarTitle).$(groupName).exists,
+        true,
+        'Group name is not correct',
+      );
 
       //click button back
       await ChatScenario($).backToChatLisFromChatGroupScreen();
 
       //verify new group is listed
-      final group = ChatListRobot($).getChatGroupByTitle(groupName) ;
-      s.softAssertEquals(group.root.exists, true, "the new group $groupName is not listed");
+      final group = ChatListRobot($).getChatGroupByTitle(groupName);
+      s.softAssertEquals(
+        group.root.exists,
+        true,
+        "the new group $groupName is not listed",
+      );
       s.verifyAll();
     },
   );
@@ -72,7 +98,7 @@ void main() {
   //     s.softAssertEquals(GroupInformationRobot($).getLinksTab().exists, true, 'Link tab is mising');
   //     s.softAssertEquals(GroupInformationRobot($).getFilesTab().exists, true, 'Files tab is mising');
   //     s.softAssertEquals(GroupInformationRobot($).getAddMembersBtn().exists, true, 'Add member button is mising',);
-      
+
   //     s.verifyAll();
   //   },
   // );
@@ -89,7 +115,7 @@ void main() {
   //     // open GroupTest
   //     await ChatScenario($).openChatGroupByTitle(groupTest);
   //     final numberOFMemberBeforeAdding = ChatGroupDetailRobot($).getTotalMemberLabel();
-      
+
   //     // add more one member
   //     final totalMemberAfterAdding = await ChatScenario($).addMembers([user3]);
   //     // verify added user listed under Memmber tab of GroupInformation screen

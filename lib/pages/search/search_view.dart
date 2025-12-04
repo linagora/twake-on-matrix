@@ -169,7 +169,7 @@ class SearchView extends StatelessWidget {
           children: [
             TwakeIconButton(
               tooltip: L10n.of(context)!.back,
-              icon: Icons.chevron_left_outlined,
+              icon: Icons.arrow_back_ios,
               onTap: () => Navigator.of(context).pop(),
             ),
             const SizedBox(width: 4.0),

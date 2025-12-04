@@ -48,37 +48,42 @@ class SettingsIgnoreListController extends State<BlockedUsers>
   }
 
   Future<void> initialBlockedUsers() async {
-    try {
-      TwakeDialog.showLoadingDialog(context);
+    TwakeDialog.showLoadingDialog(context);
 
-      if (client.ignoredUsers.isEmpty) {
-        searchUserResults.value = const Left(
-          BlockedUsersSearchEmptyState(keyword: ''),
-        );
-        TwakeDialog.hideLoadingDialog(context);
-        return;
-      }
+    if (client.ignoredUsers.isEmpty) {
+      searchUserResults.value = const Left(
+        BlockedUsersSearchEmptyState(keyword: ''),
+      );
+      TwakeDialog.hideLoadingDialog(context);
+      return;
+    }
 
-      for (final userId in client.ignoredUsers) {
+    for (final userId in client.ignoredUsers) {
+      try {
         final user = await client.getProfileFromUserId(
           userId,
           getFromRooms: false,
         );
         blockedUsers.add(user);
+      } catch (e) {
+        Logs().e(
+          "SettingsIgnoreListController::initialBlockedUsers: Error fetching profile for userId $userId: $e",
+        );
       }
+    }
+    if (blockedUsers.isNotEmpty) {
       searchUserResults.value = Right(
         BlockedUsersSearchSuccessState(
           blockedUsers: blockedUsers,
           keyword: '',
         ),
       );
-      TwakeDialog.hideLoadingDialog(context);
-    } catch (e) {
+    } else {
       searchUserResults.value = const Left(
         BlockedUsersSearchEmptyState(keyword: ''),
       );
-      TwakeDialog.hideLoadingDialog(context);
     }
+    TwakeDialog.hideLoadingDialog(context);
   }
 
   void handleSearchResults(String searchTerm) {
@@ -125,19 +130,19 @@ class SettingsIgnoreListController extends State<BlockedUsers>
   }
 
   Future<void> refreshBlockedUsers() async {
-    try {
-      TwakeDialog.showLoadingDialog(context);
-      searchUserResults.value = Right(BlockedUsersSearchInitialState());
+    TwakeDialog.showLoadingDialog(context);
+    searchUserResults.value = Right(BlockedUsersSearchInitialState());
 
-      if (client.ignoredUsers.isEmpty) {
-        searchUserResults.value = const Left(
-          BlockedUsersSearchEmptyState(keyword: ''),
-        );
-        TwakeDialog.hideLoadingDialog(context);
-        return;
-      }
+    if (client.ignoredUsers.isEmpty) {
+      searchUserResults.value = const Left(
+        BlockedUsersSearchEmptyState(keyword: ''),
+      );
+      TwakeDialog.hideLoadingDialog(context);
+      return;
+    }
 
-      for (final userId in client.ignoredUsers) {
+    for (final userId in client.ignoredUsers) {
+      try {
         final user = await client.getProfileFromUserId(
           userId,
           getFromRooms: false,
@@ -147,20 +152,26 @@ class SettingsIgnoreListController extends State<BlockedUsers>
         } else {
           blockedUsers.removeWhere((u) => u.userId != user.userId);
         }
+      } catch (e) {
+        Logs().e(
+          "SettingsIgnoreListController::refreshBlockedUsers: Error fetching profile for userId $userId: $e",
+        );
       }
+    }
+
+    if (blockedUsers.isEmpty) {
       searchUserResults.value = Right(
         BlockedUsersSearchSuccessState(
           blockedUsers: blockedUsers,
           keyword: '',
         ),
       );
-      TwakeDialog.hideLoadingDialog(context);
-    } catch (e) {
+    } else {
       searchUserResults.value = const Left(
         BlockedUsersSearchEmptyState(keyword: ''),
       );
-      TwakeDialog.hideLoadingDialog(context);
     }
+    TwakeDialog.hideLoadingDialog(context);
   }
 
   @override

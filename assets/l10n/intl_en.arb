@@ -3484,4 +3484,6 @@
     }
   },
   "unblockUserToSendMessages": "Unblock user to send messages"
+  "supportChat": "Support Chat",
+  "supportChatDescription": "I’ve got your back! If you encounter bugs or need any help using Twake Workplace, send a message, I will reply to you swiftly"
 }

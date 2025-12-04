@@ -47,11 +47,13 @@ void main() {
       final (senderMsg, receiverMsg) = await prepareTwoMessages($);
 
       await ChatGroupDetailRobot($).openPullDownMenu(senderMsg);
-      await ChatScenario($).verifyTheDisplayOfPullDownMenu(senderMsg, level:UserLevel.owner);
+      await ChatScenario($)
+          .verifyTheDisplayOfPullDownMenu(senderMsg, level: UserLevel.owner);
       await ChatGroupDetailRobot($).closePullDownMenu();
 
       await ChatGroupDetailRobot($).openPullDownMenu(receiverMsg);
-      await ChatScenario($).verifyTheDisplayOfPullDownMenu(receiverMsg, level:UserLevel.member);
+      await ChatScenario($)
+          .verifyTheDisplayOfPullDownMenu(receiverMsg, level: UserLevel.member);
     },
   );
 
@@ -105,7 +107,8 @@ void main() {
       await ChatGroupDetailRobot($).inputMessage(addedText);
       await ChatScenario($).pasteFromClipBoard();
       await $(ChatInputRowSendBtn).tap();
-      await ChatScenario($).verifyMessageIsShown('$addedText$receiverMsg', true);
+      await ChatScenario($)
+          .verifyMessageIsShown('$addedText$receiverMsg', true);
     },
   );
 
@@ -172,20 +175,39 @@ void main() {
       final s = SoftAssertHelper();
       await ChatScenario($).watchMessageInfo(senderMsg);
       // verify info dialog is shown
-      s.softAssertEquals($(EventInfoDialog).exists, true, 'EventInfoDialog is not shown');
+      s.softAssertEquals(
+        $(EventInfoDialog).exists,
+        true,
+        'EventInfoDialog is not shown',
+      );
       //Verify contains avatar
-      s.softAssertEquals($(EventInfoDialog).$(ListTile).at(0).$(Avatar).exists, true, 'Avatar is not shown');
+      s.softAssertEquals(
+        $(EventInfoDialog).$(ListTile).at(0).$(Avatar).exists,
+        true,
+        'Avatar is not shown',
+      );
       //Verify contains the time message is sent
-      s.softAssertEquals($(EventInfoDialog).$(ListTile).at(1).$(Text).at(1).text != "", true, 'sent time is not shown');
+      s.softAssertEquals(
+        $(EventInfoDialog).$(ListTile).at(1).$(Text).at(1).text != "",
+        true,
+        'sent time is not shown',
+      );
       // verify type is text
-      s.softAssertEquals($(EventInfoDialog).$(ListTile).at(2).$(Text).at(1).text == "text", true, 'type is not text');
+      s.softAssertEquals(
+        $(EventInfoDialog).$(ListTile).at(2).$(Text).at(1).text == "text",
+        true,
+        'type is not text',
+      );
       // verify source code is shown
-      s.softAssertEquals($(EventInfoDialog).$(SelectableText).exists, true, 'source code is not shown');
+      s.softAssertEquals(
+        $(EventInfoDialog).$(SelectableText).exists,
+        true,
+        'source code is not shown',
+      );
       //close message info
       await ChatScenario($).closeMessageInfo();
 
       s.verifyAll();
-
     },
   );
 }

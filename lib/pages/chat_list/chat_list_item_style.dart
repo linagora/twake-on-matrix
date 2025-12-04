@@ -13,7 +13,7 @@ class ChatListItemStyle {
 
   static const double mentionIconWidth = 20;
 
-  static const double chatItemHeight = 80;
+  static const double chatItemHeight = 72;
 
   static double unreadBadgeSize(
     bool unread,
@@ -44,7 +44,11 @@ class ChatListItemStyle {
   static const EdgeInsetsDirectional paddingIconGroup =
       EdgeInsetsDirectional.all(4);
 
-  static const EdgeInsetsDirectional paddingBody = EdgeInsetsDirectional.all(8);
+  static const EdgeInsetsDirectional paddingBody =
+      EdgeInsetsDirectional.symmetric(
+    horizontal: 8,
+    vertical: 4,
+  );
 
   static const double unreadBadgePaddingWhenMoreThanOne = 9.0;
 

@@ -184,6 +184,7 @@ class MessageContent extends StatelessWidget
                         ),
                       ],
                     ),
+                  const SizedBox(height: 8),
                   SizedBox(
                     width: MessageStyle.messageBubbleWidthVideoCaption(
                       event: event,
@@ -267,7 +268,8 @@ class MessageContent extends StatelessWidget
                 ] else ...[
                   if (event.isSending()) ...[
                     OptionalSelectionContainerDisabled(
-                      isEnabled: PlatformInfos.isWeb,
+                      isEnabled: PlatformInfos.isWeb &&
+                          !event.isMediaAndFilesWithCaption(),
                       child: MessageUploadingContent(
                         event: event,
                         style: const MessageFileTileStyle(),
@@ -275,7 +277,8 @@ class MessageContent extends StatelessWidget
                     ),
                   ] else
                     OptionalSelectionContainerDisabled(
-                      isEnabled: PlatformInfos.isWeb,
+                      isEnabled: PlatformInfos.isWeb &&
+                          !event.isMediaAndFilesWithCaption(),
                       child: MessageDownloadContentWeb(
                         event,
                       ),

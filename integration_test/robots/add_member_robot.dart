@@ -36,26 +36,33 @@ class AddMemberRobot extends CoreRobot {
 
   PatrolFinder getAgreeInviteMemberBtn() {
     if (Platform.isAndroid) {
-        return $(AlertDialog).$(TextButton).containing(find.text('YES'));
-    }
-    else{
-        return $(CupertinoAlertDialog).$(CupertinoDialogAction).containing(find.text('Yes'));
+      return $(AlertDialog).$(TextButton).containing(find.text('YES'));
+    } else {
+      return $(CupertinoAlertDialog)
+          .$(CupertinoDialogAction)
+          .containing(find.text('Yes'));
     }
   }
 
   PatrolFinder getCancelnviteMemberBtn() {
     if (Platform.isAndroid) {
-        return $(AlertDialog).$(TextButton).containing(find.text('CANCEL'));
-    }
-    else{
-        return $(CupertinoAlertDialog).$(CupertinoDialogAction).containing(find.text('Cancel'));
+      return $(AlertDialog).$(TextButton).containing(find.text('CANCEL'));
+    } else {
+      return $(CupertinoAlertDialog)
+          .$(CupertinoDialogAction)
+          .containing(find.text('Cancel'));
     }
   }
 
   Future<void> makeASearch(String searchKey) async {
     await getSearchIcon().tap();
     await typeSlowlyWithPatrol($, getSearchField(), searchKey);
-    await waitForEitherVisible($: $, first: $(ContactItem), second: $("No Results"), timeout: const Duration(seconds: 10));
+    await waitForEitherVisible(
+      $: $,
+      first: $(ContactItem),
+      second: $("No Results"),
+      timeout: const Duration(seconds: 10),
+    );
   }
 
   Future<void> clickOnNextIcon() async {
@@ -65,8 +72,8 @@ class AddMemberRobot extends CoreRobot {
 
   Future<void> selectAllFilteredAccounts() async {
     final accounts = getListOfChatGroup();
-    for( final account in accounts){
-        await account.getCheckBox().tap();
+    for (final account in accounts) {
+      await account.getCheckBox().tap();
     }
   }
 
