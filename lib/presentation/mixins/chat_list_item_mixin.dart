@@ -153,6 +153,8 @@ mixin ChatListItemMixin {
                 overflow: TextOverflow.ellipsis,
                 style: ListItemStyle.subtitleTextStyle(
                   fontFamily: 'Inter',
+                ).copyWith(
+                  fontStyle: event.text.isEmpty ? FontStyle.italic : null,
                 ),
               ),
       ],
