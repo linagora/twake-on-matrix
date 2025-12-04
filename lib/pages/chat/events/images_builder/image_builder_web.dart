@@ -27,6 +27,8 @@ class UnencryptedImageBuilderWeb extends StatelessWidget {
 
   final void Function()? onTapSelectMode;
 
+  final double? bubbleMaxWidth;
+
   const UnencryptedImageBuilderWeb({
     super.key,
     required this.event,
@@ -37,6 +39,7 @@ class UnencryptedImageBuilderWeb extends StatelessWidget {
     this.onTapSelectMode,
     this.onTapPreview,
     this.closeRightColumn,
+    this.bubbleMaxWidth,
   });
 
   @override
@@ -53,7 +56,9 @@ class UnencryptedImageBuilderWeb extends StatelessWidget {
           child: Stack(
             alignment: Alignment.center,
             children: [
-              Positioned.fill(
+              SizedBox(
+                width:
+                    width < (bubbleMaxWidth ?? 0) ? bubbleMaxWidth ?? 0 : width,
                 child: BlurHash(
                   hash: event.blurHash ?? MessageContentStyle.defaultBlurHash,
                 ),

@@ -44,6 +44,7 @@ class MessageImageBuilder extends StatelessWidget {
         event: event,
         onTapPreview: onTapPreview,
         displayImageInfo: displayImageInfo,
+        bubbleWidth: maxWidth,
       );
     }
     displayImageInfo ??= DisplayImageInfo(
@@ -65,10 +66,12 @@ class MessageImageBuilder extends StatelessWidget {
         event: event,
         onTapPreview: onTapPreview,
         displayImageInfo: displayImageInfo,
+        bubbleWidth: maxWidth,
       );
     }
     return ImageBubble(
       event,
+      bubbleMaxWidth: maxWidth,
       width: displayImageInfo.size.width,
       height: displayImageInfo.size.height,
       fit: BoxFit.cover,

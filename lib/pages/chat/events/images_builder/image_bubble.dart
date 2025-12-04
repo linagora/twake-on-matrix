@@ -18,6 +18,7 @@ class ImageBubble extends StatelessWidget {
   final bool animated;
   final double width;
   final double height;
+  final double? bubbleMaxWidth;
   final bool rounded;
   final void Function()? onTapPreview;
   final void Function()? onTapSelectMode;
@@ -36,6 +37,7 @@ class ImageBubble extends StatelessWidget {
     this.thumbnailOnly = true,
     this.width = 256,
     this.height = 300,
+    this.bubbleMaxWidth,
     this.animated = false,
     this.rounded = true,
     this.onTapSelectMode,
@@ -64,7 +66,9 @@ class ImageBubble extends StatelessWidget {
       ),
       constraints: maxSize
           ? BoxConstraints(
-              maxWidth: bubbleWidth,
+              maxWidth: bubbleWidth < (bubbleMaxWidth ?? 0)
+                  ? bubbleMaxWidth ?? 0
+                  : bubbleWidth,
               minWidth: bubbleMinWidth,
               maxHeight: bubbleHeight,
             )
@@ -77,6 +81,7 @@ class ImageBubble extends StatelessWidget {
                 !event.isBubbleEventEncrypted(isThumbnail: thumbnailOnly))
             ? UnencryptedImageBuilderWeb(
                 event: event,
+                bubbleMaxWidth: bubbleMaxWidth,
                 isThumbnail: thumbnailOnly,
                 width: width,
                 height: height,
@@ -88,7 +93,9 @@ class ImageBubble extends StatelessWidget {
                 alignment: Alignment.center,
                 children: [
                   SizedBox(
-                    width: bubbleWidth,
+                    width: bubbleWidth < (bubbleMaxWidth ?? 0)
+                        ? (bubbleMaxWidth ?? 0)
+                        : bubbleWidth,
                     height: bubbleHeight,
                     child: BlurHash(
                       hash:

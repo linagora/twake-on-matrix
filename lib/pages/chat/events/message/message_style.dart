@@ -130,6 +130,7 @@ class MessageStyle {
   static double messageBubbleWidthMediaCaption({
     required BuildContext context,
     required Event event,
+    double? textWidth,
   }) {
     if (event.isMediaAndFilesWithCaption() == true) {
       DisplayImageInfo? displayImageInfo =
@@ -143,6 +144,11 @@ class MessageStyle {
           file.width?.toDouble() ?? MessageContentStyle.imageWidth(context),
           file.height?.toDouble() ?? MessageContentStyle.imageHeight(context),
         ).getDisplayImageInfo(context);
+        if (textWidth != null && displayImageInfo.size.width < textWidth) {
+          return MessageContentStyle.imageBubbleWidth(
+            textWidth,
+          );
+        }
         return MessageContentStyle.imageBubbleWidth(
           displayImageInfo.size.width,
         );
@@ -160,8 +166,18 @@ class MessageStyle {
           file.width?.toDouble() ?? MessageContentStyle.imageWidth(context),
           file.height?.toDouble() ?? MessageContentStyle.imageHeight(context),
         ).getDisplayImageInfo(context);
+        if (textWidth != null && displayImageInfo.size.width < textWidth) {
+          return MessageContentStyle.imageBubbleWidth(
+            textWidth,
+          );
+        }
         return MessageContentStyle.imageBubbleWidth(
           displayImageInfo.size.width,
+        );
+      }
+      if (textWidth != null && displayImageInfo.size.width < textWidth) {
+        return MessageContentStyle.imageBubbleWidth(
+          textWidth,
         );
       }
 

@@ -86,6 +86,7 @@ class MessageContentBuilder extends StatelessWidget
                     MessageContent(
                       displayEvent,
                       textColor: textColor,
+                      textWidth: stepWidth,
                       endOfBubbleWidget: Padding(
                         padding: MessageStyle.paddingTimestamp,
                         child: MessageTime(

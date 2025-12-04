@@ -31,7 +31,7 @@ class MessageContentStyle {
   static const double imageBubbleHeightForMobileAndTable = 320;
   static const double imageBubbleWidthForMobileAndTablet = 256;
   static const double imageBubbleWidthForWeb = 500;
-  static const double imageBubbleMinWidth = 240;
+  static const double imageBubbleMinWidth = 128;
   static const double imageBubbleMinHeight = 100;
   static const double imageBubbleDefaultWidth = 292;
   static const double imageBubbleDefaultHeight = 340;
