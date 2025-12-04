@@ -25,13 +25,11 @@ class ChatAdaptiveScaffold extends StatefulWidget {
 }
 
 class ChatAdaptiveScaffoldController extends State<ChatAdaptiveScaffold> {
-  final key = GlobalKey();
   @override
   Widget build(BuildContext context) {
     return KeyboardDismissOnTap(
       child: ChatAdaptiveScaffoldBuilder(
         bodyBuilder: (controller) => Chat(
-          key: key,
           roomId: widget.roomId,
           shareFiles: widget.shareFiles,
           roomName: widget.roomName,
