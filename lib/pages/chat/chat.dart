@@ -231,6 +231,30 @@ class ChatController extends State<Chat>
     return validEvents.isEmpty;
   }
 
+  bool get isSupportChat {
+    return roomId == Matrix.of(context).supportChatRoomId;
+  }
+
+  bool get isEmptySupportChat {
+    final supportChatRoomId = Matrix.of(context).supportChatRoomId;
+    if (supportChatRoomId == null) return false;
+
+    if (timeline == null) return true;
+
+    final events = timeline!.events;
+    final visibleEvents = events.where((event) => event.isVisibleInGui);
+    final validEventType = [
+      EventTypes.Message,
+      EventTypes.Sticker,
+      EventTypes.Encrypted,
+      EventTypes.CallInvite,
+    ];
+    final validEvents = visibleEvents.where((event) {
+      return validEventType.contains(event.type);
+    });
+    return validEvents.isEmpty && isSupportChat;
+  }
+
   final AutoScrollController scrollController = AutoScrollController();
 
   // Constant scroll speed in pixels per second for smooth, predictable scrolling
@@ -630,10 +654,6 @@ class ChatController extends State<Chat>
     // then set the new sending client
     setState(() => sendingClient = c);
   }
-
-  void setActiveClient(Client c) => setState(() {
-        Matrix.of(context).setActiveClient(c);
-      });
 
   Future<void> send() async {
     scrollDown();
@@ -2597,6 +2617,8 @@ class ChatController extends State<Chat>
     }
   }
 
+  bool get hasActionAppBarMenu => _getListActionAppBarMenu().isEmpty;
+
   void handleAppbarMenuAction(
     BuildContext context,
     TapDownDetails tapDownDetails,
@@ -2647,7 +2669,7 @@ class ChatController extends State<Chat>
 
   List<ChatAppBarActions> _getListActionAppbarMenuNormal() {
     return [
-      ChatAppBarActions.leaveGroup,
+      if (!isSupportChat) ChatAppBarActions.leaveGroup,
     ];
   }
 

@@ -62,7 +62,8 @@ class ChatView extends StatelessWidget with MessageContentMixin {
               ),
               imageSize: ChatViewStyle.appBarIconSize,
             ),
-          if (controller.selectedEvents.length == 1)
+          if (controller.selectedEvents.length == 1 &&
+              controller.hasActionAppBarMenu)
             TwakeIconButton(
               icon: Icons.more_vert,
               tooltip: L10n.of(context)!.more,
@@ -162,7 +163,8 @@ class ChatView extends StatelessWidget with MessageContentMixin {
                               onPressed: controller.toggleSearch,
                               icon: const Icon(Icons.search),
                             ),
-                            if (!controller.room!.isDirectChat)
+                            if (!controller.room!.isDirectChat &&
+                                controller.hasActionAppBarMenu)
                               Builder(
                                 builder: (context) => TwakeIconButton(
                                   icon: Icons.more_vert,
