@@ -1,5 +1,4 @@
 import 'package:app_links/app_links.dart';
-import 'package:collection/collection.dart';
 import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/event/twake_event_types.dart';
 import 'package:fluffychat/presentation/extensions/shared_media_file_extension.dart';
@@ -29,7 +28,6 @@ mixin ReceiveSharingIntentMixin<T extends StatefulWidget> on State<T> {
   }
 
   void _processIncomingSharedFiles(List<SharedMediaFile> files) {
-    files = files.whereNot((file) => file.isNotAFile()).toList();
     Logs().d('ReceiveSharingIntentMixin::_processIncomingSharedFiles: $files');
     if (files.isEmpty) return;
     if (files.length == 1 &&
