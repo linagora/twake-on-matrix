@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'dart:typed_data';
 
+import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:matrix/matrix.dart';
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 
@@ -39,5 +40,14 @@ extension SharedMediaFileExtension on SharedMediaFile {
     return File(
       path,
     );
+  }
+
+  bool isAndroidText() {
+    return PlatformInfos.isAndroid && type == SharedMediaType.text;
+  }
+
+  bool isIOSTextAndUrl() {
+    return PlatformInfos.isIOS &&
+        (type == SharedMediaType.text || type == SharedMediaType.url);
   }
 }
