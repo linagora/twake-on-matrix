@@ -79,12 +79,6 @@ mixin ReceiveSharingIntentMixin<T extends StatefulWidget> on State<T> {
     }
     if (text.toLowerCase().startsWith(AppConfig.deepLinkPrefix) ||
         text.toLowerCase().startsWith(AppConfig.inviteLinkPrefix) ||
-        text
-            .toLowerCase()
-            .startsWith(AppConfig.httpAppLinkUniversalLinkPrefix) ||
-        text
-            .toLowerCase()
-            .startsWith(AppConfig.httpsAppLinkUniversalLinkPrefix) ||
         (text.toLowerCase().startsWith(AppConfig.schemePrefix) &&
             !RegExp(r'\s').hasMatch(text))) {
       return _processIncomingUris(text);
@@ -103,7 +97,8 @@ mixin ReceiveSharingIntentMixin<T extends StatefulWidget> on State<T> {
       return;
     }
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      UrlLauncher(TwakeApp.routerKey.currentContext!, url: text).launchUrl();
+      UrlLauncher(TwakeApp.routerKey.currentContext!, url: text)
+          .openMatrixToUrl();
     });
   }
 
