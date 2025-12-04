@@ -127,6 +127,8 @@ class DraftChatController extends State<DraftChat>
 
   final isSendingNotifier = ValueNotifier(false);
 
+  final TextEditingController _captionsController = TextEditingController();
+
   late PresentationContact presentationContact;
 
   final KeyboardVisibilityController keyboardVisibilityController =
@@ -159,6 +161,7 @@ class DraftChatController extends State<DraftChat>
     String? caption,
     Room? room,
   }) {
+    sendController.clear();
     return _createRoom(
       onRoomCreatedSuccess: (newRoom) {
         super.sendMedia(imagePickerController, room: newRoom);
@@ -232,6 +235,7 @@ class DraftChatController extends State<DraftChat>
     disposeUnblockUserSubscription();
     ignoredUsersStreamSub?.cancel();
     isBlockedUserNotifier.dispose();
+    _captionsController.dispose();
     disposeAudioMixin();
     super.dispose();
   }
@@ -532,9 +536,14 @@ class DraftChatController extends State<DraftChat>
       AssetCounter(imagePickerMode: ImagePickerMode.multiple),
     );
 
+    if (sendController.text.isNotEmpty) {
+      _captionsController.text = sendController.text;
+    }
+
     showMediaPickerBottomSheetAction(
       context: context,
       imagePickerGridController: imagePickerController,
+      captionController: _captionsController,
       onPickerTypeTap: (action) => onPickerTypeClick(
         type: action,
         context: context,
@@ -576,13 +585,22 @@ class DraftChatController extends State<DraftChat>
       return;
     }
 
+    final pendingText = sendController.text;
+
+    sendController.clear();
+
     final dialogStatus = await sendImagesWithCaption(
       context: context,
       matrixFiles: matrixFilesList,
+      pendingText: pendingText,
     );
 
     if (dialogStatus is SendMediaWithCaptionStatus) {
       _handleSendFileDialogStatus(dialogStatus, matrixFilesList);
+      if (dialogStatus != SendMediaWithCaptionStatus.done &&
+          pendingText.isNotEmpty) {
+        sendController.text = pendingText;
+      }
     }
   }
 
