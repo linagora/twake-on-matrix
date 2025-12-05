@@ -15,11 +15,13 @@ import 'package:matrix/matrix.dart';
 class SendFileDialog extends StatefulWidget {
   final Room? room;
   final List<MatrixFile> files;
+  final String? pendingText;
 
   const SendFileDialog({
     this.room,
     required this.files,
     super.key,
+    this.pendingText,
   });
 
   @override
@@ -61,6 +63,7 @@ class SendFileDialogController extends State<SendFileDialog> {
       filesNotifier.value,
       widget.room,
     );
+    textEditingController.text = widget.pendingText ?? '';
     requestFocusCaptions();
     loadThumbnailsForMedia(filesNotifier.value);
   }

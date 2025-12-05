@@ -57,6 +57,7 @@ mixin DragDrogFileMixin {
     Room? room,
     required BuildContext context,
     required List<MatrixFile> matrixFiles,
+    String? pendingText,
   }) {
     return showDialog(
       context: context,
@@ -65,6 +66,7 @@ mixin DragDrogFileMixin {
         return SendFileDialog(
           room: room,
           files: matrixFiles,
+          pendingText: pendingText,
         );
       },
     );
