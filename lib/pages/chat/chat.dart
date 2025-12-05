@@ -556,10 +556,15 @@ class ChatController extends State<Chat>
       room: room,
       pendingText: pendingText,
       matrixFilesList: matrixFiles,
-      onSendFileCallback: (result) {
+      onSendFileCallback: (result) async {
         if (result != SendMediaWithCaptionStatus.done &&
             pendingText.isNotEmpty) {
           sendController.text = pendingText;
+        }
+
+        if (result == SendMediaWithCaptionStatus.done) {
+          final prefs = await SharedPreferences.getInstance();
+          prefs.remove('draft_$roomId');
         }
         scrollDown();
       },
@@ -1845,10 +1850,14 @@ class ChatController extends State<Chat>
         context,
         room: room,
         matrixFilesList: matrixFiles,
-        onSendFileCallback: (result) {
+        onSendFileCallback: (result) async {
           if (result != SendMediaWithCaptionStatus.done &&
               pendingText.isNotEmpty) {
             sendController.text = pendingText;
+          }
+          if (result == SendMediaWithCaptionStatus.done) {
+            final prefs = await SharedPreferences.getInstance();
+            prefs.remove('draft_$roomId');
           }
           scrollDown();
         },
