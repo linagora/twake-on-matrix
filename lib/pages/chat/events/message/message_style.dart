@@ -127,9 +127,20 @@ class MessageStyle {
     return messageBubbleWidth(context, event: event);
   }
 
+  static double _calculateImageBubbleWidth({
+    required DisplayImageInfo displayImageInfo,
+    double? textWidth,
+  }) {
+    if (textWidth != null && displayImageInfo.size.width < textWidth) {
+      return MessageContentStyle.imageBubbleWidth(textWidth);
+    }
+    return MessageContentStyle.imageBubbleWidth(displayImageInfo.size.width);
+  }
+
   static double messageBubbleWidthMediaCaption({
     required BuildContext context,
     required Event event,
+    double? textWidth,
   }) {
     if (event.isMediaAndFilesWithCaption() == true) {
       DisplayImageInfo? displayImageInfo =
@@ -143,7 +154,10 @@ class MessageStyle {
           file.width?.toDouble() ?? MessageContentStyle.imageWidth(context),
           file.height?.toDouble() ?? MessageContentStyle.imageHeight(context),
         ).getDisplayImageInfo(context);
-        return displayImageInfo.size.width;
+        return _calculateImageBubbleWidth(
+          displayImageInfo: displayImageInfo,
+          textWidth: textWidth,
+        );
       }
       displayImageInfo ??= DisplayImageInfo(
         size: Size(
@@ -158,10 +172,15 @@ class MessageStyle {
           file.width?.toDouble() ?? MessageContentStyle.imageWidth(context),
           file.height?.toDouble() ?? MessageContentStyle.imageHeight(context),
         ).getDisplayImageInfo(context);
-        return displayImageInfo.size.width;
+        return _calculateImageBubbleWidth(
+          displayImageInfo: displayImageInfo,
+          textWidth: textWidth,
+        );
       }
-
-      return displayImageInfo.size.width;
+      return _calculateImageBubbleWidth(
+        displayImageInfo: displayImageInfo,
+        textWidth: textWidth,
+      );
     }
 
     return messageBubbleWidth(context, event: event);

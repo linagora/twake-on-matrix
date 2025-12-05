@@ -31,7 +31,7 @@ class MessageContentStyle {
   static const double imageBubbleHeightForMobileAndTable = 320;
   static const double imageBubbleWidthForMobileAndTablet = 256;
   static const double imageBubbleWidthForWeb = 500;
-  static const double imageBubbleMinWidth = 120;
+  static const double imageBubbleMinWidth = 128;
   static const double imageBubbleMinHeight = 100;
   static const double imageBubbleDefaultWidth = 292;
   static const double imageBubbleDefaultHeight = 340;
@@ -54,6 +54,15 @@ class MessageContentStyle {
         MessageContentStyle.imageBubbleMinHeight,
         displayHeight,
       );
+
+  static double combinedBubbleImageWidthWithBubbleMaxWidget({
+    required double bubbleImageWidget,
+    required double bubbleMaxWidth,
+  }) {
+    return bubbleImageWidget < bubbleMaxWidth
+        ? bubbleMaxWidth
+        : bubbleImageWidget;
+  }
 
   static const double letterSpacingMessageContent = -0.15;
 

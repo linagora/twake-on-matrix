@@ -3,9 +3,11 @@ import 'package:fluffychat/pages/chat/events/message_content_style.dart';
 import 'package:fluffychat/pages/image_viewer/image_viewer.dart';
 import 'package:fluffychat/presentation/enum/chat/media_viewer_popup_result_enum.dart';
 import 'package:fluffychat/utils/interactive_viewer_gallery.dart';
+import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/widgets/hero_page_route.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_blurhash/flutter_blurhash.dart';
 import 'package:matrix/matrix.dart';
 
 class UnencryptedImageBuilderWeb extends StatelessWidget {
@@ -25,6 +27,8 @@ class UnencryptedImageBuilderWeb extends StatelessWidget {
 
   final void Function()? onTapSelectMode;
 
+  final double? bubbleMaxWidth;
+
   const UnencryptedImageBuilderWeb({
     super.key,
     required this.event,
@@ -35,6 +39,7 @@ class UnencryptedImageBuilderWeb extends StatelessWidget {
     this.onTapSelectMode,
     this.onTapPreview,
     this.closeRightColumn,
+    this.bubbleMaxWidth,
   });
 
   @override
@@ -48,12 +53,27 @@ class UnencryptedImageBuilderWeb extends StatelessWidget {
           onTap: onTapPreview != null || onTapSelectMode != null
               ? () => _onTap(context)
               : null,
-          child: UnencryptedImageWidget(
-            event: event,
-            isThumbnail: isThumbnail,
-            width: width,
-            height: height,
-            fit: fit,
+          child: Stack(
+            alignment: Alignment.center,
+            children: [
+              SizedBox(
+                width: MessageContentStyle
+                    .combinedBubbleImageWidthWithBubbleMaxWidget(
+                  bubbleImageWidget: width,
+                  bubbleMaxWidth: bubbleMaxWidth ?? 0,
+                ),
+                child: BlurHash(
+                  hash: event.blurHash ?? MessageContentStyle.defaultBlurHash,
+                ),
+              ),
+              UnencryptedImageWidget(
+                event: event,
+                isThumbnail: isThumbnail,
+                width: width,
+                height: height,
+                fit: fit,
+              ),
+            ],
           ),
         ),
       ),

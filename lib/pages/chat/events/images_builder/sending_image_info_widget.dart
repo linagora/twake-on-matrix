@@ -22,6 +22,7 @@ class SendingImageInfoWidget extends StatefulWidget {
     required this.event,
     required this.displayImageInfo,
     this.onTapPreview,
+    this.bubbleWidth,
   });
 
   final MatrixImageFile matrixFile;
@@ -31,6 +32,8 @@ class SendingImageInfoWidget extends StatefulWidget {
   final void Function()? onTapPreview;
 
   final DisplayImageInfo displayImageInfo;
+
+  final double? bubbleWidth;
 
   @override
   State<SendingImageInfoWidget> createState() => _SendingImageInfoWidgetState();
@@ -123,7 +126,10 @@ class _SendingImageInfoWidgetState extends State<SendingImageInfoWidget>
                       widget.matrixFile.filePath == null)
                     SizedBox(
                       width: MessageContentStyle.imageBubbleWidth(
-                        widget.displayImageInfo.size.width,
+                        widget.displayImageInfo.size.width <
+                                (widget.bubbleWidth ?? 0)
+                            ? widget.bubbleWidth ?? 0
+                            : widget.displayImageInfo.size.width,
                       ),
                       height: MessageContentStyle.imageBubbleHeight(
                         widget.displayImageInfo.size.height,

@@ -44,6 +44,7 @@ class MessageContent extends StatelessWidget
   final void Function()? onTapSelectMode;
   final bool ownMessage;
   final Timeline timeline;
+  final double? textWidth;
 
   const MessageContent(
     this.event, {
@@ -54,6 +55,7 @@ class MessageContent extends StatelessWidget
     this.onTapSelectMode,
     required this.ownMessage,
     required this.timeline,
+    this.textWidth,
   });
 
   @override
@@ -71,16 +73,21 @@ class MessageContent extends StatelessWidget
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  MessageImageBuilder(
-                    event: event,
-                    onTapPreview: onTapPreview,
-                    onTapSelectMode: onTapSelectMode,
+                  Align(
+                    alignment: Alignment.center,
+                    child: MessageImageBuilder(
+                      event: event,
+                      onTapPreview: onTapPreview,
+                      onTapSelectMode: onTapSelectMode,
+                      maxWidth: textWidth,
+                    ),
                   ),
                   const SizedBox(height: 8),
                   SizedBox(
                     width: MessageStyle.messageBubbleWidthMediaCaption(
                       event: event,
                       context: context,
+                      textWidth: textWidth,
                     ),
                     child: TwakeLinkPreview(
                       key: ValueKey('TwakeLinkPreview%${event.eventId}%'),

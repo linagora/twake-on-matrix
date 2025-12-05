@@ -18,6 +18,7 @@ class ImageBubble extends StatelessWidget {
   final bool animated;
   final double width;
   final double height;
+  final double? bubbleMaxWidth;
   final bool rounded;
   final void Function()? onTapPreview;
   final void Function()? onTapSelectMode;
@@ -36,6 +37,7 @@ class ImageBubble extends StatelessWidget {
     this.thumbnailOnly = true,
     this.width = 256,
     this.height = 300,
+    this.bubbleMaxWidth,
     this.animated = false,
     this.rounded = true,
     this.onTapSelectMode,
@@ -54,7 +56,13 @@ class ImageBubble extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final bubbleWidth = MessageContentStyle.imageBubbleWidth(width);
-    final bubbleHeight = MessageContentStyle.imageBubbleWidth(height);
+    final bubbleHeight = MessageContentStyle.imageBubbleHeight(height);
+    const bubbleMinWidth = MessageContentStyle.imageBubbleMinWidth;
+    final maxWidth =
+        MessageContentStyle.combinedBubbleImageWidthWithBubbleMaxWidget(
+      bubbleImageWidget: bubbleWidth,
+      bubbleMaxWidth: bubbleMaxWidth ?? 0,
+    );
     return Container(
       decoration: BoxDecoration(
         borderRadius: rounded
@@ -63,7 +71,8 @@ class ImageBubble extends StatelessWidget {
       ),
       constraints: maxSize
           ? BoxConstraints(
-              maxWidth: bubbleWidth,
+              maxWidth: maxWidth,
+              minWidth: bubbleMinWidth,
               maxHeight: bubbleHeight,
             )
           : null,
@@ -75,6 +84,7 @@ class ImageBubble extends StatelessWidget {
                 !event.isBubbleEventEncrypted(isThumbnail: thumbnailOnly))
             ? UnencryptedImageBuilderWeb(
                 event: event,
+                bubbleMaxWidth: bubbleMaxWidth,
                 isThumbnail: thumbnailOnly,
                 width: width,
                 height: height,
@@ -86,10 +96,11 @@ class ImageBubble extends StatelessWidget {
                 alignment: Alignment.center,
                 children: [
                   SizedBox(
-                    width: bubbleWidth,
+                    width: maxWidth,
                     height: bubbleHeight,
-                    child: const BlurHash(
-                      hash: MessageContentStyle.defaultBlurHash,
+                    child: BlurHash(
+                      hash:
+                          event.blurHash ?? MessageContentStyle.defaultBlurHash,
                     ),
                   ),
                   MxcImage(
