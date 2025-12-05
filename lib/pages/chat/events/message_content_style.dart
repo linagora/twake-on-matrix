@@ -55,6 +55,15 @@ class MessageContentStyle {
         displayHeight,
       );
 
+  static double combinedBubbleImageWidthWithBubbleMaxWidget({
+    required double bubbleImageWidget,
+    required double bubbleMaxWidth,
+  }) {
+    return bubbleImageWidget < bubbleMaxWidth
+        ? bubbleMaxWidth
+        : bubbleImageWidget;
+  }
+
   static const double letterSpacingMessageContent = -0.15;
 
   static const double videoCenterButtonSize = 56;

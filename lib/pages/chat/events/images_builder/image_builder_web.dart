@@ -57,8 +57,11 @@ class UnencryptedImageBuilderWeb extends StatelessWidget {
             alignment: Alignment.center,
             children: [
               SizedBox(
-                width:
-                    width < (bubbleMaxWidth ?? 0) ? bubbleMaxWidth ?? 0 : width,
+                width: MessageContentStyle
+                    .combinedBubbleImageWidthWithBubbleMaxWidget(
+                  bubbleImageWidget: width,
+                  bubbleMaxWidth: bubbleMaxWidth ?? 0,
+                ),
                 child: BlurHash(
                   hash: event.blurHash ?? MessageContentStyle.defaultBlurHash,
                 ),

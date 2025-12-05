@@ -58,6 +58,11 @@ class ImageBubble extends StatelessWidget {
     final bubbleWidth = MessageContentStyle.imageBubbleWidth(width);
     final bubbleHeight = MessageContentStyle.imageBubbleHeight(height);
     const bubbleMinWidth = MessageContentStyle.imageBubbleMinWidth;
+    final maxWidth =
+        MessageContentStyle.combinedBubbleImageWidthWithBubbleMaxWidget(
+      bubbleImageWidget: bubbleWidth,
+      bubbleMaxWidth: bubbleMaxWidth ?? 0,
+    );
     return Container(
       decoration: BoxDecoration(
         borderRadius: rounded
@@ -66,9 +71,7 @@ class ImageBubble extends StatelessWidget {
       ),
       constraints: maxSize
           ? BoxConstraints(
-              maxWidth: bubbleWidth < (bubbleMaxWidth ?? 0)
-                  ? bubbleMaxWidth ?? 0
-                  : bubbleWidth,
+              maxWidth: maxWidth,
               minWidth: bubbleMinWidth,
               maxHeight: bubbleHeight,
             )
@@ -93,9 +96,7 @@ class ImageBubble extends StatelessWidget {
                 alignment: Alignment.center,
                 children: [
                   SizedBox(
-                    width: bubbleWidth < (bubbleMaxWidth ?? 0)
-                        ? (bubbleMaxWidth ?? 0)
-                        : bubbleWidth,
+                    width: maxWidth,
                     height: bubbleHeight,
                     child: BlurHash(
                       hash:

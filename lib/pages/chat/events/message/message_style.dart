@@ -127,6 +127,16 @@ class MessageStyle {
     return messageBubbleWidth(context, event: event);
   }
 
+  static double _calculateImageBubbleWidth({
+    required DisplayImageInfo displayImageInfo,
+    double? textWidth,
+  }) {
+    if (textWidth != null && displayImageInfo.size.width < textWidth) {
+      return MessageContentStyle.imageBubbleWidth(textWidth);
+    }
+    return MessageContentStyle.imageBubbleWidth(displayImageInfo.size.width);
+  }
+
   static double messageBubbleWidthMediaCaption({
     required BuildContext context,
     required Event event,
@@ -144,13 +154,9 @@ class MessageStyle {
           file.width?.toDouble() ?? MessageContentStyle.imageWidth(context),
           file.height?.toDouble() ?? MessageContentStyle.imageHeight(context),
         ).getDisplayImageInfo(context);
-        if (textWidth != null && displayImageInfo.size.width < textWidth) {
-          return MessageContentStyle.imageBubbleWidth(
-            textWidth,
-          );
-        }
-        return MessageContentStyle.imageBubbleWidth(
-          displayImageInfo.size.width,
+        return _calculateImageBubbleWidth(
+          displayImageInfo: displayImageInfo,
+          textWidth: textWidth,
         );
       }
       displayImageInfo ??= DisplayImageInfo(
@@ -166,23 +172,14 @@ class MessageStyle {
           file.width?.toDouble() ?? MessageContentStyle.imageWidth(context),
           file.height?.toDouble() ?? MessageContentStyle.imageHeight(context),
         ).getDisplayImageInfo(context);
-        if (textWidth != null && displayImageInfo.size.width < textWidth) {
-          return MessageContentStyle.imageBubbleWidth(
-            textWidth,
-          );
-        }
-        return MessageContentStyle.imageBubbleWidth(
-          displayImageInfo.size.width,
+        return _calculateImageBubbleWidth(
+          displayImageInfo: displayImageInfo,
+          textWidth: textWidth,
         );
       }
-      if (textWidth != null && displayImageInfo.size.width < textWidth) {
-        return MessageContentStyle.imageBubbleWidth(
-          textWidth,
-        );
-      }
-
-      return MessageContentStyle.imageBubbleWidth(
-        displayImageInfo.size.width,
+      return _calculateImageBubbleWidth(
+        displayImageInfo: displayImageInfo,
+        textWidth: textWidth,
       );
     }
 
