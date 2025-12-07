@@ -30,7 +30,11 @@ class LoginRobot extends CoreRobot {
     const label = 'Continue';
     await $.waitUntilVisible($(label));
     await $.tap($(label));
-    await Future.delayed(const Duration(seconds: 3));
+    await waitUntilAbsent(
+      $,
+      $(TwakeWelcome),
+      timeout: const Duration(seconds: 60),
+    );
   }
 
   Future<void> confirmShareInformation() async {
@@ -105,14 +109,38 @@ class LoginRobot extends CoreRobot {
     }
   }
 
-  String? getBrowserAppId() {
-    if (Platform.isAndroid) {
-      return 'com.android.chrome';
+  Selector getOKBtnInVerifyCapchaDialog() {
+    if (Platform.isIOS) {
+      return Selector(
+        text: 'Close',
+        className: 'button',
+      );
+    } else {
+      return Selector(resourceId: 'com.android.chrome:id/positive_button');
     }
-    return null;
   }
 
-  Future<bool> isLoginBtnVisible() async {
+  Future<bool> isSignInPageVisible() async {
+    //login on Chrome browser withou an account
+    if (Platform.isAndroid) {
+      final loginBrowserWithoutAccountOpt = Selector(
+        resourceId: 'com.android.chrome:id/signin_fre_dismiss_button',
+      );
+      if (await CoreRobot($).existsOptionalNativeItems(
+        $,
+        loginBrowserWithoutAccountOpt,
+        appId: getBrowserAppId(),
+        timeout: const Duration(seconds: 10),
+      )) {
+        await $.native.tap(
+          loginBrowserWithoutAccountOpt,
+          appId: getBrowserAppId(),
+        );
+        await waitNativeGone(loginBrowserWithoutAccountOpt);
+      }
+    }
+
+    //login in Twake Chat
     if (await CoreRobot($).existsOptionalNativeItems(
       $,
       getSignInTab(),
@@ -123,6 +151,8 @@ class LoginRobot extends CoreRobot {
         getSignInTab(),
         appId: getBrowserAppId(),
       );
+      // // set a mount of time to wait for loading Sign In tab
+      // await Future.delayed(const Duration(seconds: 2));
       return true;
     } else {
       return false;
@@ -130,43 +160,70 @@ class LoginRobot extends CoreRobot {
   }
 
   Future<void> enterUsernameSsoLogin(String username) async {
-    try {
-      await $.native.enterText(
-        getLoginTxt(),
-        text: username,
-        appId: getBrowserAppId(),
-      );
-    } catch (e) {
-      ignoreException();
-    }
+    await $.native.waitUntilVisible(
+      getLoginTxt(),
+      appId: getBrowserAppId(),
+      timeout: const Duration(seconds: 2),
+    );
+    await $.native.enterText(
+      getLoginTxt(),
+      text: username,
+      appId: getBrowserAppId(),
+    );
   }
 
   Future<void> enterPasswordSsoLogin(String password) async {
-    try {
-      await $.native.enterText(
-        getPassTxt(),
-        text: password,
-        appId: getBrowserAppId(),
-      );
-    } catch (e) {
-      ignoreException();
-    }
+    await $.native.waitUntilVisible(
+      getPassTxt(),
+      appId: getBrowserAppId(),
+      timeout: const Duration(seconds: 2),
+    );
+    //To avoid this flaky behavior, we wait ~1 second after tapping the password
+    //before enter text
+    await $.native.tap(
+      getPassTxt(),
+      appId: getBrowserAppId(),
+    );
+    await Future.delayed(const Duration(seconds: 1));
+    await $.native.enterText(
+      getPassTxt(),
+      text: password,
+      appId: getBrowserAppId(),
+    );
   }
 
   Future<void> pressSignInSsoLogin() async {
-    try {
-      await $.native.waitUntilVisible(
-        getSignInBtn(),
+    await $.native.waitUntilVisible(
+      getSignInBtn(),
+      appId: getBrowserAppId(),
+      timeout: const Duration(seconds: 20),
+    );
+
+    // set a mount of time for verifing Capcha
+    await Future.delayed(const Duration(seconds: 2));
+
+    // tap on Sign in
+    await $.native.tap(
+      getSignInBtn(),
+      appId: getBrowserAppId(),
+    );
+
+    // if "verify ...please wait for Capcha" dialog is shown, click OK for continue wait
+    // and click Sign in again
+    if (await CoreRobot($).existsOptionalNativeItems(
+      $,
+      getOKBtnInVerifyCapchaDialog(),
+      appId: getBrowserAppId(),
+      timeout: const Duration(seconds: 2),
+    )) {
+      await $.native.tap(
+        getOKBtnInVerifyCapchaDialog(),
         appId: getBrowserAppId(),
-        timeout: const Duration(seconds: 10),
       );
-      await Future.delayed(const Duration(seconds: 10));
       await $.native.tap(
         getSignInBtn(),
         appId: getBrowserAppId(),
       );
-    } catch (e) {
-      ignoreException();
     }
   }
 }
