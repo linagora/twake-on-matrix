@@ -178,13 +178,15 @@ class LoginRobot extends CoreRobot {
       appId: getBrowserAppId(),
       timeout: const Duration(seconds: 2),
     );
-    //To avoid this flaky behavior, we wait ~1 second after tapping the password
-    //before enter text
+    // Tap the field and wait for 1 second to avoid
+    // a flaky issue where the screen sometimes navigates
+    // back to the previous page right after entering the passwor
     await $.native.tap(
       getPassTxt(),
       appId: getBrowserAppId(),
     );
     await Future.delayed(const Duration(seconds: 1));
+
     await $.native.enterText(
       getPassTxt(),
       text: password,
