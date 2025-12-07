@@ -16,6 +16,13 @@ class CoreRobot {
 
   dynamic ignoreException() => $.tester.takeException();
 
+  String? getBrowserAppId() {
+    if (Platform.isAndroid) {
+      return 'com.android.chrome';
+    }
+    return null;
+  }
+
   Future<void> confirmShareContactInformation() async {
     final dialog = $(PermissionDialog);
     if (dialog.exists) {
@@ -81,6 +88,27 @@ class CoreRobot {
       }
       await $.pump(const Duration(milliseconds: 200));
     }
+  }
+
+  Future<void> waitNativeGone(
+    Selector selector, {
+    Duration timeout = const Duration(seconds: 5),
+    Duration interval = const Duration(milliseconds: 200),
+  }) async {
+    final appId = getBrowserAppId();
+    final end = DateTime.now().add(timeout);
+
+    while (DateTime.now().isBefore(end)) {
+      final views = await $.native.getNativeViews(
+        selector,
+        appId: appId,
+      );
+      if (views.isEmpty) return;
+
+      await Future.delayed(interval);
+    }
+
+    throw TimeoutException('Native element still visible: $selector');
   }
 
   Future<void> waitSnackGone(
