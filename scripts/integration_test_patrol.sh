@@ -4,4 +4,4 @@
 ENV_FILE=integration_test/.env.local.do-not-commit
 patrol test \
   --dart-define-from-file="$ENV_FILE" \
-  --device "$(grep -E '^DEVICE=' "$ENV_FILE" | cut -d= -f2-)"
+  --device "$(grep -E '^DEVICE=' "$ENV_FILE" | cut -d= -f2-)" --verbose
