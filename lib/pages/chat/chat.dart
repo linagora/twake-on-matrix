@@ -557,16 +557,10 @@ class ChatController extends State<Chat>
       pendingText: pendingText,
       matrixFilesList: matrixFiles,
       onSendFileCallback: (result) async {
-        if (result != SendMediaWithCaptionStatus.done &&
-            pendingText.isNotEmpty) {
-          sendController.text = pendingText;
-        }
-
-        if (result == SendMediaWithCaptionStatus.done) {
-          final prefs = await SharedPreferences.getInstance();
-          prefs.remove('draft_$roomId');
-        }
-        scrollDown();
+        await handleSendMediaCallback(
+          result: result,
+          pendingText: pendingText,
+        );
       },
     );
   }
@@ -1851,18 +1845,28 @@ class ChatController extends State<Chat>
         room: room,
         matrixFilesList: matrixFiles,
         onSendFileCallback: (result) async {
-          if (result != SendMediaWithCaptionStatus.done &&
-              pendingText.isNotEmpty) {
-            sendController.text = pendingText;
-          }
-          if (result == SendMediaWithCaptionStatus.done) {
-            final prefs = await SharedPreferences.getInstance();
-            prefs.remove('draft_$roomId');
-          }
-          scrollDown();
+          await handleSendMediaCallback(
+            result: result,
+            pendingText: pendingText,
+          );
         },
       );
     }
+  }
+
+  Future<void> handleSendMediaCallback({
+    required SendMediaWithCaptionStatus result,
+    required String pendingText,
+  }) async {
+    if (result != SendMediaWithCaptionStatus.done && pendingText.isNotEmpty) {
+      sendController.text = pendingText;
+    }
+    if (result == SendMediaWithCaptionStatus.done) {
+      final prefs = await SharedPreferences.getInstance();
+      prefs.remove('draft_$roomId');
+    }
+
+    scrollDown();
   }
 
   void _showMediaPicker(BuildContext context) {
