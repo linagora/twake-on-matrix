@@ -1,5 +1,4 @@
 import 'dart:io';
-
 import 'package:fluffychat/pages/homeserver_picker/homeserver_picker_view.dart';
 import 'package:fluffychat/pages/twake_welcome/twake_welcome.dart';
 import 'package:patrol/patrol.dart';
@@ -7,6 +6,51 @@ import '../base/core_robot.dart';
 
 class LoginRobot extends CoreRobot {
   LoginRobot(super.$);
+
+  Selector getLoginTxt() {
+    if (Platform.isAndroid) {
+      return Selector(resourceId: 'email_username');
+    } else {
+      return Selector(
+        className: 'textField',
+        textContains: 'Email / Username',
+      );
+    }
+  }
+
+  Selector getPassTxt() {
+    if (Platform.isAndroid) {
+      return Selector(resourceId: 'password');
+    } else {
+      return Selector(
+        className: 'secureTextField',
+        textContains: 'Password',
+      );
+    }
+  }
+
+  Selector getSignInBtn() {
+    const label = 'Sign in';
+    if (Platform.isIOS) {
+      return Selector(text: label);
+    } else {
+      return Selector(
+        className: 'android.widget.Button',
+        textContains: label,
+      );
+    }
+  }
+
+  Selector getOKBtnInVerifyCapchaDialog() {
+    if (Platform.isIOS) {
+      return Selector(
+        text: 'Close',
+        className: 'button',
+      );
+    } else {
+      return Selector(resourceId: 'com.android.chrome:id/positive_button');
+    }
+  }
 
   Future<bool> isWelComePageVisible() async {
     final welcomePage = $(TwakeWelcome);
@@ -72,51 +116,6 @@ class LoginRobot extends CoreRobot {
       );
     } else {
       return Selector(text: label);
-    }
-  }
-
-  Selector getLoginTxt() {
-    if (Platform.isAndroid) {
-      return Selector(resourceId: 'email_username');
-    } else {
-      return Selector(
-        className: 'textField',
-        textContains: 'Email / Username',
-      );
-    }
-  }
-
-  Selector getPassTxt() {
-    if (Platform.isAndroid) {
-      return Selector(resourceId: 'password');
-    } else {
-      return Selector(
-        className: 'secureTextField',
-        textContains: 'Password',
-      );
-    }
-  }
-
-  Selector getSignInBtn() {
-    const label = 'Sign in';
-    if (Platform.isIOS) {
-      return Selector(text: label);
-    } else {
-      return Selector(
-        className: 'android.widget.Button',
-        textContains: label,
-      );
-    }
-  }
-
-  Selector getOKBtnInVerifyCapchaDialog() {
-    if (Platform.isIOS) {
-      return Selector(
-        text: 'Close',
-        className: 'button',
-      );
-    } else {
-      return Selector(resourceId: 'com.android.chrome:id/positive_button');
     }
   }
 
