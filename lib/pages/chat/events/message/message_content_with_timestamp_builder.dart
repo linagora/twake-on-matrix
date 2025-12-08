@@ -711,17 +711,17 @@ class _MessageContentWithTimestampBuilderState
     final listHorizontalActionMenu = isReversed
         ? widget.listHorizontalActionMenu.reversed.toList()
         : widget.listHorizontalActionMenu;
-    return ValueListenableBuilder(
-      valueListenable: widget.isHoverNotifier,
-      builder: (context, isHover, child) {
-        if (isHover != null &&
-            isHover.contains(widget.event.eventId) &&
-            !widget.event.redacted) {
-          return child!;
-        }
-        return const SizedBox.shrink();
-      },
-      child: Expanded(
+    return Expanded(
+      child: ValueListenableBuilder(
+        valueListenable: widget.isHoverNotifier,
+        builder: (context, isHover, child) {
+          if (isHover != null &&
+              isHover.contains(widget.event.eventId) &&
+              !widget.event.redacted) {
+            return child!;
+          }
+          return const SizedBox.shrink();
+        },
         child: Container(
           decoration: BoxDecoration(
             color: Colors.transparent,
