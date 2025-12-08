@@ -129,7 +129,7 @@ class LoginRobot extends CoreRobot {
         $,
         loginBrowserWithoutAccountOpt,
         appId: getBrowserAppId(),
-        timeout: const Duration(seconds: 10),
+        timeout: const Duration(seconds: 30),
       )) {
         await $.native.tap(
           loginBrowserWithoutAccountOpt,
