@@ -711,7 +711,7 @@ class _MessageContentWithTimestampBuilderState
     final listHorizontalActionMenu = isReversed
         ? widget.listHorizontalActionMenu.reversed.toList()
         : widget.listHorizontalActionMenu;
-    return Expanded(
+    return Flexible(
       child: ValueListenableBuilder(
         valueListenable: widget.isHoverNotifier,
         builder: (context, isHover, child) {
