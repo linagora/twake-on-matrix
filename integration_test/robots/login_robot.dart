@@ -41,7 +41,7 @@ class LoginRobot extends CoreRobot {
     }
   }
 
-  Selector getOKBtnInVerifyCapchaDialog() {
+  Selector getOKBtnInVerifyCaptchaDialog() {
     if (Platform.isIOS) {
       return Selector(
         text: 'Close',
@@ -52,7 +52,7 @@ class LoginRobot extends CoreRobot {
     }
   }
 
-  Future<bool> isWelComePageVisible() async {
+  Future<bool> isWelcomePageVisible() async {
     final welcomePage = $(TwakeWelcome);
     try {
       await welcomePage.waitUntilVisible();
@@ -207,16 +207,16 @@ class LoginRobot extends CoreRobot {
       appId: getBrowserAppId(),
     );
 
-    // if "verify ...please wait for Capcha" dialog is shown, click OK for continue wait
+    // if "verify ...please wait for Captcha" dialog is shown, click OK to continue waiting
     // and click Sign in again
     if (await CoreRobot($).existsOptionalNativeItems(
       $,
-      getOKBtnInVerifyCapchaDialog(),
+      getOKBtnInVerifyCaptchaDialog(),
       appId: getBrowserAppId(),
       timeout: const Duration(seconds: 2),
     )) {
       await $.native.tap(
-        getOKBtnInVerifyCapchaDialog(),
+        getOKBtnInVerifyCaptchaDialog(),
         appId: getBrowserAppId(),
       );
       await $.native.tap(

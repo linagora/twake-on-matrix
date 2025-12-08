@@ -20,7 +20,7 @@ class LoginScenario extends BaseScenario {
 
   Future<void> login() async {
     final loginRobot = LoginRobot($);
-    if (await loginRobot.isWelComePageVisible()) {
+    if (await loginRobot.isWelcomePageVisible()) {
       await loginRobot.tapOnUseYourCompanyServer();
       await _handleWaitUntilVisibleHomeServerPickerView(loginRobot);
       await loginRobot.enterServerUrl(serverUrl);
