@@ -120,7 +120,7 @@ class LoginRobot extends CoreRobot {
   }
 
   Future<bool> isSignInPageVisible() async {
-    //login on Chrome browser withou an account
+    //login on Chrome browser without an account
     if (Platform.isAndroid) {
       final loginBrowserWithoutAccountOpt = Selector(
         resourceId: 'com.android.chrome:id/signin_fre_dismiss_button',
@@ -150,8 +150,6 @@ class LoginRobot extends CoreRobot {
         getSignInTab(),
         appId: getBrowserAppId(),
       );
-      // // set a mount of time to wait for loading Sign In tab
-      // await Future.delayed(const Duration(seconds: 2));
       return true;
     } else {
       return false;
@@ -179,7 +177,7 @@ class LoginRobot extends CoreRobot {
     );
     // Tap the field and wait for 1 second to avoid
     // a flaky issue where the screen sometimes navigates
-    // back to the previous page right after entering the passwor
+    // back to the previous page right after entering the password
     await $.native.tap(
       getPassTxt(),
       appId: getBrowserAppId(),
@@ -200,7 +198,7 @@ class LoginRobot extends CoreRobot {
       timeout: const Duration(seconds: 20),
     );
 
-    // set a mount of time for verifing Capcha
+    // set a delay for verifying Captcha
     await Future.delayed(const Duration(seconds: 2));
 
     // tap on Sign in
