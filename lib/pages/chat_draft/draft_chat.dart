@@ -586,18 +586,22 @@ class DraftChatController extends State<DraftChat>
     }
 
     final pendingText = sendController.text;
-
     sendController.clear();
 
-    final dialogStatus = await sendImagesWithCaption(
+    final dialogResult = await sendImagesWithCaption(
       context: context,
       matrixFiles: matrixFilesList,
       pendingText: pendingText,
     );
 
-    if (dialogStatus is SendMediaWithCaptionStatus) {
-      _handleSendFileDialogStatus(dialogStatus, matrixFilesList);
-      if (dialogStatus != SendMediaWithCaptionStatus.done &&
+    if (dialogResult != null) {
+      _handleSendFileDialogStatus(
+        dialogResult.status,
+        matrixFilesList,
+        dialogResult.caption ?? '',
+      );
+
+      if (dialogResult.status != SendMediaWithCaptionStatus.emptyRoom &&
           pendingText.isNotEmpty) {
         sendController.text = pendingText;
       }
@@ -607,6 +611,7 @@ class DraftChatController extends State<DraftChat>
   void _handleSendFileDialogStatus(
     SendMediaWithCaptionStatus status,
     List<MatrixFile> matrixFilesList,
+    String? caption,
   ) {
     switch (status) {
       case SendMediaWithCaptionStatus.cancel:
@@ -620,11 +625,13 @@ class DraftChatController extends State<DraftChat>
               uploadManager.uploadFilesWeb(
                 room: newRoom,
                 files: [matrixFilesList.first],
+                caption: caption,
               );
             } else {
               uploadManager.uploadFilesWeb(
                 room: newRoom,
                 files: matrixFilesList,
+                caption: caption,
               );
             }
           },

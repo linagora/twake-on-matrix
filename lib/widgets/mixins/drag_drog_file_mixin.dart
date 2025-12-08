@@ -53,7 +53,7 @@ mixin DragDrogFileMixin {
     return matrixFiles;
   }
 
-  Future<dynamic> sendImagesWithCaption({
+  Future<SendMediaDialogResult?> sendImagesWithCaption({
     Room? room,
     required BuildContext context,
     required List<MatrixFile> matrixFiles,

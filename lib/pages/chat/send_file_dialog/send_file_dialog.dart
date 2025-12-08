@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:equatable/equatable.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/domain/app_state/send_file_dialog/generate_thumbnails_media_state.dart';
 import 'package:fluffychat/domain/usecase/generate_thumbnails_media_interactor.dart';
@@ -11,6 +12,19 @@ import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_file_extension.dar
 import 'package:fluffychat/presentation/enum/chat/send_media_with_caption_status_enum.dart';
 import 'package:flutter/material.dart';
 import 'package:matrix/matrix.dart';
+
+class SendMediaDialogResult with EquatableMixin {
+  final SendMediaWithCaptionStatus status;
+  final String? caption;
+
+  SendMediaDialogResult({
+    required this.status,
+    this.caption,
+  });
+
+  @override
+  List<Object?> get props => [status, caption];
+}
 
 class SendFileDialog extends StatefulWidget {
   final Room? room;
@@ -122,7 +136,12 @@ class SendFileDialogController extends State<SendFileDialog> {
   void sendMediaWithCaption() {
     if (widget.room == null) {
       Logs().e("sendMediaWithCaption:: room is null");
-      Navigator.of(context).pop(SendMediaWithCaptionStatus.emptyRoom);
+      Navigator.of(context).pop(
+        SendMediaDialogResult(
+          status: SendMediaWithCaptionStatus.emptyRoom,
+          caption: textEditingController.text,
+        ),
+      );
       return;
     }
     if (filesNotifier.value.isEmpty) {
@@ -161,7 +180,12 @@ class SendFileDialogController extends State<SendFileDialog> {
   void sendFilesWithCaption() async {
     if (widget.room == null) {
       Logs().e("sendFilesWithCaption:: room is null");
-      Navigator.of(context).pop(SendMediaWithCaptionStatus.emptyRoom);
+      Navigator.of(context).pop(
+        SendMediaDialogResult(
+          status: SendMediaWithCaptionStatus.emptyRoom,
+          caption: textEditingController.text,
+        ),
+      );
       return;
     }
     uploadManager
