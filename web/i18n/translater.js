@@ -1,9 +1,9 @@
 const i18n = {};
 const languageDefault = "en";
 const defaultEngText = {
-  title: "Download Twake Chat application",
+  title: "Download the new Twake Chat app",
   description: "Faster and more convenient",
-  open: "Open",
+  download: "Download",
 };
 
 /**
@@ -90,7 +90,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     text: languageResources.description,
   });
   setTextContent({
-    id: "open-button-id",
-    text: languageResources.open,
+    id: "download-button-id",
+    text: languageResources.download,
   });
 });
