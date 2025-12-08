@@ -327,6 +327,12 @@ dependency_overrides:
   # TODO: Remove this part when depends of wakelock_plus update
   wakelock_plus: 1.3.2
 
+  # TODO: Remove when https://github.com/letsar/overflow_view/pull/13 is merged
+  overflow_view:
+    git:
+      url: https://github.com/linagora/overflow_view.git
+      ref: feature/reverse-overflow-direction
+
 cider:
   link_template:
     tag: https://github.com/linagora/twake-on-matrix/releases/tag/%tag% # initial release link template

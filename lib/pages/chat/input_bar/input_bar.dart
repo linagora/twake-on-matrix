@@ -7,9 +7,7 @@ import 'package:fluffychat/pages/chat/input_bar/focus_suggestion_controller.dart
 import 'package:fluffychat/pages/chat/input_bar/focus_suggestion_list.dart';
 import 'package:fluffychat/pages/chat/input_bar/input_bar_shortcut.dart';
 import 'package:fluffychat/pages/chat/input_bar/input_bar_style.dart';
-import 'package:fluffychat/presentation/extensions/text_editting_controller_extension.dart';
 import 'package:fluffychat/presentation/mixins/paste_image_mixin.dart';
-import 'package:fluffychat/utils/clipboard.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/widgets/avatar/avatar.dart';
 import 'package:fluffychat/widgets/context_menu_builder_ios_paste_without_permission.dart';
@@ -338,15 +336,6 @@ class _InputBarState extends State<InputBar> with PasteImageMixin {
         baseOffset: startText.length,
         extentOffset: startText.length,
       );
-    }
-  }
-
-  Future<void> handlePaste(BuildContext context) async {
-    if (await TwakeClipboard.instance.isReadableImageFormat() &&
-        widget.room != null) {
-      await pasteImage(context, widget.room!);
-    } else {
-      await widget.controller?.pasteText();
     }
   }
 
