@@ -538,12 +538,15 @@ class BackgroundPush {
         Logs().v('[Push] Got new clearing push');
         var syncErrored = false;
         if (client.syncPending) {
-          Logs().v('[Push] waiting for existing sync');
-          // we need to catchError here as the Future might be in a different execution zone
-          await client.oneShotSync().catchError((e) {
+          Logs().v('[Push] waiting for existing sync to complete');
+          try {
+            await client.onSync.stream.first.timeout(
+              const Duration(seconds: 30),
+            );
+          } catch (e) {
+            Logs().v('[Push] Error waiting for sync', e);
             syncErrored = true;
-            Logs().v('[Push] Error one-shot syncing', e);
-          });
+          }
         }
         if (!syncErrored) {
           Logs().v('[Push] single oneShotSync');
