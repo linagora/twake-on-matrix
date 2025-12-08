@@ -187,7 +187,8 @@ class _MessageContentWithTimestampBuilderState
       children: [
         if (widget.event.shouldDisplayContextMenuInLeftBubble &&
             !_responsiveUtils.isMobile(context) &&
-            widget.event.status.isAvailable)
+            widget.event.status.isAvailable &&
+            !widget.event.redacted)
           _menuActionsRowBuilder(context, isReversed: true),
         TwakeContextMenuArea(
           builder: widget.menuChildren != null
