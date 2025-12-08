@@ -537,26 +537,16 @@ class BackgroundPush {
       if (getFromServer) {
         Logs().v('[Push] Got new clearing push');
         var syncErrored = false;
-        if (client.syncPending) {
-          Logs().v('[Push] waiting for existing sync');
-          // we need to catchError here as the Future might be in a different execution zone
-          await client.oneShotSync().catchError((e) {
-            syncErrored = true;
-            Logs().v('[Push] Error one-shot syncing', e);
-          });
-        }
+        Logs().v('[Push] single oneShotSync');
+        // we need to catchError here as the Future might be in a different execution zone
+        await client.oneShotSync().catchError((e) {
+          syncErrored = true;
+          Logs().v('[Push] Error one-shot syncing', e);
+        });
         if (!syncErrored) {
-          Logs().v('[Push] single oneShotSync');
-          // we need to catchError here as the Future might be in a different execution zone
-          await client.oneShotSync().catchError((e) {
-            syncErrored = true;
-            Logs().v('[Push] Error one-shot syncing', e);
-          });
-          if (!syncErrored) {
-            emptyRooms = client.rooms
-                .where((r) => r.notificationCount == 0)
-                .map((r) => r.id);
-          }
+          emptyRooms = client.rooms
+              .where((r) => r.notificationCount == 0)
+              .map((r) => r.id);
         }
         if (syncErrored) {
           try {
