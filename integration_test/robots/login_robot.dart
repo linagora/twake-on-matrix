@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:fluffychat/pages/chat_list/chat_list.dart';
 import 'package:fluffychat/pages/homeserver_picker/homeserver_picker_view.dart';
 import 'package:fluffychat/pages/twake_welcome/twake_welcome.dart';
 import 'package:patrol/patrol.dart';
@@ -139,21 +140,25 @@ class LoginRobot extends CoreRobot {
       }
     }
 
-    //login in Twake Chat
-    if (await CoreRobot($).existsOptionalNativeItems(
-      $,
-      getSignInTab(),
-      appId: getBrowserAppId(),
-      timeout: const Duration(seconds: 60),
-    )) {
-      await $.native.tap(
+    for (int i = 0; i < 12; i++) {
+      // check if login page is skipt to show the Chat list
+      if ($(ChatList).exists) {
+        break;
+      }
+      //login in Twake Chat
+      if (await CoreRobot($).existsOptionalNativeItems(
+        $,
         getSignInTab(),
         appId: getBrowserAppId(),
-      );
-      return true;
-    } else {
-      return false;
+      )) {
+        await $.native.tap(
+          getSignInTab(),
+          appId: getBrowserAppId(),
+        );
+        return true;
+      }
     }
+    return false;
   }
 
   Future<void> enterUsernameSsoLogin(String username) async {
