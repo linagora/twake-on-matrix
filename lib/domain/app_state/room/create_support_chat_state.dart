@@ -2,6 +2,11 @@ import 'package:fluffychat/app_state/failure.dart';
 import 'package:fluffychat/app_state/success.dart';
 import 'package:fluffychat/presentation/state/success.dart';
 
+class CreateSupportChatInitial extends Success {
+  @override
+  List<Object?> get props => [];
+}
+
 class CreatingSupportChat extends LoadingState {}
 
 class SupportChatExisted extends Success {
