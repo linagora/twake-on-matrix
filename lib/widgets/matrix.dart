@@ -150,7 +150,6 @@ class MatrixState extends State<Matrix>
   late String currentClientSecret;
   RequestTokenResponse? currentThreepidCreds;
   String? supportChatRoomId;
-  Object createSupportChatState = CreateSupportChatInitial();
 
   Future<SetActiveClientState> setActiveClient(Client? newClient) async {
     final index = widget.clients.indexWhere(
@@ -174,7 +173,7 @@ class MatrixState extends State<Matrix>
   }
 
   void _createSupportChat(Client client) {
-    createSupportChatState = CreateSupportChatInitial();
+    Object createSupportChatState = CreateSupportChatInitial();
     supportChatRoomId = null;
     StreamSubscription? syncListener;
     syncListener = client.onSync.stream.listen((_) {
