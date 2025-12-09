@@ -154,7 +154,11 @@ class SendFileDialogController extends State<SendFileDialog> {
           caption: textEditingController.text,
         )
         .then((_) => PaintingBinding.instance.imageCache.clear());
-    Navigator.of(context).pop(SendMediaWithCaptionStatus.done);
+    Navigator.of(context).pop(
+      SendMediaDialogResult(
+        status: SendMediaWithCaptionStatus.done,
+      ),
+    );
   }
 
   List<MatrixFile> getFilesNotError() {
@@ -196,7 +200,11 @@ class SendFileDialogController extends State<SendFileDialog> {
           thumbnails: thumbnails,
         )
         .then((_) => PaintingBinding.instance.imageCache.clear());
-    Navigator.of(context).pop(SendMediaWithCaptionStatus.done);
+    Navigator.of(context).pop(
+      SendMediaDialogResult(
+        status: SendMediaWithCaptionStatus.done,
+      ),
+    );
   }
 
   void send() {

@@ -29,8 +29,8 @@ mixin SendFilesWithCaptionWebMixin {
         },
       );
       onSendFileCallback?.call(result);
-      if (result is SendMediaWithCaptionStatus) {
-        switch (result) {
+      if (result is SendMediaDialogResult) {
+        switch (result.status) {
           case SendMediaWithCaptionStatus.done:
             break;
           case SendMediaWithCaptionStatus.emptyRoom:
