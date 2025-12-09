@@ -41,6 +41,7 @@ import 'package:fluffychat/presentation/mixins/delete_event_mixin.dart';
 import 'package:fluffychat/presentation/mixins/go_to_direct_chat_mixin.dart';
 import 'package:fluffychat/presentation/mixins/handle_clipboard_action_mixin.dart';
 import 'package:fluffychat/presentation/mixins/leave_chat_mixin.dart';
+import 'package:fluffychat/presentation/mixins/mark_read_mixin.dart';
 import 'package:fluffychat/presentation/mixins/media_picker_mixin.dart';
 import 'package:fluffychat/presentation/mixins/paste_image_mixin.dart';
 import 'package:fluffychat/presentation/mixins/save_file_to_twake_downloads_folder_mixin.dart';
@@ -144,6 +145,7 @@ class ChatController extends State<Chat>
         LeaveChatMixin,
         DeleteEventMixin,
         UnblockUserMixin,
+        MarkReadMixin,
         AudioMixin {
   final NetworkConnectionService networkConnectionService =
       getIt.get<NetworkConnectionService>();
@@ -3155,6 +3157,11 @@ class ChatController extends State<Chat>
     _loadDraft();
     _tryLoadTimeline();
     sendController.addListener(updateInputTextNotifier);
+    initMarkRead(
+      context: context,
+      getRoomCallback: () => room,
+      chatFocusNode: chatFocusNode,
+    );
     super.initState();
     SchedulerBinding.instance.addPostFrameCallback((_) async {
       if (!mounted) return;
@@ -3237,6 +3244,7 @@ class ChatController extends State<Chat>
     focusHover.dispose();
     disposeAudioMixin();
     disposeAudioPlayer();
+    disposeMarkRead();
     super.dispose();
   }
 
