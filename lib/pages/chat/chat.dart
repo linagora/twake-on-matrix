@@ -30,6 +30,7 @@ import 'package:fluffychat/pages/chat/dialog_reject_invite_widget.dart';
 import 'package:fluffychat/pages/chat/events/message_content_mixin.dart';
 import 'package:fluffychat/pages/chat/input_bar/focus_suggestion_controller.dart';
 import 'package:fluffychat/presentation/enum/chat/right_column_type_enum.dart';
+import 'package:fluffychat/presentation/enum/chat/send_media_with_caption_status_enum.dart';
 import 'package:fluffychat/presentation/extensions/client_extension.dart';
 import 'package:fluffychat/presentation/extensions/event_update_extension.dart';
 import 'package:fluffychat/presentation/extensions/send_file_extension.dart';
@@ -548,11 +549,19 @@ class ChatController extends State<Chat>
 
   void handleDragDone(DropDoneDetails details) async {
     final matrixFiles = await onDragDone(details);
+    final pendingText = sendController.text;
+    sendController.clear();
     sendFileOnWebAction(
       context,
       room: room,
+      pendingText: pendingText,
       matrixFilesList: matrixFiles,
-      onSendFileCallback: scrollDown,
+      onSendFileCallback: (result) async {
+        await handleSendMediaCallback(
+          result: result.status,
+          pendingText: pendingText,
+        );
+      },
     );
   }
 
@@ -1819,7 +1828,6 @@ class ChatController extends State<Chat>
   void cancelEditEventAction() => setState(() {
         if (editEventNotifier.value != null) {
           inputText.value = sendController.text = pendingText;
-          pendingText = '';
         }
         editEventNotifier.value = null;
       });
@@ -1828,20 +1836,47 @@ class ChatController extends State<Chat>
     if (PlatformInfos.isMobile) {
       _showMediaPicker(context);
     } else {
+      final pendingText = sendController.text;
       final matrixFiles = await pickFilesFromSystem();
+      sendController.clear();
       sendFileOnWebAction(
+        pendingText: pendingText,
         context,
         room: room,
         matrixFilesList: matrixFiles,
-        onSendFileCallback: scrollDown,
+        onSendFileCallback: (result) async {
+          await handleSendMediaCallback(
+            result: result.status,
+            pendingText: pendingText,
+          );
+        },
       );
     }
+  }
+
+  Future<void> handleSendMediaCallback({
+    required SendMediaWithCaptionStatus result,
+    required String pendingText,
+  }) async {
+    if (result != SendMediaWithCaptionStatus.done && pendingText.isNotEmpty) {
+      sendController.text = pendingText;
+    }
+    if (result == SendMediaWithCaptionStatus.done) {
+      final prefs = await SharedPreferences.getInstance();
+      prefs.remove('draft_$roomId');
+    }
+
+    scrollDown();
   }
 
   void _showMediaPicker(BuildContext context) {
     final imagePickerController = ImagePickerGridController(
       AssetCounter(imagePickerMode: ImagePickerMode.multiple),
     );
+
+    if (sendController.text.isNotEmpty) {
+      _captionsController.text = sendController.text;
+    }
 
     showMediaPickerBottomSheetAction(
       room: room,
@@ -1861,10 +1896,15 @@ class ChatController extends State<Chat>
         );
         scrollDown();
         _captionsController.clear();
+        sendController.clear();
       },
-      onCameraPicked: (_) {
+      onCameraPicked: (_) async {
         sendMedia(imagePickerController, room: room);
         scrollDown();
+
+        // Also add draft cleanup here
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.remove('draft_$roomId');
       },
       captionController: _captionsController,
       focusSuggestionController: _focusSuggestionController,

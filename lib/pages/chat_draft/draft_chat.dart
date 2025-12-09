@@ -127,6 +127,8 @@ class DraftChatController extends State<DraftChat>
 
   final isSendingNotifier = ValueNotifier(false);
 
+  final TextEditingController _captionsController = TextEditingController();
+
   late PresentationContact presentationContact;
 
   final KeyboardVisibilityController keyboardVisibilityController =
@@ -159,9 +161,14 @@ class DraftChatController extends State<DraftChat>
     String? caption,
     Room? room,
   }) {
+    sendController.clear();
     return _createRoom(
       onRoomCreatedSuccess: (newRoom) {
-        super.sendMedia(imagePickerController, room: newRoom);
+        super.sendMedia(
+          imagePickerController,
+          room: newRoom,
+          caption: caption,
+        );
       },
     );
   }
@@ -232,6 +239,7 @@ class DraftChatController extends State<DraftChat>
     disposeUnblockUserSubscription();
     ignoredUsersStreamSub?.cancel();
     isBlockedUserNotifier.dispose();
+    _captionsController.dispose();
     disposeAudioMixin();
     super.dispose();
   }
@@ -532,9 +540,14 @@ class DraftChatController extends State<DraftChat>
       AssetCounter(imagePickerMode: ImagePickerMode.multiple),
     );
 
+    if (sendController.text.isNotEmpty) {
+      _captionsController.text = sendController.text;
+    }
+
     showMediaPickerBottomSheetAction(
       context: context,
       imagePickerGridController: imagePickerController,
+      captionController: _captionsController,
       onPickerTypeTap: (action) => onPickerTypeClick(
         type: action,
         context: context,
@@ -576,19 +589,33 @@ class DraftChatController extends State<DraftChat>
       return;
     }
 
-    final dialogStatus = await sendImagesWithCaption(
+    final pendingText = sendController.text;
+    sendController.clear();
+
+    final dialogResult = await sendImagesWithCaption(
       context: context,
       matrixFiles: matrixFilesList,
+      pendingText: pendingText,
     );
 
-    if (dialogStatus is SendMediaWithCaptionStatus) {
-      _handleSendFileDialogStatus(dialogStatus, matrixFilesList);
+    if (dialogResult != null) {
+      _handleSendFileDialogStatus(
+        dialogResult.status,
+        matrixFilesList,
+        dialogResult.caption ?? '',
+      );
+
+      if (dialogResult.status != SendMediaWithCaptionStatus.emptyRoom &&
+          pendingText.isNotEmpty) {
+        sendController.text = pendingText;
+      }
     }
   }
 
   void _handleSendFileDialogStatus(
     SendMediaWithCaptionStatus status,
     List<MatrixFile> matrixFilesList,
+    String? caption,
   ) {
     switch (status) {
       case SendMediaWithCaptionStatus.cancel:
@@ -602,11 +629,13 @@ class DraftChatController extends State<DraftChat>
               uploadManager.uploadFilesWeb(
                 room: newRoom,
                 files: [matrixFilesList.first],
+                caption: caption,
               );
             } else {
               uploadManager.uploadFilesWeb(
                 room: newRoom,
                 files: matrixFilesList,
+                caption: caption,
               );
             }
           },

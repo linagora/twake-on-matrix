@@ -119,7 +119,9 @@ class SendFileDialogView extends StatelessWidget {
                 children: [
                   TextButton(
                     onPressed: () => Navigator.of(context).pop(
-                      SendMediaWithCaptionStatus.cancel,
+                      SendMediaDialogResult(
+                        status: SendMediaWithCaptionStatus.cancel,
+                      ),
                     ),
                     style: ButtonStyle(
                       shape: WidgetStatePropertyAll(

@@ -55,8 +55,8 @@ mixin PasteImageMixin {
         );
       },
     );
-    if (result is SendMediaWithCaptionStatus) {
-      switch (result) {
+    if (result is SendMediaDialogResult) {
+      switch (result.status) {
         case SendMediaWithCaptionStatus.done:
         case SendMediaWithCaptionStatus.emptyRoom:
           onSendFileCallback?.call();
