@@ -2617,7 +2617,7 @@ class ChatController extends State<Chat>
     }
   }
 
-  bool get hasActionAppBarMenu => _getListActionAppBarMenu().isEmpty;
+  bool get hasActionAppBarMenu => _getListActionAppBarMenu().isNotEmpty;
 
   void handleAppbarMenuAction(
     BuildContext context,
