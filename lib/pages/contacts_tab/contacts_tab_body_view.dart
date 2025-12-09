@@ -2,6 +2,7 @@ import 'package:fluffychat/domain/app_state/contact/get_contacts_state.dart';
 import 'package:fluffychat/pages/contacts_tab/contacts_tab.dart';
 import 'package:fluffychat/pages/contacts_tab/contacts_tab_view_style.dart';
 import 'package:fluffychat/pages/contacts_tab/empty_contacts_body.dart';
+import 'package:fluffychat/pages/contacts_tab/widgets/sliver_invite_friend_button.dart';
 import 'package:fluffychat/pages/new_private_chat/widget/expansion_contact_list_tile.dart';
 import 'package:fluffychat/pages/new_private_chat/widget/expansion_phonebook_contact_list_tile.dart';
 import 'package:fluffychat/pages/new_private_chat/widget/loading_contact_widget.dart';
@@ -31,6 +32,8 @@ class ContactsTabBodyView extends StatelessWidget {
   Widget build(BuildContext context) {
     return CustomScrollView(
       slivers: [
+        if (controller.client.userID != null)
+          SliverInviteFriendButton(userId: controller.client.userID!),
         _SliverWarningBanner(controller: controller),
         _SliverPhonebookLoading(controller: controller),
         _SliverRecentContacts(controller: controller),
