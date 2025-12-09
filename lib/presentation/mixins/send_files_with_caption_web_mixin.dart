@@ -12,7 +12,7 @@ mixin SendFilesWithCaptionWebMixin {
     BuildContext context, {
     Room? room,
     required List<MatrixFile> matrixFilesList,
-    void Function(SendMediaWithCaptionStatus)? onSendFileCallback,
+    void Function(SendMediaDialogResult)? onSendFileCallback,
     String? pendingText,
   }) async {
     if (matrixFilesList.length <= AppConfig.maxFilesSendPerDialog &&

@@ -558,7 +558,7 @@ class ChatController extends State<Chat>
       matrixFilesList: matrixFiles,
       onSendFileCallback: (result) async {
         await handleSendMediaCallback(
-          result: result,
+          result: result.status,
           pendingText: pendingText,
         );
       },
@@ -1846,7 +1846,7 @@ class ChatController extends State<Chat>
         matrixFilesList: matrixFiles,
         onSendFileCallback: (result) async {
           await handleSendMediaCallback(
-            result: result,
+            result: result.status,
             pendingText: pendingText,
           );
         },
