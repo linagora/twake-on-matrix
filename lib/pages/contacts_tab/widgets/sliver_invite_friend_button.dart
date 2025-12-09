@@ -19,7 +19,6 @@ class SliverInviteFriendButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SliverPersistentHeader(
-      pinned: true,
       floating: true,
       delegate: _InviteFriendButtonDelegate(userId),
     );
@@ -107,5 +106,6 @@ class _InviteFriendButtonDelegate extends SliverPersistentHeaderDelegate {
   double get minExtent => 0;
 
   @override
-  bool shouldRebuild(_) => false;
+  bool shouldRebuild(covariant _InviteFriendButtonDelegate oldDelegate) =>
+      oldDelegate.userId != userId;
 }

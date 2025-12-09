@@ -255,10 +255,10 @@ class UrlLauncher with GoToDraftChatMixin {
     String matrixId, {
     Client? client,
   }) async {
-    if (isCreatingChatFromUrl) return;
+    if (client == null || isCreatingChatFromUrl) return;
     isCreatingChatFromUrl = true;
-    final rooms = client?.rooms.where((room) => room.isDirectChat).toList();
-    final availableRoom = rooms?.firstWhereOrNull((room) {
+    final rooms = client.rooms.where((room) => room.isDirectChat).toList();
+    final availableRoom = rooms.firstWhereOrNull((room) {
       return room.getParticipants().any((user) => user.id == matrixId);
     });
 
@@ -268,7 +268,7 @@ class UrlLauncher with GoToDraftChatMixin {
       return;
     }
 
-    final roomId = await client?.startDirectChat(matrixId);
+    final roomId = await client.startDirectChat(matrixId);
     isCreatingChatFromUrl = false;
     context.go('/rooms/$roomId');
   }
