@@ -16,6 +16,13 @@ class CoreRobot {
 
   dynamic ignoreException() => $.tester.takeException();
 
+  String? getBrowserAppId() {
+    if (Platform.isAndroid) {
+      return 'com.android.chrome';
+    }
+    return null;
+  }
+
   Future<void> confirmShareContactInformation() async {
     final dialog = $(PermissionDialog);
     if (dialog.exists) {
@@ -83,6 +90,27 @@ class CoreRobot {
     }
   }
 
+  Future<void> waitNativeGone(
+    Selector selector, {
+    Duration timeout = const Duration(seconds: 5),
+    Duration interval = const Duration(milliseconds: 200),
+  }) async {
+    final appId = getBrowserAppId();
+    final end = DateTime.now().add(timeout);
+
+    while (DateTime.now().isBefore(end)) {
+      final views = await $.native.getNativeViews(
+        selector,
+        appId: appId,
+      );
+      if (views.isEmpty) return;
+
+      await Future.delayed(interval);
+    }
+
+    throw TimeoutException('Native element still visible: $selector');
+  }
+
   Future<void> waitSnackGone(
     PatrolIntegrationTester $, {
     Duration timeout = const Duration(seconds: 8),
@@ -92,6 +120,27 @@ class CoreRobot {
       if (DateTime.now().isAfter(end)) break;
       await $.pump(const Duration(milliseconds: 150));
     }
+  }
+
+  Future<bool> existsOptionalNativeItems(
+    PatrolIntegrationTester $,
+    Selector selector, {
+    String? appId,
+    Duration timeout = const Duration(seconds: 5),
+    Duration interval = const Duration(milliseconds: 500),
+  }) async {
+    final end = DateTime.now().add(timeout);
+    while (DateTime.now().isBefore(end)) {
+      final views = await $.native.getNativeViews(
+        selector,
+        appId: appId,
+      );
+      if (views.isNotEmpty) {
+        return true;
+      }
+      await Future<void>.delayed(interval);
+    }
+    return false;
   }
 
   Future<void> typeSlowlyWithPatrol(
