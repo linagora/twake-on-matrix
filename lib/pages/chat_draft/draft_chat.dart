@@ -164,7 +164,11 @@ class DraftChatController extends State<DraftChat>
     sendController.clear();
     return _createRoom(
       onRoomCreatedSuccess: (newRoom) {
-        super.sendMedia(imagePickerController, room: newRoom);
+        super.sendMedia(
+          imagePickerController,
+          room: newRoom,
+          caption: caption,
+        );
       },
     );
   }

@@ -1898,9 +1898,13 @@ class ChatController extends State<Chat>
         _captionsController.clear();
         sendController.clear();
       },
-      onCameraPicked: (_) {
+      onCameraPicked: (_) async {
         sendMedia(imagePickerController, room: room);
         scrollDown();
+
+        // Also add draft cleanup here
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.remove('draft_$roomId');
       },
       captionController: _captionsController,
       focusSuggestionController: _focusSuggestionController,
