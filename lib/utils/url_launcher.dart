@@ -249,21 +249,27 @@ class UrlLauncher with GoToDraftChatMixin {
     }
   }
 
+  bool isCreatingChatFromUrl = false;
+
   Future<void> _openChatWithUser(
     String matrixId, {
     Client? client,
   }) async {
+    if (isCreatingChatFromUrl) return;
+    isCreatingChatFromUrl = true;
     final rooms = client?.rooms.where((room) => room.isDirectChat).toList();
     final availableRoom = rooms?.firstWhereOrNull((room) {
       return room.getParticipants().any((user) => user.id == matrixId);
     });
 
     if (availableRoom != null) {
+      isCreatingChatFromUrl = false;
       context.go('/rooms/${availableRoom.id}');
       return;
     }
 
     final roomId = await client?.startDirectChat(matrixId);
+    isCreatingChatFromUrl = false;
     context.go('/rooms/$roomId');
   }
 }
