@@ -2055,11 +2055,12 @@ packages:
   overflow_view:
     dependency: "direct main"
     description:
-      name: overflow_view
-      sha256: aa39c40f8229e6dcd243e544d707457ff630bb99063d2fd0be8b31f8da902e27
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.5.0"
+      path: "."
+      ref: master
+      resolved-ref: "4911398a0b738df77e9a9b7c64d8b9bf85f336bd"
+      url: "https://github.com/linagora/overflow_view.git"
+    source: git
+    version: "0.6.0"
   package_config:
     dependency: transitive
     description:

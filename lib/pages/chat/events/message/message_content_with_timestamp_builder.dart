@@ -3,13 +3,13 @@ import 'dart:ui';
 import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/domain/model/room/room_extension.dart';
+import 'package:fluffychat/pages/chat/chat_horizontal_action_menu.dart';
 import 'package:fluffychat/pages/chat/events/message/display_name_widget.dart';
 import 'package:fluffychat/pages/chat/events/message/message.dart';
 import 'package:fluffychat/pages/chat/events/message/message_content_builder.dart';
 import 'package:fluffychat/pages/chat/events/message/message_context_menu_action.dart';
 import 'package:fluffychat/pages/chat/events/message/message_style.dart';
 import 'package:fluffychat/pages/chat/events/message/multi_platform_message_container.dart';
-import 'package:fluffychat/pages/chat/events/message_content_style.dart';
 import 'package:fluffychat/pages/chat/events/message_reactions.dart';
 import 'package:fluffychat/pages/chat/events/message_time.dart';
 import 'package:fluffychat/pages/chat/optional_selection_container_disabled.dart';
@@ -28,7 +28,6 @@ import 'package:fluffychat/widgets/matrix.dart';
 import 'package:fluffychat/widgets/twake_components/twake_icon_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_emoji_mart/flutter_emoji_mart.dart';
-import 'package:fluffychat/generated/l10n/app_localizations.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:matrix/matrix.dart';
@@ -115,6 +114,7 @@ class _MessageContentWithTimestampBuilderState
     extends State<MessageContentWithTimestampBuilder> {
   final ValueNotifier<bool> _displayEmojiPicker = ValueNotifier(false);
   final ResponsiveUtils _responsiveUtils = getIt.get<ResponsiveUtils>();
+  bool someHorizontalActionHidden = false;
 
   List<MessageContextMenuAction> _messageContextMenu(Event event) => [
         if (event.room.canSendDefaultMessages) ...[
@@ -165,26 +165,11 @@ class _MessageContentWithTimestampBuilderState
         widget.event,
         context,
       ),
-      child: OverflowView.flexible(
-        builder: (context, index) {
-          return _messageContentWithTimestampBuilder(
-            context: context,
-            displayTime: displayTime,
-            noBubble: noBubble,
-            timelineText: timelineText,
-            overlayContextMenu: true,
-          );
-        },
-        children: [
-          _messageContentWithTimestampBuilder(
-            context: context,
-            displayTime: displayTime,
-            noBubble: noBubble,
-            timelineText: timelineText,
-            overlayContextMenu: PlatformInfos.isWeb &&
-                widget.maxWidth < MessageContentStyle.messageBoxMaxWidth,
-          ),
-        ],
+      child: _messageContentWithTimestampBuilder(
+        context: context,
+        displayTime: displayTime,
+        noBubble: noBubble,
+        timelineText: timelineText,
       ),
     );
   }
@@ -194,7 +179,6 @@ class _MessageContentWithTimestampBuilderState
     required bool displayTime,
     required bool noBubble,
     required bool timelineText,
-    bool overlayContextMenu = false,
   }) {
     return Row(
       mainAxisSize: MainAxisSize.min,
@@ -202,30 +186,10 @@ class _MessageContentWithTimestampBuilderState
       crossAxisAlignment: CrossAxisAlignment.end,
       children: [
         if (widget.event.shouldDisplayContextMenuInLeftBubble &&
-            !_responsiveUtils.isMobile(context)) ...[
-          if (widget.event.status.isAvailable)
-            if (overlayContextMenu)
-              Container(
-                padding: const EdgeInsets.only(right: 8),
-                decoration: BoxDecoration(
-                  color: Colors.transparent,
-                  borderRadius: BorderRadius.circular(24),
-                ),
-                child: TwakeIconButton(
-                  onTapDown: (tapDownDetails) => widget.onTapMoreButton?.call(
-                    context,
-                    widget.event,
-                    tapDownDetails,
-                    widget.maxWidth,
-                  ),
-                  icon: Icons.more_horiz,
-                  tooltip: L10n.of(context)!.more,
-                  preferBelow: false,
-                ),
-              )
-            else
-              _menuActionsRowBuilder(context, isReversed: true),
-        ],
+            !_responsiveUtils.isMobile(context) &&
+            widget.event.status.isAvailable &&
+            !widget.event.redacted)
+          _menuActionsRowBuilder(context, isReversed: true),
         TwakeContextMenuArea(
           builder: widget.menuChildren != null
               ? (context) => widget.menuChildren!.call(context)
@@ -470,30 +434,10 @@ class _MessageContentWithTimestampBuilderState
           ),
         ),
         if (widget.event.shouldDisplayContextMenuInRightBubble &&
-            !_responsiveUtils.isMobile(context)) ...[
-          if (widget.event.status.isAvailable && !widget.event.redacted)
-            if (overlayContextMenu)
-              Container(
-                padding: const EdgeInsets.only(left: 8),
-                decoration: BoxDecoration(
-                  color: Colors.transparent,
-                  borderRadius: BorderRadius.circular(24),
-                ),
-                child: TwakeIconButton(
-                  onTapDown: (tapDownDetails) => widget.onTapMoreButton?.call(
-                    context,
-                    widget.event,
-                    tapDownDetails,
-                    widget.maxWidth,
-                  ),
-                  icon: Icons.more_horiz,
-                  tooltip: L10n.of(context)!.more,
-                  preferBelow: false,
-                ),
-              )
-            else
-              _menuActionsRowBuilder(context),
-        ],
+            !_responsiveUtils.isMobile(context) &&
+            widget.event.status.isAvailable &&
+            !widget.event.redacted)
+          _menuActionsRowBuilder(context),
       ],
     );
   }
@@ -767,40 +711,61 @@ class _MessageContentWithTimestampBuilderState
     final listHorizontalActionMenu = isReversed
         ? widget.listHorizontalActionMenu.reversed.toList()
         : widget.listHorizontalActionMenu;
-    return ValueListenableBuilder(
-      valueListenable: widget.isHoverNotifier,
-      builder: (context, isHover, child) {
-        if (isHover != null &&
-            isHover.contains(widget.event.eventId) &&
-            !widget.event.redacted) {
-          return child!;
-        }
-        return const SizedBox.shrink();
-      },
-      child: Container(
-        decoration: BoxDecoration(
-          color: Colors.transparent,
-          borderRadius: BorderRadius.circular(24),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: listHorizontalActionMenu.map((item) {
-            return Padding(
-              padding: const EdgeInsetsDirectional.symmetric(horizontal: 4),
-              child: TwakeIconButton(
-                onTapDown: (tapDownDetails) => widget.onMenuAction?.call(
-                  context,
-                  item.action,
-                  widget.event,
-                  tapDownDetails,
-                ),
+    return Flexible(
+      child: ValueListenableBuilder(
+        valueListenable: widget.isHoverNotifier,
+        builder: (context, isHover, child) {
+          if (isHover != null &&
+              isHover.contains(widget.event.eventId) &&
+              !widget.event.redacted) {
+            return child!;
+          }
+          return const SizedBox.shrink();
+        },
+        child: Container(
+          decoration: BoxDecoration(
+            color: Colors.transparent,
+            borderRadius: BorderRadius.circular(24),
+          ),
+          alignment: isReversed
+              ? AlignmentDirectional.centerEnd
+              : AlignmentDirectional.centerStart,
+          padding: isReversed
+              ? const EdgeInsetsDirectional.only(end: 8)
+              : const EdgeInsetsDirectional.only(start: 8),
+          child: OverflowView.flexible(
+            reverse: !isReversed,
+            spacing: 8,
+            builder: (context, remainingItemCount) {
+              someHorizontalActionHidden = remainingItemCount != 0;
+              return const SizedBox();
+            },
+            children: listHorizontalActionMenu.map((item) {
+              return TwakeIconButton(
+                onTapDown: (tapDownDetails) {
+                  if (someHorizontalActionHidden &&
+                      item.action == ChatHorizontalActionMenu.more) {
+                    return widget.onTapMoreButton?.call(
+                      context,
+                      widget.event,
+                      tapDownDetails,
+                      widget.maxWidth,
+                    );
+                  }
+                  widget.onMenuAction?.call(
+                    context,
+                    item.action,
+                    widget.event,
+                    tapDownDetails,
+                  );
+                },
                 icon: item.action.getIcon(),
                 imagePath: item.action.getImagePath(),
                 tooltip: item.action.getTitle(context),
                 preferBelow: false,
-              ),
-            );
-          }).toList(),
+              );
+            }).toList(),
+          ),
         ),
       ),
     );
