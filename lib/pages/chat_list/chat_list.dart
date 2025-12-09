@@ -466,20 +466,6 @@ class ChatListController extends State<ChatList>
     });
   }
 
-  void setActiveBundle(String bundle) {
-    context.go('/rooms');
-    setState(() {
-      conversationSelectionNotifier.value.clear();
-      Matrix.of(context).activeBundle = bundle;
-      if (!Matrix.of(context)
-          .currentBundle!
-          .any((client) => client == client)) {
-        Matrix.of(context)
-            .setActiveClient(Matrix.of(context).currentBundle!.first);
-      }
-    });
-  }
-
   void editBundlesForAccount(String? userId, String? activeBundle) async {
     final l10n = L10n.of(context)!;
     final client = Matrix.of(context)
