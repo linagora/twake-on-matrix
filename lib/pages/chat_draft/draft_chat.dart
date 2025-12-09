@@ -259,10 +259,6 @@ class DraftChatController extends State<DraftChat>
 
   TextEditingController sendController = TextEditingController();
 
-  void setActiveClient(Client c) => setState(() {
-        Matrix.of(context).setActiveClient(c);
-      });
-
   Future<String> _triggerTagGreetingMessage() async {
     if (_userProfile.value == null) {
       return sendController.value.text;
