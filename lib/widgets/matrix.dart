@@ -156,6 +156,7 @@ class MatrixState extends State<Matrix>
       (client) => newClient != null && client.userID == newClient.userID,
     );
     if (index != -1) {
+      if (index == _activeClient) return SetActiveClientState.success;
       _activeClient = index;
       // TODO: Multi-client VoiP support
       createVoipPlugin();
