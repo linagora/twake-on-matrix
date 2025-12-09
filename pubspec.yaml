@@ -331,7 +331,7 @@ dependency_overrides:
   overflow_view:
     git:
       url: https://github.com/linagora/overflow_view.git
-      ref: feature/reverse-overflow-direction
+      ref: master
 
 cider:
   link_template:

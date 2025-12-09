@@ -2056,8 +2056,8 @@ packages:
     dependency: "direct main"
     description:
       path: "."
-      ref: "feature/reverse-overflow-direction"
-      resolved-ref: cfc1ec313178e98514c96991067836fe95781a74
+      ref: master
+      resolved-ref: "4911398a0b738df77e9a9b7c64d8b9bf85f336bd"
       url: "https://github.com/linagora/overflow_view.git"
     source: git
     version: "0.6.0"
