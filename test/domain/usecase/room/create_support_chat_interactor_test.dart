@@ -79,6 +79,7 @@ void main() {
         when(
           mockClient.createGroupChat(
             groupName: anyNamed('groupName'),
+            enableEncryption: anyNamed('enableEncryption'),
             preset: anyNamed('preset'),
             initialState: anyNamed('initialState'),
             powerLevelContentOverride: anyNamed('powerLevelContentOverride'),
@@ -119,6 +120,7 @@ void main() {
         verify(
           mockClient.createGroupChat(
             groupName: 'Support Twake Workplace',
+            enableEncryption: false,
             preset: CreateRoomPreset.trustedPrivateChat,
             initialState: anyNamed('initialState'),
             powerLevelContentOverride: anyNamed('powerLevelContentOverride'),
@@ -173,6 +175,7 @@ void main() {
         verifyNever(
           mockClient.createGroupChat(
             groupName: anyNamed('groupName'),
+            enableEncryption: anyNamed('enableEncryption'),
             preset: anyNamed('preset'),
             initialState: anyNamed('initialState'),
             powerLevelContentOverride: anyNamed('powerLevelContentOverride'),
@@ -205,6 +208,7 @@ void main() {
         when(
           mockClient.createGroupChat(
             groupName: anyNamed('groupName'),
+            enableEncryption: anyNamed('enableEncryption'),
             preset: anyNamed('preset'),
             initialState: anyNamed('initialState'),
             powerLevelContentOverride: anyNamed('powerLevelContentOverride'),
@@ -244,6 +248,7 @@ void main() {
         verify(
           mockClient.createGroupChat(
             groupName: 'Support Twake Workplace',
+            enableEncryption: false,
             preset: CreateRoomPreset.trustedPrivateChat,
             initialState: anyNamed('initialState'),
             powerLevelContentOverride: anyNamed('powerLevelContentOverride'),
@@ -282,6 +287,7 @@ void main() {
         verifyNever(
           mockClient.createGroupChat(
             groupName: anyNamed('groupName'),
+            enableEncryption: anyNamed('enableEncryption'),
             preset: anyNamed('preset'),
             initialState: anyNamed('initialState'),
             powerLevelContentOverride: anyNamed('powerLevelContentOverride'),
@@ -345,6 +351,7 @@ void main() {
         verifyNever(
           mockClient.createGroupChat(
             groupName: anyNamed('groupName'),
+            enableEncryption: anyNamed('enableEncryption'),
             preset: anyNamed('preset'),
             initialState: anyNamed('initialState'),
             powerLevelContentOverride: anyNamed('powerLevelContentOverride'),
@@ -388,6 +395,7 @@ void main() {
         verifyNever(
           mockClient.createGroupChat(
             groupName: anyNamed('groupName'),
+            enableEncryption: anyNamed('enableEncryption'),
             preset: anyNamed('preset'),
             initialState: anyNamed('initialState'),
             powerLevelContentOverride: anyNamed('powerLevelContentOverride'),
@@ -418,7 +426,7 @@ void main() {
         when(
           mockClient.createGroupChat(
             groupName: anyNamed('groupName'),
-            invite: anyNamed('invite'),
+            enableEncryption: anyNamed('enableEncryption'),
             preset: anyNamed('preset'),
             initialState: anyNamed('initialState'),
             powerLevelContentOverride: anyNamed('powerLevelContentOverride'),
@@ -444,6 +452,7 @@ void main() {
         verify(
           mockClient.createGroupChat(
             groupName: 'Support Twake Workplace',
+            enableEncryption: false,
             preset: CreateRoomPreset.trustedPrivateChat,
             initialState: anyNamed('initialState'),
             powerLevelContentOverride: anyNamed('powerLevelContentOverride'),
@@ -474,6 +483,7 @@ void main() {
         when(
           mockClient.createGroupChat(
             groupName: anyNamed('groupName'),
+            enableEncryption: anyNamed('enableEncryption'),
             preset: anyNamed('preset'),
             initialState: anyNamed('initialState'),
             powerLevelContentOverride: anyNamed('powerLevelContentOverride'),
@@ -523,6 +533,7 @@ void main() {
         when(
           mockClient.createGroupChat(
             groupName: anyNamed('groupName'),
+            enableEncryption: anyNamed('enableEncryption'),
             preset: anyNamed('preset'),
             initialState: anyNamed('initialState'),
             powerLevelContentOverride: anyNamed('powerLevelContentOverride'),
@@ -583,6 +594,7 @@ void main() {
         when(
           mockClient.createGroupChat(
             groupName: anyNamed('groupName'),
+            enableEncryption: anyNamed('enableEncryption'),
             preset: anyNamed('preset'),
             initialState: anyNamed('initialState'),
             powerLevelContentOverride: anyNamed('powerLevelContentOverride'),
@@ -653,6 +665,7 @@ void main() {
         when(
           mockClient.createGroupChat(
             groupName: anyNamed('groupName'),
+            enableEncryption: anyNamed('enableEncryption'),
             preset: anyNamed('preset'),
             initialState: anyNamed('initialState'),
             powerLevelContentOverride: anyNamed('powerLevelContentOverride'),
