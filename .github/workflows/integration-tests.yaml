@@ -100,9 +100,7 @@ jobs:
             echo "Running full Patrol test suite"
           fi
           whoami
-          echo $PATH
-          which patrol
-          export $PATH:/home/ubuntu/.pub-cache/bin/
+          export PATH=$PATH:/home/ubuntu/.pub-cache/bin/
           patrol build android \
             -v \
             --dart-define-from-file .env.cicd \
