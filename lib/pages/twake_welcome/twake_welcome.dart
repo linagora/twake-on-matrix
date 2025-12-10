@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:fluffychat/config/app_config.dart';
 import 'package:equatable/equatable.dart';
 import 'package:fluffychat/presentation/mixins/connect_page_mixin.dart';
+import 'package:fluffychat/presentation/mixins/temporary_database_mixin.dart';
 import 'package:fluffychat/pages/twake_welcome/twake_welcome_view.dart';
 import 'package:fluffychat/utils/client_manager.dart';
 import 'package:fluffychat/utils/dialog/twake_dialog.dart';
@@ -42,7 +43,8 @@ class TwakeWelcome extends StatefulWidget {
   State<TwakeWelcome> createState() => TwakeWelcomeController();
 }
 
-class TwakeWelcomeController extends State<TwakeWelcome> with ConnectPageMixin {
+class TwakeWelcomeController extends State<TwakeWelcome>
+    with ConnectPageMixin, TemporaryDatabaseMixin {
   void goToHomeserverPicker() {
     if (widget.arg != null && widget.arg?.isAddAnotherAccount == true) {
       context.push('/rooms/addaccount/homeserverpicker');
@@ -78,8 +80,9 @@ class TwakeWelcomeController extends State<TwakeWelcome> with ConnectPageMixin {
         TwakeDialog.hideLoadingDialog(context);
         return;
       }
+      final temporaryDatabase = await createTemporaryDatabase();
       matrix.loginHomeserverSummary = await matrix
-          .getLoginClient()
+          .getLoginClient(database: temporaryDatabase)
           .checkHomeserver(
             Uri.parse(AppConfig.twakeWorkplaceHomeserver),
           )
@@ -97,6 +100,7 @@ class TwakeWelcomeController extends State<TwakeWelcome> with ConnectPageMixin {
       TwakeDialog.hideLoadingDialog(context);
     } catch (e) {
       Logs().e("TwakeIdController::_redirectRegistrationUrl: $e");
+      await cleanupTemporaryDatabase();
       TwakeDialog.hideLoadingDialog(context);
     }
   }
@@ -142,6 +146,12 @@ class TwakeWelcomeController extends State<TwakeWelcome> with ConnectPageMixin {
       context,
       url: AppConfig.privacyUrl,
     ).openUrlInAppBrowser();
+  }
+
+  @override
+  void dispose() {
+    disposeTemporaryDatabaseMixin();
+    super.dispose();
   }
 
   @override
