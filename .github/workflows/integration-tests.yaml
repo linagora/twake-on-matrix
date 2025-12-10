@@ -86,13 +86,12 @@ jobs:
       - name: Run Patrol Tests
         shell: bash
         env:
-          USERNAME: ${{ secrets.USERNAME }}
-          PASSWORD: ${{ secrets.PASSWORD }}
-          SERVER_URL: ${{ secrets.SERVER_URL }}
+          INTEGRATION_TEST_ENV_BASE64: ${{ secrets.INTEGRATION_TEST_ENV_BASE64 }}
           PATROL_TEST_TARGET: ${{ inputs.patrol_test_target }}
         run: |
           dart pub global activate patrol_cli 3.10.0
           flutter build apk --config-only
+          echo "$INTEGRATION_TEST_ENV_BASE64" | base64 --decode > .env.cicd
           TARGET_FLAG=""
           if [ -n "$PATROL_TEST_TARGET" ]; then
             echo "Running Patrol tests defined in $PATROL_TEST_TARGET"
@@ -102,9 +101,7 @@ jobs:
           fi
           patrol build android \
             -v \
-            --dart-define=USERNAME="$USERNAME" \
-            --dart-define=SERVER_URL="$SERVER_URL" \
-            --dart-define=PASSWORD="$PASSWORD" \
+            --dart-define-from-file .env.cicd \
             $TARGET_FLAG
           gcloud firebase test android run \
             --type instrumentation \
