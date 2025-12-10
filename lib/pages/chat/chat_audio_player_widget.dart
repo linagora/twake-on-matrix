@@ -280,9 +280,6 @@ class ChatAudioPlayerWidget extends StatelessWidget {
     if (audioPlayer == null) return;
     switch (audioPlayer.speed) {
       case 0.5:
-        await audioPlayer.setSpeed(0.75);
-        break;
-      case 0.75:
         await audioPlayer.setSpeed(1.0);
         break;
       case 1.0:
