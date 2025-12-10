@@ -285,13 +285,21 @@ class MatrixState extends State<Matrix>
 
   Client? _loginClientCandidate;
 
-  Client getLoginClient() {
+  Client getLoginClient({
+    MatrixSdkDatabase? database,
+  }) {
     if (widget.clients.isNotEmpty && !client.isLogged()) {
       return client;
     }
+
+    // Generate client name consistently
+    final clientName = database?.name ??
+        '${AppConfig.applicationName}-${DateTime.now().microsecondsSinceEpoch}';
+    final clientDatabase = database ?? fallbackDatabase;
+
     final candidate = _loginClientCandidate ??= ClientManager.createClient(
-      '${AppConfig.applicationName}-${DateTime.now().millisecondsSinceEpoch}',
-      database: fallbackDatabase,
+      clientName,
+      database: clientDatabase,
     )..onLoginStateChanged
         .stream
         .where((l) => l == LoginState.loggedIn)
@@ -597,7 +605,7 @@ class MatrixState extends State<Matrix>
     if (!widget.clients.contains(_loginClientCandidate)) {
       widget.clients.add(_loginClientCandidate!);
     }
-    ClientManager.addClientNameToStore(_loginClientCandidate!.clientName);
+    await ClientManager.addClientNameToStore(_loginClientCandidate!.clientName);
     Logs().d('MatrixState::_handleAddAnotherAccount() - Registering subs');
     _registerSubs(_loginClientCandidate!.clientName);
     final activeClient = getClientByName(
