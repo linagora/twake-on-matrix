@@ -111,48 +111,23 @@ class SettingsContactsVisibilityRobot extends HomeRobot {
 
   // Helper methods to check states
   bool isEveryoneSelected() {
-    try {
-      everyoneSelected().exists;
-      return true;
-    } catch (e) {
-      return false;
-    }
+    return everyoneSelected().exists;
   }
 
   bool isContactsSelected() {
-    try {
-      contactsSelected().exists;
-      return true;
-    } catch (e) {
-      return false;
-    }
+    return contactsSelected().exists;
   }
 
   bool isNobodySelected() {
-    try {
-      nobodySelected().exists;
-      return true;
-    } catch (e) {
-      return false;
-    }
+    return nobodySelected().exists;
   }
 
   bool isEmailFieldSelected() {
-    try {
-      emailFieldSelected().exists;
-      return true;
-    } catch (e) {
-      return false;
-    }
+    return emailFieldSelected().exists;
   }
 
   bool isPhoneNumberFieldSelected() {
-    try {
-      phoneNumberFieldSelected().exists;
-      return true;
-    } catch (e) {
-      return false;
-    }
+    return phoneNumberFieldSelected().exists;
   }
 
   Future<void> waitForView() async {

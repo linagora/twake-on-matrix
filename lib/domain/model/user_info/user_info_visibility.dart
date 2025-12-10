@@ -1,40 +1,11 @@
 import 'package:equatable/equatable.dart';
-import 'package:flutter/material.dart';
 import 'package:json_annotation/json_annotation.dart';
-import 'package:fluffychat/generated/l10n/app_localizations.dart';
 
 part 'user_info_visibility.g.dart';
 
 enum VisibleEnum {
   email,
   phone;
-
-  String title(BuildContext context) {
-    switch (this) {
-      case VisibleEnum.phone:
-        return L10n.of(context)!.phone;
-      case VisibleEnum.email:
-        return L10n.of(context)!.email;
-    }
-  }
-
-  String subtitle(BuildContext context) {
-    switch (this) {
-      case VisibleEnum.phone:
-        return L10n.of(context)!.youNumberIsVisibleAccordingToTheSettingAbove;
-      case VisibleEnum.email:
-        return L10n.of(context)!.youEmailIsVisibleAccordingToTheSettingAbove;
-    }
-  }
-
-  bool enableDivider() {
-    switch (this) {
-      case VisibleEnum.phone:
-        return true;
-      case VisibleEnum.email:
-        return false;
-    }
-  }
 }
 
 @JsonSerializable()

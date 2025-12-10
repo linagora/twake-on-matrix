@@ -13,10 +13,10 @@ class BottomNavigationAvatar extends StatelessWidget {
     required this.isSelected,
     required this.profile,
   });
+
   @override
   Widget build(BuildContext context) {
     return ValueListenableBuilder<Profile?>(
-      key: key,
       valueListenable: profile,
       builder: (context, profile, child) {
         return Container(

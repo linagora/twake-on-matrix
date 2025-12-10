@@ -1,6 +1,7 @@
 import 'package:fluffychat/domain/model/user_info/user_info_visibility.dart';
 import 'package:fluffychat/pages/settings_dashboard/settings_contacts_visibility/settings_contacts_visibility.dart';
 import 'package:fluffychat/pages/settings_dashboard/settings_contacts_visibility/settings_contacts_visibility_enum.dart';
+import 'package:fluffychat/presentation/extensions/settings/user_info_visibility_extension.dart';
 import 'package:fluffychat/widgets/app_bars/twake_app_bar.dart';
 import 'package:fluffychat/widgets/layouts/max_width_body.dart';
 import 'package:fluffychat/generated/l10n/app_localizations.dart';
@@ -35,7 +36,6 @@ class SettingsContactsVisibilityView extends StatelessWidget {
         ),
       ),
       body: MaxWidthBody(
-        withScrolling: true,
         child: SingleChildScrollView(
           physics: const ClampingScrollPhysics(),
           child: SizedBox(
@@ -149,16 +149,22 @@ class SettingsContactsVisibilityView extends StatelessWidget {
                                       valueListenable: controller
                                           .getUserInfoVisibilityNotifier,
                                       builder: (context, state, _) {
-                                        return _buildVisibleFieldIem(
-                                          context: context,
-                                          option: option,
-                                          enableDivider: option.enableDivider(),
-                                          isSelected: controller
-                                              .selectedVisibleFieldNotifier
-                                              .value
-                                              .contains(option),
-                                          onTap:
-                                              controller.onUpdateVisibleFields,
+                                        return ValueListenableBuilder(
+                                          valueListenable: controller
+                                              .selectedVisibleFieldNotifier,
+                                          builder:
+                                              (context, selectedFields, child) {
+                                            return _buildVisibleFieldIem(
+                                              context: context,
+                                              option: option,
+                                              enableDivider:
+                                                  option.enableDivider(),
+                                              isSelected: selectedFields
+                                                  .contains(option),
+                                              onTap: controller
+                                                  .onUpdateVisibleFields,
+                                            );
+                                          },
                                         );
                                       },
                                     ),

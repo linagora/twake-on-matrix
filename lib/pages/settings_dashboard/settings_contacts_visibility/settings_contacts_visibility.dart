@@ -126,6 +126,14 @@ class SettingsContactsVisibilityController
   void updateUserInfoVisibility({
     required UserInfoVisibilityRequest userInfoVisibility,
   }) {
+    if (client.userID == null) {
+      TwakeSnackBar.show(
+        context,
+        L10n.of(context)!.failedToChangeContactsVisibility,
+      );
+      return;
+    }
+    updateUserInfoVisibilityStreamSub?.cancel();
     updateUserInfoVisibilityStreamSub = updateUserInfoVisibilityInteractor
         .execute(
       userId: client.userID!,
@@ -151,6 +159,8 @@ class SettingsContactsVisibilityController
               (option) => option.name == success.userInfoVisibility.visibility,
               orElse: () => SettingsContactsVisibilityEnum.private,
             );
+            selectedVisibleFieldNotifier.value =
+                success.userInfoVisibility.visibleFields ?? [];
             TwakeDialog.hideLoadingDialog(context);
           }
 
@@ -210,6 +220,8 @@ class SettingsContactsVisibilityController
   @override
   void dispose() {
     getUserInfoVisibilityStreamSub?.cancel();
+    updateUserInfoVisibilityStreamSub?.cancel();
+    selectedVisibleFieldNotifier.dispose();
     selectedVisibilityOptionNotifier.dispose();
     getUserInfoVisibilityNotifier.dispose();
     updateUserInfoVisibilityNotifier.dispose();
