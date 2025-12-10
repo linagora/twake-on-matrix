@@ -346,6 +346,7 @@ abstract class AppRoutes {
                       context,
                       const PersonalQr(),
                     ),
+                    redirect: loggedOutRedirect,
                   ),
               ],
             ),

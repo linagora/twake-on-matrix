@@ -119,6 +119,7 @@ class PersonalQrController extends State<PersonalQr> {
     final file = File(filePath);
     await file.writeAsBytes(imageBytes);
     await Gal.putImage(file.path);
+    await file.delete();
   }
 
   @override

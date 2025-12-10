@@ -9,7 +9,10 @@ class TwakeQrCodeView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final qrCode = QrCode(7, QrErrorCorrectLevel.H)..addData(data);
+    final qrCode = QrCode.fromData(
+      data: data,
+      errorCorrectLevel: QrErrorCorrectLevel.H,
+    );
     final qrImage = QrImage(qrCode);
 
     return CustomPaint(

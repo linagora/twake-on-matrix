@@ -37,7 +37,6 @@ class SettingsProfileView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final responsive = getIt.get<ResponsiveUtils>();
-    final sysColor = LinagoraSysColors.material();
     return Scaffold(
       appBar: TwakeAppBar(
         title: L10n.of(context)!.profile,
@@ -54,7 +53,7 @@ class SettingsProfileView extends StatelessWidget {
           if (PlatformInfos.isMobile)
             TwakeIconButton(
               icon: Icons.qr_code,
-              iconColor: sysColor.primary,
+              iconColor: LinagoraSysColors.material().primary,
               onTap: () => context.go('/rooms/profile/qr'),
             ),
           ValueListenableBuilder(
