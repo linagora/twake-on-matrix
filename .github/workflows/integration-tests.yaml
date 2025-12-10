@@ -89,9 +89,10 @@ jobs:
           INTEGRATION_TEST_ENV_BASE64: ${{ secrets.INTEGRATION_TEST_ENV_BASE64 }}
           PATROL_TEST_TARGET: ${{ inputs.patrol_test_target }}
         run: |
+          echo "$INTEGRATION_TEST_ENV_BASE64" | base64 --decode > .env.cicd
+          cat .env.cicd
           dart pub global activate patrol_cli 3.10.0
           flutter build apk --config-only
-          echo $INTEGRATION_TEST_ENV_BASE64 | base64 --decode > .env.cicd
           TARGET_FLAG=""
           if [ -n "$PATROL_TEST_TARGET" ]; then
             echo "Running Patrol tests defined in $PATROL_TEST_TARGET"
