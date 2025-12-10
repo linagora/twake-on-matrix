@@ -96,8 +96,7 @@ mixin ReceiveSharingIntentMixin<T extends StatefulWidget> on State<T> {
       return;
     }
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      UrlLauncher(TwakeApp.routerKey.currentContext!, url: text)
-          .openMatrixToUrl();
+      UrlLauncher(TwakeApp.routerKey.currentContext!, url: text).launchUrl();
     });
   }
 
@@ -110,6 +109,7 @@ mixin ReceiveSharingIntentMixin<T extends StatefulWidget> on State<T> {
     if (!PlatformInfos.isMobile) return;
 
     // For sharing images coming from outside the app while the app is in the memory
+    intentFileStreamSubscription?.cancel();
     intentFileStreamSubscription =
         ReceiveSharingIntent.instance.getMediaStream().listen(
       (shareMedia) {
@@ -120,6 +120,7 @@ mixin ReceiveSharingIntentMixin<T extends StatefulWidget> on State<T> {
 
     // For receiving shared Uris
     final appLinks = AppLinks();
+    intentUriStreamSubscription?.cancel();
     intentUriStreamSubscription =
         appLinks.stringLinkStream.listen(_processIncomingUris);
 

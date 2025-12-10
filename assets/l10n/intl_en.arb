@@ -3485,5 +3485,10 @@
   },
   "unblockUserToSendMessages": "Unblock user to send messages",
   "supportChat": "Support Chat",
-  "supportChatDescription": "I’ve got your back! If you encounter bugs or need any help using Twake Workplace, send a message, I will reply to you swiftly"
+  "supportChatDescription": "I’ve got your back! If you encounter bugs or need any help using Twake Workplace, send a message, I will reply to you swiftly",
+  "yourPersonalQr": "Your personal QR",
+  "personalQrDescription": "Start chatting with your contacts. Send invitation link to Twake",
+  "shareQrCode": "Share QR code",
+  "copyLink": "Copy link",
+  "downloadQrCode": "Download QR code"
 }
