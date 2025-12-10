@@ -65,6 +65,7 @@ class CreateSupportChatInteractor {
       roomId = await client.createGroupChat(
         groupName: 'Support Twake Workplace',
         preset: CreateRoomPreset.trustedPrivateChat,
+        enableEncryption: false,
         initialState: [
           if (avatarUrl != null)
             StateEvent(

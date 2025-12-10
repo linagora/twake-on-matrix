@@ -156,6 +156,7 @@ class MatrixState extends State<Matrix>
       (client) => newClient != null && client.userID == newClient.userID,
     );
     if (index != -1) {
+      if (index == _activeClient) return SetActiveClientState.success;
       _activeClient = index;
       // TODO: Multi-client VoiP support
       createVoipPlugin();
@@ -173,9 +174,12 @@ class MatrixState extends State<Matrix>
   }
 
   void _createSupportChat(Client client) {
+    Object createSupportChatState = CreateSupportChatInitial();
     supportChatRoomId = null;
     StreamSubscription? syncListener;
     syncListener = client.onSync.stream.listen((_) {
+      if (createSupportChatState is! CreateSupportChatInitial) return;
+      createSupportChatState = CreatingSupportChat();
       StreamSubscription? createSupportChatListener;
       createSupportChatListener = getIt
           .get<CreateSupportChatInteractor>()
@@ -184,6 +188,10 @@ class MatrixState extends State<Matrix>
           )
           .listen(
         (state) {
+          createSupportChatState = state.fold(
+            (failure) => failure,
+            (success) => success,
+          );
           supportChatRoomId = state.fold(
             (failure) => null,
             (success) => switch (success) {
@@ -916,9 +924,9 @@ class MatrixState extends State<Matrix>
     Logs().d(
       'Matrix::_setUpToMServicesWhenChangingActiveClient: Old twakeSupported - $twakeSupported',
     );
-    if (client == null && client?.userID == null) return;
+    if (client == null || client.userID == null) return;
     try {
-      final toMConfigurations = await getTomConfigurations(client!.userID!);
+      final toMConfigurations = await getTomConfigurations(client.userID!);
       Logs().d(
         'Matrix::_setUpToMServicesWhenChangingActiveClient: toMConfigurations - $toMConfigurations',
       );
@@ -936,7 +944,7 @@ class MatrixState extends State<Matrix>
     } catch (e) {
       _setUpToMServer(null);
       _setupAuthUrl();
-      setUpAuthorization(client!);
+      setUpAuthorization(client);
       Logs().e('Matrix::_setUpToMServicesWhenChangingActiveClient: error - $e');
     }
     Logs().d(
