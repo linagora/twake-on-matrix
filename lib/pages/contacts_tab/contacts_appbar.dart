@@ -27,6 +27,7 @@ class ContactsAppBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Column(
+      mainAxisSize: MainAxisSize.min,
       children: [
         TwakeAppBar(
           title: L10n.of(context)!.contacts,
@@ -61,20 +62,11 @@ class ContactsAppBar extends StatelessWidget {
                     : LinagoraSysColors.material().onPrimary,
               ),
               height: ContactsAppbarStyle.textFieldHeight,
-              child: Padding(
-                padding: ContactsAppbarStyle.searchFieldPadding,
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Expanded(
-                      child: SearchTextField(
-                        textEditingController: textEditingController,
-                        autofocus: false,
-                        focusNode: searchFocusNode,
-                      ),
-                    ),
-                  ],
-                ),
+              padding: ContactsAppbarStyle.searchFieldPadding,
+              child: SearchTextField(
+                textEditingController: textEditingController,
+                autofocus: false,
+                focusNode: searchFocusNode,
               ),
             );
           },

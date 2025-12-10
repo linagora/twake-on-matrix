@@ -320,6 +320,7 @@ class MatrixState extends State<Matrix>
   StreamSubscription<html.Event>? onFocusSub;
   StreamSubscription<html.Event>? onBlurSub;
   final initSettingsCompleter = Completer<void>();
+  bool _hasInitializedSharingIntent = false;
 
   String? _cachedPassword;
   Timer? _cachedPasswordClearTimer;
@@ -360,7 +361,6 @@ class MatrixState extends State<Matrix>
       initMatrix();
       final emojiRawData = await EmojiData.builtIn();
       emojiData = emojiRawData.filterByVersion(13.5);
-      initReceiveSharingIntent();
       await tryToGetFederationConfigurations();
       if (PlatformInfos.isWeb) {
         initConfigWeb().then((_) => initSettings());
@@ -374,6 +374,24 @@ class MatrixState extends State<Matrix>
     WidgetsBinding.instance.addPostFrameCallback((_) {
       LoadingDialog.defaultOnError =
           (e) => (e as Object?)!.toLocalizedString(context);
+    });
+  }
+
+  /// Initializes sharing intent once when user is logged in
+  void _initializeSharingIntentOnce() {
+    if (_hasInitializedSharingIntent) return;
+    _hasInitializedSharingIntent = true;
+    initReceiveSharingIntent();
+  }
+
+  /// Initializes sharing intent after first sync completes
+  void _initializeSharingIntentAfterFirstSync(Client client) {
+    if (_hasInitializedSharingIntent) return;
+    client.onSync.stream.first.then((_) {
+      Logs().d(
+        'MatrixState::_initializeSharingIntentAfterFirstSync: First sync completed, initializing sharing intent',
+      );
+      _initializeSharingIntentOnce();
     });
   }
 
@@ -520,6 +538,7 @@ class MatrixState extends State<Matrix>
     await _getUserInfoWithActiveClient(newActiveClient);
     await _getHomeserverInformation(newActiveClient);
     matrixState.reSyncContacts();
+    _initializeSharingIntentAfterFirstSync(newActiveClient);
     onClientLoginStateChanged.add(
       ClientLoginStateEvent(
         client: client,
@@ -647,6 +666,11 @@ class MatrixState extends State<Matrix>
     }
 
     createVoipPlugin();
+
+    // Initialize sharing intent if there are already logged-in clients
+    if (widget.clients.isNotEmpty && widget.clients.any((c) => c.isLogged())) {
+      _initializeSharingIntentOnce();
+    }
   }
 
   void createVoipPlugin() async {

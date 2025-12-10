@@ -30,7 +30,7 @@ class UrlLauncher with GoToDraftChatMixin {
   final ChromeSafariBrowser? browser =
       PlatformInfos.isMobile ? ChromeSafariBrowser() : null;
 
-  void launchUrl() {
+  Future<void> launchUrl({Client? client}) async {
     if (url!.toLowerCase().startsWith(AppConfig.deepLinkPrefix) ||
         url!.toLowerCase().startsWith(AppConfig.inviteLinkPrefix) ||
         {'#', '@', '!', '+', '\$'}.contains(url![0]) ||
@@ -45,6 +45,13 @@ class UrlLauncher with GoToDraftChatMixin {
     }
     if (uri.host == AppConstants.appLinkUniversalLinkDomain) {
       final pathWithoutChatPrefix = uri.path.replaceFirst('/chat', '');
+      if (pathWithoutChatPrefix.startsWith('/') &&
+          pathWithoutChatPrefix.replaceFirst('/', '').isValidMatrixId) {
+        return _openChatWithUser(
+          pathWithoutChatPrefix.replaceFirst('/', ''),
+          client: client,
+        );
+      }
       context.go(pathWithoutChatPrefix);
       return;
     }
@@ -240,5 +247,29 @@ class UrlLauncher with GoToDraftChatMixin {
         launchUrlString(url!);
       }
     }
+  }
+
+  bool isCreatingChatFromUrl = false;
+
+  Future<void> _openChatWithUser(
+    String matrixId, {
+    Client? client,
+  }) async {
+    if (client == null || isCreatingChatFromUrl) return;
+    isCreatingChatFromUrl = true;
+    final rooms = client.rooms.where((room) => room.isDirectChat).toList();
+    final availableRoom = rooms.firstWhereOrNull((room) {
+      return room.getParticipants().any((user) => user.id == matrixId);
+    });
+
+    if (availableRoom != null) {
+      isCreatingChatFromUrl = false;
+      context.go('/rooms/${availableRoom.id}');
+      return;
+    }
+
+    final roomId = await client.startDirectChat(matrixId);
+    isCreatingChatFromUrl = false;
+    context.go('/rooms/$roomId');
   }
 }
