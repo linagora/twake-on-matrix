@@ -62,7 +62,15 @@ class PersonalQrController extends State<PersonalQr> {
   /// Requests storage permission for Android
   Future<bool> _requestAndroidStoragePermission() async {
     final permissionHandlerService = PermissionHandlerService();
-    if (await permissionHandlerService
+    final androidVersion =
+        await permissionHandlerService.getCurrentAndroidVersion();
+    if (androidVersion >= 33) {
+      // Android 13+: use gal's built-in permission handling or request photos permission
+      return await Gal.requestAccess(toAlbum: true);
+    } else if (androidVersion >= 30) {
+      final permission = await Permission.photos.request();
+      return permission.isGranted;
+    } else if (await permissionHandlerService
         .isUserHaveToRequestStoragePermissionAndroid()) {
       final permission = await Permission.storage.request();
       return permission.isGranted;

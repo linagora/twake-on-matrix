@@ -25,7 +25,7 @@ class PermissionHandlerService {
     if (Platform.isIOS) {
       return _handlePhotosPermissionIOSAction(context);
     } else if (Platform.isAndroid) {
-      if (await _getCurrentAndroidVersion() >= 33) {
+      if (await getCurrentAndroidVersion() >= 33) {
         return _handleMediaPickerPermissionAndroidHigher33Action(context);
       }
       return _handleMediaPermissionAndroidAction(context);
@@ -34,12 +34,12 @@ class PermissionHandlerService {
     }
   }
 
-  Future<int> _getCurrentAndroidVersion() async {
+  Future<int> getCurrentAndroidVersion() async {
     return (await _deviceInfoPlugin.androidInfo).version.sdkInt;
   }
 
   Future<bool> noNeedStoragePermission() async {
-    return Platform.isAndroid && (await _getCurrentAndroidVersion() >= 33);
+    return Platform.isAndroid && (await getCurrentAndroidVersion() >= 33);
   }
 
   Future<PermissionStatus> requestPermissionForCameraActions() async {
@@ -307,7 +307,7 @@ class PermissionHandlerService {
   }
 
   Future<bool> isUserHaveToRequestStoragePermissionAndroid() async {
-    return await _getCurrentAndroidVersion() <= 29 &&
+    return await getCurrentAndroidVersion() <= 29 &&
         !(await Permission.storage.isGranted);
   }
 

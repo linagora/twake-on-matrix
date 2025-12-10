@@ -339,13 +339,14 @@ abstract class AppRoutes {
                 const SettingsProfile(),
               ),
               routes: [
-                GoRoute(
-                  path: 'qr',
-                  pageBuilder: (context, state) => defaultPageBuilder(
-                    context,
-                    const PersonalQr(),
+                if (PlatformInfos.isMobile)
+                  GoRoute(
+                    path: 'qr',
+                    pageBuilder: (context, state) => defaultPageBuilder(
+                      context,
+                      const PersonalQr(),
+                    ),
                   ),
-                ),
               ],
             ),
             GoRoute(
