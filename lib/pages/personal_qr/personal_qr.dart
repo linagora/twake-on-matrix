@@ -95,6 +95,7 @@ class PersonalQrController extends State<PersonalQr> {
     final byteData = await image.toByteData(format: ui.ImageByteFormat.png);
     if (byteData == null) {
       Logs().e('PersonalQr::_captureQrImage():: byteData is null');
+      if (!mounted) return null;
       TwakeSnackBar.show(context, l10n.oopsSomethingWentWrong);
       return null;
     }
