@@ -924,9 +924,9 @@ class MatrixState extends State<Matrix>
     Logs().d(
       'Matrix::_setUpToMServicesWhenChangingActiveClient: Old twakeSupported - $twakeSupported',
     );
-    if (client == null && client?.userID == null) return;
+    if (client == null || client.userID == null) return;
     try {
-      final toMConfigurations = await getTomConfigurations(client!.userID!);
+      final toMConfigurations = await getTomConfigurations(client.userID!);
       Logs().d(
         'Matrix::_setUpToMServicesWhenChangingActiveClient: toMConfigurations - $toMConfigurations',
       );
@@ -944,7 +944,7 @@ class MatrixState extends State<Matrix>
     } catch (e) {
       _setUpToMServer(null);
       _setupAuthUrl();
-      setUpAuthorization(client!);
+      setUpAuthorization(client);
       Logs().e('Matrix::_setUpToMServicesWhenChangingActiveClient: error - $e');
     }
     Logs().d(
