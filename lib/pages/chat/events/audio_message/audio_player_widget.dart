@@ -8,6 +8,7 @@ import 'package:fluffychat/pages/chat/seen_by_row.dart';
 import 'package:fluffychat/presentation/mixins/audio_mixin.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/download_file_extension.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
+import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/utils/room_status_extension.dart';
 import 'package:fluffychat/utils/size_string.dart';
 import 'package:fluffychat/widgets/file_widget/circular_loading_download_widget.dart';
@@ -161,6 +162,9 @@ class AudioPlayerState extends State<AudioPlayerWidget>
           .setAudioSource(MatrixFileAudioSource(matrixFile));
     }
 
+    // Set up auto-dispose listener managed globally in MatrixState
+    matrix.setupAudioPlayerAutoDispose();
+
     matrix.audioPlayer.play().onError((e, s) {
       Logs().e('Could not play audio file', e, s);
       ScaffoldMessenger.of(context).showSnackBar(
@@ -227,21 +231,23 @@ class AudioPlayerState extends State<AudioPlayerWidget>
 
   @override
   void dispose() {
-    // Stop and dispose audio player asynchronously to avoid blocking dispose
-    matrix.audioPlayer.stop().then((_) {
-      matrix.audioPlayer.dispose();
-    }).catchError((error) {
-      Logs().e('Error disposing audio player', error);
-    });
+    if (!PlatformInfos.isMobile) {
+      // Stop and dispose audio player asynchronously to avoid blocking dispose
+      matrix.audioPlayer.stop().then((_) {
+        matrix.audioPlayer.dispose();
+      }).catchError((error) {
+        Logs().e('Error disposing audio player', error);
+      });
 
-    // Schedule value updates for after the current frame to avoid
-    // setState() during widget tree lock
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (matrix.voiceMessageEvent.value?.eventId == widget.event.eventId) {
-        matrix.currentAudioStatus.value = AudioPlayerStatus.notDownloaded;
-        matrix.voiceMessageEvent.value = null;
-      }
-    });
+      // Schedule value updates for after the current frame to avoid
+      // setState() during widget tree lock
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (matrix.voiceMessageEvent.value?.eventId == widget.event.eventId) {
+          matrix.currentAudioStatus.value = AudioPlayerStatus.notDownloaded;
+          matrix.voiceMessageEvent.value = null;
+        }
+      });
+    }
 
     super.dispose();
   }
@@ -314,7 +320,7 @@ class AudioPlayerState extends State<AudioPlayerWidget>
                                 mainAxisSize: MainAxisSize.min,
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  if (fileName.isEmpty) ...[
+                                  if (_calculatedWaveform.isEmpty) ...[
                                     Text(
                                       fileName,
                                       style: Theme.of(context)

@@ -3110,6 +3110,10 @@ class ChatController extends State<Chat>
   }
 
   void disposeAudioPlayer() {
+    if (PlatformInfos.isMobile) {
+      return;
+    }
+    disposeAudioMixin();
     matrix?.audioPlayer.stop();
     matrix?.audioPlayer.clearAudioSources();
     matrix?.voiceMessageEvent.value = null;
@@ -3117,9 +3121,12 @@ class ChatController extends State<Chat>
 
   void initAudioPlayer() {
     if (matrix?.audioPlayer.playing == true) {
-      matrix?.audioPlayer
-        ?..stop()
-        ..dispose();
+      if (!PlatformInfos.isMobile) {
+        matrix?.audioPlayer
+          ?..stop()
+          ..dispose();
+      }
+      return;
     }
     if (matrix?.voiceMessageEvent != null) {
       matrix?.voiceMessageEvent.value = null;
@@ -3235,7 +3242,6 @@ class ChatController extends State<Chat>
     showScrollDownButtonNotifier.dispose();
     editEventNotifier.dispose();
     focusHover.dispose();
-    disposeAudioMixin();
     disposeAudioPlayer();
     super.dispose();
   }
