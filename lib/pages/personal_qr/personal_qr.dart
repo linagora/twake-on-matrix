@@ -40,10 +40,11 @@ class PersonalQrController extends State<PersonalQr> {
       }
 
       await _saveImageToGallery(imageBytes);
-
+      if (!mounted) return;
       TwakeSnackBar.show(context, l10n.fileSavedToGallery);
     } catch (e, s) {
       Logs().e('PersonalQr::downloadQrCode():: error', e, s);
+      if (!mounted) return;
       TwakeSnackBar.show(context, L10n.of(context)!.oopsSomethingWentWrong);
     }
   }
@@ -55,7 +56,7 @@ class PersonalQrController extends State<PersonalQr> {
     } else if (PlatformInfos.isIOS) {
       return _requestIosPhotoPermission();
     }
-    return true;
+    return false;
   }
 
   /// Requests storage permission for Android

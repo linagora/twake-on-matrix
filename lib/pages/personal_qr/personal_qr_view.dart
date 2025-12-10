@@ -164,7 +164,7 @@ class _ProfileAvatar extends StatelessWidget {
         alignment: Alignment.center,
         child: FutureBuilder<Profile>(
           future: client.getProfileFromUserId(
-            client.userID!,
+            client.userID ?? '',
             cache: true,
             getFromRooms: false,
           ),
