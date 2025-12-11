@@ -45,7 +45,7 @@ class ProfileInfoContactRows extends StatelessWidget {
                   copiableText: user.id,
                   enableDividerTop: userInfoModel != null &&
                       (userInfoModel.phones?.firstOrNull != null ||
-                          userInfoModel.mails?.firstOrNull != null),
+                          userInfoModel.emails?.firstOrNull != null),
                 ),
                 if (isLoading)
                   _LoadingPlaceholder()
@@ -56,13 +56,13 @@ class ProfileInfoContactRows extends StatelessWidget {
                       caption: L10n.of(context)!.phone,
                       copiableText: userInfoModel!.phones!.firstOrNull ?? '',
                       enableDividerTop:
-                          userInfoModel.mails?.firstOrNull != null,
+                          userInfoModel.emails?.firstOrNull != null,
                     ),
-                  if (userInfoModel?.mails?.firstOrNull != null)
+                  if (userInfoModel?.emails?.firstOrNull != null)
                     IconCopiableProfileRow(
                       icon: Icons.alternate_email,
                       caption: L10n.of(context)!.email,
-                      copiableText: userInfoModel!.mails!.firstOrNull ?? '',
+                      copiableText: userInfoModel!.emails!.firstOrNull ?? '',
                     ),
                 ],
               ],

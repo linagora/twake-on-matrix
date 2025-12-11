@@ -154,7 +154,7 @@ class SettingsContactsVisibilityView extends StatelessWidget {
                                               .selectedVisibleFieldNotifier,
                                           builder:
                                               (context, selectedFields, child) {
-                                            return _buildVisibleFieldIem(
+                                            return _buildVisibleFieldItem(
                                               context: context,
                                               option: option,
                                               enableDivider:
@@ -245,7 +245,7 @@ class SettingsContactsVisibilityView extends StatelessWidget {
     );
   }
 
-  Widget _buildVisibleFieldIem({
+  Widget _buildVisibleFieldItem({
     required BuildContext context,
     required VisibleEnum option,
     void Function(VisibleEnum)? onTap,

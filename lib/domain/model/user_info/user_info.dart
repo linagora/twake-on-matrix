@@ -11,7 +11,7 @@ class UserInfo extends Equatable {
   @JsonKey(name: 'avatar')
   final String? avatarUrl;
   final List<String>? phones;
-  final List<String>? mails;
+  final List<String>? emails;
   final String? sn;
   final String? givenName;
   final String? language;
@@ -26,7 +26,7 @@ class UserInfo extends Equatable {
     this.displayName,
     this.avatarUrl,
     this.phones,
-    this.mails,
+    this.emails,
     this.sn,
     this.givenName,
     this.language,
@@ -46,7 +46,7 @@ class UserInfo extends Equatable {
         displayName,
         avatarUrl,
         phones,
-        mails,
+        emails,
         sn,
         givenName,
         language,

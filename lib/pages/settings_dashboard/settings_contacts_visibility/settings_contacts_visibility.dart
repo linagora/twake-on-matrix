@@ -80,10 +80,14 @@ class SettingsContactsVisibilityController
     }
     switch (option) {
       case SettingsContactsVisibilityEnum.public:
+      case SettingsContactsVisibilityEnum.private:
         updateUserInfoVisibility(
           userInfoVisibility: UserInfoVisibilityRequest(
             visibility: option.name,
-            visibleFields: [],
+            visibleFields: [
+              VisibleEnum.phone,
+              VisibleEnum.email,
+            ],
           ),
         );
         break;
@@ -94,14 +98,6 @@ class SettingsContactsVisibilityController
             visibleFields: selectedVisibleFieldNotifier.value.isEmpty
                 ? visibleFieldsOptions
                 : selectedVisibleFieldNotifier.value,
-          ),
-        );
-        break;
-      case SettingsContactsVisibilityEnum.private:
-        updateUserInfoVisibility(
-          userInfoVisibility: UserInfoVisibilityRequest(
-            visibility: option.name,
-            visibleFields: selectedVisibleFieldNotifier.value,
           ),
         );
         break;
@@ -213,8 +209,8 @@ class SettingsContactsVisibilityController
 
   @override
   void initState() {
-    initialGetUserInfoVisibility();
     super.initState();
+    initialGetUserInfoVisibility();
   }
 
   @override

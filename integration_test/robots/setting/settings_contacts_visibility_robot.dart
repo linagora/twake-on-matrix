@@ -8,10 +8,6 @@ import '../home_robot.dart';
 class SettingsContactsVisibilityRobot extends HomeRobot {
   SettingsContactsVisibilityRobot(super.$);
 
-  PatrolFinder backButton() {
-    return $(IconButton).containing($(Icon));
-  }
-
   // Visibility option finders
   PatrolFinder visibilityOption(
     SettingsContactsVisibilityEnum visibilityOption,
@@ -101,11 +97,6 @@ class SettingsContactsVisibilityRobot extends HomeRobot {
 
   Future<void> togglePhoneNumberField() async {
     await phoneNumberFieldOption().tap();
-    await $.pumpAndSettle();
-  }
-
-  Future<void> backToSettingsScreen() async {
-    await backButton().tap();
     await $.pumpAndSettle();
   }
 
