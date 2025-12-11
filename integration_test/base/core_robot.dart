@@ -23,16 +23,24 @@ class CoreRobot {
     return null;
   }
 
-  Future<void> confirmShareContactInformation() async {
+  Future<bool> tapNextOnPermissionDialog() async {
     final dialog = $(PermissionDialog);
-    if (dialog.exists) {
-      final ctx = $.tester.element(dialog); // BuildContext inside dialog
-      final nextLabel = L10n.of(ctx)!.next; // whatever the app shows
-
-      await $.tester
-          .tap(find.descendant(of: dialog, matching: find.text(nextLabel)));
-      await $.tester.pumpAndSettle();
+    if (!dialog.exists) {
+      return false;
     }
+
+    final ctx = $.tester.element(dialog); // BuildContext inside dialog
+    final nextLabel = L10n.of(ctx)!.next; // localized label for "Next"
+
+    await $.tester.tap(
+      find.descendant(of: dialog, matching: find.text(nextLabel)),
+    );
+    await $.tester.pumpAndSettle();
+    return true;
+  }
+
+  Future<void> confirmShareContactInformation() async {
+    await tapNextOnPermissionDialog();
   }
 
   Future<void> confirmAccessContact() async {
@@ -44,14 +52,11 @@ class CoreRobot {
   }
 
   Future<void> cancelSynchronizeContact() async {
-    if (await CoreRobot($).existsOptionalFlutterItems(
-      $,
-      $('Next'),
-      timeout: const Duration(seconds: 3),
-    )) {
-      await $('Next').tap();
-      await $.native.denyPermission();
+    final tapped = await tapNextOnPermissionDialog();
+    if (!tapped) {
+      return;
     }
+    await $.native.denyPermission();
   }
 
   Future<void> grantNotificationPermission() async {
