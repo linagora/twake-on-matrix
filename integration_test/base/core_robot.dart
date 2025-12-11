@@ -43,7 +43,7 @@ class CoreRobot {
     }
   }
 
-  Future<void> cancelSynchronzieContact() async {
+  Future<void> cancelSynchronizeContact() async {
     if (await CoreRobot($).existsOptionalFlutterItems(
       $,
       $('Next'),

@@ -36,7 +36,7 @@ class ChatListRobot extends HomeRobot {
 
   Future<void> clickOnPenIcon() async {
     await getPenIcon().tap();
-    await cancelSynchronzieContact();
+    await cancelSynchronizeContact();
     await $.waitUntilVisible($(AppBar).$("New chat"));
   }
 
