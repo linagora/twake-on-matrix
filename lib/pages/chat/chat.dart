@@ -36,6 +36,7 @@ import 'package:fluffychat/presentation/extensions/event_update_extension.dart';
 import 'package:fluffychat/presentation/extensions/send_file_extension.dart';
 import 'package:fluffychat/presentation/extensions/send_file_web_extension.dart';
 import 'package:fluffychat/presentation/mixins/audio_mixin.dart';
+import 'package:fluffychat/presentation/mixins/auto_mark_as_read_mixin.dart';
 import 'package:fluffychat/presentation/mixins/common_media_picker_mixin.dart';
 import 'package:fluffychat/presentation/mixins/delete_event_mixin.dart';
 import 'package:fluffychat/presentation/mixins/go_to_direct_chat_mixin.dart';
@@ -144,7 +145,8 @@ class ChatController extends State<Chat>
         LeaveChatMixin,
         DeleteEventMixin,
         UnblockUserMixin,
-        AudioMixin {
+        AudioMixin,
+        AutoMarkAsReadMixin {
   final NetworkConnectionService networkConnectionService =
       getIt.get<NetworkConnectionService>();
 
@@ -188,6 +190,7 @@ class ChatController extends State<Chat>
 
   Client? sendingClient;
 
+  @override
   Timeline? timeline;
 
   MatrixState? matrix;
@@ -596,16 +599,10 @@ class ChatController extends State<Chat>
       await _tryRequestHistory();
       final fullyRead = room?.fullyRead;
       if (fullyRead == null || fullyRead.isEmpty || fullyRead == '') {
-        setReadMarker();
         return;
       }
       if (room?.hasNewMessages == true) {
         _initUnreadLocation(fullyRead);
-      }
-      if (timeline != null &&
-          timeline!.events.any((event) => event.eventId == fullyRead)) {
-        setReadMarker();
-        return;
       }
       if (!mounted) return;
     } catch (e, s) {
@@ -625,6 +622,7 @@ class ChatController extends State<Chat>
 
   Future<void>? _setReadMarkerFuture;
 
+  @override
   void setReadMarker({String? eventId}) {
     if (room == null) return;
     if (_setReadMarkerFuture != null) return;
@@ -701,7 +699,6 @@ class ChatController extends State<Chat>
       text: pendingText,
       selection: const TextSelection.collapsed(offset: 0),
     );
-    setReadMarker();
     inputText.value = pendingText;
     _updateReplyEvent();
     setState(() {
@@ -1177,7 +1174,6 @@ class ChatController extends State<Chat>
     Logs().v('Chat::requestFuture(): Requesting future...');
     try {
       await timeline.requestFuture(historyCount: _loadHistoryCount);
-      setReadMarker(eventId: timeline.events.first.eventId);
     } catch (err) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -1272,7 +1268,6 @@ class ChatController extends State<Chat>
         scrollController.jumpTo(scrollController.position.maxScrollExtent);
       }
     }
-    setReadMarker();
     _handleHideStickyTimestamp();
   }
 
@@ -1723,7 +1718,6 @@ class ChatController extends State<Chat>
     if (audioRecordStateNotifier.value != AudioRecordState.initial) {
       return;
     }
-    setReadMarker();
     _storeInputTimeoutTimer?.cancel();
     _storeInputTimeoutTimer = Timer(_storeInputTimeout, () async {
       final prefs = await SharedPreferences.getInstance();
@@ -3155,6 +3149,7 @@ class ChatController extends State<Chat>
     _loadDraft();
     _tryLoadTimeline();
     sendController.addListener(updateInputTextNotifier);
+    initAutoMarkAsReadMixin();
     super.initState();
     SchedulerBinding.instance.addPostFrameCallback((_) async {
       if (!mounted) return;
@@ -3200,6 +3195,7 @@ class ChatController extends State<Chat>
     inputFocus.removeListener(_inputFocusListener);
     inputFocus.dispose();
     composerDebouncer.cancel();
+    disposeAutoMarkAsReadMixin();
     focusSuggestionController.dispose();
     _focusSuggestionController.dispose();
     _jumpToEventIdSubscription?.cancel();

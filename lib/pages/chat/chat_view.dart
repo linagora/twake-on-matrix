@@ -104,123 +104,119 @@ class ChatView extends StatelessWidget with MessageContentMixin {
 
     return Focus(
       focusNode: controller.chatFocusNode,
-      child: GestureDetector(
-        onTapDown: (_) => controller.setReadMarker(),
-        behavior: HitTestBehavior.opaque,
-        child: StreamBuilder(
-          stream: controller.room!.onUpdate.stream
-              .rateLimit(const Duration(seconds: 1)),
-          builder: (context, snapshot) => FutureBuilder(
-            future: controller.loadTimelineFuture,
-            builder: (BuildContext context, snapshot) {
-              return Scaffold(
+      child: StreamBuilder(
+        stream: controller.room!.onUpdate.stream
+            .rateLimit(const Duration(seconds: 1)),
+        builder: (context, snapshot) => FutureBuilder(
+          future: controller.loadTimelineFuture,
+          builder: (BuildContext context, snapshot) {
+            return Scaffold(
+              backgroundColor: controller.responsive.isMobile(context)
+                  ? LinagoraSysColors.material().background
+                  : LinagoraSysColors.material().onPrimary,
+              appBar: AppBar(
                 backgroundColor: controller.responsive.isMobile(context)
-                    ? LinagoraSysColors.material().background
+                    ? LinagoraSysColors.material().surface
                     : LinagoraSysColors.material().onPrimary,
-                appBar: AppBar(
-                  backgroundColor: controller.responsive.isMobile(context)
-                      ? LinagoraSysColors.material().surface
-                      : LinagoraSysColors.material().onPrimary,
-                  automaticallyImplyLeading: false,
-                  toolbarHeight: ChatViewStyle.appBarHeight(context),
-                  title: Padding(
-                    padding: ChatViewStyle.paddingLeading(context),
-                    child: Row(
-                      children: [
-                        _buildLeading(context),
-                        Expanded(
-                          child: ChatAppBarTitle(
-                            selectedEvents: controller.selectedEvents,
-                            room: controller.room,
-                            isArchived: controller.isArchived,
-                            sendController: controller.sendController,
-                            connectivityResultStream: controller
-                                .networkConnectionService
-                                .connectivity
-                                .onConnectivityChanged,
-                            actions: _appBarActions(context),
-                            onPushDetails: controller.onPushDetails,
-                            roomName: controller.roomName,
-                            cachedPresenceNotifier:
-                                controller.cachedPresenceNotifier,
-                            cachedPresenceStreamController:
-                                controller.cachedPresenceStreamController,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  actions: [
-                    if (!controller.selectMode)
-                      Padding(
-                        padding: ChatViewStyle.paddingTrailing(context),
-                        child: Row(
-                          children: [
-                            IconButton(
-                              hoverColor: Colors.transparent,
-                              splashColor: Colors.transparent,
-                              highlightColor: Colors.transparent,
-                              onPressed: controller.toggleSearch,
-                              icon: const Icon(Icons.search),
-                            ),
-                            if (!controller.room!.isDirectChat &&
-                                controller.hasActionAppBarMenu)
-                              Builder(
-                                builder: (context) => TwakeIconButton(
-                                  icon: Icons.more_vert,
-                                  tooltip: L10n.of(context)!.more,
-                                  onTapDown: (tapDownDetails) =>
-                                      controller.handleAppbarMenuAction(
-                                    context,
-                                    tapDownDetails,
-                                  ),
-                                  preferBelow: false,
-                                ),
-                              ),
-                          ],
+                automaticallyImplyLeading: false,
+                toolbarHeight: ChatViewStyle.appBarHeight(context),
+                title: Padding(
+                  padding: ChatViewStyle.paddingLeading(context),
+                  child: Row(
+                    children: [
+                      _buildLeading(context),
+                      Expanded(
+                        child: ChatAppBarTitle(
+                          selectedEvents: controller.selectedEvents,
+                          room: controller.room,
+                          isArchived: controller.isArchived,
+                          sendController: controller.sendController,
+                          connectivityResultStream: controller
+                              .networkConnectionService
+                              .connectivity
+                              .onConnectivityChanged,
+                          actions: _appBarActions(context),
+                          onPushDetails: controller.onPushDetails,
+                          roomName: controller.roomName,
+                          cachedPresenceNotifier:
+                              controller.cachedPresenceNotifier,
+                          cachedPresenceStreamController:
+                              controller.cachedPresenceStreamController,
                         ),
                       ),
-                  ],
-                  bottom: PreferredSize(
-                    preferredSize: const Size(double.infinity, 1),
-                    child: Container(
-                      color: LinagoraStateLayer(
-                        LinagoraSysColors.material().surfaceTint,
-                      ).opacityLayer1,
-                      height: 1,
-                    ),
+                    ],
                   ),
                 ),
-                floatingActionButton: ValueListenableBuilder(
-                  valueListenable: controller.showScrollDownButtonNotifier,
-                  builder: (context, showScrollDownButton, _) {
-                    if (showScrollDownButton &&
-                        controller.selectedEvents.isEmpty &&
-                        controller.replyEventNotifier.value == null) {
-                      return ValueListenableBuilder(
-                        valueListenable: controller.audioRecordStateNotifier,
-                        builder: (context, audioRecordState, _) {
-                          if (audioRecordState != AudioRecordState.initial) {
-                            return const SizedBox.shrink();
-                          }
-                          return Padding(
-                            padding: const EdgeInsets.only(bottom: 56.0),
-                            child: FloatingActionButton(
-                              onPressed: controller.scrollDown,
-                              mini: true,
-                              child: const Icon(Icons.arrow_downward_outlined),
+                actions: [
+                  if (!controller.selectMode)
+                    Padding(
+                      padding: ChatViewStyle.paddingTrailing(context),
+                      child: Row(
+                        children: [
+                          IconButton(
+                            hoverColor: Colors.transparent,
+                            splashColor: Colors.transparent,
+                            highlightColor: Colors.transparent,
+                            onPressed: controller.toggleSearch,
+                            icon: const Icon(Icons.search),
+                          ),
+                          if (!controller.room!.isDirectChat &&
+                              controller.hasActionAppBarMenu)
+                            Builder(
+                              builder: (context) => TwakeIconButton(
+                                icon: Icons.more_vert,
+                                tooltip: L10n.of(context)!.more,
+                                onTapDown: (tapDownDetails) =>
+                                    controller.handleAppbarMenuAction(
+                                  context,
+                                  tapDownDetails,
+                                ),
+                                preferBelow: false,
+                              ),
                             ),
-                          );
-                        },
-                      );
-                    }
-                    return const SizedBox();
-                  },
+                        ],
+                      ),
+                    ),
+                ],
+                bottom: PreferredSize(
+                  preferredSize: const Size(double.infinity, 1),
+                  child: Container(
+                    color: LinagoraStateLayer(
+                      LinagoraSysColors.material().surfaceTint,
+                    ).opacityLayer1,
+                    height: 1,
+                  ),
                 ),
-                body: _buildBody(),
-              );
-            },
-          ),
+              ),
+              floatingActionButton: ValueListenableBuilder(
+                valueListenable: controller.showScrollDownButtonNotifier,
+                builder: (context, showScrollDownButton, _) {
+                  if (showScrollDownButton &&
+                      controller.selectedEvents.isEmpty &&
+                      controller.replyEventNotifier.value == null) {
+                    return ValueListenableBuilder(
+                      valueListenable: controller.audioRecordStateNotifier,
+                      builder: (context, audioRecordState, _) {
+                        if (audioRecordState != AudioRecordState.initial) {
+                          return const SizedBox.shrink();
+                        }
+                        return Padding(
+                          padding: const EdgeInsets.only(bottom: 56.0),
+                          child: FloatingActionButton(
+                            onPressed: controller.scrollDown,
+                            mini: true,
+                            child: const Icon(Icons.arrow_downward_outlined),
+                          ),
+                        );
+                      },
+                    );
+                  }
+                  return const SizedBox();
+                },
+              ),
+              body: _buildBody(),
+            );
+          },
         ),
       ),
     );
