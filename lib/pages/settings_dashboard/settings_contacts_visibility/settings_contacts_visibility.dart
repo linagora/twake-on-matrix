@@ -56,13 +56,13 @@ class SettingsContactsVisibilityController
     Right(UpdatingUserInfoVisibility()),
   );
 
-  List<SettingsContactsVisibilityEnum> visibilityOptions = [
+  final List<SettingsContactsVisibilityEnum> visibilityOptions = [
     SettingsContactsVisibilityEnum.public,
     SettingsContactsVisibilityEnum.contacts,
     SettingsContactsVisibilityEnum.private,
   ];
 
-  List<VisibleEnum> visibleFieldsOptions = [
+  final List<VisibleEnum> visibleFieldsOptions = [
     VisibleEnum.phone,
     VisibleEnum.email,
   ];
@@ -84,10 +84,7 @@ class SettingsContactsVisibilityController
         updateUserInfoVisibility(
           userInfoVisibility: UserInfoVisibilityRequest(
             visibility: option.name,
-            visibleFields: [
-              VisibleEnum.phone,
-              VisibleEnum.email,
-            ],
+            visibleFields: visibleFieldsOptions,
           ),
         );
         break;
