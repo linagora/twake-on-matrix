@@ -93,6 +93,7 @@ class _QrCodeCard extends StatelessWidget {
         borderRadius: const BorderRadius.all(Radius.circular(20)),
         child: Container(
           padding: const EdgeInsets.only(top: 36),
+          constraints: const BoxConstraints(maxWidth: 264),
           color: sysColor.surface,
           child: Stack(
             clipBehavior: Clip.none,
@@ -120,6 +121,7 @@ class _QrCodeCard extends StatelessWidget {
                     const SizedBox(height: 17),
                     Text(
                       userId,
+                      maxLines: 2,
                       style: textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.w600,
                         letterSpacing: 0.15,
@@ -127,14 +129,12 @@ class _QrCodeCard extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 32),
-                    SizedBox(
-                      width: 264,
-                      child: Text(
-                        l10n.personalQrDescription,
-                        textAlign: TextAlign.center,
-                        style: textTheme.bodyMedium?.copyWith(
-                          color: refColor.neutral[60],
-                        ),
+                    Text(
+                      l10n.personalQrDescription,
+                      textAlign: TextAlign.center,
+                      maxLines: 3,
+                      style: textTheme.bodyMedium?.copyWith(
+                        color: refColor.neutral[60],
                       ),
                     ),
                   ],
@@ -238,6 +238,7 @@ class _ActionButtonsSection extends StatelessWidget {
           borderColor: sysColor.primary,
           onTap: () => controller.downloadQrCode(context),
         ),
+        const SizedBox(height: 8),
       ],
     );
   }
