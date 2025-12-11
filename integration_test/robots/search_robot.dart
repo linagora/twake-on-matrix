@@ -7,7 +7,7 @@ import '../base/core_robot.dart';
 class SearchRobot extends CoreRobot {
   SearchRobot(super.$);
 
-  Future<PatrolFinder> getBackIcon() async {
+  PatrolFinder getBackIcon() {
     return $(AppBar).$(TwakeIconButton).$(Icon);
   }
 
@@ -21,21 +21,21 @@ class SearchRobot extends CoreRobot {
     return $(TextField).hitTestable();
   }
 
-  Future<PatrolFinder> getNoResultIcon() async {
+  PatrolFinder getNoResultIcon() {
     return $('No Results');
   }
 
-  Future<PatrolFinder> getSearchingIcon() async {
+  PatrolFinder getSearchingIcon() {
     return (getSearchTextField()).$(Icon).at(0);
   }
 
-  Future<PatrolFinder> getDeleteSearchingIcon() async {
+  PatrolFinder getDeleteSearchingIcon() {
     return (getSearchTextField()).$(TwakeIconButton).$(Icon);
   }
 
   Future<void> enterSearchText(String searchText) async {
     await getSearchTextField().tap();
-    await cancelSynchronzieContact();
+    await cancelSynchronizeContact();
     await typeSlowlyWithPatrol($, getSearchTextField(), searchText);
   }
 
