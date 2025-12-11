@@ -47,7 +47,8 @@ class PersonalQrView extends StatelessWidget {
         child: Column(
           children: [
             Expanded(
-              child: Center(
+              child: Align(
+                alignment: const Alignment(0, -0.5),
                 child: _QrCodeCard(
                   qrKey: controller.qrKey,
                   qrData: qrData,
@@ -87,64 +88,104 @@ class _QrCodeCard extends StatelessWidget {
     final textTheme = Theme.of(context).textTheme;
     final l10n = L10n.of(context)!;
 
-    return RepaintBoundary(
-      key: qrKey,
-      child: ClipRRect(
-        borderRadius: const BorderRadius.all(Radius.circular(20)),
-        child: Container(
-          padding: const EdgeInsets.only(top: 36),
-          constraints: const BoxConstraints(maxWidth: 264),
-          color: sysColor.surface,
-          child: Stack(
-            clipBehavior: Clip.none,
-            children: [
-              Container(
-                padding: const EdgeInsets.only(top: 44, bottom: 24),
-                decoration: BoxDecoration(
-                  color: sysColor.onPrimary,
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        // Calculate available space for the card based on width
+        final maxWidth = min(constraints.maxWidth, 296.0);
+        final availableWidth = maxWidth - 32; // 16px padding on each side
+        final widthBasedQrSize =
+            min(200.0, availableWidth - 32); // Additional padding inside card
+
+        // Calculate available space based on height
+        // Reserve space for: top padding (36 + 44), avatar visible part (36),
+        // spacing (8-17), userId text (~48), spacing (16-32), description (~60), bottom padding (24)
+        // Total fixed height ranges from ~265px to ~297px depending on spacing scale
+        const fixedHeight = 297.0;
+        final availableHeight = constraints.maxHeight - fixedHeight;
+        final heightBasedQrSize = max(100.0, min(200.0, availableHeight));
+
+        // Use the smaller of the two to ensure it fits in both dimensions
+        final qrSize = min(widthBasedQrSize, heightBasedQrSize);
+
+        // Calculate logo size proportionally to QR code
+        final logoSize = (qrSize * 0.31).clamp(40.0, 62.0);
+
+        // Calculate responsive spacing based on available height
+        // Scale down spacing when height is constrained
+        final spacingScale = (constraints.maxHeight / 600.0).clamp(0.5, 1.0);
+        final qrToUserIdSpacing = (17.0 * spacingScale).clamp(8.0, 17.0);
+        final userIdToDescriptionSpacing =
+            (32.0 * spacingScale).clamp(16.0, 32.0);
+
+        return RepaintBoundary(
+          key: qrKey,
+          child: Container(
+            padding:
+                const EdgeInsets.all(8).add(const EdgeInsets.only(top: 36)),
+            constraints: BoxConstraints(maxWidth: maxWidth),
+            color: sysColor.surface,
+            child: Stack(
+              clipBehavior: Clip.none,
+              children: [
+                ClipRRect(
                   borderRadius: const BorderRadius.all(Radius.circular(20)),
-                ),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Stack(
-                      alignment: Alignment.center,
+                  child: Container(
+                    padding: const EdgeInsets.only(
+                      top: 44,
+                      bottom: 24,
+                      left: 16,
+                      right: 16,
+                    ),
+                    decoration: BoxDecoration(
+                      color: sysColor.onPrimary,
+                      borderRadius: const BorderRadius.all(Radius.circular(20)),
+                    ),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
                       children: [
-                        TwakeQrCodeView(data: qrData, size: 200),
-                        Image.asset(
-                          ImagePaths.logoPng,
-                          width: 62,
-                          height: 62,
+                        Stack(
+                          alignment: Alignment.center,
+                          children: [
+                            TwakeQrCodeView(data: qrData, size: qrSize),
+                            Image.asset(
+                              ImagePaths.logoPng,
+                              width: logoSize,
+                              height: logoSize,
+                            ),
+                          ],
+                        ),
+                        SizedBox(height: qrToUserIdSpacing),
+                        Text(
+                          userId,
+                          textAlign: TextAlign.center,
+                          overflow: TextOverflow.ellipsis,
+                          maxLines: 2,
+                          style: textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.w600,
+                            letterSpacing: 0.15,
+                            color: sysColor.onSurface,
+                          ),
+                        ),
+                        SizedBox(height: userIdToDescriptionSpacing),
+                        Text(
+                          l10n.personalQrDescription,
+                          textAlign: TextAlign.center,
+                          overflow: TextOverflow.ellipsis,
+                          maxLines: 3,
+                          style: textTheme.bodyMedium?.copyWith(
+                            color: refColor.neutral[60],
+                          ),
                         ),
                       ],
                     ),
-                    const SizedBox(height: 17),
-                    Text(
-                      userId,
-                      maxLines: 2,
-                      style: textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.w600,
-                        letterSpacing: 0.15,
-                        color: sysColor.onSurface,
-                      ),
-                    ),
-                    const SizedBox(height: 32),
-                    Text(
-                      l10n.personalQrDescription,
-                      textAlign: TextAlign.center,
-                      maxLines: 3,
-                      style: textTheme.bodyMedium?.copyWith(
-                        color: refColor.neutral[60],
-                      ),
-                    ),
-                  ],
+                  ),
                 ),
-              ),
-              _ProfileAvatar(client: client),
-            ],
+                _ProfileAvatar(client: client),
+              ],
+            ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 }
