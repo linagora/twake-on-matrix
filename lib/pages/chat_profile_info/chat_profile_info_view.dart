@@ -348,9 +348,9 @@ class _Information extends StatelessWidget {
                                     ),
                                     _CopiableRowWithMaterialIcon(
                                       icon: Icons.alternate_email,
-                                      text:
-                                          success.userInfo.emails?.firstOrNull ??
-                                              '',
+                                      text: success
+                                              .userInfo.emails?.firstOrNull ??
+                                          '',
                                     ),
                                   },
                                   if (success.userInfo.phones?.firstOrNull !=
