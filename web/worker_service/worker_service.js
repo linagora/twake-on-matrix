@@ -126,8 +126,8 @@ function showSmartBanner() {
       bannerObserver.observe(parent, { childList: true });
     }
 
-    // Cleanup observer when page unloads
-    window.addEventListener("unload", () => {
+    // Cleanup observer when pagehide
+    window.addEventListener("pagehide", () => {
       if (bannerObserver) {
         bannerObserver.disconnect();
         bannerObserver = null;

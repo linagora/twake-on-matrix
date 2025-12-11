@@ -68,7 +68,10 @@ async function loadLanguageResources() {
  * @returns {void}
  */
 function setTextContent({ id, text }) {
-  document.getElementById(id).textContent = text;
+  const element = document.getElementById(id);
+  if (element !== null) {
+    element.textContent = text;
+  }
 }
 
 document.addEventListener("DOMContentLoaded", async function () {
