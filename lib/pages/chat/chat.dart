@@ -643,6 +643,7 @@ class ChatController extends State<Chat>
 
   Future<void> _processReadMarker() async {
     while (true) {
+      if (!mounted) return;
       final timeline = this.timeline;
       if (timeline == null || timeline.events.isEmpty) return;
 
