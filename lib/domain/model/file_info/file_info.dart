@@ -53,7 +53,7 @@ class FileInfo with EquatableMixin {
       return VideoFileInfo(
         file.name,
         bytes: file.bytes,
-        imagePlaceholderBytes: file.bytes,
+        imagePlaceholderBytes: Uint8List(0),
         width: file.info['w'],
         height: file.info['h'],
         duration: file.info['duration'] != null && file.info['duration'] is int
