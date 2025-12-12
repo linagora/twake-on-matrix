@@ -147,7 +147,7 @@ dependencies:
   provider: ^6.0.2
   punycode: ^1.0.0
   qr_code_scanner: ^1.0.0
-  qr_flutter: ^4.0.0
+  qr: ^3.0.1
   record: 6.1.1
   scroll_to_index: ^3.0.1
   share_plus: 10.0.2

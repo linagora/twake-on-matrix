@@ -7,8 +7,10 @@ import 'package:fluffychat/pages/settings_dashboard/settings_profile/settings_pr
 import 'package:fluffychat/pages/settings_dashboard/settings_profile/settings_profile_view_style.dart';
 import 'package:fluffychat/pages/settings_dashboard/settings_profile/settings_profile_view_web.dart';
 import 'package:fluffychat/presentation/model/settings/settings_profile_presentation.dart';
+import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/utils/responsive/responsive_utils.dart';
 import 'package:fluffychat/widgets/app_bars/twake_app_bar.dart';
+import 'package:fluffychat/widgets/twake_components/twake_icon_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_adaptive_scaffold/flutter_adaptive_scaffold.dart';
 import 'package:fluffychat/generated/l10n/app_localizations.dart';
@@ -48,6 +50,12 @@ class SettingsProfileView extends StatelessWidget {
               )
             : const SizedBox.shrink(),
         actions: [
+          if (PlatformInfos.isMobile)
+            TwakeIconButton(
+              icon: Icons.qr_code,
+              iconColor: LinagoraSysColors.material().primary,
+              onTap: () => context.go('/rooms/profile/qr'),
+            ),
           ValueListenableBuilder(
             valueListenable: controller.isEditedProfileNotifier,
             builder: (context, edited, _) {

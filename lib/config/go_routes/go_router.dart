@@ -15,6 +15,7 @@ import 'package:fluffychat/pages/error_page/error_page.dart';
 import 'package:fluffychat/pages/homeserver_picker/homeserver_picker.dart';
 import 'package:fluffychat/pages/login/on_auth_redirect.dart';
 import 'package:fluffychat/pages/new_group/new_group_chat_info.dart';
+import 'package:fluffychat/pages/personal_qr/personal_qr.dart';
 import 'package:fluffychat/pages/settings_dashboard/settings_app_language/settings_app_language.dart';
 import 'package:fluffychat/pages/settings_dashboard/settings_blocked_users/settings_blocked_user.dart';
 import 'package:fluffychat/pages/settings_dashboard/settings_profile/settings_profile.dart';
@@ -337,6 +338,17 @@ abstract class AppRoutes {
                 context,
                 const SettingsProfile(),
               ),
+              routes: [
+                if (PlatformInfos.isMobile)
+                  GoRoute(
+                    path: 'qr',
+                    pageBuilder: (context, state) => defaultPageBuilder(
+                      context,
+                      const PersonalQr(),
+                    ),
+                    redirect: loggedOutRedirect,
+                  ),
+              ],
             ),
             GoRoute(
               path: 'notifications',
