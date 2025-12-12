@@ -15,7 +15,7 @@ class UploadContentInBytesInteractor {
       final maxMediaSize = mediaConfig.mUploadSize;
       final fileSize = matrixFile.size;
       Logs().d(
-        'UploadContentWebInteractor::execute(): FileSized $fileSize || maxMediaSize $maxMediaSize',
+        'UploadContentWebInteractor::execute(): FileSize $fileSize || maxMediaSize $maxMediaSize',
       );
       if (maxMediaSize != null && maxMediaSize < fileSize) {
         yield Left(

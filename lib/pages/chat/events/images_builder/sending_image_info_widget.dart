@@ -59,7 +59,6 @@ class _SendingImageInfoWidgetState extends State<SendingImageInfoWidget>
             return InteractiveViewerGallery(
               itemBuilder: ImageViewer(
                 event: widget.event,
-                imageData: widget.matrixFile.bytes,
               ),
             );
           },
