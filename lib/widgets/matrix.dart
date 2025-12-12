@@ -1305,6 +1305,7 @@ class MatrixState extends State<Matrix>
     _audioPlayerStateSubscription?.cancel();
     audioPlayer.dispose();
     voiceMessageEvent.dispose();
+    _presenceSubscription?.cancel();
     super.dispose();
   }
 
