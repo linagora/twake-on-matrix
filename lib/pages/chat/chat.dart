@@ -625,7 +625,7 @@ class ChatController extends State<Chat>
 
   @override
   Future<void> setReadMarker({String? eventId}) async {
-    if (room == null) return;
+    if (!mounted || room == null) return;
 
     // Store the latest request
     _pendingReadMarkerEventId = eventId;
@@ -3162,6 +3162,7 @@ class ChatController extends State<Chat>
 
   @override
   void initState() {
+    super.initState();
     _initializePinnedEvents();
     _listenOnJumpToEventFromSearch();
     registerPasteShortcutListeners();
@@ -3173,7 +3174,6 @@ class ChatController extends State<Chat>
     _tryLoadTimeline();
     sendController.addListener(updateInputTextNotifier);
     initAutoMarkAsReadMixin();
-    super.initState();
     SchedulerBinding.instance.addPostFrameCallback((_) async {
       if (!mounted) return;
       if (room == null) {
