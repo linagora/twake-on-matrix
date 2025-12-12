@@ -630,11 +630,8 @@ class ChatController extends State<Chat>
     // Store the latest request
     _pendingReadMarkerEventId = eventId;
 
-    // If already processing, let the ongoing operation pick up the latest value
-    if (_setReadMarkerFuture != null) {
-      await _setReadMarkerFuture;
-      return;
-    }
+    // If already processing, just coalesce; the worker will pick it up.
+    if (_setReadMarkerFuture != null) return;
 
     try {
       _setReadMarkerFuture = _processReadMarker();
@@ -645,24 +642,30 @@ class ChatController extends State<Chat>
   }
 
   Future<void> _processReadMarker() async {
-    final currentEventId = _pendingReadMarkerEventId;
-    _pendingReadMarkerEventId = null;
+    while (true) {
+      final timeline = this.timeline;
+      if (timeline == null || timeline.events.isEmpty) return;
 
-    final timeline = this.timeline;
-    if (timeline == null || timeline.events.isEmpty) return;
+      final currentEventId = _pendingReadMarkerEventId;
+      _pendingReadMarkerEventId = null;
 
-    Logs().d('Set read marker...', currentEventId);
+      Logs().d('Set read marker...', currentEventId);
 
-    try {
-      await timeline.setReadMarker(eventId: currentEventId);
-    } catch (e, s) {
-      Logs().e('Failed to set read marker', e, s);
-      return;
-    }
+      try {
+        await timeline.setReadMarker(eventId: currentEventId);
+      } catch (e, s) {
+        Logs().e('Failed to set read marker', e, s);
+        return;
+      }
 
-    if (currentEventId == null ||
-        currentEventId == timeline.room.lastEvent?.eventId) {
-      Matrix.of(context).backgroundPush?.cancelNotification(roomId!);
+      if (!mounted) return;
+      if (currentEventId == null ||
+          currentEventId == timeline.room.lastEvent?.eventId) {
+        Matrix.of(context).backgroundPush?.cancelNotification(roomId!);
+      }
+
+      // If no new request arrived while we awaited, we're done.
+      if (_pendingReadMarkerEventId == null) return;
     }
   }
 
