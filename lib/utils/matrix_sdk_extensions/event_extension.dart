@@ -536,4 +536,19 @@ extension LocalizedBody on Event {
     editEventJson['content'] = newContent;
     return Event.fromJson(editEventJson, room);
   }
+
+  bool get isMention {
+    final currentUserId = room.client.userID;
+    if (currentUserId == null) return false;
+
+    // Check formatted_body (HTML format with matrix.to links)
+    final formattedBody = content.tryGet<String>('formatted_body');
+    if (formattedBody != null && formattedBody.isNotEmpty) {
+      final mentionedUserIds =
+          formattedBody.getAllMentionedUserIdsFromMessage(room);
+      return mentionedUserIds.contains(currentUserId);
+    }
+
+    return false;
+  }
 }

@@ -5,9 +5,9 @@ import 'package:fluffychat/config/themes.dart';
 import 'package:fluffychat/pages/chat/typing_timer_wrapper.dart';
 import 'package:fluffychat/presentation/mixins/chat_list_item_mixin.dart';
 import 'package:fluffychat/pages/chat_list/chat_list_item_style.dart';
+import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
 import 'package:fluffychat/utils/room_status_extension.dart';
-import 'package:fluffychat/utils/string_extension.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:flutter/material.dart';
 import 'package:fluffychat/generated/l10n/app_localizations.dart';
@@ -62,9 +62,7 @@ class ChatListItemSubtitle extends StatelessWidget with ChatListItemMixin {
                 lastEvent == null) {
               return const SizedBox.shrink();
             }
-            final isMentionned = snapshot.data!
-                .getAllMentionedUserIdsFromMessage(room)
-                .contains(Matrix.of(context).client.userID);
+            final isMentionned = lastEvent.isMention == true;
             return lastEvent.senderId == Matrix.of(context).client.userID
                 ? Icon(
                     Icons.done_all,

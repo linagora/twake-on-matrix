@@ -1,63 +1,12 @@
 import 'package:fluffychat/utils/string_extension.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:matrix/matrix.dart';
+import 'package:mockito/annotations.dart';
 
+import 'string_extension_test.mocks.dart';
+
+@GenerateMocks([Room])
 void main() {
-  group("getMentionsFromMessage tests", () {
-    test('getMentionsFromMessage returns a list of mentions', () {
-      const message = "Hello @[John Doe] and @[Jane Smith]! How are you?";
-      final result = message.getMentionsFromMessage();
-
-      expect(result, containsAll(['@[John Doe]', '@[Jane Smith]']));
-      expect(result.length, equals(2));
-    });
-
-    test(
-        'getMentionsFromMessage returns an empty list if no mentions are found',
-        () {
-      const message = "Hello everyone! How are you?";
-      final result = message.getMentionsFromMessage();
-
-      expect(result, isEmpty);
-    });
-
-    test('getMentionsFromMessage handles multiple mentions in a message', () {
-      const message = "Hello @[John Doe], @[Jane Smith], and @[Bob Johnson]!";
-      final result = message.getMentionsFromMessage();
-
-      expect(
-        result,
-        containsAll(['@[John Doe]', '@[Jane Smith]', '@[Bob Johnson]']),
-      );
-      expect(result.length, equals(3));
-    });
-
-    test('getMentionsFromMessage returns an empty list for an empty message',
-        () {
-      const message = "";
-      final result = message.getMentionsFromMessage();
-
-      expect(result, isEmpty);
-    });
-
-    test(
-        'getMentionsFromMessage returns an empty list if no mentions are found with @ content',
-        () {
-      const message = "Hello everyone! How are you? Let's meet @ 5pm.";
-      final result = message.getMentionsFromMessage();
-
-      expect(result, isEmpty);
-    });
-
-    test(
-        'getMentionsFromMessage returns an empty list if there is empty mention',
-        () {
-      const message = "Hello everyone! How are you? Let's meet @[]";
-      final result = message.getMentionsFromMessage();
-
-      expect(result, isEmpty);
-    });
-  });
-
   group("unMarkdownLinks tests", () {
     test('unMarkdownLinks should replace links when there is only one link',
         () {
@@ -427,6 +376,141 @@ void main() {
       const input = 'abc123';
       const expectedOutput = 'abc123';
       expect(input.urlSafeBase64, equals(expectedOutput));
+    });
+  });
+
+  group('getAllMentionedUserIdsFromMessage tests', () {
+    late MockRoom mockRoom;
+
+    setUp(() {
+      mockRoom = MockRoom();
+    });
+
+    test('extracts single matrix.to URL without query parameters', () {
+      const message =
+          '<a href="https://matrix.to/#/@alice:matrix.org">Alice</a>';
+
+      final result = message.getAllMentionedUserIdsFromMessage(mockRoom);
+
+      expect(result, equals(['@alice:matrix.org']));
+    });
+
+    test('strips query parameters from matrix.to URL', () {
+      const message =
+          '<a href="https://matrix.to/#/@alice:matrix.org?via=matrix.org&via=example.com">Alice</a>';
+
+      final result = message.getAllMentionedUserIdsFromMessage(mockRoom);
+
+      expect(result, equals(['@alice:matrix.org']));
+    });
+
+    test('extracts percent-encoded user IDs', () {
+      const message =
+          '<a href="https://matrix.to/#/@alice%3Amatrix.org">Alice</a>';
+
+      final result = message.getAllMentionedUserIdsFromMessage(mockRoom);
+
+      expect(result, equals(['@alice:matrix.org']));
+    });
+
+    test('extracts multiple matrix.to URLs', () {
+      const message =
+          '<a href="https://matrix.to/#/@alice:matrix.org">Alice</a> and <a href="https://matrix.to/#/@bob:example.com">Bob</a>';
+
+      final result = message.getAllMentionedUserIdsFromMessage(mockRoom);
+
+      expect(
+        result,
+        containsAll(['@alice:matrix.org', '@bob:example.com']),
+      );
+      expect(result.length, equals(2));
+    });
+
+    test('handles http protocol in matrix.to URLs', () {
+      const message =
+          '<a href="http://matrix.to/#/@alice:matrix.org">Alice</a>';
+
+      final result = message.getAllMentionedUserIdsFromMessage(mockRoom);
+
+      expect(result, equals(['@alice:matrix.org']));
+    });
+
+    test('ignores invalid matrix.to URLs with malformed user IDs', () {
+      const message =
+          '<a href="https://matrix.to/#/not-a-valid-id">Invalid</a>';
+
+      final result = message.getAllMentionedUserIdsFromMessage(mockRoom);
+
+      expect(result, isEmpty);
+    });
+
+    test('ignores non-matrix.to URLs', () {
+      const message = '<a href="https://example.com/@alice">Alice</a>';
+
+      final result = message.getAllMentionedUserIdsFromMessage(mockRoom);
+
+      expect(result, isEmpty);
+    });
+
+    test('returns empty list for empty string', () {
+      const message = '';
+
+      final result = message.getAllMentionedUserIdsFromMessage(mockRoom);
+
+      expect(result, isEmpty);
+    });
+
+    test('returns empty list when no mentions found', () {
+      const message = '<p>Hello world!</p>';
+
+      final result = message.getAllMentionedUserIdsFromMessage(mockRoom);
+
+      expect(result, isEmpty);
+    });
+
+    test('deduplicates mentioned user IDs', () {
+      const message =
+          '<a href="https://matrix.to/#/@alice:matrix.org">Alice</a> and <a href="https://matrix.to/#/@alice:matrix.org">Alice again</a>';
+
+      final result = message.getAllMentionedUserIdsFromMessage(mockRoom);
+
+      expect(result, equals(['@alice:matrix.org']));
+      expect(result.length, equals(1));
+    });
+
+    test('handles complex HTML with nested tags', () {
+      const message =
+          '<div><p>Message to <a href="https://matrix.to/#/@alice:matrix.org?via=matrix.org">@alice</a></p></div>';
+
+      final result = message.getAllMentionedUserIdsFromMessage(mockRoom);
+
+      expect(result, equals(['@alice:matrix.org']));
+    });
+
+    test('handles user IDs with special characters', () {
+      const message =
+          '<a href="https://matrix.to/#/@user_name-123:example.com">User</a>';
+
+      final result = message.getAllMentionedUserIdsFromMessage(mockRoom);
+
+      expect(result, equals(['@user_name-123:example.com']));
+    });
+
+    test('ignores malformed anchor tags', () {
+      const message = '<a>No href</a>';
+
+      final result = message.getAllMentionedUserIdsFromMessage(mockRoom);
+
+      expect(result, isEmpty);
+    });
+
+    test('handles real-world formatted_body example', () {
+      const message =
+          '<a href="https://matrix.to/#/@datjuly:stg.lin-saas.com">@[dat july]</a>';
+
+      final result = message.getAllMentionedUserIdsFromMessage(mockRoom);
+
+      expect(result, equals(['@datjuly:stg.lin-saas.com']));
     });
   });
 

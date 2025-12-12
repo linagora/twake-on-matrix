@@ -10,6 +10,7 @@ import 'package:fluffychat/generated/l10n/app_localizations.dart';
 import 'package:intl/intl.dart';
 import 'package:matrix/matrix.dart';
 import 'package:crypto/crypto.dart';
+import 'package:universal_html/html.dart' as html;
 
 extension StringCasingExtension on String {
   String removeDiacritics() {
@@ -60,31 +61,62 @@ extension StringCasingExtension on String {
     return Matrix.of(context).client.userID == this;
   }
 
-  List<String> getMentionsFromMessage() {
-    final RegExp regex = RegExp(r"@\[([^\]]+)\]");
-    final Iterable<Match> matches = regex.allMatches(this);
-
-    final List<String> mentions = [];
-    for (final Match match in matches) {
-      final String? mention = match.group(0);
-      if (mention != null) {
-        mentions.add(mention);
-      }
-    }
-
-    return mentions;
-  }
-
+  /// Extracts all mentioned user IDs from HTML formatted body.
+  ///
+  /// Parses HTML using DOM parser to find all <a> tags with matrix.to URLs.
+  /// Uses Matrix SDK's `isValidMatrixId` for canonical validation.
+  /// Strips query parameters from matrix.to URLs to prevent malformed IDs.
   List<String> getAllMentionedUserIdsFromMessage(Room room) {
-    final List<String> mentionUserIds = [];
-    for (final String mention in getMentionsFromMessage()) {
-      final String? userId = room.lastEvent?.room.getMention(mention);
-      if (userId != null) {
-        mentionUserIds.add(userId);
+    if (isEmpty) return [];
+
+    final mentionUserIds = <String>{};
+
+    try {
+      // Parse HTML using DOM parser
+      final document = html.DomParser().parseFromString(this, 'text/html');
+
+      // Find all <a> tags
+      final anchors = document.querySelectorAll('a');
+
+      for (final anchor in anchors) {
+        final href = anchor.attributes['href'];
+        if (href == null || href.isEmpty) continue;
+
+        // Check if it's a matrix.to URL
+        final matrixToIndex = href.indexOf('matrix.to/#/');
+        if (matrixToIndex == -1) continue;
+
+        // Extract user ID after "matrix.to/#/"
+        final idStart = matrixToIndex + 'matrix.to/#/'.length;
+        if (idStart >= href.length) continue;
+
+        // Find the end of the user ID (stop at ? for query params)
+        var idEnd = href.indexOf('?', idStart);
+        if (idEnd == -1) {
+          idEnd = href.length;
+        }
+
+        final encodedId = href.substring(idStart, idEnd);
+
+        try {
+          // Decode percent-encoded characters (e.g., %3A -> :)
+          final decodedId = Uri.decodeComponent(encodedId);
+
+          // Validate using Matrix SDK's canonical validation
+          if (decodedId.isValidMatrixId) {
+            mentionUserIds.add(decodedId);
+          }
+        } catch (e) {
+          // If decoding fails, skip this href
+          continue;
+        }
       }
+    } catch (e) {
+      // If HTML parsing fails, return empty list
+      return [];
     }
 
-    return mentionUserIds;
+    return mentionUserIds.toList();
   }
 
   String? getFirstValidUrl() {
