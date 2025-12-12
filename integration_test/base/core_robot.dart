@@ -23,31 +23,40 @@ class CoreRobot {
     return null;
   }
 
-  Future<void> confirmShareContactInformation() async {
+  Future<bool> tapNextOnPermissionDialog() async {
     final dialog = $(PermissionDialog);
-    if (dialog.exists) {
-      final ctx = $.tester.element(dialog); // BuildContext inside dialog
-      final nextLabel = L10n.of(ctx)!.next; // whatever the app shows
-
-      await $.tester
-          .tap(find.descendant(of: dialog, matching: find.text(nextLabel)));
-      await $.tester.pumpAndSettle();
+    if (!dialog.exists) {
+      return false;
     }
+
+    final ctx = $.tester.element(dialog); // BuildContext inside dialog
+    final nextLabel = L10n.of(ctx)!.next; // localized label for "Next"
+
+    await $.tester.tap(
+      find.descendant(of: dialog, matching: find.text(nextLabel)),
+    );
+    await $.tester.pumpAndSettle();
+    return true;
   }
 
-  Future<void> confirmAccessContactIOS() async {
+  Future<void> confirmShareContactInformation() async {
+    await tapNextOnPermissionDialog();
+  }
+
+  Future<void> confirmAccessContact() async {
     try {
-      await $.native.waitUntilVisible(
-        Selector(textContains: 'OK'),
-        appId: 'com.apple.springboard',
-      );
-      await $.native.tap(
-        Selector(textContains: 'OK'),
-        appId: 'com.apple.springboard',
-      );
+      await $.native.grantPermissionWhenInUse();
     } catch (e) {
       ignoreException();
     }
+  }
+
+  Future<void> cancelSynchronizeContact() async {
+    final tapped = await tapNextOnPermissionDialog();
+    if (!tapped) {
+      return;
+    }
+    await $.native.denyPermission();
   }
 
   Future<void> grantNotificationPermission() async {
@@ -120,6 +129,15 @@ class CoreRobot {
       if (DateTime.now().isAfter(end)) break;
       await $.pump(const Duration(milliseconds: 150));
     }
+  }
+
+  Future<bool> existsOptionalFlutterItems(
+    PatrolIntegrationTester $,
+    PatrolFinder finder, {
+    Duration timeout = const Duration(seconds: 5),
+  }) async {
+    await $.pumpAndTrySettle(duration: timeout);
+    return finder.exists;
   }
 
   Future<bool> existsOptionalNativeItems(

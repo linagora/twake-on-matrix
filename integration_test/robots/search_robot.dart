@@ -7,7 +7,7 @@ import '../base/core_robot.dart';
 class SearchRobot extends CoreRobot {
   SearchRobot(super.$);
 
-  Future<PatrolFinder> getBackIcon() async {
+  PatrolFinder getBackIcon() {
     return $(AppBar).$(TwakeIconButton).$(Icon);
   }
 
@@ -16,26 +16,28 @@ class SearchRobot extends CoreRobot {
     await $.waitUntilVisible($(BottomNavigationBar));
   }
 
-  Future<PatrolFinder> getSearchTextField() async {
+  PatrolFinder getSearchTextField() {
     // return $(TextField).containing(find.text('Search'));// problem when change language
     return $(TextField).hitTestable();
   }
 
-  Future<PatrolFinder> getNoResultIcon() async {
+  PatrolFinder getNoResultIcon() {
     return $('No Results');
   }
 
-  Future<PatrolFinder> getSearchingIcon() async {
-    return (await getSearchTextField()).$(Icon).at(0);
+  PatrolFinder getSearchingIcon() {
+    return (getSearchTextField()).$(Icon).at(0);
   }
 
-  Future<PatrolFinder> getDeleteSearchingIcon() async {
-    return (await getSearchTextField()).$(TwakeIconButton).$(Icon);
+  PatrolFinder getDeleteSearchingIcon() {
+    return (getSearchTextField()).$(TwakeIconButton).$(Icon);
   }
 
   Future<void> enterSearchText(String searchText) async {
-    await getSearchTextField().tap();
-    await getSearchTextField().enterText(searchText);
+    final field = getSearchTextField();
+    await field.tap();
+    await cancelSynchronizeContact();
+    await typeSlowlyWithPatrol($, field, searchText);
   }
 
   Future<void> deleteSearchPhrase() async {
