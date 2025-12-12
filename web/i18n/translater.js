@@ -1,9 +1,9 @@
 const i18n = {};
 const languageDefault = "en";
 const defaultEngText = {
-  title: "Download Twake Chat application",
+  title: "Download the new Twake Chat app",
   description: "Faster and more convenient",
-  open: "Open",
+  download: "Download",
 };
 
 /**
@@ -45,7 +45,7 @@ function getUserLanguage() {
 async function loadLanguageResources() {
   const language = getUserLanguage();
   try {
-    const response = await fetch(`/i18n/${language}.json`);
+    const response = await fetch(`./i18n/${language}.json`);
     const data = await response.json();
     i18n[language] = data;
     console.info(
@@ -68,10 +68,14 @@ async function loadLanguageResources() {
  * @returns {void}
  */
 function setTextContent({ id, text }) {
-  document.getElementById(id).textContent = text;
+  const element = document.getElementById(id);
+  if (element !== null) {
+    element.textContent = text;
+  }
 }
 
-document.addEventListener("DOMContentLoaded", function () {
+document.addEventListener("DOMContentLoaded", async function () {
+  await loadLanguageResources();
   const language = getUserLanguage();
 
   let languageResources = defaultEngText;
@@ -89,7 +93,7 @@ document.addEventListener("DOMContentLoaded", function () {
     text: languageResources.description,
   });
   setTextContent({
-    id: "open-button-id",
-    text: languageResources.open,
+    id: "download-button-id",
+    text: languageResources.download,
   });
 });

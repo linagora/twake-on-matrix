@@ -1,6 +1,7 @@
 // Constants
 const BANNER_Z_INDEX = "9999999";
 const BANNER_SELECTOR = ".smart-banner";
+const TRANSITION_DURATION_MS = 300;
 
 // Platform configuration
 const platformConfig = {
@@ -37,7 +38,11 @@ function getUniversalLink(platform) {
   return `${universalLinkBase}?fallback=${encodeURIComponent(storeUrl)}`;
 }
 
-function openTwakeChatApp() {
+/**
+ * Attempts to open the Twake Chat app via deep link, falling back to the app store.
+ * Uses visibility detection to determine if the app opened successfully.
+ */
+function downloadTwakeChatApp() {
   const platform = getPlatform();
   const universalLink = getUniversalLink(platform);
 
@@ -70,7 +75,14 @@ function openTwakeChatApp() {
   closeSmartBanner();
 }
 
-function initialTchatApp() {
+// MutationObserver instance (module-level to manage lifecycle)
+let bannerObserver = null;
+
+/**
+ * Initializes the Twake Chat app banner on mobile platforms.
+ * The banner will display on every page load for mobile users.
+ */
+function initTwakeChatApp() {
   const platform = getPlatform();
 
   // Skip displaying the banner on desktop browsers
@@ -79,36 +91,71 @@ function initialTchatApp() {
   }
 
   showSmartBanner();
-
-  // Ensure the banner stays on top after Flutter re-renders
-  const observer = new MutationObserver(() => {
-    const banner = document.querySelector(BANNER_SELECTOR);
-    if (banner) {
-      banner.style.zIndex = BANNER_Z_INDEX;
-    }
-  });
-
-  observer.observe(document.body, { childList: true, subtree: true });
-
-  // Cleanup observer when page unloads
-  window.addEventListener("unload", () => observer.disconnect(), { once: true });
 }
 
+// Maintain backward compatibility
+const initialTchatApp = initTwakeChatApp;
+
+/**
+ * Displays the smart banner with a smooth transition.
+ * Sets up a MutationObserver to ensure the banner stays on top after Flutter re-renders.
+ */
 function showSmartBanner() {
   const banner = document.querySelector(BANNER_SELECTOR);
   if (!banner) return;
 
   banner.style.display = "block";
   banner.style.zIndex = BANNER_Z_INDEX;
-  banner.style.top = "16px";
-  document.body.style.overflow = "hidden";
+
+  // Force reflow before adding class for smooth transition
+  banner.offsetHeight;
+  banner.classList.add("visible");
+
+  // Ensure the banner stays on top after Flutter re-renders
+  if (!bannerObserver) {
+    bannerObserver = new MutationObserver(() => {
+      const currentBanner = document.querySelector(BANNER_SELECTOR);
+      if (currentBanner && currentBanner.style.display !== "none") {
+        currentBanner.style.zIndex = BANNER_Z_INDEX;
+      }
+    });
+
+    // Only observe the banner's parent, not entire body
+    const parent = banner.parentElement;
+    if (parent) {
+      bannerObserver.observe(parent, { childList: true });
+    }
+
+    // Cleanup observer when pagehide
+    window.addEventListener("pagehide", () => {
+      if (bannerObserver) {
+        bannerObserver.disconnect();
+        bannerObserver = null;
+      }
+    }, { once: true });
+  }
 }
 
+/**
+ * Closes the smart banner with a smooth transition.
+ * The banner will reappear on the next page reload.
+ */
 function closeSmartBanner() {
   const banner = document.querySelector(BANNER_SELECTOR);
   if (!banner) return;
 
-  banner.style.display = "none";
-  banner.style.top = "0";
-  document.body.style.overflow = "auto";
+  banner.classList.remove("visible");
+
+  // Hide after transition completes
+  setTimeout(() => {
+    if (!banner.classList.contains("visible")) {
+      banner.style.display = "none";
+    }
+  }, TRANSITION_DURATION_MS);
+
+  // Disconnect observer when banner is closed
+  if (bannerObserver) {
+    bannerObserver.disconnect();
+    bannerObserver = null;
+  }
 }
