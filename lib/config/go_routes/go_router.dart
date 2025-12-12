@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:fluffychat/config/first_column_inner_routes.dart';
+import 'package:fluffychat/config/go_routes/app_route_paths.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/pages/add_story/add_story.dart';
 import 'package:fluffychat/pages/archive/archive.dart';
@@ -450,7 +451,7 @@ abstract class AppRoutes {
                   redirect: loggedOutRedirect,
                 ),
                 GoRoute(
-                  path: 'contactsVisibility',
+                  path: AppRoutePaths.contactsVisibility,
                   pageBuilder: (context, state) => defaultPageBuilder(
                     context,
                     const SettingsContactsVisibility(),

@@ -133,6 +133,7 @@ class SettingsContactsVisibilityController
       body: userInfoVisibility,
     )
         .listen((either) {
+      if (!mounted) return;
       updateUserInfoVisibilityNotifier.value = either;
 
       either.fold(
@@ -172,6 +173,7 @@ class SettingsContactsVisibilityController
     getUserInfoVisibilityStreamSub = getUserInfoVisibilityInteractor
         .execute(userId: client.userID!)
         .listen((either) {
+      if (!mounted) return;
       getUserInfoVisibilityNotifier.value = either;
 
       either.fold(
