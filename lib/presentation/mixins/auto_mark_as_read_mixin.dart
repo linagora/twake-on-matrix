@@ -82,9 +82,14 @@ mixin AutoMarkAsReadMixin {
     final timeline = this.timeline;
     if (timeline == null || timeline.events.isEmpty) return;
 
-    setReadMarker(eventId: eventId);
-    // Reset tracked event after marking as read
-    _newestVisibleEventId = null;
+    try {
+      setReadMarker(eventId: eventId);
+      // Reset tracked event after marking as read
+      _newestVisibleEventId = null;
+    } catch (e) {
+      // Log error but keep tracking the event for retry on next visibility update
+      Logs().e('Failed to set read marker', e);
+    }
   }
 
   /// Clean up resources.
