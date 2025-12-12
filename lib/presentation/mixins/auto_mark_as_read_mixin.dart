@@ -28,13 +28,18 @@ mixin AutoMarkAsReadMixin {
   Timeline? get timeline;
 
   /// Required method that the implementing class must provide
-  void setReadMarker({String? eventId});
+  FutureOr<void> setReadMarker({String? eventId});
 
   /// Initialize the auto-mark-as-read functionality.
   /// Call this in initState().
   void initAutoMarkAsReadMixin() {
-    _autoMarkAsReadSubscription =
-        _autoMarkAsReadDebouncer.values.listen(_performAutoMarkAsRead);
+    _autoMarkAsReadSubscription?.cancel();
+    _autoMarkAsReadSubscription = _autoMarkAsReadDebouncer.values.listen(
+      (eventId) {
+        // ignore: unawaited_futures
+        _performAutoMarkAsRead(eventId);
+      },
+    );
   }
 
   /// Called when an event becomes visible on screen.
@@ -75,7 +80,7 @@ mixin AutoMarkAsReadMixin {
     _autoMarkAsReadDebouncer.value = _newestVisibleEventId;
   }
 
-  void _performAutoMarkAsRead(String? eventId) {
+  Future<void> _performAutoMarkAsRead(String? eventId) async {
     if (eventId == null) return;
     if (room == null) return;
 
@@ -83,7 +88,7 @@ mixin AutoMarkAsReadMixin {
     if (timeline == null || timeline.events.isEmpty) return;
 
     try {
-      setReadMarker(eventId: eventId);
+      await setReadMarker(eventId: eventId);
       // Reset tracked event after marking as read
       _newestVisibleEventId = null;
     } catch (e) {

@@ -623,9 +623,12 @@ class ChatController extends State<Chat>
   Future<void>? _setReadMarkerFuture;
 
   @override
-  void setReadMarker({String? eventId}) {
+  Future<void> setReadMarker({String? eventId}) async {
     if (room == null) return;
-    if (_setReadMarkerFuture != null) return;
+    if (_setReadMarkerFuture != null) {
+      await _setReadMarkerFuture;
+      return;
+    }
     if (eventId == null &&
         !room!.hasNewMessages &&
         room!.notificationCount == 0) {
@@ -637,10 +640,12 @@ class ChatController extends State<Chat>
     if (timeline == null || timeline.events.isEmpty) return;
 
     Logs().d('Set read marker...', eventId);
-    // ignore: unawaited_futures
-    _setReadMarkerFuture = timeline.setReadMarker(eventId: eventId).then((_) {
+    _setReadMarkerFuture = timeline.setReadMarker(eventId: eventId);
+    try {
+      await _setReadMarkerFuture;
+    } finally {
       _setReadMarkerFuture = null;
-    });
+    }
     if (eventId == null || eventId == timeline.room.lastEvent?.eventId) {
       Matrix.of(context).backgroundPush?.cancelNotification(roomId!);
     }
