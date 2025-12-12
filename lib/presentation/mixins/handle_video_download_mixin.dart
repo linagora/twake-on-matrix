@@ -25,24 +25,28 @@ mixin HandleVideoDownloadMixin {
       }
       return videoBytes.bytes;
     } else {
+      Uint8List resultBytes = Uint8List(0);
       final videoFile = await event.getFileInfo(
         progressCallback: progressCallback,
         cancelToken: cancelToken,
       );
-      if (lastSelectedVideoEventId == event.eventId &&
-          playVideoAction != null &&
-          videoFile != null) {
+      if (lastSelectedVideoEventId == event.eventId && videoFile != null) {
         Uint8List? bytes;
         if (videoFile.bytes != null) {
           bytes = videoFile.bytes;
         } else if (videoFile.filePath != null) {
-          bytes = await File(videoFile.filePath!).readAsBytes();
+          try {
+            bytes = await File(videoFile.filePath!).readAsBytes();
+          } catch (e) {
+            Logs().e('HandleVideoDownloadMixin::Error reading file', e);
+          }
         }
         if (bytes != null) {
-          playVideoAction(bytes);
+          playVideoAction?.call(bytes);
+          resultBytes = bytes;
         }
       }
-      return videoFile?.bytes ?? Uint8List(0);
+      return resultBytes;
     }
   }
 }
