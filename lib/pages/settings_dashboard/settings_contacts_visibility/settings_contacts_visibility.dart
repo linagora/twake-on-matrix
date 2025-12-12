@@ -170,6 +170,7 @@ class SettingsContactsVisibilityController
     if (client.userID == null) {
       return;
     }
+    getUserInfoVisibilityStreamSub?.cancel();
     getUserInfoVisibilityStreamSub = getUserInfoVisibilityInteractor
         .execute(userId: client.userID!)
         .listen((either) {
