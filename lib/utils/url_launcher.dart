@@ -44,16 +44,14 @@ class UrlLauncher with GoToDraftChatMixin {
       return;
     }
     if (uri.host == AppConstants.appLinkUniversalLinkDomain) {
-      final pathWithoutChatPrefix = uri.path.replaceFirst('/chat', '');
-      if (pathWithoutChatPrefix.startsWith('/') &&
-          pathWithoutChatPrefix.replaceFirst('/', '').isValidMatrixId) {
-        return _openChatWithUser(
-          pathWithoutChatPrefix.replaceFirst('/', ''),
-          client: client,
+      // Handle links.twake.app URLs with /chat# pattern
+      if (uri.path.startsWith('/chat') && uri.fragment.isNotEmpty) {
+        final matrixToUrl = url!.replaceFirst(
+          'https://${AppConstants.appLinkUniversalLinkDomain}',
+          AppConfig.inviteLinkPrefix,
         );
+        return openMatrixToUrl(matrixToUrl);
       }
-      context.go(pathWithoutChatPrefix);
-      return;
     }
     if (!{'https', 'http'}.contains(uri.scheme)) {
       // just launch non-https / non-http uris directly
@@ -111,12 +109,12 @@ class UrlLauncher with GoToDraftChatMixin {
     );
   }
 
-  void openMatrixToUrl() async {
+  void openMatrixToUrl([String? customUrl]) async {
     final matrix = Matrix.of(context);
-    final url = this.url!.replaceFirst(
-          AppConfig.deepLinkPrefix,
-          AppConfig.inviteLinkPrefix,
-        );
+    final url = (customUrl ?? this.url!).replaceFirst(
+      AppConfig.deepLinkPrefix,
+      AppConfig.inviteLinkPrefix,
+    );
 
     // The identifier might be a matrix.to url and needs escaping. Or, it might have multiple
     // identifiers (room id & event id), or it might also have a query part.
