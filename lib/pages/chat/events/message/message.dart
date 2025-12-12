@@ -161,8 +161,6 @@ class _MessageState extends State<Message>
 
   final inviewNotifier = ValueNotifier(false);
 
-  double _lastVisibleFraction = 0.0;
-
   @override
   void initState() {
     super.initState();
@@ -215,12 +213,11 @@ class _MessageState extends State<Message>
   void _onVisibilityChangedForMarkAsRead(VisibilityInfo info) {
     final currentFraction = info.visibleFraction;
 
-    // Only fire callback when crossing the 50% threshold
-    if (_lastVisibleFraction < 0.5 && currentFraction >= 0.5) {
+    // Fire callback whenever message is >50% visible
+    // The debouncer in AutoMarkAsReadMixin handles deduplication
+    if (currentFraction >= 0.5) {
       widget.onEventVisible?.call(widget.event);
     }
-
-    _lastVisibleFraction = currentFraction;
   }
 
   @override

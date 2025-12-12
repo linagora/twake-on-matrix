@@ -1,14 +1,14 @@
 import 'dart:async';
 
 import 'package:debounce_throttle/debounce_throttle.dart';
-import 'package:fluffychat/widgets/matrix.dart';
 import 'package:flutter/material.dart';
 import 'package:matrix/matrix.dart';
 
 /// Mixin that automatically marks messages as read based on what the user sees.
 ///
 /// This mixin tracks visible events and marks them as read after a 2-second
-/// debounce. It respects the fullyRead marker to avoid skipping unread messages.
+/// debounce. Messages are marked as read based purely on visibility, regardless
+/// of browser focus state or fullyRead marker position.
 ///
 /// Usage:
 /// 1. Add mixin to your controller: `with AutoMarkAsReadMixin`
@@ -78,35 +78,9 @@ mixin AutoMarkAsReadMixin {
   void _performAutoMarkAsRead(String? eventId) {
     if (eventId == null) return;
     if (room == null) return;
-    if (!Matrix.of(context).webHasFocus) return;
 
     final timeline = this.timeline;
     if (timeline == null || timeline.events.isEmpty) return;
-
-    // Only mark as read if this event is after the fullyRead marker
-    final fullyRead = room?.fullyRead;
-    if (fullyRead != null && fullyRead.isNotEmpty) {
-      final fullyReadIndex = timeline.events.indexWhere(
-        (e) => e.eventId == fullyRead,
-      );
-
-      // If fullyRead marker exists but is not in current timeline,
-      // it means there are older unread messages we haven't loaded yet.
-      // Don't auto-mark anything in this case to avoid skipping unread messages.
-      if (fullyReadIndex == -1) {
-        return;
-      }
-
-      final lastVisibleIndex = timeline.events.indexWhere(
-        (e) => e.eventId == eventId,
-      );
-
-      // In timeline.events, index 0 is newest, so if fullyReadIndex <= lastVisibleIndex,
-      // it means fullyRead is newer or same as what we're trying to mark
-      if (lastVisibleIndex != -1 && fullyReadIndex <= lastVisibleIndex) {
-        return; // Don't mark older messages as read
-      }
-    }
 
     setReadMarker(eventId: eventId);
     // Reset tracked event after marking as read
