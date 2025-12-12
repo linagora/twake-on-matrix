@@ -46,13 +46,7 @@ extension DownloadFileExtension on Event {
     CancelToken? cancelToken,
     required String filename,
   }) async {
-    final attachmentPath =
-        await StorageDirectoryManager.instance.getFilePathInAppDownloads(
-      eventId: eventId,
-      fileName: filename,
-    );
-
-    final attachment = File(attachmentPath);
+    final attachment = File(savePath);
     final downloadLink = await mxcUrl.getDownloadUri(room.client);
     Logs().d(
       'DownloadFileExtension::downloadOrRetrieveAttachment(): downloadLink = $downloadLink',

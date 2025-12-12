@@ -1244,6 +1244,7 @@ class MatrixState extends State<Matrix>
     showQrCodeDownload.dispose();
     audioPlayer.dispose();
     voiceMessageEvent.dispose();
+    _presenceSubscription?.cancel();
     super.dispose();
   }
 

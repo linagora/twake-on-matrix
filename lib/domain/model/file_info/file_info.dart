@@ -42,23 +42,28 @@ class FileInfo with EquatableMixin {
 
   factory FileInfo.fromMatrixFile(MatrixFile file) {
     if (file.msgType == MessageTypes.Image) {
+      final w = file.info['w'];
+      final h = file.info['h'];
       return ImageFileInfo(
         file.name,
         bytes: file.bytes,
-        width: file.info['w'],
-        height: file.info['h'],
+        width: w is num ? w.toInt() : null,
+        height: h is num ? h.toInt() : null,
         customMimeType: file.mimeType,
       );
     } else if (file.msgType == MessageTypes.Video) {
+      final w = file.info['w'];
+      final h = file.info['h'];
+      final duration = file.info['duration'];
+      final durationMs = duration is num ? duration.toInt() : null;
       return VideoFileInfo(
         file.name,
         bytes: file.bytes,
         imagePlaceholderBytes: Uint8List(0),
-        width: file.info['w'],
-        height: file.info['h'],
-        duration: file.info['duration'] != null && file.info['duration'] is int
-            ? Duration(milliseconds: file.info['duration'])
-            : null,
+        width: w is num ? w.toInt() : null,
+        height: h is num ? h.toInt() : null,
+        duration:
+            durationMs != null ? Duration(milliseconds: durationMs) : null,
         customMimeType: file.mimeType,
       );
     }

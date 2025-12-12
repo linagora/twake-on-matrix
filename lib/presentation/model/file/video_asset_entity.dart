@@ -43,7 +43,7 @@ class VideoAssetEntity extends FileAssetEntity {
       width: assetEntity.orientatedWidth,
       height: assetEntity.orientatedHeight,
       duration: assetEntity.videoDuration.inSeconds,
-      bytes: file.readAsBytesSync(),
+      bytes: await file.readAsBytes(),
     );
   }
 

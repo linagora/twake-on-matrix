@@ -40,6 +40,11 @@ typedef MessageType = String;
 
 typedef FakeImageEvent = SyncUpdate;
 
+/// Maximum file size (in bytes) to load into memory for placeholder creation.
+/// Large files beyond this limit will skip placeholder to prevent OOM.
+/// Set to 100MB to balance UX (showing placeholders) with memory safety.
+const int maxPlaceholderFileSize = 100 * 1024 * 1024; // 100MB
+
 extension SendFileExtension on Room {
   Future<String?> sendFileEventMobile(
     FileInfo fileInfo, {
@@ -58,13 +63,6 @@ extension SendFileExtension on Room {
   }) async {
     // Check media config of the server before sending the file. Stop if the
     // Media config is unreachable or the file is bigger than the given maxsize.
-    Uint8List fileBytes = Uint8List(0);
-    Uint8List thumbnailBytes = Uint8List(0);
-    if (fileInfo.bytes != null) {
-      fileBytes = fileInfo.bytes!;
-    } else if (fileInfo.filePath != null) {
-      fileBytes = await File(fileInfo.filePath!).readAsBytes();
-    }
     try {
       final mediaConfig = await client.getConfig();
       final maxMediaSize = mediaConfig.mUploadSize;
@@ -146,11 +144,13 @@ extension SendFileExtension on Room {
         fileSendingStatusKey,
         FileSendingStatus.generatingThumbnail.name,
       );
-      thumbnail ??= await _generateThumbnail(
-        fileInfo,
-        targetPath: tempThumbnailFile ?? File(''),
-        uploadStreamController: uploadStreamController,
-      );
+      if (tempThumbnailFile != null) {
+        thumbnail ??= await _generateThumbnail(
+          fileInfo,
+          targetPath: tempThumbnailFile,
+          uploadStreamController: uploadStreamController,
+        );
+      }
       if (thumbnail != null) {
         fileInfo = ImageFileInfo(
           fileInfo.fileName,
@@ -190,30 +190,32 @@ extension SendFileExtension on Room {
         FileSendingStatus.generatingThumbnail.name,
       );
       Logs().d('Video thumbnail generation started', thumbnail != null);
-      thumbnail ??= await _getThumbnailVideo(
-        tempThumbnailFile ?? File(''),
-        fileInfo,
-        txid,
-        uploadStreamController: uploadStreamController,
-      );
+      if (tempThumbnailFile != null) {
+        thumbnail ??= await _getThumbnailVideo(
+          tempThumbnailFile,
+          fileInfo,
+          txid,
+          uploadStreamController: uploadStreamController,
+        );
+      }
       if (fileInfo.width == null ||
           fileInfo.height == null ||
           fileInfo.width == 0 ||
           fileInfo.height == 0) {
         fileInfo = VideoFileInfo(
           fileInfo.fileName,
-          filePath: thumbnail.filePath,
+          filePath: fileInfo.filePath,
           bytes: fileInfo.bytes,
           imagePlaceholderBytes: fileInfo.imagePlaceholderBytes,
-          width: thumbnail.width,
-          height: thumbnail.height,
+          width: thumbnail?.width,
+          height: thumbnail?.height,
         );
         if (fileInfo.imagePlaceholderBytes.isNotEmpty) {
           storePlaceholderFileInMem(
             fileInfo: fileInfo,
             txid: txid,
           );
-        } else {
+        } else if (thumbnail != null) {
           storePlaceholderFileInMem(
             fileInfo: thumbnail,
             txid: txid,
@@ -248,7 +250,7 @@ extension SendFileExtension on Room {
         );
         // Create a MatrixFile for encryption
         final matrixFile = MatrixFile(
-          bytes: fileBytes,
+          bytes: await _resolveBytes(fileInfo),
           name: fileInfo.fileName,
           mimeType: fileInfo.mimeType,
         );
@@ -260,19 +262,20 @@ extension SendFileExtension on Room {
         uploadStreamController?.add(
           Left(EncryptFailedFileState(exception: e)),
         );
+        await _updateFakeSync(
+          fakeImageEvent,
+          messageSendingStatusKey,
+          EventStatus.error.intValue,
+        );
+        return null;
       }
 
       fileInfo = FileInfo(
         fileInfo.fileName,
         filePath: fileInfo.filePath,
-        bytes: encryptedFileInfo?.data ?? fileInfo.bytes,
+        bytes: encryptedFileInfo.data,
       );
       if (thumbnail != null) {
-        if (thumbnail.bytes != null) {
-          thumbnailBytes = thumbnail.bytes!;
-        } else if (thumbnail.filePath != null) {
-          thumbnailBytes = await File(thumbnail.filePath!).readAsBytes();
-        }
         try {
           uploadStreamController?.add(
             const Right(
@@ -283,7 +286,7 @@ extension SendFileExtension on Room {
           );
           // Create a MatrixFile for encryption
           final thumbnailMatrixFile = MatrixFile(
-            bytes: thumbnailBytes,
+            bytes: await _resolveBytes(thumbnail),
             name: thumbnail.fileName,
             mimeType: thumbnail.mimeType,
           );
@@ -299,6 +302,13 @@ extension SendFileExtension on Room {
           uploadStreamController?.add(
             Left(EncryptFailedFileState(exception: e, isThumbnail: true)),
           );
+          // Proceed without thumbnail on encryption failure
+          Logs().e(
+            'Thumbnail encryption failed, proceeding without thumbnail',
+            e,
+          );
+          thumbnail = null;
+          encryptedThumbnail = null;
         }
       }
     }
@@ -309,8 +319,32 @@ extension SendFileExtension on Room {
       fileSendingStatusKey,
       FileSendingStatus.uploading.name,
     );
+
+    int retryCount = 0;
+    const maxRetries = 3;
+    const baseDelay = Duration(seconds: 2);
+
     while (uploadResp == null ||
         (encryptedThumbnail != null && thumbnailUploadResp == null)) {
+      if (retryCount >= maxRetries) {
+        await _updateFakeSync(
+          fakeImageEvent,
+          messageSendingStatusKey,
+          EventStatus.error.intValue,
+        );
+        uploadStreamController?.add(
+          Left(
+            UploadFileFailedState(
+              exception: UploadException(
+                error: 'Upload failed after $maxRetries retries',
+              ),
+            ),
+          ),
+        );
+        Logs().e('Upload failed after $maxRetries retries');
+        return null;
+      }
+
       try {
         final mediaApi = getIt.get<MediaAPI>();
         final response = await mediaApi.uploadFileMobile(
@@ -330,8 +364,19 @@ extension SendFileExtension on Room {
         );
         if (response.contentUri != null) {
           uploadResp = Uri.parse(response.contentUri!);
+        } else {
+          // contentUri is null, increment retry and continue
+          retryCount++;
+          Logs().w(
+            'Upload returned null contentUri, retry $retryCount/$maxRetries',
+          );
+          if (retryCount < maxRetries) {
+            await Future.delayed(baseDelay * retryCount);
+          }
+          continue;
         }
-        if (uploadResp != null && thumbnail != null) {
+
+        if (thumbnail != null) {
           final thumbnailResponse = await mediaApi.uploadFileMobile(
             fileInfo: FileInfo(
               thumbnail.fileName,
@@ -354,6 +399,19 @@ extension SendFileExtension on Room {
           );
           thumbnailUploadResp =
               Uri.tryParse(thumbnailResponse.contentUri ?? "");
+          if (thumbnailUploadResp == null &&
+              thumbnailResponse.contentUri == null) {
+            // Thumbnail upload returned null, increment retry
+            retryCount++;
+            Logs().w(
+              'Thumbnail upload returned null contentUri, retry $retryCount/$maxRetries',
+            );
+            uploadResp = null; // Reset to retry both
+            if (retryCount < maxRetries) {
+              await Future.delayed(baseDelay * retryCount);
+            }
+            continue;
+          }
         }
         uploadStreamController?.add(
           Right(
@@ -382,14 +440,19 @@ extension SendFileExtension on Room {
           );
           return null;
         }
-        await _updateFakeSync(
-          fakeImageEvent,
-          messageSendingStatusKey,
-          EventStatus.error.intValue,
-        );
+        retryCount++;
         Logs().e('Error: $e');
-        Logs().e('Send File into room failed. Try again...');
-        return null;
+        Logs().e('Send File into room failed. Retry $retryCount/$maxRetries');
+        if (retryCount >= maxRetries) {
+          await _updateFakeSync(
+            fakeImageEvent,
+            messageSendingStatusKey,
+            EventStatus.error.intValue,
+          );
+          return null;
+        }
+        // Exponential backoff
+        await Future.delayed(baseDelay * retryCount);
       }
     }
 
@@ -416,7 +479,8 @@ extension SendFileExtension on Room {
     final blurHash = thumbnail != null
         ? await runBenchmarked(
             '_generateBlurHash',
-            () => _generateBlurHashFromBytes(thumbnailBytes),
+            () async =>
+                _generateBlurHashFromBytes(await _resolveBytes(thumbnail!)),
           )
         : null;
 
@@ -498,6 +562,16 @@ extension SendFileExtension on Room {
       if (tempThumbnailFile != null) tempThumbnailFile.delete(),
     ]);
     return eventId;
+  }
+
+  /// Resolves bytes from FileInfo, always returning current bytes.
+  /// This ensures we don't use stale bytes after fileInfo mutations (e.g., HEIC conversion).
+  Future<Uint8List> _resolveBytes(FileInfo fileInfo) async {
+    if (fileInfo.bytes != null) return fileInfo.bytes!;
+    if (fileInfo.filePath != null) {
+      return File(fileInfo.filePath!).readAsBytes();
+    }
+    throw StateError('No bytes or filePath for ${fileInfo.fileName}');
   }
 
   Future<File> _createThumbnailFile(Directory tempDir, String fileName) async =>
@@ -649,7 +723,20 @@ extension SendFileExtension on Room {
   Future<void> _storePlaceholderFile({
     required String txid,
     required FileAssetEntity assetEntity,
+    required FileInfo fileInfo,
   }) async {
+    // Check file size before loading into memory to prevent OOM on large files
+    final fileSize = fileInfo.fileSize;
+
+    if (fileSize > maxPlaceholderFileSize) {
+      Logs().w(
+        '_storePlaceholderFile: Skipping placeholder for large file '
+        '(${(fileSize / (1024 * 1024)).toStringAsFixed(2)}MB). '
+        'File will upload without in-memory placeholder to prevent OOM.',
+      );
+      return;
+    }
+
     // in order to have placeholder, this line must have,
     // otherwise the sending event will be removed from timeline
     final matrixFile = await assetEntity.toMatrixFile();
@@ -672,6 +759,7 @@ extension SendFileExtension on Room {
         await _storePlaceholderFile(
           txid: txid,
           assetEntity: entity,
+          fileInfo: fileInfo,
         );
 
         final fakeImageEvent = await sendFakeFileInfoEvent(
@@ -769,7 +857,7 @@ extension SendFileExtension on Room {
     }
   }
 
-  Future<ImageFileInfo> _getThumbnailVideo(
+  Future<ImageFileInfo?> _getThumbnailVideo(
     File tempThumbnailFile,
     VideoFileInfo fileInfo,
     String txid, {
@@ -786,6 +874,8 @@ extension SendFileExtension on Room {
         quality: AppConfig.thumbnailQuality,
         thumbnailPath: tempThumbnailFile.path,
       );
+    } else {
+      return null;
     }
     var width = fileInfo.width;
     var height = fileInfo.height;
