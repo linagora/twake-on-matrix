@@ -558,4 +558,116 @@ void main() {
       expect(found, null);
     });
   });
+
+  group('isMention test', () {
+    late Client client;
+    late Room room;
+    setUpAll(() async {
+      client = await getClient();
+      room = Room(
+        client: client,
+        id: '!test:example.com',
+        membership: Membership.join,
+      );
+    });
+
+    Event createEvent({
+      required Map<String, dynamic> content,
+      String eventId = '\$event1',
+      String senderId = '@user:example.com',
+    }) {
+      return Event(
+        senderId: senderId,
+        type: 'm.room.message',
+        room: room,
+        eventId: eventId,
+        content: content,
+        originServerTs: DateTime.fromMillisecondsSinceEpoch(1234567890),
+      );
+    }
+
+    test(
+        'returns false when formatted_body contains matrix.to link NOT mentioning current user',
+        () {
+      final event = createEvent(
+        content: {
+          'body': 'User hello',
+          'format': 'org.matrix.custom.html',
+          'formatted_body':
+              '<a href="https://matrix.to/#/@otheruser:example.com">User</a> hello',
+          'msgtype': 'm.text',
+        },
+      );
+
+      expect(event.isMention, false);
+    });
+
+    test(
+        'returns true when formatted_body contains matrix.to link mentioning current user',
+        () {
+      final event = createEvent(
+        content: {
+          'body': 'admin hello',
+          'format': 'org.matrix.custom.html',
+          'formatted_body':
+              '<a href="https://matrix.to/#/@admin:fakeServer">User</a> hello',
+          'msgtype': 'm.text',
+        },
+      );
+
+      expect(event.isMention, true);
+    });
+
+    test('returns false when formatted_body is not present', () {
+      final event = createEvent(
+        content: {
+          'body': 'Message to @admin:fakeServer',
+          'msgtype': 'm.text',
+        },
+      );
+
+      expect(event.isMention, false);
+    });
+
+    test('returns false when body is empty and no formatted_body', () {
+      final event = createEvent(
+        content: {
+          'body': '',
+          'msgtype': 'm.text',
+        },
+      );
+
+      expect(event.isMention, false);
+    });
+
+    test(
+        'returns false when formatted_body has multiple matrix.to links but NOT current user',
+        () {
+      final event = createEvent(
+        content: {
+          'body': 'Alice and Bob',
+          'format': 'org.matrix.custom.html',
+          'formatted_body':
+              '<a href="https://matrix.to/#/@alice:example.com">Alice</a> and <a href="https://matrix.to/#/@bob:example.com">Bob</a>',
+          'msgtype': 'm.text',
+        },
+      );
+
+      expect(event.isMention, false);
+    });
+
+    test('returns false when formatted_body is empty string', () {
+      final event = createEvent(
+        content: {
+          'body': 'Hello @admin:fakeServer',
+          'format': 'org.matrix.custom.html',
+          'formatted_body': '',
+          'msgtype': 'm.text',
+        },
+      );
+
+      // Empty formatted_body should return false
+      expect(event.isMention, false);
+    });
+  });
 }
