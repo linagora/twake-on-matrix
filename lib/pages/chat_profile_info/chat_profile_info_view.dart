@@ -341,16 +341,16 @@ class _Information extends StatelessWidget {
                             if (success is GetUserInfoSuccess) {
                               return Column(
                                 children: [
-                                  if (success.userInfo.mails?.firstOrNull !=
+                                  if (success.userInfo.emails?.firstOrNull !=
                                       null) ...{
                                     const SizedBox(
                                       height: ChatProfileInfoStyle.textSpacing,
                                     ),
                                     _CopiableRowWithMaterialIcon(
                                       icon: Icons.alternate_email,
-                                      text:
-                                          success.userInfo.mails?.firstOrNull ??
-                                              '',
+                                      text: success
+                                              .userInfo.emails?.firstOrNull ??
+                                          '',
                                     ),
                                   },
                                   if (success.userInfo.phones?.firstOrNull !=
@@ -717,12 +717,12 @@ class _SizedAppBar extends StatelessWidget {
           return ChatDetailViewStyle.mediumToolbarHeightSliverAppBar;
         }
         if (success is GetUserInfoSuccess) {
-          if (success.userInfo.mails != null &&
+          if (success.userInfo.emails != null &&
               success.userInfo.phones != null) {
             return ChatDetailViewStyle.maxToolbarHeightSliverAppBar;
           }
 
-          if (success.userInfo.mails != null ||
+          if (success.userInfo.emails != null ||
               success.userInfo.phones != null) {
             return ChatDetailViewStyle.mediumToolbarHeightSliverAppBar;
           }

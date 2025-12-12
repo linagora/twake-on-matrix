@@ -19,6 +19,7 @@ enum AdaptiveDestinationEnum {
     switch (this) {
       case AdaptiveDestinationEnum.contacts:
         return NavigationDestination(
+          key: const Key('contacts_navigation_destination'),
           icon: TwakeNavigationIcon(
             color: LinagoraSysColors.material().onBackground,
             icon: Icons.supervised_user_circle_outlined,
@@ -31,6 +32,7 @@ enum AdaptiveDestinationEnum {
         );
       case AdaptiveDestinationEnum.rooms:
         return NavigationDestination(
+          key: const Key('rooms_navigation_destination'),
           icon: UnreadRoomsBadge(
             color: LinagoraSysColors.material().onBackground,
             filter: (room) => !room.isSpace && !room.isStoryRoom,
@@ -43,6 +45,7 @@ enum AdaptiveDestinationEnum {
         );
       case AdaptiveDestinationEnum.settings:
         return NavigationDestination(
+          key: const Key('settings_navigation_destination'),
           icon: TwakeNavigationIcon(
             color: LinagoraSysColors.material().onBackground,
             icon: Icons.settings_outlined,
@@ -88,10 +91,12 @@ enum AdaptiveDestinationEnum {
       case AdaptiveDestinationEnum.settings:
         return BottomNavigationBarItem(
           icon: BottomNavigationAvatar(
+            key: const Key('settings_navigation_destination'),
             profile: profile,
             isSelected: false,
           ),
           activeIcon: BottomNavigationAvatar(
+            key: const Key('settings_navigation_destination'),
             profile: profile,
             isSelected: true,
           ),

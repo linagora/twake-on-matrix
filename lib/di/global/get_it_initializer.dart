@@ -135,6 +135,8 @@ import 'package:fluffychat/domain/usecase/search/server_search_interactor.dart';
 import 'package:fluffychat/domain/usecase/settings/save_language_interactor.dart';
 import 'package:fluffychat/domain/usecase/settings/update_profile_interactor.dart';
 import 'package:fluffychat/domain/usecase/user_info/get_user_info_interactor.dart';
+import 'package:fluffychat/domain/usecase/user_info/get_user_info_visibility_interactor.dart';
+import 'package:fluffychat/domain/usecase/user_info/update_user_info_visibility_interactor.dart';
 import 'package:fluffychat/domain/usecase/verify_name_interactor.dart';
 import 'package:fluffychat/event/twake_event_dispatcher.dart';
 import 'package:fluffychat/modules/federation_identity_lookup/manager/federation_identity_lookup_manager.dart';
@@ -533,6 +535,11 @@ class GetItInitializer {
     getIt.registerFactory(() => const GetUserInfoInteractor());
 
     getIt.registerFactory(() => InviteUserInteractor());
+
+    getIt.registerFactory(() => const GetUserInfoVisibilityInteractor());
+
+    getIt.registerFactory(() => const UpdateUserInfoVisibilityInteractor());
+
     getIt.registerFactory(() => const CreateSupportChatInteractor());
   }
 

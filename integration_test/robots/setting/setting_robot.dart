@@ -3,6 +3,7 @@ import 'package:fluffychat/pages/settings_dashboard/settings_app_language/settin
 import 'package:fluffychat/pages/settings_dashboard/settings_chat/settings_chat_view.dart';
 import 'package:fluffychat/pages/settings_dashboard/settings_notifications/settings_notifications_view.dart';
 import 'package:fluffychat/pages/settings_dashboard/settings_security/settings_security_view.dart';
+import 'package:fluffychat/presentation/enum/settings/settings_enum.dart';
 import 'package:flutter/material.dart';
 import 'package:linagora_design_flutter/dialog/confirmation_dialog_builder.dart';
 import 'package:patrol/patrol.dart';
@@ -20,8 +21,8 @@ class SettingRobot extends HomeRobot {
     return $("Chat");
   }
 
-  PatrolFinder privateAndSecuritySetting() {
-    return $("Privacy & Security");
+  PatrolFinder privacyAndSecuritySetting() {
+    return $(Key(SettingEnum.privacyAndSecurity.name));
   }
 
   PatrolFinder notificationsSetting() {
@@ -54,7 +55,7 @@ class SettingRobot extends HomeRobot {
   }
 
   Future<void> openPrivacyAndSecuritySetting() async {
-    await privateAndSecuritySetting().tap();
+    await privacyAndSecuritySetting().tap();
     await $.waitUntilVisible($(SettingsSecurityView));
   }
 

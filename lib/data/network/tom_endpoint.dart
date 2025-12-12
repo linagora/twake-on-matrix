@@ -41,4 +41,8 @@ extension ServicePathTom on ServicePath {
   }) {
     return '$rootPath/$apiVersion$path/$userId';
   }
+
+  String userInfoVisibilityServicePath(String userId) {
+    return '${generateTomUserInfoEndpoint(userId)}/visibility';
+  }
 }

@@ -3483,6 +3483,17 @@
       "count": {}
     }
   },
+  "contactsVisibility": "Contacts visibility",
+  "whoCanFindMeByMyContacts": "Who can find me by my contacts",
+  "whoCanSeeMyPhoneEmail": "WHO CAN SEE MY PHONE/EMAIL",
+  "everyOne": "Everyone",
+  "myContacts": "My Contacts",
+  "nobody": "Nobody",
+  "chooseWhichDetailsAreVisibleToOtherUsers": "CHOOSE WHICH DETAILS ARE VISIBLE TO OTHER USERS",
+  "youNumberIsVisibleAccordingToTheSettingAbove": "Your number is visible according to the setting above",
+  "youEmailIsVisibleAccordingToTheSettingAbove": "Your email is visible according to the setting above",
+  "failedToChangeContactsVisibility": "Failed to change contacts visibility",
+  "failedToGetContactsVisibility": "Failed to get contacts visibility",
   "unblockUserToSendMessages": "Unblock user to send messages",
   "supportChat": "Support Chat",
   "supportChatDescription": "I’ve got your back! If you encounter bugs or need any help using Twake Workplace, send a message, I will reply to you swiftly",
