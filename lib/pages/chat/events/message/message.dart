@@ -29,6 +29,7 @@ import 'package:fluffychat/generated/l10n/app_localizations.dart';
 import 'package:inview_notifier_list/inview_notifier_list.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:matrix/matrix.dart';
+import 'package:visibility_detector/visibility_detector.dart';
 
 typedef OnMenuAction = Function(
   BuildContext,
@@ -81,6 +82,7 @@ class Message extends StatefulWidget {
   final FocusNode? focusNode;
   final double maxWidth;
   final void Function(Event)? timestampCallback;
+  final void Function(Event)? onEventVisible;
   final void Function(Event)? onLongPressMessage;
   final void Function()? onDisplayEmojiReaction;
   final void Function()? onHideEmojiReaction;
@@ -123,6 +125,7 @@ class Message extends StatefulWidget {
     this.markedUnreadLocation,
     this.focusNode,
     this.timestampCallback,
+    this.onEventVisible,
     this.onDisplayEmojiReaction,
     this.onHideEmojiReaction,
     this.onLongPressMessage,
@@ -204,6 +207,16 @@ class _MessageState extends State<Message>
       inviewNotifier.value = inView ?? inviewNotifier.value;
     } on FlutterError catch (e) {
       Logs().d('_MessageState:: _updateInViewNotifier: $e');
+    }
+  }
+
+  void _onVisibilityChangedForMarkAsRead(VisibilityInfo info) {
+    final currentFraction = info.visibleFraction;
+
+    // Fire callback whenever message is >50% visible
+    // The debouncer in AutoMarkAsReadMixin handles deduplication
+    if (currentFraction >= 0.5) {
+      widget.onEventVisible?.call(widget.event);
     }
   }
 
@@ -301,7 +314,7 @@ class _MessageState extends State<Message>
       mainAxisAlignment: rowMainAxisAlignment,
       children: rowChildren,
     );
-    return Column(
+    final column = Column(
       crossAxisAlignment: MessageStyle.messageCrossAxisAlignment(
         widget.event,
         context,
@@ -383,6 +396,12 @@ class _MessageState extends State<Message>
           ),
         ),
       ],
+    );
+
+    return VisibilityDetector(
+      key: Key('visibility_${widget.event.eventId}'),
+      onVisibilityChanged: _onVisibilityChangedForMarkAsRead,
+      child: column,
     );
   }
 

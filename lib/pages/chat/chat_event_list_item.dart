@@ -69,6 +69,7 @@ class ChatEventListItem extends StatelessWidget {
             event.originServerTs,
           );
         },
+        onEventVisible: controller.onEventVisible,
         onDisplayEmojiReaction: controller.onDisplayEmojiReaction,
         onHideEmojiReaction: controller.onHideEmojiReaction,
         listAction:

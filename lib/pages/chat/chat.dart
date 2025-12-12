@@ -36,6 +36,7 @@ import 'package:fluffychat/presentation/extensions/event_update_extension.dart';
 import 'package:fluffychat/presentation/extensions/send_file_extension.dart';
 import 'package:fluffychat/presentation/extensions/send_file_web_extension.dart';
 import 'package:fluffychat/presentation/mixins/audio_mixin.dart';
+import 'package:fluffychat/presentation/mixins/auto_mark_as_read_mixin.dart';
 import 'package:fluffychat/presentation/mixins/common_media_picker_mixin.dart';
 import 'package:fluffychat/presentation/mixins/delete_event_mixin.dart';
 import 'package:fluffychat/presentation/mixins/go_to_direct_chat_mixin.dart';
@@ -144,7 +145,8 @@ class ChatController extends State<Chat>
         LeaveChatMixin,
         DeleteEventMixin,
         UnblockUserMixin,
-        AudioMixin {
+        AudioMixin,
+        AutoMarkAsReadMixin {
   final NetworkConnectionService networkConnectionService =
       getIt.get<NetworkConnectionService>();
 
@@ -188,6 +190,7 @@ class ChatController extends State<Chat>
 
   Client? sendingClient;
 
+  @override
   Timeline? timeline;
 
   MatrixState? matrix;
@@ -596,16 +599,10 @@ class ChatController extends State<Chat>
       await _tryRequestHistory();
       final fullyRead = room?.fullyRead;
       if (fullyRead == null || fullyRead.isEmpty || fullyRead == '') {
-        setReadMarker();
         return;
       }
       if (room?.hasNewMessages == true) {
         _initUnreadLocation(fullyRead);
-      }
-      if (timeline != null &&
-          timeline!.events.any((event) => event.eventId == fullyRead)) {
-        setReadMarker();
-        return;
       }
       if (!mounted) return;
     } catch (e, s) {
@@ -624,27 +621,52 @@ class ChatController extends State<Chat>
   }
 
   Future<void>? _setReadMarkerFuture;
+  String? _pendingReadMarkerEventId;
 
-  void setReadMarker({String? eventId}) {
-    if (room == null) return;
+  @override
+  Future<void> setReadMarker({String? eventId}) async {
+    if (!mounted || room == null) return;
+
+    // Store the latest request
+    _pendingReadMarkerEventId = eventId;
+
+    // If already processing, just coalesce; the worker will pick it up.
     if (_setReadMarkerFuture != null) return;
-    if (eventId == null &&
-        !room!.hasNewMessages &&
-        room!.notificationCount == 0) {
-      return;
-    }
-    if (!Matrix.of(context).webHasFocus) return;
 
-    final timeline = this.timeline;
-    if (timeline == null || timeline.events.isEmpty) return;
-
-    Logs().d('Set read marker...', eventId);
-    // ignore: unawaited_futures
-    _setReadMarkerFuture = timeline.setReadMarker(eventId: eventId).then((_) {
+    try {
+      _setReadMarkerFuture = _processReadMarker();
+      await _setReadMarkerFuture;
+    } finally {
       _setReadMarkerFuture = null;
-    });
-    if (eventId == null || eventId == timeline.room.lastEvent?.eventId) {
-      Matrix.of(context).backgroundPush?.cancelNotification(roomId!);
+    }
+  }
+
+  Future<void> _processReadMarker() async {
+    while (true) {
+      if (!mounted) return;
+      final timeline = this.timeline;
+      if (timeline == null || timeline.events.isEmpty) return;
+
+      final currentEventId = _pendingReadMarkerEventId;
+      _pendingReadMarkerEventId = null;
+
+      Logs().d('Set read marker...', currentEventId);
+
+      try {
+        await timeline.setReadMarker(eventId: currentEventId);
+      } catch (e, s) {
+        Logs().e('Failed to set read marker', e, s);
+        return;
+      }
+
+      if (!mounted) return;
+      if (currentEventId == null ||
+          currentEventId == timeline.room.lastEvent?.eventId) {
+        Matrix.of(context).backgroundPush?.cancelNotification(roomId!);
+      }
+
+      // If no new request arrived while we awaited, we're done.
+      if (_pendingReadMarkerEventId == null) return;
     }
   }
 
@@ -701,7 +723,6 @@ class ChatController extends State<Chat>
       text: pendingText,
       selection: const TextSelection.collapsed(offset: 0),
     );
-    setReadMarker();
     inputText.value = pendingText;
     _updateReplyEvent();
     setState(() {
@@ -1177,7 +1198,6 @@ class ChatController extends State<Chat>
     Logs().v('Chat::requestFuture(): Requesting future...');
     try {
       await timeline.requestFuture(historyCount: _loadHistoryCount);
-      setReadMarker(eventId: timeline.events.first.eventId);
     } catch (err) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -1272,7 +1292,6 @@ class ChatController extends State<Chat>
         scrollController.jumpTo(scrollController.position.maxScrollExtent);
       }
     }
-    setReadMarker();
     _handleHideStickyTimestamp();
   }
 
@@ -1723,7 +1742,6 @@ class ChatController extends State<Chat>
     if (audioRecordStateNotifier.value != AudioRecordState.initial) {
       return;
     }
-    setReadMarker();
     _storeInputTimeoutTimer?.cancel();
     _storeInputTimeoutTimer = Timer(_storeInputTimeout, () async {
       final prefs = await SharedPreferences.getInstance();
@@ -3145,6 +3163,7 @@ class ChatController extends State<Chat>
 
   @override
   void initState() {
+    super.initState();
     _initializePinnedEvents();
     _listenOnJumpToEventFromSearch();
     registerPasteShortcutListeners();
@@ -3155,7 +3174,7 @@ class ChatController extends State<Chat>
     _loadDraft();
     _tryLoadTimeline();
     sendController.addListener(updateInputTextNotifier);
-    super.initState();
+    initAutoMarkAsReadMixin();
     SchedulerBinding.instance.addPostFrameCallback((_) async {
       if (!mounted) return;
       if (room == null) {
@@ -3195,6 +3214,7 @@ class ChatController extends State<Chat>
   @override
   void dispose() {
     unregisterPasteShortcutListeners();
+    disposeAutoMarkAsReadMixin();
     timeline?.cancelSubscriptions();
     timeline = null;
     inputFocus.removeListener(_inputFocusListener);
