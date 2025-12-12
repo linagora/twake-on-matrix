@@ -451,7 +451,7 @@ abstract class AppRoutes {
                   redirect: loggedOutRedirect,
                 ),
                 GoRoute(
-                  path: AppRoutePaths.contactsVisibility,
+                  path: AppRoutePaths.contactsVisibilitySegment,
                   pageBuilder: (context, state) => defaultPageBuilder(
                     context,
                     const SettingsContactsVisibility(),
