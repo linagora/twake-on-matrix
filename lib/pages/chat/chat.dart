@@ -3213,12 +3213,12 @@ class ChatController extends State<Chat>
   @override
   void dispose() {
     unregisterPasteShortcutListeners();
+    disposeAutoMarkAsReadMixin();
     timeline?.cancelSubscriptions();
     timeline = null;
     inputFocus.removeListener(_inputFocusListener);
     inputFocus.dispose();
     composerDebouncer.cancel();
-    disposeAutoMarkAsReadMixin();
     focusSuggestionController.dispose();
     _focusSuggestionController.dispose();
     _jumpToEventIdSubscription?.cancel();
