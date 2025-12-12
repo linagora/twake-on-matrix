@@ -8,6 +8,7 @@ import 'package:fluffychat/utils/extension/build_context_extension.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/utils/responsive/responsive_utils.dart';
 import 'package:fluffychat/widgets/matrix.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_adaptive_scaffold/flutter_adaptive_scaffold.dart';
 import 'package:matrix/matrix.dart';
@@ -139,7 +140,9 @@ mixin MediaViewerAppBarMixin on SaveMediaToGalleryAndroidMixin {
 
   void backToChatScreenInMobile(BuildContext context) {
     Navigator.of(context).popUntil(
-      (Route route) => route.settings.name == '/rooms/room',
+      (Route route) =>
+          route.settings is CupertinoPage &&
+          (route.settings as CupertinoPage).restorationId == '/rooms/:roomid',
     );
   }
 
