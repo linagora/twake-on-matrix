@@ -44,7 +44,7 @@ class _InviteFriendButtonDelegate extends SliverPersistentHeaderDelegate {
         onTap: () async {
           // TODO: Placeholder url
           const domain = AppConstants.appLinkUniversalLinkDomain;
-          final url = 'https://$domain/chat/${Uri.encodeComponent(userId)}';
+          final url = 'https://$domain/chat/#/${Uri.encodeComponent(userId)}';
           try {
             if (PlatformInfos.isMobile) {
               await Share.share(url);
