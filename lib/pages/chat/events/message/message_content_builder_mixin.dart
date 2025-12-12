@@ -49,10 +49,7 @@ mixin MessageContentBuilderMixin {
         _getMessageMetrics(context, event, maxWidth, isEdited: isEdited);
 
     if (ownMessage || hideDisplayName) {
-      return MessageMetrics(
-        totalMessageWidth: messageMetrics.totalMessageWidth,
-        isNeedAddNewLine: messageMetrics.isNeedAddNewLine,
-      );
+      return messageMetrics;
     }
 
     const rightSpaceDisplayName = 16.0;
@@ -195,6 +192,23 @@ mixin MessageContentBuilderMixin {
         ),
       ),
     );
+
+    // Validate that the text range is not empty to avoid invalid selection
+    if (lastLineRange.start == lastLineRange.end) {
+      // When text range is empty (malformed message), ensure minimum bubble width
+      // Use at least the width needed for timestamp + padding
+      final minContentWidth = messageTimeAndPaddingWidth;
+      final contentWidth = max(messageTextWidth, minContentWidth);
+      final totalWidth = contentWidth + paddingMessage;
+
+      final totalMessageWidth = totalWidth < maxWidth ? totalWidth : maxWidth;
+
+      return MessageMetrics(
+        totalMessageWidth: totalMessageWidth,
+        isNeedAddNewLine: true,
+      );
+    }
+
     final List<TextBox> lastLineBoxes = paintedMessageText.getBoxesForSelection(
       TextSelection(
         baseOffset: lastLineRange.start,

@@ -273,7 +273,7 @@ extension LocalizedBody on Event {
   }
 
   bool isDisplayOnlyEmoji() {
-    return onlyEmotes && numberEmotes < 7;
+    return onlyEmotes && numberEmotes > 0 && numberEmotes < 7;
   }
 
   TextStyle? textStyleForOnlyEmoji(BuildContext context) {
