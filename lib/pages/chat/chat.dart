@@ -621,33 +621,45 @@ class ChatController extends State<Chat>
   }
 
   Future<void>? _setReadMarkerFuture;
+  String? _pendingReadMarkerEventId;
 
   @override
   Future<void> setReadMarker({String? eventId}) async {
     if (room == null) return;
+
+    // Store the latest request
+    _pendingReadMarkerEventId = eventId;
+
+    // If already processing, let the ongoing operation pick up the latest value
     if (_setReadMarkerFuture != null) {
-      await _setReadMarkerFuture;
       return;
     }
-    if (eventId == null &&
-        !room!.hasNewMessages &&
-        room!.notificationCount == 0) {
-      return;
-    }
-    if (!Matrix.of(context).webHasFocus) return;
 
-    final timeline = this.timeline;
-    if (timeline == null || timeline.events.isEmpty) return;
+    // Process all pending updates until queue is empty
+    while (_pendingReadMarkerEventId != null) {
+      final currentEventId = _pendingReadMarkerEventId;
+      _pendingReadMarkerEventId = null;
 
-    Logs().d('Set read marker...', eventId);
-    _setReadMarkerFuture = timeline.setReadMarker(eventId: eventId);
-    try {
-      await _setReadMarkerFuture;
-    } finally {
-      _setReadMarkerFuture = null;
-    }
-    if (eventId == null || eventId == timeline.room.lastEvent?.eventId) {
-      Matrix.of(context).backgroundPush?.cancelNotification(roomId!);
+      if (currentEventId == null &&
+          !room!.hasNewMessages &&
+          room!.notificationCount == 0) {
+        continue;
+      }
+
+      final timeline = this.timeline;
+      if (timeline == null || timeline.events.isEmpty) return;
+
+      Logs().d('Set read marker...', currentEventId);
+      _setReadMarkerFuture = timeline.setReadMarker(eventId: currentEventId);
+      try {
+        await _setReadMarkerFuture;
+      } finally {
+        _setReadMarkerFuture = null;
+      }
+      if (currentEventId == null ||
+          currentEventId == timeline.room.lastEvent?.eventId) {
+        Matrix.of(context).backgroundPush?.cancelNotification(roomId!);
+      }
     }
   }
 
