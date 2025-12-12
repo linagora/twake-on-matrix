@@ -29,7 +29,11 @@ extension FileInfoExtension on FileInfo {
     if (bytes != null) {
       matrixBytes = bytes!;
     } else if (filePath != null) {
-      matrixBytes = await File(filePath!).readAsBytes();
+      try {
+        matrixBytes = await File(filePath!).readAsBytes();
+      } catch (e) {
+        Logs().e('FileInfoExtension::toMatrixFile: Error reading file', e);
+      }
     }
     return MatrixFile(
       bytes: matrixBytes,
