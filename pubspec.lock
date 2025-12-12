@@ -1868,8 +1868,8 @@ packages:
     dependency: "direct main"
     description:
       path: "."
-      ref: "twake-supported-0.22.6"
-      resolved-ref: ff523818c22ed27745facf80863c503ad2ab6dc4
+      ref: improve-matrix-ID-validation-logic
+      resolved-ref: ab0e8cf93397a31ed1660a89f5142dc63fa2e378
       url: "git@github.com:linagora/matrix-dart-sdk.git"
     source: git
     version: "0.22.6"

@@ -66,7 +66,7 @@ extension StringCasingExtension on String {
   /// Parses HTML using DOM parser to find all <a> tags with matrix.to URLs.
   /// Uses Matrix SDK's `isValidMatrixId` for canonical validation.
   /// Strips query parameters from matrix.to URLs to prevent malformed IDs.
-  List<String> getAllMentionedUserIdsFromMessage(Room room) {
+  List<String> getAllMentionedUserIdsFromMessage() {
     if (isEmpty) return [];
 
     final mentionUserIds = <String>{};
@@ -107,12 +107,13 @@ extension StringCasingExtension on String {
             mentionUserIds.add(decodedId);
           }
         } catch (e) {
-          // If decoding fails, skip this href
+          Logs().e('Error decoding matrix.to URL', e);
           continue;
         }
       }
     } catch (e) {
       // If HTML parsing fails, return empty list
+      Logs().e('Error parsing HTML', e);
       return [];
     }
 

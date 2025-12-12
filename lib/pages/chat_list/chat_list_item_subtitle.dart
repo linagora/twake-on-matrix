@@ -62,7 +62,7 @@ class ChatListItemSubtitle extends StatelessWidget with ChatListItemMixin {
                 lastEvent == null) {
               return const SizedBox.shrink();
             }
-            final isMentionned = lastEvent.isMention == true;
+            final isMentioned = lastEvent.isMention == true;
             return lastEvent.senderId == Matrix.of(context).client.userID
                 ? Icon(
                     Icons.done_all,
@@ -76,7 +76,7 @@ class ChatListItemSubtitle extends StatelessWidget with ChatListItemMixin {
                     curve: TwakeThemes.animationCurve,
                     padding: const EdgeInsets.only(bottom: 4),
                     height: ChatListItemStyle.mentionIconWidth,
-                    width: isMentionned && room.isUnreadOrInvited
+                    width: isMentioned && room.isUnreadOrInvited
                         ? ChatListItemStyle.mentionIconWidth
                         : 0,
                     decoration: BoxDecoration(
@@ -85,11 +85,11 @@ class ChatListItemSubtitle extends StatelessWidget with ChatListItemMixin {
                           BorderRadius.circular(AppConfig.borderRadius),
                     ),
                     child: Center(
-                      child: isMentionned && room.isUnreadOrInvited
+                      child: isMentioned && room.isUnreadOrInvited
                           ? Text(
                               '@',
                               style: TextStyle(
-                                color: isMentionned
+                                color: isMentioned
                                     ? Theme.of(context).colorScheme.onPrimary
                                     : Theme.of(context)
                                         .colorScheme

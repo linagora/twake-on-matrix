@@ -1,11 +1,6 @@
 import 'package:fluffychat/utils/string_extension.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:matrix/matrix.dart';
-import 'package:mockito/annotations.dart';
 
-import 'string_extension_test.mocks.dart';
-
-@GenerateMocks([Room])
 void main() {
   group("unMarkdownLinks tests", () {
     test('unMarkdownLinks should replace links when there is only one link',
@@ -380,17 +375,11 @@ void main() {
   });
 
   group('getAllMentionedUserIdsFromMessage tests', () {
-    late MockRoom mockRoom;
-
-    setUp(() {
-      mockRoom = MockRoom();
-    });
-
     test('extracts single matrix.to URL without query parameters', () {
       const message =
           '<a href="https://matrix.to/#/@alice:matrix.org">Alice</a>';
 
-      final result = message.getAllMentionedUserIdsFromMessage(mockRoom);
+      final result = message.getAllMentionedUserIdsFromMessage();
 
       expect(result, equals(['@alice:matrix.org']));
     });
@@ -399,7 +388,7 @@ void main() {
       const message =
           '<a href="https://matrix.to/#/@alice:matrix.org?via=matrix.org&via=example.com">Alice</a>';
 
-      final result = message.getAllMentionedUserIdsFromMessage(mockRoom);
+      final result = message.getAllMentionedUserIdsFromMessage();
 
       expect(result, equals(['@alice:matrix.org']));
     });
@@ -408,7 +397,7 @@ void main() {
       const message =
           '<a href="https://matrix.to/#/@alice%3Amatrix.org">Alice</a>';
 
-      final result = message.getAllMentionedUserIdsFromMessage(mockRoom);
+      final result = message.getAllMentionedUserIdsFromMessage();
 
       expect(result, equals(['@alice:matrix.org']));
     });
@@ -417,7 +406,7 @@ void main() {
       const message =
           '<a href="https://matrix.to/#/@alice:matrix.org">Alice</a> and <a href="https://matrix.to/#/@bob:example.com">Bob</a>';
 
-      final result = message.getAllMentionedUserIdsFromMessage(mockRoom);
+      final result = message.getAllMentionedUserIdsFromMessage();
 
       expect(
         result,
@@ -430,7 +419,7 @@ void main() {
       const message =
           '<a href="http://matrix.to/#/@alice:matrix.org">Alice</a>';
 
-      final result = message.getAllMentionedUserIdsFromMessage(mockRoom);
+      final result = message.getAllMentionedUserIdsFromMessage();
 
       expect(result, equals(['@alice:matrix.org']));
     });
@@ -439,7 +428,7 @@ void main() {
       const message =
           '<a href="https://matrix.to/#/not-a-valid-id">Invalid</a>';
 
-      final result = message.getAllMentionedUserIdsFromMessage(mockRoom);
+      final result = message.getAllMentionedUserIdsFromMessage();
 
       expect(result, isEmpty);
     });
@@ -447,7 +436,7 @@ void main() {
     test('ignores non-matrix.to URLs', () {
       const message = '<a href="https://example.com/@alice">Alice</a>';
 
-      final result = message.getAllMentionedUserIdsFromMessage(mockRoom);
+      final result = message.getAllMentionedUserIdsFromMessage();
 
       expect(result, isEmpty);
     });
@@ -455,7 +444,7 @@ void main() {
     test('returns empty list for empty string', () {
       const message = '';
 
-      final result = message.getAllMentionedUserIdsFromMessage(mockRoom);
+      final result = message.getAllMentionedUserIdsFromMessage();
 
       expect(result, isEmpty);
     });
@@ -463,7 +452,7 @@ void main() {
     test('returns empty list when no mentions found', () {
       const message = '<p>Hello world!</p>';
 
-      final result = message.getAllMentionedUserIdsFromMessage(mockRoom);
+      final result = message.getAllMentionedUserIdsFromMessage();
 
       expect(result, isEmpty);
     });
@@ -472,7 +461,7 @@ void main() {
       const message =
           '<a href="https://matrix.to/#/@alice:matrix.org">Alice</a> and <a href="https://matrix.to/#/@alice:matrix.org">Alice again</a>';
 
-      final result = message.getAllMentionedUserIdsFromMessage(mockRoom);
+      final result = message.getAllMentionedUserIdsFromMessage();
 
       expect(result, equals(['@alice:matrix.org']));
       expect(result.length, equals(1));
@@ -482,7 +471,7 @@ void main() {
       const message =
           '<div><p>Message to <a href="https://matrix.to/#/@alice:matrix.org?via=matrix.org">@alice</a></p></div>';
 
-      final result = message.getAllMentionedUserIdsFromMessage(mockRoom);
+      final result = message.getAllMentionedUserIdsFromMessage();
 
       expect(result, equals(['@alice:matrix.org']));
     });
@@ -491,7 +480,7 @@ void main() {
       const message =
           '<a href="https://matrix.to/#/@user_name-123:example.com">User</a>';
 
-      final result = message.getAllMentionedUserIdsFromMessage(mockRoom);
+      final result = message.getAllMentionedUserIdsFromMessage();
 
       expect(result, equals(['@user_name-123:example.com']));
     });
@@ -499,7 +488,7 @@ void main() {
     test('ignores malformed anchor tags', () {
       const message = '<a>No href</a>';
 
-      final result = message.getAllMentionedUserIdsFromMessage(mockRoom);
+      final result = message.getAllMentionedUserIdsFromMessage();
 
       expect(result, isEmpty);
     });
@@ -508,9 +497,18 @@ void main() {
       const message =
           '<a href="https://matrix.to/#/@datjuly:stg.lin-saas.com">@[dat july]</a>';
 
-      final result = message.getAllMentionedUserIdsFromMessage(mockRoom);
+      final result = message.getAllMentionedUserIdsFromMessage();
 
       expect(result, equals(['@datjuly:stg.lin-saas.com']));
+    });
+
+    test('ignores room IDs and aliases in matrix.to URLs', () {
+      const message =
+          '<a href="https://matrix.to/#/!roomid:matrix.org">Room</a> <a href="https://matrix.to/#/#alias:matrix.org">Alias</a>';
+
+      final result = message.getAllMentionedUserIdsFromMessage();
+
+      expect(result, isEmpty);
     });
   });
 

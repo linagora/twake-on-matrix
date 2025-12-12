@@ -545,7 +545,7 @@ extension LocalizedBody on Event {
     final formattedBody = content.tryGet<String>('formatted_body');
     if (formattedBody != null && formattedBody.isNotEmpty) {
       final mentionedUserIds =
-          formattedBody.getAllMentionedUserIdsFromMessage(room);
+          formattedBody.getAllMentionedUserIdsFromMessage();
       return mentionedUserIds.contains(currentUserId);
     }
 
