@@ -33,10 +33,16 @@ abstract class ClientManager {
     }
     final clients = await Future.wait(
       clientNames.map((name) async {
-        final database = await MatrixSdkDatabase.init(
-          name,
-          database: await openSqfliteDb(name: name),
-        );
+        late DatabaseApi database;
+        try {
+          database = await MatrixSdkDatabase.init(
+            name,
+            database: await openSqfliteDb(name: name),
+          );
+        } catch (e) {
+          Logs().e('Unable to open database for client $name', e);
+          database = FlutterHiveCollectionsDatabase(name, '');
+        }
         return createClient(name, database: database);
       }),
     );
