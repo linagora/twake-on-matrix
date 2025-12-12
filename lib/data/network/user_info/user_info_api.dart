@@ -49,10 +49,9 @@ class UserInfoApi {
     );
 
     final uri =
-        TomEndpoint.userInfoServicePath.generateTomUserInfoEndpoint(userId);
+        TomEndpoint.userInfoServicePath.userInfoVisibilityServicePath(userId);
 
-    final response =
-        await client.get("$uri/visibility").onError((error, stackTrace) {
+    final response = await client.get(uri).onError((error, stackTrace) {
       if (error is DioException) {
         throw DioException(
           requestOptions: error.requestOptions,
@@ -77,10 +76,10 @@ class UserInfoApi {
     );
 
     final uri =
-        TomEndpoint.userInfoServicePath.generateTomUserInfoEndpoint(userId);
+        TomEndpoint.userInfoServicePath.userInfoVisibilityServicePath(userId);
 
     final response = await client
-        .postToGetBody("$uri/visibility", data: body.toJson())
+        .postToGetBody(uri, data: body.toJson())
         .onError((error, stackTrace) {
       if (error is DioException) {
         throw DioException(

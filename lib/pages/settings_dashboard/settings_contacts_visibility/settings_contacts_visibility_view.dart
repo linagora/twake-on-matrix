@@ -185,6 +185,25 @@ class SettingsContactsVisibilityView extends StatelessWidget {
     );
   }
 
+  BorderRadius? _buildVisibilityOptionBorderRadius({
+    required SettingsContactsVisibilityEnum option,
+  }) {
+    switch (option) {
+      case SettingsContactsVisibilityEnum.public:
+        return const BorderRadius.only(
+          topLeft: Radius.circular(16),
+          topRight: Radius.circular(16),
+        );
+      case SettingsContactsVisibilityEnum.contacts:
+        return null;
+      case SettingsContactsVisibilityEnum.private:
+        return const BorderRadius.only(
+          bottomLeft: Radius.circular(16),
+          bottomRight: Radius.circular(16),
+        );
+    }
+  }
+
   Widget _buildVisibilityOptionItem({
     required BuildContext context,
     required SettingsContactsVisibilityEnum option,
@@ -195,6 +214,7 @@ class SettingsContactsVisibilityView extends StatelessWidget {
     return InkWell(
       key: Key('visibility_option_${option.name}'),
       onTap: () => onTap?.call(option),
+      borderRadius: _buildVisibilityOptionBorderRadius(option: option),
       child: Row(
         children: [
           Expanded(
@@ -245,6 +265,23 @@ class SettingsContactsVisibilityView extends StatelessWidget {
     );
   }
 
+  BorderRadius? _buildVisibleFieldBorderRadius({
+    required VisibleEnum option,
+  }) {
+    switch (option) {
+      case VisibleEnum.phone:
+        return const BorderRadius.only(
+          topLeft: Radius.circular(16),
+          topRight: Radius.circular(16),
+        );
+      case VisibleEnum.email:
+        return const BorderRadius.only(
+          bottomLeft: Radius.circular(16),
+          bottomRight: Radius.circular(16),
+        );
+    }
+  }
+
   Widget _buildVisibleFieldItem({
     required BuildContext context,
     required VisibleEnum option,
@@ -255,6 +292,7 @@ class SettingsContactsVisibilityView extends StatelessWidget {
     return InkWell(
       key: Key('visible_field_option_${option.name}'),
       onTap: () => onTap?.call(option),
+      borderRadius: _buildVisibleFieldBorderRadius(option: option),
       child: Row(
         children: [
           Expanded(

@@ -1,3 +1,5 @@
+import 'package:flutter_test/flutter_test.dart';
+
 import '../../base/test_base.dart';
 import '../../robots/home_robot.dart';
 import '../../robots/setting/settings_contacts_visibility_robot.dart';
@@ -19,6 +21,22 @@ void main() {
 
       // Verify everyone option is present
       await contactsVisibilityRobot.everyoneOption().waitUntilVisible();
+
+      // Select every one option
+      await contactsVisibilityRobot.selectEveryoneOption();
+
+      // Wait for UI to settle after selection
+      await $.pumpAndSettle();
+
+      // Verify email and phone fields are NOT visible when everyone is selected
+      expect(
+        contactsVisibilityRobot.emailFieldOption(),
+        findsNothing,
+      );
+      expect(
+        contactsVisibilityRobot.phoneNumberFieldOption(),
+        findsNothing,
+      );
     },
   );
 
@@ -38,8 +56,13 @@ void main() {
       // Verify contacts option is present
       await contactsVisibilityRobot.contactsOption().waitUntilVisible();
 
-      /// Verify email and phone visible fields are present
+      // Select contacts option
+      await contactsVisibilityRobot.selectContactsOption();
 
+      // Wait for UI to settle after selection
+      await $.pumpAndSettle();
+
+      // Verify email and phone visible fields are present
       await contactsVisibilityRobot.emailFieldOption().waitUntilVisible();
 
       await contactsVisibilityRobot.phoneNumberFieldOption().waitUntilVisible();
@@ -61,6 +84,22 @@ void main() {
 
       // Verify nobody option is present
       await contactsVisibilityRobot.nobodyOption().waitUntilVisible();
+
+      // Select nobody option
+      await contactsVisibilityRobot.selectNobodyOption();
+
+      // Wait for UI to settle after selection
+      await $.pumpAndSettle();
+
+      // Verify email and phone fields are NOT visible when nobody is selected
+      expect(
+        contactsVisibilityRobot.emailFieldOption(),
+        findsNothing,
+      );
+      expect(
+        contactsVisibilityRobot.phoneNumberFieldOption(),
+        findsNothing,
+      );
     },
   );
 }
