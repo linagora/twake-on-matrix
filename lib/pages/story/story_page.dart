@@ -209,10 +209,7 @@ class StoryPageController extends State<StoryPage> {
       final fileName =
           event.content.tryGet<String>('filename') ?? 'unknown_story_video.mp4';
       final file = File('${tmpDirectory.path}/$fileName');
-      if (matrixFile.bytes == null) {
-        return null;
-      }
-      await file.writeAsBytes(matrixFile.bytes!);
+      await file.writeAsBytes(matrixFile.bytes);
       if (!mounted) return null;
       final videoPlayerController =
           _videoPlayerController = VideoPlayerController.file(file);
@@ -339,7 +336,7 @@ class StoryPageController extends State<StoryPage> {
     );
     if (reason == null || reason.single.isEmpty) return;
     final result = await TwakeDialog.showFutureLoadingDialogFullScreen(
-      future: () => Matrix.of(context).client.reportContent(
+      future: () => Matrix.of(context).client.reportEvent(
             roomId,
             event.eventId,
             reason: reason.single,
@@ -367,20 +364,19 @@ class StoryPageController extends State<StoryPage> {
         })
       : null;
 
-  Uri? get avatar => Matrix.of(context)
-      .client
-      .getRoomById(roomId)
-      ?.getState(EventTypes.RoomCreate)
-      ?.senderFromMemoryOrFallback
-      .avatarUrl;
+  Event? get roomCreateStateEvent {
+    final event = Matrix.of(context)
+        .client
+        .getRoomById(roomId)
+        ?.getState(EventTypes.RoomCreate);
+    if (event is Event) return event;
+    return null;
+  }
+
+  Uri? get avatar => roomCreateStateEvent?.senderFromMemoryOrFallback.avatarUrl;
 
   String get title =>
-      Matrix.of(context)
-          .client
-          .getRoomById(roomId)
-          ?.getState(EventTypes.RoomCreate)
-          ?.senderFromMemoryOrFallback
-          .calcDisplayname() ??
+      roomCreateStateEvent?.senderFromMemoryOrFallback.calcDisplayname() ??
       'Story not found';
 
   Future<void>? loadStory;
