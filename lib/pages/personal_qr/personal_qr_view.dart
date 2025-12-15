@@ -17,7 +17,6 @@ import 'package:go_router/go_router.dart';
 import 'package:linagora_design_flutter/colors/linagora_ref_colors.dart';
 import 'package:linagora_design_flutter/colors/linagora_sys_colors.dart';
 import 'package:matrix/matrix.dart';
-import 'package:share_plus/share_plus.dart';
 
 class PersonalQrView extends StatelessWidget {
   const PersonalQrView(this.controller, {super.key});
@@ -256,7 +255,7 @@ class _ActionButtonsSection extends StatelessWidget {
           label: l10n.shareQrCode,
           color: sysColor.onPrimary,
           backgroundColor: sysColor.primary,
-          onTap: () => Share.share(qrData),
+          onTap: () => controller.shareQrCode(context),
           rotatePiAngle: -0.25,
         ),
         _ShareQrButton(
