@@ -77,23 +77,26 @@ mixin GoToDraftChatMixin {
     required String path,
     required ContactPresentationSearch contactPresentationSearch,
   }) {
-    if (contactPresentationSearch.matrixId !=
+    if (contactPresentationSearch.matrixId ==
         Matrix.of(context).client.userID) {
+      TwakeSnackBar.show(context, L10n.of(context)!.cannotCreateChatWithSelf);
+      return;
+    }
+
+    if (contactPresentationSearch.matrixId != null) {
       Router.neglect(
         context,
         () => context.push(
           '/$path/draftChat',
           extra: {
             PresentationContactConstant.receiverId:
-                contactPresentationSearch.matrixId ?? '',
+                contactPresentationSearch.matrixId!,
             PresentationContactConstant.displayName:
                 contactPresentationSearch.displayName ?? '',
             PresentationContactConstant.status: '',
           },
         ),
       );
-    } else {
-      TwakeSnackBar.show(context, L10n.of(context)!.cannotCreateChatWithSelf);
     }
   }
 
