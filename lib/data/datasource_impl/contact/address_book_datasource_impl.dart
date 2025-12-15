@@ -13,4 +13,9 @@ class AddressBookDatasourceImpl extends AddressBookDatasource {
   }) {
     return _addressBookApi.updateAddressBook(request: request);
   }
+
+  @override
+  Future<AddressbookResponse> getAddressBook() {
+    return _addressBookApi.getAddressBook();
+  }
 }

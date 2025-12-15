@@ -1,5 +1,7 @@
 import 'package:fluffychat/data/model/addressbook/address_book.dart';
+import 'package:fluffychat/domain/model/contact/contact.dart';
 import 'package:fluffychat/domain/model/contact/contact_status.dart';
+import 'package:fluffychat/domain/model/contact/third_party_status.dart';
 import 'package:fluffychat/presentation/model/contact/presentation_contact.dart';
 
 extension IterableAddressBookExtension on Iterable<AddressBook> {
@@ -39,6 +41,13 @@ extension AddressBookListExtension on Set<AddressBook> {
   }
 }
 
+extension IterableAddressBookToContactExtension on Iterable<AddressBook> {
+  /// Converts a list of AddressBook entries to a list of Contacts.
+  List<Contact> toContacts() {
+    return map((addressBook) => addressBook.toContact()).toList();
+  }
+}
+
 extension AddressBookExtension on AddressBook {
   Set<PresentationContact> toPresentationContact() {
     return {
@@ -51,5 +60,35 @@ extension AddressBookExtension on AddressBook {
             : ContactStatus.inactive,
       ),
     };
+  }
+
+  /// Converts an AddressBook to a Contact.
+  ///
+  /// Since AddressBook primarily contains Matrix ID (mxid) information without
+  /// email or phone number details, this creates a Contact with the mxid
+  /// stored as an email address to preserve the Matrix ID association.
+  Contact toContact() {
+    final status = addressBookIsActive()
+        ? ThirdPartyStatus.active
+        : ThirdPartyStatus.inactive;
+
+    // Use mxid as a pseudo-email to store the Matrix ID in the Contact structure
+    // This allows the Contact to maintain the Matrix ID association
+    final emails = mxid != null && mxid!.isNotEmpty
+        ? {
+            Email(
+              address: mxid!,
+              matrixId: mxid,
+              status: status,
+            ),
+          }
+        : const <Email>{};
+
+    return Contact(
+      id: id ?? addressbookId ?? mxid ?? '',
+      displayName: displayName,
+      emails: emails,
+      phoneNumbers: const {},
+    );
   }
 }

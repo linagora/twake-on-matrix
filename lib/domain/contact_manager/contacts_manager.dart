@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:dartz/dartz.dart';
 import 'package:fluffychat/app_state/failure.dart';
 import 'package:fluffychat/app_state/success.dart';
-import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/data/network/interceptor/authorization_interceptor.dart';
 import 'package:fluffychat/data/network/interceptor/dynamic_url_interceptor.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
@@ -192,9 +191,7 @@ class ContactsManager {
   }
 
   void refreshTomContacts(Client client) {
-    tomContactsSubscription = getTomContactsInteractor
-        .execute(limit: AppConfig.maxFetchContacts)
-        .listen(
+    tomContactsSubscription = getTomContactsInteractor.execute().listen(
       (event) {
         _contactsNotifier.value = event;
       },
@@ -206,9 +203,7 @@ class ContactsManager {
     bool isAvailableSupportPhonebookContacts = false,
     required String withMxId,
   }) async {
-    tomContactsSubscription = getTomContactsInteractor
-        .execute(limit: AppConfig.maxFetchContacts)
-        .listen(
+    tomContactsSubscription = getTomContactsInteractor.execute().listen(
       (event) {
         _contactsNotifier.value = event;
       },
@@ -239,9 +234,7 @@ class ContactsManager {
     bool isAvailableSupportPhonebookContacts = false,
     required String withMxId,
   }) async {
-    tomContactsSubscription = getTomContactsInteractor
-        .execute(limit: AppConfig.maxFetchContacts)
-        .listen(
+    tomContactsSubscription = getTomContactsInteractor.execute().listen(
       (event) {
         _contactsNotifier.value = event;
       },

@@ -5,4 +5,6 @@ abstract class AddressBookRepository {
   Future<AddressbookResponse> updateAddressBook({
     required AddressBookRequest request,
   });
+
+  Future<AddressbookResponse> getAddressBook();
 }
