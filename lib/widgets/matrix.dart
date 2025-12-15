@@ -379,14 +379,28 @@ class MatrixState extends State<Matrix>
 
   /// Initializes sharing intent once when user is logged in
   void _initializeSharingIntentOnce() {
-    if (_hasInitializedSharingIntent) return;
+    if (_hasInitializedSharingIntent) {
+      Logs().d(
+        'MatrixState::_initializeSharingIntentOnce: Already initialized, skipping',
+      );
+      return;
+    }
+    Logs().d('MatrixState::_initializeSharingIntentOnce: Initializing');
     _hasInitializedSharingIntent = true;
     initReceiveSharingIntent();
   }
 
   /// Initializes sharing intent after first sync completes
   void _initializeSharingIntentAfterFirstSync(Client client) {
-    if (_hasInitializedSharingIntent) return;
+    if (_hasInitializedSharingIntent) {
+      Logs().d(
+        'MatrixState::_initializeSharingIntentAfterFirstSync: Already initialized, skipping',
+      );
+      return;
+    }
+    Logs().d(
+      'MatrixState::_initializeSharingIntentAfterFirstSync: Waiting for first sync',
+    );
     client.onSync.stream.first.then((_) {
       Logs().d(
         'MatrixState::_initializeSharingIntentAfterFirstSync: First sync completed, initializing sharing intent',
