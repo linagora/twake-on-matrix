@@ -5,7 +5,6 @@ import 'package:dartz/dartz.dart';
 import 'package:dio_cache_interceptor_hive_store/dio_cache_interceptor_hive_store.dart';
 import 'package:fluffychat/app_state/failure.dart';
 import 'package:fluffychat/app_state/success.dart';
-import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/data/local/contact/shared_preferences_contact_cache_manager.dart';
 import 'package:fluffychat/data/model/federation_server/federation_configuration.dart';
 import 'package:fluffychat/data/model/federation_server/federation_server_information.dart';
@@ -158,9 +157,7 @@ void main() {
         });
 
         when(
-          mockGetTomContactsInteractor.execute(
-            limit: AppConfig.maxFetchContacts,
-          ),
+          mockGetTomContactsInteractor.execute(),
         ).thenAnswer(
           (_) => Stream.fromIterable([
             const Right(ContactsLoading()),
@@ -214,9 +211,7 @@ void main() {
         });
 
         when(
-          mockGetTomContactsInteractor.execute(
-            limit: AppConfig.maxFetchContacts,
-          ),
+          mockGetTomContactsInteractor.execute(),
         ).thenAnswer(
           (_) => Stream.fromIterable([
             const Right(ContactsLoading()),
@@ -271,9 +266,7 @@ void main() {
         });
 
         when(
-          mockGetTomContactsInteractor.execute(
-            limit: AppConfig.maxFetchContacts,
-          ),
+          mockGetTomContactsInteractor.execute(),
         ).thenAnswer(
           (_) => Stream.fromIterable([
             const Right(ContactsLoading()),
@@ -371,9 +364,7 @@ void main() {
         final List<Failure> listPhonebookContactsFailureState = [];
 
         when(
-          mockGetTomContactsInteractor.execute(
-            limit: AppConfig.maxFetchContacts,
-          ),
+          mockGetTomContactsInteractor.execute(),
         ).thenAnswer(
           (_) => Stream.fromIterable([
             const Right(ContactsLoading()),
@@ -452,9 +443,7 @@ void main() {
         await Future.delayed(const Duration(seconds: 1));
 
         verify(
-          mockGetTomContactsInteractor.execute(
-            limit: AppConfig.maxFetchContacts,
-          ),
+          mockGetTomContactsInteractor.execute(),
         ).called(1);
 
         verify(
@@ -501,9 +490,7 @@ void main() {
         final List<Success> listPhonebookContactsSuccessState = [];
 
         when(
-          mockGetTomContactsInteractor.execute(
-            limit: AppConfig.maxFetchContacts,
-          ),
+          mockGetTomContactsInteractor.execute(),
         ).thenAnswer(
           (_) => Stream.fromIterable([
             const Right(ContactsLoading()),
@@ -546,9 +533,7 @@ void main() {
         await Future.delayed(const Duration(seconds: 1));
 
         verify(
-          mockGetTomContactsInteractor.execute(
-            limit: AppConfig.maxFetchContacts,
-          ),
+          mockGetTomContactsInteractor.execute(),
         ).called(1);
 
         verify(
@@ -615,9 +600,7 @@ void main() {
         final List<Failure> listPhonebookContactsFailureState = [];
 
         when(
-          mockGetTomContactsInteractor.execute(
-            limit: AppConfig.maxFetchContacts,
-          ),
+          mockGetTomContactsInteractor.execute(),
         ).thenAnswer(
           (_) => Stream.fromIterable([
             const Right(ContactsLoading()),
@@ -699,9 +682,7 @@ void main() {
         await Future.delayed(const Duration(seconds: 1));
 
         verify(
-          mockGetTomContactsInteractor.execute(
-            limit: AppConfig.maxFetchContacts,
-          ),
+          mockGetTomContactsInteractor.execute(),
         ).called(1);
 
         verify(
@@ -774,9 +755,7 @@ void main() {
         debugDefaultTargetPlatformOverride = TargetPlatform.android;
 
         when(
-          mockGetTomContactsInteractor.execute(
-            limit: AppConfig.maxFetchContacts,
-          ),
+          mockGetTomContactsInteractor.execute(),
         ).thenAnswer(
           (_) => Stream.fromIterable([
             const Right(ContactsLoading()),
@@ -869,9 +848,7 @@ void main() {
         await Future.delayed(const Duration(seconds: 1));
 
         verify(
-          mockGetTomContactsInteractor.execute(
-            limit: AppConfig.maxFetchContacts,
-          ),
+          mockGetTomContactsInteractor.execute(),
         ).called(1);
 
         verify(
@@ -939,9 +916,7 @@ void main() {
         final List<Success> listPhonebookContactsSuccessState = [];
 
         when(
-          mockGetTomContactsInteractor.execute(
-            limit: AppConfig.maxFetchContacts,
-          ),
+          mockGetTomContactsInteractor.execute(),
         ).thenAnswer(
           (_) => Stream.fromIterable([
             const Right(ContactsLoading()),
@@ -1034,9 +1009,7 @@ void main() {
         await Future.delayed(const Duration(seconds: 1));
 
         verify(
-          mockGetTomContactsInteractor.execute(
-            limit: AppConfig.maxFetchContacts,
-          ),
+          mockGetTomContactsInteractor.execute(),
         ).called(1);
 
         verify(
@@ -1105,9 +1078,7 @@ void main() {
         final List<Failure> listPhonebookContactsFailureState = [];
 
         when(
-          mockGetTomContactsInteractor.execute(
-            limit: AppConfig.maxFetchContacts,
-          ),
+          mockGetTomContactsInteractor.execute(),
         ).thenAnswer(
           (_) => Stream.fromIterable([
             const Right(ContactsLoading()),
@@ -1186,9 +1157,7 @@ void main() {
         await Future.delayed(const Duration(seconds: 1));
 
         verify(
-          mockGetTomContactsInteractor.execute(
-            limit: AppConfig.maxFetchContacts,
-          ),
+          mockGetTomContactsInteractor.execute(),
         ).called(1);
 
         verify(
@@ -1235,9 +1204,7 @@ void main() {
         final List<Failure> listPhonebookContactsFailureState = [];
 
         when(
-          mockGetTomContactsInteractor.execute(
-            limit: AppConfig.maxFetchContacts,
-          ),
+          mockGetTomContactsInteractor.execute(),
         ).thenAnswer(
           (_) => Stream.fromIterable([
             const Right(ContactsLoading()),
@@ -1311,9 +1278,7 @@ void main() {
         await Future.delayed(const Duration(seconds: 1));
 
         verify(
-          mockGetTomContactsInteractor.execute(
-            limit: AppConfig.maxFetchContacts,
-          ),
+          mockGetTomContactsInteractor.execute(),
         ).called(1);
 
         verify(
@@ -1357,9 +1322,7 @@ void main() {
         final List<Failure> listPhonebookContactsFailureState = [];
 
         when(
-          mockGetTomContactsInteractor.execute(
-            limit: AppConfig.maxFetchContacts,
-          ),
+          mockGetTomContactsInteractor.execute(),
         ).thenAnswer(
           (_) => Stream.fromIterable([
             const Right(ContactsLoading()),
@@ -1433,9 +1396,7 @@ void main() {
         await Future.delayed(const Duration(seconds: 1));
 
         verify(
-          mockGetTomContactsInteractor.execute(
-            limit: AppConfig.maxFetchContacts,
-          ),
+          mockGetTomContactsInteractor.execute(),
         ).called(1);
 
         verify(
@@ -1479,9 +1440,7 @@ void main() {
         final List<Failure> listPhonebookContactsFailureState = [];
 
         when(
-          mockGetTomContactsInteractor.execute(
-            limit: AppConfig.maxFetchContacts,
-          ),
+          mockGetTomContactsInteractor.execute(),
         ).thenAnswer(
           (_) => Stream.fromIterable([
             const Right(ContactsLoading()),
@@ -1555,9 +1514,7 @@ void main() {
         await Future.delayed(const Duration(seconds: 1));
 
         verify(
-          mockGetTomContactsInteractor.execute(
-            limit: AppConfig.maxFetchContacts,
-          ),
+          mockGetTomContactsInteractor.execute(),
         ).called(1);
 
         verify(
@@ -1599,9 +1556,7 @@ void main() {
         final List<Failure> listPhonebookContactsFailureState = [];
 
         when(
-          mockGetTomContactsInteractor.execute(
-            limit: AppConfig.maxFetchContacts,
-          ),
+          mockGetTomContactsInteractor.execute(),
         ).thenAnswer(
           (_) => Stream.fromIterable([
             const Right(ContactsLoading()),
@@ -1680,9 +1635,7 @@ void main() {
         await Future.delayed(const Duration(seconds: 1));
 
         verify(
-          mockGetTomContactsInteractor.execute(
-            limit: AppConfig.maxFetchContacts,
-          ),
+          mockGetTomContactsInteractor.execute(),
         ).called(1);
 
         verify(
@@ -1720,9 +1673,7 @@ void main() {
         await Future.delayed(const Duration(seconds: 5));
 
         verifyNever(
-          mockGetTomContactsInteractor.execute(
-            limit: AppConfig.maxFetchContacts,
-          ),
+          mockGetTomContactsInteractor.execute(),
         );
       },
     );
@@ -1740,9 +1691,7 @@ void main() {
         final List<Failure> listPhonebookContactsFailureState = [];
 
         when(
-          mockGetTomContactsInteractor.execute(
-            limit: AppConfig.maxFetchContacts,
-          ),
+          mockGetTomContactsInteractor.execute(),
         ).thenAnswer(
           (_) => Stream.fromIterable([
             const Right(ContactsLoading()),
@@ -1821,9 +1770,7 @@ void main() {
         await Future.delayed(const Duration(seconds: 1));
 
         verify(
-          mockGetTomContactsInteractor.execute(
-            limit: AppConfig.maxFetchContacts,
-          ),
+          mockGetTomContactsInteractor.execute(),
         ).called(1);
 
         verify(
@@ -1862,9 +1809,7 @@ void main() {
         await Future.delayed(const Duration(seconds: 5));
 
         verify(
-          mockGetTomContactsInteractor.execute(
-            limit: AppConfig.maxFetchContacts,
-          ),
+          mockGetTomContactsInteractor.execute(),
         ).called(1);
       },
     );
@@ -1893,9 +1838,7 @@ void main() {
         final List<Failure> listPhonebookContactsFailureState = [];
 
         when(
-          mockGetTomContactsInteractor.execute(
-            limit: AppConfig.maxFetchContacts,
-          ),
+          mockGetTomContactsInteractor.execute(),
         ).thenAnswer(
           (_) => Stream.fromIterable([
             const Right(ContactsLoading()),
@@ -1969,9 +1912,7 @@ void main() {
         await Future.delayed(const Duration(seconds: 1));
 
         verify(
-          mockGetTomContactsInteractor.execute(
-            limit: AppConfig.maxFetchContacts,
-          ),
+          mockGetTomContactsInteractor.execute(),
         ).called(1);
 
         verify(
@@ -2008,9 +1949,7 @@ void main() {
         listPhonebookContactsFailureState.clear();
 
         when(
-          mockGetTomContactsInteractor.execute(
-            limit: AppConfig.maxFetchContacts,
-          ),
+          mockGetTomContactsInteractor.execute(),
         ).thenAnswer(
           (_) => Stream.fromIterable([
             const Right(ContactsLoading()),
@@ -2070,9 +2009,7 @@ void main() {
         await Future.delayed(const Duration(seconds: 1));
 
         verify(
-          mockGetTomContactsInteractor.execute(
-            limit: AppConfig.maxFetchContacts,
-          ),
+          mockGetTomContactsInteractor.execute(),
         ).called(1);
 
         verify(
@@ -2128,9 +2065,7 @@ void main() {
         final List<Success> listPhonebookContactsSuccessState = [];
 
         when(
-          mockGetTomContactsInteractor.execute(
-            limit: AppConfig.maxFetchContacts,
-          ),
+          mockGetTomContactsInteractor.execute(),
         ).thenAnswer(
           (_) => Stream.fromIterable([
             const Right(ContactsLoading()),
@@ -2204,9 +2139,7 @@ void main() {
         await Future.delayed(const Duration(seconds: 1));
 
         verify(
-          mockGetTomContactsInteractor.execute(
-            limit: AppConfig.maxFetchContacts,
-          ),
+          mockGetTomContactsInteractor.execute(),
         ).called(1);
 
         verify(
@@ -2245,9 +2178,7 @@ void main() {
         listPhonebookContactsSuccessState.clear();
 
         when(
-          mockGetTomContactsInteractor.execute(
-            limit: AppConfig.maxFetchContacts,
-          ),
+          mockGetTomContactsInteractor.execute(),
         ).thenAnswer(
           (_) => Stream.fromIterable([
             const Right(ContactsLoading()),
@@ -2323,9 +2254,7 @@ void main() {
         await Future.delayed(const Duration(seconds: 1));
 
         verify(
-          mockGetTomContactsInteractor.execute(
-            limit: AppConfig.maxFetchContacts,
-          ),
+          mockGetTomContactsInteractor.execute(),
         ).called(1);
 
         verify(
@@ -2402,9 +2331,7 @@ void main() {
         final List<Failure> listPhonebookContactsFailureState = [];
 
         when(
-          mockGetTomContactsInteractor.execute(
-            limit: AppConfig.maxFetchContacts,
-          ),
+          mockGetTomContactsInteractor.execute(),
         ).thenAnswer(
           (_) => Stream.fromIterable([
             const Right(ContactsLoading()),
@@ -2475,9 +2402,7 @@ void main() {
         await Future.delayed(const Duration(seconds: 1));
 
         verify(
-          mockGetTomContactsInteractor.execute(
-            limit: AppConfig.maxFetchContacts,
-          ),
+          mockGetTomContactsInteractor.execute(),
         ).called(1);
 
         verify(
@@ -2533,9 +2458,7 @@ void main() {
         final List<Failure> listPhonebookContactsFailureState = [];
 
         when(
-          mockGetTomContactsInteractor.execute(
-            limit: AppConfig.maxFetchContacts,
-          ),
+          mockGetTomContactsInteractor.execute(),
         ).thenAnswer(
           (_) => Stream.fromIterable([
             const Right(ContactsLoading()),
@@ -2606,9 +2529,7 @@ void main() {
         await Future.delayed(const Duration(seconds: 1));
 
         verify(
-          mockGetTomContactsInteractor.execute(
-            limit: AppConfig.maxFetchContacts,
-          ),
+          mockGetTomContactsInteractor.execute(),
         ).called(1);
 
         verify(
@@ -2664,9 +2585,7 @@ void main() {
         final List<Success> listPhonebookContactsSuccessState = [];
 
         when(
-          mockGetTomContactsInteractor.execute(
-            limit: AppConfig.maxFetchContacts,
-          ),
+          mockGetTomContactsInteractor.execute(),
         ).thenAnswer(
           (_) => Stream.fromIterable([
             const Right(ContactsLoading()),
@@ -2750,9 +2669,7 @@ void main() {
         await Future.delayed(const Duration(seconds: 1));
 
         verify(
-          mockGetTomContactsInteractor.execute(
-            limit: AppConfig.maxFetchContacts,
-          ),
+          mockGetTomContactsInteractor.execute(),
         ).called(1);
 
         verify(
@@ -2824,9 +2741,7 @@ void main() {
         final List<Failure> listPhonebookContactsFailureState = [];
 
         when(
-          mockGetTomContactsInteractor.execute(
-            limit: AppConfig.maxFetchContacts,
-          ),
+          mockGetTomContactsInteractor.execute(),
         ).thenAnswer(
           (_) => Stream.fromIterable([
             const Right(ContactsLoading()),
@@ -2897,9 +2812,7 @@ void main() {
         await Future.delayed(const Duration(seconds: 1));
 
         verify(
-          mockGetTomContactsInteractor.execute(
-            limit: AppConfig.maxFetchContacts,
-          ),
+          mockGetTomContactsInteractor.execute(),
         ).called(1);
 
         verify(
@@ -2936,9 +2849,7 @@ void main() {
         listPhonebookContactsFailureState.clear();
 
         when(
-          mockGetTomContactsInteractor.execute(
-            limit: AppConfig.maxFetchContacts,
-          ),
+          mockGetTomContactsInteractor.execute(),
         ).thenAnswer(
           (_) => Stream.fromIterable([
             const Right(ContactsLoading()),
@@ -3025,9 +2936,7 @@ void main() {
         await Future.delayed(const Duration(seconds: 1));
 
         verify(
-          mockGetTomContactsInteractor.execute(
-            limit: AppConfig.maxFetchContacts,
-          ),
+          mockGetTomContactsInteractor.execute(),
         ).called(1);
 
         verify(
@@ -3083,9 +2992,7 @@ void main() {
         final List<Success> listPhonebookContactsSuccessState = [];
 
         when(
-          mockGetTomContactsInteractor.execute(
-            limit: AppConfig.maxFetchContacts,
-          ),
+          mockGetTomContactsInteractor.execute(),
         ).thenAnswer(
           (_) => Stream.fromIterable([
             const Right(ContactsLoading()),
@@ -3155,9 +3062,7 @@ void main() {
         await Future.delayed(const Duration(seconds: 1));
 
         verify(
-          mockGetTomContactsInteractor.execute(
-            limit: AppConfig.maxFetchContacts,
-          ),
+          mockGetTomContactsInteractor.execute(),
         ).called(1);
 
         verify(
@@ -3196,9 +3101,7 @@ void main() {
         listPhonebookContactsSuccessState.clear();
 
         when(
-          mockGetTomContactsInteractor.execute(
-            limit: AppConfig.maxFetchContacts,
-          ),
+          mockGetTomContactsInteractor.execute(),
         ).thenAnswer(
           (_) => Stream.fromIterable([
             const Right(ContactsLoading()),
@@ -3268,9 +3171,7 @@ void main() {
         await Future.delayed(const Duration(seconds: 1));
 
         verify(
-          mockGetTomContactsInteractor.execute(
-            limit: AppConfig.maxFetchContacts,
-          ),
+          mockGetTomContactsInteractor.execute(),
         ).called(1);
 
         verify(
@@ -3338,9 +3239,7 @@ void main() {
         final List<Success> listPhonebookContactsSuccessState = [];
 
         when(
-          mockGetTomContactsInteractor.execute(
-            limit: AppConfig.maxFetchContacts,
-          ),
+          mockGetTomContactsInteractor.execute(),
         ).thenAnswer(
           (_) => Stream.fromIterable([
             const Right(ContactsLoading()),
@@ -3369,9 +3268,7 @@ void main() {
                 contactsManager.cancelAllSubscriptions();
 
                 when(
-                  mockGetTomContactsInteractor.execute(
-                    limit: AppConfig.maxFetchContacts,
-                  ),
+                  mockGetTomContactsInteractor.execute(),
                 ).thenAnswer(
                   (_) => Stream.fromIterable([
                     const Right(ContactsLoading()),
@@ -3454,9 +3351,7 @@ void main() {
                 await Future.delayed(const Duration(seconds: 1));
 
                 verify(
-                  mockGetTomContactsInteractor.execute(
-                    limit: AppConfig.maxFetchContacts,
-                  ),
+                  mockGetTomContactsInteractor.execute(),
                 ).called(2);
 
                 verify(
@@ -3545,9 +3440,7 @@ void main() {
         final List<Failure> listPhonebookContactsFailureState = [];
 
         when(
-          mockGetTomContactsInteractor.execute(
-            limit: AppConfig.maxFetchContacts,
-          ),
+          mockGetTomContactsInteractor.execute(),
         ).thenAnswer(
           (_) => Stream.fromIterable([
             const Right(ContactsLoading()),
@@ -3608,9 +3501,7 @@ void main() {
         await Future.delayed(const Duration(seconds: 1));
 
         verify(
-          mockGetTomContactsInteractor.execute(
-            limit: AppConfig.maxFetchContacts,
-          ),
+          mockGetTomContactsInteractor.execute(),
         ).called(1);
 
         expectLater(listTomContactsFailureState.length, 1);
@@ -3660,9 +3551,7 @@ void main() {
         final List<Failure> listPhonebookContactsFailureState = [];
 
         when(
-          mockGetTomContactsInteractor.execute(
-            limit: AppConfig.maxFetchContacts,
-          ),
+          mockGetTomContactsInteractor.execute(),
         ).thenAnswer(
           (_) => Stream.fromIterable([
             const Right(ContactsLoading()),
@@ -3723,9 +3612,7 @@ void main() {
         await Future.delayed(const Duration(seconds: 1));
 
         verify(
-          mockGetTomContactsInteractor.execute(
-            limit: AppConfig.maxFetchContacts,
-          ),
+          mockGetTomContactsInteractor.execute(),
         ).called(1);
 
         expectLater(listTomContactsFailureState.length, 1);
@@ -3775,9 +3662,7 @@ void main() {
         final List<Success> listPhonebookContactsSuccessState = [];
 
         when(
-          mockGetTomContactsInteractor.execute(
-            limit: AppConfig.maxFetchContacts,
-          ),
+          mockGetTomContactsInteractor.execute(),
         ).thenAnswer(
           (_) => Stream.fromIterable([
             const Right(ContactsLoading()),
@@ -3851,9 +3736,7 @@ void main() {
         await Future.delayed(const Duration(seconds: 1));
 
         verify(
-          mockGetTomContactsInteractor.execute(
-            limit: AppConfig.maxFetchContacts,
-          ),
+          mockGetTomContactsInteractor.execute(),
         ).called(1);
 
         verify(
@@ -3936,9 +3819,7 @@ void main() {
           final List<Failure> listPhonebookContactsFailureState = [];
 
           when(
-            mockGetTomContactsInteractor.execute(
-              limit: AppConfig.maxFetchContacts,
-            ),
+            mockGetTomContactsInteractor.execute(),
           ).thenAnswer(
             (_) => Stream.fromIterable([
               const Right(ContactsLoading()),
@@ -4007,9 +3888,7 @@ void main() {
           await Future.delayed(const Duration(seconds: 1));
 
           verify(
-            mockGetTomContactsInteractor.execute(
-              limit: AppConfig.maxFetchContacts,
-            ),
+            mockGetTomContactsInteractor.execute(),
           ).called(1);
 
           verify(mockHomeServerDynamicUrlInterceptors.baseUrl).called(1);
@@ -4075,9 +3954,7 @@ void main() {
           debugDefaultTargetPlatformOverride = TargetPlatform.android;
 
           when(
-            mockGetTomContactsInteractor.execute(
-              limit: AppConfig.maxFetchContacts,
-            ),
+            mockGetTomContactsInteractor.execute(),
           ).thenAnswer(
             (_) => Stream.fromIterable([
               const Right(ContactsLoading()),
@@ -4157,9 +4034,7 @@ void main() {
           await Future.delayed(const Duration(seconds: 1));
 
           verify(
-            mockGetTomContactsInteractor.execute(
-              limit: AppConfig.maxFetchContacts,
-            ),
+            mockGetTomContactsInteractor.execute(),
           ).called(1);
 
           verify(mockHomeServerDynamicUrlInterceptors.baseUrl).called(1);
@@ -4220,9 +4095,7 @@ void main() {
           final List<Success> listPhonebookContactsSuccessState = [];
 
           when(
-            mockGetTomContactsInteractor.execute(
-              limit: AppConfig.maxFetchContacts,
-            ),
+            mockGetTomContactsInteractor.execute(),
           ).thenAnswer(
             (_) => Stream.fromIterable([
               const Right(ContactsLoading()),
@@ -4302,9 +4175,7 @@ void main() {
           await Future.delayed(const Duration(seconds: 1));
 
           verify(
-            mockGetTomContactsInteractor.execute(
-              limit: AppConfig.maxFetchContacts,
-            ),
+            mockGetTomContactsInteractor.execute(),
           ).called(1);
 
           verify(mockHomeServerDynamicUrlInterceptors.baseUrl).called(1);
@@ -4366,9 +4237,7 @@ void main() {
           final List<Failure> listPhonebookContactsFailureState = [];
 
           when(
-            mockGetTomContactsInteractor.execute(
-              limit: AppConfig.maxFetchContacts,
-            ),
+            mockGetTomContactsInteractor.execute(),
           ).thenAnswer(
             (_) => Stream.fromIterable([
               const Right(ContactsLoading()),
@@ -4437,9 +4306,7 @@ void main() {
           await Future.delayed(const Duration(seconds: 1));
 
           verify(
-            mockGetTomContactsInteractor.execute(
-              limit: AppConfig.maxFetchContacts,
-            ),
+            mockGetTomContactsInteractor.execute(),
           ).called(1);
 
           expectLater(listTomContactsFailureState.length, 1);
@@ -4479,9 +4346,7 @@ void main() {
           final List<Failure> listPhonebookContactsFailureState = [];
 
           when(
-            mockGetTomContactsInteractor.execute(
-              limit: AppConfig.maxFetchContacts,
-            ),
+            mockGetTomContactsInteractor.execute(),
           ).thenAnswer(
             (_) => Stream.fromIterable([
               const Right(ContactsLoading()),
@@ -4545,9 +4410,7 @@ void main() {
           await Future.delayed(const Duration(seconds: 1));
 
           verify(
-            mockGetTomContactsInteractor.execute(
-              limit: AppConfig.maxFetchContacts,
-            ),
+            mockGetTomContactsInteractor.execute(),
           ).called(1);
 
           expectLater(listTomContactsFailureState.length, 1);
@@ -4584,9 +4447,7 @@ void main() {
           final List<Failure> listPhonebookContactsFailureState = [];
 
           when(
-            mockGetTomContactsInteractor.execute(
-              limit: AppConfig.maxFetchContacts,
-            ),
+            mockGetTomContactsInteractor.execute(),
           ).thenAnswer(
             (_) => Stream.fromIterable([
               const Right(ContactsLoading()),
@@ -4650,9 +4511,7 @@ void main() {
           await Future.delayed(const Duration(seconds: 1));
 
           verify(
-            mockGetTomContactsInteractor.execute(
-              limit: AppConfig.maxFetchContacts,
-            ),
+            mockGetTomContactsInteractor.execute(),
           ).called(1);
 
           expectLater(listTomContactsFailureState.length, 1);
@@ -4689,9 +4548,7 @@ void main() {
           final List<Failure> listPhonebookContactsFailureState = [];
 
           when(
-            mockGetTomContactsInteractor.execute(
-              limit: AppConfig.maxFetchContacts,
-            ),
+            mockGetTomContactsInteractor.execute(),
           ).thenAnswer(
             (_) => Stream.fromIterable([
               const Right(ContactsLoading()),
@@ -4755,9 +4612,7 @@ void main() {
           await Future.delayed(const Duration(seconds: 1));
 
           verify(
-            mockGetTomContactsInteractor.execute(
-              limit: AppConfig.maxFetchContacts,
-            ),
+            mockGetTomContactsInteractor.execute(),
           ).called(1);
 
           expectLater(listTomContactsFailureState.length, 1);
@@ -4793,9 +4648,7 @@ void main() {
           final List<Failure> listPhonebookContactsFailureState = [];
 
           when(
-            mockGetTomContactsInteractor.execute(
-              limit: AppConfig.maxFetchContacts,
-            ),
+            mockGetTomContactsInteractor.execute(),
           ).thenAnswer(
             (_) => Stream.fromIterable([
               const Right(ContactsLoading()),
@@ -4825,9 +4678,7 @@ void main() {
           await Future.delayed(const Duration(seconds: 1));
 
           verify(
-            mockGetTomContactsInteractor.execute(
-              limit: AppConfig.maxFetchContacts,
-            ),
+            mockGetTomContactsInteractor.execute(),
           ).called(1);
 
           contactsManager.initialSynchronizeContacts(
@@ -4838,9 +4689,7 @@ void main() {
           await Future.delayed(const Duration(seconds: 5));
 
           verifyNever(
-            mockGetTomContactsInteractor.execute(
-              limit: AppConfig.maxFetchContacts,
-            ),
+            mockGetTomContactsInteractor.execute(),
           );
 
           verifyNever(
@@ -4864,9 +4713,7 @@ void main() {
           final List<Failure> listPhonebookContactsFailureState = [];
 
           when(
-            mockGetTomContactsInteractor.execute(
-              limit: AppConfig.maxFetchContacts,
-            ),
+            mockGetTomContactsInteractor.execute(),
           ).thenAnswer(
             (_) => Stream.fromIterable([
               const Right(ContactsLoading()),
@@ -4935,9 +4782,7 @@ void main() {
           await Future.delayed(const Duration(seconds: 1));
 
           verify(
-            mockGetTomContactsInteractor.execute(
-              limit: AppConfig.maxFetchContacts,
-            ),
+            mockGetTomContactsInteractor.execute(),
           ).called(1);
 
           expectLater(listTomContactsFailureState.length, 1);
@@ -4969,9 +4814,7 @@ void main() {
           await Future.delayed(const Duration(seconds: 5));
 
           verify(
-            mockGetTomContactsInteractor.execute(
-              limit: AppConfig.maxFetchContacts,
-            ),
+            mockGetTomContactsInteractor.execute(),
           ).called(1);
 
           verify(
@@ -5013,9 +4856,7 @@ void main() {
           final List<Failure> listPhonebookContactsFailureState = [];
 
           when(
-            mockGetTomContactsInteractor.execute(
-              limit: AppConfig.maxFetchContacts,
-            ),
+            mockGetTomContactsInteractor.execute(),
           ).thenAnswer(
             (_) => Stream.fromIterable([
               const Right(ContactsLoading()),
@@ -5076,9 +4917,7 @@ void main() {
           await Future.delayed(const Duration(seconds: 1));
 
           verify(
-            mockGetTomContactsInteractor.execute(
-              limit: AppConfig.maxFetchContacts,
-            ),
+            mockGetTomContactsInteractor.execute(),
           ).called(1);
 
           expectLater(listTomContactsFailureState.length, 1);
@@ -5109,9 +4948,7 @@ void main() {
           listPhonebookContactsFailureState.clear();
 
           when(
-            mockGetTomContactsInteractor.execute(
-              limit: AppConfig.maxFetchContacts,
-            ),
+            mockGetTomContactsInteractor.execute(),
           ).thenAnswer(
             (_) => Stream.fromIterable([
               const Right(ContactsLoading()),
@@ -5188,9 +5025,7 @@ void main() {
           await Future.delayed(const Duration(seconds: 1));
 
           verify(
-            mockGetTomContactsInteractor.execute(
-              limit: AppConfig.maxFetchContacts,
-            ),
+            mockGetTomContactsInteractor.execute(),
           ).called(1);
 
           expectLater(listTomContactsFailureState.length, 1);
@@ -5240,9 +5075,7 @@ void main() {
           final List<Success> listPhonebookContactsSuccessState = [];
 
           when(
-            mockGetTomContactsInteractor.execute(
-              limit: AppConfig.maxFetchContacts,
-            ),
+            mockGetTomContactsInteractor.execute(),
           ).thenAnswer(
             (_) => Stream.fromIterable([
               const Right(ContactsLoading()),
@@ -5303,9 +5136,7 @@ void main() {
           await Future.delayed(const Duration(seconds: 1));
 
           verify(
-            mockGetTomContactsInteractor.execute(
-              limit: AppConfig.maxFetchContacts,
-            ),
+            mockGetTomContactsInteractor.execute(),
           ).called(1);
 
           expectLater(listTomContactsFailureState.length, 1);
@@ -5338,9 +5169,7 @@ void main() {
           listPhonebookContactsSuccessState.clear();
 
           when(
-            mockGetTomContactsInteractor.execute(
-              limit: AppConfig.maxFetchContacts,
-            ),
+            mockGetTomContactsInteractor.execute(),
           ).thenAnswer(
             (_) => Stream.fromIterable([
               const Right(ContactsLoading()),
@@ -5400,9 +5229,7 @@ void main() {
           await Future.delayed(const Duration(seconds: 1));
 
           verify(
-            mockGetTomContactsInteractor.execute(
-              limit: AppConfig.maxFetchContacts,
-            ),
+            mockGetTomContactsInteractor.execute(),
           ).called(1);
 
           expectLater(listTomContactsFailureState.length, 1);
@@ -5464,9 +5291,7 @@ void main() {
           final List<Success> listPhonebookContactsSuccessState = [];
 
           when(
-            mockGetTomContactsInteractor.execute(
-              limit: AppConfig.maxFetchContacts,
-            ),
+            mockGetTomContactsInteractor.execute(),
           ).thenAnswer(
             (_) => Stream.fromIterable([
               const Right(ContactsLoading()),
@@ -5495,9 +5320,7 @@ void main() {
                   contactsManager.cancelAllSubscriptions();
 
                   when(
-                    mockGetTomContactsInteractor.execute(
-                      limit: AppConfig.maxFetchContacts,
-                    ),
+                    mockGetTomContactsInteractor.execute(),
                   ).thenAnswer(
                     (_) => Stream.fromIterable([
                       const Right(ContactsLoading()),
@@ -5570,9 +5393,7 @@ void main() {
                   await Future.delayed(const Duration(seconds: 1));
 
                   verify(
-                    mockGetTomContactsInteractor.execute(
-                      limit: AppConfig.maxFetchContacts,
-                    ),
+                    mockGetTomContactsInteractor.execute(),
                   ).called(2);
 
                   expectLater(listTomContactsFailureState.length, 1);
