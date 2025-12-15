@@ -32,12 +32,12 @@ mixin RetryTextMessageMixin {
     }
 
     try {
-      await event.remove();
       await room.sendTextEvent(
         messageBody,
         inReplyTo: replyEvent,
         editEventId: editEventId,
       );
+      await event.remove();
 
       Logs().i('RetryTextMessageMixin: Text message retry successful');
     } catch (e) {
