@@ -60,33 +60,6 @@ extension StringCasingExtension on String {
     return Matrix.of(context).client.userID == this;
   }
 
-  List<String> getMentionsFromMessage() {
-    final RegExp regex = RegExp(r"@\[([^\]]+)\]");
-    final Iterable<Match> matches = regex.allMatches(this);
-
-    final List<String> mentions = [];
-    for (final Match match in matches) {
-      final String? mention = match.group(0);
-      if (mention != null) {
-        mentions.add(mention);
-      }
-    }
-
-    return mentions;
-  }
-
-  List<String> getAllMentionedUserIdsFromMessage(Room room) {
-    final List<String> mentionUserIds = [];
-    for (final String mention in getMentionsFromMessage()) {
-      final String? userId = room.lastEvent?.room.getMention(mention);
-      if (userId != null) {
-        mentionUserIds.add(userId);
-      }
-    }
-
-    return mentionUserIds;
-  }
-
   String? getFirstValidUrl() {
     final RegExp regex = RegExp(r'https:\/\/[^\s]+', caseSensitive: false);
     final List<String?> matches =
