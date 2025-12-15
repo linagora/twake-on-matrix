@@ -392,6 +392,11 @@ class MatrixState extends State<Matrix>
         'MatrixState::_initializeSharingIntentAfterFirstSync: First sync completed, initializing sharing intent',
       );
       _initializeSharingIntentOnce();
+    }).catchError((error) {
+      Logs().e(
+        'MatrixState::_initializeSharingIntentAfterFirstSync: Error waiting for first sync: $error',
+      );
+      _initializeSharingIntentOnce();
     });
   }
 

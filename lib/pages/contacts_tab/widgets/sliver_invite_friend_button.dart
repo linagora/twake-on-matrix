@@ -44,7 +44,6 @@ class _InviteFriendButtonDelegate extends SliverPersistentHeaderDelegate {
       color: sysColor.onPrimary,
       child: InkWell(
         onTap: () async {
-          // TODO: Placeholder url
           final url = client.personalInviteUrl;
           try {
             if (PlatformInfos.isMobile) {
