@@ -76,26 +76,11 @@ extension SendFileWebExtension on Room {
         'SendImage::sendImageFileEvent(): FileSized ${file.size} || maxMediaSize $maxMediaSize',
       );
       if (maxMediaSize > 0 && maxMediaSize < file.size) {
-        uploadStreamController?.add(
-          Left(
-            UploadFileFailedState(
-              exception: FileTooBigMatrixException(file.size, maxMediaSize),
-              txid: txid,
-            ),
-          ),
-        );
         throw FileTooBigMatrixException(file.size, maxMediaSize);
       }
     } catch (e) {
       Logs().d('Config error while sending file', e);
-      uploadStreamController?.add(
-        Left(
-          UploadFileFailedState(
-            exception: e,
-            txid: txid,
-          ),
-        ),
-      );
+
       fakeImageEvent.rooms!.join!.values.first.timeline!.events!.first
           .unsigned![messageSendingStatusKey] = EventStatus.error.intValue;
       await handleImageFakeSync(fakeImageEvent);
@@ -210,15 +195,7 @@ extension SendFileWebExtension on Room {
         fakeImageEvent.rooms!.join!.values.first.timeline!.events!.first
             .unsigned![messageSendingStatusKey] = EventStatus.error.intValue;
         await handleImageFakeSync(fakeImageEvent);
-        uploadStreamController?.add(
-          Left(
-            UploadFileFailedState(
-              exception: e,
-              txid: txid,
-            ),
-          ),
-        );
-        Logs().v('Error: $e');
+        Logs().e('Error: $e');
         rethrow;
       } catch (e) {
         if (e is CancelRequestException) {

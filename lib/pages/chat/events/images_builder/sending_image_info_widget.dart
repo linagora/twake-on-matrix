@@ -12,7 +12,6 @@ import 'package:fluffychat/widgets/hero_page_route.dart';
 import 'package:fluffychat/widgets/mixins/upload_file_mixin.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_blurhash/flutter_blurhash.dart';
-import 'package:linagora_design_flutter/colors/linagora_ref_colors.dart';
 import 'package:linagora_design_flutter/colors/linagora_sys_colors.dart';
 import 'package:matrix/matrix.dart' hide Visibility;
 
@@ -89,11 +88,11 @@ class _SendingImageInfoWidgetState extends State<SendingImageInfoWidget>
             alignment: Alignment.center,
             children: [
               child!,
-              if (progress != 1) ...[
-                if (!hasError)
+              if (progress != 1 || hasError) ...[
+                if (!hasError && progress != 1)
                   CircularProgressIndicator(
                     strokeWidth: 2,
-                    color: LinagoraRefColors.material().primary[100],
+                    color: sysColor.onPrimary,
                   ),
                 if (hasError)
                   IconButton(
@@ -111,11 +110,12 @@ class _SendingImageInfoWidgetState extends State<SendingImageInfoWidget>
                       shape: const CircleBorder(),
                     ),
                   )
-                else if (uploadState is! UploadFileSuccessUIState)
+                else if (uploadState is! UploadFileSuccessUIState &&
+                    progress != 1)
                   InkWell(
                     child: Icon(
                       Icons.close,
-                      color: LinagoraRefColors.material().primary[100],
+                      color: sysColor.onPrimary,
                     ),
                     onTap: () {
                       uploadManager.cancelUpload(widget.event);

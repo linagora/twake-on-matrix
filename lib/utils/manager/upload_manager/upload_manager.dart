@@ -29,6 +29,8 @@ class UploadManager {
 
   final Map<String, UploadFileInfo> _eventIdMapUploadFileInfo = {};
 
+  final Set<String> _retriesInProgress = {};
+
   static const int _shrinkImageMaxDimension = 1600;
 
   Future<void> cancelUpload(Event event) async {
@@ -43,74 +45,83 @@ class UploadManager {
 
   /// Retries a failed upload
   Future<void> retryUpload(String txid) async {
-    final uploadInfo = _eventIdMapUploadFileInfo[txid];
-
-    if (uploadInfo == null) {
-      throw Exception('Upload with txid $txid not found');
+    if (_retriesInProgress.contains(txid)) {
+      Logs().w('Retry already in progress for txid $txid');
+      return;
     }
+    _retriesInProgress.add(txid);
+    try {
+      final uploadInfo = _eventIdMapUploadFileInfo[txid];
 
-    if (!uploadInfo.isFailed) {
-      throw Exception('Upload with txid $txid is not in failed state');
-    }
+      if (uploadInfo == null) {
+        throw Exception('Upload with txid $txid not found');
+      }
 
-    final room = uploadInfo.room;
-    final fileInfo = uploadInfo.fileInfo;
-    final matrixFile = uploadInfo.matrixFile;
-    final caption = uploadInfo.captionInfo?.caption;
-    SyncUpdate? fakeImageEvent;
-    if (fileInfo != null) {
-      fakeImageEvent = await room?.sendFakeFileInfoEvent(
-        fileInfo,
-        txid: txid,
-        captionInfo: caption,
-      );
-    } else if (matrixFile != null) {
-      fakeImageEvent = await room?.sendFakeFileEvent(
-        matrixFile,
-        txid: txid,
-        captionInfo: caption,
-      );
-    }
+      if (!uploadInfo.isFailed) {
+        throw Exception('Upload with txid $txid is not in failed state');
+      }
 
-    if (room == null || fakeImageEvent == null) {
-      throw Exception('Missing required retry data for txid $txid');
-    }
+      final room = uploadInfo.room;
+      final fileInfo = uploadInfo.fileInfo;
+      final matrixFile = uploadInfo.matrixFile;
+      final caption = uploadInfo.captionInfo?.caption;
+      SyncUpdate? fakeImageEvent;
+      if (fileInfo != null) {
+        fakeImageEvent = await room?.sendFakeFileInfoEvent(
+          fileInfo,
+          txid: txid,
+          captionInfo: caption,
+        );
+      } else if (matrixFile != null) {
+        fakeImageEvent = await room?.sendFakeFileEvent(
+          matrixFile,
+          txid: txid,
+          captionInfo: caption,
+        );
+      }
 
-    uploadInfo.cancelToken = CancelToken();
-    uploadInfo.isFailed = false;
-    uploadInfo.lastError = null;
+      if (room == null || fakeImageEvent == null) {
+        throw Exception('Missing required retry data for txid $txid');
+      }
 
-    final streamController = uploadInfo.uploadStateStreamController;
-    final cancelToken = uploadInfo.cancelToken;
+      uploadInfo.cancelToken = CancelToken();
+      uploadInfo.isFailed = false;
+      uploadInfo.lastError = null;
 
-    streamController.add(const Right(UploadFileInitial()));
+      final streamController = uploadInfo.uploadStateStreamController;
+      final cancelToken = uploadInfo.cancelToken;
 
-    if (fileInfo != null) {
-      _addFileTaskToWorkerQueueMobile(
-        txid: txid,
-        fakeImageEvent: fakeImageEvent,
-        room: room,
-        fileInfo: fileInfo,
-        streamController: streamController,
-        cancelToken: cancelToken,
-        sentDate: uploadInfo.createdAt,
-        shrinkImageMaxDimension: uploadInfo.shrinkImageMaxDimension,
-        captionInfo: caption,
-      );
-    } else if (matrixFile != null) {
-      await _addFileTaskToWorkerQueueWeb(
-        txid: txid,
-        fakeImageEvent: fakeImageEvent,
-        room: room,
-        matrixFile: matrixFile,
-        streamController: streamController,
-        cancelToken: cancelToken,
-        thumbnail: uploadInfo.thumbnail,
-        sentDate: uploadInfo.createdAt,
-        captionInfo: caption,
-      );
-    } else {
-      throw Exception('No file data found for retry with txid $txid');
+      streamController.add(const Right(UploadFileInitial()));
+
+      if (fileInfo != null) {
+        _addFileTaskToWorkerQueueMobile(
+          txid: txid,
+          fakeImageEvent: fakeImageEvent,
+          room: room,
+          fileInfo: fileInfo,
+          streamController: streamController,
+          cancelToken: cancelToken,
+          sentDate: uploadInfo.createdAt,
+          shrinkImageMaxDimension: uploadInfo.shrinkImageMaxDimension,
+          captionInfo: caption,
+        );
+      } else if (matrixFile != null) {
+        await _addFileTaskToWorkerQueueWeb(
+          txid: txid,
+          fakeImageEvent: fakeImageEvent,
+          room: room,
+          matrixFile: matrixFile,
+          streamController: streamController,
+          cancelToken: cancelToken,
+          thumbnail: uploadInfo.thumbnail,
+          sentDate: uploadInfo.createdAt,
+          captionInfo: caption,
+        );
+      } else {
+        throw Exception('No file data found for retry with txid $txid');
+      }
+    } finally {
+      _retriesInProgress.remove(txid);
     }
   }
 
