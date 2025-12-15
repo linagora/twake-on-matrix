@@ -84,6 +84,11 @@ class _InitClientDialogState extends State<InitClientDialog>
   void _handleFunctionOnDone() async {
     Logs().i('StreamDialogBuilder::_handleFunctionOnDone');
     Navigator.of(context, rootNavigator: false).pop();
+
+    if (await Matrix.of(context).handleInitialLink()) {
+      return;
+    }
+
     if (_clientFirstLoggedIn != null) {
       _handleFirstLoggedIn(_clientFirstLoggedIn!);
       return;

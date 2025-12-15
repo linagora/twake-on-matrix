@@ -1095,6 +1095,7 @@ class MatrixState extends State<Matrix>
   Future<void> _handleLastLogout() async {
     matrixState.reSyncContacts();
     await matrixState.cancelListenSynchronizeContacts();
+    TwakeApp.gotInitialLink = false;
     if (PlatformInfos.isMobile) {
       await _deletePersistActiveAccount();
       TwakeApp.router.go('/home/twakeWelcome');

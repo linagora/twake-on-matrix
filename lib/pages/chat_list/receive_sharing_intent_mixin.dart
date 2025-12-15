@@ -80,7 +80,7 @@ mixin ReceiveSharingIntentMixin<T extends StatefulWidget> on State<T> {
         text.toLowerCase().startsWith(AppConfig.inviteLinkPrefix) ||
         (text.toLowerCase().startsWith(AppConfig.schemePrefix) &&
             !RegExp(r'\s').hasMatch(text))) {
-      return _processIncomingUris(text);
+      return processIncomingUris(text);
     }
     matrixState.shareContent = {
       'msgtype': 'm.text',
@@ -89,7 +89,7 @@ mixin ReceiveSharingIntentMixin<T extends StatefulWidget> on State<T> {
     openSharePage();
   }
 
-  void _processIncomingUris(String? text) async {
+  void processIncomingUris(String? text) async {
     Logs().d("ReceiveSharingIntentMixin: _processIncomingUris: $text");
     if (text == null) return;
     if (_intentOpenApp(text)) {
@@ -122,12 +122,19 @@ mixin ReceiveSharingIntentMixin<T extends StatefulWidget> on State<T> {
     final appLinks = AppLinks();
     intentUriStreamSubscription?.cancel();
     intentUriStreamSubscription =
-        appLinks.stringLinkStream.listen(_processIncomingUris);
+        appLinks.stringLinkStream.listen(processIncomingUris);
+  }
 
+  Future<bool> handleInitialLink() async {
     if (TwakeApp.gotInitialLink == false) {
       TwakeApp.gotInitialLink = true;
-      appLinks.getInitialLinkString().then(_processIncomingUris);
+      final link = await AppLinks().getInitialLinkString();
+      if (link != null) {
+        processIncomingUris(link);
+        return true;
+      }
     }
+    return false;
   }
 
   Future<void> checkInitialSharingMedia() async {
