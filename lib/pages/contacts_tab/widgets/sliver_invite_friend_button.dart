@@ -1,9 +1,10 @@
-import 'package:fluffychat/config/app_constants.dart';
 import 'package:fluffychat/generated/l10n/app_localizations.dart';
+import 'package:fluffychat/presentation/extensions/client_extension.dart';
 import 'package:fluffychat/resource/image_paths.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/utils/string_extension.dart';
 import 'package:fluffychat/utils/twake_snackbar.dart';
+import 'package:fluffychat/widgets/matrix.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -38,13 +39,13 @@ class _InviteFriendButtonDelegate extends SliverPersistentHeaderDelegate {
   ) {
     final sysColor = LinagoraSysColors.material();
     final textTheme = Theme.of(context).textTheme;
+    final client = Matrix.of(context).client;
     return Material(
       color: sysColor.onPrimary,
       child: InkWell(
         onTap: () async {
           // TODO: Placeholder url
-          const domain = AppConstants.appLinkUniversalLinkDomain;
-          final url = 'https://$domain/chat/#/${Uri.encodeComponent(userId)}';
+          final url = client.personalInviteUrl;
           try {
             if (PlatformInfos.isMobile) {
               await Share.share(url);

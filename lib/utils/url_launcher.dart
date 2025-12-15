@@ -30,7 +30,7 @@ class UrlLauncher with GoToDraftChatMixin {
   final ChromeSafariBrowser? browser =
       PlatformInfos.isMobile ? ChromeSafariBrowser() : null;
 
-  Future<void> launchUrl({Client? client}) async {
+  void launchUrl() {
     if (url!.toLowerCase().startsWith(AppConfig.deepLinkPrefix) ||
         url!.toLowerCase().startsWith(AppConfig.inviteLinkPrefix) ||
         {'#', '@', '!', '+', '\$'}.contains(url![0]) ||
@@ -44,14 +44,12 @@ class UrlLauncher with GoToDraftChatMixin {
       return;
     }
     if (uri.host == AppConstants.appLinkUniversalLinkDomain) {
-      // Handle links.twake.app URLs with /chat# pattern
-      if (uri.path.startsWith('/chat') && uri.fragment.isNotEmpty) {
-        final matrixToUrl = url!.replaceFirst(
-          'https://${AppConstants.appLinkUniversalLinkDomain}',
-          AppConfig.inviteLinkPrefix,
-        );
-        return openMatrixToUrl(matrixToUrl);
-      }
+      final inviteUri = Uri.parse(AppConfig.inviteLinkPrefix);
+      final matrixToUri = uri.replace(
+        host: inviteUri.host,
+        path: uri.path.replaceFirst('/chat', ''),
+      );
+      return openMatrixToUrl(matrixToUri.toString());
     }
     if (!{'https', 'http'}.contains(uri.scheme)) {
       // just launch non-https / non-http uris directly
@@ -245,29 +243,5 @@ class UrlLauncher with GoToDraftChatMixin {
         launchUrlString(url!);
       }
     }
-  }
-
-  bool isCreatingChatFromUrl = false;
-
-  Future<void> _openChatWithUser(
-    String matrixId, {
-    Client? client,
-  }) async {
-    if (client == null || isCreatingChatFromUrl) return;
-    isCreatingChatFromUrl = true;
-    final rooms = client.rooms.where((room) => room.isDirectChat).toList();
-    final availableRoom = rooms.firstWhereOrNull((room) {
-      return room.getParticipants().any((user) => user.id == matrixId);
-    });
-
-    if (availableRoom != null) {
-      isCreatingChatFromUrl = false;
-      context.go('/rooms/${availableRoom.id}');
-      return;
-    }
-
-    final roomId = await client.startDirectChat(matrixId);
-    isCreatingChatFromUrl = false;
-    context.go('/rooms/$roomId');
   }
 }

@@ -96,8 +96,7 @@ mixin ReceiveSharingIntentMixin<T extends StatefulWidget> on State<T> {
       return;
     }
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      UrlLauncher(TwakeApp.routerKey.currentContext!, url: text)
-          .launchUrl(client: matrixState.client);
+      UrlLauncher(TwakeApp.routerKey.currentContext!, url: text).launchUrl();
     });
   }
 
