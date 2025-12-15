@@ -1,6 +1,8 @@
+import 'package:fluffychat/generated/l10n/app_localizations.dart';
 import 'package:fluffychat/presentation/model/contact/presentation_contact_constant.dart';
 import 'package:fluffychat/presentation/model/search/presentation_search.dart';
 import 'package:fluffychat/utils/dialog/twake_dialog.dart';
+import 'package:fluffychat/utils/twake_snackbar.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:flutter/material.dart';
 
@@ -90,6 +92,8 @@ mixin GoToDraftChatMixin {
           },
         ),
       );
+    } else {
+      TwakeSnackBar.show(context, L10n.of(context)!.cannotCreateChatWithSelf);
     }
   }
 
