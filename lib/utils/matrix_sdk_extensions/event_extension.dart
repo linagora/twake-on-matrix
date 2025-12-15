@@ -546,7 +546,8 @@ extension LocalizedBody on Event {
     if (formattedBody == null || formattedBody.isEmpty) return false;
 
     try {
-      final document = html.DomParser().parseFromString(formattedBody, 'text/html');
+      final document =
+          html.DomParser().parseFromString(formattedBody, 'text/html');
       final anchors = document.querySelectorAll('a');
 
       for (final anchor in anchors) {
