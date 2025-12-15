@@ -22,6 +22,7 @@ import 'package:fluffychat/generated/l10n/app_localizations.dart';
 import 'package:future_loading_dialog/future_loading_dialog.dart';
 import 'package:linagora_design_flutter/colors/linagora_ref_colors.dart';
 import 'package:matrix/matrix.dart';
+import 'package:universal_html/html.dart' as html;
 
 import 'matrix_file_extension.dart';
 
@@ -541,12 +542,40 @@ extension LocalizedBody on Event {
     final currentUserId = room.client.userID;
     if (currentUserId == null) return false;
 
-    // Check formatted_body (HTML format with matrix.to links)
     final formattedBody = content.tryGet<String>('formatted_body');
-    if (formattedBody != null && formattedBody.isNotEmpty) {
-      final mentionedUserIds =
-          formattedBody.getAllMentionedUserIdsFromMessage();
-      return mentionedUserIds.contains(currentUserId);
+    if (formattedBody == null || formattedBody.isEmpty) return false;
+
+    try {
+      final document = html.DomParser().parseFromString(formattedBody, 'text/html');
+      final anchors = document.querySelectorAll('a');
+
+      for (final anchor in anchors) {
+        final href = anchor.attributes['href'];
+        if (href == null || href.isEmpty) continue;
+
+        final matrixToIndex = href.indexOf('matrix.to/#/');
+        if (matrixToIndex == -1) continue;
+
+        final idStart = matrixToIndex + 'matrix.to/#/'.length;
+        if (idStart >= href.length) continue;
+
+        var idEnd = href.indexOf('?', idStart);
+        if (idEnd == -1) idEnd = href.length;
+
+        final encodedId = href.substring(idStart, idEnd);
+
+        try {
+          final decodedId = Uri.decodeComponent(encodedId);
+          // Early exit as soon as we find the current user
+          if (decodedId == currentUserId && decodedId.isValidMatrixId) {
+            return true;
+          }
+        } catch (e) {
+          continue;
+        }
+      }
+    } catch (e) {
+      Logs().e('Error parsing HTML for mention check', e);
     }
 
     return false;

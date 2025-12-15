@@ -1869,7 +1869,7 @@ packages:
     description:
       path: "."
       ref: improve-matrix-ID-validation-logic
-      resolved-ref: ab0e8cf93397a31ed1660a89f5142dc63fa2e378
+      resolved-ref: a0e0bac40169fc02e751bcaf8668df433e6ac9bc
       url: "git@github.com:linagora/matrix-dart-sdk.git"
     source: git
     version: "0.22.6"
