@@ -27,8 +27,11 @@ class DisplayNameWidget extends StatelessWidget {
             getFromRooms: false,
           ),
       builder: (context, snapshot) {
-        final displayName = snapshot.data?.displayName ??
-            event.senderFromMemoryOrFallback.calcDisplayname();
+        final twakeDisplayName = snapshot.data?.displayName;
+        final displayName =
+            (twakeDisplayName != null && twakeDisplayName.isNotEmpty)
+                ? twakeDisplayName
+                : event.senderFromMemoryOrFallback.calcDisplayname();
         return Padding(
           padding: MessageStyle.paddingDisplayName(event),
           child: Text(

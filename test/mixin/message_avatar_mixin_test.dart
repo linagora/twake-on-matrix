@@ -42,6 +42,15 @@ Future<void> main() async {
   group('Tests for when the avatar next to a message should be displayed ', () {
     setUp(() {
       final room = MockRoom();
+      final testUser = MockUser();
+
+      // Stub the calcDisplayname method for the user
+      when(testUser.calcDisplayname()).thenReturn('Test User');
+
+      // Stub the unsafeGetUserFromMemoryOrFallback method
+      when(room.unsafeGetUserFromMemoryOrFallback('@bob:example.com'))
+          .thenReturn(testUser);
+
       event = Event(
         content: {
           'body': 'Test message',

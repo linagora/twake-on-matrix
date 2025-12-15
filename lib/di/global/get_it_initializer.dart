@@ -543,7 +543,7 @@ class GetItInitializer {
 
     getIt.registerFactory(() => const CreateSupportChatInteractor());
 
-    getIt.registerFactory(() => TwakeUserInfoManager());
+    getIt.registerLazySingleton(() => TwakeUserInfoManager());
   }
 
   void _bindingControllers() {

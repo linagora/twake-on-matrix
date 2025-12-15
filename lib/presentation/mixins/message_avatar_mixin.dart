@@ -41,11 +41,14 @@ mixin MessageAvatarMixin {
               ),
           builder: (context, snapshot) {
             final user = snapshot.data;
+            final displayName = (user?.displayName?.isNotEmpty ?? false)
+                ? user!.displayName!
+                : event.senderFromMemoryOrFallback.calcDisplayname();
             return Avatar(
               size: MessageStyle.avatarSize,
               fontSize: MessageStyle.fontSize,
               mxContent: Uri.parse(user?.avatarUrl ?? ''),
-              name: user?.displayName ?? '',
+              name: displayName,
               onTap: () => onAvatarTap!(event),
             );
           },

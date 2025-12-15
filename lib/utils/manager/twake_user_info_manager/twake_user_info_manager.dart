@@ -26,7 +26,7 @@ class TwakeUserInfoManager {
             displayName: result.displayName ?? matrixProfile.displayName ?? '',
             avatarUrl: result.avatarUrl != null && result.avatarUrl!.isNotEmpty
                 ? result.avatarUrl!
-                : matrixProfile.avatarUrl.toString(),
+                : (matrixProfile.avatarUrl?.toString() ?? ''),
           );
         }
       } catch (e) {
@@ -39,7 +39,7 @@ class TwakeUserInfoManager {
     return UserInfo(
       uid: matrixProfile.userId,
       displayName: matrixProfile.displayName ?? '',
-      avatarUrl: matrixProfile.avatarUrl.toString(),
+      avatarUrl: matrixProfile.avatarUrl?.toString() ?? '',
     );
   }
 }
