@@ -79,7 +79,6 @@ class SettingsContactsVisibilityController
       return;
     }
     switch (option) {
-      case SettingsContactsVisibilityEnum.public:
       case SettingsContactsVisibilityEnum.private:
         updateUserInfoVisibility(
           userInfoVisibility: UserInfoVisibilityRequest(
@@ -88,6 +87,7 @@ class SettingsContactsVisibilityController
           ),
         );
         break;
+      case SettingsContactsVisibilityEnum.public:
       case SettingsContactsVisibilityEnum.contacts:
         updateUserInfoVisibility(
           userInfoVisibility: UserInfoVisibilityRequest(

@@ -105,8 +105,8 @@ class SettingsContactsVisibilityView extends StatelessWidget {
                     valueListenable:
                         controller.selectedVisibilityOptionNotifier,
                     builder: (context, selectedOption, _) {
-                      if (selectedOption !=
-                          SettingsContactsVisibilityEnum.contacts) {
+                      if (selectedOption ==
+                          SettingsContactsVisibilityEnum.private) {
                         return const SizedBox.shrink();
                       }
                       return Column(
