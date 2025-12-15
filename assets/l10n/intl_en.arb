@@ -3499,6 +3499,7 @@
   "supportChatDescription": "I’ve got your back! If you encounter bugs or need any help using Twake Workplace, send a message, I will reply to you swiftly",
   "inviteFriend": "Invite friend",
   "linkCopiedToClipboard": "Link copied to clipboard",
+  "cannotCreateChatWithSelf": "You cannot start a conversation with yourself",
   "yourPersonalQr": "Your personal QR",
   "personalQrDescription": "Start chatting with your contacts. Send invitation link to Twake",
   "shareQrCode": "Share QR code",
