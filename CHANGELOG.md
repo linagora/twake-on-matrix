@@ -1,3 +1,40 @@
+## [2.16.5+2330] - 2025-12-15
+### Added
+- #2768: Add personal QR (#2769)
+- #2710: Add settings for displaying and managing contact info visibility (#2711)
+- #2729: Create default support chat (#2730)
+- #2703: Support Universal link and App link (#2704)
+
+### Changed
+- #2759: Handle invitation links - synchronize invite link with Personal QR, navigate to links.twake.app, support matrix scheme, show toast when opening own link, handle app installation
+- #2775: Use get address book when get all contacts (#2776)
+- #2773: Enhance mention parsing to support multiple formats and prevent duplicates
+- #2748: Display system events in italic in chat list and align titles in group chat creation
+- #2745: Update shared file processing to handle both text and URL types
+- #2741: Add jumpToEventStream to facilitate navigation from search results (#2742)
+- #2735: Replace chevron left icon with arrow back icon for consistency and adjust chat item height and padding for improved layout
+- #2731: Refactor event display logic to exclude edited content for media and files (#2732)
+- #2727: Remove open search animation
+- #2713: Make integration-test files under dart format
+- #2700: Avoid exception for optional items in tests (#2708)
+- #2699: Configure timeout settings for tests (add default value for GLOBAL_TEST_TIMEOUT_MS)
+- #2754: Update hasActionAppBarMenu condition based on support chat
+- Refactor blocked users loading logic to improve error handling and reduce code duplication
+
+### Fixed
+- #2763: Handle mark read on scroll (#2770)
+- #2752: Fix text pasted twice (#2753)
+- #2750: Attach media to the text already typed in the composer (#2751)
+- #2743: Fix the issue with bubble size when an image is narrow (#2744)
+- #2721: Prevent send message when block (#2726)
+- #2739: Remove unnecessary /sync calling
+- #2718: Support copy caption of file (#2719)
+- HOTFIX: Empty message bubble (#2772)
+- HOTFIX: Cannot load promotion banner language (#2733)
+- HOTFIX: Create support chat multiple times (#2762)
+- HOTFIX: Promotion banner redirection (#2724)
+- HOTFIX: Thumbnail is distorted when upload image
+
 ## [2.16.4+2330] - 2025-11-21
 ### Added
 - #2796 Add promotion banner for mobile browser app
