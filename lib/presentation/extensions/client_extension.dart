@@ -1,4 +1,5 @@
 import 'package:collection/collection.dart';
+import 'package:fluffychat/config/app_constants.dart';
 import 'package:fluffychat/presentation/enum/chat_list/chat_list_enum.dart';
 import 'package:fluffychat/utils/string_extension.dart';
 import 'package:flutter/material.dart';
@@ -36,5 +37,13 @@ extension ClientExtension on Client {
           ) ??
           false,
     );
+  }
+
+  String get personalInviteUrl {
+    const domain = AppConstants.appLinkUniversalLinkDomain;
+    const fallbackUrl = 'https://sign-up.twake.app';
+    return userID == null
+        ? 'https://$domain/chat?fallback=$fallbackUrl'
+        : 'https://$domain/chat/${Uri.encodeComponent(userID!)}?fallback=$fallbackUrl';
   }
 }
