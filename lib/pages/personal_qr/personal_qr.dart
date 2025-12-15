@@ -13,6 +13,7 @@ import 'package:gal/gal.dart';
 import 'package:matrix/matrix.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:share_plus/share_plus.dart';
 
 class PersonalQr extends StatefulWidget {
   const PersonalQr({super.key});
@@ -23,6 +24,40 @@ class PersonalQr extends StatefulWidget {
 
 class PersonalQrController extends State<PersonalQr> {
   final GlobalKey qrKey = GlobalKey();
+
+  /// Shares the QR code as an image file
+  Future<void> shareQrCode(BuildContext context) async {
+    try {
+      final l10n = L10n.of(context)!;
+
+      final imageBytes = await _captureQrImage(context, l10n);
+      if (imageBytes == null) {
+        return;
+      }
+
+      final tempDir = await getTemporaryDirectory();
+      final timestamp = DateTime.now().millisecondsSinceEpoch;
+      final filePath = '${tempDir.path}/qr_code_$timestamp.png';
+      final file = File(filePath);
+      await file.writeAsBytes(imageBytes);
+
+      await Share.shareXFiles(
+        [XFile(file.path)],
+        text: l10n.shareQrCode,
+      );
+
+      // Clean up temp file after a delay to ensure sharing completes
+      Future.delayed(const Duration(seconds: 2), () {
+        if (file.existsSync()) {
+          file.delete();
+        }
+      });
+    } catch (e, s) {
+      Logs().e('PersonalQr::shareQrCode():: error', e, s);
+      if (!mounted) return;
+      TwakeSnackBar.show(context, L10n.of(context)!.oopsSomethingWentWrong);
+    }
+  }
 
   /// Downloads the QR code as an image and saves it to the gallery
   Future<void> downloadQrCode(BuildContext context) async {
