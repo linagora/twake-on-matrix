@@ -28,10 +28,6 @@ class _InitClientDialogState extends State<InitClientDialog>
     with TickerProviderStateMixin {
   late AnimationController loginSSOProgressController;
 
-  Client? _clientFirstLoggedIn;
-
-  Client? _clientAddAnotherAccount;
-
   StreamSubscription? _clientLoginStateChangedSubscription;
 
   static const breakpointMobileDialogKey =
@@ -70,19 +66,13 @@ class _InitClientDialogState extends State<InitClientDialog>
     );
     if (event.multipleAccountLoginType ==
         MultipleAccountLoginType.firstLoggedIn) {
-      _clientFirstLoggedIn = event.client;
-      if (_clientFirstLoggedIn != null) {
-        _handleFirstLoggedIn(_clientFirstLoggedIn!);
-      }
+      _handleFirstLoggedIn(event.client);
       return;
     }
 
     if (event.multipleAccountLoginType ==
         MultipleAccountLoginType.otherAccountLoggedIn) {
-      _clientAddAnotherAccount = event.client;
-      if (_clientAddAnotherAccount != null) {
-        _handleAddAnotherAccount(_clientAddAnotherAccount!);
-      }
+      _handleAddAnotherAccount(event.client);
       return;
     }
   }
