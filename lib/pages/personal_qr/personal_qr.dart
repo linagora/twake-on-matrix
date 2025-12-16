@@ -27,6 +27,7 @@ class PersonalQrController extends State<PersonalQr> {
 
   /// Shares the QR code as an image file
   Future<void> shareQrCode(BuildContext context) async {
+    File? tempFile;
     try {
       final l10n = L10n.of(context)!;
 
@@ -35,25 +36,28 @@ class PersonalQrController extends State<PersonalQr> {
         return;
       }
 
-      final tempDir = await getTemporaryDirectory();
-      final timestamp = DateTime.now().millisecondsSinceEpoch;
-      final filePath = '${tempDir.path}/qr_code_$timestamp.png';
-      final file = File(filePath);
-      await file.writeAsBytes(imageBytes);
+      tempFile = await _createTempFile(imageBytes);
 
-      await Share.shareXFiles(
-        [XFile(file.path)],
+      final shareResult = await Share.shareXFiles(
+        [XFile(tempFile.path)],
         text: l10n.shareQrCode,
       );
 
-      // Clean up temp file after a delay to ensure sharing completes
-      Future.delayed(const Duration(seconds: 2), () {
-        if (file.existsSync()) {
-          file.delete();
-        }
-      });
+      // Clean up immediately if share was dismissed/completed
+      // For platforms that don't return result, fall back to delayed cleanup
+      if (shareResult.status == ShareResultStatus.dismissed ||
+          shareResult.status == ShareResultStatus.success) {
+        await _cleanupTempFile(tempFile);
+      } else {
+        // Fallback for platforms that return unavailable status
+        _scheduleDelayedCleanup(tempFile);
+      }
     } catch (e, s) {
       Logs().e('PersonalQr::shareQrCode():: error', e, s);
+      // Ensure cleanup even on error
+      if (tempFile != null) {
+        await _cleanupTempFile(tempFile);
+      }
       if (!mounted) return;
       TwakeSnackBar.show(context, L10n.of(context)!.oopsSomethingWentWrong);
     }
@@ -61,6 +65,7 @@ class PersonalQrController extends State<PersonalQr> {
 
   /// Downloads the QR code as an image and saves it to the gallery
   Future<void> downloadQrCode(BuildContext context) async {
+    File? tempFile;
     try {
       final l10n = L10n.of(context)!;
 
@@ -74,14 +79,49 @@ class PersonalQrController extends State<PersonalQr> {
         return;
       }
 
-      await _saveImageToGallery(imageBytes);
+      tempFile = await _createTempFile(imageBytes);
+      await Gal.putImage(tempFile.path);
+      await _cleanupTempFile(tempFile);
+
       if (!mounted) return;
       TwakeSnackBar.show(context, l10n.fileSavedToGallery);
     } catch (e, s) {
       Logs().e('PersonalQr::downloadQrCode():: error', e, s);
+      // Ensure cleanup even on error
+      if (tempFile != null) {
+        await _cleanupTempFile(tempFile);
+      }
       if (!mounted) return;
       TwakeSnackBar.show(context, L10n.of(context)!.oopsSomethingWentWrong);
     }
+  }
+
+  /// Creates a temporary file with the given image bytes
+  Future<File> _createTempFile(Uint8List imageBytes) async {
+    final tempDir = await getTemporaryDirectory();
+    final timestamp = DateTime.now().millisecondsSinceEpoch;
+    final filePath = '${tempDir.path}/qr_code_$timestamp.png';
+    final file = File(filePath);
+    await file.writeAsBytes(imageBytes);
+    return file;
+  }
+
+  /// Safely deletes a temporary file
+  Future<void> _cleanupTempFile(File file) async {
+    try {
+      if (file.existsSync()) {
+        await file.delete();
+      }
+    } catch (e, s) {
+      Logs().e('PersonalQr::_cleanupTempFile():: error', e, s);
+    }
+  }
+
+  /// Schedules delayed cleanup for platforms that don't return share status
+  void _scheduleDelayedCleanup(File file) {
+    Future.delayed(const Duration(seconds: 2), () {
+      _cleanupTempFile(file);
+    });
   }
 
   /// Requests storage permissions based on platform
@@ -144,17 +184,6 @@ class PersonalQrController extends State<PersonalQr> {
     }
 
     return byteData.buffer.asUint8List();
-  }
-
-  /// Saves the image bytes to the gallery
-  Future<void> _saveImageToGallery(Uint8List imageBytes) async {
-    final tempDir = await getTemporaryDirectory();
-    final timestamp = DateTime.now().millisecondsSinceEpoch;
-    final filePath = '${tempDir.path}/qr_code_$timestamp.png';
-    final file = File(filePath);
-    await file.writeAsBytes(imageBytes);
-    await Gal.putImage(file.path);
-    await file.delete();
   }
 
   @override
