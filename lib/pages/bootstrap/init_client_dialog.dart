@@ -89,6 +89,8 @@ class _InitClientDialogState extends State<InitClientDialog>
   }
 
   void _handleFirstLoggedIn(Client client) {
+    if (!mounted) return;
+
     Navigator.of(context, rootNavigator: false).pop();
 
     TwakeApp.router.go(
@@ -100,6 +102,8 @@ class _InitClientDialogState extends State<InitClientDialog>
   }
 
   void _handleAddAnotherAccount(Client client) {
+    if (!mounted) return;
+
     Navigator.of(context, rootNavigator: false).pop();
 
     TwakeApp.router.go(
