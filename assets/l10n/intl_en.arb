@@ -3229,5 +3229,7 @@
   "@videoCallJoinCall": {
     "type": "text",
     "placeholders": {}
-  }
+  },
+  "couldNotLaunchUrl": "Could not launch URL",
+  "@downloadQrCode": {}
 }
