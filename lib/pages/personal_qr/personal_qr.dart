@@ -14,6 +14,7 @@ import 'package:matrix/matrix.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:path/path.dart' as path;
 
 class PersonalQr extends StatefulWidget {
   const PersonalQr({super.key});
@@ -100,7 +101,7 @@ class PersonalQrController extends State<PersonalQr> {
   Future<File> _createTempFile(Uint8List imageBytes) async {
     final tempDir = await getTemporaryDirectory();
     final timestamp = DateTime.now().millisecondsSinceEpoch;
-    final filePath = '${tempDir.path}/qr_code_$timestamp.png';
+    final filePath = path.join(tempDir.path, 'qr_code_$timestamp.png');
     final file = File(filePath);
     await file.writeAsBytes(imageBytes);
     return file;
