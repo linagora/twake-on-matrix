@@ -28,10 +28,6 @@ class _InitClientDialogState extends State<InitClientDialog>
     with TickerProviderStateMixin {
   late AnimationController loginSSOProgressController;
 
-  Client? _clientFirstLoggedIn;
-
-  Client? _clientAddAnotherAccount;
-
   StreamSubscription? _clientLoginStateChangedSubscription;
 
   static const breakpointMobileDialogKey =
@@ -70,37 +66,33 @@ class _InitClientDialogState extends State<InitClientDialog>
     );
     if (event.multipleAccountLoginType ==
         MultipleAccountLoginType.firstLoggedIn) {
-      _clientFirstLoggedIn = event.client;
+      _handleFirstLoggedIn(event.client);
       return;
     }
 
     if (event.multipleAccountLoginType ==
         MultipleAccountLoginType.otherAccountLoggedIn) {
-      _clientAddAnotherAccount = event.client;
+      _handleAddAnotherAccount(event.client);
       return;
     }
   }
 
   void _handleFunctionOnDone() async {
     Logs().i('StreamDialogBuilder::_handleFunctionOnDone');
-    Navigator.of(context, rootNavigator: false).pop();
-    if (_clientFirstLoggedIn != null) {
-      _handleFirstLoggedIn(_clientFirstLoggedIn!);
-      return;
-    }
-
-    if (_clientAddAnotherAccount != null) {
-      _handleAddAnotherAccount(_clientAddAnotherAccount!);
-      return;
-    }
   }
 
   void _handleFunctionOnError(Object? error) {
     Logs().e('StreamDialogBuilder::_handleFunctionOnError - $error');
-    Navigator.pop(context);
+    if (mounted) {
+      Navigator.pop(context);
+    }
   }
 
   void _handleFirstLoggedIn(Client client) {
+    if (!mounted) return;
+
+    Navigator.of(context, rootNavigator: false).pop();
+
     TwakeApp.router.go(
       '/rooms',
       extra: LoggedInBodyArgs(
@@ -110,6 +102,10 @@ class _InitClientDialogState extends State<InitClientDialog>
   }
 
   void _handleAddAnotherAccount(Client client) {
+    if (!mounted) return;
+
+    Navigator.of(context, rootNavigator: false).pop();
+
     TwakeApp.router.go(
       '/rooms',
       extra: LoggedInOtherAccountBodyArgs(
