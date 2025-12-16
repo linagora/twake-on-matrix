@@ -1810,9 +1810,9 @@ packages:
     dependency: "direct main"
     description:
       path: "."
-      ref: master
-      resolved-ref: c7a4a9f6fe1be9818010122b7761ba43020ed6f2
-      url: "https://github.com/linagora/linagora-design-flutter.git"
+      ref: "feature/web-link-generator"
+      resolved-ref: "405c2e46dc88e55d04725808c9cdfe3579d4414d"
+      url: "git@github.com:linagora/linagora-design-flutter.git"
     source: git
     version: "0.0.1"
   linkfy_text:
