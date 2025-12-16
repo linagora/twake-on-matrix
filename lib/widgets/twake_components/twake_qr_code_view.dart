@@ -62,9 +62,7 @@ class _QrCodePainter extends CustomPainter {
     // Draw white background for quiet zone
     canvas.drawRect(
       Offset.zero & size,
-      Paint()
-        ..style = PaintingStyle.fill
-        ..color = const Color(0xFFFFFFFF),
+      whitePaint,
     );
 
     // Only rebuild size-dependent data if size changed
@@ -80,20 +78,27 @@ class _QrCodePainter extends CustomPainter {
           colors: [Color(0xFF6B21A8), Color(0xFF4C1D95)],
         ).createShader(Offset.zero & size);
 
+      // Module sizing constants
+      const moduleScale = 0.9; // Module size relative to cell
+      const moduleCornerRatio = 0.3; // Corner radius relative to module
+      final centeringOffset = moduleSize * (1 - moduleScale) / 2;
+
       // Build modules path using rounded rectangles for better scanning
-      final moduleRadius = moduleSize * 0.3;
+      final moduleRadius = moduleSize * moduleCornerRatio;
       _cachedCirclesPath = Path();
       for (int x = 0; x < count; x++) {
-        final left =
-            (centers[x] * moduleSize) + quietZoneOffset - (moduleSize * 0.45);
+        final left = (x * moduleSize) + quietZoneOffset + centeringOffset;
         for (int y = 0; y < count; y++) {
           if (qrImage.isDark(y, x) && !finderMask[x][y]) {
-            final top = (centers[y] * moduleSize) +
-                quietZoneOffset -
-                (moduleSize * 0.45);
+            final top = (y * moduleSize) + quietZoneOffset + centeringOffset;
             _cachedCirclesPath!.addRRect(
               RRect.fromRectAndRadius(
-                Rect.fromLTWH(left, top, moduleSize * 0.9, moduleSize * 0.9),
+                Rect.fromLTWH(
+                  left,
+                  top,
+                  moduleSize * moduleScale,
+                  moduleSize * moduleScale,
+                ),
                 Radius.circular(moduleRadius),
               ),
             );
