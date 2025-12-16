@@ -20,6 +20,7 @@ class UserInfo extends Equatable {
   final String? firstName;
   @JsonKey(name: 'last_name')
   final String? lastName;
+  final String? workplaceFqdn;
 
   const UserInfo({
     this.uid,
@@ -33,6 +34,7 @@ class UserInfo extends Equatable {
     this.timezone,
     this.firstName,
     this.lastName,
+    this.workplaceFqdn,
   });
 
   factory UserInfo.fromJson(Map<String, dynamic> json) =>
@@ -53,5 +55,6 @@ class UserInfo extends Equatable {
     timezone,
     firstName,
     lastName,
+    workplaceFqdn,
   ];
 }
