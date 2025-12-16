@@ -71,12 +71,18 @@ class _InitClientDialogState extends State<InitClientDialog>
     if (event.multipleAccountLoginType ==
         MultipleAccountLoginType.firstLoggedIn) {
       _clientFirstLoggedIn = event.client;
+      if (_clientFirstLoggedIn != null) {
+        _handleFirstLoggedIn(_clientFirstLoggedIn!);
+      }
       return;
     }
 
     if (event.multipleAccountLoginType ==
         MultipleAccountLoginType.otherAccountLoggedIn) {
       _clientAddAnotherAccount = event.client;
+      if (_clientAddAnotherAccount != null) {
+        _handleAddAnotherAccount(_clientAddAnotherAccount!);
+      }
       return;
     }
   }
@@ -84,15 +90,6 @@ class _InitClientDialogState extends State<InitClientDialog>
   void _handleFunctionOnDone() async {
     Logs().i('StreamDialogBuilder::_handleFunctionOnDone');
     Navigator.of(context, rootNavigator: false).pop();
-    if (_clientFirstLoggedIn != null) {
-      _handleFirstLoggedIn(_clientFirstLoggedIn!);
-      return;
-    }
-
-    if (_clientAddAnotherAccount != null) {
-      _handleAddAnotherAccount(_clientAddAnotherAccount!);
-      return;
-    }
   }
 
   void _handleFunctionOnError(Object? error) {
