@@ -52,45 +52,63 @@ class _QrCodePainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
+    // Add quiet zone (white margin) - 4 modules recommended by QR spec
+    const quietZoneModules = 4;
     final count = qrImage.moduleCount;
-    final moduleSize = size.width / count;
+    final totalModules = count + (quietZoneModules * 2);
+    final moduleSize = size.width / totalModules;
+    final quietZoneOffset = quietZoneModules * moduleSize;
+
+    // Draw white background for quiet zone
+    canvas.drawRect(
+      Offset.zero & size,
+      Paint()
+        ..style = PaintingStyle.fill
+        ..color = const Color(0xFFFFFFFF),
+    );
 
     // Only rebuild size-dependent data if size changed
     if (_cachedSize != size) {
       _cachedSize = size;
 
-      // Build gradient paint
+      // Build gradient paint with darker colors for better contrast
       _cachedGradientPaint = Paint()
         ..style = PaintingStyle.fill
-        ..shader = const RadialGradient(
-          center: Alignment.center,
-          radius: 0.7,
-          colors: [Color(0xFFE8A6FF), Color(0xFF8135FE)],
+        ..shader = const LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [Color(0xFF6B21A8), Color(0xFF4C1D95)],
         ).createShader(Offset.zero & size);
 
-      // Build circles path in one pass
-      final radius = moduleSize * 0.35;
+      // Build modules path using rounded rectangles for better scanning
+      final moduleRadius = moduleSize * 0.3;
       _cachedCirclesPath = Path();
       for (int x = 0; x < count; x++) {
-        final cx = centers[x] * moduleSize;
+        final left =
+            (centers[x] * moduleSize) + quietZoneOffset - (moduleSize * 0.45);
         for (int y = 0; y < count; y++) {
           if (qrImage.isDark(y, x) && !finderMask[x][y]) {
-            final cy = centers[y] * moduleSize;
-            _cachedCirclesPath!.addOval(
-              Rect.fromCircle(center: Offset(cx, cy), radius: radius),
+            final top = (centers[y] * moduleSize) +
+                quietZoneOffset -
+                (moduleSize * 0.45);
+            _cachedCirclesPath!.addRRect(
+              RRect.fromRectAndRadius(
+                Rect.fromLTWH(left, top, moduleSize * 0.9, moduleSize * 0.9),
+                Radius.circular(moduleRadius),
+              ),
             );
           }
         }
       }
     }
 
-    // Draw the circles with a single canvas call
+    // Draw the modules with a single canvas call
     canvas.drawPath(_cachedCirclesPath!, _cachedGradientPaint!);
 
-    // Draw Finder Patterns
-    _drawFinder(canvas, 0, 0, moduleSize);
-    _drawFinder(canvas, count - 7, 0, moduleSize);
-    _drawFinder(canvas, 0, count - 7, moduleSize);
+    // Draw Finder Patterns with offset for quiet zone
+    _drawFinder(canvas, 0, 0, moduleSize, quietZoneOffset);
+    _drawFinder(canvas, count - 7, 0, moduleSize, quietZoneOffset);
+    _drawFinder(canvas, 0, count - 7, moduleSize, quietZoneOffset);
   }
 
   bool _isFinderPattern(int x, int y, int count) {
@@ -101,9 +119,15 @@ class _QrCodePainter extends CustomPainter {
     return false;
   }
 
-  void _drawFinder(Canvas canvas, int xOffset, int yOffset, double m) {
-    final double startX = xOffset * m;
-    final double startY = yOffset * m;
+  void _drawFinder(
+    Canvas canvas,
+    int xOffset,
+    int yOffset,
+    double m,
+    double quietZoneOffset,
+  ) {
+    final double startX = (xOffset * m) + quietZoneOffset;
+    final double startY = (yOffset * m) + quietZoneOffset;
 
     final outer = RRect.fromRectAndRadius(
       Rect.fromLTWH(startX, startY, 7 * m, 7 * m),
