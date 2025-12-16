@@ -1,0 +1,48 @@
+import 'package:matrix/matrix.dart';
+
+mixin RetryTextMessageMixin {
+  Future<void> retryTextMessage(Event event) async {
+    if (event.status != EventStatus.error) {
+      Logs().w('RetryTextMessageMixin: Event is not in error state');
+      return;
+    }
+
+    if (event.messageType != MessageTypes.Text) {
+      Logs().w('RetryTextMessageMixin: Event is not a text message');
+      return;
+    }
+
+    final room = event.room;
+    final messageBody = event.body;
+
+    if (messageBody.isEmpty) {
+      Logs().w('RetryTextMessageMixin: Message body is empty');
+      return;
+    }
+
+    Event? replyEvent;
+    String? editEventId;
+
+    if (event.relationshipType == RelationshipTypes.reply &&
+        event.relationshipEventId != null) {
+      replyEvent = await room.getEventById(event.relationshipEventId!);
+    } else if (event.relationshipType == RelationshipTypes.edit &&
+        event.relationshipEventId != null) {
+      editEventId = event.relationshipEventId;
+    }
+
+    try {
+      await room.sendTextEvent(
+        messageBody,
+        inReplyTo: replyEvent,
+        editEventId: editEventId,
+      );
+      await event.remove();
+
+      Logs().i('RetryTextMessageMixin: Text message retry successful');
+    } catch (e) {
+      Logs().e('RetryTextMessageMixin: Failed to retry text message', e);
+      rethrow;
+    }
+  }
+}

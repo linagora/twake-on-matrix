@@ -3504,5 +3504,6 @@
   "personalQrDescription": "Start chatting with your contacts. Send invitation link to Twake",
   "shareQrCode": "Share QR code",
   "copyLink": "Copy link",
-  "downloadQrCode": "Download QR code"
+  "downloadQrCode": "Download QR code",
+  "tapToRetry": "Tap to retry"
 }
