@@ -1,10 +1,12 @@
 import 'package:fluffychat/domain/model/capabilities/capabilities_extension.dart';
 import 'package:fluffychat/domain/model/extensions/common_settings/common_settings_extensions.dart';
 import 'package:fluffychat/domain/model/extensions/homeserver_summary_extensions.dart';
+import 'package:fluffychat/domain/model/user_info/user_info.dart';
 import 'package:fluffychat/generated/l10n/app_localizations.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:flutter/material.dart';
 import 'package:linagora_design_flutter/colors/linagora_sys_colors.dart';
+import 'package:linagora_design_flutter/utils/web_link_generator.dart';
 import 'package:matrix/matrix.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -12,9 +14,11 @@ class SettingsProfileRedirectionEditButton extends StatelessWidget {
   const SettingsProfileRedirectionEditButton({
     super.key,
     required this.capabilities,
+    required this.userInfo,
   });
 
   final Capabilities? capabilities;
+  final UserInfo? userInfo;
 
   @override
   Widget build(BuildContext context) {
@@ -27,10 +31,19 @@ class SettingsProfileRedirectionEditButton extends StatelessWidget {
         ? null
         : commonSettingsInformation?.completedApplicationUrl(userId);
 
+    final workplaceFqdn = userInfo?.workplaceFqdn;
+    final redirectFqdn = workplaceFqdn == null
+        ? null
+        : WebLinkGenerator.safeGenerateWebLink(
+            workplaceFqdn: workplaceFqdn,
+            slug: 'settings',
+          );
+    final fdqnValid = redirectFqdn != null && redirectFqdn.isNotEmpty;
+
     if (capabilities?.canEditAvatar == true ||
         capabilities?.canEditDisplayName == true ||
         commonSettingsInformation?.enabled == false ||
-        redirectUrl == null) {
+        (redirectUrl == null && !fdqnValid)) {
       return const SizedBox();
     }
 
@@ -52,10 +65,17 @@ class SettingsProfileRedirectionEditButton extends StatelessWidget {
           ),
         ),
         onPressed: () {
-          launchUrl(
-            Uri.parse(redirectUrl),
-            webOnlyWindowName: '_blank',
-          );
+          if (fdqnValid) {
+            launchUrl(
+              Uri.parse(redirectFqdn),
+              webOnlyWindowName: '_blank',
+            );
+          } else if (redirectUrl != null) {
+            launchUrl(
+              Uri.parse(redirectUrl),
+              webOnlyWindowName: '_blank',
+            );
+          }
         },
         child: Text(L10n.of(context)!.edit),
       ),
