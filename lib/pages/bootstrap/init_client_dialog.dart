@@ -79,15 +79,18 @@ class _InitClientDialogState extends State<InitClientDialog>
 
   void _handleFunctionOnDone() async {
     Logs().i('StreamDialogBuilder::_handleFunctionOnDone');
-    Navigator.of(context, rootNavigator: false).pop();
   }
 
   void _handleFunctionOnError(Object? error) {
     Logs().e('StreamDialogBuilder::_handleFunctionOnError - $error');
-    Navigator.pop(context);
+    if (mounted) {
+      Navigator.pop(context);
+    }
   }
 
   void _handleFirstLoggedIn(Client client) {
+    Navigator.of(context, rootNavigator: false).pop();
+
     TwakeApp.router.go(
       '/rooms',
       extra: LoggedInBodyArgs(
@@ -97,6 +100,8 @@ class _InitClientDialogState extends State<InitClientDialog>
   }
 
   void _handleAddAnotherAccount(Client client) {
+    Navigator.of(context, rootNavigator: false).pop();
+
     TwakeApp.router.go(
       '/rooms',
       extra: LoggedInOtherAccountBodyArgs(
