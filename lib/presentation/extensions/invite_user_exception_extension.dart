@@ -10,6 +10,11 @@ extension InviteUserPartialFailureExceptionExtension
     final otherFailedCount = otherFailedUsers.length;
     final totalFailed = failedUsers.length;
 
+    assert(
+      totalFailed > 0,
+      'InviteUserPartialFailureException should not exist with empty failedUsers',
+    );
+
     if (bannedCount > 0 && otherFailedCount > 0) {
       return L10n.of(context)!.failedToAddMembersMixed(
         totalFailed,
@@ -18,8 +23,10 @@ extension InviteUserPartialFailureExceptionExtension
       );
     } else if (bannedCount > 0) {
       return L10n.of(context)!.failedToAddBannedUsers(bannedCount);
-    } else {
+    } else if (otherFailedCount > 0) {
       return L10n.of(context)!.failedToAddMembers(otherFailedCount);
+    } else {
+      return L10n.of(context)!.errorDialogTitle;
     }
   }
 }
