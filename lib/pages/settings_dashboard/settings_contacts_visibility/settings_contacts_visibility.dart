@@ -152,7 +152,7 @@ class SettingsContactsVisibilityController
             selectedVisibilityOptionNotifier.value =
                 SettingsContactsVisibilityEnum.values.firstWhere(
               (option) => option.name == success.userInfoVisibility.visibility,
-              orElse: () => SettingsContactsVisibilityEnum.private,
+              orElse: () => SettingsContactsVisibilityEnum.contacts,
             );
             selectedVisibleFieldNotifier.value =
                 success.userInfoVisibility.visibleFields ?? [];
@@ -197,7 +197,7 @@ class SettingsContactsVisibilityController
             selectedVisibilityOptionNotifier.value =
                 SettingsContactsVisibilityEnum.values.firstWhere(
               (option) => option.name == success.userInfoVisibility.visibility,
-              orElse: () => SettingsContactsVisibilityEnum.private,
+              orElse: () => SettingsContactsVisibilityEnum.contacts,
             );
             selectedVisibleFieldNotifier.value =
                 success.userInfoVisibility.visibleFields ?? [];
