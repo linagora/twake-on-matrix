@@ -31,7 +31,11 @@ class InvitationSelectionController
     extends ContactsSelectionController<InvitationSelection> {
   String? get _roomId => widget.roomId;
 
-  Room get _room => Matrix.of(context).client.getRoomById(_roomId!)!;
+  Room get _room =>
+      Matrix
+          .of(context)
+          .client
+          .getRoomById(_roomId!)!;
 
   @override
   bool get isFullScreen => widget.isFullScreen == true;
@@ -47,12 +51,14 @@ class InvitationSelectionController
   }
 
   @override
-  List<String> get disabledContactIds => Matrix.of(context)
-      .client
-      .getRoomById(_roomId!)!
-      .getParticipants()
-      .map((participant) => participant.id)
-      .toList();
+  List<String> get disabledContactIds =>
+      Matrix
+          .of(context)
+          .client
+          .getRoomById(_roomId!)!
+          .getParticipants()
+          .map((participant) => participant.id)
+          .toList();
 
   @override
   void onSubmit() async {
@@ -67,10 +73,10 @@ class InvitationSelectionController
     final subscription = getIt
         .get<InviteUserInteractor>()
         .execute(
-          matrixClient: client,
-          roomId: _room.id,
-          userIds: selectedContacts,
-        )
+      matrixClient: client,
+      roomId: _room.id,
+      userIds: selectedContacts,
+    )
         .listen((event) {
       final state = event.fold((failure) => failure, (success) => success);
 
@@ -89,14 +95,39 @@ class InvitationSelectionController
       }
 
       if (state is InviteUserSomeFailed) {
-        final failedUsers = state.inviteUserPartialFailureException.failedUsers;
+        final exception = state.inviteUserPartialFailureException;
+
+        // Use the convenient getter methods to categorize errors
+        final bannedCount = exception.bannedUsers.length;
+        final otherFailedCount = exception.otherFailedUsers.length;
+        final totalFailed = exception.failedUsers.length;
+
+        // Build error message based on error types using localized strings
+        String errorMessage = '';
+        if (bannedCount > 0 && otherFailedCount > 0) {
+          // Both banned and other errors
+          errorMessage = L10n.of(context)!.failedToAddMembersMixed(
+            totalFailed,
+            bannedCount,
+            otherFailedCount,
+          );
+        } else if (bannedCount > 0) {
+          // Only banned users
+          errorMessage = L10n.of(context)!.failedToAddBannedUsers(
+            bannedCount,
+          );
+        } else {
+          // Only other errors
+          errorMessage = L10n.of(context)!.failedToAddMembers(
+            otherFailedCount,
+          );
+        }
+
         WidgetsBinding.instance.addPostFrameCallback(
-          (_) async {
+              (_) async {
             await showConfirmAlertDialog(
               context: context,
-              message: L10n.of(context)!.failedToAddMembers(
-                failedUsers.keys.length,
-              ),
+              message: errorMessage,
               isArrangeActionButtonsVertical: true,
               okLabel: L10n.of(context)!.gotIt,
             );
@@ -108,7 +139,7 @@ class InvitationSelectionController
     });
 
     subscription.onDone(
-      () {
+          () {
         TwakeDialog.hideLoadingDialog(context);
         subscription.cancel();
       },

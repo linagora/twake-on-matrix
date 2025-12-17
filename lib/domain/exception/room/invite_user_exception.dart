@@ -2,12 +2,37 @@ import 'package:equatable/equatable.dart';
 
 /// Base exception for invite user operations
 abstract class InviteUserException extends Equatable implements Exception {
-  const InviteUserException();
+  final String userId;
+  final String? message;
+
+  const InviteUserException({
+    required this.userId,
+    this.message,
+  });
+
+  @override
+  List<Object?> get props => [userId, message];
+}
+
+/// Exception thrown when user was banned from the room
+class UserBannedException extends InviteUserException {
+  const UserBannedException({
+    required super.userId,
+    super.message,
+  });
+}
+
+/// Exception thrown for all other invite errors
+class GenericInviteException extends InviteUserException {
+  const GenericInviteException({
+    required super.userId,
+    super.message,
+  });
 }
 
 /// Exception thrown when some users failed to be invited
-class InviteUserPartialFailureException extends InviteUserException {
-  final Map<String, Exception> failedUsers;
+class InviteUserPartialFailureException extends Equatable implements Exception {
+  final Map<String, InviteUserException> failedUsers;
 
   const InviteUserPartialFailureException({
     required this.failedUsers,
@@ -15,4 +40,18 @@ class InviteUserPartialFailureException extends InviteUserException {
 
   @override
   List<Object?> get props => [failedUsers];
+
+  /// Get all banned users
+  Map<String, UserBannedException> get bannedUsers => Map.fromEntries(
+        failedUsers.entries
+            .where((e) => e.value is UserBannedException)
+            .map((e) => MapEntry(e.key, e.value as UserBannedException)),
+      );
+
+  /// Get all other failed users (non-banned)
+  Map<String, GenericInviteException> get otherFailedUsers => Map.fromEntries(
+        failedUsers.entries
+            .where((e) => e.value is GenericInviteException)
+            .map((e) => MapEntry(e.key, e.value as GenericInviteException)),
+      );
 }

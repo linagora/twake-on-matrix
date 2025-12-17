@@ -413,16 +413,39 @@ class NewGroupChatInfoController extends State<NewGroupChatInfo>
         );
 
         if (failure is InviteUserSomeFailed) {
-          final failedUsers =
-              failure.inviteUserPartialFailureException.failedUsers;
+          final exception = failure.inviteUserPartialFailureException;
           Logs().e(
-            'NewGroupController::_handleInviteUsersOnEvent - failed to invite users: ${failedUsers.keys.toList()}',
+            'NewGroupController::_handleInviteUsersOnEvent - failed to invite users: ${failure.inviteUserPartialFailureException}',
           );
+
+          // Use the convenient getter methods to categorize errors
+          final bannedCount = exception.bannedUsers.length;
+          final otherFailedCount = exception.otherFailedUsers.length;
+          final totalFailed = exception.failedUsers.length;
+
+          // Build error message based on error types using localized strings
+          String errorMessage = '';
+          if (bannedCount > 0 && otherFailedCount > 0) {
+            // Both banned and other errors
+            errorMessage = L10n.of(context)!.failedToAddMembersMixed(
+              totalFailed,
+              bannedCount,
+              otherFailedCount,
+            );
+          } else if (bannedCount > 0) {
+            // Only banned users
+            errorMessage = L10n.of(context)!.failedToAddBannedUsers(
+              bannedCount,
+            );
+          } else {
+            // Only other errors
+            errorMessage = L10n.of(context)!.failedToAddMembers(
+              otherFailedCount,
+            );
+          }
           await showConfirmAlertDialog(
             context: context,
-            message: L10n.of(context)!.failedToAddMembers(
-              failedUsers.keys.length,
-            ),
+            message: errorMessage,
             isArrangeActionButtonsVertical: true,
             okLabel: L10n.of(context)!.gotIt,
           );

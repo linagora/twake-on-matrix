@@ -3483,6 +3483,22 @@
       "count": {}
     }
   },
+  "failedToAddBannedUsers": "{count, plural, =1{1 member couldn't be added because they were previously banned} other{{count} members couldn't be added because they were previously banned. Please check their settings or try again}}",
+  "@failedToAddBannedUsers": {
+    "type": "text",
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "failedToAddMembersMixed": "{total, plural, =1{1 member couldn't be added} other{{total} members couldn't be added}}. {bannedCount, plural, =1{1 was banned} other{{bannedCount} were banned}}, {otherCount, plural, =1{1 failed} other{{otherCount} failed}} due to other reasons. Please check their settings or try again",
+  "@failedToAddMembersMixed": {
+    "type": "text",
+    "placeholders": {
+      "total": {},
+      "bannedCount": {},
+      "otherCount": {}
+    }
+  },
   "contactsVisibility": "Contacts visibility",
   "whoCanFindMeByMyContacts": "Who can find me by my contacts",
   "whoCanSeeMyPhoneEmail": "WHO CAN SEE MY PHONE/EMAIL",
