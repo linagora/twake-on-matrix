@@ -110,7 +110,8 @@ class SettingsContactsVisibilityController
             : [...selectedVisibleFieldNotifier.value, selectedField];
     updateUserInfoVisibility(
       userInfoVisibility: UserInfoVisibilityRequest(
-        visibility: selectedVisibilityOptionNotifier.value?.name,
+        visibility: selectedVisibilityOptionNotifier.value?.name ??
+            SettingsContactsVisibilityEnum.contacts.name,
         visibleFields: currentVisibleFields,
       ),
     );
