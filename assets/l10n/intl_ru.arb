@@ -3522,5 +3522,65 @@
     "placeholders": {
       "count": {}
     }
-  }
+  },
+  "failedToAddBannedUsers": "{count, plural, =1{1 участник не может быть добавлен, так как он был ранее забанен} other{{count} участников не могут быть добавлены, так как они были ранее забанены. Проверьте настройки и попробуйте снова}}",
+  "@failedToAddBannedUsers": {
+    "type": "text",
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "failedToAddMembersMixed": "{total, plural, =1{1 участник не может быть добавлен} other{{total} участников не могут быть добавлены}}. {bannedCount, plural, =1{1 был забанен} other{{bannedCount} были забанены}}, {otherCount, plural, =1{1 не добавлен} other{{otherCount} не добавлены}} по другим причинам. Пожалуйста, проверьте настройки и попробуйте снова",
+  "@failedToAddMembersMixed": {
+    "type": "text",
+    "placeholders": {
+      "total": {},
+      "bannedCount": {},
+      "otherCount": {}
+    }
+  },
+  "contactsVisibility": "Видимость профиля",
+  "@contactsVisibility": {},
+  "whoCanFindMeByMyContacts": "Кто может найти меня по контактным данным",
+  "@whoCanFindMeByMyContacts": {},
+  "whoCanSeeMyPhoneEmail": "КТО ВИДИТ МОЙ НОМЕР/EMAIL",
+  "@whoCanSeeMyPhoneEmail": {},
+  "everyOne": "Все",
+  "@everyOne": {},
+  "myContacts": "Мои контакты",
+  "@myContacts": {},
+  "nobody": "Никто",
+  "@nobody": {},
+  "chooseWhichDetailsAreVisibleToOtherUsers": "ВЫБЕРИТЕ, КАКИЕ ДАННЫЕ БУДУТ ВИДНЫ ДРУГИМ ПОЛЬЗОВАТЕЛЯМ",
+  "@chooseWhichDetailsAreVisibleToOtherUsers": {},
+  "youNumberIsVisibleAccordingToTheSettingAbove": "Ваш номер отображается в соответствии с указанными настройками",
+  "@youNumberIsVisibleAccordingToTheSettingAbove": {},
+  "youEmailIsVisibleAccordingToTheSettingAbove": "Ваша почта отображается в соответствии с указанными настройками",
+  "@youEmailIsVisibleAccordingToTheSettingAbove": {},
+  "failedToChangeContactsVisibility": "Не удалось изменить настройки видимости",
+  "@failedToChangeContactsVisibility": {},
+  "failedToGetContactsVisibility": "Не удалось загрузить настройки видимости",
+  "@failedToGetContactsVisibility": {},
+  "unblockUserToSendMessages": "Разблокируйте, чтобы писать сообщения",
+  "@unblockUserToSendMessages": {},
+  "supportChat": "Чат поддержки",
+  "@supportChat": {},
+  "supportChatDescription": "Я готов помочь! Если вы столкнетесь с ошибками или сложностями в использовании Twake Workplace, отправьте сообщение в этот чат",
+  "@supportChatDescription": {},
+  "inviteFriend": "Пригласить друга",
+  "@inviteFriend": {},
+  "linkCopiedToClipboard": "Ссылка скопирована",
+  "@linkCopiedToClipboard": {},
+  "cannotCreateChatWithSelf": "Вы не можете начать чат с самим собой",
+  "@cannotCreateChatWithSelf": {},
+  "yourPersonalQr": "Ваш личный QR",
+  "@yourPersonalQr": {},
+  "personalQrDescription": "Начните общение! Отправьте ссылку-приглашение в Twake Workplace",
+  "@personalQrDescription": {},
+  "shareQrCode": "Поледиться QR",
+  "@shareQrCode": {},
+  "copyLink": "Копировать ссылку",
+  "@copyLink": {},
+  "downloadQrCode": "Скачать QR",
+  "@downloadQrCode": {}
 }
