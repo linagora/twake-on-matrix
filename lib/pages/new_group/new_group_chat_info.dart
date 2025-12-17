@@ -13,6 +13,7 @@ import 'package:fluffychat/domain/usecase/room/invite_user_interactor.dart';
 import 'package:fluffychat/domain/usecase/verify_name_interactor.dart';
 import 'package:fluffychat/pages/new_group/new_group_chat_info_view.dart';
 import 'package:fluffychat/pages/new_group/new_group_info_controller.dart';
+import 'package:fluffychat/presentation/extensions/invite_user_exception_extension.dart';
 import 'package:fluffychat/presentation/mixins/common_media_picker_mixin.dart';
 import 'package:fluffychat/presentation/mixins/pick_avatar_mixin.dart';
 import 'package:fluffychat/presentation/mixins/single_image_picker_mixin.dart';
@@ -418,31 +419,8 @@ class NewGroupChatInfoController extends State<NewGroupChatInfo>
             'NewGroupController::_handleInviteUsersOnEvent - failed to invite users: ${failure.inviteUserPartialFailureException}',
           );
 
-          // Use the convenient getter methods to categorize errors
-          final bannedCount = exception.bannedUsers.length;
-          final otherFailedCount = exception.otherFailedUsers.length;
-          final totalFailed = exception.failedUsers.length;
+          final errorMessage = exception.getLocalizedErrorMessage(context);
 
-          // Build error message based on error types using localized strings
-          String errorMessage = '';
-          if (bannedCount > 0 && otherFailedCount > 0) {
-            // Both banned and other errors
-            errorMessage = L10n.of(context)!.failedToAddMembersMixed(
-              totalFailed,
-              bannedCount,
-              otherFailedCount,
-            );
-          } else if (bannedCount > 0) {
-            // Only banned users
-            errorMessage = L10n.of(context)!.failedToAddBannedUsers(
-              bannedCount,
-            );
-          } else {
-            // Only other errors
-            errorMessage = L10n.of(context)!.failedToAddMembers(
-              otherFailedCount,
-            );
-          }
           await showConfirmAlertDialog(
             context: context,
             message: errorMessage,

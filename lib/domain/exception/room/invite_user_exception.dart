@@ -34,7 +34,7 @@ class GenericInviteException extends InviteUserException {
 class InviteUserPartialFailureException extends Equatable implements Exception {
   final Map<String, InviteUserException> failedUsers;
 
-  const InviteUserPartialFailureException({
+  InviteUserPartialFailureException({
     required this.failedUsers,
   });
 
@@ -42,16 +42,17 @@ class InviteUserPartialFailureException extends Equatable implements Exception {
   List<Object?> get props => [failedUsers];
 
   /// Get all banned users
-  Map<String, UserBannedException> get bannedUsers => Map.fromEntries(
-        failedUsers.entries
-            .where((e) => e.value is UserBannedException)
-            .map((e) => MapEntry(e.key, e.value as UserBannedException)),
-      );
+  late final Map<String, UserBannedException> bannedUsers = Map.fromEntries(
+    failedUsers.entries
+        .where((e) => e.value is UserBannedException)
+        .map((e) => MapEntry(e.key, e.value as UserBannedException)),
+  );
 
   /// Get all other failed users (non-banned)
-  Map<String, GenericInviteException> get otherFailedUsers => Map.fromEntries(
-        failedUsers.entries
-            .where((e) => e.value is GenericInviteException)
-            .map((e) => MapEntry(e.key, e.value as GenericInviteException)),
-      );
+  late final Map<String, GenericInviteException> otherFailedUsers =
+      Map.fromEntries(
+    failedUsers.entries
+        .where((e) => e.value is GenericInviteException)
+        .map((e) => MapEntry(e.key, e.value as GenericInviteException)),
+  );
 }
