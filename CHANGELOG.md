@@ -1,3 +1,8 @@
+## [2.18.2] - 2025-12-17
+### Fixed
+- Contact visibility settings for Everyone option
+- ru translation
+
 ## [2.18.1] - 2025-12-17
 ### Fixed
 - Fix QR code sharing image
