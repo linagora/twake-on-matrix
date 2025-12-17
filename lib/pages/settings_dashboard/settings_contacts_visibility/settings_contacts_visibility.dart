@@ -110,7 +110,8 @@ class SettingsContactsVisibilityController
             : [...selectedVisibleFieldNotifier.value, selectedField];
     updateUserInfoVisibility(
       userInfoVisibility: UserInfoVisibilityRequest(
-        visibility: SettingsContactsVisibilityEnum.contacts.name,
+        visibility: selectedVisibilityOptionNotifier.value?.name ??
+            SettingsContactsVisibilityEnum.contacts.name,
         visibleFields: currentVisibleFields,
       ),
     );
@@ -151,7 +152,7 @@ class SettingsContactsVisibilityController
             selectedVisibilityOptionNotifier.value =
                 SettingsContactsVisibilityEnum.values.firstWhere(
               (option) => option.name == success.userInfoVisibility.visibility,
-              orElse: () => SettingsContactsVisibilityEnum.private,
+              orElse: () => SettingsContactsVisibilityEnum.contacts,
             );
             selectedVisibleFieldNotifier.value =
                 success.userInfoVisibility.visibleFields ?? [];
@@ -196,7 +197,7 @@ class SettingsContactsVisibilityController
             selectedVisibilityOptionNotifier.value =
                 SettingsContactsVisibilityEnum.values.firstWhere(
               (option) => option.name == success.userInfoVisibility.visibility,
-              orElse: () => SettingsContactsVisibilityEnum.private,
+              orElse: () => SettingsContactsVisibilityEnum.contacts,
             );
             selectedVisibleFieldNotifier.value =
                 success.userInfoVisibility.visibleFields ?? [];
