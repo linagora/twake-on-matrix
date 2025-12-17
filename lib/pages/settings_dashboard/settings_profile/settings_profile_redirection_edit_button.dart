@@ -38,12 +38,12 @@ class SettingsProfileRedirectionEditButton extends StatelessWidget {
             workplaceFqdn: workplaceFqdn,
             slug: 'settings',
           );
-    final fdqnValid = redirectFqdn != null && redirectFqdn.isNotEmpty;
+    final fqdnValid = redirectFqdn != null && redirectFqdn.isNotEmpty;
 
     if (capabilities?.canEditAvatar == true ||
         capabilities?.canEditDisplayName == true ||
         commonSettingsInformation?.enabled == false ||
-        (redirectUrl == null && !fdqnValid)) {
+        (redirectUrl == null && !fqdnValid)) {
       return const SizedBox();
     }
 
@@ -65,16 +65,20 @@ class SettingsProfileRedirectionEditButton extends StatelessWidget {
           ),
         ),
         onPressed: () {
-          if (fdqnValid) {
-            launchUrl(
-              Uri.parse(redirectFqdn),
-              webOnlyWindowName: '_blank',
-            );
-          } else if (redirectUrl != null) {
-            launchUrl(
-              Uri.parse(redirectUrl),
-              webOnlyWindowName: '_blank',
-            );
+          try {
+            if (fqdnValid) {
+              launchUrl(
+                Uri.parse(redirectFqdn),
+                webOnlyWindowName: '_blank',
+              );
+            } else if (redirectUrl != null) {
+              launchUrl(
+                Uri.parse(redirectUrl),
+                webOnlyWindowName: '_blank',
+              );
+            }
+          } catch (e, s) {
+            Logs().e('SettingsProfileRedirectionEditButton::onPressed()', e, s);
           }
         },
         child: Text(L10n.of(context)!.edit),
