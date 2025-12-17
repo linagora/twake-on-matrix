@@ -13,6 +13,7 @@ import 'package:fluffychat/domain/usecase/room/invite_user_interactor.dart';
 import 'package:fluffychat/domain/usecase/verify_name_interactor.dart';
 import 'package:fluffychat/pages/new_group/new_group_chat_info_view.dart';
 import 'package:fluffychat/pages/new_group/new_group_info_controller.dart';
+import 'package:fluffychat/presentation/extensions/invite_user_exception_extension.dart';
 import 'package:fluffychat/presentation/mixins/common_media_picker_mixin.dart';
 import 'package:fluffychat/presentation/mixins/pick_avatar_mixin.dart';
 import 'package:fluffychat/presentation/mixins/single_image_picker_mixin.dart';
@@ -413,16 +414,16 @@ class NewGroupChatInfoController extends State<NewGroupChatInfo>
         );
 
         if (failure is InviteUserSomeFailed) {
-          final failedUsers =
-              failure.inviteUserPartialFailureException.failedUsers;
+          final exception = failure.inviteUserPartialFailureException;
           Logs().e(
-            'NewGroupController::_handleInviteUsersOnEvent - failed to invite users: ${failedUsers.keys.toList()}',
+            'NewGroupController::_handleInviteUsersOnEvent - failed to invite users: ${failure.inviteUserPartialFailureException}',
           );
+
+          final errorMessage = exception.getLocalizedErrorMessage(context);
+
           await showConfirmAlertDialog(
             context: context,
-            message: L10n.of(context)!.failedToAddMembers(
-              failedUsers.keys.length,
-            ),
+            message: errorMessage,
             isArrangeActionButtonsVertical: true,
             okLabel: L10n.of(context)!.gotIt,
           );

@@ -3,6 +3,7 @@ import 'package:fluffychat/domain/app_state/room/invite_user_state.dart';
 import 'package:fluffychat/domain/usecase/room/invite_user_interactor.dart';
 import 'package:fluffychat/pages/new_group/contacts_selection.dart';
 import 'package:fluffychat/pages/new_group/contacts_selection_view.dart';
+import 'package:fluffychat/presentation/extensions/invite_user_exception_extension.dart';
 import 'package:fluffychat/utils/dialog/twake_dialog.dart';
 import 'package:fluffychat/utils/twake_snackbar.dart';
 import 'package:flutter/material.dart';
@@ -89,14 +90,13 @@ class InvitationSelectionController
       }
 
       if (state is InviteUserSomeFailed) {
-        final failedUsers = state.inviteUserPartialFailureException.failedUsers;
+        final exception = state.inviteUserPartialFailureException;
+
         WidgetsBinding.instance.addPostFrameCallback(
           (_) async {
             await showConfirmAlertDialog(
               context: context,
-              message: L10n.of(context)!.failedToAddMembers(
-                failedUsers.keys.length,
-              ),
+              message: exception.getLocalizedErrorMessage(context),
               isArrangeActionButtonsVertical: true,
               okLabel: L10n.of(context)!.gotIt,
             );

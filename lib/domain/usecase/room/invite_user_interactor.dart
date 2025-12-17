@@ -16,7 +16,7 @@ class InviteUserInteractor {
   }) async* {
     yield Right(InviteUserLoading());
 
-    final failedUsers = <String, Exception>{};
+    final failedUsers = <String, InviteUserException>{};
 
     for (final userId in userIds) {
       try {
@@ -26,9 +26,10 @@ class InviteUserInteractor {
           userId: userId,
         );
       } catch (exception) {
-        failedUsers[userId] = exception is Exception
-            ? exception
-            : Exception(exception.toString());
+        failedUsers[userId] = _mapExceptionToInviteUserException(
+          userId: userId,
+          exception: exception,
+        );
         Logs().e(
           'InviteUserInteractor::execute: Failed to invite user $userId after all retries',
           exception,
@@ -52,6 +53,37 @@ class InviteUserInteractor {
         ),
       );
     }
+  }
+
+  /// Maps generic exceptions to specific InviteUserException types
+  InviteUserException _mapExceptionToInviteUserException({
+    required String userId,
+    required Object exception,
+  }) {
+    if (exception is MatrixException) {
+      final errorMessage = exception.errorMessage;
+
+      // Check if it's a banned user error
+      if (exception.errcode == 'M_BAD_STATE' &&
+          errorMessage.contains('Cannot invite user who was banned')) {
+        return UserBannedException(
+          userId: userId,
+          message: errorMessage,
+        );
+      }
+
+      // All other errors are generic
+      return GenericInviteException(
+        userId: userId,
+        message: errorMessage,
+      );
+    }
+
+    // For non-Matrix exceptions
+    return GenericInviteException(
+      userId: userId,
+      message: exception.toString(),
+    );
   }
 
   Future<void> _inviteUserWithRetry({
