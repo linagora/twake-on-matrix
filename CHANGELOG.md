@@ -1,6 +1,7 @@
 ## [2.18.2] - 2025-12-17
 ### Fixed
 - Contact visibility settings for Everyone option
+- Null check for support chat id
 - ru translation
 
 ## [2.18.1] - 2025-12-17
