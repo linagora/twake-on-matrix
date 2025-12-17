@@ -3509,5 +3509,65 @@
     "placeholders": {
       "count": {}
     }
-  }
+  },
+  "failedToAddBannedUsers": "{count, plural, =1{1 учасника не вдалося додати, оскільки його раніше було забанено} other{{count} учасників не вдалося додати, оскільки їх було раніше забанено. Перевірте їхні налаштування або спробуйте ще раз.}}",
+  "@failedToAddBannedUsers": {
+    "type": "text",
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "failedToAddMembersMixed": "{total, plural, =1{1 учасника не вдалося додати} other{{total} учасників не вдалося додати}}. {bannedCount, plural, =1{1 було забанено} other{{bannedCount} було забанено}}, {otherCount, plural, =1{1 не вдалося} other{{otherCount} не вдалося}} з інших причин. Будь ласка, перевірте їхні налаштування або спробуйте ще раз",
+  "@failedToAddMembersMixed": {
+    "type": "text",
+    "placeholders": {
+      "total": {},
+      "bannedCount": {},
+      "otherCount": {}
+    }
+  },
+  "contactsVisibility": "Видимість контактів",
+  "@contactsVisibility": {},
+  "whoCanFindMeByMyContacts": "Хто може знайти мене за моїми контактами",
+  "@whoCanFindMeByMyContacts": {},
+  "whoCanSeeMyPhoneEmail": "ХТО МОЖЕ БАЧИТИ МІЙ ТЕЛЕФОН/ЕЛЕКТРОННУ ПОШТУ",
+  "@whoCanSeeMyPhoneEmail": {},
+  "everyOne": "Кожен",
+  "@everyOne": {},
+  "myContacts": "Мої контакти",
+  "@myContacts": {},
+  "nobody": "Ніхто",
+  "@nobody": {},
+  "chooseWhichDetailsAreVisibleToOtherUsers": "ВИБЕРІТЬ, ЯКІ ДЕТАЛІ БАЧИТИ ІНШІ КОРИСТУВАЧІ",
+  "@chooseWhichDetailsAreVisibleToOtherUsers": {},
+  "youNumberIsVisibleAccordingToTheSettingAbove": "Ваш номер відображається відповідно до налаштувань вище",
+  "@youNumberIsVisibleAccordingToTheSettingAbove": {},
+  "youEmailIsVisibleAccordingToTheSettingAbove": "Ваша електронна адреса видима відповідно до налаштувань вище",
+  "@youEmailIsVisibleAccordingToTheSettingAbove": {},
+  "failedToChangeContactsVisibility": "Не вдалося змінити видимість контактів",
+  "@failedToChangeContactsVisibility": {},
+  "failedToGetContactsVisibility": "Не вдалося отримати дані про видимість контактів",
+  "@failedToGetContactsVisibility": {},
+  "unblockUserToSendMessages": "Розблокувати користувача для надсилання повідомлень",
+  "@unblockUserToSendMessages": {},
+  "supportChat": "Чат підтримки",
+  "@supportChat": {},
+  "supportChatDescription": "Я тобі допоможу! Якщо у тебе виникнуть помилки або потрібна допомога з Twake Workplace, надішли повідомлення, я швидко тобі відповім",
+  "@supportChatDescription": {},
+  "inviteFriend": "Запросити друга",
+  "@inviteFriend": {},
+  "linkCopiedToClipboard": "Посилання скопійовано в буфер обміну",
+  "@linkCopiedToClipboard": {},
+  "cannotCreateChatWithSelf": "Ти не можеш почати розмову з собою",
+  "@cannotCreateChatWithSelf": {},
+  "yourPersonalQr": "Ваш персональний QR-код",
+  "@yourPersonalQr": {},
+  "personalQrDescription": "Почніть спілкуватися зі своїми контактами. Надіслати посилання-запрошення Twake",
+  "@personalQrDescription": {},
+  "shareQrCode": "Поділитися QR-кодом",
+  "@shareQrCode": {},
+  "copyLink": "Копіювати посилання",
+  "@copyLink": {},
+  "downloadQrCode": "Завантажити QR-код",
+  "@downloadQrCode": {}
 }
