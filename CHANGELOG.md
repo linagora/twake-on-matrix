@@ -1,4 +1,11 @@
-## [2.16.5+2330] - 2025-12-15
+## [2.18.1] - 2025-12-17
+### Fixed
+- Fix QR code sharing image
+- Fix QR code zone clearer
+- Update contact visibility for Everyone
+- Change error message for adding banned member
+
+## [2.18.0] - 2025-12-15
 ### Added
 - #2768: Add personal QR (#2769)
 - #2710: Add settings for displaying and managing contact info visibility (#2711)
