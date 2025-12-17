@@ -26,7 +26,7 @@ class CreateSupportChatInteractor {
       final supportChatTwakeId =
           discovery.additionalProperties[WellKnownMixin.twakeChatKey]
               ?[WellKnownMixin.supportContact];
-      if (supportChatTwakeId is! String) {
+      if (supportChatTwakeId is! String || supportChatTwakeId.trim().isEmpty) {
         throw Exception('No support contact found in well-known');
       }
 
