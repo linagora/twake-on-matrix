@@ -320,7 +320,7 @@ class MatrixState extends State<Matrix>
   StreamSubscription<html.Event>? onFocusSub;
   StreamSubscription<html.Event>? onBlurSub;
   final initSettingsCompleter = Completer<void>();
-  bool _hasInitializedSharingIntent = false;
+  bool _hasSetupSharingStreams = false;
 
   String? _cachedPassword;
   Timer? _cachedPasswordClearTimer;
@@ -377,27 +377,29 @@ class MatrixState extends State<Matrix>
     });
   }
 
-  /// Initializes sharing intent once when user is logged in
-  void _initializeSharingIntentOnce() {
-    if (_hasInitializedSharingIntent) return;
-    _hasInitializedSharingIntent = true;
-    initReceiveSharingIntent();
-  }
-
-  /// Initializes sharing intent after first sync completes
-  void _initializeSharingIntentAfterFirstSync(Client client) {
-    if (_hasInitializedSharingIntent) return;
-    client.onSync.stream.first.then((_) {
-      Logs().d(
-        'MatrixState::_initializeSharingIntentAfterFirstSync: First sync completed, initializing sharing intent',
-      );
-      _initializeSharingIntentOnce();
-    }).catchError((error) {
+  /// Sets up sharing intent stream listeners and caches initial values
+  /// This should be called as soon as the app opens
+  /// Both file and URI streams are set up immediately and cache all incoming values
+  /// Cached values are processed after _trySync completes
+  ///
+  /// IMPORTANT: This method must be awaited to ensure initial intents are
+  /// cached before processCachedSharingIntents() is called.
+  Future<void> _setupSharingStreamsOnce() async {
+    if (_hasSetupSharingStreams) return;
+    Logs().d(
+      'MatrixState::_setupSharingStreamsOnce: Setting up sharing intent streams',
+    );
+    try {
+      await setupSharingIntentStreams();
+      _hasSetupSharingStreams = true;
+    } catch (e, s) {
       Logs().e(
-        'MatrixState::_initializeSharingIntentAfterFirstSync: Error waiting for first sync: $error',
+        'MatrixState::_setupSharingStreamsOnce: Failed to setup sharing streams',
+        e,
+        s,
       );
-      _initializeSharingIntentOnce();
-    });
+      // Optionally rethrow if this is critical
+    }
   }
 
   void _registerSubs(String name) async {
@@ -509,6 +511,7 @@ class MatrixState extends State<Matrix>
     LoginState state,
     Client currentClient,
   ) async {
+    waitForFirstSync = false;
     await _cancelSubs(currentClient.clientName);
     widget.clients.remove(currentClient);
     await ClientManager.removeClientNameFromStore(currentClient.clientName);
@@ -543,7 +546,6 @@ class MatrixState extends State<Matrix>
     await _getUserInfoWithActiveClient(newActiveClient);
     await _getHomeserverInformation(newActiveClient);
     matrixState.reSyncContacts();
-    _initializeSharingIntentAfterFirstSync(newActiveClient);
     onClientLoginStateChanged.add(
       ClientLoginStateEvent(
         client: client,
@@ -614,7 +616,7 @@ class MatrixState extends State<Matrix>
     onNotification.remove(name);
   }
 
-  void initMatrix() {
+  Future<void> initMatrix() async {
     // Display the app lock
     if (PlatformInfos.isMobile) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -672,10 +674,9 @@ class MatrixState extends State<Matrix>
 
     createVoipPlugin();
 
-    // Initialize sharing intent if there are already logged-in clients
-    if (widget.clients.isNotEmpty && widget.clients.any((c) => c.isLogged())) {
-      _initializeSharingIntentOnce();
-    }
+    // Set up sharing intent stream listeners (Part 2)
+    // This happens immediately when app opens, regardless of login state
+    await _setupSharingStreamsOnce();
   }
 
   void createVoipPlugin() async {
@@ -1093,6 +1094,7 @@ class MatrixState extends State<Matrix>
   }
 
   Future<void> _handleLastLogout() async {
+    waitForFirstSync = false;
     matrixState.reSyncContacts();
     await matrixState.cancelListenSynchronizeContacts();
     if (PlatformInfos.isMobile) {
@@ -1213,7 +1215,6 @@ class MatrixState extends State<Matrix>
       html.window.removeEventListener('focus', onWindowFocus);
       html.window.removeEventListener('blur', onWindowBlur);
     }
-    intentDataStreamSubscription?.cancel();
     intentFileStreamSubscription?.cancel();
     intentUriStreamSubscription?.cancel();
     onRoomKeyRequestSub.values.map((s) => s.cancel());

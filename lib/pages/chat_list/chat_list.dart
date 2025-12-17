@@ -450,6 +450,9 @@ class ChatListController extends State<ChatList>
         matrixState.waitForFirstSync = true;
         matrixState.handleShowQrCodeDownload(_filteredRooms.isEmpty);
       });
+
+      // Process cached sharing intents after first sync
+      matrixState.processCachedSharingIntents();
     });
   }
 
@@ -464,6 +467,9 @@ class ChatListController extends State<ChatList>
       matrixState.waitForFirstSync = true;
       matrixState.handleShowQrCodeDownload(_filteredRooms.isEmpty);
     });
+
+    // Process cached sharing intents after first sync
+    matrixState.processCachedSharingIntents();
   }
 
   void editBundlesForAccount(String? userId, String? activeBundle) async {
