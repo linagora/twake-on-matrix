@@ -3507,5 +3507,65 @@
     "placeholders": {
       "count": {}
     }
-  }
+  },
+  "failedToAddBannedUsers": "{count, plural, =1{Níorbh fhéidir 1 bhall a chur leis mar bhí cosc orthu roimhe seo} other{{count} baill eile a chur leis mar bhí cosc orthu roimhe seo. Seiceáil a socruithe nó déan iarracht arís}}",
+  "@failedToAddBannedUsers": {
+    "type": "text",
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "failedToAddMembersMixed": "{total, plural, =1{Níorbh fhéidir ball amháin a chur leis} other{Níorbh fhéidir {total} bhall a chur leis}}. {bannedCount, plural, =1{Cuireadh cosc ar cheann amháin} other{Cuireadh cosc ar {bannedCount}}}, {otherCount, plural, =1{Theip ar cheann amháin} other{Theip ar {otherCount}}} ar chúiseanna eile. Seiceáil a socruithe nó bain triail eile as",
+  "@failedToAddMembersMixed": {
+    "type": "text",
+    "placeholders": {
+      "total": {},
+      "bannedCount": {},
+      "otherCount": {}
+    }
+  },
+  "contactsVisibility": "Infheictheacht na dteagmhálaithe",
+  "@contactsVisibility": {},
+  "whoCanFindMeByMyContacts": "Cé a fhéadfaidh mé a aimsiú trí mo theagmhálaithe",
+  "@whoCanFindMeByMyContacts": {},
+  "whoCanSeeMyPhoneEmail": "CÉ A FÉIDIR MO GHLUAISTEÁN/RÍOMHPHOST A FHEICEÁIL",
+  "@whoCanSeeMyPhoneEmail": {},
+  "everyOne": "Gach duine",
+  "@everyOne": {},
+  "myContacts": "Mo theagmhálaithe",
+  "@myContacts": {},
+  "nobody": "Aon duine",
+  "@nobody": {},
+  "chooseWhichDetailsAreVisibleToOtherUsers": "ROGHNAIGH CÉ NA SONRAÍ ATÁ LE FEICEÁIL AG ÚSÁIDEOIRÍ EILE",
+  "@chooseWhichDetailsAreVisibleToOtherUsers": {},
+  "youNumberIsVisibleAccordingToTheSettingAbove": "Tá d’uimhir le feiceáil de réir an tsocraithe thuas",
+  "@youNumberIsVisibleAccordingToTheSettingAbove": {},
+  "youEmailIsVisibleAccordingToTheSettingAbove": "Tá do r-phost le feiceáil de réir an tsocraithe thuas",
+  "@youEmailIsVisibleAccordingToTheSettingAbove": {},
+  "failedToChangeContactsVisibility": "Theip ar infheictheacht na dteagmhálaithe a athrú",
+  "@failedToChangeContactsVisibility": {},
+  "failedToGetContactsVisibility": "Theip ar infheictheacht na dteagmhálaithe a fháil",
+  "@failedToGetContactsVisibility": {},
+  "unblockUserToSendMessages": "Díbhlocáil úsáideoir chun teachtaireachtaí a sheoladh",
+  "@unblockUserToSendMessages": {},
+  "supportChat": "Comhrá Tacaíochta",
+  "@supportChat": {},
+  "supportChatDescription": "Táim i do shuí! Má thagann tú ar fhabhtanna nó má theastaíonn aon chabhair uait le Twake Workplace, seol teachtaireacht chugat, freagróidh mé go pras duit",
+  "@supportChatDescription": {},
+  "inviteFriend": "Tabhair cuireadh do chara",
+  "@inviteFriend": {},
+  "linkCopiedToClipboard": "Nasc cóipeáilte chuig an ghearrthaisce",
+  "@linkCopiedToClipboard": {},
+  "cannotCreateChatWithSelf": "Ní féidir leat comhrá a thosú leat féin",
+  "@cannotCreateChatWithSelf": {},
+  "yourPersonalQr": "Do QR pearsanta",
+  "@yourPersonalQr": {},
+  "personalQrDescription": "Tosaigh ag comhrá le do theagmhálaithe. Seol nasc cuireadh chuig Twake",
+  "@personalQrDescription": {},
+  "shareQrCode": "Comhroinn cód QR",
+  "@shareQrCode": {},
+  "copyLink": "Cóipeáil nasc",
+  "@copyLink": {},
+  "downloadQrCode": "Íoslódáil cód QR",
+  "@downloadQrCode": {}
 }
