@@ -64,16 +64,27 @@ extension AddressBookExtension on AddressBook {
 
   /// Converts an AddressBook to a Contact.
   ///
-  /// Since AddressBook primarily contains Matrix ID (mxid) information without
-  /// email or phone number details, this creates a Contact with the mxid
-  /// stored as matrixId and email is empty to preserve the Matrix ID association.
+  /// AddressBook entries from the server contain Matrix IDs (mxid) but no
+  /// third-party identifiers like email addresses or phone numbers.
+  ///
+  /// To preserve the Matrix ID in the Contact model, this method creates an
+  /// Email object with:
+  /// - `address`: Empty string (no actual email address available)
+  /// - `matrixId`: The Matrix ID from the AddressBook
+  /// - `status`: Active/inactive based on the AddressBook's active flag
+  ///
+  /// Note: This creates a synthetic Email entry solely to store the Matrix ID,
+  /// as the Contact model doesn't have a dedicated matrixId field. The empty
+  /// address allows the matrixId to be preserved without displaying duplicate
+  /// Matrix IDs in the UI.
   Contact toContact() {
     final status = addressBookIsActive()
         ? ThirdPartyStatus.active
         : ThirdPartyStatus.inactive;
 
-    // Use mxid as a pseudo-email to store the Matrix ID in the Contact structure
-    // This allows the Contact to maintain the Matrix ID association
+    // Create an Email object with empty address to store the Matrix ID.
+    // The Email.matrixId field stores the association while the empty address
+    // prevents the Matrix ID from being displayed twice in the UI
     final emails = mxid != null && mxid!.isNotEmpty
         ? {
             Email(
