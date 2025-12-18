@@ -66,7 +66,7 @@ extension AddressBookExtension on AddressBook {
   ///
   /// Since AddressBook primarily contains Matrix ID (mxid) information without
   /// email or phone number details, this creates a Contact with the mxid
-  /// stored as an email address to preserve the Matrix ID association.
+  /// stored as matrixId and email is empty to preserve the Matrix ID association.
   Contact toContact() {
     final status = addressBookIsActive()
         ? ThirdPartyStatus.active
@@ -77,7 +77,7 @@ extension AddressBookExtension on AddressBook {
     final emails = mxid != null && mxid!.isNotEmpty
         ? {
             Email(
-              address: mxid!,
+              address: '',
               matrixId: mxid,
               status: status,
             ),
