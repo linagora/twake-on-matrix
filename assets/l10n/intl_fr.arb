@@ -3519,5 +3519,65 @@
     "placeholders": {
       "count": {}
     }
-  }
+  },
+  "failedToAddBannedUsers": "{count, plural, =1{1 membre n'a pas pu être ajouté car il a été banni} other{{count} membres n'ont pas pu être ajoutés car ils ont été bannis. Veuillez vérifier leurs paramètres ou réessayer.}}",
+  "@failedToAddBannedUsers": {
+    "type": "text",
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "failedToAddMembersMixed": "{total, plural, =1{1 membre n'a pas pu être ajouté} other{{total} membres n'ont pas pu être ajoutés}}. {bannedCount, plural, =1{1 a été banni} other{{bannedCount} ont été bannis}}, {otherCount, plural, =1{1 échec} other{{otherCount} ont échoué}} pour d'autres raisons. Veuillez vérifier leurs paramètres ou réessayer",
+  "@failedToAddMembersMixed": {
+    "type": "text",
+    "placeholders": {
+      "total": {},
+      "bannedCount": {},
+      "otherCount": {}
+    }
+  },
+  "contactsVisibility": "Visibilité des contacts",
+  "@contactsVisibility": {},
+  "whoCanFindMeByMyContacts": "Qui peut me trouver grâce à mes contacts",
+  "@whoCanFindMeByMyContacts": {},
+  "whoCanSeeMyPhoneEmail": "QUI PEUT VOIR MON TELEPHONE/EMAIL",
+  "@whoCanSeeMyPhoneEmail": {},
+  "everyOne": "Tout le monde",
+  "@everyOne": {},
+  "myContacts": "Mes contacts",
+  "@myContacts": {},
+  "nobody": "Personne",
+  "@nobody": {},
+  "chooseWhichDetailsAreVisibleToOtherUsers": "CHOISISSEZ LES DÉTAILS VISIBLES AUX AUTRES UTILISATEURS",
+  "@chooseWhichDetailsAreVisibleToOtherUsers": {},
+  "youNumberIsVisibleAccordingToTheSettingAbove": "Votre numéro est visible conformément aux paramètres ci-dessus",
+  "@youNumberIsVisibleAccordingToTheSettingAbove": {},
+  "youEmailIsVisibleAccordingToTheSettingAbove": "Votre mail est visible conformément aux paramètres ci-dessus",
+  "@youEmailIsVisibleAccordingToTheSettingAbove": {},
+  "failedToChangeContactsVisibility": "Impossible de modifier la visibilité des contacts",
+  "@failedToChangeContactsVisibility": {},
+  "failedToGetContactsVisibility": "Impossible de récupérer la visibilité des contacts",
+  "@failedToGetContactsVisibility": {},
+  "unblockUserToSendMessages": "Débloquer l'utilisateur pour qu'il puisse envoyer des messages",
+  "@unblockUserToSendMessages": {},
+  "supportChat": "Chat d'assistance",
+  "@supportChat": {},
+  "supportChatDescription": "Je suis là pour vous aider ! Si vous rencontrez des soucis ou avez besoin d'aide pour utiliser Twake Workplace, envoyez-moi un message, je vous répondrai rapidement",
+  "@supportChatDescription": {},
+  "inviteFriend": "Inviter un ami",
+  "@inviteFriend": {},
+  "linkCopiedToClipboard": "Lien copié dans le presse-papiers",
+  "@linkCopiedToClipboard": {},
+  "cannotCreateChatWithSelf": "Vous ne pouvez pas créer une conversation avec vous même",
+  "@cannotCreateChatWithSelf": {},
+  "yourPersonalQr": "Votre QR personnel",
+  "@yourPersonalQr": {},
+  "personalQrDescription": "Commencez à discuter avec vos contacts. Envoyez le lien d'invitation à Twake",
+  "@personalQrDescription": {},
+  "shareQrCode": "Partager le QR code",
+  "@shareQrCode": {},
+  "copyLink": "Copier le lien",
+  "@copyLink": {},
+  "downloadQrCode": "Télécharger le QR code",
+  "@downloadQrCode": {}
 }
