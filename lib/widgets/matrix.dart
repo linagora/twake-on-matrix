@@ -1133,10 +1133,15 @@ class MatrixState extends State<Matrix>
   /// This method should be called after setting up a new audio source.
   /// It automatically cleans up the audio player and resets state when playback finishes.
   void setupAudioPlayerAutoDispose() {
+    final currentEvent = voiceMessageEvent.value;
     _audioPlayerStateSubscription?.cancel();
     _audioPlayerStateSubscription =
         audioPlayer.playerStateStream.listen((state) {
       if (state.processingState == ProcessingState.completed) {
+        // Guard against clearing state for a different audio
+        if (voiceMessageEvent.value?.eventId != currentEvent?.eventId) {
+          return;
+        }
         voiceMessageEvent.value = null;
         audioPlayer.stop();
         audioPlayer.dispose();
@@ -1226,6 +1231,11 @@ class MatrixState extends State<Matrix>
     } finally {
       initSettingsCompleter.complete();
     }
+  }
+
+  void cancelAudioPlayerAutoDispose() {
+    _audioPlayerStateSubscription?.cancel();
+    _audioPlayerStateSubscription = null;
   }
 
   @override

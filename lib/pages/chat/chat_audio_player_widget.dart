@@ -31,15 +31,15 @@ class ChatAudioPlayerWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final defaultAudioStatus = ValueNotifier<AudioPlayerStatus>(
+      AudioPlayerStatus.notDownloaded,
+    );
+    final defaultEvent = ValueNotifier<Event?>(null);
     return ValueListenableBuilder(
-      valueListenable: matrix?.currentAudioStatus ??
-          ValueNotifier<AudioPlayerStatus>(
-            AudioPlayerStatus.notDownloaded,
-          ),
+      valueListenable: matrix?.currentAudioStatus ?? defaultAudioStatus,
       builder: (context, status, _) {
         return ValueListenableBuilder(
-          valueListenable:
-              matrix?.voiceMessageEvent ?? ValueNotifier<Event?>(null),
+          valueListenable: matrix?.voiceMessageEvent ?? defaultEvent,
           builder: (context, hasEvent, _) {
             if (hasEvent == null) {
               return const SizedBox.shrink();
@@ -151,6 +151,7 @@ class ChatAudioPlayerWidget extends StatelessWidget {
 
   Future<void> _handleCloseAudioPlayer() async {
     matrix?.voiceMessageEvent.value = null;
+    matrix?.cancelAudioPlayerAutoDispose();
     await matrix?.audioPlayer.stop();
     await matrix?.audioPlayer.dispose();
     matrix?.currentAudioStatus.value = AudioPlayerStatus.notDownloaded;
@@ -180,12 +181,16 @@ class ChatAudioPlayerWidget extends StatelessWidget {
 
       if (!kIsWeb) {
         final tempDir = await getTemporaryDirectory();
-        final fileName = Uri.encodeComponent(
-          currentEvent?.attachmentOrThumbnailMxcUrl()!.pathSegments.last ?? '',
-        );
+        final mxcUrl = currentEvent?.attachmentOrThumbnailMxcUrl();
+        final fileName = Uri.encodeComponent(mxcUrl?.pathSegments.last ?? '');
         file = File('${tempDir.path}/${fileName}_${matrixFile?.name}');
 
-        await file.writeAsBytes(matrixFile?.bytes ?? []);
+        final bytes = matrixFile?.bytes;
+
+        if (bytes == null || bytes.isEmpty) {
+          throw Exception('Downloaded file has no content');
+        }
+        await file.writeAsBytes(bytes);
 
         if (Platform.isIOS &&
             matrixFile?.mimeType.toLowerCase() == 'audio/ogg') {

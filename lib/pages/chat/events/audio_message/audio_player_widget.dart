@@ -150,7 +150,6 @@ class AudioPlayerState extends State<AudioPlayerWidget>
       );
       rethrow;
     }
-    if (!context.mounted) return;
     if (matrix.voiceMessageEvent.value?.eventId != widget.event.eventId) return;
     matrix.audioPlayer = AudioPlayer();
     matrix.voiceMessageEvent.value = widget.event;
