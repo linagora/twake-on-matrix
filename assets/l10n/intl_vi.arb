@@ -3495,5 +3495,74 @@
   "invalidUsername": "Tên người dùng không hợp lệ",
   "@invalidUsername": {},
   "audioEncoderNotSupportedMessage": "Bộ mã hóa âm thanh không được hỗ trợ trên thiết bị hiện tại. Vui lòng sử dụng trình duyệt hoặc thiết bị khác để tiếp tục.",
-  "@audioEncoderNotSupportedMessage": {}
+  "@audioEncoderNotSupportedMessage": {},
+  "inviteUserErrorMessage": "Không thể thực hiện các tác vụ. Vui lòng xem lại tác vụ tạo nhóm và thêm thành viên, rồi hãy thử lại.",
+  "@inviteUserErrorMessage": {},
+  "failedToAddMembers": "{count, plural, =1{1 thành viên không thể thêm vào nhóm. Hãy thử lại} other{{count} thành viên không thể thêm vào nhóm. Hãy thử lại}}",
+  "@failedToAddMembers": {
+    "type": "text",
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "failedToAddBannedUsers": "{count, plural, =1{Không thể thêm 1 thành viên vì người này đã bị cấm trước đó}other{Không thể thêm {count} thành viên vì họ đã bị cấm trước đó. Vui lòng kiểm tra cài đặt hoặc thử lại}}",
+  "@failedToAddBannedUsers": {
+    "type": "text",
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "failedToAddMembersMixed": "{total, plural, =1{Không thể thêm 1 thành viên} other{Không thể thêm {total} thành viên}}.{bannedCount, plural, =1{1 thành viên đã bị cấm} other{{bannedCount} thành viên đã bị cấm}},{otherCount, plural, =1{1 thành viên thất bại} other{{otherCount} thành viên thất bại}} do các lý do khác. Vui lòng kiểm tra cài đặt hoặc thử lại.",
+  "@failedToAddMembersMixed": {
+    "type": "text",
+    "placeholders": {
+      "total": {},
+      "bannedCount": {},
+      "otherCount": {}
+    }
+  },
+  "contactsVisibility": "Hiển thị danh bạ",
+  "@contactsVisibility": {},
+  "whoCanFindMeByMyContacts": "Ai có thể tìm thấy tôi qua danh bạ",
+  "@whoCanFindMeByMyContacts": {},
+  "whoCanSeeMyPhoneEmail": "Ai có thể xem số điện thoại/email của tôi",
+  "@whoCanSeeMyPhoneEmail": {},
+  "everyOne": "Mọi người",
+  "@everyOne": {},
+  "myContacts": "Danh bạ của tôi",
+  "@myContacts": {},
+  "nobody": "Không ai",
+  "@nobody": {},
+  "chooseWhichDetailsAreVisibleToOtherUsers": "Chọn thông tin hiển thị với người dùng khác",
+  "@chooseWhichDetailsAreVisibleToOtherUsers": {},
+  "youNumberIsVisibleAccordingToTheSettingAbove": "Số của bạn sẽ được hiển thị theo cài đặt ở trên",
+  "@youNumberIsVisibleAccordingToTheSettingAbove": {},
+  "youEmailIsVisibleAccordingToTheSettingAbove": "Email của bạn sẽ được hiển thị theo cài đặt ở trên",
+  "@youEmailIsVisibleAccordingToTheSettingAbove": {},
+  "failedToChangeContactsVisibility": "Không thể thay đổi quyền hiển thị danh bạ",
+  "@failedToChangeContactsVisibility": {},
+  "failedToGetContactsVisibility": "Không thể lấy thông tin quyền hiển thị danh bạ",
+  "@failedToGetContactsVisibility": {},
+  "unblockUserToSendMessages": "Bỏ chặn người dùng để gửi tin nhắn",
+  "@unblockUserToSendMessages": {},
+  "supportChat": "Trò chuyện hỗ trợ",
+  "@supportChat": {},
+  "supportChatDescription": "Tôi luôn sẵn sàng hỗ trợ! Gặp lỗi hoặc cần trợ giúp với Twake Workplace, hãy nhắn cho tôi nhé tôi sẽ phản hồi sớm.",
+  "@supportChatDescription": {},
+  "inviteFriend": "Mời bạn bè",
+  "@inviteFriend": {},
+  "linkCopiedToClipboard": "Liên kết đã được sao chép",
+  "@linkCopiedToClipboard": {},
+  "cannotCreateChatWithSelf": "Bạn không thể bắt đầu cuộc trò chuyện với chính mình",
+  "@cannotCreateChatWithSelf": {},
+  "yourPersonalQr": "Mã QR của bạn",
+  "@yourPersonalQr": {},
+  "personalQrDescription": "Bắt đầu trò chuyện với danh bạ của bạn. Gửi liên kết mời tham gia Twake",
+  "@personalQrDescription": {},
+  "shareQrCode": "Chia sẻ mã QR",
+  "@shareQrCode": {},
+  "copyLink": "Sao chép liên kết",
+  "@copyLink": {},
+  "downloadQrCode": "Tải xuống mã QR",
+  "@downloadQrCode": {}
 }
