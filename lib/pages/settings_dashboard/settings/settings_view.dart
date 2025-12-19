@@ -195,9 +195,7 @@ class SettingsView extends StatelessWidget {
                         ? const SizedBox()
                         : Padding(
                             padding:
-                                SettingsViewStyle.settingsItemDividerPadding(
-                              context,
-                            ),
+                                SettingsViewStyle.settingsItemDividerPadding(),
                             child: Divider(
                               color: LinagoraStateLayer(
                                 LinagoraSysColors.material().surfaceTint,

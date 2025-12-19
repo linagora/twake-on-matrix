@@ -35,11 +35,12 @@ class SettingsViewStyle {
   static const double borderRadius = 4.0;
   static const double settingsItemDividerHeight = 1.0;
   static const double settingsItemDividerThikness = 1;
-  static EdgeInsets settingsItemDividerPadding(BuildContext context) =>
-      EdgeInsets.only(
+
+  static EdgeInsets settingsItemDividerPadding() => const EdgeInsets.only(
         left: 48.0,
-        right: responsiveUtils.isMobile(context) ? 0 : 8.0,
+        right: 8.0,
       );
+
   static EdgeInsets profileItemDividerPadding(BuildContext context) =>
       EdgeInsets.only(
         right: responsiveUtils.isMobile(context) ? 0 : 16.0,
