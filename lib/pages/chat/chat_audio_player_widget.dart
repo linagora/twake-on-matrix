@@ -151,6 +151,7 @@ class ChatAudioPlayerWidget extends StatelessWidget {
 
   Future<void> _handleCloseAudioPlayer() async {
     matrix?.voiceMessageEvent.value = null;
+    matrix?.cancelAudioPlayerAutoDispose();
     await matrix?.audioPlayer.stop();
     await matrix?.audioPlayer.dispose();
     matrix?.currentAudioStatus.value = AudioPlayerStatus.notDownloaded;
