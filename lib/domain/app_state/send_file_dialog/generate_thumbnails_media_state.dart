@@ -13,20 +13,6 @@ class GenerateThumbnailsMediaInitial extends GenerateThumbnailsMediaState {
   List<Object?> get props => [maxUploadFileSize];
 }
 
-class ConvertReadStreamToBytesSuccess extends GenerateThumbnailsMediaState {
-  final MatrixFile oldFile;
-
-  final MatrixFile newFile;
-
-  ConvertReadStreamToBytesSuccess({
-    required this.oldFile,
-    required this.newFile,
-  });
-
-  @override
-  List<Object?> get props => [oldFile, newFile];
-}
-
 class GenerateThumbnailsMediaSuccess extends GenerateThumbnailsMediaState {
   final MatrixFile file;
 

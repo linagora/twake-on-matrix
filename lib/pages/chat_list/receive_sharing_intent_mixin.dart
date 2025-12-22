@@ -38,7 +38,7 @@ mixin ReceiveSharingIntentMixin<T extends StatefulWidget> on State<T> {
     return text.contains('twake.chat://openApp');
   }
 
-  void _processIncomingSharedFiles(List<SharedMediaFile> files) {
+  Future<void> _processIncomingSharedFiles(List<SharedMediaFile> files) async {
     Logs().d('ReceiveSharingIntentMixin::_processIncomingSharedFiles: $files');
     if (files.isEmpty) return;
     if (files.length == 1 &&
@@ -47,18 +47,20 @@ mixin ReceiveSharingIntentMixin<T extends StatefulWidget> on State<T> {
       _processIncomingSharedText(files.first.path);
       return;
     }
-    matrixState.shareContentList = files.map(
-      (sharedMediaFile) {
-        final file = sharedMediaFile.toMatrixFile();
-        Logs().d(
-          'ReceiveSharingIntentMixin::_processIncomingSharedFiles: Size ${file.size}',
-        );
-        return {
-          'msgtype': TwakeEventTypes.shareFileEventType,
-          'file': file,
-        };
-      },
-    ).toList();
+    matrixState.shareContentList = await Future.wait(
+      files.map(
+        (sharedMediaFile) async {
+          final file = await sharedMediaFile.toMatrixFile();
+          Logs().d(
+            'ReceiveSharingIntentMixin::_processIncomingSharedFiles: Size ${file.size}',
+          );
+          return {
+            'msgtype': TwakeEventTypes.shareFileEventType,
+            'file': file,
+          };
+        },
+      ),
+    );
     openSharePage();
   }
 
@@ -142,7 +144,7 @@ mixin ReceiveSharingIntentMixin<T extends StatefulWidget> on State<T> {
     intentFileStreamSubscription?.cancel();
     intentFileStreamSubscription =
         ReceiveSharingIntent.instance.getMediaStream().listen(
-      (files) {
+      (files) async {
         if (files.isEmpty) return;
 
         Logs().d(
@@ -154,7 +156,7 @@ mixin ReceiveSharingIntentMixin<T extends StatefulWidget> on State<T> {
           Logs().d(
             'ReceiveSharingIntentMixin::setupSharingIntentStreams: Already synced, processing files immediately',
           );
-          _processIncomingSharedFiles(files);
+          await _processIncomingSharedFiles(files);
         } else {
           // Otherwise cache for processing after sync
           Logs().d(
@@ -271,7 +273,7 @@ mixin ReceiveSharingIntentMixin<T extends StatefulWidget> on State<T> {
         'ReceiveSharingIntentMixin::processCachedSharingIntents: Processing ${_cachedSharedMediaFiles!.length} cached files',
       );
       try {
-        _processIncomingSharedFiles(_cachedSharedMediaFiles!);
+        await _processIncomingSharedFiles(_cachedSharedMediaFiles!);
       } catch (e, stackTrace) {
         Logs().e(
           'ReceiveSharingIntentMixin::processCachedSharingIntents: Error processing cached files',

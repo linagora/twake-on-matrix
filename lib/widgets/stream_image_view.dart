@@ -52,6 +52,7 @@ class StreamImageViewerState extends State<StreamImageViewer> {
         imageFile!.bytes,
         fit: BoxFit.cover,
         gaplessPlayback: true,
+        errorBuilder: (_, __, ___) => const SizedBox(),
       ),
     );
   }

@@ -211,7 +211,8 @@ class ChatInputRow extends StatelessWidget {
                               Logs().d('ChatInputRowMobile:: pauseRecording');
                               controller.pauseRecording.call();
                             },
-                            sendRequestFunction: (soundFile, time, waveFrom) {
+                            sendRequestFunction:
+                                (soundFile, time, waveFrom) async {
                               Logs().d(
                                 'ChatInputRowMobile:: sendRequestFunction $soundFile',
                               );
@@ -220,7 +221,7 @@ class ChatInputRow extends StatelessWidget {
                               final file = TwakeAudioFile(
                                 name: soundFile.path,
                                 duration: time.inMilliseconds,
-                                bytes: soundFile.readAsBytesSync(),
+                                bytes: await soundFile.readAsBytes(),
                               );
                               controller.sendVoiceMessageAction(
                                 audioFile: file,

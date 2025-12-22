@@ -1014,7 +1014,13 @@ class HiveCollectionsDatabase extends DatabaseApi {
   ) async {
     final raw = await _userCrossSigningKeysBox
         .get(TupleKey(userId, publicKey).toString());
-    raw!['blocked'] = blocked;
+    if (raw == null) {
+      Logs().w(
+        'HiveCollectionsDatabase::setBlockedUserCrossSigningKey: Tried to set blocked on non-existent cross-signing key',
+      );
+      return;
+    }
+    raw['blocked'] = blocked;
     await _userCrossSigningKeysBox.put(
       TupleKey(userId, publicKey).toString(),
       raw,
@@ -1030,7 +1036,13 @@ class HiveCollectionsDatabase extends DatabaseApi {
   ) async {
     final raw =
         await _userDeviceKeysBox.get(TupleKey(userId, deviceId).toString());
-    raw!['blocked'] = blocked;
+    if (raw == null) {
+      Logs().w(
+        'HiveCollectionsDatabase::setBlockedUserDeviceKey: Tried to set blocked on non-existent cross-signing key',
+      );
+      return;
+    }
+    raw['blocked'] = blocked;
     await _userDeviceKeysBox.put(
       TupleKey(userId, deviceId).toString(),
       raw,
@@ -1046,7 +1058,13 @@ class HiveCollectionsDatabase extends DatabaseApi {
   ) async {
     final raw =
         await _userDeviceKeysBox.get(TupleKey(userId, deviceId).toString());
-    raw!['last_active'] = lastActive;
+    if (raw == null) {
+      Logs().w(
+        'HiveCollectionsDatabase::setLastActiveUserDeviceKey: Tried to set blocked on non-existent cross-signing key',
+      );
+      return;
+    }
+    raw['last_active'] = lastActive;
     await _userDeviceKeysBox.put(
       TupleKey(userId, deviceId).toString(),
       raw,
@@ -1061,7 +1079,13 @@ class HiveCollectionsDatabase extends DatabaseApi {
   ) async {
     final raw =
         await _userDeviceKeysBox.get(TupleKey(userId, deviceId).toString());
-    raw!['last_sent_message'] = lastSentMessage;
+    if (raw == null) {
+      Logs().w(
+        'HiveCollectionsDatabase::setLastSentMessageUserDeviceKey: Tried to set blocked on non-existent cross-signing key',
+      );
+      return;
+    }
+    raw['last_sent_message'] = lastSentMessage;
     await _userDeviceKeysBox.put(
       TupleKey(userId, deviceId).toString(),
       raw,
@@ -1107,7 +1131,13 @@ class HiveCollectionsDatabase extends DatabaseApi {
   ) async {
     final raw =
         await _userDeviceKeysBox.get(TupleKey(userId, deviceId).toString());
-    raw!['verified'] = verified;
+    if (raw == null) {
+      Logs().w(
+        'HiveCollectionsDatabase::setVerifiedUserDeviceKey: Tried to set blocked on non-existent cross-signing key',
+      );
+      return;
+    }
+    raw['verified'] = verified;
     await _userDeviceKeysBox.put(
       TupleKey(userId, deviceId).toString(),
       raw,
@@ -1691,73 +1721,73 @@ class HiveCollectionsDatabase extends DatabaseApi {
       await clear(supportDeleteCollections: supportDeleteCollections);
       await open();
       final json = Map.from(jsonDecode(export)).cast<String, Map>();
-      for (final key in json[_clientBoxName]!.keys) {
+      for (final key in json[_clientBoxName]?.keys ?? []) {
         await _clientBox.put(key, json[_clientBoxName]![key]);
       }
-      for (final key in json[_accountDataBoxName]!.keys) {
+      for (final key in json[_accountDataBoxName]?.keys ?? []) {
         await _accountDataBox.put(key, json[_accountDataBoxName]![key]);
       }
-      for (final key in json[_roomsBoxName]!.keys) {
+      for (final key in json[_roomsBoxName]?.keys ?? []) {
         await _roomsBox.put(key, json[_roomsBoxName]![key]);
       }
-      for (final key in json[_roomStateBoxName]!.keys) {
+      for (final key in json[_roomStateBoxName]?.keys ?? []) {
         await _roomStateBox.put(key, json[_roomStateBoxName]![key]);
       }
-      for (final key in json[_roomMembersBoxName]!.keys) {
+      for (final key in json[_roomMembersBoxName]?.keys ?? []) {
         await _roomMembersBox.put(key, json[_roomMembersBoxName]![key]);
       }
-      for (final key in json[_toDeviceQueueBoxName]!.keys) {
+      for (final key in json[_toDeviceQueueBoxName]?.keys ?? []) {
         await _toDeviceQueueBox.put(key, json[_toDeviceQueueBoxName]![key]);
       }
-      for (final key in json[_roomAccountDataBoxName]!.keys) {
+      for (final key in json[_roomAccountDataBoxName]?.keys ?? []) {
         await _roomAccountDataBox.put(key, json[_roomAccountDataBoxName]![key]);
       }
-      for (final key in json[_inboundGroupSessionsBoxName]!.keys) {
+      for (final key in json[_inboundGroupSessionsBoxName]?.keys ?? []) {
         await _inboundGroupSessionsBox.put(
           key,
           json[_inboundGroupSessionsBoxName]![key],
         );
       }
-      for (final key in json[_outboundGroupSessionsBoxName]!.keys) {
+      for (final key in json[_outboundGroupSessionsBoxName]?.keys ?? []) {
         await _outboundGroupSessionsBox.put(
           key,
           json[_outboundGroupSessionsBoxName]![key],
         );
       }
-      for (final key in json[_olmSessionsBoxName]!.keys) {
+      for (final key in json[_olmSessionsBoxName]?.keys ?? []) {
         await _olmSessionsBox.put(key, json[_olmSessionsBoxName]![key]);
       }
-      for (final key in json[_userDeviceKeysBoxName]!.keys) {
+      for (final key in json[_userDeviceKeysBoxName]?.keys ?? []) {
         await _userDeviceKeysBox.put(key, json[_userDeviceKeysBoxName]![key]);
       }
-      for (final key in json[_userDeviceKeysOutdatedBoxName]!.keys) {
+      for (final key in json[_userDeviceKeysOutdatedBoxName]?.keys ?? []) {
         await _userDeviceKeysOutdatedBox.put(
           key,
           json[_userDeviceKeysOutdatedBoxName]![key],
         );
       }
-      for (final key in json[_userCrossSigningKeysBoxName]!.keys) {
+      for (final key in json[_userCrossSigningKeysBoxName]?.keys ?? []) {
         await _userCrossSigningKeysBox.put(
           key,
           json[_userCrossSigningKeysBoxName]![key],
         );
       }
-      for (final key in json[_ssssCacheBoxName]!.keys) {
+      for (final key in json[_ssssCacheBoxName]?.keys ?? []) {
         await _ssssCacheBox.put(key, json[_ssssCacheBoxName]![key]);
       }
-      for (final key in json[_presencesBoxName]!.keys) {
+      for (final key in json[_presencesBoxName]?.keys ?? []) {
         await _presencesBox.put(key, json[_presencesBoxName]![key]);
       }
-      for (final key in json[_timelineFragmentsBoxName]!.keys) {
+      for (final key in json[_timelineFragmentsBoxName]?.keys ?? []) {
         await _timelineFragmentsBox.put(
           key,
           json[_timelineFragmentsBoxName]![key],
         );
       }
-      for (final key in json[_seenDeviceIdsBoxName]!.keys) {
+      for (final key in json[_seenDeviceIdsBoxName]?.keys ?? []) {
         await _seenDeviceIdsBox.put(key, json[_seenDeviceIdsBoxName]![key]);
       }
-      for (final key in json[_seenDeviceKeysBoxName]!.keys) {
+      for (final key in json[_seenDeviceKeysBoxName]?.keys ?? []) {
         await _seenDeviceKeysBox.put(key, json[_seenDeviceKeysBoxName]![key]);
       }
       return true;

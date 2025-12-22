@@ -26,7 +26,10 @@ class _VideoPlayerState extends State<VideoPlayer> {
   @override
   void initState() {
     super.initState();
-    Media.memory(widget.bytes).then((v) => videoController.player.open(v));
+    Media.memory(widget.bytes).then(
+      (v) => videoController.player.open(v),
+      onError: (e, s) => Logs().e('Error opening video:', e, s),
+    );
   }
 
   @override
