@@ -1,4 +1,5 @@
 import 'package:fluffychat/pages/chat/events/message_content_style.dart';
+import 'package:fluffychat/presentation/extensions/send_file_web_extension.dart';
 import 'package:fluffychat/presentation/mixins/play_video_action_mixin.dart';
 import 'package:fluffychat/presentation/model/chat/upload_file_ui_state.dart';
 import 'package:fluffychat/presentation/model/file/display_image_info.dart';
@@ -144,20 +145,27 @@ class VideoWidget extends StatelessWidget {
 
   final double imageHeight;
   final double imageWidth;
-  final MatrixFile matrixFile;
+  final MatrixVideoFile matrixFile;
   final Event event;
 
   @override
   Widget build(BuildContext context) {
-    return matrixFile.bytes.isNotEmpty
-        ? Image.memory(
-            matrixFile.bytes,
-            width: imageWidth,
-            height: imageHeight,
-            fit: BoxFit.cover,
-            filterQuality: FilterQuality.medium,
-          )
-        : SizedBox(width: imageWidth, height: imageHeight);
+    final placeholder = SizedBox(width: imageWidth, height: imageHeight);
+
+    return FutureBuilder(
+      future: event.room.generateVideoThumbnail(matrixFile),
+      builder: (context, snapshot) {
+        if (snapshot.data == null) return placeholder;
+
+        return Image.memory(
+          snapshot.data!.bytes,
+          width: imageWidth,
+          height: imageHeight,
+          fit: BoxFit.cover,
+          filterQuality: FilterQuality.medium,
+        );
+      },
+    );
   }
 }
 

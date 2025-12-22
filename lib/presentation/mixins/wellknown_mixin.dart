@@ -25,8 +25,10 @@ mixin WellKnownMixin {
   bool supportInvitation() {
     final additionalProperties =
         discoveryInformationNotifier.value?.additionalProperties;
-    final enableInvitation = (additionalProperties?[twakeChatKey]
-        as Map<String, dynamic>?)?[_enableInvitation] as bool?;
+    final twakeChatData = additionalProperties?[twakeChatKey];
+    final enableInvitation = twakeChatData is Map<String, dynamic>
+        ? twakeChatData[_enableInvitation] as bool?
+        : null;
     Logs().d(
       'WellKnownMixin::supportInvitation(): enableInvitation - $enableInvitation',
     );

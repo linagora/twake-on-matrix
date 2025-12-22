@@ -4,6 +4,7 @@ import 'package:fluffychat/data/memory/mxc_image_cache_manager.dart';
 import 'package:fluffychat/pages/image_viewer/image_viewer.dart';
 import 'package:fluffychat/pages/media_viewer/media_viewer.dart';
 import 'package:fluffychat/presentation/enum/chat/media_viewer_popup_result_enum.dart';
+import 'package:fluffychat/presentation/extensions/send_file_web_extension.dart';
 import 'package:fluffychat/utils/extension/build_context_extension.dart';
 import 'package:fluffychat/utils/extension/mime_type_extension.dart';
 import 'package:fluffychat/utils/interactive_viewer_gallery.dart';
@@ -378,6 +379,40 @@ class _ImageWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (event?.messageType == MessageTypes.Video) {
+      final matrixVideoFile = MatrixVideoFile(
+        bytes: data!,
+        name: event?.filename ?? '${DateTime.now().millisecondsSinceEpoch}.mp4',
+        mimeType: event?.mimeType,
+      );
+      return FutureBuilder(
+        future: event?.room.generateVideoThumbnail(matrixVideoFile),
+        builder: (context, snapshot) {
+          if (snapshot.data == null) {
+            return const SizedBox();
+          }
+
+          return Image.memory(
+            snapshot.data!.bytes,
+            width: width,
+            height: height,
+            cacheWidth: cacheWidth != null
+                ? cacheWidth!
+                : (width != null && needResize)
+                    ? context.getCacheSize(width!)
+                    : null,
+            cacheHeight: cacheHeight != null
+                ? cacheHeight!
+                : (height != null && needResize)
+                    ? context.getCacheSize(height!)
+                    : null,
+            fit: fit,
+            filterQuality: FilterQuality.medium,
+            errorBuilder: imageErrorWidgetBuilder,
+          );
+        },
+      );
+    }
     return filePath != null && filePath!.isNotEmpty
         ? _ImageNativeBuilder(
             filePath: filePath,

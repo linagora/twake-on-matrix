@@ -34,9 +34,6 @@ class GenerateThumbnailsMediaInteractor {
       final filesHaveThumbnail = files.whereType<MatrixImageFile>().toList();
       for (final file in filesHaveThumbnail) {
         MatrixImageFile? thumbnail;
-        yield Right(
-          ConvertReadStreamToBytesSuccess(oldFile: file, newFile: file),
-        );
         thumbnail = await room.generateThumbnail(file);
         if (thumbnail != null) {
           yield Right(
