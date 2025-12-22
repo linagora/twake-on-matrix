@@ -1,34 +1,31 @@
 import 'dart:io';
-import 'dart:typed_data';
 
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:matrix/matrix.dart';
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 
 extension SharedMediaFileExtension on SharedMediaFile {
-  MatrixFile toMatrixFile() {
+  Future<MatrixFile> toMatrixFile() async {
+    final bytes = await File(path).readAsBytes();
+    final name = path.split("/").last;
     if (type == SharedMediaType.image) {
       return MatrixImageFile(
-        bytes: File(path).readAsBytesSync(),
-        name: path.split("/").last,
+        bytes: bytes,
+        name: name,
         mimeType: mimeType,
       );
     }
     if (type == SharedMediaType.video) {
-      Uint8List? thumbnailBytes;
-      if (thumbnail != null) {
-        thumbnailBytes = File(thumbnail!).readAsBytesSync();
-      }
       return MatrixVideoFile(
-        bytes: thumbnailBytes ?? Uint8List(0),
-        name: path.split("/").last,
+        bytes: bytes,
+        name: name,
         duration: duration,
         mimeType: mimeType,
       );
     }
     return MatrixFile(
-      bytes: File(path).readAsBytesSync(),
-      name: path.split("/").last,
+      bytes: bytes,
+      name: name,
       mimeType: mimeType,
     );
   }

@@ -118,8 +118,6 @@ class SendFileDialogController extends State<SendFileDialog> {
           if (right is GenerateThumbnailsMediaSuccess) {
             thumbnails[right.file] = right.thumbnail;
             filesNotifier.notify();
-          } else if (right is ConvertReadStreamToBytesSuccess) {
-            filesNotifier.update(right.oldFile, right.newFile);
           } else if (right is GenerateThumbnailsMediaInitial) {
             maxMediaSizeNotifier.value = right.maxUploadFileSize.toDouble();
             updateHaveErrorFilesNotifier();
