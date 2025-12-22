@@ -1319,8 +1319,13 @@ class _AccountBundleWithClient extends Equatable {
   List<Object?> get props => [client, bundle];
 }
 
-extension HomeserverSummaryConversion
-    on Future<(DiscoveryInformation?, GetVersionsResponse, List<LoginFlow>)> {
+extension HomeserverSummaryConversion on Future<
+    (
+      DiscoveryInformation?,
+      GetVersionsResponse,
+      List<LoginFlow>,
+      GetAuthMetadataResponse?
+    )> {
   Future<HomeserverSummary> toHomeserverSummary() async {
     final result = await this;
     return HomeserverSummary(
