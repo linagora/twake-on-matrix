@@ -373,4 +373,14 @@ class MatrixLocals extends MatrixLocalizations {
   String voiceMessage(String senderName, Duration? duration) {
     return l10n.voiceMessage;
   }
+
+  @override
+  // TODO: implement pollHasBeenEnded
+  String get pollHasBeenEnded => throw UnimplementedError();
+
+  @override
+  String startedAPoll(String senderName) {
+    // TODO: implement startedAPoll
+    throw UnimplementedError();
+  }
 }
