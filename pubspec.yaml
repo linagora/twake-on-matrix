@@ -8,7 +8,7 @@ environment:
 
 dependencies:
   ### Dependencies from git ###
-  matrix: ^3.0.2
+  matrix: ^4.1.0
 
   receive_sharing_intent:
     git:
