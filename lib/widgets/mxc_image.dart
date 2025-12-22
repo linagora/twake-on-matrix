@@ -379,7 +379,7 @@ class _ImageWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (event?.messageType == MessageTypes.Video) {
+    if (event?.messageType == MessageTypes.Video && data != null) {
       final matrixVideoFile = MatrixVideoFile(
         bytes: data!,
         name: event?.filename ?? '${DateTime.now().millisecondsSinceEpoch}.mp4',
