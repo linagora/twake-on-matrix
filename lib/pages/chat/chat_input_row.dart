@@ -218,16 +218,24 @@ class ChatInputRow extends StatelessWidget {
                               );
                               controller.stopRecording.call();
 
-                              final file = TwakeAudioFile(
-                                name: soundFile.path,
-                                duration: time.inMilliseconds,
-                                bytes: await soundFile.readAsBytes(),
-                              );
-                              controller.sendVoiceMessageAction(
-                                audioFile: file,
-                                time: time,
-                                waveform: waveFrom,
-                              );
+                              try {
+                                final file = TwakeAudioFile(
+                                  name: soundFile.path,
+                                  duration: time.inMilliseconds,
+                                  bytes: await soundFile.readAsBytes(),
+                                );
+                                controller.sendVoiceMessageAction(
+                                  audioFile: file,
+                                  time: time,
+                                  waveform: waveFrom,
+                                );
+                              } catch (error, stackTrace) {
+                                Logs().e(
+                                  'ChatInputRowMobile:: sendRequestFunction:',
+                                  error,
+                                  stackTrace,
+                                );
+                              }
                             },
                             encode: AudioEncoderType.AAC,
                             fullRecordPackageHeight: 50,
