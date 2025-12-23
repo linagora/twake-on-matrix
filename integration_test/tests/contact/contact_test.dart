@@ -17,7 +17,7 @@ void main() {
       const currentAccount = String.fromEnvironment('CurrentAccount');
 
       // goto contact screen
-      await HomeRobot($).gotoContactListAndGrantContactPermission();
+      await HomeRobot($).gotoContactListScreen();
       // verify we can scroll the screen to find a contact
       await ContactScenario($).verifyContactListCanBeScrollable(s);
 
@@ -25,7 +25,7 @@ void main() {
       await ContactScenario($).enterSearchText("noexist");
       //verify there is no result
       s.softAssertEquals(
-        (await SearchRobot($).getNoResultIcon()).visible,
+        (SearchRobot($).getNoResultIcon()).visible,
         true,
         'lable "No Results" is not shown',
       );

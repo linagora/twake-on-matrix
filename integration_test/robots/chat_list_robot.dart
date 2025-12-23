@@ -36,6 +36,7 @@ class ChatListRobot extends HomeRobot {
 
   Future<void> clickOnPenIcon() async {
     await getPenIcon().tap();
+    await cancelSynchronizeContact();
     await $.waitUntilVisible($(AppBar).$("New chat"));
   }
 
@@ -85,6 +86,6 @@ class ChatListRobot extends HomeRobot {
     await $.waitUntilVisible($(SearchView));
 
     await confirmShareContactInformation();
-    await confirmAccessContactIOS();
+    await confirmAccessContact();
   }
 }

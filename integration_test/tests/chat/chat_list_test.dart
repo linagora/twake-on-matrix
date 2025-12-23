@@ -25,7 +25,7 @@ void main() {
       await ChatScenario($).enterSearchText("noexist");
       //verify there is no result
       s.softAssertEquals(
-        (await SearchRobot($).getNoResultIcon()).visible,
+        (SearchRobot($).getNoResultIcon()).visible,
         true,
         'lable "No Results" is not shown',
       );

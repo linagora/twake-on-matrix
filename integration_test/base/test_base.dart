@@ -2,7 +2,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:patrol/patrol.dart';
 import 'package:fluffychat/main.dart' as app;
-import '../robots/home_robot.dart';
 import '../scenarios/login_scenario.dart';
 
 class TestBase {
@@ -81,9 +80,6 @@ class TestBase {
     );
 
     await loginScenario.login();
-    //because permission to share contact and share media popup always display at contactScreen
-    //, so that I go to contactListScreen to close them
-    await HomeRobot($).gotoContactListAndGrantContactPermission();
   }
 
   void twakePatrolTest({
