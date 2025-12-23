@@ -31,10 +31,16 @@ class ChatAudioPlayerWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Return empty if matrix is not available
+    if (matrix == null) {
+      return const SizedBox.shrink();
+    }
+
     final defaultAudioStatus = ValueNotifier<AudioPlayerStatus>(
       AudioPlayerStatus.notDownloaded,
     );
     final defaultEvent = ValueNotifier<Event?>(null);
+
     return ValueListenableBuilder(
       valueListenable: matrix?.currentAudioStatus ?? defaultAudioStatus,
       builder: (context, status, _) {
@@ -47,11 +53,11 @@ class ChatAudioPlayerWidget extends StatelessWidget {
             final audioPlayer = matrix?.audioPlayer;
             return StreamBuilder<Object>(
               stream: StreamGroup.merge([
-                matrix?.audioPlayer.positionStream.asBroadcastStream() ??
+                matrix?.audioPlayer?.positionStream.asBroadcastStream() ??
                     Stream.value(Duration.zero),
-                matrix?.audioPlayer.playerStateStream.asBroadcastStream() ??
+                matrix?.audioPlayer?.playerStateStream.asBroadcastStream() ??
                     Stream.value(Duration.zero),
-                matrix?.audioPlayer.speedStream.asBroadcastStream() ??
+                matrix?.audioPlayer?.speedStream.asBroadcastStream() ??
                     Stream.value(Duration.zero),
               ]),
               builder: (context, snapshot) {
@@ -152,8 +158,8 @@ class ChatAudioPlayerWidget extends StatelessWidget {
   Future<void> _handleCloseAudioPlayer() async {
     matrix?.voiceMessageEvent.value = null;
     matrix?.cancelAudioPlayerAutoDispose();
-    await matrix?.audioPlayer.stop();
-    await matrix?.audioPlayer.dispose();
+    await matrix?.audioPlayer?.stop();
+    await matrix?.audioPlayer?.dispose();
     matrix?.currentAudioStatus.value = AudioPlayerStatus.notDownloaded;
   }
 
@@ -169,8 +175,8 @@ class ChatAudioPlayerWidget extends StatelessWidget {
   Future<void> _handlePlayAudioAgain(BuildContext context) async {
     File? file;
     MatrixFile? matrixFile;
-    await matrix?.audioPlayer.stop();
-    await matrix?.audioPlayer.dispose();
+    await matrix?.audioPlayer?.stop();
+    await matrix?.audioPlayer?.dispose();
     matrix?.currentAudioStatus.value = AudioPlayerStatus.notDownloaded;
     final currentEvent = matrix?.voiceMessageEvent.value;
 
@@ -200,13 +206,16 @@ class ChatAudioPlayerWidget extends StatelessWidget {
 
       matrix?.currentAudioStatus.value = AudioPlayerStatus.downloaded;
     } catch (e, s) {
-      Logs().v('Could not download audio file', e, s);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(e.toLocalizedString(context)),
-        ),
-      );
-      rethrow;
+      Logs().e('Could not download audio file', e, s);
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(e.toLocalizedString(context)),
+          ),
+        );
+      }
+      matrix?.currentAudioStatus.value = AudioPlayerStatus.notDownloaded;
+      return;
     }
     if (!context.mounted) return;
 
@@ -222,10 +231,10 @@ class ChatAudioPlayerWidget extends StatelessWidget {
     matrix!.audioPlayer = AudioPlayer();
 
     if (file != null) {
-      await matrix?.audioPlayer.setFilePath(file.path);
+      await matrix?.audioPlayer?.setFilePath(file.path);
     } else if (matrixFile != null) {
       await matrix?.audioPlayer
-          .setAudioSource(MatrixFileAudioSource(matrixFile));
+          ?.setAudioSource(MatrixFileAudioSource(matrixFile));
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -238,7 +247,7 @@ class ChatAudioPlayerWidget extends StatelessWidget {
     // Set up auto-dispose listener managed globally in MatrixState
     matrix?.setupAudioPlayerAutoDispose();
 
-    matrix?.audioPlayer.play().onError((e, s) {
+    matrix?.audioPlayer?.play().onError((e, s) {
       Logs().e('Could not play audio file', e, s);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
