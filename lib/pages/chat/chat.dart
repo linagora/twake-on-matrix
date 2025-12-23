@@ -3132,13 +3132,13 @@ class ChatController extends State<Chat>
       return;
     }
     disposeAudioMixin();
-    matrix?.audioPlayer.stop();
-    matrix?.audioPlayer.clearAudioSources();
+    matrix?.audioPlayer?.stop();
+    matrix?.audioPlayer?.clearAudioSources();
     matrix?.voiceMessageEvent.value = null;
   }
 
   void initAudioPlayer() {
-    if (matrix?.audioPlayer.playing == true) {
+    if (matrix?.audioPlayer?.playing == true) {
       if (!PlatformInfos.isMobile) {
         matrix?.audioPlayer
           ?..stop()
@@ -3146,12 +3146,14 @@ class ChatController extends State<Chat>
       }
       return;
     }
-    if (matrix?.voiceMessageEvent != null) {
-      matrix?.voiceMessageEvent.value = null;
-    }
+    if (!PlatformInfos.isMobile) {
+      if (matrix?.voiceMessageEvent != null) {
+        matrix?.voiceMessageEvent.value = null;
+      }
 
-    if (matrix?.currentAudioStatus.value != AudioPlayerStatus.notDownloaded) {
-      matrix?.currentAudioStatus.value = AudioPlayerStatus.notDownloaded;
+      if (matrix?.currentAudioStatus.value != AudioPlayerStatus.notDownloaded) {
+        matrix?.currentAudioStatus.value = AudioPlayerStatus.notDownloaded;
+      }
     }
   }
 
