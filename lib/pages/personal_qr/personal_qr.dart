@@ -2,8 +2,10 @@ import 'dart:io';
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 
+import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/generated/l10n/app_localizations.dart';
 import 'package:fluffychat/pages/personal_qr/personal_qr_view.dart';
+import 'package:fluffychat/utils/permission_dialog.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/utils/permission_service.dart';
 import 'package:fluffychat/utils/twake_snackbar.dart';
@@ -72,6 +74,24 @@ class PersonalQrController extends State<PersonalQr> {
 
       final permissionGranted = await _requestStoragePermissions();
       if (!permissionGranted) {
+        showDialog(
+          useRootNavigator: false,
+          context: context,
+          builder: (_) {
+            return PermissionDialog(
+              icon: const Icon(Icons.photo),
+              permission: Permission.photos,
+              explainTextRequestPermission: Text(
+                L10n.of(context)!.explainPermissionToGallery(
+                  AppConfig.applicationName,
+                ),
+                style: Theme.of(context).textTheme.bodyMedium,
+              ),
+              onAcceptButton: () =>
+                  PermissionHandlerService().goToSettingsForPermissionActions(),
+            );
+          },
+        );
         return;
       }
 

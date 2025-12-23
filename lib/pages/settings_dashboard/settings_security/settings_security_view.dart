@@ -77,6 +77,16 @@ class SettingsSecurityView extends StatelessWidget {
                     ),
                   ),
                   Padding(
+                    padding: SettingsViewStyle.settingsItemDividerPadding(),
+                    child: Divider(
+                      color: LinagoraStateLayer(
+                        LinagoraSysColors.material().surfaceTint,
+                      ).opacityLayer3,
+                      thickness: SettingsViewStyle.settingsItemDividerThikness,
+                      height: SettingsViewStyle.settingsItemDividerHeight,
+                    ),
+                  ),
+                  Padding(
                     padding: SettingsViewStyle.bodySettingsScreenPadding,
                     child: ValueListenableBuilder(
                       valueListenable: controller.ignoredUsersNotifier,
@@ -106,9 +116,7 @@ class SettingsSecurityView extends StatelessWidget {
                     ),
                   ),
                   Padding(
-                    padding: SettingsViewStyle.settingsItemDividerPadding(
-                      context,
-                    ),
+                    padding: SettingsViewStyle.settingsItemDividerPadding(),
                     child: Divider(
                       color: LinagoraStateLayer(
                         LinagoraSysColors.material().surfaceTint,
@@ -150,9 +158,7 @@ class SettingsSecurityView extends StatelessWidget {
                         ),
                       ),
                       Padding(
-                        padding: SettingsViewStyle.settingsItemDividerPadding(
-                          context,
-                        ),
+                        padding: SettingsViewStyle.settingsItemDividerPadding(),
                         child: Divider(
                           color: LinagoraStateLayer(
                             LinagoraSysColors.material().surfaceTint,
