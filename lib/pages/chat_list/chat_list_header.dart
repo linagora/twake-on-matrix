@@ -1,3 +1,4 @@
+import 'package:fluffychat/pages/chat/chat_audio_player_widget.dart';
 import 'package:fluffychat/pages/chat_list/chat_list.dart';
 import 'package:fluffychat/pages/chat_list/chat_list_header_style.dart';
 import 'package:fluffychat/pages/search/search.dart';
@@ -41,13 +42,18 @@ class ChatListHeader extends StatelessWidget {
               ? _normalModeWidgetWeb(context)
               : _normalModeWidgetsMobile(context),
         ),
-        if (ChatListHeaderStyle.responsive.isMobile(context))
+        if (ChatListHeaderStyle.responsive.isMobile(context)) ...[
+          if (PlatformInfos.isMobile)
+            ChatAudioPlayerWidget(
+              matrix: controller.matrixState,
+            ),
           Divider(
             height: ChatListHeaderStyle.dividerHeight,
             thickness: ChatListHeaderStyle.dividerThickness,
             color: LinagoraStateLayer(LinagoraSysColors.material().surfaceTint)
                 .opacityLayer3,
           ),
+        ],
       ],
     );
   }
