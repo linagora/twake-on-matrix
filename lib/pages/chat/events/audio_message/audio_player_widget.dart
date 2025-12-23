@@ -6,6 +6,7 @@ import 'package:fluffychat/pages/chat/events/audio_message/audio_player_style.da
 import 'package:fluffychat/pages/chat/events/message/message_style.dart';
 import 'package:fluffychat/pages/chat/seen_by_row.dart';
 import 'package:fluffychat/presentation/mixins/audio_mixin.dart';
+import 'package:fluffychat/presentation/mixins/event_filter_mixin.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/download_file_extension.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
@@ -16,14 +17,12 @@ import 'package:fluffychat/widgets/file_widget/file_tile_widget.dart';
 import 'package:fluffychat/widgets/file_widget/message_file_tile_style.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:fluffychat/widgets/twake_components/twake_icon_button.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:matrix/matrix.dart';
 import 'package:fluffychat/generated/l10n/app_localizations.dart';
-import 'package:path_provider/path_provider.dart';
 
 import 'package:fluffychat/utils/localized_exception_extension.dart';
 import 'package:opus_caf_converter_dart/opus_caf_converter_dart.dart';
@@ -49,7 +48,7 @@ class AudioPlayerWidget extends StatefulWidget {
 enum AudioPlayerStatus { notDownloaded, downloading, downloaded }
 
 class AudioPlayerState extends State<AudioPlayerWidget>
-    with AudioMixin, AutomaticKeepAliveClientMixin {
+    with AudioMixin, AutomaticKeepAliveClientMixin, EventFilterMixin {
   final List<double> _calculatedWaveform = [];
 
   final ValueNotifier<Duration> _durationNotifier =
@@ -89,18 +88,18 @@ class AudioPlayerState extends State<AudioPlayerWidget>
       ScaffoldMessenger.of(matrix.context).clearMaterialBanners();
     });
     if (matrix.voiceMessageEvent.value?.eventId == widget.event.eventId) {
-      if (matrix.audioPlayer.isAtEndPosition) {
+      if (matrix.audioPlayer?.isAtEndPosition == true) {
         matrix.voiceMessageEvent.value = null;
-        await matrix.audioPlayer.stop();
-        await matrix.audioPlayer.dispose();
+        await matrix.audioPlayer?.stop();
+        await matrix.audioPlayer?.dispose();
         matrix.currentAudioStatus.value = AudioPlayerStatus.notDownloaded;
         await _onButtonTap();
         return;
       }
-      if (matrix.audioPlayer.playing == true) {
-        matrix.audioPlayer.pause();
+      if (matrix.audioPlayer?.playing == true) {
+        matrix.audioPlayer?.pause();
       } else {
-        matrix.audioPlayer.play().onError((e, s) {
+        matrix.audioPlayer?.play().onError((e, s) {
           Logs().e('Could not play audio file', e, s);
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
@@ -115,66 +114,15 @@ class AudioPlayerState extends State<AudioPlayerWidget>
       return;
     }
 
-    matrix.voiceMessageEvent.value = widget.event;
-    await matrix.audioPlayer.stop();
-    await matrix.audioPlayer.dispose();
-    File? file;
-    MatrixFile? matrixFile;
+    final audioPending = await initAudioEventsUpToClicked(
+      client: matrix.client,
+      room: widget.event.room,
+      clickedEvent: widget.event,
+    );
 
-    matrix.currentAudioStatus.value = AudioPlayerStatus.downloading;
-    try {
-      matrixFile = await widget.event.downloadAndDecryptAttachment();
+    matrix.voiceMessageEvents.value = audioPending.events;
 
-      if (!kIsWeb) {
-        final tempDir = await getTemporaryDirectory();
-        final fileName = Uri.encodeComponent(
-          widget.event.attachmentOrThumbnailMxcUrl()!.pathSegments.last,
-        );
-        file = File('${tempDir.path}/${fileName}_${matrixFile.name}');
-
-        await file.writeAsBytes(matrixFile.bytes);
-
-        if (Platform.isIOS &&
-            matrixFile.mimeType.toLowerCase() == 'audio/ogg') {
-          file = await handleOggAudioFileIniOS(file);
-        }
-      }
-
-      matrix.currentAudioStatus.value = AudioPlayerStatus.downloaded;
-    } catch (e, s) {
-      Logs().v('Could not download audio file', e, s);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(e.toLocalizedString(context)),
-        ),
-      );
-      rethrow;
-    }
-    if (matrix.voiceMessageEvent.value?.eventId != widget.event.eventId) return;
-    matrix.audioPlayer = AudioPlayer();
-    matrix.voiceMessageEvent.value = widget.event;
-
-    if (file != null) {
-      matrix.audioPlayer.setFilePath(file.path);
-    } else {
-      await matrix.audioPlayer
-          .setAudioSource(MatrixFileAudioSource(matrixFile));
-    }
-
-    // Set up auto-dispose listener managed globally in MatrixState
-    matrix.setupAudioPlayerAutoDispose();
-
-    matrix.audioPlayer.play().onError((e, s) {
-      Logs().e('Could not play audio file', e, s);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            e?.toLocalizedString(context) ??
-                L10n.of(context)!.couldNotPlayAudioFile,
-          ),
-        ),
-      );
-    });
+    matrix.autoPlayAudio(currentEvent: widget.event);
   }
 
   Future<File> handleOggAudioFileIniOS(File file) async {
@@ -231,21 +179,23 @@ class AudioPlayerState extends State<AudioPlayerWidget>
   @override
   void dispose() {
     if (!PlatformInfos.isMobile) {
-      // Stop and dispose audio player asynchronously to avoid blocking dispose
-      matrix.audioPlayer.stop().then((_) {
-        matrix.audioPlayer.dispose();
-      }).catchError((error) {
-        Logs().e('Error disposing audio player', error);
-      });
+      // Only dispose if this event is currently playing
+      if (matrix.voiceMessageEvent.value?.eventId == widget.event.eventId) {
+        // Stop and dispose audio player asynchronously to avoid blocking
+        // dispose
+        matrix.audioPlayer?.stop().then((_) {
+          matrix.audioPlayer?.dispose();
+        }).catchError((error) {
+          Logs().e('Error disposing audio player', error);
+        });
 
-      // Schedule value updates for after the current frame to avoid
-      // setState() during widget tree lock
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (matrix.voiceMessageEvent.value?.eventId == widget.event.eventId) {
+        // Schedule value updates for after the current frame to avoid
+        // setState() during widget tree lock
+        WidgetsBinding.instance.addPostFrameCallback((_) {
           matrix.currentAudioStatus.value = AudioPlayerStatus.notDownloaded;
           matrix.voiceMessageEvent.value = null;
-        }
-      });
+        });
+      }
     }
 
     super.dispose();
