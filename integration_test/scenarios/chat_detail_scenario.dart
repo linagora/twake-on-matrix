@@ -17,68 +17,117 @@ class ChatDetailScenario extends BaseScenario {
     await ChatGroupDetailRobot($).getSearchIcon().tap();
     await $.waitUntilVisible($(AppBar).$(TextField));
     await $(AppBar).$(TextField).enterText(searchText);
-    await ChatGroupDetailRobot($).waitForEitherVisible($: $, first: $(TwakeListItem), second: $("No Results"), timeout: const Duration(seconds: 10));
+    await ChatGroupDetailRobot($).waitForEitherVisible(
+        $: $,
+        first: $(TwakeListItem),
+        second: $("No Results"),
+        timeout: const Duration(seconds: 10));
     await Future.delayed(const Duration(seconds: 2));
   }
 
   UserLevel parseUserLevel(String? userlevel) {
-    final noSpaces = (userlevel ?? '').trim().replaceAll(RegExp(r'\s+'), ''); // remove all space
+    final noSpaces = (userlevel ?? '')
+        .trim()
+        .replaceAll(RegExp(r'\s+'), ''); // remove all space
     final level = noSpaces.toLowerCase();
     return UserLevel.values.byName(level);
   }
-  
+
   Future<void> verifyProfileInfoOfAllMember(SoftAssertHelper s) async {
-    final List<TwakeListItemRobot> items = await GroupInformationRobot($).getListOfMembers();
+    final List<TwakeListItemRobot> items =
+        await GroupInformationRobot($).getListOfMembers();
 
     for (final item in items) {
       final row = item.root;
       final owner = row.$(Text).at(1).text;
       final displayName = row.$(Text).first.text ?? "";
       final matrixAddress = row.$(Text).last.text ?? "";
-      const currentAccount  = String.fromEnvironment('CurrentAccount');
-      await verifyProfileInfoOfAMember(s, displayName, matrixAddress, isCurrentUser: matrixAddress == currentAccount, level: parseUserLevel(owner));
+      const currentAccount = String.fromEnvironment('CurrentAccount');
+      await verifyProfileInfoOfAMember(
+        s,
+        displayName,
+        matrixAddress,
+        isCurrentUser: matrixAddress == currentAccount,
+        level: parseUserLevel(owner),
+      );
       await ProfileInformationRobot($).backToGroupInfomationScreen();
       await $.waitUntilVisible(item.root);
-      await $.tester.pump();
+      await $.tester.pumpAndSettle();
+      //pumAndSettle seem not enought to avoid get value of owner incorrectly
+      await Future.delayed(const Duration(seconds: 2));
     }
   }
 
-  Future<void> verifyProfileInfoOfAMember(SoftAssertHelper s, String displayName, String matrixAdress, {bool isCurrentUser = true,
-    UserLevel level = UserLevel.member,}) async {
+  Future<void> verifyProfileInfoOfAMember(
+    SoftAssertHelper s,
+    String displayName,
+    String matrixAdress, {
+    bool isCurrentUser = true,
+    UserLevel level = UserLevel.member,
+  }) async {
     final memberRow = GroupInformationRobot($).getMember(matrixAdress);
     await memberRow.tap();
     await $.waitUntilVisible($(ProfileInfoView));
-    await verifyProfileInfo(s, displayName, matrixAdress, isCurrentUser: isCurrentUser, level: level);
+    await verifyProfileInfo(s, displayName, matrixAdress,
+        isCurrentUser: isCurrentUser, level: level);
   }
 
-  Future<void> verifyProfileInfo(SoftAssertHelper s, String displayName, String matrixAdress, {bool isCurrentUser = true,
-    UserLevel level = UserLevel.member,}) async {
-    
-    s.softAssertEquals(ProfileInformationRobot($).getAvatar().exists, true, "Avatar is not shown");
+  Future<void> verifyProfileInfo(
+    SoftAssertHelper s,
+    String displayName,
+    String matrixAdress, {
+    bool isCurrentUser = true,
+    UserLevel level = UserLevel.member,
+  }) async {
+    s.softAssertEquals(
+      ProfileInformationRobot($).getAvatar().exists,
+      true,
+      "Avatar is not shown",
+    );
 
     // final expectedName = matrixAdress.substring(matrixAdress.indexOf("@")+1, matrixAdress.indexOf(":"));
     final actualName = ProfileInformationRobot($).getDisplayName().text;
-    s.softAssertEquals( actualName == displayName,
-     true, "displayName is not correct, expected name is $displayName while actual name is $actualName",);
-        
-    try{
-      s.softAssertEquals(ProfileInformationRobot($).getOnlineStatus().exists, true, "online status is not shown");
+    s.softAssertEquals(
+      actualName == displayName,
+      true,
+      "displayName is not correct, expected name is $displayName while actual name is $actualName",
+    );
+
+    try {
+      s.softAssertEquals(
+        ProfileInformationRobot($).getOnlineStatus().exists,
+        true,
+        "online status is not shown",
+      );
+    } catch (_) {}
+
+    s.softAssertEquals(
+      ProfileInformationRobot($).getMatrixAddress().text == matrixAdress,
+      true,
+      "Matrix address is not correct",
+    );
+
+    const currentAccount = String.fromEnvironment('CurrentAccount');
+    if (matrixAdress != currentAccount) {
+      s.softAssertEquals(
+        ProfileInformationRobot($).getSentMessageBtn().exists,
+        true,
+        "Sent message button is not shown",
+      );
     }
-    catch(_){}
 
-    s.softAssertEquals(ProfileInformationRobot($).getMatrixAddress().text == matrixAdress, true, "Matrix address is not correct",);
-
-    const currentAccount  = String.fromEnvironment('CurrentAccount');
-    if(matrixAdress != currentAccount)
-    {
-      s.softAssertEquals(ProfileInformationRobot($).getSentMessageBtn().exists, true, "Sent message button is not shown");
-    }
-
-    if((matrixAdress != currentAccount) & ((level == UserLevel.owner) || (level == UserLevel.admin)))
-    {
-      s.softAssertEquals(ProfileInformationRobot($).getRemoveFromBtn().exists, true, "Remove account button is not shown");
-      s.softAssertEquals(ProfileInformationRobot($).getTransferOwnerShipBtn().exists, true, "TransferOwnerShip is not shown");
+    if ((matrixAdress != currentAccount) &
+        ((level == UserLevel.owner) || (level == UserLevel.admin))) {
+      s.softAssertEquals(
+        ProfileInformationRobot($).getRemoveFromBtn().exists,
+        true,
+        "Remove account button is not shown",
+      );
+      s.softAssertEquals(
+        ProfileInformationRobot($).getTransferOwnerShipBtn().exists,
+        true,
+        "TransferOwnerShip is not shown",
+      );
     }
   }
-
 }
