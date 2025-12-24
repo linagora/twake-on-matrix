@@ -58,7 +58,7 @@ class ChatDetailScenario extends BaseScenario {
       await ProfileInformationRobot($).backToGroupInformationScreen();
       await $.waitUntilVisible(item.root);
       await $.tester.pumpAndSettle();
-      //pumAndSettle seem not enought to avoid get value of owner incorrectly
+      //pumAndSettle seems not enough to avoid get value of owner incorrectly
       await Future.delayed(const Duration(seconds: 2));
     }
   }
