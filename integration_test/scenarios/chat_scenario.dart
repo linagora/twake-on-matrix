@@ -16,8 +16,10 @@ import 'package:fluffychat/pages/chat_list/chat_list_body_view.dart';
 import 'package:fluffychat/widgets/context_menu/context_menu_action_item_widget.dart';
 import 'package:fluffychat/widgets/twake_components/twake_icon_button.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:linagora_design_flutter/list_item/twake_list_item.dart';
 import 'package:linkfy_text/linkfy_text.dart';
 import 'package:patrol/patrol.dart';
+import '../base/base_scenario.dart';
 import '../base/core_robot.dart';
 import '../help/soft_assertion_helper.dart';
 import '../robots/add_member_robot.dart';
@@ -31,8 +33,6 @@ import '../robots/search_robot.dart';
 import '../robots/setting_for_new_group.dart';
 import '../robots/twake_list_item_robot.dart';
 
-enum UserLevel { member, admin, owner, moderator }
-
 class ChatScenario extends CoreRobot {
   ChatScenario(super.$);
 
@@ -43,8 +43,8 @@ class ChatScenario extends CoreRobot {
 
   Future<ChatGroupDetailRobot> openChatGroupByTitle(String groupTitle) async {
     await enterSearchText(groupTitle);
-    await (await ChatListRobot($).getListOfChatGroup())[0].root.tap();
-    await $.pumpAndSettle();
+    await $(TwakeListItem).containing(groupTitle).at(0).tap();
+    await $.waitUntilVisible(ChatGroupDetailRobot($).getInputTextField());
     return ChatGroupDetailRobot($);
   }
 
@@ -114,13 +114,13 @@ class ChatScenario extends CoreRobot {
   }
 
   Future<void> replyMessage(String message, String reply) async {
-    await ChatGroupDetailRobot($).openPullDownMenu(message);
+    await ChatGroupDetailRobot($).openPullDownMenuOfAMessage(message);
     await (PullDownMenuRobot($).getReplyItem()).tap();
     await sendAMesage(reply);
   }
 
   Future<void> forwardMessage(String message, String receiver) async {
-    await ChatGroupDetailRobot($).openPullDownMenu(message);
+    await ChatGroupDetailRobot($).openPullDownMenuOfAMessage(message);
     await PullDownMenuRobot($).getForwardItem().tap();
   }
 
@@ -132,13 +132,13 @@ class ChatScenario extends CoreRobot {
   }
 
   Future<void> copyMessage(String message) async {
-    await ChatGroupDetailRobot($).openPullDownMenu(message);
+    await ChatGroupDetailRobot($).openPullDownMenuOfAMessage(message);
     await (PullDownMenuRobot($).getCopyItem()).tap();
   }
 
   Future<void> pasteFromClipBoard() async {
     // 1) Focus the input and open the context menu
-    final input = await ChatGroupDetailRobot($).getInputTextField();
+    final input = ChatGroupDetailRobot($).getInputTextField();
     await input.tap();
     await input.longPress();
     await $.pump(const Duration(milliseconds: 300)); // let the menu render
@@ -176,13 +176,13 @@ class ChatScenario extends CoreRobot {
   }
 
   Future<void> editMessage(String message, String newMessage) async {
-    await ChatGroupDetailRobot($).openPullDownMenu(message);
+    await ChatGroupDetailRobot($).openPullDownMenuOfAMessage(message);
     await (PullDownMenuRobot($).getEditItem()).tap();
     await sendAMesage(newMessage);
   }
 
   Future<void> selectMessage(String message) async {
-    await ChatGroupDetailRobot($).openPullDownMenu(message);
+    await ChatGroupDetailRobot($).openPullDownMenuOfAMessage(message);
     await (PullDownMenuRobot($).getSelectItem()).tap();
   }
 
@@ -204,19 +204,28 @@ class ChatScenario extends CoreRobot {
   }
 
   Future<void> pinMessage(String message) async {
-    await ChatGroupDetailRobot($).openPullDownMenu(message);
+    await ChatGroupDetailRobot($).openPullDownMenuOfAMessage(message);
     await (PullDownMenuRobot($).getPinItem()).tap();
   }
 
   Future<void> unpinMessage(String message) async {
-    await ChatGroupDetailRobot($).openPullDownMenu(message);
+    await ChatGroupDetailRobot($).openPullDownMenuOfAMessage(message);
     await (PullDownMenuRobot($).getUnpinItem()).tap();
   }
 
   Future<void> deleteMessage(String message) async {
-    await ChatGroupDetailRobot($).openPullDownMenu(message);
+    await ChatGroupDetailRobot($).openPullDownMenuOfAMessage(message);
     await (PullDownMenuRobot($).getDeleteItem()).tap();
-    await $.native.tap(Selector(text: 'Delete'));
+    if (Platform.isIOS) {
+      await $.native.tap(Selector(text: 'Delete'));
+    } else {
+      await $.native.tap(
+        Selector(
+          className: 'android.widget.Button',
+          contentDescription: 'Delete',
+        ),
+      );
+    }
   }
 
   Future<ChatGroupDetailRobot> createANewGroupChat(
