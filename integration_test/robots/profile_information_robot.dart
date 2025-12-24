@@ -10,6 +10,10 @@ import '../base/core_robot.dart';
 
 class ProfileInformationRobot extends CoreRobot {
   ProfileInformationRobot(super.$);
+  static const _copyAddressIcon = IconData(0xE190, fontFamily: 'MaterialIcons');
+  static const _sentMsgIcon = IconData(0xE154, fontFamily: 'MaterialIcons');
+  static const _removeAccountIcon =
+      IconData(0xEFA9, fontFamily: 'MaterialIcons');
 
   PatrolFinder getBackIcon() {
     return $(AppBar).$(TwakeIconButton);
@@ -24,6 +28,7 @@ class ProfileInformationRobot extends CoreRobot {
   }
 
   PatrolFinder getDisplayName() {
+    // Display name is second-to-last when online status exists, otherwise first
     final count = $(ProfileInfoHeader).$(Text).evaluate().length;
     if (count > 2) {
       return $(ProfileInfoHeader).$(Text).at(count - 2);
@@ -41,20 +46,17 @@ class ProfileInformationRobot extends CoreRobot {
   }
 
   PatrolFinder getMatrixAddressCopyIcon() {
-    const copyAddressData = IconData(0xE190, fontFamily: 'MaterialIcons');
     return $(ProfileInfoContactRows)
         .$(Icon)
-        .containing(find.byIcon(copyAddressData));
+        .containing(find.byIcon(_copyAddressIcon));
   }
 
   PatrolFinder getSentMessageBtn() {
-    const sentMsgData = IconData(0xE154, fontFamily: 'MaterialIcons');
-    return $(InkWell).containing(find.byIcon(sentMsgData));
+    return $(InkWell).containing(find.byIcon(_sentMsgIcon));
   }
 
   PatrolFinder getRemoveFromBtn() {
-    const removeAccountData = IconData(0xEFA9, fontFamily: 'MaterialIcons');
-    return $(InkWell).containing(find.byIcon(removeAccountData));
+    return $(InkWell).containing(find.byIcon(_removeAccountIcon));
   }
 
   PatrolFinder getTransferOwnerShipBtn() {
