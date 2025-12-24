@@ -61,7 +61,7 @@ class ProfileInformationRobot extends CoreRobot {
     return $(InkWell).containing($("Transfer ownership"));
   }
 
-  Future<void> backToGroupInfomationScreen() async {
+  Future<void> backToGroupInformationScreen() async {
     await getBackIcon().tap();
     await $.waitUntilVisible($(ChatDetailsView));
   }
