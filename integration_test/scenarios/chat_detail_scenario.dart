@@ -95,7 +95,6 @@ class ChatDetailScenario extends BaseScenario {
       "Avatar is not shown",
     );
 
-    // final expectedName = matrixAddress.substring(matrixAddress.indexOf("@")+1, matrixAddress.indexOf(":"));
     final actualName = ProfileInformationRobot($).getDisplayName().text;
     s.softAssertEquals(
       actualName == displayName,
@@ -109,16 +108,16 @@ class ChatDetailScenario extends BaseScenario {
         true,
         "online status is not shown",
       );
-    } catch (_) {}
-
+    } catch (_) {
+      // Ignore: Online status element may not exist for some users
+    }
     s.softAssertEquals(
       ProfileInformationRobot($).getMatrixAddress().text == matrixAddress,
       true,
       "Matrix address is not correct",
     );
 
-    const currentAccount = String.fromEnvironment('CurrentAccount');
-    if (matrixAddress != currentAccount) {
+    if (matrixAddress != _currentAccount) {
       s.softAssertEquals(
         ProfileInformationRobot($).getSentMessageBtn().exists,
         true,
@@ -126,7 +125,7 @@ class ChatDetailScenario extends BaseScenario {
       );
     }
 
-    if ((matrixAddress != currentAccount) &&
+    if ((matrixAddress != _currentAccount) &&
         ((level == UserLevel.owner) || (level == UserLevel.admin))) {
       s.softAssertEquals(
         ProfileInformationRobot($).getRemoveFromBtn().exists,
