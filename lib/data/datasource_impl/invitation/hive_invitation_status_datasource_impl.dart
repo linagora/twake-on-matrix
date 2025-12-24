@@ -6,6 +6,7 @@ import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/domain/exception/invitation/invitation_status_not_found.dart';
 import 'package:fluffychat/domain/model/extensions/invitation/invitation_extension.dart';
 import 'package:fluffychat/domain/model/invitation/invitation_status.dart';
+import 'package:fluffychat/utils/copy_map.dart';
 import 'package:matrix/matrix.dart';
 
 class HiveInvitationStatusDatasourceImpl

@@ -5,6 +5,7 @@ import 'package:fluffychat/domain/keychain_sharing/keychain_sharing_manager.dart
 import 'package:fluffychat/domain/keychain_sharing/keychain_sharing_restore_token.dart';
 import 'package:fluffychat/domain/keychain_sharing/keychain_sharing_session.dart';
 import 'package:fluffychat/migrate_steps/migrate_v6_to_v7/migrate_v6_to_v7.dart';
+import 'package:fluffychat/utils/matrix_sdk_extensions/hive_collections_database.dart';
 import 'package:flutter/foundation.dart' hide Key;
 import 'package:flutter/services.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -13,7 +14,6 @@ import 'package:matrix/matrix.dart';
 import 'package:path_provider/path_provider.dart';
 
 import 'package:fluffychat/utils/platform_infos.dart';
-import 'package:fluffychat/utils/manager/storage_directory_manager.dart';
 
 class FlutterHiveCollectionsDatabase extends HiveCollectionsDatabase {
   FlutterHiveCollectionsDatabase(
@@ -126,55 +126,11 @@ class FlutterHiveCollectionsDatabase extends HiveCollectionsDatabase {
   bool get supportsFileStoring => !kIsWeb;
 
   @override
-  Future<Uint8List?> getFile(String eventId, String fileName) async {
-    if (!supportsFileStoring) return null;
-    final file = File(
-      await StorageDirectoryManager.instance.getFilePathInAppDownloads(
-        eventId: eventId,
-        fileName: fileName,
-      ),
-    );
-    if (await file.exists() == false) return null;
-    final bytes = await file.readAsBytes();
-    return bytes;
-  }
-
-  @override
-  Future storeEventFile(
-    String eventId,
-    String fileName,
-    Uint8List bytes,
-    int time,
-  ) async {
-    if (!supportsFileStoring) return null;
-    final file = File(
-      await StorageDirectoryManager.instance.getFilePathInAppDownloads(
-        eventId: eventId,
-        fileName: fileName,
-      ),
-    );
-    if (await file.exists()) return;
-    await file.writeAsBytes(bytes);
-    return;
-  }
-
-  @override
-  Future<File?> getFileEntity(String eventId, String fileName) async {
-    if (!supportsFileStoring) return null;
-    final file = File(
-      await StorageDirectoryManager.instance.getFilePathInAppDownloads(
-        eventId: eventId,
-        fileName: fileName,
-      ),
-    );
-    if (await file.exists() == false) return null;
-    return file;
-  }
-
-  @override
   Future<void> updateClient(
     String homeserverUrl,
     String token,
+    DateTime? tokenExpiresAt,
+    String? refreshToken,
     String userId,
     String? deviceId,
     String? deviceName,
@@ -190,6 +146,8 @@ class FlutterHiveCollectionsDatabase extends HiveCollectionsDatabase {
     return super.updateClient(
       homeserverUrl,
       token,
+      tokenExpiresAt,
+      refreshToken,
       userId,
       deviceId,
       deviceName,
@@ -234,6 +192,8 @@ class FlutterHiveCollectionsDatabase extends HiveCollectionsDatabase {
     String name,
     String homeserverUrl,
     String token,
+    DateTime? tokenExpiresAt,
+    String? refreshToken,
     String userId,
     String? deviceId,
     String? deviceName,
@@ -250,6 +210,8 @@ class FlutterHiveCollectionsDatabase extends HiveCollectionsDatabase {
       name,
       homeserverUrl,
       token,
+      tokenExpiresAt,
+      refreshToken,
       userId,
       deviceId,
       deviceName,

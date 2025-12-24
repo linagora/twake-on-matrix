@@ -13,12 +13,13 @@ import 'package:flutter_localized_locales/flutter_localized_locales.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get_it/get_it.dart';
 import 'package:matrix/matrix.dart';
-import 'package:matrix_api_lite/fake_matrix_api.dart';
 import 'package:fluffychat/generated/l10n/app_localizations.dart';
+
+import '../../../../fake_client.dart';
 
 class MockUpMessageContentBuilder with MessageContentBuilderMixin {}
 
-void main() {
+Future<void> main() async {
   TestWidgetsFlutterBinding.ensureInitialized();
   late MockUpMessageContentBuilder mockUpMessageContentBuilder;
   setUpAll(() {
@@ -27,7 +28,7 @@ void main() {
     getIt.registerSingleton(ResponsiveUtils());
   });
 
-  final client = Client('client', httpClient: FakeMatrixApi());
+  final client = await getClient();
   final room = Room(id: '!room:example.abc', client: client);
   final fileEvent = Event(
     content: {
@@ -150,7 +151,7 @@ void main() {
             ),
           ),
         );
-        await tester.pump();
+        await tester.pumpAndSettle();
 
         if (expectedMetrics != null) {
           expect(getSizeForEmptyTextEvent, isNotNull);

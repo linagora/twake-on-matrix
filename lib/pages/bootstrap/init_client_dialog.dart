@@ -60,6 +60,8 @@ class _InitClientDialogState extends State<InitClientDialog>
     super.initState();
   }
 
+  final Completer _loginCompleter = Completer();
+
   void _listenClientLoginStateChanged(ClientLoginStateEvent event) {
     Logs().i(
       'StreamDialogBuilder::_listenClientLoginStateChanged - ${event.multipleAccountLoginType}',
@@ -67,23 +69,43 @@ class _InitClientDialogState extends State<InitClientDialog>
     if (event.multipleAccountLoginType ==
         MultipleAccountLoginType.firstLoggedIn) {
       _handleFirstLoggedIn(event.client);
+      if (!_loginCompleter.isCompleted) _loginCompleter.complete();
       return;
     }
 
     if (event.multipleAccountLoginType ==
         MultipleAccountLoginType.otherAccountLoggedIn) {
       _handleAddAnotherAccount(event.client);
+      if (!_loginCompleter.isCompleted) _loginCompleter.complete();
       return;
     }
   }
 
   void _handleFunctionOnDone() async {
     Logs().i('StreamDialogBuilder::_handleFunctionOnDone');
+    try {
+      await _loginCompleter.future.timeout(
+        const Duration(seconds: 30),
+        onTimeout: () {
+          Logs().w(
+            'StreamDialogBuilder::_handleFunctionOnDone - Timeout waiting for login state',
+          );
+        },
+      );
+    } catch (e) {
+      Logs().e('StreamDialogBuilder::_handleFunctionOnDone - Error: $e');
+    }
+
+    if (!mounted) return;
   }
 
   void _handleFunctionOnError(Object? error) {
     Logs().e('StreamDialogBuilder::_handleFunctionOnError - $error');
     if (mounted) {
+      if (!_loginCompleter.isCompleted) {
+        _loginCompleter.completeError(error ?? 'Unknown error');
+      }
+      if (!mounted) return;
       Navigator.pop(context);
     }
   }

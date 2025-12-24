@@ -118,8 +118,6 @@ class SendFileDialogController extends State<SendFileDialog> {
           if (right is GenerateThumbnailsMediaSuccess) {
             thumbnails[right.file] = right.thumbnail;
             filesNotifier.notify();
-          } else if (right is ConvertReadStreamToBytesSuccess) {
-            filesNotifier.update(right.oldFile, right.newFile);
           } else if (right is GenerateThumbnailsMediaInitial) {
             maxMediaSizeNotifier.value = right.maxUploadFileSize.toDouble();
             updateHaveErrorFilesNotifier();
@@ -165,20 +163,6 @@ class SendFileDialogController extends State<SendFileDialog> {
     return filesNotifier.value
         .where((file) => !file.isFileHaveError(maxMediaSizeNotifier.value))
         .toList();
-  }
-
-  Future<List<MatrixFile>> convertFilesToBytes(List<MatrixFile> files) async {
-    final results = await Future.wait(
-      files
-          .map(
-            (file) => file.convertReadStreamToBytes(),
-          )
-          .toList(),
-    );
-    for (int i = 0; i < files.length; i++) {
-      filesNotifier.update(files[i], results[i]);
-    }
-    return results;
   }
 
   void sendFilesWithCaption() async {

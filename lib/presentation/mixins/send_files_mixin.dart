@@ -1,13 +1,13 @@
 import 'package:file_picker/file_picker.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
-import 'package:fluffychat/domain/model/extensions/platform_file/platform_file_extension.dart';
+import 'package:fluffychat/domain/model/extensions/xfile/xfile_extension.dart';
+import 'package:fluffychat/domain/model/file_info/file_info.dart';
 import 'package:fluffychat/pages/chat/chat_actions.dart';
 import 'package:fluffychat/presentation/model/file/file_asset_entity.dart';
 import 'package:fluffychat/utils/manager/upload_manager/upload_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:linagora_design_flutter/images_picker/images_picker.dart';
 import 'package:matrix/matrix.dart';
-import 'package:path_provider/path_provider.dart';
 
 mixin SendFilesMixin {
   Future<void> sendMedia(
@@ -35,34 +35,33 @@ mixin SendFilesMixin {
     List<FileInfo>? fileInfos,
     VoidCallback? onSendFileCallback,
   }) async {
-    if (room == null) {}
+    if (room == null) return;
     Navigator.pop(context);
     final result = await FilePicker.platform.pickFiles(
-      withReadStream: true,
       allowMultiple: true,
     );
-    final temporaryDirectory = await getTemporaryDirectory();
-    fileInfos ??= result?.files.map((xFile) {
-      final matrixFile = xFile.toMatrixFileOnMobile(
-        temporaryDirectoryPath: temporaryDirectory.path,
+    fileInfos ??= result?.xFiles.map((file) {
+      return FileInfo(
+        file.name,
+        filePath: file.path,
       );
-      return FileInfo.fromMatrixFile(matrixFile);
     }).toList();
 
-    if (fileInfos == null || fileInfos.isEmpty == true) return;
+    if (fileInfos?.isEmpty == true) return;
     onSendFileCallback?.call();
     final uploadManger = getIt.get<UploadManager>();
-    uploadManger.uploadFileMobile(room: room!, fileInfos: fileInfos);
+    uploadManger.uploadFileMobile(room: room, fileInfos: fileInfos!);
   }
 
   Future<List<MatrixFile>> pickFilesFromSystem() async {
     final result = await FilePicker.platform.pickFiles(
-      withData: false,
+      withData: true,
       allowMultiple: true,
-      withReadStream: true,
     );
-    if (result == null || result.files.isEmpty) return [];
-    return result.files.map((file) => file.toMatrixFileOnWeb()).toList();
+    if (result == null || result.xFiles.isEmpty) return [];
+    return await Future.wait(
+      result.xFiles.map((file) => file.toMatrixFileOnWeb()),
+    );
   }
 
   void onPickerTypeClick({

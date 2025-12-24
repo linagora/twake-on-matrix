@@ -73,7 +73,7 @@ class MessageContentBuilder extends StatelessWidget
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
-                if (event.relationshipType == RelationshipTypes.reply)
+                if (event.inReplyToEventId() != null)
                   ReplyContentWidget(
                     event: event,
                     timeline: timeline,

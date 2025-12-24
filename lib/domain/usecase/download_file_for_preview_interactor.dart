@@ -8,6 +8,7 @@ import 'package:fluffychat/domain/app_state/preview_file/download_file_for_previ
 import 'package:fluffychat/domain/app_state/preview_file/download_file_for_preview_loading.dart';
 import 'package:fluffychat/domain/app_state/preview_file/download_file_for_preview_success.dart';
 import 'package:fluffychat/domain/model/download_file/download_file_for_preview_response.dart';
+import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
 import 'package:matrix/matrix.dart';
 import 'package:mime/mime.dart';
 
@@ -26,12 +27,7 @@ class DownloadFileForPreviewInteractor {
       );
       final tempFile = File('$tempDirPath/${event.filename}');
       tempFile.createSync(recursive: true);
-      if (matrixFile.bytes == null) {
-        yield const Left(
-          DownloadFileForPreviewFailure(exception: 'Empty file'),
-        );
-      }
-      tempFile.writeAsBytesSync(matrixFile.bytes!);
+      tempFile.writeAsBytesSync(matrixFile.bytes);
       Logs().d(
         'DownloadFileForPreviewInteractor::execute(): ${tempFile.path}, mimeType: ${lookupMimeType(tempFile.path)}',
       );

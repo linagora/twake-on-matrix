@@ -10,6 +10,7 @@ import 'package:fluffychat/data/network/homeserver_endpoint.dart';
 import 'package:fluffychat/data/network/media/cancel_exception.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/di/global/network_di.dart';
+import 'package:fluffychat/domain/model/file_info/file_info.dart';
 import 'package:matrix/matrix.dart';
 
 class MediaAPI {
@@ -24,14 +25,21 @@ class MediaAPI {
     ProgressCallback? onSendProgress,
   }) async {
     final dioHeaders = _client.getHeaders();
-    dioHeaders[HttpHeaders.contentLengthHeader] =
-        await File(fileInfo.filePath).length();
+    dioHeaders[HttpHeaders.contentLengthHeader] = fileInfo.fileSize;
     dioHeaders[HttpHeaders.contentTypeHeader] = fileInfo.mimeType;
+    Stream<List<int>>? readStream;
+    if (fileInfo.bytes != null) {
+      readStream = Stream.value(fileInfo.bytes!);
+    } else if (fileInfo.filePath != null) {
+      readStream = File(fileInfo.filePath!).openRead();
+    } else {
+      throw ArgumentError('FileInfo must have either bytes or filePath');
+    }
     final response = await _client
         .postToGetBody(
       HomeserverEndpoint.uploadMediaServicePath
           .generateHomeserverMediaEndpoint(),
-      data: fileInfo.readStream ?? File(fileInfo.filePath).openRead(),
+      data: readStream,
       queryParameters: {
         'fileName': fileInfo.fileName,
       },
@@ -56,13 +64,13 @@ class MediaAPI {
     ProgressCallback? onSendProgress,
   }) async {
     final dioHeaders = _client.getHeaders();
-    dioHeaders[HttpHeaders.contentLengthHeader] = file.bytes?.length;
+    dioHeaders[HttpHeaders.contentLengthHeader] = file.bytes.length;
     dioHeaders[HttpHeaders.contentTypeHeader] = file.mimeType;
     final response = await _client
         .postToGetBody(
       HomeserverEndpoint.uploadMediaServicePath
           .generateHomeserverMediaEndpoint(),
-      data: file.readStream ?? file.bytes,
+      data: file.bytes,
       queryParameters: {
         'fileName': file.name,
       },

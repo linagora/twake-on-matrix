@@ -139,7 +139,7 @@ mixin MediaViewerAppBarMixin on SaveMediaToGalleryAndroidMixin {
 
   void backToChatScreenInMobile(BuildContext context) {
     Navigator.of(context).popUntil(
-      (Route route) => route.settings.name == '/rooms/room',
+      (Route route) => route.settings.name?.startsWith('/rooms/') ?? false,
     );
   }
 

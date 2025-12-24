@@ -105,7 +105,8 @@ class _OnAuthRedirectState extends State<OnAuthRedirect> with ConnectPageMixin {
       Matrix.of(context).loginType = LoginType.mLoginToken;
       Matrix.of(context).loginHomeserverSummary = await Matrix.of(context)
           .getLoginClient()
-          .checkHomeserver(Uri.parse(homeserver));
+          .checkHomeserver(Uri.parse(homeserver))
+          .toHomeserverSummary();
 
       await Matrix.of(context).getLoginClient().login(
             LoginType.mLoginToken,

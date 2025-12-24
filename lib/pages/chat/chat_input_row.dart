@@ -211,22 +211,31 @@ class ChatInputRow extends StatelessWidget {
                               Logs().d('ChatInputRowMobile:: pauseRecording');
                               controller.pauseRecording.call();
                             },
-                            sendRequestFunction: (soundFile, time, waveFrom) {
+                            sendRequestFunction:
+                                (soundFile, time, waveFrom) async {
                               Logs().d(
                                 'ChatInputRowMobile:: sendRequestFunction $soundFile',
                               );
                               controller.stopRecording.call();
 
-                              final file = TwakeAudioFile(
-                                name: soundFile.path,
-                                filePath: soundFile.path,
-                                duration: time.inMilliseconds,
-                              );
-                              controller.sendVoiceMessageAction(
-                                audioFile: file,
-                                time: time,
-                                waveform: waveFrom,
-                              );
+                              try {
+                                final file = TwakeAudioFile(
+                                  name: soundFile.path,
+                                  duration: time.inMilliseconds,
+                                  bytes: await soundFile.readAsBytes(),
+                                );
+                                controller.sendVoiceMessageAction(
+                                  audioFile: file,
+                                  time: time,
+                                  waveform: waveFrom,
+                                );
+                              } catch (error, stackTrace) {
+                                Logs().e(
+                                  'ChatInputRowMobile:: sendRequestFunction:',
+                                  error,
+                                  stackTrace,
+                                );
+                              }
                             },
                             encode: AudioEncoderType.AAC,
                             fullRecordPackageHeight: 50,

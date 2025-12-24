@@ -4,6 +4,7 @@ import 'package:fluffychat/data/memory/mxc_image_cache_manager.dart';
 import 'package:fluffychat/pages/image_viewer/image_viewer.dart';
 import 'package:fluffychat/pages/media_viewer/media_viewer.dart';
 import 'package:fluffychat/presentation/enum/chat/media_viewer_popup_result_enum.dart';
+import 'package:fluffychat/presentation/extensions/send_file_web_extension.dart';
 import 'package:fluffychat/utils/extension/build_context_extension.dart';
 import 'package:fluffychat/utils/extension/mime_type_extension.dart';
 import 'package:fluffychat/utils/interactive_viewer_gallery.dart';
@@ -156,10 +157,7 @@ class _MxcImageState extends State<MxcImage>
           : uri.getDownloadLink(client);
 
       if (_isCached == null && widget.event != null) {
-        final cachedData = await client.database?.getFile(
-          event!.eventId,
-          widget.isThumbnail ? event.thumbnailFilename : event.filename,
-        );
+        final cachedData = await client.database.getFile(httpUri);
         if (cachedData != null) {
           _isCached = true;
           return (imageData: cachedData, filePath: null);
@@ -177,9 +175,8 @@ class _MxcImageState extends State<MxcImage>
       final remoteData = response.bodyBytes;
 
       if (widget.event != null) {
-        await client.database?.storeEventFile(
-          widget.event!.eventId,
-          event!.filename,
+        await client.database.storeFile(
+          httpUri,
           remoteData,
           0,
         );
@@ -195,8 +192,8 @@ class _MxcImageState extends State<MxcImage>
             getThumbnail: widget.isThumbnail,
           );
           Logs().d('MxcImage::Downloaded get file info = $fileInfo');
-          if (fileInfo != null && fileInfo.filePath.isNotEmpty) {
-            return (imageData: null, filePath: fileInfo.filePath);
+          if (fileInfo != null) {
+            return (imageData: fileInfo.bytes, filePath: fileInfo.filePath);
           }
         }
 
@@ -204,10 +201,10 @@ class _MxcImageState extends State<MxcImage>
           getThumbnail: widget.isThumbnail,
         );
         Logs().d(
-          'MxcImage::Downloaded attachment name = ${matrixFile.name} - mimeType = ${matrixFile.mimeType} - bytes = ${matrixFile.bytes?.length}',
+          'MxcImage::Downloaded attachment name = ${matrixFile.name} - mimeType = ${matrixFile.mimeType} - bytes = ${matrixFile.bytes.length}',
         );
         if (!matrixFile.isImage()) return (imageData: null, filePath: null);
-        return (imageData: matrixFile.bytes, filePath: matrixFile.filePath);
+        return (imageData: matrixFile.bytes, filePath: null);
       } catch (e) {
         Logs().e('MxcImage::Error while downloading image: $e');
         rethrow;
@@ -382,6 +379,40 @@ class _ImageWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (event?.messageType == MessageTypes.Video && data != null) {
+      final matrixVideoFile = MatrixVideoFile(
+        bytes: data!,
+        name: event?.filename ?? '${DateTime.now().millisecondsSinceEpoch}.mp4',
+        mimeType: event?.mimeType,
+      );
+      return FutureBuilder(
+        future: event?.room.generateVideoThumbnail(matrixVideoFile),
+        builder: (context, snapshot) {
+          if (snapshot.data == null) {
+            return const SizedBox();
+          }
+
+          return Image.memory(
+            snapshot.data!.bytes,
+            width: width,
+            height: height,
+            cacheWidth: cacheWidth != null
+                ? cacheWidth!
+                : (width != null && needResize)
+                    ? context.getCacheSize(width!)
+                    : null,
+            cacheHeight: cacheHeight != null
+                ? cacheHeight!
+                : (height != null && needResize)
+                    ? context.getCacheSize(height!)
+                    : null,
+            fit: fit,
+            filterQuality: FilterQuality.medium,
+            errorBuilder: imageErrorWidgetBuilder,
+          );
+        },
+      );
+    }
     return filePath != null && filePath!.isNotEmpty
         ? _ImageNativeBuilder(
             filePath: filePath,

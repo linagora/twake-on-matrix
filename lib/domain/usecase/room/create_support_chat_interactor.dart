@@ -24,8 +24,8 @@ class CreateSupportChatInteractor {
     try {
       final discovery = await client.getWellknown();
       final supportChatTwakeId =
-          discovery.additionalProperties[WellKnownMixin.twakeChatKey]
-              ?[WellKnownMixin.supportContact];
+          (discovery.additionalProperties[WellKnownMixin.twakeChatKey]
+              as Map?)?[WellKnownMixin.supportContact];
       if (supportChatTwakeId is! String || supportChatTwakeId.trim().isEmpty) {
         throw Exception('No support contact found in well-known');
       }
