@@ -204,7 +204,7 @@ class LoginRobot extends CoreRobot {
     );
 
     // set a delay for verifying Captcha
-    await Future.delayed(const Duration(seconds: 2));
+    await Future.delayed(const Duration(seconds: 3));
 
     // tap on Sign in
     await $.native.tap(
@@ -214,7 +214,7 @@ class LoginRobot extends CoreRobot {
 
     // if "verify ...please wait for Captcha" dialog is shown, click OK to continue waiting
     // and click Sign in again
-    if (await CoreRobot($).existsOptionalNativeItems(
+    while (await CoreRobot($).existsOptionalNativeItems(
       $,
       getOKBtnInVerifyCaptchaDialog(),
       appId: getBrowserAppId(),
@@ -228,6 +228,7 @@ class LoginRobot extends CoreRobot {
         getSignInBtn(),
         appId: getBrowserAppId(),
       );
+      await Future.delayed(const Duration(seconds: 2));
     }
   }
 }
