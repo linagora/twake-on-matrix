@@ -18,10 +18,11 @@ class ChatDetailScenario extends BaseScenario {
     await $.waitUntilVisible($(AppBar).$(TextField));
     await $(AppBar).$(TextField).enterText(searchText);
     await ChatGroupDetailRobot($).waitForEitherVisible(
-        $: $,
-        first: $(TwakeListItem),
-        second: $("No Results"),
-        timeout: const Duration(seconds: 10));
+      $: $,
+      first: $(TwakeListItem),
+      second: $("No Results"),
+      timeout: const Duration(seconds: 10),
+    );
     await Future.delayed(const Duration(seconds: 2));
   }
 
@@ -68,8 +69,13 @@ class ChatDetailScenario extends BaseScenario {
     final memberRow = GroupInformationRobot($).getMember(matrixAdress);
     await memberRow.tap();
     await $.waitUntilVisible($(ProfileInfoView));
-    await verifyProfileInfo(s, displayName, matrixAdress,
-        isCurrentUser: isCurrentUser, level: level);
+    await verifyProfileInfo(
+      s,
+      displayName,
+      matrixAdress,
+      isCurrentUser: isCurrentUser,
+      level: level,
+    );
   }
 
   Future<void> verifyProfileInfo(

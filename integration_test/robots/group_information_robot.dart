@@ -114,9 +114,10 @@ class GroupInformationRobot extends CoreRobot {
     }
 
     final count = $(TwakeListItem).evaluate().length;
-    return List.generate(count, (i) => TwakeListItemRobot($, $(TwakeListItem).at(i)));
-  
-
+    return List.generate(
+      count,
+      (i) => TwakeListItemRobot($, $(TwakeListItem).at(i)),
+    );
   }
 
   PatrolFinder getMemberByMatrixID(String matrixID) {
