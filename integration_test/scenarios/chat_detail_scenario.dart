@@ -12,6 +12,7 @@ import '../robots/twake_list_item_robot.dart';
 
 class ChatDetailScenario extends BaseScenario {
   ChatDetailScenario(super.$);
+  String get _currentAccount => const String.fromEnvironment('CurrentAccount');
 
   Future<void> makeASearch(String searchText) async {
     await ChatGroupDetailRobot($).getSearchIcon().tap();
@@ -31,7 +32,11 @@ class ChatDetailScenario extends BaseScenario {
         .trim()
         .replaceAll(RegExp(r'\s+'), ''); // remove all space
     final level = noSpaces.toLowerCase();
-    return UserLevel.values.byName(level);
+    try {
+      return UserLevel.values.byName(level);
+    } catch (_) {
+      return UserLevel.member; // default fallback
+    }
   }
 
   Future<void> verifyProfileInfoOfAllMember(SoftAssertHelper s) async {
@@ -43,15 +48,14 @@ class ChatDetailScenario extends BaseScenario {
       final owner = row.$(Text).at(1).text;
       final displayName = row.$(Text).first.text ?? "";
       final matrixAddress = row.$(Text).last.text ?? "";
-      const currentAccount = String.fromEnvironment('CurrentAccount');
       await verifyProfileInfoOfAMember(
         s,
         displayName,
         matrixAddress,
-        isCurrentUser: matrixAddress == currentAccount,
+        isCurrentUser: matrixAddress == _currentAccount,
         level: parseUserLevel(owner),
       );
-      await ProfileInformationRobot($).backToGroupInfomationScreen();
+      await ProfileInformationRobot($).backToGroupInformationScreen();
       await $.waitUntilVisible(item.root);
       await $.tester.pumpAndSettle();
       //pumAndSettle seem not enought to avoid get value of owner incorrectly
@@ -62,17 +66,17 @@ class ChatDetailScenario extends BaseScenario {
   Future<void> verifyProfileInfoOfAMember(
     SoftAssertHelper s,
     String displayName,
-    String matrixAdress, {
+    String matrixAddress, {
     bool isCurrentUser = true,
     UserLevel level = UserLevel.member,
   }) async {
-    final memberRow = GroupInformationRobot($).getMember(matrixAdress);
+    final memberRow = GroupInformationRobot($).getMember(matrixAddress);
     await memberRow.tap();
     await $.waitUntilVisible($(ProfileInfoView));
     await verifyProfileInfo(
       s,
       displayName,
-      matrixAdress,
+      matrixAddress,
       isCurrentUser: isCurrentUser,
       level: level,
     );
@@ -81,7 +85,7 @@ class ChatDetailScenario extends BaseScenario {
   Future<void> verifyProfileInfo(
     SoftAssertHelper s,
     String displayName,
-    String matrixAdress, {
+    String matrixAddress, {
     bool isCurrentUser = true,
     UserLevel level = UserLevel.member,
   }) async {
@@ -91,7 +95,7 @@ class ChatDetailScenario extends BaseScenario {
       "Avatar is not shown",
     );
 
-    // final expectedName = matrixAdress.substring(matrixAdress.indexOf("@")+1, matrixAdress.indexOf(":"));
+    // final expectedName = matrixAddress.substring(matrixAddress.indexOf("@")+1, matrixAddress.indexOf(":"));
     final actualName = ProfileInformationRobot($).getDisplayName().text;
     s.softAssertEquals(
       actualName == displayName,
@@ -108,13 +112,13 @@ class ChatDetailScenario extends BaseScenario {
     } catch (_) {}
 
     s.softAssertEquals(
-      ProfileInformationRobot($).getMatrixAddress().text == matrixAdress,
+      ProfileInformationRobot($).getMatrixAddress().text == matrixAddress,
       true,
       "Matrix address is not correct",
     );
 
     const currentAccount = String.fromEnvironment('CurrentAccount');
-    if (matrixAdress != currentAccount) {
+    if (matrixAddress != currentAccount) {
       s.softAssertEquals(
         ProfileInformationRobot($).getSentMessageBtn().exists,
         true,
@@ -122,7 +126,7 @@ class ChatDetailScenario extends BaseScenario {
       );
     }
 
-    if ((matrixAdress != currentAccount) &
+    if ((matrixAddress != currentAccount) &&
         ((level == UserLevel.owner) || (level == UserLevel.admin))) {
       s.softAssertEquals(
         ProfileInformationRobot($).getRemoveFromBtn().exists,
