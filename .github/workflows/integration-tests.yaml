@@ -1,5 +1,10 @@
 on:
   workflow_dispatch:
+    inputs:
+      patrol_test_target:
+        description: "Optional path to Patrol integration test Dart file (e.g. integration_test/tests/chat/chat_list_test.dart). Leave empty to run all tests."
+        required: false
+        default: ""
   schedule:
     - cron: "0 0 * * *"
 
@@ -8,7 +13,7 @@ name: Integration
 jobs:
   integration_test:
     name: Integration Test
-    runs-on: ubuntu-latest
+    runs-on: self-hosted   # Chạy trên runner của bạn
     permissions:
       id-token: write
       contents: write
@@ -23,6 +28,10 @@ jobs:
       FLUTTER_VERSION: "3.32.8"
       JAVA_VERSION: 17
 
+    defaults:
+      run:
+        shell: bash
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -34,55 +43,77 @@ jobs:
           workload_identity_provider: ${{ secrets.GOOGLE_CLOUD_WORKLOAD_IDENTITY_PROVIDER_ID }}
           service_account: ${{ secrets.GOOGLE_CLOUD_SERVICE_ACCOUNT }}
 
-      - name: Setup Cloud SDK
-        uses: google-github-actions/setup-gcloud@v2
+      - name: Show runner resources
+        run: |
+          echo "CPU cores: $(nproc)"
+          echo "Memory usage:"
+          free -h
+          echo "Disk usage:"
+          df -h
+          echo "Top processes by memory:"
+          ps -eo pid,comm,%cpu,%mem --sort=-%mem | head -n 10
 
-      - name: Setup flutter
-        uses: subosito/flutter-action@v2
-        with:
-          flutter-version: ${{ env.FLUTTER_VERSION }}
-          channel: "stable"
-          cache: true
-          cache-key: "flutter-:os:-:channel:-:version:-:arch:-:hash:-${{ hashFiles('**/pubspec.lock') }}"
-       
+      - name: Ensure PATH for Flutter & Android SDK
+        run: |
+          export PATH="/home/ubuntu/fvm/versions/3.32.8/bin/:$PATH"
+          export ANDROID_SDK_ROOT="/opt/android-sdk"
+          export PATH="$ANDROID_SDK_ROOT/cmdline-tools/latest/bin:$ANDROID_SDK_ROOT/platform-tools:$PATH"
+          flutter --version
+          sdkmanager --version
+
       - name: Set up Java
         uses: actions/setup-java@v4
         with:
           java-version: ${{ env.JAVA_VERSION }}
           distribution: "temurin"
 
+      - name: Accept Android SDK licenses
+        run: |
+          yes | sdkmanager --licenses || echo "Warning: License acceptance failed"
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Install Rust targets for Android
+        run: |
+          rustup target add aarch64-linux-android armv7-linux-androideabi i686-linux-android x86_64-linux-android
+
       - uses: webfactory/ssh-agent@v0.9.0
         with:
           ssh-private-key: ${{ secrets.SSH_KEY }}
 
-      - name: setup project
-        run:
-          flutter pub get && flutter pub run build_runner build --delete-conflicting-outputs
+      - name: Setup project
+        run: |
+          flutter pub get
+          flutter pub run build_runner build --delete-conflicting-outputs
 
       - name: Run Patrol Tests
         shell: bash
-
         env:
-          USERNAME: ${{ secrets.USERNAME }}
-          PASSWORD: ${{ secrets.PASSWORD }}
-          SERVER_URL: ${{ secrets.SERVER_URL }}
+          INTEGRATION_TEST_ENV_BASE64: ${{ secrets.INTEGRATION_TEST_ENV_BASE64 }}
+          PATROL_TEST_TARGET: ${{ inputs.patrol_test_target }}
         run: |
-
-          dart pub global activate patrol_cli
-
+          dart pub global activate patrol_cli 3.10.0
           flutter build apk --config-only
+          echo "$INTEGRATION_TEST_ENV_BASE64" | base64 --decode > .env.cicd
+          TARGET_FLAG=""
+          if [ -n "$PATROL_TEST_TARGET" ]; then
+            echo "Running Patrol tests defined in $PATROL_TEST_TARGET"
+            TARGET_FLAG="--target $PATROL_TEST_TARGET"
+          else
+            echo "Running full Patrol test suite"
+          fi
 
+          export PATH=$PATH:/home/ubuntu/.pub-cache/bin/
           patrol build android \
-          -v \
-          --dart-define=USERNAME="$USERNAME" \
-          --dart-define=SERVER_URL="$SERVER_URL" \
-          --dart-define=PASSWORD="$PASSWORD"
-
+            -v \
+            --dart-define-from-file .env.cicd \
+            $TARGET_FLAG
           gcloud firebase test android run \
-          --type instrumentation \
-          --app build/app/outputs/apk/debug/app-debug.apk \
-          --test build/app/outputs/apk/androidTest/debug/app-debug-androidTest.apk \
-          --device model=MediumPhone.arm,version=34 \
-          --timeout 5m \
-          --use-orchestrator \
-          --environment-variables clearPackageData=true
+            --type instrumentation \
+            --app build/app/outputs/apk/debug/app-debug.apk \
+            --test build/app/outputs/apk/androidTest/debug/app-debug-androidTest.apk \
+            --device model=MediumPhone.arm,version=34 \
+            --timeout 5m \
+            --use-orchestrator \
+            --environment-variables clearPackageData=true
