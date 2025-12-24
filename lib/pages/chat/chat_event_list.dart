@@ -69,7 +69,8 @@ class ChatEventList extends StatelessWidget {
               dragDevices: dragDevicesSupported(),
             ),
             child: OptionalSelectionArea(
-              isEnabled: PlatformInfos.isWeb && !controller.selectMode,
+              isEnabled: (PlatformInfos.isWeb || PlatformInfos.isDesktop) &&
+                  !controller.selectMode,
               child: ChatScrollView(
                 key: PageStorageKey('ChatScrollView-${controller.room?.id}'),
                 events: events,
@@ -84,15 +85,11 @@ class ChatEventList extends StatelessWidget {
   }
 
   Set<PointerDeviceKind>? dragDevicesSupported() {
-    if (PlatformInfos.isWeb) {
-      return {
-        PointerDeviceKind.touch,
-      };
-    }
+    // Exclude mouse from drag scrolling to reserve it for text selection
+    // Mouse wheel scrolling still works, but mouse drag is reserved for SelectionArea
     return {
       PointerDeviceKind.touch,
-      PointerDeviceKind.mouse,
-      PointerDeviceKind.trackpad,
+      if (!PlatformInfos.isWeb) PointerDeviceKind.trackpad,
     };
   }
 
