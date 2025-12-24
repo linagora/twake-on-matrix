@@ -1,6 +1,8 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:patrol/patrol.dart';
 
+enum UserLevel { member, admin, owner, moderator, readonly }
+
 abstract class BaseScenario {
   final PatrolIntegrationTester $;
 
