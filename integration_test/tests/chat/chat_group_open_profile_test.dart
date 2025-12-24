@@ -69,7 +69,8 @@ void main() {
     test: ($) async {
       final s = SoftAssertHelper();
       await HomeRobot($).gotoChatListScreen();
-      const groupTest = String.fromEnvironment('GroupTest');
+      const groupTest =
+          String.fromEnvironment('GroupTest', defaultValue: 'My Default Group');
       await ChatScenario($).openChatGroupByTitle(groupTest);
       await ChatScenario($).openGroupChatInfo();
       await ChatDetailScenario($).verifyProfileInfoOfAllMember(s);
