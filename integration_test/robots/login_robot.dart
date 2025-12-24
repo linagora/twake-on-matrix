@@ -214,12 +214,17 @@ class LoginRobot extends CoreRobot {
 
     // if "verify ...please wait for Captcha" dialog is shown, click OK to continue waiting
     // and click Sign in again
+    const maxRetries = 10;
+    var retryCount = 0;
     while (await CoreRobot($).existsOptionalNativeItems(
       $,
       getOKBtnInVerifyCaptchaDialog(),
       appId: getBrowserAppId(),
       timeout: const Duration(seconds: 2),
     )) {
+      if (retryCount >= maxRetries) {
+        throw StateError('CAPTCHA verification exceeded $maxRetries retries');
+      }
       await $.native.tap(
         getOKBtnInVerifyCaptchaDialog(),
         appId: getBrowserAppId(),
@@ -229,6 +234,7 @@ class LoginRobot extends CoreRobot {
         appId: getBrowserAppId(),
       );
       await Future.delayed(const Duration(seconds: 2));
+      retryCount++;
     }
   }
 }
