@@ -19,6 +19,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:linagora_design_flutter/list_item/twake_list_item.dart';
 import 'package:linkfy_text/linkfy_text.dart';
 import 'package:patrol/patrol.dart';
+import '../base/base_scenario.dart';
 import '../base/core_robot.dart';
 import '../help/soft_assertion_helper.dart';
 import '../robots/add_member_robot.dart';
@@ -31,8 +32,6 @@ import '../robots/new_chat_robot.dart';
 import '../robots/search_robot.dart';
 import '../robots/setting_for_new_group.dart';
 import '../robots/twake_list_item_robot.dart';
-
-enum UserLevel { member, admin, owner, moderator }
 
 class ChatScenario extends CoreRobot {
   ChatScenario(super.$);
