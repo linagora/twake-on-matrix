@@ -46,7 +46,7 @@ class HtmlMessage extends StatelessWidget with LinkifyMixin {
     // strip it.
     final renderHtml = html.replaceAll(
       RegExp(
-        '<mx-reply>.*</mx-reply>',
+        '<mx-reply>.*?</mx-reply>',
         caseSensitive: false,
         multiLine: false,
         dotAll: true,

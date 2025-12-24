@@ -364,7 +364,7 @@ mixin MessageContentBuilderMixin {
     ];
     final specialTagsPattern = specialTags.join('|');
     final specialTagRegex = RegExp(
-      '<($specialTagsPattern)[^>]*>.*</($specialTagsPattern)>|<hr[^>]*>',
+      '<($specialTagsPattern)[^>]{0,500}>.*?</($specialTagsPattern)>|<hr[^>]{0,500}>',
       multiLine: true,
       dotAll: true,
     );

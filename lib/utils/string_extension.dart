@@ -61,7 +61,10 @@ extension StringCasingExtension on String {
   }
 
   String? getFirstValidUrl() {
-    final RegExp regex = RegExp(r'https:\/\/[^\s]+', caseSensitive: false);
+    final RegExp regex = RegExp(
+      r'https:\/\/[^\s]{1,2048}',
+      caseSensitive: false,
+    );
     final List<String?> matches = regex
         .allMatches(this)
         .map((m) => m.group(0))
@@ -81,7 +84,7 @@ extension StringCasingExtension on String {
   // Removes markdowned links from a string based on the unformatted text
   // Workaround for content['formatted_body'] which formats urls in a way that makes them unusable
   String unMarkdownLinks(String unformattedText) {
-    final RegExp regex = RegExp(r'https:\/\/[^\s]+');
+    final RegExp regex = RegExp(r'https:\/\/[^\s]{1,2048}');
 
     final Iterable<Match> formattedLinksMatches = regex.allMatches(this);
     final Iterable<Match> unformattedLinksMatches = regex.allMatches(
@@ -323,8 +326,8 @@ extension StringCasingExtension on String {
   }
 
   String removeUrlSeparatorAndPreceding() {
-    final separatorRegExp = RegExp(r'\b[^ ]*://');
-    final standAloneSeparatorRegExp = RegExp(r' *:// *');
+    final separatorRegExp = RegExp(r'\b[^ ]{0,100}://');
+    final standAloneSeparatorRegExp = RegExp(r' {0,10}:// {0,10}');
 
     var replacedText = replaceAll(separatorRegExp, '');
     replacedText = replacedText.replaceAll(standAloneSeparatorRegExp, ' ');
@@ -333,18 +336,20 @@ extension StringCasingExtension on String {
   }
 
   bool isContainsATag() {
-    final aTagRegex = RegExp(r'<a[^>]*>([^<]+)</a>');
+    final aTagRegex = RegExp(r'<a[^>]{0,500}>([^<]{1,1000})</a>');
     return aTagRegex.hasMatch(this);
   }
 
   List<String> extractAllHrefs() {
-    final regex = RegExp(r'<a[^>]*href="([^"]*)"[^>]*>[^<]*</a>');
+    final regex = RegExp(
+      r'<a[^>]{0,500}href="([^"]{0,2048})"[^>]{0,500}>[^<]{0,1000}</a>',
+    );
     final matches = regex.allMatches(this);
     return matches.map((match) => match.group(1)!).toList();
   }
 
   String? extractInnerText() {
-    final regex = RegExp(r'<a[^>]*>([^<]*)</a>');
+    final regex = RegExp(r'<a[^>]{0,500}>([^<]{0,1000})</a>');
     final match = regex.firstMatch(this);
     return match?.group(1);
   }
