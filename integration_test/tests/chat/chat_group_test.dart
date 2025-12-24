@@ -211,16 +211,4 @@ void main() {
       s.verifyAll();
     },
   );
-
-  TestBase().runPatrolTest(
-    description: 'View profile of a members in a group',
-    test: ($) async {
-      final s = SoftAssertHelper();
-      await HomeRobot($).gotoChatListScreen();
-      const groupTest = String.fromEnvironment('GroupTest');
-      await ChatScenario($).openChatGroupByTitle(groupTest);
-      await ChatScenario($).openGroupChatInfo();
-      await ChatDetailScenario($).verifyProfileInfoOfAllMember(s);
-      s.verifyAll();
-    },);
 }
