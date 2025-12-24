@@ -216,7 +216,16 @@ class ChatScenario extends CoreRobot {
   Future<void> deleteMessage(String message) async {
     await ChatGroupDetailRobot($).openPullDownMenuOfAMessage(message);
     await (PullDownMenuRobot($).getDeleteItem()).tap();
-    await $.native.tap(Selector(text: 'Delete'));
+    if (Platform.isIOS) {
+      await $.native.tap(Selector(text: 'Delete'));
+    } else {
+      await $.native.tap(
+        Selector(
+          className: 'android.widget.Button',
+          contentDescription: 'Delete',
+        ),
+      );
+    }
   }
 
   Future<ChatGroupDetailRobot> createANewGroupChat(
