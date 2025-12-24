@@ -25,10 +25,9 @@ class ProfileInformationRobot extends CoreRobot {
 
   PatrolFinder getDisplayName() {
     final count = $(ProfileInfoHeader).$(Text).evaluate().length;
-    if(count>2){
-      return $(ProfileInfoHeader).$(Text).at(count-2);
-    }
-    else{
+    if (count > 2) {
+      return $(ProfileInfoHeader).$(Text).at(count - 2);
+    } else {
       return $(ProfileInfoHeader).$(Text).at(0);
     }
   }
@@ -43,7 +42,9 @@ class ProfileInformationRobot extends CoreRobot {
 
   PatrolFinder getMatrixAddressCopyIcon() {
     const copyAddressData = IconData(0xE190, fontFamily: 'MaterialIcons');
-    return $(ProfileInfoContactRows).$(Icon).containing(find.byIcon(copyAddressData));
+    return $(ProfileInfoContactRows)
+        .$(Icon)
+        .containing(find.byIcon(copyAddressData));
   }
 
   PatrolFinder getSentMessageBtn() {
@@ -60,9 +61,8 @@ class ProfileInformationRobot extends CoreRobot {
     return $(InkWell).containing($("Transfer ownership"));
   }
 
-  Future<void> backToGroupInfomationScreen() async{
+  Future<void> backToGroupInfomationScreen() async {
     await getBackIcon().tap();
     await $.waitUntilVisible($(ChatDetailsView));
   }
-
 }
