@@ -1,7 +1,9 @@
 import 'package:collection/collection.dart';
 import 'package:fluffychat/app_state/success.dart';
 import 'package:fluffychat/config/app_config.dart';
+import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/domain/app_state/room/timeline_search_event_state.dart';
+import 'package:fluffychat/domain/model/user_info/user_info.dart';
 import 'package:fluffychat/pages/chat/chat_view_style.dart';
 import 'package:fluffychat/pages/chat/events/message_download_content.dart';
 import 'package:fluffychat/pages/chat/events/message_download_content_web.dart';
@@ -14,6 +16,7 @@ import 'package:fluffychat/presentation/model/search/presentation_server_side_se
 import 'package:fluffychat/presentation/same_type_events_builder/same_type_events_builder.dart';
 import 'package:fluffychat/presentation/same_type_events_builder/same_type_events_controller.dart';
 import 'package:fluffychat/utils/date_time_extension.dart';
+import 'package:fluffychat/utils/manager/twake_user_info_manager/twake_user_info_manager.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/result_extension.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
@@ -197,10 +200,13 @@ class _SearchItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder(
-      future: event.fetchSenderUser(),
+    return FutureBuilder<UserInfo>(
+      future: getIt.get<TwakeUserInfoManager>().getTwakeProfileFromUserId(
+            client: event.room.client,
+            userId: event.senderId,
+          ),
       builder: (context, snapshot) {
-        final user = snapshot.data ?? event.senderFromMemoryOrFallback;
+        final user = snapshot.data;
         return TwakeListItem(
           height: ChatSearchStyle.itemHeight,
           margin: ChatSearchStyle.itemMargin,
@@ -211,8 +217,8 @@ class _SearchItem extends StatelessWidget {
                 Padding(
                   padding: ChatSearchStyle.avatarPadding,
                   child: Avatar(
-                    mxContent: user.avatarUrl,
-                    name: user.calcDisplayname(),
+                    mxContent: Uri.parse(user?.avatarUrl ?? ''),
+                    name: user?.displayName,
                   ),
                 ),
                 Expanded(
@@ -227,9 +233,9 @@ class _SearchItem extends StatelessWidget {
                           children: [
                             Expanded(
                               child: Text(
-                                user.id == Matrix.of(context).client.userID
+                                user?.uid == Matrix.of(context).client.userID
                                     ? L10n.of(context)!.you
-                                    : user.calcDisplayname(),
+                                    : user?.displayName ?? '',
                                 maxLines: 1,
                                 style: ListItemStyle.titleTextStyle(
                                   fontFamily: 'Inter',

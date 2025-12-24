@@ -1,9 +1,12 @@
 import 'package:fluffychat/config/app_config.dart';
+import 'package:fluffychat/di/global/get_it_initializer.dart';
+import 'package:fluffychat/domain/model/user_info/user_info.dart';
 import 'package:fluffychat/pages/chat/events/reply_content_style.dart';
 import 'package:fluffychat/pages/chat/optional_selection_container_disabled.dart';
 import 'package:fluffychat/resource/image_paths.dart';
 import 'package:fluffychat/utils/extension/event_info_extension.dart';
 import 'package:fluffychat/utils/extension/mime_type_extension.dart';
+import 'package:fluffychat/utils/manager/twake_user_info_manager/twake_user_info_manager.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/widgets/mxc_image.dart';
@@ -113,18 +116,35 @@ class ReplyContent extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
                   if (user != null)
-                    Text(
-                      user.calcDisplayname(),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: ReplyContentStyle.displayNameTextStyle(context),
+                    FutureBuilder<UserInfo>(
+                      future: getIt
+                          .get<TwakeUserInfoManager>()
+                          .getTwakeProfileFromUserId(
+                            client: replyEvent.room.client,
+                            userId: user.id,
+                          ),
+                      builder: (context, asyncSnapshot) {
+                        return Text(
+                          asyncSnapshot.data?.displayName ??
+                              user.calcDisplayname(),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style:
+                              ReplyContentStyle.displayNameTextStyle(context),
+                        );
+                      },
                     ),
                   if (displayEvent.getUser() == null)
-                    FutureBuilder<User?>(
-                      future: displayEvent.fetchSenderUser(),
+                    FutureBuilder<UserInfo>(
+                      future: getIt
+                          .get<TwakeUserInfoManager>()
+                          .getTwakeProfileFromUserId(
+                            client: replyEvent.room.client,
+                            userId: replyEvent.senderId,
+                          ),
                       builder: (context, snapshot) {
                         return Text(
-                          '${snapshot.data?.calcDisplayname() ?? displayEvent.senderFromMemoryOrFallback.calcDisplayname()}:',
+                          '${snapshot.data?.displayName ?? displayEvent.senderFromMemoryOrFallback.calcDisplayname()}:',
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style:

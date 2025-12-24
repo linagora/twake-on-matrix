@@ -2404,12 +2404,17 @@ class ChatController extends State<Chat>
     }
   }
 
-  String get displayInviterName {
+  Future<String> displayInviterName() async {
     if (room!.isDirectChat) {
-      return room!.getLocalizedDisplayname();
+      return room!.getUserDisplayName(
+        matrixId: room!.directChatMatrixID,
+      );
     } else {
-      return room!.lastEvent?.senderFromMemoryOrFallback.displayName ??
-          room!.getLocalizedDisplayname();
+      return room!.lastEvent?.senderFromMemoryOrFallback.displayName != null
+          ? Future.value(
+              room!.lastEvent!.senderFromMemoryOrFallback.displayName!,
+            )
+          : room!.getUserDisplayName();
     }
   }
 

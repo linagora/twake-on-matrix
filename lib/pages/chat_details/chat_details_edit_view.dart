@@ -431,12 +431,18 @@ class _AvatarBuilder extends StatelessWidget {
             }
 
             if (success is DeleteAvatarUIStateSuccess) {
-              return Avatar(
-                fontSize: ChatDetailEditViewStyle.avatarFontSize,
-                name: room.getLocalizedDisplayname(
-                  MatrixLocals(L10n.of(context)!),
+              return FutureBuilder(
+                future: room.getUserDisplayName(
+                  matrixId: room.isDirectChat ? room.directChatMatrixID : null,
+                  i18n: MatrixLocals(L10n.of(context)!),
                 ),
-                size: ChatDetailEditViewStyle.avatarSize(context),
+                builder: (context, asyncSnapshot) {
+                  return Avatar(
+                    fontSize: ChatDetailEditViewStyle.avatarFontSize,
+                    name: asyncSnapshot.data,
+                    size: ChatDetailEditViewStyle.avatarSize(context),
+                  );
+                },
               );
             }
           }
@@ -460,25 +466,37 @@ class _AvatarBuilder extends StatelessWidget {
             }
 
             if (success is DeleteAvatarUIStateSuccess) {
-              return Avatar(
-                fontSize: ChatDetailEditViewStyle.avatarFontSize,
-                name: room.getLocalizedDisplayname(
-                  MatrixLocals(L10n.of(context)!),
+              return FutureBuilder(
+                future: room.getUserDisplayName(
+                  matrixId: room.isDirectChat ? room.directChatMatrixID : null,
+                  i18n: MatrixLocals(L10n.of(context)!),
                 ),
-                size: ChatDetailEditViewStyle.avatarSize(context),
+                builder: (context, asyncSnapshot) {
+                  return Avatar(
+                    fontSize: ChatDetailEditViewStyle.avatarFontSize,
+                    name: asyncSnapshot.data,
+                    size: ChatDetailEditViewStyle.avatarSize(context),
+                  );
+                },
               );
             }
           }
           return child!;
         },
       ),
-      child: Avatar(
-        fontSize: ChatDetailEditViewStyle.avatarFontSize,
-        mxContent: room.avatar,
-        name: room.getLocalizedDisplayname(
-          MatrixLocals(L10n.of(context)!),
+      child: FutureBuilder(
+        future: room.getUserDisplayName(
+          matrixId: room.isDirectChat ? room.directChatMatrixID : null,
+          i18n: MatrixLocals(L10n.of(context)!),
         ),
-        size: ChatDetailEditViewStyle.avatarSize(context),
+        builder: (context, asyncSnapshot) {
+          return Avatar(
+            fontSize: ChatDetailEditViewStyle.avatarFontSize,
+            mxContent: room.avatar,
+            name: asyncSnapshot.data,
+            size: ChatDetailEditViewStyle.avatarSize(context),
+          );
+        },
       ),
     );
   }
