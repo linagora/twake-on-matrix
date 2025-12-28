@@ -565,7 +565,7 @@ class GetItInitializer {
       () => SharedPreferencesContactCacheManager(),
     );
 
-    getIt.registerLazySingleton<TwakeUserInfoManager>(
+    getIt.registerFactory<TwakeUserInfoManager>(
       () => TwakeUserInfoManager(
         userInfoRepository: getIt.get<UserInfoRepository>(),
       ),
