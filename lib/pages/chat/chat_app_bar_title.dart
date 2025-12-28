@@ -1,16 +1,8 @@
 import 'dart:async';
 
-import 'package:collection/collection.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
-import 'package:dartz/dartz.dart' show Either;
-import 'package:fluffychat/app_state/failure.dart';
-import 'package:fluffychat/app_state/success.dart';
-import 'package:fluffychat/di/global/get_it_initializer.dart';
-import 'package:fluffychat/domain/app_state/contact/get_contacts_state.dart';
-import 'package:fluffychat/domain/contact_manager/contacts_manager.dart';
+import 'package:fluffychat/domain/model/room/room_extension.dart';
 import 'package:fluffychat/pages/chat/chat_app_bar_title_style.dart';
-import 'package:fluffychat/presentation/extensions/contact/presentation_contact_extension.dart';
-import 'package:fluffychat/presentation/model/contact/presentation_contact.dart';
 import 'package:fluffychat/pages/chat/typing_timer_wrapper.dart';
 import 'package:fluffychat/resource/image_paths.dart';
 import 'package:fluffychat/utils/common_helper.dart';
@@ -52,34 +44,17 @@ class ChatAppBarTitle extends StatelessWidget {
 
   String _getRoomName(
     BuildContext context,
-    Either<Failure, Success> getContactsState,
+    String? roomName,
   ) {
     final directChatMatrixId = room?.directChatMatrixID;
     final localizedRoomName = room?.getLocalizedDisplayname(
       MatrixLocals(L10n.of(context)!),
     );
     if (directChatMatrixId == null) {
-      if (roomName != null) return roomName!;
-
       return localizedRoomName ?? '';
     }
 
-    final currentContacts = getContactsState.fold(
-      (failure) => <PresentationContact>[],
-      (success) => success is GetContactsSuccess
-          ? success.contacts.fold(
-              <PresentationContact>{},
-              (previous, contact) => {
-                ...previous,
-                ...contact.toPresentationContacts(),
-              },
-            ).toList()
-          : <PresentationContact>[],
-    );
-    final availableContact = currentContacts.firstWhereOrNull(
-      (contact) => contact.matrixId == directChatMatrixId,
-    );
-    return availableContact?.displayName ?? localizedRoomName ?? '';
+    return roomName ?? localizedRoomName ?? '';
   }
 
   @override
@@ -110,14 +85,17 @@ class ChatAppBarTitle extends StatelessWidget {
               children: [
                 Hero(
                   tag: 'content_banner',
-                  child: ValueListenableBuilder(
-                    valueListenable:
-                        getIt.get<ContactsManager>().getContactsNotifier(),
-                    builder: (context, state, child) {
+                  child: FutureBuilder(
+                    future: room!.getUserDisplayName(
+                      matrixId:
+                          room!.isDirectChat ? room!.directChatMatrixID : null,
+                      i18n: MatrixLocals(L10n.of(context)!),
+                    ),
+                    builder: (context, asyncSnapshot) {
                       return Avatar(
                         fontSize: ChatAppBarTitleStyle.avatarFontSize,
                         mxContent: room!.avatar,
-                        name: _getRoomName(context, state),
+                        name: _getRoomName(context, asyncSnapshot.data),
                         size: ChatAppBarTitleStyle.avatarSize(context),
                       );
                     },
@@ -146,12 +124,16 @@ class ChatAppBarTitle extends StatelessWidget {
                       const SizedBox(width: 4),
                     ],
                     Flexible(
-                      child: ValueListenableBuilder(
-                        valueListenable:
-                            getIt.get<ContactsManager>().getContactsNotifier(),
-                        builder: (context, state, child) {
+                      child: FutureBuilder(
+                        future: room!.getUserDisplayName(
+                          matrixId: room!.isDirectChat
+                              ? room!.directChatMatrixID
+                              : null,
+                          i18n: MatrixLocals(L10n.of(context)!),
+                        ),
+                        builder: (context, asyncSnapshot) {
                           return Text(
-                            _getRoomName(context, state),
+                            _getRoomName(context, asyncSnapshot.data),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style:

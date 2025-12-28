@@ -542,8 +542,6 @@ class GetItInitializer {
     getIt.registerFactory(() => const UpdateUserInfoVisibilityInteractor());
 
     getIt.registerFactory(() => const CreateSupportChatInteractor());
-
-    getIt.registerLazySingleton(() => TwakeUserInfoManager());
   }
 
   void _bindingControllers() {
@@ -565,6 +563,12 @@ class GetItInitializer {
     );
     getIt.registerFactory<SharedPreferencesContactCacheManager>(
       () => SharedPreferencesContactCacheManager(),
+    );
+
+    getIt.registerLazySingleton<TwakeUserInfoManager>(
+      () => TwakeUserInfoManager(
+        userInfoRepository: getIt.get<UserInfoRepository>(),
+      ),
     );
   }
 }
