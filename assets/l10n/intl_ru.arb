@@ -549,7 +549,7 @@
     "type": "text",
     "placeholders": {}
   },
-  "currentlyActive": "В настоящее время активен(а)",
+  "currentlyActive": "В сети",
   "@currentlyActive": {
     "type": "text",
     "placeholders": {}
@@ -644,7 +644,7 @@
     "type": "text",
     "placeholders": {}
   },
-  "edit": "Править",
+  "edit": "Изменить",
   "@edit": {
     "type": "text",
     "placeholders": {}
@@ -1522,7 +1522,7 @@
     "type": "text",
     "placeholders": {}
   },
-  "security": "Безопасность",
+  "security": "Конфиденциальность",
   "@security": {
     "type": "text",
     "placeholders": {}
@@ -2486,7 +2486,7 @@
   "@disableEncryptionWarning": {},
   "sorryThatsNotPossible": "Нам жаль... Это невозможно",
   "@sorryThatsNotPossible": {},
-  "deviceKeys": "Ключи устройства:",
+  "deviceKeys": "Ключи устройства",
   "@deviceKeys": {},
   "letsStart": "Начнем",
   "@letsStart": {},
@@ -2730,11 +2730,11 @@
   },
   "errorPreviewingFile": "Предварительный просмотр недоступен",
   "@errorPreviewingFile": {},
-  "unread": "Не прочтено",
+  "unread": "Не прочитано",
   "@unread": {},
   "company": "Компания",
   "@company": {},
-  "addMembers": "Добавить участников",
+  "addMembers": "Добавить",
   "@addMembers": {},
   "email": "Email",
   "@email": {},
@@ -2750,7 +2750,7 @@
   "@playVideo": {},
   "copiedMatrixIdToClipboard": "Matrix ID скопирован в буфер обмена.",
   "@copiedMatrixIdToClipboard": {},
-  "privacyAndSecurity": "Конфиденциальность и безопасность",
+  "privacyAndSecurity": "Конфиденциальность",
   "@privacyAndSecurity": {},
   "matrixId": "Matrix ID",
   "@matrixId": {},
@@ -2772,9 +2772,9 @@
   "@previous": {},
   "files": "Файлы",
   "@files": {},
-  "read": "Читать",
+  "read": "Прочитано",
   "@read": {},
-  "displayName": "Отображаемое имя",
+  "displayName": "Имя пользователя",
   "@displayName": {},
   "select": "Выбрать",
   "@select": {},
@@ -2836,11 +2836,11 @@
   "@cut": {},
   "pasteImageFailed": "Не удалось вставить изображение",
   "@pasteImageFailed": {},
-  "unmuteThisChat": "Включить уведомления",
+  "unmuteThisChat": "Вкл. звук",
   "@unmuteThisChat": {},
   "markThisChatAsUnRead": "Пометить как непрочитанный",
   "@markThisChatAsUnRead": {},
-  "muteThisChat": "Отключить уведомления",
+  "muteThisChat": "Откл. звук",
   "@muteThisChat": {},
   "youNeedToAcceptTheInvitation": "Примите приглашение, чтобы начать общение",
   "@youNeedToAcceptTheInvitation": {},
@@ -2886,7 +2886,7 @@
   "@newDirectMessage": {},
   "contactsWarningBannerTitle": "Чтобы общаться со всеми своими друзьями, предоставьте Twake доступ к вышей контактной книге. Спасибо за понимание.",
   "@contactsWarningBannerTitle": {},
-  "encryptionMessage": "Эта функция защищает ваши сообщения от прочтения другими людьми, а также не позволяет нам копировать их на наших серверах. Вы не сможете отключить ее позже.",
+  "encryptionMessage": "Эта функция защищает ваши сообщения, а также не позволяет нам копировать их на наших серверах. Вы не сможете отключить ее позже.",
   "@encryptionMessage": {},
   "declineTheInvitation": "Отклонить приглашение?",
   "@declineTheInvitation": {},
@@ -3046,7 +3046,7 @@
   "@tapToAllowAccessToYourMicrophone": {},
   "phone": "Телефон",
   "@phone": {},
-  "saveToGallery": "Сохранить в \"Галерею\"",
+  "saveToGallery": "Сохранить в Галерею",
   "@saveToGallery": {},
   "saveFileToGalleryError": "Не удалось сохранить файл в \"Галерею\"",
   "@saveFileToGalleryError": {},
@@ -3102,7 +3102,7 @@
   "@viewProfile": {},
   "profileInfo": "Информация профиля",
   "@profileInfo": {},
-  "saveToDownloads": "Сохранить в \"Загрузки\"",
+  "saveToDownloads": "Сохранить в Загрузки",
   "@saveToDownloads": {},
   "explainPermissionToGallery": "Чтобы продолжить, разрешите {appName} доступ к галерее. Это необходимо, чтобы сохранить файл.",
   "@explainPermissionToGallery": {
@@ -3398,9 +3398,9 @@
   "@unban": {},
   "permissionErrorUnbanUser": "У вас недостаточно прав, чтобы разблокировать пользователей. Обратитесь за помощью к администратору",
   "@permissionErrorUnbanUser": {},
-  "transferOwnership": "Передача права собственности",
+  "transferOwnership": "Передача прав владельца",
   "@transferOwnership": {},
-  "confirmTransferOwnership": "Вы уверены, что хотите передать право собственности на этот чат {name}?",
+  "confirmTransferOwnership": "Вы уверены, что хотите передать права владельца этого чата {name}?",
   "@confirmTransferOwnership": {
     "type": "text",
     "placeholders": {
