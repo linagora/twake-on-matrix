@@ -96,6 +96,9 @@ class MatrixState extends State<Matrix>
 
   final ValueNotifier<AudioPlayerStatus> currentAudioStatus =
       ValueNotifier(AudioPlayerStatus.notDownloaded);
+
+  StreamSubscription<PlayerState>? _audioPlayerStateSubscription;
+
   int _activeClient = -1;
   String? activeBundle;
   Store store = Store();
@@ -1125,6 +1128,28 @@ class MatrixState extends State<Matrix>
     showQrCodeDownload.value = show;
   }
 
+  /// Sets up the audio player with auto-dispose listener when playback completes.
+  ///
+  /// This method should be called after setting up a new audio source.
+  /// It automatically cleans up the audio player and resets state when playback finishes.
+  void setupAudioPlayerAutoDispose() {
+    final currentEvent = voiceMessageEvent.value;
+    _audioPlayerStateSubscription?.cancel();
+    _audioPlayerStateSubscription =
+        audioPlayer.playerStateStream.listen((state) {
+      if (state.processingState == ProcessingState.completed) {
+        // Guard against clearing state for a different audio
+        if (voiceMessageEvent.value?.eventId != currentEvent?.eventId) {
+          return;
+        }
+        voiceMessageEvent.value = null;
+        audioPlayer.stop();
+        audioPlayer.dispose();
+        currentAudioStatus.value = AudioPlayerStatus.notDownloaded;
+      }
+    });
+  }
+
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     Logs().i('didChangeAppLifecycleState: AppLifecycleState = $state');
@@ -1208,6 +1233,11 @@ class MatrixState extends State<Matrix>
     }
   }
 
+  void cancelAudioPlayerAutoDispose() {
+    _audioPlayerStateSubscription?.cancel();
+    _audioPlayerStateSubscription = null;
+  }
+
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
@@ -1229,6 +1259,7 @@ class MatrixState extends State<Matrix>
     showToMBootstrap.dispose();
     linuxNotifications?.close();
     showQrCodeDownload.dispose();
+    _audioPlayerStateSubscription?.cancel();
     audioPlayer.dispose();
     voiceMessageEvent.dispose();
     super.dispose();
