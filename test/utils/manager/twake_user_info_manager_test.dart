@@ -18,7 +18,6 @@ void main() {
   late TwakeUserInfoManager manager;
   late MockClient mockClient;
   late MockUserInfoRepository mockUserInfoRepository;
-  final getIt = GetIt.instance;
 
   setUp(() {
     mockClient = MockClient();
@@ -27,10 +26,6 @@ void main() {
     manager = TwakeUserInfoManager(
       userInfoRepository: mockUserInfoRepository,
     );
-  });
-
-  tearDown(() async {
-    await getIt.reset();
   });
 
   group('TwakeUserInfoManager', () {
@@ -109,7 +104,7 @@ void main() {
       expect(result.avatarUrl, testMatrixProfile.avatarUrl.toString());
     });
 
-    test('should merge Twake info with Matrix profile avatarUrl', () async {
+    test('should prefer Twake avatarUrl when available', () async {
       // Arrange
       final profileWithNullAvatar = Profile(
         userId: testUserId,
@@ -173,7 +168,7 @@ void main() {
       expect(result.avatarUrl, testMatrixProfile.avatarUrl.toString());
     });
 
-    test('should respect cache parameter', () async {
+    test('should respect getFromRooms and cache parameters', () async {
       // Arrange
       const twakeUserInfo = UserInfo(
         uid: testUserId,

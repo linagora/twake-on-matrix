@@ -9,44 +9,46 @@ class TwakeUserInfoManager {
     required this.userInfoRepository,
   });
 
+  /// Fetches user profile by merging Twake user info with Matrix profile.
+  ///
+  /// [getFromRooms] and [cache] are passed to Matrix client's profile fetch.
   Future<UserInfo> getTwakeProfileFromUserId({
     required Client client,
     required String userId,
     bool getFromRooms = true,
     bool cache = true,
   }) async {
+    if (userId.isEmpty) {
+      return UserInfo(
+        uid: userId,
+        displayName: '',
+        avatarUrl: '',
+      );
+    }
     final matrixProfile = await client.getProfileFromUserId(
       userId,
       getFromRooms: getFromRooms,
       cache: cache,
     );
 
-    if (userId.isEmpty) {
+    try {
+      final result = await userInfoRepository.getUserInfo(userId);
+      return UserInfo(
+        uid: result.uid ?? matrixProfile.userId,
+        displayName: result.displayName ?? matrixProfile.displayName ?? '',
+        avatarUrl: result.avatarUrl != null && result.avatarUrl!.isNotEmpty
+            ? result.avatarUrl!
+            : (matrixProfile.avatarUrl?.toString() ?? ''),
+      );
+    } catch (e) {
+      Logs().e(
+        'getTwakeProfileFromUserId:: Error fetching user info for $userId: $e',
+      );
       return UserInfo(
         uid: matrixProfile.userId,
         displayName: matrixProfile.displayName ?? '',
         avatarUrl: matrixProfile.avatarUrl?.toString() ?? '',
       );
-    } else {
-      try {
-        final result = await userInfoRepository.getUserInfo(userId);
-        return UserInfo(
-          uid: result.uid ?? matrixProfile.userId,
-          displayName: result.displayName ?? matrixProfile.displayName ?? '',
-          avatarUrl: result.avatarUrl != null && result.avatarUrl!.isNotEmpty
-              ? result.avatarUrl!
-              : (matrixProfile.avatarUrl?.toString() ?? ''),
-        );
-      } catch (e) {
-        Logs().e(
-          'getTwakeProfileFromUserId:: Error fetching user info for $userId: $e',
-        );
-        return UserInfo(
-          uid: matrixProfile.userId,
-          displayName: matrixProfile.displayName ?? '',
-          avatarUrl: matrixProfile.avatarUrl?.toString() ?? '',
-        );
-      }
     }
   }
 }
