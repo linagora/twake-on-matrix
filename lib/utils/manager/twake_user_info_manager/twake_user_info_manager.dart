@@ -35,7 +35,10 @@ class TwakeUserInfoManager {
       final result = await userInfoRepository.getUserInfo(userId);
       return UserInfo(
         uid: result.uid ?? matrixProfile.userId,
-        displayName: result.displayName ?? matrixProfile.displayName ?? '',
+        displayName:
+            result.displayName != null && result.displayName!.isNotEmpty
+                ? result.displayName!
+                : (matrixProfile.displayName ?? ''),
         avatarUrl: result.avatarUrl != null && result.avatarUrl!.isNotEmpty
             ? result.avatarUrl!
             : (matrixProfile.avatarUrl?.toString() ?? ''),
