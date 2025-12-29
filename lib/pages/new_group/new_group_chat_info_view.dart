@@ -8,6 +8,7 @@ import 'package:fluffychat/pages/new_group/new_group_chat_info_style.dart';
 import 'package:fluffychat/pages/new_group/new_group_info_controller.dart';
 import 'package:fluffychat/pages/new_group/widget/expansion_participants_list.dart';
 import 'package:fluffychat/presentation/model/pick_avatar_state.dart';
+import 'package:fluffychat/widgets/app_bars/twake_app_bar.dart';
 import 'package:fluffychat/widgets/context_menu_builder_ios_paste_without_permission.dart';
 import 'package:fluffychat/widgets/stream_image_view.dart';
 import 'package:fluffychat/widgets/twake_components/twake_fab.dart';
@@ -127,50 +128,21 @@ class NewGroupChatInfoView extends StatelessWidget {
       preferredSize: const Size.fromHeight(
         NewGroupChatInfoStyle.toolbarHeight,
       ),
-      child: AppBar(
-        backgroundColor: LinagoraSysColors.material().onPrimary,
-        automaticallyImplyLeading: false,
-        toolbarHeight: NewGroupChatInfoStyle.toolbarHeight,
-        title: Row(
-          children: [
-            TwakeIconButton(
-              icon: Icons.arrow_back_ios,
-              onTap: () => Navigator.of(context).pop(),
-              tooltip: L10n.of(context)!.back,
-              paddingAll: NewGroupChatInfoStyle.backIconPaddingAll,
-              margin: NewGroupChatInfoStyle.backIconMargin,
-            ),
-            Text(
-              L10n.of(context)!.newGroupChat,
-              style: Theme.of(context).textTheme.titleLarge,
-            ),
-          ],
+      child: TwakeAppBar(
+        title: L10n.of(context)!.newGroupChat,
+        context: context,
+        centerTitle: true,
+        withDivider: true,
+        enableLeftTitle: true,
+        leading: TwakeIconButton(
+          paddingAll: 8,
+          splashColor: Colors.transparent,
+          hoverColor: Colors.transparent,
+          highlightColor: Colors.transparent,
+          onTap: () => Navigator.of(context).pop(),
+          icon: Icons.arrow_back_ios,
         ),
-        titleSpacing: 0,
-        centerTitle: false,
-        bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(1),
-          child: Container(
-            decoration: BoxDecoration(
-              border: Border(
-                bottom: BorderSide(color: Colors.black.withOpacity(0.15)),
-              ),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.08),
-                  offset: const Offset(0, 1),
-                  blurRadius: 80,
-                ),
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.15),
-                  offset: const Offset(0, 1),
-                  blurRadius: 3,
-                  spreadRadius: 0.5,
-                ),
-              ],
-            ),
-          ),
-        ),
+        onBack: () => Navigator.of(context).pop(),
       ),
     );
   }
