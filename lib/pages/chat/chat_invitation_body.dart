@@ -71,12 +71,15 @@ class ChatInvitationBody extends StatelessWidget with MessageContentMixin {
                   child: FutureBuilder(
                     future: controller.displayInviterName(),
                     builder: (context, asyncSnapshot) {
+                      final inviterName = asyncSnapshot.data ?? '';
                       return Text.rich(
                         textAlign: TextAlign.center,
                         TextSpan(
                           children: [
                             TextSpan(
-                              text: '${asyncSnapshot.data} \n',
+                              text: inviterName.isNotEmpty
+                                  ? '$inviterName \n'
+                                  : '',
                               style: Theme.of(context)
                                   .textTheme
                                   .bodyMedium
