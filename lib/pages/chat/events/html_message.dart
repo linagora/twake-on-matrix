@@ -153,7 +153,7 @@ class HtmlMessage extends StatelessWidget with LinkifyMixin {
                     );
                 return {
                   'displayname': twakeProfile.displayName,
-                  'avatar_url': twakeProfile.avatarUrl.toString(),
+                  'avatar_url': twakeProfile.avatarUrl?.toString(),
                 };
               }
               if (identifier.sigil == '#') {
