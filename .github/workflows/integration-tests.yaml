@@ -22,9 +22,6 @@ jobs:
       pull-requests: write
 
     env:
-      USERNAME: ${{ secrets.USERNAME }}
-      PASSWORD: ${{ secrets.PASSWORD }}
-      SERVER_URL: ${{ secrets.SERVER_URL }}
       FLUTTER_VERSION: "3.32.8"
       JAVA_VERSION: 17
       ANDROID_SDK_ROOT: "/opt/android-sdk"
@@ -56,9 +53,9 @@ jobs:
 
       - name: Ensure PATH for Flutter, Android SDK and Patrol
         run: |
-          echo "$HOME/fvm/versions/3.32.8/bin" >> "$GITHUB_PATH"
-          echo "$ANDROID_SDK_ROOT/cmdline-tools/latest/bin" >> "$GITHUB_PATH"
-          echo "$ANDROID_SDK_ROOT/platform-tools" >> "$GITHUB_PATH"
+          echo "$HOME/fvm/versions/${{ env.FLUTTER_VERSION }}/bin" >> "$GITHUB_PATH"
+          echo "${{ env.ANDROID_SDK_ROOT }}/cmdline-tools/latest/bin" >> "$GITHUB_PATH"
+          echo "${{ env.ANDROID_SDK_ROOT }}/platform-tools" >> "$GITHUB_PATH"
           echo "$HOME/.pub-cache/bin" >> "$GITHUB_PATH"
           flutter --version
           sdkmanager --version
@@ -86,8 +83,7 @@ jobs:
 
       - name: Setup project
         run: |
-          flutter pub get
-          flutter pub run build_runner build --delete-conflicting-outputs
+          flutter pub get && flutter pub run build_runner build --delete-conflicting-outputs
 
       - name: Run Patrol Tests
         shell: bash
@@ -97,7 +93,11 @@ jobs:
         run: |
           dart pub global activate patrol_cli 3.10.0
           flutter build apk --config-only
+
+          # export the secret file and clean it up after
           echo "$INTEGRATION_TEST_ENV_BASE64" | base64 --decode > .env.cicd
+          trap 'rm -f .env.cicd' EXIT
+
           TARGET_FLAG=""
           if [ -n "$PATROL_TEST_TARGET" ]; then
             echo "Running Patrol tests defined in $PATROL_TEST_TARGET"
