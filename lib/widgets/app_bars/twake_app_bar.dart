@@ -15,7 +15,6 @@ class TwakeAppBar extends StatelessWidget implements PreferredSizeWidget {
   final List<Widget>? actions;
   final Color? backgroundColor;
   final double? leadingWidth;
-  final VoidCallback? onBack;
   final bool enableLeftTitle;
   final bool isDialog;
 
@@ -29,7 +28,6 @@ class TwakeAppBar extends StatelessWidget implements PreferredSizeWidget {
     this.actions,
     this.backgroundColor,
     this.leadingWidth,
-    this.onBack,
     this.enableLeftTitle = false,
     this.isDialog = false,
   });

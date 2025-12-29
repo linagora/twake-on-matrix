@@ -142,7 +142,6 @@ class NewGroupChatInfoView extends StatelessWidget {
           onTap: () => Navigator.of(context).pop(),
           icon: Icons.arrow_back_ios,
         ),
-        onBack: () => Navigator.of(context).pop(),
       ),
     );
   }

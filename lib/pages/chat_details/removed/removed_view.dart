@@ -39,7 +39,6 @@ class RemovedView extends StatelessWidget {
         centerTitle: true,
         withDivider: true,
         context: context,
-        onBack: controller.onBack,
       ),
       body: SingleChildScrollView(
         child: Column(
