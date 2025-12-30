@@ -1,14 +1,16 @@
+import 'package:fluffychat/config/default_power_level_member.dart';
+import 'package:fluffychat/pages/chat_details/chat_details_page_view/chat_details_members_page.dart';
+import 'package:fluffychat/pages/chat_details/participant_list_item/participant_list_item.dart';
 import 'package:fluffychat/pages/profile_info/profile_info_view.dart';
+import 'package:fluffychat/utils/user_extension.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:linagora_design_flutter/list_item/twake_list_item.dart';
 import '../base/base_scenario.dart';
 import '../help/soft_assertion_helper.dart';
 import '../robots/chat_group_detail_robot.dart';
 import 'package:flutter/material.dart';
-
 import '../robots/group_information_robot.dart';
 import '../robots/profile_information_robot.dart';
-import '../robots/twake_list_item_robot.dart';
 
 class ChatDetailScenario extends BaseScenario {
   ChatDetailScenario(super.$);
@@ -40,23 +42,26 @@ class ChatDetailScenario extends BaseScenario {
   }
 
   Future<void> verifyProfileInfoOfAllMember(SoftAssertHelper s) async {
-    final List<TwakeListItemRobot> items =
-        await GroupInformationRobot($).getListOfMembers();
+    await $(ParticipantListItem).waitUntilVisible();
 
-    for (final item in items) {
-      final row = item.root;
-      final owner = row.$(Text).at(1).text;
-      final displayName = row.$(Text).first.text ?? "";
-      final matrixAddress = row.$(Text).last.text ?? "";
+    final participantListItems = $.tester
+        .widgetList<ParticipantListItem>(
+          find.byType(ParticipantListItem),
+        )
+        .toList();
+
+    for (final item in participantListItems) {
+      final displayName = item.member.displayName ?? "";
+      final matrixAddress = item.member.id;
       await verifyProfileInfoOfAMember(
         s,
         displayName,
         matrixAddress,
         isCurrentUser: matrixAddress == _currentAccount,
-        level: parseUserLevel(owner),
+        level: item.member.getDefaultPowerLevelMember,
       );
       await ProfileInformationRobot($).backToGroupInformationScreen();
-      await $.waitUntilVisible(item.root);
+      await $.waitUntilVisible($(ChatDetailsMembersPage));
       await $.tester.pumpAndSettle();
       //pumAndSettle seems not enough to avoid get value of owner incorrectly
       await Future.delayed(const Duration(seconds: 2));
@@ -68,7 +73,7 @@ class ChatDetailScenario extends BaseScenario {
     String displayName,
     String matrixAddress, {
     bool isCurrentUser = true,
-    UserLevel level = UserLevel.member,
+    required DefaultPowerLevelMember level,
   }) async {
     final memberRow = GroupInformationRobot($).getMember(matrixAddress);
     await memberRow.tap();
@@ -87,7 +92,7 @@ class ChatDetailScenario extends BaseScenario {
     String displayName,
     String matrixAddress, {
     bool isCurrentUser = true,
-    UserLevel level = UserLevel.member,
+    required DefaultPowerLevelMember level,
   }) async {
     s.softAssertEquals(
       ProfileInformationRobot($).getAvatar().exists,
@@ -95,7 +100,7 @@ class ChatDetailScenario extends BaseScenario {
       "Avatar is not shown",
     );
 
-    final actualName = ProfileInformationRobot($).getDisplayName().text;
+    final actualName = ProfileInformationRobot($).getDisplayName();
     s.softAssertEquals(
       actualName == displayName,
       true,
@@ -126,7 +131,8 @@ class ChatDetailScenario extends BaseScenario {
     }
 
     if ((matrixAddress != _currentAccount) &&
-        ((level == UserLevel.owner) || (level == UserLevel.admin))) {
+        ((level == DefaultPowerLevelMember.owner) ||
+            (level == DefaultPowerLevelMember.admin))) {
       s.softAssertEquals(
         ProfileInformationRobot($).getRemoveFromBtn().exists,
         true,
