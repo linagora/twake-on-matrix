@@ -1,6 +1,7 @@
 import 'package:fluffychat/config/default_power_level_member.dart';
 import 'package:fluffychat/pages/chat_details/chat_details_page_view/chat_details_members_page.dart';
 import 'package:fluffychat/pages/chat_details/participant_list_item/participant_list_item.dart';
+import 'package:fluffychat/pages/profile_info/profile_info_body/profile_info_header.dart';
 import 'package:fluffychat/pages/profile_info/profile_info_view.dart';
 import 'package:fluffychat/utils/user_extension.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -100,11 +101,10 @@ class ChatDetailScenario extends BaseScenario {
       "Avatar is not shown",
     );
 
-    final actualName = ProfileInformationRobot($).getDisplayName().text;
     s.softAssertEquals(
-      actualName == displayName,
+      $(ProfileInfoHeader).$(displayName).exists,
       true,
-      "displayName is not correct, expected name is $displayName while actual name is $actualName",
+      "displayName is not $displayName",
     );
 
     try {

@@ -27,16 +27,6 @@ class ProfileInformationRobot extends CoreRobot {
     return $(ProfileInfoHeader).$(Avatar);
   }
 
-  PatrolFinder getDisplayName() {
-    // Display name is second-to-last when online status exists, otherwise first
-    final count = $(ProfileInfoHeader).$(Text).evaluate().length;
-    if (count > 2) {
-      return $(ProfileInfoHeader).$(Text).at(count - 2);
-    } else {
-      return $(ProfileInfoHeader).$(Text).at(0);
-    }
-  }
-
   PatrolFinder getOnlineStatus() {
     return $(ProfileInfoHeader).$(Text).at(1);
   }
