@@ -64,13 +64,14 @@ void main() {
   );
 
   TestBase().runPatrolTest(
-    tags: ["chat_group_test_test10"],
     description: 'View profile of all members in a group',
     test: ($) async {
       final s = SoftAssertHelper();
       await HomeRobot($).gotoChatListScreen();
-      const groupTest =
-          String.fromEnvironment('GroupTest', defaultValue: 'My Default Group');
+      const groupTest = String.fromEnvironment(
+        'TitleOfGroupTest',
+        defaultValue: 'My Default Group',
+      );
       await ChatScenario($).openChatGroupByTitle(groupTest);
       await ChatScenario($).openGroupChatInfo();
       await ChatDetailScenario($).verifyProfileInfoOfAllMember(s);

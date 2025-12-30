@@ -99,7 +99,7 @@ void main() {
     description: 'Count unread messages',
     test: ($) async {
       final now = DateTime.now();
-      const groupTest = String.fromEnvironment('TitleOfGroupTest');
+      const groupTest = String.fromEnvironment('SearchByTitle');
       // goto chat screen
       await HomeRobot($).gotoChatListScreen();
       //send a message by API to groupTest
