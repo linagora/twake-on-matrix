@@ -100,7 +100,7 @@ class ChatDetailScenario extends BaseScenario {
       "Avatar is not shown",
     );
 
-    final actualName = ProfileInformationRobot($).getDisplayName();
+    final actualName = ProfileInformationRobot($).getDisplayName().text;
     s.softAssertEquals(
       actualName == displayName,
       true,
