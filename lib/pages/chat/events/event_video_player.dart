@@ -54,7 +54,6 @@ class EventVideoPlayer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final hasThumbnail = event.hasThumbnail;
     final blurHash = event.blurHash ?? AppConfig.defaultVideoBlurHash;
 
     final imageWidth = width ?? MessageContentStyle.imageWidth(context);
@@ -67,11 +66,7 @@ class EventVideoPlayer extends StatelessWidget {
         color: Colors.black,
         child: InkWell(
           mouseCursor: SystemMouseCursors.click,
-          onTap: () {
-            if (onVideoTapped != null) {
-              onVideoTapped!.call();
-            }
-          },
+          onTap: onVideoTapped,
           child: SizedBox(
             width: MessageContentStyle.imageBubbleWidth(imageWidth),
             height: MessageContentStyle.videoBubbleHeight(imageHeight),
@@ -79,21 +74,19 @@ class EventVideoPlayer extends StatelessWidget {
               alignment: Alignment.center,
               children: [
                 BlurHash(hash: blurHash),
-                if (hasThumbnail)
-                  Center(
-                    child: ImageBubble(
-                      event,
-                      width: MessageContentStyle.imageBubbleWidth(imageWidth),
-                      height:
-                          MessageContentStyle.videoBubbleHeight(imageHeight),
-                      rounded: rounded,
-                      thumbnailCacheKey: thumbnailCacheKey,
-                      thumbnailCacheMap: thumbnailCacheMap,
-                      noResizeThumbnail: noResizeThumbnail,
-                      thumbnailOnly: true,
-                      isPreview: false,
-                    ),
+                Center(
+                  child: ImageBubble(
+                    event,
+                    width: MessageContentStyle.imageBubbleWidth(imageWidth),
+                    height: MessageContentStyle.videoBubbleHeight(imageHeight),
+                    rounded: rounded,
+                    thumbnailCacheKey: thumbnailCacheKey,
+                    thumbnailCacheMap: thumbnailCacheMap,
+                    noResizeThumbnail: noResizeThumbnail,
+                    thumbnailOnly: true,
+                    isPreview: false,
                   ),
+                ),
                 centerWidget,
                 if (showDuration)
                   Positioned(

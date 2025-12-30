@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 import 'dart:typed_data';
 import 'package:blurhash_dart/blurhash_dart.dart';
 import 'package:dartz/dartz.dart' hide id;
@@ -16,12 +17,14 @@ import 'package:fluffychat/utils/js_window/non_js_window.dart'
     if (dart.library.js) 'package:fluffychat/utils/js_window/js_window.dart';
 import 'package:fluffychat/utils/js_window/universal_image_bitmap.dart';
 import 'package:fluffychat/utils/manager/upload_manager/upload_state.dart';
+import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:matrix/matrix.dart';
 // ignore: implementation_imports
 import 'package:matrix/src/utils/run_benchmarked.dart';
 import 'package:image/image.dart';
 import 'package:mime/mime.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:video_player/video_player.dart';
 import 'package:video_thumbnail/video_thumbnail.dart';
 
@@ -57,12 +60,7 @@ extension SendFileWebExtension on Room {
         bytes: file.bytes,
       );
     }
-    sendingFilePlaceholders[txid] = MatrixImageFile(
-      name: file.name,
-      width: imageBitmap?.width,
-      height: imageBitmap?.height,
-      bytes: file.bytes,
-    );
+    sendingFilePlaceholders[txid] = file;
     // Check media config of the server before sending the file. Stop if the
     // Media config is unreachable or the file is bigger than the given maxsize.
     try {
@@ -440,7 +438,15 @@ extension SendFileWebExtension on Room {
       uploadStreamController?.add(
         const Right(GeneratingThumbnailState()),
       );
-      final url = originalFile.bytes.toWebUrl(mimeType: originalFile.mimeType);
+      late String url;
+      if (PlatformInfos.isWeb) {
+        url = originalFile.bytes.toWebUrl(mimeType: originalFile.mimeType);
+      } else {
+        final tempDir = await getTemporaryDirectory();
+        final tempFile = File('${tempDir.path}/${originalFile.name}');
+        await tempFile.writeAsBytes(originalFile.bytes);
+        url = tempFile.path;
+      }
 
       final result = await VideoThumbnail.thumbnailData(
         video: url,
@@ -458,6 +464,8 @@ extension SendFileWebExtension on Room {
       );
 
       final thumbnailFileName = _getVideoThumbnailFileName(originalFile);
+
+      if (PlatformInfos.isMobile) await File(url).delete();
 
       return MatrixImageFile(
         bytes: result,
@@ -486,15 +494,18 @@ extension SendFileWebExtension on Room {
   Future<int?> _getVideoDuration(
     MatrixVideoFile originalFile,
   ) async {
+    VideoPlayerController? videoPlayerController;
     try {
       final url = originalFile.bytes.toWebUrl(mimeType: originalFile.mimeType);
-      final videoPlayerController =
-          VideoPlayerController.networkUrl(Uri.parse(url));
+      videoPlayerController = VideoPlayerController.networkUrl(Uri.parse(url));
       await videoPlayerController.initialize();
-      return videoPlayerController.value.duration.inMilliseconds;
+      final duration = videoPlayerController.value.duration.inMilliseconds;
+      return duration;
     } catch (e) {
       Logs().e('Error while generating thumbnail', e);
       return null;
+    } finally {
+      videoPlayerController?.dispose();
     }
   }
 }

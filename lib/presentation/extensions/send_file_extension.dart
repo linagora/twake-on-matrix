@@ -8,6 +8,7 @@ import 'package:dio/dio.dart';
 import 'package:fluffychat/app_state/failure.dart';
 import 'package:fluffychat/app_state/success.dart';
 import 'package:fluffychat/config/app_config.dart';
+import 'package:fluffychat/data/network/extensions/file_info_extension.dart';
 import 'package:fluffychat/data/network/media/cancel_exception.dart';
 import 'package:fluffychat/data/network/media/media_api.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
@@ -134,6 +135,21 @@ extension SendFileExtension on Room {
       tempThumbnailFile = await File(
         '${tempDir.path}/${formattedDateTime}_${fileInfo.fileName}_thumbnail.jpg',
       ).create();
+    }
+
+    if (fileInfo is! ImageFileInfo && msgType == MessageTypes.Image) {
+      fileInfo = ImageFileInfo(
+        fileInfo.fileName,
+        filePath: fileInfo.filePath,
+        bytes: fileInfo.bytes,
+      );
+    } else if (fileInfo is! VideoFileInfo && msgType == MessageTypes.Video) {
+      fileInfo = VideoFileInfo(
+        fileInfo.fileName,
+        filePath: fileInfo.filePath,
+        bytes: fileInfo.bytes,
+        imagePlaceholderBytes: Uint8List(0),
+      );
     }
 
     // computing the thumbnail in case we can
@@ -739,10 +755,21 @@ extension SendFileExtension on Room {
 
     // in order to have placeholder, this line must have,
     // otherwise the sending event will be removed from timeline
-    final matrixFile = await assetEntity.toMatrixFile();
-    if (matrixFile != null) {
-      sendingFilePlaceholders[txid] = matrixFile;
-    }
+    final matrixFile =
+        await assetEntity.toMatrixFile() ?? await fileInfo.toMatrixFile();
+    sendingFilePlaceholders[txid] = switch (fileInfo.msgType) {
+      MessageTypes.Image => MatrixImageFile(
+          bytes: matrixFile.bytes,
+          name: matrixFile.name,
+          mimeType: matrixFile.mimeType,
+        ),
+      MessageTypes.Video => MatrixVideoFile(
+          bytes: matrixFile.bytes,
+          name: matrixFile.name,
+          mimeType: matrixFile.mimeType,
+        ),
+      _ => matrixFile,
+    };
   }
 
   Future<Map<TransactionId, FakeSendingFileInfo>>

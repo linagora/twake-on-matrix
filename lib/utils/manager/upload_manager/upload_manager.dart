@@ -338,7 +338,10 @@ class UploadManager {
             );
           }
         },
-        onTaskCompleted: () => _clearFileTask(txid),
+        onTaskCompleted: () async {
+          room.sendingFilePlaceholders.remove(txid);
+          await _clearFileTask(txid);
+        },
       ),
     );
   }
@@ -377,9 +380,9 @@ class UploadManager {
             );
           }
         },
-        onTaskCompleted: () {
+        onTaskCompleted: () async {
           room.sendingFilePlaceholders.remove(txid);
-          _clearFileTask(txid);
+          await _clearFileTask(txid);
         },
       ),
     );

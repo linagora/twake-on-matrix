@@ -64,8 +64,8 @@ class _MessageVideoDownloadContentWebState
             widget.event,
             width: widget.width,
             height: widget.height,
-            onVideoTapped: () {
-              downloadManager.cancelDownload(widget.event.eventId);
+            onVideoTapped: () async {
+              await downloadManager.cancelDownload(widget.event.eventId);
             },
             centerWidget: Stack(
               alignment: Alignment.center,
