@@ -32,7 +32,6 @@ class ExceptionsView extends StatelessWidget {
         withDivider: true,
         context: context,
         enableLeftTitle: true,
-        onBack: controller.onBack,
         leading: TwakeIconButton(
           paddingAll: 8,
           splashColor: Colors.transparent,
