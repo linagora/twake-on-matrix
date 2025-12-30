@@ -170,6 +170,7 @@ class _MessageState extends State<Message> with MessageAvatarMixin {
   void dispose() {
     inViewState?.removeContext(context: context);
     inViewState?.removeListener(_inviewStateListener);
+    inViewState = null;
     inviewNotifier.dispose();
     super.dispose();
   }

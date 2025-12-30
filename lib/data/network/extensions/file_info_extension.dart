@@ -35,10 +35,22 @@ extension FileInfoExtension on FileInfo {
         Logs().e('FileInfoExtension::toMatrixFile: Error reading file', e);
       }
     }
-    return MatrixFile(
-      bytes: matrixBytes,
-      name: fileName,
-      mimeType: mimeType,
-    );
+    return switch (msgType) {
+      MessageTypes.Image => MatrixImageFile(
+          bytes: matrixBytes,
+          name: fileName,
+          mimeType: mimeType,
+        ),
+      MessageTypes.Video => MatrixVideoFile(
+          bytes: matrixBytes,
+          name: fileName,
+          mimeType: mimeType,
+        ),
+      _ => MatrixFile(
+          bytes: matrixBytes,
+          name: fileName,
+          mimeType: mimeType,
+        ),
+    };
   }
 }

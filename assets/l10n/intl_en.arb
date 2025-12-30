@@ -3555,6 +3555,7 @@
   "cannotCreateChatWithSelf": "You cannot start a conversation with yourself",
   "@cannotCreateChatWithSelf": {},
   "refreshingLastEvent": "Refreshing last event",
+  "cancelledSend": "Send cancelled",
   "yourPersonalQr": "Your personal QR",
   "@yourPersonalQr": {},
   "personalQrDescription": "Start chatting with your contacts. Send invitation link to Twake",

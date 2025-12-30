@@ -8,7 +8,8 @@ Accepted
 
 ## Context
 
-When users attempted to add a second account to the application, the account was not being persisted correctly. Investigation revealed two critical issues:
+- We change db from hive to sqfite alongsite with using upstream matrix sdk
+- When users attempted to add a second account to the application, the account was not being persisted correctly. Investigation revealed two critical issues:
 
 ### Issue 1: Race Condition in InitClientDialog
 

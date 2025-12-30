@@ -333,8 +333,7 @@ class MatrixLocals extends MatrixLocalizations {
   }
 
   @override
-  // TODO: implement cancelledSend
-  String get cancelledSend => throw UnimplementedError();
+  String get cancelledSend => l10n.cancelledSend;
 
   @override
   String completedKeyVerification(String senderName) {
