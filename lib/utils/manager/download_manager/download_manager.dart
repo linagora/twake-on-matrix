@@ -28,7 +28,7 @@ class DownloadManager {
 
   final Map<String, DownloadFileInfo> _eventIdMapDownloadFileInfo = {};
 
-  void cancelDownload(String eventId) {
+  Future<void> cancelDownload(String eventId) async {
     final cancelToken = _eventIdMapDownloadFileInfo[eventId]?.cancelToken;
     if (cancelToken != null) {
       try {
@@ -50,7 +50,7 @@ class DownloadManager {
               ),
             );
       } finally {
-        clear(eventId);
+        await clear(eventId);
       }
     }
   }

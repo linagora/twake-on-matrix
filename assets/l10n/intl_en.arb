@@ -3523,6 +3523,7 @@
   "linkCopiedToClipboard": "Link copied to clipboard",
   "cannotCreateChatWithSelf": "You cannot start a conversation with yourself",
   "refreshingLastEvent": "Refreshing last event",
+  "cancelledSend": "Send cancelled",
   "yourPersonalQr": "Your personal QR",
   "personalQrDescription": "Start chatting with your contacts. Send invitation link to Twake",
   "shareQrCode": "Share QR code",

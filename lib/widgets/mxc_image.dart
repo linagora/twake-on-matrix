@@ -203,7 +203,9 @@ class _MxcImageState extends State<MxcImage>
         Logs().d(
           'MxcImage::Downloaded attachment name = ${matrixFile.name} - mimeType = ${matrixFile.mimeType} - bytes = ${matrixFile.bytes.length}',
         );
-        if (!matrixFile.isImage()) return (imageData: null, filePath: null);
+        if (!matrixFile.isImage() && event.messageType != MessageTypes.Video) {
+          return (imageData: null, filePath: null);
+        }
         return (imageData: matrixFile.bytes, filePath: null);
       } catch (e) {
         Logs().e('MxcImage::Error while downloading image: $e');
@@ -339,6 +341,7 @@ class _MxcImageState extends State<MxcImage>
         needResize: needResize,
         cacheWidth: widget.cacheWidth,
         cacheHeight: widget.cacheHeight,
+        isThumbnail: widget.isThumbnail,
         imageErrorWidgetBuilder: (context, error, ___) {
           _isCached = false;
           _imageData = null;
@@ -363,6 +366,7 @@ class _ImageWidget extends StatelessWidget {
   final ImageErrorWidgetBuilder imageErrorWidgetBuilder;
   final int? cacheWidth;
   final int? cacheHeight;
+  final bool isThumbnail;
 
   const _ImageWidget({
     this.filePath,
@@ -375,11 +379,14 @@ class _ImageWidget extends StatelessWidget {
     required this.imageErrorWidgetBuilder,
     this.cacheWidth,
     this.cacheHeight,
+    required this.isThumbnail,
   });
 
   @override
   Widget build(BuildContext context) {
-    if (event?.messageType == MessageTypes.Video && data != null) {
+    if (event?.messageType == MessageTypes.Video &&
+        data != null &&
+        !isThumbnail) {
       final matrixVideoFile = MatrixVideoFile(
         bytes: data!,
         name: event?.filename ?? '${DateTime.now().millisecondsSinceEpoch}.mp4',

@@ -32,6 +32,20 @@ class _SendingVideoWidgetState extends State<SendingVideoWidget>
   final sendingFileProgressNotifier = ValueNotifier(SendingVideoStatus.sending);
   @override
   Event get event => widget.event;
+
+  late final VideoWidget videoWidget;
+
+  @override
+  void initState() {
+    super.initState();
+    videoWidget = VideoWidget(
+      imageHeight: widget.displayImageInfo.size.height,
+      imageWidth: widget.displayImageInfo.size.width,
+      matrixFile: widget.matrixFile,
+      event: widget.event,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     _checkSendingFileStatus();
@@ -39,7 +53,7 @@ class _SendingVideoWidgetState extends State<SendingVideoWidget>
     return ValueListenableBuilder<SendingVideoStatus>(
       key: ValueKey(widget.event.eventId),
       valueListenable: sendingFileProgressNotifier,
-      builder: ((context, value, child) {
+      builder: ((context, value, _) {
         return ClipRRect(
           borderRadius: MessageContentStyle.borderRadiusBubble,
           child: Stack(
@@ -55,36 +69,41 @@ class _SendingVideoWidgetState extends State<SendingVideoWidget>
                 child:
                     const BlurHash(hash: MessageContentStyle.defaultBlurHash),
               ),
-              child!,
+              videoWidget,
               if (value == SendingVideoStatus.sending) ...[
-                Stack(
-                  alignment: Alignment.center,
-                  children: [
-                    _PlayVideoButton(
-                      event: widget.event,
-                    ),
-                    ValueListenableBuilder(
-                      valueListenable: uploadFileStateNotifier,
-                      builder: (context, state, child) {
-                        return InkWell(
-                          onTap: () {
-                            if (state is UploadFileSuccessUIState) {
-                              return;
-                            }
-                            uploadManager.cancelUpload(widget.event);
-                          },
-                          child: SizedBox(
-                            width: MessageContentStyle.videoCenterButtonSize,
-                            height: MessageContentStyle.videoCenterButtonSize,
-                            child: CircularProgressIndicator(
-                              strokeWidth: MessageContentStyle.strokeVideoWidth,
-                              color: LinagoraRefColors.material().primary[100],
-                            ),
-                          ),
-                        );
+                _PlayVideoButton(
+                  event: widget.event,
+                ),
+                ValueListenableBuilder(
+                  valueListenable: uploadFileStateNotifier,
+                  builder: (context, state, child) {
+                    int? receive, total;
+                    double? progress;
+                    if (state is UploadingFileUIState) {
+                      receive = state.receive;
+                      total = state.total;
+                    }
+                    if (receive != null && total != null && total > 0) {
+                      progress = receive / total;
+                    }
+                    return InkWell(
+                      onTap: () {
+                        if (state is UploadFileSuccessUIState) {
+                          return;
+                        }
+                        uploadManager.cancelUpload(widget.event);
                       },
-                    ),
-                  ],
+                      child: SizedBox(
+                        width: MessageContentStyle.videoCenterButtonSize,
+                        height: MessageContentStyle.videoCenterButtonSize,
+                        child: CircularProgressIndicator(
+                          strokeWidth: MessageContentStyle.strokeVideoWidth,
+                          color: LinagoraRefColors.material().primary[100],
+                          value: progress,
+                        ),
+                      ),
+                    );
+                  },
                 ),
               ] else if (value == SendingVideoStatus.sent) ...[
                 InkWell(
@@ -102,15 +121,6 @@ class _SendingVideoWidgetState extends State<SendingVideoWidget>
           ),
         );
       }),
-      child: Hero(
-        tag: widget.event.eventId,
-        child: VideoWidget(
-          imageHeight: widget.displayImageInfo.size.height,
-          imageWidth: widget.displayImageInfo.size.width,
-          matrixFile: widget.matrixFile,
-          event: widget.event,
-        ),
-      ),
     );
   }
 
