@@ -305,6 +305,8 @@ class ChatController extends State<Chat>
 
   final FocusNode rawKeyboardListenerFocusNode = FocusNode();
 
+  final searchEmojiFocusNode = FocusNode();
+
   Timer? typingCoolDown;
   Timer? typingTimeout;
   bool currentlyTyping = false;
@@ -912,12 +914,14 @@ class ChatController extends State<Chat>
   void onEmojiAction(TapDownDetails tapDownDetails) {
     if (PlatformInfos.isMobile) return;
 
-    _requestInputFocus();
-
     showEmojiPickerComposerNotifier.value = true;
   }
 
-  void _inputFocusListener() {}
+  void _inputFocusListener() {
+    if (inputFocus.hasFocus) {
+      showEmojiPickerComposerNotifier.value = false;
+    }
+  }
 
   void copySingleEventAction() async {
     if (selectedEvents.length == 1) {
@@ -3161,6 +3165,16 @@ class ChatController extends State<Chat>
   @override
   void onSendFileCallback() => scrollDown();
 
+  void _emojiPickerListener() {
+    if (!showEmojiPickerComposerNotifier.value) {
+      searchEmojiFocusNode.unfocus();
+      inputFocus.requestFocus();
+    } else {
+      inputFocus.unfocus();
+      searchEmojiFocusNode.requestFocus();
+    }
+  }
+
   @override
   void initState() {
     super.initState();
@@ -3190,6 +3204,7 @@ class ChatController extends State<Chat>
       }
       initAudioPlayer();
     });
+    showEmojiPickerComposerNotifier.addListener(_emojiPickerListener);
   }
 
   @override
@@ -3219,6 +3234,7 @@ class ChatController extends State<Chat>
     timeline = null;
     inputFocus.removeListener(_inputFocusListener);
     inputFocus.dispose();
+    searchEmojiFocusNode.dispose();
     composerDebouncer.cancel();
     focusSuggestionController.dispose();
     _focusSuggestionController.dispose();
@@ -3246,6 +3262,7 @@ class ChatController extends State<Chat>
     cachedPresenceStreamController.close();
     cachedPresenceNotifier.dispose();
     showFullEmojiPickerOnWebNotifier.dispose();
+    showEmojiPickerComposerNotifier.removeListener(_emojiPickerListener);
     showEmojiPickerComposerNotifier.dispose();
     disposeUnblockUserSubscription();
     isBlockedUserNotifier.dispose();
