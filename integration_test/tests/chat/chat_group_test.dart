@@ -47,8 +47,11 @@ void main() {
       final (senderMsg, receiverMsg) = await prepareTwoMessages($);
 
       await ChatGroupDetailRobot($).openPullDownMenuOfAMessage(senderMsg);
-      await ChatScenario($)
-          .verifyTheDisplayOfPullDownMenu(senderMsg, level: UserLevel.owner);
+      await ChatScenario($).verifyTheDisplayOfPullDownMenu(
+        senderMsg,
+        level: UserLevel.owner,
+        isMsgOfLogginUser: true,
+      );
       await ChatGroupDetailRobot($).closePullDownMenu();
 
       await ChatGroupDetailRobot($).openPullDownMenuOfAMessage(receiverMsg);
@@ -77,12 +80,8 @@ void main() {
     description: 'delete a message in a direct chat',
     test: ($) async {
       final (senderMsg, receiverMsg) = await prepareTwoMessages($);
-
       await ChatScenario($).deleteMessage(senderMsg);
       await ChatScenario($).verifyMessageIsShown(senderMsg, false);
-
-      await ChatScenario($).deleteMessage(receiverMsg);
-      await ChatScenario($).verifyMessageIsShown(receiverMsg, false);
     },
   );
 

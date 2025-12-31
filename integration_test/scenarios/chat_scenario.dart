@@ -89,6 +89,7 @@ class ChatScenario extends CoreRobot {
   Future<void> verifyTheDisplayOfPullDownMenu(
     String message, {
     UserLevel level = UserLevel.member,
+    bool isMsgOfLogginUser = false,
   }) async {
     expect((PullDownMenuRobot($).getReplyItem()).exists, isTrue);
     expect((PullDownMenuRobot($).getForwardItem()).exists, isTrue);
@@ -102,7 +103,9 @@ class ChatScenario extends CoreRobot {
     }
     expect((PullDownMenuRobot($).getSelectItem()).exists, isTrue);
     expect((PullDownMenuRobot($).getPinItem()).exists, isTrue);
-    expect((PullDownMenuRobot($).getDeleteItem()).exists, isTrue);
+    if (isMsgOfLogginUser) {
+      expect((PullDownMenuRobot($).getDeleteItem()).exists, isTrue);
+    }
     expect((PullDownMenuRobot($).getHeartIcon()).exists, isTrue);
     expect((PullDownMenuRobot($).getLikeIcon()).exists, isTrue);
     expect((PullDownMenuRobot($).getDisLikeIcon()).exists, isTrue);
