@@ -4,3 +4,4 @@ dendrite/data/matrix_key.pem
 dendrite/data/logs
 dendrite/data/jetstream
 dendrite/data/*.db
+.env.local.do-not-commit
