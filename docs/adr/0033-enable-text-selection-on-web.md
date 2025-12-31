@@ -87,24 +87,9 @@ However, to make this work without scroll jumping, we needed to remove `Automati
 
 ## Decision
 
-Implemented a two-part solution to enable text selection on web:
+### Remove AutomaticKeepAliveClientMixin to Enable Text Selection
 
-### 1. Use SelectionArea with Regular Text Widgets
-
-**File Modified:** `lib/widgets/twake_components/twake_preview_link/twake_link_preview.dart` (line 74)
-
-**Changes:**
-```dart
-// No changes needed - MatrixLinkifyText already uses Text.rich
-MatrixLinkifyText(
-  text: widget.localizedBody,
-  // ... text is now selectable via parent SelectionArea
-)
-```
-
-The existing `OptionalSelectionArea` in `chat_event_list.dart` already wraps the chat view, enabling selection for all `Text.rich` widgets inside.
-
-### 2. Remove AutomaticKeepAliveClientMixin to Prevent Scroll Jumping
+The solution was to remove `AutomaticKeepAliveClientMixin` from message widgets. The application already had `OptionalSelectionArea` wrapping the chat view (enabled on web), which makes all `Text.rich` widgets inside it selectable. However, the keep-alive mixin was preventing this from working correctly by causing scroll jumping during selection attempts.
 
 **Files Modified:**
 - `lib/pages/chat/events/message/message.dart` (lines 159, 225, 453)
@@ -141,54 +126,6 @@ class _MessageState extends State<Message> with MessageAvatarMixin {
 
 This change restored normal widget lifecycle management, allowing Flutter to properly dispose off-screen widgets and maintain accurate scroll position calculations, eliminating the scroll jumping that would have prevented text selection from working.
 
-### 3. Added ScrollNotificationObserver for Better Scroll Coordination
-
-**File Modified:** `lib/pages/chat/chat_event_list.dart` (line 71)
-
-**Changes:**
-```dart
-child: ScrollConfiguration(
-  behavior: ScrollConfiguration.of(context).copyWith(
-    dragDevices: dragDevicesSupported(),
-  ),
-  child: ScrollNotificationObserver(  // NEW: Proper scroll coordination
-    child: OptionalSelectionArea(
-      isEnabled: PlatformInfos.isWeb && !controller.selectMode,
-      child: ChatScrollView(
-        // ...
-      ),
-    ),
-  ),
-),
-```
-
-As recommended by [Flutter's SelectableText documentation](https://api.flutter.dev/flutter/material/SelectableText-class.html):
-
-> "If this SelectableText is not a descendant of Scaffold and is being used within a Scrollable or nested Scrollables, consider placing a ScrollNotificationObserver above the root Scrollable."
-
-### 4. Verified Mouse Drag Configuration
-
-**File:** `lib/pages/chat/chat_event_list.dart` (lines 88-98)
-
-Confirmed that mouse drag scrolling is already properly restricted on web:
-
-```dart
-Set<PointerDeviceKind>? dragDevicesSupported() {
-  if (PlatformInfos.isWeb) {
-    return {
-      PointerDeviceKind.touch,  // Only touch, not mouse
-    };
-  }
-  return {
-    PointerDeviceKind.touch,
-    PointerDeviceKind.mouse,
-    PointerDeviceKind.trackpad,
-  };
-}
-```
-
-This prevents gesture conflicts between mouse drag scrolling and text selection.
-
 ## Consequences
 
 ### Positive
@@ -199,7 +136,6 @@ This prevents gesture conflicts between mouse drag scrolling and text selection.
 4. **Modern Flutter Pattern** - Uses recommended SelectionArea approach instead of legacy SelectableText.rich
 5. **Performance Improvement** - Removed keep-alive behavior reduces memory usage from O(n) to O(1) for visible widgets
 6. **Framework Alignment** - Follows same fix pattern that Flutter team implemented in PR #94493
-7. **Better Scroll Coordination** - ScrollNotificationObserver ensures proper communication between selection and scroll systems
 
 ### Negative
 
@@ -261,10 +197,7 @@ From the [blog post analysis](https://www.nequalsonelifestyle.com/2021/12/02/202
    - Removed `super.build(context)` call in `build()` method
    - Removed `wantKeepAlive` getter
 
-3. **lib/pages/chat/chat_event_list.dart**
-   - Added `ScrollNotificationObserver` wrapper around `OptionalSelectionArea`
-
-**Note:** No changes were needed to text widgets themselves - the existing `MatrixLinkifyText` (which uses `Text.rich`) became selectable automatically when wrapped by the existing `OptionalSelectionArea`.
+**Note:** No changes were needed to text widgets themselves - the existing `MatrixLinkifyText` (which uses `Text.rich`) became selectable automatically when wrapped by the existing `OptionalSelectionArea` in `chat_event_list.dart`.
 
 ### Testing Recommendations
 
