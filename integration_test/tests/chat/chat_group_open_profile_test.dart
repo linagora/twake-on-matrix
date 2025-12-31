@@ -1,8 +1,11 @@
 import '../../base/test_base.dart';
+import '../../help/soft_assertion_helper.dart';
 import '../../robots/chat/chat_profile_info_robot.dart';
 import '../../robots/chat_list_robot.dart';
 import '../../robots/group_information_robot.dart';
+import '../../robots/home_robot.dart';
 import '../../robots/search/search_view_robot.dart';
+import '../../scenarios/chat_detail_scenario.dart';
 import '../../scenarios/chat_scenario.dart';
 
 const defaultTime = Duration(seconds: 60);
@@ -57,6 +60,23 @@ void main() {
       await ChatProfileInfoRobot($).verifyPhoneNumber(
         phoneNumber: phoneNumber,
       );
+    },
+  );
+
+  TestBase().runPatrolTest(
+    tags: ["chat_group_test_test10"],
+    description: 'View profile of all members in a group',
+    test: ($) async {
+      final s = SoftAssertHelper();
+      await HomeRobot($).gotoChatListScreen();
+      const groupTest = String.fromEnvironment(
+        'TitleOfGroupTest',
+        defaultValue: 'My Default Group',
+      );
+      await ChatScenario($).openChatGroupByTitle(groupTest);
+      await ChatScenario($).openGroupChatInfo();
+      await ChatDetailScenario($).verifyProfileInfoOfAllMember(s);
+      s.verifyAll();
     },
   );
 }
