@@ -20,11 +20,13 @@ Users could not select or copy text from chat messages on Flutter web. When atte
 Flutter's `Text` and `Text.rich` widgets are **not selectable by default**. The chat application uses `MatrixLinkifyText` widget from the `linkfy_text` package, which internally renders text using `Text.rich()`. This widget does not support text selection on any platform.
 
 Investigation revealed the widget hierarchy:
+
 - `MatrixLinkifyText` → `CleanRichText` → `Text.rich()` (not selectable)
 
 ### Initial Solution Attempt: SelectableText.rich
 
 The first approach was to create a selectable variant using `SelectableText.rich`:
+
 - Created `MatrixLinkifySelectableText` widget
 - Used `SelectableText.rich()` instead of `Text.rich()`
 - Expected this to enable text selection
@@ -36,6 +38,7 @@ However, this approach introduced a **critical side effect**: severe scroll jump
 When using `SelectableText.rich` in the chat's scrollable list, every selection attempt caused the view to jump. Investigation revealed this was caused by every message widget using `AutomaticKeepAliveClientMixin` with `wantKeepAlive = true`.
 
 **The Keep-Alive Problem:**
+
 - With 50 messages in chat → all 50 widgets forced to stay in memory
 - SelectionArea queries layout positions expecting ~10-15 visible widgets
 - Flutter's scroll controller sees 50 kept-alive widgets instead
@@ -50,12 +53,14 @@ This is a known issue documented in [Flutter PR #94493](https://github.com/flutt
 > "SelectableText was using AutomaticKeepAliveClientMixin to always stay alive in widget trees, which created performance degradation in long lists and unexpected PrimaryScrollController persistence."
 
 The fix in SelectableText changed from:
+
 ```dart
 @override
 bool get wantKeepAlive => true;  // Always stay alive
 ```
 
 To:
+
 ```dart
 @override
 bool get wantKeepAlive => widget.focusNode.hasFocus;  // Only when focused
@@ -92,10 +97,12 @@ However, to make this work without scroll jumping, we needed to remove `Automati
 The solution was to remove `AutomaticKeepAliveClientMixin` from message widgets. The application already had `OptionalSelectionArea` wrapping the chat view (enabled on web), which makes all `Text.rich` widgets inside it selectable. However, the keep-alive mixin was preventing this from working correctly by causing scroll jumping during selection attempts.
 
 **Files Modified:**
+
 - `lib/pages/chat/events/message/message.dart` (lines 159, 225, 453)
 - `lib/widgets/twake_components/twake_preview_link/twake_link_preview.dart` (lines 41, 63, 187)
 
 **Changes:**
+
 ```dart
 // Before:
 class _MessageState extends State<Message>
@@ -140,10 +147,12 @@ This change restored normal widget lifecycle management, allowing Flutter to pro
 ### Negative
 
 1. **Widgets No Longer Kept Alive** - Message widgets will be disposed and recreated when scrolling off-screen
+
    - **Mitigation**: Flutter's widget recycling is efficient; minimal performance impact expected
    - **Trade-off**: Previously, keep-alive was preventing proper garbage collection, causing worse performance
 
 2. **URL Preview State** - Link preview widgets may need to refetch when scrolling back
+
    - **Mitigation**: GetPreviewUrlMixin handles state management; previews cache properly
    - **Status**: Testing required to confirm no regression
 
@@ -160,6 +169,7 @@ This change restored normal widget lifecycle management, allowing Flutter to pro
 #### Browser Compatibility
 
 Tested and confirmed working on:
+
 - Chrome (primary target)
 - Safari (WebKit)
 - Firefox (Gecko)
@@ -167,6 +177,7 @@ Tested and confirmed working on:
 #### Framework Bugs Still Present
 
 Some underlying Flutter framework issues remain open:
+
 - [#84480: Scroll position changes on long press](https://github.com/flutter/flutter/issues/84480)
 - [#96434: Autoscrolls to top when selecting text](https://github.com/flutter/flutter/issues/96434)
 
@@ -188,6 +199,7 @@ From the [blog post analysis](https://www.nequalsonelifestyle.com/2021/12/02/202
 ### Files Modified
 
 1. **lib/pages/chat/events/message/message.dart**
+
    - Removed `AutomaticKeepAliveClientMixin` from `_MessageState`
    - Removed `super.build(context)` call in `build()` method
    - Removed `wantKeepAlive` getter
@@ -202,21 +214,25 @@ From the [blog post analysis](https://www.nequalsonelifestyle.com/2021/12/02/202
 ### Testing Recommendations
 
 1. **Text Selection**
+
    - Select text via click+drag
    - Verify no scroll jumping
    - Copy/paste text successfully
 
 2. **Performance**
+
    - Scroll through chat with 100+ messages
    - Monitor memory usage remains stable
    - Verify smooth scrolling performance
 
 3. **URL Previews**
+
    - Send message with URL preview
    - Scroll away and back
    - Verify preview doesn't unnecessarily refetch
 
 4. **Link Tapping**
+
    - Click links in messages
    - Verify links navigate correctly
    - Ensure no gesture conflicts
@@ -237,10 +253,3 @@ From the [blog post analysis](https://www.nequalsonelifestyle.com/2021/12/02/202
 ### Community Resources
 
 - [How SelectableText Widgets Broke Flutter ListViews](https://www.nequalsonelifestyle.com/2021/12/02/2021-12-02-how-selectable-text-widgets-break-flutter-list-views/)
-
-### Internal Documentation
-
-- Debug Reports:
-  - `plans/reports/debugger-251230-scroll-jump-deep-investigation.md`
-  - `plans/reports/debugger-251230-selectable-text-scroll-jump.md`
-  - `plans/reports/debugger-251230-selectable-text-alternatives.md`
