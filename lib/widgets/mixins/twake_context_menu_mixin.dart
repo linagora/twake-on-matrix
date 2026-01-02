@@ -24,6 +24,8 @@ mixin TwakeContextMenuMixin {
     required BuildContext context,
     double? verticalPadding,
     VoidCallback? onClose,
+    bool leadingIcon = false,
+    bool respectLeftPosition = false,
   }) async {
     dynamic result;
     await showDialog(
@@ -35,6 +37,8 @@ mixin TwakeContextMenuMixin {
         listActions: listActions,
         position: offset,
         verticalPadding: verticalPadding,
+        leadingIcon: leadingIcon,
+        respectLeftPosition: respectLeftPosition,
       ),
     ).then((value) {
       result = value;
