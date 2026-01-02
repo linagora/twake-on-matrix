@@ -6,11 +6,13 @@ import 'package:flutter_svg/svg.dart';
 class ContextMenuActionItemWidget extends StatelessWidget {
   final ContextMenuAction action;
   final void Function()? closeMenuAction;
+  final bool leadingIcon;
 
   const ContextMenuActionItemWidget({
     super.key,
     required this.action,
     this.closeMenuAction,
+    this.leadingIcon = false,
   });
 
   @override
@@ -69,21 +71,23 @@ class ContextMenuActionItemWidget extends StatelessWidget {
       return const SizedBox.shrink();
     }
 
+    final List<Widget> children = [
+      Expanded(
+        child: Text(
+          nameAction,
+          style:
+              styleName ?? TwakeContextMenuStyle.defaultItemTextStyle(context),
+        ),
+      ),
+      const SizedBox(width: TwakeContextMenuStyle.defaultItemElementsGap),
+      buildIcon(),
+    ];
+
     return Padding(
       padding: padding ?? TwakeContextMenuStyle.defaultItemPadding,
       child: SizedBox(
         child: Row(
-          children: [
-            Expanded(
-              child: Text(
-                nameAction,
-                style: styleName ??
-                    TwakeContextMenuStyle.defaultItemTextStyle(context),
-              ),
-            ),
-            const SizedBox(width: TwakeContextMenuStyle.defaultItemElementsGap),
-            buildIcon(),
-          ],
+          children: leadingIcon ? children.reversed.toList() : children,
         ),
       ),
     );

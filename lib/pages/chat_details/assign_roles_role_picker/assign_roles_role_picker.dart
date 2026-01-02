@@ -24,6 +24,7 @@ class AssignRolesRolePicker extends StatefulWidget {
   final List<User> assignedUsers;
   final bool isDialog;
   final RolePickerTypeEnum rolePickerType;
+  final VoidCallback? onSuccess;
 
   const AssignRolesRolePicker({
     super.key,
@@ -31,6 +32,7 @@ class AssignRolesRolePicker extends StatefulWidget {
     required this.assignedUsers,
     this.isDialog = false,
     this.rolePickerType = RolePickerTypeEnum.none,
+    this.onSuccess,
   });
 
   @override
@@ -216,7 +218,9 @@ class AssignRolesEditorController extends State<AssignRolesRolePicker> {
 
         if (success is SetPermissionLevelSuccess) {
           TwakeDialog.hideLoadingDialog(context);
-          if (responsive.isMobile(context)) {
+          if (widget.onSuccess != null) {
+            widget.onSuccess!();
+          } else if (responsive.isMobile(context)) {
             Navigator.of(context).popUntil(
               (route) => route.settings.name == '/assign_roles',
             );
