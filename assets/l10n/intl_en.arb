@@ -3640,5 +3640,13 @@
   "copyLink": "Copy link",
   "@copyLink": {},
   "downloadQrCode": "Download QR code",
-  "@downloadQrCode": {}
+  "@downloadQrCode": {},
+  "promoteToAdmin": "Promote to admin",
+  "@promoteToAdmin": {
+    "description": "Context menu action to promote member to admin role"
+  },
+  "changePermissions": "Change permissions",
+  "@changePermissions": {
+    "description": "Context menu action to open permission picker dialog"
+  }
 }

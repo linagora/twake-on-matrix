@@ -30,12 +30,17 @@ class TwakeContextMenu extends StatefulWidget {
   /// The padding value at the top an bottom between the edge of the [TwakeContextMenu] and the first / last item
   final double? verticalPadding;
 
+  final bool leadingIcon;
+  final bool respectLeftPosition;
+
   const TwakeContextMenu({
     super.key,
     required this.dialogContext,
     required this.listActions,
     required this.position,
     this.verticalPadding,
+    this.leadingIcon = false,
+    this.respectLeftPosition = false,
   });
 
   @override
@@ -88,6 +93,7 @@ class TwakeContextMenuState extends State<TwakeContextMenu>
                 _heights[ValueKey(action)] = height;
               });
             },
+            leadingIcon: widget.leadingIcon,
           ),
         )
         .toList();
@@ -225,7 +231,8 @@ class TwakeContextMenuState extends State<TwakeContextMenu>
     double? positionRight;
     Alignment alignment = Alignment.topLeft;
 
-    if (availableRightSpace < TwakeContextMenuStyle.menuMaxWidth) {
+    if (availableRightSpace < TwakeContextMenuStyle.menuMaxWidth &&
+        !widget.respectLeftPosition) {
       positionRight = screenWidth - positionLeftTap;
       alignment = Alignment.topRight;
     } else {
@@ -246,11 +253,13 @@ class _GrowingWidget extends StatefulWidget {
   final ContextMenuAction child;
   final ValueChanged<double> onHeightChange;
   final void Function()? closeMenuAction;
+  final bool leadingIcon;
 
   const _GrowingWidget({
     required this.child,
     required this.onHeightChange,
     this.closeMenuAction,
+    this.leadingIcon = false,
   });
 
   @override
@@ -267,6 +276,7 @@ class __GrowingWidgetState extends State<_GrowingWidget> with AfterLayoutMixin {
       child: ContextMenuActionItemWidget(
         action: widget.child,
         closeMenuAction: widget.closeMenuAction,
+        leadingIcon: widget.leadingIcon,
       ),
     );
   }

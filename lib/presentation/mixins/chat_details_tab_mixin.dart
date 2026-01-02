@@ -1,10 +1,17 @@
 import 'dart:async';
 import 'dart:math';
 import 'dart:typed_data';
+import 'package:fluffychat/app_state/failure.dart';
+import 'package:fluffychat/app_state/success.dart';
+import 'package:fluffychat/config/default_power_level_member.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/domain/app_state/room/ban_user_state.dart';
+import 'package:fluffychat/domain/app_state/room/set_permission_level_state.dart';
 import 'package:fluffychat/domain/usecase/room/ban_user_interactor.dart';
+import 'package:fluffychat/domain/usecase/room/set_permission_level_interactor.dart';
 import 'package:fluffychat/pages/chat_details/assign_roles_member_picker/selected_user_notifier.dart';
+import 'package:fluffychat/pages/chat_details/assign_roles_role_picker/assign_roles_role_picker.dart';
+import 'package:fluffychat/pages/chat_details/assign_roles_role_picker/role_picker_type_enum.dart';
 import 'package:fluffychat/pages/chat_details/chat_details_page_view/chat_details_members_page.dart';
 import 'package:fluffychat/pages/chat_details/chat_details_page_view/chat_details_page_enum.dart';
 import 'package:fluffychat/pages/chat_details/chat_details_page_view/files/chat_details_files_page.dart';
@@ -52,6 +59,7 @@ mixin ChatDetailsTabMixin<T extends StatefulWidget>
       ValueNotifier(null);
 
   StreamSubscription? _powerLevelsSubscription;
+  StreamSubscription? _setPermissionLevelSubscription;
 
   late final List<ChatDetailsPage> tabList;
 
@@ -293,6 +301,7 @@ mixin ChatDetailsTabMixin<T extends StatefulWidget>
                 selectedUsersMapChangeNotifier: removeUsersChangeNotifier,
                 onSelectMember: _onSelectMember,
                 onRemoveMember: _handleOnRemoveMember,
+                onChangeRole: _handleChangePermission,
               ),
             );
           }
@@ -387,6 +396,132 @@ mixin ChatDetailsTabMixin<T extends StatefulWidget>
     });
   }
 
+  void _handleChangePermission(
+    User user, {
+    DefaultPowerLevelMember? role,
+  }) {
+    if (room == null) return;
+
+    if (role != null) {
+      _setPermission(user, role);
+    } else if (PlatformInfos.isWeb) {
+      _openAssignRolesPageForWeb(user);
+    } else {
+      _openAssignRolesPageForMobile(user);
+    }
+  }
+
+  void _setPermission(User user, DefaultPowerLevelMember role) {
+    _setPermissionLevelSubscription?.cancel();
+    _setPermissionLevelSubscription =
+        getIt.get<SetPermissionLevelInteractor>().execute(
+      room: room!,
+      userPermissionLevels: {user: role.powerLevel},
+    ).listen(
+      (either) async => await either.fold(
+        (failure) async => _handleSetPermissionFailure(failure),
+        (success) async => await _handleSetPermissionSuccess(success),
+      ),
+      onError: (error) {
+        Logs().e('SetPermissionLevel error', error);
+        TwakeDialog.hideLoadingDialog(context);
+        TwakeSnackBar.show(context, error.toString());
+      },
+      onDone: () => _setPermissionLevelSubscription?.cancel(),
+    );
+  }
+
+  void _handleSetPermissionFailure(Failure failure) {
+    TwakeDialog.hideLoadingDialog(context);
+
+    if (failure is SetPermissionLevelFailure) {
+      TwakeSnackBar.show(
+        context,
+        failure.exception.toString(),
+      );
+      return;
+    }
+
+    if (failure is NoPermissionFailure) {
+      TwakeSnackBar.show(
+        context,
+        L10n.of(context)!.permissionErrorChangeRole,
+      );
+      return;
+    }
+  }
+
+  Future<void> _handleSetPermissionSuccess(Success success) async {
+    if (success is SetPermissionLevelLoading) {
+      TwakeDialog.showLoadingDialog(context);
+      return;
+    }
+
+    try {
+      await onUpdateMembers();
+    } catch (e) {
+      Logs().e('_handleSetPermissionSuccess() - error: $e');
+    } finally {
+      TwakeDialog.hideLoadingDialog(context);
+    }
+  }
+
+  /// Opens assign roles role picker page for web platform
+  Future<void> _openAssignRolesPageForWeb(User user) async {
+    if (room == null) return;
+    await showDialog(
+      context: context,
+      barrierColor: Colors.black.withOpacity(0.2),
+      builder: (_) => ScaffoldMessenger(
+        child: Builder(
+          builder: (messengerContext) {
+            return AlertDialog(
+              shape: const RoundedRectangleBorder(
+                borderRadius: BorderRadius.all(
+                  Radius.circular(16.0),
+                ),
+              ),
+              contentPadding: const EdgeInsets.all(0),
+              content: SizedBox(
+                width:
+                    min(600, MediaQuery.of(messengerContext).size.width * 0.9),
+                height:
+                    min(700, MediaQuery.of(messengerContext).size.height * 0.9),
+                child: AssignRolesRolePicker(
+                  room: room!,
+                  assignedUsers: [user],
+                  isDialog: true,
+                  rolePickerType: RolePickerTypeEnum.all,
+                  onSuccess: () => Navigator.pop(messengerContext),
+                ),
+              ),
+            );
+          },
+        ),
+      ),
+    );
+    await onUpdateMembers();
+  }
+
+  /// Opens assign roles role picker page for mobile platform
+  Future<void> _openAssignRolesPageForMobile(User user) async {
+    if (room == null) return;
+    await Navigator.of(context).push(
+      CupertinoPageRoute(
+        settings: const RouteSettings(name: '/assign_roles_role_picker'),
+        builder: (context) {
+          return AssignRolesRolePicker(
+            room: room!,
+            assignedUsers: [user],
+            rolePickerType: RolePickerTypeEnum.all,
+            onSuccess: () => Navigator.pop(context),
+          );
+        },
+      ),
+    );
+    await onUpdateMembers();
+  }
+
   @override
   void initState() {
     super.initState();
@@ -413,12 +548,9 @@ mixin ChatDetailsTabMixin<T extends StatefulWidget>
     _onRoomEventChangedSubscription?.cancel();
     nestedScrollViewState.currentState?.innerController.dispose();
     _powerLevelsSubscription?.cancel();
-    _mediaListController?.dispose();
-    _linksListController?.dispose();
-    _filesListController?.dispose();
-    _onRoomEventChangedSubscription?.cancel();
     removeUsersChangeNotifier.dispose();
     _banUserSubscription?.cancel();
+    _setPermissionLevelSubscription?.cancel();
     super.dispose();
   }
 }

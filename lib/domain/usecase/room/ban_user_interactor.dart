@@ -15,6 +15,7 @@ class BanUserInteractor {
         yield const Left(
           NoPermissionForBanFailure(),
         );
+        return;
       }
 
       await user.ban();
