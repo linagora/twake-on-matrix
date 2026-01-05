@@ -4,6 +4,7 @@ import 'package:async/async.dart';
 import 'package:desktop_drop/desktop_drop.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/domain/contact_manager/contacts_manager.dart';
+import 'package:fluffychat/domain/model/user_info/user_info.dart';
 import 'package:fluffychat/pages/chat/add_contact_banner.dart';
 import 'package:fluffychat/pages/chat/blocked_message_view.dart';
 import 'package:fluffychat/pages/chat/blocked_user_banner.dart';
@@ -26,6 +27,7 @@ import 'package:fluffychat/presentation/model/chat/view_event_list_ui_state.dart
 import 'package:fluffychat/resource/image_paths.dart';
 import 'package:fluffychat/utils/date_time_extension.dart';
 import 'package:fluffychat/utils/localized_exception_extension.dart';
+import 'package:fluffychat/utils/manager/twake_user_info_manager/twake_user_info_manager.dart';
 import 'package:fluffychat/utils/string_extension.dart';
 import 'package:fluffychat/widgets/connection_status_header.dart';
 import 'package:fluffychat/widgets/matrix.dart';
@@ -630,10 +632,13 @@ class ChatViewBody extends StatelessWidget with MessageContentMixin {
     Event event,
     String duration,
   ) {
-    return FutureBuilder<User?>(
-      future: event.fetchSenderUser(),
+    return FutureBuilder<UserInfo>(
+      future: getIt.get<TwakeUserInfoManager>().getTwakeProfileFromUserId(
+            client: event.room.client,
+            userId: event.senderId,
+          ),
       builder: (context, snapshot) {
-        final displayName = snapshot.data?.calcDisplayname() ??
+        final displayName = snapshot.data?.displayName ??
             event.senderFromMemoryOrFallback.calcDisplayname();
         return Text(
           "${displayName.shortenDisplayName(

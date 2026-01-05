@@ -68,30 +68,41 @@ class ChatInvitationBody extends StatelessWidget with MessageContentMixin {
                   padding: const EdgeInsets.all(
                     ChatInvitationBodyStyle.dialogTextPadding,
                   ),
-                  child: Text.rich(
-                    textAlign: TextAlign.center,
-                    TextSpan(
-                      children: [
+                  child: FutureBuilder(
+                    future: controller.displayInviterName(),
+                    builder: (context, asyncSnapshot) {
+                      final inviterName = asyncSnapshot.data ?? '';
+                      return Text.rich(
+                        textAlign: TextAlign.center,
                         TextSpan(
-                          text: '${controller.displayInviterName} \n',
-                          style: Theme.of(context)
-                              .textTheme
-                              .bodyMedium
-                              ?.copyWith(
-                                color: Theme.of(context).colorScheme.primary,
-                              ),
-                        ),
-                        TextSpan(
-                          text: L10n.of(context)!.hasInvitedYouToAChat,
-                          style:
-                              Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          children: [
+                            TextSpan(
+                              text: inviterName.isNotEmpty
+                                  ? '$inviterName \n'
+                                  : '',
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .bodyMedium
+                                  ?.copyWith(
+                                    color:
+                                        Theme.of(context).colorScheme.primary,
+                                  ),
+                            ),
+                            TextSpan(
+                              text: L10n.of(context)!.hasInvitedYouToAChat,
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .bodyMedium
+                                  ?.copyWith(
                                     color: Theme.of(context)
                                         .colorScheme
                                         .onSurfaceVariant,
                                   ),
+                            ),
+                          ],
                         ),
-                      ],
-                    ),
+                      );
+                    },
                   ),
                 ),
                 Row(

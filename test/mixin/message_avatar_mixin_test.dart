@@ -2,7 +2,9 @@
 
 import 'package:fluffychat/config/localizations/localization_service.dart';
 import 'package:fluffychat/config/themes.dart';
+import 'package:fluffychat/domain/model/user_info/user_info.dart';
 import 'package:fluffychat/presentation/mixins/message_avatar_mixin.dart';
+import 'package:fluffychat/utils/manager/twake_user_info_manager/twake_user_info_manager.dart';
 import 'package:fluffychat/utils/responsive/responsive_utils.dart';
 import 'package:fluffychat/widgets/avatar/avatar.dart';
 import 'package:fluffychat/widgets/theme_builder.dart';
@@ -20,25 +22,35 @@ import 'message_avatar_mixin_test.mocks.dart';
 @GenerateNiceMocks([
   MockSpec<User>(),
   MockSpec<Room>(),
+  MockSpec<TwakeUserInfoManager>(),
 ])
 class MockMessageAvatarUtils with MessageAvatarMixin {}
 
 Future<void> main() async {
   TestWidgetsFlutterBinding.ensureInitialized();
   late MockMessageAvatarUtils mockMessageAvatarUtils;
-  late Room room;
-  late User user;
+  late MockTwakeUserInfoManager mockTwakeUserInfoManager;
   late Event event;
   setUpAll(() {
     final getIt = GetIt.instance;
     getIt.registerSingleton(ResponsiveUtils());
+    mockTwakeUserInfoManager = MockTwakeUserInfoManager();
+    getIt.registerSingleton<TwakeUserInfoManager>(mockTwakeUserInfoManager);
     mockMessageAvatarUtils = MockMessageAvatarUtils();
   });
 
   group('Tests for when the avatar next to a message should be displayed ', () {
     setUp(() {
-      room = MockRoom();
-      user = MockUser();
+      final room = MockRoom();
+      final testUser = MockUser();
+
+      // Stub the calcDisplayname method for the user
+      when(testUser.calcDisplayname()).thenReturn('Test User');
+
+      // Stub the unsafeGetUserFromMemoryOrFallback method
+      when(room.unsafeGetUserFromMemoryOrFallback('@bob:example.com'))
+          .thenReturn(testUser);
+
       event = Event(
         content: {
           'body': 'Test message',
@@ -60,13 +72,22 @@ Future<void> main() async {
       required Size screenSize,
       required bool isDirectChat,
     }) async {
-      when(room.requestUser(event.senderId, ignoreErrors: true))
-          .thenAnswer((_) async => user);
-      when(room.unsafeGetUserFromMemoryOrFallback(event.senderId))
-          .thenReturn(user);
-      when(user.avatarUrl).thenReturn(Uri.tryParse("fakeImage"));
-      when(user.calcDisplayname()).thenReturn('Test');
       when(event.room.isDirectChat).thenReturn(isDirectChat);
+
+      // Stub TwakeUserInfoManager to return test user info
+      when(
+        mockTwakeUserInfoManager.getTwakeProfileFromUserId(
+          client: anyNamed('client'),
+          userId: event.senderId,
+        ),
+      ).thenAnswer(
+        (_) async => const UserInfo(
+          uid: '@bob:example.com',
+          displayName: 'Test',
+          avatarUrl: 'fakeImage',
+        ),
+      );
+
       Widget? widget;
       await tester.pumpWidget(
         ThemeBuilder(
@@ -128,8 +149,12 @@ Future<void> main() async {
             screenSize: webSize,
             isDirectChat: false,
           );
-          verify(room.requestUser(event.senderId, ignoreErrors: true))
-              .called(1);
+          verify(
+            mockTwakeUserInfoManager.getTwakeProfileFromUserId(
+              client: anyNamed('client'),
+              userId: event.senderId,
+            ),
+          ).called(1);
           expect(find.byType(Avatar), findsOneWidget);
         },
       );
@@ -146,8 +171,12 @@ Future<void> main() async {
             screenSize: webSize,
             isDirectChat: true,
           );
-          verify(room.requestUser(event.senderId, ignoreErrors: true))
-              .called(1);
+          verify(
+            mockTwakeUserInfoManager.getTwakeProfileFromUserId(
+              client: anyNamed('client'),
+              userId: event.senderId,
+            ),
+          ).called(1);
           expect(find.byType(Avatar), findsOneWidget);
         },
       );
@@ -164,8 +193,12 @@ Future<void> main() async {
             screenSize: webSize,
             isDirectChat: true,
           );
-          verify(room.requestUser(event.senderId, ignoreErrors: true))
-              .called(1);
+          verify(
+            mockTwakeUserInfoManager.getTwakeProfileFromUserId(
+              client: anyNamed('client'),
+              userId: event.senderId,
+            ),
+          ).called(1);
           expect(find.byType(Avatar), findsOneWidget);
         },
       );
@@ -182,8 +215,12 @@ Future<void> main() async {
             screenSize: webSize,
             isDirectChat: false,
           );
-          verify(room.requestUser(event.senderId, ignoreErrors: true))
-              .called(1);
+          verify(
+            mockTwakeUserInfoManager.getTwakeProfileFromUserId(
+              client: anyNamed('client'),
+              userId: event.senderId,
+            ),
+          ).called(1);
           expect(find.byType(Avatar), findsOneWidget);
         },
       );
@@ -200,7 +237,12 @@ Future<void> main() async {
             screenSize: webSize,
             isDirectChat: true,
           );
-          verifyNever(room.requestUser(event.senderId, ignoreErrors: true));
+          verifyNever(
+            mockTwakeUserInfoManager.getTwakeProfileFromUserId(
+              client: anyNamed('client'),
+              userId: event.senderId,
+            ),
+          );
           expect(find.byType(SizedBox), findsOneWidget);
         },
       );
@@ -220,7 +262,12 @@ Future<void> main() async {
             isDirectChat: false,
             screenSize: mobileSize,
           );
-          verifyNever(room.requestUser(event.senderId, ignoreErrors: true));
+          verifyNever(
+            mockTwakeUserInfoManager.getTwakeProfileFromUserId(
+              client: anyNamed('client'),
+              userId: event.senderId,
+            ),
+          );
           expect(find.byType(SizedBox), findsOneWidget);
         },
       );
@@ -237,7 +284,12 @@ Future<void> main() async {
             screenSize: mobileSize,
             isDirectChat: true,
           );
-          verifyNever(room.requestUser(event.senderId, ignoreErrors: true));
+          verifyNever(
+            mockTwakeUserInfoManager.getTwakeProfileFromUserId(
+              client: anyNamed('client'),
+              userId: event.senderId,
+            ),
+          );
           expect(find.byType(SizedBox), findsOneWidget);
         },
       );
@@ -254,7 +306,12 @@ Future<void> main() async {
             screenSize: mobileSize,
             isDirectChat: true,
           );
-          verifyNever(room.requestUser(event.senderId, ignoreErrors: true));
+          verifyNever(
+            mockTwakeUserInfoManager.getTwakeProfileFromUserId(
+              client: anyNamed('client'),
+              userId: event.senderId,
+            ),
+          );
           expect(find.byType(SizedBox), findsOneWidget);
         },
       );
@@ -271,8 +328,12 @@ Future<void> main() async {
             screenSize: mobileSize,
             isDirectChat: false,
           );
-          verify(room.requestUser(event.senderId, ignoreErrors: true))
-              .called(1);
+          verify(
+            mockTwakeUserInfoManager.getTwakeProfileFromUserId(
+              client: anyNamed('client'),
+              userId: event.senderId,
+            ),
+          ).called(1);
           expect(find.byType(Avatar), findsOneWidget);
         },
       );
@@ -289,7 +350,12 @@ Future<void> main() async {
             screenSize: mobileSize,
             isDirectChat: true,
           );
-          verifyNever(room.requestUser(event.senderId, ignoreErrors: true));
+          verifyNever(
+            mockTwakeUserInfoManager.getTwakeProfileFromUserId(
+              client: anyNamed('client'),
+              userId: event.senderId,
+            ),
+          );
           expect(find.byType(SizedBox), findsOneWidget);
         },
       );
