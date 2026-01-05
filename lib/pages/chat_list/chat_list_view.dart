@@ -5,6 +5,7 @@ import 'package:fluffychat/pages/chat_list/chat_list_bottom_navigator.dart';
 import 'package:fluffychat/pages/chat_list/chat_list_bottom_navigator_style.dart';
 import 'package:fluffychat/pages/chat_list/chat_list_header.dart';
 import 'package:fluffychat/pages/chat_list/chat_list_view_style.dart';
+import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/utils/responsive/responsive_utils.dart';
 import 'package:fluffychat/widgets/mixins/popup_menu_widget_style.dart';
 import 'package:fluffychat/widgets/twake_components/twake_fab.dart';
@@ -40,96 +41,105 @@ class ChatListView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: LinagoraSysColors.material().onPrimary,
-      appBar: PreferredSize(
-        preferredSize: ChatListViewStyle.preferredSizeAppBar(context),
-        child: ChatListHeader(
-          onOpenSearchPageInMultipleColumns: onOpenSearchPageInMultipleColumns,
-          controller: controller,
-        ),
-      ),
-      bottomNavigationBar: ValueListenableBuilder(
-        valueListenable: controller.conversationSelectionNotifier,
-        builder: (context, conversationSelection, __) {
-          if (conversationSelection.isNotEmpty) {
-            return ChatListBottomNavigator(
-              bottomNavigationActionsWidget:
-                  controller.bottomNavigationActionsWidget(
-                paddingIcon: ChatListBottomNavigatorStyle.paddingIcon,
-                iconSize: ChatListBottomNavigatorStyle.iconSize,
-                width: ChatListBottomNavigatorStyle.width,
-              ),
-            );
-          } else {
-            return bottomNavigationBar ?? const SizedBox();
-          }
-        },
-      ),
-      body: StreamBuilder<Client>(
-        stream: controller.clientStream,
-        builder: (context, snapshot) {
-          return ChatListBodyView(controller);
-        },
-      ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
-      floatingActionButton: ValueListenableBuilder(
-        valueListenable: controller.selectModeNotifier,
-        builder: (context, _, __) {
-          if (controller.isSelectMode) return const SizedBox();
-          return KeyBoardShortcuts(
-            keysToPress: {
-              LogicalKeyboardKey.controlLeft,
-              LogicalKeyboardKey.keyN,
+    return ValueListenableBuilder(
+      valueListenable: controller.matrixState.voiceMessageEvent,
+      builder: (context, hasEvent, child) {
+        return Scaffold(
+          backgroundColor: LinagoraSysColors.material().onPrimary,
+          appBar: PreferredSize(
+            preferredSize: ChatListViewStyle.preferredSizeAppBar(
+              hasAudioEvent: hasEvent != null && PlatformInfos.isMobile,
+            ),
+            child: ChatListHeader(
+              onOpenSearchPageInMultipleColumns:
+                  onOpenSearchPageInMultipleColumns,
+              controller: controller,
+            ),
+          ),
+          bottomNavigationBar: ValueListenableBuilder(
+            valueListenable: controller.conversationSelectionNotifier,
+            builder: (context, conversationSelection, __) {
+              if (conversationSelection.isNotEmpty) {
+                return ChatListBottomNavigator(
+                  bottomNavigationActionsWidget:
+                      controller.bottomNavigationActionsWidget(
+                    paddingIcon: ChatListBottomNavigatorStyle.paddingIcon,
+                    iconSize: ChatListBottomNavigatorStyle.iconSize,
+                    width: ChatListBottomNavigatorStyle.width,
+                  ),
+                );
+              } else {
+                return bottomNavigationBar ?? const SizedBox();
+              }
             },
-            onKeysPressed: () => controller.goToNewPrivateChat(),
-            helpLabel: L10n.of(context)!.newChat,
-            child: !responsiveUtils.isSingleColumnLayout(context)
-                ? MenuAnchor(
-                    menuChildren: [
-                      MenuItemButton(
-                        leadingIcon: const Icon(Icons.chat),
-                        child: Text(
-                          L10n.of(context)!.newDirectMessage,
-                          style: PopupMenuWidgetStyle.defaultItemTextStyle(
-                            context,
+          ),
+          body: StreamBuilder<Client>(
+            stream: controller.clientStream,
+            builder: (context, snapshot) {
+              return ChatListBodyView(controller);
+            },
+          ),
+          floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
+          floatingActionButton: ValueListenableBuilder(
+            valueListenable: controller.selectModeNotifier,
+            builder: (context, _, __) {
+              if (controller.isSelectMode) return const SizedBox();
+              return KeyBoardShortcuts(
+                keysToPress: {
+                  LogicalKeyboardKey.controlLeft,
+                  LogicalKeyboardKey.keyN,
+                },
+                onKeysPressed: () => controller.goToNewPrivateChat(),
+                helpLabel: L10n.of(context)!.newChat,
+                child: !responsiveUtils.isSingleColumnLayout(context)
+                    ? MenuAnchor(
+                        menuChildren: [
+                          MenuItemButton(
+                            leadingIcon: const Icon(Icons.chat),
+                            child: Text(
+                              L10n.of(context)!.newDirectMessage,
+                              style: PopupMenuWidgetStyle.defaultItemTextStyle(
+                                context,
+                              ),
+                            ),
+                            onPressed: () => controller.goToNewPrivateChat(),
+                          ),
+                          MenuItemButton(
+                            leadingIcon: const Icon(Icons.group),
+                            onPressed: () =>
+                                controller.goToNewGroupChat(context),
+                            child: Text(
+                              L10n.of(context)!.newGroupChat,
+                              style: PopupMenuWidgetStyle.defaultItemTextStyle(
+                                context,
+                              ),
+                            ),
+                          ),
+                        ],
+                        style: MenuStyle(
+                          alignment: Alignment.topLeft,
+                          backgroundColor: WidgetStatePropertyAll(
+                            PopupMenuWidgetStyle.defaultMenuColor(context),
                           ),
                         ),
-                        onPressed: () => controller.goToNewPrivateChat(),
-                      ),
-                      MenuItemButton(
-                        leadingIcon: const Icon(Icons.group),
-                        onPressed: () => controller.goToNewGroupChat(context),
-                        child: Text(
-                          L10n.of(context)!.newGroupChat,
-                          style: PopupMenuWidgetStyle.defaultItemTextStyle(
-                            context,
-                          ),
-                        ),
-                      ),
-                    ],
-                    style: MenuStyle(
-                      alignment: Alignment.topLeft,
-                      backgroundColor: WidgetStatePropertyAll(
-                        PopupMenuWidgetStyle.defaultMenuColor(context),
-                      ),
-                    ),
-                    builder: (context, menuController, child) {
-                      return TwakeFloatingActionButton(
+                        builder: (context, menuController, child) {
+                          return TwakeFloatingActionButton(
+                            icon: Icons.mode_edit_outline_outlined,
+                            size: ChatListViewStyle.editIconSize,
+                            onTap: () => menuController.open(),
+                          );
+                        },
+                      )
+                    : TwakeFloatingActionButton(
                         icon: Icons.mode_edit_outline_outlined,
                         size: ChatListViewStyle.editIconSize,
-                        onTap: () => menuController.open(),
-                      );
-                    },
-                  )
-                : TwakeFloatingActionButton(
-                    icon: Icons.mode_edit_outline_outlined,
-                    size: ChatListViewStyle.editIconSize,
-                    onTap: controller.goToNewPrivateChat,
-                  ),
-          );
-        },
-      ),
+                        onTap: controller.goToNewPrivateChat,
+                      ),
+              );
+            },
+          ),
+        );
+      },
     );
   }
 }

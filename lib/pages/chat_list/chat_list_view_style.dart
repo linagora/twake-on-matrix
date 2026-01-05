@@ -8,11 +8,16 @@ class ChatListViewStyle {
 
   static const double editIconSize = 18.0;
 
-  static Size preferredSizeAppBar(BuildContext context) =>
-      const Size.fromHeight(120);
+  static Size preferredSizeAppBar({
+    bool? hasAudioEvent,
+  }) =>
+      hasAudioEvent == true
+          ? const Size.fromHeight(160)
+          : const Size.fromHeight(120);
 
   // Slidable Ratio of one slidable item
   static const double slidableSizeRatio = 0.23;
+
   static double slidableExtentRatio(int slidablesLength) {
     return slidableSizeRatio * slidablesLength;
   }
@@ -21,6 +26,7 @@ class ChatListViewStyle {
   static const double slidableIconTextGap = 4.0;
 
   static const double slidableIconSize = 24.0;
+
   static Color? pinSlidableColor(bool isFavourite) {
     return isFavourite
         ? LinagoraRefColors.material().tertiary[40]
