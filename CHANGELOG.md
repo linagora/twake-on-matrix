@@ -1,3 +1,10 @@
+## [2.18.2] - 2025-01-05
+### Added
+- Translation: vi, fr, ir, ru
+
+### Fixed
+- Permission in downloading QR code
+
 ## [2.18.2] - 2025-12-17
 ### Fixed
 - Contact visibility settings for Everyone option
