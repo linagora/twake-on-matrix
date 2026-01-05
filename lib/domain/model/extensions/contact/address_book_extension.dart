@@ -46,10 +46,8 @@ extension AddressBookListExtension on Set<AddressBook> {
     final Map<String, AddressBook> uniqueAddressBooks = {};
 
     for (final addressBook in this) {
-      if (addressBook.mxid != null) {
-        if (addressBook.mxid!.isNotEmpty) {
-          uniqueAddressBooks[addressBook.mxid!] = addressBook;
-        }
+      if (addressBook.mxid?.isNotEmpty ?? false) {
+        uniqueAddressBooks[addressBook.mxid!] = addressBook;
       }
     }
 
