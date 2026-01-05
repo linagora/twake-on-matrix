@@ -305,7 +305,7 @@ class ChatController extends State<Chat>
 
   final FocusNode rawKeyboardListenerFocusNode = FocusNode();
 
-  final searchEmojiFocusNode = FocusNode();
+  final FocusNode searchEmojiFocusNode = FocusNode();
 
   Timer? typingCoolDown;
   Timer? typingTimeout;
@@ -3168,7 +3168,9 @@ class ChatController extends State<Chat>
   void _emojiPickerListener() {
     if (!showEmojiPickerComposerNotifier.value) {
       searchEmojiFocusNode.unfocus();
-      inputFocus.requestFocus();
+      if (!inputFocus.hasFocus) {
+        inputFocus.requestFocus();
+      }
     } else {
       inputFocus.unfocus();
       searchEmojiFocusNode.requestFocus();
