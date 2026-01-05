@@ -124,21 +124,20 @@ extension AddressBookExtension on AddressBook {
 
   /// Converts the AddressBook's email information to a set of Email objects.
   ///
-  /// This method handles three scenarios:
-  /// 1. If both [emails] list and [mail] field are empty/null, creates a
-  ///    synthetic Email with empty address but preserves the Matrix ID.
-  ///    This prevents Matrix ID duplication in the UI while maintaining the
-  ///    association.
-  /// 2. If [emails] list exists, maps each email string to an Email object
-  ///    with the appropriate status.
-  /// 3. Returns null if no email information is available.
+  /// This method handles two scenarios:
+  /// 1. If no emails exist but a Matrix ID is present, creates a synthetic
+  ///    Email with an empty address field while preserving the Matrix ID.
+  ///    This ensures Matrix IDs are stored correctly without displaying as
+  ///    duplicate entries in the contacts UI.
+  /// 2. If emails exist, maps each email string to an Email object with the
+  ///    associated Matrix ID and status.
   ///
-  /// Returns a Set of [Email] objects or null if no emails exist.
+  /// Returns a Set of [Email] objects or null if no email or Matrix ID data
+  /// is available.
   Set<Email>? toEmails() {
     final hasNoEmails = emails == null || emails!.isEmpty;
-    final hasNoMail = mail == null || mail!.isEmpty;
 
-    if (hasNoEmails && hasNoMail && mxid != null && mxid!.isNotEmpty) {
+    if (hasNoEmails && mxid != null && mxid!.isNotEmpty) {
       return {
         Email(
           address: '',
@@ -162,21 +161,20 @@ extension AddressBookExtension on AddressBook {
   /// Converts the AddressBook's phone information to a set of PhoneNumber
   /// objects.
   ///
-  /// This method handles three scenarios:
-  /// 1. If both [phones] list and [mobile] field are empty/null, creates a
-  ///    synthetic PhoneNumber with empty number but preserves the Matrix ID.
-  ///    This prevents Matrix ID duplication in the UI while maintaining the
-  ///    association.
-  /// 2. If [phones] list exists, maps each phone string to a PhoneNumber
-  ///    object with the Matrix ID and appropriate status.
-  /// 3. Returns null if no phone information is available.
+  /// This method handles two scenarios:
+  /// 1. If no phone numbers exist but a Matrix ID is present, creates a
+  ///    synthetic PhoneNumber with an empty number field while preserving the
+  ///    Matrix ID. This ensures Matrix IDs are stored correctly without
+  ///    displaying as duplicate entries in the contacts UI.
+  /// 2. If phone numbers exist, maps each phone string to a PhoneNumber object
+  ///    with the associated Matrix ID and status.
   ///
-  /// Returns a Set of [PhoneNumber] objects or null if no phones exist.
+  /// Returns a Set of [PhoneNumber] objects or null if no phone or Matrix ID
+  /// data is available.
   Set<PhoneNumber>? toPhoneNumber() {
     final hasNoPhones = phones == null || phones!.isEmpty;
-    final hasNoMobile = mobile == null || mobile!.isEmpty;
 
-    if (hasNoPhones && hasNoMobile && mxid != null && mxid!.isNotEmpty) {
+    if (hasNoPhones && mxid != null && mxid!.isNotEmpty) {
       return {
         PhoneNumber(
           number: '',
@@ -200,14 +198,13 @@ extension AddressBookExtension on AddressBook {
   /// Converts an AddressBook entry to a Contact object.
   ///
   /// This method transforms server-side AddressBook data into the domain
-  /// Contact model. It handles the conversion of:
-  /// - Email addresses from the [emails] list or [mail] field
-  /// - Phone numbers from the [phones] list or [mobile] field
-  /// - Matrix IDs associated with the contact
+  /// Contact model. It handles the conversion of email addresses, phone
+  /// numbers, and Matrix IDs.
   ///
-  /// The conversion uses helper methods [toEmails] and [toPhoneNumber] to
-  /// properly handle cases where Matrix IDs need to be preserved even when
-  /// no actual email/phone data exists.
+  /// The conversion uses [toEmails] and [toPhoneNumber] helper methods to
+  /// properly handle Matrix ID storage. When no email or phone data exists,
+  /// these methods create synthetic entries with empty address/number fields
+  /// to preserve the Matrix ID without causing UI duplication.
   ///
   /// Returns a [Contact] object with all available information from the
   /// AddressBook.
