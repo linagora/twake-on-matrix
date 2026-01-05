@@ -917,12 +917,6 @@ class ChatController extends State<Chat>
     showEmojiPickerComposerNotifier.value = true;
   }
 
-  void _inputFocusListener() {
-    if (inputFocus.hasFocus) {
-      showEmojiPickerComposerNotifier.value = false;
-    }
-  }
-
   void copySingleEventAction() async {
     if (selectedEvents.length == 1) {
       await selectedEvents.first.copy(context, timeline!);
@@ -3186,7 +3180,6 @@ class ChatController extends State<Chat>
     keyboardVisibilitySubscription =
         keyboardVisibilityController.onChange.listen(_keyboardListener);
     scrollController.addListener(_updateScrollController);
-    inputFocus.addListener(_inputFocusListener);
     _loadDraft();
     _tryLoadTimeline();
     sendController.addListener(updateInputTextNotifier);
@@ -3234,7 +3227,6 @@ class ChatController extends State<Chat>
     disposeAutoMarkAsReadMixin();
     timeline?.cancelSubscriptions();
     timeline = null;
-    inputFocus.removeListener(_inputFocusListener);
     inputFocus.dispose();
     searchEmojiFocusNode.dispose();
     composerDebouncer.cancel();
