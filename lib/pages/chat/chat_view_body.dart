@@ -303,7 +303,7 @@ class ChatViewBody extends StatelessWidget with MessageContentMixin {
                           searchEmptyWidget: SvgPicture.asset(
                             ImagePaths.icSearchEmojiEmpty,
                           ),
-                          searchFocusNode: FocusNode(),
+                          searchFocusNode: controller.searchEmojiFocusNode,
                         ),
                         itemBuilder: (
                           context,
@@ -312,7 +312,6 @@ class ChatViewBody extends StatelessWidget with MessageContentMixin {
                           callback,
                         ) {
                           return MouseRegion(
-                            onHover: (_) {},
                             child: EmojiItem(
                               textStyle:
                                   Theme.of(context).textTheme.headlineLarge!,
