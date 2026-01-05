@@ -28,7 +28,7 @@ extension IterableAddressBookExtension on Iterable<AddressBook> {
         (field) =>
             field?.toLowerCase().contains(keyword.toLowerCase()) ?? false,
       );
-      return plainTextContains || contact.mxid?.contains(keyword) == true;
+      return plainTextContains;
     });
     return contactsMatched;
   }
@@ -47,9 +47,8 @@ extension AddressBookListExtension on Set<AddressBook> {
 
     for (final addressBook in this) {
       if (addressBook.mxid != null) {
-        final uniqueKey = '${addressBook.mxid}';
-        if (uniqueKey.isNotEmpty) {
-          uniqueAddressBooks[uniqueKey] = addressBook;
+        if (addressBook.mxid!.isNotEmpty) {
+          uniqueAddressBooks[addressBook.mxid!] = addressBook;
         }
       }
     }
@@ -153,6 +152,7 @@ extension AddressBookExtension on AddressBook {
         ?.map(
           (email) => Email(
             address: email,
+            matrixId: mxid,
             status: addressBookStatus,
           ),
         )
