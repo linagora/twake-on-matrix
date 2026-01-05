@@ -265,25 +265,27 @@ class _ContactInformation extends StatelessWidget {
                   ],
                 ],
               ),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  if (contactPresentationSearch.matrixId != null)
-                    _SearchHighlightText(
-                      text: contactPresentationSearch.matrixId ?? "",
-                      style: ListItemStyle.subtitleTextStyle(
-                        fontFamily: 'Inter',
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    if (contactPresentationSearch.matrixId != null)
+                      _SearchHighlightText(
+                        text: contactPresentationSearch.matrixId ?? "",
+                        style: ListItemStyle.subtitleTextStyle(
+                          fontFamily: 'Inter',
+                        ),
+                        searchWord: searchKeyword,
                       ),
-                      searchWord: searchKeyword,
-                    ),
-                  if (searchKeyword?.isNotEmpty == true) ...[
-                    if (searchKeyword?.isPhoneNumberFormatted() == true) ...[
-                      _displayPrimaryPhoneNumber(),
-                    ] else ...[
-                      _displayPrimaryEmail(),
+                    if (searchKeyword?.isNotEmpty == true) ...[
+                      if (searchKeyword?.isPhoneNumberFormatted() == true) ...[
+                        _displayPrimaryPhoneNumber(),
+                      ] else ...[
+                        _displayPrimaryEmail(),
+                      ],
                     ],
                   ],
-                ],
+                ),
               ),
             ],
           ),
