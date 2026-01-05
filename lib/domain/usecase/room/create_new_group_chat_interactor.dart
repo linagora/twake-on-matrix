@@ -55,7 +55,8 @@ class CreateNewGroupChatInteractor {
           ),
         );
       }
-    } catch (exception) {
+    } catch (exception, stackTrace) {
+      Logs().e('CreateNewGroupChatInteractor', exception, stackTrace);
       if (exception.toString().contains('M_FORBIDDEN: Federation denied')) {
         yield Left(
           CreateNewGroupChatFailed(
