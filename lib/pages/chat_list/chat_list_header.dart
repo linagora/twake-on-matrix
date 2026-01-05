@@ -43,6 +43,7 @@ class ChatListHeader extends StatelessWidget {
               : _normalModeWidgetsMobile(context),
         ),
         if (ChatListHeaderStyle.responsive.isMobile(context)) ...[
+          // Only show audio player on actual mobile platforms (not just mobile-sized layouts)
           if (PlatformInfos.isMobile)
             ChatAudioPlayerWidget(
               matrix: controller.matrixState,

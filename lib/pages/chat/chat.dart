@@ -3144,6 +3144,7 @@ class ChatController extends State<Chat>
           ?..stop()
           ..dispose();
       }
+      // On mobile, keep audio playing and return early
       return;
     }
     if (matrix?.voiceMessageEvent != null) {
