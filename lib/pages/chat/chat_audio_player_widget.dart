@@ -29,6 +29,11 @@ class ChatAudioPlayerWidget extends StatelessWidget {
     super.key,
   });
 
+  static final _defaultAudioStatus = ValueNotifier<AudioPlayerStatus>(
+    AudioPlayerStatus.notDownloaded,
+  );
+  static final _defaultEvent = ValueNotifier<Event?>(null);
+
   @override
   Widget build(BuildContext context) {
     // Return empty if matrix is not available
@@ -36,16 +41,11 @@ class ChatAudioPlayerWidget extends StatelessWidget {
       return const SizedBox.shrink();
     }
 
-    final defaultAudioStatus = ValueNotifier<AudioPlayerStatus>(
-      AudioPlayerStatus.notDownloaded,
-    );
-    final defaultEvent = ValueNotifier<Event?>(null);
-
     return ValueListenableBuilder(
-      valueListenable: matrix?.currentAudioStatus ?? defaultAudioStatus,
+      valueListenable: matrix?.currentAudioStatus ?? _defaultAudioStatus,
       builder: (context, status, _) {
         return ValueListenableBuilder(
-          valueListenable: matrix?.voiceMessageEvent ?? defaultEvent,
+          valueListenable: matrix?.voiceMessageEvent ?? _defaultEvent,
           builder: (context, hasEvent, _) {
             if (hasEvent == null) {
               return const SizedBox.shrink();
