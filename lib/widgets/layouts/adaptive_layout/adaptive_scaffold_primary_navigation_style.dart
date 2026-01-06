@@ -6,6 +6,8 @@ class AdaptiveScaffoldPrimaryNavigationStyle {
       EdgeInsetsDirectional.only(top: 32, bottom: 32);
   static const EdgeInsetsDirectional dividerPadding =
       EdgeInsetsDirectional.only(bottom: 16);
+  static const EdgeInsetsDirectional avatarPadding =
+      EdgeInsetsDirectional.only(bottom: 8);
 
   static TextStyle? labelTextStyle(BuildContext context) {
     return Theme.of(context).textTheme.labelMedium?.copyWith(

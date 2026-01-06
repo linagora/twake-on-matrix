@@ -62,18 +62,22 @@ class AdaptiveScaffoldPrimaryNavigationView extends StatelessWidget {
                         .separatorLightColor,
                   ),
                 ),
-                ValueListenableBuilder(
-                  valueListenable: profileNotifier,
-                  builder: (context, profile, _) {
-                    return Avatar(
-                      mxContent: profile.avatarUrl,
-                      name: profile.displayName ??
-                          Matrix.of(context).client.userID!.localpart,
-                      size: AdaptiveScaffoldPrimaryNavigationStyle.avatarSize,
-                      fontSize: ClientChooserButtonStyle.avatarFontSizeInAppBar,
-                      onTap: () => context.go('/rooms/profile'),
-                    );
-                  },
+                Padding(
+                  padding: AdaptiveScaffoldPrimaryNavigationStyle.avatarPadding,
+                  child: ValueListenableBuilder(
+                    valueListenable: profileNotifier,
+                    builder: (context, profile, _) {
+                      return Avatar(
+                        mxContent: profile.avatarUrl,
+                        name: profile.displayName ??
+                            Matrix.of(context).client.userID!.localpart,
+                        size: AdaptiveScaffoldPrimaryNavigationStyle.avatarSize,
+                        fontSize:
+                            ClientChooserButtonStyle.avatarFontSizeInAppBar,
+                        onTap: () => context.go('/rooms/profile'),
+                      );
+                    },
+                  ),
                 ),
               ],
             ),
