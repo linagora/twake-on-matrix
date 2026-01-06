@@ -34,6 +34,19 @@ extension ContactExtension on Contact {
     );
   }
 
+  /// Helper method to convert third-party contacts to AddressBook entries.
+  ///
+  /// This method takes a set of third-party contacts (emails or phone numbers)
+  /// and creates AddressBook entries for each contact that has a Matrix ID.
+  ///
+  /// The resulting AddressBook entries include:
+  /// - The contact's Matrix ID
+  /// - The display name from this Contact
+  /// - All email addresses from this Contact
+  /// - All phone numbers from this Contact
+  /// - The active status from the third-party contact
+  ///
+  /// Returns a Set of [AddressBook] objects.
   Set<AddressBook> _addContactsToAddressBook({
     Set<ThirdPartyContact>? contacts,
   }) {
@@ -46,6 +59,8 @@ extension ContactExtension on Contact {
               displayName: displayName,
               mxid: contact.matrixId,
               active: contact.status == ThirdPartyStatus.active,
+              emails: emails?.map((email) => email.address).toList(),
+              phones: phoneNumbers?.map((phone) => phone.number).toList(),
             ),
           );
         }
