@@ -537,7 +537,8 @@ mixin EventFilterMixin {
     List<Event> audioEvents,
     Event clickedEvent,
   ) {
-    final clickedIndex = audioEvents.indexWhere(
+    final reversedEvents = audioEvents.reversed.toList();
+    final clickedIndex = reversedEvents.indexWhere(
       (event) => event.eventId == clickedEvent.eventId,
     );
 
@@ -546,7 +547,7 @@ mixin EventFilterMixin {
     }
 
     // Return from clicked event onwards for sequential playback
-    return audioEvents.sublist(clickedIndex);
+    return reversedEvents.sublist(clickedIndex);
   }
 
   /// Loads and processes initial audio events with automatic expansion.
