@@ -1236,8 +1236,12 @@ class MatrixState extends State<Matrix>
 
       if (!kIsWeb) {
         final tempDir = await getTemporaryDirectory();
+        final mxcUrl = currentEvent.attachmentOrThumbnailMxcUrl();
+        if (mxcUrl == null) {
+          throw Exception('Event has no attachment URL');
+        }
         final fileName = Uri.encodeComponent(
-          currentEvent.attachmentOrThumbnailMxcUrl()!.pathSegments.last,
+          mxcUrl.pathSegments.last,
         );
         file = File('${tempDir.path}/${fileName}_${matrixFile.name}');
 
@@ -1279,6 +1283,7 @@ class MatrixState extends State<Matrix>
 
     audioPlayer?.play().onError((e, s) {
       Logs().e('Could not play audio file', e, s);
+      if (!context.mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(

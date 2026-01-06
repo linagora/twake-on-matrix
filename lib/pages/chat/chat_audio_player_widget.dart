@@ -220,6 +220,7 @@ class ChatAudioPlayerWidget extends StatelessWidget {
     if (!context.mounted) return;
 
     if (matrix == null) {
+      if (!context.mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(L10n.of(context)!.couldNotPlayAudioFile),
@@ -249,6 +250,7 @@ class ChatAudioPlayerWidget extends StatelessWidget {
 
     matrix?.audioPlayer?.play().onError((e, s) {
       Logs().e('Could not play audio file', e, s);
+      if (!context.mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
