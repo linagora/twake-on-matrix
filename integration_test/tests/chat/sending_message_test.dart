@@ -7,9 +7,12 @@ void main() {
   TestBase().runPatrolTest(
     description: 'Checking sending message between members',
     test: ($) async {
-      const searchPharse = 'Thu Huyen HOANG';
+      const searchPhrase = String.fromEnvironment(
+        'SearchByTitle',
+        defaultValue: 'My Default Group',
+      );
       await HomeRobot($).gotoChatListScreen();
-      await ChatScenario($).enterSearchText(searchPharse);
+      await ChatScenario($).enterSearchText(searchPhrase);
       await ChatListRobot($).openChatGroupByIndex(0);
       // send a message
       final now = DateTime.now();
