@@ -6,10 +6,11 @@ class AdaptiveScaffoldRouteStyle {
   static ResponsiveUtils responsiveUtils = getIt.get<ResponsiveUtils>();
 
   static EdgeInsetsDirectional secondaryBodyWidgetPadding(
+    BuildContext context,
     bool isWebAndDesktop,
   ) {
-    return isWebAndDesktop
-        ? const EdgeInsetsDirectional.all(16)
+    return isWebAndDesktop && responsiveUtils.isWebDesktop(context)
+        ? const EdgeInsetsDirectional.only(top: 8)
         : EdgeInsetsDirectional.zero;
   }
 
@@ -17,12 +18,8 @@ class AdaptiveScaffoldRouteStyle {
     BuildContext context,
     bool isWebAndDesktop,
   ) {
-    return isWebAndDesktop
-        ? EdgeInsetsDirectional.only(
-            bottom: 16,
-            top: 16,
-            start: responsiveUtils.isTablet(context) ? 16 : 0,
-          )
+    return isWebAndDesktop && responsiveUtils.isWebDesktop(context)
+        ? const EdgeInsetsDirectional.only(top: 8)
         : EdgeInsetsDirectional.zero;
   }
 

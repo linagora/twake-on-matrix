@@ -96,17 +96,19 @@ class AppAdaptiveScaffold extends StatelessWidget {
   }) {
     return Padding(
       padding: AdaptiveScaffoldRouteStyle.secondaryBodyWidgetPadding(
+        context,
         isWebAndDesktop,
       ),
-      child: ClipRRect(
-        borderRadius:
-            AdaptiveScaffoldRouteStyle.secondaryBodyBorder(isWebAndDesktop),
-        child: Container(
-          decoration: BoxDecoration(
-            color: LinagoraRefColors.material().primary[100],
+      child: Container(
+        decoration: BoxDecoration(
+          border: Border(
+            left: BorderSide(
+              color: LinagoraSysColors.material().surface,
+              width: 1.0,
+            ),
           ),
-          child: secondaryBody,
         ),
+        child: secondaryBody,
       ),
     );
   }

@@ -1,5 +1,4 @@
 import 'package:fluffychat/pages/chat/events/message/message_style.dart';
-import 'package:fluffychat/pages/chat_adaptive_scaffold/chat_adaptive_scaffold_style.dart';
 import 'package:fluffychat/presentation/enum/chat/right_column_type_enum.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/utils/responsive/responsive_utils.dart';
@@ -7,6 +6,7 @@ import 'package:fluffychat/widgets/layouts/adaptive_layout/app_adaptive_scaffold
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_adaptive_scaffold/flutter_adaptive_scaffold.dart';
+import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 
 typedef ChatAdaptiveScaffoldBodyBuilder = Widget Function(
   ChatAdaptiveScaffoldBuilderController controller,
@@ -101,14 +101,16 @@ class ChatAdaptiveScaffoldBuilderController
                   begin: breakpoint,
                 ): SlotLayout.from(
                   key: AppAdaptiveScaffold.breakpointWebAndDesktopKey,
-                  builder: (_) => Padding(
-                    padding: rightColumnType != null
-                        ? ChatAdaptiveScaffoldStyle.webPaddingRight
-                        : EdgeInsets.zero,
-                    child: ClipRRect(
-                      borderRadius: ChatAdaptiveScaffoldStyle.borderRadius,
-                      child: body!,
+                  builder: (_) => Container(
+                    decoration: BoxDecoration(
+                      border: Border(
+                        right: BorderSide(
+                          color: LinagoraSysColors.material().surface,
+                          width: 1.0,
+                        ),
+                      ),
                     ),
+                    child: body!,
                   ),
                 ),
               },
@@ -128,13 +130,10 @@ class ChatAdaptiveScaffoldBuilderController
                         begin: breakpoint,
                       ): SlotLayout.from(
                         key: AppAdaptiveScaffold.breakpointWebAndDesktopKey,
-                        builder: (_) => ClipRRect(
-                          borderRadius: ChatAdaptiveScaffoldStyle.borderRadius,
-                          child: widget.rightBuilder(
-                            this,
-                            isInStack: false,
-                            type: rightColumnType,
-                          ),
+                        builder: (_) => widget.rightBuilder(
+                          this,
+                          isInStack: false,
+                          type: rightColumnType,
                         ),
                       ),
                     },
