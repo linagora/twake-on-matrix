@@ -6,7 +6,6 @@ import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/widgets/app_bars/searchable_app_bar.dart';
 import 'package:fluffychat/widgets/app_bars/searchable_app_bar_style.dart';
 import 'package:fluffychat/widgets/contacts_warning_banner/contacts_warning_banner_view.dart';
-import 'package:fluffychat/widgets/phone_book_loading/phone_book_loading_view.dart';
 import 'package:flutter/material.dart';
 import 'package:fluffychat/generated/l10n/app_localizations.dart';
 import 'package:linagora_design_flutter/colors/linagora_sys_colors.dart';
@@ -50,7 +49,6 @@ class NewPrivateChatView extends StatelessWidget {
                 isShowMargin: false,
               ),
             ),
-            _phonebookLoading(),
             ExpansionList(
               presentationContactsNotifier:
                   controller.presentationContactNotifier,
@@ -69,18 +67,6 @@ class NewPrivateChatView extends StatelessWidget {
           ],
         ),
       ),
-    );
-  }
-
-  Widget _phonebookLoading() {
-    return ValueListenableBuilder(
-      valueListenable: controller.contactsManager.progressPhoneBookState,
-      builder: (context, progressValue, _) {
-        if (progressValue != null) {
-          return PhoneBookLoadingView(progress: progressValue);
-        }
-        return const SizedBox.shrink();
-      },
     );
   }
 }
