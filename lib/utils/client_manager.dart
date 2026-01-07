@@ -31,21 +31,7 @@ abstract class ClientManager {
       clientNames.add(PlatformInfos.clientName);
       await Store().setItem(clientNamespace, jsonEncode(clientNames.toList()));
     }
-    final clients = await Future.wait(
-      clientNames.map((name) async {
-        late DatabaseApi database;
-        try {
-          database = await MatrixSdkDatabase.init(
-            name,
-            database: await openSqfliteDb(name: name),
-          );
-        } catch (e) {
-          Logs().e('Unable to open database for client $name', e);
-          database = FlutterHiveCollectionsDatabase(name, '');
-        }
-        return createClient(name, database: database);
-      }),
-    );
+    final clients = await Future.wait(clientNames.map(createClient));
     if (initialize) {
       await Future.wait(
         clients.map(
@@ -103,10 +89,7 @@ abstract class ClientManager {
           vodozemacInit: () => vod.init(),
         );
 
-  static Client createClient(
-    String clientName, {
-    required DatabaseApi database,
-  }) {
+  static Future<Client> createClient(String clientName) async {
     return Client(
       clientName,
       httpClient:
@@ -123,7 +106,10 @@ abstract class ClientManager {
         EventTypes.RoomPowerLevels,
       },
       logLevel: kReleaseMode ? Level.warning : Level.verbose,
-      database: database,
+      database: await MatrixSdkDatabase.init(
+        clientName,
+        database: await openSqfliteDb(name: clientName),
+      ),
       legacyDatabaseBuilder: FlutterHiveCollectionsDatabase.databaseBuilder,
       supportedLoginTypes: {
         AuthenticationTypes.password,

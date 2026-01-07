@@ -19,14 +19,18 @@ class LoginView extends StatelessWidget {
         leading: controller.loading ? null : const BackButton(),
         automaticallyImplyLeading: !controller.loading,
         centerTitle: true,
-        title: Text(
-          L10n.of(context)!.logInTo(
-            Matrix.of(context)
-                .getLoginClient()
-                .homeserver
-                .toString()
-                .replaceFirst('https://', ''),
-          ),
+        title: FutureBuilder(
+          future: Matrix.of(context).getLoginClient(),
+          builder: (context, asyncSnapshot) {
+            return Text(
+              L10n.of(context)!.logInTo(
+                asyncSnapshot.data?.homeserver
+                        .toString()
+                        .replaceFirst('https://', '') ??
+                    '',
+              ),
+            );
+          },
         ),
       ),
       body: Builder(

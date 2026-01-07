@@ -34,14 +34,21 @@ class SsoButton extends StatelessWidget {
                 padding: const EdgeInsets.all(4.0),
                 child: identityProvider.icon == null
                     ? const Icon(Icons.web_outlined)
-                    : Image.network(
-                        Uri.parse(identityProvider.icon!)
-                            .getDownloadLink(
-                              Matrix.of(context).getLoginClient(),
-                            )
-                            .toString(),
-                        width: 32,
-                        height: 32,
+                    : FutureBuilder(
+                        future: Matrix.of(context).getLoginClient(),
+                        builder: (context, asyncSnapshot) {
+                          final client = asyncSnapshot.data;
+                          if (client == null) {
+                            return const SizedBox(width: 32, height: 32);
+                          }
+                          return Image.network(
+                            Uri.parse(identityProvider.icon!)
+                                .getDownloadLink(client)
+                                .toString(),
+                            width: 32,
+                            height: 32,
+                          );
+                        },
                       ),
               ),
             ),

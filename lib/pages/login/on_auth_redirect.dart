@@ -103,16 +103,16 @@ class _OnAuthRedirectState extends State<OnAuthRedirect> with ConnectPageMixin {
       Logs().i('tryLoggingUsingToken::loginToken: $loginToken');
       Logs().i('tryLoggingUsingToken::homeserver: $homeserver');
       Matrix.of(context).loginType = LoginType.mLoginToken;
-      Matrix.of(context).loginHomeserverSummary = await Matrix.of(context)
-          .getLoginClient()
+      final client = await Matrix.of(context).getLoginClient();
+      Matrix.of(context).loginHomeserverSummary = await client
           .checkHomeserver(Uri.parse(homeserver))
           .toHomeserverSummary();
 
-      await Matrix.of(context).getLoginClient().login(
-            LoginType.mLoginToken,
-            token: loginToken,
-            initialDeviceDisplayName: PlatformInfos.clientName,
-          );
+      await client.login(
+        LoginType.mLoginToken,
+        token: loginToken,
+        initialDeviceDisplayName: PlatformInfos.clientName,
+      );
     } catch (e) {
       _handleLoginError(e);
     }

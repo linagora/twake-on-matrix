@@ -23,8 +23,11 @@ class ConnectPageView extends StatelessWidget {
       appBar: AppBar(
         leading: const BackButton(),
         centerTitle: true,
-        title: Text(
-          Matrix.of(context).getLoginClient().homeserver?.host ?? '',
+        title: FutureBuilder(
+          future: Matrix.of(context).getLoginClient(),
+          builder: (context, asyncSnapshot) {
+            return Text(asyncSnapshot.data?.homeserver?.host ?? '');
+          },
         ),
       ),
       body: Center(
@@ -49,14 +52,24 @@ class ConnectPageView extends StatelessWidget {
                               Icons.web_outlined,
                               size: 16,
                             )
-                          : Image.network(
-                              Uri.parse(identityProviders.single.icon!)
-                                  .getDownloadLink(
-                                    Matrix.of(context).getLoginClient(),
-                                  )
-                                  .toString(),
-                              width: ConnectPageViewStyle.iconSize,
-                              height: ConnectPageViewStyle.iconSize,
+                          : FutureBuilder(
+                              future: Matrix.of(context).getLoginClient(),
+                              builder: (context, asyncSnapshot) {
+                                final client = asyncSnapshot.data;
+                                if (client == null) {
+                                  return const SizedBox(
+                                    width: ConnectPageViewStyle.iconSize,
+                                    height: ConnectPageViewStyle.iconSize,
+                                  );
+                                }
+                                return Image.network(
+                                  Uri.parse(identityProviders.single.icon!)
+                                      .getDownloadLink(client)
+                                      .toString(),
+                                  width: ConnectPageViewStyle.iconSize,
+                                  height: ConnectPageViewStyle.iconSize,
+                                );
+                              },
                             ),
                       onPressed: () => controller.ssoLoginAction(
                         context: context,

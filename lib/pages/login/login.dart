@@ -70,17 +70,18 @@ class LoginController extends State<Login> {
         identifier = AuthenticationUserIdentifier(user: username);
       }
       Matrix.of(context).loginType = LoginType.mLoginPassword;
-      await matrix.getLoginClient().login(
-            LoginType.mLoginPassword,
-            identifier: identifier,
-            // To stay compatible with older server versions
-            // ignore: deprecated_member_use
-            user: identifier.type == AuthenticationIdentifierTypes.userId
-                ? username
-                : null,
-            password: passwordController.text,
-            initialDeviceDisplayName: PlatformInfos.clientName,
-          );
+      final client = await matrix.getLoginClient();
+      await client.login(
+        LoginType.mLoginPassword,
+        identifier: identifier,
+        // To stay compatible with older server versions
+        // ignore: deprecated_member_use
+        user: identifier.type == AuthenticationIdentifierTypes.userId
+            ? username
+            : null,
+        password: passwordController.text,
+        initialDeviceDisplayName: PlatformInfos.clientName,
+      );
     } on MatrixException catch (exception) {
       setState(() => passwordError = exception.errorMessage);
       return setState(() => loading = false);
@@ -105,14 +106,14 @@ class LoginController extends State<Login> {
   void _checkWellKnown(String userId) async {
     if (mounted) setState(() => usernameError = null);
     if (!userId.isValidMatrixId) return;
-    final oldHomeserver = Matrix.of(context).getLoginClient().homeserver;
+    final client = await Matrix.of(context).getLoginClient();
+    final oldHomeserver = client.homeserver;
     try {
       var newDomain = Uri.https(userId.domain!, '');
-      Matrix.of(context).getLoginClient().homeserver = newDomain;
+      client.homeserver = newDomain;
       DiscoveryInformation? wellKnownInformation;
       try {
-        wellKnownInformation =
-            await Matrix.of(context).getLoginClient().getWellknown();
+        wellKnownInformation = await client.getWellknown();
         if (wellKnownInformation.mHomeserver.baseUrl.toString().isNotEmpty) {
           newDomain = wellKnownInformation.mHomeserver.baseUrl;
         }
@@ -120,10 +121,10 @@ class LoginController extends State<Login> {
         // do nothing, newDomain is already set to a reasonable fallback
       }
       if (newDomain != oldHomeserver) {
-        await Matrix.of(context).getLoginClient().checkHomeserver(newDomain);
+        await client.checkHomeserver(newDomain);
 
-        if (Matrix.of(context).getLoginClient().homeserver == null) {
-          Matrix.of(context).getLoginClient().homeserver = oldHomeserver;
+        if (client.homeserver == null) {
+          client.homeserver = oldHomeserver;
           // okay, the server we checked does not appear to be a matrix server
           Logs().v(
             '$newDomain is not running a homeserver, asking to use $oldHomeserver',
@@ -146,13 +147,13 @@ class LoginController extends State<Login> {
         usernameError = null;
         if (mounted) setState(() {});
       } else {
-        Matrix.of(context).getLoginClient().homeserver = oldHomeserver;
+        client.homeserver = oldHomeserver;
         if (mounted) {
           setState(() {});
         }
       }
     } catch (e) {
-      Matrix.of(context).getLoginClient().homeserver = oldHomeserver;
+      client.homeserver = oldHomeserver;
       usernameError = e.toLocalizedString(context);
       if (mounted) setState(() {});
     }
@@ -179,12 +180,12 @@ class LoginController extends State<Login> {
     if (input == null) return;
     final clientSecret = DateTime.now().millisecondsSinceEpoch.toString();
     final response = await TwakeDialog.showFutureLoadingDialogFullScreen(
-      future: () =>
-          Matrix.of(context).getLoginClient().requestTokenToResetPasswordEmail(
-                clientSecret,
-                input.single,
-                sendAttempt++,
-              ),
+      future: () async => (await Matrix.of(context).getLoginClient())
+          .requestTokenToResetPasswordEmail(
+        clientSecret,
+        input.single,
+        sendAttempt++,
+      ),
     );
     if (response.error != null) return;
     final password = await showTextInputDialog(
@@ -226,11 +227,11 @@ class LoginController extends State<Login> {
       ).toJson(),
     };
     final success = await TwakeDialog.showFutureLoadingDialogFullScreen(
-      future: () => Matrix.of(context).getLoginClient().request(
-            RequestType.POST,
-            '/client/r0/account/password',
-            data: data,
-          ),
+      future: () async => (await Matrix.of(context).getLoginClient()).request(
+        RequestType.POST,
+        '/client/r0/account/password',
+        data: data,
+      ),
     );
     if (success.error == null) {
       TwakeSnackBar.show(context, L10n.of(context)!.passwordHasBeenChanged);

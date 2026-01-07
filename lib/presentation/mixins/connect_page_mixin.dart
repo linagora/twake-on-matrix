@@ -59,13 +59,13 @@ mixin ConnectPageMixin {
     return Uri.parse(redirectUrl).scheme;
   }
 
-  String _getAuthenticateUrl({
+  Future<String> _getAuthenticateUrl({
     required BuildContext context,
     required String id,
     required String redirectUrl,
-  }) {
-    final homeserver =
-        Matrix.of(context).getLoginClient().homeserver?.toString();
+  }) async {
+    final client = await Matrix.of(context).getLoginClient();
+    final homeserver = client.homeserver?.toString();
     final ssoRedirectUri =
         '$homeserver/_matrix/client/r0/login/sso/redirect/${Uri.encodeComponent(id)}';
     final redirectUrlEncode = Uri.encodeQueryComponent(redirectUrl);
@@ -95,7 +95,7 @@ mixin ConnectPageMixin {
     final redirectUrl = _generateRedirectUrl(
       Matrix.of(context).client.homeserver.toString(),
     );
-    final url = _getAuthenticateUrl(
+    final url = await _getAuthenticateUrl(
       context: context,
       id: id,
       redirectUrl: redirectUrl,
@@ -140,11 +140,11 @@ mixin ConnectPageMixin {
       if (token?.isEmpty ?? false) return SsoLoginState.tokenEmpty;
       Matrix.of(context).loginType = LoginType.mLoginToken;
       await TwakeDialog.showStreamDialogFullScreen(
-        future: () => Matrix.of(context).getLoginClient().login(
-              LoginType.mLoginToken,
-              token: token,
-              initialDeviceDisplayName: PlatformInfos.clientName,
-            ),
+        future: () async => (await Matrix.of(context).getLoginClient()).login(
+          LoginType.mLoginToken,
+          token: token,
+          initialDeviceDisplayName: PlatformInfos.clientName,
+        ),
       );
       return SsoLoginState.success;
     } catch (e) {
@@ -261,11 +261,11 @@ mixin ConnectPageMixin {
       }
       matrix.loginType = LoginType.mLoginToken;
       await TwakeDialog.showStreamDialogFullScreen(
-        future: () => matrix.getLoginClient().login(
-              LoginType.mLoginToken,
-              token: token,
-              initialDeviceDisplayName: PlatformInfos.clientName,
-            ),
+        future: () async => (await matrix.getLoginClient()).login(
+          LoginType.mLoginToken,
+          token: token,
+          initialDeviceDisplayName: PlatformInfos.clientName,
+        ),
       );
       return SsoLoginState.success;
     } catch (e) {
