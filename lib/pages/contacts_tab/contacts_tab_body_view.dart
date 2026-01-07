@@ -15,7 +15,6 @@ import 'package:fluffychat/presentation/model/contact/presentation_contact_succe
 import 'package:fluffychat/presentation/model/search/presentation_search.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/widgets/contacts_warning_banner/contacts_warning_banner_view.dart';
-import 'package:fluffychat/widgets/phone_book_loading/phone_book_loading_view.dart';
 import 'package:fluffychat/widgets/sliver_expandable_list.dart';
 import 'package:flutter/material.dart';
 import 'package:fluffychat/generated/l10n/app_localizations.dart';
@@ -35,7 +34,6 @@ class ContactsTabBodyView extends StatelessWidget {
         if (controller.client.userID != null)
           SliverInviteFriendButton(userId: controller.client.userID!),
         _SliverWarningBanner(controller: controller),
-        _SliverPhonebookLoading(controller: controller),
         _SliverRecentContacts(controller: controller),
         _SliverContactsList(controller: controller),
         if (PlatformInfos.isMobile)
@@ -318,31 +316,6 @@ class _SilverExternalContact extends StatelessWidget {
           ),
         ),
       ),
-    );
-  }
-}
-
-class _SliverPhonebookLoading extends StatelessWidget {
-  const _SliverPhonebookLoading({
-    required this.controller,
-  });
-
-  final ContactsTabController controller;
-
-  @override
-  Widget build(BuildContext context) {
-    return ValueListenableBuilder(
-      valueListenable: controller.contactsManager.progressPhoneBookState,
-      builder: (context, progressValue, _) {
-        if (progressValue != null) {
-          return SliverToBoxAdapter(
-            child: PhoneBookLoadingView(progress: progressValue),
-          );
-        }
-        return const SliverToBoxAdapter(
-          child: SizedBox.shrink(),
-        );
-      },
     );
   }
 }
