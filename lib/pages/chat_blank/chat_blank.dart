@@ -67,6 +67,8 @@ class _ChatBlankNotChat extends StatelessWidget {
             tag: 'info-logo',
             child: SvgPicture.asset(
               ImagePaths.icEmptyPage,
+              width: 182,
+              height: 182,
             ),
           ),
         ),
