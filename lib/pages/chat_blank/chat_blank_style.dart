@@ -5,6 +5,7 @@ import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 
 class ChatBlankStyle {
   static const double minWidth = 200;
+  static const double mascotSize = 182;
   static double width(BuildContext context) =>
       min<double>(MediaQuery.sizeOf(context).width, ChatBlankStyle.minWidth) /
       2;
