@@ -82,7 +82,7 @@ class SignupPageController extends State<SignupPage> {
     });
 
     try {
-      final client = Matrix.of(context).getLoginClient();
+      final client = await Matrix.of(context).getLoginClient();
       final email = emailController.text;
       if (email.isNotEmpty) {
         Matrix.of(context).currentClientSecret =

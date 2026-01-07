@@ -43,11 +43,10 @@ class AutoHomeserverPickerController extends State<AutoHomeserverPicker>
 
   void _autoConnectHomeserver() async {
     try {
-      matrix.loginHomeserverSummary = await matrix
-          .getLoginClient()
+      matrix.loginHomeserverSummary = await (await matrix.getLoginClient())
           .checkHomeserver(
-            Uri.parse(AppConfig.homeserver),
-          )
+        Uri.parse(AppConfig.homeserver),
+      )
           .timeout(
         autoHomeserverPickerTimeout,
         onTimeout: () {
@@ -59,7 +58,7 @@ class AutoHomeserverPickerController extends State<AutoHomeserverPicker>
           .any((flow) => flow.type == 'm.login.sso');
 
       try {
-        await Matrix.of(context).getLoginClient().register().timeout(
+        await (await matrix.getLoginClient()).register().timeout(
           autoHomeserverPickerTimeout,
           onTimeout: () {
             throw CheckHomeserverTimeoutException();
@@ -75,8 +74,7 @@ class AutoHomeserverPickerController extends State<AutoHomeserverPicker>
         context.push('/login');
       } else if (ssoSupported && matrix.loginRegistrationSupported == false) {
         Map<String, dynamic>? rawLoginTypes;
-        await Matrix.of(context)
-            .getLoginClient()
+        await (await matrix.getLoginClient())
             .request(
               RequestType.GET,
               '/client/r0/login',
@@ -114,13 +112,11 @@ class AutoHomeserverPickerController extends State<AutoHomeserverPicker>
   }
 
   void _autoConnectSaas() async {
-    matrix.loginHomeserverSummary = await matrix
-        .getLoginClient()
+    matrix.loginHomeserverSummary = await (await matrix.getLoginClient())
         .checkHomeserver(Uri.parse(AppConfig.twakeWorkplaceHomeserver))
         .toHomeserverSummary();
     Map<String, dynamic>? rawLoginTypes;
-    await Matrix.of(context)
-        .getLoginClient()
+    await (await matrix.getLoginClient())
         .request(
           RequestType.GET,
           '/client/r0/login',
@@ -166,17 +162,16 @@ class AutoHomeserverPickerController extends State<AutoHomeserverPicker>
       );
       final loginToken = getQueryParameter('loginToken');
       if (loginToken != null || loginToken?.isNotEmpty == true) {
-        Matrix.of(context).loginType = LoginType.mLoginToken;
-        Matrix.of(context).loginHomeserverSummary = await Matrix.of(context)
-            .getLoginClient()
+        matrix.loginType = LoginType.mLoginToken;
+        matrix.loginHomeserverSummary = await (await matrix.getLoginClient())
             .checkHomeserver(Uri.parse(AppConfig.homeserver))
             .toHomeserverSummary();
         final result = await TwakeDialog.showFutureLoadingDialogFullScreen(
-          future: () => Matrix.of(context).getLoginClient().login(
-                LoginType.mLoginToken,
-                token: loginToken,
-                initialDeviceDisplayName: PlatformInfos.clientName,
-              ),
+          future: () async => (await matrix.getLoginClient()).login(
+            LoginType.mLoginToken,
+            token: loginToken,
+            initialDeviceDisplayName: PlatformInfos.clientName,
+          ),
         );
         if (result.error != null) {
           autoHomeserverPickerUIState.value = AutoHomeServerPickerFailureState(

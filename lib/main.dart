@@ -3,8 +3,6 @@ import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/config/setting_keys.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/utils/client_manager.dart';
-import 'package:fluffychat/utils/matrix_sdk_extensions/flutter_hive_collections_database.dart';
-import 'package:fluffychat/utils/open_sqflite_db.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -23,8 +21,6 @@ import 'utils/background_push.dart';
 import 'widgets/lock_screen.dart';
 import 'widgets/twake_app.dart';
 
-late DatabaseApi fallbackDatabase;
-
 void main() async {
   // Our background push shared isolate accesses flutter-internal things very early in the startup proccess
   // To make sure that the parts of flutter needed are started up already, we need to ensure that the
@@ -35,18 +31,6 @@ void main() async {
   await vod.init();
   if (PlatformInfos.isMobile) {
     databaseFactory = databaseFactoryFfi;
-  }
-  try {
-    fallbackDatabase = await MatrixSdkDatabase.init(
-      AppConfig.applicationName,
-      database: await openSqfliteDb(name: AppConfig.applicationName),
-    );
-  } catch (e) {
-    Logs().e('Failed to create fallback database', e);
-    fallbackDatabase = FlutterHiveCollectionsDatabase(
-      AppConfig.applicationName,
-      '',
-    );
   }
   GoRouter.optionURLReflectsImperativeAPIs = true;
   if (PlatformInfos.isLinux) {

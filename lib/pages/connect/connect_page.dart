@@ -16,21 +16,25 @@ class ConnectPageController extends State<ConnectPage> with ConnectPageMixin {
 
   Map<String, dynamic>? rawLoginTypes;
 
+  Future<void> login() async {
+    final client = await Matrix.of(context).getLoginClient();
+    return client
+        .request(
+          RequestType.GET,
+          '/client/r0/login',
+        )
+        .then(
+          (loginTypes) => setState(() {
+            rawLoginTypes = loginTypes;
+          }),
+        );
+  }
+
   @override
   void initState() {
     super.initState();
     if (supportsSso(context)) {
-      Matrix.of(context)
-          .getLoginClient()
-          .request(
-            RequestType.GET,
-            '/client/r0/login',
-          )
-          .then(
-            (loginTypes) => setState(() {
-              rawLoginTypes = loginTypes;
-            }),
-          );
+      login();
     }
   }
 
