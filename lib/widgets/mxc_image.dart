@@ -203,7 +203,7 @@ class _MxcImageState extends State<MxcImage>
         Logs().d(
           'MxcImage::Downloaded attachment name = ${matrixFile.name} - mimeType = ${matrixFile.mimeType} - bytes = ${matrixFile.bytes.length}',
         );
-        if (!matrixFile.isImage() && event.messageType != MessageTypes.Video) {
+        if (_notImageOrVideo(matrixFile, event)) {
           return (imageData: null, filePath: null);
         }
         return (imageData: matrixFile.bytes, filePath: null);
@@ -215,6 +215,9 @@ class _MxcImageState extends State<MxcImage>
 
     return (imageData: null, filePath: null);
   }
+
+  bool _notImageOrVideo(MatrixFile matrixFile, Event event) =>
+      !matrixFile.isImage() && !event.isVideoOrImage;
 
   Future<void> _tryLoad(
     BuildContext context,
@@ -347,6 +350,7 @@ class _MxcImageState extends State<MxcImage>
           _imageData = null;
           return placeholder(context);
         },
+        placeholder: placeholder(context),
       ),
     );
   }
@@ -367,6 +371,7 @@ class _ImageWidget extends StatelessWidget {
   final int? cacheWidth;
   final int? cacheHeight;
   final bool isThumbnail;
+  final Widget placeholder;
 
   const _ImageWidget({
     this.filePath,
@@ -380,13 +385,12 @@ class _ImageWidget extends StatelessWidget {
     this.cacheWidth,
     this.cacheHeight,
     required this.isThumbnail,
+    required this.placeholder,
   });
 
   @override
   Widget build(BuildContext context) {
-    if (event?.messageType == MessageTypes.Video &&
-        data != null &&
-        !isThumbnail) {
+    if (_isVideoData) {
       final matrixVideoFile = MatrixVideoFile(
         bytes: data!,
         name: event?.filename ?? '${DateTime.now().millisecondsSinceEpoch}.mp4',
@@ -396,7 +400,7 @@ class _ImageWidget extends StatelessWidget {
         future: event?.room.generateVideoThumbnail(matrixVideoFile),
         builder: (context, snapshot) {
           if (snapshot.data == null) {
-            return const SizedBox();
+            return placeholder;
           }
 
           return Image.memory(
@@ -460,6 +464,12 @@ class _ImageWidget extends StatelessWidget {
                     errorBuilder: imageErrorWidgetBuilder,
                   )
             : const SizedBox.shrink();
+  }
+
+  bool get _isVideoData {
+    return event?.messageType == MessageTypes.Video &&
+        data != null &&
+        !isThumbnail;
   }
 }
 

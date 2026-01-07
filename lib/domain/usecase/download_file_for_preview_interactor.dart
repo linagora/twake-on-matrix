@@ -27,6 +27,12 @@ class DownloadFileForPreviewInteractor {
       );
       final tempFile = File('$tempDirPath/${event.filename}');
       tempFile.createSync(recursive: true);
+      if (matrixFile.bytes.isEmpty) {
+        yield const Left(
+          DownloadFileForPreviewFailure(exception: 'Empty file'),
+        );
+        return;
+      }
       tempFile.writeAsBytesSync(matrixFile.bytes);
       Logs().d(
         'DownloadFileForPreviewInteractor::execute(): ${tempFile.path}, mimeType: ${lookupMimeType(tempFile.path)}',

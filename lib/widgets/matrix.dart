@@ -11,7 +11,6 @@ import 'package:fluffychat/domain/repository/federation_configurations_repositor
 import 'package:fluffychat/domain/repository/user_info/user_info_repository.dart';
 import 'package:fluffychat/domain/usecase/room/create_support_chat_interactor.dart';
 import 'package:fluffychat/event/twake_event_types.dart';
-import 'package:fluffychat/main.dart';
 import 'package:fluffychat/pages/chat/events/audio_message/audio_player_widget.dart';
 import 'package:fluffychat/presentation/mixins/init_config_mixin.dart';
 import 'package:fluffychat/presentation/model/client_login_state_event.dart';
@@ -135,9 +134,6 @@ class MatrixState extends State<Matrix>
   String? get authUrl => _authUrl;
 
   Client get client {
-    if (widget.clients.isEmpty) {
-      widget.clients.add(getLoginClient());
-    }
     if (!isValidActiveClient) {
       return currentBundle!.first!;
     }
@@ -288,26 +284,24 @@ class MatrixState extends State<Matrix>
 
   Client? _loginClientCandidate;
 
-  Client getLoginClient({
-    MatrixSdkDatabase? database,
-  }) {
+  Future<Client> getLoginClient() async {
     if (widget.clients.isNotEmpty && !client.isLogged()) {
       return client;
     }
 
     // Generate client name consistently
-    final clientName = database?.name ??
+    final clientName =
         '${AppConfig.applicationName}-${DateTime.now().microsecondsSinceEpoch}';
-    final clientDatabase = database ?? fallbackDatabase;
 
-    final candidate = _loginClientCandidate ??= ClientManager.createClient(
+    final candidate =
+        _loginClientCandidate ??= await ClientManager.createClient(
       clientName,
-      database: clientDatabase,
-    )..onLoginStateChanged
-        .stream
-        .where((l) => l == LoginState.loggedIn)
-        .first
-        .then((state) => _handleAddAnotherAccount(state));
+    )
+          ..onLoginStateChanged
+              .stream
+              .where((l) => l == LoginState.loggedIn)
+              .first
+              .then((state) => _handleAddAnotherAccount(state));
     return candidate;
   }
 

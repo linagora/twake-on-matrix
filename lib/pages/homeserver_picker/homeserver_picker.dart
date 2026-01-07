@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:collection/collection.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:fluffychat/presentation/mixins/connect_page_mixin.dart';
-import 'package:fluffychat/presentation/mixins/temporary_database_mixin.dart';
 import 'package:fluffychat/pages/connect/sso_login_state.dart';
 import 'package:fluffychat/pages/homeserver_picker/homeserver_state.dart';
 import 'package:fluffychat/utils/client_manager.dart';
@@ -37,7 +36,7 @@ class HomeserverPicker extends StatefulWidget {
 }
 
 class HomeserverPickerController extends State<HomeserverPicker>
-    with ConnectPageMixin, TemporaryDatabaseMixin {
+    with ConnectPageMixin {
   HomeserverState state = HomeserverState.ssoLoginServer;
   final TextEditingController homeserverController = TextEditingController(
     text: AppConfig.defaultHomeserver,
@@ -152,12 +151,9 @@ class HomeserverPickerController extends State<HomeserverPicker>
           .map((client) => client.homeserver.toString())
           .toList();
       Logs().i('All homeservers: $allHomeserverLoggedIn');
+      final client = await matrix.getLoginClient();
 
-      final temporaryDatabase = await createTemporaryDatabase();
-
-      final homeserverSummary = await matrix
-          .getLoginClient(database: temporaryDatabase)
-          .checkHomeserver(homeserver);
+      final homeserverSummary = await client.checkHomeserver(homeserver);
 
       final homeserverFromSummary =
           homeserverSummary.$1?.mHomeserver.baseUrl.toString() ?? '';
@@ -171,7 +167,6 @@ class HomeserverPickerController extends State<HomeserverPicker>
 
       if (homeserverExists &&
           !AppConfig.supportMultipleAccountsInTheSameHomeserver) {
-        await cleanupTemporaryDatabase();
         TwakeSnackBar.show(
           context,
           L10n.of(context)!.isSingleAccountOnHomeserver,
@@ -180,15 +175,13 @@ class HomeserverPickerController extends State<HomeserverPicker>
         return;
       }
 
-      matrix.loginHomeserverSummary = await matrix
-          .getLoginClient(database: temporaryDatabase)
-          .checkHomeserver(homeserver)
-          .toHomeserverSummary();
+      matrix.loginHomeserverSummary =
+          await client.checkHomeserver(homeserver).toHomeserverSummary();
       final ssoSupported = matrix.loginHomeserverSummary!.loginFlows
           .any((flow) => flow.type == 'm.login.sso');
 
       try {
-        await Matrix.of(context).getLoginClient().register();
+        await client.register();
         matrix.loginRegistrationSupported = true;
       } on MatrixException catch (e) {
         matrix.loginRegistrationSupported = e.requireAdditionalAuthentication;
@@ -199,8 +192,7 @@ class HomeserverPickerController extends State<HomeserverPicker>
         context.push('/login');
       } else if (ssoSupported && matrix.loginRegistrationSupported == false) {
         Map<String, dynamic>? rawLoginTypes;
-        await Matrix.of(context)
-            .getLoginClient()
+        await client
             .request(
               RequestType.GET,
               '/client/r0/login',
@@ -227,7 +219,6 @@ class HomeserverPickerController extends State<HomeserverPicker>
         setState(() {});
       }
     } catch (e) {
-      await cleanupTemporaryDatabase();
       state = HomeserverState.wrongServerName;
       setState(() => error = (e).toLocalizedString(context));
     }
@@ -257,7 +248,6 @@ class HomeserverPickerController extends State<HomeserverPicker>
 
   @override
   void dispose() {
-    disposeTemporaryDatabaseMixin();
     homeserverFocusNode.removeListener(_updateFocus);
     homeserverFocusNode.dispose();
     homeserverController.dispose();
@@ -286,7 +276,7 @@ class HomeserverPickerController extends State<HomeserverPicker>
     await TwakeDialog.showFutureLoadingDialogFullScreen(
       future: () async {
         try {
-          final client = Matrix.of(context).getLoginClient();
+          final client = await Matrix.of(context).getLoginClient();
           await client.importDump(String.fromCharCodes(file.bytes!));
           Matrix.of(context).initMatrix();
         } catch (e, s) {
