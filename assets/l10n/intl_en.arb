@@ -100,6 +100,81 @@
   "commandHint_roomupgrade": "Upgrade the current room to the latest protocol/features",
   "commandHint_logout": "Log out of the current account on this device",
   "commandHint_logoutall": "Log out of this account from all devices",
+  "hasKnocked": "{senderName} knocked",
+  "@acceptedKeyVerification": {
+    "type": "text",
+    "placeholders": {
+      "senderName": {}
+    }
+  },
+  "acceptedKeyVerification": "🔐 {senderName} accepted the key verification",
+  "@acceptedKeyVerification": {
+    "type": "text",
+    "placeholders": {
+      "senderName": {}
+    }
+  },
+  "canceledKeyVerification": "🔐 {senderName} canceled the key verification",
+  "@canceledKeyVerification": {
+    "type": "text",
+    "placeholders": {
+      "senderName": {}
+    }
+  },
+  "completedKeyVerification": "🔐 {senderName} completed the key verification",
+  "@completedKeyVerification": {
+    "type": "text",
+    "placeholders": {
+      "senderName": {}
+    }
+  },
+  "invitedBy": "Invited by {senderName}",
+  "@invitedBy": {
+    "type": "text",
+    "placeholders": {
+      "senderName": {}
+    }
+  },
+  "isReadyForKeyVerification": "🔐 {senderName} is ready for key verification",
+  "@isReadyForKeyVerification": {
+    "type": "text",
+    "placeholders": {
+      "senderName": {}
+    }
+  },
+  "requestedKeyVerification": "🔐 {senderName} requested key verification",
+  "@requestedKeyVerification": {
+    "type": "text",
+    "placeholders": {
+      "senderName": {}
+    }
+  },
+  "startedKeyVerification": "🔐 {senderName} started key verification",
+  "@startedKeyVerification": {
+    "type": "text",
+    "placeholders": {
+      "senderName": {}
+    }
+  },
+  "pollHasBeenEnded": "The poll has been ended",
+  "@pollHasBeenEnded": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "startedAPoll": "📊 {senderName} started a poll",
+  "@startedAPoll": {
+    "type": "text",
+    "placeholders": {
+      "senderName": {}
+    }
+  },
+  "voiceMessageWithDuration": "🎤 Voice message ({duration})",
+  "@voiceMessageWithDuration": {
+    "type": "text",
+    "placeholders": {
+      "duration": {}
+    }
+  },
   "googlyEyesContent": "{senderName} sends you googly eyes",
   "@googlyEyesContent": {
     "type": "text",
