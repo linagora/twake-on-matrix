@@ -139,8 +139,9 @@ mixin ConnectPageMixin {
       final token = Uri.parse(result).queryParameters['loginToken'];
       if (token?.isEmpty ?? false) return SsoLoginState.tokenEmpty;
       Matrix.of(context).loginType = LoginType.mLoginToken;
+      final client = await Matrix.of(context).getLoginClient();
       await TwakeDialog.showStreamDialogFullScreen(
-        future: () async => (await Matrix.of(context).getLoginClient()).login(
+        future: () async => client.login(
           LoginType.mLoginToken,
           token: token,
           initialDeviceDisplayName: PlatformInfos.clientName,
@@ -260,8 +261,9 @@ mixin ConnectPageMixin {
         return SsoLoginState.tokenEmpty;
       }
       matrix.loginType = LoginType.mLoginToken;
+      final client = await matrix.getLoginClient();
       await TwakeDialog.showStreamDialogFullScreen(
-        future: () async => (await matrix.getLoginClient()).login(
+        future: () async => client.login(
           LoginType.mLoginToken,
           token: token,
           initialDeviceDisplayName: PlatformInfos.clientName,
