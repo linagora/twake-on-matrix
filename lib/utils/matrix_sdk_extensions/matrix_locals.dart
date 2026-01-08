@@ -273,7 +273,6 @@ class MatrixLocals extends MatrixLocalizations {
       l10n.reactedWith(senderName, reactionKey);
 
   @override
-  // TODO: implement youAcceptedTheInvitation
   String get youAcceptedTheInvitation => l10n.youAcceptedTheInvitation;
 
   @override
@@ -290,7 +289,6 @@ class MatrixLocals extends MatrixLocalizations {
   String youInvitedUser(String targetName) => l10n.youInvitedUser(targetName);
 
   @override
-  // TODO: implement youJoinedTheChat
   String get youJoinedTheChat => l10n.youJoinedTheChat;
 
   @override
@@ -301,7 +299,6 @@ class MatrixLocals extends MatrixLocalizations {
       l10n.youKickedAndBanned(targetName);
 
   @override
-  // TODO: implement youRejectedTheInvitation
   String get youRejectedTheInvitation => l10n.youRejectedTheInvitation;
 
   @override
@@ -315,21 +312,16 @@ class MatrixLocals extends MatrixLocalizations {
   String get unknownUser => l10n.user;
 
   @override
-  String hasKnocked(String targetName) {
-    // TODO: implement hasKnocked
-    throw UnimplementedError();
-  }
+  String hasKnocked(String targetName) => l10n.hasKnocked(targetName);
 
   @override
   String acceptedKeyVerification(String senderName) {
-    // TODO: implement acceptedKeyVerification
-    throw UnimplementedError();
+    return l10n.acceptedKeyVerification(senderName);
   }
 
   @override
   String canceledKeyVerification(String senderName) {
-    // TODO: implement canceledKeyVerification
-    throw UnimplementedError();
+    return l10n.canceledKeyVerification(senderName);
   }
 
   @override
@@ -337,20 +329,17 @@ class MatrixLocals extends MatrixLocalizations {
 
   @override
   String completedKeyVerification(String senderName) {
-    // TODO: implement completedKeyVerification
-    throw UnimplementedError();
+    return l10n.completedKeyVerification(senderName);
   }
 
   @override
   String invitedBy(String senderName) {
-    // TODO: implement invitedBy
-    throw UnimplementedError();
+    return l10n.invitedBy(senderName);
   }
 
   @override
   String isReadyForKeyVerification(String senderName) {
-    // TODO: implement isReadyForKeyVerification
-    throw UnimplementedError();
+    return l10n.isReadyForKeyVerification(senderName);
   }
 
   @override
@@ -358,28 +347,36 @@ class MatrixLocals extends MatrixLocalizations {
 
   @override
   String requestedKeyVerification(String senderName) {
-    // TODO: implement requestedKeyVerification
-    throw UnimplementedError();
+    return l10n.requestedKeyVerification(senderName);
   }
 
   @override
   String startedKeyVerification(String senderName) {
-    // TODO: implement startedKeyVerification
-    throw UnimplementedError();
+    return l10n.startedKeyVerification(senderName);
   }
 
   @override
   String voiceMessage(String senderName, Duration? duration) {
-    return l10n.voiceMessage;
+    if (duration == null) {
+      return l10n.voiceMessage;
+    }
+
+    final hours = duration.inHours;
+    final minutes = duration.inMinutes % 60;
+    final seconds = duration.inSeconds % 60;
+
+    final formatted = hours > 0
+        ? '$hours:${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}'
+        : '${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
+
+    return l10n.voiceMessageWithDuration(formatted);
   }
 
   @override
-  // TODO: implement pollHasBeenEnded
-  String get pollHasBeenEnded => throw UnimplementedError();
+  String get pollHasBeenEnded => l10n.pollHasBeenEnded;
 
   @override
   String startedAPoll(String senderName) {
-    // TODO: implement startedAPoll
-    throw UnimplementedError();
+    return l10n.startedAPoll(senderName);
   }
 }
