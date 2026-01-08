@@ -14,6 +14,7 @@ mixin SendFilesMixin {
     ImagePickerGridController imagePickerController, {
     String? caption,
     Room? room,
+    Event? inReplyTo,
   }) async {
     if (room == null) {
       return;
@@ -26,6 +27,7 @@ mixin SendFilesMixin {
         return FileAssetEntity.createAssetEntity(entity.asset);
       }).toList(),
       caption: caption,
+      inReplyTo: inReplyTo,
     );
   }
 
@@ -34,6 +36,7 @@ mixin SendFilesMixin {
     Room? room,
     List<FileInfo>? fileInfos,
     VoidCallback? onSendFileCallback,
+    Event? inReplyTo,
   }) async {
     if (room == null) {}
     Navigator.pop(context);
@@ -52,7 +55,11 @@ mixin SendFilesMixin {
     if (fileInfos == null || fileInfos.isEmpty == true) return;
     onSendFileCallback?.call();
     final uploadManger = getIt.get<UploadManager>();
-    uploadManger.uploadFileMobile(room: room!, fileInfos: fileInfos);
+    uploadManger.uploadFileMobile(
+      room: room!,
+      fileInfos: fileInfos,
+      inReplyTo: inReplyTo,
+    );
   }
 
   Future<List<MatrixFile>> pickFilesFromSystem() async {
@@ -70,6 +77,7 @@ mixin SendFilesMixin {
     Room? room,
     required PickerType type,
     VoidCallback? onSendFileCallback,
+    Event? inReplyTo,
   }) async {
     switch (type) {
       case PickerType.gallery:
@@ -79,6 +87,7 @@ mixin SendFilesMixin {
           context,
           room: room,
           onSendFileCallback: onSendFileCallback,
+          inReplyTo: inReplyTo,
         );
         break;
       case PickerType.location:

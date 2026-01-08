@@ -103,7 +103,9 @@ class BaseFileTileWidget extends StatelessWidget {
             ),
           ),
         ),
-        if (event != null && event!.isMediaAndFilesWithCaption()) ...[
+        if (event != null &&
+            event!.isMediaAndFilesWithCaption() &&
+            event!.isBodyDiffersFromFilename()) ...[
           const SizedBox(height: 8.0),
           MouseRegion(
             cursor: SystemMouseCursors.copy,
