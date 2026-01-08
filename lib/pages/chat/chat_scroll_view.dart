@@ -28,11 +28,16 @@ class _ChatScrollViewState extends State<ChatScrollView> {
   final _top = <Event>[], _bottom = <Event>[];
   ChatController get controller => widget.controller;
   bool _wasRequestingFuture = false;
+  List<Event> _currentEvents = [];
 
   @override
   void initState() {
     super.initState();
-    _bottom.addAll(widget.events);
+    _currentEvents = widget.events
+      ..sort(
+        (a, b) => b.originServerTs.compareTo(a.originServerTs),
+      );
+    _bottom.addAll(_currentEvents);
   }
 
   @override
@@ -47,14 +52,22 @@ class _ChatScrollViewState extends State<ChatScrollView> {
 
     if (widget.events == oldWidget.events) return;
 
+    final newEvents = List<Event>.from(widget.events)
+      ..sort(
+        (a, b) => b.originServerTs.compareTo(a.originServerTs),
+      );
+
     // Use the extension to sync event lists
     final result = EventListExtension.syncEventLists(
-      oldEvents: oldWidget.events,
-      newEvents: widget.events,
+      oldEvents: _currentEvents,
+      newEvents: newEvents,
       currentTop: _top,
       currentBottom: _bottom,
       wasRequestingFuture: wasRequestingFutureBeforeUpdate,
     );
+
+    // Update the current events
+    _currentEvents = newEvents;
 
     // Update the lists
     _top
@@ -122,20 +135,20 @@ class _ChatScrollViewState extends State<ChatScrollView> {
                   return const SizedBox.shrink();
                 }
                 final currentEvent = _bottom[index];
-                final currentEventIndex = widget.events.indexWhere(
+                final currentEventIndex = _currentEvents.indexWhere(
                   (e) => e.isSameEvent(currentEvent),
                 );
 
-                // If event is not in widget.events anymore, skip rendering it
+                // If event is not in _currentEvents anymore, skip rendering it
                 if (currentEventIndex == -1) {
                   return const SizedBox.shrink();
                 }
 
                 final previousEvent = currentEventIndex > 0
-                    ? widget.events[currentEventIndex - 1]
+                    ? _currentEvents[currentEventIndex - 1]
                     : null;
-                final nextEvent = currentEventIndex < widget.events.length - 1
-                    ? widget.events[currentEventIndex + 1]
+                final nextEvent = currentEventIndex < _currentEvents.length - 1
+                    ? _currentEvents[currentEventIndex + 1]
                     : null;
                 return ChatEventListItem(
                   event: currentEvent,
@@ -170,20 +183,20 @@ class _ChatScrollViewState extends State<ChatScrollView> {
                   return const SizedBox.shrink();
                 }
                 final currentEvent = _top[index];
-                final currentEventIndex = widget.events.indexWhere(
+                final currentEventIndex = _currentEvents.indexWhere(
                   (e) => e.isSameEvent(currentEvent),
                 );
 
-                // If event is not in widget.events anymore, skip rendering it
+                // If event is not in _currentEvents anymore, skip rendering it
                 if (currentEventIndex == -1) {
                   return const SizedBox.shrink();
                 }
 
                 final previousEvent = currentEventIndex > 0
-                    ? widget.events[currentEventIndex - 1]
+                    ? _currentEvents[currentEventIndex - 1]
                     : null;
-                final nextEvent = currentEventIndex < widget.events.length - 1
-                    ? widget.events[currentEventIndex + 1]
+                final nextEvent = currentEventIndex < _currentEvents.length - 1
+                    ? _currentEvents[currentEventIndex + 1]
                     : null;
                 return ChatEventListItem(
                   event: currentEvent,
