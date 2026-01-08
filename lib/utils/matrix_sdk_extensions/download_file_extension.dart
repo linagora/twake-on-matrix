@@ -111,7 +111,7 @@ extension DownloadFileExtension on Event {
       filePath: savePath,
     );
 
-    await _handleDownloadFileDone(
+    final decryptedFileInfo = await _handleDownloadFileDone(
       mxcUrl: mxcUrl,
       fileInfo: fileInfo,
       savePath: savePath,
@@ -120,10 +120,10 @@ extension DownloadFileExtension on Event {
       getThumbnail: getThumbnail,
     );
 
-    return fileInfo;
+    return decryptedFileInfo ?? fileInfo;
   }
 
-  Future<void> _handleDownloadFileDone({
+  Future<FileInfo?> _handleDownloadFileDone({
     required Uri mxcUrl,
     required String savePath,
     required String filename,
@@ -133,7 +133,7 @@ extension DownloadFileExtension on Event {
   }) async {
     Logs().i('DownloadFileExtension::_handleDownloadFileDone(): $mxcUrl');
     if (isAttachmentEncrypted) {
-      await _handleEncryptedFileEvent(
+      return await _handleEncryptedFileEvent(
         mxcUrl: mxcUrl,
         streamController: streamController,
         fileInfo: fileInfo,
@@ -149,10 +149,11 @@ extension DownloadFileExtension on Event {
           ),
         ),
       );
+      return null;
     }
   }
 
-  Future<void> _handleEncryptedFileEvent({
+  Future<FileInfo?> _handleEncryptedFileEvent({
     required Uri mxcUrl,
     required FileInfo fileInfo,
     required String savePath,
@@ -193,6 +194,8 @@ extension DownloadFileExtension on Event {
 
       // Delete the encrypted file to save space
       await _clearEncryptedFile(savePath: savePath);
+
+      return decryptedFile;
     } catch (e) {
       Logs().e(
         'DownloadManager::_handleEncryptedFileEvent(): $e',
@@ -202,6 +205,7 @@ extension DownloadFileExtension on Event {
           DownloadFileFailureState(exception: e),
         ),
       );
+      return null;
     }
   }
 
