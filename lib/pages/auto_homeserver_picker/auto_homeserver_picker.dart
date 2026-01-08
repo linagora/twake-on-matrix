@@ -43,7 +43,8 @@ class AutoHomeserverPickerController extends State<AutoHomeserverPicker>
 
   void _autoConnectHomeserver() async {
     try {
-      matrix.loginHomeserverSummary = await (await matrix.getLoginClient())
+      final client = await matrix.getLoginClient();
+      matrix.loginHomeserverSummary = await client
           .checkHomeserver(
         Uri.parse(AppConfig.homeserver),
       )
@@ -58,7 +59,7 @@ class AutoHomeserverPickerController extends State<AutoHomeserverPicker>
           .any((flow) => flow.type == 'm.login.sso');
 
       try {
-        await (await matrix.getLoginClient()).register().timeout(
+        await client.register().timeout(
           autoHomeserverPickerTimeout,
           onTimeout: () {
             throw CheckHomeserverTimeoutException();
@@ -74,7 +75,7 @@ class AutoHomeserverPickerController extends State<AutoHomeserverPicker>
         context.push('/login');
       } else if (ssoSupported && matrix.loginRegistrationSupported == false) {
         Map<String, dynamic>? rawLoginTypes;
-        await (await matrix.getLoginClient())
+        await client
             .request(
               RequestType.GET,
               '/client/r0/login',
@@ -112,11 +113,12 @@ class AutoHomeserverPickerController extends State<AutoHomeserverPicker>
   }
 
   void _autoConnectSaas() async {
-    matrix.loginHomeserverSummary = await (await matrix.getLoginClient())
+    final client = await matrix.getLoginClient();
+    matrix.loginHomeserverSummary = await client
         .checkHomeserver(Uri.parse(AppConfig.twakeWorkplaceHomeserver))
         .toHomeserverSummary();
     Map<String, dynamic>? rawLoginTypes;
-    await (await matrix.getLoginClient())
+    await client
         .request(
           RequestType.GET,
           '/client/r0/login',
@@ -163,11 +165,12 @@ class AutoHomeserverPickerController extends State<AutoHomeserverPicker>
       final loginToken = getQueryParameter('loginToken');
       if (loginToken != null || loginToken?.isNotEmpty == true) {
         matrix.loginType = LoginType.mLoginToken;
-        matrix.loginHomeserverSummary = await (await matrix.getLoginClient())
+        final client = await matrix.getLoginClient();
+        matrix.loginHomeserverSummary = await client
             .checkHomeserver(Uri.parse(AppConfig.homeserver))
             .toHomeserverSummary();
         final result = await TwakeDialog.showFutureLoadingDialogFullScreen(
-          future: () async => (await matrix.getLoginClient()).login(
+          future: () async => client.login(
             LoginType.mLoginToken,
             token: loginToken,
             initialDeviceDisplayName: PlatformInfos.clientName,
