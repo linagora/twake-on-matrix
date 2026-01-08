@@ -79,29 +79,31 @@ class MessageContent extends StatelessWidget
                       event: event,
                       onTapPreview: onTapPreview,
                       onTapSelectMode: onTapSelectMode,
-                      maxWidth: textWidth,
+                      maxWidth:
+                          event.isReplyEvent() ? double.infinity : textWidth,
                     ),
                   ),
                   const SizedBox(height: 8),
-                  SizedBox(
-                    width: MessageStyle.messageBubbleWidthMediaCaption(
-                      event: event,
-                      context: context,
-                      textWidth: textWidth,
-                    ),
-                    child: TwakeLinkPreview(
-                      key: ValueKey('TwakeLinkPreview%${event.eventId}%'),
-                      event: event,
-                      localizedBody: event.body,
-                      ownMessage: ownMessage,
-                      fontSize: fontSize,
-                      linkStyle: MessageContentStyle.linkStyleMessageContent(
-                        context,
+                  if (event.isBodyDiffersFromFilename())
+                    SizedBox(
+                      width: MessageStyle.messageBubbleWidthMediaCaption(
+                        event: event,
+                        context: context,
+                        textWidth: textWidth,
                       ),
-                      richTextStyle: event.getMessageTextStyle(context),
-                      isCaption: event.isMediaAndFilesWithCaption(),
+                      child: TwakeLinkPreview(
+                        key: ValueKey('TwakeLinkPreview%${event.eventId}%'),
+                        event: event,
+                        localizedBody: event.body,
+                        ownMessage: ownMessage,
+                        fontSize: fontSize,
+                        linkStyle: MessageContentStyle.linkStyleMessageContent(
+                          context,
+                        ),
+                        richTextStyle: event.getMessageTextStyle(context),
+                        isCaption: event.isMediaAndFilesWithCaption(),
+                      ),
                     ),
-                  ),
                 ],
               );
             }
@@ -202,25 +204,26 @@ class MessageContent extends StatelessWidget
                       ],
                     ),
                   const SizedBox(height: 8),
-                  SizedBox(
-                    width: MessageStyle.messageBubbleWidthVideoCaption(
-                      event: event,
-                      context: context,
-                      textWidth: textWidth,
-                    ),
-                    child: TwakeLinkPreview(
-                      key: ValueKey('TwakeLinkPreview%${event.eventId}%'),
-                      event: event,
-                      localizedBody: event.body,
-                      ownMessage: ownMessage,
-                      fontSize: fontSize,
-                      linkStyle: MessageContentStyle.linkStyleMessageContent(
-                        context,
+                  if (event.isBodyDiffersFromFilename())
+                    SizedBox(
+                      width: MessageStyle.messageBubbleWidthVideoCaption(
+                        event: event,
+                        context: context,
+                        textWidth: textWidth,
                       ),
-                      richTextStyle: event.getMessageTextStyle(context),
-                      isCaption: event.isMediaAndFilesWithCaption(),
+                      child: TwakeLinkPreview(
+                        key: ValueKey('TwakeLinkPreview%${event.eventId}%'),
+                        event: event,
+                        localizedBody: event.body,
+                        ownMessage: ownMessage,
+                        fontSize: fontSize,
+                        linkStyle: MessageContentStyle.linkStyleMessageContent(
+                          context,
+                        ),
+                        richTextStyle: event.getMessageTextStyle(context),
+                        isCaption: event.isMediaAndFilesWithCaption(),
+                      ),
                     ),
-                  ),
                 ],
               );
             }

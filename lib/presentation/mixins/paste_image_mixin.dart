@@ -16,6 +16,7 @@ mixin PasteImageMixin {
     Room room, {
     ClipboardReader? clipboardReader,
     VoidCallback? onSendFileCallback,
+    Event? inReplyTo,
   }) async {
     if (!(await TwakeClipboard.instance
         .isReadableImageFormat(clipboardReader: clipboardReader))) {
@@ -52,6 +53,7 @@ mixin PasteImageMixin {
         return SendFileDialog(
           room: room,
           files: nonNullableFiles,
+          inReplyTo: inReplyTo,
         );
       },
     );

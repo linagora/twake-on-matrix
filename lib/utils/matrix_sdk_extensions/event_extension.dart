@@ -418,12 +418,28 @@ extension LocalizedBody on Event {
     return reactionMap.isNotEmpty;
   }
 
+  /// Checks if this event should display in caption mode.
+  /// Returns true for:
+  /// - Media/file events (image, video, file) with non-empty text that differs from filename
+  /// - Reply events (to allow caption input when replying with media)
   bool isMediaAndFilesWithCaption() {
-    return (messageType == MessageTypes.Image ||
-            messageType == MessageTypes.Video ||
-            messageType == MessageTypes.File) &&
-        text.isNotEmpty &&
-        filename != text;
+    return ((messageType == MessageTypes.Image ||
+                messageType == MessageTypes.Video ||
+                messageType == MessageTypes.File) &&
+            text.isNotEmpty &&
+            filename != text) ||
+        relationshipType == RelationshipTypes.reply;
+  }
+
+  /// Returns true if the event's body text differs from its filename.
+  /// Used to determine if a caption should be displayed for media files.
+  bool isBodyDiffersFromFilename() {
+    return content["body"] != content["filename"];
+  }
+
+  /// Returns true if this event is a reply to another event.
+  bool isReplyEvent() {
+    return relationshipType == RelationshipTypes.reply;
   }
 
   /// Checks if this event is the same as another event, considering both eventId and transaction_id.

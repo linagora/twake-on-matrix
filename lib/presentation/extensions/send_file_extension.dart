@@ -776,6 +776,7 @@ extension SendFileExtension on Room {
       sendPlaceholdersForImagePickerFiles({
     required List<FileAssetEntity> entities,
     String? captionInfo,
+    Event? inReplyTo,
   }) async {
     final txIdMapToImageFile = <TransactionId, FakeSendingFileInfo>{};
     for (final entity in entities) {
@@ -794,6 +795,7 @@ extension SendFileExtension on Room {
           txid: txid,
           messageType: entity.messageType,
           captionInfo: captionInfo,
+          inReplyTo: inReplyTo,
         );
         txIdMapToImageFile[txid] = FakeSendingFileInfo(
           fileInfo: fileInfo,

@@ -30,12 +30,14 @@ class SendFileDialog extends StatefulWidget {
   final Room? room;
   final List<MatrixFile> files;
   final String? pendingText;
+  final Event? inReplyTo;
 
   const SendFileDialog({
     this.room,
     required this.files,
     super.key,
     this.pendingText,
+    this.inReplyTo,
   });
 
   @override
@@ -150,6 +152,7 @@ class SendFileDialogController extends State<SendFileDialog> {
           room: widget.room!,
           files: [filesNotifier.value.first],
           caption: textEditingController.text,
+          inReplyTo: widget.inReplyTo,
         )
         .then((_) => PaintingBinding.instance.imageCache.clear());
     Navigator.of(context).pop(
@@ -182,6 +185,7 @@ class SendFileDialogController extends State<SendFileDialog> {
           files: getFilesNotError(),
           caption: textEditingController.text,
           thumbnails: thumbnails,
+          inReplyTo: widget.inReplyTo,
         )
         .then((_) => PaintingBinding.instance.imageCache.clear());
     Navigator.of(context).pop(

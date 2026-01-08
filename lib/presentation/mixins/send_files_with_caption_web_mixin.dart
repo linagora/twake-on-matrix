@@ -14,6 +14,7 @@ mixin SendFilesWithCaptionWebMixin {
     required List<MatrixFile> matrixFilesList,
     void Function(SendMediaDialogResult)? onSendFileCallback,
     String? pendingText,
+    Event? inReplyTo,
   }) async {
     if (matrixFilesList.length <= AppConfig.maxFilesSendPerDialog &&
         matrixFilesList.isNotEmpty) {
@@ -25,6 +26,7 @@ mixin SendFilesWithCaptionWebMixin {
             room: room,
             files: matrixFilesList,
             pendingText: pendingText,
+            inReplyTo: inReplyTo,
           );
         },
       );
