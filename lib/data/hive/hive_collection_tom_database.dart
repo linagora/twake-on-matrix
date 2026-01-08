@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:fluffychat/utils/matrix_sdk_extensions/flutter_hive_collections_database.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
@@ -35,8 +36,6 @@ class HiveCollectionToMDatabase {
 
   HiveCollectionToMDatabase(this.name, this.path, {this.key});
 
-  static const String cipherStorageKey = 'hive_encryption_key';
-
   static Future<HiveCollectionToMDatabase> databaseBuilder() async {
     Logs().d('Open Hive for ToM...');
     HiveAesCipher? hiverCipher;
@@ -49,7 +48,7 @@ class HiveCollectionToMDatabase {
 
       const secureStorage = FlutterSecureStorage();
       final containsEncryptionKey = await secureStorage.read(
-            key: cipherStorageKey,
+            key: FlutterHiveCollectionsDatabase.cipherStorageKey,
           ) !=
           null;
       if (!containsEncryptionKey) {
@@ -57,26 +56,26 @@ class HiveCollectionToMDatabase {
         if (Platform.isLinux) throw MissingPluginException();
         final key = Hive.generateSecureKey();
         await secureStorage.write(
-          key: cipherStorageKey,
+          key: FlutterHiveCollectionsDatabase.cipherStorageKey,
           value: base64UrlEncode(key),
         );
       }
 
       // workaround for if we just wrote to the key and it still doesn't exist
       final rawEncryptionKey = await secureStorage.read(
-        key: cipherStorageKey,
+        key: FlutterHiveCollectionsDatabase.cipherStorageKey,
       );
       if (rawEncryptionKey == null) throw MissingPluginException();
 
       hiverCipher = HiveAesCipher(base64Url.decode(rawEncryptionKey));
     } on MissingPluginException catch (_) {
       const FlutterSecureStorage()
-          .delete(key: cipherStorageKey)
+          .delete(key: FlutterHiveCollectionsDatabase.cipherStorageKey)
           .catchError((_) {});
       Logs().i('Hive encryption is not supported on this platform');
     } catch (e, s) {
       const FlutterSecureStorage()
-          .delete(key: cipherStorageKey)
+          .delete(key: FlutterHiveCollectionsDatabase.cipherStorageKey)
           .catchError((_) {});
       Logs().w('Unable to init Hive encryption', e, s);
     }
@@ -90,7 +89,8 @@ class HiveCollectionToMDatabase {
       await db.open();
     } catch (e, s) {
       Logs().w('Unable to open ToM Hive.', e, s);
-      const FlutterSecureStorage().delete(key: cipherStorageKey);
+      const FlutterSecureStorage()
+          .delete(key: FlutterHiveCollectionsDatabase.cipherStorageKey);
       await db.clear().catchError((_) {});
       await Hive.deleteFromDisk();
       rethrow;
