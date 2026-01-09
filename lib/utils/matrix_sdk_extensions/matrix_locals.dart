@@ -195,7 +195,9 @@ class MatrixLocals extends MatrixLocalizations {
 
   @override
   String removedBy(Event redactedEvent) {
-    return l10n.deletedMessage;
+    return l10n.removedBy(
+      redactedEvent.senderFromMemoryOrFallback.displayName ?? '',
+    );
   }
 
   @override

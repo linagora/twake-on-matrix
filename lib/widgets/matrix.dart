@@ -1351,12 +1351,17 @@ extension HomeserverSummaryConversion on Future<
       List<LoginFlow>,
       GetAuthMetadataResponse?
     )> {
-  Future<HomeserverSummary> toHomeserverSummary() async {
-    final result = await this;
-    return HomeserverSummary(
-      discoveryInformation: result.$1,
-      versions: result.$2,
-      loginFlows: result.$3,
-    );
+  Future<HomeserverSummary?> toHomeserverSummary() async {
+    try {
+      final result = await this;
+      return HomeserverSummary(
+        discoveryInformation: result.$1,
+        versions: result.$2,
+        loginFlows: result.$3,
+      );
+    } catch (e, s) {
+      Logs().e('HomeserverSummaryConversion::toHomeserverSummary', e, s);
+      return null;
+    }
   }
 }
