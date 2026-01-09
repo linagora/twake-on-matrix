@@ -170,6 +170,7 @@ class DraftChatController extends State<DraftChat>
           imagePickerController,
           room: newRoom,
           caption: caption,
+          inReplyTo: inReplyTo,
         );
       },
     );

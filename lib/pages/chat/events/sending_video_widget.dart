@@ -3,6 +3,7 @@ import 'package:fluffychat/presentation/extensions/send_file_web_extension.dart'
 import 'package:fluffychat/presentation/mixins/play_video_action_mixin.dart';
 import 'package:fluffychat/presentation/model/chat/upload_file_ui_state.dart';
 import 'package:fluffychat/presentation/model/file/display_image_info.dart';
+import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
 import 'package:fluffychat/widgets/mixins/upload_file_mixin.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_blurhash/flutter_blurhash.dart';
@@ -64,11 +65,13 @@ class _SendingVideoWidgetState extends State<SendingVideoWidget>
             alignment: Alignment.center,
             children: [
               SizedBox(
-                width: MessageContentStyle
-                    .combinedBubbleImageWidthWithBubbleMaxWidget(
-                  bubbleImageWidget: widget.displayImageInfo.size.width,
-                  bubbleMaxWidth: widget.bubbleWidth ?? 0,
-                ),
+                width: widget.event.isReplyEvent()
+                    ? double.infinity
+                    : MessageContentStyle
+                        .combinedBubbleImageWidthWithBubbleMaxWidget(
+                        bubbleImageWidget: widget.displayImageInfo.size.width,
+                        bubbleMaxWidth: widget.bubbleWidth ?? 0,
+                      ),
                 height: MessageContentStyle.imageBubbleHeight(
                   widget.displayImageInfo.size.height,
                 ),
@@ -127,6 +130,15 @@ class _SendingVideoWidgetState extends State<SendingVideoWidget>
           ),
         );
       }),
+      child: Hero(
+        tag: widget.event.eventId,
+        child: VideoWidget(
+          imageHeight: widget.displayImageInfo.size.height,
+          imageWidth: widget.displayImageInfo.size.width,
+          matrixFile: widget.matrixFile,
+          event: widget.event,
+        ),
+      ),
     );
   }
 

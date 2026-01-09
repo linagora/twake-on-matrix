@@ -158,7 +158,7 @@ class _MessageContentWithTimestampBuilderState
           MessageTypes.Text,
           MessageTypes.BadEncrypted,
         }.contains(widget.event.messageType) ||
-        widget.event.isMediaAndFilesWithCaption();
+        widget.event.shouldShowCaptionMode();
 
     return Align(
       alignment: MessageStyle.messageAlignmentGeometry(

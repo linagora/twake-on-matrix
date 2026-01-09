@@ -108,11 +108,13 @@ class UploadManager {
 
       Logs().d('UploadManager::uploadMediaMobile(): txid: $txidKey');
 
+      final shouldIncludeReply = txidKey == txids.keys.last;
+
       _initUploadFileInfo(
         txid: txidKey,
         room: room,
-        captionInfo: txidKey == txids.keys.last ? caption : null,
-        inReplyTo: txidKey == txids.keys.last ? inReplyTo : null,
+        captionInfo: shouldIncludeReply ? caption : null,
+        inReplyTo: shouldIncludeReply ? inReplyTo : null,
       );
 
       final sentDate = _eventIdMapUploadFileInfo[txidKey]?.createdAt;
@@ -123,7 +125,7 @@ class UploadManager {
         messageType: fakeSendingFileInfo.messageType,
         sentDate: sentDate,
         captionInfo: _eventIdMapUploadFileInfo[txidKey]?.captionInfo?.caption,
-        inReplyTo: inReplyTo,
+        inReplyTo: shouldIncludeReply ? inReplyTo : null,
       );
 
       final streamController =
@@ -163,7 +165,7 @@ class UploadManager {
         sentDate: sentDate,
         shrinkImageMaxDimension: _shrinkImageMaxDimension,
         captionInfo: _eventIdMapUploadFileInfo[txidKey]?.captionInfo?.caption,
-        inReplyTo: inReplyTo,
+        inReplyTo: shouldIncludeReply ? inReplyTo : null,
       );
     }
   }
@@ -180,11 +182,13 @@ class UploadManager {
       final fileIndex = matrixFile.key;
       final fileInfo = matrixFile.value;
 
+      final shouldIncludeReply = fileIndex == files.length - 1;
+
       _initUploadFileInfo(
         txid: txid,
         room: room,
-        captionInfo: fileIndex == files.length - 1 ? caption : null,
-        inReplyTo: fileIndex == files.length - 1 ? inReplyTo : null,
+        captionInfo: shouldIncludeReply ? caption : null,
+        inReplyTo: shouldIncludeReply ? inReplyTo : null,
       );
 
       room.sendingFilePlaceholders[txid] = fileInfo;
@@ -192,7 +196,7 @@ class UploadManager {
         fileInfo,
         txid: txid,
         captionInfo: _eventIdMapUploadFileInfo[txid]?.captionInfo?.caption,
-        inReplyTo: inReplyTo,
+        inReplyTo: shouldIncludeReply ? inReplyTo : null,
       );
 
       final streamController =
@@ -236,7 +240,7 @@ class UploadManager {
             thumbnail: thumbnails?[fileInfo],
             sentDate: sentDate,
             captionInfo: _eventIdMapUploadFileInfo[txid]?.captionInfo?.caption,
-            inReplyTo: inReplyTo,
+            inReplyTo: shouldIncludeReply ? inReplyTo : null,
           ),
         ],
       );

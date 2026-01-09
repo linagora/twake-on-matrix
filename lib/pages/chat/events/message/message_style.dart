@@ -97,7 +97,7 @@ class MessageStyle {
     required Event event,
     double? textWidth,
   }) {
-    if (event.isMediaAndFilesWithCaption() == true) {
+    if (event.shouldShowCaptionMode() == true) {
       DisplayImageInfo? displayImageInfo =
           event.getOriginalResolution()?.getDisplayImageInfo(context);
 
@@ -121,6 +121,9 @@ class MessageStyle {
         ),
         hasBlur: true,
       );
+      if (event.isReplyEvent()) {
+        return double.infinity;
+      }
       if (matrixFile != null && matrixFile.isSendingImageInWeb()) {
         return _calculateMediaBubbleWidth(
           displayImageInfo: displayImageInfo,
@@ -152,7 +155,7 @@ class MessageStyle {
     required Event event,
     double? textWidth,
   }) {
-    if (event.isMediaAndFilesWithCaption() == true) {
+    if (event.shouldShowCaptionMode() == true) {
       DisplayImageInfo? displayImageInfo =
           event.getOriginalResolution()?.getDisplayImageInfo(context);
 

@@ -194,7 +194,7 @@ class _MessageUploadingContentState extends State<MessageUploadingContent>
             ],
           ),
         ),
-        if (event.isMediaAndFilesWithCaption() &&
+        if (event.shouldShowCaptionMode() &&
             event.isBodyDiffersFromFilename()) ...[
           const SizedBox(height: 8.0),
           MouseRegion(
@@ -209,7 +209,7 @@ class _MessageUploadingContentState extends State<MessageUploadingContent>
                 context,
               ),
               richTextStyle: event.getMessageTextStyle(context),
-              isCaption: event.isMediaAndFilesWithCaption(),
+              isCaption: event.shouldShowCaptionMode(),
             ),
           ),
         ],

@@ -68,7 +68,7 @@ class MessageContent extends StatelessWidget
       case EventTypes.Sticker:
         switch (event.messageType) {
           case MessageTypes.Image:
-            if (event.isMediaAndFilesWithCaption()) {
+            if (event.shouldShowCaptionMode() || event.isReplyEvent()) {
               return Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisSize: MainAxisSize.min,
@@ -101,7 +101,7 @@ class MessageContent extends StatelessWidget
                           context,
                         ),
                         richTextStyle: event.getMessageTextStyle(context),
-                        isCaption: event.isMediaAndFilesWithCaption(),
+                        isCaption: event.shouldShowCaptionMode(),
                       ),
                     ),
                 ],
@@ -148,7 +148,7 @@ class MessageContent extends StatelessWidget
             );
 
           case MessageTypes.Video:
-            if (event.isMediaAndFilesWithCaption()) {
+            if (event.shouldShowCaptionMode() || event.isReplyEvent()) {
               return Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisSize: MainAxisSize.min,
@@ -221,7 +221,7 @@ class MessageContent extends StatelessWidget
                           context,
                         ),
                         richTextStyle: event.getMessageTextStyle(context),
-                        isCaption: event.isMediaAndFilesWithCaption(),
+                        isCaption: event.shouldShowCaptionMode(),
                       ),
                     ),
                 ],
@@ -271,9 +271,10 @@ class MessageContent extends StatelessWidget
 
           case MessageTypes.File:
             return Column(
-              crossAxisAlignment: event.isMediaAndFilesWithCaption()
-                  ? CrossAxisAlignment.start
-                  : CrossAxisAlignment.end,
+              crossAxisAlignment:
+                  event.shouldShowCaptionMode() || event.isReplyEvent()
+                      ? CrossAxisAlignment.start
+                      : CrossAxisAlignment.end,
               mainAxisSize: MainAxisSize.min,
               children: [
                 if (!PlatformInfos.isWeb) ...[
@@ -290,7 +291,8 @@ class MessageContent extends StatelessWidget
                   if (event.isSending()) ...[
                     OptionalSelectionContainerDisabled(
                       isEnabled: PlatformInfos.isWeb &&
-                          !event.isMediaAndFilesWithCaption(),
+                          !(event.shouldShowCaptionMode() ||
+                              event.isReplyEvent()),
                       child: MessageUploadingContent(
                         event: event,
                         style: const MessageFileTileStyle(),
@@ -299,13 +301,14 @@ class MessageContent extends StatelessWidget
                   ] else
                     OptionalSelectionContainerDisabled(
                       isEnabled: PlatformInfos.isWeb &&
-                          !event.isMediaAndFilesWithCaption(),
+                          !(event.shouldShowCaptionMode() ||
+                              event.isReplyEvent()),
                       child: MessageDownloadContentWeb(
                         event,
                       ),
                     ),
                 ],
-                if (!event.isMediaAndFilesWithCaption())
+                if (!(event.shouldShowCaptionMode() || event.isReplyEvent()))
                   Padding(
                     padding: MessageContentStyle.endOfBubbleWidgetPadding,
                     child: OptionalSelectionContainerDisabled(

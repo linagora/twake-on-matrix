@@ -77,11 +77,13 @@ class EventVideoPlayer extends StatelessWidget {
           mouseCursor: SystemMouseCursors.click,
           onTap: onVideoTapped,
           child: SizedBox(
-            width:
-                MessageContentStyle.combinedBubbleImageWidthWithBubbleMaxWidget(
-              bubbleImageWidget: imageWidth,
-              bubbleMaxWidth: bubbleWidth ?? 0,
-            ),
+            width: event.isReplyEvent()
+                ? double.infinity
+                : MessageContentStyle
+                    .combinedBubbleImageWidthWithBubbleMaxWidget(
+                    bubbleImageWidget: imageWidth,
+                    bubbleMaxWidth: bubbleWidth ?? 0,
+                  ),
             height: MessageContentStyle.videoBubbleHeight(imageHeight),
             child: Stack(
               alignment: Alignment.center,
