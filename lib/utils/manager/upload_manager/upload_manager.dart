@@ -108,13 +108,13 @@ class UploadManager {
 
       Logs().d('UploadManager::uploadMediaMobile(): txid: $txidKey');
 
-      final shouldIncludeReply = txidKey == txids.keys.last;
+      final isLastFile = txidKey == txids.keys.last;
 
       _initUploadFileInfo(
         txid: txidKey,
         room: room,
-        captionInfo: shouldIncludeReply ? caption : null,
-        inReplyTo: shouldIncludeReply ? inReplyTo : null,
+        captionInfo: isLastFile ? caption : null,
+        inReplyTo: isLastFile ? inReplyTo : null,
       );
 
       final sentDate = _eventIdMapUploadFileInfo[txidKey]?.createdAt;
@@ -125,7 +125,7 @@ class UploadManager {
         messageType: fakeSendingFileInfo.messageType,
         sentDate: sentDate,
         captionInfo: _eventIdMapUploadFileInfo[txidKey]?.captionInfo?.caption,
-        inReplyTo: shouldIncludeReply ? inReplyTo : null,
+        inReplyTo: isLastFile ? inReplyTo : null,
       );
 
       final streamController =
@@ -165,7 +165,7 @@ class UploadManager {
         sentDate: sentDate,
         shrinkImageMaxDimension: _shrinkImageMaxDimension,
         captionInfo: _eventIdMapUploadFileInfo[txidKey]?.captionInfo?.caption,
-        inReplyTo: shouldIncludeReply ? inReplyTo : null,
+        inReplyTo: isLastFile ? inReplyTo : null,
       );
     }
   }
@@ -182,13 +182,13 @@ class UploadManager {
       final fileIndex = matrixFile.key;
       final fileInfo = matrixFile.value;
 
-      final shouldIncludeReply = fileIndex == files.length - 1;
+      final isLastFile = fileIndex == files.length - 1;
 
       _initUploadFileInfo(
         txid: txid,
         room: room,
-        captionInfo: shouldIncludeReply ? caption : null,
-        inReplyTo: shouldIncludeReply ? inReplyTo : null,
+        captionInfo: isLastFile ? caption : null,
+        inReplyTo: isLastFile ? inReplyTo : null,
       );
 
       room.sendingFilePlaceholders[txid] = fileInfo;
@@ -196,7 +196,7 @@ class UploadManager {
         fileInfo,
         txid: txid,
         captionInfo: _eventIdMapUploadFileInfo[txid]?.captionInfo?.caption,
-        inReplyTo: shouldIncludeReply ? inReplyTo : null,
+        inReplyTo: isLastFile ? inReplyTo : null,
       );
 
       final streamController =
@@ -240,7 +240,7 @@ class UploadManager {
             thumbnail: thumbnails?[fileInfo],
             sentDate: sentDate,
             captionInfo: _eventIdMapUploadFileInfo[txid]?.captionInfo?.caption,
-            inReplyTo: shouldIncludeReply ? inReplyTo : null,
+            inReplyTo: isLastFile ? inReplyTo : null,
           ),
         ],
       );
@@ -263,11 +263,13 @@ class UploadManager {
 
       Logs().d('UploadManager::uploadFileMobile(): txid: $txid');
 
+      final isLastFile = fileIndex == fileInfos.length - 1;
+
       _initUploadFileInfo(
         txid: txid,
         room: room,
-        captionInfo: fileIndex == fileInfos.length - 1 ? caption : null,
-        inReplyTo: fileIndex == fileInfos.length - 1 ? inReplyTo : null,
+        captionInfo: isLastFile ? caption : null,
+        inReplyTo: isLastFile ? inReplyTo : null,
       );
 
       final sentDate = _eventIdMapUploadFileInfo[txid]?.createdAt;
@@ -278,7 +280,7 @@ class UploadManager {
         messageType: fileValue.msgType,
         sentDate: sentDate,
         captionInfo: _eventIdMapUploadFileInfo[txid]?.captionInfo?.caption,
-        inReplyTo: inReplyTo,
+        inReplyTo: isLastFile ? inReplyTo : null,
       );
 
       final streamController =
@@ -317,7 +319,7 @@ class UploadManager {
         cancelToken: cancelToken,
         sentDate: sentDate,
         captionInfo: _eventIdMapUploadFileInfo[txid]?.captionInfo?.caption,
-        inReplyTo: inReplyTo,
+        inReplyTo: isLastFile ? inReplyTo : null,
       );
     }
   }

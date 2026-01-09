@@ -68,7 +68,7 @@ class MessageContent extends StatelessWidget
       case EventTypes.Sticker:
         switch (event.messageType) {
           case MessageTypes.Image:
-            if (event.isCaptionModeOrReply() || event.isReplyEvent()) {
+            if (event.isCaptionModeOrReply()) {
               return Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisSize: MainAxisSize.min,
@@ -148,7 +148,7 @@ class MessageContent extends StatelessWidget
             );
 
           case MessageTypes.Video:
-            if (event.isCaptionModeOrReply() || event.isReplyEvent()) {
+            if (event.isCaptionModeOrReply()) {
               return Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisSize: MainAxisSize.min,
@@ -271,10 +271,9 @@ class MessageContent extends StatelessWidget
 
           case MessageTypes.File:
             return Column(
-              crossAxisAlignment:
-                  event.isCaptionModeOrReply() || event.isReplyEvent()
-                      ? CrossAxisAlignment.start
-                      : CrossAxisAlignment.end,
+              crossAxisAlignment: event.isCaptionModeOrReply()
+                  ? CrossAxisAlignment.start
+                  : CrossAxisAlignment.end,
               mainAxisSize: MainAxisSize.min,
               children: [
                 if (!PlatformInfos.isWeb) ...[
@@ -300,15 +299,14 @@ class MessageContent extends StatelessWidget
                     ),
                   ] else
                     OptionalSelectionContainerDisabled(
-                      isEnabled: PlatformInfos.isWeb &&
-                          !(event.isCaptionModeOrReply() ||
-                              event.isReplyEvent()),
+                      isEnabled:
+                          PlatformInfos.isWeb && !event.isCaptionModeOrReply(),
                       child: MessageDownloadContentWeb(
                         event,
                       ),
                     ),
                 ],
-                if (!(event.isCaptionModeOrReply() || event.isReplyEvent()))
+                if (!event.isCaptionModeOrReply())
                   Padding(
                     padding: MessageContentStyle.endOfBubbleWidgetPadding,
                     child: OptionalSelectionContainerDisabled(

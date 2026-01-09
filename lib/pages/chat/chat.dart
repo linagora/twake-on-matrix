@@ -1122,16 +1122,15 @@ class ChatController extends State<Chat>
     }
     pendingText = sendController.text;
     editEventNotifier.value = eventToEdit;
-    sendController.text =
-        eventToEdit.isCaptionModeOrReply() || eventToEdit.isReplyEvent()
-            ? eventToEdit.body
-            : eventToEdit
-                .getDisplayEventWithoutEditEvent(timeline!)
-                .calcLocalizedBodyFallback(
-                  MatrixLocals(L10n.of(context)!),
-                  withSenderNamePrefix: false,
-                  hideReply: true,
-                );
+    sendController.text = eventToEdit.isCaptionModeOrReply()
+        ? eventToEdit.body
+        : eventToEdit
+            .getDisplayEventWithoutEditEvent(timeline!)
+            .calcLocalizedBodyFallback(
+              MatrixLocals(L10n.of(context)!),
+              withSenderNamePrefix: false,
+              hideReply: true,
+            );
 
     _clearSelectEvent();
     _requestInputFocus();
