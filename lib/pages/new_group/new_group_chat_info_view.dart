@@ -80,15 +80,8 @@ class NewGroupChatInfoView extends StatelessWidget {
         },
         body: Padding(
           padding: NewGroupChatInfoStyle.padding,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Expanded(
-                child: ExpansionParticipantsList(
-                  contactsList: newGroupInfoController.contactsList ?? {},
-                ),
-              ),
-            ],
+          child: ExpansionParticipantsList(
+            contactsList: newGroupInfoController.contactsList ?? {},
           ),
         ),
       ),

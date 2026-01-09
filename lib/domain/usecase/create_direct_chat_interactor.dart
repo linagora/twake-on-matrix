@@ -6,7 +6,22 @@ import 'package:fluffychat/domain/app_state/direct_chat/create_direct_chat_loadi
 import 'package:fluffychat/domain/app_state/direct_chat/create_direct_chat_success.dart';
 import 'package:matrix/matrix.dart';
 
+/// Manually implements direct chat creation instead of using client.startDirectChat()
+/// to enable:
+/// 1. Custom error recovery with automatic cleanup on failure
+/// 2. Handling existing rooms with different membership states (invite/join/leave)
+/// 3. Fine-grained control over encryption setup and room creation parameters
+///
+/// NOTE: This implementation should remain aligned with Matrix SDK's startDirectChat
+/// behavior when possible to benefit from upstream fixes and improvements.
 class CreateDirectChatInteractor {
+  /// Creates or retrieves a direct chat room with the specified contact.
+  ///
+  /// Returns early if an existing room is found, otherwise creates a new room.
+  /// Handles three existing room cases:
+  /// 1. Already joined -> return existing room immediately
+  /// 2. Invited -> accept invite, wait for sync, return room
+  /// 3. Left/No room -> continue to create new room below
   Stream<Either<Failure, Success>> execute({
     required String contactMxId,
     required Client client,
@@ -17,17 +32,86 @@ class CreateDirectChatInteractor {
     CreateRoomPreset? preset = CreateRoomPreset.trustedPrivateChat,
   }) async* {
     yield const Right(CreateDirectChatLoading());
+    String? roomId;
     try {
-      final roomId = await client.startDirectChat(
-        contactMxId,
-        initialState: initialState,
-        enableEncryption: enableEncryption,
-        waitForSync: waitForSync,
-        powerLevelContentOverride: powerLevelContentOverride,
+      // Check if a direct chat already exists with this contact
+      final directChatRoomId = client.getDirectChatFromUserId(contactMxId);
+      if (directChatRoomId != null) {
+        final room = client.getRoomById(directChatRoomId);
+        if (room != null) {
+          // Case 1: Already joined - return existing room
+          if (room.membership == Membership.join) {
+            yield Right(CreateDirectChatSuccess(roomId: directChatRoomId));
+            return;
+          } else if (room.membership == Membership.invite) {
+            // Case 2: Pending invite - accept and wait for sync
+            await room.join();
+            // Wait for sync to update membership status before checking
+            if (waitForSync) {
+              await client.waitForRoomInSync(directChatRoomId, join: true);
+            }
+            // After sync, verify membership is not leave
+            final updatedRoom = client.getRoomById(directChatRoomId);
+            if (updatedRoom != null &&
+                updatedRoom.membership == Membership.join) {
+              yield Right(CreateDirectChatSuccess(roomId: directChatRoomId));
+              return;
+            }
+          }
+          // Case 3: Left room - continue to create new room below
+        }
+      }
+
+      // Add encryption state if enabled
+      if (enableEncryption) {
+        initialState ??= [];
+        if (!initialState.any((s) => s.type == EventTypes.Encryption)) {
+          initialState.add(
+            StateEvent(
+              content: {
+                'algorithm': Client.supportedGroupEncryptionAlgorithms.first,
+              },
+              type: EventTypes.Encryption,
+            ),
+          );
+        }
+      }
+
+      // Create new direct chat room
+      roomId = await client.createRoom(
+        isDirect: true,
         preset: preset,
+        initialState: initialState,
+        powerLevelContentOverride: powerLevelContentOverride,
       );
+
+      // Wait for room to sync before proceeding
+      if (waitForSync) {
+        await client.waitForRoomInSync(roomId, join: true);
+        // Verify room exists after sync
+        final room = client.getRoomById(roomId);
+        if (room == null) {
+          throw Exception('Room not synced after waitForRoomInSync');
+        }
+      }
+
+      // Mark as direct chat BEFORE inviting user so recipient's client
+      // recognizes it as a direct chat when they receive the invite
+      await Room(id: roomId, client: client).addToDirectChat(contactMxId);
+
+      // Now invite the user to the direct chat
+      await client.inviteUser(roomId, contactMxId);
+
       yield Right(CreateDirectChatSuccess(roomId: roomId));
-    } catch (e) {
+    } catch (e, s) {
+      Logs().e('CreateDirectChatInteractor', e, s);
+      if (roomId != null) {
+        try {
+          await client.leaveRoom(roomId);
+        } catch (e) {
+          Logs().e('CreateDirectChatInteractor: Failed to leave room', e);
+        }
+      }
       yield Left(CreateDirectChatFailed(exception: e));
     }
   }
