@@ -1,7 +1,6 @@
 import 'package:fluffychat/config/themes.dart';
 import 'package:fluffychat/pages/chat/chat.dart';
 import 'package:fluffychat/pages/chat/chat_event_list_item.dart';
-import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/event_list_extension.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -29,14 +28,19 @@ class _ChatScrollViewState extends State<ChatScrollView> {
   ChatController get controller => widget.controller;
   bool _wasRequestingFuture = false;
   List<Event> _currentEvents = [];
+  late Map<String, int> _eventIndexMap;
 
   @override
   void initState() {
     super.initState();
-    _currentEvents = widget.events
+    _currentEvents = List<Event>.from(widget.events)
       ..sort(
         (a, b) => b.originServerTs.compareTo(a.originServerTs),
       );
+    _eventIndexMap = {
+      for (var i = 0; i < _currentEvents.length; i++)
+        _currentEvents[i].eventId: i,
+    };
     _bottom.addAll(_currentEvents);
   }
 
@@ -68,6 +72,10 @@ class _ChatScrollViewState extends State<ChatScrollView> {
 
     // Update the current events
     _currentEvents = newEvents;
+    _eventIndexMap = {
+      for (var i = 0; i < _currentEvents.length; i++)
+        _currentEvents[i].eventId: i,
+    };
 
     // Update the lists
     _top
@@ -135,9 +143,8 @@ class _ChatScrollViewState extends State<ChatScrollView> {
                   return const SizedBox.shrink();
                 }
                 final currentEvent = _bottom[index];
-                final currentEventIndex = _currentEvents.indexWhere(
-                  (e) => e.isSameEvent(currentEvent),
-                );
+                final currentEventIndex =
+                    _eventIndexMap[currentEvent.eventId] ?? -1;
 
                 // If event is not in _currentEvents anymore, skip rendering it
                 if (currentEventIndex == -1) {
@@ -183,9 +190,8 @@ class _ChatScrollViewState extends State<ChatScrollView> {
                   return const SizedBox.shrink();
                 }
                 final currentEvent = _top[index];
-                final currentEventIndex = _currentEvents.indexWhere(
-                  (e) => e.isSameEvent(currentEvent),
-                );
+                final currentEventIndex =
+                    _eventIndexMap[currentEvent.eventId] ?? -1;
 
                 // If event is not in _currentEvents anymore, skip rendering it
                 if (currentEventIndex == -1) {

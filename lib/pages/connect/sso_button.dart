@@ -4,15 +4,16 @@ import 'package:fluffychat/generated/l10n/app_localizations.dart';
 import 'package:matrix/matrix.dart';
 
 import 'package:fluffychat/pages/connect/connect_page.dart';
-import 'package:fluffychat/widgets/matrix.dart';
 
 class SsoButton extends StatelessWidget {
   final IdentityProvider identityProvider;
   final void Function()? onPressed;
+  final Future<Client> loginClientFuture;
   const SsoButton({
     super.key,
     required this.identityProvider,
     this.onPressed,
+    required this.loginClientFuture,
   });
 
   @override
@@ -35,10 +36,15 @@ class SsoButton extends StatelessWidget {
                 child: identityProvider.icon == null
                     ? const Icon(Icons.web_outlined)
                     : FutureBuilder(
-                        future: Matrix.of(context).getLoginClient(),
+                        future: loginClientFuture,
                         builder: (context, asyncSnapshot) {
+                          if (asyncSnapshot.hasError) {
+                            return const Icon(Icons.error_outline, size: 32);
+                          }
                           final client = asyncSnapshot.data;
-                          if (client == null) {
+                          if (client == null ||
+                              asyncSnapshot.connectionState !=
+                                  ConnectionState.done) {
                             return const SizedBox(width: 32, height: 32);
                           }
                           return Image.network(
@@ -47,6 +53,9 @@ class SsoButton extends StatelessWidget {
                                 .toString(),
                             width: 32,
                             height: 32,
+                            errorBuilder: (context, error, stackTrace) {
+                              return const Icon(Icons.broken_image, size: 32);
+                            },
                           );
                         },
                       ),

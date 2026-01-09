@@ -113,37 +113,50 @@ class AutoHomeserverPickerController extends State<AutoHomeserverPicker>
   }
 
   void _autoConnectSaas() async {
-    final client = await matrix.getLoginClient();
-    matrix.loginHomeserverSummary = await client
-        .checkHomeserver(Uri.parse(AppConfig.twakeWorkplaceHomeserver))
-        .toHomeserverSummary();
-    Map<String, dynamic>? rawLoginTypes;
-    await client
-        .request(
-          RequestType.GET,
-          '/client/r0/login',
-        )
-        .then((loginTypes) => rawLoginTypes = loginTypes)
-        .timeout(
-      autoHomeserverPickerTimeout,
-      onTimeout: () {
-        throw CheckHomeserverTimeoutException();
-      },
-    );
-    final identitiesProvider = identityProviders(rawLoginTypes: rawLoginTypes);
-    if (identitiesProvider?.length == 1) {
-      try {
-        await registerPublicPlatformAction(
-          context: context,
-          id: identitiesProvider!.single.id!,
-        );
-      } on HomeserverTokenNotFoundException catch (e) {
-        autoHomeserverPickerUIState.value = AutoHomeServerPickerFailureState(
-          error: e.toString(),
-        );
-      } catch (e) {
-        autoHomeserverPickerUIState.value = AutoHomeServerPickerFailureState();
+    try {
+      final client = await matrix.getLoginClient();
+      matrix.loginHomeserverSummary = await client
+          .checkHomeserver(Uri.parse(AppConfig.twakeWorkplaceHomeserver))
+          .toHomeserverSummary();
+      Map<String, dynamic>? rawLoginTypes;
+      await client
+          .request(
+            RequestType.GET,
+            '/client/r0/login',
+          )
+          .then((loginTypes) => rawLoginTypes = loginTypes)
+          .timeout(
+        autoHomeserverPickerTimeout,
+        onTimeout: () {
+          throw CheckHomeserverTimeoutException();
+        },
+      );
+      final identitiesProvider =
+          identityProviders(rawLoginTypes: rawLoginTypes);
+      if (identitiesProvider?.length == 1) {
+        try {
+          await registerPublicPlatformAction(
+            context: context,
+            id: identitiesProvider!.single.id!,
+          );
+        } on HomeserverTokenNotFoundException catch (e) {
+          autoHomeserverPickerUIState.value = AutoHomeServerPickerFailureState(
+            error: e.toString(),
+          );
+        } catch (e) {
+          autoHomeserverPickerUIState.value =
+              AutoHomeServerPickerFailureState();
+        }
       }
+    } catch (e, s) {
+      autoHomeserverPickerUIState.value = AutoHomeServerPickerFailureState(
+        error: e.toString(),
+      );
+      Logs().e(
+        "AutoHomeserverPickerController: _autoConnectSaas: Error:",
+        e,
+        s,
+      );
     }
   }
 

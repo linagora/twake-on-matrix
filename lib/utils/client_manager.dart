@@ -53,6 +53,11 @@ abstract class ClientManager {
           'Multi account is enabled but client ${client.userID} is not logged in. Removing...',
         );
         clientNames.remove(client.clientName);
+        final database = client.database;
+        await database.delete();
+        if (database is MatrixSdkDatabase && database.database?.path != null) {
+          await deleteSqfliteDb(database.database!.path);
+        }
         clients.remove(client);
       }
       await Store().setItem(clientNamespace, jsonEncode(clientNames.toList()));

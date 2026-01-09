@@ -13,26 +13,36 @@ class ConnectPage extends StatefulWidget {
 
 class ConnectPageController extends State<ConnectPage> with ConnectPageMixin {
   final TextEditingController usernameController = TextEditingController();
+  late final Future<Client> loginClientFuture;
 
   Map<String, dynamic>? rawLoginTypes;
 
   Future<void> login() async {
-    final client = await Matrix.of(context).getLoginClient();
-    return client
-        .request(
-          RequestType.GET,
-          '/client/r0/login',
-        )
-        .then(
-          (loginTypes) => setState(() {
-            rawLoginTypes = loginTypes;
-          }),
-        );
+    try {
+      final client = await Matrix.of(context).getLoginClient();
+      final loginTypes = await client.request(
+        RequestType.GET,
+        '/client/r0/login',
+      );
+      if (mounted) {
+        setState(() {
+          rawLoginTypes = loginTypes;
+        });
+      }
+    } catch (error, stackTrace) {
+      Logs().e('ConnectPage::login() failed', error, stackTrace);
+      if (mounted) {
+        setState(() {
+          rawLoginTypes = null;
+        });
+      }
+    }
   }
 
   @override
   void initState() {
     super.initState();
+    loginClientFuture = Matrix.of(context).getLoginClient();
     if (supportsSso(context)) {
       login();
     }

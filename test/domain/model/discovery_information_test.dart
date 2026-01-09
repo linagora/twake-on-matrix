@@ -49,7 +49,7 @@ void main() {
       expect(actual.additionalProperties['t.server'], isNotNull);
     });
 
-    test('one invalid customization field', () {
+    test('multiple invalid customization fields', () {
       final multipleCustomizationFields = {
         "m.homeserver": "matrix.tom-dev.xyz",
         "m.identity_server": {"base_url": "https://tom.tom-dev.xyz/"},

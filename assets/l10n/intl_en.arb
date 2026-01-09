@@ -101,7 +101,7 @@
   "commandHint_logout": "Log out of the current account on this device",
   "commandHint_logoutall": "Log out of this account from all devices",
   "hasKnocked": "{senderName} knocked",
-  "@acceptedKeyVerification": {
+  "@hasKnocked": {
     "type": "text",
     "placeholders": {
       "senderName": {}

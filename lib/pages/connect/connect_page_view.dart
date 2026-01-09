@@ -7,7 +7,6 @@ import 'package:matrix/matrix.dart';
 
 import 'package:fluffychat/pages/connect/connect_page.dart';
 import 'package:fluffychat/widgets/layouts/login_scaffold.dart';
-import 'package:fluffychat/widgets/matrix.dart';
 import 'sso_button.dart';
 
 class ConnectPageView extends StatelessWidget {
@@ -19,13 +18,17 @@ class ConnectPageView extends StatelessWidget {
   Widget build(BuildContext context) {
     final identityProviders =
         controller.identityProviders(rawLoginTypes: controller.rawLoginTypes);
+    final l10n = L10n.of(context)!;
     return LoginScaffold(
       appBar: AppBar(
         leading: const BackButton(),
         centerTitle: true,
         title: FutureBuilder(
-          future: Matrix.of(context).getLoginClient(),
+          future: controller.loginClientFuture,
           builder: (context, asyncSnapshot) {
+            if (asyncSnapshot.hasError) {
+              return Text(l10n.oopsSomethingWentWrong);
+            }
             return Text(asyncSnapshot.data?.homeserver?.host ?? '');
           },
         ),
@@ -53,10 +56,19 @@ class ConnectPageView extends StatelessWidget {
                               size: 16,
                             )
                           : FutureBuilder(
-                              future: Matrix.of(context).getLoginClient(),
+                              future: controller.loginClientFuture,
                               builder: (context, asyncSnapshot) {
+                                if (asyncSnapshot.hasError) {
+                                  return const Icon(
+                                    Icons.error_outline,
+                                    size: ConnectPageViewStyle.iconSize,
+                                  );
+                                }
+
                                 final client = asyncSnapshot.data;
-                                if (client == null) {
+                                if (client == null ||
+                                    asyncSnapshot.connectionState !=
+                                        ConnectionState.done) {
                                   return const SizedBox(
                                     width: ConnectPageViewStyle.iconSize,
                                     height: ConnectPageViewStyle.iconSize,
@@ -68,6 +80,12 @@ class ConnectPageView extends StatelessWidget {
                                       .toString(),
                                   width: ConnectPageViewStyle.iconSize,
                                   height: ConnectPageViewStyle.iconSize,
+                                  errorBuilder: (context, error, stackTrace) {
+                                    return const Icon(
+                                      Icons.broken_image,
+                                      size: ConnectPageViewStyle.iconSize,
+                                    );
+                                  },
                                 );
                               },
                             ),
@@ -91,6 +109,7 @@ class ConnectPageView extends StatelessWidget {
                             id: identityProvider.id!,
                           ),
                           identityProvider: identityProvider,
+                          loginClientFuture: controller.loginClientFuture,
                         ),
                     ].toList(),
                   ),
