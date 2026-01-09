@@ -201,7 +201,7 @@ extension LocalizedBody on Event {
         MessageTypes.Image,
       }.contains(messageType) &&
       isVideoAvailable &&
-      !shouldShowCaptionMode();
+      !isCaptionModeOrReply();
 
   bool get hideDisplayNameInBubbleChat => {
         MessageTypes.Video,
@@ -257,7 +257,7 @@ extension LocalizedBody on Event {
   }
 
   String getSelectedEventString(BuildContext context, Timeline timeline) {
-    if (shouldShowCaptionMode()) {
+    if (isCaptionModeOrReply()) {
       return body;
     }
     return getDisplayEventWithoutEditEvent(timeline).calcLocalizedBodyFallback(
@@ -352,7 +352,7 @@ extension LocalizedBody on Event {
   }
 
   bool canEditEvents(MatrixState? matrix) {
-    if (shouldShowCaptionMode()) {
+    if (isCaptionModeOrReply()) {
       return true;
     }
 
@@ -430,7 +430,7 @@ extension LocalizedBody on Event {
   /// - Any reply event (to enable caption input when replying with media)
   ///
   /// This affects editing, copying, and UI rendering behavior across the app.
-  bool shouldShowCaptionMode() {
+  bool isCaptionModeOrReply() {
     return ((messageType == MessageTypes.Image ||
                 messageType == MessageTypes.Video ||
                 messageType == MessageTypes.File) &&
@@ -529,7 +529,7 @@ extension LocalizedBody on Event {
       return this;
     }
 
-    final hasCaption = shouldShowCaptionMode();
+    final hasCaption = isCaptionModeOrReply();
 
     if (hasCaption) {
       // For media/files with caption, preserve original event structure
