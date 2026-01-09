@@ -59,7 +59,7 @@ extension DownloadFileExtension on Event {
     if (attachmentExists) {
       final actualSize = await attachment.length();
       final expectedSize = getFileSize(getThumbnail: getThumbnail);
-      if (actualSize == expectedSize) {
+      if (expectedSize > 0 && actualSize == expectedSize) {
         needsDownload = false;
       } else {
         await attachment.delete();
@@ -87,7 +87,7 @@ extension DownloadFileExtension on Event {
         );
         if (downloadResponse.statusCode != 200 ||
             !await File(savePath).exists()) {
-          throw ('getFileInfo: Download file $filename failed');
+          throw ('Download failed (status: ${downloadResponse.statusCode}): $filename');
         }
       } catch (e) {
         if (e is CancelRequestException) {

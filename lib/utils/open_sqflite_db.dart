@@ -20,3 +20,8 @@ Future<Database?> openSqfliteDb({String? name}) async {
   );
   return db;
 }
+
+Future<void> deleteSqfliteDb(String path) async {
+  final databaseFactory = databaseFactoryFfi;
+  await databaseFactory.deleteDatabase(path);
+}

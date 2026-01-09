@@ -28,6 +28,7 @@ class LoginController extends State<Login> {
   String? passwordError;
   bool loading = false;
   bool showPassword = false;
+  late final Future<Client> loginClientFuture;
 
   void toggleShowPassword() =>
       setState(() => showPassword = !loading && !showPassword);
@@ -242,6 +243,12 @@ class LoginController extends State<Login> {
   }
 
   static int sendAttempt = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    loginClientFuture = Matrix.of(context).getLoginClient();
+  }
 
   @override
   Widget build(BuildContext context) => LoginView(this);

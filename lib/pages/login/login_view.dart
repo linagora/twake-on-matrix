@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:fluffychat/generated/l10n/app_localizations.dart';
 
 import 'package:fluffychat/widgets/layouts/login_scaffold.dart';
-import 'package:fluffychat/widgets/matrix.dart';
 import 'login.dart';
 
 class LoginView extends StatelessWidget {
@@ -14,22 +13,27 @@ class LoginView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = L10n.of(context)!;
     return LoginScaffold(
       appBar: AppBar(
         leading: controller.loading ? null : const BackButton(),
         automaticallyImplyLeading: !controller.loading,
         centerTitle: true,
         title: FutureBuilder(
-          future: Matrix.of(context).getLoginClient(),
+          future: controller.loginClientFuture,
           builder: (context, asyncSnapshot) {
-            return Text(
-              L10n.of(context)!.logInTo(
-                asyncSnapshot.data?.homeserver
-                        .toString()
-                        .replaceFirst('https://', '') ??
-                    '',
-              ),
-            );
+            if (asyncSnapshot.hasError) {
+              return Text(l10n.oopsSomethingWentWrong);
+            }
+            final homeserver = asyncSnapshot.data?.homeserver
+                    ?.toString()
+                    .replaceFirst('https://', '') ??
+                '';
+            if (homeserver.isEmpty &&
+                asyncSnapshot.connectionState == ConnectionState.done) {
+              return Text(l10n.oopsSomethingWentWrong);
+            }
+            return Text(l10n.logInTo(homeserver));
           },
         ),
       ),

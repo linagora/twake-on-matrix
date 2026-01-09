@@ -60,12 +60,10 @@ mixin ConnectPageMixin {
   }
 
   Future<String> _getAuthenticateUrl({
-    required BuildContext context,
+    required String homeserver,
     required String id,
     required String redirectUrl,
   }) async {
-    final client = await Matrix.of(context).getLoginClient();
-    final homeserver = client.homeserver?.toString();
     final ssoRedirectUri =
         '$homeserver/_matrix/client/r0/login/sso/redirect/${Uri.encodeComponent(id)}';
     final redirectUrlEncode = Uri.encodeQueryComponent(redirectUrl);
@@ -92,11 +90,13 @@ mixin ConnectPageMixin {
     required BuildContext context,
     required String id,
   }) async {
+    final client = await Matrix.of(context).getLoginClient();
+    final homeserver = client.homeserver.toString();
     final redirectUrl = _generateRedirectUrl(
-      Matrix.of(context).client.homeserver.toString(),
+      homeserver,
     );
     final url = await _getAuthenticateUrl(
-      context: context,
+      homeserver: homeserver,
       id: id,
       redirectUrl: redirectUrl,
     );
