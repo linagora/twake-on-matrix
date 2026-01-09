@@ -201,7 +201,7 @@ extension LocalizedBody on Event {
         MessageTypes.Image,
       }.contains(messageType) &&
       isVideoAvailable &&
-      !isMediaAndFilesWithCaption();
+      !isCaptionModeOrReply();
 
   bool get hideDisplayNameInBubbleChat => {
         MessageTypes.Video,
@@ -257,7 +257,7 @@ extension LocalizedBody on Event {
   }
 
   String getSelectedEventString(BuildContext context, Timeline timeline) {
-    if (isMediaAndFilesWithCaption()) {
+    if (isCaptionModeOrReply()) {
       return body;
     }
     return getDisplayEventWithoutEditEvent(timeline).calcLocalizedBodyFallback(
@@ -352,7 +352,7 @@ extension LocalizedBody on Event {
   }
 
   bool canEditEvents(MatrixState? matrix) {
-    if (isMediaAndFilesWithCaption()) {
+    if (isCaptionModeOrReply()) {
       return true;
     }
 
@@ -424,12 +424,30 @@ extension LocalizedBody on Event {
     return reactionMap.isNotEmpty;
   }
 
-  bool isMediaAndFilesWithCaption() {
-    return (messageType == MessageTypes.Image ||
-            messageType == MessageTypes.Video ||
-            messageType == MessageTypes.File) &&
-        text.isNotEmpty &&
-        filename != text;
+  /// Checks if this event should be handled in caption mode.
+  /// Returns true when:
+  /// - Media/file events (image, video, file) with non-empty text that differs from filename, OR
+  /// - Any reply event (to enable caption input when replying with media)
+  ///
+  /// This affects editing, copying, and UI rendering behavior across the app.
+  bool isCaptionModeOrReply() {
+    return ((messageType == MessageTypes.Image ||
+                messageType == MessageTypes.Video ||
+                messageType == MessageTypes.File) &&
+            text.isNotEmpty &&
+            filename != text) ||
+        relationshipType == RelationshipTypes.reply;
+  }
+
+  /// Returns true if the event's body text differs from its filename.
+  /// Used to determine if a caption should be displayed for media files.
+  bool isBodyDiffersFromFilename() {
+    return content["body"] != content["filename"];
+  }
+
+  /// Returns true if this event is a reply to another event.
+  bool isReplyEvent() {
+    return relationshipType == RelationshipTypes.reply;
   }
 
   /// Checks if this event is the same as another event, considering both eventId and transaction_id.
@@ -511,7 +529,7 @@ extension LocalizedBody on Event {
       return this;
     }
 
-    final hasCaption = isMediaAndFilesWithCaption();
+    final hasCaption = isCaptionModeOrReply();
 
     if (hasCaption) {
       // For media/files with caption, preserve original event structure

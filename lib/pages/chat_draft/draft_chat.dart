@@ -160,6 +160,7 @@ class DraftChatController extends State<DraftChat>
     ImagePickerGridController imagePickerController, {
     String? caption,
     Room? room,
+    Event? inReplyTo,
   }) {
     sendController.clear();
     return _createRoom(
@@ -168,6 +169,7 @@ class DraftChatController extends State<DraftChat>
           imagePickerController,
           room: newRoom,
           caption: caption,
+          inReplyTo: inReplyTo,
         );
       },
     );

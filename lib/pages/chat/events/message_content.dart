@@ -68,7 +68,7 @@ class MessageContent extends StatelessWidget
       case EventTypes.Sticker:
         switch (event.messageType) {
           case MessageTypes.Image:
-            if (event.isMediaAndFilesWithCaption()) {
+            if (event.isCaptionModeOrReply()) {
               return Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisSize: MainAxisSize.min,
@@ -79,29 +79,31 @@ class MessageContent extends StatelessWidget
                       event: event,
                       onTapPreview: onTapPreview,
                       onTapSelectMode: onTapSelectMode,
-                      maxWidth: textWidth,
+                      maxWidth:
+                          event.isReplyEvent() ? double.infinity : textWidth,
                     ),
                   ),
                   const SizedBox(height: 8),
-                  SizedBox(
-                    width: MessageStyle.messageBubbleWidthMediaCaption(
-                      event: event,
-                      context: context,
-                      textWidth: textWidth,
-                    ),
-                    child: TwakeLinkPreview(
-                      key: ValueKey('TwakeLinkPreview%${event.eventId}%'),
-                      event: event,
-                      localizedBody: event.body,
-                      ownMessage: ownMessage,
-                      fontSize: fontSize,
-                      linkStyle: MessageContentStyle.linkStyleMessageContent(
-                        context,
+                  if (event.isBodyDiffersFromFilename())
+                    SizedBox(
+                      width: MessageStyle.messageBubbleWidthMediaCaption(
+                        event: event,
+                        context: context,
+                        textWidth: textWidth,
                       ),
-                      richTextStyle: event.getMessageTextStyle(context),
-                      isCaption: event.isMediaAndFilesWithCaption(),
+                      child: TwakeLinkPreview(
+                        key: ValueKey('TwakeLinkPreview%${event.eventId}%'),
+                        event: event,
+                        localizedBody: event.body,
+                        ownMessage: ownMessage,
+                        fontSize: fontSize,
+                        linkStyle: MessageContentStyle.linkStyleMessageContent(
+                          context,
+                        ),
+                        richTextStyle: event.getMessageTextStyle(context),
+                        isCaption: event.isCaptionModeOrReply(),
+                      ),
                     ),
-                  ),
                 ],
               );
             }
@@ -146,7 +148,7 @@ class MessageContent extends StatelessWidget
             );
 
           case MessageTypes.Video:
-            if (event.isMediaAndFilesWithCaption()) {
+            if (event.isCaptionModeOrReply()) {
               return Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisSize: MainAxisSize.min,
@@ -192,24 +194,25 @@ class MessageContent extends StatelessWidget
                       ],
                     ),
                   const SizedBox(height: 8),
-                  SizedBox(
-                    width: MessageStyle.messageBubbleWidthVideoCaption(
-                      event: event,
-                      context: context,
-                    ),
-                    child: TwakeLinkPreview(
-                      key: ValueKey('TwakeLinkPreview%${event.eventId}%'),
-                      event: event,
-                      localizedBody: event.body,
-                      ownMessage: ownMessage,
-                      fontSize: fontSize,
-                      linkStyle: MessageContentStyle.linkStyleMessageContent(
-                        context,
+                  if (event.isBodyDiffersFromFilename())
+                    SizedBox(
+                      width: MessageStyle.messageBubbleWidthVideoCaption(
+                        event: event,
+                        context: context,
                       ),
-                      richTextStyle: event.getMessageTextStyle(context),
-                      isCaption: event.isMediaAndFilesWithCaption(),
+                      child: TwakeLinkPreview(
+                        key: ValueKey('TwakeLinkPreview%${event.eventId}%'),
+                        event: event,
+                        localizedBody: event.body,
+                        ownMessage: ownMessage,
+                        fontSize: fontSize,
+                        linkStyle: MessageContentStyle.linkStyleMessageContent(
+                          context,
+                        ),
+                        richTextStyle: event.getMessageTextStyle(context),
+                        isCaption: event.isCaptionModeOrReply(),
+                      ),
                     ),
-                  ),
                 ],
               );
             }
@@ -257,7 +260,7 @@ class MessageContent extends StatelessWidget
 
           case MessageTypes.File:
             return Column(
-              crossAxisAlignment: event.isMediaAndFilesWithCaption()
+              crossAxisAlignment: event.isCaptionModeOrReply()
                   ? CrossAxisAlignment.start
                   : CrossAxisAlignment.end,
               mainAxisSize: MainAxisSize.min,
@@ -276,7 +279,8 @@ class MessageContent extends StatelessWidget
                   if (event.isSending()) ...[
                     OptionalSelectionContainerDisabled(
                       isEnabled: PlatformInfos.isWeb &&
-                          !event.isMediaAndFilesWithCaption(),
+                          !(event.isCaptionModeOrReply() ||
+                              event.isReplyEvent()),
                       child: MessageUploadingContent(
                         event: event,
                         style: const MessageFileTileStyle(),
@@ -284,14 +288,14 @@ class MessageContent extends StatelessWidget
                     ),
                   ] else
                     OptionalSelectionContainerDisabled(
-                      isEnabled: PlatformInfos.isWeb &&
-                          !event.isMediaAndFilesWithCaption(),
+                      isEnabled:
+                          PlatformInfos.isWeb && !event.isCaptionModeOrReply(),
                       child: MessageDownloadContentWeb(
                         event,
                       ),
                     ),
                 ],
-                if (!event.isMediaAndFilesWithCaption())
+                if (!event.isCaptionModeOrReply())
                   Padding(
                     padding: MessageContentStyle.endOfBubbleWidgetPadding,
                     child: OptionalSelectionContainerDisabled(

@@ -2,6 +2,7 @@ import 'package:fluffychat/pages/chat/events/message_content_style.dart';
 import 'package:fluffychat/presentation/mixins/play_video_action_mixin.dart';
 import 'package:fluffychat/presentation/model/chat/upload_file_ui_state.dart';
 import 'package:fluffychat/presentation/model/file/display_image_info.dart';
+import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
 import 'package:fluffychat/widgets/mixins/upload_file_mixin.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_blurhash/flutter_blurhash.dart';
@@ -29,8 +30,10 @@ class SendingVideoWidget extends StatefulWidget {
 class _SendingVideoWidgetState extends State<SendingVideoWidget>
     with PlayVideoActionMixin, UploadFileMixin {
   final sendingFileProgressNotifier = ValueNotifier(SendingVideoStatus.sending);
+
   @override
   Event get event => widget.event;
+
   @override
   Widget build(BuildContext context) {
     _checkSendingFileStatus();
@@ -45,9 +48,11 @@ class _SendingVideoWidgetState extends State<SendingVideoWidget>
             alignment: Alignment.center,
             children: [
               SizedBox(
-                width: MessageContentStyle.imageBubbleWidth(
-                  widget.displayImageInfo.size.width,
-                ),
+                width: widget.event.isReplyEvent()
+                    ? double.infinity
+                    : MessageContentStyle.imageBubbleWidth(
+                        widget.displayImageInfo.size.width,
+                      ),
                 height: MessageContentStyle.imageBubbleHeight(
                   widget.displayImageInfo.size.height,
                 ),
@@ -166,6 +171,7 @@ class VideoWidget extends StatelessWidget {
 
 class _PlayVideoButton extends StatelessWidget {
   final Event? event;
+
   const _PlayVideoButton({this.event});
 
   @override

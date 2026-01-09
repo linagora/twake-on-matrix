@@ -64,7 +64,7 @@ class EditContent extends StatelessWidget {
                     L10n.of(context)!.editMessage,
                     style: EditContentStyle.editTitleDefaultStyle(context),
                   ),
-                  if (displayEvent.isMediaAndFilesWithCaption())
+                  if (displayEvent.isCaptionModeOrReply())
                     Text(
                       displayEvent.body,
                       overflow: TextOverflow.ellipsis,

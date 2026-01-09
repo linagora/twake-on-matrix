@@ -71,7 +71,9 @@ class EventVideoPlayer extends StatelessWidget {
             }
           },
           child: SizedBox(
-            width: MessageContentStyle.imageBubbleWidth(imageWidth),
+            width: event.isReplyEvent()
+                ? double.infinity
+                : MessageContentStyle.imageBubbleWidth(imageWidth),
             height: MessageContentStyle.videoBubbleHeight(imageHeight),
             child: Stack(
               alignment: Alignment.center,

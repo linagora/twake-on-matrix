@@ -171,7 +171,9 @@ class DownloadFileTileWidget extends StatelessWidget {
             ],
           ),
         ),
-        if (event != null && event!.isMediaAndFilesWithCaption()) ...[
+        if (event != null &&
+            event!.isCaptionModeOrReply() &&
+            event!.isBodyDiffersFromFilename()) ...[
           const SizedBox(height: 8.0),
           MouseRegion(
             cursor: SystemMouseCursors.copy,
@@ -185,7 +187,7 @@ class DownloadFileTileWidget extends StatelessWidget {
                 context,
               ),
               richTextStyle: event!.getMessageTextStyle(context),
-              isCaption: event!.isMediaAndFilesWithCaption(),
+              isCaption: event!.isCaptionModeOrReply(),
             ),
           ),
         ],
