@@ -21,6 +21,9 @@ class ParticipantListItemStyle {
   static const double fixedDialogWidth = 448;
   static const EdgeInsets closeButtonPadding = EdgeInsets.all(16);
 
+  // Context menu
+  static const double contextMenuWidth = 231.0;
+
   // Permission batch
   static const EdgeInsets permissionBatchTextPadding = EdgeInsets.symmetric(
     horizontal: 4,

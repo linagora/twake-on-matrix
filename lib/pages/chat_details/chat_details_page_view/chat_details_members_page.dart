@@ -1,3 +1,4 @@
+import 'package:fluffychat/config/default_power_level_member.dart';
 import 'package:fluffychat/pages/chat_details/assign_roles_member_picker/selected_user_notifier.dart';
 import 'package:fluffychat/pages/chat_details/participant_list_item/participant_list_item.dart';
 import 'package:flutter/material.dart';
@@ -14,6 +15,10 @@ class ChatDetailsMembersPage extends StatelessWidget {
   final bool isMobileAndTablet;
   final void Function(User member)? onSelectMember;
   final void Function(User member)? onRemoveMember;
+  final void Function(
+    User member, {
+    DefaultPowerLevelMember? role,
+  })? onChangeRole;
 
   const ChatDetailsMembersPage({
     super.key,
@@ -26,6 +31,7 @@ class ChatDetailsMembersPage extends StatelessWidget {
     this.onUpdatedMembers,
     this.onSelectMember,
     this.onRemoveMember,
+    this.onChangeRole,
   });
 
   @override
@@ -41,6 +47,10 @@ class ChatDetailsMembersPage extends StatelessWidget {
               child: ListView.builder(
                 shrinkWrap: true,
                 itemCount: members.length + (canRequestMoreMembers ? 1 : 0),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 8,
+                ),
                 itemBuilder: (BuildContext context, int index) {
                   if (index < members!.length) {
                     return ListenableBuilder(
@@ -53,6 +63,7 @@ class ChatDetailsMembersPage extends StatelessWidget {
                               .getSelectionModeForUser(members[index]),
                           onSelectMember: onSelectMember,
                           onRemoveMember: onRemoveMember,
+                          onChangeRole: onChangeRole,
                         );
                       },
                     );
