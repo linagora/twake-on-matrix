@@ -62,11 +62,15 @@ mixin DownloadFileOnMobileMixin<T extends StatefulWidget> on State<T> {
     if (downloadFileStateNotifier.isDisposed) {
       return;
     }
-    final filePath =
-        await StorageDirectoryManager.instance.getFilePathInAppDownloads(
-      eventId: event.eventId,
-      fileName: event.filename,
-    );
+    final filePath = event.room.encrypted
+        ? await StorageDirectoryManager.instance.getDecryptedFilePath(
+            eventId: event.eventId,
+            fileName: event.filename,
+          )
+        : await StorageDirectoryManager.instance.getFilePathInAppDownloads(
+            eventId: event.eventId,
+            fileName: event.filename,
+          );
     final file = File(filePath);
     if (await file.exists() && await file.length() == event.getFileSize()) {
       if (downloadFileStateNotifier.isDisposed) {
