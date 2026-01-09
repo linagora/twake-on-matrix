@@ -104,7 +104,7 @@ class BaseFileTileWidget extends StatelessWidget {
           ),
         ),
         if (event != null &&
-            event!.shouldShowCaptionMode() &&
+            event!.isCaptionModeOrReply() &&
             event!.isBodyDiffersFromFilename()) ...[
           const SizedBox(height: 8.0),
           MouseRegion(
@@ -119,7 +119,7 @@ class BaseFileTileWidget extends StatelessWidget {
                 context,
               ),
               richTextStyle: event!.getMessageTextStyle(context),
-              isCaption: event!.shouldShowCaptionMode(),
+              isCaption: event!.isCaptionModeOrReply(),
             ),
           ),
         ],

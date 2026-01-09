@@ -1123,7 +1123,7 @@ class ChatController extends State<Chat>
     pendingText = sendController.text;
     editEventNotifier.value = eventToEdit;
     sendController.text =
-        eventToEdit.shouldShowCaptionMode() || eventToEdit.isReplyEvent()
+        eventToEdit.isCaptionModeOrReply() || eventToEdit.isReplyEvent()
             ? eventToEdit.body
             : eventToEdit
                 .getDisplayEventWithoutEditEvent(timeline!)

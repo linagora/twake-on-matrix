@@ -97,7 +97,7 @@ class MessageStyle {
     required Event event,
     double? textWidth,
   }) {
-    if (event.shouldShowCaptionMode() == true) {
+    if (event.isCaptionModeOrReply() == true) {
       DisplayImageInfo? displayImageInfo =
           event.getOriginalResolution()?.getDisplayImageInfo(context);
 
@@ -155,7 +155,7 @@ class MessageStyle {
     required Event event,
     double? textWidth,
   }) {
-    if (event.shouldShowCaptionMode() == true) {
+    if (event.isCaptionModeOrReply() == true) {
       DisplayImageInfo? displayImageInfo =
           event.getOriginalResolution()?.getDisplayImageInfo(context);
 
