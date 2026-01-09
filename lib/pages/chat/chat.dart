@@ -1127,15 +1127,16 @@ class ChatController extends State<Chat>
     }
     pendingText = sendController.text;
     editEventNotifier.value = eventToEdit;
-    sendController.text = eventToEdit.isMediaAndFilesWithCaption()
-        ? eventToEdit.body
-        : eventToEdit
-            .getDisplayEventWithoutEditEvent(timeline!)
-            .calcLocalizedBodyFallback(
-              MatrixLocals(L10n.of(context)!),
-              withSenderNamePrefix: false,
-              hideReply: true,
-            );
+    sendController.text =
+        eventToEdit.shouldShowCaptionMode() || eventToEdit.isReplyEvent()
+            ? eventToEdit.body
+            : eventToEdit
+                .getDisplayEventWithoutEditEvent(timeline!)
+                .calcLocalizedBodyFallback(
+                  MatrixLocals(L10n.of(context)!),
+                  withSenderNamePrefix: false,
+                  hideReply: true,
+                );
 
     _clearSelectEvent();
     _requestInputFocus();
@@ -1855,7 +1856,7 @@ class ChatController extends State<Chat>
     required SendMediaWithCaptionStatus result,
     required String pendingText,
   }) async {
-    if (result != SendMediaWithCaptionStatus.done && pendingText.isNotEmpty) {
+    if (result == SendMediaWithCaptionStatus.cancel && pendingText.isNotEmpty) {
       sendController.text = pendingText;
     }
     if (result == SendMediaWithCaptionStatus.done) {
