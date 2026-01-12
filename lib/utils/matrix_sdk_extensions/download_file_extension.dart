@@ -246,13 +246,14 @@ extension DownloadFileExtension on Event {
     final fileMap = getThumbnail ? infoMap['thumbnail_file'] : content['file'];
     if (fileMap is! Map<String, dynamic> ||
         fileMap['key'] is! Map<String, dynamic> ||
-        fileMap['key']['key_ops'] == null) {
+        fileMap['key']['key_ops'] == null ||
+        fileMap['hashes'] is! Map<String, dynamic>) {
       throw StateError(
         'decryptFile: Missing encryption metadata in event content',
       );
     }
     if (!fileMap['key']['key_ops'].contains('decrypt')) {
-      throw ("getFileInfo: Missing 'decrypt' in 'key_ops'.");
+      throw ("decryptFile: Missing 'decrypt' in 'key_ops'.");
     }
 
     final encryptedBytes = await File(fileInfo.filePath!).readAsBytes();
