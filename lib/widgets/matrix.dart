@@ -1215,6 +1215,8 @@ class MatrixState extends State<Matrix>
 
         // Check if there are more messages to play
         if (voiceMessageEvents.value.isEmpty) {
+          _audioPlayerStateSubscription?.cancel();
+          _audioPlayerStateSubscription = null;
           await audioPlayer?.stop();
           await audioPlayer?.dispose();
           audioPlayer = null;
@@ -1317,6 +1319,13 @@ class MatrixState extends State<Matrix>
       final convertedFile = File('${file.path}.caf');
       if (await convertedFile.exists() == false) {
         OpusCaf().convertOpusToCaf(file.path, convertedFile.path);
+        // Verify conversion succeeded
+        if (await convertedFile.exists() == false) {
+          Logs().w(
+            'MatrixState::handleOggAudioFileIniOS: OGG to CAF conversion failed - converted file does not exist',
+          );
+          return null;
+        }
       }
       return convertedFile;
     } catch (e, s) {
