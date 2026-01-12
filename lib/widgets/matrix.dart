@@ -1251,6 +1251,10 @@ class MatrixState extends State<Matrix>
         );
         file = File('${tempDir.path}/${fileName}_${matrixFile.name}');
 
+        if (matrixFile.bytes?.isEmpty == true) {
+          throw Exception('Downloaded file has no content');
+        }
+
         await file.writeAsBytes(matrixFile.bytes ?? []);
 
         if (Platform.isIOS &&
@@ -1278,6 +1282,9 @@ class MatrixState extends State<Matrix>
     if (voiceMessageEvent.value?.eventId != currentEvent.eventId) return;
 
     // Initialize audio player before use
+    await audioPlayer?.stop();
+    await audioPlayer?.dispose();
+
     audioPlayer = AudioPlayer();
     voiceMessageEvent.value = currentEvent;
 
