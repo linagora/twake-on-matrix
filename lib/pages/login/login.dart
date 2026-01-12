@@ -34,7 +34,6 @@ class LoginController extends State<Login> {
       setState(() => showPassword = !loading && !showPassword);
 
   void login() async {
-    final matrix = Matrix.of(context);
     if (usernameController.text.isEmpty) {
       setState(() => usernameError = L10n.of(context)!.pleaseEnterYourUsername);
     } else {
@@ -71,7 +70,7 @@ class LoginController extends State<Login> {
         identifier = AuthenticationUserIdentifier(user: username);
       }
       Matrix.of(context).loginType = LoginType.mLoginPassword;
-      final client = await matrix.getLoginClient();
+      final client = await loginClientFuture;
       await client.login(
         LoginType.mLoginPassword,
         identifier: identifier,
@@ -107,7 +106,7 @@ class LoginController extends State<Login> {
   void _checkWellKnown(String userId) async {
     if (mounted) setState(() => usernameError = null);
     if (!userId.isValidMatrixId) return;
-    final client = await Matrix.of(context).getLoginClient();
+    final client = await loginClientFuture;
     final oldHomeserver = client.homeserver;
     try {
       var newDomain = Uri.https(userId.domain!, '');
@@ -179,10 +178,10 @@ class LoginController extends State<Login> {
       ],
     );
     if (input == null) return;
+    final client = await loginClientFuture;
     final clientSecret = DateTime.now().millisecondsSinceEpoch.toString();
     final response = await TwakeDialog.showFutureLoadingDialogFullScreen(
-      future: () async => (await Matrix.of(context).getLoginClient())
-          .requestTokenToResetPasswordEmail(
+      future: () => client.requestTokenToResetPasswordEmail(
         clientSecret,
         input.single,
         sendAttempt++,
@@ -228,7 +227,7 @@ class LoginController extends State<Login> {
       ).toJson(),
     };
     final success = await TwakeDialog.showFutureLoadingDialogFullScreen(
-      future: () async => (await Matrix.of(context).getLoginClient()).request(
+      future: () => client.request(
         RequestType.POST,
         '/client/r0/account/password',
         data: data,

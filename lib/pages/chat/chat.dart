@@ -382,7 +382,7 @@ class ChatController extends State<Chat>
     cachedPresenceNotifier.value = room?.directChatPresence;
     if (room?.directChatMatrixID != null) {
       cachedPresenceStreamSubscription =
-          Matrix.of(context).onlatestPresenceChanged.stream.listen((event) {
+          Matrix.of(context).onLatestPresenceChanged.stream.listen((event) {
         if (event.userid == room!.directChatMatrixID) {
           Logs().v(
             'onlatestPresenceChanged: ${event.presence}, ${event.lastActiveTimestamp}',

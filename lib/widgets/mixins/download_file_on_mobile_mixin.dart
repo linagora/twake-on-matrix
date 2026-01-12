@@ -9,7 +9,6 @@ import 'package:fluffychat/presentation/extensions/value_notifier_custom.dart';
 import 'package:fluffychat/presentation/model/chat/downloading_state_presentation_model.dart';
 import 'package:fluffychat/utils/manager/download_manager/download_file_state.dart';
 import 'package:fluffychat/utils/manager/storage_directory_manager.dart';
-import 'package:fluffychat/utils/matrix_sdk_extensions/download_file_extension.dart';
 import 'package:fluffychat/utils/manager/download_manager/download_manager.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
 import 'package:flutter/material.dart';
@@ -72,7 +71,7 @@ mixin DownloadFileOnMobileMixin<T extends StatefulWidget> on State<T> {
             fileName: event.filename,
           );
     final file = File(filePath);
-    if (await file.exists() && await file.length() == event.getFileSize()) {
+    if (await file.exists()) {
       if (downloadFileStateNotifier.isDisposed) {
         return;
       }

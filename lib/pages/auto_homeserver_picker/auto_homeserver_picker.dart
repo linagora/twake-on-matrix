@@ -1,4 +1,5 @@
 import 'package:fluffychat/config/app_config.dart';
+import 'package:fluffychat/domain/model/extensions/homeserver_summary_extensions.dart';
 import 'package:fluffychat/pages/auto_homeserver_picker/auto_homeserver_picker_state.dart';
 import 'package:fluffychat/pages/auto_homeserver_picker/auto_homeserver_picker_view.dart';
 import 'package:fluffychat/presentation/mixins/connect_page_mixin.dart';
@@ -55,8 +56,7 @@ class AutoHomeserverPickerController extends State<AutoHomeserverPicker>
         },
       ).toHomeserverSummary();
 
-      final ssoSupported = matrix.loginHomeserverSummary!.loginFlows
-          .any((flow) => flow.type == 'm.login.sso');
+      final ssoSupported = matrix.loginHomeserverSummary.supportSSOLogin;
 
       try {
         await client.register().timeout(

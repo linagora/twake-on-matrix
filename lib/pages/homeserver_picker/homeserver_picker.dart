@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:collection/collection.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:fluffychat/domain/model/extensions/homeserver_summary_extensions.dart';
 import 'package:fluffychat/presentation/mixins/connect_page_mixin.dart';
 import 'package:fluffychat/pages/connect/sso_login_state.dart';
 import 'package:fluffychat/pages/homeserver_picker/homeserver_state.dart';
@@ -177,8 +178,7 @@ class HomeserverPickerController extends State<HomeserverPicker>
 
       matrix.loginHomeserverSummary =
           await client.checkHomeserver(homeserver).toHomeserverSummary();
-      final ssoSupported = matrix.loginHomeserverSummary!.loginFlows
-          .any((flow) => flow.type == 'm.login.sso');
+      final ssoSupported = matrix.loginHomeserverSummary.supportSSOLogin;
 
       try {
         await client.register();

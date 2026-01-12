@@ -214,7 +214,7 @@ class MatrixState extends State<Matrix>
   }
 
   /// Callback will be called on presence update and return latest value.
-  final CachedStreamController<CachedPresence> onlatestPresenceChanged =
+  final CachedStreamController<CachedPresence> onLatestPresenceChanged =
       CachedStreamController();
   StreamSubscription? _presenceSubscription;
   void _listenSyncPresence(Client client) {
@@ -224,17 +224,16 @@ class MatrixState extends State<Matrix>
 
       for (final newPresence in sync.presence ?? []) {
         final cachedPresence = CachedPresence.fromMatrixEvent(newPresence);
+        final newTs = cachedPresence.lastActiveTimestamp;
+        final oldTs = lastActivePresence?.lastActiveTimestamp;
         if (lastActivePresence == null ||
-            (cachedPresence.lastActiveTimestamp != null &&
-                lastActivePresence.lastActiveTimestamp != null &&
-                cachedPresence.lastActiveTimestamp!
-                    .isAfter(lastActivePresence.lastActiveTimestamp!))) {
+            (newTs != null && (oldTs == null || newTs.isAfter(oldTs)))) {
           lastActivePresence = cachedPresence;
         }
       }
 
       if (lastActivePresence != null) {
-        onlatestPresenceChanged.add(lastActivePresence);
+        onLatestPresenceChanged.add(lastActivePresence);
       }
     });
   }
@@ -301,7 +300,14 @@ class MatrixState extends State<Matrix>
               .stream
               .where((l) => l == LoginState.loggedIn)
               .first
-              .then((state) => _handleAddAnotherAccount(state));
+              .then((state) => _handleAddAnotherAccount(state))
+              .catchError(
+                (e, s) => Logs().e(
+                  'MatrixState::getLoginClient: add-account handler failed',
+                  e,
+                  s,
+                ),
+              );
     return candidate;
   }
 
@@ -1300,6 +1306,7 @@ class MatrixState extends State<Matrix>
     audioPlayer.dispose();
     voiceMessageEvent.dispose();
     _presenceSubscription?.cancel();
+    onLatestPresenceChanged.close();
     super.dispose();
   }
 

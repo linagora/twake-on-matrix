@@ -59,13 +59,14 @@ mixin ConnectPageMixin {
     return Uri.parse(redirectUrl).scheme;
   }
 
-  Future<String> _getAuthenticateUrl({
+  String _getAuthenticateUrl({
     required String homeserver,
     required String id,
     required String redirectUrl,
-  }) async {
+  }) {
+    final normalizedHomeserver = homeserver.replaceFirst(RegExp(r'/*$'), '');
     final ssoRedirectUri =
-        '$homeserver/_matrix/client/r0/login/sso/redirect/${Uri.encodeComponent(id)}';
+        '$normalizedHomeserver/_matrix/client/r0/login/sso/redirect/${Uri.encodeComponent(id)}';
     final redirectUrlEncode = Uri.encodeQueryComponent(redirectUrl);
     return '$ssoRedirectUri?redirectUrl=$redirectUrlEncode';
   }
@@ -91,11 +92,14 @@ mixin ConnectPageMixin {
     required String id,
   }) async {
     final client = await Matrix.of(context).getLoginClient();
-    final homeserver = client.homeserver.toString();
+    final homeserver = client.homeserver?.toString() ?? '';
+    if (homeserver.isEmpty) {
+      throw StateError('Homeserver is not configured for SSO');
+    }
     final redirectUrl = _generateRedirectUrl(
       homeserver,
     );
-    final url = await _getAuthenticateUrl(
+    final url = _getAuthenticateUrl(
       homeserver: homeserver,
       id: id,
       redirectUrl: redirectUrl,
@@ -137,7 +141,7 @@ mixin ConnectPageMixin {
     try {
       final result = await authenticateWithWebAuth(context: context, id: id);
       final token = Uri.parse(result).queryParameters['loginToken'];
-      if (token?.isEmpty ?? false) return SsoLoginState.tokenEmpty;
+      if (token == null || token.isEmpty) return SsoLoginState.tokenEmpty;
       Matrix.of(context).loginType = LoginType.mLoginToken;
       final client = await Matrix.of(context).getLoginClient();
       await TwakeDialog.showStreamDialogFullScreen(
@@ -254,9 +258,7 @@ mixin ConnectPageMixin {
   }) async {
     try {
       final token = Uri.parse(uri).queryParameters['loginToken'];
-      Logs().d(
-        "ConnectPageMixin: handleTokenFromRegistrationSite: token: $token",
-      );
+      Logs().d("ConnectPageMixin: handleTokenFromRegistrationSite: got token");
       if (token == null || token.isEmpty == true) {
         return SsoLoginState.tokenEmpty;
       }
