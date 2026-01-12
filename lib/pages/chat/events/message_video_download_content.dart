@@ -97,6 +97,7 @@ class _MessageVideoDownloadContentState
             },
           ),
         );
+        checkDownloadFileState();
       },
     );
   }
