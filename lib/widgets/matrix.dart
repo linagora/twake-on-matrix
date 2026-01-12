@@ -1282,7 +1282,7 @@ class MatrixState extends State<Matrix>
     voiceMessageEvent.value = currentEvent;
 
     if (file != null) {
-      audioPlayer?.setFilePath(file.path);
+      await audioPlayer?.setFilePath(file.path);
     } else {
       await audioPlayer?.setAudioSource(MatrixFileAudioSource(matrixFile));
     }
@@ -1450,6 +1450,7 @@ class MatrixState extends State<Matrix>
     showQrCodeDownload.dispose();
     _audioPlayerStateSubscription?.cancel();
     audioPlayer?.dispose();
+    voiceMessageEvents.dispose();
     voiceMessageEvent.dispose();
     _presenceSubscription?.cancel();
     onLatestPresenceChanged.close();
