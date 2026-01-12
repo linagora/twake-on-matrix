@@ -1,3 +1,5 @@
+import 'package:fluffychat/pages/connect/connect_page_view_style.dart';
+import 'package:fluffychat/widgets/identity_provider_icon.dart';
 import 'package:flutter/material.dart';
 
 import 'package:fluffychat/generated/l10n/app_localizations.dart';
@@ -35,29 +37,9 @@ class SsoButton extends StatelessWidget {
                 padding: const EdgeInsets.all(4.0),
                 child: identityProvider.icon == null
                     ? const Icon(Icons.web_outlined)
-                    : FutureBuilder(
-                        future: loginClientFuture,
-                        builder: (context, asyncSnapshot) {
-                          if (asyncSnapshot.hasError) {
-                            return const Icon(Icons.error_outline, size: 32);
-                          }
-                          final client = asyncSnapshot.data;
-                          if (client == null ||
-                              asyncSnapshot.connectionState !=
-                                  ConnectionState.done) {
-                            return const SizedBox(width: 32, height: 32);
-                          }
-                          return Image.network(
-                            Uri.parse(identityProvider.icon!)
-                                .getDownloadLink(client)
-                                .toString(),
-                            width: 32,
-                            height: 32,
-                            errorBuilder: (context, error, stackTrace) {
-                              return const Icon(Icons.broken_image, size: 32);
-                            },
-                          );
-                        },
+                    : IdentityProviderIcon(
+                        identityProvider: identityProvider,
+                        size: ConnectPageViewStyle.iconSize,
                       ),
               ),
             ),

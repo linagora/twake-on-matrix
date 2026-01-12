@@ -1,3 +1,4 @@
+import 'package:fluffychat/config/app_constants.dart';
 import 'package:fluffychat/data/model/federation_server/federation_server_information.dart';
 import 'package:fluffychat/domain/model/app_twake_information.dart';
 import 'package:fluffychat/domain/model/homeserver_summary.dart';
@@ -60,5 +61,14 @@ extension HomeserverSummaryExtensions on HomeserverSummary {
       );
       return null;
     }
+  }
+}
+
+extension NullableHomeserverSummaryExtensions on HomeserverSummary? {
+  bool get supportSSOLogin {
+    return this
+            ?.loginFlows
+            .any((flow) => flow.type == AppConstants.ssoLoginType) ==
+        true;
   }
 }

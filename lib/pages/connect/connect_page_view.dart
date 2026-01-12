@@ -1,9 +1,9 @@
 import 'package:fluffychat/pages/connect/connect_page_view_style.dart';
+import 'package:fluffychat/widgets/identity_provider_icon.dart';
 import 'package:flutter/material.dart';
 
 import 'package:fluffychat/generated/l10n/app_localizations.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
-import 'package:matrix/matrix.dart';
 
 import 'package:fluffychat/pages/connect/connect_page.dart';
 import 'package:fluffychat/widgets/layouts/login_scaffold.dart';
@@ -55,39 +55,9 @@ class ConnectPageView extends StatelessWidget {
                               Icons.web_outlined,
                               size: 16,
                             )
-                          : FutureBuilder(
-                              future: controller.loginClientFuture,
-                              builder: (context, asyncSnapshot) {
-                                if (asyncSnapshot.hasError) {
-                                  return const Icon(
-                                    Icons.error_outline,
-                                    size: ConnectPageViewStyle.iconSize,
-                                  );
-                                }
-
-                                final client = asyncSnapshot.data;
-                                if (client == null ||
-                                    asyncSnapshot.connectionState !=
-                                        ConnectionState.done) {
-                                  return const SizedBox(
-                                    width: ConnectPageViewStyle.iconSize,
-                                    height: ConnectPageViewStyle.iconSize,
-                                  );
-                                }
-                                return Image.network(
-                                  Uri.parse(identityProviders.single.icon!)
-                                      .getDownloadLink(client)
-                                      .toString(),
-                                  width: ConnectPageViewStyle.iconSize,
-                                  height: ConnectPageViewStyle.iconSize,
-                                  errorBuilder: (context, error, stackTrace) {
-                                    return const Icon(
-                                      Icons.broken_image,
-                                      size: ConnectPageViewStyle.iconSize,
-                                    );
-                                  },
-                                );
-                              },
+                          : IdentityProviderIcon(
+                              identityProvider: identityProviders.first,
+                              size: ConnectPageViewStyle.iconSize,
                             ),
                       onPressed: () => controller.ssoLoginAction(
                         context: context,

@@ -59,7 +59,8 @@ extension DownloadFileExtension on Event {
     if (attachmentExists) {
       final actualSize = await attachment.length();
       final expectedSize = getFileSize(getThumbnail: getThumbnail);
-      if (expectedSize > 0 && actualSize == expectedSize) {
+      if ((expectedSize > 0 && actualSize == expectedSize) ||
+          (expectedSize <= 0 && actualSize > 0)) {
         needsDownload = false;
       } else {
         await attachment.delete();
@@ -85,8 +86,8 @@ extension DownloadFileExtension on Event {
           },
           cancelToken: cancelToken,
         );
-        if (downloadResponse.statusCode != 200 ||
-            !await File(savePath).exists()) {
+        final status = downloadResponse.statusCode ?? 0;
+        if (status < 200 || status >= 300 || !await File(savePath).exists()) {
           throw ('Download failed (status: ${downloadResponse.statusCode}): $filename');
         }
       } catch (e) {
@@ -175,8 +176,8 @@ extension DownloadFileExtension on Event {
 
       final decryptedFile = await decryptFile(
         fileInfo,
-        mxcUrl,
         decryptedPath,
+        filename: filename,
         getThumbnail: getThumbnail,
       );
       if (decryptedFile == null) {
@@ -227,16 +228,16 @@ extension DownloadFileExtension on Event {
   // Decrypt the file if it's encrypted.
   Future<FileInfo?> decryptFile(
     FileInfo? fileInfo,
-    Uri mxcUrl,
     String decryptedPath, {
+    required String filename,
     getThumbnail = false,
   }) async {
     if (fileInfo == null) {
-      throw ('decryptFile: fileInfo is null');
+      throw ArgumentError.notNull('fileInfo');
     }
 
     if (fileInfo.filePath == null) {
-      throw ('decryptFile: fileInfo.filePath is null');
+      throw StateError('decryptFile: fileInfo.filePath is null');
     }
 
     final fileMap = getThumbnail ? infoMap['thumbnail_file'] : content['file'];
@@ -264,7 +265,7 @@ extension DownloadFileExtension on Event {
     await decryptedFile.writeAsBytes(decryptedBytes);
 
     return FileInfo(
-      body,
+      filename,
       filePath: decryptedPath,
     );
   }
