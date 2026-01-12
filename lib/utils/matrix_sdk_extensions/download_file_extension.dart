@@ -88,7 +88,9 @@ extension DownloadFileExtension on Event {
         );
         final status = downloadResponse.statusCode ?? 0;
         if (status < 200 || status >= 300 || !await File(savePath).exists()) {
-          throw ('Download failed (status: ${downloadResponse.statusCode}): $filename');
+          throw Exception(
+            'Download failed (status: ${downloadResponse.statusCode}): $filename',
+          );
         }
       } catch (e) {
         if (e is CancelRequestException) {
@@ -129,7 +131,7 @@ extension DownloadFileExtension on Event {
     required String savePath,
     required String filename,
     required FileInfo fileInfo,
-    getThumbnail = false,
+    bool getThumbnail = false,
     StreamController<Either<Failure, Success>>? streamController,
   }) async {
     Logs().i('DownloadFileExtension::_handleDownloadFileDone(): $mxcUrl');
@@ -230,7 +232,7 @@ extension DownloadFileExtension on Event {
     FileInfo? fileInfo,
     String decryptedPath, {
     required String filename,
-    getThumbnail = false,
+    bool getThumbnail = false,
   }) async {
     if (fileInfo == null) {
       throw ArgumentError.notNull('fileInfo');
@@ -258,7 +260,7 @@ extension DownloadFileExtension on Event {
         await room.client.nativeImplementations.decryptFile(encryptedFile);
 
     if (decryptedBytes == null) {
-      throw ('decryptFile: Unable to decrypt file');
+      throw Exception('decryptFile: Unable to decrypt file');
     }
 
     final decryptedFile = File(decryptedPath);
@@ -271,7 +273,7 @@ extension DownloadFileExtension on Event {
   }
 
   Future<FileInfo?> getFileInfo({
-    getThumbnail = false,
+    bool getThumbnail = false,
     StreamController<Either<Failure, Success>>? downloadStreamController,
     ProgressCallback? progressCallback,
     CancelToken? cancelToken,

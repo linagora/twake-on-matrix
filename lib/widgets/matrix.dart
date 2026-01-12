@@ -882,10 +882,9 @@ class MatrixState extends State<Matrix>
       );
 
       final fedServerJson = wellKnown
-              .additionalProperties[FederationServerInformation.fedServerKey]
-          as Map<String, dynamic>?;
+          .additionalProperties[FederationServerInformation.fedServerKey];
 
-      if (fedServerJson == null) return;
+      if (fedServerJson is! Map<String, dynamic>) return;
 
       final federationConfigurationRepository =
           getIt.get<FederationConfigurationsRepository>();

@@ -117,7 +117,12 @@ class AutoHomeserverPickerController extends State<AutoHomeserverPicker>
       final client = await matrix.getLoginClient();
       matrix.loginHomeserverSummary = await client
           .checkHomeserver(Uri.parse(AppConfig.twakeWorkplaceHomeserver))
-          .toHomeserverSummary();
+          .timeout(
+        autoHomeserverPickerTimeout,
+        onTimeout: () {
+          throw CheckHomeserverTimeoutException();
+        },
+      ).toHomeserverSummary();
       Map<String, dynamic>? rawLoginTypes;
       await client
           .request(

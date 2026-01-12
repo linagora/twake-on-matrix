@@ -32,7 +32,7 @@ class _IdentityProviderIconState extends State<IdentityProviderIcon> {
       future: loginClientFuture,
       builder: (context, asyncSnapshot) {
         if (asyncSnapshot.hasError) {
-          return const Icon(Icons.error_outline, size: 32);
+          return Icon(Icons.error_outline, size: widget.size);
         }
         final client = asyncSnapshot.data;
         if (client == null ||
@@ -40,7 +40,7 @@ class _IdentityProviderIconState extends State<IdentityProviderIcon> {
           return SizedBox.square(dimension: widget.size);
         }
         return Image.network(
-          Uri.parse(widget.identityProvider.icon!)
+          Uri.parse(widget.identityProvider.icon ?? '')
               .getDownloadLink(client)
               .toString(),
           width: widget.size,
