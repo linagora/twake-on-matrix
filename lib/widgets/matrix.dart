@@ -1120,9 +1120,10 @@ class MatrixState extends State<Matrix>
       );
       _authUrl = url;
     } else {
-      final newAuthUrl = (loginHomeserverSummary
-              ?.discoveryInformation?.additionalProperties["m.authentication"]
-          as Map<String, dynamic>?)?["issuer"];
+      final authData = loginHomeserverSummary
+          ?.discoveryInformation?.additionalProperties["m.authentication"];
+      final newAuthUrl =
+          authData is Map<String, dynamic> ? authData["issuer"] : null;
       Logs().e(
         'Matrix::_setupAuthUrl: newAuthUrl - $newAuthUrl',
       );

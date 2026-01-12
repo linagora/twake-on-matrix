@@ -33,7 +33,8 @@ extension DownloadFileExtension on Event {
   }
 
   int getFileSize({bool getThumbnail = false}) {
-    return getThumbnail ? thumbnailInfoMap['size'] : infoMap['size'];
+    final size = getThumbnail ? thumbnailInfoMap['size'] : infoMap['size'];
+    return size is int ? size : 0;
   }
 
   Future<FileInfo?> downloadOrRetrieveAttachment(
@@ -243,6 +244,13 @@ extension DownloadFileExtension on Event {
     }
 
     final fileMap = getThumbnail ? infoMap['thumbnail_file'] : content['file'];
+    if (fileMap is! Map<String, dynamic> ||
+        fileMap['key'] is! Map<String, dynamic> ||
+        fileMap['key']['key_ops'] == null) {
+      throw StateError(
+        'decryptFile: Missing encryption metadata in event content',
+      );
+    }
     if (!fileMap['key']['key_ops'].contains('decrypt')) {
       throw ("getFileInfo: Missing 'decrypt' in 'key_ops'.");
     }
