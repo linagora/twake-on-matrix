@@ -154,11 +154,15 @@ class MessageContent extends StatelessWidget
                   if (event.isVideoAvailable) ...[
                     OptionalSelectionContainerDisabled(
                       isEnabled: PlatformInfos.isWeb,
-                      child: _MessageVideoBuilder(
-                        event: event,
-                        onFileTapped: (event) => onFileTapped(
-                          context: context,
+                      child: Align(
+                        alignment: Alignment.center,
+                        child: _MessageVideoBuilder(
                           event: event,
+                          onFileTapped: (event) => onFileTapped(
+                            context: context,
+                            event: event,
+                          ),
+                          textWidth: textWidth,
                         ),
                       ),
                     ),
@@ -167,14 +171,22 @@ class MessageContent extends StatelessWidget
                       crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
                         if (!PlatformInfos.isWeb) ...[
-                          MessageDownloadContent(
-                            event,
+                          Align(
+                            alignment: Alignment.center,
+                            child: MessageDownloadContent(
+                              event,
+                              textWidth: textWidth,
+                            ),
                           ),
                         ] else ...[
                           OptionalSelectionContainerDisabled(
                             isEnabled: PlatformInfos.isWeb,
-                            child: MessageDownloadContentWeb(
-                              event,
+                            child: Align(
+                              alignment: Alignment.center,
+                              child: MessageDownloadContentWeb(
+                                event,
+                                textWidth: textWidth,
+                              ),
                             ),
                           ),
                         ],
@@ -196,6 +208,7 @@ class MessageContent extends StatelessWidget
                     width: MessageStyle.messageBubbleWidthVideoCaption(
                       event: event,
                       context: context,
+                      textWidth: textWidth,
                     ),
                     child: TwakeLinkPreview(
                       key: ValueKey('TwakeLinkPreview%${event.eventId}%'),
@@ -407,12 +420,14 @@ class MessageContent extends StatelessWidget
 
 class _MessageVideoBuilder extends StatelessWidget {
   final Event event;
+  final double? textWidth;
 
   final void Function(Event event) onFileTapped;
 
   const _MessageVideoBuilder({
     required this.event,
     required this.onFileTapped,
+    this.textWidth,
   });
 
   @override
@@ -433,6 +448,7 @@ class _MessageVideoBuilder extends StatelessWidget {
         event: event,
         matrixFile: matrixFile,
         displayImageInfo: displayImageInfo,
+        bubbleWidth: textWidth,
       );
     }
 
@@ -450,18 +466,21 @@ class _MessageVideoBuilder extends StatelessWidget {
           event: event,
           width: displayImageInfo.size.width,
           height: displayImageInfo.size.height,
+          bubbleWidth: textWidth,
         );
       }
       return MessageVideoDownloadContentWeb(
         event: event,
         width: displayImageInfo.size.width,
         height: displayImageInfo.size.height,
+        bubbleWidth: textWidth,
       );
     }
     return MessageVideoDownloadContent(
       event: event,
       width: displayImageInfo.size.width,
       height: displayImageInfo.size.height,
+      bubbleWidth: textWidth,
     );
   }
 

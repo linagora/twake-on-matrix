@@ -16,11 +16,14 @@ class MessageDownloadContentWeb extends StatefulWidget {
     this.event, {
     super.key,
     this.highlightText,
+    this.textWidth,
   });
 
   final Event event;
 
   final String? highlightText;
+
+  final double? textWidth;
 
   @override
   State<StatefulWidget> createState() => _MessageDownloadContentWebState();

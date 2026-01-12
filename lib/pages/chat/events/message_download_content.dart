@@ -14,10 +14,13 @@ class MessageDownloadContent extends StatefulWidget {
 
   final String? highlightText;
 
+  final double? textWidth;
+
   const MessageDownloadContent(
     this.event, {
     super.key,
     this.highlightText,
+    this.textWidth,
   });
 
   @override

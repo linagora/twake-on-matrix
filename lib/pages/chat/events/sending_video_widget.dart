@@ -16,11 +16,14 @@ class SendingVideoWidget extends StatefulWidget {
 
   final DisplayImageInfo displayImageInfo;
 
+  final double? bubbleWidth;
+
   const SendingVideoWidget({
     super.key,
     required this.event,
     required this.matrixFile,
     required this.displayImageInfo,
+    this.bubbleWidth,
   });
 
   @override
@@ -61,7 +64,9 @@ class _SendingVideoWidgetState extends State<SendingVideoWidget>
             children: [
               SizedBox(
                 width: MessageContentStyle.imageBubbleWidth(
-                  widget.displayImageInfo.size.width,
+                  widget.displayImageInfo.size.width < (widget.bubbleWidth ?? 0)
+                      ? widget.bubbleWidth ?? 0
+                      : widget.displayImageInfo.size.width,
                 ),
                 height: MessageContentStyle.imageBubbleHeight(
                   widget.displayImageInfo.size.height,
