@@ -167,6 +167,8 @@ class MatrixState extends State<Matrix>
     if (index != -1) {
       if (index == _activeClient) return SetActiveClientState.success;
       _activeClient = index;
+      // Clean up audio player when switching accounts
+      await cleanupAudioPlayer();
       // TODO: Multi-client VoiP support
       createVoipPlugin();
       await _setUpToMServicesWhenChangingActiveClient(newClient);
@@ -561,6 +563,8 @@ class MatrixState extends State<Matrix>
     Client currentClient,
   ) async {
     waitForFirstSync = false;
+    // Clean up audio player when logging out
+    await cleanupAudioPlayer();
     await _cancelSubs(currentClient.clientName);
     widget.clients.remove(currentClient);
     await ClientManager.removeClientNameFromStore(currentClient.clientName);
@@ -1147,6 +1151,8 @@ class MatrixState extends State<Matrix>
 
   Future<void> _handleLastLogout() async {
     waitForFirstSync = false;
+    // Clean up audio player when logging out
+    await cleanupAudioPlayer();
     matrixState.reSyncContacts();
     await matrixState.cancelListenSynchronizeContacts();
     if (PlatformInfos.isMobile) {
@@ -1216,7 +1222,7 @@ class MatrixState extends State<Matrix>
         }
 
         final nextAudioMessage = voiceMessageEvents.value.first;
-        autoPlayAudio(
+        await autoPlayAudio(
           currentEvent: nextAudioMessage,
         );
       }
@@ -1249,7 +1255,10 @@ class MatrixState extends State<Matrix>
 
         if (Platform.isIOS &&
             matrixFile.mimeType.toLowerCase() == 'audio/ogg') {
-          file = await handleOggAudioFileIniOS(file);
+          final oggAudioFileIniOS = await handleOggAudioFileIniOS(file);
+          if (oggAudioFileIniOS != null) {
+            file = oggAudioFileIniOS;
+          }
         }
       }
 
@@ -1295,13 +1304,18 @@ class MatrixState extends State<Matrix>
     });
   }
 
-  Future<File> handleOggAudioFileIniOS(File file) async {
-    Logs().v('Convert ogg audio file for iOS...');
-    final convertedFile = File('${file.path}.caf');
-    if (await convertedFile.exists() == false) {
-      OpusCaf().convertOpusToCaf(file.path, convertedFile.path);
+  Future<File?> handleOggAudioFileIniOS(File file) async {
+    try {
+      Logs().v('Convert ogg audio file for iOS...');
+      final convertedFile = File('${file.path}.caf');
+      if (await convertedFile.exists() == false) {
+        OpusCaf().convertOpusToCaf(file.path, convertedFile.path);
+      }
+      return convertedFile;
+    } catch (e, s) {
+      Logs().e('Could not convert ogg audio file for iOS', e, s);
+      return null;
     }
-    return convertedFile;
   }
 
   @override
@@ -1390,6 +1404,27 @@ class MatrixState extends State<Matrix>
   void cancelAudioPlayerAutoDispose() {
     _audioPlayerStateSubscription?.cancel();
     _audioPlayerStateSubscription = null;
+  }
+
+  /// Cleans up the audio player and clears playing lists.
+  ///
+  /// Should be called when logging out or switching accounts to ensure
+  /// audio playback is properly stopped and state is reset.
+  Future<void> cleanupAudioPlayer() async {
+    try {
+      await audioPlayer?.pause();
+      await audioPlayer?.stop();
+      await audioPlayer?.dispose();
+      audioPlayer = null;
+      _audioPlayerStateSubscription?.cancel();
+      _audioPlayerStateSubscription = null;
+      voiceMessageEvents.value = [];
+      voiceMessageEvent.value = null;
+      currentAudioStatus.value = AudioPlayerStatus.notDownloaded;
+      Logs().d('MatrixState::cleanupAudioPlayer: Audio player cleaned up');
+    } catch (e) {
+      Logs().e('MatrixState::cleanupAudioPlayer: Error - $e');
+    }
   }
 
   @override
