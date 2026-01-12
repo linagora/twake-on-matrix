@@ -33,6 +33,7 @@ class SendingVideoWidget extends StatefulWidget {
 class _SendingVideoWidgetState extends State<SendingVideoWidget>
     with PlayVideoActionMixin, UploadFileMixin {
   final sendingFileProgressNotifier = ValueNotifier(SendingVideoStatus.sending);
+
   @override
   Event get event => widget.event;
 
@@ -63,10 +64,10 @@ class _SendingVideoWidgetState extends State<SendingVideoWidget>
             alignment: Alignment.center,
             children: [
               SizedBox(
-                width: MessageContentStyle.imageBubbleWidth(
-                  widget.displayImageInfo.size.width < (widget.bubbleWidth ?? 0)
-                      ? widget.bubbleWidth ?? 0
-                      : widget.displayImageInfo.size.width,
+                width: MessageContentStyle
+                    .combinedBubbleImageWidthWithBubbleMaxWidget(
+                  bubbleImageWidget: widget.displayImageInfo.size.width,
+                  bubbleMaxWidth: widget.bubbleWidth ?? 0,
                 ),
                 height: MessageContentStyle.imageBubbleHeight(
                   widget.displayImageInfo.size.height,
@@ -186,6 +187,7 @@ class VideoWidget extends StatelessWidget {
 
 class _PlayVideoButton extends StatelessWidget {
   final Event? event;
+
   const _PlayVideoButton({this.event});
 
   @override

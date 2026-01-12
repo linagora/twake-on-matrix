@@ -175,7 +175,6 @@ class MessageContent extends StatelessWidget
                             alignment: Alignment.center,
                             child: MessageDownloadContent(
                               event,
-                              textWidth: textWidth,
                             ),
                           ),
                         ] else ...[
@@ -185,7 +184,6 @@ class MessageContent extends StatelessWidget
                               alignment: Alignment.center,
                               child: MessageDownloadContentWeb(
                                 event,
-                                textWidth: textWidth,
                               ),
                             ),
                           ),
