@@ -1301,6 +1301,9 @@ class MatrixState extends State<Matrix>
 
     audioPlayer?.play().onError((e, s) {
       Logs().e('Could not play audio file', e, s);
+      // Reset state on playback error
+      voiceMessageEvent.value = null;
+      currentAudioStatus.value = AudioPlayerStatus.notDownloaded;
       if (!context.mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
