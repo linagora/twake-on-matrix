@@ -848,12 +848,13 @@ class ChatController extends State<Chat>
 
   Future<void> sendVoiceMessageAction({
     required TwakeAudioFile audioFile,
+    required String path,
     required Duration time,
     required List<int> waveform,
   }) async {
     final fileInfo = FileInfo(
       audioFile.name,
-      bytes: audioFile.bytes,
+      filePath: path,
     );
 
     final txid = client.generateUniqueTransactionId();

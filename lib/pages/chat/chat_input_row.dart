@@ -226,6 +226,7 @@ class ChatInputRow extends StatelessWidget {
                                 );
                                 controller.sendVoiceMessageAction(
                                   audioFile: file,
+                                  path: soundFile.path,
                                   time: time,
                                   waveform: waveFrom,
                                 );
