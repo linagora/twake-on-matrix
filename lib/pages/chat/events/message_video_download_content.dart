@@ -97,6 +97,7 @@ class _MessageVideoDownloadContentState
             },
           ),
         );
+        if (!mounted) return;
         checkDownloadFileState();
       },
     );
