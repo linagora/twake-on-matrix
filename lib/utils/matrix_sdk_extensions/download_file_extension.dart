@@ -253,7 +253,7 @@ extension DownloadFileExtension on Event {
       );
     }
     if (!fileMap['key']['key_ops'].contains('decrypt')) {
-      throw ("decryptFile: Missing 'decrypt' in 'key_ops'.");
+      throw StateError("decryptFile: Missing 'decrypt' in 'key_ops'.");
     }
 
     final encryptedBytes = await File(fileInfo.filePath!).readAsBytes();
