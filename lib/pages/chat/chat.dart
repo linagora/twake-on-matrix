@@ -1514,22 +1514,13 @@ class ChatController extends State<Chat>
 
   /// Finds the index of the nearest rendered message to [targetIndex].
   int? _findNearestRenderedMessageIndex(int targetIndex) {
-    final eventsCount = timeline!.events.length;
-    int? nearestIndex;
-    int minDistance = eventsCount;
+    final index = timeline!.events.indexWhere(
+      (event) => event.eventId == visibleEventId,
+    );
 
-    for (int i = 0; i < eventsCount; i++) {
-      final key = GlobalObjectKey(timeline!.events[i].eventId);
-      if (key.currentContext != null) {
-        final distance = (i - targetIndex).abs();
-        if (distance < minDistance) {
-          minDistance = distance;
-          nearestIndex = i;
-        }
-      }
-    }
+    if (index == -1) return null;
 
-    return nearestIndex;
+    return index;
   }
 
   /// Checks if a message at [index] is currently rendered.
