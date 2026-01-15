@@ -165,6 +165,12 @@ class PinnedEventsController {
     jumpToPinnedMessageCallback?.call(index);
   }
 
+  void reset() {
+    currentPinnedEventNotifier.value = null;
+    getPinnedMessageNotifier.value = Right(ChatGetPinnedEventsInitial());
+    _pinnedEventsSubscription?.cancel();
+  }
+
   void dispose() {
     currentPinnedEventNotifier.dispose();
     getPinnedMessageNotifier.dispose();

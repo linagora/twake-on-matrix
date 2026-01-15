@@ -590,7 +590,12 @@ class ChatController extends State<Chat>
     scrollToEventId(fullyRead, highlight: false);
   }
 
-  void _tryLoadTimeline() async {
+  Future<void> _tryLoadTimeline() async {
+    final currentRoomId = roomId;
+    if (room == null && currentRoomId != null) {
+      room = matrix?.client.getRoomById(currentRoomId);
+    }
+
     _updateOpeningChatViewStateNotifier(ViewEventListLoading());
     loadTimelineFuture = _getTimeline(
       onJumpToMessage: (event) {
@@ -599,6 +604,8 @@ class ChatController extends State<Chat>
     );
     try {
       await loadTimelineFuture;
+      if (!mounted || roomId != currentRoomId) return;
+
       await _tryRequestHistory();
       final fullyRead = room?.fullyRead;
       if (fullyRead == null || fullyRead.isEmpty || fullyRead == '') {
@@ -607,7 +614,6 @@ class ChatController extends State<Chat>
       if (room?.hasNewMessages == true) {
         _initUnreadLocation(fullyRead);
       }
-      if (!mounted) return;
     } catch (e, s) {
       Logs().e('Failed to load timeline', e, s);
       rethrow;
@@ -1207,8 +1213,12 @@ class ChatController extends State<Chat>
     String? eventContextId,
     OnJumpToMessage? onJumpToMessage,
   }) async {
+    final currentRoomId = roomId;
     await Matrix.of(context).client.roomsLoading;
     await Matrix.of(context).client.accountDataLoading;
+
+    if (!mounted || roomId != currentRoomId) return;
+
     if (eventContextId != null &&
         (!eventContextId.isValidMatrixId || eventContextId.sigil != '\$')) {
       eventContextId = null;
@@ -1223,17 +1233,20 @@ class ChatController extends State<Chat>
       );
     } catch (e, s) {
       Logs().w('Unable to load timeline on event ID $eventContextId', e, s);
-      if (!mounted) return;
+      if (!mounted || roomId != currentRoomId) return;
       timeline = await room?.getTimeline(onUpdate: updateView);
-      if (!mounted) return;
+      if (!mounted || roomId != currentRoomId) return;
     }
     timeline?.requestKeys(onlineKeyBackupOnly: false);
-    if (room!.markedUnread) room?.markUnread(false);
+
+    // Safely check room state
+    if (room?.markedUnread == true) room?.markUnread(false);
+
     // when the scroll controller is attached we want to scroll to an event id, if specified
     // and update the scroll controller...which will trigger a request history, if the
     // "load more" button is visible on the screen
     SchedulerBinding.instance.addPostFrameCallback((_) async {
-      if (!mounted) return;
+      if (!mounted || roomId != currentRoomId) return;
 
       String? eventId;
 
@@ -2519,8 +2532,36 @@ class ChatController extends State<Chat>
         EventTypes.Sticker,
       ];
 
+  void _resetState() {
+    // Cancel any pending operations or subscriptions for the old room
+    onUpdateEventStreamSubcription?.cancel();
+    cachedPresenceStreamSubscription?.cancel();
+    _jumpToEventIdSubscription?.cancel();
+    ignoredUsersStreamSub?.cancel();
+    _timestampTimer?.cancel();
+
+    // Clear notifiers that might hold old room state
+    replyEventNotifier.value = null;
+    editEventNotifier.value = null;
+    stickyTimestampNotifier.value = null;
+    selectedEvents.clear();
+    pinnedEventsController.reset();
+
+    // Reset timeline and futures
+    timeline?.cancelSubscriptions();
+    timeline = null;
+    loadTimelineFuture = null;
+
+    // Reset other state variables
+    _pendingReadMarkerEventId = null;
+    _currentChatScrollState = ChatScrollState.endScroll;
+  }
+
   Future<void> _tryRequestHistory() async {
     if (timeline == null) return;
+
+    // Check mounted after async gap if any (none here but good practice)
+    if (!mounted) return;
 
     final allMembershipEvents = timeline!.events.every(
       (event) => event.type == EventTypes.RoomMember,
@@ -2536,6 +2577,7 @@ class ChatController extends State<Chat>
       try {
         await requestHistory(historyCount: _defaultEventCountDisplay)
             .then((response) async {
+          if (!mounted) return;
           Logs().v(
             'Chat::_tryRequestHistory():: Try request history success',
           );
@@ -2554,7 +2596,9 @@ class ChatController extends State<Chat>
           'Chat::_tryRequestHistory():: Error - $e',
         );
       } finally {
-        _updateOpeningChatViewStateNotifier(ViewEventListSuccess());
+        if (mounted) {
+          _updateOpeningChatViewStateNotifier(ViewEventListSuccess());
+        }
       }
     } else {
       _updateOpeningChatViewStateNotifier(ViewEventListSuccess());
@@ -3207,7 +3251,8 @@ class ChatController extends State<Chat>
   }
 
   void _initRoom() {
-    matrix = Matrix.read(context);
+    // Only init if not already initialized or needed
+    matrix ??= Matrix.read(context);
     final client = matrix!.client;
     sendingClient = client;
     room = client.getRoomById(roomId!);
@@ -3223,8 +3268,15 @@ class ChatController extends State<Chat>
   void didUpdateWidget(covariant Chat oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.roomId != widget.roomId) {
+      _resetState();
       _initRoom();
       _tryLoadTimeline();
+      _initializePinnedEvents();
+      _listenRoomUpdateEvent();
+      // Re-initialize other room-specific items
+      initCachedPresence();
+      _requestParticipants();
+      listenIgnoredUser();
     }
     final currentLocation = html.window.location.href;
 
