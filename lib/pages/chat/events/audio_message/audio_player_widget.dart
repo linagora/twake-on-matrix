@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:io';
 import 'package:async/async.dart';
 import 'package:fluffychat/pages/chat/events/audio_message/audio_play_extension.dart';
 import 'package:fluffychat/pages/chat/events/audio_message/audio_player_style.dart';
@@ -16,6 +15,7 @@ import 'package:fluffychat/widgets/file_widget/circular_loading_download_widget.
 import 'package:fluffychat/widgets/file_widget/file_tile_widget.dart';
 import 'package:fluffychat/widgets/file_widget/message_file_tile_style.dart';
 import 'package:fluffychat/widgets/matrix.dart';
+import 'package:fluffychat/widgets/mixins/audio_player_mixin.dart';
 import 'package:fluffychat/widgets/twake_components/twake_icon_button.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -25,7 +25,6 @@ import 'package:matrix/matrix.dart';
 import 'package:fluffychat/generated/l10n/app_localizations.dart';
 
 import 'package:fluffychat/utils/localized_exception_extension.dart';
-import 'package:opus_caf_converter_dart/opus_caf_converter_dart.dart';
 
 class AudioPlayerWidget extends StatefulWidget {
   final Color color;
@@ -48,7 +47,11 @@ class AudioPlayerWidget extends StatefulWidget {
 enum AudioPlayerStatus { notDownloaded, downloading, downloaded }
 
 class AudioPlayerState extends State<AudioPlayerWidget>
-    with AudioMixin, AutomaticKeepAliveClientMixin, EventFilterMixin {
+    with
+        AudioMixin,
+        AutomaticKeepAliveClientMixin,
+        EventFilterMixin,
+        AudioPlayerMixin {
   final List<double> _calculatedWaveform = [];
 
   final ValueNotifier<Duration> _durationNotifier =
@@ -123,15 +126,6 @@ class AudioPlayerState extends State<AudioPlayerWidget>
     matrix.voiceMessageEvents.value = audioPending.events;
 
     matrix.autoPlayAudio(currentEvent: widget.event);
-  }
-
-  Future<File> handleOggAudioFileIniOS(File file) async {
-    Logs().v('Convert ogg audio file for iOS...');
-    final convertedFile = File('${file.path}.caf');
-    if (await convertedFile.exists() == false) {
-      OpusCaf().convertOpusToCaf(file.path, convertedFile.path);
-    }
-    return convertedFile;
   }
 
   @override
@@ -234,7 +228,7 @@ class AudioPlayerState extends State<AudioPlayerWidget>
                 final wavePosition = (currentPosition / maxPosition) *
                     calculateWaveCountAuto(
                       minWaves: AudioPlayerStyle.minWaveCount,
-                      maxWaves: AudioPlayerStyle.maxWaveCount(context),
+                      maxWaves: _calculatedWaveform.length,
                       durationInSeconds: _durationNotifier.value.inSeconds,
                     );
 

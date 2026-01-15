@@ -31,66 +31,6 @@ mixin EventFilterMixin {
     return events.where((event) => event.isVideoOrImage).toList();
   }
 
-  /// Filters a list of events to include only image events.
-  ///
-  /// Returns a new list containing only events with messageType of
-  /// [MessageTypes.Image].
-  List<Event> filterImageEvents(List<Event> events) {
-    return events
-        .where((event) => event.messageType == MessageTypes.Image)
-        .toList();
-  }
-
-  /// Filters a list of events to include only video events.
-  ///
-  /// Returns a new list containing only events with messageType of
-  /// [MessageTypes.Video].
-  List<Event> filterVideoEvents(List<Event> events) {
-    return events
-        .where((event) => event.messageType == MessageTypes.Video)
-        .toList();
-  }
-
-  /// Filters a list of events to include only audio events.
-  ///
-  /// Returns a new list containing only events with messageType of
-  /// [MessageTypes.Audio].
-  List<Event> filterAudioEvents(List<Event> events) {
-    return events
-        .where((event) => event.messageType == MessageTypes.Audio)
-        .toList();
-  }
-
-  /// Filters a list of events to include only file events.
-  ///
-  /// Returns a new list containing only events with messageType of
-  /// [MessageTypes.File].
-  List<Event> filterFileEvents(List<Event> events) {
-    return events
-        .where((event) => event.messageType == MessageTypes.File)
-        .toList();
-  }
-
-  /// Filters a list of events to include only sticker events.
-  ///
-  /// Returns a new list containing only events with messageType of
-  /// [MessageTypes.Sticker].
-  List<Event> filterStickerEvents(List<Event> events) {
-    return events
-        .where((event) => event.messageType == MessageTypes.Sticker)
-        .toList();
-  }
-
-  /// Filters a list of events to include only text events.
-  ///
-  /// Returns a new list containing only events with messageType of
-  /// [MessageTypes.Text].
-  List<Event> filterTextEvents(List<Event> events) {
-    return events
-        .where((event) => event.messageType == MessageTypes.Text)
-        .toList();
-  }
-
   /// Filters events by custom message types.
   ///
   /// Allows filtering by multiple message types at once.
@@ -397,124 +337,6 @@ mixin EventFilterMixin {
     }
   }
 
-  /// Loads more events in a specific direction.
-  ///
-  /// Fetches additional events from the server, decrypts them if necessary,
-  /// and filters events by specified message types.
-  ///
-  /// Parameters:
-  /// - [client]: The Matrix client instance
-  /// - [room]: The room object
-  /// - [direction]: Direction to load (forward or backward)
-  /// - [token]: Pagination token for the direction
-  /// - [messageTypes]: List of message types to filter. If null, filters for
-  ///   media events (images and videos) by default.
-  /// - [limit]: Number of events to fetch (default: 10)
-  ///
-  /// Returns a record containing the loaded events and new pagination token.
-  Future<
-      ({
-        List<Event> events,
-        String? newToken,
-      })> loadMoreEvents({
-    required Client? client,
-    required Room room,
-    required Direction direction,
-    required String? token,
-    List<String>? messageTypes,
-    int limit = 10,
-  }) async {
-    if (client == null || token == null) {
-      return (events: <Event>[], newToken: null);
-    }
-
-    final mustDecrypt = room.encrypted && client.encryptionEnabled == true;
-
-    try {
-      final expandResult = await expandEvents(
-        client: client,
-        roomId: room.id,
-        backwardToken: direction == Direction.b ? token : null,
-        forwardToken: direction == Direction.f ? token : null,
-        limit: limit,
-      );
-
-      final response = direction == Direction.b
-          ? expandResult.backward
-          : expandResult.forward;
-
-      if (response == null) {
-        return (events: <Event>[], newToken: null);
-      }
-
-      List<Event> loadMoreEvents =
-          convertMatrixEventsToEvents(response.chunk, room);
-
-      if (mustDecrypt) {
-        loadMoreEvents = await decryptEvents(loadMoreEvents, client);
-      }
-
-      loadMoreEvents = messageTypes != null
-          ? filterEventsByTypes(loadMoreEvents, messageTypes)
-          : filterMediaEvents(loadMoreEvents);
-
-      return (
-        events: loadMoreEvents,
-        newToken: response.end,
-      );
-    } catch (e) {
-      Logs().e('loadMoreEvents: Error loading more events', e);
-      return (events: <Event>[], newToken: null);
-    }
-  }
-
-  /// Checks if an event is a media event (image or video).
-  bool isMediaEvent(Event event) {
-    return event.isVideoOrImage;
-  }
-
-  /// Checks if an event is an attachment (file, image, video, or audio).
-  bool isAttachmentEvent(Event event) {
-    return [
-      MessageTypes.File,
-      MessageTypes.Image,
-      MessageTypes.Video,
-      MessageTypes.Audio,
-    ].contains(event.messageType);
-  }
-
-  /// Filters events to include only attachment events.
-  ///
-  /// Returns events that are files, images, videos, or audio.
-  List<Event> filterAttachmentEvents(List<Event> events) {
-    return events.where((event) => isAttachmentEvent(event)).toList();
-  }
-
-  /// Groups events by message type.
-  ///
-  /// Returns a map where keys are message type strings and values are lists
-  /// of events of that type.
-  ///
-  /// Example:
-  /// ```dart
-  /// final grouped = groupEventsByType(events);
-  /// final images = grouped[MessageTypes.Image] ?? [];
-  /// final videos = grouped[MessageTypes.Video] ?? [];
-  /// ```
-  Map<String, List<Event>> groupEventsByType(List<Event> events) {
-    final Map<String, List<Event>> grouped = {};
-
-    for (final event in events) {
-      final type = event.messageType;
-      if (!grouped.containsKey(type)) {
-        grouped[type] = <Event>[];
-      }
-      grouped[type]!.add(event);
-    }
-
-    return grouped;
-  }
-
   /// Gets audio events from the clicked event onwards for playlist.
   ///
   /// Returns all audio events from the clicked event onwards (for auto-play).
@@ -537,8 +359,7 @@ mixin EventFilterMixin {
     List<Event> audioEvents,
     Event clickedEvent,
   ) {
-    final reversedEvents = audioEvents.reversed.toList();
-    final clickedIndex = reversedEvents.indexWhere(
+    final clickedIndex = audioEvents.indexWhere(
       (event) => event.eventId == clickedEvent.eventId,
     );
 
@@ -547,7 +368,7 @@ mixin EventFilterMixin {
     }
 
     // Return from clicked event onwards for sequential playback
-    return reversedEvents.sublist(clickedIndex);
+    return audioEvents.sublist(clickedIndex);
   }
 
   /// Loads and processes initial audio events with automatic expansion.

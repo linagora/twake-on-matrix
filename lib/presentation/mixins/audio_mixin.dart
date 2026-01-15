@@ -395,25 +395,20 @@ mixin AudioMixin {
     if (eventWaveForm == null || eventWaveForm.isEmpty || waveCount <= 0) {
       return null;
     }
-    if (waveCount == 1) return [eventWaveForm[eventWaveForm.length ~/ 2]];
-    // If we need more data points than we have, generate fake data by repeating the waveform
-    if (waveCount > eventWaveForm.length) {
-      final List<int> result = [];
-      for (int i = 0; i < waveCount; i++) {
-        // Cycle through the original waveform to generate fake data
-        final int value = eventWaveForm[i % eventWaveForm.length];
-        result.add(value);
-      }
 
-      // Apply value clamping
-      return result.map((i) => i == 0 ? 1 : (i > 1024 ? 1024 : i)).toList();
+    // Ensure the result will not exceed waveCount
+    // Use the minimum of waveCount and eventWaveForm.length
+    final int effectiveWaveCount = min(waveCount, eventWaveForm.length);
+
+    if (effectiveWaveCount == 1) {
+      return [eventWaveForm[eventWaveForm.length ~/ 2]];
     }
 
-    // Use interpolation-based sampling instead of insert/remove loops
+    // Use interpolation-based sampling
     final List<int> result = [];
-    final double step = (eventWaveForm.length - 1) / (waveCount - 1);
+    final double step = (eventWaveForm.length - 1) / (effectiveWaveCount - 1);
 
-    for (int i = 0; i < waveCount; i++) {
+    for (int i = 0; i < effectiveWaveCount; i++) {
       final double exactIndex = i * step;
       final int lowerIndex = exactIndex.floor();
       final int upperIndex =
@@ -432,7 +427,7 @@ mixin AudioMixin {
       result.add(sampledValue);
     }
 
-    // Apply the same value clamping as the original function
+    // Apply value clamping
     return result.map((i) => i == 0 ? 1 : (i > 1024 ? 1024 : i)).toList();
   }
 

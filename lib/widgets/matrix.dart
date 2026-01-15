@@ -11,16 +11,12 @@ import 'package:fluffychat/domain/repository/federation_configurations_repositor
 import 'package:fluffychat/domain/repository/user_info/user_info_repository.dart';
 import 'package:fluffychat/domain/usecase/room/create_support_chat_interactor.dart';
 import 'package:fluffychat/event/twake_event_types.dart';
-import 'package:fluffychat/pages/chat/events/audio_message/audio_play_extension.dart';
-import 'package:fluffychat/pages/chat/events/audio_message/audio_player_widget.dart';
 import 'package:fluffychat/presentation/mixins/init_config_mixin.dart';
 import 'package:fluffychat/presentation/model/client_login_state_event.dart';
 import 'package:fluffychat/widgets/layouts/agruments/logout_body_args.dart';
+import 'package:fluffychat/widgets/mixins/audio_player_mixin.dart';
 import 'package:flutter_emoji_mart/flutter_emoji_mart.dart';
-import 'package:just_audio/just_audio.dart';
 import 'package:linagora_design_flutter/cozy_config_manager/cozy_config_manager.dart';
-import 'package:opus_caf_converter_dart/opus_caf_converter_dart.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:universal_html/html.dart' as html hide File;
 
 import 'package:adaptive_dialog/adaptive_dialog.dart';
@@ -94,19 +90,12 @@ class Matrix extends StatefulWidget {
 }
 
 class MatrixState extends State<Matrix>
-    with WidgetsBindingObserver, ReceiveSharingIntentMixin, InitConfigMixin {
+    with
+        WidgetsBindingObserver,
+        ReceiveSharingIntentMixin,
+        InitConfigMixin,
+        AudioPlayerMixin {
   final _contactsManager = getIt.get<ContactsManager>();
-
-  AudioPlayer? audioPlayer;
-
-  final ValueNotifier<Event?> voiceMessageEvent = ValueNotifier(null);
-
-  final ValueNotifier<List<Event>> voiceMessageEvents = ValueNotifier([]);
-
-  final ValueNotifier<AudioPlayerStatus> currentAudioStatus =
-      ValueNotifier(AudioPlayerStatus.notDownloaded);
-
-  StreamSubscription<PlayerState>? _audioPlayerStateSubscription;
 
   int _activeClient = -1;
   String? activeBundle;
@@ -1183,160 +1172,6 @@ class MatrixState extends State<Matrix>
     showQrCodeDownload.value = show;
   }
 
-  /// Sets up the audio player with auto-dispose listener when playback completes.
-  ///
-  /// This method should be called after setting up a new audio source.
-  /// It automatically cleans up the audio player and resets state when playback finishes.
-  void setupAudioPlayerAutoDispose() {
-    _audioPlayerStateSubscription?.cancel();
-    _audioPlayerStateSubscription =
-        audioPlayer?.playerStateStream.listen((state) async {
-      if (state.processingState == ProcessingState.completed) {
-        Logs().d(
-          'setupAudioPlayerAutoDispose: Current audio message - ${voiceMessageEvents.value}',
-        );
-
-        if (voiceMessageEvents.value.isEmpty) {
-          return;
-        }
-
-        // Remove the completed message from the list
-        final updatedVoiceMessageEvent = voiceMessageEvents.value
-            .where((e) => e.eventId != voiceMessageEvent.value?.eventId)
-            .toList();
-
-        Logs().d(
-          'setupAudioPlayerAutoDispose: Remaining audio message - $updatedVoiceMessageEvent',
-        );
-
-        voiceMessageEvents.value = updatedVoiceMessageEvent;
-        voiceMessageEvent.value = null;
-        currentAudioStatus.value = AudioPlayerStatus.notDownloaded;
-
-        // Check if there are more messages to play
-        if (voiceMessageEvents.value.isEmpty) {
-          _audioPlayerStateSubscription?.cancel();
-          _audioPlayerStateSubscription = null;
-          await audioPlayer?.stop();
-          await audioPlayer?.dispose();
-          audioPlayer = null;
-          return;
-        }
-
-        final nextAudioMessage = voiceMessageEvents.value.first;
-        await autoPlayAudio(
-          currentEvent: nextAudioMessage,
-        );
-      }
-    });
-  }
-
-  Future<void> autoPlayAudio({
-    required Event currentEvent,
-  }) async {
-    voiceMessageEvent.value = currentEvent;
-    File? file;
-    MatrixFile? matrixFile;
-
-    currentAudioStatus.value = AudioPlayerStatus.downloading;
-    try {
-      matrixFile = await currentEvent.downloadAndDecryptAttachment();
-
-      if (!kIsWeb) {
-        final tempDir = await getTemporaryDirectory();
-        final mxcUrl = currentEvent.attachmentOrThumbnailMxcUrl();
-        if (mxcUrl == null) {
-          throw Exception('Event has no attachment URL');
-        }
-        final fileName = Uri.encodeComponent(
-          mxcUrl.pathSegments.last,
-        );
-        file = File('${tempDir.path}/${fileName}_${matrixFile.name}');
-
-        if (matrixFile.bytes?.isEmpty == true) {
-          throw Exception('Downloaded file has no content');
-        }
-
-        await file.writeAsBytes(matrixFile.bytes ?? []);
-
-        if (Platform.isIOS &&
-            matrixFile.mimeType.toLowerCase() == 'audio/ogg') {
-          final oggAudioFileIniOS = await handleOggAudioFileIniOS(file);
-          if (oggAudioFileIniOS != null) {
-            file = oggAudioFileIniOS;
-          }
-        }
-      }
-
-      currentAudioStatus.value = AudioPlayerStatus.downloaded;
-    } catch (e, s) {
-      Logs().e('Could not download audio file', e, s);
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(e.toLocalizedString(context)),
-          ),
-        );
-      }
-      currentAudioStatus.value = AudioPlayerStatus.notDownloaded;
-      return;
-    }
-    if (voiceMessageEvent.value?.eventId != currentEvent.eventId) return;
-
-    // Initialize audio player before use
-    await audioPlayer?.stop();
-    await audioPlayer?.dispose();
-
-    audioPlayer = AudioPlayer();
-    voiceMessageEvent.value = currentEvent;
-
-    if (file != null) {
-      await audioPlayer?.setFilePath(file.path);
-    } else {
-      await audioPlayer?.setAudioSource(MatrixFileAudioSource(matrixFile));
-    }
-
-    // Set up auto-dispose listener managed globally in MatrixState
-    setupAudioPlayerAutoDispose();
-
-    audioPlayer?.play().onError((e, s) {
-      Logs().e('Could not play audio file', e, s);
-      // Reset state on playback error
-      voiceMessageEvent.value = null;
-      currentAudioStatus.value = AudioPlayerStatus.notDownloaded;
-      if (!context.mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            e?.toLocalizedString(context) ??
-                L10n.of(context)!.couldNotPlayAudioFile,
-          ),
-        ),
-      );
-    });
-  }
-
-  Future<File?> handleOggAudioFileIniOS(File file) async {
-    try {
-      Logs().v('Convert ogg audio file for iOS...');
-      final convertedFile = File('${file.path}.caf');
-      if (await convertedFile.exists() == false) {
-        OpusCaf().convertOpusToCaf(file.path, convertedFile.path);
-        // Verify conversion succeeded
-        if (await convertedFile.exists() == false) {
-          Logs().w(
-            'MatrixState::handleOggAudioFileIniOS: OGG to CAF conversion failed - converted file does not exist',
-          );
-          return null;
-        }
-      }
-      return convertedFile;
-    } catch (e, s) {
-      Logs().e('Could not convert ogg audio file for iOS', e, s);
-      return null;
-    }
-  }
-
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     Logs().i('didChangeAppLifecycleState: AppLifecycleState = $state');
@@ -1420,32 +1255,6 @@ class MatrixState extends State<Matrix>
     }
   }
 
-  void cancelAudioPlayerAutoDispose() {
-    _audioPlayerStateSubscription?.cancel();
-    _audioPlayerStateSubscription = null;
-  }
-
-  /// Cleans up the audio player and clears playing lists.
-  ///
-  /// Should be called when logging out or switching accounts to ensure
-  /// audio playback is properly stopped and state is reset.
-  Future<void> cleanupAudioPlayer() async {
-    try {
-      await audioPlayer?.pause();
-      await audioPlayer?.stop();
-      await audioPlayer?.dispose();
-      audioPlayer = null;
-      _audioPlayerStateSubscription?.cancel();
-      _audioPlayerStateSubscription = null;
-      voiceMessageEvents.value = [];
-      voiceMessageEvent.value = null;
-      currentAudioStatus.value = AudioPlayerStatus.notDownloaded;
-      Logs().d('MatrixState::cleanupAudioPlayer: Audio player cleaned up');
-    } catch (e) {
-      Logs().e('MatrixState::cleanupAudioPlayer: Error - $e');
-    }
-  }
-
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
@@ -1467,12 +1276,12 @@ class MatrixState extends State<Matrix>
     showToMBootstrap.dispose();
     linuxNotifications?.close();
     showQrCodeDownload.dispose();
-    _audioPlayerStateSubscription?.cancel();
     audioPlayer?.dispose();
     voiceMessageEvents.dispose();
     voiceMessageEvent.dispose();
     _presenceSubscription?.cancel();
     onLatestPresenceChanged.close();
+    disposeAudioPlayer();
     super.dispose();
   }
 
