@@ -98,6 +98,7 @@ class CreateSupportChatInteractor {
           accountDataKey: roomId,
         }),
       ]);
+      await room.setPower(userId, powerLevelManager.getUserPowerLevel());
 
       yield Right(SupportChatCreated(roomId: roomId));
     } catch (e) {
