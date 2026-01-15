@@ -3177,6 +3177,7 @@ class ChatController extends State<Chat>
   @override
   void initState() {
     super.initState();
+    _initRoom();
     _initializePinnedEvents();
     _listenOnJumpToEventFromSearch();
     registerPasteShortcutListeners();
@@ -3205,6 +3206,13 @@ class ChatController extends State<Chat>
     showEmojiPickerComposerNotifier.addListener(_emojiPickerListener);
   }
 
+  void _initRoom() {
+    matrix = Matrix.read(context);
+    final client = matrix!.client;
+    sendingClient = client;
+    room = client.getRoomById(roomId!);
+  }
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
@@ -3214,6 +3222,10 @@ class ChatController extends State<Chat>
   @override
   void didUpdateWidget(covariant Chat oldWidget) {
     super.didUpdateWidget(oldWidget);
+    if (oldWidget.roomId != widget.roomId) {
+      _initRoom();
+      _tryLoadTimeline();
+    }
     final currentLocation = html.window.location.href;
 
     final highlightEventId =
