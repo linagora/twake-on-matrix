@@ -281,19 +281,21 @@ void main() {
       expect(result[1], lessThan(400));
     });
 
-    test('should repeat waveform for upsampling', () {
+    test(
+        'should clamp waveCount to eventWaveForm.length when waveCount exceeds it',
+        () {
       // Arrange
-      const waveform = [100, 200]; // 2 points
+      const waveform = [100, 200, 300, 400, 500]; // 5 elements
 
       // Act
       final result = audioMixin.calculateWaveForm(
         eventWaveForm: waveform,
-        waveCount: 6,
+        waveCount: 10, // Request 10 but only 5 available
       );
 
       // Assert
-      expect(result!.length, 6);
-      expect(result, [100, 200, 100, 200, 100, 200]);
+      expect(result!.length, 5); // Should be clamped to waveform length
+      expect(result, waveform);
     });
 
     test('should clamp values correctly', () {
@@ -314,7 +316,7 @@ void main() {
       expect(result[3], 500); // 500 should remain 500
     });
 
-    test('should handle single point waveform with upsampling', () {
+    test('should handle single point waveform', () {
       // Arrange
       const waveform = [300];
 
@@ -325,22 +327,23 @@ void main() {
       );
 
       // Assert
-      expect(result, [300, 300, 300]);
+      expect(result, [300]); // Can't exceed source length
     });
 
-    test('should handle large upsampling', () {
+    test('should downsample correctly', () {
       // Arrange
-      const waveform = [100, 200, 300];
+      const waveform = [100, 200, 300, 400, 500, 600, 700, 800, 900];
 
       // Act
       final result = audioMixin.calculateWaveForm(
         eventWaveForm: waveform,
-        waveCount: 9,
+        waveCount: 3,
       );
 
       // Assert
-      expect(result!.length, 9);
-      expect(result, [100, 200, 300, 100, 200, 300, 100, 200, 300]);
+      expect(result!.length, 3);
+      expect(result[0], 100); // First value
+      expect(result[2], 900); // Last value
     });
   });
 

@@ -108,11 +108,11 @@ mixin AudioPlayerMixin<T extends StatefulWidget> on State<T> {
         );
         file = File('${tempDir.path}/${fileName}_${matrixFile.name}');
 
-        if (matrixFile.bytes?.isEmpty == true) {
+        if (matrixFile.bytes.isEmpty == true) {
           throw Exception('Downloaded file has no content');
         }
 
-        await file.writeAsBytes(matrixFile.bytes ?? []);
+        await file.writeAsBytes(matrixFile.bytes);
 
         if (Platform.isIOS &&
             matrixFile.mimeType.toLowerCase() == 'audio/ogg') {

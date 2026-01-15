@@ -306,23 +306,20 @@ mixin EventFilterMixin {
           backwardEvents = decrypted[1];
         }
 
-        final backwardEventsReversed = backwardEvents.reversed.toList();
-        final forwardEventsReversed = forwardEvents.reversed.toList();
-
         initialFilteredEvents = [
           ...(messageTypes != null
               ? filterEventsByTypes(
-                  backwardEventsReversed,
+                  backwardEvents.reversed.toList(),
                   messageTypes,
                 )
-              : filterMediaEvents(backwardEventsReversed)),
+              : filterMediaEvents(backwardEvents.reversed.toList())),
           ...initialFilteredEvents,
           ...(messageTypes != null
               ? filterEventsByTypes(
-                  forwardEventsReversed,
+                  forwardEvents.reversed.toList(),
                   messageTypes,
                 )
-              : filterMediaEvents(forwardEventsReversed)),
+              : filterMediaEvents(forwardEvents.reversed.toList())),
         ];
       }
 
@@ -359,7 +356,8 @@ mixin EventFilterMixin {
     List<Event> audioEvents,
     Event clickedEvent,
   ) {
-    final clickedIndex = audioEvents.indexWhere(
+    final reversedEvents = audioEvents.reversed.toList();
+    final clickedIndex = reversedEvents.indexWhere(
       (event) => event.eventId == clickedEvent.eventId,
     );
 
@@ -368,7 +366,7 @@ mixin EventFilterMixin {
     }
 
     // Return from clicked event onwards for sequential playback
-    return audioEvents.sublist(clickedIndex);
+    return reversedEvents.sublist(clickedIndex);
   }
 
   /// Loads and processes initial audio events with automatic expansion.
