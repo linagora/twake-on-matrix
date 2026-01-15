@@ -7,7 +7,6 @@ import 'package:fluffychat/pages/chat/events/message_content_mixin.dart';
 import 'package:fluffychat/presentation/mixins/audio_mixin.dart';
 import 'package:fluffychat/resource/image_paths.dart';
 import 'package:fluffychat/utils/stream_extension.dart';
-import 'package:fluffychat/widgets/matrix.dart';
 import 'package:fluffychat/widgets/twake_components/twake_icon_button.dart';
 import 'package:flutter/material.dart';
 import 'package:fluffychat/generated/l10n/app_localizations.dart';
@@ -92,10 +91,6 @@ class ChatView extends StatelessWidget with MessageContentMixin {
 
   @override
   Widget build(BuildContext context) {
-    controller.matrix ??= Matrix.of(context);
-    final client = controller.matrix!.client;
-    controller.sendingClient ??= client;
-    controller.room = controller.sendingClient!.getRoomById(controller.roomId!);
     if (controller.room == null) {
       return const SizedBox.shrink();
     }
