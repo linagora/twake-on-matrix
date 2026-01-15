@@ -8,6 +8,7 @@ import 'package:fluffychat/pages/new_group/new_group_chat_info_style.dart';
 import 'package:fluffychat/pages/new_group/new_group_info_controller.dart';
 import 'package:fluffychat/pages/new_group/widget/expansion_participants_list.dart';
 import 'package:fluffychat/presentation/model/pick_avatar_state.dart';
+import 'package:fluffychat/resource/image_paths.dart';
 import 'package:fluffychat/widgets/app_bars/twake_app_bar.dart';
 import 'package:fluffychat/widgets/context_menu_builder_ios_paste_without_permission.dart';
 import 'package:fluffychat/widgets/stream_image_view.dart';
@@ -15,6 +16,7 @@ import 'package:fluffychat/widgets/twake_components/twake_fab.dart';
 import 'package:fluffychat/widgets/twake_components/twake_icon_button.dart';
 import 'package:flutter/material.dart';
 import 'package:fluffychat/generated/l10n/app_localizations.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:matrix/matrix.dart';
 import 'package:photo_manager/photo_manager.dart';
@@ -134,6 +136,7 @@ class NewGroupChatInfoView extends StatelessWidget {
         centerTitle: true,
         withDivider: true,
         enableLeftTitle: true,
+        isDialog: true,
         leading: TwakeIconButton(
           paddingAll: 8,
           splashColor: Colors.transparent,
@@ -155,7 +158,7 @@ class NewGroupChatInfoView extends StatelessWidget {
         width: NewGroupChatInfoStyle.profileSize(context),
         height: NewGroupChatInfoStyle.profileSize(context),
         decoration: BoxDecoration(
-          color: LinagoraRefColors.material().neutral[80],
+          color: LinagoraRefColors.material().tertiary[60],
           shape: BoxShape.circle,
         ),
         alignment: Alignment.center,
@@ -317,8 +320,8 @@ class _AvatarForWebBuilder extends StatelessWidget {
         },
       ),
       child: Icon(
-        Icons.camera_alt_outlined,
-        color: Theme.of(context).colorScheme.surface,
+        Icons.add_a_photo_outlined,
+        color: LinagoraSysColors.material().onPrimary,
       ),
     );
   }
@@ -341,10 +344,16 @@ class _EncryptionSettingTile extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Padding(
-            padding: EdgeInsets.only(top: 8.0),
-            child: Icon(
-              Icons.lock,
+          Padding(
+            padding: const EdgeInsets.only(top: 8.0),
+            child: SvgPicture.asset(
+              ImagePaths.icE2EEncryptionMessageIndicator,
+              width: 24,
+              height: 24,
+              colorFilter: ColorFilter.mode(
+                LinagoraRefColors.material().tertiary[30] ?? Colors.transparent,
+                BlendMode.srcIn,
+              ),
             ),
           ),
           const SizedBox(
@@ -358,8 +367,9 @@ class _EncryptionSettingTile extends StatelessWidget {
                   padding: const EdgeInsets.only(top: 8.0),
                   child: Text(
                     L10n.of(context)!.enableEncryption,
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                           letterSpacing: 0.15,
+                          fontWeight: FontWeight.w500,
                         ),
                   ),
                 ),
@@ -373,10 +383,11 @@ class _EncryptionSettingTile extends StatelessWidget {
                           L10n.of(context)!.encryptionMessage,
                           style: Theme.of(context)
                               .textTheme
-                              .bodyMedium
+                              .labelSmall
                               ?.copyWith(
-                                letterSpacing: 0.4,
-                                color: LinagoraRefColors.material().neutral[40],
+                                letterSpacing: 0.5,
+                                color: LinagoraSysColors.material().tertiary,
+                                fontWeight: FontWeight.w500,
                               ),
                         ),
                         AnimatedSize(
@@ -387,7 +398,7 @@ class _EncryptionSettingTile extends StatelessWidget {
                                   L10n.of(context)!.encryptionWarning,
                                   style: Theme.of(context)
                                       .textTheme
-                                      .bodyMedium
+                                      .labelSmall
                                       ?.copyWith(
                                         letterSpacing: 0.4,
                                         color:
@@ -412,6 +423,21 @@ class _EncryptionSettingTile extends StatelessWidget {
               return Checkbox(
                 value: isEnable,
                 onChanged: (value) => onChanged?.call(value),
+                side: WidgetStateBorderSide.resolveWith(
+                  (Set<WidgetState> states) {
+                    if (states.contains(WidgetState.selected)) {
+                      return const BorderSide(
+                        color: Colors.transparent,
+                        width: 2.0,
+                      );
+                    }
+                    return BorderSide(
+                      color: LinagoraRefColors.material().tertiary[30] ??
+                          Colors.transparent,
+                      width: 2.0,
+                    );
+                  },
+                ),
               );
             },
           ),
