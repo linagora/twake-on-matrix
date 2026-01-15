@@ -35,3 +35,10 @@ class InviteUserSomeFailed extends Failure {
   @override
   List<Object?> get props => [inviteUserPartialFailureException];
 }
+
+class InviteWithNoUserFailure extends Failure {
+  const InviteWithNoUserFailure();
+
+  @override
+  List<Object?> get props => [];
+}

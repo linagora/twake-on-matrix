@@ -20,15 +20,23 @@ import 'package:fluffychat/widgets/twake_components/twake_text_button.dart';
 import 'package:fluffychat/generated/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
+import 'package:matrix/matrix.dart';
 
 class ContactsSelectionView extends StatelessWidget {
   final ContactsSelectionController controller;
+  final bool bannedHighlight;
+  final Room? room;
 
-  const ContactsSelectionView(this.controller, {super.key});
+  const ContactsSelectionView(
+    this.controller, {
+    super.key,
+    this.bannedHighlight = false,
+    this.room,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    final child = Scaffold(
       backgroundColor: LinagoraSysColors.material().onPrimary,
       appBar: PreferredSize(
         preferredSize: controller.isFullScreen
@@ -98,6 +106,8 @@ class ContactsSelectionView extends StatelessWidget {
             )
           : null,
     );
+
+    return ScaffoldMessenger(child: child);
   }
 
   Widget _sliverRecentContacts() {
@@ -130,6 +140,8 @@ class ContactsSelectionView extends StatelessWidget {
                 recentContacts[index].directChatMatrixID,
               );
               return ContactItem(
+                bannedHighlight: bannedHighlight,
+                room: room,
                 contact: recentContacts[index].toPresentationContact(),
                 selectedContactsMapNotifier:
                     controller.selectedContactsMapNotifier,
@@ -237,6 +249,8 @@ class ContactsSelectionView extends StatelessWidget {
               }
               return SliverToBoxAdapter(
                 child: ContactItem(
+                  bannedHighlight: bannedHighlight,
+                  room: room,
                   contact: success.contact,
                   selectedContactsMapNotifier:
                       controller.selectedContactsMapNotifier,
@@ -268,6 +282,8 @@ class ContactsSelectionView extends StatelessWidget {
                     contacts[index].matrixId,
                   );
                   return ContactItem(
+                    bannedHighlight: bannedHighlight,
+                    room: room,
                     contact: contacts[index],
                     selectedContactsMapNotifier:
                         controller.selectedContactsMapNotifier,
@@ -369,6 +385,8 @@ class ContactsSelectionView extends StatelessWidget {
                       contacts[index].matrixId,
                     );
                     return ContactItem(
+                      bannedHighlight: bannedHighlight,
+                      room: room,
                       contact: contacts[index],
                       selectedContactsMapNotifier:
                           controller.selectedContactsMapNotifier,

@@ -6,7 +6,7 @@ class SelectedContactsMapChangeNotifier extends ChangeNotifier {
   final haveSelectedContactsNotifier = ValueNotifier(false);
   Set<PresentationContact> _selectedContactsList = {};
 
-  Iterable<PresentationContact> get contactsList {
+  Set<PresentationContact> get contactsList {
     return _selectedContactsList;
   }
 
