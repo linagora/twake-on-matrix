@@ -150,7 +150,7 @@ void main() {
           'should handle malicious input with mixed excessive separators quickly',
           () {
         final stopwatch = Stopwatch()..start();
-        final malicious = '+1234${' -./\\t' * 500}';
+        final malicious = '+1234${' -./\t' * 500}';
         expect(isPhoneNumber(malicious), isFalse);
         stopwatch.stop();
 
