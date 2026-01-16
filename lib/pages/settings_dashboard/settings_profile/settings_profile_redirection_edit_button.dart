@@ -64,21 +64,29 @@ class SettingsProfileRedirectionEditButton extends StatelessWidget {
             color: LinagoraSysColors.material().primary,
           ),
         ),
-        onPressed: () {
+        onPressed: () async {
           try {
-            if (fqdnValid) {
-              launchUrl(
-                Uri.parse(redirectFqdn),
+            final url = fqdnValid ? redirectFqdn : redirectUrl;
+            if (url != null) {
+              final success = await launchUrl(
+                Uri.parse(url),
                 webOnlyWindowName: '_blank',
               );
-            } else if (redirectUrl != null) {
-              launchUrl(
-                Uri.parse(redirectUrl),
-                webOnlyWindowName: '_blank',
-              );
+              if (!success && context.mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text(L10n.of(context)!.couldNotLaunchUrl)),
+                );
+              }
             }
           } catch (e, s) {
             Logs().e('SettingsProfileRedirectionEditButton::onPressed()', e, s);
+            if (context.mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(L10n.of(context)!.oopsSomethingWentWrong),
+                ),
+              );
+            }
           }
         },
         child: Text(L10n.of(context)!.edit),
