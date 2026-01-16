@@ -46,10 +46,7 @@ class AudioPlayerWidget extends StatefulWidget {
 enum AudioPlayerStatus { notDownloaded, downloading, downloaded }
 
 class AudioPlayerState extends State<AudioPlayerWidget>
-    with
-        AudioMixin,
-        AutomaticKeepAliveClientMixin,
-        EventFilterMixin {
+    with AudioMixin, AutomaticKeepAliveClientMixin, EventFilterMixin {
   final List<double> _calculatedWaveform = [];
 
   final ValueNotifier<Duration> _durationNotifier =
@@ -102,6 +99,8 @@ class AudioPlayerState extends State<AudioPlayerWidget>
       } else {
         matrix.audioPlayer?.play().onError((e, s) {
           Logs().e('Could not play audio file', e, s);
+          matrix.voiceMessageEvent.value = null;
+          matrix.currentAudioStatus.value = AudioPlayerStatus.notDownloaded;
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(

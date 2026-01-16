@@ -422,7 +422,9 @@ mixin AudioMixin {
     final int effectiveWaveCount = min(waveCount, eventWaveForm.length);
 
     if (effectiveWaveCount == 1) {
-      return [eventWaveForm[eventWaveForm.length ~/ 2]];
+      final single = eventWaveForm[eventWaveForm.length ~/ 2];
+      final clamped = single == 0 ? 1 : (single > 1024 ? 1024 : single);
+      return [clamped];
     }
 
     // Use interpolation-based sampling
@@ -688,6 +690,7 @@ mixin AudioMixin {
   ///
   /// Should be called in the dispose method of the State class using this mixin.
   void disposeAudioPlayer() {
+    cleanupAudioPlayer();
     _audioPlayerStateSubscription?.cancel();
     audioPlayer?.dispose();
     voiceMessageEvents.dispose();

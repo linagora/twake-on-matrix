@@ -201,7 +201,11 @@ class _ChatAudioPlayerWidgetState extends State<ChatAudioPlayerWidget>
 
         if (Platform.isIOS &&
             matrixFile?.mimeType.toLowerCase() == 'audio/ogg') {
-          file = await handleOggAudioFileIniOS(file);
+          final converted = await handleOggAudioFileIniOS(file);
+          if (converted == null) {
+            throw Exception('OGG to CAF conversion failed');
+          }
+          file = converted;
         }
       }
 
@@ -251,6 +255,8 @@ class _ChatAudioPlayerWidgetState extends State<ChatAudioPlayerWidget>
 
     widget.matrix?.audioPlayer?.play().onError((e, s) {
       Logs().e('Could not play audio file', e, s);
+      widget.matrix?.voiceMessageEvent.value = null;
+      widget.matrix?.currentAudioStatus.value = AudioPlayerStatus.notDownloaded;
       if (!context.mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(

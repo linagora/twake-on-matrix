@@ -3120,17 +3120,6 @@ class ChatController extends State<Chat>
     );
   }
 
-  @override
-  void disposeAudioPlayer() {
-    if (PlatformInfos.isMobile) {
-      return;
-    }
-    disposeAudioMixin();
-    matrix?.audioPlayer?.stop();
-    matrix?.audioPlayer?.clearAudioSources();
-    matrix?.voiceMessageEvent.value = null;
-  }
-
   void initAudioPlayer() {
     if (matrix?.audioPlayer?.playing == true) {
       if (!PlatformInfos.isMobile) {
@@ -3272,7 +3261,7 @@ class ChatController extends State<Chat>
     showScrollDownButtonNotifier.dispose();
     editEventNotifier.dispose();
     focusHover.dispose();
-    disposeAudioPlayer();
+    disposeAudioMixin();
     super.dispose();
   }
 
