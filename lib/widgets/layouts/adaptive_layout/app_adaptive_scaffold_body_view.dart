@@ -6,7 +6,6 @@ import 'package:fluffychat/pages/settings_dashboard/settings/settings.dart';
 import 'package:fluffychat/utils/android_utils.dart';
 import 'package:fluffychat/utils/responsive/responsive_utils.dart';
 import 'package:fluffychat/widgets/layouts/adaptive_layout/adaptive_scaffold_primary_navigation.dart';
-import 'package:fluffychat/widgets/layouts/adaptive_layout/adaptive_scaffold_view_style.dart';
 import 'package:fluffychat/widgets/layouts/adaptive_layout/app_adaptive_scaffold_body.dart';
 import 'package:fluffychat/widgets/layouts/adaptive_layout/app_adaptive_scaffold_body_view_style.dart';
 import 'package:fluffychat/widgets/layouts/agruments/app_adaptive_scaffold_body_args.dart';
@@ -100,48 +99,43 @@ class AppAdaptiveScaffoldBodyView extends StatelessWidget {
                 if (!FirstColumnInnerRoutes.instance
                     .goRouteAvailableInFirstColumn()) ...[
                   Expanded(
-                    child: ClipRRect(
-                      borderRadius: AppScaffoldViewStyle.borderRadiusBody,
-                      child: Container(
-                        decoration: BoxDecoration(
-                          color: LinagoraRefColors.material().primary[100],
-                        ),
-                        child: Navigator(
-                          key: !responsiveUtils.isSingleColumnLayout(context)
-                              ? FirstColumnInnerRoutes
-                                  .innerNavigatorNotOneColumnKey
-                              : FirstColumnInnerRoutes
-                                  .innerNavigatorOneColumnKey,
-                          initialRoute: 'innernavigator/rooms',
-                          onGenerateRoute: (settings) {
-                            if (settings.name == 'innernavigator/rooms') {
-                              return MaterialPageRoute(
-                                builder: (context) {
-                                  return _ColumnPageView(
-                                    activeRoomIdNotifier: activeRoomIdNotifier,
-                                    activeNavigationBarNotifier:
-                                        activeNavigationBarNotifier,
-                                    pageController: pageController,
-                                    onDestinationSelected:
-                                        onDestinationSelected,
-                                    onClientSelected: onClientSelected,
-                                    destinations: destinations,
-                                    bottomNavigationKey: bottomNavigationKey,
-                                    onOpenSettings: onOpenSettings,
-                                    adaptiveScaffoldBodyArgs:
-                                        adaptiveScaffoldBodyArgs,
-                                    currentProfile: currentProfile,
-                                  );
-                                },
-                              );
-                            } else {
-                              return FirstColumnInnerRoutes.routes(
-                                settings.name,
-                                arguments: settings.arguments,
-                              );
-                            }
-                          },
-                        ),
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: LinagoraRefColors.material().primary[100],
+                      ),
+                      child: Navigator(
+                        key: !responsiveUtils.isSingleColumnLayout(context)
+                            ? FirstColumnInnerRoutes
+                                .innerNavigatorNotOneColumnKey
+                            : FirstColumnInnerRoutes.innerNavigatorOneColumnKey,
+                        initialRoute: 'innernavigator/rooms',
+                        onGenerateRoute: (settings) {
+                          if (settings.name == 'innernavigator/rooms') {
+                            return MaterialPageRoute(
+                              builder: (context) {
+                                return _ColumnPageView(
+                                  activeRoomIdNotifier: activeRoomIdNotifier,
+                                  activeNavigationBarNotifier:
+                                      activeNavigationBarNotifier,
+                                  pageController: pageController,
+                                  onDestinationSelected: onDestinationSelected,
+                                  onClientSelected: onClientSelected,
+                                  destinations: destinations,
+                                  bottomNavigationKey: bottomNavigationKey,
+                                  onOpenSettings: onOpenSettings,
+                                  adaptiveScaffoldBodyArgs:
+                                      adaptiveScaffoldBodyArgs,
+                                  currentProfile: currentProfile,
+                                );
+                              },
+                            );
+                          } else {
+                            return FirstColumnInnerRoutes.routes(
+                              settings.name,
+                              arguments: settings.arguments,
+                            );
+                          }
+                        },
                       ),
                     ),
                   ),
