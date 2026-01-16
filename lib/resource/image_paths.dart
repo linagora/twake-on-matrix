@@ -87,6 +87,10 @@ class ImagePaths {
 
   static String get supportAvatarPng => _getAssetPath('support_avatar.png');
   static String get supportWelcome => _getImagePath('support_welcome.svg');
+
+  static String get icE2EEncryptionMessageIndicator =>
+      _getImagePath('ic_end_to_end_encryption_message_indicator.svg');
+
   static String _getImagePath(String imageName) {
     return AssetsPaths.images + imageName;
   }
