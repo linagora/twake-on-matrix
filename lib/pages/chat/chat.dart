@@ -3120,6 +3120,7 @@ class ChatController extends State<Chat>
     );
   }
 
+  @override
   void disposeAudioPlayer() {
     if (PlatformInfos.isMobile) {
       return;

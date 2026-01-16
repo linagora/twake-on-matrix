@@ -14,7 +14,7 @@ import 'package:fluffychat/event/twake_event_types.dart';
 import 'package:fluffychat/presentation/mixins/init_config_mixin.dart';
 import 'package:fluffychat/presentation/model/client_login_state_event.dart';
 import 'package:fluffychat/widgets/layouts/agruments/logout_body_args.dart';
-import 'package:fluffychat/widgets/mixins/audio_player_mixin.dart';
+import 'package:fluffychat/presentation/mixins/audio_mixin.dart';
 import 'package:flutter_emoji_mart/flutter_emoji_mart.dart';
 import 'package:linagora_design_flutter/cozy_config_manager/cozy_config_manager.dart';
 import 'package:universal_html/html.dart' as html hide File;
@@ -94,7 +94,7 @@ class MatrixState extends State<Matrix>
         WidgetsBindingObserver,
         ReceiveSharingIntentMixin,
         InitConfigMixin,
-        AudioPlayerMixin {
+        AudioMixin {
   final _contactsManager = getIt.get<ContactsManager>();
 
   int _activeClient = -1;

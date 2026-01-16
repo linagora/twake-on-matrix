@@ -8,7 +8,7 @@ import 'package:fluffychat/resource/image_paths.dart';
 import 'package:fluffychat/utils/localized_exception_extension.dart';
 import 'package:fluffychat/utils/string_extension.dart';
 import 'package:fluffychat/widgets/matrix.dart';
-import 'package:fluffychat/widgets/mixins/audio_player_mixin.dart';
+import 'package:fluffychat/presentation/mixins/audio_mixin.dart';
 import 'package:fluffychat/widgets/twake_components/twake_icon_button.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -39,7 +39,7 @@ class ChatAudioPlayerWidget extends StatefulWidget {
 }
 
 class _ChatAudioPlayerWidgetState extends State<ChatAudioPlayerWidget>
-    with AudioPlayerMixin {
+    with AudioMixin {
   @override
   Widget build(BuildContext context) {
     // Return empty if matrix is not available
@@ -247,7 +247,7 @@ class _ChatAudioPlayerWidgetState extends State<ChatAudioPlayerWidget>
     }
 
     // Set up auto-dispose listener managed globally in MatrixState
-    widget.matrix?.setupAudioPlayerAutoDispose();
+    widget.matrix?.setupAudioPlayerAutoDispose(context: context);
 
     widget.matrix?.audioPlayer?.play().onError((e, s) {
       Logs().e('Could not play audio file', e, s);

@@ -15,7 +15,6 @@ import 'package:fluffychat/widgets/file_widget/circular_loading_download_widget.
 import 'package:fluffychat/widgets/file_widget/file_tile_widget.dart';
 import 'package:fluffychat/widgets/file_widget/message_file_tile_style.dart';
 import 'package:fluffychat/widgets/matrix.dart';
-import 'package:fluffychat/widgets/mixins/audio_player_mixin.dart';
 import 'package:fluffychat/widgets/twake_components/twake_icon_button.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -50,8 +49,7 @@ class AudioPlayerState extends State<AudioPlayerWidget>
     with
         AudioMixin,
         AutomaticKeepAliveClientMixin,
-        EventFilterMixin,
-        AudioPlayerMixin {
+        EventFilterMixin {
   final List<double> _calculatedWaveform = [];
 
   final ValueNotifier<Duration> _durationNotifier =
@@ -125,7 +123,7 @@ class AudioPlayerState extends State<AudioPlayerWidget>
 
     matrix.voiceMessageEvents.value = audioPending.events;
 
-    matrix.autoPlayAudio(currentEvent: widget.event);
+    matrix.autoPlayAudio(currentEvent: widget.event, context: context);
   }
 
   @override
