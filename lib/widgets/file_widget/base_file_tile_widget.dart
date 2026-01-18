@@ -103,6 +103,8 @@ class BaseFileTileWidget extends StatelessWidget {
             ),
           ),
         ),
+        if (event != null && event!.isReplyEvent())
+          const SizedBox(height: 16.0),
         if (event != null &&
             event!.isCaptionModeOrReply() &&
             event!.isBodyDiffersFromFilename()) ...[

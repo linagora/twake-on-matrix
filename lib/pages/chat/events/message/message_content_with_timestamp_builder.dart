@@ -628,26 +628,27 @@ class _MessageContentWithTimestampBuilderState
                     scrollToEventId: widget.scrollToEventId,
                     selectMode: widget.selectMode,
                   ),
-                  Positioned(
-                    child: OptionalSelectionContainerDisabled(
-                      isEnabled: PlatformInfos.isWeb,
-                      child: Padding(
-                        padding: MessageStyle.paddingMessageTime,
-                        child: Text.rich(
-                          WidgetSpan(
-                            child: MessageTime(
-                              timelineOverlayMessage:
-                                  widget.event.timelineOverlayMessage,
-                              room: widget.event.room,
-                              event: widget.event,
-                              showSeenIcon: widget.event.isOwnMessage,
-                              timeline: widget.timeline,
+                  if (!widget.event.isReplyEventWithAudio())
+                    Positioned(
+                      child: OptionalSelectionContainerDisabled(
+                        isEnabled: PlatformInfos.isWeb,
+                        child: Padding(
+                          padding: MessageStyle.paddingMessageTime,
+                          child: Text.rich(
+                            WidgetSpan(
+                              child: MessageTime(
+                                timelineOverlayMessage:
+                                    widget.event.timelineOverlayMessage,
+                                room: widget.event.room,
+                                event: widget.event,
+                                showSeenIcon: widget.event.isOwnMessage,
+                                timeline: widget.timeline,
+                              ),
                             ),
                           ),
                         ),
                       ),
                     ),
-                  ),
                 ],
               ),
             ],

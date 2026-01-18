@@ -55,7 +55,7 @@ mixin SendFilesMixin {
     final uploadManger = getIt.get<UploadManager>();
     uploadManger.uploadFileMobile(
       room: room,
-      fileInfos: fileInfos,
+      fileInfos: fileInfos!,
       inReplyTo: inReplyTo,
     );
   }

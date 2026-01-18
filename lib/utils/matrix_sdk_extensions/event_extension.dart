@@ -430,7 +430,7 @@ extension LocalizedBody on Event {
                 messageType == MessageTypes.File) &&
             text.isNotEmpty &&
             filename != text) ||
-        relationshipType == RelationshipTypes.reply;
+        isReplyEvent();
   }
 
   /// Returns true if the event's body text differs from its filename.
@@ -441,7 +441,11 @@ extension LocalizedBody on Event {
 
   /// Returns true if this event is a reply to another event.
   bool isReplyEvent() {
-    return relationshipType == RelationshipTypes.reply;
+    return inReplyToEventId() != null;
+  }
+
+  bool isReplyEventWithAudio() {
+    return isReplyEvent() && messageType == MessageTypes.Audio;
   }
 
   /// Checks if this event is the same as another event, considering both eventId and transaction_id.

@@ -127,9 +127,10 @@ class MessageContentBuilder extends StatelessWidget
                     ),
                   ],
                 ),
-                if (isNeedAddNewLine ||
-                    isContainsTagName(event) ||
-                    isContainsSpecialHTMLTag(event))
+                if (!event.isReplyEventWithAudio() &&
+                    (isNeedAddNewLine ||
+                        isContainsTagName(event) ||
+                        isContainsSpecialHTMLTag(event)))
                   OptionalSelectionContainerDisabled(
                     isEnabled: PlatformInfos.isWeb,
                     child: Visibility(
