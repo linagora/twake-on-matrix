@@ -20,6 +20,7 @@ mixin AutoMarkAsReadMixin {
   final _autoMarkAsReadDebouncer =
       Debouncer<String?>(const Duration(seconds: 2), initialValue: null);
   String? _newestVisibleEventId;
+  String? visibleEventId;
   StreamSubscription? _autoMarkAsReadSubscription;
 
   /// Required getters that the implementing class must provide
@@ -54,6 +55,8 @@ mixin AutoMarkAsReadMixin {
       (e) => e.eventId == event.eventId,
     );
     if (newEventIndex == -1) return;
+
+    visibleEventId = event.eventId;
 
     // If we haven't tracked any event yet, or this event is newer (lower index),
     // update our tracked event
