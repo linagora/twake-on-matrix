@@ -486,14 +486,22 @@ mixin AudioMixin {
     );
   }
 
-  // Audio player methods
+  // Memory cache for audio data
+  final Map<String, Uint8List> _audioMemoryCache = {};
+
+  Future<File> _getAudioCacheFile(Event event) async {
+    final tempDir = await getTemporaryDirectory();
+    final mxcUrl = event.attachmentOrThumbnailMxcUrl();
+    if (mxcUrl == null) {
+      throw Exception('Event has no attachment URL');
+    }
+    final fileName = Uri.encodeComponent(mxcUrl.pathSegments.last);
+    final attachmentName = event.content['body'] as String? ?? 'audio.ogg';
+    return File('${tempDir.path}/${fileName}_$attachmentName');
+  }
 
   /// Sets up the audio player with auto-dispose listener when playback
   /// completes.
-  ///
-  /// This method should be called after setting up a new audio source.
-  /// It automatically cleans up the audio player and resets state when
-  /// playback finishes.
   void setupAudioPlayerAutoDispose({
     required BuildContext context,
   }) {
@@ -505,8 +513,21 @@ mixin AudioMixin {
           'setupAudioPlayerAutoDispose: Current audio message - ${voiceMessageEvents.value}',
         );
 
+        // Delete file for the finished event
+        final finishedEvent = voiceMessageEvent.value;
+        if (finishedEvent != null && !kIsWeb) {
+          try {
+            final file = await _getAudioCacheFile(finishedEvent);
+            if (await file.exists()) {
+              await file.delete();
+              Logs().d('Deleted temporary audio file: ${file.path}');
+            }
+          } catch (e) {
+            Logs().w('Failed to delete temporary audio file', e);
+          }
+        }
+
         if (voiceMessageEvents.value.isEmpty) {
-          // If no messages in queue, clean up everything
           await cleanupAudioPlayer();
           return;
         }
@@ -516,27 +537,19 @@ mixin AudioMixin {
             .where((e) => e.eventId != voiceMessageEvent.value?.eventId)
             .toList();
 
-        Logs().d(
-          'setupAudioPlayerAutoDispose: Remaining audio message - $updatedVoiceMessageEvent',
-        );
-
         voiceMessageEvents.value = updatedVoiceMessageEvent;
 
-        // Check if this was the last message
         if (voiceMessageEvents.value.isEmpty) {
-          Logs().d(
-            'setupAudioPlayerAutoDispose: Last audio finished, cleaning up all state',
-          );
-          // Clear all audio player state since this was the last message
           await cleanupAudioPlayer();
           return;
         }
 
-        // There are more messages to play
+        // Play next
         voiceMessageEvent.value = null;
         currentAudioStatus.value = AudioPlayerStatus.notDownloaded;
 
         final nextAudioMessage = voiceMessageEvents.value.first;
+        if (!context.mounted) return;
         await autoPlayAudio(
           currentEvent: nextAudioMessage,
           context: context,
@@ -545,10 +558,6 @@ mixin AudioMixin {
     });
   }
 
-  /// Automatically plays an audio message.
-  ///
-  /// Downloads, decrypts, and plays the audio file for the given event.
-  /// Handles platform-specific audio format conversions (e.g., OGG to CAF on iOS).
   Future<void> autoPlayAudio({
     required BuildContext context,
     required Event currentEvent,
@@ -559,32 +568,46 @@ mixin AudioMixin {
 
     currentAudioStatus.value = AudioPlayerStatus.downloading;
     try {
-      matrixFile = await currentEvent.downloadAndDecryptAttachment();
-
       if (!kIsWeb) {
-        final tempDir = await getTemporaryDirectory();
-        final mxcUrl = currentEvent.attachmentOrThumbnailMxcUrl();
-        if (mxcUrl == null) {
-          throw Exception('Event has no attachment URL');
+        file = await _getAudioCacheFile(currentEvent);
+
+        // 1. Check Memory Cache
+        if (_audioMemoryCache.containsKey(currentEvent.eventId)) {
+          Logs().d('AudioMixin: Hit memory cache for ${currentEvent.eventId}');
+          // Write to file mostly for the player to read it (just_audio often prefers files)
+          // Or we could use StreamAudioSource, but writing to file allows iOS conversion checks.
+          // Since we delete file after playback, we recreate it from memory if needed.
+          await file.writeAsBytes(_audioMemoryCache[currentEvent.eventId]!);
         }
-        final fileName = Uri.encodeComponent(
-          mxcUrl.pathSegments.last,
-        );
-        file = File('${tempDir.path}/${fileName}_${matrixFile.name}');
-
-        if (matrixFile.bytes.isEmpty == true) {
-          throw Exception('Downloaded file has no content');
+        // 2. Check File Cache
+        else if (await file.exists() && await file.length() > 0) {
+          Logs().d('AudioMixin: Hit disk cache for ${file.path}');
+          // Populate memory cache
+          _audioMemoryCache[currentEvent.eventId] = await file.readAsBytes();
+        }
+        // 3. Download
+        else {
+          Logs().d('AudioMixin: Downloading ${currentEvent.eventId}');
+          matrixFile = await currentEvent.downloadAndDecryptAttachment();
+          if (matrixFile.bytes.isEmpty) {
+            throw Exception('Downloaded file has no content');
+          }
+          await file.writeAsBytes(matrixFile.bytes);
+          _audioMemoryCache[currentEvent.eventId] = matrixFile.bytes;
         }
 
-        await file.writeAsBytes(matrixFile.bytes);
+        final contentInfo = currentEvent.content['info'];
+        final mimeType = matrixFile?.mimeType ??
+            (contentInfo is Map ? contentInfo['mimetype'] as String? : null);
 
-        if (Platform.isIOS &&
-            matrixFile.mimeType.toLowerCase() == 'audio/ogg') {
+        if (Platform.isIOS && mimeType?.toLowerCase() == 'audio/ogg') {
           final oggAudioFileIniOS = await handleOggAudioFileIniOS(file);
           if (oggAudioFileIniOS != null) {
             file = oggAudioFileIniOS;
           }
         }
+      } else {
+        matrixFile = await currentEvent.downloadAndDecryptAttachment();
       }
 
       currentAudioStatus.value = AudioPlayerStatus.downloaded;
@@ -602,7 +625,7 @@ mixin AudioMixin {
     }
     if (voiceMessageEvent.value?.eventId != currentEvent.eventId) return;
 
-    // Initialize audio player before use
+    // Initialize audio player
     await audioPlayer?.stop();
     await audioPlayer?.dispose();
 
@@ -611,28 +634,28 @@ mixin AudioMixin {
 
     if (file != null) {
       await audioPlayer?.setFilePath(file.path);
-    } else {
+    } else if (matrixFile != null) {
       await audioPlayer?.setAudioSource(MatrixFileAudioSource(matrixFile));
     }
 
-    // Set up auto-dispose listener managed globally in MatrixState
+    // Set up auto-dispose listener
     setupAudioPlayerAutoDispose(context: context);
 
-    audioPlayer?.play().onError((e, s) {
+    try {
+      await audioPlayer?.play();
+    } catch (e, s) {
       Logs().e('Could not play audio file', e, s);
-      // Reset state on playback error
       voiceMessageEvent.value = null;
       currentAudioStatus.value = AudioPlayerStatus.notDownloaded;
       if (!context.mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            e?.toLocalizedString(context) ??
-                L10n.of(context)!.couldNotPlayAudioFile,
+            e.toLocalizedString(context),
           ),
         ),
       );
-    });
+    }
   }
 
   /// Converts OGG audio files to CAF format for iOS compatibility.
