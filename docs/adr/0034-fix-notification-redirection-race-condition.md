@@ -33,7 +33,14 @@ Moved `room` initialization from `ChatView.build` to `ChatController.initState`.
 Updated `didUpdateWidget` in `ChatController`:
 
 - Checks if `widget.roomId` has changed compared to `oldWidget.roomId`.
-- If changed, calls `_initRoom()` and `_tryLoadTimeline()` to reset the view for the new room.
+- If changed, it performs a full room state reset and re-initialization:
+  - Unsubscribes existing room event listeners (canceling any active timers or streams).
+  - Clears and re-fetches pinned events.
+  - Resets cached presence and participants data.
+  - Calls `_initRoom()` to switch the internal matrix room reference.
+  - Re-subscribes to room listeners for the new room.
+  - Calls `_tryLoadTimeline()` to load the initial messages for the new room.
+- This ensures all room-scoped resources are fully refreshed and correctly isolated on room switch.
 
 ### 3. Removal of Side-Effects from Build
 
