@@ -448,6 +448,10 @@ extension LocalizedBody on Event {
     return isReplyEvent() && messageType == MessageTypes.Audio;
   }
 
+  bool isBodyHasRoomMention() {
+    return body.contains('@\u200broom');
+  }
+
   /// Checks if this event is the same as another event, considering both eventId and transaction_id.
   /// Returns true if events match by eventId or by transaction_id (for sending/sent events).
   bool isSameEvent(Event other) {
