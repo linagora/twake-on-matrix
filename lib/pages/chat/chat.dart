@@ -1437,7 +1437,7 @@ class ChatController extends State<Chat>
     if (eventsCount == 0) return;
 
     // Find nearest rendered message to determine scroll direction
-    final nearestRenderedIndex = _findNearestRenderedMessageIndex(targetIndex);
+    final nearestRenderedIndex = _findVisibleEventIndex();
     if (nearestRenderedIndex == null) return;
 
     // Determine scroll direction and estimate distance
@@ -1512,8 +1512,7 @@ class ChatController extends State<Chat>
     }
   }
 
-  /// Finds the index of the nearest rendered message to [targetIndex].
-  int? _findNearestRenderedMessageIndex(int targetIndex) {
+  int? _findVisibleEventIndex() {
     final index = timeline!.events.indexWhere(
       (event) => event.eventId == visibleEventId,
     );
