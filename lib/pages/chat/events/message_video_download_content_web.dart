@@ -14,6 +14,7 @@ class MessageVideoDownloadContentWeb extends StatefulWidget {
     required this.event,
     required this.width,
     required this.height,
+    this.bubbleWidth,
   });
 
   final Event event;
@@ -21,6 +22,8 @@ class MessageVideoDownloadContentWeb extends StatefulWidget {
   final double width;
 
   final double height;
+
+  final double? bubbleWidth;
 
   @override
   State<StatefulWidget> createState() => _MessageVideoDownloadContentWebState();
@@ -64,6 +67,7 @@ class _MessageVideoDownloadContentWebState
             widget.event,
             width: widget.width,
             height: widget.height,
+            bubbleWidth: widget.bubbleWidth,
             onVideoTapped: () async {
               await downloadManager.cancelDownload(widget.event.eventId);
             },
@@ -95,6 +99,7 @@ class _MessageVideoDownloadContentWebState
             widget.event,
             width: widget.width,
             height: widget.height,
+            bubbleWidth: widget.bubbleWidth,
             onVideoTapped: () async {
               onDownloadFileTap();
             },
@@ -108,6 +113,7 @@ class _MessageVideoDownloadContentWebState
           widget.event,
           width: widget.width,
           height: widget.height,
+          bubbleWidth: widget.bubbleWidth,
           onVideoTapped: () async {
             if (downloadState is FileWebDownloadedPresentationState) {
               playVideoAction(

@@ -38,6 +38,8 @@ class EventVideoPlayer extends StatelessWidget {
 
   final Widget centerWidget;
 
+  final double? bubbleWidth;
+
   const EventVideoPlayer(
     this.event, {
     super.key,
@@ -50,6 +52,7 @@ class EventVideoPlayer extends StatelessWidget {
     this.noResizeThumbnail = false,
     this.onVideoTapped,
     this.centerWidget = const CenterVideoButton(icon: Icons.play_arrow),
+    this.bubbleWidth,
   });
 
   @override
@@ -58,6 +61,12 @@ class EventVideoPlayer extends StatelessWidget {
 
     final imageWidth = width ?? MessageContentStyle.imageWidth(context);
     final imageHeight = height ?? MessageContentStyle.imageHeight(context);
+
+    final maxWidth =
+        MessageContentStyle.combinedBubbleImageWidthWithBubbleMaxWidget(
+      bubbleImageWidget: imageWidth,
+      bubbleMaxWidth: bubbleWidth ?? 0,
+    );
 
     return ClipRRect(
       borderRadius:
@@ -68,7 +77,11 @@ class EventVideoPlayer extends StatelessWidget {
           mouseCursor: SystemMouseCursors.click,
           onTap: onVideoTapped,
           child: SizedBox(
-            width: MessageContentStyle.imageBubbleWidth(imageWidth),
+            width:
+                MessageContentStyle.combinedBubbleImageWidthWithBubbleMaxWidget(
+              bubbleImageWidget: imageWidth,
+              bubbleMaxWidth: bubbleWidth ?? 0,
+            ),
             height: MessageContentStyle.videoBubbleHeight(imageHeight),
             child: Stack(
               alignment: Alignment.center,
@@ -79,6 +92,7 @@ class EventVideoPlayer extends StatelessWidget {
                     event,
                     width: MessageContentStyle.imageBubbleWidth(imageWidth),
                     height: MessageContentStyle.videoBubbleHeight(imageHeight),
+                    bubbleMaxWidth: maxWidth,
                     rounded: rounded,
                     thumbnailCacheKey: thumbnailCacheKey,
                     thumbnailCacheMap: thumbnailCacheMap,

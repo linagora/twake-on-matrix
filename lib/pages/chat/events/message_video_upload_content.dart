@@ -12,6 +12,7 @@ class MessageVideoUploadContentWeb extends StatefulWidget {
     required this.event,
     required this.width,
     required this.height,
+    this.bubbleWidth,
   });
 
   final Event event;
@@ -19,6 +20,8 @@ class MessageVideoUploadContentWeb extends StatefulWidget {
   final double width;
 
   final double height;
+
+  final double? bubbleWidth;
 
   @override
   State<StatefulWidget> createState() => _MessageVideoUploadContentWebState();
@@ -48,6 +51,7 @@ class _MessageVideoUploadContentWebState
           widget.event,
           width: widget.width,
           height: widget.height,
+          bubbleWidth: widget.bubbleWidth,
           onVideoTapped: () {
             if (uploadState is UploadFileSuccessUIState) {
               return;

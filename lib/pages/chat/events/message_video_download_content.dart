@@ -16,6 +16,7 @@ class MessageVideoDownloadContent extends StatefulWidget {
     required this.event,
     required this.width,
     required this.height,
+    this.bubbleWidth,
   });
 
   final Event event;
@@ -23,6 +24,8 @@ class MessageVideoDownloadContent extends StatefulWidget {
   final double width;
 
   final double height;
+
+  final double? bubbleWidth;
 
   @override
   State<StatefulWidget> createState() => _MessageVideoDownloadContentState();
@@ -48,6 +51,7 @@ class _MessageVideoDownloadContentState
       widget.event,
       width: widget.width,
       height: widget.height,
+      bubbleWidth: widget.bubbleWidth,
       centerWidget: ValueListenableBuilder(
         valueListenable: downloadFileStateNotifier,
         builder: (context, downloadState, child) {
