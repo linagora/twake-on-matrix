@@ -496,8 +496,10 @@ mixin AudioMixin {
       throw Exception('Event has no attachment URL');
     }
     final fileName = Uri.encodeComponent(mxcUrl.pathSegments.last);
-    final attachmentName = event.content['body'] as String? ?? 'audio.ogg';
-    return File('${tempDir.path}/${fileName}_$attachmentName');
+    final rawAttachmentName = event.content['body'] as String? ?? 'audio.ogg';
+    final safeAttachmentName =
+        rawAttachmentName.replaceAll(RegExp(r'[\\\/]+'), '_');
+    return File('${tempDir.path}/${fileName}_$safeAttachmentName');
   }
 
   /// Sets up the audio player with auto-dispose listener when playback
@@ -608,6 +610,9 @@ mixin AudioMixin {
         }
       } else {
         matrixFile = await currentEvent.downloadAndDecryptAttachment();
+        if (matrixFile.bytes.isEmpty) {
+          throw Exception('Downloaded file has no content');
+        }
       }
 
       currentAudioStatus.value = AudioPlayerStatus.downloaded;
@@ -692,7 +697,7 @@ mixin AudioMixin {
   ///
   /// Should be called when logging out or switching accounts to ensure
   /// audio playback is properly stopped and state is reset.
-  Future<void> cleanupAudioPlayer() async {
+  Future<void> cleanupAudioPlayer({bool resetState = true}) async {
     try {
       await audioPlayer?.pause();
       await audioPlayer?.stop();
@@ -700,9 +705,12 @@ mixin AudioMixin {
       audioPlayer = null;
       _audioPlayerStateSubscription?.cancel();
       _audioPlayerStateSubscription = null;
-      voiceMessageEvents.value = [];
-      voiceMessageEvent.value = null;
-      currentAudioStatus.value = AudioPlayerStatus.notDownloaded;
+      if (resetState) {
+        voiceMessageEvents.value = [];
+        voiceMessageEvent.value = null;
+        currentAudioStatus.value = AudioPlayerStatus.notDownloaded;
+      }
+      _audioMemoryCache.clear();
       Logs().d('AudioMixin::cleanupAudioPlayer: Audio player cleaned up');
     } catch (e) {
       Logs().e('AudioMixin::cleanupAudioPlayer: Error - $e');
@@ -713,9 +721,7 @@ mixin AudioMixin {
   ///
   /// Should be called in the dispose method of the State class using this mixin.
   void disposeAudioPlayer() {
-    cleanupAudioPlayer();
-    _audioPlayerStateSubscription?.cancel();
-    audioPlayer?.dispose();
+    unawaited(cleanupAudioPlayer(resetState: false));
     voiceMessageEvents.dispose();
     voiceMessageEvent.dispose();
     currentAudioStatus.dispose();
