@@ -243,7 +243,7 @@ mixin AudioMixin {
 
       final completer = Completer<Uint8List>();
 
-      reader.onLoad.listen((_) {
+      final loadListener = reader.onLoad.listen((_) {
         final result = reader.result;
         if (result is Uint8List) {
           completer.complete(result);
@@ -254,16 +254,21 @@ mixin AudioMixin {
         }
       });
 
-      reader.onError.listen((event) {
+      final errorListener = reader.onError.listen((event) {
         completer.completeError('FileReader failed: ${reader.error}');
       });
 
       reader.readAsArrayBuffer(blob);
 
-      yield await completer.future.timeout(
-        const Duration(seconds: 30),
-        onTimeout: () => throw TimeoutException('Chunk reading timed out'),
-      );
+      try {
+        yield await completer.future.timeout(
+          const Duration(seconds: 30),
+          onTimeout: () => throw TimeoutException('Chunk reading timed out'),
+        );
+      } finally {
+        await loadListener.cancel();
+        await errorListener.cancel();
+      }
 
       offset = end;
     }
