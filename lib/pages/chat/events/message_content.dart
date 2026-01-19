@@ -289,9 +289,8 @@ class MessageContent extends StatelessWidget
                 ] else ...[
                   if (event.isSending()) ...[
                     OptionalSelectionContainerDisabled(
-                      isEnabled: PlatformInfos.isWeb &&
-                          !(event.isCaptionModeOrReply() ||
-                              event.isReplyEvent()),
+                      isEnabled:
+                          PlatformInfos.isWeb && !event.isCaptionModeOrReply(),
                       child: MessageUploadingContent(
                         event: event,
                         style: const MessageFileTileStyle(),

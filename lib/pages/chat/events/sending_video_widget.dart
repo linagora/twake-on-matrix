@@ -52,6 +52,12 @@ class _SendingVideoWidgetState extends State<SendingVideoWidget>
   }
 
   @override
+  void dispose() {
+    sendingFileProgressNotifier.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     _checkSendingFileStatus();
 
