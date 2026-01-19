@@ -256,7 +256,7 @@ extension SendFileWebExtension on Room {
     // Send event
     final content = <String, dynamic>{
       'msgtype': file.msgType,
-      'body': captionInfo ?? file.name,
+      if (captionInfo != null) 'body': captionInfo,
       if (contentCaptionFormat != null) ...contentCaptionFormat,
       'filename': file.name,
       if (encryptedFile == null) 'url': uploadResp.toString(),
