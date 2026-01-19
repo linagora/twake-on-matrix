@@ -99,6 +99,33 @@ void main() {
       );
     });
 
+    test('should yield BanUserFailure when MatrixException is NOT M_FORBIDDEN',
+        () async {
+      // Arrange
+      when(mockUser.canBan).thenReturn(true);
+      final mockException = MockMatrixException();
+      when(mockException.error).thenReturn(MatrixError.M_UNKNOWN);
+      when(mockUser.ban()).thenThrow(mockException);
+
+      // Act
+      final result = interactor.execute(user: mockUser);
+
+      // Assert
+      await expectLater(
+        result,
+        emitsInOrder([
+          isA<Right<Failure, Success>>()
+              .having((r) => r.value, 'value', isA<BanUserLoading>()),
+          isA<Left<Failure, Success>>().having(
+            (l) => l.value,
+            'value',
+            isA<BanUserFailure>(),
+          ),
+          emitsDone,
+        ]),
+      );
+    });
+
     test('should yield BanUserFailure for generic exceptions', () async {
       // Arrange
       when(mockUser.canBan).thenReturn(true);
