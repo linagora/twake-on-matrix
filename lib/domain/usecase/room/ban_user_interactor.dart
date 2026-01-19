@@ -26,6 +26,12 @@ class BanUserInteractor {
         yield const Left(
           NoPermissionForBanFailure(),
         );
+      } else {
+        yield Left(
+          BanUserFailure(
+            exception: e,
+          ),
+        );
       }
     } catch (error) {
       yield Left(
