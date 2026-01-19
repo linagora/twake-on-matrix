@@ -620,6 +620,7 @@ mixin AudioMixin {
         }
       }
 
+      if (voiceMessageEvent.value?.eventId != currentEvent.eventId) return;
       currentAudioStatus.value = AudioPlayerStatus.downloaded;
     } catch (e, s) {
       Logs().e('Could not download audio file', e, s);
@@ -633,7 +634,6 @@ mixin AudioMixin {
       currentAudioStatus.value = AudioPlayerStatus.notDownloaded;
       return;
     }
-    if (voiceMessageEvent.value?.eventId != currentEvent.eventId) return;
 
     // Initialize audio player
     await audioPlayer?.stop();
