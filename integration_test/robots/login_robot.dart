@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:fluffychat/pages/chat_list/chat_list.dart';
 import 'package:fluffychat/pages/homeserver_picker/homeserver_picker_view.dart';
 import 'package:fluffychat/pages/twake_welcome/twake_welcome.dart';
+import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:patrol/patrol.dart';
 import '../base/core_robot.dart';
 
@@ -83,7 +84,7 @@ class LoginRobot extends CoreRobot {
   }
 
   Future<void> confirmShareInformation() async {
-    if (Platform.isIOS) {
+    if (PlatformInfos.isIOS) {
       const appId = 'com.apple.springboard';
       const label = 'Continue';
       if (await CoreRobot($).existsOptionalNativeItems(
@@ -130,7 +131,6 @@ class LoginRobot extends CoreRobot {
         $,
         loginBrowserWithoutAccountOpt,
         appId: getBrowserAppId(),
-        timeout: const Duration(seconds: 30),
       )) {
         await $.native.tap(
           loginBrowserWithoutAccountOpt,
@@ -165,7 +165,7 @@ class LoginRobot extends CoreRobot {
     await $.native.waitUntilVisible(
       getLoginTxt(),
       appId: getBrowserAppId(),
-      timeout: const Duration(seconds: 2),
+      timeout: const Duration(seconds: 10),
     );
     await $.native.enterText(
       getLoginTxt(),
@@ -178,7 +178,7 @@ class LoginRobot extends CoreRobot {
     await $.native.waitUntilVisible(
       getPassTxt(),
       appId: getBrowserAppId(),
-      timeout: const Duration(seconds: 2),
+      timeout: const Duration(seconds: 10),
     );
     // Tap the field and wait for 1 second to avoid
     // a flaky issue where the screen sometimes navigates

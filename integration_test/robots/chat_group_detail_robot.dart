@@ -2,6 +2,7 @@ import 'package:fluffychat/pages/chat/chat_app_bar_title.dart';
 import 'package:fluffychat/pages/chat/chat_event_list.dart';
 import 'package:fluffychat/pages/chat/events/message_content.dart';
 import 'package:fluffychat/utils/permission_dialog.dart';
+import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/widgets/twake_components/twake_icon_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -48,7 +49,8 @@ class ChatGroupDetailRobot extends CoreRobot {
     await $.waitUntilVisible($("Group information"));
   }
 
-  Future<void> confimrAccessMedia() async {
+  Future<void> confirmAccessMedia() async {
+    if (PlatformInfos.isAndroid) return;
     final dialog = $(PermissionDialog);
     try {
       await dialog.waitUntilVisible(timeout: const Duration(seconds: 3));
@@ -106,13 +108,12 @@ class ChatGroupDetailRobot extends CoreRobot {
   Future<void> expectSnackShown(
     PatrolIntegrationTester $, {
     String message = 'Room creation failed',
+    Duration timeout = const Duration(seconds: 5),
   }) async {
-    final snackText = $(find.textContaining(message, findRichText: true)).first;
-
     // 1) Chờ xuất hiện (ngay sau hành động tạo room)
-    await $.waitUntilVisible(snackText, timeout: const Duration(seconds: 5));
+    await $.waitUntilVisible($(message), timeout: timeout);
 
     // 2) (tuỳ chọn) Chờ nó biến mất để tránh flakiness cho bước sau
-    await waitUntilAbsent($, snackText);
+    await waitUntilAbsent($, $(message));
   }
 }

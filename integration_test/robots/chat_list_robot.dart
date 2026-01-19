@@ -88,4 +88,9 @@ class ChatListRobot extends HomeRobot {
     await confirmShareContactInformation();
     await confirmAccessContact();
   }
+
+  Future<int> getChatRoomCounts() async {
+    final listChat = await getListOfChatGroup();
+    return listChat.length;
+  }
 }
