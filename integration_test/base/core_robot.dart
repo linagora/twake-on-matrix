@@ -147,18 +147,12 @@ class CoreRobot {
     Duration timeout = const Duration(seconds: 5),
     Duration interval = const Duration(milliseconds: 500),
   }) async {
-    final end = DateTime.now().add(timeout);
-    while (DateTime.now().isBefore(end)) {
-      final views = await $.native.getNativeViews(
-        selector,
-        appId: appId,
-      );
-      if (views.isNotEmpty) {
-        return true;
-      }
-      await Future<void>.delayed(interval);
+    try {
+      await $.native.waitUntilVisible(selector, appId: appId, timeout: timeout);
+      return true;
+    } catch (e) {
+      return false;
     }
-    return false;
   }
 
   Future<void> typeSlowlyWithPatrol(

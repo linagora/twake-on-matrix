@@ -279,9 +279,9 @@ class _ContactInformation extends StatelessWidget {
                       ),
                     if (searchKeyword?.isNotEmpty == true) ...[
                       if (searchKeyword?.isPhoneNumberFormatted() == true) ...[
-                        _displayPrimaryPhoneNumber(),
+                        Flexible(child: _displayPrimaryPhoneNumber()),
                       ] else ...[
-                        _displayPrimaryEmail(),
+                        Flexible(child: _displayPrimaryEmail()),
                       ],
                     ],
                   ],

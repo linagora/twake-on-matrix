@@ -20,7 +20,7 @@ class ContactScenario extends BaseScenario {
     await enterSearchText(contactName);
     await (await ContactListRobot($).getListOfContact())[0].root.tap();
     final chatGroupDetailRobot = ChatGroupDetailRobot($);
-    await chatGroupDetailRobot.confimrAccessMedia();
+    await chatGroupDetailRobot.confirmAccessMedia();
     await $.pumpAndSettle();
     return chatGroupDetailRobot;
   }

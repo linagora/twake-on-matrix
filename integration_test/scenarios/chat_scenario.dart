@@ -473,8 +473,8 @@ class ChatScenario extends CoreRobot {
     await enterSearchText(title);
     await (await ChatListRobot($).getListOfChatGroup())[0].root.tap();
     final chatGroupDetailRobot = ChatGroupDetailRobot($);
-    await chatGroupDetailRobot.confimrAccessMedia();
-    await $.pumpAndSettle();
+    await chatGroupDetailRobot.confirmAccessMedia();
+    await $.pumpAndTrySettle();
     return chatGroupDetailRobot;
   }
 
