@@ -156,12 +156,13 @@ void main() {
     });
 
     test('should return Lookup contacts if Tom fails (not empty)', () {
+      final testException = Exception('test error');
       when(mockGetTomContactsInteractor.execute()).thenAnswer(
         (_) => Stream.value(
-          const Left(
+          Left(
             GetContactsFailure(
               keyword: '',
-              exception: 'Fail',
+              exception: testException,
             ),
           ),
         ),
@@ -197,10 +198,14 @@ void main() {
     });
 
     test('should return Tom failure if Tom fails and Lookup is empty', () {
+      final testException = Exception('test error');
       when(mockGetTomContactsInteractor.execute()).thenAnswer(
         (_) => Stream.value(
-          const Left(
-            GetContactsFailure(keyword: 'fail', exception: 'Fail'),
+          Left(
+            GetContactsFailure(
+              keyword: 'fail',
+              exception: testException,
+            ),
           ),
         ),
       );
@@ -211,7 +216,12 @@ void main() {
         interactor.execute(),
         emitsInOrder([
           const Right(ContactsLoading()),
-          const Left(GetContactsFailure(keyword: 'fail', exception: 'Fail')),
+          Left(
+            GetContactsFailure(
+              keyword: 'fail',
+              exception: testException,
+            ),
+          ),
         ]),
       );
     });
@@ -222,8 +232,11 @@ void main() {
           .thenAnswer((_) => Stream.value(const Left(GetContactsIsEmpty())));
       when(mockLookupMatchContactInteractor.execute()).thenAnswer(
         (_) => Stream.value(
-          const Left(
-            LookupContactsFailure(keyword: 'fail', exception: 'Fail'),
+          Left(
+            LookupContactsFailure(
+              keyword: 'fail',
+              exception: Exception(),
+            ),
           ),
         ),
       );

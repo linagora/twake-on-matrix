@@ -66,16 +66,13 @@ class GetCombinedContactsInteractor {
 
     // Decision Logic: Handle different scenarios
     final hasAnyContacts = tomContacts.isNotEmpty || lookupContacts.isNotEmpty;
-    final hasCriticalFailures = tomFailure != null || lookupFailure != null;
 
     if (!hasAnyContacts) {
       // Scenario 1: No contacts from either source
-      if (hasCriticalFailures) {
-        // Both failed with errors - yield the first critical failure
-        // (you could also create a combined failure here)
-        yield Left(tomFailure ?? lookupFailure!);
+      if (tomFailure != null) {
+        yield Left(tomFailure!);
       } else {
-        // Both returned empty (no errors, just no data)
+        // Swallow lookup failure when Tom is empty
         yield const Left(GetContactsIsEmpty());
       }
     } else {
