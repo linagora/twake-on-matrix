@@ -199,14 +199,6 @@ class ContactsManager {
     syncContactsAcrossDevices(client);
   }
 
-  Future<void> searchContacts(String query) async {
-    tomContactsSubscription?.cancel();
-    tomContactsSubscription =
-        getCombinedContactsInteractor.execute().listen((event) {
-      _contactsNotifier.value = event;
-    });
-  }
-
   Future<void> _getAllContacts({
     bool isAvailableSupportPhonebookContacts = false,
     required String withMxId,

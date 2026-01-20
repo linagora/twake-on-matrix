@@ -71,7 +71,7 @@ void main() {
       );
     });
 
-    test('should deduct duplicates preferring Tom contacts', () {
+    test('should deduplicate preferring Tom contacts', () {
       final duplicateContact =
           contact2.copyWith(displayName: 'User Two from Tom');
 

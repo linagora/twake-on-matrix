@@ -6,6 +6,7 @@ import 'package:fluffychat/domain/app_state/contact/lookup_match_contact_state.d
 import 'package:fluffychat/domain/model/contact/contact.dart';
 import 'package:fluffychat/domain/usecase/contacts/get_tom_contacts_interactor.dart';
 import 'package:fluffychat/domain/usecase/contacts/lookup_match_contact_interactor.dart';
+import 'package:matrix/matrix.dart' hide Contact;
 
 class GetCombinedContactsInteractor {
   final GetTomContactsInteractor getTomContactsInteractor;
@@ -19,7 +20,7 @@ class GetCombinedContactsInteractor {
   Stream<Either<Failure, Success>> execute() async* {
     yield const Right(ContactsLoading());
 
-    // Execute both interactors concurrentlyz
+    // Execute both interactors concurrently
     final tomContactsFuture = getTomContactsInteractor.execute().last;
     final lookupContactsFuture = lookupMatchContactInteractor.execute().last;
 
@@ -29,15 +30,17 @@ class GetCombinedContactsInteractor {
     final tomResult = results[0];
     final lookupResult = results[1];
 
+    // Track results separately
     List<Contact> tomContacts = [];
     List<Contact> lookupContacts = [];
-    Failure? failureState;
+    Failure? tomFailure;
+    Failure? lookupFailure;
 
     // Process Tom Contacts (Address Book)
     tomResult.fold(
       (failure) {
         if (failure is! GetContactsIsEmpty) {
-          failureState = failure; // Keep track of error
+          tomFailure = failure; // Track actual failures, not empty states
         }
       },
       (success) {
@@ -50,12 +53,8 @@ class GetCombinedContactsInteractor {
     // Process Lookup Contacts (Remote Search)
     lookupResult.fold(
       (failure) {
-        // If lookup fails, similar logic.
         if (failure is! LookupContactsEmpty) {
-          // If we already had a failure from Tom, keep it or overwrite?
-          // If Tom succeeded, we probably ignore this failure or show a warning?
-          // For this implementation, let's treat it as empty list but maybe yield Failure if both fail.
-          if (failureState != null) failureState = failure;
+          lookupFailure = failure; // Track actual failures
         }
       },
       (success) {
@@ -65,36 +64,61 @@ class GetCombinedContactsInteractor {
       },
     );
 
-    // If both failed with actual errors (not just empty), return failure
-    if (tomContacts.isEmpty && lookupContacts.isEmpty && failureState != null) {
-      yield Left(failureState!);
-      return;
-    }
+    // Decision Logic: Handle different scenarios
+    final hasAnyContacts = tomContacts.isNotEmpty || lookupContacts.isNotEmpty;
+    final hasCriticalFailures = tomFailure != null || lookupFailure != null;
 
-    // Combine and Deduplicate
-    // Priority to Tom Contacts
-    // We use a Map keyed by ID to ensure uniqueness, initializing with Tom Contacts
-    final Map<String, Contact> combinedMap = {};
+    if (!hasAnyContacts) {
+      // Scenario 1: No contacts from either source
+      if (hasCriticalFailures) {
+        // Both failed with errors - yield the first critical failure
+        // (you could also create a combined failure here)
+        yield Left(tomFailure ?? lookupFailure!);
+      } else {
+        // Both returned empty (no errors, just no data)
+        yield const Left(GetContactsIsEmpty());
+      }
+    } else {
+      // Scenario 2: We have contacts from at least one source
 
-    for (final contact in tomContacts) {
-      combinedMap[contact.id] = contact;
-    }
+      // Combine and deduplicate contacts
+      final combinedContacts =
+          _deduplicateContacts(tomContacts, lookupContacts);
 
-    for (final contact in lookupContacts) {
-      // If id is not already present, add it.
-      // We also might need to check other properties if ID isn't consistent across sources,
-      // but assuming ID is the matrix ID or valid unique ID.
-      if (!combinedMap.containsKey(contact.id)) {
-        combinedMap[contact.id] = contact;
+      // Yield success with combined contacts
+      yield Right(GetContactsSuccess(contacts: combinedContacts));
+
+      // Optional: Log warnings if one source failed but we still have data
+      if (tomFailure != null) {
+        Logs().e(
+          "GetCombinedContactsInteractor::execute: Tom failure $tomFailure",
+        );
+      }
+      if (lookupFailure != null) {
+        Logs().e(
+          "GetCombinedContactsInteractor::execute: lookupFailure $lookupFailure",
+        );
       }
     }
+  }
 
-    final combinedList = combinedMap.values.toList();
+// Helper method to deduplicate
+  List<Contact> _deduplicateContacts(
+    List<Contact> tomContacts,
+    List<Contact> lookupContacts,
+  ) {
+    final contactMap = <String, Contact>{};
 
-    if (combinedList.isEmpty) {
-      yield const Left(GetContactsIsEmpty());
-    } else {
-      yield Right(GetContactsSuccess(contacts: combinedList));
+    // Add Tom contacts first (they take precedence)
+    for (final contact in tomContacts) {
+      contactMap[contact.id] = contact;
     }
+
+    // Add lookup contacts (won't overwrite Tom contacts with same ID)
+    for (final contact in lookupContacts) {
+      contactMap.putIfAbsent(contact.id, () => contact);
+    }
+
+    return contactMap.values.toList();
   }
 }
