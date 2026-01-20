@@ -90,6 +90,7 @@ import 'package:fluffychat/domain/usecase/app_grid/get_app_grid_configuration_in
 import 'package:fluffychat/domain/usecase/capabilities/get_server_capabilities_interactor.dart';
 import 'package:fluffychat/domain/usecase/contacts/delete_third_party_contact_box_interactor.dart';
 import 'package:fluffychat/domain/usecase/contacts/federation_look_up_phonebook_contact_interactor.dart';
+import 'package:fluffychat/domain/usecase/contacts/get_combined_contacts_interactor.dart';
 import 'package:fluffychat/domain/usecase/contacts/get_tom_contacts_interactor.dart';
 import 'package:fluffychat/domain/usecase/contacts/lookup_match_contact_interactor.dart';
 import 'package:fluffychat/domain/usecase/contacts/post_address_book_interactor.dart';
@@ -379,6 +380,15 @@ class GetItInitializer {
     getIt.registerFactory<GetTomContactsInteractor>(
       () => GetTomContactsInteractor(),
     );
+    getIt.registerFactory<LookupMatchContactInteractor>(
+      () => LookupMatchContactInteractor(),
+    );
+    getIt.registerFactory<GetCombinedContactsInteractor>(
+      () => GetCombinedContactsInteractor(
+        getTomContactsInteractor: getIt.get<GetTomContactsInteractor>(),
+        lookupMatchContactInteractor: getIt.get<LookupMatchContactInteractor>(),
+      ),
+    );
     getIt.registerFactory<PostAddressBookInteractor>(
       () => PostAddressBookInteractor(),
     );
@@ -439,9 +449,6 @@ class GetItInitializer {
       ),
     );
     getIt.registerSingleton<ServerSearchInteractor>(ServerSearchInteractor());
-    getIt.registerFactory<LookupMatchContactInteractor>(
-      () => LookupMatchContactInteractor(),
-    );
     getIt.registerSingleton<UpdateGroupChatInteractor>(
       UpdateGroupChatInteractor(),
     );
