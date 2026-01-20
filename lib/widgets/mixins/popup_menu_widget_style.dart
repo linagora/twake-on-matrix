@@ -21,8 +21,9 @@ class PopupMenuWidgetStyle {
 
   // Context Menu Items
   static TextStyle? defaultItemTextStyle(BuildContext context) {
-    return context.textTheme.bodyLarge!
-        .copyWith(color: LinagoraRefColors.material().neutral[30]);
+    return context.textTheme.bodyMedium!.copyWith(
+      color: LinagoraRefColors.material().neutral[30],
+    );
   }
 
   static Color? defaultItemColorIcon(BuildContext context) {

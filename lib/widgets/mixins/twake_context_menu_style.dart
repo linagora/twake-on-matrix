@@ -24,7 +24,8 @@ class TwakeContextMenuStyle {
   static const double defaultItemElementsGap = 12.0;
 
   static TextStyle? defaultItemTextStyle(BuildContext context) {
-    return context.textTheme.bodyLarge!
-        .copyWith(color: LinagoraRefColors.material().neutral[30]);
+    return context.textTheme.bodyMedium!.copyWith(
+      color: LinagoraRefColors.material().neutral[30],
+    );
   }
 }
