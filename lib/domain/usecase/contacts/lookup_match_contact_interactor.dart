@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:dartz/dartz.dart';
 import 'package:fluffychat/app_state/failure.dart';
 import 'package:fluffychat/app_state/success.dart';
@@ -40,7 +42,7 @@ class LookupMatchContactInteractor {
         yield const Right(LookupContactsEmpty());
       } else {
         Logs().i(
-          'LookupMatchContactInteractor:: contactMatched ${contactMatched.first}',
+          'LookupMatchContactInteractor:: contactMatched ${jsonEncode(contactMatched)}',
         );
 
         yield Right(
