@@ -77,6 +77,7 @@ class TwakeLinkPreviewController extends State<TwakeLinkPreview>
               linkTypes: const [
                 LinkType.url,
                 LinkType.phone,
+                LinkType.date,
               ],
               textAlign: TextAlign.start,
               onTapDownLink: (tapDownDetails, link) => handleOnTappedLinkHtml(

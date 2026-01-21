@@ -1176,8 +1176,8 @@ packages:
     dependency: "direct main"
     description:
       path: "."
-      ref: master
-      resolved-ref: b8252e3d6ce7d247ef961957a41c48225fcb19f3
+      ref: "enhancement/separate-date-with-phone-number"
+      resolved-ref: d3fec051dd93933d1f1c74c485e6234646e876c8
       url: "https://github.com/linagora/flutter_matrix_html.git"
     source: git
     version: "1.2.0"
@@ -1787,8 +1787,8 @@ packages:
     dependency: "direct main"
     description:
       path: "."
-      ref: main
-      resolved-ref: "6690e87f19e024d70b68efbc70d2159c34b5d0fc"
+      ref: "enhancement/separate-date-with-phone-number"
+      resolved-ref: dc1d004edcf0eca619e82543d22aedeca806b4f2
       url: "git@github.com:linagora/linkfy_text.git"
     source: git
     version: "1.1.6"
