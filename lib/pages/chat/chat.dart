@@ -1885,7 +1885,7 @@ class ChatController extends State<Chat>
         replyEventNotifier.value = null;
       },
       onCameraPicked: (_) async {
-        sendMedia(
+        await sendMedia(
           imagePickerController,
           room: room,
           inReplyTo: replyEventNotifier.value,
