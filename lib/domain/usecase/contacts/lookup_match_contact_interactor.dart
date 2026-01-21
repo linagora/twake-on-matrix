@@ -42,7 +42,7 @@ class LookupMatchContactInteractor {
         yield const Right(LookupContactsEmpty());
       } else {
         Logs().i(
-          'LookupMatchContactInteractor:: contactMatched ${jsonEncode(contactMatched)}',
+          'LookupMatchContactInteractor:: contactMatched $contactMatched',
         );
 
         yield Right(
