@@ -1,7 +1,7 @@
 name: fluffychat
 description: A convenient Matrix-based tool for personal and corporate communication.
 publish_to: none
-version: 2.18.2+2330
+version: 2.19.5+2330
 
 environment:
   sdk: ">=3.3.0 <4.0.0"

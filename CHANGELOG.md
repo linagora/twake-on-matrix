@@ -1,3 +1,34 @@
+## [2.19.5] - 2026-01-21
+### Added
+- #2810: Add integration test for failing direct chat
+- #2815: Add new empty chat mascot SVG and no result mascot SVG
+- #2808: Add quick menu for change permission
+- #2725: Setup integration test with Firebase timeout configuration
+
+### Changed
+- #2824: Design update context menu style
+- #2828: Update group chat creation screen
+- #2832: Demote user to member in support chat creation
+- #2811: Design style frame
+- #2813: Move contact sync bar to background
+- #2715: Handle contact permission
+- [Migrate Matrix] Migrate upstream matrix-dart-sdk to SDK 3.0.2 - 4.1.0
+- Add permission dialog for gallery access and improve divider padding in settings
+- Get value from .env file
+- Translated using Weblate (French, Irish, Russian, Ukrainian, Vietnamese, English)
+
+### Fixed
+- #2810: Handle create direct chat failure
+- #2822: Fix recent emoji blink
+- #2820: Fix problem with bubble size for narrow videos
+- #2826: Fix cannot jump to pinned messages
+- #2792: Fix contact creation to store Matrix ID as matrixId and clear email field
+- #2806: Fix emoji search focus
+- #2766: Displayed audio player if user goes to list of chats or to another chat
+- #2801: Align titles in group chat creation
+- HOTFIX: Text selection
+- [Migrate Matrix] Fix video download state, voice message playback, video icon, thumbnails, image viewing, video playback, multiple account support, database optimization, and event ordering
+
 ## [2.18.2] - 2025-12-17
 ### Fixed
 - Contact visibility settings for Everyone option
