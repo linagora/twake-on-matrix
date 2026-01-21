@@ -41,57 +41,50 @@ class ChatDetailsMembersPage extends StatelessWidget {
       builder: (context, members, child) {
         members ??= [];
         final canRequestMoreMembers = members.length < actualMembersCount;
-        return Column(
-          children: [
-            Expanded(
-              child: ListView.builder(
-                shrinkWrap: true,
-                itemCount: members.length + (canRequestMoreMembers ? 1 : 0),
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 8,
-                ),
-                itemBuilder: (BuildContext context, int index) {
-                  if (index < members!.length) {
-                    return ListenableBuilder(
-                      listenable: selectedUsersMapChangeNotifier,
-                      builder: (context, child) {
-                        return ParticipantListItem(
-                          members![index],
-                          onUpdatedMembers: onUpdatedMembers,
-                          selectionMode: selectedUsersMapChangeNotifier
-                              .getSelectionModeForUser(members[index]),
-                          onSelectMember: onSelectMember,
-                          onRemoveMember: onRemoveMember,
-                          onChangeRole: onChangeRole,
-                        );
-                      },
-                    );
-                  }
-                  final haveMoreMembers = actualMembersCount > members.length;
-                  if (!haveMoreMembers) {
-                    return const SizedBox.shrink();
-                  }
-                  return ListTile(
-                    title: Text(
-                      L10n.of(context)!.loadCountMoreParticipants(
-                        (actualMembersCount - members.length).toString(),
-                      ),
-                    ),
-                    leading: CircleAvatar(
-                      backgroundColor:
-                          Theme.of(context).scaffoldBackgroundColor,
-                      child: const Icon(
-                        Icons.refresh,
-                        color: Colors.grey,
-                      ),
-                    ),
-                    onTap: requestMoreMembersAction,
+        return ListView.builder(
+          shrinkWrap: true,
+          itemCount: members.length + (canRequestMoreMembers ? 1 : 0),
+          padding: const EdgeInsets.symmetric(
+            horizontal: 12,
+            vertical: 8,
+          ),
+          itemBuilder: (BuildContext context, int index) {
+            if (index < members!.length) {
+              return ListenableBuilder(
+                listenable: selectedUsersMapChangeNotifier,
+                builder: (context, child) {
+                  return ParticipantListItem(
+                    members![index],
+                    onUpdatedMembers: onUpdatedMembers,
+                    selectionMode: selectedUsersMapChangeNotifier
+                        .getSelectionModeForUser(members[index]),
+                    onSelectMember: onSelectMember,
+                    onRemoveMember: onRemoveMember,
+                    onChangeRole: onChangeRole,
                   );
                 },
+              );
+            }
+            final haveMoreMembers = actualMembersCount > members.length;
+            if (!haveMoreMembers) {
+              return const SizedBox.shrink();
+            }
+            return ListTile(
+              title: Text(
+                L10n.of(context)!.loadCountMoreParticipants(
+                  (actualMembersCount - members.length).toString(),
+                ),
               ),
-            ),
-          ],
+              leading: CircleAvatar(
+                backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+                child: const Icon(
+                  Icons.refresh,
+                  color: Colors.grey,
+                ),
+              ),
+              onTap: requestMoreMembersAction,
+            );
+          },
         );
       },
     );
