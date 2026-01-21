@@ -4,6 +4,7 @@ import 'package:fluffychat/config/setting_keys.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/utils/client_manager.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
+import 'package:fluffychat/utils/sentry_init.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_app_lock/flutter_app_lock.dart';
@@ -94,8 +95,9 @@ Future<void> startGui(List<Client> clients) async {
   // Start rendering the Flutter app and wrap it in an Applock.
   // We do this only for mobile applications as we saw routing
   // problems on other platforms if we wrap it always.
-  runApp(
-    PlatformInfos.isMobile
+  await sentryInit(
+    runApp: runApp,
+    app: PlatformInfos.isMobile
         ? AppLock(
             builder: (args) => TwakeApp(clients: clients),
             lockScreen: const LockScreen(),

@@ -66,6 +66,8 @@ abstract class AppConfig {
   static String twakeChatGooglePlay =
       'https://play.google.com/store/apps/details?id=app.twake.android.chat';
 
+  static String? sentryDsn;
+
   static double toolbarHeight(BuildContext context) =>
       responsive.isMobile(context) ? 48 : 56;
   static const Color chatColor = primaryColor;
@@ -193,6 +195,8 @@ abstract class AppConfig {
     defaultValue: ConfigurationSaas.homeserver,
   );
 
+  static const String _sentryDsnEnv = String.fromEnvironment('SENTRY_DSN');
+
   static void loadEnvironment() {
     twakeWorkplaceHomeserver = _twakeWorkplaceHomeserverEnv;
 
@@ -213,6 +217,10 @@ abstract class AppConfig {
     homeserver = _homeserverEnv;
 
     Logs().i('[Public Platform] AppConfig():: HOME_SERVER $_homeserverEnv');
+
+    sentryDsn = _sentryDsnEnv.isNotEmpty ? _sentryDsnEnv : null;
+
+    Logs().i('[Public Platform] AppConfig():: SENTRY_DSN $sentryDsn');
   }
 
   static bool get isSaasPlatForm => _platformEnv == 'saas';
@@ -301,6 +309,9 @@ abstract class AppConfig {
     if (json['cozy_external_bridge_version'] is String &&
         json['cozy_external_bridge_version'].isNotEmpty) {
       cozyExternalBridgeVersion = json['cozy_external_bridge_version'];
+    }
+    if (json['sentry_dsn'] is String && json['sentry_dsn'].isNotEmpty) {
+      sentryDsn = json['sentry_dsn'];
     }
   }
 }
