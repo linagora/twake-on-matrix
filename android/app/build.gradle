@@ -3,6 +3,7 @@ plugins {
     id "kotlin-android"
     id "dev.flutter.flutter-gradle-plugin"
     id "com.google.gms.google-services"
+    id "io.sentry.android.gradle"
 }
 
 configurations.all {
@@ -79,8 +80,8 @@ android {
         }
         release {
             signingConfig signingConfigs.release
-            minifyEnabled false
-            shrinkResources false
+            minifyEnabled true
+            shrinkResources true
 
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
@@ -96,6 +97,23 @@ android {
 
 flutter {
     source '../..'
+}
+
+sentry {
+    org = System.getenv("SENTRY_ORG")
+    projectName = System.getenv("SENTRY_PROJECT")
+    authToken = System.getenv("SENTRY_AUTH_TOKEN")
+
+    // Flutter already ships with Sentry Android SDK — disable auto-install to avoid conflicts
+    autoInstallation {
+        enabled = false
+    }
+
+    // uploadNativeSymbols is not supported by the Flutter SDK
+    uploadNativeSymbols = false
+
+    includeProguardMapping = true
+    autoUploadProguardMapping = true
 }
 
 dependencies {

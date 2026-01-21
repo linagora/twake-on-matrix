@@ -18,5 +18,6 @@
   "enable_logs": false,
   "support_url": "https://twake.app/support",
   "support_email": "support@twake.app",
-  "cozy_external_bridge_version": "0.8.0"
+  "cozy_external_bridge_version": "0.8.0",
+  "sentry_dsn": ""
 }

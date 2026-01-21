@@ -14,6 +14,7 @@ import 'package:fluffychat/data/datasource/media/media_data_source.dart';
 import 'package:fluffychat/data/datasource/multiple_account/multiple_account_datasource.dart';
 import 'package:fluffychat/data/datasource/reactions/reactions_datasource.dart';
 import 'package:fluffychat/data/datasource/recovery_words_data_source.dart';
+import 'package:fluffychat/utils/logging/log_orchestrator.dart';
 import 'package:fluffychat/data/datasource/server_config_datasource.dart';
 import 'package:fluffychat/data/datasource/server_search_datasource.dart';
 import 'package:fluffychat/data/datasource/tom_configurations_datasource.dart';
@@ -181,6 +182,12 @@ class GetItInitializer {
   }
 
   void bindingGlobal() {
+    // Initialize Logging
+    final logOrchestrator = LogOrchestrator();
+    // logOrchestrator.addLogger(ConsoleLogger());
+    // logOrchestrator.addFilter(SensitiveDataFilter());
+    getIt.registerSingleton<LogOrchestrator>(logOrchestrator);
+
     HiveDI().bind();
     setupDioCache();
     NetworkDI().bind();
