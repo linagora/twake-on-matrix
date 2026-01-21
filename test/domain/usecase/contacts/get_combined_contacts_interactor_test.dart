@@ -52,7 +52,7 @@ void main() {
   );
 
   group('GetCombinedContactsInteractor', () {
-    test('should return combined contacts from both sources', () {
+    test('should return combined contacts from both sources', () async {
       when(mockGetTomContactsInteractor.execute()).thenAnswer(
         (_) => Stream.value(Right(GetContactsSuccess(contacts: [contact1]))),
       );
@@ -62,7 +62,7 @@ void main() {
         ),
       );
 
-      expectLater(
+      await expectLater(
         interactor.execute(),
         emitsInOrder([
           const Right(ContactsLoading()),
