@@ -1,14 +1,17 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:fluffychat/config/app_constants.dart';
 import 'package:fluffychat/config/config_saas/config_saas.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/utils/debug_utils.dart';
+import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/utils/responsive/responsive_utils.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
+import 'package:http/http.dart' as http;
 import 'package:matrix/matrix.dart';
 import 'package:video_thumbnail/video_thumbnail.dart';
 
@@ -65,6 +68,8 @@ abstract class AppConfig {
 
   static String twakeChatGooglePlay =
       'https://play.google.com/store/apps/details?id=app.twake.android.chat';
+
+  static String? sentryDsn;
 
   static double toolbarHeight(BuildContext context) =>
       responsive.isMobile(context) ? 48 : 56;
@@ -200,6 +205,8 @@ abstract class AppConfig {
     defaultValue: ConfigurationSaas.homeserver,
   );
 
+  static const String _sentryDsnEnv = String.fromEnvironment('SENTRY_DSN');
+
   static void loadEnvironment() {
     twakeWorkplaceHomeserver = _twakeWorkplaceHomeserverEnv;
 
@@ -312,5 +319,18 @@ abstract class AppConfig {
         json['cozy_external_bridge_version'].isNotEmpty) {
       cozyExternalBridgeVersion = json['cozy_external_bridge_version'];
     }
+  }
+
+  static Future<void> loadSentryDsn() async {
+    if (PlatformInfos.isMobile) {
+      sentryDsn = _sentryDsnEnv.isNotEmpty ? _sentryDsnEnv : null;
+    } else {
+      final configJsonString = utf8.decode(
+        (await http.get(Uri.parse('config.json'))).bodyBytes,
+      );
+      final json = jsonDecode(configJsonString);
+      sentryDsn = json['sentry_dsn'] is String ? json['sentry_dsn'] : null;
+    }
+    Logs().i('[Public Platform] AppConfig():: SENTRY_DSN $sentryDsn');
   }
 }
