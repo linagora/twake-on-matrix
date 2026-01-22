@@ -46,6 +46,7 @@ mixin ChatListItemMixin {
           overflow: TextOverflow.ellipsis,
           style: ListItemStyle.subtitleTextStyle(
             fontFamily: 'Inter',
+            fontStyle: event.text.isEmpty ? FontStyle.italic : null,
           ),
         );
       },
@@ -75,8 +76,11 @@ mixin ChatListItemMixin {
         softWrap: false,
         maxLines: 2,
         overflow: TextOverflow.ellipsis,
-        style:
-            ChatLitSubSubtitleTextStyleView.textStyle.textStyle(room, context),
+        style: ChatLitSubSubtitleTextStyleView.textStyle
+            .textStyle(room, context)
+            .copyWith(
+              fontStyle: event?.text.isEmpty == true ? FontStyle.italic : null,
+            ),
       );
     }
 
