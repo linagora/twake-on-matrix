@@ -14,13 +14,13 @@ class LookupMatchContactInteractor {
   LookupMatchContactInteractor();
 
   Stream<Either<Failure, Success>> execute({
-    required String val,
+    String? val,
   }) async* {
     try {
       yield const Right(LookupContactsLoading());
       Logs().i('LookupMatchContactInteractor:: Loading...');
       final contactMatched = await contactRepository.lookupMatchContact(
-        query: ContactQuery(keyword: val),
+        query: ContactQuery(keyword: val ?? ''),
         lookupMxidRequest: LookupMxidRequest(
           scope: [
             'mail',
@@ -40,17 +40,16 @@ class LookupMatchContactInteractor {
         yield const Right(LookupContactsEmpty());
       } else {
         Logs().i(
-          'LookupMatchContactInteractor:: contactMatched ${contactMatched.first}',
+          'LookupMatchContactInteractor:: contactMatched $contactMatched',
         );
 
-        ///TODO: IMPL After implementing Contact model
-        // yield Right(
-        //   LookupMatchContactSuccess(contact: contactMatched.first),
-        // );
+        yield Right(
+          LookupMatchContactSuccess(contacts: contactMatched),
+        );
       }
     } catch (e) {
       Logs().e('LookupMatchContactInteractor:: Error $e');
-      yield Left(LookupContactsFailure(keyword: val, exception: e));
+      yield Left(LookupContactsFailure(keyword: val ?? '', exception: e));
     }
   }
 }

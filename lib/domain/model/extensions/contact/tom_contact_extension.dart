@@ -29,7 +29,7 @@ extension TomContactExtension on TomContact {
               ),
             }
           : {},
-      id: uid,
+      id: address ?? uid,
     );
   }
 }

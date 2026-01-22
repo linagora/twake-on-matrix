@@ -16,7 +16,7 @@ import 'package:fluffychat/domain/model/contact/contact.dart';
 import 'package:fluffychat/domain/model/extensions/contact/contact_extension.dart';
 import 'package:fluffychat/domain/repository/federation_configurations_repository.dart';
 import 'package:fluffychat/domain/usecase/contacts/federation_look_up_argument.dart';
-import 'package:fluffychat/domain/usecase/contacts/get_tom_contacts_interactor.dart';
+import 'package:fluffychat/domain/usecase/contacts/get_combined_contacts_interactor.dart';
 import 'package:fluffychat/domain/usecase/contacts/federation_look_up_phonebook_contact_interactor.dart';
 import 'package:fluffychat/domain/usecase/contacts/post_address_book_interactor.dart';
 import 'package:fluffychat/domain/usecase/contacts/try_get_synced_phone_book_contact_interactor.dart';
@@ -34,9 +34,6 @@ import 'package:fluffychat/generated/l10n/app_localizations.dart';
 class ContactsManager {
   static const int _lookupChunkSize = 10;
 
-  final GetTomContactsInteractor getTomContactsInteractor =
-      getIt.get<GetTomContactsInteractor>();
-
   final FederationLookUpPhonebookContactInteractor
       federationLookUpPhonebookContactInteractor =
       getIt.get<FederationLookUpPhonebookContactInteractor>();
@@ -51,6 +48,9 @@ class ContactsManager {
   final TryGetSyncedPhoneBookContactInteractor
       tryGetSyncedPhoneBookContactInteractor =
       getIt.get<TryGetSyncedPhoneBookContactInteractor>();
+
+  final GetCombinedContactsInteractor getCombinedContactsInteractor =
+      getIt.get<GetCombinedContactsInteractor>();
 
   StreamSubscription<Either<Failure, Success>>? tomContactsSubscription;
 
@@ -191,7 +191,7 @@ class ContactsManager {
   }
 
   void refreshTomContacts(Client client) {
-    tomContactsSubscription = getTomContactsInteractor.execute().listen(
+    tomContactsSubscription = getCombinedContactsInteractor.execute().listen(
       (event) {
         _contactsNotifier.value = event;
       },
@@ -203,7 +203,7 @@ class ContactsManager {
     bool isAvailableSupportPhonebookContacts = false,
     required String withMxId,
   }) async {
-    tomContactsSubscription = getTomContactsInteractor.execute().listen(
+    tomContactsSubscription = getCombinedContactsInteractor.execute().listen(
       (event) {
         _contactsNotifier.value = event;
       },
@@ -234,7 +234,7 @@ class ContactsManager {
     bool isAvailableSupportPhonebookContacts = false,
     required String withMxId,
   }) async {
-    tomContactsSubscription = getTomContactsInteractor.execute().listen(
+    tomContactsSubscription = getCombinedContactsInteractor.execute().listen(
       (event) {
         _contactsNotifier.value = event;
       },

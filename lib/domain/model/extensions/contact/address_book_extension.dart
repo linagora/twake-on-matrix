@@ -204,11 +204,14 @@ extension AddressBookExtension on AddressBook {
   /// these methods create synthetic entries with empty address/number fields
   /// to preserve the Matrix ID without causing UI duplication.
   ///
+  /// The [Contact.id] is determined by the `mxid` if available, falling back
+  /// to `uid`.
+  ///
   /// Returns a [Contact] object with all available information from the
   /// AddressBook.
   Contact toContact() {
     return Contact(
-      id: id ?? addressbookId ?? mxid ?? '',
+      id: mxid ?? uid ?? '',
       displayName: displayName,
       emails: toEmails(),
       phoneNumbers: toPhoneNumber(),

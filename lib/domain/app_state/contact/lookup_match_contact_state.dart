@@ -18,14 +18,14 @@ class LookupContactsLoading extends Success {
 }
 
 class LookupMatchContactSuccess extends Success {
-  final Contact contact;
+  final List<Contact> contacts;
 
   const LookupMatchContactSuccess({
-    required this.contact,
+    required this.contacts,
   });
 
   @override
-  List<Object?> get props => [contact];
+  List<Object?> get props => [contacts];
 }
 
 class LookupContactsEmpty extends Success {
