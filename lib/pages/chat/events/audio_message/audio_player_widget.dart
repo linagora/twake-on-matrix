@@ -122,7 +122,7 @@ class AudioPlayerState extends State<AudioPlayerWidget>
 
     matrix.voiceMessageEvents.value = audioPending.events;
 
-    matrix.autoPlayAudio(currentEvent: widget.event, context: context);
+    await matrix.autoPlayAudio(currentEvent: widget.event, context: context);
   }
 
   @override
@@ -171,9 +171,10 @@ class AudioPlayerState extends State<AudioPlayerWidget>
   @override
   void dispose() {
     if (!PlatformInfos.isMobile) {
+      final currentEventId = widget.event.eventId;
       WidgetsBinding.instance.addPostFrameCallback((_) async {
         // Only dispose if this event is currently playing
-        if (matrix.voiceMessageEvent.value?.eventId == widget.event.eventId) {
+        if (matrix.voiceMessageEvent.value?.eventId == currentEventId) {
           // Stop and dispose audio player asynchronously to avoid blocking
           // dispose
           final playerToDispose = matrix.audioPlayer;
