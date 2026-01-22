@@ -1821,9 +1821,9 @@ class ChatController extends State<Chat>
       sendController.clear();
 
       sendFileOnWebAction(
+        context,
         pendingText: pendingText,
         inReplyTo: replyEventNotifier.value,
-        context,
         room: room,
         matrixFilesList: matrixFiles,
         onSendFileCallback: (result) async {
@@ -1843,7 +1843,8 @@ class ChatController extends State<Chat>
     if (result == SendMediaWithCaptionStatus.cancel && pendingText.isNotEmpty) {
       sendController.text = pendingText;
     }
-    if (result == SendMediaWithCaptionStatus.done) {
+    if (result == SendMediaWithCaptionStatus.done ||
+        result == SendMediaWithCaptionStatus.emptyRoom) {
       final prefs = await SharedPreferences.getInstance();
       prefs.remove('draft_$roomId');
       replyEventNotifier.value = null;
