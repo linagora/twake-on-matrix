@@ -80,7 +80,7 @@ mixin ChatListItemMixin {
         style: ChatLitSubSubtitleTextStyleView.textStyle
             .textStyle(room, context)
             .copyWith(
-              fontStyle: event?.text.isEmpty == true ? FontStyle.italic : null,
+              fontStyle: FontStyle.italic,
             ),
       );
     }
