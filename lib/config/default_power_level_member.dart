@@ -54,7 +54,11 @@ enum DefaultPowerLevelMember {
     }
   }
 
-  String displayName(BuildContext context) {
+  String displayName(
+    BuildContext context, {
+    List<DefaultPowerLevelMember> hidden = const [],
+  }) {
+    if (hidden.contains(this)) return '';
     switch (this) {
       case DefaultPowerLevelMember.member:
         return L10n.of(context)!.member;
