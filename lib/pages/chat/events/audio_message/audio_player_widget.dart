@@ -130,7 +130,11 @@ class AudioPlayerState extends State<AudioPlayerWidget>
     super.initState();
     matrix = Matrix.of(context);
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      matrix.currentAudioStatus.value = AudioPlayerStatus.notDownloaded;
+      final isCurrentEvent =
+          matrix.voiceMessageEvent.value?.eventId == widget.event.eventId;
+      if (matrix.voiceMessageEvent.value == null || isCurrentEvent) {
+        matrix.currentAudioStatus.value = AudioPlayerStatus.notDownloaded;
+      }
       final durationInt = widget.event.content
           .tryGetMap<String, dynamic>('org.matrix.msc1767.audio')
           ?.tryGet<int>('duration');
@@ -143,9 +147,9 @@ class AudioPlayerState extends State<AudioPlayerWidget>
                 ?.tryGetList<int>('waveform'),
             waveCount: calculateWaveCountAuto(
               minWaves: AudioPlayerStyle.minWaveCount,
-              maxWaves: AudioPlayerStyle.maxWaveCount(
-                context,
-              ),
+              maxWaves: _calculatedWaveform.isEmpty
+                  ? AudioPlayerStyle.maxWaveCount(context)
+                  : _calculatedWaveform.length,
               durationInSeconds: _durationNotifier.value.inSeconds,
             ),
           ) ??
@@ -159,7 +163,9 @@ class AudioPlayerState extends State<AudioPlayerWidget>
 
       if (_calculatedWaveform.isEmpty) {
         _calculatedWaveform.addAll(waveFromHeight);
-        matrix.currentAudioStatus.value = AudioPlayerStatus.downloaded;
+        if (matrix.voiceMessageEvent.value == null || isCurrentEvent) {
+          matrix.currentAudioStatus.value = AudioPlayerStatus.downloaded;
+        }
       }
 
       if (matrix.voiceMessageEvent.value?.eventId == widget.event.eventId) {
