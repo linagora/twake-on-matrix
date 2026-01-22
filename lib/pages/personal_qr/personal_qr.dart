@@ -1,17 +1,19 @@
 import 'dart:io';
-import 'dart:typed_data';
 import 'dart:ui' as ui;
 
 import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/generated/l10n/app_localizations.dart';
 import 'package:fluffychat/pages/personal_qr/personal_qr_view.dart';
+import 'package:fluffychat/resource/image_paths.dart';
 import 'package:fluffychat/utils/permission_dialog.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/utils/permission_service.dart';
 import 'package:fluffychat/utils/twake_snackbar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 import 'package:gal/gal.dart';
+import 'package:image/image.dart' as img;
 import 'package:matrix/matrix.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -181,6 +183,32 @@ class PersonalQrController extends State<PersonalQr> {
     return permissionStatus.isGranted;
   }
 
+  Future<Uint8List?> _overlayWidgetOnAsset(
+    ByteData foregroundData,
+    String assetPath,
+  ) async {
+    try {
+      final ByteData assetData = await rootBundle.load(assetPath);
+      final Uint8List assetBytes = assetData.buffer.asUint8List();
+      final img.Image? background = img.decodePng(assetBytes);
+
+      final foregroundBytes = foregroundData.buffer.asUint8List();
+      final img.Image? foreground = img.decodePng(foregroundBytes);
+
+      if (background == null || foreground == null) return foregroundBytes;
+
+      img.compositeImage(background, foreground, center: true);
+
+      return Uint8List.fromList(img.encodePng(background));
+    } catch (e) {
+      Logs().e(
+        'PersonalQrController::_overlayWidgetOnAsset:: Cannot embed background to personal QR',
+        e,
+      );
+      return foregroundData.buffer.asUint8List();
+    }
+  }
+
   /// Captures the QR code widget as a PNG image
   Future<Uint8List?> _captureQrImage(BuildContext context, L10n l10n) async {
     final boundary =
@@ -200,7 +228,10 @@ class PersonalQrController extends State<PersonalQr> {
       return null;
     }
 
-    return byteData.buffer.asUint8List();
+    return await _overlayWidgetOnAsset(
+      byteData,
+      ImagePaths.personalQrBackground,
+    );
   }
 
   @override
