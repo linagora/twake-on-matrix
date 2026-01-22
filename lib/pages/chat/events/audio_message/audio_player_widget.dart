@@ -130,6 +130,7 @@ class AudioPlayerState extends State<AudioPlayerWidget>
     super.initState();
     matrix = Matrix.of(context);
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      matrix.currentAudioStatus.value = AudioPlayerStatus.notDownloaded;
       final durationInt = widget.event.content
           .tryGetMap<String, dynamic>('org.matrix.msc1767.audio')
           ?.tryGet<int>('duration');
