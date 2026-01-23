@@ -1,6 +1,7 @@
 import 'dart:typed_data';
 
 import 'package:fluffychat/config/app_config.dart';
+import 'package:fluffychat/pages/chat/events/message/message_style.dart';
 import 'package:fluffychat/pages/chat/events/message_content_style.dart';
 import 'package:fluffychat/pages/chat_details/chat_details_page_view/media/chat_details_media_style.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
@@ -77,7 +78,11 @@ class EventVideoPlayer extends StatelessWidget {
           mouseCursor: SystemMouseCursors.click,
           onTap: onVideoTapped,
           child: SizedBox(
-            width: event.isReplyEvent() ? double.infinity : maxWidth,
+            width: MessageStyle.mediaContentWidth(
+              context: context,
+              event: event,
+              calculatedWidth: maxWidth,
+            ),
             height: MessageContentStyle.videoBubbleHeight(imageHeight),
             child: Stack(
               alignment: Alignment.center,

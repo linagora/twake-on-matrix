@@ -79,8 +79,11 @@ class MessageContent extends StatelessWidget
                       event: event,
                       onTapPreview: onTapPreview,
                       onTapSelectMode: onTapSelectMode,
-                      maxWidth:
-                          event.isReplyEvent() ? double.infinity : textWidth,
+                      maxWidth: MessageStyle.mediaContentWidth(
+                        context: context,
+                        event: event,
+                        calculatedWidth: textWidth ?? 0,
+                      ),
                     ),
                   ),
                   const SizedBox(height: 8),

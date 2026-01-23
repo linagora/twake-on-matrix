@@ -304,4 +304,15 @@ class MessageStyle {
     }
     return Alignment.topLeft;
   }
+
+  static double mediaContentWidth({
+    required BuildContext context,
+    required Event event,
+    required double calculatedWidth,
+  }) {
+    if (event.isReplyEvent()) {
+      return double.infinity;
+    }
+    return calculatedWidth;
+  }
 }

@@ -5,6 +5,7 @@ import 'package:fluffychat/config/themes.dart';
 import 'package:fluffychat/pages/chat/events/message/message_content_builder_mixin.dart';
 import 'package:fluffychat/presentation/model/chat/events/message/message_metrics.dart';
 import 'package:fluffychat/utils/custom_scroll_behaviour.dart';
+import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
 import 'package:fluffychat/utils/responsive/responsive_utils.dart';
 import 'package:fluffychat/widgets/theme_builder.dart';
 import 'package:flutter/material.dart';
@@ -168,7 +169,11 @@ Future<void> main() async {
             equals(expectedMetrics.isNeedAddNewLine),
           );
         } else {
-          expect(getSizeForEmptyTextEvent, isNull);
+          if (event.isVideoOrImage) {
+            expect(getSizeForEmptyTextEvent, isNotNull);
+          } else {
+            expect(getSizeForEmptyTextEvent, isNull);
+          }
         }
       }
 
@@ -192,7 +197,7 @@ Future<void> main() async {
             );
             testWidgets(
               'GIVEN message type is image\n'
-              'THEN return null\n',
+              'THEN return is not null\n',
               (WidgetTester tester) async {
                 await runTest(
                   tester,
@@ -203,7 +208,7 @@ Future<void> main() async {
             );
             testWidgets(
               'GIVEN message type is video\n'
-              'THEN return null\n',
+              'THEN return is not null\n',
               (WidgetTester tester) async {
                 await runTest(
                   tester,
@@ -447,7 +452,7 @@ Future<void> main() async {
             );
             testWidgets(
               'GIVEN message type is image\n'
-              'THEN return null\n',
+              'THEN return is not null\n',
               (WidgetTester tester) async {
                 await runTest(
                   tester,
@@ -458,7 +463,7 @@ Future<void> main() async {
             );
             testWidgets(
               'GIVEN message type is video\n'
-              'THEN return null\n',
+              'THEN return is not nul\n',
               (WidgetTester tester) async {
                 await runTest(
                   tester,
