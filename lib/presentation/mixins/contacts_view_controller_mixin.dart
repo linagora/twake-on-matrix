@@ -302,9 +302,15 @@ mixin class ContactsViewControllerMixin {
   Future<void> _refreshContacts(String keyword) async {
     if (presentationContactNotifier.isDisposed) return;
 
+    final externalContactState = _checkExternalContact(keyword);
+
     presentationContactNotifier.value =
         contactsManager.getContactsNotifier().value.fold(
       (failure) {
+        if (externalContactState != null) {
+          return externalContactState;
+        }
+
         if (failure is GetContactsFailure) {
           return _handleSearchExternalContact(
             keyword,
@@ -338,23 +344,8 @@ mixin class ContactsViewControllerMixin {
           final combinedContacts = _combineTomContacts(filteredContacts);
 
           if (combinedContacts.isEmpty) {
-            if (keyword.isValidMatrixId && keyword.startsWith("@")) {
-              return Right(
-                PresentationExternalContactSuccess(
-                  contact: PresentationContact(
-                    matrixId: keyword,
-                    displayName: keyword.substring(1),
-                    type: ContactType.external,
-                  ),
-                ),
-              );
-            } else {
-              return Left(
-                GetPresentationContactsEmpty(
-                  keyword: keyword,
-                ),
-              );
-            }
+            return externalContactState ??
+                Left(GetPresentationContactsEmpty(keyword: keyword));
           } else {
             return Right(
               GetPresentationContactsSuccess(
@@ -367,6 +358,23 @@ mixin class ContactsViewControllerMixin {
         return Right(success);
       },
     );
+  }
+
+  Either<Failure, Success>? _checkExternalContact(
+    String keyword,
+  ) {
+    if (keyword.isValidMatrixId && keyword.startsWith("@")) {
+      return Right(
+        PresentationExternalContactSuccess(
+          contact: PresentationContact(
+            matrixId: keyword,
+            displayName: keyword.substring(1),
+            type: ContactType.external,
+          ),
+        ),
+      );
+    }
+    return null;
   }
 
   Future<void> _refreshPhoneBookContacts(String keyword) async {
