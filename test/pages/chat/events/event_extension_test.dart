@@ -721,7 +721,7 @@ void main() {
       () {
         final event = createEvent(
           content: {
-            'body': '',
+            'body': 'image.jpg',
             'filename': 'image.jpg',
             'msgtype': 'm.image',
             'url': 'mxc://example.org/image123',
