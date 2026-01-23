@@ -56,6 +56,9 @@ mixin PickAvatarMixin {
       withData: true,
     );
     if (result == null || result.files.single.bytes == null) {
+      pickAvatarUIState.value = Right<Failure, Success>(
+        GetAvatarInitialUIState(),
+      );
       return;
     } else {
       handlePickAvatarOnWeb(result);
