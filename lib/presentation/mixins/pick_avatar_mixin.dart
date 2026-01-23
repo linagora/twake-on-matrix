@@ -4,9 +4,9 @@ import 'package:file_picker/file_picker.dart';
 import 'package:fluffychat/app_state/failure.dart';
 import 'package:fluffychat/app_state/success.dart';
 import 'package:fluffychat/config/app_config.dart';
-import 'package:fluffychat/domain/model/extensions/xfile/xfile_extension.dart';
 import 'package:fluffychat/presentation/extensions/value_notifier_custom.dart';
 import 'package:fluffychat/presentation/model/pick_avatar_state.dart';
+import 'package:fluffychat/utils/mime_type_uitls.dart';
 import 'package:fluffychat/utils/twake_snackbar.dart';
 import 'package:flutter/material.dart';
 import 'package:matrix/matrix.dart';
@@ -19,7 +19,19 @@ mixin PickAvatarMixin {
   );
 
   Future<void> handlePickAvatarOnWeb(FilePickerResult filePickerResult) async {
-    final matrixFile = await filePickerResult.xFiles.single.toMatrixFileOnWeb();
+    final file = filePickerResult.files.single;
+    final bytes = file.bytes;
+    if (bytes == null) {
+      pickAvatarUIState.value = const Left<Failure, Success>(
+        GetAvatarUIStateFailure(),
+      );
+      return;
+    }
+    final matrixFile = MatrixFile.fromMimeType(
+      bytes: bytes,
+      name: file.name,
+      mimeType: MimeTypeUitls.instance.getTwakeMimeType(file.name),
+    );
 
     if (matrixFile.size > AppConfig.defaultMaxUploadAvtarSizeInBytes) {
       pickAvatarUIState.value = const Left<Failure, Success>(
@@ -41,9 +53,12 @@ mixin PickAvatarMixin {
     final result = await FilePicker.platform.pickFiles(
       type: FileType.custom,
       allowedExtensions: AppConfig.allowedExtensionsSupportedAvatar,
-      withReadStream: true,
+      withData: true,
     );
-    if (result == null || result.files.single.readStream == null) {
+    if (result == null || result.files.single.bytes == null) {
+      pickAvatarUIState.value = Right<Failure, Success>(
+        GetAvatarInitialUIState(),
+      );
       return;
     } else {
       handlePickAvatarOnWeb(result);
@@ -62,6 +77,11 @@ mixin PickAvatarMixin {
                 AppConfig.defaultMaxUploadAvtarSizeInBytes.bytes.megaBytes
                     .toInt(),
               ),
+            );
+          } else if (failure is GetAvatarUIStateFailure) {
+            TwakeSnackBar.show(
+              context,
+              L10n.of(context)!.oopsSomethingWentWrong,
             );
           }
         },

@@ -626,7 +626,8 @@ class SettingsProfileController extends State<SettingsProfile>
       );
       pickAvatarUIState.value.fold(
         (failure) {
-          if (failure is GetAvatarBigSizeUIStateFailure) {
+          if (failure is GetAvatarBigSizeUIStateFailure ||
+              failure is GetAvatarUIStateFailure) {
             isEditedProfileNotifier.value = false;
           }
         },

@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:fluffychat/app_state/success.dart';
@@ -26,15 +27,17 @@ void main() {
         'THEN pickAvatarUIState should be GetAvatarOnWebUIStateSuccess',
         () async {
           final file = File('test1.png');
-          await file.writeAsBytes(
+          final fileBytes = Uint8List.fromList(
             List.generate(5 * 1024 * 1024, (index) => index % 256),
           );
+          await file.writeAsBytes(fileBytes);
           final filePickerResult = FilePickerResult(
             [
               PlatformFile(
                 name: 'test1.png',
                 path: file.path,
                 size: 5 * (1024 * 1024),
+                bytes: fileBytes,
               ),
             ],
           );
@@ -62,15 +65,17 @@ void main() {
         'THEN show snackbar with message file too big',
         () async {
           final file = File('test1.png');
-          await file.writeAsBytes(
+          final fileBytes = Uint8List.fromList(
             List.generate(11 * 1024 * 1024, (index) => index % 256),
           );
+          await file.writeAsBytes(fileBytes);
           final filePickerResult = FilePickerResult(
             [
               PlatformFile(
                 name: 'test1.png',
                 path: file.path,
                 size: 11 * (1024 * 1024),
+                bytes: fileBytes,
               ),
             ],
           );

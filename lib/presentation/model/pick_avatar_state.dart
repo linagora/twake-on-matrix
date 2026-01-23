@@ -32,6 +32,13 @@ class GetAvatarOnWebUIStateSuccess extends PickAvatarState {
   List<Object?> get props => [matrixFile];
 }
 
+class GetAvatarUIStateFailure extends Failure {
+  const GetAvatarUIStateFailure();
+
+  @override
+  List<Object?> get props => [];
+}
+
 class GetAvatarBigSizeUIStateFailure extends Failure {
   const GetAvatarBigSizeUIStateFailure();
 
