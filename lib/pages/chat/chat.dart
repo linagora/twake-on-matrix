@@ -1433,7 +1433,18 @@ class ChatController extends State<Chat>
 
     // Find nearest rendered message to determine scroll direction
     final nearestRenderedIndex = _findVisibleEventIndex();
-    if (nearestRenderedIndex == null) return;
+    if (nearestRenderedIndex == null) {
+      // No rendered messages found - use AutoScrollController as fallback
+      Logs().w(
+        'Chat::_scrollTowardsMessage(): No rendered messages found, using AutoScrollController fallback',
+      );
+      await scrollController.scrollToIndex(
+        getDisplayEventIndex(targetIndex),
+        preferPosition: AutoScrollPosition.middle,
+        duration: const Duration(milliseconds: 300),
+      );
+      return;
+    }
 
     // Determine scroll direction and estimate distance
     final shouldScrollDown = targetIndex < nearestRenderedIndex;
@@ -1508,13 +1519,40 @@ class ChatController extends State<Chat>
   }
 
   int? _findVisibleEventIndex() {
-    final index = timeline!.events.indexWhere(
-      (event) => event.eventId == visibleEventId,
-    );
+    // First, try to use the tracked visible event
+    if (visibleEventId != null) {
+      final index = timeline!.events.indexWhere(
+        (event) => event.eventId == visibleEventId,
+      );
+      if (index != -1) return index;
+    }
 
-    if (index == -1) return null;
+    // Fallback: Find any currently rendered event by scanning the timeline
+    // Start from the middle and work outwards for better performance
+    final eventsCount = timeline!.events.length;
+    final midPoint = eventsCount ~/ 2;
 
-    return index;
+    // Check middle first (most likely to be rendered)
+    if (_isMessageRendered(midPoint)) {
+      return midPoint;
+    }
+
+    // Spiral outwards from middle
+    for (var offset = 1; offset < eventsCount; offset++) {
+      // Check above middle
+      final upperIndex = midPoint - offset;
+      if (upperIndex >= 0 && _isMessageRendered(upperIndex)) {
+        return upperIndex;
+      }
+
+      // Check below middle
+      final lowerIndex = midPoint + offset;
+      if (lowerIndex < eventsCount && _isMessageRendered(lowerIndex)) {
+        return lowerIndex;
+      }
+    }
+
+    return null;
   }
 
   /// Checks if a message at [index] is currently rendered.
