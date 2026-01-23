@@ -50,12 +50,12 @@ mixin SendFilesMixin {
       );
     }).toList();
 
-    if (fileInfos?.isEmpty == true) return;
+    if (fileInfos == null || fileInfos.isEmpty) return;
     onSendFileCallback?.call();
     final uploadManger = getIt.get<UploadManager>();
     uploadManger.uploadFileMobile(
       room: room,
-      fileInfos: fileInfos!,
+      fileInfos: fileInfos,
       inReplyTo: inReplyTo,
     );
   }

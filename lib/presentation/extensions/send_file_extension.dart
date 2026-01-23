@@ -30,6 +30,7 @@ import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:heic_to_png_jpg/heic_to_png_jpg.dart';
 import 'package:image/image.dart' as img;
 import 'package:matrix/matrix.dart';
+
 // ignore: implementation_imports
 import 'package:matrix/src/utils/run_benchmarked.dart';
 import 'package:path_provider/path_provider.dart';
@@ -515,7 +516,7 @@ extension SendFileExtension on Room {
     // Send event
     final content = <String, dynamic>{
       'msgtype': msgType,
-      if (captionInfo != null) 'body': captionInfo,
+      'body': captionInfo ?? '',
       if (contentCaptionFormat != null) ...contentCaptionFormat,
       'filename': fileInfo.fileName,
       'url': uploadResp.toString(),
@@ -696,7 +697,7 @@ extension SendFileExtension on Room {
                 MatrixEvent(
                   content: {
                     'msgtype': messageType,
-                    if (captionInfo != null) 'body': captionInfo,
+                    'body': captionInfo ?? '',
                     'filename': fileInfo.fileName,
                     'info': <String, dynamic>{
                       ...fileInfo.metadata,

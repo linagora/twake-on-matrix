@@ -429,7 +429,7 @@ extension LocalizedBody on Event {
                 messageType == MessageTypes.Video ||
                 messageType == MessageTypes.File) &&
             text.isNotEmpty &&
-            filename != text) ||
+            isBodyDiffersFromFilename()) ||
         isReplyEvent();
   }
 
@@ -446,10 +446,6 @@ extension LocalizedBody on Event {
 
   bool isReplyEventWithAudio() {
     return isReplyEvent() && messageType == MessageTypes.Audio;
-  }
-
-  bool isBodyHasRoomMention() {
-    return body.contains('@\u200broom');
   }
 
   /// Checks if this event is the same as another event, considering both eventId and transaction_id.
@@ -531,9 +527,7 @@ extension LocalizedBody on Event {
       return this;
     }
 
-    final hasCaption = isCaptionModeOrReply();
-
-    if (hasCaption) {
+    if (isCaptionModeOrReply()) {
       // For media/files with caption, preserve original event structure
       // and add the edited content
       final originalEventJson = toJson();
