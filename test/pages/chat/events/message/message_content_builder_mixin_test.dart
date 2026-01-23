@@ -183,7 +183,8 @@ Future<void> main() async {
         'THEN maxWidth for message is 504.0\n',
         () {
           const messageMaxWidthWeb = 504.0;
-          group('GIVEN message type does not require detailed text metrics\n', () {
+          group('GIVEN message type does not require detailed text metrics\n',
+              () {
             testWidgets(
               'GIVEN message type is file\n'
               'THEN return null\n',
@@ -438,7 +439,8 @@ Future<void> main() async {
         'THEN maxWidth for message is 412.0\n',
         () {
           const messageMaxWidthMobile = 412.0;
-          group('GIVEN message type is not supported for calculate\n', () {
+          group('GIVEN message type does not require detailed text metrics\n',
+              () {
             testWidgets(
               'GIVEN message type is file\n'
               'THEN return null\n',
