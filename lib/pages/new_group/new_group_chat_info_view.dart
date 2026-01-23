@@ -287,7 +287,8 @@ class _AvatarForWebBuilder extends StatelessWidget {
       valueListenable: avatarWebNotifier,
       builder: (context, uiState, child) => uiState.fold(
         (failure) {
-          if (failure is GetAvatarBigSizeUIStateFailure) {
+          if (failure is GetAvatarBigSizeUIStateFailure ||
+              failure is GetAvatarUIStateFailure) {
             return child!;
           }
           return const SizedBox();

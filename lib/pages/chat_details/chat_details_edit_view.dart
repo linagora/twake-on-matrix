@@ -386,7 +386,8 @@ class _AvatarBuilder extends StatelessWidget {
       valueListenable: updateGroupAvatarNotifier,
       builder: (context, value, child) => value.fold(
         (failure) {
-          if (failure is GetAvatarBigSizeUIStateFailure) {
+          if (failure is GetAvatarBigSizeUIStateFailure ||
+              failure is GetAvatarUIStateFailure) {
             return child!;
           }
           return const SizedBox();
