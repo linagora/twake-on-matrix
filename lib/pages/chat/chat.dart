@@ -262,8 +262,19 @@ class ChatController extends State<Chat>
 
   final AutoScrollController scrollController = AutoScrollController();
 
-  // Constant scroll speed in pixels per second for smooth, predictable scrolling
-  static const double _scrollSpeed = 2000.0;
+  // Scroll speed configuration for adaptive scrolling performance
+  // Base speed for nearby messages (increased from 2000.0 to 4500.0)
+  static const double _scrollSpeed = 4500.0;
+
+  // Fast scroll speed for medium-distance messages
+  static const double _scrollSpeedFast = 9000.0;
+
+  // Distance thresholds (in number of messages) for adaptive behavior:
+  // - >100 messages: Reload timeline centered on target (most efficient)
+  // - 20-100 messages: Fast scroll at 9000 px/s
+  // - <20 messages: Normal scroll at 4500 px/s
+  static const int _instantJumpThreshold = 100; // Reload timeline beyond this
+  static const int _fastScrollThreshold = 20; // Use fast speed beyond this
 
   final KeyboardVisibilityController keyboardVisibilityController =
       KeyboardVisibilityController();
@@ -1344,7 +1355,7 @@ class ChatController extends State<Chat>
       });
       return;
     }
-    await _scrollToMessageWithEventId(eventId);
+    await _scrollToMessageWithEventId(eventId, highlight: highlight);
     if (highlight) {
       await scrollController.highlight(
         getDisplayEventIndex(eventIndex),
@@ -1355,14 +1366,18 @@ class ChatController extends State<Chat>
 
   /// Scrolls to a message with the given [eventId] and centers it in the viewport.
   ///
-  /// This method handles two scenarios:
+  /// This method handles three scenarios:
   /// 1. If the message is already rendered, it centers it immediately
-  /// 2. If not rendered, it gradually scrolls towards it until found
+  /// 2. If message is far away (>100 messages), reload timeline centered on it
+  /// 3. If not rendered but nearby, gradually scrolls towards it until found
   ///
   /// **Important**: Due to GlobalObjectKey behavior on mobile, we must create
   /// fresh key instances from `timeline.events[index].eventId` rather than
   /// reusing the passed [eventId] parameter to ensure reliable context lookups.
-  Future<void> _scrollToMessageWithEventId(String eventId) async {
+  Future<void> _scrollToMessageWithEventId(
+    String eventId, {
+    bool highlight = false,
+  }) async {
     if (timeline == null) return;
 
     final targetIndex =
@@ -1380,8 +1395,58 @@ class ChatController extends State<Chat>
       return;
     }
 
-    // Message not rendered - scroll towards it
-    await _scrollTowardsMessage(eventId, targetIndex);
+    // Check if message is very far away - if so, reload timeline
+    final nearestRenderedIndex = _findVisibleEventIndex();
+    if (nearestRenderedIndex != null) {
+      final messageDistance = (targetIndex - nearestRenderedIndex).abs();
+
+      if (messageDistance > _instantJumpThreshold) {
+        // Message is very far - reload timeline centered on target event
+        Logs().d(
+          'Chat::_scrollToMessageWithEventId(): Distance=$messageDistance messages (>$_instantJumpThreshold), reloading timeline centered on $eventId',
+        );
+        setState(() {
+          timeline = null;
+          loadTimelineFuture = _getTimeline(
+            eventContextId: eventId,
+          ).onError(
+            (e, s) {
+              Logs().e(
+                'Chat::_scrollToMessageWithEventId(): Unable to load timeline',
+                e,
+                s,
+              );
+            },
+          );
+        });
+        await loadTimelineFuture;
+
+        // After timeline reload, center and optionally highlight the message
+        WidgetsBinding.instance.addPostFrameCallback((_) async {
+          if (!mounted) return;
+          final newTargetIndex =
+              timeline!.events.indexWhere((event) => event.eventId == eventId);
+          if (newTargetIndex != -1) {
+            final newTargetEventId = timeline!.events[newTargetIndex].eventId;
+            final newItemContext =
+                GlobalObjectKey(newTargetEventId).currentContext;
+            if (newItemContext != null) {
+              await _centerRenderedMessage(newItemContext);
+            }
+            // Apply highlight if requested
+            if (highlight) {
+              await scrollController.highlight(
+                getDisplayEventIndex(newTargetIndex),
+              );
+            }
+          }
+        });
+        return;
+      }
+    }
+
+    // Message not rendered but nearby - scroll towards it
+    await _scrollTowardsMessage(eventId, targetIndex, highlight: highlight);
   }
 
   /// Centers an already-rendered message in the viewport.
@@ -1401,16 +1466,20 @@ class ChatController extends State<Chat>
         itemPosition.dy - (viewportHeight / 2) + (itemHeight / 2);
     final targetOffset = scrollController.offset + scrollAdjustment;
 
-    // Calculate duration based on distance and constant speed
+    // Calculate duration based on distance and adaptive speed
     final distance = scrollAdjustment.abs();
+
+    // Use faster speed for larger adjustments (>1000px), normal for small ones
+    final scrollSpeed = distance > 1000 ? _scrollSpeedFast : _scrollSpeed;
+
     final duration = Duration(
-      milliseconds: (distance / _scrollSpeed * 1000).toInt(),
+      milliseconds: (distance / scrollSpeed * 1000).toInt(),
     );
 
     await scrollController.animateTo(
       targetOffset,
       duration: duration,
-      curve: Curves.linear,
+      curve: Curves.easeInOut, // Smoother curve for centering
     );
   }
 
@@ -1424,6 +1493,7 @@ class ChatController extends State<Chat>
     String eventId,
     int targetIndex, {
     int retryCount = 0,
+    bool highlight = false,
   }) async {
     const checkIntervalMs = 50;
     const maxRetries = 5;
@@ -1441,7 +1511,7 @@ class ChatController extends State<Chat>
       await scrollController.scrollToIndex(
         getDisplayEventIndex(targetIndex),
         preferPosition: AutoScrollPosition.middle,
-        duration: const Duration(milliseconds: 300),
+        duration: const Duration(milliseconds: 150),
       );
       return;
     }
@@ -1449,6 +1519,14 @@ class ChatController extends State<Chat>
     // Determine scroll direction and estimate distance
     final shouldScrollDown = targetIndex < nearestRenderedIndex;
     final messageDistance = (targetIndex - nearestRenderedIndex).abs();
+
+    // Adaptive speed based on distance:
+    // - Medium distance (20-100 messages): Fast scroll (9000 px/s)
+    // - Nearby (<20 messages): Normal scroll (4500 px/s)
+    // Note: Very far messages (>100) are handled by timeline reload
+    final scrollSpeed = messageDistance > _fastScrollThreshold
+        ? _scrollSpeedFast // 9000 px/s for medium distances
+        : _scrollSpeed; // 4500 px/s for nearby messages
 
     // Use a more accurate estimate: 180 pixels per message with 50% safety margin
     // Based on logs: 800px scrolled only 5 messages, so ~160px/message minimum
@@ -1465,7 +1543,11 @@ class ChatController extends State<Chat>
 
     // Start continuous scroll animation
     final scrollDuration = Duration(
-      milliseconds: (estimatedDistance / _scrollSpeed * 1000).toInt(),
+      milliseconds: (estimatedDistance / scrollSpeed * 1000).toInt(),
+    );
+
+    Logs().d(
+      'Chat::_scrollTowardsMessage(): Distance=$messageDistance messages, speed=$scrollSpeed px/s, duration=${scrollDuration.inMilliseconds}ms',
     );
 
     // Start the animation (non-blocking)
@@ -1490,8 +1572,15 @@ class ChatController extends State<Chat>
         scrollController.jumpTo(currentPos);
         stopwatch.stop();
 
-        // Center the message
-        await _scrollToMessageWithEventId(eventId);
+        // Center the message (this call won't trigger highlight since we handle it here)
+        await _scrollToMessageWithEventId(eventId, highlight: false);
+
+        // Apply highlight if requested
+        if (highlight) {
+          await scrollController.highlight(
+            getDisplayEventIndex(targetIndex),
+          );
+        }
         return;
       }
 
@@ -1514,6 +1603,7 @@ class ChatController extends State<Chat>
         eventId,
         targetIndex,
         retryCount: retryCount + 1,
+        highlight: highlight,
       );
     }
   }
