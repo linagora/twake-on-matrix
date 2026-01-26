@@ -231,8 +231,7 @@ class ContactsSelectionView extends StatelessWidget {
                 return child!;
               }
               if (!PlatformInfos.isWeb) {
-                if (controller.presentationPhonebookContactNotifier.value
-                    .isRight()) {
+                if (controller.phoneBookFilterSuccess) {
                   return child!;
                 }
               }

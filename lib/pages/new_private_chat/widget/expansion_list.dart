@@ -33,6 +33,7 @@ class ExpansionList extends StatelessWidget {
   final Function()? closeContactsWarningBanner;
   final Function()? goToSettingsForPermissionActions;
   final VoidCallback? goToCreateContact;
+  final bool phoneBookFilterSuccess;
 
   const ExpansionList({
     super.key,
@@ -46,6 +47,7 @@ class ExpansionList extends StatelessWidget {
     this.goToSettingsForPermissionActions,
     required this.presentationPhonebookContactNotifier,
     this.goToCreateContact,
+    required this.phoneBookFilterSuccess,
   });
 
   @override
@@ -117,7 +119,7 @@ class ExpansionList extends StatelessWidget {
 
             if (success is PresentationExternalContactSuccess) {
               if (!PlatformInfos.isWeb) {
-                if (presentationPhonebookContactNotifier.value.isRight()) {
+                if (phoneBookFilterSuccess) {
                   return child!;
                 }
               }

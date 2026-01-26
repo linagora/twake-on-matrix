@@ -253,8 +253,7 @@ class _SliverContactsList extends StatelessWidget {
               }
 
               if (!PlatformInfos.isWeb) {
-                if (controller.presentationPhonebookContactNotifier.value
-                    .isRight()) {
+                if (controller.phoneBookFilterSuccess) {
                   return child!;
                 }
               }
