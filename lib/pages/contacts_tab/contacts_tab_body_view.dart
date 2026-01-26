@@ -252,13 +252,6 @@ class _SliverContactsList extends StatelessWidget {
                 return child!;
               }
 
-              if (!PlatformInfos.isWeb) {
-                if (controller.presentationPhonebookContactNotifier.value
-                    .isRight()) {
-                  return child!;
-                }
-              }
-
               final externalContact = success.contact;
               return _SilverExternalContact(
                 controller: controller,
