@@ -63,6 +63,7 @@ class NewPrivateChatView extends StatelessWidget {
               goToSettingsForPermissionActions: () =>
                   controller.displayContactPermissionDialog(context),
               goToCreateContact: () => showAddContactDialog(context),
+              phoneBookFilterSuccess: controller.phoneBookFilterSuccess,
             ),
           ],
         ),

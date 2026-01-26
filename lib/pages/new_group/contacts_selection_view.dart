@@ -230,6 +230,11 @@ class ContactsSelectionView extends StatelessWidget {
                   .presentationRecentContactNotifier.value.isNotEmpty) {
                 return child!;
               }
+              if (!PlatformInfos.isWeb) {
+                if (controller.phoneBookFilterSuccess) {
+                  return child!;
+                }
+              }
               return SliverToBoxAdapter(
                 child: ContactItem(
                   contact: success.contact,

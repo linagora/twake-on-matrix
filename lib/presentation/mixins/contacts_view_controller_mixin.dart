@@ -73,6 +73,12 @@ mixin class ContactsViewControllerMixin {
 
   PermissionStatus? contactsPermissionStatus;
 
+  bool get phoneBookFilterSuccess =>
+      presentationPhonebookContactNotifier.value.fold(
+        (_) => false,
+        (success) => success is GetPhonebookContactsSuccess,
+      );
+
   Future displayContactPermissionDialog(BuildContext context) async {
     final fetchContactsPermissionStatus =
         await _permissionHandlerService.contactsPermissionStatus;
