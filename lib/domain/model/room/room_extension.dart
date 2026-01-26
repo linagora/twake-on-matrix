@@ -191,6 +191,18 @@ extension RoomExtension on Room {
               if (b.shouldHideChangedDisplayNameEvent()) {
                 return a;
               }
+              // hide reaction events
+              if (a.type == EventTypes.Reaction ||
+                  a.relationshipType == RelationshipTypes.reaction) {
+                return b;
+              }
+              if (b.type == EventTypes.Reaction ||
+                  b.relationshipType == RelationshipTypes.reaction) {
+                return a;
+              }
+              // hide pinned message events
+              if (a.type == EventTypes.RoomPinnedEvents) return b;
+              if (b.type == EventTypes.RoomPinnedEvents) return a;
               if (a.originServerTs == b.originServerTs) {
                 // if two events have the same sort order we want to give encrypted events a lower priority
                 // This is so that if the same event exists in the state both encrypted *and* unencrypted,
@@ -222,6 +234,13 @@ extension RoomExtension on Room {
           if (messageEvent.shouldHideBannedEvent()) continue;
           if (messageEvent.shouldHideChangedAvatarEvent()) continue;
           if (messageEvent.shouldHideChangedDisplayNameEvent()) continue;
+          // hide reaction events
+          if (messageEvent.type == EventTypes.Reaction) continue;
+          if (messageEvent.relationshipType == RelationshipTypes.reaction) {
+            continue;
+          }
+          // hide pinned message events
+          if (messageEvent.type == EventTypes.RoomPinnedEvents) continue;
 
           if (messageEvent.originServerTs.millisecondsSinceEpoch >
               lastState.originServerTs.millisecondsSinceEpoch) {
@@ -246,6 +265,11 @@ extension RoomExtension on Room {
       if (state is! Event) return;
       if (state.shouldHideRedactedEvent()) return;
       if (state.shouldHideBannedEvent()) return;
+      // hide reaction events
+      if (state.type == EventTypes.Reaction) return;
+      if (state.relationshipType == RelationshipTypes.reaction) return;
+      // hide pinned message events
+      if (state.type == EventTypes.RoomPinnedEvents) return;
       if (state.originServerTs.millisecondsSinceEpoch >
           lastTime.millisecondsSinceEpoch) {
         lastTime = state.originServerTs;
