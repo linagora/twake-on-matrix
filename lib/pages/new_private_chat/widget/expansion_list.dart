@@ -116,11 +116,6 @@ class ExpansionList extends StatelessWidget {
             }
 
             if (success is PresentationExternalContactSuccess) {
-              if (!PlatformInfos.isWeb) {
-                if (presentationPhonebookContactNotifier.value.isRight()) {
-                  return child!;
-                }
-              }
               return TwakeInkWell(
                 onTap: () {
                   onContactTap(
