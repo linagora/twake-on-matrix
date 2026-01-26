@@ -355,7 +355,7 @@ mixin class ContactsViewControllerMixin {
             );
           }
         }
-        return Right(success);
+        return externalContactState ?? Right(success);
       },
     );
   }
