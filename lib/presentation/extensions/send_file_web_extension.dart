@@ -347,7 +347,7 @@ extension SendFileWebExtension on Room {
                 MatrixEvent(
                   content: {
                     'msgtype': file.msgType,
-                    'body': captionInfo ?? file.name,
+                    'body': captionInfo ?? '',
                     if (contentCaptionFormat != null) ...contentCaptionFormat,
                     'filename': file.name,
                     'info': file.info,
