@@ -5,6 +5,7 @@ import 'package:fluffychat/app_state/failure.dart';
 import 'package:fluffychat/app_state/success.dart';
 import 'package:fluffychat/utils/manager/upload_manager/models/upload_caption_info.dart';
 import 'package:fluffychat/utils/manager/upload_manager/models/upload_info.dart';
+import 'package:matrix/matrix.dart';
 
 class UploadFileInfo extends UploadInfo {
   final StreamController<Either<Failure, Success>> uploadStateStreamController;
@@ -12,6 +13,7 @@ class UploadFileInfo extends UploadInfo {
   final CancelToken cancelToken;
   final DateTime createdAt;
   final UploadCaptionInfo? captionInfo;
+  final Event? inReplyTo;
 
   UploadFileInfo({
     required super.txid,
@@ -20,6 +22,7 @@ class UploadFileInfo extends UploadInfo {
     required this.uploadStream,
     required this.cancelToken,
     this.captionInfo,
+    this.inReplyTo,
   });
 
   @override
@@ -30,5 +33,6 @@ class UploadFileInfo extends UploadInfo {
         cancelToken,
         createdAt,
         captionInfo,
+        inReplyTo,
       ];
 }

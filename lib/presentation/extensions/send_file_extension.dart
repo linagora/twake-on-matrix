@@ -30,6 +30,7 @@ import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:heic_to_png_jpg/heic_to_png_jpg.dart';
 import 'package:image/image.dart' as img;
 import 'package:matrix/matrix.dart';
+
 // ignore: implementation_imports
 import 'package:matrix/src/utils/run_benchmarked.dart';
 import 'package:path_provider/path_provider.dart';
@@ -515,7 +516,7 @@ extension SendFileExtension on Room {
     // Send event
     final content = <String, dynamic>{
       'msgtype': msgType,
-      'body': captionInfo ?? fileInfo.fileName,
+      'body': captionInfo ?? '',
       if (contentCaptionFormat != null) ...contentCaptionFormat,
       'filename': fileInfo.fileName,
       'url': uploadResp.toString(),
@@ -696,7 +697,7 @@ extension SendFileExtension on Room {
                 MatrixEvent(
                   content: {
                     'msgtype': messageType,
-                    'body': captionInfo ?? fileInfo.fileName,
+                    'body': captionInfo ?? '',
                     'filename': fileInfo.fileName,
                     'info': <String, dynamic>{
                       ...fileInfo.metadata,
@@ -776,6 +777,7 @@ extension SendFileExtension on Room {
       sendPlaceholdersForImagePickerFiles({
     required List<FileAssetEntity> entities,
     String? captionInfo,
+    Event? inReplyTo,
   }) async {
     final txIdMapToImageFile = <TransactionId, FakeSendingFileInfo>{};
     for (final entity in entities) {
@@ -794,6 +796,7 @@ extension SendFileExtension on Room {
           txid: txid,
           messageType: entity.messageType,
           captionInfo: captionInfo,
+          inReplyTo: inReplyTo,
         );
         txIdMapToImageFile[txid] = FakeSendingFileInfo(
           fileInfo: fileInfo,

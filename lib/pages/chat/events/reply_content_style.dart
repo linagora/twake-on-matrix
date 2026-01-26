@@ -62,7 +62,6 @@ class ReplyContentStyle {
 
   static EdgeInsetsDirectional get marginReplyContent =>
       EdgeInsetsDirectional.symmetric(
-        horizontal: 8,
         vertical: 4.0 * AppConfig.bubbleSizeFactor,
       );
 

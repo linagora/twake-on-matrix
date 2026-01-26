@@ -63,6 +63,7 @@ class UploadManager {
     required String txid,
     required Room room,
     String? captionInfo,
+    Event? inReplyTo,
   }) {
     final uploadController = StreamController<Either<Failure, Success>>();
 
@@ -78,6 +79,7 @@ class UploadManager {
               caption: captionInfo,
             )
           : null,
+      inReplyTo: inReplyTo,
     );
   }
 
@@ -89,10 +91,12 @@ class UploadManager {
     required Room room,
     required List<FileAssetEntity> entities,
     String? caption,
+    Event? inReplyTo,
   }) async {
     final txids = await room.sendPlaceholdersForImagePickerFiles(
       entities: entities,
       captionInfo: caption,
+      inReplyTo: inReplyTo,
     );
 
     for (final txid in txids.entries) {
@@ -104,10 +108,13 @@ class UploadManager {
 
       Logs().d('UploadManager::uploadMediaMobile(): txid: $txidKey');
 
+      final isLastFile = txidKey == txids.keys.last;
+
       _initUploadFileInfo(
         txid: txidKey,
         room: room,
-        captionInfo: txidKey == txids.keys.last ? caption : null,
+        captionInfo: isLastFile ? caption : null,
+        inReplyTo: isLastFile ? inReplyTo : null,
       );
 
       final sentDate = _eventIdMapUploadFileInfo[txidKey]?.createdAt;
@@ -118,6 +125,7 @@ class UploadManager {
         messageType: fakeSendingFileInfo.messageType,
         sentDate: sentDate,
         captionInfo: _eventIdMapUploadFileInfo[txidKey]?.captionInfo?.caption,
+        inReplyTo: isLastFile ? inReplyTo : null,
       );
 
       final streamController =
@@ -157,6 +165,7 @@ class UploadManager {
         sentDate: sentDate,
         shrinkImageMaxDimension: _shrinkImageMaxDimension,
         captionInfo: _eventIdMapUploadFileInfo[txidKey]?.captionInfo?.caption,
+        inReplyTo: isLastFile ? inReplyTo : null,
       );
     }
   }
@@ -166,16 +175,20 @@ class UploadManager {
     required List<MatrixFile> files,
     Map<MatrixFile, MatrixImageFile?>? thumbnails,
     String? caption,
+    Event? inReplyTo,
   }) async {
     for (final matrixFile in files.asMap().entries) {
       final txid = room.client.generateUniqueTransactionId();
       final fileIndex = matrixFile.key;
       final fileInfo = matrixFile.value;
 
+      final isLastFile = fileIndex == files.length - 1;
+
       _initUploadFileInfo(
         txid: txid,
         room: room,
-        captionInfo: fileIndex == files.length - 1 ? caption : null,
+        captionInfo: isLastFile ? caption : null,
+        inReplyTo: isLastFile ? inReplyTo : null,
       );
 
       room.sendingFilePlaceholders[txid] = fileInfo;
@@ -183,6 +196,7 @@ class UploadManager {
         fileInfo,
         txid: txid,
         captionInfo: _eventIdMapUploadFileInfo[txid]?.captionInfo?.caption,
+        inReplyTo: isLastFile ? inReplyTo : null,
       );
 
       final streamController =
@@ -226,6 +240,7 @@ class UploadManager {
             thumbnail: thumbnails?[fileInfo],
             sentDate: sentDate,
             captionInfo: _eventIdMapUploadFileInfo[txid]?.captionInfo?.caption,
+            inReplyTo: isLastFile ? inReplyTo : null,
           ),
         ],
       );
@@ -236,6 +251,7 @@ class UploadManager {
     required Room room,
     required List<FileInfo> fileInfos,
     String? caption,
+    Event? inReplyTo,
   }) async {
     for (final fileInfo in fileInfos.asMap().entries) {
       final fileIndex = fileInfo.key;
@@ -247,10 +263,13 @@ class UploadManager {
 
       Logs().d('UploadManager::uploadFileMobile(): txid: $txid');
 
+      final isLastFile = fileIndex == fileInfos.length - 1;
+
       _initUploadFileInfo(
         txid: txid,
         room: room,
-        captionInfo: fileIndex == fileInfos.length - 1 ? caption : null,
+        captionInfo: isLastFile ? caption : null,
+        inReplyTo: isLastFile ? inReplyTo : null,
       );
 
       final sentDate = _eventIdMapUploadFileInfo[txid]?.createdAt;
@@ -261,6 +280,7 @@ class UploadManager {
         messageType: fileValue.msgType,
         sentDate: sentDate,
         captionInfo: _eventIdMapUploadFileInfo[txid]?.captionInfo?.caption,
+        inReplyTo: isLastFile ? inReplyTo : null,
       );
 
       final streamController =
@@ -299,6 +319,7 @@ class UploadManager {
         cancelToken: cancelToken,
         sentDate: sentDate,
         captionInfo: _eventIdMapUploadFileInfo[txid]?.captionInfo?.caption,
+        inReplyTo: isLastFile ? inReplyTo : null,
       );
     }
   }
@@ -313,6 +334,7 @@ class UploadManager {
     DateTime? sentDate,
     int? shrinkImageMaxDimension,
     String? captionInfo,
+    Event? inReplyTo,
   }) {
     uploadWorkerQueue.addTask(
       Task(
@@ -329,6 +351,7 @@ class UploadManager {
               cancelToken: cancelToken,
               sentDate: sentDate,
               captionInfo: captionInfo,
+              inReplyTo: inReplyTo,
             );
           } catch (e) {
             streamController.add(
@@ -353,6 +376,7 @@ class UploadManager {
     required MatrixFile matrixFile,
     required StreamController<Either<Failure, Success>> streamController,
     required CancelToken cancelToken,
+    Event? inReplyTo,
     MatrixImageFile? thumbnail,
     DateTime? sentDate,
     String? captionInfo,
@@ -371,6 +395,7 @@ class UploadManager {
               cancelToken: cancelToken,
               sentDate: sentDate,
               captionInfo: captionInfo,
+              inReplyTo: inReplyTo,
             );
           } catch (e) {
             streamController.add(

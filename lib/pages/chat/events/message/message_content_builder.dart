@@ -66,7 +66,7 @@ class MessageContentBuilder extends StatelessWidget
           child: IntrinsicWidth(
             stepWidth: isContainsTagName(event) ||
                     isContainsSpecialHTMLTag(event) ||
-                    event.isMediaAndFilesWithCaption()
+                    event.isCaptionModeOrReply()
                 ? null
                 : stepWidth,
             child: Column(
@@ -127,9 +127,10 @@ class MessageContentBuilder extends StatelessWidget
                     ),
                   ],
                 ),
-                if (isNeedAddNewLine ||
-                    isContainsTagName(event) ||
-                    isContainsSpecialHTMLTag(event))
+                if (!event.isReplyEventWithAudio() &&
+                    (isNeedAddNewLine ||
+                        isContainsTagName(event) ||
+                        isContainsSpecialHTMLTag(event)))
                   OptionalSelectionContainerDisabled(
                     isEnabled: PlatformInfos.isWeb,
                     child: Visibility(

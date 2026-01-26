@@ -670,4 +670,339 @@ void main() {
       expect(event.isMention, false);
     });
   });
+
+  group('isCaptionModeOrReply test', () {
+    late Client client;
+    late Room room;
+
+    setUpAll(() async {
+      client = await getClient();
+      room = Room(
+        client: client,
+        id: '!test:example.com',
+        membership: Membership.join,
+      );
+    });
+
+    Event createEvent({
+      required Map<String, dynamic> content,
+      String eventId = '\$event1',
+      String senderId = '@user:example.com',
+    }) {
+      return Event(
+        senderId: senderId,
+        type: 'm.room.message',
+        room: room,
+        eventId: eventId,
+        content: content,
+        originServerTs: DateTime.fromMillisecondsSinceEpoch(1234567890),
+      );
+    }
+
+    test(
+      'GIVEN image event with empty body\n'
+      'THEN return false\n',
+      () {
+        final event = createEvent(
+          content: {
+            'body': '',
+            'msgtype': 'm.image',
+            'url': 'mxc://example.org/image123',
+          },
+        );
+
+        expect(event.isCaptionModeOrReply(), false);
+      },
+    );
+
+    test(
+      'GIVEN image event with body same as filename\n'
+      'THEN return false\n',
+      () {
+        final event = createEvent(
+          content: {
+            'body': 'image.jpg',
+            'filename': 'image.jpg',
+            'msgtype': 'm.image',
+            'url': 'mxc://example.org/image123',
+          },
+        );
+
+        expect(event.isCaptionModeOrReply(), false);
+      },
+    );
+
+    test(
+      'GIVEN image event with body different from filename\n'
+      'THEN return true\n',
+      () {
+        final event = createEvent(
+          content: {
+            'body': 'My vacation photo',
+            'filename': 'image.jpg',
+            'msgtype': 'm.image',
+            'url': 'mxc://example.org/image123',
+          },
+        );
+
+        expect(event.isCaptionModeOrReply(), true);
+      },
+    );
+
+    test(
+      'GIVEN video event with body different from filename\n'
+      'THEN return true\n',
+      () {
+        final event = createEvent(
+          content: {
+            'body': 'Birthday party',
+            'filename': 'video.mp4',
+            'msgtype': 'm.video',
+            'url': 'mxc://example.org/video123',
+          },
+        );
+
+        expect(event.isCaptionModeOrReply(), true);
+      },
+    );
+
+    test(
+      'GIVEN file event with body different from filename\n'
+      'THEN return true\n',
+      () {
+        final event = createEvent(
+          content: {
+            'body': 'Important document',
+            'filename': 'report.pdf',
+            'msgtype': 'm.file',
+            'url': 'mxc://example.org/file123',
+          },
+        );
+
+        expect(event.isCaptionModeOrReply(), true);
+      },
+    );
+
+    test(
+      'GIVEN text event that is a reply\n'
+      'THEN return true\n',
+      () {
+        final event = createEvent(
+          content: {
+            'body': 'This is a reply',
+            'msgtype': 'm.text',
+            'm.relates_to': {
+              'm.in_reply_to': {
+                'event_id': '\$original_event',
+              },
+            },
+          },
+        );
+
+        expect(event.isCaptionModeOrReply(), true);
+      },
+    );
+
+    test(
+      'GIVEN image event that is a reply\n'
+      'THEN return true\n',
+      () {
+        final event = createEvent(
+          content: {
+            'body': 'image.jpg',
+            'filename': 'image.jpg',
+            'msgtype': 'm.image',
+            'url': 'mxc://example.org/image123',
+            'm.relates_to': {
+              'm.in_reply_to': {
+                'event_id': '\$original_event',
+              },
+            },
+          },
+        );
+
+        expect(event.isCaptionModeOrReply(), true);
+      },
+    );
+
+    test(
+      'GIVEN text event with no caption or reply\n'
+      'THEN return false\n',
+      () {
+        final event = createEvent(
+          content: {
+            'body': 'Just a regular message',
+            'msgtype': 'm.text',
+          },
+        );
+
+        expect(event.isCaptionModeOrReply(), false);
+      },
+    );
+
+    test(
+      'GIVEN image event with no filename field (body differs from null)\n'
+      'THEN return true\n',
+      () {
+        final event = createEvent(
+          content: {
+            'body': 'image.jpg',
+            'msgtype': 'm.image',
+            'url': 'mxc://example.org/image123',
+          },
+        );
+
+        expect(event.isCaptionModeOrReply(), true);
+      },
+    );
+  });
+
+  group('isReplyEventWithAudio test', () {
+    late Client client;
+    late Room room;
+
+    setUpAll(() async {
+      client = await getClient();
+      room = Room(
+        client: client,
+        id: '!test:example.com',
+        membership: Membership.join,
+      );
+    });
+
+    Event createEvent({
+      required Map<String, dynamic> content,
+      String eventId = '\$event1',
+      String senderId = '@user:example.com',
+    }) {
+      return Event(
+        senderId: senderId,
+        type: 'm.room.message',
+        room: room,
+        eventId: eventId,
+        content: content,
+        originServerTs: DateTime.fromMillisecondsSinceEpoch(1234567890),
+      );
+    }
+
+    test(
+      'GIVEN audio event that is a reply\n'
+      'THEN return true\n',
+      () {
+        final event = createEvent(
+          content: {
+            'body': 'audio.mp3',
+            'msgtype': 'm.audio',
+            'url': 'mxc://example.org/audio123',
+            'm.relates_to': {
+              'm.in_reply_to': {
+                'event_id': '\$original_event',
+              },
+            },
+          },
+        );
+
+        expect(event.isReplyEventWithAudio(), true);
+      },
+    );
+
+    test(
+      'GIVEN audio event that is NOT a reply\n'
+      'THEN return false\n',
+      () {
+        final event = createEvent(
+          content: {
+            'body': 'audio.mp3',
+            'msgtype': 'm.audio',
+            'url': 'mxc://example.org/audio123',
+          },
+        );
+
+        expect(event.isReplyEventWithAudio(), false);
+      },
+    );
+
+    test(
+      'GIVEN image event that is a reply\n'
+      'THEN return false\n',
+      () {
+        final event = createEvent(
+          content: {
+            'body': 'image.jpg',
+            'msgtype': 'm.image',
+            'url': 'mxc://example.org/image123',
+            'm.relates_to': {
+              'm.in_reply_to': {
+                'event_id': '\$original_event',
+              },
+            },
+          },
+        );
+
+        expect(event.isReplyEventWithAudio(), false);
+      },
+    );
+
+    test(
+      'GIVEN text event that is a reply\n'
+      'THEN return false\n',
+      () {
+        final event = createEvent(
+          content: {
+            'body': 'This is a reply',
+            'msgtype': 'm.text',
+            'm.relates_to': {
+              'm.in_reply_to': {
+                'event_id': '\$original_event',
+              },
+            },
+          },
+        );
+
+        expect(event.isReplyEventWithAudio(), false);
+      },
+    );
+
+    test(
+      'GIVEN video event that is a reply\n'
+      'THEN return false\n',
+      () {
+        final event = createEvent(
+          content: {
+            'body': 'video.mp4',
+            'msgtype': 'm.video',
+            'url': 'mxc://example.org/video123',
+            'm.relates_to': {
+              'm.in_reply_to': {
+                'event_id': '\$original_event',
+              },
+            },
+          },
+        );
+
+        expect(event.isReplyEventWithAudio(), false);
+      },
+    );
+
+    test(
+      'GIVEN file event that is a reply\n'
+      'THEN return false\n',
+      () {
+        final event = createEvent(
+          content: {
+            'body': 'document.pdf',
+            'msgtype': 'm.file',
+            'url': 'mxc://example.org/file123',
+            'm.relates_to': {
+              'm.in_reply_to': {
+                'event_id': '\$original_event',
+              },
+            },
+          },
+        );
+
+        expect(event.isReplyEventWithAudio(), false);
+      },
+    );
+  });
 }

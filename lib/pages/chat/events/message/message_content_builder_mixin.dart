@@ -29,7 +29,7 @@ mixin MessageContentBuilderMixin {
           MessageTypes.Video,
           MessageTypes.Audio,
         }.contains(event.messageType) &&
-        !event.isMediaAndFilesWithCaption();
+        !event.isCaptionModeOrReply();
 
     if (isNotSupportCalcSize) {
       return null;
@@ -75,7 +75,7 @@ mixin MessageContentBuilderMixin {
     return TextPainter(
       textScaler: MediaQuery.of(context).textScaler,
       text: TextSpan(
-        text: event.isMediaAndFilesWithCaption()
+        text: event.isCaptionModeOrReply()
             ? event.body
             : event.senderFromMemoryOrFallback
                 .calcDisplayname()
@@ -103,7 +103,7 @@ mixin MessageContentBuilderMixin {
     return TextPainter(
       textScaler: MediaQuery.of(context).textScaler,
       text: TextSpan(
-        text: event.isMediaAndFilesWithCaption()
+        text: event.isCaptionModeOrReply()
             ? event.body
             : event.calcLocalizedBodyFallback(
                 MatrixLocals(L10n.of(context)!),
@@ -169,7 +169,7 @@ mixin MessageContentBuilderMixin {
     final spaceHasEdited = isEdited ? 56.0 : 0.0;
     final spaceHasPinned = event.isPinned ? MessageStyle.pushpinIconSize : 0.0;
     final paddingMessage =
-        event.isMediaAndFilesWithCaption() ? 0.0 : AppConfig.messagePadding;
+        event.isCaptionModeOrReply() ? 0.0 : AppConfig.messagePadding;
 
     final paintedMessageText = _paintMessageText(
       context,
@@ -224,7 +224,7 @@ mixin MessageContentBuilderMixin {
         messageTextWidth - lastLineWidth >= messageTimeAndPaddingWidth &&
         messageTextWidth + paddingMessage < maxWidth) {
       totalMessageWidth = messageTextWidth + paddingMessage;
-      isNeedAddNewLine = event.isMediaAndFilesWithCaption();
+      isNeedAddNewLine = event.isCaptionModeOrReply();
     } else {
       totalMessageWidth = _calculateTotalMessageWidth(
         lastLineWidth,
@@ -271,7 +271,7 @@ mixin MessageContentBuilderMixin {
     bool isEdited = false,
     required Event event,
   }) {
-    if (event.isMediaAndFilesWithCaption()) {
+    if (event.isCaptionModeOrReply()) {
       return true;
     }
     if (totalMessageWidth == maxWidth) {

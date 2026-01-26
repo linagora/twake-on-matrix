@@ -103,26 +103,41 @@ class BaseFileTileWidget extends StatelessWidget {
             ),
           ),
         ),
-        if (event != null && event!.isMediaAndFilesWithCaption()) ...[
-          const SizedBox(height: 8.0),
-          MouseRegion(
-            cursor: SystemMouseCursors.copy,
-            child: TwakeLinkPreview(
-              key: ValueKey('TwakeLinkPreview%${event!.eventId}%'),
-              event: event!,
-              localizedBody: event!.body,
-              ownMessage: ownMessage,
-              fontSize: AppConfig.messageFontSize * AppConfig.fontSizeFactor,
-              linkStyle: MessageContentStyle.linkStyleMessageContent(
-                context,
-              ),
-              richTextStyle: event!.getMessageTextStyle(context),
-              isCaption: event!.isMediaAndFilesWithCaption(),
-            ),
-          ),
-        ],
+        ..._buildReplySpacing(),
+        ..._buildLinkPreview(context),
       ],
     );
+  }
+
+  List<Widget> _buildReplySpacing() {
+    if (event != null && event!.isReplyEvent() && event!.text.isEmpty) {
+      return [const SizedBox(height: 16.0)];
+    }
+    return [];
+  }
+
+  List<Widget> _buildLinkPreview(BuildContext context) {
+    if (event != null && event!.isCaptionModeOrReply()) {
+      return [
+        const SizedBox(height: 8.0),
+        MouseRegion(
+          cursor: SystemMouseCursors.copy,
+          child: TwakeLinkPreview(
+            key: ValueKey('TwakeLinkPreview%${event!.eventId}%'),
+            event: event!,
+            localizedBody: event!.body,
+            ownMessage: ownMessage,
+            fontSize: AppConfig.messageFontSize * AppConfig.fontSizeFactor,
+            linkStyle: MessageContentStyle.linkStyleMessageContent(
+              context,
+            ),
+            richTextStyle: event!.getMessageTextStyle(context),
+            isCaption: event!.isCaptionModeOrReply(),
+          ),
+        ),
+      ];
+    }
+    return [];
   }
 }
 

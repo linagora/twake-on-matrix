@@ -90,7 +90,6 @@ import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_typeahead/flutter_typeahead.dart';
 import 'package:go_router/go_router.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:linagora_design_flutter/dialog/options_dialog.dart';
 import 'package:linagora_design_flutter/images_picker/asset_counter.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart'
@@ -102,7 +101,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:universal_html/html.dart' as html;
 
 import 'events/audio_message/audio_player_widget.dart';
-import 'send_file_dialog/send_file_dialog.dart';
 import 'sticker_picker_dialog.dart';
 
 typedef OnJumpToMessage = void Function(String eventId);
@@ -562,6 +560,7 @@ class ChatController extends State<Chat>
       room: room,
       pendingText: pendingText,
       matrixFilesList: matrixFiles,
+      inReplyTo: replyEventNotifier.value,
       onSendFileCallback: (result) async {
         await handleSendMediaCallback(
           result: result.status,
@@ -732,27 +731,6 @@ class ChatController extends State<Chat>
       editEventNotifier.value = null;
       pendingText = '';
     });
-  }
-
-  void openVideoCameraAction() async {
-    // Make sure the textfield is unfocused before opening the camera
-    FocusScope.of(context).requestFocus(FocusNode());
-    final file = await ImagePicker().pickVideo(source: ImageSource.camera);
-    if (file == null) return;
-    final bytes = await file.readAsBytes();
-    await showDialog(
-      context: context,
-      useRootNavigator: false,
-      builder: (c) => SendFileDialog(
-        files: [
-          MatrixVideoFile(
-            bytes: bytes,
-            name: file.path,
-          ),
-        ],
-        room: room!,
-      ),
-    );
   }
 
   void sendStickerAction() async {
@@ -1144,7 +1122,7 @@ class ChatController extends State<Chat>
     }
     pendingText = sendController.text;
     editEventNotifier.value = eventToEdit;
-    sendController.text = eventToEdit.isMediaAndFilesWithCaption()
+    sendController.text = eventToEdit.isCaptionModeOrReply()
         ? eventToEdit.body
         : eventToEdit
             .getDisplayEventWithoutEditEvent(timeline!)
@@ -1839,10 +1817,13 @@ class ChatController extends State<Chat>
     } else {
       final pendingText = sendController.text;
       final matrixFiles = await pickFilesFromSystem();
+      if (matrixFiles.isEmpty) return;
       sendController.clear();
+
       sendFileOnWebAction(
-        pendingText: pendingText,
         context,
+        pendingText: pendingText,
+        inReplyTo: replyEventNotifier.value,
         room: room,
         matrixFilesList: matrixFiles,
         onSendFileCallback: (result) async {
@@ -1859,12 +1840,14 @@ class ChatController extends State<Chat>
     required SendMediaWithCaptionStatus result,
     required String pendingText,
   }) async {
-    if (result != SendMediaWithCaptionStatus.done && pendingText.isNotEmpty) {
+    if (result == SendMediaWithCaptionStatus.cancel && pendingText.isNotEmpty) {
       sendController.text = pendingText;
     }
-    if (result == SendMediaWithCaptionStatus.done) {
+    if (result == SendMediaWithCaptionStatus.done ||
+        result == SendMediaWithCaptionStatus.emptyRoom) {
       final prefs = await SharedPreferences.getInstance();
       prefs.remove('draft_$roomId');
+      replyEventNotifier.value = null;
     }
 
     scrollDown();
@@ -1888,24 +1871,32 @@ class ChatController extends State<Chat>
         room: room,
         context: context,
         onSendFileCallback: scrollDown,
+        inReplyTo: replyEventNotifier.value,
       ),
-      onSendTap: () {
-        sendMedia(
+      onSendTap: () async {
+        await sendMedia(
           imagePickerController,
           room: room,
           caption: _captionsController.text,
+          inReplyTo: replyEventNotifier.value,
         );
         scrollDown();
         _captionsController.clear();
         sendController.clear();
+        replyEventNotifier.value = null;
       },
       onCameraPicked: (_) async {
-        sendMedia(imagePickerController, room: room);
+        await sendMedia(
+          imagePickerController,
+          room: room,
+          inReplyTo: replyEventNotifier.value,
+        );
         scrollDown();
 
         // Also add draft cleanup here
         final prefs = await SharedPreferences.getInstance();
         await prefs.remove('draft_$roomId');
+        replyEventNotifier.value = null;
       },
       captionController: _captionsController,
       focusSuggestionController: _focusSuggestionController,
