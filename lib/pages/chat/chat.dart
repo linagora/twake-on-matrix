@@ -1424,6 +1424,7 @@ class ChatController extends State<Chat>
         // After timeline reload, center and optionally highlight the message
         WidgetsBinding.instance.addPostFrameCallback((_) async {
           if (!mounted) return;
+          if (timeline == null) return;
           final newTargetIndex =
               timeline!.events.indexWhere((event) => event.eventId == eventId);
           if (newTargetIndex != -1) {
