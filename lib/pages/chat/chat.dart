@@ -1404,21 +1404,14 @@ class ChatController extends State<Chat>
     String eventId, {
     bool highlight = false,
   }) async {
-    print(
-        '📍 [SCROLL] _scrollToMessageWithEventId START - eventId=$eventId, highlight=$highlight');
     if (timeline == null) {
-      print(
-          '⚠️ [SCROLL] _scrollToMessageWithEventId - timeline is null, returning');
       return;
     }
 
     final targetIndex =
         timeline!.events.indexWhere((event) => event.eventId == eventId);
-    print(
-        '📍 [SCROLL] _scrollToMessageWithEventId - targetIndex=$targetIndex in timeline with ${timeline!.events.length} events');
+
     if (targetIndex == -1) {
-      print(
-          '❌ [SCROLL] _scrollToMessageWithEventId - targetIndex is -1, returning');
       return;
     }
 
@@ -1426,12 +1419,8 @@ class ChatController extends State<Chat>
     // Use event from timeline to ensure reliable GlobalObjectKey lookup
     final targetEventId = timeline!.events[targetIndex].eventId;
     final itemContext = GlobalObjectKey(targetEventId).currentContext;
-    print(
-        '📍 [SCROLL] _scrollToMessageWithEventId - itemContext=${itemContext != null ? "EXISTS" : "NULL"}');
 
     if (itemContext != null) {
-      print(
-          '✅ [SCROLL] _scrollToMessageWithEventId - Message already rendered, centering it');
       await _centerAndHighlightMessage(
         itemContext: itemContext,
         targetIndex: targetIndex,
@@ -1442,12 +1431,8 @@ class ChatController extends State<Chat>
 
     // Check if message is very far away - if so, reload timeline
     final nearestRenderedIndex = _findVisibleEventIndex();
-    print(
-        '📍 [SCROLL] _scrollToMessageWithEventId - nearestRenderedIndex=$nearestRenderedIndex, targetIndex=$targetIndex');
     if (nearestRenderedIndex != null) {
       final messageDistance = (targetIndex - nearestRenderedIndex).abs();
-      print(
-          '📍 [SCROLL] _scrollToMessageWithEventId - messageDistance=$messageDistance messages (threshold=$_instantJumpThreshold)');
 
       if (messageDistance > _instantJumpThreshold) {
         // Message is very far - reload timeline centered on target event
@@ -1473,10 +1458,11 @@ class ChatController extends State<Chat>
             );
           } else {
             // Widget still not rendered, try scrolling to it
-            print(
-                '⚠️ [SCROLL] _scrollToMessageWithEventId - Widget not rendered after timeline reload, using scroll');
-            await _scrollTowardsMessage(eventId, newTargetIndex,
-                highlight: highlight);
+            await _scrollTowardsMessage(
+              eventId,
+              newTargetIndex,
+              highlight: highlight,
+            );
           }
         }
         return;
@@ -1484,8 +1470,6 @@ class ChatController extends State<Chat>
     }
 
     // Message not rendered but nearby - wait for widgets to render, then scroll towards it
-    print(
-        '📍 [SCROLL] _scrollToMessageWithEventId - Message nearby but not rendered, waiting for render before scroll');
 
     // Use post-frame callback to give ListView time to build widgets
     await Future.delayed(const Duration(milliseconds: 100));
@@ -1493,8 +1477,6 @@ class ChatController extends State<Chat>
     // Check one more time if it rendered during the wait
     final recheckContext = GlobalObjectKey(targetEventId).currentContext;
     if (recheckContext != null) {
-      print(
-          '✅ [SCROLL] _scrollToMessageWithEventId - Message rendered during wait, centering it');
       await _centerAndHighlightMessage(
         itemContext: recheckContext,
         targetIndex: targetIndex,
@@ -1504,8 +1486,6 @@ class ChatController extends State<Chat>
     }
 
     // Still not rendered, proceed with scroll
-    print(
-        '🔄 [SCROLL] _scrollToMessageWithEventId - Message still not rendered after wait, calling _scrollTowardsMessage with highlight=$highlight');
     await _scrollTowardsMessage(eventId, targetIndex, highlight: highlight);
   }
 
