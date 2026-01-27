@@ -3520,7 +3520,7 @@
       "count": {}
     }
   },
-  "failedToAddBannedUsers": "{count, plural, =1{1 membre n'a pas pu être ajouté car il a été banni} other{{count} membres n'ont pas pu être ajoutés car ils ont été bannis. Veuillez vérifier leurs paramètres ou réessayer.}}",
+  "failedToAddBannedUsers": "{count, plural, =1{1 membre n'a pas pu être ajouté car il a été banni. Veuillez vérifier ses paramètres ou réessayer} other{{count} membres n'ont pas pu être ajoutés car ils ont été bannis. Veuillez vérifier leurs paramètres ou réessayer.}}",
   "@failedToAddBannedUsers": {
     "type": "text",
     "placeholders": {
