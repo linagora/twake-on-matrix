@@ -74,15 +74,14 @@ class ChatGroupDetailRobot extends CoreRobot {
 
   Future<PatrolFinder> getText(String text) async {
     return $(MessageContent).containing(find.text(text));
-    // return $(MatrixLinkifyText).containing(text);
   }
 
-  Future<PatrolFinder> getInputTextField() async {
+  PatrolFinder getInputTextField() {
     return $(TextField);
   }
 
   Future<void> inputMessage(String message) async {
-    final textField = await getInputTextField();
+    final textField = getInputTextField();
     // catch exception when trying to chat with non-existing account
     await CoreRobot($).captureAsyncError(() async {
       await textField.tap();
@@ -94,11 +93,18 @@ class ChatGroupDetailRobot extends CoreRobot {
     await getBackIcon().tap();
   }
 
-  Future<PullDownMenuRobot> openPullDownMenu(String message) async {
-    await $(MessageContent).containing(find.text(message)).longPress();
+  Future<PullDownMenuRobot> openPullDownMenuOfAPatrolFinder(
+    PatrolFinder message,
+  ) async {
+    await message.longPress();
     await $.waitUntilVisible($(PullDownMenu));
     await $.pump();
     return PullDownMenuRobot($);
+  }
+
+  Future<PullDownMenuRobot> openPullDownMenuOfAMessage(String message) async {
+    final patrFinder = $(MessageContent).containing(find.text(message));
+    return await openPullDownMenuOfAPatrolFinder(patrFinder);
   }
 
   Future<void> closePullDownMenu() async {
