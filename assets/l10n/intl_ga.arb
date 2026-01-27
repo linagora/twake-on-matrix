@@ -2506,7 +2506,7 @@
   "fileFormatNotSupported": "Ní thacaítear le formáid comhaid",
   "muteThisChat": "Mute an comhrá seo",
   "unpinThisChat": "Díphionnáil an comhrá seo",
-  "encryptionMessage": "Cosnaíonn an ghné seo do theachtaireachtaí ó bheith á léamh ag daoine eile, ach cuireann sé cosc orthu tacaíocht a fháil ar ár bhfreastalaithe. Ní féidir leat é seo a dhíchumasú níos déanaí.",
+  "encryptionMessage": "Cosain do theachtaireachtaí ó dhaoine eile a bheith á léamh. Cuireann sé cosc orthu cúltaca a dhéanamh ar ár bhfreastalaithe. Ní féidir leat é seo a dhíchumasú níos déanaí.",
   "newDirectMessage": "Teachtaireacht dhíreach nua",
   "unmuteThisChat": "Unmute an comhrá seo",
   "hasInvitedYouToAChat": " thug sé cuireadh duit comhrá a dhéanamh. Glac leis an gcomhrá nó diúltaigh dó agus scrios é?",
@@ -3043,5 +3043,96 @@
   "personalQrDescription": "Tosaigh ag comhrá le do theagmhálaithe. Seol nasc cuireadh chuig Twake",
   "shareQrCode": "Comhroinn cód QR",
   "copyLink": "Cóipeáil nasc",
-  "downloadQrCode": "Íoslódáil cód QR"
+  "downloadQrCode": "Íoslódáil cód QR",
+  "commandHint_sendraw": "Seol teaghrán ordaithe amh chuig an bhfreastalaí",
+  "commandHint_ignore": "Déan neamhaird de theachtaireachtaí ó úsáideoir sonraithe",
+  "commandHint_unignore": "Stop ag neamhaird a dhéanamh de theachtaireachtaí ó úsáideoir sonraithe",
+  "commandHint_roomupgrade": "Uasghrádaigh an seomra reatha go dtí an prótacal/na gnéithe is déanaí",
+  "commandHint_logout": "Logáil amach as an gcuntas reatha ar an ngléas seo",
+  "commandHint_logoutall": "Logáil amach as an gcuntas seo ó gach gléas",
+  "hasKnocked": "Bhuail {senderName}",
+  "@hasKnocked": {
+    "type": "text",
+    "placeholders": {
+      "senderName": {}
+    }
+  },
+  "acceptedKeyVerification": "🔐 Ghlac {senderName} leis an bhfíorú eochrach",
+  "@acceptedKeyVerification": {
+    "type": "text",
+    "placeholders": {
+      "senderName": {}
+    }
+  },
+  "canceledKeyVerification": "🔐 Chealaigh {senderName} fíorú na heochrach",
+  "@canceledKeyVerification": {
+    "type": "text",
+    "placeholders": {
+      "senderName": {}
+    }
+  },
+  "completedKeyVerification": "🔐 Chríochnaigh {senderName} fíorú na heochrach",
+  "@completedKeyVerification": {
+    "type": "text",
+    "placeholders": {
+      "senderName": {}
+    }
+  },
+  "invitedBy": "Cuireadh tugtha ag {senderName}",
+  "@invitedBy": {
+    "type": "text",
+    "placeholders": {
+      "senderName": {}
+    }
+  },
+  "isReadyForKeyVerification": "🔐 Tá {senderName} réidh le haghaidh fíorú eochrach",
+  "@isReadyForKeyVerification": {
+    "type": "text",
+    "placeholders": {
+      "senderName": {}
+    }
+  },
+  "requestedKeyVerification": "🔐 D'iarr {senderName} fíorú eochrach",
+  "@requestedKeyVerification": {
+    "type": "text",
+    "placeholders": {
+      "senderName": {}
+    }
+  },
+  "startedKeyVerification": "🔐 Chuir {senderName} tús le fíorú eochrach",
+  "@startedKeyVerification": {
+    "type": "text",
+    "placeholders": {
+      "senderName": {}
+    }
+  },
+  "pollHasBeenEnded": "Tá deireadh leis an vótaíocht",
+  "@pollHasBeenEnded": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "startedAPoll": "📊 Chuir {senderName} tús le pobalbhreith",
+  "@startedAPoll": {
+    "type": "text",
+    "placeholders": {
+      "senderName": {}
+    }
+  },
+  "voiceMessageWithDuration": "🎤 Teachtaireacht ghutha ({duration})",
+  "@voiceMessageWithDuration": {
+    "type": "text",
+    "placeholders": {
+      "duration": {}
+    }
+  },
+  "refreshingLastEvent": "Ag athnuachan an imeachta dheireanaigh",
+  "cancelledSend": "Cealaíodh an seoladh",
+  "promoteToAdmin": "Ardú céime go riarthóir",
+  "@promoteToAdmin": {
+    "description": "Context menu action to promote member to admin role"
+  },
+  "changePermissions": "Athraigh ceadanna",
+  "@changePermissions": {
+    "description": "Context menu action to open permission picker dialog"
+  }
 }
