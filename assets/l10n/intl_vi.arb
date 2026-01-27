@@ -3505,14 +3505,14 @@
       "count": {}
     }
   },
-  "failedToAddBannedUsers": "{count, plural, =1{Không thể thêm 1 thành viên vì người này đã bị cấm trước đó}other{Không thể thêm {count} thành viên vì họ đã bị cấm trước đó. Vui lòng kiểm tra cài đặt hoặc thử lại}}",
+  "failedToAddBannedUsers": "{count, plural, =1{Không thể thêm 1 thành viên vì người này đã bị cấm trước đó. Vui lòng kiểm tra cài đặt hoặc thử lại} other{Không thể thêm {count} thành viên vì họ đã bị cấm trước đó. Vui lòng kiểm tra cài đặt hoặc thử lại}}",
   "@failedToAddBannedUsers": {
     "type": "text",
     "placeholders": {
       "count": {}
     }
   },
-  "failedToAddMembersMixed": "{total, plural, =1{Không thể thêm 1 thành viên} other{Không thể thêm {total} thành viên}}.{bannedCount, plural, =1{1 thành viên đã bị cấm} other{{bannedCount} thành viên đã bị cấm}},{otherCount, plural, =1{1 thành viên thất bại} other{{otherCount} thành viên thất bại}} do các lý do khác. Vui lòng kiểm tra cài đặt hoặc thử lại.",
+  "failedToAddMembersMixed": "{total, plural, =1{Không thể thêm 1 thành viên} other{Không thể thêm {total} thành viên}}. {bannedCount, plural, =1{1 thành viên đã bị cấm} other{{bannedCount} thành viên đã bị cấm}}, {otherCount, plural, =1{1 thành viên thất bại} other{{otherCount} thành viên thất bại}} do các lý do khác. Vui lòng kiểm tra cài đặt hoặc thử lại.",
   "@failedToAddMembersMixed": {
     "type": "text",
     "placeholders": {
