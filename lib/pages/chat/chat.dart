@@ -1474,6 +1474,9 @@ class ChatController extends State<Chat>
     // Use post-frame callback to give ListView time to build widgets
     await Future.delayed(const Duration(milliseconds: 100));
 
+    // Guard against disposed widget after async delay
+    if (!mounted || !scrollController.hasClients) return;
+
     // Check one more time if it rendered during the wait
     final recheckContext = GlobalObjectKey(targetEventId).currentContext;
     if (recheckContext != null) {
@@ -1530,9 +1533,15 @@ class ChatController extends State<Chat>
     required int targetIndex,
     required bool highlight,
   }) async {
-    await _centerRenderedMessage(itemContext);
-    if (highlight) {
-      await scrollController.highlight(getDisplayEventIndex(targetIndex));
+    final wasProgrammatic = _isProgrammaticScrolling;
+    if (!wasProgrammatic) _isProgrammaticScrolling = true;
+    try {
+      await _centerRenderedMessage(itemContext);
+      if (highlight) {
+        await scrollController.highlight(getDisplayEventIndex(targetIndex));
+      }
+    } finally {
+      if (!wasProgrammatic) _isProgrammaticScrolling = false;
     }
   }
 
@@ -1630,6 +1639,9 @@ class ChatController extends State<Chat>
 
         // Wait for widgets to be rendered after the scroll
         await Future.delayed(const Duration(milliseconds: 500));
+
+        // Guard against disposed widget after async delay
+        if (!mounted || !scrollController.hasClients) return;
 
         // Check if target is now rendered and apply highlight
         if (_isMessageRendered(targetIndex)) {
@@ -1777,6 +1789,9 @@ class ChatController extends State<Chat>
 
       while (stopwatch.elapsedMilliseconds < scrollDuration.inMilliseconds) {
         await Future.delayed(const Duration(milliseconds: checkIntervalMs));
+
+        // Guard against disposed widget in scroll loop
+        if (!mounted || !scrollController.hasClients) return;
 
         final isRendered = _isMessageRendered(targetIndex);
         final currentPos = scrollController.offset;
