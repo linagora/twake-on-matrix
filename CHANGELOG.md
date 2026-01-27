@@ -1,3 +1,12 @@
+## [2.19.6] - 2026-01-27
+### Added
+- Translate ru, vi, fr
+
+### Fixed
+- #2852 Search with external matrix id 
+- #2817 Reply messaage with a media or file
+- #2850 Create group avatar
+
 ## [2.19.5] - 2026-01-21
 ### Added
 - #2810: Add integration test for failing direct chat
