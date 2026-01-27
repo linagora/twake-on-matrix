@@ -2627,7 +2627,7 @@
   "copyImageFailed": "Не вдалося скопіювати зображення",
   "fileFormatNotSupported": "Формат файлу не підтримується",
   "noResultsFound": "Результатів не знайдено",
-  "encryptionMessage": "Ця функція захищає ваші повідомлення від читання іншими користувачами, а також запобігає їх резервному копіюванню на наших серверах. Ви не зможете вимкнути цю функцію пізніше.",
+  "encryptionMessage": "Захистіть свої повідомлення від читання іншими. Запобігайте їх резервному копіюванню на наших серверах. Ви не зможете вимкнути цю функцію пізніше.",
   "encryptionWarning": "Ви можете втратити свої повідомлення, якщо отримаєте доступ до програми Twake на іншому пристрої.",
   "selectedUsers": "Вибрані користувачі",
   "clearAllSelected": "Очистити всі вибрані",
@@ -3045,5 +3045,96 @@
   "personalQrDescription": "Почніть спілкуватися зі своїми контактами. Надіслати посилання-запрошення Twake",
   "shareQrCode": "Поділитися QR-кодом",
   "copyLink": "Копіювати посилання",
-  "downloadQrCode": "Завантажити QR-код"
+  "downloadQrCode": "Завантажити QR-код",
+  "commandHint_sendraw": "Надіслати необроблений командний рядок на сервер",
+  "commandHint_ignore": "Ігнорувати повідомлення від вказаного користувача",
+  "commandHint_unignore": "Зупинити ігнорування повідомлень від певного користувача",
+  "commandHint_roomupgrade": "Оновіть поточну кімнату до найновішого протоколу/функцій",
+  "commandHint_logout": "Вийти з поточного облікового запису на цьому пристрої",
+  "commandHint_logoutall": "Вийти з цього облікового запису на всіх пристроях",
+  "hasKnocked": "{senderName} постукав",
+  "@hasKnocked": {
+    "type": "text",
+    "placeholders": {
+      "senderName": {}
+    }
+  },
+  "acceptedKeyVerification": "🔐 {senderName} прийняв(ла) перевірку ключа",
+  "@acceptedKeyVerification": {
+    "type": "text",
+    "placeholders": {
+      "senderName": {}
+    }
+  },
+  "canceledKeyVerification": "🔐 {senderName} скасував перевірку ключа",
+  "@canceledKeyVerification": {
+    "type": "text",
+    "placeholders": {
+      "senderName": {}
+    }
+  },
+  "completedKeyVerification": "🔐 {senderName} завершив перевірку ключа",
+  "@completedKeyVerification": {
+    "type": "text",
+    "placeholders": {
+      "senderName": {}
+    }
+  },
+  "invitedBy": "Запрошено {senderName}",
+  "@invitedBy": {
+    "type": "text",
+    "placeholders": {
+      "senderName": {}
+    }
+  },
+  "isReadyForKeyVerification": "🔐 {senderName} готовий до перевірки ключа",
+  "@isReadyForKeyVerification": {
+    "type": "text",
+    "placeholders": {
+      "senderName": {}
+    }
+  },
+  "requestedKeyVerification": "🔐 {senderName} запросив перевірку ключа",
+  "@requestedKeyVerification": {
+    "type": "text",
+    "placeholders": {
+      "senderName": {}
+    }
+  },
+  "startedKeyVerification": "🔐 {senderName} розпочав перевірку ключа",
+  "@startedKeyVerification": {
+    "type": "text",
+    "placeholders": {
+      "senderName": {}
+    }
+  },
+  "pollHasBeenEnded": "Опитування завершено",
+  "@pollHasBeenEnded": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "startedAPoll": "📊 {senderName} розпочав опитування",
+  "@startedAPoll": {
+    "type": "text",
+    "placeholders": {
+      "senderName": {}
+    }
+  },
+  "voiceMessageWithDuration": "🎤 Голосове повідомлення ({duration})",
+  "@voiceMessageWithDuration": {
+    "type": "text",
+    "placeholders": {
+      "duration": {}
+    }
+  },
+  "refreshingLastEvent": "Оновлення останньої події",
+  "cancelledSend": "Надсилання скасовано",
+  "promoteToAdmin": "Підвищити до адміністратора",
+  "@promoteToAdmin": {
+    "description": "Context menu action to promote member to admin role"
+  },
+  "changePermissions": "Змінити дозволи",
+  "@changePermissions": {
+    "description": "Context menu action to open permission picker dialog"
+  }
 }
