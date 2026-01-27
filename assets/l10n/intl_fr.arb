@@ -3527,7 +3527,7 @@
       "count": {}
     }
   },
-  "failedToAddMembersMixed": "{total, plural, =1{1 membre n'a pas pu être ajouté} other{{total} membres n'ont pas pu être ajoutés}}. {bannedCount, plural, =1{1 a été banni} other{{bannedCount} ont été bannis}}, {otherCount, plural, =1{1 échec} other{{otherCount} ont échoué}} pour d'autres raisons. Veuillez vérifier leurs paramètres ou réessayer",
+  "failedToAddMembersMixed": "{total, plural, =1{1 membre n'a pas pu être ajouté} other{{total} membres n'ont pas pu être ajoutés}}. {bannedCount, plural, =1{1 membre a été banni} other{{bannedCount} membres ont été bannis}}, {otherCount, plural, =1{1 autre échec} other{{otherCount} autres échecs}} pour d'autres raisons. Veuillez vérifier leurs paramètres ou réessayer",
   "@failedToAddMembersMixed": {
     "type": "text",
     "placeholders": {
@@ -3540,7 +3540,7 @@
   "@contactsVisibility": {},
   "whoCanFindMeByMyContacts": "Qui peut me trouver grâce à mes contacts",
   "@whoCanFindMeByMyContacts": {},
-  "whoCanSeeMyPhoneEmail": "QUI PEUT VOIR MON TELEPHONE/EMAIL",
+  "whoCanSeeMyPhoneEmail": "QUI PEUT VOIR MON TELEPHONE/E-MAIL",
   "@whoCanSeeMyPhoneEmail": {},
   "everyOne": "Tout le monde",
   "@everyOne": {},
@@ -3552,7 +3552,7 @@
   "@chooseWhichDetailsAreVisibleToOtherUsers": {},
   "youNumberIsVisibleAccordingToTheSettingAbove": "Votre numéro est visible conformément aux paramètres ci-dessus",
   "@youNumberIsVisibleAccordingToTheSettingAbove": {},
-  "youEmailIsVisibleAccordingToTheSettingAbove": "Votre mail est visible conformément aux paramètres ci-dessus",
+  "youEmailIsVisibleAccordingToTheSettingAbove": "Votre e‑mail est visible conformément aux paramètres ci-dessus",
   "@youEmailIsVisibleAccordingToTheSettingAbove": {},
   "failedToChangeContactsVisibility": "Impossible de modifier la visibilité des contacts",
   "@failedToChangeContactsVisibility": {},
@@ -3568,7 +3568,7 @@
   "@inviteFriend": {},
   "linkCopiedToClipboard": "Lien copié dans le presse-papiers",
   "@linkCopiedToClipboard": {},
-  "cannotCreateChatWithSelf": "Vous ne pouvez pas créer une conversation avec vous même",
+  "cannotCreateChatWithSelf": "Vous ne pouvez pas créer une conversation avec vous‑même",
   "@cannotCreateChatWithSelf": {},
   "yourPersonalQr": "Votre QR personnel",
   "@yourPersonalQr": {},
