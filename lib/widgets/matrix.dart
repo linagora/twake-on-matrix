@@ -1149,7 +1149,7 @@ class MatrixState extends State<Matrix>
   }
 
   Future<void> cancelListenSynchronizeContacts() async {
-    _contactsManager.cancelAllSubscriptions();
+    await _contactsManager.cancelAllSubscriptions();
   }
 
   void handleShowQrCodeDownload(bool show) {
