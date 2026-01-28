@@ -1,6 +1,7 @@
 import 'package:collection/collection.dart';
 import 'package:fluffychat/pages/twake_welcome/twake_welcome.dart';
 import 'package:fluffychat/presentation/multiple_account/twake_chat_presentation_account.dart';
+import 'package:fluffychat/utils/dialog/twake_dialog.dart';
 import 'package:fluffychat/widgets/layouts/agruments/switch_active_account_body_args.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:fluffychat/widgets/twake_components/twake_header_style.dart';
@@ -37,7 +38,7 @@ class MultipleAccountsPickerController {
       context: context,
       onAddAnotherAccount: _onAddAnotherAccount,
       onGoToAccountSettings: onGoToAccountSettings,
-      onSetAccountAsActive: (account) => _onSetAccountAsActive(
+      onSetAccountAsActive: (account) async => await _onSetAccountAsActive(
         multipleAccounts: multipleAccounts,
         account: account,
       ),
@@ -66,7 +67,7 @@ class MultipleAccountsPickerController {
     );
   }
 
-  void _onSetAccountAsActive({
+  Future<void> _onSetAccountAsActive({
     required List<TwakeChatPresentationAccount> multipleAccounts,
     required TwakePresentationAccount account,
   }) async {
@@ -89,9 +90,12 @@ class MultipleAccountsPickerController {
   }
 
   Future<void> _setActiveClient(Client newClient) async {
+    TwakeDialog.showLoadingDialog(context);
     final result = await _matrixState.setActiveClient(newClient);
     if (result.isSuccess) {
       await _matrixState.cancelListenSynchronizeContacts();
+      if (!context.mounted) return;
+      TwakeDialog.hideLoadingDialog(context);
       _matrixState.reSyncContacts();
       context.go(
         '/rooms',
@@ -99,6 +103,9 @@ class MultipleAccountsPickerController {
           newActiveClient: newClient,
         ),
       );
+    } else {
+      if (!context.mounted) return;
+      TwakeDialog.hideLoadingDialog(context);
     }
   }
 }
