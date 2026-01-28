@@ -455,18 +455,15 @@ class ContactsManager {
   }
 
   Future<void> cancelAllSubscriptions() async {
-    if (tomContactsSubscription != null) {
-      await tomContactsSubscription?.cancel();
-    }
-    if (federationPhonebookContactsSubscription != null) {
-      await federationPhonebookContactsSubscription?.cancel();
-    }
-    if (twakePhonebookContactsSubscription != null) {
-      await twakePhonebookContactsSubscription?.cancel();
-    }
-    if (postAddressBookSubscription != null) {
-      await postAddressBookSubscription?.cancel();
-    }
+    await Future.wait([
+      if (tomContactsSubscription != null) tomContactsSubscription!.cancel(),
+      if (federationPhonebookContactsSubscription != null)
+        federationPhonebookContactsSubscription!.cancel(),
+      if (twakePhonebookContactsSubscription != null)
+        twakePhonebookContactsSubscription!.cancel(),
+      if (postAddressBookSubscription != null)
+        postAddressBookSubscription!.cancel(),
+    ]);
     if (_isSynchronizing) {
       _isSynchronizing = false;
     }
