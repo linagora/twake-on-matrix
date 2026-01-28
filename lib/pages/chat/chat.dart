@@ -661,7 +661,10 @@ class ChatController extends State<Chat>
     setState(() {});
 
     // Complete any pending timeline update waiters
-    _timelineUpdateCompleter?.complete();
+    final completer = _timelineUpdateCompleter;
+    if (completer != null && !completer.isCompleted) {
+      completer.complete();
+    }
   }
 
   void onBackPress() {
@@ -1546,10 +1549,12 @@ class ChatController extends State<Chat>
     // Use faster speed for larger adjustments (>1000px), normal for small ones
     final scrollSpeed = distance > 1000 ? _scrollSpeedFast : _scrollSpeed;
 
-    final duration = Duration(
-      milliseconds: (distance / scrollSpeed * 1000).toInt(),
-    );
-
+    final durationMs = (distance / scrollSpeed * 1000).round();
+    if (durationMs <= 0) {
+      scrollController.jumpTo(targetOffset);
+      return;
+    }
+    final duration = Duration(milliseconds: durationMs);
     await scrollController.animateTo(
       targetOffset,
       duration: duration,
@@ -3688,7 +3693,6 @@ class ChatController extends State<Chat>
     // If event ID exists in URL and we haven't scrolled to it yet, scroll to it
     if (highlightEventId != null &&
         highlightEventId != _lastHighlightedEventId) {
-      _lastHighlightedEventId = highlightEventId;
       final eventIdToHighlight = highlightEventId; // Capture for closures
       Logs().d(
         'Chat::didUpdateWidget() - Event to highlight from URL: $eventIdToHighlight',
@@ -3709,6 +3713,7 @@ class ChatController extends State<Chat>
               'Chat::didUpdateWidget(): Timeline ready after $attempts frames',
             );
             await scrollToEventId(eventIdToHighlight, highlight: true);
+            _lastHighlightedEventId = highlightEventId;
             return;
           }
 
@@ -3719,6 +3724,7 @@ class ChatController extends State<Chat>
           Logs().w(
             'Chat::didUpdateWidget(): Timeline not ready after $maxWaitAttempts frames',
           );
+          _lastHighlightedEventId = highlightEventId;
         }
       });
     }
