@@ -20,6 +20,9 @@ class ServerSideSearchCategories with EquatableMixin {
         groupings: Groupings(
           groupBy: [Group(key: GroupKey.roomId)],
         ),
+        keys: [
+          KeyKind.contentBody,
+        ],
         orderBy: SearchOrder.recent,
         filter: searchFilter,
       ),
