@@ -1398,6 +1398,8 @@ class ChatController extends State<Chat>
           _timelineUpdateCompleter = null;
         }
 
+        if (!mounted) return;
+
         // Check if event is now in timeline
         if (verifyEventIdInTimeline(timeline, eventId)) {
           Logs().d(
