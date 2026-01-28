@@ -1811,9 +1811,12 @@ class ChatController extends State<Chat>
       );
 
       // Start continuous scroll animation
-      final scrollDuration = Duration(
-        milliseconds: (estimatedPixelDistance / scrollSpeed * 1000).toInt(),
-      );
+      final durationMs = (estimatedPixelDistance / scrollSpeed * 1000).toInt();
+      if (durationMs <= 0) {
+        scrollController.jumpTo(estimatedTargetOffset);
+        return;
+      }
+      final scrollDuration = Duration(milliseconds: durationMs);
 
       Logs().d(
         'Chat::_scrollTowardsMessage(): Distance=$messageDistance messages (~${estimatedPixelDistance.toInt()}px), speed=$scrollSpeed px/s, duration=${scrollDuration.inMilliseconds}ms',
