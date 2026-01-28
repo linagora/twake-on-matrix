@@ -154,6 +154,9 @@ class ChatController extends State<Chat>
   /// Flag to prevent auto-loading history/future during programmatic scrolling
   bool _isProgrammaticScrolling = false;
 
+  /// Completer to wait for timeline updates after requesting history
+  Completer<void>? _timelineUpdateCompleter;
+
   static const double _isPortionAvailableToScroll = 64;
 
   static const Duration _delayHideStickyTimestampHeader = Duration(seconds: 2);
@@ -328,6 +331,9 @@ class ChatController extends State<Chat>
   StreamSubscription<EventId>? _jumpToEventIdSubscription;
 
   StreamSubscription<String>? _jumpToEventFromSearchSubscription;
+
+  // Track the last event ID we scrolled to from URL to prevent repeated scrolls
+  String? _lastHighlightedEventId;
 
   bool get canSaveSelectedEvent =>
       selectedEvents.length == 1 &&
@@ -653,6 +659,9 @@ class ChatController extends State<Chat>
   void updateView() {
     if (!mounted) return;
     setState(() {});
+
+    // Complete any pending timeline update waiters
+    _timelineUpdateCompleter?.complete();
   }
 
   void onBackPress() {
@@ -1368,21 +1377,43 @@ class ChatController extends State<Chat>
         }
 
         // Event not found yet, request history to load more events
+        // Create a completer to wait for the timeline to update
+        _timelineUpdateCompleter = Completer<void>();
         await _tryRequestHistory();
 
-        // After history loads, wait for timeline to update and widgets to render
-        // Use a small delay to ensure all async operations complete
-        await Future.delayed(const Duration(milliseconds: 300));
-
-        // Then wait for next frame to ensure widgets are fully rendered
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          scrollToEventId(
-            eventId,
-            highlight: highlight,
-            maxAttempts: maxAttempts,
-            currentAttempt: currentAttempt + 1,
+        // Wait for timeline to actually update (or timeout after 2 seconds)
+        try {
+          await _timelineUpdateCompleter!.future.timeout(
+            const Duration(seconds: 2),
+            onTimeout: () {
+              Logs().w(
+                'Chat::scrollToEventId(): Timeline update timeout, proceeding anyway',
+              );
+            },
           );
-        });
+        } finally {
+          _timelineUpdateCompleter = null;
+        }
+
+        // Check if event is now in timeline
+        if (verifyEventIdInTimeline(timeline, eventId)) {
+          Logs().d(
+            'Chat::scrollToEventId(): Event found in timeline after update',
+          );
+          // Wait for next frame to ensure widgets are fully rendered
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            scrollToEventId(
+              eventId,
+              highlight: highlight,
+              maxAttempts: maxAttempts,
+              currentAttempt: currentAttempt + 1,
+            );
+          });
+        } else {
+          Logs().w(
+            'Chat::scrollToEventId(): Event not found after history request and timeline update',
+          );
+        }
       });
       return;
     }
@@ -1548,9 +1579,11 @@ class ChatController extends State<Chat>
   /// Helper method to reload timeline centered on an event and wait for rendering.
   /// Returns the new target index if successful, -1 otherwise.
   /// This eliminates duplication of the timeline reload + render wait pattern.
+  /// Uses frame-based polling to ensure the event is actually present before proceeding.
   Future<int> _reloadTimelineAndWaitForRender({
     required String eventId,
     required String logContext,
+    int maxAttempts = 20, // ~20 frames = ~333ms at 60fps
   }) async {
     Logs().d('$logContext: Reloading timeline centered on $eventId');
 
@@ -1566,34 +1599,37 @@ class ChatController extends State<Chat>
     });
     await loadTimelineFuture;
 
-    // Wait for timeline to load and widgets to render with double post-frame callback
-    final completer = Completer<int>();
+    // Poll for the event to appear in timeline using frame-based waiting
+    int attempts = 0;
+    while (attempts < maxAttempts) {
+      // Wait for the next frame to be rendered
+      await SchedulerBinding.instance.endOfFrame;
 
-    WidgetsBinding.instance.addPostFrameCallback((_) async {
       if (!mounted || timeline == null) {
-        completer.complete(-1);
-        return;
+        Logs().w(
+          '$logContext: Timeline became null or widget unmounted after $attempts frames',
+        );
+        return -1;
       }
 
-      // Wait for first frame - timeline state update
-      await Future.delayed(const Duration(milliseconds: 300));
+      final targetIndex = timeline!.events.indexWhere(
+        (event) => event.eventId == eventId,
+      );
 
-      WidgetsBinding.instance.addPostFrameCallback((_) async {
-        if (!mounted || timeline == null) {
-          completer.complete(-1);
-          return;
-        }
+      if (targetIndex != -1) {
+        Logs().d(
+          '$logContext: Found event at index $targetIndex after $attempts frames',
+        );
+        return targetIndex;
+      }
 
-        // Wait for widgets to complete rendering
-        await Future.delayed(const Duration(milliseconds: 300));
+      attempts++;
+    }
 
-        final newTargetIndex =
-            timeline!.events.indexWhere((event) => event.eventId == eventId);
-        completer.complete(newTargetIndex);
-      });
-    });
-
-    return completer.future;
+    Logs().w(
+      '$logContext: Event not found after $maxAttempts frame attempts',
+    );
+    return -1;
   }
 
   /// Gradually scrolls towards a message until it becomes rendered.
@@ -3649,27 +3685,41 @@ class ChatController extends State<Chat>
               ?.queryParameters['event'];
     }
 
-    // If event ID exists in URL, scroll to it
-    if (highlightEventId != null) {
+    // If event ID exists in URL and we haven't scrolled to it yet, scroll to it
+    if (highlightEventId != null &&
+        highlightEventId != _lastHighlightedEventId) {
+      _lastHighlightedEventId = highlightEventId;
       final eventIdToHighlight = highlightEventId; // Capture for closures
       Logs().d(
         'Chat::didUpdateWidget() - Event to highlight from URL: $eventIdToHighlight',
       );
 
-      // Wait for timeline and widgets to be ready
-      // Use double post-frame callback to ensure everything is settled
+      // Wait for timeline and widgets to be ready using frame-based polling
       WidgetsBinding.instance.addPostFrameCallback((_) async {
-        // First frame callback - timeline should be loaded
-        await Future.delayed(const Duration(milliseconds: 300));
+        // Poll for timeline to be loaded and widgets to be rendered
+        int attempts = 0;
+        const maxWaitAttempts = 30; // ~30 frames = ~500ms at 60fps
 
-        WidgetsBinding.instance.addPostFrameCallback((_) async {
-          // Second frame callback - widgets should be built
-          await Future.delayed(const Duration(milliseconds: 200));
+        while (attempts < maxWaitAttempts && mounted) {
+          await SchedulerBinding.instance.endOfFrame;
 
-          if (mounted) {
+          // Check if timeline is loaded and has events
+          if (timeline != null && timeline!.events.isNotEmpty) {
+            Logs().d(
+              'Chat::didUpdateWidget(): Timeline ready after $attempts frames',
+            );
             await scrollToEventId(eventIdToHighlight, highlight: true);
+            return;
           }
-        });
+
+          attempts++;
+        }
+
+        if (mounted && attempts >= maxWaitAttempts) {
+          Logs().w(
+            'Chat::didUpdateWidget(): Timeline not ready after $maxWaitAttempts frames',
+          );
+        }
       });
     }
   }
