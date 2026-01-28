@@ -90,22 +90,23 @@ class MultipleAccountsPickerController {
   }
 
   Future<void> _setActiveClient(Client newClient) async {
-    TwakeDialog.showLoadingDialog(context);
-    final result = await _matrixState.setActiveClient(newClient);
-    if (result.isSuccess) {
-      await _matrixState.cancelListenSynchronizeContacts();
-      if (!context.mounted) return;
-      TwakeDialog.hideLoadingDialog(context);
-      _matrixState.reSyncContacts();
-      context.go(
-        '/rooms',
-        extra: SwitchActiveAccountBodyArgs(
-          newActiveClient: newClient,
-        ),
-      );
-    } else {
-      if (!context.mounted) return;
-      TwakeDialog.hideLoadingDialog(context);
+    try {
+      TwakeDialog.showLoadingDialog(context);
+      final result = await _matrixState.setActiveClient(newClient);
+      if (result.isSuccess) {
+        await _matrixState.cancelListenSynchronizeContacts();
+        _matrixState.reSyncContacts();
+        context.go(
+          '/rooms',
+          extra: SwitchActiveAccountBodyArgs(
+            newActiveClient: newClient,
+          ),
+        );
+      }
+    } catch (e) {
+      Logs().e('MultipleAccountsPickerController::_setActiveClient', e);
+    } finally {
+      if (context.mounted) TwakeDialog.hideLoadingDialog(context);
     }
   }
 }
