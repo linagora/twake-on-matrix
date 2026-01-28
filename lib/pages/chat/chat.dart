@@ -1973,6 +1973,8 @@ class ChatController extends State<Chat>
 
             await Future.delayed(const Duration(milliseconds: 500));
 
+            if (!mounted || !scrollController.hasClients) return;
+
             if (_isMessageRendered(newTargetIndex) && highlight) {
               await scrollController.highlight(
                 getDisplayEventIndex(newTargetIndex),
