@@ -1405,15 +1405,36 @@ class ChatController extends State<Chat>
           Logs().d(
             'Chat::scrollToEventId(): Event found in timeline after update',
           );
-          // Wait for next frame to ensure widgets are fully rendered
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            scrollToEventId(
-              eventId,
-              highlight: highlight,
-              maxAttempts: maxAttempts,
-              currentAttempt: currentAttempt + 1,
-            );
-          });
+
+          // Poll for widget to be actually rendered in the widget tree
+          // The completer only ensures timeline DATA is updated,
+          // but widgets need time to build via ListView's lazy loading
+          int attempts = 0;
+          const maxRenderAttempts = 20; // ~333ms at 60fps
+          bool widgetRendered = false;
+
+          while (attempts < maxRenderAttempts && mounted) {
+            await SchedulerBinding.instance.endOfFrame;
+
+            // Check if widget is actually rendered by looking up its context
+            if (GlobalObjectKey(eventId).currentContext != null) {
+              widgetRendered = true;
+              break;
+            }
+            attempts++;
+          }
+
+          Logs().d(
+            'Chat::scrollToEventId(): Widget rendered=$widgetRendered after $attempts frames',
+          );
+
+          // Proceed with scroll regardless (if not rendered, next iteration will handle it)
+          scrollToEventId(
+            eventId,
+            highlight: highlight,
+            maxAttempts: maxAttempts,
+            currentAttempt: currentAttempt + 1,
+          );
         } else {
           Logs().w(
             'Chat::scrollToEventId(): Event not found after history request and timeline update',
@@ -1505,26 +1526,42 @@ class ChatController extends State<Chat>
       }
     }
 
-    // Message not rendered but nearby - wait for widgets to render, then scroll towards it
+    // Message not rendered but nearby - poll for widgets to be rendered
+    // Use frame-based polling instead of arbitrary delay
+    int attempts = 0;
+    const maxRenderAttempts =
+        10; // ~167ms at 60fps (shorter wait for nearby messages)
 
-    // Use post-frame callback to give ListView time to build widgets
-    await Future.delayed(const Duration(milliseconds: 100));
+    while (attempts < maxRenderAttempts &&
+        mounted &&
+        scrollController.hasClients) {
+      await SchedulerBinding.instance.endOfFrame;
 
-    // Guard against disposed widget after async delay
-    if (!mounted || !scrollController.hasClients) return;
+      // Check if widget rendered during the wait
+      final recheckContext = GlobalObjectKey(targetEventId).currentContext;
+      if (recheckContext != null) {
+        Logs().d(
+          'Chat::_scrollToMessageWithEventId(): Widget rendered after $attempts frames',
+        );
+        await _centerAndHighlightMessage(
+          itemContext: recheckContext,
+          targetIndex: targetIndex,
+          highlight: highlight,
+        );
+        return;
+      }
 
-    // Check one more time if it rendered during the wait
-    final recheckContext = GlobalObjectKey(targetEventId).currentContext;
-    if (recheckContext != null) {
-      await _centerAndHighlightMessage(
-        itemContext: recheckContext,
-        targetIndex: targetIndex,
-        highlight: highlight,
-      );
-      return;
+      attempts++;
     }
 
-    // Still not rendered, proceed with scroll
+    // Guard against disposed widget after polling
+    if (!mounted || !scrollController.hasClients) return;
+
+    Logs().d(
+      'Chat::_scrollToMessageWithEventId(): Widget not rendered after $attempts frames, proceeding with scroll',
+    );
+
+    // Still not rendered, proceed with scroll-towards approach
     await _scrollTowardsMessage(eventId, targetIndex, highlight: highlight);
   }
 
