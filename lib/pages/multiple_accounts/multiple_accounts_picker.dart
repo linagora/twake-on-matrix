@@ -96,6 +96,7 @@ class MultipleAccountsPickerController {
       if (result.isSuccess) {
         await _matrixState.cancelListenSynchronizeContacts();
         _matrixState.reSyncContacts();
+        if (!context.mounted) return;
         context.go(
           '/rooms',
           extra: SwitchActiveAccountBodyArgs(
