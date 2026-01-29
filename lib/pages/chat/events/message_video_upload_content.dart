@@ -10,8 +10,8 @@ import 'package:linagora_design_flutter/colors/linagora_sys_colors.dart';
 import 'package:matrix/matrix.dart';
 import 'package:video_thumbnail/video_thumbnail.dart';
 
-class MessageVideoUploadContentWeb extends StatefulWidget {
-  const MessageVideoUploadContentWeb({
+class MessageVideoUploadContent extends StatefulWidget {
+  const MessageVideoUploadContent({
     super.key,
     required this.event,
     required this.width,
@@ -28,12 +28,11 @@ class MessageVideoUploadContentWeb extends StatefulWidget {
   final double? bubbleWidth;
 
   @override
-  State<StatefulWidget> createState() => _MessageVideoUploadContentWebState();
+  State<StatefulWidget> createState() => _MessageVideoUploadContentState();
 }
 
-class _MessageVideoUploadContentWebState
-    extends State<MessageVideoUploadContentWeb>
-    with UploadFileMixin<MessageVideoUploadContentWeb> {
+class _MessageVideoUploadContentState extends State<MessageVideoUploadContent>
+    with UploadFileMixin<MessageVideoUploadContent> {
   @override
   Event get event => widget.event;
 
