@@ -629,9 +629,15 @@ class ChatController extends State<Chat>
 
   @override
   Future<void> setReadMarker({String? eventId}) async {
-    if (!mounted || room == null) return;
+    if (!mounted || room == null || eventId == null) return;
 
     // Store the latest request
+    final event = await room!.getEventById(eventId);
+    if (event == null ||
+        event.status == EventStatus.sending ||
+        event.status == EventStatus.error) {
+      return;
+    }
     _pendingReadMarkerEventId = eventId;
 
     // If already processing, just coalesce; the worker will pick it up.

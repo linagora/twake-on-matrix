@@ -33,21 +33,22 @@ class UploadManager {
 
   static const int _shrinkImageMaxDimension = 1600;
 
-  Future<UploadFileInfo?> getUploadFileInfo(String eventId) async {
+  Future<UploadFileInfo?> getUploadFileInfo(
+    String eventId, {
+    required Room room,
+  }) async {
     if (_eventIdMapUploadFileInfo.containsKey(eventId)) {
       return _eventIdMapUploadFileInfo[eventId];
     }
 
     // Attempt to restore on-demand from the event's unsigned data
-    for (final room in getIt.get<Client>().rooms) {
-      final event = await room.getEventById(eventId);
-      if (event != null) {
-        final uploadInfoMap = event.unsigned?['upload_info'];
-        if (uploadInfoMap is Map<String, dynamic>) {
-          final info = UploadFileInfo.fromJson(uploadInfoMap);
-          _eventIdMapUploadFileInfo[eventId] = info;
-          return info;
-        }
+    final event = await room.getEventById(eventId);
+    if (event != null) {
+      final uploadInfoMap = event.unsigned?['upload_info'];
+      if (uploadInfoMap is Map<String, dynamic>) {
+        final info = UploadFileInfo.fromJson(uploadInfoMap);
+        _eventIdMapUploadFileInfo[eventId] = info;
+        return info;
       }
     }
 
@@ -64,6 +65,22 @@ class UploadManager {
     }
   }
 
+  Future<MatrixFile?> getMatrixFile(
+    String eventId, {
+    required Room room,
+  }) async {
+    try {
+      final uploadInfo = await getUploadFileInfo(eventId, room: room);
+      if (uploadInfo == null) {
+        return null;
+      }
+      return uploadInfo.matrixFile ?? await uploadInfo.fileInfo?.toMatrixFile();
+    } catch (e) {
+      Logs().e('Error getting matrix file for eventid $eventId', e);
+      return null;
+    }
+  }
+
   /// Retries a failed upload
   Future<void> retryUpload(Event event) async {
     final txid = event.eventId;
@@ -73,7 +90,7 @@ class UploadManager {
     }
     _retriesInProgress.add(txid);
     try {
-      final uploadInfo = await getUploadFileInfo(txid);
+      final uploadInfo = await getUploadFileInfo(txid, room: event.room);
 
       if (uploadInfo == null) {
         throw Exception('Upload with txid $txid not found');

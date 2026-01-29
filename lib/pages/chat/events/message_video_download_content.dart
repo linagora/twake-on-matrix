@@ -53,8 +53,10 @@ class _MessageVideoDownloadContentState
   late final Completer<String?> _completer;
   Future<String?> getMobileThumbnail() async {
     try {
-      final uploadFileInfo =
-          await getIt.get<UploadManager>().getUploadFileInfo(event.eventId);
+      final uploadFileInfo = await getIt.get<UploadManager>().getUploadFileInfo(
+            event.eventId,
+            room: event.room,
+          );
       if (uploadFileInfo == null) {
         _completer.complete(null);
         return null;
