@@ -224,7 +224,9 @@ mixin MessageContentBuilderMixin {
         messageTextWidth - lastLineWidth >= messageTimeAndPaddingWidth &&
         messageTextWidth + paddingMessage < maxWidth) {
       totalMessageWidth = messageTextWidth + paddingMessage;
-      isNeedAddNewLine = event.isCaptionModeOrReply();
+      isNeedAddNewLine = event.isCaptionModeOrReply() ||
+          (event.status == EventStatus.error &&
+              event.messageType == MessageTypes.Text);
     } else {
       totalMessageWidth = _calculateTotalMessageWidth(
         lastLineWidth,
@@ -272,6 +274,10 @@ mixin MessageContentBuilderMixin {
     required Event event,
   }) {
     if (event.isCaptionModeOrReply()) {
+      return true;
+    }
+    if (event.status == EventStatus.error &&
+        event.messageType == MessageTypes.Text) {
       return true;
     }
     if (totalMessageWidth == maxWidth) {

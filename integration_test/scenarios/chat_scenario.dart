@@ -1,5 +1,6 @@
 import 'dart:developer';
 import 'dart:io';
+import 'package:fluffychat/generated/l10n/app_localizations.dart';
 import 'package:fluffychat/pages/chat/chat_app_bar_title.dart';
 import 'package:fluffychat/pages/chat/chat_input_row.dart';
 import 'package:fluffychat/pages/chat/chat_input_row_send_btn.dart';
@@ -15,7 +16,10 @@ import 'package:fluffychat/pages/chat_draft/draft_chat_view.dart';
 import 'package:fluffychat/pages/chat_list/chat_list_body_view.dart';
 import 'package:fluffychat/widgets/context_menu/context_menu_action_item_widget.dart';
 import 'package:fluffychat/widgets/twake_components/twake_icon_button.dart';
+import 'package:fluffychat/pages/chat/events/images_builder/sending_image_info_widget.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:linagora_design_flutter/images_picker/image_item_widget.dart';
 import 'package:linkfy_text/linkfy_text.dart';
 import 'package:patrol/patrol.dart';
 import '../base/core_robot.dart';
@@ -591,5 +595,39 @@ class ChatScenario extends CoreRobot {
       isPin,
       reason: 'Expected pin=$isPin but got $exists for "$title"',
     );
+  }
+
+  Future<void> sendImage() async {
+    // 1. Tap on the "More" button to open media picker
+    final addIcon = $(TwakeIconButton).which<TwakeIconButton>((widget) {
+      return widget.icon == Icons.add_circle_outline;
+    });
+    await addIcon.tap();
+    final context = $(addIcon).evaluate().first;
+    final nextLabel = L10n.of(context)!.next;
+    await $(nextLabel).tap();
+
+    // 2. Handle permissions if necessary (though usually handled by CoreRobot or LoginScenario)
+    // CoreRobot's confirmAccessContact style
+    if (await $.native
+        .isPermissionDialogVisible(timeout: const Duration(seconds: 5))) {
+      await $.native.tap(Selector(text: 'Allow all'));
+    }
+
+    // 3. Select the first image in the grid
+    await $(ImagePickerItemWidget).tap();
+
+    // 4. Tap the send button in the bottom sheet
+    final sendBtn = $(find.byType(InkWell)).containing(find.byType(SvgPicture));
+    await sendBtn.tap();
+    await $.pumpAndTrySettle();
+  }
+
+  Future<void> retryImageUpload() async {
+    final retryBtn = $(SendingImageInfoWidget)
+        .$(IconButton)
+        .containing(find.byIcon(Icons.refresh));
+    await retryBtn.tap();
+    await $.pumpAndTrySettle();
   }
 }

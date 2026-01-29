@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:fluffychat/config/app_config.dart';
@@ -31,6 +32,7 @@ class EventVideoPlayer extends StatelessWidget {
   final String? thumbnailCacheKey;
 
   final Map<EventId, ImageData>? thumbnailCacheMap;
+  final String? thumbnailPath;
 
   /// Enable it if the thumbnail image is stretched, and you don't want to resize it
   final bool noResizeThumbnail;
@@ -50,6 +52,7 @@ class EventVideoPlayer extends StatelessWidget {
     this.showDuration = false,
     this.thumbnailCacheMap,
     this.thumbnailCacheKey,
+    this.thumbnailPath,
     this.noResizeThumbnail = false,
     this.onVideoTapped,
     this.centerWidget = const CenterVideoButton(icon: Icons.play_arrow),
@@ -88,20 +91,29 @@ class EventVideoPlayer extends StatelessWidget {
               alignment: Alignment.center,
               children: [
                 BlurHash(hash: blurHash),
-                Center(
-                  child: ImageBubble(
-                    event,
+                if (thumbnailPath != null)
+                  Image.file(
+                    File(thumbnailPath!),
                     width: MessageContentStyle.imageBubbleWidth(imageWidth),
                     height: MessageContentStyle.videoBubbleHeight(imageHeight),
-                    bubbleMaxWidth: maxWidth,
-                    rounded: rounded,
-                    thumbnailCacheKey: thumbnailCacheKey,
-                    thumbnailCacheMap: thumbnailCacheMap,
-                    noResizeThumbnail: noResizeThumbnail,
-                    thumbnailOnly: true,
-                    isPreview: false,
+                    fit: BoxFit.cover,
+                  )
+                else
+                  Center(
+                    child: ImageBubble(
+                      event,
+                      width: MessageContentStyle.imageBubbleWidth(imageWidth),
+                      height:
+                          MessageContentStyle.videoBubbleHeight(imageHeight),
+                      bubbleMaxWidth: maxWidth,
+                      rounded: rounded,
+                      thumbnailCacheKey: thumbnailCacheKey,
+                      thumbnailCacheMap: thumbnailCacheMap,
+                      noResizeThumbnail: noResizeThumbnail,
+                      thumbnailOnly: true,
+                      isPreview: false,
+                    ),
                   ),
-                ),
                 centerWidget,
                 if (showDuration)
                   Positioned(

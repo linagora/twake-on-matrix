@@ -466,7 +466,7 @@ class _MessageVideoBuilder extends StatelessWidget {
 
     if (PlatformInfos.isWeb) {
       if (event.isSending()) {
-        return MessageVideoUploadContentWeb(
+        return MessageVideoUploadContent(
           event: event,
           width: displayImageInfo.size.width,
           height: displayImageInfo.size.height,
@@ -474,6 +474,14 @@ class _MessageVideoBuilder extends StatelessWidget {
         );
       }
       return MessageVideoDownloadContentWeb(
+        event: event,
+        width: displayImageInfo.size.width,
+        height: displayImageInfo.size.height,
+        bubbleWidth: textWidth,
+      );
+    }
+    if (event.status == EventStatus.error) {
+      return MessageVideoUploadContent(
         event: event,
         width: displayImageInfo.size.width,
         height: displayImageInfo.size.height,

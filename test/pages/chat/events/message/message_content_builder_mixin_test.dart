@@ -109,6 +109,7 @@ Future<void> main() async {
         MessageMetrics? expectedMetrics,
         bool ownMessage = false,
         bool hideDisplayName = false,
+        bool? expectedIsNeedAddNewLine,
       }) async {
         MessageMetrics? getSizeForEmptyTextEvent;
 
@@ -167,6 +168,12 @@ Future<void> main() async {
           expect(
             getSizeForEmptyTextEvent!.isNeedAddNewLine,
             equals(expectedMetrics.isNeedAddNewLine),
+          );
+        } else if (expectedIsNeedAddNewLine != null) {
+          expect(getSizeForEmptyTextEvent, isNotNull);
+          expect(
+            getSizeForEmptyTextEvent!.isNeedAddNewLine,
+            equals(expectedIsNeedAddNewLine),
           );
         } else {
           if (event.isVideoOrImage) {
@@ -1027,6 +1034,64 @@ Future<void> main() async {
           },
         );
       });
+      group(
+        'GIVEN event status is error\n',
+        () {
+          testWidgets(
+            'GIVEN event is text message\n'
+            'THEN isNeedAddNewLine is true\n',
+            (tester) async {
+              final textEventWithError = Event(
+                content: {
+                  'body': 'Hello',
+                  'msgtype': 'm.text',
+                },
+                type: 'm.room.message',
+                eventId: '\$123',
+                senderId: '@user:example.org',
+                originServerTs: DateTime.now(),
+                room: room,
+                status: EventStatus.error,
+              );
+
+              await runTest(
+                tester,
+                event: textEventWithError,
+                maxWidth: 400,
+                ownMessage: true,
+                expectedIsNeedAddNewLine: true,
+              );
+            },
+          );
+
+          testWidgets(
+            'GIVEN event is NOT text message (e.g. m.notice)\n'
+            'THEN isNeedAddNewLine is false (if fits)\n',
+            (tester) async {
+              final noticeEventWithError = Event(
+                content: {
+                  'body': 'Notice',
+                  'msgtype': 'm.notice',
+                },
+                type: 'm.room.message',
+                eventId: '\$456',
+                senderId: '@user:example.org',
+                originServerTs: DateTime.now(),
+                room: room,
+                status: EventStatus.error,
+              );
+
+              await runTest(
+                tester,
+                event: noticeEventWithError,
+                maxWidth: 1000,
+                ownMessage: true,
+                expectedIsNeedAddNewLine: false,
+              );
+            },
+          );
+        },
+      );
     },
   );
 }

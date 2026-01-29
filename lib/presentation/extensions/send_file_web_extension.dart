@@ -61,33 +61,23 @@ extension SendFileWebExtension on Room {
       );
     }
     sendingFilePlaceholders[txid] = file;
-    // Check media config of the server before sending the file. Stop if the
-    // Media config is unreachable or the file is bigger than the given maxsize.
     try {
-      final mediaConfig = await client.getConfig();
-      final maxMediaSize = mediaConfig.mUploadSize;
+      int maxMediaSize = 0;
+      try {
+        final mediaConfig = await client.getConfig();
+        maxMediaSize = mediaConfig.mUploadSize ?? 0;
+      } catch (e) {
+        Logs().e('Cannot get media config', e);
+      }
       Logs().d(
         'SendImage::sendImageFileEvent(): FileSized ${file.size} || maxMediaSize $maxMediaSize',
       );
-      if (maxMediaSize != null && maxMediaSize < file.size) {
-        uploadStreamController?.add(
-          Left(
-            UploadFileFailedState(
-              exception: FileTooBigMatrixException(file.size, maxMediaSize),
-            ),
-          ),
-        );
+      if (maxMediaSize > 0 && maxMediaSize < file.size) {
         throw FileTooBigMatrixException(file.size, maxMediaSize);
       }
     } catch (e) {
       Logs().d('Config error while sending file', e);
-      uploadStreamController?.add(
-        Left(
-          UploadFileFailedState(
-            exception: e,
-          ),
-        ),
-      );
+
       fakeImageEvent.rooms!.join!.values.first.timeline!.events!.first
           .unsigned![messageSendingStatusKey] = EventStatus.error.intValue;
       await handleImageFakeSync(fakeImageEvent);
@@ -202,14 +192,7 @@ extension SendFileWebExtension on Room {
         fakeImageEvent.rooms!.join!.values.first.timeline!.events!.first
             .unsigned![messageSendingStatusKey] = EventStatus.error.intValue;
         await handleImageFakeSync(fakeImageEvent);
-        uploadStreamController?.add(
-          Left(
-            UploadFileFailedState(
-              exception: e,
-            ),
-          ),
-        );
-        Logs().v('Error: $e');
+        Logs().e('Error: $e');
         rethrow;
       } catch (e) {
         if (e is CancelRequestException) {
@@ -218,6 +201,7 @@ extension SendFileWebExtension on Room {
             Left(
               UploadFileFailedState(
                 exception: CancelUploadException(),
+                txid: txid,
               ),
             ),
           );
@@ -230,6 +214,7 @@ extension SendFileWebExtension on Room {
           Left(
             UploadFileFailedState(
               exception: e,
+              txid: txid,
             ),
           ),
         );
@@ -321,6 +306,7 @@ extension SendFileWebExtension on Room {
     Map<String, dynamic>? extraContent,
     DateTime? sentDate,
     String? captionInfo,
+    Map<String, dynamic>? uploadInfo,
   }) async {
     // sendingFileThumbnails[txid] =  MatrixImageFile(bytes: file.bytes, name: file.name);
 
@@ -365,6 +351,7 @@ extension SendFileWebExtension on Room {
                     if (shrinkImageMaxDimension != null)
                       'shrink_image_max_dimension': shrinkImageMaxDimension,
                     if (extraContent != null) 'extra_content': extraContent,
+                    if (uploadInfo != null) 'upload_info': uploadInfo,
                   },
                 ),
               ],

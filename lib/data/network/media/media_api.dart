@@ -8,6 +8,7 @@ import 'package:fluffychat/data/network/dio_client.dart';
 import 'package:fluffychat/data/network/exception/dio_duplicate_download_exception.dart';
 import 'package:fluffychat/data/network/homeserver_endpoint.dart';
 import 'package:fluffychat/data/network/media/cancel_exception.dart';
+import 'package:fluffychat/data/network/media/file_not_exist_exception.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/di/global/network_di.dart';
 import 'package:fluffychat/domain/model/file_info/file_info.dart';
@@ -31,7 +32,20 @@ class MediaAPI {
     if (fileInfo.bytes != null) {
       readStream = Stream.value(fileInfo.bytes!);
     } else if (fileInfo.filePath != null) {
-      readStream = File(fileInfo.filePath!).openRead();
+      final file = File(fileInfo.filePath!);
+      final exist = await file.exists();
+      if (!exist) {
+        throw FileNotExistException(path: fileInfo.filePath!);
+      }
+      try {
+        readStream = file.openRead();
+      } on FileSystemException catch (e) {
+        // Map "file missing" to the same exception for consistent UX.
+        if (e.osError?.errorCode == 2) {
+          throw FileNotExistException(path: fileInfo.filePath!);
+        }
+        rethrow;
+      }
     } else {
       throw ArgumentError('FileInfo must have either bytes or filePath');
     }

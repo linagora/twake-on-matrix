@@ -59,6 +59,7 @@ class _SendingVideoWidgetState extends State<SendingVideoWidget>
 
   @override
   Widget build(BuildContext context) {
+    final sysColor = LinagoraSysColors.material();
     _checkSendingFileStatus();
 
     return ValueListenableBuilder<SendingVideoStatus>(
@@ -128,10 +129,20 @@ class _SendingVideoWidgetState extends State<SendingVideoWidget>
                   child: const _PlayVideoButton(),
                 ),
               ] else if (value == SendingVideoStatus.error) ...[
-                const SizedBox(
-                  width: MessageContentStyle.videoCenterButtonSize,
-                  height: MessageContentStyle.videoCenterButtonSize,
-                  child: Icon(Icons.error),
+                IconButton(
+                  onPressed: () {
+                    uploadManager.retryUpload(widget.event);
+                  },
+                  icon: Icon(
+                    Icons.refresh,
+                    color: sysColor.primary,
+                    size: 24,
+                  ),
+                  padding: const EdgeInsets.all(4),
+                  style: IconButton.styleFrom(
+                    backgroundColor: sysColor.onPrimary,
+                    shape: const CircleBorder(),
+                  ),
                 ),
               ],
             ],
