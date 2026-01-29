@@ -1,8 +1,13 @@
+import 'package:fluffychat/domain/model/room/room_extension.dart';
+import 'package:fluffychat/generated/l10n/app_localizations.dart';
 import 'package:fluffychat/pages/new_group/selected_contacts_map_change_notifier.dart';
 import 'package:fluffychat/pages/new_group/widget/contacts_selection_list_style.dart';
 import 'package:fluffychat/pages/new_private_chat/widget/expansion_contact_list_tile.dart';
 import 'package:fluffychat/presentation/model/contact/presentation_contact.dart';
+import 'package:fluffychat/utils/twake_snackbar.dart';
 import 'package:flutter/material.dart';
+import 'package:linagora_design_flutter/colors/linagora_sys_colors.dart';
+import 'package:matrix/matrix.dart';
 
 class ContactItem extends StatelessWidget {
   final PresentationContact contact;
@@ -11,6 +16,8 @@ class ContactItem extends StatelessWidget {
   final bool disabled;
   final double paddingTop;
   final String highlightKeyword;
+  final bool disableBannedUser;
+  final Room? room;
 
   const ContactItem({
     super.key,
@@ -20,29 +27,45 @@ class ContactItem extends StatelessWidget {
     this.highlightKeyword = '',
     this.disabled = false,
     this.paddingTop = 0,
+    this.disableBannedUser = false,
+    this.room,
   });
+
+  bool canSelect(BuildContext context) {
+    if (!disableBannedUser) return true;
+    if (!room.canSelectToInvite(contact.matrixId)) {
+      TwakeSnackBar.show(
+        context,
+        L10n.of(context)!.cannotInviteBannedMember,
+      );
+      return false;
+    }
+
+    return true;
+  }
 
   @override
   Widget build(BuildContext context) {
     final contactNotifier =
         selectedContactsMapNotifier.getNotifierAtContact(contact);
-    return Padding(
-      padding: ContactsSelectionListStyle.contactItemPadding,
-      child: InkWell(
-        key: ValueKey(contact.matrixId),
-        onTap: disabled
-            ? null
-            : () {
-                onSelectedContact?.call();
-                selectedContactsMapNotifier.onContactTileTap(
-                  context,
-                  contact,
-                );
-              },
-        borderRadius: ContactsSelectionListStyle.contactItemBorderRadius,
-        child: SizedBox(
-          width: MediaQuery.of(context).size.width,
-          child: Padding(
+    return Stack(
+      children: [
+        InkWell(
+          key: ValueKey(contact.matrixId ?? contact.hashCode),
+          onTap: disabled
+              ? null
+              : () {
+                  if (!canSelect(context)) return;
+                  onSelectedContact?.call();
+                  selectedContactsMapNotifier.onContactTileTap(
+                    context,
+                    contact,
+                  );
+                },
+          borderRadius: ContactsSelectionListStyle.contactItemBorderRadius,
+          child: Container(
+            width: MediaQuery.of(context).size.width,
+            margin: ContactsSelectionListStyle.contactItemPadding,
             padding: ContactsSelectionListStyle.checkBoxPadding(paddingTop),
             child: Row(
               children: [
@@ -54,6 +77,7 @@ class ContactItem extends StatelessWidget {
                       onChanged: disabled
                           ? null
                           : (newValue) {
+                              if (!canSelect(context)) return;
                               onSelectedContact?.call();
                               selectedContactsMapNotifier.onContactTileTap(
                                 context,
@@ -73,7 +97,17 @@ class ContactItem extends StatelessWidget {
             ),
           ),
         ),
-      ),
+        if (disableBannedUser && !room.canSelectToInvite(contact.matrixId))
+          Positioned.fill(
+            child: IgnorePointer(
+              child: ColoredBox(
+                color: LinagoraSysColors.material()
+                    .onPrimary
+                    .withValues(alpha: 0.5),
+              ),
+            ),
+          ),
+      ],
     );
   }
 }

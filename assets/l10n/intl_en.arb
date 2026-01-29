@@ -3648,5 +3648,6 @@
   "changePermissions": "Change permissions",
   "@changePermissions": {
     "description": "Context menu action to open permission picker dialog"
-  }
+  },
+  "cannotInviteBannedMember": "This user has been removed by an administrator. Change status in \"Removed users\" to proceed"
 }
