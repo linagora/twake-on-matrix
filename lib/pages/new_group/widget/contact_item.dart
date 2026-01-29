@@ -51,7 +51,7 @@ class ContactItem extends StatelessWidget {
     return Stack(
       children: [
         InkWell(
-          key: ValueKey(contact.matrixId),
+          key: ValueKey(contact.matrixId ?? contact.hashCode),
           onTap: disabled
               ? null
               : () {
@@ -97,7 +97,7 @@ class ContactItem extends StatelessWidget {
             ),
           ),
         ),
-        if (!room.canSelectToInvite(contact.matrixId))
+        if (disableBannedUser && !room.canSelectToInvite(contact.matrixId))
           Positioned.fill(
             child: IgnorePointer(
               child: ColoredBox(

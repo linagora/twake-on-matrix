@@ -393,9 +393,9 @@ extension RoomExtension on Room {
 
 extension NullableRoomExtension on Room? {
   bool canSelectToInvite(String? matrixId) {
-    return this == null ||
-        this!.canBan ||
-        this!.getBannedMembers().none((u) => u.id == matrixId);
+    if (this == null) return true;
+    if (this!.canBan) return true;
+    return this!.getBannedMembers().none((u) => u.id == matrixId);
   }
 }
 
