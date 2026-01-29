@@ -140,7 +140,7 @@ class ContactsSelectionView extends StatelessWidget {
                 recentContacts[index].directChatMatrixID,
               );
               return ContactItem(
-                bannedHighlight: bannedHighlight,
+                disableBannedUser: bannedHighlight,
                 room: room,
                 contact: recentContacts[index].toPresentationContact(),
                 selectedContactsMapNotifier:
@@ -249,7 +249,7 @@ class ContactsSelectionView extends StatelessWidget {
               }
               return SliverToBoxAdapter(
                 child: ContactItem(
-                  bannedHighlight: bannedHighlight,
+                  disableBannedUser: bannedHighlight,
                   room: room,
                   contact: success.contact,
                   selectedContactsMapNotifier:
@@ -282,7 +282,7 @@ class ContactsSelectionView extends StatelessWidget {
                     contacts[index].matrixId,
                   );
                   return ContactItem(
-                    bannedHighlight: bannedHighlight,
+                    disableBannedUser: bannedHighlight,
                     room: room,
                     contact: contacts[index],
                     selectedContactsMapNotifier:
@@ -385,7 +385,7 @@ class ContactsSelectionView extends StatelessWidget {
                       contacts[index].matrixId,
                     );
                     return ContactItem(
-                      bannedHighlight: bannedHighlight,
+                      disableBannedUser: bannedHighlight,
                       room: room,
                       contact: contacts[index],
                       selectedContactsMapNotifier:

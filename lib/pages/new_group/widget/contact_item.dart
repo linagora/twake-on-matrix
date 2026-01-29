@@ -1,4 +1,3 @@
-import 'package:collection/collection.dart';
 import 'package:fluffychat/domain/model/room/room_extension.dart';
 import 'package:fluffychat/generated/l10n/app_localizations.dart';
 import 'package:fluffychat/pages/new_group/selected_contacts_map_change_notifier.dart';
@@ -17,7 +16,7 @@ class ContactItem extends StatelessWidget {
   final bool disabled;
   final double paddingTop;
   final String highlightKeyword;
-  final bool bannedHighlight;
+  final bool disableBannedUser;
   final Room? room;
 
   const ContactItem({
@@ -28,19 +27,13 @@ class ContactItem extends StatelessWidget {
     this.highlightKeyword = '',
     this.disabled = false,
     this.paddingTop = 0,
-    this.bannedHighlight = false,
+    this.disableBannedUser = false,
     this.room,
   });
 
-  bool get canUnban {
-    return room == null ||
-        room!.canBan ||
-        room!.getBannedMembers().none((u) => u.id == contact.matrixId);
-  }
-
   bool canSelect(BuildContext context) {
-    if (!bannedHighlight) return true;
-    if (!canUnban) {
+    if (!disableBannedUser) return true;
+    if (!room.canSelectToInvite(contact.matrixId)) {
       TwakeSnackBar.show(
         context,
         L10n.of(context)!.cannotInviteBannedMember,
@@ -104,7 +97,7 @@ class ContactItem extends StatelessWidget {
             ),
           ),
         ),
-        if (!canUnban)
+        if (!room.canSelectToInvite(contact.matrixId))
           Positioned.fill(
             child: IgnorePointer(
               child: ColoredBox(
