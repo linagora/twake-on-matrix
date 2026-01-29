@@ -23,8 +23,8 @@ mixin RetryTextMessageMixin {
     Event? replyEvent;
     String? editEventId;
 
-    if (event.inReplyToEventId() != null && event.relationshipEventId != null) {
-      replyEvent = await room.getEventById(event.relationshipEventId!);
+    if (event.inReplyToEventId() != null) {
+      replyEvent = await room.getEventById(event.inReplyToEventId()!);
     } else if (event.relationshipType == RelationshipTypes.edit &&
         event.relationshipEventId != null) {
       editEventId = event.relationshipEventId;
