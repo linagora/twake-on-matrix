@@ -2583,7 +2583,7 @@
   "noResultsFound": "Aucun résultat trouvé",
   "muteThisChat": "Mettre ce salon en sourdine",
   "clearAllSelected": "Tout désélectionner",
-  "encryptionMessage": "Cette fonction protège vos messages contre la lecture par d'autres personnes, mais les empêche également d'être sauvegardés sur nos serveurs. Vous ne pouvez pas désactiver cette fonction ultérieurement.",
+  "encryptionMessage": "Protège vos messages contre la lecture par d'autres personnes. Évite également leur sauvegarde sur nos serveurs. Choix définitif : vous ne pourrez pas désactiver cette fonction plus tard.",
   "selectedUsers": "Utilisateurs sélectionnés",
   "unmuteThisChat": "Retirer la sourdine de ce salon",
   "encryptionWarning": "Vous risquez de perdre vos messages si vous accédez à l'application Twake Chat sur un autre appareil.",
@@ -2833,8 +2833,8 @@
       }
     }
   },
-  "disable_notifications": "Désactiver les notifications",
-  "enable_notifications": "Activer les notifications",
+  "disable_notifications": "Notifications activées",
+  "enable_notifications": "Notifications désactivées",
   "logoutDialogWarning": "Vous allez perdre tout vos messages chiffrés. Nous vous recommandons d'activer la sauvegarde des messages avant de vous déconnecter",
   "thisFieldCannotBeBlank": "Ce champ ne peut pas être vide",
   "copyNumber": "Copier le numéro",
