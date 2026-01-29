@@ -1,5 +1,6 @@
 import 'dart:developer';
 import 'dart:io';
+import 'package:fluffychat/generated/l10n/app_localizations.dart';
 import 'package:fluffychat/pages/chat/chat_app_bar_title.dart';
 import 'package:fluffychat/pages/chat/chat_input_row.dart';
 import 'package:fluffychat/pages/chat/chat_input_row_send_btn.dart';
@@ -598,10 +599,13 @@ class ChatScenario extends CoreRobot {
 
   Future<void> sendImage() async {
     // 1. Tap on the "More" button to open media picker
-    await $(TwakeIconButton).which<TwakeIconButton>((widget) {
+    final addIcon = $(TwakeIconButton).which<TwakeIconButton>((widget) {
       return widget.icon == Icons.add_circle_outline;
-    }).tap();
-    await $('Next').tap();
+    });
+    await addIcon.tap();
+    final context = $(addIcon).evaluate().first;
+    final nextLabel = L10n.of(context)!.next;
+    await $(nextLabel).tap();
 
     // 2. Handle permissions if necessary (though usually handled by CoreRobot or LoginScenario)
     // CoreRobot's confirmAccessContact style
@@ -619,7 +623,7 @@ class ChatScenario extends CoreRobot {
     await $.pumpAndTrySettle();
   }
 
-  Future<void> retryImageUpload(String txid) async {
+  Future<void> retryImageUpload() async {
     final retryBtn = $(SendingImageInfoWidget)
         .$(IconButton)
         .containing(find.byIcon(Icons.refresh));

@@ -49,9 +49,7 @@ void main() {
       await Future.delayed(const Duration(seconds: 5));
 
       // 6. Hit retry button
-      await chatScenario.retryImageUpload(
-        'txid_not_needed_by_finder',
-      ); // The finder doesn't use the txid in my implementation
+      await chatScenario.retryImageUpload();
 
       // 7. Expect the message is retried successfully
       // Success is indicated by the retry button disappearing and the send status icon appearing
