@@ -84,7 +84,7 @@ class _MessageVideoUploadContentState extends State<MessageVideoUploadContent>
         if (uploadState is UploadingFileUIState) {
           if (uploadState.total != null &&
               uploadState.receive != null &&
-              uploadState.receive != 0) {
+              uploadState.receive! > 0) {
             progress = uploadState.receive! / uploadState.total!;
           }
         }

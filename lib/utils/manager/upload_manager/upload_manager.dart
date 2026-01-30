@@ -437,6 +437,7 @@ class UploadManager {
         sentDate: sentDate,
         captionInfo: _eventIdMapUploadFileInfo[txid]?.captionInfo?.caption,
         inReplyTo: isLastFile ? inReplyTo : null,
+        uploadInfo: _eventIdMapUploadFileInfo[txid]?.toJson(),
       );
 
       final streamController =
@@ -635,7 +636,9 @@ class UploadManager {
             },
           ),
         );
-        await room.client.handleSync(syncUpdate);
+        await room.client.database.transaction(() async {
+          await room.client.handleSync(syncUpdate);
+        });
       }
     } catch (e) {
       Logs().e('UploadManager::_updateEventUploadInfo(): $e');

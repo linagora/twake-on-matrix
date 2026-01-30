@@ -43,6 +43,16 @@ class _MessageImageBuilderState extends State<MessageImageBuilder> {
   }
 
   @override
+  void didUpdateWidget(covariant MessageImageBuilder oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.event != widget.event) {
+      _matrixFileFuture = widget.event.getPlaceholderMatrixFile(
+        getIt.get<UploadManager>(),
+      );
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     return FutureBuilder(
       future: _matrixFileFuture,

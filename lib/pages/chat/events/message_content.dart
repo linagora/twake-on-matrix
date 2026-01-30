@@ -452,6 +452,16 @@ class _MessageVideoBuilderState extends State<_MessageVideoBuilder> {
   }
 
   @override
+  void didUpdateWidget(covariant _MessageVideoBuilder oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.event != widget.event) {
+      _matrixFileFuture = widget.event.getPlaceholderMatrixFile(
+        getIt.get<UploadManager>(),
+      );
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     return FutureBuilder(
       future: _matrixFileFuture,
