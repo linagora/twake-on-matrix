@@ -1,6 +1,6 @@
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/domain/app_state/room/invite_user_state.dart';
-import 'package:fluffychat/domain/usecase/room/invite_user_interactor.dart';
+import 'package:fluffychat/domain/usecase/room/unban_and_invite_users_interactor.dart';
 import 'package:fluffychat/pages/new_group/contacts_selection.dart';
 import 'package:fluffychat/pages/new_group/contacts_selection_view.dart';
 import 'package:fluffychat/presentation/extensions/invite_user_exception_extension.dart';
@@ -66,10 +66,9 @@ class InvitationSelectionController
         .toList();
 
     final subscription = getIt
-        .get<InviteUserInteractor>()
+        .get<UnbanAndInviteUsersInteractor>()
         .execute(
-          matrixClient: client,
-          roomId: _room.id,
+          room: _room,
           userIds: selectedContacts,
         )
         .listen((event) {
@@ -120,5 +119,9 @@ class InvitationSelectionController
   }
 
   @override
-  Widget build(BuildContext context) => ContactsSelectionView(this);
+  Widget build(BuildContext context) => ContactsSelectionView(
+        this,
+        bannedHighlight: true,
+        room: _room,
+      );
 }

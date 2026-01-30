@@ -1,3 +1,4 @@
+import 'package:collection/collection.dart';
 import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/config/default_power_level_member.dart';
 import 'package:fluffychat/data/network/extensions/file_info_extension.dart';
@@ -387,6 +388,14 @@ extension RoomExtension on Room {
       }
     }
     return event;
+  }
+}
+
+extension NullableRoomExtension on Room? {
+  bool canSelectToInvite(String? matrixId) {
+    if (this == null) return true;
+    if (this!.canBan) return true;
+    return this!.getBannedMembers().none((u) => u.id == matrixId);
   }
 }
 

@@ -123,7 +123,9 @@ import 'package:fluffychat/domain/usecase/room/invite_user_interactor.dart';
 import 'package:fluffychat/domain/usecase/room/report_content_interactor.dart';
 import 'package:fluffychat/domain/usecase/room/set_permission_level_interactor.dart';
 import 'package:fluffychat/domain/usecase/room/timeline_search_event_interactor.dart';
+import 'package:fluffychat/domain/usecase/room/unban_and_invite_users_interactor.dart';
 import 'package:fluffychat/domain/usecase/room/unban_user_interactor.dart';
+import 'package:fluffychat/domain/usecase/room/unban_users_interactor.dart';
 import 'package:fluffychat/domain/usecase/room/unblock_user_interactor.dart';
 import 'package:fluffychat/domain/usecase/room/update_group_chat_interactor.dart';
 import 'package:fluffychat/domain/usecase/room/update_pinned_messages_interactor.dart';
@@ -541,6 +543,18 @@ class GetItInitializer {
     getIt.registerFactory(() => const UpdateUserInfoVisibilityInteractor());
 
     getIt.registerFactory(() => const CreateSupportChatInteractor());
+
+    getIt.registerFactory(
+      () => UnbanUsersInteractor(
+        unbanUserInteractor: getIt.get<UnbanUserInteractor>(),
+      ),
+    );
+    getIt.registerFactory(
+      () => UnbanAndInviteUsersInteractor(
+        inviteUserInteractor: getIt.get<InviteUserInteractor>(),
+        unbanUsersInteractor: getIt.get<UnbanUsersInteractor>(),
+      ),
+    );
   }
 
   void _bindingControllers() {

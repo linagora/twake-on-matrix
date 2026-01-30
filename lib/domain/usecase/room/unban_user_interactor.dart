@@ -15,6 +15,7 @@ class UnbanUserInteractor {
         yield const Left(
           NoPermissionForUnbanFailure(),
         );
+        return;
       }
 
       await user.unban();
