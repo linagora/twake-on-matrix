@@ -73,8 +73,8 @@ class TwakeAppState extends State<TwakeApp> {
 
   @override
   void dispose() {
-    super.dispose();
     networkConnectionService.onDispose();
+    super.dispose();
   }
 
   @override

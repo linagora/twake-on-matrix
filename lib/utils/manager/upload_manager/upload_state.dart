@@ -113,12 +113,14 @@ class UploadFileSuccessState extends Success {
 class UploadFileFailedState extends Failure {
   final dynamic exception;
   final bool isThumbnail;
+  final String? txid;
 
   const UploadFileFailedState({
     required this.exception,
     this.isThumbnail = false,
+    this.txid,
   });
 
   @override
-  List<Object?> get props => [exception, isThumbnail];
+  List<Object?> get props => [exception, isThumbnail, txid];
 }

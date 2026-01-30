@@ -10,6 +10,7 @@ import 'package:fluffychat/app_state/success.dart';
 import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/data/network/extensions/file_info_extension.dart';
 import 'package:fluffychat/data/network/media/cancel_exception.dart';
+import 'package:fluffychat/data/network/media/file_not_exist_exception.dart';
 import 'package:fluffychat/data/network/media/media_api.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/domain/model/file_info/file_info.dart';
@@ -62,6 +63,7 @@ extension SendFileExtension on Room {
     CancelToken? cancelToken,
     DateTime? sentDate,
     String? captionInfo,
+    Map<String, dynamic>? uploadInfo,
   }) async {
     // Check media config of the server before sending the file. Stop if the
     // Media config is unreachable or the file is bigger than the given maxsize.
@@ -86,6 +88,7 @@ extension SendFileExtension on Room {
                 fileInfo.fileSize,
                 maxMediaSize,
               ),
+              txid: txid,
             ),
           ),
         );
@@ -190,6 +193,7 @@ extension SendFileExtension on Room {
         shrinkImageMaxDimension: shrinkImageMaxDimension,
         extraContent: extraContent,
         captionInfo: captionInfo,
+        uploadInfo: uploadInfo,
       );
 
       if (thumbnail != null &&
@@ -248,6 +252,7 @@ extension SendFileExtension on Room {
           shrinkImageMaxDimension: shrinkImageMaxDimension,
           extraContent: extraContent,
           captionInfo: captionInfo,
+          uploadInfo: uploadInfo,
         );
       }
     }
@@ -452,8 +457,15 @@ extension SendFileExtension on Room {
             Left(
               UploadFileFailedState(
                 exception: CancelUploadException(),
+                txid: txid,
               ),
             ),
+          );
+          return null;
+        } else if (e is FileNotExistException) {
+          Logs().e('File not exist: ${e.path}');
+          uploadStreamController?.add(
+            Left(UploadFileFailedState(exception: e, txid: txid)),
           );
           return null;
         }
@@ -674,6 +686,7 @@ extension SendFileExtension on Room {
     Map<String, dynamic>? extraContent,
     DateTime? sentDate,
     String? captionInfo,
+    Map<String, dynamic>? uploadInfo,
   }) async {
     final contentFromCaption = getEventContentFromMsgText(
       message: captionInfo ?? '',
@@ -718,6 +731,7 @@ extension SendFileExtension on Room {
                     if (shrinkImageMaxDimension != null)
                       'shrink_image_max_dimension': shrinkImageMaxDimension,
                     if (extraContent != null) 'extra_content': extraContent,
+                    if (uploadInfo != null) 'upload_info': uploadInfo,
                   },
                 ),
               ],

@@ -111,6 +111,7 @@ class ChatEventListItem extends StatelessWidget {
         },
         recentEmojiFuture: controller.getRecentReactionsInteractor.execute(),
         onReport: controller.reportEventAction,
+        onRetryTextMessage: controller.retryTextMessage,
       ),
     );
   }

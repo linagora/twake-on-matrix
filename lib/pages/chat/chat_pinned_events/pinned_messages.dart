@@ -15,6 +15,7 @@ import 'package:fluffychat/pages/chat/chat_pinned_events/pinned_messages_style.d
 import 'package:fluffychat/pages/chat/context_item_chat_action.dart';
 import 'package:fluffychat/presentation/extensions/event_update_extension.dart';
 import 'package:fluffychat/presentation/mixins/delete_event_mixin.dart';
+import 'package:fluffychat/presentation/mixins/retry_text_message_mixin.dart';
 import 'package:fluffychat/presentation/model/forward/forward_argument.dart';
 import 'package:fluffychat/resource/image_paths.dart';
 import 'package:fluffychat/utils/adaptive_bottom_sheet.dart';
@@ -53,7 +54,8 @@ class PinnedMessagesController extends State<PinnedMessages>
         PopupContextMenuActionMixin,
         PopupMenuWidgetMixin,
         TwakeContextMenuMixin,
-        DeleteEventMixin {
+        DeleteEventMixin,
+        RetryTextMessageMixin {
   ValueNotifier<List<Event?>> eventsNotifier = ValueNotifier([]);
 
   final ValueNotifier<String?> isHoverNotifier = ValueNotifier(null);
