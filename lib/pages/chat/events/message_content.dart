@@ -1,4 +1,5 @@
 import 'package:fluffychat/config/app_config.dart';
+import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/pages/chat/events/call_invite_content.dart';
 import 'package:fluffychat/pages/chat/events/encrypted_content.dart';
 import 'package:fluffychat/pages/chat/events/formatted_text_widget.dart';
@@ -16,6 +17,7 @@ import 'package:fluffychat/pages/chat/optional_selection_container_disabled.dart
 import 'package:fluffychat/presentation/model/file/display_image_info.dart';
 import 'package:fluffychat/utils/extension/event_info_extension.dart';
 import 'package:fluffychat/utils/extension/image_size_extension.dart';
+import 'package:fluffychat/utils/manager/upload_manager/upload_manager.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/download_file_extension.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
@@ -422,7 +424,7 @@ class MessageContent extends StatelessWidget
   }
 }
 
-class _MessageVideoBuilder extends StatelessWidget {
+class _MessageVideoBuilder extends StatefulWidget {
   final Event event;
   final double? textWidth;
 
@@ -435,64 +437,84 @@ class _MessageVideoBuilder extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
-    final matrixFile = event.getMatrixFile();
+  State<_MessageVideoBuilder> createState() => _MessageVideoBuilderState();
+}
 
-    DisplayImageInfo? displayImageInfo =
-        event.getOriginalResolution()?.getDisplayImageInfo(context);
+class _MessageVideoBuilderState extends State<_MessageVideoBuilder> {
+  Future<MatrixFile?>? _matrixFileFuture;
 
-    if (isSendingVideo(matrixFile)) {
-      final file = matrixFile as MatrixVideoFile;
-      displayImageInfo = Size(
-        file.width?.toDouble() ?? MessageContentStyle.imageWidth(context),
-        file.height?.toDouble() ?? MessageContentStyle.imageHeight(context),
-      ).getDisplayImageInfo(context);
-      return SendingVideoWidget(
-        key: ValueKey(event.eventId),
-        event: event,
-        matrixFile: matrixFile,
-        displayImageInfo: displayImageInfo,
-        bubbleWidth: textWidth,
-      );
-    }
-
-    displayImageInfo ??= DisplayImageInfo(
-      size: Size(
-        MessageContentStyle.imageWidth(context),
-        MessageContentStyle.imageHeight(context),
-      ),
-      hasBlur: true,
+  @override
+  void initState() {
+    super.initState();
+    _matrixFileFuture = widget.event.getPlaceholderMatrixFile(
+      getIt.get<UploadManager>(),
     );
+  }
 
-    if (PlatformInfos.isWeb) {
-      if (event.isSending()) {
-        return MessageVideoUploadContent(
-          event: event,
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder(
+      future: _matrixFileFuture,
+      builder: (context, snapshot) {
+        final matrixFile = snapshot.data;
+
+        DisplayImageInfo? displayImageInfo =
+            widget.event.getOriginalResolution()?.getDisplayImageInfo(context);
+
+        if (isSendingVideo(matrixFile)) {
+          final file = matrixFile as MatrixVideoFile;
+          displayImageInfo = Size(
+            file.width?.toDouble() ?? MessageContentStyle.imageWidth(context),
+            file.height?.toDouble() ?? MessageContentStyle.imageHeight(context),
+          ).getDisplayImageInfo(context);
+          return SendingVideoWidget(
+            key: ValueKey(widget.event.eventId),
+            event: widget.event,
+            matrixFile: matrixFile,
+            displayImageInfo: displayImageInfo,
+            bubbleWidth: widget.textWidth,
+          );
+        }
+
+        displayImageInfo ??= DisplayImageInfo(
+          size: Size(
+            MessageContentStyle.imageWidth(context),
+            MessageContentStyle.imageHeight(context),
+          ),
+          hasBlur: true,
+        );
+
+        if (PlatformInfos.isWeb) {
+          if (widget.event.isSending()) {
+            return MessageVideoUploadContent(
+              event: widget.event,
+              width: displayImageInfo.size.width,
+              height: displayImageInfo.size.height,
+              bubbleWidth: widget.textWidth,
+            );
+          }
+          return MessageVideoDownloadContentWeb(
+            event: widget.event,
+            width: displayImageInfo.size.width,
+            height: displayImageInfo.size.height,
+            bubbleWidth: widget.textWidth,
+          );
+        }
+        if (widget.event.status == EventStatus.error) {
+          return MessageVideoUploadContent(
+            event: widget.event,
+            width: displayImageInfo.size.width,
+            height: displayImageInfo.size.height,
+            bubbleWidth: widget.textWidth,
+          );
+        }
+        return MessageVideoDownloadContent(
+          event: widget.event,
           width: displayImageInfo.size.width,
           height: displayImageInfo.size.height,
-          bubbleWidth: textWidth,
+          bubbleWidth: widget.textWidth,
         );
-      }
-      return MessageVideoDownloadContentWeb(
-        event: event,
-        width: displayImageInfo.size.width,
-        height: displayImageInfo.size.height,
-        bubbleWidth: textWidth,
-      );
-    }
-    if (event.status == EventStatus.error) {
-      return MessageVideoUploadContent(
-        event: event,
-        width: displayImageInfo.size.width,
-        height: displayImageInfo.size.height,
-        bubbleWidth: textWidth,
-      );
-    }
-    return MessageVideoDownloadContent(
-      event: event,
-      width: displayImageInfo.size.width,
-      height: displayImageInfo.size.height,
-      bubbleWidth: textWidth,
+      },
     );
   }
 

@@ -34,22 +34,12 @@ class MessageImageBuilder extends StatefulWidget {
 class _MessageImageBuilderState extends State<MessageImageBuilder> {
   Future<MatrixFile?>? _matrixFileFuture;
 
-  Future<MatrixFile?>? _getMatrixFile() async {
-    final placeholder = widget.event.getMatrixFile();
-    if (placeholder != null) {
-      return placeholder;
-    }
-    final uploadManager = getIt.get<UploadManager>();
-    return await uploadManager.getMatrixFile(
-      widget.event.eventId,
-      room: widget.event.room,
-    );
-  }
-
   @override
   void initState() {
     super.initState();
-    _matrixFileFuture = _getMatrixFile();
+    _matrixFileFuture = widget.event.getPlaceholderMatrixFile(
+      getIt.get<UploadManager>(),
+    );
   }
 
   @override

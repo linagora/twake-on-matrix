@@ -97,6 +97,7 @@ class UploadManager {
       }
 
       if (!uploadInfo.isFailed) {
+        await event.cancelSend();
         throw Exception('Upload with txid $txid is not in failed state');
       }
 

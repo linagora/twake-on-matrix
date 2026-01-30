@@ -33,8 +33,6 @@ class SendingVideoWidget extends StatefulWidget {
 
 class _SendingVideoWidgetState extends State<SendingVideoWidget>
     with PlayVideoActionMixin, UploadFileMixin {
-  final sendingFileProgressNotifier = ValueNotifier(SendingVideoStatus.sending);
-
   @override
   Event get event => widget.event;
 
@@ -47,51 +45,60 @@ class _SendingVideoWidgetState extends State<SendingVideoWidget>
       imageHeight: widget.displayImageInfo.size.height,
       imageWidth: widget.displayImageInfo.size.width,
       matrixFile: widget.matrixFile,
-      event: widget.event,
+      event: event,
     );
-  }
-
-  @override
-  void dispose() {
-    sendingFileProgressNotifier.dispose();
-    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     final sysColor = LinagoraSysColors.material();
-    _checkSendingFileStatus();
-
-    return ValueListenableBuilder<SendingVideoStatus>(
-      key: ValueKey(widget.event.eventId),
-      valueListenable: sendingFileProgressNotifier,
-      builder: ((context, value, _) {
-        return ClipRRect(
-          borderRadius: MessageContentStyle.borderRadiusBubble,
-          child: Stack(
-            alignment: Alignment.center,
-            children: [
-              SizedBox(
-                width: MessageStyle.mediaContentWidth(
-                  context: context,
-                  event: widget.event,
-                  calculatedWidth: MessageContentStyle
-                      .combinedBubbleImageWidthWithBubbleMaxWidget(
-                    bubbleImageWidget: widget.displayImageInfo.size.width,
-                    bubbleMaxWidth: widget.bubbleWidth ?? 0,
+    return ClipRRect(
+      borderRadius: MessageContentStyle.borderRadiusBubble,
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          SizedBox(
+            width: MessageStyle.mediaContentWidth(
+              context: context,
+              event: event,
+              calculatedWidth: MessageContentStyle
+                  .combinedBubbleImageWidthWithBubbleMaxWidget(
+                bubbleImageWidget: widget.displayImageInfo.size.width,
+                bubbleMaxWidth: widget.bubbleWidth ?? 0,
+              ),
+            ),
+            height: MessageContentStyle.imageBubbleHeight(
+              widget.displayImageInfo.size.height,
+            ),
+            child: const BlurHash(hash: MessageContentStyle.defaultBlurHash),
+          ),
+          videoWidget,
+          ...switch (event.status) {
+            EventStatus.error => [
+                IconButton(
+                  onPressed: () {
+                    uploadManager.retryUpload(event);
+                  },
+                  icon: Icon(
+                    Icons.refresh,
+                    color: sysColor.primary,
+                    size: 24,
+                  ),
+                  padding: const EdgeInsets.all(4),
+                  style: IconButton.styleFrom(
+                    backgroundColor: sysColor.onPrimary,
+                    shape: const CircleBorder(),
                   ),
                 ),
-                height: MessageContentStyle.imageBubbleHeight(
-                  widget.displayImageInfo.size.height,
+              ],
+            EventStatus.sent || EventStatus.synced => [
+                InkWell(
+                  onTap: () => _onPlayVideo(context),
+                  child: const _PlayVideoButton(),
                 ),
-                child:
-                    const BlurHash(hash: MessageContentStyle.defaultBlurHash),
-              ),
-              videoWidget,
-              if (value == SendingVideoStatus.sending) ...[
-                _PlayVideoButton(
-                  event: widget.event,
-                ),
+              ],
+            _ => [
+                _PlayVideoButton(event: event),
                 ValueListenableBuilder(
                   valueListenable: uploadFileStateNotifier,
                   builder: (context, state, child) {
@@ -109,7 +116,7 @@ class _SendingVideoWidgetState extends State<SendingVideoWidget>
                         if (state is UploadFileSuccessUIState) {
                           return;
                         }
-                        uploadManager.cancelUpload(widget.event);
+                        uploadManager.cancelUpload(event);
                       },
                       child: SizedBox(
                         width: MessageContentStyle.videoCenterButtonSize,
@@ -123,32 +130,10 @@ class _SendingVideoWidgetState extends State<SendingVideoWidget>
                     );
                   },
                 ),
-              ] else if (value == SendingVideoStatus.sent) ...[
-                InkWell(
-                  onTap: () => _onPlayVideo(context),
-                  child: const _PlayVideoButton(),
-                ),
-              ] else if (value == SendingVideoStatus.error) ...[
-                IconButton(
-                  onPressed: () {
-                    uploadManager.retryUpload(widget.event);
-                  },
-                  icon: Icon(
-                    Icons.refresh,
-                    color: sysColor.primary,
-                    size: 24,
-                  ),
-                  padding: const EdgeInsets.all(4),
-                  style: IconButton.styleFrom(
-                    backgroundColor: sysColor.onPrimary,
-                    shape: const CircleBorder(),
-                  ),
-                ),
               ],
-            ],
-          ),
-        );
-      }),
+          },
+        ],
+      ),
     );
   }
 
@@ -156,19 +141,9 @@ class _SendingVideoWidgetState extends State<SendingVideoWidget>
     playVideoAction(
       context,
       widget.matrixFile.bytes,
-      event: widget.event,
+      event: event,
       isReplacement: false,
     );
-  }
-
-  void _checkSendingFileStatus() {
-    if ((widget.event.status == EventStatus.sent ||
-            widget.event.status == EventStatus.synced) &&
-        sendingFileProgressNotifier.value != SendingVideoStatus.sent) {
-      sendingFileProgressNotifier.value = SendingVideoStatus.sent;
-    } else if (widget.event.status == EventStatus.error) {
-      sendingFileProgressNotifier.value = SendingVideoStatus.error;
-    }
   }
 }
 

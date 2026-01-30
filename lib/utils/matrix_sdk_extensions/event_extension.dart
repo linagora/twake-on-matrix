@@ -7,6 +7,7 @@ import 'package:fluffychat/utils/clipboard.dart';
 import 'package:fluffychat/utils/dialog/twake_dialog.dart';
 import 'package:fluffychat/utils/extension/event_info_extension.dart';
 import 'package:fluffychat/utils/extension/mime_type_extension.dart';
+import 'package:fluffychat/utils/manager/upload_manager/upload_manager.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/filtered_timeline_extension.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
@@ -627,5 +628,18 @@ extension FutureEventExtension on Event {
     );
 
     return body.replaceAll(RegExp(r'\n'), ' ');
+  }
+
+  Future<MatrixFile?> getPlaceholderMatrixFile(
+    UploadManager uploadManager,
+  ) async {
+    final placeholder = getMatrixFile();
+    if (placeholder != null) {
+      return placeholder;
+    }
+    return await uploadManager.getMatrixFile(
+      eventId,
+      room: room,
+    );
   }
 }

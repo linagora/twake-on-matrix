@@ -401,7 +401,7 @@ class MatrixState extends State<Matrix>
         html.window.addEventListener('focus', onWindowFocus);
         html.window.addEventListener('blur', onWindowBlur);
       }
-      initMatrix();
+      await initMatrix();
       final emojiRawData = await EmojiData.builtIn();
       emojiData = emojiRawData.filterByVersion(13.5);
       await tryToGetFederationConfigurations();
@@ -684,7 +684,7 @@ class MatrixState extends State<Matrix>
       _registerSubs(c.clientName);
     }
 
-    _retrieveLocalToMConfiguration();
+    await _retrieveLocalToMConfiguration();
 
     if (kIsWeb) {
       onFocusSub = html.window.onFocus.listen((_) => webHasFocus = true);
@@ -758,7 +758,7 @@ class MatrixState extends State<Matrix>
     return null;
   }
 
-  void _retrieveLocalToMConfiguration() async {
+  Future<void> _retrieveLocalToMConfiguration() async {
     if (client.userID == null) return;
     try {
       final toMConfigurations = await getTomConfigurations(client.userID!);
