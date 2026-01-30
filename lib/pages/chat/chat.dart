@@ -680,7 +680,13 @@ class ChatController extends State<Chat>
     if (!mounted || room == null || eventId == null) return;
 
     // Store the latest request
-    final event = await room!.getEventById(eventId);
+    Event? event;
+    try {
+      event = await room!.getEventById(eventId);
+    } catch (e) {
+      Logs().w('Chat::setReadMarker(): getEventById failed', e);
+      return;
+    }
     if (event == null ||
         event.status == EventStatus.sending ||
         event.status == EventStatus.error) {

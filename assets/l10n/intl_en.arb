@@ -3650,6 +3650,6 @@
     "description": "Context menu action to open permission picker dialog"
   },
   "tapToRetry": "Tap to retry",
-  "fileNoLongerExist": "File no longer exist",
+  "fileNoLongerExists": "File no longer exists",
   "cannotInviteBannedMember": "This user has been removed by an administrator. Change status in \"Removed users\" to proceed"
 }
