@@ -1,3 +1,9 @@
+## [2.19.7] - 2026-01-30
+### Fixed
+- #2854 Jump to search doesn't work
+- #2830 Unban users before invite
+- #2716 Retry sensing failed message
+
 ## [2.19.6] - 2026-01-27
 ### Added
 - Translate ru, vi, fr
