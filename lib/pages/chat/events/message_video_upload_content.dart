@@ -36,30 +36,31 @@ class _MessageVideoUploadContentState extends State<MessageVideoUploadContent>
   @override
   Event get event => widget.event;
 
-  late final Completer<String?> _completer;
+  late Completer<String?> _completer;
   Future<String?> getMobileThumbnail() async {
+    final completer = _completer;
     try {
       final uploadFileInfo = await uploadManager.getUploadFileInfo(
         event.eventId,
         room: event.room,
       );
       if (uploadFileInfo == null) {
-        _completer.complete(null);
+        if (!completer.isCompleted) completer.complete(null);
         return null;
       }
 
       final filePath = uploadFileInfo.fileInfo?.filePath;
       if (filePath == null) {
-        _completer.complete(null);
+        if (!completer.isCompleted) completer.complete(null);
         return null;
       }
 
       final thumbnail = await VideoThumbnail.thumbnailFile(video: filePath);
-      _completer.complete(thumbnail.path);
+      if (!completer.isCompleted) completer.complete(thumbnail.path);
       return thumbnail.path;
     } catch (e) {
       Logs().e('Error getting thumbnail: $e');
-      _completer.complete(null);
+      if (!completer.isCompleted) completer.complete(null);
       return null;
     }
   }
