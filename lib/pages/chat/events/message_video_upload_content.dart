@@ -72,6 +72,15 @@ class _MessageVideoUploadContentState extends State<MessageVideoUploadContent>
   }
 
   @override
+  void didUpdateWidget(covariant MessageVideoUploadContent oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.event != widget.event) {
+      _completer = Completer<String?>();
+      getMobileThumbnail();
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     final sysColor = LinagoraSysColors.material();
 
