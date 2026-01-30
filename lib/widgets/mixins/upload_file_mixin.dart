@@ -40,7 +40,7 @@ mixin UploadFileMixin<T extends StatefulWidget> on State<T> {
         if (failure is UploadFileFailedState &&
             failure.exception is FileNotExistException) {
           if (mounted) {
-            TwakeSnackBar.show(context, L10n.of(context)!.fileNoLongerExist);
+            TwakeSnackBar.show(context, L10n.of(context)!.fileNoLongerExists);
           }
         }
         uploadFileStateNotifier.value = const UploadFileFailedUIState();
