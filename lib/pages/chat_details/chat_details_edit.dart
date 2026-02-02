@@ -5,6 +5,7 @@ import 'package:dartz/dartz.dart' hide State;
 import 'package:fluffychat/app_state/failure.dart';
 import 'package:fluffychat/app_state/success.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
+import 'package:fluffychat/domain/app_state/room/remove_all_members_and_leave_state.dart';
 import 'package:fluffychat/domain/app_state/room/update_group_chat_failure.dart';
 import 'package:fluffychat/domain/app_state/room/update_group_chat_success.dart';
 import 'package:fluffychat/domain/app_state/room/upload_content_state.dart';
@@ -12,6 +13,7 @@ import 'package:fluffychat/domain/app_state/validator/verify_name_view_state.dar
 import 'package:fluffychat/domain/model/extensions/validator_failure_extension.dart';
 import 'package:fluffychat/domain/model/verification/empty_name_validator.dart';
 import 'package:fluffychat/domain/model/verification/name_with_space_only_validator.dart';
+import 'package:fluffychat/domain/usecase/room/remove_all_members_and_leave_interactor.dart';
 import 'package:fluffychat/domain/usecase/room/update_group_chat_interactor.dart';
 import 'package:fluffychat/domain/usecase/room/upload_content_for_web_interactor.dart';
 import 'package:fluffychat/domain/usecase/room/upload_content_interactor.dart';
@@ -38,6 +40,7 @@ import 'package:fluffychat/widgets/mixins/popup_menu_widget_mixin.dart';
 import 'package:fluffychat/widgets/mixins/popup_menu_widget_style.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:linagora_design_flutter/images_picker/asset_counter.dart';
 import 'package:linagora_design_flutter/images_picker/images_picker_grid.dart';
 import 'package:matrix/matrix.dart';
@@ -69,6 +72,9 @@ class ChatDetailsEditController extends State<ChatDetailsEdit>
   final uploadContentWebInteractor =
       getIt.get<UploadContentInBytesInteractor>();
   final verifyNameInteractor = getIt.get<VerifyNameInteractor>();
+
+  final removeAllMembersAndLeaveInteractor =
+      getIt.get<RemoveAllMembersAndLeaveInteractor>();
 
   Room? room;
 
@@ -558,6 +564,66 @@ class ChatDetailsEditController extends State<ChatDetailsEdit>
           );
         },
       ),
+    );
+  }
+
+  Future<void> onDeleteGroup() async {
+    if (room == null) return;
+    final confirmResult = await showConfirmAlertDialog(
+      context: context,
+      title: L10n.of(context)!.deleteGroupConfirmation,
+      okLabel: L10n.of(context)!.delete,
+      cancelLabel: L10n.of(context)!.cancel,
+      showCloseButton: PlatformInfos.isWeb,
+    );
+    if (confirmResult == ConfirmResult.cancel) return;
+    removeAllMembersAndLeaveInteractor.execute(room: room!).listen((event) {
+      _handleRemoveAllMembersAndLeave(event);
+    });
+  }
+
+  void _handleRemoveAllMembersAndLeave(Either<Failure, Success> event) {
+    event.fold(
+      (failure) {
+        if (failure is NoPermissionToRemoveMembersFailure) {
+          TwakeDialog.hideLoadingDialog(context);
+          TwakeSnackBar.show(
+            context,
+            L10n.of(context)!.permissionErrorBanUser,
+          );
+          return;
+        }
+
+        if (failure is LeaveRoomFailure) {
+          TwakeDialog.hideLoadingDialog(context);
+          TwakeSnackBar.show(
+            context,
+            L10n.of(context)!.oopsSomethingWentWrong,
+          );
+          return;
+        }
+
+        if (failure is RemoveAllMembersAndLeaveFailure) {
+          TwakeDialog.hideLoadingDialog(context);
+          TwakeSnackBar.show(
+            context,
+            L10n.of(context)!.oopsSomethingWentWrong,
+          );
+          return;
+        }
+      },
+      (success) {
+        if (success is RemoveAllMembersAndLeaveLoading) {
+          TwakeDialog.showLoadingDialog(context);
+          return;
+        }
+
+        if (success is RemoveAllMembersAndLeaveSuccess) {
+          TwakeDialog.showLoadingDialog(context);
+          context.go('/rooms');
+          return;
+        }
+      },
     );
   }
 

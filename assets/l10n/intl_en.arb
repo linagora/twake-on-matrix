@@ -3651,5 +3651,11 @@
   },
   "tapToRetry": "Tap to retry",
   "fileNoLongerExists": "File no longer exists",
-  "cannotInviteBannedMember": "This user has been removed by an administrator. Change status in \"Removed users\" to proceed"
+  "cannotInviteBannedMember": "This user has been removed by an administrator. Change status in \"Removed users\" to proceed",
+  "deleteGroup": "Delete group",
+  "@deleteGroup": {},
+  "deleteGroupDescription": "You will permanently delete the group chat for all members",
+  "@deleteGroupDescription": {},
+  "deleteGroupConfirmation": "Are you sure you want to delete this group chat?",
+  "@deleteGroupConfirmation": {}
 }

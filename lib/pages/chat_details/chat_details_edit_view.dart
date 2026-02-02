@@ -361,6 +361,15 @@ class ChatDetailsEditView extends StatelessWidget {
                 leadingIconColor: Theme.of(context).colorScheme.error,
                 onTap: () => controller.leaveChat(context, controller.room),
               ),
+              if (controller.room?.canDeleteRoom == true)
+                ChatDetailsEditOption(
+                  title: L10n.of(context)!.deleteGroup,
+                  subtitle: L10n.of(context)!.deleteGroupDescription,
+                  leading: Icons.delete_outline_outlined,
+                  titleColor: Theme.of(context).colorScheme.error,
+                  leadingIconColor: Theme.of(context).colorScheme.error,
+                  onTap: () async => await controller.onDeleteGroup(),
+                ),
             ],
           ],
         ),

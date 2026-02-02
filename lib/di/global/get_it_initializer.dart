@@ -120,6 +120,7 @@ import 'package:fluffychat/domain/usecase/room/create_support_chat_interactor.da
 import 'package:fluffychat/domain/usecase/room/delete_event_interactor.dart';
 import 'package:fluffychat/domain/usecase/room/download_media_file_interactor.dart';
 import 'package:fluffychat/domain/usecase/room/invite_user_interactor.dart';
+import 'package:fluffychat/domain/usecase/room/remove_all_members_and_leave_interactor.dart';
 import 'package:fluffychat/domain/usecase/room/report_content_interactor.dart';
 import 'package:fluffychat/domain/usecase/room/set_permission_level_interactor.dart';
 import 'package:fluffychat/domain/usecase/room/timeline_search_event_interactor.dart';
@@ -554,6 +555,10 @@ class GetItInitializer {
         inviteUserInteractor: getIt.get<InviteUserInteractor>(),
         unbanUsersInteractor: getIt.get<UnbanUsersInteractor>(),
       ),
+    );
+
+    getIt.registerFactory<RemoveAllMembersAndLeaveInteractor>(
+      () => RemoveAllMembersAndLeaveInteractor(),
     );
   }
 
