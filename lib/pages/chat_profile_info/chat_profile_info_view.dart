@@ -73,6 +73,7 @@ class ChatProfileInfoView extends StatelessWidget {
               handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context),
               sliver: _SizedAppBar(
                 userInfoNotifier: controller.userInfoNotifier,
+                room: controller.room,
                 user: user,
                 contact: contact,
                 isAlreadyInChat: controller.isAlreadyInChat(context),
@@ -110,6 +111,11 @@ class ChatProfileInfoView extends StatelessWidget {
                                     controller.isAlreadyInChat(context),
                                 blockUserLoadingNotifier:
                                     controller.blockUserLoadingNotifier,
+                                room: controller.room,
+                                onLeaveChat: () => controller.leaveChat(
+                                  context,
+                                  controller.room,
+                                ),
                               ),
                             );
                           }
@@ -126,6 +132,11 @@ class ChatProfileInfoView extends StatelessWidget {
                                   controller.isAlreadyInChat(context),
                               blockUserLoadingNotifier:
                                   controller.blockUserLoadingNotifier,
+                              room: controller.room,
+                              onLeaveChat: () => controller.leaveChat(
+                                context,
+                                controller.room,
+                              ),
                             );
                           }
                           return _Information(
@@ -141,6 +152,11 @@ class ChatProfileInfoView extends StatelessWidget {
                                 controller.isAlreadyInChat(context),
                             blockUserLoadingNotifier:
                                 controller.blockUserLoadingNotifier,
+                            room: controller.room,
+                            onLeaveChat: () => controller.leaveChat(
+                              context,
+                              controller.room,
+                            ),
                           );
                         },
                       ),
@@ -216,6 +232,8 @@ class _Information extends StatelessWidget {
     this.onBlockUser,
     required this.blockUserLoadingNotifier,
     required this.isAlreadyInChat,
+    this.room,
+    this.onLeaveChat,
   });
 
   final Uri? avatarUri;
@@ -228,6 +246,8 @@ class _Information extends StatelessWidget {
   final void Function()? onBlockUser;
   final ValueNotifier<bool?> blockUserLoadingNotifier;
   final bool isAlreadyInChat;
+  final Room? room;
+  final void Function()? onLeaveChat;
 
   bool canAddContact(Either<Failure, Success> state) {
     if (PlatformInfos.isMobile || matrixId == null) return false;
@@ -248,15 +268,13 @@ class _Information extends StatelessWidget {
             userInfo.getSuccessOrNull<GetUserInfoSuccess>()?.userInfo;
         return Column(
           children: [
-            Padding(
-              padding: ChatProfileInfoStyle.mainPadding,
-              child: LayoutBuilder(
-                builder: (context, constraints) => Builder(
+            Stack(
+              children: [
+                Builder(
                   builder: (context) {
                     final text = displayName?.getShortcutNameForAvatar() ?? '@';
                     final placeholder = Container(
                       decoration: BoxDecoration(
-                        shape: BoxShape.circle,
                         gradient: LinearGradient(
                           begin: Alignment.topLeft,
                           end: Alignment.bottomRight,
@@ -264,8 +282,8 @@ class _Information extends StatelessWidget {
                           stops: RoundAvatarStyle.defaultGradientStops,
                         ),
                       ),
-                      width: ChatProfileInfoStyle.avatarSize,
-                      height: ChatProfileInfoStyle.avatarSize,
+                      width: double.infinity,
+                      height: ChatProfileInfoStyle.avatarHeight,
                       child: Center(
                         child: Text(
                           text,
@@ -288,13 +306,10 @@ class _Information extends StatelessWidget {
                     );
                   },
                 ),
-              ),
-            ),
-            Padding(
-              padding: ChatProfileInfoStyle.mainPadding,
-              child: Column(
-                children: [
-                  OptionalSelectionArea(
+                Positioned(
+                  bottom: 16,
+                  left: 16,
+                  child: OptionalSelectionArea(
                     isEnabled: PlatformInfos.isWeb,
                     child: _buildDisplayNameWidget(
                       context: context,
@@ -302,6 +317,13 @@ class _Information extends StatelessWidget {
                       userInfoModel: userInfoModel,
                     ),
                   ),
+                ),
+              ],
+            ),
+            Padding(
+              padding: ChatProfileInfoStyle.mainPadding,
+              child: Column(
+                children: [
                   if (!isAlreadyInChat)
                     Padding(
                       padding: const EdgeInsets.symmetric(vertical: 8),
@@ -334,6 +356,7 @@ class _Information extends StatelessWidget {
                           _CopiableRowWithSvgIcon(
                             iconPath: ImagePaths.icMatrixid,
                             text: matrixId!,
+                            title: L10n.of(context)!.username,
                           ),
                         userInfo.fold(
                           (failure) => const SizedBox.shrink(),
@@ -348,9 +371,11 @@ class _Information extends StatelessWidget {
                                     ),
                                     _CopiableRowWithMaterialIcon(
                                       icon: Icons.alternate_email,
+                                      title: L10n.of(context)!.email,
                                       text: success
                                               .userInfo.emails?.firstOrNull ??
                                           '',
+                                      enableDivider: true,
                                     ),
                                   },
                                   if (success.userInfo.phones?.firstOrNull !=
@@ -360,6 +385,7 @@ class _Information extends StatelessWidget {
                                     ),
                                     _CopiableRowWithMaterialIcon(
                                       icon: Icons.call,
+                                      title: L10n.of(context)!.phoneNumber,
                                       text: success
                                               .userInfo.phones?.firstOrNull ??
                                           '',
@@ -384,6 +410,23 @@ class _Information extends StatelessWidget {
                             );
                           },
                         ),
+                        if (room?.isDirectChat == true) ...[
+                          const SizedBox(
+                            height: ChatProfileInfoStyle.textSpacing,
+                          ),
+                          InkWell(
+                            hoverColor: Colors.transparent,
+                            highlightColor: Colors.transparent,
+                            focusColor: Colors.transparent,
+                            splashColor: Colors.transparent,
+                            onTap: onLeaveChat,
+                            child: _CopiableRowWithMaterialIcon(
+                              icon: Icons.logout_outlined,
+                              text: L10n.of(context)!.leaveChat,
+                              enableCopy: false,
+                            ),
+                          ),
+                        ],
                         const SizedBox(
                           height: ChatProfileInfoStyle.textSpacing,
                         ),
@@ -406,6 +449,7 @@ class _Information extends StatelessWidget {
                                   child: _CopiableRowWithSvgIcon(
                                     iconPath: ImagePaths.icFrontHand,
                                     enableCopyIcon: false,
+                                    enableDivider: false,
                                     text: isBlockedUser
                                         ? L10n.of(context)!.unblockUser
                                         : L10n.of(context)!.blockUser,
@@ -456,15 +500,17 @@ class _Information extends StatelessWidget {
         return Avatar(
           mxContent: avatarUri,
           name: userInfoModel?.displayName ?? displayName,
-          size: ChatProfileInfoStyle.avatarSize,
+          size: ChatProfileInfoStyle.avatarHeight,
+          sizeWidth: double.infinity,
+          isCircle: false,
           fontSize: ChatProfileInfoStyle.avatarFontSize,
         );
       },
       (success) {
         if (success is GettingUserInfo) {
           return SizedBox(
-            width: ChatProfileInfoStyle.avatarSize,
-            height: ChatProfileInfoStyle.avatarSize,
+            width: double.infinity,
+            height: ChatProfileInfoStyle.avatarHeight,
             child: Center(
               child: CupertinoActivityIndicator(
                 animating: true,
@@ -479,14 +525,18 @@ class _Information extends StatelessWidget {
                 ? Uri.parse(userInfoModel?.avatarUrl ?? '')
                 : avatarUri,
             name: userInfoModel?.displayName ?? displayName,
-            size: ChatProfileInfoStyle.avatarSize,
+            sizeWidth: double.infinity,
+            size: ChatProfileInfoStyle.avatarHeight,
+            isCircle: false,
             fontSize: ChatProfileInfoStyle.avatarFontSize,
           );
         }
         return Avatar(
           mxContent: avatarUri,
           name: userInfoModel?.displayName ?? displayName,
-          size: ChatProfileInfoStyle.avatarSize,
+          sizeWidth: double.infinity,
+          size: ChatProfileInfoStyle.avatarHeight,
+          isCircle: false,
           fontSize: ChatProfileInfoStyle.avatarFontSize,
         );
       },
@@ -577,48 +627,90 @@ class _CopiableRowWithMaterialIcon extends StatelessWidget {
   const _CopiableRowWithMaterialIcon({
     required this.icon,
     required this.text,
+    this.title,
+    this.enableDivider = true,
+    this.enableCopy = true,
   });
 
   final IconData icon;
   final String text;
+  final String? title;
+  final bool enableDivider;
+  final bool enableCopy;
 
   @override
   Widget build(BuildContext context) {
-    return Row(
+    return Column(
       children: [
-        Padding(
-          padding: const EdgeInsets.all(ChatProfileInfoStyle.iconPadding),
-          child: Icon(
-            icon,
-            size: ChatProfileInfoStyle.iconSize,
-            color: LinagoraSysColors.material().onSurface,
-          ),
-        ),
-        Expanded(
-          child: Padding(
-            padding: ChatProfileInfoStyle.textPadding,
-            child: Text(
-              text,
-              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                    color: LinagoraSysColors.material().onSurface,
-                  ),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
+        Row(
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(ChatProfileInfoStyle.iconPadding),
+              child: Icon(
+                icon,
+                size: ChatProfileInfoStyle.iconSize,
+                color: LinagoraSysColors.material().tertiary,
+              ),
             ),
-          ),
+            Expanded(
+              child: Padding(
+                padding: ChatProfileInfoStyle.textPadding,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    if (title != null)
+                      Text(
+                        title!,
+                        style: Theme.of(context)
+                            .textTheme
+                            .labelMedium
+                            ?.copyWith(
+                              color: LinagoraRefColors.material().neutral[40],
+                            ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    Text(
+                      text,
+                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                            color: LinagoraSysColors.material().onSurface,
+                          ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            if (enableCopy)
+              IconButton(
+                icon: Icon(
+                  Icons.content_copy,
+                  size: ChatProfileInfoStyle.copyIconSize,
+                  color: LinagoraRefColors.material().tertiary[40],
+                ),
+                color: LinagoraRefColors.material().tertiary[40],
+                onPressed: () {
+                  TwakeClipboard.instance.copyText(text);
+                  TwakeSnackBar.show(
+                    context,
+                    L10n.of(context)!.copiedToClipboard,
+                  );
+                },
+              ),
+          ],
         ),
-        IconButton(
-          icon: Icon(
-            Icons.content_copy,
-            size: ChatProfileInfoStyle.copyIconSize,
-            color: LinagoraRefColors.material().tertiary[40],
+        if (enableDivider) ...[
+          const SizedBox(height: 8),
+          Container(
+            width: double.infinity,
+            height: 1,
+            margin: const EdgeInsets.only(left: 48),
+            color: LinagoraStateLayer(
+              LinagoraSysColors.material().surfaceTint,
+            ).opacityLayer3,
           ),
-          color: LinagoraRefColors.material().tertiary[40],
-          onPressed: () {
-            TwakeClipboard.instance.copyText(text);
-            TwakeSnackBar.show(context, L10n.of(context)!.copiedToClipboard);
-          },
-        ),
+        ],
       ],
     );
   }
@@ -628,10 +720,12 @@ class _CopiableRowWithSvgIcon extends StatelessWidget {
   const _CopiableRowWithSvgIcon({
     required this.iconPath,
     required this.text,
+    this.title,
     this.textColor,
     this.iconColor,
     this.enableCopyIcon = true,
     this.actionIcon,
+    this.enableDivider = true,
   });
 
   final String iconPath;
@@ -640,51 +734,89 @@ class _CopiableRowWithSvgIcon extends StatelessWidget {
   final Color? iconColor;
   final bool enableCopyIcon;
   final Widget? actionIcon;
+  final String? title;
+  final bool enableDivider;
 
   @override
   Widget build(BuildContext context) {
-    return Row(
+    return Column(
       children: [
-        Padding(
-          padding: const EdgeInsets.all(ChatProfileInfoStyle.iconPadding),
-          child: SvgPicture.asset(
-            iconPath,
-            width: ChatProfileInfoStyle.iconSize,
-            height: ChatProfileInfoStyle.iconSize,
-            colorFilter: ColorFilter.mode(
-              iconColor ?? LinagoraSysColors.material().onSurface,
-              BlendMode.srcIn,
+        Row(
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(ChatProfileInfoStyle.iconPadding),
+              child: SvgPicture.asset(
+                iconPath,
+                width: ChatProfileInfoStyle.iconSize,
+                height: ChatProfileInfoStyle.iconSize,
+                colorFilter: ColorFilter.mode(
+                  iconColor ?? LinagoraSysColors.material().tertiary,
+                  BlendMode.srcIn,
+                ),
+              ),
             ),
-          ),
+            Expanded(
+              child: Padding(
+                padding: ChatProfileInfoStyle.textPadding,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    if (title != null)
+                      Text(
+                        title!,
+                        style: Theme.of(context)
+                            .textTheme
+                            .labelMedium
+                            ?.copyWith(
+                              color: LinagoraRefColors.material().neutral[40],
+                            ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    Text(
+                      text,
+                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                            color: textColor ??
+                                LinagoraSysColors.material().onSurface,
+                          ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            actionIcon ?? const SizedBox.shrink(),
+            if (enableCopyIcon)
+              IconButton(
+                icon: Icon(
+                  Icons.content_copy,
+                  size: ChatProfileInfoStyle.copyIconSize,
+                  color: LinagoraRefColors.material().tertiary[40],
+                ),
+                color: LinagoraRefColors.material().tertiary[40],
+                focusColor: Theme.of(context).primaryColor,
+                onPressed: () {
+                  TwakeClipboard.instance.copyText(text);
+                  TwakeSnackBar.show(
+                    context,
+                    L10n.of(context)!.copiedToClipboard,
+                  );
+                },
+              ),
+          ],
         ),
-        Expanded(
-          child: Padding(
-            padding: ChatProfileInfoStyle.textPadding,
-            child: Text(
-              text,
-              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                    color: textColor ?? LinagoraSysColors.material().onSurface,
-                  ),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-            ),
+        if (enableDivider) ...[
+          const SizedBox(height: 8),
+          Container(
+            width: double.infinity,
+            height: 1,
+            margin: const EdgeInsets.only(left: 48),
+            color: LinagoraStateLayer(
+              LinagoraSysColors.material().surfaceTint,
+            ).opacityLayer3,
           ),
-        ),
-        actionIcon ?? const SizedBox.shrink(),
-        if (enableCopyIcon)
-          IconButton(
-            icon: Icon(
-              Icons.content_copy,
-              size: ChatProfileInfoStyle.copyIconSize,
-              color: LinagoraRefColors.material().tertiary[40],
-            ),
-            color: LinagoraRefColors.material().tertiary[40],
-            focusColor: Theme.of(context).primaryColor,
-            onPressed: () {
-              TwakeClipboard.instance.copyText(text);
-              TwakeSnackBar.show(context, L10n.of(context)!.copiedToClipboard);
-            },
-          ),
+        ],
       ],
     );
   }
@@ -697,6 +829,7 @@ class _SizedAppBar extends StatelessWidget {
     required this.contact,
     required this.isAlreadyInChat,
     required this.builder,
+    this.room,
   });
 
   final ValueNotifier<Either<Failure, Success>> userInfoNotifier;
@@ -704,6 +837,7 @@ class _SizedAppBar extends StatelessWidget {
   final PresentationContact? contact;
   final bool isAlreadyInChat;
   final Widget Function(BuildContext context, double height) builder;
+  final Room? room;
 
   double getToolbarHeight(
     BuildContext context,
@@ -719,7 +853,10 @@ class _SizedAppBar extends StatelessWidget {
         if (success is GetUserInfoSuccess) {
           if (success.userInfo.emails != null &&
               success.userInfo.phones != null) {
-            return ChatDetailViewStyle.maxToolbarHeightSliverAppBar;
+            if (room != null) {
+              return ChatDetailViewStyle.maxToolbarHeightSliverAppBar;
+            }
+            return ChatDetailViewStyle.mediumToolbarHeightSliverAppBar;
           }
 
           if (success.userInfo.emails != null ||

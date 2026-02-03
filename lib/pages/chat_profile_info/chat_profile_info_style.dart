@@ -10,7 +10,7 @@ class ChatProfileInfoStyle {
   static const double textSpacing = 4;
 
   static const double avatarFontSize = 36;
-  static const double avatarSize = 96;
+  static const double avatarHeight = 304;
 
   static const double toolbarHeightSliverAppBar = 340.0;
 
@@ -19,7 +19,7 @@ class ChatProfileInfoStyle {
   static BorderRadius copiableContainerBorderRadius = BorderRadius.circular(16);
 
   static const EdgeInsetsGeometry mainPadding =
-      EdgeInsets.symmetric(horizontal: 20, vertical: 16);
+      EdgeInsets.symmetric(horizontal: 20, vertical: 12);
 
   static const EdgeInsetsGeometry backIconPadding =
       EdgeInsets.symmetric(vertical: 8, horizontal: 4);

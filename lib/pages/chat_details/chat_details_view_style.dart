@@ -15,9 +15,9 @@ class ChatDetailViewStyle {
       EdgeInsets.symmetric(horizontal: 4.0, vertical: 8.0);
 
   // Informations Content
-  static const double minToolbarHeightSliverAppBar = 376.0;
-  static const double mediumToolbarHeightSliverAppBar = 416.0;
-  static const double maxToolbarHeightSliverAppBar = 464.0;
+  static const double minToolbarHeightSliverAppBar = 528.0;
+  static const double mediumToolbarHeightSliverAppBar = 620.0;
+  static const double maxToolbarHeightSliverAppBar = 668.0;
   static const double groupToolbarHeightSliverAppBar = 360.0;
   static const double avatarSize = 96;
   static double chatDetailsPageViewWebBorderRadius = 16.0;
