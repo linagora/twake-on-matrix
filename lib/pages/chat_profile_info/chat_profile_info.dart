@@ -18,6 +18,7 @@ import 'package:fluffychat/presentation/extensions/client_extension.dart';
 import 'package:fluffychat/presentation/extensions/contact/presentation_contact_extension.dart';
 import 'package:fluffychat/presentation/mixins/chat_details_tab_mixin.dart';
 import 'package:fluffychat/presentation/mixins/handle_video_download_mixin.dart';
+import 'package:fluffychat/presentation/mixins/leave_chat_mixin.dart';
 import 'package:fluffychat/presentation/mixins/play_video_action_mixin.dart';
 import 'package:fluffychat/presentation/model/contact/presentation_contact.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
@@ -53,7 +54,8 @@ class ChatProfileInfoController extends State<ChatProfileInfo>
         HandleVideoDownloadMixin,
         PlayVideoActionMixin,
         TickerProviderStateMixin,
-        ChatDetailsTabMixin<ChatProfileInfo> {
+        ChatDetailsTabMixin<ChatProfileInfo>,
+        LeaveChatMixin {
   final _getUserInfoInteractor = getIt.get<GetUserInfoInteractor>();
 
   StreamSubscription? userInfoNotifierSub;

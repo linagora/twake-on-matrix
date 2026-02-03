@@ -8,21 +8,25 @@ class Avatar extends StatelessWidget {
   final Uri? mxContent;
   final String? name;
   final double size;
+  final double? sizeWidth;
   final void Function()? onTap;
   final double fontSize;
   final List<BoxShadow>? boxShadows;
   final Color? textColor;
   final bool keepAlive;
+  final bool isCircle;
 
   const Avatar({
     this.mxContent,
     this.name,
     this.size = AvatarStyle.defaultSize,
+    this.sizeWidth,
     this.onTap,
     this.fontSize = AvatarStyle.defaultFontSize,
     this.boxShadows,
     this.textColor,
     this.keepAlive = false,
+    this.isCircle = true,
     super.key,
   });
 
@@ -34,14 +38,16 @@ class Avatar extends StatelessWidget {
       shadowColor: Colors.transparent,
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(size / 2),
+        borderRadius: isCircle ? BorderRadius.circular(size / 2) : null,
         child: ClipRRect(
-          borderRadius: BorderRadius.circular(size / 2),
+          borderRadius:
+              isCircle ? BorderRadius.circular(size / 2) : BorderRadius.zero,
           child: MxcImage(
             key: Key(mxContent.toString()),
             uri: mxContent,
+            rounded: isCircle,
             fit: BoxFit.cover,
-            width: size,
+            width: sizeWidth ?? size,
             height: size,
             cacheWidth: (size * MediaQuery.devicePixelRatioOf(context) * 2)
                 .round(),

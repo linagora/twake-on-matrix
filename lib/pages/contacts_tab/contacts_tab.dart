@@ -75,11 +75,16 @@ class ContactsTabController extends State<ContactsTab>
       goToSettingsProfile();
       return;
     }
-    final roomId = Matrix.of(
-      context,
-    ).client.getDirectChatFromUserId(contact.matrixId!);
-    if (roomId == null) {
-      goToDraftChat(context: context, path: path, contact: contact);
+    final roomId =
+        Matrix.of(context).client.getDirectChatFromUserId(contact.matrixId!);
+    final room =
+        roomId != null ? Matrix.of(context).client.getRoomById(roomId) : null;
+    if (roomId == null || room?.isAbandonedDMRoom == true) {
+      goToDraftChat(
+        context: context,
+        path: path,
+        contact: contact,
+      );
     } else {
       context.go('/$path/$roomId');
     }

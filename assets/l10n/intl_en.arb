@@ -3651,5 +3651,6 @@
   },
   "tapToRetry": "Tap to retry",
   "fileNoLongerExists": "File no longer exists",
-  "cannotInviteBannedMember": "This user has been removed by an administrator. Change status in \"Removed users\" to proceed"
+  "cannotInviteBannedMember": "This user has been removed by an administrator. Change status in \"Removed users\" to proceed",
+  "leaveChat": "Leave chat"
 }

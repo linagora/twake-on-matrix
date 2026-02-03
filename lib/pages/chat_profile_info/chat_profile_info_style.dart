@@ -10,7 +10,7 @@ class ChatProfileInfoStyle {
   static const double textSpacing = 4;
 
   static const double avatarFontSize = 36;
-  static const double avatarSize = 96;
+  static const double avatarHeight = 304;
 
   static const double toolbarHeightSliverAppBar = 340.0;
 
@@ -20,7 +20,7 @@ class ChatProfileInfoStyle {
 
   static const EdgeInsetsGeometry mainPadding = EdgeInsets.symmetric(
     horizontal: 20,
-    vertical: 16,
+    vertical: 12,
   );
 
   static const EdgeInsetsGeometry backIconPadding = EdgeInsets.symmetric(
@@ -53,8 +53,8 @@ class ChatProfileInfoStyle {
 
   static TextStyle? tabBarUnselectedLabelStyle(BuildContext context) =>
       Theme.of(context).textTheme.titleSmall?.copyWith(
-        color: Theme.of(context).colorScheme.onSurfaceVariant,
-      );
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
+          );
 
   static Decoration tabViewDecoration = BoxDecoration(
     color: LinagoraRefColors.material().primary[100],
