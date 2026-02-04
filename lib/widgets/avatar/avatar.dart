@@ -4,18 +4,14 @@ import 'package:fluffychat/widgets/mxc_image.dart';
 import 'package:flutter/material.dart';
 import 'package:linagora_design_flutter/avatar/round_avatar.dart';
 
-import 'package:matrix/matrix.dart';
-
 class Avatar extends StatelessWidget {
   final Uri? mxContent;
   final String? name;
   final double size;
   final void Function()? onTap;
-  final Client? client;
   final double fontSize;
   final List<BoxShadow>? boxShadows;
   final Color? textColor;
-  final TextStyle? textStyle;
   final bool keepAlive;
 
   const Avatar({
@@ -23,10 +19,8 @@ class Avatar extends StatelessWidget {
     this.name,
     this.size = AvatarStyle.defaultSize,
     this.onTap,
-    this.client,
     this.fontSize = AvatarStyle.defaultFontSize,
     this.boxShadows,
-    this.textStyle,
     this.textColor,
     this.keepAlive = false,
     super.key,

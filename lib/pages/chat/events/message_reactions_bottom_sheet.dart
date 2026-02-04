@@ -208,7 +208,6 @@ class _MessageReactionsBottomSheetState
                                     size: 24,
                                     mxContent: reactor.avatarUrl,
                                     name: reactor.displayName,
-                                    client: widget.client,
                                   ),
                                   const SizedBox(width: 8),
                                   Expanded(

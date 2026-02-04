@@ -578,7 +578,6 @@ class SuggestionTile extends StatelessWidget {
                           size: InputBarStyle.suggestionAvatarSize * 0.9,
                           fontSize:
                               InputBarStyle.suggestionAvatarFontSize * 0.9,
-                          client: client,
                         )
                       : Text(suggestion['pack_display_name']!),
                 ),
@@ -602,7 +601,6 @@ class SuggestionTile extends StatelessWidget {
                   suggestion.tryGet<String>('mxid'),
               size: InputBarStyle.suggestionAvatarSize,
               fontSize: InputBarStyle.suggestionAvatarFontSize,
-              client: client,
             ),
             const SizedBox(
               width: InputBarStyle.suggestionTileAvatarTextGap,
