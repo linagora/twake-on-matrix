@@ -67,6 +67,30 @@ class _ParticipantListItemState extends State<ParticipantListItem>
 
   @override
   Widget build(BuildContext context) {
+    final roleName = ValueListenableBuilder(
+      valueListenable: isHoverParticipantItemNotifier,
+      builder: (context, isHover, child) {
+        if (!isHover) {
+          return child ?? const SizedBox.shrink();
+        }
+        return const SizedBox.shrink();
+      },
+      child: Padding(
+        padding: const EdgeInsets.only(right: 16),
+        child: Text(
+          widget.member.getDefaultPowerLevelMember.displayName(
+            context,
+            hidden: [
+              DefaultPowerLevelMember.member,
+            ],
+          ),
+          style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                color: LinagoraRefColors.material().tertiary[30],
+              ),
+        ),
+      ),
+    );
+
     Widget child = TwakeInkWell(
       onTap: () async => await _onItemTap(context),
       onLongPress: () => _handleLongPress(context),
@@ -120,29 +144,7 @@ class _ParticipantListItemState extends State<ParticipantListItem>
                                       ),
                                 ),
                               ),
-                              ValueListenableBuilder(
-                                valueListenable: isHoverParticipantItemNotifier,
-                                builder: (context, isHover, _) {
-                                  if (!isHover) {
-                                    return Padding(
-                                      padding: const EdgeInsets.only(right: 16),
-                                      child: Text(
-                                        widget.member.getDefaultPowerLevelMember
-                                            .displayName(context),
-                                        style: Theme.of(context)
-                                            .textTheme
-                                            .labelMedium
-                                            ?.copyWith(
-                                              color:
-                                                  LinagoraRefColors.material()
-                                                      .tertiary[30],
-                                            ),
-                                      ),
-                                    );
-                                  }
-                                  return const SizedBox.shrink();
-                                },
-                              ),
+                              roleName,
                             ],
                           ),
                           const SizedBox(height: 4.0),
