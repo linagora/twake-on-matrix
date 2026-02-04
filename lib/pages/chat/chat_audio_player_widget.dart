@@ -8,6 +8,7 @@ import 'package:fluffychat/resource/image_paths.dart';
 import 'package:fluffychat/utils/localized_exception_extension.dart';
 import 'package:fluffychat/utils/string_extension.dart';
 import 'package:fluffychat/widgets/matrix.dart';
+import 'package:fluffychat/presentation/mixins/audio_mixin.dart';
 import 'package:fluffychat/widgets/twake_components/twake_icon_button.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -16,10 +17,9 @@ import 'package:fluffychat/generated/l10n/app_localizations.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:matrix/matrix.dart';
-import 'package:opus_caf_converter_dart/opus_caf_converter_dart.dart';
 import 'package:path_provider/path_provider.dart';
 
-class ChatAudioPlayerWidget extends StatelessWidget {
+class ChatAudioPlayerWidget extends StatefulWidget {
   final MatrixState? matrix;
   final bool enableBorder;
 
@@ -29,29 +29,45 @@ class ChatAudioPlayerWidget extends StatelessWidget {
     super.key,
   });
 
+  static final _defaultAudioStatus = ValueNotifier<AudioPlayerStatus>(
+    AudioPlayerStatus.notDownloaded,
+  );
+  static final _defaultEvent = ValueNotifier<Event?>(null);
+
+  @override
+  State<ChatAudioPlayerWidget> createState() => _ChatAudioPlayerWidgetState();
+}
+
+class _ChatAudioPlayerWidgetState extends State<ChatAudioPlayerWidget>
+    with AudioMixin {
   @override
   Widget build(BuildContext context) {
-    final defaultAudioStatus = ValueNotifier<AudioPlayerStatus>(
-      AudioPlayerStatus.notDownloaded,
-    );
-    final defaultEvent = ValueNotifier<Event?>(null);
+    // Return empty if matrix is not available
+    if (widget.matrix == null) {
+      return const SizedBox.shrink();
+    }
+
     return ValueListenableBuilder(
-      valueListenable: matrix?.currentAudioStatus ?? defaultAudioStatus,
+      valueListenable: widget.matrix?.currentAudioStatus ??
+          ChatAudioPlayerWidget._defaultAudioStatus,
       builder: (context, status, _) {
         return ValueListenableBuilder(
-          valueListenable: matrix?.voiceMessageEvent ?? defaultEvent,
+          valueListenable: widget.matrix?.voiceMessageEvent ??
+              ChatAudioPlayerWidget._defaultEvent,
           builder: (context, hasEvent, _) {
             if (hasEvent == null) {
               return const SizedBox.shrink();
             }
-            final audioPlayer = matrix?.audioPlayer;
+            final audioPlayer = widget.matrix?.audioPlayer;
             return StreamBuilder<Object>(
               stream: StreamGroup.merge([
-                matrix?.audioPlayer.positionStream.asBroadcastStream() ??
+                widget.matrix?.audioPlayer?.positionStream
+                        .asBroadcastStream() ??
                     Stream.value(Duration.zero),
-                matrix?.audioPlayer.playerStateStream.asBroadcastStream() ??
+                widget.matrix?.audioPlayer?.playerStateStream
+                        .asBroadcastStream() ??
                     Stream.value(Duration.zero),
-                matrix?.audioPlayer.speedStream.asBroadcastStream() ??
+                widget.matrix?.audioPlayer?.speedStream.asBroadcastStream() ??
                     Stream.value(Duration.zero),
               ]),
               builder: (context, snapshot) {
@@ -67,7 +83,7 @@ class ChatAudioPlayerWidget extends StatelessWidget {
                   constraints: const BoxConstraints(maxHeight: 40),
                   decoration: BoxDecoration(
                     color: LinagoraSysColors.material().onPrimary,
-                    border: enableBorder
+                    border: widget.enableBorder
                         ? Border(
                             top: BorderSide(
                               color: LinagoraStateLayer(
@@ -150,31 +166,22 @@ class ChatAudioPlayerWidget extends StatelessWidget {
   }
 
   Future<void> _handleCloseAudioPlayer() async {
-    matrix?.voiceMessageEvent.value = null;
-    matrix?.cancelAudioPlayerAutoDispose();
-    await matrix?.audioPlayer.stop();
-    await matrix?.audioPlayer.dispose();
-    matrix?.currentAudioStatus.value = AudioPlayerStatus.notDownloaded;
-  }
-
-  Future<File> _handleOggAudioFileIniOS(File file) async {
-    Logs().v('Convert ogg audio file for iOS...');
-    final convertedFile = File('${file.path}.caf');
-    if (await convertedFile.exists() == false) {
-      OpusCaf().convertOpusToCaf(file.path, convertedFile.path);
-    }
-    return convertedFile;
+    widget.matrix?.voiceMessageEvent.value = null;
+    widget.matrix?.cancelAudioPlayerAutoDispose();
+    await widget.matrix?.audioPlayer?.stop();
+    await widget.matrix?.audioPlayer?.dispose();
+    widget.matrix?.currentAudioStatus.value = AudioPlayerStatus.notDownloaded;
   }
 
   Future<void> _handlePlayAudioAgain(BuildContext context) async {
     File? file;
     MatrixFile? matrixFile;
-    await matrix?.audioPlayer.stop();
-    await matrix?.audioPlayer.dispose();
-    matrix?.currentAudioStatus.value = AudioPlayerStatus.notDownloaded;
-    final currentEvent = matrix?.voiceMessageEvent.value;
+    await widget.matrix?.audioPlayer?.stop();
+    await widget.matrix?.audioPlayer?.dispose();
+    widget.matrix?.currentAudioStatus.value = AudioPlayerStatus.notDownloaded;
+    final currentEvent = widget.matrix?.voiceMessageEvent.value;
 
-    matrix?.currentAudioStatus.value = AudioPlayerStatus.downloading;
+    widget.matrix?.currentAudioStatus.value = AudioPlayerStatus.downloading;
 
     try {
       matrixFile = await currentEvent?.downloadAndDecryptAttachment();
@@ -194,23 +201,31 @@ class ChatAudioPlayerWidget extends StatelessWidget {
 
         if (Platform.isIOS &&
             matrixFile?.mimeType.toLowerCase() == 'audio/ogg') {
-          file = await _handleOggAudioFileIniOS(file);
+          final converted = await handleOggAudioFileIniOS(file);
+          if (converted == null) {
+            throw Exception('OGG to CAF conversion failed');
+          }
+          file = converted;
         }
       }
 
-      matrix?.currentAudioStatus.value = AudioPlayerStatus.downloaded;
+      widget.matrix?.currentAudioStatus.value = AudioPlayerStatus.downloaded;
     } catch (e, s) {
-      Logs().v('Could not download audio file', e, s);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(e.toLocalizedString(context)),
-        ),
-      );
-      rethrow;
+      Logs().e('Could not download audio file', e, s);
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(e.toLocalizedString(context)),
+          ),
+        );
+      }
+      widget.matrix?.currentAudioStatus.value = AudioPlayerStatus.notDownloaded;
+      return;
     }
     if (!context.mounted) return;
 
-    if (matrix == null) {
+    if (widget.matrix == null) {
+      if (!context.mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(L10n.of(context)!.couldNotPlayAudioFile),
@@ -219,13 +234,13 @@ class ChatAudioPlayerWidget extends StatelessWidget {
       return;
     }
 
-    matrix!.audioPlayer = AudioPlayer();
+    widget.matrix!.audioPlayer = AudioPlayer();
 
     if (file != null) {
-      await matrix?.audioPlayer.setFilePath(file.path);
+      await widget.matrix?.audioPlayer?.setFilePath(file.path);
     } else if (matrixFile != null) {
-      await matrix?.audioPlayer
-          .setAudioSource(MatrixFileAudioSource(matrixFile));
+      await widget.matrix?.audioPlayer
+          ?.setAudioSource(MatrixFileAudioSource(matrixFile));
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -236,10 +251,13 @@ class ChatAudioPlayerWidget extends StatelessWidget {
     }
 
     // Set up auto-dispose listener managed globally in MatrixState
-    matrix?.setupAudioPlayerAutoDispose();
+    widget.matrix?.setupAudioPlayerAutoDispose(context: context);
 
-    matrix?.audioPlayer.play().onError((e, s) {
+    widget.matrix?.audioPlayer?.play().onError((e, s) {
       Logs().e('Could not play audio file', e, s);
+      widget.matrix?.voiceMessageEvent.value = null;
+      widget.matrix?.currentAudioStatus.value = AudioPlayerStatus.notDownloaded;
+      if (!context.mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
@@ -252,7 +270,7 @@ class ChatAudioPlayerWidget extends StatelessWidget {
   }
 
   Future<void> _handlePlayOrPauseAudioPlayer(BuildContext context) async {
-    final audioPlayer = matrix?.audioPlayer;
+    final audioPlayer = widget.matrix?.audioPlayer;
     if (audioPlayer == null) return;
     if (audioPlayer.isAtEndPosition) {
       await _handlePlayAudioAgain(context);
