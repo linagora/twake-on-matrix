@@ -77,6 +77,13 @@ class CreateDirectChatInteractor {
         }
       }
 
+      // Verify the contact is reachable on their homeserver before
+      // creating the room.  getUserProfile (unlike getProfileFromUserId)
+      // rethrows when the server request fails and there is no cached
+      // copy, so a federation denial or unknown user surfaces here
+      // instead of silently producing an empty DM later.
+      await client.getUserProfile(contactMxId);
+
       // Create new direct chat room with the contact invited at creation
       // time. The invite must be part of the createRoom payload so the
       // server associates is_direct with an actual two-party room from the
@@ -109,8 +116,12 @@ class CreateDirectChatInteractor {
       if (roomId != null) {
         try {
           await client.leaveRoom(roomId);
+          await client.forgetRoom(roomId);
         } catch (e) {
-          Logs().e('CreateDirectChatInteractor: Failed to leave room', e);
+          Logs().e(
+            'CreateDirectChatInteractor: Failed to clean up room',
+            e,
+          );
         }
       }
       yield Left(CreateDirectChatFailed(exception: e));
