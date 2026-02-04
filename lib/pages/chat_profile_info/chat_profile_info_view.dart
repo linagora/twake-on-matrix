@@ -520,7 +520,7 @@ class _Information extends StatelessWidget {
           );
         }
         if (success is GetUserInfoSuccess) {
-          Avatar(
+          return Avatar(
             mxContent: userInfoModel?.avatarUrl != null
                 ? Uri.parse(userInfoModel?.avatarUrl ?? '')
                 : avatarUri,
