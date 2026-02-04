@@ -107,6 +107,8 @@ class _RightColumnNavigator extends StatelessWidget {
           closeRightColumn: controller.hideRightColumn,
           roomId: roomId,
           isInStack: isInStack,
+          onTapSearch: () =>
+              controller.setRightColumnType(RightColumnType.search),
         );
     }
   }

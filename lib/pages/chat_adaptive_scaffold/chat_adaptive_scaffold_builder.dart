@@ -1,4 +1,3 @@
-import 'package:fluffychat/pages/chat/events/message/message_style.dart';
 import 'package:fluffychat/presentation/enum/chat/right_column_type_enum.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/utils/responsive/responsive_utils.dart';
@@ -69,7 +68,7 @@ class ChatAdaptiveScaffoldBuilderController
 
   @override
   Widget build(BuildContext context) {
-    final breakpoint = getBreakpoint(context);
+    final breakpoint = responsiveUtils.getChatAdaptiveBreakPoint(context);
     return ValueListenableBuilder(
       valueListenable: rightColumnTypeNotifier,
       builder: (context, rightColumnType, body) {
@@ -135,15 +134,5 @@ class ChatAdaptiveScaffoldBuilderController
       },
       child: widget.bodyBuilder(this),
     );
-  }
-
-  double getBreakpoint(BuildContext context) {
-    var breakpoint = responsiveUtils.getMinDesktopWidth(context);
-    if (breakpoint < 0) {
-      breakpoint =
-          ResponsiveUtils.minTabletWidth +
-          MessageStyle.messageBubbleDesktopMaxWidth;
-    }
-    return breakpoint;
   }
 }

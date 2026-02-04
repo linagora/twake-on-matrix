@@ -1,4 +1,5 @@
 import 'package:fluffychat/config/app_config.dart';
+import 'package:fluffychat/pages/chat/events/message/message_style.dart';
 import 'package:fluffychat/utils/extension/build_context_extension.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:flutter/widgets.dart';
@@ -122,5 +123,21 @@ class ResponsiveUtils {
   bool enableRightAndLeftMessageAlignment(BuildContext context) {
     return isMobile(context) ||
         AppConfig.enableRightAndLeftMessageAlignmentOnWeb;
+  }
+
+  double getChatAdaptiveBreakPoint(BuildContext context) {
+    var breakpoint = getMinDesktopWidth(context);
+    if (breakpoint < 0) {
+      breakpoint =
+          ResponsiveUtils.minTabletWidth +
+          MessageStyle.messageBubbleDesktopMaxWidth;
+    }
+    return breakpoint;
+  }
+
+  bool isRightColumnStacked(BuildContext context) {
+    final breakpoint = getChatAdaptiveBreakPoint(context);
+    final screenWidth = MediaQuery.sizeOf(context).width;
+    return PlatformInfos.isWeb && screenWidth < breakpoint;
   }
 }

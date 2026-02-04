@@ -1,14 +1,17 @@
 import 'dart:async';
 import 'dart:math';
 import 'dart:typed_data';
+
 import 'package:fluffychat/app_state/failure.dart';
 import 'package:fluffychat/app_state/success.dart';
 import 'package:fluffychat/config/default_power_level_member.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/domain/app_state/room/ban_user_state.dart';
 import 'package:fluffychat/domain/app_state/room/set_permission_level_state.dart';
+import 'package:fluffychat/domain/model/room/room_extension.dart';
 import 'package:fluffychat/domain/usecase/room/ban_user_interactor.dart';
 import 'package:fluffychat/domain/usecase/room/set_permission_level_interactor.dart';
+import 'package:fluffychat/generated/l10n/app_localizations.dart';
 import 'package:fluffychat/pages/chat_details/assign_roles_member_picker/selected_user_notifier.dart';
 import 'package:fluffychat/pages/chat_details/assign_roles_role_picker/assign_roles_role_picker.dart';
 import 'package:fluffychat/pages/chat_details/assign_roles_role_picker/role_picker_type_enum.dart';
@@ -35,10 +38,8 @@ import 'package:fluffychat/utils/twake_snackbar.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:fluffychat/generated/l10n/app_localizations.dart';
 import 'package:flutter_adaptive_scaffold/flutter_adaptive_scaffold.dart';
 import 'package:matrix/matrix.dart';
-import 'package:fluffychat/domain/model/room/room_extension.dart';
 
 mixin ChatDetailsTabMixin<T extends StatefulWidget>
     on
@@ -283,6 +284,7 @@ mixin ChatDetailsTabMixin<T extends StatefulWidget>
           onSelectMember: _onSelectMember,
           onRemoveMember: _handleOnRemoveMember,
           onChangeRole: _handleChangePermission,
+          onAddMembers: onTapAddMembers,
         ),
       );
     }
