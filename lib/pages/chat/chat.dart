@@ -652,7 +652,7 @@ class ChatController extends State<Chat>
       }
       if (!mounted) return;
     } catch (e, s) {
-      Logs().e('Failed to load timeline', e, s);
+      Logs().wtf('Failed to load timeline', e, s);
       rethrow;
     }
   }
@@ -1291,7 +1291,7 @@ class ChatController extends State<Chat>
         timeline = null;
         loadTimelineFuture = _getTimeline().onError(
           (e, s) {
-            Logs().e('Chat::scrollDown(): Unable to load timeline', e, s);
+            Logs().wtf('Chat::scrollDown(): Unable to load timeline', e, s);
           },
         );
       });
@@ -1629,7 +1629,7 @@ class ChatController extends State<Chat>
         eventContextId: eventId,
       ).onError(
         (e, s) {
-          Logs().e('$logContext: Unable to reload timeline', e, s);
+          Logs().wtf('$logContext: Unable to reload timeline', e, s);
         },
       );
     });

@@ -3,6 +3,7 @@ import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/config/setting_keys.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/utils/client_manager.dart';
+import 'package:fluffychat/utils/logging/init_matrix_logger.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/utils/sentry_init.dart';
 import 'package:flutter/material.dart';
@@ -28,6 +29,7 @@ void main() async {
   // widget bindings are initialized already.
   WidgetsFlutterBinding.ensureInitialized();
   SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
+  initMatrixLogger();
   MediaKit.ensureInitialized();
   await vod.init();
   if (PlatformInfos.isMobile) {
