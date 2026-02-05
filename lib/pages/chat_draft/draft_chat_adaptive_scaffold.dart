@@ -35,6 +35,9 @@ class DraftChatAdaptiveScaffold extends StatelessWidget {
               contact: _contact,
               isInStack: isInStack,
               isDraftInfo: true,
+              onSearch: () => controller.setRightColumnType(
+                RightColumnType.search,
+              ),
             );
           default:
             return const SizedBox();
