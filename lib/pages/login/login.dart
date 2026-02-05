@@ -255,7 +255,7 @@ class LoginController extends State<Login> {
 
 extension on String {
   static final RegExp _phoneRegex =
-      RegExp(r'^[+]*[(]{0,1}[0-9]{1,4}[)]{0,1}[-\s\./0-9]*$');
+      RegExp(r'^[+]?[(]?[0-9]{1,4}[)]?[-\s\./0-9]{0,20}$');
   static final RegExp _emailRegex = RegExp(r'(.+)@(.+)\.(.+)');
 
   bool get isEmail => _emailRegex.hasMatch(this);
