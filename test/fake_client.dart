@@ -45,13 +45,23 @@ class MockDatabase extends Mock implements DatabaseApi {
   }
 
   @override
-  Future<DiscoveryInformation?> getWellKnown() {
+  Future<User?> getUser(String userId, Room room) {
     return Future.value(null);
   }
 
   @override
-  Future<User?> getUser(String userId, Room room) {
+  Future<({Map<String, Object?> content, DateTime savedAt})?>
+  getCustomCacheObject(String key) {
     return Future.value(null);
+  }
+
+  @override
+  Future<void> cacheCustomObject(
+    String key,
+    Map<String, Object?> content, {
+    DateTime? savedAt,
+  }) {
+    return Future.value();
   }
 }
 

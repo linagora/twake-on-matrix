@@ -13,7 +13,7 @@ name: Integration
 jobs:
   integration_test:
     name: Integration Test
-    runs-on: self-hosted   # Run on our self-hosted runner
+    runs-on: self-hosted # Run on our self-hosted runner
     permissions:
       id-token: write
       contents: write
@@ -22,7 +22,7 @@ jobs:
       pull-requests: write
 
     env:
-      FLUTTER_VERSION: "3.32.8"
+      FLUTTER_VERSION: "3.38.9"
       JAVA_VERSION: 17
       ANDROID_SDK_ROOT: "/opt/android-sdk"
 

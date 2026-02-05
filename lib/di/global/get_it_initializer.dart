@@ -4,6 +4,7 @@ import 'package:fluffychat/config/app_grid_config/app_config_loader.dart';
 import 'package:fluffychat/data/datasource/capabilities/server_capabilities_datasource.dart';
 import 'package:fluffychat/data/datasource/contact/address_book_datasource.dart';
 import 'package:fluffychat/data/datasource/contact/hive_third_party_contact_datasource.dart';
+import 'package:fluffychat/data/datasource/contact/contacts_provider.dart';
 import 'package:fluffychat/data/datasource/contact/phonebook_datasource.dart';
 import 'package:fluffychat/data/datasource/federation_configurations_datasource.dart';
 import 'package:fluffychat/data/datasource/invitation/hive_invitation_status_datasource.dart';
@@ -284,8 +285,11 @@ class GetItInitializer {
     getIt.registerFactory<TomContactsDatasource>(
       () => TomContactsDatasourceImpl(),
     );
+    getIt.registerFactory<ContactsProvider>(
+      () => FlutterContactsProviderImpl(),
+    );
     getIt.registerFactory<PhonebookContactDatasource>(
-      () => PhonebookContactDatasourceImpl(),
+      () => PhonebookContactDatasourceImpl(getIt.get<ContactsProvider>()),
     );
     getIt.registerLazySingleton(
       () => MediaDataSourceImpl(

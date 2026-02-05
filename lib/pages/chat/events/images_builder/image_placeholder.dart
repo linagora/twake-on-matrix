@@ -29,7 +29,7 @@ class ImagePlaceholder extends StatelessWidget {
     final String blurHashString =
         event.blurHash ?? AppConfig.defaultImageBlurHash;
     final ratio = event.infoMap['w'] is int && event.infoMap['h'] is int
-        ? event.infoMap['w'] / event.infoMap['h']
+        ? (event.infoMap['w'] as int) / (event.infoMap['h'] as int)
         : 1.0;
     var width = MessageContentStyle.blurhashSize;
     var height = MessageContentStyle.blurhashSize;

@@ -1,5 +1,5 @@
 # Specify versions
-ARG FLUTTER_VERSION=3.32.8
+ARG FLUTTER_VERSION=3.38.9
 
 # Building Twake for the web
 FROM --platform=linux/amd64 ghcr.io/cirruslabs/flutter:${FLUTTER_VERSION} AS web-builder
