@@ -19,8 +19,8 @@ class SaveRecoveryWordsInteractor {
       return response
           ? const Right(SaveRecoveryWordsSuccess())
           : const Left(SaveRecoveryWordsFailed());
-    } catch (e) {
-      Logs().e('SaveRecoveryWordsInteractor::execute() [Exception]', e);
+    } catch (e, s) {
+      Logs().wtf('SaveRecoveryWordsInteractor::execute() [Exception]', e, s);
       return Left(SaveRecoveryWordsFailed(exception: e));
     }
   }

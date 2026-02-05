@@ -127,4 +127,21 @@ class LogOrchestrator {
       ),
     );
   }
+
+  void wtf(
+    String message, {
+    Object? error,
+    StackTrace? stackTrace,
+    Map<String, dynamic>? context,
+  }) {
+    log(
+      LogEntry(
+        message: message,
+        level: LogLevel.wtf,
+        error: error,
+        stackTrace: stackTrace,
+        context: context,
+      ),
+    );
+  }
 }

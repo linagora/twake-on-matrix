@@ -156,9 +156,11 @@ mixin ReceiveSharingIntentMixin<T extends StatefulWidget> on State<T> {
           _cachedSharedMediaFiles = files;
         }
       },
-      onError: (error) {
-        Logs().e(
-          'ReceiveSharingIntentMixin::setupSharingIntentStreams: Media stream error - $error',
+      onError: (error, stackTrace) {
+        Logs().wtf(
+          'ReceiveSharingIntentMixin::setupSharingIntentStreams: Media stream error',
+          error,
+          stackTrace,
         );
       },
     );
@@ -188,9 +190,11 @@ mixin ReceiveSharingIntentMixin<T extends StatefulWidget> on State<T> {
           _cachedSharedUri = uri;
         }
       },
-      onError: (error) {
-        Logs().e(
-          'ReceiveSharingIntentMixin::setupSharingIntentStreams: URI stream error - $error',
+      onError: (error, stackTrace) {
+        Logs().wtf(
+          'ReceiveSharingIntentMixin::setupSharingIntentStreams: URI stream error',
+          error,
+          stackTrace,
         );
       },
     );
@@ -215,7 +219,7 @@ mixin ReceiveSharingIntentMixin<T extends StatefulWidget> on State<T> {
         _cachedSharedUri = uri;
       }
     } catch (e, stackTrace) {
-      Logs().e(
+      Logs().wtf(
         'ReceiveSharingIntentMixin::setupSharingIntentStreams: Error fetching initial intents',
         e,
         stackTrace,
@@ -266,7 +270,7 @@ mixin ReceiveSharingIntentMixin<T extends StatefulWidget> on State<T> {
       try {
         await _processIncomingSharedFiles(_cachedSharedMediaFiles!);
       } catch (e, stackTrace) {
-        Logs().e(
+        Logs().wtf(
           'ReceiveSharingIntentMixin::processCachedSharingIntents: Error processing cached files',
           e,
           stackTrace,
@@ -284,7 +288,7 @@ mixin ReceiveSharingIntentMixin<T extends StatefulWidget> on State<T> {
       try {
         _processIncomingUris(_cachedSharedUri);
       } catch (e, stackTrace) {
-        Logs().e(
+        Logs().wtf(
           'ReceiveSharingIntentMixin::processCachedSharingIntents: Error processing cached URI',
           e,
           stackTrace,

@@ -36,7 +36,7 @@ class TwakeApp extends StatefulWidget {
     debugLogDiagnostics: true,
     navigatorKey: routerKey,
     onException: (context, state, router) {
-      Logs().e('GoRouter exception: ${state.error}');
+      Logs().wtf('GoRouter exception: ${state.error}');
       return router.go('/error');
     },
     initialLocation: PlatformInfos.isIOS ? '/splash' : null,
