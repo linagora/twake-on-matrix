@@ -19,8 +19,8 @@ extension HomeserverSummaryExtensions on HomeserverSummary {
     }
     try {
       return ToMServerInformation.fromJson(tomServerJson);
-    } catch (e) {
-      Logs().e('Failed to parse t.server from homeserver summary', e);
+    } catch (e, s) {
+      Logs().wtf('Failed to parse t.server from homeserver summary', e, s);
       return null;
     }
   }
@@ -38,8 +38,12 @@ extension HomeserverSummaryExtensions on HomeserverSummary {
     }
     try {
       return AppTwakeInformation.fromJson(appTwakeJson);
-    } catch (e) {
-      Logs().e('Failed to parse app.twake.chat from homeserver summary', e);
+    } catch (e, s) {
+      Logs().wtf(
+        'Failed to parse app.twake.chat from homeserver summary',
+        e,
+        s,
+      );
       return null;
     }
   }
@@ -57,10 +61,11 @@ extension HomeserverSummaryExtensions on HomeserverSummary {
     }
     try {
       return FederationServerInformation.fromJson(fedServerJson);
-    } catch (e) {
-      Logs().e(
+    } catch (e, s) {
+      Logs().wtf(
         'Failed to parse m.federated_identity_services from homeserver summary',
         e,
+        s,
       );
       return null;
     }
