@@ -100,6 +100,9 @@ class _RightColumnNavigator extends StatelessWidget {
           onBack: controller.hideRightColumn,
           roomId: roomId,
           isInStack: isInStack,
+          onSearch: () => controller.setRightColumnType(
+            RightColumnType.search,
+          ),
         );
       case RightColumnType.groupChatDetails:
         return ChatDetailsNavigator(

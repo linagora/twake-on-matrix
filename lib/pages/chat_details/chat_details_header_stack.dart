@@ -1,9 +1,10 @@
+import 'package:fluffychat/generated/l10n/app_localizations.dart';
 import 'package:fluffychat/pages/chat_details/chat_details_group_actions_view.dart';
 import 'package:fluffychat/pages/chat_details/chat_details_group_info_background_view.dart';
 import 'package:fluffychat/pages/chat_details/chat_details_group_information_view.dart';
-import 'package:fluffychat/pages/chat_details/chat_details_group_secondary_avatar.dart';
 import 'package:fluffychat/pages/chat_details/chat_details_view_style.dart';
 import 'package:fluffychat/presentation/extensions/room_summary_extension.dart';
+import 'package:fluffychat/widgets/avatar/secondary_avatar.dart';
 import 'package:flutter/material.dart';
 import 'package:matrix/matrix.dart';
 
@@ -36,7 +37,7 @@ class ChatDetailsHeaderStack extends StatelessWidget {
     return Stack(
       children: [
         Positioned.fill(
-          child: ChatDetailsGroupSecondaryAvatar(
+          child: SecondaryAvatar(
             animationController: animationController,
             mxContent: room.avatar,
             name: room.getLocalizedDisplayname(),
@@ -54,9 +55,11 @@ class ChatDetailsHeaderStack extends StatelessWidget {
               height: groupInfoHeight,
               maxHeight: maxGroupInfoHeight,
               animationController: animationController,
-              avatarUri: room.avatar,
               displayName: room.getLocalizedDisplayname(),
-              membersCount: room.summary.actualMembersCount,
+              subTitle: room.summary.actualMembersCount > 0
+                  ? L10n.of(context)
+                      ?.countMembers(room.summary.actualMembersCount)
+                  : '',
               onTap: onGroupInfoTap,
             ),
             ChatDetailsGroupActionsView(
