@@ -1,4 +1,4 @@
-enum LogLevel { debug, info, warn, error }
+enum LogLevel { debug, info, warn, error, wtf }
 
 class LogEntry {
   final String message;

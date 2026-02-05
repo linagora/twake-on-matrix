@@ -21,5 +21,11 @@ class AuthorizationInterceptor extends InterceptorsWrapper {
     super.onRequest(options, handler);
   }
 
+  @override
+  void onError(DioException err, ErrorInterceptorHandler handler) {
+    Logs().wtf('AuthorizationInterceptor::onError:', err.error, err.stackTrace);
+    super.onError(err, handler);
+  }
+
   String get _bearerToken => 'Bearer $_accessToken';
 }

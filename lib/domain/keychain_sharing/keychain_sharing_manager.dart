@@ -29,7 +29,7 @@ class KeychainSharingManager {
         return KeychainSharingRestoreToken.fromJson(jsonDecode(token));
       }
     } catch (e, s) {
-      Logs().e('Unable to read token from Secure storage: $e $s');
+      Logs().wtf('Unable to read token from Secure storage', e, s);
       return null;
     }
     return null;

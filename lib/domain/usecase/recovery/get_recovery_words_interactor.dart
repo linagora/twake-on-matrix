@@ -16,8 +16,8 @@ class GetRecoveryWordsInteractor {
       final RecoveryWords response = await _recoveryWordsRepository
           .getRecoveryWords();
       return Right(GetRecoveryWordsSuccess(words: response));
-    } catch (e) {
-      Logs().e('GetRecoveryWordsInteractor::execute(): $e');
+    } catch (e, s) {
+      Logs().wtf('GetRecoveryWordsInteractor::execute()', e, s);
       return Left(GetRecoveryWordsFailed(exception: e));
     }
   }
