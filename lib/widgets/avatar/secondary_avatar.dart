@@ -1,12 +1,10 @@
 import 'package:fluffychat/pages/chat_details/chat_details_view_style.dart';
-import 'package:fluffychat/utils/string_extension.dart';
+import 'package:fluffychat/widgets/avatar/avatar_gradient_placeholder.dart';
 import 'package:fluffychat/widgets/avatar/avatar_style.dart';
 import 'package:fluffychat/widgets/mxc_image.dart';
 import 'package:flutter/material.dart';
-import 'package:linagora_design_flutter/avatar/round_avatar_style.dart';
-import 'package:linagora_design_flutter/extensions/string_extension.dart';
 
-class ChatDetailsGroupSecondaryAvatar extends StatelessWidget {
+class SecondaryAvatar extends StatelessWidget {
   final AnimationController animationController;
   final Uri? mxContent;
   final String? name;
@@ -15,7 +13,7 @@ class ChatDetailsGroupSecondaryAvatar extends StatelessWidget {
   final Color? textColor;
   final bool keepAlive;
 
-  const ChatDetailsGroupSecondaryAvatar({
+  const SecondaryAvatar({
     required this.animationController,
     this.mxContent,
     this.name,
@@ -52,47 +50,24 @@ class ChatDetailsGroupSecondaryAvatar extends StatelessWidget {
           fit: BoxFit.cover,
           width: size,
           height: size,
-          cacheWidth: (size * MediaQuery.devicePixelRatioOf(context) * 2)
-              .round(),
+          cacheWidth:
+              (size * MediaQuery.devicePixelRatioOf(context) * 2).round(),
           cacheKey: mxContent.toString(),
           animated: true,
           isThumbnail: false,
-          placeholder: (context) => _fallbackAvatar(size),
-          keepAlive: keepAlive,
-        ),
-      ),
-    );
-  }
-
-  Widget _fallbackAvatar(double size) {
-    final text = name?.getShortcutNameForAvatar() ?? '@';
-    return Container(
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(
-          Tween<double>(
-            begin: size / 2,
-            end: 0,
-          ).transform(animationController.value),
-        ),
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: text.avatarColors,
-          stops: RoundAvatarStyle.defaultGradientStops,
-        ),
-        boxShadow: boxShadows,
-      ),
-      width: size,
-      height: size,
-      child: Center(
-        child: Text(
-          text,
-          style: TextStyle(
+          placeholder: (_) => AvatarGradientPlaceholder(
+            name: name,
+            width: size,
+            height: size,
             fontSize: fontSize,
-            color: textColor ?? AvatarStyle.defaultTextColor(true),
-            fontFamily: AvatarStyle.fontFamily,
-            fontWeight: AvatarStyle.fontWeight,
+            borderRadius: BorderRadius.circular(
+              Tween<double>(
+                begin: size / 2,
+                end: 0,
+              ).transform(animationController.value),
+            ),
           ),
+          keepAlive: keepAlive,
         ),
       ),
     );

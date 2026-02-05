@@ -1,4 +1,3 @@
-import 'package:fluffychat/generated/l10n/app_localizations.dart';
 import 'package:fluffychat/pages/chat_details/chat_details_view_style.dart';
 import 'package:flutter/material.dart';
 import 'package:linagora_design_flutter/colors/linagora_ref_colors.dart';
@@ -10,18 +9,16 @@ class ChatDetailsGroupInformationView extends StatefulWidget {
     required this.height,
     required this.maxHeight,
     required this.animationController,
-    this.avatarUri,
     this.displayName,
-    this.membersCount,
+    this.subTitle,
     this.onTap,
   });
 
   final double height;
   final double maxHeight;
   final AnimationController animationController;
-  final Uri? avatarUri;
   final String? displayName;
-  final int? membersCount;
+  final String? subTitle;
   final VoidCallback? onTap;
 
   @override
@@ -94,24 +91,23 @@ class _ChatDetailsGroupInformationViewState
                 ),
               ),
               const SizedBox(height: 8),
-              Align(
-                alignment: Tween<Alignment>(
-                  begin: Alignment.center,
-                  end: Alignment.centerLeft,
-                ).transform(widget.animationController.value),
-                child: Text(
-                  widget.membersCount != null
-                      ? L10n.of(context)!.countMembers(widget.membersCount!)
-                      : '',
-                  style: textTheme.bodyMedium?.copyWith(
-                    color: ColorTween(
-                      begin: refColors.tertiary[30],
-                      end: sysColors.onPrimary,
-                    ).transform(widget.animationController.value),
+              if (widget.subTitle != null)
+                Align(
+                  alignment: Tween<Alignment>(
+                    begin: Alignment.center,
+                    end: Alignment.centerLeft,
+                  ).transform(widget.animationController.value),
+                  child: Text(
+                    widget.subTitle!,
+                    style: textTheme.bodyMedium?.copyWith(
+                      color: ColorTween(
+                        begin: refColors.tertiary[30],
+                        end: sysColors.onPrimary,
+                      ).transform(widget.animationController.value),
+                    ),
+                    maxLines: 2,
                   ),
-                  maxLines: 2,
                 ),
-              ),
             ],
           ),
         ),

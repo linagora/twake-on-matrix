@@ -22,6 +22,8 @@ import 'package:fluffychat/presentation/mixins/leave_chat_mixin.dart';
 import 'package:fluffychat/presentation/mixins/play_video_action_mixin.dart';
 import 'package:fluffychat/presentation/model/contact/presentation_contact.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
+import 'package:fluffychat/utils/room_status_extension.dart';
+import 'package:fluffychat/utils/string_extension.dart';
 import 'package:fluffychat/utils/twake_snackbar.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:flutter/material.dart';
@@ -31,6 +33,7 @@ import 'package:fluffychat/generated/l10n/app_localizations.dart';
 
 class ChatProfileInfo extends StatefulWidget {
   final VoidCallback? onBack;
+  final VoidCallback? onSearch;
   final String? roomId;
   final PresentationContact? contact;
   final bool isInStack;
@@ -39,6 +42,7 @@ class ChatProfileInfo extends StatefulWidget {
   const ChatProfileInfo({
     super.key,
     required this.onBack,
+    required this.onSearch,
     required this.isInStack,
     this.roomId,
     this.contact,
@@ -269,6 +273,24 @@ class ChatProfileInfoController extends State<ChatProfileInfo>
         presentationContact = updatedContact;
       });
     }
+  }
+
+  String? get getLocalizedStatusMessage {
+    return room
+        ?.getLocalizedStatus(
+          context,
+          presence: room?.directChatPresence,
+        )
+        .capitalize(context);
+  }
+
+  void handleOnMessage() {
+    widget.onBack?.call();
+  }
+
+  void handleOnSearch() {
+    widget.onBack?.call();
+    widget.onSearch?.call();
   }
 
   @override

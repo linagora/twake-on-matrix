@@ -38,7 +38,7 @@ class CreateDirectChatInteractor {
       final directChatRoomId = client.getDirectChatFromUserId(contactMxId);
       if (directChatRoomId != null) {
         final room = client.getRoomById(directChatRoomId);
-        if (room != null && room.isAbandonedDMRoom == false) {
+        if (room != null && !room.isAbandonedDMRoom) {
           // Case 1: Already joined - return existing room
           if (room.membership == Membership.join) {
             yield Right(CreateDirectChatSuccess(roomId: directChatRoomId));
