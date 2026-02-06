@@ -58,6 +58,12 @@ class _ChatDetailsGroupDescriptionViewState
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    WidgetsBinding.instance.addPostFrameCallback((_) => calculateHeight());
+  }
+
+  @override
   Widget build(BuildContext context) {
     final l10n = L10n.of(context)!;
     final textTheme = Theme.of(context).textTheme;

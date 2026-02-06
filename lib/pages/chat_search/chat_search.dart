@@ -98,9 +98,11 @@ class ChatSearchController extends State<ChatSearch> {
     }
   }
 
-  void onEventTap(Event event) async {
+  void onEventTap(BuildContext context, Event event) async {
     if (widget.isInStack) {
-      await onBack();
+      Navigator.of(context).popUntil(
+        (route) => route.settings.name == '/rooms/room_${widget.roomId}',
+      );
     }
 
     widget.jumpToEventStreamController?.add(event.eventId);

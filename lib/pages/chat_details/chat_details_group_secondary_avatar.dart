@@ -80,6 +80,7 @@ class ChatDetailsGroupSecondaryAvatar extends StatelessWidget {
           colors: text.avatarColors,
           stops: RoundAvatarStyle.defaultGradientStops,
         ),
+        boxShadow: boxShadows,
       ),
       width: size,
       height: size,
@@ -87,8 +88,8 @@ class ChatDetailsGroupSecondaryAvatar extends StatelessWidget {
         child: Text(
           text,
           style: TextStyle(
-            fontSize: ChatDetailViewStyle.avatarFontSize,
-            color: AvatarStyle.defaultTextColor(true),
+            fontSize: fontSize,
+            color: textColor ?? AvatarStyle.defaultTextColor(true),
             fontFamily: AvatarStyle.fontFamily,
             fontWeight: AvatarStyle.fontWeight,
           ),

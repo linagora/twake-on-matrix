@@ -97,7 +97,7 @@ class _ServerSearchView extends StatelessWidget {
                     event: event,
                     searchWord:
                         controller.serverSearchController.debouncerValue,
-                    onTap: controller.onEventTap,
+                    onTap: (event) => controller.onEventTap(context, event),
                   );
                 },
               );
@@ -155,7 +155,7 @@ class _TimelineSearchView extends StatelessWidget {
             return _SearchItem(
               event: event,
               searchWord: controller.serverSearchController.debouncerValue,
-              onTap: controller.onEventTap,
+              onTap: (event) => controller.onEventTap(context, event),
             );
           },
         );
