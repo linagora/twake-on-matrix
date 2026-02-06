@@ -7,6 +7,7 @@ environment:
   sdk: ">=3.10.0 <4.0.0"
 
 dependencies:
+  sentry_flutter: ^9.10.0
   ### Dependencies from git ###
   matrix: ^6.0.0
 
@@ -217,6 +218,7 @@ dependencies:
   web: ^1.1.1
 
 dev_dependencies:
+  sentry_dart_plugin: ^3.2.1
   build_runner: 2.10.5
   flutter_launcher_icons: ^0.13.1
   flutter_lints: ^3.0.2
@@ -339,3 +341,7 @@ patrol:
   ios:
     bundle_id: app.twake.ios.chat
     app_name: Twake Chat
+
+sentry:
+  upload_debug_symbols: true
+  upload_source_maps: true
