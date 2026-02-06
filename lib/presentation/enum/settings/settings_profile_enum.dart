@@ -11,7 +11,7 @@ enum SettingsProfileEnum {
   String getTitle(BuildContext context) {
     switch (this) {
       case SettingsProfileEnum.displayName:
-        return L10n.of(context)!.displayName;
+        return L10n.of(context)!.username;
       case SettingsProfileEnum.bio:
         return L10n.of(context)!.bio;
       case SettingsProfileEnum.matrixId:
