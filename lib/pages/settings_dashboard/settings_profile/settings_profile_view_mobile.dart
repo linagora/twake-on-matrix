@@ -1,26 +1,24 @@
-import 'package:dartz/dartz.dart';
+import 'package:dartz/dartz.dart' hide State;
 import 'package:fluffychat/app_state/failure.dart';
 import 'package:fluffychat/app_state/success.dart';
 import 'package:fluffychat/pages/settings_dashboard/settings_profile/settings_profile_state/get_clients_ui_state.dart';
 import 'package:fluffychat/pages/settings_dashboard/settings_profile/settings_profile_view_mobile_style.dart';
 import 'package:fluffychat/presentation/extensions/client_extension.dart';
-import 'package:fluffychat/presentation/model/pick_avatar_state.dart';
 import 'package:fluffychat/presentation/multiple_account/twake_chat_presentation_account.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
-import 'package:fluffychat/widgets/avatar/avatar.dart';
-import 'package:fluffychat/widgets/avatar/avatar_style.dart';
+import 'package:fluffychat/utils/responsive/responsive_utils.dart';
+import 'package:fluffychat/widgets/avatar/secondary_avatar.dart';
 import 'package:fluffychat/widgets/mixins/popup_menu_widget_style.dart';
-import 'package:fluffychat/widgets/stream_image_view.dart';
 import 'package:flutter/material.dart';
+import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:matrix/matrix.dart';
-import 'package:wechat_camera_picker/wechat_camera_picker.dart';
 import 'package:fluffychat/generated/l10n/app_localizations.dart';
 
 typedef OnTapMultipleAccountsButton = void Function(
   List<TwakeChatPresentationAccount> multipleAccounts,
 );
 
-class SettingsProfileViewMobile extends StatelessWidget {
+class SettingsProfileViewMobile extends StatefulWidget {
   final ValueNotifier<Either<Failure, Success>> settingsProfileUIState;
   final OnTapMultipleAccountsButton onTapMultipleAccountsButton;
   final Widget settingsProfileOptions;
@@ -32,6 +30,10 @@ class SettingsProfileViewMobile extends StatelessWidget {
   final Function(MatrixFile) onImageLoaded;
   final ValueNotifier<Profile?> currentProfile;
   final bool canEditAvatar;
+  final AnimationController animationController;
+  final VoidCallback onAvatarInfoTap;
+  final ValueNotifier<bool> isExpandedAvatar;
+  final ResponsiveUtils responsive;
 
   const SettingsProfileViewMobile({
     super.key,
@@ -44,9 +46,21 @@ class SettingsProfileViewMobile extends StatelessWidget {
     required this.settingsMultiAccountsUIState,
     required this.onImageLoaded,
     required this.canEditAvatar,
+    required this.animationController,
+    required this.onAvatarInfoTap,
+    required this.isExpandedAvatar,
     this.menuChildren,
     this.menuController,
+    required this.responsive,
   });
+
+  @override
+  State<SettingsProfileViewMobile> createState() =>
+      _SettingsProfileViewMobileState();
+}
+
+class _SettingsProfileViewMobileState extends State<SettingsProfileViewMobile> {
+  bool isTextSelected = false;
 
   @override
   Widget build(BuildContext context) {
@@ -54,182 +68,126 @@ class SettingsProfileViewMobile extends StatelessWidget {
       children: [
         Column(
           children: [
-            Padding(
-              padding: SettingsProfileViewMobileStyle.padding,
-              child: Stack(
-                alignment: AlignmentDirectional.center,
-                children: [
-                  const SizedBox(
-                    width: SettingsProfileViewMobileStyle.widthSize,
-                  ),
-                  ValueListenableBuilder(
-                    valueListenable: settingsProfileUIState,
-                    builder: (context, uiState, child) => uiState.fold(
-                      (failure) => child!,
-                      (success) {
-                        if (success is GetAvatarOnMobileUIStateSuccess &&
-                            PlatformInfos.isMobile) {
-                          if (success.assetEntity == null) {
-                            return child!;
-                          }
-                          return ClipOval(
-                            child: SizedBox.fromSize(
-                              size: const Size.fromRadius(
-                                AvatarStyle.defaultSize,
-                              ),
-                              child: AssetEntityImage(
-                                width: AvatarStyle.defaultSize,
-                                height: AvatarStyle.defaultSize,
-                                success.assetEntity!,
-                                thumbnailSize: const ThumbnailSize(
-                                  SettingsProfileViewMobileStyle.thumbnailSize,
-                                  SettingsProfileViewMobileStyle.thumbnailSize,
-                                ),
-                                fit: BoxFit.cover,
-                                loadingBuilder:
-                                    (context, child, loadingProgress) {
-                                  if (loadingProgress != null &&
-                                      loadingProgress.cumulativeBytesLoaded !=
-                                          loadingProgress.expectedTotalBytes) {
-                                    return const Center(
-                                      child:
-                                          CircularProgressIndicator.adaptive(),
-                                    );
-                                  }
-                                  return child;
-                                },
-                                errorBuilder: (context, error, stackTrace) {
-                                  return const Center(
-                                    child: Icon(Icons.error_outline),
-                                  );
-                                },
-                              ),
-                            ),
-                          );
-                        }
-                        if (success is GetAvatarOnWebUIStateSuccess &&
-                            PlatformInfos.isWeb) {
-                          return ClipOval(
-                            child: SizedBox.fromSize(
-                              size: const Size.fromRadius(
-                                AvatarStyle.defaultSize,
-                              ),
-                              child: StreamImageViewer(
-                                matrixFile: success.matrixFile!,
-                                onImageLoaded: onImageLoaded,
-                              ),
-                            ),
-                          );
-                        }
-                        return child!;
-                      },
-                    ),
-                    child: ValueListenableBuilder(
-                      valueListenable: currentProfile,
-                      builder: (context, profile, _) {
-                        final displayName = profile?.displayName ??
-                            client.mxid(context).localpart ??
-                            client.mxid(context);
-                        return Material(
-                          elevation: Theme.of(context)
-                                  .appBarTheme
-                                  .scrolledUnderElevation ??
-                              4,
-                          shadowColor:
-                              Theme.of(context).appBarTheme.shadowColor,
-                          shape: RoundedRectangleBorder(
-                            side: BorderSide(
-                              color: Theme.of(context).dividerColor,
-                            ),
-                            borderRadius: BorderRadius.circular(
-                              AvatarStyle.defaultSize,
-                            ),
-                          ),
-                          child: Avatar(
-                            mxContent: profile?.avatarUrl,
-                            name: displayName,
-                            size: SettingsProfileViewMobileStyle.avatarSize,
-                            fontSize:
-                                SettingsProfileViewMobileStyle.avatarFontSize,
-                          ),
-                        );
-                      },
-                    ),
-                  ),
-                  if (canEditAvatar)
-                    Positioned(
-                      bottom:
-                          SettingsProfileViewMobileStyle.positionedBottomSize,
-                      right: SettingsProfileViewMobileStyle.positionedRightSize,
-                      child: MenuAnchor(
-                        controller: menuController,
-                        style: MenuStyle(
-                          padding: const WidgetStatePropertyAll(
-                            EdgeInsets.zero,
-                          ),
-                          backgroundColor: WidgetStatePropertyAll(
-                            PopupMenuWidgetStyle.defaultMenuColor(context),
-                          ),
-                          shape: WidgetStatePropertyAll(
-                            RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(
-                                PopupMenuWidgetStyle.menuBorderRadius,
-                              ),
-                            ),
-                          ),
+            ValueListenableBuilder(
+              valueListenable: widget.isExpandedAvatar,
+              builder: (context, isExpanded, _) {
+                return AnimatedBuilder(
+                  animation: widget.animationController,
+                  builder: (context, _) {
+                    return Stack(
+                      children: [
+                        Positioned.fill(
+                          child: _buildAvatarBackground(context),
                         ),
-                        builder: (
-                          BuildContext context,
-                          MenuController menuController,
-                          Widget? child,
-                        ) {
-                          return GestureDetector(
-                            onTap: () {
-                              if (PlatformInfos.isWeb) {
-                                menuController.isOpen
-                                    ? menuController.close()
-                                    : menuController.open();
-                              } else {
-                                onTapAvatar?.call();
-                              }
-                            },
-                            child: Container(
-                              decoration: BoxDecoration(
-                                color: Theme.of(context).colorScheme.primary,
-                                borderRadius: BorderRadius.circular(
-                                  SettingsProfileViewMobileStyle.avatarSize,
+                        Positioned.fill(
+                          child: _buildGradientOverlay(context),
+                        ),
+                        Column(
+                          children: [
+                            _buildProfileInformation(context),
+                          ],
+                        ),
+                        if (widget.canEditAvatar && !isExpanded)
+                          Positioned(
+                            bottom: SettingsProfileViewMobileStyle
+                                .positionedBottomSize,
+                            right: SettingsProfileViewMobileStyle
+                                .positionedRightSize,
+                            child: MenuAnchor(
+                              controller: widget.menuController,
+                              style: MenuStyle(
+                                padding: const WidgetStatePropertyAll(
+                                  EdgeInsets.zero,
                                 ),
-                                border: Border.all(
-                                  color:
-                                      Theme.of(context).colorScheme.onPrimary,
-                                  width: SettingsProfileViewMobileStyle
-                                      .iconEditBorderWidth,
+                                backgroundColor: WidgetStatePropertyAll(
+                                  PopupMenuWidgetStyle.defaultMenuColor(
+                                    context,
+                                  ),
+                                ),
+                                shape: WidgetStatePropertyAll(
+                                  RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(
+                                      PopupMenuWidgetStyle.menuBorderRadius,
+                                    ),
+                                  ),
                                 ),
                               ),
-                              padding: SettingsProfileViewMobileStyle
-                                  .editIconPadding,
-                              child: Icon(
-                                Icons.edit,
-                                size:
-                                    SettingsProfileViewMobileStyle.iconEditSize,
-                                color: Theme.of(context).colorScheme.onPrimary,
-                              ),
+                              builder: (
+                                BuildContext context,
+                                MenuController menuController,
+                                Widget? child,
+                              ) {
+                                return GestureDetector(
+                                  onTap: () {
+                                    if (PlatformInfos.isWeb) {
+                                      menuController.isOpen
+                                          ? menuController.close()
+                                          : menuController.open();
+                                    } else {
+                                      widget.onTapAvatar?.call();
+                                    }
+                                  },
+                                  child: Container(
+                                    decoration: BoxDecoration(
+                                      color:
+                                          Theme.of(context).colorScheme.primary,
+                                      borderRadius: BorderRadius.circular(
+                                        SettingsProfileViewMobileStyle
+                                            .avatarSize,
+                                      ),
+                                      border: Border.all(
+                                        color: Theme.of(context)
+                                            .colorScheme
+                                            .onPrimary,
+                                        width: SettingsProfileViewMobileStyle
+                                            .iconEditBorderWidth,
+                                      ),
+                                    ),
+                                    padding: SettingsProfileViewMobileStyle
+                                        .editIconPadding,
+                                    child: Icon(
+                                      Icons.edit,
+                                      size: SettingsProfileViewMobileStyle
+                                          .iconEditSize,
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .onPrimary,
+                                    ),
+                                  ),
+                                );
+                              },
+                              menuChildren: widget.menuChildren ?? [],
                             ),
-                          );
-                        },
-                        menuChildren: menuChildren ?? [],
-                      ),
-                    ),
-                ],
-              ),
+                          ),
+                      ],
+                    );
+                  },
+                );
+              },
             ),
-            settingsProfileOptions,
+            Container(
+              margin: const EdgeInsets.only(left: 12, right: 12, top: 12),
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                borderRadius: const BorderRadius.all(
+                  Radius.circular(8),
+                ),
+                border: Border.all(
+                  color:
+                      LinagoraRefColors.material().neutral[90] ?? Colors.black,
+                ),
+                color: widget.responsive.isWebDesktop(context)
+                    ? Theme.of(context).colorScheme.surface
+                    : LinagoraSysColors.material().onPrimary,
+              ),
+              child: widget.settingsProfileOptions,
+            ),
           ],
         ),
         const Expanded(child: SizedBox()),
         if (PlatformInfos.isMobile)
           ValueListenableBuilder(
-            valueListenable: settingsMultiAccountsUIState,
+            valueListenable: widget.settingsMultiAccountsUIState,
             builder: (context, uiState, child) => uiState.fold(
               (failure) => child!,
               (success) {
@@ -274,7 +232,7 @@ class SettingsProfileViewMobile extends StatelessWidget {
 
                 if (success is GetClientsSuccessUIState) {
                   return InkWell(
-                    onTap: () => onTapMultipleAccountsButton.call(
+                    onTap: () => widget.onTapMultipleAccountsButton.call(
                       success.multipleAccounts,
                     ),
                     highlightColor: Colors.transparent,
@@ -328,6 +286,109 @@ class SettingsProfileViewMobile extends StatelessWidget {
             child: const SizedBox.shrink(),
           ),
       ],
+    );
+  }
+
+  Widget _buildAvatarBackground(BuildContext context) {
+    return ValueListenableBuilder(
+      valueListenable: widget.currentProfile,
+      builder: (context, profile, _) {
+        final displayName = profile?.displayName ??
+            widget.client.mxid(context).localpart ??
+            widget.client.mxid(context);
+        return SecondaryAvatar(
+          animationController: widget.animationController,
+          mxContent: profile?.avatarUrl,
+          name: displayName,
+          fontSize: SettingsProfileViewMobileStyle.avatarFontSize,
+        );
+      },
+    );
+  }
+
+  Widget _buildGradientOverlay(BuildContext context) {
+    final sysColor = LinagoraSysColors.material();
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [
+            Colors.transparent,
+            sysColor.onTertiaryContainer.withValues(
+              alpha: widget.animationController.value,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildProfileInformation(BuildContext context) {
+    return ValueListenableBuilder(
+      valueListenable: widget.currentProfile,
+      builder: (context, profile, _) {
+        final displayName = profile?.displayName ??
+            widget.client.mxid(context).localpart ??
+            widget.client.mxid(context);
+        final sysColors = LinagoraSysColors.material();
+
+        return SelectionArea(
+          onSelectionChanged: (value) {
+            final newSelected = value != null && value.plainText.isNotEmpty;
+            if (newSelected != isTextSelected) {
+              setState(() => isTextSelected = newSelected);
+            }
+          },
+          child: GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onTap: () {
+              if (!isTextSelected) {
+                widget.onAvatarInfoTap.call();
+                return;
+              }
+
+              FocusScope.of(context).unfocus();
+            },
+            child: Container(
+              height: Tween<double>(
+                begin: SettingsProfileViewMobileStyle.minAvatarBackgroundHeight,
+                end: SettingsProfileViewMobileStyle.maxAvatarBackgroundHeight,
+              ).transform(widget.animationController.value),
+              padding: const EdgeInsets.symmetric(horizontal: 12),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  const SizedBox(
+                    height: SettingsProfileViewMobileStyle.avatarSize,
+                    width: SettingsProfileViewMobileStyle.avatarSize,
+                  ),
+                  const SizedBox(height: 8),
+                  Align(
+                    alignment: Tween<Alignment>(
+                      begin: Alignment.center,
+                      end: Alignment.centerLeft,
+                    ).transform(widget.animationController.value),
+                    child: Text(
+                      displayName,
+                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                            color: ColorTween(
+                              begin: sysColors.onSurface,
+                              end: sysColors.onPrimary,
+                            ).transform(widget.animationController.value),
+                            fontWeight: FontWeight.bold,
+                          ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
     );
   }
 }
