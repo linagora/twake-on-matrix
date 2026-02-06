@@ -92,14 +92,14 @@ class SettingsProfileItemBuilder extends StatelessWidget {
         ),
         const SizedBox(height: 8),
         if (enableDivider)
-        Container(
-          width: double.infinity,
-          height: 1,
-          margin: const EdgeInsets.only(left: 40),
-          color: LinagoraStateLayer(
-            LinagoraSysColors.material().surfaceTint,
-          ).opacityLayer3,
-        ),
+          Container(
+            width: double.infinity,
+            height: 1,
+            margin: const EdgeInsets.only(left: 40),
+            color: LinagoraStateLayer(
+              LinagoraSysColors.material().surfaceTint,
+            ).opacityLayer3,
+          ),
       ],
     );
   }
