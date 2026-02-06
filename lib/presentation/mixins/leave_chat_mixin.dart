@@ -16,7 +16,8 @@ mixin LeaveChatMixin {
 
       final confirmResult = await showConfirmAlertDialog(
         context: context,
-        title: L10n.of(context)!.leaveChatDescription,
+        title: L10n.of(context)!.leaveChatTitle,
+        message: L10n.of(context)!.leaveChatDescription,
         okLabel: L10n.of(context)!.leave,
         cancelLabel: L10n.of(context)!.cancel,
         showCloseButton: PlatformInfos.isWeb,
