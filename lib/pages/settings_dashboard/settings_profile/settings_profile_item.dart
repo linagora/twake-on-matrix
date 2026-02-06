@@ -4,7 +4,6 @@ import 'package:fluffychat/app_state/success.dart';
 import 'package:fluffychat/pages/settings_dashboard/settings_profile/settings_profile_item_style.dart';
 import 'package:fluffychat/presentation/enum/settings/settings_profile_enum.dart';
 import 'package:fluffychat/presentation/model/settings/settings_profile_presentation.dart';
-import 'package:fluffychat/widgets/context_menu_builder_ios_paste_without_permission.dart';
 import 'package:flutter/material.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 
@@ -20,6 +19,7 @@ class SettingsProfileItemBuilder extends StatelessWidget {
   final VoidCallback? onCopyAction;
   final ValueNotifier<Either<Failure, Success>> settingsProfileUIState;
   final bool canEditDisplayName;
+  final bool enableDivider;
 
   const SettingsProfileItemBuilder({
     super.key,
@@ -34,27 +34,27 @@ class SettingsProfileItemBuilder extends StatelessWidget {
     this.onCopyAction,
     required this.settingsProfileUIState,
     required this.canEditDisplayName,
+    this.enableDivider = true,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
+    return Column(
       children: [
-        Padding(
-          padding: SettingsProfileItemStyle.itemBuilderPadding,
-          child: Icon(
-            leadingIcon,
-            size: SettingsProfileItemStyle.iconSize,
-            color: Theme.of(context).colorScheme.onSurfaceVariant,
-          ),
-        ),
-        Expanded(
-          child: Row(
-            children: [
-              Expanded(
+        Row(
+          children: [
+            Padding(
+              padding: SettingsProfileItemStyle.itemBuilderPadding,
+              child: Icon(
+                leadingIcon,
+                size: SettingsProfileItemStyle.iconSize,
+                color: LinagoraSysColors.material().tertiary,
+              ),
+            ),
+            Expanded(
+              child: Padding(
+                padding: SettingsProfileItemStyle.textPadding,
                 child: Column(
-                  mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
@@ -62,52 +62,43 @@ class SettingsProfileItemBuilder extends StatelessWidget {
                       style: Theme.of(context).textTheme.labelMedium?.copyWith(
                             color: LinagoraRefColors.material().neutral[40],
                           ),
-                      maxLines: 2,
+                      maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
-                    ValueListenableBuilder(
-                      valueListenable: settingsProfileUIState,
-                      builder: (context, _, __) {
-                        return TextField(
-                          onChanged: (value) =>
-                              onChange!(value, settingsProfileEnum),
-                          readOnly: isReadOnly,
-                          autofocus: false,
-                          contextMenuBuilder: mobileTwakeContextMenuBuilder,
-                          focusNode: focusNode,
-                          controller: textEditingController,
-                          decoration: InputDecoration(
-                            suffixIcon: hasSuffixIcon
-                                ? IconButton(
-                                    onPressed:
-                                        settingsProfilePresentation.isEditable
-                                            ? focusNode?.requestFocus
-                                            : onCopyAction,
-                                    icon: Icon(
-                                      suffixIcon,
-                                      size: SettingsProfileItemStyle.iconSize,
-                                      color: Theme.of(context)
-                                          .colorScheme
-                                          .onSurfaceVariant,
-                                    ),
-                                  )
-                                : null,
-                            hintText: textEditingController?.text,
+                    Text(
+                      textEditingController?.text ?? '',
+                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                            color: LinagoraSysColors.material().onSurface,
                           ),
-                        );
-                      },
-                    ),
-                    Divider(
-                      height: SettingsProfileItemStyle.dividerSize,
-                      color: LinagoraStateLayer(
-                        LinagoraSysColors.material().surfaceTint,
-                      ).opacityLayer3,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                     ),
                   ],
                 ),
               ),
-            ],
-          ),
+            ),
+            if (hasSuffixIcon)
+              IconButton(
+                onPressed: settingsProfilePresentation.isEditable
+                    ? focusNode?.requestFocus
+                    : onCopyAction,
+                icon: Icon(
+                  suffixIcon,
+                  size: SettingsProfileItemStyle.copyIconSize,
+                  color: LinagoraRefColors.material().tertiary[40],
+                ),
+              ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        if (enableDivider)
+        Container(
+          width: double.infinity,
+          height: 1,
+          margin: const EdgeInsets.only(left: 40),
+          color: LinagoraStateLayer(
+            LinagoraSysColors.material().surfaceTint,
+          ).opacityLayer3,
         ),
       ],
     );

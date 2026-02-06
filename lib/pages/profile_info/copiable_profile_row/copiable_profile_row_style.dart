@@ -8,9 +8,5 @@ class CopiableProfileRowStyle {
   static const EdgeInsets ripplePadding = EdgeInsets.all(8.0);
   static BorderRadiusGeometry rippleRadius = BorderRadius.circular(8);
 
-  static const EdgeInsetsGeometry copiableRowPadding = EdgeInsets.only(
-    left: 8.0,
-    right: 8.0,
-    top: 8.0,
-  );
+  static const EdgeInsetsGeometry copiableRowPadding = EdgeInsets.all(8);
 }

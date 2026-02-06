@@ -89,176 +89,181 @@ class SettingsProfileView extends StatelessWidget {
         context: context,
         withDivider: true,
       ),
-      backgroundColor: responsive.isWebDesktop(context)
-          ? Theme.of(context).colorScheme.surface
-          : LinagoraSysColors.material().onPrimary,
-      body: Padding(
-        padding: SettingsProfileViewStyle.paddingBody,
-        child: SlotLayout(
-          config: <Breakpoint, SlotLayoutConfig>{
-            const WidthPlatformBreakpoint(
-              end: ResponsiveUtils.minDesktopWidth,
-            ): SlotLayout.from(
-              key: settingsProfileViewMobileKey,
-              builder: (_) {
-                return SettingsProfileViewMobile(
-                  client: controller.client,
-                  settingsProfileUIState: controller.pickAvatarUIState,
-                  onTapAvatar: controller.onTapAvatarInMobile,
-                  onTapMultipleAccountsButton: (multipleAccounts) =>
-                      controller.onBottomButtonTap(
-                    multipleAccounts: multipleAccounts,
-                  ),
-                  settingsMultiAccountsUIState:
-                      controller.settingsMultiAccountsUIState,
-                  menuChildren: controller.listContextMenuBuilder(context),
-                  menuController: controller.menuController,
-                  settingsProfileOptions: ListView.separated(
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    itemBuilder: (context, index) {
-                      return SettingsProfileItemBuilder(
-                        settingsProfileEnum:
-                            controller.getListProfileMobile[index],
-                        title: controller.getListProfileMobile[index]
-                            .getTitle(context),
-                        settingsProfileUIState: controller.pickAvatarUIState,
-                        settingsProfilePresentation:
-                            SettingsProfilePresentation(
-                          settingsProfileType: controller
-                              .getListProfileMobile[index]
-                              .getSettingsProfileType(),
-                        ),
-                        suffixIcon: controller.getListProfileMobile[index]
-                            .getTrailingIcon(),
-                        leadingIcon: controller.getListProfileMobile[index]
-                            .getLeadingIcon(),
-                        focusNode: controller.getFocusNode(
+      backgroundColor: backgroundColor(responsive, context),
+      body: SlotLayout(
+        config: <Breakpoint, SlotLayoutConfig>{
+          const WidthPlatformBreakpoint(
+            end: ResponsiveUtils.minDesktopWidth,
+          ): SlotLayout.from(
+            key: settingsProfileViewMobileKey,
+            builder: (_) {
+              return SettingsProfileViewMobile(
+                client: controller.client,
+                responsive: responsive,
+                settingsProfileUIState: controller.pickAvatarUIState,
+                onTapAvatar: controller.onTapAvatarInMobile,
+                onTapMultipleAccountsButton: (multipleAccounts) =>
+                    controller.onBottomButtonTap(
+                  multipleAccounts: multipleAccounts,
+                ),
+                settingsMultiAccountsUIState:
+                    controller.settingsMultiAccountsUIState,
+                menuChildren: controller.listContextMenuBuilder(context),
+                menuController: controller.menuController,
+                animationController: controller.animationController,
+                onAvatarInfoTap: controller.handleAvatarInfoTap,
+                isExpandedAvatar: controller.isExpandedAvatar,
+                settingsProfileOptions: ListView.separated(
+                  shrinkWrap: true,
+                  padding: EdgeInsets.zero,
+                  physics: const NeverScrollableScrollPhysics(),
+                  itemBuilder: (context, index) {
+                    return SettingsProfileItemBuilder(
+                      settingsProfileEnum:
                           controller.getListProfileMobile[index],
-                        ),
-                        textEditingController: controller.getController(
-                          controller.getListProfileMobile[index],
-                        ),
-                        onChange: (_, settingsProfileEnum) {
-                          controller
-                              .handleTextEditOnChange(settingsProfileEnum);
-                        },
-                        onCopyAction: () => controller.copyEventsAction(
-                          controller.getListProfileMobile[index],
-                        ),
-                        canEditDisplayName:
-                            capabilities?.canEditDisplayName == true,
-                      );
-                    },
-                    separatorBuilder: (context, index) {
-                      return const SizedBox(height: 16);
-                    },
-                    itemCount: controller.getListProfileMobile.length,
-                  ),
-                  onImageLoaded: controller.updateMatrixFile,
-                  currentProfile: controller.currentProfile,
-                  canEditAvatar: capabilities?.canEditAvatar == true,
-                );
-              },
-            ),
-            const WidthPlatformBreakpoint(
-              begin: ResponsiveUtils.minDesktopWidth,
-            ): SlotLayout.from(
-              key: settingsProfileViewWebKey,
-              builder: (_) {
-                return SettingsProfileViewWeb(
-                  currentProfile: controller.currentProfile,
-                  settingsProfileUIState: controller.pickAvatarUIState,
-                  client: controller.client,
-                  menuChildren: controller.listContextMenuBuilder(context),
-                  menuController: controller.menuController,
-                  basicInfoWidget: ListView.separated(
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    itemBuilder: (context, index) {
-                      return SettingsProfileItemBuilder(
-                        settingsProfileUIState: controller.pickAvatarUIState,
-                        settingsProfileEnum:
-                            controller.getListProfileBasicInfo[index],
-                        title: controller.getListProfileBasicInfo[index]
-                            .getTitle(context),
-                        settingsProfilePresentation:
-                            SettingsProfilePresentation(
-                          settingsProfileType: controller
-                              .getListProfileBasicInfo[index]
-                              .getSettingsProfileType(),
-                        ),
-                        suffixIcon: controller.getListProfileBasicInfo[index]
-                            .getTrailingIcon(),
-                        focusNode: controller.getFocusNode(
+                      title: controller.getListProfileMobile[index]
+                          .getTitle(context),
+                      settingsProfileUIState: controller.pickAvatarUIState,
+                      settingsProfilePresentation: SettingsProfilePresentation(
+                        settingsProfileType: controller
+                            .getListProfileMobile[index]
+                            .getSettingsProfileType(),
+                      ),
+                      suffixIcon: controller.getListProfileMobile[index]
+                          .getTrailingIcon(),
+                      leadingIcon: controller.getListProfileMobile[index]
+                          .getLeadingIcon(),
+                      focusNode: controller.getFocusNode(
+                        controller.getListProfileMobile[index],
+                      ),
+                      textEditingController: controller.getController(
+                        controller.getListProfileMobile[index],
+                      ),
+                      onChange: (_, settingsProfileEnum) {
+                        controller.handleTextEditOnChange(settingsProfileEnum);
+                      },
+                      onCopyAction: () => controller.copyEventsAction(
+                        controller.getListProfileMobile[index],
+                      ),
+                      canEditDisplayName:
+                          capabilities?.canEditDisplayName == true,
+                      enableDivider:
+                          index != (controller.getListProfileMobile.length - 1),
+                    );
+                  },
+                  separatorBuilder: (context, index) {
+                    return const SizedBox(height: 8);
+                  },
+                  itemCount: controller.getListProfileMobile.length,
+                ),
+                onImageLoaded: controller.updateMatrixFile,
+                currentProfile: controller.currentProfile,
+                canEditAvatar: capabilities?.canEditAvatar == true,
+              );
+            },
+          ),
+          const WidthPlatformBreakpoint(
+            begin: ResponsiveUtils.minDesktopWidth,
+          ): SlotLayout.from(
+            key: settingsProfileViewWebKey,
+            builder: (_) {
+              return SettingsProfileViewWeb(
+                currentProfile: controller.currentProfile,
+                settingsProfileUIState: controller.pickAvatarUIState,
+                client: controller.client,
+                menuChildren: controller.listContextMenuBuilder(context),
+                menuController: controller.menuController,
+                basicInfoWidget: ListView.separated(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  itemBuilder: (context, index) {
+                    return SettingsProfileItemBuilder(
+                      settingsProfileUIState: controller.pickAvatarUIState,
+                      settingsProfileEnum:
                           controller.getListProfileBasicInfo[index],
-                        ),
-                        textEditingController: controller.getController(
-                          controller.getListProfileBasicInfo[index],
-                        ),
-                        onChange: (_, settingsProfileEnum) {
-                          controller
-                              .handleTextEditOnChange(settingsProfileEnum);
-                        },
-                        canEditDisplayName:
-                            capabilities?.canEditDisplayName == true,
-                      );
-                    },
-                    separatorBuilder: (context, index) {
-                      return const SizedBox(height: 16);
-                    },
-                    itemCount: controller.getListProfileBasicInfo.length,
-                  ),
-                  onImageLoaded: controller.updateMatrixFile,
-                  workIdentitiesInfoWidget: ListView.separated(
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    itemBuilder: (context, index) {
-                      return SettingsProfileItemBuilder(
-                        settingsProfileUIState: controller.pickAvatarUIState,
-                        settingsProfileEnum:
-                            controller.getListProfileWorkIdentitiesInfo[index],
-                        title: controller
+                      title: controller.getListProfileBasicInfo[index]
+                          .getTitle(context),
+                      settingsProfilePresentation: SettingsProfilePresentation(
+                        settingsProfileType: controller
+                            .getListProfileBasicInfo[index]
+                            .getSettingsProfileType(),
+                      ),
+                      suffixIcon: controller.getListProfileBasicInfo[index]
+                          .getTrailingIcon(),
+                      focusNode: controller.getFocusNode(
+                        controller.getListProfileBasicInfo[index],
+                      ),
+                      textEditingController: controller.getController(
+                        controller.getListProfileBasicInfo[index],
+                      ),
+                      onChange: (_, settingsProfileEnum) {
+                        controller.handleTextEditOnChange(settingsProfileEnum);
+                      },
+                      canEditDisplayName:
+                          capabilities?.canEditDisplayName == true,
+                    );
+                  },
+                  separatorBuilder: (context, index) {
+                    return const SizedBox(height: 16);
+                  },
+                  itemCount: controller.getListProfileBasicInfo.length,
+                ),
+                onImageLoaded: controller.updateMatrixFile,
+                workIdentitiesInfoWidget: ListView.separated(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  itemBuilder: (context, index) {
+                    return SettingsProfileItemBuilder(
+                      settingsProfileUIState: controller.pickAvatarUIState,
+                      settingsProfileEnum:
+                          controller.getListProfileWorkIdentitiesInfo[index],
+                      title: controller.getListProfileWorkIdentitiesInfo[index]
+                          .getTitle(context),
+                      settingsProfilePresentation: SettingsProfilePresentation(
+                        settingsProfileType: controller
                             .getListProfileWorkIdentitiesInfo[index]
-                            .getTitle(context),
-                        settingsProfilePresentation:
-                            SettingsProfilePresentation(
-                          settingsProfileType: controller
-                              .getListProfileWorkIdentitiesInfo[index]
-                              .getSettingsProfileType(),
-                        ),
-                        suffixIcon: controller
-                            .getListProfileWorkIdentitiesInfo[index]
-                            .getTrailingIcon(),
-                        focusNode: controller.getFocusNode(
-                          controller.getListProfileWorkIdentitiesInfo[index],
-                        ),
-                        textEditingController: controller.getController(
-                          controller.getListProfileWorkIdentitiesInfo[index],
-                        ),
-                        onChange: (_, settingsProfileEnum) {
-                          controller
-                              .handleTextEditOnChange(settingsProfileEnum);
-                        },
-                        onCopyAction: () => controller.copyEventsAction(
-                          controller.getListProfileWorkIdentitiesInfo[index],
-                        ),
-                        canEditDisplayName:
-                            capabilities?.canEditDisplayName == true,
-                      );
-                    },
-                    separatorBuilder: (context, index) {
-                      return const SizedBox(height: 16);
-                    },
-                    itemCount: controller.getListProfileBasicInfo.length,
-                  ),
-                  canEditAvatar: capabilities?.canEditAvatar == true,
-                );
-              },
-            ),
-          },
-        ),
+                            .getSettingsProfileType(),
+                      ),
+                      suffixIcon: controller
+                          .getListProfileWorkIdentitiesInfo[index]
+                          .getTrailingIcon(),
+                      focusNode: controller.getFocusNode(
+                        controller.getListProfileWorkIdentitiesInfo[index],
+                      ),
+                      textEditingController: controller.getController(
+                        controller.getListProfileWorkIdentitiesInfo[index],
+                      ),
+                      onChange: (_, settingsProfileEnum) {
+                        controller.handleTextEditOnChange(settingsProfileEnum);
+                      },
+                      onCopyAction: () => controller.copyEventsAction(
+                        controller.getListProfileWorkIdentitiesInfo[index],
+                      ),
+                      canEditDisplayName:
+                          capabilities?.canEditDisplayName == true,
+                    );
+                  },
+                  separatorBuilder: (context, index) {
+                    return const SizedBox(height: 16);
+                  },
+                  itemCount: controller.getListProfileBasicInfo.length,
+                ),
+                canEditAvatar: capabilities?.canEditAvatar == true,
+              );
+            },
+          ),
+        },
       ),
     );
+  }
+
+  Color backgroundColor(ResponsiveUtils responsive, BuildContext context) {
+    if (PlatformInfos.isMobile) {
+      return Theme.of(context).colorScheme.surface;
+    } else {
+      return responsive.isWebDesktop(context)
+          ? Theme.of(context).colorScheme.surface
+          : LinagoraSysColors.material().onPrimary;
+    }
   }
 }
