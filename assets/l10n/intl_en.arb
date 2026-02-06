@@ -3653,5 +3653,6 @@
   "fileNoLongerExists": "File no longer exists",
   "cannotInviteBannedMember": "This user has been removed by an administrator. Change status in \"Removed users\" to proceed",
   "leaveChat": "Leave chat",
-  "leaveChatDescription": "Are you sure you want to leave this chat? Messaging history will still be available to the other person."
+  "leaveChatDescription": "Messaging history will still be available to the other person.",
+  "leaveChatTitle": "Are you sure you want to leave this chat?"
 }
