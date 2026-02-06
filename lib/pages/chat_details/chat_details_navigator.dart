@@ -12,6 +12,7 @@ class ChatDetailsRoutes {
 
 class ChatDetailsNavigator extends StatelessWidget {
   final VoidCallback? closeRightColumn;
+  final VoidCallback? onTapSearch;
   final String? roomId;
   final PresentationContact? contact;
   final bool isInStack;
@@ -19,6 +20,7 @@ class ChatDetailsNavigator extends StatelessWidget {
   const ChatDetailsNavigator({
     super.key,
     this.closeRightColumn,
+    this.onTapSearch,
     this.roomId,
     this.contact,
     required this.isInStack,
@@ -30,6 +32,7 @@ class ChatDetailsNavigator extends StatelessWidget {
       return ChatDetails(
         roomId: roomId!,
         closeRightColumn: closeRightColumn,
+        onTapSearch: onTapSearch,
         isInStack: isInStack,
       );
     }
@@ -42,6 +45,7 @@ class ChatDetailsNavigator extends StatelessWidget {
               return ChatDetails(
                 roomId: roomId!,
                 closeRightColumn: closeRightColumn,
+                onTapSearch: onTapSearch,
                 isInStack: isInStack,
               );
             case ChatDetailsRoutes.chatDetailsEdit:
@@ -52,6 +56,7 @@ class ChatDetailsNavigator extends StatelessWidget {
               return ChatDetails(
                 roomId: roomId!,
                 closeRightColumn: closeRightColumn,
+                onTapSearch: onTapSearch,
                 isInStack: isInStack,
               );
           }
