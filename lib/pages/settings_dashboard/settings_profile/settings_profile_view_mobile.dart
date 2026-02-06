@@ -14,9 +14,8 @@ import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:matrix/matrix.dart';
 import 'package:fluffychat/generated/l10n/app_localizations.dart';
 
-typedef OnTapMultipleAccountsButton = void Function(
-  List<TwakeChatPresentationAccount> multipleAccounts,
-);
+typedef OnTapMultipleAccountsButton =
+    void Function(List<TwakeChatPresentationAccount> multipleAccounts);
 
 class SettingsProfileViewMobile extends StatefulWidget {
   final ValueNotifier<Either<Failure, Success>> settingsProfileUIState;
@@ -76,17 +75,9 @@ class _SettingsProfileViewMobileState extends State<SettingsProfileViewMobile> {
                   builder: (context, _) {
                     return Stack(
                       children: [
-                        Positioned.fill(
-                          child: _buildAvatarBackground(context),
-                        ),
-                        Positioned.fill(
-                          child: _buildGradientOverlay(context),
-                        ),
-                        Column(
-                          children: [
-                            _buildProfileInformation(context),
-                          ],
-                        ),
+                        Positioned.fill(child: _buildAvatarBackground(context)),
+                        Positioned.fill(child: _buildGradientOverlay(context)),
+                        Column(children: [_buildProfileInformation(context)]),
                         if (widget.canEditAvatar && !isExpanded)
                           Positioned(
                             bottom: SettingsProfileViewMobileStyle
@@ -112,50 +103,53 @@ class _SettingsProfileViewMobileState extends State<SettingsProfileViewMobile> {
                                   ),
                                 ),
                               ),
-                              builder: (
-                                BuildContext context,
-                                MenuController menuController,
-                                Widget? child,
-                              ) {
-                                return GestureDetector(
-                                  onTap: () {
-                                    if (PlatformInfos.isWeb) {
-                                      menuController.isOpen
-                                          ? menuController.close()
-                                          : menuController.open();
-                                    } else {
-                                      widget.onTapAvatar?.call();
-                                    }
+                              builder:
+                                  (
+                                    BuildContext context,
+                                    MenuController menuController,
+                                    Widget? child,
+                                  ) {
+                                    return GestureDetector(
+                                      onTap: () {
+                                        if (PlatformInfos.isWeb) {
+                                          menuController.isOpen
+                                              ? menuController.close()
+                                              : menuController.open();
+                                        } else {
+                                          widget.onTapAvatar?.call();
+                                        }
+                                      },
+                                      child: Container(
+                                        decoration: BoxDecoration(
+                                          color: Theme.of(
+                                            context,
+                                          ).colorScheme.primary,
+                                          borderRadius: BorderRadius.circular(
+                                            SettingsProfileViewMobileStyle
+                                                .avatarSize,
+                                          ),
+                                          border: Border.all(
+                                            color: Theme.of(
+                                              context,
+                                            ).colorScheme.onPrimary,
+                                            width:
+                                                SettingsProfileViewMobileStyle
+                                                    .iconEditBorderWidth,
+                                          ),
+                                        ),
+                                        padding: SettingsProfileViewMobileStyle
+                                            .editIconPadding,
+                                        child: Icon(
+                                          Icons.edit,
+                                          size: SettingsProfileViewMobileStyle
+                                              .iconEditSize,
+                                          color: Theme.of(
+                                            context,
+                                          ).colorScheme.onPrimary,
+                                        ),
+                                      ),
+                                    );
                                   },
-                                  child: Container(
-                                    decoration: BoxDecoration(
-                                      color:
-                                          Theme.of(context).colorScheme.primary,
-                                      borderRadius: BorderRadius.circular(
-                                        SettingsProfileViewMobileStyle
-                                            .avatarSize,
-                                      ),
-                                      border: Border.all(
-                                        color: Theme.of(context)
-                                            .colorScheme
-                                            .onPrimary,
-                                        width: SettingsProfileViewMobileStyle
-                                            .iconEditBorderWidth,
-                                      ),
-                                    ),
-                                    padding: SettingsProfileViewMobileStyle
-                                        .editIconPadding,
-                                    child: Icon(
-                                      Icons.edit,
-                                      size: SettingsProfileViewMobileStyle
-                                          .iconEditSize,
-                                      color: Theme.of(context)
-                                          .colorScheme
-                                          .onPrimary,
-                                    ),
-                                  ),
-                                );
-                              },
                               menuChildren: widget.menuChildren ?? [],
                             ),
                           ),
@@ -169,9 +163,7 @@ class _SettingsProfileViewMobileState extends State<SettingsProfileViewMobile> {
               margin: const EdgeInsets.only(left: 12, right: 12, top: 12),
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                borderRadius: const BorderRadius.all(
-                  Radius.circular(8),
-                ),
+                borderRadius: const BorderRadius.all(Radius.circular(8)),
                 border: Border.all(
                   color:
                       LinagoraRefColors.material().neutral[90] ?? Colors.black,
@@ -218,9 +210,7 @@ class _SettingsProfileViewMobileState extends State<SettingsProfileViewMobile> {
                         SettingsProfileViewMobileStyle.paddingIconAndText,
                         Text(
                           L10n.of(context)!.loadingPleaseWait,
-                          style: Theme.of(context)
-                              .textTheme
-                              .labelLarge
+                          style: Theme.of(context).textTheme.labelLarge
                               ?.copyWith(
                                 color: Theme.of(context).colorScheme.onPrimary,
                               ),
@@ -266,12 +256,11 @@ class _SettingsProfileViewMobileState extends State<SettingsProfileViewMobile> {
                             success.haveMultipleAccounts
                                 ? L10n.of(context)!.switchAccounts
                                 : L10n.of(context)!.addAnotherAccount,
-                            style: Theme.of(context)
-                                .textTheme
-                                .labelLarge
+                            style: Theme.of(context).textTheme.labelLarge
                                 ?.copyWith(
-                                  color:
-                                      Theme.of(context).colorScheme.onPrimary,
+                                  color: Theme.of(
+                                    context,
+                                  ).colorScheme.onPrimary,
                                 ),
                           ),
                         ],
@@ -293,7 +282,8 @@ class _SettingsProfileViewMobileState extends State<SettingsProfileViewMobile> {
     return ValueListenableBuilder(
       valueListenable: widget.currentProfile,
       builder: (context, profile, _) {
-        final displayName = profile?.displayName ??
+        final displayName =
+            profile?.displayName ??
             widget.client.mxid(context).localpart ??
             widget.client.mxid(context);
         return SecondaryAvatar(
@@ -328,7 +318,8 @@ class _SettingsProfileViewMobileState extends State<SettingsProfileViewMobile> {
     return ValueListenableBuilder(
       valueListenable: widget.currentProfile,
       builder: (context, profile, _) {
-        final displayName = profile?.displayName ??
+        final displayName =
+            profile?.displayName ??
             widget.client.mxid(context).localpart ??
             widget.client.mxid(context);
         final sysColors = LinagoraSysColors.material();
@@ -372,12 +363,12 @@ class _SettingsProfileViewMobileState extends State<SettingsProfileViewMobile> {
                     child: Text(
                       displayName,
                       style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                            color: ColorTween(
-                              begin: sysColors.onSurface,
-                              end: sysColors.onPrimary,
-                            ).transform(widget.animationController.value),
-                            fontWeight: FontWeight.bold,
-                          ),
+                        color: ColorTween(
+                          begin: sysColors.onSurface,
+                          end: sysColors.onPrimary,
+                        ).transform(widget.animationController.value),
+                        fontWeight: FontWeight.bold,
+                      ),
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),

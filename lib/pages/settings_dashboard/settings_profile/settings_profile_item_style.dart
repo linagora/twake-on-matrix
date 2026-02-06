@@ -8,6 +8,7 @@ class SettingsProfileItemStyle {
   static const EdgeInsetsDirectional itemBuilderPadding =
       EdgeInsetsDirectional.only(end: 8.0);
 
-  static const EdgeInsetsGeometry textPadding =
-      EdgeInsets.symmetric(horizontal: 8.0);
+  static const EdgeInsetsGeometry textPadding = EdgeInsets.symmetric(
+    horizontal: 8.0,
+  );
 }

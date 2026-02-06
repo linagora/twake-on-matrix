@@ -291,22 +291,26 @@ class ProfileInfoBodyController extends State<ProfileInfoBody>
     if (!responsive.isMobile(context)) {
       return;
     }
+    // Prevent rapid tapping during animation
+    if (animationController.isAnimating) {
+      return;
+    }
     if (animationController.isCompleted) {
       animationController.reverse();
-      Future.delayed(const Duration(milliseconds: _animationDuration))
-          .then((_) {
+      Future.delayed(const Duration(milliseconds: _animationDuration)).then((
+        _,
+      ) {
         if (mounted) {
-          setState(() {
-            isExpandedAvatar.value = false;
-          });
+          isExpandedAvatar.value = false;
         }
       });
     } else {
-      setState(() {
+      if (mounted) {
         isExpandedAvatar.value = true;
-      });
-      Future.delayed(const Duration(milliseconds: _animationDuration))
-          .then((_) {
+      }
+      Future.delayed(const Duration(milliseconds: _animationDuration)).then((
+        _,
+      ) {
         if (mounted) {
           animationController.forward();
         }

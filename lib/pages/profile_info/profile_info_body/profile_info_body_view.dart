@@ -49,12 +49,8 @@ class ProfileInfoBodyView extends StatelessWidget {
           builder: (context, _) {
             return Stack(
               children: [
-                Positioned.fill(
-                  child: _buildAvatarBackground(context),
-                ),
-                Positioned.fill(
-                  child: _buildGradientOverlay(context),
-                ),
+                Positioned.fill(child: _buildAvatarBackground(context)),
+                Positioned.fill(child: _buildGradientOverlay(context)),
                 Column(
                   children: [
                     ProfileInfoHeader(

@@ -639,21 +639,27 @@ class SettingsProfileController extends State<SettingsProfile>
   }
 
   void handleAvatarInfoTap() {
+    // Prevent rapid tapping during animation
+    if (animationController.isAnimating) {
+      return;
+    }
     if (animationController.isCompleted) {
       animationController.reverse();
-      Future.delayed(const Duration(milliseconds: _animationDuration))
-          .then((_) {
-        setState(() {
+      Future.delayed(const Duration(milliseconds: _animationDuration)).then((
+        _,
+      ) {
+        if (mounted) {
           isExpandedAvatar.value = false;
-        });
+        }
       });
     } else {
-      setState(() {
-        isExpandedAvatar.value = true;
-      });
-      Future.delayed(const Duration(milliseconds: _animationDuration))
-          .then((_) {
-        animationController.forward();
+      isExpandedAvatar.value = true;
+      Future.delayed(const Duration(milliseconds: _animationDuration)).then((
+        _,
+      ) {
+        if (mounted) {
+          animationController.forward();
+        }
       });
     }
   }

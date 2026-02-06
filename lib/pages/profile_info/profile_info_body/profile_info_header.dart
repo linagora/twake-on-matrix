@@ -53,8 +53,9 @@ class _ProfileInfoHeaderState extends State<ProfileInfoHeader> {
     return ValueListenableBuilder(
       valueListenable: widget.userInfoNotifier,
       builder: (context, userInfo, child) {
-        final userInfoModel =
-            userInfo.getSuccessOrNull<GetUserInfoSuccess>()?.userInfo;
+        final userInfoModel = userInfo
+            .getSuccessOrNull<GetUserInfoSuccess>()
+            ?.userInfo;
         final displayName =
             userInfoModel?.displayName ?? widget.user.calcDisplayname();
 
@@ -96,12 +97,12 @@ class _ProfileInfoHeaderState extends State<ProfileInfoHeader> {
                     child: Text(
                       displayName,
                       style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                            color: ColorTween(
-                              begin: sysColors.onSurface,
-                              end: sysColors.onPrimary,
-                            ).transform(widget.animationController.value),
-                            fontWeight: FontWeight.bold,
-                          ),
+                        color: ColorTween(
+                          begin: sysColors.onSurface,
+                          end: sysColors.onPrimary,
+                        ).transform(widget.animationController.value),
+                        fontWeight: FontWeight.bold,
+                      ),
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -115,7 +116,9 @@ class _ProfileInfoHeaderState extends State<ProfileInfoHeader> {
                       ).transform(widget.animationController.value),
                       child: Text(
                         presence.getLocalizedStatusMessage(context),
-                        style: presence.getPresenceTextStyle(context)?.copyWith(
+                        style: presence
+                            .getPresenceTextStyle(context)
+                            ?.copyWith(
                               color: ColorTween(
                                 begin: sysColors.onSurface,
                                 end: sysColors.onPrimary,
@@ -141,8 +144,9 @@ class _ProfileInfoHeaderState extends State<ProfileInfoHeader> {
     return ValueListenableBuilder(
       valueListenable: widget.userInfoNotifier,
       builder: (context, userInfo, child) {
-        final userInfoModel =
-            userInfo.getSuccessOrNull<GetUserInfoSuccess>()?.userInfo;
+        final userInfoModel = userInfo
+            .getSuccessOrNull<GetUserInfoSuccess>()
+            ?.userInfo;
         return Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -159,8 +163,8 @@ class _ProfileInfoHeaderState extends State<ProfileInfoHeader> {
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: LinagoraTextStyle.material().bodyMedium2.copyWith(
-                    color: LinagoraSysColors.material().onSurface,
-                  ),
+                color: LinagoraSysColors.material().onSurface,
+              ),
             ),
             if (presence != null) ...[
               const SizedBox(height: 8),
@@ -193,17 +197,13 @@ class _ProfileInfoHeaderState extends State<ProfileInfoHeader> {
           return const SizedBox(
             width: 160,
             height: 160,
-            child: Center(
-              child: CupertinoActivityIndicator(
-                animating: true,
-              ),
-            ),
+            child: Center(child: CupertinoActivityIndicator(animating: true)),
           );
         }
         if (success is GetUserInfoSuccess) {
           return Avatar(
             mxContent: userInfoModel?.avatarUrl != null
-                ? Uri.parse(userInfoModel?.avatarUrl ?? '')
+                ? Uri.tryParse(userInfoModel?.avatarUrl ?? '')
                 : widget.user.avatarUrl,
             name: userInfoModel?.displayName ?? widget.user.calcDisplayname(),
             size: 160,

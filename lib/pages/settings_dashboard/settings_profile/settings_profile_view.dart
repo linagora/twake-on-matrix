@@ -22,11 +22,13 @@ class SettingsProfileView extends StatelessWidget {
   final SettingsProfileController controller;
   final Capabilities? capabilities;
 
-  static const ValueKey settingsProfileViewMobileKey =
-      ValueKey('settingsProfileViewMobile');
+  static const ValueKey settingsProfileViewMobileKey = ValueKey(
+    'settingsProfileViewMobile',
+  );
 
-  static const ValueKey settingsProfileViewWebKey =
-      ValueKey('settingsProfileViewWeb');
+  static const ValueKey settingsProfileViewWebKey = ValueKey(
+    'settingsProfileViewWeb',
+  );
 
   const SettingsProfileView({
     super.key,
@@ -76,8 +78,8 @@ class SettingsProfileView extends StatelessWidget {
                     child: Text(
                       L10n.of(context)!.done,
                       style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                            color: Theme.of(context).colorScheme.primary,
-                          ),
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
                     ),
                   ),
                 ),
@@ -102,10 +104,8 @@ class SettingsProfileView extends StatelessWidget {
                 responsive: responsive,
                 settingsProfileUIState: controller.pickAvatarUIState,
                 onTapAvatar: controller.onTapAvatarInMobile,
-                onTapMultipleAccountsButton: (multipleAccounts) =>
-                    controller.onBottomButtonTap(
-                  multipleAccounts: multipleAccounts,
-                ),
+                onTapMultipleAccountsButton: (multipleAccounts) => controller
+                    .onBottomButtonTap(multipleAccounts: multipleAccounts),
                 settingsMultiAccountsUIState:
                     controller.settingsMultiAccountsUIState,
                 menuChildren: controller.listContextMenuBuilder(context),
@@ -121,8 +121,9 @@ class SettingsProfileView extends StatelessWidget {
                     return SettingsProfileItemBuilder(
                       settingsProfileEnum:
                           controller.getListProfileMobile[index],
-                      title: controller.getListProfileMobile[index]
-                          .getTitle(context),
+                      title: controller.getListProfileMobile[index].getTitle(
+                        context,
+                      ),
                       settingsProfileUIState: controller.pickAvatarUIState,
                       settingsProfilePresentation: SettingsProfilePresentation(
                         settingsProfileType: controller
@@ -181,8 +182,9 @@ class SettingsProfileView extends StatelessWidget {
                       settingsProfileUIState: controller.pickAvatarUIState,
                       settingsProfileEnum:
                           controller.getListProfileBasicInfo[index],
-                      title: controller.getListProfileBasicInfo[index]
-                          .getTitle(context),
+                      title: controller.getListProfileBasicInfo[index].getTitle(
+                        context,
+                      ),
                       settingsProfilePresentation: SettingsProfilePresentation(
                         settingsProfileType: controller
                             .getListProfileBasicInfo[index]

@@ -11,7 +11,7 @@ class ChatProfileInfoStyle {
   static const double avatarFontSize = 36;
   static const double avatarHeight = 304;
 
-  static const double toolbarHeightSliverAppBar = 192.0;
+  static const double toolbarHeightSliverAppBar = 224.0;
 
   static const double maxAvatarHeight = 304.0;
 

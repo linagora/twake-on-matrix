@@ -41,7 +41,7 @@ class _ChatDetailsAppBarState extends State<ChatDetailsAppBar>
   late final AnimationController animationController;
 
   static const int _animationDuration = 100;
-  static const double _groupInfoHeight = 192;
+  static const double _groupInfoHeight = 224;
   static const double _actionsHeight = 69;
   static const double _actionsExpandedBottomPadding = 16;
 

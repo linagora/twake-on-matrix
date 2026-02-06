@@ -60,16 +60,16 @@ class SettingsProfileItemBuilder extends StatelessWidget {
                     Text(
                       title,
                       style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                            color: LinagoraRefColors.material().neutral[40],
-                          ),
+                        color: LinagoraRefColors.material().neutral[40],
+                      ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
                     Text(
                       textEditingController?.text ?? '',
                       style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                            color: LinagoraSysColors.material().onSurface,
-                          ),
+                        color: LinagoraSysColors.material().onSurface,
+                      ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -92,14 +92,14 @@ class SettingsProfileItemBuilder extends StatelessWidget {
         ),
         const SizedBox(height: 8),
         if (enableDivider)
-        Container(
-          width: double.infinity,
-          height: 1,
-          margin: const EdgeInsets.only(left: 40),
-          color: LinagoraStateLayer(
-            LinagoraSysColors.material().surfaceTint,
-          ).opacityLayer3,
-        ),
+          Container(
+            width: double.infinity,
+            height: 1,
+            margin: const EdgeInsets.only(left: 40),
+            color: LinagoraStateLayer(
+              LinagoraSysColors.material().surfaceTint,
+            ).opacityLayer3,
+          ),
       ],
     );
   }
