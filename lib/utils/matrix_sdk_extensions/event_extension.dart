@@ -48,7 +48,7 @@ extension LocalizedBody on Event {
 
   String? get blurHash {
     return infoMap['xyz.amorgan.blurhash'] is String
-        ? infoMap['xyz.amorgan.blurhash']
+        ? infoMap['xyz.amorgan.blurhash'] as String
         : null;
   }
 
@@ -101,11 +101,11 @@ extension LocalizedBody on Event {
 
   bool get isAttachmentSmallEnough =>
       infoMap['size'] is int &&
-      infoMap['size'] < room.client.database.maxFileSize;
+      (infoMap['size'] as int) < room.client.database.maxFileSize;
 
   bool get isThumbnailSmallEnough =>
       thumbnailInfoMap['size'] is int &&
-      thumbnailInfoMap['size'] < room.client.database.maxFileSize;
+      (thumbnailInfoMap['size'] as int) < room.client.database.maxFileSize;
 
   bool get showThumbnail =>
       [MessageTypes.Image, MessageTypes.Sticker, MessageTypes.Video]
@@ -117,7 +117,7 @@ extension LocalizedBody on Event {
 
   Duration? get duration {
     return infoMap['duration'] is int
-        ? Duration(milliseconds: infoMap['duration'])
+        ? Duration(milliseconds: infoMap['duration'] as int)
         : null;
   }
 
@@ -601,7 +601,7 @@ extension LocalizedBody on Event {
     final database = room.client.database;
     final thisInfoMap = getThumbnail ? thumbnailInfoMap : infoMap;
     return thisInfoMap['size'] is int &&
-        thisInfoMap['size'] <= database.maxFileSize;
+        (thisInfoMap['size'] as int) <= database.maxFileSize;
   }
 }
 

@@ -1,13 +1,19 @@
+import 'package:fluffychat/data/datasource/contact/contacts_provider.dart';
 import 'package:fluffychat/domain/model/contact/contact.dart';
 import 'package:fluffychat/utils/string_extension.dart';
 import 'package:flutter_contacts/flutter_contacts.dart' as flutter_contact;
 import 'package:fluffychat/data/datasource/contact/phonebook_datasource.dart';
 
 class PhonebookContactDatasourceImpl implements PhonebookContactDatasource {
+  final ContactsProvider _contactsProvider;
+
+  PhonebookContactDatasourceImpl(this._contactsProvider);
+
   @override
   Future<List<Contact>> fetchContacts() async {
-    final phonebookContacts =
-        await flutter_contact.FlutterContacts.getContacts(withProperties: true);
+    final phonebookContacts = await _contactsProvider.getAll(
+      properties: flutter_contact.ContactProperties.all,
+    );
 
     final contacts = mappingToContact(phonebookContacts);
     return _sortContactsByDisplayName(contacts);
@@ -24,7 +30,7 @@ class PhonebookContactDatasourceImpl implements PhonebookContactDatasource {
           contact.emails.map((email) => Email(address: email.address)).toList();
 
       return Contact(
-        id: contact.id,
+        id: contact.id ?? '${emails.hashCode}${phoneNumbers.hashCode}',
         displayName: contact.displayName,
         phoneNumbers: _removeDuplicatedPhoneNumbers(phoneNumbers).toSet(),
         emails: _removeDuplicatedEmails(emails).toSet(),

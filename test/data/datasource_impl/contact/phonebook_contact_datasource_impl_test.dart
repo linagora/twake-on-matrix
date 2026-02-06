@@ -1,176 +1,167 @@
+import 'package:fluffychat/data/datasource/contact/contacts_provider.dart';
 import 'package:fluffychat/data/datasource_impl/contact/phonebook_contact_datasource_impl.dart';
 import 'package:fluffychat/domain/model/contact/contact.dart';
-import 'package:flutter/services.dart';
+import 'package:flutter_contacts/flutter_contacts.dart' as flutter_contact;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get_it/get_it.dart';
+import 'package:mockito/annotations.dart';
+import 'package:mockito/mockito.dart';
 
+import 'phonebook_contact_datasource_impl_test.mocks.dart';
+
+@GenerateNiceMocks([MockSpec<ContactsProvider>()])
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
   late PhonebookContactDatasourceImpl dataSource;
-  const MethodChannel channel =
-      MethodChannel('github.com/QuisApp/flutter_contacts');
+  late MockContactsProvider mockContactsProvider;
 
   group('[PhonebookContactDatasourceV2Impl] test\n', () {
     final listAllContacts = [
-      {
-        'id': 'id_1',
-        'displayName': 'Alice',
-        'phones': [
-          {'number': '(212)555-6789'},
-          {'number': '2125556789'},
+      const flutter_contact.Contact(
+        id: 'id_1',
+        displayName: 'Alice',
+        phones: [
+          flutter_contact.Phone(number: '(212)555-6789'),
+          flutter_contact.Phone(number: '2125556789'),
         ],
-        'emails': [
-          {
-            'address': 'Alice@domain.com',
-          },
-          {
-            'address': 'Alice_1@domain.com',
-          },
+        emails: [
+          flutter_contact.Email(address: 'Alice@domain.com'),
+          flutter_contact.Email(address: 'Alice_1@domain.com'),
         ],
-      },
-      {
-        'id': 'id_2',
-        'displayName': 'Bob',
-        'phones': [
-          {'number': '2124678190'},
-          {'number': '(212)467-8190'},
+      ),
+      const flutter_contact.Contact(
+        id: 'id_2',
+        displayName: 'Bob',
+        phones: [
+          flutter_contact.Phone(number: '2124678190'),
+          flutter_contact.Phone(number: '(212)467-8190'),
         ],
-        'emails': [
-          {
-            'address': 'bob@domain.com',
-          },
-          {
-            'address': 'bob2@domain.com',
-          }
+        emails: [
+          flutter_contact.Email(address: 'bob@domain.com'),
+          flutter_contact.Email(address: 'bob2@domain.com'),
         ],
-      },
-      {
-        'id': 'id_3',
-        'displayName': 'Charlie',
-        'phones': [
-          {'number': '212 555-6789'},
-          {'number': '2125556789'},
+      ),
+      const flutter_contact.Contact(
+        id: 'id_3',
+        displayName: 'Charlie',
+        phones: [
+          flutter_contact.Phone(number: '212 555-6789'),
+          flutter_contact.Phone(number: '2125556789'),
         ],
-      },
-      {
-        'id': 'id_4',
-        'displayName': 'David',
-        'phones': [
-          {'number': '2124678190'},
-          {'number': '212 467-8190'},
+      ),
+      const flutter_contact.Contact(
+        id: 'id_4',
+        displayName: 'David',
+        phones: [
+          flutter_contact.Phone(number: '2124678190'),
+          flutter_contact.Phone(number: '212 467-8190'),
         ],
-      },
-      {
-        'id': 'id_5',
-        'displayName': 'Eve',
-        'phones': [
-          {'number': '+1.123.456.7890'},
-          {'number': '11234567890'},
+      ),
+      const flutter_contact.Contact(
+        id: 'id_5',
+        displayName: 'Eve',
+        phones: [
+          flutter_contact.Phone(number: '+1.123.456.7890'),
+          flutter_contact.Phone(number: '11234567890'),
         ],
-      },
-      {
-        'id': 'id_6',
-        'displayName': 'Frank',
-        'phones': [
-          {'number': '81234977890'},
-          {'number': '+8.123.497.7890'},
+      ),
+      const flutter_contact.Contact(
+        id: 'id_6',
+        displayName: 'Frank',
+        phones: [
+          flutter_contact.Phone(number: '81234977890'),
+          flutter_contact.Phone(number: '+8.123.497.7890'),
         ],
-      },
-      {
-        'id': 'id_7',
-        'displayName': 'Grace',
-        'phones': [
-          {'number': '+1 (800)-555-1234 ext. 123'},
-          {'number': '18005551234123'},
+      ),
+      const flutter_contact.Contact(
+        id: 'id_7',
+        displayName: 'Grace',
+        phones: [
+          flutter_contact.Phone(number: '+1 (800)-555-1234 ext. 123'),
+          flutter_contact.Phone(number: '18005551234123'),
         ],
-      },
-      {
-        'id': 'id_8',
-        'displayName': 'Hank',
-        'phones': [
-          {'number': '18005879106234'},
-          {'number': '+1 (800)-587-9106 ext. 234'},
+      ),
+      const flutter_contact.Contact(
+        id: 'id_8',
+        displayName: 'Hank',
+        phones: [
+          flutter_contact.Phone(number: '18005879106234'),
+          flutter_contact.Phone(number: '+1 (800)-587-9106 ext. 234'),
         ],
-      },
-      {
-        'id': 'id_9',
-        'displayName': 'Ivy',
-        'phones': [
-          {'number': '+1 (800)-555.1234'},
-          {'number': '18005551234'},
+      ),
+      const flutter_contact.Contact(
+        id: 'id_9',
+        displayName: 'Ivy',
+        phones: [
+          flutter_contact.Phone(number: '+1 (800)-555.1234'),
+          flutter_contact.Phone(number: '18005551234'),
         ],
-      },
-      {
-        'id': 'id_10',
-        'displayName': 'Karl',
-        'phones': [
-          {'number': '18005873456'},
-          {'number': '+1 (800)-587.3456'},
+      ),
+      const flutter_contact.Contact(
+        id: 'id_10',
+        displayName: 'Karl',
+        phones: [
+          flutter_contact.Phone(number: '18005873456'),
+          flutter_contact.Phone(number: '+1 (800)-587.3456'),
         ],
-      },
-      {
-        'id': 'id_11',
-        'displayName': 'Liam',
-        'phones': [
-          {'number': '(212) 555-6789'},
-          {'number': '2125556789'},
+      ),
+      const flutter_contact.Contact(
+        id: 'id_11',
+        displayName: 'Liam',
+        phones: [
+          flutter_contact.Phone(number: '(212) 555-6789'),
+          flutter_contact.Phone(number: '2125556789'),
         ],
-      },
-      {
-        'id': 'id_12',
-        'displayName': 'Mia',
-        'phones': [
-          {'number': '2125556789'},
-          {'number': '(212) 555-6789'},
+      ),
+      const flutter_contact.Contact(
+        id: 'id_12',
+        displayName: 'Mia',
+        phones: [
+          flutter_contact.Phone(number: '2125556789'),
+          flutter_contact.Phone(number: '(212) 555-6789'),
         ],
-      },
-      {
-        'id': 'id_13',
-        'displayName': 'Nina',
-        'emails': [
-          {
-            'address': 'nina@domain.com',
-          },
-          {
-            'address': 'nina1@domain.com',
-          },
-          {
-            'address': 'nina2@domain.com',
-          },
-          {
-            'address': 'nina3@domain.com',
-          }
+      ),
+      const flutter_contact.Contact(
+        id: 'id_13',
+        displayName: 'Nina',
+        emails: [
+          flutter_contact.Email(address: 'nina@domain.com'),
+          flutter_contact.Email(address: 'nina1@domain.com'),
+          flutter_contact.Email(address: 'nina2@domain.com'),
+          flutter_contact.Email(address: 'nina3@domain.com'),
         ],
-      },
-      {
-        'id': 'id_14',
-        'displayName': 'Nina',
-      },
-      {
-        'id': 'id_15',
-        'displayName': '222',
-      },
-      {
-        'id': 'id_16',
-        'displayName': '222',
-      }
+      ),
+      const flutter_contact.Contact(
+        id: 'id_14',
+        displayName: 'Nina',
+      ),
+      const flutter_contact.Contact(
+        id: 'id_15',
+        displayName: '222',
+      ),
+      const flutter_contact.Contact(
+        id: 'id_16',
+        displayName: '222',
+      )
     ];
 
     setUp(() {
+      mockContactsProvider = MockContactsProvider();
       final getIt = GetIt.instance;
-      getIt.registerFactory(
-        () => PhonebookContactDatasourceImpl(),
+      getIt.allowReassignment = true;
+      getIt.registerFactory<ContactsProvider>(() => mockContactsProvider);
+      getIt.registerFactory<PhonebookContactDatasourceImpl>(
+        () => PhonebookContactDatasourceImpl(getIt.get<ContactsProvider>()),
       );
       dataSource = getIt.get<PhonebookContactDatasourceImpl>();
 
-      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
-          .setMockMethodCallHandler(channel, (MethodCall methodCall) async {
-        if (methodCall.method == 'select') {
-          return listAllContacts;
-        }
-        return null;
-      });
+      when(mockContactsProvider.getAll(properties: anyNamed('properties')))
+          .thenAnswer((_) async => listAllContacts);
+    });
+
+    tearDown(() {
+      GetIt.instance.reset();
     });
 
     test(

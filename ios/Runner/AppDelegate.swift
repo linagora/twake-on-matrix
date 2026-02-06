@@ -5,28 +5,31 @@ import receive_sharing_intent
 let apnTokenKey = "apnToken"
 
 @main
-@objc class AppDelegate: FlutterAppDelegate {
+@objc class AppDelegate: FlutterAppDelegate, FlutterImplicitEngineDelegate {
   var twakeApnChannel: FlutterMethodChannel?
   var initialNotiInfo: Any?
   override func application(
     _ application: UIApplication,
     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
   ) -> Bool {
-    twakeApnChannel = createApnChannel()
     initialNotiInfo = launchOptions?[.remoteNotification]
     
-    GeneratedPluginRegistrant.register(with: self)
     if #available(iOS 10.0, *) {
       UNUserNotificationCenter.current().delegate = self
     }
     return super.application(application, didFinishLaunchingWithOptions: launchOptions)
   }
     
-    func createApnChannel() -> FlutterMethodChannel {
-        let controller : FlutterViewController = window?.rootViewController as! FlutterViewController
+    
+    func didInitializeImplicitFlutterEngine(_ engineBridge: FlutterImplicitEngineBridge) {
+        GeneratedPluginRegistrant.register(with: engineBridge.pluginRegistry)
+        twakeApnChannel = createApnChannel(engineBridge.applicationRegistrar.messenger())
+    }
+    
+    func createApnChannel(_ messenger: FlutterBinaryMessenger) -> FlutterMethodChannel {
         let twakeApnChannel = FlutterMethodChannel(
             name: "twake_apn",
-            binaryMessenger: controller.binaryMessenger)
+            binaryMessenger: messenger)
         twakeApnChannel.setMethodCallHandler { [weak self ] call, result in
             switch call.method {
             case "getToken":
@@ -41,7 +44,7 @@ let apnTokenKey = "apnToken"
                 center.removeAllPendingNotificationRequests()
                 result(true)
             default:
-                break
+                result(FlutterMethodNotImplemented)
             }
         }
         return twakeApnChannel
