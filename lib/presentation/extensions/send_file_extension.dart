@@ -224,12 +224,7 @@ extension SendFileExtension on Room {
           width: thumbnail?.width,
           height: thumbnail?.height,
         );
-        if (fileInfo.imagePlaceholderBytes.isNotEmpty) {
-          storePlaceholderFileInMem(fileInfo: fileInfo, txid: txid);
-        } else if (thumbnail != null) {
-          storePlaceholderFileInMem(fileInfo: thumbnail, txid: txid);
-        }
-
+        storePlaceholderFileInMem(fileInfo: fileInfo, txid: txid);
         fakeImageEvent = await sendFakeFileInfoEvent(
           fileInfo,
           txid: txid,
@@ -723,19 +718,7 @@ extension SendFileExtension on Room {
     // otherwise the sending event will be removed from timeline
     final matrixFile =
         await assetEntity.toMatrixFile() ?? await fileInfo.toMatrixFile();
-    sendingFilePlaceholders[txid] = switch (fileInfo.msgType) {
-      MessageTypes.Image => MatrixImageFile(
-        bytes: matrixFile.bytes,
-        name: matrixFile.name,
-        mimeType: matrixFile.mimeType,
-      ),
-      MessageTypes.Video => MatrixVideoFile(
-        bytes: matrixFile.bytes,
-        name: matrixFile.name,
-        mimeType: matrixFile.mimeType,
-      ),
-      _ => matrixFile,
-    };
+    sendingFilePlaceholders[txid] = matrixFile;
   }
 
   Future<Map<TransactionId, FakeSendingFileInfo>>

@@ -19,12 +19,15 @@ class VideoAssetEntity extends FileAssetEntity {
     return VideoFileInfo(
       file.path.split('/').last,
       filePath: file.path,
-      width: assetEntity.width,
-      height: assetEntity.height,
+      width: assetEntity.orientatedWidth,
+      height: assetEntity.orientatedHeight,
       duration: assetEntity.videoDuration,
       imagePlaceholderBytes:
           await assetEntity.thumbnailDataWithSize(
-            ThumbnailSize(assetEntity.width, assetEntity.height),
+            ThumbnailSize(
+              assetEntity.orientatedWidth,
+              assetEntity.orientatedHeight,
+            ),
             quality: AppConfig.thumbnailQuality,
           ) ??
           Uint8List(0),

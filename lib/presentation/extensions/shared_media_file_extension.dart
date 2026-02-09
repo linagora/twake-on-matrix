@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:fluffychat/presentation/extensions/uint8list_extension.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:matrix/matrix.dart';
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
@@ -9,7 +10,14 @@ extension SharedMediaFileExtension on SharedMediaFile {
     final bytes = await File(path).readAsBytes();
     final name = path.split("/").last;
     if (type == SharedMediaType.image) {
-      return MatrixImageFile(bytes: bytes, name: name, mimeType: mimeType);
+      final size = await bytes.imageSize;
+      return MatrixImageFile(
+        bytes: bytes,
+        name: name,
+        mimeType: mimeType,
+        width: size?.width.toInt(),
+        height: size?.height.toInt(),
+      );
     }
     if (type == SharedMediaType.video) {
       return MatrixVideoFile(
