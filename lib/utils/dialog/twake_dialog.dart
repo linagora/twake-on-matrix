@@ -30,6 +30,8 @@ class TwakeDialog {
 
   static const int defaultMaxLinesMessage = 3;
 
+  static const Key showConfirmAlertDialogKey = Key('show_confirm_alert_dialog');
+
   static void hideLoadingDialog(BuildContext context) {
     if (PlatformInfos.isWeb) {
       if (TwakeApp.routerKey.currentContext != null) {
@@ -308,6 +310,7 @@ Future<ConfirmResult> showConfirmAlertDialog({
     useRootNavigator: useRootNavigator,
     builder: (context) {
       return ConfirmationDialogBuilder(
+        key: TwakeDialog.showConfirmAlertDialogKey,
         title: title ?? '',
         textContent: message ?? '',
         confirmText: okLabel ?? '',

@@ -26,6 +26,8 @@ import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:matrix/matrix.dart' hide Contact;
 
 class ChatProfileInfoDetails extends StatelessWidget {
+  static const Key leaveChatButtonKey = Key('leave_chat_button');
+
   const ChatProfileInfoDetails({
     super.key,
     this.displayName,
@@ -128,6 +130,7 @@ class ChatProfileInfoDetails extends StatelessWidget {
                     height: ChatProfileInfoStyle.textSpacing,
                   ),
                   InkWell(
+                    key: leaveChatButtonKey,
                     hoverColor: Colors.transparent,
                     highlightColor: Colors.transparent,
                     focusColor: Colors.transparent,

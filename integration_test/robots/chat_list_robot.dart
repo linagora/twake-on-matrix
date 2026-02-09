@@ -89,6 +89,13 @@ class ChatListRobot extends HomeRobot {
     await confirmAccessContact();
   }
 
+  Future<void> openSearchScreenWithoutAcceptPermission() async {
+    // Tap on the search TextField in the chat list to open search screen
+    await $(TextField).tap();
+    // Verify SearchView is opened
+    await $.waitUntilVisible($(SearchView));
+  }
+
   Future<int> getChatRoomCounts() async {
     final listChat = await getListOfChatGroup();
     return listChat.length;

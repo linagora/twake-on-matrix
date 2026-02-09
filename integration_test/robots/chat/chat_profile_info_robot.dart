@@ -1,7 +1,10 @@
+import 'package:fluffychat/pages/chat_profile_info/chat_profile_info_details.dart';
 import 'package:fluffychat/pages/profile_info/profile_info_body/profile_info_contact_rows.dart';
 import 'package:fluffychat/pages/profile_info/profile_info_body/profile_info_header.dart';
+import 'package:fluffychat/utils/dialog/twake_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:patrol/patrol.dart';
 
 import '../../base/core_robot.dart';
 
@@ -122,5 +125,75 @@ class ChatProfileInfoRobot extends CoreRobot {
       }
     }
     return '';
+  }
+
+  /// Find the "Leave chat" button in the profile info screen
+  PatrolFinder getLeaveChatButton() {
+    return $(find.byKey(ChatProfileInfoDetails.leaveChatButtonKey));
+  }
+
+  /// Tap on the "Leave chat" button
+  Future<void> tapLeaveChatButton() async {
+    final leaveChatButton = getLeaveChatButton();
+    await leaveChatButton.waitUntilVisible();
+    expect(
+      leaveChatButton.exists,
+      isTrue,
+      reason: 'Leave chat button not found',
+    );
+    await leaveChatButton.tap();
+    await $.pumpAndSettle();
+  }
+
+  /// Verify the leave chat confirmation dialog is shown
+  Future<void> verifyLeaveChatConfirmDialog() async {
+    // Wait for the dialog to appear using its key
+    await $
+        .waitUntilVisible($(find.byKey(TwakeDialog.showConfirmAlertDialogKey)));
+
+    // Verify the dialog exists
+    final dialogFinder = find.byKey(TwakeDialog.showConfirmAlertDialogKey);
+    expect(dialogFinder, findsOneWidget, reason: 'Leave chat dialog not found');
+  }
+
+  /// Confirm leaving the chat in the dialog
+  Future<void> confirmLeaveChat() async {
+    // Find the dialog using the key we already verified exists
+    final dialogFinder = find.byKey(TwakeDialog.showConfirmAlertDialogKey);
+
+    // Try to find the "Leave" button by text (hardcoded for test reliability)
+    final leaveButtonByText = find.descendant(
+      of: dialogFinder,
+      matching: find.text('Leave'),
+    );
+
+    if (leaveButtonByText.evaluate().isNotEmpty) {
+      await $(leaveButtonByText).tap();
+      await $.pumpAndSettle(timeout: const Duration(seconds: 5));
+      return;
+    }
+
+    // Fallback: Find all buttons and tap the confirm button (positive action)
+    final confirmButtons = find.descendant(
+      of: dialogFinder,
+      matching: find.byWidgetPredicate(
+        (widget) => widget is TextButton || widget is ElevatedButton,
+      ),
+    );
+
+    if (confirmButtons.evaluate().length >= 2) {
+      // The confirm button is typically the second button
+      await $(confirmButtons.at(1)).tap();
+    } else if (confirmButtons.evaluate().isNotEmpty) {
+      await $(confirmButtons.first).tap();
+    }
+    await $.pumpAndSettle(timeout: const Duration(seconds: 5));
+  }
+
+  /// Navigate back from profile info screen
+  Future<void> navigateBack() async {
+    final backButton = $(AppBar).$(IconButton).first;
+    await backButton.tap();
+    await $.pumpAndSettle();
   }
 }
