@@ -64,15 +64,13 @@ class ChatDetailsGroupActionsView extends StatelessWidget {
         12,
         8,
         12,
-        Tween<double>(
-          begin: 0,
-          end: 16,
-        ).transform(animationController.value),
+        Tween<double>(begin: 0, end: 16).transform(animationController.value),
       ),
       child: Row(
         children: List.generate(actions.length, (index) {
-          final padding =
-              EdgeInsetsDirectional.only(start: index == 0 ? 0 : 12);
+          final padding = EdgeInsetsDirectional.only(
+            start: index == 0 ? 0 : 12,
+          );
           return Expanded(
             child: Padding(
               padding: padding,

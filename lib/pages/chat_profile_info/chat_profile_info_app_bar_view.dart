@@ -62,8 +62,9 @@ class ChatProfileInfoAppBarView extends StatelessWidget {
     return ValueListenableBuilder(
       valueListenable: userInfoNotifier,
       builder: (context, userInfo, child) {
-        final userInfoModel =
-            userInfo.getSuccessOrNull<GetUserInfoSuccess>()?.userInfo;
+        final userInfoModel = userInfo
+            .getSuccessOrNull<GetUserInfoSuccess>()
+            ?.userInfo;
         return Column(
           children: [
             Stack(
@@ -175,16 +176,19 @@ class ChatProfileInfoAppBarView extends StatelessWidget {
     required Either<Failure, Success> userInfo,
     required UserInfo? userInfoModel,
   }) {
-    return userInfo.fold((failure) {
-      return displayName ?? '';
-    }, (success) {
-      if (success is GettingUserInfo) {
-        return null;
-      }
-      if (success is GetUserInfoSuccess) {
-        return userInfoModel?.displayName ?? displayName ?? '';
-      }
-      return displayName ?? '';
-    });
+    return userInfo.fold(
+      (failure) {
+        return displayName ?? '';
+      },
+      (success) {
+        if (success is GettingUserInfo) {
+          return null;
+        }
+        if (success is GetUserInfoSuccess) {
+          return userInfoModel?.displayName ?? displayName ?? '';
+        }
+        return displayName ?? '';
+      },
+    );
   }
 }

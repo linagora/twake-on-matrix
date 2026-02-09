@@ -11,10 +11,7 @@ import 'package:fluffychat/pages/chat_profile_info/chat_profile_info_style.dart'
 class ChatProfileInfoView extends StatelessWidget {
   final ChatProfileInfoController controller;
 
-  const ChatProfileInfoView(
-    this.controller, {
-    super.key,
-  });
+  const ChatProfileInfoView(this.controller, {super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -28,9 +25,7 @@ class ChatProfileInfoView extends StatelessWidget {
         leading: IconButton(
           onPressed: controller.widget.onBack,
           icon: controller.widget.isInStack
-              ? const Icon(
-                  Icons.arrow_back_ios,
-                )
+              ? const Icon(Icons.arrow_back_ios)
               : const Icon(Icons.close),
         ),
         context: context,

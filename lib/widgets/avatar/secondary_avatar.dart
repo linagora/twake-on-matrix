@@ -50,8 +50,8 @@ class SecondaryAvatar extends StatelessWidget {
           fit: BoxFit.cover,
           width: size,
           height: size,
-          cacheWidth:
-              (size * MediaQuery.devicePixelRatioOf(context) * 2).round(),
+          cacheWidth: (size * MediaQuery.devicePixelRatioOf(context) * 2)
+              .round(),
           cacheKey: mxContent.toString(),
           animated: true,
           isThumbnail: false,

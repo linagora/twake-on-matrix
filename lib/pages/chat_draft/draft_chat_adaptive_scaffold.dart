@@ -11,10 +11,7 @@ import 'package:fluffychat/pages/chat_adaptive_scaffold/chat_adaptive_scaffold_b
 class DraftChatAdaptiveScaffold extends StatelessWidget {
   final GoRouterState state;
 
-  const DraftChatAdaptiveScaffold({
-    super.key,
-    required this.state,
-  });
+  const DraftChatAdaptiveScaffold({super.key, required this.state});
 
   @override
   Widget build(BuildContext context) {
@@ -23,26 +20,26 @@ class DraftChatAdaptiveScaffold extends StatelessWidget {
         contact: _contact,
         onChangeRightColumnType: controller.setRightColumnType,
       ),
-      rightBuilder: (
-        controller, {
-        required bool isInStack,
-        required RightColumnType type,
-      }) {
-        switch (type) {
-          case RightColumnType.profileInfo:
-            return ChatProfileInfoNavigator(
-              onBack: controller.hideRightColumn,
-              contact: _contact,
-              isInStack: isInStack,
-              isDraftInfo: true,
-              onSearch: () => controller.setRightColumnType(
-                RightColumnType.search,
-              ),
-            );
-          default:
-            return const SizedBox();
-        }
-      },
+      rightBuilder:
+          (
+            controller, {
+            required bool isInStack,
+            required RightColumnType type,
+          }) {
+            switch (type) {
+              case RightColumnType.profileInfo:
+                return ChatProfileInfoNavigator(
+                  onBack: controller.hideRightColumn,
+                  contact: _contact,
+                  isInStack: isInStack,
+                  isDraftInfo: true,
+                  onSearch: () =>
+                      controller.setRightColumnType(RightColumnType.search),
+                );
+              default:
+                return const SizedBox();
+            }
+          },
     );
   }
 

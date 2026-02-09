@@ -7,16 +7,20 @@ class ChatDetailViewStyle {
   static const double fixedWidth = 360.0;
 
   // Navigation App Bar
-  static const EdgeInsetsGeometry backIconPadding =
-      EdgeInsets.symmetric(vertical: 8, horizontal: 4);
+  static const EdgeInsetsGeometry backIconPadding = EdgeInsets.symmetric(
+    vertical: 8,
+    horizontal: 4,
+  );
 
   static double toolbarHeight(BuildContext context) =>
       responsive.isMobile(context) ? 56 : 80;
-  static const EdgeInsets navigationAppBarPadding =
-      EdgeInsets.symmetric(horizontal: 4.0, vertical: 8.0);
+  static const EdgeInsets navigationAppBarPadding = EdgeInsets.symmetric(
+    horizontal: 4.0,
+    vertical: 8.0,
+  );
 
   // Informations Content
-  static const double minToolbarHeightSliverAppBar = 640.0;
+  static const double minToolbarHeightSliverAppBar = 616.0;
   static const double mediumToolbarHeightSliverAppBar = 688.0;
   static const double maxToolbarHeightSliverAppBar = 744.0;
   static const double avatarSize = 96;
@@ -25,9 +29,7 @@ class ChatDetailViewStyle {
   static const double chatInfoActionHeight = 83;
   static const double chatInfoAddContactHeight = 50;
   static EdgeInsetsDirectional paddingTabBarView =
-      const EdgeInsetsDirectional.only(
-    top: 50,
-  );
+      const EdgeInsetsDirectional.only(top: 50);
   static const double avatarFontSize = 36;
   static const EdgeInsets groupDescriptionContainerPadding =
       EdgeInsets.symmetric(vertical: 16.0, horizontal: 20.0);

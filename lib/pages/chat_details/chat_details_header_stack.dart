@@ -57,8 +57,9 @@ class ChatDetailsHeaderStack extends StatelessWidget {
               animationController: animationController,
               displayName: room.getLocalizedDisplayname(),
               subTitle: room.summary.actualMembersCount > 0
-                  ? L10n.of(context)
-                      ?.countMembers(room.summary.actualMembersCount)
+                  ? L10n.of(
+                      context,
+                    )?.countMembers(room.summary.actualMembersCount)
                   : '',
               onTap: onGroupInfoTap,
             ),

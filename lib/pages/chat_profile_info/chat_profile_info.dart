@@ -277,10 +277,7 @@ class ChatProfileInfoController extends State<ChatProfileInfo>
 
   String? get getLocalizedStatusMessage {
     return room
-        ?.getLocalizedStatus(
-          context,
-          presence: room?.directChatPresence,
-        )
+        ?.getLocalizedStatus(context, presence: room?.directChatPresence)
         .capitalize(context);
   }
 

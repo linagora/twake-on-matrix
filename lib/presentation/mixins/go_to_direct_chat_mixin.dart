@@ -35,11 +35,12 @@ mixin GoToDraftChatMixin {
     required String path,
     required ContactPresentationSearch contactPresentationSearch,
   }) {
-    final roomId = Matrix.of(context)
-        .client
-        .getDirectChatFromUserId(contactPresentationSearch.matrixId!);
-    final room =
-        roomId != null ? Matrix.of(context).client.getRoomById(roomId) : null;
+    final roomId = Matrix.of(
+      context,
+    ).client.getDirectChatFromUserId(contactPresentationSearch.matrixId!);
+    final room = roomId != null
+        ? Matrix.of(context).client.getRoomById(roomId)
+        : null;
     if (roomId == null || room?.isAbandonedDMRoom == true) {
       goToDraftChat(
         context: context,

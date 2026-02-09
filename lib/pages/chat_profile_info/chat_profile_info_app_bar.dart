@@ -94,8 +94,9 @@ class _ChatProfileInfoAppBarState extends State<ChatProfileInfoAppBar>
   void _handleGroupInfoTap() {
     if (animationController.isCompleted) {
       animationController.reverse();
-      Future.delayed(const Duration(milliseconds: _animationDuration))
-          .then((_) {
+      Future.delayed(const Duration(milliseconds: _animationDuration)).then((
+        _,
+      ) {
         setState(() {
           isExpandedAvatar.value = false;
         });
@@ -104,8 +105,9 @@ class _ChatProfileInfoAppBarState extends State<ChatProfileInfoAppBar>
       setState(() {
         isExpandedAvatar.value = true;
       });
-      Future.delayed(const Duration(milliseconds: _animationDuration))
-          .then((_) {
+      Future.delayed(const Duration(milliseconds: _animationDuration)).then((
+        _,
+      ) {
         animationController.forward();
       });
     }
@@ -128,56 +130,56 @@ class _ChatProfileInfoAppBarState extends State<ChatProfileInfoAppBar>
               final totalHeight = isExpanded
                   ? height
                   : height -
-                      (ChatProfileInfoStyle.maxAvatarHeight -
-                          ChatProfileInfoStyle.toolbarHeightSliverAppBar);
+                        (ChatProfileInfoStyle.maxAvatarHeight -
+                            ChatProfileInfoStyle.toolbarHeightSliverAppBar);
               return SliverAppBar(
                 backgroundColor: LinagoraSysColors.material().surfaceVariant,
                 toolbarHeight: totalHeight,
                 title: ConstrainedBox(
-                  constraints: BoxConstraints(
-                    maxHeight: totalHeight,
-                  ),
+                  constraints: BoxConstraints(maxHeight: totalHeight),
                   child: AnimatedBuilder(
                     animation: animationController,
                     builder: (context, _) {
                       final contact = widget.presentationContact;
                       if (contact?.matrixId != null) {
                         return FutureBuilder(
-                          future:
-                              Matrix.of(context).client.getProfileFromUserId(
-                                    contact!.matrixId!,
-                                    getFromRooms: false,
-                                  ),
+                          future: Matrix.of(context).client
+                              .getProfileFromUserId(
+                                contact!.matrixId!,
+                                getFromRooms: false,
+                              ),
                           builder: (context, snapshot) =>
                               ChatProfileInfoAppBarView(
-                            groupInfoHeight:
-                                ChatProfileInfoStyle.toolbarHeightSliverAppBar,
-                            maxGroupInfoHeight:
-                                ChatProfileInfoStyle.maxAvatarHeight,
-                            avatarUri: snapshot.data?.avatarUrl,
-                            displayName: snapshot.data?.displayName ??
-                                contact.displayName,
-                            matrixId: contact.matrixId,
-                            userInfoNotifier: widget.userInfoNotifier,
-                            isDraftInfo: widget.isDraftInfo,
-                            isBlockedUserNotifier: widget.isBlockedUserNotifier,
-                            onUnblockUser: widget.onUnblockUser,
-                            onBlockUser: widget.onBlockUser,
-                            isAlreadyInChat: widget.isAlreadyInChat,
-                            blockUserLoadingNotifier:
-                                widget.blockUserLoadingNotifier,
-                            room: widget.room,
-                            onLeaveChat: () => widget.onLeaveChat?.call(
-                              context,
-                              widget.room,
-                            ),
-                            onChatInfoTap: _handleGroupInfoTap,
-                            animationController: animationController,
-                            getLocalizedStatusMessage:
-                                widget.getLocalizedStatusMessage,
-                            onSearch: widget.onSearch,
-                            onMessage: widget.onMessage,
-                          ),
+                                groupInfoHeight: ChatProfileInfoStyle
+                                    .toolbarHeightSliverAppBar,
+                                maxGroupInfoHeight:
+                                    ChatProfileInfoStyle.maxAvatarHeight,
+                                avatarUri: snapshot.data?.avatarUrl,
+                                displayName:
+                                    snapshot.data?.displayName ??
+                                    contact.displayName,
+                                matrixId: contact.matrixId,
+                                userInfoNotifier: widget.userInfoNotifier,
+                                isDraftInfo: widget.isDraftInfo,
+                                isBlockedUserNotifier:
+                                    widget.isBlockedUserNotifier,
+                                onUnblockUser: widget.onUnblockUser,
+                                onBlockUser: widget.onBlockUser,
+                                isAlreadyInChat: widget.isAlreadyInChat,
+                                blockUserLoadingNotifier:
+                                    widget.blockUserLoadingNotifier,
+                                room: widget.room,
+                                onLeaveChat: () => widget.onLeaveChat?.call(
+                                  context,
+                                  widget.room,
+                                ),
+                                onChatInfoTap: _handleGroupInfoTap,
+                                animationController: animationController,
+                                getLocalizedStatusMessage:
+                                    widget.getLocalizedStatusMessage,
+                                onSearch: widget.onSearch,
+                                onMessage: widget.onMessage,
+                              ),
                         );
                       }
                       if (contact != null) {
@@ -197,10 +199,8 @@ class _ChatProfileInfoAppBarState extends State<ChatProfileInfoAppBar>
                           blockUserLoadingNotifier:
                               widget.blockUserLoadingNotifier,
                           room: widget.room,
-                          onLeaveChat: () => widget.onLeaveChat?.call(
-                            context,
-                            widget.room,
-                          ),
+                          onLeaveChat: () =>
+                              widget.onLeaveChat?.call(context, widget.room),
                           onChatInfoTap: _handleGroupInfoTap,
                           animationController: animationController,
                           avatarUri: widget.avatarUri,
@@ -227,10 +227,8 @@ class _ChatProfileInfoAppBarState extends State<ChatProfileInfoAppBar>
                         blockUserLoadingNotifier:
                             widget.blockUserLoadingNotifier,
                         room: widget.room,
-                        onLeaveChat: () => widget.onLeaveChat?.call(
-                          context,
-                          widget.room,
-                        ),
+                        onLeaveChat: () =>
+                            widget.onLeaveChat?.call(context, widget.room),
                         onChatInfoTap: _handleGroupInfoTap,
                         animationController: animationController,
                         getLocalizedStatusMessage:
@@ -254,9 +252,7 @@ class _ChatProfileInfoAppBarState extends State<ChatProfileInfoAppBar>
                   indicatorWeight: ChatProfileInfoStyle.indicatorWeight,
                   labelStyle: ChatProfileInfoStyle.tabBarLabelStyle(context),
                   unselectedLabelStyle:
-                      ChatProfileInfoStyle.tabBarUnselectedLabelStyle(
-                    context,
-                  ),
+                      ChatProfileInfoStyle.tabBarUnselectedLabelStyle(context),
                   tabs: widget.tabList.map((page) {
                     return Tab(
                       child: Text(
@@ -335,7 +331,8 @@ class _SizedAppBar extends StatelessWidget {
     }
 
     final matrixId = contact?.matrixId ?? user?.id;
-    final canAddContact = matrixId != null &&
+    final canAddContact =
+        matrixId != null &&
         getContactState.fold(
           (failure) => false,
           (success) => success is GetContactsSuccess

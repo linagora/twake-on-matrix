@@ -62,10 +62,12 @@ class NewPrivateChatController extends State<NewPrivateChat>
       Logs().e('NewPrivateChatController::onContactAction: no MatrixId');
       return;
     }
-    final roomId =
-        Matrix.of(context).client.getDirectChatFromUserId(contact.matrixId!);
-    final room =
-        roomId != null ? Matrix.of(context).client.getRoomById(roomId) : null;
+    final roomId = Matrix.of(
+      context,
+    ).client.getDirectChatFromUserId(contact.matrixId!);
+    final room = roomId != null
+        ? Matrix.of(context).client.getRoomById(roomId)
+        : null;
     if (roomId == null || room?.isAbandonedDMRoom == true) {
       goToDraftChat(
         context: context,

@@ -26,6 +26,8 @@ import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:matrix/matrix.dart' hide Contact;
 
 class ChatProfileInfoDetails extends StatelessWidget {
+  static const Key leaveChatButtonKey = Key('leave_chat_button');
+
   const ChatProfileInfoDetails({
     super.key,
     this.displayName,
@@ -124,10 +126,9 @@ class ChatProfileInfoDetails extends StatelessWidget {
                   },
                 ),
                 if (room?.isDirectChat == true) ...[
-                  const SizedBox(
-                    height: ChatProfileInfoStyle.textSpacing,
-                  ),
+                  const SizedBox(height: ChatProfileInfoStyle.textSpacing),
                   InkWell(
+                    key: leaveChatButtonKey,
                     hoverColor: Colors.transparent,
                     highlightColor: Colors.transparent,
                     focusColor: Colors.transparent,
@@ -141,8 +142,9 @@ class ChatProfileInfoDetails extends StatelessWidget {
                   ),
                 ],
                 ValueListenableBuilder(
-                  valueListenable:
-                      getIt.get<ContactsManager>().getContactsNotifier(),
+                  valueListenable: getIt
+                      .get<ContactsManager>()
+                      .getContactsNotifier(),
                   builder: (context, state, child) {
                     return _AddContactButton(
                       canAddContact: canAddContact(state),
@@ -151,9 +153,7 @@ class ChatProfileInfoDetails extends StatelessWidget {
                     );
                   },
                 ),
-                const SizedBox(
-                  height: ChatProfileInfoStyle.textSpacing,
-                ),
+                const SizedBox(height: ChatProfileInfoStyle.textSpacing),
                 ValueListenableBuilder(
                   valueListenable: blockUserLoadingNotifier,
                   builder: (context, isLoading, child) {
@@ -168,8 +168,8 @@ class ChatProfileInfoDetails extends StatelessWidget {
                           onTap: isLoading == true
                               ? null
                               : isBlockedUser
-                                  ? onUnblockUser
-                                  : onBlockUser,
+                              ? onUnblockUser
+                              : onBlockUser,
                           child: _CopiableRowWithSvgIcon(
                             iconPath: ImagePaths.icFrontHand,
                             enableCopyIcon: false,
@@ -280,9 +280,7 @@ class _CopiableRowWithMaterialIcon extends StatelessWidget {
                     if (title != null)
                       Text(
                         title!,
-                        style: Theme.of(context)
-                            .textTheme
-                            .labelMedium
+                        style: Theme.of(context).textTheme.labelMedium
                             ?.copyWith(
                               color: LinagoraRefColors.material().neutral[40],
                             ),
@@ -291,10 +289,11 @@ class _CopiableRowWithMaterialIcon extends StatelessWidget {
                       ),
                     Text(
                       text,
-                      style: textStyle ??
+                      style:
+                          textStyle ??
                           Theme.of(context).textTheme.bodyLarge?.copyWith(
-                                color: LinagoraSysColors.material().onSurface,
-                              ),
+                            color: LinagoraSysColors.material().onSurface,
+                          ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -384,9 +383,7 @@ class _CopiableRowWithSvgIcon extends StatelessWidget {
                     if (title != null)
                       Text(
                         title!,
-                        style: Theme.of(context)
-                            .textTheme
-                            .labelMedium
+                        style: Theme.of(context).textTheme.labelMedium
                             ?.copyWith(
                               color: LinagoraRefColors.material().neutral[40],
                             ),
@@ -396,9 +393,9 @@ class _CopiableRowWithSvgIcon extends StatelessWidget {
                     Text(
                       text,
                       style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                            color: textColor ??
-                                LinagoraSysColors.material().onSurface,
-                          ),
+                        color:
+                            textColor ?? LinagoraSysColors.material().onSurface,
+                      ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -459,9 +456,7 @@ class _AddContactButton extends StatelessWidget {
       return const SizedBox();
     }
     return Padding(
-      padding: const EdgeInsets.only(
-        top: ChatProfileInfoStyle.textSpacing,
-      ),
+      padding: const EdgeInsets.only(top: ChatProfileInfoStyle.textSpacing),
       child: InkWell(
         hoverColor: Colors.transparent,
         highlightColor: Colors.transparent,
@@ -477,8 +472,8 @@ class _AddContactButton extends StatelessWidget {
           iconColor: LinagoraSysColors.material().primary,
           text: L10n.of(context)!.addToContacts,
           textStyle: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                color: LinagoraSysColors.material().primary,
-              ),
+            color: LinagoraSysColors.material().primary,
+          ),
           enableCopy: false,
         ),
       ),
