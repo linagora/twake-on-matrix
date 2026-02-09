@@ -365,8 +365,18 @@ mixin EventFilterMixin {
       return [];
     }
 
+    // Get clicked event's timestamp
+    final clickedTimestamp = clickedEvent.originServerTs.millisecondsSinceEpoch;
+
     // Return from clicked event onwards for sequential playback
-    return reversedEvents.sublist(clickedIndex);
+    final eventsFromClicked = reversedEvents.sublist(clickedIndex);
+
+    // Filter by timestamp: only keep clicked event + events with newer timestamps
+    final filteredByTimestamp = eventsFromClicked.where((event) {
+      return event.originServerTs.millisecondsSinceEpoch >= clickedTimestamp;
+    }).toList();
+
+    return filteredByTimestamp;
   }
 
   /// Loads and processes initial audio events with automatic expansion.

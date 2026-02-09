@@ -141,6 +141,7 @@ class AudioPlayerState extends State<AudioPlayerWidget>
       if (durationInt != null) {
         _durationNotifier.value = Duration(milliseconds: durationInt);
       }
+      final maxBubbleWaves = AudioPlayerStyle.maxWaveCount(context);
       final waveForm = calculateWaveForm(
             eventWaveForm: widget.event.content
                 .tryGetMap<String, dynamic>('org.matrix.msc1767.audio')
@@ -148,10 +149,11 @@ class AudioPlayerState extends State<AudioPlayerWidget>
             waveCount: calculateWaveCountAuto(
               minWaves: AudioPlayerStyle.minWaveCount,
               maxWaves: _calculatedWaveform.isEmpty
-                  ? AudioPlayerStyle.maxWaveCount(context)
+                  ? maxBubbleWaves
                   : _calculatedWaveform.length,
               durationInSeconds: _durationNotifier.value.inSeconds,
             ),
+            maxBubbleWaveCount: maxBubbleWaves,
           ) ??
           [];
 
