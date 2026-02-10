@@ -354,7 +354,6 @@
     "placeholders": {}
   },
   "clearArchive": "Vakigi arĥivon",
-  "@clearArchive": {},
   "close": "Fermi",
   "@close": {
     "type": "text",
@@ -739,7 +738,6 @@
     "placeholders": {}
   },
   "enterASpacepName": "Enigi nomon de aro",
-  "@enterASpacepName": {},
   "enterYourHomeserver": "Enigu vian hejmservilon",
   "@enterYourHomeserver": {
     "type": "text",
@@ -2059,16 +2057,12 @@
     "description": "Usage hint for the command /send"
   },
   "chatHasBeenAddedToThisSpace": "Babilo aldoniĝis al ĉi tiu aro",
-  "@chatHasBeenAddedToThisSpace": {},
   "autoplayImages": "Memage ludi movbildajn glumarkojn kaj mienetojn",
   "@autoplayImages": {
     "type": "text",
     "placeholder": {}
   },
   "addToSpace": "Aldoni al aro",
-  "@addToSpace": {},
   "homeserver": "Hejmservilo",
-  "@homeserver": {},
-  "sendOnEnter": "Sendi per eniga klavo",
-  "@sendOnEnter": {}
+  "sendOnEnter": "Sendi per eniga klavo"
 }
