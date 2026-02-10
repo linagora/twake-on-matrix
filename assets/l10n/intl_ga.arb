@@ -1193,7 +1193,7 @@
     "type": "text",
     "placeholders": {}
   },
-  "groupDescription": "Cur síos ar chomhrá grúpa",
+  "groupDescription": "Cur síos",
   "@groupDescription": {
     "type": "text",
     "placeholders": {}
@@ -1805,7 +1805,7 @@
     "type": "text",
     "placeholders": {}
   },
-  "renderRichContent": "Taispeáin ábhar teachtaireachta saibhir",
+  "renderRichContent": "Taispeáin téacs formáidithe",
   "@renderRichContent": {
     "type": "text",
     "placeholders": {}
@@ -1871,7 +1871,7 @@
     "type": "text",
     "placeholders": {}
   },
-  "pleaseEnter4Digits": "Iontráil 4 dhigit le do thoil nó fág folamh chun glas aipe a dhíchumasú.",
+  "pleaseEnter4Digits": "Cuir isteach cód 4 dhigit. Bain é chun an glas a dhíchumasú",
   "@pleaseEnter4Digits": {
     "type": "text",
     "placeholders": {}
@@ -2151,7 +2151,7 @@
     "type": "text",
     "placeholders": {}
   },
-  "groupInformation": "Faisnéis ghrúpa",
+  "groupInformation": "Sonraí an ghrúpa",
   "copyMessageText": "Cóipeáil",
   "noResultsFound": "Níor aimsíodh aon torthaí",
   "editWorkIdentitiesDescriptions": "Cuir do shocruithe aitheantais oibre in eagar, mar shampla Matrix ID, ríomhphost nó ainm cuideachta.",
@@ -2267,7 +2267,7 @@
   "showMore": "Taispeáin Níos Mó",
   "isSingleAccountOnHomeserver": "Ní thacaímid go fóill le cuntais iolracha ar fhreastalaí baile amháin",
   "recent": "Le déanaí",
-  "hideUnimportantStateEvents": "Folaigh imeachtaí stáit gan tábhacht",
+  "hideUnimportantStateEvents": "Folaigh imeachtaí neamhthábhachtacha",
   "copiedPublicKeyToClipboard": "Cóipeáladh eochair phoiblí go dtí an ghearrthaisce.",
   "sSwitchCameraLensDirectionLabel": "Athraigh go dtí an ceamara {value}",
   "searchResultNotFound3": "• Seiceáil an cead rochtana teagmhála, d'fhéadfadh an t-úsáideoir a bheith ar do liosta teagmhála.\n",
