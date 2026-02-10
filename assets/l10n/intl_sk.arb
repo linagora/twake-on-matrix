@@ -1325,9 +1325,7 @@
     "placeholders": {}
   },
   "pleaseEnterValidEmail": "Prosím zadajte správnu emailovú adresu.",
-  "@pleaseEnterValidEmail": {},
   "passwordsDoNotMatch": "Heslá niesú zhodné!",
-  "@passwordsDoNotMatch": {},
   "pleaseChooseAtLeastChars": "Prosím zvoľte si aspoň {min} znakov.",
   "@pleaseChooseAtLeastChars": {
     "type": "text",
@@ -1394,7 +1392,6 @@
     "placeholders": {}
   },
   "addToSpace": "Pridať do priestoru",
-  "@addToSpace": {},
   "cantOpenUri": "Nemožno otvoriť identifikátor prostriedku {uri}",
   "@cantOpenUri": {
     "type": "text",
@@ -1403,9 +1400,7 @@
     }
   },
   "yourChatBackupHasBeenSetUp": "Záloha vašich chatov bola nastavená.",
-  "@yourChatBackupHasBeenSetUp": {},
   "repeatPassword": "Zopakujte heslo",
-  "@repeatPassword": {},
   "all": "Všetky",
   "@all": {
     "type": "text",
@@ -1422,9 +1417,7 @@
     "placeholders": {}
   },
   "sendOnEnter": "Odoslať pri vstupe",
-  "@sendOnEnter": {},
   "yourUserId": "Vaše užívateľské ID:",
-  "@yourUserId": {},
   "ignoredUsers": "Ignorovaní užívatelia",
   "@ignoredUsers": {
     "type": "text",
@@ -1455,7 +1448,5 @@
     "placeholders": {}
   },
   "updateAvailable": "dostupná aktualizácia FluffyChat",
-  "@updateAvailable": {},
-  "updateNow": "Začať aktualizáciu na pozadí",
-  "@updateNow": {}
+  "updateNow": "Začať aktualizáciu na pozadí"
 }
