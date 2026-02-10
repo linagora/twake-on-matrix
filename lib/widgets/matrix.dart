@@ -12,6 +12,7 @@ import 'package:fluffychat/domain/repository/user_info/user_info_repository.dart
 import 'package:fluffychat/domain/usecase/room/create_support_chat_interactor.dart';
 import 'package:fluffychat/event/twake_event_types.dart';
 import 'package:fluffychat/pages/chat/events/audio_message/audio_player_widget.dart';
+import 'package:fluffychat/presentation/mixins/connectivity_mixin.dart';
 import 'package:fluffychat/presentation/mixins/init_config_mixin.dart';
 import 'package:fluffychat/presentation/model/client_login_state_event.dart';
 import 'package:fluffychat/widgets/layouts/agruments/logout_body_args.dart';
@@ -91,7 +92,11 @@ class Matrix extends StatefulWidget {
 }
 
 class MatrixState extends State<Matrix>
-    with WidgetsBindingObserver, ReceiveSharingIntentMixin, InitConfigMixin {
+    with
+        WidgetsBindingObserver,
+        ReceiveSharingIntentMixin,
+        InitConfigMixin,
+        ConnectivityMixin {
   final _contactsManager = getIt.get<ContactsManager>();
 
   AudioPlayer audioPlayer = AudioPlayer();
@@ -1073,6 +1078,15 @@ class MatrixState extends State<Matrix>
     );
   }
 
+  Future<void> _refreshHomeserverInformation(Client client) async {
+    if (client.homeserver == null) {
+      final domain = client.userID?.domain;
+      if (domain == null) return;
+      client.homeserver = Uri.https(domain, '');
+    }
+    await _getHomeserverInformation(client);
+  }
+
   Future<void> _storePersistActiveAccount(Client newClient) async {
     if (newClient.userID == null) return;
     try {
@@ -1177,6 +1191,11 @@ class MatrixState extends State<Matrix>
         currentAudioStatus.value = AudioPlayerStatus.notDownloaded;
       }
     });
+  }
+
+  @override
+  Future<void> onConnect() async {
+    await _refreshHomeserverInformation(client);
   }
 
   @override
