@@ -1393,11 +1393,8 @@
     "placeholders": {}
   },
   "scanQrCode": "امسح رمز الاستجابة السريعة",
-  "@scanQrCode": {},
   "typeInInviteLinkManually": "اكتب رابط الدعوة...",
-  "@typeInInviteLinkManually": {},
   "shareYourInviteLink": "شارك رابط الدعوة",
-  "@shareYourInviteLink": {},
   "noMatrixServer": "{server1} ليس خادم ماتريكس، بدلًا منه أتريد استخدام {server2}؟",
   "@noMatrixServer": {
     "type": "text",
@@ -1494,9 +1491,7 @@
     "placeholders": {}
   },
   "homeserver": "الخادم",
-  "@homeserver": {},
   "enterASpacepName": "أدخل اسم الفضاء",
-  "@enterASpacepName": {},
   "enterAnEmailAddress": "أدخل عنوان بريد إلكتروني",
   "@enterAnEmailAddress": {
     "type": "text",
@@ -1650,14 +1645,12 @@
     "description": "Usage hint for the command /ban"
   },
   "clearArchive": "امسح الأرشيف",
-  "@clearArchive": {},
   "chats": "المحادثات",
   "@chats": {
     "type": "text",
     "placeholders": {}
   },
   "chatHasBeenAddedToThisSpace": "أُضيفت المحادثة الى هذا الفضاء",
-  "@chatHasBeenAddedToThisSpace": {},
   "chatBackup": "انسخ احتياطيًا المحادثة",
   "@chatBackup": {
     "type": "text",
@@ -1691,7 +1684,6 @@
     "placeholders": {}
   },
   "sendOnEnter": "أرسل عند الدخول",
-  "@sendOnEnter": {},
   "autoplayImages": "شغِّل الملصقات والوجوه المتحركة تلقائيا",
   "@autoplayImages": {
     "type": "text",
@@ -1718,7 +1710,6 @@
     "placeholders": {}
   },
   "addToSpace": "أضفه لفضاء",
-  "@addToSpace": {},
   "addEmail": "أضف بريدًا إلكترونيًا",
   "@addEmail": {
     "type": "text",
@@ -1812,26 +1803,18 @@
     "placeholders": {}
   },
   "serverRequiresEmail": "يتطلب هذا الخادم التحقق من بريدك الإلكتروني.",
-  "@serverRequiresEmail": {},
   "link": "رابط",
-  "@link": {},
   "openInMaps": "افتح في الخريطة",
   "@openInMaps": {
     "type": "text",
     "placeholders": {}
   },
   "enableMultiAccounts": "(ميزة تجربية) فعّل تعدد الحسابات",
-  "@enableMultiAccounts": {},
   "bundleName": "اسم الحزمة",
-  "@bundleName": {},
   "removeFromBundle": "أزله من الحزمة",
-  "@removeFromBundle": {},
   "addToBundle": "أضفه الى حزمة",
-  "@addToBundle": {},
   "editBundlesForAccount": "عدّل حزم هذا الحساب",
-  "@editBundlesForAccount": {},
   "addAccount": "أضف حسابًا",
-  "@addAccount": {},
   "online": "متصل",
   "@online": {
     "type": "text",
@@ -2009,7 +1992,6 @@
     "placeholders": {}
   },
   "oneClientLoggedOut": "أُ خرج أحد العملاء الذي تسختدمها",
-  "@oneClientLoggedOut": {},
   "pleaseEnter4Digits": "أدخل 4 أرقام أو أتركه فارغ لتعطيل القفل.",
   "@pleaseEnter4Digits": {
     "type": "text",
@@ -2031,13 +2013,9 @@
     "placeholders": {}
   },
   "yourUserId": "معرّف المستخدم:",
-  "@yourUserId": {},
   "passwordsDoNotMatch": "كلمتا السر لا تتطبقان!",
-  "@passwordsDoNotMatch": {},
   "pleaseEnterValidEmail": "رجاءً أدخل بيردًا إلكترونيًا صالحًا.",
-  "@pleaseEnterValidEmail": {},
   "repeatPassword": "كرّر كلمة السر",
-  "@repeatPassword": {},
   "pleaseChooseAtLeastChars": "رجاءً اختر ما لا يقل عن {min} محرف.",
   "@pleaseChooseAtLeastChars": {
     "type": "text",
@@ -2046,24 +2024,17 @@
     }
   },
   "removeFromSpace": "أزل من الفضاء",
-  "@removeFromSpace": {},
   "unverified": "غير مؤكد",
-  "@unverified": {},
   "whoCanPerformWhichAction": "من يستطيع القيام بأي عمل",
   "@whoCanPerformWhichAction": {
     "type": "text",
     "placeholders": {}
   },
   "messageInfo": "معلومات الرسالة",
-  "@messageInfo": {},
   "messageType": "نوع الرسالة",
-  "@messageType": {},
   "sender": "المرسل",
-  "@sender": {},
   "openGallery": "افتخ المعرض",
-  "@openGallery": {},
   "time": "الوقت",
-  "@time": {},
   "badServerLoginTypesException": "يدعم الخادم المستخدم أنواع تسجيل الدخول التالية:\n{serverVersions}\nلكن هذا التطبيق يدعم فقط:\n{supportedVersions}",
   "@badServerLoginTypesException": {
     "type": "text",
@@ -2098,7 +2069,6 @@
     "placeholders": {}
   },
   "loginWithOneClick": "تسجيل الدخول بكبسة واحدة",
-  "@loginWithOneClick": {},
   "badServerVersionsException": "يدعم الخادم الرئيسي المستخدم إصدارات المواصفات:\n{serverVersions}\nلكن هذا التطبيق يدعم فقط:\n{supportedVersions}",
   "@badServerVersionsException": {
     "type": "text",
@@ -2118,26 +2088,18 @@
     "placeholders": {}
   },
   "yourChatBackupHasBeenSetUp": "تم إعداد النسخ الاحتياطي لمحادثاتك.",
-  "@yourChatBackupHasBeenSetUp": {},
   "noEncryptionForPublicRooms": "يمكنك فقط تفعيل التشفير عندما تصبح الغرفة غير متاحة للعامة.",
   "@noEncryptionForPublicRooms": {
     "type": "text",
     "placeholders": {}
   },
   "emojis": "إيموجي",
-  "@emojis": {},
   "voiceCall": "مكالمة صوتية",
-  "@voiceCall": {},
   "unsupportedAndroidVersion": "نسخة أندرويد غير مدعومة",
-  "@unsupportedAndroidVersion": {},
   "unsupportedAndroidVersionLong": "تتطلب هذه الميزة إصدار Android أحدث. يرجى التحقق من وجود تحديثات أو دعم Lineage OS.",
-  "@unsupportedAndroidVersionLong": {},
   "thisUserHasNotPostedAnythingYet": "هذا المستخدم لم ينشر أي شيء في قصته حتى الآن",
-  "@thisUserHasNotPostedAnythingYet": {},
   "storyPrivacyWarning": "يرجى ملاحظة أنه يمكن للأشخاص رؤية بعضهم البعض والتواصل مع بعضهم البعض في قصتك. ستكون قصصك مرئية لمدة 24 ساعة ولكن ليس هناك ما يضمن حذفها من جميع الأجهزة والخوادم.",
-  "@storyPrivacyWarning": {},
   "experimentalVideoCalls": "مكالمات الفيديو التجريبية",
-  "@experimentalVideoCalls": {},
   "commandHint_create": "أنشأ محادثة جماعية فارغة\nاستخدم --لا-تشفير لتعطيل التشفير",
   "@commandHint_create": {
     "type": "text",
@@ -2164,11 +2126,8 @@
     "description": "Usage hint for the command /myroomavatar"
   },
   "videoCallsBetaWarning": "يرجى ملاحظة أن مكالمات الفيديو حالياً في مرحلة تجريبية. قد لا تعمل كما هو متوقع أو تعمل على الإطلاق على جميع المنصات.",
-  "@videoCallsBetaWarning": {},
   "placeCall": "إجراء مكالمة",
-  "@placeCall": {},
   "replyHasBeenSent": "تم إرسال الرد",
-  "@replyHasBeenSent": {},
   "videoWithSize": "فيديو ({size})",
   "@videoWithSize": {
     "type": "text",
@@ -2185,19 +2144,12 @@
     }
   },
   "whoCanSeeMyStoriesDesc": "يرجى ملاحظة أنه يمكن للأشخاص رؤية بعضهم البعض والتواصل مع بعضهم البعض في قصتك.",
-  "@whoCanSeeMyStoriesDesc": {},
   "emailOrUsername": "البريد الإلكتروني أو اسم المستخدم",
-  "@emailOrUsername": {},
   "dismiss": "رفض",
-  "@dismiss": {},
   "matrixWidgets": "إضافات ماتريكس",
-  "@matrixWidgets": {},
   "iUnderstand": "أنا أتفهم",
-  "@iUnderstand": {},
   "whatIsGoingOn": "ما الذي يحصل؟",
-  "@whatIsGoingOn": {},
   "addDescription": "إضافة وصف",
-  "@addDescription": {},
   "setAsCanonicalAlias": "تعيين كاسم مستعار رئيسي",
   "@setAsCanonicalAlias": {
     "type": "text",
@@ -2227,30 +2179,19 @@
     }
   },
   "markAsRead": "حدد كمقروء",
-  "@markAsRead": {},
   "openVideoCamera": "افتح الكاميرا لمقطع فيديو",
   "@openVideoCamera": {
     "type": "text",
     "placeholders": {}
   },
   "start": "إبدأ",
-  "@start": {},
   "publish": "انشر",
-  "@publish": {},
   "whoCanSeeMyStories": "من يمكنه رؤية قصصي؟",
-  "@whoCanSeeMyStories": {},
   "unsubscribeStories": "إلغاء الإشتراك بالقصص",
-  "@unsubscribeStories": {},
   "yourStory": "قصتك",
-  "@yourStory": {},
   "addToSpaceDescription": "إختر فضاء لإضافة هذه المحادثة إليه.",
-  "@addToSpaceDescription": {},
   "addToStory": "إضافة للقصة",
-  "@addToStory": {},
   "reportUser": "التبيلغ عن المستخدم",
-  "@reportUser": {},
   "openChat": "فتح المحادثة",
-  "@openChat": {},
-  "confirmEventUnpin": "هل أنت متأكد من إلغاء تثبيت الحدث بشكل دائم؟",
-  "@confirmEventUnpin": {}
+  "confirmEventUnpin": "هل أنت متأكد من إلغاء تثبيت الحدث بشكل دائم؟"
 }
