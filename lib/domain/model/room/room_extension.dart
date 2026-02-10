@@ -217,7 +217,11 @@ extension RoomExtension on Room {
 
       if (lastEventAvailableInPreview == null ||
           lastEventAvailableInPreview.shouldHideRedactedEvent() ||
-          lastEventAvailableInPreview.shouldHideBannedEvent()) {
+          lastEventAvailableInPreview.shouldHideBannedEvent() ||
+          lastEventAvailableInPreview.type == EventTypes.Reaction ||
+          lastEventAvailableInPreview.relationshipType ==
+              RelationshipTypes.reaction ||
+          lastEventAvailableInPreview.type == EventTypes.RoomPinnedEvents) {
         final lastState = _getLastestRoomState();
 
         if (lastState == null) return null;
