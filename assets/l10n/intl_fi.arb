@@ -1,10 +1,7 @@
 {
   "passwordsDoNotMatch": "Salasanat eivät täsmää!",
-  "@passwordsDoNotMatch": {},
   "pleaseEnterValidEmail": "Syötä kelvollinen sähköpostiosoite.",
-  "@pleaseEnterValidEmail": {},
   "repeatPassword": "Salasana uudelleen",
-  "@repeatPassword": {},
   "pleaseChooseAtLeastChars": "Käytä vähintään {min} merkkiä.",
   "@pleaseChooseAtLeastChars": {
     "type": "text",
@@ -62,7 +59,6 @@
     "placeholders": {}
   },
   "addToSpace": "Lisää tilaan",
-  "@addToSpace": {},
   "admin": "Ylläpitäjä",
   "@admin": {
     "type": "text",
@@ -133,7 +129,6 @@
     }
   },
   "sendOnEnter": "Lähetä painamalla rivinvaihtonäppäintä",
-  "@sendOnEnter": {},
   "badServerVersionsException": "Kotipalvelin tukee Matrix Spec versio(it)a:\n{serverVersions}, mutta tämä sovellus tukee vain versio(it)a {supportedVersions}",
   "@badServerVersionsException": {
     "type": "text",
@@ -315,9 +310,7 @@
     "placeholders": {}
   },
   "yourUserId": "Käyttäjätunnuksesi:",
-  "@yourUserId": {},
   "yourChatBackupHasBeenSetUp": "Keskustelujesi varmuuskopiointi on asetettu.",
-  "@yourChatBackupHasBeenSetUp": {},
   "chatBackup": "Keskustelun varmuuskopiointi",
   "@chatBackup": {
     "type": "text",
@@ -334,7 +327,6 @@
     "placeholders": {}
   },
   "chatHasBeenAddedToThisSpace": "Keskustelu on lisätty tähän tilaan",
-  "@chatHasBeenAddedToThisSpace": {},
   "chats": "Keskustelut",
   "@chats": {
     "type": "text",
@@ -600,7 +592,6 @@
     "placeholders": {}
   },
   "homeserver": "Kotipalvelin",
-  "@homeserver": {},
   "enterYourHomeserver": "Syötä kotipalvelimesi",
   "@enterYourHomeserver": {
     "type": "text",
@@ -872,7 +863,6 @@
     }
   },
   "loginWithOneClick": "Kirjaudu sisään yhdellä klikkauksella",
-  "@loginWithOneClick": {},
   "logout": "Kirjaudu ulos",
   "@logout": {
     "type": "text",
@@ -952,11 +942,8 @@
     }
   },
   "shareYourInviteLink": "Jaa kutsulinkkisi",
-  "@shareYourInviteLink": {},
   "typeInInviteLinkManually": "Kirjoita kutsulinkki käsin...",
-  "@typeInInviteLinkManually": {},
   "scanQrCode": "Skannaa QR-koodi",
-  "@scanQrCode": {},
   "none": "Ei yhtään",
   "@none": {
     "type": "text",
@@ -1045,7 +1032,6 @@
     "placeholders": {}
   },
   "clearArchive": "Tyhjennä arkisto",
-  "@clearArchive": {},
   "forward": "Edelleenlähetä",
   "@forward": {
     "type": "text",
@@ -1171,7 +1157,6 @@
     "placeholders": {}
   },
   "enterASpacepName": "Nimeä tila",
-  "@enterASpacepName": {},
   "inoffensive": "Loukkaamatonta",
   "@inoffensive": {
     "type": "text",
@@ -1272,7 +1257,6 @@
     "placeholders": {}
   },
   "enableMultiAccounts": "(BETA) Ota käyttöön tuki usealle tilille tällä laitteella",
-  "@enableMultiAccounts": {},
   "onlineKeyBackupEnabled": "Verkkkoavainvarmuuskopio on käytössä",
   "@onlineKeyBackupEnabled": {
     "type": "text",
@@ -1299,17 +1283,11 @@
     "placeholders": {}
   },
   "oneClientLoggedOut": "Yksi tunnuksistasi on kirjattu ulos",
-  "@oneClientLoggedOut": {},
   "addAccount": "Lisää tili",
-  "@addAccount": {},
   "editBundlesForAccount": "Muokkaa tämän tilin kääröjä",
-  "@editBundlesForAccount": {},
   "addToBundle": "Lisää kääreeseen",
-  "@addToBundle": {},
   "removeFromBundle": "Poista tästä kääreestä",
-  "@removeFromBundle": {},
   "bundleName": "Kääreen nimi",
-  "@bundleName": {},
   "openInMaps": "Avaa kartoissa",
   "@openInMaps": {
     "type": "text",
@@ -1742,7 +1720,6 @@
     }
   },
   "unverified": "Varmistamaton",
-  "@unverified": {},
   "verified": "Varmistettu",
   "@verified": {
     "type": "text",
@@ -1864,13 +1841,9 @@
     "placeholders": {}
   },
   "removeFromSpace": "Poista tilasta",
-  "@removeFromSpace": {},
   "addToSpaceDescription": "Valitse tila, johon tämä keskustelu lisätään.",
-  "@addToSpaceDescription": {},
   "start": "Aloita",
-  "@start": {},
   "serverRequiresEmail": "Tämän palvelimen täytyy tarkistaa sähköposti-osoitteesi rekisteröitymistä varten.",
-  "@serverRequiresEmail": {},
   "roomVersion": "Huoneen versio",
   "@roomVersion": {
     "type": "text",
@@ -1938,7 +1911,6 @@
     }
   },
   "link": "Linkki",
-  "@link": {},
   "passwordForgotten": "Salasana unohtunut",
   "@passwordForgotten": {
     "type": "text",
@@ -2073,7 +2045,6 @@
     "placeholders": {}
   },
   "sender": "Lähettäjä",
-  "@sender": {},
   "startedACall": "{senderName} aloitti puhelun",
   "@startedACall": {
     "type": "text",
@@ -2107,9 +2078,7 @@
     "placeholders": {}
   },
   "time": "Aika",
-  "@time": {},
   "messageType": "Viestin tyyppi",
-  "@messageType": {},
   "username": "Käyttäjätunnus",
   "@username": {
     "type": "text",
@@ -2136,9 +2105,7 @@
     "placeholders": {}
   },
   "messageInfo": "Viestin tiedot",
-  "@messageInfo": {},
   "openGallery": "Avaa galleria",
-  "@openGallery": {},
   "commandHint_clearcache": "Tyhjennä välimuisti",
   "@commandHint_clearcache": {
     "type": "text",
@@ -2155,9 +2122,7 @@
     "description": "Usage hint for the command /dm"
   },
   "yourStory": "Sinun tarinasi",
-  "@yourStory": {},
   "replyHasBeenSent": "Vastaus on lähetetty",
-  "@replyHasBeenSent": {},
   "storyFrom": "Tarina ajalta {date}: \n{body}",
   "@storyFrom": {
     "type": "text",
@@ -2184,50 +2149,30 @@
     }
   },
   "whoCanSeeMyStoriesDesc": "Huomaathan, että ihmiset voivat nähdä ja olla yhteydessä toisiinsa tarinassasi.",
-  "@whoCanSeeMyStoriesDesc": {},
   "addToStory": "Lisää tarinaan",
-  "@addToStory": {},
   "publish": "Julkaise",
-  "@publish": {},
   "whoCanSeeMyStories": "Kuka voi nähdä tarinani?",
-  "@whoCanSeeMyStories": {},
   "unsubscribeStories": "Poista tarinoiden tilaus",
-  "@unsubscribeStories": {},
   "thisUserHasNotPostedAnythingYet": "Tämä käyttäjä ei ole vielä julkaissut mitään tarinassaan",
-  "@thisUserHasNotPostedAnythingYet": {},
   "iUnderstand": "Ymmärrän",
-  "@iUnderstand": {},
   "storyPrivacyWarning": "Huomaathan ihmisten pystyvän näkemään ja olemaan yhteydessä toisiinsa tarinassasi. Tarinasi tulevat olemaan näkyvissä 24 tuntia, mutta niiden poistamisesta kaikilta laitteilta ja palvelimilta ei ole takeita.",
-  "@storyPrivacyWarning": {},
   "whatIsGoingOn": "Mitä on meneillään?",
-  "@whatIsGoingOn": {},
   "addDescription": "Lisää kuvaus",
-  "@addDescription": {},
   "markAsRead": "Merkitse luetuksi",
-  "@markAsRead": {},
   "dismiss": "Hylkää",
-  "@dismiss": {},
   "bubbleSize": "Kuplan koko",
   "@bubbleSize": {
     "type": "text",
     "placeholders": {}
   },
   "emojis": "Hymiöt",
-  "@emojis": {},
   "unsupportedAndroidVersionLong": "Tämä ominaisuus vaatii uudemman Android-version. Tarkista päivitykset tai LineageOS-tuki.",
-  "@unsupportedAndroidVersionLong": {},
   "unsupportedAndroidVersion": "Ei tuettu Android-versio",
-  "@unsupportedAndroidVersion": {},
   "reportUser": "Ilmianna käyttäjä",
-  "@reportUser": {},
   "voiceCall": "Äänipuhelu",
-  "@voiceCall": {},
   "videoCallsBetaWarning": "Huomaathan videopuheluiden ovan beta-asteella. Ne eivät ehkä toimi odotetusti tai toimi ollenkaan kaikilla alustoilla.",
-  "@videoCallsBetaWarning": {},
   "placeCall": "Soita",
-  "@placeCall": {},
   "matrixWidgets": "Matrix-pienoisohjelmat",
-  "@matrixWidgets": {},
   "reactedWith": "{sender} reagoi {reaction}",
   "@reactedWith": {
     "type": "text",
@@ -2237,25 +2182,15 @@
     }
   },
   "openChat": "Avaa Keskustelu",
-  "@openChat": {},
   "confirmEventUnpin": "Haluatko varmasti irrottaa tapahtuman pysyvästi?",
-  "@confirmEventUnpin": {},
   "editWidgets": "Muokkaa pienoissovelluksia",
-  "@editWidgets": {},
   "widgetVideo": "Video",
-  "@widgetVideo": {},
   "widgetJitsi": "Jitsi Meet",
-  "@widgetJitsi": {},
   "widgetCustom": "Mukautettu",
-  "@widgetCustom": {},
   "widgetName": "Nimi",
-  "@widgetName": {},
   "widgetUrlError": "Epäkelvollinen URL.",
-  "@widgetUrlError": {},
   "errorAddingWidget": "Virhe lisättäessä pienoissovellusta.",
-  "@errorAddingWidget": {},
   "nextAccount": "Seuraava tili",
-  "@nextAccount": {},
   "switchToAccount": "Siirry tilille {number}",
   "@switchToAccount": {
     "type": "number",
@@ -2264,28 +2199,19 @@
     }
   },
   "experimentalVideoCalls": "Kokeelliset videopuhelut",
-  "@experimentalVideoCalls": {},
   "emailOrUsername": "Sähköposti-osoite tai käyttäjätunnus",
-  "@emailOrUsername": {},
   "previousAccount": "Edellinen tili",
-  "@previousAccount": {},
   "widgetEtherpad": "Tekstimuotoinen muistiinpano",
-  "@widgetEtherpad": {},
   "widgetNameError": "Syötä näyttönimi.",
-  "@widgetNameError": {},
   "addWidget": "Lisää pienoissovellus",
-  "@addWidget": {},
   "showDirectChatsInSpaces": "Näytä tiloihin kuuluvat yksityisviestit niissä",
   "@showDirectChatsInSpaces": {
     "type": "text",
     "placeholders": {}
   },
   "youRejectedTheInvitation": "Kieltäydyit kutsusta",
-  "@youRejectedTheInvitation": {},
   "youJoinedTheChat": "Liityit keskusteluun",
-  "@youJoinedTheChat": {},
   "youAcceptedTheInvitation": "👍 Hyväksyit kutsun",
-  "@youAcceptedTheInvitation": {},
   "youBannedUser": "Annoit porttikiellon käyttäjälle {user}",
   "@youBannedUser": {
     "placeholders": {
@@ -2334,49 +2260,27 @@
     "placeholders": {}
   },
   "noEmailWarning": "Syötä oikea sähköposti-osoite. Muutoin et voi palauttaa salasanaasi. Jollet halua, paina näppäintä uudelleen jatkaaksesi.",
-  "@noEmailWarning": {},
   "dehydrateShare": "Tämä on yksityinen FluffyChat-vientisi. Varmista ettet hukkaa sitä ja pidät sen yksityisenä.",
-  "@dehydrateShare": {},
   "dehydrateTor": "TOR-käyttäjät: vie istunto",
-  "@dehydrateTor": {},
   "hydrateTor": "TOR-käyttäjät: tuo viety istunto",
-  "@hydrateTor": {},
   "hydrateTorLong": "Veitkö edellisen istuntosi käyttäessäsi TORia? Tuo se nopeasti ja jatka jutustelua.",
-  "@hydrateTorLong": {},
   "pleaseEnterRecoveryKey": "Syötä palautusavaimesi:",
-  "@pleaseEnterRecoveryKey": {},
   "recoveryKey": "Palautusavain",
-  "@recoveryKey": {},
   "recoveryKeyLost": "Kadonnut palautusavain?",
-  "@recoveryKeyLost": {},
   "dehydrateTorLong": "Tor-käyttäjille suositellaan istunnon vientiä ennen ikkunan sulkemista.",
-  "@dehydrateTorLong": {},
   "hydrate": "Palauta varmuuskopiotiedostosta",
-  "@hydrate": {},
   "dehydrate": "Vie istunto ja tyhjennä laite",
-  "@dehydrate": {},
   "dehydrateWarning": "Tätä toimenpidettä ei voi kumota.\nVarmista varmuuskopiotiedoston turvallinen tallennus.",
-  "@dehydrateWarning": {},
   "stories": "Tarinat",
-  "@stories": {},
   "users": "Käyttäjät",
-  "@users": {},
   "enableAutoBackups": "Ota automaattiset varmuuskopiot käyttöön",
-  "@enableAutoBackups": {},
   "storeSecurlyOnThisDevice": "Tallenna turvallisesti tälle laitteelle",
-  "@storeSecurlyOnThisDevice": {},
   "pleaseEnterRecoveryKeyDescription": "Avataksesi vanhojen viestiesi salauksen, syötä palautusavaimesi, joka luotiin edellisessä istunnossa. Palautusavaimesi EI OLE salasanasi.",
-  "@pleaseEnterRecoveryKeyDescription": {},
   "unlockOldMessages": "Pura vanhojen viestien salaus",
-  "@unlockOldMessages": {},
   "indexedDbErrorLong": "Viestivarasto ei ole käytössä yksityisselauksessa oletuksena.\nKäythän osoitteessa\n - about:config\n - Aseta dom.indexedDB.privateBrowsing.enabled arvoon true\nMuuten FluffyChatin käyttäminen ei ole mahdollista.",
-  "@indexedDbErrorLong": {},
   "saveKeyManuallyDescription": "Tallenna tämä avain manuaalisesti käyttäen järjestelmän jakodialogia tai leikepöytää.",
-  "@saveKeyManuallyDescription": {},
   "storeInAndroidKeystore": "Tallenna Android KeyStoreen",
-  "@storeInAndroidKeystore": {},
   "storeInAppleKeyChain": "Tallenna Applen avainnippuun",
-  "@storeInAppleKeyChain": {},
   "countFiles": "{count} tiedostoa",
   "@countFiles": {
     "placeholders": {
@@ -2384,15 +2288,10 @@
     }
   },
   "storeInSecureStorageDescription": "Tallenna palautusavain tämän laitteen turvavarastoon.",
-  "@storeInSecureStorageDescription": {},
   "indexedDbErrorTitle": "Yksityisen selauksen ongelmat",
-  "@indexedDbErrorTitle": {},
   "user": "Käyttäjä",
-  "@user": {},
   "custom": "Mukautettu",
-  "@custom": {},
   "confirmMatrixId": "Kirjoita Matrix IDsi uudelleen poistaaksesi tunnuksesi.",
-  "@confirmMatrixId": {},
   "supposedMxid": "Tämän pitäisi olla {mxid}",
   "@supposedMxid": {
     "type": "text",
@@ -2401,45 +2300,25 @@
     }
   },
   "updateAvailable": "FluffyChatin päivitys on saatavilla",
-  "@updateAvailable": {},
   "updateNow": "Aloita päivitys taustalla",
-  "@updateNow": {},
   "commandHint_markasgroup": "Merkitse ryhmäksi",
-  "@commandHint_markasgroup": {},
   "whyIsThisMessageEncrypted": "Miksei tätä viestiä voida lukea?",
-  "@whyIsThisMessageEncrypted": {},
   "noKeyForThisMessage": "Tämä voi tapahtua mikäli viesti lähetettiin ennen sisäänkirjautumistasi tälle laitteelle.\n\nOn myös mahdollista, että lähettäjä on estänyt tämän laitteen tai jokin meni pieleen verkkoyhteyden kanssa.\n\nPystytkö lukemaan viestin toisella istunnolla? Siinä tapauksessa voit siirtää viestin siltä! Mene Asetukset > Laitteet ja varmista, että laitteesi ovat varmistaneet toisensa. Seuraavankerran avatessasi laitteen ja molempien istuntojen ollessa etualalla, avaimet siirretään automaattisesti.\n\nHaluatko varmistaa ettet menetä avaimia uloskirjautuessa tai laitteita vaihtaessa? Varmista avainvarmuuskopion käytössäolo asetuksista.",
-  "@noKeyForThisMessage": {},
   "commandHint_markasdm": "Merkitse yksityiskeskusteluksi",
-  "@commandHint_markasdm": {},
   "foregroundServiceRunning": "Tämä ilmoitus näkyy etualapalvelun ollessa käynnissä.",
-  "@foregroundServiceRunning": {},
   "callingPermissions": "Puheluoikeudet",
-  "@callingPermissions": {},
   "callingAccount": "Soittamistunnus",
-  "@callingAccount": {},
   "callingAccountDetails": "Sallii FluffyChatin käyttää Androidin omaa Puhelut-sovellusta.",
-  "@callingAccountDetails": {},
   "appearOnTop": "Näy päällä",
-  "@appearOnTop": {},
   "appearOnTopDetails": "Sallii sovelluksen näkyä muiden sovellusten päällä (tätä ei tarvita, mikäli olet jo määrittänyt FluffyChatin puhelin-tunnukseksi)",
-  "@appearOnTopDetails": {},
   "newSpace": "Uusi tila",
-  "@newSpace": {},
   "enterSpace": "Siirry tilaan",
-  "@enterSpace": {},
   "enterRoom": "Siirry huoneeseen",
-  "@enterRoom": {},
   "allSpaces": "Kaikki tilat",
-  "@allSpaces": {},
   "screenSharingTitle": "ruudunjako",
-  "@screenSharingTitle": {},
   "otherCallingPermissions": "Mikrofoni, kamera ja muut FluffyChatin oikeudet",
-  "@otherCallingPermissions": {},
   "newGroup": "Uusi ryhmä",
-  "@newGroup": {},
   "screenSharingDetail": "Jaat ruutuasi FluffyChatissä",
-  "@screenSharingDetail": {},
   "hugContent": "{senderName} halaa sinua",
   "@hugContent": {
     "type": "text",
@@ -2455,7 +2334,6 @@
     }
   },
   "commandHint_hug": "Lähetä halaus",
-  "@commandHint_hug": {},
   "googlyEyesContent": "{senderName} lähettää askartelusilmiä",
   "@googlyEyesContent": {
     "type": "text",
@@ -2471,11 +2349,7 @@
     }
   },
   "commandHint_googly": "Lähetä askartelusilmiä",
-  "@commandHint_googly": {},
   "commandHint_cuddle": "Lähetä kokovartaluhalaus",
-  "@commandHint_cuddle": {},
   "hideUnimportantStateEvents": "Piilota ei-niin-tärkeät tilatapahtumat",
-  "@hideUnimportantStateEvents": {},
-  "doNotShowAgain": "Älä näytä uudelleen",
-  "@doNotShowAgain": {}
+  "doNotShowAgain": "Älä näytä uudelleen"
 }
