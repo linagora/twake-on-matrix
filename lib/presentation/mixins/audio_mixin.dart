@@ -768,6 +768,12 @@ mixin AudioMixin {
     try {
       await audioPlayer?.setAudioSource(MatrixFileAudioSource(matrixFile));
 
+      // Reset status to notDownloaded immediately after setting audio source
+      // so the UI shows the normal play/pause button instead of loading
+      if (voiceMessageEvent.value?.eventId == currentEvent.eventId) {
+        currentAudioStatus.value = AudioPlayerStatus.notDownloaded;
+      }
+
       // Set up auto-dispose listener
       setupAudioPlayerAutoDispose(context: context);
 
