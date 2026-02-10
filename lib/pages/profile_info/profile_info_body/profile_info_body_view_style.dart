@@ -32,4 +32,9 @@ class ProfileInfoBodyViewStyle {
       EdgeInsets.symmetric(vertical: 16.0);
 
   static const double actionHeight = 40.0;
+
+  static const double avatarSize = 96;
+  static const double avatarFontSize = 36;
+  static const double minAvatarBackgroundHeight = 184;
+  static const double maxAvatarBackgroundHeight = 360;
 }

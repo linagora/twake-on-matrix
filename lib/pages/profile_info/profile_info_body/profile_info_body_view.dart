@@ -2,7 +2,9 @@ import 'package:fluffychat/pages/profile_info/profile_info_body/profile_info_bod
 import 'package:fluffychat/pages/profile_info/profile_info_body/profile_info_body_view_style.dart';
 import 'package:fluffychat/pages/profile_info/profile_info_body/profile_info_contact_rows.dart';
 import 'package:fluffychat/pages/profile_info/profile_info_body/profile_info_header.dart';
+import 'package:fluffychat/widgets/avatar/secondary_avatar.dart';
 import 'package:flutter/material.dart';
+import 'package:linagora_design_flutter/colors/linagora_sys_colors.dart';
 
 class ProfileInfoBodyView extends StatelessWidget {
   const ProfileInfoBodyView({
@@ -21,20 +23,14 @@ class ProfileInfoBodyView extends StatelessWidget {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Padding(
-          padding: ProfileInfoBodyViewStyle.profileInformationsTopPadding,
-          child: Column(
-            children: [
-              ProfileInfoHeader(
-                user: controller.user!,
-                userInfoNotifier: controller.userInfoNotifier,
-              ),
-              ProfileInfoContactRows(
-                user: controller.user!,
-                userInfoNotifier: controller.userInfoNotifier,
-              ),
-            ],
-          ),
+        if (controller.responsive.isMobile(context))
+          _buildMobileHeader(context)
+        else
+          _buildWebHeader(context),
+        const SizedBox(height: 16),
+        ProfileInfoContactRows(
+          user: controller.user!,
+          userInfoNotifier: controller.userInfoNotifier,
         ),
         if (!controller.isOwnProfile) ...[
           Padding(
@@ -44,6 +40,83 @@ class ProfileInfoBodyView extends StatelessWidget {
         ] else
           const SizedBox(height: 16),
       ],
+    );
+  }
+
+  Widget _buildMobileHeader(BuildContext context) {
+    return ValueListenableBuilder(
+      valueListenable: controller.isExpandedAvatar,
+      builder: (context, isExpanded, _) {
+        return AnimatedBuilder(
+          animation: controller.animationController,
+          builder: (context, _) {
+            return Stack(
+              children: [
+                Positioned.fill(
+                  child: _buildAvatarBackground(context),
+                ),
+                Positioned.fill(
+                  child: _buildGradientOverlay(context),
+                ),
+                Column(
+                  children: [
+                    ProfileInfoHeader(
+                      user: controller.user!,
+                      userInfoNotifier: controller.userInfoNotifier,
+                      animationController: controller.animationController,
+                      onAvatarInfoTap: controller.onAvatarInfoTap,
+                    ),
+                  ],
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
+
+  Widget _buildWebHeader(BuildContext context) {
+    return ProfileInfoHeader(
+      user: controller.user!,
+      userInfoNotifier: controller.userInfoNotifier,
+      animationController: controller.animationController,
+      onAvatarInfoTap: controller.onAvatarInfoTap,
+    );
+  }
+
+  Widget _buildAvatarBackground(BuildContext context) {
+    return ValueListenableBuilder(
+      valueListenable: controller.userInfoNotifier,
+      builder: (context, userInfo, _) {
+        final displayName = controller.user?.calcDisplayname() ?? '';
+        final avatarUrl = controller.user?.avatarUrl;
+
+        return SecondaryAvatar(
+          animationController: controller.animationController,
+          mxContent: avatarUrl,
+          name: displayName,
+          fontSize: ProfileInfoBodyViewStyle.avatarFontSize,
+        );
+      },
+    );
+  }
+
+  Widget _buildGradientOverlay(BuildContext context) {
+    final sysColor = LinagoraSysColors.material();
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [
+            Colors.transparent,
+            sysColor.onTertiaryContainer.withValues(
+              alpha: controller.animationController.value,
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

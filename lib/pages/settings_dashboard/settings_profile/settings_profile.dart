@@ -62,13 +62,18 @@ class SettingsProfileController extends State<SettingsProfile>
         PopupContextMenuActionMixin,
         PopupMenuWidgetMixin,
         OnProfileChangeMixin,
-        PickAvatarMixin {
+        PickAvatarMixin,
+        SingleTickerProviderStateMixin {
   final uploadProfileInteractor = getIt.get<UpdateProfileInteractor>();
   final uploadContentInteractor = getIt.get<UploadContentInteractor>();
   final uploadContentWebInteractor =
       getIt.get<UploadContentInBytesInteractor>();
 
   final MenuController menuController = MenuController();
+
+  late final AnimationController animationController;
+  static const int _animationDuration = 100;
+  ValueNotifier<bool> isExpandedAvatar = ValueNotifier(false);
 
   final ValueNotifier<Profile?> currentProfile = ValueNotifier<Profile?>(null);
   AssetEntity? assetEntity;
@@ -680,8 +685,32 @@ class SettingsProfileController extends State<SettingsProfile>
     }
   }
 
+  void handleAvatarInfoTap() {
+    if (animationController.isCompleted) {
+      animationController.reverse();
+      Future.delayed(const Duration(milliseconds: _animationDuration))
+          .then((_) {
+        setState(() {
+          isExpandedAvatar.value = false;
+        });
+      });
+    } else {
+      setState(() {
+        isExpandedAvatar.value = true;
+      });
+      Future.delayed(const Duration(milliseconds: _animationDuration))
+          .then((_) {
+        animationController.forward();
+      });
+    }
+  }
+
   @override
   void initState() {
+    animationController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: _animationDuration),
+    );
     _handleViewState();
     _getCurrentProfile(client);
     listenToPickAvatarUIState(context);
@@ -718,6 +747,8 @@ class SettingsProfileController extends State<SettingsProfile>
 
   @override
   void dispose() {
+    animationController.dispose();
+    isExpandedAvatar.dispose();
     _clearImageInLocal();
     _clearImageInMemory();
     disposePickAvatarMixin();
