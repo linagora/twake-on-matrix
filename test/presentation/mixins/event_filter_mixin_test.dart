@@ -364,7 +364,7 @@ void main() {
     });
 
     test('should handle large list of events efficiently', () {
-      // Arrange - Create 100 events in CHRONOLOGICAL ORDER (oldest first)
+      // Arrange - Create 100 events in REVERSE CHRONOLOGICAL ORDER (newest first, like UI)
       final now = DateTime.now();
       final audioEvents = List.generate(
         100,
@@ -373,8 +373,8 @@ void main() {
           type: EventTypes.Message,
           eventId: 'event$index',
           senderId: '@user:example.com',
-          // Event 0 (oldest) has largest time offset
-          originServerTs: now.subtract(Duration(minutes: 100 - index)),
+          // Event 0 (newest) has smallest time offset
+          originServerTs: now.subtract(Duration(minutes: index + 1)),
           room: room,
         ),
       );

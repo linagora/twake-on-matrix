@@ -514,14 +514,14 @@ mixin AudioMixin {
   Uint8List? getFromAudioCache(String eventId) {
     final data = _audioMemoryCache[eventId];
     if (data != null) {
-      // Validate cached data isn't corrupted
-      const minValidAudioSize = 1024;
-      if (data.length < minValidAudioSize) {
+      // Validate size (reject entries < 1KB, same as disk cache validation)
+      if (data.length < 1024) {
         Logs().w(
-          'AudioMixin: Removing corrupted cache entry for $eventId '
-          '(${data.length} bytes)',
+          'AudioMixin: Memory cache entry too small (${data.length} bytes), removing',
         );
-        _removeFromAudioCache(eventId);
+        _audioMemoryCache.remove(eventId);
+        _audioCacheAccessOrder.remove(eventId);
+        _currentCacheMemoryBytes -= data.length;
         return null;
       }
 
@@ -530,16 +530,6 @@ mixin AudioMixin {
       Logs().v('AudioMixin: LRU cache hit for $eventId');
     }
     return data;
-  }
-
-  /// Removes a specific item from the audio cache.
-  void _removeFromAudioCache(String eventId) {
-    final data = _audioMemoryCache.remove(eventId);
-    if (data != null) {
-      _currentCacheMemoryBytes -= data.length;
-      _audioCacheAccessOrder.remove(eventId);
-      Logs().v('AudioMixin: Removed $eventId from cache');
-    }
   }
 
   /// Stores audio data in cache with LRU eviction.
@@ -728,6 +718,7 @@ mixin AudioMixin {
           if (oggAudioFileIniOS != null) {
             audioBytes = await oggAudioFileIniOS.readAsBytes();
             mimeType = 'audio/x-caf';
+            putInAudioCache(currentEvent.eventId, audioBytes);
             Logs().d('AudioMixin: Conversion successful');
           } else {
             Logs().w('AudioMixin: OGG to CAF conversion failed');
@@ -774,12 +765,12 @@ mixin AudioMixin {
     audioPlayer = AudioPlayer();
     voiceMessageEvent.value = currentEvent;
 
-    await audioPlayer?.setAudioSource(MatrixFileAudioSource(matrixFile));
-
-    // Set up auto-dispose listener
-    setupAudioPlayerAutoDispose(context: context);
-
     try {
+      await audioPlayer?.setAudioSource(MatrixFileAudioSource(matrixFile));
+
+      // Set up auto-dispose listener
+      setupAudioPlayerAutoDispose(context: context);
+
       await audioPlayer?.play();
     } catch (e, s) {
       Logs().e('Could not play audio file', e, s);

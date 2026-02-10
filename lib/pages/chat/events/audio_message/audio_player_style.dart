@@ -15,14 +15,16 @@ class AudioPlayerStyle {
 
   static int maxWaveCount(BuildContext context) {
     // Calculate available width for waveform:
-    // messageBubbleWidth - padding - playButton - spacing - safetyMargin
+    // messageBubbleWidth - padding - playButton - spacing
     final availableWidth = MessageStyle.messageBubbleWidth(context) -
         paddingLeft -
         paddingRight -
         playButtonWidth -
         spacingAfterButton;
 
-    return availableWidth ~/ maxWaveWidth;
+    return (availableWidth ~/ maxWaveWidth)
+        .clamp(minWaveCount, double.infinity)
+        .toInt();
   }
 
   static const minWaveHeight = 4.0;

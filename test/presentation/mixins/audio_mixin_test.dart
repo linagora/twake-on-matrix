@@ -678,11 +678,11 @@ void main() {
       audioMixin.putInAudioCache(eventId, tooSmallData);
       final result = audioMixin.getFromAudioCache(eventId);
 
-      // Assert - Should not be cached (putInAudioCache rejects it)
+      // Assert - Should not be cached (getFromAudioCache rejects it)
       expect(result, null);
     });
 
-    test('should clear all cache data on cleanup', () {
+    test('should clear all cache data on cleanup', () async {
       // Arrange
       final data = Uint8List.fromList(List.generate(2048, (i) => i % 256));
       audioMixin.putInAudioCache('event_1', data);
@@ -690,15 +690,12 @@ void main() {
       audioMixin.putInAudioCache('event_3', data);
 
       // Act
-      audioMixin.cleanupAudioPlayer();
+      await audioMixin.cleanupAudioPlayer();
 
-      // Give async cleanup time to complete
-      return Future.delayed(const Duration(milliseconds: 100), () {
-        // Assert - All cache should be cleared
-        expect(audioMixin.getFromAudioCache('event_1'), null);
-        expect(audioMixin.getFromAudioCache('event_2'), null);
-        expect(audioMixin.getFromAudioCache('event_3'), null);
-      });
+      // Assert - All cache should be cleared
+      expect(audioMixin.getFromAudioCache('event_1'), null);
+      expect(audioMixin.getFromAudioCache('event_2'), null);
+      expect(audioMixin.getFromAudioCache('event_3'), null);
     });
   });
 }
