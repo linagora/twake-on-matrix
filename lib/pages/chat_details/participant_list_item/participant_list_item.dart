@@ -30,10 +30,8 @@ class ParticipantListItem extends StatefulWidget {
   final void Function(User member)? onSelectMember;
   final bool isMembersSelecting;
   final void Function(User member)? onRemoveMember;
-  final void Function(
-    User member, {
-    DefaultPowerLevelMember? role,
-  })? onChangeRole;
+  final void Function(User member, {DefaultPowerLevelMember? role})?
+  onChangeRole;
 
   const ParticipantListItem(
     this.member, {
@@ -52,8 +50,9 @@ class ParticipantListItem extends StatefulWidget {
 
 class _ParticipantListItemState extends State<ParticipantListItem>
     with TwakeContextMenuMixin {
-  final ValueNotifier<bool> isHoverParticipantItemNotifier =
-      ValueNotifier(false);
+  final ValueNotifier<bool> isHoverParticipantItemNotifier = ValueNotifier(
+    false,
+  );
   final GlobalKey _participantItemKey = GlobalKey();
 
   bool get canChangePermissions =>
@@ -80,13 +79,11 @@ class _ParticipantListItemState extends State<ParticipantListItem>
         child: Text(
           widget.member.getDefaultPowerLevelMember.displayName(
             context,
-            hidden: [
-              DefaultPowerLevelMember.member,
-            ],
+            hidden: [DefaultPowerLevelMember.member],
           ),
           style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                color: LinagoraRefColors.material().tertiary[30],
-              ),
+            color: LinagoraRefColors.material().tertiary[30],
+          ),
         ),
       ),
     );
@@ -150,9 +147,7 @@ class _ParticipantListItemState extends State<ParticipantListItem>
                           const SizedBox(height: 4.0),
                           Text(
                             widget.member.id,
-                            style: Theme.of(context)
-                                .textTheme
-                                .bodyMedium
+                            style: Theme.of(context).textTheme.bodyMedium
                                 ?.copyWith(
                                   color:
                                       LinagoraRefColors.material().tertiary[30],
@@ -345,9 +340,7 @@ class _ParticipantListItemState extends State<ParticipantListItem>
           context: context,
           name: l10n.changePermissions,
           icon: Icons.admin_panel_settings_outlined,
-          onTap: () => widget.onChangeRole?.call(
-            widget.member,
-          ),
+          onTap: () => widget.onChangeRole?.call(widget.member),
         ),
       ],
       if (widget.onRemoveMember != null)

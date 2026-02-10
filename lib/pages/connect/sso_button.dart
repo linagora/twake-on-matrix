@@ -48,10 +48,7 @@ class SsoButton extends StatelessWidget {
               identityProvider.name ??
                   identityProvider.brand ??
                   L10n.of(context)!.singlesignon,
-              style: const TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.bold,
-              ),
+              style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
             ),
           ],
         ),

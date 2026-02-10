@@ -45,10 +45,7 @@ class SupportedPreviewFileTypes {
     'image/png',
   ];
 
-  static const imageMimeTypesAndroid = [
-    ...imageMimeTypes,
-    'image/webp',
-  ];
+  static const imageMimeTypesAndroid = [...imageMimeTypes, 'image/webp'];
 
   static const imageMimeTypesIOS = [
     ...imageMimeTypes,
@@ -74,11 +71,7 @@ class SupportedPreviewFileTypes {
     'video/mpeg',
   ];
 
-  static const audioMimeTypes = [
-    'audio/mpeg',
-    'audio/wav',
-    'audio/x-ms-wmv',
-  ];
+  static const audioMimeTypes = ['audio/mpeg', 'audio/wav', 'audio/x-ms-wmv'];
 
   static const docMimeTypes = [
     'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
@@ -213,14 +206,7 @@ class SupportedPreviewFileTypes {
 
   static const pdfFileTypes = ['pdf'];
 
-  static const xlsFileTypes = [
-    'xls',
-    'xlsx',
-    'xslsm',
-    'xlt',
-    'xltx',
-    'xltm',
-  ];
+  static const xlsFileTypes = ['xls', 'xlsx', 'xslsm', 'xlt', 'xltx', 'xltm'];
 
   static const pptFileTypes = ['ppt', 'pptx', 'pps', 'ppsx', 'ppsm', 'pptm'];
 
@@ -233,8 +219,5 @@ class SupportedPreviewFileTypes {
     'video/x-msvideo',
   ];
 
-  static const wmvMineType = [
-    'video/x-ms-wmv',
-    'video/x-ms-asf',
-  ];
+  static const wmvMineType = ['video/x-ms-wmv', 'video/x-ms-asf'];
 }

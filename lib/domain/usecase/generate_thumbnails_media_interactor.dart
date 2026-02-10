@@ -7,10 +7,8 @@ import 'package:fluffychat/domain/repository/server_config_repository.dart';
 import 'package:fluffychat/presentation/extensions/send_file_web_extension.dart';
 import 'package:matrix/matrix.dart';
 
-typedef OnConvertReadStreamToBytesDone = void Function(
-  MatrixFile oldFile,
-  MatrixFile newFile,
-);
+typedef OnConvertReadStreamToBytesDone =
+    void Function(MatrixFile oldFile, MatrixFile newFile);
 
 class GenerateThumbnailsMediaInteractor {
   ServerConfigRepository get _serverConfigRepository =>
@@ -37,10 +35,7 @@ class GenerateThumbnailsMediaInteractor {
         thumbnail = await room.generateThumbnail(file);
         if (thumbnail != null) {
           yield Right(
-            GenerateThumbnailsMediaSuccess(
-              file: file,
-              thumbnail: thumbnail,
-            ),
+            GenerateThumbnailsMediaSuccess(file: file, thumbnail: thumbnail),
           );
         } else {
           yield const Left(GenerateThumbnailsMediaFailure('thumbnail is null'));

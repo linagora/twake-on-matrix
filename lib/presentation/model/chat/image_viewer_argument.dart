@@ -5,10 +5,7 @@ class ImageViewerArgument extends PopResult {
 
   final String? roomId;
 
-  ImageViewerArgument({
-    this.showInChatEventId,
-    this.roomId,
-  });
+  ImageViewerArgument({this.showInChatEventId, this.roomId});
 
   @override
   List<Object?> get props => [roomId, showInChatEventId];

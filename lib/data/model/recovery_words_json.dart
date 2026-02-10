@@ -9,9 +9,7 @@ class RecoveryWordsResponse with EquatableMixin {
   @JsonKey(name: 'words')
   final String? words;
 
-  RecoveryWordsResponse({
-    this.words,
-  });
+  RecoveryWordsResponse({this.words});
 
   factory RecoveryWordsResponse.fromJson(Map<String, dynamic> json) =>
       _$RecoveryWordsResponseFromJson(json);

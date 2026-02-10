@@ -40,50 +40,44 @@ class ChatEventListItem extends StatelessWidget {
         matrixState: controller.matrix!,
         onSwipe: (direction) => controller.replyAction(replyTo: event),
         onAvatarTap: (Event event) => controller.onContactTap(
-          contactPresentationSearch:
-              event.senderFromMemoryOrFallback.toContactPresentationSearch(),
+          contactPresentationSearch: event.senderFromMemoryOrFallback
+              .toContactPresentationSearch(),
           context: context,
           path: 'rooms',
         ),
         onSelect: controller.onSelectMessage,
         selectMode: controller.selectMode,
         maxWidth: constraints.maxWidth,
-        scrollToEventId: (String eventId) => controller.scrollToEventId(
-          eventId,
-          highlight: true,
+        scrollToEventId: (String eventId) =>
+            controller.scrollToEventId(eventId, highlight: true),
+        selected: controller.selectedEvents.any(
+          (e) => e.eventId == event.eventId,
         ),
-        selected:
-            controller.selectedEvents.any((e) => e.eventId == event.eventId),
         timeline: controller.timeline!,
         previousEvent: previousEvent,
         nextEvent: nextEvent,
         onHover: (isHover, event) => controller.onHover(isHover, index, event),
         isHoverNotifier: controller.focusHover,
-        listHorizontalActionMenu:
-            controller.listHorizontalActionMenuBuilder(event),
+        listHorizontalActionMenu: controller.listHorizontalActionMenuBuilder(
+          event,
+        ),
         onMenuAction: controller.handleHorizontalActionMenu,
         hideKeyboardChatScreen: controller.onHideKeyboardAndEmoji,
         markedUnreadLocation: controller.unreadReceivedMessageLocation,
         timestampCallback: (event) {
-          controller.handleDisplayStickyTimestamp(
-            event.originServerTs,
-          );
+          controller.handleDisplayStickyTimestamp(event.originServerTs);
         },
         onEventVisible: controller.onEventVisible,
         onDisplayEmojiReaction: controller.onDisplayEmojiReaction,
         onHideEmojiReaction: controller.onHideEmojiReaction,
-        listAction:
-            controller.listHorizontalActionMenuBuilder(event).map((action) {
-          return ContextMenuAction(
-            name: action.action.name,
-          );
+        listAction: controller.listHorizontalActionMenuBuilder(event).map((
+          action,
+        ) {
+          return ContextMenuAction(name: action.action.name);
         }).toList(),
         onPickEmojiReaction: () {},
         onSelectEmojiReaction: (emoji, event) {
-          controller.sendEmojiAction(
-            emoji: emoji,
-            event: event,
-          );
+          controller.sendEmojiAction(emoji: emoji, event: event);
         },
         onForward: (event) {
           controller.forwardEventsAction(event: event);
@@ -96,10 +90,7 @@ class ChatEventListItem extends StatelessWidget {
           controller.pinEventAction(event);
         },
         onSaveToDownload: (event) =>
-            controller.saveSelectedEventToDownloadAndroid(
-          context,
-          event,
-        ),
+            controller.saveSelectedEventToDownloadAndroid(context, event),
         onSaveToGallery: (event) =>
             controller.saveSelectedEventToGallery(context, event),
         onTapMoreButton: controller.handleOnTapMoreButtonOnWeb,

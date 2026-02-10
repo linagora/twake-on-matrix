@@ -12,11 +12,7 @@ class EditContent extends StatelessWidget {
   final Event editEvent;
   final Timeline? timeline;
 
-  const EditContent({
-    super.key,
-    required this.editEvent,
-    this.timeline,
-  });
+  const EditContent({super.key, required this.editEvent, this.timeline});
 
   @override
   Widget build(BuildContext context) {
@@ -49,9 +45,7 @@ class EditContent extends StatelessWidget {
                 child: Center(
                   child: OptionalSelectionContainerDisabled(
                     isEnabled: PlatformInfos.isWeb,
-                    child: ReplyPreviewIconBuilder(
-                      event: displayEvent,
-                    ),
+                    child: ReplyPreviewIconBuilder(event: displayEvent),
                   ),
                 ),
               ),
@@ -91,8 +85,9 @@ class EditContent extends StatelessWidget {
                           overflow: TextOverflow.ellipsis,
                           maxLines: 1,
                           style: TextStyle(
-                            color:
-                                Theme.of(context).textTheme.bodyMedium!.color,
+                            color: Theme.of(
+                              context,
+                            ).textTheme.bodyMedium!.color,
                           ),
                         );
                       },

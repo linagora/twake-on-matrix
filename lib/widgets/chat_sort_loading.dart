@@ -26,10 +26,7 @@ class ChatSortLoading extends StatelessWidget {
           children: [
             const CircularProgressIndicator.adaptive(
               strokeWidth: 2,
-              constraints: BoxConstraints(
-                minHeight: 24,
-                minWidth: 24,
-              ),
+              constraints: BoxConstraints(minHeight: 24, minWidth: 24),
             ),
             const SizedBox(width: 12),
             Text(

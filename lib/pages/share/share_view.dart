@@ -72,9 +72,8 @@ class ShareView extends StatelessWidget {
             alignment: Alignment.centerRight,
             child: TwakeIconButton(
               paddingAll: 0,
-              onTap: () => controller.shareTo(
-                controller.selectedChatNotifier.value,
-              ),
+              onTap: () =>
+                  controller.shareTo(controller.selectedChatNotifier.value),
               tooltip: L10n.of(context)!.send,
               imagePath: ImagePaths.icSend,
               imageSize: ForwardViewStyle.iconSendSize,

@@ -41,9 +41,7 @@ class StreamImageViewerState extends State<StreamImageViewer> {
   @override
   Widget build(BuildContext context) {
     if (imageFile == null) {
-      return const Center(
-        child: CircularProgressIndicator(),
-      );
+      return const Center(child: CircularProgressIndicator());
     }
     return InteractiveViewer(
       minScale: 0.1,

@@ -23,10 +23,7 @@ import 'package:fluffychat/generated/l10n/app_localizations.dart';
 import 'package:universal_html/html.dart' as html;
 
 mixin HandleDownloadAndPreviewFileMixin {
-  void onFileTapped({
-    required Event event,
-    required BuildContext context,
-  }) {
+  void onFileTapped({required Event event, required BuildContext context}) {
     if (PlatformInfos.isWeb) {
       onFileTappedWeb(event: event, context: context);
     } else {
@@ -72,17 +69,11 @@ mixin HandleDownloadAndPreviewFileMixin {
         );
         if (await permissionHandler.storagePermissionStatus ==
             PermissionStatus.granted) {
-          _handleDownloadFileForPreviewMobile(
-            event: event,
-            context: context,
-          );
+          _handleDownloadFileForPreviewMobile(event: event, context: context);
         }
         break;
       case PermissionStatus.granted:
-        _handleDownloadFileForPreviewMobile(
-          event: event,
-          context: context,
-        );
+        _handleDownloadFileForPreviewMobile(event: event, context: context);
         break;
       case PermissionStatus.permanentlyDenied:
         showDialog(
@@ -128,32 +119,32 @@ mixin HandleDownloadAndPreviewFileMixin {
     required Event event,
     required BuildContext context,
   }) async {
-    final downloadFileForPreviewInteractor =
-        getIt.get<DownloadFileForPreviewInteractor>();
+    final downloadFileForPreviewInteractor = getIt
+        .get<DownloadFileForPreviewInteractor>();
     final tempDirPath = (await getTemporaryDirectory()).path;
     downloadFileForPreviewInteractor
-        .execute(
-      event: event,
-      tempDirPath: tempDirPath,
-    )
+        .execute(event: event, tempDirPath: tempDirPath)
         .listen((event) {
-      event.fold((failure) {
-        if (failure is DownloadFileForPreviewFailure) {
-          TwakeSnackBar.show(context, 'Error: ${failure.exception}');
-        }
-        TwakeDialog.hideLoadingDialog(context);
-      }, (success) {
-        if (success is DownloadFileForPreviewSuccess) {
-          handleDownloadFileForPreviewSuccess(
-            filePath: success.downloadFileForPreviewResponse.filePath,
-            mimeType: success.downloadFileForPreviewResponse.mimeType,
+          event.fold(
+            (failure) {
+              if (failure is DownloadFileForPreviewFailure) {
+                TwakeSnackBar.show(context, 'Error: ${failure.exception}');
+              }
+              TwakeDialog.hideLoadingDialog(context);
+            },
+            (success) {
+              if (success is DownloadFileForPreviewSuccess) {
+                handleDownloadFileForPreviewSuccess(
+                  filePath: success.downloadFileForPreviewResponse.filePath,
+                  mimeType: success.downloadFileForPreviewResponse.mimeType,
+                );
+                TwakeDialog.hideLoadingDialog(context);
+              } else if (success is DownloadFileForPreviewLoading) {
+                TwakeDialog.showLoadingDialog(context);
+              }
+            },
           );
-          TwakeDialog.hideLoadingDialog(context);
-        } else if (success is DownloadFileForPreviewLoading) {
-          TwakeDialog.showLoadingDialog(context);
-        }
-      });
-    });
+        });
   }
 
   void handleDownloadFileForPreviewSuccess({
@@ -169,10 +160,7 @@ mixin HandleDownloadAndPreviewFileMixin {
     }
 
     if (PlatformInfos.isIOS) {
-      _openDownloadedFileForPreviewIos(
-        filePath: filePath,
-        mimeType: mimeType,
-      );
+      _openDownloadedFileForPreviewIos(filePath: filePath, mimeType: mimeType);
       return;
     }
   }
@@ -188,8 +176,9 @@ mixin HandleDownloadAndPreviewFileMixin {
     final openResults = await OpenFile.open(
       filePath,
       type: mimeType,
-      uti: DocumentUti(SupportedPreviewFileTypes.iOSSupportedTypes[mimeType])
-          .value,
+      uti: DocumentUti(
+        SupportedPreviewFileTypes.iOSSupportedTypes[mimeType],
+      ).value,
     );
     Logs().d(
       'ChatController:_openDownloadedFileForPreviewAndroid(): ${openResults.message}',
@@ -205,13 +194,8 @@ mixin HandleDownloadAndPreviewFileMixin {
     required String filePath,
     required String? mimeType,
   }) async {
-    Logs().d(
-      'ChatController:_openDownloadedFileForPreviewIos(): $filePath',
-    );
-    await OpenFile.open(
-      filePath,
-      type: mimeType,
-    );
+    Logs().d('ChatController:_openDownloadedFileForPreviewIos(): $filePath');
+    await OpenFile.open(filePath, type: mimeType);
   }
 
   Future<void> previewPdfWeb(

@@ -18,7 +18,8 @@ class ChatListSortRooms extends StatefulWidget {
   final Widget Function(
     List<Room> sortedRooms,
     Map<String, Event?> lastEventByRoomId,
-  ) builder;
+  )
+  builder;
   final ValueNotifier<bool> sortingRoomsNotifier;
 
   @override
@@ -31,27 +32,26 @@ class _ChatListSortRoomsState extends State<ChatListSortRooms> {
   Map<String, StreamSubscription?> _roomSubscriptions = {};
 
   RoomSorter sortRoomsBy(Client client) => (a, b) {
-        if (client.pinInvitedRooms &&
-            a.membership != b.membership &&
-            [a.membership, b.membership].any((m) => m == Membership.invite)) {
-          return a.membership == Membership.invite ? -1 : 1;
-        }
-        if (a.isFavourite != b.isFavourite) {
-          return a.isFavourite ? -1 : 1;
-        }
-        if (client.pinUnreadRooms &&
-            a.notificationCount != b.notificationCount) {
-          return b.notificationCount.compareTo(a.notificationCount);
-        }
-        return (_lastEventByRoomId[b.id]?.originServerTs ??
-                b.latestEventReceivedTime)
-            .millisecondsSinceEpoch
-            .compareTo(
-              (_lastEventByRoomId[a.id]?.originServerTs ??
-                      a.latestEventReceivedTime)
-                  .millisecondsSinceEpoch,
-            );
-      };
+    if (client.pinInvitedRooms &&
+        a.membership != b.membership &&
+        [a.membership, b.membership].any((m) => m == Membership.invite)) {
+      return a.membership == Membership.invite ? -1 : 1;
+    }
+    if (a.isFavourite != b.isFavourite) {
+      return a.isFavourite ? -1 : 1;
+    }
+    if (client.pinUnreadRooms && a.notificationCount != b.notificationCount) {
+      return b.notificationCount.compareTo(a.notificationCount);
+    }
+    return (_lastEventByRoomId[b.id]?.originServerTs ??
+            b.latestEventReceivedTime)
+        .millisecondsSinceEpoch
+        .compareTo(
+          (_lastEventByRoomId[a.id]?.originServerTs ??
+                  a.latestEventReceivedTime)
+              .millisecondsSinceEpoch,
+        );
+  };
 
   Future<List<Room>> sortRooms() async {
     await Matrix.of(context).initSettingsCompleter.future;
@@ -95,8 +95,9 @@ class _ChatListSortRoomsState extends State<ChatListSortRooms> {
         ),
       ),
     );
-    final removedRooms =
-        oldWidget.rooms.whereNot(widget.rooms.contains).toList();
+    final removedRooms = oldWidget.rooms
+        .whereNot(widget.rooms.contains)
+        .toList();
     for (final room in removedRooms) {
       _roomSubscriptions[room.id]?.cancel();
     }

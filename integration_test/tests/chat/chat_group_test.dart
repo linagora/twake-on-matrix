@@ -12,10 +12,14 @@ import 'package:patrol/patrol.dart';
 
 // --- Common config ---
 const defaultTime = Duration(seconds: 60);
-const searchPhrase =
-    String.fromEnvironment('SearchByTitle', defaultValue: 'My Default Group');
-const forwardReceiver =
-    String.fromEnvironment('Receiver', defaultValue: 'Receiver Group');
+const searchPhrase = String.fromEnvironment(
+  'SearchByTitle',
+  defaultValue: 'My Default Group',
+);
+const forwardReceiver = String.fromEnvironment(
+  'Receiver',
+  defaultValue: 'Receiver Group',
+);
 
 int uniqueId() => DateTime.now().microsecondsSinceEpoch;
 
@@ -27,8 +31,9 @@ Future<(String, String)> prepareTwoMessages(PatrolIntegrationTester $) async {
   await HomeRobot($).gotoChatListScreen();
   await ChatScenario($).openChatGroupByTitle(searchPhrase);
 
-  await ChatScenario($)
-      .sendAMesage(senderMsg); // NOTE: keep current helper name
+  await ChatScenario(
+    $,
+  ).sendAMesage(senderMsg); // NOTE: keep current helper name
   final senderFinder = await ChatGroupDetailRobot($).getText(senderMsg);
   await $.waitUntilVisible(senderFinder, timeout: defaultTime);
 
@@ -47,13 +52,15 @@ void main() {
       final (senderMsg, receiverMsg) = await prepareTwoMessages($);
 
       await ChatGroupDetailRobot($).openPullDownMenu(senderMsg);
-      await ChatScenario($)
-          .verifyTheDisplayOfPullDownMenu(senderMsg, level: UserLevel.owner);
+      await ChatScenario(
+        $,
+      ).verifyTheDisplayOfPullDownMenu(senderMsg, level: UserLevel.owner);
       await ChatGroupDetailRobot($).closePullDownMenu();
 
       await ChatGroupDetailRobot($).openPullDownMenu(receiverMsg);
-      await ChatScenario($)
-          .verifyTheDisplayOfPullDownMenu(receiverMsg, level: UserLevel.member);
+      await ChatScenario(
+        $,
+      ).verifyTheDisplayOfPullDownMenu(receiverMsg, level: UserLevel.member);
     },
   );
 
@@ -107,8 +114,9 @@ void main() {
       await ChatGroupDetailRobot($).inputMessage(addedText);
       await ChatScenario($).pasteFromClipBoard();
       await $(ChatInputRowSendBtn).tap();
-      await ChatScenario($)
-          .verifyMessageIsShown('$addedText$receiverMsg', true);
+      await ChatScenario(
+        $,
+      ).verifyMessageIsShown('$addedText$receiverMsg', true);
     },
   );
 

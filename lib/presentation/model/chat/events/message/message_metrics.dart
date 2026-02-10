@@ -10,8 +10,5 @@ class MessageMetrics extends Equatable {
   });
 
   @override
-  List<Object?> get props => [
-        totalMessageWidth,
-        isNeedAddNewLine,
-      ];
+  List<Object?> get props => [totalMessageWidth, isNeedAddNewLine];
 }

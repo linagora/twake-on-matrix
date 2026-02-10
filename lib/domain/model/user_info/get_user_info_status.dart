@@ -1,5 +1,1 @@
-enum GetUserInfoStatus {
-  initial,
-  success,
-  failure,
-}
+enum GetUserInfoStatus { initial, success, failure }

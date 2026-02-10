@@ -15,10 +15,7 @@ class SettingsAppLanguageView extends StatelessWidget {
   final SettingsAppLanguageController controller;
   final ResponsiveUtils responsiveUtils = getIt.get<ResponsiveUtils>();
 
-  SettingsAppLanguageView({
-    super.key,
-    required this.controller,
-  });
+  SettingsAppLanguageView({super.key, required this.controller});
 
   @override
   Widget build(BuildContext context) {
@@ -71,11 +68,11 @@ class SettingsAppLanguageView extends StatelessWidget {
                         controller.supportedLocales[index]
                             .getSourceLanguageName(),
                         style: Theme.of(context).textTheme.bodySmall!.copyWith(
-                              color: LinagoraRefColors.material().neutral[40],
-                            ),
+                          color: LinagoraRefColors.material().neutral[40],
+                        ),
                       ),
-                      trailing: controller
-                                  .supportedLocales[index].languageCode ==
+                      trailing:
+                          controller.supportedLocales[index].languageCode ==
                               locale.languageCode
                           ? Icon(
                               Icons.check,

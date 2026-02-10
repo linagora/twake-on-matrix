@@ -22,13 +22,9 @@ class EditContentStyle {
         left: responsive.isMobile(context) ? 4.0 : 16.0,
       );
 
-  static BoxDecoration editParentContainerDecoration(
-    BuildContext context,
-  ) {
+  static BoxDecoration editParentContainerDecoration(BuildContext context) {
     if (responsive.isMobile(context)) {
-      return const BoxDecoration(
-        color: Colors.transparent,
-      );
+      return const BoxDecoration(color: Colors.transparent);
     }
     return BoxDecoration(
       color: LinagoraSysColors.material().primaryContainer,
@@ -49,7 +45,7 @@ class EditContentStyle {
 
   static TextStyle? editTitleDefaultStyle(BuildContext context) {
     return Theme.of(context).textTheme.labelMedium?.copyWith(
-          color: LinagoraSysColors.material().secondary,
-        );
+      color: LinagoraSysColors.material().secondary,
+    );
   }
 }

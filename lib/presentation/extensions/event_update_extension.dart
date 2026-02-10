@@ -1,11 +1,12 @@
 import 'package:collection/collection.dart';
 import 'package:matrix/matrix.dart';
 
-typedef OnPinnedMessageUpdated = void Function({
-  required bool isInitial,
-  required bool isUnpin,
-  String? eventId,
-});
+typedef OnPinnedMessageUpdated =
+    void Function({
+      required bool isInitial,
+      required bool isUnpin,
+      String? eventId,
+    });
 
 extension EventUpdateExtension on EventUpdate {
   String? get eventId {
@@ -40,8 +41,9 @@ extension EventUpdateExtension on EventUpdate {
     if (!isPinnedEventsHasChanged) return;
     final content = this.content['content'];
     final unsignedContent = this.content['unsigned'];
-    final prevContent =
-        unsignedContent != null ? unsignedContent['prev_content'] : null;
+    final prevContent = unsignedContent != null
+        ? unsignedContent['prev_content']
+        : null;
     if (content != null && prevContent != null) {
       if (!_isPinnedListChanged(content, prevContent)) return;
 
@@ -72,10 +74,7 @@ extension EventUpdateExtension on EventUpdate {
     OnPinnedMessageUpdated onPinnedMessageUpdated,
   ) {
     if (prevPinnedList.isEmpty) {
-      return onPinnedMessageUpdated(
-        isInitial: true,
-        isUnpin: false,
-      );
+      return onPinnedMessageUpdated(isInitial: true, isUnpin: false);
     }
     final eventId = pinnedList.firstWhereOrNull(
       (event) => !prevPinnedList.contains(event),
@@ -93,10 +92,7 @@ extension EventUpdateExtension on EventUpdate {
     OnPinnedMessageUpdated onPinnedMessageUpdated,
   ) {
     if (pinnedList.isEmpty) {
-      return onPinnedMessageUpdated(
-        isInitial: false,
-        isUnpin: true,
-      );
+      return onPinnedMessageUpdated(isInitial: false, isUnpin: true);
     }
     final eventId = prevPinnedList.firstWhereOrNull(
       (event) => !pinnedList.contains(event),

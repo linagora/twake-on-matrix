@@ -29,20 +29,20 @@ import 'package:fluffychat/modules/federation_identity_request_token/manager/fed
 import 'package:matrix/matrix.dart' hide Contact;
 
 class FederationLookUpPhonebookContactInteractor {
-  final PhonebookContactRepository _phonebookContactRepository =
-      getIt.get<PhonebookContactRepository>();
-  final IdentityLookupManager _identityLookupManager =
-      getIt.get<IdentityLookupManager>();
+  final PhonebookContactRepository _phonebookContactRepository = getIt
+      .get<PhonebookContactRepository>();
+  final IdentityLookupManager _identityLookupManager = getIt
+      .get<IdentityLookupManager>();
   final FederationIdentityRequestTokenManager
-      _federationIdentityRequestTokenManager =
-      getIt.get<FederationIdentityRequestTokenManager>();
+  _federationIdentityRequestTokenManager = getIt
+      .get<FederationIdentityRequestTokenManager>();
 
-  final HiveContactRepository _hiveContactRepository =
-      getIt.get<HiveContactRepository>();
+  final HiveContactRepository _hiveContactRepository = getIt
+      .get<HiveContactRepository>();
 
   final SharedPreferencesContactCacheManager
-      _sharedPreferencesContactCacheManager =
-      getIt.get<SharedPreferencesContactCacheManager>();
+  _sharedPreferencesContactCacheManager = getIt
+      .get<SharedPreferencesContactCacheManager>();
 
   Stream<Either<Failure, Success>> execute({
     int lookupChunkSize = 10,
@@ -74,9 +74,7 @@ class FederationLookUpPhonebookContactInteractor {
         Logs().e(
           'FederationLookUpPhonebookContactInteractor::execute: Register: $e',
         );
-        yield Left(
-          GetPhoneBookContactFailure(exception: e),
-        );
+        yield Left(GetPhoneBookContactFailure(exception: e));
         return;
       }
 
@@ -89,14 +87,11 @@ class FederationLookUpPhonebookContactInteractor {
             ),
           )
           .then(
-            (state) => state.fold(
-              (failure) {},
-              (success) {
-                if (success is FederationIdentityRequestTokenSuccess) {
-                  federationIdentityRequestTokenRes = success.tokenInformation;
-                }
-              },
-            ),
+            (state) => state.fold((failure) {}, (success) {
+              if (success is FederationIdentityRequestTokenSuccess) {
+                federationIdentityRequestTokenRes = success.tokenInformation;
+              }
+            }),
           );
 
       Logs().d(
@@ -105,10 +100,7 @@ class FederationLookUpPhonebookContactInteractor {
 
       if (federationIdentityRequestTokenRes == null) {
         yield Left(
-          RequestTokenFailure(
-            exception: 'Token is empty',
-            contacts: contacts,
-          ),
+          RequestTokenFailure(exception: 'Token is empty', contacts: contacts),
         );
         return;
       }
@@ -160,9 +152,7 @@ class FederationLookUpPhonebookContactInteractor {
         if (res.lookupPepper?.isEmpty == true &&
             res.algorithms?.isEmpty == true) {
           yield const Left(
-            GetHashDetailsFailure(
-              exception: 'Hash details is empty',
-            ),
+            GetHashDetailsFailure(exception: 'Hash details is empty'),
           );
         }
 
@@ -171,11 +161,7 @@ class FederationLookUpPhonebookContactInteractor {
         Logs().e(
           'FederationLookUpPhonebookContactInteractor::execute: GetHashDetails: $e',
         );
-        yield Left(
-          GetHashDetailsFailure(
-            exception: e,
-          ),
-        );
+        yield Left(GetHashDetailsFailure(exception: e));
       }
 
       final contactIdToHashMap = {
@@ -201,24 +187,18 @@ class FederationLookUpPhonebookContactInteractor {
 
               hashToContactIdMappings
                   .putIfAbsent(chunkContact.id, () => [])
-                  .addAll(
-                    phoneToHashMap.values.expand((hash) => hash),
-                  );
+                  .addAll(phoneToHashMap.values.expand((hash) => hash));
             }
 
             if (chunkContact.emails != null &&
                 chunkContact.emails!.isNotEmpty) {
               emailToHashMap.addAll(
-                chunkContact.emails!.calculateHashesForEmails(
-                  hashDetails,
-                ),
+                chunkContact.emails!.calculateHashesForEmails(hashDetails),
               );
 
               hashToContactIdMappings
                   .putIfAbsent(chunkContact.id, () => [])
-                  .addAll(
-                    emailToHashMap.values.expand((hash) => hash),
-                  );
+                  .addAll(emailToHashMap.values.expand((hash) => hash));
             }
 
             final updatedContact = chunkContact.updateContactWithHashes(
@@ -230,8 +210,9 @@ class FederationLookUpPhonebookContactInteractor {
           }
 
           final request = FederationLookupMxidRequest(
-            addresses:
-                hashToContactIdMappings.values.expand((hash) => hash).toSet(),
+            addresses: hashToContactIdMappings.values
+                .expand((hash) => hash)
+                .toSet(),
             algorithm: hashDetails?.algorithms?.firstOrNull,
             pepper: hashDetails?.lookupPepper,
           );
@@ -248,11 +229,12 @@ class FederationLookUpPhonebookContactInteractor {
 
           try {
             if (response.mappings != null && response.mappings!.isNotEmpty) {
-              final updatedContact =
-                  contactIdToHashMap.values.toSet().handleLookupMappings(
-                        mappings: response.mappings ?? {},
-                        hashToContactIdMappings: hashToContactIdMappings,
-                      );
+              final updatedContact = contactIdToHashMap.values
+                  .toSet()
+                  .handleLookupMappings(
+                    mappings: response.mappings ?? {},
+                    hashToContactIdMappings: hashToContactIdMappings,
+                  );
 
               contactsFromMappings.addAll(updatedContact);
             }
@@ -286,9 +268,9 @@ class FederationLookUpPhonebookContactInteractor {
           }
 
           final combinedContacts = chunkContacts.toSet().combineContacts(
-                contactsFromMappings: contactsFromMappings,
-                contactsFromThirdParty: contactsFromThirdParty,
-              );
+            contactsFromMappings: contactsFromMappings,
+            contactsFromThirdParty: contactsFromThirdParty,
+          );
 
           await _storeContactsInHive(
             contacts: combinedContacts,
@@ -330,8 +312,8 @@ class FederationLookUpPhonebookContactInteractor {
     if (chunkError != null) {
       await _sharedPreferencesContactCacheManager
           .storeChunkFederationLookUpError(
-        ChunkLookUpContactErrorEnum.chunkError,
-      );
+            ChunkLookUpContactErrorEnum.chunkError,
+          );
       yield Left(
         LookUpPhonebookContactPartialFailed(
           exception: chunkError,
@@ -363,9 +345,9 @@ class FederationLookUpPhonebookContactInteractor {
       final Map<String, Contact> contactsNeedToCalculate = {};
       for (final hash in hashes) {
         final contact = newContacts.toSet().findContactWithHash(
-              hashToContactIdMappings: hashToContactIdMappings,
-              hash: hash,
-            );
+          hashToContactIdMappings: hashToContactIdMappings,
+          hash: hash,
+        );
 
         if (contact == null) {
           continue;
@@ -385,14 +367,11 @@ class FederationLookUpPhonebookContactInteractor {
             ),
           )
           .then(
-            (state) => state.fold(
-              (failure) {},
-              (success) {
-                if (success is FederationIdentityRequestTokenSuccess) {
-                  federationIdentityRequestTokenRes = success.tokenInformation;
-                }
-              },
-            ),
+            (state) => state.fold((failure) {}, (success) {
+              if (success is FederationIdentityRequestTokenSuccess) {
+                federationIdentityRequestTokenRes = success.tokenInformation;
+              }
+            }),
           );
 
       if (federationIdentityRequestTokenRes == null) {

@@ -12,20 +12,15 @@ import 'package:fluffychat/widgets/avatar/avatar.dart';
 
 extension EventInfoDialogExtension on Event {
   void showInfoDialog(BuildContext context) => showAdaptiveBottomSheet(
-        context: context,
-        builder: (context) =>
-            EventInfoDialog(l10n: L10n.of(context)!, event: this),
-      );
+    context: context,
+    builder: (context) => EventInfoDialog(l10n: L10n.of(context)!, event: this),
+  );
 }
 
 class EventInfoDialog extends StatelessWidget {
   final Event event;
   final L10n l10n;
-  const EventInfoDialog({
-    required this.event,
-    required this.l10n,
-    super.key,
-  });
+  const EventInfoDialog({required this.event, required this.l10n, super.key});
 
   String get prettyJson {
     const JsonDecoder decoder = JsonDecoder();

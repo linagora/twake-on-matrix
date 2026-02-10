@@ -38,9 +38,7 @@ class GenerateThumbnailSuccess extends Success {
 
 class GenerateThumbnailFailed extends Failure {
   final dynamic exception;
-  const GenerateThumbnailFailed({
-    required this.exception,
-  });
+  const GenerateThumbnailFailed({required this.exception});
 
   @override
   List<Object?> get props => [exception];
@@ -48,9 +46,7 @@ class GenerateThumbnailFailed extends Failure {
 
 class EncryptingFileState extends Success {
   final bool isThumbnail;
-  const EncryptingFileState({
-    this.isThumbnail = false,
-  });
+  const EncryptingFileState({this.isThumbnail = false});
 
   @override
   List<Object?> get props => [isThumbnail];
@@ -58,9 +54,7 @@ class EncryptingFileState extends Success {
 
 class EncryptedFileState extends Success {
   final bool isThumbnail;
-  const EncryptedFileState({
-    this.isThumbnail = false,
-  });
+  const EncryptedFileState({this.isThumbnail = false});
 
   @override
   List<Object?> get props => [isThumbnail];
@@ -90,21 +84,14 @@ class UploadingFileState extends Success {
   });
 
   @override
-  List<Object?> get props => [
-        receive,
-        total,
-        isThumbnail,
-      ];
+  List<Object?> get props => [receive, total, isThumbnail];
 }
 
 class UploadFileSuccessState extends Success {
   final String? eventId;
   final bool isThumbnail;
 
-  const UploadFileSuccessState({
-    this.eventId,
-    this.isThumbnail = false,
-  });
+  const UploadFileSuccessState({this.eventId, this.isThumbnail = false});
 
   @override
   List<Object?> get props => [eventId, isThumbnail];

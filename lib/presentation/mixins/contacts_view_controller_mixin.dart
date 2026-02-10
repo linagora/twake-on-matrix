@@ -40,8 +40,8 @@ mixin class ContactsViewControllerMixin {
   final PermissionHandlerService _permissionHandlerService =
       PermissionHandlerService();
 
-  final SearchRecentChatInteractor _searchRecentChatInteractor =
-      getIt.get<SearchRecentChatInteractor>();
+  final SearchRecentChatInteractor _searchRecentChatInteractor = getIt
+      .get<SearchRecentChatInteractor>();
 
   ValueNotifier<WarningContactsBannerState> warningBannerNotifier =
       ValueNotifier(WarningContactsBannerState.hide);
@@ -54,13 +54,13 @@ mixin class ContactsViewControllerMixin {
 
   final presentationContactNotifier =
       ValueNotifierCustom<Either<Failure, Success>>(
-    const Right(ContactsInitial()),
-  );
+        const Right(ContactsInitial()),
+      );
 
   final presentationPhonebookContactNotifier =
       ValueNotifierCustom<Either<Failure, Success>>(
-    const Right(GetPhonebookContactsInitial()),
-  );
+        const Right(GetPhonebookContactsInitial()),
+      );
 
   final FocusNode searchFocusNode = FocusNode();
 
@@ -73,11 +73,8 @@ mixin class ContactsViewControllerMixin {
 
   PermissionStatus? contactsPermissionStatus;
 
-  bool get phoneBookFilterSuccess =>
-      presentationPhonebookContactNotifier.value.fold(
-        (_) => false,
-        (success) => success is GetPhonebookContactsSuccess,
-      );
+  bool get phoneBookFilterSuccess => presentationPhonebookContactNotifier.value
+      .fold((_) => false, (success) => success is GetPhonebookContactsSuccess);
 
   Future displayContactPermissionDialog(BuildContext context) async {
     final fetchContactsPermissionStatus =
@@ -170,9 +167,7 @@ mixin class ContactsViewControllerMixin {
           currentContactPermission.isGranted) {
         contactsPermissionStatus = currentContactPermission;
         warningBannerNotifier.value = WarningContactsBannerState.hide;
-        contactsManager.synchronizePhonebookContacts(
-          withMxId: client.userID!,
-        );
+        contactsManager.synchronizePhonebookContacts(withMxId: client.userID!);
         return;
       }
     }
@@ -217,7 +212,8 @@ mixin class ContactsViewControllerMixin {
     }
     await contactsManager.initialSynchronizeContacts(
       withMxId: client.userID!,
-      isAvailableSupportPhonebookContacts: PlatformInfos.isMobile &&
+      isAvailableSupportPhonebookContacts:
+          PlatformInfos.isMobile &&
           contactsPermissionStatus != null &&
           contactsPermissionStatus == PermissionStatus.granted,
       forceRun: forceRun,
@@ -262,7 +258,8 @@ mixin class ContactsViewControllerMixin {
     }
     await contactsManager.synchronizeContactsOnContactTab(
       withMxId: client.userID!,
-      isAvailableSupportPhonebookContacts: PlatformInfos.isMobile &&
+      isAvailableSupportPhonebookContacts:
+          PlatformInfos.isMobile &&
           contactsPermissionStatus != null &&
           contactsPermissionStatus == PermissionStatus.granted,
     );
@@ -274,19 +271,19 @@ mixin class ContactsViewControllerMixin {
     required MatrixLocalizations matrixLocalizations,
   }) {
     contactsManager.getContactsNotifier().addListener(
-          () => _refreshAllContacts(
-            context: context,
-            client: client,
-            matrixLocalizations: matrixLocalizations,
-          ),
-        );
+      () => _refreshAllContacts(
+        context: context,
+        client: client,
+        matrixLocalizations: matrixLocalizations,
+      ),
+    );
     contactsManager.getPhonebookContactsNotifier().addListener(
-          () => _refreshAllContacts(
-            context: context,
-            client: client,
-            matrixLocalizations: matrixLocalizations,
-          ),
-        );
+      () => _refreshAllContacts(
+        context: context,
+        client: client,
+        matrixLocalizations: matrixLocalizations,
+      ),
+    );
   }
 
   void _refreshAllContacts({
@@ -310,8 +307,8 @@ mixin class ContactsViewControllerMixin {
 
     final externalContactState = _checkExternalContact(keyword);
 
-    presentationContactNotifier.value =
-        contactsManager.getContactsNotifier().value.fold(
+    presentationContactNotifier
+        .value = contactsManager.getContactsNotifier().value.fold(
       (failure) {
         if (externalContactState != null) {
           return externalContactState;
@@ -320,22 +317,14 @@ mixin class ContactsViewControllerMixin {
         if (failure is GetContactsFailure) {
           return _handleSearchExternalContact(
             keyword,
-            otherResult: Left(
-              GetPresentationContactsFailure(
-                keyword: keyword,
-              ),
-            ),
+            otherResult: Left(GetPresentationContactsFailure(keyword: keyword)),
           );
         }
 
         if (failure is GetContactsIsEmpty) {
           return _handleSearchExternalContact(
             keyword,
-            otherResult: Left(
-              GetPresentationContactsEmpty(
-                keyword: keyword,
-              ),
-            ),
+            otherResult: Left(GetPresentationContactsEmpty(keyword: keyword)),
           );
         }
         return Left(failure);
@@ -366,9 +355,7 @@ mixin class ContactsViewControllerMixin {
     );
   }
 
-  Either<Failure, Success>? _checkExternalContact(
-    String keyword,
-  ) {
+  Either<Failure, Success>? _checkExternalContact(String keyword) {
     if (keyword.isValidMatrixId && keyword.startsWith("@")) {
       return Right(
         PresentationExternalContactSuccess(
@@ -385,120 +372,102 @@ mixin class ContactsViewControllerMixin {
 
   Future<void> _refreshPhoneBookContacts(String keyword) async {
     if (presentationPhonebookContactNotifier.isDisposed) return;
-    presentationPhonebookContactNotifier.value =
-        contactsManager.getPhonebookContactsNotifier().value.fold(
-      (failure) {
-        if (failure is LookUpPhonebookContactPartialFailed) {
-          final filteredContacts = failure.contacts
-              .searchContacts(keyword)
-              .expand((contact) => contact.toPresentationContacts())
-              .toList();
-          if (filteredContacts.isEmpty) {
-            return Left(
-              GetPresentationContactsEmpty(
-                keyword: keyword,
-              ),
-            );
-          } else {
-            return Right(
-              GetPresentationContactsSuccess(
-                contacts: filteredContacts,
-                keyword: keyword,
-              ),
-            );
-          }
-        }
+    presentationPhonebookContactNotifier.value = contactsManager
+        .getPhonebookContactsNotifier()
+        .value
+        .fold(
+          (failure) {
+            if (failure is LookUpPhonebookContactPartialFailed) {
+              final filteredContacts = failure.contacts
+                  .searchContacts(keyword)
+                  .expand((contact) => contact.toPresentationContacts())
+                  .toList();
+              if (filteredContacts.isEmpty) {
+                return Left(GetPresentationContactsEmpty(keyword: keyword));
+              } else {
+                return Right(
+                  GetPresentationContactsSuccess(
+                    contacts: filteredContacts,
+                    keyword: keyword,
+                  ),
+                );
+              }
+            }
 
-        if (failure is GetPhonebookContactsFailure) {
-          final filteredContacts = failure.contacts
-              .searchContacts(keyword)
-              .expand((contact) => contact.toPresentationContacts())
-              .toList();
-          if (filteredContacts.isEmpty) {
-            return Left(
-              GetPresentationContactsEmpty(
-                keyword: keyword,
-              ),
-            );
-          } else {
-            return Right(
-              GetPresentationContactsSuccess(
-                contacts: filteredContacts,
-                keyword: keyword,
-              ),
-            );
-          }
-        }
+            if (failure is GetPhonebookContactsFailure) {
+              final filteredContacts = failure.contacts
+                  .searchContacts(keyword)
+                  .expand((contact) => contact.toPresentationContacts())
+                  .toList();
+              if (filteredContacts.isEmpty) {
+                return Left(GetPresentationContactsEmpty(keyword: keyword));
+              } else {
+                return Right(
+                  GetPresentationContactsSuccess(
+                    contacts: filteredContacts,
+                    keyword: keyword,
+                  ),
+                );
+              }
+            }
 
-        if (failure is RequestTokenFailure) {
-          final filteredContacts = failure.contacts
-              .searchContacts(keyword)
-              .expand((contact) => contact.toPresentationContacts())
-              .toList();
-          if (filteredContacts.isEmpty) {
-            return Left(
-              GetPresentationContactsEmpty(
-                keyword: keyword,
-              ),
-            );
-          } else {
-            return Right(
-              GetPresentationContactsSuccess(
-                contacts: filteredContacts,
-                keyword: keyword,
-              ),
-            );
-          }
-        }
+            if (failure is RequestTokenFailure) {
+              final filteredContacts = failure.contacts
+                  .searchContacts(keyword)
+                  .expand((contact) => contact.toPresentationContacts())
+                  .toList();
+              if (filteredContacts.isEmpty) {
+                return Left(GetPresentationContactsEmpty(keyword: keyword));
+              } else {
+                return Right(
+                  GetPresentationContactsSuccess(
+                    contacts: filteredContacts,
+                    keyword: keyword,
+                  ),
+                );
+              }
+            }
 
-        if (failure is RegisterTokenFailure) {
-          final filteredContacts = failure.contacts
-              .searchContacts(keyword)
-              .expand((contact) => contact.toPresentationContacts())
-              .toList();
-          if (filteredContacts.isEmpty) {
-            return Left(
-              GetPresentationContactsEmpty(
-                keyword: keyword,
-              ),
-            );
-          } else {
-            return Right(
-              GetPresentationContactsSuccess(
-                contacts: filteredContacts,
-                keyword: keyword,
-              ),
-            );
-          }
-        }
+            if (failure is RegisterTokenFailure) {
+              final filteredContacts = failure.contacts
+                  .searchContacts(keyword)
+                  .expand((contact) => contact.toPresentationContacts())
+                  .toList();
+              if (filteredContacts.isEmpty) {
+                return Left(GetPresentationContactsEmpty(keyword: keyword));
+              } else {
+                return Right(
+                  GetPresentationContactsSuccess(
+                    contacts: filteredContacts,
+                    keyword: keyword,
+                  ),
+                );
+              }
+            }
 
-        return Left(failure);
-      },
-      (success) {
-        if (success is GetPhonebookContactsSuccess) {
-          final filteredContacts = success.contacts
-              .searchContacts(keyword)
-              .expand((contact) => contact.toPresentationContacts())
-              .toList();
-          _refreshContacts(keyword);
-          if (filteredContacts.isEmpty) {
-            return Left(
-              GetPresentationContactsEmpty(
-                keyword: keyword,
-              ),
-            );
-          } else {
-            return Right(
-              GetPresentationContactsSuccess(
-                contacts: filteredContacts,
-                keyword: keyword,
-              ),
-            );
-          }
-        }
-        return Right(success);
-      },
-    );
+            return Left(failure);
+          },
+          (success) {
+            if (success is GetPhonebookContactsSuccess) {
+              final filteredContacts = success.contacts
+                  .searchContacts(keyword)
+                  .expand((contact) => contact.toPresentationContacts())
+                  .toList();
+              _refreshContacts(keyword);
+              if (filteredContacts.isEmpty) {
+                return Left(GetPresentationContactsEmpty(keyword: keyword));
+              } else {
+                return Right(
+                  GetPresentationContactsSuccess(
+                    contacts: filteredContacts,
+                    keyword: keyword,
+                  ),
+                );
+              }
+            }
+            return Right(success);
+          },
+        );
   }
 
   Either<Failure, Success> _handleSearchExternalContact(
@@ -528,48 +497,47 @@ mixin class ContactsViewControllerMixin {
   }) async {
     _searchRecentChatInteractor
         .execute(
-      keyword: keyword ?? '',
-      matrixLocalizations: matrixLocalizations,
-      rooms: client.rooms,
-    )
-        .listen(
-      (event) {
-        event.map((success) {
-          if (success is SearchRecentChatSuccess) {
-            final recent = success
-                .toPresentation()
-                .contacts
-                .where((contact) => contact.directChatMatrixID != null)
-                .toList();
+          keyword: keyword ?? '',
+          matrixLocalizations: matrixLocalizations,
+          rooms: client.rooms,
+        )
+        .listen((event) {
+          event.map((success) {
+            if (success is SearchRecentChatSuccess) {
+              final recent = success
+                  .toPresentation()
+                  .contacts
+                  .where((contact) => contact.directChatMatrixID != null)
+                  .toList();
 
-            final tomContacts = contactsManager
-                    .getContactsNotifier()
-                    .value
-                    .getSuccessOrNull<GetContactsSuccess>()
-                    ?.contacts ??
-                [];
-            final tomPresentationSearchContacts = tomContacts
-                .expand((contact) => contact.toPresentationContacts())
-                .toList();
-            final tomContactPresentationSearchMatched =
-                tomPresentationSearchContacts
-                    .expand((contact) => contact.toPresentationSearch())
-                    .where(
-                      (contact) => contact.doesMatchKeyword(success.keyword),
-                    )
-                    .toList();
-            if (presentationRecentContactNotifier.isDisposed) return;
+              final tomContacts =
+                  contactsManager
+                      .getContactsNotifier()
+                      .value
+                      .getSuccessOrNull<GetContactsSuccess>()
+                      ?.contacts ??
+                  [];
+              final tomPresentationSearchContacts = tomContacts
+                  .expand((contact) => contact.toPresentationContacts())
+                  .toList();
+              final tomContactPresentationSearchMatched =
+                  tomPresentationSearchContacts
+                      .expand((contact) => contact.toPresentationSearch())
+                      .where(
+                        (contact) => contact.doesMatchKeyword(success.keyword),
+                      )
+                      .toList();
+              if (presentationRecentContactNotifier.isDisposed) return;
 
-            presentationRecentContactNotifier.value =
-                handleSearchRecentContacts(
-              contacts: tomContactPresentationSearchMatched,
-              recentChat: recent,
-              keyword: success.keyword,
-            );
-          }
+              presentationRecentContactNotifier.value =
+                  handleSearchRecentContacts(
+                    contacts: tomContactPresentationSearchMatched,
+                    recentChat: recent,
+                    keyword: success.keyword,
+                  );
+            }
+          });
         });
-      },
-    );
   }
 
   List<PresentationSearch> handleSearchRecentContacts({
@@ -595,11 +563,10 @@ mixin class ContactsViewControllerMixin {
     required List<PresentationSearch> recentChat,
   }) {
     final contactIds = contacts.map((contact) => contact.id).toSet();
-    final List<PresentationSearch> filteredRecentChat =
-        recentChat.where((chat) {
-      return !contactIds.contains(
-        chat.directChatMatrixID,
-      );
+    final List<PresentationSearch> filteredRecentChat = recentChat.where((
+      chat,
+    ) {
+      return !contactIds.contains(chat.directChatMatrixID);
     }).toList();
 
     return filteredRecentChat;
@@ -627,12 +594,10 @@ mixin class ContactsViewControllerMixin {
   Future<void> _handleRequestContactsPermission({
     required Client client,
   }) async {
-    final currentContactsPermissionStatus =
-        await _permissionHandlerService.requestContactsPermissionActions();
+    final currentContactsPermissionStatus = await _permissionHandlerService
+        .requestContactsPermissionActions();
     if (currentContactsPermissionStatus == PermissionStatus.granted) {
-      contactsManager.synchronizePhonebookContacts(
-        withMxId: client.userID!,
-      );
+      contactsManager.synchronizePhonebookContacts(withMxId: client.userID!);
       warningBannerNotifier.value = WarningContactsBannerState.hide;
     } else {
       contactsManager.updateNotShowWarningContactsDialogAgain = true;
@@ -665,7 +630,8 @@ mixin class ContactsViewControllerMixin {
   }
 
   List<String> _flatMatrixIdsFromPhonebookContacts() {
-    final phonebookContacts = contactsManager
+    final phonebookContacts =
+        contactsManager
             .getPhonebookContactsNotifier()
             .value
             .getSuccessOrNull<GetPhonebookContactsSuccess>()
@@ -675,12 +641,14 @@ mixin class ContactsViewControllerMixin {
     final Set<String> matrixIds = {};
 
     for (final contact in phonebookContacts) {
-      final emailMatrixIds = contact.emails
+      final emailMatrixIds =
+          contact.emails
               ?.where((email) => email.matrixId != null)
               .map((email) => email.matrixId!) ??
           [];
 
-      final phoneMatrixIds = contact.phoneNumbers
+      final phoneMatrixIds =
+          contact.phoneNumbers
               ?.where((phone) => phone.matrixId != null)
               .map((phone) => phone.matrixId!) ??
           [];

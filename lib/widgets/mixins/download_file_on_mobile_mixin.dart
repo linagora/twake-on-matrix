@@ -19,8 +19,8 @@ mixin DownloadFileOnMobileMixin<T extends StatefulWidget> on State<T> {
 
   final downloadFileStateNotifier =
       ValueNotifierCustom<DownloadPresentationState>(
-    const NotDownloadPresentationState(),
-  );
+        const NotDownloadPresentationState(),
+      );
 
   StreamSubscription<Either<Failure, Success>>? streamSubscription;
 
@@ -83,16 +83,17 @@ mixin DownloadFileOnMobileMixin<T extends StatefulWidget> on State<T> {
   }
 
   StreamSubscription<Either<Failure, Success>>?
-      _trySetupDownloadingStreamSubcription() =>
-          streamSubscription = downloadManager
-              .getDownloadStateStream(event.eventId)
-              ?.listen(setupDownloadingProcess);
+  _trySetupDownloadingStreamSubcription() =>
+      streamSubscription = downloadManager
+          .getDownloadStateStream(event.eventId)
+          ?.listen(setupDownloadingProcess);
 
   void setupDownloadingProcess(Either<Failure, Success> resultEvent) {
     resultEvent.fold(
       (failure) {
-        Logs()
-            .e('$T::setupDownloadingProcess::onDownloadingProcess(): $failure');
+        Logs().e(
+          '$T::setupDownloadingProcess::onDownloadingProcess(): $failure',
+        );
         downloadFileStateNotifier.value = const NotDownloadPresentationState();
         streamSubscription?.cancel();
       },
@@ -122,9 +123,7 @@ mixin DownloadFileOnMobileMixin<T extends StatefulWidget> on State<T> {
       return;
     }
     downloadFileStateNotifier.value = const DownloadingPresentationState();
-    downloadManager.download(
-      event: event,
-    );
+    downloadManager.download(event: event);
     _trySetupDownloadingStreamSubcription();
   }
 

@@ -10,10 +10,7 @@ class SendInvitationResponse with EquatableMixin {
   @JsonKey(name: "id")
   final String? id;
 
-  SendInvitationResponse({
-    this.message,
-    this.id,
-  });
+  SendInvitationResponse({this.message, this.id});
 
   factory SendInvitationResponse.fromJson(Map<String, dynamic> json) =>
       _$SendInvitationResponseFromJson(json);
@@ -21,8 +18,5 @@ class SendInvitationResponse with EquatableMixin {
   Map<String, dynamic> toJson() => _$SendInvitationResponseToJson(this);
 
   @override
-  List<Object?> get props => [
-        message,
-        id,
-      ];
+  List<Object?> get props => [message, id];
 }

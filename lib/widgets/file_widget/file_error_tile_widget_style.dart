@@ -8,15 +8,15 @@ class FileErrorTileWidgetStyle extends FileTileWidgetStyle {
 
   @override
   TextStyle textInformationStyle(BuildContext context) {
-    return Theme.of(context).textTheme.bodySmall!.copyWith(
-          color: fileInfoColor,
-        );
+    return Theme.of(
+      context,
+    ).textTheme.bodySmall!.copyWith(color: fileInfoColor);
   }
 
   @override
   TextStyle? textStyle(BuildContext context) {
-    return Theme.of(context).textTheme.bodyLarge?.copyWith(
-          color: Theme.of(context).colorScheme.error,
-        );
+    return Theme.of(
+      context,
+    ).textTheme.bodyLarge?.copyWith(color: Theme.of(context).colorScheme.error);
   }
 }

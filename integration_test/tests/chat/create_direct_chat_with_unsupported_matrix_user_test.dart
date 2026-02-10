@@ -8,7 +8,8 @@ import '../../scenarios/chat_scenario.dart';
 
 void main() {
   TestBase().runPatrolTest(
-    description: 'Should not create any chat '
+    description:
+        'Should not create any chat '
         'when create direct chat with unsupported matrix user',
     test: ($) async {
       const searchPhrase = '@awsd:awsd.com';
@@ -20,10 +21,12 @@ void main() {
       await ChatScenario($).sendAMesage('hello');
 
       // check message is sent
-      await ChatGroupDetailRobot($)
-          .expectSnackShown($, timeout: const Duration(seconds: 30));
-      await ChatScenario($)
-          .backToChatLisFromChatGroupScreen(isOpenGroupFromSearchResult: true);
+      await ChatGroupDetailRobot(
+        $,
+      ).expectSnackShown($, timeout: const Duration(seconds: 30));
+      await ChatScenario(
+        $,
+      ).backToChatLisFromChatGroupScreen(isOpenGroupFromSearchResult: true);
 
       final afterChatRoomCounts = await ChatListRobot($).getChatRoomCounts();
       expect(afterChatRoomCounts, beforeChatRoomCounts);

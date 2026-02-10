@@ -10,9 +10,7 @@ class UploadContentLoading extends Success {
 class UploadContentSuccess extends Success {
   final Uri uri;
 
-  const UploadContentSuccess({
-    required this.uri,
-  });
+  const UploadContentSuccess({required this.uri});
 
   @override
   List<Object?> get props => [uri];

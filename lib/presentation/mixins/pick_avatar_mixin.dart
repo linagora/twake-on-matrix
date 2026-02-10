@@ -15,8 +15,8 @@ import 'package:fluffychat/generated/l10n/app_localizations.dart';
 mixin PickAvatarMixin {
   final ValueNotifierCustom<Either<Failure, Success>> pickAvatarUIState =
       ValueNotifierCustom<Either<Failure, Success>>(
-    Right(GetAvatarInitialUIState()),
-  );
+        Right(GetAvatarInitialUIState()),
+      );
 
   Future<void> handlePickAvatarOnWeb(FilePickerResult filePickerResult) async {
     final file = filePickerResult.files.single;
@@ -40,16 +40,12 @@ mixin PickAvatarMixin {
       return;
     }
     pickAvatarUIState.value = Right<Failure, Success>(
-      GetAvatarOnWebUIStateSuccess(
-        matrixFile: matrixFile,
-      ),
+      GetAvatarOnWebUIStateSuccess(matrixFile: matrixFile),
     );
   }
 
   void pickAvatarImageOnWeb() async {
-    pickAvatarUIState.value = Right<Failure, Success>(
-      PickingAvatarUIState(),
-    );
+    pickAvatarUIState.value = Right<Failure, Success>(PickingAvatarUIState());
     final result = await FilePicker.platform.pickFiles(
       type: FileType.custom,
       allowedExtensions: AppConfig.allowedExtensionsSupportedAvatar,

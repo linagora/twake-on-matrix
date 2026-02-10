@@ -8,8 +8,8 @@ import 'package:fluffychat/domain/repository/invitation/invitation_repository.da
 import 'package:matrix/matrix.dart';
 
 class GetInvitationStatusInteractor {
-  final InvitationRepository _invitationRepository =
-      getIt.get<InvitationRepository>();
+  final InvitationRepository _invitationRepository = getIt
+      .get<InvitationRepository>();
 
   Stream<Either<Failure, Success>> execute({
     required String userId,
@@ -33,9 +33,7 @@ class GetInvitationStatusInteractor {
       }
 
       yield Right(
-        GetInvitationStatusSuccessState(
-          invitationStatusResponse: res,
-        ),
+        GetInvitationStatusSuccessState(invitationStatusResponse: res),
       );
     } catch (e) {
       Logs().e('GetInvitationStatusInteractor::execute', e);

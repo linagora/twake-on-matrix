@@ -29,14 +29,13 @@ class UploadContentInteractor {
         );
         if (maxMediaSize != null && maxMediaSize < fileSize) {
           yield Left(
-            FileTooBigMatrix(
-              FileTooBigMatrixException(fileSize, maxMediaSize),
-            ),
+            FileTooBigMatrix(FileTooBigMatrixException(fileSize, maxMediaSize)),
           );
         }
 
-        final response =
-            await mediaApi.uploadFileMobile(fileInfo: contentFileInfo);
+        final response = await mediaApi.uploadFileMobile(
+          fileInfo: contentFileInfo,
+        );
 
         if (response.contentUri != null) {
           final contentUri = Uri.parse(response.contentUri!);

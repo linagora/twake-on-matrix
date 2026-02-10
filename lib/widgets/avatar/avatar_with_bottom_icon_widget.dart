@@ -24,18 +24,16 @@ class AvatarWithBottomIconWidget extends StatelessWidget {
     return Container(
       width: size,
       height: size,
-      decoration: const BoxDecoration(
-        shape: BoxShape.circle,
-      ),
+      decoration: const BoxDecoration(shape: BoxShape.circle),
       child: Stack(
         alignment: Alignment.bottomRight,
         children: [
           if (presentationContact.matrixId != null)
             FutureBuilder<Profile>(
               future: Matrix.of(context).client.getProfileFromUserId(
-                    presentationContact.matrixId!,
-                    getFromRooms: false,
-                  ),
+                presentationContact.matrixId!,
+                getFromRooms: false,
+              ),
               builder: ((context, snapshot) {
                 return Avatar(
                   mxContent: snapshot.data?.avatarUrl,
@@ -44,17 +42,12 @@ class AvatarWithBottomIconWidget extends StatelessWidget {
               }),
             ),
           if (presentationContact.matrixId == null)
-            Avatar(
-              name: presentationContact.displayName,
-            ),
+            Avatar(name: presentationContact.displayName),
           Container(
             height: 20,
             width: 20,
             decoration: BoxDecoration(
-              border: Border.all(
-                width: 2,
-                color: Colors.white,
-              ),
+              border: Border.all(width: 2, color: Colors.white),
               color: LinagoraRefColors.material().neutral[60],
               shape: BoxShape.circle,
             ),

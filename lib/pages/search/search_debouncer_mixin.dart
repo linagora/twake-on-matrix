@@ -13,9 +13,7 @@ mixin SearchDebouncerMixin {
     );
 
     _debouncer?.values.listen((keyword) async {
-      Logs().d(
-        "SearchDebouncerMixin::initializeDebouncer: $keyword",
-      );
+      Logs().d("SearchDebouncerMixin::initializeDebouncer: $keyword");
       onDebouncerChanged?.call(keyword);
     });
   }

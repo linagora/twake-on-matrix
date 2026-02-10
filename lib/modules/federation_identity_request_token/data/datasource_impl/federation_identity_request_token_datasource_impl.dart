@@ -11,11 +11,7 @@ class FederationIdentityRequestTokenDatasourceImpl
   });
 
   @override
-  Future<FederationTokenInformation> requestToken({
-    required String mxid,
-  }) {
-    return federationIdentityRequestTokenApi.getToken(
-      mxid: mxid,
-    );
+  Future<FederationTokenInformation> requestToken({required String mxid}) {
+    return federationIdentityRequestTokenApi.getToken(mxid: mxid);
   }
 }

@@ -219,9 +219,7 @@ void main() {
             baseUrl: Uri.parse('https://app.twake.com/'),
           ),
           additionalProperties: {
-            'app.twake.chat': {
-              'invalid_key': 'invalid_value',
-            },
+            'app.twake.chat': {'invalid_key': 'invalid_value'},
           },
         ),
         versions: GetVersionsResponse(
@@ -235,9 +233,7 @@ void main() {
         ],
       );
 
-      final expected = AppTwakeInformation(
-        commonSettingsInformation: null,
-      );
+      final expected = AppTwakeInformation(commonSettingsInformation: null);
 
       expect(homeserver.appTwakeInformation, equals(expected));
     });
@@ -252,9 +248,7 @@ void main() {
             baseUrl: Uri.parse('https://app.twake.com/'),
           ),
           additionalProperties: {
-            'app.twake.chat': {
-              'common_settings': null,
-            },
+            'app.twake.chat': {'common_settings': null},
           },
         ),
         versions: GetVersionsResponse(
@@ -268,9 +262,7 @@ void main() {
         ],
       );
 
-      final expected = AppTwakeInformation(
-        commonSettingsInformation: null,
-      );
+      final expected = AppTwakeInformation(commonSettingsInformation: null);
 
       expect(homeserver.appTwakeInformation, equals(expected));
     });

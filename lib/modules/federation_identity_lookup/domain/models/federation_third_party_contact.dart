@@ -11,11 +11,11 @@ abstract class FederationThirdPartyContact extends ThirdPartyContact {
 
   @override
   List<Object?> get props => [
-        matrixId,
-        thirdPartyIdType,
-        thirdPartyId,
-        thirdPartyIdToHashMap,
-      ];
+    matrixId,
+    thirdPartyIdType,
+    thirdPartyId,
+    thirdPartyIdToHashMap,
+  ];
 }
 
 class FederationPhone extends FederationThirdPartyContact {
@@ -26,17 +26,17 @@ class FederationPhone extends FederationThirdPartyContact {
     super.matrixId,
     super.thirdPartyIdToHashMap,
   }) : super(
-          thirdPartyIdType: ThirdPartyIdType.msisdn,
-          thirdPartyId: number.msisdnSanitizer(),
-        );
+         thirdPartyIdType: ThirdPartyIdType.msisdn,
+         thirdPartyId: number.msisdnSanitizer(),
+       );
 
   @override
   List<Object?> get props => [
-        matrixId,
-        number,
-        thirdPartyIdType,
-        thirdPartyIdToHashMap,
-      ];
+    matrixId,
+    number,
+    thirdPartyIdType,
+    thirdPartyIdToHashMap,
+  ];
 
   FederationPhone copyWith({
     String? matrixId,
@@ -58,18 +58,15 @@ class FederationEmail extends FederationThirdPartyContact {
     super.matrixId,
     required this.address,
     super.thirdPartyIdToHashMap,
-  }) : super(
-          thirdPartyIdType: ThirdPartyIdType.email,
-          thirdPartyId: address,
-        );
+  }) : super(thirdPartyIdType: ThirdPartyIdType.email, thirdPartyId: address);
 
   @override
   List<Object?> get props => [
-        address,
-        matrixId,
-        thirdPartyIdType,
-        thirdPartyIdToHashMap,
-      ];
+    address,
+    matrixId,
+    thirdPartyIdType,
+    thirdPartyIdToHashMap,
+  ];
 
   FederationEmail copyWith({
     String? matrixId,

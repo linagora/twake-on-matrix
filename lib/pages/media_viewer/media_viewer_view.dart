@@ -38,9 +38,7 @@ class MediaViewerView extends StatelessWidget {
         }
 
         if (event.type == EventTypes.Encrypted) {
-          return Center(
-            child: Text(L10n.of(context)!.encrypted),
-          );
+          return Center(child: Text(L10n.of(context)!.encrypted));
         }
 
         return const SizedBox();
@@ -61,9 +59,7 @@ class MediaViewerView extends StatelessWidget {
 
           return Material(
             type: MaterialType.transparency,
-            child: MediaViewerAppBar(
-              event: controller.mediaEvents[page],
-            ),
+            child: MediaViewerAppBar(event: controller.mediaEvents[page]),
           );
         },
       ),
@@ -88,10 +84,7 @@ class MediaViewerView extends StatelessWidget {
       builder: (context, show, child) {
         return IgnorePointer(
           ignoring: !show,
-          child: Opacity(
-            opacity: show ? 1 : 0,
-            child: child,
-          ),
+          child: Opacity(opacity: show ? 1 : 0, child: child),
         );
       },
       child: SizedBox(
@@ -141,17 +134,13 @@ class MediaViewerView extends StatelessWidget {
     return Stack(
       children: [
         pageView,
-        Positioned.fill(
-          child: toggleAppBarAndPreviewOverlay,
-        ),
+        Positioned.fill(child: toggleAppBarAndPreviewOverlay),
         appBar,
         Positioned(
           bottom: 0,
           left: 0,
           right: 0,
-          child: SafeArea(
-            child: previewer,
-          ),
+          child: SafeArea(child: previewer),
         ),
       ],
     );

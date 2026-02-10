@@ -23,22 +23,23 @@ class DraftChatViewStyle {
         hintMaxLines: 1,
         contentPadding: ChatInputRowStyle.contentPadding(context),
         hintStyle: Theme.of(context).textTheme.bodyLarge?.copyWith(
-              color: responsive.isMobile(context)
-                  ? LinagoraRefColors.material().tertiary[50]
-                  : LinagoraRefColors.material().tertiary[30],
-              fontFamily: 'Inter',
-            ),
+          color: responsive.isMobile(context)
+              ? LinagoraRefColors.material().tertiary[50]
+              : LinagoraRefColors.material().tertiary[30],
+          fontFamily: 'Inter',
+        ),
       );
 
   static double bottomBarInputPadding(BuildContext context) =>
       responsive.isMobile(context) ? 8.0 : 8.0;
 
   static EdgeInsetsGeometry get emptyChatChildrenPadding =>
-      const EdgeInsetsDirectional.only(
-        end: 8,
-      );
+      const EdgeInsetsDirectional.only(end: 8);
   static const double emptyChatGapWidth = 12.0;
 
-  static const EdgeInsetsGeometry iconSendPadding =
-      EdgeInsetsDirectional.only(end: 8.0, start: 8, bottom: 8);
+  static const EdgeInsetsGeometry iconSendPadding = EdgeInsetsDirectional.only(
+    end: 8.0,
+    start: 8,
+    bottom: 8,
+  );
 }

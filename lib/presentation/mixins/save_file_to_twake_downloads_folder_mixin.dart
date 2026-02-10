@@ -30,10 +30,8 @@ mixin SaveFileToTwakeAndroidDownloadsFolderMixin {
       await handleAndroidStoragePermission(context);
 
       final downloadManager = getIt.get<DownloadManager>();
-      final downloadingStreamSubscription =
-          downloadManager.getDownloadStateStream(
-        downloadEvent.eventId,
-      );
+      final downloadingStreamSubscription = downloadManager
+          .getDownloadStateStream(downloadEvent.eventId);
       if (downloadingStreamSubscription == null) {
         await handleSaveToDownloadsForFileNotInDownloading(
           downloadEvent,
@@ -50,10 +48,7 @@ mixin SaveFileToTwakeAndroidDownloadsFolderMixin {
     } catch (e) {
       Logs().e('Chat::saveSelectedEventToDownloadAndroid(): $e');
       if (e is! StoragePermissionException) {
-        TwakeSnackBar.show(
-          context,
-          L10n.of(context)!.saveFileToDownloadsError,
-        );
+        TwakeSnackBar.show(context, L10n.of(context)!.saveFileToDownloadsError);
       }
     }
   }
@@ -65,18 +60,15 @@ mixin SaveFileToTwakeAndroidDownloadsFolderMixin {
   }) {
     final downloadProgressNotifier = ValueNotifier<double?>(0);
     StreamSubscription? streamSubscription;
-    streamSubscription = downloadingStreamSubscription.listen(
-      (downloadState) {
-        _onDownloadingFileStateChange(
-          event: event,
-          downloadState: downloadState,
-          context: context,
-          downloadProgressNotifier: downloadProgressNotifier,
-          streamSubscription: streamSubscription,
-        );
-      },
-      cancelOnError: true,
-    );
+    streamSubscription = downloadingStreamSubscription.listen((downloadState) {
+      _onDownloadingFileStateChange(
+        event: event,
+        downloadState: downloadState,
+        context: context,
+        downloadProgressNotifier: downloadProgressNotifier,
+        streamSubscription: streamSubscription,
+      );
+    }, cancelOnError: true);
 
     showDialog(
       context: context,
@@ -93,11 +85,11 @@ mixin SaveFileToTwakeAndroidDownloadsFolderMixin {
     Event event, {
     required BuildContext context,
   }) async {
-    final filePath =
-        await StorageDirectoryManager.instance.getFilePathInAppDownloads(
-      eventId: event.eventId,
-      fileName: event.filename,
-    );
+    final filePath = await StorageDirectoryManager.instance
+        .getFilePathInAppDownloads(
+          eventId: event.eventId,
+          fileName: event.filename,
+        );
     final file = File(filePath);
     if (!await file.exists()) {
       await handleWhenFileHaveNotDownloaded(
@@ -126,10 +118,8 @@ mixin SaveFileToTwakeAndroidDownloadsFolderMixin {
       if (twakeFolder?.isNotEmpty != true) {
         throw SaveToDownloadsException(error: 'Twake folder is empty');
       }
-      final twakeFilePath =
-          await StorageDirectoryManager.instance.getAvailableFilePath(
-        '$twakeFolder/${event.filename}',
-      );
+      final twakeFilePath = await StorageDirectoryManager.instance
+          .getAvailableFilePath('$twakeFolder/${event.filename}');
 
       await File(twakeFilePath).create(recursive: true);
       final copiedFile = await file.copy(twakeFilePath);
@@ -138,9 +128,7 @@ mixin SaveFileToTwakeAndroidDownloadsFolderMixin {
       );
       TwakeSnackBar.show(context, L10n.of(context)!.fileSavedToDownloads);
     } catch (e) {
-      Logs().e(
-        'Chat::saveSelectedEventToDownloadAndroid():: Error - $e',
-      );
+      Logs().e('Chat::saveSelectedEventToDownloadAndroid():: Error - $e');
       TwakeSnackBar.show(context, L10n.of(context)!.saveFileToDownloadsError);
     }
   }
@@ -149,19 +137,15 @@ mixin SaveFileToTwakeAndroidDownloadsFolderMixin {
     Event event,
     BuildContext context, {
     Future<void> Function(Event event, BuildContext context)?
-        handleDownloadFileDone,
+    handleDownloadFileDone,
   }) async {
-    Logs().d(
-      'Chat::saveSelectedEventToDownloadAndroid():: File not exists',
-    );
+    Logs().d('Chat::saveSelectedEventToDownloadAndroid():: File not exists');
     final downloadManager = getIt.get<DownloadManager>();
-    await downloadManager.download(
-      event: event,
-      isFirstPriority: true,
-    );
+    await downloadManager.download(event: event, isFirstPriority: true);
 
-    final downloadStreamController =
-        downloadManager.getDownloadStateStream(event.eventId);
+    final downloadStreamController = downloadManager.getDownloadStateStream(
+      event.eventId,
+    );
     StreamSubscription? streamSubcription;
     final downloadProgressNotifier = ValueNotifier<double?>(0);
     streamSubcription = downloadStreamController?.listen((downloadState) {
@@ -192,7 +176,7 @@ mixin SaveFileToTwakeAndroidDownloadsFolderMixin {
     required ValueNotifier<double?> downloadProgressNotifier,
     required StreamSubscription? streamSubscription,
     Future<void> Function(Event event, BuildContext context)?
-        handleDownloadFileDone,
+    handleDownloadFileDone,
   }) {
     downloadState.fold(
       (left) {
@@ -242,9 +226,9 @@ mixin SaveFileToTwakeAndroidDownloadsFolderMixin {
               icon: const Icon(Icons.storage_rounded),
               permission: Permission.storage,
               explainTextRequestPermission: Text(
-                L10n.of(context)!.explainPermissionToDownloadFiles(
-                  AppConfig.applicationName,
-                ),
+                L10n.of(
+                  context,
+                )!.explainPermissionToDownloadFiles(AppConfig.applicationName),
                 style: Theme.of(context).textTheme.bodyMedium,
               ),
               onAcceptButton: () =>

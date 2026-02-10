@@ -16,7 +16,7 @@ class TwakeHeader extends StatefulWidget implements PreferredSizeWidget {
   final VoidCallback onClearSelection;
   final ValueNotifier<SelectMode> selectModeNotifier;
   final ValueNotifier<List<ConversationSelectionPresentation>>
-      conversationSelectionNotifier;
+  conversationSelectionNotifier;
   final VoidCallback onClickAvatar;
   final Client client;
 
@@ -51,9 +51,7 @@ class _TwakeHeaderState extends State<TwakeHeader>
       widget.client.userID!,
       getFromRooms: false,
     );
-    Logs().d(
-      'ChatList::_getCurrentProfile() - currentProfile1: $profile',
-    );
+    Logs().d('ChatList::_getCurrentProfile() - currentProfile1: $profile');
     currentProfileNotifier.value = profile;
   }
 
@@ -102,10 +100,7 @@ class _TwakeHeaderState extends State<TwakeHeader>
       valueListenable: widget.selectModeNotifier,
       builder: (context, selectMode, _) {
         return selectMode == SelectMode.normal
-            ? TwakeAppBar(
-                title: L10n.of(context)!.chats,
-                context: context,
-              )
+            ? TwakeAppBar(title: L10n.of(context)!.chats, context: context)
             : AppBar(
                 backgroundColor: responsive.isMobile(context)
                     ? LinagoraSysColors.material().background
@@ -137,9 +132,9 @@ class _TwakeHeaderState extends State<TwakeHeader>
                                   Icons.close,
                                   size: TwakeHeaderStyle.closeIconSize,
                                   color: selectMode == SelectMode.select
-                                      ? Theme.of(context)
-                                          .colorScheme
-                                          .onSurfaceVariant
+                                      ? Theme.of(
+                                          context,
+                                        ).colorScheme.onSurfaceVariant
                                       : Colors.transparent,
                                 ),
                               ),
@@ -158,10 +153,10 @@ class _TwakeHeaderState extends State<TwakeHeader>
                                           ?.copyWith(
                                             color:
                                                 selectMode == SelectMode.select
-                                                    ? Theme.of(context)
-                                                        .colorScheme
-                                                        .onSurfaceVariant
-                                                    : Colors.transparent,
+                                                ? Theme.of(
+                                                    context,
+                                                  ).colorScheme.onSurfaceVariant
+                                                : Colors.transparent,
                                           ),
                                     ),
                                   );

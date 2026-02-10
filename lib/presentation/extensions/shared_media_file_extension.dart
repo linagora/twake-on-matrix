@@ -9,11 +9,7 @@ extension SharedMediaFileExtension on SharedMediaFile {
     final bytes = await File(path).readAsBytes();
     final name = path.split("/").last;
     if (type == SharedMediaType.image) {
-      return MatrixImageFile(
-        bytes: bytes,
-        name: name,
-        mimeType: mimeType,
-      );
+      return MatrixImageFile(bytes: bytes, name: name, mimeType: mimeType);
     }
     if (type == SharedMediaType.video) {
       return MatrixVideoFile(
@@ -23,17 +19,11 @@ extension SharedMediaFileExtension on SharedMediaFile {
         mimeType: mimeType,
       );
     }
-    return MatrixFile(
-      bytes: bytes,
-      name: name,
-      mimeType: mimeType,
-    );
+    return MatrixFile(bytes: bytes, name: name, mimeType: mimeType);
   }
 
   File toFile() {
-    return File(
-      path,
-    );
+    return File(path);
   }
 
   bool isAndroidText() {

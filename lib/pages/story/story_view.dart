@@ -24,26 +24,10 @@ class StoryView extends StatelessWidget {
   const StoryView(this.controller, {super.key});
 
   static const List<Shadow> textShadows = [
-    Shadow(
-      color: Colors.black,
-      offset: Offset(5, 5),
-      blurRadius: 20,
-    ),
-    Shadow(
-      color: Colors.black,
-      offset: Offset(5, 5),
-      blurRadius: 20,
-    ),
-    Shadow(
-      color: Colors.black,
-      offset: Offset(-5, -5),
-      blurRadius: 20,
-    ),
-    Shadow(
-      color: Colors.black,
-      offset: Offset(-5, -5),
-      blurRadius: 20,
-    ),
+    Shadow(color: Colors.black, offset: Offset(5, 5), blurRadius: 20),
+    Shadow(color: Colors.black, offset: Offset(5, 5), blurRadius: 20),
+    Shadow(color: Colors.black, offset: Offset(-5, -5), blurRadius: 20),
+    Shadow(color: Colors.black, offset: Offset(-5, -5), blurRadius: 20),
   ];
 
   @override
@@ -90,10 +74,7 @@ class StoryView extends StatelessWidget {
               : null,
           leading: Hero(
             tag: 'stories_${controller.roomId}',
-            child: Avatar(
-              mxContent: controller.avatar,
-              name: controller.title,
-            ),
+            child: Avatar(mxContent: controller.avatar, name: controller.title),
           ),
         ),
         actions: currentEvent == null
@@ -108,10 +89,7 @@ class StoryView extends StatelessWidget {
                 PopupMenuButton<PopupStoryAction>(
                   color: Colors.white,
                   onSelected: controller.onPopupStoryAction,
-                  icon: Icon(
-                    Icons.adaptive.more_outlined,
-                    color: Colors.white,
-                  ),
+                  icon: Icon(Icons.adaptive.more_outlined, color: Colors.white),
                   itemBuilder: (context) => [
                     if (controller.currentEvent?.canRedact ?? false)
                       PopupMenuItem(
@@ -146,9 +124,7 @@ class StoryView extends StatelessWidget {
           final events = controller.events;
           if (snapshot.connectionState != ConnectionState.done) {
             return const Center(
-              child: CircularProgressIndicator.adaptive(
-                strokeWidth: 2,
-              ),
+              child: CircularProgressIndicator.adaptive(strokeWidth: 2),
             );
           }
           if (events.isEmpty) {
@@ -167,20 +143,19 @@ class StoryView extends StatelessWidget {
                   Text(
                     L10n.of(context)!.thisUserHasNotPostedAnythingYet,
                     textAlign: TextAlign.center,
-                    style: const TextStyle(
-                      fontSize: 20,
-                      color: Colors.white,
-                    ),
+                    style: const TextStyle(fontSize: 20, color: Colors.white),
                   ),
                 ],
               ),
             );
           }
           final event = events[controller.index];
-          final backgroundColor = controller.storyThemeData.color1 ??
+          final backgroundColor =
+              controller.storyThemeData.color1 ??
               event.content.tryGet<String>('body')?.color ??
               Theme.of(context).primaryColor;
-          final backgroundColorDark = controller.storyThemeData.color2 ??
+          final backgroundColorDark =
+              controller.storyThemeData.color2 ??
               event.content.tryGet<String>('body')?.darkColor ??
               Theme.of(context).primaryColorDark;
           if (event.messageType == MessageTypes.Text) {
@@ -189,13 +164,11 @@ class StoryView extends StatelessWidget {
           final hash = event.infoMap['xyz.amorgan.blurhash'];
           return Stack(
             children: [
-              if (hash is String)
-                BlurHash(
-                  hash: hash,
-                  imageFit: BoxFit.cover,
-                ),
-              if ({MessageTypes.Video, MessageTypes.Audio}
-                      .contains(event.messageType) &&
+              if (hash is String) BlurHash(hash: hash, imageFit: BoxFit.cover),
+              if ({
+                    MessageTypes.Video,
+                    MessageTypes.Audio,
+                  }.contains(event.messageType) &&
                   PlatformInfos.isMobile)
                 Positioned(
                   top: 80,
@@ -203,8 +176,8 @@ class StoryView extends StatelessWidget {
                   left: 0,
                   right: 0,
                   child: FutureBuilder<VideoPlayerController?>(
-                    future: controller.loadVideoControllerFuture ??=
-                        controller.loadVideoController(event),
+                    future: controller.loadVideoControllerFuture ??= controller
+                        .loadVideoController(event),
                     builder: (context, snapshot) {
                       final videoPlayerController = snapshot.data;
                       if (videoPlayerController == null) {
@@ -261,10 +234,7 @@ class StoryView extends StatelessWidget {
                   decoration: BoxDecoration(
                     gradient: event.messageType == MessageTypes.Text
                         ? LinearGradient(
-                            colors: [
-                              backgroundColorDark,
-                              backgroundColor,
-                            ],
+                            colors: [backgroundColorDark, backgroundColor],
                             begin: Alignment.topCenter,
                             end: Alignment.bottomCenter,
                           )
@@ -316,13 +286,15 @@ class StoryView extends StatelessWidget {
                               ? LinearProgressIndicator(
                                   color: Colors.white,
                                   minHeight: 2,
-                                  backgroundColor:
-                                      Colors.white.withOpacity(0.25),
+                                  backgroundColor: Colors.white.withOpacity(
+                                    0.25,
+                                  ),
                                   value: controller.loadingMode
                                       ? null
                                       : controller.progress.inMilliseconds /
-                                          StoryPageController
-                                              .maxProgress.inMilliseconds,
+                                            StoryPageController
+                                                .maxProgress
+                                                .inMilliseconds,
                                 )
                               : Container(
                                   margin: const EdgeInsets.all(4),
@@ -358,8 +330,12 @@ class StoryView extends StatelessWidget {
                         readOnly: controller.replyLoading,
                         contextMenuBuilder: mobileTwakeContextMenuBuilder,
                         decoration: InputDecoration(
-                          contentPadding:
-                              const EdgeInsets.fromLTRB(0, 16, 0, 16),
+                          contentPadding: const EdgeInsets.fromLTRB(
+                            0,
+                            16,
+                            0,
+                            16,
+                          ),
                           hintText: L10n.of(context)!.reply,
                           prefixIcon: IconButton(
                             onPressed: controller.replyEmojiAction,
@@ -397,8 +373,9 @@ class StoryView extends StatelessWidget {
                     child: Center(
                       child: OutlinedButton.icon(
                         style: OutlinedButton.styleFrom(
-                          backgroundColor:
-                              Theme.of(context).colorScheme.surface,
+                          backgroundColor: Theme.of(
+                            context,
+                          ).colorScheme.surface,
                         ),
                         onPressed: controller.displaySeenByUsers,
                         icon: const Icon(Icons.visibility_outlined),

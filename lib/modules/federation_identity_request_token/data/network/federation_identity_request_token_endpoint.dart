@@ -8,9 +8,8 @@ class FederationIdentityRequestTokenEndpoint {
 
   static const contentTypeHeaderDefault = 'application/json';
 
-  static ServicePath requestTokenServicePath(String mxid) => ServicePath(
-        '/user/$mxid/openid/request_token',
-      );
+  static ServicePath requestTokenServicePath(String mxid) =>
+      ServicePath('/user/$mxid/openid/request_token');
 }
 
 extension FederationRequestTokenServicePathExtensions on ServicePath {

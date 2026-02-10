@@ -13,18 +13,17 @@ class HiveFederationConfigurationsDatasourceImpl
   Future<FederationConfigurations> getFederationConfigurations(
     String userId,
   ) async {
-    final hiveCollectionFederationDatabase =
-        await getIt.getAsync<HiveCollectionToMDatabase>();
+    final hiveCollectionFederationDatabase = await getIt
+        .getAsync<HiveCollectionToMDatabase>();
     final cachedFederationConfigurations =
-        await hiveCollectionFederationDatabase.federationConfigurationsBox
-            .get(userId);
+        await hiveCollectionFederationDatabase.federationConfigurationsBox.get(
+          userId,
+        );
     if (cachedFederationConfigurations != null) {
       final federationConfigurationsHiveObj =
           FederationConfigurationsHiveObj.fromJson(
-        copyMap(
-          cachedFederationConfigurations,
-        ),
-      );
+            copyMap(cachedFederationConfigurations),
+          );
 
       return FederationConfigurations(
         fedServerInformation: federationConfigurationsHiveObj
@@ -32,12 +31,12 @@ class HiveFederationConfigurationsDatasourceImpl
             .toFederationServerInformation(),
         identityServerInformation:
             federationConfigurationsHiveObj.identityServerUrl != null
-                ? IdentityServerInformation(
-                    baseUrl: Uri.parse(
-                      federationConfigurationsHiveObj.identityServerUrl!,
-                    ),
-                  )
-                : null,
+            ? IdentityServerInformation(
+                baseUrl: Uri.parse(
+                  federationConfigurationsHiveObj.identityServerUrl!,
+                ),
+              )
+            : null,
       );
     }
     throw FederationConfigurationNotFound();
@@ -48,8 +47,8 @@ class HiveFederationConfigurationsDatasourceImpl
     String userId,
     FederationConfigurations federationConfiguration,
   ) async {
-    final hiveCollectionFederationDatabase =
-        await getIt.getAsync<HiveCollectionToMDatabase>();
+    final hiveCollectionFederationDatabase = await getIt
+        .getAsync<HiveCollectionToMDatabase>();
     return hiveCollectionFederationDatabase.federationConfigurationsBox.put(
       userId,
       FederationConfigurationsHiveObj.fromFederationConfigurations(
@@ -60,8 +59,8 @@ class HiveFederationConfigurationsDatasourceImpl
 
   @override
   Future<void> deleteFederationConfigurations(String userId) async {
-    final hiveCollectionFederationDatabase =
-        getIt.get<HiveCollectionToMDatabase>();
+    final hiveCollectionFederationDatabase = getIt
+        .get<HiveCollectionToMDatabase>();
     return hiveCollectionFederationDatabase.federationConfigurationsBox.delete(
       userId,
     );

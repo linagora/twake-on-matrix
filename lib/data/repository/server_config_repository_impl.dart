@@ -4,8 +4,8 @@ import 'package:fluffychat/domain/model/server_config.dart';
 import 'package:fluffychat/domain/repository/server_config_repository.dart';
 
 class ServerConfigRepositoryImpl implements ServerConfigRepository {
-  final ServerConfigDatasource _dataSource =
-      getIt.get<ServerConfigDatasource>();
+  final ServerConfigDatasource _dataSource = getIt
+      .get<ServerConfigDatasource>();
 
   ServerConfigRepositoryImpl();
 

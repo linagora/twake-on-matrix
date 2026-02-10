@@ -60,10 +60,7 @@ class PermissionHandlerService {
     if (currentStatus == PermissionStatus.denied ||
         currentStatus == PermissionStatus.permanentlyDenied) {
       if (audioTypeEnum == AudioTypeEnum.record) {
-        return _handleMicroPermissionAction(
-          context,
-          currentStatus,
-        );
+        return _handleMicroPermissionAction(context, currentStatus);
       } else {
         return await Permission.microphone.request();
       }
@@ -93,14 +90,14 @@ class PermissionHandlerService {
           explainTextRequestPermission: Text(
             L10n.of(context)!.explainPermissionToAccessMicrophone,
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: Theme.of(context).colorScheme.onSurface,
-                ),
+              color: Theme.of(context).colorScheme.onSurface,
+            ),
           ),
           titleTextRequestPermission: Text(
             L10n.of(context)!.allowMicrophoneAccess,
             style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                  color: Theme.of(context).colorScheme.onSurface,
-                ),
+              color: Theme.of(context).colorScheme.onSurface,
+            ),
           ),
           customButtonRow: Row(
             mainAxisAlignment: MainAxisAlignment.end,
@@ -109,8 +106,8 @@ class PermissionHandlerService {
                 context: context,
                 text: L10n.of(context)!.later,
                 textStyle: Theme.of(context).textTheme.labelLarge?.copyWith(
-                      color: Theme.of(context).colorScheme.primary,
-                    ),
+                  color: Theme.of(context).colorScheme.primary,
+                ),
                 padding: const EdgeInsets.symmetric(
                   horizontal: 24.0,
                   vertical: 10.0,
@@ -124,8 +121,8 @@ class PermissionHandlerService {
                 context: context,
                 text: L10n.of(context)!.continueProcess,
                 textStyle: Theme.of(context).textTheme.labelLarge?.copyWith(
-                      color: Theme.of(context).colorScheme.onPrimary,
-                    ),
+                  color: Theme.of(context).colorScheme.onPrimary,
+                ),
                 padding: const EdgeInsets.symmetric(
                   horizontal: 24.0,
                   vertical: 10.0,
@@ -251,8 +248,9 @@ class PermissionHandlerService {
           builder: (dialogContext) {
             return PermissionDialog(
               icon: const Icon(Icons.photo),
-              permission:
-                  Platform.isIOS ? Permission.photos : Permission.storage,
+              permission: Platform.isIOS
+                  ? Permission.photos
+                  : Permission.storage,
               explainTextRequestPermission: Text(
                 L10n.of(context)!.explainPermissionToAccessMedias,
                 style: Theme.of(context).textTheme.bodyMedium,

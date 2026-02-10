@@ -45,14 +45,13 @@ class ChatListHeader extends StatelessWidget {
         if (ChatListHeaderStyle.responsive.isMobile(context)) ...[
           // Only show audio player on actual mobile platforms (not just mobile-sized layouts)
           if (PlatformInfos.isMobile)
-            ChatAudioPlayerWidget(
-              matrix: controller.matrixState,
-            ),
+            ChatAudioPlayerWidget(matrix: controller.matrixState),
           Divider(
             height: ChatListHeaderStyle.dividerHeight,
             thickness: ChatListHeaderStyle.dividerThickness,
-            color: LinagoraStateLayer(LinagoraSysColors.material().surfaceTint)
-                .opacityLayer3,
+            color: LinagoraStateLayer(
+              LinagoraSysColors.material().surfaceTint,
+            ).opacityLayer3,
           ),
         ],
       ],
@@ -80,9 +79,7 @@ class ChatListHeader extends StatelessWidget {
     Navigator.of(context).push(
       PageRouteBuilder(
         pageBuilder: (context, animation, secondaryAnimation) {
-          return const SwipeToDismissWrap(
-            child: Search(),
-          );
+          return const SwipeToDismissWrap(child: Search());
         },
       ),
     );
@@ -93,8 +90,9 @@ class ChatListHeader extends StatelessWidget {
       children: [
         Expanded(
           child: InkWell(
-            borderRadius:
-                BorderRadius.circular(ChatListHeaderStyle.searchRadiusBorder),
+            borderRadius: BorderRadius.circular(
+              ChatListHeaderStyle.searchRadiusBorder,
+            ),
             onTap: onOpenSearchPageInMultipleColumns,
             child: ValueListenableBuilder(
               valueListenable: controller.matrixState.showToMBootstrap,
@@ -103,8 +101,9 @@ class ChatListHeader extends StatelessWidget {
                   textInputAction: TextInputAction.search,
                   contextMenuBuilder: mobileTwakeContextMenuBuilder,
                   enabled: false,
-                  decoration:
-                      ChatListHeaderStyle.searchInputDecoration(context),
+                  decoration: ChatListHeaderStyle.searchInputDecoration(
+                    context,
+                  ),
                 );
               },
             ),

@@ -53,7 +53,8 @@ extension LocalNotificationsExtension on MatrixState {
       hideEdit: true,
       removeMarkdown: true,
     );
-    final icon = event.senderFromMemoryOrFallback.avatarUrl?.getThumbnail(
+    final icon =
+        event.senderFromMemoryOrFallback.avatarUrl?.getThumbnail(
           client,
           width: 64,
           height: 64,
@@ -88,8 +89,9 @@ extension LocalNotificationsExtension on MatrixState {
       File? appIconFile;
       if (appIconUrl != null) {
         final tempDirectory = await getApplicationSupportDirectory();
-        final avatarDirectory =
-            await Directory('${tempDirectory.path}/notiavatars/').create();
+        final avatarDirectory = await Directory(
+          '${tempDirectory.path}/notiavatars/',
+        ).create();
         appIconFile = File(
           '${avatarDirectory.path}/${Uri.encodeComponent(appIconUrl.toString())}',
         );
@@ -114,13 +116,12 @@ extension LocalNotificationsExtension on MatrixState {
             L10n.of(context)!.markAsRead,
           ),
         ],
-        hints: [
-          NotificationHint.soundName('message-new-instant'),
-        ],
+        hints: [NotificationHint.soundName('message-new-instant')],
       );
       notification.action.then((actionStr) {
-        final action = DesktopNotificationActions.values
-            .singleWhere((a) => a.name == actionStr);
+        final action = DesktopNotificationActions.values.singleWhere(
+          (a) => a.name == actionStr,
+        );
         switch (action) {
           case DesktopNotificationActions.seen:
             room.setReadMarker(event.eventId, mRead: event.eventId);

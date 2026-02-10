@@ -30,9 +30,9 @@ void main() {
       await chatScenario.sendImage();
 
       // 4. Verify that the upload failed and the retry button is shown
-      final retryBtn = $(SendingImageInfoWidget)
-          .$(IconButton)
-          .containing(find.byIcon(Icons.refresh));
+      final retryBtn = $(
+        SendingImageInfoWidget,
+      ).$(IconButton).containing(find.byIcon(Icons.refresh));
       await $.waitUntilVisible(retryBtn, timeout: const Duration(seconds: 30));
       expect(
         retryBtn.exists,

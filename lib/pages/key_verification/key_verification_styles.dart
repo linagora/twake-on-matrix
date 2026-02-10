@@ -8,9 +8,7 @@ class KeyVerificationStyles {
   static const double borderHoverButtonWaningBanner = 100.0;
 
   static EdgeInsetsDirectional marginButtonWarningBanner =
-      const EdgeInsetsDirectional.symmetric(
-    horizontal: 24.0,
-  );
+      const EdgeInsetsDirectional.symmetric(horizontal: 24.0);
 
   static const double maxWidthMatchButtonMobile = 158;
 

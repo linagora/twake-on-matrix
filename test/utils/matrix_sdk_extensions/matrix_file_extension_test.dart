@@ -16,18 +16,25 @@ void main() {
     });
 
     test('should return true for valid image file extension', () {
-      final file =
-          MatrixFile(name: 'image.png', mimeType: null, bytes: Uint8List(0));
+      final file = MatrixFile(
+        name: 'image.png',
+        mimeType: null,
+        bytes: Uint8List(0),
+      );
       expect(file.isImage(), isTrue);
     });
 
     test(
-        'should return true for valid image file extension with null MIME type',
-        () {
-      final file =
-          MatrixFile(name: 'image.gif', mimeType: null, bytes: Uint8List(0));
-      expect(file.isImage(), isTrue);
-    });
+      'should return true for valid image file extension with null MIME type',
+      () {
+        final file = MatrixFile(
+          name: 'image.gif',
+          mimeType: null,
+          bytes: Uint8List(0),
+        );
+        expect(file.isImage(), isTrue);
+      },
+    );
 
     test('should return false for non-image MIME type', () {
       final file = MatrixFile(
@@ -39,8 +46,11 @@ void main() {
     });
 
     test('should return false for non-image file extension', () {
-      final file =
-          MatrixFile(name: 'document.txt', mimeType: null, bytes: Uint8List(0));
+      final file = MatrixFile(
+        name: 'document.txt',
+        mimeType: null,
+        bytes: Uint8List(0),
+      );
       expect(file.isImage(), isFalse);
     });
 

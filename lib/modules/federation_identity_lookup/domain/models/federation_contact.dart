@@ -18,12 +18,7 @@ class FederationContact with EquatableMixin {
   });
 
   @override
-  List<Object?> get props => [
-        id,
-        name,
-        phoneNumbers,
-        emails,
-      ];
+  List<Object?> get props => [id, name, phoneNumbers, emails];
 
   FederationContact copyWith({
     Set<FederationPhone>? phoneNumbers,

@@ -20,8 +20,9 @@ mixin PopupContextMenuActionMixin {
       elevation: PopupMenuWidgetStyle.menuElevation,
       menuPadding: EdgeInsets.zero,
       shape: RoundedRectangleBorder(
-        borderRadius:
-            BorderRadius.circular(PopupMenuWidgetStyle.menuBorderRadius),
+        borderRadius: BorderRadius.circular(
+          PopupMenuWidgetStyle.menuBorderRadius,
+        ),
       ),
       items: popupMenuItems,
       useRootNavigator: PlatformInfos.isWeb,

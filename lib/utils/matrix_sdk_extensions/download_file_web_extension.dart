@@ -18,7 +18,7 @@ import 'package:matrix/matrix.dart';
 extension DownloadFileWebExtension on Event {
   Future<MatrixFile?> downloadFileWeb({
     required StreamController<Either<Failure, Success>>
-        downloadStreamController,
+    downloadStreamController,
     CancelToken? cancelToken,
   }) async {
     if (!canContainAttachment()) {
@@ -74,7 +74,7 @@ extension DownloadFileWebExtension on Event {
   Future<MatrixFile?> _handleDownloadFileWeb({
     required Uri mxcUrl,
     required StreamController<Either<Failure, Success>>
-        downloadStreamController,
+    downloadStreamController,
     CancelToken? cancelToken,
     bool storeable = true,
   }) async {
@@ -86,12 +86,7 @@ extension DownloadFileWebExtension on Event {
         uri: downloadLink,
         onReceiveProgress: (receive, total) {
           downloadStreamController.add(
-            Right(
-              DownloadingFileState(
-                receive: receive,
-                total: total,
-              ),
-            ),
+            Right(DownloadingFileState(receive: receive, total: total)),
           );
         },
         cancelToken: cancelToken,
@@ -105,10 +100,7 @@ extension DownloadFileWebExtension on Event {
         );
       }
 
-      await _handleDownloadFileWebSuccess(
-        uint8List,
-        downloadStreamController,
-      );
+      await _handleDownloadFileWebSuccess(uint8List, downloadStreamController);
       return MatrixFile(bytes: uint8List, name: filename);
     } catch (e) {
       if (e is CancelRequestException) {
@@ -116,9 +108,7 @@ extension DownloadFileWebExtension on Event {
       }
       Logs().e("_handleDownloadFileWeb: $e");
       downloadStreamController.add(
-        Left(
-          DownloadFileFailureState(exception: e),
-        ),
+        Left(DownloadFileFailureState(exception: e)),
       );
     }
     return null;
@@ -149,15 +139,9 @@ extension DownloadFileWebExtension on Event {
     required StreamController<Either<Failure, Success>> streamController,
     required Uint8List uint8list,
   }) async {
-    streamController.add(
-      const Right(
-        DecryptingFileState(),
-      ),
-    );
+    streamController.add(const Right(DecryptingFileState()));
     try {
-      final decryptedFile = await _decryptAttachmentWeb(
-        uint8list: uint8list,
-      );
+      final decryptedFile = await _decryptAttachmentWeb(uint8list: uint8list);
       streamController.add(
         Right(
           DownloadMatrixFileSuccessState(
@@ -166,14 +150,8 @@ extension DownloadFileWebExtension on Event {
         ),
       );
     } catch (e) {
-      Logs().e(
-        '_handleDecryptedFileWeb:: $e',
-      );
-      streamController.add(
-        Left(
-          DownloadFileFailureState(exception: e),
-        ),
-      );
+      Logs().e('_handleDecryptedFileWeb:: $e');
+      streamController.add(Left(DownloadFileFailureState(exception: e)));
     }
   }
 
@@ -192,8 +170,8 @@ extension DownloadFileWebExtension on Event {
       k: fileMap['key']['k'],
       sha256: fileMap['hashes']['sha256'],
     );
-    final decryptAttachment =
-        await room.client.nativeImplementations.decryptFile(encryptedFile);
+    final decryptAttachment = await room.client.nativeImplementations
+        .decryptFile(encryptedFile);
     if (decryptAttachment == null) {
       throw DownloadFileWebException(
         error: '_decryptAttachmentWeb: Unable to decrypt file',

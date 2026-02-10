@@ -104,15 +104,15 @@ class _MxcImageState extends State<MxcImage>
     final image = cacheKey == null
         ? _imageDataNoCache
         : widget.cacheMap != null
-            ? _imageDataFromLocalCache
-            : _imageDataFromGlobalCache;
+        ? _imageDataFromLocalCache
+        : _imageDataFromGlobalCache;
     return image;
   }
 
   ImageData? get _imageDataFromLocalCache =>
       widget.cacheKey != null && widget.cacheMap != null
-          ? widget.cacheMap![widget.cacheKey]
-          : null;
+      ? widget.cacheMap![widget.cacheKey]
+      : null;
 
   ImageData? get _imageDataFromGlobalCache => widget.cacheKey != null
       ? MxcImageCacheManager.instance.getImage(widget.cacheKey!)
@@ -175,11 +175,7 @@ class _MxcImageState extends State<MxcImage>
       final remoteData = response.bodyBytes;
 
       if (widget.event != null) {
-        await client.database.storeFile(
-          httpUri,
-          remoteData,
-          0,
-        );
+        await client.database.storeFile(httpUri, remoteData, 0);
       }
 
       return (imageData: remoteData, filePath: null);
@@ -219,9 +215,7 @@ class _MxcImageState extends State<MxcImage>
   bool _notImageOrVideo(MatrixFile matrixFile, Event event) =>
       !matrixFile.isImage() && !event.isVideoOrImage;
 
-  Future<void> _tryLoad(
-    BuildContext context,
-  ) async {
+  Future<void> _tryLoad(BuildContext context) async {
     _imageData = widget.imageData;
     if (_imageData != null) {
       isLoadDone = true;
@@ -247,16 +241,16 @@ class _MxcImageState extends State<MxcImage>
       widget.onTapPreview!();
       final result =
           await Navigator.of(context, rootNavigator: PlatformInfos.isWeb).push(
-        HeroPageRoute(
-          builder: (context) {
-            return InteractiveViewerGallery(
-              itemBuilder: PlatformInfos.isMobile
-                  ? MediaViewer(event: widget.event!)
-                  : ImageViewer(event: widget.event!),
-            );
-          },
-        ),
-      );
+            HeroPageRoute(
+              builder: (context) {
+                return InteractiveViewerGallery(
+                  itemBuilder: PlatformInfos.isMobile
+                      ? MediaViewer(event: widget.event!)
+                      : ImageViewer(event: widget.event!),
+                );
+              },
+            ),
+          );
       if (result == MediaViewerPopupResultEnum.closeRightColumnFlag) {
         widget.closeRightColumn?.call();
       }
@@ -302,18 +296,16 @@ class _MxcImageState extends State<MxcImage>
         : _buildImageWidget(context);
 
     if (widget.event?.eventId != null && widget.enableHeroAnimation) {
-      imageWidget = Hero(
-        tag: widget.event!.eventId,
-        child: imageWidget,
-      );
+      imageWidget = Hero(tag: widget.event!.eventId, child: imageWidget);
     }
 
     if (widget.isPreview) {
       return Material(
         child: InkWell(
           mouseCursor: SystemMouseCursors.click,
-          borderRadius:
-              widget.rounded ? BorderRadius.circular(12.0) : BorderRadius.zero,
+          borderRadius: widget.rounded
+              ? BorderRadius.circular(12.0)
+              : BorderRadius.zero,
           onTap: widget.onTapPreview != null || widget.onTapSelectMode != null
               ? () => _onTap(context)
               : null,
@@ -332,8 +324,9 @@ class _MxcImageState extends State<MxcImage>
     }
     return ClipRRect(
       key: Key('${_imageData.hashCode}'),
-      borderRadius:
-          widget.rounded ? BorderRadius.circular(12.0) : BorderRadius.zero,
+      borderRadius: widget.rounded
+          ? BorderRadius.circular(12.0)
+          : BorderRadius.zero,
       child: _ImageWidget(
         filePath: filePath,
         event: widget.event,
@@ -410,13 +403,13 @@ class _ImageWidget extends StatelessWidget {
             cacheWidth: cacheWidth != null
                 ? cacheWidth!
                 : (width != null && needResize)
-                    ? context.getCacheSize(width!)
-                    : null,
+                ? context.getCacheSize(width!)
+                : null,
             cacheHeight: cacheHeight != null
                 ? cacheHeight!
                 : (height != null && needResize)
-                    ? context.getCacheSize(height!)
-                    : null,
+                ? context.getCacheSize(height!)
+                : null,
             fit: fit,
             filterQuality: FilterQuality.medium,
             errorBuilder: imageErrorWidgetBuilder,
@@ -437,33 +430,33 @@ class _ImageWidget extends StatelessWidget {
             imageErrorWidgetBuilder: imageErrorWidgetBuilder,
           )
         : data != null
-            ? event?.mimeType == TwakeMimeTypeExtension.avifMimeType
-                ? AvifImage.memory(
-                    data!,
-                    height: height,
-                    width: width,
-                    fit: BoxFit.cover,
-                    errorBuilder: imageErrorWidgetBuilder,
-                  )
-                : Image.memory(
-                    data!,
-                    width: width,
-                    height: height,
-                    cacheWidth: cacheWidth != null
-                        ? cacheWidth!
-                        : (width != null && needResize)
-                            ? context.getCacheSize(width!)
-                            : null,
-                    cacheHeight: cacheHeight != null
-                        ? cacheHeight!
-                        : (height != null && needResize)
-                            ? context.getCacheSize(height!)
-                            : null,
-                    fit: fit,
-                    filterQuality: FilterQuality.medium,
-                    errorBuilder: imageErrorWidgetBuilder,
-                  )
-            : const SizedBox.shrink();
+        ? event?.mimeType == TwakeMimeTypeExtension.avifMimeType
+              ? AvifImage.memory(
+                  data!,
+                  height: height,
+                  width: width,
+                  fit: BoxFit.cover,
+                  errorBuilder: imageErrorWidgetBuilder,
+                )
+              : Image.memory(
+                  data!,
+                  width: width,
+                  height: height,
+                  cacheWidth: cacheWidth != null
+                      ? cacheWidth!
+                      : (width != null && needResize)
+                      ? context.getCacheSize(width!)
+                      : null,
+                  cacheHeight: cacheHeight != null
+                      ? cacheHeight!
+                      : (height != null && needResize)
+                      ? context.getCacheSize(height!)
+                      : null,
+                  fit: fit,
+                  filterQuality: FilterQuality.medium,
+                  errorBuilder: imageErrorWidgetBuilder,
+                )
+        : const SizedBox.shrink();
   }
 
   bool get _isVideoData {
@@ -514,13 +507,13 @@ class _ImageNativeBuilder extends StatelessWidget {
       cacheWidth: cacheWidth != null
           ? cacheWidth!
           : (width != null && needResize)
-              ? context.getCacheSize(width!)
-              : null,
+          ? context.getCacheSize(width!)
+          : null,
       cacheHeight: cacheHeight != null
           ? cacheHeight!
           : (height != null && needResize)
-              ? context.getCacheSize(height!)
-              : null,
+          ? context.getCacheSize(height!)
+          : null,
       fit: fit,
       filterQuality: FilterQuality.medium,
       errorBuilder: imageErrorWidgetBuilder,

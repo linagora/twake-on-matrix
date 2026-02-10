@@ -13,10 +13,7 @@ class LoginRobot extends CoreRobot {
     if (Platform.isAndroid) {
       return Selector(resourceId: 'email_username');
     } else {
-      return Selector(
-        className: 'textField',
-        textContains: 'Email / Username',
-      );
+      return Selector(className: 'textField', textContains: 'Email / Username');
     }
   }
 
@@ -24,10 +21,7 @@ class LoginRobot extends CoreRobot {
     if (Platform.isAndroid) {
       return Selector(resourceId: 'password');
     } else {
-      return Selector(
-        className: 'secureTextField',
-        textContains: 'Password',
-      );
+      return Selector(className: 'secureTextField', textContains: 'Password');
     }
   }
 
@@ -36,19 +30,13 @@ class LoginRobot extends CoreRobot {
     if (Platform.isIOS) {
       return Selector(text: label);
     } else {
-      return Selector(
-        className: 'android.widget.Button',
-        textContains: label,
-      );
+      return Selector(className: 'android.widget.Button', textContains: label);
     }
   }
 
   Selector getOKBtnInVerifyCaptchaDialog() {
     if (Platform.isIOS) {
-      return Selector(
-        text: 'Close',
-        className: 'button',
-      );
+      return Selector(text: 'Close', className: 'button');
     } else {
       return Selector(resourceId: 'com.android.chrome:id/positive_button');
     }
@@ -92,10 +80,7 @@ class LoginRobot extends CoreRobot {
         Selector(textContains: label),
         appId: appId,
       )) {
-        await $.native.tap(
-          Selector(textContains: label),
-          appId: appId,
-        );
+        await $.native.tap(Selector(textContains: label), appId: appId);
       }
     }
   }
@@ -112,10 +97,7 @@ class LoginRobot extends CoreRobot {
   Selector getSignInTab() {
     const label = 'Email / Username';
     if (Platform.isAndroid) {
-      return Selector(
-        className: 'android.widget.Button',
-        textContains: label,
-      );
+      return Selector(className: 'android.widget.Button', textContains: label);
     } else {
       return Selector(text: label);
     }
@@ -151,10 +133,7 @@ class LoginRobot extends CoreRobot {
         getSignInTab(),
         appId: getBrowserAppId(),
       )) {
-        await $.native.tap(
-          getSignInTab(),
-          appId: getBrowserAppId(),
-        );
+        await $.native.tap(getSignInTab(), appId: getBrowserAppId());
         return true;
       }
     }
@@ -183,10 +162,7 @@ class LoginRobot extends CoreRobot {
     // Tap the field and wait for 1 second to avoid
     // a flaky issue where the screen sometimes navigates
     // back to the previous page right after entering the password
-    await $.native.tap(
-      getPassTxt(),
-      appId: getBrowserAppId(),
-    );
+    await $.native.tap(getPassTxt(), appId: getBrowserAppId());
     await Future.delayed(const Duration(seconds: 1));
 
     await $.native.enterText(
@@ -207,10 +183,7 @@ class LoginRobot extends CoreRobot {
     await Future.delayed(const Duration(seconds: 2));
 
     // tap on Sign in
-    await $.native.tap(
-      getSignInBtn(),
-      appId: getBrowserAppId(),
-    );
+    await $.native.tap(getSignInBtn(), appId: getBrowserAppId());
 
     // if "verify ...please wait for Captcha" dialog is shown, click OK to continue waiting
     // and click Sign in again
@@ -224,10 +197,7 @@ class LoginRobot extends CoreRobot {
         getOKBtnInVerifyCaptchaDialog(),
         appId: getBrowserAppId(),
       );
-      await $.native.tap(
-        getSignInBtn(),
-        appId: getBrowserAppId(),
-      );
+      await $.native.tap(getSignInBtn(), appId: getBrowserAppId());
     }
   }
 }

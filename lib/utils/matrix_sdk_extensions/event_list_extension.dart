@@ -210,8 +210,9 @@ extension EventListExtension on List<Event> {
 
     int endDiff = 0;
     while (endDiff < newEvents.length &&
-        !newEvents[newEvents.length - 1 - endDiff]
-            .isSameEvent(lastOldEventInLists)) {
+        !newEvents[newEvents.length - 1 - endDiff].isSameEvent(
+          lastOldEventInLists,
+        )) {
       endDiff++;
     }
     return endDiff;

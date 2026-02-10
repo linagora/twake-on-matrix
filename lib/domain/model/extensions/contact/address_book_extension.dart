@@ -20,10 +20,7 @@ extension IterableAddressBookExtension on Iterable<AddressBook> {
       return this;
     }
     final contactsMatched = where((contact) {
-      final supportedFields = [
-        contact.displayName,
-        contact.mxid,
-      ];
+      final supportedFields = [contact.displayName, contact.mxid];
       final plainTextContains = supportedFields.any(
         (field) =>
             field?.toLowerCase().contains(keyword.toLowerCase()) ?? false,
@@ -136,22 +133,13 @@ extension AddressBookExtension on AddressBook {
     final hasNoEmails = emails == null || emails!.isEmpty;
 
     if (hasNoEmails && mxid != null && mxid!.isNotEmpty) {
-      return {
-        Email(
-          address: '',
-          matrixId: mxid,
-          status: addressBookStatus,
-        ),
-      };
+      return {Email(address: '', matrixId: mxid, status: addressBookStatus)};
     }
 
     return emails
         ?.map(
-          (email) => Email(
-            address: email,
-            matrixId: mxid,
-            status: addressBookStatus,
-          ),
+          (email) =>
+              Email(address: email, matrixId: mxid, status: addressBookStatus),
         )
         .toSet();
   }
@@ -174,11 +162,7 @@ extension AddressBookExtension on AddressBook {
 
     if (hasNoPhones && mxid != null && mxid!.isNotEmpty) {
       return {
-        PhoneNumber(
-          number: '',
-          matrixId: mxid,
-          status: addressBookStatus,
-        ),
+        PhoneNumber(number: '', matrixId: mxid, status: addressBookStatus),
       };
     }
 

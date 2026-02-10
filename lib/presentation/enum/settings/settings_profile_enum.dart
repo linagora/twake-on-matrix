@@ -62,13 +62,6 @@ enum SettingsProfileEnum {
   }
 }
 
-enum SettingsProfileType {
-  edit,
-  copy,
-}
+enum SettingsProfileType { edit, copy }
 
-enum AvatarAction {
-  camera,
-  file,
-  remove,
-}
+enum AvatarAction { camera, file, remove }

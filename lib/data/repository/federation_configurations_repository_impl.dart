@@ -10,8 +10,9 @@ class FederationConfigurationsRepositoryImpl
 
   @override
   Future<FederationConfigurations> getFederationConfigurations(String userId) {
-    return federationConfigurationsDatasource
-        .getFederationConfigurations(userId);
+    return federationConfigurationsDatasource.getFederationConfigurations(
+      userId,
+    );
   }
 
   @override

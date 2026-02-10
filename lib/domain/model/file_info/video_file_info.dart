@@ -24,19 +24,19 @@ class VideoFileInfo extends FileInfo {
 
   @override
   Map<String, dynamic> get metadata => ({
-        'mimetype': mimeType,
-        'size': fileSize,
-        'w': width,
-        'h': height,
-        if (duration != null) 'duration': duration!.inMilliseconds,
-      });
+    'mimetype': mimeType,
+    'size': fileSize,
+    'w': width,
+    'h': height,
+    if (duration != null) 'duration': duration!.inMilliseconds,
+  });
 
   @override
   List<Object?> get props => [
-        width,
-        height,
-        duration,
-        imagePlaceholderBytes,
-        ...super.props,
-      ];
+    width,
+    height,
+    duration,
+    imagePlaceholderBytes,
+    ...super.props,
+  ];
 }

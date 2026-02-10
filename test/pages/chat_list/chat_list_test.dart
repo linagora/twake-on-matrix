@@ -19,9 +19,7 @@ import 'package:fluffychat/generated/l10n/app_localizations.dart';
 
 import 'chat_list_test.mocks.dart';
 
-@GenerateNiceMocks([
-  MockSpec<Room>(),
-])
+@GenerateNiceMocks([MockSpec<Room>()])
 void main() {
   const double iconSize = 24.0;
   late final Room room;
@@ -71,223 +69,188 @@ void main() {
   group('[ChatList] TEST', () {
     group('[getSlidables] TEST', () {
       group('GIVEN room is invitation', () {
-        testWidgets(
-          'GIVEN room is muted\n'
-          'THEN return unmute action ',
-          (WidgetTester tester) async {
-            when(room.membership).thenReturn(Membership.invite);
-            when(room.pushRuleState).thenReturn(PushRuleState.dontNotify);
+        testWidgets('GIVEN room is muted\n'
+            'THEN return unmute action ', (WidgetTester tester) async {
+          when(room.membership).thenReturn(Membership.invite);
+          when(room.pushRuleState).thenReturn(PushRuleState.dontNotify);
 
-            final List<Widget> slideActions = await makeTestable(tester);
+          final List<Widget> slideActions = await makeTestable(tester);
 
-            expect(slideActions, isNotNull);
-            expect(slideActions.length, 1);
-            expect(slideActions[0], isA<ChatCustomSlidableAction>());
+          expect(slideActions, isNotNull);
+          expect(slideActions.length, 1);
+          expect(slideActions[0], isA<ChatCustomSlidableAction>());
 
-            final unmuteAction = slideActions[0] as ChatCustomSlidableAction;
-            expect(unmuteAction.label, isA<String>());
-            expect(unmuteAction.label, 'Unmute');
-            expect(unmuteAction.icon, isA<Icon>());
-            expect(
-              (unmuteAction.icon as Icon).icon,
-              equals(Icons.notifications_on_outlined),
-            );
-            expect(
-              (unmuteAction.icon as Icon).size,
-              equals(iconSize),
-            );
-            expect(unmuteAction.backgroundColor, isA<Color>());
-            expect(
-              unmuteAction.backgroundColor,
-              equals(LinagoraRefColors.material().primary[50]),
-            );
-          },
-        );
+          final unmuteAction = slideActions[0] as ChatCustomSlidableAction;
+          expect(unmuteAction.label, isA<String>());
+          expect(unmuteAction.label, 'Unmute');
+          expect(unmuteAction.icon, isA<Icon>());
+          expect(
+            (unmuteAction.icon as Icon).icon,
+            equals(Icons.notifications_on_outlined),
+          );
+          expect((unmuteAction.icon as Icon).size, equals(iconSize));
+          expect(unmuteAction.backgroundColor, isA<Color>());
+          expect(
+            unmuteAction.backgroundColor,
+            equals(LinagoraRefColors.material().primary[50]),
+          );
+        });
 
-        testWidgets(
-          'GIVEN room is not muted\n'
-          'THEN return mute action ',
-          (WidgetTester tester) async {
-            when(room.membership).thenReturn(Membership.invite);
-            when(room.pushRuleState).thenReturn(PushRuleState.notify);
+        testWidgets('GIVEN room is not muted\n'
+            'THEN return mute action ', (WidgetTester tester) async {
+          when(room.membership).thenReturn(Membership.invite);
+          when(room.pushRuleState).thenReturn(PushRuleState.notify);
 
-            final List<Widget> slideActions = await makeTestable(tester);
+          final List<Widget> slideActions = await makeTestable(tester);
 
-            expect(slideActions, isNotNull);
-            expect(slideActions.length, 1);
-            expect(slideActions[0], isA<ChatCustomSlidableAction>());
+          expect(slideActions, isNotNull);
+          expect(slideActions.length, 1);
+          expect(slideActions[0], isA<ChatCustomSlidableAction>());
 
-            final unmuteAction = slideActions[0] as ChatCustomSlidableAction;
-            expect(unmuteAction.label, isA<String>());
-            expect(unmuteAction.label, 'Mute');
-            expect(unmuteAction.icon, isA<Icon>());
-            expect(
-              (unmuteAction.icon as Icon).icon,
-              equals(Icons.notifications_off_outlined),
-            );
-            expect(
-              (unmuteAction.icon as Icon).size,
-              equals(iconSize),
-            );
-            expect(unmuteAction.backgroundColor, isA<Color>());
-            expect(
-              unmuteAction.backgroundColor,
-              equals(LinagoraRefColors.material().primary[40]),
-            );
-          },
-        );
+          final unmuteAction = slideActions[0] as ChatCustomSlidableAction;
+          expect(unmuteAction.label, isA<String>());
+          expect(unmuteAction.label, 'Mute');
+          expect(unmuteAction.icon, isA<Icon>());
+          expect(
+            (unmuteAction.icon as Icon).icon,
+            equals(Icons.notifications_off_outlined),
+          );
+          expect((unmuteAction.icon as Icon).size, equals(iconSize));
+          expect(unmuteAction.backgroundColor, isA<Color>());
+          expect(
+            unmuteAction.backgroundColor,
+            equals(LinagoraRefColors.material().primary[40]),
+          );
+        });
       });
 
       group('GIVEN room is not invitation', () {
-        testWidgets(
-          'GIVEN room is unread\n'
-          'AND room is muted\n'
-          'AND room is favourite\n'
-          'THEN return read, unmute, and unpin actions\n',
-          (WidgetTester tester) async {
-            when(room.membership).thenReturn(Membership.join);
-            when(room.isUnread).thenReturn(true);
-            when(room.pushRuleState).thenReturn(PushRuleState.dontNotify);
-            when(room.isFavourite).thenReturn(true);
+        testWidgets('GIVEN room is unread\n'
+            'AND room is muted\n'
+            'AND room is favourite\n'
+            'THEN return read, unmute, and unpin actions\n', (
+          WidgetTester tester,
+        ) async {
+          when(room.membership).thenReturn(Membership.join);
+          when(room.isUnread).thenReturn(true);
+          when(room.pushRuleState).thenReturn(PushRuleState.dontNotify);
+          when(room.isFavourite).thenReturn(true);
 
-            final List<Widget> slideActions = await makeTestable(tester);
+          final List<Widget> slideActions = await makeTestable(tester);
 
-            expect(slideActions, isNotNull);
-            expect(slideActions.length, 3);
-            expect(slideActions[0], isA<ChatCustomSlidableAction>());
-            expect(slideActions[1], isA<ChatCustomSlidableAction>());
-            expect(slideActions[2], isA<ChatCustomSlidableAction>());
+          expect(slideActions, isNotNull);
+          expect(slideActions.length, 3);
+          expect(slideActions[0], isA<ChatCustomSlidableAction>());
+          expect(slideActions[1], isA<ChatCustomSlidableAction>());
+          expect(slideActions[2], isA<ChatCustomSlidableAction>());
 
-            final readAction = slideActions[0] as ChatCustomSlidableAction;
-            expect(readAction.label, isA<String>());
-            expect(readAction.label, 'Read');
-            expect(readAction.icon, isA<Icon>());
-            expect(
-              (readAction.icon as Icon).icon,
-              equals(Icons.mark_chat_read_outlined),
-            );
-            expect(
-              (readAction.icon as Icon).size,
-              equals(iconSize),
-            );
-            expect(readAction.backgroundColor, isA<Color>());
-            expect(
-              readAction.backgroundColor,
-              equals(LinagoraRefColors.material().tertiary[40]),
-            );
+          final readAction = slideActions[0] as ChatCustomSlidableAction;
+          expect(readAction.label, isA<String>());
+          expect(readAction.label, 'Read');
+          expect(readAction.icon, isA<Icon>());
+          expect(
+            (readAction.icon as Icon).icon,
+            equals(Icons.mark_chat_read_outlined),
+          );
+          expect((readAction.icon as Icon).size, equals(iconSize));
+          expect(readAction.backgroundColor, isA<Color>());
+          expect(
+            readAction.backgroundColor,
+            equals(LinagoraRefColors.material().tertiary[40]),
+          );
 
-            final unmuteAction = slideActions[1] as ChatCustomSlidableAction;
-            expect(unmuteAction.label, isA<String>());
-            expect(unmuteAction.label, 'Unmute');
-            expect(unmuteAction.icon, isA<Icon>());
-            expect(
-              (unmuteAction.icon as Icon).icon,
-              equals(Icons.notifications_on_outlined),
-            );
-            expect(
-              (unmuteAction.icon as Icon).size,
-              equals(iconSize),
-            );
-            expect(unmuteAction.backgroundColor, isA<Color>());
-            expect(
-              unmuteAction.backgroundColor,
-              equals(LinagoraRefColors.material().primary[50]),
-            );
+          final unmuteAction = slideActions[1] as ChatCustomSlidableAction;
+          expect(unmuteAction.label, isA<String>());
+          expect(unmuteAction.label, 'Unmute');
+          expect(unmuteAction.icon, isA<Icon>());
+          expect(
+            (unmuteAction.icon as Icon).icon,
+            equals(Icons.notifications_on_outlined),
+          );
+          expect((unmuteAction.icon as Icon).size, equals(iconSize));
+          expect(unmuteAction.backgroundColor, isA<Color>());
+          expect(
+            unmuteAction.backgroundColor,
+            equals(LinagoraRefColors.material().primary[50]),
+          );
 
-            final unpinAction = slideActions[2] as ChatCustomSlidableAction;
-            expect(unpinAction.label, isA<String>());
-            expect(unpinAction.label, 'Unpin');
-            expect(unpinAction.icon, isA<SvgPicture>());
-            expect(
-              (unpinAction.icon as SvgPicture).toString(),
-              contains('assets/images/ic_unpin.svg'),
-            );
-            expect(
-              (unpinAction.icon as SvgPicture).width,
-              equals(iconSize),
-            );
-            expect(unpinAction.backgroundColor, isA<Color>());
-            expect(
-              unpinAction.backgroundColor,
-              equals(LinagoraRefColors.material().tertiary[40]),
-            );
-          },
-        );
+          final unpinAction = slideActions[2] as ChatCustomSlidableAction;
+          expect(unpinAction.label, isA<String>());
+          expect(unpinAction.label, 'Unpin');
+          expect(unpinAction.icon, isA<SvgPicture>());
+          expect(
+            (unpinAction.icon as SvgPicture).toString(),
+            contains('assets/images/ic_unpin.svg'),
+          );
+          expect((unpinAction.icon as SvgPicture).width, equals(iconSize));
+          expect(unpinAction.backgroundColor, isA<Color>());
+          expect(
+            unpinAction.backgroundColor,
+            equals(LinagoraRefColors.material().tertiary[40]),
+          );
+        });
 
-        testWidgets(
-          'GIVEN room is not unread\n'
-          'AND room is not muted\n'
-          'AND room is not favourite\n'
-          'THEN return unread, mute and pin actions\n',
-          (WidgetTester tester) async {
-            when(room.membership).thenReturn(Membership.join);
-            when(room.isUnread).thenReturn(false);
-            when(room.pushRuleState).thenReturn(PushRuleState.notify);
-            when(room.isFavourite).thenReturn(false);
+        testWidgets('GIVEN room is not unread\n'
+            'AND room is not muted\n'
+            'AND room is not favourite\n'
+            'THEN return unread, mute and pin actions\n', (
+          WidgetTester tester,
+        ) async {
+          when(room.membership).thenReturn(Membership.join);
+          when(room.isUnread).thenReturn(false);
+          when(room.pushRuleState).thenReturn(PushRuleState.notify);
+          when(room.isFavourite).thenReturn(false);
 
-            final List<Widget> slideActions = await makeTestable(tester);
+          final List<Widget> slideActions = await makeTestable(tester);
 
-            expect(slideActions, isNotNull);
-            expect(slideActions.length, 3);
-            expect(slideActions[0], isA<ChatCustomSlidableAction>());
-            expect(slideActions[1], isA<ChatCustomSlidableAction>());
-            expect(slideActions[2], isA<ChatCustomSlidableAction>());
+          expect(slideActions, isNotNull);
+          expect(slideActions.length, 3);
+          expect(slideActions[0], isA<ChatCustomSlidableAction>());
+          expect(slideActions[1], isA<ChatCustomSlidableAction>());
+          expect(slideActions[2], isA<ChatCustomSlidableAction>());
 
-            final unreadAction = slideActions[0] as ChatCustomSlidableAction;
-            expect(unreadAction.label, isA<String>());
-            expect(unreadAction.label, 'Unread');
-            expect(unreadAction.icon, isA<Icon>());
-            expect(
-              (unreadAction.icon as Icon).icon,
-              equals(Icons.mark_chat_unread_outlined),
-            );
-            expect(
-              (unreadAction.icon as Icon).size,
-              equals(iconSize),
-            );
-            expect(unreadAction.backgroundColor, isA<Color>());
-            expect(
-              unreadAction.backgroundColor,
-              equals(Colors.deepPurpleAccent[200]),
-            );
+          final unreadAction = slideActions[0] as ChatCustomSlidableAction;
+          expect(unreadAction.label, isA<String>());
+          expect(unreadAction.label, 'Unread');
+          expect(unreadAction.icon, isA<Icon>());
+          expect(
+            (unreadAction.icon as Icon).icon,
+            equals(Icons.mark_chat_unread_outlined),
+          );
+          expect((unreadAction.icon as Icon).size, equals(iconSize));
+          expect(unreadAction.backgroundColor, isA<Color>());
+          expect(
+            unreadAction.backgroundColor,
+            equals(Colors.deepPurpleAccent[200]),
+          );
 
-            final muteAction = slideActions[1] as ChatCustomSlidableAction;
-            expect(muteAction.label, isA<String>());
-            expect(muteAction.label, 'Mute');
-            expect(muteAction.icon, isA<Icon>());
-            expect(
-              (muteAction.icon as Icon).icon,
-              equals(Icons.notifications_off_outlined),
-            );
-            expect(
-              (muteAction.icon as Icon).size,
-              equals(iconSize),
-            );
-            expect(muteAction.backgroundColor, isA<Color>());
-            expect(
-              muteAction.backgroundColor,
-              equals(LinagoraRefColors.material().primary[40]),
-            );
+          final muteAction = slideActions[1] as ChatCustomSlidableAction;
+          expect(muteAction.label, isA<String>());
+          expect(muteAction.label, 'Mute');
+          expect(muteAction.icon, isA<Icon>());
+          expect(
+            (muteAction.icon as Icon).icon,
+            equals(Icons.notifications_off_outlined),
+          );
+          expect((muteAction.icon as Icon).size, equals(iconSize));
+          expect(muteAction.backgroundColor, isA<Color>());
+          expect(
+            muteAction.backgroundColor,
+            equals(LinagoraRefColors.material().primary[40]),
+          );
 
-            final pinAction = slideActions[2] as ChatCustomSlidableAction;
-            expect(pinAction.label, isA<String>());
-            expect(pinAction.label, 'Pin');
-            expect(pinAction.icon, isA<Icon>());
-            expect(
-              (pinAction.icon as Icon).icon,
-              equals(Icons.push_pin_outlined),
-            );
-            expect(
-              (pinAction.icon as Icon).size,
-              equals(iconSize),
-            );
-            expect(pinAction.backgroundColor, isA<Color>());
-            expect(
-              pinAction.backgroundColor,
-              equals(Colors.tealAccent[700]),
-            );
-          },
-        );
+          final pinAction = slideActions[2] as ChatCustomSlidableAction;
+          expect(pinAction.label, isA<String>());
+          expect(pinAction.label, 'Pin');
+          expect(pinAction.icon, isA<Icon>());
+          expect(
+            (pinAction.icon as Icon).icon,
+            equals(Icons.push_pin_outlined),
+          );
+          expect((pinAction.icon as Icon).size, equals(iconSize));
+          expect(pinAction.backgroundColor, isA<Color>());
+          expect(pinAction.backgroundColor, equals(Colors.tealAccent[700]));
+        });
       });
     });
   });

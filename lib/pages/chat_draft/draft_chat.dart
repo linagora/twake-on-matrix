@@ -84,14 +84,14 @@ class DraftChatController extends State<DraftChat>
 
   final createDirectChatInteractor = getIt.get<CreateDirectChatInteractor>();
 
-  final getRecentReactionsInteractor =
-      getIt.get<GetRecentReactionsInteractor>();
+  final getRecentReactionsInteractor = getIt
+      .get<GetRecentReactionsInteractor>();
 
-  final storeRecentReactionsInteractor =
-      getIt.get<StoreRecentReactionsInteractor>();
+  final storeRecentReactionsInteractor = getIt
+      .get<StoreRecentReactionsInteractor>();
 
-  final NetworkConnectionService networkConnectionService =
-      getIt.get<NetworkConnectionService>();
+  final NetworkConnectionService networkConnectionService = getIt
+      .get<NetworkConnectionService>();
 
   final uploadManager = getIt.get<UploadManager>();
 
@@ -103,11 +103,13 @@ class DraftChatController extends State<DraftChat>
 
   StreamSubscription? _createRoomSubscription;
 
-  final ValueKey draftChatComposerTypeAheadKey =
-      const ValueKey('draftChatComposerTypeAheadKey');
+  final ValueKey draftChatComposerTypeAheadKey = const ValueKey(
+    'draftChatComposerTypeAheadKey',
+  );
 
-  final ValueKey _draftChatMediaPickerTypeAheadKey =
-      const ValueKey('draftChatMediaPickerTypeAheadKey');
+  final ValueKey _draftChatMediaPickerTypeAheadKey = const ValueKey(
+    'draftChatMediaPickerTypeAheadKey',
+  );
 
   final ValueNotifier<bool> isBlockedUserNotifier = ValueNotifier(false);
 
@@ -151,9 +153,7 @@ class DraftChatController extends State<DraftChat>
   List<IndexedAssetEntity> sortedSelectedAssets = [];
 
   void onLongPressAudioRecordInMobile() {
-    handleLongPressAudioRecordInMobile(
-      context: context,
-    );
+    handleLongPressAudioRecordInMobile(context: context);
   }
 
   @override
@@ -185,19 +185,18 @@ class DraftChatController extends State<DraftChat>
   void _onTomContactsUpdateListener() {
     final matrixId = presentationContact.matrixId;
     final getContactsState = getIt.get<ContactsManager>().getContactsNotifier();
-    final updatedContact = getContactsState.value.fold(
-      (failure) => null,
-      (success) {
-        if (success is! GetContactsSuccess) return null;
+    final updatedContact = getContactsState.value.fold((failure) => null, (
+      success,
+    ) {
+      if (success is! GetContactsSuccess) return null;
 
-        return success.contacts
-            .firstWhereOrNull(
-              (c) => c.emails?.any((e) => e.matrixId == matrixId) == true,
-            )
-            ?.toPresentationContacts()
-            .firstOrNull;
-      },
-    );
+      return success.contacts
+          .firstWhereOrNull(
+            (c) => c.emails?.any((e) => e.matrixId == matrixId) == true,
+          )
+          ?.toPresentationContacts()
+          .firstOrNull;
+    });
     if (mounted && updatedContact != null) {
       setState(() {
         presentationContact = updatedContact;
@@ -210,8 +209,8 @@ class DraftChatController extends State<DraftChat>
     super.initState();
     presentationContact = widget.contact;
     getIt.get<ContactsManager>().getContactsNotifier().addListener(
-          _onTomContactsUpdateListener,
-        );
+      _onTomContactsUpdateListener,
+    );
     scrollController.addListener(_updateScrollController);
     keyboardVisibilityController.onChange.listen(_keyboardListener);
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -226,8 +225,8 @@ class DraftChatController extends State<DraftChat>
   @override
   void dispose() {
     getIt.get<ContactsManager>().getContactsNotifier().removeListener(
-          _onTomContactsUpdateListener,
-        );
+      _onTomContactsUpdateListener,
+    );
     scrollController.dispose();
     sendController.dispose();
     forwardListController.dispose();
@@ -247,17 +246,17 @@ class DraftChatController extends State<DraftChat>
     super.dispose();
   }
 
-  bool get isBlockedUser => Matrix.of(context)
-      .client
-      .ignoredUsers
-      .contains(widget.contact.matrixId ?? '');
+  bool get isBlockedUser => Matrix.of(
+    context,
+  ).client.ignoredUsers.contains(widget.contact.matrixId ?? '');
 
   void listenIgnoredUser() {
     isBlockedUserNotifier.value = isBlockedUser;
-    ignoredUsersStreamSub =
-        Matrix.of(context).client.ignoredUsersStream.listen((value) {
-      isBlockedUserNotifier.value = isBlockedUser;
-    });
+    ignoredUsersStreamSub = Matrix.of(context).client.ignoredUsersStream.listen(
+      (value) {
+        isBlockedUserNotifier.value = isBlockedUser;
+      },
+    );
   }
 
   TextEditingController sendController = TextEditingController();
@@ -279,14 +278,14 @@ class DraftChatController extends State<DraftChat>
   }
 
   bool isInsideContactManager(Either<Failure, Success> state) => state.fold(
-        (failure) => false,
-        (success) => success is GetContactsSuccess
-            ? success.contacts.any(
-                (contact) => contact
-                    .inTomAddressBook(presentationContact.matrixId ?? ""),
-              )
-            : false,
-      );
+    (failure) => false,
+    (success) => success is GetContactsSuccess
+        ? success.contacts.any(
+            (contact) =>
+                contact.inTomAddressBook(presentationContact.matrixId ?? ""),
+          )
+        : false,
+  );
   final showAddContactBanner = ValueNotifier(true);
 
   Future<void> sendVoiceMessageWeb() async {
@@ -294,9 +293,7 @@ class DraftChatController extends State<DraftChat>
       onRoomCreatedSuccess: (room) async {
         final duration = Duration(seconds: recordDurationWebNotifier.value);
         final path = await stopRecordWeb();
-        final file = await recordToFileOnWeb(
-          blobUrl: path,
-        );
+        final file = await recordToFileOnWeb(blobUrl: path);
 
         if (file == null) return;
 
@@ -307,20 +304,14 @@ class DraftChatController extends State<DraftChat>
 
         if (matrixFile == null) return;
 
-        final fileInfo = FileInfo(
-          matrixFile.name,
-          bytes: matrixFile.bytes,
-        );
+        final fileInfo = FileInfo(matrixFile.name, bytes: matrixFile.bytes);
 
         final txid = client.generateUniqueTransactionId();
 
         room.sendingFilePlaceholders[txid] = matrixFile;
 
         final extraContent = {
-          'info': {
-            ...matrixFile.info,
-            'duration': duration.inMilliseconds,
-          },
+          'info': {...matrixFile.info, 'duration': duration.inMilliseconds},
           'org.matrix.msc3245.voice': {},
           'org.matrix.msc1767.audio': {
             'duration': duration.inMilliseconds,
@@ -337,15 +328,15 @@ class DraftChatController extends State<DraftChat>
 
         await room
             .sendFileOnWebEvent(
-          matrixFile,
-          txid: txid,
-          fakeImageEvent: fakeImageEvent,
-          extraContent: extraContent,
-        )
+              matrixFile,
+              txid: txid,
+              fakeImageEvent: fakeImageEvent,
+              extraContent: extraContent,
+            )
             .catchError((e) {
-          Logs().e('Failed to send voice message', e);
-          return null;
-        });
+              Logs().e('Failed to send voice message', e);
+              return null;
+            });
       },
     );
   }
@@ -357,10 +348,7 @@ class DraftChatController extends State<DraftChat>
   }) async {
     _createRoom(
       onRoomCreatedSuccess: (room) async {
-        final fileInfo = FileInfo(
-          audioFile.name,
-          bytes: audioFile.bytes,
-        );
+        final fileInfo = FileInfo(audioFile.name, bytes: audioFile.bytes);
 
         final txid = client.generateUniqueTransactionId();
 
@@ -370,37 +358,34 @@ class DraftChatController extends State<DraftChat>
           messageType: MessageTypes.Audio,
         );
 
-        await room.sendFileEventMobile(
-          fileInfo,
-          txid: txid,
-          msgType: MessageTypes.Audio,
-          fakeImageEvent: fakeImageEvent,
-          extraContent: {
-            'info': {
-              ...audioFile.info,
-              'duration': time.inMilliseconds,
-            },
-            'org.matrix.msc3245.voice': {},
-            'org.matrix.msc1767.audio': {
-              'duration': time.inMilliseconds,
-              'waveform': waveform,
-            },
-          },
-        ).catchError((e) {
-          TwakeSnackBar.show(
-            context,
-            L10n.of(context)!.audioMessageFailedToSend,
-          );
-          Logs().e('Failed to send voice message', e);
-          return null;
-        });
+        await room
+            .sendFileEventMobile(
+              fileInfo,
+              txid: txid,
+              msgType: MessageTypes.Audio,
+              fakeImageEvent: fakeImageEvent,
+              extraContent: {
+                'info': {...audioFile.info, 'duration': time.inMilliseconds},
+                'org.matrix.msc3245.voice': {},
+                'org.matrix.msc1767.audio': {
+                  'duration': time.inMilliseconds,
+                  'waveform': waveform,
+                },
+              },
+            )
+            .catchError((e) {
+              TwakeSnackBar.show(
+                context,
+                L10n.of(context)!.audioMessageFailedToSend,
+              );
+              Logs().e('Failed to send voice message', e);
+              return null;
+            });
       },
     );
   }
 
-  Future<void> sendText({
-    OnRoomCreatedFailed onCreateRoomFailed,
-  }) async {
+  Future<void> sendText({OnRoomCreatedFailed onCreateRoomFailed}) async {
     scrollDown();
     sendController.value = TextEditingValue(
       text: sendController.value.text,
@@ -411,9 +396,7 @@ class DraftChatController extends State<DraftChat>
     isSendingNotifier.value = true;
     _createRoom(
       onRoomCreatedSuccess: (room) {
-        room.sendTextEvent(
-          textEvent,
-        );
+        room.sendTextEvent(textEvent);
       },
       onRoomCreatedFailed: onCreateRoomFailed,
     );
@@ -425,33 +408,39 @@ class DraftChatController extends State<DraftChat>
   }) async {
     _createRoomSubscription = createDirectChatInteractor
         .execute(
-      contactMxId: presentationContact.matrixId!,
-      client: Matrix.of(context).client,
-      enableEncryption: false,
-    )
+          contactMxId: presentationContact.matrixId!,
+          client: Matrix.of(context).client,
+          enableEncryption: false,
+        )
         .listen((event) {
-      event.fold((failure) {
-        onRoomCreatedFailed?.call();
-        Logs().d("_createRoom: $failure");
-        isSendingNotifier.value = false;
-      }, (success) async {
-        if (success is CreateDirectChatSuccess) {
-          final room = Matrix.of(context).client.getRoomById(success.roomId);
-          if (room != null) {
-            onRoomCreatedSuccess?.call(room);
-            context.go(
-              '/rooms/${room.id}/',
-              extra: ChatRouterInputArgument(
-                type: ChatRouterInputArgumentType.draft,
-                data: _userProfile.value?.displayName ??
-                    presentationContact.displayName ??
-                    room.name,
-              ),
-            );
-          }
-        }
-      });
-    });
+          event.fold(
+            (failure) {
+              onRoomCreatedFailed?.call();
+              Logs().d("_createRoom: $failure");
+              isSendingNotifier.value = false;
+            },
+            (success) async {
+              if (success is CreateDirectChatSuccess) {
+                final room = Matrix.of(
+                  context,
+                ).client.getRoomById(success.roomId);
+                if (room != null) {
+                  onRoomCreatedSuccess?.call(room);
+                  context.go(
+                    '/rooms/${room.id}/',
+                    extra: ChatRouterInputArgument(
+                      type: ChatRouterInputArgumentType.draft,
+                      data:
+                          _userProfile.value?.displayName ??
+                          presentationContact.displayName ??
+                          room.name,
+                    ),
+                  );
+                }
+              }
+            },
+          );
+        });
   }
 
   void onEmojiAction(TapDownDetails details) {
@@ -536,20 +525,15 @@ class DraftChatController extends State<DraftChat>
       context: context,
       imagePickerGridController: imagePickerController,
       captionController: _captionsController,
-      onPickerTypeTap: (action) => onPickerTypeClick(
-        type: action,
-        context: context,
-      ),
+      onPickerTypeTap: (action) =>
+          onPickerTypeClick(type: action, context: context),
       onSendTap: () => sendMedia(imagePickerController),
       onCameraPicked: (_) => sendMedia(imagePickerController),
       typeAheadKey: _draftChatMediaPickerTypeAheadKey,
     );
   }
 
-  void sendFileOnWebAction(
-    BuildContext context, {
-    Room? room,
-  }) async {
+  void sendFileOnWebAction(BuildContext context, {Room? room}) async {
     final result = await FilePicker.platform.pickFiles(
       withData: true,
       allowMultiple: true,
@@ -557,15 +541,13 @@ class DraftChatController extends State<DraftChat>
     if (result == null || result.files.isEmpty) return;
 
     final matrixFilesList = await Future.wait(
-      result.xFiles.map(
-        (file) async {
-          try {
-            return (await file.toMatrixFileOnWeb()).detectFileType;
-          } catch (e) {
-            return null;
-          }
-        },
-      ),
+      result.xFiles.map((file) async {
+        try {
+          return (await file.toMatrixFileOnWeb()).detectFileType;
+        } catch (e) {
+          return null;
+        }
+      }),
     );
 
     _handleSendFileOnWeb(context, matrixFilesList.nonNulls.toList());
@@ -576,10 +558,7 @@ class DraftChatController extends State<DraftChat>
     List<MatrixFile> matrixFilesList,
   ) async {
     if (matrixFilesList.isEmpty) {
-      TwakeSnackBar.show(
-        context,
-        L10n.of(context)!.failedToSendFiles,
-      );
+      TwakeSnackBar.show(context, L10n.of(context)!.failedToSendFiles);
       return;
     }
 
@@ -657,9 +636,9 @@ class DraftChatController extends State<DraftChat>
   Future<void> _getProfile() async {
     try {
       final profile = await Matrix.of(context).client.getProfileFromUserId(
-            presentationContact.matrixId!,
-            getFromRooms: false,
-          );
+        presentationContact.matrixId!,
+        getFromRooms: false,
+      );
       _userProfile.value = profile;
     } catch (e) {
       Logs().e('Error _getProfile profile: $e');

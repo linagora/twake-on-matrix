@@ -36,10 +36,7 @@ mixin SendFilesWithCaptionWebMixin {
           case SendMediaWithCaptionStatus.done:
             break;
           case SendMediaWithCaptionStatus.emptyRoom:
-            TwakeSnackBar.show(
-              context,
-              L10n.of(context)!.failedToSendFiles,
-            );
+            TwakeSnackBar.show(context, L10n.of(context)!.failedToSendFiles);
             break;
           case SendMediaWithCaptionStatus.cancel:
             break;
@@ -48,8 +45,9 @@ mixin SendFilesWithCaptionWebMixin {
     } else if (matrixFilesList.length > AppConfig.maxFilesSendPerDialog) {
       TwakeSnackBar.show(
         context,
-        L10n.of(context)!
-            .countFilesSendPerDialog(AppConfig.maxFilesSendPerDialog),
+        L10n.of(
+          context,
+        )!.countFilesSendPerDialog(AppConfig.maxFilesSendPerDialog),
       );
     }
   }

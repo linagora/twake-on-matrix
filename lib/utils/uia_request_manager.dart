@@ -20,7 +20,8 @@ extension UiaRequestManager on MatrixState {
       Logs().d('Uia Request Stage: $stage');
       switch (stage) {
         case AuthenticationTypes.password:
-          final input = cachedPassword ??
+          final input =
+              cachedPassword ??
               (await showTextInputDialog(
                 context: TwakeApp.routerKey.currentContext!,
                 title: l10n.pleaseEnterYourPassword,
@@ -34,8 +35,7 @@ extension UiaRequestManager on MatrixState {
                     hintText: '******',
                   ),
                 ],
-              ))
-                  ?.single;
+              ))?.single;
           if (input == null || input.isEmpty) {
             return uiaRequest.cancel();
           }

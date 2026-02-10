@@ -28,9 +28,7 @@ class ChatInvitationBody extends StatelessWidget with MessageContentMixin {
             children: [
               Column(
                 children: <Widget>[
-                  Expanded(
-                    child: _buildInvitationContent(context),
-                  ),
+                  Expanded(child: _buildInvitationContent(context)),
                   const InvitationBottomBar(),
                 ],
               ),
@@ -54,14 +52,16 @@ class ChatInvitationBody extends StatelessWidget with MessageContentMixin {
               ChatInvitationBodyStyle.dialogBorderRadius,
             ),
             border: Border.all(
-              color:
-                  Theme.of(context).colorScheme.surfaceTint.withOpacity(0.16),
+              color: Theme.of(
+                context,
+              ).colorScheme.surfaceTint.withOpacity(0.16),
               width: 1,
             ),
           ),
           child: Padding(
-            padding:
-                const EdgeInsets.all(ChatInvitationBodyStyle.dialogPadding),
+            padding: const EdgeInsets.all(
+              ChatInvitationBodyStyle.dialogPadding,
+            ),
             child: Column(
               children: [
                 Padding(
@@ -74,21 +74,19 @@ class ChatInvitationBody extends StatelessWidget with MessageContentMixin {
                       children: [
                         TextSpan(
                           text: '${controller.displayInviterName} \n',
-                          style: Theme.of(context)
-                              .textTheme
-                              .bodyMedium
+                          style: Theme.of(context).textTheme.bodyMedium
                               ?.copyWith(
                                 color: Theme.of(context).colorScheme.primary,
                               ),
                         ),
                         TextSpan(
                           text: L10n.of(context)!.hasInvitedYouToAChat,
-                          style:
-                              Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                    color: Theme.of(context)
-                                        .colorScheme
-                                        .onSurfaceVariant,
-                                  ),
+                          style: Theme.of(context).textTheme.bodyMedium
+                              ?.copyWith(
+                                color: Theme.of(
+                                  context,
+                                ).colorScheme.onSurfaceVariant,
+                              ),
                         ),
                       ],
                     ),
@@ -123,10 +121,7 @@ class ChatInvitationBody extends StatelessWidget with MessageContentMixin {
 class InvitationAcceptButton extends StatelessWidget {
   final Function() onAccept;
 
-  const InvitationAcceptButton({
-    required this.onAccept,
-    super.key,
-  });
+  const InvitationAcceptButton({required this.onAccept, super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -159,10 +154,7 @@ class InvitationAcceptButton extends StatelessWidget {
 class InvitationRejectButton extends StatelessWidget {
   final Function() onReject;
 
-  const InvitationRejectButton({
-    required this.onReject,
-    super.key,
-  });
+  const InvitationRejectButton({required this.onReject, super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -193,9 +185,7 @@ class InvitationRejectButton extends StatelessWidget {
 }
 
 class InvitationBottomBar extends StatelessWidget {
-  const InvitationBottomBar({
-    super.key,
-  });
+  const InvitationBottomBar({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -225,8 +215,8 @@ class InvitationBottomBar extends StatelessWidget {
                 maxLines: 2,
                 textAlign: TextAlign.start,
                 style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                      color: LinagoraRefColors.material().tertiary[30],
-                    ),
+                  color: LinagoraRefColors.material().tertiary[30],
+                ),
               ),
             ),
           ],

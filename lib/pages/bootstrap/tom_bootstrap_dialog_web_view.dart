@@ -7,10 +7,7 @@ import 'package:lottie/lottie.dart';
 
 class TomBootstrapDialogWebView extends StatelessWidget {
   final String description;
-  const TomBootstrapDialogWebView({
-    super.key,
-    required this.description,
-  });
+  const TomBootstrapDialogWebView({super.key, required this.description});
 
   @override
   Widget build(BuildContext context) {
@@ -28,8 +25,8 @@ class TomBootstrapDialogWebView extends StatelessWidget {
                 Text(
                   L10n.of(context)!.settingUpYourTwake,
                   style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                        color: LinagoraSysColors.material().onBackground,
-                      ),
+                    color: LinagoraSysColors.material().onBackground,
+                  ),
                   textAlign: TextAlign.center,
                 ),
                 Padding(
@@ -43,8 +40,8 @@ class TomBootstrapDialogWebView extends StatelessWidget {
                 Text(
                   description,
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: LinagoraSysColors.material().onBackground,
-                      ),
+                    color: LinagoraSysColors.material().onBackground,
+                  ),
                   textAlign: TextAlign.center,
                 ),
               ],

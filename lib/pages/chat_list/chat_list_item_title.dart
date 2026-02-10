@@ -17,11 +17,7 @@ class ChatListItemTitle extends StatelessWidget with ChatListItemMixin {
 
   final DateTime? originServerTs;
 
-  const ChatListItemTitle({
-    super.key,
-    required this.room,
-    this.originServerTs,
-  });
+  const ChatListItemTitle({super.key, required this.room, this.originServerTs});
 
   @override
   Widget build(BuildContext context) {
@@ -99,8 +95,8 @@ class ChatListItemTitle extends StatelessWidget with ChatListItemMixin {
                   (originServerTs ?? room.latestEventReceivedTime)
                       .localizedTimeShort(context),
                   style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                        color: LinagoraRefColors.material().tertiary[30],
-                      ),
+                    color: LinagoraRefColors.material().tertiary[30],
+                  ),
                 ),
               ),
             ],

@@ -23,9 +23,7 @@ class ServerSearchController with SearchDebouncerMixin {
 
   BuildContext? currentContext;
 
-  ServerSearchController({
-    this.inRoomId,
-  });
+  ServerSearchController({this.inRoomId});
 
   final _serverSearchInteractor = getIt.get<ServerSearchInteractor>();
 
@@ -77,30 +75,55 @@ class ServerSearchController with SearchDebouncerMixin {
   }
 
   void _handleListenServerSearch(Either<Failure, Success> searchResult) {
-    searchResult.fold(
-      (failure) => resetNextBatch(),
-      (success) {
-        if (!searchTermIsNotEmpty) {
-          return;
-        }
+    searchResult.fold((failure) => resetNextBatch(), (success) {
+      if (!searchTermIsNotEmpty) {
+        return;
+      }
 
-        if (success is ServerSearchInitial) {
-          searchResultsNotifier.value = PresentationServerSideInitial();
-        }
+      if (success is ServerSearchInitial) {
+        searchResultsNotifier.value = PresentationServerSideInitial();
+      }
 
-        if (success is ServerSearchChatSuccess) {
-          updateNextBatch(success.nextBatch);
-          if (success.results?.isEmpty == true) {
-            if (isLoadingMoreNotifier.value) {
-              searchResultsNotifier.value = PresentationServerSideSearch(
-                searchResults: [
-                  if (searchResultsNotifier.value
-                      is PresentationServerSideSearch)
-                    ...(searchResultsNotifier.value
-                            as PresentationServerSideSearch)
-                        .searchResults,
-                  ...success.results ?? <Result>[],
-                ]
+      if (success is ServerSearchChatSuccess) {
+        updateNextBatch(success.nextBatch);
+        if (success.results?.isEmpty == true) {
+          if (isLoadingMoreNotifier.value) {
+            searchResultsNotifier.value = PresentationServerSideSearch(
+              searchResults:
+                  [
+                        if (searchResultsNotifier.value
+                            is PresentationServerSideSearch)
+                          ...(searchResultsNotifier.value
+                                  as PresentationServerSideSearch)
+                              .searchResults,
+                        ...success.results ?? <Result>[],
+                      ]
+                      .where(
+                        (result) => result.isDisplayableResult(
+                          context: currentContext,
+                          event: result.getEvent(currentContext),
+                          matrixLocalizations: currentContext == null
+                              ? const MatrixDefaultLocalizations()
+                              : MatrixLocals(L10n.of(currentContext!)!),
+                          searchWord: _searchCategories!.searchTerm,
+                        ),
+                      )
+                      .toList(),
+            );
+          } else {
+            searchResultsNotifier.value = PresentationServerSideEmptySearch();
+          }
+        } else {
+          searchResultsNotifier.value = PresentationServerSideSearch(
+            searchResults:
+                [
+                      if (searchResultsNotifier.value
+                          is PresentationServerSideSearch)
+                        ...(searchResultsNotifier.value
+                                as PresentationServerSideSearch)
+                            .searchResults,
+                      ...success.results ?? <Result>[],
+                    ]
                     .where(
                       (result) => result.isDisplayableResult(
                         context: currentContext,
@@ -112,35 +135,10 @@ class ServerSearchController with SearchDebouncerMixin {
                       ),
                     )
                     .toList(),
-              );
-            } else {
-              searchResultsNotifier.value = PresentationServerSideEmptySearch();
-            }
-          } else {
-            searchResultsNotifier.value = PresentationServerSideSearch(
-              searchResults: [
-                if (searchResultsNotifier.value is PresentationServerSideSearch)
-                  ...(searchResultsNotifier.value
-                          as PresentationServerSideSearch)
-                      .searchResults,
-                ...success.results ?? <Result>[],
-              ]
-                  .where(
-                    (result) => result.isDisplayableResult(
-                      context: currentContext,
-                      event: result.getEvent(currentContext),
-                      matrixLocalizations: currentContext == null
-                          ? const MatrixDefaultLocalizations()
-                          : MatrixLocals(L10n.of(currentContext!)!),
-                      searchWord: _searchCategories!.searchTerm,
-                    ),
-                  )
-                  .toList(),
-            );
-          }
+          );
         }
-      },
-    );
+      }
+    });
   }
 
   void resetSearchResults() {
@@ -181,12 +179,8 @@ class ServerSearchController with SearchDebouncerMixin {
 
   void searchUnencryptedMessages() {
     _searchSubscription = _serverSearchInteractor
-        .execute(
-          searchCategories: _searchCategories!,
-        )
-        .listen(
-          (searchResult) => _handleListenServerSearch(searchResult),
-        );
+        .execute(searchCategories: _searchCategories!)
+        .listen((searchResult) => _handleListenServerSearch(searchResult));
   }
 
   void loadMore() {
@@ -201,15 +195,12 @@ class ServerSearchController with SearchDebouncerMixin {
     }
     isLoadingMoreNotifier.value = true;
     _searchSubscription = _serverSearchInteractor
-        .execute(
-      searchCategories: _searchCategories!,
-      nextBatch: _nextBatch,
-    )
+        .execute(searchCategories: _searchCategories!, nextBatch: _nextBatch)
         .listen(
-      (searchResult) => _handleListenServerSearch(searchResult),
-      onDone: () {
-        isLoadingMoreNotifier.value = false;
-      },
-    );
+          (searchResult) => _handleListenServerSearch(searchResult),
+          onDone: () {
+            isLoadingMoreNotifier.value = false;
+          },
+        );
   }
 }

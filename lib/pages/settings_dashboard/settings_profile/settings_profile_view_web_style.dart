@@ -13,8 +13,9 @@ class SettingsProfileViewWebStyle {
   static const double radiusCircular = 16;
   static const double radiusImageMemory = 48;
 
-  static const EdgeInsetsDirectional paddingBody =
-      EdgeInsetsDirectional.all(32);
+  static const EdgeInsetsDirectional paddingBody = EdgeInsetsDirectional.all(
+    32,
+  );
 
   static const EdgeInsetsDirectional paddingWidgetBasicInfo =
       EdgeInsetsDirectional.all(16);

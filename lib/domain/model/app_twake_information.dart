@@ -11,9 +11,7 @@ class AppTwakeInformation with EquatableMixin {
   @JsonKey(name: 'common_settings')
   CommonSettingsInformation? commonSettingsInformation;
 
-  AppTwakeInformation({
-    this.commonSettingsInformation,
-  });
+  AppTwakeInformation({this.commonSettingsInformation});
 
   factory AppTwakeInformation.fromJson(Map<String, dynamic> json) =>
       _$AppTwakeInformationFromJson(json);

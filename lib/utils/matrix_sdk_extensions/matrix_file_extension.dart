@@ -71,8 +71,9 @@ extension MatrixFileExtension on MatrixFile {
     final box = context.findRenderObject() as RenderBox?;
     await Share.shareXFiles(
       [XFile.fromData(bytes, name: name, mimeType: mimeType)],
-      sharePositionOrigin:
-          box == null ? null : box.localToGlobal(Offset.zero) & box.size,
+      sharePositionOrigin: box == null
+          ? null
+          : box.localToGlobal(Offset.zero) & box.size,
     );
     return;
   }
@@ -86,9 +87,7 @@ extension MatrixFileExtension on MatrixFile {
       );
       return '$directory/$name';
     } catch (e) {
-      Logs().e(
-        "MatrixFileExtension()::downloadFileInWeb()::Error: $e",
-      );
+      Logs().e("MatrixFileExtension()::downloadFileInWeb()::Error: $e");
     }
     return null;
   }
@@ -98,10 +97,7 @@ extension MatrixFileExtension on MatrixFile {
       "MatrixFileExtension()::downloadImageInMobile()::download on Mobile",
     );
 
-    final result = await ImageGallerySaver.saveImage(
-      bytes,
-      name: name,
-    );
+    final result = await ImageGallerySaver.saveImage(bytes, name: name);
 
     TwakeSnackBar.show(
       context,
@@ -170,10 +166,8 @@ class TwakeAudioFile extends MatrixFile {
   String get msgType => 'm.audio';
 
   @override
-  Map<String, dynamic> get info => ({
-        ...super.info,
-        if (duration != null) 'duration': duration,
-      });
+  Map<String, dynamic> get info =>
+      ({...super.info, if (duration != null) 'duration': duration});
 
   @override
   bool operator ==(Object other) =>

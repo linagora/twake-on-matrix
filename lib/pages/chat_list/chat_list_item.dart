@@ -131,7 +131,7 @@ class ChatListItem extends StatelessWidget with ChatListItemMixin {
                               size: ChatListItemStyle.groupIconSize,
                               color: room.isUnreadOrInvited
                                   ? LinagoraSysColors.material()
-                                      .onSurfaceVariant
+                                        .onSurfaceVariant
                                   : LinagoraRefColors.material().tertiary[30],
                             ),
                           ),

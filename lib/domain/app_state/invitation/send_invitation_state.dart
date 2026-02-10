@@ -27,10 +27,7 @@ class SendInvitationSuccessState extends Success {
   });
 
   @override
-  List<Object?> get props => [
-        sendInvitationResponse,
-        contactId,
-      ];
+  List<Object?> get props => [sendInvitationResponse, contactId];
 }
 
 class InvitationAlreadySentState extends Failure {
@@ -44,16 +41,10 @@ class SendInvitationFailureState extends Failure {
   final dynamic exception;
   final String? message;
 
-  const SendInvitationFailureState({
-    required this.exception,
-    this.message,
-  });
+  const SendInvitationFailureState({required this.exception, this.message});
 
   @override
-  List<Object?> get props => [
-        exception,
-        message,
-      ];
+  List<Object?> get props => [exception, message];
 }
 
 class InvalidPhoneNumberFailureState extends Failure {

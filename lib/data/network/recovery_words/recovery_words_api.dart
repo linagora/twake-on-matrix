@@ -7,8 +7,9 @@ import 'package:fluffychat/di/global/network_di.dart';
 import 'package:matrix/matrix.dart';
 
 class RecoveryWordsAPI {
-  final DioClient _client =
-      getIt.get<DioClient>(instanceName: NetworkDI.tomDioClientName);
+  final DioClient _client = getIt.get<DioClient>(
+    instanceName: NetworkDI.tomDioClientName,
+  );
 
   RecoveryWordsAPI();
 
@@ -36,9 +37,12 @@ class RecoveryWordsAPI {
     final response = await _client
         .delete(TomEndpoint.recoveryWordsServicePath.path, options: options)
         .onError((error, stackTrace) {
-      Logs().e('RecoveryWordsAPI::deleteRecoveryWords() [Exception]', error);
-      throw Exception(error);
-    });
+          Logs().e(
+            'RecoveryWordsAPI::deleteRecoveryWords() [Exception]',
+            error,
+          );
+          throw Exception(error);
+        });
     return _deleteRecoverySuccess(response?.statusCode);
   }
 

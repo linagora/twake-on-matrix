@@ -36,10 +36,10 @@ mixin DownloadFileOnWebMixin<T extends StatefulWidget> on State<T> {
   }
 
   StreamSubscription<Either<Failure, Success>>?
-      _trySetupDownloadingStreamSubcription() =>
-          streamSubscription = downloadManager
-              .getDownloadStateStream(event.eventId)
-              ?.listen(setupDownloadingProcess);
+  _trySetupDownloadingStreamSubcription() =>
+      streamSubscription = downloadManager
+          .getDownloadStateStream(event.eventId)
+          ?.listen(setupDownloadingProcess);
 
   void setupDownloadingProcess(Either<Failure, Success> resultEvent) {
     resultEvent.fold(
@@ -81,9 +81,7 @@ mixin DownloadFileOnWebMixin<T extends StatefulWidget> on State<T> {
 
   void _downloadFile() async {
     downloadFileStateNotifier.value = const DownloadingPresentationState();
-    downloadManager.download(
-      event: event,
-    );
+    downloadManager.download(event: event);
     _trySetupDownloadingStreamSubcription();
   }
 

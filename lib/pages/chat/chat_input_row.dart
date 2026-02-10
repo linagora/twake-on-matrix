@@ -46,15 +46,11 @@ class ChatInputRow extends StatelessWidget {
               child: Row(
                 crossAxisAlignment:
                     ChatInputRowStyle.responsiveUtils.isMobile(context)
-                        ? CrossAxisAlignment.end
-                        : CrossAxisAlignment.center,
+                    ? CrossAxisAlignment.end
+                    : CrossAxisAlignment.center,
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: controller.selectMode
-                    ? [
-                        ActionSelectModeWidget(
-                          controller: controller,
-                        ),
-                      ]
+                    ? [ActionSelectModeWidget(controller: controller)]
                     : <Widget>[
                         if (ChatInputRowStyle.responsiveUtils.isMobile(context))
                           ValueListenableBuilder(
@@ -119,8 +115,10 @@ class ChatInputRow extends StatelessWidget {
                               );
                             }
                             return Expanded(
-                              child: ChatInputRowStyle.responsiveUtils
-                                      .isMobile(context)
+                              child:
+                                  ChatInputRowStyle.responsiveUtils.isMobile(
+                                    context,
+                                  )
                                   ? _buildMobileInputRow(context)
                                   : _buildWebInputRow(context),
                             );
@@ -129,9 +127,8 @@ class ChatInputRow extends StatelessWidget {
                         ChatInputRowSendBtn(
                           inputText: controller.inputText,
                           onTap: controller.onInputBarSubmitted,
-                          onTapRecorderWeb: () => controller.onTapRecorderWeb(
-                            context: context,
-                          ),
+                          onTapRecorderWeb: () =>
+                              controller.onTapRecorderWeb(context: context),
                           audioRecordStateNotifier:
                               controller.audioRecordStateNotifier,
                           onDeleteRecorderWeb: controller.stopRecordWeb,
@@ -148,7 +145,8 @@ class ChatInputRow extends StatelessWidget {
                     valueListenable: controller.replyEventNotifier,
                     builder: (context, reply, _) {
                       final view = View.maybeOf(context);
-                      final bottomInset = (view?.viewInsets.bottom ?? 0) /
+                      final bottomInset =
+                          (view?.viewInsets.bottom ?? 0) /
                           (view?.devicePixelRatio ?? 0);
                       return Offstage(
                         offstage: text.isNotEmpty || reply != null,
@@ -211,8 +209,7 @@ class ChatInputRow extends StatelessWidget {
                               Logs().d('ChatInputRowMobile:: pauseRecording');
                               controller.pauseRecording.call();
                             },
-                            sendRequestFunction:
-                                (soundFile, time, waveFrom) async {
+                            sendRequestFunction: (soundFile, time, waveFrom) async {
                               Logs().d(
                                 'ChatInputRowMobile:: sendRequestFunction $soundFile',
                               );
@@ -264,8 +261,9 @@ class ChatInputRow extends StatelessWidget {
                                   color:
                                       LinagoraRefColors.material().neutral[50],
                                 ),
-                            slideToCancelPadding:
-                                const EdgeInsets.only(right: 24),
+                            slideToCancelPadding: const EdgeInsets.only(
+                              right: 24,
+                            ),
                             recordIcon: Icon(
                               Icons.keyboard_voice_outlined,
                               color: LinagoraSysColors.material().tertiary,
@@ -309,9 +307,7 @@ class ChatInputRow extends StatelessWidget {
     );
   }
 
-  Widget _counterAudioWeb({
-    required BuildContext context,
-  }) {
+  Widget _counterAudioWeb({required BuildContext context}) {
     return ValueListenableBuilder(
       valueListenable: controller.recordDurationWebNotifier,
       builder: (context, duration, _) {
@@ -340,20 +336,20 @@ class ChatInputRow extends StatelessWidget {
                 Text(
                   (duration ~/ 60).formatNumberAudioDuration(),
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: LinagoraRefColors.material().neutral[50],
-                      ),
+                    color: LinagoraRefColors.material().neutral[50],
+                  ),
                 ),
                 Text(
                   " : ",
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: LinagoraRefColors.material().neutral[50],
-                      ),
+                    color: LinagoraRefColors.material().neutral[50],
+                  ),
                 ),
                 Text(
                   (duration % 60).formatNumberAudioDuration(),
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: LinagoraRefColors.material().neutral[50],
-                      ),
+                    color: LinagoraRefColors.material().neutral[50],
+                  ),
                 ),
               ],
             ),
@@ -377,9 +373,7 @@ class ChatInputRow extends StatelessWidget {
         )) {
       return EdgeInsets.zero;
     }
-    return const EdgeInsets.only(
-      bottom: 16,
-    );
+    return const EdgeInsets.only(bottom: 16);
   }
 
   EdgeInsetsGeometry _paddingAudioRow({
@@ -396,9 +390,7 @@ class ChatInputRow extends StatelessWidget {
         )) {
       return EdgeInsets.zero;
     }
-    return const EdgeInsets.only(
-      bottom: 16,
-    );
+    return const EdgeInsets.only(bottom: 16);
   }
 
   ChatInputRowMobile _buildMobileInputRow(BuildContext context) {
@@ -409,10 +401,7 @@ class ChatInputRow extends StatelessWidget {
           return Column(
             children: [
               ReplyDisplay(controller),
-              Offstage(
-                offstage: value,
-                child: _buildInputBar(context),
-              ),
+              Offstage(offstage: value, child: _buildInputBar(context)),
             ],
           );
         },
@@ -425,10 +414,7 @@ class ChatInputRow extends StatelessWidget {
       editEventNotifier: controller.editEventNotifier,
       onCloseEditAction: controller.cancelEditEventAction,
       inputBar: Column(
-        children: [
-          ReplyDisplay(controller),
-          _buildInputBar(context),
-        ],
+        children: [ReplyDisplay(controller), _buildInputBar(context)],
       ),
       onTapMoreBtn: () => controller.onSendFileClick(context),
       onEmojiAction: controller.onEmojiAction,
@@ -458,11 +444,11 @@ class ChatInputRow extends StatelessWidget {
         isDense: true,
         hintMaxLines: 1,
         hintStyle: Theme.of(context).textTheme.bodyLarge?.copyWith(
-              color: controller.responsive.isMobile(context)
-                  ? LinagoraRefColors.material().tertiary[50]
-                  : LinagoraRefColors.material().tertiary[30],
-              fontFamily: 'Inter',
-            ),
+          color: controller.responsive.isMobile(context)
+              ? LinagoraRefColors.material().tertiary[50]
+              : LinagoraRefColors.material().tertiary[30],
+          fontFamily: 'Inter',
+        ),
       ),
       onChanged: controller.onInputBarChanged,
     );
@@ -472,10 +458,7 @@ class ChatInputRow extends StatelessWidget {
 class ActionSelectModeWidget extends StatelessWidget {
   final ChatController controller;
 
-  const ActionSelectModeWidget({
-    super.key,
-    required this.controller,
-  });
+  const ActionSelectModeWidget({super.key, required this.controller});
 
   @override
   Widget build(BuildContext context) {
@@ -506,7 +489,10 @@ class ActionSelectModeWidget extends StatelessWidget {
                     .status
                     .isSent &&
                 controller
-                    .selectedEvents.first.room.canSendDefaultMessages) ...[
+                    .selectedEvents
+                    .first
+                    .room
+                    .canSendDefaultMessages) ...[
               SizedBox(
                 height: ChatInputRowStyle.chatInputRowHeight,
                 child: TextButton(
@@ -554,8 +540,10 @@ class ChatAccountPicker extends StatelessWidget {
   const ChatAccountPicker(this.controller, {super.key});
 
   void _popupMenuButtonSelected(String mxid) {
-    final client = controller.matrix!.currentBundle!
-        .firstWhere((cl) => cl!.userID == mxid, orElse: () => null);
+    final client = controller.matrix!.currentBundle!.firstWhere(
+      (cl) => cl!.userID == mxid,
+      orElse: () => null,
+    );
     if (client == null) {
       Logs().w('Attempted to switch to a non-existing client $mxid');
       return;
@@ -582,7 +570,8 @@ class ChatAccountPicker extends StatelessWidget {
                     builder: (context, snapshot) => ListTile(
                       leading: Avatar(
                         mxContent: snapshot.data?.avatarUrl,
-                        name: snapshot.data?.displayName ??
+                        name:
+                            snapshot.data?.displayName ??
                             client.userID!.localpart,
                         size: 20,
                       ),
@@ -595,7 +584,8 @@ class ChatAccountPicker extends StatelessWidget {
               .toList(),
           child: Avatar(
             mxContent: snapshot.data?.avatarUrl,
-            name: snapshot.data?.displayName ??
+            name:
+                snapshot.data?.displayName ??
                 controller.matrix!.client.userID!.localpart,
             size: 20,
             fontSize: 8,

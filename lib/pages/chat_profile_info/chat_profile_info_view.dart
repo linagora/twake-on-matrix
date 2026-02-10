@@ -40,10 +40,7 @@ import 'package:matrix/matrix.dart' hide Contact;
 class ChatProfileInfoView extends StatelessWidget {
   final ChatProfileInfoController controller;
 
-  const ChatProfileInfoView(
-    this.controller, {
-    super.key,
-  });
+  const ChatProfileInfoView(this.controller, {super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -57,9 +54,7 @@ class ChatProfileInfoView extends StatelessWidget {
         leading: IconButton(
           onPressed: controller.widget.onBack,
           icon: controller.widget.isInStack
-              ? const Icon(
-                  Icons.arrow_back_ios,
-                )
+              ? const Icon(Icons.arrow_back_ios)
               : const Icon(Icons.close),
         ),
         context: context,
@@ -90,15 +85,15 @@ class ChatProfileInfoView extends StatelessWidget {
                         builder: (context) {
                           if (contact?.matrixId != null) {
                             return FutureBuilder(
-                              future: Matrix.of(context)
-                                  .client
+                              future: Matrix.of(context).client
                                   .getProfileFromUserId(
                                     contact!.matrixId!,
                                     getFromRooms: false,
                                   ),
                               builder: (context, snapshot) => _Information(
                                 avatarUri: snapshot.data?.avatarUrl,
-                                displayName: snapshot.data?.displayName ??
+                                displayName:
+                                    snapshot.data?.displayName ??
                                     contact.displayName,
                                 matrixId: contact.matrixId,
                                 userInfoNotifier: controller.userInfoNotifier,
@@ -106,8 +101,9 @@ class ChatProfileInfoView extends StatelessWidget {
                                 isBlockedUserNotifier: controller.isBlockedUser,
                                 onUnblockUser: controller.onUnblockUser,
                                 onBlockUser: controller.onBlockUser,
-                                isAlreadyInChat:
-                                    controller.isAlreadyInChat(context),
+                                isAlreadyInChat: controller.isAlreadyInChat(
+                                  context,
+                                ),
                                 blockUserLoadingNotifier:
                                     controller.blockUserLoadingNotifier,
                               ),
@@ -122,8 +118,9 @@ class ChatProfileInfoView extends StatelessWidget {
                               isBlockedUserNotifier: controller.isBlockedUser,
                               onUnblockUser: controller.onUnblockUser,
                               onBlockUser: controller.onBlockUser,
-                              isAlreadyInChat:
-                                  controller.isAlreadyInChat(context),
+                              isAlreadyInChat: controller.isAlreadyInChat(
+                                context,
+                              ),
                               blockUserLoadingNotifier:
                                   controller.blockUserLoadingNotifier,
                             );
@@ -137,8 +134,9 @@ class ChatProfileInfoView extends StatelessWidget {
                             isBlockedUserNotifier: controller.isBlockedUser,
                             onUnblockUser: controller.onUnblockUser,
                             onBlockUser: controller.onBlockUser,
-                            isAlreadyInChat:
-                                controller.isAlreadyInChat(context),
+                            isAlreadyInChat: controller.isAlreadyInChat(
+                              context,
+                            ),
                             blockUserLoadingNotifier:
                                 controller.blockUserLoadingNotifier,
                           );
@@ -156,12 +154,13 @@ class ChatProfileInfoView extends StatelessWidget {
                       indicatorColor: Theme.of(context).colorScheme.primary,
                       indicatorPadding: ChatProfileInfoStyle.indicatorPadding,
                       indicatorWeight: ChatProfileInfoStyle.indicatorWeight,
-                      labelStyle:
-                          ChatProfileInfoStyle.tabBarLabelStyle(context),
-                      unselectedLabelStyle:
-                          ChatProfileInfoStyle.tabBarUnselectedLabelStyle(
+                      labelStyle: ChatProfileInfoStyle.tabBarLabelStyle(
                         context,
                       ),
+                      unselectedLabelStyle:
+                          ChatProfileInfoStyle.tabBarUnselectedLabelStyle(
+                            context,
+                          ),
                       tabs: controller.tabList.map((page) {
                         return Tab(
                           child: Text(
@@ -244,8 +243,9 @@ class _Information extends StatelessWidget {
     return ValueListenableBuilder(
       valueListenable: userInfoNotifier,
       builder: (context, userInfo, child) {
-        final userInfoModel =
-            userInfo.getSuccessOrNull<GetUserInfoSuccess>()?.userInfo;
+        final userInfoModel = userInfo
+            .getSuccessOrNull<GetUserInfoSuccess>()
+            ?.userInfo;
         return Column(
           children: [
             Padding(
@@ -321,7 +321,8 @@ class _Information extends StatelessWidget {
                     margin: ChatProfileInfoStyle.copiableContainerMargin,
                     decoration: BoxDecoration(
                       border: Border.all(
-                        color: LinagoraRefColors.material().neutral[90] ??
+                        color:
+                            LinagoraRefColors.material().neutral[90] ??
                             Colors.black,
                       ),
                       borderRadius:
@@ -335,43 +336,42 @@ class _Information extends StatelessWidget {
                             iconPath: ImagePaths.icMatrixid,
                             text: matrixId!,
                           ),
-                        userInfo.fold(
-                          (failure) => const SizedBox.shrink(),
-                          (success) {
-                            if (success is GetUserInfoSuccess) {
-                              return Column(
-                                children: [
-                                  if (success.userInfo.emails?.firstOrNull !=
-                                      null) ...{
-                                    const SizedBox(
-                                      height: ChatProfileInfoStyle.textSpacing,
-                                    ),
-                                    _CopiableRowWithMaterialIcon(
-                                      icon: Icons.alternate_email,
-                                      text: success
-                                              .userInfo.emails?.firstOrNull ??
-                                          '',
-                                    ),
-                                  },
-                                  if (success.userInfo.phones?.firstOrNull !=
-                                      null) ...{
-                                    const SizedBox(
-                                      height: ChatProfileInfoStyle.textSpacing,
-                                    ),
-                                    _CopiableRowWithMaterialIcon(
-                                      icon: Icons.call,
-                                      text: success
-                                              .userInfo.phones?.firstOrNull ??
-                                          '',
-                                    ),
-                                  },
-                                ],
-                              );
-                            }
+                        userInfo.fold((failure) => const SizedBox.shrink(), (
+                          success,
+                        ) {
+                          if (success is GetUserInfoSuccess) {
+                            return Column(
+                              children: [
+                                if (success.userInfo.emails?.firstOrNull !=
+                                    null) ...{
+                                  const SizedBox(
+                                    height: ChatProfileInfoStyle.textSpacing,
+                                  ),
+                                  _CopiableRowWithMaterialIcon(
+                                    icon: Icons.alternate_email,
+                                    text:
+                                        success.userInfo.emails?.firstOrNull ??
+                                        '',
+                                  ),
+                                },
+                                if (success.userInfo.phones?.firstOrNull !=
+                                    null) ...{
+                                  const SizedBox(
+                                    height: ChatProfileInfoStyle.textSpacing,
+                                  ),
+                                  _CopiableRowWithMaterialIcon(
+                                    icon: Icons.call,
+                                    text:
+                                        success.userInfo.phones?.firstOrNull ??
+                                        '',
+                                  ),
+                                },
+                              ],
+                            );
+                          }
 
-                            return const SizedBox.shrink();
-                          },
-                        ),
+                          return const SizedBox.shrink();
+                        }),
                         ValueListenableBuilder(
                           valueListenable: getIt
                               .get<ContactsManager>()
@@ -401,8 +401,8 @@ class _Information extends StatelessWidget {
                                   onTap: isLoading == true
                                       ? null
                                       : isBlockedUser
-                                          ? onUnblockUser
-                                          : onBlockUser,
+                                      ? onUnblockUser
+                                      : onBlockUser,
                                   child: _CopiableRowWithSvgIcon(
                                     iconPath: ImagePaths.icFrontHand,
                                     enableCopyIcon: false,
@@ -504,15 +504,13 @@ class _Information extends StatelessWidget {
         return FadeTransition(
           opacity: animation,
           child: SlideTransition(
-            position: Tween<Offset>(
-              begin: const Offset(0, 0.5),
-              end: Offset.zero,
-            ).animate(
-              CurvedAnimation(
-                parent: animation,
-                curve: Curves.easeOut,
-              ),
-            ),
+            position:
+                Tween<Offset>(
+                  begin: const Offset(0, 0.5),
+                  end: Offset.zero,
+                ).animate(
+                  CurvedAnimation(parent: animation, curve: Curves.easeOut),
+                ),
             child: child,
           ),
         );
@@ -522,8 +520,8 @@ class _Information extends StatelessWidget {
           return Text(
             displayName ?? '',
             style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                  color: LinagoraSysColors.material().onSurface,
-                ),
+              color: LinagoraSysColors.material().onSurface,
+            ),
             maxLines: 1,
           );
         },
@@ -537,16 +535,16 @@ class _Information extends StatelessWidget {
             return Text(
               userInfoModel?.displayName ?? displayName ?? '',
               style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                    color: LinagoraSysColors.material().onSurface,
-                  ),
+                color: LinagoraSysColors.material().onSurface,
+              ),
               maxLines: 1,
             );
           }
           return Text(
             displayName ?? '',
             style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                  color: LinagoraSysColors.material().onSurface,
-                ),
+              color: LinagoraSysColors.material().onSurface,
+            ),
             maxLines: 1,
           );
         },
@@ -574,10 +572,7 @@ class _Information extends StatelessWidget {
 }
 
 class _CopiableRowWithMaterialIcon extends StatelessWidget {
-  const _CopiableRowWithMaterialIcon({
-    required this.icon,
-    required this.text,
-  });
+  const _CopiableRowWithMaterialIcon({required this.icon, required this.text});
 
   final IconData icon;
   final String text;
@@ -600,8 +595,8 @@ class _CopiableRowWithMaterialIcon extends StatelessWidget {
             child: Text(
               text,
               style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                    color: LinagoraSysColors.material().onSurface,
-                  ),
+                color: LinagoraSysColors.material().onSurface,
+              ),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
             ),
@@ -663,8 +658,8 @@ class _CopiableRowWithSvgIcon extends StatelessWidget {
             child: Text(
               text,
               style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                    color: textColor ?? LinagoraSysColors.material().onSurface,
-                  ),
+                color: textColor ?? LinagoraSysColors.material().onSurface,
+              ),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
             ),
@@ -740,7 +735,8 @@ class _SizedAppBar extends StatelessWidget {
     }
 
     final matrixId = contact?.matrixId ?? user?.id;
-    final canAddContact = matrixId != null &&
+    final canAddContact =
+        matrixId != null &&
         getContactState.fold(
           (failure) => false,
           (success) => success is GetContactsSuccess
@@ -792,9 +788,7 @@ class _AddContactButton extends StatelessWidget {
       return const SizedBox();
     }
     return Padding(
-      padding: const EdgeInsets.only(
-        top: ChatProfileInfoStyle.textSpacing,
-      ),
+      padding: const EdgeInsets.only(top: ChatProfileInfoStyle.textSpacing),
       child: InkWell(
         hoverColor: Colors.transparent,
         highlightColor: Colors.transparent,
@@ -821,8 +815,8 @@ class _AddContactButton extends StatelessWidget {
                 child: Text(
                   L10n.of(context)!.addToContacts,
                   style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                        color: LinagoraSysColors.material().primary,
-                      ),
+                    color: LinagoraSysColors.material().primary,
+                  ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),

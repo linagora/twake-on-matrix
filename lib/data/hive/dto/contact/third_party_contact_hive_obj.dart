@@ -18,24 +18,15 @@ abstract class ThirdPartyContactHiveObj with EquatableMixin {
   final ThirdPartyIdType thirdPartyIdType;
 
   @override
-  List<Object?> get props => [
-        matrixId,
-        thirdPartyId,
-        thirdPartyIdType,
-      ];
+  List<Object?> get props => [matrixId, thirdPartyId, thirdPartyIdType];
 }
 
 @JsonSerializable(explicitToJson: true)
 class PhoneNumberHiveObject extends ThirdPartyContactHiveObj {
   final String number;
 
-  PhoneNumberHiveObject({
-    required this.number,
-    required super.matrixId,
-  }) : super(
-          thirdPartyId: number,
-          thirdPartyIdType: ThirdPartyIdType.msisdn,
-        );
+  PhoneNumberHiveObject({required this.number, required super.matrixId})
+    : super(thirdPartyId: number, thirdPartyIdType: ThirdPartyIdType.msisdn);
 
   factory PhoneNumberHiveObject.fromJson(Map<String, dynamic> json) =>
       _$PhoneNumberHiveObjectFromJson(json);
@@ -43,25 +34,15 @@ class PhoneNumberHiveObject extends ThirdPartyContactHiveObj {
   Map<String, dynamic> toJson() => _$PhoneNumberHiveObjectToJson(this);
 
   @override
-  List<Object?> get props => [
-        number,
-        matrixId,
-        thirdPartyId,
-        thirdPartyIdType,
-      ];
+  List<Object?> get props => [number, matrixId, thirdPartyId, thirdPartyIdType];
 }
 
 @JsonSerializable(explicitToJson: true)
 class EmailHiveObject extends ThirdPartyContactHiveObj {
   final String email;
 
-  EmailHiveObject({
-    required this.email,
-    required super.matrixId,
-  }) : super(
-          thirdPartyId: email,
-          thirdPartyIdType: ThirdPartyIdType.email,
-        );
+  EmailHiveObject({required this.email, required super.matrixId})
+    : super(thirdPartyId: email, thirdPartyIdType: ThirdPartyIdType.email);
 
   factory EmailHiveObject.fromJson(Map<String, dynamic> json) =>
       _$EmailHiveObjectFromJson(json);
@@ -69,10 +50,5 @@ class EmailHiveObject extends ThirdPartyContactHiveObj {
   Map<String, dynamic> toJson() => _$EmailHiveObjectToJson(this);
 
   @override
-  List<Object?> get props => [
-        email,
-        matrixId,
-        thirdPartyId,
-        thirdPartyIdType,
-      ];
+  List<Object?> get props => [email, matrixId, thirdPartyId, thirdPartyIdType];
 }

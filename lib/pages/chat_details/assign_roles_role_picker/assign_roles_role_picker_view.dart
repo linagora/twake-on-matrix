@@ -52,9 +52,8 @@ class AssignRolesRolePickerView extends StatelessWidget {
                   splashColor: Colors.transparent,
                   hoverColor: Colors.transparent,
                   highlightColor: Colors.transparent,
-                  onTap: () => Navigator.of(context).popUntil(
-                    (route) => route.isFirst,
-                  ),
+                  onTap: () =>
+                      Navigator.of(context).popUntil((route) => route.isFirst),
                   icon: Icons.close,
                 ),
               ]
@@ -66,15 +65,14 @@ class AssignRolesRolePickerView extends StatelessWidget {
           children: [
             Expanded(
               child: SingleChildScrollView(
-                padding: const EdgeInsets.only(
-                  bottom: 56,
-                ),
+                padding: const EdgeInsets.only(bottom: 56),
                 child: Column(
                   children: [
                     selectedUsersList(context),
                     Container(
-                      color:
-                          Theme.of(context).colorScheme.surfaceContainerHighest,
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.surfaceContainerHighest,
                       alignment: Alignment.centerLeft,
                       padding: const EdgeInsets.symmetric(
                         horizontal: 16.0,
@@ -86,8 +84,8 @@ class AssignRolesRolePickerView extends StatelessWidget {
                       child: Text(
                         L10n.of(context)!.selectRole,
                         style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                              color: LinagoraRefColors.material().neutral[40],
-                            ),
+                          color: LinagoraRefColors.material().neutral[40],
+                        ),
                       ),
                     ),
                     ListView.builder(
@@ -143,9 +141,7 @@ class AssignRolesRolePickerView extends StatelessWidget {
                               color: Theme.of(context).colorScheme.primary,
                             ),
                           ),
-                          styleMessage: Theme.of(context)
-                              .textTheme
-                              .labelLarge
+                          styleMessage: Theme.of(context).textTheme.labelLarge
                               ?.copyWith(
                                 color: Theme.of(context).colorScheme.primary,
                               ),
@@ -156,9 +152,7 @@ class AssignRolesRolePickerView extends StatelessWidget {
                         onTap: () {
                           controller.onTapToDoneButton();
                         },
-                        styleMessage: Theme.of(context)
-                            .textTheme
-                            .labelLarge
+                        styleMessage: Theme.of(context).textTheme.labelLarge
                             ?.copyWith(
                               color: Theme.of(context).colorScheme.onPrimary,
                             ),
@@ -185,8 +179,9 @@ class AssignRolesRolePickerView extends StatelessWidget {
     DefaultPowerLevelMember? isSelected,
   }) {
     return ExpandableWidget(
-      dividerPadding:
-          isDialog ? const EdgeInsets.symmetric(horizontal: 16) : null,
+      dividerPadding: isDialog
+          ? const EdgeInsets.symmetric(horizontal: 16)
+          : null,
       isExpanded:
           isSelected == controller.widget.rolePickerType.assignRoles[index],
       parentWidget: Row(
@@ -217,16 +212,16 @@ class AssignRolesRolePickerView extends StatelessWidget {
                   controller.widget.rolePickerType.assignRoles[index]
                       .displayName(context),
                   style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                        color: LinagoraSysColors.material().onSurface,
-                      ),
+                    color: LinagoraSysColors.material().onSurface,
+                  ),
                 ),
                 Text(
                   controller.subtitleForRoles(
                     controller.widget.rolePickerType.assignRoles[index],
                   ),
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: LinagoraRefColors.material().tertiary[20],
-                      ),
+                    color: LinagoraRefColors.material().tertiary[20],
+                  ),
                 ),
               ],
             ),
@@ -234,10 +229,8 @@ class AssignRolesRolePickerView extends StatelessWidget {
           AnimatedSwitcher(
             duration: const Duration(milliseconds: 200),
             switchOutCurve: Curves.easeInOut,
-            transitionBuilder: (child, animation) => ScaleTransition(
-              scale: animation,
-              child: child,
-            ),
+            transitionBuilder: (child, animation) =>
+                ScaleTransition(scale: animation, child: child),
             child: SizedBox(
               width: 24,
               height: 24,
@@ -271,9 +264,7 @@ class AssignRolesRolePickerView extends StatelessWidget {
     if (users.length == 1) {
       return TwakeListItem(
         padding: const EdgeInsets.all(8),
-        margin: EdgeInsets.symmetric(
-          horizontal: isDialog ? 16 : 0,
-        ),
+        margin: EdgeInsets.symmetric(horizontal: isDialog ? 16 : 0),
         child: Row(
           children: [
             Avatar(
@@ -290,8 +281,7 @@ class AssignRolesRolePickerView extends StatelessWidget {
                       Expanded(
                         child: Text(
                           users.first.calcDisplayname(),
-                          style: LinagoraTextStyle.material()
-                              .bodyMedium2
+                          style: LinagoraTextStyle.material().bodyMedium2
                               .copyWith(
                                 color: LinagoraSysColors.material().onSurface,
                               ),
@@ -304,8 +294,8 @@ class AssignRolesRolePickerView extends StatelessWidget {
                   Text(
                     users.first.id,
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: LinagoraRefColors.material().tertiary[30],
-                        ),
+                      color: LinagoraRefColors.material().tertiary[30],
+                    ),
                     overflow: TextOverflow.ellipsis,
                     maxLines: 1,
                   ),
@@ -355,9 +345,7 @@ class AssignRolesRolePickerView extends StatelessWidget {
                         padding: AssignRolesRolePickerStyle.textChipPadding,
                         child: Text(
                           member.calcDisplayname(),
-                          style: Theme.of(context)
-                              .textTheme
-                              .titleSmall
+                          style: Theme.of(context).textTheme.titleSmall
                               ?.copyWith(
                                 color: LinagoraSysColors.material().onSurface,
                               ),

@@ -67,7 +67,8 @@ class BackgroundPush {
   Future<void> loadLocale() async {
     final context = _matrixState?.context;
     // inspired by _lookupL10n in .dart_tool/flutter_gen/gen_l10n/l10n.dart
-    l10n ??= (context != null ? L10n.of(context) : null) ??
+    l10n ??=
+        (context != null ? L10n.of(context) : null) ??
         (await L10n.delegate.load(View.of(context!).platformDispatcher.locale));
   }
 
@@ -83,12 +84,9 @@ class BackgroundPush {
   bool upAction = false;
 
   BackgroundPush._(this.client) {
-    clearingPushTimer ??= Timer.periodic(
-      const Duration(seconds: 20),
-      (_) {
-        _onClearingPush(getFromServer: false);
-      },
-    );
+    clearingPushTimer ??= Timer.periodic(const Duration(seconds: 20), (_) {
+      _onClearingPush(getFromServer: false);
+    });
     if (Platform.isAndroid) {
       UnifiedPush.initialize(
         onNewEndpoint: (endpoint, i) => _newUpEndpoint(endpoint.url, i),
@@ -114,9 +112,7 @@ class BackgroundPush {
     }
   }
 
-  factory BackgroundPush.clientOnly(
-    Client client,
-  ) {
+  factory BackgroundPush.clientOnly(Client client) {
     _instance ??= BackgroundPush._(client);
     return _instance!;
   }
@@ -159,7 +155,8 @@ class BackgroundPush {
   }) async {
     final clientName = PlatformInfos.clientName;
     oldTokens ??= <String>{};
-    final pushers = await (client.getPushers().catchError((e) {
+    final pushers =
+        await (client.getPushers().catchError((e) {
           Logs().w('[Push] Unable to request pushers', e);
           return <Pusher>[];
         })) ??
@@ -272,9 +269,9 @@ class BackgroundPush {
     }
 
     // ignore: unawaited_futures
-    _flutterLocalNotificationsPlugin
-        .getNotificationAppLaunchDetails()
-        .then((details) {
+    _flutterLocalNotificationsPlugin.getNotificationAppLaunchDetails().then((
+      details,
+    ) {
       if (details == null ||
           !details.didNotificationLaunchApp ||
           _wentToRoomOnStartup ||
@@ -298,9 +295,7 @@ class BackgroundPush {
       if (PlatformInfos.isAndroid) {
         onFcmError?.call(
           l10n!.noGoogleServicesWarning,
-          link: Uri.parse(
-            AppConfig.enablePushTutorial,
-          ),
+          link: Uri.parse(AppConfig.enablePushTutorial),
         );
         return;
       }
@@ -318,7 +313,8 @@ class BackgroundPush {
         } else if (Platform.isAndroid) {
           await _flutterLocalNotificationsPlugin
               .resolvePlatformSpecificImplementation<
-                  AndroidFlutterLocalNotificationsPlugin>()
+                AndroidFlutterLocalNotificationsPlugin
+              >()
               ?.requestNotificationsPermission();
         }
         _pushToken = await (Platform.isIOS
@@ -358,19 +354,15 @@ class BackgroundPush {
   }
 
   void onReceiveNotification(dynamic message) {
-    Logs().d(
-      'BackgroundPush::onReceiveNotification(): Message $message}',
-    );
+    Logs().d('BackgroundPush::onReceiveNotification(): Message $message}');
     final notification = _parseMessagePayload(message);
     pushHelper(
       notification,
       client: client,
       l10n: l10n,
       activeRoomId: _matrixState?.activeRoomId,
-      onSelectNotification: (data) => onSelectNotification(
-        data,
-        eventId: notification.eventId,
-      ),
+      onSelectNotification: (data) =>
+          onSelectNotification(data, eventId: notification.eventId),
     );
     Logs().d('BackgroundPush::onMessage(): finished pushHelper');
   }
@@ -385,10 +377,7 @@ class BackgroundPush {
     return goToRoom(response?.payload, eventId: eventId);
   }
 
-  Future<void> goToRoom(
-    String? roomId, {
-    String? eventId,
-  }) async {
+  Future<void> goToRoom(String? roomId, {String? eventId}) async {
     try {
       Logs().v('[Push] Attempting to go to room $roomId...');
       await _clearAllNavigatorAvailable(roomId: roomId);
@@ -398,7 +387,8 @@ class BackgroundPush {
       await client.roomsLoading;
       await client.accountDataLoading;
       // ignore: unused_local_variable
-      final isStory = client
+      final isStory =
+          client
               .getRoomById(roomId)
               ?.getState(EventTypes.RoomCreate)
               ?.content
@@ -428,15 +418,13 @@ class BackgroundPush {
         'https://matrix.gateway.unifiedpush.org/_matrix/push/v1/notify';
     try {
       final url = Uri.parse(newEndpoint)
-          .replace(
-            path: '/_matrix/push/v1/notify',
-            query: '',
-          )
+          .replace(path: '/_matrix/push/v1/notify', query: '')
           .toString()
           .split('?')
           .first;
-      final res =
-          json.decode(utf8.decode((await http.get(Uri.parse(url))).bodyBytes));
+      final res = json.decode(
+        utf8.decode((await http.get(Uri.parse(url))).bodyBytes),
+      );
       if (res['gateway'] == 'matrix' ||
           (res['unifiedpush'] is Map &&
               res['unifiedpush']['gateway'] == 'matrix')) {
@@ -471,9 +459,7 @@ class BackgroundPush {
     await store.deleteItem(SettingKeys.unifiedPushEndpoint);
     if (oldEndpoint?.isNotEmpty ?? false) {
       // remove the old pusher
-      await setupPusher(
-        oldTokens: {oldEndpoint},
-      );
+      await setupPusher(oldTokens: {oldEndpoint});
     }
   }
 
@@ -564,8 +550,9 @@ class BackgroundPush {
               '[Push] failed to sync for fallback push, fetching notifications endpoint...',
             );
             final notifications = await client.getNotifications(limit: 20);
-            final notificationRooms =
-                notifications.notifications.map((n) => n.roomId).toSet();
+            final notificationRooms = notifications.notifications
+                .map((n) => n.roomId)
+                .toSet();
             emptyRooms = client.rooms
                 .where((r) => !notificationRooms.contains(r.id))
                 .map((r) => r.id);
@@ -625,9 +612,7 @@ class BackgroundPush {
 
   Future<void> removeCurrentPusher() async {
     if (_pushToken == null) return;
-    await setupPusher(
-      oldTokens: {_pushToken},
-    );
+    await setupPusher(oldTokens: {_pushToken});
   }
 
   Future<void> _handleInnerNavigation() async {
@@ -648,9 +633,7 @@ class BackgroundPush {
     }
   }
 
-  Future<void> _clearAllNavigatorAvailable({
-    String? roomId,
-  }) async {
+  Future<void> _clearAllNavigatorAvailable({String? roomId}) async {
     Logs().d(
       "BackgroundPush:: - Current active room id ${TwakeApp.router.activeRoomId}",
     );
@@ -661,10 +644,7 @@ class BackgroundPush {
     await _handleInnerNavigation();
   }
 
-  void _handleRedirectRoom(
-    String roomId, {
-    String? eventId,
-  }) {
+  void _handleRedirectRoom(String roomId, {String? eventId}) {
     if (eventId != null) {
       TwakeApp.router.go('/rooms/$roomId?event=$eventId');
       return;

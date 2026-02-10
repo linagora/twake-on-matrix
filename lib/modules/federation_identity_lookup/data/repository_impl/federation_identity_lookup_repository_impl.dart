@@ -16,9 +16,7 @@ class FederationIdentityLookupRepositoryImpl
   Future<FederationHashDetailsResponse> getHashDetails({
     required String registeredToken,
   }) {
-    return datasource.getHashDetails(
-      registeredToken: registeredToken,
-    );
+    return datasource.getHashDetails(registeredToken: registeredToken);
   }
 
   @override
@@ -36,8 +34,6 @@ class FederationIdentityLookupRepositoryImpl
   Future<FederationRegisterResponse> register({
     required FederationTokenInformation tokenInformation,
   }) {
-    return datasource.register(
-      tokenInformation: tokenInformation,
-    );
+    return datasource.register(tokenInformation: tokenInformation);
   }
 }

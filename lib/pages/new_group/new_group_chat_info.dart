@@ -54,15 +54,17 @@ class NewGroupChatInfoController extends State<NewGroupChatInfo>
     with CommonMediaPickerMixin, SingleImagePickerMixin, PickAvatarMixin {
   final enableEncryptionNotifier = ValueNotifier(false);
   final haveGroupNameNotifier = ValueNotifier(false);
-  final createRoomStateNotifier =
-      ValueNotifier<Either<Failure, Success>>(Right(CreateNewGroupInitial()));
-  final inviteUserStateNotifier =
-      ValueNotifier<Either<Failure, Success>>(Right(InviteUserInitial()));
+  final createRoomStateNotifier = ValueNotifier<Either<Failure, Success>>(
+    Right(CreateNewGroupInitial()),
+  );
+  final inviteUserStateNotifier = ValueNotifier<Either<Failure, Success>>(
+    Right(InviteUserInitial()),
+  );
   final uploadContentInteractor = getIt.get<UploadContentInteractor>();
-  final uploadContentWebInteractor =
-      getIt.get<UploadContentInBytesInteractor>();
-  final createNewGroupChatInteractor =
-      getIt.get<CreateNewGroupChatInteractor>();
+  final uploadContentWebInteractor = getIt
+      .get<UploadContentInBytesInteractor>();
+  final createNewGroupChatInteractor = getIt
+      .get<CreateNewGroupChatInteractor>();
   final inviteUserInteractor = getIt.get<InviteUserInteractor>();
   StreamSubscription? inviteUserInteractorStreamSubscription;
   final groupNameTextEditingController = TextEditingController();
@@ -81,9 +83,7 @@ class NewGroupChatInfoController extends State<NewGroupChatInfo>
 
   Future<ServerConfig> getServerConfig() async {
     final mediaConfig = await Matrix.of(context).client.getConfig();
-    return ServerConfig(
-      mUploadSize: mediaConfig.mUploadSize,
-    );
+    return ServerConfig(mUploadSize: mediaConfig.mUploadSize);
   }
 
   void toggleEnableEncryption() {
@@ -94,12 +94,14 @@ class NewGroupChatInfoController extends State<NewGroupChatInfo>
     bool isCustomDisplayName = true,
   }) async {
     final userId = Matrix.of(context).client.userID;
-    final profile =
-        await Matrix.of(context).client.getProfileFromUserId(userId ?? '');
+    final profile = await Matrix.of(
+      context,
+    ).client.getProfileFromUserId(userId ?? '');
     final newContactsList = {
       PresentationContact(
-        displayName:
-            isCustomDisplayName ? L10n.of(context)!.you : profile.displayName,
+        displayName: isCustomDisplayName
+            ? L10n.of(context)!.you
+            : profile.displayName,
         matrixId: Matrix.of(context).client.userID,
       ),
     };
@@ -114,10 +116,9 @@ class NewGroupChatInfoController extends State<NewGroupChatInfo>
       matrixClient: client,
       createNewGroupChatRequest: CreateNewGroupChatRequest(
         groupName: groupName,
-        invite: getSelectedValidContacts(contactsList ?? {})
-            .map((contact) => contact.matrixId)
-            .whereNotNull()
-            .toList(),
+        invite: getSelectedValidContacts(
+          contactsList ?? {},
+        ).map((contact) => contact.matrixId).whereNotNull().toList(),
         enableEncryption: enableEncryptionNotifier.value,
         urlAvatar: urlAvatar,
         powerLevelContentOverride: {
@@ -142,8 +143,9 @@ class NewGroupChatInfoController extends State<NewGroupChatInfo>
         );
         WarningDialog.showCancelable(
           context,
-          message: L10n.of(context)!
-              .youAreUploadingPhotosDoYouWantToCancelOrContinue,
+          message: L10n.of(
+            context,
+          )!.youAreUploadingPhotosDoYouWantToCancelOrContinue,
           acceptText: L10n.of(context)!.continueProcess,
           onAccept: () {
             WarningDialog.hideWarningDialog(context);
@@ -230,10 +232,7 @@ class NewGroupChatInfoController extends State<NewGroupChatInfo>
     required AssetEntity entity,
   }) {
     uploadContentInteractor
-        .execute(
-          matrixClient: matrixClient,
-          entity: entity,
-        )
+        .execute(matrixClient: matrixClient, entity: entity)
         .listen(
           (event) => _handleUploadAvatarNewGroupChatOnData(context, event),
           onDone: _handleUploadAvatarNewGroupChatOnDone,
@@ -246,10 +245,7 @@ class NewGroupChatInfoController extends State<NewGroupChatInfo>
     required MatrixFile matrixFile,
   }) {
     uploadContentWebInteractor
-        .execute(
-          matrixClient: matrixClient,
-          matrixFile: matrixFile,
-        )
+        .execute(matrixClient: matrixClient, matrixFile: matrixFile)
         .listen(
           (event) => _handleUploadAvatarNewGroupChatOnData(context, event),
           onDone: _handleUploadAvatarNewGroupChatOnDone,
@@ -274,10 +270,7 @@ class NewGroupChatInfoController extends State<NewGroupChatInfo>
             );
   }
 
-  void _goToRoom({
-    required String roomId,
-    String? groupName,
-  }) {
+  void _goToRoom({required String roomId, String? groupName}) {
     context.go(
       "/rooms/$roomId",
       extra: ChatRouterInputArgument(
@@ -291,9 +284,7 @@ class NewGroupChatInfoController extends State<NewGroupChatInfo>
     avatarFilePickerNotifier.value = matrixFile;
   }
 
-  void showImagesPickerAction({
-    required BuildContext context,
-  }) async {
+  void showImagesPickerAction({required BuildContext context}) async {
     if (isCreatingRoom) {
       return;
     }
@@ -350,29 +341,21 @@ class NewGroupChatInfoController extends State<NewGroupChatInfo>
 
   String? getErrorMessage(String content) {
     return verifyNameInteractor
-        .execute(content, [NameWithSpaceOnlyValidator()]).fold(
-      (failure) {
-        if (failure is VerifyNameFailure) {
-          return failure.getMessage(context);
-        } else {
-          return null;
-        }
-      },
-      (success) => null,
-    );
+        .execute(content, [NameWithSpaceOnlyValidator()])
+        .fold((failure) {
+          if (failure is VerifyNameFailure) {
+            return failure.getMessage(context);
+          } else {
+            return null;
+          }
+        }, (success) => null);
   }
 
-  void _completeGroupCreation({
-    required String groundId,
-    String? groupName,
-  }) {
+  void _completeGroupCreation({required String groundId, String? groupName}) {
     if (!responsiveUtils.isSingleColumnLayout(context)) {
       context.popInnerAll();
     }
-    _goToRoom(
-      roomId: groundId,
-      groupName: groupName,
-    );
+    _goToRoom(roomId: groundId, groupName: groupName);
   }
 
   void _handleInviteUsers({
@@ -381,10 +364,7 @@ class NewGroupChatInfoController extends State<NewGroupChatInfo>
     String? groupName,
   }) {
     if (userIds.isEmpty) {
-      _completeGroupCreation(
-        groundId: roomId,
-        groupName: groupName,
-      );
+      _completeGroupCreation(groundId: roomId, groupName: groupName);
       return;
     }
 
@@ -431,10 +411,7 @@ class NewGroupChatInfoController extends State<NewGroupChatInfo>
             okLabel: L10n.of(context)!.gotIt,
           );
         }
-        _completeGroupCreation(
-          groundId: roomId,
-          groupName: groupName,
-        );
+        _completeGroupCreation(groundId: roomId, groupName: groupName);
       },
       (success) {
         Logs().d(

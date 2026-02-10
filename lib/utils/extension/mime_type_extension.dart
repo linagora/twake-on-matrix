@@ -24,26 +24,30 @@ extension TwakeMimeTypeExtension on TwakeMimeType {
   bool isDocFile({String? fileType}) =>
       SupportedPreviewFileTypes.docMimeTypes.contains(this) ||
       fileType != null &&
-          SupportedPreviewFileTypes.docFileTypes
-              .contains(fileType.toLowerCase());
+          SupportedPreviewFileTypes.docFileTypes.contains(
+            fileType.toLowerCase(),
+          );
 
   bool isPowerPointFile({String? fileType}) =>
       SupportedPreviewFileTypes.pptMimeTypes.contains(this) ||
       fileType != null &&
-          SupportedPreviewFileTypes.pptFileTypes
-              .contains(fileType.toLowerCase());
+          SupportedPreviewFileTypes.pptFileTypes.contains(
+            fileType.toLowerCase(),
+          );
 
   bool isExcelFile({String? fileType}) =>
       SupportedPreviewFileTypes.xlsMimeTypes.contains(this) ||
       fileType != null &&
-          SupportedPreviewFileTypes.xlsFileTypes
-              .contains(fileType.toLowerCase());
+          SupportedPreviewFileTypes.xlsFileTypes.contains(
+            fileType.toLowerCase(),
+          );
 
   bool isZipFile({String? fileType}) =>
       SupportedPreviewFileTypes.zipMimeTypes.contains(this) ||
       fileType != null &&
-          SupportedPreviewFileTypes.zipFileTypes
-              .contains(fileType.toLowerCase());
+          SupportedPreviewFileTypes.zipFileTypes.contains(
+            fileType.toLowerCase(),
+          );
 
   bool isVideoFile() {
     return SupportedPreviewFileTypes.videoMimeTypes.contains(this) ||
@@ -53,8 +57,9 @@ extension TwakeMimeTypeExtension on TwakeMimeType {
   bool isPdfFile({String? fileType}) =>
       SupportedPreviewFileTypes.pdfMimeTypes.contains(this) ||
       fileType != null &&
-          SupportedPreviewFileTypes.pdfFileTypes
-              .contains(fileType.toLowerCase());
+          SupportedPreviewFileTypes.pdfFileTypes.contains(
+            fileType.toLowerCase(),
+          );
 
   bool isAudioFile() => SupportedPreviewFileTypes.audioMimeTypes.contains(this);
 
@@ -108,8 +113,5 @@ extension TwakeMimeTypeExtension on TwakeMimeType {
 
   static const String avifMimeType = 'image/avif';
 
-  static const List<String> heicMimeTypes = [
-    'image/heic',
-    'image/heif',
-  ];
+  static const List<String> heicMimeTypes = ['image/heic', 'image/heif'];
 }

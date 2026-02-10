@@ -16,9 +16,7 @@ class ChatGetPinnedEventsLoading extends Success {
 class ChatGetPinnedEventsSuccess extends Success {
   final List<Event?> pinnedEvents;
 
-  const ChatGetPinnedEventsSuccess({
-    required this.pinnedEvents,
-  });
+  const ChatGetPinnedEventsSuccess({required this.pinnedEvents});
 
   @override
   List<Object?> get props => [pinnedEvents];

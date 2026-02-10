@@ -8,15 +8,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_adaptive_scaffold/flutter_adaptive_scaffold.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 
-typedef ChatAdaptiveScaffoldBodyBuilder = Widget Function(
-  ChatAdaptiveScaffoldBuilderController controller,
-);
+typedef ChatAdaptiveScaffoldBodyBuilder =
+    Widget Function(ChatAdaptiveScaffoldBuilderController controller);
 
-typedef ChatAdaptiveScaffoldRightBuilder = Widget Function(
-  ChatAdaptiveScaffoldBuilderController controller, {
-  required bool isInStack,
-  required RightColumnType type,
-});
+typedef ChatAdaptiveScaffoldRightBuilder =
+    Widget Function(
+      ChatAdaptiveScaffoldBuilderController controller, {
+      required bool isInStack,
+      required RightColumnType type,
+    });
 
 class ChatAdaptiveScaffoldBuilder extends StatefulWidget {
   final ChatAdaptiveScaffoldBodyBuilder bodyBuilder;
@@ -52,11 +52,8 @@ class ChatAdaptiveScaffoldBuilderController
     if (PlatformInfos.isMobile) {
       Navigator.of(context).push(
         CupertinoPageRoute(
-          builder: (context) => widget.rightBuilder(
-            this,
-            isInStack: true,
-            type: type,
-          ),
+          builder: (context) =>
+              widget.rightBuilder(this, isInStack: true, type: type),
         ),
       );
     } else {
@@ -81,9 +78,7 @@ class ChatAdaptiveScaffoldBuilderController
           child: AdaptiveLayout(
             body: SlotLayout(
               config: {
-                WidthPlatformBreakpoint(
-                  end: breakpoint,
-                ): SlotLayout.from(
+                WidthPlatformBreakpoint(end: breakpoint): SlotLayout.from(
                   key: AppAdaptiveScaffold.breakpointMobileKey,
                   builder: (_) => Stack(
                     children: [
@@ -97,9 +92,7 @@ class ChatAdaptiveScaffoldBuilderController
                     ],
                   ),
                 ),
-                WidthPlatformBreakpoint(
-                  begin: breakpoint,
-                ): SlotLayout.from(
+                WidthPlatformBreakpoint(begin: breakpoint): SlotLayout.from(
                   key: AppAdaptiveScaffold.breakpointWebAndDesktopKey,
                   builder: (_) => Container(
                     decoration: BoxDecoration(
@@ -120,9 +113,7 @@ class ChatAdaptiveScaffoldBuilderController
             secondaryBody: rightColumnType != null
                 ? SlotLayout(
                     config: {
-                      WidthPlatformBreakpoint(
-                        end: breakpoint,
-                      ): SlotLayout.from(
+                      WidthPlatformBreakpoint(end: breakpoint): SlotLayout.from(
                         key: AppAdaptiveScaffold.breakpointMobileKey,
                         builder: null,
                       ),
@@ -149,7 +140,8 @@ class ChatAdaptiveScaffoldBuilderController
   double getBreakpoint(BuildContext context) {
     var breakpoint = responsiveUtils.getMinDesktopWidth(context);
     if (breakpoint < 0) {
-      breakpoint = ResponsiveUtils.minTabletWidth +
+      breakpoint =
+          ResponsiveUtils.minTabletWidth +
           MessageStyle.messageBubbleDesktopMaxWidth;
     }
     return breakpoint;

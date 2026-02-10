@@ -7,8 +7,8 @@ import 'package:fluffychat/domain/model/extensions/contact/address_book_extensio
 import 'package:fluffychat/domain/repository/contact/address_book_repository.dart';
 
 class GetTomContactsInteractor {
-  final AddressBookRepository addressBookRepository =
-      getIt.get<AddressBookRepository>();
+  final AddressBookRepository addressBookRepository = getIt
+      .get<AddressBookRepository>();
 
   GetTomContactsInteractor();
 

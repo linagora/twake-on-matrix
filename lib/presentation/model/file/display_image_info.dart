@@ -5,10 +5,7 @@ class DisplayImageInfo with EquatableMixin {
   final Size size;
   final bool hasBlur;
 
-  DisplayImageInfo({
-    required this.size,
-    required this.hasBlur,
-  });
+  DisplayImageInfo({required this.size, required this.hasBlur});
 
   @override
   List<Object?> get props => [size, hasBlur];

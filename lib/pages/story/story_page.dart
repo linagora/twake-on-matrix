@@ -48,10 +48,11 @@ class StoryPageController extends State<StoryPage> {
 
   Event? get currentEvent => index < events.length ? events[index] : null;
   StoryThemeData get storyThemeData => StoryThemeData.fromJson(
-        currentEvent?.content
-                .tryGetMap<String, dynamic>(StoryThemeData.contentKey) ??
-            {},
-      );
+    currentEvent?.content.tryGetMap<String, dynamic>(
+          StoryThemeData.contentKey,
+        ) ??
+        {},
+  );
 
   bool replyLoading = false;
   bool _modalOpened = false;
@@ -108,10 +109,9 @@ class StoryPageController extends State<StoryPage> {
     final timeline = this.timeline;
     final currentEvent = this.currentEvent;
     if (timeline == null || currentEvent == null) return [];
-    return Matrix.of(context).client.getRoomById(roomId)?.getSeenByUsers(
-              timeline,
-              eventId: currentEvent.eventId,
-            ) ??
+    return Matrix.of(context).client
+            .getRoomById(roomId)
+            ?.getSeenByUsers(timeline, eventId: currentEvent.eventId) ??
         [];
   }
 
@@ -126,9 +126,7 @@ class StoryPageController extends State<StoryPage> {
     await showAdaptiveBottomSheet(
       context: context,
       builder: (context) => Scaffold(
-        appBar: AppBar(
-          title: Text(seenByUsersTitle),
-        ),
+        appBar: AppBar(title: Text(seenByUsersTitle)),
         body: ListView.builder(
           itemCount: currentSeenByUsers.length,
           itemBuilder: (context, i) => ListTile(
@@ -211,8 +209,8 @@ class StoryPageController extends State<StoryPage> {
       final file = File('${tmpDirectory.path}/$fileName');
       await file.writeAsBytes(matrixFile.bytes);
       if (!mounted) return null;
-      final videoPlayerController =
-          _videoPlayerController = VideoPlayerController.file(file);
+      final videoPlayerController = _videoPlayerController =
+          VideoPlayerController.file(file);
       await videoPlayerController.initialize();
       await videoPlayerController.play();
       return videoPlayerController;
@@ -311,18 +309,9 @@ class StoryPageController extends State<StoryPage> {
       cancelLabel: L10n.of(context)!.cancel,
       okLabel: L10n.of(context)!.ok,
       actions: [
-        AlertDialogAction(
-          key: -100,
-          label: L10n.of(context)!.extremeOffensive,
-        ),
-        AlertDialogAction(
-          key: -50,
-          label: L10n.of(context)!.offensive,
-        ),
-        AlertDialogAction(
-          key: 0,
-          label: L10n.of(context)!.inoffensive,
-        ),
+        AlertDialogAction(key: -100, label: L10n.of(context)!.extremeOffensive),
+        AlertDialogAction(key: -50, label: L10n.of(context)!.offensive),
+        AlertDialogAction(key: 0, label: L10n.of(context)!.inoffensive),
       ],
     );
     if (score == null) return;
@@ -337,11 +326,11 @@ class StoryPageController extends State<StoryPage> {
     if (reason == null || reason.single.isEmpty) return;
     final result = await TwakeDialog.showFutureLoadingDialogFullScreen(
       future: () => Matrix.of(context).client.reportEvent(
-            roomId,
-            event.eventId,
-            reason: reason.single,
-            score: score,
-          ),
+        roomId,
+        event.eventId,
+        reason: reason.single,
+        score: score,
+      ),
     );
     _modalOpened = false;
     if (result.error != null) return;
@@ -352,8 +341,9 @@ class StoryPageController extends State<StoryPage> {
     Event event,
     bool getThumbnail,
   ) async {
-    return _fileCache[event.eventId] ??=
-        event.downloadAndDecryptAttachment(getThumbnail: getThumbnail);
+    return _fileCache[event.eventId] ??= event.downloadAndDecryptAttachment(
+      getThumbnail: getThumbnail,
+    );
   }
 
   void _setLoadingMode(bool mode) => loadingMode != mode
@@ -365,10 +355,9 @@ class StoryPageController extends State<StoryPage> {
       : null;
 
   Event? get roomCreateStateEvent {
-    final event = Matrix.of(context)
-        .client
-        .getRoomById(roomId)
-        ?.getState(EventTypes.RoomCreate);
+    final event = Matrix.of(
+      context,
+    ).client.getRoomById(roomId)?.getState(EventTypes.RoomCreate);
     if (event is Event) return event;
     return null;
   }
@@ -433,8 +422,10 @@ class StoryPageController extends State<StoryPage> {
       // Preload images and videos
       events
           .where(
-            (event) => {MessageTypes.Image, MessageTypes.Video}
-                .contains(event.messageType),
+            (event) => {
+              MessageTypes.Image,
+              MessageTypes.Video,
+            }.contains(event.messageType),
           )
           .forEach(
             (event) => downloadAndDecryptAttachment(
@@ -488,9 +479,9 @@ class StoryPageController extends State<StoryPage> {
       case PopupStoryAction.message:
         final roomIdResult =
             await TwakeDialog.showFutureLoadingDialogFullScreen(
-          future: () =>
-              currentEvent!.senderFromMemoryOrFallback.startDirectChat(),
-        );
+              future: () =>
+                  currentEvent!.senderFromMemoryOrFallback.startDirectChat(),
+            );
         if (roomIdResult.error != null) return;
         context.go('/rooms/${roomIdResult.result!}');
         break;
@@ -519,8 +510,4 @@ extension on List<Event> {
   }
 }
 
-enum PopupStoryAction {
-  report,
-  delete,
-  message,
-}
+enum PopupStoryAction { report, delete, message }

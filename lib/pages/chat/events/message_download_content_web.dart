@@ -12,11 +12,7 @@ import 'package:flutter/material.dart';
 import 'package:matrix/matrix.dart';
 
 class MessageDownloadContentWeb extends StatefulWidget {
-  const MessageDownloadContentWeb(
-    this.event, {
-    super.key,
-    this.highlightText,
-  });
+  const MessageDownloadContentWeb(this.event, {super.key, this.highlightText});
 
   final Event event;
 

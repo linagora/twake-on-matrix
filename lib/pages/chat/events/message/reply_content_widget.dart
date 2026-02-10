@@ -29,10 +29,7 @@ class ReplyContentWidget extends StatelessWidget {
         } else if (event.relationshipEventId != null) {
           replyEvent = Event(
             eventId: event.relationshipEventId!,
-            content: {
-              'msgtype': 'm.text',
-              'body': '...',
-            },
+            content: {'msgtype': 'm.text', 'body': '...'},
             senderId: event.senderId,
             type: 'm.room.message',
             room: event.room,

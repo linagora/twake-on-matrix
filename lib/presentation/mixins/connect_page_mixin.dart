@@ -26,10 +26,9 @@ mixin ConnectPageMixin {
     required BuildContext context,
     required String flowType,
   }) =>
-      Matrix.of(context)
-          .loginHomeserverSummary
-          ?.loginFlows
-          .any((flow) => flow.type == flowType) ??
+      Matrix.of(context).loginHomeserverSummary?.loginFlows.any(
+        (flow) => flow.type == flowType,
+      ) ??
       false;
 
   bool supportsSso(BuildContext context) =>
@@ -46,8 +45,10 @@ mixin ConnectPageMixin {
     if (questionMarkIndex == -1) {
       return null;
     }
-    final queryParams =
-        Uri.parse(html.window.location.href, questionMarkIndex).queryParameters;
+    final queryParams = Uri.parse(
+      html.window.location.href,
+      questionMarkIndex,
+    ).queryParameters;
     return queryParams[key];
   }
 
@@ -96,9 +97,7 @@ mixin ConnectPageMixin {
     if (homeserver.isEmpty) {
       throw StateError('Homeserver is not configured for SSO');
     }
-    final redirectUrl = _generateRedirectUrl(
-      homeserver,
-    );
+    final redirectUrl = _generateRedirectUrl(homeserver);
     final url = _getAuthenticateUrl(
       homeserver: homeserver,
       id: id,
@@ -169,9 +168,7 @@ mixin ConnectPageMixin {
       final result = await FlutterWebAuth2.authenticate(
         url: url,
         callbackUrlScheme: urlScheme,
-        options: const FlutterWebAuth2Options(
-          windowName: windowNameValue,
-        ),
+        options: const FlutterWebAuth2Options(windowName: windowNameValue),
       );
       Logs().d('tryLogoutSso::result: $result');
     } catch (e) {
@@ -240,7 +237,9 @@ mixin ConnectPageMixin {
   }) {
     final loginTypes = rawLoginTypes;
     if (loginTypes == null) return null;
-    final rawProviders = loginTypes.tryGetList('flows')!.singleWhere(
+    final rawProviders = loginTypes
+        .tryGetList('flows')!
+        .singleWhere(
           (flow) => flow['type'] == AuthenticationTypes.sso,
         )['identity_providers'];
     final list = (rawProviders as List)
@@ -273,15 +272,14 @@ mixin ConnectPageMixin {
       );
       return SsoLoginState.success;
     } catch (e) {
-      Logs()
-          .e('ConnectPageMixin:: handleTokenFromRegistrationSite(): error: $e');
+      Logs().e(
+        'ConnectPageMixin:: handleTokenFromRegistrationSite(): error: $e',
+      );
       return SsoLoginState.error;
     }
   }
 
-  void resetLocationPathWithLoginToken({
-    String? route,
-  }) {
+  void resetLocationPathWithLoginToken({String? route}) {
     final loginTokenExisted = getQueryParameter('loginToken') != null;
     if (!loginTokenExisted) return;
     html.window.history.replaceState(

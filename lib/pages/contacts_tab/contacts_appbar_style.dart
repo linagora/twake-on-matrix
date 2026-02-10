@@ -14,9 +14,8 @@ class ContactsAppbarStyle {
   static EdgeInsetsDirectional contentPadding = EdgeInsetsDirectional.zero;
   static const EdgeInsets trailingIconPadding = EdgeInsets.only(right: 16.0);
 
-  static EdgeInsets titlePadding(context) => EdgeInsets.only(
-        left: responsiveUtils.isMobile(context) ? 0 : 16.0,
-      );
+  static EdgeInsets titlePadding(context) =>
+      EdgeInsets.only(left: responsiveUtils.isMobile(context) ? 0 : 16.0);
   static const EdgeInsets searchFieldPadding = EdgeInsets.only(
     left: 16.0,
     right: 16.0,

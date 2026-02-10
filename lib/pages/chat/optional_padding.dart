@@ -15,10 +15,7 @@ class OptionalPadding extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (isEnabled) {
-      return Padding(
-        padding: padding ?? EdgeInsets.zero,
-        child: child,
-      );
+      return Padding(padding: padding ?? EdgeInsets.zero, child: child);
     } else {
       return child;
     }

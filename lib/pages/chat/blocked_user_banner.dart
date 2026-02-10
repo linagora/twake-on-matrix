@@ -30,8 +30,8 @@ class BlockedUserBanner extends StatelessWidget {
           Text(
             L10n.of(context)!.unblockUser,
             style: Theme.of(context).textTheme.bodyMedium!.copyWith(
-                  color: LinagoraSysColors.material().primary,
-                ),
+              color: LinagoraSysColors.material().primary,
+            ),
           ),
         ],
       ),

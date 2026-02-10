@@ -59,14 +59,12 @@ abstract class AppRoutes {
   static FutureOr<String?> loggedInRedirect(
     BuildContext context,
     GoRouterState state,
-  ) =>
-      Matrix.of(context).client.isLogged() ? '/rooms' : null;
+  ) => Matrix.of(context).client.isLogged() ? '/rooms' : null;
 
   static FutureOr<String?> loggedOutRedirect(
     BuildContext context,
     GoRouterState state,
-  ) =>
-      Matrix.of(context).client.isLogged() ? null : '/home/twakeWelcome';
+  ) => Matrix.of(context).client.isLogged() ? null : '/home/twakeWelcome';
 
   AppRoutes();
 
@@ -75,10 +73,8 @@ abstract class AppRoutes {
   static final List<RouteBase> routes = [
     GoRoute(
       path: '/splash',
-      pageBuilder: (context, state) => defaultPageBuilder(
-        context,
-        const Splash(),
-      ),
+      pageBuilder: (context, state) =>
+          defaultPageBuilder(context, const Splash()),
     ),
     GoRoute(
       path: '/',
@@ -99,26 +95,20 @@ abstract class AppRoutes {
       routes: [
         GoRoute(
           path: 'login',
-          pageBuilder: (context, state) => defaultPageBuilder(
-            context,
-            const Login(),
-          ),
+          pageBuilder: (context, state) =>
+              defaultPageBuilder(context, const Login()),
           redirect: loggedInRedirect,
         ),
         GoRoute(
           path: 'twakeWelcome',
-          pageBuilder: (context, state) => defaultPageBuilder(
-            context,
-            const TwakeWelcome(),
-          ),
+          pageBuilder: (context, state) =>
+              defaultPageBuilder(context, const TwakeWelcome()),
           redirect: loggedInRedirect,
         ),
         GoRoute(
           path: 'homeserverpicker',
-          pageBuilder: (context, state) => defaultPageBuilder(
-            context,
-            const HomeserverPicker(),
-          ),
+          pageBuilder: (context, state) =>
+              defaultPageBuilder(context, const HomeserverPicker()),
           redirect: loggedInRedirect,
         ),
       ],
@@ -126,39 +116,28 @@ abstract class AppRoutes {
     GoRoute(
       path: '/onAuthRedirect',
       pageBuilder: (context, state) {
-        return defaultPageBuilder(
-          context,
-          const OnAuthRedirect(),
-        );
+        return defaultPageBuilder(context, const OnAuthRedirect());
       },
     ),
     GoRoute(
       path: '/connect',
-      pageBuilder: (context, state) => defaultPageBuilder(
-        context,
-        const ConnectPage(),
-      ),
+      pageBuilder: (context, state) =>
+          defaultPageBuilder(context, const ConnectPage()),
     ),
     GoRoute(
       path: '/signup',
-      pageBuilder: (context, state) => defaultPageBuilder(
-        context,
-        const SignupPage(),
-      ),
+      pageBuilder: (context, state) =>
+          defaultPageBuilder(context, const SignupPage()),
     ),
     GoRoute(
       path: '/logs',
-      pageBuilder: (context, state) => defaultPageBuilder(
-        context,
-        const LogViewer(),
-      ),
+      pageBuilder: (context, state) =>
+          defaultPageBuilder(context, const LogViewer()),
     ),
     GoRoute(
       path: '/error',
-      pageBuilder: (context, state) => defaultPageBuilder(
-        context,
-        const ErrorPage(),
-      ),
+      pageBuilder: (context, state) =>
+          defaultPageBuilder(context, const ErrorPage()),
     ),
     ShellRoute(
       pageBuilder: (context, state, child) => defaultPageBuilder(
@@ -195,36 +174,28 @@ abstract class AppRoutes {
           routes: [
             GoRoute(
               path: 'stories/create',
-              pageBuilder: (context, state) => defaultPageBuilder(
-                context,
-                const AddStoryPage(),
-              ),
+              pageBuilder: (context, state) =>
+                  defaultPageBuilder(context, const AddStoryPage()),
               redirect: loggedOutRedirect,
             ),
             GoRoute(
               path: 'stories/:roomid',
-              pageBuilder: (context, state) => defaultPageBuilder(
-                context,
-                const StoryPage(),
-              ),
+              pageBuilder: (context, state) =>
+                  defaultPageBuilder(context, const StoryPage()),
               redirect: loggedOutRedirect,
               routes: [
                 GoRoute(
                   path: 'share',
-                  pageBuilder: (context, state) => defaultPageBuilder(
-                    context,
-                    const AddStoryPage(),
-                  ),
+                  pageBuilder: (context, state) =>
+                      defaultPageBuilder(context, const AddStoryPage()),
                   redirect: loggedOutRedirect,
                 ),
               ],
             ),
             GoRoute(
               path: 'archive',
-              pageBuilder: (context, state) => defaultPageBuilder(
-                context,
-                const Archive(),
-              ),
+              pageBuilder: (context, state) =>
+                  defaultPageBuilder(context, const Archive()),
               routes: [
                 GoRoute(
                   path: ':roomid',
@@ -246,19 +217,14 @@ abstract class AppRoutes {
               GoRoute(
                 path: 'newprivatechat',
                 pageBuilder: (context, state) {
-                  return defaultPageBuilder(
-                    context,
-                    const NewPrivateChat(),
-                  );
+                  return defaultPageBuilder(context, const NewPrivateChat());
                 },
                 redirect: loggedOutRedirect,
                 routes: [
                   GoRoute(
                     path: 'newgroup',
-                    pageBuilder: (context, state) => defaultPageBuilder(
-                      context,
-                      const NewGroup(),
-                    ),
+                    pageBuilder: (context, state) =>
+                        defaultPageBuilder(context, const NewGroup()),
                     routes: [
                       GoRoute(
                         path: 'newgroupinfo',
@@ -285,10 +251,8 @@ abstract class AppRoutes {
             ],
             GoRoute(
               path: 'newgroup',
-              pageBuilder: (context, state) => defaultPageBuilder(
-                context,
-                const NewGroup(),
-              ),
+              pageBuilder: (context, state) =>
+                  defaultPageBuilder(context, const NewGroup()),
               redirect: loggedOutRedirect,
             ),
             GoRoute(
@@ -328,75 +292,56 @@ abstract class AppRoutes {
             GoRoute(
               path: 'share',
               pageBuilder: (context, state) {
-                return defaultPageBuilder(
-                  context,
-                  const Share(),
-                );
+                return defaultPageBuilder(context, const Share());
               },
             ),
             GoRoute(
               path: 'profile',
-              pageBuilder: (context, state) => defaultPageBuilder(
-                context,
-                const SettingsProfile(),
-              ),
+              pageBuilder: (context, state) =>
+                  defaultPageBuilder(context, const SettingsProfile()),
               routes: [
                 if (PlatformInfos.isMobile)
                   GoRoute(
                     path: 'qr',
-                    pageBuilder: (context, state) => defaultPageBuilder(
-                      context,
-                      const PersonalQr(),
-                    ),
+                    pageBuilder: (context, state) =>
+                        defaultPageBuilder(context, const PersonalQr()),
                     redirect: loggedOutRedirect,
                   ),
               ],
             ),
             GoRoute(
               path: 'notifications',
-              pageBuilder: (context, state) => defaultPageBuilder(
-                context,
-                const SettingsNotifications(),
-              ),
+              pageBuilder: (context, state) =>
+                  defaultPageBuilder(context, const SettingsNotifications()),
               redirect: loggedOutRedirect,
             ),
             GoRoute(
               path: 'style',
-              pageBuilder: (context, state) => defaultPageBuilder(
-                context,
-                const SettingsStyle(),
-              ),
+              pageBuilder: (context, state) =>
+                  defaultPageBuilder(context, const SettingsStyle()),
               redirect: loggedOutRedirect,
             ),
             GoRoute(
               path: 'devices',
-              pageBuilder: (context, state) => defaultPageBuilder(
-                context,
-                const DevicesSettings(),
-              ),
+              pageBuilder: (context, state) =>
+                  defaultPageBuilder(context, const DevicesSettings()),
               redirect: loggedOutRedirect,
             ),
             GoRoute(
               path: 'appLanguage',
-              pageBuilder: (context, state) => defaultPageBuilder(
-                context,
-                const SettingsAppLanguage(),
-              ),
+              pageBuilder: (context, state) =>
+                  defaultPageBuilder(context, const SettingsAppLanguage()),
               redirect: loggedOutRedirect,
             ),
             GoRoute(
               path: 'chat',
-              pageBuilder: (context, state) => defaultPageBuilder(
-                context,
-                const SettingsChat(),
-              ),
+              pageBuilder: (context, state) =>
+                  defaultPageBuilder(context, const SettingsChat()),
               routes: [
                 GoRoute(
                   path: 'emotes',
-                  pageBuilder: (context, state) => defaultPageBuilder(
-                    context,
-                    const EmotesSettings(),
-                  ),
+                  pageBuilder: (context, state) =>
+                      defaultPageBuilder(context, const EmotesSettings()),
                 ),
               ],
               redirect: loggedOutRedirect,
@@ -415,51 +360,39 @@ abstract class AppRoutes {
               routes: [
                 GoRoute(
                   path: 'login',
-                  pageBuilder: (context, state) => defaultPageBuilder(
-                    context,
-                    const Login(),
-                  ),
+                  pageBuilder: (context, state) =>
+                      defaultPageBuilder(context, const Login()),
                   redirect: loggedOutRedirect,
                 ),
                 GoRoute(
                   path: 'homeserverpicker',
-                  pageBuilder: (context, state) => defaultPageBuilder(
-                    context,
-                    const HomeserverPicker(),
-                  ),
+                  pageBuilder: (context, state) =>
+                      defaultPageBuilder(context, const HomeserverPicker()),
                 ),
               ],
             ),
             GoRoute(
               path: 'security',
               redirect: loggedOutRedirect,
-              pageBuilder: (context, state) => defaultPageBuilder(
-                context,
-                const SettingsSecurity(),
-              ),
+              pageBuilder: (context, state) =>
+                  defaultPageBuilder(context, const SettingsSecurity()),
               routes: [
                 GoRoute(
                   path: 'stories',
-                  pageBuilder: (context, state) => defaultPageBuilder(
-                    context,
-                    const SettingsStories(),
-                  ),
+                  pageBuilder: (context, state) =>
+                      defaultPageBuilder(context, const SettingsStories()),
                   redirect: loggedOutRedirect,
                 ),
                 GoRoute(
                   path: 'blockedUsers',
-                  pageBuilder: (context, state) => defaultPageBuilder(
-                    context,
-                    const BlockedUsers(),
-                  ),
+                  pageBuilder: (context, state) =>
+                      defaultPageBuilder(context, const BlockedUsers()),
                   redirect: loggedOutRedirect,
                 ),
                 GoRoute(
                   path: '3pid',
-                  pageBuilder: (context, state) => defaultPageBuilder(
-                    context,
-                    const Settings3Pid(),
-                  ),
+                  pageBuilder: (context, state) =>
+                      defaultPageBuilder(context, const Settings3Pid()),
                   redirect: loggedOutRedirect,
                 ),
                 GoRoute(
@@ -619,18 +552,17 @@ abstract class AppRoutes {
     BuildContext context,
     Widget child, {
     String? name,
-  }) =>
-      CustomTransitionPage(
-        name: name,
-        child: child,
-        transitionsBuilder: (context, animation, secondaryAnimation, child) =>
-            !_responsive.isMobile(context)
-                ? FadeTransition(opacity: animation, child: child)
-                : CupertinoPageTransition(
-                    primaryRouteAnimation: animation,
-                    secondaryRouteAnimation: secondaryAnimation,
-                    linearTransition: false,
-                    child: child,
-                  ),
-      );
+  }) => CustomTransitionPage(
+    name: name,
+    child: child,
+    transitionsBuilder: (context, animation, secondaryAnimation, child) =>
+        !_responsive.isMobile(context)
+        ? FadeTransition(opacity: animation, child: child)
+        : CupertinoPageTransition(
+            primaryRouteAnimation: animation,
+            secondaryRouteAnimation: secondaryAnimation,
+            linearTransition: false,
+            child: child,
+          ),
+  );
 }

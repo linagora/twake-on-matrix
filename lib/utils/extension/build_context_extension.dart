@@ -118,12 +118,7 @@ extension ContextExtensionss on BuildContext {
   /// and less than 1200 return [tablet] value.
   /// if the device width is less than 300  return [watch] value.
   /// in other cases return [mobile] value.
-  T responsiveValue<T>({
-    required T mobile,
-    T? tablet,
-    T? desktop,
-    T? watch,
-  }) {
+  T responsiveValue<T>({required T mobile, T? tablet, T? desktop, T? watch}) {
     final deviceWidth = mediaQuerySize.width;
     if (deviceWidth >= minDesktopWidth && desktop != null) {
       return desktop;
@@ -146,10 +141,8 @@ extension ContextExtensionss on BuildContext {
 
   static const double defaultMinWidth = 300;
 
-  void goChild(String path, {Object? extra}) => go(
-        '${GoRouterState.of(this).uri.path}/$path',
-        extra: extra,
-      );
+  void goChild(String path, {Object? extra}) =>
+      go('${GoRouterState.of(this).uri.path}/$path', extra: extra);
 
   Future<T?> pushChild<T extends Object?>(String path, {Object? extra}) =>
       push('${GoRouterState.of(this).uri.path}/$path', extra: extra);

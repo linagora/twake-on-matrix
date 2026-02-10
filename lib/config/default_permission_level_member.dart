@@ -166,8 +166,8 @@ enum DefaultPermissionLevelMember {
             child: Text(
               permission.title(context),
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    color: LinagoraSysColors.material().onSurface,
-                  ),
+                color: LinagoraSysColors.material().onSurface,
+              ),
             ),
           ),
           Container(
@@ -192,8 +192,9 @@ enum DefaultPermissionLevelMember {
                 child: Icon(
                   Icons.check,
                   size: 16,
-                  color:
-                      LinagoraSysColors.material().onSurface.withOpacity(0.4),
+                  color: LinagoraSysColors.material().onSurface.withOpacity(
+                    0.4,
+                  ),
                 ),
               ),
             ),

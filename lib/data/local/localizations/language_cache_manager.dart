@@ -33,9 +33,10 @@ class LanguageCacheManager {
 
   Future<void> removeLanguage() async {
     return Future.sync(() async {
-      await Future.wait(
-        [pres.deleteItem(keyLanguageCode), pres.deleteItem(keyCountryCode)],
-      );
+      await Future.wait([
+        pres.deleteItem(keyLanguageCode),
+        pres.deleteItem(keyCountryCode),
+      ]);
     }).catchError((error) {
       Logs().e('LanguageCacheManager::removeLanguage(): error: $error');
       return null;

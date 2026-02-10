@@ -1,5 +1,1 @@
-enum WarningContactsBannerState {
-  display,
-  hide,
-  notDisplayAgain,
-}
+enum WarningContactsBannerState { display, hide, notDisplayAgain }

@@ -56,17 +56,15 @@ class HomeserverPickerController extends State<HomeserverPicker>
   Future<void> _checkTorBrowser() async {
     if (!kIsWeb) return;
 
-    Hive.openBox('test').then((value) => null).catchError(
-      (e, s) async {
-        await showOkAlertDialog(
-          context: context,
-          title: L10n.of(context)!.indexedDbErrorTitle,
-          message: L10n.of(context)!.indexedDbErrorLong,
-          onWillPop: () async => false,
-        );
-        _checkTorBrowser();
-      },
-    );
+    Hive.openBox('test').then((value) => null).catchError((e, s) async {
+      await showOkAlertDialog(
+        context: context,
+        title: L10n.of(context)!.indexedDbErrorTitle,
+        message: L10n.of(context)!.indexedDbErrorLong,
+        onWillPop: () async => false,
+      );
+      _checkTorBrowser();
+    });
 
     final isTor = await TorBrowserDetector.isTorBrowser;
     isTorBrowser = isTor;
@@ -84,14 +82,12 @@ class HomeserverPickerController extends State<HomeserverPicker>
   void showServerInfo(HomeserverBenchmarkResult server) =>
       showAdaptiveBottomSheet(
         context: context,
-        builder: (_) => HomeserverBottomSheet(
-          homeserver: server,
-        ),
+        builder: (_) => HomeserverBottomSheet(homeserver: server),
       );
 
   void onChanged(String text) => setState(() {
-        searchTerm = text;
-      });
+    searchTerm = text;
+  });
 
   List<HomeserverBenchmarkResult> filteredHomeservers(String searchTerm) {
     return benchmarkResults!
@@ -105,8 +101,8 @@ class HomeserverPickerController extends State<HomeserverPicker>
 
   void loadHomeserverList() async {
     try {
-      final homeserverList =
-          await const JoinmatrixOrgParser().fetchHomeservers();
+      final homeserverList = await const JoinmatrixOrgParser()
+          .fetchHomeservers();
       final benchmark = await HomeserverListProvider.benchmarkHomeserver(
         homeserverList,
         timeout: const Duration(seconds: 10),
@@ -122,11 +118,11 @@ class HomeserverPickerController extends State<HomeserverPicker>
   }
 
   void setServer(String server) => setState(() {
-        homeserverController.text = server;
-        searchTerm = '';
-        homeserverFocusNode.unfocus();
-        displayServerList = false;
-      });
+    homeserverController.text = server;
+    searchTerm = '';
+    homeserverFocusNode.unfocus();
+    displayServerList = false;
+  });
 
   /// Starts an analysis of the given homeserver. It uses the current domain and
   /// makes sure that it is prefixed with https. Then it searches for the
@@ -141,8 +137,10 @@ class HomeserverPickerController extends State<HomeserverPicker>
     });
 
     try {
-      homeserverController.text =
-          homeserverController.text.trim().toLowerCase().replaceAll(' ', '-');
+      homeserverController.text = homeserverController.text
+          .trim()
+          .toLowerCase()
+          .replaceAll(' ', '-');
       var homeserver = Uri.parse(homeserverController.text);
       if (homeserver.scheme.isEmpty) {
         homeserver = Uri.https(homeserverController.text, '');
@@ -163,8 +161,9 @@ class HomeserverPickerController extends State<HomeserverPicker>
           ? homeserverFromSummary.substring(0, homeserverFromSummary.length - 1)
           : homeserverFromSummary;
 
-      final homeserverExists =
-          allHomeserverLoggedIn.contains(cleanHomeserver.toString());
+      final homeserverExists = allHomeserverLoggedIn.contains(
+        cleanHomeserver.toString(),
+      );
 
       if (homeserverExists &&
           !AppConfig.supportMultipleAccountsInTheSameHomeserver) {
@@ -176,8 +175,9 @@ class HomeserverPickerController extends State<HomeserverPicker>
         return;
       }
 
-      matrix.loginHomeserverSummary =
-          await client.checkHomeserver(homeserver).toHomeserverSummary();
+      matrix.loginHomeserverSummary = await client
+          .checkHomeserver(homeserver)
+          .toHomeserverSummary();
       final ssoSupported = matrix.loginHomeserverSummary.supportSSOLogin;
 
       try {
@@ -193,13 +193,11 @@ class HomeserverPickerController extends State<HomeserverPicker>
       } else if (ssoSupported && matrix.loginRegistrationSupported == false) {
         Map<String, dynamic>? rawLoginTypes;
         await client
-            .request(
-              RequestType.GET,
-              '/client/r0/login',
-            )
+            .request(RequestType.GET, '/client/r0/login')
             .then((loginTypes) => rawLoginTypes = loginTypes);
-        final identitiesProvider =
-            identityProviders(rawLoginTypes: rawLoginTypes);
+        final identitiesProvider = identityProviders(
+          rawLoginTypes: rawLoginTypes,
+        );
 
         if (supportsSso(context) && identitiesProvider?.length == 1) {
           final result = await ssoLoginAction(

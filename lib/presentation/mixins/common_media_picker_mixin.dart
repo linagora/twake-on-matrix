@@ -35,10 +35,7 @@ mixin CommonMediaPickerMixin {
     );
   }
 
-  void goToSettings(
-    BuildContext context, {
-    bool isMicrophone = false,
-  }) {
+  void goToSettings(BuildContext context, {bool isMicrophone = false}) {
     showDialog<bool?>(
       context: context,
       useRootNavigator: false,
@@ -53,9 +50,9 @@ mixin CommonMediaPickerMixin {
             children: <TextSpan>[
               TextSpan(
                 text: ' ${L10n.of(context)!.twake}.',
-                style: Theme.of(context).textTheme.bodyMedium!.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
+                style: Theme.of(
+                  context,
+                ).textTheme.bodyMedium!.copyWith(fontWeight: FontWeight.bold),
               ),
             ],
           ),
@@ -69,10 +66,7 @@ mixin CommonMediaPickerMixin {
     );
   }
 
-  void _onError({
-    required BuildContext context,
-    required Object error,
-  }) {
+  void _onError({required BuildContext context, required Object error}) {
     if (error is! CameraException) return;
     Logs().e("CommonMediaPickerMixin:: _onError", error.code);
     if (error.code.contains(_audioAccessDeniedCode)) {
@@ -89,25 +83,19 @@ mixin CommonMediaPickerMixin {
       context,
       pickerConfig: onlyImage
           ? CameraPickerConfig(
-              textDelegate: getTextDelegateForLocale(
-                context,
-              ),
+              textDelegate: getTextDelegateForLocale(context),
               enableAudio: false,
               onError: (e, a) => _onError(context: context, error: e),
             )
           : CameraPickerConfig(
-              textDelegate: getTextDelegateForLocale(
-                context,
-              ),
+              textDelegate: getTextDelegateForLocale(context),
               enableRecording: true,
               onError: (e, a) => _onError(context: context, error: e),
             ),
     );
   }
 
-  CameraPickerTextDelegate getTextDelegateForLocale(
-    BuildContext context,
-  ) {
+  CameraPickerTextDelegate getTextDelegateForLocale(BuildContext context) {
     switch (LocalizationService.currentLocale.value.languageCode) {
       case 'ru':
       case 'fr':
@@ -135,9 +123,9 @@ mixin CommonMediaPickerMixin {
             children: <TextSpan>[
               TextSpan(
                 text: ' ${L10n.of(context)!.twake}.',
-                style: Theme.of(context).textTheme.bodyMedium!.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
+                style: Theme.of(
+                  context,
+                ).textTheme.bodyMedium!.copyWith(fontWeight: FontWeight.bold),
               ),
             ],
           ),

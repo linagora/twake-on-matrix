@@ -1,5 +1,1 @@
-enum PinnedMessagesActionEnum {
-  pin,
-  unpin,
-  unpinAll,
-}
+enum PinnedMessagesActionEnum { pin, unpin, unpinAll }

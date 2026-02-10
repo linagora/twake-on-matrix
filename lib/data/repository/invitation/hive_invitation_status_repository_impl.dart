@@ -5,8 +5,8 @@ import 'package:fluffychat/domain/repository/invitation/hive_invitation_status_r
 
 class HiveInvitationStatusRepositoryImpl
     extends HiveInvitationStatusRepository {
-  final HiveInvitationStatusDatasource _hiveInvitationStatusDatasource =
-      getIt.get<HiveInvitationStatusDatasource>();
+  final HiveInvitationStatusDatasource _hiveInvitationStatusDatasource = getIt
+      .get<HiveInvitationStatusDatasource>();
 
   @override
   Future<void> deleteInvitationStatusByContactId({

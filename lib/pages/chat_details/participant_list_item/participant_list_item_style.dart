@@ -14,8 +14,9 @@ class ParticipantListItemStyle {
   // Bottom Sheet drag handle
   static const double dragHandleHeight = 4;
   static const double dragHandleWidth = 32;
-  static BorderRadiusGeometry dragHandleBorderRadius =
-      BorderRadius.circular(100);
+  static BorderRadiusGeometry dragHandleBorderRadius = BorderRadius.circular(
+    100,
+  );
 
   // Dialog
   static const double fixedDialogWidth = 448;
@@ -29,14 +30,16 @@ class ParticipantListItemStyle {
     horizontal: 4,
     vertical: 2,
   );
-  static const EdgeInsets permissionBatchMargin =
-      EdgeInsets.symmetric(horizontal: 8);
+  static const EdgeInsets permissionBatchMargin = EdgeInsets.symmetric(
+    horizontal: 8,
+  );
   static BorderRadiusGeometry permissionBatchRadius = BorderRadius.circular(8);
   static const double permissionBatchTextFontSize = 14;
 
   // Membership batch
   static const EdgeInsets membershipBatchPadding = EdgeInsets.all(4);
-  static const EdgeInsets membershipBatchMargin =
-      EdgeInsets.symmetric(horizontal: 8);
+  static const EdgeInsets membershipBatchMargin = EdgeInsets.symmetric(
+    horizontal: 8,
+  );
   static BorderRadiusGeometry membershipBatchRadius = BorderRadius.circular(8);
 }

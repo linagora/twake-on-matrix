@@ -19,10 +19,7 @@ class HiveGetInvitationStatusLoadingState extends Success {
   });
 
   @override
-  List<Object?> get props => [
-        contactId,
-        userId,
-      ];
+  List<Object?> get props => [contactId, userId];
 }
 
 class HiveGetInvitationStatusSuccessState extends Success {
@@ -35,10 +32,7 @@ class HiveGetInvitationStatusSuccessState extends Success {
   });
 
   @override
-  List<Object?> get props => [
-        contactId,
-        invitationId,
-      ];
+  List<Object?> get props => [contactId, invitationId];
 }
 
 class HiveGetInvitationStatusFailureState extends Failure {
@@ -55,10 +49,5 @@ class HiveGetInvitationStatusFailureState extends Failure {
   });
 
   @override
-  List<Object?> get props => [
-        exception,
-        message,
-        contactId,
-        userId,
-      ];
+  List<Object?> get props => [exception, message, contactId, userId];
 }

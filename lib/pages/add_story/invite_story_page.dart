@@ -13,10 +13,7 @@ import 'package:fluffychat/widgets/matrix.dart';
 
 class InviteStoryPage extends StatefulWidget {
   final Room? storiesRoom;
-  const InviteStoryPage({
-    required this.storiesRoom,
-    super.key,
-  });
+  const InviteStoryPage({required this.storiesRoom, super.key});
 
   @override
   InviteStoryPageState createState() => InviteStoryPageState();
@@ -64,12 +61,11 @@ class InviteStoryPageState extends State<InviteStoryPage> {
 
   @override
   Widget build(BuildContext context) {
-    loadContacts ??= Matrix.of(context)
-        .client
+    loadContacts ??= Matrix.of(context).client
         .getUndecidedContactsForStories(widget.storiesRoom)
         .then((contacts) {
-      return contacts;
-    });
+          return contacts;
+        });
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(

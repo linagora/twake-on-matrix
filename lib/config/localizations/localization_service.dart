@@ -23,8 +23,10 @@ class LocalizationService {
     String langCode,
   ) async {
     Logs().d('LocalizationService::changeLocale():langCode: $langCode');
-    final newLocale =
-        await getLocaleFromLanguage(langCode: langCode, context: context);
+    final newLocale = await getLocaleFromLanguage(
+      langCode: langCode,
+      context: context,
+    );
     Logs().d('LocalizationService::changeLocale():newLocale: $newLocale');
     currentLocale.value = newLocale;
     await WidgetsFlutterBinding.ensureInitialized().performReassemble();
@@ -63,8 +65,9 @@ class LocalizationService {
       return;
     }
 
-    final storedLanguage =
-        await getIt.get<LanguageCacheManager>().getStoredLanguage();
+    final storedLanguage = await getIt
+        .get<LanguageCacheManager>()
+        .getStoredLanguage();
     if (storedLanguage != null &&
         _isLanguageSupported(storedLanguage.languageCode)) {
       await changeLocale(context, storedLanguage.languageCode);

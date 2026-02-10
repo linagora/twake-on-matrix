@@ -15,8 +15,9 @@ extension PresenceExtension on CachedPresence {
   String getLocalizedLastActiveAgo(BuildContext context) {
     final lastActiveTimestamp = this.lastActiveTimestamp;
     if (lastActiveTimestamp != null) {
-      return L10n.of(context)!
-          .lastActiveAgo(lastActiveTimestamp.localizedTimeShort(context));
+      return L10n.of(
+        context,
+      )!.lastActiveAgo(lastActiveTimestamp.localizedTimeShort(context));
     }
     return L10n.of(context)!.lastSeenLongTimeAgo;
   }
@@ -45,28 +46,28 @@ extension PresenceExtension on CachedPresence {
 
   TextStyle? getPresenceTextStyle(BuildContext context) =>
       currentlyActive ?? false
-          ? _onlineStatusTextStyle(context)
-          : _offlineStatusTextStyle(context);
+      ? _onlineStatusTextStyle(context)
+      : _offlineStatusTextStyle(context);
 
   TextStyle? _offlineStatusTextStyle(BuildContext context) =>
       responsive.isMobile(context)
-          ? Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: LinagoraRefColors.material().tertiary[30],
-                letterSpacing: ChatAppBarTitleStyle.letterSpacingStatusContent,
-              )
-          : Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: LinagoraRefColors.material().neutral[50],
-                letterSpacing: ChatAppBarTitleStyle.letterSpacingRoomName,
-              );
+      ? Theme.of(context).textTheme.bodyMedium?.copyWith(
+          color: LinagoraRefColors.material().tertiary[30],
+          letterSpacing: ChatAppBarTitleStyle.letterSpacingStatusContent,
+        )
+      : Theme.of(context).textTheme.bodyMedium?.copyWith(
+          color: LinagoraRefColors.material().neutral[50],
+          letterSpacing: ChatAppBarTitleStyle.letterSpacingRoomName,
+        );
 
   TextStyle? _onlineStatusTextStyle(BuildContext context) =>
       responsive.isMobile(context)
-          ? Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: LinagoraRefColors.material().secondary,
-                letterSpacing: ChatAppBarTitleStyle.letterSpacingStatusContent,
-              )
-          : Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: LinagoraRefColors.material().secondary,
-                letterSpacing: ChatAppBarTitleStyle.letterSpacingRoomName,
-              );
+      ? Theme.of(context).textTheme.bodyMedium?.copyWith(
+          color: LinagoraRefColors.material().secondary,
+          letterSpacing: ChatAppBarTitleStyle.letterSpacingStatusContent,
+        )
+      : Theme.of(context).textTheme.bodyMedium?.copyWith(
+          color: LinagoraRefColors.material().secondary,
+          letterSpacing: ChatAppBarTitleStyle.letterSpacingRoomName,
+        );
 }

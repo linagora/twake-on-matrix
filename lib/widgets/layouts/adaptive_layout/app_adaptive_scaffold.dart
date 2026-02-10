@@ -11,8 +11,9 @@ class AppAdaptiveScaffold extends StatelessWidget {
   final Widget? secondaryBody;
   final bool? displayAppBar;
 
-  static const scaffoldWithNestedNavigationKey =
-      ValueKey('ScaffoldWithNestedNavigation');
+  static const scaffoldWithNestedNavigationKey = ValueKey(
+    'ScaffoldWithNestedNavigation',
+  );
 
   static const breakpointMobileKey = Key('BreakPointMobile');
 
@@ -113,10 +114,7 @@ class AppAdaptiveScaffold extends StatelessWidget {
     );
   }
 
-  Widget _bodyWidget(
-    BuildContext context, {
-    bool isWebAndDesktop = true,
-  }) {
+  Widget _bodyWidget(BuildContext context, {bool isWebAndDesktop = true}) {
     return Padding(
       padding: AdaptiveScaffoldRouteStyle.bodyWidgetPadding(
         context,

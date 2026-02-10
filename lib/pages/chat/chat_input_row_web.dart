@@ -109,26 +109,25 @@ class ChatInputRowWeb extends StatelessWidget {
                     size: ChatInputRowStyle.chatInputRowMoreBtnSize,
                     onTap: onTapMoreBtn,
                   ),
-                  Expanded(
-                    child: inputBar,
-                  ),
+                  Expanded(child: inputBar),
                   InkWell(
                     onTapDown: onEmojiAction,
                     hoverColor: Colors.transparent,
                     child: PageTransitionSwitcher(
-                      transitionBuilder: (
-                        Widget child,
-                        Animation<double> primaryAnimation,
-                        Animation<double> secondaryAnimation,
-                      ) {
-                        return SharedAxisTransition(
-                          animation: primaryAnimation,
-                          secondaryAnimation: secondaryAnimation,
-                          transitionType: SharedAxisTransitionType.scaled,
-                          fillColor: Colors.transparent,
-                          child: child,
-                        );
-                      },
+                      transitionBuilder:
+                          (
+                            Widget child,
+                            Animation<double> primaryAnimation,
+                            Animation<double> secondaryAnimation,
+                          ) {
+                            return SharedAxisTransition(
+                              animation: primaryAnimation,
+                              secondaryAnimation: secondaryAnimation,
+                              transitionType: SharedAxisTransitionType.scaled,
+                              fillColor: Colors.transparent,
+                              child: child,
+                            );
+                          },
                       child: TwakeIconButton(
                         iconColor: LinagoraSysColors.material().tertiary,
                         paddingAll: ChatInputRowStyle.chatInputRowPaddingBtnWeb,

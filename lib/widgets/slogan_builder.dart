@@ -56,7 +56,8 @@ class SloganBuilder extends StatelessWidget {
             children: [
               _logoApp(),
               Padding(
-                padding: paddingText ??
+                padding:
+                    paddingText ??
                     const EdgeInsetsDirectional.only(
                       top: 16,
                       start: 16,

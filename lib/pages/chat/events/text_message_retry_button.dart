@@ -4,11 +4,7 @@ import 'package:linagora_design_flutter/colors/linagora_sys_colors.dart';
 import 'package:matrix/matrix.dart';
 
 class TextMessageRetryButton extends StatelessWidget {
-  const TextMessageRetryButton({
-    super.key,
-    required this.event,
-    this.onRetry,
-  });
+  const TextMessageRetryButton({super.key, required this.event, this.onRetry});
 
   final Event event;
   final Future<void> Function(Event)? onRetry;
@@ -27,10 +23,10 @@ class TextMessageRetryButton extends StatelessWidget {
         child: Text(
           L10n.of(context)!.tapToRetry,
           style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                fontSize: 12,
-                height: 16 / 12,
-                color: LinagoraSysColors.material().primary,
-              ),
+            fontSize: 12,
+            height: 16 / 12,
+            color: LinagoraSysColors.material().primary,
+          ),
         ),
       ),
     );

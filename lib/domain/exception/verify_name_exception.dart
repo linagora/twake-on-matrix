@@ -13,7 +13,7 @@ abstract class VerifyNameException extends Equatable implements Exception {
 
 class NameWithSpaceOnlyException extends VerifyNameException {
   const NameWithSpaceOnlyException()
-      : super(VerifyNameException.nameWithOnlySpace);
+    : super(VerifyNameException.nameWithOnlySpace);
 }
 
 class EmptyNameException extends VerifyNameException {

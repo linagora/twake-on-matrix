@@ -46,13 +46,9 @@ extension SendFileWebExtension on Room {
     UniversalImageBitmap? imageBitmap;
     MatrixFile file = matrixFile;
     if (file is MatrixImageFile) {
-      uploadStreamController?.add(
-        const Right(ConvertingStreamToBytesState()),
-      );
+      uploadStreamController?.add(const Right(ConvertingStreamToBytesState()));
       imageBitmap = await convertUint8ListToBitmap(file.bytes);
-      uploadStreamController?.add(
-        const Right(ConvertedStreamToBytesState()),
-      );
+      uploadStreamController?.add(const Right(ConvertedStreamToBytesState()));
       file = MatrixImageFile(
         name: file.name,
         width: imageBitmap?.width,
@@ -78,8 +74,16 @@ extension SendFileWebExtension on Room {
     } catch (e) {
       Logs().d('Config error while sending file', e);
 
-      fakeImageEvent.rooms!.join!.values.first.timeline!.events!.first
-          .unsigned![messageSendingStatusKey] = EventStatus.error.intValue;
+      fakeImageEvent
+              .rooms!
+              .join!
+              .values
+              .first
+              .timeline!
+              .events!
+              .first
+              .unsigned![messageSendingStatusKey] =
+          EventStatus.error.intValue;
       await handleImageFakeSync(fakeImageEvent);
       rethrow;
     }
@@ -87,7 +91,14 @@ extension SendFileWebExtension on Room {
     if (file.msgType == MessageTypes.Image &&
         (thumbnail == null || shrinkImageMaxDimension != null) &&
         file is MatrixImageFile) {
-      fakeImageEvent.rooms!.join!.values.first.timeline!.events!.first
+      fakeImageEvent
+              .rooms!
+              .join!
+              .values
+              .first
+              .timeline!
+              .events!
+              .first
               .unsigned![fileSendingStatusKey] =
           FileSendingStatus.generatingThumbnail.name;
       await handleImageFakeSync(fakeImageEvent);
@@ -96,7 +107,14 @@ extension SendFileWebExtension on Room {
         thumbnail = null; // in this case, the thumbnail is not usefull
       }
     } else if (file is MatrixVideoFile) {
-      fakeImageEvent.rooms!.join!.values.first.timeline!.events!.first
+      fakeImageEvent
+              .rooms!
+              .join!
+              .values
+              .first
+              .timeline!
+              .events!
+              .first
               .unsigned![fileSendingStatusKey] =
           FileSendingStatus.generatingThumbnail.name;
       await handleImageFakeSync(fakeImageEvent);
@@ -108,18 +126,24 @@ extension SendFileWebExtension on Room {
     MatrixFile? uploadThumbnail = thumbnail;
     EncryptedFile? encryptedThumbnail;
     if (encrypted && client.fileEncryptionEnabled) {
-      uploadStreamController?.add(
-        const Right(EncryptingFileState()),
-      );
-      fakeImageEvent.rooms!.join!.values.first.timeline!.events!.first
-          .unsigned![fileSendingStatusKey] = FileSendingStatus.encrypting.name;
+      uploadStreamController?.add(const Right(EncryptingFileState()));
+      fakeImageEvent
+              .rooms!
+              .join!
+              .values
+              .first
+              .timeline!
+              .events!
+              .first
+              .unsigned![fileSendingStatusKey] =
+          FileSendingStatus.encrypting.name;
       await handleImageFakeSync(fakeImageEvent);
       encryptedFile = await file.encrypt();
-      uploadFile =
-          MatrixFile.fromMimeType(bytes: encryptedFile.data, name: 'crypt');
-      uploadStreamController?.add(
-        const Right(EncryptedFileState()),
+      uploadFile = MatrixFile.fromMimeType(
+        bytes: encryptedFile.data,
+        name: 'crypt',
       );
+      uploadStreamController?.add(const Right(EncryptedFileState()));
       if (thumbnail != null) {
         uploadStreamController?.add(
           const Right(EncryptingFileState(isThumbnail: true)),
@@ -136,8 +160,16 @@ extension SendFileWebExtension on Room {
     }
     Uri? uploadResp, thumbnailUploadResp;
 
-    fakeImageEvent.rooms!.join!.values.first.timeline!.events!.first
-        .unsigned![fileSendingStatusKey] = FileSendingStatus.uploading.name;
+    fakeImageEvent
+            .rooms!
+            .join!
+            .values
+            .first
+            .timeline!
+            .events!
+            .first
+            .unsigned![fileSendingStatusKey] =
+        FileSendingStatus.uploading.name;
     while (uploadResp == null) {
       try {
         final mediaApi = getIt.get<MediaAPI>();
@@ -146,12 +178,7 @@ extension SendFileWebExtension on Room {
           cancelToken: cancelToken,
           onSendProgress: (receive, total) {
             uploadStreamController?.add(
-              Right(
-                UploadingFileState(
-                  receive: receive,
-                  total: total,
-                ),
-              ),
+              Right(UploadingFileState(receive: receive, total: total)),
             );
           },
         );
@@ -182,15 +209,19 @@ extension SendFileWebExtension on Room {
         }
 
         uploadStreamController?.add(
-          Right(
-            UploadFileSuccessState(
-              eventId: txid,
-            ),
-          ),
+          Right(UploadFileSuccessState(eventId: txid)),
         );
       } on MatrixException catch (e) {
-        fakeImageEvent.rooms!.join!.values.first.timeline!.events!.first
-            .unsigned![messageSendingStatusKey] = EventStatus.error.intValue;
+        fakeImageEvent
+                .rooms!
+                .join!
+                .values
+                .first
+                .timeline!
+                .events!
+                .first
+                .unsigned![messageSendingStatusKey] =
+            EventStatus.error.intValue;
         await handleImageFakeSync(fakeImageEvent);
         Logs().e('Error: $e');
         rethrow;
@@ -207,16 +238,19 @@ extension SendFileWebExtension on Room {
           );
           return null;
         }
-        fakeImageEvent.rooms!.join!.values.first.timeline!.events!.first
-            .unsigned![messageSendingStatusKey] = EventStatus.error.intValue;
+        fakeImageEvent
+                .rooms!
+                .join!
+                .values
+                .first
+                .timeline!
+                .events!
+                .first
+                .unsigned![messageSendingStatusKey] =
+            EventStatus.error.intValue;
         await handleImageFakeSync(fakeImageEvent);
         uploadStreamController?.add(
-          Left(
-            UploadFileFailedState(
-              exception: e,
-              txid: txid,
-            ),
-          ),
+          Left(UploadFileFailedState(exception: e, txid: txid)),
         );
         Logs().v('Error: $e');
         Logs().v('Send File into room failed. Try again...');
@@ -224,8 +258,9 @@ extension SendFileWebExtension on Room {
       }
     }
 
-    final duration =
-        file is MatrixVideoFile ? await _getVideoDuration(file) : null;
+    final duration = file is MatrixVideoFile
+        ? await _getVideoDuration(file)
+        : null;
 
     final contentFromCaption = getEventContentFromMsgText(
       message: captionInfo ?? '',
@@ -378,9 +413,7 @@ extension SendFileWebExtension on Room {
     StreamController<Either<Failure, Success>>? uploadStreamController,
   }) async {
     try {
-      uploadStreamController?.add(
-        const Right(GeneratingThumbnailState()),
-      );
+      uploadStreamController?.add(const Right(GeneratingThumbnailState()));
       final result = await FlutterImageCompress.compressWithList(
         originalFile.bytes,
         quality: AppConfig.thumbnailQuality,
@@ -392,9 +425,7 @@ extension SendFileWebExtension on Room {
         () => _generateBlurHash(result),
       );
 
-      uploadStreamController?.add(
-        const Right(GenerateThumbnailSuccess()),
-      );
+      uploadStreamController?.add(const Right(GenerateThumbnailSuccess()));
 
       return MatrixImageFile(
         bytes: result,
@@ -405,13 +436,7 @@ extension SendFileWebExtension on Room {
         blurhash: blurHash,
       );
     } catch (e) {
-      uploadStreamController?.add(
-        Left(
-          GenerateThumbnailFailed(
-            exception: e,
-          ),
-        ),
-      );
+      uploadStreamController?.add(Left(GenerateThumbnailFailed(exception: e)));
       Logs().e('Error while generating thumbnail', e);
       return null;
     }
@@ -422,9 +447,7 @@ extension SendFileWebExtension on Room {
     StreamController<Either<Failure, Success>>? uploadStreamController,
   }) async {
     try {
-      uploadStreamController?.add(
-        const Right(GeneratingThumbnailState()),
-      );
+      uploadStreamController?.add(const Right(GeneratingThumbnailState()));
       late String url;
       if (PlatformInfos.isWeb) {
         url = originalFile.bytes.toWebUrl(mimeType: originalFile.mimeType);
@@ -446,9 +469,7 @@ extension SendFileWebExtension on Room {
         () => _generateBlurHash(result),
       );
 
-      uploadStreamController?.add(
-        const Right(GenerateThumbnailSuccess()),
-      );
+      uploadStreamController?.add(const Right(GenerateThumbnailSuccess()));
 
       final thumbnailFileName = _getVideoThumbnailFileName(originalFile);
 
@@ -463,13 +484,7 @@ extension SendFileWebExtension on Room {
         blurhash: blurHash,
       );
     } catch (e) {
-      uploadStreamController?.add(
-        Left(
-          GenerateThumbnailFailed(
-            exception: e,
-          ),
-        ),
-      );
+      uploadStreamController?.add(Left(GenerateThumbnailFailed(exception: e)));
       Logs().e('Error while generating thumbnail', e);
       return null;
     }
@@ -478,9 +493,7 @@ extension SendFileWebExtension on Room {
   String _getVideoThumbnailFileName(MatrixVideoFile originalFile) =>
       '${originalFile.name}.${AppConfig.videoThumbnailFormat.name.toLowerCase()}';
 
-  Future<int?> _getVideoDuration(
-    MatrixVideoFile originalFile,
-  ) async {
+  Future<int?> _getVideoDuration(MatrixVideoFile originalFile) async {
     VideoPlayerController? videoPlayerController;
     try {
       final url = originalFile.bytes.toWebUrl(mimeType: originalFile.mimeType);

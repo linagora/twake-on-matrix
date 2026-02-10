@@ -77,15 +77,9 @@ class ShareController extends State<Share>
     Logs().d('ShareController::shareTo() shareContent: $shareContent');
     Logs().d('ShareController::shareTo() shareContentList: $shareContentList');
     if (shareContentList.isNotEmpty) {
-      _handleShareFilesContent(
-        room: room,
-        shareContentList: shareContentList,
-      );
+      _handleShareFilesContent(room: room, shareContentList: shareContentList);
     } else if (shareContent != null) {
-      _handleShareTextContent(
-        room: room,
-        textContent: shareContent,
-      );
+      _handleShareTextContent(room: room, textContent: shareContent);
     }
   }
 

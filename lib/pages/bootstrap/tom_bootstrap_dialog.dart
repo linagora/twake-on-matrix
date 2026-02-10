@@ -30,9 +30,9 @@ class TomBootstrapDialog extends StatefulWidget {
   });
 
   Future<bool?> show(BuildContext context) => TwakeDialog.showDialogFullScreen(
-        builder: () => this,
-        barrierColor: TomBootstrapDialogStyle.barrierColor(context),
-      );
+    builder: () => this,
+    barrierColor: TomBootstrapDialogStyle.barrierColor(context),
+  );
 
   @override
   TomBootstrapDialogState createState() => TomBootstrapDialogState();
@@ -44,13 +44,14 @@ class TomBootstrapDialogState extends State<TomBootstrapDialog>
 
   final _getRecoveryWordsInteractor = getIt.get<GetRecoveryWordsInteractor>();
 
-  final _deleteRecoveryWordsInteractor =
-      getIt.get<DeleteRecoveryWordsInteractor>();
+  final _deleteRecoveryWordsInteractor = getIt
+      .get<DeleteRecoveryWordsInteractor>();
 
   static const breakpointMobileDialogKey = Key('BreakPointMobileDialog');
 
-  static const breakpointWebAndDesktopDialogKey =
-      Key('BreakpointWebAndDesktopKeyDialog');
+  static const breakpointWebAndDesktopDialogKey = Key(
+    'BreakpointWebAndDesktopKeyDialog',
+  );
 
   static const Duration getRecoveryWordsDelay = Duration(seconds: 5);
 
@@ -83,10 +84,7 @@ class TomBootstrapDialogState extends State<TomBootstrapDialog>
 
   Future<RecoveryWords?> _getRecoveryWords() async {
     final result = await _getRecoveryWordsInteractor.execute();
-    return result.fold(
-      (failure) => null,
-      (success) => success.words,
-    );
+    return result.fold((failure) => null, (success) => success.words);
   }
 
   Future<void> _loadingData() async {
@@ -137,13 +135,10 @@ class TomBootstrapDialogState extends State<TomBootstrapDialog>
             'TomBootstrapDialog::_initializeRecoveryKeyState(): no recovery existed then call bootstrap',
           );
 
-          Future.delayed(
-            getRecoveryWordsDelay,
-            () {
-              Matrix.of(context).showToMBootstrap.value = false;
-              Navigator.of(context, rootNavigator: false).pop<bool>(false);
-            },
-          );
+          Future.delayed(getRecoveryWordsDelay, () {
+            Matrix.of(context).showToMBootstrap.value = false;
+            Navigator.of(context, rootNavigator: false).pop<bool>(false);
+          });
         }
       }
     } else {
@@ -164,8 +159,9 @@ class TomBootstrapDialogState extends State<TomBootstrapDialog>
   }
 
   void _createBootstrap() {
-    bootstrap =
-        widget.client.encryption?.bootstrap(onUpdate: (_) => setState(() {}));
+    bootstrap = widget.client.encryption?.bootstrap(
+      onUpdate: (_) => setState(() {}),
+    );
   }
 
   bool get isDataLoadingState =>
@@ -220,9 +216,7 @@ class TomBootstrapDialogState extends State<TomBootstrapDialog>
           final key = bootstrap?.newSsssKey!.recoveryKey;
           WidgetsBinding.instance.addPostFrameCallback((_) {
             Logs().i(
-              'TomBootstrapDialogState::build(): check if key is already in TOM = ${_existedRecoveryWordsInTom(
-                key,
-              )} - ${_recoveryWords?.words}',
+              'TomBootstrapDialogState::build(): check if key is already in TOM = ${_existedRecoveryWordsInTom(key)} - ${_recoveryWords?.words}',
             );
             if (_existedRecoveryWordsInTom(key)) {
               _uploadRecoveryKeyState = UploadRecoveryKeyState.uploaded;
@@ -264,17 +258,14 @@ class TomBootstrapDialogState extends State<TomBootstrapDialog>
           end: ResponsiveUtils.maxMobileWidth,
         ): SlotLayout.from(
           key: breakpointMobileDialogKey,
-          builder: (_) => TomBootstrapDialogMobileView(
-            description: _description,
-          ),
+          builder: (_) =>
+              TomBootstrapDialogMobileView(description: _description),
         ),
         const WidthPlatformBreakpoint(
           begin: ResponsiveUtils.minTabletWidth,
         ): SlotLayout.from(
           key: breakpointWebAndDesktopDialogKey,
-          builder: (_) => TomBootstrapDialogWebView(
-            description: _description,
-          ),
+          builder: (_) => TomBootstrapDialogWebView(description: _description),
         ),
       },
     );
@@ -331,15 +322,12 @@ class TomBootstrapDialogState extends State<TomBootstrapDialog>
         case BootstrapState.askNewSsss:
           WidgetsBinding.instance.addPostFrameCallback(
             (_) => bootstrap?.newSsss().then(
-                  (_) =>
-                      _uploadRecoveryKeyState = UploadRecoveryKeyState.created,
-                ),
+              (_) => _uploadRecoveryKeyState = UploadRecoveryKeyState.created,
+            ),
           );
           break;
         case BootstrapState.openExistingSsss:
-          WidgetsBinding.instance.addPostFrameCallback(
-            (_) => _unlockBackUp(),
-          );
+          WidgetsBinding.instance.addPostFrameCallback((_) => _unlockBackUp());
           break;
         case BootstrapState.askWipeCrossSigning:
           WidgetsBinding.instance.addPostFrameCallback(
@@ -418,7 +406,9 @@ class TomBootstrapDialogState extends State<TomBootstrapDialog>
         _uploadRecoveryKeyState = UploadRecoveryKeyState.uploadError;
       });
     }
-    await _saveRecoveryWordsInteractor.execute(key!).then(
+    await _saveRecoveryWordsInteractor
+        .execute(key!)
+        .then(
           (either) => either.fold(
             (failure) {
               Logs().i(
@@ -449,9 +439,7 @@ class TomBootstrapDialogState extends State<TomBootstrapDialog>
       Logs().i(
         'TomBootstrapDialogState::_unlockBackUp() unlocking: ${recoveryWords.words}',
       );
-      await bootstrap?.newSsssKey!.unlock(
-        keyOrPassphrase: recoveryWords.words,
-      );
+      await bootstrap?.newSsssKey!.unlock(keyOrPassphrase: recoveryWords.words);
       Logs().i('TomBootstrapDialogState::_unlockBackUp() self Signing');
       await bootstrap?.client.encryption!.crossSigning.selfSign(
         keyOrPassphrase: recoveryWords.words,

@@ -55,10 +55,7 @@ class ContactScenario extends BaseScenario {
 
   Future<void> verifyContactListCanBeScrollable(SoftAssertHelper s) async {
     s.softAssertEquals(
-      await CoreRobot($).isActuallyScrollable(
-        $,
-        root: $(CustomScrollView),
-      ),
+      await CoreRobot($).isActuallyScrollable($, root: $(CustomScrollView)),
       true,
       'Contact list is not scrollable',
     );

@@ -29,14 +29,8 @@ void main() {
       await $.pumpAndSettle();
 
       // Verify email and phone fields are NOT visible when everyone is selected
-      expect(
-        contactsVisibilityRobot.emailFieldOption(),
-        findsNothing,
-      );
-      expect(
-        contactsVisibilityRobot.phoneNumberFieldOption(),
-        findsNothing,
-      );
+      expect(contactsVisibilityRobot.emailFieldOption(), findsNothing);
+      expect(contactsVisibilityRobot.phoneNumberFieldOption(), findsNothing);
     },
   );
 
@@ -92,14 +86,8 @@ void main() {
       await $.pumpAndSettle();
 
       // Verify email and phone fields are NOT visible when nobody is selected
-      expect(
-        contactsVisibilityRobot.emailFieldOption(),
-        findsNothing,
-      );
-      expect(
-        contactsVisibilityRobot.phoneNumberFieldOption(),
-        findsNothing,
-      );
+      expect(contactsVisibilityRobot.emailFieldOption(), findsNothing);
+      expect(contactsVisibilityRobot.phoneNumberFieldOption(), findsNothing);
     },
   );
 }

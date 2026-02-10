@@ -13,11 +13,7 @@ class AddressbookResponse with EquatableMixin {
   @JsonKey(name: "contacts")
   final List<AddressBook>? addressBooks;
 
-  AddressbookResponse({
-    this.id,
-    this.owner,
-    this.addressBooks,
-  });
+  AddressbookResponse({this.id, this.owner, this.addressBooks});
 
   factory AddressbookResponse.fromJson(Map<String, dynamic> json) =>
       _$AddressbookResponseFromJson(json);
@@ -25,9 +21,5 @@ class AddressbookResponse with EquatableMixin {
   Map<String, dynamic> toJson() => _$AddressbookResponseToJson(this);
 
   @override
-  List<Object?> get props => [
-        id,
-        owner,
-        addressBooks,
-      ];
+  List<Object?> get props => [id, owner, addressBooks];
 }

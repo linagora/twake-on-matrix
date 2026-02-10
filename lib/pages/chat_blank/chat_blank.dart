@@ -51,9 +51,7 @@ class ChatBlank extends StatelessWidget {
 }
 
 class _ChatBlankNotChat extends StatelessWidget {
-  const _ChatBlankNotChat({
-    required this.context,
-  });
+  const _ChatBlankNotChat({required this.context});
 
   final BuildContext context;
 
@@ -76,9 +74,9 @@ class _ChatBlankNotChat extends StatelessWidget {
           padding: ChatBlankStyle.elementsPadding,
           child: Text(
             L10n.of(context)!.notInAChatYet,
-            style: Theme.of(context).textTheme.headlineLarge?.copyWith(
-                  fontWeight: FontWeight.w600,
-                ),
+            style: Theme.of(
+              context,
+            ).textTheme.headlineLarge?.copyWith(fontWeight: FontWeight.w600),
           ),
         ),
         _ChatBlankRichText(context: context),
@@ -88,9 +86,7 @@ class _ChatBlankNotChat extends StatelessWidget {
 }
 
 class _ChatBlankRichText extends StatelessWidget with GoToGroupChatMixin {
-  const _ChatBlankRichText({
-    required this.context,
-  });
+  const _ChatBlankRichText({required this.context});
 
   final BuildContext context;
 
@@ -98,15 +94,12 @@ class _ChatBlankRichText extends StatelessWidget with GoToGroupChatMixin {
   Widget build(BuildContext context) {
     return RichText(
       textAlign: TextAlign.center,
-      text: TextSpan(
-        children: _buildInlineSpans(context),
-      ),
+      text: TextSpan(children: _buildInlineSpans(context)),
     );
   }
 
   List<InlineSpan> _buildInlineSpans(BuildContext context) {
-    final List<InlineSpan> inlineSpans = L10n.of(context)!
-        .blankChatTitle
+    final List<InlineSpan> inlineSpans = L10n.of(context)!.blankChatTitle
         .splitMapJoinToList<InlineSpan>(
           RegExp(r'#EditIcon#'),
           onMatch: (_) => _buildIconTitle(context),
@@ -131,9 +124,7 @@ class _ChatBlankRichText extends StatelessWidget with GoToGroupChatMixin {
           ),
           MenuItemButton(
             leadingIcon: const Icon(Icons.group),
-            onPressed: () => goToNewGroupChat(
-              innerNavigatorContext(),
-            ),
+            onPressed: () => goToNewGroupChat(innerNavigatorContext()),
             child: Text(
               L10n.of(context)!.newChat,
               style: PopupMenuWidgetStyle.defaultItemTextStyle(context),
@@ -166,10 +157,14 @@ class _ChatBlankRichText extends StatelessWidget with GoToGroupChatMixin {
   BuildContext innerNavigatorContext() {
     if (!goRouteAvailableInFirstColumn) {
       return FirstColumnInnerRoutes
-          .innerNavigatorNotOneColumnKey.currentState!.context;
+          .innerNavigatorNotOneColumnKey
+          .currentState!
+          .context;
     } else {
       return FirstColumnInnerRoutes
-          .innerNavigatorOneColumnKey.currentState!.context;
+          .innerNavigatorOneColumnKey
+          .currentState!
+          .context;
     }
   }
 

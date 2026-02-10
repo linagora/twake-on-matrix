@@ -61,9 +61,7 @@ class ImageViewerView extends StatelessWidget {
       transformationController: controller.transformationController,
       minScale: ImageViewerStyle.minScaleInteractiveViewer,
       maxScale: ImageViewerStyle.maxScaleInteractiveViewer,
-      child: Center(
-        child: imageWidget,
-      ),
+      child: Center(child: imageWidget),
     );
 
     if (controller.widget.event != null) {
@@ -132,9 +130,7 @@ class _ImageWidget extends StatelessWidget {
         );
       }
       return FutureBuilder(
-        future: event.downloadAndDecryptAttachment(
-          getThumbnail: true,
-        ),
+        future: event.downloadAndDecryptAttachment(getThumbnail: true),
         builder: (context, snapshot) {
           if (snapshot.data == null || snapshot.data!.bytes.isEmpty != false) {
             return const CircularProgressIndicator();

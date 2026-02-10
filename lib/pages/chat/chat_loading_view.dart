@@ -7,9 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:skeletons/skeletons.dart';
 
 class ChatLoadingView extends StatelessWidget {
-  const ChatLoadingView({
-    super.key,
-  });
+  const ChatLoadingView({super.key});
 
   @override
   Widget build(BuildContext context) {

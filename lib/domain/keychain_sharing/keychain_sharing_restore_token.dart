@@ -9,9 +9,7 @@ class KeychainSharingRestoreToken {
   final KeychainSharingSession session;
   String? pusherNotificationClientIdentifier;
 
-  KeychainSharingRestoreToken({
-    required this.session,
-  }) {
+  KeychainSharingRestoreToken({required this.session}) {
     pusherNotificationClientIdentifier = session.userId.sha256Hash;
   }
 

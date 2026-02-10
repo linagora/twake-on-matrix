@@ -23,11 +23,12 @@ class BuildDisplayName extends StatelessWidget {
     return HighlightText(
       text: displayName,
       searchWord: highlightKeyword,
-      style: style ??
+      style:
+          style ??
           Theme.of(context).textTheme.bodySmall!.copyWith(
-                color: Theme.of(context).colorScheme.onSurface,
-                fontWeight: FontWeight.w700,
-              ),
+            color: Theme.of(context).colorScheme.onSurface,
+            fontWeight: FontWeight.w700,
+          ),
       overflow: TextOverflow.ellipsis,
     );
   }

@@ -41,11 +41,9 @@ class SettingsNotificationsView extends StatelessWidget {
       body: MaxWidthBody(
         withScrolling: true,
         child: StreamBuilder(
-          stream: Matrix.of(context)
-              .client
-              .onAccountData
-              .stream
-              .where((event) => event.type == 'm.push_rules'),
+          stream: Matrix.of(context).client.onAccountData.stream.where(
+            (event) => event.type == 'm.push_rules',
+          ),
           builder: (BuildContext context, _) {
             return Column(
               children: [
@@ -56,17 +54,18 @@ class SettingsNotificationsView extends StatelessWidget {
                         ? L10n.of(context)!.enable_notifications
                         : L10n.of(context)!.disable_notifications,
                     style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                          color: Theme.of(context).colorScheme.onSurface,
-                        ),
+                      color: Theme.of(context).colorScheme.onSurface,
+                    ),
                   ),
                   onChanged: (_) =>
                       TwakeDialog.showFutureLoadingDialogFullScreen(
-                    future: () => Matrix.of(context)
-                        .client
-                        .setMuteAllPushNotifications(
-                          !Matrix.of(context).client.allPushNotificationsMuted,
-                        ),
-                  ),
+                        future: () => Matrix.of(context).client
+                            .setMuteAllPushNotifications(
+                              !Matrix.of(
+                                context,
+                              ).client.allPushNotificationsMuted,
+                            ),
+                      ),
                 ),
                 if (!Matrix.of(context).client.allPushNotificationsMuted) ...{
                   const Divider(thickness: 1),
@@ -74,9 +73,9 @@ class SettingsNotificationsView extends StatelessWidget {
                     title: Text(
                       L10n.of(context)!.pushRules,
                       style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                            color: Theme.of(context).colorScheme.onSurface,
-                            fontWeight: FontWeight.w700,
-                          ),
+                        color: Theme.of(context).colorScheme.onSurface,
+                        fontWeight: FontWeight.w700,
+                      ),
                     ),
                   ),
                   for (final item in NotificationSettingsItem.items)
@@ -85,8 +84,8 @@ class SettingsNotificationsView extends StatelessWidget {
                       title: Text(
                         item.title(context),
                         style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                              color: Theme.of(context).colorScheme.onSurface,
-                            ),
+                          color: Theme.of(context).colorScheme.onSurface,
+                        ),
                       ),
                       onChanged: (bool enabled) =>
                           controller.setNotificationSetting(item, enabled),

@@ -22,11 +22,7 @@ class TwakeApp extends StatefulWidget {
   final List<Client> clients;
   static GlobalKey<NavigatorState> routerKey = GlobalKey<NavigatorState>();
 
-  const TwakeApp({
-    super.key,
-    this.testWidget,
-    required this.clients,
-  });
+  const TwakeApp({super.key, this.testWidget, required this.clients});
 
   /// getInitialLink may rereturn the value multiple times if this view is
   /// opened multiple times for example if the user logs out after they logged
@@ -65,9 +61,7 @@ class TwakeAppState extends State<TwakeApp> {
     networkConnectionService.onInit();
     SchedulerBinding.instance.addPostFrameCallback((_) async {
       LocalizationService.currentLocale.value =
-          await LocalizationService.getLocaleFromLanguage(
-        context: context,
-      );
+          await LocalizationService.getLocaleFromLanguage(context: context);
     });
   }
 
@@ -117,10 +111,8 @@ class TwakeAppState extends State<TwakeApp> {
               return supportedLocales.first;
             },
             routerConfig: TwakeApp.router,
-            builder: (context, child) => Matrix(
-              clients: widget.clients,
-              child: child,
-            ),
+            builder: (context, child) =>
+                Matrix(clients: widget.clients, child: child),
           );
         },
       ),

@@ -6,13 +6,7 @@ class ChatDetailsPageModel extends Equatable {
   final ChatDetailsPage page;
   final Widget child;
 
-  const ChatDetailsPageModel({
-    required this.page,
-    required this.child,
-  });
+  const ChatDetailsPageModel({required this.page, required this.child});
   @override
-  List<Object?> get props => [
-        page,
-        child,
-      ];
+  List<Object?> get props => [page, child];
 }

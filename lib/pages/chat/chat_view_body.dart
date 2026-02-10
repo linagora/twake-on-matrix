@@ -82,9 +82,7 @@ class ChatViewBody extends StatelessWidget with MessageContentMixin {
                               }
 
                               if (viewState is ViewEventListSuccess) {
-                                return ChatEventList(
-                                  controller: controller,
-                                );
+                                return ChatEventList(controller: controller);
                               }
 
                               return const SizedBox.shrink();
@@ -103,8 +101,8 @@ class ChatViewBody extends StatelessWidget with MessageContentMixin {
                                   padding: EdgeInsets.only(
                                     bottom:
                                         ChatViewBodyStyle.bottomSheetPadding(
-                                      context,
-                                    ),
+                                          context,
+                                        ),
                                     left: ChatViewBodyStyle.bottomSheetPadding(
                                       context,
                                     ),
@@ -120,9 +118,9 @@ class ChatViewBody extends StatelessWidget with MessageContentMixin {
                                         TextButton.icon(
                                           style: TextButton.styleFrom(
                                             padding: const EdgeInsets.all(16),
-                                            foregroundColor: Theme.of(context)
-                                                .colorScheme
-                                                .error,
+                                            foregroundColor: Theme.of(
+                                              context,
+                                            ).colorScheme.error,
                                           ),
                                           icon: const Icon(
                                             Icons.archive_outlined,
@@ -131,17 +129,13 @@ class ChatViewBody extends StatelessWidget with MessageContentMixin {
                                             context,
                                             controller.room,
                                           ),
-                                          label: Text(
-                                            L10n.of(context)!.leave,
-                                          ),
+                                          label: Text(L10n.of(context)!.leave),
                                         ),
                                       TextButton.icon(
                                         style: TextButton.styleFrom(
                                           padding: const EdgeInsets.all(16),
                                         ),
-                                        icon: const Icon(
-                                          Icons.chat_outlined,
-                                        ),
+                                        icon: const Icon(Icons.chat_outlined),
                                         onPressed: controller.recreateChat,
                                         label: Text(
                                           L10n.of(context)!.reopenChat,
@@ -186,8 +180,9 @@ class ChatViewBody extends StatelessWidget with MessageContentMixin {
                       },
                     ),
                     ValueListenableBuilder(
-                      valueListenable:
-                          getIt.get<ContactsManager>().getContactsNotifier(),
+                      valueListenable: getIt
+                          .get<ContactsManager>()
+                          .getContactsNotifier(),
                       builder: (context, state, child) {
                         final contactToAdd = controller.contactToAdd(state);
                         if (contactToAdd == null) {
@@ -235,14 +230,11 @@ class ChatViewBody extends StatelessWidget with MessageContentMixin {
               builder: (context, dragging, _) {
                 if (!dragging) return const SizedBox.shrink();
                 return Container(
-                  color: Theme.of(context)
-                      .scaffoldBackgroundColor
-                      .withOpacity(0.9),
+                  color: Theme.of(
+                    context,
+                  ).scaffoldBackgroundColor.withOpacity(0.9),
                   alignment: Alignment.center,
-                  child: const Icon(
-                    Icons.upload_outlined,
-                    size: 100,
-                  ),
+                  child: const Icon(Icons.upload_outlined, size: 100),
                 );
               },
             ),
@@ -267,9 +259,7 @@ class ChatViewBody extends StatelessWidget with MessageContentMixin {
                       height: ChatController.defaultMaxHeightReactionPicker,
                       decoration: BoxDecoration(
                         color: LinagoraRefColors.material().primary[100],
-                        borderRadius: BorderRadius.circular(
-                          24,
-                        ),
+                        borderRadius: BorderRadius.circular(24),
                         boxShadow: [
                           BoxShadow(
                             color: const Color(0x0000004D).withOpacity(0.15),
@@ -287,12 +277,13 @@ class ChatViewBody extends StatelessWidget with MessageContentMixin {
                       ),
                       child: EmojiPicker(
                         emojiData: Matrix.of(context).emojiData,
-                        recentEmoji:
-                            controller.getRecentReactionsInteractor.execute(),
+                        recentEmoji: controller.getRecentReactionsInteractor
+                            .execute(),
                         configuration: EmojiPickerConfiguration(
                           showRecentTab: true,
-                          emojiStyle:
-                              Theme.of(context).textTheme.headlineLarge!,
+                          emojiStyle: Theme.of(
+                            context,
+                          ).textTheme.headlineLarge!,
                           searchEmptyTextStyle: Theme.of(context)
                               .textTheme
                               .labelMedium!
@@ -305,30 +296,20 @@ class ChatViewBody extends StatelessWidget with MessageContentMixin {
                           ),
                           searchFocusNode: controller.searchEmojiFocusNode,
                         ),
-                        itemBuilder: (
-                          context,
-                          emojiId,
-                          emoji,
-                          callback,
-                        ) {
+                        itemBuilder: (context, emojiId, emoji, callback) {
                           return MouseRegion(
                             child: EmojiItem(
-                              textStyle:
-                                  Theme.of(context).textTheme.headlineLarge!,
+                              textStyle: Theme.of(
+                                context,
+                              ).textTheme.headlineLarge!,
                               onTap: () {
-                                callback(
-                                  emojiId,
-                                  emoji,
-                                );
+                                callback(emojiId, emoji);
                               },
                               emoji: emoji,
                             ),
                           );
                         },
-                        onEmojiSelected: (
-                          emojiId,
-                          emoji,
-                        ) {
+                        onEmojiSelected: (emojiId, emoji) {
                           controller.typeEmoji(emoji);
                           controller.handleStoreRecentReactions(emoji);
                         },
@@ -390,8 +371,9 @@ class ChatViewBody extends StatelessWidget with MessageContentMixin {
               return const BlockedMessageView();
             },
             child: Padding(
-              padding: ChatViewBodyStyle.inputBarPadding(context)
-                  .add(const EdgeInsetsGeometry.symmetric(vertical: 8)),
+              padding: ChatViewBodyStyle.inputBarPadding(
+                context,
+              ).add(const EdgeInsetsGeometry.symmetric(vertical: 8)),
               child: ChatInputRow(controller),
             ),
           ),

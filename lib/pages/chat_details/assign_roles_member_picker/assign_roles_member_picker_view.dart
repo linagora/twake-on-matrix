@@ -80,31 +80,33 @@ class AssignRolesMemberPickerView extends StatelessWidget {
                         onTapOutside: (_) {
                           controller.inputFocus.unfocus();
                         },
-                        decoration: ChatListHeaderStyle.searchInputDecoration(
-                          context,
-                          prefixIconColor:
-                              LinagoraSysColors.material().tertiary,
-                        ).copyWith(
-                          hintStyle: Theme.of(context)
-                              .textTheme
-                              .titleMedium
-                              ?.copyWith(
-                                color: LinagoraSysColors.material().tertiary,
+                        decoration:
+                            ChatListHeaderStyle.searchInputDecoration(
+                              context,
+                              prefixIconColor:
+                                  LinagoraSysColors.material().tertiary,
+                            ).copyWith(
+                              hintStyle: Theme.of(context).textTheme.titleMedium
+                                  ?.copyWith(
+                                    color:
+                                        LinagoraSysColors.material().tertiary,
+                                  ),
+                              hintText: L10n.of(context)!.searchGroupMembers,
+                              suffixIcon: ValueListenableBuilder(
+                                valueListenable:
+                                    controller.textEditingController,
+                                builder: (context, value, child) =>
+                                    value.text.isNotEmpty
+                                    ? IconButton(
+                                        onPressed: () {
+                                          controller.textEditingController
+                                              .clear();
+                                        },
+                                        icon: const Icon(Icons.close),
+                                      )
+                                    : const SizedBox.shrink(),
                               ),
-                          hintText: L10n.of(context)!.searchGroupMembers,
-                          suffixIcon: ValueListenableBuilder(
-                            valueListenable: controller.textEditingController,
-                            builder: (context, value, child) => value
-                                    .text.isNotEmpty
-                                ? IconButton(
-                                    onPressed: () {
-                                      controller.textEditingController.clear();
-                                    },
-                                    icon: const Icon(Icons.close),
-                                  )
-                                : const SizedBox.shrink(),
-                          ),
-                        ),
+                            ),
                       ),
                     ),
                     Divider(
@@ -116,8 +118,9 @@ class AssignRolesMemberPickerView extends StatelessWidget {
                     ),
                     selectedUsersList(context),
                     Container(
-                      color:
-                          Theme.of(context).colorScheme.surfaceContainerHighest,
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.surfaceContainerHighest,
                       alignment: Alignment.centerLeft,
                       padding: const EdgeInsets.symmetric(
                         horizontal: 16.0,
@@ -127,12 +130,12 @@ class AssignRolesMemberPickerView extends StatelessWidget {
                         horizontal: isDialog ? 16.0 : 0,
                       ),
                       child: Text(
-                        L10n.of(context)!.memberOfTheGroup(
-                          controller.members.length,
-                        ),
+                        L10n.of(
+                          context,
+                        )!.memberOfTheGroup(controller.members.length),
                         style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                              color: LinagoraRefColors.material().neutral[40],
-                            ),
+                          color: LinagoraRefColors.material().neutral[40],
+                        ),
                       ),
                     ),
                     const SizedBox(height: 8.0),
@@ -144,7 +147,8 @@ class AssignRolesMemberPickerView extends StatelessWidget {
             ),
             ValueListenableBuilder<bool>(
               valueListenable: controller
-                  .selectedUsersMapChangeNotifier.haveSelectedUsersNotifier,
+                  .selectedUsersMapChangeNotifier
+                  .haveSelectedUsersNotifier,
               builder: (context, haveSelectedContacts, child) {
                 if (!haveSelectedContacts) {
                   return const SizedBox.shrink();
@@ -175,10 +179,10 @@ class AssignRolesMemberPickerView extends StatelessWidget {
                             color: Theme.of(context).colorScheme.primary,
                           ),
                         ),
-                        styleMessage:
-                            Theme.of(context).textTheme.labelLarge?.copyWith(
-                                  color: Theme.of(context).colorScheme.primary,
-                                ),
+                        styleMessage: Theme.of(context).textTheme.labelLarge
+                            ?.copyWith(
+                              color: Theme.of(context).colorScheme.primary,
+                            ),
                       ),
                     ),
                     TwakeTextButton(
@@ -186,10 +190,10 @@ class AssignRolesMemberPickerView extends StatelessWidget {
                       onTap: () {
                         controller.navigateToAssignRolesEditor(context);
                       },
-                      styleMessage:
-                          Theme.of(context).textTheme.labelLarge?.copyWith(
-                                color: Theme.of(context).colorScheme.onPrimary,
-                              ),
+                      styleMessage: Theme.of(context).textTheme.labelLarge
+                          ?.copyWith(
+                            color: Theme.of(context).colorScheme.onPrimary,
+                          ),
                       borderHover: 100,
                       buttonDecoration: BoxDecoration(
                         color: Theme.of(context).colorScheme.primary,
@@ -255,9 +259,7 @@ class AssignRolesMemberPickerView extends StatelessWidget {
                                 AssignRolesMemberPickerStyle.textChipPadding,
                             child: Text(
                               member.calcDisplayname(),
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .titleSmall
+                              style: Theme.of(context).textTheme.titleSmall
                                   ?.copyWith(
                                     color:
                                         LinagoraSysColors.material().onSurface,
@@ -289,9 +291,7 @@ class AssignRolesMemberPickerView extends StatelessWidget {
         return searchResults.fold(
           (failure) {
             if (failure is AssignRolesMemberPickerSearchEmptyState) {
-              return const Center(
-                child: EmptySearchWidget(),
-              );
+              return const Center(child: EmptySearchWidget());
             }
             return const SizedBox.shrink();
           },
@@ -303,19 +303,17 @@ class AssignRolesMemberPickerView extends StatelessWidget {
                 itemCount: success.members.length,
                 itemBuilder: (context, index) {
                   final member = success.members[index];
-                  final role =
-                      member.getDefaultPowerLevelMember.displayName(context);
-                  final canUpdateRole =
-                      controller.widget.room.canUpdateRoleInRoom(member);
+                  final role = member.getDefaultPowerLevelMember.displayName(
+                    context,
+                  );
+                  final canUpdateRole = controller.widget.room
+                      .canUpdateRoleInRoom(member);
                   return TwakeInkWell(
                     onTap: !canUpdateRole
                         ? null
                         : () {
                             controller.selectedUsersMapChangeNotifier
-                                .onUserTileTap(
-                              context,
-                              member,
-                            );
+                                .onUserTileTap(context, member);
                           },
                     child: TwakeListItem(
                       padding: const EdgeInsets.all(8),
@@ -332,7 +330,7 @@ class AssignRolesMemberPickerView extends StatelessWidget {
                                   color: isCurrentSelected
                                       ? Theme.of(context).colorScheme.primary
                                       : LinagoraRefColors.material()
-                                          .tertiary[30]!,
+                                            .tertiary[30]!,
                                   width: 2,
                                 ),
                                 onChanged: !canUpdateRole
@@ -340,10 +338,7 @@ class AssignRolesMemberPickerView extends StatelessWidget {
                                     : (newValue) {
                                         controller
                                             .selectedUsersMapChangeNotifier
-                                            .onUserTileTap(
-                                          context,
-                                          member,
-                                        );
+                                            .onUserTileTap(context, member);
                                       },
                               );
                             },
@@ -378,9 +373,7 @@ class AssignRolesMemberPickerView extends StatelessWidget {
         return searchResults.fold(
           (failure) {
             if (failure is AssignRolesMemberPickerSearchEmptyState) {
-              return const Center(
-                child: EmptySearchWidget(),
-              );
+              return const Center(child: EmptySearchWidget());
             }
             return const SizedBox.shrink();
           },
@@ -390,24 +383,20 @@ class AssignRolesMemberPickerView extends StatelessWidget {
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
                 itemCount: success.members.length,
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 12.0,
-                ),
+                padding: const EdgeInsets.symmetric(horizontal: 12.0),
                 itemBuilder: (context, index) {
                   final member = success.members[index];
-                  final role =
-                      member.getDefaultPowerLevelMember.displayName(context);
-                  final canUpdateRole =
-                      controller.widget.room.canUpdateRoleInRoom(member);
+                  final role = member.getDefaultPowerLevelMember.displayName(
+                    context,
+                  );
+                  final canUpdateRole = controller.widget.room
+                      .canUpdateRoleInRoom(member);
                   return TwakeInkWell(
                     onTap: !canUpdateRole
                         ? null
                         : () {
                             controller.selectedUsersMapChangeNotifier
-                                .onUserTileTap(
-                              context,
-                              member,
-                            );
+                                .onUserTileTap(context, member);
                           },
                     child: TwakeListItem(
                       padding: const EdgeInsets.all(8),
@@ -424,7 +413,7 @@ class AssignRolesMemberPickerView extends StatelessWidget {
                                   color: isCurrentSelected
                                       ? Theme.of(context).colorScheme.primary
                                       : LinagoraRefColors.material()
-                                          .tertiary[30]!,
+                                            .tertiary[30]!,
                                   width: 2,
                                 ),
                                 onChanged: !canUpdateRole
@@ -432,10 +421,7 @@ class AssignRolesMemberPickerView extends StatelessWidget {
                                     : (newValue) {
                                         controller
                                             .selectedUsersMapChangeNotifier
-                                            .onUserTileTap(
-                                          context,
-                                          member,
-                                        );
+                                            .onUserTileTap(context, member);
                                       },
                               );
                             },
@@ -468,10 +454,7 @@ class AssignRolesMemberPickerView extends StatelessWidget {
     return Expanded(
       child: Row(
         children: [
-          Avatar(
-            mxContent: member.avatarUrl,
-            name: member.calcDisplayname(),
-          ),
+          Avatar(mxContent: member.avatarUrl, name: member.calcDisplayname()),
           const SizedBox(width: 8.0),
           Expanded(
             child: Column(
@@ -482,10 +465,10 @@ class AssignRolesMemberPickerView extends StatelessWidget {
                     Expanded(
                       child: Text(
                         member.calcDisplayname(),
-                        style:
-                            LinagoraTextStyle.material().bodyMedium2.copyWith(
-                                  color: LinagoraSysColors.material().onSurface,
-                                ),
+                        style: LinagoraTextStyle.material().bodyMedium2
+                            .copyWith(
+                              color: LinagoraSysColors.material().onSurface,
+                            ),
                         overflow: TextOverflow.ellipsis,
                         maxLines: 1,
                       ),
@@ -498,14 +481,12 @@ class AssignRolesMemberPickerView extends StatelessWidget {
                             role,
                             style:
                                 AssignRolesMemberPickerStyle.roleNameTextStyle(
-                              context,
-                            ),
+                                  context,
+                                ),
                             overflow: TextOverflow.ellipsis,
                             maxLines: 1,
                           ),
-                          const SizedBox(
-                            width: 4,
-                          ),
+                          const SizedBox(width: 4),
                         ],
                       ),
                   ],
@@ -513,8 +494,8 @@ class AssignRolesMemberPickerView extends StatelessWidget {
                 Text(
                   member.id,
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: LinagoraRefColors.material().tertiary[30],
-                      ),
+                    color: LinagoraRefColors.material().tertiary[30],
+                  ),
                   overflow: TextOverflow.ellipsis,
                   maxLines: 1,
                 ),

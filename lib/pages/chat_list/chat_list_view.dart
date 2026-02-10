@@ -34,8 +34,9 @@ class ChatListView extends StatelessWidget {
 
   static const ValueKey bottomNavigationKey = ValueKey('BottomNavigation');
 
-  static const ValueKey primaryNavigationKey =
-      ValueKey('AdaptiveScaffoldPrimaryNavigation');
+  static const ValueKey primaryNavigationKey = ValueKey(
+    'AdaptiveScaffoldPrimaryNavigation',
+  );
 
   static const ValueKey contacts = ValueKey('Contacts');
 
@@ -61,12 +62,12 @@ class ChatListView extends StatelessWidget {
             builder: (context, conversationSelection, __) {
               if (conversationSelection.isNotEmpty) {
                 return ChatListBottomNavigator(
-                  bottomNavigationActionsWidget:
-                      controller.bottomNavigationActionsWidget(
-                    paddingIcon: ChatListBottomNavigatorStyle.paddingIcon,
-                    iconSize: ChatListBottomNavigatorStyle.iconSize,
-                    width: ChatListBottomNavigatorStyle.width,
-                  ),
+                  bottomNavigationActionsWidget: controller
+                      .bottomNavigationActionsWidget(
+                        paddingIcon: ChatListBottomNavigatorStyle.paddingIcon,
+                        iconSize: ChatListBottomNavigatorStyle.iconSize,
+                        width: ChatListBottomNavigatorStyle.width,
+                      ),
                 );
               } else {
                 return bottomNavigationBar ?? const SizedBox();

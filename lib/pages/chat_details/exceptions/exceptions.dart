@@ -18,10 +18,7 @@ import 'package:matrix/matrix.dart';
 class Exceptions extends StatefulWidget {
   final Room room;
 
-  const Exceptions({
-    super.key,
-    required this.room,
-  });
+  const Exceptions({super.key, required this.room});
 
   @override
   ExceptionsController createState() => ExceptionsController();
@@ -39,10 +36,8 @@ class ExceptionsController extends State<Exceptions>
 
   final ValueNotifier<Either<Failure, Success>> searchUserResults =
       ValueNotifier<Either<Failure, Success>>(
-    Right(
-      ExceptionsSearchInitialState(),
-    ),
-  );
+        Right(ExceptionsSearchInitialState()),
+      );
 
   void onBack() {
     Navigator.of(context).pop();
@@ -79,9 +74,9 @@ class ExceptionsController extends State<Exceptions>
     final exceptionUsers = exceptionsMember;
 
     final searchResults = exceptionUsers.where((user) {
-      return (user.displayName ?? '')
-              .toLowerCase()
-              .contains(searchTerm.toLowerCase()) ||
+      return (user.displayName ?? '').toLowerCase().contains(
+            searchTerm.toLowerCase(),
+          ) ||
           (user.id).toLowerCase().contains(searchTerm.toLowerCase());
     }).toList();
 
@@ -133,9 +128,7 @@ class ExceptionsController extends State<Exceptions>
   Widget build(BuildContext context) {
     return SizedBox(
       width: ChatDetailEditViewStyle.fixedWidth,
-      child: ExceptionsView(
-        controller: this,
-      ),
+      child: ExceptionsView(controller: this),
     );
   }
 }

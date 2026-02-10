@@ -25,10 +25,7 @@ import 'package:photo_manager_image_provider/photo_manager_image_provider.dart';
 class NewGroupChatInfoView extends StatelessWidget {
   final NewGroupChatInfoController newGroupInfoController;
 
-  const NewGroupChatInfoView(
-    this.newGroupInfoController, {
-    super.key,
-  });
+  const NewGroupChatInfoView(this.newGroupInfoController, {super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -51,18 +48,20 @@ class NewGroupChatInfoView extends StatelessWidget {
                     Text(
                       L10n.of(context)!.addAPhoto,
                       style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                            color: Theme.of(context).colorScheme.onSurface,
-                          ),
+                        color: Theme.of(context).colorScheme.onSurface,
+                      ),
                     ),
                     Text(
                       L10n.of(context)!.maxImageSize(
                         AppConfig
-                            .defaultMaxUploadAvtarSizeInBytes.bytes.megaBytes
+                            .defaultMaxUploadAvtarSizeInBytes
+                            .bytes
+                            .megaBytes
                             .toInt(),
                       ),
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: LinagoraRefColors.material().neutral[40],
-                          ),
+                        color: LinagoraRefColors.material().neutral[40],
+                      ),
                     ),
                     const SizedBox(height: 32),
                     _buildGroupNameTextField(context),
@@ -120,9 +119,7 @@ class NewGroupChatInfoView extends StatelessWidget {
 
   PreferredSizeWidget _buildAppBar(BuildContext context) {
     return PreferredSize(
-      preferredSize: const Size.fromHeight(
-        NewGroupChatInfoStyle.toolbarHeight,
-      ),
+      preferredSize: const Size.fromHeight(NewGroupChatInfoStyle.toolbarHeight),
       child: TwakeAppBar(
         title: L10n.of(context)!.newGroupChat,
         context: context,
@@ -190,22 +187,24 @@ class NewGroupChatInfoView extends StatelessWidget {
                     ),
                   ),
                   border: OutlineInputBorder(
-                    borderSide:
-                        BorderSide(color: Theme.of(context).colorScheme.shadow),
+                    borderSide: BorderSide(
+                      color: Theme.of(context).colorScheme.shadow,
+                    ),
                   ),
                   errorText: newGroupInfoController.getErrorMessage(
                     newGroupInfoController.groupNameTextEditingController.text,
                   ),
-                  errorStyle:
-                      TextStyle(color: LinagoraSysColors.material().error),
+                  errorStyle: TextStyle(
+                    color: LinagoraSysColors.material().error,
+                  ),
                   labelText: L10n.of(context)!.widgetName,
                   labelStyle: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: Theme.of(context).colorScheme.onSurface,
-                      ),
+                    color: Theme.of(context).colorScheme.onSurface,
+                  ),
                   hintText: L10n.of(context)!.enterGroupName,
                   hintStyle: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                        color: LinagoraRefColors.material().neutral[60],
-                      ),
+                    color: LinagoraRefColors.material().neutral[60],
+                  ),
                   contentPadding: NewGroupChatInfoStyle.contentPadding,
                 ),
                 contextMenuBuilder: mobileTwakeContextMenuBuilder,
@@ -221,9 +220,7 @@ class NewGroupChatInfoView extends StatelessWidget {
 class _AvatarForMobileBuilder extends StatelessWidget {
   final ValueNotifier<AssetEntity?> avatarMobileNotifier;
 
-  const _AvatarForMobileBuilder({
-    required this.avatarMobileNotifier,
-  });
+  const _AvatarForMobileBuilder({required this.avatarMobileNotifier});
 
   @override
   Widget build(BuildContext context) {
@@ -256,9 +253,7 @@ class _AvatarForMobileBuilder extends StatelessWidget {
                 return child;
               },
               errorBuilder: (context, error, stackTrace) {
-                return const Center(
-                  child: Icon(Icons.error_outline),
-                );
+                return const Center(child: Icon(Icons.error_outline));
               },
             ),
           ),
@@ -347,9 +342,7 @@ class _EncryptionSettingTile extends StatelessWidget {
               ),
             ),
           ),
-          const SizedBox(
-            width: 8.0,
-          ),
+          const SizedBox(width: 8.0),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -359,9 +352,9 @@ class _EncryptionSettingTile extends StatelessWidget {
                   child: Text(
                     L10n.of(context)!.enableEncryption,
                     style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                          letterSpacing: 0.15,
-                          fontWeight: FontWeight.w500,
-                        ),
+                      letterSpacing: 0.15,
+                      fontWeight: FontWeight.w500,
+                    ),
                   ),
                 ),
                 const SizedBox(height: 4.0),
@@ -372,9 +365,7 @@ class _EncryptionSettingTile extends StatelessWidget {
                       children: [
                         Text(
                           L10n.of(context)!.encryptionMessage,
-                          style: Theme.of(context)
-                              .textTheme
-                              .labelSmall
+                          style: Theme.of(context).textTheme.labelSmall
                               ?.copyWith(
                                 letterSpacing: 0.5,
                                 color: LinagoraSysColors.material().tertiary,
@@ -387,13 +378,12 @@ class _EncryptionSettingTile extends StatelessWidget {
                           child: isEnable
                               ? Text(
                                   L10n.of(context)!.encryptionWarning,
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .labelSmall
+                                  style: Theme.of(context).textTheme.labelSmall
                                       ?.copyWith(
                                         letterSpacing: 0.4,
-                                        color:
-                                            Theme.of(context).colorScheme.error,
+                                        color: Theme.of(
+                                          context,
+                                        ).colorScheme.error,
                                       ),
                                 )
                               : const SizedBox.shrink(),
@@ -405,30 +395,29 @@ class _EncryptionSettingTile extends StatelessWidget {
               ],
             ),
           ),
-          const SizedBox(
-            width: 12,
-          ),
+          const SizedBox(width: 12),
           ValueListenableBuilder<bool>(
             valueListenable: enableEncryptionNotifier,
             builder: (context, isEnable, child) {
               return Checkbox(
                 value: isEnable,
                 onChanged: (value) => onChanged?.call(value),
-                side: WidgetStateBorderSide.resolveWith(
-                  (Set<WidgetState> states) {
-                    if (states.contains(WidgetState.selected)) {
-                      return const BorderSide(
-                        color: Colors.transparent,
-                        width: 2.0,
-                      );
-                    }
-                    return BorderSide(
-                      color: LinagoraRefColors.material().tertiary[30] ??
-                          Colors.transparent,
+                side: WidgetStateBorderSide.resolveWith((
+                  Set<WidgetState> states,
+                ) {
+                  if (states.contains(WidgetState.selected)) {
+                    return const BorderSide(
+                      color: Colors.transparent,
                       width: 2.0,
                     );
-                  },
-                ),
+                  }
+                  return BorderSide(
+                    color:
+                        LinagoraRefColors.material().tertiary[30] ??
+                        Colors.transparent,
+                    width: 2.0,
+                  );
+                }),
               );
             },
           ),

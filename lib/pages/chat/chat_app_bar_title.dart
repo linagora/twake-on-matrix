@@ -67,13 +67,15 @@ class ChatAppBarTitle extends StatelessWidget {
     final currentContacts = getContactsState.fold(
       (failure) => <PresentationContact>[],
       (success) => success is GetContactsSuccess
-          ? success.contacts.fold(
-              <PresentationContact>{},
-              (previous, contact) => {
-                ...previous,
-                ...contact.toPresentationContacts(),
-              },
-            ).toList()
+          ? success.contacts
+                .fold(
+                  <PresentationContact>{},
+                  (previous, contact) => {
+                    ...previous,
+                    ...contact.toPresentationContacts(),
+                  },
+                )
+                .toList()
           : <PresentationContact>[],
     );
     final availableContact = currentContacts.firstWhereOrNull(
@@ -111,8 +113,9 @@ class ChatAppBarTitle extends StatelessWidget {
                 Hero(
                   tag: 'content_banner',
                   child: ValueListenableBuilder(
-                    valueListenable:
-                        getIt.get<ContactsManager>().getContactsNotifier(),
+                    valueListenable: getIt
+                        .get<ContactsManager>()
+                        .getContactsNotifier(),
                     builder: (context, state, child) {
                       return Avatar(
                         fontSize: ChatAppBarTitleStyle.avatarFontSize,
@@ -147,15 +150,17 @@ class ChatAppBarTitle extends StatelessWidget {
                     ],
                     Flexible(
                       child: ValueListenableBuilder(
-                        valueListenable:
-                            getIt.get<ContactsManager>().getContactsNotifier(),
+                        valueListenable: getIt
+                            .get<ContactsManager>()
+                            .getContactsNotifier(),
                         builder: (context, state, child) {
                           return Text(
                             _getRoomName(context, state),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
-                            style:
-                                ChatAppBarTitleStyle.appBarTitleStyle(context),
+                            style: ChatAppBarTitleStyle.appBarTitleStyle(
+                              context,
+                            ),
                           );
                         },
                       ),
@@ -315,10 +320,7 @@ class _GroupChatAppBarStatusContent extends StatelessWidget {
 }
 
 class ChatAppBarTitleText extends StatelessWidget {
-  const ChatAppBarTitleText({
-    super.key,
-    required this.text,
-  });
+  const ChatAppBarTitleText({super.key, required this.text});
 
   final String text;
 
@@ -338,9 +340,7 @@ class ChatAppBarTitleText extends StatelessWidget {
 }
 
 class _ChatAppBarTitleTyping extends StatelessWidget {
-  const _ChatAppBarTitleTyping({
-    required this.typingText,
-  });
+  const _ChatAppBarTitleTyping({required this.typingText});
 
   final String typingText;
 

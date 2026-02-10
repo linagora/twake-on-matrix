@@ -8,11 +8,7 @@ class ClipboardImageInfo with EquatableMixin {
 
   final int? fileSize;
 
-  ClipboardImageInfo({
-    required this.stream,
-    this.fileName,
-    this.fileSize,
-  });
+  ClipboardImageInfo({required this.stream, this.fileName, this.fileSize});
 
   @override
   List<Object?> get props => [stream, fileName, fileSize];

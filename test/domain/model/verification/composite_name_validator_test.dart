@@ -31,37 +31,46 @@ void main() {
     });
 
     test(
-        'applies multiple validators and returns failure if any validator fails',
-        () {
-      final newNameRequest = NewNameRequest('InvalidName');
+      'applies multiple validators and returns failure if any validator fails',
+      () {
+        final newNameRequest = NewNameRequest('InvalidName');
 
-      when(mockValidator1.validate(newNameRequest))
-          .thenReturn(Right(VerifyNameSuccessViewState()));
-      when(mockValidator2.validate(newNameRequest))
-          .thenReturn(const Left(VerifyNameFailure("Invalid name")));
+        when(
+          mockValidator1.validate(newNameRequest),
+        ).thenReturn(Right(VerifyNameSuccessViewState()));
+        when(
+          mockValidator2.validate(newNameRequest),
+        ).thenReturn(const Left(VerifyNameFailure("Invalid name")));
 
-      final compositeValidator =
-          CompositeNameValidator([mockValidator1, mockValidator2]);
+        final compositeValidator = CompositeNameValidator([
+          mockValidator1,
+          mockValidator2,
+        ]);
 
-      final result = compositeValidator.validate(newNameRequest);
+        final result = compositeValidator.validate(newNameRequest);
 
-      expect(result, isA<Left>());
-      verify(mockValidator1.validate(newNameRequest)).called(1);
-      verify(mockValidator2.validate(newNameRequest)).called(1);
-    });
+        expect(result, isA<Left>());
+        verify(mockValidator1.validate(newNameRequest)).called(1);
+        verify(mockValidator2.validate(newNameRequest)).called(1);
+      },
+    );
 
     test('returns success if all validators pass', () {
       final mockValidator1 = MockValidator();
       final mockValidator2 = MockValidator();
       final newNameRequest = NewNameRequest('ValidName');
 
-      when(mockValidator1.validate(newNameRequest))
-          .thenReturn(Right(VerifyNameSuccessViewState()));
-      when(mockValidator2.validate(newNameRequest))
-          .thenReturn(Right(VerifyNameSuccessViewState()));
+      when(
+        mockValidator1.validate(newNameRequest),
+      ).thenReturn(Right(VerifyNameSuccessViewState()));
+      when(
+        mockValidator2.validate(newNameRequest),
+      ).thenReturn(Right(VerifyNameSuccessViewState()));
 
-      final compositeValidator =
-          CompositeNameValidator([mockValidator1, mockValidator2]);
+      final compositeValidator = CompositeNameValidator([
+        mockValidator1,
+        mockValidator2,
+      ]);
 
       final result = compositeValidator.validate(newNameRequest);
 

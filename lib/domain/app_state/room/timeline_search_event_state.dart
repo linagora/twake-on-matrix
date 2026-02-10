@@ -32,8 +32,6 @@ class TimelineSearchEventFailure extends Failure {
 
 extension TimelineSearchEventSuccessExtension on TimelineSearchEventSuccess {
   TimelineSearchEventSuccess concat(TimelineSearchEventSuccess other) {
-    return TimelineSearchEventSuccess(
-      events: events + other.events,
-    );
+    return TimelineSearchEventSuccess(events: events + other.events);
   }
 }

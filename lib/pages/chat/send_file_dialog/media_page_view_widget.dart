@@ -33,9 +33,7 @@ class MediaPageViewWidget extends StatelessWidget {
               HeroPageRoute(
                 builder: (context) {
                   return InteractiveViewerGallery(
-                    itemBuilder: ImageViewer(
-                      imageData: files.first.bytes,
-                    ),
+                    itemBuilder: ImageViewer(imageData: files.first.bytes),
                   );
                 },
               ),
@@ -53,9 +51,10 @@ class MediaPageViewWidget extends StatelessWidget {
                   : Image.memory(
                       firstFile.bytes,
                       fit: BoxFit.cover,
-                      cacheWidth: (SendFileDialogStyle.imageSize *
-                              MediaQuery.devicePixelRatioOf(context))
-                          .round(),
+                      cacheWidth:
+                          (SendFileDialogStyle.imageSize *
+                                  MediaQuery.devicePixelRatioOf(context))
+                              .round(),
                     ),
             ),
           ),

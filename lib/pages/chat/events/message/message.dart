@@ -31,22 +31,12 @@ import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:matrix/matrix.dart';
 import 'package:visibility_detector/visibility_detector.dart';
 
-typedef OnMenuAction = Function(
-  BuildContext,
-  ChatHorizontalActionMenu,
-  Event,
-  TapDownDetails,
-);
+typedef OnMenuAction =
+    Function(BuildContext, ChatHorizontalActionMenu, Event, TapDownDetails);
 
-typedef OnSendEmojiReactionAction = void Function(
-  String emoji,
-  Event event,
-);
+typedef OnSendEmojiReactionAction = void Function(String emoji, Event event);
 
-typedef OnRemoveEmojiReactionAction = void Function(
-  String emoji,
-  Event event,
-);
+typedef OnRemoveEmojiReactionAction = void Function(String emoji, Event event);
 
 typedef OnPickEmojiReactionAction = void Function();
 
@@ -99,7 +89,7 @@ class Message extends StatefulWidget {
   final void Function(Event)? onSaveToDownload;
   final void Function(Event)? onSaveToGallery;
   final void Function(BuildContext context, Event, TapDownDetails, double)?
-      onTapMoreButton;
+  onTapMoreButton;
   final Future<Category?>? recentEmojiFuture;
   final Future<void> Function(Event)? onRetryTextMessage;
 
@@ -253,10 +243,12 @@ class _MessageState extends State<Message> with MessageAvatarMixin {
       );
     }
 
-    final displayTime = widget.event.type == EventTypes.RoomCreate ||
+    final displayTime =
+        widget.event.type == EventTypes.RoomCreate ||
         widget.nextEvent == null ||
-        !widget.event.originServerTs
-            .sameEnvironment(widget.nextEvent!.originServerTs);
+        !widget.event.originServerTs.sameEnvironment(
+          widget.nextEvent!.originServerTs,
+        );
     final rowMainAxisAlignment = widget.event.isOwnMessage
         ? MainAxisAlignment.end
         : MainAxisAlignment.start;
@@ -379,7 +371,8 @@ class _MessageState extends State<Message> with MessageAvatarMixin {
                 isEnabled: widget.selectMode && widget.event.status.isAvailable,
                 child: OptionalPadding(
                   padding: EdgeInsetsDirectional.only(
-                    end: widget.event.isOwnMessage ||
+                    end:
+                        widget.event.isOwnMessage ||
                             Message.responsiveUtils.isDesktop(context)
                         ? 8.0
                         : 16.0,
@@ -387,11 +380,7 @@ class _MessageState extends State<Message> with MessageAvatarMixin {
                     bottom: 1.0,
                   ),
                   isEnabled: !widget.selected,
-                  child: _messageSelectedWidget(
-                    context,
-                    row,
-                    widget.event,
-                  ),
+                  child: _messageSelectedWidget(context, row, widget.event),
                 ),
               ),
             ),
@@ -419,8 +408,9 @@ class _MessageState extends State<Message> with MessageAvatarMixin {
       color: widget.selected
           ? LinagoraSysColors.material().secondaryContainer
           : Theme.of(context).primaryColor.withAlpha(0),
-      constraints:
-          const BoxConstraints(maxWidth: TwakeThemes.columnWidth * 2.5),
+      constraints: const BoxConstraints(
+        maxWidth: TwakeThemes.columnWidth * 2.5,
+      ),
       child: Row(
         mainAxisSize: MainAxisSize.max,
         children: [

@@ -10,9 +10,10 @@ extension HomeserverSummaryExtensions on HomeserverSummary {
     if (discoveryInformation?.additionalProperties == null) {
       return null;
     }
-    final tomServerJson = discoveryInformation
-            ?.additionalProperties[ToMServerInformation.tomServerKey]
-        as Map<String, dynamic>?;
+    final tomServerJson =
+        discoveryInformation?.additionalProperties[ToMServerInformation
+                .tomServerKey]
+            as Map<String, dynamic>?;
     if (tomServerJson == null) {
       return null;
     }
@@ -28,9 +29,10 @@ extension HomeserverSummaryExtensions on HomeserverSummary {
     if (discoveryInformation?.additionalProperties == null) {
       return null;
     }
-    final appTwakeJson = discoveryInformation
-            ?.additionalProperties[AppTwakeInformation.appTwakeInformationKey]
-        as Map<String, dynamic>?;
+    final appTwakeJson =
+        discoveryInformation?.additionalProperties[AppTwakeInformation
+                .appTwakeInformationKey]
+            as Map<String, dynamic>?;
     if (appTwakeJson == null) {
       return null;
     }
@@ -46,9 +48,10 @@ extension HomeserverSummaryExtensions on HomeserverSummary {
     if (discoveryInformation?.additionalProperties == null) {
       return null;
     }
-    final fedServerJson = discoveryInformation
-            ?.additionalProperties[FederationServerInformation.fedServerKey]
-        as Map<String, dynamic>?;
+    final fedServerJson =
+        discoveryInformation?.additionalProperties[FederationServerInformation
+                .fedServerKey]
+            as Map<String, dynamic>?;
     if (fedServerJson == null) {
       return null;
     }
@@ -66,9 +69,9 @@ extension HomeserverSummaryExtensions on HomeserverSummary {
 
 extension NullableHomeserverSummaryExtensions on HomeserverSummary? {
   bool get supportSSOLogin {
-    return this
-            ?.loginFlows
-            .any((flow) => flow.type == AppConstants.ssoLoginType) ==
+    return this?.loginFlows.any(
+          (flow) => flow.type == AppConstants.ssoLoginType,
+        ) ==
         true;
   }
 }

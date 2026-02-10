@@ -38,7 +38,8 @@ class ChatDetailsMediaPage extends StatelessWidget {
     return SameTypeEventsBuilder(
       controller: controller,
       builder: (context, eventsState, _) {
-        final events = eventsState
+        final events =
+            eventsState
                 .getSuccessOrNull<TimelineSearchEventSuccess>()
                 ?.events ??
             [];
@@ -50,17 +51,17 @@ class ChatDetailsMediaPage extends StatelessWidget {
           itemCount: events.length,
           itemBuilder: (context, index) =>
               events[index].messageType == MessageTypes.Image
-                  ? _ImageItem(
-                      event: events[index],
-                      cacheMap: cacheMap,
-                      closeRightColumn: closeRightColumn,
-                    )
-                  : _VideoItem(
-                      event: events[index],
-                      handleDownloadVideoEvent: handleDownloadVideoEvent,
-                      thumbnailCacheMap: cacheMap,
-                      closeRightColumn: closeRightColumn,
-                    ),
+              ? _ImageItem(
+                  event: events[index],
+                  cacheMap: cacheMap,
+                  closeRightColumn: closeRightColumn,
+                )
+              : _VideoItem(
+                  event: events[index],
+                  handleDownloadVideoEvent: handleDownloadVideoEvent,
+                  thumbnailCacheMap: cacheMap,
+                  closeRightColumn: closeRightColumn,
+                ),
         );
       },
     );
@@ -72,11 +73,7 @@ class _ImageItem extends StatelessWidget {
   final Map<EventId, ImageData>? cacheMap;
   final VoidCallback? closeRightColumn;
 
-  const _ImageItem({
-    required this.event,
-    this.cacheMap,
-    this.closeRightColumn,
-  });
+  const _ImageItem({required this.event, this.cacheMap, this.closeRightColumn});
 
   @override
   Widget build(BuildContext context) {
@@ -86,9 +83,8 @@ class _ImageItem extends StatelessWidget {
       fit: BoxFit.cover,
       onTapPreview: () {},
       isPreview: true,
-      placeholder: (context) => BlurHash(
-        hash: event.blurHash ?? AppConfig.defaultImageBlurHash,
-      ),
+      placeholder: (context) =>
+          BlurHash(hash: event.blurHash ?? AppConfig.defaultImageBlurHash),
       cacheKey: event.eventId,
       cacheMap: cacheMap,
       closeRightColumn: closeRightColumn,
@@ -129,20 +125,18 @@ class _VideoItem extends StatelessWidget {
   }
 
   Future<void> _onTapVideo(BuildContext context) async {
-    final result = await Navigator.of(
-      context,
-      rootNavigator: PlatformInfos.isWeb,
-    ).push(
-      HeroPageRoute(
-        builder: (context) {
-          return InteractiveViewerGallery(
-            itemBuilder: PlatformInfos.isMobile
-                ? MediaViewer(event: event)
-                : DownloadVideoWidget(event: event),
-          );
-        },
-      ),
-    );
+    final result =
+        await Navigator.of(context, rootNavigator: PlatformInfos.isWeb).push(
+          HeroPageRoute(
+            builder: (context) {
+              return InteractiveViewerGallery(
+                itemBuilder: PlatformInfos.isMobile
+                    ? MediaViewer(event: event)
+                    : DownloadVideoWidget(event: event),
+              );
+            },
+          ),
+        );
     if (result == MediaViewerPopupResultEnum.closeRightColumnFlag) {
       closeRightColumn?.call();
     }

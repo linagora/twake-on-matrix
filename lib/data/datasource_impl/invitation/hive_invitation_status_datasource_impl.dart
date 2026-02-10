@@ -16,24 +16,18 @@ class HiveInvitationStatusDatasourceImpl
     required String userId,
     required String contactId,
   }) async {
-    final hiveCollectionFederationDatabase =
-        await getIt.getAsync<HiveCollectionToMDatabase>();
-    final invitationStatus =
-        await hiveCollectionFederationDatabase.invitationStatus.get(
-      TupleKey(userId, contactId).toString(),
-    );
+    final hiveCollectionFederationDatabase = await getIt
+        .getAsync<HiveCollectionToMDatabase>();
+    final invitationStatus = await hiveCollectionFederationDatabase
+        .invitationStatus
+        .get(TupleKey(userId, contactId).toString());
 
     if (invitationStatus == null) {
-      throw InvitationStatusNotFound(
-        userId: userId,
-        contactId: contactId,
-      );
+      throw InvitationStatusNotFound(userId: userId, contactId: contactId);
     }
 
     return InvitationStatusHiveObj.fromJson(
-      copyMap(
-        invitationStatus,
-      ),
+      copyMap(invitationStatus),
     ).toInvitationStatus();
   }
 
@@ -42,8 +36,8 @@ class HiveInvitationStatusDatasourceImpl
     required String userId,
     required InvitationStatus invitationStatus,
   }) async {
-    final hiveCollectionFederationDatabase =
-        await getIt.getAsync<HiveCollectionToMDatabase>();
+    final hiveCollectionFederationDatabase = await getIt
+        .getAsync<HiveCollectionToMDatabase>();
 
     return hiveCollectionFederationDatabase.invitationStatus.put(
       TupleKey(userId, invitationStatus.contactId).toString(),
@@ -56,8 +50,8 @@ class HiveInvitationStatusDatasourceImpl
     required String userId,
     required String contactId,
   }) async {
-    final hiveCollectionFederationDatabase =
-        await getIt.getAsync<HiveCollectionToMDatabase>();
+    final hiveCollectionFederationDatabase = await getIt
+        .getAsync<HiveCollectionToMDatabase>();
 
     return hiveCollectionFederationDatabase.invitationStatus.delete(
       TupleKey(userId, contactId).toString(),

@@ -18,11 +18,7 @@ class SettingsView extends StatelessWidget {
   final Widget? bottomNavigationBar;
   static final responsiveUtils = getIt.get<ResponsiveUtils>();
 
-  const SettingsView(
-    this.controller, {
-    super.key,
-    this.bottomNavigationBar,
-  });
+  const SettingsView(this.controller, {super.key, this.bottomNavigationBar});
 
   @override
   Widget build(BuildContext context) {
@@ -44,10 +40,12 @@ class SettingsView extends StatelessWidget {
             Padding(
               padding: SettingsViewStyle.bodySettingsScreenPadding,
               child: Material(
-                borderRadius:
-                    BorderRadius.circular(SettingsViewStyle.borderRadius),
+                borderRadius: BorderRadius.circular(
+                  SettingsViewStyle.borderRadius,
+                ),
                 clipBehavior: Clip.hardEdge,
-                color: controller.optionsSelectNotifier.value ==
+                color:
+                    controller.optionsSelectNotifier.value ==
                         SettingEnum.profile
                     ? Theme.of(context).colorScheme.secondaryContainer
                     : LinagoraSysColors.material().onPrimary,
@@ -63,12 +61,14 @@ class SettingsView extends StatelessWidget {
                             return Padding(
                               padding: SettingsViewStyle.avatarPadding,
                               child: Material(
-                                elevation: Theme.of(context)
-                                        .appBarTheme
-                                        .scrolledUnderElevation ??
+                                elevation:
+                                    Theme.of(
+                                      context,
+                                    ).appBarTheme.scrolledUnderElevation ??
                                     4,
-                                shadowColor:
-                                    Theme.of(context).appBarTheme.shadowColor,
+                                shadowColor: Theme.of(
+                                  context,
+                                ).appBarTheme.shadowColor,
                                 shape: RoundedRectangleBorder(
                                   side: BorderSide(
                                     color: Theme.of(context).dividerColor,
@@ -106,9 +106,9 @@ class SettingsView extends StatelessWidget {
                                               .textTheme
                                               .titleLarge
                                               ?.copyWith(
-                                                color: Theme.of(context)
-                                                    .colorScheme
-                                                    .onSurface,
+                                                color: Theme.of(
+                                                  context,
+                                                ).colorScheme.onSurface,
                                               ),
                                           maxLines: 1,
                                           overflow: TextOverflow.ellipsis,

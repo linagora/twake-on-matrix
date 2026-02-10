@@ -7,18 +7,18 @@ import 'package:matrix/matrix.dart';
 
 class KeychainSharingManager {
   static FlutterSecureStorage get _secureStorage => const FlutterSecureStorage(
-        iOptions: IOSOptions(
-          groupId: AppConfig.iOSKeychainSharingId,
-          accountName: AppConfig.iOSKeychainSharingAccount,
-          synchronizable: true,
-          accessibility: KeychainAccessibility.first_unlock_this_device,
-        ),
-      );
+    iOptions: IOSOptions(
+      groupId: AppConfig.iOSKeychainSharingId,
+      accountName: AppConfig.iOSKeychainSharingAccount,
+      synchronizable: true,
+      accessibility: KeychainAccessibility.first_unlock_this_device,
+    ),
+  );
 
   static Future save(KeychainSharingRestoreToken token) => _secureStorage.write(
-        key: token.session.userId,
-        value: jsonEncode(token.toJson()),
-      );
+    key: token.session.userId,
+    value: jsonEncode(token.toJson()),
+  );
 
   static Future<KeychainSharingRestoreToken?> read({
     required String userId,

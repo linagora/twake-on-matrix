@@ -20,9 +20,7 @@ class ContactsLoading extends Success {
 class GetContactsSuccess extends Success {
   final List<Contact> contacts;
 
-  const GetContactsSuccess({
-    required this.contacts,
-  });
+  const GetContactsSuccess({required this.contacts});
 
   @override
   List<Object?> get props => [contacts];
@@ -39,10 +37,7 @@ class GetContactsFailure extends Failure {
   final String keyword;
   final dynamic exception;
 
-  const GetContactsFailure({
-    required this.keyword,
-    required this.exception,
-  });
+  const GetContactsFailure({required this.keyword, required this.exception});
 
   @override
   List<Object?> get props => [keyword, exception];

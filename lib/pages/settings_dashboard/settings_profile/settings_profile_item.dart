@@ -60,8 +60,8 @@ class SettingsProfileItemBuilder extends StatelessWidget {
                     Text(
                       title,
                       style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                            color: LinagoraRefColors.material().neutral[40],
-                          ),
+                        color: LinagoraRefColors.material().neutral[40],
+                      ),
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -81,14 +81,14 @@ class SettingsProfileItemBuilder extends StatelessWidget {
                                 ? IconButton(
                                     onPressed:
                                         settingsProfilePresentation.isEditable
-                                            ? focusNode?.requestFocus
-                                            : onCopyAction,
+                                        ? focusNode?.requestFocus
+                                        : onCopyAction,
                                     icon: Icon(
                                       suffixIcon,
                                       size: SettingsProfileItemStyle.iconSize,
-                                      color: Theme.of(context)
-                                          .colorScheme
-                                          .onSurfaceVariant,
+                                      color: Theme.of(
+                                        context,
+                                      ).colorScheme.onSurfaceVariant,
                                     ),
                                   )
                                 : null,

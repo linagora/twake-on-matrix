@@ -20,12 +20,7 @@ class SearchRecentChatInteractor {
         keyword: keyword,
         limit: limit,
       );
-      yield Right(
-        SearchRecentChatSuccess(
-          data: recentChat,
-          keyword: keyword,
-        ),
-      );
+      yield Right(SearchRecentChatSuccess(data: recentChat, keyword: keyword));
     } catch (e) {
       yield Left(SearchRecentChatFailed(exception: e));
     }

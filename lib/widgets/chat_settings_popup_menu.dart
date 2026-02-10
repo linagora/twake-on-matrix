@@ -38,14 +38,9 @@ class ChatSettingsPopupMenuState extends State<ChatSettingsPopupMenu> {
 
   @override
   Widget build(BuildContext context) {
-    notificationChangeSub ??= Matrix.of(context)
-        .client
-        .onAccountData
-        .stream
+    notificationChangeSub ??= Matrix.of(context).client.onAccountData.stream
         .where((u) => u.type == 'm.push_rules')
-        .listen(
-          (u) => setState(() {}),
-        );
+        .listen((u) => setState(() {}));
     final items = <PopupMenuEntry<String>>[
       PopupMenuItem<String>(
         value: 'widgets',
@@ -150,8 +145,8 @@ class ChatSettingsPopupMenuState extends State<ChatSettingsPopupMenu> {
                 if (confirmed == OkCancelResult.ok) {
                   final success =
                       await TwakeDialog.showFutureLoadingDialogFullScreen(
-                    future: () => widget.room.leave(),
-                  );
+                        future: () => widget.room.leave(),
+                      );
                   if (success.error == null) {
                     context.go('/rooms');
                   }
@@ -178,8 +173,11 @@ class ChatSettingsPopupMenuState extends State<ChatSettingsPopupMenu> {
     );
   }
 
-  void _showWidgets() => [TargetPlatform.iOS, TargetPlatform.macOS]
-          .contains(Theme.of(context).platform)
+  void _showWidgets() =>
+      [
+        TargetPlatform.iOS,
+        TargetPlatform.macOS,
+      ].contains(Theme.of(context).platform)
       ? showCupertinoModalPopup(
           context: context,
           builder: (context) => CupertinoWidgetsBottomSheet(room: widget.room),

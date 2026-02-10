@@ -61,11 +61,11 @@ class _SendingVideoWidgetState extends State<SendingVideoWidget>
             width: MessageStyle.mediaContentWidth(
               context: context,
               event: event,
-              calculatedWidth: MessageContentStyle
-                  .combinedBubbleImageWidthWithBubbleMaxWidget(
-                bubbleImageWidget: widget.displayImageInfo.size.width,
-                bubbleMaxWidth: widget.bubbleWidth ?? 0,
-              ),
+              calculatedWidth:
+                  MessageContentStyle.combinedBubbleImageWidthWithBubbleMaxWidget(
+                    bubbleImageWidget: widget.displayImageInfo.size.width,
+                    bubbleMaxWidth: widget.bubbleWidth ?? 0,
+                  ),
             ),
             height: MessageContentStyle.imageBubbleHeight(
               widget.displayImageInfo.size.height,
@@ -75,62 +75,58 @@ class _SendingVideoWidgetState extends State<SendingVideoWidget>
           videoWidget,
           ...switch (event.status) {
             EventStatus.error => [
-                IconButton(
-                  onPressed: () {
-                    uploadManager.retryUpload(event);
-                  },
-                  icon: Icon(
-                    Icons.refresh,
-                    color: sysColor.primary,
-                    size: 24,
-                  ),
-                  padding: const EdgeInsets.all(4),
-                  style: IconButton.styleFrom(
-                    backgroundColor: sysColor.onPrimary,
-                    shape: const CircleBorder(),
-                  ),
+              IconButton(
+                onPressed: () {
+                  uploadManager.retryUpload(event);
+                },
+                icon: Icon(Icons.refresh, color: sysColor.primary, size: 24),
+                padding: const EdgeInsets.all(4),
+                style: IconButton.styleFrom(
+                  backgroundColor: sysColor.onPrimary,
+                  shape: const CircleBorder(),
                 ),
-              ],
+              ),
+            ],
             EventStatus.sent || EventStatus.synced => [
-                InkWell(
-                  onTap: () => _onPlayVideo(context),
-                  child: const _PlayVideoButton(),
-                ),
-              ],
+              InkWell(
+                onTap: () => _onPlayVideo(context),
+                child: const _PlayVideoButton(),
+              ),
+            ],
             _ => [
-                _PlayVideoButton(event: event),
-                ValueListenableBuilder(
-                  valueListenable: uploadFileStateNotifier,
-                  builder: (context, state, child) {
-                    int? receive, total;
-                    double? progress;
-                    if (state is UploadingFileUIState) {
-                      receive = state.receive;
-                      total = state.total;
-                    }
-                    if (receive != null && total != null && total > 0) {
-                      progress = receive / total;
-                    }
-                    return InkWell(
-                      onTap: () {
-                        if (state is UploadFileSuccessUIState) {
-                          return;
-                        }
-                        uploadManager.cancelUpload(event);
-                      },
-                      child: SizedBox(
-                        width: MessageContentStyle.videoCenterButtonSize,
-                        height: MessageContentStyle.videoCenterButtonSize,
-                        child: CircularProgressIndicator(
-                          strokeWidth: MessageContentStyle.strokeVideoWidth,
-                          color: LinagoraRefColors.material().primary[100],
-                          value: progress,
-                        ),
+              _PlayVideoButton(event: event),
+              ValueListenableBuilder(
+                valueListenable: uploadFileStateNotifier,
+                builder: (context, state, child) {
+                  int? receive, total;
+                  double? progress;
+                  if (state is UploadingFileUIState) {
+                    receive = state.receive;
+                    total = state.total;
+                  }
+                  if (receive != null && total != null && total > 0) {
+                    progress = receive / total;
+                  }
+                  return InkWell(
+                    onTap: () {
+                      if (state is UploadFileSuccessUIState) {
+                        return;
+                      }
+                      uploadManager.cancelUpload(event);
+                    },
+                    child: SizedBox(
+                      width: MessageContentStyle.videoCenterButtonSize,
+                      height: MessageContentStyle.videoCenterButtonSize,
+                      child: CircularProgressIndicator(
+                        strokeWidth: MessageContentStyle.strokeVideoWidth,
+                        color: LinagoraRefColors.material().primary[100],
+                        value: progress,
                       ),
-                    );
-                  },
-                ),
-              ],
+                    ),
+                  );
+                },
+              ),
+            ],
           },
         ],
       ),
@@ -206,8 +202,4 @@ class _PlayVideoButton extends StatelessWidget {
   }
 }
 
-enum SendingVideoStatus {
-  sending,
-  sent,
-  error,
-}
+enum SendingVideoStatus { sending, sent, error }

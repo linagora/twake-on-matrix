@@ -16,11 +16,7 @@ class TomContactRepositoryImpl implements ContactRepository {
     int? limit,
     int? offset,
   }) async {
-    return datasource.fetchContacts(
-      query: query,
-      limit: limit,
-      offset: offset,
-    );
+    return datasource.fetchContacts(query: query, limit: limit, offset: offset);
   }
 
   @override

@@ -28,8 +28,9 @@ class ChatView extends StatelessWidget with MessageContentMixin {
           TwakeIconButton(
             icon: Icons.copy_outlined,
             tooltip: L10n.of(context)!.copy,
-            onTap: () => controller
-                .actionWithClearSelections(controller.copySingleEventAction),
+            onTap: () => controller.actionWithClearSelections(
+              controller.copySingleEventAction,
+            ),
           ),
           // #777 Hide Delete Message functionality
           // if (controller.canRedactSelectedEvents)
@@ -46,19 +47,18 @@ class ChatView extends StatelessWidget with MessageContentMixin {
                   : null,
               iconColor:
                   controller.isUnpinEvent(controller.selectedEvents.first)
-                      ? Theme.of(context).colorScheme.onSurfaceVariant
-                      : null,
+                  ? Theme.of(context).colorScheme.onSurfaceVariant
+                  : null,
               imagePath:
                   controller.isUnpinEvent(controller.selectedEvents.first)
-                      ? ImagePaths.icUnpin
-                      : null,
+                  ? ImagePaths.icUnpin
+                  : null,
               tooltip: !controller.isUnpinEvent(controller.selectedEvents.first)
                   ? L10n.of(context)!.pinChat
                   : L10n.of(context)!.unpin,
               onTap: () => controller.actionWithClearSelections(
-                () => controller.pinEventAction(
-                  controller.selectedEvents.single,
-                ),
+                () =>
+                    controller.pinEventAction(controller.selectedEvents.single),
               ),
               imageSize: ChatViewStyle.appBarIconSize,
             ),
@@ -67,10 +67,8 @@ class ChatView extends StatelessWidget with MessageContentMixin {
             TwakeIconButton(
               icon: Icons.more_vert,
               tooltip: L10n.of(context)!.more,
-              onTapDown: (tapDownDetails) => controller.handleAppbarMenuAction(
-                context,
-                tapDownDetails,
-              ),
+              onTapDown: (tapDownDetails) =>
+                  controller.handleAppbarMenuAction(context, tapDownDetails),
               preferBelow: false,
             ),
         ],
@@ -105,8 +103,9 @@ class ChatView extends StatelessWidget with MessageContentMixin {
     return Focus(
       focusNode: controller.chatFocusNode,
       child: StreamBuilder(
-        stream: controller.room!.onUpdate.stream
-            .rateLimit(const Duration(seconds: 1)),
+        stream: controller.room!.onUpdate.stream.rateLimit(
+          const Duration(seconds: 1),
+        ),
         builder: (context, snapshot) => FutureBuilder(
           future: controller.loadTimelineFuture,
           builder: (BuildContext context, snapshot) {
@@ -168,9 +167,9 @@ class ChatView extends StatelessWidget with MessageContentMixin {
                                 tooltip: L10n.of(context)!.more,
                                 onTapDown: (tapDownDetails) =>
                                     controller.handleAppbarMenuAction(
-                                  context,
-                                  tapDownDetails,
-                                ),
+                                      context,
+                                      tapDownDetails,
+                                    ),
                                 preferBelow: false,
                               ),
                             ),
@@ -240,14 +239,14 @@ class ChatView extends StatelessWidget with MessageContentMixin {
   }
 
   Widget _buildBackButton(BuildContext context) => Padding(
-        padding: const EdgeInsets.only(left: 8, right: 8),
-        child: TwakeIconButton(
-          tooltip: L10n.of(context)!.back,
-          icon: Icons.arrow_back_ios,
-          onTap: controller.onBackPress,
-          margin: const EdgeInsets.symmetric(vertical: 12.0),
-        ),
-      );
+    padding: const EdgeInsets.only(left: 8, right: 8),
+    child: TwakeIconButton(
+      tooltip: L10n.of(context)!.back,
+      icon: Icons.arrow_back_ios,
+      onTap: controller.onBackPress,
+      margin: const EdgeInsets.symmetric(vertical: 12.0),
+    ),
+  );
 
   Widget _buildLeading(BuildContext context) {
     if (controller.selectMode) {

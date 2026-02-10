@@ -36,11 +36,11 @@ abstract class PresentationSearch extends Equatable {
 
   @override
   List<Object?> get props => [
-        displayName,
-        directChatMatrixID,
-        emails,
-        phoneNumbers,
-      ];
+    displayName,
+    directChatMatrixID,
+    emails,
+    phoneNumbers,
+  ];
 }
 
 class ContactPresentationSearch extends PresentationSearch {
@@ -57,12 +57,7 @@ class ContactPresentationSearch extends PresentationSearch {
   String get id => matrixId ?? '';
 
   @override
-  List<Object?> get props => [
-        matrixId,
-        displayName,
-        emails,
-        phoneNumbers,
-      ];
+  List<Object?> get props => [matrixId, displayName, emails, phoneNumbers];
 }
 
 class RecentChatPresentationSearch extends PresentationSearch {
@@ -70,9 +65,7 @@ class RecentChatPresentationSearch extends PresentationSearch {
 
   final RoomSummary? roomSummary;
 
-  Uri? getAvatarUriByMatrixId({
-    required Client client,
-  }) {
+  Uri? getAvatarUriByMatrixId({required Client client}) {
     if (roomId == null) return null;
     return client.getRoomById(roomId!)?.avatar;
   }
@@ -88,8 +81,12 @@ class RecentChatPresentationSearch extends PresentationSearch {
   String get id => roomId ?? '';
 
   @override
-  List<Object?> get props =>
-      [roomId, displayName, roomSummary, directChatMatrixID];
+  List<Object?> get props => [
+    roomId,
+    displayName,
+    roomSummary,
+    directChatMatrixID,
+  ];
 }
 
 extension RecentChatSearchModelExtension on RecentChatSearchModel {
@@ -105,19 +102,13 @@ extension RecentChatSearchModelExtension on RecentChatSearchModel {
 
 extension ContactSearchModelExtension on ContactSearchModel {
   ContactPresentationSearch toPresentation() {
-    return ContactPresentationSearch(
-      matrixId: id,
-      displayName: displayName,
-    );
+    return ContactPresentationSearch(matrixId: id, displayName: displayName);
   }
 }
 
 extension UserExtension on User {
   ContactPresentationSearch toContactPresentationSearch() {
-    return ContactPresentationSearch(
-      matrixId: id,
-      displayName: displayName,
-    );
+    return ContactPresentationSearch(matrixId: id, displayName: displayName);
   }
 }
 

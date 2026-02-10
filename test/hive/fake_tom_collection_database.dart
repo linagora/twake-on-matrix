@@ -11,10 +11,7 @@ Future<HiveCollectionToMDatabase> getHiveCollectionsDatabase() async {
     Directory(testHivePath).createSync(recursive: true);
     Hive.init(testHivePath);
   }
-  final db = HiveCollectionToMDatabase(
-    'unit_test',
-    testHivePath,
-  );
+  final db = HiveCollectionToMDatabase('unit_test', testHivePath);
   await db.open();
   return db;
 }

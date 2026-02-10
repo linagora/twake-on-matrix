@@ -9,17 +9,16 @@ import 'package:mockito/mockito.dart';
 
 import 'hive_delete_invitation_status_interactor_test.mocks.dart';
 
-@GenerateMocks([
-  HiveInvitationStatusRepository,
-])
+@GenerateMocks([HiveInvitationStatusRepository])
 void main() {
   late HiveDeleteInvitationStatusInteractor interactor;
   late MockHiveInvitationStatusRepository mockRepository;
 
   setUp(() {
     mockRepository = MockHiveInvitationStatusRepository();
-    GetIt.instance
-        .registerSingleton<HiveInvitationStatusRepository>(mockRepository);
+    GetIt.instance.registerSingleton<HiveInvitationStatusRepository>(
+      mockRepository,
+    );
     interactor = HiveDeleteInvitationStatusInteractor();
   });
 
@@ -32,33 +31,34 @@ void main() {
   const testContactId = 'contact123';
 
   test(
-      'execute returns success state when invitation status is deleted successfully',
-      () async {
-    when(
-      mockRepository.deleteInvitationStatusByContactId(
+    'execute returns success state when invitation status is deleted successfully',
+    () async {
+      when(
+        mockRepository.deleteInvitationStatusByContactId(
+          userId: testUserId,
+          contactId: testContactId,
+        ),
+      ).thenAnswer((_) async => {});
+
+      final result = interactor.execute(
         userId: testUserId,
         contactId: testContactId,
-      ),
-    ).thenAnswer((_) async => {});
+      );
 
-    final result = interactor.execute(
-      userId: testUserId,
-      contactId: testContactId,
-    );
-
-    await expectLater(
-      result,
-      emitsInOrder([
-        const Right(HiveDeleteInvitationStatusLoadingState()),
-        const Right(
-          HiveDeleteInvitationStatusSuccessState(
-            userId: testUserId,
-            contactId: testContactId,
+      await expectLater(
+        result,
+        emitsInOrder([
+          const Right(HiveDeleteInvitationStatusLoadingState()),
+          const Right(
+            HiveDeleteInvitationStatusSuccessState(
+              userId: testUserId,
+              contactId: testContactId,
+            ),
           ),
-        ),
-      ]),
-    );
-  });
+        ]),
+      );
+    },
+  );
 
   test('execute returns failure state on error', () async {
     when(

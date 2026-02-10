@@ -26,20 +26,20 @@ enum ProfileInfoActions {
     switch (this) {
       case ProfileInfoActions.sendMessage:
         return Theme.of(context).textTheme.labelLarge!.copyWith(
-              color: LinagoraSysColors.material().onPrimary,
-            );
+          color: LinagoraSysColors.material().onPrimary,
+        );
       case ProfileInfoActions.removeFromGroup:
         return Theme.of(context).textTheme.labelLarge!.copyWith(
-              color: LinagoraSysColors.material().error,
-            );
+          color: LinagoraSysColors.material().error,
+        );
       case ProfileInfoActions.downgradeToReadOnly:
         return Theme.of(context).textTheme.labelLarge!.copyWith(
-              color: LinagoraSysColors.material().primary,
-            );
+          color: LinagoraSysColors.material().primary,
+        );
       case ProfileInfoActions.transferOwnership:
         return Theme.of(context).textTheme.labelLarge!.copyWith(
-              color: LinagoraSysColors.material().primary,
-            );
+          color: LinagoraSysColors.material().primary,
+        );
     }
   }
 
@@ -60,20 +60,12 @@ enum ProfileInfoActions {
   EdgeInsetsGeometry padding(BuildContext context) {
     switch (this) {
       case ProfileInfoActions.sendMessage:
-        return const EdgeInsets.only(
-          top: 16,
-          bottom: 8,
-        );
+        return const EdgeInsets.only(top: 16, bottom: 8);
       case ProfileInfoActions.removeFromGroup:
-        return const EdgeInsets.only(
-          top: 8,
-          bottom: 8,
-        );
+        return const EdgeInsets.only(top: 8, bottom: 8);
       case ProfileInfoActions.downgradeToReadOnly:
       case ProfileInfoActions.transferOwnership:
-        return const EdgeInsets.only(
-          bottom: 8,
-        );
+        return const EdgeInsets.only(bottom: 8);
     }
   }
 

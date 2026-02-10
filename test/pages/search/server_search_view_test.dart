@@ -33,7 +33,7 @@ void main() {
   late final ServerSearchController mockServerSearchController;
   late final TextEditingController mockTextEditingController;
   late final SearchContactsAndChatsController
-      mockSearchContactAndRecentChatController;
+  mockSearchContactAndRecentChatController;
 
   setUpAll(() {
     final getIt = GetIt.instance;
@@ -81,22 +81,24 @@ void main() {
   }
 
   group('[ServerSearchMessagesList] TEST', () {
-    group('GIVEN searchResultsNotifier is PresentationServerSideEmptySearch',
-        () {
-      testWidgets(
-        'GIVEN notifier value is empty\n'
-        'AND recentAndContactsNotifier value is empty\n'
-        'AND keyword is a Matrix ID\n'
-        'THEN should display SizedBox.shrink\n',
-        (WidgetTester tester) async {
-          when(mockSearchController.serverSearchController)
-              .thenReturn(mockServerSearchController);
-          when(mockSearchController.textEditingController)
-              .thenReturn(mockTextEditingController);
-          when(mockSearchController.searchContactAndRecentChatController)
-              .thenReturn(
-            mockSearchContactAndRecentChatController,
-          );
+    group(
+      'GIVEN searchResultsNotifier is PresentationServerSideEmptySearch',
+      () {
+        testWidgets('GIVEN notifier value is empty\n'
+            'AND recentAndContactsNotifier value is empty\n'
+            'AND keyword is a Matrix ID\n'
+            'THEN should display SizedBox.shrink\n', (
+          WidgetTester tester,
+        ) async {
+          when(
+            mockSearchController.serverSearchController,
+          ).thenReturn(mockServerSearchController);
+          when(
+            mockSearchController.textEditingController,
+          ).thenReturn(mockTextEditingController);
+          when(
+            mockSearchController.searchContactAndRecentChatController,
+          ).thenReturn(mockSearchContactAndRecentChatController);
           when(mockTextEditingController.text).thenReturn('@test:domain.com');
           when(mockServerSearchController.searchResultsNotifier).thenReturn(
             ValueNotifier<PresentationServerSideUIState>(
@@ -111,28 +113,29 @@ void main() {
 
           expect(find.byType(SizedBox), findsOneWidget);
 
-          final SizedBox foundSizedBox =
-              tester.firstWidget(find.byType(SizedBox));
+          final SizedBox foundSizedBox = tester.firstWidget(
+            find.byType(SizedBox),
+          );
           expect(foundSizedBox.child, isNull);
           expect(foundSizedBox.width, equals(0));
           expect(foundSizedBox.height, equals(0));
-        },
-      );
+        });
 
-      testWidgets(
-        'GIVEN searchResultsNotifier value is empty\n'
-        'AND recentAndContactsNotifier value is empty\n'
-        'AND keyword is not a Matrix ID\n'
-        'THEN should display EmptySearchWidget\n',
-        (WidgetTester tester) async {
-          when(mockSearchController.serverSearchController)
-              .thenReturn(mockServerSearchController);
-          when(mockSearchController.textEditingController)
-              .thenReturn(mockTextEditingController);
-          when(mockSearchController.searchContactAndRecentChatController)
-              .thenReturn(
-            mockSearchContactAndRecentChatController,
-          );
+        testWidgets('GIVEN searchResultsNotifier value is empty\n'
+            'AND recentAndContactsNotifier value is empty\n'
+            'AND keyword is not a Matrix ID\n'
+            'THEN should display EmptySearchWidget\n', (
+          WidgetTester tester,
+        ) async {
+          when(
+            mockSearchController.serverSearchController,
+          ).thenReturn(mockServerSearchController);
+          when(
+            mockSearchController.textEditingController,
+          ).thenReturn(mockTextEditingController);
+          when(
+            mockSearchController.searchContactAndRecentChatController,
+          ).thenReturn(mockSearchContactAndRecentChatController);
           when(mockTextEditingController.text).thenReturn('test');
           when(mockServerSearchController.searchResultsNotifier).thenReturn(
             ValueNotifier<PresentationServerSideUIState>(
@@ -147,8 +150,8 @@ void main() {
           await tester.pumpAndSettle();
 
           expect(find.byType(EmptySearchWidget), findsOneWidget);
-        },
-      );
-    });
+        });
+      },
+    );
   });
 }

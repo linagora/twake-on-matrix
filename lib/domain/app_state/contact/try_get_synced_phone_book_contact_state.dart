@@ -25,9 +25,7 @@ class GetSyncedPhoneBookContactIsEmpty extends Failure {
 class GetSyncedPhoneBookContactFailure extends Failure {
   final dynamic exception;
 
-  const GetSyncedPhoneBookContactFailure({
-    required this.exception,
-  });
+  const GetSyncedPhoneBookContactFailure({required this.exception});
 
   @override
   List<Object> get props => [exception];
@@ -36,9 +34,7 @@ class GetSyncedPhoneBookContactFailure extends Failure {
 class HasErrorFromHiveState extends Failure {
   final dynamic exception;
 
-  const HasErrorFromHiveState({
-    required this.exception,
-  });
+  const HasErrorFromHiveState({required this.exception});
 
   @override
   List<Object> get props => [exception];
@@ -47,9 +43,7 @@ class HasErrorFromHiveState extends Failure {
 class HasErrorFromVaultState extends Failure {
   final dynamic exception;
 
-  const HasErrorFromVaultState({
-    required this.exception,
-  });
+  const HasErrorFromVaultState({required this.exception});
 
   @override
   List<Object> get props => [exception];
@@ -58,9 +52,7 @@ class HasErrorFromVaultState extends Failure {
 class HasErrorFromChunkState extends Failure {
   final dynamic exception;
 
-  const HasErrorFromChunkState({
-    required this.exception,
-  });
+  const HasErrorFromChunkState({required this.exception});
 
   @override
   List<Object> get props => [exception];

@@ -11,8 +11,9 @@ void main() {
     description: 'searching a chat group',
     test: ($) async {
       final s = SoftAssertHelper();
-      const searchByMatrixAddress =
-          String.fromEnvironment('SearchByMatrixAddress');
+      const searchByMatrixAddress = String.fromEnvironment(
+        'SearchByMatrixAddress',
+      );
       const searchByTitle = String.fromEnvironment('SearchByTitle');
       const currentAccount = String.fromEnvironment('CurrentAccount');
 
@@ -33,8 +34,9 @@ void main() {
       //searching by a text that included in some groups
       await ChatScenario($).enterSearchText(currentAccount.substring(1, 3));
       await ChatScenario($).verifySearchResultViewIsShown();
-      await ChatScenario($)
-          .verifySearchResultContains(currentAccount.substring(1, 3));
+      await ChatScenario(
+        $,
+      ).verifySearchResultContains(currentAccount.substring(1, 3));
       //return a list of result
       s.softAssertEquals(
         (await ChatListRobot($).getListOfChatGroup()).isNotEmpty,
@@ -52,8 +54,9 @@ void main() {
       );
 
       // search by full an address matrix but make it in case-sensitive format
-      await ChatScenario($)
-          .enterSearchText(searchByMatrixAddress.toUpperCase());
+      await ChatScenario(
+        $,
+      ).enterSearchText(searchByMatrixAddress.toUpperCase());
       //verify there is one result
       s.softAssertEquals(
         (await ChatListRobot($).getListOfChatGroup()).length == 1,
@@ -66,28 +69,31 @@ void main() {
       //verify items displayed on the TwakeListItem
       //todo: handle the case list both contact and Message
       s.softAssertEquals(
-        (await (await ChatListRobot($).getListOfChatGroup())[0].getOwnerLabel())
-            .visible,
+        (await (await ChatListRobot(
+          $,
+        ).getListOfChatGroup())[0].getOwnerLabel()).visible,
         true,
         'Owner is missing!',
       );
       s.softAssertEquals(
-        (await (await ChatListRobot($).getListOfChatGroup())[0]
-                .getEmailLabelIncaseSearching())
-            .visible,
+        (await (await ChatListRobot(
+          $,
+        ).getListOfChatGroup())[0].getEmailLabelIncaseSearching()).visible,
         true,
         'Email field is not shown',
       );
 
       // after searching, open a chat by clicking on a result
-      final chatGroupDetailRobot =
-          await ChatScenario($).openChatGroup(searchByTitle);
+      final chatGroupDetailRobot = await ChatScenario(
+        $,
+      ).openChatGroup(searchByTitle);
       //verify group chat detail screen is shown
       expect(await chatGroupDetailRobot.isVisible(), isTrue);
 
       //back to chat list
-      await ChatScenario($)
-          .backToChatLisFromChatGroupScreen(isOpenGroupFromSearchResult: true);
+      await ChatScenario(
+        $,
+      ).backToChatLisFromChatGroupScreen(isOpenGroupFromSearchResult: true);
       //verify chat list screen is shown gain with correct display
       await ChatScenario($).verifyDisplayOfGroupListScreen(s);
 
@@ -103,18 +109,22 @@ void main() {
       // goto chat screen
       await HomeRobot($).gotoChatListScreen();
       //send a message by API to groupTest
-      await ChatScenario($)
-          .sendAMessageByAPI("${now.month}${now.day}${now.hour}${now.minute}");
+      await ChatScenario(
+        $,
+      ).sendAMessageByAPI("${now.month}${now.day}${now.hour}${now.minute}");
       //get current unread message of groupTest
-      final numberOfUnreadMessage1 =
-          ChatListRobot($).getUnreadMessage(groupTest);
+      final numberOfUnreadMessage1 = ChatListRobot(
+        $,
+      ).getUnreadMessage(groupTest);
 
       //send the ome more message by API
-      await ChatScenario($)
-          .sendAMessageByAPI("${now.month}${now.day}${now.hour}${now.minute}");
+      await ChatScenario(
+        $,
+      ).sendAMessageByAPI("${now.month}${now.day}${now.hour}${now.minute}");
       //get current unread message of groupTest
-      final numberOfUnreadMessage2 =
-          ChatListRobot($).getUnreadMessage(groupTest);
+      final numberOfUnreadMessage2 = ChatListRobot(
+        $,
+      ).getUnreadMessage(groupTest);
 
       expect(
         (numberOfUnreadMessage2 - numberOfUnreadMessage1) == 1,

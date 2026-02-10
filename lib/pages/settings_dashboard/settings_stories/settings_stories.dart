@@ -58,18 +58,18 @@ class SettingsStoriesController extends State<SettingsStories> {
   }
 
   Future<void> _loadUsers() async {
-    final room =
-        _storiesRoom = await Matrix.of(context).client.getStoriesRoom(context);
+    final room = _storiesRoom = await Matrix.of(
+      context,
+    ).client.getStoriesRoom(context);
     if (room == null) {
       noStoriesRoom = true;
       return;
     }
     final users = await room.requestParticipants();
     users.removeWhere((u) => u.id == room.client.userID);
-    final contacts = Matrix.of(context)
-        .client
-        .contacts
-        .where((contact) => !users.any((u) => u.id == contact.id));
+    final contacts = Matrix.of(
+      context,
+    ).client.contacts.where((contact) => !users.any((u) => u.id == contact.id));
     for (final user in contacts) {
       this.users[user] = false;
     }

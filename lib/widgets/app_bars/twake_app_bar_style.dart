@@ -11,33 +11,34 @@ class TwakeAppBarStyle {
 
   static Color appBarBackgroundColor(BuildContext context) =>
       responsiveUtils.isMobile(context)
-          ? LinagoraSysColors.material().background
-          : LinagoraSysColors.material().onPrimary;
+      ? LinagoraSysColors.material().background
+      : LinagoraSysColors.material().onPrimary;
 
   static TextStyle? titleTextStyle(
     BuildContext context, {
     bool isDialog = false,
-  }) =>
-      isDialog
-          ? Theme.of(context).textTheme.headlineSmall?.copyWith(
-                color: Theme.of(context).colorScheme.onSurface,
-                height: 32 / 24,
-              )
-          : responsiveUtils.isMobile(context)
-              ? LinagoraTextStyle.material().bodyLarge1.copyWith(
-                    color: Theme.of(context).colorScheme.onSurface,
-                    height: 24 / 17,
-                  )
-              : Theme.of(context).textTheme.titleLarge?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurface,
-                    height: 28 / 22,
-                  );
+  }) => isDialog
+      ? Theme.of(context).textTheme.headlineSmall?.copyWith(
+          color: Theme.of(context).colorScheme.onSurface,
+          height: 32 / 24,
+        )
+      : responsiveUtils.isMobile(context)
+      ? LinagoraTextStyle.material().bodyLarge1.copyWith(
+          color: Theme.of(context).colorScheme.onSurface,
+          height: 24 / 17,
+        )
+      : Theme.of(context).textTheme.titleLarge?.copyWith(
+          color: Theme.of(context).colorScheme.onSurface,
+          height: 28 / 22,
+        );
 
   static const double dividerHeight = 1.0;
   static const double dividerthickness = 1.0;
   static const EdgeInsets leadingIconPadding = EdgeInsets.only(left: 12);
   static const double leadingIconSize = 24;
 
-  static const EdgeInsetsGeometry backIconPadding =
-      EdgeInsets.symmetric(vertical: 8, horizontal: 4);
+  static const EdgeInsetsGeometry backIconPadding = EdgeInsets.symmetric(
+    vertical: 8,
+    horizontal: 4,
+  );
 }

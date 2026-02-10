@@ -18,22 +18,15 @@ class UnblockUserInteractor {
       if (!client.ignoredUsers.contains(userId)) {
         throw NotInTheIgnoreListException();
       }
-      await client.setAccountData(
-        client.userID!,
-        'm.ignored_user_list',
-        {
-          'ignored_users': Map.fromEntries(
-            (client.ignoredUsers..remove(userId))
-                .map((key) => MapEntry(key, {})),
-          ),
-        },
-      );
+      await client.setAccountData(client.userID!, 'm.ignored_user_list', {
+        'ignored_users': Map.fromEntries(
+          (client.ignoredUsers..remove(userId)).map((key) => MapEntry(key, {})),
+        ),
+      });
       yield const Right(UnblockUserSuccess());
     } on MatrixException catch (e) {
       if (e.error == MatrixError.M_FORBIDDEN) {
-        yield const Left(
-          NoPermissionForUnblockFailure(),
-        );
+        yield const Left(NoPermissionForUnblockFailure());
       }
     } catch (error) {
       if (error is NotValidMxidException) {
@@ -42,11 +35,7 @@ class UnblockUserInteractor {
       if (error is NotInTheIgnoreListException) {
         yield const Left(NotInTheIgnoreListFailure());
       }
-      yield Left(
-        UnblockUserFailure(
-          exception: error,
-        ),
-      );
+      yield Left(UnblockUserFailure(exception: error));
     }
   }
 }

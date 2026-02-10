@@ -38,12 +38,7 @@ class Contact extends Equatable {
   });
 
   @override
-  List<Object?> get props => [
-        id,
-        emails,
-        displayName,
-        phoneNumbers,
-      ];
+  List<Object?> get props => [id, emails, displayName, phoneNumbers];
 
   Contact copyWith({
     String? displayName,
@@ -78,13 +73,12 @@ abstract class ThirdPartyContact with EquatableMixin {
     this.thirdPartyIdToHashMap,
   });
 
-  String calculateHashWithAlgorithmSha256({
-    required String pepper,
-  }) {
+  String calculateHashWithAlgorithmSha256({required String pepper}) {
     final input = [thirdPartyId, thirdPartyIdType, pepper].join(' ');
     final bytes = utf8.encode(input);
-    final lookupHash =
-        encodeBase64Unpadded(sha256.convert(bytes).bytes).urlSafeBase64;
+    final lookupHash = encodeBase64Unpadded(
+      sha256.convert(bytes).bytes,
+    ).urlSafeBase64;
     return lookupHash;
   }
 
@@ -106,16 +100,11 @@ abstract class ThirdPartyContact with EquatableMixin {
     }
 
     for (final algorithm in algorithms) {
-      final peppers = {
-        lookupPepper,
-        ...?altLookupPeppers,
-      };
+      final peppers = {lookupPepper, ...?altLookupPeppers};
 
       for (final pepper in peppers) {
         if (algorithm == 'sha256') {
-          final hash = calculateHashWithAlgorithmSha256(
-            pepper: pepper ?? '',
-          );
+          final hash = calculateHashWithAlgorithmSha256(pepper: pepper ?? '');
           hashes.add(hash);
         } else {
           final hash = calculateHashWithoutAlgorithm();
@@ -128,12 +117,12 @@ abstract class ThirdPartyContact with EquatableMixin {
 
   @override
   List<Object?> get props => [
-        thirdPartyId,
-        thirdPartyIdType,
-        matrixId,
-        status,
-        thirdPartyIdToHashMap,
-      ];
+    thirdPartyId,
+    thirdPartyIdType,
+    matrixId,
+    status,
+    thirdPartyIdToHashMap,
+  ];
 }
 
 class PhoneNumber extends ThirdPartyContact {
@@ -145,19 +134,19 @@ class PhoneNumber extends ThirdPartyContact {
     super.status,
     super.thirdPartyIdToHashMap,
   }) : super(
-          thirdPartyId: number.msisdnSanitizer(),
-          thirdPartyIdType: ThirdPartyIdType.msisdn,
-        );
+         thirdPartyId: number.msisdnSanitizer(),
+         thirdPartyIdType: ThirdPartyIdType.msisdn,
+       );
 
   @override
   List<Object?> get props => [
-        number,
-        matrixId,
-        status,
-        thirdPartyIdToHashMap,
-        thirdPartyId,
-        thirdPartyIdType,
-      ];
+    number,
+    matrixId,
+    status,
+    thirdPartyIdToHashMap,
+    thirdPartyId,
+    thirdPartyIdType,
+  ];
 
   PhoneNumber copyWith({
     String? matrixId,
@@ -182,10 +171,7 @@ class Email extends ThirdPartyContact {
     super.matrixId,
     super.status,
     super.thirdPartyIdToHashMap,
-  }) : super(
-          thirdPartyId: address,
-          thirdPartyIdType: ThirdPartyIdType.email,
-        );
+  }) : super(thirdPartyId: address, thirdPartyIdType: ThirdPartyIdType.email);
 
   Email copyWith({
     String? matrixId,
@@ -203,11 +189,11 @@ class Email extends ThirdPartyContact {
 
   @override
   List<Object?> get props => [
-        address,
-        matrixId,
-        status,
-        thirdPartyIdToHashMap,
-        thirdPartyId,
-        thirdPartyIdType,
-      ];
+    address,
+    matrixId,
+    status,
+    thirdPartyIdToHashMap,
+    thirdPartyId,
+    thirdPartyIdType,
+  ];
 }

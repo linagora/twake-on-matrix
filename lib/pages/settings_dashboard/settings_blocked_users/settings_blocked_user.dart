@@ -38,8 +38,8 @@ class SettingsIgnoreListController extends State<BlockedUsers>
 
   final ValueNotifier<Either<Failure, Success>> searchUserResults =
       ValueNotifier<Either<Failure, Success>>(
-    Right(BlockedUsersSearchInitialState()),
-  );
+        Right(BlockedUsersSearchInitialState()),
+      );
 
   final List<Profile> blockedUsers = [];
 
@@ -73,10 +73,7 @@ class SettingsIgnoreListController extends State<BlockedUsers>
     }
     if (blockedUsers.isNotEmpty) {
       searchUserResults.value = Right(
-        BlockedUsersSearchSuccessState(
-          blockedUsers: blockedUsers,
-          keyword: '',
-        ),
+        BlockedUsersSearchSuccessState(blockedUsers: blockedUsers, keyword: ''),
       );
     } else {
       searchUserResults.value = const Left(
@@ -89,18 +86,15 @@ class SettingsIgnoreListController extends State<BlockedUsers>
   void handleSearchResults(String searchTerm) {
     if (searchTerm.isEmpty) {
       searchUserResults.value = Right(
-        BlockedUsersSearchSuccessState(
-          blockedUsers: blockedUsers,
-          keyword: '',
-        ),
+        BlockedUsersSearchSuccessState(blockedUsers: blockedUsers, keyword: ''),
       );
       return;
     }
 
     final searchResults = blockedUsers.where((user) {
-      return (user.displayName ?? '')
-              .toLowerCase()
-              .contains(searchTerm.toLowerCase()) ||
+      return (user.displayName ?? '').toLowerCase().contains(
+            searchTerm.toLowerCase(),
+          ) ||
           (user.userId).toLowerCase().contains(searchTerm.toLowerCase());
     }).toList();
 
@@ -161,10 +155,7 @@ class SettingsIgnoreListController extends State<BlockedUsers>
 
     if (blockedUsers.isEmpty) {
       searchUserResults.value = Right(
-        BlockedUsersSearchSuccessState(
-          blockedUsers: blockedUsers,
-          keyword: '',
-        ),
+        BlockedUsersSearchSuccessState(blockedUsers: blockedUsers, keyword: ''),
       );
     } else {
       searchUserResults.value = const Left(

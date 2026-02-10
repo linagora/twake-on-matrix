@@ -34,19 +34,17 @@ mixin ChatListItemMixin {
           room.membership == Membership.invite
               ? L10n.of(context)!.youAreInvitedToThisChat
               : snapshot.data ??
-                  event.calcLocalizedBodyFallback(
-                    MatrixLocals(L10n.of(context)!),
-                    hideReply: true,
-                    hideEdit: true,
-                    plaintextBody: true,
-                    removeMarkdown: true,
-                  ),
+                    event.calcLocalizedBodyFallback(
+                      MatrixLocals(L10n.of(context)!),
+                      hideReply: true,
+                      hideEdit: true,
+                      plaintextBody: true,
+                      removeMarkdown: true,
+                    ),
           softWrap: false,
           maxLines: isGroup ? 1 : 2,
           overflow: TextOverflow.ellipsis,
-          style: ListItemStyle.subtitleTextStyle(
-            fontFamily: 'Inter',
-          ),
+          style: ListItemStyle.subtitleTextStyle(fontFamily: 'Inter'),
         );
       },
     );
@@ -56,9 +54,7 @@ mixin ChatListItemMixin {
     final displayedTypingText = "$typingText…";
     return Text(
       displayedTypingText,
-      style: ListItemStyle.subtitleTextStyle(
-        fontFamily: 'Inter',
-      ),
+      style: ListItemStyle.subtitleTextStyle(fontFamily: 'Inter'),
       maxLines: 2,
       softWrap: true,
     );
@@ -75,19 +71,17 @@ mixin ChatListItemMixin {
         softWrap: false,
         maxLines: 2,
         overflow: TextOverflow.ellipsis,
-        style:
-            ChatLitSubSubtitleTextStyleView.textStyle.textStyle(room, context),
+        style: ChatLitSubSubtitleTextStyleView.textStyle.textStyle(
+          room,
+          context,
+        ),
       );
     }
 
     return FutureBuilder<User?>(
       future: event?.fetchSenderUser(),
-      builder: (context, snapshot) => _subTitleFutureBuilder(
-        context,
-        room,
-        event,
-        snapshot.data,
-      ),
+      builder: (context, snapshot) =>
+          _subTitleFutureBuilder(context, room, event, snapshot.data),
     );
   }
 
@@ -108,8 +102,10 @@ mixin ChatListItemMixin {
         softWrap: false,
         maxLines: 2,
         overflow: TextOverflow.ellipsis,
-        style:
-            ChatLitSubSubtitleTextStyleView.textStyle.textStyle(room, context),
+        style: ChatLitSubSubtitleTextStyleView.textStyle.textStyle(
+          room,
+          context,
+        ),
       );
     }
 
@@ -124,33 +120,23 @@ mixin ChatListItemMixin {
           softWrap: false,
           style: ListItemStyle.subtitleTextStyle(
             fontFamily: 'Inter',
-          ).copyWith(
-            color: LinagoraSysColors.material().onSurface,
-          ),
+          ).copyWith(color: LinagoraSysColors.material().onSurface),
         ),
         event.messageType == MessageTypes.Image ||
                 event.messageType == MessageTypes.Video
-            ? chatListItemMediaPreviewSubTitle(
-                context,
-                event,
-              )
+            ? chatListItemMediaPreviewSubTitle(context, event)
             : Text(
                 subscriptions,
                 softWrap: false,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: ListItemStyle.subtitleTextStyle(
-                  fontFamily: 'Inter',
-                ),
+                style: ListItemStyle.subtitleTextStyle(fontFamily: 'Inter'),
               ),
       ],
     );
   }
 
-  Widget chatListItemMediaPreviewSubTitle(
-    BuildContext context,
-    Event? event,
-  ) {
+  Widget chatListItemMediaPreviewSubTitle(BuildContext context, Event? event) {
     return Row(
       children: [
         if (event == null || event.status != EventStatus.synced)
@@ -160,8 +146,9 @@ mixin ChatListItemMixin {
             height: SubtitleImagePreviewStyle.height,
             width: SubtitleImagePreviewStyle.width,
             child: ClipRRect(
-              borderRadius:
-                  BorderRadius.circular(SubtitleImagePreviewStyle.borderRadius),
+              borderRadius: BorderRadius.circular(
+                SubtitleImagePreviewStyle.borderRadius,
+              ),
               child: MxcImage(
                 key: ValueKey(event.eventId),
                 cacheKey: event.eventId,
@@ -183,9 +170,7 @@ mixin ChatListItemMixin {
             event?.messageType == MessageTypes.Image
                 ? L10n.of(context)!.photo
                 : L10n.of(context)!.video,
-            style: ListItemStyle.subtitleTextStyle(
-              fontFamily: 'Inter',
-            ),
+            style: ListItemStyle.subtitleTextStyle(fontFamily: 'Inter'),
           ),
         ),
       ],
@@ -202,17 +187,11 @@ mixin ChatListItemMixin {
     }
 
     if (hasNewMessage(room)) {
-      return _handleNotificationColorHasNewMessage(
-        room,
-        context,
-      );
+      return _handleNotificationColorHasNewMessage(room, context);
     }
 
     if (room.markedUnread) {
-      return _handleNotificationColorMarkedUnread(
-        context: context,
-        room: room,
-      );
+      return _handleNotificationColorMarkedUnread(context: context, room: room);
     }
     return Colors.transparent;
   }

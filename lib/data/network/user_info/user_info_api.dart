@@ -16,16 +16,15 @@ class UserInfoApi {
       instanceName: NetworkDI.tomDioClientName,
     );
 
-    final uri =
-        TomEndpoint.userInfoServicePath.generateTomUserInfoEndpoint(userId);
+    final uri = TomEndpoint.userInfoServicePath.generateTomUserInfoEndpoint(
+      userId,
+    );
 
     final dioCacheCustomInterceptor = getIt.get<MatrixDioCacheInterceptor>(
       instanceName: NetworkDI.memCacheDioInterceptorName,
     );
 
-    dioCacheCustomInterceptor.addUriSupportsCache([
-      uri,
-    ]);
+    dioCacheCustomInterceptor.addUriSupportsCache([uri]);
 
     final response = await client.get(uri).onError((error, stackTrace) {
       if (error is DioException) {
@@ -48,8 +47,9 @@ class UserInfoApi {
       instanceName: NetworkDI.tomDioClientName,
     );
 
-    final uri =
-        TomEndpoint.userInfoServicePath.userInfoVisibilityServicePath(userId);
+    final uri = TomEndpoint.userInfoServicePath.userInfoVisibilityServicePath(
+      userId,
+    );
 
     final response = await client.get(uri).onError((error, stackTrace) {
       if (error is DioException) {
@@ -75,24 +75,25 @@ class UserInfoApi {
       instanceName: NetworkDI.tomDioClientName,
     );
 
-    final uri =
-        TomEndpoint.userInfoServicePath.userInfoVisibilityServicePath(userId);
+    final uri = TomEndpoint.userInfoServicePath.userInfoVisibilityServicePath(
+      userId,
+    );
 
     final response = await client
         .postToGetBody(uri, data: body.toJson())
         .onError((error, stackTrace) {
-      if (error is DioException) {
-        throw DioException(
-          requestOptions: error.requestOptions,
-          response: error.response,
-          type: error.type,
-          error: error.error,
-          stackTrace: error.stackTrace,
-        );
-      } else {
-        throw Exception(error);
-      }
-    });
+          if (error is DioException) {
+            throw DioException(
+              requestOptions: error.requestOptions,
+              response: error.response,
+              type: error.type,
+              error: error.error,
+              stackTrace: error.stackTrace,
+            );
+          } else {
+            throw Exception(error);
+          }
+        });
     return UserInfoVisibility.fromJson(response);
   }
 }

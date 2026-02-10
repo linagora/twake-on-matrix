@@ -19,25 +19,18 @@ mixin PlayVideoActionMixin {
       builder: (context) {
         return InteractiveViewerGallery(
           itemBuilder: PlatformInfos.isMobile
-              ? VideoViewerMobileTheme(
-                  bytes: bytes,
-                  event: event,
-                )
-              : VideoViewerDesktopTheme(
-                  bytes: bytes,
-                  event: event,
-                ),
+              ? VideoViewerMobileTheme(bytes: bytes, event: event)
+              : VideoViewerDesktopTheme(bytes: bytes, event: event),
         );
       },
     );
     if (isReplacement) {
-      Navigator.of(context, rootNavigator: PlatformInfos.isWeb).pushReplacement(
-        pageRoute,
-      );
+      Navigator.of(
+        context,
+        rootNavigator: PlatformInfos.isWeb,
+      ).pushReplacement(pageRoute);
     } else {
-      Navigator.of(context, rootNavigator: PlatformInfos.isWeb).push(
-        pageRoute,
-      );
+      Navigator.of(context, rootNavigator: PlatformInfos.isWeb).push(pageRoute);
     }
   }
 }

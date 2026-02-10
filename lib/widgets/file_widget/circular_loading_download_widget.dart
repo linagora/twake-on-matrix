@@ -33,10 +33,7 @@ class _CircularLoadingDownloadWidgetState
       vsync: this,
     )..repeat(reverse: true);
 
-    _animation = CurvedAnimation(
-      parent: _controller!,
-      curve: Curves.linear,
-    );
+    _animation = CurvedAnimation(parent: _controller!, curve: Curves.linear);
   }
 
   @override

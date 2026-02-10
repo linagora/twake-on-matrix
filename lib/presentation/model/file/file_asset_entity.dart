@@ -22,18 +22,12 @@ abstract class FileAssetEntity with EquatableMixin {
   factory FileAssetEntity.createAssetEntity(AssetEntity asset) {
     switch (asset.type) {
       case AssetType.video:
-        return VideoAssetEntity(
-          assetEntity: asset,
-        );
+        return VideoAssetEntity(assetEntity: asset);
       case AssetType.image:
-        return ImageAssetEntity(
-          assetEntity: asset,
-        );
+        return ImageAssetEntity(assetEntity: asset);
       case AssetType.audio:
       case AssetType.other:
-        return DefaultAssetEntity(
-          assetEntity: asset,
-        );
+        return DefaultAssetEntity(assetEntity: asset);
     }
   }
 

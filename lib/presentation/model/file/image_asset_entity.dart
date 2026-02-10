@@ -6,9 +6,7 @@ import 'package:fluffychat/presentation/model/file/file_asset_entity.dart';
 import 'package:matrix/matrix.dart';
 
 class ImageAssetEntity extends FileAssetEntity {
-  ImageAssetEntity({
-    required super.assetEntity,
-  });
+  ImageAssetEntity({required super.assetEntity});
 
   @override
   Future<FileInfo?> toFileInfo() async {

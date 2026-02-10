@@ -23,6 +23,6 @@ Future<UniversalImageBitmap?> convertUint8ListToBitmap(Uint8List buffer) async {
   final blob = web.Blob([buffer.toJS].toJS);
 
   final web.ImageBitmap bitmap = await jsWindow.createImageBitmap(blob).toDart;
-  
+
   return UniversalImageBitmap(width: bitmap.width, height: bitmap.height);
 }

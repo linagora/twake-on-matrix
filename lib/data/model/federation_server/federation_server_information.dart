@@ -10,9 +10,7 @@ class FederationServerInformation with EquatableMixin {
   @JsonKey(name: 'base_urls')
   final List<Uri>? baseUrls;
 
-  FederationServerInformation({
-    this.baseUrls,
-  });
+  FederationServerInformation({this.baseUrls});
 
   bool get hasBaseUrls => baseUrls != null && baseUrls!.isNotEmpty;
 

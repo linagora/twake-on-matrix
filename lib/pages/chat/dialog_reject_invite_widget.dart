@@ -2,15 +2,10 @@ import 'package:fluffychat/pages/chat/dialog_reject_invite_style.dart';
 import 'package:flutter/material.dart';
 import 'package:fluffychat/generated/l10n/app_localizations.dart';
 
-enum DialogRejectInviteResult {
-  reject,
-  cancel,
-}
+enum DialogRejectInviteResult { reject, cancel }
 
 class DialogRejectInviteWidget extends StatelessWidget {
-  const DialogRejectInviteWidget({
-    super.key,
-  });
+  const DialogRejectInviteWidget({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -37,9 +32,7 @@ class DialogRejectInviteWidget extends StatelessWidget {
                     children: [
                       Text(
                         L10n.of(context)!.declineTheInvitation,
-                        style: Theme.of(context)
-                            .textTheme
-                            .headlineSmall
+                        style: Theme.of(context).textTheme.headlineSmall
                             ?.copyWith(
                               color: Theme.of(context).colorScheme.onSurface,
                             ),
@@ -48,14 +41,15 @@ class DialogRejectInviteWidget extends StatelessWidget {
                       SizedBox(
                         width: DialogAcceptInviteStyle.dialogTextWidth,
                         child: Text(
-                          L10n.of(context)!
-                              .doYouReallyWantToDeclineThisInvitation,
-                          style:
-                              Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                    color: Theme.of(context)
-                                        .colorScheme
-                                        .onSurfaceVariant,
-                                  ),
+                          L10n.of(
+                            context,
+                          )!.doYouReallyWantToDeclineThisInvitation,
+                          style: Theme.of(context).textTheme.bodyMedium
+                              ?.copyWith(
+                                color: Theme.of(
+                                  context,
+                                ).colorScheme.onSurfaceVariant,
+                              ),
                         ),
                       ),
                     ],
@@ -69,15 +63,17 @@ class DialogRejectInviteWidget extends StatelessWidget {
                       _ActionButton(
                         context: context,
                         text: L10n.of(context)!.declineAndRemove,
-                        onPressed: () => Navigator.of(context)
-                            .pop(DialogRejectInviteResult.reject),
+                        onPressed: () => Navigator.of(
+                          context,
+                        ).pop(DialogRejectInviteResult.reject),
                       ),
                       const SizedBox(width: 8),
                       _ActionButton(
                         context: context,
                         text: L10n.of(context)!.cancel,
-                        onPressed: () => Navigator.of(context)
-                            .pop(DialogRejectInviteResult.cancel),
+                        onPressed: () => Navigator.of(
+                          context,
+                        ).pop(DialogRejectInviteResult.cancel),
                       ),
                     ],
                   ),
@@ -119,8 +115,8 @@ class _ActionButton extends StatelessWidget {
         child: Text(
           text,
           style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                color: Theme.of(context).colorScheme.primary,
-              ),
+            color: Theme.of(context).colorScheme.primary,
+          ),
         ),
       ),
     );

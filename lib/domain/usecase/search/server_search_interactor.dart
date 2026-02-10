@@ -8,8 +8,8 @@ import 'package:fluffychat/domain/repository/server_search_repository.dart';
 import 'package:matrix/matrix.dart';
 
 class ServerSearchInteractor {
-  final ServerSearchRepository _repository =
-      getIt.get<ServerSearchRepository>();
+  final ServerSearchRepository _repository = getIt
+      .get<ServerSearchRepository>();
 
   Stream<Either<Failure, Success>> execute({
     required ServerSideSearchCategories searchCategories,
@@ -37,9 +37,7 @@ class ServerSearchInteractor {
         ),
       );
     } catch (e) {
-      Logs().e(
-        'ServerSearchInteractor::execute(): Exception - $e}.',
-      );
+      Logs().e('ServerSearchInteractor::execute(): Exception - $e}.');
       yield Left(ServerSearchChatFailed(exception: e));
     }
   }

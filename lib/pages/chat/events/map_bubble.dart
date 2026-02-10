@@ -75,8 +75,9 @@ class MapBubble extends StatelessWidget {
                     color: Theme.of(context).brightness == Brightness.dark
                         ? Colors.white
                         : Colors.black,
-                    backgroundColor:
-                        Theme.of(context).appBarTheme.backgroundColor,
+                    backgroundColor: Theme.of(
+                      context,
+                    ).appBarTheme.backgroundColor,
                   ),
                 ),
               ),

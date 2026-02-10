@@ -5,10 +5,7 @@ import 'package:fluffychat/generated/l10n/app_localizations.dart';
 class DraftChatEmpty extends StatelessWidget {
   final void Function()? onTap;
 
-  const DraftChatEmpty({
-    super.key,
-    this.onTap,
-  });
+  const DraftChatEmpty({super.key, this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -17,9 +14,7 @@ class DraftChatEmpty extends StatelessWidget {
       onTap: onTap,
       child: Container(
         padding: const EdgeInsets.all(16),
-        constraints: const BoxConstraints(
-          maxWidth: 236,
-        ),
+        constraints: const BoxConstraints(maxWidth: 236),
         decoration: BoxDecoration(
           color: DraftChatEmptyWidgetStyle.greetingButtonBackground,
           borderRadius: BorderRadius.circular(16),
@@ -49,10 +44,9 @@ class DraftChatEmpty extends StatelessWidget {
             const SizedBox(height: 8),
             Text(
               '🤗',
-              style: Theme.of(context)
-                  .textTheme
-                  .titleLarge
-                  ?.merge(const TextStyle(fontSize: 88)),
+              style: Theme.of(
+                context,
+              ).textTheme.titleLarge?.merge(const TextStyle(fontSize: 88)),
             ),
           ],
         ),

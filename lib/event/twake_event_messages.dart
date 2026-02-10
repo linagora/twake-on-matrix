@@ -1,6 +1,6 @@
 class TwakeEventMessages {
   static Map<String, Map<String, Map<String, dynamic>>>
-      updateAddressBookMessage(String clientId, String senderDeviceId) {
+  updateAddressBookMessage(String clientId, String senderDeviceId) {
     return {
       clientId: {
         '*': {

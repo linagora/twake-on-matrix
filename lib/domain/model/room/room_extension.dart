@@ -170,8 +170,9 @@ extension RoomExtension on Room {
     // said room list, so it should be good enough.
     Event? lastEventAvailableInPreview;
     try {
-      final lastEvents =
-          client.roomPreviewLastEvents.map(getState).whereType<Event>();
+      final lastEvents = client.roomPreviewLastEvents
+          .map(getState)
+          .whereType<Event>();
 
       lastEventAvailableInPreview = lastEvents.isEmpty
           ? null
@@ -212,8 +213,10 @@ extension RoomExtension on Room {
         if (lastState == null) return null;
 
         lastEventAvailableInPreview = lastState;
-        final messageEvents =
-            await client.database.getEventList(this, limit: 30);
+        final messageEvents = await client.database.getEventList(
+          this,
+          limit: 30,
+        );
         if (messageEvents.isEmpty) {
           return lastState;
         }
@@ -271,51 +274,36 @@ extension RoomExtension on Room {
     final members = getParticipants();
     if (members.isEmpty) return [];
     return members.where((final User member) {
-      final powerLevel = member.powerLevel;
-      return powerLevel >= DefaultPowerLevelMember.moderator.powerLevel &&
-          member.membership == Membership.join;
-    }).toList()
-      ..sort(
-        (small, great) => great.powerLevel.compareTo(small.powerLevel),
-      );
+        final powerLevel = member.powerLevel;
+        return powerLevel >= DefaultPowerLevelMember.moderator.powerLevel &&
+            member.membership == Membership.join;
+      }).toList()
+      ..sort((small, great) => great.powerLevel.compareTo(small.powerLevel));
   }
 
   List<User> getExceptionsMember() {
     final members = getParticipants();
     if (members.isEmpty) return [];
     return members.where((final User member) {
-      final powerLevel = member.powerLevel;
-      return powerLevel < DefaultPowerLevelMember.member.powerLevel &&
-          member.membership == Membership.join;
-    }).toList()
-      ..sort(
-        (small, great) => great.powerLevel.compareTo(small.powerLevel),
-      );
+        final powerLevel = member.powerLevel;
+        return powerLevel < DefaultPowerLevelMember.member.powerLevel &&
+            member.membership == Membership.join;
+      }).toList()
+      ..sort((small, great) => great.powerLevel.compareTo(small.powerLevel));
   }
 
   List<User> getBannedMembers() {
-    final members = getParticipants(
-      [Membership.ban],
-    );
+    final members = getParticipants([Membership.ban]);
     if (members.isEmpty) return [];
     return members
-      ..sort(
-        (small, great) => great.powerLevel.compareTo(small.powerLevel),
-      );
+      ..sort((small, great) => great.powerLevel.compareTo(small.powerLevel));
   }
 
   List<User> getCurrentMembers() {
-    final members = getParticipants(
-      [
-        Membership.invite,
-        Membership.join,
-      ],
-    );
+    final members = getParticipants([Membership.invite, Membership.join]);
     if (members.isEmpty) return [];
     return members
-      ..sort(
-        (small, great) => great.powerLevel.compareTo(small.powerLevel),
-      );
+      ..sort((small, great) => great.powerLevel.compareTo(small.powerLevel));
   }
 
   bool canUpdateRoleInRoom(User user) {
@@ -327,20 +315,22 @@ extension RoomExtension on Room {
   }
 
   Stream get powerLevelsChanged => client.onSync.stream.where(
-        (e) =>
-            (e.rooms?.join?.containsKey(id) ?? false) &&
-            ((e.rooms!.join![id]?.timeline?.events
-                        ?.any((s) => s.type == EventTypes.RoomPowerLevels) ??
-                    false) ||
-                (e.rooms!.join![id]?.timeline?.events
-                        ?.any((s) => s.type == EventTypes.RoomMember) ??
-                    false)),
-      );
+    (e) =>
+        (e.rooms?.join?.containsKey(id) ?? false) &&
+        ((e.rooms!.join![id]?.timeline?.events?.any(
+                  (s) => s.type == EventTypes.RoomPowerLevels,
+                ) ??
+                false) ||
+            (e.rooms!.join![id]?.timeline?.events?.any(
+                  (s) => s.type == EventTypes.RoomMember,
+                ) ??
+                false)),
+  );
 
   int getUserDefaultLevel() {
-    return getState(EventTypes.RoomPowerLevels)!
-            .content
-            .tryGet<int>('users_default') ??
+    return getState(
+          EventTypes.RoomPowerLevels,
+        )!.content.tryGet<int>('users_default') ??
         0;
   }
 
@@ -350,9 +340,7 @@ extension RoomExtension on Room {
   }
 
   User get ownUser {
-    return getParticipants().firstWhere(
-      (user) => user.id == client.userID,
-    );
+    return getParticipants().firstWhere((user) => user.id == client.userID);
   }
 
   bool get canReportContent => membership.isJoin;
@@ -362,10 +350,7 @@ extension RoomExtension on Room {
     bool parseMarkdown = true,
     String msgtype = MessageTypes.Text,
   }) {
-    final event = <String, dynamic>{
-      'msgtype': msgtype,
-      'body': message,
-    };
+    final event = <String, dynamic>{'msgtype': msgtype, 'body': message};
     if (parseMarkdown) {
       final html = markdown(
         event['body'],

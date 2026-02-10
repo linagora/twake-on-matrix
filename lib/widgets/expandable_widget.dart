@@ -59,7 +59,8 @@ class _ExpandableWidgetState extends State<ExpandableWidget> {
                 isExpandedNotifier.toggle();
               },
               child: Container(
-                padding: widget.padding ??
+                padding:
+                    widget.padding ??
                     const EdgeInsets.symmetric(
                       vertical: 13.0,
                       horizontal: 16.0,

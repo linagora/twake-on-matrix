@@ -5,9 +5,7 @@ Widget mobileTwakeContextMenuBuilder(
   EditableTextState editableTextState,
 ) {
   if (SystemContextMenu.isSupported(context)) {
-    return SystemContextMenu.editableText(
-      editableTextState: editableTextState,
-    );
+    return SystemContextMenu.editableText(editableTextState: editableTextState);
   }
   return AdaptiveTextSelectionToolbar.editableText(
     editableTextState: editableTextState,

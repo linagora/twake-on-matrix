@@ -14,7 +14,7 @@ mixin SearchMixin {
     for (final chat in recentChat) {
       final isContactHasChat =
           distinctContactsAndChatsMap[chat.directChatMatrixID ?? chat.id] !=
-              null;
+          null;
       if (!isContactHasChat) {
         distinctContactsAndChatsMap[chat.id] = chat;
       }

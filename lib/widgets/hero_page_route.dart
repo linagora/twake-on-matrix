@@ -1,10 +1,7 @@
 import 'package:flutter/material.dart';
 
 class HeroPageRoute<T> extends PageRoute<T> {
-  HeroPageRoute({
-    required this.builder,
-    this.onBackgroundTap,
-  }) : super();
+  HeroPageRoute({required this.builder, this.onBackgroundTap}) : super();
 
   final WidgetBuilder builder;
 

@@ -14,11 +14,8 @@ class WarningDialog {
     showDialog(
       context: context,
       useRootNavigator: false,
-      builder: (c) => WarningDialogWidget(
-        title: title,
-        message: message,
-        actions: actions,
-      ),
+      builder: (c) =>
+          WarningDialogWidget(title: title, message: message, actions: actions),
     );
   }
 

@@ -110,9 +110,7 @@ void main() {
 
         when(
           mockContactsViewControllerMixin.presentationContactNotifier,
-        ).thenReturn(
-          ValueNotifierCustom(const Left(GetContactsIsEmpty())),
-        );
+        ).thenReturn(ValueNotifierCustom(const Left(GetContactsIsEmpty())));
 
         when(
           mockContactsViewControllerMixin.presentationPhonebookContactNotifier,
@@ -146,7 +144,8 @@ void main() {
 
         expect(
           mockContactsViewControllerMixin
-              .presentationRecentContactNotifier.value,
+              .presentationRecentContactNotifier
+              .value,
           [],
         );
 
@@ -157,7 +156,8 @@ void main() {
 
         expect(
           mockContactsViewControllerMixin
-              .presentationPhonebookContactNotifier.value,
+              .presentationPhonebookContactNotifier
+              .value,
           const Right(GetPhonebookContactsInitial()),
         );
       },
@@ -221,7 +221,9 @@ void main() {
 
         expect(
           mockContactsViewControllerMixin
-              .presentationRecentContactNotifier.value.isNotEmpty,
+              .presentationRecentContactNotifier
+              .value
+              .isNotEmpty,
           true,
         );
 
@@ -232,7 +234,8 @@ void main() {
 
         expect(
           mockContactsViewControllerMixin
-              .presentationPhonebookContactNotifier.value,
+              .presentationPhonebookContactNotifier
+              .value,
           const Right(GetPhonebookContactsInitial()),
         );
       },
@@ -298,7 +301,9 @@ void main() {
 
         expect(
           mockContactsViewControllerMixin
-              .presentationRecentContactNotifier.value.isNotEmpty,
+              .presentationRecentContactNotifier
+              .value
+              .isNotEmpty,
           true,
         );
 
@@ -308,13 +313,11 @@ void main() {
         );
 
         final presentationContact = mockContactsViewControllerMixin
-            .presentationContactNotifier.value
+            .presentationContactNotifier
+            .value
             .getSuccessOrNull();
 
-        expect(
-          presentationContact is GetContactsSuccess,
-          true,
-        );
+        expect(presentationContact is GetContactsSuccess, true);
 
         expect(
           (presentationContact as GetContactsSuccess).contacts.isNotEmpty,
@@ -323,7 +326,8 @@ void main() {
 
         expect(
           mockContactsViewControllerMixin
-              .presentationPhonebookContactNotifier.value,
+              .presentationPhonebookContactNotifier
+              .value,
           const Right(GetPhonebookContactsInitial()),
         );
       },
@@ -391,7 +395,9 @@ void main() {
 
         expect(
           mockContactsViewControllerMixin
-              .presentationRecentContactNotifier.value.isNotEmpty,
+              .presentationRecentContactNotifier
+              .value
+              .isNotEmpty,
           false,
         );
 
@@ -402,7 +408,8 @@ void main() {
 
         expect(
           mockContactsViewControllerMixin
-              .presentationPhonebookContactNotifier.value,
+              .presentationPhonebookContactNotifier
+              .value,
           const Right(GetPhonebookContactsInitial()),
         );
       },
@@ -454,9 +461,7 @@ void main() {
 
         when(
           mockContactsViewControllerMixin.presentationContactNotifier,
-        ).thenReturn(
-          ValueNotifierCustom(const Left(GetContactsIsEmpty())),
-        );
+        ).thenReturn(ValueNotifierCustom(const Left(GetContactsIsEmpty())));
 
         when(
           mockContactsViewControllerMixin.presentationPhonebookContactNotifier,
@@ -490,7 +495,8 @@ void main() {
 
         expect(
           mockContactsViewControllerMixin
-              .presentationRecentContactNotifier.value,
+              .presentationRecentContactNotifier
+              .value,
           [],
         );
 
@@ -501,7 +507,8 @@ void main() {
 
         expect(
           mockContactsViewControllerMixin
-              .presentationPhonebookContactNotifier.value,
+              .presentationPhonebookContactNotifier
+              .value,
           const Right(GetPhonebookContactsInitial()),
         );
 
@@ -518,9 +525,7 @@ void main() {
 
         when(
           mockContactsViewControllerMixin.presentationContactNotifier,
-        ).thenReturn(
-          ValueNotifierCustom(const Left(GetContactsIsEmpty())),
-        );
+        ).thenReturn(ValueNotifierCustom(const Left(GetContactsIsEmpty())));
 
         when(
           mockContactsViewControllerMixin.presentationPhonebookContactNotifier,
@@ -565,7 +570,8 @@ void main() {
 
         expect(
           mockContactsViewControllerMixin
-              .presentationRecentContactNotifier.value,
+              .presentationRecentContactNotifier
+              .value,
           [],
         );
 
@@ -576,7 +582,8 @@ void main() {
 
         expect(
           mockContactsViewControllerMixin
-              .presentationPhonebookContactNotifier.value,
+              .presentationPhonebookContactNotifier
+              .value,
           const Right(GetPhonebookContactsInitial()),
         );
       },
@@ -628,9 +635,7 @@ void main() {
 
         when(
           mockContactsViewControllerMixin.presentationContactNotifier,
-        ).thenReturn(
-          ValueNotifierCustom(const Left(GetContactsIsEmpty())),
-        );
+        ).thenReturn(ValueNotifierCustom(const Left(GetContactsIsEmpty())));
 
         when(
           mockContactsViewControllerMixin.presentationPhonebookContactNotifier,
@@ -664,7 +669,9 @@ void main() {
 
         expect(
           mockContactsViewControllerMixin
-              .presentationRecentContactNotifier.value.isNotEmpty,
+              .presentationRecentContactNotifier
+              .value
+              .isNotEmpty,
           true,
         );
 
@@ -675,7 +682,8 @@ void main() {
 
         expect(
           mockContactsViewControllerMixin
-              .presentationPhonebookContactNotifier.value,
+              .presentationPhonebookContactNotifier
+              .value,
           const Right(GetPhonebookContactsInitial()),
         );
 
@@ -692,9 +700,7 @@ void main() {
 
         when(
           mockContactsViewControllerMixin.presentationContactNotifier,
-        ).thenReturn(
-          ValueNotifierCustom(const Left(GetContactsIsEmpty())),
-        );
+        ).thenReturn(ValueNotifierCustom(const Left(GetContactsIsEmpty())));
 
         when(
           mockContactsViewControllerMixin.presentationPhonebookContactNotifier,
@@ -739,7 +745,9 @@ void main() {
 
         expect(
           mockContactsViewControllerMixin
-              .presentationRecentContactNotifier.value.isNotEmpty,
+              .presentationRecentContactNotifier
+              .value
+              .isNotEmpty,
           false,
         );
 
@@ -750,7 +758,8 @@ void main() {
 
         expect(
           mockContactsViewControllerMixin
-              .presentationPhonebookContactNotifier.value,
+              .presentationPhonebookContactNotifier
+              .value,
           const Right(GetPhonebookContactsInitial()),
         );
       },
@@ -838,7 +847,9 @@ void main() {
 
         expect(
           mockContactsViewControllerMixin
-              .presentationRecentContactNotifier.value.isNotEmpty,
+              .presentationRecentContactNotifier
+              .value
+              .isNotEmpty,
           true,
         );
 
@@ -849,7 +860,8 @@ void main() {
 
         expect(
           mockContactsViewControllerMixin
-              .presentationPhonebookContactNotifier.value,
+              .presentationPhonebookContactNotifier
+              .value,
           const Right(GetPhonebookContactsInitial()),
         );
 
@@ -866,9 +878,7 @@ void main() {
 
         when(
           mockContactsViewControllerMixin.presentationContactNotifier,
-        ).thenReturn(
-          ValueNotifierCustom(const Left(GetContactsIsEmpty())),
-        );
+        ).thenReturn(ValueNotifierCustom(const Left(GetContactsIsEmpty())));
 
         when(
           mockContactsViewControllerMixin.presentationPhonebookContactNotifier,
@@ -913,7 +923,9 @@ void main() {
 
         expect(
           mockContactsViewControllerMixin
-              .presentationRecentContactNotifier.value.isNotEmpty,
+              .presentationRecentContactNotifier
+              .value
+              .isNotEmpty,
           false,
         );
 
@@ -924,7 +936,8 @@ void main() {
 
         expect(
           mockContactsViewControllerMixin
-              .presentationPhonebookContactNotifier.value,
+              .presentationPhonebookContactNotifier
+              .value,
           const Right(GetPhonebookContactsInitial()),
         );
       },
@@ -1012,7 +1025,9 @@ void main() {
 
         expect(
           mockContactsViewControllerMixin
-              .presentationRecentContactNotifier.value.isNotEmpty,
+              .presentationRecentContactNotifier
+              .value
+              .isNotEmpty,
           true,
         );
 
@@ -1023,7 +1038,8 @@ void main() {
 
         expect(
           mockContactsViewControllerMixin
-              .presentationPhonebookContactNotifier.value,
+              .presentationPhonebookContactNotifier
+              .value,
           const Right(GetPhonebookContactsInitial()),
         );
 
@@ -1094,25 +1110,32 @@ void main() {
 
         expect(
           mockContactsViewControllerMixin
-              .presentationRecentContactNotifier.value.isNotEmpty,
+              .presentationRecentContactNotifier
+              .value
+              .isNotEmpty,
           true,
         );
 
         expect(
           mockContactsViewControllerMixin
-              .presentationRecentContactNotifier.value.first.displayName,
+              .presentationRecentContactNotifier
+              .value
+              .first
+              .displayName,
           'Alice test',
         );
 
         expect(
           mockContactsViewControllerMixin.presentationContactNotifier.value
-              .getSuccessOrNull() is GetPresentationContactsSuccess,
+                  .getSuccessOrNull()
+              is GetPresentationContactsSuccess,
           true,
         );
 
-        final presentationContact = mockContactsViewControllerMixin
-            .presentationContactNotifier.value
-            .getSuccessOrNull() as GetPresentationContactsSuccess;
+        final presentationContact =
+            mockContactsViewControllerMixin.presentationContactNotifier.value
+                    .getSuccessOrNull()
+                as GetPresentationContactsSuccess;
 
         expect(presentationContact.keyword, keyword);
 
@@ -1122,7 +1145,8 @@ void main() {
 
         expect(
           mockContactsViewControllerMixin
-              .presentationPhonebookContactNotifier.value,
+              .presentationPhonebookContactNotifier
+              .value,
           const Right(GetPhonebookContactsInitial()),
         );
       },
@@ -1215,7 +1239,9 @@ void main() {
 
         expect(
           mockContactsViewControllerMixin
-              .presentationRecentContactNotifier.value.isNotEmpty,
+              .presentationRecentContactNotifier
+              .value
+              .isNotEmpty,
           true,
         );
 
@@ -1226,7 +1252,8 @@ void main() {
 
         expect(
           mockContactsViewControllerMixin
-              .presentationPhonebookContactNotifier.value,
+              .presentationPhonebookContactNotifier
+              .value,
           const Right(GetPhonebookContactsInitial()),
         );
 
@@ -1297,25 +1324,32 @@ void main() {
 
         expect(
           mockContactsViewControllerMixin
-              .presentationRecentContactNotifier.value.isNotEmpty,
+              .presentationRecentContactNotifier
+              .value
+              .isNotEmpty,
           true,
         );
 
         expect(
           mockContactsViewControllerMixin
-              .presentationRecentContactNotifier.value.first.displayName,
+              .presentationRecentContactNotifier
+              .value
+              .first
+              .displayName,
           'Alice test',
         );
 
         expect(
           mockContactsViewControllerMixin.presentationContactNotifier.value
-              .getSuccessOrNull() is GetPresentationContactsSuccess,
+                  .getSuccessOrNull()
+              is GetPresentationContactsSuccess,
           true,
         );
 
-        final presentationContact = mockContactsViewControllerMixin
-            .presentationContactNotifier.value
-            .getSuccessOrNull() as GetPresentationContactsSuccess;
+        final presentationContact =
+            mockContactsViewControllerMixin.presentationContactNotifier.value
+                    .getSuccessOrNull()
+                as GetPresentationContactsSuccess;
 
         expect(presentationContact.keyword, keyword);
 
@@ -1325,7 +1359,8 @@ void main() {
 
         expect(
           mockContactsViewControllerMixin
-              .presentationPhonebookContactNotifier.value,
+              .presentationPhonebookContactNotifier
+              .value,
           const Right(GetPhonebookContactsInitial()),
         );
 
@@ -1392,25 +1427,32 @@ void main() {
 
         expect(
           mockContactsViewControllerMixin
-              .presentationRecentContactNotifier.value.isNotEmpty,
+              .presentationRecentContactNotifier
+              .value
+              .isNotEmpty,
           true,
         );
 
         expect(
           mockContactsViewControllerMixin
-              .presentationRecentContactNotifier.value.first.displayName,
+              .presentationRecentContactNotifier
+              .value
+              .first
+              .displayName,
           'Alice test',
         );
 
         expect(
           mockContactsViewControllerMixin.presentationContactNotifier.value
-              .getSuccessOrNull() is GetPresentationContactsSuccess,
+                  .getSuccessOrNull()
+              is GetPresentationContactsSuccess,
           true,
         );
 
-        final presentationContactTwo = mockContactsViewControllerMixin
-            .presentationContactNotifier.value
-            .getSuccessOrNull() as GetPresentationContactsSuccess;
+        final presentationContactTwo =
+            mockContactsViewControllerMixin.presentationContactNotifier.value
+                    .getSuccessOrNull()
+                as GetPresentationContactsSuccess;
 
         expect(presentationContactTwo.keyword, searchKeywordSecond);
 
@@ -1420,7 +1462,8 @@ void main() {
 
         expect(
           mockContactsViewControllerMixin
-              .presentationPhonebookContactNotifier.value,
+              .presentationPhonebookContactNotifier
+              .value,
           const Right(GetPhonebookContactsInitial()),
         );
       },
@@ -1463,9 +1506,7 @@ void main() {
 
         when(
           mockContactsViewControllerMixin.presentationContactNotifier,
-        ).thenReturn(
-          ValueNotifierCustom(const Left(GetContactsIsEmpty())),
-        );
+        ).thenReturn(ValueNotifierCustom(const Left(GetContactsIsEmpty())));
 
         when(
           mockContactsViewControllerMixin.presentationPhonebookContactNotifier,
@@ -1499,7 +1540,8 @@ void main() {
 
         expect(
           mockContactsViewControllerMixin
-              .presentationRecentContactNotifier.value,
+              .presentationRecentContactNotifier
+              .value,
           [],
         );
 
@@ -1510,7 +1552,8 @@ void main() {
 
         expect(
           mockContactsViewControllerMixin
-              .presentationPhonebookContactNotifier.value,
+              .presentationPhonebookContactNotifier
+              .value,
           const Left(GetPhonebookContactsIsEmpty()),
         );
       },
@@ -1574,7 +1617,9 @@ void main() {
 
         expect(
           mockContactsViewControllerMixin
-              .presentationRecentContactNotifier.value.isNotEmpty,
+              .presentationRecentContactNotifier
+              .value
+              .isNotEmpty,
           true,
         );
 
@@ -1585,7 +1630,8 @@ void main() {
 
         expect(
           mockContactsViewControllerMixin
-              .presentationPhonebookContactNotifier.value,
+              .presentationPhonebookContactNotifier
+              .value,
           const Left(GetPhonebookContactsIsEmpty()),
         );
       },
@@ -1658,7 +1704,9 @@ void main() {
 
         expect(
           mockContactsViewControllerMixin
-              .presentationRecentContactNotifier.value.isNotEmpty,
+              .presentationRecentContactNotifier
+              .value
+              .isNotEmpty,
           true,
         );
 
@@ -1668,13 +1716,11 @@ void main() {
         );
 
         final presentationContact = mockContactsViewControllerMixin
-            .presentationContactNotifier.value
+            .presentationContactNotifier
+            .value
             .getSuccessOrNull();
 
-        expect(
-          presentationContact is GetContactsSuccess,
-          true,
-        );
+        expect(presentationContact is GetContactsSuccess, true);
 
         expect(
           (presentationContact as GetContactsSuccess).contacts.isNotEmpty,
@@ -1682,7 +1728,8 @@ void main() {
         );
 
         final presentationPhonebookContact = mockContactsViewControllerMixin
-            .presentationPhonebookContactNotifier.value
+            .presentationPhonebookContactNotifier
+            .value
             .getSuccessOrNull();
 
         expect(
@@ -1734,10 +1781,7 @@ void main() {
         ).thenReturn(
           ValueNotifierCustom(
             const Left(
-              GetPhonebookContactsFailure(
-                exception: dynamic,
-                contacts: [],
-              ),
+              GetPhonebookContactsFailure(exception: dynamic, contacts: []),
             ),
           ),
         );
@@ -1768,7 +1812,9 @@ void main() {
 
         expect(
           mockContactsViewControllerMixin
-              .presentationRecentContactNotifier.value.isNotEmpty,
+              .presentationRecentContactNotifier
+              .value
+              .isNotEmpty,
           false,
         );
 
@@ -1779,12 +1825,10 @@ void main() {
 
         expect(
           mockContactsViewControllerMixin
-              .presentationPhonebookContactNotifier.value,
+              .presentationPhonebookContactNotifier
+              .value,
           const Left(
-            GetPhonebookContactsFailure(
-              exception: dynamic,
-              contacts: [],
-            ),
+            GetPhonebookContactsFailure(exception: dynamic, contacts: []),
           ),
         );
       },
@@ -1836,9 +1880,7 @@ void main() {
 
         when(
           mockContactsViewControllerMixin.presentationContactNotifier,
-        ).thenReturn(
-          ValueNotifierCustom(const Left(GetContactsIsEmpty())),
-        );
+        ).thenReturn(ValueNotifierCustom(const Left(GetContactsIsEmpty())));
 
         when(
           mockContactsViewControllerMixin.presentationPhonebookContactNotifier,
@@ -1872,7 +1914,8 @@ void main() {
 
         expect(
           mockContactsViewControllerMixin
-              .presentationRecentContactNotifier.value,
+              .presentationRecentContactNotifier
+              .value,
           [],
         );
 
@@ -1883,7 +1926,8 @@ void main() {
 
         expect(
           mockContactsViewControllerMixin
-              .presentationPhonebookContactNotifier.value,
+              .presentationPhonebookContactNotifier
+              .value,
           const Left(GetPhonebookContactsIsEmpty()),
         );
 
@@ -1900,9 +1944,7 @@ void main() {
 
         when(
           mockContactsViewControllerMixin.presentationContactNotifier,
-        ).thenReturn(
-          ValueNotifierCustom(const Left(GetContactsIsEmpty())),
-        );
+        ).thenReturn(ValueNotifierCustom(const Left(GetContactsIsEmpty())));
 
         when(
           mockContactsViewControllerMixin.presentationPhonebookContactNotifier,
@@ -1947,7 +1989,8 @@ void main() {
 
         expect(
           mockContactsViewControllerMixin
-              .presentationRecentContactNotifier.value,
+              .presentationRecentContactNotifier
+              .value,
           [],
         );
 
@@ -1958,7 +2001,8 @@ void main() {
 
         expect(
           mockContactsViewControllerMixin
-              .presentationPhonebookContactNotifier.value,
+              .presentationPhonebookContactNotifier
+              .value,
           const Left(GetPhonebookContactsIsEmpty()),
         );
       },
@@ -2010,9 +2054,7 @@ void main() {
 
         when(
           mockContactsViewControllerMixin.presentationContactNotifier,
-        ).thenReturn(
-          ValueNotifierCustom(const Left(GetContactsIsEmpty())),
-        );
+        ).thenReturn(ValueNotifierCustom(const Left(GetContactsIsEmpty())));
 
         when(
           mockContactsViewControllerMixin.presentationPhonebookContactNotifier,
@@ -2046,7 +2088,9 @@ void main() {
 
         expect(
           mockContactsViewControllerMixin
-              .presentationRecentContactNotifier.value.isNotEmpty,
+              .presentationRecentContactNotifier
+              .value
+              .isNotEmpty,
           true,
         );
 
@@ -2057,7 +2101,8 @@ void main() {
 
         expect(
           mockContactsViewControllerMixin
-              .presentationPhonebookContactNotifier.value,
+              .presentationPhonebookContactNotifier
+              .value,
           const Left(GetPhonebookContactsIsEmpty()),
         );
 
@@ -2074,9 +2119,7 @@ void main() {
 
         when(
           mockContactsViewControllerMixin.presentationContactNotifier,
-        ).thenReturn(
-          ValueNotifierCustom(const Left(GetContactsIsEmpty())),
-        );
+        ).thenReturn(ValueNotifierCustom(const Left(GetContactsIsEmpty())));
 
         when(
           mockContactsViewControllerMixin.presentationPhonebookContactNotifier,
@@ -2121,7 +2164,9 @@ void main() {
 
         expect(
           mockContactsViewControllerMixin
-              .presentationRecentContactNotifier.value.isNotEmpty,
+              .presentationRecentContactNotifier
+              .value
+              .isNotEmpty,
           false,
         );
 
@@ -2132,7 +2177,8 @@ void main() {
 
         expect(
           mockContactsViewControllerMixin
-              .presentationPhonebookContactNotifier.value,
+              .presentationPhonebookContactNotifier
+              .value,
           const Left(GetPhonebookContactsIsEmpty()),
         );
       },
@@ -2227,7 +2273,9 @@ void main() {
 
         expect(
           mockContactsViewControllerMixin
-              .presentationRecentContactNotifier.value.isNotEmpty,
+              .presentationRecentContactNotifier
+              .value
+              .isNotEmpty,
           true,
         );
 
@@ -2238,7 +2286,8 @@ void main() {
 
         expect(
           mockContactsViewControllerMixin
-              .presentationPhonebookContactNotifier.value,
+              .presentationPhonebookContactNotifier
+              .value,
           Right(
             GetPhonebookContactsSuccess(
               contacts: phonebookContacts,
@@ -2260,9 +2309,7 @@ void main() {
 
         when(
           mockContactsViewControllerMixin.presentationContactNotifier,
-        ).thenReturn(
-          ValueNotifierCustom(const Left(GetContactsIsEmpty())),
-        );
+        ).thenReturn(ValueNotifierCustom(const Left(GetContactsIsEmpty())));
 
         when(
           mockContactsViewControllerMixin.presentationPhonebookContactNotifier,
@@ -2307,7 +2354,9 @@ void main() {
 
         expect(
           mockContactsViewControllerMixin
-              .presentationRecentContactNotifier.value.isNotEmpty,
+              .presentationRecentContactNotifier
+              .value
+              .isNotEmpty,
           false,
         );
 
@@ -2318,7 +2367,8 @@ void main() {
 
         expect(
           mockContactsViewControllerMixin
-              .presentationPhonebookContactNotifier.value,
+              .presentationPhonebookContactNotifier
+              .value,
           const Left(GetPhonebookContactsIsEmpty()),
         );
       },
@@ -2413,7 +2463,9 @@ void main() {
 
         expect(
           mockContactsViewControllerMixin
-              .presentationRecentContactNotifier.value.isNotEmpty,
+              .presentationRecentContactNotifier
+              .value
+              .isNotEmpty,
           true,
         );
 
@@ -2424,7 +2476,8 @@ void main() {
 
         expect(
           mockContactsViewControllerMixin
-              .presentationPhonebookContactNotifier.value,
+              .presentationPhonebookContactNotifier
+              .value,
           Right(
             GetPhonebookContactsSuccess(
               contacts: phonebookContacts,
@@ -2500,25 +2553,32 @@ void main() {
 
         expect(
           mockContactsViewControllerMixin
-              .presentationRecentContactNotifier.value.isNotEmpty,
+              .presentationRecentContactNotifier
+              .value
+              .isNotEmpty,
           true,
         );
 
         expect(
           mockContactsViewControllerMixin
-              .presentationRecentContactNotifier.value.first.displayName,
+              .presentationRecentContactNotifier
+              .value
+              .first
+              .displayName,
           'Alice test',
         );
 
         expect(
           mockContactsViewControllerMixin.presentationContactNotifier.value
-              .getSuccessOrNull() is GetPresentationContactsSuccess,
+                  .getSuccessOrNull()
+              is GetPresentationContactsSuccess,
           true,
         );
 
-        final presentationContact = mockContactsViewControllerMixin
-            .presentationContactNotifier.value
-            .getSuccessOrNull() as GetPresentationContactsSuccess;
+        final presentationContact =
+            mockContactsViewControllerMixin.presentationContactNotifier.value
+                    .getSuccessOrNull()
+                as GetPresentationContactsSuccess;
 
         expect(presentationContact.keyword, keyword);
 
@@ -2528,7 +2588,8 @@ void main() {
 
         expect(
           mockContactsViewControllerMixin
-              .presentationPhonebookContactNotifier.value,
+              .presentationPhonebookContactNotifier
+              .value,
           const Left(GetPhonebookContactsIsEmpty()),
         );
       },
@@ -2628,7 +2689,9 @@ void main() {
 
         expect(
           mockContactsViewControllerMixin
-              .presentationRecentContactNotifier.value.isNotEmpty,
+              .presentationRecentContactNotifier
+              .value
+              .isNotEmpty,
           true,
         );
 
@@ -2639,7 +2702,8 @@ void main() {
 
         expect(
           mockContactsViewControllerMixin
-              .presentationPhonebookContactNotifier.value,
+              .presentationPhonebookContactNotifier
+              .value,
           Right(
             GetPhonebookContactsSuccess(
               contacts: phonebookContacts,
@@ -2715,25 +2779,32 @@ void main() {
 
         expect(
           mockContactsViewControllerMixin
-              .presentationRecentContactNotifier.value.isNotEmpty,
+              .presentationRecentContactNotifier
+              .value
+              .isNotEmpty,
           true,
         );
 
         expect(
           mockContactsViewControllerMixin
-              .presentationRecentContactNotifier.value.first.displayName,
+              .presentationRecentContactNotifier
+              .value
+              .first
+              .displayName,
           'Alice test',
         );
 
         expect(
           mockContactsViewControllerMixin.presentationContactNotifier.value
-              .getSuccessOrNull() is GetPresentationContactsSuccess,
+                  .getSuccessOrNull()
+              is GetPresentationContactsSuccess,
           true,
         );
 
-        final presentationContact = mockContactsViewControllerMixin
-            .presentationContactNotifier.value
-            .getSuccessOrNull() as GetPresentationContactsSuccess;
+        final presentationContact =
+            mockContactsViewControllerMixin.presentationContactNotifier.value
+                    .getSuccessOrNull()
+                as GetPresentationContactsSuccess;
 
         expect(presentationContact.keyword, keyword);
 
@@ -2743,7 +2814,8 @@ void main() {
 
         expect(
           mockContactsViewControllerMixin
-              .presentationPhonebookContactNotifier.value,
+              .presentationPhonebookContactNotifier
+              .value,
           const Left(GetPhonebookContactsIsEmpty()),
         );
 
@@ -2810,25 +2882,32 @@ void main() {
 
         expect(
           mockContactsViewControllerMixin
-              .presentationRecentContactNotifier.value.isNotEmpty,
+              .presentationRecentContactNotifier
+              .value
+              .isNotEmpty,
           true,
         );
 
         expect(
           mockContactsViewControllerMixin
-              .presentationRecentContactNotifier.value.first.displayName,
+              .presentationRecentContactNotifier
+              .value
+              .first
+              .displayName,
           'Alice test',
         );
 
         expect(
           mockContactsViewControllerMixin.presentationContactNotifier.value
-              .getSuccessOrNull() is GetPresentationContactsSuccess,
+                  .getSuccessOrNull()
+              is GetPresentationContactsSuccess,
           true,
         );
 
-        final presentationContactTwo = mockContactsViewControllerMixin
-            .presentationContactNotifier.value
-            .getSuccessOrNull() as GetPresentationContactsSuccess;
+        final presentationContactTwo =
+            mockContactsViewControllerMixin.presentationContactNotifier.value
+                    .getSuccessOrNull()
+                as GetPresentationContactsSuccess;
 
         expect(presentationContactTwo.keyword, searchKeywordSecond);
 
@@ -2838,7 +2917,8 @@ void main() {
 
         expect(
           mockContactsViewControllerMixin
-              .presentationPhonebookContactNotifier.value,
+              .presentationPhonebookContactNotifier
+              .value,
           const Left(GetPhonebookContactsIsEmpty()),
         );
       },

@@ -30,8 +30,9 @@ void main() {
       eventId: eventId,
       content: {'body': body},
       originServerTs: DateTime.fromMillisecondsSinceEpoch(timestamp),
-      unsigned:
-          transactionId != null ? {'transaction_id': transactionId} : null,
+      unsigned: transactionId != null
+          ? {'transaction_id': transactionId}
+          : null,
     );
   }
 
@@ -45,10 +46,7 @@ void main() {
     });
 
     test('should create map with both eventId and transactionId as keys', () {
-      final event = createEvent(
-        eventId: '\$event1',
-        transactionId: 'txn123',
-      );
+      final event = createEvent(eventId: '\$event1', transactionId: 'txn123');
       final map = EventListExtension.buildEventMap([event]);
 
       expect(map['\$event1'], event);

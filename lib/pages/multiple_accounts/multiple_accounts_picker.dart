@@ -29,8 +29,9 @@ class MultipleAccountsPickerController {
     required VoidCallback onGoToAccountSettings,
   }) async {
     multipleAccounts.sort((pre, next) {
-      return pre.accountActiveStatus.index
-          .compareTo(next.accountActiveStatus.index);
+      return pre.accountActiveStatus.index.compareTo(
+        next.accountActiveStatus.index,
+      );
     });
     MultipleAccountPicker.showMultipleAccountPicker(
       accounts: multipleAccounts,
@@ -51,18 +52,16 @@ class MultipleAccountsPickerController {
         ),
       ),
       accountNameStyle: Theme.of(context).textTheme.bodyLarge!.copyWith(
-            color: LinagoraSysColors.material().onSurface,
-          ),
+        color: LinagoraSysColors.material().onSurface,
+      ),
       accountIdStyle: Theme.of(context).textTheme.bodyMedium!.copyWith(
-            color: LinagoraRefColors.material().tertiary[20],
-          ),
+        color: LinagoraRefColors.material().tertiary[20],
+      ),
       addAnotherAccountStyle: Theme.of(context).textTheme.labelLarge!.copyWith(
-            color: LinagoraSysColors.material().onPrimary,
-          ),
-      titleAccountSettingsStyle:
-          Theme.of(context).textTheme.labelLarge!.copyWith(
-                color: LinagoraSysColors.material().primary,
-              ),
+        color: LinagoraSysColors.material().onPrimary,
+      ),
+      titleAccountSettingsStyle: Theme.of(context).textTheme.labelLarge!
+          .copyWith(color: LinagoraSysColors.material().primary),
     );
   }
 
@@ -71,9 +70,7 @@ class MultipleAccountsPickerController {
     required TwakePresentationAccount account,
   }) async {
     final client = multipleAccounts
-        .firstWhereOrNull(
-          (element) => element.accountId == account.accountId,
-        )
+        .firstWhereOrNull((element) => element.accountId == account.accountId)
         ?.clientAccount;
     if (client == null || client == _matrixState.client) return;
     await _setActiveClient(client);
@@ -82,9 +79,7 @@ class MultipleAccountsPickerController {
   void _onAddAnotherAccount() {
     context.push(
       '/rooms/addaccount',
-      extra: const TwakeWelcomeArg(
-        twakeIdType: TwakeWelcomeType.otherAccounts,
-      ),
+      extra: const TwakeWelcomeArg(twakeIdType: TwakeWelcomeType.otherAccounts),
     );
   }
 
@@ -95,9 +90,7 @@ class MultipleAccountsPickerController {
       _matrixState.reSyncContacts();
       context.go(
         '/rooms',
-        extra: SwitchActiveAccountBodyArgs(
-          newActiveClient: newClient,
-        ),
+        extra: SwitchActiveAccountBodyArgs(newActiveClient: newClient),
       );
     }
   }

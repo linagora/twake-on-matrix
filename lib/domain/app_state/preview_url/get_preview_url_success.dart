@@ -9,9 +9,7 @@ class GetPreviewUrlInitial extends Success {
 class GetPreviewUrlSuccess extends Success {
   final UrlPreview urlPreview;
 
-  const GetPreviewUrlSuccess({
-    required this.urlPreview,
-  });
+  const GetPreviewUrlSuccess({required this.urlPreview});
 
   @override
   List<Object> get props => [urlPreview];

@@ -27,15 +27,17 @@ class _FocusSuggestionListState extends State<FocusSuggestionList> {
 
   @override
   void initState() {
-    widget.focusSuggestionController.currentIndex
-        .addListener(_suggestionIndexChanged);
+    widget.focusSuggestionController.currentIndex.addListener(
+      _suggestionIndexChanged,
+    );
     super.initState();
   }
 
   @override
   void dispose() {
-    widget.focusSuggestionController.currentIndex
-        .removeListener(_suggestionIndexChanged);
+    widget.focusSuggestionController.currentIndex.removeListener(
+      _suggestionIndexChanged,
+    );
     super.dispose();
   }
 
@@ -49,7 +51,8 @@ class _FocusSuggestionListState extends State<FocusSuggestionList> {
 
   @override
   Widget build(BuildContext context) {
-    final listHeight = InputBarStyle.suggestionSize *
+    final listHeight =
+        InputBarStyle.suggestionSize *
             min(_suggestionMaxVisible, widget.items.length) +
         InputBarStyle.suggestionListPadding * 2;
     return SizedBox(

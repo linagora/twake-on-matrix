@@ -5,10 +5,7 @@ import 'package:fluffychat/pages/profile_info/profile_info_body/profile_info_hea
 import 'package:flutter/material.dart';
 
 class ProfileInfoBodyView extends StatelessWidget {
-  const ProfileInfoBodyView({
-    required this.controller,
-    super.key,
-  });
+  const ProfileInfoBodyView({required this.controller, super.key});
 
   final ProfileInfoBodyController controller;
 

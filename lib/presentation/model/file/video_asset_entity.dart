@@ -8,9 +8,7 @@ import 'package:matrix/matrix.dart';
 import 'package:photo_manager/photo_manager.dart';
 
 class VideoAssetEntity extends FileAssetEntity {
-  VideoAssetEntity({
-    required super.assetEntity,
-  });
+  VideoAssetEntity({required super.assetEntity});
 
   @override
   Future<FileInfo?> toFileInfo() async {
@@ -24,7 +22,8 @@ class VideoAssetEntity extends FileAssetEntity {
       width: assetEntity.width,
       height: assetEntity.height,
       duration: assetEntity.videoDuration,
-      imagePlaceholderBytes: await assetEntity.thumbnailDataWithSize(
+      imagePlaceholderBytes:
+          await assetEntity.thumbnailDataWithSize(
             ThumbnailSize(assetEntity.width, assetEntity.height),
             quality: AppConfig.thumbnailQuality,
           ) ??

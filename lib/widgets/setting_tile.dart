@@ -37,13 +37,9 @@ class SettingTile extends StatelessWidget {
           children: [
             Padding(
               padding: const EdgeInsets.only(top: 8.0),
-              child: Icon(
-                leadingIcon,
-              ),
+              child: Icon(leadingIcon),
             ),
-            const SizedBox(
-              width: 8.0,
-            ),
+            const SizedBox(width: 8.0),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -52,9 +48,9 @@ class SettingTile extends StatelessWidget {
                     padding: const EdgeInsets.only(top: 8.0),
                     child: Text(
                       settingTitle,
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                            letterSpacing: 0.15,
-                          ),
+                      style: Theme.of(
+                        context,
+                      ).textTheme.titleMedium?.copyWith(letterSpacing: 0.15),
                     ),
                   ),
                   const SizedBox(height: 4.0),
@@ -62,16 +58,14 @@ class SettingTile extends StatelessWidget {
                       settingDescription!.isNotEmpty)
                     Text(
                       settingDescription!,
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            letterSpacing: 0.4,
-                          ),
+                      style: Theme.of(
+                        context,
+                      ).textTheme.bodySmall?.copyWith(letterSpacing: 0.4),
                     ),
                 ],
               ),
             ),
-            const SizedBox(
-              width: 12,
-            ),
+            const SizedBox(width: 12),
             IgnorePointer(
               ignoring: !isEditable,
               child: SwitchButton(

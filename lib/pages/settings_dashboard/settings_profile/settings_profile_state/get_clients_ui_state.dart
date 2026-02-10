@@ -15,9 +15,7 @@ class GetClientsLoadingUIState extends Success {
 class GetClientsSuccessUIState extends Success {
   final List<TwakeChatPresentationAccount> multipleAccounts;
 
-  const GetClientsSuccessUIState({
-    required this.multipleAccounts,
-  });
+  const GetClientsSuccessUIState({required this.multipleAccounts});
 
   bool get haveMultipleAccounts => multipleAccounts.length > 1;
 

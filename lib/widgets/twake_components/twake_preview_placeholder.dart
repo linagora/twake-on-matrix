@@ -23,9 +23,7 @@ class TwakePreviewPlaceHolder extends StatelessWidget {
         borderRadius: BorderRadius.circular(borderRadius),
       ),
       child: Center(
-        child: CircularProgressIndicator(
-          color: Theme.of(context).primaryColor,
-        ),
+        child: CircularProgressIndicator(color: Theme.of(context).primaryColor),
       ),
     );
   }

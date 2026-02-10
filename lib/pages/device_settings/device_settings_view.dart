@@ -91,8 +91,8 @@ class DevicesSettingsView extends StatelessWidget {
                           onTap: controller.loadingDeletingDevices
                               ? null
                               : () => controller.removeDevicesAction(
-                                    controller.notThisDevice,
-                                  ),
+                                  controller.notThisDevice,
+                                ),
                         )
                       else
                         Center(

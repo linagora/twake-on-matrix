@@ -25,8 +25,8 @@ class TwakeNavigationIcon extends StatelessWidget {
       label: Text(
         notificationCount.toString(),
         style: Theme.of(context).textTheme.labelSmall?.copyWith(
-              color: Theme.of(context).colorScheme.onError,
-            ),
+          color: Theme.of(context).colorScheme.onError,
+        ),
       ),
       child: Icon(
         icon,

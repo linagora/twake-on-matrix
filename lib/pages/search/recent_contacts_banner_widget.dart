@@ -32,9 +32,7 @@ class PreSearchRecentContactsContainer extends StatelessWidget {
           scrollDirection: Axis.horizontal,
           itemCount: recentRooms.length,
           itemBuilder: (context, index) {
-            return PreSearchRecentContactWidget(
-              room: recentRooms[index],
-            );
+            return PreSearchRecentContactWidget(room: recentRooms[index]);
           },
         ),
       );
@@ -44,10 +42,7 @@ class PreSearchRecentContactsContainer extends StatelessWidget {
 
 class PreSearchRecentContactWidget extends StatelessWidget {
   final Room room;
-  const PreSearchRecentContactWidget({
-    super.key,
-    required this.room,
-  });
+  const PreSearchRecentContactWidget({super.key, required this.room});
 
   @override
   Widget build(BuildContext context) {
@@ -64,17 +59,12 @@ class PreSearchRecentContactWidget extends StatelessWidget {
             SizedBox(
               width: RecentContactsBannerWidgetStyle.avatarWidthSize,
               height: RecentContactsBannerWidgetStyle.avatarWidthSize,
-              child: Avatar(
-                mxContent: room.avatar,
-                name: displayName,
-              ),
+              child: Avatar(mxContent: room.avatar, name: displayName),
             ),
             Padding(
               padding:
                   RecentContactsBannerWidgetStyle.chatRecentContactItemPadding,
-              child: BuildDisplayName(
-                profileDisplayName: displayName,
-              ),
+              child: BuildDisplayName(profileDisplayName: displayName),
             ),
           ],
         ),

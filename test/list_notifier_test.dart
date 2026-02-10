@@ -51,13 +51,7 @@ void main() {
       );
       listNotifier.add(newFile);
 
-      expect(
-        listNotifier.value,
-        equals(<MatrixFile>[
-          ...matrixFiles,
-          newFile,
-        ]),
-      );
+      expect(listNotifier.value, equals(<MatrixFile>[...matrixFiles, newFile]));
       expect(notificationCount, equals(1));
     });
 
@@ -82,10 +76,7 @@ void main() {
 
       expect(
         listNotifier.value,
-        equals(<MatrixFile>[
-          ...listNotifier.value.getRange(0, 2),
-          replaceFile,
-        ]),
+        equals(<MatrixFile>[...listNotifier.value.getRange(0, 2), replaceFile]),
       );
       expect(notificationCount, equals(1));
     });

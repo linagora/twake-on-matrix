@@ -60,10 +60,7 @@ class _QrCodePainter extends CustomPainter {
     final quietZoneOffset = quietZoneModules * moduleSize;
 
     // Draw white background for quiet zone
-    canvas.drawRect(
-      Offset.zero & size,
-      whitePaint,
-    );
+    canvas.drawRect(Offset.zero & size, whitePaint);
 
     // Only rebuild size-dependent data if size changed
     if (_cachedSize != size) {

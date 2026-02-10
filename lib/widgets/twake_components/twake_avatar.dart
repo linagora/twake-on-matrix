@@ -31,7 +31,8 @@ class TwakeAvatar extends StatelessWidget {
       fallbackLetters = name[0];
     }
 
-    final noPic = mxContent == null ||
+    final noPic =
+        mxContent == null ||
         mxContent.toString().isEmpty ||
         mxContent.toString() == 'null';
     final textWidget = Center(
@@ -40,8 +41,8 @@ class TwakeAvatar extends StatelessWidget {
         style: TextStyle(
           color: noPic
               ? (Theme.of(context).brightness == Brightness.dark
-                  ? Colors.white
-                  : Colors.black)
+                    ? Colors.white
+                    : Colors.black)
               : null,
           fontSize: fontSize,
         ),
@@ -79,10 +80,6 @@ class TwakeAvatar extends StatelessWidget {
       ),
     );
     if (onTap == null) return container;
-    return InkWell(
-      onTap: onTap,
-      borderRadius: borderRadius,
-      child: container,
-    );
+    return InkWell(onTap: onTap, borderRadius: borderRadius, child: container);
   }
 }

@@ -25,8 +25,9 @@ class ProfileInfoContactRows extends StatelessWidget {
     return ValueListenableBuilder(
       valueListenable: userInfoNotifier,
       builder: (context, userInfo, child) {
-        final userInfoModel =
-            userInfo.getSuccessOrNull<GetUserInfoSuccess>()?.userInfo;
+        final userInfoModel = userInfo
+            .getSuccessOrNull<GetUserInfoSuccess>()
+            ?.userInfo;
         final isLoading = userInfo is GettingUserInfo;
 
         return AnimatedSize(
@@ -43,7 +44,8 @@ class ProfileInfoContactRows extends StatelessWidget {
                   leadingIconPath: ImagePaths.icMatrixid,
                   caption: L10n.of(context)!.matrixId,
                   copiableText: user.id,
-                  enableDividerTop: userInfoModel != null &&
+                  enableDividerTop:
+                      userInfoModel != null &&
                       (userInfoModel.phones?.firstOrNull != null ||
                           userInfoModel.emails?.firstOrNull != null),
                 ),
@@ -80,11 +82,7 @@ class _LoadingPlaceholder extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: Column(
-        children: [
-          _ShimmerRow(),
-          const SizedBox(height: 8),
-          _ShimmerRow(),
-        ],
+        children: [_ShimmerRow(), const SizedBox(height: 8), _ShimmerRow()],
       ),
     );
   }

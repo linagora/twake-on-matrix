@@ -38,8 +38,8 @@ class SearchController extends State<Search> with WidgetsBindingObserver {
   SearchContactsAndChatsController? searchContactAndRecentChatController;
   final serverSearchController = ServerSearchController();
 
-  final _preSearchRecentContactsInteractor =
-      getIt.get<PreSearchRecentContactsInteractor>();
+  final _preSearchRecentContactsInteractor = getIt
+      .get<PreSearchRecentContactsInteractor>();
 
   final preSearchRecentContactsNotifier =
       ValueNotifier<Either<Failure, Success>>(Right(SearchInitial()));
@@ -54,7 +54,8 @@ class SearchController extends State<Search> with WidgetsBindingObserver {
       textEditingController.value.text.isNotEmpty &&
       searchContactAndRecentChatController != null &&
       searchContactAndRecentChatController!
-          .isShowChatsAndContactsNotifier.value;
+          .isShowChatsAndContactsNotifier
+          .value;
 
   String get searchWord => textEditingController.text;
 
@@ -74,22 +75,19 @@ class SearchController extends State<Search> with WidgetsBindingObserver {
           plaintextBody: true,
           removeMarkdown: true,
         )
-        .substringToHighlight(
-          searchWord,
-          prefixLength: _prefixLengthHighlight,
-        );
+        .substringToHighlight(searchWord, prefixLength: _prefixLengthHighlight);
     return '$senderName: $bodyContent';
   }
 
   void fetchPreSearchRecentContacts() {
     _preSearchRecentContactsInteractor
         .execute(
-      allRooms: Matrix.of(context).client.rooms,
-      limit: limitPrefetchedRecentContacts,
-    )
+          allRooms: Matrix.of(context).client.rooms,
+          limit: limitPrefetchedRecentContacts,
+        )
         .listen((value) {
-      preSearchRecentContactsNotifier.value = value;
-    });
+          preSearchRecentContactsNotifier.value = value;
+        });
   }
 
   void onSearchItemTap(PresentationSearch presentationSearch) async {
@@ -109,9 +107,9 @@ class SearchController extends State<Search> with WidgetsBindingObserver {
   }
 
   void onContactTap(ContactPresentationSearch contactPresentationSearch) {
-    final roomId = Matrix.of(context)
-        .client
-        .getDirectChatFromUserId(contactPresentationSearch.matrixId!);
+    final roomId = Matrix.of(
+      context,
+    ).client.getDirectChatFromUserId(contactPresentationSearch.matrixId!);
     if (roomId == null) {
       goToDraftChat(
         context: context,
@@ -151,8 +149,9 @@ class SearchController extends State<Search> with WidgetsBindingObserver {
   }
 
   void goToChatScreenFormRecentChat(User user) async {
-    Logs()
-        .d('SearchController::getContactAndRecentChatStream() - event: $user');
+    Logs().d(
+      'SearchController::getContactAndRecentChatStream() - event: $user',
+    );
     final roomIdResult = await TwakeDialog.showFutureLoadingDialogFullScreen(
       future: () => user.startDirectChat(),
     );
@@ -162,15 +161,14 @@ class SearchController extends State<Search> with WidgetsBindingObserver {
 
   @override
   void initState() {
-    searchContactAndRecentChatController =
-        SearchContactsAndChatsController(context);
+    searchContactAndRecentChatController = SearchContactsAndChatsController(
+      context,
+    );
     super.initState();
     SchedulerBinding.instance.addPostFrameCallback((_) async {
       if (mounted) {
         await searchContactAndRecentChatController?.init();
-        serverSearchController.initSearch(
-          context: context,
-        );
+        serverSearchController.initSearch(context: context);
         fetchPreSearchRecentContacts();
         textEditingController.addListener(() {
           onSearchBarChanged(textEditingController.text);

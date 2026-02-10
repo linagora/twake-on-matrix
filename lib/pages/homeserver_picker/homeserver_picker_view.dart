@@ -46,8 +46,9 @@ class HomeserverPickerView extends StatelessWidget {
               decoration: const BoxDecoration(),
               child: Material(
                 clipBehavior: Clip.hardEdge,
-                borderRadius:
-                    const BorderRadius.vertical(bottom: Radius.circular(8)),
+                borderRadius: const BorderRadius.vertical(
+                  bottom: Radius.circular(8),
+                ),
                 color: Theme.of(context).colorScheme.surface,
                 child: ListTile(
                   leading: const Icon(Icons.vpn_key),
@@ -72,9 +73,9 @@ class HomeserverPickerView extends StatelessWidget {
                 child: Text(
                   L10n.of(context)!.serverNameWrongExplain,
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        letterSpacing: 0.25,
-                        color: Theme.of(context).colorScheme.outline,
-                      ),
+                    letterSpacing: 0.25,
+                    color: Theme.of(context).colorScheme.outline,
+                  ),
                   textAlign: TextAlign.center,
                 ),
               ),
@@ -92,8 +93,9 @@ class HomeserverPickerView extends StatelessWidget {
                         padding: const EdgeInsets.symmetric(horizontal: 16.0),
                         maximumSize: const Size.fromHeight(40),
                         backgroundColor: Theme.of(context).colorScheme.primary,
-                        foregroundColor:
-                            Theme.of(context).colorScheme.onPrimary,
+                        foregroundColor: Theme.of(
+                          context,
+                        ).colorScheme.onPrimary,
                       ),
                       onPressed: () => controller.loginButtonPressed(),
                       child: Row(
@@ -113,9 +115,9 @@ class HomeserverPickerView extends StatelessWidget {
 
   Widget _getLabelLoginButton(BuildContext context) {
     final textStyle = Theme.of(context).textTheme.labelLarge?.copyWith(
-          color: Theme.of(context).colorScheme.onPrimary,
-          letterSpacing: 0.1,
-        );
+      color: Theme.of(context).colorScheme.onPrimary,
+      letterSpacing: 0.1,
+    );
     switch (controller.state) {
       case HomeserverState.otherLoginMethod:
         return Text(L10n.of(context)!.continueProcess, style: textStyle);
@@ -150,7 +152,8 @@ class HomeserverTextField extends StatelessWidget {
       builder: (context, value, focusNode) {
         return TextField(
           onEditingComplete: () => controller.loginButtonPressed(),
-          autofocus: controller.state != HomeserverState.ssoLoginServer ||
+          autofocus:
+              controller.state != HomeserverState.ssoLoginServer ||
               controller.state != HomeserverState.otherLoginMethod,
           focusNode: controller.homeserverFocusNode,
           autocorrect: false,
@@ -159,8 +162,9 @@ class HomeserverTextField extends StatelessWidget {
           contextMenuBuilder: mobileTwakeContextMenuBuilder,
           decoration: InputDecoration(
             border: OutlineInputBorder(
-              borderSide:
-                  BorderSide(color: Theme.of(context).colorScheme.outline),
+              borderSide: BorderSide(
+                color: Theme.of(context).colorScheme.outline,
+              ),
             ),
             focusedBorder: controller.state == HomeserverState.wrongServerName
                 ? OutlineInputBorder(
@@ -174,10 +178,10 @@ class HomeserverTextField extends StatelessWidget {
                 ? L10n.of(context)!.homeserver
                 : L10n.of(context)!.wrongServerName,
             labelStyle: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: controller.state != HomeserverState.wrongServerName
-                      ? Theme.of(context).colorScheme.onSurface
-                      : Theme.of(context).colorScheme.error,
-                ),
+              color: controller.state != HomeserverState.wrongServerName
+                  ? Theme.of(context).colorScheme.onSurface
+                  : Theme.of(context).colorScheme.error,
+            ),
             hintText: L10n.of(context)!.enterYourHomeserver,
             contentPadding: const EdgeInsets.all(16.0),
           ),
@@ -186,23 +190,16 @@ class HomeserverTextField extends StatelessWidget {
       itemBuilder: (BuildContext context, HomeserverBenchmarkResult server) {
         return ListTile(
           trailing: IconButton(
-            icon: const Icon(
-              Icons.info_outlined,
-              color: Colors.black,
-            ),
+            icon: const Icon(Icons.info_outlined, color: Colors.black),
             onPressed: () => controller.showServerInfo(server),
           ),
           title: Text(
             server.homeserver.baseUrl.host,
-            style: const TextStyle(
-              color: Colors.black,
-            ),
+            style: const TextStyle(color: Colors.black),
           ),
           subtitle: Text(
             server.homeserver.description ?? '',
-            style: TextStyle(
-              color: Colors.grey.shade700,
-            ),
+            style: TextStyle(color: Colors.grey.shade700),
           ),
         );
       },

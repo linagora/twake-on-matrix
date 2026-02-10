@@ -3,9 +3,6 @@ import 'package:fluffychat/domain/model/invitation/invitation_status.dart';
 
 extension InvitationStatusHiveObjExtension on InvitationStatusHiveObj {
   InvitationStatus toInvitationStatus() {
-    return InvitationStatus(
-      invitationId: invitationId,
-      contactId: contactId,
-    );
+    return InvitationStatus(invitationId: invitationId, contactId: contactId);
   }
 }

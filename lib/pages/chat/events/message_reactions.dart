@@ -23,8 +23,10 @@ class MessageReactions extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final allReactionEvents =
-        event.aggregatedEvents(timeline, RelationshipTypes.reaction);
+    final allReactionEvents = event.aggregatedEvents(
+      timeline,
+      RelationshipTypes.reaction,
+    );
     final reactionMap = <String, ReactionEntry>{};
     final client = Matrix.of(context).client;
 
@@ -112,7 +114,9 @@ class ReactionsList extends StatelessWidget {
         );
       },
       children: [
-        ...reactionList.take(3).map(
+        ...reactionList
+            .take(3)
+            .map(
               (r) => Reaction(
                 reactionKey: r.key,
                 count: event.room.isDirectChat ? null : r.count,
@@ -143,16 +147,13 @@ class ReactionsList extends StatelessWidget {
               border: Border.all(color: MessageReactionsStyle.borderColor),
               shape: BoxShape.circle,
             ),
-            padding: const EdgeInsets.only(
-              left: 4,
-              right: 4,
-            ),
+            padding: const EdgeInsets.only(left: 4, right: 4),
             child: Center(
               child: Text(
                 '+${reactionList.length - 3}',
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: LinagoraRefColors.material().neutral[50],
-                    ),
+                  color: LinagoraRefColors.material().neutral[50],
+                ),
               ),
             ),
           ),
@@ -244,9 +245,7 @@ class ReactionsList extends StatelessWidget {
                       height: AppConfig.defaultMaxHeightReactionsView,
                       decoration: BoxDecoration(
                         color: LinagoraRefColors.material().primary[100],
-                        borderRadius: BorderRadius.circular(
-                          24,
-                        ),
+                        borderRadius: BorderRadius.circular(24),
                         boxShadow: [
                           BoxShadow(
                             color: const Color(0x0000004D).withOpacity(0.15),
@@ -273,10 +272,12 @@ class ReactionsList extends StatelessWidget {
                           client: client,
                           reactionList: reactionList,
                           scrollController: ScrollController(),
-                          reactionHeaderPadding:
-                              const EdgeInsets.symmetric(horizontal: 8),
-                          reactionListPadding:
-                              const EdgeInsets.symmetric(horizontal: 8),
+                          reactionHeaderPadding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                          ),
+                          reactionListPadding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                          ),
                         ),
                       ),
                     ),
@@ -381,18 +382,14 @@ class Reaction extends StatelessWidget {
       content = Row(
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
-          MxcImage(
-            uri: Uri.parse(reactionKey!),
-            width: 9999,
-            height: fontSize,
-          ),
+          MxcImage(uri: Uri.parse(reactionKey!), width: 9999, height: fontSize),
           if (count != null && count! > 1) ...[
             const SizedBox(width: 4),
             Text(
               count.toString(),
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: LinagoraRefColors.material().neutral[50],
-                  ),
+                color: LinagoraRefColors.material().neutral[50],
+              ),
             ),
           ],
         ],
@@ -401,12 +398,8 @@ class Reaction extends StatelessWidget {
       final renderKey = Characters(reactionKey!);
       content = Text(
         '$renderKey',
-        strutStyle: const StrutStyle(
-          forceStrutHeight: true,
-        ),
-        style: TextStyle(
-          fontSize: MessageReactionsStyle.renderKeyFontSize,
-        ),
+        strutStyle: const StrutStyle(forceStrutHeight: true),
+        style: TextStyle(fontSize: MessageReactionsStyle.renderKeyFontSize),
         textAlign: TextAlign.center,
       );
     }
@@ -427,27 +420,20 @@ class Reaction extends StatelessWidget {
                 ),
               )
             : null,
-        padding: const EdgeInsets.only(
-          left: 4,
-          right: 4,
-        ),
+        padding: const EdgeInsets.only(left: 4, right: 4),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Padding(
-              padding: const EdgeInsets.only(top: 4),
-              child: content,
-            ),
+            Padding(padding: const EdgeInsets.only(top: 4), child: content),
             if (count != null && count! > 1) ...[
-              const SizedBox(
-                width: 4,
-              ),
+              const SizedBox(width: 4),
               Text(
                 '$count',
-                style: countStyle ??
+                style:
+                    countStyle ??
                     Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: LinagoraRefColors.material().neutral[50],
-                        ),
+                      color: LinagoraRefColors.material().neutral[50],
+                    ),
                 textAlign: TextAlign.center,
               ),
             ],
@@ -472,10 +458,5 @@ class ReactionEntry with EquatableMixin {
   });
 
   @override
-  List<Object?> get props => [
-        key,
-        count,
-        reacted,
-        reactors,
-      ];
+  List<Object?> get props => [key, count, reacted, reactors];
 }

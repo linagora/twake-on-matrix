@@ -14,11 +14,7 @@ class ContactsWarningBannerStyle {
   static EdgeInsets paddingForContentBanner = const EdgeInsets.only(bottom: 16);
 
   static EdgeInsetsDirectional marginButtonWarningBanner =
-      const EdgeInsetsDirectional.symmetric(
-    horizontal: 24.0,
-  );
+      const EdgeInsetsDirectional.symmetric(horizontal: 24.0);
 
-  static EdgeInsets paddingRightButton = const EdgeInsets.only(
-    right: 10,
-  );
+  static EdgeInsets paddingRightButton = const EdgeInsets.only(right: 10);
 }

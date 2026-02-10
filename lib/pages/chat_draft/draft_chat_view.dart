@@ -29,10 +29,7 @@ import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:matrix/matrix.dart';
 
 class DraftChatView extends StatelessWidget {
-  const DraftChatView({
-    super.key,
-    required this.controller,
-  });
+  const DraftChatView({super.key, required this.controller});
 
   final DraftChatController controller;
 
@@ -41,10 +38,7 @@ class DraftChatView extends StatelessWidget {
     return ValueListenableBuilder<bool>(
       valueListenable: controller.isSendingNotifier,
       builder: (context, isIgnorePointer, child) {
-        return IgnorePointer(
-          ignoring: isIgnorePointer,
-          child: child,
-        );
+        return IgnorePointer(ignoring: isIgnorePointer, child: child);
       },
       child: KeyboardDismissOnTap(
         child: Scaffold(
@@ -97,9 +91,12 @@ class DraftChatView extends StatelessWidget {
             color: DraftChatViewStyle.responsive.isMobile(context)
                 ? LinagoraSysColors.material().surface
                 : Colors.transparent,
-            child: AndroidUtils.isNavigationButtonsEnabled(
-              systemGestureInsets: MediaQuery.systemGestureInsetsOf(context),
-            )
+            child:
+                AndroidUtils.isNavigationButtonsEnabled(
+                  systemGestureInsets: MediaQuery.systemGestureInsetsOf(
+                    context,
+                  ),
+                )
                 ? SafeArea(child: _chatViewBody(context))
                 : _chatViewBody(context),
           ),
@@ -116,9 +113,7 @@ class DraftChatView extends StatelessWidget {
             children: [
               Expanded(
                 child: Container(
-                  color: ChatViewBodyStyle.chatViewBackgroundColor(
-                    context,
-                  ),
+                  color: ChatViewBodyStyle.chatViewBackgroundColor(context),
                   child: Center(
                     child: DropTarget(
                       onDragDone: (details) =>
@@ -156,9 +151,7 @@ class DraftChatView extends StatelessWidget {
                       : null,
                   padding: EdgeInsets.only(
                     top: 8,
-                    bottom: DraftChatViewStyle.bottomBarInputPadding(
-                      context,
-                    ),
+                    bottom: DraftChatViewStyle.bottomBarInputPadding(context),
                   ),
                   child: DraftChatInputRow(
                     onEmojiAction: controller.onEmojiAction,
@@ -193,13 +186,12 @@ class DraftChatView extends StatelessWidget {
                     },
                     sendVoiceMessageAction: (audioFile, duration, waveform) =>
                         controller.sendVoiceMessageAction(
-                      audioFile: audioFile,
-                      time: duration,
-                      waveform: waveform,
-                    ),
-                    onTapRecorderWeb: () => controller.onTapRecorderWeb(
-                      context: context,
-                    ),
+                          audioFile: audioFile,
+                          time: duration,
+                          waveform: waveform,
+                        ),
+                    onTapRecorderWeb: () =>
+                        controller.onTapRecorderWeb(context: context),
                     onFinishRecorderWeb: controller.sendVoiceMessageWeb,
                     onDeleteRecorderWeb: controller.stopRecordWeb,
                     recordDurationWebNotifier:
@@ -230,9 +222,7 @@ class DraftChatView extends StatelessWidget {
                     height: ChatController.defaultMaxHeightReactionPicker,
                     decoration: BoxDecoration(
                       color: LinagoraRefColors.material().primary[100],
-                      borderRadius: BorderRadius.circular(
-                        24,
-                      ),
+                      borderRadius: BorderRadius.circular(24),
                       boxShadow: [
                         BoxShadow(
                           color: const Color(0x0000004D).withOpacity(0.15),
@@ -250,8 +240,8 @@ class DraftChatView extends StatelessWidget {
                     ),
                     child: EmojiPicker(
                       emojiData: Matrix.of(context).emojiData,
-                      recentEmoji:
-                          controller.getRecentReactionsInteractor.execute(),
+                      recentEmoji: controller.getRecentReactionsInteractor
+                          .execute(),
                       configuration: EmojiPickerConfiguration(
                         showRecentTab: true,
                         emojiStyle: Theme.of(context).textTheme.headlineLarge!,
@@ -266,31 +256,21 @@ class DraftChatView extends StatelessWidget {
                         ),
                         searchFocusNode: FocusNode(),
                       ),
-                      itemBuilder: (
-                        context,
-                        emojiId,
-                        emoji,
-                        callback,
-                      ) {
+                      itemBuilder: (context, emojiId, emoji, callback) {
                         return MouseRegion(
                           onHover: (_) {},
                           child: EmojiItem(
-                            textStyle:
-                                Theme.of(context).textTheme.headlineLarge!,
+                            textStyle: Theme.of(
+                              context,
+                            ).textTheme.headlineLarge!,
                             onTap: () {
-                              callback(
-                                emojiId,
-                                emoji,
-                              );
+                              callback(emojiId, emoji);
                             },
                             emoji: emoji,
                           ),
                         );
                       },
-                      onEmojiSelected: (
-                        emojiId,
-                        emoji,
-                      ) {
+                      onEmojiSelected: (emojiId, emoji) {
                         controller.typeEmoji(emoji);
                       },
                     ),
@@ -396,10 +376,10 @@ class _EmptyChatTitle extends StatelessWidget {
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                            color: Theme.of(context).colorScheme.onSurface,
-                            letterSpacing:
-                                ChatAppBarTitleStyle.letterSpacingRoomName,
-                          ),
+                        color: Theme.of(context).colorScheme.onSurface,
+                        letterSpacing:
+                            ChatAppBarTitleStyle.letterSpacingRoomName,
+                      ),
                     ),
                   ],
                 ),
@@ -416,15 +396,11 @@ class _EmptyChatTitle extends StatelessWidget {
     String receiverId,
   ) async {
     try {
-      return await Matrix.of(context)
-          .client
-          .getProfileFromUserId(receiverId, getFromRooms: false);
+      return await Matrix.of(
+        context,
+      ).client.getProfileFromUserId(receiverId, getFromRooms: false);
     } catch (e) {
-      return Profile(
-        avatarUrl: null,
-        displayName: null,
-        userId: receiverId,
-      );
+      return Profile(avatarUrl: null, displayName: null, userId: receiverId);
     }
   }
 }

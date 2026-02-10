@@ -38,9 +38,9 @@ class AddMemberRobot extends CoreRobot {
     if (Platform.isAndroid) {
       return $(AlertDialog).$(TextButton).containing(find.text('YES'));
     } else {
-      return $(CupertinoAlertDialog)
-          .$(CupertinoDialogAction)
-          .containing(find.text('Yes'));
+      return $(
+        CupertinoAlertDialog,
+      ).$(CupertinoDialogAction).containing(find.text('Yes'));
     }
   }
 
@@ -48,9 +48,9 @@ class AddMemberRobot extends CoreRobot {
     if (Platform.isAndroid) {
       return $(AlertDialog).$(TextButton).containing(find.text('CANCEL'));
     } else {
-      return $(CupertinoAlertDialog)
-          .$(CupertinoDialogAction)
-          .containing(find.text('Cancel'));
+      return $(
+        CupertinoAlertDialog,
+      ).$(CupertinoDialogAction).containing(find.text('Cancel'));
     }
   }
 

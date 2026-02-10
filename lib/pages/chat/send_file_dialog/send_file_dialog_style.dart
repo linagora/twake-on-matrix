@@ -29,12 +29,8 @@ class SendFileDialogStyle {
       InputDecoration(
         hintText: L10n.of(context)!.enterCaption,
         hintMaxLines: 1,
-        hintStyle: Theme.of(context)
-            .textTheme
-            .bodyMedium
-            ?.merge(
-              Theme.of(context).inputDecorationTheme.hintStyle,
-            )
+        hintStyle: Theme.of(context).textTheme.bodyMedium
+            ?.merge(Theme.of(context).inputDecorationTheme.hintStyle)
             .copyWith(
               letterSpacing: -0.15,
               color: LinagoraRefColors.material().neutralVariant[60],
@@ -73,8 +69,8 @@ class SendFileDialogStyle {
 
   static TextStyle? subHeaderErrorStyle(BuildContext context) =>
       Theme.of(context).textTheme.bodyMedium?.copyWith(
-            color: LinagoraRefColors.material().error[30],
-          );
+        color: LinagoraRefColors.material().error[30],
+      );
 
   static const double errorSubHeaderWidth = 340;
 }

@@ -27,6 +27,10 @@ class FederationTokenInformation extends Equatable {
   Map<String, dynamic> toJson() => _$FederationTokenInformationToJson(this);
 
   @override
-  List<Object?> get props =>
-      [accessToken, tokenType, matrixServerName, expiresIn];
+  List<Object?> get props => [
+    accessToken,
+    tokenType,
+    matrixServerName,
+    expiresIn,
+  ];
 }

@@ -25,22 +25,12 @@ class _AnimatedPauseButtonState extends State<AnimatedPauseButton>
     _scaleAnimation = Tween<double>(
       begin: 0.9,
       end: 1.0,
-    ).animate(
-      CurvedAnimation(
-        parent: _controller,
-        curve: Curves.easeInOut,
-      ),
-    );
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
 
     _opacityAnimation = Tween<double>(
       begin: 0.5,
       end: 1.0,
-    ).animate(
-      CurvedAnimation(
-        parent: _controller,
-        curve: Curves.easeInOut,
-      ),
-    );
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
   }
 
   @override
@@ -70,9 +60,9 @@ class _AnimatedPauseButtonState extends State<AnimatedPauseButton>
                 ),
                 boxShadow: [
                   BoxShadow(
-                    color: LinagoraSysColors.material()
-                        .primary
-                        .withOpacity(0.3 * _opacityAnimation.value),
+                    color: LinagoraSysColors.material().primary.withOpacity(
+                      0.3 * _opacityAnimation.value,
+                    ),
                     blurRadius: 8 * _opacityAnimation.value,
                     spreadRadius: 2 * _opacityAnimation.value,
                   ),

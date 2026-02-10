@@ -14,28 +14,18 @@ import 'package:fluffychat/modules/federation_identity_request_token/domain/mode
 import 'package:flutter/foundation.dart';
 
 class IdentityLookupManager {
-  DioClient _bindingDio({
-    required String federationUrl,
-  }) {
+  DioClient _bindingDio({required String federationUrl}) {
     final headers = {
       HttpHeaders.acceptHeader: FederationIdentityEndpoint.acceptHeaderDefault,
       HttpHeaders.contentTypeHeader:
           FederationIdentityEndpoint.contentTypeHeaderDefault,
     };
 
-    final dio = Dio(
-      BaseOptions(
-        baseUrl: federationUrl,
-        headers: headers,
-      ),
-    );
+    final dio = Dio(BaseOptions(baseUrl: federationUrl, headers: headers));
 
     if (kDebugMode) {
       dio.interceptors.add(
-        LogInterceptor(
-          requestBody: true,
-          responseBody: true,
-        ),
+        LogInterceptor(requestBody: true, responseBody: true),
       );
     }
 
@@ -57,9 +47,7 @@ class IdentityLookupManager {
   FederationIdentityLookupRepositoryImpl _bindingRepositoryImpl(
     FederationIdentityLookupDatasourceImpl datasource,
   ) {
-    return FederationIdentityLookupRepositoryImpl(
-      datasource: datasource,
-    );
+    return FederationIdentityLookupRepositoryImpl(datasource: datasource);
   }
 
   Future<FederationRegisterResponse> register({

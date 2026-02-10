@@ -9,9 +9,7 @@ class AddressBookRequest with EquatableMixin {
   @JsonKey(name: "contacts")
   final List<AddressBook>? addressBooks;
 
-  AddressBookRequest({
-    this.addressBooks,
-  });
+  AddressBookRequest({this.addressBooks});
 
   factory AddressBookRequest.fromJson(Map<String, dynamic> json) =>
       _$AddressBookRequestFromJson(json);
@@ -19,7 +17,5 @@ class AddressBookRequest with EquatableMixin {
   Map<String, dynamic> toJson() => _$AddressBookRequestToJson(this);
 
   @override
-  List<Object?> get props => [
-        addressBooks,
-      ];
+  List<Object?> get props => [addressBooks];
 }

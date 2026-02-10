@@ -26,8 +26,8 @@ mixin QuickRolePickerMixin on TwakeContextMenuMixin {
     DefaultPowerLevelMember.member,
     DefaultPowerLevelMember.guest,
   ];
-  final setPermissionLevelInteractor =
-      getIt.get<SetPermissionLevelInteractor>();
+  final setPermissionLevelInteractor = getIt
+      .get<SetPermissionLevelInteractor>();
   StreamSubscription<Either<Failure, Success>>? _setPermissionLevelSubscription;
 
   List<ContextMenuAction> _mapPopupRolesToContextMenuActions(
@@ -52,14 +52,14 @@ mixin QuickRolePickerMixin on TwakeContextMenuMixin {
     _setPermissionLevelSubscription = setPermissionLevelInteractor
         .execute(room: room, userPermissionLevels: userPermissionLevels)
         .listen(
-      (result) {
-        _handleAssignRolesResult(context, result);
-      },
-      onDone: () {
-        _setPermissionLevelSubscription?.cancel();
-        onHandledResult?.call();
-      },
-    );
+          (result) {
+            _handleAssignRolesResult(context, result);
+          },
+          onDone: () {
+            _setPermissionLevelSubscription?.cancel();
+            onHandledResult?.call();
+          },
+        );
   }
 
   void _handleAssignRolesResult(
@@ -70,10 +70,7 @@ mixin QuickRolePickerMixin on TwakeContextMenuMixin {
       (failure) {
         if (failure is SetPermissionLevelFailure) {
           TwakeDialog.hideLoadingDialog(context);
-          TwakeSnackBar.show(
-            context,
-            failure.exception.toString(),
-          );
+          TwakeSnackBar.show(context, failure.exception.toString());
           return;
         }
 
@@ -117,18 +114,14 @@ mixin QuickRolePickerMixin on TwakeContextMenuMixin {
       onTap: () {
         Navigator.of(dialogContext).pop();
         handleClickOnContextMenuItem(
-          userPermissionLevels: {
-            user: role.powerLevel,
-          },
+          userPermissionLevels: {user: role.powerLevel},
           loadingContext,
           room: room,
           onHandledResult: onHandledResult,
         );
       },
       child: Container(
-        padding: const EdgeInsets.symmetric(
-          horizontal: 32,
-        ),
+        padding: const EdgeInsets.symmetric(horizontal: 32),
         margin: const EdgeInsets.only(bottom: 8),
         height: 36,
         child: Row(
@@ -172,10 +165,7 @@ mixin QuickRolePickerMixin on TwakeContextMenuMixin {
     final selectedActionIndex = await showTwakeContextMenu(
       offset: offset,
       context: context,
-      listActions: _mapPopupRolesToContextMenuActions(
-        context,
-        user: user,
-      ),
+      listActions: _mapPopupRolesToContextMenuActions(context, user: user),
     );
 
     if (selectedActionIndex != null && selectedActionIndex is int) {
@@ -218,10 +208,7 @@ mixin QuickRolePickerMixin on TwakeContextMenuMixin {
           expand: false,
           builder: (BuildContext context, ScrollController scrollController) {
             return Padding(
-              padding: const EdgeInsets.only(
-                top: 16,
-                bottom: 12,
-              ),
+              padding: const EdgeInsets.only(top: 16, bottom: 12),
               child: Column(
                 children: [
                   Container(

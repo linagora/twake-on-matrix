@@ -19,8 +19,8 @@ mixin LinkifyMixin {
   final ValueNotifier<bool> openingPopupMenu = ValueNotifier(false);
 
   List<PhoneNumberContextMenuActions> get phoneNumberContextMenuOnWeb => [
-        PhoneNumberContextMenuActions.copy,
-      ];
+    PhoneNumberContextMenuActions.copy,
+  ];
 
   List<ContextMenuAction> _mapPopupMenuActionsToContextMenuActions({
     required BuildContext context,
@@ -28,9 +28,7 @@ mixin LinkifyMixin {
   }) {
     return actions.map((action) {
       return ContextMenuAction(
-        name: action.getTitle(
-          context,
-        ),
+        name: action.getTitle(context),
         icon: action.getIconData(),
       );
     }).toList();
@@ -137,9 +135,7 @@ mixin LinkifyMixin {
         PullDownMenuItem(
           title: L10n.of(context)!.copyNumber,
           onTap: () async {
-            await Clipboard.setData(
-              ClipboardData(text: number),
-            );
+            await Clipboard.setData(ClipboardData(text: number));
             TwakeSnackBar.show(
               context,
               L10n.of(context)!.phoneNumberCopiedToClipboard,

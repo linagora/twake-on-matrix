@@ -5,10 +5,7 @@ class DownloadFileForPreviewResponse with EquatableMixin {
 
   final String? mimeType;
 
-  DownloadFileForPreviewResponse({
-    required this.filePath,
-    this.mimeType,
-  });
+  DownloadFileForPreviewResponse({required this.filePath, this.mimeType});
 
   @override
   List<Object?> get props => [filePath, mimeType];

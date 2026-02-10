@@ -31,10 +31,7 @@ import 'package:fluffychat/generated/l10n/app_localizations.dart';
 class AssignRoles extends StatefulWidget {
   final Room room;
 
-  const AssignRoles({
-    super.key,
-    required this.room,
-  });
+  const AssignRoles({super.key, required this.room});
 
   @override
   AssignRolesController createState() => AssignRolesController();
@@ -56,8 +53,9 @@ class AssignRolesController extends State<AssignRoles>
   final ValueNotifier<bool> enableSelectMembersMobileNotifier =
       ValueNotifier<bool>(false);
 
-  final ValueNotifier<List<User>> membersNotifier =
-      ValueNotifier<List<User>>([]);
+  final ValueNotifier<List<User>> membersNotifier = ValueNotifier<List<User>>(
+    [],
+  );
 
   final textEditingController = TextEditingController();
 
@@ -65,10 +63,8 @@ class AssignRolesController extends State<AssignRoles>
 
   final ValueNotifier<Either<Failure, Success>> searchUserResults =
       ValueNotifier<Either<Failure, Success>>(
-    Right(
-      AssignRolesSearchInitialState(),
-    ),
-  );
+        Right(AssignRolesSearchInitialState()),
+      );
 
   void onBack() {
     Navigator.of(context).pop();
@@ -80,9 +76,7 @@ class AssignRolesController extends State<AssignRoles>
         CupertinoPageRoute(
           settings: const RouteSettings(name: '/assign-roles-member-picker'),
           builder: (context) {
-            return AssignRolesMemberPicker(
-              room: widget.room,
-            );
+            return AssignRolesMemberPicker(room: widget.room);
           },
         ),
       );
@@ -94,18 +88,13 @@ class AssignRolesController extends State<AssignRoles>
       builder: (dialogContext) => ScaffoldMessenger(
         child: AlertDialog(
           shape: const RoundedRectangleBorder(
-            borderRadius: BorderRadius.all(
-              Radius.circular(16.0),
-            ),
+            borderRadius: BorderRadius.all(Radius.circular(16.0)),
           ),
           contentPadding: const EdgeInsets.all(0),
           content: SizedBox(
             width: AssignRolesMemberPickerStyle.fixedDialogWidth,
             height: AssignRolesMemberPickerStyle.fixedDialogHeight,
-            child: AssignRolesMemberPicker(
-              room: widget.room,
-              isDialog: true,
-            ),
+            child: AssignRolesMemberPicker(room: widget.room, isDialog: true),
           ),
         ),
       ),
@@ -138,9 +127,9 @@ class AssignRolesController extends State<AssignRoles>
     final assignedUsers = assignRolesMember;
 
     final searchResults = assignedUsers.where((user) {
-      return (user.displayName ?? '')
-              .toLowerCase()
-              .contains(searchTerm.toLowerCase()) ||
+      return (user.displayName ?? '').toLowerCase().contains(
+            searchTerm.toLowerCase(),
+          ) ||
           (user.id).toLowerCase().contains(searchTerm.toLowerCase());
     }).toList();
 
@@ -175,9 +164,7 @@ class AssignRolesController extends State<AssignRoles>
     });
   }
 
-  void handleOnLongPressMobile({
-    required User member,
-  }) {
+  void handleOnLongPressMobile({required User member}) {
     if (!responsive.isMobile(context)) {
       return;
     }
@@ -191,10 +178,7 @@ class AssignRolesController extends State<AssignRoles>
     }
 
     enableSelectMembersMobileNotifier.toggle();
-    selectedUsersMapChangeNotifier.onUserTileTap(
-      context,
-      member,
-    );
+    selectedUsersMapChangeNotifier.onUserTileTap(context, member);
   }
 
   void handleDemoteMultiAdminsAndModeratorsMobile() {
@@ -256,19 +240,15 @@ class AssignRolesController extends State<AssignRoles>
     ];
   }
 
-  void _handleOnTapRemoveUser({
-    required User user,
-  }) {
-    _banUserSubscription =
-        banUserInteractor.execute(user: user).listen((result) {
+  void _handleOnTapRemoveUser({required User user}) {
+    _banUserSubscription = banUserInteractor.execute(user: user).listen((
+      result,
+    ) {
       result.fold(
         (failure) {
           if (failure is BanUserFailure) {
             TwakeDialog.hideLoadingDialog(context);
-            TwakeSnackBar.show(
-              context,
-              failure.exception.toString(),
-            );
+            TwakeSnackBar.show(context, failure.exception.toString());
             return;
           }
 
@@ -334,9 +314,7 @@ class AssignRolesController extends State<AssignRoles>
   Widget build(BuildContext context) {
     return SizedBox(
       width: ChatDetailEditViewStyle.fixedWidth,
-      child: AssignRolesView(
-        controller: this,
-      ),
+      child: AssignRolesView(controller: this),
     );
   }
 }

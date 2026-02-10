@@ -12,16 +12,15 @@ class GetServerCapabilitiesInteractor {
   Stream<Either<Failure, Success>> execute() async* {
     try {
       yield Right(GettingServerCapabilities());
-      final response =
-          await getIt.get<ServerCapabilitiesRepository>().getCapabilities();
+      final response = await getIt
+          .get<ServerCapabilitiesRepository>()
+          .getCapabilities();
       Logs().d(
         'GetServerCapabilitiesInteractor::execute(): response - $response',
       );
       yield Right(GetServerCapabilitiesSuccess(response));
     } catch (e) {
-      Logs().e(
-        'GetServerCapabilitiesInteractor::execute(): Exception - $e',
-      );
+      Logs().e('GetServerCapabilitiesInteractor::execute(): Exception - $e');
       yield Left(GetServerCapabilitiesFailure(exception: e));
     }
   }

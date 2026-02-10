@@ -40,14 +40,9 @@ mixin SendFilesMixin {
   }) async {
     if (room == null) return;
     Navigator.pop(context);
-    final result = await FilePicker.platform.pickFiles(
-      allowMultiple: true,
-    );
+    final result = await FilePicker.platform.pickFiles(allowMultiple: true);
     fileInfos ??= result?.xFiles.map((file) {
-      return FileInfo(
-        file.name,
-        filePath: file.path,
-      );
+      return FileInfo(file.name, filePath: file.path);
     }).toList();
 
     if (fileInfos == null || fileInfos.isEmpty) return;

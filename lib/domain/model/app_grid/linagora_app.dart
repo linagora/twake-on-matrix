@@ -36,12 +36,12 @@ class LinagoraApp with EquatableMixin {
 
   @override
   List<Object?> get props => [
-        appName,
-        iconName,
-        appUri,
-        androidPackageId,
-        iosUrlScheme,
-        iosAppStoreLink,
-        publicIconUri,
-      ];
+    appName,
+    iconName,
+    appUri,
+    androidPackageId,
+    iosUrlScheme,
+    iosAppStoreLink,
+    publicIconUri,
+  ];
 }

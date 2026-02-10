@@ -6,15 +6,16 @@ import 'package:fluffychat/domain/repository/recovery_words_repository.dart';
 import 'package:matrix/matrix.dart';
 
 class SaveRecoveryWordsInteractor {
-  final RecoveryWordsRepository recoveryWordsRepository =
-      getIt.get<RecoveryWordsRepository>();
+  final RecoveryWordsRepository recoveryWordsRepository = getIt
+      .get<RecoveryWordsRepository>();
 
   Future<Either<SaveRecoveryWordsFailed, SaveRecoveryWordsSuccess>> execute(
     String words,
   ) async {
     try {
-      final bool response =
-          await recoveryWordsRepository.saveRecoveryWords(words);
+      final bool response = await recoveryWordsRepository.saveRecoveryWords(
+        words,
+      );
       return response
           ? const Right(SaveRecoveryWordsSuccess())
           : const Left(SaveRecoveryWordsFailed());

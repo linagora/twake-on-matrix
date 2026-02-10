@@ -34,13 +34,11 @@ class EmotesSettingsController extends State<EmotesSettings> {
 
   ImagePackContent _getPack() {
     final client = Matrix.of(context).client;
-    final event = (room != null
+    final event =
+        (room != null
             ? room!.getState('im.ponies.room_emotes', stateKey ?? '')
             : client.accountData['im.ponies.user_emotes']) ??
-        BasicEvent(
-          type: 'm.dummy',
-          content: {},
-        );
+        BasicEvent(type: 'm.dummy', content: {});
     // make sure we work on a *copy* of the event
     return BasicEvent.fromJson(event.toJson()).parsedImagePackContent;
   }
@@ -85,7 +83,8 @@ class EmotesSettingsController extends State<EmotesSettings> {
       return;
     }
     final client = Matrix.of(context).client;
-    final content = client.accountData['im.ponies.emote_rooms']?.content ??
+    final content =
+        client.accountData['im.ponies.emote_rooms']?.content ??
         <String, dynamic>{};
     if (active) {
       if (content['rooms'] is! Map) {
@@ -112,9 +111,9 @@ class EmotesSettingsController extends State<EmotesSettings> {
   }
 
   void removeImageAction(String oldImageCode) => setState(() {
-        pack!.images.remove(oldImageCode);
-        showSave = true;
-      });
+    pack!.images.remove(oldImageCode);
+    showSave = true;
+  });
 
   void submitImageAction(
     String oldImageCode,
@@ -224,10 +223,7 @@ class EmotesSettingsController extends State<EmotesSettings> {
     );
     final pickedFile = result?.files.firstOrNull;
     if (pickedFile == null || pickedFile.bytes == null) return;
-    var file = MatrixImageFile(
-      bytes: pickedFile.bytes!,
-      name: pickedFile.name,
-    );
+    var file = MatrixImageFile(bytes: pickedFile.bytes!, name: pickedFile.name);
     try {
       file = (await file.generateThumbnail(
         nativeImplementations: ClientManager.nativeImplementations,
@@ -237,16 +233,14 @@ class EmotesSettingsController extends State<EmotesSettings> {
     }
     final uploadResp = await TwakeDialog.showFutureLoadingDialogFullScreen(
       future: () => Matrix.of(context).client.uploadContent(
-            file.bytes,
-            filename: file.name,
-            contentType: file.mimeType,
-          ),
+        file.bytes,
+        filename: file.name,
+        contentType: file.mimeType,
+      ),
     );
     if (uploadResp.error == null) {
       setState(() {
-        final info = <String, dynamic>{
-          ...file.info,
-        };
+        final info = <String, dynamic>{...file.info};
         // normalize width / height to 256, required for stickers
         if (info['w'] is int && info['h'] is int) {
           final ratio = info['w'] / info['h'];

@@ -27,8 +27,8 @@ class MediaViewerAppbarView extends StatelessWidget {
           child: Container(
             padding: controller.widget.enablePaddingAppbar == true
                 ? showAppbarPreview
-                    ? ImageViewerStyle.paddingTopAppBar
-                    : EdgeInsets.zero
+                      ? ImageViewerStyle.paddingTopAppBar
+                      : EdgeInsets.zero
                 : EdgeInsets.zero,
             height: ImageViewerStyle.appBarHeight,
             width: MediaQuery.sizeOf(context).width,
@@ -44,9 +44,7 @@ class MediaViewerAppbarView extends StatelessWidget {
                               : Icons.close,
                           color: LinagoraSysColors.material().onPrimary,
                         ),
-                        onPressed: () => controller.onClose(
-                          context,
-                        ),
+                        onPressed: () => controller.onClose(context),
                         color: LinagoraSysColors.material().onPrimary,
                         tooltip: L10n.of(context)!.back,
                       ),
@@ -140,8 +138,8 @@ class MediaViewerAppbarView extends StatelessWidget {
                                         .showMoreIconSplashRadius,
                                     onTap: () =>
                                         controller.toggleShowMoreActions(
-                                      controller.menuController,
-                                    ),
+                                          controller.menuController,
+                                        ),
                                     child: Padding(
                                       padding: MediaViewewAppbarStyle
                                           .marginAllShowMoreIcon,

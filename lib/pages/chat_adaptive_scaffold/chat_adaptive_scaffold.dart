@@ -52,19 +52,20 @@ class ChatAdaptiveScaffoldController extends State<ChatAdaptiveScaffold> {
           onChangeRightColumnType: controller.setRightColumnType,
           jumpToEventStream: jumpToEventStreamController.stream,
         ),
-        rightBuilder: (
-          controller, {
-          required bool isInStack,
-          required RightColumnType type,
-        }) {
-          return _RightColumnNavigator(
-            isInStack: isInStack,
-            controller: controller,
-            type: type,
-            roomId: widget.roomId,
-            jumpToEventStreamController: jumpToEventStreamController,
-          );
-        },
+        rightBuilder:
+            (
+              controller, {
+              required bool isInStack,
+              required RightColumnType type,
+            }) {
+              return _RightColumnNavigator(
+                isInStack: isInStack,
+                controller: controller,
+                type: type,
+                roomId: widget.roomId,
+                jumpToEventStreamController: jumpToEventStreamController,
+              );
+            },
       ),
     );
   }

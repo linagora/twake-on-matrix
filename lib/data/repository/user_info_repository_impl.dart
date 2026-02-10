@@ -24,8 +24,8 @@ class UserInfoRepositoryImpl implements UserInfoRepository {
     UserInfoVisibilityRequest body,
   ) {
     return getIt.get<UserInfoDatasource>().updateUserInfoVisibility(
-          userId,
-          body,
-        );
+      userId,
+      body,
+    );
   }
 }

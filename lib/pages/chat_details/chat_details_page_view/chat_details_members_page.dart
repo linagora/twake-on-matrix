@@ -15,10 +15,8 @@ class ChatDetailsMembersPage extends StatelessWidget {
   final bool isMobileAndTablet;
   final void Function(User member)? onSelectMember;
   final void Function(User member)? onRemoveMember;
-  final void Function(
-    User member, {
-    DefaultPowerLevelMember? role,
-  })? onChangeRole;
+  final void Function(User member, {DefaultPowerLevelMember? role})?
+  onChangeRole;
 
   const ChatDetailsMembersPage({
     super.key,
@@ -44,10 +42,7 @@ class ChatDetailsMembersPage extends StatelessWidget {
         return ListView.builder(
           shrinkWrap: true,
           itemCount: members.length + (canRequestMoreMembers ? 1 : 0),
-          padding: const EdgeInsets.symmetric(
-            horizontal: 12,
-            vertical: 8,
-          ),
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
           itemBuilder: (BuildContext context, int index) {
             if (index < members!.length) {
               return ListenableBuilder(
@@ -77,10 +72,7 @@ class ChatDetailsMembersPage extends StatelessWidget {
               ),
               leading: CircleAvatar(
                 backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-                child: const Icon(
-                  Icons.refresh,
-                  color: Colors.grey,
-                ),
+                child: const Icon(Icons.refresh, color: Colors.grey),
               ),
               onTap: requestMoreMembersAction,
             );

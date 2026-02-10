@@ -27,8 +27,8 @@ class AutoHomeserverPickerView extends StatelessWidget {
                 Text(
                   L10n.of(context)!.welcomeTo,
                   style: Theme.of(context).textTheme.headlineLarge?.copyWith(
-                        color: LinagoraSysColors.material().onSurfaceVariant,
-                      ),
+                    color: LinagoraSysColors.material().onSurfaceVariant,
+                  ),
                 ),
                 SvgPicture.asset(
                   ImagePaths.logoTwakeWelcome,
@@ -41,8 +41,8 @@ class AutoHomeserverPickerView extends StatelessWidget {
                     L10n.of(context)!.descriptionWelcomeTo,
                     textAlign: TextAlign.center,
                     style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                          color: LinagoraSysColors.material().onSurfaceVariant,
-                        ),
+                      color: LinagoraSysColors.material().onSurfaceVariant,
+                    ),
                   ),
                 ),
                 const SizedBox(height: 32),
@@ -94,9 +94,7 @@ class AutoHomeserverPickerView extends StatelessWidget {
                                 child: Text(
                                   L10n.of(context)!.startMessaging,
                                   textAlign: TextAlign.center,
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .bodyLarge
+                                  style: Theme.of(context).textTheme.bodyLarge
                                       ?.copyWith(
                                         color: LinagoraSysColors.material()
                                             .onPrimary,
@@ -109,9 +107,7 @@ class AutoHomeserverPickerView extends StatelessWidget {
                           Text(
                             state.error ??
                                 L10n.of(context)!.configurationNotFound,
-                            style: Theme.of(context)
-                                .textTheme
-                                .titleMedium
+                            style: Theme.of(context).textTheme.titleMedium
                                 ?.copyWith(
                                   color: LinagoraSysColors.material().error,
                                 ),
@@ -132,9 +128,7 @@ class AutoHomeserverPickerView extends StatelessWidget {
                         onTap: controller.retryCheckHomeserver,
                         child: Container(
                           height: AutoHomeserverPickerViewStyle.buttonHeight,
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 40,
-                          ),
+                          padding: const EdgeInsets.symmetric(horizontal: 40),
                           clipBehavior: Clip.antiAlias,
                           decoration: ShapeDecoration(
                             gradient:
@@ -149,9 +143,7 @@ class AutoHomeserverPickerView extends StatelessWidget {
                             child: Text(
                               L10n.of(context)!.startMessaging,
                               textAlign: TextAlign.center,
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .bodyLarge
+                              style: Theme.of(context).textTheme.bodyLarge
                                   ?.copyWith(
                                     color:
                                         LinagoraSysColors.material().onPrimary,

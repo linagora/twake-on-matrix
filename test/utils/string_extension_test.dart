@@ -31,15 +31,17 @@ void main() {
       expect(result, equals(expectedPhoneNumber));
     });
 
-    test('should return phone number without any Country Code or Extension',
-        () {
-      const phoneNumber = '+1 (800)-555-1234 ext. 123';
-      const expectedPhoneNumber = '18005551234123';
+    test(
+      'should return phone number without any Country Code or Extension',
+      () {
+        const phoneNumber = '+1 (800)-555-1234 ext. 123';
+        const expectedPhoneNumber = '18005551234123';
 
-      final result = phoneNumber.normalizePhoneNumber();
+        final result = phoneNumber.normalizePhoneNumber();
 
-      expect(result, equals(expectedPhoneNumber));
-    });
+        expect(result, equals(expectedPhoneNumber));
+      },
+    );
 
     test('should return phone number without any special characters', () {
       const phoneNumber = '+1 (800)-555.1234 ext. 325';
@@ -51,8 +53,7 @@ void main() {
     });
   });
 
-  group(
-      '[isContainsHttpProtocol] TEST\n'
+  group('[isContainsHttpProtocol] TEST\n'
       'GIVEN a string\n'
       'USING isContainsUrl function\n'
       'IF the string contains a URL\n'
@@ -154,8 +155,7 @@ void main() {
     }
   });
 
-  group(
-      '[removeHttpProtocol] TEST\n'
+  group('[removeHttpProtocol] TEST\n'
       'GIVEN a string\n'
       'USING removeHttpProtocol function\n'
       'IF the string starts with http:// or https://\n'
@@ -337,14 +337,15 @@ void main() {
     });
 
     test(
-        'extractAllHrefs extracts hrefs from <a> tags with multiple attributes',
-        () {
-      expect(
-        '<a class="link" href="https://example.com" target="_blank">Link</a> <a href="https://another.com">Another Link</a>'
-            .extractAllHrefs(),
-        equals(['https://example.com', 'https://another.com']),
-      );
-    });
+      'extractAllHrefs extracts hrefs from <a> tags with multiple attributes',
+      () {
+        expect(
+          '<a class="link" href="https://example.com" target="_blank">Link</a> <a href="https://another.com">Another Link</a>'
+              .extractAllHrefs(),
+          equals(['https://example.com', 'https://another.com']),
+        );
+      },
+    );
 
     test('extractAllHrefs extracts href when only one <a> tag', () {
       expect(
@@ -355,8 +356,7 @@ void main() {
   });
 
   group('[extractInnerText] TEST\n', () {
-    test(
-        'GIVEN an a tag\n'
+    test('GIVEN an a tag\n'
         'CONTAINS innerText\n'
         'THEN return innerText\n', () {
       expect(
@@ -365,14 +365,12 @@ void main() {
       );
     });
 
-    test(
-        'GIVEN string without a tag\n'
+    test('GIVEN string without a tag\n'
         'THEN return null\n', () {
       expect('Hello world!'.extractInnerText(), isNull);
     });
 
-    test(
-        'GIVEN an a tag\n'
+    test('GIVEN an a tag\n'
         'NOT CONTAINS innerText\n'
         'THEN return an empty string\n', () {
       expect('<a href="https://example.com"></a>'.extractInnerText(), isEmpty);
@@ -381,223 +379,287 @@ void main() {
 
   group('buildHighlightTextSpans tests', () {
     test(
-        'buildHighlightTextSpans handles special * and \\ characters in highlightText',
-        () {
-      const text =
-          'This is a test string with special characters like * and \\.';
-      const highlightText = '* and \\';
-      final expectedSpans = [
-        const TextSpan(
-          text: 'This is a test string with special characters like ',
-          style: TextStyle(color: Colors.black),
-        ),
-        const TextSpan(text: '* and \\', style: TextStyle(color: Colors.red)),
-        const TextSpan(text: '.', style: TextStyle(color: Colors.black)),
-      ];
+      'buildHighlightTextSpans handles special * and \\ characters in highlightText',
+      () {
+        const text =
+            'This is a test string with special characters like * and \\.';
+        const highlightText = '* and \\';
+        final expectedSpans = [
+          const TextSpan(
+            text: 'This is a test string with special characters like ',
+            style: TextStyle(color: Colors.black),
+          ),
+          const TextSpan(
+            text: '* and \\',
+            style: TextStyle(color: Colors.red),
+          ),
+          const TextSpan(
+            text: '.',
+            style: TextStyle(color: Colors.black),
+          ),
+        ];
 
-      final result = text.buildHighlightTextSpans(
-        highlightText,
-        style: const TextStyle(color: Colors.black),
-        highlightStyle: const TextStyle(color: Colors.red),
-      );
+        final result = text.buildHighlightTextSpans(
+          highlightText,
+          style: const TextStyle(color: Colors.black),
+          highlightStyle: const TextStyle(color: Colors.red),
+        );
 
-      expect(result.length, expectedSpans.length);
+        expect(result.length, expectedSpans.length);
 
-      for (int i = 0; i < result.length; i++) {
-        expect(result[i].text, expectedSpans[i].text);
-        expect(result[i].style, expectedSpans[i].style);
-      }
-    });
+        for (int i = 0; i < result.length; i++) {
+          expect(result[i].text, expectedSpans[i].text);
+          expect(result[i].style, expectedSpans[i].style);
+        }
+      },
+    );
 
     test(
-        'buildHighlightTextSpans handles special \\ characters in highlightText',
-        () {
-      const text = 'This is a test string with special characters like 123\\.';
-      const highlightText = '123';
-      final expectedSpans = [
-        const TextSpan(
-          text: 'This is a test string with special characters like ',
-          style: TextStyle(color: Colors.black),
-        ),
-        const TextSpan(text: '123', style: TextStyle(color: Colors.red)),
-        const TextSpan(text: '\\.', style: TextStyle(color: Colors.black)),
-      ];
+      'buildHighlightTextSpans handles special \\ characters in highlightText',
+      () {
+        const text =
+            'This is a test string with special characters like 123\\.';
+        const highlightText = '123';
+        final expectedSpans = [
+          const TextSpan(
+            text: 'This is a test string with special characters like ',
+            style: TextStyle(color: Colors.black),
+          ),
+          const TextSpan(
+            text: '123',
+            style: TextStyle(color: Colors.red),
+          ),
+          const TextSpan(
+            text: '\\.',
+            style: TextStyle(color: Colors.black),
+          ),
+        ];
 
-      final result = text.buildHighlightTextSpans(
-        highlightText,
-        style: const TextStyle(color: Colors.black),
-        highlightStyle: const TextStyle(color: Colors.red),
-      );
+        final result = text.buildHighlightTextSpans(
+          highlightText,
+          style: const TextStyle(color: Colors.black),
+          highlightStyle: const TextStyle(color: Colors.red),
+        );
 
-      expect(result.length, expectedSpans.length);
+        expect(result.length, expectedSpans.length);
 
-      for (int i = 0; i < result.length; i++) {
-        expect(result[i].text, expectedSpans[i].text);
-        expect(result[i].style, expectedSpans[i].style);
-      }
-    });
+        for (int i = 0; i < result.length; i++) {
+          expect(result[i].text, expectedSpans[i].text);
+          expect(result[i].style, expectedSpans[i].style);
+        }
+      },
+    );
 
-    test('buildHighlightTextSpans handles special characters in highlightText',
-        () {
-      const text = 'This is a test string with special characters like 123.';
-      const highlightText = '123';
-      final expectedSpans = [
-        const TextSpan(
-          text: 'This is a test string with special characters like ',
-          style: TextStyle(color: Colors.black),
-        ),
-        const TextSpan(text: '123', style: TextStyle(color: Colors.red)),
-        const TextSpan(text: '.', style: TextStyle(color: Colors.black)),
-      ];
+    test(
+      'buildHighlightTextSpans handles special characters in highlightText',
+      () {
+        const text = 'This is a test string with special characters like 123.';
+        const highlightText = '123';
+        final expectedSpans = [
+          const TextSpan(
+            text: 'This is a test string with special characters like ',
+            style: TextStyle(color: Colors.black),
+          ),
+          const TextSpan(
+            text: '123',
+            style: TextStyle(color: Colors.red),
+          ),
+          const TextSpan(
+            text: '.',
+            style: TextStyle(color: Colors.black),
+          ),
+        ];
 
-      final result = text.buildHighlightTextSpans(
-        highlightText,
-        style: const TextStyle(color: Colors.black),
-        highlightStyle: const TextStyle(color: Colors.red),
-      );
+        final result = text.buildHighlightTextSpans(
+          highlightText,
+          style: const TextStyle(color: Colors.black),
+          highlightStyle: const TextStyle(color: Colors.red),
+        );
 
-      expect(result.length, expectedSpans.length);
+        expect(result.length, expectedSpans.length);
 
-      for (int i = 0; i < result.length; i++) {
-        expect(result[i].text, expectedSpans[i].text);
-        expect(result[i].style, expectedSpans[i].style);
-      }
-    });
+        for (int i = 0; i < result.length; i++) {
+          expect(result[i].text, expectedSpans[i].text);
+          expect(result[i].style, expectedSpans[i].style);
+        }
+      },
+    );
 
-    test('buildHighlightTextSpans handles special characters in highlightText',
-        () {
-      const text = 'This is a test string with special characters like 123.';
-      const highlightText = '123.';
-      final expectedSpans = [
-        const TextSpan(
-          text: 'This is a test string with special characters like ',
-          style: TextStyle(color: Colors.black),
-        ),
-        const TextSpan(text: '123.', style: TextStyle(color: Colors.red)),
-        const TextSpan(text: '', style: TextStyle(color: Colors.black)),
-      ];
+    test(
+      'buildHighlightTextSpans handles special characters in highlightText',
+      () {
+        const text = 'This is a test string with special characters like 123.';
+        const highlightText = '123.';
+        final expectedSpans = [
+          const TextSpan(
+            text: 'This is a test string with special characters like ',
+            style: TextStyle(color: Colors.black),
+          ),
+          const TextSpan(
+            text: '123.',
+            style: TextStyle(color: Colors.red),
+          ),
+          const TextSpan(
+            text: '',
+            style: TextStyle(color: Colors.black),
+          ),
+        ];
 
-      final result = text.buildHighlightTextSpans(
-        highlightText,
-        style: const TextStyle(color: Colors.black),
-        highlightStyle: const TextStyle(color: Colors.red),
-      );
+        final result = text.buildHighlightTextSpans(
+          highlightText,
+          style: const TextStyle(color: Colors.black),
+          highlightStyle: const TextStyle(color: Colors.red),
+        );
 
-      expect(result.length, expectedSpans.length);
+        expect(result.length, expectedSpans.length);
 
-      for (int i = 0; i < result.length; i++) {
-        expect(result[i].text, expectedSpans[i].text);
-        expect(result[i].style, expectedSpans[i].style);
-      }
-    });
+        for (int i = 0; i < result.length; i++) {
+          expect(result[i].text, expectedSpans[i].text);
+          expect(result[i].style, expectedSpans[i].style);
+        }
+      },
+    );
 
-    test('buildHighlightTextSpans handles special characters in highlightText',
-        () {
-      const text = 'This is a test string with special characters like 123\\';
-      const highlightText = '123\\';
-      final expectedSpans = [
-        const TextSpan(
-          text: 'This is a test string with special characters like ',
-          style: TextStyle(color: Colors.black),
-        ),
-        const TextSpan(text: '123\\', style: TextStyle(color: Colors.red)),
-        const TextSpan(text: '', style: TextStyle(color: Colors.black)),
-      ];
+    test(
+      'buildHighlightTextSpans handles special characters in highlightText',
+      () {
+        const text = 'This is a test string with special characters like 123\\';
+        const highlightText = '123\\';
+        final expectedSpans = [
+          const TextSpan(
+            text: 'This is a test string with special characters like ',
+            style: TextStyle(color: Colors.black),
+          ),
+          const TextSpan(
+            text: '123\\',
+            style: TextStyle(color: Colors.red),
+          ),
+          const TextSpan(
+            text: '',
+            style: TextStyle(color: Colors.black),
+          ),
+        ];
 
-      final result = text.buildHighlightTextSpans(
-        highlightText,
-        style: const TextStyle(color: Colors.black),
-        highlightStyle: const TextStyle(color: Colors.red),
-      );
+        final result = text.buildHighlightTextSpans(
+          highlightText,
+          style: const TextStyle(color: Colors.black),
+          highlightStyle: const TextStyle(color: Colors.red),
+        );
 
-      expect(result.length, expectedSpans.length);
+        expect(result.length, expectedSpans.length);
 
-      for (int i = 0; i < result.length; i++) {
-        expect(result[i].text, expectedSpans[i].text);
-        expect(result[i].style, expectedSpans[i].style);
-      }
-    });
+        for (int i = 0; i < result.length; i++) {
+          expect(result[i].text, expectedSpans[i].text);
+          expect(result[i].style, expectedSpans[i].style);
+        }
+      },
+    );
 
-    test('buildHighlightTextSpans handles special characters in highlightText',
-        () {
-      const text = 'This is a test string with special characters like 123@@++';
-      const highlightText = '123@@++';
-      final expectedSpans = [
-        const TextSpan(
-          text: 'This is a test string with special characters like ',
-          style: TextStyle(color: Colors.black),
-        ),
-        const TextSpan(text: '123@@++', style: TextStyle(color: Colors.red)),
-        const TextSpan(text: '', style: TextStyle(color: Colors.black)),
-      ];
+    test(
+      'buildHighlightTextSpans handles special characters in highlightText',
+      () {
+        const text =
+            'This is a test string with special characters like 123@@++';
+        const highlightText = '123@@++';
+        final expectedSpans = [
+          const TextSpan(
+            text: 'This is a test string with special characters like ',
+            style: TextStyle(color: Colors.black),
+          ),
+          const TextSpan(
+            text: '123@@++',
+            style: TextStyle(color: Colors.red),
+          ),
+          const TextSpan(
+            text: '',
+            style: TextStyle(color: Colors.black),
+          ),
+        ];
 
-      final result = text.buildHighlightTextSpans(
-        highlightText,
-        style: const TextStyle(color: Colors.black),
-        highlightStyle: const TextStyle(color: Colors.red),
-      );
+        final result = text.buildHighlightTextSpans(
+          highlightText,
+          style: const TextStyle(color: Colors.black),
+          highlightStyle: const TextStyle(color: Colors.red),
+        );
 
-      expect(result.length, expectedSpans.length);
+        expect(result.length, expectedSpans.length);
 
-      for (int i = 0; i < result.length; i++) {
-        expect(result[i].text, expectedSpans[i].text);
-        expect(result[i].style, expectedSpans[i].style);
-      }
-    });
+        for (int i = 0; i < result.length; i++) {
+          expect(result[i].text, expectedSpans[i].text);
+          expect(result[i].style, expectedSpans[i].style);
+        }
+      },
+    );
 
-    test('buildHighlightTextSpans handles special characters in highlightText',
-        () {
-      const text = 'This is a test string with special characters like .123';
-      const highlightText = '.123';
-      final expectedSpans = [
-        const TextSpan(
-          text: 'This is a test string with special characters like ',
-          style: TextStyle(color: Colors.black),
-        ),
-        const TextSpan(text: '.123', style: TextStyle(color: Colors.red)),
-        const TextSpan(text: '', style: TextStyle(color: Colors.black)),
-      ];
+    test(
+      'buildHighlightTextSpans handles special characters in highlightText',
+      () {
+        const text = 'This is a test string with special characters like .123';
+        const highlightText = '.123';
+        final expectedSpans = [
+          const TextSpan(
+            text: 'This is a test string with special characters like ',
+            style: TextStyle(color: Colors.black),
+          ),
+          const TextSpan(
+            text: '.123',
+            style: TextStyle(color: Colors.red),
+          ),
+          const TextSpan(
+            text: '',
+            style: TextStyle(color: Colors.black),
+          ),
+        ];
 
-      final result = text.buildHighlightTextSpans(
-        highlightText,
-        style: const TextStyle(color: Colors.black),
-        highlightStyle: const TextStyle(color: Colors.red),
-      );
+        final result = text.buildHighlightTextSpans(
+          highlightText,
+          style: const TextStyle(color: Colors.black),
+          highlightStyle: const TextStyle(color: Colors.red),
+        );
 
-      expect(result.length, expectedSpans.length);
+        expect(result.length, expectedSpans.length);
 
-      for (int i = 0; i < result.length; i++) {
-        expect(result[i].text, expectedSpans[i].text);
-        expect(result[i].style, expectedSpans[i].style);
-      }
-    });
+        for (int i = 0; i < result.length; i++) {
+          expect(result[i].text, expectedSpans[i].text);
+          expect(result[i].style, expectedSpans[i].style);
+        }
+      },
+    );
 
-    test('buildHighlightTextSpans handles special characters in highlightText',
-        () {
-      const text = 'This is a test string with special characters like \\123';
-      const highlightText = '\\123';
-      final expectedSpans = [
-        const TextSpan(
-          text: 'This is a test string with special characters like ',
-          style: TextStyle(color: Colors.black),
-        ),
-        const TextSpan(text: '\\123', style: TextStyle(color: Colors.red)),
-        const TextSpan(text: '', style: TextStyle(color: Colors.black)),
-      ];
+    test(
+      'buildHighlightTextSpans handles special characters in highlightText',
+      () {
+        const text = 'This is a test string with special characters like \\123';
+        const highlightText = '\\123';
+        final expectedSpans = [
+          const TextSpan(
+            text: 'This is a test string with special characters like ',
+            style: TextStyle(color: Colors.black),
+          ),
+          const TextSpan(
+            text: '\\123',
+            style: TextStyle(color: Colors.red),
+          ),
+          const TextSpan(
+            text: '',
+            style: TextStyle(color: Colors.black),
+          ),
+        ];
 
-      final result = text.buildHighlightTextSpans(
-        highlightText,
-        style: const TextStyle(color: Colors.black),
-        highlightStyle: const TextStyle(color: Colors.red),
-      );
+        final result = text.buildHighlightTextSpans(
+          highlightText,
+          style: const TextStyle(color: Colors.black),
+          highlightStyle: const TextStyle(color: Colors.red),
+        );
 
-      expect(result.length, expectedSpans.length);
+        expect(result.length, expectedSpans.length);
 
-      for (int i = 0; i < result.length; i++) {
-        expect(result[i].text, expectedSpans[i].text);
-        expect(result[i].style, expectedSpans[i].style);
-      }
-    });
+        for (int i = 0; i < result.length; i++) {
+          expect(result[i].text, expectedSpans[i].text);
+          expect(result[i].style, expectedSpans[i].style);
+        }
+      },
+    );
   });
 
   group('getBaseUrlBeforeHash test', () {
@@ -667,20 +729,18 @@ void main() {
 
     test('returns correct path without homeserverParams in dev mode', () {
       const baseUrl = 'https://example.com/';
-      final result = baseUrl.generateLoginAuthPath(
-        isDevMode: true,
-      );
+      final result = baseUrl.generateLoginAuthPath(isDevMode: true);
       expect(result, equals('https://example.com/web/auth.html'));
     });
 
-    test('returns correct path without homeserverParams in production mode',
-        () {
-      const baseUrl = 'https://example.com/';
-      final result = baseUrl.generateLoginAuthPath(
-        isDevMode: false,
-      );
-      expect(result, equals('https://example.com/auth.html'));
-    });
+    test(
+      'returns correct path without homeserverParams in production mode',
+      () {
+        const baseUrl = 'https://example.com/';
+        final result = baseUrl.generateLoginAuthPath(isDevMode: false);
+        expect(result, equals('https://example.com/auth.html'));
+      },
+    );
 
     test('trims homeserverParams before appending', () {
       const baseUrl = 'https://example.com/';
@@ -754,8 +814,10 @@ void main() {
     });
 
     test('removes oldest emoji if over max size', () {
-      final reactions =
-          List.generate(12, (i) => String.fromCharCode(0x1F600 + i));
+      final reactions = List.generate(
+        12,
+        (i) => String.fromCharCode(0x1F600 + i),
+      );
       final result = reactions.combineRecentReactions(emojiId: '😎');
       expect(result.first, '😎');
       expect(result.length, 12);
@@ -763,8 +825,10 @@ void main() {
     });
 
     test('does not duplicate emoji', () {
-      final reactions =
-          List.generate(12, (i) => String.fromCharCode(0x1F600 + i));
+      final reactions = List.generate(
+        12,
+        (i) => String.fromCharCode(0x1F600 + i),
+      );
       final result = reactions.combineRecentReactions(emojiId: reactions.first);
       expect(result, reactions);
       expect(result.length, 12);

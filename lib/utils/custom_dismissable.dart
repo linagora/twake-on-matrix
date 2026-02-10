@@ -59,26 +59,16 @@ class _CustomDismissibleState extends State<CustomDismissible>
     final double end = _dragExtent.sign;
 
     _moveAnimation = _animateController.drive(
-      Tween<Offset>(
-        begin: Offset.zero,
-        end: Offset(0, end),
-      ),
+      Tween<Offset>(begin: Offset.zero, end: Offset(0, end)),
     );
 
     _scaleAnimation = _animateController.drive(
-      Tween<double>(
-        begin: 1,
-        end: 0.5,
-      ),
+      Tween<double>(begin: 1, end: 0.5),
     );
 
     _opacityAnimation = DecorationTween(
-      begin: BoxDecoration(
-        color: Colors.black.withOpacity(1.0),
-      ),
-      end: BoxDecoration(
-        color: Colors.black.withOpacity(0.0),
-      ),
+      begin: BoxDecoration(color: Colors.black.withOpacity(1.0)),
+      end: BoxDecoration(color: Colors.black.withOpacity(0.0)),
     ).animate(_animateController);
   }
 
@@ -149,10 +139,7 @@ class _CustomDismissibleState extends State<CustomDismissible>
       decoration: _opacityAnimation,
       child: SlideTransition(
         position: _moveAnimation,
-        child: ScaleTransition(
-          scale: _scaleAnimation,
-          child: widget.child,
-        ),
+        child: ScaleTransition(scale: _scaleAnimation, child: widget.child),
       ),
     );
 

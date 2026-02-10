@@ -12,8 +12,5 @@ class FederationConfigurations with EquatableMixin {
   });
 
   @override
-  List<Object?> get props => [
-        fedServerInformation,
-        identityServerInformation,
-      ];
+  List<Object?> get props => [fedServerInformation, identityServerInformation];
 }

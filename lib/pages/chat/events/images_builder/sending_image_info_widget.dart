@@ -57,9 +57,7 @@ class _SendingImageInfoWidgetState extends State<SendingImageInfoWidget>
         HeroPageRoute(
           builder: (context) {
             return InteractiveViewerGallery(
-              itemBuilder: ImageViewer(
-                event: widget.event,
-              ),
+              itemBuilder: ImageViewer(event: widget.event),
             );
           },
         ),
@@ -111,10 +109,7 @@ class _SendingImageInfoWidgetState extends State<SendingImageInfoWidget>
                 else if (uploadState is! UploadFileSuccessUIState &&
                     progress != 1)
                   InkWell(
-                    child: Icon(
-                      Icons.close,
-                      color: sysColor.onPrimary,
-                    ),
+                    child: Icon(Icons.close, color: sysColor.onPrimary),
                     onTap: () {
                       uploadManager.cancelUpload(widget.event);
                     },
@@ -144,7 +139,8 @@ class _SendingImageInfoWidgetState extends State<SendingImageInfoWidget>
                         widget.displayImageInfo.size.height,
                       ),
                       child: BlurHash(
-                        hash: widget.event.blurHash ??
+                        hash:
+                            widget.event.blurHash ??
                             AppConfig.defaultImageBlurHash,
                       ),
                     )
@@ -153,10 +149,12 @@ class _SendingImageInfoWidgetState extends State<SendingImageInfoWidget>
                       widget.matrixFile.bytes,
                       width: widget.displayImageInfo.size.width,
                       height: widget.displayImageInfo.size.height,
-                      cacheHeight: context
-                          .getCacheSize(widget.displayImageInfo.size.height),
-                      cacheWidth: context
-                          .getCacheSize(widget.displayImageInfo.size.width),
+                      cacheHeight: context.getCacheSize(
+                        widget.displayImageInfo.size.height,
+                      ),
+                      cacheWidth: context.getCacheSize(
+                        widget.displayImageInfo.size.width,
+                      ),
                       fit: BoxFit.cover,
                       filterQuality: FilterQuality.none,
                     ),
@@ -184,7 +182,8 @@ class _SendingImageInfoOverlay extends StatelessWidget {
     double progress,
     UploadFileUIState uploadState,
     Widget? child,
-  ) builder;
+  )
+  builder;
   final Widget? child;
 
   @override

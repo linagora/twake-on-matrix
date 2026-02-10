@@ -52,9 +52,7 @@ class TwakeDialog {
           opacity: Tween<double>(begin: 0, end: 1).animate(animation),
           child: const PopScope(
             canPop: false,
-            child: ProgressDialog(
-              lottieSize: lottieSizeMobile,
-            ),
+            child: ProgressDialog(lottieSize: lottieSizeMobile),
           ),
         );
       },
@@ -76,8 +74,9 @@ class TwakeDialog {
           child: PopScope(
             canPop: false,
             child: ProgressDialog(
-              lottieSize:
-                  PlatformInfos.isWeb ? lottieSizeWeb : lottieSizeMobile,
+              lottieSize: PlatformInfos.isWeb
+                  ? lottieSizeWeb
+                  : lottieSizeMobile,
             ),
           ),
         );
@@ -128,19 +127,19 @@ class TwakeDialog {
       maxWidth: maxWidthLoadingDialogWeb,
       errorTitle: L10n.of(context)!.errorDialogTitle,
       errorTitleStyle: Theme.of(context).textTheme.titleLarge?.copyWith(
-            color: LinagoraSysColors.material().onSurfaceVariant,
-          ),
+        color: LinagoraSysColors.material().onSurfaceVariant,
+      ),
       errorDescriptionStyle: Theme.of(context).textTheme.titleSmall?.copyWith(
-            color: LinagoraSysColors.material().onSurfaceVariant,
-          ),
+        color: LinagoraSysColors.material().onSurfaceVariant,
+      ),
       errorBackLabel: L10n.of(context)!.cancel,
       errorBackLabelStyle: Theme.of(context).textTheme.labelLarge?.copyWith(
-            color: Theme.of(context).colorScheme.primary,
-          ),
+        color: Theme.of(context).colorScheme.primary,
+      ),
       errorNextLabel: L10n.of(context)!.next,
       errorNextLabelStyle: Theme.of(context).textTheme.labelLarge?.copyWith(
-            color: LinagoraSysColors.material().onPrimary,
-          ),
+        color: LinagoraSysColors.material().onPrimary,
+      ),
       backgroundErrorDialog: LinagoraSysColors.material().onPrimary,
       backgroundNextLabel: Theme.of(context).colorScheme.primary,
       maxWidthButton: maxWidthDialogButtonMobile,
@@ -165,19 +164,19 @@ class TwakeDialog {
       loadingTitleStyle: Theme.of(context).textTheme.titleMedium,
       errorTitle: L10n.of(context)!.errorDialogTitle,
       errorTitleStyle: Theme.of(context).textTheme.headlineSmall?.copyWith(
-            color: LinagoraSysColors.material().onSurfaceVariant,
-          ),
+        color: LinagoraSysColors.material().onSurfaceVariant,
+      ),
       errorDescriptionStyle: Theme.of(context).textTheme.bodyMedium?.copyWith(
-            color: LinagoraSysColors.material().onSurfaceVariant,
-          ),
+        color: LinagoraSysColors.material().onSurfaceVariant,
+      ),
       errorBackLabel: L10n.of(context)!.cancel,
       errorBackLabelStyle: Theme.of(context).textTheme.labelLarge?.copyWith(
-            color: Theme.of(context).colorScheme.primary,
-          ),
+        color: Theme.of(context).colorScheme.primary,
+      ),
       errorNextLabel: L10n.of(context)!.next,
       errorNextLabelStyle: Theme.of(context).textTheme.labelLarge?.copyWith(
-            color: LinagoraSysColors.material().onPrimary,
-          ),
+        color: LinagoraSysColors.material().onPrimary,
+      ),
       backgroundNextLabel: Theme.of(context).colorScheme.primary,
       backgroundErrorDialog: LinagoraSysColors.material().onPrimary,
       isMobileResponsive: true,
@@ -196,9 +195,7 @@ class TwakeDialog {
     }
     return await showDialog(
       context: twakeContext!,
-      builder: (context) => InitClientDialog(
-        future: future,
-      ),
+      builder: (context) => InitClientDialog(future: future),
       barrierDismissible: true,
       barrierColor: Colors.transparent,
       useRootNavigator: false,
@@ -248,10 +245,7 @@ class TwakeDialog {
 class ProgressDialog extends StatelessWidget {
   final double lottieSize;
 
-  const ProgressDialog({
-    super.key,
-    required this.lottieSize,
-  });
+  const ProgressDialog({super.key, required this.lottieSize});
 
   @override
   Widget build(BuildContext context) {
@@ -279,10 +273,7 @@ class ProgressDialog extends StatelessWidget {
   }
 }
 
-enum ConfirmResult {
-  ok,
-  cancel,
-}
+enum ConfirmResult { ok, cancel }
 
 Future<ConfirmResult> showConfirmAlertDialog({
   required BuildContext context,

@@ -8,8 +8,8 @@ import 'package:fluffychat/domain/repository/invitation/hive_invitation_status_r
 import 'package:matrix/matrix.dart';
 
 class StoreInvitationStatusInteractor {
-  final HiveInvitationStatusRepository _hiveInvitationStatusRepository =
-      getIt.get<HiveInvitationStatusRepository>();
+  final HiveInvitationStatusRepository _hiveInvitationStatusRepository = getIt
+      .get<HiveInvitationStatusRepository>();
 
   Stream<Either<Failure, Success>> execute({
     required String userId,

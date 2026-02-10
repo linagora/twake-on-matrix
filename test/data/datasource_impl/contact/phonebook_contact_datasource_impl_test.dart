@@ -132,18 +132,9 @@ void main() {
           flutter_contact.Email(address: 'nina3@domain.com'),
         ],
       ),
-      const flutter_contact.Contact(
-        id: 'id_14',
-        displayName: 'Nina',
-      ),
-      const flutter_contact.Contact(
-        id: 'id_15',
-        displayName: '222',
-      ),
-      const flutter_contact.Contact(
-        id: 'id_16',
-        displayName: '222',
-      )
+      const flutter_contact.Contact(id: 'id_14', displayName: 'Nina'),
+      const flutter_contact.Contact(id: 'id_15', displayName: '222'),
+      const flutter_contact.Contact(id: 'id_16', displayName: '222'),
     ];
 
     setUp(() {
@@ -156,8 +147,9 @@ void main() {
       );
       dataSource = getIt.get<PhonebookContactDatasourceImpl>();
 
-      when(mockContactsProvider.getAll(properties: anyNamed('properties')))
-          .thenAnswer((_) async => listAllContacts);
+      when(
+        mockContactsProvider.getAll(properties: anyNamed('properties')),
+      ).thenAnswer((_) async => listAllContacts);
     });
 
     tearDown(() {
@@ -165,171 +157,108 @@ void main() {
     });
 
     test(
-        'Give a list of phonebook contacts'
-        'When fetchContacts is called'
-        'Then it should return a list of contacts without unknown phone number and email'
-        'Then it should return a list of contacts without duplicated phone number and email',
-        () async {
-      final List<Contact> expectedListContact = [
-        Contact(
-          id: 'id_1',
-          displayName: 'Alice',
-          phoneNumbers: {
-            PhoneNumber(
-              number: '(212)555-6789',
-            ),
-          },
-          emails: {
-            Email(
-              address: 'Alice@domain.com',
-            ),
-            Email(
-              address: 'Alice_1@domain.com',
-            ),
-          },
-        ),
-        Contact(
-          id: 'id_2',
-          displayName: 'Bob',
-          phoneNumbers: {
-            PhoneNumber(
-              number: '2124678190',
-            ),
-          },
-          emails: {
-            Email(
-              address: 'bob@domain.com',
-            ),
-            Email(
-              address: 'bob2@domain.com',
-            ),
-          },
-        ),
-        Contact(
-          id: 'id_3',
-          displayName: 'Charlie',
-          phoneNumbers: {
-            PhoneNumber(
-              number: '212 555-6789',
-            ),
-          },
-          emails: const {},
-        ),
-        Contact(
-          id: 'id_4',
-          displayName: 'David',
-          phoneNumbers: {
-            PhoneNumber(
-              number: '2124678190',
-            ),
-          },
-          emails: const {},
-        ),
-        Contact(
-          id: 'id_5',
-          displayName: 'Eve',
-          phoneNumbers: {
-            PhoneNumber(
-              number: '+1.123.456.7890',
-            ),
-          },
-          emails: const {},
-        ),
-        Contact(
-          id: 'id_6',
-          displayName: 'Frank',
-          phoneNumbers: {
-            PhoneNumber(
-              number: '81234977890',
-            ),
-          },
-          emails: const {},
-        ),
-        Contact(
-          id: 'id_7',
-          displayName: 'Grace',
-          phoneNumbers: {
-            PhoneNumber(
-              number: '+1 (800)-555-1234 ext. 123',
-            ),
-          },
-          emails: const {},
-        ),
-        Contact(
-          id: 'id_8',
-          displayName: 'Hank',
-          phoneNumbers: {
-            PhoneNumber(
-              number: '18005879106234',
-            ),
-          },
-          emails: const {},
-        ),
-        Contact(
-          id: 'id_9',
-          displayName: 'Ivy',
-          phoneNumbers: {
-            PhoneNumber(
-              number: '+1 (800)-555.1234',
-            ),
-          },
-          emails: const {},
-        ),
-        Contact(
-          id: 'id_10',
-          displayName: 'Karl',
-          phoneNumbers: {
-            PhoneNumber(
-              number: '18005873456',
-            ),
-          },
-          emails: const {},
-        ),
-        Contact(
-          id: 'id_11',
-          displayName: 'Liam',
-          phoneNumbers: {
-            PhoneNumber(
-              number: '(212) 555-6789',
-            ),
-          },
-          emails: const {},
-        ),
-        Contact(
-          id: 'id_12',
-          displayName: 'Mia',
-          phoneNumbers: {
-            PhoneNumber(
-              number: '2125556789',
-            ),
-          },
-          emails: const {},
-        ),
-        Contact(
-          id: 'id_13',
-          displayName: 'Nina',
-          phoneNumbers: const {},
-          emails: {
-            Email(
-              address: 'nina@domain.com',
-            ),
-            Email(
-              address: 'nina1@domain.com',
-            ),
-            Email(
-              address: 'nina2@domain.com',
-            ),
-            Email(
-              address: 'nina3@domain.com',
-            ),
-          },
-        ),
-      ];
+      'Give a list of phonebook contacts'
+      'When fetchContacts is called'
+      'Then it should return a list of contacts without unknown phone number and email'
+      'Then it should return a list of contacts without duplicated phone number and email',
+      () async {
+        final List<Contact> expectedListContact = [
+          Contact(
+            id: 'id_1',
+            displayName: 'Alice',
+            phoneNumbers: {PhoneNumber(number: '(212)555-6789')},
+            emails: {
+              Email(address: 'Alice@domain.com'),
+              Email(address: 'Alice_1@domain.com'),
+            },
+          ),
+          Contact(
+            id: 'id_2',
+            displayName: 'Bob',
+            phoneNumbers: {PhoneNumber(number: '2124678190')},
+            emails: {
+              Email(address: 'bob@domain.com'),
+              Email(address: 'bob2@domain.com'),
+            },
+          ),
+          Contact(
+            id: 'id_3',
+            displayName: 'Charlie',
+            phoneNumbers: {PhoneNumber(number: '212 555-6789')},
+            emails: const {},
+          ),
+          Contact(
+            id: 'id_4',
+            displayName: 'David',
+            phoneNumbers: {PhoneNumber(number: '2124678190')},
+            emails: const {},
+          ),
+          Contact(
+            id: 'id_5',
+            displayName: 'Eve',
+            phoneNumbers: {PhoneNumber(number: '+1.123.456.7890')},
+            emails: const {},
+          ),
+          Contact(
+            id: 'id_6',
+            displayName: 'Frank',
+            phoneNumbers: {PhoneNumber(number: '81234977890')},
+            emails: const {},
+          ),
+          Contact(
+            id: 'id_7',
+            displayName: 'Grace',
+            phoneNumbers: {PhoneNumber(number: '+1 (800)-555-1234 ext. 123')},
+            emails: const {},
+          ),
+          Contact(
+            id: 'id_8',
+            displayName: 'Hank',
+            phoneNumbers: {PhoneNumber(number: '18005879106234')},
+            emails: const {},
+          ),
+          Contact(
+            id: 'id_9',
+            displayName: 'Ivy',
+            phoneNumbers: {PhoneNumber(number: '+1 (800)-555.1234')},
+            emails: const {},
+          ),
+          Contact(
+            id: 'id_10',
+            displayName: 'Karl',
+            phoneNumbers: {PhoneNumber(number: '18005873456')},
+            emails: const {},
+          ),
+          Contact(
+            id: 'id_11',
+            displayName: 'Liam',
+            phoneNumbers: {PhoneNumber(number: '(212) 555-6789')},
+            emails: const {},
+          ),
+          Contact(
+            id: 'id_12',
+            displayName: 'Mia',
+            phoneNumbers: {PhoneNumber(number: '2125556789')},
+            emails: const {},
+          ),
+          Contact(
+            id: 'id_13',
+            displayName: 'Nina',
+            phoneNumbers: const {},
+            emails: {
+              Email(address: 'nina@domain.com'),
+              Email(address: 'nina1@domain.com'),
+              Email(address: 'nina2@domain.com'),
+              Email(address: 'nina3@domain.com'),
+            },
+          ),
+        ];
 
-      final result = await dataSource.fetchContacts();
+        final result = await dataSource.fetchContacts();
 
-      expect(result, isA<List<Contact>>());
-      expect(result, equals(expectedListContact));
-    });
+        expect(result, isA<List<Contact>>());
+        expect(result, equals(expectedListContact));
+      },
+    );
   });
 }

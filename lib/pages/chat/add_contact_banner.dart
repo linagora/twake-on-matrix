@@ -4,11 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:linagora_design_flutter/colors/linagora_sys_colors.dart';
 
 class AddContactBanner extends StatelessWidget {
-  const AddContactBanner({
-    super.key,
-    required this.onTap,
-    required this.show,
-  });
+  const AddContactBanner({super.key, required this.onTap, required this.show});
 
   final VoidCallback onTap;
   final ValueNotifier<bool> show;
@@ -43,10 +39,10 @@ class AddContactBanner extends StatelessWidget {
                       Text(
                         L10n.of(context)!.addToContacts,
                         style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                              fontSize: 14,
-                              height: 20 / 14,
-                              color: LinagoraSysColors.material().primary,
-                            ),
+                          fontSize: 14,
+                          height: 20 / 14,
+                          color: LinagoraSysColors.material().primary,
+                        ),
                       ),
                     ],
                   ),

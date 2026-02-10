@@ -17,10 +17,10 @@ class UrlPreviewPresentation with EquatableMixin {
 
   @override
   List<Object?> get props => [
-        description,
-        imageUri,
-        title,
-        imageHeight,
-        imageWidth,
-      ];
+    description,
+    imageUri,
+    title,
+    imageHeight,
+    imageWidth,
+  ];
 }

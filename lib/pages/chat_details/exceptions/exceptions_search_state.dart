@@ -18,18 +18,13 @@ class ExceptionsSearchSuccessState extends Success {
   });
 
   @override
-  List<Object?> get props => [
-        exceptionsMember,
-        keyword,
-      ];
+  List<Object?> get props => [exceptionsMember, keyword];
 }
 
 class ExceptionsSearchEmptyState extends Failure {
   final String keyword;
 
-  const ExceptionsSearchEmptyState({
-    required this.keyword,
-  });
+  const ExceptionsSearchEmptyState({required this.keyword});
 
   @override
   List<Object?> get props => [keyword];

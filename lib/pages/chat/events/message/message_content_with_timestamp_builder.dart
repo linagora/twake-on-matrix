@@ -67,7 +67,7 @@ class MessageContentWithTimestampBuilder extends StatefulWidget {
   final void Function(Event)? saveToDownload;
   final void Function(Event)? saveToGallery;
   final void Function(BuildContext context, Event, TapDownDetails, double)?
-      onTapMoreButton;
+  onTapMoreButton;
   final Future<Category?>? recentEmojiFuture;
   final Future<void> Function(Event)? onRetryTextMessage;
 
@@ -119,25 +119,23 @@ class _MessageContentWithTimestampBuilderState
   bool someHorizontalActionHidden = false;
 
   List<MessageContextMenuAction> _messageContextMenu(Event event) => [
-        if (event.room.canSendDefaultMessages) ...[
-          MessageContextMenuAction.reply,
-        ],
-        MessageContextMenuAction.forward,
-        MessageContextMenuAction.copy,
-        if (event.room.canReportContent) MessageContextMenuAction.report,
-        if (event.canEditEvents(widget.matrixState)) ...[
-          MessageContextMenuAction.edit,
-        ],
-        MessageContextMenuAction.select,
-        MessageContextMenuAction.pin,
-        if (PlatformInfos.isAndroid) ...[
-          if (event.hasAttachment && !event.isVideoOrImage)
-            MessageContextMenuAction.saveToDownload,
-        ],
-        if (event.isVideoOrImage && !PlatformInfos.isWeb)
-          MessageContextMenuAction.saveToGallery,
-        if (event.canDelete) MessageContextMenuAction.delete,
-      ];
+    if (event.room.canSendDefaultMessages) ...[MessageContextMenuAction.reply],
+    MessageContextMenuAction.forward,
+    MessageContextMenuAction.copy,
+    if (event.room.canReportContent) MessageContextMenuAction.report,
+    if (event.canEditEvents(widget.matrixState)) ...[
+      MessageContextMenuAction.edit,
+    ],
+    MessageContextMenuAction.select,
+    MessageContextMenuAction.pin,
+    if (PlatformInfos.isAndroid) ...[
+      if (event.hasAttachment && !event.isVideoOrImage)
+        MessageContextMenuAction.saveToDownload,
+    ],
+    if (event.isVideoOrImage && !PlatformInfos.isWeb)
+      MessageContextMenuAction.saveToGallery,
+    if (event.canDelete) MessageContextMenuAction.delete,
+  ];
 
   @override
   void dispose() {
@@ -147,26 +145,25 @@ class _MessageContentWithTimestampBuilderState
 
   @override
   Widget build(BuildContext context) {
-    final displayTime = widget.event.type == EventTypes.RoomCreate ||
+    final displayTime =
+        widget.event.type == EventTypes.RoomCreate ||
         widget.nextEvent == null ||
-        !widget.event.originServerTs
-            .sameEnvironment(widget.nextEvent!.originServerTs);
-    final noBubble = {
-          MessageTypes.Sticker,
-        }.contains(widget.event.messageType) &&
+        !widget.event.originServerTs.sameEnvironment(
+          widget.nextEvent!.originServerTs,
+        );
+    final noBubble =
+        {MessageTypes.Sticker}.contains(widget.event.messageType) &&
         !widget.event.redacted;
 
-    final timelineText = {
+    final timelineText =
+        {
           MessageTypes.Text,
           MessageTypes.BadEncrypted,
         }.contains(widget.event.messageType) ||
         widget.event.isCaptionModeOrReply();
 
     return Align(
-      alignment: MessageStyle.messageAlignmentGeometry(
-        widget.event,
-        context,
-      ),
+      alignment: MessageStyle.messageAlignmentGeometry(widget.event, context),
       child: _messageContentWithTimestampBuilder(
         context: context,
         displayTime: displayTime,
@@ -223,72 +220,81 @@ class _MessageContentWithTimestampBuilderState
                       // for chat screen
                       widget.onDisplayEmojiReaction?.call();
                       _displayEmojiPicker.value = false;
-                      await Navigator.of(context).push(
-                        HeroDialogRoute(
-                          builder: (context) {
-                            final myReaction = event
-                                .aggregatedEvents(
-                                  widget.timeline,
-                                  RelationshipTypes.reaction,
-                                )
-                                .where(
-                                  (event) =>
-                                      event.senderId ==
-                                          event.room.client.userID &&
-                                      event.type == 'm.reaction',
-                                )
-                                .firstOrNull;
-                            final relatesTo = (myReaction?.content
-                                as Map<String, dynamic>?)?['m.relates_to'];
-                            return GestureDetector(
-                              behavior: HitTestBehavior.opaque,
-                              onTap: () {
-                                Navigator.of(context).pop();
-                              },
-                              child: Stack(
-                                children: [
-                                  Positioned.fill(
-                                    child: BackdropFilter(
-                                      filter: ImageFilter.blur(
-                                        sigmaX: 80,
-                                        sigmaY: 80,
-                                      ),
-                                      child: Container(
-                                        color: const Color(
-                                          0xFF636363,
-                                        ).withOpacity(0.2),
-                                      ),
-                                    ),
-                                  ),
-                                  ValueListenableBuilder(
-                                    valueListenable: _displayEmojiPicker,
-                                    builder: (context, display, child) {
-                                      return ReactionsDialogWidget(
-                                        messageWidget: Material(
-                                          color: widget.event.isOwnMessage
-                                              ? LinagoraRefColors.material()
-                                                  .primary[95]
-                                              : _responsiveUtils
-                                                      .isMobile(context)
-                                                  ? LinagoraSysColors.material()
-                                                      .onPrimary
-                                                  : Theme.of(context)
-                                                      .colorScheme
-                                                      .surfaceContainerHighest,
-                                          shape: RoundedRectangleBorder(
-                                            borderRadius:
-                                                MessageStyle.bubbleBorderRadius,
+                      await Navigator.of(context)
+                          .push(
+                            HeroDialogRoute(
+                              builder: (context) {
+                                final myReaction = event
+                                    .aggregatedEvents(
+                                      widget.timeline,
+                                      RelationshipTypes.reaction,
+                                    )
+                                    .where(
+                                      (event) =>
+                                          event.senderId ==
+                                              event.room.client.userID &&
+                                          event.type == 'm.reaction',
+                                    )
+                                    .firstOrNull;
+                                final relatesTo =
+                                    (myReaction?.content
+                                        as Map<
+                                          String,
+                                          dynamic
+                                        >?)?['m.relates_to'];
+                                return GestureDetector(
+                                  behavior: HitTestBehavior.opaque,
+                                  onTap: () {
+                                    Navigator.of(context).pop();
+                                  },
+                                  child: Stack(
+                                    children: [
+                                      Positioned.fill(
+                                        child: BackdropFilter(
+                                          filter: ImageFilter.blur(
+                                            sigmaX: 80,
+                                            sigmaY: 80,
                                           ),
                                           child: Container(
-                                            padding: const EdgeInsets.symmetric(
-                                              horizontal: 4,
-                                              vertical: 4,
-                                            ),
-                                            decoration: BoxDecoration(
-                                              borderRadius: MessageStyle
-                                                  .bubbleBorderRadius,
-                                              border:
-                                                  !widget.event.isOwnMessage &&
+                                            color: const Color(
+                                              0xFF636363,
+                                            ).withOpacity(0.2),
+                                          ),
+                                        ),
+                                      ),
+                                      ValueListenableBuilder(
+                                        valueListenable: _displayEmojiPicker,
+                                        builder: (context, display, child) {
+                                          return ReactionsDialogWidget(
+                                            messageWidget: Material(
+                                              color: widget.event.isOwnMessage
+                                                  ? LinagoraRefColors.material()
+                                                        .primary[95]
+                                                  : _responsiveUtils.isMobile(
+                                                      context,
+                                                    )
+                                                  ? LinagoraSysColors.material()
+                                                        .onPrimary
+                                                  : Theme.of(context)
+                                                        .colorScheme
+                                                        .surfaceContainerHighest,
+                                              shape: RoundedRectangleBorder(
+                                                borderRadius: MessageStyle
+                                                    .bubbleBorderRadius,
+                                              ),
+                                              child: Container(
+                                                padding:
+                                                    const EdgeInsets.symmetric(
+                                                      horizontal: 4,
+                                                      vertical: 4,
+                                                    ),
+                                                decoration: BoxDecoration(
+                                                  borderRadius: MessageStyle
+                                                      .bubbleBorderRadius,
+                                                  border:
+                                                      !widget
+                                                              .event
+                                                              .isOwnMessage &&
                                                           _responsiveUtils
                                                               .isMobile(context)
                                                       ? Border.all(
@@ -296,134 +302,144 @@ class _MessageContentWithTimestampBuilderState
                                                               .borderColorReceivedBubble,
                                                         )
                                                       : null,
-                                            ),
-                                            child: SingleChildScrollView(
-                                              primary: true,
-                                              physics:
-                                                  const ClampingScrollPhysics(),
-                                              child: _messageBuilder(
-                                                key: ValueKey(
-                                                  'PreviewReactionWidgetKey%${DateTime.now().millisecondsSinceEpoch}',
                                                 ),
-                                                mainAxisSize: MainAxisSize.min,
-                                                context: context,
-                                                timelineText: timelineText,
-                                                noBubble: noBubble,
-                                                displayTime: displayTime,
-                                                paddingBubble: EdgeInsets.zero,
-                                                enableBorder: false,
+                                                child: SingleChildScrollView(
+                                                  primary: true,
+                                                  physics:
+                                                      const ClampingScrollPhysics(),
+                                                  child: _messageBuilder(
+                                                    key: ValueKey(
+                                                      'PreviewReactionWidgetKey%${DateTime.now().millisecondsSinceEpoch}',
+                                                    ),
+                                                    mainAxisSize:
+                                                        MainAxisSize.min,
+                                                    context: context,
+                                                    timelineText: timelineText,
+                                                    noBubble: noBubble,
+                                                    displayTime: displayTime,
+                                                    paddingBubble:
+                                                        EdgeInsets.zero,
+                                                    enableBorder: false,
+                                                  ),
+                                                ),
                                               ),
                                             ),
-                                          ),
-                                        ),
-                                        reactionWidget:
-                                            !event.room.canSendReactions
+                                            reactionWidget:
+                                                !event.room.canSendReactions
                                                 ? const SizedBox.shrink()
                                                 : display
-                                                    ? _emojiPickerBuilder(
-                                                        emojiData:
-                                                            Matrix.of(context)
-                                                                .emojiData,
-                                                        myReaction: myReaction,
-                                                        event: event,
-                                                        relatesTo: relatesTo,
-                                                      )
-                                                    : null,
-                                        isOwnMessage: event.isOwnMessage,
-                                        emojis: AppConfig.emojisDefault,
-                                        enableMoreEmojiWidget: true,
-                                        onPickEmojiReactionAction: () {
-                                          _displayEmojiPicker.value = true;
-                                        },
-                                        myEmojiReacted: relatesTo?['key'] ?? '',
-                                        onClickEmojiReactionAction:
-                                            (emoji) async {
-                                          final isSelected = emoji ==
-                                              (relatesTo?['key'] ?? '');
-                                          if (myReaction == null) {
-                                            widget.onSendEmojiReaction
-                                                ?.call(emoji, event);
-                                            return;
-                                          }
+                                                ? _emojiPickerBuilder(
+                                                    emojiData: Matrix.of(
+                                                      context,
+                                                    ).emojiData,
+                                                    myReaction: myReaction,
+                                                    event: event,
+                                                    relatesTo: relatesTo,
+                                                  )
+                                                : null,
+                                            isOwnMessage: event.isOwnMessage,
+                                            emojis: AppConfig.emojisDefault,
+                                            enableMoreEmojiWidget: true,
+                                            onPickEmojiReactionAction: () {
+                                              _displayEmojiPicker.value = true;
+                                            },
+                                            myEmojiReacted:
+                                                relatesTo?['key'] ?? '',
+                                            onClickEmojiReactionAction:
+                                                (emoji) async {
+                                                  final isSelected =
+                                                      emoji ==
+                                                      (relatesTo?['key'] ?? '');
+                                                  if (myReaction == null) {
+                                                    widget.onSendEmojiReaction
+                                                        ?.call(emoji, event);
+                                                    return;
+                                                  }
 
-                                          if (isSelected) {
-                                            await myReaction.redactEvent();
-                                            return;
-                                          }
+                                                  if (isSelected) {
+                                                    await myReaction
+                                                        .redactEvent();
+                                                    return;
+                                                  }
 
-                                          if (!isSelected) {
-                                            await myReaction.redactEvent();
-                                            widget.onSendEmojiReaction
-                                                ?.call(emoji, event);
-                                            return;
-                                          }
-                                        },
-                                        contextMenuWidget: display
-                                            ? const SizedBox()
-                                            : Padding(
-                                                padding: const EdgeInsets.only(
-                                                  top: 16,
-                                                ),
-                                                child: PullDownMenu(
-                                                  routeTheme:
-                                                      PullDownMenuRouteTheme(
-                                                    backgroundColor:
-                                                        LinagoraRefColors
-                                                                .material()
-                                                            .primary[100],
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                      20,
+                                                  if (!isSelected) {
+                                                    await myReaction
+                                                        .redactEvent();
+                                                    widget.onSendEmojiReaction
+                                                        ?.call(emoji, event);
+                                                    return;
+                                                  }
+                                                },
+                                            contextMenuWidget: display
+                                                ? const SizedBox()
+                                                : Padding(
+                                                    padding:
+                                                        const EdgeInsets.only(
+                                                          top: 16,
+                                                        ),
+                                                    child: PullDownMenu(
+                                                      routeTheme: PullDownMenuRouteTheme(
+                                                        backgroundColor:
+                                                            LinagoraRefColors.material()
+                                                                .primary[100],
+                                                        borderRadius:
+                                                            BorderRadius.circular(
+                                                              20,
+                                                            ),
+                                                      ),
+                                                      items: _messageContextMenu(event)
+                                                          .map(
+                                                            (
+                                                              item,
+                                                            ) => PullDownMenuItem(
+                                                              title: item
+                                                                  .getTitle(
+                                                                    context,
+                                                                    event,
+                                                                  ),
+                                                              itemTheme:
+                                                                  _themeContextMenu(
+                                                                    item,
+                                                                  ),
+                                                              icon: item
+                                                                  .getIcon(
+                                                                    event,
+                                                                  ),
+                                                              onTap: () =>
+                                                                  item.onTap(
+                                                                    context,
+                                                                  ),
+                                                              iconWidget:
+                                                                  _iconContextMenu(
+                                                                    event,
+                                                                    item,
+                                                                  ),
+                                                              iconColor: item
+                                                                  .getIconColor(
+                                                                    context,
+                                                                    event,
+                                                                  ),
+                                                            ),
+                                                          )
+                                                          .toList(),
                                                     ),
                                                   ),
-                                                  items: _messageContextMenu(
-                                                    event,
-                                                  )
-                                                      .map(
-                                                        (item) =>
-                                                            PullDownMenuItem(
-                                                          title: item.getTitle(
-                                                            context,
-                                                            event,
-                                                          ),
-                                                          itemTheme:
-                                                              _themeContextMenu(
-                                                            item,
-                                                          ),
-                                                          icon: item
-                                                              .getIcon(event),
-                                                          onTap: () => item
-                                                              .onTap(context),
-                                                          iconWidget:
-                                                              _iconContextMenu(
-                                                            event,
-                                                            item,
-                                                          ),
-                                                          iconColor:
-                                                              item.getIconColor(
-                                                            context,
-                                                            event,
-                                                          ),
-                                                        ),
-                                                      )
-                                                      .toList(),
-                                                ),
-                                              ),
-                                        widgetAlignment: event.isOwnMessage
-                                            ? Alignment.centerRight
-                                            : Alignment.centerLeft,
-                                      );
-                                    },
+                                            widgetAlignment: event.isOwnMessage
+                                                ? Alignment.centerRight
+                                                : Alignment.centerLeft,
+                                          );
+                                        },
+                                      ),
+                                    ],
                                   ),
-                                ],
-                              ),
-                            );
-                          },
-                        ),
-                      ).then((result) {
-                        _handleResultFromHeroPage(context, result);
-                        widget.onHideEmojiReaction?.call();
-                      });
+                                );
+                              },
+                            ),
+                          )
+                          .then((result) {
+                            _handleResultFromHeroPage(context, result);
+                            widget.onHideEmojiReaction?.call();
+                          });
                     }
                   : null,
               child: _messageBuilder(
@@ -444,10 +460,7 @@ class _MessageContentWithTimestampBuilderState
     );
   }
 
-  void _handleResultFromHeroPage(
-    BuildContext context,
-    dynamic result,
-  ) {
+  void _handleResultFromHeroPage(BuildContext context, dynamic result) {
     if (result is String) {
       switch (result) {
         case 'reply':
@@ -501,31 +514,20 @@ class _MessageContentWithTimestampBuilderState
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
           color: LinagoraRefColors.material().primary[100],
-          borderRadius: BorderRadius.circular(
-            24,
-          ),
+          borderRadius: BorderRadius.circular(24),
         ),
         child: EmojiPicker(
           emojiData: emojiData,
           recentEmoji: widget.recentEmojiFuture,
           configuration: EmojiPickerConfiguration(
             emojiStyle: Theme.of(context).textTheme.headlineLarge!,
-            searchEmptyTextStyle:
-                Theme.of(context).textTheme.labelMedium!.copyWith(
-                      color: LinagoraRefColors.material().tertiary[30],
-                    ),
-            searchEmptyWidget: SvgPicture.asset(
-              ImagePaths.icSearchEmojiEmpty,
-            ),
+            searchEmptyTextStyle: Theme.of(context).textTheme.labelMedium!
+                .copyWith(color: LinagoraRefColors.material().tertiary[30]),
+            searchEmptyWidget: SvgPicture.asset(ImagePaths.icSearchEmojiEmpty),
             searchFocusNode: FocusNode(),
             showRecentTab: true,
           ),
-          itemBuilder: (
-            context,
-            emojiId,
-            emoji,
-            callback,
-          ) {
+          itemBuilder: (context, emojiId, emoji, callback) {
             return MouseRegion(
               onHover: (_) {},
               child: EmojiItem(
@@ -537,16 +539,13 @@ class _MessageContentWithTimestampBuilderState
               ),
             );
           },
-          onEmojiSelected: (
-            emojiId,
-            emoji,
-          ) =>
+          onEmojiSelected: (emojiId, emoji) =>
               _handleEmojiSelectionFromEmojiPicker(
-            emoji: emoji,
-            myReaction: myReaction,
-            event: event,
-            relatesTo: relatesTo,
-          ),
+                emoji: emoji,
+                myReaction: myReaction,
+                event: event,
+                relatesTo: relatesTo,
+              ),
         ),
       ),
     );
@@ -581,27 +580,22 @@ class _MessageContentWithTimestampBuilderState
                   color: widget.event.isOwnMessage
                       ? LinagoraRefColors.material().primary[95]
                       : _responsiveUtils.isMobile(context)
-                          ? LinagoraSysColors.material().onPrimary
-                          : Theme.of(context)
-                              .colorScheme
-                              .surfaceContainerHighest,
+                      ? LinagoraSysColors.material().onPrimary
+                      : Theme.of(context).colorScheme.surfaceContainerHighest,
                   border: enableBorder
                       ? (!widget.event.isOwnMessage &&
-                              _responsiveUtils.isMobile(context)
-                          ? Border.all(
-                              color: MessageStyle.borderColorReceivedBubble,
-                            )
-                          : null)
+                                _responsiveUtils.isMobile(context)
+                            ? Border.all(
+                                color: MessageStyle.borderColorReceivedBubble,
+                              )
+                            : null)
                       : null,
                 ),
-          padding: paddingBubble ??
+          padding:
+              paddingBubble ??
               (noBubble
-                  ? const EdgeInsets.symmetric(
-                      horizontal: 16.0,
-                    )
-                  : MessageStyle.paddingMessageContentBuilder(
-                      widget.event,
-                    )),
+                  ? const EdgeInsets.symmetric(horizontal: 16.0)
+                  : MessageStyle.paddingMessageContentBuilder(widget.event)),
           constraints: BoxConstraints(
             maxWidth: MessageStyle.messageBubbleWidth(
               context,
@@ -686,10 +680,7 @@ class _MessageContentWithTimestampBuilderState
     final isSelected = emoji == (relatesTo?['key'] ?? '');
     if (myReaction == null) {
       Navigator.of(context).pop();
-      widget.onSendEmojiReaction?.call(
-        emoji,
-        event,
-      );
+      widget.onSendEmojiReaction?.call(emoji, event);
       return;
     }
 
@@ -783,9 +774,7 @@ class _MessageContentWithTimestampBuilderState
   PullDownMenuItemTheme _themeContextMenu(MessageContextMenuAction action) {
     return PullDownMenuItemTheme(
       textStyle: context.textTheme.bodyLarge!.copyWith(
-        color: _textContextMenuColor(
-          action,
-        ),
+        color: _textContextMenuColor(action),
       ),
     );
   }
@@ -793,10 +782,7 @@ class _MessageContentWithTimestampBuilderState
   Widget? _iconContextMenu(Event event, MessageContextMenuAction item) {
     return item.imagePath(event) != null
         ? SvgPicture.asset(
-            item.imagePath(
-                  event,
-                ) ??
-                '',
+            item.imagePath(event) ?? '',
             width: 24,
             height: 24,
             colorFilter: ColorFilter.mode(

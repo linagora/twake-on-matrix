@@ -30,13 +30,17 @@ class ChatListViewBuilder extends StatelessWidget {
                 key: ValueKey(sortedRooms[index].id),
                 valueListenable: controller.selectModeNotifier,
                 builder: (context, selectMode, _) {
-                  final slidables =
-                      controller.getSlidables(context, sortedRooms[index]);
+                  final slidables = controller.getSlidables(
+                    context,
+                    sortedRooms[index],
+                  );
                   return SlidableChatListItem(
                     controller: controller,
                     slidables: slidables,
-                    enabled: ChatListViewStyle.responsiveUtils
-                            .isMobileOrTablet(context) &&
+                    enabled:
+                        ChatListViewStyle.responsiveUtils.isMobileOrTablet(
+                          context,
+                        ) &&
                         !selectMode.isSelectMode &&
                         slidables.isNotEmpty,
                     chatListItem: CommonChatListItem(
@@ -50,8 +54,9 @@ class ChatListViewBuilder extends StatelessWidget {
             },
             childCount: sortedRooms.length,
             findChildIndexCallback: (key) {
-              return sortedRooms
-                  .indexWhere((room) => room.id == (key as ValueKey).value);
+              return sortedRooms.indexWhere(
+                (room) => room.id == (key as ValueKey).value,
+              );
             },
           ),
         );

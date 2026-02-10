@@ -8,12 +8,12 @@ abstract class Success extends Equatable {
 
 extension SuccessExtension on Either {
   T? getSuccessOrNull<T extends Success>({T? fallbackValue}) => fold(
-        (failure) => fallbackValue,
-        (success) => success is T ? success : fallbackValue,
-      );
+    (failure) => fallbackValue,
+    (success) => success is T ? success : fallbackValue,
+  );
 
   T? getFailureOrNull<T extends Failure>({T? fallbackValue}) => fold(
-        (failure) => failure is T ? failure : fallbackValue,
-        (success) => fallbackValue,
-      );
+    (failure) => failure is T ? failure : fallbackValue,
+    (success) => fallbackValue,
+  );
 }

@@ -198,12 +198,8 @@ class GetItInitializer {
     getIt.registerFactory<MultipleAccountCacheManager>(
       () => MultipleAccountCacheManager(),
     );
-    getIt.registerFactory<LanguageCacheManager>(
-      () => LanguageCacheManager(),
-    );
-    getIt.registerFactory<ReactionsCacheManager>(
-      () => ReactionsCacheManager(),
-    );
+    getIt.registerFactory<LanguageCacheManager>(() => LanguageCacheManager());
+    getIt.registerFactory<ReactionsCacheManager>(() => ReactionsCacheManager());
   }
 
   void bindingQueue() {
@@ -226,18 +222,10 @@ class GetItInitializer {
   }
 
   void bindingManager() {
-    getIt.registerSingleton<DownloadWorkerQueue>(
-      DownloadWorkerQueue(),
-    );
-    getIt.registerSingleton<DownloadManager>(
-      DownloadManager(),
-    );
-    getIt.registerSingleton<UploadWorkerQueue>(
-      UploadWorkerQueue(),
-    );
-    getIt.registerSingleton<UploadManager>(
-      UploadManager(),
-    );
+    getIt.registerSingleton<DownloadWorkerQueue>(DownloadWorkerQueue());
+    getIt.registerSingleton<DownloadManager>(DownloadManager());
+    getIt.registerSingleton<UploadWorkerQueue>(UploadWorkerQueue());
+    getIt.registerSingleton<UploadManager>(UploadManager());
   }
 
   void bindingDatasource() {
@@ -254,9 +242,7 @@ class GetItInitializer {
       () => MediaDataSourceImpl(getIt.get<MediaAPI>()),
     );
     getIt.registerFactory<LocalizationsDataSource>(
-      () => LocalizationsDataSourceImpl(
-        getIt.get<LanguageCacheManager>(),
-      ),
+      () => LocalizationsDataSourceImpl(getIt.get<LanguageCacheManager>()),
     );
     getIt.registerFactory<ServerSearchDatasource>(
       () => ServerSearchDatasourceImpl(),
@@ -292,14 +278,10 @@ class GetItInitializer {
       () => PhonebookContactDatasourceImpl(getIt.get<ContactsProvider>()),
     );
     getIt.registerLazySingleton(
-      () => MediaDataSourceImpl(
-        getIt.get<MediaAPI>(),
-      ),
+      () => MediaDataSourceImpl(getIt.get<MediaAPI>()),
     );
     getIt.registerFactory(
-      () => LocalizationsDataSourceImpl(
-        getIt.get<LanguageCacheManager>(),
-      ),
+      () => LocalizationsDataSourceImpl(getIt.get<LanguageCacheManager>()),
     );
 
     getIt.registerFactory<ServerSearchDatasourceImpl>(
@@ -311,9 +293,7 @@ class GetItInitializer {
     getIt.registerFactory<InvitationDatasource>(
       () => InvitationDatasourceImpl(),
     );
-    getIt.registerFactory<ReactionsDatasource>(
-      () => ReactionsDatasourceImpl(),
-    );
+    getIt.registerFactory<ReactionsDatasource>(() => ReactionsDatasourceImpl());
   }
 
   void bindingRepositories() {
@@ -334,14 +314,11 @@ class GetItInitializer {
       () => PhonebookContactRepositoryImpl(),
     );
     getIt.registerFactory<MediaRepositoryImpl>(
-      () => MediaRepositoryImpl(
-        getIt.get<MediaDataSourceImpl>(),
-      ),
+      () => MediaRepositoryImpl(getIt.get<MediaDataSourceImpl>()),
     );
     getIt.registerFactory<LocalizationsRepository>(
-      () => LocalizationsRepositoryImpl(
-        getIt.get<LocalizationsDataSourceImpl>(),
-      ),
+      () =>
+          LocalizationsRepositoryImpl(getIt.get<LocalizationsDataSourceImpl>()),
     );
     getIt.registerFactory<ServerSearchRepository>(
       () => ServerSearchRepositoryImpl(),
@@ -361,9 +338,7 @@ class GetItInitializer {
     getIt.registerFactory<HiveInvitationStatusRepository>(
       () => HiveInvitationStatusRepositoryImpl(),
     );
-    getIt.registerFactory<ReactionsRepository>(
-      () => ReactionsRepositoryImpl(),
-    );
+    getIt.registerFactory<ReactionsRepository>(() => ReactionsRepositoryImpl());
     getIt.registerFactory<ServerCapabilitiesRepository>(
       () => const ServerCapabilitiesRepositoryImpl(),
     );
@@ -423,26 +398,18 @@ class GetItInitializer {
       ChatRoomSearchInteractor(),
     );
     getIt.registerSingleton<GetPreviewURLInteractor>(
-      GetPreviewURLInteractor(
-        getIt.get<MediaRepositoryImpl>(),
-      ),
+      GetPreviewURLInteractor(getIt.get<MediaRepositoryImpl>()),
     );
     getIt.registerSingleton<TimelineSearchEventInteractor>(
       TimelineSearchEventInteractor(),
     );
-    getIt.registerSingleton<UpdateProfileInteractor>(
-      UpdateProfileInteractor(),
-    );
+    getIt.registerSingleton<UpdateProfileInteractor>(UpdateProfileInteractor());
     getIt.registerFactory<ChatGetPinnedEventsInteractor>(
       () => ChatGetPinnedEventsInteractor(),
     );
-    getIt.registerSingleton<ContactsManager>(
-      ContactsManager(),
-    );
+    getIt.registerSingleton<ContactsManager>(ContactsManager());
     getIt.registerLazySingleton<SaveLanguageInteractor>(
-      () => SaveLanguageInteractor(
-        getIt.get<LocalizationsRepository>(),
-      ),
+      () => SaveLanguageInteractor(getIt.get<LocalizationsRepository>()),
     );
     getIt.registerSingleton<ServerSearchInteractor>(ServerSearchInteractor());
     getIt.registerFactory<LookupMatchContactInteractor>(
@@ -460,18 +427,14 @@ class GetItInitializer {
     );
 
     getIt.registerFactory<GetAppGridConfigurationInteractor>(
-      () => GetAppGridConfigurationInteractor(
-        getIt.get<AppConfigLoader>(),
-      ),
+      () => GetAppGridConfigurationInteractor(getIt.get<AppConfigLoader>()),
     );
 
     getIt.registerSingleton<DownloadMediaFileInteractor>(
       DownloadMediaFileInteractor(),
     );
 
-    getIt.registerFactory<VerifyNameInteractor>(
-      () => VerifyNameInteractor(),
-    );
+    getIt.registerFactory<VerifyNameInteractor>(() => VerifyNameInteractor());
 
     getIt.registerFactory<SendInvitationInteractor>(
       () => SendInvitationInteractor(),
@@ -509,29 +472,19 @@ class GetItInitializer {
       () => GetRecentReactionsInteractor(),
     );
 
-    getIt.registerFactory<DeleteEventInteractor>(
-      () => DeleteEventInteractor(),
-    );
+    getIt.registerFactory<DeleteEventInteractor>(() => DeleteEventInteractor());
 
     getIt.registerFactory<SetPermissionLevelInteractor>(
       () => SetPermissionLevelInteractor(),
     );
 
-    getIt.registerFactory<BanUserInteractor>(
-      () => BanUserInteractor(),
-    );
+    getIt.registerFactory<BanUserInteractor>(() => BanUserInteractor());
 
-    getIt.registerFactory<UnbanUserInteractor>(
-      () => UnbanUserInteractor(),
-    );
+    getIt.registerFactory<UnbanUserInteractor>(() => UnbanUserInteractor());
 
-    getIt.registerFactory<UnblockUserInteractor>(
-      () => UnblockUserInteractor(),
-    );
+    getIt.registerFactory<UnblockUserInteractor>(() => UnblockUserInteractor());
 
-    getIt.registerFactory<BlockUserInteractor>(
-      () => BlockUserInteractor(),
-    );
+    getIt.registerFactory<BlockUserInteractor>(() => BlockUserInteractor());
 
     getIt.registerFactory<ReportContentInteractor>(
       () => ReportContentInteractor(),
@@ -568,9 +521,7 @@ class GetItInitializer {
   }
 
   void _bindingManagers() {
-    getIt.registerFactory<IdentityLookupManager>(
-      () => IdentityLookupManager(),
-    );
+    getIt.registerFactory<IdentityLookupManager>(() => IdentityLookupManager());
     getIt.registerFactory<FederationIdentityRequestTokenManager>(
       () => FederationIdentityRequestTokenManager(),
     );

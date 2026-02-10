@@ -7,8 +7,5 @@ abstract class SearchModel extends Equatable {
 
   String get id;
 
-  const SearchModel({
-    this.directChatMatrixID,
-    this.displayName,
-  });
+  const SearchModel({this.directChatMatrixID, this.displayName});
 }

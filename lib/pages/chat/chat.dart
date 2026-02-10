@@ -148,8 +148,8 @@ class ChatController extends State<Chat>
         RetryTextMessageMixin,
         AudioMixin,
         AutoMarkAsReadMixin {
-  final NetworkConnectionService networkConnectionService =
-      getIt.get<NetworkConnectionService>();
+  final NetworkConnectionService networkConnectionService = getIt
+      .get<NetworkConnectionService>();
 
   /// Flag to prevent auto-loading history/future during programmatic scrolling
   bool _isProgrammaticScrolling = false;
@@ -167,8 +167,9 @@ class ChatController extends State<Chat>
 
   static const double defaultMaxHeightReactionPicker = 360;
 
-  final GlobalKey stickyTimestampKey =
-      GlobalKey(debugLabel: 'stickyTimestampKey');
+  final GlobalKey stickyTimestampKey = GlobalKey(
+    debugLabel: 'stickyTimestampKey',
+  );
 
   final responsive = getIt.get<ResponsiveUtils>();
 
@@ -176,17 +177,19 @@ class ChatController extends State<Chat>
 
   final pinnedEventsController = getIt.get<PinnedEventsController>();
 
-  final getRecentReactionsInteractor =
-      getIt.get<GetRecentReactionsInteractor>();
+  final getRecentReactionsInteractor = getIt
+      .get<GetRecentReactionsInteractor>();
 
-  final storeRecentReactionsInteractor =
-      getIt.get<StoreRecentReactionsInteractor>();
+  final storeRecentReactionsInteractor = getIt
+      .get<StoreRecentReactionsInteractor>();
 
-  final ValueKey chatComposerTypeAheadKey =
-      const ValueKey('chatComposerTypeAheadKey');
+  final ValueKey chatComposerTypeAheadKey = const ValueKey(
+    'chatComposerTypeAheadKey',
+  );
 
-  final ValueKey _chatMediaPickerTypeAheadKey =
-      const ValueKey('chatMediaPickerTypeAheadKey');
+  final ValueKey _chatMediaPickerTypeAheadKey = const ValueKey(
+    'chatMediaPickerTypeAheadKey',
+  );
 
   StreamSubscription? onUpdateEventStreamSubcription;
 
@@ -217,8 +220,10 @@ class ChatController extends State<Chat>
   User? get user =>
       room?.unsafeGetUserFromMemoryOrFallback(room?.directChatMatrixID ?? '');
 
-  final composerDebouncer =
-      Debouncer<String>(const Duration(milliseconds: 100), initialValue: '');
+  final composerDebouncer = Debouncer<String>(
+    const Duration(milliseconds: 100),
+    initialValue: '',
+  );
 
   bool get hasNoMessageEvents {
     if (timeline == null) return true;
@@ -234,7 +239,8 @@ class ChatController extends State<Chat>
     final validEvents = visibleEvents.where((event) {
       final currentMembership = event.content.tryGet<String>('membership');
       final prevMembership = event.prevContent?.tryGet<String>('membership');
-      final isAcceptInviteEvent = event.type == EventTypes.RoomMember &&
+      final isAcceptInviteEvent =
+          event.type == EventTypes.RoomMember &&
           currentMembership == 'join' &&
           prevMembership == 'invite';
       return validEventType.contains(event.type) || isAcceptInviteEvent;
@@ -292,13 +298,15 @@ class ChatController extends State<Chat>
 
   final ValueNotifier<bool> showEmojiPickerNotifier = ValueNotifier(false);
 
-  final ValueNotifier<bool> showEmojiPickerComposerNotifier =
-      ValueNotifier(false);
+  final ValueNotifier<bool> showEmojiPickerComposerNotifier = ValueNotifier(
+    false,
+  );
 
   final ValueNotifier<DateTime?> stickyTimestampNotifier = ValueNotifier(null);
 
-  final ValueNotifier<bool> showFullEmojiPickerOnWebNotifier =
-      ValueNotifier(false);
+  final ValueNotifier<bool> showFullEmojiPickerOnWebNotifier = ValueNotifier(
+    false,
+  );
 
   final ValueNotifier<ViewEventListUIState> openingChatViewStateNotifier =
       ValueNotifier(ViewEventListInitial());
@@ -356,12 +364,10 @@ class ChatController extends State<Chat>
       (success) => success is GetContactsSuccess ? success.contacts : [],
     );
     return room?.getParticipants().firstWhereOrNull(
-          (user) =>
-              user.id != client.userID &&
-              contacts.none(
-                (contact) => contact.inTomAddressBook(user.id),
-              ),
-        );
+      (user) =>
+          user.id != client.userID &&
+          contacts.none((contact) => contact.inTomAddressBook(user.id)),
+    );
   }
 
   List<Event> selectedEvents = [];
@@ -400,15 +406,17 @@ class ChatController extends State<Chat>
   Future<void> initCachedPresence() async {
     cachedPresenceNotifier.value = room?.directChatPresence;
     if (room?.directChatMatrixID != null) {
-      cachedPresenceStreamSubscription =
-          Matrix.of(context).onLatestPresenceChanged.stream.listen((event) {
-        if (event.userid == room!.directChatMatrixID) {
-          Logs().v(
-            'onlatestPresenceChanged: ${event.presence}, ${event.lastActiveTimestamp}',
-          );
-          cachedPresenceStreamController.add(event);
-        }
-      });
+      cachedPresenceStreamSubscription = Matrix.of(context)
+          .onLatestPresenceChanged
+          .stream
+          .listen((event) {
+            if (event.userid == room!.directChatMatrixID) {
+              Logs().v(
+                'onlatestPresenceChanged: ${event.presence}, ${event.lastActiveTimestamp}',
+              );
+              cachedPresenceStreamController.add(event);
+            }
+          });
       try {
         final getPresenceResponse = await client.getPresence(
           room!.directChatMatrixID!,
@@ -420,8 +428,9 @@ class ChatController extends State<Chat>
         );
       } catch (e) {
         Logs().e('Failed to get presence', e);
-        cachedPresenceNotifier.value =
-            CachedPresence.neverSeen(room!.directChatMatrixID!);
+        cachedPresenceNotifier.value = CachedPresence.neverSeen(
+          room!.directChatMatrixID!,
+        );
       }
     }
   }
@@ -437,14 +446,17 @@ class ChatController extends State<Chat>
         true,
       );
     } catch (e) {
-      Logs()
-          .e('Chat::_requestParticipants(): Failed to request participants', e);
+      Logs().e(
+        'Chat::_requestParticipants(): Failed to request participants',
+        e,
+      );
     }
   }
 
   bool isUnpinEvent(Event event) =>
-      room?.pinnedEventIds
-          .firstWhereOrNull((eventId) => eventId == event.eventId) !=
+      room?.pinnedEventIds.firstWhereOrNull(
+        (eventId) => eventId == event.eventId,
+      ) !=
       null;
 
   void updateInputTextNotifier() {
@@ -455,9 +467,8 @@ class ChatController extends State<Chat>
     inputText.value = sendController.text;
   }
 
-  bool isSelected(Event event) => selectedEvents.any(
-        (e) => e.eventId == event.eventId,
-      );
+  bool isSelected(Event event) =>
+      selectedEvents.any((e) => e.eventId == event.eventId);
 
   String? _findUnreadReceivedMessageLocation() {
     if (timeline == null) return null;
@@ -494,8 +505,9 @@ class ChatController extends State<Chat>
     final success = await TwakeDialog.showFutureLoadingDialogFullScreen(
       future: () async {
         final client = room.client;
-        final waitForSync = client.onSync.stream
-            .firstWhere((s) => s.rooms?.leave?.containsKey(room.id) ?? false);
+        final waitForSync = client.onSync.stream.firstWhere(
+          (s) => s.rooms?.leave?.containsKey(room.id) ?? false,
+        );
         await room.leave();
         await waitForSync;
         return await client.startDirectChat(userId, enableEncryption: true);
@@ -506,10 +518,7 @@ class ChatController extends State<Chat>
     context.go('/rooms/$roomId');
   }
 
-  Future<void> requestHistory({
-    int? historyCount,
-    StateFilter? filter,
-  }) async {
+  Future<void> requestHistory({int? historyCount, StateFilter? filter}) async {
     if (!timeline!.canRequestHistory) return;
     Logs().v('Chat::requestHistory(): Requesting history...');
     try {
@@ -518,13 +527,9 @@ class ChatController extends State<Chat>
         filter: filter,
       );
     } catch (err) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            (err).toLocalizedString(context),
-          ),
-        ),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text((err).toLocalizedString(context))));
       rethrow;
     }
   }
@@ -537,7 +542,8 @@ class ChatController extends State<Chat>
     if (timeline?.allowNewEvent == false) {
       showScrollDownButtonNotifier.value = true;
     } else {
-      showScrollDownButtonNotifier.value = scrollController.position.pixels !=
+      showScrollDownButtonNotifier.value =
+          scrollController.position.pixels !=
           scrollController.position.maxScrollExtent;
     }
 
@@ -634,8 +640,9 @@ class ChatController extends State<Chat>
         } else {
           final currentLocation = html.window.location.href;
 
-          eventId = Uri.tryParse(Uri.tryParse(currentLocation)?.fragment ?? '')
-              ?.queryParameters['event'];
+          eventId = Uri.tryParse(
+            Uri.tryParse(currentLocation)?.fragment ?? '',
+          )?.queryParameters['event'];
         }
 
         if (eventId != null) {
@@ -807,18 +814,13 @@ class ChatController extends State<Chat>
       'url': sticker.url.toString(),
     };
     // send the sticker
-    await room!.sendEvent(
-      eventContent,
-      type: EventTypes.Sticker,
-    );
+    await room!.sendEvent(eventContent, type: EventTypes.Sticker);
   }
 
   Future<void> sendVoiceMessageWeb() async {
     final duration = Duration(seconds: recordDurationWebNotifier.value);
     final path = await stopRecordWeb();
-    final file = await recordToFileOnWeb(
-      blobUrl: path,
-    );
+    final file = await recordToFileOnWeb(blobUrl: path);
 
     if (file == null) {
       TwakeSnackBar.show(context, L10n.of(context)!.audioMessageFailedToSend);
@@ -835,20 +837,14 @@ class ChatController extends State<Chat>
       return;
     }
 
-    final fileInfo = FileInfo(
-      matrixFile.name,
-      bytes: matrixFile.bytes,
-    );
+    final fileInfo = FileInfo(matrixFile.name, bytes: matrixFile.bytes);
 
     final txid = client.generateUniqueTransactionId();
 
     room?.sendingFilePlaceholders[txid] = matrixFile;
 
     final extraContent = {
-      'info': {
-        ...matrixFile.info,
-        'duration': duration.inMilliseconds,
-      },
+      'info': {...matrixFile.info, 'duration': duration.inMilliseconds},
       'org.matrix.msc3245.voice': {},
       'org.matrix.msc1767.audio': {
         'duration': duration.inMilliseconds,
@@ -872,17 +868,20 @@ class ChatController extends State<Chat>
 
     await room!
         .sendFileOnWebEvent(
-      matrixFile,
-      txid: txid,
-      fakeImageEvent: fakeImageEvent,
-      inReplyTo: replyEventNotifier.value,
-      extraContent: extraContent,
-    )
+          matrixFile,
+          txid: txid,
+          fakeImageEvent: fakeImageEvent,
+          inReplyTo: replyEventNotifier.value,
+          extraContent: extraContent,
+        )
         .catchError((e) {
-      TwakeSnackBar.show(context, L10n.of(context)!.audioMessageFailedToSend);
-      Logs().e('Failed to send voice message', e);
-      return null;
-    });
+          TwakeSnackBar.show(
+            context,
+            L10n.of(context)!.audioMessageFailedToSend,
+          );
+          Logs().e('Failed to send voice message', e);
+          return null;
+        });
     _updateReplyEvent();
   }
 
@@ -892,20 +891,14 @@ class ChatController extends State<Chat>
     required Duration time,
     required List<int> waveform,
   }) async {
-    final fileInfo = FileInfo(
-      audioFile.name,
-      filePath: path,
-    );
+    final fileInfo = FileInfo(audioFile.name, filePath: path);
 
     final txid = client.generateUniqueTransactionId();
 
     room?.sendingFilePlaceholders[txid] = audioFile;
 
     final extraContent = {
-      'info': {
-        ...audioFile.info,
-        'duration': time.inMilliseconds,
-      },
+      'info': {...audioFile.info, 'duration': time.inMilliseconds},
       'org.matrix.msc3245.voice': {},
       'org.matrix.msc1767.audio': {
         'duration': time.inMilliseconds,
@@ -929,20 +922,24 @@ class ChatController extends State<Chat>
 
     await room!
         .sendFileEventMobile(
-      fileInfo,
-      txid: txid,
-      msgType: MessageTypes.Audio,
-      fakeImageEvent: fakeImageEvent,
-      inReplyTo: replyEventNotifier.value,
-      extraContent: extraContent,
-    )
+          fileInfo,
+          txid: txid,
+          msgType: MessageTypes.Audio,
+          fakeImageEvent: fakeImageEvent,
+          inReplyTo: replyEventNotifier.value,
+          extraContent: extraContent,
+        )
         .then((_) {
-      room?.sendingFilePlaceholders.remove(txid);
-    }).catchError((e) {
-      TwakeSnackBar.show(context, L10n.of(context)!.audioMessageFailedToSend);
-      Logs().e('Failed to send voice message', e);
-      return null;
-    });
+          room?.sendingFilePlaceholders.remove(txid);
+        })
+        .catchError((e) {
+          TwakeSnackBar.show(
+            context,
+            L10n.of(context)!.audioMessageFailedToSend,
+          );
+          Logs().e('Failed to send voice message', e);
+          return null;
+        });
     _updateReplyEvent();
   }
 
@@ -980,17 +977,17 @@ class ChatController extends State<Chat>
     }).toList();
     final selectedOption =
         await showDialog<LinagoraDialogOption<MessageReportReason>>(
-      context: context,
-      builder: (context) {
-        return OptionsDialog(
-          title: l10n.report,
-          description: l10n.reportDesc,
-          isBottomSheet: MediaQuery.sizeOf(context).width < 600,
-          availableOptions: options,
-          onSelected: (selected) => Navigator.pop(context, selected),
+          context: context,
+          builder: (context) {
+            return OptionsDialog(
+              title: l10n.report,
+              description: l10n.reportDesc,
+              isBottomSheet: MediaQuery.sizeOf(context).width < 600,
+              availableOptions: options,
+              onSelected: (selected) => Navigator.pop(context, selected),
+            );
+          },
         );
-      },
-    );
     if (selectedOption == null) return;
     String additionalReason = '';
     if (selectedOption.value == MessageReportReason.other) {
@@ -1030,31 +1027,26 @@ class ChatController extends State<Chat>
               score: selectedOption.value.score,
             )
             .last;
-        return state.fold(
-          (failure) {
-            if (failure is ReportContentFailure) {
-              throw failure.exception;
-            }
-            return failure;
-          },
-          (success) => success,
-        );
+        return state.fold((failure) {
+          if (failure is ReportContentFailure) {
+            throw failure.exception;
+          }
+          return failure;
+        }, (success) => success);
       },
     );
     showEmojiPickerNotifier.value = false;
     _clearSelectEvent();
     if (result.error != null) {
-      TwakeSnackBar.show(
-        context,
-        result.error.toLocalizedString(context),
-      );
+      TwakeSnackBar.show(context, result.error.toLocalizedString(context));
       return;
     }
     TwakeSnackBar.show(context, l10n.contentHasBeenReported);
   }
 
   void redactEventsAction() async {
-    final confirmed = await showOkCancelAlertDialog(
+    final confirmed =
+        await showOkCancelAlertDialog(
           useRootNavigator: false,
           context: context,
           title: L10n.of(context)!.messageWillBeRemovedWarning,
@@ -1114,8 +1106,9 @@ class ChatController extends State<Chat>
         !selectedEvents.first.status.isSent) {
       return false;
     }
-    return currentRoomBundle
-        .any((cl) => selectedEvents.first.senderId == cl!.userID);
+    return currentRoomBundle.any(
+      (cl) => selectedEvents.first.senderId == cl!.userID,
+    );
   }
 
   void forwardEventsAction({Event? event}) async {
@@ -1147,9 +1140,7 @@ class ChatController extends State<Chat>
     _clearSelectEvent();
     context.push(
       '/rooms/forward',
-      extra: ForwardArgument(
-        fromRoomId: roomId ?? '',
-      ),
+      extra: ForwardArgument(fromRoomId: roomId ?? ''),
     );
   }
 
@@ -1167,9 +1158,7 @@ class ChatController extends State<Chat>
     _clearSelectEvent();
   }
 
-  void editAction({
-    Event? editEvent,
-  }) {
+  void editAction({Event? editEvent}) {
     if (audioRecordStateNotifier.value != AudioRecordState.initial) {
       preventActionWhileRecordingMobile(context: context);
       return;
@@ -1187,20 +1176,18 @@ class ChatController extends State<Chat>
     sendController.text = eventToEdit.isCaptionModeOrReply()
         ? eventToEdit.body
         : eventToEdit
-            .getDisplayEventWithoutEditEvent(timeline!)
-            .calcLocalizedBodyFallback(
-              MatrixLocals(L10n.of(context)!),
-              withSenderNamePrefix: false,
-              hideReply: true,
-            );
+              .getDisplayEventWithoutEditEvent(timeline!)
+              .calcLocalizedBodyFallback(
+                MatrixLocals(L10n.of(context)!),
+                withSenderNamePrefix: false,
+                hideReply: true,
+              );
 
     _clearSelectEvent();
     _requestInputFocus();
   }
 
-  void replyAction({
-    Event? replyTo,
-  }) {
+  void replyAction({Event? replyTo}) {
     if (audioRecordStateNotifier.value != AudioRecordState.initial) {
       preventActionWhileRecordingMobile(context: context);
       return;
@@ -1211,9 +1198,7 @@ class ChatController extends State<Chat>
     if (replyTo?.status.isAvailable == false) {
       return;
     }
-    _updateReplyEvent(
-      event: replyTo ?? selectedEvents.first,
-    );
+    _updateReplyEvent(event: replyTo ?? selectedEvents.first);
     _clearSelectEvent();
     _requestInputFocus();
   }
@@ -1232,20 +1217,14 @@ class ChatController extends State<Chat>
     try {
       await timeline.requestFuture(historyCount: _loadHistoryCount);
     } catch (err) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            (err).toLocalizedString(context),
-          ),
-        ),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text((err).toLocalizedString(context))));
       rethrow;
     }
   }
 
-  Future<void> _getTimeline({
-    String? eventContextId,
-  }) async {
+  Future<void> _getTimeline({String? eventContextId}) async {
     await Matrix.of(context).client.roomsLoading;
     await Matrix.of(context).client.accountDataLoading;
     if (eventContextId != null &&
@@ -1289,11 +1268,9 @@ class ChatController extends State<Chat>
     if (!timeline!.allowNewEvent) {
       setState(() {
         timeline = null;
-        loadTimelineFuture = _getTimeline().onError(
-          (e, s) {
-            Logs().e('Chat::scrollDown(): Unable to load timeline', e, s);
-          },
-        );
+        loadTimelineFuture = _getTimeline().onError((e, s) {
+          Logs().e('Chat::scrollDown(): Unable to load timeline', e, s);
+        });
       });
       await loadTimelineFuture;
     }
@@ -1313,8 +1290,9 @@ class ChatController extends State<Chat>
 
   int _getEventIndex(String eventId) {
     if (timeline == null) return -1;
-    final foundEvent =
-        timeline!.events.firstWhereOrNull((event) => event.eventId == eventId);
+    final foundEvent = timeline!.events.firstWhereOrNull(
+      (event) => event.eventId == eventId,
+    );
 
     final eventIndex = foundEvent == null
         ? -1
@@ -1341,13 +1319,12 @@ class ChatController extends State<Chat>
       }
       setState(() {
         timeline = null;
-        loadTimelineFuture = _getTimeline(
-          eventContextId: eventId,
-        ).onError(
-          (e, s) {
-            Logs().e('Chat::scrollToEventId(): Unable to load timeline', e, s);
-          },
-        );
+        loadTimelineFuture = _getTimeline(eventContextId: eventId).onError((
+          e,
+          s,
+        ) {
+          Logs().e('Chat::scrollToEventId(): Unable to load timeline', e, s);
+        });
       });
       await loadTimelineFuture;
 
@@ -1457,8 +1434,9 @@ class ChatController extends State<Chat>
       return;
     }
 
-    final targetIndex =
-        timeline!.events.indexWhere((event) => event.eventId == eventId);
+    final targetIndex = timeline!.events.indexWhere(
+      (event) => event.eventId == eventId,
+    );
 
     if (targetIndex == -1) {
       return;
@@ -1496,8 +1474,9 @@ class ChatController extends State<Chat>
 
         if (newTargetIndex != -1 && timeline != null) {
           final newTargetEventId = timeline!.events[newTargetIndex].eventId;
-          final newItemContext =
-              GlobalObjectKey(newTargetEventId).currentContext;
+          final newItemContext = GlobalObjectKey(
+            newTargetEventId,
+          ).currentContext;
 
           if (newItemContext != null) {
             await _centerAndHighlightMessage(
@@ -1560,12 +1539,16 @@ class ChatController extends State<Chat>
   /// Centers an already-rendered message in the viewport.
   Future<void> _centerRenderedMessage(BuildContext itemContext) async {
     final itemBox = itemContext.findRenderObject() as RenderBox?;
-    final scrollBox = scrollController.position.context.notificationContext
-        ?.findRenderObject() as RenderBox?;
+    final scrollBox =
+        scrollController.position.context.notificationContext
+                ?.findRenderObject()
+            as RenderBox?;
     if (itemBox == null || scrollBox == null) return;
 
-    final itemPosition =
-        itemBox.localToGlobal(Offset.zero, ancestor: scrollBox);
+    final itemPosition = itemBox.localToGlobal(
+      Offset.zero,
+      ancestor: scrollBox,
+    );
     final viewportHeight = scrollBox.size.height;
     final itemHeight = itemBox.size.height;
 
@@ -1625,13 +1608,12 @@ class ChatController extends State<Chat>
 
     setState(() {
       timeline = null;
-      loadTimelineFuture = _getTimeline(
-        eventContextId: eventId,
-      ).onError(
-        (e, s) {
-          Logs().e('$logContext: Unable to reload timeline', e, s);
-        },
-      );
+      loadTimelineFuture = _getTimeline(eventContextId: eventId).onError((
+        e,
+        s,
+      ) {
+        Logs().e('$logContext: Unable to reload timeline', e, s);
+      });
     });
     await loadTimelineFuture;
 
@@ -1662,9 +1644,7 @@ class ChatController extends State<Chat>
       attempts++;
     }
 
-    Logs().w(
-      '$logContext: Event not found after $maxAttempts frame attempts',
-    );
+    Logs().w('$logContext: Event not found after $maxAttempts frame attempts');
     return -1;
   }
 
@@ -1721,9 +1701,7 @@ class ChatController extends State<Chat>
             'Chat::_scrollTowardsMessage(): Message rendered after AutoScrollController',
           );
           if (highlight) {
-            await scrollController.highlight(
-              getDisplayEventIndex(targetIndex),
-            );
+            await scrollController.highlight(getDisplayEventIndex(targetIndex));
           }
         } else if (retryCount < maxRetries) {
           // Still not rendered, retry
@@ -1757,24 +1735,29 @@ class ChatController extends State<Chat>
       // return SizedBox() when !isVisibleInGui
       double estimatedPixelDistance;
 
-      final nearestKey =
-          GlobalObjectKey(timeline!.events[nearestRenderedIndex].eventId);
+      final nearestKey = GlobalObjectKey(
+        timeline!.events[nearestRenderedIndex].eventId,
+      );
       final nearestContext = nearestKey.currentContext;
 
       if (nearestContext != null) {
         // Get actual pixel position of nearest rendered message
         final nearestBox = nearestContext.findRenderObject() as RenderBox?;
-        final scrollBox = scrollController.position.context.notificationContext
-            ?.findRenderObject() as RenderBox?;
+        final scrollBox =
+            scrollController.position.context.notificationContext
+                    ?.findRenderObject()
+                as RenderBox?;
 
         if (nearestBox != null && scrollBox != null) {
           // Estimate target position based on visible message count between nearest and target
           // Count only visible events to get accurate estimate
           int visibleEventCount = 0;
-          final startIndex =
-              shouldScrollDown ? targetIndex : nearestRenderedIndex;
-          final endIndex =
-              shouldScrollDown ? nearestRenderedIndex : targetIndex;
+          final startIndex = shouldScrollDown
+              ? targetIndex
+              : nearestRenderedIndex;
+          final endIndex = shouldScrollDown
+              ? nearestRenderedIndex
+              : targetIndex;
 
           for (int i = startIndex; i < endIndex; i++) {
             if (timeline!.events[i].isVisibleInGui) {
@@ -1827,13 +1810,15 @@ class ChatController extends State<Chat>
       // Adaptive speed based on pixel distance:
       // - Large distance (>3000px): Fast scroll (9000 px/s)
       // - Medium distance: Normal scroll (4500 px/s)
-      final scrollSpeed =
-          estimatedPixelDistance > 3000 ? _scrollSpeedFast : _scrollSpeed;
+      final scrollSpeed = estimatedPixelDistance > 3000
+          ? _scrollSpeedFast
+          : _scrollSpeed;
 
       // Calculate target offset for continuous scroll
       final currentOffset = scrollController.offset;
-      final scrollDirection =
-          shouldScrollDown ? estimatedPixelDistance : -estimatedPixelDistance;
+      final scrollDirection = shouldScrollDown
+          ? estimatedPixelDistance
+          : -estimatedPixelDistance;
       final estimatedTargetOffset = (currentOffset + scrollDirection).clamp(
         scrollController.position.minScrollExtent,
         scrollController.position.maxScrollExtent,
@@ -1881,9 +1866,7 @@ class ChatController extends State<Chat>
 
           // Apply highlight if requested
           if (highlight) {
-            await scrollController.highlight(
-              getDisplayEventIndex(targetIndex),
-            );
+            await scrollController.highlight(getDisplayEventIndex(targetIndex));
           }
           return;
         }
@@ -1923,9 +1906,7 @@ class ChatController extends State<Chat>
         Logs().d(
           'Chat::_scrollTowardsMessage(): Message rendered after animation, applying highlight',
         );
-        await scrollController.highlight(
-          getDisplayEventIndex(targetIndex),
-        );
+        await scrollController.highlight(getDisplayEventIndex(targetIndex));
       } else if (!finalRendered && reachedBoundary) {
         // Message not rendered and we hit a scroll boundary
         // Try reloading timeline centered on the event as a fallback
@@ -1940,8 +1921,9 @@ class ChatController extends State<Chat>
 
         if (newTargetIndex != -1 && timeline != null) {
           final newTargetEventId = timeline!.events[newTargetIndex].eventId;
-          final newItemContext =
-              GlobalObjectKey(newTargetEventId).currentContext;
+          final newItemContext = GlobalObjectKey(
+            newTargetEventId,
+          ).currentContext;
 
           if (newItemContext != null) {
             Logs().d(
@@ -2063,21 +2045,13 @@ class ChatController extends State<Chat>
     final emojiId = Matrix.of(context).emojiData.getIdByEmoji(emoji ?? '');
 
     if (emojiId.isNotEmpty) {
-      await storeRecentReactionsInteractor.execute(
-        emojiId: emojiId,
-      );
+      await storeRecentReactionsInteractor.execute(emojiId: emojiId);
     }
   }
 
-  void sendEmojiAction({
-    String? emoji,
-    required Event event,
-  }) async {
+  void sendEmojiAction({String? emoji, required Event event}) async {
     handleStoreRecentReactions(emoji);
-    await room!.sendReaction(
-      event.eventId,
-      emoji!,
-    );
+    await room!.sendReaction(event.eventId, emoji!);
   }
 
   void clearSelectedEvents() {
@@ -2140,9 +2114,7 @@ class ChatController extends State<Chat>
             .replacementRoom,
       ),
     );
-    await TwakeDialog.showFutureLoadingDialogFullScreen(
-      future: room!.leave,
-    );
+    await TwakeDialog.showFutureLoadingDialogFullScreen(future: room!.leave);
     if (result.error == null) {
       context.go('/rooms/${result.result}');
     }
@@ -2267,8 +2239,10 @@ class ChatController extends State<Chat>
     });
     if (!currentlyTyping) {
       currentlyTyping = true;
-      room!
-          .setTyping(true, timeout: const Duration(seconds: 30).inMilliseconds);
+      room!.setTyping(
+        true,
+        timeout: const Duration(seconds: 30).inMilliseconds,
+      );
     }
     inputText.value = text;
   }
@@ -2333,15 +2307,15 @@ class ChatController extends State<Chat>
   }
 
   void cancelReplyEventAction() => setState(() {
-        _updateReplyEvent();
-      });
+    _updateReplyEvent();
+  });
 
   void cancelEditEventAction() => setState(() {
-        if (editEventNotifier.value != null) {
-          inputText.value = sendController.text = pendingText;
-        }
-        editEventNotifier.value = null;
-      });
+    if (editEventNotifier.value != null) {
+      inputText.value = sendController.text = pendingText;
+    }
+    editEventNotifier.value = null;
+  });
 
   void onSendFileClick(BuildContext context) async {
     if (PlatformInfos.isMobile) {
@@ -2450,9 +2424,7 @@ class ChatController extends State<Chat>
     openingPopupMenu.toggle();
   }
 
-  List<ContextMenuItemChatAction> listHorizontalActionMenuBuilder(
-    Event event,
-  ) {
+  List<ContextMenuItemChatAction> listHorizontalActionMenuBuilder(Event event) {
     final listAction = [
       if (event.room.canSendReactions) ChatHorizontalActionMenu.reaction,
       if (event.status.isAvailable && event.room.canSendDefaultMessages)
@@ -2477,11 +2449,7 @@ class ChatController extends State<Chat>
   ) {
     switch (actions) {
       case ChatHorizontalActionMenu.reaction:
-        handleReactionEmojiAction(
-          context,
-          event,
-          tapDownDetails,
-        );
+        handleReactionEmojiAction(context, event, tapDownDetails);
         break;
       case ChatHorizontalActionMenu.reply:
         replyAction(replyTo: event);
@@ -2490,11 +2458,7 @@ class ChatController extends State<Chat>
         forwardEventsAction(event: event);
         break;
       case ChatHorizontalActionMenu.more:
-        handleContextMenuAction(
-          context,
-          event,
-          tapDownDetails,
-        );
+        handleContextMenuAction(context, event, tapDownDetails);
         break;
     }
   }
@@ -2503,9 +2467,7 @@ class ChatController extends State<Chat>
     final listAction = [
       if (event.status.isAvailable) ChatContextMenuActions.forward,
       if (event.isCopyable) ChatContextMenuActions.copyMessage,
-      if (event.canEditEvents(matrix)) ...[
-        ChatContextMenuActions.edit,
-      ],
+      if (event.canEditEvents(matrix)) ...[ChatContextMenuActions.edit],
       if (event.room.canReportContent) ChatContextMenuActions.report,
       if (event.room.canPinMessage) ChatContextMenuActions.pinChat,
       if (PlatformInfos.isWeb && event.hasAttachment)
@@ -2527,19 +2489,13 @@ class ChatController extends State<Chat>
           unpin: isUnpinEvent(event),
           isSelected: isSelected(event),
         ),
-        icon: action.getIconData(
-          unpin: isUnpinEvent(event),
-        ),
-        imagePath: action.getImagePath(
-          unpin: isUnpinEvent(event),
-        ),
+        icon: action.getIconData(unpin: isUnpinEvent(event)),
+        imagePath: action.getImagePath(unpin: isUnpinEvent(event)),
         colorIcon: action.getIconColor(context, event, action),
         styleName: action == ChatContextMenuActions.delete
-            ? PopupMenuWidgetStyle.defaultItemTextStyle(context)?.merge(
-                TextStyle(
-                  color: LinagoraSysColors.material().error,
-                ),
-              )
+            ? PopupMenuWidgetStyle.defaultItemTextStyle(
+                context,
+              )?.merge(TextStyle(color: LinagoraSysColors.material().error))
             : null,
       );
     }).toList();
@@ -2649,10 +2605,7 @@ class ChatController extends State<Chat>
     }
     _handleStateContextMenu();
     final myReaction = event
-        .aggregatedEvents(
-          timeline!,
-          RelationshipTypes.reaction,
-        )
+        .aggregatedEvents(timeline!, RelationshipTypes.reaction)
         .where(
           (event) =>
               event.senderId == event.room.client.userID &&
@@ -2694,20 +2647,20 @@ class ChatController extends State<Chat>
                                 decoration: BoxDecoration(
                                   color:
                                       LinagoraRefColors.material().primary[100],
-                                  borderRadius: BorderRadius.circular(
-                                    24,
-                                  ),
+                                  borderRadius: BorderRadius.circular(24),
                                   boxShadow: [
                                     BoxShadow(
-                                      color: const Color(0x0000004D)
-                                          .withOpacity(0.15),
+                                      color: const Color(
+                                        0x0000004D,
+                                      ).withOpacity(0.15),
                                       offset: const Offset(0, 4),
                                       blurRadius: 8,
                                       spreadRadius: 3,
                                     ),
                                     BoxShadow(
-                                      color: const Color(0x00000026)
-                                          .withOpacity(0.3),
+                                      color: const Color(
+                                        0x00000026,
+                                      ).withOpacity(0.3),
                                       offset: const Offset(0, 1),
                                       blurRadius: 3,
                                       spreadRadius: 0,
@@ -2716,52 +2669,43 @@ class ChatController extends State<Chat>
                                 ),
                                 child: emoji_mart.EmojiPicker(
                                   emojiData: Matrix.of(context).emojiData,
-                                  recentEmoji:
-                                      getRecentReactionsInteractor.execute(),
+                                  recentEmoji: getRecentReactionsInteractor
+                                      .execute(),
                                   configuration:
                                       emoji_mart.EmojiPickerConfiguration(
-                                    showRecentTab: true,
-                                    emojiStyle: Theme.of(context)
-                                        .textTheme
-                                        .headlineLarge!,
-                                    searchEmptyTextStyle: Theme.of(context)
-                                        .textTheme
-                                        .labelMedium!
-                                        .copyWith(
-                                          color: LinagoraRefColors.material()
-                                              .tertiary[30],
-                                        ),
-                                    searchEmptyWidget: SvgPicture.asset(
-                                      ImagePaths.icSearchEmojiEmpty,
-                                    ),
-                                    searchFocusNode: FocusNode(),
-                                  ),
-                                  itemBuilder: (
-                                    context,
-                                    emojiId,
-                                    emoji,
-                                    callback,
-                                  ) {
-                                    return MouseRegion(
-                                      onHover: (_) {},
-                                      child: emoji_mart.EmojiItem(
-                                        textStyle: Theme.of(context)
+                                        showRecentTab: true,
+                                        emojiStyle: Theme.of(
+                                          context,
+                                        ).textTheme.headlineLarge!,
+                                        searchEmptyTextStyle: Theme.of(context)
                                             .textTheme
-                                            .headlineLarge!,
-                                        onTap: () {
-                                          callback(
-                                            emojiId,
-                                            emoji,
-                                          );
-                                        },
-                                        emoji: emoji,
+                                            .labelMedium!
+                                            .copyWith(
+                                              color:
+                                                  LinagoraRefColors.material()
+                                                      .tertiary[30],
+                                            ),
+                                        searchEmptyWidget: SvgPicture.asset(
+                                          ImagePaths.icSearchEmojiEmpty,
+                                        ),
+                                        searchFocusNode: FocusNode(),
                                       ),
-                                    );
-                                  },
-                                  onEmojiSelected: (
-                                    emojiId,
-                                    emoji,
-                                  ) async {
+                                  itemBuilder:
+                                      (context, emojiId, emoji, callback) {
+                                        return MouseRegion(
+                                          onHover: (_) {},
+                                          child: emoji_mart.EmojiItem(
+                                            textStyle: Theme.of(
+                                              context,
+                                            ).textTheme.headlineLarge!,
+                                            onTap: () {
+                                              callback(emojiId, emoji);
+                                            },
+                                            emoji: emoji,
+                                          ),
+                                        );
+                                      },
+                                  onEmojiSelected: (emojiId, emoji) async {
                                     final isSelected =
                                         emoji == (relatesTo?['key'] ?? '');
                                     if (myReaction == null) {
@@ -2803,10 +2747,7 @@ class ChatController extends State<Chat>
                                   final isSelected =
                                       emoji == (relatesTo?['key'] ?? '');
                                   if (myReaction == null) {
-                                    sendEmojiAction(
-                                      emoji: emoji,
-                                      event: event,
-                                    );
+                                    sendEmojiAction(emoji: emoji, event: event);
                                     return;
                                   }
 
@@ -2817,10 +2758,7 @@ class ChatController extends State<Chat>
 
                                   if (!isSelected) {
                                     await myReaction.redactEvent();
-                                    sendEmojiAction(
-                                      emoji: emoji,
-                                      event: event,
-                                    );
+                                    sendEmojiAction(emoji: emoji, event: event);
                                     return;
                                   }
                                 },
@@ -2861,8 +2799,9 @@ class ChatController extends State<Chat>
     if (room?.isDirectChat == true) {
       return widget.onChangeRightColumnType?.call(RightColumnType.profileInfo);
     } else {
-      return widget.onChangeRightColumnType
-          ?.call(RightColumnType.groupChatDetails);
+      return widget.onChangeRightColumnType?.call(
+        RightColumnType.groupChatDetails,
+      );
     }
   }
 
@@ -2922,8 +2861,9 @@ class ChatController extends State<Chat>
   void _resetLocationPath() {
     final currentLocation = html.window.location.href;
 
-    final event = Uri.tryParse(Uri.tryParse(currentLocation)?.fragment ?? '')
-        ?.queryParameters['event'];
+    final event = Uri.tryParse(
+      Uri.tryParse(currentLocation)?.fragment ?? '',
+    )?.queryParameters['event'];
     if (event == null) return;
     Logs().d("Chat::_resetLocationPath: CurrentLocation - $currentLocation");
     final queryIndex = currentLocation.indexOf('?');
@@ -2950,11 +2890,7 @@ class ChatController extends State<Chat>
 
   void _initializePinnedEvents() {
     if (roomId == null) return;
-    _getPinnedEvents(
-      client: client,
-      roomId: roomId!,
-      isInitial: true,
-    );
+    _getPinnedEvents(client: client, roomId: roomId!, isInitial: true);
   }
 
   void _getPinnedEvents({
@@ -2984,9 +2920,7 @@ class ChatController extends State<Chat>
       Logs().d(
         'Chat::handleDisplayStickyTimestamp() CurrentDateTimeEvent - $_currentDateTimeEvent',
       );
-      _updateStickyTimestampNotifier(
-        dateTime: dateTime,
-      );
+      _updateStickyTimestampNotifier(dateTime: dateTime);
     }
   }
 
@@ -3011,8 +2945,10 @@ class ChatController extends State<Chat>
     if (PlatformInfos.isMobile) {
       _timestampTimer?.cancel();
       _currentChatScrollState = ChatScrollState.endScroll;
-      _timestampTimer =
-          Timer(_delayHideStickyTimestampHeader, _handleHideStickyTimestamp);
+      _timestampTimer = Timer(
+        _delayHideStickyTimestampHeader,
+        _handleHideStickyTimestamp,
+      );
     }
   }
 
@@ -3027,10 +2963,10 @@ class ChatController extends State<Chat>
   }
 
   List<String> get getEventTypeToFilterUnnecessaryEvent => [
-        EventTypes.Message,
-        EventTypes.Encrypted,
-        EventTypes.Sticker,
-      ];
+    EventTypes.Message,
+    EventTypes.Encrypted,
+    EventTypes.Sticker,
+  ];
 
   Future<void> _tryRequestHistory() async {
     if (timeline == null) return;
@@ -3039,7 +2975,8 @@ class ChatController extends State<Chat>
       (event) => event.type == EventTypes.RoomMember,
     );
 
-    final canRequestHistory = timeline!.events
+    final canRequestHistory =
+        timeline!.events
             .where((event) => event.isVisibleInGui)
             .toList()
             .length <
@@ -3047,11 +2984,10 @@ class ChatController extends State<Chat>
 
     if (allMembershipEvents || canRequestHistory) {
       try {
-        await requestHistory(historyCount: _defaultEventCountDisplay)
-            .then((response) async {
-          Logs().v(
-            'Chat::_tryRequestHistory():: Try request history success',
-          );
+        await requestHistory(historyCount: _defaultEventCountDisplay).then((
+          response,
+        ) async {
+          Logs().v('Chat::_tryRequestHistory():: Try request history success');
           if (allMembershipEvents) {
             await requestHistory(
               historyCount: _defaultEventCountDisplay,
@@ -3063,9 +2999,7 @@ class ChatController extends State<Chat>
           }
         });
       } catch (e) {
-        Logs().e(
-          'Chat::_tryRequestHistory():: Error - $e',
-        );
+        Logs().e('Chat::_tryRequestHistory():: Error - $e');
       } finally {
         _updateOpeningChatViewStateNotifier(ViewEventListSuccess());
       }
@@ -3078,9 +3012,7 @@ class ChatController extends State<Chat>
     try {
       openingChatViewStateNotifier.value = state;
     } on FlutterError catch (e) {
-      Logs().e(
-        'Chat::_updateViewEventListNotifier():: FlutterError - $e',
-      );
+      Logs().e('Chat::_updateViewEventListNotifier():: FlutterError - $e');
     }
   }
 
@@ -3094,10 +3026,7 @@ class ChatController extends State<Chat>
     try {
       replyEventNotifier.value = event;
     } on FlutterError catch (e) {
-      Logs().e(
-        'Chat::_updateReplyEvent():: FlutterError: $e',
-        e.stackTrace,
-      );
+      Logs().e('Chat::_updateReplyEvent():: FlutterError: $e', e.stackTrace);
     }
   }
 
@@ -3122,8 +3051,9 @@ class ChatController extends State<Chat>
 
   void _listenRoomUpdateEvent() {
     if (room == null) return;
-    onUpdateEventStreamSubcription =
-        client.onEvent.stream.listen((eventUpdate) async {
+    onUpdateEventStreamSubcription = client.onEvent.stream.listen((
+      eventUpdate,
+    ) async {
       Logs().d(
         'Chat::_listenRoomUpdateEvent():: Event Update Content ${eventUpdate.content}',
       );
@@ -3157,9 +3087,7 @@ class ChatController extends State<Chat>
     String? eventId,
   }) {
     if (roomId == null) return;
-    Logs().d(
-      'Chat::_handlePinnedMessageCallBack():: eventId - $eventId',
-    );
+    Logs().d('Chat::_handlePinnedMessageCallBack():: eventId - $eventId');
     _getPinnedEvents(
       client: client,
       roomId: roomId!,
@@ -3169,15 +3097,11 @@ class ChatController extends State<Chat>
     );
   }
 
-  void _updateStickyTimestampNotifier({
-    DateTime? dateTime,
-  }) {
+  void _updateStickyTimestampNotifier({DateTime? dateTime}) {
     try {
       stickyTimestampNotifier.value = dateTime;
     } on FlutterError catch (e) {
-      Logs().e(
-        'Chat::_updateStickyTimestampNotifier():: FlutterError - $e',
-      );
+      Logs().e('Chat::_updateStickyTimestampNotifier():: FlutterError - $e');
     }
   }
 
@@ -3193,8 +3117,9 @@ class ChatController extends State<Chat>
     }
     final offset = tapDownDetails.globalPosition;
     final listAppBarActions = _getListActionAppBarMenu();
-    final listContextMenuActions =
-        _mapAppbarMenuActionToContextMenuAction(listAppBarActions);
+    final listContextMenuActions = _mapAppbarMenuActionToContextMenuAction(
+      listAppBarActions,
+    );
 
     final selectedActionIndex = await showTwakeContextMenu(
       offset: offset,
@@ -3232,9 +3157,7 @@ class ChatController extends State<Chat>
   }
 
   List<ChatAppBarActions> _getListActionAppbarMenuNormal() {
-    return [
-      if (!isSupportChat) ChatAppBarActions.leaveGroup,
-    ];
+    return [if (!isSupportChat) ChatAppBarActions.leaveGroup];
   }
 
   List<ContextMenuAction> _mapAppbarMenuActionToContextMenuAction(
@@ -3246,9 +3169,9 @@ class ChatController extends State<Chat>
         icon: action.getIcon(),
         colorIcon: action.getColorIcon(context),
         styleName: action == ChatAppBarActions.leaveGroup
-            ? PopupMenuWidgetStyle.defaultItemTextStyle(context)?.copyWith(
-                color: action.getColorIcon(context),
-              )
+            ? PopupMenuWidgetStyle.defaultItemTextStyle(
+                context,
+              )?.copyWith(color: action.getColorIcon(context))
             : null,
       );
     }).toList();
@@ -3258,10 +3181,8 @@ class ChatController extends State<Chat>
     switch (action) {
       case ChatAppBarActions.saveToDownload:
         actionWithClearSelections(
-          () => saveSelectedEventToDownloadAndroid(
-            context,
-            selectedEvents.first,
-          ),
+          () =>
+              saveSelectedEventToDownloadAndroid(context, selectedEvents.first),
         );
         break;
       case ChatAppBarActions.saveToGallery:
@@ -3271,10 +3192,7 @@ class ChatController extends State<Chat>
         break;
       case ChatAppBarActions.info:
         actionWithClearSelections(
-          () => showEventInfo(
-            context,
-            selectedEvents.single,
-          ),
+          () => showEventInfo(context, selectedEvents.single),
         );
         break;
       case ChatAppBarActions.report:
@@ -3338,10 +3256,7 @@ class ChatController extends State<Chat>
     }
     _handleStateContextMenu();
     final myReaction = event
-        .aggregatedEvents(
-          timeline!,
-          RelationshipTypes.reaction,
-        )
+        .aggregatedEvents(timeline!, RelationshipTypes.reaction)
         .where(
           (event) =>
               event.senderId == event.room.client.userID &&
@@ -3402,20 +3317,20 @@ class ChatController extends State<Chat>
                                     decoration: BoxDecoration(
                                       color: LinagoraRefColors.material()
                                           .primary[100],
-                                      borderRadius: BorderRadius.circular(
-                                        24,
-                                      ),
+                                      borderRadius: BorderRadius.circular(24),
                                       boxShadow: [
                                         BoxShadow(
-                                          color: const Color(0x0000004D)
-                                              .withOpacity(0.15),
+                                          color: const Color(
+                                            0x0000004D,
+                                          ).withOpacity(0.15),
                                           offset: const Offset(0, 4),
                                           blurRadius: 8,
                                           spreadRadius: 3,
                                         ),
                                         BoxShadow(
-                                          color: const Color(0x00000026)
-                                              .withOpacity(0.3),
+                                          color: const Color(
+                                            0x00000026,
+                                          ).withOpacity(0.3),
                                           offset: const Offset(0, 1),
                                           blurRadius: 3,
                                           spreadRadius: 0,
@@ -3428,49 +3343,39 @@ class ChatController extends State<Chat>
                                           .execute(),
                                       configuration:
                                           emoji_mart.EmojiPickerConfiguration(
-                                        showRecentTab: true,
-                                        emojiStyle: Theme.of(context)
-                                            .textTheme
-                                            .headlineLarge!,
-                                        searchEmptyTextStyle: Theme.of(context)
-                                            .textTheme
-                                            .labelMedium!
-                                            .copyWith(
-                                              color:
-                                                  LinagoraRefColors.material()
-                                                      .tertiary[30],
+                                            showRecentTab: true,
+                                            emojiStyle: Theme.of(
+                                              context,
+                                            ).textTheme.headlineLarge!,
+                                            searchEmptyTextStyle:
+                                                Theme.of(
+                                                  context,
+                                                ).textTheme.labelMedium!.copyWith(
+                                                  color:
+                                                      LinagoraRefColors.material()
+                                                          .tertiary[30],
+                                                ),
+                                            searchEmptyWidget: SvgPicture.asset(
+                                              ImagePaths.icSearchEmojiEmpty,
                                             ),
-                                        searchEmptyWidget: SvgPicture.asset(
-                                          ImagePaths.icSearchEmojiEmpty,
-                                        ),
-                                        searchFocusNode: FocusNode(),
-                                      ),
-                                      itemBuilder: (
-                                        context,
-                                        emojiId,
-                                        emoji,
-                                        callback,
-                                      ) {
-                                        return MouseRegion(
-                                          onHover: (_) {},
-                                          child: emoji_mart.EmojiItem(
-                                            textStyle: Theme.of(context)
-                                                .textTheme
-                                                .headlineLarge!,
-                                            onTap: () {
-                                              callback(
-                                                emojiId,
-                                                emoji,
-                                              );
-                                            },
-                                            emoji: emoji,
+                                            searchFocusNode: FocusNode(),
                                           ),
-                                        );
-                                      },
-                                      onEmojiSelected: (
-                                        emojiId,
-                                        emoji,
-                                      ) async {
+                                      itemBuilder:
+                                          (context, emojiId, emoji, callback) {
+                                            return MouseRegion(
+                                              onHover: (_) {},
+                                              child: emoji_mart.EmojiItem(
+                                                textStyle: Theme.of(
+                                                  context,
+                                                ).textTheme.headlineLarge!,
+                                                onTap: () {
+                                                  callback(emojiId, emoji);
+                                                },
+                                                emoji: emoji,
+                                              ),
+                                            );
+                                          },
+                                      onEmojiSelected: (emojiId, emoji) async {
                                         final isSelected =
                                             emoji == (relatesTo?['key'] ?? '');
                                         if (myReaction == null) {
@@ -3553,8 +3458,8 @@ class ChatController extends State<Chat>
                                   child: Material(
                                     color:
                                         TwakeContextMenuStyle.defaultMenuColor(
-                                      context,
-                                    ),
+                                          context,
+                                        ),
                                     child: ConstrainedBox(
                                       constraints: const BoxConstraints(
                                         minWidth:
@@ -3573,19 +3478,17 @@ class ChatController extends State<Chat>
                                                 CrossAxisAlignment.start,
                                             children: listContextMenuActions
                                                 .map(
-                                                  (action) =>
-                                                      ContextMenuActionItemWidget(
+                                                  (
+                                                    action,
+                                                  ) => ContextMenuActionItemWidget(
                                                     action: action,
                                                     closeMenuAction: () {
                                                       Navigator.of(
                                                         dialogContext,
                                                       ).pop();
                                                       _handleClickOnContextMenuItem(
-                                                        listPopupMenuActions[
-                                                            listContextMenuActions
-                                                                .indexOf(
-                                                          action,
-                                                        )],
+                                                        listPopupMenuActions[listContextMenuActions
+                                                            .indexOf(action)],
                                                         event,
                                                       );
                                                     },
@@ -3617,10 +3520,12 @@ class ChatController extends State<Chat>
   }
 
   void listenIgnoredUser() {
-    isBlockedUserNotifier.value = room?.isDirectChat == true &&
+    isBlockedUserNotifier.value =
+        room?.isDirectChat == true &&
         client.ignoredUsers.contains(user?.id ?? '');
     ignoredUsersStreamSub = client.ignoredUsersStream.listen((value) {
-      isBlockedUserNotifier.value = room?.isDirectChat == true &&
+      isBlockedUserNotifier.value =
+          room?.isDirectChat == true &&
           client.ignoredUsers.contains(user?.id ?? '');
     });
   }
@@ -3628,9 +3533,7 @@ class ChatController extends State<Chat>
   StreamSubscription? keyboardVisibilitySubscription;
 
   void onLongPressAudioRecordInMobile() {
-    handleLongPressAudioRecordInMobile(
-      context: context,
-    );
+    handleLongPressAudioRecordInMobile(context: context);
   }
 
   void disposeAudioPlayer() {
@@ -3663,8 +3566,9 @@ class ChatController extends State<Chat>
   }
 
   void _listenOnJumpToEventFromSearch() {
-    _jumpToEventFromSearchSubscription =
-        widget.jumpToEventStream?.listen((eventId) {
+    _jumpToEventFromSearchSubscription = widget.jumpToEventStream?.listen((
+      eventId,
+    ) {
       Logs().d(
         'Chat::_listenOnJumpToEventFromSearch(): Jump to eventId from search: $eventId',
       );
@@ -3693,8 +3597,8 @@ class ChatController extends State<Chat>
     _initializePinnedEvents();
     _listenOnJumpToEventFromSearch();
     registerPasteShortcutListeners();
-    keyboardVisibilitySubscription =
-        keyboardVisibilityController.onChange.listen(_keyboardListener);
+    keyboardVisibilitySubscription = keyboardVisibilityController.onChange
+        .listen(_keyboardListener);
     scrollController.addListener(_updateScrollController);
     _loadDraft();
     _tryLoadTimeline();
@@ -3734,9 +3638,9 @@ class ChatController extends State<Chat>
       highlightEventId = GoRouterState.of(context).uri.queryParameters['event'];
     } else {
       final currentLocation = html.window.location.href;
-      highlightEventId =
-          Uri.tryParse(Uri.tryParse(currentLocation)?.fragment ?? '')
-              ?.queryParameters['event'];
+      highlightEventId = Uri.tryParse(
+        Uri.tryParse(currentLocation)?.fragment ?? '',
+      )?.queryParameters['event'];
     }
 
     // If event ID exists in URL and we haven't scrolled to it yet, scroll to it

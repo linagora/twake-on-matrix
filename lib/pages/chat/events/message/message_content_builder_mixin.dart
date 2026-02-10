@@ -23,7 +23,8 @@ mixin MessageContentBuilderMixin {
     bool hideDisplayName = false,
     bool isEdited = false,
   }) {
-    final isNotSupportCalcSize = {
+    final isNotSupportCalcSize =
+        {
           MessageTypes.File,
           MessageTypes.Image,
           MessageTypes.Video,
@@ -45,8 +46,12 @@ mixin MessageContentBuilderMixin {
       maxWidth,
     ).width;
 
-    final messageMetrics =
-        _getMessageMetrics(context, event, maxWidth, isEdited: isEdited);
+    final messageMetrics = _getMessageMetrics(
+      context,
+      event,
+      maxWidth,
+      isEdited: isEdited,
+    );
 
     if (ownMessage || hideDisplayName) {
       return messageMetrics;
@@ -78,16 +83,14 @@ mixin MessageContentBuilderMixin {
         text: event.isCaptionModeOrReply()
             ? event.body
             : event.senderFromMemoryOrFallback
-                .calcDisplayname()
-                .shortenDisplayName(
-                  maxCharacters:
-                      DisplayNameWidget.maxCharactersDisplayNameBubble,
-                ),
+                  .calcDisplayname()
+                  .shortenDisplayName(
+                    maxCharacters:
+                        DisplayNameWidget.maxCharactersDisplayNameBubble,
+                  ),
         style: Theme.of(context).textTheme.labelMedium?.copyWith(
-              color: Theme.of(
-                context,
-              ).colorScheme.primary,
-            ),
+          color: Theme.of(context).colorScheme.primary,
+        ),
       ),
       maxLines: 2,
       textDirection: TextDirection.ltr,
@@ -126,13 +129,13 @@ mixin MessageContentBuilderMixin {
       text: TextSpan(
         text: DateFormat("HH:mm").format(event.originServerTs),
         style: Theme.of(context).textTheme.bodySmall?.merge(
-              TextStyle(
-                color: event.timelineOverlayMessage
-                    ? Colors.white
-                    : LinagoraRefColors.material().tertiary[30],
-                letterSpacing: 0.4,
-              ),
-            ),
+          TextStyle(
+            color: event.timelineOverlayMessage
+                ? Colors.white
+                : LinagoraRefColors.material().tertiary[30],
+            letterSpacing: 0.4,
+          ),
+        ),
       ),
       textDirection: TextDirection.ltr,
     )..layout(minWidth: 0, maxWidth: maxWidth);
@@ -146,7 +149,8 @@ mixin MessageContentBuilderMixin {
     double totalWidth = painTimeText.width;
 
     if (event.isPinned) {
-      totalWidth += paddingTimeAndIcon +
+      totalWidth +=
+          paddingTimeAndIcon +
           pushpinIconSize +
           paddingAllPushpin +
           paddingToTimeSpacing;
@@ -168,28 +172,18 @@ mixin MessageContentBuilderMixin {
     const spaceMessageAndTime = 4.0;
     final spaceHasEdited = isEdited ? 56.0 : 0.0;
     final spaceHasPinned = event.isPinned ? MessageStyle.pushpinIconSize : 0.0;
-    final paddingMessage =
-        event.isCaptionModeOrReply() ? 0.0 : AppConfig.messagePadding;
+    final paddingMessage = event.isCaptionModeOrReply()
+        ? 0.0
+        : AppConfig.messagePadding;
 
-    final paintedMessageText = _paintMessageText(
-      context,
-      event,
-      maxWidth,
-    );
-    final sizeMessageTime = _getWidthMessageTime(
-      context,
-      event,
-      maxWidth,
-    );
+    final paintedMessageText = _paintMessageText(context, event, maxWidth);
+    final sizeMessageTime = _getWidthMessageTime(context, event, maxWidth);
     final messageTimeAndPaddingWidth =
         sizeMessageTime + spaceMessageAndTime + spaceHasEdited + spaceHasPinned;
     final messageTextWidth = paintedMessageText.width;
     final TextRange lastLineRange = paintedMessageText.getLineBoundary(
       paintedMessageText.getPositionForOffset(
-        Offset(
-          paintedMessageText.size.width,
-          paintedMessageText.size.height,
-        ),
+        Offset(paintedMessageText.size.width, paintedMessageText.size.height),
       ),
     );
 
@@ -224,7 +218,8 @@ mixin MessageContentBuilderMixin {
         messageTextWidth - lastLineWidth >= messageTimeAndPaddingWidth &&
         messageTextWidth + paddingMessage < maxWidth) {
       totalMessageWidth = messageTextWidth + paddingMessage;
-      isNeedAddNewLine = event.isCaptionModeOrReply() ||
+      isNeedAddNewLine =
+          event.isCaptionModeOrReply() ||
           (event.status == EventStatus.error &&
               event.messageType == MessageTypes.Text);
     } else {
@@ -342,17 +337,14 @@ mixin MessageContentBuilderMixin {
   }
 
   bool _handleMatrixSchemeTagName(String hrefLower) {
-    final match = RegExp(r'^matrix:(r|roomid|u)\/([^\/]+)$')
-        .firstMatch(hrefLower.split('?').first.split('#').first);
+    final match = RegExp(
+      r'^matrix:(r|roomid|u)\/([^\/]+)$',
+    ).firstMatch(hrefLower.split('?').first.split('#').first);
     if (match == null || match.group(2) == null) {
       return false;
     }
 
-    final sigil = {
-      'r': '#',
-      'roomid': '!',
-      'u': '@',
-    }[match.group(1)];
+    final sigil = {'r': '#', 'roomid': '!', 'u': '@'}[match.group(1)];
 
     return sigil != null;
   }

@@ -10,9 +10,7 @@ class NetworkConnectivityDI extends BaseDI {
   }
 
   void _bindDioForNetworkConnectionService(GetIt get) {
-    get.registerLazySingleton<Connectivity>(
-      () => Connectivity(),
-    );
+    get.registerLazySingleton<Connectivity>(() => Connectivity());
     get.registerLazySingleton<NetworkConnectionService>(
       () => NetworkConnectionService(get.get<Connectivity>()),
     );

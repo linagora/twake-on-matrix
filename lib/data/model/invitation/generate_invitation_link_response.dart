@@ -10,10 +10,7 @@ class GenerateInvitationLinkResponse with EquatableMixin {
   @JsonKey(name: "id")
   final String id;
 
-  GenerateInvitationLinkResponse({
-    required this.link,
-    required this.id,
-  });
+  GenerateInvitationLinkResponse({required this.link, required this.id});
 
   factory GenerateInvitationLinkResponse.fromJson(Map<String, dynamic> json) =>
       _$GenerateInvitationLinkResponseFromJson(json);
@@ -21,8 +18,5 @@ class GenerateInvitationLinkResponse with EquatableMixin {
   Map<String, dynamic> toJson() => _$GenerateInvitationLinkResponseToJson(this);
 
   @override
-  List<Object?> get props => [
-        link,
-        id,
-      ];
+  List<Object?> get props => [link, id];
 }

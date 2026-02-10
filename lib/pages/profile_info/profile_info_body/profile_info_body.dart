@@ -51,17 +51,15 @@ class ProfileInfoBody extends StatefulWidget {
 class ProfileInfoBodyController extends State<ProfileInfoBody> {
   final _getUserInfoInteractor = getIt.get<GetUserInfoInteractor>();
 
-  final _setPermissionLevelInteractor =
-      getIt.get<SetPermissionLevelInteractor>();
+  final _setPermissionLevelInteractor = getIt
+      .get<SetPermissionLevelInteractor>();
 
   StreamSubscription? _setPermissionLevelSubscription;
 
   StreamSubscription? userInfoNotifierSub;
 
   final ValueNotifier<Either<Failure, Success>> userInfoNotifier =
-      ValueNotifier<Either<Failure, Success>>(
-    Right(GettingUserInfo()),
-  );
+      ValueNotifier<Either<Failure, Success>>(Right(GettingUserInfo()));
 
   User? get user => widget.user;
 
@@ -70,12 +68,8 @@ class ProfileInfoBodyController extends State<ProfileInfoBody> {
   void getUserInfoAction() {
     if (user == null) return;
     userInfoNotifierSub = _getUserInfoInteractor
-        .execute(
-          userId: user!.id,
-        )
-        .listen(
-          (event) => userInfoNotifier.value = event,
-        );
+        .execute(userId: user!.id)
+        .listen((event) => userInfoNotifier.value = event);
   }
 
   void openNewChat() {
@@ -94,8 +88,9 @@ class ProfileInfoBodyController extends State<ProfileInfoBody> {
       );
     } else {
       if (PlatformInfos.isMobile) {
-        Navigator.of(context)
-            .popUntil((route) => route.settings.name == "/rooms/room");
+        Navigator.of(
+          context,
+        ).popUntil((route) => route.settings.name == "/rooms/room");
       } else {
         if (widget.onNewChatOpen != null) widget.onNewChatOpen!();
       }
@@ -134,10 +129,7 @@ class ProfileInfoBodyController extends State<ProfileInfoBody> {
       future: () => user!.ban(),
     );
     if (result.error != null) {
-      TwakeSnackBar.show(
-        context,
-        result.error!.message,
-      );
+      TwakeSnackBar.show(context, result.error!.message);
       return;
     }
     widget.onUpdatedMembers?.call();
@@ -231,36 +223,33 @@ class ProfileInfoBodyController extends State<ProfileInfoBody> {
     if (user?.room == null) return;
     await showConfirmAlertDialog(
       context: context,
-      title: L10n.of(context)?.confirmTransferOwnership(
-        user?.displayName ?? '',
-      ),
+      title: L10n.of(
+        context,
+      )?.confirmTransferOwnership(user?.displayName ?? ''),
       message: L10n.of(context)?.transferOwnershipDescription,
       okLabel: L10n.of(context)?.confirm,
       cancelLabel: L10n.of(context)?.cancel,
     ).then((result) {
       if (result == ConfirmResult.ok) {
-        _setPermissionLevelSubscription = _setPermissionLevelInteractor.execute(
-          room: user!.room,
-          userPermissionLevels: {
-            user!: DefaultPowerLevelMember.owner.powerLevel,
-            user!.room.ownUser: DefaultPowerLevelMember.admin.powerLevel,
-          },
-        ).listen((state) => _handleSetPermissionState(state));
+        _setPermissionLevelSubscription = _setPermissionLevelInteractor
+            .execute(
+              room: user!.room,
+              userPermissionLevels: {
+                user!: DefaultPowerLevelMember.owner.powerLevel,
+                user!.room.ownUser: DefaultPowerLevelMember.admin.powerLevel,
+              },
+            )
+            .listen((state) => _handleSetPermissionState(state));
       }
     });
   }
 
-  void _handleSetPermissionState(
-    Either<Failure, Success> state,
-  ) {
+  void _handleSetPermissionState(Either<Failure, Success> state) {
     state.fold(
       (failure) {
         if (failure is SetPermissionLevelFailure) {
           TwakeDialog.hideLoadingDialog(context);
-          TwakeSnackBar.show(
-            context,
-            failure.exception.toString(),
-          );
+          TwakeSnackBar.show(context, failure.exception.toString());
           return;
         }
 

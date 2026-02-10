@@ -37,17 +37,12 @@ Future<void> showAddContactDialog(
       context: context,
       backgroundColor: LinagoraSysColors.material().onPrimary,
       shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(
-          top: Radius.circular(20),
-        ),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       useSafeArea: true,
       scrollControlDisabledMaxHeightRatio: 0.8,
       builder: (context) {
-        return AddContactDialog(
-          displayName: displayName,
-          matrixId: matrixId,
-        );
+        return AddContactDialog(displayName: displayName, matrixId: matrixId);
       },
     );
   }
@@ -61,10 +56,7 @@ Future<void> showAddContactDialog(
           borderRadius: BorderRadius.all(Radius.circular(16)),
         ),
         insetPadding: const EdgeInsets.all(16),
-        child: AddContactDialog(
-          displayName: displayName,
-          matrixId: matrixId,
-        ),
+        child: AddContactDialog(displayName: displayName, matrixId: matrixId),
       );
     },
   );
@@ -123,31 +115,33 @@ class AddContactDialogController extends State<AddContactDialog> {
     );
 
     if (existedContact == null) {
-      final result = await TwakeDialog.showFutureLoadingDialogFullScreen<
-          Either<Failure, Success>>(
-        future: () => getIt.get<PostAddressBookInteractor>().execute(
-          addressBooks: [
-            AddressBook(
-              mxid: userName.value,
-              displayName: '$firstName $lastName',
-            ),
-          ],
-        ).last,
-      );
+      final result =
+          await TwakeDialog.showFutureLoadingDialogFullScreen<
+            Either<Failure, Success>
+          >(
+            future: () => getIt
+                .get<PostAddressBookInteractor>()
+                .execute(
+                  addressBooks: [
+                    AddressBook(
+                      mxid: userName.value,
+                      displayName: '$firstName $lastName',
+                    ),
+                  ],
+                )
+                .last,
+          );
       final state = result.result?.fold(
         (failure) => failure,
         (success) => success,
       );
       if (state is PostAddressBookFailureState) {
-        TwakeSnackBar.show(
-          context,
-          state.exception.toString(),
-        );
+        TwakeSnackBar.show(context, state.exception.toString());
         return;
       } else if (state is PostAddressBookSuccessState) {
         getIt.get<ContactsManager>().refreshTomContacts(
-              Matrix.of(context).client,
-            );
+          Matrix.of(context).client,
+        );
         final createdContact = state.updatedAddressBooks.firstOrNull
             ?.toPresentationContact()
             .firstOrNull;
@@ -173,8 +167,9 @@ class AddContactDialogController extends State<AddContactDialog> {
   }
 
   void chatWithUser(String matrixId, {PresentationContact? contact}) {
-    final existedRoomId =
-        Matrix.of(context).client.getDirectChatFromUserId(matrixId);
+    final existedRoomId = Matrix.of(
+      context,
+    ).client.getDirectChatFromUserId(matrixId);
 
     Navigator.pop(context);
 

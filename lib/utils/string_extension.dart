@@ -62,8 +62,10 @@ extension StringCasingExtension on String {
 
   String? getFirstValidUrl() {
     final RegExp regex = RegExp(r'https:\/\/[^\s]+', caseSensitive: false);
-    final List<String?> matches =
-        regex.allMatches(this).map((m) => m.group(0)).toList();
+    final List<String?> matches = regex
+        .allMatches(this)
+        .map((m) => m.group(0))
+        .toList();
 
     if (matches.isEmpty) {
       return null;
@@ -82,8 +84,9 @@ extension StringCasingExtension on String {
     final RegExp regex = RegExp(r'https:\/\/[^\s]+');
 
     final Iterable<Match> formattedLinksMatches = regex.allMatches(this);
-    final Iterable<Match> unformattedLinksMatches =
-        regex.allMatches(unformattedText);
+    final Iterable<Match> unformattedLinksMatches = regex.allMatches(
+      unformattedText,
+    );
 
     if (formattedLinksMatches.isEmpty ||
         unformattedLinksMatches.isEmpty ||
@@ -105,8 +108,10 @@ extension StringCasingExtension on String {
       final String formattedLink = formattedLinkMatch.group(0)!;
       final String unformattedLink = unformattedLinkMatch.group(0)!;
 
-      unMarkdownedText =
-          unMarkdownedText.replaceFirst(formattedLink, unformattedLink);
+      unMarkdownedText = unMarkdownedText.replaceFirst(
+        formattedLink,
+        unformattedLink,
+      );
     }
 
     return unMarkdownedText;
@@ -115,10 +120,12 @@ extension StringCasingExtension on String {
   bool isEventIdOlderOrSameAs(Timeline timeline, String thatEventId) {
     if (timeline.events.isEmpty) return false;
 
-    final firstEvent =
-        timeline.events.firstWhereOrNull((e) => e.eventId == this);
-    final secondEvent =
-        timeline.events.firstWhereOrNull((e) => e.eventId == thatEventId);
+    final firstEvent = timeline.events.firstWhereOrNull(
+      (e) => e.eventId == this,
+    );
+    final secondEvent = timeline.events.firstWhereOrNull(
+      (e) => e.eventId == thatEventId,
+    );
 
     if (secondEvent == null || firstEvent == null) return false;
 
@@ -185,10 +192,7 @@ extension StringCasingExtension on String {
   }
 
   bool containsWord(String word) {
-    final containsWordRegex = RegExp(
-      "\\b(?:$word)\\b",
-      caseSensitive: false,
-    );
+    final containsWordRegex = RegExp("\\b(?:$word)\\b", caseSensitive: false);
     return containsWordRegex.hasMatch(this);
   }
 
@@ -216,13 +220,7 @@ extension StringCasingExtension on String {
     GestureRecognizer? recognizer,
   }) {
     if (highlightText.isEmpty || isEmpty) {
-      return [
-        TextSpan(
-          text: this,
-          style: style,
-          recognizer: recognizer,
-        ),
-      ];
+      return [TextSpan(text: this, style: style, recognizer: recognizer)];
     }
 
     // Escape special characters in the highlightText
@@ -240,11 +238,7 @@ extension StringCasingExtension on String {
         );
       },
       onNonMatch: (String nonMatch) {
-        return TextSpan(
-          text: nonMatch,
-          style: style,
-          recognizer: recognizer,
-        );
+        return TextSpan(text: nonMatch, style: style, recognizer: recognizer);
       },
     );
 
@@ -271,9 +265,7 @@ extension StringCasingExtension on String {
     return result;
   }
 
-  String shortenDisplayName({
-    required int maxCharacters,
-  }) {
+  String shortenDisplayName({required int maxCharacters}) {
     if (length < maxCharacters) return this;
     return substring(0, maxCharacters);
   }
@@ -282,8 +274,10 @@ extension StringCasingExtension on String {
     if (prefixLength < 0) return this;
     final index = toLowerCase().indexOf(highlightText.toLowerCase());
     if (index > prefixLength) {
-      final enterIndex =
-          substring(index - prefixLength, index).lastIndexOf(RegExp(r'\n'));
+      final enterIndex = substring(
+        index - prefixLength,
+        index,
+      ).lastIndexOf(RegExp(r'\n'));
       if (enterIndex <= -1) {
         return '...${substring(index - prefixLength)}';
       }
@@ -369,9 +363,7 @@ extension StringCasingExtension on String {
     return '$this$path$newHomeserverParams';
   }
 
-  String generateLogoutAuthPath({
-    bool isDevMode = false,
-  }) {
+  String generateLogoutAuthPath({bool isDevMode = false}) {
     if (isDevMode) {
       return '${this}web/auth.html';
     } else {
@@ -396,9 +388,7 @@ extension StringCasingExtension on String {
 }
 
 extension ListStringExtension on List<String> {
-  List<String> combineRecentReactions({
-    required String emojiId,
-  }) {
+  List<String> combineRecentReactions({required String emojiId}) {
     final updatedReactions = List<String>.from(this);
     final emojiExisted = updatedReactions.contains(emojiId);
     if (emojiExisted) {

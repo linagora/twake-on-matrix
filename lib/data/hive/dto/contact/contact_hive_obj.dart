@@ -27,10 +27,5 @@ class ContactHiveObj with EquatableMixin {
   Map<String, dynamic> toJson() => _$ContactHiveObjToJson(this);
 
   @override
-  List<Object?> get props => [
-        id,
-        displayName,
-        emails,
-        phoneNumbers,
-      ];
+  List<Object?> get props => [id, displayName, emails, phoneNumbers];
 }

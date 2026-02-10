@@ -10,16 +10,11 @@ class NoContactsFound extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return keyword != null
-        ? const Align(
-            alignment: Alignment.center,
-            child: EmptySearchWidget(),
-          )
+        ? const Align(alignment: Alignment.center, child: EmptySearchWidget())
         : SizedBox(
             height: MediaQuery.sizeOf(context).height * 0.7,
             child: Align(
-              child: Text(
-                L10n.of(context)!.youDontHaveAnyContactsYet,
-              ),
+              child: Text(L10n.of(context)!.youDontHaveAnyContactsYet),
             ),
           );
   }

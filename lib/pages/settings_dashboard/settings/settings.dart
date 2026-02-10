@@ -31,10 +31,7 @@ import 'settings_view.dart';
 class Settings extends StatefulWidget {
   final Widget? bottomNavigationBar;
 
-  const Settings({
-    super.key,
-    this.bottomNavigationBar,
-  });
+  const Settings({super.key, this.bottomNavigationBar});
 
   @override
   SettingsController createState() => SettingsController();
@@ -45,8 +42,8 @@ class SettingsController extends State<Settings> with ConnectPageMixin {
   final ValueNotifier<String?> displayNameNotifier = ValueNotifier('');
 
   final tomConfigurationRepository = getIt.get<ToMConfigurationsRepository>();
-  final federationConfigurationsRepository =
-      getIt.get<FederationConfigurationsRepository>();
+  final federationConfigurationsRepository = getIt
+      .get<FederationConfigurationsRepository>();
 
   static const String generateEmailSubject =
       'Request for Deletion of Twake Chat Account';
@@ -82,9 +79,7 @@ class SettingsController extends State<Settings> with ConnectPageMixin {
   void logoutAction() async {
     final twakeContext = TwakeApp.routerKey.currentContext;
     if (twakeContext == null) {
-      Logs().e(
-        'SettingsController()::logoutAction - Twake context is null',
-      );
+      Logs().e('SettingsController()::logoutAction - Twake context is null');
     }
     if (await showConfirmAlertDialog(
           useRootNavigator: false,
@@ -169,9 +164,7 @@ class SettingsController extends State<Settings> with ConnectPageMixin {
       client.userID!,
       getFromRooms: false,
     );
-    Logs().d(
-      'Settings::_getCurrentProfile() - currentProfile: $profile',
-    );
+    Logs().d('Settings::_getCurrentProfile() - currentProfile: $profile');
     avatarUriNotifier.value = profile.avatarUrl;
     displayNameNotifier.value = profile.displayName;
   }
@@ -190,8 +183,8 @@ class SettingsController extends State<Settings> with ConnectPageMixin {
     );
     final needsBootstrap =
         await client.encryption?.keyManager.isCached() == false ||
-            client.encryption?.crossSigning.enabled == false ||
-            crossSigning == false;
+        client.encryption?.crossSigning.enabled == false ||
+        crossSigning == false;
     Logs().d(
       "SettingsController::checkBootstrap() - needsBootstrap: $needsBootstrap",
     );
@@ -215,9 +208,7 @@ class SettingsController extends State<Settings> with ConnectPageMixin {
       );
       return;
     }
-    await BootstrapDialog(
-      client: Matrix.of(context).client,
-    ).show();
+    await BootstrapDialog(client: Matrix.of(context).client).show();
     checkBootstrap();
   }
 
@@ -265,10 +256,7 @@ class SettingsController extends State<Settings> with ConnectPageMixin {
         }
         break;
       case SettingEnum.help:
-        UrlLauncher(
-          context,
-          url: AppConfig.supportUrl,
-        ).openUrlInAppBrowser();
+        UrlLauncher(context, url: AppConfig.supportUrl).openUrlInAppBrowser();
         break;
       case SettingEnum.about:
         PlatformInfos.showAboutDialogFullScreen();
@@ -278,16 +266,15 @@ class SettingsController extends State<Settings> with ConnectPageMixin {
       case SettingEnum.deleteAccount:
         final matrix = Matrix.of(context);
         final userId = matrix.client.userID;
-        final commonSettingsInformation = matrix.loginHomeserverSummary
-            ?.appTwakeInformation?.commonSettingsInformation;
+        final commonSettingsInformation = matrix
+            .loginHomeserverSummary
+            ?.appTwakeInformation
+            ?.commonSettingsInformation;
         final commonSettingsUrl = userId == null
             ? null
             : commonSettingsInformation?.completedApplicationUrl(userId);
         if (commonSettingsUrl != null) {
-          launchUrl(
-            Uri.parse(commonSettingsUrl),
-            webOnlyWindowName: '_blank',
-          );
+          launchUrl(Uri.parse(commonSettingsUrl), webOnlyWindowName: '_blank');
           return;
         }
         if (await showConfirmAlertDialog(
@@ -339,16 +326,13 @@ class SettingsController extends State<Settings> with ConnectPageMixin {
         'SettingsController::_deleteTomConfigurations - Client ID: ${currentClient.userID}',
       );
       if (matrix.twakeSupported) {
-        await tomConfigurationRepository
-            .deleteTomConfigurations(currentClient.userID!);
+        await tomConfigurationRepository.deleteTomConfigurations(
+          currentClient.userID!,
+        );
       }
-      Logs().d(
-        'SettingsController::_deleteTomConfigurations - Success',
-      );
+      Logs().d('SettingsController::_deleteTomConfigurations - Success');
     } catch (e) {
-      Logs().e(
-        'SettingsController::_deleteTomConfigurations - error: $e',
-      );
+      Logs().e('SettingsController::_deleteTomConfigurations - error: $e');
     }
   }
 
@@ -357,11 +341,10 @@ class SettingsController extends State<Settings> with ConnectPageMixin {
       Logs().d(
         'SettingsController::_deleteFederationConfigurations - Client ID: ${currentClient.userID}',
       );
-      await federationConfigurationsRepository
-          .deleteFederationConfigurations(currentClient.userID!);
-      Logs().d(
-        'SettingsController::_deleteFederationConfigurations - Success',
+      await federationConfigurationsRepository.deleteFederationConfigurations(
+        currentClient.userID!,
       );
+      Logs().d('SettingsController::_deleteFederationConfigurations - Success');
     } catch (e) {
       Logs().e(
         'SettingsController::_deleteFederationConfigurations - error: $e',
@@ -402,9 +385,6 @@ class SettingsController extends State<Settings> with ConnectPageMixin {
 
   @override
   Widget build(BuildContext context) {
-    return SettingsView(
-      this,
-      bottomNavigationBar: widget.bottomNavigationBar,
-    );
+    return SettingsView(this, bottomNavigationBar: widget.bottomNavigationBar);
   }
 }

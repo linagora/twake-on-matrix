@@ -13,11 +13,7 @@ class ChatListHeaderStyle {
   static const double searchIconSize = 24.0;
 
   static const EdgeInsetsDirectional searchInputPadding =
-      EdgeInsetsDirectional.only(
-    start: 16,
-    end: 16,
-    bottom: 8,
-  );
+      EdgeInsetsDirectional.only(start: 16, end: 16, bottom: 8);
 
   static const EdgeInsetsDirectional paddingZero = EdgeInsetsDirectional.zero;
 
@@ -38,8 +34,8 @@ class ChatListHeaderStyle {
       ),
       hintText: hintText ?? L10n.of(context)!.search,
       hintStyle: Theme.of(context).textTheme.titleMedium?.copyWith(
-            color: LinagoraRefColors.material().neutral[60],
-          ),
+        color: LinagoraRefColors.material().neutral[60],
+      ),
       floatingLabelBehavior: FloatingLabelBehavior.never,
       prefixIcon: Icon(
         Icons.search,

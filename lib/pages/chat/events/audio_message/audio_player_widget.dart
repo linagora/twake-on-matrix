@@ -52,8 +52,9 @@ class AudioPlayerState extends State<AudioPlayerWidget>
     with AudioMixin, AutomaticKeepAliveClientMixin {
   final List<double> _calculatedWaveform = [];
 
-  final ValueNotifier<Duration> _durationNotifier =
-      ValueNotifier(Duration.zero);
+  final ValueNotifier<Duration> _durationNotifier = ValueNotifier(
+    Duration.zero,
+  );
 
   late final MatrixState matrix;
 
@@ -76,8 +77,9 @@ class AudioPlayerState extends State<AudioPlayerWidget>
   }
 
   bool get isAudio {
-    return widget.event.content
-            .tryGetMap<String, dynamic>('org.matrix.msc1767.audio') !=
+    return widget.event.content.tryGetMap<String, dynamic>(
+          'org.matrix.msc1767.audio',
+        ) !=
         null;
   }
 
@@ -143,11 +145,9 @@ class AudioPlayerState extends State<AudioPlayerWidget>
       matrix.currentAudioStatus.value = AudioPlayerStatus.downloaded;
     } catch (e, s) {
       Logs().v('Could not download audio file', e, s);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(e.toLocalizedString(context)),
-        ),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(e.toLocalizedString(context))));
       rethrow;
     }
     if (matrix.voiceMessageEvent.value?.eventId != widget.event.eventId) return;
@@ -157,8 +157,9 @@ class AudioPlayerState extends State<AudioPlayerWidget>
     if (file != null) {
       matrix.audioPlayer.setFilePath(file.path);
     } else {
-      await matrix.audioPlayer
-          .setAudioSource(MatrixFileAudioSource(matrixFile));
+      await matrix.audioPlayer.setAudioSource(
+        MatrixFileAudioSource(matrixFile),
+      );
     }
 
     // Set up auto-dispose listener managed globally in MatrixState
@@ -197,15 +198,14 @@ class AudioPlayerState extends State<AudioPlayerWidget>
       if (durationInt != null) {
         _durationNotifier.value = Duration(milliseconds: durationInt);
       }
-      final waveForm = calculateWaveForm(
+      final waveForm =
+          calculateWaveForm(
             eventWaveForm: widget.event.content
                 .tryGetMap<String, dynamic>('org.matrix.msc1767.audio')
                 ?.tryGetList<int>('waveform'),
             waveCount: calculateWaveCountAuto(
               minWaves: AudioPlayerStyle.minWaveCount,
-              maxWaves: AudioPlayerStyle.maxWaveCount(
-                context,
-              ),
+              maxWaves: AudioPlayerStyle.maxWaveCount(context),
               durationInSeconds: _durationNotifier.value.inSeconds,
             ),
           ) ??
@@ -232,11 +232,14 @@ class AudioPlayerState extends State<AudioPlayerWidget>
   void dispose() {
     if (!PlatformInfos.isMobile) {
       // Stop and dispose audio player asynchronously to avoid blocking dispose
-      matrix.audioPlayer.stop().then((_) {
-        matrix.audioPlayer.dispose();
-      }).catchError((error) {
-        Logs().e('Error disposing audio player', error);
-      });
+      matrix.audioPlayer
+          .stop()
+          .then((_) {
+            matrix.audioPlayer.dispose();
+          })
+          .catchError((error) {
+            Logs().e('Error disposing audio player', error);
+          });
 
       // Schedule value updates for after the current frame to avoid
       // setState() during widget tree lock
@@ -281,7 +284,8 @@ class AudioPlayerState extends State<AudioPlayerWidget>
                   currentPosition = maxPosition;
                 }
 
-                final wavePosition = (currentPosition / maxPosition) *
+                final wavePosition =
+                    (currentPosition / maxPosition) *
                     calculateWaveCountAuto(
                       minWaves: AudioPlayerStyle.minWaveCount,
                       maxWaves: AudioPlayerStyle.maxWaveCount(context),
@@ -326,9 +330,9 @@ class AudioPlayerState extends State<AudioPlayerWidget>
                                           .textTheme
                                           .bodySmall
                                           ?.copyWith(
-                                            color: Theme.of(context)
-                                                .colorScheme
-                                                .onSurface,
+                                            color: Theme.of(
+                                              context,
+                                            ).colorScheme.onSurface,
                                           ),
                                       maxLines: 2,
                                       overflow: TextOverflow.ellipsis,
@@ -351,9 +355,11 @@ class AudioPlayerState extends State<AudioPlayerWidget>
                                   _audioMessageTimeBuilder(
                                     duration: audioPlayer == null
                                         ? _durationNotifier
-                                            .value.minuteSecondString
+                                              .value
+                                              .minuteSecondString
                                         : audioPlayer
-                                            .position.minuteSecondString,
+                                              .position
+                                              .minuteSecondString,
                                   ),
                                 ],
                               ),
@@ -372,9 +378,7 @@ class AudioPlayerState extends State<AudioPlayerWidget>
     );
   }
 
-  Widget _audioMessageTimeBuilder({
-    required String duration,
-  }) {
+  Widget _audioMessageTimeBuilder({required String duration}) {
     return Row(
       mainAxisSize: MainAxisSize.min,
       mainAxisAlignment: MainAxisAlignment.start,
@@ -383,8 +387,8 @@ class AudioPlayerState extends State<AudioPlayerWidget>
           Text(
             duration,
             style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                  color: LinagoraRefColors.material().tertiary[30],
-                ),
+              color: LinagoraRefColors.material().tertiary[30],
+            ),
           ),
         ] else ...[
           if (fileSize != null)
@@ -414,18 +418,14 @@ class AudioPlayerState extends State<AudioPlayerWidget>
                   const SizedBox(width: 4.0),
                 ],
                 Text(
-                  DateFormat("HH:mm").format(
-                    widget.event.originServerTs,
-                  ),
-                  textScaler: const TextScaler.linear(
-                    1.0,
-                  ),
+                  DateFormat("HH:mm").format(widget.event.originServerTs),
+                  textScaler: const TextScaler.linear(1.0),
                   style: Theme.of(context).textTheme.bodySmall?.merge(
-                        TextStyle(
-                          color: LinagoraRefColors.material().tertiary[30],
-                          letterSpacing: 0.4,
-                        ),
-                      ),
+                    TextStyle(
+                      color: LinagoraRefColors.material().tertiary[30],
+                      letterSpacing: 0.4,
+                    ),
+                  ),
                 ),
                 const SizedBox(width: 4),
                 SeenByRow(
@@ -455,16 +455,12 @@ class AudioPlayerState extends State<AudioPlayerWidget>
       height: waveHeight,
       width: 2,
       alignment: Alignment.center,
-      margin: const EdgeInsets.symmetric(
-        horizontal: 1,
-      ),
+      margin: const EdgeInsets.symmetric(horizontal: 1),
       decoration: BoxDecoration(
         color: index < wavePosition
             ? LinagoraSysColors.material().primary
             : LinagoraSysColors.material().primary.withAlpha(70),
-        borderRadius: BorderRadius.circular(
-          64,
-        ),
+        borderRadius: BorderRadius.circular(64),
       ),
     );
   }

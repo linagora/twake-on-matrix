@@ -26,8 +26,9 @@ class PhonebookContactDatasourceImpl implements PhonebookContactDatasource {
       final phoneNumbers = contact.phones
           .map((phone) => PhoneNumber(number: phone.number))
           .toList();
-      final emails =
-          contact.emails.map((email) => Email(address: email.address)).toList();
+      final emails = contact.emails
+          .map((email) => Email(address: email.address))
+          .toList();
 
       return Contact(
         id: contact.id ?? '${emails.hashCode}${phoneNumbers.hashCode}',
@@ -114,10 +115,7 @@ class PhonebookContactDatasourceImpl implements PhonebookContactDatasource {
     return filteredEmails;
   }
 
-  bool _hasSameFilteredEmail(
-    List<Email> filteredEmails,
-    String emailAddress,
-  ) {
+  bool _hasSameFilteredEmail(List<Email> filteredEmails, String emailAddress) {
     return filteredEmails.any(
       (filteredEmail) => filteredEmail.address == emailAddress,
     );

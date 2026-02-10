@@ -10,8 +10,5 @@ class ReceiveContentArgs extends AbsAppAdaptiveScaffoldBodyArgs {
   final AdaptiveDestinationEnum? activeDestination;
 
   @override
-  List<Object?> get props => [
-        newActiveClient,
-        activeDestination,
-      ];
+  List<Object?> get props => [newActiveClient, activeDestination];
 }

@@ -1,6 +1,1 @@
-enum DownloadVideoState {
-  initial,
-  loading,
-  done,
-  failed,
-}
+enum DownloadVideoState { initial, loading, done, failed }

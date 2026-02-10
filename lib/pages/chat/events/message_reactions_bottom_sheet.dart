@@ -97,9 +97,7 @@ class _MessageReactionsBottomSheetState
                             height: 24,
                             child: Text(
                               "${L10n.of(context)!.all} ${widget.allReactionEvents.length}",
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .titleMedium
+                              style: Theme.of(context).textTheme.titleMedium
                                   ?.copyWith(
                                     color: LinagoraSysColors.material()
                                         .onSurfaceVariant,
@@ -164,7 +162,8 @@ class _MessageReactionsBottomSheetState
                                 height: 3,
                                 width: 32,
                                 margin: const EdgeInsets.only(top: 11),
-                                decoration: selectedReactionKey != null &&
+                                decoration:
+                                    selectedReactionKey != null &&
                                         selectedReactionKey == r.key
                                     ? BoxDecoration(
                                         color: LinagoraSysColors.material()
@@ -198,7 +197,8 @@ class _MessageReactionsBottomSheetState
                   itemCount: reactionList.length,
                   itemBuilder: (context, index) {
                     return Column(
-                      children: reactionList[index].reactors?.map((reactor) {
+                      children:
+                          reactionList[index].reactors?.map((reactor) {
                             return Container(
                               height: 40,
                               margin: const EdgeInsets.symmetric(vertical: 8),

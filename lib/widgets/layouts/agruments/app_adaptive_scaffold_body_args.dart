@@ -4,11 +4,7 @@ import 'package:matrix/matrix.dart';
 abstract class AbsAppAdaptiveScaffoldBodyArgs with EquatableMixin {
   final Client? newActiveClient;
 
-  const AbsAppAdaptiveScaffoldBodyArgs({
-    required this.newActiveClient,
-  });
+  const AbsAppAdaptiveScaffoldBodyArgs({required this.newActiveClient});
   @override
-  List<Object?> get props => [
-        newActiveClient,
-      ];
+  List<Object?> get props => [newActiveClient];
 }

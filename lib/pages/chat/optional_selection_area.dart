@@ -20,8 +20,9 @@ class _OptionalSelectionAreaState extends State<OptionalSelectionArea> {
   Widget build(BuildContext context) {
     return PageStorage(
       bucket: _bucket,
-      child:
-          widget.isEnabled ? SelectionArea(child: widget.child) : widget.child,
+      child: widget.isEnabled
+          ? SelectionArea(child: widget.child)
+          : widget.child,
     );
   }
 }

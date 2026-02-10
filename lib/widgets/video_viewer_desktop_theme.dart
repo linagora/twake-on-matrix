@@ -8,11 +8,7 @@ import 'package:matrix/matrix.dart';
 import 'package:media_kit_video/media_kit_video.dart';
 
 class VideoViewerDesktopTheme extends StatelessWidget {
-  const VideoViewerDesktopTheme({
-    super.key,
-    required this.bytes,
-    this.event,
-  });
+  const VideoViewerDesktopTheme({super.key, required this.bytes, this.event});
 
   final Uint8List bytes;
 
@@ -27,9 +23,7 @@ class VideoViewerDesktopTheme extends StatelessWidget {
         seekBarHeight: VideoViewerStyle.seekBarHeight,
         seekBarThumbColor: Theme.of(context).colorScheme.primary,
         topButtonBarMargin: const EdgeInsets.all(0),
-        topButtonBar: [
-          MediaViewerAppBarWeb(event: event),
-        ],
+        topButtonBar: [MediaViewerAppBarWeb(event: event)],
       ),
       fullscreen: MaterialDesktopVideoControlsThemeData(
         seekBarColor: Theme.of(context).colorScheme.onSurfaceVariant,
@@ -37,10 +31,7 @@ class VideoViewerDesktopTheme extends StatelessWidget {
         seekBarHeight: VideoViewerStyle.seekBarHeight,
         seekBarThumbColor: Theme.of(context).colorScheme.primary,
       ),
-      child: VideoPlayer(
-        bytes: bytes,
-        event: event,
-      ),
+      child: VideoPlayer(bytes: bytes, event: event),
     );
   }
 }

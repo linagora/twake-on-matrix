@@ -15,12 +15,8 @@ void main() {
     });
 
     test('should create a Contact instance with all fields', () {
-      final emails = {
-        Email(address: 'test@example.com'),
-      };
-      final phoneNumbers = {
-        PhoneNumber(number: '+1234567890'),
-      };
+      final emails = {Email(address: 'test@example.com')};
+      final phoneNumbers = {PhoneNumber(number: '+1234567890')};
 
       const displayName = 'Test Contact';
 
@@ -143,8 +139,9 @@ void main() {
     test('calculateHashWithAlgorithmSha256 should return correct hash', () {
       final phoneNumber = PhoneNumber(number: '+1234567890');
 
-      final hash =
-          phoneNumber.calculateHashWithAlgorithmSha256(pepper: 'test_pepper');
+      final hash = phoneNumber.calculateHashWithAlgorithmSha256(
+        pepper: 'test_pepper',
+      );
 
       // The hash is a base64 encoded string, so it should be a non-empty string
       expect(hash, isA<String>());
@@ -232,8 +229,9 @@ void main() {
     test('calculateHashWithAlgorithmSha256 should return correct hash', () {
       final email = Email(address: 'test@example.com');
 
-      final hash =
-          email.calculateHashWithAlgorithmSha256(pepper: 'test_pepper');
+      final hash = email.calculateHashWithAlgorithmSha256(
+        pepper: 'test_pepper',
+      );
 
       // The hash is a base64 encoded string, so it should be a non-empty string
       expect(hash, isA<String>());
@@ -269,93 +267,76 @@ void main() {
     });
   });
 
-  group(
-    'toAddressBooks test',
-    () {
-      test('should return empty when contact is empty', () {
-        final Set<Contact> contacts = {};
+  group('toAddressBooks test', () {
+    test('should return empty when contact is empty', () {
+      final Set<Contact> contacts = {};
 
-        final result = contacts.toAddressBooks();
+      final result = contacts.toAddressBooks();
 
-        expect(result, contacts);
-      });
+      expect(result, contacts);
+    });
 
-      test('should return empty when contact has no matrix id', () {
-        final contacts = {
-          Contact(
-            id: 'contact1',
-            displayName: 'Alice',
-            emails: {Email(address: 'alice@mail.com')},
-            phoneNumbers: {PhoneNumber(number: '+1234567890')},
-          ),
-        };
+    test('should return empty when contact has no matrix id', () {
+      final contacts = {
+        Contact(
+          id: 'contact1',
+          displayName: 'Alice',
+          emails: {Email(address: 'alice@mail.com')},
+          phoneNumbers: {PhoneNumber(number: '+1234567890')},
+        ),
+      };
 
-        final result = contacts.toAddressBooks();
+      final result = contacts.toAddressBooks();
 
-        expect(result, []);
-      });
+      expect(result, []);
+    });
 
-      test('should return empty when contact matrix id is empty', () {
-        final contacts = {
-          Contact(
-            id: 'contact1',
-            displayName: 'Alice',
-            emails: {
-              Email(
-                address: 'alice@mail.com',
-                matrixId: '',
-              ),
-            },
-            phoneNumbers: {
-              PhoneNumber(
-                number: '+1234567890',
-                matrixId: '',
-              ),
-            },
-          ),
-        };
+    test('should return empty when contact matrix id is empty', () {
+      final contacts = {
+        Contact(
+          id: 'contact1',
+          displayName: 'Alice',
+          emails: {Email(address: 'alice@mail.com', matrixId: '')},
+          phoneNumbers: {PhoneNumber(number: '+1234567890', matrixId: '')},
+        ),
+      };
 
-        final result = contacts.toAddressBooks();
+      final result = contacts.toAddressBooks();
 
-        expect(result, []);
-      });
+      expect(result, []);
+    });
 
-      test('should return address books when contact has matrix id', () {
-        final contacts = {
-          Contact(
-            id: 'contact1',
-            displayName: 'Alice',
-            emails: {
-              Email(
-                address: 'alice@mail.com',
-                matrixId: '@alice:example.com',
-              ),
-            },
-            phoneNumbers: {
-              PhoneNumber(
-                number: '+1234567890',
-                matrixId: '@alice_phone:example.com',
-              ),
-            },
-          ),
-        };
+    test('should return address books when contact has matrix id', () {
+      final contacts = {
+        Contact(
+          id: 'contact1',
+          displayName: 'Alice',
+          emails: {
+            Email(address: 'alice@mail.com', matrixId: '@alice:example.com'),
+          },
+          phoneNumbers: {
+            PhoneNumber(
+              number: '+1234567890',
+              matrixId: '@alice_phone:example.com',
+            ),
+          },
+        ),
+      };
 
-        final result = contacts.toAddressBooks();
+      final result = contacts.toAddressBooks();
 
-        expect(result.length, 2);
-      });
+      expect(result.length, 2);
+    });
 
-      test('should return address books for multiple contacts with matrix ids',
-          () {
+    test(
+      'should return address books for multiple contacts with matrix ids',
+      () {
         final contacts = {
           Contact(
             id: 'contact1',
             displayName: 'Alice',
             emails: {
-              Email(
-                address: 'alice@mail.com',
-                matrixId: '@alice:example.com',
-              ),
+              Email(address: 'alice@mail.com', matrixId: '@alice:example.com'),
             },
             phoneNumbers: {
               PhoneNumber(
@@ -368,10 +349,7 @@ void main() {
             id: 'contact2',
             displayName: 'Bob',
             emails: {
-              Email(
-                address: 'bob@mail.com',
-                matrixId: '@bob:example.com',
-              ),
+              Email(address: 'bob@mail.com', matrixId: '@bob:example.com'),
             },
             phoneNumbers: {
               PhoneNumber(
@@ -385,37 +363,25 @@ void main() {
         final result = contacts.toAddressBooks();
 
         expect(result.length, 4);
-      });
+      },
+    );
 
-      test(
-          'should return address books for contacts with mixed valid and invalid matrix ids',
-          () {
+    test(
+      'should return address books for contacts with mixed valid and invalid matrix ids',
+      () {
         final contacts = {
           Contact(
             id: 'contact1',
             displayName: 'Alice',
             emails: {
-              Email(
-                address: 'alice@mail.com',
-                matrixId: '@alice:example.com',
-              ),
+              Email(address: 'alice@mail.com', matrixId: '@alice:example.com'),
             },
-            phoneNumbers: {
-              PhoneNumber(
-                number: '+1234567890',
-                matrixId: '',
-              ),
-            },
+            phoneNumbers: {PhoneNumber(number: '+1234567890', matrixId: '')},
           ),
           Contact(
             id: 'contact2',
             displayName: 'Bob',
-            emails: {
-              Email(
-                address: 'bob@mail.com',
-                matrixId: '',
-              ),
-            },
+            emails: {Email(address: 'bob@mail.com', matrixId: '')},
             phoneNumbers: {
               PhoneNumber(
                 number: '+0987654321',
@@ -428,20 +394,18 @@ void main() {
         final result = contacts.toAddressBooks();
 
         expect(result.length, 2);
-      });
+      },
+    );
 
-      test(
-          'should return address books for contacts with only email or phone number matrix ids',
-          () {
+    test(
+      'should return address books for contacts with only email or phone number matrix ids',
+      () {
         final contacts = {
           Contact(
             id: 'contact1',
             displayName: 'Alice',
             emails: {
-              Email(
-                address: 'alice@mail.com',
-                matrixId: '@alice:example.com',
-              ),
+              Email(address: 'alice@mail.com', matrixId: '@alice:example.com'),
             },
           ),
           Contact(
@@ -459,7 +423,7 @@ void main() {
         final result = contacts.toAddressBooks();
 
         expect(result.length, 2);
-      });
-    },
-  );
+      },
+    );
+  });
 }

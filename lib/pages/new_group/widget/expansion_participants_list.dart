@@ -8,10 +8,7 @@ import 'package:fluffychat/generated/l10n/app_localizations.dart';
 class ExpansionParticipantsList extends StatefulWidget {
   final Set<PresentationContact> contactsList;
 
-  const ExpansionParticipantsList({
-    super.key,
-    required this.contactsList,
-  });
+  const ExpansionParticipantsList({super.key, required this.contactsList});
 
   @override
   State<StatefulWidget> createState() => _ExpansionParticipantsListState();
@@ -37,11 +34,12 @@ class _ExpansionParticipantsListState extends State<ExpansionParticipantsList> {
                   child: Row(
                     children: [
                       Text(
-                        L10n.of(context)!
-                            .participantsCount(widget.contactsList.length),
+                        L10n.of(
+                          context,
+                        )!.participantsCount(widget.contactsList.length),
                         style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                              color: LinagoraRefColors.material().neutral[40],
-                            ),
+                          color: LinagoraRefColors.material().neutral[40],
+                        ),
                       ),
                     ],
                   ),
@@ -51,10 +49,9 @@ class _ExpansionParticipantsListState extends State<ExpansionParticipantsList> {
                   paddingAll: 6,
                   buttonDecoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    color: Theme.of(context)
-                        .colorScheme
-                        .onSurface
-                        .withOpacity(0.12),
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.onSurface.withOpacity(0.12),
                   ),
                   icon: isExpanded ? Icons.expand_less : Icons.expand_more,
                   tooltip: isExpanded
@@ -73,9 +70,8 @@ class _ExpansionParticipantsListState extends State<ExpansionParticipantsList> {
                   child: Column(
                     children: widget.contactsList
                         .map(
-                          (contact) => ExpansionContactListTile(
-                            contact: contact,
-                          ),
+                          (contact) =>
+                              ExpansionContactListTile(contact: contact),
                         )
                         .toList(),
                   ),

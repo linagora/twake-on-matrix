@@ -54,27 +54,19 @@ void main() {
 
   group("fullscreen = false", () {
     testWidgets("Display title and search button", (widgetTester) async {
-      await widgetTester.pumpWidget(
-        makeTestableAppBar(isFullScreen: false),
-      );
+      await widgetTester.pumpWidget(makeTestableAppBar(isFullScreen: false));
 
       expect(find.text("Title"), findsOneWidget);
       expect(find.text("Hint"), findsOneWidget);
       expect(find.byIcon(Icons.search_outlined), findsOneWidget);
       expect(find.byIcon(Icons.close), findsOneWidget);
-      expect(
-        find.byIcon(
-          Icons.arrow_back_ios,
-        ),
-        findsNothing,
-      );
+      expect(find.byIcon(Icons.arrow_back_ios), findsNothing);
     });
 
-    testWidgets("Still one textfield when clicking on title",
-        (widgetTester) async {
-      await widgetTester.pumpWidget(
-        makeTestableAppBar(isFullScreen: false),
-      );
+    testWidgets("Still one textfield when clicking on title", (
+      widgetTester,
+    ) async {
+      await widgetTester.pumpWidget(makeTestableAppBar(isFullScreen: false));
 
       await widgetTester.tap(find.text("Title"), warnIfMissed: false);
       await widgetTester.pump();
@@ -86,10 +78,7 @@ void main() {
 
     testWidgets("Display back button remove back button", (widgetTester) async {
       await widgetTester.pumpWidget(
-        makeTestableAppBar(
-          isFullScreen: false,
-          displayBackButton: false,
-        ),
+        makeTestableAppBar(isFullScreen: false, displayBackButton: false),
       );
 
       expect(find.byType(TextField), findsOneWidget);
@@ -99,98 +88,78 @@ void main() {
   });
 
   group("fullscreen = true", () {
-    testWidgets("Display title and search button (searchMode disabled)",
-        (widgetTester) async {
-      await widgetTester.pumpWidget(
-        makeTestableAppBar(),
-      );
+    testWidgets("Display title and search button (searchMode disabled)", (
+      widgetTester,
+    ) async {
+      await widgetTester.pumpWidget(makeTestableAppBar());
 
       expect(find.text("Title"), findsOneWidget);
       expect(find.text("Hint"), findsNothing);
       expect(find.byIcon(Icons.search_outlined), findsNothing);
-      expect(
-        find.byIcon(
-          Icons.arrow_back_ios,
-        ),
-        findsOneWidget,
-      );
+      expect(find.byIcon(Icons.arrow_back_ios), findsOneWidget);
       expect(find.byIcon(Icons.close), findsNothing);
     });
 
     testWidgets(
-        "Still one textfield when clicking on title (searchMode enabled and search text is empty)",
-        (widgetTester) async {
-      await widgetTester.pumpWidget(
-        makeTestableAppBar(),
-      );
+      "Still one textfield when clicking on title (searchMode enabled and search text is empty)",
+      (widgetTester) async {
+        await widgetTester.pumpWidget(makeTestableAppBar());
 
-      await widgetTester.tap(find.byIcon(Icons.search));
-      await widgetTester.pump();
+        await widgetTester.tap(find.byIcon(Icons.search));
+        await widgetTester.pump();
 
-      expect(find.text("Title"), findsNothing);
-      expect(find.text("Hint"), findsOneWidget);
-      expect(find.byType(TextField), findsOneWidget);
-      expect(find.byIcon(Icons.search_outlined), findsNothing);
-      expect(find.byIcon(Icons.close), findsNothing);
-    });
+        expect(find.text("Title"), findsNothing);
+        expect(find.text("Hint"), findsOneWidget);
+        expect(find.byType(TextField), findsOneWidget);
+        expect(find.byIcon(Icons.search_outlined), findsNothing);
+        expect(find.byIcon(Icons.close), findsNothing);
+      },
+    );
 
     testWidgets(
-        "Still one textfield when clicking on title (searchMode enabled and search text is not empty)",
-        (widgetTester) async {
-      await widgetTester.pumpWidget(
-        makeTestableAppBar(),
-      );
+      "Still one textfield when clicking on title (searchMode enabled and search text is not empty)",
+      (widgetTester) async {
+        await widgetTester.pumpWidget(makeTestableAppBar());
 
-      await widgetTester.tap(find.byIcon(Icons.search));
-      textEditingController.text = "Search text";
-      await widgetTester.pump();
+        await widgetTester.tap(find.byIcon(Icons.search));
+        textEditingController.text = "Search text";
+        await widgetTester.pump();
 
-      expect(find.text("Title"), findsNothing);
-      expect(find.text("Hint"), findsOneWidget);
-      expect(find.byType(TextField), findsOneWidget);
-      expect(find.byIcon(Icons.search_outlined), findsNothing);
-      expect(find.byIcon(Icons.close), findsOneWidget);
-    });
+        expect(find.text("Title"), findsNothing);
+        expect(find.text("Hint"), findsOneWidget);
+        expect(find.byType(TextField), findsOneWidget);
+        expect(find.byIcon(Icons.search_outlined), findsNothing);
+        expect(find.byIcon(Icons.close), findsOneWidget);
+      },
+    );
 
-    testWidgets("Display title and search button when turning search mode off",
-        (widgetTester) async {
-      await widgetTester.pumpWidget(
-        makeTestableAppBar(
-          isSearchModeEnabled: true,
-        ),
-      );
+    testWidgets(
+      "Display title and search button when turning search mode off",
+      (widgetTester) async {
+        await widgetTester.pumpWidget(
+          makeTestableAppBar(isSearchModeEnabled: true),
+        );
 
-      await widgetTester.tap(find.byIcon(Icons.close));
-      await widgetTester.pump();
+        await widgetTester.tap(find.byIcon(Icons.close));
+        await widgetTester.pump();
 
-      expect(find.text("Title"), findsOneWidget);
-      expect(find.text("Hint"), findsNothing);
-      expect(find.byIcon(Icons.search_outlined), findsNothing);
-      expect(find.byIcon(Icons.close), findsNothing);
-      expect(
-        find.byIcon(
-          Icons.arrow_back_ios,
-        ),
-        findsOneWidget,
-      );
-    });
+        expect(find.text("Title"), findsOneWidget);
+        expect(find.text("Hint"), findsNothing);
+        expect(find.byIcon(Icons.search_outlined), findsNothing);
+        expect(find.byIcon(Icons.close), findsNothing);
+        expect(find.byIcon(Icons.arrow_back_ios), findsOneWidget);
+      },
+    );
 
     testWidgets("change displayBackButton does nothing", (widgetTester) async {
       await widgetTester.pumpWidget(
-        makeTestableAppBar(
-          displayBackButton: false,
-        ),
+        makeTestableAppBar(displayBackButton: false),
       );
 
       expect(find.text("Title"), findsOneWidget);
       expect(find.text("Hint"), findsNothing);
       expect(find.byIcon(Icons.search_outlined), findsNothing);
-      expect(
-        find.byIcon(
-          Icons.arrow_back_ios,
-        ),
-        findsOneWidget,
-      );
+      expect(find.byIcon(Icons.arrow_back_ios), findsOneWidget);
       expect(find.byIcon(Icons.close), findsNothing);
     });
   });

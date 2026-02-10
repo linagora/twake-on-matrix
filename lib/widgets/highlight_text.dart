@@ -23,10 +23,8 @@ class HighlightText extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final actualHighlightStyle = highlightStyle ??
-        style?.copyWith(
-          color: Colors.amber[900],
-        );
+    final actualHighlightStyle =
+        highlightStyle ?? style?.copyWith(color: Colors.amber[900]);
     final spans = text.buildHighlightTextSpans(
       searchWord ?? '',
       style: style,

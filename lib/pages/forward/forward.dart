@@ -23,11 +23,7 @@ class Forward extends StatefulWidget {
   final String? sendFromRoomId;
   final bool? isFullScreen;
 
-  const Forward({
-    super.key,
-    this.sendFromRoomId,
-    this.isFullScreen = true,
-  });
+  const Forward({super.key, this.sendFromRoomId, this.isFullScreen = true});
 
   @override
   ForwardController createState() => ForwardController();
@@ -113,35 +109,38 @@ class ForwardController extends State<Forward>
   ) {
     Logs().d('ForwardController::_handleForwardMessageOnData()');
     forwardMessageNotifier.value = event;
-    event.fold((failure) {
-      Logs().e(
-        'ForwardController::_handleForwardMessageOnData() - failure: $failure',
-      );
-    }, (success) async {
-      Logs().d(
-        'ForwardController::_handleForwardMessageOnData() - success: $success',
-      );
-      switch (success.runtimeType) {
-        case const (ForwardMessageSuccess):
-          final dataOnSuccess = success as ForwardMessageSuccess;
-          if (Navigator.of(context).canPop()) {
-            Navigator.of(context).pop(const PopResultFromForward());
-          }
-          context.go('/rooms/${dataOnSuccess.room.id}');
-          break;
-        case const (ForwardMessageIsShareFileState):
-          final dataOnSuccess = success as ForwardMessageIsShareFileState;
-          await showDialog(
-            context: context,
-            useRootNavigator: false,
-            builder: (c) => SendFileDialog(
-              files: [dataOnSuccess.shareFile],
-              room: dataOnSuccess.room,
-            ),
-          );
-          break;
-      }
-    });
+    event.fold(
+      (failure) {
+        Logs().e(
+          'ForwardController::_handleForwardMessageOnData() - failure: $failure',
+        );
+      },
+      (success) async {
+        Logs().d(
+          'ForwardController::_handleForwardMessageOnData() - success: $success',
+        );
+        switch (success.runtimeType) {
+          case const (ForwardMessageSuccess):
+            final dataOnSuccess = success as ForwardMessageSuccess;
+            if (Navigator.of(context).canPop()) {
+              Navigator.of(context).pop(const PopResultFromForward());
+            }
+            context.go('/rooms/${dataOnSuccess.room.id}');
+            break;
+          case const (ForwardMessageIsShareFileState):
+            final dataOnSuccess = success as ForwardMessageIsShareFileState;
+            await showDialog(
+              context: context,
+              useRootNavigator: false,
+              builder: (c) => SendFileDialog(
+                files: [dataOnSuccess.shareFile],
+                room: dataOnSuccess.room,
+              ),
+            );
+            break;
+        }
+      },
+    );
   }
 
   void _handleForwardMessageOnDone() {

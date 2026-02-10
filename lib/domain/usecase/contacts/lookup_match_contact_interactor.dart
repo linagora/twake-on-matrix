@@ -13,9 +13,7 @@ class LookupMatchContactInteractor {
 
   LookupMatchContactInteractor();
 
-  Stream<Either<Failure, Success>> execute({
-    required String val,
-  }) async* {
+  Stream<Either<Failure, Success>> execute({required String val}) async* {
     try {
       yield const Right(LookupContactsLoading());
       Logs().i('LookupMatchContactInteractor:: Loading...');

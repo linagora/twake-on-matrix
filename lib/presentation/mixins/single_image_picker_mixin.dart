@@ -35,8 +35,9 @@ mixin SingleImagePickerMixin on CommonMediaPickerMixin {
         initialChildSize: MediaPickerStyle.initialChildSize,
         permissionStatus: permissionStatusPhotos,
         assetBackgroundColor: LinagoraSysColors.material().background,
-        expandedWidget:
-            const SizedBox(height: MediaPickerStyle.expandedWidgetHeight),
+        expandedWidget: const SizedBox(
+          height: MediaPickerStyle.expandedWidgetHeight,
+        ),
         counterImageBuilder: (_) => const SizedBox.shrink(),
         goToSettingsWidget: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -49,10 +50,10 @@ mixin SingleImagePickerMixin on CommonMediaPickerMixin {
             Text(
               L10n.of(context)!.tapToAllowAccessToYourGallery,
               style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                    color: LinagoraRefColors.material().neutral,
-                    fontWeight: MediaPickerStyle.photoPermissionFontWeight,
-                    fontSize: MediaPickerStyle.photoPermissionFontSize,
-                  ),
+                color: LinagoraRefColors.material().neutral,
+                fontWeight: MediaPickerStyle.photoPermissionFontWeight,
+                fontSize: MediaPickerStyle.photoPermissionFontSize,
+              ),
               textAlign: TextAlign.center,
             ),
           ],
@@ -77,8 +78,10 @@ mixin SingleImagePickerMixin on CommonMediaPickerMixin {
     BuildContext context,
     ImagePickerGridController imagePickerController,
   ) async {
-    final assetEntity =
-        await pickMediaFromCameraAction(context: context, onlyImage: true);
+    final assetEntity = await pickMediaFromCameraAction(
+      context: context,
+      onlyImage: true,
+    );
     if (assetEntity != null && assetEntity.type == AssetType.image) {
       imagePickerController.pickAssetFromCamera(assetEntity);
     }

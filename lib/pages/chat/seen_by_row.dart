@@ -2,12 +2,7 @@ import 'package:fluffychat/pages/chat/events/message_time_style.dart';
 import 'package:flutter/material.dart';
 import 'package:matrix/matrix.dart';
 
-enum MessageStatus {
-  sending,
-  sent,
-  hasBeenSeen,
-  error,
-}
+enum MessageStatus { sending, sent, hasBeenSeen, error }
 
 class SeenByRow extends StatelessWidget {
   final List<User> getSeenByUsers;
@@ -27,11 +22,7 @@ class SeenByRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return getEventIcon(
-      context,
-      getSeenByUsers,
-      eventStatus: eventStatus,
-    );
+    return getEventIcon(context, getSeenByUsers, eventStatus: eventStatus);
   }
 
   MessageStatus getMessageStatus(

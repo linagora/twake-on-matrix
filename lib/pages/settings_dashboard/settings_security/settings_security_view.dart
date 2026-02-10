@@ -93,8 +93,9 @@ class SettingsSecurityView extends StatelessWidget {
                       builder: (context, ignoredUsers, _) {
                         return SettingsItemBuilder(
                           title: L10n.of(context)!.blockedUsers,
-                          titleColor:
-                              Theme.of(context).colorScheme.onBackground,
+                          titleColor: Theme.of(
+                            context,
+                          ).colorScheme.onBackground,
                           subtitle: ignoredUsers.isEmpty
                               ? null
                               : ignoredUsers.length.toString(),
@@ -149,8 +150,9 @@ class SettingsSecurityView extends StatelessWidget {
                         padding: SettingsViewStyle.bodySettingsScreenPadding,
                         child: SettingsItemBuilder(
                           title: L10n.of(context)!.appLock,
-                          titleColor:
-                              Theme.of(context).colorScheme.onBackground,
+                          titleColor: Theme.of(
+                            context,
+                          ).colorScheme.onBackground,
                           leading: Icons.lock_outlined,
                           onTap: controller.setAppLockAction,
                           leadingIconColor:
@@ -176,13 +178,14 @@ class SettingsSecurityView extends StatelessWidget {
                     height: 116,
                     title: L10n.of(context)!.yourPublicKey,
                     titleColor: Theme.of(context).colorScheme.onBackground,
-                    subtitle:
-                        Matrix.of(context).client.fingerprintKey.beautified,
-                    subtitleStyle:
-                        LinagoraTextStyle.material().bodyMedium.copyWith(
-                              color: LinagoraRefColors.material().tertiary[30],
-                              fontFamily: 'monospace',
-                            ),
+                    subtitle: Matrix.of(
+                      context,
+                    ).client.fingerprintKey.beautified,
+                    subtitleStyle: LinagoraTextStyle.material().bodyMedium
+                        .copyWith(
+                          color: LinagoraRefColors.material().tertiary[30],
+                          fontFamily: 'monospace',
+                        ),
                     leading: Icons.notifications_outlined,
                     onTap: controller.copyPublicKey,
                     leadingIconColor: LinagoraRefColors.material().tertiary[30],

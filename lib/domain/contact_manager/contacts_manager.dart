@@ -34,31 +34,31 @@ import 'package:fluffychat/generated/l10n/app_localizations.dart';
 class ContactsManager {
   static const int _lookupChunkSize = 10;
 
-  final GetTomContactsInteractor getTomContactsInteractor =
-      getIt.get<GetTomContactsInteractor>();
+  final GetTomContactsInteractor getTomContactsInteractor = getIt
+      .get<GetTomContactsInteractor>();
 
   final FederationLookUpPhonebookContactInteractor
-      federationLookUpPhonebookContactInteractor =
-      getIt.get<FederationLookUpPhonebookContactInteractor>();
+  federationLookUpPhonebookContactInteractor = getIt
+      .get<FederationLookUpPhonebookContactInteractor>();
 
   final TwakeLookupPhonebookContactInteractor
-      twakeLookupPhonebookContactInteractor =
-      getIt.get<TwakeLookupPhonebookContactInteractor>();
+  twakeLookupPhonebookContactInteractor = getIt
+      .get<TwakeLookupPhonebookContactInteractor>();
 
-  final PostAddressBookInteractor postAddressBookInteractor =
-      getIt.get<PostAddressBookInteractor>();
+  final PostAddressBookInteractor postAddressBookInteractor = getIt
+      .get<PostAddressBookInteractor>();
 
   final TryGetSyncedPhoneBookContactInteractor
-      tryGetSyncedPhoneBookContactInteractor =
-      getIt.get<TryGetSyncedPhoneBookContactInteractor>();
+  tryGetSyncedPhoneBookContactInteractor = getIt
+      .get<TryGetSyncedPhoneBookContactInteractor>();
 
   StreamSubscription<Either<Failure, Success>>? tomContactsSubscription;
 
   StreamSubscription<Either<Failure, Success>>?
-      federationPhonebookContactsSubscription;
+  federationPhonebookContactsSubscription;
 
   StreamSubscription<Either<Failure, Success>>?
-      twakePhonebookContactsSubscription;
+  twakePhonebookContactsSubscription;
 
   StreamSubscription<Either<Failure, Success>>? postAddressBookSubscription;
 
@@ -70,20 +70,22 @@ class ContactsManager {
       ValueNotifierCustom(const Right(ContactsInitial()));
 
   final ValueNotifierCustom<Either<Failure, Success>>
-      _phonebookContactsNotifier =
-      ValueNotifierCustom(const Right(GetPhonebookContactsInitial()));
+  _phonebookContactsNotifier = ValueNotifierCustom(
+    const Right(GetPhonebookContactsInitial()),
+  );
 
   final ValueNotifierCustom<Either<Failure, Success>> _postAddressBookNotifier =
       ValueNotifierCustom(const Right(PostAddressBookInitial()));
 
-  final ValueNotifierCustom<int?> _progressPhoneBookState =
-      ValueNotifierCustom(null);
+  final ValueNotifierCustom<int?> _progressPhoneBookState = ValueNotifierCustom(
+    null,
+  );
 
   ValueNotifierCustom<Either<Failure, Success>> getContactsNotifier() =>
       _contactsNotifier;
 
   ValueNotifierCustom<Either<Failure, Success>>
-      getPhonebookContactsNotifier() => _phonebookContactsNotifier;
+  getPhonebookContactsNotifier() => _phonebookContactsNotifier;
 
   ValueNotifierCustom<Either<Failure, Success>> postAddressBookNotifier() =>
       _postAddressBookNotifier;
@@ -124,8 +126,9 @@ class ContactsManager {
 
   Future<void> reSyncContacts() async {
     _contactsNotifier.value = const Right(ContactsInitial());
-    _phonebookContactsNotifier.value =
-        const Right(GetPhonebookContactsInitial());
+    _phonebookContactsNotifier.value = const Right(
+      GetPhonebookContactsInitial(),
+    );
   }
 
   /// Synchronizes contacts when the contact tab is accessed.
@@ -191,11 +194,11 @@ class ContactsManager {
   }
 
   void refreshTomContacts(Client client) {
-    tomContactsSubscription = getTomContactsInteractor.execute().listen(
-      (event) {
-        _contactsNotifier.value = event;
-      },
-    );
+    tomContactsSubscription = getTomContactsInteractor.execute().listen((
+      event,
+    ) {
+      _contactsNotifier.value = event;
+    });
     syncContactsAcrossDevices(client);
   }
 
@@ -203,59 +206,54 @@ class ContactsManager {
     bool isAvailableSupportPhonebookContacts = false,
     required String withMxId,
   }) async {
-    tomContactsSubscription = getTomContactsInteractor.execute().listen(
-      (event) {
-        _contactsNotifier.value = event;
-      },
-    )
-      ..onDone(() async {
-        Logs().d('ContactsManager::_getAllContacts: done');
-        await _lookUpPhonebookContacts(
-          isAvailableSupportPhonebookContacts:
-              isAvailableSupportPhonebookContacts,
-          withMxId: withMxId,
-        ).whenComplete(
-          () => _isSynchronizing = false,
-        );
-      })
-      ..onError((error) async {
-        Logs().d('ContactsManager::_getAllContacts: error - $error');
-        await _lookUpPhonebookContacts(
-          isAvailableSupportPhonebookContacts:
-              isAvailableSupportPhonebookContacts,
-          withMxId: withMxId,
-        ).whenComplete(
-          () => _isSynchronizing = false,
-        );
-      });
+    tomContactsSubscription =
+        getTomContactsInteractor.execute().listen((event) {
+            _contactsNotifier.value = event;
+          })
+          ..onDone(() async {
+            Logs().d('ContactsManager::_getAllContacts: done');
+            await _lookUpPhonebookContacts(
+              isAvailableSupportPhonebookContacts:
+                  isAvailableSupportPhonebookContacts,
+              withMxId: withMxId,
+            ).whenComplete(() => _isSynchronizing = false);
+          })
+          ..onError((error) async {
+            Logs().d('ContactsManager::_getAllContacts: error - $error');
+            await _lookUpPhonebookContacts(
+              isAvailableSupportPhonebookContacts:
+                  isAvailableSupportPhonebookContacts,
+              withMxId: withMxId,
+            ).whenComplete(() => _isSynchronizing = false);
+          });
   }
 
   Future<void> _getAllContactsOnContactTab({
     bool isAvailableSupportPhonebookContacts = false,
     required String withMxId,
   }) async {
-    tomContactsSubscription = getTomContactsInteractor.execute().listen(
-      (event) {
-        _contactsNotifier.value = event;
-      },
-    )
-      ..onDone(() async {
-        Logs().d('ContactsManager::_getAllContactsOnContactTab: done');
-        await _lookUpPhonebookContactsInContact(
-          isAvailableSupportPhonebookContacts:
-              isAvailableSupportPhonebookContacts,
-          withMxId: withMxId,
-        );
-      })
-      ..onError((error) async {
-        Logs()
-            .d('ContactsManager::_getAllContactsOnContactTab: error - $error');
-        await _lookUpPhonebookContactsInContact(
-          isAvailableSupportPhonebookContacts:
-              isAvailableSupportPhonebookContacts,
-          withMxId: withMxId,
-        );
-      });
+    tomContactsSubscription =
+        getTomContactsInteractor.execute().listen((event) {
+            _contactsNotifier.value = event;
+          })
+          ..onDone(() async {
+            Logs().d('ContactsManager::_getAllContactsOnContactTab: done');
+            await _lookUpPhonebookContactsInContact(
+              isAvailableSupportPhonebookContacts:
+                  isAvailableSupportPhonebookContacts,
+              withMxId: withMxId,
+            );
+          })
+          ..onError((error) async {
+            Logs().d(
+              'ContactsManager::_getAllContactsOnContactTab: error - $error',
+            );
+            await _lookUpPhonebookContactsInContact(
+              isAvailableSupportPhonebookContacts:
+                  isAvailableSupportPhonebookContacts,
+              withMxId: withMxId,
+            );
+          });
   }
 
   Future<void> _lookUpPhonebookContacts({
@@ -280,13 +278,9 @@ class ContactsManager {
     await _handleLookUpPhonebookContacts(withMxId: withMxId);
   }
 
-  Future<void> _tryGetSyncedPhoneBookContact({
-    required String withMxId,
-  }) async {
+  Future<void> _tryGetSyncedPhoneBookContact({required String withMxId}) async {
     await tryGetSyncedPhoneBookContactInteractor
-        .execute(
-          userId: withMxId,
-        )
+        .execute(userId: withMxId)
         .then(
           (state) => state.fold(
             (failure) {
@@ -316,34 +310,33 @@ class ContactsManager {
     final identityServerUrlInterceptor = getIt.get<DynamicUrlInterceptors>(
       instanceName: NetworkDI.identityServerUrlInterceptorName,
     );
-    twakePhonebookContactsSubscription = twakeLookupPhonebookContactInteractor
-        .execute(
-      argument: TwakeLookUpArgument(
-        homeServerUrl: identityServerUrlInterceptor.baseUrl ?? '',
-        withAccessToken: authorizationInterceptor.getAccessToken ?? '',
-      ),
-    )
-        .listen(
-      (state) {
-        _phonebookContactsNotifier.value = state;
-        state.fold(
-          (failure) => _handleLookUpFailureState(failure),
-          (success) => _handleLookUpSuccessState(success),
-        );
-      },
-    )
-      ..onDone(() async {
-        Logs().d(
-          'ContactsManager::_handleTwakeLookUpPhoneBookContacts: onDone',
-        );
-        _isSynchronizing = false;
-      })
-      ..onError((error) async {
-        Logs().d(
-          'ContactsManager::_handleTwakeLookUpPhoneBookContacts: onError',
-        );
-        _isSynchronizing = false;
-      });
+    twakePhonebookContactsSubscription =
+        twakeLookupPhonebookContactInteractor
+            .execute(
+              argument: TwakeLookUpArgument(
+                homeServerUrl: identityServerUrlInterceptor.baseUrl ?? '',
+                withAccessToken: authorizationInterceptor.getAccessToken ?? '',
+              ),
+            )
+            .listen((state) {
+              _phonebookContactsNotifier.value = state;
+              state.fold(
+                (failure) => _handleLookUpFailureState(failure),
+                (success) => _handleLookUpSuccessState(success),
+              );
+            })
+          ..onDone(() async {
+            Logs().d(
+              'ContactsManager::_handleTwakeLookUpPhoneBookContacts: onDone',
+            );
+            _isSynchronizing = false;
+          })
+          ..onError((error) async {
+            Logs().d(
+              'ContactsManager::_handleTwakeLookUpPhoneBookContacts: onError',
+            );
+            _isSynchronizing = false;
+          });
   }
 
   Future<void> _handleLookUpPhonebookContacts({
@@ -351,8 +344,8 @@ class ContactsManager {
   }) async {
     try {
       _isSynchronizing = true;
-      final federationConfigurationRepository =
-          getIt.get<FederationConfigurationsRepository>();
+      final federationConfigurationRepository = getIt
+          .get<FederationConfigurationsRepository>();
       final federationConfigurations = await federationConfigurationRepository
           .getFederationConfigurations(withMxId);
       if (!federationConfigurations.fedServerInformation.hasBaseUrls) {
@@ -369,26 +362,28 @@ class ContactsManager {
       federationPhonebookContactsSubscription =
           federationLookUpPhonebookContactInteractor
               .execute(
-        lookupChunkSize: _lookupChunkSize,
-        argument: FederationLookUpArgument(
-          homeServerUrl: homeServerUrlInterceptor.baseUrl ?? '',
-          federationUrl: federationConfigurations
-                  .fedServerInformation.baseUrls?.first
-                  .toString() ??
-              '',
-          withMxId: withMxId,
-          withAccessToken: authorizationInterceptor.getAccessToken ?? '',
-        ),
-      )
-              .listen(
-        (state) {
-          _phonebookContactsNotifier.value = state;
-          state.fold(
-            (failure) => _handleLookUpFailureState(failure),
-            (success) => _handleLookUpSuccessState(success),
-          );
-        },
-      )
+                lookupChunkSize: _lookupChunkSize,
+                argument: FederationLookUpArgument(
+                  homeServerUrl: homeServerUrlInterceptor.baseUrl ?? '',
+                  federationUrl:
+                      federationConfigurations
+                          .fedServerInformation
+                          .baseUrls
+                          ?.first
+                          .toString() ??
+                      '',
+                  withMxId: withMxId,
+                  withAccessToken:
+                      authorizationInterceptor.getAccessToken ?? '',
+                ),
+              )
+              .listen((state) {
+                _phonebookContactsNotifier.value = state;
+                state.fold(
+                  (failure) => _handleLookUpFailureState(failure),
+                  (success) => _handleLookUpSuccessState(success),
+                );
+              })
             ..onDone(() async {
               Logs().d(
                 'ContactsManager::_handleLookUpPhonebookContacts: onDone',
@@ -417,14 +412,13 @@ class ContactsManager {
       if (TwakeApp.router.routerDelegate.navigatorKey.currentContext != null) {
         TwakeSnackBar.show(
           TwakeApp.router.routerDelegate.navigatorKey.currentContext!,
-          L10n.of(TwakeApp.router.routerDelegate.navigatorKey.currentContext!)!
-              .contactLookupFailed,
+          L10n.of(
+            TwakeApp.router.routerDelegate.navigatorKey.currentContext!,
+          )!.contactLookupFailed,
         );
       }
 
-      _postAddressBookOnMobile(
-        contacts: failure.contacts,
-      );
+      _postAddressBookOnMobile(contacts: failure.contacts);
     }
 
     if (failure is GetPhonebookContactsFailure ||
@@ -442,30 +436,22 @@ class ContactsManager {
     if (success is GetPhonebookContactsSuccess) {
       _progressPhoneBookState.value = success.progress;
       if (success.progress == 100) {
-        _postAddressBookOnMobile(
-          contacts: success.contacts,
-        );
+        _postAddressBookOnMobile(contacts: success.contacts);
         _progressPhoneBookState.value = null;
       }
     }
   }
 
-  void _postAddressBookOnMobile({
-    required List<Contact> contacts,
-  }) {
+  void _postAddressBookOnMobile({required List<Contact> contacts}) {
     if (PlatformInfos.isWeb) {
       return;
     }
     postAddressBookSubscription = postAddressBookInteractor
-        .execute(
-      addressBooks: contacts.toSet().toAddressBooks().toList(),
-    )
-        .listen(
-      (state) {
-        Logs().i('ContactsManager::_postAddressBook', state);
-        _postAddressBookNotifier.value = state;
-      },
-    );
+        .execute(addressBooks: contacts.toSet().toAddressBooks().toList())
+        .listen((state) {
+          Logs().i('ContactsManager::_postAddressBook', state);
+          _postAddressBookNotifier.value = state;
+        });
   }
 
   Future<void> cancelAllSubscriptions() async {
@@ -486,9 +472,7 @@ class ContactsManager {
     }
   }
 
-  void synchronizePhonebookContacts({
-    required String withMxId,
-  }) =>
+  void synchronizePhonebookContacts({required String withMxId}) =>
       _lookUpPhonebookContacts(
         isAvailableSupportPhonebookContacts: true,
         withMxId: withMxId,

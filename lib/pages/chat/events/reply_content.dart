@@ -37,10 +37,15 @@ class ReplyContent extends StatelessWidget {
         ? replyEvent.getDisplayEventWithoutEditEvent(timeline)
         : replyEvent;
     if (AppConfig.renderHtml &&
-        [EventTypes.Message, EventTypes.Encrypted]
-            .contains(displayEvent.type) &&
-        [MessageTypes.Text, MessageTypes.Notice, MessageTypes.Emote]
-            .contains(displayEvent.messageType) &&
+        [
+          EventTypes.Message,
+          EventTypes.Encrypted,
+        ].contains(displayEvent.type) &&
+        [
+          MessageTypes.Text,
+          MessageTypes.Notice,
+          MessageTypes.Emote,
+        ].contains(displayEvent.messageType) &&
         !displayEvent.redacted &&
         displayEvent.content['format'] == 'org.matrix.custom.html' &&
         displayEvent.content['formatted_body'] is String) {
@@ -77,8 +82,10 @@ class ReplyContent extends StatelessWidget {
     final user = displayEvent.getUser();
     return Container(
       padding: ReplyContentStyle.replyParentContainerPadding,
-      decoration:
-          ReplyContentStyle.replyParentContainerDecoration(context, ownMessage),
+      decoration: ReplyContentStyle.replyParentContainerDecoration(
+        context,
+        ownMessage,
+      ),
       child: IntrinsicHeight(
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -99,14 +106,10 @@ class ReplyContent extends StatelessWidget {
               Center(
                 child: OptionalSelectionContainerDisabled(
                   isEnabled: PlatformInfos.isWeb,
-                  child: ReplyPreviewIconBuilder(
-                    event: displayEvent,
-                  ),
+                  child: ReplyPreviewIconBuilder(event: displayEvent),
                 ),
               ),
-            const SizedBox(
-              width: ReplyContentStyle.contentSpacing,
-            ),
+            const SizedBox(width: ReplyContentStyle.contentSpacing),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -127,8 +130,9 @@ class ReplyContent extends StatelessWidget {
                           '${snapshot.data?.calcDisplayname() ?? displayEvent.senderFromMemoryOrFallback.calcDisplayname()}:',
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style:
-                              ReplyContentStyle.displayNameTextStyle(context),
+                          style: ReplyContentStyle.displayNameTextStyle(
+                            context,
+                          ),
                         );
                       },
                     ),
@@ -146,10 +150,7 @@ class ReplyContent extends StatelessWidget {
 class ReplyPreviewIconBuilder extends StatelessWidget {
   final Event event;
 
-  const ReplyPreviewIconBuilder({
-    super.key,
-    required this.event,
-  });
+  const ReplyPreviewIconBuilder({super.key, required this.event});
 
   @override
   Widget build(BuildContext context) {
@@ -157,18 +158,14 @@ class ReplyPreviewIconBuilder extends StatelessWidget {
         !event.isVideoAvailable &&
         event.mimeType != null) {
       return SvgPicture.asset(
-        event.mimeType!.getIcon(
-          fileType: event.fileType,
-        ),
+        event.mimeType!.getIcon(fileType: event.fileType),
         width: ReplyContentStyle.replyContentSize,
         height: ReplyContentStyle.replyContentSize,
       );
     }
     if (event.isAFile) {
       return SvgPicture.asset(
-        event.mimeType?.getIcon(
-              fileType: event.fileType,
-            ) ??
+        event.mimeType?.getIcon(fileType: event.fileType) ??
             ImagePaths.icFileUnknown,
         width: ReplyContentStyle.replyContentSize,
         height: ReplyContentStyle.replyContentSize,
@@ -189,9 +186,7 @@ class ReplyPreviewIconBuilder extends StatelessWidget {
         fit: BoxFit.cover,
         enableHeroAnimation: false,
         placeholder: (context) {
-          return BlurHashPlaceHolder(
-            event: event,
-          );
+          return BlurHashPlaceHolder(event: event);
         },
       ),
     );
@@ -201,10 +196,7 @@ class ReplyPreviewIconBuilder extends StatelessWidget {
 class BlurHashPlaceHolder extends StatelessWidget {
   final Event event;
 
-  const BlurHashPlaceHolder({
-    super.key,
-    required this.event,
-  });
+  const BlurHashPlaceHolder({super.key, required this.event});
 
   @override
   Widget build(BuildContext context) {
@@ -213,10 +205,7 @@ class BlurHashPlaceHolder extends StatelessWidget {
     return SizedBox(
       width: ReplyContentStyle.replyContentSize,
       height: ReplyContentStyle.replyContentSize,
-      child: BlurHash(
-        hash: blurHashString,
-        imageFit: BoxFit.cover,
-      ),
+      child: BlurHash(hash: blurHashString, imageFit: BoxFit.cover),
     );
   }
 }

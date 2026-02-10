@@ -19,10 +19,7 @@ import 'package:matrix/matrix.dart';
 class ContactsTab extends StatefulWidget {
   final Widget? bottomNavigationBar;
 
-  const ContactsTab({
-    super.key,
-    this.bottomNavigationBar,
-  });
+  const ContactsTab({super.key, this.bottomNavigationBar});
 
   @override
   State<StatefulWidget> createState() => ContactsTabController();
@@ -78,14 +75,11 @@ class ContactsTabController extends State<ContactsTab>
       goToSettingsProfile();
       return;
     }
-    final roomId =
-        Matrix.of(context).client.getDirectChatFromUserId(contact.matrixId!);
+    final roomId = Matrix.of(
+      context,
+    ).client.getDirectChatFromUserId(contact.matrixId!);
     if (roomId == null) {
-      goToDraftChat(
-        context: context,
-        path: path,
-        contact: contact,
-      );
+      goToDraftChat(context: context, path: path, contact: contact);
     } else {
       context.go('/$path/$roomId');
     }
@@ -129,7 +123,7 @@ class ContactsTabController extends State<ContactsTab>
 
   @override
   Widget build(BuildContext context) => ContactsTabView(
-        contactsController: this,
-        bottomNavigationBar: widget.bottomNavigationBar,
-      );
+    contactsController: this,
+    bottomNavigationBar: widget.bottomNavigationBar,
+  );
 }

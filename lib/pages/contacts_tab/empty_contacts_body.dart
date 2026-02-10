@@ -14,30 +14,24 @@ class EmptyContactBody extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          const SizedBox(
-            height: 100,
-          ),
+          const SizedBox(height: 100),
           SvgPicture.asset(ImagePaths.icSkeletons),
-          const SizedBox(
-            height: 16.0,
-          ),
+          const SizedBox(height: 16.0),
           Text(
             L10n.of(context)!.soonThereHaveContacts,
             style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                  // TODO: change to colorSurface when its approved
-                  // ignore: deprecated_member_use
-                  color: Theme.of(context).colorScheme.onBackground,
-                ),
+              // TODO: change to colorSurface when its approved
+              // ignore: deprecated_member_use
+              color: Theme.of(context).colorScheme.onBackground,
+            ),
             textAlign: TextAlign.center,
           ),
-          const SizedBox(
-            height: 8.0,
-          ),
+          const SizedBox(height: 8.0),
           Text(
             L10n.of(context)!.searchSuggestion,
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: LinagoraRefColors.material().neutral[40],
-                ),
+              color: LinagoraRefColors.material().neutral[40],
+            ),
             textAlign: TextAlign.center,
           ),
         ],

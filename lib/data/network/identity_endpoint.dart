@@ -10,9 +10,7 @@ class IdentityEndpoint {
   static final ServicePath matchUserIdServicePath = ServicePath(
     '/lookup/match',
   );
-  static final ServicePath matchListUserIdsServicePath = ServicePath(
-    '/lookup',
-  );
+  static final ServicePath matchListUserIdsServicePath = ServicePath('/lookup');
   static final ServicePath hashDetailsServicePath = ServicePath(
     '/hash_details',
   );

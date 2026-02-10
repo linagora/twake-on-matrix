@@ -8,9 +8,7 @@ class InvitationStatusResponse with EquatableMixin {
   @JsonKey(name: "invitation")
   final Invitation? invitation;
 
-  InvitationStatusResponse({
-    this.invitation,
-  });
+  InvitationStatusResponse({this.invitation});
 
   factory InvitationStatusResponse.fromJson(Map<String, dynamic> json) =>
       _$InvitationStatusResponseFromJson(json);
@@ -18,9 +16,7 @@ class InvitationStatusResponse with EquatableMixin {
   Map<String, dynamic> toJson() => _$InvitationStatusResponseToJson(this);
 
   @override
-  List<Object?> get props => [
-        invitation,
-      ];
+  List<Object?> get props => [invitation];
 }
 
 @JsonSerializable()
@@ -75,13 +71,13 @@ class Invitation with EquatableMixin {
 
   @override
   List<Object?> get props => [
-        id,
-        sender,
-        recepient,
-        medium,
-        expiration,
-        accessed,
-        roomId,
-        matrixId,
-      ];
+    id,
+    sender,
+    recepient,
+    medium,
+    expiration,
+    accessed,
+    roomId,
+    matrixId,
+  ];
 }

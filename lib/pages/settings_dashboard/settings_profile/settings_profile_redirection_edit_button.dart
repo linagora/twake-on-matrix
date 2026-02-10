@@ -22,7 +22,9 @@ class SettingsProfileRedirectionEditButton extends StatelessWidget {
     final matrix = Matrix.of(context);
     final userId = matrix.client.userID;
     final commonSettingsInformation = matrix
-        .loginHomeserverSummary?.appTwakeInformation?.commonSettingsInformation;
+        .loginHomeserverSummary
+        ?.appTwakeInformation
+        ?.commonSettingsInformation;
     final redirectUrl = userId == null
         ? null
         : commonSettingsInformation?.completedApplicationUrl(userId);
@@ -38,13 +40,10 @@ class SettingsProfileRedirectionEditButton extends StatelessWidget {
       padding: const EdgeInsetsDirectional.only(end: 16),
       child: TextButton(
         style: TextButton.styleFrom(
-          padding: const EdgeInsets.symmetric(
-            vertical: 10,
-            horizontal: 12,
-          ),
+          padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
           overlayColor: LinagoraSysColors.material().shadow.withValues(
-                alpha: 0.2,
-              ),
+            alpha: 0.2,
+          ),
           textStyle: textTheme.labelLarge?.copyWith(
             fontSize: 14,
             height: 20 / 14,
@@ -52,10 +51,7 @@ class SettingsProfileRedirectionEditButton extends StatelessWidget {
           ),
         ),
         onPressed: () {
-          launchUrl(
-            Uri.parse(redirectUrl),
-            webOnlyWindowName: '_blank',
-          );
+          launchUrl(Uri.parse(redirectUrl), webOnlyWindowName: '_blank');
         },
         child: Text(L10n.of(context)!.edit),
       ),

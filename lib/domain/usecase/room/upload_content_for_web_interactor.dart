@@ -19,9 +19,7 @@ class UploadContentInBytesInteractor {
       );
       if (maxMediaSize != null && maxMediaSize < fileSize) {
         yield Left(
-          FileTooBigMatrix(
-            FileTooBigMatrixException(fileSize, maxMediaSize),
-          ),
+          FileTooBigMatrix(FileTooBigMatrixException(fileSize, maxMediaSize)),
         );
         return;
       }

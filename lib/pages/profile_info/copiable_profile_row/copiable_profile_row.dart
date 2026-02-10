@@ -67,9 +67,7 @@ class CopiableProfileRow extends StatelessWidget {
                           children: [
                             Text(
                               caption,
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .labelMedium
+                              style: Theme.of(context).textTheme.labelMedium
                                   ?.copyWith(
                                     color: LinagoraRefColors.material()
                                         .neutral[40],
@@ -77,9 +75,7 @@ class CopiableProfileRow extends StatelessWidget {
                             ),
                             Text(
                               copiableText,
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .bodyLarge
+                              style: Theme.of(context).textTheme.bodyLarge
                                   ?.copyWith(
                                     color:
                                         LinagoraSysColors.material().onSurface,
@@ -116,17 +112,11 @@ class CopiableProfileRow extends StatelessWidget {
                   ),
                   if (enableDividerTop)
                     Padding(
-                      padding: const EdgeInsets.only(
-                        top: 8,
-                        right: 16,
-                      ),
+                      padding: const EdgeInsets.only(top: 8, right: 16),
                       child: Divider(
                         height: 1,
-                        color: LinagoraSysColors.material()
-                            .surfaceTint
-                            .withOpacity(
-                              CopiableProfileRowStyle.borderOpacity,
-                            ),
+                        color: LinagoraSysColors.material().surfaceTint
+                            .withOpacity(CopiableProfileRowStyle.borderOpacity),
                       ),
                     ),
                 ],

@@ -30,8 +30,9 @@ class MediaPickerStyle {
 
   static const EdgeInsets sendButtonPadding = EdgeInsets.only(top: 4, left: 12);
 
-  static const BorderRadius sendButtonBorderRadius =
-      BorderRadius.all(Radius.circular(100));
+  static const BorderRadius sendButtonBorderRadius = BorderRadius.all(
+    Radius.circular(100),
+  );
 
   static const double sendButtonSize = 48.0;
 

@@ -14,14 +14,11 @@ import 'package:mockito/mockito.dart';
 
 import 'post_address_book_interactor_test.mocks.dart';
 
-@GenerateMocks([
-  AddressBookRepository,
-  SharedPreferencesContactCacheManager,
-])
+@GenerateMocks([AddressBookRepository, SharedPreferencesContactCacheManager])
 void main() {
   late MockAddressBookRepository addressBookRepository;
   late MockSharedPreferencesContactCacheManager
-      sharedPreferencesContactCacheManager;
+  sharedPreferencesContactCacheManager;
   late PostAddressBookInteractor postAddressBookInteractor;
   late GetIt getIt;
 
@@ -71,14 +68,13 @@ void main() {
 
       when(
         addressBookRepository.updateAddressBook(
-          request: AddressBookRequest(
-            addressBooks: addressBooks,
-          ),
+          request: AddressBookRequest(addressBooks: addressBooks),
         ),
       ).thenThrow(exception);
 
-      final result =
-          postAddressBookInteractor.execute(addressBooks: addressBooks);
+      final result = postAddressBookInteractor.execute(
+        addressBooks: addressBooks,
+      );
 
       await expectLater(
         result,
@@ -107,16 +103,13 @@ void main() {
 
       when(
         addressBookRepository.updateAddressBook(
-          request: AddressBookRequest(
-            addressBooks: addressBooks,
-          ),
+          request: AddressBookRequest(addressBooks: addressBooks),
         ),
-      ).thenAnswer(
-        (_) async => AddressbookResponse(),
-      );
+      ).thenAnswer((_) async => AddressbookResponse());
 
-      final result =
-          postAddressBookInteractor.execute(addressBooks: addressBooks);
+      final result = postAddressBookInteractor.execute(
+        addressBooks: addressBooks,
+      );
 
       await expectLater(
         result,
@@ -152,16 +145,13 @@ void main() {
 
       when(
         addressBookRepository.updateAddressBook(
-          request: AddressBookRequest(
-            addressBooks: addressBooks,
-          ),
+          request: AddressBookRequest(addressBooks: addressBooks),
         ),
-      ).thenAnswer(
-        (_) async => response,
-      );
+      ).thenAnswer((_) async => response);
 
-      final result =
-          postAddressBookInteractor.execute(addressBooks: addressBooks);
+      final result = postAddressBookInteractor.execute(
+        addressBooks: addressBooks,
+      );
 
       await expectLater(
         result,
@@ -171,8 +161,9 @@ void main() {
         ]),
       );
 
-      verify(sharedPreferencesContactCacheManager.storeTimeLastSyncedVault(any))
-          .called(1);
+      verify(
+        sharedPreferencesContactCacheManager.storeTimeLastSyncedVault(any),
+      ).called(1);
 
       verify(
         sharedPreferencesContactCacheManager.deteleContactsVaultError(),

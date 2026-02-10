@@ -55,21 +55,22 @@ class _InteractiveViewerGalleryState extends State<InteractiveViewerGallery>
 
     _transformationController = TransformationController();
 
-    _animationController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 300),
-    )
-      ..addListener(() {
-        _transformationController!.value =
-            _animation?.value ?? Matrix4.identity();
-      })
-      ..addStatusListener((AnimationStatus status) {
-        if (status == AnimationStatus.completed && !_enableDismiss) {
-          setState(() {
-            _enableDismiss = true;
+    _animationController =
+        AnimationController(
+            vsync: this,
+            duration: const Duration(milliseconds: 300),
+          )
+          ..addListener(() {
+            _transformationController!.value =
+                _animation?.value ?? Matrix4.identity();
+          })
+          ..addStatusListener((AnimationStatus status) {
+            if (status == AnimationStatus.completed && !_enableDismiss) {
+              setState(() {
+                _enableDismiss = true;
+              });
+            }
           });
-        }
-      });
   }
 
   @override

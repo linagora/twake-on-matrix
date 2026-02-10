@@ -15,9 +15,7 @@ class PickingAvatarUIState extends PickAvatarState {
 class GetAvatarOnMobileUIStateSuccess extends PickAvatarState {
   final AssetEntity? assetEntity;
 
-  GetAvatarOnMobileUIStateSuccess({
-    this.assetEntity,
-  });
+  GetAvatarOnMobileUIStateSuccess({this.assetEntity});
 
   @override
   List<Object?> get props => [assetEntity];

@@ -34,9 +34,7 @@ class _ChatScrollViewState extends State<ChatScrollView> {
   void initState() {
     super.initState();
     _currentEvents = List<Event>.from(widget.events)
-      ..sort(
-        (a, b) => b.originServerTs.compareTo(a.originServerTs),
-      );
+      ..sort((a, b) => b.originServerTs.compareTo(a.originServerTs));
     _eventIndexMap = {
       for (var i = 0; i < _currentEvents.length; i++)
         _currentEvents[i].eventId: i,
@@ -57,9 +55,7 @@ class _ChatScrollViewState extends State<ChatScrollView> {
     if (widget.events == oldWidget.events) return;
 
     final newEvents = List<Event>.from(widget.events)
-      ..sort(
-        (a, b) => b.originServerTs.compareTo(a.originServerTs),
-      );
+      ..sort((a, b) => b.originServerTs.compareTo(a.originServerTs));
 
     // Use the extension to sync event lists
     final result = EventListExtension.syncEventLists(
@@ -124,97 +120,87 @@ class _ChatScrollViewState extends State<ChatScrollView> {
         keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
         slivers: [
           SliverList(
-            delegate: SliverChildBuilderDelegate(
-              (context, index) {
-                if (index == _bottom.length) {
-                  if (controller.timeline!.isRequestingHistory) {
-                    return const Center(
-                      child: CupertinoActivityIndicator(),
-                    );
-                  }
-                  if (controller.timeline!.canRequestHistory) {
-                    return Center(
-                      child: IconButton(
-                        onPressed: controller.requestHistory,
-                        icon: const Icon(Icons.refresh_outlined),
-                      ),
-                    );
-                  }
-                  return const SizedBox.shrink();
+            delegate: SliverChildBuilderDelegate((context, index) {
+              if (index == _bottom.length) {
+                if (controller.timeline!.isRequestingHistory) {
+                  return const Center(child: CupertinoActivityIndicator());
                 }
-                final currentEvent = _bottom[index];
-                final currentEventIndex =
-                    _eventIndexMap[currentEvent.eventId] ?? -1;
-
-                // If event is not in _currentEvents anymore, skip rendering it
-                if (currentEventIndex == -1) {
-                  return const SizedBox.shrink();
+                if (controller.timeline!.canRequestHistory) {
+                  return Center(
+                    child: IconButton(
+                      onPressed: controller.requestHistory,
+                      icon: const Icon(Icons.refresh_outlined),
+                    ),
+                  );
                 }
+                return const SizedBox.shrink();
+              }
+              final currentEvent = _bottom[index];
+              final currentEventIndex =
+                  _eventIndexMap[currentEvent.eventId] ?? -1;
 
-                final previousEvent = currentEventIndex > 0
-                    ? _currentEvents[currentEventIndex - 1]
-                    : null;
-                final nextEvent = currentEventIndex < _currentEvents.length - 1
-                    ? _currentEvents[currentEventIndex + 1]
-                    : null;
-                return ChatEventListItem(
-                  event: currentEvent,
-                  index: currentEventIndex + 1,
-                  controller: controller,
-                  constraints: widget.constraints,
-                  previousEvent: previousEvent,
-                  nextEvent: nextEvent,
-                );
-              },
-              childCount: _bottom.length + 1,
-            ),
+              // If event is not in _currentEvents anymore, skip rendering it
+              if (currentEventIndex == -1) {
+                return const SizedBox.shrink();
+              }
+
+              final previousEvent = currentEventIndex > 0
+                  ? _currentEvents[currentEventIndex - 1]
+                  : null;
+              final nextEvent = currentEventIndex < _currentEvents.length - 1
+                  ? _currentEvents[currentEventIndex + 1]
+                  : null;
+              return ChatEventListItem(
+                event: currentEvent,
+                index: currentEventIndex + 1,
+                controller: controller,
+                constraints: widget.constraints,
+                previousEvent: previousEvent,
+                nextEvent: nextEvent,
+              );
+            }, childCount: _bottom.length + 1),
           ),
           SliverList(
             key: centerKey,
-            delegate: SliverChildBuilderDelegate(
-              (context, index) {
-                if (index == _top.length) {
-                  if (controller.timeline!.isRequestingFuture) {
-                    return const Center(
-                      child: CupertinoActivityIndicator(),
-                    );
-                  }
-                  if (controller.timeline!.canRequestFuture) {
-                    return Center(
-                      child: IconButton(
-                        onPressed: controller.requestFuture,
-                        icon: const Icon(Icons.refresh_outlined),
-                      ),
-                    );
-                  }
-                  return const SizedBox.shrink();
+            delegate: SliverChildBuilderDelegate((context, index) {
+              if (index == _top.length) {
+                if (controller.timeline!.isRequestingFuture) {
+                  return const Center(child: CupertinoActivityIndicator());
                 }
-                final currentEvent = _top[index];
-                final currentEventIndex =
-                    _eventIndexMap[currentEvent.eventId] ?? -1;
-
-                // If event is not in _currentEvents anymore, skip rendering it
-                if (currentEventIndex == -1) {
-                  return const SizedBox.shrink();
+                if (controller.timeline!.canRequestFuture) {
+                  return Center(
+                    child: IconButton(
+                      onPressed: controller.requestFuture,
+                      icon: const Icon(Icons.refresh_outlined),
+                    ),
+                  );
                 }
+                return const SizedBox.shrink();
+              }
+              final currentEvent = _top[index];
+              final currentEventIndex =
+                  _eventIndexMap[currentEvent.eventId] ?? -1;
 
-                final previousEvent = currentEventIndex > 0
-                    ? _currentEvents[currentEventIndex - 1]
-                    : null;
-                final nextEvent = currentEventIndex < _currentEvents.length - 1
-                    ? _currentEvents[currentEventIndex + 1]
-                    : null;
-                return ChatEventListItem(
-                  event: currentEvent,
-                  index: currentEventIndex + 1,
-                  controller: controller,
-                  constraints: widget.constraints,
-                  previousEvent: previousEvent,
-                  nextEvent: nextEvent,
-                );
-              },
-              childCount: _top.length + 1,
-            ),
+              // If event is not in _currentEvents anymore, skip rendering it
+              if (currentEventIndex == -1) {
+                return const SizedBox.shrink();
+              }
+
+              final previousEvent = currentEventIndex > 0
+                  ? _currentEvents[currentEventIndex - 1]
+                  : null;
+              final nextEvent = currentEventIndex < _currentEvents.length - 1
+                  ? _currentEvents[currentEventIndex + 1]
+                  : null;
+              return ChatEventListItem(
+                event: currentEvent,
+                index: currentEventIndex + 1,
+                controller: controller,
+                constraints: widget.constraints,
+                previousEvent: previousEvent,
+                nextEvent: nextEvent,
+              );
+            }, childCount: _top.length + 1),
           ),
         ],
       ),

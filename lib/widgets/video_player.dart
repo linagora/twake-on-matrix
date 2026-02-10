@@ -6,11 +6,7 @@ import 'package:media_kit/media_kit.dart';
 import 'package:media_kit_video/media_kit_video.dart';
 
 class VideoPlayer extends StatefulWidget {
-  const VideoPlayer({
-    super.key,
-    required this.bytes,
-    required this.event,
-  });
+  const VideoPlayer({super.key, required this.bytes, required this.event});
 
   final Uint8List bytes;
 

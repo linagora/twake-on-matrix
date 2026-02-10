@@ -11,8 +11,8 @@ class FileTileWidgetStyle {
 
   Color backgroundColor(BuildContext context, {bool ownMessage = false}) =>
       ownMessage
-          ? LinagoraSysColors.material().primaryContainer
-          : LinagoraSysColors.material().onSurface.withOpacity(0.08);
+      ? LinagoraSysColors.material().primaryContainer
+      : LinagoraSysColors.material().onSurface.withOpacity(0.08);
 
   BorderRadiusGeometry get borderRadius => BorderRadius.circular(8.0);
 
@@ -38,14 +38,14 @@ class FileTileWidgetStyle {
 
   TextStyle? textStyle(BuildContext context) {
     return Theme.of(context).textTheme.bodyLarge?.copyWith(
-          color: Theme.of(context).colorScheme.onSurface,
-        );
+      color: Theme.of(context).colorScheme.onSurface,
+    );
   }
 
   TextStyle textInformationStyle(BuildContext context) {
-    return Theme.of(context).textTheme.bodySmall!.copyWith(
-          color: fileInfoColor,
-        );
+    return Theme.of(
+      context,
+    ).textTheme.bodySmall!.copyWith(color: fileInfoColor);
   }
 
   EdgeInsets get imagePadding => const EdgeInsets.all(4.0);

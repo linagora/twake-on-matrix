@@ -52,8 +52,9 @@ class ForwardView extends StatelessWidget {
         children: [
           Expanded(
             child: SingleChildScrollView(
-              padding:
-                  const EdgeInsetsDirectional.all(ForwardViewStyle.paddingBody),
+              padding: const EdgeInsetsDirectional.all(
+                ForwardViewStyle.paddingBody,
+              ),
               child: Column(
                 children: [
                   const RecentChatsTitle(),
@@ -131,8 +132,9 @@ class _WebActionsButton extends StatelessWidget {
                       child: Align(
                         alignment: Alignment.centerRight,
                         child: TwakeFloatingActionButton(
-                          customIcon:
-                              SizedBox(child: CupertinoActivityIndicator()),
+                          customIcon: SizedBox(
+                            child: CupertinoActivityIndicator(),
+                          ),
                         ),
                       ),
                     );
@@ -155,10 +157,8 @@ class _WebActionsButton extends StatelessWidget {
                       ForwardViewStyle.webActionsButtonBorder,
                     ),
                   ),
-                  styleMessage:
-                      Theme.of(context).textTheme.labelLarge?.copyWith(
-                            color: LinagoraSysColors.material().primary,
-                          ),
+                  styleMessage: Theme.of(context).textTheme.labelLarge
+                      ?.copyWith(color: LinagoraSysColors.material().primary),
                 ),
                 const SizedBox(width: 8.0),
                 TwakeTextButton(
@@ -176,14 +176,13 @@ class _WebActionsButton extends StatelessWidget {
                       ForwardViewStyle.webActionsButtonBorder,
                     ),
                   ),
-                  styleMessage:
-                      Theme.of(context).textTheme.labelLarge?.copyWith(
-                            color: selectedChat.isNotEmpty
-                                ? LinagoraSysColors.material().onPrimary
-                                : LinagoraSysColors.material()
-                                    .inverseSurface
-                                    .withOpacity(0.6),
-                          ),
+                  styleMessage: Theme.of(context).textTheme.labelLarge
+                      ?.copyWith(
+                        color: selectedChat.isNotEmpty
+                            ? LinagoraSysColors.material().onPrimary
+                            : LinagoraSysColors.material().inverseSurface
+                                  .withOpacity(0.6),
+                      ),
                 ),
               ],
             ),

@@ -54,55 +54,42 @@ mixin SaveMediaToGalleryAndroidMixin
     } catch (e) {
       Logs().e('Chat::saveSelectedEventToGallery(): $e');
       if (e is! StoragePermissionException) {
-        TwakeSnackBar.show(
-          context,
-          L10n.of(context)!.saveFileToDownloadsError,
-        );
+        TwakeSnackBar.show(context, L10n.of(context)!.saveFileToDownloadsError);
       }
     }
   }
 
   Future<File> getCachedMediaFile(Event event) async {
     if (event.attachmentMxcUrl == null) {
-      throw SaveToGalleryException(
-        error: 'File not found',
-      );
+      throw SaveToGalleryException(error: 'File not found');
     }
     if (event.room.isRoomEncrypted()) {
-      final filePath =
-          await StorageDirectoryManager.instance.getDecryptedFilePath(
-        eventId: event.eventId,
-        fileName: event.filename,
-      );
+      final filePath = await StorageDirectoryManager.instance
+          .getDecryptedFilePath(
+            eventId: event.eventId,
+            fileName: event.filename,
+          );
       final file = File(filePath);
       if (await file.exists()) {
         return file;
       }
     }
 
-    final filePath =
-        await StorageDirectoryManager.instance.getFilePathInAppDownloads(
-      eventId: event.eventId,
-      fileName: event.filename,
-    );
+    final filePath = await StorageDirectoryManager.instance
+        .getFilePathInAppDownloads(
+          eventId: event.eventId,
+          fileName: event.filename,
+        );
     return File(filePath);
   }
 
-  Future<void> saveImageToGallery({
-    required File file,
-  }) async {
+  Future<void> saveImageToGallery({required File file}) async {
     Logs().i('Chat::saveImageToGallery():: file path: ${file.path}');
-    await Gal.putImage(
-      file.path,
-    );
+    await Gal.putImage(file.path);
   }
 
-  Future<void> saveVideoToGallery({
-    required File file,
-  }) async {
-    await Gal.putVideo(
-      file.path,
-    );
+  Future<void> saveVideoToGallery({required File file}) async {
+    await Gal.putVideo(file.path);
   }
 
   Future<void> saveMediaToGallery({
@@ -116,16 +103,13 @@ mixin SaveMediaToGalleryAndroidMixin
       await saveVideoToGallery(file: fileInDownloadsInApp);
     }
 
-    TwakeSnackBar.show(
-      context,
-      L10n.of(context)!.fileSavedToGallery,
-    );
+    TwakeSnackBar.show(context, L10n.of(context)!.fileSavedToGallery);
   }
 
   Future<void> handlePhotoPermissionIOS(BuildContext context) async {
     final permissionHandlerService = PermissionHandlerService();
-    final permissionStatus =
-        await permissionHandlerService.requestPhotoAddOnlyPermissionIOS();
+    final permissionStatus = await permissionHandlerService
+        .requestPhotoAddOnlyPermissionIOS();
     if (permissionStatus.isPermanentlyDenied) {
       showDialog(
         useRootNavigator: false,
@@ -135,9 +119,9 @@ mixin SaveMediaToGalleryAndroidMixin
             icon: const Icon(Icons.photo),
             permission: Permission.photos,
             explainTextRequestPermission: Text(
-              L10n.of(context)!.explainPermissionToGallery(
-                AppConfig.applicationName,
-              ),
+              L10n.of(
+                context,
+              )!.explainPermissionToGallery(AppConfig.applicationName),
               style: Theme.of(context).textTheme.bodyMedium,
             ),
             onAcceptButton: () =>

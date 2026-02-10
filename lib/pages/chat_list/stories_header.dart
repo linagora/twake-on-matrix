@@ -12,11 +12,7 @@ import 'package:fluffychat/utils/matrix_sdk_extensions/client_stories_extension.
 import 'package:fluffychat/widgets/avatar/avatar.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 
-enum ContextualRoomAction {
-  mute,
-  unmute,
-  leave,
-}
+enum ContextualRoomAction { mute, unmute, leave }
 
 class StoriesHeader extends StatelessWidget {
   final String filter;
@@ -97,8 +93,9 @@ class StoriesHeader extends StatelessWidget {
         onTap: () => _addToStoryAction(context),
       );
     }
-    final ownStoryRoom = client.storiesRooms
-        .firstWhereOrNull((r) => r.creatorId == client.userID);
+    final ownStoryRoom = client.storiesRooms.firstWhereOrNull(
+      (r) => r.creatorId == client.userID,
+    );
     final stories = [
       if (ownStoryRoom != null) ownStoryRoom,
       ...client.storiesRooms..remove(ownStoryRoom),
@@ -111,8 +108,9 @@ class StoriesHeader extends StatelessWidget {
         itemCount: stories.length,
         itemBuilder: (context, i) {
           final room = stories[i];
-          final creator = room
-              .unsafeGetUserFromMemoryOrFallback(room.creatorId ?? 'Unknown');
+          final creator = room.unsafeGetUserFromMemoryOrFallback(
+            room.creatorId ?? 'Unknown',
+          );
           final userId = room.creatorId;
           final displayname = creator.calcDisplayname();
           final avatarUrl = creator.avatarUrl;
@@ -128,7 +126,8 @@ class StoriesHeader extends StatelessWidget {
             heroTag: 'stories_${room.id}',
             hasPosts: room.hasPosts || room == ownStoryRoom,
             showEditFab: userId == client.userID,
-            unread: room.membership == Membership.invite ||
+            unread:
+                room.membership == Membership.invite ||
                 (room.hasNewMessages && room.hasPosts),
             onPressed: () => _goToStoryAction(context, room.id),
             onLongPressed: () => _contextualActions(context, room),
@@ -205,26 +204,30 @@ class _StoryButton extends StatelessWidget {
                           : null,
                       color: unread
                           ? null
-                          : Theme.of(context)
-                              .colorScheme
-                              .surfaceContainerHighest,
-                      borderRadius:
-                          BorderRadius.circular(AvatarStyle.defaultSize),
+                          : Theme.of(
+                              context,
+                            ).colorScheme.surfaceContainerHighest,
+                      borderRadius: BorderRadius.circular(
+                        AvatarStyle.defaultSize,
+                      ),
                     ),
                     child: Stack(
                       children: [
                         Material(
                           color: Theme.of(context).colorScheme.surface,
-                          borderRadius:
-                              BorderRadius.circular(AvatarStyle.defaultSize),
+                          borderRadius: BorderRadius.circular(
+                            AvatarStyle.defaultSize,
+                          ),
                           child: Padding(
                             padding: const EdgeInsets.all(2.0),
                             child: CircleAvatar(
                               radius: 30,
-                              backgroundColor:
-                                  Theme.of(context).colorScheme.surface,
-                              foregroundColor:
-                                  Theme.of(context).textTheme.bodyLarge?.color,
+                              backgroundColor: Theme.of(
+                                context,
+                              ).colorScheme.surface,
+                              foregroundColor: Theme.of(
+                                context,
+                              ).textTheme.bodyLarge?.color,
                               child: Hero(
                                 tag: heroTag,
                                 child: Avatar(
@@ -247,10 +250,7 @@ class _StoryButton extends StatelessWidget {
                               child: FloatingActionButton.small(
                                 heroTag: null,
                                 onPressed: () => context.go('/stories/create'),
-                                child: const Icon(
-                                  Icons.add_outlined,
-                                  size: 16,
-                                ),
+                                child: const Icon(Icons.add_outlined, size: 16),
                               ),
                             ),
                           ),

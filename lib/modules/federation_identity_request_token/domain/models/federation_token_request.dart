@@ -12,9 +12,5 @@ class FederationTokenRequest with EquatableMixin {
   });
 
   @override
-  List<Object?> get props => [
-        homeserverUrl,
-        mxid,
-        accessToken,
-      ];
+  List<Object?> get props => [homeserverUrl, mxid, accessToken];
 }

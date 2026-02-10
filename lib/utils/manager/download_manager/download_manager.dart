@@ -34,30 +34,22 @@ class DownloadManager {
       try {
         cancelToken.cancel();
         _eventIdMapDownloadFileInfo[eventId]?.downloadStateStreamController.add(
-              Left(
-                DownloadFileFailureState(
-                  exception: CancelDownloadingException(),
-                ),
-              ),
-            );
-      } catch (e) {
-        Logs().e(
-          'DownloadManager::cancelDownload(): $e',
+          Left(
+            DownloadFileFailureState(exception: CancelDownloadingException()),
+          ),
         );
+      } catch (e) {
+        Logs().e('DownloadManager::cancelDownload(): $e');
         _eventIdMapDownloadFileInfo[eventId]?.downloadStateStreamController.add(
-              Left(
-                DownloadFileFailureState(exception: e),
-              ),
-            );
+          Left(DownloadFileFailureState(exception: e)),
+        );
       } finally {
         await clear(eventId);
       }
     }
   }
 
-  void _initDownloadFileInfo(
-    Event event,
-  ) {
+  void _initDownloadFileInfo(Event event) {
     final streamController = StreamController<Either<Failure, Success>>();
 
     _eventIdMapDownloadFileInfo[event.eventId] = DownloadFileInfo(
@@ -74,23 +66,16 @@ class DownloadManager {
 
   Future<void> clear(String eventId) async {
     try {
-      await _eventIdMapDownloadFileInfo[eventId]
-          ?.downloadStateStreamController
+      await _eventIdMapDownloadFileInfo[eventId]?.downloadStateStreamController
           .close();
     } catch (e) {
-      Logs().e(
-        'DownloadManager::_clear(): $e',
-      );
+      Logs().e('DownloadManager::_clear(): $e');
       _eventIdMapDownloadFileInfo[eventId]?.downloadStateStreamController.add(
-            Left(
-              DownloadFileFailureState(exception: e),
-            ),
-          );
+        Left(DownloadFileFailureState(exception: e)),
+      );
     } finally {
       _eventIdMapDownloadFileInfo.remove(eventId);
-      Logs().i(
-        'DownloadManager::clear with $eventId successfully',
-      );
+      Logs().i('DownloadManager::clear with $eventId successfully');
     }
   }
 
@@ -107,24 +92,17 @@ class DownloadManager {
       Logs().e(
         'DownloadManager::download(): streamController or cancelToken is null',
       );
-      _eventIdMapDownloadFileInfo[event.eventId]
-          ?.downloadStateStreamController
+      _eventIdMapDownloadFileInfo[event.eventId]?.downloadStateStreamController
           .add(
             Left(
               DownloadFileFailureState(
-                exception: Exception(
-                  'streamController or cancelToken is null',
-                ),
+                exception: Exception('streamController or cancelToken is null'),
               ),
             ),
           );
       return;
     }
-    streamController.add(
-      const Right(
-        DownloadFileInitial(),
-      ),
-    );
+    streamController.add(const Right(DownloadFileInitial()));
     _addTaskToWorkerQueue(
       event: event,
       getThumbnail: getThumbnail,
@@ -179,11 +157,7 @@ class DownloadManager {
             );
           } catch (e) {
             Logs().e('DownloadManager::download(): $e');
-            streamController.add(
-              Left(
-                DownloadFileFailureState(exception: e),
-              ),
-            );
+            streamController.add(Left(DownloadFileFailureState(exception: e)));
           }
         },
         onTaskCompleted: () => clear(event.eventId),
@@ -209,11 +183,7 @@ class DownloadManager {
             );
           } catch (e) {
             Logs().e('DownloadManager::download(): $e');
-            streamController.add(
-              Left(
-                DownloadFileFailureState(exception: e),
-              ),
-            );
+            streamController.add(Left(DownloadFileFailureState(exception: e)));
           }
         },
         onTaskCompleted: () => clear(event.eventId),

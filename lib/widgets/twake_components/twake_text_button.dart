@@ -51,10 +51,11 @@ class TwakeTextButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final textWidget = Text(
       message,
-      style: styleMessage ??
+      style:
+          styleMessage ??
           Theme.of(context).textTheme.labelLarge?.copyWith(
-                color: LinagoraSysColors.material().onPrimary,
-              ),
+            color: LinagoraSysColors.material().onPrimary,
+          ),
       overflow: TextOverflow.ellipsis,
     );
 
@@ -67,10 +68,12 @@ class TwakeTextButton extends StatelessWidget {
         hoverColor: hoverColor,
         borderRadius: BorderRadius.circular(borderHover ?? 0),
         child: Container(
-          constraints: constraints ??
+          constraints:
+              constraints ??
               BoxConstraints(
-                maxWidth:
-                    TwakeTextButtonStyle.getBoxConstraintMaxWidth(context),
+                maxWidth: TwakeTextButtonStyle.getBoxConstraintMaxWidth(
+                  context,
+                ),
               ),
           height: 48,
           padding: margin,

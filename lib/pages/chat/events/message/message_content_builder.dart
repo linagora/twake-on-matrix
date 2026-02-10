@@ -54,10 +54,7 @@ class MessageContentBuilder extends StatelessWidget
             nextEvent,
             Message.responsiveUtils.isMobile(context),
           ),
-          isEdited: event.hasAggregatedEvents(
-            timeline,
-            RelationshipTypes.edit,
-          ),
+          isEdited: event.hasAggregatedEvents(timeline, RelationshipTypes.edit),
         );
         final stepWidth = sizeMessageBubble?.totalMessageWidth;
         final isNeedAddNewLine = sizeMessageBubble?.isNeedAddNewLine ?? false;
@@ -68,7 +65,8 @@ class MessageContentBuilder extends StatelessWidget
           padding: const EdgeInsets.only(bottom: 8),
           isEnabled: !noPadding && !event.timelineOverlayMessage,
           child: IntrinsicWidth(
-            stepWidth: isContainsTagName(event) ||
+            stepWidth:
+                isContainsTagName(event) ||
                     isContainsSpecialHTMLTag(event) ||
                     event.isCaptionModeOrReply()
                 ? null
@@ -102,11 +100,8 @@ class MessageContentBuilder extends StatelessWidget
                           onRetryTextMessage: onRetryTextMessage,
                         ),
                       ),
-                      onTapSelectMode: () => selectMode
-                          ? onSelect!(
-                              event,
-                            )
-                          : null,
+                      onTapSelectMode: () =>
+                          selectMode ? onSelect!(event) : null,
                       onTapPreview: !selectMode ? () {} : null,
                       ownMessage: event.isOwnMessage,
                       timeline: timeline,

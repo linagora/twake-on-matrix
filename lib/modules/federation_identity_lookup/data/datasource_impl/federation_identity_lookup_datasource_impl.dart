@@ -18,9 +18,7 @@ class FederationIdentityLookupDatasourceImpl
   Future<FederationHashDetailsResponse> getHashDetails({
     required String registeredToken,
   }) {
-    return federationIdentityLookupApi.getHashDetails(
-      registeredToken,
-    );
+    return federationIdentityLookupApi.getHashDetails(registeredToken);
   }
 
   @override

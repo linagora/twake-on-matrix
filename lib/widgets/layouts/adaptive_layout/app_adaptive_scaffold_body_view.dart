@@ -28,13 +28,15 @@ class AppAdaptiveScaffoldBodyView extends StatelessWidget {
   final ValueNotifier<Profile?> currentProfile;
   final ValueNotifier<String?> activeRoomIdNotifier;
 
-  static const ValueKey scaffoldWithNestedNavigationKey =
-      ValueKey('ScaffoldWithNestedNavigation');
+  static const ValueKey scaffoldWithNestedNavigationKey = ValueKey(
+    'ScaffoldWithNestedNavigation',
+  );
 
   static const ValueKey bottomNavigationKey = ValueKey('BottomNavigation');
 
-  static const ValueKey primaryNavigationKey =
-      ValueKey('AdaptiveScaffoldPrimaryNavigation');
+  static const ValueKey primaryNavigationKey = ValueKey(
+    'AdaptiveScaffoldPrimaryNavigation',
+  );
 
   const AppAdaptiveScaffoldBodyView({
     Key? key,
@@ -85,8 +87,9 @@ class AppAdaptiveScaffoldBodyView extends StatelessWidget {
                                         activeNavigationBarNotifier,
                                     onDestinationSelected:
                                         onDestinationSelected,
-                                    destinations:
-                                        getNavigationDestinations(context),
+                                    destinations: getNavigationDestinations(
+                                      context,
+                                    ),
                                   );
                               }
                             },
@@ -106,7 +109,7 @@ class AppAdaptiveScaffoldBodyView extends StatelessWidget {
                       child: Navigator(
                         key: !responsiveUtils.isSingleColumnLayout(context)
                             ? FirstColumnInnerRoutes
-                                .innerNavigatorNotOneColumnKey
+                                  .innerNavigatorNotOneColumnKey
                             : FirstColumnInnerRoutes.innerNavigatorOneColumnKey,
                         initialRoute: 'innernavigator/rooms',
                         onGenerateRoute: (settings) {
@@ -176,10 +179,7 @@ class AppAdaptiveScaffoldBodyView extends StatelessWidget {
 
   List<NavigationDestination> getNavigationDestinations(BuildContext context) {
     return destinations.map((destination) {
-      return destination.getNavigationDestination(
-        context,
-        currentProfile,
-      );
+      return destination.getNavigationDestination(context, currentProfile);
     }).toList();
   }
 }
@@ -313,10 +313,7 @@ class _ColumnPageView extends StatelessWidget {
 
   List<NavigationDestination> getNavigationDestinations(BuildContext context) {
     return destinations.map((destination) {
-      return destination.getNavigationDestination(
-        context,
-        currentProfile,
-      );
+      return destination.getNavigationDestination(context, currentProfile);
     }).toList();
   }
 

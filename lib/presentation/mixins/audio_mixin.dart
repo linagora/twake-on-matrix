@@ -13,13 +13,7 @@ import 'package:fluffychat/utils/dialog/twake_dialog.dart';
 import 'package:fluffychat/generated/l10n/app_localizations.dart';
 import 'package:universal_html/html.dart' as html;
 
-enum AudioRecordState {
-  initial,
-  recording,
-  recorded,
-  playing,
-  paused,
-}
+enum AudioRecordState { initial, recording, recorded, playing, paused }
 
 mixin AudioMixin {
   static const waveCount = 40;
@@ -72,10 +66,10 @@ mixin AudioMixin {
     _amplitudeSubWeb = _audioRecorder
         .onAmplitudeChanged(const Duration(milliseconds: 100))
         .listen((amp) {
-      var value = 100 + amp.current * 2;
-      value = value < 1 ? 1 : value;
-      _amplitudeTimelineWeb.add(value);
-    });
+          var value = 100 + amp.current * 2;
+          value = value < 1 ? 1 : value;
+          _amplitudeTimelineWeb.add(value);
+        });
   }
 
   void _disposeAudioRecorderWeb() {
@@ -120,9 +114,7 @@ mixin AudioMixin {
     });
   }
 
-  Future<void> onTapRecorderWeb({
-    required BuildContext context,
-  }) async {
+  Future<void> onTapRecorderWeb({required BuildContext context}) async {
     try {
       if (await _audioRecorder.hasPermission()) {
         const encoder = AudioEncoder.wav;
@@ -130,9 +122,7 @@ mixin AudioMixin {
         if (!await _isEncoderSupported(encoder)) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text(
-                L10n.of(context)!.audioEncoderNotSupportedMessage,
-              ),
+              content: Text(L10n.of(context)!.audioEncoderNotSupportedMessage),
             ),
           );
           return;
@@ -149,9 +139,7 @@ mixin AudioMixin {
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(
-              L10n.of(context)!.microphonePermissionDeniedOnWeb,
-            ),
+            content: Text(L10n.of(context)!.microphonePermissionDeniedOnWeb),
           ),
         );
         return;
@@ -159,9 +147,7 @@ mixin AudioMixin {
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(
-            L10n.of(context)!.audioEncoderNotSupportedMessage,
-          ),
+          content: Text(L10n.of(context)!.audioEncoderNotSupportedMessage),
         ),
       );
       return;
@@ -173,13 +159,12 @@ mixin AudioMixin {
   }
 
   Future<bool> _isEncoderSupported(AudioEncoder encoder) async {
-    final isSupported = await _audioRecorder.isEncoderSupported(
-      encoder,
-    );
+    final isSupported = await _audioRecorder.isEncoderSupported(encoder);
 
     if (!isSupported) {
-      Logs()
-          .d('AudioMixin: ${encoder.name} is not supported on this platform.');
+      Logs().d(
+        'AudioMixin: ${encoder.name} is not supported on this platform.',
+      );
 
       for (final e in AudioEncoder.values) {
         if (await _audioRecorder.isEncoderSupported(e)) {
@@ -216,8 +201,9 @@ mixin AudioMixin {
     var offset = 0;
 
     while (offset < file.size) {
-      final end =
-          (offset + chunkSize) > file.size ? file.size : offset + chunkSize;
+      final end = (offset + chunkSize) > file.size
+          ? file.size
+          : offset + chunkSize;
       final blob = file.slice(offset, end);
 
       final completer = Completer<Uint8List>();
@@ -248,13 +234,12 @@ mixin AudioMixin {
     }
   }
 
-  Future<html.File?> recordToFileOnWeb({
-    String? blobUrl,
-  }) async {
+  Future<html.File?> recordToFileOnWeb({String? blobUrl}) async {
     try {
       if (blobUrl != null) {
-        Logs()
-            .d('AudioMixin::recordToFileOnWeb: Processing blob URL: $blobUrl');
+        Logs().d(
+          'AudioMixin::recordToFileOnWeb: Processing blob URL: $blobUrl',
+        );
 
         // Fetch the actual blob data with timeout
         final response = await html.window
@@ -293,7 +278,7 @@ mixin AudioMixin {
     return null;
   }
 
-// Optional: Helper function to create MatrixAudioFile from the web file
+  // Optional: Helper function to create MatrixAudioFile from the web file
   Future<TwakeAudioFile?> createMatrixAudioFileFromWebFile({
     required html.File file,
     required Duration duration,
@@ -379,8 +364,10 @@ mixin AudioMixin {
         return (rangeStart + rangeSize * progress).round();
       default:
         // Long messages: use 70-100% of range
-        final double progress =
-            min(1.0, (durationInSeconds - 30) / 90); // 0-1 over 30-120s
+        final double progress = min(
+          1.0,
+          (durationInSeconds - 30) / 90,
+        ); // 0-1 over 30-120s
         final int rangeStart = (minWaves + (maxWaves - minWaves) * 0.7).round();
         final int rangeSize = ((maxWaves - minWaves) * 0.3).round();
         return (rangeStart + rangeSize * progress).round();
@@ -416,15 +403,18 @@ mixin AudioMixin {
     for (int i = 0; i < waveCount; i++) {
       final double exactIndex = i * step;
       final int lowerIndex = exactIndex.floor();
-      final int upperIndex =
-          (lowerIndex + 1).clamp(0, eventWaveForm.length - 1);
+      final int upperIndex = (lowerIndex + 1).clamp(
+        0,
+        eventWaveForm.length - 1,
+      );
 
       int sampledValue;
       if (lowerIndex == upperIndex) {
         sampledValue = eventWaveForm[lowerIndex];
       } else {
         final double fraction = exactIndex - lowerIndex;
-        final double interpolated = eventWaveForm[lowerIndex] * (1 - fraction) +
+        final double interpolated =
+            eventWaveForm[lowerIndex] * (1 - fraction) +
             eventWaveForm[upperIndex] * fraction;
         sampledValue = interpolated.round();
       }

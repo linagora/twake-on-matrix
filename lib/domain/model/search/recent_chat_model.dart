@@ -17,6 +17,10 @@ class RecentChatSearchModel extends SearchModel {
   String get id => roomId ?? '';
 
   @override
-  List<Object?> get props =>
-      [roomId, displayName, roomSummary, directChatMatrixID];
+  List<Object?> get props => [
+    roomId,
+    displayName,
+    roomSummary,
+    directChatMatrixID,
+  ];
 }

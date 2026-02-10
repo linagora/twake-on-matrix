@@ -20,8 +20,8 @@ class UpdateCheckerNoStore {
   static const gitLabHost = 'gitlab.com';
 
   static Uri get tagsUri => Uri.parse(
-        'https://$gitLabHost/projects/$gitLabProjectId/repository/tags',
-      );
+    'https://$gitLabHost/projects/$gitLabProjectId/repository/tags',
+  );
 
   final BuildContext context;
 
@@ -63,9 +63,11 @@ class UpdateCheckerNoStore {
   Uri downloadUri(UpdateMetadata metadata) {
     // platform specific
     if (PlatformInfos.isWindows) {
-      return Uri.parse('https://$gitLabHost/famedly/fluffychat/-'
-          '/jobs/artifacts/$metadata/raw/'
-          'build/windows/runner/Release/fluffychat.msix?job=build_windows');
+      return Uri.parse(
+        'https://$gitLabHost/famedly/fluffychat/-'
+        '/jobs/artifacts/$metadata/raw/'
+        'build/windows/runner/Release/fluffychat.msix?job=build_windows',
+      );
     } else {
       throw UnimplementedError('No download URI available for this platform.');
     }

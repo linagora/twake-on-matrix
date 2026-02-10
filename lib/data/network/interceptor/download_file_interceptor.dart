@@ -19,9 +19,7 @@ class DownloadFileInterceptor extends InterceptorsWrapper {
       return;
     }
     if (isAlreadyDownloading(options.path)) {
-      handler.reject(
-        DioDuplicateDownloadException(requestOptions: options),
-      );
+      handler.reject(DioDuplicateDownloadException(requestOptions: options));
       return;
     }
     _currentDownloads.add(options.path);
@@ -34,15 +32,17 @@ class DownloadFileInterceptor extends InterceptorsWrapper {
 
   @override
   void onError(DioException err, ErrorInterceptorHandler handler) {
-    _currentDownloads
-        .removeWhere((request) => request == err.requestOptions.path);
+    _currentDownloads.removeWhere(
+      (request) => request == err.requestOptions.path,
+    );
     super.onError(err, handler);
   }
 
   @override
   void onResponse(Response response, ResponseInterceptorHandler handler) {
-    _currentDownloads
-        .removeWhere((request) => request == response.requestOptions.path);
+    _currentDownloads.removeWhere(
+      (request) => request == response.requestOptions.path,
+    );
     super.onResponse(response, handler);
   }
 }

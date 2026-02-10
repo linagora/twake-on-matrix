@@ -13,11 +13,11 @@ class InputBarStyle {
 
   static TextStyle? getTypeAheadTextStyle(BuildContext context) =>
       Theme.of(context).textTheme.bodyLarge?.copyWith(
-            color: Theme.of(context).brightness == Brightness.light
-                ? Colors.black
-                : Colors.white,
-            fontFamily: 'Inter',
-          );
+        color: Theme.of(context).brightness == Brightness.light
+            ? Colors.black
+            : Colors.white,
+        fontFamily: 'Inter',
+      );
 
   static const double suggestionTileAvatarTextGap = 8.0;
 }

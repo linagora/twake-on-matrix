@@ -21,29 +21,26 @@ class FileTileWidget extends BaseFileTileWidget {
     super.event,
     super.onTap,
   }) : super(
-          subTitle: (context) => Row(
-            children: [
-              if (sizeString != null)
-                TextInformationOfFile(
-                  value: sizeString,
-                  style: style.textInformationStyle(context),
-                ),
-              TextInformationOfFile(
-                value: " · ",
-                style: style.textInformationStyle(context),
-              ),
-              Flexible(
-                child: TextInformationOfFile(
-                  value: mimeType.getFileType(
-                    context,
-                    fileType: fileType,
-                  ),
-                  style: style.textInformationStyle(context),
-                ),
-              ),
-            ],
-          ),
-        );
+         subTitle: (context) => Row(
+           children: [
+             if (sizeString != null)
+               TextInformationOfFile(
+                 value: sizeString,
+                 style: style.textInformationStyle(context),
+               ),
+             TextInformationOfFile(
+               value: " · ",
+               style: style.textInformationStyle(context),
+             ),
+             Flexible(
+               child: TextInformationOfFile(
+                 value: mimeType.getFileType(context, fileType: fileType),
+                 style: style.textInformationStyle(context),
+               ),
+             ),
+           ],
+         ),
+       );
 }
 
 class TextInformationOfFile extends StatelessWidget {
@@ -80,12 +77,7 @@ class TextInformationOfFile extends StatelessWidget {
               return const SizedBox.shrink();
             }),
           ),
-        Text(
-          value,
-          style: style,
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-        ),
+        Text(value, style: style, maxLines: 1, overflow: TextOverflow.ellipsis),
       ],
     );
   }

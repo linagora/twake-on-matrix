@@ -35,34 +35,35 @@ class SearchView extends StatelessWidget {
             valueListenable: searchController.preSearchRecentContactsNotifier,
             builder: (context, value, emptyChild) =>
                 value.fold((failure) => emptyChild!, (success) {
-              switch (success.runtimeType) {
-                case const (PreSearchRecentContactsSuccess):
-                  final data = success as PreSearchRecentContactsSuccess;
-                  return ValueListenableBuilder(
-                    valueListenable: searchController.textEditingController,
-                    builder: (context, textEditingValue, child) {
-                      if (textEditingValue.text.isNotEmpty) {
-                        return emptyChild!;
-                      }
-                      return SliverAppBar(
-                        flexibleSpace: FlexibleSpaceBar(
-                          title: PreSearchRecentContactsContainer(
-                            searchController: searchController,
-                            recentRooms: data.rooms,
-                          ),
-                          titlePadding:
-                              const EdgeInsetsDirectional.only(start: 0.0),
-                        ),
-                        toolbarHeight: 112,
-                        backgroundColor: Colors.transparent,
-                        automaticallyImplyLeading: false,
+                  switch (success.runtimeType) {
+                    case const (PreSearchRecentContactsSuccess):
+                      final data = success as PreSearchRecentContactsSuccess;
+                      return ValueListenableBuilder(
+                        valueListenable: searchController.textEditingController,
+                        builder: (context, textEditingValue, child) {
+                          if (textEditingValue.text.isNotEmpty) {
+                            return emptyChild!;
+                          }
+                          return SliverAppBar(
+                            flexibleSpace: FlexibleSpaceBar(
+                              title: PreSearchRecentContactsContainer(
+                                searchController: searchController,
+                                recentRooms: data.rooms,
+                              ),
+                              titlePadding: const EdgeInsetsDirectional.only(
+                                start: 0.0,
+                              ),
+                            ),
+                            toolbarHeight: 112,
+                            backgroundColor: Colors.transparent,
+                            automaticallyImplyLeading: false,
+                          );
+                        },
                       );
-                    },
-                  );
-                default:
-                  return emptyChild!;
-              }
-            }),
+                    default:
+                      return emptyChild!;
+                  }
+                }),
             child: const SliverToBoxAdapter(),
           ),
           _RecentChatAndContactsHeader(searchController: searchController),
@@ -109,7 +110,8 @@ class SearchView extends StatelessWidget {
   Widget _recentChatsWidget() {
     return SliverToBoxAdapter(
       child: ValueListenableBuilder(
-        valueListenable: searchController.searchContactAndRecentChatController!
+        valueListenable: searchController
+            .searchContactAndRecentChatController!
             .isShowChatsAndContactsNotifier,
         builder: (context, isShowMore, _) {
           return ValueListenableBuilder(
@@ -193,9 +195,7 @@ class SearchView extends StatelessWidget {
 }
 
 class _RecentChatAndContactsHeader extends StatelessWidget {
-  const _RecentChatAndContactsHeader({
-    required this.searchController,
-  });
+  const _RecentChatAndContactsHeader({required this.searchController});
 
   final SearchController searchController;
 
@@ -207,7 +207,8 @@ class _RecentChatAndContactsHeader extends StatelessWidget {
         final searchTerm = value.text;
         return ValueListenableBuilder(
           valueListenable: searchController
-              .searchContactAndRecentChatController!.recentAndContactsNotifier,
+              .searchContactAndRecentChatController!
+              .recentAndContactsNotifier,
           builder: (context, contacts, _) {
             if (searchTerm.isNotEmpty && contacts.isEmpty) {
               return _EmptySliverBox();
@@ -244,11 +245,7 @@ class _SearchHeader extends StatelessWidget {
     return SliverAppBar(
       toolbarHeight: SearchViewStyle.toolbarHeightOfSliverAppBar,
       flexibleSpace: FlexibleSpaceBar(
-        title: _chatsHeaders(
-          context,
-          header,
-          needShowMore: needShowMore,
-        ),
+        title: _chatsHeaders(context, header, needShowMore: needShowMore),
         titlePadding: SearchViewStyle.appbarPadding,
       ),
       backgroundColor: Colors.transparent,
@@ -308,8 +305,6 @@ class _SearchHeader extends StatelessWidget {
 class _EmptySliverBox extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return const SliverToBoxAdapter(
-      child: SizedBox.shrink(),
-    );
+    return const SliverToBoxAdapter(child: SizedBox.shrink());
   }
 }

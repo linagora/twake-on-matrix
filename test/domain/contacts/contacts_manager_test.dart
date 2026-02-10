@@ -51,22 +51,22 @@ void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
   late MockFederationLookUpPhonebookContactInteractor
-      mockFederationLookUpPhonebookContactInteractor;
+  mockFederationLookUpPhonebookContactInteractor;
   late MockGetTomContactsInteractor mockGetTomContactsInteractor;
   late MockTryGetSyncedPhoneBookContactInteractor
-      mockTryGetSyncedPhoneBookContactInteractor;
+  mockTryGetSyncedPhoneBookContactInteractor;
   late MockTwakeLookupPhonebookContactInteractor
-      mockTwakeLookupPhonebookContactInteractor;
+  mockTwakeLookupPhonebookContactInteractor;
   late MockPostAddressBookInteractor mockPostAddressBookInteractor;
   late MockAuthorizationInterceptor mockAuthorizationInterceptor;
   late MockDynamicUrlInterceptors mockHomeServerDynamicUrlInterceptors;
   late MockDynamicUrlInterceptors mockIdentityServerDynamicUrlInterceptors;
   late MockFederationConfigurationsRepository
-      mockFederationConfigurationsRepository;
+  mockFederationConfigurationsRepository;
   late ContactsManager contactsManager;
   late MockHiveContactRepository mockHiveContactRepository;
   late MockSharedPreferencesContactCacheManager
-      mockSharedPreferencesContactCacheManager;
+  mockSharedPreferencesContactCacheManager;
   late GetIt getIt;
 
   setUp(() {
@@ -151,14 +151,12 @@ void main() {
 
         contactsManager.getContactsNotifier().addListener(() {
           contactsManager.getContactsNotifier().value.fold(
-                (failure) => listTomContactsFailureState.add(failure),
-                (success) => null,
-              );
+            (failure) => listTomContactsFailureState.add(failure),
+            (success) => null,
+          );
         });
 
-        when(
-          mockGetTomContactsInteractor.execute(),
-        ).thenAnswer(
+        when(mockGetTomContactsInteractor.execute()).thenAnswer(
           (_) => Stream.fromIterable([
             const Right(ContactsLoading()),
             const Left(GetContactsIsEmpty()),
@@ -174,12 +172,7 @@ void main() {
 
         expectLater(listTomContactsFailureState.length, 1);
 
-        expectLater(
-          listTomContactsFailureState,
-          [
-            const GetContactsIsEmpty(),
-          ],
-        );
+        expectLater(listTomContactsFailureState, [const GetContactsIsEmpty()]);
 
         verifyNever(
           mockFederationLookUpPhonebookContactInteractor.execute(
@@ -205,14 +198,12 @@ void main() {
 
         contactsManager.getContactsNotifier().addListener(() {
           contactsManager.getContactsNotifier().value.fold(
-                (failure) => listTomContactsFailureState.add(failure),
-                (success) => null,
-              );
+            (failure) => listTomContactsFailureState.add(failure),
+            (success) => null,
+          );
         });
 
-        when(
-          mockGetTomContactsInteractor.execute(),
-        ).thenAnswer(
+        when(mockGetTomContactsInteractor.execute()).thenAnswer(
           (_) => Stream.fromIterable([
             const Right(ContactsLoading()),
             const Left(GetContactsFailure(keyword: '', exception: dynamic)),
@@ -228,12 +219,9 @@ void main() {
 
         expectLater(listTomContactsFailureState.length, 1);
 
-        expectLater(
-          listTomContactsFailureState,
-          [
-            const GetContactsFailure(keyword: '', exception: dynamic),
-          ],
-        );
+        expectLater(listTomContactsFailureState, [
+          const GetContactsFailure(keyword: '', exception: dynamic),
+        ]);
 
         verifyNever(
           mockFederationLookUpPhonebookContactInteractor.execute(
@@ -260,22 +248,17 @@ void main() {
 
         contactsManager.getContactsNotifier().addListener(() {
           contactsManager.getContactsNotifier().value.fold(
-                (failure) => null,
-                (success) => listTomContactsSuccessState.add(success),
-              );
+            (failure) => null,
+            (success) => listTomContactsSuccessState.add(success),
+          );
         });
 
-        when(
-          mockGetTomContactsInteractor.execute(),
-        ).thenAnswer(
+        when(mockGetTomContactsInteractor.execute()).thenAnswer(
           (_) => Stream.fromIterable([
             const Right(ContactsLoading()),
             Right(
               GetContactsSuccess(
-                contacts: [
-                  ContactFixtures.contact1,
-                  ContactFixtures.contact2,
-                ],
+                contacts: [ContactFixtures.contact1, ContactFixtures.contact2],
               ),
             ),
           ]),
@@ -290,18 +273,12 @@ void main() {
 
         expectLater(listTomContactsSuccessState.length, 2);
 
-        expectLater(
-          listTomContactsSuccessState,
-          [
-            const ContactsLoading(),
-            GetContactsSuccess(
-              contacts: [
-                ContactFixtures.contact1,
-                ContactFixtures.contact2,
-              ],
-            ),
-          ],
-        );
+        expectLater(listTomContactsSuccessState, [
+          const ContactsLoading(),
+          GetContactsSuccess(
+            contacts: [ContactFixtures.contact1, ContactFixtures.contact2],
+          ),
+        ]);
 
         final tomContact = contactsManager
             .getContactsNotifier()
@@ -324,8 +301,7 @@ void main() {
     );
   });
 
-  group('ContactsManager Unit test - ENV: Mobile - Supported Federation server',
-      () {
+  group('ContactsManager Unit test - ENV: Mobile - Supported Federation server', () {
     const mxId = 'mxId';
 
     const baseUrl = 'https://example.com';
@@ -334,12 +310,7 @@ void main() {
 
     final federationConfigurations = FederationConfigurations(
       fedServerInformation: FederationServerInformation(
-        baseUrls: [
-          Uri(
-            scheme: 'https',
-            host: 'federation',
-          ),
-        ],
+        baseUrls: [Uri(scheme: 'https', host: 'federation')],
       ),
     );
 
@@ -349,23 +320,1069 @@ void main() {
       ContactFixtures.contact3,
     ];
 
+    test('WHEN it is available get Phonebook contact.\n'
+        'AND contactsNotifier return GetContactsIsEmpty with contacts is empty.\n'
+        'AND tryGetSyncedPhoneBookContactInteractor return GetSyncedPhoneBookContactFailure state.\n'
+        'AND phonebookContactNotifier return RequestTokenFailure state.\n'
+        'THEN contactsNotifier in ContactsManager SHOULD have GetContactsIsEmpty state.\n'
+        'THEN phonebookContactNotifier in ContactsManager SHOULD have RequestTokenFailure state.\n'
+        'THEN list ToM contact SHOULD is empty.\n'
+        'THEN list Phonebook contact SHOULD is empty.\n', () async {
+      final List<Failure> listTomContactsFailureState = [];
+
+      final List<Failure> listPhonebookContactsFailureState = [];
+
+      when(mockGetTomContactsInteractor.execute()).thenAnswer(
+        (_) => Stream.fromIterable([
+          const Right(ContactsLoading()),
+          const Left(GetContactsIsEmpty()),
+        ]),
+      );
+
+      when(
+        mockTryGetSyncedPhoneBookContactInteractor.execute(userId: mxId),
+      ).thenAnswer(
+        (_) async =>
+            const Left(GetSyncedPhoneBookContactFailure(exception: dynamic)),
+      );
+
+      when(mockHomeServerDynamicUrlInterceptors.baseUrl).thenReturn(baseUrl);
+
+      when(mockAuthorizationInterceptor.getAccessToken).thenReturn(accessToken);
+
+      when(
+        mockFederationConfigurationsRepository.getFederationConfigurations(
+          mxId,
+        ),
+      ).thenAnswer((_) async => federationConfigurations);
+
+      when(
+        mockFederationLookUpPhonebookContactInteractor.execute(
+          argument: FederationLookUpArgument(
+            homeServerUrl: baseUrl,
+            federationUrl:
+                federationConfigurations.fedServerInformation.baseUrls?.first
+                    .toString() ??
+                '',
+            withMxId: mxId,
+            withAccessToken: accessToken,
+          ),
+        ),
+      ).thenAnswer(
+        (_) => Stream.fromIterable([
+          const Right(GetPhonebookContactsLoading()),
+          Left(RequestTokenFailure(exception: dynamic, contacts: contacts)),
+        ]),
+      );
+
+      contactsManager.getContactsNotifier().addListener(() {
+        contactsManager.getContactsNotifier().value.fold(
+          (failure) => listTomContactsFailureState.add(failure),
+          (success) => null,
+        );
+      });
+
+      contactsManager.getPhonebookContactsNotifier().addListener(() {
+        contactsManager.getPhonebookContactsNotifier().value.fold(
+          (failure) => listPhonebookContactsFailureState.add(failure),
+          (success) => null,
+        );
+      });
+
+      contactsManager.initialSynchronizeContacts(
+        isAvailableSupportPhonebookContacts: true,
+        withMxId: mxId,
+      );
+
+      await Future.delayed(const Duration(seconds: 1));
+
+      verify(mockGetTomContactsInteractor.execute()).called(1);
+
+      verify(
+        mockTryGetSyncedPhoneBookContactInteractor.execute(userId: mxId),
+      ).called(1);
+
+      expectLater(listTomContactsFailureState.length, 1);
+
+      expectLater(listTomContactsFailureState, [const GetContactsIsEmpty()]);
+
+      expectLater(listPhonebookContactsFailureState.length, 1);
+
+      expectLater(listPhonebookContactsFailureState, [
+        RequestTokenFailure(exception: dynamic, contacts: contacts),
+      ]);
+    });
+
+    test('WHEN it is available get Phonebook contact.\n'
+        'AND contactsNotifier return GetContactsIsEmpty with contacts is empty.\n'
+        'AND tryGetSyncedPhoneBookContactInteractor return GetSyncedPhoneBookContactSuccessState state.\n'
+        'AND timeAvailableForSyncVault is false.\n'
+        'THEN contactsNotifier in ContactsManager SHOULD have GetContactsIsEmpty state.\n'
+        'THEN phonebookContactNotifier in ContactsManager SHOULD have GetPhonebookContactsSuccess state.\n'
+        'THEN list ToM contact SHOULD is empty.\n'
+        'THEN list Phonebook contact SHOULD is not empty.\n', () async {
+      final List<Failure> listTomContactsFailureState = [];
+
+      final List<Success> listPhonebookContactsSuccessState = [];
+
+      when(mockGetTomContactsInteractor.execute()).thenAnswer(
+        (_) => Stream.fromIterable([
+          const Right(ContactsLoading()),
+          const Left(GetContactsIsEmpty()),
+        ]),
+      );
+
+      when(
+        mockTryGetSyncedPhoneBookContactInteractor.execute(userId: mxId),
+      ).thenAnswer(
+        (_) async => Right(
+          GetSyncedPhoneBookContactSuccessState(
+            contacts: contacts,
+            timeAvailableForSyncVault: false,
+          ),
+        ),
+      );
+
+      contactsManager.getContactsNotifier().addListener(() {
+        contactsManager.getContactsNotifier().value.fold(
+          (failure) => listTomContactsFailureState.add(failure),
+          (success) => null,
+        );
+      });
+
+      contactsManager.getPhonebookContactsNotifier().addListener(() {
+        contactsManager.getPhonebookContactsNotifier().value.fold(
+          (failure) => null,
+          (success) => listPhonebookContactsSuccessState.add(success),
+        );
+      });
+
+      contactsManager.initialSynchronizeContacts(
+        isAvailableSupportPhonebookContacts: true,
+        withMxId: mxId,
+      );
+
+      await Future.delayed(const Duration(seconds: 1));
+
+      verify(mockGetTomContactsInteractor.execute()).called(1);
+
+      verify(
+        mockTryGetSyncedPhoneBookContactInteractor.execute(userId: mxId),
+      ).called(1);
+
+      verifyNever(mockHomeServerDynamicUrlInterceptors.baseUrl);
+
+      verifyNever(mockAuthorizationInterceptor.getAccessToken);
+
+      verifyNever(
+        mockFederationConfigurationsRepository.getFederationConfigurations(
+          mxId,
+        ),
+      );
+
+      verifyNever(
+        mockFederationLookUpPhonebookContactInteractor.execute(
+          argument: FederationLookUpArgument(
+            homeServerUrl: baseUrl,
+            federationUrl:
+                federationConfigurations.fedServerInformation.baseUrls?.first
+                    .toString() ??
+                '',
+            withMxId: mxId,
+            withAccessToken: accessToken,
+          ),
+        ),
+      );
+
+      expectLater(listTomContactsFailureState.length, 1);
+
+      expectLater(listTomContactsFailureState, [const GetContactsIsEmpty()]);
+
+      expectLater(listPhonebookContactsSuccessState.length, 1);
+
+      expectLater(listPhonebookContactsSuccessState, [
+        GetPhonebookContactsSuccess(progress: 100, contacts: contacts),
+      ]);
+    });
+
+    test('WHEN it is available get Phonebook contact.\n'
+        'AND contactsNotifier return GetContactsIsEmpty with contacts is empty.\n'
+        'AND tryGetSyncedPhoneBookContactInteractor return GetSyncedPhoneBookContactSuccessState state.\n'
+        'AND timeAvailableForSyncVault is true.\n'
+        'THEN contactsNotifier in ContactsManager SHOULD have GetContactsIsEmpty state.\n'
+        'THEN phonebookContactNotifier in ContactsManager SHOULD have RequestTokenFailure state.\n'
+        'THEN list ToM contact SHOULD is empty.\n'
+        'THEN list Phonebook contact SHOULD is empty.\n', () async {
+      final List<Failure> listTomContactsFailureState = [];
+
+      final List<Failure> listPhonebookContactsFailureState = [];
+
+      when(mockGetTomContactsInteractor.execute()).thenAnswer(
+        (_) => Stream.fromIterable([
+          const Right(ContactsLoading()),
+          const Left(GetContactsIsEmpty()),
+        ]),
+      );
+
+      when(
+        mockTryGetSyncedPhoneBookContactInteractor.execute(userId: mxId),
+      ).thenAnswer(
+        (_) async => Right(
+          GetSyncedPhoneBookContactSuccessState(
+            contacts: contacts,
+            timeAvailableForSyncVault: true,
+          ),
+        ),
+      );
+
+      when(mockHomeServerDynamicUrlInterceptors.baseUrl).thenReturn(baseUrl);
+
+      when(mockAuthorizationInterceptor.getAccessToken).thenReturn(accessToken);
+
+      when(
+        mockFederationConfigurationsRepository.getFederationConfigurations(
+          mxId,
+        ),
+      ).thenAnswer((_) async => federationConfigurations);
+
+      when(
+        mockFederationLookUpPhonebookContactInteractor.execute(
+          argument: FederationLookUpArgument(
+            homeServerUrl: baseUrl,
+            federationUrl:
+                federationConfigurations.fedServerInformation.baseUrls?.first
+                    .toString() ??
+                '',
+            withMxId: mxId,
+            withAccessToken: accessToken,
+          ),
+        ),
+      ).thenAnswer(
+        (_) => Stream.fromIterable([
+          const Right(GetPhonebookContactsLoading()),
+          Left(RequestTokenFailure(exception: dynamic, contacts: contacts)),
+        ]),
+      );
+
+      contactsManager.getContactsNotifier().addListener(() {
+        contactsManager.getContactsNotifier().value.fold(
+          (failure) => listTomContactsFailureState.add(failure),
+          (success) => null,
+        );
+      });
+
+      contactsManager.getPhonebookContactsNotifier().addListener(() {
+        contactsManager.getPhonebookContactsNotifier().value.fold(
+          (failure) => listPhonebookContactsFailureState.add(failure),
+          (success) => null,
+        );
+      });
+
+      contactsManager.initialSynchronizeContacts(
+        isAvailableSupportPhonebookContacts: true,
+        withMxId: mxId,
+      );
+
+      await Future.delayed(const Duration(seconds: 1));
+
+      verify(mockGetTomContactsInteractor.execute()).called(1);
+
+      verify(
+        mockTryGetSyncedPhoneBookContactInteractor.execute(userId: mxId),
+      ).called(1);
+
+      verify(mockHomeServerDynamicUrlInterceptors.baseUrl).called(1);
+
+      verify(mockAuthorizationInterceptor.getAccessToken).called(1);
+
+      verify(
+        mockFederationConfigurationsRepository.getFederationConfigurations(
+          mxId,
+        ),
+      ).called(1);
+
+      verify(
+        mockFederationLookUpPhonebookContactInteractor.execute(
+          argument: FederationLookUpArgument(
+            homeServerUrl: baseUrl,
+            federationUrl:
+                federationConfigurations.fedServerInformation.baseUrls?.first
+                    .toString() ??
+                '',
+            withMxId: mxId,
+            withAccessToken: accessToken,
+          ),
+        ),
+      ).called(1);
+
+      expectLater(listTomContactsFailureState.length, 1);
+
+      expectLater(listTomContactsFailureState, [const GetContactsIsEmpty()]);
+
+      expectLater(listPhonebookContactsFailureState.length, 1);
+
+      expectLater(listPhonebookContactsFailureState, [
+        RequestTokenFailure(exception: dynamic, contacts: contacts),
+      ]);
+    });
+
+    test('WHEN it is available get Phonebook contact.\n'
+        'AND contactsNotifier return GetContactsIsEmpty with contacts is empty.\n'
+        'AND tryGetSyncedPhoneBookContactInteractor return GetSyncedPhoneBookContactSuccessState state.\n'
+        'AND timeAvailableForSyncVault is true.\n'
+        'AND phonebookContactNotifier return GetPhonebookContactsSuccess state.\n'
+        'THEN contactsNotifier in ContactsManager SHOULD have GetContactsIsEmpty state.\n'
+        'THEN phonebookContactNotifier in ContactsManager SHOULD have GetPhonebookContactsSuccess state.\n'
+        'THEN list ToM contact SHOULD is empty.\n'
+        'THEN list Phonebook contact SHOULD is not empty.\n', () async {
+      final List<Failure> listTomContactsFailureState = [];
+
+      final List<Success> listPhonebookContactsSuccessState = [];
+
+      debugDefaultTargetPlatformOverride = TargetPlatform.android;
+
+      when(mockGetTomContactsInteractor.execute()).thenAnswer(
+        (_) => Stream.fromIterable([
+          const Right(ContactsLoading()),
+          const Left(GetContactsIsEmpty()),
+        ]),
+      );
+
+      when(
+        mockTryGetSyncedPhoneBookContactInteractor.execute(userId: mxId),
+      ).thenAnswer(
+        (_) async => Right(
+          GetSyncedPhoneBookContactSuccessState(
+            contacts: contacts,
+            timeAvailableForSyncVault: true,
+          ),
+        ),
+      );
+
+      when(mockHomeServerDynamicUrlInterceptors.baseUrl).thenReturn(baseUrl);
+
+      when(mockAuthorizationInterceptor.getAccessToken).thenReturn(accessToken);
+
+      when(
+        mockFederationConfigurationsRepository.getFederationConfigurations(
+          mxId,
+        ),
+      ).thenAnswer((_) async => federationConfigurations);
+
+      when(
+        mockFederationLookUpPhonebookContactInteractor.execute(
+          argument: FederationLookUpArgument(
+            homeServerUrl: baseUrl,
+            federationUrl:
+                federationConfigurations.fedServerInformation.baseUrls?.first
+                    .toString() ??
+                '',
+            withMxId: mxId,
+            withAccessToken: accessToken,
+          ),
+        ),
+      ).thenAnswer(
+        (_) => Stream.fromIterable([
+          const Right(GetPhonebookContactsLoading()),
+          Right(GetPhonebookContactsSuccess(contacts: contacts, progress: 100)),
+        ]),
+      );
+
+      when(
+        mockPostAddressBookInteractor.execute(
+          addressBooks: contacts.toSet().toAddressBooks().toList(),
+        ),
+      ).thenAnswer(
+        (_) => Stream.fromIterable([
+          const Right(PostAddressBookLoading()),
+          const Right(PostAddressBookSuccessState(updatedAddressBooks: [])),
+        ]),
+      );
+
+      contactsManager.getContactsNotifier().addListener(() {
+        contactsManager.getContactsNotifier().value.fold(
+          (failure) => listTomContactsFailureState.add(failure),
+          (success) => null,
+        );
+      });
+
+      contactsManager.getPhonebookContactsNotifier().addListener(() {
+        contactsManager.getPhonebookContactsNotifier().value.fold(
+          (failure) => null,
+          (success) => listPhonebookContactsSuccessState.add(success),
+        );
+      });
+
+      contactsManager.initialSynchronizeContacts(
+        isAvailableSupportPhonebookContacts: true,
+        withMxId: mxId,
+      );
+
+      await Future.delayed(const Duration(seconds: 1));
+
+      verify(mockGetTomContactsInteractor.execute()).called(1);
+
+      verify(
+        mockTryGetSyncedPhoneBookContactInteractor.execute(userId: mxId),
+      ).called(1);
+
+      verify(mockHomeServerDynamicUrlInterceptors.baseUrl).called(1);
+
+      verify(mockAuthorizationInterceptor.getAccessToken).called(1);
+
+      verify(
+        mockFederationConfigurationsRepository.getFederationConfigurations(
+          mxId,
+        ),
+      ).called(1);
+
+      verify(
+        mockFederationLookUpPhonebookContactInteractor.execute(
+          argument: FederationLookUpArgument(
+            homeServerUrl: baseUrl,
+            federationUrl:
+                federationConfigurations.fedServerInformation.baseUrls?.first
+                    .toString() ??
+                '',
+            withMxId: mxId,
+            withAccessToken: accessToken,
+          ),
+        ),
+      ).called(1);
+
+      expectLater(listTomContactsFailureState.length, 1);
+
+      expectLater(listTomContactsFailureState, [const GetContactsIsEmpty()]);
+
+      expectLater(listPhonebookContactsSuccessState.length, 2);
+
+      expectLater(listPhonebookContactsSuccessState, [
+        const GetPhonebookContactsLoading(),
+        GetPhonebookContactsSuccess(progress: 100, contacts: contacts),
+      ]);
+    });
+
+    test('WHEN it is available get Phonebook contact.\n'
+        'AND contactsNotifier return GetContactsSuccess with contacts not empty.\n'
+        'AND tryGetSyncedPhoneBookContactInteractor return GetSyncedPhoneBookContactSuccessState state.\n'
+        'AND timeAvailableForSyncVault is true.\n'
+        'THEN contactsNotifier in ContactsManager SHOULD have GetContactsSuccess state.\n'
+        'THEN phonebookContactNotifier in ContactsManager SHOULD have GetPhonebookContactsSuccess state.\n'
+        'THEN list ToM contact SHOULD is empty.\n'
+        'THEN list Phonebook contact SHOULD is not empty.\n', () async {
+      final List<Success> listTomContactsSuccessState = [];
+
+      final List<Success> listPhonebookContactsSuccessState = [];
+
+      when(mockGetTomContactsInteractor.execute()).thenAnswer(
+        (_) => Stream.fromIterable([
+          const Right(ContactsLoading()),
+          Right(GetContactsSuccess(contacts: contacts)),
+        ]),
+      );
+
+      when(
+        mockTryGetSyncedPhoneBookContactInteractor.execute(userId: mxId),
+      ).thenAnswer(
+        (_) async => Right(
+          GetSyncedPhoneBookContactSuccessState(
+            contacts: contacts,
+            timeAvailableForSyncVault: true,
+          ),
+        ),
+      );
+
+      when(mockHomeServerDynamicUrlInterceptors.baseUrl).thenReturn(baseUrl);
+
+      when(mockAuthorizationInterceptor.getAccessToken).thenReturn(accessToken);
+
+      when(
+        mockFederationConfigurationsRepository.getFederationConfigurations(
+          mxId,
+        ),
+      ).thenAnswer((_) async => federationConfigurations);
+
+      when(
+        mockFederationLookUpPhonebookContactInteractor.execute(
+          argument: FederationLookUpArgument(
+            homeServerUrl: baseUrl,
+            federationUrl:
+                federationConfigurations.fedServerInformation.baseUrls?.first
+                    .toString() ??
+                '',
+            withMxId: mxId,
+            withAccessToken: accessToken,
+          ),
+        ),
+      ).thenAnswer(
+        (_) => Stream.fromIterable([
+          const Right(GetPhonebookContactsLoading()),
+          Right(GetPhonebookContactsSuccess(contacts: contacts, progress: 100)),
+        ]),
+      );
+
+      when(
+        mockPostAddressBookInteractor.execute(
+          addressBooks: contacts.toSet().toAddressBooks().toList(),
+        ),
+      ).thenAnswer(
+        (_) => Stream.fromIterable([
+          const Right(PostAddressBookLoading()),
+          const Right(PostAddressBookSuccessState(updatedAddressBooks: [])),
+        ]),
+      );
+
+      contactsManager.getContactsNotifier().addListener(() {
+        contactsManager.getContactsNotifier().value.fold(
+          (failure) => null,
+          (success) => listTomContactsSuccessState.add(success),
+        );
+      });
+
+      contactsManager.getPhonebookContactsNotifier().addListener(() {
+        contactsManager.getPhonebookContactsNotifier().value.fold(
+          (failure) => null,
+          (success) => listPhonebookContactsSuccessState.add(success),
+        );
+      });
+
+      contactsManager.initialSynchronizeContacts(
+        isAvailableSupportPhonebookContacts: true,
+        withMxId: mxId,
+      );
+
+      await Future.delayed(const Duration(seconds: 1));
+
+      verify(mockGetTomContactsInteractor.execute()).called(1);
+
+      verify(
+        mockTryGetSyncedPhoneBookContactInteractor.execute(userId: mxId),
+      ).called(1);
+
+      verify(mockHomeServerDynamicUrlInterceptors.baseUrl).called(1);
+
+      verify(mockAuthorizationInterceptor.getAccessToken).called(1);
+
+      verify(
+        mockFederationConfigurationsRepository.getFederationConfigurations(
+          mxId,
+        ),
+      ).called(1);
+
+      verify(
+        mockFederationLookUpPhonebookContactInteractor.execute(
+          argument: FederationLookUpArgument(
+            homeServerUrl: baseUrl,
+            federationUrl:
+                federationConfigurations.fedServerInformation.baseUrls?.first
+                    .toString() ??
+                '',
+            withMxId: mxId,
+            withAccessToken: accessToken,
+          ),
+        ),
+      ).called(1);
+
+      expectLater(listTomContactsSuccessState.length, 2);
+
+      expectLater(listTomContactsSuccessState, [
+        const ContactsLoading(),
+        GetContactsSuccess(contacts: contacts),
+      ]);
+
+      expectLater(listPhonebookContactsSuccessState.length, 2);
+
+      expectLater(listPhonebookContactsSuccessState, [
+        const GetPhonebookContactsLoading(),
+        GetPhonebookContactsSuccess(progress: 100, contacts: contacts),
+      ]);
+    });
+
+    test('WHEN it is available get Phonebook contact.\n'
+        'AND contactsNotifier return GetContactsIsEmpty with contacts is empty.\n'
+        'AND tryGetSyncedPhoneBookContactInteractor return GetSyncedPhoneBookContactFailure state.\n'
+        'AND phonebookContactNotifier return RegisterTokenFailure state.\n'
+        'THEN contactsNotifier in ContactsManager SHOULD have GetContactsIsEmpty state.\n'
+        'THEN phonebookContactNotifier in ContactsManager SHOULD have RegisterTokenFailure state.\n'
+        'THEN list ToM contact SHOULD is empty.\n'
+        'THEN list Phonebook contact SHOULD is empty.\n', () async {
+      final List<Failure> listTomContactsFailureState = [];
+
+      final List<Failure> listPhonebookContactsFailureState = [];
+
+      when(mockGetTomContactsInteractor.execute()).thenAnswer(
+        (_) => Stream.fromIterable([
+          const Right(ContactsLoading()),
+          const Left(GetContactsIsEmpty()),
+        ]),
+      );
+
+      when(
+        mockTryGetSyncedPhoneBookContactInteractor.execute(userId: mxId),
+      ).thenAnswer(
+        (_) async =>
+            const Left(GetSyncedPhoneBookContactFailure(exception: dynamic)),
+      );
+
+      when(mockHomeServerDynamicUrlInterceptors.baseUrl).thenReturn(baseUrl);
+
+      when(mockAuthorizationInterceptor.getAccessToken).thenReturn(accessToken);
+
+      when(
+        mockFederationConfigurationsRepository.getFederationConfigurations(
+          mxId,
+        ),
+      ).thenAnswer((_) async => federationConfigurations);
+
+      when(
+        mockFederationLookUpPhonebookContactInteractor.execute(
+          argument: FederationLookUpArgument(
+            homeServerUrl: baseUrl,
+            federationUrl:
+                federationConfigurations.fedServerInformation.baseUrls?.first
+                    .toString() ??
+                '',
+            withMxId: mxId,
+            withAccessToken: accessToken,
+          ),
+        ),
+      ).thenAnswer(
+        (_) => Stream.fromIterable([
+          const Right(GetPhonebookContactsLoading()),
+          Left(RegisterTokenFailure(exception: dynamic, contacts: contacts)),
+        ]),
+      );
+
+      contactsManager.getContactsNotifier().addListener(() {
+        contactsManager.getContactsNotifier().value.fold(
+          (failure) => listTomContactsFailureState.add(failure),
+          (success) => null,
+        );
+      });
+
+      contactsManager.getPhonebookContactsNotifier().addListener(() {
+        contactsManager.getPhonebookContactsNotifier().value.fold(
+          (failure) => listPhonebookContactsFailureState.add(failure),
+          (success) => null,
+        );
+      });
+
+      contactsManager.initialSynchronizeContacts(
+        isAvailableSupportPhonebookContacts: true,
+        withMxId: mxId,
+      );
+
+      await Future.delayed(const Duration(seconds: 1));
+
+      verify(mockGetTomContactsInteractor.execute()).called(1);
+
+      verify(
+        mockTryGetSyncedPhoneBookContactInteractor.execute(userId: mxId),
+      ).called(1);
+
+      expectLater(listTomContactsFailureState.length, 1);
+
+      expectLater(listTomContactsFailureState, [const GetContactsIsEmpty()]);
+
+      expectLater(listPhonebookContactsFailureState.length, 1);
+
+      expectLater(listPhonebookContactsFailureState, [
+        RegisterTokenFailure(exception: dynamic, contacts: contacts),
+      ]);
+    });
+
+    test('WHEN it is available get Phonebook contact.\n'
+        'AND contactsNotifier return GetContactsIsEmpty with contacts is empty.\n'
+        'AND tryGetSyncedPhoneBookContactInteractor return GetSyncedPhoneBookContactFailure state.\n'
+        'AND phonebookContactNotifier return GetPhonebookContactsIsEmpty state.\n'
+        'THEN contactsNotifier in ContactsManager SHOULD have GetContactsIsEmpty state.\n'
+        'THEN phonebookContactNotifier in ContactsManager SHOULD have GetPhonebookContactsIsEmpty state.\n'
+        'THEN list ToM contact SHOULD is empty.\n'
+        'THEN list Phonebook contact SHOULD is empty.\n', () async {
+      final List<Failure> listTomContactsFailureState = [];
+
+      final List<Failure> listPhonebookContactsFailureState = [];
+
+      when(mockGetTomContactsInteractor.execute()).thenAnswer(
+        (_) => Stream.fromIterable([
+          const Right(ContactsLoading()),
+          const Left(GetContactsIsEmpty()),
+        ]),
+      );
+
+      when(
+        mockTryGetSyncedPhoneBookContactInteractor.execute(userId: mxId),
+      ).thenAnswer(
+        (_) async =>
+            const Left(GetSyncedPhoneBookContactFailure(exception: dynamic)),
+      );
+
+      when(mockHomeServerDynamicUrlInterceptors.baseUrl).thenReturn(baseUrl);
+
+      when(mockAuthorizationInterceptor.getAccessToken).thenReturn(accessToken);
+
+      when(
+        mockFederationConfigurationsRepository.getFederationConfigurations(
+          mxId,
+        ),
+      ).thenAnswer((_) async => federationConfigurations);
+
+      when(
+        mockFederationLookUpPhonebookContactInteractor.execute(
+          argument: FederationLookUpArgument(
+            homeServerUrl: baseUrl,
+            federationUrl:
+                federationConfigurations.fedServerInformation.baseUrls?.first
+                    .toString() ??
+                '',
+            withMxId: mxId,
+            withAccessToken: accessToken,
+          ),
+        ),
+      ).thenAnswer(
+        (_) => Stream.fromIterable([
+          const Right(GetPhonebookContactsLoading()),
+          const Left(GetPhonebookContactsIsEmpty()),
+        ]),
+      );
+
+      contactsManager.getContactsNotifier().addListener(() {
+        contactsManager.getContactsNotifier().value.fold(
+          (failure) => listTomContactsFailureState.add(failure),
+          (success) => null,
+        );
+      });
+
+      contactsManager.getPhonebookContactsNotifier().addListener(() {
+        contactsManager.getPhonebookContactsNotifier().value.fold(
+          (failure) => listPhonebookContactsFailureState.add(failure),
+          (success) => null,
+        );
+      });
+
+      contactsManager.initialSynchronizeContacts(
+        isAvailableSupportPhonebookContacts: true,
+        withMxId: mxId,
+      );
+
+      await Future.delayed(const Duration(seconds: 1));
+
+      verify(mockGetTomContactsInteractor.execute()).called(1);
+
+      verify(
+        mockTryGetSyncedPhoneBookContactInteractor.execute(userId: mxId),
+      ).called(1);
+
+      expectLater(listTomContactsFailureState.length, 1);
+
+      expectLater(listTomContactsFailureState, [const GetContactsIsEmpty()]);
+
+      expectLater(listPhonebookContactsFailureState.length, 1);
+
+      expectLater(listPhonebookContactsFailureState, [
+        const GetPhonebookContactsIsEmpty(),
+      ]);
+    });
+
+    test('WHEN it is available get Phonebook contact.\n'
+        'AND contactsNotifier return GetContactsIsEmpty with contacts is empty.\n'
+        'AND tryGetSyncedPhoneBookContactInteractor return GetSyncedPhoneBookContactFailure state.\n'
+        'AND phonebookContactNotifier return GetPhoneBookContactFailure state.\n'
+        'THEN contactsNotifier in ContactsManager SHOULD have GetContactsIsEmpty state.\n'
+        'THEN phonebookContactNotifier in ContactsManager SHOULD have GetPhoneBookContactFailure state.\n'
+        'THEN list ToM contact SHOULD is empty.\n'
+        'THEN list Phonebook contact SHOULD is empty.\n', () async {
+      final List<Failure> listTomContactsFailureState = [];
+
+      final List<Failure> listPhonebookContactsFailureState = [];
+
+      when(mockGetTomContactsInteractor.execute()).thenAnswer(
+        (_) => Stream.fromIterable([
+          const Right(ContactsLoading()),
+          const Left(GetContactsIsEmpty()),
+        ]),
+      );
+
+      when(
+        mockTryGetSyncedPhoneBookContactInteractor.execute(userId: mxId),
+      ).thenAnswer(
+        (_) async =>
+            const Left(GetSyncedPhoneBookContactFailure(exception: dynamic)),
+      );
+
+      when(mockHomeServerDynamicUrlInterceptors.baseUrl).thenReturn(baseUrl);
+
+      when(mockAuthorizationInterceptor.getAccessToken).thenReturn(accessToken);
+
+      when(
+        mockFederationConfigurationsRepository.getFederationConfigurations(
+          mxId,
+        ),
+      ).thenAnswer((_) async => federationConfigurations);
+
+      when(
+        mockFederationLookUpPhonebookContactInteractor.execute(
+          argument: FederationLookUpArgument(
+            homeServerUrl: baseUrl,
+            federationUrl:
+                federationConfigurations.fedServerInformation.baseUrls?.first
+                    .toString() ??
+                '',
+            withMxId: mxId,
+            withAccessToken: accessToken,
+          ),
+        ),
+      ).thenAnswer(
+        (_) => Stream.fromIterable([
+          const Right(GetPhonebookContactsLoading()),
+          const Left(GetPhoneBookContactFailure(exception: dynamic)),
+        ]),
+      );
+
+      contactsManager.getContactsNotifier().addListener(() {
+        contactsManager.getContactsNotifier().value.fold(
+          (failure) => listTomContactsFailureState.add(failure),
+          (success) => null,
+        );
+      });
+
+      contactsManager.getPhonebookContactsNotifier().addListener(() {
+        contactsManager.getPhonebookContactsNotifier().value.fold(
+          (failure) => listPhonebookContactsFailureState.add(failure),
+          (success) => null,
+        );
+      });
+
+      contactsManager.initialSynchronizeContacts(
+        isAvailableSupportPhonebookContacts: true,
+        withMxId: mxId,
+      );
+
+      await Future.delayed(const Duration(seconds: 1));
+
+      verify(mockGetTomContactsInteractor.execute()).called(1);
+
+      verify(
+        mockTryGetSyncedPhoneBookContactInteractor.execute(userId: mxId),
+      ).called(1);
+
+      expectLater(listTomContactsFailureState.length, 1);
+
+      expectLater(listTomContactsFailureState, [const GetContactsIsEmpty()]);
+
+      expectLater(listPhonebookContactsFailureState.length, 1);
+
+      expectLater(listPhonebookContactsFailureState, [
+        const GetPhoneBookContactFailure(exception: dynamic),
+      ]);
+    });
+
+    test('WHEN it is available get Phonebook contact.\n'
+        'AND contactsNotifier return GetContactsIsEmpty with contacts is empty.\n'
+        'AND tryGetSyncedPhoneBookContactInteractor return GetSyncedPhoneBookContactFailure state.\n'
+        'AND phonebookContactNotifier return GetHashDetailsFailure state.\n'
+        'THEN contactsNotifier in ContactsManager SHOULD have GetContactsIsEmpty state.\n'
+        'THEN phonebookContactNotifier in ContactsManager SHOULD have GetHashDetailsFailure state.\n'
+        'THEN list ToM contact SHOULD is empty.\n'
+        'THEN list Phonebook contact SHOULD is empty.\n', () async {
+      final List<Failure> listTomContactsFailureState = [];
+
+      final List<Failure> listPhonebookContactsFailureState = [];
+
+      when(mockGetTomContactsInteractor.execute()).thenAnswer(
+        (_) => Stream.fromIterable([
+          const Right(ContactsLoading()),
+          const Left(GetContactsIsEmpty()),
+        ]),
+      );
+
+      when(
+        mockTryGetSyncedPhoneBookContactInteractor.execute(userId: mxId),
+      ).thenAnswer(
+        (_) async =>
+            const Left(GetSyncedPhoneBookContactFailure(exception: dynamic)),
+      );
+
+      when(mockHomeServerDynamicUrlInterceptors.baseUrl).thenReturn(baseUrl);
+
+      when(mockAuthorizationInterceptor.getAccessToken).thenReturn(accessToken);
+
+      when(
+        mockFederationConfigurationsRepository.getFederationConfigurations(
+          mxId,
+        ),
+      ).thenAnswer((_) async => federationConfigurations);
+
+      when(
+        mockFederationLookUpPhonebookContactInteractor.execute(
+          argument: FederationLookUpArgument(
+            homeServerUrl: baseUrl,
+            federationUrl:
+                federationConfigurations.fedServerInformation.baseUrls?.first
+                    .toString() ??
+                '',
+            withMxId: mxId,
+            withAccessToken: accessToken,
+          ),
+        ),
+      ).thenAnswer(
+        (_) => Stream.fromIterable([
+          const Right(GetPhonebookContactsLoading()),
+          const Left(GetHashDetailsFailure(exception: dynamic)),
+        ]),
+      );
+
+      contactsManager.getContactsNotifier().addListener(() {
+        contactsManager.getContactsNotifier().value.fold(
+          (failure) => listTomContactsFailureState.add(failure),
+          (success) => null,
+        );
+      });
+
+      contactsManager.getPhonebookContactsNotifier().addListener(() {
+        contactsManager.getPhonebookContactsNotifier().value.fold(
+          (failure) => listPhonebookContactsFailureState.add(failure),
+          (success) => null,
+        );
+      });
+
+      contactsManager.initialSynchronizeContacts(
+        isAvailableSupportPhonebookContacts: true,
+        withMxId: mxId,
+      );
+
+      await Future.delayed(const Duration(seconds: 1));
+
+      verify(mockGetTomContactsInteractor.execute()).called(1);
+
+      verify(
+        mockTryGetSyncedPhoneBookContactInteractor.execute(userId: mxId),
+      ).called(1);
+
+      expectLater(listTomContactsFailureState.length, 1);
+
+      expectLater(listTomContactsFailureState, [const GetContactsIsEmpty()]);
+
+      expectLater(listPhonebookContactsFailureState.length, 1);
+
+      expectLater(listPhonebookContactsFailureState, [
+        const GetHashDetailsFailure(exception: dynamic),
+      ]);
+    });
+
+    test('WHEN it is available get Phonebook contact.\n'
+        'AND call initialSynchronizeContacts.\n'
+        'AND contactsNotifier is LoadingState.\n'
+        'AND THEN call initialSynchronizeContacts again.\n'
+        'AND contactsNotifier not call again\n'
+        'AND federationLookUpPhonebookContactInteractor not call.\n', () async {
+      final List<Failure> listTomContactsFailureState = [];
+
+      final List<Failure> listPhonebookContactsFailureState = [];
+
+      when(mockGetTomContactsInteractor.execute()).thenAnswer(
+        (_) => Stream.fromIterable([
+          const Right(ContactsLoading()),
+          const Left(GetContactsIsEmpty()),
+        ]),
+      );
+
+      when(
+        mockTryGetSyncedPhoneBookContactInteractor.execute(userId: mxId),
+      ).thenAnswer(
+        (_) async =>
+            const Left(GetSyncedPhoneBookContactFailure(exception: dynamic)),
+      );
+
+      when(mockHomeServerDynamicUrlInterceptors.baseUrl).thenReturn(baseUrl);
+
+      when(mockAuthorizationInterceptor.getAccessToken).thenReturn(accessToken);
+
+      when(
+        mockFederationConfigurationsRepository.getFederationConfigurations(
+          mxId,
+        ),
+      ).thenAnswer((_) async => federationConfigurations);
+
+      when(
+        mockFederationLookUpPhonebookContactInteractor.execute(
+          argument: FederationLookUpArgument(
+            homeServerUrl: baseUrl,
+            federationUrl:
+                federationConfigurations.fedServerInformation.baseUrls?.first
+                    .toString() ??
+                '',
+            withMxId: mxId,
+            withAccessToken: accessToken,
+          ),
+        ),
+      ).thenAnswer(
+        (_) => Stream.fromIterable([
+          const Right(GetPhonebookContactsLoading()),
+          Left(RequestTokenFailure(exception: dynamic, contacts: contacts)),
+        ]),
+      );
+
+      contactsManager.getContactsNotifier().addListener(() {
+        contactsManager.getContactsNotifier().value.fold(
+          (failure) => listTomContactsFailureState.add(failure),
+          (success) => null,
+        );
+      });
+
+      contactsManager.getPhonebookContactsNotifier().addListener(() {
+        contactsManager.getPhonebookContactsNotifier().value.fold(
+          (failure) => listPhonebookContactsFailureState.add(failure),
+          (success) => null,
+        );
+      });
+
+      contactsManager.initialSynchronizeContacts(
+        isAvailableSupportPhonebookContacts: true,
+        withMxId: mxId,
+      );
+
+      await Future.delayed(const Duration(seconds: 1));
+
+      verify(mockGetTomContactsInteractor.execute()).called(1);
+
+      verify(
+        mockTryGetSyncedPhoneBookContactInteractor.execute(userId: mxId),
+      ).called(1);
+
+      expectLater(listTomContactsFailureState.length, 1);
+
+      expectLater(listTomContactsFailureState, [const GetContactsIsEmpty()]);
+
+      expectLater(listPhonebookContactsFailureState.length, 1);
+
+      expectLater(listPhonebookContactsFailureState, [
+        RequestTokenFailure(exception: dynamic, contacts: contacts),
+      ]);
+
+      contactsManager.initialSynchronizeContacts(
+        isAvailableSupportPhonebookContacts: true,
+        withMxId: mxId,
+      );
+
+      await Future.delayed(const Duration(seconds: 5));
+
+      verifyNever(mockGetTomContactsInteractor.execute());
+    });
+
     test(
       'WHEN it is available get Phonebook contact.\n'
-      'AND contactsNotifier return GetContactsIsEmpty with contacts is empty.\n'
-      'AND tryGetSyncedPhoneBookContactInteractor return GetSyncedPhoneBookContactFailure state.\n'
-      'AND phonebookContactNotifier return RequestTokenFailure state.\n'
-      'THEN contactsNotifier in ContactsManager SHOULD have GetContactsIsEmpty state.\n'
-      'THEN phonebookContactNotifier in ContactsManager SHOULD have RequestTokenFailure state.\n'
-      'THEN list ToM contact SHOULD is empty.\n'
-      'THEN list Phonebook contact SHOULD is empty.\n',
+      'AND call initialSynchronizeContacts.\n'
+      'AND contactsNotifier is LoadingState.\n'
+      'AND THEN call initialSynchronizeContacts again with forceRun is true.\n'
+      'AND contactsNotifier must call again\n'
+      'AND federationLookUpPhonebookContactInteractor must call.\n',
       () async {
         final List<Failure> listTomContactsFailureState = [];
 
         final List<Failure> listPhonebookContactsFailureState = [];
 
-        when(
-          mockGetTomContactsInteractor.execute(),
-        ).thenAnswer(
+        when(mockGetTomContactsInteractor.execute()).thenAnswer(
           (_) => Stream.fromIterable([
             const Right(ContactsLoading()),
             const Left(GetContactsIsEmpty()),
@@ -373,36 +1390,30 @@ void main() {
         );
 
         when(
-          mockTryGetSyncedPhoneBookContactInteractor.execute(
-            userId: mxId,
-          ),
+          mockTryGetSyncedPhoneBookContactInteractor.execute(userId: mxId),
         ).thenAnswer(
-          (_) async => const Left(
-            GetSyncedPhoneBookContactFailure(exception: dynamic),
-          ),
+          (_) async =>
+              const Left(GetSyncedPhoneBookContactFailure(exception: dynamic)),
         );
 
-        when(mockHomeServerDynamicUrlInterceptors.baseUrl).thenReturn(
-          baseUrl,
-        );
-
-        when(mockAuthorizationInterceptor.getAccessToken).thenReturn(
-          accessToken,
-        );
+        when(mockHomeServerDynamicUrlInterceptors.baseUrl).thenReturn(baseUrl);
 
         when(
-          mockFederationConfigurationsRepository
-              .getFederationConfigurations(mxId),
-        ).thenAnswer(
-          (_) async => federationConfigurations,
-        );
+          mockAuthorizationInterceptor.getAccessToken,
+        ).thenReturn(accessToken);
+
+        when(
+          mockFederationConfigurationsRepository.getFederationConfigurations(
+            mxId,
+          ),
+        ).thenAnswer((_) async => federationConfigurations);
 
         when(
           mockFederationLookUpPhonebookContactInteractor.execute(
             argument: FederationLookUpArgument(
               homeServerUrl: baseUrl,
-              federationUrl: federationConfigurations
-                      .fedServerInformation.baseUrls?.first
+              federationUrl:
+                  federationConfigurations.fedServerInformation.baseUrls?.first
                       .toString() ??
                   '',
               withMxId: mxId,
@@ -412,27 +1423,22 @@ void main() {
         ).thenAnswer(
           (_) => Stream.fromIterable([
             const Right(GetPhonebookContactsLoading()),
-            Left(
-              RequestTokenFailure(
-                exception: dynamic,
-                contacts: contacts,
-              ),
-            ),
+            Left(RequestTokenFailure(exception: dynamic, contacts: contacts)),
           ]),
         );
 
         contactsManager.getContactsNotifier().addListener(() {
           contactsManager.getContactsNotifier().value.fold(
-                (failure) => listTomContactsFailureState.add(failure),
-                (success) => null,
-              );
+            (failure) => listTomContactsFailureState.add(failure),
+            (success) => null,
+          );
         });
 
         contactsManager.getPhonebookContactsNotifier().addListener(() {
           contactsManager.getPhonebookContactsNotifier().value.fold(
-                (failure) => listPhonebookContactsFailureState.add(failure),
-                (success) => null,
-              );
+            (failure) => listPhonebookContactsFailureState.add(failure),
+            (success) => null,
+          );
         });
 
         contactsManager.initialSynchronizeContacts(
@@ -442,56 +1448,1565 @@ void main() {
 
         await Future.delayed(const Duration(seconds: 1));
 
-        verify(
-          mockGetTomContactsInteractor.execute(),
-        ).called(1);
+        verify(mockGetTomContactsInteractor.execute()).called(1);
 
         verify(
-          mockTryGetSyncedPhoneBookContactInteractor.execute(
-            userId: mxId,
-          ),
+          mockTryGetSyncedPhoneBookContactInteractor.execute(userId: mxId),
         ).called(1);
 
         expectLater(listTomContactsFailureState.length, 1);
 
-        expectLater(
-          listTomContactsFailureState,
-          [
-            const GetContactsIsEmpty(),
-          ],
-        );
+        expectLater(listTomContactsFailureState, [const GetContactsIsEmpty()]);
 
         expectLater(listPhonebookContactsFailureState.length, 1);
 
-        expectLater(
-          listPhonebookContactsFailureState,
-          [
-            RequestTokenFailure(
-              exception: dynamic,
-              contacts: contacts,
-            ),
-          ],
+        expectLater(listPhonebookContactsFailureState, [
+          RequestTokenFailure(exception: dynamic, contacts: contacts),
+        ]);
+
+        contactsManager.initialSynchronizeContacts(
+          isAvailableSupportPhonebookContacts: true,
+          forceRun: true,
+          withMxId: mxId,
         );
+
+        await Future.delayed(const Duration(seconds: 5));
+
+        verify(mockGetTomContactsInteractor.execute()).called(1);
       },
     );
 
-    test(
-      'WHEN it is available get Phonebook contact.\n'
-      'AND contactsNotifier return GetContactsIsEmpty with contacts is empty.\n'
-      'AND tryGetSyncedPhoneBookContactInteractor return GetSyncedPhoneBookContactSuccessState state.\n'
-      'AND timeAvailableForSyncVault is false.\n'
-      'THEN contactsNotifier in ContactsManager SHOULD have GetContactsIsEmpty state.\n'
-      'THEN phonebookContactNotifier in ContactsManager SHOULD have GetPhonebookContactsSuccess state.\n'
-      'THEN list ToM contact SHOULD is empty.\n'
-      'THEN list Phonebook contact SHOULD is not empty.\n',
-      () async {
+    test('[Account-A] WHEN it is available get Phonebook contact.\n'
+        '[Account-A] AND contactsNotifier return GetContactsIsEmpty with contacts is empty.\n'
+        '[Account-A] AND tryGetSyncedPhoneBookContactInteractor return GetSyncedPhoneBookContactFailure state.\n'
+        '[Account-A] AND phonebookContactNotifier return GetHashDetailsFailure state.\n'
+        '[Account-A] THEN contactsNotifier in ContactsManager SHOULD have GetContactsIsEmpty state.\n'
+        '[Account-A] THEN phonebookContactNotifier in ContactsManager SHOULD have GetHashDetailsFailure state.\n'
+        '[Account-A] THEN list ToM contact SHOULD is empty.\n'
+        '[Account-A] THEN list Phonebook contact SHOULD is empty.\n'
+        'Trigger UI => switch to another account and call synchronize contacts.\n'
+        '[Account-B] AND contactsNotifier return GetContactsSuccess with contacts is empty.\n'
+        '[Account-B] AND phonebookContactInteractor return GetPhonebookContactsSuccess with contacts is empty.\n'
+        '[Account-A] AND tryGetSyncedPhoneBookContactInteractor return GetSyncedPhoneBookContactFailure state.\n'
+        '[Account-A] AND phonebookContactNotifier return GetHashDetailsFailure state.\n'
+        '[Account-A] THEN contactsNotifier in ContactsManager SHOULD have GetContactsIsEmpty state.\n'
+        '[Account-A] THEN phonebookContactNotifier in ContactsManager SHOULD have GetHashDetailsFailure state.\n'
+        '[Account-B] THEN list ToM contact SHOULD is empty.\n'
+        '[Account-B] THEN list Phonebook contact SHOULD is empty.\n', () async {
+      final List<Failure> listTomContactsFailureState = [];
+
+      final List<Failure> listPhonebookContactsFailureState = [];
+
+      when(mockGetTomContactsInteractor.execute()).thenAnswer(
+        (_) => Stream.fromIterable([
+          const Right(ContactsLoading()),
+          const Left(GetContactsIsEmpty()),
+        ]),
+      );
+
+      when(
+        mockTryGetSyncedPhoneBookContactInteractor.execute(userId: mxId),
+      ).thenAnswer(
+        (_) async =>
+            const Left(GetSyncedPhoneBookContactFailure(exception: dynamic)),
+      );
+
+      when(mockHomeServerDynamicUrlInterceptors.baseUrl).thenReturn(baseUrl);
+
+      when(mockAuthorizationInterceptor.getAccessToken).thenReturn(accessToken);
+
+      when(
+        mockFederationConfigurationsRepository.getFederationConfigurations(
+          mxId,
+        ),
+      ).thenAnswer((_) async => federationConfigurations);
+
+      when(
+        mockFederationLookUpPhonebookContactInteractor.execute(
+          argument: FederationLookUpArgument(
+            homeServerUrl: baseUrl,
+            federationUrl:
+                federationConfigurations.fedServerInformation.baseUrls?.first
+                    .toString() ??
+                '',
+            withMxId: mxId,
+            withAccessToken: accessToken,
+          ),
+        ),
+      ).thenAnswer(
+        (_) => Stream.fromIterable([
+          const Right(GetPhonebookContactsLoading()),
+          const Left(GetHashDetailsFailure(exception: dynamic)),
+        ]),
+      );
+
+      contactsManager.getContactsNotifier().addListener(() {
+        contactsManager.getContactsNotifier().value.fold(
+          (failure) => listTomContactsFailureState.add(failure),
+          (success) => null,
+        );
+      });
+
+      contactsManager.getPhonebookContactsNotifier().addListener(() {
+        contactsManager.getPhonebookContactsNotifier().value.fold(
+          (failure) => listPhonebookContactsFailureState.add(failure),
+          (success) => null,
+        );
+      });
+
+      contactsManager.initialSynchronizeContacts(
+        isAvailableSupportPhonebookContacts: true,
+        withMxId: mxId,
+      );
+
+      await Future.delayed(const Duration(seconds: 1));
+
+      verify(mockGetTomContactsInteractor.execute()).called(1);
+
+      verify(
+        mockTryGetSyncedPhoneBookContactInteractor.execute(userId: mxId),
+      ).called(1);
+
+      expectLater(listTomContactsFailureState.length, 1);
+
+      expectLater(listTomContactsFailureState, [const GetContactsIsEmpty()]);
+
+      expectLater(listPhonebookContactsFailureState.length, 1);
+
+      expectLater(listPhonebookContactsFailureState, [
+        const GetHashDetailsFailure(exception: dynamic),
+      ]);
+
+      /// Trigger switch account
+      contactsManager.reSyncContacts();
+
+      contactsManager.cancelAllSubscriptions();
+
+      listTomContactsFailureState.clear();
+
+      listPhonebookContactsFailureState.clear();
+
+      when(mockGetTomContactsInteractor.execute()).thenAnswer(
+        (_) => Stream.fromIterable([
+          const Right(ContactsLoading()),
+          const Left(GetContactsIsEmpty()),
+        ]),
+      );
+
+      when(
+        mockTryGetSyncedPhoneBookContactInteractor.execute(userId: mxId),
+      ).thenAnswer(
+        (_) async =>
+            const Left(GetSyncedPhoneBookContactFailure(exception: dynamic)),
+      );
+
+      when(mockHomeServerDynamicUrlInterceptors.baseUrl).thenReturn(baseUrl);
+
+      when(mockAuthorizationInterceptor.getAccessToken).thenReturn(accessToken);
+
+      when(
+        mockFederationConfigurationsRepository.getFederationConfigurations(
+          mxId,
+        ),
+      ).thenAnswer((_) async => federationConfigurations);
+
+      when(
+        mockFederationLookUpPhonebookContactInteractor.execute(
+          argument: FederationLookUpArgument(
+            homeServerUrl: baseUrl,
+            federationUrl:
+                federationConfigurations.fedServerInformation.baseUrls?.first
+                    .toString() ??
+                '',
+            withMxId: mxId,
+            withAccessToken: accessToken,
+          ),
+        ),
+      ).thenAnswer(
+        (_) => Stream.fromIterable([
+          const Right(GetPhonebookContactsLoading()),
+          const Left(GetHashDetailsFailure(exception: dynamic)),
+        ]),
+      );
+
+      contactsManager.initialSynchronizeContacts(
+        isAvailableSupportPhonebookContacts: true,
+        withMxId: mxId,
+      );
+
+      await Future.delayed(const Duration(seconds: 1));
+
+      verify(mockGetTomContactsInteractor.execute()).called(1);
+
+      verify(
+        mockTryGetSyncedPhoneBookContactInteractor.execute(userId: mxId),
+      ).called(1);
+
+      expectLater(listTomContactsFailureState.length, 1);
+
+      expectLater(listTomContactsFailureState, [const GetContactsIsEmpty()]);
+
+      expectLater(listPhonebookContactsFailureState.length, 1);
+
+      expectLater(listPhonebookContactsFailureState, [
+        const GetHashDetailsFailure(exception: dynamic),
+      ]);
+    });
+
+    test('[Account-A] WHEN it is available get Phonebook contact.\n'
+        '[Account-A] AND contactsNotifier return GetContactsIsEmpty with contacts is empty.\n'
+        '[Account-A] AND tryGetSyncedPhoneBookContactInteractor return GetSyncedPhoneBookContactFailure state.\n'
+        '[Account-A] AND phonebookContactNotifier return GetHashDetailsFailure state.\n'
+        '[Account-A] THEN contactsNotifier in ContactsManager SHOULD have GetContactsIsEmpty state.\n'
+        '[Account-A] THEN phonebookContactNotifier in ContactsManager SHOULD have GetHashDetailsFailure state.\n'
+        '[Account-A] THEN list ToM contact SHOULD is empty.\n'
+        '[Account-A] THEN list Phonebook contact SHOULD is empty.\n'
+        'Trigger UI => switch to another account and call synchronize contacts.\n'
+        '[Account-B] AND contactsNotifier return GetContactsSuccess with contacts is empty.\n'
+        '[Account-B] AND phonebookContactInteractor return GetPhonebookContactsSuccess with contacts is empty.\n'
+        '[Account-A] AND tryGetSyncedPhoneBookContactInteractor return GetSyncedPhoneBookContactFailure state.\n'
+        '[Account-A] AND phonebookContactNotifier return GetPhonebookContactsSuccess state.\n'
+        '[Account-A] THEN contactsNotifier in ContactsManager SHOULD have GetContactsIsEmpty state.\n'
+        '[Account-A] THEN phonebookContactNotifier in ContactsManager SHOULD have GetPhonebookContactsSuccess state.\n'
+        '[Account-B] THEN list ToM contact SHOULD is empty.\n'
+        '[Account-B] THEN list Phonebook contact SHOULD not empty.\n'
+        '[Account-B] THEN call post addressbook success', () async {
+      final List<Failure> listTomContactsFailureState = [];
+
+      final List<Failure> listPhonebookContactsFailureState = [];
+
+      final List<Success> listPhonebookContactsSuccessState = [];
+
+      when(mockGetTomContactsInteractor.execute()).thenAnswer(
+        (_) => Stream.fromIterable([
+          const Right(ContactsLoading()),
+          const Left(GetContactsIsEmpty()),
+        ]),
+      );
+
+      when(
+        mockTryGetSyncedPhoneBookContactInteractor.execute(userId: mxId),
+      ).thenAnswer(
+        (_) async =>
+            const Left(GetSyncedPhoneBookContactFailure(exception: dynamic)),
+      );
+
+      when(mockHomeServerDynamicUrlInterceptors.baseUrl).thenReturn(baseUrl);
+
+      when(mockAuthorizationInterceptor.getAccessToken).thenReturn(accessToken);
+
+      when(
+        mockFederationConfigurationsRepository.getFederationConfigurations(
+          mxId,
+        ),
+      ).thenAnswer((_) async => federationConfigurations);
+
+      when(
+        mockFederationLookUpPhonebookContactInteractor.execute(
+          argument: FederationLookUpArgument(
+            homeServerUrl: baseUrl,
+            federationUrl:
+                federationConfigurations.fedServerInformation.baseUrls?.first
+                    .toString() ??
+                '',
+            withMxId: mxId,
+            withAccessToken: accessToken,
+          ),
+        ),
+      ).thenAnswer(
+        (_) => Stream.fromIterable([
+          const Right(GetPhonebookContactsLoading()),
+          const Left(GetHashDetailsFailure(exception: dynamic)),
+        ]),
+      );
+
+      contactsManager.getContactsNotifier().addListener(() {
+        contactsManager.getContactsNotifier().value.fold(
+          (failure) => listTomContactsFailureState.add(failure),
+          (success) => null,
+        );
+      });
+
+      contactsManager.getPhonebookContactsNotifier().addListener(() {
+        contactsManager.getPhonebookContactsNotifier().value.fold(
+          (failure) => listPhonebookContactsFailureState.add(failure),
+          (success) => listPhonebookContactsSuccessState.add(success),
+        );
+      });
+
+      contactsManager.initialSynchronizeContacts(
+        isAvailableSupportPhonebookContacts: true,
+        withMxId: mxId,
+      );
+
+      await Future.delayed(const Duration(seconds: 1));
+
+      verify(mockGetTomContactsInteractor.execute()).called(1);
+
+      verify(
+        mockTryGetSyncedPhoneBookContactInteractor.execute(userId: mxId),
+      ).called(1);
+
+      expectLater(listTomContactsFailureState.length, 1);
+
+      expectLater(listTomContactsFailureState, [const GetContactsIsEmpty()]);
+
+      expectLater(listPhonebookContactsFailureState.length, 1);
+
+      expectLater(listPhonebookContactsFailureState, [
+        const GetHashDetailsFailure(exception: dynamic),
+      ]);
+
+      /// Trigger switch account
+      contactsManager.reSyncContacts();
+
+      contactsManager.cancelAllSubscriptions();
+
+      listTomContactsFailureState.clear();
+
+      listPhonebookContactsFailureState.clear();
+
+      listPhonebookContactsSuccessState.clear();
+
+      when(mockGetTomContactsInteractor.execute()).thenAnswer(
+        (_) => Stream.fromIterable([
+          const Right(ContactsLoading()),
+          const Left(GetContactsIsEmpty()),
+        ]),
+      );
+
+      when(
+        mockTryGetSyncedPhoneBookContactInteractor.execute(userId: mxId),
+      ).thenAnswer(
+        (_) async =>
+            const Left(GetSyncedPhoneBookContactFailure(exception: dynamic)),
+      );
+
+      when(mockHomeServerDynamicUrlInterceptors.baseUrl).thenReturn(baseUrl);
+
+      when(mockAuthorizationInterceptor.getAccessToken).thenReturn(accessToken);
+
+      when(
+        mockFederationConfigurationsRepository.getFederationConfigurations(
+          mxId,
+        ),
+      ).thenAnswer((_) async => federationConfigurations);
+
+      when(
+        mockFederationLookUpPhonebookContactInteractor.execute(
+          argument: FederationLookUpArgument(
+            homeServerUrl: baseUrl,
+            federationUrl:
+                federationConfigurations.fedServerInformation.baseUrls?.first
+                    .toString() ??
+                '',
+            withMxId: mxId,
+            withAccessToken: accessToken,
+          ),
+        ),
+      ).thenAnswer(
+        (_) => Stream.fromIterable([
+          const Right(GetPhonebookContactsLoading()),
+          Right(GetPhonebookContactsSuccess(contacts: contacts, progress: 100)),
+        ]),
+      );
+
+      when(
+        mockPostAddressBookInteractor.execute(
+          addressBooks: contacts.toSet().toAddressBooks().toList(),
+        ),
+      ).thenAnswer(
+        (_) => Stream.fromIterable([
+          const Right(PostAddressBookLoading()),
+          const Right(PostAddressBookSuccessState(updatedAddressBooks: [])),
+        ]),
+      );
+
+      contactsManager.initialSynchronizeContacts(
+        isAvailableSupportPhonebookContacts: true,
+        withMxId: mxId,
+      );
+
+      await Future.delayed(const Duration(seconds: 1));
+
+      verify(mockGetTomContactsInteractor.execute()).called(1);
+
+      verify(
+        mockTryGetSyncedPhoneBookContactInteractor.execute(userId: mxId),
+      ).called(1);
+
+      expectLater(listTomContactsFailureState.length, 1);
+
+      expectLater(listTomContactsFailureState, [const GetContactsIsEmpty()]);
+
+      expectLater(listPhonebookContactsFailureState.length, 0);
+
+      expectLater(listPhonebookContactsFailureState, []);
+
+      expectLater(listPhonebookContactsSuccessState.length, 2);
+
+      expectLater(listPhonebookContactsSuccessState, [
+        const GetPhonebookContactsLoading(),
+        GetPhonebookContactsSuccess(contacts: contacts, progress: 100),
+      ]);
+
+      verify(
+        mockPostAddressBookInteractor.execute(
+          addressBooks: contacts.toSet().toAddressBooks().toList(),
+        ),
+      ).called(1);
+    });
+  });
+
+  group('ContactsManager Unit test - ENV: Mobile - Unsupported Federation server', () {
+    const mxId = 'mxId';
+
+    const baseUrl = 'https://example.com';
+
+    const accessToken = 'accessToken';
+
+    final contacts = [
+      ContactFixtures.contact1,
+      ContactFixtures.contact2,
+      ContactFixtures.contact3,
+    ];
+
+    test('WHEN it is available get Phonebook contact.\n'
+        'AND contactsNotifier return GetContactsIsEmpty with contacts is empty.\n'
+        'AND tryGetSyncedPhoneBookContactInteractor return GetSyncedPhoneBookContactFailure state.\n'
+        'AND phonebookContactNotifier return GetPhonebookContactsIsEmpty state.\n'
+        'THEN contactsNotifier in ContactsManager SHOULD have GetContactsIsEmpty state.\n'
+        'THEN phonebookContactNotifier in ContactsManager SHOULD have GetPhonebookContactsIsEmpty state.\n'
+        'THEN list ToM contact SHOULD is empty.\n'
+        'THEN list Phonebook contact SHOULD is empty.\n', () async {
+      final List<Failure> listTomContactsFailureState = [];
+
+      final List<Failure> listPhonebookContactsFailureState = [];
+
+      when(mockGetTomContactsInteractor.execute()).thenAnswer(
+        (_) => Stream.fromIterable([
+          const Right(ContactsLoading()),
+          const Left(GetContactsIsEmpty()),
+        ]),
+      );
+
+      when(
+        mockTryGetSyncedPhoneBookContactInteractor.execute(userId: mxId),
+      ).thenAnswer(
+        (_) async =>
+            const Left(GetSyncedPhoneBookContactFailure(exception: dynamic)),
+      );
+
+      when(
+        mockFederationConfigurationsRepository.getFederationConfigurations(
+          mxId,
+        ),
+      ).thenAnswer(
+        (_) async => FederationConfigurations(
+          fedServerInformation: FederationServerInformation(),
+        ),
+      );
+
+      when(
+        mockIdentityServerDynamicUrlInterceptors.baseUrl,
+      ).thenReturn(baseUrl);
+
+      when(mockAuthorizationInterceptor.getAccessToken).thenReturn(accessToken);
+
+      when(
+        mockTwakeLookupPhonebookContactInteractor.execute(
+          argument: TwakeLookUpArgument(
+            homeServerUrl: baseUrl,
+            withAccessToken: accessToken,
+          ),
+        ),
+      ).thenAnswer(
+        (_) => Stream.fromIterable([
+          const Right(GetPhonebookContactsLoading()),
+          const Left(GetPhonebookContactsIsEmpty()),
+        ]),
+      );
+
+      contactsManager.getContactsNotifier().addListener(() {
+        contactsManager.getContactsNotifier().value.fold(
+          (failure) => listTomContactsFailureState.add(failure),
+          (success) => null,
+        );
+      });
+
+      contactsManager.getPhonebookContactsNotifier().addListener(() {
+        contactsManager.getPhonebookContactsNotifier().value.fold(
+          (failure) => listPhonebookContactsFailureState.add(failure),
+          (success) => null,
+        );
+      });
+
+      contactsManager.initialSynchronizeContacts(
+        isAvailableSupportPhonebookContacts: true,
+        withMxId: mxId,
+      );
+
+      await Future.delayed(const Duration(seconds: 1));
+
+      verify(mockGetTomContactsInteractor.execute()).called(1);
+
+      verify(
+        mockTryGetSyncedPhoneBookContactInteractor.execute(userId: mxId),
+      ).called(1);
+
+      expectLater(listTomContactsFailureState.length, 1);
+
+      expectLater(listTomContactsFailureState, [const GetContactsIsEmpty()]);
+
+      expectLater(listPhonebookContactsFailureState.length, 1);
+
+      expectLater(listPhonebookContactsFailureState, [
+        const GetPhonebookContactsIsEmpty(),
+      ]);
+
+      verify(
+        mockTwakeLookupPhonebookContactInteractor.execute(
+          argument: anyNamed('argument'),
+        ),
+      ).called(1);
+
+      verifyNever(
+        mockFederationLookUpPhonebookContactInteractor.execute(
+          argument: anyNamed('argument'),
+        ),
+      );
+    });
+
+    test('WHEN it is available get Phonebook contact.\n'
+        'AND contactsNotifier return GetContactsIsEmpty with contacts is empty.\n'
+        'AND tryGetSyncedPhoneBookContactInteractor return GetSyncedPhoneBookContactFailure state.\n'
+        'AND phonebookContactNotifier return GetHashDetailsFailure state.\n'
+        'THEN contactsNotifier in ContactsManager SHOULD have GetContactsIsEmpty state.\n'
+        'THEN phonebookContactNotifier in ContactsManager SHOULD have GetHashDetailsFailure state.\n'
+        'THEN list ToM contact SHOULD is empty.\n'
+        'THEN list Phonebook contact SHOULD is empty.\n', () async {
+      final List<Failure> listTomContactsFailureState = [];
+
+      final List<Failure> listPhonebookContactsFailureState = [];
+
+      when(mockGetTomContactsInteractor.execute()).thenAnswer(
+        (_) => Stream.fromIterable([
+          const Right(ContactsLoading()),
+          const Left(GetContactsIsEmpty()),
+        ]),
+      );
+
+      when(
+        mockTryGetSyncedPhoneBookContactInteractor.execute(userId: mxId),
+      ).thenAnswer(
+        (_) async =>
+            const Left(GetSyncedPhoneBookContactFailure(exception: dynamic)),
+      );
+
+      when(
+        mockFederationConfigurationsRepository.getFederationConfigurations(
+          mxId,
+        ),
+      ).thenAnswer(
+        (_) async => FederationConfigurations(
+          fedServerInformation: FederationServerInformation(),
+        ),
+      );
+
+      when(
+        mockIdentityServerDynamicUrlInterceptors.baseUrl,
+      ).thenReturn(baseUrl);
+
+      when(mockAuthorizationInterceptor.getAccessToken).thenReturn(accessToken);
+
+      when(
+        mockTwakeLookupPhonebookContactInteractor.execute(
+          argument: TwakeLookUpArgument(
+            homeServerUrl: baseUrl,
+            withAccessToken: accessToken,
+          ),
+        ),
+      ).thenAnswer(
+        (_) => Stream.fromIterable([
+          const Right(GetPhonebookContactsLoading()),
+          const Left(GetHashDetailsFailure(exception: dynamic)),
+        ]),
+      );
+
+      contactsManager.getContactsNotifier().addListener(() {
+        contactsManager.getContactsNotifier().value.fold(
+          (failure) => listTomContactsFailureState.add(failure),
+          (success) => null,
+        );
+      });
+
+      contactsManager.getPhonebookContactsNotifier().addListener(() {
+        contactsManager.getPhonebookContactsNotifier().value.fold(
+          (failure) => listPhonebookContactsFailureState.add(failure),
+          (success) => null,
+        );
+      });
+
+      contactsManager.initialSynchronizeContacts(
+        isAvailableSupportPhonebookContacts: true,
+        withMxId: mxId,
+      );
+
+      await Future.delayed(const Duration(seconds: 1));
+
+      verify(mockGetTomContactsInteractor.execute()).called(1);
+
+      verify(
+        mockTryGetSyncedPhoneBookContactInteractor.execute(userId: mxId),
+      ).called(1);
+
+      expectLater(listTomContactsFailureState.length, 1);
+
+      expectLater(listTomContactsFailureState, [const GetContactsIsEmpty()]);
+
+      expectLater(listPhonebookContactsFailureState.length, 1);
+
+      expectLater(listPhonebookContactsFailureState, [
+        const GetHashDetailsFailure(exception: dynamic),
+      ]);
+
+      verify(
+        mockTwakeLookupPhonebookContactInteractor.execute(
+          argument: anyNamed('argument'),
+        ),
+      ).called(1);
+
+      verifyNever(
+        mockFederationLookUpPhonebookContactInteractor.execute(
+          argument: anyNamed('argument'),
+        ),
+      );
+    });
+
+    test('WHEN it is available get Phonebook contact.\n'
+        'AND contactsNotifier return GetContactsIsEmpty with contacts is empty.\n'
+        'AND tryGetSyncedPhoneBookContactInteractor return GetSyncedPhoneBookContactFailure state.\n'
+        'AND phonebookContactNotifier return GetPhonebookContactsSuccess state.\n'
+        'THEN contactsNotifier in ContactsManager SHOULD have GetContactsIsEmpty state.\n'
+        'THEN phonebookContactNotifier in ContactsManager SHOULD have GetPhonebookContactsSuccess state.\n'
+        'THEN list ToM contact SHOULD is empty.\n'
+        'THEN list Phonebook contact SHOULD is empty.\n', () async {
+      final List<Failure> listTomContactsFailureState = [];
+
+      final List<Success> listPhonebookContactsSuccessState = [];
+
+      when(mockGetTomContactsInteractor.execute()).thenAnswer(
+        (_) => Stream.fromIterable([
+          const Right(ContactsLoading()),
+          const Left(GetContactsIsEmpty()),
+        ]),
+      );
+
+      when(
+        mockTryGetSyncedPhoneBookContactInteractor.execute(userId: mxId),
+      ).thenAnswer(
+        (_) async =>
+            const Left(GetSyncedPhoneBookContactFailure(exception: dynamic)),
+      );
+
+      when(
+        mockFederationConfigurationsRepository.getFederationConfigurations(
+          mxId,
+        ),
+      ).thenAnswer(
+        (_) async => FederationConfigurations(
+          fedServerInformation: FederationServerInformation(),
+        ),
+      );
+
+      when(
+        mockIdentityServerDynamicUrlInterceptors.baseUrl,
+      ).thenReturn(baseUrl);
+
+      when(mockAuthorizationInterceptor.getAccessToken).thenReturn(accessToken);
+
+      when(
+        mockTwakeLookupPhonebookContactInteractor.execute(
+          argument: TwakeLookUpArgument(
+            homeServerUrl: baseUrl,
+            withAccessToken: accessToken,
+          ),
+        ),
+      ).thenAnswer(
+        (_) => Stream.fromIterable([
+          const Right(GetPhonebookContactsLoading()),
+          Right(GetPhonebookContactsSuccess(contacts: contacts, progress: 100)),
+        ]),
+      );
+
+      when(
+        mockPostAddressBookInteractor.execute(
+          addressBooks: contacts.toSet().toAddressBooks().toList(),
+        ),
+      ).thenAnswer(
+        (_) => Stream.fromIterable([
+          const Right(PostAddressBookLoading()),
+          const Right(PostAddressBookSuccessState(updatedAddressBooks: [])),
+        ]),
+      );
+
+      contactsManager.getContactsNotifier().addListener(() {
+        contactsManager.getContactsNotifier().value.fold(
+          (failure) => listTomContactsFailureState.add(failure),
+          (success) => null,
+        );
+      });
+
+      contactsManager.getPhonebookContactsNotifier().addListener(() {
+        contactsManager.getPhonebookContactsNotifier().value.fold(
+          (failure) => null,
+          (success) => listPhonebookContactsSuccessState.add(success),
+        );
+      });
+
+      contactsManager.initialSynchronizeContacts(
+        isAvailableSupportPhonebookContacts: true,
+        withMxId: mxId,
+      );
+
+      await Future.delayed(const Duration(seconds: 1));
+
+      verify(mockGetTomContactsInteractor.execute()).called(1);
+
+      verify(
+        mockTryGetSyncedPhoneBookContactInteractor.execute(userId: mxId),
+      ).called(1);
+
+      verify(
+        mockPostAddressBookInteractor.execute(
+          addressBooks: contacts.toSet().toAddressBooks().toList(),
+        ),
+      ).called(1);
+
+      expectLater(listTomContactsFailureState.length, 1);
+
+      expectLater(listTomContactsFailureState, [const GetContactsIsEmpty()]);
+
+      expectLater(listPhonebookContactsSuccessState.length, 2);
+
+      expectLater(listPhonebookContactsSuccessState, [
+        const GetPhonebookContactsLoading(),
+        GetPhonebookContactsSuccess(contacts: contacts, progress: 100),
+      ]);
+
+      verify(
+        mockTwakeLookupPhonebookContactInteractor.execute(
+          argument: anyNamed('argument'),
+        ),
+      ).called(1);
+
+      verifyNever(
+        mockFederationLookUpPhonebookContactInteractor.execute(
+          argument: anyNamed('argument'),
+        ),
+      );
+    });
+
+    test('[Account-A] WHEN it is available get Phonebook contact.\n'
+        '[Account-A] AND contactsNotifier return GetContactsIsEmpty with contacts is empty.\n'
+        '[Account-A] AND tryGetSyncedPhoneBookContactInteractor return GetSyncedPhoneBookContactFailure state.\n'
+        '[Account-A] AND phonebookContactNotifier return GetPhonebookContactsIsEmpty state.\n'
+        '[Account-A] THEN contactsNotifier in ContactsManager SHOULD have GetContactsIsEmpty state.\n'
+        '[Account-A] THEN phonebookContactNotifier in ContactsManager SHOULD have GetPhonebookContactsIsEmpty state.\n'
+        '[Account-A] THEN list ToM contact SHOULD is empty.\n'
+        '[Account-A] THEN list Phonebook contact SHOULD is empty.\n'
+        'Trigger UI => switch to another account and call synchronize contacts.\n'
+        '[Account-B] AND contactsNotifier return GetContactsSuccess with contacts is empty.\n'
+        '[Account-B] AND phonebookContactInteractor return GetPhonebookContactsSuccess with contacts is empty.\n'
+        '[Account-A] AND tryGetSyncedPhoneBookContactInteractor return GetSyncedPhoneBookContactFailure state.\n'
+        '[Account-A] AND phonebookContactNotifier return GetPhonebookContactsIsEmpty state.\n'
+        '[Account-A] THEN contactsNotifier in ContactsManager SHOULD have GetContactsIsEmpty state.\n'
+        '[Account-A] THEN phonebookContactNotifier in ContactsManager SHOULD have GetPhonebookContactsIsEmpty state.\n'
+        '[Account-B] THEN list ToM contact SHOULD is empty.\n'
+        '[Account-B] THEN list Phonebook contact SHOULD is empty.\n', () async {
+      final List<Failure> listTomContactsFailureState = [];
+
+      final List<Failure> listPhonebookContactsFailureState = [];
+
+      when(mockGetTomContactsInteractor.execute()).thenAnswer(
+        (_) => Stream.fromIterable([
+          const Right(ContactsLoading()),
+          const Left(GetContactsIsEmpty()),
+        ]),
+      );
+
+      when(
+        mockTryGetSyncedPhoneBookContactInteractor.execute(userId: mxId),
+      ).thenAnswer(
+        (_) async =>
+            const Left(GetSyncedPhoneBookContactFailure(exception: dynamic)),
+      );
+
+      when(
+        mockFederationConfigurationsRepository.getFederationConfigurations(
+          mxId,
+        ),
+      ).thenAnswer(
+        (_) async => FederationConfigurations(
+          fedServerInformation: FederationServerInformation(),
+        ),
+      );
+
+      when(
+        mockIdentityServerDynamicUrlInterceptors.baseUrl,
+      ).thenReturn(baseUrl);
+
+      when(mockAuthorizationInterceptor.getAccessToken).thenReturn(accessToken);
+
+      when(
+        mockTwakeLookupPhonebookContactInteractor.execute(
+          argument: TwakeLookUpArgument(
+            homeServerUrl: baseUrl,
+            withAccessToken: accessToken,
+          ),
+        ),
+      ).thenAnswer(
+        (_) => Stream.fromIterable([
+          const Right(GetPhonebookContactsLoading()),
+          const Left(GetPhonebookContactsIsEmpty()),
+        ]),
+      );
+
+      contactsManager.getContactsNotifier().addListener(() {
+        contactsManager.getContactsNotifier().value.fold(
+          (failure) => listTomContactsFailureState.add(failure),
+          (success) => null,
+        );
+      });
+
+      contactsManager.getPhonebookContactsNotifier().addListener(() {
+        contactsManager.getPhonebookContactsNotifier().value.fold(
+          (failure) => listPhonebookContactsFailureState.add(failure),
+          (success) => null,
+        );
+      });
+
+      contactsManager.initialSynchronizeContacts(
+        isAvailableSupportPhonebookContacts: true,
+        withMxId: mxId,
+      );
+
+      await Future.delayed(const Duration(seconds: 1));
+
+      verify(mockGetTomContactsInteractor.execute()).called(1);
+
+      verify(
+        mockTryGetSyncedPhoneBookContactInteractor.execute(userId: mxId),
+      ).called(1);
+
+      expectLater(listTomContactsFailureState.length, 1);
+
+      expectLater(listTomContactsFailureState, [const GetContactsIsEmpty()]);
+
+      expectLater(listPhonebookContactsFailureState.length, 1);
+
+      expectLater(listPhonebookContactsFailureState, [
+        const GetPhonebookContactsIsEmpty(),
+      ]);
+
+      /// Trigger switch account
+      contactsManager.reSyncContacts();
+
+      contactsManager.cancelAllSubscriptions();
+
+      listTomContactsFailureState.clear();
+
+      listPhonebookContactsFailureState.clear();
+
+      when(mockGetTomContactsInteractor.execute()).thenAnswer(
+        (_) => Stream.fromIterable([
+          const Right(ContactsLoading()),
+          const Left(GetContactsIsEmpty()),
+        ]),
+      );
+
+      when(
+        mockTryGetSyncedPhoneBookContactInteractor.execute(userId: mxId),
+      ).thenAnswer(
+        (_) async =>
+            const Left(GetSyncedPhoneBookContactFailure(exception: dynamic)),
+      );
+
+      when(
+        mockFederationConfigurationsRepository.getFederationConfigurations(
+          mxId,
+        ),
+      ).thenAnswer(
+        (_) async => FederationConfigurations(
+          fedServerInformation: FederationServerInformation(),
+        ),
+      );
+
+      when(
+        mockIdentityServerDynamicUrlInterceptors.baseUrl,
+      ).thenReturn(baseUrl);
+
+      when(mockAuthorizationInterceptor.getAccessToken).thenReturn(accessToken);
+
+      when(
+        mockTwakeLookupPhonebookContactInteractor.execute(
+          argument: TwakeLookUpArgument(
+            homeServerUrl: baseUrl,
+            withAccessToken: accessToken,
+          ),
+        ),
+      ).thenAnswer(
+        (_) => Stream.fromIterable([
+          const Right(GetPhonebookContactsLoading()),
+          const Left(GetPhonebookContactsIsEmpty()),
+        ]),
+      );
+      when(
+        mockFederationConfigurationsRepository.getFederationConfigurations(
+          mxId,
+        ),
+      ).thenAnswer(
+        (_) async => FederationConfigurations(
+          fedServerInformation: FederationServerInformation(),
+        ),
+      );
+
+      when(
+        mockIdentityServerDynamicUrlInterceptors.baseUrl,
+      ).thenReturn(baseUrl);
+
+      when(mockAuthorizationInterceptor.getAccessToken).thenReturn(accessToken);
+
+      when(
+        mockTwakeLookupPhonebookContactInteractor.execute(
+          argument: TwakeLookUpArgument(
+            homeServerUrl: baseUrl,
+            withAccessToken: accessToken,
+          ),
+        ),
+      ).thenAnswer(
+        (_) => Stream.fromIterable([
+          const Right(GetPhonebookContactsLoading()),
+          const Left(GetPhonebookContactsIsEmpty()),
+        ]),
+      );
+
+      contactsManager.initialSynchronizeContacts(
+        isAvailableSupportPhonebookContacts: true,
+        withMxId: mxId,
+      );
+
+      await Future.delayed(const Duration(seconds: 1));
+
+      verify(mockGetTomContactsInteractor.execute()).called(1);
+
+      verify(
+        mockTryGetSyncedPhoneBookContactInteractor.execute(userId: mxId),
+      ).called(1);
+
+      expectLater(listTomContactsFailureState.length, 1);
+
+      expectLater(listTomContactsFailureState, [const GetContactsIsEmpty()]);
+
+      expectLater(listPhonebookContactsFailureState.length, 1);
+
+      expectLater(listPhonebookContactsFailureState, [
+        const GetPhonebookContactsIsEmpty(),
+      ]);
+    });
+
+    test('[Account-A] WHEN it is available get Phonebook contact.\n'
+        '[Account-A] AND contactsNotifier return GetContactsIsEmpty with contacts is empty.\n'
+        '[Account-A] AND tryGetSyncedPhoneBookContactInteractor return GetSyncedPhoneBookContactFailure state.\n'
+        '[Account-A] AND phonebookContactNotifier return GetHashDetailsFailure state.\n'
+        '[Account-A] THEN contactsNotifier in ContactsManager SHOULD have GetContactsIsEmpty state.\n'
+        '[Account-A] THEN phonebookContactNotifier in ContactsManager SHOULD have GetHashDetailsFailure state.\n'
+        '[Account-A] THEN list ToM contact SHOULD is empty.\n'
+        '[Account-A] THEN list Phonebook contact SHOULD is empty.\n'
+        'Trigger UI => switch to another account and call synchronize contacts.\n'
+        '[Account-B] AND contactsNotifier return GetContactsSuccess with contacts is empty.\n'
+        '[Account-B] AND phonebookContactInteractor return GetPhonebookContactsSuccess with contacts is empty.\n'
+        '[Account-A] AND tryGetSyncedPhoneBookContactInteractor return GetSyncedPhoneBookContactFailure state.\n'
+        '[Account-A] AND phonebookContactNotifier return GetPhonebookContactsSuccess state.\n'
+        '[Account-A] THEN contactsNotifier in ContactsManager SHOULD have GetContactsIsEmpty state.\n'
+        '[Account-A] THEN phonebookContactNotifier in ContactsManager SHOULD have GetPhonebookContactsSuccess state.\n'
+        '[Account-B] THEN list ToM contact SHOULD is empty.\n'
+        '[Account-B] THEN list Phonebook contact SHOULD not empty.\n'
+        '[Account-B] THEN call post addressbook success', () async {
+      final List<Failure> listTomContactsFailureState = [];
+
+      final List<Failure> listPhonebookContactsFailureState = [];
+
+      final List<Success> listPhonebookContactsSuccessState = [];
+
+      when(mockGetTomContactsInteractor.execute()).thenAnswer(
+        (_) => Stream.fromIterable([
+          const Right(ContactsLoading()),
+          const Left(GetContactsIsEmpty()),
+        ]),
+      );
+      when(
+        mockTryGetSyncedPhoneBookContactInteractor.execute(userId: mxId),
+      ).thenAnswer(
+        (_) async =>
+            const Left(GetSyncedPhoneBookContactFailure(exception: dynamic)),
+      );
+
+      when(
+        mockFederationConfigurationsRepository.getFederationConfigurations(
+          mxId,
+        ),
+      ).thenAnswer(
+        (_) async => FederationConfigurations(
+          fedServerInformation: FederationServerInformation(),
+        ),
+      );
+
+      when(
+        mockIdentityServerDynamicUrlInterceptors.baseUrl,
+      ).thenReturn(baseUrl);
+
+      when(mockAuthorizationInterceptor.getAccessToken).thenReturn(accessToken);
+
+      when(
+        mockTwakeLookupPhonebookContactInteractor.execute(
+          argument: TwakeLookUpArgument(
+            homeServerUrl: baseUrl,
+            withAccessToken: accessToken,
+          ),
+        ),
+      ).thenAnswer(
+        (_) => Stream.fromIterable([
+          const Right(GetPhonebookContactsLoading()),
+          const Left(GetPhonebookContactsIsEmpty()),
+        ]),
+      );
+
+      contactsManager.getContactsNotifier().addListener(() {
+        contactsManager.getContactsNotifier().value.fold(
+          (failure) => listTomContactsFailureState.add(failure),
+          (success) => null,
+        );
+      });
+
+      contactsManager.getPhonebookContactsNotifier().addListener(() {
+        contactsManager.getPhonebookContactsNotifier().value.fold(
+          (failure) => listPhonebookContactsFailureState.add(failure),
+          (success) => listPhonebookContactsSuccessState.add(success),
+        );
+      });
+
+      contactsManager.initialSynchronizeContacts(
+        isAvailableSupportPhonebookContacts: true,
+        withMxId: mxId,
+      );
+
+      await Future.delayed(const Duration(seconds: 1));
+
+      verify(mockGetTomContactsInteractor.execute()).called(1);
+
+      verify(
+        mockTryGetSyncedPhoneBookContactInteractor.execute(userId: mxId),
+      ).called(1);
+
+      expectLater(listTomContactsFailureState.length, 1);
+
+      expectLater(listTomContactsFailureState, [const GetContactsIsEmpty()]);
+
+      expectLater(listPhonebookContactsFailureState.length, 1);
+
+      expectLater(listPhonebookContactsFailureState, [
+        const GetPhonebookContactsIsEmpty(),
+      ]);
+
+      /// Trigger switch account
+      contactsManager.reSyncContacts();
+
+      contactsManager.cancelAllSubscriptions();
+
+      listTomContactsFailureState.clear();
+
+      listPhonebookContactsFailureState.clear();
+
+      listPhonebookContactsSuccessState.clear();
+
+      when(mockGetTomContactsInteractor.execute()).thenAnswer(
+        (_) => Stream.fromIterable([
+          const Right(ContactsLoading()),
+          const Left(GetContactsIsEmpty()),
+        ]),
+      );
+
+      when(
+        mockTryGetSyncedPhoneBookContactInteractor.execute(userId: mxId),
+      ).thenAnswer(
+        (_) async =>
+            const Left(GetSyncedPhoneBookContactFailure(exception: dynamic)),
+      );
+
+      when(
+        mockFederationConfigurationsRepository.getFederationConfigurations(
+          mxId,
+        ),
+      ).thenAnswer(
+        (_) async => FederationConfigurations(
+          fedServerInformation: FederationServerInformation(),
+        ),
+      );
+
+      when(
+        mockIdentityServerDynamicUrlInterceptors.baseUrl,
+      ).thenReturn(baseUrl);
+
+      when(mockAuthorizationInterceptor.getAccessToken).thenReturn(accessToken);
+
+      when(
+        mockTwakeLookupPhonebookContactInteractor.execute(
+          argument: TwakeLookUpArgument(
+            homeServerUrl: baseUrl,
+            withAccessToken: accessToken,
+          ),
+        ),
+      ).thenAnswer(
+        (_) => Stream.fromIterable([
+          const Right(GetPhonebookContactsLoading()),
+          Right(GetPhonebookContactsSuccess(contacts: contacts, progress: 100)),
+        ]),
+      );
+
+      when(
+        mockPostAddressBookInteractor.execute(
+          addressBooks: contacts.toSet().toAddressBooks().toList(),
+        ),
+      ).thenAnswer(
+        (_) => Stream.fromIterable([
+          const Right(PostAddressBookLoading()),
+          const Right(PostAddressBookSuccessState(updatedAddressBooks: [])),
+        ]),
+      );
+
+      contactsManager.initialSynchronizeContacts(
+        isAvailableSupportPhonebookContacts: true,
+        withMxId: mxId,
+      );
+
+      await Future.delayed(const Duration(seconds: 1));
+
+      verify(mockGetTomContactsInteractor.execute()).called(1);
+
+      verify(
+        mockTryGetSyncedPhoneBookContactInteractor.execute(userId: mxId),
+      ).called(1);
+
+      expectLater(listTomContactsFailureState.length, 1);
+
+      expectLater(listTomContactsFailureState, [const GetContactsIsEmpty()]);
+
+      expectLater(listPhonebookContactsFailureState.length, 0);
+
+      expectLater(listPhonebookContactsFailureState, []);
+
+      expectLater(listPhonebookContactsSuccessState.length, 2);
+
+      expectLater(listPhonebookContactsSuccessState, [
+        const GetPhonebookContactsLoading(),
+        GetPhonebookContactsSuccess(contacts: contacts, progress: 100),
+      ]);
+
+      verify(
+        mockPostAddressBookInteractor.execute(
+          addressBooks: contacts.toSet().toAddressBooks().toList(),
+        ),
+      ).called(1);
+    });
+
+    test('[Account-A] WHEN it is available get Phonebook contact.\n'
+        '[Account-A] AND contactsNotifier return GetContactsSuccess.\n'
+        '[Account-A] THEN contactsNotifier in ContactsManager SHOULD have GetContactsSuccess state.\n'
+        '[Account-A] THEN list ToM contact SHOULD is not empty.\n'
+        'Trigger UI => switch to another account and call synchronize contacts.\n'
+        '[Account-B] AND contactsNotifier return GetContactsSuccess with contacts is empty.\n'
+        '[Account-B] AND phonebookContactInteractor return GetPhonebookContactsSuccess with contacts is empty.\n'
+        '[Account-A] AND tryGetSyncedPhoneBookContactInteractor return GetSyncedPhoneBookContactFailure state.\n'
+        '[Account-A] AND phonebookContactNotifier return GetPhonebookContactsSuccess state.\n'
+        '[Account-A] THEN contactsNotifier in ContactsManager SHOULD have GetContactsIsEmpty state.\n'
+        '[Account-A] THEN phonebookContactNotifier in ContactsManager SHOULD have GetPhonebookContactsSuccess state.\n'
+        '[Account-B] THEN list ToM contact SHOULD is empty.\n'
+        '[Account-B] THEN list Phonebook contact SHOULD not empty.\n'
+        '[Account-B] THEN call post addressbook success', () async {
+      final List<Success> listTomContactsSuccessState = [];
+      final List<Failure> listTomContactsFailureState = [];
+      final List<Failure> listPhonebookContactsFailureState = [];
+      final List<Success> listPhonebookContactsSuccessState = [];
+
+      when(mockGetTomContactsInteractor.execute()).thenAnswer(
+        (_) => Stream.fromIterable([
+          const Right(ContactsLoading()),
+          Right(GetContactsSuccess(contacts: contacts)),
+        ]),
+      );
+
+      contactsManager.getContactsNotifier().addListener(() {
+        contactsManager.getContactsNotifier().value.fold(
+          (failure) => listTomContactsFailureState.add(failure),
+          (success) async {
+            listTomContactsSuccessState.add(success);
+
+            if (success is GetContactsSuccess) {
+              expect(listTomContactsSuccessState.length, 2);
+
+              expect(listTomContactsSuccessState, [
+                const ContactsLoading(),
+                GetContactsSuccess(contacts: contacts),
+              ]);
+
+              /// Trigger switch account
+              contactsManager.cancelAllSubscriptions();
+
+              when(mockGetTomContactsInteractor.execute()).thenAnswer(
+                (_) => Stream.fromIterable([
+                  const Right(ContactsLoading()),
+                  const Left(GetContactsIsEmpty()),
+                ]),
+              );
+
+              when(
+                mockTryGetSyncedPhoneBookContactInteractor.execute(
+                  userId: mxId,
+                ),
+              ).thenAnswer(
+                (_) async => const Left(
+                  GetSyncedPhoneBookContactFailure(exception: dynamic),
+                ),
+              );
+
+              when(
+                mockFederationConfigurationsRepository
+                    .getFederationConfigurations(mxId),
+              ).thenAnswer(
+                (_) async => FederationConfigurations(
+                  fedServerInformation: FederationServerInformation(),
+                ),
+              );
+
+              when(
+                mockIdentityServerDynamicUrlInterceptors.baseUrl,
+              ).thenReturn(baseUrl);
+
+              when(
+                mockAuthorizationInterceptor.getAccessToken,
+              ).thenReturn(accessToken);
+
+              when(
+                mockTwakeLookupPhonebookContactInteractor.execute(
+                  argument: TwakeLookUpArgument(
+                    homeServerUrl: baseUrl,
+                    withAccessToken: accessToken,
+                  ),
+                ),
+              ).thenAnswer(
+                (_) => Stream.fromIterable([
+                  const Right(GetPhonebookContactsLoading()),
+                  Right(
+                    GetPhonebookContactsSuccess(
+                      contacts: contacts,
+                      progress: 100,
+                    ),
+                  ),
+                ]),
+              );
+
+              when(
+                mockPostAddressBookInteractor.execute(
+                  addressBooks: contacts.toSet().toAddressBooks().toList(),
+                ),
+              ).thenAnswer(
+                (_) => Stream.fromIterable([
+                  const Right(PostAddressBookLoading()),
+                  const Right(
+                    PostAddressBookSuccessState(updatedAddressBooks: []),
+                  ),
+                ]),
+              );
+
+              contactsManager.reSyncContacts();
+
+              listTomContactsFailureState.clear();
+              listTomContactsSuccessState.clear();
+              listPhonebookContactsFailureState.clear();
+              listPhonebookContactsSuccessState.clear();
+
+              contactsManager.initialSynchronizeContacts(
+                isAvailableSupportPhonebookContacts: true,
+                withMxId: mxId,
+              );
+
+              await Future.delayed(const Duration(seconds: 1));
+
+              verify(mockGetTomContactsInteractor.execute()).called(2);
+
+              verify(
+                mockTryGetSyncedPhoneBookContactInteractor.execute(
+                  userId: mxId,
+                ),
+              ).called(1);
+
+              expectLater(listTomContactsFailureState.length, 1);
+              expectLater(listTomContactsFailureState, [
+                const GetContactsIsEmpty(),
+              ]);
+
+              expectLater(listPhonebookContactsFailureState.length, 0);
+              expectLater(listPhonebookContactsFailureState, []);
+
+              expectLater(listPhonebookContactsSuccessState.length, 2);
+
+              expectLater(listPhonebookContactsSuccessState, [
+                const GetPhonebookContactsLoading(),
+                GetPhonebookContactsSuccess(contacts: contacts, progress: 100),
+              ]);
+
+              verify(
+                mockPostAddressBookInteractor.execute(
+                  addressBooks: contacts.toSet().toAddressBooks().toList(),
+                ),
+              ).called(1);
+            }
+          },
+        );
+      });
+
+      contactsManager.getPhonebookContactsNotifier().addListener(() {
+        contactsManager.getPhonebookContactsNotifier().value.fold(
+          (failure) => listPhonebookContactsFailureState.add(failure),
+          (success) => listPhonebookContactsSuccessState.add(success),
+        );
+      });
+    });
+  });
+
+  group(
+    'ContactsManager Unit test - ENV: Mobile - Open contact tab and Unsupported Federation server',
+    () {
+      const mxId = 'mxId';
+
+      const baseUrl = 'https://example.com';
+
+      const accessToken = 'accessToken';
+
+      final contacts = [
+        ContactFixtures.contact1,
+        ContactFixtures.contact2,
+        ContactFixtures.contact3,
+      ];
+
+      test('WHEN it is available get Phonebook contact.\n'
+          'AND open the contact tab.\n'
+          'AND contactsNotifier return GetContactsIsEmpty with contacts is empty.\n'
+          'AND phonebookContactNotifier return GetPhonebookContactsIsEmpty state.\n'
+          'THEN contactsNotifier in ContactsManager SHOULD have GetContactsIsEmpty state.\n'
+          'THEN phonebookContactNotifier in ContactsManager SHOULD have GetPhonebookContactsIsEmpty state.\n'
+          'THEN list ToM contact SHOULD is empty.\n'
+          'THEN list Phonebook contact SHOULD is empty.\n', () async {
+        final List<Failure> listTomContactsFailureState = [];
+
+        final List<Failure> listPhonebookContactsFailureState = [];
+
+        when(mockGetTomContactsInteractor.execute()).thenAnswer(
+          (_) => Stream.fromIterable([
+            const Right(ContactsLoading()),
+            const Left(GetContactsIsEmpty()),
+          ]),
+        );
+
+        when(
+          mockFederationConfigurationsRepository.getFederationConfigurations(
+            mxId,
+          ),
+        ).thenAnswer(
+          (_) async => FederationConfigurations(
+            fedServerInformation: FederationServerInformation(),
+          ),
+        );
+
+        when(
+          mockIdentityServerDynamicUrlInterceptors.baseUrl,
+        ).thenReturn(baseUrl);
+
+        when(
+          mockAuthorizationInterceptor.getAccessToken,
+        ).thenReturn(accessToken);
+
+        when(
+          mockTwakeLookupPhonebookContactInteractor.execute(
+            argument: TwakeLookUpArgument(
+              homeServerUrl: baseUrl,
+              withAccessToken: accessToken,
+            ),
+          ),
+        ).thenAnswer(
+          (_) => Stream.fromIterable([
+            const Right(GetPhonebookContactsLoading()),
+            const Left(GetPhonebookContactsIsEmpty()),
+          ]),
+        );
+
+        contactsManager.getContactsNotifier().addListener(() {
+          contactsManager.getContactsNotifier().value.fold(
+            (failure) => listTomContactsFailureState.add(failure),
+            (success) => null,
+          );
+        });
+
+        contactsManager.getPhonebookContactsNotifier().addListener(() {
+          contactsManager.getPhonebookContactsNotifier().value.fold(
+            (failure) => listPhonebookContactsFailureState.add(failure),
+            (success) => null,
+          );
+        });
+
+        contactsManager.synchronizeContactsOnContactTab(
+          isAvailableSupportPhonebookContacts: true,
+          withMxId: mxId,
+        );
+
+        await Future.delayed(const Duration(seconds: 1));
+
+        verify(mockGetTomContactsInteractor.execute()).called(1);
+
+        expectLater(listTomContactsFailureState.length, 1);
+
+        expectLater(listTomContactsFailureState, [const GetContactsIsEmpty()]);
+
+        expectLater(listPhonebookContactsFailureState.length, 1);
+
+        expectLater(listPhonebookContactsFailureState, [
+          const GetPhonebookContactsIsEmpty(),
+        ]);
+
+        verify(
+          mockTwakeLookupPhonebookContactInteractor.execute(
+            argument: anyNamed('argument'),
+          ),
+        ).called(1);
+
+        verifyNever(
+          mockFederationLookUpPhonebookContactInteractor.execute(
+            argument: anyNamed('argument'),
+          ),
+        );
+      });
+
+      test('WHEN it is available get Phonebook contact.\n'
+          'AND open the contact tab.\n'
+          'AND contactsNotifier return GetContactsIsEmpty with contacts is empty.\n'
+          'AND phonebookContactNotifier return GetHashDetailsFailure state.\n'
+          'THEN contactsNotifier in ContactsManager SHOULD have GetContactsIsEmpty state.\n'
+          'THEN phonebookContactNotifier in ContactsManager SHOULD have GetHashDetailsFailure state.\n'
+          'THEN list ToM contact SHOULD is empty.\n'
+          'THEN list Phonebook contact SHOULD is empty.\n', () async {
+        final List<Failure> listTomContactsFailureState = [];
+
+        final List<Failure> listPhonebookContactsFailureState = [];
+
+        when(mockGetTomContactsInteractor.execute()).thenAnswer(
+          (_) => Stream.fromIterable([
+            const Right(ContactsLoading()),
+            const Left(GetContactsIsEmpty()),
+          ]),
+        );
+
+        when(
+          mockFederationConfigurationsRepository.getFederationConfigurations(
+            mxId,
+          ),
+        ).thenAnswer(
+          (_) async => FederationConfigurations(
+            fedServerInformation: FederationServerInformation(),
+          ),
+        );
+
+        when(
+          mockIdentityServerDynamicUrlInterceptors.baseUrl,
+        ).thenReturn(baseUrl);
+
+        when(
+          mockAuthorizationInterceptor.getAccessToken,
+        ).thenReturn(accessToken);
+
+        when(
+          mockTwakeLookupPhonebookContactInteractor.execute(
+            argument: TwakeLookUpArgument(
+              homeServerUrl: baseUrl,
+              withAccessToken: accessToken,
+            ),
+          ),
+        ).thenAnswer(
+          (_) => Stream.fromIterable([
+            const Right(GetPhonebookContactsLoading()),
+            const Left(GetHashDetailsFailure(exception: dynamic)),
+          ]),
+        );
+
+        contactsManager.getContactsNotifier().addListener(() {
+          contactsManager.getContactsNotifier().value.fold(
+            (failure) => listTomContactsFailureState.add(failure),
+            (success) => null,
+          );
+        });
+
+        contactsManager.getPhonebookContactsNotifier().addListener(() {
+          contactsManager.getPhonebookContactsNotifier().value.fold(
+            (failure) => listPhonebookContactsFailureState.add(failure),
+            (success) => null,
+          );
+        });
+
+        contactsManager.synchronizeContactsOnContactTab(
+          isAvailableSupportPhonebookContacts: true,
+          withMxId: mxId,
+        );
+
+        await Future.delayed(const Duration(seconds: 1));
+
+        verify(mockGetTomContactsInteractor.execute()).called(1);
+
+        expectLater(listTomContactsFailureState.length, 1);
+
+        expectLater(listTomContactsFailureState, [const GetContactsIsEmpty()]);
+
+        expectLater(listPhonebookContactsFailureState.length, 1);
+
+        expectLater(listPhonebookContactsFailureState, [
+          const GetHashDetailsFailure(exception: dynamic),
+        ]);
+
+        verify(
+          mockTwakeLookupPhonebookContactInteractor.execute(
+            argument: anyNamed('argument'),
+          ),
+        ).called(1);
+
+        verifyNever(
+          mockFederationLookUpPhonebookContactInteractor.execute(
+            argument: anyNamed('argument'),
+          ),
+        );
+      });
+
+      test('WHEN it is available get Phonebook contact.\n'
+          'AND open the contact tab.\n'
+          'AND contactsNotifier return GetContactsIsEmpty with contacts is empty.\n'
+          'AND phonebookContactNotifier return GetPhonebookContactsSuccess state.\n'
+          'THEN contactsNotifier in ContactsManager SHOULD have GetContactsIsEmpty state.\n'
+          'THEN phonebookContactNotifier in ContactsManager SHOULD have GetPhonebookContactsSuccess state.\n'
+          'THEN list ToM contact SHOULD is empty.\n'
+          'THEN list Phonebook contact SHOULD is empty.\n', () async {
         final List<Failure> listTomContactsFailureState = [];
 
         final List<Success> listPhonebookContactsSuccessState = [];
 
-        when(
-          mockGetTomContactsInteractor.execute(),
-        ).thenAnswer(
+        when(mockGetTomContactsInteractor.execute()).thenAnswer(
           (_) => Stream.fromIterable([
             const Right(ContactsLoading()),
             const Left(GetContactsIsEmpty()),
@@ -499,149 +3014,162 @@ void main() {
         );
 
         when(
-          mockTryGetSyncedPhoneBookContactInteractor.execute(
-            userId: mxId,
+          mockFederationConfigurationsRepository.getFederationConfigurations(
+            mxId,
           ),
         ).thenAnswer(
-          (_) async => Right(
-            GetSyncedPhoneBookContactSuccessState(
-              contacts: contacts,
-              timeAvailableForSyncVault: false,
+          (_) async => FederationConfigurations(
+            fedServerInformation: FederationServerInformation(),
+          ),
+        );
+
+        when(
+          mockIdentityServerDynamicUrlInterceptors.baseUrl,
+        ).thenReturn(baseUrl);
+
+        when(
+          mockAuthorizationInterceptor.getAccessToken,
+        ).thenReturn(accessToken);
+
+        when(
+          mockTwakeLookupPhonebookContactInteractor.execute(
+            argument: TwakeLookUpArgument(
+              homeServerUrl: baseUrl,
+              withAccessToken: accessToken,
             ),
           ),
+        ).thenAnswer(
+          (_) => Stream.fromIterable([
+            const Right(GetPhonebookContactsLoading()),
+            Right(
+              GetPhonebookContactsSuccess(contacts: contacts, progress: 100),
+            ),
+          ]),
+        );
+
+        when(
+          mockPostAddressBookInteractor.execute(
+            addressBooks: contacts.toSet().toAddressBooks().toList(),
+          ),
+        ).thenAnswer(
+          (_) => Stream.fromIterable([
+            const Right(PostAddressBookLoading()),
+            const Right(PostAddressBookSuccessState(updatedAddressBooks: [])),
+          ]),
         );
 
         contactsManager.getContactsNotifier().addListener(() {
           contactsManager.getContactsNotifier().value.fold(
-                (failure) => listTomContactsFailureState.add(failure),
-                (success) => null,
-              );
+            (failure) => listTomContactsFailureState.add(failure),
+            (success) => null,
+          );
         });
 
         contactsManager.getPhonebookContactsNotifier().addListener(() {
           contactsManager.getPhonebookContactsNotifier().value.fold(
-                (failure) => null,
-                (success) => listPhonebookContactsSuccessState.add(success),
-              );
+            (failure) => null,
+            (success) => listPhonebookContactsSuccessState.add(success),
+          );
         });
 
-        contactsManager.initialSynchronizeContacts(
+        contactsManager.synchronizeContactsOnContactTab(
           isAvailableSupportPhonebookContacts: true,
           withMxId: mxId,
         );
 
         await Future.delayed(const Duration(seconds: 1));
 
-        verify(
-          mockGetTomContactsInteractor.execute(),
-        ).called(1);
+        verify(mockGetTomContactsInteractor.execute()).called(1);
 
         verify(
-          mockTryGetSyncedPhoneBookContactInteractor.execute(
-            userId: mxId,
+          mockPostAddressBookInteractor.execute(
+            addressBooks: contacts.toSet().toAddressBooks().toList(),
           ),
         ).called(1);
-
-        verifyNever(mockHomeServerDynamicUrlInterceptors.baseUrl);
-
-        verifyNever(mockAuthorizationInterceptor.getAccessToken);
-
-        verifyNever(
-          mockFederationConfigurationsRepository
-              .getFederationConfigurations(mxId),
-        );
-
-        verifyNever(
-          mockFederationLookUpPhonebookContactInteractor.execute(
-            argument: FederationLookUpArgument(
-              homeServerUrl: baseUrl,
-              federationUrl: federationConfigurations
-                      .fedServerInformation.baseUrls?.first
-                      .toString() ??
-                  '',
-              withMxId: mxId,
-              withAccessToken: accessToken,
-            ),
-          ),
-        );
 
         expectLater(listTomContactsFailureState.length, 1);
 
-        expectLater(
-          listTomContactsFailureState,
-          [
-            const GetContactsIsEmpty(),
-          ],
+        expectLater(listTomContactsFailureState, [const GetContactsIsEmpty()]);
+
+        expectLater(listPhonebookContactsSuccessState.length, 2);
+
+        expectLater(listPhonebookContactsSuccessState, [
+          const GetPhonebookContactsLoading(),
+          GetPhonebookContactsSuccess(contacts: contacts, progress: 100),
+        ]);
+
+        verify(
+          mockTwakeLookupPhonebookContactInteractor.execute(
+            argument: anyNamed('argument'),
+          ),
+        ).called(1);
+
+        verifyNever(
+          mockFederationLookUpPhonebookContactInteractor.execute(
+            argument: anyNamed('argument'),
+          ),
         );
+      });
+    },
+  );
 
-        expectLater(listPhonebookContactsSuccessState.length, 1);
+  group(
+    'ContactsManager Unit test - ENV: Mobile - Open contact tab and supported Federation server',
+    () {
+      const mxId = 'mxId';
 
-        expectLater(
-          listPhonebookContactsSuccessState,
-          [
-            GetPhonebookContactsSuccess(progress: 100, contacts: contacts),
-          ],
-        );
-      },
-    );
+      const baseUrl = 'https://example.com';
 
-    test(
-      'WHEN it is available get Phonebook contact.\n'
-      'AND contactsNotifier return GetContactsIsEmpty with contacts is empty.\n'
-      'AND tryGetSyncedPhoneBookContactInteractor return GetSyncedPhoneBookContactSuccessState state.\n'
-      'AND timeAvailableForSyncVault is true.\n'
-      'THEN contactsNotifier in ContactsManager SHOULD have GetContactsIsEmpty state.\n'
-      'THEN phonebookContactNotifier in ContactsManager SHOULD have RequestTokenFailure state.\n'
-      'THEN list ToM contact SHOULD is empty.\n'
-      'THEN list Phonebook contact SHOULD is empty.\n',
-      () async {
+      const accessToken = 'accessToken';
+
+      final federationConfigurations = FederationConfigurations(
+        fedServerInformation: FederationServerInformation(
+          baseUrls: [Uri(scheme: 'https', host: 'federation')],
+        ),
+      );
+
+      final contacts = [
+        ContactFixtures.contact1,
+        ContactFixtures.contact2,
+        ContactFixtures.contact3,
+      ];
+
+      test('WHEN it is available get Phonebook contact.\n'
+          'AND contactsNotifier return GetContactsIsEmpty with contacts is empty.\n'
+          'AND timeAvailableForSyncVault is true.\n'
+          'THEN contactsNotifier in ContactsManager SHOULD have GetContactsIsEmpty state.\n'
+          'THEN phonebookContactNotifier in ContactsManager SHOULD have RequestTokenFailure state.\n'
+          'THEN list ToM contact SHOULD is empty.\n'
+          'THEN list Phonebook contact SHOULD is empty.\n', () async {
         final List<Failure> listTomContactsFailureState = [];
 
         final List<Failure> listPhonebookContactsFailureState = [];
 
-        when(
-          mockGetTomContactsInteractor.execute(),
-        ).thenAnswer(
+        when(mockGetTomContactsInteractor.execute()).thenAnswer(
           (_) => Stream.fromIterable([
             const Right(ContactsLoading()),
             const Left(GetContactsIsEmpty()),
           ]),
         );
 
-        when(
-          mockTryGetSyncedPhoneBookContactInteractor.execute(
-            userId: mxId,
-          ),
-        ).thenAnswer(
-          (_) async => Right(
-            GetSyncedPhoneBookContactSuccessState(
-              contacts: contacts,
-              timeAvailableForSyncVault: true,
-            ),
-          ),
-        );
-
-        when(mockHomeServerDynamicUrlInterceptors.baseUrl).thenReturn(
-          baseUrl,
-        );
-
-        when(mockAuthorizationInterceptor.getAccessToken).thenReturn(
-          accessToken,
-        );
+        when(mockHomeServerDynamicUrlInterceptors.baseUrl).thenReturn(baseUrl);
 
         when(
-          mockFederationConfigurationsRepository
-              .getFederationConfigurations(mxId),
-        ).thenAnswer(
-          (_) async => federationConfigurations,
-        );
+          mockAuthorizationInterceptor.getAccessToken,
+        ).thenReturn(accessToken);
+
+        when(
+          mockFederationConfigurationsRepository.getFederationConfigurations(
+            mxId,
+          ),
+        ).thenAnswer((_) async => federationConfigurations);
 
         when(
           mockFederationLookUpPhonebookContactInteractor.execute(
             argument: FederationLookUpArgument(
               homeServerUrl: baseUrl,
-              federationUrl: federationConfigurations
-                      .fedServerInformation.baseUrls?.first
+              federationUrl:
+                  federationConfigurations.fedServerInformation.baseUrls?.first
                       .toString() ??
                   '',
               withMxId: mxId,
@@ -651,61 +3179,49 @@ void main() {
         ).thenAnswer(
           (_) => Stream.fromIterable([
             const Right(GetPhonebookContactsLoading()),
-            Left(
-              RequestTokenFailure(
-                exception: dynamic,
-                contacts: contacts,
-              ),
-            ),
+            Left(RequestTokenFailure(exception: dynamic, contacts: contacts)),
           ]),
         );
 
         contactsManager.getContactsNotifier().addListener(() {
           contactsManager.getContactsNotifier().value.fold(
-                (failure) => listTomContactsFailureState.add(failure),
-                (success) => null,
-              );
+            (failure) => listTomContactsFailureState.add(failure),
+            (success) => null,
+          );
         });
 
         contactsManager.getPhonebookContactsNotifier().addListener(() {
           contactsManager.getPhonebookContactsNotifier().value.fold(
-                (failure) => listPhonebookContactsFailureState.add(failure),
-                (success) => null,
-              );
+            (failure) => listPhonebookContactsFailureState.add(failure),
+            (success) => null,
+          );
         });
 
-        contactsManager.initialSynchronizeContacts(
+        contactsManager.synchronizeContactsOnContactTab(
           isAvailableSupportPhonebookContacts: true,
           withMxId: mxId,
         );
 
         await Future.delayed(const Duration(seconds: 1));
 
-        verify(
-          mockGetTomContactsInteractor.execute(),
-        ).called(1);
-
-        verify(
-          mockTryGetSyncedPhoneBookContactInteractor.execute(
-            userId: mxId,
-          ),
-        ).called(1);
+        verify(mockGetTomContactsInteractor.execute()).called(1);
 
         verify(mockHomeServerDynamicUrlInterceptors.baseUrl).called(1);
 
         verify(mockAuthorizationInterceptor.getAccessToken).called(1);
 
         verify(
-          mockFederationConfigurationsRepository
-              .getFederationConfigurations(mxId),
+          mockFederationConfigurationsRepository.getFederationConfigurations(
+            mxId,
+          ),
         ).called(1);
 
         verify(
           mockFederationLookUpPhonebookContactInteractor.execute(
             argument: FederationLookUpArgument(
               homeServerUrl: baseUrl,
-              federationUrl: federationConfigurations
-                      .fedServerInformation.baseUrls?.first
+              federationUrl:
+                  federationConfigurations.fedServerInformation.baseUrls?.first
                       .toString() ??
                   '',
               withMxId: mxId,
@@ -716,87 +3232,54 @@ void main() {
 
         expectLater(listTomContactsFailureState.length, 1);
 
-        expectLater(
-          listTomContactsFailureState,
-          [
-            const GetContactsIsEmpty(),
-          ],
-        );
+        expectLater(listTomContactsFailureState, [const GetContactsIsEmpty()]);
 
         expectLater(listPhonebookContactsFailureState.length, 1);
 
-        expectLater(
-          listPhonebookContactsFailureState,
-          [
-            RequestTokenFailure(
-              exception: dynamic,
-              contacts: contacts,
-            ),
-          ],
-        );
-      },
-    );
+        expectLater(listPhonebookContactsFailureState, [
+          RequestTokenFailure(exception: dynamic, contacts: contacts),
+        ]);
+      });
 
-    test(
-      'WHEN it is available get Phonebook contact.\n'
-      'AND contactsNotifier return GetContactsIsEmpty with contacts is empty.\n'
-      'AND tryGetSyncedPhoneBookContactInteractor return GetSyncedPhoneBookContactSuccessState state.\n'
-      'AND timeAvailableForSyncVault is true.\n'
-      'AND phonebookContactNotifier return GetPhonebookContactsSuccess state.\n'
-      'THEN contactsNotifier in ContactsManager SHOULD have GetContactsIsEmpty state.\n'
-      'THEN phonebookContactNotifier in ContactsManager SHOULD have GetPhonebookContactsSuccess state.\n'
-      'THEN list ToM contact SHOULD is empty.\n'
-      'THEN list Phonebook contact SHOULD is not empty.\n',
-      () async {
+      test('WHEN it is available get Phonebook contact.\n'
+          'AND contactsNotifier return GetContactsIsEmpty with contacts is empty.\n'
+          'AND timeAvailableForSyncVault is true.\n'
+          'AND phonebookContactNotifier return GetPhonebookContactsSuccess state.\n'
+          'THEN contactsNotifier in ContactsManager SHOULD have GetContactsIsEmpty state.\n'
+          'THEN phonebookContactNotifier in ContactsManager SHOULD have GetPhonebookContactsSuccess state.\n'
+          'THEN list ToM contact SHOULD is empty.\n'
+          'THEN list Phonebook contact SHOULD is not empty.\n', () async {
         final List<Failure> listTomContactsFailureState = [];
 
         final List<Success> listPhonebookContactsSuccessState = [];
 
         debugDefaultTargetPlatformOverride = TargetPlatform.android;
 
-        when(
-          mockGetTomContactsInteractor.execute(),
-        ).thenAnswer(
+        when(mockGetTomContactsInteractor.execute()).thenAnswer(
           (_) => Stream.fromIterable([
             const Right(ContactsLoading()),
             const Left(GetContactsIsEmpty()),
           ]),
         );
 
-        when(
-          mockTryGetSyncedPhoneBookContactInteractor.execute(
-            userId: mxId,
-          ),
-        ).thenAnswer(
-          (_) async => Right(
-            GetSyncedPhoneBookContactSuccessState(
-              contacts: contacts,
-              timeAvailableForSyncVault: true,
-            ),
-          ),
-        );
-
-        when(mockHomeServerDynamicUrlInterceptors.baseUrl).thenReturn(
-          baseUrl,
-        );
-
-        when(mockAuthorizationInterceptor.getAccessToken).thenReturn(
-          accessToken,
-        );
+        when(mockHomeServerDynamicUrlInterceptors.baseUrl).thenReturn(baseUrl);
 
         when(
-          mockFederationConfigurationsRepository
-              .getFederationConfigurations(mxId),
-        ).thenAnswer(
-          (_) async => federationConfigurations,
-        );
+          mockAuthorizationInterceptor.getAccessToken,
+        ).thenReturn(accessToken);
+
+        when(
+          mockFederationConfigurationsRepository.getFederationConfigurations(
+            mxId,
+          ),
+        ).thenAnswer((_) async => federationConfigurations);
 
         when(
           mockFederationLookUpPhonebookContactInteractor.execute(
             argument: FederationLookUpArgument(
               homeServerUrl: baseUrl,
-              federationUrl: federationConfigurations
-                      .fedServerInformation.baseUrls?.first
+              federationUrl:
+                  federationConfigurations.fedServerInformation.baseUrls?.first
                       .toString() ??
                   '',
               withMxId: mxId,
@@ -807,10 +3290,7 @@ void main() {
           (_) => Stream.fromIterable([
             const Right(GetPhonebookContactsLoading()),
             Right(
-              GetPhonebookContactsSuccess(
-                contacts: contacts,
-                progress: 100,
-              ),
+              GetPhonebookContactsSuccess(contacts: contacts, progress: 100),
             ),
           ]),
         );
@@ -828,50 +3308,43 @@ void main() {
 
         contactsManager.getContactsNotifier().addListener(() {
           contactsManager.getContactsNotifier().value.fold(
-                (failure) => listTomContactsFailureState.add(failure),
-                (success) => null,
-              );
+            (failure) => listTomContactsFailureState.add(failure),
+            (success) => null,
+          );
         });
 
         contactsManager.getPhonebookContactsNotifier().addListener(() {
           contactsManager.getPhonebookContactsNotifier().value.fold(
-                (failure) => null,
-                (success) => listPhonebookContactsSuccessState.add(success),
-              );
+            (failure) => null,
+            (success) => listPhonebookContactsSuccessState.add(success),
+          );
         });
 
-        contactsManager.initialSynchronizeContacts(
+        contactsManager.synchronizeContactsOnContactTab(
           isAvailableSupportPhonebookContacts: true,
           withMxId: mxId,
         );
 
         await Future.delayed(const Duration(seconds: 1));
 
-        verify(
-          mockGetTomContactsInteractor.execute(),
-        ).called(1);
-
-        verify(
-          mockTryGetSyncedPhoneBookContactInteractor.execute(
-            userId: mxId,
-          ),
-        ).called(1);
+        verify(mockGetTomContactsInteractor.execute()).called(1);
 
         verify(mockHomeServerDynamicUrlInterceptors.baseUrl).called(1);
 
         verify(mockAuthorizationInterceptor.getAccessToken).called(1);
 
         verify(
-          mockFederationConfigurationsRepository
-              .getFederationConfigurations(mxId),
+          mockFederationConfigurationsRepository.getFederationConfigurations(
+            mxId,
+          ),
         ).called(1);
 
         verify(
           mockFederationLookUpPhonebookContactInteractor.execute(
             argument: FederationLookUpArgument(
               homeServerUrl: baseUrl,
-              federationUrl: federationConfigurations
-                      .fedServerInformation.baseUrls?.first
+              federationUrl:
+                  federationConfigurations.fedServerInformation.baseUrls?.first
                       .toString() ??
                   '',
               withMxId: mxId,
@@ -882,82 +3355,52 @@ void main() {
 
         expectLater(listTomContactsFailureState.length, 1);
 
-        expectLater(
-          listTomContactsFailureState,
-          [
-            const GetContactsIsEmpty(),
-          ],
-        );
+        expectLater(listTomContactsFailureState, [const GetContactsIsEmpty()]);
 
         expectLater(listPhonebookContactsSuccessState.length, 2);
 
-        expectLater(
-          listPhonebookContactsSuccessState,
-          [
-            const GetPhonebookContactsLoading(),
-            GetPhonebookContactsSuccess(progress: 100, contacts: contacts),
-          ],
-        );
-      },
-    );
+        expectLater(listPhonebookContactsSuccessState, [
+          const GetPhonebookContactsLoading(),
+          GetPhonebookContactsSuccess(progress: 100, contacts: contacts),
+        ]);
+      });
 
-    test(
-      'WHEN it is available get Phonebook contact.\n'
-      'AND contactsNotifier return GetContactsSuccess with contacts not empty.\n'
-      'AND tryGetSyncedPhoneBookContactInteractor return GetSyncedPhoneBookContactSuccessState state.\n'
-      'AND timeAvailableForSyncVault is true.\n'
-      'THEN contactsNotifier in ContactsManager SHOULD have GetContactsSuccess state.\n'
-      'THEN phonebookContactNotifier in ContactsManager SHOULD have GetPhonebookContactsSuccess state.\n'
-      'THEN list ToM contact SHOULD is empty.\n'
-      'THEN list Phonebook contact SHOULD is not empty.\n',
-      () async {
+      test('WHEN it is available get Phonebook contact.\n'
+          'AND contactsNotifier return GetContactsSuccess with contacts not empty.\n'
+          'AND timeAvailableForSyncVault is true.\n'
+          'THEN contactsNotifier in ContactsManager SHOULD have GetContactsSuccess state.\n'
+          'THEN phonebookContactNotifier in ContactsManager SHOULD have GetPhonebookContactsSuccess state.\n'
+          'THEN list ToM contact SHOULD is empty.\n'
+          'THEN list Phonebook contact SHOULD is not empty.\n', () async {
         final List<Success> listTomContactsSuccessState = [];
 
         final List<Success> listPhonebookContactsSuccessState = [];
 
-        when(
-          mockGetTomContactsInteractor.execute(),
-        ).thenAnswer(
+        when(mockGetTomContactsInteractor.execute()).thenAnswer(
           (_) => Stream.fromIterable([
             const Right(ContactsLoading()),
             Right(GetContactsSuccess(contacts: contacts)),
           ]),
         );
 
-        when(
-          mockTryGetSyncedPhoneBookContactInteractor.execute(
-            userId: mxId,
-          ),
-        ).thenAnswer(
-          (_) async => Right(
-            GetSyncedPhoneBookContactSuccessState(
-              contacts: contacts,
-              timeAvailableForSyncVault: true,
-            ),
-          ),
-        );
-
-        when(mockHomeServerDynamicUrlInterceptors.baseUrl).thenReturn(
-          baseUrl,
-        );
-
-        when(mockAuthorizationInterceptor.getAccessToken).thenReturn(
-          accessToken,
-        );
+        when(mockHomeServerDynamicUrlInterceptors.baseUrl).thenReturn(baseUrl);
 
         when(
-          mockFederationConfigurationsRepository
-              .getFederationConfigurations(mxId),
-        ).thenAnswer(
-          (_) async => federationConfigurations,
-        );
+          mockAuthorizationInterceptor.getAccessToken,
+        ).thenReturn(accessToken);
+
+        when(
+          mockFederationConfigurationsRepository.getFederationConfigurations(
+            mxId,
+          ),
+        ).thenAnswer((_) async => federationConfigurations);
 
         when(
           mockFederationLookUpPhonebookContactInteractor.execute(
             argument: FederationLookUpArgument(
               homeServerUrl: baseUrl,
-              federationUrl: federationConfigurations
-                      .fedServerInformation.baseUrls?.first
+              federationUrl:
+                  federationConfigurations.fedServerInformation.baseUrls?.first
                       .toString() ??
                   '',
               withMxId: mxId,
@@ -968,10 +3411,7 @@ void main() {
           (_) => Stream.fromIterable([
             const Right(GetPhonebookContactsLoading()),
             Right(
-              GetPhonebookContactsSuccess(
-                contacts: contacts,
-                progress: 100,
-              ),
+              GetPhonebookContactsSuccess(contacts: contacts, progress: 100),
             ),
           ]),
         );
@@ -989,50 +3429,43 @@ void main() {
 
         contactsManager.getContactsNotifier().addListener(() {
           contactsManager.getContactsNotifier().value.fold(
-                (failure) => null,
-                (success) => listTomContactsSuccessState.add(success),
-              );
+            (failure) => null,
+            (success) => listTomContactsSuccessState.add(success),
+          );
         });
 
         contactsManager.getPhonebookContactsNotifier().addListener(() {
           contactsManager.getPhonebookContactsNotifier().value.fold(
-                (failure) => null,
-                (success) => listPhonebookContactsSuccessState.add(success),
-              );
+            (failure) => null,
+            (success) => listPhonebookContactsSuccessState.add(success),
+          );
         });
 
-        contactsManager.initialSynchronizeContacts(
+        contactsManager.synchronizeContactsOnContactTab(
           isAvailableSupportPhonebookContacts: true,
           withMxId: mxId,
         );
 
         await Future.delayed(const Duration(seconds: 1));
 
-        verify(
-          mockGetTomContactsInteractor.execute(),
-        ).called(1);
-
-        verify(
-          mockTryGetSyncedPhoneBookContactInteractor.execute(
-            userId: mxId,
-          ),
-        ).called(1);
+        verify(mockGetTomContactsInteractor.execute()).called(1);
 
         verify(mockHomeServerDynamicUrlInterceptors.baseUrl).called(1);
 
         verify(mockAuthorizationInterceptor.getAccessToken).called(1);
 
         verify(
-          mockFederationConfigurationsRepository
-              .getFederationConfigurations(mxId),
+          mockFederationConfigurationsRepository.getFederationConfigurations(
+            mxId,
+          ),
         ).called(1);
 
         verify(
           mockFederationLookUpPhonebookContactInteractor.execute(
             argument: FederationLookUpArgument(
               homeServerUrl: baseUrl,
-              federationUrl: federationConfigurations
-                      .fedServerInformation.baseUrls?.first
+              federationUrl:
+                  federationConfigurations.fedServerInformation.baseUrls?.first
                       .toString() ??
                   '',
               withMxId: mxId,
@@ -1043,80 +3476,55 @@ void main() {
 
         expectLater(listTomContactsSuccessState.length, 2);
 
-        expectLater(
-          listTomContactsSuccessState,
-          [
-            const ContactsLoading(),
-            GetContactsSuccess(contacts: contacts),
-          ],
-        );
+        expectLater(listTomContactsSuccessState, [
+          const ContactsLoading(),
+          GetContactsSuccess(contacts: contacts),
+        ]);
 
         expectLater(listPhonebookContactsSuccessState.length, 2);
 
-        expectLater(
-          listPhonebookContactsSuccessState,
-          [
-            const GetPhonebookContactsLoading(),
-            GetPhonebookContactsSuccess(progress: 100, contacts: contacts),
-          ],
-        );
-      },
-    );
+        expectLater(listPhonebookContactsSuccessState, [
+          const GetPhonebookContactsLoading(),
+          GetPhonebookContactsSuccess(progress: 100, contacts: contacts),
+        ]);
+      });
 
-    test(
-      'WHEN it is available get Phonebook contact.\n'
-      'AND contactsNotifier return GetContactsIsEmpty with contacts is empty.\n'
-      'AND tryGetSyncedPhoneBookContactInteractor return GetSyncedPhoneBookContactFailure state.\n'
-      'AND phonebookContactNotifier return RegisterTokenFailure state.\n'
-      'THEN contactsNotifier in ContactsManager SHOULD have GetContactsIsEmpty state.\n'
-      'THEN phonebookContactNotifier in ContactsManager SHOULD have RegisterTokenFailure state.\n'
-      'THEN list ToM contact SHOULD is empty.\n'
-      'THEN list Phonebook contact SHOULD is empty.\n',
-      () async {
+      test('WHEN it is available get Phonebook contact.\n'
+          'AND contactsNotifier return GetContactsIsEmpty with contacts is empty.\n'
+          'AND phonebookContactNotifier return RegisterTokenFailure state.\n'
+          'THEN contactsNotifier in ContactsManager SHOULD have GetContactsIsEmpty state.\n'
+          'THEN phonebookContactNotifier in ContactsManager SHOULD have RegisterTokenFailure state.\n'
+          'THEN list ToM contact SHOULD is empty.\n'
+          'THEN list Phonebook contact SHOULD is empty.\n', () async {
         final List<Failure> listTomContactsFailureState = [];
 
         final List<Failure> listPhonebookContactsFailureState = [];
 
-        when(
-          mockGetTomContactsInteractor.execute(),
-        ).thenAnswer(
+        when(mockGetTomContactsInteractor.execute()).thenAnswer(
           (_) => Stream.fromIterable([
             const Right(ContactsLoading()),
             const Left(GetContactsIsEmpty()),
           ]),
         );
 
-        when(
-          mockTryGetSyncedPhoneBookContactInteractor.execute(
-            userId: mxId,
-          ),
-        ).thenAnswer(
-          (_) async => const Left(
-            GetSyncedPhoneBookContactFailure(exception: dynamic),
-          ),
-        );
-
-        when(mockHomeServerDynamicUrlInterceptors.baseUrl).thenReturn(
-          baseUrl,
-        );
-
-        when(mockAuthorizationInterceptor.getAccessToken).thenReturn(
-          accessToken,
-        );
+        when(mockHomeServerDynamicUrlInterceptors.baseUrl).thenReturn(baseUrl);
 
         when(
-          mockFederationConfigurationsRepository
-              .getFederationConfigurations(mxId),
-        ).thenAnswer(
-          (_) async => federationConfigurations,
-        );
+          mockAuthorizationInterceptor.getAccessToken,
+        ).thenReturn(accessToken);
+
+        when(
+          mockFederationConfigurationsRepository.getFederationConfigurations(
+            mxId,
+          ),
+        ).thenAnswer((_) async => federationConfigurations);
 
         when(
           mockFederationLookUpPhonebookContactInteractor.execute(
             argument: FederationLookUpArgument(
               homeServerUrl: baseUrl,
-              federationUrl: federationConfigurations
-                      .fedServerInformation.baseUrls?.first
+              federationUrl:
+                  federationConfigurations.fedServerInformation.baseUrls?.first
                       .toString() ??
                   '',
               withMxId: mxId,
@@ -1126,123 +3534,80 @@ void main() {
         ).thenAnswer(
           (_) => Stream.fromIterable([
             const Right(GetPhonebookContactsLoading()),
-            Left(
-              RegisterTokenFailure(
-                exception: dynamic,
-                contacts: contacts,
-              ),
-            ),
+            Left(RegisterTokenFailure(exception: dynamic, contacts: contacts)),
           ]),
         );
 
         contactsManager.getContactsNotifier().addListener(() {
           contactsManager.getContactsNotifier().value.fold(
-                (failure) => listTomContactsFailureState.add(failure),
-                (success) => null,
-              );
+            (failure) => listTomContactsFailureState.add(failure),
+            (success) => null,
+          );
         });
 
         contactsManager.getPhonebookContactsNotifier().addListener(() {
           contactsManager.getPhonebookContactsNotifier().value.fold(
-                (failure) => listPhonebookContactsFailureState.add(failure),
-                (success) => null,
-              );
+            (failure) => listPhonebookContactsFailureState.add(failure),
+            (success) => null,
+          );
         });
 
-        contactsManager.initialSynchronizeContacts(
+        contactsManager.synchronizeContactsOnContactTab(
           isAvailableSupportPhonebookContacts: true,
           withMxId: mxId,
         );
 
         await Future.delayed(const Duration(seconds: 1));
 
-        verify(
-          mockGetTomContactsInteractor.execute(),
-        ).called(1);
-
-        verify(
-          mockTryGetSyncedPhoneBookContactInteractor.execute(
-            userId: mxId,
-          ),
-        ).called(1);
+        verify(mockGetTomContactsInteractor.execute()).called(1);
 
         expectLater(listTomContactsFailureState.length, 1);
 
-        expectLater(
-          listTomContactsFailureState,
-          [
-            const GetContactsIsEmpty(),
-          ],
-        );
+        expectLater(listTomContactsFailureState, [const GetContactsIsEmpty()]);
 
         expectLater(listPhonebookContactsFailureState.length, 1);
 
-        expectLater(
-          listPhonebookContactsFailureState,
-          [
-            RegisterTokenFailure(
-              exception: dynamic,
-              contacts: contacts,
-            ),
-          ],
-        );
-      },
-    );
+        expectLater(listPhonebookContactsFailureState, [
+          RegisterTokenFailure(exception: dynamic, contacts: contacts),
+        ]);
+      });
 
-    test(
-      'WHEN it is available get Phonebook contact.\n'
-      'AND contactsNotifier return GetContactsIsEmpty with contacts is empty.\n'
-      'AND tryGetSyncedPhoneBookContactInteractor return GetSyncedPhoneBookContactFailure state.\n'
-      'AND phonebookContactNotifier return GetPhonebookContactsIsEmpty state.\n'
-      'THEN contactsNotifier in ContactsManager SHOULD have GetContactsIsEmpty state.\n'
-      'THEN phonebookContactNotifier in ContactsManager SHOULD have GetPhonebookContactsIsEmpty state.\n'
-      'THEN list ToM contact SHOULD is empty.\n'
-      'THEN list Phonebook contact SHOULD is empty.\n',
-      () async {
+      test('WHEN it is available get Phonebook contact.\n'
+          'AND contactsNotifier return GetContactsIsEmpty with contacts is empty.\n'
+          'AND phonebookContactNotifier return GetPhonebookContactsIsEmpty state.\n'
+          'THEN contactsNotifier in ContactsManager SHOULD have GetContactsIsEmpty state.\n'
+          'THEN phonebookContactNotifier in ContactsManager SHOULD have GetPhonebookContactsIsEmpty state.\n'
+          'THEN list ToM contact SHOULD is empty.\n'
+          'THEN list Phonebook contact SHOULD is empty.\n', () async {
         final List<Failure> listTomContactsFailureState = [];
 
         final List<Failure> listPhonebookContactsFailureState = [];
 
-        when(
-          mockGetTomContactsInteractor.execute(),
-        ).thenAnswer(
+        when(mockGetTomContactsInteractor.execute()).thenAnswer(
           (_) => Stream.fromIterable([
             const Right(ContactsLoading()),
             const Left(GetContactsIsEmpty()),
           ]),
         );
 
-        when(
-          mockTryGetSyncedPhoneBookContactInteractor.execute(
-            userId: mxId,
-          ),
-        ).thenAnswer(
-          (_) async => const Left(
-            GetSyncedPhoneBookContactFailure(exception: dynamic),
-          ),
-        );
-
-        when(mockHomeServerDynamicUrlInterceptors.baseUrl).thenReturn(
-          baseUrl,
-        );
-
-        when(mockAuthorizationInterceptor.getAccessToken).thenReturn(
-          accessToken,
-        );
+        when(mockHomeServerDynamicUrlInterceptors.baseUrl).thenReturn(baseUrl);
 
         when(
-          mockFederationConfigurationsRepository
-              .getFederationConfigurations(mxId),
-        ).thenAnswer(
-          (_) async => federationConfigurations,
-        );
+          mockAuthorizationInterceptor.getAccessToken,
+        ).thenReturn(accessToken);
+
+        when(
+          mockFederationConfigurationsRepository.getFederationConfigurations(
+            mxId,
+          ),
+        ).thenAnswer((_) async => federationConfigurations);
 
         when(
           mockFederationLookUpPhonebookContactInteractor.execute(
             argument: FederationLookUpArgument(
               homeServerUrl: baseUrl,
-              federationUrl: federationConfigurations
-                      .fedServerInformation.baseUrls?.first
+              federationUrl:
+                  federationConfigurations.fedServerInformation.baseUrls?.first
                       .toString() ??
                   '',
               withMxId: mxId,
@@ -1258,109 +3623,74 @@ void main() {
 
         contactsManager.getContactsNotifier().addListener(() {
           contactsManager.getContactsNotifier().value.fold(
-                (failure) => listTomContactsFailureState.add(failure),
-                (success) => null,
-              );
+            (failure) => listTomContactsFailureState.add(failure),
+            (success) => null,
+          );
         });
 
         contactsManager.getPhonebookContactsNotifier().addListener(() {
           contactsManager.getPhonebookContactsNotifier().value.fold(
-                (failure) => listPhonebookContactsFailureState.add(failure),
-                (success) => null,
-              );
+            (failure) => listPhonebookContactsFailureState.add(failure),
+            (success) => null,
+          );
         });
 
-        contactsManager.initialSynchronizeContacts(
+        contactsManager.synchronizeContactsOnContactTab(
           isAvailableSupportPhonebookContacts: true,
           withMxId: mxId,
         );
 
         await Future.delayed(const Duration(seconds: 1));
 
-        verify(
-          mockGetTomContactsInteractor.execute(),
-        ).called(1);
-
-        verify(
-          mockTryGetSyncedPhoneBookContactInteractor.execute(
-            userId: mxId,
-          ),
-        ).called(1);
+        verify(mockGetTomContactsInteractor.execute()).called(1);
 
         expectLater(listTomContactsFailureState.length, 1);
 
-        expectLater(
-          listTomContactsFailureState,
-          [
-            const GetContactsIsEmpty(),
-          ],
-        );
+        expectLater(listTomContactsFailureState, [const GetContactsIsEmpty()]);
 
         expectLater(listPhonebookContactsFailureState.length, 1);
 
-        expectLater(
-          listPhonebookContactsFailureState,
-          [
-            const GetPhonebookContactsIsEmpty(),
-          ],
-        );
-      },
-    );
+        expectLater(listPhonebookContactsFailureState, [
+          const GetPhonebookContactsIsEmpty(),
+        ]);
+      });
 
-    test(
-      'WHEN it is available get Phonebook contact.\n'
-      'AND contactsNotifier return GetContactsIsEmpty with contacts is empty.\n'
-      'AND tryGetSyncedPhoneBookContactInteractor return GetSyncedPhoneBookContactFailure state.\n'
-      'AND phonebookContactNotifier return GetPhoneBookContactFailure state.\n'
-      'THEN contactsNotifier in ContactsManager SHOULD have GetContactsIsEmpty state.\n'
-      'THEN phonebookContactNotifier in ContactsManager SHOULD have GetPhoneBookContactFailure state.\n'
-      'THEN list ToM contact SHOULD is empty.\n'
-      'THEN list Phonebook contact SHOULD is empty.\n',
-      () async {
+      test('WHEN it is available get Phonebook contact.\n'
+          'AND contactsNotifier return GetContactsIsEmpty with contacts is empty.\n'
+          'AND phonebookContactNotifier return GetPhoneBookContactFailure state.\n'
+          'THEN contactsNotifier in ContactsManager SHOULD have GetContactsIsEmpty state.\n'
+          'THEN phonebookContactNotifier in ContactsManager SHOULD have GetPhoneBookContactFailure state.\n'
+          'THEN list ToM contact SHOULD is empty.\n'
+          'THEN list Phonebook contact SHOULD is empty.\n', () async {
         final List<Failure> listTomContactsFailureState = [];
 
         final List<Failure> listPhonebookContactsFailureState = [];
 
-        when(
-          mockGetTomContactsInteractor.execute(),
-        ).thenAnswer(
+        when(mockGetTomContactsInteractor.execute()).thenAnswer(
           (_) => Stream.fromIterable([
             const Right(ContactsLoading()),
             const Left(GetContactsIsEmpty()),
           ]),
         );
 
-        when(
-          mockTryGetSyncedPhoneBookContactInteractor.execute(
-            userId: mxId,
-          ),
-        ).thenAnswer(
-          (_) async => const Left(
-            GetSyncedPhoneBookContactFailure(exception: dynamic),
-          ),
-        );
-
-        when(mockHomeServerDynamicUrlInterceptors.baseUrl).thenReturn(
-          baseUrl,
-        );
-
-        when(mockAuthorizationInterceptor.getAccessToken).thenReturn(
-          accessToken,
-        );
+        when(mockHomeServerDynamicUrlInterceptors.baseUrl).thenReturn(baseUrl);
 
         when(
-          mockFederationConfigurationsRepository
-              .getFederationConfigurations(mxId),
-        ).thenAnswer(
-          (_) async => federationConfigurations,
-        );
+          mockAuthorizationInterceptor.getAccessToken,
+        ).thenReturn(accessToken);
+
+        when(
+          mockFederationConfigurationsRepository.getFederationConfigurations(
+            mxId,
+          ),
+        ).thenAnswer((_) async => federationConfigurations);
 
         when(
           mockFederationLookUpPhonebookContactInteractor.execute(
             argument: FederationLookUpArgument(
               homeServerUrl: baseUrl,
-              federationUrl: federationConfigurations
-                      .fedServerInformation.baseUrls?.first
+              federationUrl:
+                  federationConfigurations.fedServerInformation.baseUrls?.first
                       .toString() ??
                   '',
               withMxId: mxId,
@@ -1376,109 +3706,74 @@ void main() {
 
         contactsManager.getContactsNotifier().addListener(() {
           contactsManager.getContactsNotifier().value.fold(
-                (failure) => listTomContactsFailureState.add(failure),
-                (success) => null,
-              );
+            (failure) => listTomContactsFailureState.add(failure),
+            (success) => null,
+          );
         });
 
         contactsManager.getPhonebookContactsNotifier().addListener(() {
           contactsManager.getPhonebookContactsNotifier().value.fold(
-                (failure) => listPhonebookContactsFailureState.add(failure),
-                (success) => null,
-              );
+            (failure) => listPhonebookContactsFailureState.add(failure),
+            (success) => null,
+          );
         });
 
-        contactsManager.initialSynchronizeContacts(
+        contactsManager.synchronizeContactsOnContactTab(
           isAvailableSupportPhonebookContacts: true,
           withMxId: mxId,
         );
 
         await Future.delayed(const Duration(seconds: 1));
 
-        verify(
-          mockGetTomContactsInteractor.execute(),
-        ).called(1);
-
-        verify(
-          mockTryGetSyncedPhoneBookContactInteractor.execute(
-            userId: mxId,
-          ),
-        ).called(1);
+        verify(mockGetTomContactsInteractor.execute()).called(1);
 
         expectLater(listTomContactsFailureState.length, 1);
 
-        expectLater(
-          listTomContactsFailureState,
-          [
-            const GetContactsIsEmpty(),
-          ],
-        );
+        expectLater(listTomContactsFailureState, [const GetContactsIsEmpty()]);
 
         expectLater(listPhonebookContactsFailureState.length, 1);
 
-        expectLater(
-          listPhonebookContactsFailureState,
-          [
-            const GetPhoneBookContactFailure(exception: dynamic),
-          ],
-        );
-      },
-    );
+        expectLater(listPhonebookContactsFailureState, [
+          const GetPhoneBookContactFailure(exception: dynamic),
+        ]);
+      });
 
-    test(
-      'WHEN it is available get Phonebook contact.\n'
-      'AND contactsNotifier return GetContactsIsEmpty with contacts is empty.\n'
-      'AND tryGetSyncedPhoneBookContactInteractor return GetSyncedPhoneBookContactFailure state.\n'
-      'AND phonebookContactNotifier return GetHashDetailsFailure state.\n'
-      'THEN contactsNotifier in ContactsManager SHOULD have GetContactsIsEmpty state.\n'
-      'THEN phonebookContactNotifier in ContactsManager SHOULD have GetHashDetailsFailure state.\n'
-      'THEN list ToM contact SHOULD is empty.\n'
-      'THEN list Phonebook contact SHOULD is empty.\n',
-      () async {
+      test('WHEN it is available get Phonebook contact.\n'
+          'AND contactsNotifier return GetContactsIsEmpty with contacts is empty.\n'
+          'AND phonebookContactNotifier return GetHashDetailsFailure state.\n'
+          'THEN contactsNotifier in ContactsManager SHOULD have GetContactsIsEmpty state.\n'
+          'THEN phonebookContactNotifier in ContactsManager SHOULD have GetHashDetailsFailure state.\n'
+          'THEN list ToM contact SHOULD is empty.\n'
+          'THEN list Phonebook contact SHOULD is empty.\n', () async {
         final List<Failure> listTomContactsFailureState = [];
 
         final List<Failure> listPhonebookContactsFailureState = [];
 
-        when(
-          mockGetTomContactsInteractor.execute(),
-        ).thenAnswer(
+        when(mockGetTomContactsInteractor.execute()).thenAnswer(
           (_) => Stream.fromIterable([
             const Right(ContactsLoading()),
             const Left(GetContactsIsEmpty()),
           ]),
         );
 
-        when(
-          mockTryGetSyncedPhoneBookContactInteractor.execute(
-            userId: mxId,
-          ),
-        ).thenAnswer(
-          (_) async => const Left(
-            GetSyncedPhoneBookContactFailure(exception: dynamic),
-          ),
-        );
-
-        when(mockHomeServerDynamicUrlInterceptors.baseUrl).thenReturn(
-          baseUrl,
-        );
-
-        when(mockAuthorizationInterceptor.getAccessToken).thenReturn(
-          accessToken,
-        );
+        when(mockHomeServerDynamicUrlInterceptors.baseUrl).thenReturn(baseUrl);
 
         when(
-          mockFederationConfigurationsRepository
-              .getFederationConfigurations(mxId),
-        ).thenAnswer(
-          (_) async => federationConfigurations,
-        );
+          mockAuthorizationInterceptor.getAccessToken,
+        ).thenReturn(accessToken);
+
+        when(
+          mockFederationConfigurationsRepository.getFederationConfigurations(
+            mxId,
+          ),
+        ).thenAnswer((_) async => federationConfigurations);
 
         when(
           mockFederationLookUpPhonebookContactInteractor.execute(
             argument: FederationLookUpArgument(
               homeServerUrl: baseUrl,
-              federationUrl: federationConfigurations
-                      .fedServerInformation.baseUrls?.first
+              federationUrl:
+                  federationConfigurations.fedServerInformation.baseUrls?.first
                       .toString() ??
                   '',
               withMxId: mxId,
@@ -1494,579 +3789,438 @@ void main() {
 
         contactsManager.getContactsNotifier().addListener(() {
           contactsManager.getContactsNotifier().value.fold(
-                (failure) => listTomContactsFailureState.add(failure),
-                (success) => null,
-              );
+            (failure) => listTomContactsFailureState.add(failure),
+            (success) => null,
+          );
         });
 
         contactsManager.getPhonebookContactsNotifier().addListener(() {
           contactsManager.getPhonebookContactsNotifier().value.fold(
-                (failure) => listPhonebookContactsFailureState.add(failure),
-                (success) => null,
-              );
+            (failure) => listPhonebookContactsFailureState.add(failure),
+            (success) => null,
+          );
         });
 
-        contactsManager.initialSynchronizeContacts(
+        contactsManager.synchronizeContactsOnContactTab(
           isAvailableSupportPhonebookContacts: true,
           withMxId: mxId,
         );
 
         await Future.delayed(const Duration(seconds: 1));
 
-        verify(
-          mockGetTomContactsInteractor.execute(),
-        ).called(1);
-
-        verify(
-          mockTryGetSyncedPhoneBookContactInteractor.execute(
-            userId: mxId,
-          ),
-        ).called(1);
+        verify(mockGetTomContactsInteractor.execute()).called(1);
 
         expectLater(listTomContactsFailureState.length, 1);
 
-        expectLater(
-          listTomContactsFailureState,
-          [
-            const GetContactsIsEmpty(),
-          ],
-        );
+        expectLater(listTomContactsFailureState, [const GetContactsIsEmpty()]);
 
         expectLater(listPhonebookContactsFailureState.length, 1);
 
-        expectLater(
-          listPhonebookContactsFailureState,
-          [
-            const GetHashDetailsFailure(exception: dynamic),
-          ],
-        );
-      },
-    );
+        expectLater(listPhonebookContactsFailureState, [
+          const GetHashDetailsFailure(exception: dynamic),
+        ]);
+      });
 
-    test(
-      'WHEN it is available get Phonebook contact.\n'
-      'AND call initialSynchronizeContacts.\n'
-      'AND contactsNotifier is LoadingState.\n'
-      'AND THEN call initialSynchronizeContacts again.\n'
-      'AND contactsNotifier not call again\n'
-      'AND federationLookUpPhonebookContactInteractor not call.\n',
-      () async {
-        final List<Failure> listTomContactsFailureState = [];
+      test(
+        'WHEN it is available get Phonebook contact.\n'
+        'AND call initialSynchronizeContacts.\n'
+        'AND contactsNotifier is LoadingState.\n'
+        'AND THEN call initialSynchronizeContacts again.\n'
+        'AND contactsNotifier not call again\n'
+        'AND federationLookUpPhonebookContactInteractor not call.\n',
+        () async {
+          final List<Failure> listTomContactsFailureState = [];
 
-        final List<Failure> listPhonebookContactsFailureState = [];
+          final List<Failure> listPhonebookContactsFailureState = [];
 
-        when(
-          mockGetTomContactsInteractor.execute(),
-        ).thenAnswer(
-          (_) => Stream.fromIterable([
-            const Right(ContactsLoading()),
-            const Left(GetContactsIsEmpty()),
-          ]),
-        );
+          when(mockGetTomContactsInteractor.execute()).thenAnswer(
+            (_) => Stream.fromIterable([
+              const Right(ContactsLoading()),
+              const Left(GetContactsIsEmpty()),
+            ]),
+          );
 
-        when(
-          mockTryGetSyncedPhoneBookContactInteractor.execute(
-            userId: mxId,
-          ),
-        ).thenAnswer(
-          (_) async => const Left(
-            GetSyncedPhoneBookContactFailure(exception: dynamic),
-          ),
-        );
+          contactsManager.getContactsNotifier().addListener(() {
+            contactsManager.getContactsNotifier().value.fold(
+              (failure) => listTomContactsFailureState.add(failure),
+              (success) => null,
+            );
+          });
 
-        when(mockHomeServerDynamicUrlInterceptors.baseUrl).thenReturn(
-          baseUrl,
-        );
+          contactsManager.getPhonebookContactsNotifier().addListener(() {
+            contactsManager.getPhonebookContactsNotifier().value.fold(
+              (failure) => listPhonebookContactsFailureState.add(failure),
+              (success) => null,
+            );
+          });
 
-        when(mockAuthorizationInterceptor.getAccessToken).thenReturn(
-          accessToken,
-        );
+          contactsManager.synchronizeContactsOnContactTab(
+            isAvailableSupportPhonebookContacts: true,
+            withMxId: mxId,
+          );
 
-        when(
-          mockFederationConfigurationsRepository
-              .getFederationConfigurations(mxId),
-        ).thenAnswer(
-          (_) async => federationConfigurations,
-        );
+          await Future.delayed(const Duration(seconds: 1));
 
-        when(
-          mockFederationLookUpPhonebookContactInteractor.execute(
-            argument: FederationLookUpArgument(
-              homeServerUrl: baseUrl,
-              federationUrl: federationConfigurations
-                      .fedServerInformation.baseUrls?.first
-                      .toString() ??
-                  '',
-              withMxId: mxId,
-              withAccessToken: accessToken,
+          verify(mockGetTomContactsInteractor.execute()).called(1);
+
+          contactsManager.initialSynchronizeContacts(
+            isAvailableSupportPhonebookContacts: true,
+            withMxId: mxId,
+          );
+
+          await Future.delayed(const Duration(seconds: 5));
+
+          verifyNever(mockGetTomContactsInteractor.execute());
+
+          verifyNever(
+            mockFederationLookUpPhonebookContactInteractor.execute(
+              argument: anyNamed('argument'),
             ),
-          ),
-        ).thenAnswer(
-          (_) => Stream.fromIterable([
-            const Right(GetPhonebookContactsLoading()),
-            Left(
-              RequestTokenFailure(
-                exception: dynamic,
-                contacts: contacts,
+          );
+        },
+      );
+
+      test(
+        'WHEN it is available get Phonebook contact.\n'
+        'AND call synchronizeContactsOnContactTab.\n'
+        'AND contactsNotifier is LoadingState.\n'
+        'AND THEN call synchronizeContactsOnContactTab agian.\n'
+        'AND contactsNotifier must call again\n'
+        'AND federationLookUpPhonebookContactInteractor must call.\n',
+        () async {
+          final List<Failure> listTomContactsFailureState = [];
+
+          final List<Failure> listPhonebookContactsFailureState = [];
+
+          when(mockGetTomContactsInteractor.execute()).thenAnswer(
+            (_) => Stream.fromIterable([
+              const Right(ContactsLoading()),
+              const Left(GetContactsIsEmpty()),
+            ]),
+          );
+
+          when(
+            mockHomeServerDynamicUrlInterceptors.baseUrl,
+          ).thenReturn(baseUrl);
+
+          when(
+            mockAuthorizationInterceptor.getAccessToken,
+          ).thenReturn(accessToken);
+
+          when(
+            mockFederationConfigurationsRepository.getFederationConfigurations(
+              mxId,
+            ),
+          ).thenAnswer((_) async => federationConfigurations);
+
+          when(
+            mockFederationLookUpPhonebookContactInteractor.execute(
+              argument: FederationLookUpArgument(
+                homeServerUrl: baseUrl,
+                federationUrl:
+                    federationConfigurations
+                        .fedServerInformation
+                        .baseUrls
+                        ?.first
+                        .toString() ??
+                    '',
+                withMxId: mxId,
+                withAccessToken: accessToken,
               ),
             ),
-          ]),
-        );
+          ).thenAnswer(
+            (_) => Stream.fromIterable([
+              const Right(GetPhonebookContactsLoading()),
+              Left(RequestTokenFailure(exception: dynamic, contacts: contacts)),
+            ]),
+          );
 
-        contactsManager.getContactsNotifier().addListener(() {
-          contactsManager.getContactsNotifier().value.fold(
-                (failure) => listTomContactsFailureState.add(failure),
-                (success) => null,
-              );
-        });
+          contactsManager.getContactsNotifier().addListener(() {
+            contactsManager.getContactsNotifier().value.fold(
+              (failure) => listTomContactsFailureState.add(failure),
+              (success) => null,
+            );
+          });
 
-        contactsManager.getPhonebookContactsNotifier().addListener(() {
-          contactsManager.getPhonebookContactsNotifier().value.fold(
-                (failure) => listPhonebookContactsFailureState.add(failure),
-                (success) => null,
-              );
-        });
+          contactsManager.getPhonebookContactsNotifier().addListener(() {
+            contactsManager.getPhonebookContactsNotifier().value.fold(
+              (failure) => listPhonebookContactsFailureState.add(failure),
+              (success) => null,
+            );
+          });
 
-        contactsManager.initialSynchronizeContacts(
-          isAvailableSupportPhonebookContacts: true,
-          withMxId: mxId,
-        );
+          contactsManager.synchronizeContactsOnContactTab(
+            isAvailableSupportPhonebookContacts: true,
+            withMxId: mxId,
+          );
 
-        await Future.delayed(const Duration(seconds: 1));
+          await Future.delayed(const Duration(seconds: 1));
 
-        verify(
-          mockGetTomContactsInteractor.execute(),
-        ).called(1);
+          verify(mockGetTomContactsInteractor.execute()).called(1);
 
-        verify(
-          mockTryGetSyncedPhoneBookContactInteractor.execute(
-            userId: mxId,
-          ),
-        ).called(1);
+          expectLater(listTomContactsFailureState.length, 1);
 
-        expectLater(listTomContactsFailureState.length, 1);
-
-        expectLater(
-          listTomContactsFailureState,
-          [
+          expectLater(listTomContactsFailureState, [
             const GetContactsIsEmpty(),
-          ],
-        );
+          ]);
 
-        expectLater(listPhonebookContactsFailureState.length, 1);
+          expectLater(listPhonebookContactsFailureState.length, 1);
 
-        expectLater(
-          listPhonebookContactsFailureState,
-          [
-            RequestTokenFailure(
-              exception: dynamic,
-              contacts: contacts,
-            ),
-          ],
-        );
+          expectLater(listPhonebookContactsFailureState, [
+            RequestTokenFailure(exception: dynamic, contacts: contacts),
+          ]);
 
-        contactsManager.initialSynchronizeContacts(
-          isAvailableSupportPhonebookContacts: true,
-          withMxId: mxId,
-        );
+          contactsManager.synchronizeContactsOnContactTab(
+            isAvailableSupportPhonebookContacts: true,
+            withMxId: mxId,
+          );
 
-        await Future.delayed(const Duration(seconds: 5));
+          await Future.delayed(const Duration(seconds: 5));
 
-        verifyNever(
-          mockGetTomContactsInteractor.execute(),
-        );
-      },
-    );
+          verify(mockGetTomContactsInteractor.execute()).called(1);
 
-    test(
-      'WHEN it is available get Phonebook contact.\n'
-      'AND call initialSynchronizeContacts.\n'
-      'AND contactsNotifier is LoadingState.\n'
-      'AND THEN call initialSynchronizeContacts again with forceRun is true.\n'
-      'AND contactsNotifier must call again\n'
-      'AND federationLookUpPhonebookContactInteractor must call.\n',
-      () async {
-        final List<Failure> listTomContactsFailureState = [];
-
-        final List<Failure> listPhonebookContactsFailureState = [];
-
-        when(
-          mockGetTomContactsInteractor.execute(),
-        ).thenAnswer(
-          (_) => Stream.fromIterable([
-            const Right(ContactsLoading()),
-            const Left(GetContactsIsEmpty()),
-          ]),
-        );
-
-        when(
-          mockTryGetSyncedPhoneBookContactInteractor.execute(
-            userId: mxId,
-          ),
-        ).thenAnswer(
-          (_) async => const Left(
-            GetSyncedPhoneBookContactFailure(exception: dynamic),
-          ),
-        );
-
-        when(mockHomeServerDynamicUrlInterceptors.baseUrl).thenReturn(
-          baseUrl,
-        );
-
-        when(mockAuthorizationInterceptor.getAccessToken).thenReturn(
-          accessToken,
-        );
-
-        when(
-          mockFederationConfigurationsRepository
-              .getFederationConfigurations(mxId),
-        ).thenAnswer(
-          (_) async => federationConfigurations,
-        );
-
-        when(
-          mockFederationLookUpPhonebookContactInteractor.execute(
-            argument: FederationLookUpArgument(
-              homeServerUrl: baseUrl,
-              federationUrl: federationConfigurations
-                      .fedServerInformation.baseUrls?.first
-                      .toString() ??
-                  '',
-              withMxId: mxId,
-              withAccessToken: accessToken,
-            ),
-          ),
-        ).thenAnswer(
-          (_) => Stream.fromIterable([
-            const Right(GetPhonebookContactsLoading()),
-            Left(
-              RequestTokenFailure(
-                exception: dynamic,
-                contacts: contacts,
+          verify(
+            mockFederationLookUpPhonebookContactInteractor.execute(
+              argument: FederationLookUpArgument(
+                homeServerUrl: baseUrl,
+                federationUrl:
+                    federationConfigurations
+                        .fedServerInformation
+                        .baseUrls
+                        ?.first
+                        .toString() ??
+                    '',
+                withMxId: mxId,
+                withAccessToken: accessToken,
               ),
             ),
-          ]),
-        );
+          ).called(2);
+        },
+      );
+      test(
+        '[Account-A] WHEN it is available get Phonebook contact.\n'
+        '[Account-A] AND contactsNotifier return GetContactsIsEmpty with contacts is empty.\n'
+        '[Account-A] open the contact tab.\n'
+        '[Account-A] AND phonebookContactNotifier return GetPhonebookContactsIsEmpty state.\n'
+        '[Account-A] THEN contactsNotifier in ContactsManager SHOULD have GetContactsIsEmpty state.\n'
+        '[Account-A] THEN phonebookContactNotifier in ContactsManager SHOULD have GetPhonebookContactsIsEmpty state.\n'
+        '[Account-A] THEN list ToM contact SHOULD is empty.\n'
+        '[Account-A] THEN list Phonebook contact SHOULD is empty.\n'
+        'Trigger UI => switch to another account and call synchronize contacts.\n'
+        '[Account-B] AND contactsNotifier return GetContactsSuccess with contacts is empty.\n'
+        '[Account-B] AND phonebookContactInteractor return GetPhonebookContactsSuccess with contacts is empty.\n'
+        '[Account-B] open the contact tab.\n'
+        '[Account-B] AND phonebookContactNotifier return GetPhonebookContactsIsEmpty state.\n'
+        '[Account-B] THEN contactsNotifier in ContactsManager SHOULD have GetContactsIsEmpty state.\n'
+        '[Account-B] THEN phonebookContactNotifier in ContactsManager SHOULD have GetPhonebookContactsIsEmpty state.\n'
+        '[Account-B] THEN list ToM contact SHOULD is empty.\n'
+        '[Account-B] THEN list Phonebook contact SHOULD is empty.\n',
+        () async {
+          final List<Failure> listTomContactsFailureState = [];
 
-        contactsManager.getContactsNotifier().addListener(() {
-          contactsManager.getContactsNotifier().value.fold(
-                (failure) => listTomContactsFailureState.add(failure),
-                (success) => null,
-              );
-        });
+          final List<Failure> listPhonebookContactsFailureState = [];
 
-        contactsManager.getPhonebookContactsNotifier().addListener(() {
-          contactsManager.getPhonebookContactsNotifier().value.fold(
-                (failure) => listPhonebookContactsFailureState.add(failure),
-                (success) => null,
-              );
-        });
+          when(mockGetTomContactsInteractor.execute()).thenAnswer(
+            (_) => Stream.fromIterable([
+              const Right(ContactsLoading()),
+              const Left(GetContactsIsEmpty()),
+            ]),
+          );
 
-        contactsManager.initialSynchronizeContacts(
-          isAvailableSupportPhonebookContacts: true,
-          withMxId: mxId,
-        );
-
-        await Future.delayed(const Duration(seconds: 1));
-
-        verify(
-          mockGetTomContactsInteractor.execute(),
-        ).called(1);
-
-        verify(
-          mockTryGetSyncedPhoneBookContactInteractor.execute(
-            userId: mxId,
-          ),
-        ).called(1);
-
-        expectLater(listTomContactsFailureState.length, 1);
-
-        expectLater(
-          listTomContactsFailureState,
-          [
-            const GetContactsIsEmpty(),
-          ],
-        );
-
-        expectLater(listPhonebookContactsFailureState.length, 1);
-
-        expectLater(
-          listPhonebookContactsFailureState,
-          [
-            RequestTokenFailure(
-              exception: dynamic,
-              contacts: contacts,
+          when(
+            mockFederationConfigurationsRepository.getFederationConfigurations(
+              mxId,
             ),
-          ],
-        );
-
-        contactsManager.initialSynchronizeContacts(
-          isAvailableSupportPhonebookContacts: true,
-          forceRun: true,
-          withMxId: mxId,
-        );
-
-        await Future.delayed(const Duration(seconds: 5));
-
-        verify(
-          mockGetTomContactsInteractor.execute(),
-        ).called(1);
-      },
-    );
-
-    test(
-      '[Account-A] WHEN it is available get Phonebook contact.\n'
-      '[Account-A] AND contactsNotifier return GetContactsIsEmpty with contacts is empty.\n'
-      '[Account-A] AND tryGetSyncedPhoneBookContactInteractor return GetSyncedPhoneBookContactFailure state.\n'
-      '[Account-A] AND phonebookContactNotifier return GetHashDetailsFailure state.\n'
-      '[Account-A] THEN contactsNotifier in ContactsManager SHOULD have GetContactsIsEmpty state.\n'
-      '[Account-A] THEN phonebookContactNotifier in ContactsManager SHOULD have GetHashDetailsFailure state.\n'
-      '[Account-A] THEN list ToM contact SHOULD is empty.\n'
-      '[Account-A] THEN list Phonebook contact SHOULD is empty.\n'
-      'Trigger UI => switch to another account and call synchronize contacts.\n'
-      '[Account-B] AND contactsNotifier return GetContactsSuccess with contacts is empty.\n'
-      '[Account-B] AND phonebookContactInteractor return GetPhonebookContactsSuccess with contacts is empty.\n'
-      '[Account-A] AND tryGetSyncedPhoneBookContactInteractor return GetSyncedPhoneBookContactFailure state.\n'
-      '[Account-A] AND phonebookContactNotifier return GetHashDetailsFailure state.\n'
-      '[Account-A] THEN contactsNotifier in ContactsManager SHOULD have GetContactsIsEmpty state.\n'
-      '[Account-A] THEN phonebookContactNotifier in ContactsManager SHOULD have GetHashDetailsFailure state.\n'
-      '[Account-B] THEN list ToM contact SHOULD is empty.\n'
-      '[Account-B] THEN list Phonebook contact SHOULD is empty.\n',
-      () async {
-        final List<Failure> listTomContactsFailureState = [];
-
-        final List<Failure> listPhonebookContactsFailureState = [];
-
-        when(
-          mockGetTomContactsInteractor.execute(),
-        ).thenAnswer(
-          (_) => Stream.fromIterable([
-            const Right(ContactsLoading()),
-            const Left(GetContactsIsEmpty()),
-          ]),
-        );
-
-        when(
-          mockTryGetSyncedPhoneBookContactInteractor.execute(
-            userId: mxId,
-          ),
-        ).thenAnswer(
-          (_) async => const Left(
-            GetSyncedPhoneBookContactFailure(exception: dynamic),
-          ),
-        );
-
-        when(mockHomeServerDynamicUrlInterceptors.baseUrl).thenReturn(
-          baseUrl,
-        );
-
-        when(mockAuthorizationInterceptor.getAccessToken).thenReturn(
-          accessToken,
-        );
-
-        when(
-          mockFederationConfigurationsRepository
-              .getFederationConfigurations(mxId),
-        ).thenAnswer(
-          (_) async => federationConfigurations,
-        );
-
-        when(
-          mockFederationLookUpPhonebookContactInteractor.execute(
-            argument: FederationLookUpArgument(
-              homeServerUrl: baseUrl,
-              federationUrl: federationConfigurations
-                      .fedServerInformation.baseUrls?.first
-                      .toString() ??
-                  '',
-              withMxId: mxId,
-              withAccessToken: accessToken,
+          ).thenAnswer(
+            (_) async => FederationConfigurations(
+              fedServerInformation: FederationServerInformation(),
             ),
-          ),
-        ).thenAnswer(
-          (_) => Stream.fromIterable([
-            const Right(GetPhonebookContactsLoading()),
-            const Left(GetHashDetailsFailure(exception: dynamic)),
-          ]),
-        );
+          );
 
-        contactsManager.getContactsNotifier().addListener(() {
-          contactsManager.getContactsNotifier().value.fold(
-                (failure) => listTomContactsFailureState.add(failure),
-                (success) => null,
-              );
-        });
+          when(
+            mockIdentityServerDynamicUrlInterceptors.baseUrl,
+          ).thenReturn(baseUrl);
 
-        contactsManager.getPhonebookContactsNotifier().addListener(() {
-          contactsManager.getPhonebookContactsNotifier().value.fold(
-                (failure) => listPhonebookContactsFailureState.add(failure),
-                (success) => null,
-              );
-        });
+          when(
+            mockAuthorizationInterceptor.getAccessToken,
+          ).thenReturn(accessToken);
 
-        contactsManager.initialSynchronizeContacts(
-          isAvailableSupportPhonebookContacts: true,
-          withMxId: mxId,
-        );
-
-        await Future.delayed(const Duration(seconds: 1));
-
-        verify(
-          mockGetTomContactsInteractor.execute(),
-        ).called(1);
-
-        verify(
-          mockTryGetSyncedPhoneBookContactInteractor.execute(
-            userId: mxId,
-          ),
-        ).called(1);
-
-        expectLater(listTomContactsFailureState.length, 1);
-
-        expectLater(
-          listTomContactsFailureState,
-          [
-            const GetContactsIsEmpty(),
-          ],
-        );
-
-        expectLater(listPhonebookContactsFailureState.length, 1);
-
-        expectLater(
-          listPhonebookContactsFailureState,
-          [
-            const GetHashDetailsFailure(exception: dynamic),
-          ],
-        );
-
-        /// Trigger switch account
-        contactsManager.reSyncContacts();
-
-        contactsManager.cancelAllSubscriptions();
-
-        listTomContactsFailureState.clear();
-
-        listPhonebookContactsFailureState.clear();
-
-        when(
-          mockGetTomContactsInteractor.execute(),
-        ).thenAnswer(
-          (_) => Stream.fromIterable([
-            const Right(ContactsLoading()),
-            const Left(GetContactsIsEmpty()),
-          ]),
-        );
-
-        when(
-          mockTryGetSyncedPhoneBookContactInteractor.execute(
-            userId: mxId,
-          ),
-        ).thenAnswer(
-          (_) async => const Left(
-            GetSyncedPhoneBookContactFailure(exception: dynamic),
-          ),
-        );
-
-        when(mockHomeServerDynamicUrlInterceptors.baseUrl).thenReturn(
-          baseUrl,
-        );
-
-        when(mockAuthorizationInterceptor.getAccessToken).thenReturn(
-          accessToken,
-        );
-
-        when(
-          mockFederationConfigurationsRepository
-              .getFederationConfigurations(mxId),
-        ).thenAnswer(
-          (_) async => federationConfigurations,
-        );
-
-        when(
-          mockFederationLookUpPhonebookContactInteractor.execute(
-            argument: FederationLookUpArgument(
-              homeServerUrl: baseUrl,
-              federationUrl: federationConfigurations
-                      .fedServerInformation.baseUrls?.first
-                      .toString() ??
-                  '',
-              withMxId: mxId,
-              withAccessToken: accessToken,
+          when(
+            mockTwakeLookupPhonebookContactInteractor.execute(
+              argument: TwakeLookUpArgument(
+                homeServerUrl: baseUrl,
+                withAccessToken: accessToken,
+              ),
             ),
-          ),
-        ).thenAnswer(
-          (_) => Stream.fromIterable([
-            const Right(GetPhonebookContactsLoading()),
-            const Left(GetHashDetailsFailure(exception: dynamic)),
-          ]),
-        );
+          ).thenAnswer(
+            (_) => Stream.fromIterable([
+              const Right(GetPhonebookContactsLoading()),
+              const Left(GetPhonebookContactsIsEmpty()),
+            ]),
+          );
 
-        contactsManager.initialSynchronizeContacts(
-          isAvailableSupportPhonebookContacts: true,
-          withMxId: mxId,
-        );
+          contactsManager.getContactsNotifier().addListener(() {
+            contactsManager.getContactsNotifier().value.fold(
+              (failure) => listTomContactsFailureState.add(failure),
+              (success) => null,
+            );
+          });
 
-        await Future.delayed(const Duration(seconds: 1));
+          contactsManager.getPhonebookContactsNotifier().addListener(() {
+            contactsManager.getPhonebookContactsNotifier().value.fold(
+              (failure) => listPhonebookContactsFailureState.add(failure),
+              (success) => null,
+            );
+          });
 
-        verify(
-          mockGetTomContactsInteractor.execute(),
-        ).called(1);
+          contactsManager.synchronizeContactsOnContactTab(
+            isAvailableSupportPhonebookContacts: true,
+            withMxId: mxId,
+          );
 
-        verify(
-          mockTryGetSyncedPhoneBookContactInteractor.execute(
-            userId: mxId,
-          ),
-        ).called(1);
+          await Future.delayed(const Duration(seconds: 1));
 
-        expectLater(listTomContactsFailureState.length, 1);
+          verify(mockGetTomContactsInteractor.execute()).called(1);
 
-        expectLater(
-          listTomContactsFailureState,
-          [
+          expectLater(listTomContactsFailureState.length, 1);
+
+          expectLater(listTomContactsFailureState, [
             const GetContactsIsEmpty(),
-          ],
-        );
+          ]);
 
-        expectLater(listPhonebookContactsFailureState.length, 1);
+          expectLater(listPhonebookContactsFailureState.length, 1);
 
-        expectLater(
-          listPhonebookContactsFailureState,
-          [
-            const GetHashDetailsFailure(exception: dynamic),
-          ],
-        );
-      },
-    );
+          expectLater(listPhonebookContactsFailureState, [
+            const GetPhonebookContactsIsEmpty(),
+          ]);
 
-    test(
-      '[Account-A] WHEN it is available get Phonebook contact.\n'
-      '[Account-A] AND contactsNotifier return GetContactsIsEmpty with contacts is empty.\n'
-      '[Account-A] AND tryGetSyncedPhoneBookContactInteractor return GetSyncedPhoneBookContactFailure state.\n'
-      '[Account-A] AND phonebookContactNotifier return GetHashDetailsFailure state.\n'
-      '[Account-A] THEN contactsNotifier in ContactsManager SHOULD have GetContactsIsEmpty state.\n'
-      '[Account-A] THEN phonebookContactNotifier in ContactsManager SHOULD have GetHashDetailsFailure state.\n'
-      '[Account-A] THEN list ToM contact SHOULD is empty.\n'
-      '[Account-A] THEN list Phonebook contact SHOULD is empty.\n'
-      'Trigger UI => switch to another account and call synchronize contacts.\n'
-      '[Account-B] AND contactsNotifier return GetContactsSuccess with contacts is empty.\n'
-      '[Account-B] AND phonebookContactInteractor return GetPhonebookContactsSuccess with contacts is empty.\n'
-      '[Account-A] AND tryGetSyncedPhoneBookContactInteractor return GetSyncedPhoneBookContactFailure state.\n'
-      '[Account-A] AND phonebookContactNotifier return GetPhonebookContactsSuccess state.\n'
-      '[Account-A] THEN contactsNotifier in ContactsManager SHOULD have GetContactsIsEmpty state.\n'
-      '[Account-A] THEN phonebookContactNotifier in ContactsManager SHOULD have GetPhonebookContactsSuccess state.\n'
-      '[Account-B] THEN list ToM contact SHOULD is empty.\n'
-      '[Account-B] THEN list Phonebook contact SHOULD not empty.\n'
-      '[Account-B] THEN call post addressbook success',
-      () async {
+          /// Trigger switch account
+          contactsManager.reSyncContacts();
+
+          contactsManager.cancelAllSubscriptions();
+
+          listTomContactsFailureState.clear();
+
+          listPhonebookContactsFailureState.clear();
+
+          when(mockGetTomContactsInteractor.execute()).thenAnswer(
+            (_) => Stream.fromIterable([
+              const Right(ContactsLoading()),
+              const Left(GetContactsIsEmpty()),
+            ]),
+          );
+
+          when(
+            mockFederationConfigurationsRepository.getFederationConfigurations(
+              mxId,
+            ),
+          ).thenAnswer(
+            (_) async => FederationConfigurations(
+              fedServerInformation: FederationServerInformation(),
+            ),
+          );
+
+          when(
+            mockIdentityServerDynamicUrlInterceptors.baseUrl,
+          ).thenReturn(baseUrl);
+
+          when(
+            mockAuthorizationInterceptor.getAccessToken,
+          ).thenReturn(accessToken);
+
+          when(
+            mockTwakeLookupPhonebookContactInteractor.execute(
+              argument: TwakeLookUpArgument(
+                homeServerUrl: baseUrl,
+                withAccessToken: accessToken,
+              ),
+            ),
+          ).thenAnswer(
+            (_) => Stream.fromIterable([
+              const Right(GetPhonebookContactsLoading()),
+              const Left(GetPhonebookContactsIsEmpty()),
+            ]),
+          );
+          when(
+            mockFederationConfigurationsRepository.getFederationConfigurations(
+              mxId,
+            ),
+          ).thenAnswer(
+            (_) async => FederationConfigurations(
+              fedServerInformation: FederationServerInformation(),
+            ),
+          );
+
+          when(
+            mockIdentityServerDynamicUrlInterceptors.baseUrl,
+          ).thenReturn(baseUrl);
+
+          when(
+            mockAuthorizationInterceptor.getAccessToken,
+          ).thenReturn(accessToken);
+
+          when(
+            mockTwakeLookupPhonebookContactInteractor.execute(
+              argument: TwakeLookUpArgument(
+                homeServerUrl: baseUrl,
+                withAccessToken: accessToken,
+              ),
+            ),
+          ).thenAnswer(
+            (_) => Stream.fromIterable([
+              const Right(GetPhonebookContactsLoading()),
+              const Left(GetPhonebookContactsIsEmpty()),
+            ]),
+          );
+
+          contactsManager.synchronizeContactsOnContactTab(
+            isAvailableSupportPhonebookContacts: true,
+            withMxId: mxId,
+          );
+
+          await Future.delayed(const Duration(seconds: 1));
+
+          verify(mockGetTomContactsInteractor.execute()).called(1);
+
+          expectLater(listTomContactsFailureState.length, 1);
+
+          expectLater(listTomContactsFailureState, [
+            const GetContactsIsEmpty(),
+          ]);
+
+          expectLater(listPhonebookContactsFailureState.length, 1);
+
+          expectLater(listPhonebookContactsFailureState, [
+            const GetPhonebookContactsIsEmpty(),
+          ]);
+        },
+      );
+
+      test('[Account-A] WHEN it is available get Phonebook contact.\n'
+          '[Account-A] AND contactsNotifier return GetContactsIsEmpty with contacts is empty.\n'
+          '[Account-A] open the contact tab.\n'
+          '[Account-A] AND phonebookContactNotifier return GetHashDetailsFailure state.\n'
+          '[Account-A] THEN contactsNotifier in ContactsManager SHOULD have GetContactsIsEmpty state.\n'
+          '[Account-A] THEN phonebookContactNotifier in ContactsManager SHOULD have GetHashDetailsFailure state.\n'
+          '[Account-A] THEN list ToM contact SHOULD is empty.\n'
+          '[Account-A] THEN list Phonebook contact SHOULD is empty.\n'
+          'Trigger UI => switch to another account and call synchronize contacts.\n'
+          '[Account-B] AND contactsNotifier return GetContactsSuccess with contacts is empty.\n'
+          '[Account-B] AND phonebookContactInteractor return GetPhonebookContactsSuccess with contacts is empty.\n'
+          '[Account-B] open the contact tab.\n'
+          '[Account-B] AND phonebookContactNotifier return GetPhonebookContactsSuccess state.\n'
+          '[Account-B] THEN contactsNotifier in ContactsManager SHOULD have GetContactsIsEmpty state.\n'
+          '[Account-B] THEN phonebookContactNotifier in ContactsManager SHOULD have GetPhonebookContactsSuccess state.\n'
+          '[Account-B] THEN list ToM contact SHOULD is empty.\n'
+          '[Account-B] THEN list Phonebook contact SHOULD not empty.\n'
+          '[Account-B] THEN call post addressbook success', () async {
         final List<Failure> listTomContactsFailureState = [];
 
         final List<Failure> listPhonebookContactsFailureState = [];
 
         final List<Success> listPhonebookContactsSuccessState = [];
 
-        when(
-          mockGetTomContactsInteractor.execute(),
-        ).thenAnswer(
+        when(mockGetTomContactsInteractor.execute()).thenAnswer(
           (_) => Stream.fromIterable([
             const Right(ContactsLoading()),
             const Left(GetContactsIsEmpty()),
@@ -2074,297 +4228,22 @@ void main() {
         );
 
         when(
-          mockTryGetSyncedPhoneBookContactInteractor.execute(
-            userId: mxId,
+          mockFederationConfigurationsRepository.getFederationConfigurations(
+            mxId,
           ),
-        ).thenAnswer(
-          (_) async => const Left(
-            GetSyncedPhoneBookContactFailure(exception: dynamic),
-          ),
-        );
-
-        when(mockHomeServerDynamicUrlInterceptors.baseUrl).thenReturn(
-          baseUrl,
-        );
-
-        when(mockAuthorizationInterceptor.getAccessToken).thenReturn(
-          accessToken,
-        );
-
-        when(
-          mockFederationConfigurationsRepository
-              .getFederationConfigurations(mxId),
-        ).thenAnswer(
-          (_) async => federationConfigurations,
-        );
-
-        when(
-          mockFederationLookUpPhonebookContactInteractor.execute(
-            argument: FederationLookUpArgument(
-              homeServerUrl: baseUrl,
-              federationUrl: federationConfigurations
-                      .fedServerInformation.baseUrls?.first
-                      .toString() ??
-                  '',
-              withMxId: mxId,
-              withAccessToken: accessToken,
-            ),
-          ),
-        ).thenAnswer(
-          (_) => Stream.fromIterable([
-            const Right(GetPhonebookContactsLoading()),
-            const Left(GetHashDetailsFailure(exception: dynamic)),
-          ]),
-        );
-
-        contactsManager.getContactsNotifier().addListener(() {
-          contactsManager.getContactsNotifier().value.fold(
-                (failure) => listTomContactsFailureState.add(failure),
-                (success) => null,
-              );
-        });
-
-        contactsManager.getPhonebookContactsNotifier().addListener(() {
-          contactsManager.getPhonebookContactsNotifier().value.fold(
-                (failure) => listPhonebookContactsFailureState.add(failure),
-                (success) => listPhonebookContactsSuccessState.add(success),
-              );
-        });
-
-        contactsManager.initialSynchronizeContacts(
-          isAvailableSupportPhonebookContacts: true,
-          withMxId: mxId,
-        );
-
-        await Future.delayed(const Duration(seconds: 1));
-
-        verify(
-          mockGetTomContactsInteractor.execute(),
-        ).called(1);
-
-        verify(
-          mockTryGetSyncedPhoneBookContactInteractor.execute(
-            userId: mxId,
-          ),
-        ).called(1);
-
-        expectLater(listTomContactsFailureState.length, 1);
-
-        expectLater(
-          listTomContactsFailureState,
-          [
-            const GetContactsIsEmpty(),
-          ],
-        );
-
-        expectLater(listPhonebookContactsFailureState.length, 1);
-
-        expectLater(
-          listPhonebookContactsFailureState,
-          [
-            const GetHashDetailsFailure(exception: dynamic),
-          ],
-        );
-
-        /// Trigger switch account
-        contactsManager.reSyncContacts();
-
-        contactsManager.cancelAllSubscriptions();
-
-        listTomContactsFailureState.clear();
-
-        listPhonebookContactsFailureState.clear();
-
-        listPhonebookContactsSuccessState.clear();
-
-        when(
-          mockGetTomContactsInteractor.execute(),
-        ).thenAnswer(
-          (_) => Stream.fromIterable([
-            const Right(ContactsLoading()),
-            const Left(GetContactsIsEmpty()),
-          ]),
-        );
-
-        when(
-          mockTryGetSyncedPhoneBookContactInteractor.execute(
-            userId: mxId,
-          ),
-        ).thenAnswer(
-          (_) async => const Left(
-            GetSyncedPhoneBookContactFailure(exception: dynamic),
-          ),
-        );
-
-        when(mockHomeServerDynamicUrlInterceptors.baseUrl).thenReturn(
-          baseUrl,
-        );
-
-        when(mockAuthorizationInterceptor.getAccessToken).thenReturn(
-          accessToken,
-        );
-
-        when(
-          mockFederationConfigurationsRepository
-              .getFederationConfigurations(mxId),
-        ).thenAnswer(
-          (_) async => federationConfigurations,
-        );
-
-        when(
-          mockFederationLookUpPhonebookContactInteractor.execute(
-            argument: FederationLookUpArgument(
-              homeServerUrl: baseUrl,
-              federationUrl: federationConfigurations
-                      .fedServerInformation.baseUrls?.first
-                      .toString() ??
-                  '',
-              withMxId: mxId,
-              withAccessToken: accessToken,
-            ),
-          ),
-        ).thenAnswer(
-          (_) => Stream.fromIterable([
-            const Right(GetPhonebookContactsLoading()),
-            Right(
-              GetPhonebookContactsSuccess(
-                contacts: contacts,
-                progress: 100,
-              ),
-            ),
-          ]),
-        );
-
-        when(
-          mockPostAddressBookInteractor.execute(
-            addressBooks: contacts.toSet().toAddressBooks().toList(),
-          ),
-        ).thenAnswer(
-          (_) => Stream.fromIterable([
-            const Right(PostAddressBookLoading()),
-            const Right(PostAddressBookSuccessState(updatedAddressBooks: [])),
-          ]),
-        );
-
-        contactsManager.initialSynchronizeContacts(
-          isAvailableSupportPhonebookContacts: true,
-          withMxId: mxId,
-        );
-
-        await Future.delayed(const Duration(seconds: 1));
-
-        verify(
-          mockGetTomContactsInteractor.execute(),
-        ).called(1);
-
-        verify(
-          mockTryGetSyncedPhoneBookContactInteractor.execute(
-            userId: mxId,
-          ),
-        ).called(1);
-
-        expectLater(listTomContactsFailureState.length, 1);
-
-        expectLater(
-          listTomContactsFailureState,
-          [
-            const GetContactsIsEmpty(),
-          ],
-        );
-
-        expectLater(listPhonebookContactsFailureState.length, 0);
-
-        expectLater(
-          listPhonebookContactsFailureState,
-          [],
-        );
-
-        expectLater(
-          listPhonebookContactsSuccessState.length,
-          2,
-        );
-
-        expectLater(
-          listPhonebookContactsSuccessState,
-          [
-            const GetPhonebookContactsLoading(),
-            GetPhonebookContactsSuccess(contacts: contacts, progress: 100),
-          ],
-        );
-
-        verify(
-          mockPostAddressBookInteractor.execute(
-            addressBooks: contacts.toSet().toAddressBooks().toList(),
-          ),
-        ).called(1);
-      },
-    );
-  });
-
-  group(
-      'ContactsManager Unit test - ENV: Mobile - Unsupported Federation server',
-      () {
-    const mxId = 'mxId';
-
-    const baseUrl = 'https://example.com';
-
-    const accessToken = 'accessToken';
-
-    final contacts = [
-      ContactFixtures.contact1,
-      ContactFixtures.contact2,
-      ContactFixtures.contact3,
-    ];
-
-    test(
-      'WHEN it is available get Phonebook contact.\n'
-      'AND contactsNotifier return GetContactsIsEmpty with contacts is empty.\n'
-      'AND tryGetSyncedPhoneBookContactInteractor return GetSyncedPhoneBookContactFailure state.\n'
-      'AND phonebookContactNotifier return GetPhonebookContactsIsEmpty state.\n'
-      'THEN contactsNotifier in ContactsManager SHOULD have GetContactsIsEmpty state.\n'
-      'THEN phonebookContactNotifier in ContactsManager SHOULD have GetPhonebookContactsIsEmpty state.\n'
-      'THEN list ToM contact SHOULD is empty.\n'
-      'THEN list Phonebook contact SHOULD is empty.\n',
-      () async {
-        final List<Failure> listTomContactsFailureState = [];
-
-        final List<Failure> listPhonebookContactsFailureState = [];
-
-        when(
-          mockGetTomContactsInteractor.execute(),
-        ).thenAnswer(
-          (_) => Stream.fromIterable([
-            const Right(ContactsLoading()),
-            const Left(GetContactsIsEmpty()),
-          ]),
-        );
-
-        when(
-          mockTryGetSyncedPhoneBookContactInteractor.execute(
-            userId: mxId,
-          ),
-        ).thenAnswer(
-          (_) async => const Left(
-            GetSyncedPhoneBookContactFailure(exception: dynamic),
-          ),
-        );
-
-        when(
-          mockFederationConfigurationsRepository
-              .getFederationConfigurations(mxId),
         ).thenAnswer(
           (_) async => FederationConfigurations(
             fedServerInformation: FederationServerInformation(),
           ),
         );
 
-        when(mockIdentityServerDynamicUrlInterceptors.baseUrl).thenReturn(
-          baseUrl,
-        );
+        when(
+          mockIdentityServerDynamicUrlInterceptors.baseUrl,
+        ).thenReturn(baseUrl);
 
-        when(mockAuthorizationInterceptor.getAccessToken).thenReturn(
-          accessToken,
-        );
+        when(
+          mockAuthorizationInterceptor.getAccessToken,
+        ).thenReturn(accessToken);
 
         when(
           mockTwakeLookupPhonebookContactInteractor.execute(
@@ -2382,84 +4261,49 @@ void main() {
 
         contactsManager.getContactsNotifier().addListener(() {
           contactsManager.getContactsNotifier().value.fold(
-                (failure) => listTomContactsFailureState.add(failure),
-                (success) => null,
-              );
+            (failure) => listTomContactsFailureState.add(failure),
+            (success) => null,
+          );
         });
 
         contactsManager.getPhonebookContactsNotifier().addListener(() {
           contactsManager.getPhonebookContactsNotifier().value.fold(
-                (failure) => listPhonebookContactsFailureState.add(failure),
-                (success) => null,
-              );
+            (failure) => listPhonebookContactsFailureState.add(failure),
+            (success) => listPhonebookContactsSuccessState.add(success),
+          );
         });
 
-        contactsManager.initialSynchronizeContacts(
+        contactsManager.synchronizeContactsOnContactTab(
           isAvailableSupportPhonebookContacts: true,
           withMxId: mxId,
         );
 
         await Future.delayed(const Duration(seconds: 1));
 
-        verify(
-          mockGetTomContactsInteractor.execute(),
-        ).called(1);
-
-        verify(
-          mockTryGetSyncedPhoneBookContactInteractor.execute(
-            userId: mxId,
-          ),
-        ).called(1);
+        verify(mockGetTomContactsInteractor.execute()).called(1);
 
         expectLater(listTomContactsFailureState.length, 1);
 
-        expectLater(
-          listTomContactsFailureState,
-          [
-            const GetContactsIsEmpty(),
-          ],
-        );
+        expectLater(listTomContactsFailureState, [const GetContactsIsEmpty()]);
 
         expectLater(listPhonebookContactsFailureState.length, 1);
 
-        expectLater(
-          listPhonebookContactsFailureState,
-          [
-            const GetPhonebookContactsIsEmpty(),
-          ],
-        );
+        expectLater(listPhonebookContactsFailureState, [
+          const GetPhonebookContactsIsEmpty(),
+        ]);
 
-        verify(
-          mockTwakeLookupPhonebookContactInteractor.execute(
-            argument: anyNamed('argument'),
-          ),
-        ).called(1);
+        /// Trigger switch account
+        contactsManager.reSyncContacts();
 
-        verifyNever(
-          mockFederationLookUpPhonebookContactInteractor.execute(
-            argument: anyNamed('argument'),
-          ),
-        );
-      },
-    );
+        contactsManager.cancelAllSubscriptions();
 
-    test(
-      'WHEN it is available get Phonebook contact.\n'
-      'AND contactsNotifier return GetContactsIsEmpty with contacts is empty.\n'
-      'AND tryGetSyncedPhoneBookContactInteractor return GetSyncedPhoneBookContactFailure state.\n'
-      'AND phonebookContactNotifier return GetHashDetailsFailure state.\n'
-      'THEN contactsNotifier in ContactsManager SHOULD have GetContactsIsEmpty state.\n'
-      'THEN phonebookContactNotifier in ContactsManager SHOULD have GetHashDetailsFailure state.\n'
-      'THEN list ToM contact SHOULD is empty.\n'
-      'THEN list Phonebook contact SHOULD is empty.\n',
-      () async {
-        final List<Failure> listTomContactsFailureState = [];
+        listTomContactsFailureState.clear();
 
-        final List<Failure> listPhonebookContactsFailureState = [];
+        listPhonebookContactsFailureState.clear();
 
-        when(
-          mockGetTomContactsInteractor.execute(),
-        ).thenAnswer(
+        listPhonebookContactsSuccessState.clear();
+
+        when(mockGetTomContactsInteractor.execute()).thenAnswer(
           (_) => Stream.fromIterable([
             const Right(ContactsLoading()),
             const Left(GetContactsIsEmpty()),
@@ -2467,158 +4311,22 @@ void main() {
         );
 
         when(
-          mockTryGetSyncedPhoneBookContactInteractor.execute(
-            userId: mxId,
+          mockFederationConfigurationsRepository.getFederationConfigurations(
+            mxId,
           ),
-        ).thenAnswer(
-          (_) async => const Left(
-            GetSyncedPhoneBookContactFailure(exception: dynamic),
-          ),
-        );
-
-        when(
-          mockFederationConfigurationsRepository
-              .getFederationConfigurations(mxId),
         ).thenAnswer(
           (_) async => FederationConfigurations(
             fedServerInformation: FederationServerInformation(),
           ),
         );
 
-        when(mockIdentityServerDynamicUrlInterceptors.baseUrl).thenReturn(
-          baseUrl,
-        );
-
-        when(mockAuthorizationInterceptor.getAccessToken).thenReturn(
-          accessToken,
-        );
+        when(
+          mockIdentityServerDynamicUrlInterceptors.baseUrl,
+        ).thenReturn(baseUrl);
 
         when(
-          mockTwakeLookupPhonebookContactInteractor.execute(
-            argument: TwakeLookUpArgument(
-              homeServerUrl: baseUrl,
-              withAccessToken: accessToken,
-            ),
-          ),
-        ).thenAnswer(
-          (_) => Stream.fromIterable([
-            const Right(GetPhonebookContactsLoading()),
-            const Left(GetHashDetailsFailure(exception: dynamic)),
-          ]),
-        );
-
-        contactsManager.getContactsNotifier().addListener(() {
-          contactsManager.getContactsNotifier().value.fold(
-                (failure) => listTomContactsFailureState.add(failure),
-                (success) => null,
-              );
-        });
-
-        contactsManager.getPhonebookContactsNotifier().addListener(() {
-          contactsManager.getPhonebookContactsNotifier().value.fold(
-                (failure) => listPhonebookContactsFailureState.add(failure),
-                (success) => null,
-              );
-        });
-
-        contactsManager.initialSynchronizeContacts(
-          isAvailableSupportPhonebookContacts: true,
-          withMxId: mxId,
-        );
-
-        await Future.delayed(const Duration(seconds: 1));
-
-        verify(
-          mockGetTomContactsInteractor.execute(),
-        ).called(1);
-
-        verify(
-          mockTryGetSyncedPhoneBookContactInteractor.execute(
-            userId: mxId,
-          ),
-        ).called(1);
-
-        expectLater(listTomContactsFailureState.length, 1);
-
-        expectLater(
-          listTomContactsFailureState,
-          [
-            const GetContactsIsEmpty(),
-          ],
-        );
-
-        expectLater(listPhonebookContactsFailureState.length, 1);
-
-        expectLater(
-          listPhonebookContactsFailureState,
-          [
-            const GetHashDetailsFailure(exception: dynamic),
-          ],
-        );
-
-        verify(
-          mockTwakeLookupPhonebookContactInteractor.execute(
-            argument: anyNamed('argument'),
-          ),
-        ).called(1);
-
-        verifyNever(
-          mockFederationLookUpPhonebookContactInteractor.execute(
-            argument: anyNamed('argument'),
-          ),
-        );
-      },
-    );
-
-    test(
-      'WHEN it is available get Phonebook contact.\n'
-      'AND contactsNotifier return GetContactsIsEmpty with contacts is empty.\n'
-      'AND tryGetSyncedPhoneBookContactInteractor return GetSyncedPhoneBookContactFailure state.\n'
-      'AND phonebookContactNotifier return GetPhonebookContactsSuccess state.\n'
-      'THEN contactsNotifier in ContactsManager SHOULD have GetContactsIsEmpty state.\n'
-      'THEN phonebookContactNotifier in ContactsManager SHOULD have GetPhonebookContactsSuccess state.\n'
-      'THEN list ToM contact SHOULD is empty.\n'
-      'THEN list Phonebook contact SHOULD is empty.\n',
-      () async {
-        final List<Failure> listTomContactsFailureState = [];
-
-        final List<Success> listPhonebookContactsSuccessState = [];
-
-        when(
-          mockGetTomContactsInteractor.execute(),
-        ).thenAnswer(
-          (_) => Stream.fromIterable([
-            const Right(ContactsLoading()),
-            const Left(GetContactsIsEmpty()),
-          ]),
-        );
-
-        when(
-          mockTryGetSyncedPhoneBookContactInteractor.execute(
-            userId: mxId,
-          ),
-        ).thenAnswer(
-          (_) async => const Left(
-            GetSyncedPhoneBookContactFailure(exception: dynamic),
-          ),
-        );
-
-        when(
-          mockFederationConfigurationsRepository
-              .getFederationConfigurations(mxId),
-        ).thenAnswer(
-          (_) async => FederationConfigurations(
-            fedServerInformation: FederationServerInformation(),
-          ),
-        );
-
-        when(mockIdentityServerDynamicUrlInterceptors.baseUrl).thenReturn(
-          baseUrl,
-        );
-
-        when(mockAuthorizationInterceptor.getAccessToken).thenReturn(
-          accessToken,
-        );
+          mockAuthorizationInterceptor.getAccessToken,
+        ).thenReturn(accessToken);
 
         when(
           mockTwakeLookupPhonebookContactInteractor.execute(
@@ -2647,600 +4355,57 @@ void main() {
           ]),
         );
 
-        contactsManager.getContactsNotifier().addListener(() {
-          contactsManager.getContactsNotifier().value.fold(
-                (failure) => listTomContactsFailureState.add(failure),
-                (success) => null,
-              );
-        });
-
-        contactsManager.getPhonebookContactsNotifier().addListener(() {
-          contactsManager.getPhonebookContactsNotifier().value.fold(
-                (failure) => null,
-                (success) => listPhonebookContactsSuccessState.add(success),
-              );
-        });
-
-        contactsManager.initialSynchronizeContacts(
+        contactsManager.synchronizeContactsOnContactTab(
           isAvailableSupportPhonebookContacts: true,
           withMxId: mxId,
         );
 
         await Future.delayed(const Duration(seconds: 1));
 
-        verify(
-          mockGetTomContactsInteractor.execute(),
-        ).called(1);
-
-        verify(
-          mockTryGetSyncedPhoneBookContactInteractor.execute(
-            userId: mxId,
-          ),
-        ).called(1);
-
-        verify(
-          mockPostAddressBookInteractor.execute(
-            addressBooks: contacts.toSet().toAddressBooks().toList(),
-          ),
-        ).called(1);
+        verify(mockGetTomContactsInteractor.execute()).called(1);
 
         expectLater(listTomContactsFailureState.length, 1);
 
-        expectLater(
-          listTomContactsFailureState,
-          [
-            const GetContactsIsEmpty(),
-          ],
-        );
+        expectLater(listTomContactsFailureState, [const GetContactsIsEmpty()]);
+
+        expectLater(listPhonebookContactsFailureState.length, 0);
+
+        expectLater(listPhonebookContactsFailureState, []);
 
         expectLater(listPhonebookContactsSuccessState.length, 2);
 
-        expectLater(
-          listPhonebookContactsSuccessState,
-          [
-            const GetPhonebookContactsLoading(),
-            GetPhonebookContactsSuccess(contacts: contacts, progress: 100),
-          ],
-        );
-
-        verify(
-          mockTwakeLookupPhonebookContactInteractor.execute(
-            argument: anyNamed('argument'),
-          ),
-        ).called(1);
-
-        verifyNever(
-          mockFederationLookUpPhonebookContactInteractor.execute(
-            argument: anyNamed('argument'),
-          ),
-        );
-      },
-    );
-
-    test(
-      '[Account-A] WHEN it is available get Phonebook contact.\n'
-      '[Account-A] AND contactsNotifier return GetContactsIsEmpty with contacts is empty.\n'
-      '[Account-A] AND tryGetSyncedPhoneBookContactInteractor return GetSyncedPhoneBookContactFailure state.\n'
-      '[Account-A] AND phonebookContactNotifier return GetPhonebookContactsIsEmpty state.\n'
-      '[Account-A] THEN contactsNotifier in ContactsManager SHOULD have GetContactsIsEmpty state.\n'
-      '[Account-A] THEN phonebookContactNotifier in ContactsManager SHOULD have GetPhonebookContactsIsEmpty state.\n'
-      '[Account-A] THEN list ToM contact SHOULD is empty.\n'
-      '[Account-A] THEN list Phonebook contact SHOULD is empty.\n'
-      'Trigger UI => switch to another account and call synchronize contacts.\n'
-      '[Account-B] AND contactsNotifier return GetContactsSuccess with contacts is empty.\n'
-      '[Account-B] AND phonebookContactInteractor return GetPhonebookContactsSuccess with contacts is empty.\n'
-      '[Account-A] AND tryGetSyncedPhoneBookContactInteractor return GetSyncedPhoneBookContactFailure state.\n'
-      '[Account-A] AND phonebookContactNotifier return GetPhonebookContactsIsEmpty state.\n'
-      '[Account-A] THEN contactsNotifier in ContactsManager SHOULD have GetContactsIsEmpty state.\n'
-      '[Account-A] THEN phonebookContactNotifier in ContactsManager SHOULD have GetPhonebookContactsIsEmpty state.\n'
-      '[Account-B] THEN list ToM contact SHOULD is empty.\n'
-      '[Account-B] THEN list Phonebook contact SHOULD is empty.\n',
-      () async {
-        final List<Failure> listTomContactsFailureState = [];
-
-        final List<Failure> listPhonebookContactsFailureState = [];
-
-        when(
-          mockGetTomContactsInteractor.execute(),
-        ).thenAnswer(
-          (_) => Stream.fromIterable([
-            const Right(ContactsLoading()),
-            const Left(GetContactsIsEmpty()),
-          ]),
-        );
-
-        when(
-          mockTryGetSyncedPhoneBookContactInteractor.execute(
-            userId: mxId,
-          ),
-        ).thenAnswer(
-          (_) async => const Left(
-            GetSyncedPhoneBookContactFailure(exception: dynamic),
-          ),
-        );
-
-        when(
-          mockFederationConfigurationsRepository
-              .getFederationConfigurations(mxId),
-        ).thenAnswer(
-          (_) async => FederationConfigurations(
-            fedServerInformation: FederationServerInformation(),
-          ),
-        );
-
-        when(mockIdentityServerDynamicUrlInterceptors.baseUrl).thenReturn(
-          baseUrl,
-        );
-
-        when(mockAuthorizationInterceptor.getAccessToken).thenReturn(
-          accessToken,
-        );
-
-        when(
-          mockTwakeLookupPhonebookContactInteractor.execute(
-            argument: TwakeLookUpArgument(
-              homeServerUrl: baseUrl,
-              withAccessToken: accessToken,
-            ),
-          ),
-        ).thenAnswer(
-          (_) => Stream.fromIterable([
-            const Right(GetPhonebookContactsLoading()),
-            const Left(GetPhonebookContactsIsEmpty()),
-          ]),
-        );
-
-        contactsManager.getContactsNotifier().addListener(() {
-          contactsManager.getContactsNotifier().value.fold(
-                (failure) => listTomContactsFailureState.add(failure),
-                (success) => null,
-              );
-        });
-
-        contactsManager.getPhonebookContactsNotifier().addListener(() {
-          contactsManager.getPhonebookContactsNotifier().value.fold(
-                (failure) => listPhonebookContactsFailureState.add(failure),
-                (success) => null,
-              );
-        });
-
-        contactsManager.initialSynchronizeContacts(
-          isAvailableSupportPhonebookContacts: true,
-          withMxId: mxId,
-        );
-
-        await Future.delayed(const Duration(seconds: 1));
-
-        verify(
-          mockGetTomContactsInteractor.execute(),
-        ).called(1);
-
-        verify(
-          mockTryGetSyncedPhoneBookContactInteractor.execute(
-            userId: mxId,
-          ),
-        ).called(1);
-
-        expectLater(listTomContactsFailureState.length, 1);
-
-        expectLater(
-          listTomContactsFailureState,
-          [
-            const GetContactsIsEmpty(),
-          ],
-        );
-
-        expectLater(listPhonebookContactsFailureState.length, 1);
-
-        expectLater(
-          listPhonebookContactsFailureState,
-          [
-            const GetPhonebookContactsIsEmpty(),
-          ],
-        );
-
-        /// Trigger switch account
-        contactsManager.reSyncContacts();
-
-        contactsManager.cancelAllSubscriptions();
-
-        listTomContactsFailureState.clear();
-
-        listPhonebookContactsFailureState.clear();
-
-        when(
-          mockGetTomContactsInteractor.execute(),
-        ).thenAnswer(
-          (_) => Stream.fromIterable([
-            const Right(ContactsLoading()),
-            const Left(GetContactsIsEmpty()),
-          ]),
-        );
-
-        when(
-          mockTryGetSyncedPhoneBookContactInteractor.execute(
-            userId: mxId,
-          ),
-        ).thenAnswer(
-          (_) async => const Left(
-            GetSyncedPhoneBookContactFailure(exception: dynamic),
-          ),
-        );
-
-        when(
-          mockFederationConfigurationsRepository
-              .getFederationConfigurations(mxId),
-        ).thenAnswer(
-          (_) async => FederationConfigurations(
-            fedServerInformation: FederationServerInformation(),
-          ),
-        );
-
-        when(mockIdentityServerDynamicUrlInterceptors.baseUrl).thenReturn(
-          baseUrl,
-        );
-
-        when(mockAuthorizationInterceptor.getAccessToken).thenReturn(
-          accessToken,
-        );
-
-        when(
-          mockTwakeLookupPhonebookContactInteractor.execute(
-            argument: TwakeLookUpArgument(
-              homeServerUrl: baseUrl,
-              withAccessToken: accessToken,
-            ),
-          ),
-        ).thenAnswer(
-          (_) => Stream.fromIterable([
-            const Right(GetPhonebookContactsLoading()),
-            const Left(GetPhonebookContactsIsEmpty()),
-          ]),
-        );
-        when(
-          mockFederationConfigurationsRepository
-              .getFederationConfigurations(mxId),
-        ).thenAnswer(
-          (_) async => FederationConfigurations(
-            fedServerInformation: FederationServerInformation(),
-          ),
-        );
-
-        when(mockIdentityServerDynamicUrlInterceptors.baseUrl).thenReturn(
-          baseUrl,
-        );
-
-        when(mockAuthorizationInterceptor.getAccessToken).thenReturn(
-          accessToken,
-        );
-
-        when(
-          mockTwakeLookupPhonebookContactInteractor.execute(
-            argument: TwakeLookUpArgument(
-              homeServerUrl: baseUrl,
-              withAccessToken: accessToken,
-            ),
-          ),
-        ).thenAnswer(
-          (_) => Stream.fromIterable([
-            const Right(GetPhonebookContactsLoading()),
-            const Left(GetPhonebookContactsIsEmpty()),
-          ]),
-        );
-
-        contactsManager.initialSynchronizeContacts(
-          isAvailableSupportPhonebookContacts: true,
-          withMxId: mxId,
-        );
-
-        await Future.delayed(const Duration(seconds: 1));
-
-        verify(
-          mockGetTomContactsInteractor.execute(),
-        ).called(1);
-
-        verify(
-          mockTryGetSyncedPhoneBookContactInteractor.execute(
-            userId: mxId,
-          ),
-        ).called(1);
-
-        expectLater(listTomContactsFailureState.length, 1);
-
-        expectLater(
-          listTomContactsFailureState,
-          [
-            const GetContactsIsEmpty(),
-          ],
-        );
-
-        expectLater(listPhonebookContactsFailureState.length, 1);
-
-        expectLater(
-          listPhonebookContactsFailureState,
-          [
-            const GetPhonebookContactsIsEmpty(),
-          ],
-        );
-      },
-    );
-
-    test(
-      '[Account-A] WHEN it is available get Phonebook contact.\n'
-      '[Account-A] AND contactsNotifier return GetContactsIsEmpty with contacts is empty.\n'
-      '[Account-A] AND tryGetSyncedPhoneBookContactInteractor return GetSyncedPhoneBookContactFailure state.\n'
-      '[Account-A] AND phonebookContactNotifier return GetHashDetailsFailure state.\n'
-      '[Account-A] THEN contactsNotifier in ContactsManager SHOULD have GetContactsIsEmpty state.\n'
-      '[Account-A] THEN phonebookContactNotifier in ContactsManager SHOULD have GetHashDetailsFailure state.\n'
-      '[Account-A] THEN list ToM contact SHOULD is empty.\n'
-      '[Account-A] THEN list Phonebook contact SHOULD is empty.\n'
-      'Trigger UI => switch to another account and call synchronize contacts.\n'
-      '[Account-B] AND contactsNotifier return GetContactsSuccess with contacts is empty.\n'
-      '[Account-B] AND phonebookContactInteractor return GetPhonebookContactsSuccess with contacts is empty.\n'
-      '[Account-A] AND tryGetSyncedPhoneBookContactInteractor return GetSyncedPhoneBookContactFailure state.\n'
-      '[Account-A] AND phonebookContactNotifier return GetPhonebookContactsSuccess state.\n'
-      '[Account-A] THEN contactsNotifier in ContactsManager SHOULD have GetContactsIsEmpty state.\n'
-      '[Account-A] THEN phonebookContactNotifier in ContactsManager SHOULD have GetPhonebookContactsSuccess state.\n'
-      '[Account-B] THEN list ToM contact SHOULD is empty.\n'
-      '[Account-B] THEN list Phonebook contact SHOULD not empty.\n'
-      '[Account-B] THEN call post addressbook success',
-      () async {
-        final List<Failure> listTomContactsFailureState = [];
-
-        final List<Failure> listPhonebookContactsFailureState = [];
-
-        final List<Success> listPhonebookContactsSuccessState = [];
-
-        when(
-          mockGetTomContactsInteractor.execute(),
-        ).thenAnswer(
-          (_) => Stream.fromIterable([
-            const Right(ContactsLoading()),
-            const Left(GetContactsIsEmpty()),
-          ]),
-        );
-        when(
-          mockTryGetSyncedPhoneBookContactInteractor.execute(
-            userId: mxId,
-          ),
-        ).thenAnswer(
-          (_) async => const Left(
-            GetSyncedPhoneBookContactFailure(exception: dynamic),
-          ),
-        );
-
-        when(
-          mockFederationConfigurationsRepository
-              .getFederationConfigurations(mxId),
-        ).thenAnswer(
-          (_) async => FederationConfigurations(
-            fedServerInformation: FederationServerInformation(),
-          ),
-        );
-
-        when(mockIdentityServerDynamicUrlInterceptors.baseUrl).thenReturn(
-          baseUrl,
-        );
-
-        when(mockAuthorizationInterceptor.getAccessToken).thenReturn(
-          accessToken,
-        );
-
-        when(
-          mockTwakeLookupPhonebookContactInteractor.execute(
-            argument: TwakeLookUpArgument(
-              homeServerUrl: baseUrl,
-              withAccessToken: accessToken,
-            ),
-          ),
-        ).thenAnswer(
-          (_) => Stream.fromIterable([
-            const Right(GetPhonebookContactsLoading()),
-            const Left(GetPhonebookContactsIsEmpty()),
-          ]),
-        );
-
-        contactsManager.getContactsNotifier().addListener(() {
-          contactsManager.getContactsNotifier().value.fold(
-                (failure) => listTomContactsFailureState.add(failure),
-                (success) => null,
-              );
-        });
-
-        contactsManager.getPhonebookContactsNotifier().addListener(() {
-          contactsManager.getPhonebookContactsNotifier().value.fold(
-                (failure) => listPhonebookContactsFailureState.add(failure),
-                (success) => listPhonebookContactsSuccessState.add(success),
-              );
-        });
-
-        contactsManager.initialSynchronizeContacts(
-          isAvailableSupportPhonebookContacts: true,
-          withMxId: mxId,
-        );
-
-        await Future.delayed(const Duration(seconds: 1));
-
-        verify(
-          mockGetTomContactsInteractor.execute(),
-        ).called(1);
-
-        verify(
-          mockTryGetSyncedPhoneBookContactInteractor.execute(
-            userId: mxId,
-          ),
-        ).called(1);
-
-        expectLater(listTomContactsFailureState.length, 1);
-
-        expectLater(
-          listTomContactsFailureState,
-          [
-            const GetContactsIsEmpty(),
-          ],
-        );
-
-        expectLater(listPhonebookContactsFailureState.length, 1);
-
-        expectLater(
-          listPhonebookContactsFailureState,
-          [
-            const GetPhonebookContactsIsEmpty(),
-          ],
-        );
-
-        /// Trigger switch account
-        contactsManager.reSyncContacts();
-
-        contactsManager.cancelAllSubscriptions();
-
-        listTomContactsFailureState.clear();
-
-        listPhonebookContactsFailureState.clear();
-
-        listPhonebookContactsSuccessState.clear();
-
-        when(
-          mockGetTomContactsInteractor.execute(),
-        ).thenAnswer(
-          (_) => Stream.fromIterable([
-            const Right(ContactsLoading()),
-            const Left(GetContactsIsEmpty()),
-          ]),
-        );
-
-        when(
-          mockTryGetSyncedPhoneBookContactInteractor.execute(
-            userId: mxId,
-          ),
-        ).thenAnswer(
-          (_) async => const Left(
-            GetSyncedPhoneBookContactFailure(exception: dynamic),
-          ),
-        );
-
-        when(
-          mockFederationConfigurationsRepository
-              .getFederationConfigurations(mxId),
-        ).thenAnswer(
-          (_) async => FederationConfigurations(
-            fedServerInformation: FederationServerInformation(),
-          ),
-        );
-
-        when(mockIdentityServerDynamicUrlInterceptors.baseUrl).thenReturn(
-          baseUrl,
-        );
-
-        when(mockAuthorizationInterceptor.getAccessToken).thenReturn(
-          accessToken,
-        );
-
-        when(
-          mockTwakeLookupPhonebookContactInteractor.execute(
-            argument: TwakeLookUpArgument(
-              homeServerUrl: baseUrl,
-              withAccessToken: accessToken,
-            ),
-          ),
-        ).thenAnswer(
-          (_) => Stream.fromIterable([
-            const Right(GetPhonebookContactsLoading()),
-            Right(
-              GetPhonebookContactsSuccess(contacts: contacts, progress: 100),
-            ),
-          ]),
-        );
-
-        when(
-          mockPostAddressBookInteractor.execute(
-            addressBooks: contacts.toSet().toAddressBooks().toList(),
-          ),
-        ).thenAnswer(
-          (_) => Stream.fromIterable([
-            const Right(PostAddressBookLoading()),
-            const Right(PostAddressBookSuccessState(updatedAddressBooks: [])),
-          ]),
-        );
-
-        contactsManager.initialSynchronizeContacts(
-          isAvailableSupportPhonebookContacts: true,
-          withMxId: mxId,
-        );
-
-        await Future.delayed(const Duration(seconds: 1));
-
-        verify(
-          mockGetTomContactsInteractor.execute(),
-        ).called(1);
-
-        verify(
-          mockTryGetSyncedPhoneBookContactInteractor.execute(
-            userId: mxId,
-          ),
-        ).called(1);
-
-        expectLater(listTomContactsFailureState.length, 1);
-
-        expectLater(
-          listTomContactsFailureState,
-          [
-            const GetContactsIsEmpty(),
-          ],
-        );
-
-        expectLater(listPhonebookContactsFailureState.length, 0);
-
-        expectLater(
-          listPhonebookContactsFailureState,
-          [],
-        );
-
-        expectLater(
-          listPhonebookContactsSuccessState.length,
-          2,
-        );
-
-        expectLater(
-          listPhonebookContactsSuccessState,
-          [
-            const GetPhonebookContactsLoading(),
-            GetPhonebookContactsSuccess(contacts: contacts, progress: 100),
-          ],
-        );
+        expectLater(listPhonebookContactsSuccessState, [
+          const GetPhonebookContactsLoading(),
+          GetPhonebookContactsSuccess(contacts: contacts, progress: 100),
+        ]);
 
         verify(
           mockPostAddressBookInteractor.execute(
             addressBooks: contacts.toSet().toAddressBooks().toList(),
           ),
         ).called(1);
-      },
-    );
+      });
 
-    test(
-      '[Account-A] WHEN it is available get Phonebook contact.\n'
-      '[Account-A] AND contactsNotifier return GetContactsSuccess.\n'
-      '[Account-A] THEN contactsNotifier in ContactsManager SHOULD have GetContactsSuccess state.\n'
-      '[Account-A] THEN list ToM contact SHOULD is not empty.\n'
-      'Trigger UI => switch to another account and call synchronize contacts.\n'
-      '[Account-B] AND contactsNotifier return GetContactsSuccess with contacts is empty.\n'
-      '[Account-B] AND phonebookContactInteractor return GetPhonebookContactsSuccess with contacts is empty.\n'
-      '[Account-A] AND tryGetSyncedPhoneBookContactInteractor return GetSyncedPhoneBookContactFailure state.\n'
-      '[Account-A] AND phonebookContactNotifier return GetPhonebookContactsSuccess state.\n'
-      '[Account-A] THEN contactsNotifier in ContactsManager SHOULD have GetContactsIsEmpty state.\n'
-      '[Account-A] THEN phonebookContactNotifier in ContactsManager SHOULD have GetPhonebookContactsSuccess state.\n'
-      '[Account-B] THEN list ToM contact SHOULD is empty.\n'
-      '[Account-B] THEN list Phonebook contact SHOULD not empty.\n'
-      '[Account-B] THEN call post addressbook success',
-      () async {
+      test('[Account-A] WHEN it is available get Phonebook contact.\n'
+          '[Account-A] AND contactsNotifier return GetContactsSuccess.\n'
+          '[Account-A] THEN contactsNotifier in ContactsManager SHOULD have GetContactsSuccess state.\n'
+          '[Account-A] THEN list ToM contact SHOULD is not empty.\n'
+          'Trigger UI => switch to another account and call synchronize contacts.\n'
+          '[Account-B] AND contactsNotifier return GetContactsSuccess with contacts is empty.\n'
+          '[Account-B] AND phonebookContactInteractor return GetPhonebookContactsSuccess with contacts is empty.\n'
+          '[Account-B] open the contact tab.\n'
+          '[Account-B] AND phonebookContactNotifier return GetPhonebookContactsSuccess state.\n'
+          '[Account-B] THEN contactsNotifier in ContactsManager SHOULD have GetContactsIsEmpty state.\n'
+          '[Account-B] THEN phonebookContactNotifier in ContactsManager SHOULD have GetPhonebookContactsSuccess state.\n'
+          '[Account-B] THEN list ToM contact SHOULD is empty.\n'
+          '[Account-B] THEN list Phonebook contact SHOULD not empty.\n'
+          '[Account-B] THEN call post addressbook success', () async {
         final List<Success> listTomContactsSuccessState = [];
         final List<Failure> listTomContactsFailureState = [];
         final List<Failure> listPhonebookContactsFailureState = [];
         final List<Success> listPhonebookContactsSuccessState = [];
 
-        when(
-          mockGetTomContactsInteractor.execute(),
-        ).thenAnswer(
+        when(mockGetTomContactsInteractor.execute()).thenAnswer(
           (_) => Stream.fromIterable([
             const Right(ContactsLoading()),
             Right(GetContactsSuccess(contacts: contacts)),
@@ -3256,34 +4421,19 @@ void main() {
               if (success is GetContactsSuccess) {
                 expect(listTomContactsSuccessState.length, 2);
 
-                expect(
-                  listTomContactsSuccessState,
-                  [
-                    const ContactsLoading(),
-                    GetContactsSuccess(contacts: contacts),
-                  ],
-                );
+                expect(listTomContactsSuccessState, [
+                  const ContactsLoading(),
+                  GetContactsSuccess(contacts: contacts),
+                ]);
 
                 /// Trigger switch account
                 contactsManager.cancelAllSubscriptions();
 
-                when(
-                  mockGetTomContactsInteractor.execute(),
-                ).thenAnswer(
+                when(mockGetTomContactsInteractor.execute()).thenAnswer(
                   (_) => Stream.fromIterable([
                     const Right(ContactsLoading()),
                     const Left(GetContactsIsEmpty()),
                   ]),
-                );
-
-                when(
-                  mockTryGetSyncedPhoneBookContactInteractor.execute(
-                    userId: mxId,
-                  ),
-                ).thenAnswer(
-                  (_) async => const Left(
-                    GetSyncedPhoneBookContactFailure(exception: dynamic),
-                  ),
                 );
 
                 when(
@@ -3295,14 +4445,13 @@ void main() {
                   ),
                 );
 
-                when(mockIdentityServerDynamicUrlInterceptors.baseUrl)
-                    .thenReturn(
-                  baseUrl,
-                );
+                when(
+                  mockIdentityServerDynamicUrlInterceptors.baseUrl,
+                ).thenReturn(baseUrl);
 
-                when(mockAuthorizationInterceptor.getAccessToken).thenReturn(
-                  accessToken,
-                );
+                when(
+                  mockAuthorizationInterceptor.getAccessToken,
+                ).thenReturn(accessToken);
 
                 when(
                   mockTwakeLookupPhonebookContactInteractor.execute(
@@ -3343,52 +4492,32 @@ void main() {
                 listPhonebookContactsFailureState.clear();
                 listPhonebookContactsSuccessState.clear();
 
-                contactsManager.initialSynchronizeContacts(
+                contactsManager.synchronizeContactsOnContactTab(
                   isAvailableSupportPhonebookContacts: true,
                   withMxId: mxId,
                 );
 
                 await Future.delayed(const Duration(seconds: 1));
 
-                verify(
-                  mockGetTomContactsInteractor.execute(),
-                ).called(2);
-
-                verify(
-                  mockTryGetSyncedPhoneBookContactInteractor.execute(
-                    userId: mxId,
-                  ),
-                ).called(1);
+                verify(mockGetTomContactsInteractor.execute()).called(2);
 
                 expectLater(listTomContactsFailureState.length, 1);
-                expectLater(
-                  listTomContactsFailureState,
-                  [
-                    const GetContactsIsEmpty(),
-                  ],
-                );
+                expectLater(listTomContactsFailureState, [
+                  const GetContactsIsEmpty(),
+                ]);
 
                 expectLater(listPhonebookContactsFailureState.length, 0);
-                expectLater(
-                  listPhonebookContactsFailureState,
-                  [],
-                );
+                expectLater(listPhonebookContactsFailureState, []);
 
-                expectLater(
-                  listPhonebookContactsSuccessState.length,
-                  2,
-                );
+                expectLater(listPhonebookContactsSuccessState.length, 2);
 
-                expectLater(
-                  listPhonebookContactsSuccessState,
-                  [
-                    const GetPhonebookContactsLoading(),
-                    GetPhonebookContactsSuccess(
-                      contacts: contacts,
-                      progress: 100,
-                    ),
-                  ],
-                );
+                expectLater(listPhonebookContactsSuccessState, [
+                  const GetPhonebookContactsLoading(),
+                  GetPhonebookContactsSuccess(
+                    contacts: contacts,
+                    progress: 100,
+                  ),
+                ]);
 
                 verify(
                   mockPostAddressBookInteractor.execute(
@@ -3402,2053 +4531,16 @@ void main() {
 
         contactsManager.getPhonebookContactsNotifier().addListener(() {
           contactsManager.getPhonebookContactsNotifier().value.fold(
-                (failure) => listPhonebookContactsFailureState.add(failure),
-                (success) => listPhonebookContactsSuccessState.add(success),
-              );
-        });
-      },
-    );
-  });
-
-  group(
-      'ContactsManager Unit test - ENV: Mobile - Open contact tab and Unsupported Federation server',
-      () {
-    const mxId = 'mxId';
-
-    const baseUrl = 'https://example.com';
-
-    const accessToken = 'accessToken';
-
-    final contacts = [
-      ContactFixtures.contact1,
-      ContactFixtures.contact2,
-      ContactFixtures.contact3,
-    ];
-
-    test(
-      'WHEN it is available get Phonebook contact.\n'
-      'AND open the contact tab.\n'
-      'AND contactsNotifier return GetContactsIsEmpty with contacts is empty.\n'
-      'AND phonebookContactNotifier return GetPhonebookContactsIsEmpty state.\n'
-      'THEN contactsNotifier in ContactsManager SHOULD have GetContactsIsEmpty state.\n'
-      'THEN phonebookContactNotifier in ContactsManager SHOULD have GetPhonebookContactsIsEmpty state.\n'
-      'THEN list ToM contact SHOULD is empty.\n'
-      'THEN list Phonebook contact SHOULD is empty.\n',
-      () async {
-        final List<Failure> listTomContactsFailureState = [];
-
-        final List<Failure> listPhonebookContactsFailureState = [];
-
-        when(
-          mockGetTomContactsInteractor.execute(),
-        ).thenAnswer(
-          (_) => Stream.fromIterable([
-            const Right(ContactsLoading()),
-            const Left(GetContactsIsEmpty()),
-          ]),
-        );
-
-        when(
-          mockFederationConfigurationsRepository
-              .getFederationConfigurations(mxId),
-        ).thenAnswer(
-          (_) async => FederationConfigurations(
-            fedServerInformation: FederationServerInformation(),
-          ),
-        );
-
-        when(mockIdentityServerDynamicUrlInterceptors.baseUrl).thenReturn(
-          baseUrl,
-        );
-
-        when(mockAuthorizationInterceptor.getAccessToken).thenReturn(
-          accessToken,
-        );
-
-        when(
-          mockTwakeLookupPhonebookContactInteractor.execute(
-            argument: TwakeLookUpArgument(
-              homeServerUrl: baseUrl,
-              withAccessToken: accessToken,
-            ),
-          ),
-        ).thenAnswer(
-          (_) => Stream.fromIterable([
-            const Right(GetPhonebookContactsLoading()),
-            const Left(GetPhonebookContactsIsEmpty()),
-          ]),
-        );
-
-        contactsManager.getContactsNotifier().addListener(() {
-          contactsManager.getContactsNotifier().value.fold(
-                (failure) => listTomContactsFailureState.add(failure),
-                (success) => null,
-              );
-        });
-
-        contactsManager.getPhonebookContactsNotifier().addListener(() {
-          contactsManager.getPhonebookContactsNotifier().value.fold(
-                (failure) => listPhonebookContactsFailureState.add(failure),
-                (success) => null,
-              );
+            (failure) => listPhonebookContactsFailureState.add(failure),
+            (success) => listPhonebookContactsSuccessState.add(success),
+          );
         });
 
         contactsManager.synchronizeContactsOnContactTab(
           isAvailableSupportPhonebookContacts: true,
           withMxId: mxId,
         );
-
-        await Future.delayed(const Duration(seconds: 1));
-
-        verify(
-          mockGetTomContactsInteractor.execute(),
-        ).called(1);
-
-        expectLater(listTomContactsFailureState.length, 1);
-
-        expectLater(
-          listTomContactsFailureState,
-          [
-            const GetContactsIsEmpty(),
-          ],
-        );
-
-        expectLater(listPhonebookContactsFailureState.length, 1);
-
-        expectLater(
-          listPhonebookContactsFailureState,
-          [
-            const GetPhonebookContactsIsEmpty(),
-          ],
-        );
-
-        verify(
-          mockTwakeLookupPhonebookContactInteractor.execute(
-            argument: anyNamed('argument'),
-          ),
-        ).called(1);
-
-        verifyNever(
-          mockFederationLookUpPhonebookContactInteractor.execute(
-            argument: anyNamed('argument'),
-          ),
-        );
-      },
-    );
-
-    test(
-      'WHEN it is available get Phonebook contact.\n'
-      'AND open the contact tab.\n'
-      'AND contactsNotifier return GetContactsIsEmpty with contacts is empty.\n'
-      'AND phonebookContactNotifier return GetHashDetailsFailure state.\n'
-      'THEN contactsNotifier in ContactsManager SHOULD have GetContactsIsEmpty state.\n'
-      'THEN phonebookContactNotifier in ContactsManager SHOULD have GetHashDetailsFailure state.\n'
-      'THEN list ToM contact SHOULD is empty.\n'
-      'THEN list Phonebook contact SHOULD is empty.\n',
-      () async {
-        final List<Failure> listTomContactsFailureState = [];
-
-        final List<Failure> listPhonebookContactsFailureState = [];
-
-        when(
-          mockGetTomContactsInteractor.execute(),
-        ).thenAnswer(
-          (_) => Stream.fromIterable([
-            const Right(ContactsLoading()),
-            const Left(GetContactsIsEmpty()),
-          ]),
-        );
-
-        when(
-          mockFederationConfigurationsRepository
-              .getFederationConfigurations(mxId),
-        ).thenAnswer(
-          (_) async => FederationConfigurations(
-            fedServerInformation: FederationServerInformation(),
-          ),
-        );
-
-        when(mockIdentityServerDynamicUrlInterceptors.baseUrl).thenReturn(
-          baseUrl,
-        );
-
-        when(mockAuthorizationInterceptor.getAccessToken).thenReturn(
-          accessToken,
-        );
-
-        when(
-          mockTwakeLookupPhonebookContactInteractor.execute(
-            argument: TwakeLookUpArgument(
-              homeServerUrl: baseUrl,
-              withAccessToken: accessToken,
-            ),
-          ),
-        ).thenAnswer(
-          (_) => Stream.fromIterable([
-            const Right(GetPhonebookContactsLoading()),
-            const Left(GetHashDetailsFailure(exception: dynamic)),
-          ]),
-        );
-
-        contactsManager.getContactsNotifier().addListener(() {
-          contactsManager.getContactsNotifier().value.fold(
-                (failure) => listTomContactsFailureState.add(failure),
-                (success) => null,
-              );
-        });
-
-        contactsManager.getPhonebookContactsNotifier().addListener(() {
-          contactsManager.getPhonebookContactsNotifier().value.fold(
-                (failure) => listPhonebookContactsFailureState.add(failure),
-                (success) => null,
-              );
-        });
-
-        contactsManager.synchronizeContactsOnContactTab(
-          isAvailableSupportPhonebookContacts: true,
-          withMxId: mxId,
-        );
-
-        await Future.delayed(const Duration(seconds: 1));
-
-        verify(
-          mockGetTomContactsInteractor.execute(),
-        ).called(1);
-
-        expectLater(listTomContactsFailureState.length, 1);
-
-        expectLater(
-          listTomContactsFailureState,
-          [
-            const GetContactsIsEmpty(),
-          ],
-        );
-
-        expectLater(listPhonebookContactsFailureState.length, 1);
-
-        expectLater(
-          listPhonebookContactsFailureState,
-          [
-            const GetHashDetailsFailure(exception: dynamic),
-          ],
-        );
-
-        verify(
-          mockTwakeLookupPhonebookContactInteractor.execute(
-            argument: anyNamed('argument'),
-          ),
-        ).called(1);
-
-        verifyNever(
-          mockFederationLookUpPhonebookContactInteractor.execute(
-            argument: anyNamed('argument'),
-          ),
-        );
-      },
-    );
-
-    test(
-      'WHEN it is available get Phonebook contact.\n'
-      'AND open the contact tab.\n'
-      'AND contactsNotifier return GetContactsIsEmpty with contacts is empty.\n'
-      'AND phonebookContactNotifier return GetPhonebookContactsSuccess state.\n'
-      'THEN contactsNotifier in ContactsManager SHOULD have GetContactsIsEmpty state.\n'
-      'THEN phonebookContactNotifier in ContactsManager SHOULD have GetPhonebookContactsSuccess state.\n'
-      'THEN list ToM contact SHOULD is empty.\n'
-      'THEN list Phonebook contact SHOULD is empty.\n',
-      () async {
-        final List<Failure> listTomContactsFailureState = [];
-
-        final List<Success> listPhonebookContactsSuccessState = [];
-
-        when(
-          mockGetTomContactsInteractor.execute(),
-        ).thenAnswer(
-          (_) => Stream.fromIterable([
-            const Right(ContactsLoading()),
-            const Left(GetContactsIsEmpty()),
-          ]),
-        );
-
-        when(
-          mockFederationConfigurationsRepository
-              .getFederationConfigurations(mxId),
-        ).thenAnswer(
-          (_) async => FederationConfigurations(
-            fedServerInformation: FederationServerInformation(),
-          ),
-        );
-
-        when(mockIdentityServerDynamicUrlInterceptors.baseUrl).thenReturn(
-          baseUrl,
-        );
-
-        when(mockAuthorizationInterceptor.getAccessToken).thenReturn(
-          accessToken,
-        );
-
-        when(
-          mockTwakeLookupPhonebookContactInteractor.execute(
-            argument: TwakeLookUpArgument(
-              homeServerUrl: baseUrl,
-              withAccessToken: accessToken,
-            ),
-          ),
-        ).thenAnswer(
-          (_) => Stream.fromIterable([
-            const Right(GetPhonebookContactsLoading()),
-            Right(
-              GetPhonebookContactsSuccess(contacts: contacts, progress: 100),
-            ),
-          ]),
-        );
-
-        when(
-          mockPostAddressBookInteractor.execute(
-            addressBooks: contacts.toSet().toAddressBooks().toList(),
-          ),
-        ).thenAnswer(
-          (_) => Stream.fromIterable([
-            const Right(PostAddressBookLoading()),
-            const Right(PostAddressBookSuccessState(updatedAddressBooks: [])),
-          ]),
-        );
-
-        contactsManager.getContactsNotifier().addListener(() {
-          contactsManager.getContactsNotifier().value.fold(
-                (failure) => listTomContactsFailureState.add(failure),
-                (success) => null,
-              );
-        });
-
-        contactsManager.getPhonebookContactsNotifier().addListener(() {
-          contactsManager.getPhonebookContactsNotifier().value.fold(
-                (failure) => null,
-                (success) => listPhonebookContactsSuccessState.add(success),
-              );
-        });
-
-        contactsManager.synchronizeContactsOnContactTab(
-          isAvailableSupportPhonebookContacts: true,
-          withMxId: mxId,
-        );
-
-        await Future.delayed(const Duration(seconds: 1));
-
-        verify(
-          mockGetTomContactsInteractor.execute(),
-        ).called(1);
-
-        verify(
-          mockPostAddressBookInteractor.execute(
-            addressBooks: contacts.toSet().toAddressBooks().toList(),
-          ),
-        ).called(1);
-
-        expectLater(listTomContactsFailureState.length, 1);
-
-        expectLater(
-          listTomContactsFailureState,
-          [
-            const GetContactsIsEmpty(),
-          ],
-        );
-
-        expectLater(listPhonebookContactsSuccessState.length, 2);
-
-        expectLater(
-          listPhonebookContactsSuccessState,
-          [
-            const GetPhonebookContactsLoading(),
-            GetPhonebookContactsSuccess(contacts: contacts, progress: 100),
-          ],
-        );
-
-        verify(
-          mockTwakeLookupPhonebookContactInteractor.execute(
-            argument: anyNamed('argument'),
-          ),
-        ).called(1);
-
-        verifyNever(
-          mockFederationLookUpPhonebookContactInteractor.execute(
-            argument: anyNamed('argument'),
-          ),
-        );
-      },
-    );
-  });
-
-  group(
-    'ContactsManager Unit test - ENV: Mobile - Open contact tab and supported Federation server',
-    () {
-      const mxId = 'mxId';
-
-      const baseUrl = 'https://example.com';
-
-      const accessToken = 'accessToken';
-
-      final federationConfigurations = FederationConfigurations(
-        fedServerInformation: FederationServerInformation(
-          baseUrls: [
-            Uri(
-              scheme: 'https',
-              host: 'federation',
-            ),
-          ],
-        ),
-      );
-
-      final contacts = [
-        ContactFixtures.contact1,
-        ContactFixtures.contact2,
-        ContactFixtures.contact3,
-      ];
-
-      test(
-        'WHEN it is available get Phonebook contact.\n'
-        'AND contactsNotifier return GetContactsIsEmpty with contacts is empty.\n'
-        'AND timeAvailableForSyncVault is true.\n'
-        'THEN contactsNotifier in ContactsManager SHOULD have GetContactsIsEmpty state.\n'
-        'THEN phonebookContactNotifier in ContactsManager SHOULD have RequestTokenFailure state.\n'
-        'THEN list ToM contact SHOULD is empty.\n'
-        'THEN list Phonebook contact SHOULD is empty.\n',
-        () async {
-          final List<Failure> listTomContactsFailureState = [];
-
-          final List<Failure> listPhonebookContactsFailureState = [];
-
-          when(
-            mockGetTomContactsInteractor.execute(),
-          ).thenAnswer(
-            (_) => Stream.fromIterable([
-              const Right(ContactsLoading()),
-              const Left(GetContactsIsEmpty()),
-            ]),
-          );
-
-          when(mockHomeServerDynamicUrlInterceptors.baseUrl).thenReturn(
-            baseUrl,
-          );
-
-          when(mockAuthorizationInterceptor.getAccessToken).thenReturn(
-            accessToken,
-          );
-
-          when(
-            mockFederationConfigurationsRepository
-                .getFederationConfigurations(mxId),
-          ).thenAnswer(
-            (_) async => federationConfigurations,
-          );
-
-          when(
-            mockFederationLookUpPhonebookContactInteractor.execute(
-              argument: FederationLookUpArgument(
-                homeServerUrl: baseUrl,
-                federationUrl: federationConfigurations
-                        .fedServerInformation.baseUrls?.first
-                        .toString() ??
-                    '',
-                withMxId: mxId,
-                withAccessToken: accessToken,
-              ),
-            ),
-          ).thenAnswer(
-            (_) => Stream.fromIterable([
-              const Right(GetPhonebookContactsLoading()),
-              Left(
-                RequestTokenFailure(
-                  exception: dynamic,
-                  contacts: contacts,
-                ),
-              ),
-            ]),
-          );
-
-          contactsManager.getContactsNotifier().addListener(() {
-            contactsManager.getContactsNotifier().value.fold(
-                  (failure) => listTomContactsFailureState.add(failure),
-                  (success) => null,
-                );
-          });
-
-          contactsManager.getPhonebookContactsNotifier().addListener(() {
-            contactsManager.getPhonebookContactsNotifier().value.fold(
-                  (failure) => listPhonebookContactsFailureState.add(failure),
-                  (success) => null,
-                );
-          });
-
-          contactsManager.synchronizeContactsOnContactTab(
-            isAvailableSupportPhonebookContacts: true,
-            withMxId: mxId,
-          );
-
-          await Future.delayed(const Duration(seconds: 1));
-
-          verify(
-            mockGetTomContactsInteractor.execute(),
-          ).called(1);
-
-          verify(mockHomeServerDynamicUrlInterceptors.baseUrl).called(1);
-
-          verify(mockAuthorizationInterceptor.getAccessToken).called(1);
-
-          verify(
-            mockFederationConfigurationsRepository
-                .getFederationConfigurations(mxId),
-          ).called(1);
-
-          verify(
-            mockFederationLookUpPhonebookContactInteractor.execute(
-              argument: FederationLookUpArgument(
-                homeServerUrl: baseUrl,
-                federationUrl: federationConfigurations
-                        .fedServerInformation.baseUrls?.first
-                        .toString() ??
-                    '',
-                withMxId: mxId,
-                withAccessToken: accessToken,
-              ),
-            ),
-          ).called(1);
-
-          expectLater(listTomContactsFailureState.length, 1);
-
-          expectLater(
-            listTomContactsFailureState,
-            [
-              const GetContactsIsEmpty(),
-            ],
-          );
-
-          expectLater(listPhonebookContactsFailureState.length, 1);
-
-          expectLater(
-            listPhonebookContactsFailureState,
-            [
-              RequestTokenFailure(
-                exception: dynamic,
-                contacts: contacts,
-              ),
-            ],
-          );
-        },
-      );
-
-      test(
-        'WHEN it is available get Phonebook contact.\n'
-        'AND contactsNotifier return GetContactsIsEmpty with contacts is empty.\n'
-        'AND timeAvailableForSyncVault is true.\n'
-        'AND phonebookContactNotifier return GetPhonebookContactsSuccess state.\n'
-        'THEN contactsNotifier in ContactsManager SHOULD have GetContactsIsEmpty state.\n'
-        'THEN phonebookContactNotifier in ContactsManager SHOULD have GetPhonebookContactsSuccess state.\n'
-        'THEN list ToM contact SHOULD is empty.\n'
-        'THEN list Phonebook contact SHOULD is not empty.\n',
-        () async {
-          final List<Failure> listTomContactsFailureState = [];
-
-          final List<Success> listPhonebookContactsSuccessState = [];
-
-          debugDefaultTargetPlatformOverride = TargetPlatform.android;
-
-          when(
-            mockGetTomContactsInteractor.execute(),
-          ).thenAnswer(
-            (_) => Stream.fromIterable([
-              const Right(ContactsLoading()),
-              const Left(GetContactsIsEmpty()),
-            ]),
-          );
-
-          when(mockHomeServerDynamicUrlInterceptors.baseUrl).thenReturn(
-            baseUrl,
-          );
-
-          when(mockAuthorizationInterceptor.getAccessToken).thenReturn(
-            accessToken,
-          );
-
-          when(
-            mockFederationConfigurationsRepository
-                .getFederationConfigurations(mxId),
-          ).thenAnswer(
-            (_) async => federationConfigurations,
-          );
-
-          when(
-            mockFederationLookUpPhonebookContactInteractor.execute(
-              argument: FederationLookUpArgument(
-                homeServerUrl: baseUrl,
-                federationUrl: federationConfigurations
-                        .fedServerInformation.baseUrls?.first
-                        .toString() ??
-                    '',
-                withMxId: mxId,
-                withAccessToken: accessToken,
-              ),
-            ),
-          ).thenAnswer(
-            (_) => Stream.fromIterable([
-              const Right(GetPhonebookContactsLoading()),
-              Right(
-                GetPhonebookContactsSuccess(
-                  contacts: contacts,
-                  progress: 100,
-                ),
-              ),
-            ]),
-          );
-
-          when(
-            mockPostAddressBookInteractor.execute(
-              addressBooks: contacts.toSet().toAddressBooks().toList(),
-            ),
-          ).thenAnswer(
-            (_) => Stream.fromIterable([
-              const Right(PostAddressBookLoading()),
-              const Right(PostAddressBookSuccessState(updatedAddressBooks: [])),
-            ]),
-          );
-
-          contactsManager.getContactsNotifier().addListener(() {
-            contactsManager.getContactsNotifier().value.fold(
-                  (failure) => listTomContactsFailureState.add(failure),
-                  (success) => null,
-                );
-          });
-
-          contactsManager.getPhonebookContactsNotifier().addListener(() {
-            contactsManager.getPhonebookContactsNotifier().value.fold(
-                  (failure) => null,
-                  (success) => listPhonebookContactsSuccessState.add(success),
-                );
-          });
-
-          contactsManager.synchronizeContactsOnContactTab(
-            isAvailableSupportPhonebookContacts: true,
-            withMxId: mxId,
-          );
-
-          await Future.delayed(const Duration(seconds: 1));
-
-          verify(
-            mockGetTomContactsInteractor.execute(),
-          ).called(1);
-
-          verify(mockHomeServerDynamicUrlInterceptors.baseUrl).called(1);
-
-          verify(mockAuthorizationInterceptor.getAccessToken).called(1);
-
-          verify(
-            mockFederationConfigurationsRepository
-                .getFederationConfigurations(mxId),
-          ).called(1);
-
-          verify(
-            mockFederationLookUpPhonebookContactInteractor.execute(
-              argument: FederationLookUpArgument(
-                homeServerUrl: baseUrl,
-                federationUrl: federationConfigurations
-                        .fedServerInformation.baseUrls?.first
-                        .toString() ??
-                    '',
-                withMxId: mxId,
-                withAccessToken: accessToken,
-              ),
-            ),
-          ).called(1);
-
-          expectLater(listTomContactsFailureState.length, 1);
-
-          expectLater(
-            listTomContactsFailureState,
-            [
-              const GetContactsIsEmpty(),
-            ],
-          );
-
-          expectLater(listPhonebookContactsSuccessState.length, 2);
-
-          expectLater(
-            listPhonebookContactsSuccessState,
-            [
-              const GetPhonebookContactsLoading(),
-              GetPhonebookContactsSuccess(progress: 100, contacts: contacts),
-            ],
-          );
-        },
-      );
-
-      test(
-        'WHEN it is available get Phonebook contact.\n'
-        'AND contactsNotifier return GetContactsSuccess with contacts not empty.\n'
-        'AND timeAvailableForSyncVault is true.\n'
-        'THEN contactsNotifier in ContactsManager SHOULD have GetContactsSuccess state.\n'
-        'THEN phonebookContactNotifier in ContactsManager SHOULD have GetPhonebookContactsSuccess state.\n'
-        'THEN list ToM contact SHOULD is empty.\n'
-        'THEN list Phonebook contact SHOULD is not empty.\n',
-        () async {
-          final List<Success> listTomContactsSuccessState = [];
-
-          final List<Success> listPhonebookContactsSuccessState = [];
-
-          when(
-            mockGetTomContactsInteractor.execute(),
-          ).thenAnswer(
-            (_) => Stream.fromIterable([
-              const Right(ContactsLoading()),
-              Right(GetContactsSuccess(contacts: contacts)),
-            ]),
-          );
-
-          when(mockHomeServerDynamicUrlInterceptors.baseUrl).thenReturn(
-            baseUrl,
-          );
-
-          when(mockAuthorizationInterceptor.getAccessToken).thenReturn(
-            accessToken,
-          );
-
-          when(
-            mockFederationConfigurationsRepository
-                .getFederationConfigurations(mxId),
-          ).thenAnswer(
-            (_) async => federationConfigurations,
-          );
-
-          when(
-            mockFederationLookUpPhonebookContactInteractor.execute(
-              argument: FederationLookUpArgument(
-                homeServerUrl: baseUrl,
-                federationUrl: federationConfigurations
-                        .fedServerInformation.baseUrls?.first
-                        .toString() ??
-                    '',
-                withMxId: mxId,
-                withAccessToken: accessToken,
-              ),
-            ),
-          ).thenAnswer(
-            (_) => Stream.fromIterable([
-              const Right(GetPhonebookContactsLoading()),
-              Right(
-                GetPhonebookContactsSuccess(
-                  contacts: contacts,
-                  progress: 100,
-                ),
-              ),
-            ]),
-          );
-
-          when(
-            mockPostAddressBookInteractor.execute(
-              addressBooks: contacts.toSet().toAddressBooks().toList(),
-            ),
-          ).thenAnswer(
-            (_) => Stream.fromIterable([
-              const Right(PostAddressBookLoading()),
-              const Right(PostAddressBookSuccessState(updatedAddressBooks: [])),
-            ]),
-          );
-
-          contactsManager.getContactsNotifier().addListener(() {
-            contactsManager.getContactsNotifier().value.fold(
-                  (failure) => null,
-                  (success) => listTomContactsSuccessState.add(success),
-                );
-          });
-
-          contactsManager.getPhonebookContactsNotifier().addListener(() {
-            contactsManager.getPhonebookContactsNotifier().value.fold(
-                  (failure) => null,
-                  (success) => listPhonebookContactsSuccessState.add(success),
-                );
-          });
-
-          contactsManager.synchronizeContactsOnContactTab(
-            isAvailableSupportPhonebookContacts: true,
-            withMxId: mxId,
-          );
-
-          await Future.delayed(const Duration(seconds: 1));
-
-          verify(
-            mockGetTomContactsInteractor.execute(),
-          ).called(1);
-
-          verify(mockHomeServerDynamicUrlInterceptors.baseUrl).called(1);
-
-          verify(mockAuthorizationInterceptor.getAccessToken).called(1);
-
-          verify(
-            mockFederationConfigurationsRepository
-                .getFederationConfigurations(mxId),
-          ).called(1);
-
-          verify(
-            mockFederationLookUpPhonebookContactInteractor.execute(
-              argument: FederationLookUpArgument(
-                homeServerUrl: baseUrl,
-                federationUrl: federationConfigurations
-                        .fedServerInformation.baseUrls?.first
-                        .toString() ??
-                    '',
-                withMxId: mxId,
-                withAccessToken: accessToken,
-              ),
-            ),
-          ).called(1);
-
-          expectLater(listTomContactsSuccessState.length, 2);
-
-          expectLater(
-            listTomContactsSuccessState,
-            [
-              const ContactsLoading(),
-              GetContactsSuccess(contacts: contacts),
-            ],
-          );
-
-          expectLater(listPhonebookContactsSuccessState.length, 2);
-
-          expectLater(
-            listPhonebookContactsSuccessState,
-            [
-              const GetPhonebookContactsLoading(),
-              GetPhonebookContactsSuccess(progress: 100, contacts: contacts),
-            ],
-          );
-        },
-      );
-
-      test(
-        'WHEN it is available get Phonebook contact.\n'
-        'AND contactsNotifier return GetContactsIsEmpty with contacts is empty.\n'
-        'AND phonebookContactNotifier return RegisterTokenFailure state.\n'
-        'THEN contactsNotifier in ContactsManager SHOULD have GetContactsIsEmpty state.\n'
-        'THEN phonebookContactNotifier in ContactsManager SHOULD have RegisterTokenFailure state.\n'
-        'THEN list ToM contact SHOULD is empty.\n'
-        'THEN list Phonebook contact SHOULD is empty.\n',
-        () async {
-          final List<Failure> listTomContactsFailureState = [];
-
-          final List<Failure> listPhonebookContactsFailureState = [];
-
-          when(
-            mockGetTomContactsInteractor.execute(),
-          ).thenAnswer(
-            (_) => Stream.fromIterable([
-              const Right(ContactsLoading()),
-              const Left(GetContactsIsEmpty()),
-            ]),
-          );
-
-          when(mockHomeServerDynamicUrlInterceptors.baseUrl).thenReturn(
-            baseUrl,
-          );
-
-          when(mockAuthorizationInterceptor.getAccessToken).thenReturn(
-            accessToken,
-          );
-
-          when(
-            mockFederationConfigurationsRepository
-                .getFederationConfigurations(mxId),
-          ).thenAnswer(
-            (_) async => federationConfigurations,
-          );
-
-          when(
-            mockFederationLookUpPhonebookContactInteractor.execute(
-              argument: FederationLookUpArgument(
-                homeServerUrl: baseUrl,
-                federationUrl: federationConfigurations
-                        .fedServerInformation.baseUrls?.first
-                        .toString() ??
-                    '',
-                withMxId: mxId,
-                withAccessToken: accessToken,
-              ),
-            ),
-          ).thenAnswer(
-            (_) => Stream.fromIterable([
-              const Right(GetPhonebookContactsLoading()),
-              Left(
-                RegisterTokenFailure(
-                  exception: dynamic,
-                  contacts: contacts,
-                ),
-              ),
-            ]),
-          );
-
-          contactsManager.getContactsNotifier().addListener(() {
-            contactsManager.getContactsNotifier().value.fold(
-                  (failure) => listTomContactsFailureState.add(failure),
-                  (success) => null,
-                );
-          });
-
-          contactsManager.getPhonebookContactsNotifier().addListener(() {
-            contactsManager.getPhonebookContactsNotifier().value.fold(
-                  (failure) => listPhonebookContactsFailureState.add(failure),
-                  (success) => null,
-                );
-          });
-
-          contactsManager.synchronizeContactsOnContactTab(
-            isAvailableSupportPhonebookContacts: true,
-            withMxId: mxId,
-          );
-
-          await Future.delayed(const Duration(seconds: 1));
-
-          verify(
-            mockGetTomContactsInteractor.execute(),
-          ).called(1);
-
-          expectLater(listTomContactsFailureState.length, 1);
-
-          expectLater(
-            listTomContactsFailureState,
-            [
-              const GetContactsIsEmpty(),
-            ],
-          );
-
-          expectLater(listPhonebookContactsFailureState.length, 1);
-
-          expectLater(
-            listPhonebookContactsFailureState,
-            [
-              RegisterTokenFailure(
-                exception: dynamic,
-                contacts: contacts,
-              ),
-            ],
-          );
-        },
-      );
-
-      test(
-        'WHEN it is available get Phonebook contact.\n'
-        'AND contactsNotifier return GetContactsIsEmpty with contacts is empty.\n'
-        'AND phonebookContactNotifier return GetPhonebookContactsIsEmpty state.\n'
-        'THEN contactsNotifier in ContactsManager SHOULD have GetContactsIsEmpty state.\n'
-        'THEN phonebookContactNotifier in ContactsManager SHOULD have GetPhonebookContactsIsEmpty state.\n'
-        'THEN list ToM contact SHOULD is empty.\n'
-        'THEN list Phonebook contact SHOULD is empty.\n',
-        () async {
-          final List<Failure> listTomContactsFailureState = [];
-
-          final List<Failure> listPhonebookContactsFailureState = [];
-
-          when(
-            mockGetTomContactsInteractor.execute(),
-          ).thenAnswer(
-            (_) => Stream.fromIterable([
-              const Right(ContactsLoading()),
-              const Left(GetContactsIsEmpty()),
-            ]),
-          );
-
-          when(mockHomeServerDynamicUrlInterceptors.baseUrl).thenReturn(
-            baseUrl,
-          );
-
-          when(mockAuthorizationInterceptor.getAccessToken).thenReturn(
-            accessToken,
-          );
-
-          when(
-            mockFederationConfigurationsRepository
-                .getFederationConfigurations(mxId),
-          ).thenAnswer(
-            (_) async => federationConfigurations,
-          );
-
-          when(
-            mockFederationLookUpPhonebookContactInteractor.execute(
-              argument: FederationLookUpArgument(
-                homeServerUrl: baseUrl,
-                federationUrl: federationConfigurations
-                        .fedServerInformation.baseUrls?.first
-                        .toString() ??
-                    '',
-                withMxId: mxId,
-                withAccessToken: accessToken,
-              ),
-            ),
-          ).thenAnswer(
-            (_) => Stream.fromIterable([
-              const Right(GetPhonebookContactsLoading()),
-              const Left(GetPhonebookContactsIsEmpty()),
-            ]),
-          );
-
-          contactsManager.getContactsNotifier().addListener(() {
-            contactsManager.getContactsNotifier().value.fold(
-                  (failure) => listTomContactsFailureState.add(failure),
-                  (success) => null,
-                );
-          });
-
-          contactsManager.getPhonebookContactsNotifier().addListener(() {
-            contactsManager.getPhonebookContactsNotifier().value.fold(
-                  (failure) => listPhonebookContactsFailureState.add(failure),
-                  (success) => null,
-                );
-          });
-
-          contactsManager.synchronizeContactsOnContactTab(
-            isAvailableSupportPhonebookContacts: true,
-            withMxId: mxId,
-          );
-
-          await Future.delayed(const Duration(seconds: 1));
-
-          verify(
-            mockGetTomContactsInteractor.execute(),
-          ).called(1);
-
-          expectLater(listTomContactsFailureState.length, 1);
-
-          expectLater(
-            listTomContactsFailureState,
-            [
-              const GetContactsIsEmpty(),
-            ],
-          );
-
-          expectLater(listPhonebookContactsFailureState.length, 1);
-
-          expectLater(
-            listPhonebookContactsFailureState,
-            [
-              const GetPhonebookContactsIsEmpty(),
-            ],
-          );
-        },
-      );
-
-      test(
-        'WHEN it is available get Phonebook contact.\n'
-        'AND contactsNotifier return GetContactsIsEmpty with contacts is empty.\n'
-        'AND phonebookContactNotifier return GetPhoneBookContactFailure state.\n'
-        'THEN contactsNotifier in ContactsManager SHOULD have GetContactsIsEmpty state.\n'
-        'THEN phonebookContactNotifier in ContactsManager SHOULD have GetPhoneBookContactFailure state.\n'
-        'THEN list ToM contact SHOULD is empty.\n'
-        'THEN list Phonebook contact SHOULD is empty.\n',
-        () async {
-          final List<Failure> listTomContactsFailureState = [];
-
-          final List<Failure> listPhonebookContactsFailureState = [];
-
-          when(
-            mockGetTomContactsInteractor.execute(),
-          ).thenAnswer(
-            (_) => Stream.fromIterable([
-              const Right(ContactsLoading()),
-              const Left(GetContactsIsEmpty()),
-            ]),
-          );
-
-          when(mockHomeServerDynamicUrlInterceptors.baseUrl).thenReturn(
-            baseUrl,
-          );
-
-          when(mockAuthorizationInterceptor.getAccessToken).thenReturn(
-            accessToken,
-          );
-
-          when(
-            mockFederationConfigurationsRepository
-                .getFederationConfigurations(mxId),
-          ).thenAnswer(
-            (_) async => federationConfigurations,
-          );
-
-          when(
-            mockFederationLookUpPhonebookContactInteractor.execute(
-              argument: FederationLookUpArgument(
-                homeServerUrl: baseUrl,
-                federationUrl: federationConfigurations
-                        .fedServerInformation.baseUrls?.first
-                        .toString() ??
-                    '',
-                withMxId: mxId,
-                withAccessToken: accessToken,
-              ),
-            ),
-          ).thenAnswer(
-            (_) => Stream.fromIterable([
-              const Right(GetPhonebookContactsLoading()),
-              const Left(GetPhoneBookContactFailure(exception: dynamic)),
-            ]),
-          );
-
-          contactsManager.getContactsNotifier().addListener(() {
-            contactsManager.getContactsNotifier().value.fold(
-                  (failure) => listTomContactsFailureState.add(failure),
-                  (success) => null,
-                );
-          });
-
-          contactsManager.getPhonebookContactsNotifier().addListener(() {
-            contactsManager.getPhonebookContactsNotifier().value.fold(
-                  (failure) => listPhonebookContactsFailureState.add(failure),
-                  (success) => null,
-                );
-          });
-
-          contactsManager.synchronizeContactsOnContactTab(
-            isAvailableSupportPhonebookContacts: true,
-            withMxId: mxId,
-          );
-
-          await Future.delayed(const Duration(seconds: 1));
-
-          verify(
-            mockGetTomContactsInteractor.execute(),
-          ).called(1);
-
-          expectLater(listTomContactsFailureState.length, 1);
-
-          expectLater(
-            listTomContactsFailureState,
-            [
-              const GetContactsIsEmpty(),
-            ],
-          );
-
-          expectLater(listPhonebookContactsFailureState.length, 1);
-
-          expectLater(
-            listPhonebookContactsFailureState,
-            [
-              const GetPhoneBookContactFailure(exception: dynamic),
-            ],
-          );
-        },
-      );
-
-      test(
-        'WHEN it is available get Phonebook contact.\n'
-        'AND contactsNotifier return GetContactsIsEmpty with contacts is empty.\n'
-        'AND phonebookContactNotifier return GetHashDetailsFailure state.\n'
-        'THEN contactsNotifier in ContactsManager SHOULD have GetContactsIsEmpty state.\n'
-        'THEN phonebookContactNotifier in ContactsManager SHOULD have GetHashDetailsFailure state.\n'
-        'THEN list ToM contact SHOULD is empty.\n'
-        'THEN list Phonebook contact SHOULD is empty.\n',
-        () async {
-          final List<Failure> listTomContactsFailureState = [];
-
-          final List<Failure> listPhonebookContactsFailureState = [];
-
-          when(
-            mockGetTomContactsInteractor.execute(),
-          ).thenAnswer(
-            (_) => Stream.fromIterable([
-              const Right(ContactsLoading()),
-              const Left(GetContactsIsEmpty()),
-            ]),
-          );
-
-          when(mockHomeServerDynamicUrlInterceptors.baseUrl).thenReturn(
-            baseUrl,
-          );
-
-          when(mockAuthorizationInterceptor.getAccessToken).thenReturn(
-            accessToken,
-          );
-
-          when(
-            mockFederationConfigurationsRepository
-                .getFederationConfigurations(mxId),
-          ).thenAnswer(
-            (_) async => federationConfigurations,
-          );
-
-          when(
-            mockFederationLookUpPhonebookContactInteractor.execute(
-              argument: FederationLookUpArgument(
-                homeServerUrl: baseUrl,
-                federationUrl: federationConfigurations
-                        .fedServerInformation.baseUrls?.first
-                        .toString() ??
-                    '',
-                withMxId: mxId,
-                withAccessToken: accessToken,
-              ),
-            ),
-          ).thenAnswer(
-            (_) => Stream.fromIterable([
-              const Right(GetPhonebookContactsLoading()),
-              const Left(GetHashDetailsFailure(exception: dynamic)),
-            ]),
-          );
-
-          contactsManager.getContactsNotifier().addListener(() {
-            contactsManager.getContactsNotifier().value.fold(
-                  (failure) => listTomContactsFailureState.add(failure),
-                  (success) => null,
-                );
-          });
-
-          contactsManager.getPhonebookContactsNotifier().addListener(() {
-            contactsManager.getPhonebookContactsNotifier().value.fold(
-                  (failure) => listPhonebookContactsFailureState.add(failure),
-                  (success) => null,
-                );
-          });
-
-          contactsManager.synchronizeContactsOnContactTab(
-            isAvailableSupportPhonebookContacts: true,
-            withMxId: mxId,
-          );
-
-          await Future.delayed(const Duration(seconds: 1));
-
-          verify(
-            mockGetTomContactsInteractor.execute(),
-          ).called(1);
-
-          expectLater(listTomContactsFailureState.length, 1);
-
-          expectLater(
-            listTomContactsFailureState,
-            [
-              const GetContactsIsEmpty(),
-            ],
-          );
-
-          expectLater(listPhonebookContactsFailureState.length, 1);
-
-          expectLater(
-            listPhonebookContactsFailureState,
-            [
-              const GetHashDetailsFailure(exception: dynamic),
-            ],
-          );
-        },
-      );
-
-      test(
-        'WHEN it is available get Phonebook contact.\n'
-        'AND call initialSynchronizeContacts.\n'
-        'AND contactsNotifier is LoadingState.\n'
-        'AND THEN call initialSynchronizeContacts again.\n'
-        'AND contactsNotifier not call again\n'
-        'AND federationLookUpPhonebookContactInteractor not call.\n',
-        () async {
-          final List<Failure> listTomContactsFailureState = [];
-
-          final List<Failure> listPhonebookContactsFailureState = [];
-
-          when(
-            mockGetTomContactsInteractor.execute(),
-          ).thenAnswer(
-            (_) => Stream.fromIterable([
-              const Right(ContactsLoading()),
-              const Left(GetContactsIsEmpty()),
-            ]),
-          );
-
-          contactsManager.getContactsNotifier().addListener(() {
-            contactsManager.getContactsNotifier().value.fold(
-                  (failure) => listTomContactsFailureState.add(failure),
-                  (success) => null,
-                );
-          });
-
-          contactsManager.getPhonebookContactsNotifier().addListener(() {
-            contactsManager.getPhonebookContactsNotifier().value.fold(
-                  (failure) => listPhonebookContactsFailureState.add(failure),
-                  (success) => null,
-                );
-          });
-
-          contactsManager.synchronizeContactsOnContactTab(
-            isAvailableSupportPhonebookContacts: true,
-            withMxId: mxId,
-          );
-
-          await Future.delayed(const Duration(seconds: 1));
-
-          verify(
-            mockGetTomContactsInteractor.execute(),
-          ).called(1);
-
-          contactsManager.initialSynchronizeContacts(
-            isAvailableSupportPhonebookContacts: true,
-            withMxId: mxId,
-          );
-
-          await Future.delayed(const Duration(seconds: 5));
-
-          verifyNever(
-            mockGetTomContactsInteractor.execute(),
-          );
-
-          verifyNever(
-            mockFederationLookUpPhonebookContactInteractor.execute(
-              argument: anyNamed('argument'),
-            ),
-          );
-        },
-      );
-
-      test(
-        'WHEN it is available get Phonebook contact.\n'
-        'AND call synchronizeContactsOnContactTab.\n'
-        'AND contactsNotifier is LoadingState.\n'
-        'AND THEN call synchronizeContactsOnContactTab agian.\n'
-        'AND contactsNotifier must call again\n'
-        'AND federationLookUpPhonebookContactInteractor must call.\n',
-        () async {
-          final List<Failure> listTomContactsFailureState = [];
-
-          final List<Failure> listPhonebookContactsFailureState = [];
-
-          when(
-            mockGetTomContactsInteractor.execute(),
-          ).thenAnswer(
-            (_) => Stream.fromIterable([
-              const Right(ContactsLoading()),
-              const Left(GetContactsIsEmpty()),
-            ]),
-          );
-
-          when(mockHomeServerDynamicUrlInterceptors.baseUrl).thenReturn(
-            baseUrl,
-          );
-
-          when(mockAuthorizationInterceptor.getAccessToken).thenReturn(
-            accessToken,
-          );
-
-          when(
-            mockFederationConfigurationsRepository
-                .getFederationConfigurations(mxId),
-          ).thenAnswer(
-            (_) async => federationConfigurations,
-          );
-
-          when(
-            mockFederationLookUpPhonebookContactInteractor.execute(
-              argument: FederationLookUpArgument(
-                homeServerUrl: baseUrl,
-                federationUrl: federationConfigurations
-                        .fedServerInformation.baseUrls?.first
-                        .toString() ??
-                    '',
-                withMxId: mxId,
-                withAccessToken: accessToken,
-              ),
-            ),
-          ).thenAnswer(
-            (_) => Stream.fromIterable([
-              const Right(GetPhonebookContactsLoading()),
-              Left(
-                RequestTokenFailure(
-                  exception: dynamic,
-                  contacts: contacts,
-                ),
-              ),
-            ]),
-          );
-
-          contactsManager.getContactsNotifier().addListener(() {
-            contactsManager.getContactsNotifier().value.fold(
-                  (failure) => listTomContactsFailureState.add(failure),
-                  (success) => null,
-                );
-          });
-
-          contactsManager.getPhonebookContactsNotifier().addListener(() {
-            contactsManager.getPhonebookContactsNotifier().value.fold(
-                  (failure) => listPhonebookContactsFailureState.add(failure),
-                  (success) => null,
-                );
-          });
-
-          contactsManager.synchronizeContactsOnContactTab(
-            isAvailableSupportPhonebookContacts: true,
-            withMxId: mxId,
-          );
-
-          await Future.delayed(const Duration(seconds: 1));
-
-          verify(
-            mockGetTomContactsInteractor.execute(),
-          ).called(1);
-
-          expectLater(listTomContactsFailureState.length, 1);
-
-          expectLater(
-            listTomContactsFailureState,
-            [
-              const GetContactsIsEmpty(),
-            ],
-          );
-
-          expectLater(listPhonebookContactsFailureState.length, 1);
-
-          expectLater(
-            listPhonebookContactsFailureState,
-            [
-              RequestTokenFailure(
-                exception: dynamic,
-                contacts: contacts,
-              ),
-            ],
-          );
-
-          contactsManager.synchronizeContactsOnContactTab(
-            isAvailableSupportPhonebookContacts: true,
-            withMxId: mxId,
-          );
-
-          await Future.delayed(const Duration(seconds: 5));
-
-          verify(
-            mockGetTomContactsInteractor.execute(),
-          ).called(1);
-
-          verify(
-            mockFederationLookUpPhonebookContactInteractor.execute(
-              argument: FederationLookUpArgument(
-                homeServerUrl: baseUrl,
-                federationUrl: federationConfigurations
-                        .fedServerInformation.baseUrls?.first
-                        .toString() ??
-                    '',
-                withMxId: mxId,
-                withAccessToken: accessToken,
-              ),
-            ),
-          ).called(2);
-        },
-      );
-      test(
-        '[Account-A] WHEN it is available get Phonebook contact.\n'
-        '[Account-A] AND contactsNotifier return GetContactsIsEmpty with contacts is empty.\n'
-        '[Account-A] open the contact tab.\n'
-        '[Account-A] AND phonebookContactNotifier return GetPhonebookContactsIsEmpty state.\n'
-        '[Account-A] THEN contactsNotifier in ContactsManager SHOULD have GetContactsIsEmpty state.\n'
-        '[Account-A] THEN phonebookContactNotifier in ContactsManager SHOULD have GetPhonebookContactsIsEmpty state.\n'
-        '[Account-A] THEN list ToM contact SHOULD is empty.\n'
-        '[Account-A] THEN list Phonebook contact SHOULD is empty.\n'
-        'Trigger UI => switch to another account and call synchronize contacts.\n'
-        '[Account-B] AND contactsNotifier return GetContactsSuccess with contacts is empty.\n'
-        '[Account-B] AND phonebookContactInteractor return GetPhonebookContactsSuccess with contacts is empty.\n'
-        '[Account-B] open the contact tab.\n'
-        '[Account-B] AND phonebookContactNotifier return GetPhonebookContactsIsEmpty state.\n'
-        '[Account-B] THEN contactsNotifier in ContactsManager SHOULD have GetContactsIsEmpty state.\n'
-        '[Account-B] THEN phonebookContactNotifier in ContactsManager SHOULD have GetPhonebookContactsIsEmpty state.\n'
-        '[Account-B] THEN list ToM contact SHOULD is empty.\n'
-        '[Account-B] THEN list Phonebook contact SHOULD is empty.\n',
-        () async {
-          final List<Failure> listTomContactsFailureState = [];
-
-          final List<Failure> listPhonebookContactsFailureState = [];
-
-          when(
-            mockGetTomContactsInteractor.execute(),
-          ).thenAnswer(
-            (_) => Stream.fromIterable([
-              const Right(ContactsLoading()),
-              const Left(GetContactsIsEmpty()),
-            ]),
-          );
-
-          when(
-            mockFederationConfigurationsRepository
-                .getFederationConfigurations(mxId),
-          ).thenAnswer(
-            (_) async => FederationConfigurations(
-              fedServerInformation: FederationServerInformation(),
-            ),
-          );
-
-          when(mockIdentityServerDynamicUrlInterceptors.baseUrl).thenReturn(
-            baseUrl,
-          );
-
-          when(mockAuthorizationInterceptor.getAccessToken).thenReturn(
-            accessToken,
-          );
-
-          when(
-            mockTwakeLookupPhonebookContactInteractor.execute(
-              argument: TwakeLookUpArgument(
-                homeServerUrl: baseUrl,
-                withAccessToken: accessToken,
-              ),
-            ),
-          ).thenAnswer(
-            (_) => Stream.fromIterable([
-              const Right(GetPhonebookContactsLoading()),
-              const Left(GetPhonebookContactsIsEmpty()),
-            ]),
-          );
-
-          contactsManager.getContactsNotifier().addListener(() {
-            contactsManager.getContactsNotifier().value.fold(
-                  (failure) => listTomContactsFailureState.add(failure),
-                  (success) => null,
-                );
-          });
-
-          contactsManager.getPhonebookContactsNotifier().addListener(() {
-            contactsManager.getPhonebookContactsNotifier().value.fold(
-                  (failure) => listPhonebookContactsFailureState.add(failure),
-                  (success) => null,
-                );
-          });
-
-          contactsManager.synchronizeContactsOnContactTab(
-            isAvailableSupportPhonebookContacts: true,
-            withMxId: mxId,
-          );
-
-          await Future.delayed(const Duration(seconds: 1));
-
-          verify(
-            mockGetTomContactsInteractor.execute(),
-          ).called(1);
-
-          expectLater(listTomContactsFailureState.length, 1);
-
-          expectLater(
-            listTomContactsFailureState,
-            [
-              const GetContactsIsEmpty(),
-            ],
-          );
-
-          expectLater(listPhonebookContactsFailureState.length, 1);
-
-          expectLater(
-            listPhonebookContactsFailureState,
-            [
-              const GetPhonebookContactsIsEmpty(),
-            ],
-          );
-
-          /// Trigger switch account
-          contactsManager.reSyncContacts();
-
-          contactsManager.cancelAllSubscriptions();
-
-          listTomContactsFailureState.clear();
-
-          listPhonebookContactsFailureState.clear();
-
-          when(
-            mockGetTomContactsInteractor.execute(),
-          ).thenAnswer(
-            (_) => Stream.fromIterable([
-              const Right(ContactsLoading()),
-              const Left(GetContactsIsEmpty()),
-            ]),
-          );
-
-          when(
-            mockFederationConfigurationsRepository
-                .getFederationConfigurations(mxId),
-          ).thenAnswer(
-            (_) async => FederationConfigurations(
-              fedServerInformation: FederationServerInformation(),
-            ),
-          );
-
-          when(mockIdentityServerDynamicUrlInterceptors.baseUrl).thenReturn(
-            baseUrl,
-          );
-
-          when(mockAuthorizationInterceptor.getAccessToken).thenReturn(
-            accessToken,
-          );
-
-          when(
-            mockTwakeLookupPhonebookContactInteractor.execute(
-              argument: TwakeLookUpArgument(
-                homeServerUrl: baseUrl,
-                withAccessToken: accessToken,
-              ),
-            ),
-          ).thenAnswer(
-            (_) => Stream.fromIterable([
-              const Right(GetPhonebookContactsLoading()),
-              const Left(GetPhonebookContactsIsEmpty()),
-            ]),
-          );
-          when(
-            mockFederationConfigurationsRepository
-                .getFederationConfigurations(mxId),
-          ).thenAnswer(
-            (_) async => FederationConfigurations(
-              fedServerInformation: FederationServerInformation(),
-            ),
-          );
-
-          when(mockIdentityServerDynamicUrlInterceptors.baseUrl).thenReturn(
-            baseUrl,
-          );
-
-          when(mockAuthorizationInterceptor.getAccessToken).thenReturn(
-            accessToken,
-          );
-
-          when(
-            mockTwakeLookupPhonebookContactInteractor.execute(
-              argument: TwakeLookUpArgument(
-                homeServerUrl: baseUrl,
-                withAccessToken: accessToken,
-              ),
-            ),
-          ).thenAnswer(
-            (_) => Stream.fromIterable([
-              const Right(GetPhonebookContactsLoading()),
-              const Left(GetPhonebookContactsIsEmpty()),
-            ]),
-          );
-
-          contactsManager.synchronizeContactsOnContactTab(
-            isAvailableSupportPhonebookContacts: true,
-            withMxId: mxId,
-          );
-
-          await Future.delayed(const Duration(seconds: 1));
-
-          verify(
-            mockGetTomContactsInteractor.execute(),
-          ).called(1);
-
-          expectLater(listTomContactsFailureState.length, 1);
-
-          expectLater(
-            listTomContactsFailureState,
-            [
-              const GetContactsIsEmpty(),
-            ],
-          );
-
-          expectLater(listPhonebookContactsFailureState.length, 1);
-
-          expectLater(
-            listPhonebookContactsFailureState,
-            [
-              const GetPhonebookContactsIsEmpty(),
-            ],
-          );
-        },
-      );
-
-      test(
-        '[Account-A] WHEN it is available get Phonebook contact.\n'
-        '[Account-A] AND contactsNotifier return GetContactsIsEmpty with contacts is empty.\n'
-        '[Account-A] open the contact tab.\n'
-        '[Account-A] AND phonebookContactNotifier return GetHashDetailsFailure state.\n'
-        '[Account-A] THEN contactsNotifier in ContactsManager SHOULD have GetContactsIsEmpty state.\n'
-        '[Account-A] THEN phonebookContactNotifier in ContactsManager SHOULD have GetHashDetailsFailure state.\n'
-        '[Account-A] THEN list ToM contact SHOULD is empty.\n'
-        '[Account-A] THEN list Phonebook contact SHOULD is empty.\n'
-        'Trigger UI => switch to another account and call synchronize contacts.\n'
-        '[Account-B] AND contactsNotifier return GetContactsSuccess with contacts is empty.\n'
-        '[Account-B] AND phonebookContactInteractor return GetPhonebookContactsSuccess with contacts is empty.\n'
-        '[Account-B] open the contact tab.\n'
-        '[Account-B] AND phonebookContactNotifier return GetPhonebookContactsSuccess state.\n'
-        '[Account-B] THEN contactsNotifier in ContactsManager SHOULD have GetContactsIsEmpty state.\n'
-        '[Account-B] THEN phonebookContactNotifier in ContactsManager SHOULD have GetPhonebookContactsSuccess state.\n'
-        '[Account-B] THEN list ToM contact SHOULD is empty.\n'
-        '[Account-B] THEN list Phonebook contact SHOULD not empty.\n'
-        '[Account-B] THEN call post addressbook success',
-        () async {
-          final List<Failure> listTomContactsFailureState = [];
-
-          final List<Failure> listPhonebookContactsFailureState = [];
-
-          final List<Success> listPhonebookContactsSuccessState = [];
-
-          when(
-            mockGetTomContactsInteractor.execute(),
-          ).thenAnswer(
-            (_) => Stream.fromIterable([
-              const Right(ContactsLoading()),
-              const Left(GetContactsIsEmpty()),
-            ]),
-          );
-
-          when(
-            mockFederationConfigurationsRepository
-                .getFederationConfigurations(mxId),
-          ).thenAnswer(
-            (_) async => FederationConfigurations(
-              fedServerInformation: FederationServerInformation(),
-            ),
-          );
-
-          when(mockIdentityServerDynamicUrlInterceptors.baseUrl).thenReturn(
-            baseUrl,
-          );
-
-          when(mockAuthorizationInterceptor.getAccessToken).thenReturn(
-            accessToken,
-          );
-
-          when(
-            mockTwakeLookupPhonebookContactInteractor.execute(
-              argument: TwakeLookUpArgument(
-                homeServerUrl: baseUrl,
-                withAccessToken: accessToken,
-              ),
-            ),
-          ).thenAnswer(
-            (_) => Stream.fromIterable([
-              const Right(GetPhonebookContactsLoading()),
-              const Left(GetPhonebookContactsIsEmpty()),
-            ]),
-          );
-
-          contactsManager.getContactsNotifier().addListener(() {
-            contactsManager.getContactsNotifier().value.fold(
-                  (failure) => listTomContactsFailureState.add(failure),
-                  (success) => null,
-                );
-          });
-
-          contactsManager.getPhonebookContactsNotifier().addListener(() {
-            contactsManager.getPhonebookContactsNotifier().value.fold(
-                  (failure) => listPhonebookContactsFailureState.add(failure),
-                  (success) => listPhonebookContactsSuccessState.add(success),
-                );
-          });
-
-          contactsManager.synchronizeContactsOnContactTab(
-            isAvailableSupportPhonebookContacts: true,
-            withMxId: mxId,
-          );
-
-          await Future.delayed(const Duration(seconds: 1));
-
-          verify(
-            mockGetTomContactsInteractor.execute(),
-          ).called(1);
-
-          expectLater(listTomContactsFailureState.length, 1);
-
-          expectLater(
-            listTomContactsFailureState,
-            [
-              const GetContactsIsEmpty(),
-            ],
-          );
-
-          expectLater(listPhonebookContactsFailureState.length, 1);
-
-          expectLater(
-            listPhonebookContactsFailureState,
-            [
-              const GetPhonebookContactsIsEmpty(),
-            ],
-          );
-
-          /// Trigger switch account
-          contactsManager.reSyncContacts();
-
-          contactsManager.cancelAllSubscriptions();
-
-          listTomContactsFailureState.clear();
-
-          listPhonebookContactsFailureState.clear();
-
-          listPhonebookContactsSuccessState.clear();
-
-          when(
-            mockGetTomContactsInteractor.execute(),
-          ).thenAnswer(
-            (_) => Stream.fromIterable([
-              const Right(ContactsLoading()),
-              const Left(GetContactsIsEmpty()),
-            ]),
-          );
-
-          when(
-            mockFederationConfigurationsRepository
-                .getFederationConfigurations(mxId),
-          ).thenAnswer(
-            (_) async => FederationConfigurations(
-              fedServerInformation: FederationServerInformation(),
-            ),
-          );
-
-          when(mockIdentityServerDynamicUrlInterceptors.baseUrl).thenReturn(
-            baseUrl,
-          );
-
-          when(mockAuthorizationInterceptor.getAccessToken).thenReturn(
-            accessToken,
-          );
-
-          when(
-            mockTwakeLookupPhonebookContactInteractor.execute(
-              argument: TwakeLookUpArgument(
-                homeServerUrl: baseUrl,
-                withAccessToken: accessToken,
-              ),
-            ),
-          ).thenAnswer(
-            (_) => Stream.fromIterable([
-              const Right(GetPhonebookContactsLoading()),
-              Right(
-                GetPhonebookContactsSuccess(contacts: contacts, progress: 100),
-              ),
-            ]),
-          );
-
-          when(
-            mockPostAddressBookInteractor.execute(
-              addressBooks: contacts.toSet().toAddressBooks().toList(),
-            ),
-          ).thenAnswer(
-            (_) => Stream.fromIterable([
-              const Right(PostAddressBookLoading()),
-              const Right(PostAddressBookSuccessState(updatedAddressBooks: [])),
-            ]),
-          );
-
-          contactsManager.synchronizeContactsOnContactTab(
-            isAvailableSupportPhonebookContacts: true,
-            withMxId: mxId,
-          );
-
-          await Future.delayed(const Duration(seconds: 1));
-
-          verify(
-            mockGetTomContactsInteractor.execute(),
-          ).called(1);
-
-          expectLater(listTomContactsFailureState.length, 1);
-
-          expectLater(
-            listTomContactsFailureState,
-            [
-              const GetContactsIsEmpty(),
-            ],
-          );
-
-          expectLater(listPhonebookContactsFailureState.length, 0);
-
-          expectLater(
-            listPhonebookContactsFailureState,
-            [],
-          );
-
-          expectLater(
-            listPhonebookContactsSuccessState.length,
-            2,
-          );
-
-          expectLater(
-            listPhonebookContactsSuccessState,
-            [
-              const GetPhonebookContactsLoading(),
-              GetPhonebookContactsSuccess(contacts: contacts, progress: 100),
-            ],
-          );
-
-          verify(
-            mockPostAddressBookInteractor.execute(
-              addressBooks: contacts.toSet().toAddressBooks().toList(),
-            ),
-          ).called(1);
-        },
-      );
-
-      test(
-        '[Account-A] WHEN it is available get Phonebook contact.\n'
-        '[Account-A] AND contactsNotifier return GetContactsSuccess.\n'
-        '[Account-A] THEN contactsNotifier in ContactsManager SHOULD have GetContactsSuccess state.\n'
-        '[Account-A] THEN list ToM contact SHOULD is not empty.\n'
-        'Trigger UI => switch to another account and call synchronize contacts.\n'
-        '[Account-B] AND contactsNotifier return GetContactsSuccess with contacts is empty.\n'
-        '[Account-B] AND phonebookContactInteractor return GetPhonebookContactsSuccess with contacts is empty.\n'
-        '[Account-B] open the contact tab.\n'
-        '[Account-B] AND phonebookContactNotifier return GetPhonebookContactsSuccess state.\n'
-        '[Account-B] THEN contactsNotifier in ContactsManager SHOULD have GetContactsIsEmpty state.\n'
-        '[Account-B] THEN phonebookContactNotifier in ContactsManager SHOULD have GetPhonebookContactsSuccess state.\n'
-        '[Account-B] THEN list ToM contact SHOULD is empty.\n'
-        '[Account-B] THEN list Phonebook contact SHOULD not empty.\n'
-        '[Account-B] THEN call post addressbook success',
-        () async {
-          final List<Success> listTomContactsSuccessState = [];
-          final List<Failure> listTomContactsFailureState = [];
-          final List<Failure> listPhonebookContactsFailureState = [];
-          final List<Success> listPhonebookContactsSuccessState = [];
-
-          when(
-            mockGetTomContactsInteractor.execute(),
-          ).thenAnswer(
-            (_) => Stream.fromIterable([
-              const Right(ContactsLoading()),
-              Right(GetContactsSuccess(contacts: contacts)),
-            ]),
-          );
-
-          contactsManager.getContactsNotifier().addListener(() {
-            contactsManager.getContactsNotifier().value.fold(
-              (failure) => listTomContactsFailureState.add(failure),
-              (success) async {
-                listTomContactsSuccessState.add(success);
-
-                if (success is GetContactsSuccess) {
-                  expect(listTomContactsSuccessState.length, 2);
-
-                  expect(
-                    listTomContactsSuccessState,
-                    [
-                      const ContactsLoading(),
-                      GetContactsSuccess(contacts: contacts),
-                    ],
-                  );
-
-                  /// Trigger switch account
-                  contactsManager.cancelAllSubscriptions();
-
-                  when(
-                    mockGetTomContactsInteractor.execute(),
-                  ).thenAnswer(
-                    (_) => Stream.fromIterable([
-                      const Right(ContactsLoading()),
-                      const Left(GetContactsIsEmpty()),
-                    ]),
-                  );
-
-                  when(
-                    mockFederationConfigurationsRepository
-                        .getFederationConfigurations(mxId),
-                  ).thenAnswer(
-                    (_) async => FederationConfigurations(
-                      fedServerInformation: FederationServerInformation(),
-                    ),
-                  );
-
-                  when(mockIdentityServerDynamicUrlInterceptors.baseUrl)
-                      .thenReturn(
-                    baseUrl,
-                  );
-
-                  when(mockAuthorizationInterceptor.getAccessToken).thenReturn(
-                    accessToken,
-                  );
-
-                  when(
-                    mockTwakeLookupPhonebookContactInteractor.execute(
-                      argument: TwakeLookUpArgument(
-                        homeServerUrl: baseUrl,
-                        withAccessToken: accessToken,
-                      ),
-                    ),
-                  ).thenAnswer(
-                    (_) => Stream.fromIterable([
-                      const Right(GetPhonebookContactsLoading()),
-                      Right(
-                        GetPhonebookContactsSuccess(
-                          contacts: contacts,
-                          progress: 100,
-                        ),
-                      ),
-                    ]),
-                  );
-
-                  when(
-                    mockPostAddressBookInteractor.execute(
-                      addressBooks: contacts.toSet().toAddressBooks().toList(),
-                    ),
-                  ).thenAnswer(
-                    (_) => Stream.fromIterable([
-                      const Right(PostAddressBookLoading()),
-                      const Right(
-                        PostAddressBookSuccessState(updatedAddressBooks: []),
-                      ),
-                    ]),
-                  );
-
-                  contactsManager.reSyncContacts();
-
-                  listTomContactsFailureState.clear();
-                  listTomContactsSuccessState.clear();
-                  listPhonebookContactsFailureState.clear();
-                  listPhonebookContactsSuccessState.clear();
-
-                  contactsManager.synchronizeContactsOnContactTab(
-                    isAvailableSupportPhonebookContacts: true,
-                    withMxId: mxId,
-                  );
-
-                  await Future.delayed(const Duration(seconds: 1));
-
-                  verify(
-                    mockGetTomContactsInteractor.execute(),
-                  ).called(2);
-
-                  expectLater(listTomContactsFailureState.length, 1);
-                  expectLater(
-                    listTomContactsFailureState,
-                    [
-                      const GetContactsIsEmpty(),
-                    ],
-                  );
-
-                  expectLater(listPhonebookContactsFailureState.length, 0);
-                  expectLater(
-                    listPhonebookContactsFailureState,
-                    [],
-                  );
-
-                  expectLater(
-                    listPhonebookContactsSuccessState.length,
-                    2,
-                  );
-
-                  expectLater(
-                    listPhonebookContactsSuccessState,
-                    [
-                      const GetPhonebookContactsLoading(),
-                      GetPhonebookContactsSuccess(
-                        contacts: contacts,
-                        progress: 100,
-                      ),
-                    ],
-                  );
-
-                  verify(
-                    mockPostAddressBookInteractor.execute(
-                      addressBooks: contacts.toSet().toAddressBooks().toList(),
-                    ),
-                  ).called(1);
-                }
-              },
-            );
-          });
-
-          contactsManager.getPhonebookContactsNotifier().addListener(() {
-            contactsManager.getPhonebookContactsNotifier().value.fold(
-                  (failure) => listPhonebookContactsFailureState.add(failure),
-                  (success) => listPhonebookContactsSuccessState.add(success),
-                );
-          });
-
-          contactsManager.synchronizeContactsOnContactTab(
-            isAvailableSupportPhonebookContacts: true,
-            withMxId: mxId,
-          );
-        },
-      );
+      });
     },
   );
 }

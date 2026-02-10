@@ -15,8 +15,9 @@ class PopupMenuWidgetStyle {
   static const double dividerThickness = 1.0;
 
   static Color? defaultDividerColor(BuildContext context) {
-    return LinagoraStateLayer(LinagoraSysColors.material().surfaceTint)
-        .opacityLayer3;
+    return LinagoraStateLayer(
+      LinagoraSysColors.material().surfaceTint,
+    ).opacityLayer3;
   }
 
   // Context Menu Items

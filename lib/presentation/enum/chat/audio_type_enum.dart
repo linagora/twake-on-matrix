@@ -1,4 +1,1 @@
-enum AudioTypeEnum {
-  record,
-  camera;
-}
+enum AudioTypeEnum { record, camera }

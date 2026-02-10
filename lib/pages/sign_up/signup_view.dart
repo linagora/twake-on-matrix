@@ -27,8 +27,9 @@ class SignupPageView extends StatelessWidget {
                 readOnly: controller.loading,
                 autocorrect: false,
                 onChanged: controller.onPasswordType,
-                autofillHints:
-                    controller.loading ? null : [AutofillHints.newPassword],
+                autofillHints: controller.loading
+                    ? null
+                    : [AutofillHints.newPassword],
                 controller: controller.passwordController,
                 obscureText: !controller.showPassword,
                 validator: controller.password1TextFieldValidator,
@@ -55,8 +56,9 @@ class SignupPageView extends StatelessWidget {
                 child: TextFormField(
                   readOnly: controller.loading,
                   autocorrect: false,
-                  autofillHints:
-                      controller.loading ? null : [AutofillHints.newPassword],
+                  autofillHints: controller.loading
+                      ? null
+                      : [AutofillHints.newPassword],
                   controller: controller.password2Controller,
                   obscureText: !controller.showPassword,
                   validator: controller.password2TextFieldValidator,
@@ -74,8 +76,9 @@ class SignupPageView extends StatelessWidget {
                 autocorrect: false,
                 controller: controller.emailController,
                 keyboardType: TextInputType.emailAddress,
-                autofillHints:
-                    controller.loading ? null : [AutofillHints.username],
+                autofillHints: controller.loading
+                    ? null
+                    : [AutofillHints.username],
                 validator: controller.emailTextFieldValidator,
                 decoration: InputDecoration(
                   prefixIcon: const Icon(Icons.mail_outlined),

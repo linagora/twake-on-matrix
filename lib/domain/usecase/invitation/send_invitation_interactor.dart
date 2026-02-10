@@ -12,8 +12,8 @@ import 'package:fluffychat/utils/string_extension.dart';
 import 'package:matrix/matrix.dart';
 
 class SendInvitationInteractor {
-  final InvitationRepository _invitationRepository =
-      getIt.get<InvitationRepository>();
+  final InvitationRepository _invitationRepository = getIt
+      .get<InvitationRepository>();
 
   Stream<Either<Failure, Success>> execute({
     required String contact,
@@ -43,23 +43,21 @@ class SendInvitationInteractor {
             Constants.alreadySentInvitationMessage) {
           yield const Left(InvitationAlreadySentState());
           return;
-        } else if (e.response?.data['message']
-                ?.contains(Constants.invalidPhoneNumberMessage) ==
+        } else if (e.response?.data['message']?.contains(
+              Constants.invalidPhoneNumberMessage,
+            ) ==
             true) {
           yield const Left(InvalidPhoneNumberFailureState());
           return;
-        } else if (e.response?.data['message']
-                ?.contains(Constants.invalidEmailMessage) ==
+        } else if (e.response?.data['message']?.contains(
+              Constants.invalidEmailMessage,
+            ) ==
             true) {
           yield const Left(InvalidEmailFailureState());
           return;
         }
       }
-      yield Left(
-        SendInvitationFailureState(
-          exception: e,
-        ),
-      );
+      yield Left(SendInvitationFailureState(exception: e));
       return;
     }
   }

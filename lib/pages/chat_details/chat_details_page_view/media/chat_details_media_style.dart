@@ -26,10 +26,10 @@ class ChatDetailsMediaStyle {
         shape: const StadiumBorder(),
       );
 
-  static TextStyle? durationTextStyle(BuildContext context) =>
-      Theme.of(context).textTheme.bodySmall?.copyWith(
-            color: Theme.of(context).colorScheme.onPrimary,
-          );
+  static TextStyle? durationTextStyle(BuildContext context) => Theme.of(context)
+      .textTheme
+      .bodySmall
+      ?.copyWith(color: Theme.of(context).colorScheme.onPrimary);
 
   static double durationPaddingAll(BuildContext context) =>
       responsive.isDesktop(context) ? 4 : 10;

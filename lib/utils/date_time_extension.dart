@@ -89,8 +89,9 @@ extension DateTimeExtension on DateTime {
   bool isInCurrentWeek({DateTime? currentTime}) {
     currentTime ??= DateTime.now();
 
-    final currentWeekStart =
-        currentTime.subtract(Duration(days: currentTime.weekday - 1));
+    final currentWeekStart = currentTime.subtract(
+      Duration(days: currentTime.weekday - 1),
+    );
 
     final weekStart = subtract(Duration(days: weekday - 1));
 
@@ -174,10 +175,7 @@ extension DateTimeExtension on DateTime {
     final currentLanguageCode =
         LocalizationService.currentLocale.value.languageCode;
 
-    final formattedDate = DateFormat(
-      pattern,
-      currentLanguageCode,
-    ).format(this);
+    final formattedDate = DateFormat(pattern, currentLanguageCode).format(this);
 
     switch (pattern) {
       case _fullMonthWithDayPattern:

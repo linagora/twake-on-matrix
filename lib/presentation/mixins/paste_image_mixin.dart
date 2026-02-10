@@ -18,25 +18,25 @@ mixin PasteImageMixin {
     VoidCallback? onSendFileCallback,
     Event? inReplyTo,
   }) async {
-    if (!(await TwakeClipboard.instance
-        .isReadableImageFormat(clipboardReader: clipboardReader))) {
+    if (!(await TwakeClipboard.instance.isReadableImageFormat(
+      clipboardReader: clipboardReader,
+    ))) {
       TwakeSnackBar.show(context, L10n.of(context)!.fileFormatNotSupported);
       Logs().e('PasteImageMixin::pasteImage(): not readable image format');
       return;
     }
     List<MatrixFile?>? matrixFiles;
     if (PlatformInfos.isWeb) {
-      matrixFiles = await TwakeClipboard.instance
-          .pasteImagesUsingBytes(reader: clipboardReader);
+      matrixFiles = await TwakeClipboard.instance.pasteImagesUsingBytes(
+        reader: clipboardReader,
+      );
     }
     if (matrixFiles == null || matrixFiles.isEmpty) {
       TwakeSnackBar.show(context, L10n.of(context)!.pasteImageFailed);
       return;
     }
     final nonNullableFiles = matrixFiles
-        .where(
-          (matrixFile) => matrixFile != null,
-        )
+        .where((matrixFile) => matrixFile != null)
         .map(
           (matrixFile) => MatrixFile(
             name: matrixFile!.name,

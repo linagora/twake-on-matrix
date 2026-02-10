@@ -16,11 +16,9 @@ extension InviteUserPartialFailureExceptionExtension
     );
 
     if (bannedCount > 0 && otherFailedCount > 0) {
-      return L10n.of(context)!.failedToAddMembersMixed(
-        totalFailed,
-        bannedCount,
-        otherFailedCount,
-      );
+      return L10n.of(
+        context,
+      )!.failedToAddMembersMixed(totalFailed, bannedCount, otherFailedCount);
     } else if (bannedCount > 0) {
       return L10n.of(context)!.failedToAddBannedUsers(bannedCount);
     } else if (otherFailedCount > 0) {

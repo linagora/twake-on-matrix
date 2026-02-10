@@ -8,10 +8,7 @@ class UploadCaptionInfo with EquatableMixin {
   final String txid;
   final String caption;
 
-  UploadCaptionInfo({
-    required this.caption,
-    required this.txid,
-  });
+  UploadCaptionInfo({required this.caption, required this.txid});
 
   factory UploadCaptionInfo.fromJson(Map<String, dynamic> json) =>
       _$UploadCaptionInfoFromJson(json);

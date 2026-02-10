@@ -13,10 +13,7 @@ class ToMServerInformation with EquatableMixin {
   @JsonKey(name: 'server_name')
   final String? serverName;
 
-  ToMServerInformation({
-    this.baseUrl,
-    this.serverName,
-  });
+  ToMServerInformation({this.baseUrl, this.serverName});
 
   factory ToMServerInformation.fromJson(Map<String, dynamic> json) =>
       _$ToMServerInformationFromJson(json);

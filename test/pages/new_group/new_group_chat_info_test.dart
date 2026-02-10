@@ -18,9 +18,7 @@ import 'package:mockito/mockito.dart';
 
 import 'new_group_chat_info_test.mocks.dart';
 
-@GenerateNiceMocks([
-  MockSpec<NewGroupChatInfoController>(),
-])
+@GenerateNiceMocks([MockSpec<NewGroupChatInfoController>()])
 void main() {
   final getIt = GetIt.instance;
 
@@ -37,8 +35,9 @@ void main() {
     mockController = MockNewGroupChatInfoController();
 
     // Setup default mock values for controller properties
-    when(mockController.enableEncryptionNotifier)
-        .thenReturn(ValueNotifier(false));
+    when(
+      mockController.enableEncryptionNotifier,
+    ).thenReturn(ValueNotifier(false));
     when(mockController.haveGroupNameNotifier).thenReturn(ValueNotifier(false));
     when(mockController.createRoomStateNotifier).thenReturn(
       ValueNotifier<Either<Failure, Success>>(Right(CreateNewGroupInitial())),
@@ -46,22 +45,24 @@ void main() {
     when(mockController.inviteUserStateNotifier).thenReturn(
       ValueNotifier<Either<Failure, Success>>(Right(InviteUserInitial())),
     );
-    when(mockController.groupNameTextEditingController).thenReturn(
-      TextEditingController(),
-    );
+    when(
+      mockController.groupNameTextEditingController,
+    ).thenReturn(TextEditingController());
     when(mockController.groupNameFocusNode).thenReturn(FocusNode());
     when(mockController.contactsList).thenReturn(<PresentationContact>{});
     when(mockController.isCreatingRoom).thenReturn(false);
     when(mockController.getErrorMessage(any)).thenReturn(null);
-    when(mockController.avatarAssetEntityNotifier)
-        .thenReturn(ValueNotifier(null));
+    when(
+      mockController.avatarAssetEntityNotifier,
+    ).thenReturn(ValueNotifier(null));
     when(mockController.pickAvatarUIState).thenReturn(
       ValueNotifierCustom<Either<Failure, Success>>(
         Right(CreateNewGroupInitial()),
       ),
     );
-    when(mockController.responsiveUtils)
-        .thenReturn(getIt.get<ResponsiveUtils>());
+    when(
+      mockController.responsiveUtils,
+    ).thenReturn(getIt.get<ResponsiveUtils>());
   });
 
   tearDownAll(() {
@@ -69,8 +70,9 @@ void main() {
   });
 
   group('NewGroupChatInfo AppBar verification - widget test', () {
-    testWidgets('verify TwakeAppBar inside NewGroupChatInfoView',
-        (WidgetTester tester) async {
+    testWidgets('verify TwakeAppBar inside NewGroupChatInfoView', (
+      WidgetTester tester,
+    ) async {
       // Pump NewGroupChatInfoView directly with mock controller
       await tester.pumpWidget(
         MaterialApp(
@@ -97,10 +99,7 @@ void main() {
 
       // Verify title text
       final context = tester.element(find.byType(TwakeAppBar));
-      expect(
-        twakeAppBar.title,
-        equals(L10n.of(context)!.newGroupChat),
-      );
+      expect(twakeAppBar.title, equals(L10n.of(context)!.newGroupChat));
 
       // Verify back button icon
       expect(find.byIcon(Icons.arrow_back_ios), findsOneWidget);

@@ -68,13 +68,14 @@ class EventVideoPlayer extends StatelessWidget {
 
     final maxWidth =
         MessageContentStyle.combinedBubbleImageWidthWithBubbleMaxWidget(
-      bubbleImageWidget: imageWidth,
-      bubbleMaxWidth: bubbleWidth ?? 0,
-    );
+          bubbleImageWidget: imageWidth,
+          bubbleMaxWidth: bubbleWidth ?? 0,
+        );
 
     return ClipRRect(
-      borderRadius:
-          rounded ? MessageContentStyle.borderRadiusBubble : BorderRadius.zero,
+      borderRadius: rounded
+          ? MessageContentStyle.borderRadiusBubble
+          : BorderRadius.zero,
       child: Material(
         color: Colors.black,
         child: InkWell(
@@ -103,8 +104,9 @@ class EventVideoPlayer extends StatelessWidget {
                     child: ImageBubble(
                       event,
                       width: MessageContentStyle.imageBubbleWidth(imageWidth),
-                      height:
-                          MessageContentStyle.videoBubbleHeight(imageHeight),
+                      height: MessageContentStyle.videoBubbleHeight(
+                        imageHeight,
+                      ),
                       bubbleMaxWidth: maxWidth,
                       rounded: rounded,
                       thumbnailCacheKey: thumbnailCacheKey,
@@ -144,11 +146,7 @@ class CenterVideoButton extends StatelessWidget {
 
   final double? iconSize;
 
-  const CenterVideoButton({
-    super.key,
-    required this.icon,
-    this.iconSize,
-  });
+  const CenterVideoButton({super.key, required this.icon, this.iconSize});
 
   @override
   Widget build(BuildContext context) {

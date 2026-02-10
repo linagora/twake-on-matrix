@@ -41,8 +41,10 @@ class _MessageUploadingContentState extends State<MessageUploadingContent>
         Container(
           padding: widget.style.paddingFileTileAll,
           decoration: ShapeDecoration(
-            color: widget.style
-                .backgroundColor(context, ownMessage: event.isOwnMessage),
+            color: widget.style.backgroundColor(
+              context,
+              ownMessage: event.isOwnMessage,
+            ),
             shape: RoundedRectangleBorder(
               borderRadius: widget.style.borderRadius,
             ),
@@ -112,8 +114,9 @@ class _MessageUploadingContentState extends State<MessageUploadingContent>
                             height: widget.style.circularProgressLoadingSize,
                             child: CircularLoadingDownloadWidget(
                               style: widget.style,
-                              downloadProgress:
-                                  uploadProgress != 1 ? uploadProgress : null,
+                              downloadProgress: uploadProgress != 1
+                                  ? uploadProgress
+                                  : null,
                             ),
                           ),
                         Container(
@@ -178,8 +181,9 @@ class _MessageUploadingContentState extends State<MessageUploadingContent>
                                       IntExtension.oneKB) {
                                 return Text(
                                   '${uploadFileState.receive!.bytesToMB(placeDecimal: 2)} MB / ${uploadFileState.total!.bytesToMB(placeDecimal: 2)} MB',
-                                  style: widget.style
-                                      .textInformationStyle(context),
+                                  style: widget.style.textInformationStyle(
+                                    context,
+                                  ),
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
                                 );
@@ -224,9 +228,7 @@ class _MessageUploadingContentState extends State<MessageUploadingContent>
               localizedBody: event.body,
               ownMessage: event.isOwnMessage,
               fontSize: AppConfig.messageFontSize * AppConfig.fontSizeFactor,
-              linkStyle: MessageContentStyle.linkStyleMessageContent(
-                context,
-              ),
+              linkStyle: MessageContentStyle.linkStyleMessageContent(context),
               richTextStyle: event.getMessageTextStyle(context),
               isCaption: event.isCaptionModeOrReply(),
             ),

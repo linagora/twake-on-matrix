@@ -111,8 +111,9 @@ class _TwakeSmartRefresherView extends StatelessWidget {
           ValueListenableBuilder(
             valueListenable: refreshController.loadingNotifier,
             builder: (context, loading, child) => SliverToBoxAdapter(
-              child:
-                  loading ? const CenterLoadingIndicator() : const SizedBox(),
+              child: loading
+                  ? const CenterLoadingIndicator()
+                  : const SizedBox(),
             ),
           ),
         ],

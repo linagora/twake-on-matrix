@@ -5,9 +5,7 @@ part 'upload_file_json.g.dart';
 
 @JsonSerializable()
 class UploadFileResponse with EquatableMixin {
-  const UploadFileResponse({
-    this.contentUri,
-  });
+  const UploadFileResponse({this.contentUri});
 
   @JsonKey(name: 'content_uri')
   final String? contentUri;

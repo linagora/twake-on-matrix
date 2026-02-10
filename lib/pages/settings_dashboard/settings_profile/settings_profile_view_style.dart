@@ -5,15 +5,9 @@ class SettingsProfileViewStyle {
   static const borderRadius = 20.0;
 
   static const EdgeInsetsDirectional paddingTextButton =
-      EdgeInsetsDirectional.symmetric(
-    horizontal: 12,
-  );
+      EdgeInsetsDirectional.symmetric(horizontal: 12);
 
   static const EdgeInsetsDirectional paddingBody =
-      EdgeInsetsDirectional.symmetric(
-    horizontal: 16,
-  );
-  static const actionButtonPadding = EdgeInsets.only(
-    top: 8,
-  );
+      EdgeInsetsDirectional.symmetric(horizontal: 16);
+  static const actionButtonPadding = EdgeInsets.only(top: 8);
 }

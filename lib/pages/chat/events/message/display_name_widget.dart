@@ -5,10 +5,7 @@ import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:matrix/matrix.dart';
 
 class DisplayNameWidget extends StatelessWidget {
-  const DisplayNameWidget({
-    super.key,
-    required this.event,
-  });
+  const DisplayNameWidget({super.key, required this.event});
 
   final Event event;
 
@@ -19,7 +16,8 @@ class DisplayNameWidget extends StatelessWidget {
     return FutureBuilder<User?>(
       future: event.fetchSenderUser(),
       builder: (context, snapshot) {
-        final displayName = snapshot.data?.calcDisplayname() ??
+        final displayName =
+            snapshot.data?.calcDisplayname() ??
             event.senderFromMemoryOrFallback.calcDisplayname();
         return Padding(
           padding: MessageStyle.paddingDisplayName(event),
@@ -28,9 +26,9 @@ class DisplayNameWidget extends StatelessWidget {
               maxCharacters: maxCharactersDisplayNameBubble,
             ),
             style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                  fontFamily: 'Inter',
-                  color: LinagoraSysColors.material().secondary,
-                ),
+              fontFamily: 'Inter',
+              color: LinagoraSysColors.material().secondary,
+            ),
             maxLines: 2,
             overflow: TextOverflow.clip,
           ),

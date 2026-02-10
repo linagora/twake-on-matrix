@@ -3,8 +3,8 @@ import 'package:fluffychat/data/local/multiple_account/multiple_account_cache_ma
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 
 class MultipleAccountDatasourceImpl implements MultipleAccountDatasource {
-  final MultipleAccountCacheManager _multipleAccountCacheManager =
-      getIt.get<MultipleAccountCacheManager>();
+  final MultipleAccountCacheManager _multipleAccountCacheManager = getIt
+      .get<MultipleAccountCacheManager>();
 
   @override
   Future<String?> getPersistActiveAccount() {

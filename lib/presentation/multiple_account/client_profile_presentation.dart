@@ -11,8 +11,5 @@ class ClientProfilePresentation extends Equatable {
   });
 
   @override
-  List<Object?> get props => [
-        profile,
-        client,
-      ];
+  List<Object?> get props => [profile, client];
 }

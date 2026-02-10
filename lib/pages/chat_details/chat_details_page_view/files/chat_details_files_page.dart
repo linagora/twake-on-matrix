@@ -11,10 +11,7 @@ import 'package:flutter/material.dart';
 class ChatDetailsFilesPage extends StatelessWidget {
   final SameTypeEventsBuilderController controller;
 
-  const ChatDetailsFilesPage({
-    super.key,
-    required this.controller,
-  });
+  const ChatDetailsFilesPage({super.key, required this.controller});
 
   @override
   Widget build(BuildContext context) {
@@ -23,7 +20,8 @@ class ChatDetailsFilesPage extends StatelessWidget {
       child: SameTypeEventsBuilder(
         controller: controller,
         builder: (context, eventsState, _) {
-          final events = eventsState
+          final events =
+              eventsState
                   .getSuccessOrNull<TimelineSearchEventSuccess>()
                   ?.events ??
               [];

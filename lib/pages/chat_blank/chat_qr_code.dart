@@ -52,9 +52,7 @@ class _ChatQrCodeState extends State<ChatQrCode> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Padding(
-            padding: const EdgeInsets.only(
-              bottom: 36,
-            ),
+            padding: const EdgeInsets.only(bottom: 36),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -65,9 +63,7 @@ class _ChatQrCodeState extends State<ChatQrCode> {
                       url: AppConfig.twakeChatGooglePlay,
                     ).launchUrl();
                   },
-                  child: SvgPicture.asset(
-                    ImagePaths.googlePlay,
-                  ),
+                  child: SvgPicture.asset(ImagePaths.googlePlay),
                 ),
                 const SizedBox(width: 24),
                 InkWell(
@@ -77,9 +73,7 @@ class _ChatQrCodeState extends State<ChatQrCode> {
                       url: AppConfig.twakeChatAppleStore,
                     ).launchUrl();
                   },
-                  child: SvgPicture.asset(
-                    ImagePaths.appStore,
-                  ),
+                  child: SvgPicture.asset(ImagePaths.appStore),
                 ),
               ],
             ),
@@ -93,14 +87,9 @@ class _ChatQrCodeState extends State<ChatQrCode> {
                 end: decoration,
               ),
               curve: Curves.ease,
-              duration: const Duration(
-                milliseconds: 240,
-              ),
+              duration: const Duration(milliseconds: 240),
               builder: (context, decoration, child) {
-                return PrettyQrView(
-                  qrImage: qrImage,
-                  decoration: decoration,
-                );
+                return PrettyQrView(qrImage: qrImage, decoration: decoration);
               },
             ),
           ),
@@ -108,16 +97,12 @@ class _ChatQrCodeState extends State<ChatQrCode> {
             constraints: const BoxConstraints(
               maxWidth: ResponsiveUtils.bodyRadioWidth,
             ),
-            padding: const EdgeInsets.only(
-              top: 16,
-              left: 24,
-              right: 24,
-            ),
+            padding: const EdgeInsets.only(top: 16, left: 24, right: 24),
             child: Text(
               L10n.of(context)!.scanQrCodeToJoin,
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    color: LinagoraSysColors.material().onSurface,
-                  ),
+                color: LinagoraSysColors.material().onSurface,
+              ),
               textAlign: TextAlign.center,
             ),
           ),

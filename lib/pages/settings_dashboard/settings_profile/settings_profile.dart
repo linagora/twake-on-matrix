@@ -47,9 +47,7 @@ import 'package:fluffychat/generated/l10n/app_localizations.dart';
 import 'package:wechat_camera_picker/wechat_camera_picker.dart';
 
 class SettingsProfile extends StatefulWidget {
-  const SettingsProfile({
-    super.key,
-  });
+  const SettingsProfile({super.key});
 
   @override
   State<SettingsProfile> createState() => SettingsProfileController();
@@ -65,8 +63,8 @@ class SettingsProfileController extends State<SettingsProfile>
         PickAvatarMixin {
   final uploadProfileInteractor = getIt.get<UpdateProfileInteractor>();
   final uploadContentInteractor = getIt.get<UploadContentInteractor>();
-  final uploadContentWebInteractor =
-      getIt.get<UploadContentInBytesInteractor>();
+  final uploadContentWebInteractor = getIt
+      .get<UploadContentInBytesInteractor>();
 
   final MenuController menuController = MenuController();
 
@@ -76,8 +74,8 @@ class SettingsProfileController extends State<SettingsProfile>
 
   List<TwakeChatPresentationAccount> _multipleAccounts = [];
 
-  final TwakeEventDispatcher twakeEventDispatcher =
-      getIt.get<TwakeEventDispatcher>();
+  final TwakeEventDispatcher twakeEventDispatcher = getIt
+      .get<TwakeEventDispatcher>();
 
   final ValueNotifier<bool> isEditedProfileNotifier = ValueNotifier(false);
 
@@ -116,19 +114,19 @@ class SettingsProfileController extends State<SettingsProfile>
   ];
 
   List<SheetAction<AvatarAction>> actions() => [
-        SheetAction(
-          key: AvatarAction.file,
-          label: L10n.of(context)!.changeProfileAvatar,
-          icon: Icons.add_a_photo_outlined,
-        ),
-        if (currentProfile.value?.avatarUrl != null)
-          SheetAction(
-            key: AvatarAction.remove,
-            label: L10n.of(context)!.removeYourAvatar,
-            isDestructiveAction: true,
-            icon: Icons.delete_outlined,
-          ),
-      ];
+    SheetAction(
+      key: AvatarAction.file,
+      label: L10n.of(context)!.changeProfileAvatar,
+      icon: Icons.add_a_photo_outlined,
+    ),
+    if (currentProfile.value?.avatarUrl != null)
+      SheetAction(
+        key: AvatarAction.remove,
+        label: L10n.of(context)!.removeYourAvatar,
+        isDestructiveAction: true,
+        icon: Icons.delete_outlined,
+      ),
+  ];
 
   TextEditingController? getController(
     SettingsProfileEnum settingsProfileEnum,
@@ -198,9 +196,7 @@ class SettingsProfileController extends State<SettingsProfile>
           Navigator.pop(context);
         }
         pickAvatarUIState.value = Right<Failure, Success>(
-          GetAvatarOnMobileUIStateSuccess(
-            assetEntity: selectedAsset?.asset,
-          ),
+          GetAvatarOnMobileUIStateSuccess(assetEntity: selectedAsset?.asset),
         );
         if (!isEditedProfileNotifier.value) {
           isEditedProfileNotifier.toggle();
@@ -226,9 +222,7 @@ class SettingsProfileController extends State<SettingsProfile>
     _showImagesPickerAction();
   }
 
-  List<Widget> listContextMenuBuilder(
-    BuildContext context,
-  ) {
+  List<Widget> listContextMenuBuilder(BuildContext context) {
     final listAction = [
       SettingsProfileContextMenuActions.edit,
       SettingsProfileContextMenuActions.delete,
@@ -273,9 +267,7 @@ class SettingsProfileController extends State<SettingsProfile>
     }
   }
 
-  void _sendAccountDataEvent({
-    required Profile profile,
-  }) async {
+  void _sendAccountDataEvent({required Profile profile}) async {
     Logs().d(
       'SettingsProfileController::_handleSyncProfile() - Syncing profile',
     );
@@ -294,10 +286,7 @@ class SettingsProfileController extends State<SettingsProfile>
   void _setAvatarInStream() {
     if (assetEntity != null) {
       uploadContentInteractor
-          .execute(
-            matrixClient: client,
-            entity: assetEntity!,
-          )
+          .execute(matrixClient: client, entity: assetEntity!)
           .listen(
             (event) => _handleUploadAvatarOnData(context, event),
             onDone: _handleUploadAvatarOnDone,
@@ -311,10 +300,7 @@ class SettingsProfileController extends State<SettingsProfile>
   void _setAvatarOnWeb() {
     if (matrixFile != null) {
       uploadContentWebInteractor
-          .execute(
-            matrixClient: client,
-            matrixFile: matrixFile!,
-          )
+          .execute(matrixClient: client, matrixFile: matrixFile!)
           .listen(
             (event) => _handleUploadAvatarOnData(context, event),
             onDone: _handleUploadAvatarOnDone,
@@ -336,9 +322,7 @@ class SettingsProfileController extends State<SettingsProfile>
   }
 
   void _clearImageInMemory() {
-    Logs().d(
-      'SettingsProfile::_clearImageInLocal() - Clear image in local',
-    );
+    Logs().d('SettingsProfile::_clearImageInLocal() - Clear image in local');
     if (assetEntity != null) {
       assetEntity = null;
     }
@@ -351,15 +335,10 @@ class SettingsProfileController extends State<SettingsProfile>
   }
 
   void _handleUploadAvatarOnDone() {
-    Logs().d(
-      'SettingsProfile::_handleUploadAvatarOnDone() - done',
-    );
+    Logs().d('SettingsProfile::_handleUploadAvatarOnDone() - done');
   }
 
-  void _handleUploadAvatarOnError(
-    dynamic error,
-    StackTrace? stackTrace,
-  ) {
+  void _handleUploadAvatarOnError(dynamic error, StackTrace? stackTrace) {
     TwakeDialog.hideLoadingDialog(context);
     Logs().e(
       'SettingsProfile::_handleUploadAvatarOnError() - error: $error | stackTrace: $stackTrace',
@@ -378,10 +357,7 @@ class SettingsProfileController extends State<SettingsProfile>
         );
         if (failure is UploadContentFailed) {
           TwakeDialog.hideLoadingDialog(context);
-          TwakeSnackBar.show(
-            context,
-            failure.exception.toString(),
-          );
+          TwakeSnackBar.show(context, failure.exception.toString());
         } else if (failure is FileTooBigMatrix) {
           TwakeDialog.hideLoadingDialog(context);
           TwakeSnackBar.show(
@@ -426,15 +402,10 @@ class SettingsProfileController extends State<SettingsProfile>
   }
 
   void _handleUploadProfileOnDone() {
-    Logs().d(
-      'SettingsProfile::_handleUploadProfileOnDone() - done',
-    );
+    Logs().d('SettingsProfile::_handleUploadProfileOnDone() - done');
   }
 
-  void _handleUploadProfileOnError(
-    dynamic error,
-    StackTrace? stackTrace,
-  ) {
+  void _handleUploadProfileOnError(dynamic error, StackTrace? stackTrace) {
     TwakeDialog.hideLoadingDialog(context);
     Logs().e(
       'SettingsProfile::_handleUploadProfileOnError() - error: $error | stackTrace: $stackTrace',
@@ -491,10 +462,7 @@ class SettingsProfileController extends State<SettingsProfile>
     );
   }
 
-  void _getCurrentProfile(
-    Client client, {
-    isUpdated = false,
-  }) async {
+  void _getCurrentProfile(Client client, {isUpdated = false}) async {
     final profile = await client.getProfileFromUserId(
       client.userID!,
       cache: !isUpdated,
@@ -547,9 +515,7 @@ class SettingsProfileController extends State<SettingsProfile>
     }
   }
 
-  Future<void> _getMultipleAccounts(
-    Client currentActiveClient,
-  ) async {
+  Future<void> _getMultipleAccounts(Client currentActiveClient) async {
     try {
       settingsMultiAccountsUIState.value = Right(GetClientsLoadingUIState());
       final profileBundles = await _getClientProfiles();
@@ -562,18 +528,12 @@ class SettingsProfileController extends State<SettingsProfile>
           )
           .toList();
       settingsMultiAccountsUIState.value = Right(
-        GetClientsSuccessUIState(
-          multipleAccounts: _multipleAccounts,
-        ),
+        GetClientsSuccessUIState(multipleAccounts: _multipleAccounts),
       );
     } catch (e) {
-      Logs().e(
-        'SettingsProfileController::_getMultipleAccounts() - Error: $e',
-      );
+      Logs().e('SettingsProfileController::_getMultipleAccounts() - Error: $e');
       settingsMultiAccountsUIState.value = Left<Failure, Success>(
-        GetClientsFailureUIState(
-          exception: e,
-        ),
+        GetClientsFailureUIState(exception: e),
       );
     }
   }
@@ -598,9 +558,7 @@ class SettingsProfileController extends State<SettingsProfile>
 
       return profiles.toList();
     } catch (e) {
-      Logs().e(
-        'SettingsProfileController::getProfileBundles() - Error: $e',
-      );
+      Logs().e('SettingsProfileController::getProfileBundles() - Error: $e');
       rethrow;
     }
   }
@@ -658,10 +616,7 @@ class SettingsProfileController extends State<SettingsProfile>
 
   void _handleUpdateProfileFailure(String errorMessage) {
     TwakeDialog.hideLoadingDialog(context);
-    TwakeSnackBar.show(
-      context,
-      errorMessage,
-    );
+    TwakeSnackBar.show(context, errorMessage);
     _clearImageInLocal();
     if (currentProfile.value != null) {
       _sendAccountDataEvent(profile: currentProfile.value!);
@@ -669,9 +624,7 @@ class SettingsProfileController extends State<SettingsProfile>
   }
 
   void _clearImageInLocal() {
-    Logs().d(
-      'SettingsProfile::_clearImageInLocal() - Clear image in local',
-    );
+    Logs().d('SettingsProfile::_clearImageInLocal() - Clear image in local');
     if (assetEntity != null) {
       assetEntity = null;
     }
@@ -697,8 +650,9 @@ class SettingsProfileController extends State<SettingsProfile>
       client: Matrix.of(context).client,
       currentProfile: currentProfile.value,
       onProfileChanged: (newProfile) {
-        final indexOldAccount = _multipleAccounts
-            .indexWhere((element) => element.accountId == client.userID);
+        final indexOldAccount = _multipleAccounts.indexWhere(
+          (element) => element.accountId == client.userID,
+        );
         if (indexOldAccount < 0) {
           return;
         }
@@ -708,9 +662,7 @@ class SettingsProfileController extends State<SettingsProfile>
         ).toTwakeChatPresentationAccount(Matrix.of(context).client);
         _multipleAccounts[indexOldAccount] = newAccount;
         settingsMultiAccountsUIState.value = Right<Failure, Success>(
-          GetClientsSuccessUIState(
-            multipleAccounts: _multipleAccounts,
-          ),
+          GetClientsSuccessUIState(multipleAccounts: _multipleAccounts),
         );
       },
     );

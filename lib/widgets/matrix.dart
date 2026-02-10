@@ -97,8 +97,9 @@ class MatrixState extends State<Matrix>
   AudioPlayer audioPlayer = AudioPlayer();
   final ValueNotifier<Event?> voiceMessageEvent = ValueNotifier(null);
 
-  final ValueNotifier<AudioPlayerStatus> currentAudioStatus =
-      ValueNotifier(AudioPlayerStatus.notDownloaded);
+  final ValueNotifier<AudioPlayerStatus> currentAudioStatus = ValueNotifier(
+    AudioPlayerStatus.notDownloaded,
+  );
 
   StreamSubscription<PlayerState>? _audioPlayerStateSubscription;
 
@@ -187,29 +188,27 @@ class MatrixState extends State<Matrix>
       StreamSubscription? createSupportChatListener;
       createSupportChatListener = getIt
           .get<CreateSupportChatInteractor>()
-          .execute(
-            client,
-          )
+          .execute(client)
           .listen(
-        (state) {
-          createSupportChatState = state.fold(
-            (failure) => failure,
-            (success) => success,
-          );
-          supportChatRoomId = state.fold(
-            (failure) => null,
-            (success) => switch (success) {
-              SupportChatExisted(:final roomId) => roomId,
-              SupportChatCreated(:final roomId) => roomId,
-              _ => null,
+            (state) {
+              createSupportChatState = state.fold(
+                (failure) => failure,
+                (success) => success,
+              );
+              supportChatRoomId = state.fold(
+                (failure) => null,
+                (success) => switch (success) {
+                  SupportChatExisted(:final roomId) => roomId,
+                  SupportChatCreated(:final roomId) => roomId,
+                  _ => null,
+                },
+              );
+            },
+            onDone: () {
+              createSupportChatListener?.cancel();
+              syncListener?.cancel();
             },
           );
-        },
-        onDone: () {
-          createSupportChatListener?.cancel();
-          syncListener?.cancel();
-        },
-      );
     });
   }
 
@@ -259,10 +258,7 @@ class MatrixState extends State<Matrix>
         }
         resBundles[bundle.name] ??= [];
         resBundles[bundle.name]!.add(
-          _AccountBundleWithClient(
-            client: widget.clients[i],
-            bundle: bundle,
-          ),
+          _AccountBundleWithClient(client: widget.clients[i], bundle: bundle),
         );
       }
     }
@@ -271,12 +267,13 @@ class MatrixState extends State<Matrix>
         (a, b) => a.bundle!.priority == null
             ? 1
             : b.bundle!.priority == null
-                ? -1
-                : a.bundle!.priority!.compareTo(b.bundle!.priority!),
+            ? -1
+            : a.bundle!.priority!.compareTo(b.bundle!.priority!),
       );
     }
-    return resBundles
-        .map((k, v) => MapEntry(k, v.map((vv) => vv.client).toList()));
+    return resBundles.map(
+      (k, v) => MapEntry(k, v.map((vv) => vv.client).toList()),
+    );
   }
 
   bool get hasComplexBundles => accountBundles.values.any((v) => v.length > 1);
@@ -292,12 +289,9 @@ class MatrixState extends State<Matrix>
     final clientName =
         '${AppConfig.applicationName}-${DateTime.now().microsecondsSinceEpoch}';
 
-    final candidate =
-        _loginClientCandidate ??= await ClientManager.createClient(
-      clientName,
-    )
-          ..onLoginStateChanged
-              .stream
+    final candidate = _loginClientCandidate ??=
+        await ClientManager.createClient(clientName)
+          ..onLoginStateChanged.stream
               .where((l) => l == LoginState.loggedIn)
               .first
               .then((state) => _handleAddAnotherAccount(state))
@@ -388,8 +382,9 @@ class MatrixState extends State<Matrix>
     return path.split('/')[2];
   }
 
-  final linuxNotifications =
-      PlatformInfos.isLinux ? NotificationsClient() : null;
+  final linuxNotifications = PlatformInfos.isLinux
+      ? NotificationsClient()
+      : null;
   final Map<String, int> linuxNotificationIds = {};
 
   @override
@@ -415,8 +410,8 @@ class MatrixState extends State<Matrix>
 
   void initLoadingDialog() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      LoadingDialog.defaultOnError =
-          (e) => (e as Object?)!.toLocalizedString(context);
+      LoadingDialog.defaultOnError = (e) =>
+          (e as Object?)!.toLocalizedString(context);
     });
   }
 
@@ -456,8 +451,9 @@ class MatrixState extends State<Matrix>
     if (PlatformInfos.isMobile) {
       await HiveCollectionToMDatabase.databaseBuilder();
     }
-    onRoomKeyRequestSub[name] ??= currentClient.onRoomKeyRequest.stream
-        .listen((RoomKeyRequest request) async {
+    onRoomKeyRequestSub[name] ??= currentClient.onRoomKeyRequest.stream.listen((
+      RoomKeyRequest request,
+    ) async {
       if (widget.clients.any(
         ((cl) =>
             cl.userID == request.requestingDevice.userId &&
@@ -470,27 +466,32 @@ class MatrixState extends State<Matrix>
       }
     });
     onKeyVerificationRequestSub[name] ??= currentClient
-        .onKeyVerificationRequest.stream
+        .onKeyVerificationRequest
+        .stream
         .listen((KeyVerification request) async {
-      var hidPopup = false;
-      request.onUpdate = () {
-        if (!hidPopup &&
-            {KeyVerificationState.done, KeyVerificationState.error}
-                .contains(request.state)) {
-          Navigator.of(context).pop('dialog');
-        }
-        hidPopup = true;
-      };
-      request.onUpdate = null;
-      hidPopup = true;
-      await KeyVerificationDialog(request: request).show(
-        TwakeApp.router.routerDelegate.navigatorKey.currentContext ?? context,
-      );
-    });
+          var hidPopup = false;
+          request.onUpdate = () {
+            if (!hidPopup &&
+                {
+                  KeyVerificationState.done,
+                  KeyVerificationState.error,
+                }.contains(request.state)) {
+              Navigator.of(context).pop('dialog');
+            }
+            hidPopup = true;
+          };
+          request.onUpdate = null;
+          hidPopup = true;
+          await KeyVerificationDialog(request: request).show(
+            TwakeApp.router.routerDelegate.navigatorKey.currentContext ??
+                context,
+          );
+        });
     onLoginStateChanged[name] ??= currentClient.onLoginStateChanged.stream
         .listen((state) => _listenLoginStateChanged(state, currentClient));
-    onUiaRequest[name] ??=
-        currentClient.onUiaRequest.stream.listen(uiaRequestHandler);
+    onUiaRequest[name] ??= currentClient.onUiaRequest.stream.listen(
+      uiaRequestHandler,
+    );
     if (PlatformInfos.isWeb || PlatformInfos.isLinux) {
       currentClient.onSync.stream.first.then((s) async {
         await _requestNotificationPermission();
@@ -498,8 +499,11 @@ class MatrixState extends State<Matrix>
             .where(
               (e) =>
                   e.type == EventUpdateType.timeline &&
-                  [EventTypes.Message, EventTypes.Sticker, EventTypes.Encrypted]
-                      .contains(e.content['type']) &&
+                  [
+                    EventTypes.Message,
+                    EventTypes.Sticker,
+                    EventTypes.Encrypted,
+                  ].contains(e.content['type']) &&
                   e.content['sender'] != currentClient.userID,
             )
             .listen(showLocalNotification);
@@ -571,9 +575,7 @@ class MatrixState extends State<Matrix>
     if (state != LoginState.loggedIn && result.isSuccess) {
       TwakeApp.router.go(
         '/rooms',
-        extra: LogoutBodyArgs(
-          newActiveClient: widget.clients.first,
-        ),
+        extra: LogoutBodyArgs(newActiveClient: widget.clients.first),
       );
     }
   }
@@ -611,9 +613,7 @@ class MatrixState extends State<Matrix>
     await ClientManager.addClientNameToStore(_loginClientCandidate!.clientName);
     Logs().d('MatrixState::_handleAddAnotherAccount() - Registering subs');
     _registerSubs(_loginClientCandidate!.clientName);
-    final activeClient = getClientByName(
-      _loginClientCandidate!.clientName,
-    );
+    final activeClient = getClientByName(_loginClientCandidate!.clientName);
     if (activeClient == null) return;
     waitForFirstSync = false;
     await setUpToMServicesInLogin(activeClient);
@@ -642,9 +642,7 @@ class MatrixState extends State<Matrix>
         'MatrixState::_handleLogoutWithMultipleAccount: Delete persist active account success',
       );
     } catch (e) {
-      Logs().e(
-        'MatrixState::_handleLogoutWithMultipleAccount: Error - $e',
-      );
+      Logs().e('MatrixState::_handleLogoutWithMultipleAccount: Error - $e');
     }
   }
 
@@ -664,16 +662,18 @@ class MatrixState extends State<Matrix>
     if (PlatformInfos.isMobile) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         ([TargetPlatform.linux].contains(Theme.of(context).platform)
-                ? SharedPreferences.getInstance()
-                    .then((prefs) => prefs.getString(SettingKeys.appLockKey))
-                : const FlutterSecureStorage()
-                    .read(key: SettingKeys.appLockKey))
+                ? SharedPreferences.getInstance().then(
+                    (prefs) => prefs.getString(SettingKeys.appLockKey),
+                  )
+                : const FlutterSecureStorage().read(
+                    key: SettingKeys.appLockKey,
+                  ))
             .then((lock) {
-          if (lock?.isNotEmpty ?? false) {
-            AppLock.of(context)!.enable();
-            AppLock.of(context)!.showLockScreen();
-          }
-        });
+              if (lock?.isNotEmpty ?? false) {
+                AppLock.of(context)!.enable();
+                AppLock.of(context)!.showLockScreen();
+              }
+            });
       });
     }
 
@@ -701,8 +701,9 @@ class MatrixState extends State<Matrix>
             context: context,
             title: L10n.of(context)!.oopsSomethingWentWrong,
             message: errorMsg,
-            okLabel:
-                link == null ? L10n.of(context)!.ok : L10n.of(context)!.help,
+            okLabel: link == null
+                ? L10n.of(context)!.ok
+                : L10n.of(context)!.help,
             cancelLabel: L10n.of(context)!.doNotShowAgain,
           );
           if (result == OkCancelResult.ok && link != null) {
@@ -732,10 +733,10 @@ class MatrixState extends State<Matrix>
 
   Future<ToMConfigurations?> getTomConfigurations(String userID) async {
     try {
-      final tomConfigurationRepository =
-          getIt.get<ToMConfigurationsRepository>();
-      final toMConfigurations =
-          await tomConfigurationRepository.getTomConfigurations(userID);
+      final tomConfigurationRepository = getIt
+          .get<ToMConfigurationsRepository>();
+      final toMConfigurations = await tomConfigurationRepository
+          .getTomConfigurations(userID);
       return toMConfigurations;
     } catch (e) {
       Logs().e('MatrixState::_getTomConfigurations: $e');
@@ -747,8 +748,8 @@ class MatrixState extends State<Matrix>
     String userId,
   ) async {
     try {
-      final federationConfigurationRepository =
-          getIt.get<FederationConfigurationsRepository>();
+      final federationConfigurationRepository = getIt
+          .get<FederationConfigurationsRepository>();
       final federationConfigurations = await federationConfigurationRepository
           .getFederationConfigurations(userId);
       return federationConfigurations;
@@ -845,12 +846,10 @@ class MatrixState extends State<Matrix>
   Future<void> tryToGetFederationConfigurations() async {
     if (client.userID == null) return;
     try {
-      final federationConfigurationRepository =
-          getIt.get<FederationConfigurationsRepository>();
-      final federationConfigurations =
-          await federationConfigurationRepository.getFederationConfigurations(
-        client.userID!,
-      );
+      final federationConfigurationRepository = getIt
+          .get<FederationConfigurationsRepository>();
+      final federationConfigurations = await federationConfigurationRepository
+          .getFederationConfigurations(client.userID!);
 
       if (federationConfigurations.fedServerInformation.hasBaseUrls) {
         Logs().d(
@@ -877,23 +876,22 @@ class MatrixState extends State<Matrix>
     try {
       final wellKnown = await client.getWellknown();
 
-      Logs().d(
-        'MatrixState::_tryStoreFederationConfiguration: $wellKnown',
-      );
+      Logs().d('MatrixState::_tryStoreFederationConfiguration: $wellKnown');
 
       final fedServerJson = wellKnown
           .additionalProperties[FederationServerInformation.fedServerKey];
 
       if (fedServerJson is! Map<String, dynamic>) return;
 
-      final federationConfigurationRepository =
-          getIt.get<FederationConfigurationsRepository>();
+      final federationConfigurationRepository = getIt
+          .get<FederationConfigurationsRepository>();
 
       await federationConfigurationRepository.saveFederationConfigurations(
         client.userID!,
         FederationConfigurations(
-          fedServerInformation:
-              FederationServerInformation.fromJson(fedServerJson),
+          fedServerInformation: FederationServerInformation.fromJson(
+            fedServerJson,
+          ),
         ),
       );
     } catch (e) {
@@ -936,8 +934,9 @@ class MatrixState extends State<Matrix>
     Logs().d(
       'MatrixState::_setUpIdentityServer: ${identityServerUrlInterceptor.hashCode}',
     );
-    identityServerUrlInterceptor
-        .changeBaseUrl(identityServer.baseUrl.toString());
+    identityServerUrlInterceptor.changeBaseUrl(
+      identityServer.baseUrl.toString(),
+    );
   }
 
   Future<void> _storeToMConfiguration(
@@ -948,12 +947,10 @@ class MatrixState extends State<Matrix>
       Logs().e(
         'Matrix::_storeToMConfiguration: clientName - ${client.clientName}',
       );
-      Logs().e(
-        'Matrix::_storeToMConfiguration: userId - ${client.userID}',
-      );
+      Logs().e('Matrix::_storeToMConfiguration: userId - ${client.userID}');
       if (client.userID == null) return;
-      final ToMConfigurationsRepository configurationRepository =
-          getIt.get<ToMConfigurationsRepository>();
+      final ToMConfigurationsRepository configurationRepository = getIt
+          .get<ToMConfigurationsRepository>();
       await configurationRepository.saveTomConfigurations(
         client.userID!,
         config,
@@ -979,8 +976,8 @@ class MatrixState extends State<Matrix>
       );
       if (client.userID == null) return;
       final FederationConfigurationsRepository
-          federationConfigurationRepository =
-          getIt.get<FederationConfigurationsRepository>();
+      federationConfigurationRepository = getIt
+          .get<FederationConfigurationsRepository>();
       await federationConfigurationRepository.saveFederationConfigurations(
         client.userID!,
         config,
@@ -1028,8 +1025,8 @@ class MatrixState extends State<Matrix>
   Future<void> retrievePersistedActiveClient() async {
     try {
       final multipleAccountRepository = getIt.get<MultipleAccountRepository>();
-      final persistActiveAccount =
-          await multipleAccountRepository.getPersistActiveAccount();
+      final persistActiveAccount = await multipleAccountRepository
+          .getPersistActiveAccount();
       if (persistActiveAccount == null) {
         await _storePersistActiveAccount(client);
         await _getUserInfoWithActiveClient(client);
@@ -1042,30 +1039,24 @@ class MatrixState extends State<Matrix>
         }
       }
     } catch (e) {
-      Logs().e(
-        'Matrix::_retrievePersistedActiveAccount(): Error - $e',
-      );
+      Logs().e('Matrix::_retrievePersistedActiveAccount(): Error - $e');
     }
   }
 
   Future<void> _getUserInfoWithActiveClient(Client newClient) async {
     if (newClient.userID == null) return;
     try {
-      final result = await getIt
-          .get<UserInfoRepository>()
-          .getUserInfo(Uri.encodeComponent(newClient.userID!));
+      final result = await getIt.get<UserInfoRepository>().getUserInfo(
+        Uri.encodeComponent(newClient.userID!),
+      );
 
       await LocalizationService.initializeLanguage(
         context,
         serverLanguage: result.language,
       );
     } catch (e) {
-      Logs().e(
-        'Matrix::_getUserInfoWithActiveClient(): Error - $e',
-      );
-      await LocalizationService.initializeLanguage(
-        context,
-      );
+      Logs().e('Matrix::_getUserInfoWithActiveClient(): Error - $e');
+      await LocalizationService.initializeLanguage(context);
     }
   }
 
@@ -1091,15 +1082,13 @@ class MatrixState extends State<Matrix>
       Logs().d(
         'Matrix::_storePersistActiveAccount: userId - ${newClient.userID}',
       );
-      final MultipleAccountRepository multipleAccountRepository =
-          getIt.get<MultipleAccountRepository>();
+      final MultipleAccountRepository multipleAccountRepository = getIt
+          .get<MultipleAccountRepository>();
       await multipleAccountRepository.storePersistActiveAccount(
         newClient.userID!,
       );
     } catch (e) {
-      Logs().e(
-        'Matrix::_storePersistActiveAccount(): Error - $e',
-      );
+      Logs().e('Matrix::_storePersistActiveAccount(): Error - $e');
     }
   }
 
@@ -1111,22 +1100,18 @@ class MatrixState extends State<Matrix>
     didChangeAppLifecycleState(AppLifecycleState.paused);
   }
 
-  void _setupAuthUrl({
-    String? url,
-  }) {
+  void _setupAuthUrl({String? url}) {
     if (url != null) {
-      Logs().e(
-        'Matrix::_setupAuthUrl: newAuthUrl - $url',
-      );
+      Logs().e('Matrix::_setupAuthUrl: newAuthUrl - $url');
       _authUrl = url;
     } else {
       final authData = loginHomeserverSummary
-          ?.discoveryInformation?.additionalProperties["m.authentication"];
-      final newAuthUrl =
-          authData is Map<String, dynamic> ? authData["issuer"] : null;
-      Logs().e(
-        'Matrix::_setupAuthUrl: newAuthUrl - $newAuthUrl',
-      );
+          ?.discoveryInformation
+          ?.additionalProperties["m.authentication"];
+      final newAuthUrl = authData is Map<String, dynamic>
+          ? authData["issuer"]
+          : null;
+      Logs().e('Matrix::_setupAuthUrl: newAuthUrl - $newAuthUrl');
       _authUrl = newAuthUrl is String ? newAuthUrl : url;
     }
   }
@@ -1178,8 +1163,9 @@ class MatrixState extends State<Matrix>
   void setupAudioPlayerAutoDispose() {
     final currentEvent = voiceMessageEvent.value;
     _audioPlayerStateSubscription?.cancel();
-    _audioPlayerStateSubscription =
-        audioPlayer.playerStateStream.listen((state) {
+    _audioPlayerStateSubscription = audioPlayer.playerStateStream.listen((
+      state,
+    ) {
       if (state.processingState == ProcessingState.completed) {
         // Guard against clearing state for a different audio
         if (voiceMessageEvent.value?.eventId != currentEvent?.eventId) {
@@ -1197,7 +1183,8 @@ class MatrixState extends State<Matrix>
   void didChangeAppLifecycleState(AppLifecycleState state) {
     Logs().i('didChangeAppLifecycleState: AppLifecycleState = $state');
     Logs().i('didChangeAppLifecycleState: currentTime: ${DateTime.now()}');
-    final foreground = state != AppLifecycleState.detached &&
+    final foreground =
+        state != AppLifecycleState.detached &&
         state != AppLifecycleState.paused;
     client.backgroundSync = foreground;
     client.syncPresence = foreground ? null : PresenceType.unavailable;
@@ -1215,11 +1202,15 @@ class MatrixState extends State<Matrix>
             wallpaper = file;
           }
         }),
-        store.getItem(SettingKeys.fontSizeFactor).then(
+        store
+            .getItem(SettingKeys.fontSizeFactor)
+            .then(
               (value) => AppConfig.fontSizeFactor =
                   double.tryParse(value ?? '') ?? AppConfig.fontSizeFactor,
             ),
-        store.getItem(SettingKeys.bubbleSizeFactor).then(
+        store
+            .getItem(SettingKeys.bubbleSizeFactor)
+            .then(
               (value) => AppConfig.bubbleSizeFactor =
                   double.tryParse(value ?? '') ?? AppConfig.bubbleSizeFactor,
             ),
@@ -1312,10 +1303,7 @@ class MatrixState extends State<Matrix>
 
   @override
   Widget build(BuildContext context) {
-    return Provider(
-      create: (_) => this,
-      child: widget.child,
-    );
+    return Provider(create: (_) => this, child: widget.child);
   }
 
   @override
@@ -1351,13 +1339,16 @@ class _AccountBundleWithClient extends Equatable {
   List<Object?> get props => [client, bundle];
 }
 
-extension HomeserverSummaryConversion on Future<
-    (
-      DiscoveryInformation?,
-      GetVersionsResponse,
-      List<LoginFlow>,
-      GetAuthMetadataResponse?
-    )> {
+extension HomeserverSummaryConversion
+    on
+        Future<
+          (
+            DiscoveryInformation?,
+            GetVersionsResponse,
+            List<LoginFlow>,
+            GetAuthMetadataResponse?,
+          )
+        > {
   Future<HomeserverSummary?> toHomeserverSummary() async {
     try {
       final result = await this;

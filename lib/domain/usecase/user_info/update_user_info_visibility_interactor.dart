@@ -16,11 +16,9 @@ class UpdateUserInfoVisibilityInteractor {
     try {
       yield Right(UpdatingUserInfoVisibility());
 
-      final result =
-          await getIt.get<UserInfoRepository>().updateUserInfoVisibility(
-                userId,
-                body,
-              );
+      final result = await getIt
+          .get<UserInfoRepository>()
+          .updateUserInfoVisibility(userId, body);
       yield Right(UpdateUserInfoVisibilitySuccess(result));
     } catch (e) {
       yield Left(UpdateUserInfoVisibilityFailure(exception: e));

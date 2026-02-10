@@ -15,8 +15,9 @@ class ForwardMessageInteractor {
     try {
       yield Right(ForwardMessageLoading());
 
-      final room =
-          rooms.firstWhere((element) => element.id == selectedEvents.first);
+      final room = rooms.firstWhere(
+        (element) => element.id == selectedEvents.first,
+      );
       if (room.membership == Membership.join) {
         if (matrixState.shareContentList.isEmpty &&
             matrixState.shareContent != null) {

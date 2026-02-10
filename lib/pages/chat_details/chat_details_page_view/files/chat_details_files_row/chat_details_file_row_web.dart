@@ -63,8 +63,9 @@ class ChatDetailsFileTileRowWeb extends StatelessWidget {
                     padding: ChatDetailsFileTileStyle.trailingPadding,
                     child: Text(
                       sentDate.localizedTimeShort(context),
-                      style: ChatDetailsFileTileStyle()
-                          .textInformationStyle(context),
+                      style: ChatDetailsFileTileStyle().textInformationStyle(
+                        context,
+                      ),
                     ),
                   ),
                 ],

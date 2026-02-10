@@ -42,9 +42,7 @@ class MediaViewerAppBarWeb extends StatelessWidget
                     : Icons.close,
                 color: LinagoraSysColors.material().onPrimary,
               ),
-              onPressed: () => onClose(
-                context,
-              ),
+              onPressed: () => onClose(context),
               color: LinagoraSysColors.material().onPrimary,
               tooltip: L10n.of(context)!.back,
             ),
@@ -56,10 +54,7 @@ class MediaViewerAppBarWeb extends StatelessWidget
                       Icons.shortcut,
                       color: LinagoraSysColors.material().onPrimary,
                     ),
-                    onPressed: () => forwardAction(
-                      context,
-                      event,
-                    ),
+                    onPressed: () => forwardAction(context, event),
                     color: LinagoraSysColors.material().onPrimary,
                     tooltip: L10n.of(context)!.share,
                   ),
@@ -70,10 +65,7 @@ class MediaViewerAppBarWeb extends StatelessWidget
                       color: LinagoraSysColors.material().onPrimary,
                     ),
                     tooltip: L10n.of(context)!.saveFile,
-                    onPressed: () => saveFileAction(
-                      context,
-                      event,
-                    ),
+                    onPressed: () => saveFileAction(context, event),
                   ),
                   IconButton(
                     tooltip: L10n.of(context)!.showInChat,
@@ -84,10 +76,7 @@ class MediaViewerAppBarWeb extends StatelessWidget
                         BlendMode.srcIn,
                       ),
                     ),
-                    onPressed: () => showInChat(
-                      context,
-                      event,
-                    ),
+                    onPressed: () => showInChat(context, event),
                   ),
                 ],
               ],

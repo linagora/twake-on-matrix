@@ -45,7 +45,7 @@ void main() {
   late MockIdentityLookupManager mockIdentityLookupManager;
   late MockHiveContactRepository mockHiveContactRepository;
   late MockSharedPreferencesContactCacheManager
-      mockSharedPreferencesContactCacheManager;
+  mockSharedPreferencesContactCacheManager;
 
   late MockFederationIdentityLookupManager mockFederationIdentityLookupManager;
 
@@ -72,10 +72,7 @@ void main() {
     accessToken: accessToken,
   );
 
-  final testContacts = [
-    ContactFixtures.contact1,
-    ContactFixtures.contact2,
-  ];
+  final testContacts = [ContactFixtures.contact1, ContactFixtures.contact2];
 
   setUp(() {
     mockRepository = MockPhonebookContactRepository();
@@ -115,8 +112,9 @@ void main() {
   group('execute', () {
     group('error handling', () {
       test('should emit failure when register token request fails', () async {
-        when(mockRepository.fetchContacts())
-            .thenAnswer((_) async => testContacts);
+        when(
+          mockRepository.fetchContacts(),
+        ).thenAnswer((_) async => testContacts);
 
         when(
           mockRequestTokenManager.execute(
@@ -152,8 +150,9 @@ void main() {
       });
 
       test('should emit failure when hash details request fails', () async {
-        when(mockRepository.fetchContacts())
-            .thenAnswer((_) async => testContacts);
+        when(
+          mockRepository.fetchContacts(),
+        ).thenAnswer((_) async => testContacts);
 
         when(
           mockRequestTokenManager.execute(
@@ -198,8 +197,9 @@ void main() {
       test('should emit failure when lookup mxid request fails', () async {
         final exception = Exception('Lookup failed');
 
-        when(mockRepository.fetchContacts())
-            .thenAnswer((_) async => testContacts);
+        when(
+          mockRepository.fetchContacts(),
+        ).thenAnswer((_) async => testContacts);
 
         when(
           mockRequestTokenManager.execute(
@@ -332,8 +332,9 @@ void main() {
       });
 
       test('should emit failure when token request fails', () async {
-        when(mockRepository.fetchContacts())
-            .thenAnswer((_) async => testContacts);
+        when(
+          mockRepository.fetchContacts(),
+        ).thenAnswer((_) async => testContacts);
 
         when(
           mockRequestTokenManager.execute(
@@ -363,8 +364,9 @@ void main() {
       });
 
       test('should emit failure when hash details response is empty', () async {
-        when(mockRepository.fetchContacts())
-            .thenAnswer((_) async => testContacts);
+        when(
+          mockRepository.fetchContacts(),
+        ).thenAnswer((_) async => testContacts);
 
         when(
           mockRequestTokenManager.execute(
@@ -416,120 +418,110 @@ void main() {
 
     group('contact processing', () {
       test(
-          'should process contacts with both phone and email but third party module has problem',
-          () async {
-        final expectedContacts = [
-          Contact(
-            id: 'id_1',
-            displayName: 'Alice',
-            phoneNumbers: {
-              PhoneNumber(
-                number: '(212)555-6789',
-                matrixId: '@alice:matrix.org',
-              ),
-            },
-            emails: {
-              Email(
-                address: 'alice@gmail.com',
-              ),
-            },
-          ),
-          Contact(
-            id: 'id_2',
-            displayName: 'Bob',
-            phoneNumbers: {
-              PhoneNumber(
-                number: '(212)555-1234',
-              ),
-            },
-            emails: {
-              Email(
-                address: 'bob@gmail.com',
-              ),
-            },
-          ),
-        ];
+        'should process contacts with both phone and email but third party module has problem',
+        () async {
+          final expectedContacts = [
+            Contact(
+              id: 'id_1',
+              displayName: 'Alice',
+              phoneNumbers: {
+                PhoneNumber(
+                  number: '(212)555-6789',
+                  matrixId: '@alice:matrix.org',
+                ),
+              },
+              emails: {Email(address: 'alice@gmail.com')},
+            ),
+            Contact(
+              id: 'id_2',
+              displayName: 'Bob',
+              phoneNumbers: {PhoneNumber(number: '(212)555-1234')},
+              emails: {Email(address: 'bob@gmail.com')},
+            ),
+          ];
 
-        when(mockRepository.fetchContacts())
-            .thenAnswer((_) async => testContacts);
+          when(
+            mockRepository.fetchContacts(),
+          ).thenAnswer((_) async => testContacts);
 
-        when(
-          mockRequestTokenManager.execute(
-            federationTokenRequest: testTokenRequest,
-          ),
-        ).thenAnswer(
-          (_) async => const Right<Failure, Success>(
-            FederationIdentityRequestTokenSuccess(
+          when(
+            mockRequestTokenManager.execute(
+              federationTokenRequest: testTokenRequest,
+            ),
+          ).thenAnswer(
+            (_) async => const Right<Failure, Success>(
+              FederationIdentityRequestTokenSuccess(
+                tokenInformation: tokenInformation,
+              ),
+            ),
+          );
+
+          when(
+            mockIdentityLookupManager.register(
+              federationUrl: federationUrl,
               tokenInformation: tokenInformation,
             ),
-          ),
-        );
+          ).thenAnswer(
+            (_) async => const FederationRegisterResponse(
+              token: 'aB7c9Dz4EfGh5iJkLm3nOp==',
+            ),
+          );
 
-        when(
-          mockIdentityLookupManager.register(
-            federationUrl: federationUrl,
-            tokenInformation: tokenInformation,
-          ),
-        ).thenAnswer(
-          (_) async => const FederationRegisterResponse(
-            token: 'aB7c9Dz4EfGh5iJkLm3nOp==',
-          ),
-        );
+          const hashDetails = FederationHashDetailsResponse(
+            algorithms: {'sha256'},
+            lookupPepper: 'pepper',
+            altLookupPeppers: {'pepper1', 'pepper2'},
+          );
 
-        const hashDetails = FederationHashDetailsResponse(
-          algorithms: {'sha256'},
-          lookupPepper: 'pepper',
-          altLookupPeppers: {'pepper1', 'pepper2'},
-        );
+          when(
+            mockIdentityLookupManager.getHashDetails(
+              federationUrl: anyNamed('federationUrl'),
+              registeredToken: anyNamed('registeredToken'),
+            ),
+          ).thenAnswer((_) async => hashDetails);
 
-        when(
-          mockIdentityLookupManager.getHashDetails(
-            federationUrl: anyNamed('federationUrl'),
-            registeredToken: anyNamed('registeredToken'),
-          ),
-        ).thenAnswer((_) async => hashDetails);
-
-        when(
-          mockIdentityLookupManager.lookupMxid(
-            federationUrl: anyNamed('federationUrl'),
-            request: anyNamed('request'),
-            registeredToken: anyNamed('registeredToken'),
-          ),
-        ).thenAnswer(
-          (_) async => const FederationLookupMxidResponse(
-            mappings: {
-              '6mWe5lBps9Rqabkqc_QIh0-jsdFogvcBi9EWs523fok':
-                  '@alice:matrix.org',
-            },
-            thirdPartyMappings: {
-              'tom.domain.com': {
-                'WYOGPQyKEyY0iTxQoPTfk58eQvGi0_hpP2hI0S8cQeM',
+          when(
+            mockIdentityLookupManager.lookupMxid(
+              federationUrl: anyNamed('federationUrl'),
+              request: anyNamed('request'),
+              registeredToken: anyNamed('registeredToken'),
+            ),
+          ).thenAnswer(
+            (_) async => const FederationLookupMxidResponse(
+              mappings: {
+                '6mWe5lBps9Rqabkqc_QIh0-jsdFogvcBi9EWs523fok':
+                    '@alice:matrix.org',
               },
-            },
-          ),
-        );
-
-        final result = interactor.execute(argument: testArgument);
-
-        expect(
-          result,
-          emitsInOrder(<dynamic>[
-            const Right<Failure, Success>(GetPhonebookContactsLoading()),
-            Right<Failure, Success>(
-              GetPhonebookContactsSuccess(
-                progress: 100,
-                contacts: expectedContacts,
-              ),
+              thirdPartyMappings: {
+                'tom.domain.com': {
+                  'WYOGPQyKEyY0iTxQoPTfk58eQvGi0_hpP2hI0S8cQeM',
+                },
+              },
             ),
-            Right<Failure, Success>(
-              GetPhonebookContactsSuccess(
-                progress: 100,
-                contacts: expectedContacts,
+          );
+
+          final result = interactor.execute(argument: testArgument);
+
+          expect(
+            result,
+            emitsInOrder(<dynamic>[
+              const Right<Failure, Success>(GetPhonebookContactsLoading()),
+              Right<Failure, Success>(
+                GetPhonebookContactsSuccess(
+                  progress: 100,
+                  contacts: expectedContacts,
+                ),
               ),
-            ),
-          ]),
-        );
-      });
+              Right<Failure, Success>(
+                GetPhonebookContactsSuccess(
+                  progress: 100,
+                  contacts: expectedContacts,
+                ),
+              ),
+            ]),
+          );
+        },
+      );
 
       test('should process contacts with both phone and email', () async {
         final expectedContacts = [
@@ -542,31 +534,21 @@ void main() {
                 matrixId: '@alice:matrix.org',
               ),
             },
-            emails: {
-              Email(
-                address: 'alice@gmail.com',
-              ),
-            },
+            emails: {Email(address: 'alice@gmail.com')},
           ),
           Contact(
             id: 'id_2',
             displayName: 'Bob',
             phoneNumbers: {
-              PhoneNumber(
-                matrixId: '@bob:matrix.com',
-                number: '(212)555-1234',
-              ),
+              PhoneNumber(matrixId: '@bob:matrix.com', number: '(212)555-1234'),
             },
-            emails: {
-              Email(
-                address: 'bob@gmail.com',
-              ),
-            },
+            emails: {Email(address: 'bob@gmail.com')},
           ),
         ];
 
-        when(mockRepository.fetchContacts())
-            .thenAnswer((_) async => testContacts);
+        when(
+          mockRepository.fetchContacts(),
+        ).thenAnswer((_) async => testContacts);
 
         when(
           mockRequestTokenManager.execute(
@@ -617,9 +599,7 @@ void main() {
                   '@alice:matrix.org',
             },
             thirdPartyMappings: {
-              'tom.domain.com': {
-                'WYOGPQyKEyY0iTxQoPTfk58eQvGi0_hpP2hI0S8cQeM',
-              },
+              'tom.domain.com': {'WYOGPQyKEyY0iTxQoPTfk58eQvGi0_hpP2hI0S8cQeM'},
             },
           ),
         );
@@ -707,19 +687,15 @@ void main() {
 
       test('should handle contacts with only phone numbers', () async {
         final phoneOnlyContacts = [
-          ContactFixtures.contact1.copyWith(emails: {}).copyWith(
-            phoneNumbers: {
-              PhoneNumber(
-                number: '(212)555-6789',
+          ContactFixtures.contact1
+              .copyWith(emails: {})
+              .copyWith(
+                phoneNumbers: {
+                  PhoneNumber(number: '(212)555-6789'),
+                  PhoneNumber(number: '(252)555-1234'),
+                  PhoneNumber(number: '(213)555-1234'),
+                },
               ),
-              PhoneNumber(
-                number: '(252)555-1234',
-              ),
-              PhoneNumber(
-                number: '(213)555-1234',
-              ),
-            },
-          ),
           ContactFixtures.contact2.copyWith(emails: {}),
         ];
 
@@ -732,29 +708,22 @@ void main() {
                 number: '(212)555-6789',
                 matrixId: '@alice:matrix.org',
               ),
-              PhoneNumber(
-                number: '(252)555-1234',
-              ),
-              PhoneNumber(
-                number: '(213)555-1234',
-              ),
+              PhoneNumber(number: '(252)555-1234'),
+              PhoneNumber(number: '(213)555-1234'),
             },
             emails: const {},
           ),
           Contact(
             id: 'id_2',
             displayName: 'Bob',
-            phoneNumbers: {
-              PhoneNumber(
-                number: '(212)555-1234',
-              ),
-            },
+            phoneNumbers: {PhoneNumber(number: '(212)555-1234')},
             emails: const {},
           ),
         ];
 
-        when(mockRepository.fetchContacts())
-            .thenAnswer((_) async => phoneOnlyContacts);
+        when(
+          mockRepository.fetchContacts(),
+        ).thenAnswer((_) async => phoneOnlyContacts);
 
         when(
           mockRequestTokenManager.execute(
@@ -802,9 +771,7 @@ void main() {
           (_) async => const FederationLookupMxidResponse(
             mappings: {},
             thirdPartyMappings: {
-              'tom.domain.com': {
-                'lWcTz7CJ9a9OqxlYWsl2MibzKep0abdGl6g3I3t7BPM',
-              },
+              'tom.domain.com': {'lWcTz7CJ9a9OqxlYWsl2MibzKep0abdGl6g3I3t7BPM'},
             },
           ),
         );
@@ -887,19 +854,15 @@ void main() {
 
       test('should handle contacts with only emails', () async {
         final emailOnlyContacts = [
-          ContactFixtures.contact1.copyWith(phoneNumbers: {}).copyWith(
-            emails: {
-              Email(
-                address: 'alice1@mail.com',
+          ContactFixtures.contact1
+              .copyWith(phoneNumbers: {})
+              .copyWith(
+                emails: {
+                  Email(address: 'alice1@mail.com'),
+                  Email(address: 'alice2@mail.com'),
+                  Email(address: 'alice3@mail.com'),
+                },
               ),
-              Email(
-                address: 'alice2@mail.com',
-              ),
-              Email(
-                address: 'alice3@mail.com',
-              ),
-            },
-          ),
           ContactFixtures.contact2.copyWith(phoneNumbers: {}),
         ];
 
@@ -908,34 +871,23 @@ void main() {
             id: 'id_1',
             displayName: 'Alice',
             emails: {
-              Email(
-                address: 'alice1@mail.com',
-                matrixId: '@alice:matrix.org',
-              ),
-              Email(
-                address: 'alice2@mail.com',
-                matrixId: '@alice2:matrix.com',
-              ),
-              Email(
-                address: 'alice3@mail.com',
-              ),
+              Email(address: 'alice1@mail.com', matrixId: '@alice:matrix.org'),
+              Email(address: 'alice2@mail.com', matrixId: '@alice2:matrix.com'),
+              Email(address: 'alice3@mail.com'),
             },
             phoneNumbers: const {},
           ),
           Contact(
             id: 'id_2',
             displayName: 'Bob',
-            emails: {
-              Email(
-                address: 'bob@gmail.com',
-              ),
-            },
+            emails: {Email(address: 'bob@gmail.com')},
             phoneNumbers: const {},
           ),
         ];
 
-        when(mockRepository.fetchContacts())
-            .thenAnswer((_) async => emailOnlyContacts);
+        when(
+          mockRepository.fetchContacts(),
+        ).thenAnswer((_) async => emailOnlyContacts);
 
         when(
           mockRequestTokenManager.execute(
@@ -983,9 +935,7 @@ void main() {
           (_) async => const FederationLookupMxidResponse(
             mappings: {},
             thirdPartyMappings: {
-              'tom.domain.com': {
-                'lWcTz7CJ9a9OqxlYWsl2MibzKep0abdGl6g3I3t7BPM',
-              },
+              'tom.domain.com': {'lWcTz7CJ9a9OqxlYWsl2MibzKep0abdGl6g3I3t7BPM'},
             },
           ),
         );
@@ -1062,8 +1012,9 @@ void main() {
       });
 
       test('should handle different chunk sizes correctly', () async {
-        when(mockRepository.fetchContacts())
-            .thenAnswer((_) async => testContacts);
+        when(
+          mockRepository.fetchContacts(),
+        ).thenAnswer((_) async => testContacts);
 
         when(
           mockRequestTokenManager.execute(
@@ -1217,23 +1168,21 @@ void main() {
             request: anyNamed('request'),
             registeredToken: anyNamed('registeredToken'),
           ),
-        ).thenAnswer(
-          (_) async {
-            callCount++;
-            if (callCount == 1) {
-              return const FederationLookupMxidResponse(
-                mappings: {},
-                thirdPartyMappings: {
-                  'tom.domain.com': {
-                    'lWcTz7CJ9a9OqxlYWsl2MibzKep0abdGl6g3I3t7BPM',
-                  },
+        ).thenAnswer((_) async {
+          callCount++;
+          if (callCount == 1) {
+            return const FederationLookupMxidResponse(
+              mappings: {},
+              thirdPartyMappings: {
+                'tom.domain.com': {
+                  'lWcTz7CJ9a9OqxlYWsl2MibzKep0abdGl6g3I3t7BPM',
                 },
-              );
-            } else {
-              throw exception;
-            }
-          },
-        );
+              },
+            );
+          } else {
+            throw exception;
+          }
+        });
 
         when(
           mockRequestTokenManager.execute(
@@ -1436,23 +1385,21 @@ void main() {
             request: anyNamed('request'),
             registeredToken: anyNamed('registeredToken'),
           ),
-        ).thenAnswer(
-          (_) async {
-            callCount++;
-            if (callCount == 1) {
-              return const FederationLookupMxidResponse(
-                mappings: {},
-                thirdPartyMappings: {
-                  'tom.domain.com': {
-                    'lWcTz7CJ9a9OqxlYWsl2MibzKep0abdGl6g3I3t7BPM',
-                  },
+        ).thenAnswer((_) async {
+          callCount++;
+          if (callCount == 1) {
+            return const FederationLookupMxidResponse(
+              mappings: {},
+              thirdPartyMappings: {
+                'tom.domain.com': {
+                  'lWcTz7CJ9a9OqxlYWsl2MibzKep0abdGl6g3I3t7BPM',
                 },
-              );
-            } else {
-              throw exception;
-            }
-          },
-        );
+              },
+            );
+          } else {
+            throw exception;
+          }
+        });
 
         // Setup the third party lookup manager to fail
         when(
@@ -1481,16 +1428,10 @@ void main() {
           emitsInOrder(<dynamic>[
             const Right<Failure, Success>(GetPhonebookContactsLoading()),
             Right<Failure, Success>(
-              GetPhonebookContactsSuccess(
-                progress: 100,
-                contacts: contacts,
-              ),
+              GetPhonebookContactsSuccess(progress: 100, contacts: contacts),
             ),
             Right<Failure, Success>(
-              GetPhonebookContactsSuccess(
-                progress: 100,
-                contacts: contacts,
-              ),
+              GetPhonebookContactsSuccess(progress: 100, contacts: contacts),
             ),
           ]),
         );
@@ -1565,16 +1506,10 @@ void main() {
           emitsInOrder(<dynamic>[
             const Right<Failure, Success>(GetPhonebookContactsLoading()),
             Right<Failure, Success>(
-              GetPhonebookContactsSuccess(
-                progress: 100,
-                contacts: contacts,
-              ),
+              GetPhonebookContactsSuccess(progress: 100, contacts: contacts),
             ),
             Right<Failure, Success>(
-              GetPhonebookContactsSuccess(
-                progress: 100,
-                contacts: contacts,
-              ),
+              GetPhonebookContactsSuccess(progress: 100, contacts: contacts),
             ),
           ]),
         );

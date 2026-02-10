@@ -28,9 +28,10 @@ class ChatEncryptionSettingsView extends StatelessWidget {
           title: Text(L10n.of(context)!.endToEndEncryption),
           actions: [
             TextButton(
-              onPressed: () =>
-                  UrlLauncher(context, url: AppConfig.encryptionTutorial)
-                      .openUrlInAppBrowser(),
+              onPressed: () => UrlLauncher(
+                context,
+                url: AppConfig.encryptionTutorial,
+              ).openUrlInAppBrowser(),
               child: Text(L10n.of(context)!.help),
             ),
           ],
@@ -39,8 +40,9 @@ class ChatEncryptionSettingsView extends StatelessWidget {
           children: [
             SwitchListTile(
               secondary: CircleAvatar(
-                foregroundColor:
-                    Theme.of(context).colorScheme.onPrimaryContainer,
+                foregroundColor: Theme.of(
+                  context,
+                ).colorScheme.onPrimaryContainer,
                 backgroundColor: Theme.of(context).colorScheme.primaryContainer,
                 child: const Icon(Icons.lock_outlined),
               ),
@@ -48,12 +50,7 @@ class ChatEncryptionSettingsView extends StatelessWidget {
               value: room.encrypted,
               onChanged: controller.enableEncryption,
             ),
-            Center(
-              child: Image.asset(
-                'assets/encryption.png',
-                width: 212,
-              ),
-            ),
+            Center(child: Image.asset('assets/encryption.png', width: 212)),
             const Divider(height: 1),
             if (room.isDirectChat)
               Padding(
@@ -72,9 +69,7 @@ class ChatEncryptionSettingsView extends StatelessWidget {
               ListTile(
                 title: Text(
                   L10n.of(context)!.deviceKeys,
-                  style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: const TextStyle(fontWeight: FontWeight.bold),
                 ),
               ),
               StreamBuilder(
@@ -103,75 +98,77 @@ class ChatEncryptionSettingsView extends StatelessWidget {
                       itemCount: deviceKeys.length,
                       itemBuilder: (BuildContext context, int i) =>
                           SwitchListTile(
-                        value: !deviceKeys[i].blocked,
-                        activeColor: deviceKeys[i].verified
-                            ? Colors.green
-                            : Colors.orange,
-                        onChanged: (_) =>
-                            controller.toggleDeviceKey(deviceKeys[i]),
-                        title: Row(
-                          children: [
-                            Icon(
-                              deviceKeys[i].verified
-                                  ? Icons.verified_outlined
-                                  : deviceKeys[i].blocked
+                            value: !deviceKeys[i].blocked,
+                            activeColor: deviceKeys[i].verified
+                                ? Colors.green
+                                : Colors.orange,
+                            onChanged: (_) =>
+                                controller.toggleDeviceKey(deviceKeys[i]),
+                            title: Row(
+                              children: [
+                                Icon(
+                                  deviceKeys[i].verified
+                                      ? Icons.verified_outlined
+                                      : deviceKeys[i].blocked
                                       ? Icons.block_outlined
                                       : Icons.info_outlined,
-                              color: deviceKeys[i].verified
-                                  ? Colors.green
-                                  : deviceKeys[i].blocked
+                                  color: deviceKeys[i].verified
+                                      ? Colors.green
+                                      : deviceKeys[i].blocked
                                       ? Colors.red
                                       : Colors.orange,
-                              size: 20,
-                            ),
-                            const SizedBox(width: 4),
-                            Text(
-                              deviceKeys[i].deviceId ??
-                                  L10n.of(context)!.unknownDevice,
-                            ),
-                            const SizedBox(width: 4),
-                            Flexible(
-                              fit: FlexFit.loose,
-                              child: Material(
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(
-                                    AppConfig.borderRadius,
-                                  ),
-                                  side: BorderSide(
-                                    color:
-                                        Theme.of(context).colorScheme.primary,
-                                  ),
+                                  size: 20,
                                 ),
-                                color: Theme.of(context)
-                                    .colorScheme
-                                    .primaryContainer,
-                                child: Padding(
-                                  padding: const EdgeInsets.all(4.0),
-                                  child: Text(
-                                    deviceKeys[i].userId,
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: TextStyle(
-                                      color:
-                                          Theme.of(context).colorScheme.primary,
-                                      fontSize: 12,
-                                      fontStyle: FontStyle.italic,
+                                const SizedBox(width: 4),
+                                Text(
+                                  deviceKeys[i].deviceId ??
+                                      L10n.of(context)!.unknownDevice,
+                                ),
+                                const SizedBox(width: 4),
+                                Flexible(
+                                  fit: FlexFit.loose,
+                                  child: Material(
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(
+                                        AppConfig.borderRadius,
+                                      ),
+                                      side: BorderSide(
+                                        color: Theme.of(
+                                          context,
+                                        ).colorScheme.primary,
+                                      ),
+                                    ),
+                                    color: Theme.of(
+                                      context,
+                                    ).colorScheme.primaryContainer,
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(4.0),
+                                      child: Text(
+                                        deviceKeys[i].userId,
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: TextStyle(
+                                          color: Theme.of(
+                                            context,
+                                          ).colorScheme.primary,
+                                          fontSize: 12,
+                                          fontStyle: FontStyle.italic,
+                                        ),
+                                      ),
                                     ),
                                   ),
                                 ),
+                              ],
+                            ),
+                            subtitle: Text(
+                              deviceKeys[i].ed25519Key?.beautified ??
+                                  L10n.of(context)!.unknownEncryptionAlgorithm,
+                              style: TextStyle(
+                                fontFamily: 'Inter',
+                                color: Theme.of(context).colorScheme.secondary,
                               ),
                             ),
-                          ],
-                        ),
-                        subtitle: Text(
-                          deviceKeys[i].ed25519Key?.beautified ??
-                              L10n.of(context)!.unknownEncryptionAlgorithm,
-                          style: TextStyle(
-                            fontFamily: 'Inter',
-                            color: Theme.of(context).colorScheme.secondary,
                           ),
-                        ),
-                      ),
                     );
                   },
                 ),
@@ -182,9 +179,7 @@ class ChatEncryptionSettingsView extends StatelessWidget {
                 child: Center(
                   child: Text(
                     L10n.of(context)!.encryptionNotEnabled,
-                    style: const TextStyle(
-                      fontStyle: FontStyle.italic,
-                    ),
+                    style: const TextStyle(fontStyle: FontStyle.italic),
                   ),
                 ),
               ),

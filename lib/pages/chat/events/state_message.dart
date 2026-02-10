@@ -13,10 +13,7 @@ class StateMessage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(
-        horizontal: 8.0,
-        vertical: 4.0,
-      ),
+      padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
       child: Center(
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
@@ -30,11 +27,12 @@ class StateMessage extends StatelessWidget {
                     ),
                 textAlign: TextAlign.center,
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: LinagoraRefColors.material().tertiary[20],
-                      decoration:
-                          event.redacted ? TextDecoration.lineThrough : null,
-                      letterSpacing: 0.4,
-                    ),
+                  color: LinagoraRefColors.material().tertiary[20],
+                  decoration: event.redacted
+                      ? TextDecoration.lineThrough
+                      : null,
+                  letterSpacing: 0.4,
+                ),
               );
             },
           ),

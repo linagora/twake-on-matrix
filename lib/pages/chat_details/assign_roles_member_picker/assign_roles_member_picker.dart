@@ -43,21 +43,16 @@ class AssignRolesPickerController extends State<AssignRolesMemberPicker>
 
   final ValueNotifier<Either<Failure, Success>> searchUserResults =
       ValueNotifier<Either<Failure, Success>>(
-    Right(
-      AssignRolesMemberPickerSearchInitialState(),
-    ),
-  );
+        Right(AssignRolesMemberPickerSearchInitialState()),
+      );
 
   List<User> get members => widget.room.getCurrentMembers().where((member) {
-        return widget.room.canUpdateRoleInRoom(member);
-      }).toList();
+    return widget.room.canUpdateRoleInRoom(member);
+  }).toList();
 
   void initialAssignRoles() {
     searchUserResults.value = Right(
-      AssignRolesMemberPickerSearchSuccessState(
-        members: members,
-        keyword: '',
-      ),
+      AssignRolesMemberPickerSearchSuccessState(members: members, keyword: ''),
     );
   }
 
@@ -75,9 +70,9 @@ class AssignRolesPickerController extends State<AssignRolesMemberPicker>
     final assignedUsers = members;
 
     final searchResults = assignedUsers.where((user) {
-      return (user.displayName ?? '')
-              .toLowerCase()
-              .contains(searchTerm.toLowerCase()) ||
+      return (user.displayName ?? '').toLowerCase().contains(
+            searchTerm.toLowerCase(),
+          ) ||
           (user.id).toLowerCase().contains(searchTerm.toLowerCase());
     }).toList();
 
@@ -128,9 +123,7 @@ class AssignRolesPickerController extends State<AssignRolesMemberPicker>
         child: AlertDialog(
           contentPadding: const EdgeInsets.all(0),
           shape: const RoundedRectangleBorder(
-            borderRadius: BorderRadius.all(
-              Radius.circular(16.0),
-            ),
+            borderRadius: BorderRadius.all(Radius.circular(16.0)),
           ),
           content: SizedBox(
             width: AssignRolesRolePickerStyle.fixedDialogWidth,
@@ -174,9 +167,7 @@ class AssignRolesPickerController extends State<AssignRolesMemberPicker>
     return Material(
       color: LinagoraSysColors.material().onPrimary,
       shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.all(
-          Radius.circular(16.0),
-        ),
+        borderRadius: BorderRadius.all(Radius.circular(16.0)),
       ),
       child: AssignRolesMemberPickerView(
         controller: this,

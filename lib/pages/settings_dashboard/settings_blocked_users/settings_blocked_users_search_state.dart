@@ -18,18 +18,13 @@ class BlockedUsersSearchSuccessState extends Success {
   });
 
   @override
-  List<Object?> get props => [
-        blockedUsers,
-        keyword,
-      ];
+  List<Object?> get props => [blockedUsers, keyword];
 }
 
 class BlockedUsersSearchEmptyState extends Failure {
   final String keyword;
 
-  const BlockedUsersSearchEmptyState({
-    required this.keyword,
-  });
+  const BlockedUsersSearchEmptyState({required this.keyword});
 
   @override
   List<Object?> get props => [keyword];

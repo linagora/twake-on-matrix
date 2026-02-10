@@ -130,12 +130,12 @@ class MessageContent extends StatelessWidget
             return CuteContent(event);
           case MessageTypes.Audio:
             if (PlatformInfos.isMobile ||
-                    PlatformInfos.isMacOS ||
-                    PlatformInfos.isWeb
-                // Disabled until https://github.com/bleonard252/just_audio_mpv/issues/3
-                // is fixed
-                //   || PlatformInfos.isLinux
-                ) {
+                PlatformInfos.isMacOS ||
+                PlatformInfos.isWeb
+            // Disabled until https://github.com/bleonard252/just_audio_mpv/issues/3
+            // is fixed
+            //   || PlatformInfos.isLinux
+            ) {
               return OptionalSelectionContainerDisabled(
                 isEnabled: PlatformInfos.isWeb,
                 child: AudioPlayerWidget(
@@ -147,9 +147,7 @@ class MessageContent extends StatelessWidget
             }
             return OptionalSelectionContainerDisabled(
               isEnabled: PlatformInfos.isWeb,
-              child: MessageDownloadContent(
-                event,
-              ),
+              child: MessageDownloadContent(event),
             );
 
           case MessageTypes.Video:
@@ -165,10 +163,8 @@ class MessageContent extends StatelessWidget
                         alignment: Alignment.center,
                         child: _MessageVideoBuilder(
                           event: event,
-                          onFileTapped: (event) => onFileTapped(
-                            context: context,
-                            event: event,
-                          ),
+                          onFileTapped: (event) =>
+                              onFileTapped(context: context, event: event),
                           textWidth: textWidth,
                         ),
                       ),
@@ -180,18 +176,14 @@ class MessageContent extends StatelessWidget
                         if (!PlatformInfos.isWeb) ...[
                           Align(
                             alignment: Alignment.center,
-                            child: MessageDownloadContent(
-                              event,
-                            ),
+                            child: MessageDownloadContent(event),
                           ),
                         ] else ...[
                           OptionalSelectionContainerDisabled(
                             isEnabled: PlatformInfos.isWeb,
                             child: Align(
                               alignment: Alignment.center,
-                              child: MessageDownloadContentWeb(
-                                event,
-                              ),
+                              child: MessageDownloadContentWeb(event),
                             ),
                           ),
                         ],
@@ -200,9 +192,7 @@ class MessageContent extends StatelessWidget
                           child: OptionalSelectionContainerDisabled(
                             isEnabled: PlatformInfos.isWeb,
                             child: Text.rich(
-                              WidgetSpan(
-                                child: endOfBubbleWidget,
-                              ),
+                              WidgetSpan(child: endOfBubbleWidget),
                             ),
                           ),
                         ),
@@ -237,10 +227,8 @@ class MessageContent extends StatelessWidget
                 isEnabled: PlatformInfos.isWeb,
                 child: _MessageVideoBuilder(
                   event: event,
-                  onFileTapped: (event) => onFileTapped(
-                    context: context,
-                    event: event,
-                  ),
+                  onFileTapped: (event) =>
+                      onFileTapped(context: context, event: event),
                 ),
               );
             } else {
@@ -248,26 +236,18 @@ class MessageContent extends StatelessWidget
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
                   if (!PlatformInfos.isWeb) ...[
-                    MessageDownloadContent(
-                      event,
-                    ),
+                    MessageDownloadContent(event),
                   ] else ...[
                     OptionalSelectionContainerDisabled(
                       isEnabled: PlatformInfos.isWeb,
-                      child: MessageDownloadContentWeb(
-                        event,
-                      ),
+                      child: MessageDownloadContentWeb(event),
                     ),
                   ],
                   Padding(
                     padding: MessageContentStyle.endOfBubbleWidgetPadding,
                     child: OptionalSelectionContainerDisabled(
                       isEnabled: PlatformInfos.isWeb,
-                      child: Text.rich(
-                        WidgetSpan(
-                          child: endOfBubbleWidget,
-                        ),
-                      ),
+                      child: Text.rich(WidgetSpan(child: endOfBubbleWidget)),
                     ),
                   ),
                 ],
@@ -288,9 +268,7 @@ class MessageContent extends StatelessWidget
                       style: const MessageFileTileStyle(),
                     ),
                   ] else
-                    MessageDownloadContent(
-                      event,
-                    ),
+                    MessageDownloadContent(event),
                 ] else ...[
                   if (event.isSending()) ...[
                     OptionalSelectionContainerDisabled(
@@ -305,9 +283,7 @@ class MessageContent extends StatelessWidget
                     OptionalSelectionContainerDisabled(
                       isEnabled:
                           PlatformInfos.isWeb && !event.isCaptionModeOrReply(),
-                      child: MessageDownloadContentWeb(
-                        event,
-                      ),
+                      child: MessageDownloadContentWeb(event),
                     ),
                 ],
                 if (!event.isCaptionModeOrReply())
@@ -315,11 +291,7 @@ class MessageContent extends StatelessWidget
                     padding: MessageContentStyle.endOfBubbleWidgetPadding,
                     child: OptionalSelectionContainerDisabled(
                       isEnabled: PlatformInfos.isWeb,
-                      child: Text.rich(
-                        WidgetSpan(
-                          child: endOfBubbleWidget,
-                        ),
-                      ),
+                      child: Text.rich(WidgetSpan(child: endOfBubbleWidget)),
                     ),
                   ),
               ],
@@ -337,8 +309,9 @@ class MessageContent extends StatelessWidget
                 padding: MessageContentStyle.emojiPadding,
                 child: FormattedTextWidget(
                   event: event,
-                  linkStyle:
-                      MessageContentStyle.linkStyleMessageContent(context),
+                  linkStyle: MessageContentStyle.linkStyleMessageContent(
+                    context,
+                  ),
                   fontSize: fontSize,
                 ),
               );
@@ -349,8 +322,9 @@ class MessageContent extends StatelessWidget
           case EventTypes.Encrypted:
             return EncryptedContent(event: event);
           case MessageTypes.Location:
-            final geoUri =
-                Uri.tryParse(event.content.tryGet<String>('geo_uri')!);
+            final geoUri = Uri.tryParse(
+              event.content.tryGet<String>('geo_uri')!,
+            );
             if (geoUri != null && geoUri.scheme == 'geo') {
               final latlong = geoUri.path
                   .split(';')
@@ -371,8 +345,10 @@ class MessageContent extends StatelessWidget
                     const SizedBox(height: 6),
                     OutlinedButton.icon(
                       icon: Icon(Icons.location_on_outlined, color: textColor),
-                      onPressed: UrlLauncher(context, url: geoUri.toString())
-                          .launchUrl,
+                      onPressed: UrlLauncher(
+                        context,
+                        url: geoUri.toString(),
+                      ).launchUrl,
                       label: Text(
                         L10n.of(context)!.openInMaps,
                         style: TextStyle(color: textColor),
@@ -392,7 +368,8 @@ class MessageContent extends StatelessWidget
                 hideReply: true,
               ),
               builder: (context, snapshot) {
-                final localizedBody = snapshot.data ??
+                final localizedBody =
+                    snapshot.data ??
                     event.calcLocalizedBodyFallback(
                       MatrixLocals(L10n.of(context)!),
                       hideReply: true,
@@ -403,8 +380,9 @@ class MessageContent extends StatelessWidget
                   localizedBody: localizedBody,
                   ownMessage: ownMessage,
                   fontSize: fontSize,
-                  linkStyle:
-                      MessageContentStyle.linkStyleMessageContent(context),
+                  linkStyle: MessageContentStyle.linkStyleMessageContent(
+                    context,
+                  ),
                   richTextStyle: event.getMessageTextStyle(context),
                 );
               },
@@ -468,8 +446,9 @@ class _MessageVideoBuilderState extends State<_MessageVideoBuilder> {
       builder: (context, snapshot) {
         final matrixFile = snapshot.data;
 
-        DisplayImageInfo? displayImageInfo =
-            widget.event.getOriginalResolution()?.getDisplayImageInfo(context);
+        DisplayImageInfo? displayImageInfo = widget.event
+            .getOriginalResolution()
+            ?.getDisplayImageInfo(context);
 
         if (isSendingVideo(matrixFile)) {
           final file = matrixFile as MatrixVideoFile;

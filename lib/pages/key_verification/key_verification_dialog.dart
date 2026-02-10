@@ -20,17 +20,14 @@ import 'package:fluffychat/widgets/avatar/avatar.dart';
 
 class KeyVerificationDialog extends StatefulWidget {
   Future<void> show(BuildContext context) => showAdaptiveBottomSheet(
-        context: context,
-        builder: (context) => this,
-        isDismissible: false,
-      );
+    context: context,
+    builder: (context) => this,
+    isDismissible: false,
+  );
 
   final KeyVerification request;
 
-  const KeyVerificationDialog({
-    super.key,
-    required this.request,
-  });
+  const KeyVerificationDialog({super.key, required this.request});
 
   @override
   KeyVerificationPageState createState() => KeyVerificationPageState();
@@ -62,8 +59,10 @@ class KeyVerificationPageState extends State<KeyVerificationDialog> {
   void dispose() {
     widget.request.onUpdate =
         originalOnUpdate; // don't want to get updates anymore
-    if (![KeyVerificationState.error, KeyVerificationState.done]
-        .contains(widget.request.state)) {
+    if (![
+      KeyVerificationState.error,
+      KeyVerificationState.done,
+    ].contains(widget.request.state)) {
       widget.request.cancel('m.user');
     }
     super.dispose();
@@ -100,8 +99,9 @@ class KeyVerificationPageState extends State<KeyVerificationDialog> {
   @override
   Widget build(BuildContext context) {
     User? user;
-    final directChatId =
-        widget.request.client.getDirectChatFromUserId(widget.request.userId);
+    final directChatId = widget.request.client.getDirectChatFromUserId(
+      widget.request.userId,
+    );
     if (directChatId != null) {
       user = widget.request.client
           .getRoomById(directChatId)!
@@ -157,14 +157,12 @@ class KeyVerificationPageState extends State<KeyVerificationDialog> {
             message: L10n.of(context)!.submit,
             borderHover: KeyVerificationStyles.borderHoverButtonWaningBanner,
             styleMessage: Theme.of(context).textTheme.labelLarge?.copyWith(
-                  color: Theme.of(context).colorScheme.primary,
-                ),
+              color: Theme.of(context).colorScheme.primary,
+            ),
             margin: KeyVerificationStyles.marginButtonWarningBanner,
             buttonDecoration: BoxDecoration(
               color: LinagoraSysColors.material().onPrimary,
-              borderRadius: const BorderRadius.all(
-                Radius.circular(100),
-              ),
+              borderRadius: const BorderRadius.all(Radius.circular(100)),
             ),
           ),
         );
@@ -174,14 +172,12 @@ class KeyVerificationPageState extends State<KeyVerificationDialog> {
             message: L10n.of(context)!.skip,
             borderHover: KeyVerificationStyles.borderHoverButtonWaningBanner,
             styleMessage: Theme.of(context).textTheme.labelLarge?.copyWith(
-                  color: Theme.of(context).colorScheme.primary,
-                ),
+              color: Theme.of(context).colorScheme.primary,
+            ),
             margin: KeyVerificationStyles.marginButtonWarningBanner,
             buttonDecoration: BoxDecoration(
               color: LinagoraSysColors.material().onPrimary,
-              borderRadius: const BorderRadius.all(
-                Radius.circular(100),
-              ),
+              borderRadius: const BorderRadius.all(Radius.circular(100)),
             ),
           ),
         );
@@ -198,27 +194,23 @@ class KeyVerificationPageState extends State<KeyVerificationDialog> {
               size: AvatarStyle.defaultSize * 2,
             ),
             const SizedBox(height: 16),
-            Text(
-              L10n.of(context)!.askVerificationRequest(displayName),
-            ),
+            Text(L10n.of(context)!.askVerificationRequest(displayName)),
           ],
         );
         buttons.add(
           TwakeTextButton(
-            onTap: () => widget.request
-                .rejectVerification()
-                .then((_) => Navigator.maybePop(context)),
+            onTap: () => widget.request.rejectVerification().then(
+              (_) => Navigator.maybePop(context),
+            ),
             message: L10n.of(context)!.reject,
             borderHover: KeyVerificationStyles.borderHoverButtonWaningBanner,
             styleMessage: Theme.of(context).textTheme.labelLarge?.copyWith(
-                  color: Theme.of(context).colorScheme.primary,
-                ),
+              color: Theme.of(context).colorScheme.primary,
+            ),
             margin: KeyVerificationStyles.marginButtonWarningBanner,
             buttonDecoration: BoxDecoration(
               color: LinagoraSysColors.material().onPrimary,
-              borderRadius: const BorderRadius.all(
-                Radius.circular(100),
-              ),
+              borderRadius: const BorderRadius.all(Radius.circular(100)),
             ),
           ),
         );
@@ -228,8 +220,8 @@ class KeyVerificationPageState extends State<KeyVerificationDialog> {
             message: L10n.of(context)!.accept,
             borderHover: KeyVerificationStyles.borderHoverButtonWaningBanner,
             styleMessage: Theme.of(context).textTheme.labelLarge?.copyWith(
-                  color: LinagoraSysColors.material().onPrimary,
-                ),
+              color: LinagoraSysColors.material().onPrimary,
+            ),
             margin: KeyVerificationStyles.marginButtonWarningBanner,
             buttonDecoration: BoxDecoration(
               color: Theme.of(context).colorScheme.primary,
@@ -246,10 +238,7 @@ class KeyVerificationPageState extends State<KeyVerificationDialog> {
               Stack(
                 alignment: Alignment.center,
                 children: [
-                  Avatar(
-                    mxContent: user?.avatarUrl,
-                    name: displayName,
-                  ),
+                  Avatar(mxContent: user?.avatarUrl, name: displayName),
                   const SizedBox(
                     width: AvatarStyle.defaultSize + 2,
                     height: AvatarStyle.defaultSize + 2,
@@ -287,16 +276,15 @@ class KeyVerificationPageState extends State<KeyVerificationDialog> {
           title = Text(L10n.of(context)!.compareNumbersMatch);
           final numbers = widget.request.sasNumbers;
           final numbstr = '${numbers[0]}-${numbers[1]}-${numbers[2]}';
-          compareWidget =
-              TextSpan(text: numbstr, style: const TextStyle(fontSize: 40));
+          compareWidget = TextSpan(
+            text: numbstr,
+            style: const TextStyle(fontSize: 40),
+          );
         }
         body = Column(
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
-            Text.rich(
-              compareWidget,
-              textAlign: TextAlign.center,
-            ),
+            Text.rich(compareWidget, textAlign: TextAlign.center),
           ],
         );
         buttons.add(
@@ -305,14 +293,12 @@ class KeyVerificationPageState extends State<KeyVerificationDialog> {
             message: L10n.of(context)!.theyDontMatch,
             borderHover: KeyVerificationStyles.borderHoverButtonWaningBanner,
             styleMessage: Theme.of(context).textTheme.labelLarge?.copyWith(
-                  color: Theme.of(context).colorScheme.primary,
-                ),
+              color: Theme.of(context).colorScheme.primary,
+            ),
             margin: KeyVerificationStyles.marginButtonWarningBanner,
             buttonDecoration: BoxDecoration(
               color: LinagoraSysColors.material().onPrimary,
-              borderRadius: const BorderRadius.all(
-                Radius.circular(100),
-              ),
+              borderRadius: const BorderRadius.all(Radius.circular(100)),
             ),
             constraints: BoxConstraints(
               maxWidth: KeyVerificationStyles.maxWidthMatchButton(context),
@@ -325,8 +311,8 @@ class KeyVerificationPageState extends State<KeyVerificationDialog> {
             message: L10n.of(context)!.theyMatch,
             borderHover: KeyVerificationStyles.borderHoverButtonWaningBanner,
             styleMessage: Theme.of(context).textTheme.labelLarge?.copyWith(
-                  color: LinagoraSysColors.material().onPrimary,
-                ),
+              color: LinagoraSysColors.material().onPrimary,
+            ),
             margin: KeyVerificationStyles.marginButtonWarningBanner,
             buttonDecoration: BoxDecoration(
               color: Theme.of(context).colorScheme.primary,
@@ -347,10 +333,7 @@ class KeyVerificationPageState extends State<KeyVerificationDialog> {
           children: <Widget>[
             const CircularProgressIndicator.adaptive(strokeWidth: 2),
             const SizedBox(height: 10),
-            Text(
-              acceptText,
-              textAlign: TextAlign.center,
-            ),
+            Text(acceptText, textAlign: TextAlign.center),
           ],
         );
         break;
@@ -364,10 +347,7 @@ class KeyVerificationPageState extends State<KeyVerificationDialog> {
               size: 128.0,
             ),
             const SizedBox(height: 10),
-            Text(
-              L10n.of(context)!.verifySuccess,
-              textAlign: TextAlign.center,
-            ),
+            Text(L10n.of(context)!.verifySuccess, textAlign: TextAlign.center),
           ],
         );
         buttons.add(
@@ -376,14 +356,12 @@ class KeyVerificationPageState extends State<KeyVerificationDialog> {
             message: L10n.of(context)!.close,
             borderHover: KeyVerificationStyles.borderHoverButtonWaningBanner,
             styleMessage: Theme.of(context).textTheme.labelLarge?.copyWith(
-                  color: Theme.of(context).colorScheme.primary,
-                ),
+              color: Theme.of(context).colorScheme.primary,
+            ),
             margin: KeyVerificationStyles.marginButtonWarningBanner,
             buttonDecoration: BoxDecoration(
               color: LinagoraSysColors.material().onPrimary,
-              borderRadius: const BorderRadius.all(
-                Radius.circular(100),
-              ),
+              borderRadius: const BorderRadius.all(Radius.circular(100)),
             ),
           ),
         );
@@ -406,28 +384,20 @@ class KeyVerificationPageState extends State<KeyVerificationDialog> {
             message: L10n.of(context)!.close,
             borderHover: KeyVerificationStyles.borderHoverButtonWaningBanner,
             styleMessage: Theme.of(context).textTheme.labelLarge?.copyWith(
-                  color: Theme.of(context).colorScheme.primary,
-                ),
+              color: Theme.of(context).colorScheme.primary,
+            ),
             margin: KeyVerificationStyles.marginButtonWarningBanner,
             buttonDecoration: BoxDecoration(
               color: LinagoraSysColors.material().onPrimary,
-              borderRadius: const BorderRadius.all(
-                Radius.circular(100),
-              ),
+              borderRadius: const BorderRadius.all(Radius.circular(100)),
             ),
           ),
         );
         break;
     }
     return Scaffold(
-      appBar: AppBar(
-        leading: const CloseButton(),
-        title: title,
-      ),
-      body: ListView(
-        padding: const EdgeInsets.all(12.0),
-        children: [body],
-      ),
+      appBar: AppBar(leading: const CloseButton(), title: title),
+      body: ListView(padding: const EdgeInsets.all(12.0), children: [body]),
       bottomNavigationBar: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(12.0),

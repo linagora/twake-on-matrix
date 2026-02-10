@@ -34,22 +34,16 @@ class PostAddressBookResponseIsNullState extends Failure {
 class PostAddressBookSuccessState extends Success {
   final List<AddressBook> updatedAddressBooks;
 
-  const PostAddressBookSuccessState({
-    required this.updatedAddressBooks,
-  });
+  const PostAddressBookSuccessState({required this.updatedAddressBooks});
 
   @override
-  List<Object> get props => [
-        updatedAddressBooks,
-      ];
+  List<Object> get props => [updatedAddressBooks];
 }
 
 class PostAddressBookFailureState extends Failure {
   final dynamic exception;
 
-  const PostAddressBookFailureState({
-    required this.exception,
-  });
+  const PostAddressBookFailureState({required this.exception});
 
   @override
   List<Object> get props => [exception];

@@ -22,12 +22,12 @@ class ContextMenuAction extends Equatable {
 
   @override
   List<Object?> get props => [
-        name,
-        icon,
-        imagePath,
-        colorIcon,
-        iconSize,
-        styleName,
-        padding,
-      ];
+    name,
+    icon,
+    imagePath,
+    colorIcon,
+    iconSize,
+    styleName,
+    padding,
+  ];
 }

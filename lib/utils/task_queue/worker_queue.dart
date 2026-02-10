@@ -40,8 +40,8 @@ abstract class WorkerQueue {
             .then(_handleTaskExecuteCompleted)
             .catchError(_handleTaskExecuteError)
             .whenComplete(() {
-          firstTask.onTaskCompleted?.call();
-        });
+              firstTask.onTaskCompleted?.call();
+            });
       } else {
         _completer?.complete();
       }

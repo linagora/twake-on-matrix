@@ -20,11 +20,11 @@ class CreateNewGroupChatRequest extends Equatable {
 
   @override
   List<Object?> get props => [
-        groupName,
-        invite,
-        enableEncryption,
-        createRoomPreset,
-        urlAvatar,
-        powerLevelContentOverride,
-      ];
+    groupName,
+    invite,
+    enableEncryption,
+    createRoomPreset,
+    urlAvatar,
+    powerLevelContentOverride,
+  ];
 }

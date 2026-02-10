@@ -23,9 +23,7 @@ class AdaptiveScaffoldRouteStyle {
         : EdgeInsetsDirectional.zero;
   }
 
-  static BorderRadiusGeometry secondaryBodyBorder(
-    bool isWebAndDesktop,
-  ) {
+  static BorderRadiusGeometry secondaryBodyBorder(bool isWebAndDesktop) {
     if (isWebAndDesktop) {
       return const BorderRadius.all(Radius.circular(16.0));
     } else {

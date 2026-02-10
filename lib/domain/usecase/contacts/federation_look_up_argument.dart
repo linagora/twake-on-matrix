@@ -13,9 +13,9 @@ class FederationLookUpArgument extends TwakeLookUpArgument {
 
   @override
   List<Object?> get props => [
-        homeServerUrl,
-        federationUrl,
-        withMxId,
-        withAccessToken,
-      ];
+    homeServerUrl,
+    federationUrl,
+    withMxId,
+    withAccessToken,
+  ];
 }

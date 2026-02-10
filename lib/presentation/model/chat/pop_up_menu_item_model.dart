@@ -21,11 +21,5 @@ class ContextMenuItemModel with EquatableMixin {
   });
 
   @override
-  List<Object?> get props => [
-        text,
-        imagePath,
-        iconData,
-        color,
-        onTap,
-      ];
+  List<Object?> get props => [text, imagePath, iconData, color, onTap];
 }

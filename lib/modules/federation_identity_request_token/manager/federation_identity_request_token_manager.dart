@@ -35,10 +35,7 @@ class FederationIdentityRequestTokenManager {
 
     if (kDebugMode) {
       dio.interceptors.add(
-        LogInterceptor(
-          requestBody: true,
-          responseBody: true,
-        ),
+        LogInterceptor(requestBody: true, responseBody: true),
       );
     }
 
@@ -60,24 +57,18 @@ class FederationIdentityRequestTokenManager {
   FederationIdentityRequestTokenRepositoryImpl _bindingRepositoryImpl(
     FederationIdentityRequestTokenDatasourceImpl datasource,
   ) {
-    return FederationIdentityRequestTokenRepositoryImpl(
-      datasource: datasource,
-    );
+    return FederationIdentityRequestTokenRepositoryImpl(datasource: datasource);
   }
 
   FederationIdentityRequestTokenInteractor _bindingInteractor({
     required FederationTokenRequest federationTokenRequest,
   }) {
-    final dio = _bindingDio(
-      federationTokenRequest: federationTokenRequest,
-    );
+    final dio = _bindingDio(federationTokenRequest: federationTokenRequest);
     final api = _bindingAPI(dio);
     final datasource = _bindingDataSourceImpl(api);
     final repository = _bindingRepositoryImpl(datasource);
 
-    return FederationIdentityRequestTokenInteractor(
-      repository: repository,
-    );
+    return FederationIdentityRequestTokenInteractor(repository: repository);
   }
 
   Future<Either<Failure, Success>> execute({
@@ -85,8 +76,6 @@ class FederationIdentityRequestTokenManager {
   }) {
     return _bindingInteractor(
       federationTokenRequest: federationTokenRequest,
-    ).execute(
-      mxid: federationTokenRequest.mxid,
-    );
+    ).execute(mxid: federationTokenRequest.mxid);
   }
 }

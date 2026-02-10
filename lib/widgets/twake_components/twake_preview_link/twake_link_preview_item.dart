@@ -26,9 +26,7 @@ class TwakeLinkPreviewItem extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       key: linkPreviewBodyKey,
-      constraints: const BoxConstraints(
-        minWidth: double.infinity,
-      ),
+      constraints: const BoxConstraints(minWidth: double.infinity),
       height: TwakeLinkPreviewItemStyle.maxHeightPreviewItem,
       decoration: ShapeDecoration(
         color: ownMessage
@@ -93,17 +91,14 @@ class LinkPreviewBuilder extends StatelessWidget {
           ClipRRect(
             key: LinkPreviewBuilder.clipRRectKey,
             borderRadius: const BorderRadius.vertical(
-              top: Radius.circular(
-                TwakeLinkPreviewItemStyle.radiusBorder,
-              ),
-              bottom: Radius.circular(
-                TwakeLinkPreviewItemStyle.radiusBorder,
-              ),
+              top: Radius.circular(TwakeLinkPreviewItemStyle.radiusBorder),
+              bottom: Radius.circular(TwakeLinkPreviewItemStyle.radiusBorder),
             ),
             child: SizedBox(
               width: TwakeLinkPreviewItemStyle.heightMxcImagePreview,
               height: TwakeLinkPreviewItemStyle.heightMxcImagePreview,
-              child: (urlPreviewPresentation.imageUri != null &&
+              child:
+                  (urlPreviewPresentation.imageUri != null &&
                       urlPreviewPresentation.imageWidth != null &&
                       urlPreviewPresentation.imageHeight != null)
                   ? MxcImage(
@@ -151,8 +146,8 @@ class LinkPreviewBuilder extends StatelessWidget {
                     key: LinkPreviewBuilder.titleKey,
                     urlPreviewPresentation.title ?? '',
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          color: Theme.of(context).colorScheme.onSurfaceVariant,
-                        ),
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -164,8 +159,8 @@ class LinkPreviewBuilder extends StatelessWidget {
                     key: LinkPreviewBuilder.subtitleKey,
                     urlPreviewPresentation.description ?? '',
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: LinagoraRefColors.material().neutral[50],
-                        ),
+                      color: LinagoraRefColors.material().neutral[50],
+                    ),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),

@@ -1,5 +1,1 @@
-enum SsoLoginState {
-  success,
-  error,
-  tokenEmpty,
-}
+enum SsoLoginState { success, error, tokenEmpty }

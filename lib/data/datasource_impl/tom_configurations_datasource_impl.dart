@@ -10,18 +10,20 @@ import 'package:matrix/matrix.dart';
 class HiveToMConfigurationDatasource implements ToMConfigurationsDatasource {
   @override
   Future<ToMConfigurations> getTomConfigurations(String userId) async {
-    final hiveCollectionToMDatabase =
-        await getIt.getAsync<HiveCollectionToMDatabase>();
-    final cachedConfiguration =
-        await hiveCollectionToMDatabase.tomConfigurationsBox.get(userId);
+    final hiveCollectionToMDatabase = await getIt
+        .getAsync<HiveCollectionToMDatabase>();
+    final cachedConfiguration = await hiveCollectionToMDatabase
+        .tomConfigurationsBox
+        .get(userId);
     if (cachedConfiguration != null) {
-      final toMConfigurationsHiveObj =
-          ToMConfigurationsHiveObj.fromJson(copyMap(cachedConfiguration));
+      final toMConfigurationsHiveObj = ToMConfigurationsHiveObj.fromJson(
+        copyMap(cachedConfiguration),
+      );
       return ToMConfigurations(
         tomServerInformation: toMConfigurationsHiveObj.tomServerInformation
             .toToMServerInformation(),
-        identityServerInformation: toMConfigurationsHiveObj.identityServerUrl !=
-                null
+        identityServerInformation:
+            toMConfigurationsHiveObj.identityServerUrl != null
             ? IdentityServerInformation(
                 baseUrl: Uri.parse(toMConfigurationsHiveObj.identityServerUrl!),
               )
@@ -39,12 +41,13 @@ class HiveToMConfigurationDatasource implements ToMConfigurationsDatasource {
     String userId,
     ToMConfigurations toMConfigurations,
   ) async {
-    final hiveCollectionToMDatabase =
-        await getIt.getAsync<HiveCollectionToMDatabase>();
+    final hiveCollectionToMDatabase = await getIt
+        .getAsync<HiveCollectionToMDatabase>();
     return hiveCollectionToMDatabase.tomConfigurationsBox.put(
       userId,
-      ToMConfigurationsHiveObj.fromToMConfigurations(toMConfigurations)
-          .toJson(),
+      ToMConfigurationsHiveObj.fromToMConfigurations(
+        toMConfigurations,
+      ).toJson(),
     );
   }
 

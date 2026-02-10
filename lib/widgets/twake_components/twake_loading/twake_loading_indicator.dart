@@ -33,9 +33,8 @@ class _TwakeLoadingIndicatorState extends State<TwakeLoadingIndicator>
   void initState() {
     super.initState();
 
-    _appearanceController = AnimationController(
-      vsync: this,
-    )..addListener(() {
+    _appearanceController = AnimationController(vsync: this)
+      ..addListener(() {
         setState(() {});
       });
 

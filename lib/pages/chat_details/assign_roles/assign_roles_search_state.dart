@@ -18,18 +18,13 @@ class AssignRolesSearchSuccessState extends Success {
   });
 
   @override
-  List<Object?> get props => [
-        assignRolesMember,
-        keyword,
-      ];
+  List<Object?> get props => [assignRolesMember, keyword];
 }
 
 class AssignRolesSearchEmptyState extends Failure {
   final String keyword;
 
-  const AssignRolesSearchEmptyState({
-    required this.keyword,
-  });
+  const AssignRolesSearchEmptyState({required this.keyword});
 
   @override
   List<Object?> get props => [keyword];

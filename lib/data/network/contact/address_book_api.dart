@@ -12,9 +12,7 @@ class AddressBookApi {
 
   Future<AddressbookResponse> getAddressBook() async {
     final response = await _client
-        .get(
-          TomEndpoint.addressbookServicePath.path,
-        )
+        .get(TomEndpoint.addressbookServicePath.path)
         .onError((error, stackTrace) => throw Exception(error));
 
     return AddressbookResponse.fromJson(response);

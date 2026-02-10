@@ -1,10 +1,7 @@
 import 'package:equatable/equatable.dart';
 import 'package:matrix/matrix.dart';
 
-enum MultipleAccountLoginType {
-  firstLoggedIn,
-  otherAccountLoggedIn,
-}
+enum MultipleAccountLoginType { firstLoggedIn, otherAccountLoggedIn }
 
 class ClientLoginStateEvent with EquatableMixin {
   final Client client;
@@ -18,9 +15,5 @@ class ClientLoginStateEvent with EquatableMixin {
   });
 
   @override
-  List<Object?> get props => [
-        client,
-        loginState,
-        multipleAccountLoginType,
-      ];
+  List<Object?> get props => [client, loginState, multipleAccountLoginType];
 }

@@ -23,16 +23,14 @@ mixin UploadFileMixin<T extends StatefulWidget> on State<T> {
   Event get event;
 
   StreamSubscription<Either<Failure, Success>>?
-      _trySetupUploadStreamSubcription() => streamSubscription = uploadManager
-          .getUploadStateStream(event.eventId)
-          ?.listen(setupUploadProcess);
+  _trySetupUploadStreamSubcription() => streamSubscription = uploadManager
+      .getUploadStateStream(event.eventId)
+      ?.listen(setupUploadProcess);
 
   void setupUploadProcess(Either<Failure, Success> state) {
     state.fold(
       (failure) {
-        Logs().e(
-          'UploadFileMixin::setupUploadProcess(): Failure $failure',
-        );
+        Logs().e('UploadFileMixin::setupUploadProcess(): Failure $failure');
         if (failure is UploadFileFailedState &&
             failure.exception is CancelUploadException) {
           return;
@@ -46,9 +44,7 @@ mixin UploadFileMixin<T extends StatefulWidget> on State<T> {
         uploadFileStateNotifier.value = const UploadFileFailedUIState();
       },
       (success) {
-        Logs().d(
-          'UploadFileMixin::setupUploadProcess(): Success $success',
-        );
+        Logs().d('UploadFileMixin::setupUploadProcess(): Success $success');
         if (success is UploadingFileState) {
           if (!success.isThumbnail) {
             uploadFileStateNotifier.value = UploadingFileUIState(

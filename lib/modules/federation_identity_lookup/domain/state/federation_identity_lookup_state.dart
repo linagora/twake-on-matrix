@@ -3,9 +3,7 @@ import 'package:fluffychat/app_state/success.dart';
 import 'package:fluffychat/modules/federation_identity_lookup/domain/models/federation_contact.dart';
 
 class FederationIdentityLookupSuccess extends Success {
-  const FederationIdentityLookupSuccess({
-    required this.newContacts,
-  });
+  const FederationIdentityLookupSuccess({required this.newContacts});
 
   final Map<String, FederationContact> newContacts;
 

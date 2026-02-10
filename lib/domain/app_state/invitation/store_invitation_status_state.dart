@@ -28,11 +28,7 @@ class StoreInvitationStatusSuccessState extends Success {
   });
 
   @override
-  List<Object?> get props => [
-        contactId,
-        userId,
-        invitationId,
-      ];
+  List<Object?> get props => [contactId, userId, invitationId];
 }
 
 class StoreInvitationStatusFailureState extends Failure {
@@ -52,10 +48,10 @@ class StoreInvitationStatusFailureState extends Failure {
 
   @override
   List<Object?> get props => [
-        exception,
-        message,
-        contactId,
-        userId,
-        invitationId,
-      ];
+    exception,
+    message,
+    contactId,
+    userId,
+    invitationId,
+  ];
 }

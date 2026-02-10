@@ -14,10 +14,10 @@ class TwakeChatPresentationAccount extends TwakePresentationAccount {
 
   @override
   List<Object?> get props => [
-        clientAccount,
-        accountName,
-        accountId,
-        avatar,
-        accountActiveStatus,
-      ];
+    clientAccount,
+    accountName,
+    accountId,
+    avatar,
+    accountActiveStatus,
+  ];
 }

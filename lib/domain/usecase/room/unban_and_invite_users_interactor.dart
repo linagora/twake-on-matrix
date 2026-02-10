@@ -26,9 +26,9 @@ class UnbanAndInviteUsersInteractor {
     }
     await unbanUsersInteractor
         .execute(
-          users: room
-              .getBannedMembers()
-              .where((user) => userIds.contains(user.id)),
+          users: room.getBannedMembers().where(
+            (user) => userIds.contains(user.id),
+          ),
         )
         .last;
     yield* inviteUserInteractor.execute(

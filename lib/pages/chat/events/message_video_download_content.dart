@@ -54,9 +54,9 @@ class _MessageVideoDownloadContentState
   Future<String?> getMobileThumbnail() async {
     try {
       final uploadFileInfo = await getIt.get<UploadManager>().getUploadFileInfo(
-            event.eventId,
-            room: event.room,
-          );
+        event.eventId,
+        room: event.room,
+      );
       if (uploadFileInfo == null) {
         _completer.complete(null);
         return null;

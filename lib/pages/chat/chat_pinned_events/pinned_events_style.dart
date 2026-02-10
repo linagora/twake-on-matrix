@@ -23,15 +23,10 @@ class PinnedEventsStyle {
   }
 
   static const EdgeInsetsDirectional marginPinnedEventsWidget =
-      EdgeInsetsDirectional.symmetric(
-    horizontal: 16,
-    vertical: 8,
-  );
+      EdgeInsetsDirectional.symmetric(horizontal: 16, vertical: 8);
 
   static const EdgeInsetsDirectional paddingContentPinned =
-      EdgeInsetsDirectional.symmetric(
-    horizontal: 4.0,
-  );
+      EdgeInsetsDirectional.symmetric(horizontal: 4.0);
 
   static EdgeInsets get marginPinIcon => const EdgeInsets.only(top: 4.0);
   static const double paddingPinIcon = 8.0;

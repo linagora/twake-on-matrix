@@ -67,20 +67,14 @@ class _PermissionDialogState extends State<PermissionDialog>
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 if (widget.icon != null) ...[
-                  const SizedBox(
-                    height: 24.0,
-                  ),
+                  const SizedBox(height: 24.0),
                   widget.icon!,
                 ],
                 if (widget.titleTextRequestPermission != null) ...[
-                  const SizedBox(
-                    height: 16.0,
-                  ),
+                  const SizedBox(height: 16.0),
                   widget.titleTextRequestPermission!,
                 ],
-                const SizedBox(
-                  height: 16.0,
-                ),
+                const SizedBox(height: 16.0),
                 widget.explainTextRequestPermission,
                 const SizedBox(height: 24.0),
                 widget.customButtonRow ??
@@ -104,8 +98,8 @@ class _PermissionDialogState extends State<PermissionDialog>
                               widget.onAcceptButton!.call();
                             } else {
                               await widget.permission.request().then(
-                                    (value) => Navigator.of(context).pop(),
-                                  );
+                                (value) => Navigator.of(context).pop(),
+                              );
                             }
                           },
                         ),
@@ -147,15 +141,17 @@ class PermissionTextButton extends StatelessWidget {
         borderRadius: BorderRadius.circular(100.0),
         onTap: onPressed,
         child: Container(
-          padding: padding ??
+          padding:
+              padding ??
               const EdgeInsets.symmetric(horizontal: 12.0, vertical: 10.0),
           decoration: decoration,
           child: Text(
             text,
-            style: textStyle ??
+            style:
+                textStyle ??
                 Theme.of(context).textTheme.labelLarge?.copyWith(
-                      color: Theme.of(context).colorScheme.primary,
-                    ),
+                  color: Theme.of(context).colorScheme.primary,
+                ),
           ),
         ),
       ),

@@ -19,8 +19,9 @@ class PreSearchRecentContactsInteractor {
         yield const Left(PreSearchRecentContactsEmpty());
         return;
       }
-      final recentRooms =
-          directRooms.getRange(0, min(directRooms.length, limit)).toList();
+      final recentRooms = directRooms
+          .getRange(0, min(directRooms.length, limit))
+          .toList();
 
       yield Right(PreSearchRecentContactsSuccess(rooms: recentRooms));
     } catch (e) {
