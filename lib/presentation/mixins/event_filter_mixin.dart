@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
 import 'package:matrix/matrix.dart';
 
@@ -97,6 +99,7 @@ mixin EventFilterMixin {
     required String roomId,
     required String eventId,
     int limit = 100,
+    String? filter,
   }) async {
     if (client == null) return null;
 
@@ -105,6 +108,7 @@ mixin EventFilterMixin {
         roomId,
         eventId,
         limit: limit,
+        filter: filter,
       );
     } catch (e) {
       Logs().e('getInitialEventContext: Error getting event context', e);
@@ -163,6 +167,7 @@ mixin EventFilterMixin {
     String? backwardToken,
     String? forwardToken,
     int limit = 10,
+    String? filter,
   }) async {
     if (client == null) return (backward: null, forward: null);
 
@@ -174,6 +179,7 @@ mixin EventFilterMixin {
             Direction.b,
             limit: limit,
             from: backwardToken,
+            filter: filter,
           ),
         if (forwardToken != null)
           client.getRoomEvents(
@@ -181,6 +187,7 @@ mixin EventFilterMixin {
             Direction.f,
             limit: limit,
             from: forwardToken,
+            filter: filter,
           ),
       ]);
 
@@ -235,6 +242,7 @@ mixin EventFilterMixin {
     int minEventsTarget = 7,
     int maxExpandIterations = 10,
     int expandLimit = 10,
+    String? filter,
   }) async {
     if (client == null) {
       return (events: <Event>[], forwardToken: null, backwardToken: null);
@@ -248,6 +256,7 @@ mixin EventFilterMixin {
         roomId: room.id,
         eventId: eventId,
         limit: initialLimit,
+        filter: filter,
       );
 
       if (initialEventContext == null) {
@@ -282,6 +291,7 @@ mixin EventFilterMixin {
           forwardToken: forwardToken,
           backwardToken: backwardToken,
           limit: expandLimit,
+          filter: filter,
         );
 
         forwardToken = expandResult.forward?.end;
@@ -416,6 +426,12 @@ mixin EventFilterMixin {
       minEventsTarget: minEventsTarget,
       maxExpandIterations: maxExpandIterations,
       expandLimit: expandLimit,
+      filter: jsonEncode(
+        SearchFilter(
+          containsUrl: true,
+          types: [EventTypes.Message],
+        ),
+      ),
     );
 
     // Find the clicked event and return only events up to it

@@ -232,12 +232,9 @@ class AudioPlayerState extends State<AudioPlayerWidget>
                   currentPosition = maxPosition;
                 }
 
+                // Use the fixed wave count calculated during initialization
                 final wavePosition = (currentPosition / maxPosition) *
-                    calculateWaveCountAuto(
-                      minWaves: AudioPlayerStyle.minWaveCount,
-                      maxWaves: _calculatedWaveform.length,
-                      durationInSeconds: _durationNotifier.value.inSeconds,
-                    );
+                    _calculatedWaveform.length;
 
                 return Padding(
                   padding: const EdgeInsets.only(
