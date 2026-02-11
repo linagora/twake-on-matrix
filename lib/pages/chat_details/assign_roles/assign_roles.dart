@@ -63,8 +63,8 @@ class AssignRolesController extends State<AssignRoles>
 
   final ValueNotifier<Either<Failure, Success>> searchUserResults =
       ValueNotifier<Either<Failure, Success>>(
-        Right(AssignRolesSearchInitialState()),
-      );
+    Right(AssignRolesSearchInitialState()),
+  );
 
   void onBack() {
     Navigator.of(context).pop();
@@ -128,8 +128,8 @@ class AssignRolesController extends State<AssignRoles>
 
     final searchResults = assignedUsers.where((user) {
       return (user.displayName ?? '').toLowerCase().contains(
-            searchTerm.toLowerCase(),
-          ) ||
+                searchTerm.toLowerCase(),
+              ) ||
           (user.id).toLowerCase().contains(searchTerm.toLowerCase());
     }).toList();
 
@@ -241,9 +241,9 @@ class AssignRolesController extends State<AssignRoles>
   }
 
   void _handleOnTapRemoveUser({required User user}) {
-    _banUserSubscription = banUserInteractor.execute(user: user).listen((
-      result,
-    ) {
+    _banUserSubscription = banUserInteractor
+        .execute(user: user, room: widget.room)
+        .listen((result) {
       result.fold(
         (failure) {
           if (failure is BanUserFailure) {
