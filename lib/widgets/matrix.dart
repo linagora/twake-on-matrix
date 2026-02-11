@@ -11,12 +11,11 @@ import 'package:fluffychat/domain/repository/federation_configurations_repositor
 import 'package:fluffychat/domain/repository/user_info/user_info_repository.dart';
 import 'package:fluffychat/domain/usecase/room/create_support_chat_interactor.dart';
 import 'package:fluffychat/event/twake_event_types.dart';
-import 'package:fluffychat/pages/chat/events/audio_message/audio_player_widget.dart';
 import 'package:fluffychat/presentation/mixins/init_config_mixin.dart';
 import 'package:fluffychat/presentation/model/client_login_state_event.dart';
 import 'package:fluffychat/widgets/layouts/agruments/logout_body_args.dart';
+import 'package:fluffychat/presentation/mixins/audio_mixin.dart';
 import 'package:flutter_emoji_mart/flutter_emoji_mart.dart';
-import 'package:just_audio/just_audio.dart';
 import 'package:linagora_design_flutter/cozy_config_manager/cozy_config_manager.dart';
 import 'package:universal_html/html.dart' as html hide File;
 
@@ -91,16 +90,12 @@ class Matrix extends StatefulWidget {
 }
 
 class MatrixState extends State<Matrix>
-    with WidgetsBindingObserver, ReceiveSharingIntentMixin, InitConfigMixin {
+    with
+        WidgetsBindingObserver,
+        ReceiveSharingIntentMixin,
+        InitConfigMixin,
+        AudioMixin {
   final _contactsManager = getIt.get<ContactsManager>();
-
-  AudioPlayer audioPlayer = AudioPlayer();
-  final ValueNotifier<Event?> voiceMessageEvent = ValueNotifier(null);
-
-  final ValueNotifier<AudioPlayerStatus> currentAudioStatus =
-      ValueNotifier(AudioPlayerStatus.notDownloaded);
-
-  StreamSubscription<PlayerState>? _audioPlayerStateSubscription;
 
   int _activeClient = -1;
   String? activeBundle;
@@ -161,6 +156,8 @@ class MatrixState extends State<Matrix>
     if (index != -1) {
       if (index == _activeClient) return SetActiveClientState.success;
       _activeClient = index;
+      // Clean up audio player when switching accounts
+      await cleanupAudioPlayer();
       // TODO: Multi-client VoiP support
       createVoipPlugin();
       await _setUpToMServicesWhenChangingActiveClient(newClient);
@@ -555,6 +552,8 @@ class MatrixState extends State<Matrix>
     Client currentClient,
   ) async {
     waitForFirstSync = false;
+    // Clean up audio player when logging out
+    await cleanupAudioPlayer();
     await _cancelSubs(currentClient.clientName);
     widget.clients.remove(currentClient);
     await ClientManager.removeClientNameFromStore(currentClient.clientName);
@@ -1141,6 +1140,8 @@ class MatrixState extends State<Matrix>
 
   Future<void> _handleLastLogout() async {
     waitForFirstSync = false;
+    // Clean up audio player when logging out
+    await cleanupAudioPlayer();
     matrixState.reSyncContacts();
     await matrixState.cancelListenSynchronizeContacts();
     if (PlatformInfos.isMobile) {
@@ -1169,28 +1170,6 @@ class MatrixState extends State<Matrix>
 
   void handleShowQrCodeDownload(bool show) {
     showQrCodeDownload.value = show;
-  }
-
-  /// Sets up the audio player with auto-dispose listener when playback completes.
-  ///
-  /// This method should be called after setting up a new audio source.
-  /// It automatically cleans up the audio player and resets state when playback finishes.
-  void setupAudioPlayerAutoDispose() {
-    final currentEvent = voiceMessageEvent.value;
-    _audioPlayerStateSubscription?.cancel();
-    _audioPlayerStateSubscription =
-        audioPlayer.playerStateStream.listen((state) {
-      if (state.processingState == ProcessingState.completed) {
-        // Guard against clearing state for a different audio
-        if (voiceMessageEvent.value?.eventId != currentEvent?.eventId) {
-          return;
-        }
-        voiceMessageEvent.value = null;
-        audioPlayer.stop();
-        audioPlayer.dispose();
-        currentAudioStatus.value = AudioPlayerStatus.notDownloaded;
-      }
-    });
   }
 
   @override
@@ -1276,11 +1255,6 @@ class MatrixState extends State<Matrix>
     }
   }
 
-  void cancelAudioPlayerAutoDispose() {
-    _audioPlayerStateSubscription?.cancel();
-    _audioPlayerStateSubscription = null;
-  }
-
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
@@ -1302,11 +1276,12 @@ class MatrixState extends State<Matrix>
     showToMBootstrap.dispose();
     linuxNotifications?.close();
     showQrCodeDownload.dispose();
-    _audioPlayerStateSubscription?.cancel();
-    audioPlayer.dispose();
+    audioPlayer?.dispose();
+    voiceMessageEvents.dispose();
     voiceMessageEvent.dispose();
     _presenceSubscription?.cancel();
     onLatestPresenceChanged.close();
+    disposeAudioPlayer();
     super.dispose();
   }
 

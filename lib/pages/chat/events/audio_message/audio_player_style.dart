@@ -7,11 +7,24 @@ class AudioPlayerStyle {
 
   static const maxWaveWidth = 4.0;
 
-  static const maxBodyContentWidth = 88.0;
+  // UI element widths that take up space in the audio player
+  static const playButtonWidth = 40.0;
+  static const spacingAfterButton = 4.0;
+  static const paddingLeft = 32.0;
+  static const paddingRight = 32.0;
 
   static int maxWaveCount(BuildContext context) {
-    return (MessageStyle.messageBubbleWidth(context) - maxBodyContentWidth) ~/
-        maxWaveWidth;
+    // Calculate available width for waveform:
+    // messageBubbleWidth - padding - playButton - spacing
+    final availableWidth = MessageStyle.messageBubbleWidth(context) -
+        paddingLeft -
+        paddingRight -
+        playButtonWidth -
+        spacingAfterButton;
+
+    return (availableWidth ~/ maxWaveWidth)
+        .clamp(minWaveCount, double.infinity)
+        .toInt();
   }
 
   static const minWaveHeight = 4.0;

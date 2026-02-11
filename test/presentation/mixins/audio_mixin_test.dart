@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fluffychat/presentation/mixins/audio_mixin.dart';
 
@@ -281,19 +283,25 @@ void main() {
       expect(result[1], lessThan(400));
     });
 
-    test('should repeat waveform for upsampling', () {
+    test(
+        'should interpolate to generate waveCount values when waveCount exceeds input length',
+        () {
       // Arrange
-      const waveform = [100, 200]; // 2 points
+      const waveform = [100, 200, 300, 400, 500]; // 5 elements
 
       // Act
       final result = audioMixin.calculateWaveForm(
         eventWaveForm: waveform,
-        waveCount: 6,
+        waveCount: 10, // Request 10 from 5 input values
       );
 
       // Assert
-      expect(result!.length, 6);
-      expect(result, [100, 200, 100, 200, 100, 200]);
+      expect(result!.length, 10); // Should interpolate to 10 values
+      // First and last should match input
+      expect(result.first, 100);
+      expect(result.last, 500);
+      // Middle values should be interpolated
+      expect(result[5], closeTo(300, 50)); // ~middle value
     });
 
     test('should clamp values correctly', () {
@@ -314,7 +322,7 @@ void main() {
       expect(result[3], 500); // 500 should remain 500
     });
 
-    test('should handle single point waveform with upsampling', () {
+    test('should handle single point waveform', () {
       // Arrange
       const waveform = [300];
 
@@ -325,22 +333,92 @@ void main() {
       );
 
       // Assert
+      // With 1 input value, all output values will be the same
       expect(result, [300, 300, 300]);
     });
 
-    test('should handle large upsampling', () {
+    test('should downsample correctly', () {
       // Arrange
-      const waveform = [100, 200, 300];
+      const waveform = [100, 200, 300, 400, 500, 600, 700, 800, 900];
 
       // Act
       final result = audioMixin.calculateWaveForm(
         eventWaveForm: waveform,
-        waveCount: 9,
+        waveCount: 3,
       );
 
       // Assert
-      expect(result!.length, 9);
-      expect(result, [100, 200, 300, 100, 200, 300, 100, 200, 300]);
+      expect(result!.length, 3);
+      expect(result[0], 100); // First value
+      expect(result[2], 900); // Last value
+    });
+
+    test('should cap waveCount when maxBubbleWaveCount is exceeded', () {
+      // Arrange
+      const waveform = [100, 200, 300, 400, 500, 600, 700, 800];
+      const requestedWaveCount = 10;
+      const maxBubbleWaveCount = 5;
+
+      // Act
+      final result = audioMixin.calculateWaveForm(
+        eventWaveForm: waveform,
+        waveCount: requestedWaveCount,
+        maxBubbleWaveCount: maxBubbleWaveCount,
+      );
+
+      // Assert
+      expect(result!.length, maxBubbleWaveCount);
+    });
+
+    test('should not cap waveCount when below maxBubbleWaveCount', () {
+      // Arrange
+      const waveform = [100, 200, 300, 400, 500, 600, 700, 800];
+      const requestedWaveCount = 3;
+      const maxBubbleWaveCount = 5;
+
+      // Act
+      final result = audioMixin.calculateWaveForm(
+        eventWaveForm: waveform,
+        waveCount: requestedWaveCount,
+        maxBubbleWaveCount: maxBubbleWaveCount,
+      );
+
+      // Assert
+      expect(result!.length, requestedWaveCount);
+    });
+
+    test('should use exact maxBubbleWaveCount when requested equals max', () {
+      // Arrange
+      const waveform = [100, 200, 300, 400, 500, 600, 700, 800];
+      const requestedWaveCount = 5;
+      const maxBubbleWaveCount = 5;
+
+      // Act
+      final result = audioMixin.calculateWaveForm(
+        eventWaveForm: waveform,
+        waveCount: requestedWaveCount,
+        maxBubbleWaveCount: maxBubbleWaveCount,
+      );
+
+      // Assert
+      expect(result!.length, 5);
+    });
+
+    test('should ignore maxBubbleWaveCount when null', () {
+      // Arrange
+      const waveform = [100, 200, 300, 400, 500];
+      const requestedWaveCount = 10;
+
+      // Act
+      final result = audioMixin.calculateWaveForm(
+        eventWaveForm: waveform,
+        waveCount: requestedWaveCount,
+        maxBubbleWaveCount: null,
+      );
+
+      // Assert
+      // Should interpolate to requested count when no max is set
+      expect(result!.length, requestedWaveCount);
     });
   });
 
@@ -475,6 +553,149 @@ void main() {
       expect(result.length, 2);
       expect(result[0], 12.5); // 25 (min value) maps to minHeight
       expect(result[1], 37.5); // 75 (max value) maps to maxHeight
+    });
+  });
+
+  group('Audio LRU Cache', () {
+    test('should cache and retrieve audio data', () {
+      // Arrange
+      // Create data larger than 1KB minimum
+      final testData = Uint8List.fromList(List.generate(2048, (i) => i % 256));
+      const eventId = 'test_event_1';
+
+      // Act
+      audioMixin.putInAudioCache(eventId, testData);
+      final result = audioMixin.getFromAudioCache(eventId);
+
+      // Assert
+      expect(result, testData);
+    });
+
+    test('should return null for non-existent cache key', () {
+      // Act
+      final result = audioMixin.getFromAudioCache('non_existent');
+
+      // Assert
+      expect(result, null);
+    });
+
+    test('should update access order when retrieving cached data', () {
+      // Arrange
+      final data1 = Uint8List.fromList(List.generate(2048, (i) => 1));
+      final data2 = Uint8List.fromList(List.generate(2048, (i) => 2));
+      final data3 = Uint8List.fromList(List.generate(2048, (i) => 3));
+
+      // Act
+      audioMixin.putInAudioCache('event1', data1);
+      audioMixin.putInAudioCache('event2', data2);
+      audioMixin.putInAudioCache('event3', data3);
+
+      // Access event1 to move it to the end
+      audioMixin.getFromAudioCache('event1');
+
+      // Assert - event1 should still be accessible
+      expect(audioMixin.getFromAudioCache('event1'), data1);
+    });
+
+    test('should evict oldest item when max items limit is reached', () {
+      // Arrange - Create valid test data (>1KB)
+      final smallData = Uint8List.fromList(List.generate(2048, (i) => i % 256));
+
+      // Act - Add 21 items (max is 20)
+      for (var i = 0; i < 21; i++) {
+        audioMixin.putInAudioCache('event_$i', smallData);
+      }
+
+      // Assert - First item should be evicted
+      expect(audioMixin.getFromAudioCache('event_0'), null);
+      // Last item should still exist
+      expect(audioMixin.getFromAudioCache('event_20'), smallData);
+    });
+
+    test('should evict items when memory limit would be exceeded', () {
+      // Arrange - Create large data (10MB each)
+      final largeData = Uint8List(10 * 1024 * 1024);
+
+      // Act - Add 6 items (6 * 10MB = 60MB, exceeds 50MB limit)
+      for (var i = 0; i < 6; i++) {
+        audioMixin.putInAudioCache('large_event_$i', largeData);
+      }
+
+      // Assert - Early items should be evicted to stay under memory limit
+      expect(audioMixin.getFromAudioCache('large_event_0'), null);
+      // More recent items should exist
+      expect(audioMixin.getFromAudioCache('large_event_5'), isNotNull);
+    });
+
+    test('should preserve most recently accessed items during eviction', () {
+      // Arrange
+      final data = Uint8List.fromList(List.generate(2048, (i) => i % 256));
+
+      // Act - Add enough items to fill cache
+      for (var i = 1; i <= 19; i++) {
+        audioMixin.putInAudioCache('event_$i', data);
+      }
+
+      // Access event_1 to make it most recent
+      audioMixin.getFromAudioCache('event_1');
+
+      // Add 2 more items to trigger eviction (total would be 21, max is 20)
+      audioMixin.putInAudioCache('event_20', data);
+      audioMixin.putInAudioCache('event_21', data);
+
+      // Assert - event_1 should be preserved as it was accessed recently
+      // event_2 should be evicted as it was least recent
+      // event_3 should still be in cache (only one eviction needed)
+      expect(audioMixin.getFromAudioCache('event_2'), null);
+      expect(audioMixin.getFromAudioCache('event_3'), isNotNull);
+      expect(audioMixin.getFromAudioCache('event_1'), isNotNull);
+      expect(audioMixin.getFromAudioCache('event_20'), isNotNull);
+      expect(audioMixin.getFromAudioCache('event_21'), isNotNull);
+    });
+
+    test('should update existing cache entry without duplication', () {
+      // Arrange
+      final data1 = Uint8List.fromList(List.generate(2048, (i) => 1));
+      final data2 = Uint8List.fromList(List.generate(3072, (i) => 2));
+      const eventId = 'same_event';
+
+      // Act
+      audioMixin.putInAudioCache(eventId, data1);
+      audioMixin.putInAudioCache(eventId, data2); // Update with new data
+
+      // Assert - Should have the updated data
+      final result = audioMixin.getFromAudioCache(eventId);
+      expect(result, data2);
+      expect(result!.length, 3072);
+    });
+
+    test('should reject cache entries that are too small', () {
+      // Arrange
+      final tooSmallData = Uint8List.fromList([1, 2, 3, 4, 5]); // Only 5 bytes
+      const eventId = 'small_event';
+
+      // Act
+      audioMixin.putInAudioCache(eventId, tooSmallData);
+      final result = audioMixin.getFromAudioCache(eventId);
+
+      // Assert - Should not be cached (getFromAudioCache rejects it)
+      expect(result, null);
+    });
+
+    test('should clear all cache data on cleanup', () async {
+      // Arrange
+      final data = Uint8List.fromList(List.generate(2048, (i) => i % 256));
+      audioMixin.putInAudioCache('event_1', data);
+      audioMixin.putInAudioCache('event_2', data);
+      audioMixin.putInAudioCache('event_3', data);
+
+      // Act
+      await audioMixin.cleanupAudioPlayer();
+
+      // Assert - All cache should be cleared
+      expect(audioMixin.getFromAudioCache('event_1'), null);
+      expect(audioMixin.getFromAudioCache('event_2'), null);
+      expect(audioMixin.getFromAudioCache('event_3'), null);
     });
   });
 }

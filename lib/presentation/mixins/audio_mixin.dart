@@ -1,16 +1,23 @@
 import 'dart:async';
+import 'dart:io';
 import 'dart:math';
 import 'dart:typed_data';
 
+import 'package:fluffychat/generated/l10n/app_localizations.dart';
+import 'package:fluffychat/pages/chat/events/audio_message/audio_play_extension.dart';
+import 'package:fluffychat/pages/chat/events/audio_message/audio_player_widget.dart';
+import 'package:fluffychat/utils/dialog/twake_dialog.dart';
+import 'package:fluffychat/utils/localized_exception_extension.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_file_extension.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:flutter/foundation.dart';
-import 'package:intl/intl.dart';
-import 'package:matrix/matrix.dart';
-import 'package:record/record.dart';
 import 'package:flutter/material.dart';
-import 'package:fluffychat/utils/dialog/twake_dialog.dart';
-import 'package:fluffychat/generated/l10n/app_localizations.dart';
+import 'package:intl/intl.dart';
+import 'package:just_audio/just_audio.dart';
+import 'package:matrix/matrix.dart';
+import 'package:opus_caf_converter_dart/opus_caf_converter_dart.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:record/record.dart';
 import 'package:universal_html/html.dart' as html;
 
 enum AudioRecordState {
@@ -25,6 +32,7 @@ mixin AudioMixin {
   static const waveCount = 40;
   static const maxRecordDurationInSeconds = 1800; // 30 minutes
 
+  // Audio recording properties
   final ValueNotifier<int> recordDurationWebNotifier = ValueNotifier<int>(0);
 
   Timer? _timerWeb;
@@ -40,9 +48,22 @@ mixin AudioMixin {
   final ValueNotifier<AudioRecordState> audioRecordStateNotifier =
       ValueNotifier<AudioRecordState>(AudioRecordState.initial);
 
+  // Audio player properties
+  AudioPlayer? audioPlayer;
+
+  final ValueNotifier<Event?> voiceMessageEvent = ValueNotifier(null);
+
+  final ValueNotifier<List<Event>> voiceMessageEvents = ValueNotifier([]);
+
+  final ValueNotifier<AudioPlayerStatus> currentAudioStatus =
+      ValueNotifier(AudioPlayerStatus.notDownloaded);
+
+  StreamSubscription<PlayerState>? _audioPlayerStateSubscription;
+
   void disposeAudioMixin() {
     audioRecordStateNotifier.dispose();
     _disposeAudioRecorderWeb();
+    disposeAudioPlayer();
   }
 
   void startRecording() {
@@ -222,7 +243,7 @@ mixin AudioMixin {
 
       final completer = Completer<Uint8List>();
 
-      reader.onLoad.listen((_) {
+      final loadListener = reader.onLoad.listen((_) {
         final result = reader.result;
         if (result is Uint8List) {
           completer.complete(result);
@@ -233,16 +254,21 @@ mixin AudioMixin {
         }
       });
 
-      reader.onError.listen((event) {
+      final errorListener = reader.onError.listen((event) {
         completer.completeError('FileReader failed: ${reader.error}');
       });
 
       reader.readAsArrayBuffer(blob);
 
-      yield await completer.future.timeout(
-        const Duration(seconds: 30),
-        onTimeout: () => throw TimeoutException('Chunk reading timed out'),
-      );
+      try {
+        yield await completer.future.timeout(
+          const Duration(seconds: 30),
+          onTimeout: () => throw TimeoutException('Chunk reading timed out'),
+        );
+      } finally {
+        await loadListener.cancel();
+        await errorListener.cancel();
+      }
 
       offset = end;
     }
@@ -390,30 +416,32 @@ mixin AudioMixin {
   List<int>? calculateWaveForm({
     required List<int>? eventWaveForm,
     required int waveCount,
+    int? maxBubbleWaveCount,
   }) {
     // Handle edge cases
     if (eventWaveForm == null || eventWaveForm.isEmpty || waveCount <= 0) {
       return null;
     }
-    if (waveCount == 1) return [eventWaveForm[eventWaveForm.length ~/ 2]];
-    // If we need more data points than we have, generate fake data by repeating the waveform
-    if (waveCount > eventWaveForm.length) {
-      final List<int> result = [];
-      for (int i = 0; i < waveCount; i++) {
-        // Cycle through the original waveform to generate fake data
-        final int value = eventWaveForm[i % eventWaveForm.length];
-        result.add(value);
-      }
 
-      // Apply value clamping
-      return result.map((i) => i == 0 ? 1 : (i > 1024 ? 1024 : i)).toList();
+    // If maxBubbleWaveCount is provided and waveCount exceeds it, cap it
+    int adjustedWaveCount = waveCount;
+    if (maxBubbleWaveCount != null && waveCount > maxBubbleWaveCount) {
+      adjustedWaveCount = maxBubbleWaveCount;
     }
 
-    // Use interpolation-based sampling instead of insert/remove loops
-    final List<int> result = [];
-    final double step = (eventWaveForm.length - 1) / (waveCount - 1);
+    // Use adjustedWaveCount as the target number of output waves
+    // Interpolation will generate the requested number from input data
+    if (adjustedWaveCount == 1) {
+      final single = eventWaveForm[eventWaveForm.length ~/ 2];
+      final clamped = single == 0 ? 1 : (single > 1024 ? 1024 : single);
+      return [clamped];
+    }
 
-    for (int i = 0; i < waveCount; i++) {
+    // Use interpolation-based sampling to generate exactly adjustedWaveCount values
+    final List<int> result = [];
+    final double step = (eventWaveForm.length - 1) / (adjustedWaveCount - 1);
+
+    for (int i = 0; i < adjustedWaveCount; i++) {
       final double exactIndex = i * step;
       final int lowerIndex = exactIndex.floor();
       final int upperIndex =
@@ -432,7 +460,7 @@ mixin AudioMixin {
       result.add(sampledValue);
     }
 
-    // Apply the same value clamping as the original function
+    // Apply value clamping
     return result.map((i) => i == 0 ? 1 : (i > 1024 ? 1024 : i)).toList();
   }
 
@@ -466,5 +494,368 @@ mixin AudioMixin {
       message: L10n.of(context)!.pleaseFinishOrStopTheRecording,
       isArrangeActionButtonsVertical: true,
     );
+  }
+
+  // Memory cache for audio data with LRU eviction
+  static const _maxCachedAudioItems = 20;
+  static const _maxCacheMemoryBytes = 50 * 1024 * 1024; // 50MB
+
+  final Map<String, Uint8List> _audioMemoryCache = {};
+  final List<String> _audioCacheAccessOrder = [];
+  int _currentCacheMemoryBytes = 0;
+
+  /// Checks if audio is cached in memory.
+  bool isAudioCached(String eventId) {
+    return _audioMemoryCache.containsKey(eventId);
+  }
+
+  /// Gets cached audio data with LRU tracking.
+  @visibleForTesting
+  Uint8List? getFromAudioCache(String eventId) {
+    final data = _audioMemoryCache[eventId];
+    if (data != null) {
+      // Validate size (reject entries < 1KB, same as disk cache validation)
+      if (data.length < 1024) {
+        Logs().w(
+          'AudioMixin: Memory cache entry too small (${data.length} bytes), removing',
+        );
+        _audioMemoryCache.remove(eventId);
+        _audioCacheAccessOrder.remove(eventId);
+        _currentCacheMemoryBytes -= data.length;
+        return null;
+      }
+
+      _audioCacheAccessOrder.remove(eventId);
+      _audioCacheAccessOrder.add(eventId);
+      Logs().v('AudioMixin: LRU cache hit for $eventId');
+    }
+    return data;
+  }
+
+  /// Stores audio data in cache with LRU eviction.
+  @visibleForTesting
+  void putInAudioCache(String eventId, Uint8List data) {
+    if (_audioMemoryCache.containsKey(eventId)) {
+      _currentCacheMemoryBytes -= _audioMemoryCache[eventId]!.length;
+      _audioCacheAccessOrder.remove(eventId);
+    }
+
+    while ((_audioMemoryCache.length >= _maxCachedAudioItems ||
+            _currentCacheMemoryBytes + data.length > _maxCacheMemoryBytes) &&
+        _audioCacheAccessOrder.isNotEmpty) {
+      _evictOldestAudioFromCache();
+    }
+
+    _audioMemoryCache[eventId] = data;
+    _audioCacheAccessOrder.add(eventId);
+    _currentCacheMemoryBytes += data.length;
+
+    Logs().d(
+      'AudioMixin: Cached $eventId (${data.length} bytes). '
+      'Cache: ${_audioMemoryCache.length}/$_maxCachedAudioItems items, '
+      '${_formatCacheBytes(_currentCacheMemoryBytes)}/'
+      '${_formatCacheBytes(_maxCacheMemoryBytes)}',
+    );
+  }
+
+  /// Evicts the least recently used audio from cache.
+  void _evictOldestAudioFromCache() {
+    if (_audioCacheAccessOrder.isEmpty) return;
+    final oldestKey = _audioCacheAccessOrder.removeAt(0);
+    final data = _audioMemoryCache.remove(oldestKey);
+    if (data != null) {
+      _currentCacheMemoryBytes -= data.length;
+      Logs().d(
+        'AudioMixin: Evicted $oldestKey (${data.length} bytes) - LRU',
+      );
+    }
+  }
+
+  /// Formats bytes into human-readable string.
+  String _formatCacheBytes(int bytes) {
+    if (bytes < 1024) return '$bytes B';
+    if (bytes < 1024 * 1024) {
+      return '${(bytes / 1024).toStringAsFixed(1)} KB';
+    }
+    return '${(bytes / (1024 * 1024)).toStringAsFixed(1)} MB';
+  }
+
+  Future<File> _getAudioCacheFile(Event event) async {
+    final tempDir = await getTemporaryDirectory();
+    final mxcUrl = event.attachmentOrThumbnailMxcUrl();
+    if (mxcUrl == null) {
+      throw Exception('Event has no attachment URL');
+    }
+    final fileName = Uri.encodeComponent(mxcUrl.pathSegments.last);
+    final rawAttachmentName = event.content['body'] as String? ?? 'audio.ogg';
+    final safeAttachmentName =
+        rawAttachmentName.replaceAll(RegExp(r'[\\\/]+'), '_');
+    return File('${tempDir.path}/${fileName}_$safeAttachmentName');
+  }
+
+  /// Sets up the audio player with auto-dispose listener when playback
+  /// completes.
+  void setupAudioPlayerAutoDispose({
+    required BuildContext context,
+  }) {
+    _audioPlayerStateSubscription?.cancel();
+    _audioPlayerStateSubscription =
+        audioPlayer?.playerStateStream.listen((state) async {
+      if (state.processingState == ProcessingState.completed) {
+        Logs().d(
+          'setupAudioPlayerAutoDispose: Current audio message - ${voiceMessageEvents.value}',
+        );
+
+        // Note: We keep disk cache files for future plays
+
+        if (voiceMessageEvents.value.isEmpty) {
+          await cleanupAudioPlayer();
+          return;
+        }
+
+        // Remove the completed message from the list
+        final updatedVoiceMessageEvent = voiceMessageEvents.value
+            .where((e) => e.eventId != voiceMessageEvent.value?.eventId)
+            .toList();
+
+        voiceMessageEvents.value = updatedVoiceMessageEvent;
+
+        if (voiceMessageEvents.value.isEmpty) {
+          await cleanupAudioPlayer();
+          return;
+        }
+
+        // Play next
+        voiceMessageEvent.value = null;
+        currentAudioStatus.value = AudioPlayerStatus.notDownloaded;
+
+        final nextAudioMessage = voiceMessageEvents.value.first;
+        if (!context.mounted) return;
+        await autoPlayAudio(
+          currentEvent: nextAudioMessage,
+          context: context,
+        );
+      }
+    });
+  }
+
+  Future<void> autoPlayAudio({
+    required BuildContext context,
+    required Event currentEvent,
+  }) async {
+    voiceMessageEvent.value = currentEvent;
+    MatrixFile? matrixFile;
+    Uint8List? audioBytes;
+    String? mimeType;
+
+    currentAudioStatus.value = AudioPlayerStatus.downloading;
+    try {
+      // Get mime type from event content
+      final contentInfo = currentEvent.content['info'];
+      mimeType = contentInfo is Map ? contentInfo['mimetype'] as String? : null;
+
+      if (!kIsWeb) {
+        // 1. Check Memory Cache (LRU)
+        final cachedData = getFromAudioCache(currentEvent.eventId);
+        if (cachedData != null) {
+          Logs().d(
+            'AudioMixin: Hit memory cache for ${currentEvent.eventId} '
+            '(${cachedData.length} bytes)',
+          );
+          audioBytes = cachedData;
+        } else {
+          // 2. Check File Cache
+          final file = await _getAudioCacheFile(currentEvent);
+          if (await file.exists() && await file.length() > 0) {
+            final diskFileSize = await file.length();
+            Logs().d(
+              'AudioMixin: Hit disk cache for ${file.path} ($diskFileSize bytes)',
+            );
+
+            // Validate disk cache file size
+            if (diskFileSize < 1024) {
+              Logs().w(
+                'AudioMixin: Disk cache file too small ($diskFileSize bytes), '
+                'deleting and re-downloading',
+              );
+              await file.delete();
+            } else {
+              audioBytes = await file.readAsBytes();
+              putInAudioCache(currentEvent.eventId, audioBytes);
+            }
+          }
+
+          // 3. Download (if not cached or cache was invalid)
+          if (audioBytes == null) {
+            Logs().d('AudioMixin: Downloading ${currentEvent.eventId}');
+            matrixFile = await currentEvent.downloadAndDecryptAttachment();
+
+            Logs().d(
+              'AudioMixin: Downloaded ${matrixFile.bytes.length} bytes, '
+              'MIME: ${matrixFile.mimeType}',
+            );
+
+            if (matrixFile.bytes.isEmpty) {
+              throw Exception('Downloaded file has no content');
+            }
+
+            audioBytes = matrixFile.bytes;
+            mimeType = matrixFile.mimeType;
+
+            // Cache the downloaded bytes
+            await file.writeAsBytes(audioBytes);
+            putInAudioCache(currentEvent.eventId, audioBytes);
+          }
+        }
+
+        // iOS OGG to CAF conversion (if needed)
+        if (Platform.isIOS && mimeType?.toLowerCase() == 'audio/ogg') {
+          Logs().d('AudioMixin: Converting OGG to CAF for iOS...');
+          // Write to temp file for conversion
+          final tempFile = await _getAudioCacheFile(currentEvent);
+          await tempFile.writeAsBytes(audioBytes);
+          final oggAudioFileIniOS = await handleOggAudioFileIniOS(tempFile);
+          if (oggAudioFileIniOS != null) {
+            audioBytes = await oggAudioFileIniOS.readAsBytes();
+            mimeType = 'audio/x-caf';
+            putInAudioCache(currentEvent.eventId, audioBytes);
+            Logs().d('AudioMixin: Conversion successful');
+          } else {
+            Logs().w('AudioMixin: OGG to CAF conversion failed');
+          }
+        }
+
+        // Create MatrixFile from cached bytes
+        matrixFile = MatrixFile(
+          bytes: audioBytes,
+          name: currentEvent.content['body'] as String? ?? 'audio.ogg',
+          mimeType: mimeType ?? 'application/octet-stream',
+        );
+      } else {
+        // Web: always download
+        matrixFile = await currentEvent.downloadAndDecryptAttachment();
+        if (matrixFile.bytes.isEmpty) {
+          throw Exception('Downloaded file has no content');
+        }
+        Logs().d(
+          'AudioMixin: Downloaded ${matrixFile.bytes.length} bytes, '
+          'MIME: ${matrixFile.mimeType}',
+        );
+      }
+
+      if (voiceMessageEvent.value?.eventId != currentEvent.eventId) return;
+      currentAudioStatus.value = AudioPlayerStatus.downloaded;
+    } catch (e, s) {
+      Logs().e('Could not download audio file', e, s);
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(e.toLocalizedString(context)),
+          ),
+        );
+      }
+      currentAudioStatus.value = AudioPlayerStatus.notDownloaded;
+      return;
+    }
+
+    // Initialize audio player
+    await audioPlayer?.stop();
+    await audioPlayer?.dispose();
+
+    audioPlayer = AudioPlayer();
+    voiceMessageEvent.value = currentEvent;
+
+    try {
+      await audioPlayer?.setAudioSource(MatrixFileAudioSource(matrixFile));
+
+      // Reset status to notDownloaded immediately after setting audio source
+      // so the UI shows the normal play/pause button instead of loading
+      if (voiceMessageEvent.value?.eventId == currentEvent.eventId) {
+        currentAudioStatus.value = AudioPlayerStatus.notDownloaded;
+      }
+
+      // Set up auto-dispose listener
+      setupAudioPlayerAutoDispose(context: context);
+
+      await audioPlayer?.play();
+    } catch (e, s) {
+      Logs().e('Could not play audio file', e, s);
+      voiceMessageEvent.value = null;
+      currentAudioStatus.value = AudioPlayerStatus.notDownloaded;
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            e.toLocalizedString(context),
+          ),
+        ),
+      );
+    }
+  }
+
+  /// Converts OGG audio files to CAF format for iOS compatibility.
+  ///
+  /// Returns the converted file if successful, null otherwise.
+  Future<File?> handleOggAudioFileIniOS(File file) async {
+    try {
+      Logs().v('Convert ogg audio file for iOS...');
+      final convertedFile = File('${file.path}.caf');
+      if (await convertedFile.exists() == false) {
+        OpusCaf().convertOpusToCaf(file.path, convertedFile.path);
+        // Verify conversion succeeded
+        if (await convertedFile.exists() == false) {
+          Logs().w(
+            'AudioMixin::handleOggAudioFileIniOS: OGG to CAF conversion failed - converted file does not exist',
+          );
+          return null;
+        }
+      }
+      return convertedFile;
+    } catch (e, s) {
+      Logs().e('Could not convert ogg audio file for iOS', e, s);
+      return null;
+    }
+  }
+
+  /// Cancels the audio player auto-dispose subscription.
+  void cancelAudioPlayerAutoDispose() {
+    _audioPlayerStateSubscription?.cancel();
+    _audioPlayerStateSubscription = null;
+  }
+
+  /// Cleans up the audio player and clears playing lists.
+  ///
+  /// Should be called when logging out or switching accounts to ensure
+  /// audio playback is properly stopped and state is reset.
+  Future<void> cleanupAudioPlayer({bool resetState = true}) async {
+    try {
+      await audioPlayer?.pause();
+      await audioPlayer?.stop();
+      await audioPlayer?.dispose();
+      audioPlayer = null;
+      _audioPlayerStateSubscription?.cancel();
+      _audioPlayerStateSubscription = null;
+      if (resetState) {
+        voiceMessageEvents.value = [];
+        voiceMessageEvent.value = null;
+        currentAudioStatus.value = AudioPlayerStatus.notDownloaded;
+      }
+      _audioMemoryCache.clear();
+      _audioCacheAccessOrder.clear();
+      _currentCacheMemoryBytes = 0;
+      Logs().d('AudioMixin::cleanupAudioPlayer: Audio player cleaned up');
+    } catch (e) {
+      Logs().e('AudioMixin::cleanupAudioPlayer: Error - $e');
+    }
+  }
+
+  /// Disposes audio player resources.
+  ///
+  /// Should be called in the dispose method of the State class using this mixin.
+  void disposeAudioPlayer() {
+    unawaited(cleanupAudioPlayer(resetState: false));
+    voiceMessageEvents.dispose();
+    voiceMessageEvent.dispose();
+    currentAudioStatus.dispose();
   }
 }
