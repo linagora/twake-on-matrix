@@ -10,10 +10,7 @@ class CommonSettingsInformation with EquatableMixin {
   @JsonKey(name: "application_url")
   String? applicationUrl;
 
-  CommonSettingsInformation({
-    this.enabled,
-    this.applicationUrl,
-  });
+  CommonSettingsInformation({this.enabled, this.applicationUrl});
 
   factory CommonSettingsInformation.fromJson(Map<String, dynamic> json) =>
       _$CommonSettingsInformationFromJson(json);

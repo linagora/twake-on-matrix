@@ -22,9 +22,7 @@ class FocusSuggestionController {
         currentIndex.value = _suggestions.length - 1;
       }
     } on FlutterError catch (error) {
-      Logs().e(
-        "FocusSuggestionController()::up(): FlutterError: $error",
-      );
+      Logs().e("FocusSuggestionController()::up(): FlutterError: $error");
     }
   }
 
@@ -35,9 +33,7 @@ class FocusSuggestionController {
         currentIndex.value = 0;
       }
     } on FlutterError catch (error) {
-      Logs().e(
-        "FocusSuggestionController()::down(): FlutterError: $error",
-      );
+      Logs().e("FocusSuggestionController()::down(): FlutterError: $error");
     }
   }
 

@@ -3,10 +3,7 @@ import 'package:fluffychat/presentation/model/search/presentation_search.dart';
 
 extension SearchExtension on ContactSearchModel {
   ContactPresentationSearch toContactPresentationSearch() {
-    return ContactPresentationSearch(
-      matrixId: id,
-      displayName: displayName,
-    );
+    return ContactPresentationSearch(matrixId: id, displayName: displayName);
   }
 
   bool isDisplayNameContains(String keyword) {

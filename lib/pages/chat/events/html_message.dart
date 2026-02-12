@@ -66,16 +66,14 @@ class HtmlMessage extends StatelessWidget with LinkifyMixin {
       inlineSpanEnd: bottomWidgetSpan != null
           ? WidgetSpan(child: bottomWidgetSpan!)
           : null,
-      linkStyle: linkStyle ??
+      linkStyle:
+          linkStyle ??
           themeData.textTheme.bodyMedium!.copyWith(
             color: themeData.colorScheme.secondary,
             decoration: TextDecoration.underline,
             decorationColor: themeData.colorScheme.secondary,
           ),
-      linkTypes: const [
-        LinkType.url,
-        LinkType.phone,
-      ],
+      linkTypes: const [LinkType.url, LinkType.phone],
       shrinkToFit: true,
       maxLines: maxLines,
       onTapDownLink: (tapDownDetails, link) => handleOnTappedLinkHtml(
@@ -88,23 +86,24 @@ class HtmlMessage extends StatelessWidget with LinkifyMixin {
               UrlLauncher(context, url: url, room: room).launchUrl();
             }
           : null,
-      getMxcUrl: (
-        String mxc,
-        double? width,
-        double? height, {
-        bool? animated = false,
-      }) {
-        final ratio = MediaQuery.devicePixelRatioOf(context);
-        return Uri.parse(mxc)
-            .getThumbnail(
-              matrix.client,
-              width: (width ?? 800) * ratio,
-              height: (height ?? 800) * ratio,
-              method: ThumbnailMethod.scale,
-              animated: AppConfig.autoplayImages ? animated : false,
-            )
-            .toString();
-      },
+      getMxcUrl:
+          (
+            String mxc,
+            double? width,
+            double? height, {
+            bool? animated = false,
+          }) {
+            final ratio = MediaQuery.devicePixelRatioOf(context);
+            return Uri.parse(mxc)
+                .getThumbnail(
+                  matrix.client,
+                  width: (width ?? 800) * ratio,
+                  height: (height ?? 800) * ratio,
+                  method: ThumbnailMethod.scale,
+                  animated: AppConfig.autoplayImages ? animated : false,
+                )
+                .toString();
+          },
       onImageTap: (String mxc) => showDialog(
         context: context,
         useRootNavigator: false,
@@ -143,8 +142,9 @@ class HtmlMessage extends StatelessWidget with LinkifyMixin {
                   return user.content;
                 }
                 // there might still be a profile...
-                final profile =
-                    await room.client.getProfileFromUserId(identifier);
+                final profile = await room.client.getProfileFromUserId(
+                  identifier,
+                );
                 return {
                   'displayname': profile.displayName,
                   'avatar_url': profile.avatarUrl.toString(),
@@ -178,8 +178,9 @@ class HtmlMessage extends StatelessWidget with LinkifyMixin {
                   return {};
                 }
                 return {
-                  'displayname': r
-                      .getLocalizedDisplayname(MatrixLocals(L10n.of(context)!)),
+                  'displayname': r.getLocalizedDisplayname(
+                    MatrixLocals(L10n.of(context)!),
+                  ),
                   'avatar_url': r.getState('m.room.avatar')?.content['url'],
                 };
               }
@@ -190,17 +191,16 @@ class HtmlMessage extends StatelessWidget with LinkifyMixin {
         final user = room.getUser(identifier);
         final displayName = user?.displayName ?? identifier;
         return MentionedUser(
-          displayName:
-              !room.isDirectChat ? displayName.displayMentioned : displayName,
+          displayName: !room.isDirectChat
+              ? displayName.displayMentioned
+              : displayName,
           url: url,
           onTap: !room.isDirectChat ? onTap : null,
           textStyle: !room.isDirectChat
-              ? defaultTextStyle?.copyWith(
-                  color: themeData.colorScheme.primary,
-                )
+              ? defaultTextStyle?.copyWith(color: themeData.colorScheme.primary)
               : Theme.of(context).textTheme.bodyLarge?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurface,
-                  ),
+                  color: Theme.of(context).colorScheme.onSurface,
+                ),
         );
       },
     );

@@ -11,13 +11,7 @@ enum SelectMode {
   bool get isSelectMode => this == SelectMode.select;
 }
 
-enum PopupMenuAction {
-  settings,
-  invite,
-  newGroup,
-  setStatus,
-  archive,
-}
+enum PopupMenuAction { settings, invite, newGroup, setStatus, archive }
 
 enum ActiveFilter {
   allChats,
@@ -90,10 +84,7 @@ enum ChatListSelectionActions {
     }
   }
 
-  String getTitleContextMenuSelection(
-    BuildContext context,
-    Room room,
-  ) {
+  String getTitleContextMenuSelection(BuildContext context, Room room) {
     switch (this) {
       case ChatListSelectionActions.read:
         if (room.isUnreadOrInvited) {

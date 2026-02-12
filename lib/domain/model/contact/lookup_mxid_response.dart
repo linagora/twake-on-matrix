@@ -12,10 +12,7 @@ class LookupMxidResponse with EquatableMixin {
   @JsonKey(name: "inactive_matches")
   final Set<TomContact> inactiveContacts;
 
-  LookupMxidResponse({
-    required this.contacts,
-    required this.inactiveContacts,
-  });
+  LookupMxidResponse({required this.contacts, required this.inactiveContacts});
 
   @override
   List<Object?> get props => [contacts, inactiveContacts];

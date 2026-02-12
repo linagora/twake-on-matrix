@@ -59,9 +59,8 @@ class ArchiveView extends StatelessWidget {
               }
               return ListView.builder(
                 itemCount: archive!.length,
-                itemBuilder: (BuildContext context, int i) => ChatListItem(
-                  archive![i],
-                ),
+                itemBuilder: (BuildContext context, int i) =>
+                    ChatListItem(archive![i]),
               );
             }
           },

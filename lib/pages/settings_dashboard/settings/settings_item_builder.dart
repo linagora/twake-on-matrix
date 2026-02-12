@@ -49,7 +49,8 @@ class SettingsItemBuilder extends StatelessWidget {
             children: [
               Padding(
                 padding: SettingsViewStyle.leadingItemBuilderPadding,
-                child: leadingWidget ??
+                child:
+                    leadingWidget ??
                     Icon(
                       leading,
                       size: SettingsViewStyle.iconSize,
@@ -67,8 +68,7 @@ class SettingsItemBuilder extends StatelessWidget {
                         children: [
                           Text(
                             title,
-                            style: LinagoraTextStyle.material()
-                                .bodyMedium2
+                            style: LinagoraTextStyle.material().bodyMedium2
                                 .copyWith(
                                   color: titleColor,
                                   fontFamily: 'Inter',
@@ -81,11 +81,12 @@ class SettingsItemBuilder extends StatelessWidget {
                               padding: const EdgeInsets.only(top: 4),
                               child: Text(
                                 subtitle!,
-                                style: subtitleStyle ??
-                                    LinagoraTextStyle.material()
-                                        .bodyMedium
+                                style:
+                                    subtitleStyle ??
+                                    LinagoraTextStyle.material().bodyMedium
                                         .copyWith(
-                                          color: subtitleColor ??
+                                          color:
+                                              subtitleColor ??
                                               LinagoraRefColors.material()
                                                   .tertiary[30],
                                           fontFamily: 'Inter',

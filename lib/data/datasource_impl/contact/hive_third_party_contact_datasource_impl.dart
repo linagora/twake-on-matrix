@@ -11,16 +11,15 @@ import 'package:matrix/matrix.dart' hide Contact;
 class HiveThirdPartyContactDatasourceImpl
     extends HiveThirdPartyContactDatasource {
   @override
-  Future<List<Contact>> getThirdPartyContactByUserId(
-    String userId,
-  ) async {
+  Future<List<Contact>> getThirdPartyContactByUserId(String userId) async {
     final updateContacts = <Contact>[];
-    final hiveCollectionFederationDatabase =
-        await getIt.getAsync<HiveCollectionToMDatabase>();
-    final keys = (await hiveCollectionFederationDatabase.thirdPartyContactsBox
-            .getAllKeys())
-        .where((key) => TupleKey.fromString(key).parts.first == userId)
-        .toList();
+    final hiveCollectionFederationDatabase = await getIt
+        .getAsync<HiveCollectionToMDatabase>();
+    final keys =
+        (await hiveCollectionFederationDatabase.thirdPartyContactsBox
+                .getAllKeys())
+            .where((key) => TupleKey.fromString(key).parts.first == userId)
+            .toList();
     final contacts = await hiveCollectionFederationDatabase
         .thirdPartyContactsBox
         .getAll(keys);
@@ -39,8 +38,8 @@ class HiveThirdPartyContactDatasourceImpl
     String userId,
     List<Contact> contacts,
   ) async {
-    final hiveCollectionFederationDatabase =
-        await getIt.getAsync<HiveCollectionToMDatabase>();
+    final hiveCollectionFederationDatabase = await getIt
+        .getAsync<HiveCollectionToMDatabase>();
 
     for (final contact in contacts) {
       final key = TupleKey(userId, contact.id).toString();
@@ -55,8 +54,8 @@ class HiveThirdPartyContactDatasourceImpl
 
   @override
   Future<void> deleteThirdPartyContactBox() {
-    final hiveCollectionFederationDatabase =
-        getIt.get<HiveCollectionToMDatabase>();
+    final hiveCollectionFederationDatabase = getIt
+        .get<HiveCollectionToMDatabase>();
     return hiveCollectionFederationDatabase.thirdPartyContactsBox.clear();
   }
 }

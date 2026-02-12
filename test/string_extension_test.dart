@@ -3,144 +3,160 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   group("unMarkdownLinks tests", () {
-    test('unMarkdownLinks should replace links when there is only one link',
-        () {
-      const unMarkdownMessageWithOnlyLink =
-          "https://superman.com/this-is-a-*superman*-link";
-      const markdownMessageWithOnlyLink =
-          "https://superman.com/this-is-a-<em>superman</em>-link";
+    test(
+      'unMarkdownLinks should replace links when there is only one link',
+      () {
+        const unMarkdownMessageWithOnlyLink =
+            "https://superman.com/this-is-a-*superman*-link";
+        const markdownMessageWithOnlyLink =
+            "https://superman.com/this-is-a-<em>superman</em>-link";
 
-      final result = markdownMessageWithOnlyLink
-          .unMarkdownLinks(unMarkdownMessageWithOnlyLink);
+        final result = markdownMessageWithOnlyLink.unMarkdownLinks(
+          unMarkdownMessageWithOnlyLink,
+        );
 
-      expect(result, equals(unMarkdownMessageWithOnlyLink));
-    });
+        expect(result, equals(unMarkdownMessageWithOnlyLink));
+      },
+    );
 
-    test('unMarkdownLinks should replace links when there are multiple links',
-        () {
+    test('unMarkdownLinks should replace links when there are multiple links', () {
       const unMarkdownMessageWith2Links =
           "https://superman.com/this-is-a-*superman*-link https://batman.com/this-is-a-*batman*-link";
       const markdownMessageWith2Links =
           "https://superman.com/this-is-a-<em>superman</em>-link https://batman.com/this-is-a-<em>batman</em>-link";
 
-      final result = markdownMessageWith2Links
-          .unMarkdownLinks(unMarkdownMessageWith2Links);
+      final result = markdownMessageWith2Links.unMarkdownLinks(
+        unMarkdownMessageWith2Links,
+      );
 
       expect(result, equals(unMarkdownMessageWith2Links));
     });
 
-    test('unMarkdownLinks should replace links when there are links and text',
-        () {
+    test('unMarkdownLinks should replace links when there are links and text', () {
       const unMarkdownMessageWithLinksAndTexts =
           "is this serious https://superman.com/this-is-a-*superman*-link hello guys https://batman.com/this-is-a-*batman*-link";
       const markdownMessageWithLinksAndTexts =
           "is this serious https://superman.com/this-is-a-<em>superman</em>-link hello guys https://batman.com/this-is-a-<em>batman</em>-link";
 
-      final result = markdownMessageWithLinksAndTexts
-          .unMarkdownLinks(unMarkdownMessageWithLinksAndTexts);
+      final result = markdownMessageWithLinksAndTexts.unMarkdownLinks(
+        unMarkdownMessageWithLinksAndTexts,
+      );
       expect(result, equals(unMarkdownMessageWithLinksAndTexts));
     });
 
     test(
-        'unMarkdownLinks should replace links when there is link starting with text',
-        () {
-      const unMarkdownMessageWithLinkStartingWithText =
-          "is this serious https://superman.com/this-is-a-*superman*-link";
-      const markdownMessageWithLinkStartingWithText =
-          "is this serious https://superman.com/this-is-a-<em>superman</em>-link";
+      'unMarkdownLinks should replace links when there is link starting with text',
+      () {
+        const unMarkdownMessageWithLinkStartingWithText =
+            "is this serious https://superman.com/this-is-a-*superman*-link";
+        const markdownMessageWithLinkStartingWithText =
+            "is this serious https://superman.com/this-is-a-<em>superman</em>-link";
 
-      final result = markdownMessageWithLinkStartingWithText
-          .unMarkdownLinks(unMarkdownMessageWithLinkStartingWithText);
-      expect(result, equals(unMarkdownMessageWithLinkStartingWithText));
-    });
+        final result = markdownMessageWithLinkStartingWithText.unMarkdownLinks(
+          unMarkdownMessageWithLinkStartingWithText,
+        );
+        expect(result, equals(unMarkdownMessageWithLinkStartingWithText));
+      },
+    );
 
-    test('unMarkdownLinks should not replace links when the link is not valid',
-        () {
+    test('unMarkdownLinks should not replace links when the link is not valid', () {
       const unMarkdownMessageWithUnvalidLink =
           "is this serious-https://superman.com/this-is-a-<em>superman</em>-link";
       const markdownMessageWithUnvalidLink =
           "is this serious-https://superman.com/this-is-a-<em>superman</em>-link";
 
-      final result = markdownMessageWithUnvalidLink
-          .unMarkdownLinks(unMarkdownMessageWithUnvalidLink);
+      final result = markdownMessageWithUnvalidLink.unMarkdownLinks(
+        unMarkdownMessageWithUnvalidLink,
+      );
       expect(result, equals(unMarkdownMessageWithUnvalidLink));
     });
 
-    test('unMarkdownLinks should return formatted text when there is no link',
-        () {
-      const unMarkdownMessageWithNoLink = "hello guys";
-      const markdownMessageWithNoLink = "hello guys";
+    test(
+      'unMarkdownLinks should return formatted text when there is no link',
+      () {
+        const unMarkdownMessageWithNoLink = "hello guys";
+        const markdownMessageWithNoLink = "hello guys";
 
-      final result = markdownMessageWithNoLink
-          .unMarkdownLinks(unMarkdownMessageWithNoLink);
+        final result = markdownMessageWithNoLink.unMarkdownLinks(
+          unMarkdownMessageWithNoLink,
+        );
 
-      expect(result, equals(unMarkdownMessageWithNoLink));
-    });
+        expect(result, equals(unMarkdownMessageWithNoLink));
+      },
+    );
 
     test(
-        'unMarkdownLinks should replace links when there is link ending with text',
-        () {
-      const unMarkdownMessageWithLinkEndingWithText =
-          "https://superman.com/this-is-a-*superman*-link hello guys";
-      const markdownMessageWithLinkEndingWithText =
-          "https://superman.com/this-is-a-<em>superman</em>-link hello guys";
+      'unMarkdownLinks should replace links when there is link ending with text',
+      () {
+        const unMarkdownMessageWithLinkEndingWithText =
+            "https://superman.com/this-is-a-*superman*-link hello guys";
+        const markdownMessageWithLinkEndingWithText =
+            "https://superman.com/this-is-a-<em>superman</em>-link hello guys";
 
-      final result = markdownMessageWithLinkEndingWithText
-          .unMarkdownLinks(unMarkdownMessageWithLinkEndingWithText);
-      expect(result, equals(unMarkdownMessageWithLinkEndingWithText));
-    });
-
-    test(
-        'unMarkdownLinks should replace links when there is link ending with incomplete markdown',
-        () {
-      const unMarkdownMessageWithIncompleteMarkdownLink =
-          "https://superman.com/this-is-a-*supe hello guys";
-      const markdownMessageWithIncompleteMarkdownLink =
-          "https://superman.com/this-is-a-<em>supe hello guys";
-
-      final result = markdownMessageWithIncompleteMarkdownLink
-          .unMarkdownLinks(unMarkdownMessageWithIncompleteMarkdownLink);
-      expect(result, equals(unMarkdownMessageWithIncompleteMarkdownLink));
-    });
+        final result = markdownMessageWithLinkEndingWithText.unMarkdownLinks(
+          unMarkdownMessageWithLinkEndingWithText,
+        );
+        expect(result, equals(unMarkdownMessageWithLinkEndingWithText));
+      },
+    );
 
     test(
-        'unMarkdownLinks should replace links when there are text and unusable links',
-        () {
-      const unMarkdownMessageWithUnusableLinks =
-          "https://superman.com/this-is-a-*superman*-link hello guys https://bat";
-      const markdownMessageWithUnusableLinks =
-          "https://superman.com/this-is-a-<em>superman</em>-link hello guys https://bat";
+      'unMarkdownLinks should replace links when there is link ending with incomplete markdown',
+      () {
+        const unMarkdownMessageWithIncompleteMarkdownLink =
+            "https://superman.com/this-is-a-*supe hello guys";
+        const markdownMessageWithIncompleteMarkdownLink =
+            "https://superman.com/this-is-a-<em>supe hello guys";
 
-      final result = markdownMessageWithUnusableLinks
-          .unMarkdownLinks(unMarkdownMessageWithUnusableLinks);
-      expect(result, equals(unMarkdownMessageWithUnusableLinks));
-    });
-
-    test(
-        'unMarkdownLinks should replace links when there are markdown and unmarkdown links',
-        () {
-      const unMarkdownMessageWithMarkdownAndUnMarkdownLinks =
-          "https://superman.com/this-is-a-*superman*-link hello guys https://batman.com/this-";
-      const markdownMessageWithMarkdownAndUnMarkdownLinks =
-          "https://superman.com/this-is-a-<em>superman</em>-link hello guys https://batman.com/this-";
-
-      final result = markdownMessageWithMarkdownAndUnMarkdownLinks
-          .unMarkdownLinks(unMarkdownMessageWithMarkdownAndUnMarkdownLinks);
-      expect(result, equals(unMarkdownMessageWithMarkdownAndUnMarkdownLinks));
-    });
+        final result = markdownMessageWithIncompleteMarkdownLink
+            .unMarkdownLinks(unMarkdownMessageWithIncompleteMarkdownLink);
+        expect(result, equals(unMarkdownMessageWithIncompleteMarkdownLink));
+      },
+    );
 
     test(
-        'unMarkdownLinks should return formatted link when the unformatted text has no link',
-        () {
-      const messageWithNoLinkUnMarkdowned = "hello guys";
-      const messageWithNoLinkMarkdowned =
-          "hello guys https://superman.com/this-is-a-*superman*-link";
+      'unMarkdownLinks should replace links when there are text and unusable links',
+      () {
+        const unMarkdownMessageWithUnusableLinks =
+            "https://superman.com/this-is-a-*superman*-link hello guys https://bat";
+        const markdownMessageWithUnusableLinks =
+            "https://superman.com/this-is-a-<em>superman</em>-link hello guys https://bat";
 
-      final result = messageWithNoLinkMarkdowned
-          .unMarkdownLinks(messageWithNoLinkUnMarkdowned);
+        final result = markdownMessageWithUnusableLinks.unMarkdownLinks(
+          unMarkdownMessageWithUnusableLinks,
+        );
+        expect(result, equals(unMarkdownMessageWithUnusableLinks));
+      },
+    );
 
-      expect(result, equals(messageWithNoLinkMarkdowned));
-    });
+    test(
+      'unMarkdownLinks should replace links when there are markdown and unmarkdown links',
+      () {
+        const unMarkdownMessageWithMarkdownAndUnMarkdownLinks =
+            "https://superman.com/this-is-a-*superman*-link hello guys https://batman.com/this-";
+        const markdownMessageWithMarkdownAndUnMarkdownLinks =
+            "https://superman.com/this-is-a-<em>superman</em>-link hello guys https://batman.com/this-";
+
+        final result = markdownMessageWithMarkdownAndUnMarkdownLinks
+            .unMarkdownLinks(unMarkdownMessageWithMarkdownAndUnMarkdownLinks);
+        expect(result, equals(unMarkdownMessageWithMarkdownAndUnMarkdownLinks));
+      },
+    );
+
+    test(
+      'unMarkdownLinks should return formatted link when the unformatted text has no link',
+      () {
+        const messageWithNoLinkUnMarkdowned = "hello guys";
+        const messageWithNoLinkMarkdowned =
+            "hello guys https://superman.com/this-is-a-*superman*-link";
+
+        final result = messageWithNoLinkMarkdowned.unMarkdownLinks(
+          messageWithNoLinkUnMarkdowned,
+        );
+
+        expect(result, equals(messageWithNoLinkMarkdowned));
+      },
+    );
   });
 
   group('String contains word tests', () {
@@ -238,70 +254,88 @@ void main() {
       const text = "Hello, world!";
       const highlightText = "world";
       const prefixLength = 3;
-      final result =
-          text.substringToHighlight(highlightText, prefixLength: prefixLength);
+      final result = text.substringToHighlight(
+        highlightText,
+        prefixLength: prefixLength,
+      );
 
       expect(result, equals("...o, world!"));
     });
 
     test(
-        'substringToHighlight returns an empty string if highlightText is empty',
-        () {
-      const text = "Hello, world!";
-      const highlightText = "";
-      final result = text.substringToHighlight(highlightText);
+      'substringToHighlight returns an empty string if highlightText is empty',
+      () {
+        const text = "Hello, world!";
+        const highlightText = "";
+        final result = text.substringToHighlight(highlightText);
 
-      expect(result, equals("Hello, world!"));
-    });
-
-    test(
-        'substringToHighlight returns an empty string if highlightText is not found',
-        () {
-      const text = "Hello, world!";
-      const highlightText = "foo";
-      final result = text.substringToHighlight(highlightText);
-
-      expect(result, equals("Hello, world!"));
-    });
+        expect(result, equals("Hello, world!"));
+      },
+    );
 
     test(
-        'substringToHighlight returns the full string if highlightText is the same as text',
-        () {
-      const text = "Hello, world!";
-      const highlightText = "Hello, world!";
-      final result = text.substringToHighlight(highlightText);
+      'substringToHighlight returns an empty string if highlightText is not found',
+      () {
+        const text = "Hello, world!";
+        const highlightText = "foo";
+        final result = text.substringToHighlight(highlightText);
 
-      expect(result, equals(text));
-    });
-
-    test(
-        'substringToHighlight returns second line if text have multi short line',
-        () {
-      const text = "First\nSecond\nThird";
-      const highlightText = "Second";
-      final result = text.substringToHighlight(highlightText, prefixLength: 3);
-
-      expect(result, equals('...Second\nThird'));
-    });
-
-    test('substringToHighlight returns last line if text have multi short line',
-        () {
-      const text = "First\nSecond\nThird";
-      const highlightText = "Third";
-      final result = text.substringToHighlight(highlightText, prefixLength: 3);
-
-      expect(result, equals('...Third'));
-    });
+        expect(result, equals("Hello, world!"));
+      },
+    );
 
     test(
-        'substringToHighlight returns last line if text have multi short line and long prefix length',
-        () {
-      const text = "First\nSecond\nThird";
-      const highlightText = "Third";
-      final result = text.substringToHighlight(highlightText, prefixLength: 20);
+      'substringToHighlight returns the full string if highlightText is the same as text',
+      () {
+        const text = "Hello, world!";
+        const highlightText = "Hello, world!";
+        final result = text.substringToHighlight(highlightText);
 
-      expect(result, equals('...Third'));
-    });
+        expect(result, equals(text));
+      },
+    );
+
+    test(
+      'substringToHighlight returns second line if text have multi short line',
+      () {
+        const text = "First\nSecond\nThird";
+        const highlightText = "Second";
+        final result = text.substringToHighlight(
+          highlightText,
+          prefixLength: 3,
+        );
+
+        expect(result, equals('...Second\nThird'));
+      },
+    );
+
+    test(
+      'substringToHighlight returns last line if text have multi short line',
+      () {
+        const text = "First\nSecond\nThird";
+        const highlightText = "Third";
+        final result = text.substringToHighlight(
+          highlightText,
+          prefixLength: 3,
+        );
+
+        expect(result, equals('...Third'));
+      },
+    );
+
+    test(
+      'substringToHighlight returns last line if text have multi short line and long prefix length',
+      () {
+        const text = "First\nSecond\nThird";
+        const highlightText = "Third";
+        final result = text.substringToHighlight(
+          highlightText,
+          prefixLength: 20,
+        );
+
+        expect(result, equals('...Third'));
+      },
+    );
   });
 
   group('msisdnSanitizer tests', () {
@@ -315,11 +349,13 @@ void main() {
       expect(result, equals('08030000000'));
     });
 
-    test('msisdnSanitizer returns the correct msisdn with special characters',
-        () {
-      final result = '+234803000#!*()%,^&0000'.msisdnSanitizer();
-      expect(result, equals('2348030000000'));
-    });
+    test(
+      'msisdnSanitizer returns the correct msisdn with special characters',
+      () {
+        final result = '+234803000#!*()%,^&0000'.msisdnSanitizer();
+        expect(result, equals('2348030000000'));
+      },
+    );
 
     test('msisdnSanitizer returns the correct msisdn with letters', () {
       final result = '+234803000kddskdskf0000'.msisdnSanitizer();
@@ -347,11 +383,12 @@ void main() {
     });
 
     test(
-        'msisdnSanitizer returns the correct msisdn with hyphens and no spaces',
-        () {
-      final result = '+84-3667-69439'.msisdnSanitizer();
-      expect(result, equals('84366769439'));
-    });
+      'msisdnSanitizer returns the correct msisdn with hyphens and no spaces',
+      () {
+        final result = '+84-3667-69439'.msisdnSanitizer();
+        expect(result, equals('84366769439'));
+      },
+    );
   });
 
   group('urlSafeBase64 tests', () {

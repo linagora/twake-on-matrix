@@ -43,8 +43,9 @@ class SettingsStyleView extends StatelessWidget {
                           child: color == null
                               ? Material(
                                   elevation: 0,
-                                  borderRadius:
-                                      BorderRadius.circular(colorPickerSize),
+                                  borderRadius: BorderRadius.circular(
+                                    colorPickerSize,
+                                  ),
                                   child: Image.asset(
                                     'assets/colors.png',
                                     width: colorPickerSize,
@@ -54,8 +55,9 @@ class SettingsStyleView extends StatelessWidget {
                               : Material(
                                   color: color,
                                   elevation: 6,
-                                  borderRadius:
-                                      BorderRadius.circular(colorPickerSize),
+                                  borderRadius: BorderRadius.circular(
+                                    colorPickerSize,
+                                  ),
                                   child: SizedBox(
                                     width: colorPickerSize,
                                     height: colorPickerSize,
@@ -107,15 +109,8 @@ class SettingsStyleView extends StatelessWidget {
             ),
             if (wallpaper != null)
               ListTile(
-                title: Image.file(
-                  wallpaper,
-                  height: 38,
-                  fit: BoxFit.cover,
-                ),
-                trailing: const Icon(
-                  Icons.delete_outlined,
-                  color: Colors.red,
-                ),
+                title: Image.file(wallpaper, height: 38, fit: BoxFit.cover),
+                trailing: const Icon(Icons.delete_outlined, color: Colors.red),
                 onTap: controller.deleteWallpaperAction,
               ),
             Builder(
@@ -146,8 +141,9 @@ class SettingsStyleView extends StatelessWidget {
               child: Material(
                 color: Theme.of(context).colorScheme.primary,
                 elevation: 6,
-                shadowColor:
-                    Theme.of(context).secondaryHeaderColor.withAlpha(100),
+                shadowColor: Theme.of(
+                  context,
+                ).secondaryHeaderColor.withAlpha(100),
                 borderRadius: BorderRadius.circular(AppConfig.borderRadius),
                 child: Padding(
                   padding: EdgeInsets.all(16 * AppConfig.bubbleSizeFactor),

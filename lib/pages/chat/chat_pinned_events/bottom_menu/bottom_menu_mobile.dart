@@ -33,8 +33,8 @@ class BottomMenuMobile extends StatelessWidget {
                 label: Text(
                   L10n.of(context)!.unpin,
                   style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                        color: Theme.of(context).colorScheme.primary,
-                      ),
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
                 ),
               ),
             ],
@@ -47,8 +47,8 @@ class BottomMenuMobile extends StatelessWidget {
             label: Text(
               L10n.of(context)!.unpinAllMessages,
               style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                    color: Theme.of(context).colorScheme.primary,
-                  ),
+                color: Theme.of(context).colorScheme.primary,
+              ),
             ),
           ),
         ),

@@ -75,8 +75,9 @@ class ContactsAppBar extends StatelessWidget {
           Divider(
             height: ContactsAppbarStyle.dividerHeight,
             thickness: ContactsAppbarStyle.dividerThickness,
-            color: LinagoraStateLayer(LinagoraSysColors.material().surfaceTint)
-                .opacityLayer3,
+            color: LinagoraStateLayer(
+              LinagoraSysColors.material().surfaceTint,
+            ).opacityLayer3,
           ),
       ],
     );

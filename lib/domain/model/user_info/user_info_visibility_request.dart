@@ -11,10 +11,7 @@ class UserInfoVisibilityRequest with EquatableMixin {
   @JsonKey(name: "visible_fields")
   final List<VisibleEnum>? visibleFields;
 
-  UserInfoVisibilityRequest({
-    this.visibility,
-    this.visibleFields,
-  });
+  UserInfoVisibilityRequest({this.visibility, this.visibleFields});
 
   factory UserInfoVisibilityRequest.fromJson(Map<String, dynamic> json) =>
       _$UserInfoVisibilityRequestFromJson(json);
@@ -22,8 +19,5 @@ class UserInfoVisibilityRequest with EquatableMixin {
   Map<String, dynamic> toJson() => _$UserInfoVisibilityRequestToJson(this);
 
   @override
-  List<Object?> get props => [
-        visibility,
-        visibleFields,
-      ];
+  List<Object?> get props => [visibility, visibleFields];
 }

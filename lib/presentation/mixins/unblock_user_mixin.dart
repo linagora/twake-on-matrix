@@ -31,19 +31,13 @@ mixin UnblockUserMixin {
     );
     if (confirmResult == ConfirmResult.cancel) return;
     unblockUserSubscription = unblockUserInteractor
-        .execute(
-          client: client,
-          userId: userID,
-        )
+        .execute(client: client, userId: userID)
         .listen(
           (event) => event.fold(
             (failure) {
               if (failure is UnblockUserFailure) {
                 TwakeDialog.hideLoadingDialog(context);
-                TwakeSnackBar.show(
-                  context,
-                  failure.exception.toString(),
-                );
+                TwakeSnackBar.show(context, failure.exception.toString());
                 return;
               }
 
@@ -60,9 +54,7 @@ mixin UnblockUserMixin {
                 TwakeDialog.hideLoadingDialog(context);
                 TwakeSnackBar.show(
                   context,
-                  L10n.of(context)!.userIsNotAValidMxid(
-                    userID,
-                  ),
+                  L10n.of(context)!.userIsNotAValidMxid(userID),
                 );
                 return;
               }
@@ -71,9 +63,7 @@ mixin UnblockUserMixin {
                 TwakeDialog.hideLoadingDialog(context);
                 TwakeSnackBar.show(
                   context,
-                  L10n.of(context)!.userNotFoundInIgnoreList(
-                    userID,
-                  ),
+                  L10n.of(context)!.userNotFoundInIgnoreList(userID),
                 );
                 return;
               }

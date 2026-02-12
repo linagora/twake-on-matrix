@@ -25,12 +25,11 @@ class ChatDetailsFileItemWebState extends State<ChatDetailsFileItemWeb>
   @override
   void handleDownloadMatrixFileSuccessDone({
     required DownloadMatrixFileSuccessState success,
-  }) =>
-      handlePreviewWeb(
-        event: widget.event,
-        matrixFile: success.matrixFile,
-        context: TwakeApp.routerKey.currentContext!,
-      );
+  }) => handlePreviewWeb(
+    event: widget.event,
+    matrixFile: success.matrixFile,
+    context: TwakeApp.routerKey.currentContext!,
+  );
 
   @override
   Widget build(BuildContext context) {

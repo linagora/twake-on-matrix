@@ -15,8 +15,8 @@ class AppGridDashboard extends StatefulWidget {
 }
 
 class AppGridDashboardController extends State<AppGridDashboard> {
-  final _getAppGridConfigurationInteractor =
-      getIt.get<GetAppGridConfigurationInteractor>();
+  final _getAppGridConfigurationInteractor = getIt
+      .get<GetAppGridConfigurationInteractor>();
 
   final isOpenAppGridDashboardNotifier = ValueNotifier<bool>(false);
 
@@ -28,25 +28,23 @@ class AppGridDashboardController extends State<AppGridDashboard> {
 
   void _getAppGridConfiguration() {
     _getAppGridConfigurationInteractor
-        .execute(
-      appGridConfigurationPath: AppConfig.appGridConfigurationPath,
-    )
+        .execute(appGridConfigurationPath: AppConfig.appGridConfigurationPath)
         .listen((event) {
-      event.fold(
-        (failure) {
-          if (failure is GetAppGridConfigurationFailure) {
-            Logs().e(
-              'AppGridDashboardController::_getAppGridConfiguration(): $failure',
-            );
-          }
-        },
-        (success) {
-          if (success is GetAppGridConfigurationSuccess) {
-            handleGetAppGridDashboardSuccess(success.linagoraApplications);
-          }
-        },
-      );
-    });
+          event.fold(
+            (failure) {
+              if (failure is GetAppGridConfigurationFailure) {
+                Logs().e(
+                  'AppGridDashboardController::_getAppGridConfiguration(): $failure',
+                );
+              }
+            },
+            (success) {
+              if (success is GetAppGridConfigurationSuccess) {
+                handleGetAppGridDashboardSuccess(success.linagoraApplications);
+              }
+            },
+          );
+        });
   }
 
   void handleGetAppGridDashboardSuccess(LinagoraApplications linagoraApps) {
@@ -57,9 +55,7 @@ class AppGridDashboardController extends State<AppGridDashboard> {
       );
       linagoraApplications.value = linagoraApps;
     } on FlutterError catch (e) {
-      Logs().e(
-        'AppGridDashboardController::handleShowAppDashboard(): $e',
-      );
+      Logs().e('AppGridDashboardController::handleShowAppDashboard(): $e');
     }
   }
 
@@ -69,9 +65,7 @@ class AppGridDashboardController extends State<AppGridDashboard> {
       if (isOpenAppGridDashboardNotifier.value == false) return;
       isOpenAppGridDashboardNotifier.value = false;
     } on FlutterError catch (e) {
-      Logs().e(
-        'AppGridDashboardController::hideAppGridDashboard(): $e',
-      );
+      Logs().e('AppGridDashboardController::hideAppGridDashboard(): $e');
     }
   }
 
@@ -100,8 +94,6 @@ class AppGridDashboardController extends State<AppGridDashboard> {
 
   @override
   Widget build(BuildContext context) {
-    return AppGridDashboardView(
-      controller: this,
-    );
+    return AppGridDashboardView(controller: this);
   }
 }

@@ -19,8 +19,8 @@ abstract class ClientManager {
     try {
       final rawClientNames = await Store().getItem(clientNamespace);
       if (rawClientNames != null) {
-        final clientNamesList =
-            (jsonDecode(rawClientNames) as List).cast<String>();
+        final clientNamesList = (jsonDecode(rawClientNames) as List)
+            .cast<String>();
         clientNames.addAll(clientNamesList);
       }
     } catch (e, s) {
@@ -89,16 +89,14 @@ abstract class ClientManager {
 
   static NativeImplementations get nativeImplementations => kIsWeb
       ? const NativeImplementationsDummy()
-      : NativeImplementationsIsolate(
-          compute,
-          vodozemacInit: () => vod.init(),
-        );
+      : NativeImplementationsIsolate(compute, vodozemacInit: () => vod.init());
 
   static Future<Client> createClient(String clientName) async {
     return Client(
       clientName,
-      httpClient:
-          PlatformInfos.isAndroid ? CustomHttpClient.createHTTPClient() : null,
+      httpClient: PlatformInfos.isAndroid
+          ? CustomHttpClient.createHTTPClient()
+          : null,
       verificationMethods: {
         KeyVerificationMethod.numbers,
         if (kIsWeb || PlatformInfos.isMobile || PlatformInfos.isLinux)

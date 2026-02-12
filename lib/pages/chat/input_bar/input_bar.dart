@@ -87,8 +87,10 @@ class _InputBarState extends State<InputBar> with PasteImageMixin {
         widget.controller!.selection.baseOffset < 0) {
       return []; // no entries if there is selected text
     }
-    final searchText = widget.controller!.text
-        .substring(0, widget.controller!.selection.baseOffset);
+    final searchText = widget.controller!.text.substring(
+      0,
+      widget.controller!.selection.baseOffset,
+    );
     final List<Map<String, String?>> ret = <Map<String, String?>>[];
     const maxResults = 30;
 
@@ -97,17 +99,15 @@ class _InputBarState extends State<InputBar> with PasteImageMixin {
       final commandSearch = commandMatch[1]!.toLowerCase();
       for (final command in widget.room!.client.commands.keys) {
         if (command.contains(commandSearch)) {
-          ret.add({
-            'type': 'command',
-            'name': command,
-          });
+          ret.add({'type': 'command', 'name': command});
         }
 
         if (ret.length > maxResults) return ret;
       }
     }
-    final emojiMatch =
-        RegExp(r'(?:\s|^):(?:([-\w]+)~)?([-\w]+)$').firstMatch(searchText);
+    final emojiMatch = RegExp(
+      r'(?:\s|^):(?:([-\w]+)~)?([-\w]+)$',
+    ).firstMatch(searchText);
     if (emojiMatch != null && widget.room != null) {
       final packSearch = emojiMatch[1];
       final emoteSearch = emojiMatch[2]!.toLowerCase();
@@ -140,8 +140,8 @@ class _InputBarState extends State<InputBar> with PasteImageMixin {
               'type': 'emote',
               'name': emote.key,
               'pack': packSearch,
-              'pack_avatar_url':
-                  emotePacks[packSearch]!.pack.avatarUrl?.toString(),
+              'pack_avatar_url': emotePacks[packSearch]!.pack.avatarUrl
+                  ?.toString(),
               'pack_display_name':
                   emotePacks[packSearch]!.pack.displayName ?? packSearch,
               'mxc': emote.value.url.toString(),
@@ -155,8 +155,10 @@ class _InputBarState extends State<InputBar> with PasteImageMixin {
       // aside of emote packs, also propose normal (tm) unicode emojis
       final matchingUnicodeEmojis = Emoji.all()
           .where(
-            (element) => [element.name, ...element.keywords]
-                .any((element) => element.toLowerCase().contains(emoteSearch)),
+            (element) => [
+              element.name,
+              ...element.keywords,
+            ].any((element) => element.toLowerCase().contains(emoteSearch)),
           )
           .toList();
       // sort by the index of the search term in the name in order to have
@@ -204,8 +206,9 @@ class _InputBarState extends State<InputBar> with PasteImageMixin {
       for (final user in users) {
         if ((user.displayName != null &&
                 (user.displayName!.toLowerCase().contains(userSearch) ||
-                    slugify(user.displayName!.toLowerCase())
-                        .contains(userSearch))) ||
+                    slugify(
+                      user.displayName!.toLowerCase(),
+                    ).contains(userSearch))) ||
             user.id.split(':')[0].toLowerCase().contains(userSearch)) {
           ret.add({
             'type': 'user',
@@ -263,13 +266,16 @@ class _InputBarState extends State<InputBar> with PasteImageMixin {
 
   void insertSuggestion(Map<String, String?> suggestion) {
     if (widget.room!.isDirectChat && !widget.isDraftChat) return;
-    final replaceText = widget.controller!.text
-        .substring(0, widget.controller!.selection.baseOffset);
+    final replaceText = widget.controller!.text.substring(
+      0,
+      widget.controller!.selection.baseOffset,
+    );
     var startText = '';
     final afterText = replaceText == widget.controller!.text
         ? ''
-        : widget.controller!.text
-            .substring(widget.controller!.selection.baseOffset + 1);
+        : widget.controller!.text.substring(
+            widget.controller!.selection.baseOffset + 1,
+          );
     var insertText = '';
     if (suggestion['type'] == 'command') {
       insertText = '${suggestion['name']!} ';
@@ -342,8 +348,10 @@ class _InputBarState extends State<InputBar> with PasteImageMixin {
   void _onEnter(String text) {
     if (widget.focusSuggestionController.suggestions.isNotEmpty) {
       insertSuggestion(
-        widget.focusSuggestionController
-            .suggestions[widget.focusSuggestionController.currentIndex.value],
+        widget.focusSuggestionController.suggestions[widget
+            .focusSuggestionController
+            .currentIndex
+            .value],
       );
     } else {
       widget.onSubmitted?.call(text);
@@ -435,8 +443,9 @@ class _InputBarState extends State<InputBar> with PasteImageMixin {
                 widget.onChanged!(text);
               }
             },
-            contextMenuBuilder:
-                PlatformInfos.isWeb ? null : mobileTwakeContextMenuBuilder,
+            contextMenuBuilder: PlatformInfos.isWeb
+                ? null
+                : mobileTwakeContextMenuBuilder,
             onTap: () async {
               await Future.delayed(InputBar.debounceDurationTap);
               FocusScope.of(context).requestFocus(focusNode);
@@ -498,11 +507,7 @@ class NewLineIntent extends Intent {}
 class SubmitLineIntent extends Intent {}
 
 class SuggestionTile extends StatelessWidget {
-  const SuggestionTile({
-    super.key,
-    required this.suggestion,
-    this.client,
-  });
+  const SuggestionTile({super.key, required this.suggestion, this.client});
 
   final Map<String, String?> suggestion;
   final Client? client;
@@ -598,15 +603,14 @@ class SuggestionTile extends StatelessWidget {
           children: <Widget>[
             Avatar(
               mxContent: url,
-              name: suggestion.tryGet<String>('displayname') ??
+              name:
+                  suggestion.tryGet<String>('displayname') ??
                   suggestion.tryGet<String>('mxid'),
               size: InputBarStyle.suggestionAvatarSize,
               fontSize: InputBarStyle.suggestionAvatarFontSize,
               client: client,
             ),
-            const SizedBox(
-              width: InputBarStyle.suggestionTileAvatarTextGap,
-            ),
+            const SizedBox(width: InputBarStyle.suggestionTileAvatarTextGap),
             Expanded(
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.center,
@@ -618,8 +622,8 @@ class SuggestionTile extends StatelessWidget {
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                            color: Theme.of(context).colorScheme.onSurface,
-                          ),
+                        color: Theme.of(context).colorScheme.onSurface,
+                      ),
                     ),
                   ),
                   Flexible(
@@ -628,8 +632,8 @@ class SuggestionTile extends StatelessWidget {
                       suggestion['mxid']!,
                       overflow: TextOverflow.ellipsis,
                       style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                            color: LinagoraRefColors.material().tertiary[30],
-                          ),
+                        color: LinagoraRefColors.material().tertiary[30],
+                      ),
                     ),
                   ),
                 ],

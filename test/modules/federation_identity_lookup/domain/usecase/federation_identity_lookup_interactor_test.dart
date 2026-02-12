@@ -21,8 +21,10 @@ void main() {
   late FederationIdentityLookupInteractor interactor;
   late MockFederationIdentityLookupRepository mockRepository;
 
-  const testToken =
-      FederationTokenInformation(accessToken: 'test_token', tokenType: 'test');
+  const testToken = FederationTokenInformation(
+    accessToken: 'test_token',
+    tokenType: 'test',
+  );
 
   setUp(() {
     mockRepository = MockFederationIdentityLookupRepository();
@@ -34,9 +36,7 @@ void main() {
   group('Registration Failures', () {
     test('should handle registration exceptions', () async {
       when(
-        mockRepository.register(
-          tokenInformation: testToken,
-        ),
+        mockRepository.register(tokenInformation: testToken),
       ).thenThrow(Exception('Network error'));
 
       final result = await interactor.execute(
@@ -48,23 +48,21 @@ void main() {
       );
 
       expect(result.isLeft(), true);
-      final failure =
-          result.swap().getOrElse(() => throw Exception('Expect a failure'));
+      final failure = result.swap().getOrElse(
+        () => throw Exception('Expect a failure'),
+      );
       expect(failure, isA<FederationIdentityLookupFailure>());
     });
   });
 
   group('Hash Calculation', () {
     test('should handle empty contact list', () async {
-      when(
-        mockRepository.register(
-          tokenInformation: testToken,
-        ),
-      ).thenAnswer(
+      when(mockRepository.register(tokenInformation: testToken)).thenAnswer(
         (_) async => const FederationRegisterResponse(token: 'valid_token'),
       );
-      when(mockRepository.getHashDetails(registeredToken: 'valid_token'))
-          .thenAnswer(
+      when(
+        mockRepository.getHashDetails(registeredToken: 'valid_token'),
+      ).thenAnswer(
         (_) async => const FederationHashDetailsResponse(
           algorithms: {'sha256'},
           lookupPepper: 'pepper',
@@ -80,24 +78,19 @@ void main() {
       );
 
       expect(result.isLeft(), true);
-      final failure =
-          result.swap().getOrElse(() => throw Exception('Expect a failure'));
-      expect(
-        failure,
-        isA<FederationIdentityCalculationHashesEmpty>(),
+      final failure = result.swap().getOrElse(
+        () => throw Exception('Expect a failure'),
       );
+      expect(failure, isA<FederationIdentityCalculationHashesEmpty>());
     });
 
     test('should handle mixed phone/email contacts', () async {
-      when(
-        mockRepository.register(
-          tokenInformation: testToken,
-        ),
-      ).thenAnswer(
+      when(mockRepository.register(tokenInformation: testToken)).thenAnswer(
         (_) async => const FederationRegisterResponse(token: 'valid_token'),
       );
-      when(mockRepository.getHashDetails(registeredToken: 'valid_token'))
-          .thenAnswer(
+      when(
+        mockRepository.getHashDetails(registeredToken: 'valid_token'),
+      ).thenAnswer(
         (_) async => const FederationHashDetailsResponse(
           algorithms: {'sha256'},
           lookupPepper: 'pepper',
@@ -132,8 +125,9 @@ void main() {
       );
 
       expect(result.isRight(), true);
-      final success =
-          result.getOrElse(() => throw Exception('Expected Success'));
+      final success = result.getOrElse(
+        () => throw Exception('Expected Success'),
+      );
       final contact = (success as FederationIdentityLookupSuccess)
           .newContacts[FederationContactFixtures.contact1.id]!;
       expect(contact.phoneNumbers?.first.matrixId, '@alice:matrix.com');
@@ -143,15 +137,12 @@ void main() {
 
   group('MXID Lookup', () {
     test('should handle partial mapping matches', () async {
-      when(
-        mockRepository.register(
-          tokenInformation: testToken,
-        ),
-      ).thenAnswer(
+      when(mockRepository.register(tokenInformation: testToken)).thenAnswer(
         (_) async => const FederationRegisterResponse(token: 'valid_token'),
       );
-      when(mockRepository.getHashDetails(registeredToken: 'valid_token'))
-          .thenAnswer(
+      when(
+        mockRepository.getHashDetails(registeredToken: 'valid_token'),
+      ).thenAnswer(
         (_) async => const FederationHashDetailsResponse(
           algorithms: {'sha256'},
           lookupPepper: 'pepper',
@@ -188,8 +179,9 @@ void main() {
       );
 
       expect(result.isRight(), true);
-      final success =
-          result.getOrElse(() => throw Exception('Expected Success'));
+      final success = result.getOrElse(
+        () => throw Exception('Expected Success'),
+      );
       expect(
         (success as FederationIdentityLookupSuccess)
             .newContacts[FederationContactFixtures.contact1.id]
@@ -208,102 +200,94 @@ void main() {
       );
     });
 
-    test('should handle partial mapping matches with multiple phone number',
-        () async {
-      when(
-        mockRepository.register(
-          tokenInformation: testToken,
-        ),
-      ).thenAnswer(
-        (_) async => const FederationRegisterResponse(token: 'valid_token'),
-      );
-      when(mockRepository.getHashDetails(registeredToken: 'valid_token'))
-          .thenAnswer(
-        (_) async => const FederationHashDetailsResponse(
-          algorithms: {'sha256'},
-          lookupPepper: 'pepper',
-          altLookupPeppers: {'pepper1', 'pepper2'},
-        ),
-      );
-      when(
-        mockRepository.lookupMxid(
-          request: anyNamed('request'),
-          registeredToken: anyNamed('registeredToken'),
-        ),
-      ).thenAnswer(
-        (_) async => const FederationLookupMxidResponse(
-          mappings: {
-            'lWcTz7CJ9a9OqxlYWsl2MibzKep0abdGl6g3I3t7BPM':
-                '@alice_pepper1:matrix.com',
-            'rJnCyQMaiAcZNw_qB5D5iCCjUdKUKF7Mzl18HMY6DjQ':
-                '@alice_pepper2:matrix.com',
-          },
-        ),
-      );
+    test(
+      'should handle partial mapping matches with multiple phone number',
+      () async {
+        when(mockRepository.register(tokenInformation: testToken)).thenAnswer(
+          (_) async => const FederationRegisterResponse(token: 'valid_token'),
+        );
+        when(
+          mockRepository.getHashDetails(registeredToken: 'valid_token'),
+        ).thenAnswer(
+          (_) async => const FederationHashDetailsResponse(
+            algorithms: {'sha256'},
+            lookupPepper: 'pepper',
+            altLookupPeppers: {'pepper1', 'pepper2'},
+          ),
+        );
+        when(
+          mockRepository.lookupMxid(
+            request: anyNamed('request'),
+            registeredToken: anyNamed('registeredToken'),
+          ),
+        ).thenAnswer(
+          (_) async => const FederationLookupMxidResponse(
+            mappings: {
+              'lWcTz7CJ9a9OqxlYWsl2MibzKep0abdGl6g3I3t7BPM':
+                  '@alice_pepper1:matrix.com',
+              'rJnCyQMaiAcZNw_qB5D5iCCjUdKUKF7Mzl18HMY6DjQ':
+                  '@alice_pepper2:matrix.com',
+            },
+          ),
+        );
 
-      final contacts = {
-        FederationContactFixtures.contact1.id:
-            FederationContactFixtures.contact1.copyWith(
-          phoneNumbers: {
-            FederationPhone(
-              number: '(212)555-6789',
-            ),
-            FederationPhone(
-              number: '(213)555-6789',
-            ),
-            FederationPhone(
-              number: '(214)555-6789',
-            ),
-          },
-        ),
-      };
+        final contacts = {
+          FederationContactFixtures.contact1.id: FederationContactFixtures
+              .contact1
+              .copyWith(
+                phoneNumbers: {
+                  FederationPhone(number: '(212)555-6789'),
+                  FederationPhone(number: '(213)555-6789'),
+                  FederationPhone(number: '(214)555-6789'),
+                },
+              ),
+        };
 
-      final result = await interactor.execute(
-        arguments: FederationArguments(
-          federationUrl: 'test.server',
-          tokenInformation: testToken,
-          contactMaps: contacts,
-        ),
-      );
+        final result = await interactor.execute(
+          arguments: FederationArguments(
+            federationUrl: 'test.server',
+            tokenInformation: testToken,
+            contactMaps: contacts,
+          ),
+        );
 
-      expect(result.isRight(), true);
-      final success =
-          result.getOrElse(() => throw Exception('Expected Success'));
-      expect(
-        (success as FederationIdentityLookupSuccess)
-            .newContacts[FederationContactFixtures.contact1.id]
-            ?.phoneNumbers
-            ?.length,
-        equals(3),
-      );
-      expect(
-        (success)
-            .newContacts[FederationContactFixtures.contact1.id]
-            ?.phoneNumbers
-            ?.first
-            .matrixId,
-        '@alice_pepper1:matrix.com',
-      );
-      expect(
-        (success)
-            .newContacts[FederationContactFixtures.contact1.id]
-            ?.emails
-            ?.first
-            .matrixId,
-        '@alice_pepper2:matrix.com',
-      );
-    });
+        expect(result.isRight(), true);
+        final success = result.getOrElse(
+          () => throw Exception('Expected Success'),
+        );
+        expect(
+          (success as FederationIdentityLookupSuccess)
+              .newContacts[FederationContactFixtures.contact1.id]
+              ?.phoneNumbers
+              ?.length,
+          equals(3),
+        );
+        expect(
+          (success)
+              .newContacts[FederationContactFixtures.contact1.id]
+              ?.phoneNumbers
+              ?.first
+              .matrixId,
+          '@alice_pepper1:matrix.com',
+        );
+        expect(
+          (success)
+              .newContacts[FederationContactFixtures.contact1.id]
+              ?.emails
+              ?.first
+              .matrixId,
+          '@alice_pepper2:matrix.com',
+        );
+      },
+    );
 
     test('should handle partial mapping matches with multiple email', () async {
-      when(
-        mockRepository.register(
-          tokenInformation: testToken,
-        ),
-      ).thenAnswer(
+      when(mockRepository.register(tokenInformation: testToken)).thenAnswer(
         (_) async => const FederationRegisterResponse(token: 'valid_token'),
       );
-      when(mockRepository.getHashDetails(registeredToken: 'valid_token'))
-          .thenAnswer(
+      when(
+        mockRepository.getHashDetails(registeredToken: 'valid_token'),
+      ).thenAnswer(
         (_) async => const FederationHashDetailsResponse(
           algorithms: {'sha256'},
           lookupPepper: 'pepper',
@@ -327,20 +311,15 @@ void main() {
       );
 
       final contacts = {
-        FederationContactFixtures.contact1.id:
-            FederationContactFixtures.contact1.copyWith(
-          emails: {
-            FederationEmail(
-              address: 'alice1@gmail.com',
+        FederationContactFixtures.contact1.id: FederationContactFixtures
+            .contact1
+            .copyWith(
+              emails: {
+                FederationEmail(address: 'alice1@gmail.com'),
+                FederationEmail(address: 'alice2@gmail.com'),
+                FederationEmail(address: 'alice3@gmail.com'),
+              },
             ),
-            FederationEmail(
-              address: 'alice2@gmail.com',
-            ),
-            FederationEmail(
-              address: 'alice3@gmail.com',
-            ),
-          },
-        ),
       };
 
       final result = await interactor.execute(
@@ -352,8 +331,9 @@ void main() {
       );
 
       expect(result.isRight(), true);
-      final success =
-          result.getOrElse(() => throw Exception('Expected Success'));
+      final success = result.getOrElse(
+        () => throw Exception('Expected Success'),
+      );
       expect(
         (success as FederationIdentityLookupSuccess)
             .newContacts[FederationContactFixtures.contact1.id]
@@ -380,15 +360,12 @@ void main() {
     });
 
     test('should handle empty lookup response', () async {
-      when(
-        mockRepository.register(
-          tokenInformation: testToken,
-        ),
-      ).thenAnswer(
+      when(mockRepository.register(tokenInformation: testToken)).thenAnswer(
         (_) async => const FederationRegisterResponse(token: 'valid_token'),
       );
-      when(mockRepository.getHashDetails(registeredToken: 'valid_token'))
-          .thenAnswer(
+      when(
+        mockRepository.getHashDetails(registeredToken: 'valid_token'),
+      ).thenAnswer(
         (_) async => const FederationHashDetailsResponse(
           algorithms: {'sha256'},
           lookupPepper: 'pepper',
@@ -418,8 +395,9 @@ void main() {
       );
 
       expect(result.isLeft(), true);
-      final failure =
-          result.swap().getOrElse(() => throw Exception("Expected failure"));
+      final failure = result.swap().getOrElse(
+        () => throw Exception("Expected failure"),
+      );
       expect(
         (failure as FederationIdentityLookupFailure).exception,
         isA<LookUpFederationIdentityNotFoundException>(),
@@ -438,16 +416,15 @@ void main() {
       );
 
       expect(result.isLeft(), true);
-      final failure =
-          result.swap().getOrElse(() => throw Exception('Expect a failure'));
+      final failure = result.swap().getOrElse(
+        () => throw Exception('Expect a failure'),
+      );
       expect(failure, isA<NoFederationIdentityURL>());
     });
 
     test('should handle invalid token information', () async {
       when(
-        mockRepository.register(
-          tokenInformation: anyNamed('tokenInformation'),
-        ),
+        mockRepository.register(tokenInformation: anyNamed('tokenInformation')),
       ).thenThrow(Exception("Can not register"));
 
       final result = await interactor.execute(
@@ -462,21 +439,19 @@ void main() {
       );
 
       expect(result.isLeft(), true);
-      final failure =
-          result.swap().getOrElse(() => throw Exception('Expect an exception'));
+      final failure = result.swap().getOrElse(
+        () => throw Exception('Expect an exception'),
+      );
       expect(failure, isA<FederationIdentityLookupFailure>());
     });
 
     test('should handle invalid contact data', () async {
-      when(
-        mockRepository.register(
-          tokenInformation: testToken,
-        ),
-      ).thenAnswer(
+      when(mockRepository.register(tokenInformation: testToken)).thenAnswer(
         (_) async => const FederationRegisterResponse(token: 'valid_token'),
       );
-      when(mockRepository.getHashDetails(registeredToken: 'valid_token'))
-          .thenAnswer(
+      when(
+        mockRepository.getHashDetails(registeredToken: 'valid_token'),
+      ).thenAnswer(
         (_) async => const FederationHashDetailsResponse(
           algorithms: {'sha256'},
           lookupPepper: 'pepper',
@@ -502,26 +477,21 @@ void main() {
       );
 
       expect(result.isLeft(), true);
-      final failure =
-          result.swap().getOrElse(() => throw Exception("Expected failure"));
-      expect(
-        failure,
-        isA<FederationIdentityCalculationHashesEmpty>(),
+      final failure = result.swap().getOrElse(
+        () => throw Exception("Expected failure"),
       );
+      expect(failure, isA<FederationIdentityCalculationHashesEmpty>());
     });
   });
 
   group('Hash Details', () {
     test('should handle unsupported hash algorithms', () async {
-      when(
-        mockRepository.register(
-          tokenInformation: testToken,
-        ),
-      ).thenAnswer(
+      when(mockRepository.register(tokenInformation: testToken)).thenAnswer(
         (_) async => const FederationRegisterResponse(token: 'valid_token'),
       );
-      when(mockRepository.getHashDetails(registeredToken: 'valid_token'))
-          .thenAnswer(
+      when(
+        mockRepository.getHashDetails(registeredToken: 'valid_token'),
+      ).thenAnswer(
         (_) async => const FederationHashDetailsResponse(
           algorithms: {'unsupported algorithm'},
           lookupPepper: 'pepper',
@@ -556,8 +526,9 @@ void main() {
       );
 
       expect(result.isRight(), true);
-      final success =
-          result.getOrElse(() => throw Exception('Expected Success'));
+      final success = result.getOrElse(
+        () => throw Exception('Expected Success'),
+      );
       expect(
         (success as FederationIdentityLookupSuccess)
             .newContacts[FederationContactFixtures.contact1.id]
@@ -577,15 +548,12 @@ void main() {
     });
 
     test('should handle missing lookup pepper', () async {
-      when(
-        mockRepository.register(
-          tokenInformation: testToken,
-        ),
-      ).thenAnswer(
+      when(mockRepository.register(tokenInformation: testToken)).thenAnswer(
         (_) async => const FederationRegisterResponse(token: 'valid_token'),
       );
-      when(mockRepository.getHashDetails(registeredToken: 'valid_token'))
-          .thenAnswer(
+      when(
+        mockRepository.getHashDetails(registeredToken: 'valid_token'),
+      ).thenAnswer(
         (_) async => const FederationHashDetailsResponse(
           algorithms: {'sha256'},
           lookupPepper: null,
@@ -606,21 +574,19 @@ void main() {
       );
 
       expect(result.isLeft(), true);
-      final failure =
-          result.swap().getOrElse(() => throw Exception('Expected failure'));
+      final failure = result.swap().getOrElse(
+        () => throw Exception('Expected failure'),
+      );
       expect(failure, isA<FederationIdentityGetHashDetailsFailure>());
     });
 
     test('should handle empty algorithms list', () async {
-      when(
-        mockRepository.register(
-          tokenInformation: testToken,
-        ),
-      ).thenAnswer(
+      when(mockRepository.register(tokenInformation: testToken)).thenAnswer(
         (_) async => const FederationRegisterResponse(token: 'valid_token'),
       );
-      when(mockRepository.getHashDetails(registeredToken: 'valid_token'))
-          .thenAnswer(
+      when(
+        mockRepository.getHashDetails(registeredToken: 'valid_token'),
+      ).thenAnswer(
         (_) async => const FederationHashDetailsResponse(
           algorithms: {},
           lookupPepper: 'pepper',
@@ -641,8 +607,9 @@ void main() {
       );
 
       expect(result.isLeft(), true);
-      final failure =
-          result.swap().getOrElse(() => throw Exception('Expected failure'));
+      final failure = result.swap().getOrElse(
+        () => throw Exception('Expected failure'),
+      );
       expect(failure, isA<FederationIdentityGetHashDetailsFailure>());
     });
   });
@@ -650,9 +617,7 @@ void main() {
   group('Registration Response', () {
     test('should handle empty token in registration response', () async {
       when(
-        mockRepository.register(
-          tokenInformation: testToken,
-        ),
+        mockRepository.register(tokenInformation: testToken),
       ).thenAnswer((_) async => const FederationRegisterResponse(token: ''));
 
       final result = await interactor.execute(
@@ -664,8 +629,9 @@ void main() {
       );
 
       expect(result.isLeft(), true);
-      final failure =
-          result.swap().getOrElse(() => throw Exception('Expected failure'));
+      final failure = result.swap().getOrElse(
+        () => throw Exception('Expected failure'),
+      );
       expect(failure, isA<FederationIdentityRegisterAccountFailure>());
       expect(
         (failure as FederationIdentityRegisterAccountFailure).identityServer,
@@ -675,9 +641,7 @@ void main() {
 
     test('should handle null token in registration response', () async {
       when(
-        mockRepository.register(
-          tokenInformation: testToken,
-        ),
+        mockRepository.register(tokenInformation: testToken),
       ).thenAnswer((_) async => const FederationRegisterResponse(token: null));
 
       final result = await interactor.execute(
@@ -689,23 +653,21 @@ void main() {
       );
 
       expect(result.isLeft(), true);
-      final failure =
-          result.swap().getOrElse(() => throw Exception('Expected failure'));
+      final failure = result.swap().getOrElse(
+        () => throw Exception('Expected failure'),
+      );
       expect(failure, isA<FederationIdentityRegisterAccountFailure>());
     });
   });
 
   group('Contact Processing', () {
     test('should handle contacts with only phone numbers', () async {
-      when(
-        mockRepository.register(
-          tokenInformation: testToken,
-        ),
-      ).thenAnswer(
+      when(mockRepository.register(tokenInformation: testToken)).thenAnswer(
         (_) async => const FederationRegisterResponse(token: 'valid_token'),
       );
-      when(mockRepository.getHashDetails(registeredToken: 'valid_token'))
-          .thenAnswer(
+      when(
+        mockRepository.getHashDetails(registeredToken: 'valid_token'),
+      ).thenAnswer(
         (_) async => const FederationHashDetailsResponse(
           algorithms: {'sha256'},
           lookupPepper: 'pepper',
@@ -739,8 +701,9 @@ void main() {
       );
 
       expect(result.isRight(), true);
-      final success =
-          result.getOrElse(() => throw Exception('Expected Success'));
+      final success = result.getOrElse(
+        () => throw Exception('Expected Success'),
+      );
       expect(
         (success as FederationIdentityLookupSuccess)
             .newContacts[FederationContactFixtures.contact3.id]
@@ -752,15 +715,12 @@ void main() {
     });
 
     test('should handle contacts with only emails', () async {
-      when(
-        mockRepository.register(
-          tokenInformation: testToken,
-        ),
-      ).thenAnswer(
+      when(mockRepository.register(tokenInformation: testToken)).thenAnswer(
         (_) async => const FederationRegisterResponse(token: 'valid_token'),
       );
-      when(mockRepository.getHashDetails(registeredToken: 'valid_token'))
-          .thenAnswer(
+      when(
+        mockRepository.getHashDetails(registeredToken: 'valid_token'),
+      ).thenAnswer(
         (_) async => const FederationHashDetailsResponse(
           algorithms: {'sha256'},
           lookupPepper: 'pepper',
@@ -794,8 +754,9 @@ void main() {
       );
 
       expect(result.isRight(), true);
-      final success =
-          result.getOrElse(() => throw Exception('Expected Success'));
+      final success = result.getOrElse(
+        () => throw Exception('Expected Success'),
+      );
       expect(
         (success as FederationIdentityLookupSuccess)
             .newContacts[FederationContactFixtures.contact4.id]
@@ -807,15 +768,12 @@ void main() {
     });
 
     test('should handle multiple contacts in a single request', () async {
-      when(
-        mockRepository.register(
-          tokenInformation: testToken,
-        ),
-      ).thenAnswer(
+      when(mockRepository.register(tokenInformation: testToken)).thenAnswer(
         (_) async => const FederationRegisterResponse(token: 'valid_token'),
       );
-      when(mockRepository.getHashDetails(registeredToken: 'valid_token'))
-          .thenAnswer(
+      when(
+        mockRepository.getHashDetails(registeredToken: 'valid_token'),
+      ).thenAnswer(
         (_) async => const FederationHashDetailsResponse(
           algorithms: {'sha256'},
           lookupPepper: 'pepper',
@@ -828,10 +786,7 @@ void main() {
         ),
       ).thenAnswer(
         (_) async => const FederationLookupMxidResponse(
-          mappings: {
-            'hash1': '@alice:matrix.com',
-            'hash2': '@bob:matrix.com',
-          },
+          mappings: {'hash1': '@alice:matrix.com', 'hash2': '@bob:matrix.com'},
         ),
       );
 
@@ -851,8 +806,9 @@ void main() {
       );
 
       expect(result.isRight(), true);
-      final success =
-          result.getOrElse(() => throw Exception('Expected Success'));
+      final success = result.getOrElse(
+        () => throw Exception('Expected Success'),
+      );
       expect(
         (success as FederationIdentityLookupSuccess).newContacts.length,
         equals(2),
@@ -860,15 +816,12 @@ void main() {
     });
 
     test('should handle partial matches with no matching hash', () async {
-      when(
-        mockRepository.register(
-          tokenInformation: testToken,
-        ),
-      ).thenAnswer(
+      when(mockRepository.register(tokenInformation: testToken)).thenAnswer(
         (_) async => const FederationRegisterResponse(token: 'valid_token'),
       );
-      when(mockRepository.getHashDetails(registeredToken: 'valid_token'))
-          .thenAnswer(
+      when(
+        mockRepository.getHashDetails(registeredToken: 'valid_token'),
+      ).thenAnswer(
         (_) async => const FederationHashDetailsResponse(
           algorithms: {'sha256'},
           lookupPepper: 'pepper',
@@ -881,9 +834,7 @@ void main() {
         ),
       ).thenAnswer(
         (_) async => const FederationLookupMxidResponse(
-          mappings: {
-            'unrelated_hash': '@unrelated:matrix.com',
-          },
+          mappings: {'unrelated_hash': '@unrelated:matrix.com'},
         ),
       );
 
@@ -901,8 +852,9 @@ void main() {
       );
 
       expect(result.isRight(), true);
-      final success =
-          result.getOrElse(() => throw Exception('Expected Success'));
+      final success = result.getOrElse(
+        () => throw Exception('Expected Success'),
+      );
       // The contact should be returned but without matrix IDs assigned
       expect(
         (success as FederationIdentityLookupSuccess)
@@ -998,7 +950,9 @@ void main() {
       );
       expect(
         updatedContact
-            .phoneNumbers?.first.thirdPartyIdToHashMap?['(212)555-6789'],
+            .phoneNumbers
+            ?.first
+            .thirdPartyIdToHashMap?['(212)555-6789'],
         contains('phone_hash1'),
       );
       expect(updatedContact.emails?.first.thirdPartyIdToHashMap, isNotNull);
@@ -1011,15 +965,12 @@ void main() {
 
   group('Error Handling and Edge Cases', () {
     test('should handle getHashDetails exceptions', () async {
-      when(
-        mockRepository.register(
-          tokenInformation: testToken,
-        ),
-      ).thenAnswer(
+      when(mockRepository.register(tokenInformation: testToken)).thenAnswer(
         (_) async => const FederationRegisterResponse(token: 'valid_token'),
       );
-      when(mockRepository.getHashDetails(registeredToken: 'valid_token'))
-          .thenThrow(Exception('Network error'));
+      when(
+        mockRepository.getHashDetails(registeredToken: 'valid_token'),
+      ).thenThrow(Exception('Network error'));
 
       final result = await interactor.execute(
         arguments: FederationArguments(
@@ -1033,21 +984,19 @@ void main() {
       );
 
       expect(result.isLeft(), true);
-      final failure =
-          result.swap().getOrElse(() => throw Exception('Expected failure'));
+      final failure = result.swap().getOrElse(
+        () => throw Exception('Expected failure'),
+      );
       expect(failure, isA<FederationIdentityLookupFailure>());
     });
 
     test('should handle lookupMxid exceptions', () async {
-      when(
-        mockRepository.register(
-          tokenInformation: testToken,
-        ),
-      ).thenAnswer(
+      when(mockRepository.register(tokenInformation: testToken)).thenAnswer(
         (_) async => const FederationRegisterResponse(token: 'valid_token'),
       );
-      when(mockRepository.getHashDetails(registeredToken: 'valid_token'))
-          .thenAnswer(
+      when(
+        mockRepository.getHashDetails(registeredToken: 'valid_token'),
+      ).thenAnswer(
         (_) async => const FederationHashDetailsResponse(
           algorithms: {'sha256'},
           lookupPepper: 'pepper',
@@ -1072,21 +1021,19 @@ void main() {
       );
 
       expect(result.isLeft(), true);
-      final failure =
-          result.swap().getOrElse(() => throw Exception('Expected failure'));
+      final failure = result.swap().getOrElse(
+        () => throw Exception('Expected failure'),
+      );
       expect(failure, isA<FederationIdentityLookupFailure>());
     });
 
     test('should handle contacts with no phone numbers or emails', () async {
-      when(
-        mockRepository.register(
-          tokenInformation: testToken,
-        ),
-      ).thenAnswer(
+      when(mockRepository.register(tokenInformation: testToken)).thenAnswer(
         (_) async => const FederationRegisterResponse(token: 'valid_token'),
       );
-      when(mockRepository.getHashDetails(registeredToken: 'valid_token'))
-          .thenAnswer(
+      when(
+        mockRepository.getHashDetails(registeredToken: 'valid_token'),
+      ).thenAnswer(
         (_) async => const FederationHashDetailsResponse(
           algorithms: {'sha256'},
           lookupPepper: 'pepper',
@@ -1109,21 +1056,19 @@ void main() {
       );
 
       expect(result.isLeft(), true);
-      final failure =
-          result.swap().getOrElse(() => throw Exception('Expected failure'));
+      final failure = result.swap().getOrElse(
+        () => throw Exception('Expected failure'),
+      );
       expect(failure, isA<FederationIdentityCalculationHashesEmpty>());
     });
 
     test('should handle null phone numbers and emails in contact', () async {
-      when(
-        mockRepository.register(
-          tokenInformation: testToken,
-        ),
-      ).thenAnswer(
+      when(mockRepository.register(tokenInformation: testToken)).thenAnswer(
         (_) async => const FederationRegisterResponse(token: 'valid_token'),
       );
-      when(mockRepository.getHashDetails(registeredToken: 'valid_token'))
-          .thenAnswer(
+      when(
+        mockRepository.getHashDetails(registeredToken: 'valid_token'),
+      ).thenAnswer(
         (_) async => const FederationHashDetailsResponse(
           algorithms: {'sha256'},
           lookupPepper: 'pepper',
@@ -1146,8 +1091,9 @@ void main() {
       );
 
       expect(result.isLeft(), true);
-      final failure =
-          result.swap().getOrElse(() => throw Exception('Expected failure'));
+      final failure = result.swap().getOrElse(
+        () => throw Exception('Expected failure'),
+      );
       expect(failure, isA<FederationIdentityCalculationHashesEmpty>());
     });
   });

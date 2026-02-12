@@ -26,8 +26,9 @@ extension ClientStoriesExtension on Client {
 
   Future<List<User>> getUndecidedContactsForStories(Room? storiesRoom) async {
     if (storiesRoom == null) return contacts;
-    final invitedContacts =
-        (await storiesRoom.requestParticipants()).map((user) => user.id);
+    final invitedContacts = (await storiesRoom.requestParticipants()).map(
+      (user) => user.id,
+    );
     final decidedContacts = storiesBlockList.toSet()..addAll(invitedContacts);
     return contacts
         .where((contact) => !decidedContacts.contains(contact.id))
@@ -38,11 +39,8 @@ extension ClientStoriesExtension on Client {
       accountData[storiesBlockListType]?.content.tryGetList<String>('users') ??
       [];
 
-  Future<void> setStoriesBlockList(List<String> users) => setAccountData(
-        userID!,
-        storiesBlockListType,
-        {'users': users},
-      );
+  Future<void> setStoriesBlockList(List<String> users) =>
+      setAccountData(userID!, storiesBlockListType, {'users': users});
 
   Future<Room> createStoriesRoom([List<String>? invite]) async {
     final roomId = await createRoom(
@@ -56,25 +54,21 @@ extension ClientStoriesExtension on Client {
         StateEvent(
           type: EventTypes.Encryption,
           stateKey: '',
-          content: {
-            'algorithm': 'm.megolm.v1.aes-sha2',
-          },
+          content: {'algorithm': 'm.megolm.v1.aes-sha2'},
         ),
         StateEvent(
           type: 'm.room.retention',
           stateKey: '',
-          content: {
-            'min_lifetime': 86400000,
-            'max_lifetime': 86400000,
-          },
+          content: {'min_lifetime': 86400000, 'max_lifetime': 86400000},
         ),
       ],
       invite: invite,
     );
     if (getRoomById(roomId) == null) {
       // Wait for room actually appears in sync
-      await onSync.stream
-          .firstWhere((sync) => sync.rooms?.join?.containsKey(roomId) ?? false);
+      await onSync.stream.firstWhere(
+        (sync) => sync.rooms?.join?.containsKey(roomId) ?? false,
+      );
     }
     return getRoomById(roomId)!;
   }

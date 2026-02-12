@@ -19,18 +19,14 @@ class ChatDetailsFileRowWrapper extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        const SizedBox(
-          width: ChatDetailsFileTileStyle.wrapperLeftPadding,
-        ),
+        const SizedBox(width: ChatDetailsFileTileStyle.wrapperLeftPadding),
         SvgPicture.asset(
           mimeType.getIcon(fileType: fileType),
           width: ChatDetailsFileTileStyle().iconSize,
           height: ChatDetailsFileTileStyle().iconSize,
         ),
         ChatDetailsFileTileStyle().paddingRightIcon,
-        Expanded(
-          child: child,
-        ),
+        Expanded(child: child),
       ],
     );
   }

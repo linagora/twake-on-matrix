@@ -27,34 +27,32 @@ class ChatAppBarTitleStyle {
 
   static TextStyle? appBarTitleStyle(BuildContext context) =>
       Theme.of(context).textTheme.titleMedium?.copyWith(
-            color: Theme.of(context).colorScheme.onSurface,
-            letterSpacing: ChatAppBarTitleStyle.letterSpacingRoomName,
-          );
+        color: Theme.of(context).colorScheme.onSurface,
+        letterSpacing: ChatAppBarTitleStyle.letterSpacingRoomName,
+      );
 
   static TextStyle? offlineStatusTextStyle(BuildContext context) =>
       responsive.isMobile(context)
-          ? Theme.of(context).textTheme.labelMedium?.copyWith(
-                color: LinagoraRefColors.material().tertiary[30],
-                letterSpacing: ChatAppBarTitleStyle.letterSpacingStatusContent,
-                fontFamily: 'Inter',
-              )
-          : Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: LinagoraRefColors.material().neutral[50],
-                letterSpacing: ChatAppBarTitleStyle.letterSpacingRoomName,
-                fontFamily: 'Inter',
-              );
+      ? Theme.of(context).textTheme.labelMedium?.copyWith(
+          color: LinagoraRefColors.material().tertiary[30],
+          letterSpacing: ChatAppBarTitleStyle.letterSpacingStatusContent,
+          fontFamily: 'Inter',
+        )
+      : Theme.of(context).textTheme.bodySmall?.copyWith(
+          color: LinagoraRefColors.material().neutral[50],
+          letterSpacing: ChatAppBarTitleStyle.letterSpacingRoomName,
+          fontFamily: 'Inter',
+        );
 
   static TextStyle? onlineStatusTextStyle(BuildContext context) =>
       responsive.isMobile(context)
-          ? Theme.of(context).textTheme.labelMedium?.copyWith(
-                color: LinagoraRefColors.material().secondary[40],
-                letterSpacing: ChatAppBarTitleStyle.letterSpacingStatusContent,
-              )
-          : Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: LinagoraRefColors.material().secondary[40],
-                letterSpacing: ChatAppBarTitleStyle.letterSpacingRoomName,
-              );
-  static const avatarPadding = EdgeInsetsDirectional.only(
-    end: 8,
-  );
+      ? Theme.of(context).textTheme.labelMedium?.copyWith(
+          color: LinagoraRefColors.material().secondary[40],
+          letterSpacing: ChatAppBarTitleStyle.letterSpacingStatusContent,
+        )
+      : Theme.of(context).textTheme.bodySmall?.copyWith(
+          color: LinagoraRefColors.material().secondary[40],
+          letterSpacing: ChatAppBarTitleStyle.letterSpacingRoomName,
+        );
+  static const avatarPadding = EdgeInsetsDirectional.only(end: 8);
 }

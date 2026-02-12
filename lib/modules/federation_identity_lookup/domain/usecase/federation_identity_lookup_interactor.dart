@@ -25,10 +25,8 @@ class FederationIdentityLookupInteractor {
         return const Left(NoFederationIdentityURL());
       }
 
-      final registerResponse =
-          await federationIdentityLookupRepository.register(
-        tokenInformation: arguments.tokenInformation,
-      );
+      final registerResponse = await federationIdentityLookupRepository
+          .register(tokenInformation: arguments.tokenInformation);
       if (registerResponse.token == null || registerResponse.token!.isEmpty) {
         return Left(
           FederationIdentityRegisterAccountFailure(
@@ -37,10 +35,8 @@ class FederationIdentityLookupInteractor {
         );
       }
 
-      final hashDetails =
-          await federationIdentityLookupRepository.getHashDetails(
-        registeredToken: registerResponse.token!,
-      );
+      final hashDetails = await federationIdentityLookupRepository
+          .getHashDetails(registeredToken: registerResponse.token!);
       if (hashDetails.lookupPepper == null || hashDetails.algorithms == null) {
         return const Left(FederationIdentityGetHashDetailsFailure());
       }
@@ -98,29 +94,31 @@ class FederationIdentityLookupInteractor {
         contactIdToHashMap.putIfAbsent(contact.id, () => updatedContact);
       }
 
-      final contactToHashMap =
-          contactIdToHashesMap.values.expand((hash) => hash).toSet();
+      final contactToHashMap = contactIdToHashesMap.values
+          .expand((hash) => hash)
+          .toSet();
 
       if (contactToHashMap.isEmpty) {
         return const Left(FederationIdentityCalculationHashesEmpty());
       }
 
-      final lookupMxidResponse =
-          await federationIdentityLookupRepository.lookupMxid(
-        request: FederationLookupMxidRequest(
-          addresses: contactToHashMap.toSet(),
-          algorithm: hashDetails.algorithms?.firstOrNull,
-          pepper: hashDetails.lookupPepper,
-        ),
-        registeredToken: registerResponse.token!,
-      );
+      final lookupMxidResponse = await federationIdentityLookupRepository
+          .lookupMxid(
+            request: FederationLookupMxidRequest(
+              addresses: contactToHashMap.toSet(),
+              algorithm: hashDetails.algorithms?.firstOrNull,
+              pepper: hashDetails.lookupPepper,
+            ),
+            registeredToken: registerResponse.token!,
+          );
 
       if (lookupMxidResponse.mappings == null ||
           lookupMxidResponse.mappings!.isEmpty) {
         return Left(
           FederationIdentityLookupFailure(
-            exception:
-                LookUpFederationIdentityNotFoundException('No mappings found'),
+            exception: LookUpFederationIdentityNotFoundException(
+              'No mappings found',
+            ),
           ),
         );
       }
@@ -132,22 +130,18 @@ class FederationIdentityLookupInteractor {
 
         final contact = contactIdToHashMap[contactId];
         if (contact != null) {
-          final updatedPhoneNumber = _updatePhoneNumber(
-            contact,
-            {
-              mapping.key: mapping.value,
-            },
-          );
-          final updatedEmails = _updateEmail(
-            contact,
-            {
-              mapping.key: mapping.value,
-            },
-          );
+          final updatedPhoneNumber = _updatePhoneNumber(contact, {
+            mapping.key: mapping.value,
+          });
+          final updatedEmails = _updateEmail(contact, {
+            mapping.key: mapping.value,
+          });
 
           final updatedContact = contact.copyWith(
-            phoneNumbers:
-                replacePhoneNumber(contact.phoneNumbers, updatedPhoneNumber),
+            phoneNumbers: replacePhoneNumber(
+              contact.phoneNumbers,
+              updatedPhoneNumber,
+            ),
             emails: replaceEmail(contact.emails, updatedEmails),
           );
 
@@ -156,9 +150,7 @@ class FederationIdentityLookupInteractor {
       }
 
       return Right(
-        FederationIdentityLookupSuccess(
-          newContacts: contactIdToHashMap,
-        ),
+        FederationIdentityLookupSuccess(newContacts: contactIdToHashMap),
       );
     } catch (e) {
       return Left(FederationIdentityLookupFailure(exception: e));
@@ -180,9 +172,7 @@ class FederationIdentityLookupInteractor {
         );
         if (phone != null) {
           final phoneNumberUpdated = phoneNumber.copyWith(
-            thirdPartyIdToHashMap: {
-              phoneNumber.number: phoneToHashMap[phone]!,
-            },
+            thirdPartyIdToHashMap: {phoneNumber.number: phoneToHashMap[phone]!},
           );
           updatedPhoneNumbers.add(phoneNumberUpdated);
         }
@@ -197,9 +187,7 @@ class FederationIdentityLookupInteractor {
 
         if (address != null) {
           final emailUpdated = email.copyWith(
-            thirdPartyIdToHashMap: {
-              email.address: emailToHashMap[address]!,
-            },
+            thirdPartyIdToHashMap: {email.address: emailToHashMap[address]!},
           );
           updatedEmails.add(emailUpdated);
         }
@@ -248,9 +236,7 @@ class FederationIdentityLookupInteractor {
               mappings.keys.firstWhereOrNull((key) => key == hash) != null,
         );
         if (foundHash != null) {
-          final updatedEmail = email.copyWith(
-            matrixId: mappings[foundHash],
-          );
+          final updatedEmail = email.copyWith(matrixId: mappings[foundHash]);
           return updatedEmail;
         }
       }

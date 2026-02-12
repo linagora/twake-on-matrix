@@ -17,9 +17,7 @@ class HomeserverBottomSheet extends StatelessWidget {
     final jurisdiction = homeserver.homeserver.jurisdiction;
     final homeserverSoftware = homeserver.homeserver.homeserverSoftware;
     return Scaffold(
-      appBar: AppBar(
-        title: Text(homeserver.homeserver.baseUrl.host),
-      ),
+      appBar: AppBar(title: Text(homeserver.homeserver.baseUrl.host)),
       body: ListView(
         children: [
           if (description != null && description.isNotEmpty)
@@ -47,22 +45,28 @@ class HomeserverBottomSheet extends StatelessWidget {
           ),
           if (registration != null)
             ListTile(
-              onTap: () => UrlLauncher(context, url: registration.toString())
-                  .openUrlInAppBrowser(),
+              onTap: () => UrlLauncher(
+                context,
+                url: registration.toString(),
+              ).openUrlInAppBrowser(),
               leading: const Icon(Icons.person_add_outlined),
               title: Text(registration.toString()),
             ),
           if (rules != null)
             ListTile(
-              onTap: () => UrlLauncher(context, url: rules.toString())
-                  .openUrlInAppBrowser(),
+              onTap: () => UrlLauncher(
+                context,
+                url: rules.toString(),
+              ).openUrlInAppBrowser(),
               leading: const Icon(Icons.visibility_outlined),
               title: Text(rules.toString()),
             ),
           if (privacy != null)
             ListTile(
-              onTap: () => UrlLauncher(context, url: privacy.toString())
-                  .openUrlInAppBrowser(),
+              onTap: () => UrlLauncher(
+                context,
+                url: privacy.toString(),
+              ).openUrlInAppBrowser(),
               leading: const Icon(Icons.shield_outlined),
               title: Text(privacy.toString()),
             ),

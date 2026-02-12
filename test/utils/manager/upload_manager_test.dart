@@ -79,8 +79,7 @@ void main() {
     );
   });
   group('UploadManager test on WEB', () {
-    test(
-        '\nWHEN pick file successfully and upload a file.\n'
+    test('\nWHEN pick file successfully and upload a file.\n'
         'THEN upload file successfully.\n', () async {
       const txidA = 'txidA';
 
@@ -116,8 +115,7 @@ void main() {
       );
     });
 
-    test(
-        '\nWHEN pick file successfully and upload a file in encryption room.\n'
+    test('\nWHEN pick file successfully and upload a file in encryption room.\n'
         'THEN upload file successfully.\n', () async {
       const txidA = 'txidA';
 
@@ -157,8 +155,7 @@ void main() {
       );
     });
 
-    test(
-        '\nWHEN pick file successfully and upload a file.\n'
+    test('\nWHEN pick file successfully and upload a file.\n'
         'THEN upload file failed.\n', () async {
       const txidA = 'txidA';
 
@@ -192,16 +189,12 @@ void main() {
       );
     });
 
-    test(
-        '\nWHEN pick files successfully and upload files.\n'
+    test('\nWHEN pick files successfully and upload files.\n'
         'THEN upload files successfully.\n', () async {
       const txidA = 'txidA';
       const txidB = 'txidB';
 
-      final listFiles = {
-        txidA: MockMatrixFile(),
-        txidB: MockMatrixFile(),
-      };
+      final listFiles = {txidA: MockMatrixFile(), txidB: MockMatrixFile()};
 
       when(room.client.generateUniqueTransactionId()).thenReturn(txidA);
 
@@ -259,16 +252,12 @@ void main() {
       );
     });
 
-    test(
-        '\nWHEN pick files successfully and upload files.\n'
+    test('\nWHEN pick files successfully and upload files.\n'
         'THEN upload files failed.\n', () async {
       const txidA = 'txidA';
       const txidB = 'txidB';
 
-      final listFiles = {
-        txidA: MockMatrixFile(),
-        txidB: MockMatrixFile(),
-      };
+      final listFiles = {txidA: MockMatrixFile(), txidB: MockMatrixFile()};
 
       when(room.client.generateUniqueTransactionId()).thenReturn(txidA);
 
@@ -322,18 +311,14 @@ void main() {
       );
     });
 
-    test(
-        '\nWHEN pick file successfully and upload files [A, B].\n'
+    test('\nWHEN pick file successfully and upload files [A, B].\n'
         'AND cancel upload load file [A]'
         'THEN getUploadStateStream[A] SHOULD return UploadFileFailedState with CancelUploadException\n'
         'THEN upload file[B] successfully.\n', () async {
       const txidA = 'txidA';
       const txidB = 'txidB';
 
-      final listFiles = {
-        txidA: MockMatrixFile(),
-        txidB: MockMatrixFile(),
-      };
+      final listFiles = {txidA: MockMatrixFile(), txidB: MockMatrixFile()};
 
       when(room.client.generateUniqueTransactionId()).thenReturn(txidA);
 
@@ -370,14 +355,11 @@ void main() {
       });
 
       uploadManager.getUploadStateStream(txidA)?.listen((state) {
-        state.fold(
-          (failure) {
-            if (failure is UploadFileFailedState) {
-              expect(failure.exception is CancelUploadException, true);
-            }
-          },
-          (success) => null,
-        );
+        state.fold((failure) {
+          if (failure is UploadFileFailedState) {
+            expect(failure.exception is CancelUploadException, true);
+          }
+        }, (success) => null);
       });
 
       expect(
@@ -394,79 +376,70 @@ void main() {
     });
 
     test(
-        '\nWHEN pick file successfully and upload files [A, B].\n'
-        'AND cancel upload load file [A] and [B]\n'
-        'THEN getUploadStateStream[A] SHOULD return UploadFileFailedState with CancelUploadException\n'
-        'THEN getUploadStateStream[B] SHOULD return UploadFileFailedState with CancelUploadException\n',
-        () async {
-      const txidA = 'txidA';
-      const txidB = 'txidB';
+      '\nWHEN pick file successfully and upload files [A, B].\n'
+      'AND cancel upload load file [A] and [B]\n'
+      'THEN getUploadStateStream[A] SHOULD return UploadFileFailedState with CancelUploadException\n'
+      'THEN getUploadStateStream[B] SHOULD return UploadFileFailedState with CancelUploadException\n',
+      () async {
+        const txidA = 'txidA';
+        const txidB = 'txidB';
 
-      final listFiles = {
-        txidA: MockMatrixFile(),
-        txidB: MockMatrixFile(),
-      };
+        final listFiles = {txidA: MockMatrixFile(), txidB: MockMatrixFile()};
 
-      when(room.client.generateUniqueTransactionId()).thenReturn(txidA);
+        when(room.client.generateUniqueTransactionId()).thenReturn(txidA);
 
-      when(uploadManager.getUploadStateStream(txidA)).thenAnswer(
-        (_) => Stream.fromIterable([
-          const Right(UploadFileInitial()),
-          const Right(ConvertingStreamToBytesState()),
-          const Right(ConvertedStreamToBytesState()),
-          const Right(UploadingFileState(receive: 0, total: 1)),
-          Left(UploadFileFailedState(exception: CancelUploadException())),
-        ]),
-      );
+        when(uploadManager.getUploadStateStream(txidA)).thenAnswer(
+          (_) => Stream.fromIterable([
+            const Right(UploadFileInitial()),
+            const Right(ConvertingStreamToBytesState()),
+            const Right(ConvertedStreamToBytesState()),
+            const Right(UploadingFileState(receive: 0, total: 1)),
+            Left(UploadFileFailedState(exception: CancelUploadException())),
+          ]),
+        );
 
-      when(room.client.generateUniqueTransactionId()).thenReturn(txidB);
+        when(room.client.generateUniqueTransactionId()).thenReturn(txidB);
 
-      when(uploadManager.getUploadStateStream(txidB)).thenAnswer(
-        (_) => Stream.fromIterable([
-          const Right(UploadFileInitial()),
-          const Right(ConvertingStreamToBytesState()),
-          const Right(ConvertedStreamToBytesState()),
-          const Right(UploadingFileState(receive: 0, total: 1)),
-          const Right(UploadingFileState(receive: 1, total: 1)),
-          Left(UploadFileFailedState(exception: CancelUploadException())),
-        ]),
-      );
+        when(uploadManager.getUploadStateStream(txidB)).thenAnswer(
+          (_) => Stream.fromIterable([
+            const Right(UploadFileInitial()),
+            const Right(ConvertingStreamToBytesState()),
+            const Right(ConvertedStreamToBytesState()),
+            const Right(UploadingFileState(receive: 0, total: 1)),
+            const Right(UploadingFileState(receive: 1, total: 1)),
+            Left(UploadFileFailedState(exception: CancelUploadException())),
+          ]),
+        );
 
-      await uploadManager.uploadFilesWeb(
-        room: room,
-        files: listFiles.values.toList(),
-      );
+        await uploadManager.uploadFilesWeb(
+          room: room,
+          files: listFiles.values.toList(),
+        );
 
-      await Future.delayed(const Duration(seconds: 1), () {
-        uploadManager.cancelUpload(Event.fromJson(creatEvent(txidA), room));
-        uploadManager.cancelUpload(Event.fromJson(creatEvent(txidB), room));
-      });
+        await Future.delayed(const Duration(seconds: 1), () {
+          uploadManager.cancelUpload(Event.fromJson(creatEvent(txidA), room));
+          uploadManager.cancelUpload(Event.fromJson(creatEvent(txidB), room));
+        });
 
-      uploadManager.getUploadStateStream(txidA)?.listen((state) {
-        state.fold(
-          (failure) {
+        uploadManager.getUploadStateStream(txidA)?.listen((state) {
+          state.fold((failure) {
             if (failure is UploadFileFailedState) {
               expect(failure.exception is CancelUploadException, true);
             }
-          },
-          (success) => null,
-        );
-      });
+          }, (success) => null);
+        });
 
-      uploadManager.getUploadStateStream(txidB)?.listen((state) {
-        state.fold(
-          (failure) {
+        uploadManager.getUploadStateStream(txidB)?.listen((state) {
+          state.fold((failure) {
             if (failure is UploadFileFailedState) {
               expect(failure.exception is CancelUploadException, true);
             }
-          },
-          (success) => null,
-        );
-      });
-    });
+          }, (success) => null);
+        });
+      },
+    );
 
-    test(
-        '\nWHEN pick file successfully and upload files [A, B].\n'
+    test('\nWHEN pick file successfully and upload files [A, B].\n'
         'AND cancel upload load file [A] and [B]\n'
         'THEN getUploadStateStream[A] SHOULD return UploadFileFailedState with CancelUploadException\n'
         'THEN getUploadStateStream[B] SHOULD return UploadFileFailedState with CancelUploadException\n'
@@ -475,10 +448,7 @@ void main() {
       const txidA = 'txidA';
       const txidB = 'txidB';
 
-      final listFiles = {
-        txidA: MockMatrixFile(),
-        txidB: MockMatrixFile(),
-      };
+      final listFiles = {txidA: MockMatrixFile(), txidB: MockMatrixFile()};
 
       when(room.client.generateUniqueTransactionId()).thenReturn(txidA);
 
@@ -523,34 +493,25 @@ void main() {
       });
 
       uploadManager.getUploadStateStream(txidA)?.listen((state) {
-        state.fold(
-          (failure) {
-            if (failure is UploadFileFailedState) {
-              expect(failure.exception is CancelUploadException, true);
-            }
-          },
-          (success) => null,
-        );
+        state.fold((failure) {
+          if (failure is UploadFileFailedState) {
+            expect(failure.exception is CancelUploadException, true);
+          }
+        }, (success) => null);
       });
 
       uploadManager.getUploadStateStream(txidB)?.listen((state) {
-        state.fold(
-          (failure) {
-            if (failure is UploadFileFailedState) {
-              expect(failure.exception is CancelUploadException, true);
-            }
-          },
-          (success) => null,
-        );
+        state.fold((failure) {
+          if (failure is UploadFileFailedState) {
+            expect(failure.exception is CancelUploadException, true);
+          }
+        }, (success) => null);
       });
 
       const txidC = 'txid_c';
       const txidD = 'txid_d';
 
-      final newFiles = {
-        txidC: MockMatrixFile(),
-        txidD: MockMatrixFile(),
-      };
+      final newFiles = {txidC: MockMatrixFile(), txidD: MockMatrixFile()};
 
       when(room.client.generateUniqueTransactionId()).thenReturn(txidC);
 
@@ -616,485 +577,441 @@ void main() {
     });
 
     test(
-        '\nWHEN pick file successfully and upload files [A, B].\n'
-        'AND cancel upload load file [A] and [B]\n'
-        'THEN getUploadStateStream[A] SHOULD return UploadFileFailedState with CancelUploadException\n'
-        'THEN getUploadStateStream[B] SHOULD return UploadFileFailedState with CancelUploadException\n'
-        'AND pick new file successfully and upload file [C, D]\n'
-        'AND cancel upload load file [C] and [D]\n'
-        'THEN getUploadStateStream[C] SHOULD return UploadFileFailedState with CancelUploadException\n'
-        'THEN getUploadStateStream[D] SHOULD return UploadFileFailedState with CancelUploadException\n',
-        () async {
-      const txidA = 'txidA';
-      const txidB = 'txidB';
+      '\nWHEN pick file successfully and upload files [A, B].\n'
+      'AND cancel upload load file [A] and [B]\n'
+      'THEN getUploadStateStream[A] SHOULD return UploadFileFailedState with CancelUploadException\n'
+      'THEN getUploadStateStream[B] SHOULD return UploadFileFailedState with CancelUploadException\n'
+      'AND pick new file successfully and upload file [C, D]\n'
+      'AND cancel upload load file [C] and [D]\n'
+      'THEN getUploadStateStream[C] SHOULD return UploadFileFailedState with CancelUploadException\n'
+      'THEN getUploadStateStream[D] SHOULD return UploadFileFailedState with CancelUploadException\n',
+      () async {
+        const txidA = 'txidA';
+        const txidB = 'txidB';
 
-      final listFiles = {
-        txidA: MockMatrixFile(),
-        txidB: MockMatrixFile(),
-      };
+        final listFiles = {txidA: MockMatrixFile(), txidB: MockMatrixFile()};
 
-      when(room.client.generateUniqueTransactionId()).thenReturn(txidA);
+        when(room.client.generateUniqueTransactionId()).thenReturn(txidA);
 
-      when(uploadManager.getUploadStateStream(txidA)).thenAnswer(
-        (_) => Stream.fromIterable([
-          const Right(UploadFileInitial()),
-          const Right(ConvertingStreamToBytesState()),
-          const Right(ConvertedStreamToBytesState()),
-          const Right(UploadingFileState(receive: 0, total: 1)),
-          Left(UploadFileFailedState(exception: CancelUploadException())),
-        ]),
-      );
+        when(uploadManager.getUploadStateStream(txidA)).thenAnswer(
+          (_) => Stream.fromIterable([
+            const Right(UploadFileInitial()),
+            const Right(ConvertingStreamToBytesState()),
+            const Right(ConvertedStreamToBytesState()),
+            const Right(UploadingFileState(receive: 0, total: 1)),
+            Left(UploadFileFailedState(exception: CancelUploadException())),
+          ]),
+        );
 
-      when(room.client.generateUniqueTransactionId()).thenReturn(txidB);
+        when(room.client.generateUniqueTransactionId()).thenReturn(txidB);
 
-      when(uploadManager.getUploadStateStream(txidB)).thenAnswer(
-        (_) => Stream.fromIterable([
-          const Right(UploadFileInitial()),
-          const Right(ConvertingStreamToBytesState()),
-          const Right(ConvertedStreamToBytesState()),
-          const Right(UploadingFileState(receive: 0, total: 1)),
-          const Right(UploadingFileState(receive: 1, total: 1)),
-          Left(UploadFileFailedState(exception: CancelUploadException())),
-        ]),
-      );
+        when(uploadManager.getUploadStateStream(txidB)).thenAnswer(
+          (_) => Stream.fromIterable([
+            const Right(UploadFileInitial()),
+            const Right(ConvertingStreamToBytesState()),
+            const Right(ConvertedStreamToBytesState()),
+            const Right(UploadingFileState(receive: 0, total: 1)),
+            const Right(UploadingFileState(receive: 1, total: 1)),
+            Left(UploadFileFailedState(exception: CancelUploadException())),
+          ]),
+        );
 
-      await uploadManager.uploadFilesWeb(
-        room: room,
-        files: listFiles.values.toList(),
-      );
-
-      verify(
-        uploadManager.uploadFilesWeb(
+        await uploadManager.uploadFilesWeb(
           room: room,
           files: listFiles.values.toList(),
-        ),
-      ).called(1);
+        );
 
-      await Future.delayed(const Duration(seconds: 1), () {
-        uploadManager.cancelUpload(Event.fromJson(creatEvent(txidA), room));
-        uploadManager.cancelUpload(Event.fromJson(creatEvent(txidB), room));
-      });
+        verify(
+          uploadManager.uploadFilesWeb(
+            room: room,
+            files: listFiles.values.toList(),
+          ),
+        ).called(1);
 
-      uploadManager.getUploadStateStream(txidA)?.listen((state) {
-        state.fold(
-          (failure) {
+        await Future.delayed(const Duration(seconds: 1), () {
+          uploadManager.cancelUpload(Event.fromJson(creatEvent(txidA), room));
+          uploadManager.cancelUpload(Event.fromJson(creatEvent(txidB), room));
+        });
+
+        uploadManager.getUploadStateStream(txidA)?.listen((state) {
+          state.fold((failure) {
             if (failure is UploadFileFailedState) {
               expect(failure.exception is CancelUploadException, true);
             }
-          },
-          (success) => null,
-        );
-      });
+          }, (success) => null);
+        });
 
-      uploadManager.getUploadStateStream(txidB)?.listen((state) {
-        state.fold(
-          (failure) {
+        uploadManager.getUploadStateStream(txidB)?.listen((state) {
+          state.fold((failure) {
             if (failure is UploadFileFailedState) {
               expect(failure.exception is CancelUploadException, true);
             }
-          },
-          (success) => null,
+          }, (success) => null);
+        });
+
+        const txidC = 'txid_c';
+        const txidD = 'txid_d';
+
+        final newFiles = {txidC: MockMatrixFile(), txidD: MockMatrixFile()};
+
+        when(room.client.generateUniqueTransactionId()).thenReturn(txidC);
+
+        when(uploadManager.getUploadStateStream(txidC)).thenAnswer(
+          (_) => Stream.fromIterable([
+            const Right(UploadFileInitial()),
+            const Right(ConvertingStreamToBytesState()),
+            const Right(ConvertedStreamToBytesState()),
+            const Right(UploadingFileState(receive: 0, total: 1)),
+            const Right(UploadingFileState(receive: 1, total: 1)),
+            Left(UploadFileFailedState(exception: CancelUploadException())),
+          ]),
         );
-      });
 
-      const txidC = 'txid_c';
-      const txidD = 'txid_d';
+        when(room.client.generateUniqueTransactionId()).thenReturn(txidD);
 
-      final newFiles = {
-        txidC: MockMatrixFile(),
-        txidD: MockMatrixFile(),
-      };
+        when(uploadManager.getUploadStateStream(txidD)).thenAnswer(
+          (_) => Stream.fromIterable([
+            const Right(UploadFileInitial()),
+            const Right(ConvertingStreamToBytesState()),
+            const Right(ConvertedStreamToBytesState()),
+            const Right(UploadingFileState(receive: 0, total: 1)),
+            const Right(UploadingFileState(receive: 1, total: 1)),
+            Left(UploadFileFailedState(exception: CancelUploadException())),
+          ]),
+        );
 
-      when(room.client.generateUniqueTransactionId()).thenReturn(txidC);
-
-      when(uploadManager.getUploadStateStream(txidC)).thenAnswer(
-        (_) => Stream.fromIterable([
-          const Right(UploadFileInitial()),
-          const Right(ConvertingStreamToBytesState()),
-          const Right(ConvertedStreamToBytesState()),
-          const Right(UploadingFileState(receive: 0, total: 1)),
-          const Right(UploadingFileState(receive: 1, total: 1)),
-          Left(UploadFileFailedState(exception: CancelUploadException())),
-        ]),
-      );
-
-      when(room.client.generateUniqueTransactionId()).thenReturn(txidD);
-
-      when(uploadManager.getUploadStateStream(txidD)).thenAnswer(
-        (_) => Stream.fromIterable([
-          const Right(UploadFileInitial()),
-          const Right(ConvertingStreamToBytesState()),
-          const Right(ConvertedStreamToBytesState()),
-          const Right(UploadingFileState(receive: 0, total: 1)),
-          const Right(UploadingFileState(receive: 1, total: 1)),
-          Left(UploadFileFailedState(exception: CancelUploadException())),
-        ]),
-      );
-
-      await uploadManager.uploadFilesWeb(
-        room: room,
-        files: newFiles.values.toList(),
-      );
-
-      verify(
-        uploadManager.uploadFilesWeb(
+        await uploadManager.uploadFilesWeb(
           room: room,
           files: newFiles.values.toList(),
-        ),
-      ).called(1);
+        );
 
-      await Future.delayed(const Duration(seconds: 1), () {
-        uploadManager.cancelUpload(Event.fromJson(creatEvent(txidC), room));
-        uploadManager.cancelUpload(Event.fromJson(creatEvent(txidD), room));
-      });
+        verify(
+          uploadManager.uploadFilesWeb(
+            room: room,
+            files: newFiles.values.toList(),
+          ),
+        ).called(1);
 
-      uploadManager.getUploadStateStream(txidC)?.listen((state) {
-        state.fold(
-          (failure) {
+        await Future.delayed(const Duration(seconds: 1), () {
+          uploadManager.cancelUpload(Event.fromJson(creatEvent(txidC), room));
+          uploadManager.cancelUpload(Event.fromJson(creatEvent(txidD), room));
+        });
+
+        uploadManager.getUploadStateStream(txidC)?.listen((state) {
+          state.fold((failure) {
             if (failure is UploadFileFailedState) {
               expect(failure.exception is CancelUploadException, true);
             }
-          },
-          (success) => null,
-        );
-      });
+          }, (success) => null);
+        });
 
-      uploadManager.getUploadStateStream(txidD)?.listen((state) {
-        state.fold(
-          (failure) {
+        uploadManager.getUploadStateStream(txidD)?.listen((state) {
+          state.fold((failure) {
             if (failure is UploadFileFailedState) {
               expect(failure.exception is CancelUploadException, true);
             }
-          },
-          (success) => null,
-        );
-      });
-    });
+          }, (success) => null);
+        });
+      },
+    );
 
     test(
-        '\nWHEN pick file successfully and upload files [A, B] in encryption room.\n'
-        'AND cancel upload load file [A] and [B]\n'
-        'THEN getUploadStateStream[A] SHOULD return UploadFileFailedState with CancelUploadException\n'
-        'THEN getUploadStateStream[B] SHOULD return UploadFileFailedState with CancelUploadException\n'
-        'AND pick new file successfully and upload file [C, D]\n'
-        'THEN upload file [C, D] successfully.\n', () async {
-      const txidA = 'txidA';
-      const txidB = 'txidB';
+      '\nWHEN pick file successfully and upload files [A, B] in encryption room.\n'
+      'AND cancel upload load file [A] and [B]\n'
+      'THEN getUploadStateStream[A] SHOULD return UploadFileFailedState with CancelUploadException\n'
+      'THEN getUploadStateStream[B] SHOULD return UploadFileFailedState with CancelUploadException\n'
+      'AND pick new file successfully and upload file [C, D]\n'
+      'THEN upload file [C, D] successfully.\n',
+      () async {
+        const txidA = 'txidA';
+        const txidB = 'txidB';
 
-      final listFiles = {
-        txidA: MockMatrixFile(),
-        txidB: MockMatrixFile(),
-      };
+        final listFiles = {txidA: MockMatrixFile(), txidB: MockMatrixFile()};
 
-      when(room.client.generateUniqueTransactionId()).thenReturn(txidA);
+        when(room.client.generateUniqueTransactionId()).thenReturn(txidA);
 
-      when(uploadManager.getUploadStateStream(txidA)).thenAnswer(
-        (_) => Stream.fromIterable([
-          const Right(UploadFileInitial()),
-          const Right(ConvertingStreamToBytesState()),
-          const Right(ConvertedStreamToBytesState()),
-          const Right(EncryptingFileState()),
-          const Right(EncryptedFileState()),
-          const Right(UploadingFileState(receive: 0, total: 1)),
-          Left(UploadFileFailedState(exception: CancelUploadException())),
-        ]),
-      );
+        when(uploadManager.getUploadStateStream(txidA)).thenAnswer(
+          (_) => Stream.fromIterable([
+            const Right(UploadFileInitial()),
+            const Right(ConvertingStreamToBytesState()),
+            const Right(ConvertedStreamToBytesState()),
+            const Right(EncryptingFileState()),
+            const Right(EncryptedFileState()),
+            const Right(UploadingFileState(receive: 0, total: 1)),
+            Left(UploadFileFailedState(exception: CancelUploadException())),
+          ]),
+        );
 
-      when(room.client.generateUniqueTransactionId()).thenReturn(txidB);
+        when(room.client.generateUniqueTransactionId()).thenReturn(txidB);
 
-      when(uploadManager.getUploadStateStream(txidB)).thenAnswer(
-        (_) => Stream.fromIterable([
-          const Right(UploadFileInitial()),
-          const Right(ConvertingStreamToBytesState()),
-          const Right(ConvertedStreamToBytesState()),
-          const Right(EncryptingFileState()),
-          const Right(EncryptedFileState()),
-          const Right(UploadingFileState(receive: 0, total: 1)),
-          const Right(UploadingFileState(receive: 1, total: 1)),
-          Left(UploadFileFailedState(exception: CancelUploadException())),
-        ]),
-      );
+        when(uploadManager.getUploadStateStream(txidB)).thenAnswer(
+          (_) => Stream.fromIterable([
+            const Right(UploadFileInitial()),
+            const Right(ConvertingStreamToBytesState()),
+            const Right(ConvertedStreamToBytesState()),
+            const Right(EncryptingFileState()),
+            const Right(EncryptedFileState()),
+            const Right(UploadingFileState(receive: 0, total: 1)),
+            const Right(UploadingFileState(receive: 1, total: 1)),
+            Left(UploadFileFailedState(exception: CancelUploadException())),
+          ]),
+        );
 
-      await uploadManager.uploadFilesWeb(
-        room: room,
-        files: listFiles.values.toList(),
-      );
-
-      verify(
-        uploadManager.uploadFilesWeb(
+        await uploadManager.uploadFilesWeb(
           room: room,
           files: listFiles.values.toList(),
-        ),
-      ).called(1);
+        );
 
-      await Future.delayed(const Duration(seconds: 1), () {
-        uploadManager.cancelUpload(Event.fromJson(creatEvent(txidA), room));
-        uploadManager.cancelUpload(Event.fromJson(creatEvent(txidB), room));
-      });
+        verify(
+          uploadManager.uploadFilesWeb(
+            room: room,
+            files: listFiles.values.toList(),
+          ),
+        ).called(1);
 
-      uploadManager.getUploadStateStream(txidA)?.listen((state) {
-        state.fold(
-          (failure) {
+        await Future.delayed(const Duration(seconds: 1), () {
+          uploadManager.cancelUpload(Event.fromJson(creatEvent(txidA), room));
+          uploadManager.cancelUpload(Event.fromJson(creatEvent(txidB), room));
+        });
+
+        uploadManager.getUploadStateStream(txidA)?.listen((state) {
+          state.fold((failure) {
             if (failure is UploadFileFailedState) {
               expect(failure.exception is CancelUploadException, true);
             }
-          },
-          (success) => null,
-        );
-      });
+          }, (success) => null);
+        });
 
-      uploadManager.getUploadStateStream(txidB)?.listen((state) {
-        state.fold(
-          (failure) {
+        uploadManager.getUploadStateStream(txidB)?.listen((state) {
+          state.fold((failure) {
             if (failure is UploadFileFailedState) {
               expect(failure.exception is CancelUploadException, true);
             }
-          },
-          (success) => null,
+          }, (success) => null);
+        });
+
+        const txidC = 'txid_c';
+        const txidD = 'txid_d';
+
+        final newFiles = {txidC: MockMatrixFile(), txidD: MockMatrixFile()};
+
+        when(room.client.generateUniqueTransactionId()).thenReturn(txidC);
+
+        when(uploadManager.getUploadStateStream(txidC)).thenAnswer(
+          (_) => Stream.fromIterable([
+            const Right(UploadFileInitial()),
+            const Right(ConvertingStreamToBytesState()),
+            const Right(ConvertedStreamToBytesState()),
+            const Right(EncryptingFileState()),
+            const Right(EncryptedFileState()),
+            const Right(UploadingFileState(receive: 0, total: 1)),
+            const Right(UploadingFileState(receive: 1, total: 1)),
+            const Right(UploadFileSuccessState(eventId: txidC)),
+          ]),
         );
-      });
 
-      const txidC = 'txid_c';
-      const txidD = 'txid_d';
+        when(room.client.generateUniqueTransactionId()).thenReturn(txidD);
 
-      final newFiles = {
-        txidC: MockMatrixFile(),
-        txidD: MockMatrixFile(),
-      };
+        when(uploadManager.getUploadStateStream(txidD)).thenAnswer(
+          (_) => Stream.fromIterable([
+            const Right(UploadFileInitial()),
+            const Right(ConvertingStreamToBytesState()),
+            const Right(ConvertedStreamToBytesState()),
+            const Right(EncryptingFileState()),
+            const Right(EncryptedFileState()),
+            const Right(UploadingFileState(receive: 0, total: 1)),
+            const Right(UploadingFileState(receive: 1, total: 1)),
+            const Right(UploadFileSuccessState(eventId: txidD)),
+          ]),
+        );
 
-      when(room.client.generateUniqueTransactionId()).thenReturn(txidC);
-
-      when(uploadManager.getUploadStateStream(txidC)).thenAnswer(
-        (_) => Stream.fromIterable([
-          const Right(UploadFileInitial()),
-          const Right(ConvertingStreamToBytesState()),
-          const Right(ConvertedStreamToBytesState()),
-          const Right(EncryptingFileState()),
-          const Right(EncryptedFileState()),
-          const Right(UploadingFileState(receive: 0, total: 1)),
-          const Right(UploadingFileState(receive: 1, total: 1)),
-          const Right(UploadFileSuccessState(eventId: txidC)),
-        ]),
-      );
-
-      when(room.client.generateUniqueTransactionId()).thenReturn(txidD);
-
-      when(uploadManager.getUploadStateStream(txidD)).thenAnswer(
-        (_) => Stream.fromIterable([
-          const Right(UploadFileInitial()),
-          const Right(ConvertingStreamToBytesState()),
-          const Right(ConvertedStreamToBytesState()),
-          const Right(EncryptingFileState()),
-          const Right(EncryptedFileState()),
-          const Right(UploadingFileState(receive: 0, total: 1)),
-          const Right(UploadingFileState(receive: 1, total: 1)),
-          const Right(UploadFileSuccessState(eventId: txidD)),
-        ]),
-      );
-
-      await uploadManager.uploadFilesWeb(
-        room: room,
-        files: newFiles.values.toList(),
-      );
-
-      verify(
-        uploadManager.uploadFilesWeb(
+        await uploadManager.uploadFilesWeb(
           room: room,
           files: newFiles.values.toList(),
-        ),
-      ).called(1);
+        );
 
-      expect(
-        uploadManager.getUploadStateStream(txidC),
-        emitsInOrder([
-          const Right(UploadFileInitial()),
-          const Right(ConvertingStreamToBytesState()),
-          const Right(ConvertedStreamToBytesState()),
-          const Right(EncryptingFileState()),
-          const Right(EncryptedFileState()),
-          const Right(UploadingFileState(receive: 0, total: 1)),
-          const Right(UploadingFileState(receive: 1, total: 1)),
-          const Right(UploadFileSuccessState(eventId: txidC)),
-        ]),
-      );
+        verify(
+          uploadManager.uploadFilesWeb(
+            room: room,
+            files: newFiles.values.toList(),
+          ),
+        ).called(1);
 
-      expect(
-        uploadManager.getUploadStateStream(txidD),
-        emitsInOrder([
-          const Right(UploadFileInitial()),
-          const Right(ConvertingStreamToBytesState()),
-          const Right(ConvertedStreamToBytesState()),
-          const Right(EncryptingFileState()),
-          const Right(EncryptedFileState()),
-          const Right(UploadingFileState(receive: 0, total: 1)),
-          const Right(UploadingFileState(receive: 1, total: 1)),
-          const Right(UploadFileSuccessState(eventId: txidD)),
-        ]),
-      );
-    });
+        expect(
+          uploadManager.getUploadStateStream(txidC),
+          emitsInOrder([
+            const Right(UploadFileInitial()),
+            const Right(ConvertingStreamToBytesState()),
+            const Right(ConvertedStreamToBytesState()),
+            const Right(EncryptingFileState()),
+            const Right(EncryptedFileState()),
+            const Right(UploadingFileState(receive: 0, total: 1)),
+            const Right(UploadingFileState(receive: 1, total: 1)),
+            const Right(UploadFileSuccessState(eventId: txidC)),
+          ]),
+        );
+
+        expect(
+          uploadManager.getUploadStateStream(txidD),
+          emitsInOrder([
+            const Right(UploadFileInitial()),
+            const Right(ConvertingStreamToBytesState()),
+            const Right(ConvertedStreamToBytesState()),
+            const Right(EncryptingFileState()),
+            const Right(EncryptedFileState()),
+            const Right(UploadingFileState(receive: 0, total: 1)),
+            const Right(UploadingFileState(receive: 1, total: 1)),
+            const Right(UploadFileSuccessState(eventId: txidD)),
+          ]),
+        );
+      },
+    );
 
     test(
-        '\nWHEN pick file successfully and upload files [A, B] in encryption room.\n'
-        'AND cancel upload load file [A] and [B]\n'
-        'THEN getUploadStateStream[A] SHOULD return UploadFileFailedState with CancelUploadException\n'
-        'THEN getUploadStateStream[B] SHOULD return UploadFileFailedState with CancelUploadException\n'
-        'AND pick new file successfully and upload file [C, D]\n'
-        'AND cancel upload load file [C] and [D]\n'
-        'THEN getUploadStateStream[C] SHOULD return UploadFileFailedState with CancelUploadException\n'
-        'THEN getUploadStateStream[D] SHOULD return UploadFileFailedState with CancelUploadException\n',
-        () async {
-      const txidA = 'txidA';
-      const txidB = 'txidB';
+      '\nWHEN pick file successfully and upload files [A, B] in encryption room.\n'
+      'AND cancel upload load file [A] and [B]\n'
+      'THEN getUploadStateStream[A] SHOULD return UploadFileFailedState with CancelUploadException\n'
+      'THEN getUploadStateStream[B] SHOULD return UploadFileFailedState with CancelUploadException\n'
+      'AND pick new file successfully and upload file [C, D]\n'
+      'AND cancel upload load file [C] and [D]\n'
+      'THEN getUploadStateStream[C] SHOULD return UploadFileFailedState with CancelUploadException\n'
+      'THEN getUploadStateStream[D] SHOULD return UploadFileFailedState with CancelUploadException\n',
+      () async {
+        const txidA = 'txidA';
+        const txidB = 'txidB';
 
-      final listFiles = {
-        txidA: MockMatrixFile(),
-        txidB: MockMatrixFile(),
-      };
+        final listFiles = {txidA: MockMatrixFile(), txidB: MockMatrixFile()};
 
-      when(room.client.generateUniqueTransactionId()).thenReturn(txidA);
+        when(room.client.generateUniqueTransactionId()).thenReturn(txidA);
 
-      when(uploadManager.getUploadStateStream(txidA)).thenAnswer(
-        (_) => Stream.fromIterable([
-          const Right(UploadFileInitial()),
-          const Right(ConvertingStreamToBytesState()),
-          const Right(ConvertedStreamToBytesState()),
-          const Right(EncryptingFileState()),
-          const Right(EncryptedFileState()),
-          const Right(UploadingFileState(receive: 0, total: 1)),
-          Left(UploadFileFailedState(exception: CancelUploadException())),
-        ]),
-      );
+        when(uploadManager.getUploadStateStream(txidA)).thenAnswer(
+          (_) => Stream.fromIterable([
+            const Right(UploadFileInitial()),
+            const Right(ConvertingStreamToBytesState()),
+            const Right(ConvertedStreamToBytesState()),
+            const Right(EncryptingFileState()),
+            const Right(EncryptedFileState()),
+            const Right(UploadingFileState(receive: 0, total: 1)),
+            Left(UploadFileFailedState(exception: CancelUploadException())),
+          ]),
+        );
 
-      when(room.client.generateUniqueTransactionId()).thenReturn(txidB);
+        when(room.client.generateUniqueTransactionId()).thenReturn(txidB);
 
-      when(uploadManager.getUploadStateStream(txidB)).thenAnswer(
-        (_) => Stream.fromIterable([
-          const Right(UploadFileInitial()),
-          const Right(ConvertingStreamToBytesState()),
-          const Right(ConvertedStreamToBytesState()),
-          const Right(EncryptingFileState()),
-          const Right(EncryptedFileState()),
-          const Right(UploadingFileState(receive: 0, total: 1)),
-          const Right(UploadingFileState(receive: 1, total: 1)),
-          Left(UploadFileFailedState(exception: CancelUploadException())),
-        ]),
-      );
+        when(uploadManager.getUploadStateStream(txidB)).thenAnswer(
+          (_) => Stream.fromIterable([
+            const Right(UploadFileInitial()),
+            const Right(ConvertingStreamToBytesState()),
+            const Right(ConvertedStreamToBytesState()),
+            const Right(EncryptingFileState()),
+            const Right(EncryptedFileState()),
+            const Right(UploadingFileState(receive: 0, total: 1)),
+            const Right(UploadingFileState(receive: 1, total: 1)),
+            Left(UploadFileFailedState(exception: CancelUploadException())),
+          ]),
+        );
 
-      await uploadManager.uploadFilesWeb(
-        room: room,
-        files: listFiles.values.toList(),
-      );
-
-      verify(
-        uploadManager.uploadFilesWeb(
+        await uploadManager.uploadFilesWeb(
           room: room,
           files: listFiles.values.toList(),
-        ),
-      ).called(1);
+        );
 
-      await Future.delayed(const Duration(seconds: 1), () {
-        uploadManager.cancelUpload(Event.fromJson(creatEvent(txidA), room));
-        uploadManager.cancelUpload(Event.fromJson(creatEvent(txidB), room));
-      });
+        verify(
+          uploadManager.uploadFilesWeb(
+            room: room,
+            files: listFiles.values.toList(),
+          ),
+        ).called(1);
 
-      uploadManager.getUploadStateStream(txidA)?.listen((state) {
-        state.fold(
-          (failure) {
+        await Future.delayed(const Duration(seconds: 1), () {
+          uploadManager.cancelUpload(Event.fromJson(creatEvent(txidA), room));
+          uploadManager.cancelUpload(Event.fromJson(creatEvent(txidB), room));
+        });
+
+        uploadManager.getUploadStateStream(txidA)?.listen((state) {
+          state.fold((failure) {
             if (failure is UploadFileFailedState) {
               expect(failure.exception is CancelUploadException, true);
             }
-          },
-          (success) => null,
-        );
-      });
+          }, (success) => null);
+        });
 
-      uploadManager.getUploadStateStream(txidB)?.listen((state) {
-        state.fold(
-          (failure) {
+        uploadManager.getUploadStateStream(txidB)?.listen((state) {
+          state.fold((failure) {
             if (failure is UploadFileFailedState) {
               expect(failure.exception is CancelUploadException, true);
             }
-          },
-          (success) => null,
+          }, (success) => null);
+        });
+
+        const txidC = 'txid_c';
+        const txidD = 'txid_d';
+
+        final newFiles = {txidC: MockMatrixFile(), txidD: MockMatrixFile()};
+
+        when(room.client.generateUniqueTransactionId()).thenReturn(txidC);
+
+        when(uploadManager.getUploadStateStream(txidC)).thenAnswer(
+          (_) => Stream.fromIterable([
+            const Right(UploadFileInitial()),
+            const Right(ConvertingStreamToBytesState()),
+            const Right(ConvertedStreamToBytesState()),
+            const Right(EncryptingFileState()),
+            const Right(EncryptedFileState()),
+            const Right(UploadingFileState(receive: 0, total: 1)),
+            const Right(UploadingFileState(receive: 1, total: 1)),
+            Left(UploadFileFailedState(exception: CancelUploadException())),
+          ]),
         );
-      });
 
-      const txidC = 'txid_c';
-      const txidD = 'txid_d';
+        when(room.client.generateUniqueTransactionId()).thenReturn(txidD);
 
-      final newFiles = {
-        txidC: MockMatrixFile(),
-        txidD: MockMatrixFile(),
-      };
+        when(uploadManager.getUploadStateStream(txidD)).thenAnswer(
+          (_) => Stream.fromIterable([
+            const Right(UploadFileInitial()),
+            const Right(ConvertingStreamToBytesState()),
+            const Right(ConvertedStreamToBytesState()),
+            const Right(EncryptingFileState()),
+            const Right(EncryptedFileState()),
+            const Right(UploadingFileState(receive: 0, total: 1)),
+            const Right(UploadingFileState(receive: 1, total: 1)),
+            Left(UploadFileFailedState(exception: CancelUploadException())),
+          ]),
+        );
 
-      when(room.client.generateUniqueTransactionId()).thenReturn(txidC);
-
-      when(uploadManager.getUploadStateStream(txidC)).thenAnswer(
-        (_) => Stream.fromIterable([
-          const Right(UploadFileInitial()),
-          const Right(ConvertingStreamToBytesState()),
-          const Right(ConvertedStreamToBytesState()),
-          const Right(EncryptingFileState()),
-          const Right(EncryptedFileState()),
-          const Right(UploadingFileState(receive: 0, total: 1)),
-          const Right(UploadingFileState(receive: 1, total: 1)),
-          Left(UploadFileFailedState(exception: CancelUploadException())),
-        ]),
-      );
-
-      when(room.client.generateUniqueTransactionId()).thenReturn(txidD);
-
-      when(uploadManager.getUploadStateStream(txidD)).thenAnswer(
-        (_) => Stream.fromIterable([
-          const Right(UploadFileInitial()),
-          const Right(ConvertingStreamToBytesState()),
-          const Right(ConvertedStreamToBytesState()),
-          const Right(EncryptingFileState()),
-          const Right(EncryptedFileState()),
-          const Right(UploadingFileState(receive: 0, total: 1)),
-          const Right(UploadingFileState(receive: 1, total: 1)),
-          Left(UploadFileFailedState(exception: CancelUploadException())),
-        ]),
-      );
-
-      await uploadManager.uploadFilesWeb(
-        room: room,
-        files: newFiles.values.toList(),
-      );
-
-      verify(
-        uploadManager.uploadFilesWeb(
+        await uploadManager.uploadFilesWeb(
           room: room,
           files: newFiles.values.toList(),
-        ),
-      ).called(1);
+        );
 
-      await Future.delayed(const Duration(seconds: 1), () {
-        uploadManager.cancelUpload(Event.fromJson(creatEvent(txidC), room));
-        uploadManager.cancelUpload(Event.fromJson(creatEvent(txidD), room));
-      });
+        verify(
+          uploadManager.uploadFilesWeb(
+            room: room,
+            files: newFiles.values.toList(),
+          ),
+        ).called(1);
 
-      uploadManager.getUploadStateStream(txidC)?.listen((state) {
-        state.fold(
-          (failure) {
+        await Future.delayed(const Duration(seconds: 1), () {
+          uploadManager.cancelUpload(Event.fromJson(creatEvent(txidC), room));
+          uploadManager.cancelUpload(Event.fromJson(creatEvent(txidD), room));
+        });
+
+        uploadManager.getUploadStateStream(txidC)?.listen((state) {
+          state.fold((failure) {
             if (failure is UploadFileFailedState) {
               expect(failure.exception is CancelUploadException, true);
             }
-          },
-          (success) => null,
-        );
-      });
+          }, (success) => null);
+        });
 
-      uploadManager.getUploadStateStream(txidD)?.listen((state) {
-        state.fold(
-          (failure) {
+        uploadManager.getUploadStateStream(txidD)?.listen((state) {
+          state.fold((failure) {
             if (failure is UploadFileFailedState) {
               expect(failure.exception is CancelUploadException, true);
             }
-          },
-          (success) => null,
-        );
-      });
-    });
+          }, (success) => null);
+        });
+      },
+    );
   });
 }

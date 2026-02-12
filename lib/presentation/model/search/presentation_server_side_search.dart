@@ -4,9 +4,7 @@ import 'package:matrix/matrix.dart';
 class PresentationServerSideSearch extends PresentationServerSideUIState {
   final List<Result> searchResults;
 
-  PresentationServerSideSearch({
-    required this.searchResults,
-  });
+  PresentationServerSideSearch({required this.searchResults});
 
   @override
   List<Object> get props => [searchResults];

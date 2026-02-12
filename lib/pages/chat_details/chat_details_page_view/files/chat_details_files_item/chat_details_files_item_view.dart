@@ -8,10 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 
 class ChatDetailsFilesView extends StatelessWidget {
-  const ChatDetailsFilesView({
-    super.key,
-    required this.controller,
-  });
+  const ChatDetailsFilesView({super.key, required this.controller});
 
   final ChatDetailsFileItemController controller;
 
@@ -34,8 +31,9 @@ class ChatDetailsFilesView extends StatelessWidget {
             onTap: () {
               controller.downloadFileStateNotifier.value =
                   const NotDownloadPresentationState();
-              controller.downloadManager
-                  .cancelDownload(controller.event.eventId);
+              controller.downloadManager.cancelDownload(
+                controller.event.eventId,
+              );
             },
           );
         } else if (state is DownloadedPresentationState) {

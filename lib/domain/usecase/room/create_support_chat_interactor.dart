@@ -53,13 +53,13 @@ class CreateSupportChatInteractor {
       final avatarMatrixFile = MatrixFile.fromMimeType(
         name: 'logo.png',
         mimeType: 'image/png',
-        bytes: (await rootBundle.load(ImagePaths.supportAvatarPng))
-            .buffer
-            .asUint8List(),
+        bytes: (await rootBundle.load(
+          ImagePaths.supportAvatarPng,
+        )).buffer.asUint8List(),
       );
-      final avatarUrl =
-          (await getIt.get<MediaAPI>().uploadFileWeb(file: avatarMatrixFile))
-              .contentUri;
+      final avatarUrl = (await getIt.get<MediaAPI>().uploadFileWeb(
+        file: avatarMatrixFile,
+      )).contentUri;
 
       final powerLevelManager = getIt.get<PowerLevelManager>();
       roomId = await client.createGroupChat(
@@ -70,9 +70,7 @@ class CreateSupportChatInteractor {
           if (avatarUrl != null)
             StateEvent(
               type: EventTypes.RoomAvatar,
-              content: {
-                'url': avatarUrl,
-              },
+              content: {'url': avatarUrl},
               stateKey: '',
             ),
         ],
@@ -94,18 +92,13 @@ class CreateSupportChatInteractor {
           powerLevelManager.getAdminPowerLevel(),
         ),
         room.setFavourite(true),
-        client.setAccountData(userId, type, {
-          accountDataKey: roomId,
-        }),
+        client.setAccountData(userId, type, {accountDataKey: roomId}),
       ]);
       await room.setPower(userId, powerLevelManager.getUserPowerLevel());
 
       yield Right(SupportChatCreated(roomId: roomId));
     } catch (e) {
-      Logs().e(
-        'CreateSupportChatInteractor::execute(): Exception',
-        e,
-      );
+      Logs().e('CreateSupportChatInteractor::execute(): Exception', e);
       try {
         await Future.wait([
           if (roomId != null) client.leaveRoom(roomId),

@@ -63,8 +63,8 @@ class SameTypeEventsBuilderController {
   }
 
   void loadMore() async {
-    final lastSuccess =
-        eventsNotifier.value.getSuccessOrNull<TimelineSearchEventSuccess>();
+    final lastSuccess = eventsNotifier.value
+        .getSuccessOrNull<TimelineSearchEventSuccess>();
     if (lastSuccess == null ||
         refreshing.value ||
         loadingMore.value ||
@@ -107,7 +107,8 @@ class SameTypeEventsBuilderController {
   void _onRefreshDone() {
     Logs().v('SameTypeEventsListController::refresh done');
     refreshing.value = false;
-    emptyNotifier.value = eventsNotifier.value
+    emptyNotifier.value =
+        eventsNotifier.value
             .getSuccessOrNull<TimelineSearchEventSuccess>()
             ?.events
             .isEmpty ??
@@ -131,17 +132,15 @@ class SameTypeEventsBuilderController {
   ) {
     if (key != _loadMoreKey) return;
     Logs().v('SameTypeEventsListController::loadMore $event');
-    eventsNotifier.value = event.map(
-      (success) {
-        if (success is TimelineSearchEventSuccess) {
-          _isEnd = limit != null
-              ? success.events.length < limit!
-              : success.events.isEmpty;
-          return lastSuccess.concat(success);
-        }
-        return success;
-      },
-    );
+    eventsNotifier.value = event.map((success) {
+      if (success is TimelineSearchEventSuccess) {
+        _isEnd = limit != null
+            ? success.events.length < limit!
+            : success.events.isEmpty;
+        return lastSuccess.concat(success);
+      }
+      return success;
+    });
   }
 
   void _onLoadMoreDone() {

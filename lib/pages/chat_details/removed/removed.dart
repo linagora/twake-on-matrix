@@ -40,10 +40,8 @@ class RemovedController extends State<Removed> with SearchDebouncerMixin {
 
   final ValueNotifier<Either<Failure, Success>> searchUserResults =
       ValueNotifier<Either<Failure, Success>>(
-    Right(
-      RemovedSearchInitialState(),
-    ),
-  );
+        Right(RemovedSearchInitialState()),
+      );
 
   void onBack() {
     Navigator.of(context).pop();
@@ -53,28 +51,22 @@ class RemovedController extends State<Removed> with SearchDebouncerMixin {
 
   void initialRemoved() {
     searchUserResults.value = Right(
-      RemovedSearchSuccessState(
-        removedMember: removedMember,
-        keyword: '',
-      ),
+      RemovedSearchSuccessState(removedMember: removedMember, keyword: ''),
     );
   }
 
   void handleSearchResults(String searchTerm) {
     if (searchTerm.isEmpty) {
       searchUserResults.value = Right(
-        RemovedSearchSuccessState(
-          removedMember: removedMember,
-          keyword: '',
-        ),
+        RemovedSearchSuccessState(removedMember: removedMember, keyword: ''),
       );
       return;
     }
 
     final searchResults = removedMember.where((user) {
-      return (user.displayName ?? '')
-              .toLowerCase()
-              .contains(searchTerm.toLowerCase()) ||
+      return (user.displayName ?? '').toLowerCase().contains(
+            searchTerm.toLowerCase(),
+          ) ||
           (user.id).toLowerCase().contains(searchTerm.toLowerCase());
     }).toList();
 
@@ -99,22 +91,17 @@ class RemovedController extends State<Removed> with SearchDebouncerMixin {
 
   void handleOnTapUnbanUser(User user) async {
     Logs().d("RemovedController::handleOnTapUnbanUser");
-    _unbanUserSubscription = _unbanUserInteractor.execute(user: user).listen(
-          (result) => handleUnbanState(result),
-        );
+    _unbanUserSubscription = _unbanUserInteractor
+        .execute(user: user)
+        .listen((result) => handleUnbanState(result));
   }
 
-  void handleUnbanState(
-    Either<Failure, Success> state,
-  ) {
+  void handleUnbanState(Either<Failure, Success> state) {
     state.fold(
       (failure) {
         if (failure is UnbanUserFailure) {
           TwakeDialog.hideLoadingDialog(context);
-          TwakeSnackBar.show(
-            context,
-            failure.exception.toString(),
-          );
+          TwakeSnackBar.show(context, failure.exception.toString());
           return;
         }
 

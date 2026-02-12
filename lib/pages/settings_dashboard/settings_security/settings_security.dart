@@ -61,9 +61,9 @@ class SettingsSecurityController extends State<SettingsSecurity> {
     );
     if (input == null) return;
     final success = await TwakeDialog.showFutureLoadingDialogFullScreen(
-      future: () => Matrix.of(context)
-          .client
-          .changePassword(input.last, oldPassword: input.first),
+      future: () => Matrix.of(
+        context,
+      ).client.changePassword(input.last, oldPassword: input.first),
     );
     if (success.error == null) {
       TwakeSnackBar.show(context, L10n.of(context)!.passwordHasBeenChanged);
@@ -71,8 +71,9 @@ class SettingsSecurityController extends State<SettingsSecurity> {
   }
 
   void setAppLockAction() async {
-    final currentLock =
-        await const FlutterSecureStorage().read(key: SettingKeys.appLockKey);
+    final currentLock = await const FlutterSecureStorage().read(
+      key: SettingKeys.appLockKey,
+    );
     if (currentLock?.isNotEmpty ?? false) {
       await AppLock.of(context)!.showLockScreen();
     }
@@ -99,8 +100,10 @@ class SettingsSecurityController extends State<SettingsSecurity> {
       ],
     );
     if (newLock != null) {
-      await const FlutterSecureStorage()
-          .write(key: SettingKeys.appLockKey, value: newLock.single);
+      await const FlutterSecureStorage().write(
+        key: SettingKeys.appLockKey,
+        value: newLock.single,
+      );
       if (newLock.single.isEmpty) {
         AppLock.of(context)!.disable();
       } else {
@@ -110,9 +113,7 @@ class SettingsSecurityController extends State<SettingsSecurity> {
   }
 
   void showBootstrapDialog(BuildContext context) async {
-    await BootstrapDialog(
-      client: Matrix.of(context).client,
-    ).show();
+    await BootstrapDialog(client: Matrix.of(context).client).show();
   }
 
   Future<void> dehydrateAction() => dehydrateDevice(context);
@@ -150,10 +151,7 @@ class SettingsSecurityController extends State<SettingsSecurity> {
     Clipboard.setData(
       ClipboardData(text: Matrix.of(context).client.fingerprintKey.beautified),
     );
-    TwakeSnackBar.show(
-      context,
-      L10n.of(context)!.copiedPublicKeyToClipboard,
-    );
+    TwakeSnackBar.show(context, L10n.of(context)!.copiedPublicKeyToClipboard);
   }
 
   void listenIgnoredUser() {

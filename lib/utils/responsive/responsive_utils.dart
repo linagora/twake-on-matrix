@@ -20,7 +20,7 @@ class ResponsiveUtils {
   static const double defaultSizeBodyLayoutDesktop = 280;
   static const double heightBottomNavigation = 72;
   static const double
-      heightBottomNavigationWhenAndroidNavigationButtonsEnabled = 64;
+  heightBottomNavigationWhenAndroidNavigationButtonsEnabled = 64;
 
   static const double bodyWithRightColumnRatio = 0.64;
   static const double groupDetailsMinWidth = 370;

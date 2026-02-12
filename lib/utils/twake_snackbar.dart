@@ -9,10 +9,7 @@ class TwakeSnackBarStyle {
   static ResponsiveUtils responsiveUtils = getIt.get<ResponsiveUtils>();
 
   static const EdgeInsetsDirectional snackBarPadding =
-      EdgeInsetsDirectional.symmetric(
-    horizontal: 16,
-    vertical: 14,
-  );
+      EdgeInsetsDirectional.symmetric(horizontal: 16, vertical: 14);
 
   static double? widthSnackBar(BuildContext context) {
     if (responsiveUtils.isWebDesktop(context)) {
@@ -42,10 +39,10 @@ class TwakeSnackBar {
               child: Text(
                 message,
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      // TODO: change to colorSurface when its approved
-                      // ignore: deprecated_member_use
-                      color: Theme.of(context).colorScheme.background,
-                    ),
+                  // TODO: change to colorSurface when its approved
+                  // ignore: deprecated_member_use
+                  color: Theme.of(context).colorScheme.background,
+                ),
               ),
             ),
             InkWell(

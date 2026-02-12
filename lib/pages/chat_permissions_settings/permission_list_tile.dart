@@ -81,9 +81,7 @@ class PermissionsListTile extends StatelessWidget {
               color: Theme.of(context).secondaryHeaderColor,
               borderRadius: BorderRadius.circular(8),
             ),
-            child: Center(
-              child: Text(permission.toString()),
-            ),
+            child: Center(child: Text(permission.toString())),
           ),
           const SizedBox(width: 8),
           Text(permission.toLocalizedPowerLevelString(context)),
@@ -98,7 +96,7 @@ extension on int {
     return this == 100
         ? L10n.of(context)!.admin
         : this >= 50
-            ? L10n.of(context)!.moderator
-            : L10n.of(context)!.participant;
+        ? L10n.of(context)!.moderator
+        : L10n.of(context)!.participant;
   }
 }

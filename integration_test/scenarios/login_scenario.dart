@@ -33,9 +33,7 @@ class LoginScenario extends BaseScenario {
         password: password,
       );
     }
-    await $(ChatList).waitUntilVisible(
-      timeout: const Duration(seconds: 120),
-    );
+    await $(ChatList).waitUntilVisible(timeout: const Duration(seconds: 120));
     await loginRobot.grantNotificationPermission();
   }
 
@@ -43,9 +41,7 @@ class LoginScenario extends BaseScenario {
     LoginRobot loginRobot,
   ) async {
     try {
-      await $.waitUntilVisible(
-        $(HomeserverPickerView),
-      );
+      await $.waitUntilVisible($(HomeserverPickerView));
     } catch (e) {
       loginRobot.ignoreException();
     }

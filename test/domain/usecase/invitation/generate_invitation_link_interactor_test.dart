@@ -15,9 +15,7 @@ import 'package:mockito/mockito.dart';
 
 import 'generate_invitation_link_interactor_test.mocks.dart';
 
-@GenerateMocks([
-  InvitationRepository,
-])
+@GenerateMocks([InvitationRepository])
 void main() {
   late GenerateInvitationLinkInteractor interactor;
   late MockInvitationRepository mockRepository;
@@ -36,79 +34,76 @@ void main() {
   const testContact = 'test@example.com';
   const testMedium = InvitationMediumEnum.email;
 
-  test('execute returns success state when link is generated successfully',
-      () async {
-    final response = GenerateInvitationLinkResponse(
-      id: 'inv123',
-      link: 'https://test.link',
-    );
+  test(
+    'execute returns success state when link is generated successfully',
+    () async {
+      final response = GenerateInvitationLinkResponse(
+        id: 'inv123',
+        link: 'https://test.link',
+      );
 
-    when(
-      mockRepository.generateInvitationLink(
-        request: InvitationRequest(
-          contact: testContact,
-          medium: testMedium.value,
-        ),
-      ),
-    ).thenAnswer((_) async => response);
-
-    final result = interactor.execute(
-      contact: testContact,
-      medium: testMedium,
-    );
-
-    await expectLater(
-      result,
-      emitsInOrder([
-        const Right(GenerateInvitationLinkLoadingState()),
-        const Right(
-          GenerateInvitationLinkSuccessState(
-            link: 'https://test.link',
-            id: 'inv123',
+      when(
+        mockRepository.generateInvitationLink(
+          request: InvitationRequest(
+            contact: testContact,
+            medium: testMedium.value,
           ),
         ),
-      ]),
-    );
-  });
+      ).thenAnswer((_) async => response);
+
+      final result = interactor.execute(
+        contact: testContact,
+        medium: testMedium,
+      );
+
+      await expectLater(
+        result,
+        emitsInOrder([
+          const Right(GenerateInvitationLinkLoadingState()),
+          const Right(
+            GenerateInvitationLinkSuccessState(
+              link: 'https://test.link',
+              id: 'inv123',
+            ),
+          ),
+        ]),
+      );
+    },
+  );
 
   test(
-      'execute returns success state when link is generated successfully with null contact',
-      () async {
-    final response = GenerateInvitationLinkResponse(
-      id: 'inv123',
-      link: 'https://test.link',
-    );
+    'execute returns success state when link is generated successfully with null contact',
+    () async {
+      final response = GenerateInvitationLinkResponse(
+        id: 'inv123',
+        link: 'https://test.link',
+      );
 
-    when(
-      mockRepository.generateInvitationLink(
-        request: InvitationRequest(contact: null, medium: null),
-      ),
-    ).thenAnswer((_) async => response);
-
-    final result = interactor.execute(
-      contact: null,
-      medium: null,
-    );
-
-    await expectLater(
-      result,
-      emitsInOrder([
-        const Right(GenerateInvitationLinkLoadingState()),
-        const Right(
-          GenerateInvitationLinkSuccessState(
-            link: 'https://test.link',
-            id: 'inv123',
-          ),
+      when(
+        mockRepository.generateInvitationLink(
+          request: InvitationRequest(contact: null, medium: null),
         ),
-      ]),
-    );
-  });
+      ).thenAnswer((_) async => response);
+
+      final result = interactor.execute(contact: null, medium: null);
+
+      await expectLater(
+        result,
+        emitsInOrder([
+          const Right(GenerateInvitationLinkLoadingState()),
+          const Right(
+            GenerateInvitationLinkSuccessState(
+              link: 'https://test.link',
+              id: 'inv123',
+            ),
+          ),
+        ]),
+      );
+    },
+  );
 
   test('execute returns failure state when link is empty', () async {
-    final response = GenerateInvitationLinkResponse(
-      id: 'inv123',
-      link: '',
-    );
+    final response = GenerateInvitationLinkResponse(id: 'inv123', link: '');
 
     when(
       mockRepository.generateInvitationLink(
@@ -119,10 +114,7 @@ void main() {
       ),
     ).thenAnswer((_) async => response);
 
-    final result = interactor.execute(
-      contact: testContact,
-      medium: testMedium,
-    );
+    final result = interactor.execute(contact: testContact, medium: testMedium);
 
     await expectLater(
       result,
@@ -143,10 +135,7 @@ void main() {
       ),
     ).thenThrow(Exception('Test error'));
 
-    final result = interactor.execute(
-      contact: testContact,
-      medium: testMedium,
-    );
+    final result = interactor.execute(contact: testContact, medium: testMedium);
 
     await expectLater(
       result,
@@ -179,10 +168,7 @@ void main() {
       ),
     );
 
-    final result = interactor.execute(
-      contact: testContact,
-      medium: testMedium,
-    );
+    final result = interactor.execute(contact: testContact, medium: testMedium);
 
     await expectLater(
       result,
@@ -198,60 +184,62 @@ void main() {
   });
 
   test(
-      'execute returns InvitationAlreadySentState when invitation already sent',
-      () async {
-    when(
-      mockRepository.generateInvitationLink(
-        request: InvitationRequest(contact: null, medium: null),
-      ),
-    ).thenThrow(
-      DioException(
-        requestOptions: RequestOptions(),
-        response: Response(
-          requestOptions: RequestOptions(),
-          data: {'message': Constants.alreadySentInvitationMessage},
-          statusCode: 400,
+    'execute returns InvitationAlreadySentState when invitation already sent',
+    () async {
+      when(
+        mockRepository.generateInvitationLink(
+          request: InvitationRequest(contact: null, medium: null),
         ),
-      ),
-    );
+      ).thenThrow(
+        DioException(
+          requestOptions: RequestOptions(),
+          response: Response(
+            requestOptions: RequestOptions(),
+            data: {'message': Constants.alreadySentInvitationMessage},
+            statusCode: 400,
+          ),
+        ),
+      );
 
-    final result = interactor.execute();
-    await expectLater(
-      result,
-      emitsInOrder([
-        const Right(GenerateInvitationLinkLoadingState()),
-        const Left(InvitationAlreadySentState()),
-      ]),
-    );
-  });
+      final result = interactor.execute();
+      await expectLater(
+        result,
+        emitsInOrder([
+          const Right(GenerateInvitationLinkLoadingState()),
+          const Left(InvitationAlreadySentState()),
+        ]),
+      );
+    },
+  );
 
   test(
-      'execute returns InvalidPhoneNumberFailureState when invalid phone number',
-      () async {
-    when(
-      mockRepository.generateInvitationLink(
-        request: InvitationRequest(contact: null, medium: null),
-      ),
-    ).thenThrow(
-      DioException(
-        requestOptions: RequestOptions(),
-        response: Response(
-          requestOptions: RequestOptions(),
-          data: {'message': Constants.invalidPhoneNumberMessage},
-          statusCode: 400,
+    'execute returns InvalidPhoneNumberFailureState when invalid phone number',
+    () async {
+      when(
+        mockRepository.generateInvitationLink(
+          request: InvitationRequest(contact: null, medium: null),
         ),
-      ),
-    );
+      ).thenThrow(
+        DioException(
+          requestOptions: RequestOptions(),
+          response: Response(
+            requestOptions: RequestOptions(),
+            data: {'message': Constants.invalidPhoneNumberMessage},
+            statusCode: 400,
+          ),
+        ),
+      );
 
-    final result = interactor.execute();
-    await expectLater(
-      result,
-      emitsInOrder([
-        const Right(GenerateInvitationLinkLoadingState()),
-        const Left(InvalidPhoneNumberFailureState()),
-      ]),
-    );
-  });
+      final result = interactor.execute();
+      await expectLater(
+        result,
+        emitsInOrder([
+          const Right(GenerateInvitationLinkLoadingState()),
+          const Left(InvalidPhoneNumberFailureState()),
+        ]),
+      );
+    },
+  );
 
   test('execute returns InvalidEmailFailureState when invalid email', () async {
     when(
@@ -280,66 +268,68 @@ void main() {
   });
 
   test(
-      'execute returns GenerateInvitationLinkFailureState when response data is not a map',
-      () async {
-    when(
-      mockRepository.generateInvitationLink(
-        request: InvitationRequest(contact: null, medium: null),
-      ),
-    ).thenThrow(
-      DioException(
-        requestOptions: RequestOptions(),
-        response: Response(
+    'execute returns GenerateInvitationLinkFailureState when response data is not a map',
+    () async {
+      when(
+        mockRepository.generateInvitationLink(
+          request: InvitationRequest(contact: null, medium: null),
+        ),
+      ).thenThrow(
+        DioException(
           requestOptions: RequestOptions(),
-          data: Constants.invalidEmailMessage,
-          statusCode: 400,
+          response: Response(
+            requestOptions: RequestOptions(),
+            data: Constants.invalidEmailMessage,
+            statusCode: 400,
+          ),
         ),
-      ),
-    );
+      );
 
-    final result = interactor.execute();
-    await expectLater(
-      result,
-      emitsInOrder([
-        const Right(GenerateInvitationLinkLoadingState()),
-        predicate(
-          (dynamic value) =>
-              value is Left &&
-              value.value is GenerateInvitationLinkFailureState,
-        ),
-      ]),
-    );
-  });
+      final result = interactor.execute();
+      await expectLater(
+        result,
+        emitsInOrder([
+          const Right(GenerateInvitationLinkLoadingState()),
+          predicate(
+            (dynamic value) =>
+                value is Left &&
+                value.value is GenerateInvitationLinkFailureState,
+          ),
+        ]),
+      );
+    },
+  );
 
   test(
-      'execute returns GenerateInvitationLinkFailureState when response data is a map but not contain message',
-      () async {
-    when(
-      mockRepository.generateInvitationLink(
-        request: InvitationRequest(contact: null, medium: null),
-      ),
-    ).thenThrow(
-      DioException(
-        requestOptions: RequestOptions(),
-        response: Response(
+    'execute returns GenerateInvitationLinkFailureState when response data is a map but not contain message',
+    () async {
+      when(
+        mockRepository.generateInvitationLink(
+          request: InvitationRequest(contact: null, medium: null),
+        ),
+      ).thenThrow(
+        DioException(
           requestOptions: RequestOptions(),
-          data: {'error': Constants.invalidEmailMessage},
-          statusCode: 400,
+          response: Response(
+            requestOptions: RequestOptions(),
+            data: {'error': Constants.invalidEmailMessage},
+            statusCode: 400,
+          ),
         ),
-      ),
-    );
+      );
 
-    final result = interactor.execute();
-    await expectLater(
-      result,
-      emitsInOrder([
-        const Right(GenerateInvitationLinkLoadingState()),
-        predicate(
-          (dynamic value) =>
-              value is Left &&
-              value.value is GenerateInvitationLinkFailureState,
-        ),
-      ]),
-    );
-  });
+      final result = interactor.execute();
+      await expectLater(
+        result,
+        emitsInOrder([
+          const Right(GenerateInvitationLinkLoadingState()),
+          predicate(
+            (dynamic value) =>
+                value is Left &&
+                value.value is GenerateInvitationLinkFailureState,
+          ),
+        ]),
+      );
+    },
+  );
 }

@@ -6,10 +6,7 @@ import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
 import 'package:flutter/material.dart';
 
 class ChatDetailsFilesViewWeb extends StatelessWidget {
-  const ChatDetailsFilesViewWeb({
-    super.key,
-    required this.controller,
-  });
+  const ChatDetailsFilesViewWeb({super.key, required this.controller});
 
   final ChatDetailsFileItemWebState controller;
 
@@ -33,8 +30,9 @@ class ChatDetailsFilesViewWeb extends StatelessWidget {
             onTap: () {
               controller.downloadFileStateNotifier.value =
                   const NotDownloadPresentationState();
-              controller.downloadManager
-                  .cancelDownload(controller.event.eventId);
+              controller.downloadManager.cancelDownload(
+                controller.event.eventId,
+              );
             },
           );
         }

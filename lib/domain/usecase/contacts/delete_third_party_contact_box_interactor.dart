@@ -7,8 +7,8 @@ import 'package:fluffychat/domain/repository/contact/hive_contact_repository.dar
 import 'package:matrix/matrix.dart';
 
 class DeleteThirdPartyContactBoxInteractor {
-  final HiveContactRepository _hiveContactRepository =
-      getIt.get<HiveContactRepository>();
+  final HiveContactRepository _hiveContactRepository = getIt
+      .get<HiveContactRepository>();
 
   DeleteThirdPartyContactBoxInteractor();
 

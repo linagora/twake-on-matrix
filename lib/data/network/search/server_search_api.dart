@@ -7,8 +7,9 @@ import 'package:fluffychat/di/global/network_di.dart';
 import 'package:matrix/matrix.dart';
 
 class ServerSearchAPI {
-  final DioClient _client =
-      getIt.get<DioClient>(instanceName: NetworkDI.homeDioClientName);
+  final DioClient _client = getIt.get<DioClient>(
+    instanceName: NetworkDI.homeDioClientName,
+  );
 
   ServerSearchAPI();
 

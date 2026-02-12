@@ -44,8 +44,8 @@ class SearchTextField extends StatelessWidget {
           ),
           hintText: hintText ?? L10n.of(context)!.search,
           hintStyle: Theme.of(context).textTheme.titleMedium?.copyWith(
-                color: LinagoraRefColors.material().neutral[60],
-              ),
+            color: LinagoraRefColors.material().neutral[60],
+          ),
           floatingLabelBehavior: FloatingLabelBehavior.never,
           prefixIcon: Icon(
             Icons.search_outlined,

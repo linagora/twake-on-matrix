@@ -12,7 +12,7 @@ class DownloadFileInfo with EquatableMixin {
   final CancelToken cancelToken;
 
   final StreamController<Either<Failure, Success>>
-      downloadStateStreamController;
+  downloadStateStreamController;
 
   final Stream<Either<Failure, Success>> downloadStream;
 
@@ -24,6 +24,10 @@ class DownloadFileInfo with EquatableMixin {
   });
 
   @override
-  List<Object?> get props =>
-      [eventId, cancelToken, downloadStateStreamController, downloadStream];
+  List<Object?> get props => [
+    eventId,
+    cancelToken,
+    downloadStateStreamController,
+    downloadStream,
+  ];
 }

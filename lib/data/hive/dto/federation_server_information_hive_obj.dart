@@ -8,14 +8,11 @@ part 'federation_server_information_hive_obj.g.dart';
 class FederationServerInformationHiveObj with EquatableMixin {
   final List<String>? baseUrls;
 
-  FederationServerInformationHiveObj({
-    required this.baseUrls,
-  });
+  FederationServerInformationHiveObj({required this.baseUrls});
 
   factory FederationServerInformationHiveObj.fromJson(
     Map<String, dynamic> json,
-  ) =>
-      _$FederationServerInformationHiveObjFromJson(json);
+  ) => _$FederationServerInformationHiveObjFromJson(json);
 
   Map<String, dynamic> toJson() =>
       _$FederationServerInformationHiveObjToJson(this);
@@ -30,8 +27,9 @@ class FederationServerInformationHiveObj with EquatableMixin {
     FederationServerInformation fedServerInformation,
   ) {
     return FederationServerInformationHiveObj(
-      baseUrls:
-          fedServerInformation.baseUrls?.map((e) => e.toString()).toList(),
+      baseUrls: fedServerInformation.baseUrls
+          ?.map((e) => e.toString())
+          .toList(),
     );
   }
 

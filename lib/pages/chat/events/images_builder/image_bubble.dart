@@ -60,9 +60,9 @@ class ImageBubble extends StatelessWidget {
     const bubbleMinWidth = MessageContentStyle.imageBubbleMinWidth;
     final maxWidth =
         MessageContentStyle.combinedBubbleImageWidthWithBubbleMaxWidget(
-      bubbleImageWidget: bubbleWidth,
-      bubbleMaxWidth: bubbleMaxWidth ?? 0,
-    );
+          bubbleImageWidget: bubbleWidth,
+          bubbleMaxWidth: bubbleMaxWidth ?? 0,
+        );
     return Container(
       decoration: BoxDecoration(
         borderRadius: rounded
@@ -80,7 +80,8 @@ class ImageBubble extends StatelessWidget {
         borderRadius: rounded
             ? MessageContentStyle.borderRadiusBubble
             : BorderRadius.zero,
-        child: (PlatformInfos.isWeb &&
+        child:
+            (PlatformInfos.isWeb &&
                 !event.isBubbleEventEncrypted(isThumbnail: thumbnailOnly))
             ? UnencryptedImageBuilderWeb(
                 event: event,

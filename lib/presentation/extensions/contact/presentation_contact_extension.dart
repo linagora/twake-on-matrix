@@ -30,16 +30,17 @@ extension ContactExtensionInPresentation on Contact {
       (email) => email.matrixId != null && email.matrixId!.isNotEmpty,
     );
 
-    final status = phoneNumberHasMatrixId?.status ??
+    final status =
+        phoneNumberHasMatrixId?.status ??
         emailHasMatrixId?.status ??
         ThirdPartyStatus.active;
 
     final displayName = (this.displayName?.isNotEmpty == true)
         ? this.displayName
         : phoneNumberHasMatrixId?.number ??
-            emailHasMatrixId?.address ??
-            phoneNumbers?.firstOrNull?.number ??
-            emails?.firstOrNull?.address;
+              emailHasMatrixId?.address ??
+              phoneNumbers?.firstOrNull?.number ??
+              emails?.firstOrNull?.address;
 
     final contactMatrix = phoneNumberHasMatrixId ?? emailHasMatrixId;
     final listContacts = {

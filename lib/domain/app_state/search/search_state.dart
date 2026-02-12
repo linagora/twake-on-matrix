@@ -12,10 +12,7 @@ class SearchRecentChatSuccess extends Success {
   final Iterable<RecentChatSearchModel> data;
   final String keyword;
 
-  const SearchRecentChatSuccess({
-    required this.data,
-    required this.keyword,
-  });
+  const SearchRecentChatSuccess({required this.data, required this.keyword});
 
   @override
   List<Object?> get props => [data, keyword];

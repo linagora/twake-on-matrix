@@ -3,9 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:linagora_design_flutter/colors/linagora_ref_colors.dart';
 
 class RecentChatsTitle extends StatelessWidget {
-  const RecentChatsTitle({
-    super.key,
-  });
+  const RecentChatsTitle({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -14,8 +12,8 @@ class RecentChatsTitle extends StatelessWidget {
         Text(
           L10n.of(context)!.recentChat,
           style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                color: LinagoraRefColors.material().neutral,
-              ),
+            color: LinagoraRefColors.material().neutral,
+          ),
         ),
       ],
     );

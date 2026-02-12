@@ -57,11 +57,11 @@ class UnencryptedImageBuilderWeb extends StatelessWidget {
             alignment: Alignment.center,
             children: [
               SizedBox(
-                width: MessageContentStyle
-                    .combinedBubbleImageWidthWithBubbleMaxWidget(
-                  bubbleImageWidget: width,
-                  bubbleMaxWidth: bubbleMaxWidth ?? 0,
-                ),
+                width:
+                    MessageContentStyle.combinedBubbleImageWidthWithBubbleMaxWidget(
+                      bubbleImageWidget: width,
+                      bubbleMaxWidth: bubbleMaxWidth ?? 0,
+                    ),
                 child: BlurHash(
                   hash: event.blurHash ?? MessageContentStyle.defaultBlurHash,
                 ),
@@ -85,16 +85,14 @@ class UnencryptedImageBuilderWeb extends StatelessWidget {
       onTapPreview!();
       final result =
           await Navigator.of(context, rootNavigator: PlatformInfos.isWeb).push(
-        HeroPageRoute(
-          builder: (context) {
-            return InteractiveViewerGallery(
-              itemBuilder: ImageViewer(
-                event: event,
-              ),
-            );
-          },
-        ),
-      );
+            HeroPageRoute(
+              builder: (context) {
+                return InteractiveViewerGallery(
+                  itemBuilder: ImageViewer(event: event),
+                );
+              },
+            ),
+          );
       if (result == MediaViewerPopupResultEnum.closeRightColumnFlag) {
         closeRightColumn?.call();
       }

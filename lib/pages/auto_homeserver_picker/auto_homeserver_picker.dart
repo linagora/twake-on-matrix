@@ -16,10 +16,7 @@ import 'package:fluffychat/generated/l10n/app_localizations.dart';
 class AutoHomeserverPicker extends StatefulWidget {
   final bool? loggedOut;
 
-  const AutoHomeserverPicker({
-    super.key,
-    this.loggedOut,
-  });
+  const AutoHomeserverPicker({super.key, this.loggedOut});
 
   @override
   State<AutoHomeserverPicker> createState() => AutoHomeserverPickerController();
@@ -46,15 +43,14 @@ class AutoHomeserverPickerController extends State<AutoHomeserverPicker>
     try {
       final client = await matrix.getLoginClient();
       matrix.loginHomeserverSummary = await client
-          .checkHomeserver(
-        Uri.parse(AppConfig.homeserver),
-      )
+          .checkHomeserver(Uri.parse(AppConfig.homeserver))
           .timeout(
-        autoHomeserverPickerTimeout,
-        onTimeout: () {
-          throw CheckHomeserverTimeoutException();
-        },
-      ).toHomeserverSummary();
+            autoHomeserverPickerTimeout,
+            onTimeout: () {
+              throw CheckHomeserverTimeoutException();
+            },
+          )
+          .toHomeserverSummary();
 
       final ssoSupported = matrix.loginHomeserverSummary.supportSSOLogin;
 
@@ -76,19 +72,17 @@ class AutoHomeserverPickerController extends State<AutoHomeserverPicker>
       } else if (ssoSupported && matrix.loginRegistrationSupported == false) {
         Map<String, dynamic>? rawLoginTypes;
         await client
-            .request(
-              RequestType.GET,
-              '/client/r0/login',
-            )
+            .request(RequestType.GET, '/client/r0/login')
             .then((loginTypes) => rawLoginTypes = loginTypes)
             .timeout(
-          autoHomeserverPickerTimeout,
-          onTimeout: () {
-            throw CheckHomeserverTimeoutException();
-          },
+              autoHomeserverPickerTimeout,
+              onTimeout: () {
+                throw CheckHomeserverTimeoutException();
+              },
+            );
+        final identitiesProvider = identityProviders(
+          rawLoginTypes: rawLoginTypes,
         );
-        final identitiesProvider =
-            identityProviders(rawLoginTypes: rawLoginTypes);
         if (supportsSso(context) && identitiesProvider?.length == 1) {
           ssoLoginAction(context: context, id: identitiesProvider!.single.id!);
         }
@@ -118,26 +112,25 @@ class AutoHomeserverPickerController extends State<AutoHomeserverPicker>
       matrix.loginHomeserverSummary = await client
           .checkHomeserver(Uri.parse(AppConfig.twakeWorkplaceHomeserver))
           .timeout(
-        autoHomeserverPickerTimeout,
-        onTimeout: () {
-          throw CheckHomeserverTimeoutException();
-        },
-      ).toHomeserverSummary();
+            autoHomeserverPickerTimeout,
+            onTimeout: () {
+              throw CheckHomeserverTimeoutException();
+            },
+          )
+          .toHomeserverSummary();
       Map<String, dynamic>? rawLoginTypes;
       await client
-          .request(
-            RequestType.GET,
-            '/client/r0/login',
-          )
+          .request(RequestType.GET, '/client/r0/login')
           .then((loginTypes) => rawLoginTypes = loginTypes)
           .timeout(
-        autoHomeserverPickerTimeout,
-        onTimeout: () {
-          throw CheckHomeserverTimeoutException();
-        },
+            autoHomeserverPickerTimeout,
+            onTimeout: () {
+              throw CheckHomeserverTimeoutException();
+            },
+          );
+      final identitiesProvider = identityProviders(
+        rawLoginTypes: rawLoginTypes,
       );
-      final identitiesProvider =
-          identityProviders(rawLoginTypes: rawLoginTypes);
       if (identitiesProvider?.length == 1) {
         try {
           await registerPublicPlatformAction(
@@ -198,9 +191,7 @@ class AutoHomeserverPickerController extends State<AutoHomeserverPicker>
           autoHomeserverPickerUIState.value = AutoHomeServerPickerFailureState(
             error: L10n.of(context)!.invalidLoginToken,
           );
-          resetLocationPathWithLoginToken(
-            route: 'home',
-          );
+          resetLocationPathWithLoginToken(route: 'home');
         } else {
           resetLocationPathWithLoginToken();
         }
@@ -232,8 +223,6 @@ class AutoHomeserverPickerController extends State<AutoHomeserverPicker>
 
   @override
   Widget build(BuildContext context) {
-    return AutoHomeserverPickerView(
-      controller: this,
-    );
+    return AutoHomeserverPickerView(controller: this);
   }
 }

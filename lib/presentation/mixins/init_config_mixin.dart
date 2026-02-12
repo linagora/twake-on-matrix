@@ -7,8 +7,9 @@ import 'package:matrix/matrix.dart';
 mixin InitConfigMixin {
   Future<void> initConfigWeb() async {
     try {
-      final configJsonString =
-          utf8.decode((await http.get(Uri.parse('config.json'))).bodyBytes);
+      final configJsonString = utf8.decode(
+        (await http.get(Uri.parse('config.json'))).bodyBytes,
+      );
       final configJson = json.decode(configJsonString);
       AppConfig.loadFromJson(configJson);
       Logs().d('[ConfigLoader] $configJson');

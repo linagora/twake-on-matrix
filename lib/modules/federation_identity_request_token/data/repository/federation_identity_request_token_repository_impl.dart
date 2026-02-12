@@ -9,11 +9,7 @@ class FederationIdentityRequestTokenRepositoryImpl
   FederationIdentityRequestTokenRepositoryImpl({required this.datasource});
 
   @override
-  Future<FederationTokenInformation> requestToken({
-    required String mxid,
-  }) {
-    return datasource.requestToken(
-      mxid: mxid,
-    );
+  Future<FederationTokenInformation> requestToken({required String mxid}) {
+    return datasource.requestToken(mxid: mxid);
   }
 }

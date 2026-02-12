@@ -84,7 +84,8 @@ mixin PopupMenuWidgetMixin {
             Expanded(
               child: Text(
                 nameAction,
-                style: styleName ??
+                style:
+                    styleName ??
                     PopupMenuWidgetStyle.defaultItemTextStyle(context),
               ),
             ),

@@ -136,9 +136,7 @@ class _ExpansionContactListTileState extends State<ExpansionContactListTile>
                       ),
                     ),
                   ),
-                  const SizedBox(
-                    width: 8.0,
-                  ),
+                  const SizedBox(width: 8.0),
                   Expanded(
                     child: SizedBox(
                       height: 64,
@@ -170,9 +168,9 @@ class _ExpansionContactListTileState extends State<ExpansionContactListTile>
                                         const SizedBox(width: 8.0),
                                         TwakeChip(
                                           text: L10n.of(context)!.owner,
-                                          textColor: Theme.of(context)
-                                              .colorScheme
-                                              .primary,
+                                          textColor: Theme.of(
+                                            context,
+                                          ).colorScheme.primary,
                                         ),
                                       ],
                                       const SizedBox(width: 8.0),
@@ -235,8 +233,10 @@ class _ExpansionContactListTileState extends State<ExpansionContactListTile>
 
   BuildDisplayName _displayNameWidget(String? snapshotDisplayName) {
     return BuildDisplayName(
-      profileDisplayName:
-          _profileDisplayName(widget.contact, snapshotDisplayName),
+      profileDisplayName: _profileDisplayName(
+        widget.contact,
+        snapshotDisplayName,
+      ),
       contactDisplayName: widget.contact.displayName,
       highlightKeyword: widget.highlightKeyword,
       style: ListItemStyle.titleTextStyle(fontFamily: 'Inter'),
@@ -259,39 +259,33 @@ class _ExpansionContactListTileState extends State<ExpansionContactListTile>
       return const SizedBox();
     }
 
-    return status.fold(
-      (failure) => child!,
-      (success) {
-        if (success is GetInvitationStatusLoadingState) {
-          return const Padding(
-            padding: EdgeInsets.all(8),
-            child: SizedBox(
-              width: 16,
-              height: 16,
-              child: CupertinoActivityIndicator(),
-            ),
-          );
-        }
+    return status.fold((failure) => child!, (success) {
+      if (success is GetInvitationStatusLoadingState) {
+        return const Padding(
+          padding: EdgeInsets.all(8),
+          child: SizedBox(
+            width: 16,
+            height: 16,
+            child: CupertinoActivityIndicator(),
+          ),
+        );
+      }
 
-        if (success is GetInvitationStatusSuccessState) {
-          if (success.invitationStatusResponse.invitation?.hasMatrixId ==
-              true) {
-            return const SizedBox();
-          }
-          return _displayIconInvitation(
-            isExpired: success
-                .invitationStatusResponse.invitation!.expiredTimeToInvite,
-          );
+      if (success is GetInvitationStatusSuccessState) {
+        if (success.invitationStatusResponse.invitation?.hasMatrixId == true) {
+          return const SizedBox();
         }
+        return _displayIconInvitation(
+          isExpired:
+              success.invitationStatusResponse.invitation!.expiredTimeToInvite,
+        );
+      }
 
-        return child!;
-      },
-    );
+      return child!;
+    });
   }
 
-  Widget _displayIconInvitation({
-    bool isExpired = true,
-  }) {
+  Widget _displayIconInvitation({bool isExpired = true}) {
     return InkWell(
       onTap: () {
         _handleMatrixIdNull(
@@ -323,17 +317,13 @@ class _ExpansionContactListTileState extends State<ExpansionContactListTile>
       return HighlightText(
         text: widget.contact.primaryPhoneNumber,
         searchWord: widget.highlightKeyword,
-        style: ListItemStyle.subtitleTextStyle(
-          fontFamily: 'Inter',
-        ),
+        style: ListItemStyle.subtitleTextStyle(fontFamily: 'Inter'),
       );
     } else if (widget.contact.primaryEmail.isNotEmpty) {
       return HighlightText(
         text: widget.contact.primaryEmail,
         searchWord: widget.highlightKeyword,
-        style: ListItemStyle.subtitleTextStyle(
-          fontFamily: 'Inter',
-        ),
+        style: ListItemStyle.subtitleTextStyle(fontFamily: 'Inter'),
         maxLines: 1,
         overflow: TextOverflow.ellipsis,
       );
@@ -346,9 +336,7 @@ class _ExpansionContactListTileState extends State<ExpansionContactListTile>
       return HighlightText(
         text: widget.contact.primaryPhoneNumber,
         searchWord: widget.highlightKeyword,
-        style: ListItemStyle.subtitleTextStyle(
-          fontFamily: 'Inter',
-        ),
+        style: ListItemStyle.subtitleTextStyle(fontFamily: 'Inter'),
       );
     }
     return const SizedBox();
@@ -359,9 +347,7 @@ class _ExpansionContactListTileState extends State<ExpansionContactListTile>
       return HighlightText(
         text: widget.contact.primaryEmail,
         searchWord: widget.highlightKeyword,
-        style: ListItemStyle.subtitleTextStyle(
-          fontFamily: 'Inter',
-        ),
+        style: ListItemStyle.subtitleTextStyle(fontFamily: 'Inter'),
         maxLines: 1,
         overflow: TextOverflow.ellipsis,
       );
@@ -379,8 +365,9 @@ class _ExpansionContactListTileState extends State<ExpansionContactListTile>
         widget.contact.matrixId!,
         getFromRooms: false,
       );
-      Logs()
-          .d("ExpansionContactListTile()::getProfiles(): ${profile.avatarUrl}");
+      Logs().d(
+        "ExpansionContactListTile()::getProfiles(): ${profile.avatarUrl}",
+      );
       return profile;
     } catch (e) {
       return Profile(
@@ -398,10 +385,10 @@ class _ExpansionContactListTileState extends State<ExpansionContactListTile>
   ) {
     if (widget.enableInvitation) {
       return () => _handleMatrixIdNull(
-            context: context,
-            contact: contact,
-            invitationStatus: invitationStatus,
-          );
+        context: context,
+        contact: contact,
+        invitationStatus: invitationStatus,
+      );
     }
 
     if (widget.onContactTap != null) {

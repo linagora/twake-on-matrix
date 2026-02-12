@@ -20,13 +20,13 @@ class TwakeHeaderStyle {
   static TextStyle? twakeHeaderStyle(BuildContext context) {
     return responsive.isMobile(context)
         ? LinagoraTextStyle.material().bodyLarge1.copyWith(
-              color: Theme.of(context).colorScheme.onSurface,
-              height: TwakeHeaderStyle.titleLineHeightMobile,
-            )
+            color: Theme.of(context).colorScheme.onSurface,
+            height: TwakeHeaderStyle.titleLineHeightMobile,
+          )
         : Theme.of(context).textTheme.headlineSmall?.copyWith(
-              color: Theme.of(context).colorScheme.onSurface,
-              height: TwakeHeaderStyle.titleLineHeightWeb,
-            );
+            color: Theme.of(context).colorScheme.onSurface,
+            height: TwakeHeaderStyle.titleLineHeightWeb,
+          );
   }
 
   static double get avatarFontSizeInAppBar => 14.0;
@@ -41,19 +41,13 @@ class TwakeHeaderStyle {
       EdgeInsetsDirectional.all(16);
 
   static const EdgeInsetsDirectional actionsPadding =
-      EdgeInsetsDirectional.only(
-    end: 16,
-  );
+      EdgeInsetsDirectional.only(end: 16);
 
   static const EdgeInsetsDirectional paddingTitleHeader =
-      EdgeInsetsDirectional.only(
-    start: 16,
-  );
+      EdgeInsetsDirectional.only(start: 16);
 
   static const EdgeInsetsDirectional leadingPadding =
-      EdgeInsetsDirectional.only(
-    start: 26,
-  );
+      EdgeInsetsDirectional.only(start: 26);
 
   static const EdgeInsetsDirectional textButtonPadding =
       EdgeInsetsDirectional.all(8);
@@ -63,6 +57,6 @@ class TwakeHeaderStyle {
 
   static TextStyle? selectAccountTextStyle(BuildContext context) =>
       Theme.of(context).textTheme.titleLarge?.copyWith(
-            color: Theme.of(context).colorScheme.onSurface,
-          );
+        color: Theme.of(context).colorScheme.onSurface,
+      );
 }

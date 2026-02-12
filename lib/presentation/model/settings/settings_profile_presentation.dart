@@ -11,7 +11,5 @@ class SettingsProfilePresentation extends Equatable {
   });
 
   @override
-  List<Object?> get props => [
-        settingsProfileType,
-      ];
+  List<Object?> get props => [settingsProfileType];
 }

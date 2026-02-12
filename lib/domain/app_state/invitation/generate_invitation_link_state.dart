@@ -46,8 +46,5 @@ class GenerateInvitationLinkFailureState extends Failure {
   });
 
   @override
-  List<Object?> get props => [
-        exception,
-        message,
-      ];
+  List<Object?> get props => [exception, message];
 }

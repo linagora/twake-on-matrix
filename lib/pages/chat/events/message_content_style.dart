@@ -38,22 +38,15 @@ class MessageContentStyle {
   static Color backgroundColorButton = Colors.white.withAlpha(64);
   static const String defaultBlurHash = 'LEHV6nWB2yk8pyo0adR*.7kCMdnj';
 
-  static double imageBubbleWidth(double displayWidth) => max(
-        MessageContentStyle.imageBubbleMinWidth,
-        displayWidth,
-      );
+  static double imageBubbleWidth(double displayWidth) =>
+      max(MessageContentStyle.imageBubbleMinWidth, displayWidth);
 
   static double imageBubbleHeight(double displayHeight) => PlatformInfos.isWeb
       ? displayHeight
-      : max(
-          MessageContentStyle.imageBubbleMinHeight,
-          displayHeight,
-        );
+      : max(MessageContentStyle.imageBubbleMinHeight, displayHeight);
 
-  static double videoBubbleHeight(double displayHeight) => max(
-        MessageContentStyle.imageBubbleMinHeight,
-        displayHeight,
-      );
+  static double videoBubbleHeight(double displayHeight) =>
+      max(MessageContentStyle.imageBubbleMinHeight, displayHeight);
 
   static double combinedBubbleImageWidthWithBubbleMaxWidget({
     required double bubbleImageWidget,
@@ -78,22 +71,22 @@ class MessageContentStyle {
 
   static const Color backgroundColorCenterButton = Colors.black38;
 
-  static const BorderRadius borderRadiusBubble =
-      BorderRadius.all(Radius.circular(12.0));
+  static const BorderRadius borderRadiusBubble = BorderRadius.all(
+    Radius.circular(12.0),
+  );
 
   static const backIconColor = Colors.white;
 
-  static const EdgeInsets endOfBubbleWidgetPadding =
-      EdgeInsets.symmetric(vertical: 4);
-
-  static const EdgeInsets emojiPadding = EdgeInsets.symmetric(
-    horizontal: 8.0,
+  static const EdgeInsets endOfBubbleWidgetPadding = EdgeInsets.symmetric(
+    vertical: 4,
   );
+
+  static const EdgeInsets emojiPadding = EdgeInsets.symmetric(horizontal: 8.0);
 
   static TextStyle? linkStyleMessageContent(BuildContext context) =>
       Theme.of(context).textTheme.bodyLarge?.copyWith(
-            color: Theme.of(context).colorScheme.secondary,
-          );
+        color: Theme.of(context).colorScheme.secondary,
+      );
 
   static const blurhashSize = 32;
 

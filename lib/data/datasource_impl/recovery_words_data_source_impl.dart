@@ -9,9 +9,9 @@ class RecoveryWordsDataSourceImpl implements RecoveryWordsDataSource {
 
   @override
   Future<RecoveryWords> getRecoveryWords() {
-    return _recoveryWordsAPI
-        .getRecoveryWords()
-        .then((response) => response.toRecoveryWords());
+    return _recoveryWordsAPI.getRecoveryWords().then(
+      (response) => response.toRecoveryWords(),
+    );
   }
 
   @override

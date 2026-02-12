@@ -112,9 +112,7 @@ class _GroupChatInformation extends StatelessWidget {
             children: [
               _SearchHighlightText(
                 text: recentChatPresentationSearch.displayName ?? "",
-                style: ListItemStyle.titleTextStyle(
-                  fontFamily: 'Inter',
-                ),
+                style: ListItemStyle.titleTextStyle(fontFamily: 'Inter'),
                 searchWord: searchKeyword,
               ),
               Text(
@@ -122,9 +120,7 @@ class _GroupChatInformation extends StatelessWidget {
                 overflow: TextOverflow.ellipsis,
                 maxLines: 1,
                 softWrap: false,
-                style: ListItemStyle.subtitleTextStyle(
-                  fontFamily: 'Inter',
-                ),
+                style: ListItemStyle.subtitleTextStyle(fontFamily: 'Inter'),
               ),
             ],
           ),
@@ -139,11 +135,7 @@ class _SearchHighlightText extends StatelessWidget {
   final String? searchWord;
   final TextStyle? style;
 
-  const _SearchHighlightText({
-    required this.text,
-    this.searchWord,
-    this.style,
-  });
+  const _SearchHighlightText({required this.text, this.searchWord, this.style});
 
   @override
   Widget build(BuildContext context) {
@@ -190,16 +182,12 @@ class _DirectChatInformation extends StatelessWidget {
             children: [
               _SearchHighlightText(
                 text: recentChatPresentationSearch.displayName ?? "",
-                style: ListItemStyle.titleTextStyle(
-                  fontFamily: 'Inter',
-                ),
+                style: ListItemStyle.titleTextStyle(fontFamily: 'Inter'),
                 searchWord: searchKeyword,
               ),
               _SearchHighlightText(
                 text: recentChatPresentationSearch.directChatMatrixID ?? "",
-                style: ListItemStyle.subtitleTextStyle(
-                  fontFamily: 'Inter',
-                ),
+                style: ListItemStyle.subtitleTextStyle(fontFamily: 'Inter'),
                 searchWord: searchKeyword,
               ),
             ],
@@ -248,15 +236,14 @@ class _ContactInformation extends StatelessWidget {
                   Expanded(
                     child: _SearchHighlightText(
                       text: contactPresentationSearch.displayName ?? "",
-                      style: ListItemStyle.titleTextStyle(
-                        fontFamily: 'Inter',
-                      ),
+                      style: ListItemStyle.titleTextStyle(fontFamily: 'Inter'),
                       searchWord: searchKeyword,
                     ),
                   ),
                   if (contactPresentationSearch.matrixId != null &&
-                      contactPresentationSearch.matrixId!
-                          .isCurrentMatrixId(context)) ...[
+                      contactPresentationSearch.matrixId!.isCurrentMatrixId(
+                        context,
+                      )) ...[
                     const SizedBox(width: 8.0),
                     TwakeChip(
                       text: L10n.of(context)!.owner,
@@ -300,9 +287,7 @@ class _ContactInformation extends StatelessWidget {
     }
     return _SearchHighlightText(
       text: contactPresentationSearch.primaryEmail,
-      style: ListItemStyle.subtitleTextStyle(
-        fontFamily: 'Inter',
-      ),
+      style: ListItemStyle.subtitleTextStyle(fontFamily: 'Inter'),
       searchWord: searchKeyword,
     );
   }
@@ -313,9 +298,7 @@ class _ContactInformation extends StatelessWidget {
     }
     return _SearchHighlightText(
       text: contactPresentationSearch.primaryPhoneNumber,
-      style: ListItemStyle.subtitleTextStyle(
-        fontFamily: 'Inter',
-      ),
+      style: ListItemStyle.subtitleTextStyle(fontFamily: 'Inter'),
       searchWord: searchKeyword,
     );
   }

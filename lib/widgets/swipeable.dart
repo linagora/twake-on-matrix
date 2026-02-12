@@ -67,8 +67,8 @@ class Swipeable extends StatefulWidget {
       PointerDeviceKind.touch,
     },
     this.onOverScrollTheMaxOffset,
-  })  : assert(secondaryBackground == null || background != null),
-        super(key: key);
+  }) : assert(secondaryBackground == null || background != null),
+       super(key: key);
 
   /// The widget below this widget in the tree.
   ///
@@ -170,9 +170,8 @@ class Swipeable extends StatefulWidget {
 }
 
 class _SwipeableClipper extends CustomClipper<Rect> {
-  _SwipeableClipper({
-    required this.moveAnimation,
-  }) : super(reclip: moveAnimation);
+  _SwipeableClipper({required this.moveAnimation})
+    : super(reclip: moveAnimation);
 
   final Animation<Offset> moveAnimation;
 
@@ -200,9 +199,10 @@ class SwipeableState extends State<Swipeable>
     with TickerProviderStateMixin, AutomaticKeepAliveClientMixin {
   @override
   void initState() {
-    _moveController =
-        AnimationController(duration: widget.movementDuration, vsync: this)
-          ..addStatusListener(_handleDismissStatusChanged);
+    _moveController = AnimationController(
+      duration: widget.movementDuration,
+      vsync: this,
+    )..addStatusListener(_handleDismissStatusChanged);
     _updateMoveAnimation();
     _moveController.addListener(listenMoveController);
 
@@ -478,9 +478,7 @@ class SwipeableState extends State<Swipeable>
           if (!_moveAnimation.isDismissed)
             Positioned.fill(
               child: ClipRect(
-                clipper: _SwipeableClipper(
-                  moveAnimation: _moveAnimation,
-                ),
+                clipper: _SwipeableClipper(moveAnimation: _moveAnimation),
                 child: background,
               ),
             ),

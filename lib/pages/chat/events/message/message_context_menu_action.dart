@@ -17,9 +17,7 @@ enum MessageContextMenuAction {
   saveToDownload,
   saveToGallery;
 
-  void onTap(
-    BuildContext context,
-  ) {
+  void onTap(BuildContext context) {
     switch (this) {
       case MessageContextMenuAction.reply:
         Navigator.of(context).pop('reply');
@@ -54,10 +52,7 @@ enum MessageContextMenuAction {
     }
   }
 
-  String getTitle(
-    BuildContext context,
-    Event event,
-  ) {
+  String getTitle(BuildContext context, Event event) {
     switch (this) {
       case MessageContextMenuAction.reply:
         return L10n.of(context)!.reply;
@@ -82,10 +77,7 @@ enum MessageContextMenuAction {
     }
   }
 
-  Color? getIconColor(
-    BuildContext context,
-    Event event,
-  ) {
+  Color? getIconColor(BuildContext context, Event event) {
     if (this == MessageContextMenuAction.delete) {
       return LinagoraSysColors.material().error;
     }

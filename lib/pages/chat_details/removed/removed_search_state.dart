@@ -18,18 +18,13 @@ class RemovedSearchSuccessState extends Success {
   });
 
   @override
-  List<Object?> get props => [
-        removedMember,
-        keyword,
-      ];
+  List<Object?> get props => [removedMember, keyword];
 }
 
 class RemovedSearchEmptyState extends Failure {
   final String keyword;
 
-  const RemovedSearchEmptyState({
-    required this.keyword,
-  });
+  const RemovedSearchEmptyState({required this.keyword});
 
   @override
   List<Object?> get props => [keyword];

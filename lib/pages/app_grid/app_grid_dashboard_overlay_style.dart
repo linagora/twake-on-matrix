@@ -23,6 +23,8 @@ class AppGridDashboardOverlayStyle {
 
   static const double borderRadius = 14;
 
-  static const EdgeInsets padding =
-      EdgeInsets.symmetric(vertical: 14, horizontal: 10);
+  static const EdgeInsets padding = EdgeInsets.symmetric(
+    vertical: 14,
+    horizontal: 10,
+  );
 }

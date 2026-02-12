@@ -154,16 +154,10 @@ extension DefaultFlowExtensions on WidgetTester {
         chatListFinder.evaluate().isEmpty);
 
     if (homeserverPickerFinder.evaluate().isNotEmpty) {
-      log(
-        'Found HomeserverPicker, performing login.',
-        name: 'Test Runner',
-      );
+      log('Found HomeserverPicker, performing login.', name: 'Test Runner');
       await tester.login();
     } else {
-      log(
-        'Found ChatListViewBody, skipping login.',
-        name: 'Test Runner',
-      );
+      log('Found ChatListViewBody, skipping login.', name: 'Test Runner');
     }
 
     await tester.acceptPushWarning();

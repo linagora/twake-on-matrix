@@ -149,10 +149,7 @@ class _AddContactInfoState extends State<AddContactInfo> {
                   padding: textfieldPadding,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      title,
-                      textField,
-                    ],
+                    children: [title, textField],
                   ),
                 ),
               ),

@@ -19,22 +19,15 @@ class UpdateGroupChatInteractor {
 
     if (avatarUrl != null || isDeleteAvatar) {
       try {
-        await client.setRoomStateWithKey(
-          room.id,
-          EventTypes.RoomAvatar,
-          '',
-          {
-            'url': isDeleteAvatar ? null : avatarUrl.toString(),
-          },
-        );
+        await client.setRoomStateWithKey(room.id, EventTypes.RoomAvatar, '', {
+          'url': isDeleteAvatar ? null : avatarUrl.toString(),
+        });
         yield Right(UpdateAvatarGroupChatSuccess(isDeleteAvatar));
       } on MatrixException catch (error) {
         Logs().e(
           'UpdateGroupChatInteractor::_updateAvatarForRoom(): ErrorCode ${error.errcode} - ErrorMessage ${error.errorMessage}',
         );
-        yield Left(
-          UpdateGroupChatFailure(error),
-        );
+        yield Left(UpdateGroupChatFailure(error));
         return;
       } catch (e) {
         Logs().e('UpdateGroupChatInteractor::_updateAvatarForRoom(): $e');
@@ -45,26 +38,20 @@ class UpdateGroupChatInteractor {
     if (displayName != null) {
       if (displayName != room.name) {
         try {
-          await client.setRoomStateWithKey(
-            room.id,
-            EventTypes.RoomName,
-            '',
-            {
-              'name': displayName,
-            },
-          );
+          await client.setRoomStateWithKey(room.id, EventTypes.RoomName, '', {
+            'name': displayName,
+          });
           yield const Right(UpdateDisplayNameGroupChatSuccess());
         } on MatrixException catch (error) {
           Logs().e(
             'UpdateGroupChatInteractor::_updateDisplayNameForRoom(): ErrorCode ${error.errcode} - ErrorMessage ${error.errorMessage}',
           );
-          yield Left(
-            UpdateGroupChatFailure(error),
-          );
+          yield Left(UpdateGroupChatFailure(error));
           return;
         } catch (e) {
-          Logs()
-              .e('UpdateGroupChatInteractor::_updateDisplayNameForRoom(): $e');
+          Logs().e(
+            'UpdateGroupChatInteractor::_updateDisplayNameForRoom(): $e',
+          );
           yield Left(UpdateGroupDisplayNameFailure(exception: e));
           return;
         }
@@ -76,22 +63,15 @@ class UpdateGroupChatInteractor {
 
     if (description != null && description != room.topic) {
       try {
-        await client.setRoomStateWithKey(
-          room.id,
-          EventTypes.RoomTopic,
-          '',
-          {
-            'topic': description,
-          },
-        );
+        await client.setRoomStateWithKey(room.id, EventTypes.RoomTopic, '', {
+          'topic': description,
+        });
         yield const Right(UpdateDescriptionGroupChatSuccess());
       } on MatrixException catch (error) {
         Logs().e(
           'UpdateGroupChatInteractor::_updateDescriptionForRoom(): ErrorCode ${error.errcode} - ErrorMessage ${error.errorMessage}',
         );
-        yield Left(
-          UpdateGroupChatFailure(error),
-        );
+        yield Left(UpdateGroupChatFailure(error));
         return;
       } catch (e) {
         Logs().e('UpdateGroupChatInteractor::_updateDescriptionForRoom(): $e');

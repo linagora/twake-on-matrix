@@ -3,10 +3,7 @@ import 'package:json_annotation/json_annotation.dart';
 
 part 'user_info_visibility.g.dart';
 
-enum VisibleEnum {
-  email,
-  phone;
-}
+enum VisibleEnum { email, phone }
 
 @JsonSerializable()
 class UserInfoVisibility with EquatableMixin {
@@ -17,11 +14,7 @@ class UserInfoVisibility with EquatableMixin {
   @JsonKey(name: "visible_fields")
   final List<VisibleEnum>? visibleFields;
 
-  UserInfoVisibility({
-    this.matrixId,
-    this.visibility,
-    this.visibleFields,
-  });
+  UserInfoVisibility({this.matrixId, this.visibility, this.visibleFields});
 
   factory UserInfoVisibility.fromJson(Map<String, dynamic> json) =>
       _$UserInfoVisibilityFromJson(json);
@@ -29,9 +22,5 @@ class UserInfoVisibility with EquatableMixin {
   Map<String, dynamic> toJson() => _$UserInfoVisibilityToJson(this);
 
   @override
-  List<Object?> get props => [
-        matrixId,
-        visibility,
-        visibleFields,
-      ];
+  List<Object?> get props => [matrixId, visibility, visibleFields];
 }

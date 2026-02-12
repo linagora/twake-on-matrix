@@ -48,30 +48,30 @@ class TestBase {
     const defaultNativeConfig = NativeAutomatorConfig(
       findTimeout: Duration(milliseconds: nativeFindTimeoutMs),
     );
-    patrolTest(description,
-        timeout: testTimeout,
-        config: patrolConfig,
-        nativeAutomatorConfig: nativeAutomatorConfig ?? defaultNativeConfig,
-        tags: tags,
-        framePolicy: LiveTestWidgetsFlutterBindingFramePolicy.fullyLive,
-        ($) async {
-      await initTwakeChat();
-      final originalOnError = FlutterError.onError!;
-      FlutterError.onError = (FlutterErrorDetails details) {
-        originalOnError(details);
-      };
-      await loginAndRun($);
-      await test($);
-    });
+    patrolTest(
+      description,
+      timeout: testTimeout,
+      config: patrolConfig,
+      nativeAutomatorConfig: nativeAutomatorConfig ?? defaultNativeConfig,
+      tags: tags,
+      framePolicy: LiveTestWidgetsFlutterBindingFramePolicy.fullyLive,
+      ($) async {
+        await initTwakeChat();
+        final originalOnError = FlutterError.onError!;
+        FlutterError.onError = (FlutterErrorDetails details) {
+          originalOnError(details);
+        };
+        await loginAndRun($);
+        await test($);
+      },
+    );
   }
 
   Future<void> initTwakeChat() async {
     app.main();
   }
 
-  Future<void> loginAndRun(
-    PatrolIntegrationTester $,
-  ) async {
+  Future<void> loginAndRun(PatrolIntegrationTester $) async {
     final loginScenario = LoginScenario(
       $,
       username: const String.fromEnvironment('USERNAME'),
@@ -87,28 +87,28 @@ class TestBase {
     required Function(PatrolIntegrationTester $) test,
     NativeAutomatorConfig? nativeAutomatorConfig,
   }) {
-    patrolTest(description,
-        config: const PatrolTesterConfig(
-          printLogs: true,
-          visibleTimeout: Duration(minutes: 1),
-        ),
-        nativeAutomatorConfig:
-            nativeAutomatorConfig ?? const NativeAutomatorConfig(),
-        framePolicy: LiveTestWidgetsFlutterBindingFramePolicy.fullyLive,
-        ($) async {
-      await initTwakeChat();
-      final originalOnError = FlutterError.onError!;
-      FlutterError.onError = (FlutterErrorDetails details) {
-        originalOnError(details);
-      };
-      await login($);
-      await test($);
-    });
+    patrolTest(
+      description,
+      config: const PatrolTesterConfig(
+        printLogs: true,
+        visibleTimeout: Duration(minutes: 1),
+      ),
+      nativeAutomatorConfig:
+          nativeAutomatorConfig ?? const NativeAutomatorConfig(),
+      framePolicy: LiveTestWidgetsFlutterBindingFramePolicy.fullyLive,
+      ($) async {
+        await initTwakeChat();
+        final originalOnError = FlutterError.onError!;
+        FlutterError.onError = (FlutterErrorDetails details) {
+          originalOnError(details);
+        };
+        await login($);
+        await test($);
+      },
+    );
   }
 
-  Future<void> login(
-    PatrolIntegrationTester $,
-  ) async {
+  Future<void> login(PatrolIntegrationTester $) async {
     final loginScenario = LoginScenario(
       $,
       username: const String.fromEnvironment('USERNAME'),

@@ -10,10 +10,7 @@ import 'chat_list_item_mixin_test.mocks.dart';
 
 class ChatListItemMixinTest with ChatListItemMixin {}
 
-@GenerateNiceMocks([
-  MockSpec<BuildContext>(),
-  MockSpec<Room>(),
-])
+@GenerateNiceMocks([MockSpec<BuildContext>(), MockSpec<Room>()])
 void main() {
   group('notificationColor Test', () {
     late Room room;
@@ -27,8 +24,7 @@ void main() {
     });
 
     group('Test highlight message and invitation', () {
-      testWidgets(
-          'WHEN group is invite\n'
+      testWidgets('WHEN group is invite\n'
           'THEN color should have color primary\n', (
         WidgetTester tester,
       ) async {
@@ -42,13 +38,10 @@ void main() {
         expect(color, Theme.of(context).colorScheme.primary);
       });
 
-      testWidgets(
-          'WHEN has new message with mention\n'
+      testWidgets('WHEN has new message with mention\n'
           'AND highlight count is greater than zero\n'
           'AND pushRuleState is notify\n'
-          'THEN color should be primary\n', (
-        WidgetTester tester,
-      ) async {
+          'THEN color should be primary\n', (WidgetTester tester) async {
         when(room.pushRuleState).thenReturn(PushRuleState.mentionsOnly);
         when(room.highlightCount).thenReturn(1);
 
@@ -62,12 +55,9 @@ void main() {
     });
 
     group('Test room has new message', () {
-      testWidgets(
-          'WHEN notification count is zero\n'
+      testWidgets('WHEN notification count is zero\n'
           'AND pushRuleState is notify\n'
-          'THEN color should have transparent\n', (
-        WidgetTester tester,
-      ) async {
+          'THEN color should have transparent\n', (WidgetTester tester) async {
         when(room.notificationCount).thenReturn(0);
         when(room.pushRuleState).thenReturn(PushRuleState.notify);
 
@@ -79,12 +69,9 @@ void main() {
         expect(color, Colors.transparent);
       });
 
-      testWidgets(
-          'WHEN notification count is greater than zero\n'
+      testWidgets('WHEN notification count is greater than zero\n'
           'AND pushRuleState is notify\n'
-          'THEN color should be primary\n', (
-        WidgetTester tester,
-      ) async {
+          'THEN color should be primary\n', (WidgetTester tester) async {
         when(room.notificationCount).thenReturn(5);
         when(room.pushRuleState).thenReturn(PushRuleState.notify);
 
@@ -96,12 +83,9 @@ void main() {
         expect(color, Theme.of(context).colorScheme.primary);
       });
 
-      testWidgets(
-          'WHEN notification count is greater than zero\n'
+      testWidgets('WHEN notification count is greater than zero\n'
           'AND pushRuleState is mentionsOnly\n'
-          'THEN color should be tertiary[30]\n', (
-        WidgetTester tester,
-      ) async {
+          'THEN color should be tertiary[30]\n', (WidgetTester tester) async {
         when(room.notificationCount).thenReturn(5);
         when(room.pushRuleState).thenReturn(PushRuleState.mentionsOnly);
 
@@ -113,12 +97,9 @@ void main() {
         expect(color, LinagoraRefColors.material().tertiary[30]);
       });
 
-      testWidgets(
-          'WHEN has new message \n'
+      testWidgets('WHEN has new message \n'
           'AND pushRuleState is mentionsOnly\n'
-          'THEN color should be tertiary[30]\n', (
-        WidgetTester tester,
-      ) async {
+          'THEN color should be tertiary[30]\n', (WidgetTester tester) async {
         when(room.pushRuleState).thenReturn(PushRuleState.mentionsOnly);
         when(room.hasNewMessages).thenReturn(true);
         when(room.notificationCount).thenReturn(0);
@@ -134,8 +115,7 @@ void main() {
         expect(color, LinagoraRefColors.material().tertiary[30]);
       });
 
-      testWidgets(
-          'WHEN has new message but no notification count\n'
+      testWidgets('WHEN has new message but no notification count\n'
           'AND pushRuleState is notify\n'
           'THEN color should be transparent (race condition)\n', (
         WidgetTester tester,
@@ -157,12 +137,9 @@ void main() {
     });
 
     group('Test room is mark as unread', () {
-      testWidgets(
-          'WHEN marked unread for room\n'
+      testWidgets('WHEN marked unread for room\n'
           'AND pushRuleState is notify\n'
-          'THEN color should be primary]\n', (
-        WidgetTester tester,
-      ) async {
+          'THEN color should be primary]\n', (WidgetTester tester) async {
         when(room.markedUnread).thenReturn(true);
 
         final color = chatListItemMixinTest.notificationColor(
@@ -173,12 +150,9 @@ void main() {
         expect(color, Theme.of(context).colorScheme.primary);
       });
 
-      testWidgets(
-          'WHEN marked unread for room\n'
+      testWidgets('WHEN marked unread for room\n'
           'AND pushRuleState is mentionsOnly\n'
-          'THEN color should be primary]\n', (
-        WidgetTester tester,
-      ) async {
+          'THEN color should be primary]\n', (WidgetTester tester) async {
         when(room.markedUnread).thenReturn(true);
         when(room.pushRuleState).thenReturn(PushRuleState.mentionsOnly);
 

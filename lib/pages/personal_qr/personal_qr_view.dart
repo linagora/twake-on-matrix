@@ -55,10 +55,7 @@ class PersonalQrView extends StatelessWidget {
                 ),
               ),
             ),
-            _ActionButtonsSection(
-              qrData: qrData,
-              controller: controller,
-            ),
+            _ActionButtonsSection(qrData: qrData, controller: controller),
           ],
         ),
       ),
@@ -91,8 +88,10 @@ class _QrCodeCard extends StatelessWidget {
         // Calculate available space for the card based on width
         final maxWidth = min(constraints.maxWidth, 296.0);
         final availableWidth = maxWidth - 32; // 16px padding on each side
-        final widthBasedQrSize =
-            min(200.0, availableWidth - 32); // Additional padding inside card
+        final widthBasedQrSize = min(
+          200.0,
+          availableWidth - 32,
+        ); // Additional padding inside card
 
         // Calculate available space based on height
         // Reserve space for: top padding (36 + 44), avatar visible part (36),
@@ -112,14 +111,17 @@ class _QrCodeCard extends StatelessWidget {
         // Scale down spacing when height is constrained
         final spacingScale = (constraints.maxHeight / 600.0).clamp(0.5, 1.0);
         final qrToUserIdSpacing = (17.0 * spacingScale).clamp(8.0, 17.0);
-        final userIdToDescriptionSpacing =
-            (32.0 * spacingScale).clamp(16.0, 32.0);
+        final userIdToDescriptionSpacing = (32.0 * spacingScale).clamp(
+          16.0,
+          32.0,
+        );
 
         return RepaintBoundary(
           key: qrKey,
           child: Container(
-            padding:
-                const EdgeInsets.all(8).add(const EdgeInsets.only(top: 36)),
+            padding: const EdgeInsets.all(
+              8,
+            ).add(const EdgeInsets.only(top: 36)),
             constraints: BoxConstraints(maxWidth: maxWidth),
             color: sysColor.surface,
             child: Stack(
@@ -209,7 +211,8 @@ class _ProfileAvatar extends StatelessWidget {
           ),
           builder: (context, snapshot) {
             final profile = snapshot.data;
-            final displayName = profile?.displayName ??
+            final displayName =
+                profile?.displayName ??
                 client.mxid(context).localpart ??
                 client.mxid(context);
             return Material(
@@ -235,10 +238,7 @@ class _ProfileAvatar extends StatelessWidget {
 }
 
 class _ActionButtonsSection extends StatelessWidget {
-  const _ActionButtonsSection({
-    required this.qrData,
-    required this.controller,
-  });
+  const _ActionButtonsSection({required this.qrData, required this.controller});
 
   final String qrData;
   final PersonalQrController controller;
@@ -332,19 +332,10 @@ class _ShareQrButton extends StatelessWidget {
             children: [
               Transform.rotate(
                 angle: rotatePiAngle * pi,
-                child: Icon(
-                  iconData,
-                  size: 24,
-                  color: color,
-                ),
+                child: Icon(iconData, size: 24, color: color),
               ),
               SettingsProfileViewMobileStyle.paddingIconAndText,
-              Text(
-                label,
-                style: textTheme.labelLarge?.copyWith(
-                  color: color,
-                ),
-              ),
+              Text(label, style: textTheme.labelLarge?.copyWith(color: color)),
             ],
           ),
         ),

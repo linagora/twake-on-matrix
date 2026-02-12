@@ -26,10 +26,7 @@ class HiveDeleteInvitationStatusSuccessState extends Success {
   });
 
   @override
-  List<Object?> get props => [
-        userId,
-        contactId,
-      ];
+  List<Object?> get props => [userId, contactId];
 }
 
 class HiveDeleteInvitationStatusFailureState extends Failure {
@@ -46,10 +43,5 @@ class HiveDeleteInvitationStatusFailureState extends Failure {
   });
 
   @override
-  List<Object?> get props => [
-        exception,
-        message,
-        userId,
-        contactId,
-      ];
+  List<Object?> get props => [exception, message, userId, contactId];
 }

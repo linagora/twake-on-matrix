@@ -1,5 +1,1 @@
-enum SendMediaWithCaptionStatus {
-  cancel,
-  done,
-  emptyRoom,
-}
+enum SendMediaWithCaptionStatus { cancel, done, emptyRoom }

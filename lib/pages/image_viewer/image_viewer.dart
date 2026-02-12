@@ -65,33 +65,34 @@ class ImageViewerController extends State<ImageViewer> {
 
   Future<void> handleDownloadFile(Event event) async {
     try {
-      streamSubcription =
-          downloadMediaFileInteractor.execute(event: event).listen((state) {
-        state.fold(
-          (failure) {
-            if (failure is DownloadMediaFileFailure) {
-              Logs().e('Error downloading file', failure.exception);
-            }
-          },
-          (success) {
-            if (success is DownloadMediaFileSuccess) {
-              if (success.fileInfo.bytes != null) {
-                setState(() {
-                  bytes = success.fileInfo.bytes!;
-                });
-              } else if (success.fileInfo.filePath != null) {
-                File(success.fileInfo.filePath!).readAsBytes().then((data) {
-                  if (mounted) {
+      streamSubcription = downloadMediaFileInteractor
+          .execute(event: event)
+          .listen((state) {
+            state.fold(
+              (failure) {
+                if (failure is DownloadMediaFileFailure) {
+                  Logs().e('Error downloading file', failure.exception);
+                }
+              },
+              (success) {
+                if (success is DownloadMediaFileSuccess) {
+                  if (success.fileInfo.bytes != null) {
                     setState(() {
-                      bytes = data;
+                      bytes = success.fileInfo.bytes!;
+                    });
+                  } else if (success.fileInfo.filePath != null) {
+                    File(success.fileInfo.filePath!).readAsBytes().then((data) {
+                      if (mounted) {
+                        setState(() {
+                          bytes = data;
+                        });
+                      }
                     });
                   }
-                });
-              }
-            }
-          },
-        );
-      });
+                }
+              },
+            );
+          });
     } catch (e) {
       Logs().e('Error downloading file', e);
     }
@@ -102,31 +103,31 @@ class ImageViewerController extends State<ImageViewer> {
       streamSubcription = downloadMediaFileInteractor
           .execute(event: event, getThumbnail: true)
           .listen((state) {
-        state.fold(
-          (failure) {
-            if (failure is DownloadMediaFileFailure) {
-              Logs().e('Error downloading file', failure.exception);
-            }
-          },
-          (success) {
-            if (success is DownloadMediaFileSuccess) {
-              if (success.fileInfo.bytes != null) {
-                setState(() {
-                  thumbnailBytes = success.fileInfo.bytes!;
-                });
-              } else if (success.fileInfo.filePath != null) {
-                File(success.fileInfo.filePath!).readAsBytes().then((data) {
-                  if (mounted) {
+            state.fold(
+              (failure) {
+                if (failure is DownloadMediaFileFailure) {
+                  Logs().e('Error downloading file', failure.exception);
+                }
+              },
+              (success) {
+                if (success is DownloadMediaFileSuccess) {
+                  if (success.fileInfo.bytes != null) {
                     setState(() {
-                      thumbnailBytes = data;
+                      thumbnailBytes = success.fileInfo.bytes!;
+                    });
+                  } else if (success.fileInfo.filePath != null) {
+                    File(success.fileInfo.filePath!).readAsBytes().then((data) {
+                      if (mounted) {
+                        setState(() {
+                          thumbnailBytes = data;
+                        });
+                      }
                     });
                   }
-                });
-              }
-            }
-          },
-        );
-      });
+                }
+              },
+            );
+          });
     } catch (e) {
       Logs().e('Error downloading file', e);
     }
@@ -192,10 +193,10 @@ class ImageViewerController extends State<ImageViewer> {
 
   @override
   Widget build(BuildContext context) => ImageViewerView(
-        this,
-        imageData: widget.imageData,
-        filePath: widget.filePath,
-        width: widget.width,
-        height: widget.height,
-      );
+    this,
+    imageData: widget.imageData,
+    filePath: widget.filePath,
+    width: widget.width,
+    height: widget.height,
+  );
 }

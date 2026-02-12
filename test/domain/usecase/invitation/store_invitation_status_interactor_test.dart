@@ -10,17 +10,16 @@ import 'package:mockito/mockito.dart';
 
 import 'store_invitation_status_interactor_test.mocks.dart';
 
-@GenerateMocks([
-  HiveInvitationStatusRepository,
-])
+@GenerateMocks([HiveInvitationStatusRepository])
 void main() {
   late StoreInvitationStatusInteractor interactor;
   late MockHiveInvitationStatusRepository mockRepository;
 
   setUp(() {
     mockRepository = MockHiveInvitationStatusRepository();
-    GetIt.instance
-        .registerSingleton<HiveInvitationStatusRepository>(mockRepository);
+    GetIt.instance.registerSingleton<HiveInvitationStatusRepository>(
+      mockRepository,
+    );
     interactor = StoreInvitationStatusInteractor();
   });
 
@@ -33,70 +32,74 @@ void main() {
   const testInvitationId = 'inv123';
 
   test(
-      'execute returns success state when invitation status is stored successfully',
-      () async {
-    final invitationStatus = InvitationStatus(
-      invitationId: testInvitationId,
-      contactId: testContactId,
-    );
+    'execute returns success state when invitation status is stored successfully',
+    () async {
+      final invitationStatus = InvitationStatus(
+        invitationId: testInvitationId,
+        contactId: testContactId,
+      );
 
-    when(
-      mockRepository.storeInvitationStatus(
+      when(
+        mockRepository.storeInvitationStatus(
+          userId: testUserId,
+          invitationStatus: invitationStatus,
+        ),
+      ).thenAnswer((_) async {});
+
+      final result = interactor.execute(
         userId: testUserId,
-        invitationStatus: invitationStatus,
-      ),
-    ).thenAnswer((_) async {});
+        contactId: testContactId,
+        invitationId: testInvitationId,
+      );
 
-    final result = interactor.execute(
-      userId: testUserId,
-      contactId: testContactId,
-      invitationId: testInvitationId,
-    );
-
-    await expectLater(
-      result,
-      emitsInOrder([
-        const Right(StoreInvitationStatusLoadingState()),
-        const Right(
-          StoreInvitationStatusSuccessState(
-            contactId: testContactId,
-            userId: testUserId,
-            invitationId: testInvitationId,
+      await expectLater(
+        result,
+        emitsInOrder([
+          const Right(StoreInvitationStatusLoadingState()),
+          const Right(
+            StoreInvitationStatusSuccessState(
+              contactId: testContactId,
+              userId: testUserId,
+              invitationId: testInvitationId,
+            ),
           ),
+        ]),
+      );
+    },
+  );
+
+  test(
+    'execute returns failure state when storing invitation status fails',
+    () async {
+      final invitationStatus = InvitationStatus(
+        invitationId: testInvitationId,
+        contactId: testContactId,
+      );
+
+      when(
+        mockRepository.storeInvitationStatus(
+          userId: testUserId,
+          invitationStatus: invitationStatus,
         ),
-      ]),
-    );
-  });
+      ).thenThrow(Exception('Failed to store invitation status'));
 
-  test('execute returns failure state when storing invitation status fails',
-      () async {
-    final invitationStatus = InvitationStatus(
-      invitationId: testInvitationId,
-      contactId: testContactId,
-    );
-
-    when(
-      mockRepository.storeInvitationStatus(
+      final result = interactor.execute(
         userId: testUserId,
-        invitationStatus: invitationStatus,
-      ),
-    ).thenThrow(Exception('Failed to store invitation status'));
+        contactId: testContactId,
+        invitationId: testInvitationId,
+      );
 
-    final result = interactor.execute(
-      userId: testUserId,
-      contactId: testContactId,
-      invitationId: testInvitationId,
-    );
-
-    await expectLater(
-      result,
-      emitsInOrder([
-        const Right(StoreInvitationStatusLoadingState()),
-        predicate(
-          (dynamic value) =>
-              value is Left && value.value is StoreInvitationStatusFailureState,
-        ),
-      ]),
-    );
-  });
+      await expectLater(
+        result,
+        emitsInOrder([
+          const Right(StoreInvitationStatusLoadingState()),
+          predicate(
+            (dynamic value) =>
+                value is Left &&
+                value.value is StoreInvitationStatusFailureState,
+          ),
+        ]),
+      );
+    },
+  );
 }

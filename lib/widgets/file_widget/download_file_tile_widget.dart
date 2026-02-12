@@ -49,9 +49,7 @@ class DownloadFileTileWidget extends StatelessWidget {
           padding: style.paddingFileTileAll,
           decoration: ShapeDecoration(
             color: style.backgroundColor(context, ownMessage: ownMessage),
-            shape: RoundedRectangleBorder(
-              borderRadius: style.borderRadius,
-            ),
+            shape: RoundedRectangleBorder(borderRadius: style.borderRadius),
           ),
           child: Row(
             crossAxisAlignment: style.crossAxisAlignment,
@@ -109,8 +107,8 @@ class DownloadFileTileWidget extends StatelessWidget {
                           hasError
                               ? Icons.error_outline
                               : downloadProgress == 0
-                                  ? Icons.arrow_downward
-                                  : Icons.close,
+                              ? Icons.arrow_downward
+                              : Icons.close,
                           key: ValueKey(downloadProgress),
                           color: Theme.of(context).colorScheme.surface,
                           size: style.downloadIconSize,
@@ -183,9 +181,7 @@ class DownloadFileTileWidget extends StatelessWidget {
               localizedBody: event!.body,
               ownMessage: ownMessage,
               fontSize: AppConfig.messageFontSize * AppConfig.fontSizeFactor,
-              linkStyle: MessageContentStyle.linkStyleMessageContent(
-                context,
-              ),
+              linkStyle: MessageContentStyle.linkStyleMessageContent(context),
               richTextStyle: event!.getMessageTextStyle(context),
               isCaption: event!.isCaptionModeOrReply(),
             ),

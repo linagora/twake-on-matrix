@@ -37,20 +37,16 @@ extension FileInfoExtension on FileInfo {
     }
     return switch (msgType) {
       MessageTypes.Image => MatrixImageFile(
-          bytes: matrixBytes,
-          name: fileName,
-          mimeType: mimeType,
-        ),
+        bytes: matrixBytes,
+        name: fileName,
+        mimeType: mimeType,
+      ),
       MessageTypes.Video => MatrixVideoFile(
-          bytes: matrixBytes,
-          name: fileName,
-          mimeType: mimeType,
-        ),
-      _ => MatrixFile(
-          bytes: matrixBytes,
-          name: fileName,
-          mimeType: mimeType,
-        ),
+        bytes: matrixBytes,
+        name: fileName,
+        mimeType: mimeType,
+      ),
+      _ => MatrixFile(bytes: matrixBytes, name: fileName, mimeType: mimeType),
     };
   }
 }

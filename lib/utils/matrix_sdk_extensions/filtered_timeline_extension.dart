@@ -6,8 +6,10 @@ import '../../config/app_config.dart';
 extension IsStateExtension on Event {
   bool get isVisibleInGui =>
       // always filter out edit and reaction relationships
-      !{RelationshipTypes.edit, RelationshipTypes.reaction}
-          .contains(relationshipType) &&
+      !{
+        RelationshipTypes.edit,
+        RelationshipTypes.reaction,
+      }.contains(relationshipType) &&
       // always filter out m.key.* events
       !type.startsWith('m.key.verification.') &&
       // event types to hide: redaction and reaction events
@@ -48,10 +50,10 @@ extension IsStateExtension on Event {
   };
 
   bool get isState => !{
-        EventTypes.Message,
-        EventTypes.Sticker,
-        EventTypes.Encrypted,
-      }.contains(type);
+    EventTypes.Message,
+    EventTypes.Sticker,
+    EventTypes.Encrypted,
+  }.contains(type);
 
   bool isSomeoneChangeDisplayName() {
     return stateKey != null &&

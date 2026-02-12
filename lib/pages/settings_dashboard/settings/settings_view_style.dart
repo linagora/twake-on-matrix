@@ -20,31 +20,24 @@ class SettingsViewStyle {
       const EdgeInsetsDirectional.only(top: 4);
 
   static EdgeInsetsDirectional bodySettingsScreenPadding =
-      const EdgeInsetsDirectional.symmetric(
-    horizontal: 8,
-  );
+      const EdgeInsetsDirectional.symmetric(horizontal: 8);
 
   static EdgeInsetsDirectional backupSwitchPadding =
-      const EdgeInsetsDirectional.symmetric(
-    horizontal: 24,
-  );
+      const EdgeInsetsDirectional.symmetric(horizontal: 24);
 
-  static EdgeInsetsDirectional avatarPadding =
-      const EdgeInsetsDirectional.only(end: 8);
+  static EdgeInsetsDirectional avatarPadding = const EdgeInsetsDirectional.only(
+    end: 8,
+  );
 
   static const double borderRadius = 4.0;
   static const double settingsItemDividerHeight = 1.0;
   static const double settingsItemDividerThikness = 1;
 
-  static EdgeInsets settingsItemDividerPadding() => const EdgeInsets.only(
-        left: 48.0,
-        right: 8.0,
-      );
+  static EdgeInsets settingsItemDividerPadding() =>
+      const EdgeInsets.only(left: 48.0, right: 8.0);
 
   static EdgeInsets profileItemDividerPadding(BuildContext context) =>
-      EdgeInsets.only(
-        right: responsiveUtils.isMobile(context) ? 0 : 16.0,
-      );
+      EdgeInsets.only(right: responsiveUtils.isMobile(context) ? 0 : 16.0);
   static const double settingsItemHeight = 80;
 
   static const double maxWidthCancelButton = 127;

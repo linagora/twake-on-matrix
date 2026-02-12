@@ -8,23 +8,17 @@ import '../../base/core_robot.dart';
 class ChatProfileInfoRobot extends CoreRobot {
   ChatProfileInfoRobot(super.$);
 
-  Future<void> verifyDisplayName({
-    required String displayName,
-  }) async {
+  Future<void> verifyDisplayName({required String displayName}) async {
     final displayNameFinder = find.text(displayName);
     expect(displayNameFinder, findsOneWidget);
   }
 
-  Future<void> verifyDisplayMatrixId({
-    required String matrixId,
-  }) async {
+  Future<void> verifyDisplayMatrixId({required String matrixId}) async {
     final matrixIdFinder = find.text(matrixId);
     expect(matrixIdFinder, findsOneWidget);
   }
 
-  Future<void> verifyEmail({
-    required String email,
-  }) async {
+  Future<void> verifyEmail({required String email}) async {
     final emailFinder = find.text(email);
     if (email.isEmpty) {
       expect(emailFinder, findsNothing);
@@ -32,9 +26,7 @@ class ChatProfileInfoRobot extends CoreRobot {
     }
   }
 
-  Future<void> verifyPhoneNumber({
-    required String phoneNumber,
-  }) async {
+  Future<void> verifyPhoneNumber({required String phoneNumber}) async {
     final phoneNumberFinder = find.text(phoneNumber);
     if (phoneNumber.isEmpty) {
       expect(phoneNumberFinder, findsNothing);

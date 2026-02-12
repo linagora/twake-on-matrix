@@ -23,9 +23,7 @@ class AutoHomeServerPickerSuccessState extends AutoHomeServerPickerState {
 class AutoHomeServerPickerFailureState extends AutoHomeServerPickerState {
   final String? error;
 
-  AutoHomeServerPickerFailureState({
-    this.error,
-  });
+  AutoHomeServerPickerFailureState({this.error});
 
   @override
   List<Object?> get props => [error];

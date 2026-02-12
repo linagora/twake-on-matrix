@@ -2,9 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 typedef OnTapIconButtonCallbackAction = void Function();
-typedef OnTapDownIconButtonCallbackAction = void Function(
-  TapDownDetails,
-);
+typedef OnTapDownIconButtonCallbackAction = void Function(TapDownDetails);
 
 class TwakeIconButton extends StatelessWidget {
   final BoxDecoration? buttonDecoration;
@@ -71,26 +69,17 @@ class TwakeIconButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final iconWidget = icon != null
-        ? Icon(
-            icon,
-            size: size,
-            fill: fill,
-            weight: weight,
-            color: iconColor,
-          )
+        ? Icon(icon, size: size, fill: fill, weight: weight, color: iconColor)
         : imagePath != null
-            ? SvgPicture.asset(
-                imagePath!,
-                height: imageSize,
-                width: imageSize,
-                colorFilter: iconColor != null
-                    ? ColorFilter.mode(
-                        iconColor!,
-                        BlendMode.srcIn,
-                      )
-                    : null,
-              )
-            : null;
+        ? SvgPicture.asset(
+            imagePath!,
+            height: imageSize,
+            width: imageSize,
+            colorFilter: iconColor != null
+                ? ColorFilter.mode(iconColor!, BlendMode.srcIn)
+                : null,
+          )
+        : null;
 
     return Material(
       color: Colors.transparent,

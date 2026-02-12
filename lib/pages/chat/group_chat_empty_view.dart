@@ -13,7 +13,8 @@ class GroupChatEmptyView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final hasCreatedRoom = firstEvent.type == EventTypes.RoomCreate &&
+    final hasCreatedRoom =
+        firstEvent.type == EventTypes.RoomCreate &&
         firstEvent.senderId == Matrix.of(context).client.userID;
 
     return hasCreatedRoom
@@ -24,9 +25,7 @@ class GroupChatEmptyView extends StatelessWidget {
   Container _buildOwnGroupChatEmptyView(BuildContext context) {
     return Container(
       padding: const EdgeInsets.only(top: 18, right: 16, left: 16, bottom: 26),
-      constraints: const BoxConstraints(
-        maxWidth: 256,
-      ),
+      constraints: const BoxConstraints(maxWidth: 256),
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.08),
         borderRadius: BorderRadius.circular(16),
@@ -36,9 +35,7 @@ class GroupChatEmptyView extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           SvgPicture.asset(ImagePaths.icEmptyGroupChat),
-          const SizedBox(
-            height: 26.0,
-          ),
+          const SizedBox(height: 26.0),
           Text(
             L10n.of(context)!.youCreatedGroupChat,
             style: TextStyle(
@@ -76,11 +73,7 @@ class GroupChatEmptyView extends StatelessWidget {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        SvgPicture.asset(
-          ImagePaths.icDone,
-          width: 20,
-          height: 20,
-        ),
+        SvgPicture.asset(ImagePaths.icDone, width: 20, height: 20),
         const SizedBox(width: 8),
         Expanded(
           child: Text(

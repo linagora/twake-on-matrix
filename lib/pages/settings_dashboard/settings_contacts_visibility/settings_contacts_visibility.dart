@@ -39,20 +39,19 @@ class SettingsContactsVisibilityController
 
   StreamSubscription? updateUserInfoVisibilityStreamSub;
 
-  final getUserInfoVisibilityInteractor =
-      getIt.get<GetUserInfoVisibilityInteractor>();
+  final getUserInfoVisibilityInteractor = getIt
+      .get<GetUserInfoVisibilityInteractor>();
 
-  final updateUserInfoVisibilityInteractor =
-      getIt.get<UpdateUserInfoVisibilityInteractor>();
+  final updateUserInfoVisibilityInteractor = getIt
+      .get<UpdateUserInfoVisibilityInteractor>();
 
   final ValueNotifier<Either<Failure, Success>> getUserInfoVisibilityNotifier =
       ValueNotifier<Either<Failure, Success>>(
-    Right(GettingUserInfoVisibility()),
-  );
+        Right(GettingUserInfoVisibility()),
+      );
 
   final ValueNotifier<Either<Failure, Success>>
-      updateUserInfoVisibilityNotifier =
-      ValueNotifier<Either<Failure, Success>>(
+  updateUserInfoVisibilityNotifier = ValueNotifier<Either<Failure, Success>>(
     Right(UpdatingUserInfoVisibility()),
   );
 
@@ -68,7 +67,7 @@ class SettingsContactsVisibilityController
   ];
 
   final ValueNotifier<SettingsContactsVisibilityEnum?>
-      selectedVisibilityOptionNotifier =
+  selectedVisibilityOptionNotifier =
       ValueNotifier<SettingsContactsVisibilityEnum?>(null);
 
   final ValueNotifier<List<VisibleEnum>> selectedVisibleFieldNotifier =
@@ -104,13 +103,14 @@ class SettingsContactsVisibilityController
   void onUpdateVisibleFields(VisibleEnum selectedField) {
     final currentVisibleFields =
         selectedVisibleFieldNotifier.value.contains(selectedField)
-            ? selectedVisibleFieldNotifier.value
-                .where((field) => field != selectedField)
-                .toList()
-            : [...selectedVisibleFieldNotifier.value, selectedField];
+        ? selectedVisibleFieldNotifier.value
+              .where((field) => field != selectedField)
+              .toList()
+        : [...selectedVisibleFieldNotifier.value, selectedField];
     updateUserInfoVisibility(
       userInfoVisibility: UserInfoVisibilityRequest(
-        visibility: selectedVisibilityOptionNotifier.value?.name ??
+        visibility:
+            selectedVisibilityOptionNotifier.value?.name ??
             SettingsContactsVisibilityEnum.contacts.name,
         visibleFields: currentVisibleFields,
       ),
@@ -129,42 +129,40 @@ class SettingsContactsVisibilityController
     }
     updateUserInfoVisibilityStreamSub?.cancel();
     updateUserInfoVisibilityStreamSub = updateUserInfoVisibilityInteractor
-        .execute(
-      userId: client.userID!,
-      body: userInfoVisibility,
-    )
+        .execute(userId: client.userID!, body: userInfoVisibility)
         .listen((either) {
-      if (!mounted) return;
-      updateUserInfoVisibilityNotifier.value = either;
+          if (!mounted) return;
+          updateUserInfoVisibilityNotifier.value = either;
 
-      either.fold(
-        (failure) {
-          if (failure is UpdateUserInfoVisibilityFailure) {
-            TwakeDialog.hideLoadingDialog(context);
-            TwakeSnackBar.show(
-              context,
-              L10n.of(context)!.failedToChangeContactsVisibility,
-            );
-          }
-        },
-        (success) {
-          if (success is UpdateUserInfoVisibilitySuccess) {
-            selectedVisibilityOptionNotifier.value =
-                SettingsContactsVisibilityEnum.values.firstWhere(
-              (option) => option.name == success.userInfoVisibility.visibility,
-              orElse: () => SettingsContactsVisibilityEnum.contacts,
-            );
-            selectedVisibleFieldNotifier.value =
-                success.userInfoVisibility.visibleFields ?? [];
-            TwakeDialog.hideLoadingDialog(context);
-          }
+          either.fold(
+            (failure) {
+              if (failure is UpdateUserInfoVisibilityFailure) {
+                TwakeDialog.hideLoadingDialog(context);
+                TwakeSnackBar.show(
+                  context,
+                  L10n.of(context)!.failedToChangeContactsVisibility,
+                );
+              }
+            },
+            (success) {
+              if (success is UpdateUserInfoVisibilitySuccess) {
+                selectedVisibilityOptionNotifier.value =
+                    SettingsContactsVisibilityEnum.values.firstWhere(
+                      (option) =>
+                          option.name == success.userInfoVisibility.visibility,
+                      orElse: () => SettingsContactsVisibilityEnum.contacts,
+                    );
+                selectedVisibleFieldNotifier.value =
+                    success.userInfoVisibility.visibleFields ?? [];
+                TwakeDialog.hideLoadingDialog(context);
+              }
 
-          if (success is UpdatingUserInfoVisibility) {
-            TwakeDialog.showLoadingDialog(context);
-          }
-        },
-      );
-    });
+              if (success is UpdatingUserInfoVisibility) {
+                TwakeDialog.showLoadingDialog(context);
+              }
+            },
+          );
+        });
   }
 
   void initialGetUserInfoVisibility() {
@@ -175,37 +173,38 @@ class SettingsContactsVisibilityController
     getUserInfoVisibilityStreamSub = getUserInfoVisibilityInteractor
         .execute(userId: client.userID!)
         .listen((either) {
-      if (!mounted) return;
-      getUserInfoVisibilityNotifier.value = either;
+          if (!mounted) return;
+          getUserInfoVisibilityNotifier.value = either;
 
-      either.fold(
-        (failure) {
-          if (failure is GetUserInfoVisibilityFailure) {
-            TwakeDialog.hideLoadingDialog(context);
-            TwakeSnackBar.show(
-              context,
-              L10n.of(context)!.failedToGetContactsVisibility,
-            );
-          }
-        },
-        (success) {
-          if (success is GettingUserInfoVisibility) {
-            TwakeDialog.showLoadingDialog(context);
-          }
+          either.fold(
+            (failure) {
+              if (failure is GetUserInfoVisibilityFailure) {
+                TwakeDialog.hideLoadingDialog(context);
+                TwakeSnackBar.show(
+                  context,
+                  L10n.of(context)!.failedToGetContactsVisibility,
+                );
+              }
+            },
+            (success) {
+              if (success is GettingUserInfoVisibility) {
+                TwakeDialog.showLoadingDialog(context);
+              }
 
-          if (success is GetUserInfoVisibilitySuccess) {
-            selectedVisibilityOptionNotifier.value =
-                SettingsContactsVisibilityEnum.values.firstWhere(
-              (option) => option.name == success.userInfoVisibility.visibility,
-              orElse: () => SettingsContactsVisibilityEnum.contacts,
-            );
-            selectedVisibleFieldNotifier.value =
-                success.userInfoVisibility.visibleFields ?? [];
-            TwakeDialog.hideLoadingDialog(context);
-          }
-        },
-      );
-    });
+              if (success is GetUserInfoVisibilitySuccess) {
+                selectedVisibilityOptionNotifier.value =
+                    SettingsContactsVisibilityEnum.values.firstWhere(
+                      (option) =>
+                          option.name == success.userInfoVisibility.visibility,
+                      orElse: () => SettingsContactsVisibilityEnum.contacts,
+                    );
+                selectedVisibleFieldNotifier.value =
+                    success.userInfoVisibility.visibleFields ?? [];
+                TwakeDialog.hideLoadingDialog(context);
+              }
+            },
+          );
+        });
   }
 
   @override

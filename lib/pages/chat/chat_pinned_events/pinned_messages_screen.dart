@@ -33,8 +33,8 @@ class PinnedMessagesScreen extends StatelessWidget {
             return Text(
               L10n.of(context)!.pinnedMessages(events.length),
               style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
             );
           },
         ),
@@ -71,62 +71,59 @@ class PinnedMessagesScreen extends StatelessWidget {
                         controller: controller.scrollController,
                         shrinkWrap: true,
                         reverse: true,
-                        childrenDelegate: SliverChildBuilderDelegate(
-                          (context, index) {
-                            // The message at this index:
-                            final currentEventIndex = events.length - index - 1;
-                            final event = events[currentEventIndex];
-                            final nextEvent = currentEventIndex > 0
-                                ? events[currentEventIndex - 1]
-                                : null;
-                            final previousEvent =
-                                currentEventIndex < events.length - 1
-                                    ? events[currentEventIndex + 1]
-                                    : null;
-                            return ValueListenableBuilder<List<Event>>(
-                              valueListenable: controller.selectedEvents,
-                              builder: (context, selectedEvents, child) {
-                                return Message(
-                                  event!,
-                                  previousEvent: previousEvent,
-                                  nextEvent: nextEvent,
-                                  timeline: controller.widget.timeline!,
-                                  maxWidth: constraints.maxWidth,
-                                  isHoverNotifier: controller.isHoverNotifier,
-                                  listHorizontalActionMenu: controller
-                                      .listHorizontalActionMenuBuilder(),
-                                  onMenuAction:
-                                      controller.handleHorizontalActionMenu,
-                                  onHover: (isHover, event) =>
-                                      controller.onHover(isHover, index, event),
-                                  selectMode: selectedEvents.isNotEmpty,
-                                  onSelect: controller.onSelectMessage,
-                                  selected: controller.isSelected(event),
-                                  menuChildren: (context) =>
-                                      controller.pinnedMessagesActionsList(
-                                    context,
-                                    controller
-                                        .getPinnedMessagesActionsList(event),
-                                    event,
-                                  ),
-                                  onLongPressMessage: (event) =>
-                                      controller.onLongPressMessage(
-                                    context,
-                                    event,
-                                  ),
-                                  listAction: controller
-                                      .pinnedMessagesContextMenuActionsList(
-                                    context,
-                                    event,
-                                  ),
-                                  onRetryTextMessage:
-                                      controller.retryTextMessage,
-                                );
-                              },
-                            );
-                          },
-                          childCount: events.length,
-                        ),
+                        childrenDelegate: SliverChildBuilderDelegate((
+                          context,
+                          index,
+                        ) {
+                          // The message at this index:
+                          final currentEventIndex = events.length - index - 1;
+                          final event = events[currentEventIndex];
+                          final nextEvent = currentEventIndex > 0
+                              ? events[currentEventIndex - 1]
+                              : null;
+                          final previousEvent =
+                              currentEventIndex < events.length - 1
+                              ? events[currentEventIndex + 1]
+                              : null;
+                          return ValueListenableBuilder<List<Event>>(
+                            valueListenable: controller.selectedEvents,
+                            builder: (context, selectedEvents, child) {
+                              return Message(
+                                event!,
+                                previousEvent: previousEvent,
+                                nextEvent: nextEvent,
+                                timeline: controller.widget.timeline!,
+                                maxWidth: constraints.maxWidth,
+                                isHoverNotifier: controller.isHoverNotifier,
+                                listHorizontalActionMenu: controller
+                                    .listHorizontalActionMenuBuilder(),
+                                onMenuAction:
+                                    controller.handleHorizontalActionMenu,
+                                onHover: (isHover, event) =>
+                                    controller.onHover(isHover, index, event),
+                                selectMode: selectedEvents.isNotEmpty,
+                                onSelect: controller.onSelectMessage,
+                                selected: controller.isSelected(event),
+                                menuChildren: (context) =>
+                                    controller.pinnedMessagesActionsList(
+                                      context,
+                                      controller.getPinnedMessagesActionsList(
+                                        event,
+                                      ),
+                                      event,
+                                    ),
+                                onLongPressMessage: (event) => controller
+                                    .onLongPressMessage(context, event),
+                                listAction: controller
+                                    .pinnedMessagesContextMenuActionsList(
+                                      context,
+                                      event,
+                                    ),
+                                onRetryTextMessage: controller.retryTextMessage,
+                              );
+                            },
+                          );
+                        }, childCount: events.length),
                       );
                     },
                   );

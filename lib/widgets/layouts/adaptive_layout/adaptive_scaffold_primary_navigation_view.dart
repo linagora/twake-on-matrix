@@ -27,9 +27,7 @@ class AdaptiveScaffoldPrimaryNavigationView extends StatelessWidget {
       color: Theme.of(context).colorScheme.surface,
       child: Container(
         width: AdaptiveScaffoldPrimaryNavigationStyle.primaryNavigationWidth,
-        decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.surface,
-        ),
+        decoration: BoxDecoration(color: Theme.of(context).colorScheme.surface),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
@@ -40,14 +38,14 @@ class AdaptiveScaffoldPrimaryNavigationView extends StatelessWidget {
                 onDestinationSelected: onDestinationSelected,
                 labelType: NavigationRailLabelType.all,
                 backgroundColor: Theme.of(context).colorScheme.surface,
-                selectedLabelTextStyle: AdaptiveScaffoldPrimaryNavigationStyle
-                    .selectedLabelTextStyle(
-                  context,
-                ),
+                selectedLabelTextStyle:
+                    AdaptiveScaffoldPrimaryNavigationStyle.selectedLabelTextStyle(
+                      context,
+                    ),
                 unselectedLabelTextStyle:
                     AdaptiveScaffoldPrimaryNavigationStyle.labelTextStyle(
-                  context,
-                ),
+                      context,
+                    ),
                 indicatorColor: LinagoraSysColors.material().secondaryContainer,
               ),
             ),
@@ -69,7 +67,8 @@ class AdaptiveScaffoldPrimaryNavigationView extends StatelessWidget {
                     builder: (context, profile, _) {
                       return Avatar(
                         mxContent: profile.avatarUrl,
-                        name: profile.displayName ??
+                        name:
+                            profile.displayName ??
                             Matrix.of(context).client.userID!.localpart,
                         size: AdaptiveScaffoldPrimaryNavigationStyle.avatarSize,
                         fontSize:

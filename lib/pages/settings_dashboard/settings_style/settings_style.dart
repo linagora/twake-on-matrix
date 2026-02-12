@@ -16,15 +16,13 @@ class SettingsStyle extends StatefulWidget {
 
 class SettingsStyleController extends State<SettingsStyle> {
   void setWallpaperAction() async {
-    final picked = await FilePicker.platform.pickFiles(
-      type: FileType.image,
-    );
+    final picked = await FilePicker.platform.pickFiles(type: FileType.image);
     final pickedFile = picked?.files.firstOrNull;
 
     if (pickedFile == null) return;
-    await Matrix.of(context)
-        .store
-        .setItem(SettingKeys.wallpaper, pickedFile.path);
+    await Matrix.of(
+      context,
+    ).store.setItem(SettingKeys.wallpaper, pickedFile.path);
     setState(() {});
   }
 
@@ -73,17 +71,17 @@ class SettingsStyleController extends State<SettingsStyle> {
   void changeFontSizeFactor(double d) {
     setState(() => AppConfig.fontSizeFactor = d);
     Matrix.of(context).store.setItem(
-          SettingKeys.fontSizeFactor,
-          AppConfig.fontSizeFactor.toString(),
-        );
+      SettingKeys.fontSizeFactor,
+      AppConfig.fontSizeFactor.toString(),
+    );
   }
 
   void changeBubbleSizeFactor(double d) {
     setState(() => AppConfig.bubbleSizeFactor = d);
     Matrix.of(context).store.setItem(
-          SettingKeys.bubbleSizeFactor,
-          AppConfig.bubbleSizeFactor.toString(),
-        );
+      SettingKeys.bubbleSizeFactor,
+      AppConfig.bubbleSizeFactor.toString(),
+    );
   }
 
   @override

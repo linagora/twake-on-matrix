@@ -65,9 +65,7 @@ class _MobileContextMenuOverlayState extends State<MobileContextMenuOverlay>
             opacity: widget.animation,
             child: BackdropFilter(
               filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
-              child: Container(
-                color: Colors.black.withOpacity(0.3),
-              ),
+              child: Container(color: Colors.black.withOpacity(0.3)),
             ),
           ),
           // Floating participant item with Hero animation
@@ -116,15 +114,15 @@ class _MobileContextMenuOverlayState extends State<MobileContextMenuOverlay>
                   overflow: TextOverflow.ellipsis,
                   maxLines: 1,
                   style: LinagoraTextStyle.material().bodyMedium2.copyWith(
-                        color: LinagoraSysColors.material().onSurface,
-                      ),
+                    color: LinagoraSysColors.material().onSurface,
+                  ),
                 ),
                 const SizedBox(height: 4.0),
                 Text(
                   widget.member.id,
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: LinagoraRefColors.material().tertiary[30],
-                      ),
+                    color: LinagoraRefColors.material().tertiary[30],
+                  ),
                   overflow: TextOverflow.ellipsis,
                   maxLines: 1,
                 ),

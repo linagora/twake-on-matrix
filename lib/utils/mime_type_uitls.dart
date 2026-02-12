@@ -13,8 +13,9 @@ class MimeTypeUitls {
       return 'application/octet-stream';
     }
     if (mimeType.startsWith('image/')) {
-      if (SupportedPreviewFileTypes.crossPlatformImageMimeTypes
-          .contains(mimeType)) {
+      if (SupportedPreviewFileTypes.crossPlatformImageMimeTypes.contains(
+        mimeType,
+      )) {
         return mimeType;
       } else {
         return TwakeMimeTypeExtension.defaultUnsupportedImageMimeType;

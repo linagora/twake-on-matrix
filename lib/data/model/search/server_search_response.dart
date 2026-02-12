@@ -9,9 +9,7 @@ class ServerSearchResponse with EquatableMixin {
   @JsonKey(name: 'search_categories')
   final ResultCategories searchCategories;
 
-  ServerSearchResponse({
-    required this.searchCategories,
-  });
+  ServerSearchResponse({required this.searchCategories});
 
   @override
   List<Object?> get props => [searchCategories];

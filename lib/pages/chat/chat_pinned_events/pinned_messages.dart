@@ -62,8 +62,8 @@ class PinnedMessagesController extends State<PinnedMessages>
 
   final ScrollController scrollController = ScrollController();
 
-  final updatePinnedMessagesInteractor =
-      getIt.get<UpdatePinnedMessagesInteractor>();
+  final updatePinnedMessagesInteractor = getIt
+      .get<UpdatePinnedMessagesInteractor>();
 
   Room? get room => widget.pinnedEvents.first?.room;
 
@@ -81,130 +81,120 @@ class PinnedMessagesController extends State<PinnedMessages>
   StreamSubscription<Either<Failure, Success>>? unpinAllStreamSubcription;
 
   StreamSubscription<Either<Failure, Success>>?
-      unpinSelectedEventsStreamSubcription;
+  unpinSelectedEventsStreamSubcription;
 
   StreamSubscription<EventUpdate>? onEventStreamSubscription;
 
   void unpin(String eventId) {
     unpinMessagesStreamSubcription = updatePinnedMessagesInteractor
-        .execute(room: room!, eventIds: [eventId]).listen((event) {
-      event.fold((failure) {
-        _showErrorSnackbar(failure);
-      }, (success) {
-        if (success is UpdatePinnedEventsSuccess) {
-          _updateEventsNotifier(
-            eventsNotifier.value
-                .where((event) => event?.eventId != eventId)
-                .toList(),
+        .execute(room: room!, eventIds: [eventId])
+        .listen((event) {
+          event.fold(
+            (failure) {
+              _showErrorSnackbar(failure);
+            },
+            (success) {
+              if (success is UpdatePinnedEventsSuccess) {
+                _updateEventsNotifier(
+                  eventsNotifier.value
+                      .where((event) => event?.eventId != eventId)
+                      .toList(),
+                );
+                if (eventsNotifier.value.isEmpty) {
+                  Navigator.of(context).pop(eventsNotifier.value);
+                }
+              }
+            },
           );
-          if (eventsNotifier.value.isEmpty) {
-            Navigator.of(context).pop(eventsNotifier.value);
-          }
-        }
-      });
-    });
+        });
   }
 
   void unpinAll() {
     unpinAllStreamSubcription = updatePinnedMessagesInteractor
         .execute(
-      room: room!,
-      eventIds: [],
-      action: PinnedMessagesActionEnum.unpinAll,
-    )
+          room: room!,
+          eventIds: [],
+          action: PinnedMessagesActionEnum.unpinAll,
+        )
         .listen((event) {
-      event.fold(
-        (failure) {
-          _showErrorSnackbar(failure);
-        },
-        (success) {
-          if (success is UpdatePinnedEventsSuccess) {
-            _updateEventsNotifier([]);
-            Navigator.of(context).pop();
-          }
-        },
-      );
-    });
+          event.fold(
+            (failure) {
+              _showErrorSnackbar(failure);
+            },
+            (success) {
+              if (success is UpdatePinnedEventsSuccess) {
+                _updateEventsNotifier([]);
+                Navigator.of(context).pop();
+              }
+            },
+          );
+        });
   }
 
   void unpinSelectedEvents() {
     unpinSelectedEventsStreamSubcription = updatePinnedMessagesInteractor
-        .execute(
-      room: room!,
-      eventIds: selectedPinnedEventsIds,
-    )
-        .listen(
-      (event) {
-        event.fold(
-          (failure) {
-            _showErrorSnackbar(failure);
-          },
-          (success) {
-            if (success is UpdatePinnedEventsSuccess) {
-              _updateEventsNotifier(
-                eventsNotifier.value
-                    .where(
-                      (event) =>
-                          !selectedPinnedEventsIds.contains(event?.eventId),
-                    )
-                    .toList(),
-              );
-              selectedEvents.value = [];
-              if (eventsNotifier.value.isEmpty) {
-                Navigator.of(context).pop();
+        .execute(room: room!, eventIds: selectedPinnedEventsIds)
+        .listen((event) {
+          event.fold(
+            (failure) {
+              _showErrorSnackbar(failure);
+            },
+            (success) {
+              if (success is UpdatePinnedEventsSuccess) {
+                _updateEventsNotifier(
+                  eventsNotifier.value
+                      .where(
+                        (event) =>
+                            !selectedPinnedEventsIds.contains(event?.eventId),
+                      )
+                      .toList(),
+                );
+                selectedEvents.value = [];
+                if (eventsNotifier.value.isEmpty) {
+                  Navigator.of(context).pop();
+                }
               }
-            }
-          },
-        );
-      },
-    );
+            },
+          );
+        });
   }
 
   void _showErrorSnackbar(Failure failure) {
     if (failure is UnpinEventsFailure) {
       TwakeSnackBar.show(context, L10n.of(context)!.failedToUnpin);
     } else if (failure is UpdatePinnedEventsFailure) {
-      TwakeSnackBar.show(
-        context,
-        failure.exception.toLocalizedString(context),
-      );
+      TwakeSnackBar.show(context, failure.exception.toLocalizedString(context));
     }
   }
 
-  bool isSelected(Event event) => selectedEvents.value.any(
-        (e) => e.eventId == event.eventId,
-      );
+  bool isSelected(Event event) =>
+      selectedEvents.value.any((e) => e.eventId == event.eventId);
 
   void closeSelectionMode() {
     selectedEvents.value = [];
   }
 
-  void handleContextMenuActionInMore(
-    BuildContext context,
-  ) {
-    openPopupMenuAction(
-      context,
-      context.getCurrentRelativeRectOfWidget(),
-      [
-        PopupMenuItem(
-          padding: EdgeInsets.zero,
-          child: popupItemByTwakeAppRouter(
-            context,
-            L10n.of(context)!.unpinAllMessages,
-            imagePath: ImagePaths.icUnpin,
-            colorIcon: Theme.of(context).colorScheme.onSurface,
-            onCallbackAction: () => unpinAll(),
-          ),
+  void handleContextMenuActionInMore(BuildContext context) {
+    openPopupMenuAction(context, context.getCurrentRelativeRectOfWidget(), [
+      PopupMenuItem(
+        padding: EdgeInsets.zero,
+        child: popupItemByTwakeAppRouter(
+          context,
+          L10n.of(context)!.unpinAllMessages,
+          imagePath: ImagePaths.icUnpin,
+          colorIcon: Theme.of(context).colorScheme.onSurface,
+          onCallbackAction: () => unpinAll(),
         ),
-      ],
-    );
+      ),
+    ]);
   }
 
   void onSelectMessage(Event event) {
     if (!event.redacted) {
       if (selectedEvents.value.contains(event)) {
-        selectedEvents.value =
-            selectedEvents.value.where((element) => element != event).toList();
+        selectedEvents.value = selectedEvents.value
+            .where((element) => element != event)
+            .toList();
       } else {
         selectedEvents.value = [...selectedEvents.value, event];
       }
@@ -237,15 +227,11 @@ class PinnedMessagesController extends State<PinnedMessages>
               iconAction: action.getIconData(unpin: event.isPinned),
               imagePath: action.getImagePath(unpin: event.isPinned),
               colorIcon: action.getIconColor(context, event, action),
-              onCallbackAction: () => _handleClickOnContextMenuItem(
-                action,
-                event,
-              ),
+              onCallbackAction: () =>
+                  _handleClickOnContextMenuItem(action, event),
               styleName: action == ChatContextMenuActions.delete
                   ? PopupMenuWidgetStyle.defaultItemTextStyle(context)?.merge(
-                      TextStyle(
-                        color: LinagoraSysColors.material().error,
-                      ),
+                      TextStyle(color: LinagoraSysColors.material().error),
                     )
                   : null,
             );
@@ -273,9 +259,7 @@ class PinnedMessagesController extends State<PinnedMessages>
   }
 
   List<ContextMenuItemChatAction> listHorizontalActionMenuBuilder() {
-    final listAction = [
-      ChatHorizontalActionMenu.more,
-    ];
+    final listAction = [ChatHorizontalActionMenu.more];
     return listAction
         .map(
           (action) => ContextMenuItemChatAction(
@@ -302,11 +286,7 @@ class PinnedMessagesController extends State<PinnedMessages>
   ) {
     switch (actions) {
       case ChatHorizontalActionMenu.more:
-        handleContextMenuAction(
-          context,
-          event,
-          tapDownDetails,
-        );
+        handleContextMenuAction(context, event, tapDownDetails);
         break;
       default:
         break;
@@ -333,16 +313,11 @@ class PinnedMessagesController extends State<PinnedMessages>
         iconAction: action.getIconData(unpin: event.isPinned),
         imagePath: action.getImagePath(unpin: event.isPinned),
         colorIcon: action.getIconColor(context, event, action),
-        onCallbackAction: () => _handleClickOnContextMenuItem(
-          action,
-          event,
-        ),
+        onCallbackAction: () => _handleClickOnContextMenuItem(action, event),
         styleName: action == ChatContextMenuActions.delete
-            ? PopupMenuWidgetStyle.defaultItemTextStyle(context)?.merge(
-                TextStyle(
-                  color: LinagoraSysColors.material().error,
-                ),
-              )
+            ? PopupMenuWidgetStyle.defaultItemTextStyle(
+                context,
+              )?.merge(TextStyle(color: LinagoraSysColors.material().error))
             : null,
       );
     }).toList();
@@ -377,11 +352,9 @@ class PinnedMessagesController extends State<PinnedMessages>
         imagePath: action.getImagePath(unpin: event.isPinned),
         colorIcon: action.getIconColor(context, event, action),
         styleName: action == ChatContextMenuActions.delete
-            ? PopupMenuWidgetStyle.defaultItemTextStyle(context)?.merge(
-                TextStyle(
-                  color: LinagoraSysColors.material().error,
-                ),
-              )
+            ? PopupMenuWidgetStyle.defaultItemTextStyle(
+                context,
+              )?.merge(TextStyle(color: LinagoraSysColors.material().error))
             : null,
       );
     }).toList();
@@ -420,22 +393,19 @@ class PinnedMessagesController extends State<PinnedMessages>
   }
 
   void jumpToMessage(BuildContext context, Event event) {
-    context.go(
-      '/rooms/${event.roomId}?event=${event.eventId}',
-    );
+    context.go('/rooms/${event.roomId}?event=${event.eventId}');
   }
 
   void forwardEventAction(Event event) async {
-    Matrix.of(context).shareContent =
-        event.getDisplayEventWithoutEditEvent(widget.timeline!).content;
+    Matrix.of(context).shareContent = event
+        .getDisplayEventWithoutEditEvent(widget.timeline!)
+        .content;
     Logs().d(
       "forwardEventsAction():: shareContent: ${Matrix.of(context).shareContent}",
     );
     context.go(
       '/rooms/forward',
-      extra: ForwardArgument(
-        fromRoomId: event.roomId ?? '',
-      ),
+      extra: ForwardArgument(fromRoomId: event.roomId ?? ''),
     );
   }
 
@@ -470,13 +440,14 @@ class PinnedMessagesController extends State<PinnedMessages>
       if (eventUpdate.isPinnedEventsHasChanged) {
         WidgetsBinding.instance.addPostFrameCallback((_) {
           eventUpdate.updatePinnedMessage(
-            onPinnedMessageUpdated: ({
-              required bool isInitial,
-              required bool isUnpin,
-              String? eventId,
-            }) {
-              _handlePinnedMessageCallBack();
-            },
+            onPinnedMessageUpdated:
+                ({
+                  required bool isInitial,
+                  required bool isUnpin,
+                  String? eventId,
+                }) {
+                  _handlePinnedMessageCallBack();
+                },
           );
         });
       }
@@ -485,10 +456,9 @@ class PinnedMessagesController extends State<PinnedMessages>
 
   void _handlePinnedMessageCallBack() async {
     try {
-      final result =
-          (await Future.wait(room!.pinnedEventIds.map(room!.getEventById)))
-              .nonNulls
-              .toList();
+      final result = (await Future.wait(
+        room!.pinnedEventIds.map(room!.getEventById),
+      )).nonNulls.toList();
 
       if (result.isNotEmpty) {
         _updateEventsNotifier(result);

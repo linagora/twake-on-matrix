@@ -13,10 +13,7 @@ import 'package:fluffychat/generated/l10n/app_localizations.dart';
 class AppGridDashboardView extends StatelessWidget {
   final AppGridDashboardController controller;
 
-  const AppGridDashboardView({
-    super.key,
-    required this.controller,
-  });
+  const AppGridDashboardView({super.key, required this.controller});
 
   @override
   Widget build(BuildContext context) {

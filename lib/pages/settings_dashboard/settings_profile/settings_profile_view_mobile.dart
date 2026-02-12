@@ -16,9 +16,8 @@ import 'package:matrix/matrix.dart';
 import 'package:wechat_camera_picker/wechat_camera_picker.dart';
 import 'package:fluffychat/generated/l10n/app_localizations.dart';
 
-typedef OnTapMultipleAccountsButton = void Function(
-  List<TwakeChatPresentationAccount> multipleAccounts,
-);
+typedef OnTapMultipleAccountsButton =
+    void Function(List<TwakeChatPresentationAccount> multipleAccounts);
 
 class SettingsProfileViewMobile extends StatelessWidget {
   final ValueNotifier<Either<Failure, Success>> settingsProfileUIState;
@@ -86,8 +85,7 @@ class SettingsProfileViewMobile extends StatelessWidget {
                                   SettingsProfileViewMobileStyle.thumbnailSize,
                                 ),
                                 fit: BoxFit.cover,
-                                loadingBuilder:
-                                    (context, child, loadingProgress) {
+                                loadingBuilder: (context, child, loadingProgress) {
                                   if (loadingProgress != null &&
                                       loadingProgress.cumulativeBytesLoaded !=
                                           loadingProgress.expectedTotalBytes) {
@@ -127,16 +125,19 @@ class SettingsProfileViewMobile extends StatelessWidget {
                     child: ValueListenableBuilder(
                       valueListenable: currentProfile,
                       builder: (context, profile, _) {
-                        final displayName = profile?.displayName ??
+                        final displayName =
+                            profile?.displayName ??
                             client.mxid(context).localpart ??
                             client.mxid(context);
                         return Material(
-                          elevation: Theme.of(context)
-                                  .appBarTheme
-                                  .scrolledUnderElevation ??
+                          elevation:
+                              Theme.of(
+                                context,
+                              ).appBarTheme.scrolledUnderElevation ??
                               4,
-                          shadowColor:
-                              Theme.of(context).appBarTheme.shadowColor,
+                          shadowColor: Theme.of(
+                            context,
+                          ).appBarTheme.shadowColor,
                           shape: RoundedRectangleBorder(
                             side: BorderSide(
                               color: Theme.of(context).dividerColor,
@@ -178,45 +179,51 @@ class SettingsProfileViewMobile extends StatelessWidget {
                             ),
                           ),
                         ),
-                        builder: (
-                          BuildContext context,
-                          MenuController menuController,
-                          Widget? child,
-                        ) {
-                          return GestureDetector(
-                            onTap: () {
-                              if (PlatformInfos.isWeb) {
-                                menuController.isOpen
-                                    ? menuController.close()
-                                    : menuController.open();
-                              } else {
-                                onTapAvatar?.call();
-                              }
+                        builder:
+                            (
+                              BuildContext context,
+                              MenuController menuController,
+                              Widget? child,
+                            ) {
+                              return GestureDetector(
+                                onTap: () {
+                                  if (PlatformInfos.isWeb) {
+                                    menuController.isOpen
+                                        ? menuController.close()
+                                        : menuController.open();
+                                  } else {
+                                    onTapAvatar?.call();
+                                  }
+                                },
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    color: Theme.of(
+                                      context,
+                                    ).colorScheme.primary,
+                                    borderRadius: BorderRadius.circular(
+                                      SettingsProfileViewMobileStyle.avatarSize,
+                                    ),
+                                    border: Border.all(
+                                      color: Theme.of(
+                                        context,
+                                      ).colorScheme.onPrimary,
+                                      width: SettingsProfileViewMobileStyle
+                                          .iconEditBorderWidth,
+                                    ),
+                                  ),
+                                  padding: SettingsProfileViewMobileStyle
+                                      .editIconPadding,
+                                  child: Icon(
+                                    Icons.edit,
+                                    size: SettingsProfileViewMobileStyle
+                                        .iconEditSize,
+                                    color: Theme.of(
+                                      context,
+                                    ).colorScheme.onPrimary,
+                                  ),
+                                ),
+                              );
                             },
-                            child: Container(
-                              decoration: BoxDecoration(
-                                color: Theme.of(context).colorScheme.primary,
-                                borderRadius: BorderRadius.circular(
-                                  SettingsProfileViewMobileStyle.avatarSize,
-                                ),
-                                border: Border.all(
-                                  color:
-                                      Theme.of(context).colorScheme.onPrimary,
-                                  width: SettingsProfileViewMobileStyle
-                                      .iconEditBorderWidth,
-                                ),
-                              ),
-                              padding: SettingsProfileViewMobileStyle
-                                  .editIconPadding,
-                              child: Icon(
-                                Icons.edit,
-                                size:
-                                    SettingsProfileViewMobileStyle.iconEditSize,
-                                color: Theme.of(context).colorScheme.onPrimary,
-                              ),
-                            ),
-                          );
-                        },
                         menuChildren: menuChildren ?? [],
                       ),
                     ),
@@ -260,9 +267,7 @@ class SettingsProfileViewMobile extends StatelessWidget {
                         SettingsProfileViewMobileStyle.paddingIconAndText,
                         Text(
                           L10n.of(context)!.loadingPleaseWait,
-                          style: Theme.of(context)
-                              .textTheme
-                              .labelLarge
+                          style: Theme.of(context).textTheme.labelLarge
                               ?.copyWith(
                                 color: Theme.of(context).colorScheme.onPrimary,
                               ),
@@ -308,12 +313,11 @@ class SettingsProfileViewMobile extends StatelessWidget {
                             success.haveMultipleAccounts
                                 ? L10n.of(context)!.switchAccounts
                                 : L10n.of(context)!.addAnotherAccount,
-                            style: Theme.of(context)
-                                .textTheme
-                                .labelLarge
+                            style: Theme.of(context).textTheme.labelLarge
                                 ?.copyWith(
-                                  color:
-                                      Theme.of(context).colorScheme.onPrimary,
+                                  color: Theme.of(
+                                    context,
+                                  ).colorScheme.onPrimary,
                                 ),
                           ),
                         ],

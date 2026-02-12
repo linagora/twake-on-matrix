@@ -20,8 +20,9 @@ class SettingsAppLanguageController extends State<SettingsAppLanguage> {
   final saveLanguageInteractor = getIt.get<SaveLanguageInteractor>();
 
   List<Locale> get supportedLocales {
-    final List<Locale> copySupportedLocales =
-        List.from(LocalizationService.supportedLocales);
+    final List<Locale> copySupportedLocales = List.from(
+      LocalizationService.supportedLocales,
+    );
 
     copySupportedLocales.sort(
       (a, b) => a.languageCode.compareTo(b.languageCode),
@@ -34,7 +35,9 @@ class SettingsAppLanguageController extends State<SettingsAppLanguage> {
 
   void changeLanguage(Locale selectedLocale) {
     currentLocale.value = selectedLocale;
-    saveLanguageInteractor.execute(selectedLocale).listen(
+    saveLanguageInteractor
+        .execute(selectedLocale)
+        .listen(
           (event) => _handleSaveLanguageOnData(context, event),
           onDone: _handleSaveLanguageOnDone,
           onError: _handleSaveLanguageOnError,
@@ -45,17 +48,14 @@ class SettingsAppLanguageController extends State<SettingsAppLanguage> {
     BuildContext context,
     Either<Failure, Success> event,
   ) {
-    event.fold(
-      (failure) => null,
-      (success) {
-        if (success is SaveLanguageSuccess) {
-          LocalizationService.changeLocale(
-            context,
-            success.localeStored.languageCode,
-          );
-        }
-      },
-    );
+    event.fold((failure) => null, (success) {
+      if (success is SaveLanguageSuccess) {
+        LocalizationService.changeLocale(
+          context,
+          success.localeStored.languageCode,
+        );
+      }
+    });
   }
 
   void _handleSaveLanguageOnDone() {
@@ -70,8 +70,6 @@ class SettingsAppLanguageController extends State<SettingsAppLanguage> {
 
   @override
   Widget build(BuildContext context) {
-    return SettingsAppLanguageView(
-      controller: this,
-    );
+    return SettingsAppLanguageView(controller: this);
   }
 }

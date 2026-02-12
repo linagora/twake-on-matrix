@@ -29,11 +29,7 @@ class GetInvitationStatusEmptyState extends Failure {
   }) : super();
 
   @override
-  List<Object?> get props => [
-        contactId,
-        userId,
-        invitationId,
-      ];
+  List<Object?> get props => [contactId, userId, invitationId];
 }
 
 class GetInvitationStatusSuccessState extends Success {
@@ -64,10 +60,10 @@ class GetInvitationStatusFailureState extends Failure {
 
   @override
   List<Object?> get props => [
-        exception,
-        message,
-        contactId,
-        userId,
-        invitationId,
-      ];
+    exception,
+    message,
+    contactId,
+    userId,
+    invitationId,
+  ];
 }

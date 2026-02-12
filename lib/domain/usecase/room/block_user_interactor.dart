@@ -15,32 +15,22 @@ class BlockUserInteractor {
       if (!userId.isValidMatrixId) {
         throw NotValidMxidException();
       }
-      await client.setAccountData(
-        client.userID!,
-        'm.ignored_user_list',
-        {
-          'ignored_users': Map.fromEntries(
-            (client.ignoredUsers..add(userId)).map((key) => MapEntry(key, {})),
-          ),
-        },
-      );
+      await client.setAccountData(client.userID!, 'm.ignored_user_list', {
+        'ignored_users': Map.fromEntries(
+          (client.ignoredUsers..add(userId)).map((key) => MapEntry(key, {})),
+        ),
+      });
 
       yield const Right(BlockUserSuccess());
     } on MatrixException catch (e) {
       if (e.error == MatrixError.M_FORBIDDEN) {
-        yield const Left(
-          NoPermissionForBlockFailure(),
-        );
+        yield const Left(NoPermissionForBlockFailure());
       }
     } catch (error) {
       if (error is NotValidMxidException) {
         yield const Left(NotValidMxidBlockFailure());
       }
-      yield Left(
-        BlockUserFailure(
-          exception: error,
-        ),
-      );
+      yield Left(BlockUserFailure(exception: error));
     }
   }
 }

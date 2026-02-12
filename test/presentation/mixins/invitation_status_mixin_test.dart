@@ -31,13 +31,13 @@ class InvitationStatusMixinTest with InvitationStatusMixin {}
 void main() {
   late InvitationStatusMixinTest mixinTest;
   late MockHiveGetInvitationStatusInteractor
-      mockHiveGetInvitationStatusInteractor;
+  mockHiveGetInvitationStatusInteractor;
   late MockGetInvitationStatusInteractor mockGetInvitationStatusInteractor;
   late MockPostAddressBookInteractor mockPostAddressBookInteractor;
   late MockHiveDeleteInvitationStatusInteractor
-      mockHiveDeleteInvitationStatusInteractor;
+  mockHiveDeleteInvitationStatusInteractor;
   late MockDeleteThirdPartyContactBoxInteractor
-      mockDeleteThirdPartyContactBoxInteractor;
+  mockDeleteThirdPartyContactBoxInteractor;
 
   const testUserId = 'user123';
   const testContactId = 'contact123';
@@ -125,9 +125,7 @@ void main() {
         Right(
           GetInvitationStatusSuccessState(
             invitationStatusResponse: InvitationStatusResponse(
-              invitation: Invitation(
-                id: testInvitationId,
-              ),
+              invitation: Invitation(id: testInvitationId),
             ),
           ),
         ),
@@ -144,9 +142,7 @@ void main() {
         Right(
           GetInvitationStatusSuccessState(
             invitationStatusResponse: InvitationStatusResponse(
-              invitation: Invitation(
-                id: testInvitationId,
-              ),
+              invitation: Invitation(id: testInvitationId),
             ),
           ),
         ),
@@ -158,9 +154,7 @@ void main() {
         Right(
           GetInvitationStatusSuccessState(
             invitationStatusResponse: InvitationStatusResponse(
-              invitation: Invitation(
-                id: testInvitationId,
-              ),
+              invitation: Invitation(id: testInvitationId),
             ),
           ),
         ),
@@ -168,8 +162,9 @@ void main() {
     );
 
     mixinTest = InvitationStatusMixinTest();
-    mixinTest.getInvitationStatusNotifier.value =
-        const Right(GetInvitationStatusInitial());
+    mixinTest.getInvitationStatusNotifier.value = const Right(
+      GetInvitationStatusInitial(),
+    );
   });
 
   tearDown(() {
@@ -239,84 +234,78 @@ void main() {
   });
 
   group('getInvitationNetworkStatus', () {
-    test('should update notifier and handle success state with matrix ID',
-        () async {
-      final response = InvitationStatusResponse(
-        invitation: Invitation(
-          id: testInvitationId,
-          matrixId: testMatrixId,
-        ),
-      );
+    test(
+      'should update notifier and handle success state with matrix ID',
+      () async {
+        final response = InvitationStatusResponse(
+          invitation: Invitation(id: testInvitationId, matrixId: testMatrixId),
+        );
 
-      when(
-        mockGetInvitationStatusInteractor.execute(
-          userId: testUserId,
-          contactId: testContactId,
-          invitationId: testInvitationId,
-        ),
-      ).thenAnswer(
-        (_) => Stream.value(
-          Right(
-            GetInvitationStatusSuccessState(
-              invitationStatusResponse: response,
+        when(
+          mockGetInvitationStatusInteractor.execute(
+            userId: testUserId,
+            contactId: testContactId,
+            invitationId: testInvitationId,
+          ),
+        ).thenAnswer(
+          (_) => Stream.value(
+            Right(
+              GetInvitationStatusSuccessState(
+                invitationStatusResponse: response,
+              ),
             ),
           ),
-        ),
-      );
+        );
 
-      when(
-        mockPostAddressBookInteractor.execute(
-          addressBooks: [
-            AddressBook(
-              mxid: testMatrixId,
-              displayName: testContact.displayName,
-            ),
-          ],
-        ),
-      ).thenAnswer(
-        (_) => Stream.value(
-          Right(
-            GetInvitationStatusSuccessState(
-              invitationStatusResponse: InvitationStatusResponse(
-                invitation: Invitation(
-                  id: testInvitationId,
+        when(
+          mockPostAddressBookInteractor.execute(
+            addressBooks: [
+              AddressBook(
+                mxid: testMatrixId,
+                displayName: testContact.displayName,
+              ),
+            ],
+          ),
+        ).thenAnswer(
+          (_) => Stream.value(
+            Right(
+              GetInvitationStatusSuccessState(
+                invitationStatusResponse: InvitationStatusResponse(
+                  invitation: Invitation(id: testInvitationId),
                 ),
               ),
             ),
           ),
-        ),
-      );
+        );
 
-      mixinTest.getInvitationNetworkStatus(
-        userId: testUserId,
-        contactId: testContactId,
-        invitationId: testInvitationId,
-        contact: testContact,
-      );
-
-      await untilCalled(
-        mockGetInvitationStatusInteractor.execute(
+        mixinTest.getInvitationNetworkStatus(
           userId: testUserId,
           contactId: testContactId,
           invitationId: testInvitationId,
-        ),
-      );
-      verify(
-        mockGetInvitationStatusInteractor.execute(
-          userId: testUserId,
-          contactId: testContactId,
-          invitationId: testInvitationId,
-        ),
-      ).called(1);
-    });
+          contact: testContact,
+        );
+
+        await untilCalled(
+          mockGetInvitationStatusInteractor.execute(
+            userId: testUserId,
+            contactId: testContactId,
+            invitationId: testInvitationId,
+          ),
+        );
+        verify(
+          mockGetInvitationStatusInteractor.execute(
+            userId: testUserId,
+            contactId: testContactId,
+            invitationId: testInvitationId,
+          ),
+        ).called(1);
+      },
+    );
 
     test('should handle 404 error and delete invitation status', () async {
       final dioException = DioException(
         requestOptions: RequestOptions(),
-        response: Response(
-          requestOptions: RequestOptions(),
-          statusCode: 404,
-        ),
+        response: Response(requestOptions: RequestOptions(), statusCode: 404),
       );
 
       when(
@@ -348,9 +337,7 @@ void main() {
           Right(
             GetInvitationStatusSuccessState(
               invitationStatusResponse: InvitationStatusResponse(
-                invitation: Invitation(
-                  id: testInvitationId,
-                ),
+                invitation: Invitation(id: testInvitationId),
               ),
             ),
           ),

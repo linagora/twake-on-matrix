@@ -55,27 +55,29 @@ class SettingsBlockedUsersView extends StatelessWidget {
                   focusNode: controller.inputFocus,
                   textInputAction: TextInputAction.search,
                   autofocus: true,
-                  decoration: ChatListHeaderStyle.searchInputDecoration(
-                    context,
-                    prefixIconColor: LinagoraSysColors.material().tertiary,
-                  ).copyWith(
-                    hintStyle:
-                        Theme.of(context).textTheme.titleMedium?.copyWith(
+                  decoration:
+                      ChatListHeaderStyle.searchInputDecoration(
+                        context,
+                        prefixIconColor: LinagoraSysColors.material().tertiary,
+                      ).copyWith(
+                        hintStyle: Theme.of(context).textTheme.titleMedium
+                            ?.copyWith(
                               color: LinagoraSysColors.material().tertiary,
                             ),
-                    hintText: L10n.of(context)!.enterAnEmailAddress,
-                    suffixIcon: ValueListenableBuilder(
-                      valueListenable: controller.textEditingController,
-                      builder: (context, value, child) => value.text.isNotEmpty
-                          ? IconButton(
-                              onPressed: () {
-                                controller.textEditingController.clear();
-                              },
-                              icon: const Icon(Icons.close),
-                            )
-                          : const SizedBox.shrink(),
-                    ),
-                  ),
+                        hintText: L10n.of(context)!.enterAnEmailAddress,
+                        suffixIcon: ValueListenableBuilder(
+                          valueListenable: controller.textEditingController,
+                          builder: (context, value, child) =>
+                              value.text.isNotEmpty
+                              ? IconButton(
+                                  onPressed: () {
+                                    controller.textEditingController.clear();
+                                  },
+                                  icon: const Icon(Icons.close),
+                                )
+                              : const SizedBox.shrink(),
+                        ),
+                      ),
                 ),
               ),
               ValueListenableBuilder(
@@ -84,9 +86,7 @@ class SettingsBlockedUsersView extends StatelessWidget {
                   return searchResults.fold(
                     (failure) {
                       if (failure is BlockedUsersSearchEmptyState) {
-                        return const Center(
-                          child: EmptySearchWidget(),
-                        );
+                        return const Center(child: EmptySearchWidget());
                       }
                       return const SizedBox.shrink();
                     },
@@ -96,9 +96,7 @@ class SettingsBlockedUsersView extends StatelessWidget {
                           shrinkWrap: true,
                           physics: const NeverScrollableScrollPhysics(),
                           itemCount: success.blockedUsers.length,
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 12.0,
-                          ),
+                          padding: const EdgeInsets.symmetric(horizontal: 12.0),
                           itemBuilder: (context, index) {
                             final profile = success.blockedUsers[index];
 
@@ -132,8 +130,9 @@ class SettingsBlockedUsersView extends StatelessWidget {
   }) {
     return TwakeInkWell(
       onTap: () {
-        final roomId =
-            Matrix.of(context).client.getDirectChatFromUserId(profile.userId);
+        final roomId = Matrix.of(
+          context,
+        ).client.getDirectChatFromUserId(profile.userId);
         if (roomId == null) {
           if (profile.userId != Matrix.of(context).client.userID) {
             Router.neglect(
@@ -175,8 +174,7 @@ class SettingsBlockedUsersView extends StatelessWidget {
                       Expanded(
                         child: Text(
                           profile.displayName ?? '',
-                          style: LinagoraTextStyle.material()
-                              .bodyMedium2
+                          style: LinagoraTextStyle.material().bodyMedium2
                               .copyWith(
                                 color: LinagoraSysColors.material().onSurface,
                               ),
@@ -189,8 +187,8 @@ class SettingsBlockedUsersView extends StatelessWidget {
                   Text(
                     profile.userId,
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: LinagoraRefColors.material().tertiary[30],
-                        ),
+                      color: LinagoraRefColors.material().tertiary[30],
+                    ),
                     overflow: TextOverflow.ellipsis,
                     maxLines: 1,
                   ),

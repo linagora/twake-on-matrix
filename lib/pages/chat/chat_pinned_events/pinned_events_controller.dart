@@ -21,8 +21,8 @@ class PinnedEventsController {
 
   final ValueNotifier<Either<Failure, Success>> getPinnedMessageNotifier =
       ValueNotifier<Either<Failure, Success>>(
-    Right(ChatGetPinnedEventsInitial()),
-  );
+        Right(ChatGetPinnedEventsInitial()),
+      );
 
   StreamSubscription? _pinnedEventsSubscription;
 
@@ -40,38 +40,34 @@ class PinnedEventsController {
   }) async {
     await Future.delayed(_timeDelayGetPinnedMessage);
     _pinnedEventsSubscription = getPinnedMessageInteractor
-        .execute(
-      roomId: roomId,
-      client: client,
-      isInitial: isInitial,
-    )
+        .execute(roomId: roomId, client: client, isInitial: isInitial)
         .listen((event) {
-      try {
-        getPinnedMessageNotifier.value = event;
-        event.fold((_) => null, (success) {
-          if (success is ChatGetPinnedEventsSuccess) {
-            if (success.pinnedEvents.isNotEmpty) {
-              if (isInitial || isUnpin) {
-                updatePinnedMessage(
-                  success.pinnedEvents,
-                  jumpToPinnedMessageCallback: jumpToPinnedMessageCallback,
-                );
-              } else {
-                jumpToCurrentMessage(
-                  success.pinnedEvents,
-                  eventId: eventId,
-                  jumpToPinnedMessageCallback: jumpToPinnedMessageCallback,
-                );
+          try {
+            getPinnedMessageNotifier.value = event;
+            event.fold((_) => null, (success) {
+              if (success is ChatGetPinnedEventsSuccess) {
+                if (success.pinnedEvents.isNotEmpty) {
+                  if (isInitial || isUnpin) {
+                    updatePinnedMessage(
+                      success.pinnedEvents,
+                      jumpToPinnedMessageCallback: jumpToPinnedMessageCallback,
+                    );
+                  } else {
+                    jumpToCurrentMessage(
+                      success.pinnedEvents,
+                      eventId: eventId,
+                      jumpToPinnedMessageCallback: jumpToPinnedMessageCallback,
+                    );
+                  }
+                }
               }
-            }
+            });
+          } on FlutterError catch (error) {
+            Logs().e(
+              "PinnedEventsController()::getPinnedMessageAction(): FlutterError: $error",
+            );
           }
         });
-      } on FlutterError catch (error) {
-        Logs().e(
-          "PinnedEventsController()::getPinnedMessageAction(): FlutterError: $error",
-        );
-      }
-    });
   }
 
   void jumpToPinnedMessageAction(
@@ -93,14 +89,12 @@ class PinnedEventsController {
   }
 
   int currentIndexOfPinnedMessage(List<Event?> pinnedEvents) {
-    final index = pinnedEvents.indexWhere(
-      (event) {
-        Logs().d(
-          "PinnedEventsController()::currentIndexOfPinnedMessage(): ${currentPinnedEventNotifier.value?.eventId}",
-        );
-        return event?.eventId == currentPinnedEventNotifier.value?.eventId;
-      },
-    );
+    final index = pinnedEvents.indexWhere((event) {
+      Logs().d(
+        "PinnedEventsController()::currentIndexOfPinnedMessage(): ${currentPinnedEventNotifier.value?.eventId}",
+      );
+      return event?.eventId == currentPinnedEventNotifier.value?.eventId;
+    });
     if (index < 0) {
       currentPinnedEventNotifier.value = pinnedEvents.first;
       return 0;
@@ -110,8 +104,9 @@ class PinnedEventsController {
 
   int _nextIndexOfPinnedMessage(List<Event?> pinnedEvents) {
     final currentIndex = currentIndexOfPinnedMessage(pinnedEvents);
-    final index =
-        currentIndex == 0 ? pinnedEvents.length - 1 : currentIndex - 1;
+    final index = currentIndex == 0
+        ? pinnedEvents.length - 1
+        : currentIndex - 1;
     return index;
   }
 
@@ -121,16 +116,11 @@ class PinnedEventsController {
   }) {
     currentPinnedEventNotifier.value = pinnedEvents.last;
     if (pinnedEvents.isNotEmpty) {
-      jumpToPinnedMessageCallback?.call(
-        pinnedEvents.length - 1,
-      );
+      jumpToPinnedMessageCallback?.call(pinnedEvents.length - 1);
     }
   }
 
-  void handlePopBack({
-    required Client client,
-    Object? popResult,
-  }) {
+  void handlePopBack({required Client client, Object? popResult}) {
     Logs().d(
       "PinnedEventsController()::handlePopBack(): popResult: $popResult",
     );
@@ -140,10 +130,7 @@ class PinnedEventsController {
       }
       final room = popResult.first?.room;
       if (room != null) {
-        getPinnedMessageAction(
-          roomId: room.id,
-          client: client,
-        );
+        getPinnedMessageAction(roomId: room.id, client: client);
       }
     }
   }

@@ -16,10 +16,7 @@ import 'package:matrix/matrix.dart';
 class ServerSearchMessagesList extends StatelessWidget {
   final SearchController searchController;
 
-  const ServerSearchMessagesList({
-    super.key,
-    required this.searchController,
-  });
+  const ServerSearchMessagesList({super.key, required this.searchController});
 
   @override
   Widget build(BuildContext context) {
@@ -29,8 +26,11 @@ class ServerSearchMessagesList extends StatelessWidget {
             searchController.serverSearchController.searchResultsNotifier,
         builder: (context, serverSearchNotifier, child) {
           if (serverSearchNotifier is PresentationServerSideEmptySearch) {
-            if (searchController.searchContactAndRecentChatController!
-                    .recentAndContactsNotifier.value.isEmpty &&
+            if (searchController
+                    .searchContactAndRecentChatController!
+                    .recentAndContactsNotifier
+                    .value
+                    .isEmpty &&
                 !(searchController.isSearchMatrixUserId)) {
               return child!;
             }
@@ -46,9 +46,9 @@ class ServerSearchMessagesList extends StatelessWidget {
               itemBuilder: ((context, index) {
                 final searchResult =
                     serverSearchNotifier.searchResults[index].result;
-                final room = Matrix.of(context).client.getRoomById(
-                      searchResult?.roomId ?? '',
-                    );
+                final room = Matrix.of(
+                  context,
+                ).client.getRoomById(searchResult?.roomId ?? '');
                 if (room == null || searchResult == null) {
                   return const SizedBox.shrink();
                 }

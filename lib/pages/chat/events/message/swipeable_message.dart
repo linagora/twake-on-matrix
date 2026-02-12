@@ -33,9 +33,7 @@ class SwipeableMessage extends StatelessWidget {
       key: ValueKey(event.eventId),
       background: Padding(
         padding: MessageStyle.paddingSwipeMessage,
-        child: const Center(
-          child: Icon(Icons.reply_outlined),
-        ),
+        child: const Center(child: Icon(Icons.reply_outlined)),
       ),
       onOverScrollTheMaxOffset: () => HapticFeedback.heavyImpact(),
       maxOffset: maxOffset,

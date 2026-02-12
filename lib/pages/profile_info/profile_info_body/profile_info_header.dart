@@ -32,8 +32,9 @@ class ProfileInfoHeader extends StatelessWidget {
     return ValueListenableBuilder(
       valueListenable: userInfoNotifier,
       builder: (context, userInfo, child) {
-        final userInfoModel =
-            userInfo.getSuccessOrNull<GetUserInfoSuccess>()?.userInfo;
+        final userInfoModel = userInfo
+            .getSuccessOrNull<GetUserInfoSuccess>()
+            ?.userInfo;
         return Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -84,11 +85,7 @@ class ProfileInfoHeader extends StatelessWidget {
           return const SizedBox(
             width: 160,
             height: 160,
-            child: Center(
-              child: CupertinoActivityIndicator(
-                animating: true,
-              ),
-            ),
+            child: Center(child: CupertinoActivityIndicator(animating: true)),
           );
         }
         if (success is GetUserInfoSuccess) {
@@ -120,15 +117,13 @@ class ProfileInfoHeader extends StatelessWidget {
         return FadeTransition(
           opacity: animation,
           child: SlideTransition(
-            position: Tween<Offset>(
-              begin: const Offset(0, 0.5),
-              end: Offset.zero,
-            ).animate(
-              CurvedAnimation(
-                parent: animation,
-                curve: Curves.easeOut,
-              ),
-            ),
+            position:
+                Tween<Offset>(
+                  begin: const Offset(0, 0.5),
+                  end: Offset.zero,
+                ).animate(
+                  CurvedAnimation(parent: animation, curve: Curves.easeOut),
+                ),
             child: child,
           ),
         );
@@ -140,8 +135,8 @@ class ProfileInfoHeader extends StatelessWidget {
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: LinagoraTextStyle.material().bodyMedium2.copyWith(
-                  color: LinagoraSysColors.material().onSurface,
-                ),
+              color: LinagoraSysColors.material().onSurface,
+            ),
           );
         },
         (success) {
@@ -156,8 +151,8 @@ class ProfileInfoHeader extends StatelessWidget {
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: LinagoraTextStyle.material().bodyMedium2.copyWith(
-                    color: LinagoraSysColors.material().onSurface,
-                  ),
+                color: LinagoraSysColors.material().onSurface,
+              ),
             );
           }
           return Text(
@@ -165,8 +160,8 @@ class ProfileInfoHeader extends StatelessWidget {
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: LinagoraTextStyle.material().bodyMedium2.copyWith(
-                  color: LinagoraSysColors.material().onSurface,
-                ),
+              color: LinagoraSysColors.material().onSurface,
+            ),
           );
         },
       ),

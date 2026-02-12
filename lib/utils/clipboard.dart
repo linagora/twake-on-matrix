@@ -145,9 +145,7 @@ class TwakeClipboard {
         _reader!.canProvide(Formats.svg);
   }
 
-  Future<String?> pasteText({
-    ClipboardReader? clipboardReader,
-  }) async {
+  Future<String?> pasteText({ClipboardReader? clipboardReader}) async {
     _reader = clipboardReader ?? await SystemClipboard.instance?.read();
     String? copied;
 

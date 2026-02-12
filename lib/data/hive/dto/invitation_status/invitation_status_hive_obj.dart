@@ -20,8 +20,5 @@ class InvitationStatusHiveObj with EquatableMixin {
   Map<String, dynamic> toJson() => _$InvitationStatusHiveObjToJson(this);
 
   @override
-  List<Object?> get props => [
-        invitationId,
-        contactId,
-      ];
+  List<Object?> get props => [invitationId, contactId];
 }

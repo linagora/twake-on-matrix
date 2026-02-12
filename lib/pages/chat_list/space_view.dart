@@ -18,11 +18,7 @@ import '../../widgets/matrix.dart';
 class SpaceView extends StatefulWidget {
   final ChatListController controller;
   final ScrollController scrollController;
-  const SpaceView(
-    this.controller, {
-    super.key,
-    required this.scrollController,
-  });
+  const SpaceView(this.controller, {super.key, required this.scrollController});
 
   @override
   State<SpaceView> createState() => _SpaceViewState();
@@ -40,11 +36,9 @@ class _SpaceViewState extends State<SpaceView> {
   }
 
   Future<GetSpaceHierarchyResponse> getFuture(String activeSpaceId) =>
-      _requests[activeSpaceId] ??= Matrix.of(context).client.getSpaceHierarchy(
-            activeSpaceId,
-            maxDepth: 1,
-            from: prevBatch,
-          );
+      _requests[activeSpaceId] ??= Matrix.of(
+        context,
+      ).client.getSpaceHierarchy(activeSpaceId, maxDepth: 1, from: prevBatch);
 
   void _onJoinSpaceChild(SpaceRoomsChunk spaceChild) async {
     final client = Matrix.of(context).client;
@@ -55,9 +49,7 @@ class _SpaceViewState extends State<SpaceView> {
           await client.joinRoom(
             spaceChild.roomId,
             serverName: space?.spaceChildren
-                .firstWhereOrNull(
-                  (child) => child.roomId == spaceChild.roomId,
-                )
+                .firstWhereOrNull((child) => child.roomId == spaceChild.roomId)
                 ?.via,
           );
           if (client.getRoomById(spaceChild.roomId) == null) {
@@ -86,14 +78,14 @@ class _SpaceViewState extends State<SpaceView> {
   ]) async {
     final client = Matrix.of(context).client;
     final activeSpaceId = widget.controller.activeSpaceId;
-    final activeSpace =
-        activeSpaceId == null ? null : client.getRoomById(activeSpaceId);
+    final activeSpace = activeSpaceId == null
+        ? null
+        : client.getRoomById(activeSpaceId);
     final action = await showModalActionSheet<SpaceChildContextAction>(
       context: context,
-      title: spaceChild?.name ??
-          room?.getLocalizedDisplayname(
-            MatrixLocals(L10n.of(context)!),
-          ),
+      title:
+          spaceChild?.name ??
+          room?.getLocalizedDisplayname(MatrixLocals(L10n.of(context)!)),
       message: spaceChild?.topic ?? room?.topic,
       actions: [
         if (room == null)
@@ -145,8 +137,9 @@ class _SpaceViewState extends State<SpaceView> {
       final rootSpaces = allSpaces
           .where(
             (space) => !allSpaces.any(
-              (parentSpace) => parentSpace.spaceChildren
-                  .any((child) => child.roomId == space.id),
+              (parentSpace) => parentSpace.spaceChildren.any(
+                (child) => child.roomId == space.id,
+              ),
             ),
           )
           .toList();
@@ -164,18 +157,16 @@ class _SpaceViewState extends State<SpaceView> {
             // ignore: deprecated_member_use
             color: Theme.of(context).colorScheme.background,
             child: ListTile(
-              leading: Avatar(
-                mxContent: rootSpace.avatar,
-                name: displayname,
-              ),
+              leading: Avatar(mxContent: rootSpace.avatar, name: displayname),
               title: Text(
                 displayname,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
               ),
               subtitle: Text(
-                L10n.of(context)!
-                    .numChats(rootSpace.spaceChildren.length.toString()),
+                L10n.of(
+                  context,
+                )!.numChats(rootSpace.spaceChildren.length.toString()),
               ),
               onTap: () => widget.controller.setActiveSpace(rootSpace.id),
               onLongPress: () => _onSpaceChildContextMenu(null, rootSpace),
@@ -263,8 +254,9 @@ class _SpaceViewState extends State<SpaceView> {
               );
             }
             final isSpace = spaceChild.roomType == 'm.space';
-            final topic =
-                spaceChild.topic?.isEmpty ?? true ? null : spaceChild.topic;
+            final topic = spaceChild.topic?.isEmpty ?? true
+                ? null
+                : spaceChild.topic;
             if (spaceChild.roomId == activeSpaceId) {
               return SearchTitle(
                 title: spaceChild.name ?? spaceChild.canonicalAlias ?? 'Space',
@@ -277,10 +269,9 @@ class _SpaceViewState extends State<SpaceView> {
                     fontSize: 9,
                   ),
                 ),
-                color: Theme.of(context)
-                    .colorScheme
-                    .secondaryContainer
-                    .withAlpha(128),
+                color: Theme.of(
+                  context,
+                ).colorScheme.secondaryContainer.withAlpha(128),
                 trailing: const Padding(
                   padding: EdgeInsets.symmetric(horizontal: 16.0),
                   child: Icon(Icons.edit_outlined),
@@ -305,10 +296,7 @@ class _SpaceViewState extends State<SpaceView> {
                     ),
                   ),
                   if (!isSpace) ...[
-                    const Icon(
-                      Icons.people_outline,
-                      size: 16,
-                    ),
+                    const Icon(Icons.people_outline, size: 16),
                     const SizedBox(width: 4),
                     Text(
                       spaceChild.numJoinedMembers.toString(),
@@ -329,8 +317,9 @@ class _SpaceViewState extends State<SpaceView> {
                   color: Theme.of(context).colorScheme.onSurface,
                 ),
               ),
-              trailing:
-                  isSpace ? const Icon(Icons.chevron_right_outlined) : null,
+              trailing: isSpace
+                  ? const Icon(Icons.chevron_right_outlined)
+                  : null,
             );
           },
         );
@@ -339,8 +328,4 @@ class _SpaceViewState extends State<SpaceView> {
   }
 }
 
-enum SpaceChildContextAction {
-  join,
-  leave,
-  removeFromSpace,
-}
+enum SpaceChildContextAction { join, leave, removeFromSpace }

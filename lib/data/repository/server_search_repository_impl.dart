@@ -5,8 +5,8 @@ import 'package:fluffychat/domain/repository/server_search_repository.dart';
 import 'package:matrix/matrix.dart';
 
 class ServerSearchRepositoryImpl extends ServerSearchRepository {
-  final ServerSearchDatasource _serverSearchDatasource =
-      getIt.get<ServerSearchDatasource>();
+  final ServerSearchDatasource _serverSearchDatasource = getIt
+      .get<ServerSearchDatasource>();
 
   @override
   Future<ServerSearchResponse> search({

@@ -22,8 +22,9 @@ class _AdaptiveScaffoldAppBarState extends State<AdaptiveScaffoldAppBar> {
   Widget build(BuildContext context) {
     final child = SlotLayout(
       config: <Breakpoint, SlotLayoutConfig>{
-        const WidthPlatformBreakpoint(begin: ResponsiveUtils.minDesktopWidth):
-            SlotLayout.from(
+        const WidthPlatformBreakpoint(
+          begin: ResponsiveUtils.minDesktopWidth,
+        ): SlotLayout.from(
           key: AdaptiveScaffoldAppBarStyle.adaptiveAppBarKey,
           builder: (_) {
             return Container(
@@ -39,9 +40,7 @@ class _AdaptiveScaffoldAppBarState extends State<AdaptiveScaffoldAppBar> {
                     const _LeadingAppBarWidget(),
                     if (AppConfig.appGridDashboardAvailable &&
                         PlatformInfos.isWeb)
-                      const Expanded(
-                        child: AppGridDashboard(),
-                      ),
+                      const Expanded(child: AppGridDashboard()),
                   ],
                 ),
               ),

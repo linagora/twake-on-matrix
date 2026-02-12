@@ -18,9 +18,7 @@ class ForwardWebView extends StatelessWidget {
           ),
         ),
         clipBehavior: Clip.antiAlias,
-        child: const Forward(
-          isFullScreen: false,
-        ),
+        child: const Forward(isFullScreen: false),
       ),
     );
   }

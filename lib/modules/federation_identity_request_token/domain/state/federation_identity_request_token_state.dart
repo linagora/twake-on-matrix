@@ -13,9 +13,7 @@ class FederationIdentityRequestTokenInitial extends Initial {
 class FederationIdentityRequestTokenSuccess extends Success {
   final FederationTokenInformation tokenInformation;
 
-  const FederationIdentityRequestTokenSuccess({
-    required this.tokenInformation,
-  });
+  const FederationIdentityRequestTokenSuccess({required this.tokenInformation});
 
   @override
   List<Object?> get props => [tokenInformation];

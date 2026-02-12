@@ -24,9 +24,9 @@ class ConnectionStatusHeaderState extends State<ConnectionStatusHeader> {
 
   @override
   void initState() {
-    _onSyncSub = Matrix.of(context).client.onSyncStatus.stream.listen(
-          (_) => setState(() {}),
-        );
+    _onSyncSub = Matrix.of(
+      context,
+    ).client.onSyncStatus.stream.listen((_) => setState(() {}));
     super.initState();
   }
 
@@ -39,9 +39,11 @@ class ConnectionStatusHeaderState extends State<ConnectionStatusHeader> {
   @override
   Widget build(BuildContext context) {
     final client = Matrix.of(context).client;
-    final status = client.onSyncStatus.value ??
+    final status =
+        client.onSyncStatus.value ??
         const SyncStatusUpdate(SyncStatus.waitingForResponse);
-    final hide = client.onSync.value != null &&
+    final hide =
+        client.onSync.value != null &&
         status.status != SyncStatus.error &&
         client.prevBatch != null;
 
@@ -82,8 +84,9 @@ extension on SyncStatusUpdate {
       case SyncStatus.waitingForResponse:
         return L10n.of(context)!.loadingPleaseWait;
       case SyncStatus.error:
-        return ((error?.exception ?? Object()) as Object)
-            .toLocalizedString(context);
+        return ((error?.exception ?? Object()) as Object).toLocalizedString(
+          context,
+        );
       case SyncStatus.processing:
       case SyncStatus.cleaningUp:
       case SyncStatus.finished:

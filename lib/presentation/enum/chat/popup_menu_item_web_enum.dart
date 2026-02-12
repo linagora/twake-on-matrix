@@ -1,5 +1,1 @@
-enum InputBarContextMenu {
-  copy,
-  cut,
-  paste,
-}
+enum InputBarContextMenu { copy, cut, paste }

@@ -14,10 +14,7 @@ import 'package:matrix/matrix.dart';
 class ChatEventList extends StatelessWidget {
   final ChatController controller;
 
-  const ChatEventList({
-    super.key,
-    required this.controller,
-  });
+  const ChatEventList({super.key, required this.controller});
 
   @override
   Widget build(BuildContext context) {
@@ -65,9 +62,9 @@ class ChatEventList extends StatelessWidget {
             return false;
           },
           child: ScrollConfiguration(
-            behavior: ScrollConfiguration.of(context).copyWith(
-              dragDevices: dragDevicesSupported(),
-            ),
+            behavior: ScrollConfiguration.of(
+              context,
+            ).copyWith(dragDevices: dragDevicesSupported()),
             child: OptionalSelectionArea(
               isEnabled: PlatformInfos.isWeb && !controller.selectMode,
               child: ChatScrollView(
@@ -85,9 +82,7 @@ class ChatEventList extends StatelessWidget {
 
   Set<PointerDeviceKind>? dragDevicesSupported() {
     if (PlatformInfos.isWeb) {
-      return {
-        PointerDeviceKind.touch,
-      };
+      return {PointerDeviceKind.touch};
     }
     return {
       PointerDeviceKind.touch,
@@ -98,9 +93,7 @@ class ChatEventList extends StatelessWidget {
 
   Widget _chatEmptyBuilder(Timeline timeline) {
     if (controller.room?.isDirectChat ?? true) {
-      return DraftChatEmpty(
-        onTap: () => controller.inputFocus.requestFocus(),
-      );
+      return DraftChatEmpty(onTap: () => controller.inputFocus.requestFocus());
     } else {
       return _groupChatEmptyBuilder(timeline);
     }
@@ -108,9 +101,7 @@ class ChatEventList extends StatelessWidget {
 
   Widget _groupChatEmptyBuilder(Timeline timeline) {
     if (timeline.events.isNotEmpty) {
-      return GroupChatEmptyView(
-        firstEvent: timeline.events.last,
-      );
+      return GroupChatEmptyView(firstEvent: timeline.events.last);
     } else {
       return const SizedBox.shrink();
     }

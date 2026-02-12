@@ -15,10 +15,7 @@ class OptionalStack extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (isEnabled) {
-      return Stack(
-        alignment: alignment,
-        children: children,
-      );
+      return Stack(alignment: alignment, children: children);
     } else {
       return children.first;
     }

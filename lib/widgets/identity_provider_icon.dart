@@ -40,9 +40,9 @@ class _IdentityProviderIconState extends State<IdentityProviderIcon> {
           return SizedBox.square(dimension: widget.size);
         }
         return Image.network(
-          Uri.parse(widget.identityProvider.icon ?? '')
-              .getDownloadLink(client)
-              .toString(),
+          Uri.parse(
+            widget.identityProvider.icon ?? '',
+          ).getDownloadLink(client).toString(),
           width: widget.size,
           height: widget.size,
           errorBuilder: (context, error, stackTrace) {

@@ -9,11 +9,7 @@ import 'package:matrix/matrix.dart';
 import 'package:media_kit_video/media_kit_video.dart';
 
 class VideoViewerMobileTheme extends StatelessWidget {
-  const VideoViewerMobileTheme({
-    super.key,
-    required this.bytes,
-    this.event,
-  });
+  const VideoViewerMobileTheme({super.key, required this.bytes, this.event});
 
   final Uint8List bytes;
 
@@ -24,16 +20,10 @@ class VideoViewerMobileTheme extends StatelessWidget {
     return MaterialVideoControlsTheme(
       normal: MaterialVideoControlsThemeData(
         topButtonBarMargin: VideoViewerStyle.topButtonBarMargin(context),
-        bottomButtonBar: const [
-          MaterialPositionIndicator(),
-          Spacer(),
-        ],
+        bottomButtonBar: const [MaterialPositionIndicator(), Spacer()],
         topButtonBar: [
           Expanded(
-            child: MediaViewerAppBar(
-              event: event,
-              enablePaddingAppbar: false,
-            ),
+            child: MediaViewerAppBar(event: event, enablePaddingAppbar: false),
           ),
         ],
         controlsHoverDuration: VideoViewerStyle.controlsHoverDuration,
@@ -50,16 +40,10 @@ class VideoViewerMobileTheme extends StatelessWidget {
               alignment: Alignment.center,
               children: [
                 MxcImage(event: event),
-                VideoPlayer(
-                  bytes: bytes,
-                  event: event,
-                ),
+                VideoPlayer(bytes: bytes, event: event),
               ],
             )
-          : VideoPlayer(
-              bytes: bytes,
-              event: event,
-            ),
+          : VideoPlayer(bytes: bytes, event: event),
     );
   }
 }

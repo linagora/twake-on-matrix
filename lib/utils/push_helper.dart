@@ -163,11 +163,7 @@ Future<void> _tryPushHelper(
 
   // The person object for the android message style notification
   final avatar = event.room.avatar
-      ?.getThumbnail(
-        client,
-        width: 126,
-        height: 126,
-      )
+      ?.getThumbnail(client, width: 126, height: 126)
       .toString();
   File? avatarFile;
   try {
@@ -194,7 +190,7 @@ Future<void> _tryPushHelper(
 
   final messagingStyleInformation = PlatformInfos.isAndroid
       ? await AndroidFlutterLocalNotificationsPlugin()
-          .getActiveNotificationMessagingStyle(id)
+            .getActiveNotificationMessagingStyle(id)
       : null;
   messagingStyleInformation?.messages?.add(newMessage);
 
@@ -203,7 +199,8 @@ Future<void> _tryPushHelper(
     AppConfig.pushNotificationsChannelName,
     channelDescription: AppConfig.pushNotificationsChannelDescription,
     number: notification.counts?.unread,
-    styleInformation: messagingStyleInformation ??
+    styleInformation:
+        messagingStyleInformation ??
         MessagingStyleInformation(
           Person(name: event.room.client.userID),
           conversationTitle: event.room.getLocalizedDisplayname(
@@ -225,9 +222,7 @@ Future<void> _tryPushHelper(
 
   await flutterLocalNotificationsPlugin.show(
     id,
-    event.room.getLocalizedDisplayname(
-      MatrixLocals(l10n),
-    ),
+    event.room.getLocalizedDisplayname(MatrixLocals(l10n)),
     body,
     platformChannelSpecifics,
     payload: event.roomId,

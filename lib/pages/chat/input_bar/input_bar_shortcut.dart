@@ -43,14 +43,13 @@ class InputBarShortcuts extends StatelessWidget {
           _debouncer.run(() {
             controller?.addNewLine();
             Timer(const Duration(milliseconds: 50), () {
-              scrollController
-                  .jumpTo(scrollController.position.maxScrollExtent);
+              scrollController.jumpTo(
+                scrollController.position.maxScrollExtent,
+              );
             });
           });
         },
-        const SingleActivator(
-          flutter.LogicalKeyboardKey.enter,
-        ): () {
+        const SingleActivator(flutter.LogicalKeyboardKey.enter): () {
           onEnter?.call(controller?.text ?? '');
         },
       },

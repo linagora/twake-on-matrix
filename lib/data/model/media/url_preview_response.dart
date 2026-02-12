@@ -46,15 +46,15 @@ class UrlPreviewResponse with EquatableMixin {
 
   @override
   List<Object?> get props => [
-        matrixImageSize,
-        siteName,
-        imageAlt,
-        description,
-        imageUrl,
-        imageHeight,
-        imageType,
-        imageWidth,
-        imageTitle,
-        title,
-      ];
+    matrixImageSize,
+    siteName,
+    imageAlt,
+    description,
+    imageUrl,
+    imageHeight,
+    imageType,
+    imageWidth,
+    imageTitle,
+    title,
+  ];
 }

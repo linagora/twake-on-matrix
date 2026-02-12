@@ -25,7 +25,7 @@ class FileWebDownloadedPresentationState extends DownloadPresentationState {
   final MatrixFile matrixFile;
 
   const FileWebDownloadedPresentationState({required this.matrixFile})
-      : super();
+    : super();
 
   @override
   List<Object?> get props => [matrixFile];
@@ -36,10 +36,7 @@ class DownloadingPresentationState extends DownloadPresentationState {
 
   final int? total;
 
-  const DownloadingPresentationState({
-    this.receive,
-    this.total,
-  });
+  const DownloadingPresentationState({this.receive, this.total});
 
   @override
   List<Object?> get props => [receive, total];

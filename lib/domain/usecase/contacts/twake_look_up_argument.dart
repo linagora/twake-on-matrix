@@ -10,8 +10,5 @@ class TwakeLookUpArgument with EquatableMixin {
   });
 
   @override
-  List<Object?> get props => [
-        homeServerUrl,
-        withAccessToken,
-      ];
+  List<Object?> get props => [homeServerUrl, withAccessToken];
 }

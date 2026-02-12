@@ -1,9 +1,7 @@
 class LeaveChatException implements Exception {
   final dynamic error;
 
-  LeaveChatException({
-    this.error,
-  });
+  LeaveChatException({this.error});
 
   @override
   String toString() => error;
@@ -11,8 +9,8 @@ class LeaveChatException implements Exception {
 
 class RoomNullException extends LeaveChatException {
   RoomNullException()
-      : super(
-          error:
-              'Leave room button clicked while room is null. This should not be possible from the UI!',
-        );
+    : super(
+        error:
+            'Leave room button clicked while room is null. This should not be possible from the UI!',
+      );
 }

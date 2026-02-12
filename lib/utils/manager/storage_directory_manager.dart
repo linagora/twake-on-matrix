@@ -29,8 +29,8 @@ class StorageDirectoryManager {
     required String eventId,
     required String fileName,
   }) async {
-    final fileStoreDirectory =
-        await StorageDirectoryManager.instance.getFileStoreDirectory();
+    final fileStoreDirectory = await StorageDirectoryManager.instance
+        .getFileStoreDirectory();
     return '$fileStoreDirectory/$eventId/$fileName';
   }
 
@@ -72,8 +72,8 @@ class StorageDirectoryManager {
     required String eventId,
     required String fileName,
   }) async {
-    final fileStoreDirectory =
-        await StorageDirectoryManager.instance.getFileStoreDirectory();
+    final fileStoreDirectory = await StorageDirectoryManager.instance
+        .getFileStoreDirectory();
     return '$fileStoreDirectory/$eventId/decrypted-$fileName';
   }
 

@@ -13,9 +13,7 @@ class ChatGetPinnedEventsInteractor {
     required Client client,
     bool isInitial = false,
   }) async* {
-    Logs().d(
-      "ChatGetPinnedEventsInteractor()::execute()::roomId: $roomId",
-    );
+    Logs().d("ChatGetPinnedEventsInteractor()::execute()::roomId: $roomId");
     if (isInitial) {
       yield Right(ChatGetPinnedEventsLoading());
     }
@@ -23,9 +21,7 @@ class ChatGetPinnedEventsInteractor {
     try {
       final room = client.getRoomById(roomId);
       if (room == null) {
-        Logs().d(
-          "ChatGetPinnedEventsInteractor()::execute(): Room is Null",
-        );
+        Logs().d("ChatGetPinnedEventsInteractor()::execute(): Room is Null");
         yield Left(CannotGetPinnedMessages());
         return;
       }
@@ -38,16 +34,15 @@ class ChatGetPinnedEventsInteractor {
       );
       final result = (await Future.wait(
         pinnedEvents.map(room.getEventById),
-      ))
-          .nonNulls
-          .toList();
+      )).nonNulls.toList();
 
       if (result.isEmpty) {
         yield Left(ChatGetPinnedEventsNoResult());
         return;
       } else {
-        final filteredEvents =
-            result.where((event) => !event.shouldHideRedactedEvent()).toList();
+        final filteredEvents = result
+            .where((event) => !event.shouldHideRedactedEvent())
+            .toList();
 
         filteredEvents.sort((currentEvent, nextEvent) {
           final currentPinnedTime = currentEvent.originServerTs;

@@ -64,11 +64,7 @@ class TwakeFloatingActionButton extends StatelessWidget {
         color: Theme.of(context).colorScheme.onPrimaryContainer,
       );
     } else if (customIcon != null) {
-      return SizedBox(
-        width: 24.0,
-        height: 24.0,
-        child: customIcon,
-      );
+      return SizedBox(width: 24.0, height: 24.0, child: customIcon);
     } else if (imagePath != null) {
       return SvgPicture.asset(imagePath!);
     } else {

@@ -8,10 +8,7 @@ import 'package:fluffychat/generated/l10n/app_localizations.dart';
 class ContactStatusWidget extends StatelessWidget {
   final ContactStatus status;
 
-  ContactStatusWidget({
-    super.key,
-    required this.status,
-  });
+  ContactStatusWidget({super.key, required this.status});
 
   final Color? inactiveColor = LinagoraRefColors.material().neutral[60];
 
@@ -19,22 +16,22 @@ class ContactStatusWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return status == ContactStatus.inactive
         ? Padding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: 8.0,
-            ),
+            padding: const EdgeInsets.symmetric(horizontal: 8.0),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 SvgPicture.asset(
                   ImagePaths.icStatus,
-                  colorFilter:
-                      ColorFilter.mode(inactiveColor!, BlendMode.srcIn),
+                  colorFilter: ColorFilter.mode(
+                    inactiveColor!,
+                    BlendMode.srcIn,
+                  ),
                 ),
                 Text(
                   " ${L10n.of(context)!.inactive}",
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: inactiveColor,
-                      ),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.bodySmall?.copyWith(color: inactiveColor),
                 ),
               ],
             ),

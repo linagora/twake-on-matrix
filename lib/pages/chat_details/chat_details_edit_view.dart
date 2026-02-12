@@ -26,10 +26,7 @@ import 'package:photo_manager_image_provider/photo_manager_image_provider.dart';
 class ChatDetailsEditView extends StatelessWidget {
   final ChatDetailsEditController controller;
 
-  const ChatDetailsEditView(
-    this.controller, {
-    super.key,
-  });
+  const ChatDetailsEditView(this.controller, {super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -142,52 +139,62 @@ class ChatDetailsEditView extends StatelessWidget {
                                   ),
                                 ),
                               ),
-                              alignmentOffset: ChatDetailEditViewStyle
-                                  .contextMenuAlignmentOffset(context),
-                              builder: (
-                                BuildContext context,
-                                MenuController menuController,
-                                Widget? child,
-                              ) {
-                                return Container(
-                                  decoration: BoxDecoration(
-                                    shape: BoxShape.circle,
-                                    color:
-                                        Theme.of(context).colorScheme.onPrimary,
+                              alignmentOffset:
+                                  ChatDetailEditViewStyle.contextMenuAlignmentOffset(
+                                    context,
                                   ),
-                                  padding:
-                                      ChatDetailEditViewStyle.editIconPadding,
-                                  child: ElevatedButton(
-                                    onPressed: () => {
-                                      menuController.isOpen
-                                          ? menuController.close()
-                                          : menuController.open(),
-                                    },
-                                    style: ButtonStyle(
-                                      shape: WidgetStateProperty.all(
-                                        const CircleBorder(),
+                              builder:
+                                  (
+                                    BuildContext context,
+                                    MenuController menuController,
+                                    Widget? child,
+                                  ) {
+                                    return Container(
+                                      decoration: BoxDecoration(
+                                        shape: BoxShape.circle,
+                                        color: Theme.of(
+                                          context,
+                                        ).colorScheme.onPrimary,
                                       ),
-                                      padding: WidgetStateProperty.all(
-                                        ChatDetailEditViewStyle
-                                            .editIconMaterialPadding,
+                                      padding: ChatDetailEditViewStyle
+                                          .editIconPadding,
+                                      child: ElevatedButton(
+                                        onPressed: () => {
+                                          menuController.isOpen
+                                              ? menuController.close()
+                                              : menuController.open(),
+                                        },
+                                        style: ButtonStyle(
+                                          shape: WidgetStateProperty.all(
+                                            const CircleBorder(),
+                                          ),
+                                          padding: WidgetStateProperty.all(
+                                            ChatDetailEditViewStyle
+                                                .editIconMaterialPadding,
+                                          ),
+                                          iconColor: WidgetStateProperty.all(
+                                            Theme.of(
+                                              context,
+                                            ).colorScheme.onPrimary,
+                                          ),
+                                          backgroundColor:
+                                              WidgetStateProperty.all(
+                                                Theme.of(
+                                                  context,
+                                                ).colorScheme.primary,
+                                              ),
+                                        ),
+                                        child: const Icon(
+                                          Icons.edit_outlined,
+                                          size: ChatDetailEditViewStyle
+                                              .editIconSize,
+                                        ),
                                       ),
-                                      iconColor: WidgetStateProperty.all(
-                                        Theme.of(context).colorScheme.onPrimary,
-                                      ),
-                                      backgroundColor: WidgetStateProperty.all(
-                                        Theme.of(context).colorScheme.primary,
-                                      ),
-                                    ),
-                                    child: const Icon(
-                                      Icons.edit_outlined,
-                                      size:
-                                          ChatDetailEditViewStyle.editIconSize,
-                                    ),
-                                  ),
-                                );
-                              },
-                              menuChildren:
-                                  controller.listContextMenuBuilder(context),
+                                    );
+                                  },
+                              menuChildren: controller.listContextMenuBuilder(
+                                context,
+                              ),
                             );
                           },
                         ),
@@ -204,9 +211,7 @@ class ChatDetailsEditView extends StatelessWidget {
               child: Column(
                 children: [
                   _GroupNameField(controller: controller),
-                  const SizedBox(
-                    height: ChatDetailEditViewStyle.textFieldsGap,
-                  ),
+                  const SizedBox(height: ChatDetailEditViewStyle.textFieldsGap),
                   _DescriptionField(controller: controller),
                   const SizedBox(height: 20),
                   ValueListenableBuilder(
@@ -227,18 +232,14 @@ class ChatDetailsEditView extends StatelessWidget {
                         ),
                         title: Text(
                           L10n.of(context)!.encryption,
-                          style: Theme.of(context)
-                              .textTheme
-                              .bodyLarge
+                          style: Theme.of(context).textTheme.bodyLarge
                               ?.copyWith(
                                 color: Theme.of(context).colorScheme.onSurface,
                               ),
                         ),
                         subtitle: Text(
                           L10n.of(context)!.yourDataIsEncryptedForSecurity,
-                          style: Theme.of(context)
-                              .textTheme
-                              .bodySmall
+                          style: Theme.of(context).textTheme.bodySmall
                               ?.copyWith(
                                 color: LinagoraSysColors.material().tertiary,
                               ),
@@ -249,8 +250,8 @@ class ChatDetailsEditView extends StatelessWidget {
                           child: FittedBox(
                             fit: BoxFit.fill,
                             child: Switch(
-                              activeTrackColor: controller
-                                              .room?.canEnableEncryption !=
+                              activeTrackColor:
+                                  controller.room?.canEnableEncryption !=
                                           true ||
                                       controller.room?.encrypted == true
                                   ? LinagoraStateLayer(
@@ -258,7 +259,8 @@ class ChatDetailsEditView extends StatelessWidget {
                                     ).opacityLayer3
                                   : Theme.of(context).colorScheme.primary,
                               value: isRoomEnabledEncryption,
-                              onChanged: controller.room?.encrypted == false &&
+                              onChanged:
+                                  controller.room?.encrypted == false &&
                                       controller.room?.canEnableEncryption ==
                                           true
                                   ? (value) {
@@ -283,17 +285,17 @@ class ChatDetailsEditView extends StatelessWidget {
                   return Column(
                     children: [
                       Container(
-                        color: Theme.of(context)
-                            .colorScheme
-                            .surfaceContainerHighest,
+                        color: Theme.of(
+                          context,
+                        ).colorScheme.surfaceContainerHighest,
                         alignment: Alignment.centerLeft,
                         padding: const EdgeInsets.all(8.0),
                         child: Text(
                           L10n.of(context)!.administration,
-                          style: ChatDetailEditViewStyle
-                              .textChatDetailsEditCategoryStyle(
-                            context,
-                          ),
+                          style:
+                              ChatDetailEditViewStyle.textChatDetailsEditCategoryStyle(
+                                context,
+                              ),
                         ),
                       ),
                       ChatDetailsEditOption(
@@ -304,8 +306,9 @@ class ChatDetailsEditView extends StatelessWidget {
                             LinagoraRefColors.material().tertiary[30],
                         leading: Icons.admin_panel_settings_outlined,
                         titleColor: Theme.of(context).colorScheme.onSurface,
-                        leadingIconColor:
-                            Theme.of(context).colorScheme.onSurface,
+                        leadingIconColor: Theme.of(
+                          context,
+                        ).colorScheme.onSurface,
                         onTap: controller.openAssignRolesPage,
                       ),
                       if (controller.room?.getExceptionsMember().isNotEmpty ==
@@ -318,8 +321,9 @@ class ChatDetailsEditView extends StatelessWidget {
                               LinagoraRefColors.material().tertiary[30],
                           leading: Icons.people_outlined,
                           titleColor: Theme.of(context).colorScheme.onSurface,
-                          leadingIconColor:
-                              Theme.of(context).colorScheme.onSurface,
+                          leadingIconColor: Theme.of(
+                            context,
+                          ).colorScheme.onSurface,
                           onTap: controller.openExceptionsPage,
                         ),
                       if (controller.room?.getBannedMembers().isNotEmpty ==
@@ -332,8 +336,9 @@ class ChatDetailsEditView extends StatelessWidget {
                               LinagoraRefColors.material().tertiary[30],
                           leading: Icons.block,
                           titleColor: Theme.of(context).colorScheme.onSurface,
-                          leadingIconColor:
-                              Theme.of(context).colorScheme.onSurface,
+                          leadingIconColor: Theme.of(
+                            context,
+                          ).colorScheme.onSurface,
                           onTap: controller.openRemovedPage,
                         ),
                     ],
@@ -349,8 +354,8 @@ class ChatDetailsEditView extends StatelessWidget {
                   L10n.of(context)!.dangerZone,
                   style:
                       ChatDetailEditViewStyle.textChatDetailsEditCategoryStyle(
-                    context,
-                  ),
+                        context,
+                      ),
                 ),
               ),
               ChatDetailsEditOption(
@@ -421,9 +426,7 @@ class _AvatarBuilder extends StatelessWidget {
                       return child;
                     },
                     errorBuilder: (context, error, stackTrace) {
-                      return const Center(
-                        child: Icon(Icons.error_outline),
-                      );
+                      return const Center(child: Icon(Icons.error_outline));
                     },
                   ),
                 ),
@@ -475,9 +478,7 @@ class _AvatarBuilder extends StatelessWidget {
       child: Avatar(
         fontSize: ChatDetailEditViewStyle.avatarFontSize,
         mxContent: room.avatar,
-        name: room.getLocalizedDisplayname(
-          MatrixLocals(L10n.of(context)!),
-        ),
+        name: room.getLocalizedDisplayname(MatrixLocals(L10n.of(context)!)),
         size: ChatDetailEditViewStyle.avatarSize(context),
       ),
     );
@@ -485,9 +486,7 @@ class _AvatarBuilder extends StatelessWidget {
 }
 
 class _GroupNameField extends StatelessWidget {
-  const _GroupNameField({
-    required this.controller,
-  });
+  const _GroupNameField({required this.controller});
 
   final ChatDetailsEditController controller;
 
@@ -507,8 +506,9 @@ class _GroupNameField extends StatelessWidget {
           },
           decoration: InputDecoration(
             border: OutlineInputBorder(
-              borderSide:
-                  BorderSide(color: Theme.of(context).colorScheme.shadow),
+              borderSide: BorderSide(
+                color: Theme.of(context).colorScheme.shadow,
+              ),
             ),
             labelText: L10n.of(context)!.groupName,
             labelStyle: ChatDetailEditViewStyle.textFieldLabelStyle(context),
@@ -547,9 +547,7 @@ class _GroupNameField extends StatelessWidget {
 }
 
 class _DescriptionField extends StatelessWidget {
-  const _DescriptionField({
-    required this.controller,
-  });
+  const _DescriptionField({required this.controller});
 
   final ChatDetailsEditController controller;
 
@@ -569,8 +567,9 @@ class _DescriptionField extends StatelessWidget {
           },
           decoration: InputDecoration(
             border: OutlineInputBorder(
-              borderSide:
-                  BorderSide(color: Theme.of(context).colorScheme.shadow),
+              borderSide: BorderSide(
+                color: Theme.of(context).colorScheme.shadow,
+              ),
             ),
             labelText: L10n.of(context)!.description,
             labelStyle: ChatDetailEditViewStyle.textFieldLabelStyle(context),
@@ -602,16 +601,14 @@ class _DescriptionField extends StatelessWidget {
             ),
           ),
         ),
-        const SizedBox(
-          height: 2.0,
-        ),
+        const SizedBox(height: 2.0),
         Padding(
           padding: const EdgeInsets.only(left: 16),
           child: Text(
             L10n.of(context)!.descriptionHelper,
             style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
-                ),
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+            ),
           ),
         ),
       ],

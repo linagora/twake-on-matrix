@@ -25,9 +25,11 @@ class LoginView extends StatelessWidget {
             if (asyncSnapshot.hasError) {
               return Text(l10n.oopsSomethingWentWrong);
             }
-            final homeserver = asyncSnapshot.data?.homeserver
-                    ?.toString()
-                    .replaceFirst('https://', '') ??
+            final homeserver =
+                asyncSnapshot.data?.homeserver?.toString().replaceFirst(
+                  'https://',
+                  '',
+                ) ??
                 '';
             if (homeserver.isEmpty &&
                 asyncSnapshot.connectionState == ConnectionState.done) {
@@ -53,8 +55,9 @@ class LoginView extends StatelessWidget {
                     controller: controller.usernameController,
                     textInputAction: TextInputAction.next,
                     keyboardType: TextInputType.emailAddress,
-                    autofillHints:
-                        controller.loading ? null : [AutofillHints.username],
+                    autofillHints: controller.loading
+                        ? null
+                        : [AutofillHints.username],
                     decoration: InputDecoration(
                       prefixIcon: const Icon(Icons.account_box_outlined),
                       errorText: controller.usernameError,
@@ -68,8 +71,9 @@ class LoginView extends StatelessWidget {
                   child: TextField(
                     readOnly: controller.loading,
                     autocorrect: false,
-                    autofillHints:
-                        controller.loading ? null : [AutofillHints.password],
+                    autofillHints: controller.loading
+                        ? null
+                        : [AutofillHints.password],
                     contextMenuBuilder: mobileTwakeContextMenuBuilder,
                     controller: controller.passwordController,
                     textInputAction: TextInputAction.go,
@@ -99,8 +103,9 @@ class LoginView extends StatelessWidget {
                     child: ElevatedButton.icon(
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Theme.of(context).colorScheme.primary,
-                        foregroundColor:
-                            Theme.of(context).colorScheme.onPrimary,
+                        foregroundColor: Theme.of(
+                          context,
+                        ).colorScheme.onPrimary,
                       ),
                       onPressed: controller.loading ? null : controller.login,
                       icon: const Icon(Icons.login_outlined),

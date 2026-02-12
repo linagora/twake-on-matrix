@@ -28,12 +28,12 @@ typedef OnCameraPicked = void Function(AssetEntity assetEntity)?;
 
 mixin MediaPickerMixin on CommonMediaPickerMixin {
   List<PickerType> get listChatActions => [
-        PickerType.gallery,
-        PickerType.documents,
-        //TODO: Enable when we have location and contact picker
-        // PickerType.location,
-        // PickerType.contact,
-      ];
+    PickerType.gallery,
+    PickerType.documents,
+    //TODO: Enable when we have location and contact picker
+    // PickerType.location,
+    // PickerType.contact,
+  ];
 
   final PermissionHandlerService _permissionHandlerService =
       PermissionHandlerService();
@@ -49,26 +49,28 @@ mixin MediaPickerMixin on CommonMediaPickerMixin {
     TextEditingController? captionController,
     ValueKey? typeAheadKey,
   }) async {
-    await getCurrentMediaPermission(context)?.then((currentPermissionPhotos) {
-      if (currentPermissionPhotos != null) {
-        showMediasPickerBottomSheet(
-          context: context,
-          imagePickerController: imagePickerGridController,
-          permissionStatusPhotos: currentPermissionPhotos,
-          onSendTap: onSendTap,
-          room: room,
-          onPickerTypeTap: onPickerTypeTap,
-          onCameraPicked: onCameraPicked,
-          focusSuggestionController: focusSuggestionController,
-          captionController: captionController,
-          typeAheadKey: typeAheadKey,
-        );
-      }
-    }).onError((error, _) {
-      Logs().e(
-        "MediaPickerMixin::showMediaPickerBottomSheetAction(): error - $error",
-      );
-    });
+    await getCurrentMediaPermission(context)
+        ?.then((currentPermissionPhotos) {
+          if (currentPermissionPhotos != null) {
+            showMediasPickerBottomSheet(
+              context: context,
+              imagePickerController: imagePickerGridController,
+              permissionStatusPhotos: currentPermissionPhotos,
+              onSendTap: onSendTap,
+              room: room,
+              onPickerTypeTap: onPickerTypeTap,
+              onCameraPicked: onCameraPicked,
+              focusSuggestionController: focusSuggestionController,
+              captionController: captionController,
+              typeAheadKey: typeAheadKey,
+            );
+          }
+        })
+        .onError((error, _) {
+          Logs().e(
+            "MediaPickerMixin::showMediaPickerBottomSheetAction(): error - $error",
+          );
+        });
   }
 
   Future<void> showMediasPickerBottomSheet({
@@ -143,10 +145,9 @@ mixin MediaPickerMixin on CommonMediaPickerMixin {
                 color: LinagoraSysColors.material().surface,
                 border: Border(
                   top: BorderSide(
-                    color: Theme.of(context)
-                        .colorScheme
-                        .surfaceTint
-                        .withOpacity(0.16),
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.surfaceTint.withOpacity(0.16),
                   ),
                 ),
               ),
@@ -177,10 +178,9 @@ mixin MediaPickerMixin on CommonMediaPickerMixin {
                     decoration: BoxDecoration(
                       border: Border(
                         top: BorderSide(
-                          color: Theme.of(context)
-                              .colorScheme
-                              .surfaceTint
-                              .withOpacity(0.16),
+                          color: Theme.of(
+                            context,
+                          ).colorScheme.surfaceTint.withOpacity(0.16),
                         ),
                       ),
                     ),
@@ -194,13 +194,13 @@ mixin MediaPickerMixin on CommonMediaPickerMixin {
                             textInputAction: null,
                             focusSuggestionController:
                                 focusSuggestionController ??
-                                    FocusSuggestionController(),
+                                FocusSuggestionController(),
                             room: room,
                             controller: captionController,
                             decoration:
                                 SendFileDialogStyle.bottomBarInputDecoration(
-                              context,
-                            ),
+                                  context,
+                                ),
                             keyboardType: TextInputType.multiline,
                             autofocus: !PlatformInfos.isMobile,
                             onSubmitted: (_) {
@@ -237,52 +237,52 @@ mixin MediaPickerMixin on CommonMediaPickerMixin {
                                         numberSelectedImagesNotifier,
                                     builder:
                                         (context, numberSelectedImages, child) {
-                                      if (numberSelectedImages == 0 &&
-                                          onPickerTypeTap != null) {
-                                        return child!;
-                                      }
-                                      return Positioned(
-                                        bottom: 0,
-                                        right: 0,
-                                        child: Container(
-                                          width:
-                                              MediaPickerStyle.counterIconSize,
-                                          height:
-                                              MediaPickerStyle.counterIconSize,
-                                          padding:
-                                              MediaPickerStyle.counterPadding,
-                                          decoration: ShapeDecoration(
-                                            color: Theme.of(context)
-                                                .colorScheme
-                                                .primary,
-                                            shape:
-                                                const CircleBorder().copyWith(
-                                              side: BorderSide(
-                                                color: Theme.of(context)
-                                                    .colorScheme
-                                                    .surface,
-                                                width: MediaPickerStyle
-                                                    .borderSideWidth,
+                                          if (numberSelectedImages == 0 &&
+                                              onPickerTypeTap != null) {
+                                            return child!;
+                                          }
+                                          return Positioned(
+                                            bottom: 0,
+                                            right: 0,
+                                            child: Container(
+                                              width: MediaPickerStyle
+                                                  .counterIconSize,
+                                              height: MediaPickerStyle
+                                                  .counterIconSize,
+                                              padding: MediaPickerStyle
+                                                  .counterPadding,
+                                              decoration: ShapeDecoration(
+                                                color: Theme.of(
+                                                  context,
+                                                ).colorScheme.primary,
+                                                shape: const CircleBorder()
+                                                    .copyWith(
+                                                      side: BorderSide(
+                                                        color: Theme.of(
+                                                          context,
+                                                        ).colorScheme.surface,
+                                                        width: MediaPickerStyle
+                                                            .borderSideWidth,
+                                                      ),
+                                                    ),
+                                              ),
+                                              alignment: Alignment.center,
+                                              child: AutoSizeText(
+                                                "$numberSelectedImages",
+                                                style: Theme.of(context)
+                                                    .textTheme
+                                                    .labelLarge
+                                                    ?.copyWith(
+                                                      color: Theme.of(
+                                                        context,
+                                                      ).colorScheme.surface,
+                                                    ),
+                                                minFontSize: MediaPickerStyle
+                                                    .minFontSize,
                                               ),
                                             ),
-                                          ),
-                                          alignment: Alignment.center,
-                                          child: AutoSizeText(
-                                            "$numberSelectedImages",
-                                            style: Theme.of(context)
-                                                .textTheme
-                                                .labelLarge
-                                                ?.copyWith(
-                                                  color: Theme.of(context)
-                                                      .colorScheme
-                                                      .surface,
-                                                ),
-                                            minFontSize:
-                                                MediaPickerStyle.minFontSize,
-                                          ),
-                                        ),
-                                      );
-                                    },
+                                          );
+                                        },
                                     child: const SizedBox.shrink(),
                                   ),
                                 ],
@@ -302,8 +302,9 @@ mixin MediaPickerMixin on CommonMediaPickerMixin {
       ),
       onGoToSettings: (context) async {
         Navigator.pop(context);
-        await _permissionHandlerService
-            .requestPermissionForMediaActions(context);
+        await _permissionHandlerService.requestPermissionForMediaActions(
+          context,
+        );
       },
       goToSettingsWidget: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -316,20 +317,17 @@ mixin MediaPickerMixin on CommonMediaPickerMixin {
           Text(
             L10n.of(context)!.tapToAllowAccessToYourGallery,
             style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                  color: LinagoraRefColors.material().neutral,
-                  fontWeight: MediaPickerStyle.photoPermissionFontWeight,
-                  fontSize: MediaPickerStyle.photoPermissionFontSize,
-                ),
+              color: LinagoraRefColors.material().neutral,
+              fontWeight: MediaPickerStyle.photoPermissionFontWeight,
+              fontSize: MediaPickerStyle.photoPermissionFontSize,
+            ),
             textAlign: TextAlign.center,
           ),
         ],
       ),
       cameraWidget: UseCameraWidget(
-        onPressed: () => _onPressedCamera(
-          context,
-          imagePickerController,
-          onCameraPicked,
-        ),
+        onPressed: () =>
+            _onPressedCamera(context, imagePickerController, onCameraPicked),
         backgroundImage: const AssetImage("assets/verification.png"),
       ),
     );
@@ -366,8 +364,10 @@ mixin MediaPickerMixin on CommonMediaPickerMixin {
     OnCameraPicked? onCameraPicked,
     bool onlyImage = false,
   }) async {
-    var assetEntity =
-        await pickMediaFromCameraAction(context: context, onlyImage: onlyImage);
+    var assetEntity = await pickMediaFromCameraAction(
+      context: context,
+      onlyImage: onlyImage,
+    );
     Logs().d(
       "MediaPickerMixin::_pickFromCameraAction(): assetEntity - $assetEntity",
     );

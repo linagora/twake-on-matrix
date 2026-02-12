@@ -45,8 +45,9 @@ class ChatDetailsDownloadFileTile extends StatelessWidget {
                 children: [
                   Text(
                     filename,
-                    style:
-                        ChatDetailsFileTileStyle.downloadFileTextStyle(context),
+                    style: ChatDetailsFileTileStyle.downloadFileTextStyle(
+                      context,
+                    ),
                     maxLines: ChatDetailsFileTileStyle.downloadFilenameMaxLines,
                     overflow: TextOverflow.ellipsis,
                   ),

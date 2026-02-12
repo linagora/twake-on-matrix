@@ -28,10 +28,9 @@ import 'matrix_file_extension.dart';
 extension LocalizedBody on Event {
   Future<LoadingDialogResult<MatrixFile?>> getFile(
     BuildContext context,
-  ) async =>
-      TwakeDialog.showFutureLoadingDialogFullScreen(
-        future: downloadAndDecryptAttachment,
-      );
+  ) async => TwakeDialog.showFutureLoadingDialogFullScreen(
+    future: downloadAndDecryptAttachment,
+  );
 
   Future<String?> saveFile(
     BuildContext context, {
@@ -70,9 +69,9 @@ extension LocalizedBody on Event {
     return (filename.contains('.')
         ? filename.split('.').last.toUpperCase()
         : content
-            .tryGetMap<String, dynamic>('info')
-            ?.tryGet<String>('mimetype')
-            ?.toUpperCase());
+              .tryGetMap<String, dynamic>('info')
+              ?.tryGet<String>('mimetype')
+              ?.toUpperCase());
   }
 
   bool get isVideoOrImage =>
@@ -108,8 +107,11 @@ extension LocalizedBody on Event {
       (thumbnailInfoMap['size'] as int) < room.client.database.maxFileSize;
 
   bool get showThumbnail =>
-      [MessageTypes.Image, MessageTypes.Sticker, MessageTypes.Video]
-          .contains(messageType) &&
+      [
+        MessageTypes.Image,
+        MessageTypes.Sticker,
+        MessageTypes.Video,
+      ].contains(messageType) &&
       (kIsWeb ||
           isAttachmentSmallEnough ||
           isThumbnailSmallEnough ||
@@ -142,9 +144,9 @@ extension LocalizedBody on Event {
   }
 
   User? getUser() {
-    return room
-        .getParticipants()
-        .firstWhereOrNull((user) => user.id == senderId);
+    return room.getParticipants().firstWhereOrNull(
+      (user) => user.id == senderId,
+    );
   }
 
   // Check if the sender of the current event is the same as the compared event.
@@ -198,18 +200,15 @@ extension LocalizedBody on Event {
   bool _isContextMenuForRightAlignedMessage() => !isOwnMessage;
 
   bool get timelineOverlayMessage =>
-      {
-        MessageTypes.Video,
-        MessageTypes.Image,
-      }.contains(messageType) &&
+      {MessageTypes.Video, MessageTypes.Image}.contains(messageType) &&
       isVideoAvailable &&
       !isCaptionModeOrReply();
 
   bool get hideDisplayNameInBubbleChat => {
-        MessageTypes.Video,
-        MessageTypes.Image,
-        MessageTypes.File,
-      }.contains(messageType);
+    MessageTypes.Video,
+    MessageTypes.Image,
+    MessageTypes.File,
+  }.contains(messageType);
 
   bool hideDisplayName(Event? nextEvent, bool isMobile) =>
       isMobile && (isOwnMessage || room.isDirectChat) ||
@@ -222,10 +221,9 @@ extension LocalizedBody on Event {
 
   Future<void> copy(BuildContext context, Timeline timeline) async {
     if (messageType == MessageTypes.Image && PlatformInfos.isWeb) {
-      final matrixFile = getMatrixFile() ??
-          await downloadAndDecryptAttachment(
-            getThumbnail: true,
-          );
+      final matrixFile =
+          getMatrixFile() ??
+          await downloadAndDecryptAttachment(getThumbnail: true);
       try {
         await TwakeClipboard.instance.copyImageAsBytes(
           matrixFile.bytes,
@@ -243,12 +241,10 @@ extension LocalizedBody on Event {
   }
 
   Future<void> copyTextEvent(BuildContext context, Timeline timeline) async {
-    await TwakeClipboard.instance
-        .copyText(getSelectedEventString(context, timeline));
-    TwakeSnackBar.show(
-      context,
-      L10n.of(context)!.textCopiedToClipboard,
+    await TwakeClipboard.instance.copyText(
+      getSelectedEventString(context, timeline),
     );
+    TwakeSnackBar.show(context, L10n.of(context)!.textCopiedToClipboard);
   }
 
   String getSelectedEventString(BuildContext context, Timeline timeline) {
@@ -276,48 +272,48 @@ extension LocalizedBody on Event {
     switch (numberEmotes) {
       case 1:
         return Theme.of(context).textTheme.bodyLarge?.copyWith(
-              fontSize: 79.5,
-              color: Theme.of(context).colorScheme.onSurface,
-            );
+          fontSize: 79.5,
+          color: Theme.of(context).colorScheme.onSurface,
+        );
       case 2:
         return Theme.of(context).textTheme.bodyLarge?.copyWith(
-              fontSize: 63.24,
-              color: Theme.of(context).colorScheme.onSurface,
-            );
+          fontSize: 63.24,
+          color: Theme.of(context).colorScheme.onSurface,
+        );
       case 3:
         return Theme.of(context).textTheme.bodyLarge?.copyWith(
-              fontSize: 54.2,
-              color: Theme.of(context).colorScheme.onSurface,
-            );
+          fontSize: 54.2,
+          color: Theme.of(context).colorScheme.onSurface,
+        );
       case 4:
         return Theme.of(context).textTheme.bodyLarge?.copyWith(
-              fontSize: 45.17,
-              color: Theme.of(context).colorScheme.onSurface,
-            );
+          fontSize: 45.17,
+          color: Theme.of(context).colorScheme.onSurface,
+        );
       case 5:
         return Theme.of(context).textTheme.bodyLarge?.copyWith(
-              fontSize: 36.14,
-              color: Theme.of(context).colorScheme.onSurface,
-            );
+          fontSize: 36.14,
+          color: Theme.of(context).colorScheme.onSurface,
+        );
       case 6:
         return Theme.of(context).textTheme.bodyLarge?.copyWith(
-              fontSize: 18.07,
-              color: Theme.of(context).colorScheme.onSurface,
-            );
+          fontSize: 18.07,
+          color: Theme.of(context).colorScheme.onSurface,
+        );
       default:
         return Theme.of(context).textTheme.bodyLarge?.copyWith(
-              color: Theme.of(context).colorScheme.onSurface,
-            );
+          color: Theme.of(context).colorScheme.onSurface,
+        );
     }
   }
 
   TextStyle? getMessageTextStyle(BuildContext context) {
     if (redacted) {
       return Theme.of(context).textTheme.bodyLarge?.copyWith(
-            fontSize: 17,
-            height: 24 / 17,
-            color: LinagoraRefColors.material().tertiary[30],
-          );
+        fontSize: 17,
+        height: 24 / 17,
+        color: LinagoraRefColors.material().tertiary[30],
+      );
     }
 
     if (isDisplayOnlyEmoji()) {
@@ -325,10 +321,8 @@ extension LocalizedBody on Event {
     }
 
     return Theme.of(context).textTheme.bodyLarge?.copyWith(
-          color: Theme.of(
-            context,
-          ).colorScheme.onSurface,
-        );
+      color: Theme.of(context).colorScheme.onSurface,
+    );
   }
 
   List<Client?> currentRoomBundle(MatrixState? matrix) {
@@ -390,11 +384,11 @@ extension LocalizedBody on Event {
     return isSomeoneChangeDisplayName();
   }
 
-  bool hasReactionEvent({
-    required Timeline timeline,
-  }) {
-    final allReactionEvents =
-        aggregatedEvents(timeline, RelationshipTypes.reaction);
+  bool hasReactionEvent({required Timeline timeline}) {
+    final allReactionEvents = aggregatedEvents(
+      timeline,
+      RelationshipTypes.reaction,
+    );
     final reactionMap = <String, ReactionEntry>{};
 
     for (final e in allReactionEvents) {
@@ -515,7 +509,8 @@ extension LocalizedBody on Event {
 
     // Find the most recent edit event
     final latestEdit = editEvents.reduce(
-      (latest, current) => current.originServerTs.millisecondsSinceEpoch >
+      (latest, current) =>
+          current.originServerTs.millisecondsSinceEpoch >
               latest.originServerTs.millisecondsSinceEpoch
           ? current
           : latest,
@@ -561,8 +556,10 @@ extension LocalizedBody on Event {
     if (formattedBody == null || formattedBody.isEmpty) return false;
 
     try {
-      final document =
-          html.DomParser().parseFromString(formattedBody, 'text/html');
+      final document = html.DomParser().parseFromString(
+        formattedBody,
+        'text/html',
+      );
       final anchors = document.querySelectorAll('a');
 
       for (final anchor in anchors) {
@@ -637,9 +634,6 @@ extension FutureEventExtension on Event {
     if (placeholder != null) {
       return placeholder;
     }
-    return await uploadManager.getMatrixFile(
-      eventId,
-      room: room,
-    );
+    return await uploadManager.getMatrixFile(eventId, room: room);
   }
 }

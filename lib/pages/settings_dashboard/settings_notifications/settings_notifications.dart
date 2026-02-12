@@ -17,8 +17,7 @@ enum PushRule {
   containsUserName(ruleKey: '.m.rule.contains_user_name'),
   inviteForMe(ruleKey: '.m.rule.invite_for_me'),
   memberEvent(ruleKey: '.m.rule.member_event'),
-  suppressNotices(ruleKey: '.m.rule.suppress_notices'),
-  ;
+  suppressNotices(ruleKey: '.m.rule.suppress_notices');
 
   const PushRule({required this.ruleKey});
 
@@ -127,14 +126,8 @@ class SettingsNotificationsController extends State<SettingsNotifications> {
 
   static const _oneToOneEnabledActions = [
     'notify',
-    {
-      "set_tweak": "sound",
-      "value": "default",
-    },
-    {
-      "set_tweak": "highlight",
-      "value": false,
-    }
+    {"set_tweak": "sound", "value": "default"},
+    {"set_tweak": "highlight", "value": false},
   ];
 
   void setNotificationSetting(NotificationSettingsItem item, bool enabled) {
@@ -143,11 +136,7 @@ class SettingsNotificationsController extends State<SettingsNotifications> {
         final client = Matrix.of(context).client;
         if (item.key == PushRule.roomOneToOne.ruleKey) {
           return Future.wait([
-            client.setPushRuleEnabled(
-              item.type,
-              item.key,
-              true,
-            ),
+            client.setPushRuleEnabled(item.type, item.key, true),
             client.setPushRuleEnabled(
               item.type,
               PushRule.roomEncryptedOneToOne.ruleKey,
@@ -166,11 +155,7 @@ class SettingsNotificationsController extends State<SettingsNotifications> {
           ]);
         }
 
-        return client.setPushRuleEnabled(
-          item.type,
-          item.key,
-          enabled,
-        );
+        return client.setPushRuleEnabled(item.type, item.key, enabled);
       },
     );
   }
@@ -192,11 +177,8 @@ class SettingsNotificationsController extends State<SettingsNotifications> {
 
     final success = await TwakeDialog.showFutureLoadingDialogFullScreen(
       future: () => Matrix.of(context).client.deletePusher(
-            PusherId(
-              appId: pusher.appId,
-              pushkey: pusher.pushkey,
-            ),
-          ),
+        PusherId(appId: pusher.appId, pushkey: pusher.pushkey),
+      ),
     );
 
     if (success.error != null) return;

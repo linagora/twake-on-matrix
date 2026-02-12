@@ -64,8 +64,10 @@ extension RoomStatusExtension on Room {
       // we checked users that have seen the eventId argument or older
       final mainThreadReceipts = receiptState.mainThread!.otherUsers.entries
           .where(
-            (element) => element.value.eventId
-                .isEventIdOlderOrSameAs(timeline, eventId!),
+            (element) => element.value.eventId.isEventIdOlderOrSameAs(
+              timeline,
+              eventId!,
+            ),
           )
           .map((e) => unsafeGetUserFromMemoryOrFallback(e.key))
           .toList();
@@ -78,9 +80,7 @@ extension RoomStatusExtension on Room {
           break;
         }
       }
-      lastReceipts.removeWhere(
-        (user) => user.id == client.userID,
-      );
+      lastReceipts.removeWhere((user) => user.id == client.userID);
     }
     return lastReceipts.toList();
   }
@@ -117,9 +117,9 @@ extension RoomStatusExtension on Room {
           );
         } else if (lastActiveDateTime.isLessThanADayAgo()) {
           final timeOffline = currentDateTime.difference(lastActiveDateTime);
-          return L10n.of(context)!.onlineHourAgo(
-            (timeOffline.inMinutes / 60).round(),
-          );
+          return L10n.of(
+            context,
+          )!.onlineHourAgo((timeOffline.inMinutes / 60).round());
         } else if (lastActiveDateTime.isLessThan30DaysAgo()) {
           return L10n.of(context)!.onlineDayAgo(
             currentDateTime.difference(lastActiveDateTime).inDays,

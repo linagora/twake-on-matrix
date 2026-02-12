@@ -19,8 +19,9 @@ class SendFileDialogView extends StatelessWidget {
     return Center(
       child: Material(
         color: Theme.of(context).colorScheme.onPrimary,
-        borderRadius:
-            BorderRadius.circular(SendFileDialogStyle.dialogBorderRadius),
+        borderRadius: BorderRadius.circular(
+          SendFileDialogStyle.dialogBorderRadius,
+        ),
         child: Container(
           width: controller.isSendMediaWithCaption
               ? SendFileDialogStyle.dialogWidthForMedia
@@ -64,8 +65,8 @@ class SendFileDialogView extends StatelessWidget {
                                   L10n.of(context)!.errorSendingFiles,
                                   style:
                                       SendFileDialogStyle.subHeaderErrorStyle(
-                                    context,
-                                  ),
+                                        context,
+                                      ),
                                   maxLines: 3,
                                 ),
                               ),
@@ -105,8 +106,9 @@ class SendFileDialogView extends StatelessWidget {
                   room: controller.widget.room,
                   controller: controller.textEditingController,
                   textInputAction: null,
-                  decoration:
-                      SendFileDialogStyle.bottomBarInputDecoration(context),
+                  decoration: SendFileDialogStyle.bottomBarInputDecoration(
+                    context,
+                  ),
                   keyboardType: TextInputType.multiline,
                   typeAheadFocusNode: controller.captionsFocusNode,
                   autofocus: !PlatformInfos.isMobile,
@@ -138,13 +140,11 @@ class SendFileDialogView extends StatelessWidget {
                     child: Text(
                       L10n.of(context)!.cancel,
                       style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                            color: Theme.of(context).colorScheme.primary,
-                          ),
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
                     ),
                   ),
-                  const SizedBox(
-                    width: 4.0,
-                  ),
+                  const SizedBox(width: 4.0),
                   TextButton(
                     onPressed: controller.send,
                     autofocus: true,
@@ -166,10 +166,10 @@ class SendFileDialogView extends StatelessWidget {
                     child: Text(
                       L10n.of(context)!.send,
                       style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                            color: SendFileDialogStyle.listViewBackgroundColor(
-                              context,
-                            ),
-                          ),
+                        color: SendFileDialogStyle.listViewBackgroundColor(
+                          context,
+                        ),
+                      ),
                     ),
                   ),
                 ],

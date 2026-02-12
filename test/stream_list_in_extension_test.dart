@@ -9,16 +9,13 @@ void main() {
       const chunkSize = 1024 * 1024; // 1MB
       final numChunks = (dataSize / chunkSize).ceil();
       final dataStream = Stream<List<int>>.fromIterable(
-        List.generate(
-          numChunks,
-          (index) {
-            final chunk = List<int>.filled(chunkSize, index % 256);
-            if (index == numChunks - 1 && dataSize % chunkSize != 0) {
-              return chunk.sublist(0, dataSize % chunkSize);
-            }
-            return chunk;
-          },
-        ),
+        List.generate(numChunks, (index) {
+          final chunk = List<int>.filled(chunkSize, index % 256);
+          if (index == numChunks - 1 && dataSize % chunkSize != 0) {
+            return chunk.sublist(0, dataSize % chunkSize);
+          }
+          return chunk;
+        }),
       );
 
       final startTime = DateTime.now();

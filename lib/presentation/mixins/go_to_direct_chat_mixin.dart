@@ -35,9 +35,9 @@ mixin GoToDraftChatMixin {
     required String path,
     required ContactPresentationSearch contactPresentationSearch,
   }) {
-    final roomId = Matrix.of(context)
-        .client
-        .getDirectChatFromUserId(contactPresentationSearch.matrixId!);
+    final roomId = Matrix.of(
+      context,
+    ).client.getDirectChatFromUserId(contactPresentationSearch.matrixId!);
     if (roomId == null) {
       goToDraftChat(
         context: context,
@@ -105,8 +105,9 @@ mixin GoToDraftChatMixin {
     required String path,
     required User user,
   }) async {
-    Logs()
-        .d('SearchController::getContactAndRecentChatStream() - event: $user');
+    Logs().d(
+      'SearchController::getContactAndRecentChatStream() - event: $user',
+    );
     final roomIdResult = await TwakeDialog.showFutureLoadingDialogFullScreen(
       future: () => user.startDirectChat(),
     );

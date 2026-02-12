@@ -1,5 +1,1 @@
-enum RightColumnType {
-  search,
-  profileInfo,
-  groupChatDetails,
-}
+enum RightColumnType { search, profileInfo, groupChatDetails }

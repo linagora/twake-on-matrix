@@ -55,10 +55,7 @@ class DevicesSettingsController extends State<DevicesSettings> {
         errorDeletingDevices = null;
       });
       await matrix.client.uiaRequestBackground(
-        (auth) => matrix.client.deleteDevices(
-          deviceIds,
-          auth: auth,
-        ),
+        (auth) => matrix.client.deleteDevices(deviceIds, auth: auth),
       );
       reload();
     } catch (e, s) {
@@ -76,17 +73,13 @@ class DevicesSettingsController extends State<DevicesSettings> {
       title: L10n.of(context)!.changeDeviceName,
       okLabel: L10n.of(context)!.ok,
       cancelLabel: L10n.of(context)!.cancel,
-      textFields: [
-        DialogTextField(
-          hintText: device.displayName,
-        ),
-      ],
+      textFields: [DialogTextField(hintText: device.displayName)],
     );
     if (displayName == null) return;
     final success = await TwakeDialog.showFutureLoadingDialogFullScreen(
-      future: () => Matrix.of(context)
-          .client
-          .updateDevice(device.deviceId, displayName: displayName.single),
+      future: () => Matrix.of(
+        context,
+      ).client.updateDevice(device.deviceId, displayName: displayName.single),
     );
     if (success.error == null) {
       reload();
@@ -100,8 +93,10 @@ class DevicesSettingsController extends State<DevicesSettings> {
         .deviceKeys[device.deviceId]!
         .startVerification();
     req.onUpdate = () {
-      if ({KeyVerificationState.error, KeyVerificationState.done}
-          .contains(req.state)) {
+      if ({
+        KeyVerificationState.error,
+        KeyVerificationState.done,
+      }.contains(req.state)) {
         setState(() {});
       }
     };
@@ -132,9 +127,7 @@ class DevicesSettingsController extends State<DevicesSettings> {
   bool _isOwnDevice(Device userDevice) =>
       userDevice.deviceId == Matrix.of(context).client.deviceID;
 
-  Device? get thisDevice => devices!.firstWhereOrNull(
-        _isOwnDevice,
-      );
+  Device? get thisDevice => devices!.firstWhereOrNull(_isOwnDevice);
 
   List<Device> get notThisDevice => List<Device>.from(devices!)
     ..removeWhere(_isOwnDevice)

@@ -11,8 +11,9 @@ void main() {
     description: 'searching a contact',
     test: ($) async {
       final s = SoftAssertHelper();
-      const searchByMatrixAddress =
-          String.fromEnvironment('SearchByMatrixAddress');
+      const searchByMatrixAddress = String.fromEnvironment(
+        'SearchByMatrixAddress',
+      );
       const searchByTitle = String.fromEnvironment('SearchByTitle');
       const currentAccount = String.fromEnvironment('CurrentAccount');
 
@@ -49,8 +50,9 @@ void main() {
       );
 
       // search by full an address matrix but make it in case-sensitive format
-      await ContactScenario($)
-          .enterSearchText(searchByMatrixAddress.toUpperCase());
+      await ContactScenario(
+        $,
+      ).enterSearchText(searchByMatrixAddress.toUpperCase());
       //verify there is one result
       s.softAssertEquals(
         ((await ContactListRobot($).getListOfContact()).length) == 1,
@@ -58,16 +60,16 @@ void main() {
         'Search by $searchByMatrixAddress.toUpperCase() Expected number of group is 1 , but found != 1',
       );
       s.softAssertEquals(
-        (await (await ContactListRobot($).getListOfContact())[0]
-                .getOwnerLabel())
-            .visible,
+        (await (await ContactListRobot(
+          $,
+        ).getListOfContact())[0].getOwnerLabel()).visible,
         false,
         'Owner is missing!',
       );
       s.softAssertEquals(
-        (await (await ContactListRobot($).getListOfContact())[0]
-                .getEmailLabelIncaseSearching())
-            .visible,
+        (await (await ContactListRobot(
+          $,
+        ).getListOfContact())[0].getEmailLabelIncaseSearching()).visible,
         true,
         'Email field is not shown',
       );
@@ -81,23 +83,24 @@ void main() {
         '>1',
       );
       s.softAssertEquals(
-        (await (await ContactListRobot($).getListOfContact())[0]
-                .getOwnerLabel())
-            .visible,
+        (await (await ContactListRobot(
+          $,
+        ).getListOfContact())[0].getOwnerLabel()).visible,
         true,
         'Owner is missing!',
       );
       s.softAssertEquals(
-        (await (await ContactListRobot($).getListOfContact())[0]
-                .getEmailLabelIncaseSearching())
-            .visible,
+        (await (await ContactListRobot(
+          $,
+        ).getListOfContact())[0].getEmailLabelIncaseSearching()).visible,
         true,
         'Email field is not shown',
       );
 
       // after searching, open a chat by clicking on a result
-      final chatGroupDetailRobot =
-          await ContactScenario($).openChatWithContact(searchByTitle);
+      final chatGroupDetailRobot = await ContactScenario(
+        $,
+      ).openChatWithContact(searchByTitle);
       //verify group chat detail screen is shown
       expect(await chatGroupDetailRobot.isVisible(), isTrue);
 

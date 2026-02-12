@@ -14,10 +14,7 @@ import 'package:matrix/matrix.dart';
 part 'upload_file_info.g.dart';
 
 @JsonSerializable(
-  converters: [
-    StreamControllerConverter(),
-    CancelTokenConverter(),
-  ],
+  converters: [StreamControllerConverter(), CancelTokenConverter()],
   explicitToJson: true,
 )
 class UploadFileInfo extends UploadInfo {
@@ -55,16 +52,16 @@ class UploadFileInfo extends UploadInfo {
 
   @override
   List<Object?> get props => [
-        txid,
-        uploadStateStreamController,
-        cancelToken,
-        createdAt,
-        captionInfo,
-        inReplyToEventId,
-        isFailed,
-        fileInfo,
-        matrixFile,
-        thumbnail,
-        shrinkImageMaxDimension,
-      ];
+    txid,
+    uploadStateStreamController,
+    cancelToken,
+    createdAt,
+    captionInfo,
+    inReplyToEventId,
+    isFailed,
+    fileInfo,
+    matrixFile,
+    thumbnail,
+    shrinkImageMaxDimension,
+  ];
 }

@@ -27,8 +27,9 @@ class DioCacheInterceptorForClient {
   }
 
   void _bindInterceptor(GetIt get) async {
-    final instanceName =
-        getInstanceNameForClient(_memCacheDioInterceptorForClientName);
+    final instanceName = getInstanceNameForClient(
+      _memCacheDioInterceptorForClientName,
+    );
     if (!get.isRegistered<MatrixDioCacheInterceptor>(
       instanceName: instanceName,
     )) {
@@ -62,16 +63,18 @@ class DioCacheInterceptorForClient {
     final dio = get.get<Dio>(instanceName: NetworkDI.homeServerDioName);
     dio.interceptors.add(
       get.get<MatrixDioCacheInterceptor>(
-        instanceName:
-            getInstanceNameForClient(_memCacheDioInterceptorForClientName),
+        instanceName: getInstanceNameForClient(
+          _memCacheDioInterceptorForClientName,
+        ),
       ),
     );
   }
 
   void _bindMethodSupportMemCache(GetIt get) {
     final dioCacheCustomInterceptor = get.get<MatrixDioCacheInterceptor>(
-      instanceName:
-          getInstanceNameForClient(_memCacheDioInterceptorForClientName),
+      instanceName: getInstanceNameForClient(
+        _memCacheDioInterceptorForClientName,
+      ),
     );
     dioCacheCustomInterceptor.addUriSupportsCache([
       HomeserverEndpoint.configPath.generateHomeserverConfigEndpoint(),

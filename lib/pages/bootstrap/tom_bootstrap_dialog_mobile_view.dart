@@ -12,10 +12,7 @@ import 'package:lottie/lottie.dart';
 
 class TomBootstrapDialogMobileView extends StatelessWidget {
   final String description;
-  const TomBootstrapDialogMobileView({
-    super.key,
-    required this.description,
-  });
+  const TomBootstrapDialogMobileView({super.key, required this.description});
 
   @override
   Widget build(BuildContext context) {
@@ -84,8 +81,8 @@ class TomBootstrapDialogMobileView extends StatelessWidget {
                   Text(
                     L10n.of(context)!.settingUpYourTwake,
                     style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                          color: LinagoraSysColors.material().onBackground,
-                        ),
+                      color: LinagoraSysColors.material().onBackground,
+                    ),
                     textAlign: TextAlign.center,
                   ),
                   Padding(
@@ -99,8 +96,8 @@ class TomBootstrapDialogMobileView extends StatelessWidget {
                   Text(
                     description,
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: LinagoraSysColors.material().tertiary,
-                        ),
+                      color: LinagoraSysColors.material().tertiary,
+                    ),
                     textAlign: TextAlign.center,
                   ),
                 ],

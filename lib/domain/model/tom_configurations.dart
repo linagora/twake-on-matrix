@@ -16,6 +16,10 @@ class ToMConfigurations with EquatableMixin {
   });
 
   @override
-  List<Object?> get props =>
-      [tomServerInformation, identityServerInformation, authUrl, loginType];
+  List<Object?> get props => [
+    tomServerInformation,
+    identityServerInformation,
+    authUrl,
+    loginType,
+  ];
 }

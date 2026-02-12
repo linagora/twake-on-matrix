@@ -16,9 +16,5 @@ class FederationArguments with EquatableMixin {
   });
 
   @override
-  List<Object?> get props => [
-        federationUrl,
-        tokenInformation,
-        contactMaps,
-      ];
+  List<Object?> get props => [federationUrl, tokenInformation, contactMaps];
 }

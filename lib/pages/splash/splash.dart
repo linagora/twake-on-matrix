@@ -39,10 +39,7 @@ class _SplashState extends State<Splash> {
           Positioned(
             bottom: 40,
             child: SafeArea(
-              child: Image.asset(
-                ImagePaths.icBrandingPng,
-                width: 210,
-              ),
+              child: Image.asset(ImagePaths.icBrandingPng, width: 210),
             ),
           ),
         ],

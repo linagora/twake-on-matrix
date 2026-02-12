@@ -48,18 +48,13 @@ mixin ReceiveSharingIntentMixin<T extends StatefulWidget> on State<T> {
       return;
     }
     matrixState.shareContentList = await Future.wait(
-      files.map(
-        (sharedMediaFile) async {
-          final file = await sharedMediaFile.toMatrixFile();
-          Logs().d(
-            'ReceiveSharingIntentMixin::_processIncomingSharedFiles: Size ${file.size}',
-          );
-          return {
-            'msgtype': TwakeEventTypes.shareFileEventType,
-            'file': file,
-          };
-        },
-      ),
+      files.map((sharedMediaFile) async {
+        final file = await sharedMediaFile.toMatrixFile();
+        Logs().d(
+          'ReceiveSharingIntentMixin::_processIncomingSharedFiles: Size ${file.size}',
+        );
+        return {'msgtype': TwakeEventTypes.shareFileEventType, 'file': file};
+      }),
     );
     openSharePage();
   }
@@ -92,10 +87,7 @@ mixin ReceiveSharingIntentMixin<T extends StatefulWidget> on State<T> {
             !RegExp(r'\s').hasMatch(text))) {
       return _processIncomingUris(text);
     }
-    matrixState.shareContent = {
-      'msgtype': 'm.text',
-      'body': text,
-    };
+    matrixState.shareContent = {'msgtype': 'm.text', 'body': text};
     openSharePage();
   }
 
@@ -142,8 +134,7 @@ mixin ReceiveSharingIntentMixin<T extends StatefulWidget> on State<T> {
 
     // Set up file stream - process immediately if synced, otherwise cache
     intentFileStreamSubscription?.cancel();
-    intentFileStreamSubscription =
-        ReceiveSharingIntent.instance.getMediaStream().listen(
+    intentFileStreamSubscription = ReceiveSharingIntent.instance.getMediaStream().listen(
       (files) async {
         if (files.isEmpty) return;
 

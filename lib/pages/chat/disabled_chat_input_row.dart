@@ -4,9 +4,7 @@ import 'package:linagora_design_flutter/colors/linagora_ref_colors.dart';
 import 'package:fluffychat/generated/l10n/app_localizations.dart';
 
 class DisabledChatInputRow extends StatelessWidget {
-  const DisabledChatInputRow({
-    super.key,
-  });
+  const DisabledChatInputRow({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -36,8 +34,8 @@ class DisabledChatInputRow extends StatelessWidget {
                 maxLines: 2,
                 textAlign: TextAlign.start,
                 style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                      color: LinagoraRefColors.material().tertiary[30],
-                    ),
+                  color: LinagoraRefColors.material().tertiary[30],
+                ),
               ),
             ),
           ],

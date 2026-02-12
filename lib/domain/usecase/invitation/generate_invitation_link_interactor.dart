@@ -12,8 +12,8 @@ import 'package:fluffychat/domain/usecase/invitation/constants.dart';
 import 'package:matrix/matrix.dart';
 
 class GenerateInvitationLinkInteractor {
-  final InvitationRepository _invitationRepository =
-      getIt.get<InvitationRepository>();
+  final InvitationRepository _invitationRepository = getIt
+      .get<InvitationRepository>();
 
   Stream<Either<Failure, Success>> execute({
     String? contact,
@@ -22,20 +22,14 @@ class GenerateInvitationLinkInteractor {
     try {
       yield const Right(GenerateInvitationLinkLoadingState());
       final res = await _invitationRepository.generateInvitationLink(
-        request: InvitationRequest(
-          contact: contact,
-          medium: medium?.value,
-        ),
+        request: InvitationRequest(contact: contact, medium: medium?.value),
       );
 
       if (res.link.isEmpty == true) {
         yield const Left(GenerateInvitationLinkIsEmptyState());
       }
       yield Right(
-        GenerateInvitationLinkSuccessState(
-          link: res.link,
-          id: res.id,
-        ),
+        GenerateInvitationLinkSuccessState(link: res.link, id: res.id),
       );
     } catch (e) {
       Logs().e('GenerateInvitationLinkInteractor::execute', e);
@@ -46,13 +40,15 @@ class GenerateInvitationLinkInteractor {
             Constants.alreadySentInvitationMessage) {
           yield const Left(InvitationAlreadySentState());
           return;
-        } else if (e.response?.data['message']
-                ?.contains(Constants.invalidPhoneNumberMessage) ==
+        } else if (e.response?.data['message']?.contains(
+              Constants.invalidPhoneNumberMessage,
+            ) ==
             true) {
           yield const Left(InvalidPhoneNumberFailureState());
           return;
-        } else if (e.response?.data['message']
-                ?.contains(Constants.invalidEmailMessage) ==
+        } else if (e.response?.data['message']?.contains(
+              Constants.invalidEmailMessage,
+            ) ==
             true) {
           yield const Left(InvalidEmailFailureState());
           return;
@@ -61,14 +57,11 @@ class GenerateInvitationLinkInteractor {
 
       final message = e is DioException
           ? e.response?.data is Map<String, dynamic>
-              ? e.response?.data['message']
-              : null
+                ? e.response?.data['message']
+                : null
           : null;
       yield Left(
-        GenerateInvitationLinkFailureState(
-          exception: e,
-          message: message,
-        ),
+        GenerateInvitationLinkFailureState(exception: e, message: message),
       );
       return;
     }

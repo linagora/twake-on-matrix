@@ -24,8 +24,8 @@ class UserInfoDatasourceImpl implements UserInfoDatasource {
     UserInfoVisibilityRequest body,
   ) {
     return getIt.get<UserInfoApi>().updateUserVisibility(
-          userId: userId,
-          body: body,
-        );
+      userId: userId,
+      body: body,
+    );
   }
 }

@@ -22,10 +22,7 @@ import 'package:fluffychat/generated/l10n/app_localizations.dart';
 class ContactsTabBodyView extends StatelessWidget {
   final ContactsTabController controller;
 
-  const ContactsTabBodyView(
-    this.controller, {
-    super.key,
-  });
+  const ContactsTabBodyView(this.controller, {super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -50,17 +47,13 @@ class _SliverPadding extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const SliverToBoxAdapter(
-      child: SizedBox(
-        height: ContactsTabViewStyle.padding,
-      ),
+      child: SizedBox(height: ContactsTabViewStyle.padding),
     );
   }
 }
 
 class _SliverPhonebookList extends StatelessWidget {
-  const _SliverPhonebookList({
-    required this.controller,
-  });
+  const _SliverPhonebookList({required this.controller});
 
   final ContactsTabController controller;
 
@@ -78,10 +71,41 @@ class _SliverPhonebookList extends StatelessWidget {
                 controller.presentationRecentContactNotifier.value;
             if (failure is GetPresentationContactsFailure) {
               if (presentationRecentContact.isEmpty) {
-                return controller.presentationContactNotifier.value.fold(
-                  (failure) {
-                    if (failure is GetPresentationContactsFailure ||
-                        failure is GetPresentationContactsEmpty) {
+                return controller.presentationContactNotifier.value.fold((
+                  failure,
+                ) {
+                  if (failure is GetPresentationContactsFailure ||
+                      failure is GetPresentationContactsEmpty) {
+                    return SliverToBoxAdapter(
+                      child: Padding(
+                        padding: const EdgeInsets.only(
+                          left: ContactsTabViewStyle.padding,
+                          top: ContactsTabViewStyle.padding,
+                        ),
+                        child: NoContactsFound(
+                          keyword: controller.textEditingController.text.isEmpty
+                              ? null
+                              : controller.textEditingController.text,
+                        ),
+                      ),
+                    );
+                  }
+                  return child!;
+                }, (_) => child!);
+              }
+            }
+            if (failure is GetPresentationContactsEmpty) {
+              if (presentationRecentContact.isEmpty) {
+                return controller.presentationContactNotifier.value.fold((
+                  failure,
+                ) {
+                  if (failure is GetPresentationContactsFailure ||
+                      failure is GetPresentationContactsEmpty) {
+                    if (controller.textEditingController.text.isEmpty) {
+                      return const SliverToBoxAdapter(
+                        child: EmptyContactBody(),
+                      );
+                    } else {
                       return SliverToBoxAdapter(
                         child: Padding(
                           padding: const EdgeInsets.only(
@@ -89,48 +113,14 @@ class _SliverPhonebookList extends StatelessWidget {
                             top: ContactsTabViewStyle.padding,
                           ),
                           child: NoContactsFound(
-                            keyword:
-                                controller.textEditingController.text.isEmpty
-                                    ? null
-                                    : controller.textEditingController.text,
+                            keyword: controller.textEditingController.text,
                           ),
                         ),
                       );
                     }
-                    return child!;
-                  },
-                  (_) => child!,
-                );
-              }
-            }
-            if (failure is GetPresentationContactsEmpty) {
-              if (presentationRecentContact.isEmpty) {
-                return controller.presentationContactNotifier.value.fold(
-                  (failure) {
-                    if (failure is GetPresentationContactsFailure ||
-                        failure is GetPresentationContactsEmpty) {
-                      if (controller.textEditingController.text.isEmpty) {
-                        return const SliverToBoxAdapter(
-                          child: EmptyContactBody(),
-                        );
-                      } else {
-                        return SliverToBoxAdapter(
-                          child: Padding(
-                            padding: const EdgeInsets.only(
-                              left: ContactsTabViewStyle.padding,
-                              top: ContactsTabViewStyle.padding,
-                            ),
-                            child: NoContactsFound(
-                              keyword: controller.textEditingController.text,
-                            ),
-                          ),
-                        );
-                      }
-                    }
-                    return child!;
-                  },
-                  (_) => child!,
-                );
+                  }
+                  return child!;
+                }, (_) => child!);
               }
             }
             return child!;
@@ -152,17 +142,13 @@ class _SliverPhonebookList extends StatelessWidget {
           },
         );
       },
-      child: const SliverToBoxAdapter(
-        child: SizedBox(),
-      ),
+      child: const SliverToBoxAdapter(child: SizedBox()),
     );
   }
 }
 
 class _SliverContactsList extends StatelessWidget {
-  const _SliverContactsList({
-    required this.controller,
-  });
+  const _SliverContactsList({required this.controller});
 
   final ContactsTabController controller;
 
@@ -187,9 +173,7 @@ class _SliverContactsList extends StatelessWidget {
                   failure is GetPresentationContactsEmpty) {
                 final keyword = controller.textEditingController.text;
                 if (keyword.isEmpty) {
-                  return const SliverToBoxAdapter(
-                    child: EmptyContactBody(),
-                  );
+                  return const SliverToBoxAdapter(child: EmptyContactBody());
                 } else {
                   return SliverToBoxAdapter(
                     child: Padding(
@@ -241,14 +225,14 @@ class _SliverContactsList extends StatelessWidget {
           },
           (success) {
             if (success is ContactsLoading) {
-              return const SliverToBoxAdapter(
-                child: LoadingContactWidget(),
-              );
+              return const SliverToBoxAdapter(child: LoadingContactWidget());
             }
 
             if (success is PresentationExternalContactSuccess) {
               if (controller
-                  .presentationRecentContactNotifier.value.isNotEmpty) {
+                  .presentationRecentContactNotifier
+                  .value
+                  .isNotEmpty) {
                 return child!;
               }
 
@@ -270,10 +254,8 @@ class _SliverContactsList extends StatelessWidget {
               return SliverExpandableList(
                 title: L10n.of(context)!.linagoraContactsCount(contacts.length),
                 itemCount: contacts.length,
-                itemBuilder: (context, index) => _Contact(
-                  contact: contacts[index],
-                  controller: controller,
-                ),
+                itemBuilder: (context, index) =>
+                    _Contact(contact: contacts[index], controller: controller),
               );
             }
 
@@ -281,9 +263,7 @@ class _SliverContactsList extends StatelessWidget {
           },
         );
       },
-      child: const SliverToBoxAdapter(
-        child: SizedBox(),
-      ),
+      child: const SliverToBoxAdapter(child: SizedBox()),
     );
   }
 }
@@ -329,17 +309,12 @@ class _SliverRecentContacts extends StatelessWidget {
     return ValueListenableBuilder(
       valueListenable: controller.presentationContactNotifier,
       builder: (context, state, child) {
-        return state.fold(
-          (failure) => child!,
-          (success) {
-            if (success is ContactsLoading) {
-              return const SliverToBoxAdapter(
-                child: SizedBox(),
-              );
-            }
-            return child!;
-          },
-        );
+        return state.fold((failure) => child!, (success) {
+          if (success is ContactsLoading) {
+            return const SliverToBoxAdapter(child: SizedBox());
+          }
+          return child!;
+        });
       },
       child: ValueListenableBuilder(
         valueListenable: controller.presentationRecentContactNotifier,
@@ -369,18 +344,14 @@ class _SliverRecentContacts extends StatelessWidget {
             ),
           );
         },
-        child: const SliverToBoxAdapter(
-          child: SizedBox(),
-        ),
+        child: const SliverToBoxAdapter(child: SizedBox()),
       ),
     );
   }
 }
 
 class _SliverWarningBanner extends StatelessWidget {
-  const _SliverWarningBanner({
-    required this.controller,
-  });
+  const _SliverWarningBanner({required this.controller});
 
   final ContactsTabController controller;
 
@@ -398,10 +369,7 @@ class _SliverWarningBanner extends StatelessWidget {
 }
 
 class _Contact extends StatelessWidget {
-  const _Contact({
-    required this.contact,
-    required this.controller,
-  });
+  const _Contact({required this.contact, required this.controller});
 
   final PresentationContact contact;
   final ContactsTabController controller;
@@ -427,10 +395,7 @@ class _Contact extends StatelessWidget {
 }
 
 class _PhonebookContact extends StatelessWidget {
-  const _PhonebookContact({
-    required this.contact,
-    required this.controller,
-  });
+  const _PhonebookContact({required this.contact, required this.controller});
 
   final PresentationContact contact;
   final ContactsTabController controller;

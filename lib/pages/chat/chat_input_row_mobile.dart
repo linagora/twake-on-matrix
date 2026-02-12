@@ -5,10 +5,7 @@ import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 typedef OnTapEmojiAction = void Function();
 
 class ChatInputRowMobile extends StatelessWidget {
-  const ChatInputRowMobile({
-    super.key,
-    required this.inputBar,
-  });
+  const ChatInputRowMobile({super.key, required this.inputBar});
 
   final Widget inputBar;
 
@@ -29,13 +26,7 @@ class ChatInputRowMobile extends StatelessWidget {
             width: 1,
           ),
         ),
-        child: Row(
-          children: [
-            Expanded(
-              child: inputBar,
-            ),
-          ],
-        ),
+        child: Row(children: [Expanded(child: inputBar)]),
       ),
     );
   }

@@ -10,10 +10,7 @@ import 'package:flutter/material.dart';
 import 'package:matrix/matrix.dart';
 
 class ChatDetailsLinkItem extends StatefulWidget {
-  const ChatDetailsLinkItem({
-    super.key,
-    required this.event,
-  });
+  const ChatDetailsLinkItem({super.key, required this.event});
 
   final Event event;
 
@@ -70,9 +67,7 @@ class _ChatDetailsLinkItemState extends State<ChatDetailsLinkItem>
                         )
                       : child!,
                 ),
-                const SizedBox(
-                  width: ChatDetailsLinksStyle.margin,
-                ),
+                const SizedBox(width: ChatDetailsLinksStyle.margin),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -109,9 +104,7 @@ class _ChatDetailsLinkItemState extends State<ChatDetailsLinkItem>
 }
 
 class _AvatarPlaceholder extends StatelessWidget {
-  const _AvatarPlaceholder({
-    required this.uri,
-  });
+  const _AvatarPlaceholder({required this.uri});
 
   final Uri uri;
 

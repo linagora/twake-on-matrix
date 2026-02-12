@@ -27,10 +27,9 @@ class _OnAuthRedirectState extends State<OnAuthRedirect> with ConnectPageMixin {
   @override
   void initState() {
     super.initState();
-    _clientLoginStateChangedSubscription =
-        Matrix.of(context).onClientLoginStateChanged.stream.listen(
-              _listenClientLoginStateChanged,
-            );
+    _clientLoginStateChangedSubscription = Matrix.of(
+      context,
+    ).onClientLoginStateChanged.stream.listen(_listenClientLoginStateChanged);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       tryLoggingUsingToken(context: context);
     });
@@ -59,9 +58,7 @@ class _OnAuthRedirectState extends State<OnAuthRedirect> with ConnectPageMixin {
     if (_clientFirstLoggedIn != null) {
       context.go(
         '/rooms',
-        extra: LoggedInBodyArgs(
-          newActiveClient: _clientFirstLoggedIn,
-        ),
+        extra: LoggedInBodyArgs(newActiveClient: _clientFirstLoggedIn),
       );
     } else {
       context.go('/home');
@@ -73,32 +70,24 @@ class _OnAuthRedirectState extends State<OnAuthRedirect> with ConnectPageMixin {
     context.go('/home');
   }
 
-  Future<void> tryLoggingUsingToken({
-    required BuildContext context,
-  }) async {
+  Future<void> tryLoggingUsingToken({required BuildContext context}) async {
     try {
       final isConfigured = await AppConfig.initConfigCompleter.future;
       if (!isConfigured) {
         if (!AppConfig.hasReachedMaxRetries) {
           tryLoggingUsingToken(context: context);
         } else {
-          throw Exception(
-            'tryLoggingUsingToken(): Config not found',
-          );
+          throw Exception('tryLoggingUsingToken(): Config not found');
         }
       }
       final homeserver = AppConfig.homeserver;
       if (!homeserverIsConfigured) {
-        throw Exception(
-          'tryLoggingUsingToken(): Missing homeserver',
-        );
+        throw Exception('tryLoggingUsingToken(): Missing homeserver');
       }
 
       final loginToken = getQueryParameter('loginToken');
       if (loginToken == null || loginToken.isEmpty) {
-        throw Exception(
-          'tryLoggingUsingToken(): Missing loginToken',
-        );
+        throw Exception('tryLoggingUsingToken(): Missing loginToken');
       }
       Logs().i('tryLoggingUsingToken::loginToken: $loginToken');
       Logs().i('tryLoggingUsingToken::homeserver: $homeserver');

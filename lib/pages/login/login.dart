@@ -132,8 +132,9 @@ class LoginController extends State<Login> {
           final dialogResult = await showOkCancelAlertDialog(
             context: context,
             useRootNavigator: false,
-            message:
-                L10n.of(context)!.noMatrixServer(newDomain, oldHomeserver!),
+            message: L10n.of(
+              context,
+            )!.noMatrixServer(newDomain, oldHomeserver!),
             okLabel: L10n.of(context)!.ok,
             cancelLabel: L10n.of(context)!.cancel,
           );
@@ -170,8 +171,9 @@ class LoginController extends State<Login> {
       fullyCapitalizedForMaterial: false,
       textFields: [
         DialogTextField(
-          initialText:
-              usernameController.text.isEmail ? usernameController.text : '',
+          initialText: usernameController.text.isEmail
+              ? usernameController.text
+              : '',
           hintText: L10n.of(context)!.enterAnEmailAddress,
           keyboardType: TextInputType.emailAddress,
         ),
@@ -254,8 +256,9 @@ class LoginController extends State<Login> {
 }
 
 extension on String {
-  static final RegExp _phoneRegex =
-      RegExp(r'^[+]*[(]{0,1}[0-9]{1,4}[)]{0,1}[-\s\./0-9]*$');
+  static final RegExp _phoneRegex = RegExp(
+    r'^[+]*[(]{0,1}[0-9]{1,4}[)]{0,1}[-\s\./0-9]*$',
+  );
   static final RegExp _emailRegex = RegExp(r'(.+)@(.+)\.(.+)');
 
   bool get isEmail => _emailRegex.hasMatch(this);

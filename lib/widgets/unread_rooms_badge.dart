@@ -19,11 +19,9 @@ class UnreadRoomsBadge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return StreamBuilder(
-      stream: Matrix.of(context)
-          .client
-          .onSync
-          .stream
-          .where((syncUpdate) => syncUpdate.hasRoomUpdate),
+      stream: Matrix.of(
+        context,
+      ).client.onSync.stream.where((syncUpdate) => syncUpdate.hasRoomUpdate),
       builder: (context, _) {
         final unreadCount = getNotificationsCount(context);
 
@@ -38,9 +36,7 @@ class UnreadRoomsBadge extends StatelessWidget {
   }
 
   int getNotificationsCount(BuildContext context) {
-    return Matrix.of(context)
-        .client
-        .rooms
+    return Matrix.of(context).client.rooms
         .where(filter)
         .where((r) => (r.isUnread || r.membership == Membership.invite))
         .map((element) => element.isUnread ? element.notificationCount : 1)

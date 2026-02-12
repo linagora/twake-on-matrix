@@ -17,9 +17,7 @@ class UpdateUserInfoVisibilitySuccess extends Success {
 class UpdateUserInfoVisibilityFailure extends Failure {
   final dynamic exception;
 
-  const UpdateUserInfoVisibilityFailure({
-    this.exception,
-  });
+  const UpdateUserInfoVisibilityFailure({this.exception});
 
   @override
   List<Object?> get props => [exception];

@@ -62,8 +62,9 @@ class NewPrivateChatController extends State<NewPrivateChat>
       Logs().e('NewPrivateChatController::onContactAction: no MatrixId');
       return;
     }
-    final roomId =
-        Matrix.of(context).client.getDirectChatFromUserId(contact.matrixId!);
+    final roomId = Matrix.of(
+      context,
+    ).client.getDirectChatFromUserId(contact.matrixId!);
     if (roomId == null) {
       goToDraftChat(
         context: context,
@@ -83,10 +84,7 @@ class NewPrivateChatController extends State<NewPrivateChat>
     PresentationContact contact,
   ) {
     showInviteExternalContactDialog(context, () {
-      onContactAction(
-        context,
-        contact,
-      );
+      onContactAction(context, contact);
     });
   }
 

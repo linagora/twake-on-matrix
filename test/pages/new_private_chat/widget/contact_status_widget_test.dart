@@ -8,8 +8,9 @@ import 'package:linagora_design_flutter/colors/linagora_ref_colors.dart';
 
 void main() {
   group('ContactStatusWidget', () {
-    testWidgets('renders correctly for inactive status',
-        (WidgetTester tester) async {
+    testWidgets('renders correctly for inactive status', (
+      WidgetTester tester,
+    ) async {
       await tester.pumpWidget(
         MaterialApp(
           localizationsDelegates: L10n.localizationsDelegates,
@@ -37,15 +38,15 @@ void main() {
       expect(text.style?.color, LinagoraRefColors.material().neutral[60]);
       expect(
         text.style?.fontSize,
-        Theme.of(tester.element(find.byType(ContactStatusWidget)))
-            .textTheme
-            .bodySmall
-            ?.fontSize,
+        Theme.of(
+          tester.element(find.byType(ContactStatusWidget)),
+        ).textTheme.bodySmall?.fontSize,
       );
     });
 
-    testWidgets('renders correctly for active status',
-        (WidgetTester tester) async {
+    testWidgets('renders correctly for active status', (
+      WidgetTester tester,
+    ) async {
       await tester.pumpWidget(
         MaterialApp(
           localizationsDelegates: L10n.localizationsDelegates,

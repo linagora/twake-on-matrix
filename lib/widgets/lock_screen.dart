@@ -47,12 +47,7 @@ class LockScreenState extends State<LockScreen> {
               gradient: LinearGradient(
                 begin: Alignment.topRight,
                 end: Alignment.bottomLeft,
-                stops: const [
-                  0.1,
-                  0.4,
-                  0.6,
-                  0.9,
-                ],
+                stops: const [0.1, 0.4, 0.6, 0.9],
                 colors: [
                   Theme.of(context).secondaryHeaderColor.withAlpha(16),
                   Theme.of(context).primaryColor.withAlpha(16),
@@ -74,13 +69,15 @@ class LockScreenState extends State<LockScreen> {
               hasError: _wrongInput,
               onDone: (String input) async {
                 if (input ==
-                    await ([TargetPlatform.linux]
-                            .contains(Theme.of(context).platform)
+                    await ([
+                          TargetPlatform.linux,
+                        ].contains(Theme.of(context).platform)
                         ? SharedPreferences.getInstance().then(
                             (prefs) => prefs.getString(SettingKeys.appLockKey),
                           )
-                        : const FlutterSecureStorage()
-                            .read(key: SettingKeys.appLockKey))) {
+                        : const FlutterSecureStorage().read(
+                            key: SettingKeys.appLockKey,
+                          ))) {
                   AppLock.of(context)!.didUnlock();
                 } else {
                   _textEditingController.clear();

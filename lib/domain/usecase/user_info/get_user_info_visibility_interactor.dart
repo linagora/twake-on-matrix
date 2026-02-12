@@ -8,14 +8,13 @@ import 'package:fluffychat/domain/repository/user_info/user_info_repository.dart
 class GetUserInfoVisibilityInteractor {
   const GetUserInfoVisibilityInteractor();
 
-  Stream<Either<Failure, Success>> execute({
-    required String userId,
-  }) async* {
+  Stream<Either<Failure, Success>> execute({required String userId}) async* {
     try {
       yield Right(GettingUserInfoVisibility());
 
-      final result =
-          await getIt.get<UserInfoRepository>().getUserVisibility(userId);
+      final result = await getIt.get<UserInfoRepository>().getUserVisibility(
+        userId,
+      );
       yield Right(GetUserInfoVisibilitySuccess(result));
     } catch (e) {
       yield Left(GetUserInfoVisibilityFailure(exception: e));

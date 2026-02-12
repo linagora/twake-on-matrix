@@ -48,10 +48,7 @@ enum ChatContextMenuActions {
     }
   }
 
-  IconData? getIconData({
-    bool isSelected = false,
-    bool unpin = false,
-  }) {
+  IconData? getIconData({bool isSelected = false, bool unpin = false}) {
     switch (this) {
       case ChatContextMenuActions.select:
         return isSelected ? Icons.circle_outlined : Icons.check_circle_outline;
@@ -74,9 +71,7 @@ enum ChatContextMenuActions {
     }
   }
 
-  String? getImagePath({
-    bool unpin = false,
-  }) {
+  String? getImagePath({bool unpin = false}) {
     switch (this) {
       case ChatContextMenuActions.reply:
         return ImagePaths.icReply;

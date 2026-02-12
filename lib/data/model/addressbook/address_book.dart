@@ -105,19 +105,19 @@ class AddressBook with EquatableMixin {
 
   @override
   List<Object?> get props => [
-        id,
-        addressbookId,
-        mxid,
-        displayName,
-        active,
-        uid,
-        sn,
-        lastName,
-        givenName,
-        firstName,
-        emails,
-        phones,
-        mail,
-        mobile,
-      ];
+    id,
+    addressbookId,
+    mxid,
+    displayName,
+    active,
+    uid,
+    sn,
+    lastName,
+    givenName,
+    firstName,
+    emails,
+    phones,
+    mail,
+    mobile,
+  ];
 }

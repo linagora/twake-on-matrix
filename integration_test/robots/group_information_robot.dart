@@ -61,8 +61,9 @@ class GroupInformationRobot extends CoreRobot {
     final loadMoreTextFinder = find.byWidgetPredicate(
       (w) =>
           w is Text &&
-          RegExp(r'^Load\s+\d+\s+more\s+participant(s)?$')
-              .hasMatch(w.data ?? ''),
+          RegExp(
+            r'^Load\s+\d+\s+more\s+participant(s)?$',
+          ).hasMatch(w.data ?? ''),
       description: 'Load N more participants text',
     );
 
@@ -126,9 +127,7 @@ class GroupInformationRobot extends CoreRobot {
     return $(find.byKey(ValueKey<String>(matrixID)));
   }
 
-  Future<void> openMemberDetail({
-    required String matrixID,
-  }) async {
+  Future<void> openMemberDetail({required String matrixID}) async {
     await $.scrollUntilVisible(finder: getMemberByMatrixID(matrixID));
     await getMemberByMatrixID(matrixID).tap();
 

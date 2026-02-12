@@ -35,8 +35,8 @@ class PickerTypeOnBottom extends StatelessWidget {
           Text(
             pickerType.getTitle(context),
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: pickerType.getTextColor(context),
-                ),
+              color: pickerType.getTextColor(context),
+            ),
           ),
         ],
       ),

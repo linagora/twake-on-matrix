@@ -39,7 +39,7 @@ class DraftChatInputRow extends StatelessWidget {
   final Function()? pauseRecording;
   final Function()? deleteRecording;
   final void Function(TwakeAudioFile, Duration, List<int>)?
-      sendVoiceMessageAction;
+  sendVoiceMessageAction;
   final Function()? onTapRecorderWeb;
   final void Function()? onFinishRecorderWeb;
   final void Function()? onDeleteRecorderWeb;
@@ -85,8 +85,8 @@ class DraftChatInputRow extends StatelessWidget {
               child: Row(
                 crossAxisAlignment:
                     ChatInputRowStyle.responsiveUtils.isMobile(context)
-                        ? CrossAxisAlignment.end
-                        : CrossAxisAlignment.center,
+                    ? CrossAxisAlignment.end
+                    : CrossAxisAlignment.center,
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   if (ChatInputRowStyle.responsiveUtils.isMobile(context))
@@ -139,8 +139,8 @@ class DraftChatInputRow extends StatelessWidget {
                       return Expanded(
                         child:
                             ChatInputRowStyle.responsiveUtils.isMobile(context)
-                                ? _buildMobileInputRow(context)
-                                : _buildWebInputRow(context),
+                            ? _buildMobileInputRow(context)
+                            : _buildWebInputRow(context),
                       );
                     },
                   ),
@@ -231,9 +231,7 @@ class DraftChatInputRow extends StatelessWidget {
                 deleteRecording?.call();
               },
               sendRequestFunction: (soundFile, time, waveFrom) {
-                Logs().d(
-                  'DraftChatInputRow:: sendRequestFunction $soundFile',
-                );
+                Logs().d('DraftChatInputRow:: sendRequestFunction $soundFile');
                 stopRecording?.call();
 
                 final file = TwakeAudioFile(
@@ -249,16 +247,14 @@ class DraftChatInputRow extends StatelessWidget {
               cancelTextBackGroundColor: Colors.transparent,
               cancelText: L10n.of(context)!.cancel,
               cancelTextStyle: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: LinagoraSysColors.material().primary,
-                  ),
+                color: LinagoraSysColors.material().primary,
+              ),
               slideToCancelText: L10n.of(context)!.slideToCancel,
-              slideToCancelTextStyle:
-                  Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: LinagoraRefColors.material().neutral[30],
-                      ),
+              slideToCancelTextStyle: Theme.of(context).textTheme.bodySmall
+                  ?.copyWith(color: LinagoraRefColors.material().neutral[30]),
               counterTextStyle: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: LinagoraRefColors.material().neutral[50],
-                  ),
+                color: LinagoraRefColors.material().neutral[50],
+              ),
               slideToCancelPadding: const EdgeInsets.only(right: 24),
               recordIcon: Icon(
                 Icons.keyboard_voice_outlined,
@@ -275,10 +271,10 @@ class DraftChatInputRow extends StatelessWidget {
                   color: LinagoraSysColors.material().error,
                 ),
               ),
-              pauseSplashColor:
-                  LinagoraSysColors.material().primary.withOpacity(0.5),
-              pauseHighlightColor:
-                  LinagoraSysColors.material().primary.withOpacity(0.2),
+              pauseSplashColor: LinagoraSysColors.material().primary
+                  .withOpacity(0.5),
+              pauseHighlightColor: LinagoraSysColors.material().primary
+                  .withOpacity(0.2),
               pauseWidget: const AnimatedPauseButton(),
             ),
           ),
@@ -288,9 +284,7 @@ class DraftChatInputRow extends StatelessWidget {
   }
 
   ChatInputRowMobile _buildMobileInputRow(BuildContext context) {
-    return ChatInputRowMobile(
-      inputBar: _buildInputBar(context),
-    );
+    return ChatInputRowMobile(inputBar: _buildInputBar(context));
   }
 
   ChatInputRowWeb _buildWebInputRow(BuildContext context) {
@@ -301,9 +295,7 @@ class DraftChatInputRow extends StatelessWidget {
     );
   }
 
-  Widget _counterAudioWeb({
-    required BuildContext context,
-  }) {
+  Widget _counterAudioWeb({required BuildContext context}) {
     return ValueListenableBuilder(
       valueListenable: recordDurationWebNotifier,
       builder: (context, duration, _) {
@@ -332,20 +324,20 @@ class DraftChatInputRow extends StatelessWidget {
                 Text(
                   (duration ~/ 60).formatNumberAudioDuration(),
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: LinagoraRefColors.material().neutral[50],
-                      ),
+                    color: LinagoraRefColors.material().neutral[50],
+                  ),
                 ),
                 Text(
                   " : ",
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: LinagoraRefColors.material().neutral[50],
-                      ),
+                    color: LinagoraRefColors.material().neutral[50],
+                  ),
                 ),
                 Text(
                   (duration % 60).formatNumberAudioDuration(),
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: LinagoraRefColors.material().neutral[50],
-                      ),
+                    color: LinagoraRefColors.material().neutral[50],
+                  ),
                 ),
               ],
             ),
@@ -368,9 +360,7 @@ class DraftChatInputRow extends StatelessWidget {
           onSubmitted: (_) => onInputBarSubmitted(),
           typeAheadFocusNode: typeAheadFocusNode,
           controller: textEditingController,
-          decoration: DraftChatViewStyle.bottomBarInputDecoration(
-            context,
-          ),
+          decoration: DraftChatViewStyle.bottomBarInputDecoration(context),
           onChanged: onInputBarChanged,
           focusSuggestionController: focusSuggestionController,
           isDraftChat: true,

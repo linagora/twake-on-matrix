@@ -72,9 +72,7 @@ class AddContactDialogView extends StatelessWidget {
               Stack(
                 alignment: Alignment.centerLeft,
                 children: [
-                  IgnorePointer(
-                    child: Opacity(opacity: 0, child: saveButton),
-                  ),
+                  IgnorePointer(child: Opacity(opacity: 0, child: saveButton)),
                   cancelButton,
                 ],
               ),

@@ -50,9 +50,7 @@ class NetworkDI extends BaseDI {
       HttpHeaders.contentTypeHeader: contentTypeHeaderDefault,
     };
 
-    get.registerLazySingleton<DioCacheOption>(
-      () => DioCacheOption(),
-    );
+    get.registerLazySingleton<DioCacheOption>(() => DioCacheOption());
 
     get.registerLazySingleton<BaseOptions>(() => BaseOptions(headers: headers));
   }
@@ -71,9 +69,7 @@ class NetworkDI extends BaseDI {
       instanceName: homeServerUrlInterceptorName,
     );
 
-    get.registerLazySingleton(
-      () => AuthorizationInterceptor(),
-    );
+    get.registerLazySingleton(() => AuthorizationInterceptor());
 
     get.registerSingleton(
       MatrixDioCacheInterceptor(
@@ -87,9 +83,7 @@ class NetworkDI extends BaseDI {
       ),
       instanceName: memCacheDioInterceptorName,
     );
-    get.registerSingleton(
-      DownloadFileInterceptor(),
-    );
+    get.registerSingleton(DownloadFileInterceptor());
   }
 
   void _bindDio(GetIt get) {
@@ -107,8 +101,9 @@ class NetworkDI extends BaseDI {
     );
     dio.interceptors.add(get.get<AuthorizationInterceptor>());
     if (kDebugMode) {
-      dio.interceptors
-          .add(LogInterceptor(requestBody: true, responseBody: true));
+      dio.interceptors.add(
+        LogInterceptor(requestBody: true, responseBody: true),
+      );
     }
     get.registerLazySingleton<Dio>(() => dio, instanceName: tomServerDioName);
     get.registerLazySingleton<DioClient>(
@@ -131,8 +126,9 @@ class NetworkDI extends BaseDI {
     );
     dio.interceptors.add(get.get<AuthorizationInterceptor>());
     if (kDebugMode) {
-      dio.interceptors
-          .add(LogInterceptor(requestBody: true, responseBody: true));
+      dio.interceptors.add(
+        LogInterceptor(requestBody: true, responseBody: true),
+      );
     }
     get.registerLazySingleton<Dio>(
       () => dio,
@@ -159,8 +155,9 @@ class NetworkDI extends BaseDI {
     dio.interceptors.add(get.get<AuthorizationInterceptor>());
     dio.interceptors.add(get.get<DownloadFileInterceptor>());
     if (kDebugMode) {
-      dio.interceptors
-          .add(LogInterceptor(requestBody: true, responseBody: true));
+      dio.interceptors.add(
+        LogInterceptor(requestBody: true, responseBody: true),
+      );
     }
     get.registerLazySingleton<Dio>(() => dio, instanceName: homeServerDioName);
     get.registerLazySingleton<DioClient>(

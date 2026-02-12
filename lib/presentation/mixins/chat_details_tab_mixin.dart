@@ -55,8 +55,9 @@ mixin ChatDetailsTabMixin<T extends StatefulWidget>
 
   final ValueNotifier<List<User>?> _membersNotifier = ValueNotifier(null);
 
-  final ValueNotifier<List<User>?> _displayMembersNotifier =
-      ValueNotifier(null);
+  final ValueNotifier<List<User>?> _displayMembersNotifier = ValueNotifier(
+    null,
+  );
 
   StreamSubscription? _powerLevelsSubscription;
   StreamSubscription? _setPermissionLevelSubscription;
@@ -94,10 +95,12 @@ mixin ChatDetailsTabMixin<T extends StatefulWidget>
   static const _linksPageKey = PageStorageKey('links');
   static const _filesPageKey = PageStorageKey('files');
 
-  static const invitationSelectionMobileAndTabletKey =
-      Key('InvitationSelectionMobileAndTabletKey');
-  static const invitationSelectionWebAndDesktopKey =
-      Key('InvitationSelectionWebAndDesktopKey');
+  static const invitationSelectionMobileAndTabletKey = Key(
+    'InvitationSelectionMobileAndTabletKey',
+  );
+  static const invitationSelectionWebAndDesktopKey = Key(
+    'InvitationSelectionWebAndDesktopKey',
+  );
 
   Future<Timeline?> _getTimeline() async {
     _timeline ??= await room?.getTimeline();
@@ -107,11 +110,7 @@ mixin ChatDetailsTabMixin<T extends StatefulWidget>
   Future<Uint8List> _handleDownloadAndPlayVideo(Event event) {
     return handleDownloadVideoEvent(
       event: event,
-      playVideoAction: (path) => playVideoAction(
-        context,
-        path,
-        event: event,
-      ),
+      playVideoAction: (path) => playVideoAction(context, path, event: event),
     );
   }
 
@@ -125,15 +124,15 @@ mixin ChatDetailsTabMixin<T extends StatefulWidget>
   }
 
   void _listenForRoomMembersChanged() {
-    _onRoomEventChangedSubscription =
-        Matrix.of(context).client.onEvent.stream.listen((event) {
-      if (event.isMemberChangedEvent && room?.id == event.roomID) {
-        _membersNotifier.value = room?.getParticipants().toList()
-          ?..sort(
-            (small, great) => great.powerLevel.compareTo(small.powerLevel),
-          );
-      }
-    });
+    _onRoomEventChangedSubscription = Matrix.of(context).client.onEvent.stream
+        .listen((event) {
+          if (event.isMemberChangedEvent && room?.id == event.roomID) {
+            _membersNotifier.value = room?.getParticipants().toList()
+              ?..sort(
+                (small, great) => great.powerLevel.compareTo(small.powerLevel),
+              );
+          }
+        });
   }
 
   void _requestMoreMembersAction() async {
@@ -165,9 +164,7 @@ mixin ChatDetailsTabMixin<T extends StatefulWidget>
     if (PlatformInfos.isMobile) {
       Navigator.of(context).push(
         CupertinoPageRoute(
-          builder: (_) => InvitationSelection(
-            roomId: room!.id,
-          ),
+          builder: (_) => InvitationSelection(roomId: room!.id),
         ),
       );
       return;
@@ -184,17 +181,13 @@ mixin ChatDetailsTabMixin<T extends StatefulWidget>
               begin: ResponsiveUtils.minDesktopWidth,
             ): SlotLayout.from(
               key: invitationSelectionWebAndDesktopKey,
-              builder: (_) => InvitationSelectionWebView(
-                roomId: room!.id,
-              ),
+              builder: (_) => InvitationSelectionWebView(roomId: room!.id),
             ),
             const WidthPlatformBreakpoint(
               end: ResponsiveUtils.minDesktopWidth,
             ): SlotLayout.from(
               key: invitationSelectionMobileAndTabletKey,
-              builder: (_) => InvitationSelection(
-                roomId: room!.id,
-              ),
+              builder: (_) => InvitationSelection(roomId: room!.id),
             ),
           },
         );
@@ -203,23 +196,14 @@ mixin ChatDetailsTabMixin<T extends StatefulWidget>
   }
 
   Future<void> onUpdateMembers() async {
-    final members = room!.getParticipants(
-      [
-        Membership.join,
-        Membership.invite,
-      ],
-    )..sort(
-        (small, great) => great.powerLevel.compareTo(small.powerLevel),
-      );
+    final members = room!.getParticipants([Membership.join, Membership.invite])
+      ..sort((small, great) => great.powerLevel.compareTo(small.powerLevel));
     _membersNotifier.value = members;
     _displayMembersNotifier.value = members;
   }
 
   void _initControllers() {
-    tabController = TabController(
-      length: tabList.length,
-      vsync: this,
-    );
+    tabController = TabController(length: tabList.length, vsync: this);
     _mediaListController = SameTypeEventsBuilderController(
       getTimeline: () => _getTimeline(),
       searchFunc: (event) => event.isVideoOrImage,
@@ -240,9 +224,7 @@ mixin ChatDetailsTabMixin<T extends StatefulWidget>
   void _initMembers() {
     if (chatType == ChatDetailsScreenEnum.group) {
       _membersNotifier.value = room?.getParticipants().toList()
-        ?..sort(
-          (small, great) => great.powerLevel.compareTo(small.powerLevel),
-        );
+        ?..sort((small, great) => great.powerLevel.compareTo(small.powerLevel));
       _initDisplayMembers();
     }
   }
@@ -284,68 +266,63 @@ mixin ChatDetailsTabMixin<T extends StatefulWidget>
     _openDialogInvite();
   }
 
-  List<ChatDetailsPageModel> sharedPages() => tabList.map(
-        (page) {
-          if (chatType == ChatDetailsScreenEnum.group &&
-              page == ChatDetailsPage.members) {
-            return ChatDetailsPageModel(
-              page: page,
-              child: ChatDetailsMembersPage(
-                key: _memberPageKey,
-                displayMembersNotifier: _displayMembersNotifier,
-                actualMembersCount: actualMembersCount,
-                requestMoreMembersAction: _requestMoreMembersAction,
-                openDialogInvite: _openDialogInvite,
-                isMobileAndTablet: isMobileAndTablet,
-                onUpdatedMembers: () async => await onUpdateMembers(),
-                selectedUsersMapChangeNotifier: removeUsersChangeNotifier,
-                onSelectMember: _onSelectMember,
-                onRemoveMember: _handleOnRemoveMember,
-                onChangeRole: _handleChangePermission,
-              ),
-            );
-          }
-          switch (page) {
-            case ChatDetailsPage.media:
-              return ChatDetailsPageModel(
-                page: page,
-                child: _mediaListController == null
-                    ? const SizedBox()
-                    : ChatDetailsMediaPage(
-                        key: _mediaPageKey,
-                        controller: _mediaListController!,
-                        handleDownloadVideoEvent: _handleDownloadAndPlayVideo,
-                        // closeRightColumn: widget.closeRightColumn,
-                      ),
-              );
-            case ChatDetailsPage.links:
-              return ChatDetailsPageModel(
-                page: page,
-                child: _linksListController == null
-                    ? const SizedBox()
-                    : ChatDetailsLinksPage(
-                        key: _linksPageKey,
-                        controller: _linksListController!,
-                      ),
-              );
-            case ChatDetailsPage.files:
-              return ChatDetailsPageModel(
-                page: page,
-                child: _filesListController == null
-                    ? const SizedBox()
-                    : ChatDetailsFilesPage(
-                        key: _filesPageKey,
-                        controller: _filesListController!,
-                      ),
-              );
-            default:
-              return ChatDetailsPageModel(
-                page: page,
-                child: const SizedBox(),
-              );
-          }
-        },
-      ).toList();
+  List<ChatDetailsPageModel> sharedPages() => tabList.map((page) {
+    if (chatType == ChatDetailsScreenEnum.group &&
+        page == ChatDetailsPage.members) {
+      return ChatDetailsPageModel(
+        page: page,
+        child: ChatDetailsMembersPage(
+          key: _memberPageKey,
+          displayMembersNotifier: _displayMembersNotifier,
+          actualMembersCount: actualMembersCount,
+          requestMoreMembersAction: _requestMoreMembersAction,
+          openDialogInvite: _openDialogInvite,
+          isMobileAndTablet: isMobileAndTablet,
+          onUpdatedMembers: () async => await onUpdateMembers(),
+          selectedUsersMapChangeNotifier: removeUsersChangeNotifier,
+          onSelectMember: _onSelectMember,
+          onRemoveMember: _handleOnRemoveMember,
+          onChangeRole: _handleChangePermission,
+        ),
+      );
+    }
+    switch (page) {
+      case ChatDetailsPage.media:
+        return ChatDetailsPageModel(
+          page: page,
+          child: _mediaListController == null
+              ? const SizedBox()
+              : ChatDetailsMediaPage(
+                  key: _mediaPageKey,
+                  controller: _mediaListController!,
+                  handleDownloadVideoEvent: _handleDownloadAndPlayVideo,
+                  // closeRightColumn: widget.closeRightColumn,
+                ),
+        );
+      case ChatDetailsPage.links:
+        return ChatDetailsPageModel(
+          page: page,
+          child: _linksListController == null
+              ? const SizedBox()
+              : ChatDetailsLinksPage(
+                  key: _linksPageKey,
+                  controller: _linksListController!,
+                ),
+        );
+      case ChatDetailsPage.files:
+        return ChatDetailsPageModel(
+          page: page,
+          child: _filesListController == null
+              ? const SizedBox()
+              : ChatDetailsFilesPage(
+                  key: _filesPageKey,
+                  controller: _filesListController!,
+                ),
+        );
+      default:
+        return ChatDetailsPageModel(page: page, child: const SizedBox());
+    }
+  }).toList();
 
   void _onSelectMember(User user) {
     if (!PlatformInfos.isMobile) return;
@@ -359,16 +336,14 @@ mixin ChatDetailsTabMixin<T extends StatefulWidget>
   }
 
   void _handleOnRemoveMember(User user) {
-    _banUserSubscription =
-        banUserInteractor.execute(user: user).listen((result) {
+    _banUserSubscription = banUserInteractor.execute(user: user).listen((
+      result,
+    ) {
       result.fold(
         (failure) {
           if (failure is BanUserFailure) {
             TwakeDialog.hideLoadingDialog(context);
-            TwakeSnackBar.show(
-              context,
-              failure.exception.toString(),
-            );
+            TwakeSnackBar.show(context, failure.exception.toString());
             return;
           }
 
@@ -396,10 +371,7 @@ mixin ChatDetailsTabMixin<T extends StatefulWidget>
     });
   }
 
-  void _handleChangePermission(
-    User user, {
-    DefaultPowerLevelMember? role,
-  }) {
+  void _handleChangePermission(User user, {DefaultPowerLevelMember? role}) {
     if (room == null) return;
 
     if (role != null) {
@@ -413,40 +385,33 @@ mixin ChatDetailsTabMixin<T extends StatefulWidget>
 
   void _setPermission(User user, DefaultPowerLevelMember role) {
     _setPermissionLevelSubscription?.cancel();
-    _setPermissionLevelSubscription =
-        getIt.get<SetPermissionLevelInteractor>().execute(
-      room: room!,
-      userPermissionLevels: {user: role.powerLevel},
-    ).listen(
-      (either) async => await either.fold(
-        (failure) async => _handleSetPermissionFailure(failure),
-        (success) async => await _handleSetPermissionSuccess(success),
-      ),
-      onError: (error) {
-        Logs().e('SetPermissionLevel error', error);
-        TwakeDialog.hideLoadingDialog(context);
-        TwakeSnackBar.show(context, error.toString());
-      },
-      onDone: () => _setPermissionLevelSubscription?.cancel(),
-    );
+    _setPermissionLevelSubscription = getIt
+        .get<SetPermissionLevelInteractor>()
+        .execute(room: room!, userPermissionLevels: {user: role.powerLevel})
+        .listen(
+          (either) async => await either.fold(
+            (failure) async => _handleSetPermissionFailure(failure),
+            (success) async => await _handleSetPermissionSuccess(success),
+          ),
+          onError: (error) {
+            Logs().e('SetPermissionLevel error', error);
+            TwakeDialog.hideLoadingDialog(context);
+            TwakeSnackBar.show(context, error.toString());
+          },
+          onDone: () => _setPermissionLevelSubscription?.cancel(),
+        );
   }
 
   void _handleSetPermissionFailure(Failure failure) {
     TwakeDialog.hideLoadingDialog(context);
 
     if (failure is SetPermissionLevelFailure) {
-      TwakeSnackBar.show(
-        context,
-        failure.exception.toString(),
-      );
+      TwakeSnackBar.show(context, failure.exception.toString());
       return;
     }
 
     if (failure is NoPermissionFailure) {
-      TwakeSnackBar.show(
-        context,
-        L10n.of(context)!.permissionErrorChangeRole,
-      );
+      TwakeSnackBar.show(context, L10n.of(context)!.permissionErrorChangeRole);
       return;
     }
   }
@@ -477,16 +442,18 @@ mixin ChatDetailsTabMixin<T extends StatefulWidget>
           builder: (messengerContext) {
             return AlertDialog(
               shape: const RoundedRectangleBorder(
-                borderRadius: BorderRadius.all(
-                  Radius.circular(16.0),
-                ),
+                borderRadius: BorderRadius.all(Radius.circular(16.0)),
               ),
               contentPadding: const EdgeInsets.all(0),
               content: SizedBox(
-                width:
-                    min(600, MediaQuery.of(messengerContext).size.width * 0.9),
-                height:
-                    min(700, MediaQuery.of(messengerContext).size.height * 0.9),
+                width: min(
+                  600,
+                  MediaQuery.of(messengerContext).size.width * 0.9,
+                ),
+                height: min(
+                  700,
+                  MediaQuery.of(messengerContext).size.height * 0.9,
+                ),
                 child: AssignRolesRolePicker(
                   room: room!,
                   assignedUsers: [user],

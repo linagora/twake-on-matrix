@@ -4,8 +4,8 @@ import 'package:fluffychat/domain/model/contact/contact.dart';
 import 'package:fluffychat/domain/repository/phonebook_contact_repository.dart';
 
 class PhonebookContactRepositoryImpl extends PhonebookContactRepository {
-  final PhonebookContactDatasource datasource =
-      getIt.get<PhonebookContactDatasource>();
+  final PhonebookContactDatasource datasource = getIt
+      .get<PhonebookContactDatasource>();
 
   @override
   Future<List<Contact>> fetchContacts() {

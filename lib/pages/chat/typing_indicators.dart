@@ -22,23 +22,23 @@ class TypingIndicators extends StatelessWidget {
       width: double.infinity,
       alignment: Alignment.center,
       child: AnimatedContainer(
-        constraints:
-            const BoxConstraints(maxWidth: TwakeThemes.columnWidth * 2.5),
-        height:
-            typingUsers.isEmpty ? 0 : AvatarStyle.defaultSize + bottomPadding,
+        constraints: const BoxConstraints(
+          maxWidth: TwakeThemes.columnWidth * 2.5,
+        ),
+        height: typingUsers.isEmpty
+            ? 0
+            : AvatarStyle.defaultSize + bottomPadding,
         duration: TwakeThemes.animationDuration,
         curve: TwakeThemes.animationCurve,
-        alignment: controller.timeline!.events.isNotEmpty &&
+        alignment:
+            controller.timeline!.events.isNotEmpty &&
                 controller.timeline!.events.first.senderId ==
                     Matrix.of(context).client.userID
             ? Alignment.topRight
             : Alignment.topLeft,
         clipBehavior: Clip.hardEdge,
         decoration: const BoxDecoration(),
-        padding: const EdgeInsets.only(
-          left: 8.0,
-          bottom: bottomPadding,
-        ),
+        padding: const EdgeInsets.only(left: 8.0, bottom: bottomPadding),
         child: Row(
           children: [
             SizedBox(
@@ -74,8 +74,9 @@ class TypingIndicators extends StatelessWidget {
               child: Material(
                 color: Theme.of(context).appBarTheme.backgroundColor,
                 elevation: 6,
-                shadowColor:
-                    Theme.of(context).secondaryHeaderColor.withAlpha(100),
+                shadowColor: Theme.of(
+                  context,
+                ).secondaryHeaderColor.withAlpha(100),
                 borderRadius: const BorderRadius.only(
                   topLeft: Radius.circular(2),
                   topRight: Radius.circular(AppConfig.borderRadius),

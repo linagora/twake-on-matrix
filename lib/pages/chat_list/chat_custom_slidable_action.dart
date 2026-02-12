@@ -34,9 +34,9 @@ class ChatCustomSlidableAction extends StatelessWidget {
           const SizedBox(height: ChatListViewStyle.slidableIconTextGap),
           Text(
             label,
-            style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                  color: foregroundColor,
-                ),
+            style: Theme.of(
+              context,
+            ).textTheme.labelMedium?.copyWith(color: foregroundColor),
             overflow: TextOverflow.ellipsis,
           ),
         ],

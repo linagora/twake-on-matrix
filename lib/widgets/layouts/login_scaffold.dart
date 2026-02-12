@@ -6,11 +6,7 @@ class LoginScaffold extends StatelessWidget {
   final Widget body;
   final AppBar? appBar;
 
-  const LoginScaffold({
-    super.key,
-    required this.body,
-    this.appBar,
-  });
+  const LoginScaffold({super.key, required this.body, this.appBar});
 
   @override
   Widget build(BuildContext context) {

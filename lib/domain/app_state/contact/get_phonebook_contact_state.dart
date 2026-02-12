@@ -27,10 +27,7 @@ class GetPhonebookContactsSuccess extends Success {
   });
 
   @override
-  List<Object?> get props => [
-        progress,
-        contacts,
-      ];
+  List<Object?> get props => [progress, contacts];
 }
 
 class GetPhonebookContactsIsEmpty extends Failure {
@@ -57,10 +54,7 @@ class RequestTokenFailure extends Failure {
   final List<Contact> contacts;
   final dynamic exception;
 
-  const RequestTokenFailure({
-    required this.exception,
-    required this.contacts,
-  });
+  const RequestTokenFailure({required this.exception, required this.contacts});
 
   @override
   List<Object?> get props => [exception, contacts];
@@ -70,10 +64,7 @@ class RegisterTokenFailure extends Failure {
   final List<Contact> contacts;
   final dynamic exception;
 
-  const RegisterTokenFailure({
-    required this.contacts,
-    required this.exception,
-  });
+  const RegisterTokenFailure({required this.contacts, required this.exception});
 
   @override
   List<Object?> get props => [exception, contacts];
@@ -95,9 +86,7 @@ class LookUpPhonebookContactPartialFailed extends Failure {
 class GetPhoneBookContactFailure extends Failure {
   final dynamic exception;
 
-  const GetPhoneBookContactFailure({
-    required this.exception,
-  });
+  const GetPhoneBookContactFailure({required this.exception});
 
   @override
   List<Object?> get props => [exception];
@@ -106,9 +95,7 @@ class GetPhoneBookContactFailure extends Failure {
 class GetHashDetailsFailure extends Failure {
   final dynamic exception;
 
-  const GetHashDetailsFailure({
-    required this.exception,
-  });
+  const GetHashDetailsFailure({required this.exception});
 
   @override
   List<Object?> get props => [exception];
@@ -117,9 +104,7 @@ class GetHashDetailsFailure extends Failure {
 class LookUpContactFailure extends Failure {
   final dynamic exception;
 
-  const LookUpContactFailure({
-    required this.exception,
-  });
+  const LookUpContactFailure({required this.exception});
 
   @override
   List<Object?> get props => [exception];

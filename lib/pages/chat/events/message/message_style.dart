@@ -52,11 +52,11 @@ class MessageStyle {
 
   static TextStyle? displayTime(BuildContext context) =>
       Theme.of(context).textTheme.bodySmall?.merge(
-            TextStyle(
-              color: Theme.of(context).colorScheme.onSurface,
-              letterSpacing: 0.4,
-            ),
-          );
+        TextStyle(
+          color: Theme.of(context).colorScheme.onSurface,
+          letterSpacing: 0.4,
+        ),
+      );
 
   static double get forwardContainerSize => 40.0;
 
@@ -98,8 +98,9 @@ class MessageStyle {
     double? textWidth,
   }) {
     if (event.isCaptionModeOrReply() == true) {
-      DisplayImageInfo? displayImageInfo =
-          event.getOriginalResolution()?.getDisplayImageInfo(context);
+      DisplayImageInfo? displayImageInfo = event
+          .getOriginalResolution()
+          ?.getDisplayImageInfo(context);
 
       final matrixFile = event.getMatrixFile();
 
@@ -156,8 +157,9 @@ class MessageStyle {
     double? textWidth,
   }) {
     if (event.isCaptionModeOrReply() == true) {
-      DisplayImageInfo? displayImageInfo =
-          event.getOriginalResolution()?.getDisplayImageInfo(context);
+      DisplayImageInfo? displayImageInfo = event
+          .getOriginalResolution()
+          ?.getDisplayImageInfo(context);
 
       final matrixFile = event.getMatrixFile();
 
@@ -215,25 +217,20 @@ class MessageStyle {
   }
 
   static EdgeInsets paddingDisplayName(Event event) => EdgeInsets.only(
-        left: event.messageType == MessageTypes.Image ? 0 : 8.0,
-        bottom: 4.0,
-      );
+    left: event.messageType == MessageTypes.Image ? 0 : 8.0,
+    bottom: 4.0,
+  );
 
   static EdgeInsets get paddingMessage =>
       const EdgeInsets.symmetric(vertical: 2.0);
 
-  static EdgeInsets get paddingTimestamp => const EdgeInsets.only(
-        left: 8.0,
-        right: 4.0,
-      );
+  static EdgeInsets get paddingTimestamp =>
+      const EdgeInsets.only(left: 8.0, right: 4.0);
 
-  static EdgeInsets get paddingEditButton => EdgeInsets.only(
-        top: 4.0 * AppConfig.bubbleSizeFactor,
-      );
+  static EdgeInsets get paddingEditButton =>
+      EdgeInsets.only(top: 4.0 * AppConfig.bubbleSizeFactor);
 
-  static const EdgeInsets paddingAvatar = EdgeInsets.only(
-    right: 8.0,
-  );
+  static const EdgeInsets paddingAvatar = EdgeInsets.only(right: 8.0);
 
   static EdgeInsetsDirectional paddingMessageContainer(
     bool displayTime,
@@ -243,11 +240,7 @@ class MessageStyle {
     bool selected,
   ) {
     return EdgeInsetsDirectional.only(
-      top: MessageStyle.messageSpacing(
-        displayTime,
-        nextEvent,
-        event,
-      ),
+      top: MessageStyle.messageSpacing(displayTime, nextEvent, event),
       end: selected || responsiveUtils.isDesktop(context) ? 8 : 0,
     );
   }
@@ -262,11 +255,8 @@ class MessageStyle {
             : 0 * AppConfig.bubbleSizeFactor,
       );
 
-  static EdgeInsets get paddingMessageTime => const EdgeInsets.only(
-        left: 6,
-        right: 8.0,
-        bottom: 4.0,
-      );
+  static EdgeInsets get paddingMessageTime =>
+      const EdgeInsets.only(left: 6, right: 8.0, bottom: 4.0);
 
   static EdgeInsetsDirectional get paddingSwipeMessage =>
       const EdgeInsetsDirectional.symmetric(horizontal: 16.0);
@@ -281,10 +271,9 @@ class MessageStyle {
   static MainAxisAlignment messageAlignment(
     Event event,
     BuildContext context,
-  ) =>
-      responsiveUtils.isMobile(context) && event.isOwnMessage
-          ? MainAxisAlignment.end
-          : MainAxisAlignment.start;
+  ) => responsiveUtils.isMobile(context) && event.isOwnMessage
+      ? MainAxisAlignment.end
+      : MainAxisAlignment.start;
 
   static CrossAxisAlignment messageCrossAxisAlignment(
     Event event,

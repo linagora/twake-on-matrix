@@ -51,15 +51,12 @@ class ChatSearchController extends State<ChatSearch> {
 
   @override
   void initState() {
-    serverSearchController = ServerSearchController(
-      inRoomId: widget.roomId,
-    );
+    serverSearchController = ServerSearchController(inRoomId: widget.roomId);
     _initSearchInsideChat();
     scrollController.addLoadMoreListener(loadMore);
     textEditingController.addListener(
-      () => serverSearchController.setDebouncerValue(
-        textEditingController.text,
-      ),
+      () =>
+          serverSearchController.setDebouncerValue(textEditingController.text),
     );
     serverSearchController.initSearch(
       context: context,

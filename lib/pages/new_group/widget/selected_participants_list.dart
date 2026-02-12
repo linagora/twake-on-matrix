@@ -62,17 +62,16 @@ class _SelectedParticipantsListState extends State<SelectedParticipantsList> {
                         padding: const EdgeInsets.all(0),
                         label: Text(
                           contact.displayName ?? contact.matrixId ?? '',
-                          style:
-                              Theme.of(context).textTheme.labelLarge?.copyWith(
-                                    color: Theme.of(context)
-                                        .colorScheme
-                                        .onSurfaceVariant,
-                                  ),
+                          style: Theme.of(context).textTheme.labelLarge
+                              ?.copyWith(
+                                color: Theme.of(
+                                  context,
+                                ).colorScheme.onSurfaceVariant,
+                              ),
                         ),
                         avatar: contact.matrixId != null
                             ? FutureBuilder<Profile>(
-                                future: Matrix.of(context)
-                                    .client
+                                future: Matrix.of(context).client
                                     .getProfileFromUserId(
                                       contact.matrixId!,
                                       getFromRooms: false,
@@ -92,7 +91,8 @@ class _SelectedParticipantsListState extends State<SelectedParticipantsList> {
                                     .avatarChipSize,
                               ),
                         onDeleted: () {
-                          widget.contactsSelectionController
+                          widget
+                              .contactsSelectionController
                               .selectedContactsMapNotifier
                               .unselectContact(contact);
                         },
@@ -101,14 +101,11 @@ class _SelectedParticipantsListState extends State<SelectedParticipantsList> {
                   ),
                 ),
                 Divider(
-                  color: Theme.of(context)
-                      .colorScheme
-                      .surfaceTint
-                      .withOpacity(0.16),
+                  color: Theme.of(
+                    context,
+                  ).colorScheme.surfaceTint.withOpacity(0.16),
                 ),
-                const SizedBox(
-                  height: 4.0,
-                ),
+                const SizedBox(height: 4.0),
                 Padding(
                   padding: SelectedParticipantsListStyle.contactPadding,
                   child: Row(
@@ -116,22 +113,21 @@ class _SelectedParticipantsListState extends State<SelectedParticipantsList> {
                       Text(
                         '${L10n.of(context)!.selectedUsers}: ${contactsNotifier.contactsList.length}',
                         style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                              color: LinagoraRefColors.material().tertiary[20],
-                            ),
+                          color: LinagoraRefColors.material().tertiary[20],
+                        ),
                       ),
                       Expanded(
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.end,
                           children: [
                             InkWell(
-                              onTap: () => widget.contactsSelectionController
+                              onTap: () => widget
+                                  .contactsSelectionController
                                   .selectedContactsMapNotifier
                                   .unselectAllContacts(),
                               child: Text(
                                 L10n.of(context)!.clearAllSelected,
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .labelLarge
+                                style: Theme.of(context).textTheme.labelLarge
                                     ?.copyWith(
                                       color: LinagoraRefColors.material()
                                           .tertiary[20],

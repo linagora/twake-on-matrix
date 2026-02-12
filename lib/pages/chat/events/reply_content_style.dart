@@ -39,25 +39,26 @@ class ReplyContentStyle {
   }
 
   static const double contentSpacing = 6.0;
-  static const BorderRadius previewedImageBorderRadius =
-      BorderRadius.all(Radius.circular(4));
+  static const BorderRadius previewedImageBorderRadius = BorderRadius.all(
+    Radius.circular(4),
+  );
   static const double previewedImagePlaceholderPadding = 4.0;
 
   static TextStyle? displayNameTextStyle(BuildContext context) {
     return Theme.of(context).textTheme.titleSmall?.copyWith(
-          color: Theme.of(context).colorScheme.onSurfaceVariant,
-          fontWeight: FontWeight.bold,
-          fontSize: fontSizeDisplayName,
-        );
+      color: Theme.of(context).colorScheme.onSurfaceVariant,
+      fontWeight: FontWeight.bold,
+      fontSize: fontSizeDisplayName,
+    );
   }
 
   static TextStyle? replyBodyTextStyle(BuildContext context) {
     return Theme.of(context).textTheme.bodySmall?.copyWith(
-          color: LinagoraRefColors.material().neutral[50],
-          fontWeight: FontWeight.w500,
-          overflow: TextOverflow.ellipsis,
-          fontSize: fontSizeDisplayContent,
-        );
+      color: LinagoraRefColors.material().neutral[50],
+      fontWeight: FontWeight.w500,
+      overflow: TextOverflow.ellipsis,
+      fontSize: fontSizeDisplayContent,
+    );
   }
 
   static EdgeInsetsDirectional get marginReplyContent =>

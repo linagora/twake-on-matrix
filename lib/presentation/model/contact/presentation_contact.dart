@@ -34,12 +34,12 @@ class PresentationContact extends Equatable {
   });
 
   PresentationContact get presentationContactEmpty => const PresentationContact(
-        id: '',
-        emails: {},
-        displayName: '',
-        matrixId: '',
-        status: ContactStatus.inactive,
-      );
+    id: '',
+    emails: {},
+    displayName: '',
+    matrixId: '',
+    status: ContactStatus.inactive,
+  );
 
   String get primaryEmail =>
       emails?.firstWhereOrNull((email) => email.email.isNotEmpty)?.email ?? '';
@@ -59,24 +59,22 @@ class PresentationContact extends Equatable {
       );
     }
     if (primaryEmail.isNotEmpty) {
-      return emails?.firstWhereOrNull(
-        (email) => email.email == primaryEmail,
-      );
+      return emails?.firstWhereOrNull((email) => email.email == primaryEmail);
     }
     return null;
   }
 
   @override
   List<Object?> get props => [
-        id,
-        emails,
-        phoneNumbers,
-        displayName,
-        matrixId,
-        expandInformation,
-        status,
-        type,
-      ];
+    id,
+    emails,
+    phoneNumbers,
+    displayName,
+    matrixId,
+    expandInformation,
+    status,
+    type,
+  ];
 }
 
 abstract class PresentationThirdPartyContact with EquatableMixin {
@@ -109,12 +107,12 @@ class PresentationEmail extends PresentationThirdPartyContact {
 
   @override
   List<Object?> get props => [
-        email,
-        matrixId,
-        thirdPartyId,
-        thirdPartyIdType,
-        status,
-      ];
+    email,
+    matrixId,
+    thirdPartyId,
+    thirdPartyIdType,
+    status,
+  ];
 }
 
 class PresentationPhoneNumber extends PresentationThirdPartyContact {
@@ -130,10 +128,10 @@ class PresentationPhoneNumber extends PresentationThirdPartyContact {
 
   @override
   List<Object?> get props => [
-        phoneNumber,
-        matrixId,
-        thirdPartyId,
-        thirdPartyIdType,
-        status,
-      ];
+    phoneNumber,
+    matrixId,
+    thirdPartyId,
+    thirdPartyIdType,
+    status,
+  ];
 }

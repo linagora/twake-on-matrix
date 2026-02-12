@@ -20,17 +20,17 @@ import 'package:fluffychat/modules/federation_identity_lookup/manager/identity_l
 import 'package:matrix/matrix.dart' hide Contact;
 
 class TwakeLookupPhonebookContactInteractor {
-  final PhonebookContactRepository _phonebookContactRepository =
-      getIt.get<PhonebookContactRepository>();
-  final IdentityLookupManager _identityLookupManager =
-      getIt.get<IdentityLookupManager>();
+  final PhonebookContactRepository _phonebookContactRepository = getIt
+      .get<PhonebookContactRepository>();
+  final IdentityLookupManager _identityLookupManager = getIt
+      .get<IdentityLookupManager>();
 
-  final HiveContactRepository _hiveContactRepository =
-      getIt.get<HiveContactRepository>();
+  final HiveContactRepository _hiveContactRepository = getIt
+      .get<HiveContactRepository>();
 
   final SharedPreferencesContactCacheManager
-      _sharedPreferencesContactCacheManager =
-      getIt.get<SharedPreferencesContactCacheManager>();
+  _sharedPreferencesContactCacheManager = getIt
+      .get<SharedPreferencesContactCacheManager>();
 
   Stream<Either<Failure, Success>> execute({
     int lookupChunkSize = 10,
@@ -52,12 +52,8 @@ class TwakeLookupPhonebookContactInteractor {
 
       contacts.addAll(res);
     } catch (e) {
-      Logs().e(
-        'TwakeLookupPhonebookContactInteractor::execute: Register: $e',
-      );
-      yield Left(
-        GetPhoneBookContactFailure(exception: e),
-      );
+      Logs().e('TwakeLookupPhonebookContactInteractor::execute: Register: $e');
+      yield Left(GetPhoneBookContactFailure(exception: e));
       return;
     }
 
@@ -78,9 +74,7 @@ class TwakeLookupPhonebookContactInteractor {
       if (res.lookupPepper?.isEmpty == true &&
           res.algorithms?.isEmpty == true) {
         yield const Left(
-          GetHashDetailsFailure(
-            exception: 'Hash details is empty',
-          ),
+          GetHashDetailsFailure(exception: 'Hash details is empty'),
         );
         return;
       }
@@ -90,11 +84,7 @@ class TwakeLookupPhonebookContactInteractor {
       Logs().e(
         'FederationLookUpPhonebookContactInteractor::execute: GetHashDetails: $e',
       );
-      yield Left(
-        GetHashDetailsFailure(
-          exception: e,
-        ),
-      );
+      yield Left(GetHashDetailsFailure(exception: e));
       return;
     }
 
@@ -121,23 +111,17 @@ class TwakeLookupPhonebookContactInteractor {
 
             hashToContactIdMappings
                 .putIfAbsent(chunkContact.id, () => [])
-                .addAll(
-                  phoneToHashMap.values.expand((hash) => hash),
-                );
+                .addAll(phoneToHashMap.values.expand((hash) => hash));
           }
 
           if (chunkContact.emails != null && chunkContact.emails!.isNotEmpty) {
             emailToHashMap.addAll(
-              chunkContact.emails!.calculateHashesForEmails(
-                hashDetails,
-              ),
+              chunkContact.emails!.calculateHashesForEmails(hashDetails),
             );
 
             hashToContactIdMappings
                 .putIfAbsent(chunkContact.id, () => [])
-                .addAll(
-                  emailToHashMap.values.expand((hash) => hash),
-                );
+                .addAll(emailToHashMap.values.expand((hash) => hash));
           }
 
           final updatedContact = chunkContact.updateContactWithHashes(
@@ -149,8 +133,9 @@ class TwakeLookupPhonebookContactInteractor {
         }
 
         final request = FederationLookupMxidRequest(
-          addresses:
-              hashToContactIdMappings.values.expand((hash) => hash).toSet(),
+          addresses: hashToContactIdMappings.values
+              .expand((hash) => hash)
+              .toSet(),
           algorithm: hashDetails.algorithms?.firstOrNull,
           pepper: hashDetails.lookupPepper,
         );
@@ -201,9 +186,7 @@ class TwakeLookupPhonebookContactInteractor {
           ),
         );
       } catch (e) {
-        Logs().e(
-          'TwakeLookupPhonebookContactInteractor::execute: $e',
-        );
+        Logs().e('TwakeLookupPhonebookContactInteractor::execute: $e');
         updatedContact.addAll(chunkContacts);
         chunkError = TwakeLookupChunkException(e.toString());
         continue;
@@ -214,8 +197,8 @@ class TwakeLookupPhonebookContactInteractor {
     if (chunkError != null) {
       await _sharedPreferencesContactCacheManager
           .storeChunkFederationLookUpError(
-        ChunkLookUpContactErrorEnum.chunkError,
-      );
+            ChunkLookUpContactErrorEnum.chunkError,
+          );
       yield Left(
         LookUpPhonebookContactPartialFailed(
           exception: chunkError,
@@ -243,15 +226,13 @@ class TwakeLookupPhonebookContactInteractor {
     try {
       if (mappings != null && mappings.isNotEmpty) {
         return contactIdToHashMap.values.toSet().handleLookupMappings(
-              mappings: mappings,
-              hashToContactIdMappings: hashToContactIdMappings,
-            );
+          mappings: mappings,
+          hashToContactIdMappings: hashToContactIdMappings,
+        );
       }
       return {};
     } catch (e) {
-      Logs().e(
-        'TwakeLookupPhonebookContactInteractor::handleMappings: $e',
-      );
+      Logs().e('TwakeLookupPhonebookContactInteractor::handleMappings: $e');
       return {};
     }
   }

@@ -58,8 +58,9 @@ class ChatGroupDetailRobot extends CoreRobot {
         final ctx = $.tester.element(dialog); // BuildContext inside dialog
         final nextLabel = L10n.of(ctx)!.next; // whatever the app shows
 
-        await $.tester
-            .tap(find.descendant(of: dialog, matching: find.text(nextLabel)));
+        await $.tester.tap(
+          find.descendant(of: dialog, matching: find.text(nextLabel)),
+        );
         await $.tester.pumpAndSettle();
       }
     } catch (e) {

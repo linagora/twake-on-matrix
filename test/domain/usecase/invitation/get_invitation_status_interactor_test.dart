@@ -11,9 +11,7 @@ import 'package:mockito/mockito.dart';
 
 import 'get_invitation_status_interactor_test.mocks.dart';
 
-@GenerateMocks([
-  InvitationRepository,
-])
+@GenerateMocks([InvitationRepository])
 void main() {
   late GetInvitationStatusInteractor interactor;
   late MockInvitationRepository mockRepository;
@@ -34,14 +32,10 @@ void main() {
   const testInvitationId = 'inv123';
 
   test('execute returns empty state when invitation status is null', () async {
-    final response = InvitationStatusResponse(
-      invitation: null,
-    );
+    final response = InvitationStatusResponse(invitation: null);
 
     when(
-      mockRepository.getInvitationStatus(
-        invitationId: testInvitationId,
-      ),
+      mockRepository.getInvitationStatus(invitationId: testInvitationId),
     ).thenAnswer((_) async => response);
 
     final result = interactor.execute(
@@ -62,9 +56,7 @@ void main() {
           ),
         ),
         Right(
-          GetInvitationStatusSuccessState(
-            invitationStatusResponse: response,
-          ),
+          GetInvitationStatusSuccessState(invitationStatusResponse: response),
         ),
       ]),
     );
@@ -85,9 +77,7 @@ void main() {
     );
 
     when(
-      mockRepository.getInvitationStatus(
-        invitationId: testInvitationId,
-      ),
+      mockRepository.getInvitationStatus(invitationId: testInvitationId),
     ).thenAnswer((_) async => response);
 
     final result = interactor.execute(
@@ -101,9 +91,7 @@ void main() {
       emitsInOrder([
         const Right(GetInvitationStatusLoadingState()),
         Right(
-          GetInvitationStatusSuccessState(
-            invitationStatusResponse: response,
-          ),
+          GetInvitationStatusSuccessState(invitationStatusResponse: response),
         ),
       ]),
     );
@@ -111,9 +99,7 @@ void main() {
 
   test('execute returns failure state on error', () async {
     when(
-      mockRepository.getInvitationStatus(
-        invitationId: testInvitationId,
-      ),
+      mockRepository.getInvitationStatus(invitationId: testInvitationId),
     ).thenThrow(Exception('Test error'));
 
     final result = interactor.execute(
@@ -139,9 +125,7 @@ void main() {
 
   test('execute returns failure state with message on DioException', () async {
     when(
-      mockRepository.getInvitationStatus(
-        invitationId: testInvitationId,
-      ),
+      mockRepository.getInvitationStatus(invitationId: testInvitationId),
     ).thenThrow(
       DioException(
         requestOptions: RequestOptions(),

@@ -149,8 +149,9 @@ class ChatScenario extends CoreRobot {
 
     // 2) Get MaterialLocalizations from the input's own context (NOT WidgetsApp)
     final BuildContext inputCtx = $.tester.element(input.finder);
-    final String pasteLabel =
-        MaterialLocalizations.of(inputCtx).pasteButtonLabel;
+    final String pasteLabel = MaterialLocalizations.of(
+      inputCtx,
+    ).pasteButtonLabel;
 
     // 3) Try Flutter tree first (Android usually)
     final flutterMenu = find.text(pasteLabel);
@@ -256,8 +257,9 @@ class ChatScenario extends CoreRobot {
   }
 
   PatrolFinder _tileByText(String text) {
-    final msg =
-        $(MatrixLinkifyText).containing(text); //_richTextWithExact(text);
+    final msg = $(
+      MatrixLinkifyText,
+    ).containing(text); //_richTextWithExact(text);
     final container = find.ancestor(
       of: msg,
       matching: find.byType(MultiPlatformsMessageContainer),
@@ -327,8 +329,9 @@ class ChatScenario extends CoreRobot {
       timeout: const Duration(seconds: 30),
     );
     await $.waitUntilVisible(
-      $(PinnedMessagesScreen)
-          .containing(find.textContaining('Unpin all message')),
+      $(
+        PinnedMessagesScreen,
+      ).containing(find.textContaining('Unpin all message')),
     );
   }
 
@@ -507,10 +510,7 @@ class ChatScenario extends CoreRobot {
 
     // 2) get ancestor that contains message and Stack
     final bubbleStack = $(
-      find.ancestor(
-        of: text.finder,
-        matching: find.byType(Stack),
-      ),
+      find.ancestor(of: text.finder, matching: find.byType(Stack)),
     );
 
     // 3) Find SelectionContainer
@@ -523,10 +523,7 @@ class ChatScenario extends CoreRobot {
 
     // 4) find SeenByRow và Icon
     final seenBy = $(
-      find.descendant(
-        of: selection.finder,
-        matching: find.byType(SeenByRow),
-      ),
+      find.descendant(of: selection.finder, matching: find.byType(SeenByRow)),
     );
 
     // 5) find seenIcon
@@ -548,10 +545,9 @@ class ChatScenario extends CoreRobot {
 
   Future<void> verifyChatListCanBeScrollable(SoftAssertHelper s) async {
     s.softAssertEquals(
-      await CoreRobot($).isActuallyScrollable(
+      await CoreRobot(
         $,
-        root: $(SingleChildScrollView),
-      ),
+      ).isActuallyScrollable($, root: $(SingleChildScrollView)),
       true,
       'Chat list is not scrollable',
     );
@@ -609,8 +605,9 @@ class ChatScenario extends CoreRobot {
 
     // 2. Handle permissions if necessary (though usually handled by CoreRobot or LoginScenario)
     // CoreRobot's confirmAccessContact style
-    if (await $.native
-        .isPermissionDialogVisible(timeout: const Duration(seconds: 5))) {
+    if (await $.native.isPermissionDialogVisible(
+      timeout: const Duration(seconds: 5),
+    )) {
       await $.native.tap(Selector(text: 'Allow all'));
     }
 
@@ -624,9 +621,9 @@ class ChatScenario extends CoreRobot {
   }
 
   Future<void> retryImageUpload() async {
-    final retryBtn = $(SendingImageInfoWidget)
-        .$(IconButton)
-        .containing(find.byIcon(Icons.refresh));
+    final retryBtn = $(
+      SendingImageInfoWidget,
+    ).$(IconButton).containing(find.byIcon(Icons.refresh));
     await retryBtn.tap();
     await $.pumpAndTrySettle();
   }

@@ -67,9 +67,7 @@ class MockDatabase extends Mock implements DatabaseApi {
 
 Future<Client> getClient() async {
   if (!vod.isInitialized()) {
-    await vod.init(
-      libraryPath: './vodozemac/debug/',
-    );
+    await vod.init(libraryPath: './vodozemac/debug/');
   }
   final client = Client(
     'testclient',

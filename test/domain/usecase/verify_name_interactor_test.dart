@@ -21,13 +21,17 @@ void main() {
     test('returns VerifyNameViewState success when all validators pass', () {
       const newName = 'ValidName';
 
-      when(mockValidator1.validate(any))
-          .thenReturn(Right(VerifyNameSuccessViewState()));
-      when(mockValidator2.validate(any))
-          .thenReturn(Right(VerifyNameSuccessViewState()));
+      when(
+        mockValidator1.validate(any),
+      ).thenReturn(Right(VerifyNameSuccessViewState()));
+      when(
+        mockValidator2.validate(any),
+      ).thenReturn(Right(VerifyNameSuccessViewState()));
 
-      final result =
-          interactor.execute(newName, [mockValidator1, mockValidator2]);
+      final result = interactor.execute(newName, [
+        mockValidator1,
+        mockValidator2,
+      ]);
 
       expect(result, isA<Right>());
       expect(result, Right<Failure, Success>(VerifyNameSuccessViewState()));
@@ -41,13 +45,17 @@ void main() {
       final interactor = VerifyNameInteractor();
       const newName = 'InvalidName';
 
-      when(mockValidator1.validate(any))
-          .thenReturn(Right(VerifyNameSuccessViewState()));
-      when(mockValidator2.validate(any))
-          .thenReturn(const Left(VerifyNameFailure('Name is not valid')));
+      when(
+        mockValidator1.validate(any),
+      ).thenReturn(Right(VerifyNameSuccessViewState()));
+      when(
+        mockValidator2.validate(any),
+      ).thenReturn(const Left(VerifyNameFailure('Name is not valid')));
 
-      final result =
-          interactor.execute(newName, [mockValidator1, mockValidator2]);
+      final result = interactor.execute(newName, [
+        mockValidator1,
+        mockValidator2,
+      ]);
 
       expect(result, isA<Left>());
       verify(mockValidator1.validate(any)).called(1);
@@ -60,8 +68,9 @@ void main() {
       const newName = 'ValidName';
 
       // Mock a validator to throw an exception
-      when(mockValidator.validate(any))
-          .thenThrow(Exception('Validation failed'));
+      when(
+        mockValidator.validate(any),
+      ).thenThrow(Exception('Validation failed'));
 
       final result = interactor.execute(newName, [mockValidator]);
 

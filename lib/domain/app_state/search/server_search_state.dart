@@ -13,18 +13,10 @@ class ServerSearchChatSuccess extends Success {
   final List<Result>? results;
   final String? nextBatch;
 
-  const ServerSearchChatSuccess({
-    this.results,
-    this.nextBatch,
-    this.roomId,
-  });
+  const ServerSearchChatSuccess({this.results, this.nextBatch, this.roomId});
 
   @override
-  List<Object?> get props => [
-        results,
-        nextBatch,
-        roomId,
-      ];
+  List<Object?> get props => [results, nextBatch, roomId];
 }
 
 class ServerSearchChatFailed extends Failure {

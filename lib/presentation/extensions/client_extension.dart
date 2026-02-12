@@ -15,8 +15,9 @@ extension ClientExtension on Client {
     if (room1.isFavourite ^ room2.isFavourite) {
       return room1.isFavourite ? newerChat : olderChat;
     }
-    return room2.latestEventReceivedTime
-        .compareTo(room1.latestEventReceivedTime);
+    return room2.latestEventReceivedTime.compareTo(
+      room1.latestEventReceivedTime,
+    );
   }
 
   List<Room> filteredRoomsForAll(ActiveFilter activeFilter) {

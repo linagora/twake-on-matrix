@@ -15,9 +15,7 @@ Future<Database?> openSqfliteDb({String? name}) async {
     "databases",
     "${name ?? AppConfig.applicationName}.db",
   );
-  final db = await databaseFactory.openDatabase(
-    dbPath,
-  );
+  final db = await databaseFactory.openDatabase(dbPath);
   return db;
 }
 

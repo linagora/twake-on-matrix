@@ -15,17 +15,12 @@ import 'package:flutter_web_auth_2/flutter_web_auth_2.dart';
 import 'package:go_router/go_router.dart';
 import 'package:matrix/matrix.dart';
 
-enum TwakeWelcomeType {
-  firstAccount,
-  otherAccounts,
-}
+enum TwakeWelcomeType { firstAccount, otherAccounts }
 
 class TwakeWelcomeArg extends Equatable {
   final TwakeWelcomeType twakeIdType;
 
-  const TwakeWelcomeArg({
-    this.twakeIdType = TwakeWelcomeType.firstAccount,
-  });
+  const TwakeWelcomeArg({this.twakeIdType = TwakeWelcomeType.firstAccount});
 
   bool get isAddAnotherAccount => twakeIdType == TwakeWelcomeType.otherAccounts;
 
@@ -80,9 +75,7 @@ class TwakeWelcomeController extends State<TwakeWelcome> with ConnectPageMixin {
       }
       final client = await matrix.getLoginClient();
       matrix.loginHomeserverSummary = await client
-          .checkHomeserver(
-            Uri.parse(AppConfig.twakeWorkplaceHomeserver),
-          )
+          .checkHomeserver(Uri.parse(AppConfig.twakeWorkplaceHomeserver))
           .toHomeserverSummary();
       final uri = await FlutterWebAuth2.authenticate(
         url: url,
@@ -138,16 +131,11 @@ class TwakeWelcomeController extends State<TwakeWelcome> with ConnectPageMixin {
   }
 
   void onClickPrivacyPolicy() {
-    UrlLauncher(
-      context,
-      url: AppConfig.privacyUrl,
-    ).openUrlInAppBrowser();
+    UrlLauncher(context, url: AppConfig.privacyUrl).openUrlInAppBrowser();
   }
 
   @override
   Widget build(BuildContext context) {
-    return TwakeWelcomeView(
-      controller: this,
-    );
+    return TwakeWelcomeView(controller: this);
   }
 }

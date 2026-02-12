@@ -25,13 +25,9 @@ class GetPreviewURLInteractor {
       Logs().d(
         'GetPreviewURLInteractor::execute(): imageUrl - ${response.imageUrl}}',
       );
-      yield Right(
-        GetPreviewUrlSuccess(urlPreview: response),
-      );
+      yield Right(GetPreviewUrlSuccess(urlPreview: response));
     } catch (e) {
-      Logs().d(
-        'GetPreviewURLInteractor::execute(): Exception - $e}',
-      );
+      Logs().d('GetPreviewURLInteractor::execute(): Exception - $e}');
       yield Left(GetPreviewURLFailure(e));
     }
   }

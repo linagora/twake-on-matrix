@@ -20,6 +20,6 @@ class AudioPlayerStyle {
 
   static TextStyle? textInformationStyle(BuildContext context) =>
       Theme.of(context).textTheme.bodySmall!.copyWith(
-            color: LinagoraRefColors.material().tertiary[20],
-          );
+        color: LinagoraRefColors.material().tertiary[20],
+      );
 }

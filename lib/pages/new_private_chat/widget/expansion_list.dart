@@ -20,14 +20,14 @@ import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 
 class ExpansionList extends StatelessWidget {
   final ValueNotifierCustom<Either<Failure, Success>>
-      presentationContactsNotifier;
+  presentationContactsNotifier;
   final ValueNotifierCustom<Either<Failure, Success>>
-      presentationPhonebookContactNotifier;
+  presentationPhonebookContactNotifier;
   final Function() goToNewGroupChat;
   final Function(BuildContext context, PresentationContact contact)
-      onExternalContactTap;
+  onExternalContactTap;
   final Function(BuildContext context, PresentationContact contact)
-      onContactTap;
+  onContactTap;
   final TextEditingController textEditingController;
   final ValueNotifier<WarningContactsBannerState> warningBannerNotifier;
   final Function()? closeContactsWarningBanner;
@@ -73,9 +73,7 @@ class ExpansionList extends StatelessWidget {
                   failure is GetPresentationContactsEmpty) {
                 return Column(
                   children: [
-                    const SizedBox(
-                      height: 12,
-                    ),
+                    const SizedBox(height: 12),
                     NoContactsFound(
                       keyword: textControllerIsEmpty
                           ? null
@@ -86,30 +84,25 @@ class ExpansionList extends StatelessWidget {
               }
               return child!;
             } else {
-              return presentationPhonebookContactNotifier.value.fold(
-                (_) {
-                  if (presentationPhonebookContactNotifier.value.isRight()) {
-                    return child!;
-                  }
-                  if (failure is GetPresentationContactsFailure ||
-                      failure is GetPresentationContactsEmpty) {
-                    return Column(
-                      children: [
-                        const SizedBox(
-                          height: 12,
-                        ),
-                        NoContactsFound(
-                          keyword: textControllerIsEmpty
-                              ? null
-                              : textEditingController.text,
-                        ),
-                      ],
-                    );
-                  }
+              return presentationPhonebookContactNotifier.value.fold((_) {
+                if (presentationPhonebookContactNotifier.value.isRight()) {
                   return child!;
-                },
-                (success) => child!,
-              );
+                }
+                if (failure is GetPresentationContactsFailure ||
+                    failure is GetPresentationContactsEmpty) {
+                  return Column(
+                    children: [
+                      const SizedBox(height: 12),
+                      NoContactsFound(
+                        keyword: textControllerIsEmpty
+                            ? null
+                            : textEditingController.text,
+                      ),
+                    ],
+                  );
+                }
+                return child!;
+              }, (success) => child!);
             }
           },
           (success) {
@@ -125,10 +118,7 @@ class ExpansionList extends StatelessWidget {
               }
               return TwakeInkWell(
                 onTap: () {
-                  onContactTap(
-                    context,
-                    success.contact,
-                  );
+                  onContactTap(context, success.contact);
                 },
                 child: ExpansionContactListTile(
                   contact: success.contact,
@@ -155,10 +145,7 @@ class ExpansionList extends StatelessWidget {
                       contacts[index].matrixId!.isNotEmpty) {
                     return TwakeInkWell(
                       onTap: () {
-                        onContactTap(
-                          context,
-                          contacts[index],
-                        );
+                        onContactTap(context, contacts[index]);
                       },
                       child: ExpansionContactListTile(
                         contact: contacts[index],
@@ -199,10 +186,7 @@ class ExpansionList extends StatelessWidget {
                       contacts[index].matrixId!.isNotEmpty) {
                     return TwakeInkWell(
                       onTap: () {
-                        onContactTap(
-                          context,
-                          contacts[index],
-                        );
+                        onContactTap(context, contacts[index]);
                       },
                       child: ExpansionContactListTile(
                         contact: contacts[index],
@@ -226,13 +210,9 @@ class ExpansionList extends StatelessWidget {
     if (!getIt.get<ResponsiveUtils>().isSingleColumnLayout(context)) return [];
 
     return [
-      _NewGroupButton(
-        onPressed: goToNewGroupChat,
-      ),
+      _NewGroupButton(onPressed: goToNewGroupChat),
       if (PlatformInfos.isMobile)
-        _CreateContactButton(
-          onPressed: goToCreateContact,
-        ),
+        _CreateContactButton(onPressed: goToCreateContact),
     ];
   }
 }
@@ -273,9 +253,9 @@ class _IconTextTileButton extends StatelessWidget {
                 Text(
                   text,
                   style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                        color: Theme.of(context).colorScheme.primary,
-                        letterSpacing: -0.15,
-                      ),
+                    color: Theme.of(context).colorScheme.primary,
+                    letterSpacing: -0.15,
+                  ),
                 ),
               ],
             ),
@@ -289,9 +269,7 @@ class _IconTextTileButton extends StatelessWidget {
 class _NewGroupButton extends StatelessWidget {
   final Function() onPressed;
 
-  const _NewGroupButton({
-    required this.onPressed,
-  });
+  const _NewGroupButton({required this.onPressed});
 
   @override
   Widget build(BuildContext context) {
@@ -307,9 +285,7 @@ class _NewGroupButton extends StatelessWidget {
 class _CreateContactButton extends StatelessWidget {
   final VoidCallback? onPressed;
 
-  const _CreateContactButton({
-    required this.onPressed,
-  });
+  const _CreateContactButton({required this.onPressed});
 
   @override
   Widget build(BuildContext context) {

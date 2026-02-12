@@ -36,10 +36,7 @@ class ChatDetailsFileRowBody extends StatelessWidget {
           ),
           Padding(
             padding: ChatDetailsFileTileStyle.trailingPadding,
-            child: Icon(
-              trailingIcon,
-              color: iconColor,
-            ),
+            child: Icon(trailingIcon, color: iconColor),
           ),
         ],
       ),

@@ -7,8 +7,9 @@ import 'package:fluffychat/domain/model/contact/lookup_mxid_request.dart';
 import 'package:fluffychat/domain/model/contact/lookup_mxid_response.dart';
 
 class TomContactAPI {
-  final DioClient _client =
-      getIt.get<DioClient>(instanceName: NetworkDI.tomDioClientName);
+  final DioClient _client = getIt.get<DioClient>(
+    instanceName: NetworkDI.tomDioClientName,
+  );
 
   TomContactAPI();
 
@@ -18,7 +19,8 @@ class TomContactAPI {
     int? offset,
     LookupMxidRequest? lookupMxidRequest,
   }) async {
-    final requestBody = lookupMxidRequest ??
+    final requestBody =
+        lookupMxidRequest ??
         LookupMxidRequest(
           scope: ['mail', 'uid', 'mobile', 'cn', 'displayName'],
           fields: ['uid', 'mobile', 'mail', 'cn', 'displayName'],

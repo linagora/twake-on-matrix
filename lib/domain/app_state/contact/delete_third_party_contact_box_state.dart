@@ -40,9 +40,7 @@ class DeleteThirdPartyContactBoxSuccessState extends Success {
 class DeleteThirdPartyContactBoxFailureState extends Failure {
   final dynamic exception;
 
-  const DeleteThirdPartyContactBoxFailureState({
-    required this.exception,
-  });
+  const DeleteThirdPartyContactBoxFailureState({required this.exception});
 
   @override
   List<Object> get props => [exception];

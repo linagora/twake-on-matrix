@@ -33,133 +33,125 @@ class PinnedEventsView extends StatelessWidget {
       valueListenable:
           controller.pinnedEventsController.getPinnedMessageNotifier,
       builder: (context, value, child) {
-        return value.fold(
-          (failure) => child!,
-          (success) {
-            switch (success.runtimeType) {
-              case const (ChatGetPinnedEventsSuccess):
-                final data = success as ChatGetPinnedEventsSuccess;
-                return Material(
-                  color: LinagoraSysColors.material().onPrimary,
-                  child: InkWell(
-                    onTap: () => controller.pinnedEventsController
-                        .jumpToPinnedMessageAction(
-                      data.pinnedEvents,
-                      scrollToEventId: (eventId) => controller.scrollToEventId(
-                        eventId,
-                        highlight: true,
+        return value.fold((failure) => child!, (success) {
+          switch (success.runtimeType) {
+            case const (ChatGetPinnedEventsSuccess):
+              final data = success as ChatGetPinnedEventsSuccess;
+              return Material(
+                color: LinagoraSysColors.material().onPrimary,
+                child: InkWell(
+                  onTap: () => controller.pinnedEventsController
+                      .jumpToPinnedMessageAction(
+                        data.pinnedEvents,
+                        scrollToEventId: (eventId) => controller
+                            .scrollToEventId(eventId, highlight: true),
                       ),
-                    ),
-                    child: Container(
-                      margin: PinnedEventsStyle.marginPinnedEventsWidget,
-                      height: PinnedEventsStyle.maxHeight,
-                      child: Row(
-                        children: [
-                          ValueListenableBuilder(
-                            valueListenable: controller.pinnedEventsController
-                                .currentPinnedEventNotifier,
-                            builder: (context, currentEvent, child) {
-                              if (currentEvent == null) return child!;
-                              return Expanded(
-                                child: Row(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    SizedBox(
-                                      width:
-                                          PinnedEventsStyle.maxWidthIndicator,
-                                      child: ScrollConfiguration(
-                                        behavior:
-                                            ScrollConfiguration.of(context)
-                                                .copyWith(scrollbars: false),
-                                        child: ListView.separated(
-                                          controller: controller
-                                              .pinnedMessageScrollController,
-                                          shrinkWrap: true,
-                                          physics:
-                                              const NeverScrollableScrollPhysics(),
-                                          itemBuilder: (_, index) {
-                                            if (data.pinnedEvents[index] ==
-                                                null) {
-                                              return const SizedBox();
-                                            }
-                                            final isCurrentPinnedEvent =
-                                                controller
-                                                    .pinnedEventsController
-                                                    .isCurrentPinnedEvent(
-                                              data.pinnedEvents[index]!,
-                                            );
-                                            return _PinnedEventsIndicator(
-                                              currentEvent: currentEvent,
-                                              scrollController: controller
-                                                  .pinnedMessageScrollController,
-                                              color:
-                                                  LinagoraSysColors.material()
-                                                      .secondary
-                                                      .withOpacity(
-                                                        isCurrentPinnedEvent
-                                                            ? 1
-                                                            : 0.48,
-                                                      ),
-                                              index: index,
-                                              height: PinnedEventsStyle
-                                                  .calcHeightIndicator(
-                                                data.pinnedEvents.length,
-                                              ),
-                                            );
-                                          },
-                                          separatorBuilder: (_, __) {
-                                            return const SizedBox(height: 1);
-                                          },
-                                          itemCount: data.pinnedEvents.length,
+                  child: Container(
+                    margin: PinnedEventsStyle.marginPinnedEventsWidget,
+                    height: PinnedEventsStyle.maxHeight,
+                    child: Row(
+                      children: [
+                        ValueListenableBuilder(
+                          valueListenable: controller
+                              .pinnedEventsController
+                              .currentPinnedEventNotifier,
+                          builder: (context, currentEvent, child) {
+                            if (currentEvent == null) return child!;
+                            return Expanded(
+                              child: Row(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  SizedBox(
+                                    width: PinnedEventsStyle.maxWidthIndicator,
+                                    child: ScrollConfiguration(
+                                      behavior: ScrollConfiguration.of(
+                                        context,
+                                      ).copyWith(scrollbars: false),
+                                      child: ListView.separated(
+                                        controller: controller
+                                            .pinnedMessageScrollController,
+                                        shrinkWrap: true,
+                                        physics:
+                                            const NeverScrollableScrollPhysics(),
+                                        itemBuilder: (_, index) {
+                                          if (data.pinnedEvents[index] ==
+                                              null) {
+                                            return const SizedBox();
+                                          }
+                                          final isCurrentPinnedEvent =
+                                              controller.pinnedEventsController
+                                                  .isCurrentPinnedEvent(
+                                                    data.pinnedEvents[index]!,
+                                                  );
+                                          return _PinnedEventsIndicator(
+                                            currentEvent: currentEvent,
+                                            scrollController: controller
+                                                .pinnedMessageScrollController,
+                                            color: LinagoraSysColors.material()
+                                                .secondary
+                                                .withOpacity(
+                                                  isCurrentPinnedEvent
+                                                      ? 1
+                                                      : 0.48,
+                                                ),
+                                            index: index,
+                                            height:
+                                                PinnedEventsStyle.calcHeightIndicator(
+                                                  data.pinnedEvents.length,
+                                                ),
+                                          );
+                                        },
+                                        separatorBuilder: (_, __) {
+                                          return const SizedBox(height: 1);
+                                        },
+                                        itemCount: data.pinnedEvents.length,
+                                      ),
+                                    ),
+                                  ),
+                                  _PinnedEventsContentWidget(
+                                    countPinnedEvents: controller
+                                        .pinnedEventsController
+                                        .currentIndexOfPinnedMessage(
+                                          data.pinnedEvents.reversed.toList(),
                                         ),
-                                      ),
-                                    ),
-                                    _PinnedEventsContentWidget(
-                                      countPinnedEvents: controller
-                                          .pinnedEventsController
-                                          .currentIndexOfPinnedMessage(
-                                        data.pinnedEvents.reversed.toList(),
-                                      ),
-                                      currentEvent: currentEvent,
-                                    ),
-                                    TwakeIconButton(
-                                      tooltip: L10n.of(context)!
-                                          .pinnedMessagesTooltip,
-                                      icon: Icons.list,
-                                      margin: PinnedEventsStyle.marginPinIcon,
-                                      paddingAll:
-                                          PinnedEventsStyle.paddingPinIcon,
-                                      onTap: () async {
-                                        final popResult =
-                                            await context.pushChild(
-                                          'pinnedmessages',
-                                          extra: PinnedEventsArgument(
-                                            pinnedEvents: data.pinnedEvents,
-                                            timeline: controller.timeline,
-                                          ),
-                                        );
-                                        controller
-                                            .handlePopBackFromPinnedScreen(
-                                          popResult,
-                                        );
-                                      },
-                                    ),
-                                  ],
-                                ),
-                              );
-                            },
-                            child: const SizedBox.shrink(),
-                          ),
-                        ],
-                      ),
+                                    currentEvent: currentEvent,
+                                  ),
+                                  TwakeIconButton(
+                                    tooltip: L10n.of(
+                                      context,
+                                    )!.pinnedMessagesTooltip,
+                                    icon: Icons.list,
+                                    margin: PinnedEventsStyle.marginPinIcon,
+                                    paddingAll:
+                                        PinnedEventsStyle.paddingPinIcon,
+                                    onTap: () async {
+                                      final popResult = await context.pushChild(
+                                        'pinnedmessages',
+                                        extra: PinnedEventsArgument(
+                                          pinnedEvents: data.pinnedEvents,
+                                          timeline: controller.timeline,
+                                        ),
+                                      );
+                                      controller.handlePopBackFromPinnedScreen(
+                                        popResult,
+                                      );
+                                    },
+                                  ),
+                                ],
+                              ),
+                            );
+                          },
+                          child: const SizedBox.shrink(),
+                        ),
+                      ],
                     ),
                   ),
-                );
-              default:
-                return child!;
-            }
-          },
-        );
+                ),
+              );
+            default:
+              return child!;
+          }
+        });
       },
       child: const SizedBox(),
     );
@@ -184,9 +176,7 @@ class _PinnedEventsIndicator extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AutoScrollTag(
-      key: ValueKey(
-        currentEvent.eventId,
-      ),
+      key: ValueKey(currentEvent.eventId),
       index: index,
       highlightColor: Theme.of(context).highlightColor,
       controller: scrollController,
@@ -222,8 +212,8 @@ class _PinnedEventsContentWidget extends StatelessWidget {
             Text(
               L10n.of(context)!.countPinnedMessage(countPinnedEvents),
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    color: LinagoraSysColors.material().secondary,
-                  ),
+                color: LinagoraSysColors.material().secondary,
+              ),
             ),
             FutureBuilder<String>(
               future: currentEvent.calcLocalizedBody(
@@ -236,20 +226,19 @@ class _PinnedEventsContentWidget extends StatelessWidget {
                   return LinkText(
                     text: currentEvent.filename,
                     maxLines: 1,
-                    textStyle:
-                        LinagoraTextStyle.material().bodyMedium3.copyWith(
-                              color: Theme.of(
-                                context,
-                              ).colorScheme.onSurfaceVariant,
-                              overflow: TextOverflow.ellipsis,
-                              decoration: currentEvent.redacted
-                                  ? TextDecoration.lineThrough
-                                  : null,
-                            ),
+                    textStyle: LinagoraTextStyle.material().bodyMedium3
+                        .copyWith(
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                          overflow: TextOverflow.ellipsis,
+                          decoration: currentEvent.redacted
+                              ? TextDecoration.lineThrough
+                              : null,
+                        ),
                   );
                 }
                 return LinkText(
-                  text: snapshot.data ??
+                  text:
+                      snapshot.data ??
                       currentEvent.calcLocalizedBodyFallback(
                         MatrixLocals(L10n.of(context)!),
                         withSenderNamePrefix: false,
@@ -257,26 +246,21 @@ class _PinnedEventsContentWidget extends StatelessWidget {
                       ),
                   maxLines: 1,
                   textStyle: LinagoraTextStyle.material().bodyMedium3.copyWith(
-                        color: Theme.of(
-                          context,
-                        ).colorScheme.onSurfaceVariant,
-                        overflow: TextOverflow.ellipsis,
-                        decoration: currentEvent.redacted
-                            ? TextDecoration.lineThrough
-                            : null,
-                      ),
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    overflow: TextOverflow.ellipsis,
+                    decoration: currentEvent.redacted
+                        ? TextDecoration.lineThrough
+                        : null,
+                  ),
                   linkStyle: LinagoraTextStyle.material().bodyMedium3.copyWith(
-                        color: Theme.of(
-                          context,
-                        ).colorScheme.onSurfaceVariant,
-                        decoration: TextDecoration.underline,
-                        decorationColor:
-                            Theme.of(context).colorScheme.onSurfaceVariant,
-                      ),
-                  onLinkTap: (url) => UrlLauncher(
-                    context,
-                    url: url.toString(),
-                  ).launchUrl(),
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    decoration: TextDecoration.underline,
+                    decorationColor: Theme.of(
+                      context,
+                    ).colorScheme.onSurfaceVariant,
+                  ),
+                  onLinkTap: (url) =>
+                      UrlLauncher(context, url: url.toString()).launchUrl(),
                 );
               },
             ),

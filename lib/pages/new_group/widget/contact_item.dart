@@ -34,10 +34,7 @@ class ContactItem extends StatelessWidget {
   bool canSelect(BuildContext context) {
     if (!disableBannedUser) return true;
     if (!room.canSelectToInvite(contact.matrixId)) {
-      TwakeSnackBar.show(
-        context,
-        L10n.of(context)!.cannotInviteBannedMember,
-      );
+      TwakeSnackBar.show(context, L10n.of(context)!.cannotInviteBannedMember);
       return false;
     }
 
@@ -46,8 +43,9 @@ class ContactItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final contactNotifier =
-        selectedContactsMapNotifier.getNotifierAtContact(contact);
+    final contactNotifier = selectedContactsMapNotifier.getNotifierAtContact(
+      contact,
+    );
     return Stack(
       children: [
         InkWell(
@@ -101,9 +99,9 @@ class ContactItem extends StatelessWidget {
           Positioned.fill(
             child: IgnorePointer(
               child: ColoredBox(
-                color: LinagoraSysColors.material()
-                    .onPrimary
-                    .withValues(alpha: 0.5),
+                color: LinagoraSysColors.material().onPrimary.withValues(
+                  alpha: 0.5,
+                ),
               ),
             ),
           ),

@@ -27,8 +27,9 @@ void main() {
     description: 'create a new group chat',
     test: ($) async {
       final s = SoftAssertHelper();
-      const searchByMatrixAddress =
-          String.fromEnvironment('SearchByMatrixAddress');
+      const searchByMatrixAddress = String.fromEnvironment(
+        'SearchByMatrixAddress',
+      );
       final now = DateTime.now();
       final groupName =
           "${now.year}${now.month}${now.day}${now.hour}${now.minute}";
@@ -36,11 +37,9 @@ void main() {
       // goto chat screen
       await HomeRobot($).gotoChatListScreen();
       // click on Pen icon
-      await ChatScenario($).createANewGroupChat(
-        groupName,
-        [searchByMatrixAddress],
-        searchKey: searchByMatrixAddress,
-      );
+      await ChatScenario($).createANewGroupChat(groupName, [
+        searchByMatrixAddress,
+      ], searchKey: searchByMatrixAddress);
       // verify group is shown with correct name, back iocn, search icon and more icon
       s.softAssertEquals(
         ChatGroupDetailRobot($).getBackIcon().exists,

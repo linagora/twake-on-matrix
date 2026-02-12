@@ -211,12 +211,7 @@ class _ChatReportMessageAdditionalReasonDialogState
               width: double.infinity,
               child: Stack(
                 children: [
-                  Positioned(
-                    left: 8,
-                    top: 8,
-                    right: 8,
-                    child: titleWidget,
-                  ),
+                  Positioned(left: 8, top: 8, right: 8, child: titleWidget),
                   backButton,
                 ],
               ),

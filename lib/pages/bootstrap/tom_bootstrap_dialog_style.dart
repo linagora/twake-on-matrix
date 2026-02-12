@@ -6,14 +6,12 @@ import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 class TomBootstrapDialogStyle {
   static ResponsiveUtils responsiveUtils = ResponsiveUtils();
 
-  static EdgeInsets paddingDialog = const EdgeInsets.symmetric(
-    horizontal: 56,
-  );
+  static EdgeInsets paddingDialog = const EdgeInsets.symmetric(horizontal: 56);
 
   static Color? barrierColor(BuildContext context) =>
       responsiveUtils.isMobile(context)
-          ? LinagoraSysColors.material().onPrimary
-          : Colors.transparent;
+      ? LinagoraSysColors.material().onPrimary
+      : Colors.transparent;
 
   static double? sizedDialogWeb = PlatformInfos.isMobile ? null : 400;
 

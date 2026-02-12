@@ -30,8 +30,8 @@ class ProfileInfoPageState extends State<ProfileInfoPage> {
 
   @override
   Widget build(BuildContext context) => ProfileInfoView(
-        this,
-        onUpdatedMembers: widget.onUpdatedMembers,
-        onTransferOwnershipSuccess: widget.onTransferOwnershipSuccess,
-      );
+    this,
+    onUpdatedMembers: widget.onUpdatedMembers,
+    onTransferOwnershipSuccess: widget.onTransferOwnershipSuccess,
+  );
 }

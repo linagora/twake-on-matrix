@@ -46,12 +46,7 @@ class InviteUserInteractor {
         ),
       );
     } else {
-      yield Right(
-        InviteUserSuccess(
-          roomId: roomId,
-          groupName: groupName,
-        ),
-      );
+      yield Right(InviteUserSuccess(roomId: roomId, groupName: groupName));
     }
   }
 
@@ -66,17 +61,11 @@ class InviteUserInteractor {
       // Check if it's a banned user error
       if (exception.errcode == 'M_BAD_STATE' &&
           errorMessage.contains('Cannot invite user who was banned')) {
-        return UserBannedException(
-          userId: userId,
-          message: errorMessage,
-        );
+        return UserBannedException(userId: userId, message: errorMessage);
       }
 
       // All other errors are generic
-      return GenericInviteException(
-        userId: userId,
-        message: errorMessage,
-      );
+      return GenericInviteException(userId: userId, message: errorMessage);
     }
 
     // For non-Matrix exceptions
@@ -96,10 +85,7 @@ class InviteUserInteractor {
     while (attempt < _maxRetries) {
       try {
         attempt++;
-        await matrixClient.inviteUser(
-          roomId,
-          userId,
-        );
+        await matrixClient.inviteUser(roomId, userId);
         return;
       } catch (exception) {
         Logs().e(

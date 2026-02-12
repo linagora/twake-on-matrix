@@ -47,10 +47,7 @@ import 'package:photo_manager/photo_manager.dart' as photo_manager;
 class ChatDetailsEdit extends StatefulWidget {
   final String roomId;
 
-  const ChatDetailsEdit({
-    super.key,
-    required this.roomId,
-  });
+  const ChatDetailsEdit({super.key, required this.roomId});
 
   @override
   ChatDetailsEditController createState() => ChatDetailsEditController();
@@ -66,14 +63,15 @@ class ChatDetailsEditController extends State<ChatDetailsEdit>
   final updateGroupChatInteractor = getIt.get<UpdateGroupChatInteractor>();
 
   final uploadContentInteractor = getIt.get<UploadContentInteractor>();
-  final uploadContentWebInteractor =
-      getIt.get<UploadContentInBytesInteractor>();
+  final uploadContentWebInteractor = getIt
+      .get<UploadContentInBytesInteractor>();
   final verifyNameInteractor = getIt.get<VerifyNameInteractor>();
 
   Room? room;
 
-  static const Duration _delayedUpdateAvatarDuration =
-      Duration(milliseconds: 500);
+  static const Duration _delayedUpdateAvatarDuration = Duration(
+    milliseconds: 500,
+  );
 
   final groupNameTextEditingController = TextEditingController();
   final groupNameEmptyNotifier = ValueNotifier<bool>(false);
@@ -113,9 +111,7 @@ class ChatDetailsEditController extends State<ChatDetailsEdit>
     Navigator.of(context).pop();
   }
 
-  List<Widget> listContextMenuBuilder(
-    BuildContext context,
-  ) {
+  List<Widget> listContextMenuBuilder(BuildContext context) {
     final listAction = [
       EditChatAvatarContextMenuActions.edit,
       if (_enableDeleteAvatarButton) EditChatAvatarContextMenuActions.delete,
@@ -192,9 +188,7 @@ class ChatDetailsEditController extends State<ChatDetailsEdit>
           avatarAssetEntity = selectedAsset.asset;
 
           pickAvatarUIState.value = Right(
-            GetAvatarOnMobileUIStateSuccess(
-              assetEntity: avatarAssetEntity,
-            ),
+            GetAvatarOnMobileUIStateSuccess(assetEntity: avatarAssetEntity),
           );
         }
 
@@ -215,9 +209,7 @@ class ChatDetailsEditController extends State<ChatDetailsEdit>
   void _handleRemoveAvatarAction() async {
     if (avatarFilePicker != null) {
       avatarFilePicker = null;
-      pickAvatarUIState.value = Right(
-        DeleteAvatarUIStateSuccess(),
-      );
+      pickAvatarUIState.value = Right(DeleteAvatarUIStateSuccess());
       if (_isEditDescription || _isEditGroupName) {
         return;
       } else {
@@ -226,9 +218,7 @@ class ChatDetailsEditController extends State<ChatDetailsEdit>
     }
     if (avatarAssetEntity != null) {
       avatarAssetEntity = null;
-      pickAvatarUIState.value = Right(
-        DeleteAvatarUIStateSuccess(),
-      );
+      pickAvatarUIState.value = Right(DeleteAvatarUIStateSuccess());
       if (_isEditDescription || _isEditGroupName) {
         return;
       } else {
@@ -236,9 +226,7 @@ class ChatDetailsEditController extends State<ChatDetailsEdit>
       }
     }
     if (room?.avatar != null) {
-      pickAvatarUIState.value = Right(
-        DeleteAvatarUIStateSuccess(),
-      );
+      pickAvatarUIState.value = Right(DeleteAvatarUIStateSuccess());
       _isDeleteAvatar = true;
       if (_isEditDescription || _isEditGroupName) {
         return;
@@ -251,27 +239,20 @@ class ChatDetailsEditController extends State<ChatDetailsEdit>
   void _setAvatarInStream() {
     if (avatarAssetEntity != null) {
       uploadContentInteractor
-          .execute(
-        matrixClient: client,
-        entity: avatarAssetEntity!,
-      )
+          .execute(matrixClient: client, entity: avatarAssetEntity!)
           .listen(
-        (event) => _handleUploadAvatarOnData(context, event),
-        onDone: () {
-          Logs().d(
-            'ChatDetailsEdit::_setAvatarInStream() - done',
+            (event) => _handleUploadAvatarOnData(context, event),
+            onDone: () {
+              Logs().d('ChatDetailsEdit::_setAvatarInStream() - done');
+            },
+            onError: (error) {
+              Logs().e('ChatDetailsEdit::_setAvatarInStream() - error: $error');
+              TwakeSnackBar.show(
+                context,
+                L10n.of(context)!.oopsSomethingWentWrong,
+              );
+            },
           );
-        },
-        onError: (error) {
-          Logs().e(
-            'ChatDetailsEdit::_setAvatarInStream() - error: $error',
-          );
-          TwakeSnackBar.show(
-            context,
-            L10n.of(context)!.oopsSomethingWentWrong,
-          );
-        },
-      );
     } else {
       _updateGroupInfo(
         displayName: groupNameTextEditingController.text,
@@ -309,27 +290,20 @@ class ChatDetailsEditController extends State<ChatDetailsEdit>
   void _setAvatarInBytes() {
     if (avatarFilePicker != null) {
       uploadContentWebInteractor
-          .execute(
-        matrixClient: client,
-        matrixFile: avatarFilePicker!,
-      )
+          .execute(matrixClient: client, matrixFile: avatarFilePicker!)
           .listen(
-        (event) => _handleUploadAvatarOnData(context, event),
-        onDone: () {
-          Logs().d(
-            'ChatDetailsEdit::_setAvatarInBytes() - done',
+            (event) => _handleUploadAvatarOnData(context, event),
+            onDone: () {
+              Logs().d('ChatDetailsEdit::_setAvatarInBytes() - done');
+            },
+            onError: (error) {
+              Logs().e('ChatDetailsEdit::_setAvatarInBytes() - error: $error');
+              TwakeSnackBar.show(
+                context,
+                L10n.of(context)!.oopsSomethingWentWrong,
+              );
+            },
           );
-        },
-        onError: (error) {
-          Logs().e(
-            'ChatDetailsEdit::_setAvatarInBytes() - error: $error',
-          );
-          TwakeSnackBar.show(
-            context,
-            L10n.of(context)!.oopsSomethingWentWrong,
-          );
-        },
-      );
     } else {
       _updateGroupInfo(
         displayName: groupNameTextEditingController.text,
@@ -359,9 +333,7 @@ class ChatDetailsEditController extends State<ChatDetailsEdit>
           },
           onDone: _handleUpdateGroupInfoOnDone,
           onError: (error) {
-            Logs().e(
-              'ChatDetailsEdit::_uploadGroupInfo() - error: $error',
-            );
+            Logs().e('ChatDetailsEdit::_uploadGroupInfo() - error: $error');
           },
         );
   }
@@ -388,31 +360,19 @@ class ChatDetailsEditController extends State<ChatDetailsEdit>
           Logs().e(
             'ChatDetailsEdit::_handleUpdateGroupInfoOnEvents() - UpdateGroupDisplayNameFailure - ${failure.exception}',
           );
-          TwakeSnackBar.show(
-            context,
-            L10n.of(context)!.oopsSomethingWentWrong,
-          );
+          TwakeSnackBar.show(context, L10n.of(context)!.oopsSomethingWentWrong);
         } else if (failure is UpdateGroupAvatarFailure) {
           Logs().e(
             'ChatDetailsEdit::_handleUpdateGroupInfoOnEvents() - UpdateGroupAvatarFailure - ${failure.exception}',
           );
-          TwakeSnackBar.show(
-            context,
-            L10n.of(context)!.oopsSomethingWentWrong,
-          );
+          TwakeSnackBar.show(context, L10n.of(context)!.oopsSomethingWentWrong);
         } else if (failure is UpdateGroupDescriptionFailure) {
           Logs().e(
             'ChatDetailsEdit::_handleUpdateGroupInfoOnEvents() - UpdateGroupDescriptionFailure - ${failure.exception}',
           );
-          TwakeSnackBar.show(
-            context,
-            L10n.of(context)!.oopsSomethingWentWrong,
-          );
+          TwakeSnackBar.show(context, L10n.of(context)!.oopsSomethingWentWrong);
         } else if (failure is UpdateGroupNameIsEmptyFailure) {
-          TwakeSnackBar.show(
-            context,
-            L10n.of(context)!.groupNameCannotBeEmpty,
-          );
+          TwakeSnackBar.show(context, L10n.of(context)!.groupNameCannotBeEmpty);
         } else if (failure is UpdateGroupChatFailure) {
           TwakeSnackBar.show(
             context,
@@ -475,10 +435,10 @@ class ChatDetailsEditController extends State<ChatDetailsEdit>
     if (content == room?.name) {
       return null;
     }
-    final result = verifyNameInteractor.execute(
-      content,
-      [EmptyNameValidator(), NameWithSpaceOnlyValidator()],
-    );
+    final result = verifyNameInteractor.execute(content, [
+      EmptyNameValidator(),
+      NameWithSpaceOnlyValidator(),
+    ]);
 
     return result.fold(
       (failure) =>
@@ -506,8 +466,8 @@ class ChatDetailsEditController extends State<ChatDetailsEdit>
     );
     if (consent != OkCancelResult.ok) return;
     await TwakeDialog.showFutureLoadingDialogFullScreen(
-      future: () => room!.enableEncryption(),
-    )
+          future: () => room!.enableEncryption(),
+        )
         .then((_) => isRoomEnabledEncryptionNotifier.value = true)
         .onError((_, __) => isRoomEnabledEncryptionNotifier.value = false);
   }
@@ -521,9 +481,7 @@ class ChatDetailsEditController extends State<ChatDetailsEdit>
       CupertinoPageRoute(
         settings: const RouteSettings(name: '/assign_roles'),
         builder: (context) {
-          return AssignRoles(
-            room: room!,
-          );
+          return AssignRoles(room: room!);
         },
       ),
     );
@@ -537,9 +495,7 @@ class ChatDetailsEditController extends State<ChatDetailsEdit>
     Navigator.of(context).push(
       CupertinoPageRoute(
         builder: (context) {
-          return Exceptions(
-            room: room!,
-          );
+          return Exceptions(room: room!);
         },
       ),
     );
@@ -553,9 +509,7 @@ class ChatDetailsEditController extends State<ChatDetailsEdit>
     Navigator.of(context).push(
       CupertinoPageRoute(
         builder: (context) {
-          return Removed(
-            room: room!,
-          );
+          return Removed(room: room!);
         },
       ),
     );
@@ -625,9 +579,7 @@ class ChatDetailsEditController extends State<ChatDetailsEdit>
   Widget build(BuildContext context) {
     return SizedBox(
       width: ChatDetailEditViewStyle.fixedWidth,
-      child: ChatDetailsEditView(
-        this,
-      ),
+      child: ChatDetailsEditView(this),
     );
   }
 }

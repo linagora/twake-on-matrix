@@ -6,9 +6,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 
 class EmptySearchWidget extends StatelessWidget {
-  const EmptySearchWidget({
-    super.key,
-  });
+  const EmptySearchWidget({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -26,8 +24,8 @@ class EmptySearchWidget extends StatelessWidget {
             child: Text(
               L10n.of(context)!.noResults,
               style: Theme.of(context).textTheme.titleLarge!.copyWith(
-                    color: LinagoraRefColors.material().neutral[40],
-                  ),
+                color: LinagoraRefColors.material().neutral[40],
+              ),
             ),
           ),
         ],

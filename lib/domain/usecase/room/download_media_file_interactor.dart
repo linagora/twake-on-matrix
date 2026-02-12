@@ -13,9 +13,7 @@ class DownloadMediaFileInteractor {
     bool getThumbnail = false,
   }) async* {
     try {
-      final fileInfo = await event.getFileInfo(
-        getThumbnail: getThumbnail,
-      );
+      final fileInfo = await event.getFileInfo(getThumbnail: getThumbnail);
       if (fileInfo == null) {
         yield const Left(
           DownloadMediaFileFailure(exception: 'FileInfo is null'),

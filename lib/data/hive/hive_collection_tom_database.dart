@@ -47,7 +47,8 @@ class HiveCollectionToMDatabase {
       }
 
       const secureStorage = FlutterSecureStorage();
-      final containsEncryptionKey = await secureStorage.read(
+      final containsEncryptionKey =
+          await secureStorage.read(
             key: FlutterHiveCollectionsDatabase.cipherStorageKey,
           ) !=
           null;
@@ -89,8 +90,9 @@ class HiveCollectionToMDatabase {
       await db.open();
     } catch (e, s) {
       Logs().w('Unable to open ToM Hive.', e, s);
-      const FlutterSecureStorage()
-          .delete(key: FlutterHiveCollectionsDatabase.cipherStorageKey);
+      const FlutterSecureStorage().delete(
+        key: FlutterHiveCollectionsDatabase.cipherStorageKey,
+      );
       await db.clear().catchError((_) {});
       await Hive.deleteFromDisk();
       rethrow;
@@ -144,12 +146,8 @@ class HiveCollectionToMDatabase {
     federationConfigurationsBox = await _collection.openBox(
       _federationConfigurationsBoxName,
     );
-    thirdPartyContactsBox = await _collection.openBox(
-      _thirdPartyContactsBox,
-    );
-    invitationStatus = await _collection.openBox(
-      _invitationStatusBox,
-    );
+    thirdPartyContactsBox = await _collection.openBox(_thirdPartyContactsBox);
+    invitationStatus = await _collection.openBox(_invitationStatusBox);
   }
 
   Future<void> clear() async {

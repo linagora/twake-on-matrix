@@ -1,3 +1,1 @@
-enum MediaViewerPopupResultEnum {
-  closeRightColumnFlag,
-}
+enum MediaViewerPopupResultEnum { closeRightColumnFlag }

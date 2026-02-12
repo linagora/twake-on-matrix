@@ -84,11 +84,12 @@ class ChatListController extends State<ChatList>
 
   final ValueNotifier<bool> sortingRoomsNotifier = ValueNotifier(true);
 
-  final ValueNotifier<SelectMode> selectModeNotifier =
-      ValueNotifier(SelectMode.normal);
+  final ValueNotifier<SelectMode> selectModeNotifier = ValueNotifier(
+    SelectMode.normal,
+  );
 
   final ValueNotifier<List<ConversationSelectionPresentation>>
-      conversationSelectionNotifier = ValueNotifier([]);
+  conversationSelectionNotifier = ValueNotifier([]);
 
   final TextEditingController searchChatController = TextEditingController();
 
@@ -148,20 +149,18 @@ class ChatListController extends State<ChatList>
 
   bool get anySelectedRoomNotFavorite =>
       conversationSelectionNotifier.value.any(
-        (conversation) => !Matrix.of(context)
-            .client
-            .getRoomById(conversation.roomId)!
-            .isFavourite,
+        (conversation) => !Matrix.of(
+          context,
+        ).client.getRoomById(conversation.roomId)!.isFavourite,
       );
 
   bool get anySelectedRoomNotMuted => conversationSelectionNotifier.value.any(
-        (conversation) =>
-            Matrix.of(context)
-                .client
-                .getRoomById(conversation.roomId)!
-                .pushRuleState ==
-            PushRuleState.notify,
-      );
+    (conversation) =>
+        Matrix.of(
+          context,
+        ).client.getRoomById(conversation.roomId)!.pushRuleState ==
+        PushRuleState.notify,
+  );
 
   bool get displayBundles =>
       Matrix.of(context).hasComplexBundles &&
@@ -201,10 +200,9 @@ class ChatListController extends State<ChatList>
 
   String? get secureActiveBundle {
     if (Matrix.of(context).activeBundle == null ||
-        !Matrix.of(context)
-            .accountBundles
-            .keys
-            .contains(Matrix.of(context).activeBundle)) {
+        !Matrix.of(
+          context,
+        ).accountBundles.keys.contains(Matrix.of(context).activeBundle)) {
       return Matrix.of(context).accountBundles.keys.first;
     }
     return Matrix.of(context).activeBundle;
@@ -216,8 +214,8 @@ class ChatListController extends State<ChatList>
     );
 
     final Set<ConversationSelectionPresentation>
-        tempConversationSelectionPresentation =
-        conversationSelectionNotifier.value.toSet();
+    tempConversationSelectionPresentation = conversationSelectionNotifier.value
+        .toSet();
 
     if (conversation != null && conversation.isSelected) {
       tempConversationSelectionPresentation.remove(conversation);
@@ -233,13 +231,14 @@ class ChatListController extends State<ChatList>
       );
     }
 
-    conversationSelectionNotifier.value =
-        tempConversationSelectionPresentation.toList();
+    conversationSelectionNotifier.value = tempConversationSelectionPresentation
+        .toList();
   }
 
   void toggleSelectMode() {
-    selectModeNotifier.value =
-        isSelectMode ? SelectMode.normal : SelectMode.select;
+    selectModeNotifier.value = isSelectMode
+        ? SelectMode.normal
+        : SelectMode.select;
     _clearSelectionItem();
   }
 
@@ -324,7 +323,8 @@ class ChatListController extends State<ChatList>
   }
 
   Future<void> archiveAction() async {
-    final confirmed = await showOkCancelAlertDialog(
+    final confirmed =
+        await showOkCancelAlertDialog(
           useRootNavigator: false,
           context: context,
           title: L10n.of(context)!.areYouSure,
@@ -347,9 +347,7 @@ class ChatListController extends State<ChatList>
       okLabel: L10n.of(context)!.ok,
       cancelLabel: L10n.of(context)!.cancel,
       textFields: [
-        DialogTextField(
-          hintText: L10n.of(context)!.statusExampleMessage,
-        ),
+        DialogTextField(hintText: L10n.of(context)!.statusExampleMessage),
       ],
     );
     if (input == null) return;
@@ -379,15 +377,14 @@ class ChatListController extends State<ChatList>
       title: L10n.of(context)!.addToSpace,
       message: L10n.of(context)!.addToSpaceDescription,
       fullyCapitalizedForMaterial: false,
-      actions: Matrix.of(context)
-          .client
-          .rooms
+      actions: Matrix.of(context).client.rooms
           .where((r) => r.isSpace)
           .map(
             (space) => AlertDialogAction(
               key: space.id,
-              label: space
-                  .getLocalizedDisplayname(MatrixLocals(L10n.of(context)!)),
+              label: space.getLocalizedDisplayname(
+                MatrixLocals(L10n.of(context)!),
+              ),
             ),
           )
           .toList(),
@@ -474,9 +471,9 @@ class ChatListController extends State<ChatList>
 
   void editBundlesForAccount(String? userId, String? activeBundle) async {
     final l10n = L10n.of(context)!;
-    final client = Matrix.of(context)
-        .widget
-        .clients[Matrix.of(context).getClientIndexByMatrixId(userId!)];
+    final client = Matrix.of(
+      context,
+    ).widget.clients[Matrix.of(context).getClientIndexByMatrixId(userId!)];
     final action = await showConfirmationDialog<EditBundleAction>(
       context: context,
       title: L10n.of(context)!.editBundlesForAccount,
@@ -527,9 +524,7 @@ class ChatListController extends State<ChatList>
         return;
       case ChatListSelectionActions.more:
         await actionWithToggleSelectMode(
-          () => {
-            TwakeSnackBar.show(context, 'Not implemented yet'),
-          },
+          () => {TwakeSnackBar.show(context, 'Not implemented yet')},
         );
         return;
     }
@@ -674,8 +669,8 @@ class ChatListController extends State<ChatList>
               Text(
                 _getTitleBottomNavigation(item),
                 style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                      color: Theme.of(context).colorScheme.primary,
-                    ),
+                  color: Theme.of(context).colorScheme.primary,
+                ),
               ),
             ],
           ),
@@ -733,9 +728,7 @@ class ChatListController extends State<ChatList>
 
   void _handleOnLongPressInSelectMode(Room room) {
     if (conversationSelectionNotifierIsEmpty) {
-      toggleSelection(
-        room.id,
-      );
+      toggleSelection(room.id);
     }
   }
 
@@ -810,8 +803,9 @@ class ChatListController extends State<ChatList>
     return [
       if (!room.isInvitation)
         ChatCustomSlidableAction(
-          label:
-              room.isUnread ? L10n.of(context)!.read : L10n.of(context)!.unread,
+          label: room.isUnread
+              ? L10n.of(context)!.read
+              : L10n.of(context)!.unread,
           icon: Icon(
             room.isUnread
                 ? Icons.mark_chat_read_outlined
@@ -854,8 +848,9 @@ class ChatListController extends State<ChatList>
                 ),
           onPressed: (_) => togglePin(room),
           foregroundColor: Theme.of(context).colorScheme.onPrimary,
-          backgroundColor:
-              ChatListViewStyle.pinSlidableColor(room.isFavourite)!,
+          backgroundColor: ChatListViewStyle.pinSlidableColor(
+            room.isFavourite,
+          )!,
         ),
     ];
   }
@@ -864,11 +859,11 @@ class ChatListController extends State<ChatList>
     _roomUpdateSubscription = activeClient.onSync.stream
         .where((s) => s.hasRoomUpdate)
         .listen((syncUpdated) {
-      if (syncUpdated.hasRoomUpdate) {
-        if (_filteredRooms.length > 2) return;
-        matrixState.handleShowQrCodeDownload(_filteredRooms.isEmpty);
-      }
-    });
+          if (syncUpdated.hasRoomUpdate) {
+            if (_filteredRooms.length > 2) return;
+            matrixState.handleShowQrCodeDownload(_filteredRooms.isEmpty);
+          }
+        });
   }
 
   @override

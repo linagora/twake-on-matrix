@@ -6,8 +6,7 @@ import 'package:fluffychat/utils/extension/presentation_search_extension.dart';
 
 void main() {
   group('doesMatchKeyword test with Display name', () {
-    test(
-        'WHEN displayName is null'
+    test('WHEN displayName is null'
         'THEN returns false', () {
       const search = ContactPresentationSearch(
         matrixId: 'matrix_id_1',
@@ -16,8 +15,7 @@ void main() {
       expect(search.doesMatchKeyword('keyword'), false);
     });
 
-    test(
-        'WHEN displayName does not match keyword'
+    test('WHEN displayName does not match keyword'
         'THEN returns false', () {
       const search = ContactPresentationSearch(
         matrixId: 'matrix_id_1',
@@ -26,8 +24,7 @@ void main() {
       expect(search.doesMatchKeyword('keyword'), false);
     });
 
-    test(
-        'WHEN displayName matches keyword'
+    test('WHEN displayName matches keyword'
         'THEN returns true', () {
       const search = ContactPresentationSearch(
         matrixId: 'matrix_id_1',
@@ -36,8 +33,7 @@ void main() {
       expect(search.doesMatchKeyword('matrix_u'), true);
     });
 
-    test(
-        'WHEN keyword is empty'
+    test('WHEN keyword is empty'
         'THEN returns true', () {
       const search = ContactPresentationSearch(
         matrixId: 'matrix_id_1',
@@ -48,8 +44,7 @@ void main() {
   });
 
   group('doesMatchKeyword test with email', () {
-    test(
-        'WHEN email is null'
+    test('WHEN email is null'
         'THEN returns false', () {
       const search = ContactPresentationSearch(
         matrixId: 'matrix_id_1',
@@ -58,8 +53,7 @@ void main() {
       expect(search.doesMatchKeyword('keyword'), false);
     });
 
-    test(
-        'WHEN email does not match keyword'
+    test('WHEN email does not match keyword'
         'THEN returns false', () {
       final search = ContactPresentationSearch(
         matrixId: 'matrix_id_1',
@@ -75,8 +69,7 @@ void main() {
       expect(search.doesMatchKeyword('keyword'), false);
     });
 
-    test(
-        'WHEN email matches keyword'
+    test('WHEN email matches keyword'
         'THEN returns true', () {
       final search = ContactPresentationSearch(
         matrixId: 'matrix_id_1',
@@ -97,8 +90,7 @@ void main() {
       expect(search.doesMatchKeyword('email1'), true);
     });
 
-    test(
-        'WHEN keyword is empty'
+    test('WHEN keyword is empty'
         'THEN returns true', () {
       final search = ContactPresentationSearch(
         matrixId: 'matrix_id_1',
@@ -116,8 +108,7 @@ void main() {
   });
 
   group('doesMatchKeyword test with phone', () {
-    test(
-        'WHEN email is null'
+    test('WHEN email is null'
         'THEN returns false', () {
       const search = ContactPresentationSearch(
         matrixId: 'matrix_id_1',
@@ -126,8 +117,7 @@ void main() {
       expect(search.doesMatchKeyword('keyword'), false);
     });
 
-    test(
-        'WHEN email does not match keyword'
+    test('WHEN email does not match keyword'
         'THEN returns false', () {
       final search = ContactPresentationSearch(
         matrixId: 'matrix_id_1',
@@ -143,8 +133,7 @@ void main() {
       expect(search.doesMatchKeyword('keyword'), false);
     });
 
-    test(
-        'WHEN email matches keyword'
+    test('WHEN email matches keyword'
         'THEN returns true', () {
       final search = ContactPresentationSearch(
         matrixId: 'matrix_id_1',
@@ -160,8 +149,7 @@ void main() {
       expect(search.doesMatchKeyword('12345'), true);
     });
 
-    test(
-        'WHEN keyword is empty'
+    test('WHEN keyword is empty'
         'THEN returns true', () {
       final search = ContactPresentationSearch(
         matrixId: 'matrix_id_1',
@@ -179,17 +167,13 @@ void main() {
   });
 
   group('doesMatchKeyword test with matrixId', () {
-    test(
-        'WHEN matrixId is null'
+    test('WHEN matrixId is null'
         'THEN returns false', () {
-      const search = ContactPresentationSearch(
-        displayName: 'matrix_user',
-      );
+      const search = ContactPresentationSearch(displayName: 'matrix_user');
       expect(search.doesMatchKeyword('keyword'), false);
     });
 
-    test(
-        'WHEN matrixId does not match keyword'
+    test('WHEN matrixId does not match keyword'
         'THEN returns false', () {
       const search = ContactPresentationSearch(
         matrixId: 'matrix_id_1',
@@ -198,8 +182,7 @@ void main() {
       expect(search.doesMatchKeyword('keyword'), false);
     });
 
-    test(
-        'WHEN matrixId matches keyword'
+    test('WHEN matrixId matches keyword'
         'THEN returns true', () {
       const search = ContactPresentationSearch(
         matrixId: 'matrix_id_1',
@@ -208,8 +191,7 @@ void main() {
       expect(search.doesMatchKeyword('matrix_'), true);
     });
 
-    test(
-        'WHEN keyword is empty'
+    test('WHEN keyword is empty'
         'THEN returns true', () {
       const search = ContactPresentationSearch(
         matrixId: 'matrix_id_1',
@@ -219,8 +201,7 @@ void main() {
     });
   });
 
-  test(
-      'WHEN all fields matches keyword'
+  test('WHEN all fields matches keyword'
       'THEN returns true', () {
     final search = ContactPresentationSearch(
       displayName: 'matrix',

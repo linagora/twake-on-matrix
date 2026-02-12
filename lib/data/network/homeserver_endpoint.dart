@@ -5,25 +5,17 @@ class HomeserverEndpoint {
   static const String homeserverAPIVersion = 'v3';
   static const String homeserverClientPath = '/_matrix/client';
 
-  static final ServicePath uploadMediaServicePath = ServicePath(
-    '/upload',
-  );
+  static final ServicePath uploadMediaServicePath = ServicePath('/upload');
 
   static final ServicePath getPreviewUrlServicePath = ServicePath(
     '/preview_url',
   );
 
-  static final ServicePath searchPath = ServicePath(
-    '/search',
-  );
+  static final ServicePath searchPath = ServicePath('/search');
 
-  static final ServicePath configPath = ServicePath(
-    '/config',
-  );
+  static final ServicePath configPath = ServicePath('/config');
 
-  static final ServicePath capabilitiesPath = ServicePath(
-    '/capabilities',
-  );
+  static final ServicePath capabilitiesPath = ServicePath('/capabilities');
 }
 
 extension ServicePathHomeserver on ServicePath {

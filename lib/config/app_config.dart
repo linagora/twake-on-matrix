@@ -124,8 +124,8 @@ abstract class AppConfig {
       'Push notifications for Twake Chat';
   static String pushNotificationsAppId = Platform.isIOS
       ? kReleaseMode
-          ? "app.twake.ios.chat"
-          : "app.twake.ios.chat.sandbox"
+            ? "app.twake.ios.chat"
+            : "app.twake.ios.chat.sandbox"
       : "app.twake.android.chat";
 
   static const String _pushNotificationsGatewayUrlEnv = String.fromEnvironment(
@@ -208,15 +208,11 @@ abstract class AppConfig {
 
     platform = _platformEnv;
 
-    Logs().i(
-      '[Public Platform] AppConfig():: Platform $_platformEnv',
-    );
+    Logs().i('[Public Platform] AppConfig():: Platform $_platformEnv');
 
     homeserver = _homeserverEnv;
 
-    Logs().i(
-      '[Public Platform] AppConfig():: HOME_SERVER $_homeserverEnv',
-    );
+    Logs().i('[Public Platform] AppConfig():: HOME_SERVER $_homeserverEnv');
   }
 
   static bool get isSaasPlatForm => _platformEnv == 'saas';

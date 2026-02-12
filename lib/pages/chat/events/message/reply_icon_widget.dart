@@ -6,10 +6,7 @@ import 'package:flutter/material.dart';
 class ReplyIconWidget extends StatelessWidget {
   final bool isOwnMessage;
 
-  const ReplyIconWidget({
-    super.key,
-    required this.isOwnMessage,
-  });
+  const ReplyIconWidget({super.key, required this.isOwnMessage});
 
   @override
   Widget build(BuildContext context) {
@@ -17,13 +14,11 @@ class ReplyIconWidget extends StatelessWidget {
       flex: MessageStyle.replyIconFlexMobile,
       child: Row(
         mainAxisSize: MainAxisSize.min,
-        mainAxisAlignment:
-            isOwnMessage ? MainAxisAlignment.end : MainAxisAlignment.start,
+        mainAxisAlignment: isOwnMessage
+            ? MainAxisAlignment.end
+            : MainAxisAlignment.start,
         children: [
-          if (isOwnMessage)
-            const SizedBox(
-              width: 8.0,
-            ),
+          if (isOwnMessage) const SizedBox(width: 8.0),
           Transform(
             alignment: Alignment.center,
             transform: Matrix4.rotationY(math.pi),
@@ -37,10 +32,7 @@ class ReplyIconWidget extends StatelessWidget {
               child: const Icon(Icons.reply),
             ),
           ),
-          if (!isOwnMessage)
-            const SizedBox(
-              width: 12.0,
-            ),
+          if (!isOwnMessage) const SizedBox(width: 12.0),
         ],
       ),
     );

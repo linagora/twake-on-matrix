@@ -9,50 +9,47 @@ class PullDownMenuRobot extends CoreRobot {
   PullDownMenuRobot(super.$);
 
   PatrolFinder getHeartIcon() {
-    return $(Overlay)
-        .$(ReactionsDialogWidget)
-        .$(InkWell)
-        .containing(find.text('💜'));
+    return $(
+      Overlay,
+    ).$(ReactionsDialogWidget).$(InkWell).containing(find.text('💜'));
   }
 
   PatrolFinder getLikeIcon() {
-    return $(Overlay)
-        .$(ReactionsDialogWidget)
-        .$(InkWell)
-        .containing(find.text('👍'));
+    return $(
+      Overlay,
+    ).$(ReactionsDialogWidget).$(InkWell).containing(find.text('👍'));
   }
 
   PatrolFinder getDisLikeIcon() {
-    return $(Overlay)
-        .$(ReactionsDialogWidget)
-        .$(InkWell)
-        .containing(find.text('👎'));
+    return $(
+      Overlay,
+    ).$(ReactionsDialogWidget).$(InkWell).containing(find.text('👎'));
   }
 
   PatrolFinder getCryIcon() {
-    return $(Overlay)
-        .$(ReactionsDialogWidget)
-        .$(InkWell)
-        .containing(find.text('😂'));
+    return $(
+      Overlay,
+    ).$(ReactionsDialogWidget).$(InkWell).containing(find.text('😂'));
   }
 
   PatrolFinder getSadIcon() {
-    return $(Overlay)
-        .$(ReactionsDialogWidget)
-        .$(InkWell)
-        .containing(find.text('🥲'));
+    return $(
+      Overlay,
+    ).$(ReactionsDialogWidget).$(InkWell).containing(find.text('🥲'));
   }
 
   PatrolFinder getSuppriseIcon() {
-    return $(Overlay)
-        .$(ReactionsDialogWidget)
-        .$(InkWell)
-        .containing(find.text('😮'));
+    return $(
+      Overlay,
+    ).$(ReactionsDialogWidget).$(InkWell).containing(find.text('😮'));
   }
 
   PatrolFinder getExpandIcon() {
     // return find.descendant(of: $(Overlay).$(ReactionsDialogWidget).finder, matching: find.byType(InkWell)).last;
-    return $(Overlay).$(ReactionsDialogWidget).$(InkWell).containing(
+    return $(Overlay)
+        .$(ReactionsDialogWidget)
+        .$(InkWell)
+        .containing(
           find.byWidgetPredicate(
             (w) => w is Icon && w.icon != null && w.icon!.codePoint == 0xF04FC,
           ),

@@ -17,10 +17,7 @@ class SendMediaDialogResult with EquatableMixin {
   final SendMediaWithCaptionStatus status;
   final String? caption;
 
-  SendMediaDialogResult({
-    required this.status,
-    this.caption,
-  });
+  SendMediaDialogResult({required this.status, this.caption});
 
   @override
   List<Object?> get props => [status, caption];
@@ -47,8 +44,8 @@ class SendFileDialog extends StatefulWidget {
 class SendFileDialogController extends State<SendFileDialog> {
   final uploadManager = getIt.get<UploadManager>();
 
-  final generateThumbnailsMediaInteractor =
-      getIt.get<GenerateThumbnailsMediaInteractor>();
+  final generateThumbnailsMediaInteractor = getIt
+      .get<GenerateThumbnailsMediaInteractor>();
 
   final focusSuggestionController = FocusSuggestionController();
 
@@ -56,8 +53,9 @@ class SendFileDialogController extends State<SendFileDialog> {
 
   final FocusNode captionsFocusNode = FocusNode();
 
-  final ValueKey sendFileDialogTypeAheadKey =
-      const ValueKey('sendFileDialogTypeAhead');
+  final ValueKey sendFileDialogTypeAheadKey = const ValueKey(
+    'sendFileDialogTypeAhead',
+  );
 
   bool isSendMediaWithCaption = true;
 
@@ -107,26 +105,23 @@ class SendFileDialogController extends State<SendFileDialog> {
       return;
     }
     _thumbnailsForMediaSubscription = generateThumbnailsMediaInteractor
-        .execute(
-      room: widget.room!,
-      files: files,
-    )
+        .execute(room: widget.room!, files: files)
         .listen((event) {
-      event.fold(
-        (left) {
-          Logs().e("loadThumbnailsForMedia:: $left");
-        },
-        (right) async {
-          if (right is GenerateThumbnailsMediaSuccess) {
-            thumbnails[right.file] = right.thumbnail;
-            filesNotifier.notify();
-          } else if (right is GenerateThumbnailsMediaInitial) {
-            maxMediaSizeNotifier.value = right.maxUploadFileSize.toDouble();
-            updateHaveErrorFilesNotifier();
-          }
-        },
-      );
-    });
+          event.fold(
+            (left) {
+              Logs().e("loadThumbnailsForMedia:: $left");
+            },
+            (right) async {
+              if (right is GenerateThumbnailsMediaSuccess) {
+                thumbnails[right.file] = right.thumbnail;
+                filesNotifier.notify();
+              } else if (right is GenerateThumbnailsMediaInitial) {
+                maxMediaSizeNotifier.value = right.maxUploadFileSize.toDouble();
+                updateHaveErrorFilesNotifier();
+              }
+            },
+          );
+        });
   }
 
   void requestFocusCaptions() {
@@ -155,11 +150,9 @@ class SendFileDialogController extends State<SendFileDialog> {
           inReplyTo: widget.inReplyTo,
         )
         .then((_) => PaintingBinding.instance.imageCache.clear());
-    Navigator.of(context).pop(
-      SendMediaDialogResult(
-        status: SendMediaWithCaptionStatus.done,
-      ),
-    );
+    Navigator.of(
+      context,
+    ).pop(SendMediaDialogResult(status: SendMediaWithCaptionStatus.done));
   }
 
   List<MatrixFile> getFilesNotError() {
@@ -188,11 +181,9 @@ class SendFileDialogController extends State<SendFileDialog> {
           inReplyTo: widget.inReplyTo,
         )
         .then((_) => PaintingBinding.instance.imageCache.clear());
-    Navigator.of(context).pop(
-      SendMediaDialogResult(
-        status: SendMediaWithCaptionStatus.done,
-      ),
-    );
+    Navigator.of(
+      context,
+    ).pop(SendMediaDialogResult(status: SendMediaWithCaptionStatus.done));
   }
 
   void send() {

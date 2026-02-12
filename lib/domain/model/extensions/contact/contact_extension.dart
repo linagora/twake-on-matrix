@@ -29,9 +29,9 @@ extension ContactExtension on Contact {
   }
 
   Set<AddressBook> toAddressBook() {
-    return _addContactsToAddressBook(contacts: emails).union(
-      _addContactsToAddressBook(contacts: phoneNumbers),
-    );
+    return _addContactsToAddressBook(
+      contacts: emails,
+    ).union(_addContactsToAddressBook(contacts: phoneNumbers));
   }
 
   /// Helper method to convert third-party contacts to AddressBook entries.
@@ -100,10 +100,7 @@ extension ContactExtension on Contact {
       }
     }
 
-    return copyWith(
-      phoneNumbers: updatedPhoneNumbers,
-      emails: updatedEmails,
-    );
+    return copyWith(phoneNumbers: updatedPhoneNumbers, emails: updatedEmails);
   }
 
   Set<Email> _mergeEmails(Set<Email>? emails1, Set<Email>? emails2) {
@@ -178,18 +175,14 @@ extension ContactExtension on Contact {
         final hash = thirdPartyIdToHashMap.values
             .expand((hashes) => hashes)
             .firstWhere((hash) => mappings.containsKey(hash));
-        final updatedEmail = email.copyWith(
-          matrixId: mappings[hash],
-        );
+        final updatedEmail = email.copyWith(matrixId: mappings[hash]);
         updatedEmails.add(updatedEmail);
       }
     }
     return updatedEmails.isEmpty ? emails ?? {} : updatedEmails;
   }
 
-  Set<PhoneNumber> updatePhoneNumbers(
-    Map<String, String> mappings,
-  ) {
+  Set<PhoneNumber> updatePhoneNumbers(Map<String, String> mappings) {
     final updatedPhoneNumbers = <PhoneNumber>{};
 
     if (phoneNumbers == null || phoneNumbers!.isEmpty) {
@@ -221,10 +214,7 @@ extension ContactExtension on Contact {
     Set<PhoneNumber> updatedPhoneNumbers,
     Set<Email> updatedEmails,
   ) {
-    return copyWith(
-      phoneNumbers: updatedPhoneNumbers,
-      emails: updatedEmails,
-    );
+    return copyWith(phoneNumbers: updatedPhoneNumbers, emails: updatedEmails);
   }
 
   bool inTomAddressBook(String matrixId) {
@@ -244,9 +234,7 @@ extension SetContactExtension on Set<Contact> {
     if (contactId == null) {
       return null;
     }
-    final contact = firstWhere(
-      (contact) => contact.id == contactId,
-    );
+    final contact = firstWhere((contact) => contact.id == contactId);
     return contact;
   }
 
@@ -263,18 +251,14 @@ extension SetContactExtension on Set<Contact> {
 
       if (contactIds != null) {
         foundContact.addAll(
-          where(
-            (contact) => contactIds.contains(contact.id),
-          ),
+          where((contact) => contactIds.contains(contact.id)),
         );
       }
     }
     return foundContact;
   }
 
-  Set<Contact> updateContacts({
-    required Map<String, String> mappings,
-  }) {
+  Set<Contact> updateContacts({required Map<String, String> mappings}) {
     final Set<Contact> updatedContacts = {};
     for (final contact in this) {
       final updatedPhoneNumbers = contact.updatePhoneNumbers(mappings);
@@ -299,9 +283,7 @@ extension SetContactExtension on Set<Contact> {
       hashToContactIdMappings,
     );
 
-    final updatedContacts = foundContact.updateContacts(
-      mappings: mappings,
-    );
+    final updatedContacts = foundContact.updateContacts(mappings: mappings);
 
     currentContacts.removeAll(foundContact);
     currentContacts.addAll(updatedContacts);
@@ -325,8 +307,8 @@ extension SetContactExtension on Set<Contact> {
     for (final contact in allContacts) {
       if (uniqueContactsById.containsKey(contact.id)) {
         // If the contact already exists, combine the properties
-        uniqueContactsById[contact.id] =
-            uniqueContactsById[contact.id]!.combine(contact);
+        uniqueContactsById[contact.id] = uniqueContactsById[contact.id]!
+            .combine(contact);
       } else {
         // Otherwise, add the contact to the map
         uniqueContactsById[contact.id] = contact;
@@ -351,33 +333,32 @@ extension IterableContactsExtension on Iterable<Contact> {
       return this;
     }
     final contactsMatched = where((contact) {
-      final supportedFields = [
-        contact.displayName,
-        contact.id,
-      ];
+      final supportedFields = [contact.displayName, contact.id];
       final plainTextContains = supportedFields.any(
         (field) =>
             field?.toLowerCase().contains(keyword.toLowerCase()) ?? false,
       );
-      final phoneNumberContains = contact.phoneNumbers?.any(
+      final phoneNumberContains =
+          contact.phoneNumbers?.any(
             (phoneNumber) =>
                 phoneNumber.number.replaceAll(" ", "").contains(keyword),
           ) ??
           false;
 
-      final emailContains = contact.emails?.any(
-            (email) => email.address.contains(keyword),
-          ) ??
+      final emailContains =
+          contact.emails?.any((email) => email.address.contains(keyword)) ??
           false;
 
-      final emailMatrixIdContains = contact.emails
+      final emailMatrixIdContains =
+          contact.emails
               ?.firstWhereOrNull(
                 (email) => email.matrixId?.contains(keyword) == true,
               )
               ?.matrixId !=
           null;
 
-      final phoneMatrixIdContains = contact.phoneNumbers
+      final phoneMatrixIdContains =
+          contact.phoneNumbers
               ?.firstWhereOrNull(
                 (phone) => phone.matrixId?.contains(keyword) == true,
               )
@@ -397,39 +378,27 @@ extension IterableContactsExtension on Iterable<Contact> {
 
 extension ContactsExtension on Map<String, Contact> {
   Map<String, FederationContact> toFederationContactMap() {
-    return map(
-      (key, value) => MapEntry(key, value.toFederationContact()),
-    );
+    return map((key, value) => MapEntry(key, value.toFederationContact()));
   }
 }
 
 extension PhoneNumberExtension on PhoneNumber {
   FederationPhone toFedPhone() {
-    return FederationPhone(
-      number: number,
-    );
+    return FederationPhone(number: number);
   }
 
   PhoneNumberHiveObject toHiveObj() {
-    return PhoneNumberHiveObject(
-      number: number,
-      matrixId: matrixId ?? '',
-    );
+    return PhoneNumberHiveObject(number: number, matrixId: matrixId ?? '');
   }
 }
 
 extension EmailExtension on Email {
   FederationEmail toFedEmail() {
-    return FederationEmail(
-      address: address,
-    );
+    return FederationEmail(address: address);
   }
 
   EmailHiveObject toHiveObj() {
-    return EmailHiveObject(
-      email: address,
-      matrixId: matrixId ?? '',
-    );
+    return EmailHiveObject(email: address, matrixId: matrixId ?? '');
   }
 }
 
@@ -458,19 +427,13 @@ extension FederationContactsExtension on List<FederationContact> {
 
 extension FederationPhoneExtension on FederationPhone {
   PhoneNumber toPhoneNumber() {
-    return PhoneNumber(
-      number: number,
-      matrixId: matrixId,
-    );
+    return PhoneNumber(number: number, matrixId: matrixId);
   }
 }
 
 extension FederationEmailExtension on FederationEmail {
   Email toEmail() {
-    return Email(
-      address: address,
-      matrixId: matrixId,
-    );
+    return Email(address: address, matrixId: matrixId);
   }
 }
 

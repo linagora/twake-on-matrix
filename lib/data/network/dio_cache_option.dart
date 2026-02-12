@@ -22,10 +22,7 @@ class DioCacheOption {
 
   Future<void> setUpDioHiveCache() async {
     Logs().d('DioCacheOption::_setUpDioHiveCache() Start setup DioHiveCache');
-    _hiveCacheStore = HiveCacheStore(
-      null,
-      hiveBoxName: _hiveBoxName,
-    );
+    _hiveCacheStore = HiveCacheStore(null, hiveBoxName: _hiveBoxName);
     Logs().d('DioCacheOption::_setUpDioHiveCache() DioHiveCache Ready');
   }
 

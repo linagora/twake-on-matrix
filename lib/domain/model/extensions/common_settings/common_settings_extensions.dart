@@ -8,9 +8,7 @@ extension CommonSettingsInformationExtension on CommonSettingsInformation {
       return null;
     }
 
-    final RegExp userIdRegex = RegExp(
-      r'^@([a-zA-Z0-9._-]+):([a-zA-Z0-9.-]+)$',
-    );
+    final RegExp userIdRegex = RegExp(r'^@([a-zA-Z0-9._-]+):([a-zA-Z0-9.-]+)$');
     final Match? match = userIdRegex.firstMatch(userId);
 
     if (match == null) {

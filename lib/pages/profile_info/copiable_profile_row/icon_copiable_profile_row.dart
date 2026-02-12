@@ -12,10 +12,10 @@ class IconCopiableProfileRow extends CopiableProfileRow {
     super.key,
     super.enableDividerTop,
   }) : super(
-          leadingIcon: Icon(
-            icon,
-            size: ChatProfileInfoStyle.iconSize,
-            color: LinagoraSysColors.material().tertiary,
-          ),
-        );
+         leadingIcon: Icon(
+           icon,
+           size: ChatProfileInfoStyle.iconSize,
+           color: LinagoraSysColors.material().tertiary,
+         ),
+       );
 }

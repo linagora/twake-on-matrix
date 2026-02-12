@@ -67,7 +67,7 @@ class SharedPreferencesContactCacheManager {
     return time == null
         ? true
         : DateTime.now().difference(DateTime.parse(time)).inHours >
-            timeToSyncVault.inHours;
+              timeToSyncVault.inHours;
   }
 
   Future<void> storeChunkFederationLookUpError(

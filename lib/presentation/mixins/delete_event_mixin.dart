@@ -24,22 +24,16 @@ mixin DeleteEventMixin {
     );
     if (confirmResult == ConfirmResult.cancel) return;
     _streamSubscription = deleteEventInteractor.execute(event).listen((state) {
-      state.fold(
-        (failure) {
-          if (failure is NoPermissionToDeleteEvent) {
-            TwakeSnackBar.show(
-              context,
-              L10n.of(context)!.noDeletePermissionMessage,
-            );
-            return;
-          }
+      state.fold((failure) {
+        if (failure is NoPermissionToDeleteEvent) {
           TwakeSnackBar.show(
             context,
-            L10n.of(context)!.failedToDeleteMessage,
+            L10n.of(context)!.noDeletePermissionMessage,
           );
-        },
-        (success) {},
-      );
+          return;
+        }
+        TwakeSnackBar.show(context, L10n.of(context)!.failedToDeleteMessage);
+      }, (success) {});
     });
   }
 

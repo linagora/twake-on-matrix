@@ -12,12 +12,7 @@ class ChatDetailsEditOptionStyle {
   }
 
   static const EdgeInsetsDirectional itemBuilderPadding =
-      EdgeInsetsDirectional.only(
-    top: 16,
-    bottom: 16,
-    start: 16,
-    end: 8,
-  );
+      EdgeInsetsDirectional.only(top: 16, bottom: 16, start: 16, end: 8);
   static const EdgeInsetsDirectional leadingIconPadding =
       EdgeInsetsDirectional.only(end: 8.0);
   static const EdgeInsetsDirectional subtitleItemBuilderPadding =
@@ -27,8 +22,8 @@ class ChatDetailsEditOptionStyle {
 
   static TextStyle? titleTextStyle(BuildContext context, Color? titleColor) {
     return LinagoraTextStyle.material().bodyMedium2.copyWith(
-          color: titleColor ?? Theme.of(context).colorScheme.onSurface,
-        );
+      color: titleColor ?? Theme.of(context).colorScheme.onSurface,
+    );
   }
 
   static TextStyle? subtitleTextStyle(
@@ -36,7 +31,7 @@ class ChatDetailsEditOptionStyle {
     Color? subtitleColor,
   ) {
     return Theme.of(context).textTheme.bodyMedium?.copyWith(
-          color: subtitleColor ?? LinagoraRefColors.material().neutral[40],
-        );
+      color: subtitleColor ?? LinagoraRefColors.material().neutral[40],
+    );
   }
 }

@@ -39,9 +39,7 @@ class EmotesSettingsView extends StatelessWidget {
           children: <Widget>[
             if (!controller.readonly)
               Container(
-                padding: const EdgeInsets.symmetric(
-                  vertical: 8.0,
-                ),
+                padding: const EdgeInsets.symmetric(vertical: 8.0),
                 child: ListTile(
                   leading: Container(
                     width: 180.0,
@@ -130,8 +128,9 @@ class EmotesSettingsView extends StatelessWidget {
                             height: 38,
                             padding: const EdgeInsets.symmetric(horizontal: 8),
                             decoration: BoxDecoration(
-                              borderRadius:
-                                  const BorderRadius.all(Radius.circular(10)),
+                              borderRadius: const BorderRadius.all(
+                                Radius.circular(10),
+                              ),
                               color: Theme.of(context).secondaryHeaderColor,
                             ),
                             child: Shortcuts(
@@ -170,26 +169,26 @@ class EmotesSettingsView extends StatelessWidget {
                                     prefixText: ': ',
                                     suffixText: ':',
                                     prefixStyle: TextStyle(
-                                      color: Theme.of(context)
-                                          .colorScheme
-                                          .secondary,
+                                      color: Theme.of(
+                                        context,
+                                      ).colorScheme.secondary,
                                       fontWeight: FontWeight.bold,
                                     ),
                                     suffixStyle: TextStyle(
-                                      color: Theme.of(context)
-                                          .colorScheme
-                                          .secondary,
+                                      color: Theme.of(
+                                        context,
+                                      ).colorScheme.secondary,
                                       fontWeight: FontWeight.bold,
                                     ),
                                     border: InputBorder.none,
                                   ),
                                   onSubmitted: (s) =>
                                       controller.submitImageAction(
-                                    imageCode,
-                                    s,
-                                    image,
-                                    textEditingController,
-                                  ),
+                                        imageCode,
+                                        s,
+                                        image,
+                                        textEditingController,
+                                      ),
                                 ),
                               ),
                             ),
@@ -224,12 +223,7 @@ class _EmoteImage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     const size = 38.0;
-    return MxcImage(
-      uri: mxc,
-      fit: BoxFit.contain,
-      width: size,
-      height: size,
-    );
+    return MxcImage(uri: mxc, fit: BoxFit.contain, width: size, height: size);
   }
 }
 

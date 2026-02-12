@@ -17,8 +17,10 @@ import 'package:matrix/matrix.dart';
 /// 4. Call `onEventVisible(event)` when events become visible
 /// 5. Implement required getters: context, room, timeline, setReadMarker
 mixin AutoMarkAsReadMixin {
-  final _autoMarkAsReadDebouncer =
-      Debouncer<String?>(const Duration(seconds: 2), initialValue: null);
+  final _autoMarkAsReadDebouncer = Debouncer<String?>(
+    const Duration(seconds: 2),
+    initialValue: null,
+  );
   String? _newestVisibleEventId;
   String? visibleEventId;
   StreamSubscription? _autoMarkAsReadSubscription;
@@ -35,12 +37,12 @@ mixin AutoMarkAsReadMixin {
   /// Call this in initState().
   void initAutoMarkAsReadMixin() {
     _autoMarkAsReadSubscription?.cancel();
-    _autoMarkAsReadSubscription = _autoMarkAsReadDebouncer.values.listen(
-      (eventId) {
-        // ignore: unawaited_futures
-        _performAutoMarkAsRead(eventId);
-      },
-    );
+    _autoMarkAsReadSubscription = _autoMarkAsReadDebouncer.values.listen((
+      eventId,
+    ) {
+      // ignore: unawaited_futures
+      _performAutoMarkAsRead(eventId);
+    });
   }
 
   /// Called when an event becomes visible on screen.

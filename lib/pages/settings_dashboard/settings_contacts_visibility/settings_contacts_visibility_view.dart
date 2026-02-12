@@ -54,8 +54,8 @@ class SettingsContactsVisibilityView extends StatelessWidget {
                     child: Text(
                       L10n.of(context)!.whoCanSeeMyPhoneEmail,
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            color: LinagoraSysColors.material().tertiary,
-                          ),
+                        color: LinagoraSysColors.material().tertiary,
+                      ),
                       textAlign: TextAlign.center,
                     ),
                   ),
@@ -64,7 +64,8 @@ class SettingsContactsVisibilityView extends StatelessWidget {
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(16),
                       border: Border.all(
-                        color: LinagoraRefColors.material().neutral[90] ??
+                        color:
+                            LinagoraRefColors.material().neutral[90] ??
                             Colors.transparent,
                         width: 1,
                       ),
@@ -80,7 +81,8 @@ class SettingsContactsVisibilityView extends StatelessWidget {
                                   valueListenable: controller
                                       .selectedVisibilityOptionNotifier,
                                   builder: (context, _, __) {
-                                    final isVisibilitySelected = controller
+                                    final isVisibilitySelected =
+                                        controller
                                             .selectedVisibilityOptionNotifier
                                             .value ==
                                         option;
@@ -118,11 +120,10 @@ class SettingsContactsVisibilityView extends StatelessWidget {
                               bottom: 8,
                             ),
                             child: Text(
-                              L10n.of(context)!
-                                  .chooseWhichDetailsAreVisibleToOtherUsers,
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .bodyMedium
+                              L10n.of(
+                                context,
+                              )!.chooseWhichDetailsAreVisibleToOtherUsers,
+                              style: Theme.of(context).textTheme.bodyMedium
                                   ?.copyWith(
                                     color:
                                         LinagoraSysColors.material().tertiary,
@@ -137,7 +138,7 @@ class SettingsContactsVisibilityView extends StatelessWidget {
                               border: Border.all(
                                 color:
                                     LinagoraRefColors.material().neutral[90] ??
-                                        Colors.transparent,
+                                    Colors.transparent,
                                 width: 1,
                               ),
                             ),
@@ -153,17 +154,17 @@ class SettingsContactsVisibilityView extends StatelessWidget {
                                               .selectedVisibleFieldNotifier,
                                           builder:
                                               (context, selectedFields, child) {
-                                            return _buildVisibleFieldItem(
-                                              context: context,
-                                              option: option,
-                                              enableDivider:
-                                                  option.enableDivider(),
-                                              isSelected: selectedFields
-                                                  .contains(option),
-                                              onTap: controller
-                                                  .onUpdateVisibleFields,
-                                            );
-                                          },
+                                                return _buildVisibleFieldItem(
+                                                  context: context,
+                                                  option: option,
+                                                  enableDivider: option
+                                                      .enableDivider(),
+                                                  isSelected: selectedFields
+                                                      .contains(option),
+                                                  onTap: controller
+                                                      .onUpdateVisibleFields,
+                                                );
+                                              },
                                         );
                                       },
                                     ),
@@ -226,8 +227,8 @@ class SettingsContactsVisibilityView extends StatelessWidget {
                   child: Text(
                     option.title(context),
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          color: LinagoraSysColors.material().onSurface,
-                        ),
+                      color: LinagoraSysColors.material().onSurface,
+                    ),
                     overflow: TextOverflow.ellipsis,
                     maxLines: 1,
                     textAlign: TextAlign.center,
@@ -242,10 +243,7 @@ class SettingsContactsVisibilityView extends StatelessWidget {
             ),
           ),
           Padding(
-            padding: const EdgeInsets.only(
-              left: 8,
-              right: 16,
-            ),
+            padding: const EdgeInsets.only(left: 8, right: 16),
             child: SizedBox(
               width: 24,
               height: 24,
@@ -264,9 +262,7 @@ class SettingsContactsVisibilityView extends StatelessWidget {
     );
   }
 
-  BorderRadius? _buildVisibleFieldBorderRadius({
-    required VisibleEnum option,
-  }) {
+  BorderRadius? _buildVisibleFieldBorderRadius({required VisibleEnum option}) {
     switch (option) {
       case VisibleEnum.phone:
         return const BorderRadius.only(
@@ -306,20 +302,20 @@ class SettingsContactsVisibilityView extends StatelessWidget {
                     children: [
                       Text(
                         option.title(context),
-                        style:
-                            Theme.of(context).textTheme.titleMedium?.copyWith(
-                                  color: LinagoraSysColors.material().onSurface,
-                                ),
+                        style: Theme.of(context).textTheme.titleMedium
+                            ?.copyWith(
+                              color: LinagoraSysColors.material().onSurface,
+                            ),
                         overflow: TextOverflow.ellipsis,
                         maxLines: 1,
                         textAlign: TextAlign.center,
                       ),
                       Text(
                         option.subtitle(context),
-                        style:
-                            Theme.of(context).textTheme.labelMedium?.copyWith(
-                                  color: LinagoraSysColors.material().tertiary,
-                                ),
+                        style: Theme.of(context).textTheme.labelMedium
+                            ?.copyWith(
+                              color: LinagoraSysColors.material().tertiary,
+                            ),
                         overflow: TextOverflow.ellipsis,
                         maxLines: 2,
                         textAlign: TextAlign.left,
@@ -336,10 +332,7 @@ class SettingsContactsVisibilityView extends StatelessWidget {
             ),
           ),
           Padding(
-            padding: const EdgeInsets.only(
-              left: 8,
-              right: 16,
-            ),
+            padding: const EdgeInsets.only(left: 8, right: 16),
             child: SizedBox(
               width: 24,
               height: 24,

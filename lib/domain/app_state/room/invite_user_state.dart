@@ -16,10 +16,7 @@ class InviteUserSuccess extends Success {
   final String roomId;
   final String? groupName;
 
-  const InviteUserSuccess({
-    required this.roomId,
-    this.groupName,
-  });
+  const InviteUserSuccess({required this.roomId, this.groupName});
 
   @override
   List<Object?> get props => [roomId, groupName];
@@ -28,9 +25,7 @@ class InviteUserSuccess extends Success {
 class InviteUserSomeFailed extends Failure {
   final InviteUserPartialFailureException inviteUserPartialFailureException;
 
-  const InviteUserSomeFailed({
-    required this.inviteUserPartialFailureException,
-  });
+  const InviteUserSomeFailed({required this.inviteUserPartialFailureException});
 
   @override
   List<Object?> get props => [inviteUserPartialFailureException];

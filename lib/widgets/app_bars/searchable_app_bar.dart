@@ -97,9 +97,7 @@ class SearchableAppBar extends StatelessWidget {
                         child: Text(
                           title,
                           textAlign: TextAlign.center,
-                          style: TwakeAppBarStyle.titleTextStyle(
-                            context,
-                          ),
+                          style: TwakeAppBarStyle.titleTextStyle(context),
                         ),
                       );
                     },
@@ -185,13 +183,13 @@ class SearchableAppBar extends StatelessWidget {
       autofocus: true,
       maxLines: SearchableAppBarStyle.textFieldMaxLines,
       contextMenuBuilder: mobileTwakeContextMenuBuilder,
-      buildCounter: (
-        BuildContext context, {
-        required int currentLength,
-        required int? maxLength,
-        required bool isFocused,
-      }) =>
-          const SizedBox.shrink(),
+      buildCounter:
+          (
+            BuildContext context, {
+            required int currentLength,
+            required int? maxLength,
+            required bool isFocused,
+          }) => const SizedBox.shrink(),
       maxLength: SearchableAppBarStyle.textFieldMaxLength,
       cursorHeight: 26,
       scrollPadding: const EdgeInsets.all(0),
@@ -210,8 +208,8 @@ class SearchableAppBar extends StatelessWidget {
             : null,
         suffixIcon: const SizedBox.shrink(),
         hintStyle: Theme.of(context).textTheme.bodyLarge?.copyWith(
-              color: LinagoraRefColors.material().neutral[60],
-            ),
+          color: LinagoraRefColors.material().neutral[60],
+        ),
       ),
     );
   }

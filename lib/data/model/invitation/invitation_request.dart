@@ -10,10 +10,7 @@ class InvitationRequest with EquatableMixin {
   @JsonKey(name: "medium")
   final String? medium;
 
-  InvitationRequest({
-    this.contact,
-    this.medium,
-  });
+  InvitationRequest({this.contact, this.medium});
 
   factory InvitationRequest.fromJson(Map<String, dynamic> json) =>
       _$InvitationRequestFromJson(json);
@@ -23,8 +20,5 @@ class InvitationRequest with EquatableMixin {
       : _$InvitationRequestToJson(this);
 
   @override
-  List<Object?> get props => [
-        contact,
-        medium,
-      ];
+  List<Object?> get props => [contact, medium];
 }

@@ -35,8 +35,8 @@ class ContactsInvitation extends StatefulWidget {
 }
 
 class ContactsInvitationController extends State<ContactsInvitation> {
-  final SendInvitationInteractor _sendInvitationInteractor =
-      getIt.get<SendInvitationInteractor>();
+  final SendInvitationInteractor _sendInvitationInteractor = getIt
+      .get<SendInvitationInteractor>();
 
   final GenerateInvitationLinkInteractor _generateInvitationLinkInteractor =
       getIt.get<GenerateInvitationLinkInteractor>();
@@ -66,19 +66,18 @@ class ContactsInvitationController extends State<ContactsInvitation> {
     }
   }
 
-  ({
-    String contact,
-    InvitationMediumEnum medium,
-  })? _getInvitationData(PresentationThirdPartyContact contact) {
+  ({String contact, InvitationMediumEnum medium})? _getInvitationData(
+    PresentationThirdPartyContact contact,
+  ) {
     return switch (contact) {
       final PresentationPhoneNumber phoneNumber => (
-          contact: phoneNumber.phoneNumber,
-          medium: InvitationMediumEnum.phone,
-        ),
+        contact: phoneNumber.phoneNumber,
+        medium: InvitationMediumEnum.phone,
+      ),
       final PresentationEmail email => (
-          contact: email.email,
-          medium: InvitationMediumEnum.email,
-        ),
+        contact: email.email,
+        medium: InvitationMediumEnum.email,
+      ),
       _ => null,
     };
   }
@@ -89,13 +88,13 @@ class ContactsInvitationController extends State<ContactsInvitation> {
     if (invitationData != null) {
       _sendInvitationInteractor
           .execute(
-        contact: invitationData.contact,
-        medium: invitationData.medium,
-        contactId: widget.contact.id ?? '',
-      )
+            contact: invitationData.contact,
+            medium: invitationData.medium,
+            contactId: widget.contact.id ?? '',
+          )
           .listen((state) {
-        sendInvitationNotifier.value = state;
-      });
+            sendInvitationNotifier.value = state;
+          });
     }
   }
 
@@ -122,24 +121,15 @@ class ContactsInvitationController extends State<ContactsInvitation> {
           return;
         }
         if (failure is InvalidPhoneNumberFailureState) {
-          TwakeSnackBar.show(
-            context,
-            L10n.of(context)!.invalidPhoneNumber,
-          );
+          TwakeSnackBar.show(context, L10n.of(context)!.invalidPhoneNumber);
           return;
         }
         if (failure is InvalidEmailFailureState) {
-          TwakeSnackBar.show(
-            context,
-            L10n.of(context)!.invalidEmail,
-          );
+          TwakeSnackBar.show(context, L10n.of(context)!.invalidEmail);
           return;
         }
         if (failure is SendInvitationFailureState) {
-          TwakeSnackBar.show(
-            context,
-            L10n.of(context)!.failedToSendInvitation,
-          );
+          TwakeSnackBar.show(context, L10n.of(context)!.failedToSendInvitation);
           return;
         }
       },
@@ -188,17 +178,11 @@ class ContactsInvitationController extends State<ContactsInvitation> {
           return;
         }
         if (failure is InvalidPhoneNumberFailureState) {
-          TwakeSnackBar.show(
-            context,
-            L10n.of(context)!.invalidPhoneNumber,
-          );
+          TwakeSnackBar.show(context, L10n.of(context)!.invalidPhoneNumber);
           return;
         }
         if (failure is InvalidEmailFailureState) {
-          TwakeSnackBar.show(
-            context,
-            L10n.of(context)!.invalidEmail,
-          );
+          TwakeSnackBar.show(context, L10n.of(context)!.invalidEmail);
           return;
         }
         if (failure is GenerateInvitationLinkIsEmptyState) {
@@ -217,9 +201,7 @@ class ContactsInvitationController extends State<ContactsInvitation> {
           TwakeDialog.hideLoadingDialog(context);
         }
         if (success is GenerateInvitationLinkSuccessState) {
-          await Share.shareUri(
-            Uri.parse(success.link),
-          );
+          await Share.shareUri(Uri.parse(success.link));
           Navigator.of(context).pop();
           return;
         }
@@ -237,16 +219,16 @@ class ContactsInvitationController extends State<ContactsInvitation> {
     }
     _hiveStoreInvitationStatusInteractor
         .execute(
-      userId: userId,
-      contactId: contactId,
-      invitationId: invitationId,
-    )
+          userId: userId,
+          contactId: contactId,
+          invitationId: invitationId,
+        )
         .listen((state) {
-      Logs().d(
-        'ContactsInvitationController::_onStoreInvitationStatusInteractor',
-        state,
-      );
-    });
+          Logs().d(
+            'ContactsInvitationController::_onStoreInvitationStatusInteractor',
+            state,
+          );
+        });
   }
 
   @override
@@ -263,9 +245,6 @@ class ContactsInvitationController extends State<ContactsInvitation> {
 
   @override
   Widget build(BuildContext context) {
-    return ContactsInvitationView(
-      controller: this,
-      contact: widget.contact,
-    );
+    return ContactsInvitationView(controller: this, contact: widget.contact);
   }
 }

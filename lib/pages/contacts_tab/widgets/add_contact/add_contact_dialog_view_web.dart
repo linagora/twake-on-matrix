@@ -115,10 +115,10 @@ class AddContactDialogViewWeb extends StatelessWidget {
                   ValueListenableBuilder(
                     valueListenable: controller.userName,
                     builder: (context, userName, child) {
-                      final existedContact =
-                          controller.availableContacts.firstWhereOrNull(
-                        (contact) => contact.matrixId == userName,
-                      );
+                      final existedContact = controller.availableContacts
+                          .firstWhereOrNull(
+                            (contact) => contact.matrixId == userName,
+                          );
 
                       return TextButton(
                         style: TextButton.styleFrom(
@@ -130,8 +130,9 @@ class AddContactDialogViewWeb extends StatelessWidget {
                               ? sysColor.primary
                               : refColor.neutral[70],
                           shape: const RoundedRectangleBorder(
-                            borderRadius:
-                                BorderRadius.all(Radius.circular(100)),
+                            borderRadius: BorderRadius.all(
+                              Radius.circular(100),
+                            ),
                           ),
                         ),
                         onPressed: controller.onSave,

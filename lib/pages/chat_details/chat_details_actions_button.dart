@@ -50,7 +50,8 @@ class ChatDetailsActionsButton extends StatelessWidget {
           decoration: ShapeDecoration(
             color: buttonColor,
             shape: RoundedRectangleBorder(
-              side: borderSide ??
+              side:
+                  borderSide ??
                   BorderSide(
                     width: 0.50,
                     color: LinagoraRefColors.material().neutral[90]!,
@@ -62,19 +63,15 @@ class ChatDetailsActionsButton extends StatelessWidget {
             mainAxisSize: MainAxisSize.max,
             children: [
               if (iconData != null)
-                Icon(
-                  iconData,
-                  size: iconSize ?? 24,
-                  color: iconColor,
-                ),
+                Icon(iconData, size: iconSize ?? 24, color: iconColor),
               const SizedBox(height: 4),
               Text(
                 title,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                      color: Theme.of(context).colorScheme.onSurface,
-                    ),
+                  color: Theme.of(context).colorScheme.onSurface,
+                ),
               ),
             ],
           ),

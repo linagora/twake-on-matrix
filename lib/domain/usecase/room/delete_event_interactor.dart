@@ -6,9 +6,7 @@ import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
 import 'package:matrix/matrix.dart';
 
 class DeleteEventInteractor {
-  Stream<Either<Failure, Success>> execute(
-    Event event,
-  ) async* {
+  Stream<Either<Failure, Success>> execute(Event event) async* {
     if (!event.canDelete) {
       yield Left(NoPermissionToDeleteEvent());
     }

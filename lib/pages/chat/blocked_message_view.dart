@@ -11,8 +11,9 @@ class BlockedMessageView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isMobileResponsive = getIt.get<ResponsiveUtils>().isMobile(context);
-    final isTabletLargeResponsive =
-        getIt.get<ResponsiveUtils>().isTabletLarge(context);
+    final isTabletLargeResponsive = getIt.get<ResponsiveUtils>().isTabletLarge(
+      context,
+    );
     final refColor = LinagoraRefColors.material();
     final sysColor = LinagoraSysColors.material();
     return SafeArea(
@@ -50,10 +51,10 @@ class BlockedMessageView extends StatelessWidget {
               child: Text(
                 L10n.of(context)!.unblockUserToSendMessages,
                 style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                      fontSize: 17,
-                      height: 24 / 17,
-                      color: refColor.tertiary[30],
-                    ),
+                  fontSize: 17,
+                  height: 24 / 17,
+                  color: refColor.tertiary[30],
+                ),
               ),
             ),
           ],

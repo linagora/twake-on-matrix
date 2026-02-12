@@ -5,10 +5,7 @@ import 'package:flutter/material.dart';
 class InvitationSelectionWebView extends StatelessWidget {
   final String roomId;
 
-  const InvitationSelectionWebView({
-    super.key,
-    required this.roomId,
-  });
+  const InvitationSelectionWebView({super.key, required this.roomId});
 
   @override
   Widget build(BuildContext context) {
@@ -23,10 +20,7 @@ class InvitationSelectionWebView extends StatelessWidget {
           ),
         ),
         clipBehavior: Clip.antiAlias,
-        child: InvitationSelection(
-          roomId: roomId,
-          isFullScreen: false,
-        ),
+        child: InvitationSelection(roomId: roomId, isFullScreen: false),
       ),
     );
   }

@@ -108,10 +108,7 @@ class CoreRobot {
     final end = DateTime.now().add(timeout);
 
     while (DateTime.now().isBefore(end)) {
-      final views = await $.native.getNativeViews(
-        selector,
-        appId: appId,
-      );
+      final views = await $.native.getNativeViews(selector, appId: appId);
       if (views.isEmpty) return;
 
       await Future.delayed(interval);
@@ -178,15 +175,18 @@ class CoreRobot {
     Object? err;
     final done = Completer<void>();
 
-    runZonedGuarded(() async {
-      try {
-        await body();
-      } finally {
-        done.complete();
-      }
-    }, (e, _) {
-      err ??= e; // store the first error
-    });
+    runZonedGuarded(
+      () async {
+        try {
+          await body();
+        } finally {
+          done.complete();
+        }
+      },
+      (e, _) {
+        err ??= e; // store the first error
+      },
+    );
 
     await done.future;
     return err?.toString();
@@ -347,15 +347,16 @@ class CoreRobot {
     thirdRequest.headers
       ..set('Sec-Fetch-Mode', 'navigate')
       ..set(
-          HttpHeaders.refererHeader,
-          'https://$ssoURL/oauth2/authorize?response_type=code'
-          '&client_id=$clientId'
-          '&redirect_uri=$redirectUriValue'
-          '&scope=$scope'
-          '&state=$state'
-          '&nonce=$nonce'
-          '&code_challenge_method=$codeChallengeMethod'
-          '&code_challenge=$codeChallenge')
+        HttpHeaders.refererHeader,
+        'https://$ssoURL/oauth2/authorize?response_type=code'
+        '&client_id=$clientId'
+        '&redirect_uri=$redirectUriValue'
+        '&scope=$scope'
+        '&state=$state'
+        '&nonce=$nonce'
+        '&code_challenge_method=$codeChallengeMethod'
+        '&code_challenge=$codeChallenge',
+      )
       ..set('Sec-Fetch-Site', 'same-origin')
       ..set(HttpHeaders.acceptLanguageHeader, 'en-US,en;q=0.9,vi;q=0.8')
       ..set('Origin', 'https://$ssoURL')
@@ -407,8 +408,9 @@ class CoreRobot {
       (cookie) => cookie.contains('lemonldap='),
       orElse: () => '',
     );
-    final matchOfThirdResponse =
-        RegExp(r'lemonldap=([^&;]+)').firstMatch(oidcCookieOfThirdResponse);
+    final matchOfThirdResponse = RegExp(
+      r'lemonldap=([^&;]+)',
+    ).firstMatch(oidcCookieOfThirdResponse);
     lemonldap = matchOfThirdResponse?.group(1);
 
     // Step 7: Call OIDC callback to get loginToken
@@ -487,10 +489,7 @@ class CoreRobot {
         'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36',
       )
       ..set('Sec-Fetch-Dest', 'empty')
-      ..set(
-        HttpHeaders.cookieHeader,
-        'lemonldap=$lemonldap',
-      );
+      ..set(HttpHeaders.cookieHeader, 'lemonldap=$lemonldap');
 
     fifthRequest.write(
       jsonEncode({
@@ -545,17 +544,9 @@ class CoreRobot {
         'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36',
       )
       ..set('Sec-Fetch-Dest', 'empty')
-      ..set(
-        HttpHeaders.cookieHeader,
-        'lemonldap=$lemonldap',
-      );
+      ..set(HttpHeaders.cookieHeader, 'lemonldap=$lemonldap');
 
-    sixthRequest.write(
-      jsonEncode({
-        'msgtype': 'm.text',
-        'body': message,
-      }),
-    );
+    sixthRequest.write(jsonEncode({'msgtype': 'm.text', 'body': message}));
 
     await sixthRequest.close();
   }
@@ -573,10 +564,7 @@ class CoreRobot {
     final PatrolFinder scrollable = root == null
         ? $(Scrollable).first
         : $(
-            find.descendant(
-              of: root.finder,
-              matching: find.byType(Scrollable),
-            ),
+            find.descendant(of: root.finder, matching: find.byType(Scrollable)),
           ).first;
 
     var lastPixels = -1.0;
@@ -602,10 +590,7 @@ class CoreRobot {
     final PatrolFinder scrollable = root == null
         ? $(Scrollable).first
         : $(
-            find.descendant(
-              of: root.finder,
-              matching: find.byType(Scrollable),
-            ),
+            find.descendant(of: root.finder, matching: find.byType(Scrollable)),
           ).first;
 
     for (var i = 0; i < maxDrags; i++) {
@@ -652,10 +637,7 @@ class CoreRobot {
     final scrollableFinder = root == null
         ? $(Scrollable)
         : $(
-            find.descendant(
-              of: root.finder,
-              matching: find.byType(Scrollable),
-            ),
+            find.descendant(of: root.finder, matching: find.byType(Scrollable)),
           );
 
     return scrollableFinder.exists;

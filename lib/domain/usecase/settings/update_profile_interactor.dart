@@ -19,37 +19,24 @@ class UpdateProfileInteractor {
         'UploadProfileInteractor::execute(): Uri - $avatarUrl - displayName - $displayName',
       );
       if (avatarUrl != null || isDeleteAvatar) {
-        await client.setProfileField(
-          client.userID!,
-          'avatar_url',
-          {'avatar_url': isDeleteAvatar ? null : avatarUrl?.toString()},
-        );
+        await client.setProfileField(client.userID!, 'avatar_url', {
+          'avatar_url': isDeleteAvatar ? null : avatarUrl?.toString(),
+        });
       }
       if (displayName != null) {
-        await client.setProfileField(
-          client.userID!,
-          'displayname',
-          {'displayname': displayName},
-        );
+        await client.setProfileField(client.userID!, 'displayname', {
+          'displayname': displayName,
+        });
       }
       if (isDeleteAvatar) {
-        yield Right(
-          DeleteProfileSuccess(
-            displayName: displayName,
-          ),
-        );
+        yield Right(DeleteProfileSuccess(displayName: displayName));
         return;
       }
       yield Right(
-        UpdateProfileSuccess(
-          displayName: displayName,
-          avatar: avatarUrl,
-        ),
+        UpdateProfileSuccess(displayName: displayName, avatar: avatarUrl),
       );
     } catch (e) {
-      Logs().d(
-        'UploadAvatarInteractor::execute(): Exception - $e}',
-      );
+      Logs().d('UploadAvatarInteractor::execute(): Exception - $e}');
       yield Left(UpdateProfileFailure(e));
     }
   }

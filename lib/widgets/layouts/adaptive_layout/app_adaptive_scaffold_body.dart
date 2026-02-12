@@ -19,10 +19,8 @@ import 'package:flutter/material.dart';
 import 'package:matrix/matrix.dart';
 
 typedef OnCloseSearchPage = void Function();
-typedef OnClientSelectedSetting = void Function(
-  Object object,
-  BuildContext context,
-);
+typedef OnClientSelectedSetting =
+    void Function(Object object, BuildContext context);
 typedef OnDestinationSelected = void Function(int index);
 typedef OnPopInvoked = void Function(bool);
 
@@ -50,16 +48,18 @@ class AppAdaptiveScaffoldBodyController extends State<AppAdaptiveScaffoldBody>
   final currentProfileNotifier = ValueNotifier<Profile?>(Profile(userId: ''));
   StreamSubscription? onAccountDataSubscription;
 
-  final PageController pageController =
-      PageController(initialPage: 1, keepPage: true);
+  final PageController pageController = PageController(
+    initialPage: 1,
+    keepPage: true,
+  );
 
   final responsiveUtils = ResponsiveUtils();
 
   List<AdaptiveDestinationEnum> get destinations => [
-        AdaptiveDestinationEnum.contacts,
-        AdaptiveDestinationEnum.rooms,
-        AdaptiveDestinationEnum.settings,
-      ];
+    AdaptiveDestinationEnum.contacts,
+    AdaptiveDestinationEnum.rooms,
+    AdaptiveDestinationEnum.settings,
+  ];
 
   void onDestinationSelected(int index) {
     final destinationType = destinations[index];
@@ -77,10 +77,7 @@ class AppAdaptiveScaffoldBodyController extends State<AppAdaptiveScaffoldBody>
     }
   }
 
-  void clientSelected(
-    Object object,
-    BuildContext context,
-  ) async {
+  void clientSelected(Object object, BuildContext context) async {
     if (object is SettingsAction) {
       switch (object) {
         case SettingsAction.settings:
@@ -135,14 +132,17 @@ class AppAdaptiveScaffoldBodyController extends State<AppAdaptiveScaffoldBody>
   }
 
   void getCurrentProfile() async {
-    final profile =
-        await matrix.client.fetchOwnProfile(getFromRooms: false, cache: false);
+    final profile = await matrix.client.fetchOwnProfile(
+      getFromRooms: false,
+      cache: false,
+    );
     currentProfileNotifier.value = profile;
   }
 
   void _handleProfileDataChange() {
-    onAccountDataSubscription =
-        matrix.client.onAccountData.stream.listen((event) {
+    onAccountDataSubscription = matrix.client.onAccountData.stream.listen((
+      event,
+    ) {
       if (event.type == TwakeInappEventTypes.uploadAvatarEvent) {
         getCurrentProfile();
       }
@@ -216,15 +216,15 @@ class AppAdaptiveScaffoldBodyController extends State<AppAdaptiveScaffoldBody>
 
   @override
   Widget build(BuildContext context) => AppAdaptiveScaffoldBodyView(
-        destinations: destinations,
-        activeRoomIdNotifier: activeRoomIdNotifier,
-        activeNavigationBarNotifier: activeNavigationBarNotifier,
-        pageController: pageController,
-        onDestinationSelected: onDestinationSelected,
-        onClientSelected: clientSelected,
-        onPopInvoked: _onPopInvoked,
-        onOpenSettings: _onOpenSettingsPage,
-        adaptiveScaffoldBodyArgs: widget.args,
-        currentProfile: currentProfileNotifier,
-      );
+    destinations: destinations,
+    activeRoomIdNotifier: activeRoomIdNotifier,
+    activeNavigationBarNotifier: activeNavigationBarNotifier,
+    pageController: pageController,
+    onDestinationSelected: onDestinationSelected,
+    onClientSelected: clientSelected,
+    onPopInvoked: _onPopInvoked,
+    onOpenSettings: _onOpenSettingsPage,
+    adaptiveScaffoldBodyArgs: widget.args,
+    currentProfile: currentProfileNotifier,
+  );
 }

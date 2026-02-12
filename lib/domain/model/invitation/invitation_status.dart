@@ -4,14 +4,8 @@ class InvitationStatus with EquatableMixin {
   final String invitationId;
   final String contactId;
 
-  InvitationStatus({
-    required this.invitationId,
-    required this.contactId,
-  });
+  InvitationStatus({required this.invitationId, required this.contactId});
 
   @override
-  List<Object?> get props => [
-        invitationId,
-        contactId,
-      ];
+  List<Object?> get props => [invitationId, contactId];
 }

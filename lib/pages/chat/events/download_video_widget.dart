@@ -63,11 +63,7 @@ class _DownloadVideoWidgetState extends State<DownloadVideoWidget>
       bytes = await handleDownloadVideoEvent(
         event: widget.event,
         playVideoAction: PlatformInfos.isWeb
-            ? (path) => playVideoAction(
-                  context,
-                  path,
-                  event: widget.event,
-                )
+            ? (path) => playVideoAction(context, path, event: widget.event)
             : null,
         progressCallback: (count, total) {
           downloadProgressNotifier.value = count / total;
@@ -77,10 +73,7 @@ class _DownloadVideoWidgetState extends State<DownloadVideoWidget>
       _downloadStateNotifier.value = DownloadVideoState.done;
     } catch (e, s) {
       _downloadStateNotifier.value = DownloadVideoState.failed;
-      TwakeSnackBar.show(
-        context,
-        e.toLocalizedString(context),
-      );
+      TwakeSnackBar.show(context, e.toLocalizedString(context));
       Logs().e('Error while playing video', e, s);
     }
   }
@@ -95,10 +88,7 @@ class _DownloadVideoWidgetState extends State<DownloadVideoWidget>
           Stack(
             alignment: Alignment.center,
             children: [
-              MxcImage(
-                event: widget.event,
-                fit: BoxFit.cover,
-              ),
+              MxcImage(event: widget.event, fit: BoxFit.cover),
               ValueListenableBuilder<DownloadVideoState>(
                 valueListenable: _downloadStateNotifier,
                 builder: (context, downloadState, child) {
@@ -111,9 +101,7 @@ class _DownloadVideoWidgetState extends State<DownloadVideoWidget>
                         child: Center(
                           child: Stack(
                             children: [
-                              const CenterVideoButton(
-                                icon: Icons.play_arrow,
-                              ),
+                              const CenterVideoButton(icon: Icons.play_arrow),
                               SizedBox(
                                 width:
                                     MessageContentStyle.videoCenterButtonSize,
@@ -126,8 +114,9 @@ class _DownloadVideoWidgetState extends State<DownloadVideoWidget>
                                       strokeWidth: 2,
                                       color: LinagoraRefColors.material()
                                           .primary[100],
-                                      value:
-                                          PlatformInfos.isWeb ? null : progress,
+                                      value: PlatformInfos.isWeb
+                                          ? null
+                                          : progress,
                                     );
                                   },
                                 ),
@@ -140,9 +129,7 @@ class _DownloadVideoWidgetState extends State<DownloadVideoWidget>
                       return InkWell(
                         onTap: _downloadAction,
                         child: const Center(
-                          child: CenterVideoButton(
-                            icon: Icons.play_arrow,
-                          ),
+                          child: CenterVideoButton(icon: Icons.play_arrow),
                         ),
                       );
                     case DownloadVideoState.done:
@@ -158,18 +145,14 @@ class _DownloadVideoWidgetState extends State<DownloadVideoWidget>
                           }
                         },
                         child: const Center(
-                          child: CenterVideoButton(
-                            icon: Icons.play_arrow,
-                          ),
+                          child: CenterVideoButton(icon: Icons.play_arrow),
                         ),
                       );
                     case DownloadVideoState.failed:
                       return InkWell(
                         onTap: _downloadAction,
                         child: const Center(
-                          child: CenterVideoButton(
-                            icon: Icons.error,
-                          ),
+                          child: CenterVideoButton(icon: Icons.error),
                         ),
                       );
                   }
@@ -178,9 +161,7 @@ class _DownloadVideoWidgetState extends State<DownloadVideoWidget>
             ],
           ),
           if (!PlatformInfos.isMobile)
-            MediaViewerAppBarWeb(
-              event: widget.event,
-            )
+            MediaViewerAppBarWeb(event: widget.event)
           else if (widget.showAppBar)
             MediaViewerAppBar(
               showAppbarPreviewNotifier: showAppbarPreview,

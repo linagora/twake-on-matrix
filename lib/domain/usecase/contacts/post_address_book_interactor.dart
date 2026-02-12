@@ -11,12 +11,12 @@ import 'package:fluffychat/domain/repository/contact/address_book_repository.dar
 import 'package:matrix/matrix.dart';
 
 class PostAddressBookInteractor {
-  final AddressBookRepository _addressBookRepository =
-      getIt.get<AddressBookRepository>();
+  final AddressBookRepository _addressBookRepository = getIt
+      .get<AddressBookRepository>();
 
   final SharedPreferencesContactCacheManager
-      _sharedPreferencesContactCacheManager =
-      getIt.get<SharedPreferencesContactCacheManager>();
+  _sharedPreferencesContactCacheManager = getIt
+      .get<SharedPreferencesContactCacheManager>();
 
   Stream<Either<Failure, Success>> execute({
     required List<AddressBook> addressBooks,

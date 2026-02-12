@@ -43,8 +43,9 @@ class TwakeLinkView extends StatelessWidget {
 
   Widget _buildMessageBody(BuildContext context) {
     return Padding(
-      padding:
-          isCaption ? EdgeInsets.zero : TwakeLinkViewStyle.paddingMessageBody,
+      padding: isCaption
+          ? EdgeInsets.zero
+          : TwakeLinkViewStyle.paddingMessageBody,
       child: body,
     );
   }

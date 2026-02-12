@@ -45,9 +45,7 @@ class ChatDetailsNavigator extends StatelessWidget {
                 isInStack: isInStack,
               );
             case ChatDetailsRoutes.chatDetailsEdit:
-              return ChatDetailsEdit(
-                roomId: roomId!,
-              );
+              return ChatDetailsEdit(roomId: roomId!);
             default:
               return ChatDetails(
                 roomId: roomId!,

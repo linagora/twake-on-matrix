@@ -45,8 +45,8 @@ class AssignRolesEditorController extends State<AssignRolesRolePicker> {
   final ValueNotifier<DefaultPowerLevelMember?> roleSelectedNotifier =
       ValueNotifier<DefaultPowerLevelMember?>(null);
 
-  final setPermissionLevelInteractor =
-      getIt.get<SetPermissionLevelInteractor>();
+  final setPermissionLevelInteractor = getIt
+      .get<SetPermissionLevelInteractor>();
 
   Color colorBackgroundForRoles(DefaultPowerLevelMember role) {
     switch (role) {
@@ -180,13 +180,10 @@ class AssignRolesEditorController extends State<AssignRolesRolePicker> {
     }
 
     setPermissionLevelInteractor
-        .execute(
-      room: widget.room,
-      userPermissionLevels: userPermissionLevels,
-    )
+        .execute(room: widget.room, userPermissionLevels: userPermissionLevels)
         .listen((result) {
-      _handleAssignRolesResult(result);
-    });
+          _handleAssignRolesResult(result);
+        });
   }
 
   void _handleAssignRolesResult(Either<Failure, Success> result) {
@@ -194,10 +191,7 @@ class AssignRolesEditorController extends State<AssignRolesRolePicker> {
       (failure) {
         if (failure is SetPermissionLevelFailure) {
           TwakeDialog.hideLoadingDialog(context);
-          TwakeSnackBar.show(
-            context,
-            failure.exception.toString(),
-          );
+          TwakeSnackBar.show(context, failure.exception.toString());
           return;
         }
 
@@ -221,13 +215,11 @@ class AssignRolesEditorController extends State<AssignRolesRolePicker> {
           if (widget.onSuccess != null) {
             widget.onSuccess!();
           } else if (responsive.isMobile(context)) {
-            Navigator.of(context).popUntil(
-              (route) => route.settings.name == '/assign_roles',
-            );
+            Navigator.of(
+              context,
+            ).popUntil((route) => route.settings.name == '/assign_roles');
           } else {
-            Navigator.of(context).popUntil(
-              (route) => route.isFirst,
-            );
+            Navigator.of(context).popUntil((route) => route.isFirst);
           }
 
           return;
@@ -242,8 +234,8 @@ class AssignRolesEditorController extends State<AssignRolesRolePicker> {
     } else {
       roleSelectedNotifier.value =
           DefaultPowerLevelMember.getDefaultPowerLevelByUsersDefault(
-        usersDefault: widget.room.getUserDefaultLevel(),
-      );
+            usersDefault: widget.room.getUserDefaultLevel(),
+          );
     }
   }
 
@@ -264,9 +256,7 @@ class AssignRolesEditorController extends State<AssignRolesRolePicker> {
     return Material(
       color: LinagoraSysColors.material().onPrimary,
       shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.all(
-          Radius.circular(16.0),
-        ),
+        borderRadius: BorderRadius.all(Radius.circular(16.0)),
       ),
       child: AssignRolesRolePickerView(
         controller: this,

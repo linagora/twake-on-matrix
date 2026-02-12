@@ -7,12 +7,10 @@ class FederationIdentityRequestTokenApi {
 
   FederationIdentityRequestTokenApi(this.client);
 
-  Future<FederationTokenInformation> getToken({
-    required String mxid,
-  }) async {
-    final path =
-        FederationIdentityRequestTokenEndpoint.requestTokenServicePath(mxid)
-            .generateFederationIdentityRequestTokenEndpoint();
+  Future<FederationTokenInformation> getToken({required String mxid}) async {
+    final path = FederationIdentityRequestTokenEndpoint.requestTokenServicePath(
+      mxid,
+    ).generateFederationIdentityRequestTokenEndpoint();
     final response = await client.postToGetBody(path, data: {});
 
     return FederationTokenInformation.fromJson(response);

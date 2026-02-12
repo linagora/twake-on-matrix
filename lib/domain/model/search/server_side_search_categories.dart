@@ -17,12 +17,8 @@ class ServerSideSearchCategories with EquatableMixin {
     return Categories(
       roomEvents: RoomEventsCriteria(
         searchTerm: searchTerm,
-        groupings: Groupings(
-          groupBy: [Group(key: GroupKey.roomId)],
-        ),
-        keys: [
-          KeyKind.contentBody,
-        ],
+        groupings: Groupings(groupBy: [Group(key: GroupKey.roomId)]),
+        keys: [KeyKind.contentBody],
         orderBy: SearchOrder.recent,
         filter: searchFilter,
       ),

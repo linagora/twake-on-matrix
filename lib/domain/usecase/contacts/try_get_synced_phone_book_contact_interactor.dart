@@ -9,23 +9,21 @@ import 'package:matrix/matrix.dart';
 
 class TryGetSyncedPhoneBookContactInteractor {
   final SharedPreferencesContactCacheManager
-      _sharedPreferencesContactCacheManager =
-      getIt.get<SharedPreferencesContactCacheManager>();
+  _sharedPreferencesContactCacheManager = getIt
+      .get<SharedPreferencesContactCacheManager>();
 
-  final HiveContactRepository _hiveContactRepository =
-      getIt.get<HiveContactRepository>();
+  final HiveContactRepository _hiveContactRepository = getIt
+      .get<HiveContactRepository>();
 
-  Future<Either<Failure, Success>> execute({
-    required String userId,
-  }) async {
+  Future<Either<Failure, Success>> execute({required String userId}) async {
     try {
-      final hiveContacts =
-          await _hiveContactRepository.getThirdPartyContactByUserId(userId);
-      final errorHive =
-          await _sharedPreferencesContactCacheManager.getContactsHiveError();
+      final hiveContacts = await _hiveContactRepository
+          .getThirdPartyContactByUserId(userId);
+      final errorHive = await _sharedPreferencesContactCacheManager
+          .getContactsHiveError();
 
-      final errorVault =
-          await _sharedPreferencesContactCacheManager.getContactsVaultError();
+      final errorVault = await _sharedPreferencesContactCacheManager
+          .getContactsVaultError();
 
       final chunkLookUpError = await _sharedPreferencesContactCacheManager
           .getChunkFederationLookUpError();
@@ -46,23 +44,11 @@ class TryGetSyncedPhoneBookContactInteractor {
             ),
           );
         } else if (errorHive != null) {
-          return Left(
-            HasErrorFromHiveState(
-              exception: errorHive,
-            ),
-          );
+          return Left(HasErrorFromHiveState(exception: errorHive));
         } else if (errorVault != null) {
-          return Left(
-            HasErrorFromVaultState(
-              exception: errorVault,
-            ),
-          );
+          return Left(HasErrorFromVaultState(exception: errorVault));
         } else if (chunkLookUpError != null) {
-          return Left(
-            HasErrorFromChunkState(
-              exception: chunkLookUpError,
-            ),
-          );
+          return Left(HasErrorFromChunkState(exception: chunkLookUpError));
         }
         return Right(
           GetSyncedPhoneBookContactSuccessState(
@@ -71,9 +57,7 @@ class TryGetSyncedPhoneBookContactInteractor {
           ),
         );
       } else {
-        return const Left(
-          GetSyncedPhoneBookContactIsEmpty(),
-        );
+        return const Left(GetSyncedPhoneBookContactIsEmpty());
       }
     } catch (e) {
       Logs().e('TryGetSyncedPhoneBookContact::getThirdPartyContactByUserId', e);

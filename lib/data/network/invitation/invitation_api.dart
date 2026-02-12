@@ -19,22 +19,22 @@ class InvitationAPI {
   }) async {
     final response = await _client
         .postToGetBody(
-      TomEndpoint.invitationServicePath.generateTomEndpoint(),
-      data: request.toJson(),
-    )
+          TomEndpoint.invitationServicePath.generateTomEndpoint(),
+          data: request.toJson(),
+        )
         .onError((error, stackTrace) {
-      if (error is DioException) {
-        throw DioException(
-          requestOptions: error.requestOptions,
-          response: error.response,
-          type: error.type,
-          error: error.error,
-          stackTrace: error.stackTrace,
-        );
-      } else {
-        throw Exception(error);
-      }
-    });
+          if (error is DioException) {
+            throw DioException(
+              requestOptions: error.requestOptions,
+              response: error.response,
+              type: error.type,
+              error: error.error,
+              stackTrace: error.stackTrace,
+            );
+          } else {
+            throw Exception(error);
+          }
+        });
 
     return SendInvitationResponse.fromJson(response);
   }
@@ -44,22 +44,22 @@ class InvitationAPI {
   }) async {
     final response = await _client
         .postToGetBody(
-      TomEndpoint.generateInvitationServicePath.generateTomEndpoint(),
-      data: request.toJson(),
-    )
+          TomEndpoint.generateInvitationServicePath.generateTomEndpoint(),
+          data: request.toJson(),
+        )
         .onError((error, stackTrace) {
-      if (error is DioException) {
-        throw DioException(
-          requestOptions: error.requestOptions,
-          response: error.response,
-          type: error.type,
-          error: error.error,
-          stackTrace: error.stackTrace,
-        );
-      } else {
-        throw Exception(error);
-      }
-    });
+          if (error is DioException) {
+            throw DioException(
+              requestOptions: error.requestOptions,
+              response: error.response,
+              type: error.type,
+              error: error.error,
+              stackTrace: error.stackTrace,
+            );
+          } else {
+            throw Exception(error);
+          }
+        });
 
     return GenerateInvitationLinkResponse.fromJson(response);
   }
@@ -73,9 +73,7 @@ class InvitationAPI {
       instanceName: NetworkDI.memCacheDioInterceptorName,
     );
 
-    dioCacheCustomInterceptor.addUriSupportsCache([
-      uri,
-    ]);
+    dioCacheCustomInterceptor.addUriSupportsCache([uri]);
 
     final response = await _client.get(uri).onError((error, stackTrace) {
       if (error is DioException) {

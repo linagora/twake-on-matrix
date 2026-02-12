@@ -28,10 +28,10 @@ class ToMConfigurationsHiveObj with EquatableMixin {
     return ToMConfigurationsHiveObj(
       tomServerInformation:
           ToMServerInformationHiveObj.fromToMServerInformation(
-        toMConfigurations.tomServerInformation,
-      ),
-      identityServerUrl:
-          toMConfigurations.identityServerInformation?.baseUrl.toString(),
+            toMConfigurations.tomServerInformation,
+          ),
+      identityServerUrl: toMConfigurations.identityServerInformation?.baseUrl
+          .toString(),
       authUrl: toMConfigurations.authUrl,
       loginType: toMConfigurations.loginType,
     );
@@ -43,6 +43,10 @@ class ToMConfigurationsHiveObj with EquatableMixin {
   Map<String, dynamic> toJson() => _$ToMConfigurationsHiveObjToJson(this);
 
   @override
-  List<Object?> get props =>
-      [tomServerInformation, identityServerUrl, authUrl, loginType];
+  List<Object?> get props => [
+    tomServerInformation,
+    identityServerUrl,
+    authUrl,
+    loginType,
+  ];
 }

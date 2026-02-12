@@ -16,10 +16,7 @@ import 'package:matrix/matrix.dart';
 class ExceptionsView extends StatelessWidget {
   final ExceptionsController controller;
 
-  const ExceptionsView({
-    super.key,
-    required this.controller,
-  });
+  const ExceptionsView({super.key, required this.controller});
 
   @override
   Widget build(BuildContext context) {
@@ -52,26 +49,29 @@ class ExceptionsView extends StatelessWidget {
                 focusNode: controller.inputFocus,
                 textInputAction: TextInputAction.search,
                 autofocus: true,
-                decoration: ChatListHeaderStyle.searchInputDecoration(
-                  context,
-                  prefixIconColor: LinagoraSysColors.material().tertiary,
-                ).copyWith(
-                  hintStyle: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        color: LinagoraSysColors.material().tertiary,
+                decoration:
+                    ChatListHeaderStyle.searchInputDecoration(
+                      context,
+                      prefixIconColor: LinagoraSysColors.material().tertiary,
+                    ).copyWith(
+                      hintStyle: Theme.of(context).textTheme.titleMedium
+                          ?.copyWith(
+                            color: LinagoraSysColors.material().tertiary,
+                          ),
+                      hintText: L10n.of(context)!.enterAnEmailAddress,
+                      suffixIcon: ValueListenableBuilder(
+                        valueListenable: controller.textEditingController,
+                        builder: (context, value, child) =>
+                            value.text.isNotEmpty
+                            ? IconButton(
+                                onPressed: () {
+                                  controller.textEditingController.clear();
+                                },
+                                icon: const Icon(Icons.close),
+                              )
+                            : const SizedBox.shrink(),
                       ),
-                  hintText: L10n.of(context)!.enterAnEmailAddress,
-                  suffixIcon: ValueListenableBuilder(
-                    valueListenable: controller.textEditingController,
-                    builder: (context, value, child) => value.text.isNotEmpty
-                        ? IconButton(
-                            onPressed: () {
-                              controller.textEditingController.clear();
-                            },
-                            icon: const Icon(Icons.close),
-                          )
-                        : const SizedBox.shrink(),
-                  ),
-                ),
+                    ),
               ),
             ),
             Container(
@@ -82,12 +82,12 @@ class ExceptionsView extends StatelessWidget {
                 vertical: 8.0,
               ),
               child: Text(
-                L10n.of(context)!.readOnlyCount(
-                  controller.exceptionsMember.length,
-                ),
+                L10n.of(
+                  context,
+                )!.readOnlyCount(controller.exceptionsMember.length),
                 style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                      color: LinagoraRefColors.material().neutral[40],
-                    ),
+                  color: LinagoraRefColors.material().neutral[40],
+                ),
               ),
             ),
             const SizedBox(height: 8.0),
@@ -109,9 +109,7 @@ class ExceptionsView extends StatelessWidget {
         return searchResults.fold(
           (failure) {
             if (failure is ExceptionsSearchEmptyState) {
-              return const Center(
-                child: EmptySearchWidget(),
-              );
+              return const Center(child: EmptySearchWidget());
             }
             return const SizedBox.shrink();
           },
@@ -123,8 +121,9 @@ class ExceptionsView extends StatelessWidget {
                 itemCount: success.exceptionsMember.length,
                 itemBuilder: (context, index) {
                   final member = success.exceptionsMember[index];
-                  final role =
-                      member.getDefaultPowerLevelMember.displayName(context);
+                  final role = member.getDefaultPowerLevelMember.displayName(
+                    context,
+                  );
 
                   return _itemMemberBuilder(
                     context: context,
@@ -151,9 +150,7 @@ class ExceptionsView extends StatelessWidget {
         return searchResults.fold(
           (failure) {
             if (failure is ExceptionsSearchEmptyState) {
-              return const Center(
-                child: EmptySearchWidget(),
-              );
+              return const Center(child: EmptySearchWidget());
             }
             return const SizedBox.shrink();
           },
@@ -163,13 +160,12 @@ class ExceptionsView extends StatelessWidget {
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
                 itemCount: success.exceptionsMember.length,
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 12.0,
-                ),
+                padding: const EdgeInsets.symmetric(horizontal: 12.0),
                 itemBuilder: (context, index) {
                   final member = success.exceptionsMember[index];
-                  final role =
-                      member.getDefaultPowerLevelMember.displayName(context);
+                  final role = member.getDefaultPowerLevelMember.displayName(
+                    context,
+                  );
                   return _itemMemberBuilder(
                     context: context,
                     member: member,
@@ -203,10 +199,7 @@ class ExceptionsView extends StatelessWidget {
         padding: const EdgeInsets.all(8),
         child: Row(
           children: [
-            Avatar(
-              mxContent: member.avatarUrl,
-              name: member.calcDisplayname(),
-            ),
+            Avatar(mxContent: member.avatarUrl, name: member.calcDisplayname()),
             const SizedBox(width: 8.0),
             Expanded(
               child: Column(
@@ -217,8 +210,7 @@ class ExceptionsView extends StatelessWidget {
                       Expanded(
                         child: Text(
                           member.calcDisplayname(),
-                          style: LinagoraTextStyle.material()
-                              .bodyMedium2
+                          style: LinagoraTextStyle.material().bodyMedium2
                               .copyWith(
                                 color: LinagoraSysColors.material().onSurface,
                               ),
@@ -233,8 +225,8 @@ class ExceptionsView extends StatelessWidget {
                   Text(
                     member.id,
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: LinagoraRefColors.material().tertiary[30],
-                        ),
+                      color: LinagoraRefColors.material().tertiary[30],
+                    ),
                     overflow: TextOverflow.ellipsis,
                     maxLines: 1,
                   ),
@@ -251,40 +243,39 @@ class ExceptionsView extends StatelessWidget {
     BuildContext context, {
     required User member,
     required String role,
-  }) =>
-      InkWell(
-        hoverColor: Colors.transparent,
-        highlightColor: Colors.transparent,
-        focusColor: Colors.transparent,
-        splashColor: Colors.transparent,
-        onTapDown: !controller.widget.room.canUpdateRoleInRoom(member)
-            ? null
-            : (details) => handleOnTapQuickRolePicker(
-                  context,
-                  room: controller.widget.room,
-                  member: member,
-                  tapDownDetails: details,
-                  onHandledResult: controller.refreshView,
-                ),
-        child: Row(
-          children: [
-            Text(
-              role,
-              style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                    color: LinagoraRefColors.material().tertiary[30],
-                  ),
-              overflow: TextOverflow.ellipsis,
-              maxLines: 1,
-            ),
-            const SizedBox(width: 4),
-            if (controller.widget.room.canUpdateRoleInRoom(member))
-              Icon(
-                Icons.arrow_drop_down,
-                color: LinagoraRefColors.material().tertiary[30],
-              ),
-          ],
+  }) => InkWell(
+    hoverColor: Colors.transparent,
+    highlightColor: Colors.transparent,
+    focusColor: Colors.transparent,
+    splashColor: Colors.transparent,
+    onTapDown: !controller.widget.room.canUpdateRoleInRoom(member)
+        ? null
+        : (details) => handleOnTapQuickRolePicker(
+            context,
+            room: controller.widget.room,
+            member: member,
+            tapDownDetails: details,
+            onHandledResult: controller.refreshView,
+          ),
+    child: Row(
+      children: [
+        Text(
+          role,
+          style: Theme.of(context).textTheme.labelMedium?.copyWith(
+            color: LinagoraRefColors.material().tertiary[30],
+          ),
+          overflow: TextOverflow.ellipsis,
+          maxLines: 1,
         ),
-      );
+        const SizedBox(width: 4),
+        if (controller.widget.room.canUpdateRoleInRoom(member))
+          Icon(
+            Icons.arrow_drop_down,
+            color: LinagoraRefColors.material().tertiary[30],
+          ),
+      ],
+    ),
+  );
 
   void handleOnTapQuickRolePicker(
     BuildContext context, {

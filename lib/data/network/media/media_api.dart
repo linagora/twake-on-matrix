@@ -15,8 +15,9 @@ import 'package:fluffychat/domain/model/file_info/file_info.dart';
 import 'package:matrix/matrix.dart';
 
 class MediaAPI {
-  final DioClient _client =
-      getIt.get<DioClient>(instanceName: NetworkDI.homeDioClientName);
+  final DioClient _client = getIt.get<DioClient>(
+    instanceName: NetworkDI.homeDioClientName,
+  );
 
   MediaAPI();
 
@@ -51,23 +52,21 @@ class MediaAPI {
     }
     final response = await _client
         .postToGetBody(
-      HomeserverEndpoint.uploadMediaServicePath
-          .generateHomeserverMediaEndpoint(),
-      data: readStream,
-      queryParameters: {
-        'fileName': fileInfo.fileName,
-      },
-      cancelToken: cancelToken,
-      onSendProgress: onSendProgress,
-      options: Options(headers: dioHeaders),
-    )
+          HomeserverEndpoint.uploadMediaServicePath
+              .generateHomeserverMediaEndpoint(),
+          data: readStream,
+          queryParameters: {'fileName': fileInfo.fileName},
+          cancelToken: cancelToken,
+          onSendProgress: onSendProgress,
+          options: Options(headers: dioHeaders),
+        )
         .onError((error, stackTrace) {
-      if (error is DioException && error.type == DioExceptionType.cancel) {
-        throw CancelRequestException();
-      } else {
-        throw Exception(error);
-      }
-    });
+          if (error is DioException && error.type == DioExceptionType.cancel) {
+            throw CancelRequestException();
+          } else {
+            throw Exception(error);
+          }
+        });
 
     return UploadFileResponse.fromJson(response);
   }
@@ -82,23 +81,21 @@ class MediaAPI {
     dioHeaders[HttpHeaders.contentTypeHeader] = file.mimeType;
     final response = await _client
         .postToGetBody(
-      HomeserverEndpoint.uploadMediaServicePath
-          .generateHomeserverMediaEndpoint(),
-      data: Stream.value(file.bytes),
-      queryParameters: {
-        'fileName': file.name,
-      },
-      onSendProgress: onSendProgress,
-      cancelToken: cancelToken,
-      options: Options(headers: dioHeaders),
-    )
+          HomeserverEndpoint.uploadMediaServicePath
+              .generateHomeserverMediaEndpoint(),
+          data: Stream.value(file.bytes),
+          queryParameters: {'fileName': file.name},
+          onSendProgress: onSendProgress,
+          cancelToken: cancelToken,
+          options: Options(headers: dioHeaders),
+        )
         .onError((error, stackTrace) {
-      if (error is DioException && error.type == DioExceptionType.cancel) {
-        throw CancelRequestException();
-      } else {
-        throw Exception(error);
-      }
-    });
+          if (error is DioException && error.type == DioExceptionType.cancel) {
+            throw CancelRequestException();
+          } else {
+            throw Exception(error);
+          }
+        });
 
     return UploadFileResponse.fromJson(response);
   }
@@ -109,31 +106,33 @@ class MediaAPI {
     CancelToken? cancelToken,
     ProgressCallback? onReceiveProgress,
   }) async {
-    final response = await _client.download(
-      uriPath,
-      savePath: savePath,
-      options: Options(
-        headers: {HttpHeaders.acceptEncodingHeader: '*'}, // Disable gzip
-      ),
-      onReceiveProgress: (receive, total) {
-        if (onReceiveProgress != null) {
-          onReceiveProgress(receive, total);
-        }
-      },
-      cancelToken: cancelToken,
-    ).onError((error, stackTrace) {
-      if (error is DioException && error.type == DioExceptionType.cancel) {
-        throw CancelRequestException();
-      } else if (error is DioDuplicateDownloadException) {
-        Logs().i('downloadFileInfo error: $error');
-        throw DioDuplicateDownloadException(
-          requestOptions: error.requestOptions,
-        );
-      } else {
-        Logs().i('downloadFileInfo error: $error');
-        throw Exception(error);
-      }
-    });
+    final response = await _client
+        .download(
+          uriPath,
+          savePath: savePath,
+          options: Options(
+            headers: {HttpHeaders.acceptEncodingHeader: '*'}, // Disable gzip
+          ),
+          onReceiveProgress: (receive, total) {
+            if (onReceiveProgress != null) {
+              onReceiveProgress(receive, total);
+            }
+          },
+          cancelToken: cancelToken,
+        )
+        .onError((error, stackTrace) {
+          if (error is DioException && error.type == DioExceptionType.cancel) {
+            throw CancelRequestException();
+          } else if (error is DioDuplicateDownloadException) {
+            Logs().i('downloadFileInfo error: $error');
+            throw DioDuplicateDownloadException(
+              requestOptions: error.requestOptions,
+            );
+          } else {
+            Logs().i('downloadFileInfo error: $error');
+            throw Exception(error);
+          }
+        });
 
     return DownloadFileResponse(
       savePath: savePath,
@@ -156,20 +155,18 @@ class MediaAPI {
   }) async {
     final response = await _client
         .get(
-      uri.path,
-      onReceiveProgress: onReceiveProgress,
-      cancelToken: cancelToken,
-      options: Options(
-        responseType: ResponseType.stream,
-      ),
-    )
+          uri.path,
+          onReceiveProgress: onReceiveProgress,
+          cancelToken: cancelToken,
+          options: Options(responseType: ResponseType.stream),
+        )
         .onError((error, stackTrace) {
-      if (error is DioException && error.type == DioExceptionType.cancel) {
-        throw CancelRequestException();
-      } else {
-        throw Exception(error);
-      }
-    });
+          if (error is DioException && error.type == DioExceptionType.cancel) {
+            throw CancelRequestException();
+          } else {
+            throw Exception(error);
+          }
+        });
 
     return response.stream;
   }
@@ -178,14 +175,16 @@ class MediaAPI {
     required Uri uri,
     int? preferredPreviewTime,
   }) async {
-    final response = await _client.get(
-      HomeserverEndpoint.getPreviewUrlServicePath
-          .generateHomeserverMediaEndpoint(),
-      queryParameters: {
-        'url': uri.toString(),
-        if (preferredPreviewTime != null) 'ts': preferredPreviewTime,
-      },
-    ).onError((error, stackTrace) => throw Exception(error));
+    final response = await _client
+        .get(
+          HomeserverEndpoint.getPreviewUrlServicePath
+              .generateHomeserverMediaEndpoint(),
+          queryParameters: {
+            'url': uri.toString(),
+            if (preferredPreviewTime != null) 'ts': preferredPreviewTime,
+          },
+        )
+        .onError((error, stackTrace) => throw Exception(error));
 
     return UrlPreviewResponse.fromJson(response);
   }

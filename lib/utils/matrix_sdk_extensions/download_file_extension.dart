@@ -41,7 +41,7 @@ extension DownloadFileExtension on Event {
     Uri mxcUrl,
     String savePath, {
     required StreamController<Either<Failure, Success>>?
-        downloadStreamController,
+    downloadStreamController,
     ProgressCallback? progressCallback,
     bool getThumbnail = false,
     CancelToken? cancelToken,
@@ -77,12 +77,7 @@ extension DownloadFileExtension on Event {
           onReceiveProgress: (receive, total) {
             progressCallback?.call(receive, total);
             downloadStreamController?.add(
-              Right(
-                DownloadingFileState(
-                  receive: receive,
-                  total: total,
-                ),
-              ),
+              Right(DownloadingFileState(receive: receive, total: total)),
             );
           },
           cancelToken: cancelToken,
@@ -101,19 +96,14 @@ extension DownloadFileExtension on Event {
         } else {
           Logs().e("downloadOrRetrieveAttachment: $e");
           downloadStreamController?.add(
-            Left(
-              DownloadFileFailureState(exception: e),
-            ),
+            Left(DownloadFileFailureState(exception: e)),
           );
         }
         return null;
       }
     }
 
-    final fileInfo = FileInfo(
-      filename,
-      filePath: savePath,
-    );
+    final fileInfo = FileInfo(filename, filePath: savePath);
 
     final decryptedFileInfo = await _handleDownloadFileDone(
       mxcUrl: mxcUrl,
@@ -147,11 +137,7 @@ extension DownloadFileExtension on Event {
       );
     } else {
       streamController?.add(
-        Right(
-          DownloadNativeFileSuccessState(
-            filePath: savePath,
-          ),
-        ),
+        Right(DownloadNativeFileSuccessState(filePath: savePath)),
       );
       return null;
     }
@@ -165,17 +151,10 @@ extension DownloadFileExtension on Event {
     bool getThumbnail = false,
     StreamController<Either<Failure, Success>>? streamController,
   }) async {
-    streamController?.add(
-      const Right(
-        DecryptingFileState(),
-      ),
-    );
+    streamController?.add(const Right(DecryptingFileState()));
     try {
-      final decryptedPath =
-          await StorageDirectoryManager.instance.getDecryptedFilePath(
-        eventId: eventId,
-        fileName: filename,
-      );
+      final decryptedPath = await StorageDirectoryManager.instance
+          .getDecryptedFilePath(eventId: eventId, fileName: filename);
 
       final decryptedFile = await decryptFile(
         fileInfo,
@@ -184,16 +163,10 @@ extension DownloadFileExtension on Event {
         getThumbnail: getThumbnail,
       );
       if (decryptedFile == null) {
-        throw Exception(
-          'DownloadManager::download(): decryptedFile is null',
-        );
+        throw Exception('DownloadManager::download(): decryptedFile is null');
       }
       streamController?.add(
-        Right(
-          DownloadNativeFileSuccessState(
-            filePath: decryptedPath,
-          ),
-        ),
+        Right(DownloadNativeFileSuccessState(filePath: decryptedPath)),
       );
 
       // Delete the encrypted file to save space
@@ -201,30 +174,20 @@ extension DownloadFileExtension on Event {
 
       return decryptedFile;
     } catch (e) {
-      Logs().e(
-        'DownloadManager::_handleEncryptedFileEvent(): $e',
-      );
-      streamController?.add(
-        Left(
-          DownloadFileFailureState(exception: e),
-        ),
-      );
+      Logs().e('DownloadManager::_handleEncryptedFileEvent(): $e');
+      streamController?.add(Left(DownloadFileFailureState(exception: e)));
       return null;
     }
   }
 
-  Future<void> _clearEncryptedFile({
-    required String savePath,
-  }) async {
+  Future<void> _clearEncryptedFile({required String savePath}) async {
     try {
       final encryptedFile = File(savePath);
       if (await encryptedFile.exists()) {
         await encryptedFile.delete();
       }
     } catch (e) {
-      Logs().e(
-        '_clearEncryptedFile(): $e',
-      );
+      Logs().e('_clearEncryptedFile(): $e');
     }
   }
 
@@ -265,8 +228,9 @@ extension DownloadFileExtension on Event {
       sha256: fileMap['hashes']['sha256'],
     );
 
-    final decryptedBytes =
-        await room.client.nativeImplementations.decryptFile(encryptedFile);
+    final decryptedBytes = await room.client.nativeImplementations.decryptFile(
+      encryptedFile,
+    );
 
     if (decryptedBytes == null) {
       throw Exception('decryptFile: Unable to decrypt file');
@@ -275,10 +239,7 @@ extension DownloadFileExtension on Event {
     final decryptedFile = File(decryptedPath);
     await decryptedFile.writeAsBytes(decryptedBytes);
 
-    return FileInfo(
-      filename,
-      filePath: decryptedPath,
-    );
+    return FileInfo(filename, filePath: decryptedPath);
   }
 
   Future<FileInfo?> getFileInfo({
@@ -306,28 +267,23 @@ extension DownloadFileExtension on Event {
       throw ('getFileInfo: This event has a thumbnail but it is not an image.');
     }
 
-    final isFileEncrypted =
-        getThumbnail ? isThumbnailEncrypted : isAttachmentEncrypted;
+    final isFileEncrypted = getThumbnail
+        ? isThumbnailEncrypted
+        : isAttachmentEncrypted;
     if (isEncryptionDisabled(isFileEncrypted)) {
       throw ('getFileInfo: Encryption is not enabled in your Client.');
     }
 
     final filename = getThumbnail ? thumbnailFilename : this.filename;
     if (isFileEncrypted) {
-      final decryptedPath =
-          await StorageDirectoryManager.instance.getDecryptedFilePath(
-        eventId: eventId,
-        fileName: filename,
-      );
+      final decryptedPath = await StorageDirectoryManager.instance
+          .getDecryptedFilePath(eventId: eventId, fileName: filename);
       final decryptedFile = File(decryptedPath);
 
       if (await decryptedFile.exists()) {
         final decryptedFileLength = await decryptedFile.length();
         if (decryptedFileLength > 0) {
-          return FileInfo(
-            filename,
-            filePath: decryptedPath,
-          );
+          return FileInfo(filename, filePath: decryptedPath);
         } else {
           await decryptedFile.delete();
         }
@@ -336,8 +292,10 @@ extension DownloadFileExtension on Event {
 
     return downloadOrRetrieveAttachment(
       mxcUrl,
-      await StorageDirectoryManager.instance
-          .getFilePathInAppDownloads(eventId: eventId, fileName: filename),
+      await StorageDirectoryManager.instance.getFilePathInAppDownloads(
+        eventId: eventId,
+        fileName: filename,
+      ),
       downloadStreamController: downloadStreamController,
       getThumbnail: getThumbnail,
       progressCallback: progressCallback,

@@ -51,10 +51,7 @@ class ProfileBottomSheet extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                   style: const TextStyle(fontSize: 18),
                 ),
-                subtitle: Text(
-                  userId,
-                  style: const TextStyle(fontSize: 12),
-                ),
+                subtitle: Text(userId, style: const TextStyle(fontSize: 12)),
               ),
               actions: [
                 Padding(

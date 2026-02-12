@@ -41,9 +41,9 @@ class DownloadingFileDialog extends StatelessWidget {
                   Text(
                     L10n.of(parentContext)!.downloading,
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          color: Theme.of(context).colorScheme.onSurface,
-                          fontSize: DownloadingFileDialogStyle.titleFontSize,
-                        ),
+                      color: Theme.of(context).colorScheme.onSurface,
+                      fontSize: DownloadingFileDialogStyle.titleFontSize,
+                    ),
                   ),
                   const SizedBox(height: 16.0),
                   ValueListenableBuilder(
@@ -75,9 +75,7 @@ class DownloadingFileDialog extends StatelessWidget {
                       );
                     },
                   ),
-                  const SizedBox(
-                    height: 24,
-                  ),
+                  const SizedBox(height: 24),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: [

@@ -84,9 +84,7 @@ class TwakeContextMenuState extends State<TwakeContextMenu>
           (action) => _GrowingWidget(
             child: action,
             closeMenuAction: () {
-              closeContextMenu(
-                popResult: widget.listActions.indexOf(action),
-              );
+              closeContextMenu(popResult: widget.listActions.indexOf(action));
             },
             onHeightChange: (height) {
               setState(() {
@@ -110,8 +108,9 @@ class TwakeContextMenuState extends State<TwakeContextMenu>
               Positioned(
                 left: contextMenuPosition.left,
                 top: contextMenuPosition.top,
-                bottom:
-                    !PlatformInfos.isMobile ? contextMenuPosition.bottom : null,
+                bottom: !PlatformInfos.isMobile
+                    ? contextMenuPosition.bottom
+                    : null,
                 right: contextMenuPosition.right,
                 child: AnimatedBuilder(
                   animation: _animationController,
@@ -119,10 +118,7 @@ class TwakeContextMenuState extends State<TwakeContextMenu>
                     return Transform.scale(
                       scale: _animation.value,
                       alignment: contextMenuPosition.alignment,
-                      child: Opacity(
-                        opacity: _animation.value,
-                        child: child,
-                      ),
+                      child: Opacity(opacity: _animation.value, child: child),
                     );
                   },
                   child: Card(
@@ -147,13 +143,15 @@ class TwakeContextMenuState extends State<TwakeContextMenu>
                           child: IntrinsicWidth(
                             child: Padding(
                               padding: EdgeInsets.symmetric(
-                                vertical: widget.verticalPadding ??
+                                vertical:
+                                    widget.verticalPadding ??
                                     TwakeContextMenuStyle
                                         .defaultVerticalPadding,
                               ),
                               child: ScrollConfiguration(
-                                behavior: ScrollConfiguration.of(context)
-                                    .copyWith(scrollbars: false),
+                                behavior: ScrollConfiguration.of(
+                                  context,
+                                ).copyWith(scrollbars: false),
                                 child: SingleChildScrollView(
                                   physics: const NeverScrollableScrollPhysics(),
                                   primary: false,
@@ -170,8 +168,10 @@ class TwakeContextMenuState extends State<TwakeContextMenu>
                                                 .dividerHeight,
                                             thickness: PopupMenuWidgetStyle
                                                 .dividerThickness,
-                                            color: PopupMenuWidgetStyle
-                                                .defaultDividerColor(context),
+                                            color:
+                                                PopupMenuWidgetStyle.defaultDividerColor(
+                                                  context,
+                                                ),
                                           ),
                                       ],
                                     ],
@@ -200,7 +200,8 @@ class TwakeContextMenuState extends State<TwakeContextMenu>
   }
 
   ContextMenuPosition _calculatePosition(List<ContextMenuAction> children) {
-    double height = 2 *
+    double height =
+        2 *
         (widget.verticalPadding ??
             TwakeContextMenuStyle.defaultVerticalPadding);
     for (final element in _heights.values) {
@@ -214,7 +215,8 @@ class TwakeContextMenuState extends State<TwakeContextMenu>
       height = MediaQuery.sizeOf(context).height;
     }
 
-    double positionTop = widget.position.dy -
+    double positionTop =
+        widget.position.dy -
         MediaQueryData.fromView(View.of(context)).viewPadding.top;
     double positionBottom =
         MediaQuery.sizeOf(context).height - widget.position.dy - height;

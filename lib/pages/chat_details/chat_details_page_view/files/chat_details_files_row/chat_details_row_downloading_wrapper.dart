@@ -24,9 +24,7 @@ class ChatDetailsFileRowDownloadingWrapper extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        const SizedBox(
-          width: ChatDetailsFileTileStyle.wrapperLeftPadding,
-        ),
+        const SizedBox(width: ChatDetailsFileTileStyle.wrapperLeftPadding),
         ValueListenableBuilder(
           valueListenable: downloadFileStateNotifier,
           builder: (context, downloadFileState, child) {
@@ -81,9 +79,7 @@ class ChatDetailsFileRowDownloadingWrapper extends StatelessWidget {
           },
         ),
         ChatDetailsFileTileStyle().paddingRightIcon,
-        Expanded(
-          child: child,
-        ),
+        Expanded(child: child),
       ],
     );
   }

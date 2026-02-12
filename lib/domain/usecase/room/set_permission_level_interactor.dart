@@ -32,16 +32,10 @@ class SetPermissionLevelInteractor {
       yield const Right(SetPermissionLevelSuccess());
     } on MatrixException catch (e) {
       if (e.error == MatrixError.M_FORBIDDEN) {
-        yield const Left(
-          NoPermissionFailure(),
-        );
+        yield const Left(NoPermissionFailure());
       }
     } catch (error) {
-      yield Left(
-        SetPermissionLevelFailure(
-          exception: error,
-        ),
-      );
+      yield Left(SetPermissionLevelFailure(exception: error));
     }
   }
 }

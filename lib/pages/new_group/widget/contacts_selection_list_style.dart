@@ -12,10 +12,6 @@ class ContactsSelectionListStyle {
   static const contactItemPadding = EdgeInsets.symmetric(horizontal: 16.0);
 
   static EdgeInsets checkBoxPadding(double paddingTop) {
-    return EdgeInsets.only(
-      left: 8.0,
-      right: 16,
-      top: paddingTop,
-    );
+    return EdgeInsets.only(left: 8.0, right: 16, top: paddingTop);
   }
 }

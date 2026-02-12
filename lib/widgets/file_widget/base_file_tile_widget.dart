@@ -54,11 +54,10 @@ class BaseFileTileWidget extends StatelessWidget {
           child: Container(
             padding: style.paddingFileTileAll,
             decoration: ShapeDecoration(
-              color: backgroundColor ??
+              color:
+                  backgroundColor ??
                   style.backgroundColor(context, ownMessage: ownMessage),
-              shape: RoundedRectangleBorder(
-                borderRadius: style.borderRadius,
-              ),
+              shape: RoundedRectangleBorder(borderRadius: style.borderRadius),
             ),
             child: Row(
               crossAxisAlignment: style.crossAxisAlignment,
@@ -128,9 +127,7 @@ class BaseFileTileWidget extends StatelessWidget {
             localizedBody: event!.body,
             ownMessage: ownMessage,
             fontSize: AppConfig.messageFontSize * AppConfig.fontSizeFactor,
-            linkStyle: MessageContentStyle.linkStyleMessageContent(
-              context,
-            ),
+            linkStyle: MessageContentStyle.linkStyleMessageContent(context),
             richTextStyle: event!.getMessageTextStyle(context),
             isCaption: event!.isCaptionModeOrReply(),
           ),

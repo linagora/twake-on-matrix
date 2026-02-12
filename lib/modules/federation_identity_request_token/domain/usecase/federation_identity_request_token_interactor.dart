@@ -9,24 +9,14 @@ class FederationIdentityRequestTokenInteractor {
 
   FederationIdentityRequestTokenInteractor({required this.repository});
 
-  Future<Either<Failure, Success>> execute({
-    required String mxid,
-  }) async {
+  Future<Either<Failure, Success>> execute({required String mxid}) async {
     try {
-      final response = await repository.requestToken(
-        mxid: mxid,
-      );
+      final response = await repository.requestToken(mxid: mxid);
       return Right(
-        FederationIdentityRequestTokenSuccess(
-          tokenInformation: response,
-        ),
+        FederationIdentityRequestTokenSuccess(tokenInformation: response),
       );
     } catch (e) {
-      return Left(
-        FederationIdentityRequestTokenFailure(
-          exception: e,
-        ),
-      );
+      return Left(FederationIdentityRequestTokenFailure(exception: e));
     }
   }
 }

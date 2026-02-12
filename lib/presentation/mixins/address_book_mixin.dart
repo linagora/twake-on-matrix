@@ -10,8 +10,8 @@ mixin AddressBooksMixin {
     final contactsManager = getIt.get<ContactsManager>();
     contactsManager.postAddressBookNotifier().addListener(() {
       contactsManager.postAddressBookNotifier().value.map(
-            (newSuccess) => _handleAddressBookUpdatedEvent(client, newSuccess),
-          );
+        (newSuccess) => _handleAddressBookUpdatedEvent(client, newSuccess),
+      );
     });
   }
 

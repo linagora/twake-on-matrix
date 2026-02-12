@@ -8,9 +8,7 @@ class FederationRegisterResponse extends Equatable {
   @JsonKey(name: "token")
   final String? token;
 
-  const FederationRegisterResponse({
-    this.token,
-  });
+  const FederationRegisterResponse({this.token});
 
   factory FederationRegisterResponse.fromJson(Map<String, dynamic> json) =>
       _$FederationRegisterResponseFromJson(json);

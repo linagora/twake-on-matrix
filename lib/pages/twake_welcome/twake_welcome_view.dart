@@ -33,8 +33,9 @@ class TwakeWelcomeView extends StatelessWidget {
       highlightColor: Colors.transparent,
       overlayColor: WidgetStateProperty.all(Colors.transparent),
       signInTitle: AppConfig.isSaasPlatForm ? L10n.of(context)!.signIn : null,
-      createTwakeIdTitle:
-          AppConfig.isSaasPlatForm ? L10n.of(context)!.createTwakeId : null,
+      createTwakeIdTitle: AppConfig.isSaasPlatForm
+          ? L10n.of(context)!.createTwakeId
+          : null,
       useCompanyServerTitle: L10n.of(context)!.useYourCompanyServer,
       description: L10n.of(context)!.descriptionTwakeId,
       onUseCompanyServerOnTap: controller.goToHomeserverPicker,
@@ -42,8 +43,9 @@ class TwakeWelcomeView extends StatelessWidget {
       privacyPolicy: L10n.of(context)!.privacyPolicy,
       descriptionPrivacyPolicy: L10n.of(context)!.byContinuingYourAgreeingToOur,
       onPrivacyPolicyOnTap: controller.onClickPrivacyPolicy,
-      onCreateTwakeIdOnTap:
-          AppConfig.isSaasPlatForm ? controller.onClickCreateTwakeId : null,
+      onCreateTwakeIdOnTap: AppConfig.isSaasPlatForm
+          ? controller.onClickCreateTwakeId
+          : null,
       logo: SvgPicture.asset(
         ImagePaths.logoTwakeWelcome,
         width: TwakeWelcomeViewStyle.logoWidth,

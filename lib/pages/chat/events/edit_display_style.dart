@@ -7,14 +7,9 @@ class EditDisplayStyle {
     right: 12,
   );
 
-  static const EdgeInsets iconEditPadding = EdgeInsets.only(
-    right: 16.0,
-  );
+  static const EdgeInsets iconEditPadding = EdgeInsets.only(right: 16.0);
 
-  static const EdgeInsets iconClosePadding = EdgeInsets.only(
-    top: 8,
-    left: 8.0,
-  );
+  static const EdgeInsets iconClosePadding = EdgeInsets.only(top: 8, left: 8.0);
 
   static const double replyContainerHeight = 60;
 }

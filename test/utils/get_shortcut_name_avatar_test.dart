@@ -20,10 +20,11 @@ void main() {
       });
 
       test(
-          'should return the first non-ASCII character if input has non-ASCII characters',
-          () {
-        expect('Æblegrød'.getShortcutNameForAvatar(), 'Æ');
-      });
+        'should return the first non-ASCII character if input has non-ASCII characters',
+        () {
+          expect('Æblegrød'.getShortcutNameForAvatar(), 'Æ');
+        },
+      );
 
       test('should return the input character in upper case', () {
         expect('j'.getShortcutNameForAvatar(), 'J');
@@ -32,45 +33,51 @@ void main() {
       });
 
       test(
-          'should ignore leading/trailing spaces and return "@" if there are no words',
-          () {
-        expect('   '.getShortcutNameForAvatar(), '@');
-        expect('\t\t\t'.getShortcutNameForAvatar(), '@');
-        expect('  \t\n   \r '.getShortcutNameForAvatar(), '@');
-      });
+        'should ignore leading/trailing spaces and return "@" if there are no words',
+        () {
+          expect('   '.getShortcutNameForAvatar(), '@');
+          expect('\t\t\t'.getShortcutNameForAvatar(), '@');
+          expect('  \t\n   \r '.getShortcutNameForAvatar(), '@');
+        },
+      );
     });
 
     // Group 2: Returns 2 characters
     group('when input has multiple words', () {
-      test('should return the first characters of the first and last words',
-          () {
-        expect('John Doe'.getShortcutNameForAvatar(), 'JD');
-        expect('Apple Pie'.getShortcutNameForAvatar(), 'AP');
-        expect('Foo Bar Baz'.getShortcutNameForAvatar(), 'FB');
-      });
+      test(
+        'should return the first characters of the first and last words',
+        () {
+          expect('John Doe'.getShortcutNameForAvatar(), 'JD');
+          expect('Apple Pie'.getShortcutNameForAvatar(), 'AP');
+          expect('Foo Bar Baz'.getShortcutNameForAvatar(), 'FB');
+        },
+      );
 
       test(
-          'should return the first characters of the first and last words in upper case',
-          () {
-        expect('john doe'.getShortcutNameForAvatar(), 'JD');
-        expect('apple pie'.getShortcutNameForAvatar(), 'AP');
-        expect('foo bar baz'.getShortcutNameForAvatar(), 'FB');
-      });
+        'should return the first characters of the first and last words in upper case',
+        () {
+          expect('john doe'.getShortcutNameForAvatar(), 'JD');
+          expect('apple pie'.getShortcutNameForAvatar(), 'AP');
+          expect('foo bar baz'.getShortcutNameForAvatar(), 'FB');
+        },
+      );
 
       test(
-          'should return the first characters of the first and second words in upper case',
-          () {
-        expect('Đỗ Quang Khải'.getShortcutNameForAvatar(), 'ĐQ');
-        expect('John Paul Jones'.getShortcutNameForAvatar(), 'JP');
-      });
+        'should return the first characters of the first and second words in upper case',
+        () {
+          expect('Đỗ Quang Khải'.getShortcutNameForAvatar(), 'ĐQ');
+          expect('John Paul Jones'.getShortcutNameForAvatar(), 'JP');
+        },
+      );
 
       test(
-          'should ignore leading/trailing spaces and return the first characters of the first and last words',
-          () {
-        expect('  John Doe  '.getShortcutNameForAvatar(), 'JD');
-        expect('\tApple Pie\t'.getShortcutNameForAvatar(), 'AP');
-        expect(' Foo  Bar  Baz '.getShortcutNameForAvatar(), 'FB');
-      });
+        'should ignore leading/trailing spaces and return the first characters of the first and last words',
+        () {
+          expect('  John Doe  '.getShortcutNameForAvatar(), 'JD');
+          expect('\tApple Pie\t'.getShortcutNameForAvatar(), 'AP');
+          expect(' Foo  Bar  Baz '.getShortcutNameForAvatar(), 'FB');
+        },
+      );
 
       test('should handle special characters', () {
         expect('John D. Rockefeller'.getShortcutNameForAvatar(), 'JD');

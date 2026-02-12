@@ -21,19 +21,14 @@ class DownloadingFileState extends DownloadFileState {
 
   final int total;
 
-  const DownloadingFileState({
-    required this.receive,
-    required this.total,
-  });
+  const DownloadingFileState({required this.receive, required this.total});
 
   @override
   List<Object?> get props => [receive, total];
 }
 
 class DownloadNativeFileSuccessState extends DownloadFileState {
-  const DownloadNativeFileSuccessState({
-    required this.filePath,
-  });
+  const DownloadNativeFileSuccessState({required this.filePath});
 
   final String filePath;
 
@@ -42,9 +37,7 @@ class DownloadNativeFileSuccessState extends DownloadFileState {
 }
 
 class DownloadMatrixFileSuccessState extends DownloadFileState {
-  const DownloadMatrixFileSuccessState({
-    required this.matrixFile,
-  });
+  const DownloadMatrixFileSuccessState({required this.matrixFile});
 
   final MatrixFile matrixFile;
 
@@ -62,9 +55,7 @@ class DecryptingFileState extends DownloadFileState {
 class DownloadFileFailureState extends Failure {
   final dynamic exception;
 
-  const DownloadFileFailureState({
-    required this.exception,
-  });
+  const DownloadFileFailureState({required this.exception});
 
   @override
   List<Object?> get props => [exception];

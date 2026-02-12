@@ -69,8 +69,9 @@ class ChatListRobot extends HomeRobot {
   }
 
   TwakeListItemRobot getChatGroupByTitle(String title) {
-    final finder = $(SlidableChatListItem)
-        .containing($(ChatListItemTitle).containing($(title)));
+    final finder = $(
+      SlidableChatListItem,
+    ).containing($(ChatListItemTitle).containing($(title)));
     return TwakeListItemRobot($, finder);
   }
 

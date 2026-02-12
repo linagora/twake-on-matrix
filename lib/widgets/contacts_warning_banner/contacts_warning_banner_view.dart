@@ -32,9 +32,7 @@ class ContactsWarningBannerView extends StatelessWidget {
             decoration: BoxDecoration(
               color: Theme.of(context).colorScheme.surface,
               borderRadius: const BorderRadius.all(
-                Radius.circular(
-                  ContactsWarningBannerStyle.borderWarningBanner,
-                ),
+                Radius.circular(ContactsWarningBannerStyle.borderWarningBanner),
               ),
             ),
             child: Column(
@@ -44,8 +42,8 @@ class ContactsWarningBannerView extends StatelessWidget {
                   child: Text(
                     L10n.of(context)!.explainPermissionToAccessContacts,
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: Theme.of(context).colorScheme.onSurface,
-                        ),
+                      color: Theme.of(context).colorScheme.onSurface,
+                    ),
                   ),
                 ),
                 Row(
@@ -58,10 +56,10 @@ class ContactsWarningBannerView extends StatelessWidget {
                         message: L10n.of(context)!.notNow,
                         borderHover: ContactsWarningBannerStyle
                             .borderHoverButtonWaningBanner,
-                        styleMessage:
-                            Theme.of(context).textTheme.labelLarge?.copyWith(
-                                  color: Theme.of(context).colorScheme.primary,
-                                ),
+                        styleMessage: Theme.of(context).textTheme.labelLarge
+                            ?.copyWith(
+                              color: Theme.of(context).colorScheme.primary,
+                            ),
                         margin: ContactsWarningBannerStyle
                             .marginButtonWarningBanner,
                       ),
@@ -71,10 +69,10 @@ class ContactsWarningBannerView extends StatelessWidget {
                       borderHover: ContactsWarningBannerStyle
                           .borderHoverButtonWaningBanner,
                       onTap: goToSettingsForPermissionActions,
-                      styleMessage:
-                          Theme.of(context).textTheme.labelLarge?.copyWith(
-                                color: Theme.of(context).colorScheme.onPrimary,
-                              ),
+                      styleMessage: Theme.of(context).textTheme.labelLarge
+                          ?.copyWith(
+                            color: Theme.of(context).colorScheme.onPrimary,
+                          ),
                       buttonDecoration: BoxDecoration(
                         color: Theme.of(context).colorScheme.primary,
                         borderRadius: BorderRadius.circular(100),

@@ -6,10 +6,14 @@ import '../../robots/search/search_view_robot.dart';
 import '../../scenarios/chat_scenario.dart';
 
 const defaultTime = Duration(seconds: 60);
-const searchPhrase =
-    String.fromEnvironment('SearchByTitle', defaultValue: 'My Default Group');
-const forwardReceiver =
-    String.fromEnvironment('Receiver', defaultValue: 'Receiver Group');
+const searchPhrase = String.fromEnvironment(
+  'SearchByTitle',
+  defaultValue: 'My Default Group',
+);
+const forwardReceiver = String.fromEnvironment(
+  'Receiver',
+  defaultValue: 'Receiver Group',
+);
 
 int uniqueId() => DateTime.now().microsecondsSinceEpoch;
 
@@ -31,9 +35,7 @@ void main() {
 
       await ChatScenario($).openGroupChatInfo();
 
-      await GroupInformationRobot($).openMemberDetail(
-        matrixID: matrixID,
-      );
+      await GroupInformationRobot($).openMemberDetail(matrixID: matrixID);
 
       // Get data from UI
       final displayName = await ChatProfileInfoRobot($).getDisplayName();
@@ -42,21 +44,13 @@ void main() {
 
       final phoneNumber = await ChatProfileInfoRobot($).getPhoneNumber();
 
-      await ChatProfileInfoRobot($).verifyDisplayName(
-        displayName: displayName,
-      );
+      await ChatProfileInfoRobot($).verifyDisplayName(displayName: displayName);
 
-      await ChatProfileInfoRobot($).verifyDisplayMatrixId(
-        matrixId: matrixID,
-      );
+      await ChatProfileInfoRobot($).verifyDisplayMatrixId(matrixId: matrixID);
 
-      await ChatProfileInfoRobot($).verifyEmail(
-        email: email,
-      );
+      await ChatProfileInfoRobot($).verifyEmail(email: email);
 
-      await ChatProfileInfoRobot($).verifyPhoneNumber(
-        phoneNumber: phoneNumber,
-      );
+      await ChatProfileInfoRobot($).verifyPhoneNumber(phoneNumber: phoneNumber);
     },
   );
 }

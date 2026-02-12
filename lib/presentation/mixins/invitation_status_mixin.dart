@@ -23,19 +23,19 @@ mixin InvitationStatusMixin {
   final HiveGetInvitationStatusInteractor _hiveGetInvitationStatusInteractor =
       getIt.get<HiveGetInvitationStatusInteractor>();
 
-  final GetInvitationStatusInteractor _getInvitationStatusInteractor =
-      getIt.get<GetInvitationStatusInteractor>();
+  final GetInvitationStatusInteractor _getInvitationStatusInteractor = getIt
+      .get<GetInvitationStatusInteractor>();
 
-  final PostAddressBookInteractor _postAddressBookInteractor =
-      getIt.get<PostAddressBookInteractor>();
+  final PostAddressBookInteractor _postAddressBookInteractor = getIt
+      .get<PostAddressBookInteractor>();
 
   final HiveDeleteInvitationStatusInteractor
-      _hiveDeleteInvitationStatusInteractor =
-      getIt.get<HiveDeleteInvitationStatusInteractor>();
+  _hiveDeleteInvitationStatusInteractor = getIt
+      .get<HiveDeleteInvitationStatusInteractor>();
 
   final DeleteThirdPartyContactBoxInteractor
-      _deleteThirdPartyContactBoxInteractor =
-      getIt.get<DeleteThirdPartyContactBoxInteractor>();
+  _deleteThirdPartyContactBoxInteractor = getIt
+      .get<DeleteThirdPartyContactBoxInteractor>();
 
   void getInvitationStatus({
     required String userId,
@@ -51,27 +51,21 @@ mixin InvitationStatusMixin {
       return;
     }
     _hiveGetInvitationStatusInteractor
-        .execute(
-          userId: userId,
-          contactId: contactId,
-        )
+        .execute(userId: userId, contactId: contactId)
         .listen(
-          (state) => state.fold(
-            (failure) {},
-            (success) {
-              if (success is HiveGetInvitationStatusSuccessState) {
-                Logs().d(
-                  'InvitationStatusMixin::getInvitationStatus - ${success.contactId} - ${success.invitationId}',
-                );
-                getInvitationNetworkStatus(
-                  userId: userId,
-                  contactId: success.contactId,
-                  invitationId: success.invitationId,
-                  contact: contact,
-                );
-              }
-            },
-          ),
+          (state) => state.fold((failure) {}, (success) {
+            if (success is HiveGetInvitationStatusSuccessState) {
+              Logs().d(
+                'InvitationStatusMixin::getInvitationStatus - ${success.contactId} - ${success.invitationId}',
+              );
+              getInvitationNetworkStatus(
+                userId: userId,
+                contactId: success.contactId,
+                invitationId: success.invitationId,
+                contact: contact,
+              );
+            }
+          }),
         );
   }
 
@@ -83,21 +77,19 @@ mixin InvitationStatusMixin {
   }) {
     _getInvitationStatusInteractor
         .execute(
-      userId: userId,
-      contactId: contactId,
-      invitationId: invitationId,
-    )
-        .listen(
-      (state) {
-        getInvitationStatusNotifier.value = state;
-        _handleInvitationNetworkStatusState(
-          state: state,
           userId: userId,
           contactId: contactId,
-          contact: contact,
-        );
-      },
-    );
+          invitationId: invitationId,
+        )
+        .listen((state) {
+          getInvitationStatusNotifier.value = state;
+          _handleInvitationNetworkStatusState(
+            state: state,
+            userId: userId,
+            contactId: contactId,
+            contact: contact,
+          );
+        });
   }
 
   void _handleInvitationNetworkStatusState({
@@ -112,10 +104,7 @@ mixin InvitationStatusMixin {
             failure.exception is DioException) {
           final dioException = failure.exception as DioException;
           if (dioException.response?.statusCode == 404) {
-            _onHiveDeleteInvitationStatus(
-              userId: userId,
-              contactId: contactId,
-            );
+            _onHiveDeleteInvitationStatus(userId: userId, contactId: contactId);
           }
         }
       },
@@ -135,7 +124,9 @@ mixin InvitationStatusMixin {
           }
 
           if (success
-                  .invitationStatusResponse.invitation?.expiredTimeToInvite ==
+                  .invitationStatusResponse
+                  .invitation
+                  ?.expiredTimeToInvite ==
               true) {
             Logs().d(
               'InvitationStatusMixin::getInvitationNetworkStatus - contactID ${success.invitationStatusResponse.invitation?.id} expired',
@@ -152,10 +143,7 @@ mixin InvitationStatusMixin {
     required String contactId,
   }) {
     _hiveDeleteInvitationStatusInteractor
-        .execute(
-          userId: userId,
-          contactId: contactId,
-        )
+        .execute(userId: userId, contactId: contactId)
         .listen(
           (state) => state.fold(
             (failure) => Logs().e(
@@ -174,43 +162,38 @@ mixin InvitationStatusMixin {
     required String userId,
     required String contactId,
   }) {
-    _postAddressBookInteractor.execute(
-      addressBooks: [
-        AddressBook(
-          mxid: matrixId,
-          displayName: contact.displayName,
-        ),
-      ],
-    ).listen(
-      (state) {
-        Logs().i('InvitationStatusMixin::_postAddressBook', state);
+    _postAddressBookInteractor
+        .execute(
+          addressBooks: [
+            AddressBook(mxid: matrixId, displayName: contact.displayName),
+          ],
+        )
+        .listen((state) {
+          Logs().i('InvitationStatusMixin::_postAddressBook', state);
 
-        state.fold(
-          (failure) {
-            Logs().e('InvitationStatusMixin::_postAddressBook', failure);
-          },
-          (success) {
-            Logs().d('ContactsManager::_postAddressBook', success);
-            _onDeleteThirdPartyContactBox();
-          },
-        );
-      },
-    );
+          state.fold(
+            (failure) {
+              Logs().e('InvitationStatusMixin::_postAddressBook', failure);
+            },
+            (success) {
+              Logs().d('ContactsManager::_postAddressBook', success);
+              _onDeleteThirdPartyContactBox();
+            },
+          );
+        });
   }
 
   void _onDeleteThirdPartyContactBox() {
-    _deleteThirdPartyContactBoxInteractor.execute().listen(
-      (state) {
-        state.fold(
-          (failure) => Logs().e(
-            'InvitationStatusMixin::_onDeleteThirdPartyContactBox $failure',
-          ),
-          (success) => Logs().d(
-            'InvitationStatusMixin::_onDeleteThirdPartyContactBox $success',
-          ),
-        );
-      },
-    );
+    _deleteThirdPartyContactBoxInteractor.execute().listen((state) {
+      state.fold(
+        (failure) => Logs().e(
+          'InvitationStatusMixin::_onDeleteThirdPartyContactBox $failure',
+        ),
+        (success) => Logs().d(
+          'InvitationStatusMixin::_onDeleteThirdPartyContactBox $success',
+        ),
+      );
+    });
   }
 
   void disposeInvitationStatus() {

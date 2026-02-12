@@ -52,8 +52,8 @@ class BottomMenuWeb extends StatelessWidget {
                   Text(
                     L10n.of(context)!.messageSelected(selectedEvents.length),
                     style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                          color: Theme.of(context).colorScheme.onSurfaceVariant,
-                        ),
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
                   ),
                   const Spacer(),
                   TextButton.icon(
@@ -62,8 +62,8 @@ class BottomMenuWeb extends StatelessWidget {
                     label: Text(
                       L10n.of(context)!.unpin,
                       style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                            color: Theme.of(context).colorScheme.primary,
-                          ),
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
                     ),
                   ),
                 ],

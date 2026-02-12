@@ -41,10 +41,9 @@ class PersonalQrController extends State<PersonalQr> {
 
       tempFile = await _createTempFile(imageBytes);
 
-      final shareResult = await Share.shareXFiles(
-        [XFile(tempFile.path)],
-        text: l10n.shareQrCode,
-      );
+      final shareResult = await Share.shareXFiles([
+        XFile(tempFile.path),
+      ], text: l10n.shareQrCode);
 
       // Clean up immediately if share was dismissed/completed
       // For platforms that don't return result, fall back to delayed cleanup
@@ -82,9 +81,9 @@ class PersonalQrController extends State<PersonalQr> {
               icon: const Icon(Icons.photo),
               permission: Permission.photos,
               explainTextRequestPermission: Text(
-                L10n.of(context)!.explainPermissionToGallery(
-                  AppConfig.applicationName,
-                ),
+                L10n.of(
+                  context,
+                )!.explainPermissionToGallery(AppConfig.applicationName),
                 style: Theme.of(context).textTheme.bodyMedium,
               ),
               onAcceptButton: () =>
@@ -158,8 +157,8 @@ class PersonalQrController extends State<PersonalQr> {
   /// Requests storage permission for Android
   Future<bool> _requestAndroidStoragePermission() async {
     final permissionHandlerService = PermissionHandlerService();
-    final androidVersion =
-        await permissionHandlerService.getCurrentAndroidVersion();
+    final androidVersion = await permissionHandlerService
+        .getCurrentAndroidVersion();
     if (androidVersion >= 33) {
       // Android 13+: use gal's built-in permission handling or request photos permission
       return await Gal.requestAccess(toAlbum: true);
@@ -177,16 +176,13 @@ class PersonalQrController extends State<PersonalQr> {
   /// Requests photo permission for iOS
   Future<bool> _requestIosPhotoPermission() async {
     final permissionHandlerService = PermissionHandlerService();
-    final permissionStatus =
-        await permissionHandlerService.requestPhotoAddOnlyPermissionIOS();
+    final permissionStatus = await permissionHandlerService
+        .requestPhotoAddOnlyPermissionIOS();
     return permissionStatus.isGranted;
   }
 
   /// Captures the QR code widget as a PNG image
-  Future<Uint8List?> _captureQrImage(
-    BuildContext context,
-    L10n l10n,
-  ) async {
+  Future<Uint8List?> _captureQrImage(BuildContext context, L10n l10n) async {
     final boundary =
         qrKey.currentContext?.findRenderObject() as RenderRepaintBoundary?;
     if (boundary == null) {

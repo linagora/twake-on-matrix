@@ -11,7 +11,7 @@ class SameTypeEventsBuilder extends StatelessWidget {
 
   /// The builder must return a sliver.
   final Widget Function(BuildContext, Either<Failure, Success>, Widget?)
-      builder;
+  builder;
 
   const SameTypeEventsBuilder({
     super.key,
@@ -28,8 +28,9 @@ class SameTypeEventsBuilder extends StatelessWidget {
         ValueListenableBuilder(
           valueListenable: controller.refreshing,
           builder: (context, refreshing, child) => SliverToBoxAdapter(
-            child:
-                refreshing ? const CenterLoadingIndicator() : const SizedBox(),
+            child: refreshing
+                ? const CenterLoadingIndicator()
+                : const SizedBox(),
           ),
         ),
         ValueListenableBuilder(
@@ -39,8 +40,9 @@ class SameTypeEventsBuilder extends StatelessWidget {
         ValueListenableBuilder(
           valueListenable: controller.loadingMore,
           builder: (context, loadingMore, child) => SliverToBoxAdapter(
-            child:
-                loadingMore ? const CenterLoadingIndicator() : const SizedBox(),
+            child: loadingMore
+                ? const CenterLoadingIndicator()
+                : const SizedBox(),
           ),
         ),
       ],

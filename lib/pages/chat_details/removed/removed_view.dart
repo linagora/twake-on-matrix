@@ -15,10 +15,7 @@ import 'package:matrix/matrix.dart';
 class RemovedView extends StatelessWidget {
   final RemovedController controller;
 
-  const RemovedView({
-    super.key,
-    required this.controller,
-  });
+  const RemovedView({super.key, required this.controller});
 
   @override
   Widget build(BuildContext context) {
@@ -51,26 +48,29 @@ class RemovedView extends StatelessWidget {
                 focusNode: controller.inputFocus,
                 textInputAction: TextInputAction.search,
                 autofocus: true,
-                decoration: ChatListHeaderStyle.searchInputDecoration(
-                  context,
-                  prefixIconColor: LinagoraSysColors.material().tertiary,
-                ).copyWith(
-                  hintStyle: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        color: LinagoraSysColors.material().tertiary,
+                decoration:
+                    ChatListHeaderStyle.searchInputDecoration(
+                      context,
+                      prefixIconColor: LinagoraSysColors.material().tertiary,
+                    ).copyWith(
+                      hintStyle: Theme.of(context).textTheme.titleMedium
+                          ?.copyWith(
+                            color: LinagoraSysColors.material().tertiary,
+                          ),
+                      hintText: L10n.of(context)!.enterAnEmailAddress,
+                      suffixIcon: ValueListenableBuilder(
+                        valueListenable: controller.textEditingController,
+                        builder: (context, value, child) =>
+                            value.text.isNotEmpty
+                            ? IconButton(
+                                onPressed: () {
+                                  controller.textEditingController.clear();
+                                },
+                                icon: const Icon(Icons.close),
+                              )
+                            : const SizedBox.shrink(),
                       ),
-                  hintText: L10n.of(context)!.enterAnEmailAddress,
-                  suffixIcon: ValueListenableBuilder(
-                    valueListenable: controller.textEditingController,
-                    builder: (context, value, child) => value.text.isNotEmpty
-                        ? IconButton(
-                            onPressed: () {
-                              controller.textEditingController.clear();
-                            },
-                            icon: const Icon(Icons.close),
-                          )
-                        : const SizedBox.shrink(),
-                  ),
-                ),
+                    ),
               ),
             ),
             Container(
@@ -84,12 +84,12 @@ class RemovedView extends StatelessWidget {
                 valueListenable: controller.searchUserResults,
                 builder: (context, _, __) {
                   return Text(
-                    L10n.of(context)!.bannedUsersCount(
-                      controller.removedMember.length,
-                    ),
+                    L10n.of(
+                      context,
+                    )!.bannedUsersCount(controller.removedMember.length),
                     style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                          color: LinagoraRefColors.material().neutral[40],
-                        ),
+                      color: LinagoraRefColors.material().neutral[40],
+                    ),
                   );
                 },
               ),
@@ -113,9 +113,7 @@ class RemovedView extends StatelessWidget {
         return searchResults.fold(
           (failure) {
             if (failure is RemovedSearchEmptyState) {
-              return const Center(
-                child: EmptySearchWidget(),
-              );
+              return const Center(child: EmptySearchWidget());
             }
             return const SizedBox.shrink();
           },
@@ -136,10 +134,7 @@ class RemovedView extends StatelessWidget {
                         },
                       );
                     },
-                    child: _itemMemberBuilder(
-                      context: context,
-                      member: member,
-                    ),
+                    child: _itemMemberBuilder(context: context, member: member),
                   );
                 },
               );
@@ -161,9 +156,7 @@ class RemovedView extends StatelessWidget {
         return searchResults.fold(
           (failure) {
             if (failure is RemovedSearchEmptyState) {
-              return const Center(
-                child: EmptySearchWidget(),
-              );
+              return const Center(child: EmptySearchWidget());
             }
             return const SizedBox.shrink();
           },
@@ -173,17 +166,12 @@ class RemovedView extends StatelessWidget {
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
                 itemCount: success.removedMember.length,
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 12.0,
-                ),
+                padding: const EdgeInsets.symmetric(horizontal: 12.0),
                 itemBuilder: (context, index) {
                   final member = success.removedMember[index];
                   return TwakeInkWell(
                     onTap: () {},
-                    child: _itemMemberBuilder(
-                      context: context,
-                      member: member,
-                    ),
+                    child: _itemMemberBuilder(context: context, member: member),
                   );
                 },
               );
@@ -212,10 +200,7 @@ class RemovedView extends StatelessWidget {
         padding: const EdgeInsets.all(8),
         child: Row(
           children: [
-            Avatar(
-              mxContent: member.avatarUrl,
-              name: member.calcDisplayname(),
-            ),
+            Avatar(mxContent: member.avatarUrl, name: member.calcDisplayname()),
             const SizedBox(width: 8.0),
             Expanded(
               child: Column(
@@ -226,8 +211,7 @@ class RemovedView extends StatelessWidget {
                       Expanded(
                         child: Text(
                           member.calcDisplayname(),
-                          style: LinagoraTextStyle.material()
-                              .bodyMedium2
+                          style: LinagoraTextStyle.material().bodyMedium2
                               .copyWith(
                                 color: LinagoraSysColors.material().onSurface,
                               ),
@@ -252,9 +236,7 @@ class RemovedView extends StatelessWidget {
                               const SizedBox(width: 8.0),
                               Text(
                                 L10n.of(context)!.unban,
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .labelLarge
+                                style: Theme.of(context).textTheme.labelLarge
                                     ?.copyWith(
                                       color:
                                           LinagoraSysColors.material().primary,
@@ -269,8 +251,8 @@ class RemovedView extends StatelessWidget {
                   Text(
                     member.id,
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: LinagoraRefColors.material().tertiary[30],
-                        ),
+                      color: LinagoraRefColors.material().tertiary[30],
+                    ),
                     overflow: TextOverflow.ellipsis,
                     maxLines: 1,
                   ),

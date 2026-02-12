@@ -59,7 +59,8 @@ class ContactsSelectionView extends StatelessWidget {
           Expanded(
             child: ValueListenableBuilder<bool>(
               valueListenable: controller
-                  .selectedContactsMapNotifier.haveSelectedContactsNotifier,
+                  .selectedContactsMapNotifier
+                  .haveSelectedContactsNotifier,
               builder: (context, haveSelectedContact, child) {
                 return child!;
               },
@@ -92,7 +93,8 @@ class ContactsSelectionView extends StatelessWidget {
       floatingActionButton: controller.isFullScreen
           ? ValueListenableBuilder<bool>(
               valueListenable: controller
-                  .selectedContactsMapNotifier.haveSelectedContactsNotifier,
+                  .selectedContactsMapNotifier
+                  .haveSelectedContactsNotifier,
               builder: (context, haveSelectedContacts, child) {
                 if (!haveSelectedContacts) {
                   return const SizedBox.shrink();
@@ -114,17 +116,12 @@ class ContactsSelectionView extends StatelessWidget {
     return ValueListenableBuilder(
       valueListenable: controller.presentationContactNotifier,
       builder: (context, state, child) {
-        return state.fold(
-          (failure) => child!,
-          (success) {
-            if (success is ContactsLoading) {
-              return const SliverToBoxAdapter(
-                child: SizedBox(),
-              );
-            }
-            return child!;
-          },
-        );
+        return state.fold((failure) => child!, (success) {
+          if (success is ContactsLoading) {
+            return const SliverToBoxAdapter(child: SizedBox());
+          }
+          return child!;
+        });
       },
       child: ValueListenableBuilder(
         valueListenable: controller.presentationRecentContactNotifier,
@@ -152,9 +149,7 @@ class ContactsSelectionView extends StatelessWidget {
             },
           );
         },
-        child: const SliverToBoxAdapter(
-          child: SizedBox(),
-        ),
+        child: const SliverToBoxAdapter(child: SizedBox()),
       ),
     );
   }
@@ -181,9 +176,7 @@ class ContactsSelectionView extends StatelessWidget {
                   failure is GetPresentationContactsEmpty) {
                 final keyword = controller.textEditingController.text;
                 if (keyword.isEmpty) {
-                  return const SliverToBoxAdapter(
-                    child: EmptyContactBody(),
-                  );
+                  return const SliverToBoxAdapter(child: EmptyContactBody());
                 } else {
                   return SliverToBoxAdapter(
                     child: Padding(
@@ -231,15 +224,15 @@ class ContactsSelectionView extends StatelessWidget {
           },
           (success) {
             if (success is ContactsLoading) {
-              return const SliverToBoxAdapter(
-                child: LoadingContactWidget(),
-              );
+              return const SliverToBoxAdapter(child: LoadingContactWidget());
             }
 
             if (success is PresentationExternalContactSuccess &&
                 recentContact) {
               if (controller
-                  .presentationRecentContactNotifier.value.isNotEmpty) {
+                  .presentationRecentContactNotifier
+                  .value
+                  .isNotEmpty) {
                 return child!;
               }
               if (!PlatformInfos.isWeb) {
@@ -302,9 +295,7 @@ class ContactsSelectionView extends StatelessWidget {
           },
         );
       },
-      child: const SliverToBoxAdapter(
-        child: SizedBox(),
-      ),
+      child: const SliverToBoxAdapter(child: SizedBox()),
     );
   }
 
@@ -321,53 +312,50 @@ class ContactsSelectionView extends StatelessWidget {
                 controller.presentationRecentContactNotifier.value;
             if (failure is GetPresentationContactsFailure) {
               if (presentationRecentContact.isEmpty) {
-                return controller.presentationContactNotifier.value.fold(
-                  (failure) {
-                    if (failure is GetPresentationContactsFailure ||
-                        failure is GetPresentationContactsEmpty) {
-                      return SliverToBoxAdapter(
-                        child: Padding(
-                          padding: ContactsSelectionListStyle.notFoundPadding,
-                          child: NoContactsFound(
-                            keyword:
-                                controller.textEditingController.text.isEmpty
-                                    ? null
-                                    : controller.textEditingController.text,
-                          ),
+                return controller.presentationContactNotifier.value.fold((
+                  failure,
+                ) {
+                  if (failure is GetPresentationContactsFailure ||
+                      failure is GetPresentationContactsEmpty) {
+                    return SliverToBoxAdapter(
+                      child: Padding(
+                        padding: ContactsSelectionListStyle.notFoundPadding,
+                        child: NoContactsFound(
+                          keyword: controller.textEditingController.text.isEmpty
+                              ? null
+                              : controller.textEditingController.text,
                         ),
-                      );
-                    }
-                    return child!;
-                  },
-                  (_) => child!,
-                );
+                      ),
+                    );
+                  }
+                  return child!;
+                }, (_) => child!);
               }
             }
             if (failure is GetPresentationContactsEmpty) {
               if (presentationRecentContact.isEmpty) {
-                return controller.presentationContactNotifier.value.fold(
-                  (failure) {
-                    if (failure is GetPresentationContactsFailure ||
-                        failure is GetPresentationContactsEmpty) {
-                      if (controller.textEditingController.text.isEmpty) {
-                        return const SliverToBoxAdapter(
-                          child: EmptyContactBody(),
-                        );
-                      } else {
-                        return SliverToBoxAdapter(
-                          child: Padding(
-                            padding: ContactsSelectionListStyle.notFoundPadding,
-                            child: NoContactsFound(
-                              keyword: controller.textEditingController.text,
-                            ),
+                return controller.presentationContactNotifier.value.fold((
+                  failure,
+                ) {
+                  if (failure is GetPresentationContactsFailure ||
+                      failure is GetPresentationContactsEmpty) {
+                    if (controller.textEditingController.text.isEmpty) {
+                      return const SliverToBoxAdapter(
+                        child: EmptyContactBody(),
+                      );
+                    } else {
+                      return SliverToBoxAdapter(
+                        child: Padding(
+                          padding: ContactsSelectionListStyle.notFoundPadding,
+                          child: NoContactsFound(
+                            keyword: controller.textEditingController.text,
                           ),
-                        );
-                      }
+                        ),
+                      );
                     }
-                    return child!;
-                  },
-                  (_) => child!,
-                );
+                  }
+                  return child!;
+                }, (_) => child!);
               }
             }
             return child!;
@@ -406,9 +394,7 @@ class ContactsSelectionView extends StatelessWidget {
           },
         );
       },
-      child: const SliverToBoxAdapter(
-        child: SizedBox(),
-      ),
+      child: const SliverToBoxAdapter(child: SizedBox()),
     );
   }
 
@@ -429,13 +415,14 @@ class ContactsSelectionView extends StatelessWidget {
               ),
             ),
             styleMessage: Theme.of(context).textTheme.labelLarge?.copyWith(
-                  color: LinagoraSysColors.material().primary,
-                ),
+              color: LinagoraSysColors.material().primary,
+            ),
           ),
           const SizedBox(width: 8.0),
           ValueListenableBuilder<bool>(
             valueListenable: controller
-                .selectedContactsMapNotifier.haveSelectedContactsNotifier,
+                .selectedContactsMapNotifier
+                .haveSelectedContactsNotifier,
             builder: (context, haveSelectedContacts, _) {
               return TwakeTextButton(
                 onTap: () =>
@@ -454,12 +441,12 @@ class ContactsSelectionView extends StatelessWidget {
                   ),
                 ),
                 styleMessage: Theme.of(context).textTheme.labelLarge?.copyWith(
-                      color: haveSelectedContacts
-                          ? LinagoraSysColors.material().onPrimary
-                          : LinagoraSysColors.material()
-                              .inverseSurface
-                              .withOpacity(0.6),
-                    ),
+                  color: haveSelectedContacts
+                      ? LinagoraSysColors.material().onPrimary
+                      : LinagoraSysColors.material().inverseSurface.withOpacity(
+                          0.6,
+                        ),
+                ),
               );
             },
           ),

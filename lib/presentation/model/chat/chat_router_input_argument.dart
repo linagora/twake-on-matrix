@@ -5,19 +5,10 @@ class ChatRouterInputArgument with EquatableMixin {
 
   final Object? data;
 
-  ChatRouterInputArgument({
-    required this.type,
-    this.data,
-  });
+  ChatRouterInputArgument({required this.type, this.data});
 
   @override
-  List<Object?> get props => [
-        type,
-        data,
-      ];
+  List<Object?> get props => [type, data];
 }
 
-enum ChatRouterInputArgumentType {
-  draft,
-  share,
-}
+enum ChatRouterInputArgumentType { draft, share }

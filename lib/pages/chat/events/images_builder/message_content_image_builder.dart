@@ -59,8 +59,9 @@ class _MessageImageBuilderState extends State<MessageImageBuilder> {
       builder: (context, snapshot) {
         final matrixFile = snapshot.data;
 
-        DisplayImageInfo? displayImageInfo =
-            widget.event.getOriginalResolution()?.getDisplayImageInfo(context);
+        DisplayImageInfo? displayImageInfo = widget.event
+            .getOriginalResolution()
+            ?.getDisplayImageInfo(context);
 
         if (matrixFile != null && matrixFile.isSendingImageInMobile()) {
           final file = matrixFile as MatrixImageFile;

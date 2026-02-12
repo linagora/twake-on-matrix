@@ -20,9 +20,7 @@ class LookupContactsLoading extends Success {
 class LookupMatchContactSuccess extends Success {
   final Contact contact;
 
-  const LookupMatchContactSuccess({
-    required this.contact,
-  });
+  const LookupMatchContactSuccess({required this.contact});
 
   @override
   List<Object?> get props => [contact];
@@ -39,10 +37,7 @@ class LookupContactsFailure extends Failure {
   final String keyword;
   final dynamic exception;
 
-  const LookupContactsFailure({
-    required this.keyword,
-    required this.exception,
-  });
+  const LookupContactsFailure({required this.keyword, required this.exception});
 
   @override
   List<Object?> get props => [keyword, exception];

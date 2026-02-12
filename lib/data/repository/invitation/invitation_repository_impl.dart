@@ -7,8 +7,8 @@ import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/domain/repository/invitation/invitation_repository.dart';
 
 class InvitationRepositoryImpl implements InvitationRepository {
-  final InvitationDatasource _invitationDatasource =
-      getIt.get<InvitationDatasource>();
+  final InvitationDatasource _invitationDatasource = getIt
+      .get<InvitationDatasource>();
 
   @override
   Future<GenerateInvitationLinkResponse> generateInvitationLink({

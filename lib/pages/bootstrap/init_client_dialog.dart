@@ -15,10 +15,7 @@ import 'package:fluffychat/generated/l10n/app_localizations.dart';
 class InitClientDialog extends StatefulWidget {
   final Future Function() future;
 
-  const InitClientDialog({
-    super.key,
-    required this.future,
-  });
+  const InitClientDialog({super.key, required this.future});
 
   @override
   State<InitClientDialog> createState() => _InitClientDialogState();
@@ -30,32 +27,27 @@ class _InitClientDialogState extends State<InitClientDialog>
 
   StreamSubscription? _clientLoginStateChangedSubscription;
 
-  static const breakpointMobileDialogKey =
-      Key('BreakPointMobileInitClientDialog');
+  static const breakpointMobileDialogKey = Key(
+    'BreakPointMobileInitClientDialog',
+  );
 
-  static const breakpointWebAndDesktopDialogKey =
-      Key('BreakpointWebAndDesktopKeyInitClientDialog');
+  static const breakpointWebAndDesktopDialogKey = Key(
+    'BreakpointWebAndDesktopKeyInitClientDialog',
+  );
 
   @override
   void initState() {
     _initial();
-    _clientLoginStateChangedSubscription =
-        Matrix.of(context).onClientLoginStateChanged.stream.listen(
-              _listenClientLoginStateChanged,
-            );
-    WidgetsBinding.instance.addPostFrameCallback(
-      (_) async {
-        _startLoginSSOProgress();
-        await widget
-            .future()
-            .then(
-              (_) => _handleFunctionOnDone(),
-            )
-            .onError(
-              (error, _) => _handleFunctionOnError(error),
-            );
-      },
-    );
+    _clientLoginStateChangedSubscription = Matrix.of(
+      context,
+    ).onClientLoginStateChanged.stream.listen(_listenClientLoginStateChanged);
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      _startLoginSSOProgress();
+      await widget
+          .future()
+          .then((_) => _handleFunctionOnDone())
+          .onError((error, _) => _handleFunctionOnError(error));
+    });
 
     super.initState();
   }
@@ -117,9 +109,7 @@ class _InitClientDialogState extends State<InitClientDialog>
 
     TwakeApp.router.go(
       '/rooms',
-      extra: LoggedInBodyArgs(
-        newActiveClient: client,
-      ),
+      extra: LoggedInBodyArgs(newActiveClient: client),
     );
   }
 
@@ -130,9 +120,7 @@ class _InitClientDialogState extends State<InitClientDialog>
 
     TwakeApp.router.go(
       '/rooms',
-      extra: LoggedInOtherAccountBodyArgs(
-        newActiveClient: client,
-      ),
+      extra: LoggedInOtherAccountBodyArgs(newActiveClient: client),
     );
   }
 

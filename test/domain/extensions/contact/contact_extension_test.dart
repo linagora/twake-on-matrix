@@ -26,56 +26,52 @@ void main() {
       expect(federationContact.phoneNumbers?.first.number, '+1234567890');
     });
 
-    test('updateContactWithHashes should update contact with hash mappings',
-        () {
-      final contact = Contact(
-        id: 'contact1',
-        displayName: 'Test Contact',
-        emails: {Email(address: 'test@example.com')},
-        phoneNumbers: {PhoneNumber(number: '+1234567890')},
-      );
+    test(
+      'updateContactWithHashes should update contact with hash mappings',
+      () {
+        final contact = Contact(
+          id: 'contact1',
+          displayName: 'Test Contact',
+          emails: {Email(address: 'test@example.com')},
+          phoneNumbers: {PhoneNumber(number: '+1234567890')},
+        );
 
-      final phoneToHashMap = {
-        '+1234567890': ['phone_hash1', 'phone_hash2'],
-      };
+        final phoneToHashMap = {
+          '+1234567890': ['phone_hash1', 'phone_hash2'],
+        };
 
-      final emailToHashMap = {
-        'test@example.com': ['email_hash1', 'email_hash2'],
-      };
+        final emailToHashMap = {
+          'test@example.com': ['email_hash1', 'email_hash2'],
+        };
 
-      final updatedContact = contact.updateContactWithHashes(
-        phoneToHashMap: phoneToHashMap,
-        emailToHashMap: emailToHashMap,
-      );
+        final updatedContact = contact.updateContactWithHashes(
+          phoneToHashMap: phoneToHashMap,
+          emailToHashMap: emailToHashMap,
+        );
 
-      expect(updatedContact.id, 'contact1');
-      expect(updatedContact.displayName, 'Test Contact');
-      expect(updatedContact.emails?.length, 1);
-      expect(updatedContact.phoneNumbers?.length, 1);
+        expect(updatedContact.id, 'contact1');
+        expect(updatedContact.displayName, 'Test Contact');
+        expect(updatedContact.emails?.length, 1);
+        expect(updatedContact.phoneNumbers?.length, 1);
 
-      // Check that the hash maps were correctly assigned
-      final updatedEmail = updatedContact.emails?.first;
-      expect(updatedEmail?.thirdPartyIdToHashMap, emailToHashMap);
+        // Check that the hash maps were correctly assigned
+        final updatedEmail = updatedContact.emails?.first;
+        expect(updatedEmail?.thirdPartyIdToHashMap, emailToHashMap);
 
-      final updatedPhone = updatedContact.phoneNumbers?.first;
-      expect(updatedPhone?.thirdPartyIdToHashMap, phoneToHashMap);
-    });
+        final updatedPhone = updatedContact.phoneNumbers?.first;
+        expect(updatedPhone?.thirdPartyIdToHashMap, phoneToHashMap);
+      },
+    );
 
     test('combine should merge two contacts correctly', () {
       final contact1 = Contact(
         id: 'contact1',
         displayName: 'Contact 1',
         emails: {
-          Email(
-            address: 'test@example.com',
-            matrixId: '@user1:example.com',
-          ),
+          Email(address: 'test@example.com', matrixId: '@user1:example.com'),
         },
         phoneNumbers: {
-          PhoneNumber(
-            number: '+1234567890',
-            matrixId: '@user1:example.com',
-          ),
+          PhoneNumber(number: '+1234567890', matrixId: '@user1:example.com'),
         },
       );
 
@@ -83,17 +79,11 @@ void main() {
         id: 'contact1',
         displayName: 'Contact 2',
         emails: {
-          Email(
-            address: 'test@example.com',
-            status: ThirdPartyStatus.active,
-          ),
+          Email(address: 'test@example.com', status: ThirdPartyStatus.active),
           Email(address: 'another@example.com'),
         },
         phoneNumbers: {
-          PhoneNumber(
-            number: '+1234567890',
-            status: ThirdPartyStatus.active,
-          ),
+          PhoneNumber(number: '+1234567890', status: ThirdPartyStatus.active),
           PhoneNumber(number: '+9876543210'),
         },
       );
@@ -137,9 +127,7 @@ void main() {
         emails: {email},
       );
 
-      final mappings = {
-        'hash1': '@user:example.com',
-      };
+      final mappings = {'hash1': '@user:example.com'};
 
       final updatedEmails = contact.updateEmails(mappings);
 
@@ -149,50 +137,40 @@ void main() {
     });
 
     test(
-        'updatePhoneNumbers should update phone numbers with matrix IDs from mappings',
-        () {
-      final phoneNumber = PhoneNumber(
-        number: '+1234567890',
-        thirdPartyIdToHashMap: {
-          '+1234567890': ['hash1', 'hash2'],
-        },
-      );
+      'updatePhoneNumbers should update phone numbers with matrix IDs from mappings',
+      () {
+        final phoneNumber = PhoneNumber(
+          number: '+1234567890',
+          thirdPartyIdToHashMap: {
+            '+1234567890': ['hash1', 'hash2'],
+          },
+        );
 
-      final contact = Contact(
-        id: 'contact1',
-        displayName: 'Test Contact',
-        phoneNumbers: {phoneNumber},
-      );
+        final contact = Contact(
+          id: 'contact1',
+          displayName: 'Test Contact',
+          phoneNumbers: {phoneNumber},
+        );
 
-      final mappings = {
-        'hash1': '@user:example.com',
-      };
+        final mappings = {'hash1': '@user:example.com'};
 
-      final updatedPhoneNumbers = contact.updatePhoneNumbers(mappings);
+        final updatedPhoneNumbers = contact.updatePhoneNumbers(mappings);
 
-      expect(updatedPhoneNumbers.length, 1);
-      expect(updatedPhoneNumbers.first.number, '+1234567890');
-      expect(updatedPhoneNumbers.first.matrixId, '@user:example.com');
-    });
+        expect(updatedPhoneNumbers.length, 1);
+        expect(updatedPhoneNumbers.first.number, '+1234567890');
+        expect(updatedPhoneNumbers.first.matrixId, '@user:example.com');
+      },
+    );
 
     test('updateContact should return a new contact with updated fields', () {
-      const contact = Contact(
-        id: 'contact1',
-        displayName: 'Test Contact',
-      );
+      const contact = Contact(id: 'contact1', displayName: 'Test Contact');
 
       final updatedPhoneNumbers = {
-        PhoneNumber(
-          number: '+1234567890',
-          matrixId: '@user:example.com',
-        ),
+        PhoneNumber(number: '+1234567890', matrixId: '@user:example.com'),
       };
 
       final updatedEmails = {
-        Email(
-          address: 'test@example.com',
-          matrixId: '@user:example.com',
-        ),
+        Email(address: 'test@example.com', matrixId: '@user:example.com'),
       };
 
       final updatedContact = contact.updateContact(
@@ -252,34 +230,32 @@ void main() {
       expect(foundContacts.contains(contact2), true);
     });
 
-    test('updateContacts should update contacts with matrix IDs from mappings',
-        () {
-      final phoneNumber = PhoneNumber(
-        number: '+1234567890',
-        thirdPartyIdToHashMap: {
-          '+1234567890': ['hash1'],
-        },
-      );
+    test(
+      'updateContacts should update contacts with matrix IDs from mappings',
+      () {
+        final phoneNumber = PhoneNumber(
+          number: '+1234567890',
+          thirdPartyIdToHashMap: {
+            '+1234567890': ['hash1'],
+          },
+        );
 
-      final contact = Contact(
-        id: 'contact1',
-        phoneNumbers: {phoneNumber},
-      );
+        final contact = Contact(id: 'contact1', phoneNumbers: {phoneNumber});
 
-      final contacts = {contact};
+        final contacts = {contact};
 
-      final mappings = {
-        'hash1': '@user:example.com',
-      };
+        final mappings = {'hash1': '@user:example.com'};
 
-      final updatedContacts = contacts.updateContacts(
-        mappings: mappings,
-      );
+        final updatedContacts = contacts.updateContacts(mappings: mappings);
 
-      expect(updatedContacts.length, 1);
-      final updatedContact = updatedContacts.first;
-      expect(updatedContact.phoneNumbers?.first.matrixId, '@user:example.com');
-    });
+        expect(updatedContacts.length, 1);
+        final updatedContact = updatedContacts.first;
+        expect(
+          updatedContact.phoneNumbers?.first.matrixId,
+          '@user:example.com',
+        );
+      },
+    );
 
     test('handleLookupMappings should update contacts based on mappings', () {
       final phoneNumber = PhoneNumber(
@@ -289,16 +265,11 @@ void main() {
         },
       );
 
-      final contact = Contact(
-        id: 'contact1',
-        phoneNumbers: {phoneNumber},
-      );
+      final contact = Contact(id: 'contact1', phoneNumbers: {phoneNumber});
 
       final contacts = {contact};
 
-      final mappings = {
-        'hash1': '@user:example.com',
-      };
+      final mappings = {'hash1': '@user:example.com'};
 
       final hashToContactIdMappings = {
         'contact1': ['hash1'],
@@ -315,10 +286,7 @@ void main() {
     });
 
     test('combineContacts should merge contacts from different sources', () {
-      const contact1 = Contact(
-        id: 'contact1',
-        displayName: 'Contact 1',
-      );
+      const contact1 = Contact(id: 'contact1', displayName: 'Contact 1');
 
       final contact2 = Contact(
         id: 'contact1',
@@ -395,9 +363,7 @@ void main() {
 
   group('PhoneNumbersExtension', () {
     test('calculateHashesForPhoneNumbers should generate hash mappings', () {
-      final phoneNumbers = {
-        PhoneNumber(number: '+1234567890'),
-      };
+      final phoneNumbers = {PhoneNumber(number: '+1234567890')};
 
       const hashDetails = FederationHashDetailsResponse(
         lookupPepper: 'main_pepper',
@@ -405,8 +371,9 @@ void main() {
         algorithms: {'sha256'},
       );
 
-      final phoneToHashMap =
-          phoneNumbers.calculateHashesForPhoneNumbers(hashDetails);
+      final phoneToHashMap = phoneNumbers.calculateHashesForPhoneNumbers(
+        hashDetails,
+      );
 
       expect(phoneToHashMap.keys.contains('+1234567890'), true);
       expect(phoneToHashMap['+1234567890']?.length, 3); // One for each pepper
@@ -415,9 +382,7 @@ void main() {
 
   group('EmailsExtension', () {
     test('calculateHashesForEmails should generate hash mappings', () {
-      final emails = {
-        Email(address: 'test@example.com'),
-      };
+      final emails = {Email(address: 'test@example.com')};
 
       const hashDetails = FederationHashDetailsResponse(
         lookupPepper: 'main_pepper',
@@ -440,12 +405,8 @@ void main() {
       final federationContact = FederationContact(
         id: 'contact1',
         name: 'Test Contact',
-        emails: {
-          FederationEmail(address: 'test@example.com'),
-        },
-        phoneNumbers: {
-          FederationPhone(number: '+1234567890'),
-        },
+        emails: {FederationEmail(address: 'test@example.com')},
+        phoneNumbers: {FederationPhone(number: '+1234567890')},
       );
 
       final contact = federationContact.toContact();
@@ -461,48 +422,38 @@ void main() {
 
   group('FederationContactsMapExtension', () {
     test(
-        'toContacts should convert map of FederationContacts to list of Contacts',
-        () {
-      final federationContactsMap = {
-        'contact1': FederationContact(
-          id: 'contact1',
-          name: 'Contact 1',
-        ),
-        'contact2': FederationContact(
-          id: 'contact2',
-          name: 'Contact 2',
-        ),
-      };
+      'toContacts should convert map of FederationContacts to list of Contacts',
+      () {
+        final federationContactsMap = {
+          'contact1': FederationContact(id: 'contact1', name: 'Contact 1'),
+          'contact2': FederationContact(id: 'contact2', name: 'Contact 2'),
+        };
 
-      final contacts = federationContactsMap.toContacts();
+        final contacts = federationContactsMap.toContacts();
 
-      expect(contacts.length, 2);
-      expect(contacts.any((contact) => contact.id == 'contact1'), true);
-      expect(contacts.any((contact) => contact.id == 'contact2'), true);
-    });
+        expect(contacts.length, 2);
+        expect(contacts.any((contact) => contact.id == 'contact1'), true);
+        expect(contacts.any((contact) => contact.id == 'contact2'), true);
+      },
+    );
   });
 
   group('FederationContactsExtension', () {
     test(
-        'toContacts should convert list of FederationContacts to list of Contacts',
-        () {
-      final federationContacts = [
-        FederationContact(
-          id: 'contact1',
-          name: 'Contact 1',
-        ),
-        FederationContact(
-          id: 'contact2',
-          name: 'Contact 2',
-        ),
-      ];
+      'toContacts should convert list of FederationContacts to list of Contacts',
+      () {
+        final federationContacts = [
+          FederationContact(id: 'contact1', name: 'Contact 1'),
+          FederationContact(id: 'contact2', name: 'Contact 2'),
+        ];
 
-      final contacts = federationContacts.toContacts();
+        final contacts = federationContacts.toContacts();
 
-      expect(contacts.length, 2);
-      expect(contacts.any((contact) => contact.id == 'contact1'), true);
-      expect(contacts.any((contact) => contact.id == 'contact2'), true);
-    });
+        expect(contacts.length, 2);
+        expect(contacts.any((contact) => contact.id == 'contact1'), true);
+        expect(contacts.any((contact) => contact.id == 'contact2'), true);
+      },
+    );
   });
 
   group('FederationPhoneExtension', () {

@@ -6,7 +6,7 @@ class ChatLoadingViewStyle {
   static ResponsiveUtils responsive = getIt.get<ResponsiveUtils>();
 
   static EdgeInsets padding(BuildContext context) => EdgeInsets.symmetric(
-        vertical: 8,
-        horizontal: responsive.isMobile(context) ? 8 : 16,
-      );
+    vertical: 8,
+    horizontal: responsive.isMobile(context) ? 8 : 16,
+  );
 }

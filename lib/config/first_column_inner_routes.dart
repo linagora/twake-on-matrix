@@ -18,31 +18,19 @@ class FirstColumnInnerRoutes {
   );
 
   static final GlobalKey<NavigatorState> innerNavigatorNotOneColumnKey =
-      GlobalKey(
-    debugLabel: 'innerNavigatorNotOneColumnKey',
-  );
+      GlobalKey(debugLabel: 'innerNavigatorNotOneColumnKey');
 
   static Route<dynamic> routes(String? routerName, {Object? arguments}) {
     switch (routerName) {
       case 'innernavigator/search':
-        return PageRouteBuilder(
-          pageBuilder: (_, __, ___) => const Search(),
-        );
+        return PageRouteBuilder(pageBuilder: (_, __, ___) => const Search());
       case 'innernavigator/newgroup':
-        return _defaultPageRoute(
-          const NewGroup(),
-        );
+        return _defaultPageRoute(const NewGroup());
       case 'innernavigator/newprivatechat':
-        return _defaultPageRoute(
-          const NewPrivateChat(),
-        );
+        return _defaultPageRoute(const NewPrivateChat());
       case 'innernavigator/newgroupchatinfo':
         if (arguments is Set<PresentationContact>) {
-          return _defaultPageRoute(
-            NewGroupChatInfo(
-              contactsList: arguments,
-            ),
-          );
+          return _defaultPageRoute(NewGroupChatInfo(contactsList: arguments));
         } else {
           return _defaultPageRoute(const NewGroupChatInfo(contactsList: {}));
         }

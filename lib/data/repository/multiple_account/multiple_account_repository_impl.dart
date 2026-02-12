@@ -3,8 +3,8 @@ import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/domain/repository/multiple_account/multiple_account_repository.dart';
 
 class MultipleAccountRepositoryImpl extends MultipleAccountRepository {
-  final MultipleAccountDatasource _multipleAccountDatasource =
-      getIt.get<MultipleAccountDatasource>();
+  final MultipleAccountDatasource _multipleAccountDatasource = getIt
+      .get<MultipleAccountDatasource>();
 
   @override
   Future<String?> getPersistActiveAccount() {

@@ -9,17 +9,13 @@ class TomEndpoint {
     '/_twake/addressbook',
   );
 
-  static final ServicePath invitationServicePath = ServicePath(
-    '/invite',
-  );
+  static final ServicePath invitationServicePath = ServicePath('/invite');
 
   static final ServicePath generateInvitationServicePath = ServicePath(
     '/invite/generate',
   );
 
-  static final ServicePath userInfoServicePath = ServicePath(
-    '/user_info',
-  );
+  static final ServicePath userInfoServicePath = ServicePath('/user_info');
 
   static const String twakeRootPath = '/_twake';
 

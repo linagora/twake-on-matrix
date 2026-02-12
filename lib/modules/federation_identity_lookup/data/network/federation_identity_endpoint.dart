@@ -8,9 +8,7 @@ class FederationIdentityEndpoint {
 
   static const contentTypeHeaderDefault = 'application/json';
 
-  static final ServicePath lookupServicePath = ServicePath(
-    '/lookup',
-  );
+  static final ServicePath lookupServicePath = ServicePath('/lookup');
 
   static final ServicePath hashDetailsServicePath = ServicePath(
     '/hash_details',

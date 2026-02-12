@@ -31,7 +31,8 @@ class ChatListItemSubtitle extends StatelessWidget with ChatListItemMixin {
       room.notificationCount > 0,
     );
     final lastEvent = this.lastEvent ?? room.lastEvent;
-    final isMediaEvent = lastEvent?.messageType == MessageTypes.Image ||
+    final isMediaEvent =
+        lastEvent?.messageType == MessageTypes.Image ||
         lastEvent?.messageType == MessageTypes.Video;
     return Row(
       mainAxisAlignment: MainAxisAlignment.start,
@@ -48,7 +49,8 @@ class ChatListItemSubtitle extends StatelessWidget with ChatListItemMixin {
         ),
         const SizedBox(width: 8),
         FutureBuilder<String>(
-          future: lastEvent?.calcLocalizedBody(
+          future:
+              lastEvent?.calcLocalizedBody(
                 MatrixLocals(L10n.of(context)!),
                 hideReply: true,
                 hideEdit: true,
@@ -81,8 +83,9 @@ class ChatListItemSubtitle extends StatelessWidget with ChatListItemMixin {
                         : 0,
                     decoration: BoxDecoration(
                       color: Theme.of(context).colorScheme.primary,
-                      borderRadius:
-                          BorderRadius.circular(AppConfig.borderRadius),
+                      borderRadius: BorderRadius.circular(
+                        AppConfig.borderRadius,
+                      ),
                     ),
                     child: Center(
                       child: isMentioned && room.isUnreadOrInvited
@@ -91,13 +94,12 @@ class ChatListItemSubtitle extends StatelessWidget with ChatListItemMixin {
                               style: TextStyle(
                                 color: isMentioned
                                     ? Theme.of(context).colorScheme.onPrimary
-                                    : Theme.of(context)
-                                        .colorScheme
-                                        .onPrimaryContainer,
-                                fontSize: Theme.of(context)
-                                    .textTheme
-                                    .labelMedium
-                                    ?.fontSize,
+                                    : Theme.of(
+                                        context,
+                                      ).colorScheme.onPrimaryContainer,
+                                fontSize: Theme.of(
+                                  context,
+                                ).textTheme.labelMedium?.fontSize,
                               ),
                             )
                           : Container(),
@@ -117,10 +119,7 @@ class ChatListItemSubtitle extends StatelessWidget with ChatListItemMixin {
             room.notificationCount,
           ),
           decoration: BoxDecoration(
-            color: notificationColor(
-              context: context,
-              room: room,
-            ),
+            color: notificationColor(context: context, room: room),
             borderRadius: BorderRadius.circular(AppConfig.borderRadius),
           ),
           child: Center(
@@ -128,9 +127,9 @@ class ChatListItemSubtitle extends StatelessWidget with ChatListItemMixin {
                 ? Text(
                     room.notificationCount.toString(),
                     style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                          letterSpacing: -0.5,
-                          color: Theme.of(context).colorScheme.onPrimary,
-                        ),
+                      letterSpacing: -0.5,
+                      color: Theme.of(context).colorScheme.onPrimary,
+                    ),
                   )
                 : Container(),
           ),
@@ -157,17 +156,14 @@ class ChatListItemSubtitle extends StatelessWidget with ChatListItemMixin {
               event: lastEvent,
             )
           : isMediaEvent
-              ? chatListItemMediaPreviewSubTitle(
-                  context,
-                  lastEvent,
-                )
-              : textContentWidget(
-                  room,
-                  lastEvent,
-                  context,
-                  isGroup,
-                  room.isUnreadOrInvited,
-                ),
+          ? chatListItemMediaPreviewSubTitle(context, lastEvent)
+          : textContentWidget(
+              room,
+              lastEvent,
+              context,
+              isGroup,
+              room.isUnreadOrInvited,
+            ),
     );
   }
 }

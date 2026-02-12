@@ -20,19 +20,11 @@ class BootstrapDialog extends StatefulWidget {
   final bool wipe;
   final Client client;
 
-  const BootstrapDialog({
-    super.key,
-    this.wipe = false,
-    required this.client,
-  });
+  const BootstrapDialog({super.key, this.wipe = false, required this.client});
 
   Future<bool?> show() => PlatformInfos.isCupertinoStyle
-      ? TwakeDialog.showCupertinoDialogFullScreen(
-          builder: () => this,
-        )
-      : TwakeDialog.showDialogFullScreen(
-          builder: () => this,
-        );
+      ? TwakeDialog.showCupertinoDialogFullScreen(builder: () => this)
+      : TwakeDialog.showDialogFullScreen(builder: () => this);
 
   @override
   BootstrapDialogState createState() => BootstrapDialogState();
@@ -83,8 +75,9 @@ class BootstrapDialogState extends State<BootstrapDialog> {
     _wipe = wipe;
     titleText = null;
     _recoveryKeyStored = false;
-    bootstrap =
-        widget.client.encryption!.bootstrap(onUpdate: (_) => setState(() {}));
+    bootstrap = widget.client.encryption!.bootstrap(
+      onUpdate: (_) => setState(() {}),
+    );
     final key = await const FlutterSecureStorage().read(key: _secureStorageKey);
     if (key == null) return;
     _recoveryKeyTextEditingController.text = key;
@@ -112,8 +105,9 @@ class BootstrapDialogState extends State<BootstrapDialog> {
         ),
         body: Center(
           child: ConstrainedBox(
-            constraints:
-                const BoxConstraints(maxWidth: TwakeThemes.columnWidth * 1.5),
+            constraints: const BoxConstraints(
+              maxWidth: TwakeThemes.columnWidth * 1.5,
+            ),
             child: ListView(
               padding: const EdgeInsets.all(16.0),
               children: [
@@ -128,10 +122,7 @@ class BootstrapDialogState extends State<BootstrapDialog> {
                   ),
                   subtitle: Text(L10n.of(context)!.chatBackupDescription),
                 ),
-                const Divider(
-                  height: 32,
-                  thickness: 1,
-                ),
+                const Divider(height: 32, thickness: 1),
                 TextField(
                   minLines: 2,
                   maxLines: 4,
@@ -156,8 +147,9 @@ class BootstrapDialogState extends State<BootstrapDialog> {
                       });
                     },
                     title: Text(_getSecureStorageLocalizedName()),
-                    subtitle:
-                        Text(L10n.of(context)!.storeInSecureStorageDescription),
+                    subtitle: Text(
+                      L10n.of(context)!.storeInSecureStorageDescription,
+                    ),
                   ),
                 const SizedBox(height: 16),
                 CheckboxListTile(
@@ -182,16 +174,16 @@ class BootstrapDialogState extends State<BootstrapDialog> {
                   label: Text(L10n.of(context)!.next),
                   onPressed:
                       (_recoveryKeyCopied || _storeInSecureStorage == true)
-                          ? () {
-                              if (_storeInSecureStorage == true) {
-                                const FlutterSecureStorage().write(
-                                  key: _secureStorageKey,
-                                  value: key,
-                                );
-                              }
-                              setState(() => _recoveryKeyStored = true);
-                            }
-                          : null,
+                      ? () {
+                          if (_storeInSecureStorage == true) {
+                            const FlutterSecureStorage().write(
+                              key: _secureStorageKey,
+                              value: key,
+                            );
+                          }
+                          setState(() => _recoveryKeyStored = true);
+                        }
+                      : null,
                 ),
               ],
             ),
@@ -247,8 +239,9 @@ class BootstrapDialogState extends State<BootstrapDialog> {
                   padding: const EdgeInsets.all(16.0),
                   children: [
                     ListTile(
-                      contentPadding:
-                          const EdgeInsets.symmetric(horizontal: 8.0),
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 8.0,
+                      ),
                       trailing: Icon(
                         Icons.info_outlined,
                         color: Theme.of(context).colorScheme.primary,
@@ -271,9 +264,7 @@ class BootstrapDialogState extends State<BootstrapDialog> {
                       style: Theme.of(context).textTheme.bodyLarge,
                       decoration: InputDecoration(
                         contentPadding: const EdgeInsets.all(16),
-                        hintStyle: const TextStyle(
-                          fontFamily: 'Inter',
-                        ),
+                        hintStyle: const TextStyle(fontFamily: 'Inter'),
                         hintText: L10n.of(context)!.recoveryKey,
                         errorText: _recoveryKeyInputError,
                       ),
@@ -281,8 +272,9 @@ class BootstrapDialogState extends State<BootstrapDialog> {
                     const SizedBox(height: 16),
                     ElevatedButton.icon(
                       style: ElevatedButton.styleFrom(
-                        foregroundColor:
-                            Theme.of(context).colorScheme.onPrimary,
+                        foregroundColor: Theme.of(
+                          context,
+                        ).colorScheme.onPrimary,
                         backgroundColor: Theme.of(context).primaryColor,
                       ),
                       icon: _recoveryKeyInputLoading
@@ -304,16 +296,15 @@ class BootstrapDialogState extends State<BootstrapDialog> {
                                 );
                                 Logs().d('SSSS unlocked');
                                 await bootstrap.client.encryption!.crossSigning
-                                    .selfSign(
-                                  keyOrPassphrase: key,
-                                );
+                                    .selfSign(keyOrPassphrase: key);
                                 Logs().d('Successful elfsigned');
                                 await bootstrap.openExistingSsss();
                               } catch (e, s) {
                                 Logs().w('Unable to unlock SSSS', e, s);
                                 setState(
-                                  () => _recoveryKeyInputError =
-                                      L10n.of(context)!.oopsSomethingWentWrong,
+                                  () => _recoveryKeyInputError = L10n.of(
+                                    context,
+                                  )!.oopsSomethingWentWrong,
                                 );
                               } finally {
                                 setState(
@@ -340,15 +331,17 @@ class BootstrapDialogState extends State<BootstrapDialog> {
                       onPressed: _recoveryKeyInputLoading
                           ? null
                           : () async {
-                              final req = await TwakeDialog
-                                  .showFutureLoadingDialogFullScreen(
-                                future: () => widget.client
-                                    .userDeviceKeys[widget.client.userID!]!
-                                    .startVerification(),
-                              );
+                              final req =
+                                  await TwakeDialog.showFutureLoadingDialogFullScreen(
+                                    future: () => widget
+                                        .client
+                                        .userDeviceKeys[widget.client.userID!]!
+                                        .startVerification(),
+                                  );
                               if (req.error != null) return;
-                              await KeyVerificationDialog(request: req.result!)
-                                  .show(context);
+                              await KeyVerificationDialog(
+                                request: req.result!,
+                              ).show(context);
                               Navigator.of(context, rootNavigator: false).pop();
                             },
                     ),
@@ -374,10 +367,12 @@ class BootstrapDialogState extends State<BootstrapDialog> {
                                   )) {
                                 if (Matrix.of(context).twakeSupported) {
                                   await TomBootstrapDialog(
-                                    client: widget.client,
-                                    wipe: true,
-                                    wipeRecovery: true,
-                                  ).show(context).then(
+                                        client: widget.client,
+                                        wipe: true,
+                                        wipeRecovery: true,
+                                      )
+                                      .show(context)
+                                      .then(
                                         (value) => Navigator.of(
                                           context,
                                           rootNavigator: false,
@@ -465,12 +460,7 @@ class BootstrapDialogState extends State<BootstrapDialog> {
             ),
           ),
           if (titleText != null)
-            Expanded(
-              child: Text(
-                titleText!,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ),
+            Expanded(child: Text(titleText!, overflow: TextOverflow.ellipsis)),
         ],
       ),
       actions: buttons.isNotEmpty ? buttons : null,

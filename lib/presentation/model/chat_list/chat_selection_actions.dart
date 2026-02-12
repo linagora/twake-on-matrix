@@ -1,9 +1,6 @@
 import 'package:equatable/equatable.dart';
 
-enum SelectionType {
-  selected,
-  unselected,
-}
+enum SelectionType { selected, unselected }
 
 class ConversationSelectionPresentation extends Equatable {
   final String roomId;

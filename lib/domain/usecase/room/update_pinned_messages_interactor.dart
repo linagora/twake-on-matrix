@@ -31,9 +31,7 @@ class UpdatePinnedMessagesInteractor {
       Logs().e(
         'UpdatePinnedMessagesInteractor::execute(): ErrorCode ${exception.errcode}: ${exception.errorMessage}',
       );
-      yield Left(
-        UpdatePinnedEventsFailure(exception),
-      );
+      yield Left(UpdatePinnedEventsFailure(exception));
     } catch (e) {
       if (action == PinnedMessagesActionEnum.pin) {
         yield Left(PinEventsFailure(e));

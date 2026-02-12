@@ -14,9 +14,7 @@ class OthersGroupChatEmptyView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      constraints: const BoxConstraints(
-        maxWidth: 224,
-      ),
+      constraints: const BoxConstraints(maxWidth: 224),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
@@ -44,18 +42,19 @@ class OthersGroupChatEmptyView extends StatelessWidget {
                 TextSpan(
                   text: firstEvent.getUser()?.displayName,
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        fontSize: 14,
-                        color: LinagoraRefColors.material().neutral[40],
-                      ),
+                    fontSize: 14,
+                    color: LinagoraRefColors.material().neutral[40],
+                  ),
                 ),
                 const TextSpan(text: ' ', style: TextStyle(fontSize: 14)),
                 TextSpan(
-                  text: L10n.of(context)!
-                      .hasCreatedAGroupChat(firstEvent.room.name),
+                  text: L10n.of(
+                    context,
+                  )!.hasCreatedAGroupChat(firstEvent.room.name),
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        fontSize: 14,
-                        color: LinagoraRefColors.material().neutral[60],
-                      ),
+                    fontSize: 14,
+                    color: LinagoraRefColors.material().neutral[60],
+                  ),
                 ),
               ],
             ),
@@ -71,10 +70,10 @@ class OthersGroupChatEmptyView extends StatelessWidget {
     return Text(
       eventDateTime.relativeTime(context),
       style: Theme.of(context).textTheme.bodySmall?.copyWith(
-            fontWeight: FontWeight.w500,
-            fontSize: 12,
-            color: Theme.of(context).colorScheme.onSurface,
-          ),
+        fontWeight: FontWeight.w500,
+        fontSize: 12,
+        color: Theme.of(context).colorScheme.onSurface,
+      ),
     );
   }
 }

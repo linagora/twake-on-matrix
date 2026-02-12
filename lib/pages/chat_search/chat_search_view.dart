@@ -33,10 +33,7 @@ import 'package:matrix/matrix.dart';
 class ChatSearchView extends StatelessWidget {
   final ChatSearchController controller;
 
-  const ChatSearchView(
-    this.controller, {
-    super.key,
-  });
+  const ChatSearchView(this.controller, {super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -76,11 +73,7 @@ class _ServerSearchView extends StatelessWidget {
     return CustomScrollView(
       controller: controller.scrollController,
       slivers: [
-        const SliverToBoxAdapter(
-          child: SizedBox(
-            height: 8,
-          ),
-        ),
+        const SliverToBoxAdapter(child: SizedBox(height: 8)),
         ValueListenableBuilder(
           valueListenable: serverSearchController.searchResultsNotifier,
           builder: (context, searchResults, child) {
@@ -104,15 +97,11 @@ class _ServerSearchView extends StatelessWidget {
             }
 
             if (searchResults is PresentationServerSideEmptySearch) {
-              return const SliverToBoxAdapter(
-                child: EmptySearchWidget(),
-              );
+              return const SliverToBoxAdapter(child: EmptySearchWidget());
             }
             return child!;
           },
-          child: const SliverToBoxAdapter(
-            child: SizedBox(),
-          ),
+          child: const SliverToBoxAdapter(child: SizedBox()),
         ),
         ValueListenableBuilder(
           valueListenable: serverSearchController.isLoadingMoreNotifier,
@@ -142,8 +131,8 @@ class _TimelineSearchView extends StatelessWidget {
       controller: sameTypeEventsBuilderController,
       scrollController: controller.scrollController,
       builder: (context, eventsState, child) {
-        final success =
-            eventsState.getSuccessOrNull<TimelineSearchEventSuccess>();
+        final success = eventsState
+            .getSuccessOrNull<TimelineSearchEventSuccess>();
         final events = success?.events ?? [];
         if (events.isEmpty) {
           return _EmptyView(controller: controller);
@@ -165,9 +154,7 @@ class _TimelineSearchView extends StatelessWidget {
 }
 
 class _EmptyView extends StatelessWidget {
-  const _EmptyView({
-    required this.controller,
-  });
+  const _EmptyView({required this.controller});
 
   final ChatSearchController controller;
 
@@ -238,9 +225,7 @@ class _SearchItem extends StatelessWidget {
                             ),
                             Text(
                               event.originServerTs.localizedTimeShort(context),
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .labelMedium
+                              style: Theme.of(context).textTheme.labelMedium
                                   ?.copyWith(
                                     color: LinagoraRefColors.material()
                                         .tertiary[30],
@@ -265,10 +250,7 @@ class _SearchItem extends StatelessWidget {
 class _MessageContent extends StatelessWidget {
   static const _prefixLengthHighlight = 20;
 
-  const _MessageContent({
-    required this.event,
-    required this.searchWord,
-  });
+  const _MessageContent({required this.event, required this.searchWord});
 
   final Event event;
   final String searchWord;
@@ -298,18 +280,16 @@ class _MessageContent extends StatelessWidget {
               ),
           searchWord: searchWord,
           maxLines: 2,
-          style: LinagoraTextStyle.material()
-              .bodyMedium3
-              .copyWith(color: LinagoraSysColors.material().onSurface),
+          style: LinagoraTextStyle.material().bodyMedium3.copyWith(
+            color: LinagoraSysColors.material().onSurface,
+          ),
         );
     }
   }
 }
 
 class _ChatSearchAppBar extends StatelessWidget {
-  const _ChatSearchAppBar(
-    this.controller,
-  );
+  const _ChatSearchAppBar(this.controller);
 
   final ChatSearchController controller;
 
@@ -338,20 +318,21 @@ class _ChatSearchAppBar extends StatelessWidget {
                 focusNode: controller.inputFocus,
                 textInputAction: TextInputAction.search,
                 autofocus: true,
-                decoration:
-                    ChatListHeaderStyle.searchInputDecoration(context).copyWith(
-                  suffixIcon: ValueListenableBuilder(
-                    valueListenable: controller.textEditingController,
-                    builder: (context, value, child) => value.text.isNotEmpty
-                        ? IconButton(
-                            onPressed: () {
-                              controller.textEditingController.clear();
-                            },
-                            icon: const Icon(Icons.close),
-                          )
-                        : const SizedBox.shrink(),
-                  ),
-                ),
+                decoration: ChatListHeaderStyle.searchInputDecoration(context)
+                    .copyWith(
+                      suffixIcon: ValueListenableBuilder(
+                        valueListenable: controller.textEditingController,
+                        builder: (context, value, child) =>
+                            value.text.isNotEmpty
+                            ? IconButton(
+                                onPressed: () {
+                                  controller.textEditingController.clear();
+                                },
+                                icon: const Icon(Icons.close),
+                              )
+                            : const SizedBox.shrink(),
+                      ),
+                    ),
               ),
             ),
           ),

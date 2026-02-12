@@ -29,8 +29,8 @@ class SearchContactsAndChatsController
 
   static const int _limitPrefetchedRecentChats = 3;
 
-  final SearchRecentChatInteractor _searchRecentChatInteractor =
-      getIt.get<SearchRecentChatInteractor>();
+  final SearchRecentChatInteractor _searchRecentChatInteractor = getIt
+      .get<SearchRecentChatInteractor>();
 
   final ContactsManager contactManger = getIt.get<ContactsManager>();
 
@@ -64,26 +64,27 @@ class SearchContactsAndChatsController
   void fetchPreSearchChat() {
     _searchRecentChatInteractor
         .execute(
-      keyword: '',
-      matrixLocalizations: _matrixLocalizations,
-      rooms: _rooms,
-      limit: _limitPrefetchedRecentChats,
-    )
-        .listen(
-      (event) {
-        event.map((success) {
-          if (success is SearchRecentChatSuccess) {
-            recentAndContactsNotifier.value = success.toPresentation().contacts;
-          }
+          keyword: '',
+          matrixLocalizations: _matrixLocalizations,
+          rooms: _rooms,
+          limit: _limitPrefetchedRecentChats,
+        )
+        .listen((event) {
+          event.map((success) {
+            if (success is SearchRecentChatSuccess) {
+              recentAndContactsNotifier.value = success
+                  .toPresentation()
+                  .contacts;
+            }
+          });
         });
-      },
-    );
   }
 
   List<PresentationSearch> contactPresentationSearchMatchedOnMobile({
     required String keyword,
   }) {
-    final tomContacts = contactManger
+    final tomContacts =
+        contactManger
             .getContactsNotifier()
             .value
             .getSuccessOrNull<GetContactsSuccess>()
@@ -103,11 +104,12 @@ class SearchContactsAndChatsController
         phoneBookPresentationSearchContacts
             .expand((contact) => contact.toPresentationSearch())
             .where((contact) {
-      final matrixId = (contact as ContactPresentationSearch).matrixId;
-      return matrixId != null &&
-          matrixId.isNotEmpty &&
-          contact.doesMatchKeyword(keyword);
-    }).toList();
+              final matrixId = (contact as ContactPresentationSearch).matrixId;
+              return matrixId != null &&
+                  matrixId.isNotEmpty &&
+                  contact.doesMatchKeyword(keyword);
+            })
+            .toList();
     final tomContactPresentationSearchMatched = tomPresentationSearchContacts
         .expand((contact) => contact.toPresentationSearch())
         .where((contact) => contact.doesMatchKeyword(keyword))
@@ -120,7 +122,8 @@ class SearchContactsAndChatsController
   }
 
   List<Contact> _tryToGetPhonebookContacts() {
-    final phoneBookContacts = contactManger
+    final phoneBookContacts =
+        contactManger
             .getPhonebookContactsNotifier()
             .value
             .getSuccessOrNull<GetPhonebookContactsSuccess>()
@@ -152,7 +155,8 @@ class SearchContactsAndChatsController
   List<PresentationSearch> contactPresentationSearchMatchedOnWeb({
     required String keyword,
   }) {
-    final tomContacts = contactManger
+    final tomContacts =
+        contactManger
             .getContactsNotifier()
             .value
             .getSuccessOrNull<GetContactsSuccess>()
@@ -181,14 +185,12 @@ class SearchContactsAndChatsController
 
     _searchRecentChatInteractor
         .execute(
-      keyword: keyword,
-      matrixLocalizations: _matrixLocalizations,
-      rooms: _rooms,
-    )
-        .listen(
-      (event) {
-        event.map(
-          (success) {
+          keyword: keyword,
+          matrixLocalizations: _matrixLocalizations,
+          rooms: _rooms,
+        )
+        .listen((event) {
+          event.map((success) {
             if (success is SearchRecentChatSuccess) {
               recentAndContactsNotifier.value = combineDuplicateContactAndChat(
                 recentChat: success.toPresentation().contacts,
@@ -197,10 +199,8 @@ class SearchContactsAndChatsController
                     : contactPresentationSearchMatchedOnWeb(keyword: keyword),
               );
             }
-          },
-        );
-      },
-    );
+          });
+        });
   }
 
   void onSearchBarChanged(String keyword) {

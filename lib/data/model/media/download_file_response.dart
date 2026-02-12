@@ -21,15 +21,15 @@ class DownloadFileResponse extends Response<dynamic> with EquatableMixin {
 
   @override
   List<Object?> get props => [
-        statusCode,
-        statusMessage,
-        data,
-        extra,
-        headers,
-        isRedirect,
-        requestOptions,
-        savePath,
-        onReceiveProgress,
-        requestOptions,
-      ];
+    statusCode,
+    statusMessage,
+    data,
+    extra,
+    headers,
+    isRedirect,
+    requestOptions,
+    savePath,
+    onReceiveProgress,
+    requestOptions,
+  ];
 }

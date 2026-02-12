@@ -11,12 +11,12 @@ enum DefaultPowerLevelMember {
   none;
 
   static List<int> powerLevelAvailable() => [
-        DefaultPowerLevelMember.guest.powerLevel,
-        DefaultPowerLevelMember.member.powerLevel,
-        DefaultPowerLevelMember.moderator.powerLevel,
-        DefaultPowerLevelMember.admin.powerLevel,
-        DefaultPowerLevelMember.owner.powerLevel,
-      ];
+    DefaultPowerLevelMember.guest.powerLevel,
+    DefaultPowerLevelMember.member.powerLevel,
+    DefaultPowerLevelMember.moderator.powerLevel,
+    DefaultPowerLevelMember.admin.powerLevel,
+    DefaultPowerLevelMember.owner.powerLevel,
+  ];
 
   static DefaultPowerLevelMember getDefaultPowerLevelByUsersDefault({
     required int usersDefault,
@@ -76,9 +76,7 @@ enum DefaultPowerLevelMember {
   }
 
   List<DefaultPermissionLevelMember> permissionForGuest(BuildContext context) {
-    return [
-      DefaultPermissionLevelMember.invitePeopleToTheRoom,
-    ];
+    return [DefaultPermissionLevelMember.invitePeopleToTheRoom];
   }
 
   List<DefaultPermissionLevelMember> permissionForMember(BuildContext context) {

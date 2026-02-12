@@ -16,8 +16,9 @@ class ConnectPageView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final identityProviders =
-        controller.identityProviders(rawLoginTypes: controller.rawLoginTypes);
+    final identityProviders = controller.identityProviders(
+      rawLoginTypes: controller.rawLoginTypes,
+    );
     final l10n = L10n.of(context)!;
     return LoginScaffold(
       appBar: AppBar(
@@ -40,49 +41,48 @@ class ConnectPageView extends StatelessWidget {
                     LinagoraSysColors.material().onTertiaryContainer,
               )
             : identityProviders.length == 1
-                ? Container(
-                    width: double.infinity,
-                    padding: ConnectPageViewStyle.padding,
-                    child: ElevatedButton.icon(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor:
-                            Theme.of(context).colorScheme.primaryContainer,
-                        foregroundColor:
-                            Theme.of(context).colorScheme.onPrimaryContainer,
-                      ),
-                      icon: identityProviders.single.icon == null
-                          ? const Icon(
-                              Icons.web_outlined,
-                              size: 16,
-                            )
-                          : IdentityProviderIcon(
-                              identityProvider: identityProviders.first,
-                              size: ConnectPageViewStyle.iconSize,
-                            ),
+            ? Container(
+                width: double.infinity,
+                padding: ConnectPageViewStyle.padding,
+                child: ElevatedButton.icon(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Theme.of(
+                      context,
+                    ).colorScheme.primaryContainer,
+                    foregroundColor: Theme.of(
+                      context,
+                    ).colorScheme.onPrimaryContainer,
+                  ),
+                  icon: identityProviders.single.icon == null
+                      ? const Icon(Icons.web_outlined, size: 16)
+                      : IdentityProviderIcon(
+                          identityProvider: identityProviders.first,
+                          size: ConnectPageViewStyle.iconSize,
+                        ),
+                  onPressed: () => controller.ssoLoginAction(
+                    context: context,
+                    id: identityProviders.single.id!,
+                  ),
+                  label: Text(
+                    identityProviders.single.name ??
+                        identityProviders.single.brand ??
+                        L10n.of(context)!.loginWithOneClick,
+                  ),
+                ),
+              )
+            : Wrap(
+                children: [
+                  for (final identityProvider in identityProviders)
+                    SsoButton(
                       onPressed: () => controller.ssoLoginAction(
                         context: context,
-                        id: identityProviders.single.id!,
+                        id: identityProvider.id!,
                       ),
-                      label: Text(
-                        identityProviders.single.name ??
-                            identityProviders.single.brand ??
-                            L10n.of(context)!.loginWithOneClick,
-                      ),
+                      identityProvider: identityProvider,
+                      loginClientFuture: controller.loginClientFuture,
                     ),
-                  )
-                : Wrap(
-                    children: [
-                      for (final identityProvider in identityProviders)
-                        SsoButton(
-                          onPressed: () => controller.ssoLoginAction(
-                            context: context,
-                            id: identityProvider.id!,
-                          ),
-                          identityProvider: identityProvider,
-                          loginClientFuture: controller.loginClientFuture,
-                        ),
-                    ].toList(),
-                  ),
+                ].toList(),
+              ),
       ),
     );
   }

@@ -21,8 +21,8 @@ class MessageFileTileStyle extends FileTileWidgetStyle {
   @override
   TextStyle? textStyle(BuildContext context) {
     return Theme.of(context).textTheme.titleSmall?.copyWith(
-          color: Theme.of(context).colorScheme.onSurface,
-        );
+      color: Theme.of(context).colorScheme.onSurface,
+    );
   }
 
   @override
@@ -31,10 +31,8 @@ class MessageFileTileStyle extends FileTileWidgetStyle {
   @override
   Widget get paddingRightIcon => const SizedBox(width: 4.0);
 
-  EdgeInsets get paddingDownloadFileIcon => const EdgeInsets.symmetric(
-        horizontal: 6.0,
-        vertical: 4.0,
-      );
+  EdgeInsets get paddingDownloadFileIcon =>
+      const EdgeInsets.symmetric(horizontal: 6.0, vertical: 4.0);
 
   double get strokeWidthLoading => 2;
 
@@ -51,8 +49,7 @@ class MessageFileTileStyle extends FileTileWidgetStyle {
   Color iconBackgroundColor({
     required bool hasError,
     required BuildContext context,
-  }) =>
-      hasError
-          ? Theme.of(context).colorScheme.error
-          : Theme.of(context).colorScheme.primary;
+  }) => hasError
+      ? Theme.of(context).colorScheme.error
+      : Theme.of(context).colorScheme.primary;
 }

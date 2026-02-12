@@ -18,12 +18,7 @@ class FileInfo with EquatableMixin {
   final Uint8List? bytes;
   final String? customMimeType;
 
-  FileInfo(
-    this.fileName, {
-    this.filePath,
-    this.bytes,
-    this.customMimeType,
-  });
+  FileInfo(this.fileName, {this.filePath, this.bytes, this.customMimeType});
 
   factory FileInfo.empty() {
     return FileInfo('');
@@ -40,10 +35,8 @@ class FileInfo with EquatableMixin {
   String get mimeType =>
       customMimeType ?? lookupMimeType(fileName) ?? 'application/octet-stream';
 
-  Map<String, dynamic> get metadata => ({
-        'mimetype': mimeType,
-        'size': fileSize,
-      });
+  Map<String, dynamic> get metadata =>
+      ({'mimetype': mimeType, 'size': fileSize});
 
   factory FileInfo.fromMatrixFile(MatrixFile file) {
     if (file.msgType == MessageTypes.Image) {
@@ -67,8 +60,9 @@ class FileInfo with EquatableMixin {
         imagePlaceholderBytes: Uint8List(0),
         width: w is num ? w.toInt() : null,
         height: h is num ? h.toInt() : null,
-        duration:
-            durationMs != null ? Duration(milliseconds: durationMs) : null,
+        duration: durationMs != null
+            ? Duration(milliseconds: durationMs)
+            : null,
         customMimeType: file.mimeType,
       );
     }

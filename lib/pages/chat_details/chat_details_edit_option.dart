@@ -44,9 +44,11 @@ class ChatDetailsEditOption extends StatelessWidget {
                 padding: ChatDetailsEditOptionStyle.leadingIconPadding,
                 child: Icon(
                   leading,
-                  size: leadingIconSize ??
+                  size:
+                      leadingIconSize ??
                       ChatDetailsEditOptionStyle.defaultLeadingIconSize,
-                  color: leadingIconColor ??
+                  color:
+                      leadingIconColor ??
                       ChatDetailsEditOptionStyle.defaultLeadingIconColor(
                         context,
                       ),
@@ -67,9 +69,9 @@ class ChatDetailsEditOption extends StatelessWidget {
                                 title,
                                 style:
                                     ChatDetailsEditOptionStyle.titleTextStyle(
-                                  context,
-                                  titleColor,
-                                ),
+                                      context,
+                                      titleColor,
+                                    ),
                                 maxLines:
                                     ChatDetailsEditOptionStyle.titleMaxLines,
                                 overflow: TextOverflow.ellipsis,
@@ -80,11 +82,11 @@ class ChatDetailsEditOption extends StatelessWidget {
                                   padding: const EdgeInsets.only(left: 4.0),
                                   child: Text(
                                     counterText!,
-                                    style: ChatDetailsEditOptionStyle
-                                        .subtitleTextStyle(
-                                      context,
-                                      subtitleColor,
-                                    ),
+                                    style:
+                                        ChatDetailsEditOptionStyle.subtitleTextStyle(
+                                          context,
+                                          subtitleColor,
+                                        ),
                                     maxLines: ChatDetailsEditOptionStyle
                                         .subtitleMaxLines,
                                     overflow: TextOverflow.ellipsis,
@@ -98,11 +100,11 @@ class ChatDetailsEditOption extends StatelessWidget {
                                   .subtitleItemBuilderPadding,
                               child: Text(
                                 subtitle!,
-                                style: ChatDetailsEditOptionStyle
-                                    .subtitleTextStyle(
-                                  context,
-                                  subtitleColor,
-                                ),
+                                style:
+                                    ChatDetailsEditOptionStyle.subtitleTextStyle(
+                                      context,
+                                      subtitleColor,
+                                    ),
                                 maxLines:
                                     ChatDetailsEditOptionStyle.subtitleMaxLines,
                                 overflow: TextOverflow.ellipsis,
@@ -113,7 +115,8 @@ class ChatDetailsEditOption extends StatelessWidget {
                     ),
                     Icon(
                       Icons.chevron_right_outlined,
-                      size: trailingIconSize ??
+                      size:
+                          trailingIconSize ??
                           ChatDetailsEditOptionStyle.defaultTrailingIconSize,
                     ),
                   ],

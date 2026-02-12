@@ -10,17 +10,16 @@ import 'package:mockito/mockito.dart';
 
 import 'hive_get_invitation_status_interactor_test.mocks.dart';
 
-@GenerateMocks([
-  HiveInvitationStatusRepository,
-])
+@GenerateMocks([HiveInvitationStatusRepository])
 void main() {
   late HiveGetInvitationStatusInteractor interactor;
   late MockHiveInvitationStatusRepository mockRepository;
 
   setUp(() {
     mockRepository = MockHiveInvitationStatusRepository();
-    GetIt.instance
-        .registerSingleton<HiveInvitationStatusRepository>(mockRepository);
+    GetIt.instance.registerSingleton<HiveInvitationStatusRepository>(
+      mockRepository,
+    );
     interactor = HiveGetInvitationStatusInteractor();
   });
 
@@ -33,43 +32,44 @@ void main() {
   const testInvitationId = 'inv123';
 
   test(
-      'execute returns success state when invitation status is retrieved successfully',
-      () async {
-    final invitationStatus = InvitationStatus(
-      contactId: testContactId,
-      invitationId: testInvitationId,
-    );
+    'execute returns success state when invitation status is retrieved successfully',
+    () async {
+      final invitationStatus = InvitationStatus(
+        contactId: testContactId,
+        invitationId: testInvitationId,
+      );
 
-    when(
-      mockRepository.getInvitationStatus(
+      when(
+        mockRepository.getInvitationStatus(
+          userId: testUserId,
+          contactId: testContactId,
+        ),
+      ).thenAnswer((_) async => invitationStatus);
+
+      final result = interactor.execute(
         userId: testUserId,
         contactId: testContactId,
-      ),
-    ).thenAnswer((_) async => invitationStatus);
+      );
 
-    final result = interactor.execute(
-      userId: testUserId,
-      contactId: testContactId,
-    );
-
-    await expectLater(
-      result,
-      emitsInOrder([
-        const Right(
-          HiveGetInvitationStatusLoadingState(
-            userId: testUserId,
-            contactId: testContactId,
+      await expectLater(
+        result,
+        emitsInOrder([
+          const Right(
+            HiveGetInvitationStatusLoadingState(
+              userId: testUserId,
+              contactId: testContactId,
+            ),
           ),
-        ),
-        const Right(
-          HiveGetInvitationStatusSuccessState(
-            contactId: testContactId,
-            invitationId: testInvitationId,
+          const Right(
+            HiveGetInvitationStatusSuccessState(
+              contactId: testContactId,
+              invitationId: testInvitationId,
+            ),
           ),
-        ),
-      ]),
-    );
-  });
+        ]),
+      );
+    },
+  );
 
   test('execute returns failure state on error', () async {
     when(

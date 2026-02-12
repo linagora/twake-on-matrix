@@ -7,9 +7,7 @@ import 'package:matrix/matrix.dart';
 class MigrateV6ToV7 extends MigrateSteps {
   @override
   Future<void> onMigrate(int currentVersion, int newVersion) async {
-    Logs().d(
-      'MigrateV6ToV7::onMigrate() Starting migration from v6 to v7',
-    );
+    Logs().d('MigrateV6ToV7::onMigrate() Starting migration from v6 to v7');
     await migrateHiveCollectionToMDatabase();
     final multipleAccountRepository = getIt.get<MultipleAccountRepository>();
     await multipleAccountRepository.deletePersistActiveAccount();
@@ -20,17 +18,12 @@ class MigrateV6ToV7 extends MigrateSteps {
 
   Future<void> migrateHiveCollectionToMDatabase() async {
     try {
-      final hiveCollectionToMDatabase =
-          await getIt.getAsync<HiveCollectionToMDatabase>();
+      final hiveCollectionToMDatabase = await getIt
+          .getAsync<HiveCollectionToMDatabase>();
       await hiveCollectionToMDatabase.clear();
-      Logs().d(
-        'MigrateV6ToV7::onMigrate(): Delete ToM database success',
-      );
+      Logs().d('MigrateV6ToV7::onMigrate(): Delete ToM database success');
     } catch (e) {
-      Logs().e(
-        'MigrateV6ToV7::onMigrate(): Delete ToM database failed',
-        e,
-      );
+      Logs().e('MigrateV6ToV7::onMigrate(): Delete ToM database failed', e);
     }
   }
 }

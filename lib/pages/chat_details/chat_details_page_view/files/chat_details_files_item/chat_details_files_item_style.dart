@@ -22,28 +22,29 @@ class ChatDetailsFileTileStyle extends FileTileWidgetStyle {
 
   static const EdgeInsets bodyPadding = EdgeInsets.only(right: 8.0);
   static const EdgeInsets bodyPaddingWeb = EdgeInsets.all(8.0);
-  static const EdgeInsets bodyChildPadding =
-      EdgeInsets.symmetric(vertical: 8.0);
+  static const EdgeInsets bodyChildPadding = EdgeInsets.symmetric(
+    vertical: 8.0,
+  );
   static const EdgeInsets trailingPadding = EdgeInsets.only(left: 8);
 
   static TextStyle? downloadedFileTextStyle(BuildContext context) =>
       Theme.of(context).textTheme.titleMedium?.copyWith(
-            color: LinagoraSysColors.material().primary,
-          );
+        color: LinagoraSysColors.material().primary,
+      );
   static const int downloadedFilenameMaxLines = 3;
 
   static TextStyle? downloadFileTextStyle(BuildContext context) =>
       Theme.of(context).textTheme.titleMedium?.copyWith(
-            color: Theme.of(context).colorScheme.onSurface,
-          );
+        color: Theme.of(context).colorScheme.onSurface,
+      );
   static const int downloadFilenameMaxLines = 1;
 
   static const double wrapperLeftPadding = 8;
 
   static TextStyle? downloadSizeFileTextStyle(BuildContext context) =>
       Theme.of(context).textTheme.bodyMedium?.copyWith(
-            color: const FileTileWidgetStyle().fileInfoColor,
-          );
+        color: const FileTileWidgetStyle().fileInfoColor,
+      );
 
   static double get tileHeight => 56;
 

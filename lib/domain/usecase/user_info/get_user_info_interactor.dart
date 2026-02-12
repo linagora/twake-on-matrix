@@ -8,9 +8,7 @@ import 'package:fluffychat/domain/repository/user_info/user_info_repository.dart
 class GetUserInfoInteractor {
   const GetUserInfoInteractor();
 
-  Stream<Either<Failure, Success>> execute({
-    String? userId,
-  }) async* {
+  Stream<Either<Failure, Success>> execute({String? userId}) async* {
     try {
       yield Right(GettingUserInfo());
       if (userId == null) {

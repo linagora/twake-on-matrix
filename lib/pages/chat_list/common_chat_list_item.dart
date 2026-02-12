@@ -28,14 +28,9 @@ class CommonChatListItem extends StatelessWidget {
           onTap: controller.isSelectMode
               ? () => controller.toggleSelection(room.id)
               : null,
-          onSecondaryTapDown: (detail) => controller.handleContextMenuAction(
-            context,
-            room,
-            detail,
-          ),
-          onLongPress: () => controller.onLongPressChatListItem(
-            room,
-          ),
+          onSecondaryTapDown: (detail) =>
+              controller.handleContextMenuAction(context, room, detail),
+          onLongPress: () => controller.onLongPressChatListItem(room),
           checkBoxWidget: ValueListenableBuilder(
             valueListenable: controller.conversationSelectionNotifier,
             builder: (context, conversationSelection, __) {

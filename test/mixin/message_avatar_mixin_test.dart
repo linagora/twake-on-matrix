@@ -17,10 +17,7 @@ import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
 import 'message_avatar_mixin_test.mocks.dart';
 
-@GenerateNiceMocks([
-  MockSpec<User>(),
-  MockSpec<Room>(),
-])
+@GenerateNiceMocks([MockSpec<User>(), MockSpec<Room>()])
 class MockMessageAvatarUtils with MessageAvatarMixin {}
 
 Future<void> main() async {
@@ -40,10 +37,7 @@ Future<void> main() async {
       room = MockRoom();
       user = MockUser();
       event = Event(
-        content: {
-          'body': 'Test message',
-          'msgtype': 'm.text',
-        },
+        content: {'body': 'Test message', 'msgtype': 'm.text'},
         type: 'm.room.message',
         eventId: '7365636s6r64300:example.com',
         senderId: '@bob:example.com',
@@ -60,10 +54,12 @@ Future<void> main() async {
       required Size screenSize,
       required bool isDirectChat,
     }) async {
-      when(room.requestUser(event.senderId, ignoreErrors: true))
-          .thenAnswer((_) async => user);
-      when(room.unsafeGetUserFromMemoryOrFallback(event.senderId))
-          .thenReturn(user);
+      when(
+        room.requestUser(event.senderId, ignoreErrors: true),
+      ).thenAnswer((_) async => user);
+      when(
+        room.unsafeGetUserFromMemoryOrFallback(event.senderId),
+      ).thenReturn(user);
       when(user.avatarUrl).thenReturn(Uri.tryParse("fakeImage"));
       when(user.calcDisplayname()).thenReturn('Test');
       when(event.room.isDirectChat).thenReturn(isDirectChat);
@@ -86,9 +82,7 @@ Future<void> main() async {
               primaryColor,
             ),
             builder: (context, child) => MediaQuery(
-              data: MediaQueryData(
-                size: screenSize,
-              ),
+              data: MediaQueryData(size: screenSize),
               child: child!,
             ),
             home: Scaffold(
@@ -116,183 +110,168 @@ Future<void> main() async {
     group('Web-sized screens', () {
       const webSize = Size(1200, 800);
 
-      testWidgets(
-        'Should display Avatar when Own message in group chat',
-        (WidgetTester tester) async {
-          await runTest(
-            tester,
-            event: event,
-            selectMode: false,
-            sameSender: true,
-            ownMessage: true,
-            screenSize: webSize,
-            isDirectChat: false,
-          );
-          verify(room.requestUser(event.senderId, ignoreErrors: true))
-              .called(1);
-          expect(find.byType(Avatar), findsOneWidget);
-        },
-      );
+      testWidgets('Should display Avatar when Own message in group chat', (
+        WidgetTester tester,
+      ) async {
+        await runTest(
+          tester,
+          event: event,
+          selectMode: false,
+          sameSender: true,
+          ownMessage: true,
+          screenSize: webSize,
+          isDirectChat: false,
+        );
+        verify(room.requestUser(event.senderId, ignoreErrors: true)).called(1);
+        expect(find.byType(Avatar), findsOneWidget);
+      });
 
-      testWidgets(
-        'Should display Avatar when Own message in direct chat',
-        (WidgetTester tester) async {
-          await runTest(
-            tester,
-            event: event,
-            selectMode: false,
-            sameSender: true,
-            ownMessage: true,
-            screenSize: webSize,
-            isDirectChat: true,
-          );
-          verify(room.requestUser(event.senderId, ignoreErrors: true))
-              .called(1);
-          expect(find.byType(Avatar), findsOneWidget);
-        },
-      );
+      testWidgets('Should display Avatar when Own message in direct chat', (
+        WidgetTester tester,
+      ) async {
+        await runTest(
+          tester,
+          event: event,
+          selectMode: false,
+          sameSender: true,
+          ownMessage: true,
+          screenSize: webSize,
+          isDirectChat: true,
+        );
+        verify(room.requestUser(event.senderId, ignoreErrors: true)).called(1);
+        expect(find.byType(Avatar), findsOneWidget);
+      });
 
-      testWidgets(
-        'Should return Avatar when Not my message in direct chat',
-        (WidgetTester tester) async {
-          await runTest(
-            tester,
-            event: event,
-            selectMode: false,
-            sameSender: true,
-            ownMessage: false,
-            screenSize: webSize,
-            isDirectChat: true,
-          );
-          verify(room.requestUser(event.senderId, ignoreErrors: true))
-              .called(1);
-          expect(find.byType(Avatar), findsOneWidget);
-        },
-      );
+      testWidgets('Should return Avatar when Not my message in direct chat', (
+        WidgetTester tester,
+      ) async {
+        await runTest(
+          tester,
+          event: event,
+          selectMode: false,
+          sameSender: true,
+          ownMessage: false,
+          screenSize: webSize,
+          isDirectChat: true,
+        );
+        verify(room.requestUser(event.senderId, ignoreErrors: true)).called(1);
+        expect(find.byType(Avatar), findsOneWidget);
+      });
 
-      testWidgets(
-        'Should return Avatar when not my message in group chat',
-        (WidgetTester tester) async {
-          await runTest(
-            tester,
-            event: event,
-            selectMode: false,
-            sameSender: true,
-            ownMessage: false,
-            screenSize: webSize,
-            isDirectChat: false,
-          );
-          verify(room.requestUser(event.senderId, ignoreErrors: true))
-              .called(1);
-          expect(find.byType(Avatar), findsOneWidget);
-        },
-      );
+      testWidgets('Should return Avatar when not my message in group chat', (
+        WidgetTester tester,
+      ) async {
+        await runTest(
+          tester,
+          event: event,
+          selectMode: false,
+          sameSender: true,
+          ownMessage: false,
+          screenSize: webSize,
+          isDirectChat: false,
+        );
+        verify(room.requestUser(event.senderId, ignoreErrors: true)).called(1);
+        expect(find.byType(Avatar), findsOneWidget);
+      });
 
-      testWidgets(
-        'Should return SizedBox when Select mode is active',
-        (WidgetTester tester) async {
-          await runTest(
-            tester,
-            event: event,
-            selectMode: true,
-            sameSender: true,
-            ownMessage: false,
-            screenSize: webSize,
-            isDirectChat: true,
-          );
-          verifyNever(room.requestUser(event.senderId, ignoreErrors: true));
-          expect(find.byType(SizedBox), findsOneWidget);
-        },
-      );
+      testWidgets('Should return SizedBox when Select mode is active', (
+        WidgetTester tester,
+      ) async {
+        await runTest(
+          tester,
+          event: event,
+          selectMode: true,
+          sameSender: true,
+          ownMessage: false,
+          screenSize: webSize,
+          isDirectChat: true,
+        );
+        verifyNever(room.requestUser(event.senderId, ignoreErrors: true));
+        expect(find.byType(SizedBox), findsOneWidget);
+      });
     });
     group('Mobile-sized screens', () {
       const mobileSize = Size(400, 800);
 
-      testWidgets(
-        'Should return SizedBox when Own message in group chat',
-        (WidgetTester tester) async {
-          await runTest(
-            tester,
-            event: event,
-            selectMode: false,
-            sameSender: true,
-            ownMessage: true,
-            isDirectChat: false,
-            screenSize: mobileSize,
-          );
-          verifyNever(room.requestUser(event.senderId, ignoreErrors: true));
-          expect(find.byType(SizedBox), findsOneWidget);
-        },
-      );
+      testWidgets('Should return SizedBox when Own message in group chat', (
+        WidgetTester tester,
+      ) async {
+        await runTest(
+          tester,
+          event: event,
+          selectMode: false,
+          sameSender: true,
+          ownMessage: true,
+          isDirectChat: false,
+          screenSize: mobileSize,
+        );
+        verifyNever(room.requestUser(event.senderId, ignoreErrors: true));
+        expect(find.byType(SizedBox), findsOneWidget);
+      });
 
-      testWidgets(
-        'Should return SizedBox when Own message in direct chat',
-        (WidgetTester tester) async {
-          await runTest(
-            tester,
-            event: event,
-            selectMode: false,
-            sameSender: true,
-            ownMessage: true,
-            screenSize: mobileSize,
-            isDirectChat: true,
-          );
-          verifyNever(room.requestUser(event.senderId, ignoreErrors: true));
-          expect(find.byType(SizedBox), findsOneWidget);
-        },
-      );
+      testWidgets('Should return SizedBox when Own message in direct chat', (
+        WidgetTester tester,
+      ) async {
+        await runTest(
+          tester,
+          event: event,
+          selectMode: false,
+          sameSender: true,
+          ownMessage: true,
+          screenSize: mobileSize,
+          isDirectChat: true,
+        );
+        verifyNever(room.requestUser(event.senderId, ignoreErrors: true));
+        expect(find.byType(SizedBox), findsOneWidget);
+      });
 
-      testWidgets(
-        'Should return SizedBox when Not my message in direct chat',
-        (WidgetTester tester) async {
-          await runTest(
-            tester,
-            event: event,
-            selectMode: false,
-            sameSender: true,
-            ownMessage: false,
-            screenSize: mobileSize,
-            isDirectChat: true,
-          );
-          verifyNever(room.requestUser(event.senderId, ignoreErrors: true));
-          expect(find.byType(SizedBox), findsOneWidget);
-        },
-      );
+      testWidgets('Should return SizedBox when Not my message in direct chat', (
+        WidgetTester tester,
+      ) async {
+        await runTest(
+          tester,
+          event: event,
+          selectMode: false,
+          sameSender: true,
+          ownMessage: false,
+          screenSize: mobileSize,
+          isDirectChat: true,
+        );
+        verifyNever(room.requestUser(event.senderId, ignoreErrors: true));
+        expect(find.byType(SizedBox), findsOneWidget);
+      });
 
-      testWidgets(
-        'Should return Avatar when Not my message in group chat',
-        (WidgetTester tester) async {
-          await runTest(
-            tester,
-            event: event,
-            selectMode: false,
-            sameSender: true,
-            ownMessage: false,
-            screenSize: mobileSize,
-            isDirectChat: false,
-          );
-          verify(room.requestUser(event.senderId, ignoreErrors: true))
-              .called(1);
-          expect(find.byType(Avatar), findsOneWidget);
-        },
-      );
+      testWidgets('Should return Avatar when Not my message in group chat', (
+        WidgetTester tester,
+      ) async {
+        await runTest(
+          tester,
+          event: event,
+          selectMode: false,
+          sameSender: true,
+          ownMessage: false,
+          screenSize: mobileSize,
+          isDirectChat: false,
+        );
+        verify(room.requestUser(event.senderId, ignoreErrors: true)).called(1);
+        expect(find.byType(Avatar), findsOneWidget);
+      });
 
-      testWidgets(
-        'Should return SizedBox when Select mode is active',
-        (WidgetTester tester) async {
-          await runTest(
-            tester,
-            event: event,
-            selectMode: true,
-            sameSender: true,
-            ownMessage: false,
-            screenSize: mobileSize,
-            isDirectChat: true,
-          );
-          verifyNever(room.requestUser(event.senderId, ignoreErrors: true));
-          expect(find.byType(SizedBox), findsOneWidget);
-        },
-      );
+      testWidgets('Should return SizedBox when Select mode is active', (
+        WidgetTester tester,
+      ) async {
+        await runTest(
+          tester,
+          event: event,
+          selectMode: true,
+          sameSender: true,
+          ownMessage: false,
+          screenSize: mobileSize,
+          isDirectChat: true,
+        );
+        verifyNever(room.requestUser(event.senderId, ignoreErrors: true));
+        expect(find.byType(SizedBox), findsOneWidget);
+      });
     });
   });
 }

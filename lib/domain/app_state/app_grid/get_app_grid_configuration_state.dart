@@ -19,9 +19,7 @@ class GetAppGridConfigurationSuccess extends Success {
 class GetAppGridConfigurationFailure extends Failure {
   final dynamic exception;
 
-  const GetAppGridConfigurationFailure({
-    required this.exception,
-  });
+  const GetAppGridConfigurationFailure({required this.exception});
 
   @override
   List<Object?> get props => [exception];

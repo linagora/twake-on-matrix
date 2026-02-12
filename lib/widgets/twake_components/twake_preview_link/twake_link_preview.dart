@@ -74,10 +74,7 @@ class TwakeLinkPreviewController extends State<TwakeLinkPreview>
               text: widget.localizedBody,
               textStyle: widget.richTextStyle,
               linkStyle: widget.linkStyle,
-              linkTypes: const [
-                LinkType.url,
-                LinkType.phone,
-              ],
+              linkTypes: const [LinkType.url, LinkType.phone],
               textAlign: TextAlign.start,
               onTapDownLink: (tapDownDetails, link) => handleOnTappedLinkHtml(
                 context: context,
@@ -88,27 +85,22 @@ class TwakeLinkPreviewController extends State<TwakeLinkPreview>
       previewItemWidget: ValueListenableBuilder(
         valueListenable: getPreviewUrlStateNotifier,
         builder: (context, state, child) {
-          return state.fold(
-            (failure) => const SizedBox.shrink(),
-            (success) {
-              if (success is GetPreviewUrlSuccess) {
-                final previewLink = success.urlPreview.toPresentation();
-                return TwakeLinkPreviewItem(
-                  key: twakeLinkPreviewItemKey,
-                  ownMessage: widget.ownMessage,
-                  urlPreviewPresentation: previewLink,
-                  previewLink: firstValidUrl,
-                );
-              }
-              return child!;
-            },
-          );
+          return state.fold((failure) => const SizedBox.shrink(), (success) {
+            if (success is GetPreviewUrlSuccess) {
+              final previewLink = success.urlPreview.toPresentation();
+              return TwakeLinkPreviewItem(
+                key: twakeLinkPreviewItemKey,
+                ownMessage: widget.ownMessage,
+                urlPreviewPresentation: previewLink,
+                previewLink: firstValidUrl,
+              );
+            }
+            return child!;
+          });
         },
         child: Skeletonizer.zone(
           child: Container(
-            constraints: const BoxConstraints(
-              minWidth: double.infinity,
-            ),
+            constraints: const BoxConstraints(minWidth: double.infinity),
             height: TwakeLinkPreviewItemStyle.maxHeightPreviewItem,
             decoration: ShapeDecoration(
               color: widget.ownMessage

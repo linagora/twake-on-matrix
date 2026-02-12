@@ -6,11 +6,7 @@ class ProfileInfoBodyViewStyle {
   static ResponsiveUtils responsive = getIt.get<ResponsiveUtils>();
 
   static const EdgeInsetsGeometry profileInformationsTopPadding =
-      EdgeInsets.only(
-    top: 16.0,
-    left: 16.0,
-    right: 16.0,
-  );
+      EdgeInsets.only(top: 16.0, left: 16.0, right: 16.0);
 
   static const double bigDividerThickness = 1;
 
@@ -28,8 +24,9 @@ class ProfileInfoBodyViewStyle {
     vertical: 8,
   );
 
-  static const EdgeInsetsGeometry avatarPadding =
-      EdgeInsets.symmetric(vertical: 16.0);
+  static const EdgeInsetsGeometry avatarPadding = EdgeInsets.symmetric(
+    vertical: 16.0,
+  );
 
   static const double actionHeight = 40.0;
 }

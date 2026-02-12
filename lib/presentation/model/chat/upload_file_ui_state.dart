@@ -18,10 +18,7 @@ class UploadingFileUIState extends UploadFileUIState {
   final int? receive;
   final int? total;
 
-  const UploadingFileUIState({
-    this.receive,
-    this.total,
-  });
+  const UploadingFileUIState({this.receive, this.total});
 
   @override
   List<Object?> get props => [receive, total];

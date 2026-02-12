@@ -195,18 +195,13 @@ class UploadManager {
   Future<void> _clearFileTask(String eventId) async {
     try {
       uploadWorkerQueue.clearTaskInQueue(eventId);
-      await _eventIdMapUploadFileInfo[eventId]
-          ?.uploadStateStreamController
+      await _eventIdMapUploadFileInfo[eventId]?.uploadStateStreamController
           .close();
     } catch (e) {
-      Logs().e(
-        'UploadManager::_clear(): Error $e',
-      );
+      Logs().e('UploadManager::_clear(): Error $e');
     } finally {
       _eventIdMapUploadFileInfo.remove(eventId);
-      Logs().i(
-        'UploadManager:: Clear with $eventId successfully',
-      );
+      Logs().i('UploadManager:: Clear with $eventId successfully');
     }
   }
 
@@ -289,23 +284,17 @@ class UploadManager {
           'DownloadManager::download(): streamController or cancelToken is null',
         );
         _eventIdMapUploadFileInfo[txidKey]?.uploadStateStreamController.add(
-              Left(
-                UploadFileFailedState(
-                  exception: Exception(
-                    'streamController or cancelToken is null',
-                  ),
-                  txid: txidKey,
-                ),
-              ),
-            );
+          Left(
+            UploadFileFailedState(
+              exception: Exception('streamController or cancelToken is null'),
+              txid: txidKey,
+            ),
+          ),
+        );
         return;
       }
 
-      streamController.add(
-        const Right(
-          UploadFileInitial(),
-        ),
-      );
+      streamController.add(const Right(UploadFileInitial()));
 
       _addFileTaskToWorkerQueueMobile(
         txid: txidKey,
@@ -365,41 +354,33 @@ class UploadManager {
           'DownloadManager::download(): streamController or cancelToken is null',
         );
         _eventIdMapUploadFileInfo[txid]?.uploadStateStreamController.add(
-              Left(
-                UploadFileFailedState(
-                  exception: Exception(
-                    'streamController or cancelToken is null',
-                  ),
-                  txid: txid,
-                ),
-              ),
-            );
+          Left(
+            UploadFileFailedState(
+              exception: Exception('streamController or cancelToken is null'),
+              txid: txid,
+            ),
+          ),
+        );
         return;
       }
 
-      streamController.add(
-        const Right(
-          UploadFileInitial(),
-        ),
-      );
+      streamController.add(const Right(UploadFileInitial()));
 
-      await Future.wait(
-        [
-          _addFileTaskToWorkerQueueWeb(
-            txid: txid,
-            fakeImageEvent: fakeFileEvent,
-            room: room,
-            matrixFile: fileInfo,
-            streamController: streamController,
-            cancelToken: cancelToken,
-            thumbnail: thumbnails?[fileInfo],
-            sentDate: sentDate,
-            captionInfo: _eventIdMapUploadFileInfo[txid]?.captionInfo?.caption,
-            inReplyTo: isLastFile ? inReplyTo : null,
-            uploadInfo: _eventIdMapUploadFileInfo[txid]?.toJson(),
-          ),
-        ],
-      );
+      await Future.wait([
+        _addFileTaskToWorkerQueueWeb(
+          txid: txid,
+          fakeImageEvent: fakeFileEvent,
+          room: room,
+          matrixFile: fileInfo,
+          streamController: streamController,
+          cancelToken: cancelToken,
+          thumbnail: thumbnails?[fileInfo],
+          sentDate: sentDate,
+          captionInfo: _eventIdMapUploadFileInfo[txid]?.captionInfo?.caption,
+          inReplyTo: isLastFile ? inReplyTo : null,
+          uploadInfo: _eventIdMapUploadFileInfo[txid]?.toJson(),
+        ),
+      ]);
     }
   }
 
@@ -413,9 +394,7 @@ class UploadManager {
       final fileIndex = fileInfo.key;
       final fileValue = fileInfo.value;
 
-      final txid = await room.storePlaceholderFileInMem(
-        fileInfo: fileValue,
-      );
+      final txid = await room.storePlaceholderFileInMem(fileInfo: fileValue);
 
       Logs().d('UploadManager::uploadFileMobile(): txid: $txid');
 
@@ -450,23 +429,17 @@ class UploadManager {
           'DownloadManager::download(): streamController or cancelToken is null',
         );
         _eventIdMapUploadFileInfo[txid]?.uploadStateStreamController.add(
-              Left(
-                UploadFileFailedState(
-                  exception: Exception(
-                    'streamController or cancelToken is null',
-                  ),
-                  txid: txid,
-                ),
-              ),
-            );
+          Left(
+            UploadFileFailedState(
+              exception: Exception('streamController or cancelToken is null'),
+              txid: txid,
+            ),
+          ),
+        );
         return;
       }
 
-      streamController.add(
-        const Right(
-          UploadFileInitial(),
-        ),
-      );
+      streamController.add(const Right(UploadFileInitial()));
 
       _addFileTaskToWorkerQueueMobile(
         txid: txid,
@@ -529,9 +502,7 @@ class UploadManager {
               _updateEventUploadInfo(room, txid, info);
             }
             streamController.add(
-              Left(
-                UploadFileFailedState(exception: e, txid: txid),
-              ),
+              Left(UploadFileFailedState(exception: e, txid: txid)),
             );
           }
         },
@@ -589,9 +560,7 @@ class UploadManager {
               _updateEventUploadInfo(room, txid, info);
             }
             streamController.add(
-              Left(
-                UploadFileFailedState(exception: e, txid: txid),
-              ),
+              Left(UploadFileFailedState(exception: e, txid: txid)),
             );
           }
         },

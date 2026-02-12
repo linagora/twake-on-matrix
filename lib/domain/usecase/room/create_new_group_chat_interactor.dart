@@ -16,15 +16,13 @@ class CreateNewGroupChatInteractor {
 
       final addAvatarStateEvent = StateEvent(
         type: EventTypes.RoomAvatar,
-        content: {
-          'url': createNewGroupChatRequest.urlAvatar,
-        },
+        content: {'url': createNewGroupChatRequest.urlAvatar},
         stateKey: '',
       );
       final historyVisibility =
           createNewGroupChatRequest.enableEncryption == true
-              ? HistoryVisibility.joined
-              : HistoryVisibility.shared;
+          ? HistoryVisibility.joined
+          : HistoryVisibility.shared;
       final historyVisibilityStateEvent = StateEvent(
         type: EventTypes.HistoryVisibility,
         content: {'history_visibility': historyVisibility.name},
@@ -65,9 +63,9 @@ class CreateNewGroupChatInteractor {
         );
         return;
       }
-      if (exception
-          .toString()
-          .contains('M_UNKNOWN: Cannot invite so many users at once')) {
+      if (exception.toString().contains(
+        'M_UNKNOWN: Cannot invite so many users at once',
+      )) {
         yield Left(
           CreateNewGroupChatFailed(
             exception:

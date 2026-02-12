@@ -1,9 +1,7 @@
 class CheckHomeserverTimeoutException implements Exception {
   final dynamic error;
 
-  CheckHomeserverTimeoutException({
-    this.error,
-  });
+  CheckHomeserverTimeoutException({this.error});
 
   @override
   String toString() => error;
@@ -12,9 +10,7 @@ class CheckHomeserverTimeoutException implements Exception {
 class HomeserverTokenNotFoundException implements Exception {
   final dynamic error;
 
-  HomeserverTokenNotFoundException({
-    this.error,
-  });
+  HomeserverTokenNotFoundException({this.error});
 
   @override
   String toString() => error;

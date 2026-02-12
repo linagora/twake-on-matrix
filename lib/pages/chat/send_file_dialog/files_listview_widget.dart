@@ -68,8 +68,8 @@ class FilesListViewWidget extends StatelessWidget {
                           sizeString: file.sizeString,
                           backgroundColor:
                               SendFileDialogStyle.listViewBackgroundColor(
-                            context,
-                          ),
+                                context,
+                              ),
                           fileTileIcon: file.isFileHaveError(maxMediaSize)
                               ? ImagePaths.icFileError
                               : null,

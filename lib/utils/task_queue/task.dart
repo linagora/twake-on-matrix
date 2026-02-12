@@ -8,11 +8,7 @@ class Task with EquatableMixin {
   final Future Function() runnable;
   final void Function()? onTaskCompleted;
 
-  Task({
-    this.id,
-    required this.runnable,
-    this.onTaskCompleted,
-  });
+  Task({this.id, required this.runnable, this.onTaskCompleted});
 
   Future execute() async {
     final resultCompleter = Completer();

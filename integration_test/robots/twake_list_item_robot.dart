@@ -43,14 +43,14 @@ class TwakeListItemRobot extends CoreRobot {
   PatrolFinder getPinIcon() {
     final title = root.$(ChatListItemTitle);
     const pinData = IconData(0xF2D7, fontFamily: 'MaterialIcons');
-    final pinFinder =
-        find.descendant(of: title, matching: find.byIcon(pinData));
+    final pinFinder = find.descendant(
+      of: title,
+      matching: find.byIcon(pinData),
+    );
     return $(pinFinder);
   }
 
-  PatrolFinder getProfile({
-    required String matrixID,
-  }) {
+  PatrolFinder getProfile({required String matrixID}) {
     return root
         .$(ParticipantListItem)
         .containing(find.byKey(ValueKey<String>(matrixID)));

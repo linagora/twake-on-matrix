@@ -75,27 +75,19 @@ class AddStoryController extends State<AddStoryPage> {
     );
     final file = picked?.files.firstOrNull;
     if (file == null) return;
-    final matrixFile = MatrixImageFile(
-      bytes: file.bytes!,
-      name: file.name,
-    );
+    final matrixFile = MatrixImageFile(bytes: file.bytes!, name: file.name);
     setState(() {
       image = matrixFile;
     });
   }
 
   void capturePhoto() async {
-    final picked = await ImagePicker().pickImage(
-      source: ImageSource.camera,
-    );
+    final picked = await ImagePicker().pickImage(source: ImageSource.camera);
     if (picked == null) return;
     final matrixFile = await TwakeDialog.showFutureLoadingDialogFullScreen(
       future: () async {
         final bytes = await picked.readAsBytes();
-        return MatrixImageFile(
-          bytes: bytes,
-          name: picked.name,
-        );
+        return MatrixImageFile(bytes: bytes, name: picked.name);
       },
     );
 
@@ -113,9 +105,7 @@ class AddStoryController extends State<AddStoryPage> {
   }
 
   void captureVideo() async {
-    final picked = await ImagePicker().pickVideo(
-      source: ImageSource.camera,
-    );
+    final picked = await ImagePicker().pickVideo(source: ImageSource.camera);
     if (picked == null) return;
     final bytes = await picked.readAsBytes();
 
@@ -127,10 +117,10 @@ class AddStoryController extends State<AddStoryPage> {
   }
 
   void reset() => setState(() {
-        image = video = null;
-        alignmentX = alignmentY = 0;
-        controller.clear();
-      });
+    image = video = null;
+    alignmentX = alignmentY = 0;
+    controller.clear();
+  });
 
   void postStory() async {
     if (video == null && image == null && controller.text.isEmpty) return;

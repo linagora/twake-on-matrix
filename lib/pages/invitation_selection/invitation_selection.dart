@@ -48,8 +48,7 @@ class InvitationSelectionController
   }
 
   @override
-  List<String> get disabledContactIds => Matrix.of(context)
-      .client
+  List<String> get disabledContactIds => Matrix.of(context).client
       .getRoomById(_roomId!)!
       .getParticipants()
       .map((participant) => participant.id)
@@ -67,51 +66,44 @@ class InvitationSelectionController
 
     final subscription = getIt
         .get<UnbanAndInviteUsersInteractor>()
-        .execute(
-          room: _room,
-          userIds: selectedContacts,
-        )
+        .execute(room: _room, userIds: selectedContacts)
         .listen((event) {
-      final state = event.fold((failure) => failure, (success) => success);
+          final state = event.fold((failure) => failure, (success) => success);
 
-      if (state is InviteUserLoading) {
-        TwakeDialog.showLoadingDialog(context);
-        return;
-      }
+          if (state is InviteUserLoading) {
+            TwakeDialog.showLoadingDialog(context);
+            return;
+          }
 
-      if (state is InviteUserSuccess) {
-        TwakeSnackBar.show(
-          context,
-          L10n.of(context)!.contactHasBeenInvitedToTheGroup,
-        );
-        inviteSuccessAction();
-        return;
-      }
-
-      if (state is InviteUserSomeFailed) {
-        final exception = state.inviteUserPartialFailureException;
-
-        WidgetsBinding.instance.addPostFrameCallback(
-          (_) async {
-            await showConfirmAlertDialog(
-              context: context,
-              message: exception.getLocalizedErrorMessage(context),
-              isArrangeActionButtonsVertical: true,
-              okLabel: L10n.of(context)!.gotIt,
+          if (state is InviteUserSuccess) {
+            TwakeSnackBar.show(
+              context,
+              L10n.of(context)!.contactHasBeenInvitedToTheGroup,
             );
-          },
-        );
-        inviteSuccessAction();
-        return;
-      }
-    });
+            inviteSuccessAction();
+            return;
+          }
 
-    subscription.onDone(
-      () {
-        TwakeDialog.hideLoadingDialog(context);
-        subscription.cancel();
-      },
-    );
+          if (state is InviteUserSomeFailed) {
+            final exception = state.inviteUserPartialFailureException;
+
+            WidgetsBinding.instance.addPostFrameCallback((_) async {
+              await showConfirmAlertDialog(
+                context: context,
+                message: exception.getLocalizedErrorMessage(context),
+                isArrangeActionButtonsVertical: true,
+                okLabel: L10n.of(context)!.gotIt,
+              );
+            });
+            inviteSuccessAction();
+            return;
+          }
+        });
+
+    subscription.onDone(() {
+      TwakeDialog.hideLoadingDialog(context);
+      subscription.cancel();
+    });
   }
 
   void inviteSuccessAction() {
@@ -119,9 +111,6 @@ class InvitationSelectionController
   }
 
   @override
-  Widget build(BuildContext context) => ContactsSelectionView(
-        this,
-        bannedHighlight: true,
-        room: _room,
-      );
+  Widget build(BuildContext context) =>
+      ContactsSelectionView(this, bannedHighlight: true, room: _room);
 }

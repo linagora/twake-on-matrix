@@ -9,17 +9,15 @@ import 'package:fluffychat/presentation/same_type_events_builder/same_type_event
 class ChatDetailsLinksPage extends StatelessWidget {
   final SameTypeEventsBuilderController controller;
 
-  const ChatDetailsLinksPage({
-    super.key,
-    required this.controller,
-  });
+  const ChatDetailsLinksPage({super.key, required this.controller});
 
   @override
   Widget build(BuildContext context) {
     return SameTypeEventsBuilder(
       controller: controller,
       builder: (context, eventsState, _) {
-        final events = eventsState
+        final events =
+            eventsState
                 .getSuccessOrNull<TimelineSearchEventSuccess>()
                 ?.events ??
             [];

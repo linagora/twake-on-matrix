@@ -7,8 +7,8 @@ import 'package:fluffychat/domain/repository/recovery_words_repository.dart';
 import 'package:matrix/matrix.dart';
 
 class DeleteRecoveryWordsInteractor {
-  final RecoveryWordsRepository recoveryWordsRepository =
-      getIt.get<RecoveryWordsRepository>();
+  final RecoveryWordsRepository recoveryWordsRepository = getIt
+      .get<RecoveryWordsRepository>();
 
   Future<Either<Failure, Success>> execute() async {
     try {

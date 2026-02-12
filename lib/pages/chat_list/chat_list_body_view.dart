@@ -28,19 +28,20 @@ class ChatListBodyView extends StatelessWidget {
       excludeFromSemantics: true,
       behavior: HitTestBehavior.translucent,
       child: PageTransitionSwitcher(
-        transitionBuilder: (
-          Widget child,
-          Animation<double> primaryAnimation,
-          Animation<double> secondaryAnimation,
-        ) {
-          return SharedAxisTransition(
-            animation: primaryAnimation,
-            secondaryAnimation: secondaryAnimation,
-            transitionType: SharedAxisTransitionType.vertical,
-            fillColor: LinagoraSysColors.material().onPrimary,
-            child: child,
-          );
-        },
+        transitionBuilder:
+            (
+              Widget child,
+              Animation<double> primaryAnimation,
+              Animation<double> secondaryAnimation,
+            ) {
+              return SharedAxisTransition(
+                animation: primaryAnimation,
+                secondaryAnimation: secondaryAnimation,
+                transitionType: SharedAxisTransitionType.vertical,
+                fillColor: LinagoraSysColors.material().onPrimary,
+                child: child,
+              );
+            },
         child: SlidableAutoCloseBehavior(
           child: StreamBuilder(
             key: ValueKey(
@@ -69,18 +70,15 @@ class ChatListBodyView extends StatelessWidget {
                         padding: ChatListBodyViewStyle.paddingIconSkeletons,
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            SvgPicture.asset(
-                              ImagePaths.icSkeletons,
-                            ),
-                          ],
+                          children: [SvgPicture.asset(ImagePaths.icSkeletons)],
                         ),
                       ),
                       Padding(
                         padding: ChatListBodyViewStyle.paddingOwnProfile,
                         child: FutureBuilder<Profile?>(
-                          future: controller.activeClient
-                              .fetchOwnProfile(getFromRooms: false),
+                          future: controller.activeClient.fetchOwnProfile(
+                            getFromRooms: false,
+                          ),
                           builder: (context, snapshotProfile) {
                             if (snapshotProfile.connectionState !=
                                 ConnectionState.done) {
@@ -100,8 +98,9 @@ class ChatListBodyView extends StatelessWidget {
                                       .paddingTextStartNewChatMessage,
                                   child: Text(
                                     L10n.of(context)!.startNewChatMessage,
-                                    style:
-                                        Theme.of(context).textTheme.bodyMedium,
+                                    style: Theme.of(
+                                      context,
+                                    ).textTheme.bodyMedium,
                                     textAlign: TextAlign.center,
                                   ),
                                 ),
@@ -195,8 +194,8 @@ class ExpandableTitleBuilder extends StatelessWidget {
             Text(
               title,
               style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                    color: LinagoraRefColors.material().neutral[40],
-                  ),
+                color: LinagoraRefColors.material().neutral[40],
+              ),
             ),
             Padding(
               padding: ChatListBodyViewStyle.paddingIconExpand,

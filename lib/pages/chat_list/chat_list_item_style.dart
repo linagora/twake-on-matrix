@@ -22,33 +22,24 @@ class ChatListItemStyle {
   ) {
     return unread || hasNewMessages
         ? hasNotifications
-            ? 20.0
-            : 14.0
+              ? 20.0
+              : 14.0
         : 0.0;
   }
 
-  static const EdgeInsets paddingConversation = EdgeInsets.fromLTRB(
-    8,
-    8,
-    8,
-    8,
-  );
+  static const EdgeInsets paddingConversation = EdgeInsets.fromLTRB(8, 8, 8, 8);
 
-  static const EdgeInsets padding = EdgeInsets.symmetric(
-    horizontal: 8,
-  );
+  static const EdgeInsets padding = EdgeInsets.symmetric(horizontal: 8);
 
-  static const EdgeInsetsDirectional paddingAvatar =
-      EdgeInsetsDirectional.only(end: 8);
+  static const EdgeInsetsDirectional paddingAvatar = EdgeInsetsDirectional.only(
+    end: 8,
+  );
 
   static const EdgeInsetsDirectional paddingIconGroup =
       EdgeInsetsDirectional.all(4);
 
   static const EdgeInsetsDirectional paddingBody =
-      EdgeInsetsDirectional.symmetric(
-    horizontal: 8,
-    vertical: 4,
-  );
+      EdgeInsetsDirectional.symmetric(horizontal: 8, vertical: 4);
 
   static const double unreadBadgePaddingWhenMoreThanOne = 9.0;
 

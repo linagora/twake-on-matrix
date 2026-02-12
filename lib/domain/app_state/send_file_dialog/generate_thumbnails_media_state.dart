@@ -26,5 +26,5 @@ class GenerateThumbnailsMediaSuccess extends GenerateThumbnailsMediaState {
 
 class GenerateThumbnailsMediaFailure extends FeatureFailure {
   const GenerateThumbnailsMediaFailure(dynamic exception)
-      : super(exception: exception);
+    : super(exception: exception);
 }

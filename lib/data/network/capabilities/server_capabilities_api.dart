@@ -8,8 +8,9 @@ class ServerCapabilitiesAPI {
   const ServerCapabilitiesAPI();
 
   Future<ServerCapabilitiesResponse> getCapabilities() async {
-    final client =
-        getIt.get<DioClient>(instanceName: NetworkDI.homeDioClientName);
+    final client = getIt.get<DioClient>(
+      instanceName: NetworkDI.homeDioClientName,
+    );
 
     final response = await client.get(
       HomeserverEndpoint.capabilitiesPath.generateHomeserverCapabilitiesPath(),

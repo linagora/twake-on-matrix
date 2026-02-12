@@ -225,47 +225,43 @@ void main() {
     130,
   ];
 
-  group(
-    'stream image view tests',
-    () {
-      testWidgets(
-        'GIVE a MatrixFile with image stream data'
+  group('stream image view tests', () {
+    testWidgets('GIVE a MatrixFile with image stream data'
         'WHEN StreamImageViewer is rendered'
         'THEN the image is loaded and displayed'
-        'AND the onImageLoaded callback is called with the loaded image',
-        (WidgetTester tester) async {
-          final mockMatrixFile = MatrixFile(
-            name: 'test1.png',
-            bytes: Uint8List.fromList(kBlueLandscapePng),
-            mimeType: 'image/png',
-          );
-
-          MatrixFile? loadedFile;
-
-          await tester.pumpWidget(
-            MaterialApp(
-              home: StreamImageViewer(
-                matrixFile: mockMatrixFile,
-                onImageLoaded: (file) {
-                  loadedFile = file;
-                },
-              ),
-            ),
-          );
-
-          await tester.pumpAndSettle();
-
-          expect(loadedFile, isNotNull);
-
-          expect(mockMatrixFile.size == loadedFile?.size, true);
-
-          expect(loadedFile?.name.equals(mockMatrixFile.name), true);
-
-          expect(loadedFile?.bytes != null, true);
-
-          expect(loadedFile?.bytes.length, kBlueLandscapePng.length);
-        },
+        'AND the onImageLoaded callback is called with the loaded image', (
+      WidgetTester tester,
+    ) async {
+      final mockMatrixFile = MatrixFile(
+        name: 'test1.png',
+        bytes: Uint8List.fromList(kBlueLandscapePng),
+        mimeType: 'image/png',
       );
-    },
-  );
+
+      MatrixFile? loadedFile;
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: StreamImageViewer(
+            matrixFile: mockMatrixFile,
+            onImageLoaded: (file) {
+              loadedFile = file;
+            },
+          ),
+        ),
+      );
+
+      await tester.pumpAndSettle();
+
+      expect(loadedFile, isNotNull);
+
+      expect(mockMatrixFile.size == loadedFile?.size, true);
+
+      expect(loadedFile?.name.equals(mockMatrixFile.name), true);
+
+      expect(loadedFile?.bytes != null, true);
+
+      expect(loadedFile?.bytes.length, kBlueLandscapePng.length);
+    });
+  });
 }

@@ -15,18 +15,12 @@ extension ContactHiveObjExtension on ContactHiveObj {
 
 extension PhoneNumberHiveObjectExtension on PhoneNumberHiveObject {
   PhoneNumber toPhoneNumber() {
-    return PhoneNumber(
-      number: number,
-      matrixId: matrixId,
-    );
+    return PhoneNumber(number: number, matrixId: matrixId);
   }
 }
 
 extension EmailHiveObjectExtension on EmailHiveObject {
   Email toEmail() {
-    return Email(
-      address: email,
-      matrixId: matrixId,
-    );
+    return Email(address: email, matrixId: matrixId);
   }
 }

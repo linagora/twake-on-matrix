@@ -27,10 +27,7 @@ mixin MediaViewerAppBarMixin on SaveMediaToGalleryAndroidMixin {
   }
 
   /// Forward this image to another room.
-  void forwardAction(
-    BuildContext context,
-    Event? event,
-  ) async {
+  void forwardAction(BuildContext context, Event? event) async {
     Matrix.of(context).shareContent = event?.content;
     final responsive = getIt.get<ResponsiveUtils>();
 
@@ -45,52 +42,49 @@ mixin MediaViewerAppBarMixin on SaveMediaToGalleryAndroidMixin {
 
   Future<PopResultFromForward?> _showForwardMobileDialog(
     BuildContext context,
-  ) async =>
-      await showDialog(
-        context: context,
-        useSafeArea: false,
-        useRootNavigator: false,
-        builder: (c) => const Forward(),
-      );
+  ) async => await showDialog(
+    context: context,
+    useSafeArea: false,
+    useRootNavigator: false,
+    builder: (c) => const Forward(),
+  );
 
-  final forwardSelectionMobileAndTabletKey =
-      const Key('ForwardSelectionMobileAndTabletKey');
+  final forwardSelectionMobileAndTabletKey = const Key(
+    'ForwardSelectionMobileAndTabletKey',
+  );
 
-  final forwardSelectionWebAndDesktopKey =
-      const Key('ForwardSelectionWebAndDesktopKey');
+  final forwardSelectionWebAndDesktopKey = const Key(
+    'ForwardSelectionWebAndDesktopKey',
+  );
 
   Future<PopResultFromForward?> _showForwardWebDialog(
     BuildContext context,
-  ) async =>
-      await showDialog(
-        context: context,
-        barrierDismissible: false,
-        useSafeArea: false,
-        useRootNavigator: false,
-        builder: (context) {
-          return SlotLayout(
-            config: <Breakpoint, SlotLayoutConfig>{
-              const WidthPlatformBreakpoint(
-                begin: ResponsiveUtils.minTabletWidth,
-              ): SlotLayout.from(
-                key: forwardSelectionWebAndDesktopKey,
-                builder: (_) => const ForwardWebView(),
-              ),
-              const WidthPlatformBreakpoint(
-                end: ResponsiveUtils.minTabletWidth,
-              ): SlotLayout.from(
-                key: forwardSelectionMobileAndTabletKey,
-                builder: (_) => const Forward(),
-              ),
-            },
-          );
+  ) async => await showDialog(
+    context: context,
+    barrierDismissible: false,
+    useSafeArea: false,
+    useRootNavigator: false,
+    builder: (context) {
+      return SlotLayout(
+        config: <Breakpoint, SlotLayoutConfig>{
+          const WidthPlatformBreakpoint(
+            begin: ResponsiveUtils.minTabletWidth,
+          ): SlotLayout.from(
+            key: forwardSelectionWebAndDesktopKey,
+            builder: (_) => const ForwardWebView(),
+          ),
+          const WidthPlatformBreakpoint(
+            end: ResponsiveUtils.minTabletWidth,
+          ): SlotLayout.from(
+            key: forwardSelectionMobileAndTabletKey,
+            builder: (_) => const Forward(),
+          ),
         },
       );
+    },
+  );
 
-  void showInChat(
-    BuildContext context,
-    Event? event,
-  ) {
+  void showInChat(BuildContext context, Event? event) {
     if (!PlatformInfos.isMobile) {
       handleShowInChatInWeb(context, event);
     } else {
@@ -98,40 +92,29 @@ mixin MediaViewerAppBarMixin on SaveMediaToGalleryAndroidMixin {
     }
   }
 
-  void handleShowInChatInWeb(
-    BuildContext context,
-    Event? event,
-  ) {
+  void handleShowInChatInWeb(BuildContext context, Event? event) {
     backToChatScreenInWeb(context, event);
     scrollToEventInChat(context, event);
     return;
   }
 
-  void handleShowInChatInMobile(
-    BuildContext context,
-    Event? event,
-  ) {
+  void handleShowInChatInMobile(BuildContext context, Event? event) {
     backToChatScreenInMobile(context);
     scrollToEventInChat(context, event);
   }
 
-  void backToChatScreenInWeb(
-    BuildContext context,
-    Event? event,
-  ) {
+  void backToChatScreenInWeb(BuildContext context, Event? event) {
     if (responsiveUtils.isTablet(context) ||
         responsiveUtils.isMobile(context)) {
-      Navigator.of(context)
-          .pop(MediaViewerPopupResultEnum.closeRightColumnFlag);
+      Navigator.of(
+        context,
+      ).pop(MediaViewerPopupResultEnum.closeRightColumnFlag);
     } else {
       Navigator.of(context).pop();
     }
   }
 
-  void scrollToEventInChat(
-    BuildContext context,
-    Event? event,
-  ) {
+  void scrollToEventInChat(BuildContext context, Event? event) {
     if (event != null) {
       context.goToRoomWithEvent(event.room.id, event.eventId);
     }
@@ -147,10 +130,7 @@ mixin MediaViewerAppBarMixin on SaveMediaToGalleryAndroidMixin {
     Navigator.of(context).pop();
   }
 
-  void saveFileAction(
-    BuildContext context,
-    Event? event,
-  ) {
+  void saveFileAction(BuildContext context, Event? event) {
     if (PlatformInfos.isWeb) {
       event?.saveFile(context);
     } else {
@@ -160,9 +140,6 @@ mixin MediaViewerAppBarMixin on SaveMediaToGalleryAndroidMixin {
     }
   }
 
-  void shareFileAction(
-    BuildContext context,
-    Event? event,
-  ) =>
+  void shareFileAction(BuildContext context, Event? event) =>
       event?.shareFile(context);
 }

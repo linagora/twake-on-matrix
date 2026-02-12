@@ -13,14 +13,14 @@ class SvgCopiableProfileRow extends CopiableProfileRow {
     super.enableDividerTop,
     super.key,
   }) : super(
-          leadingIcon: SvgPicture.asset(
-            leadingIconPath,
-            width: ChatProfileInfoStyle.iconSize,
-            height: ChatProfileInfoStyle.iconSize,
-            colorFilter: ColorFilter.mode(
-              LinagoraSysColors.material().tertiary,
-              BlendMode.srcIn,
-            ),
-          ),
-        );
+         leadingIcon: SvgPicture.asset(
+           leadingIconPath,
+           width: ChatProfileInfoStyle.iconSize,
+           height: ChatProfileInfoStyle.iconSize,
+           colorFilter: ColorFilter.mode(
+             LinagoraSysColors.material().tertiary,
+             BlendMode.srcIn,
+           ),
+         ),
+       );
 }

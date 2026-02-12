@@ -8,9 +8,7 @@ part 'server_capabilities_response.g.dart';
 class ServerCapabilitiesResponse extends Equatable {
   final Capabilities capabilities;
 
-  const ServerCapabilitiesResponse({
-    required this.capabilities,
-  });
+  const ServerCapabilitiesResponse({required this.capabilities});
 
   factory ServerCapabilitiesResponse.fromJson(Map<String, dynamic> json) =>
       _$ServerCapabilitiesResponseFromJson(json);

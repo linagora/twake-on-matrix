@@ -10,23 +10,22 @@ Future<T?> showAdaptiveBottomSheet<T>({
   bool isDismissible = true,
   bool isScrollControlled = false,
   bool showDragHandle = false,
-}) =>
-    showModalBottomSheet(
-      context: context,
-      builder: builder,
-      showDragHandle: showDragHandle,
-      useRootNavigator: !PlatformInfos.isMobile,
-      isDismissible: isDismissible,
-      isScrollControlled: isScrollControlled,
-      constraints: BoxConstraints(
-        maxHeight: MediaQuery.sizeOf(context).height - 128,
-        maxWidth: TwakeThemes.columnWidth * 1.5,
-      ),
-      clipBehavior: Clip.hardEdge,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.only(
-          topLeft: Radius.circular(AppConfig.borderRadius),
-          topRight: Radius.circular(AppConfig.borderRadius),
-        ),
-      ),
-    );
+}) => showModalBottomSheet(
+  context: context,
+  builder: builder,
+  showDragHandle: showDragHandle,
+  useRootNavigator: !PlatformInfos.isMobile,
+  isDismissible: isDismissible,
+  isScrollControlled: isScrollControlled,
+  constraints: BoxConstraints(
+    maxHeight: MediaQuery.sizeOf(context).height - 128,
+    maxWidth: TwakeThemes.columnWidth * 1.5,
+  ),
+  clipBehavior: Clip.hardEdge,
+  shape: const RoundedRectangleBorder(
+    borderRadius: BorderRadius.only(
+      topLeft: Radius.circular(AppConfig.borderRadius),
+      topRight: Radius.circular(AppConfig.borderRadius),
+    ),
+  ),
+);

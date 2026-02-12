@@ -8,10 +8,14 @@ import '../../robots/home_robot.dart';
 
 // --- Common config ---
 const defaultTime = Duration(seconds: 60);
-const searchPhrase =
-    String.fromEnvironment('SearchByTitle', defaultValue: 'My Default Group');
-const forwardReceiver =
-    String.fromEnvironment('Receiver', defaultValue: 'Receiver Group');
+const searchPhrase = String.fromEnvironment(
+  'SearchByTitle',
+  defaultValue: 'My Default Group',
+);
+const forwardReceiver = String.fromEnvironment(
+  'Receiver',
+  defaultValue: 'Receiver Group',
+);
 
 int uniqueId() => DateTime.now().microsecondsSinceEpoch;
 
@@ -82,9 +86,9 @@ void main() {
         "No message here yet... is not shown",
       );
       s.softAssertEquals(
-        $(DraftChatEmpty)
-            .$("Send a message or tap on the greeting below.")
-            .exists,
+        $(
+          DraftChatEmpty,
+        ).$("Send a message or tap on the greeting below.").exists,
         true,
         "Send a message or tap on the greeting below is not shown",
       );
@@ -122,9 +126,9 @@ void main() {
         "No message here yet... is not shown",
       );
       s.softAssertEquals(
-        $(DraftChatEmpty)
-            .$("Send a message or tap on the greeting below.")
-            .exists,
+        $(
+          DraftChatEmpty,
+        ).$("Send a message or tap on the greeting below.").exists,
         true,
         "Send a message or tap on the greeting below is not shown",
       );

@@ -75,6 +75,8 @@ void _selectText(
   required int start,
   required int end,
 }) {
-  textEditingController.selection =
-      TextSelection(baseOffset: start, extentOffset: end);
+  textEditingController.selection = TextSelection(
+    baseOffset: start,
+    extentOffset: end,
+  );
 }

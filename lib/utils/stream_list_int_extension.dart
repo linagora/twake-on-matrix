@@ -21,15 +21,17 @@ extension StreamListIntExtension on Stream<List<int>> {
         final remainingBytes = chunkLength - offset;
 
         // Calculate bytes to copy (either remaining bytes or chunk size, whichever is smaller)
-        final bytesToCopy =
-            remainingBytes < chunkSize ? remainingBytes : chunkSize;
+        final bytesToCopy = remainingBytes < chunkSize
+            ? remainingBytes
+            : chunkSize;
 
         // Resize the byteData if necessary
         if (length + bytesToCopy > byteData.lengthInBytes) {
           final newByteData = ByteData(length + bytesToCopy);
-          newByteData.buffer
-              .asUint8List()
-              .setAll(0, byteData.buffer.asUint8List());
+          newByteData.buffer.asUint8List().setAll(
+            0,
+            byteData.buffer.asUint8List(),
+          );
           byteData = newByteData;
         }
 
@@ -50,9 +52,7 @@ extension StreamListIntExtension on Stream<List<int>> {
   Future<Uint8List> toBytes() {
     final completer = Completer<Uint8List>();
     final sink = ByteConversionSink.withCallback(
-      (bytes) => completer.complete(
-        Uint8List.fromList(bytes),
-      ),
+      (bytes) => completer.complete(Uint8List.fromList(bytes)),
     );
 
     late StreamSubscription<List<int>> subscription;

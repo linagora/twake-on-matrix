@@ -22,10 +22,11 @@ class FederationConfigurationsHiveObj with EquatableMixin {
     return FederationConfigurationsHiveObj(
       federationServerInformation:
           FederationServerInformationHiveObj.fromFederationServerInformation(
-        federationConfigurations.fedServerInformation,
-      ),
+            federationConfigurations.fedServerInformation,
+          ),
       identityServerUrl: federationConfigurations
-          .identityServerInformation?.baseUrl
+          .identityServerInformation
+          ?.baseUrl
           .toString(),
     );
   }
@@ -37,8 +38,5 @@ class FederationConfigurationsHiveObj with EquatableMixin {
       _$FederationConfigurationsHiveObjToJson(this);
 
   @override
-  List<Object?> get props => [
-        federationServerInformation,
-        identityServerUrl,
-      ];
+  List<Object?> get props => [federationServerInformation, identityServerUrl];
 }

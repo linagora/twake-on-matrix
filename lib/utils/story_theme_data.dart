@@ -27,18 +27,19 @@ class StoryThemeData {
     return StoryThemeData(
       color1: color1,
       color2: color2,
-      fit:
-          json.tryGet<String>('fit') == 'cover' ? BoxFit.cover : BoxFit.contain,
+      fit: json.tryGet<String>('fit') == 'cover'
+          ? BoxFit.cover
+          : BoxFit.contain,
       alignmentX: json.tryGet<int>('alignment_x') ?? 0,
       alignmentY: json.tryGet<int>('alignment_y') ?? 0,
     );
   }
 
   Map<String, dynamic> toJson() => {
-        if (color1 != null) 'color1': color1?.value,
-        if (color2 != null) 'color2': color2?.value,
-        'fit': fit.name,
-        'alignment_x': alignmentX,
-        'alignment_y': alignmentY,
-      };
+    if (color1 != null) 'color1': color1?.value,
+    if (color2 != null) 'color2': color2?.value,
+    'fit': fit.name,
+    'alignment_x': alignmentX,
+    'alignment_y': alignmentY,
+  };
 }

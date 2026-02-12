@@ -31,11 +31,7 @@ class AddStoryView extends StatelessWidget {
           style: const TextStyle(
             color: Colors.white,
             shadows: [
-              Shadow(
-                color: Colors.black,
-                offset: Offset(0, 0),
-                blurRadius: 5,
-              ),
+              Shadow(color: Colors.black, offset: Offset(0, 0), blurRadius: 5),
             ],
           ),
         ),

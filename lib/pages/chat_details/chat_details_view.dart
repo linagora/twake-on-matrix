@@ -45,7 +45,9 @@ class ChatDetailsView extends StatelessWidget {
             listenable: controller.removeUsersChangeNotifier,
             builder: (context, child) {
               if (!controller
-                  .removeUsersChangeNotifier.haveSelectedUsersNotifier.value) {
+                  .removeUsersChangeNotifier
+                  .haveSelectedUsersNotifier
+                  .value) {
                 return child ?? const SizedBox();
               }
               return _RemoveMembersButton(controller: controller);
@@ -89,8 +91,9 @@ class ChatDetailsView extends StatelessWidget {
             headerSliverBuilder: (context, innerBoxIsScrolled) {
               return [
                 SliverOverlapAbsorber(
-                  handle:
-                      NestedScrollView.sliverOverlapAbsorberHandleFor(context),
+                  handle: NestedScrollView.sliverOverlapAbsorberHandleFor(
+                    context,
+                  ),
                   sliver: SliverAppBar(
                     backgroundColor: LinagoraSysColors.material().onPrimary,
                     toolbarHeight:
@@ -101,8 +104,8 @@ class ChatDetailsView extends StatelessWidget {
                       children: [
                         _GroupInformation(
                           avatarUri: controller.room?.avatar,
-                          displayName:
-                              controller.room?.getLocalizedDisplayname(),
+                          displayName: controller.room
+                              ?.getLocalizedDisplayname(),
                           membersCount:
                               controller.room?.summary.actualMembersCount,
                         ),
@@ -131,9 +134,9 @@ class ChatDetailsView extends StatelessWidget {
                                     child: _TileSubtitleText(
                                       subtitle:
                                           controller.room?.topic == null ||
-                                                  controller.room!.topic.isEmpty
-                                              ? L10n.of(context)!.noDescription
-                                              : controller.room!.topic,
+                                              controller.room!.topic.isEmpty
+                                          ? L10n.of(context)!.noDescription
+                                          : controller.room!.topic,
                                     ),
                                   ),
                                 ),
@@ -155,10 +158,11 @@ class ChatDetailsView extends StatelessWidget {
                                         child: FittedBox(
                                           fit: BoxFit.fill,
                                           child: Switch(
-                                            activeTrackColor: Theme.of(context)
-                                                .colorScheme
-                                                .primary,
-                                            value: pushRuleState ==
+                                            activeTrackColor: Theme.of(
+                                              context,
+                                            ).colorScheme.primary,
+                                            value:
+                                                pushRuleState ==
                                                 PushRuleState.notify,
                                             onChanged: (value) {
                                               controller.onToggleNotification();
@@ -181,25 +185,24 @@ class ChatDetailsView extends StatelessWidget {
                     forceElevated: innerBoxIsScrolled,
                     bottom: TabBar(
                       physics: const NeverScrollableScrollPhysics(),
-                      overlayColor: WidgetStateProperty.all(
-                        Colors.transparent,
-                      ),
+                      overlayColor: WidgetStateProperty.all(Colors.transparent),
                       indicatorSize: TabBarIndicatorSize.tab,
                       indicatorColor: Theme.of(context).colorScheme.primary,
                       indicatorPadding: const EdgeInsets.symmetric(
                         horizontal: 12.0,
                       ),
                       indicatorWeight: 3.0,
-                      labelStyle:
-                          Theme.of(context).textTheme.titleSmall?.copyWith(
-                                color: Theme.of(context).colorScheme.primary,
-                              ),
+                      labelStyle: Theme.of(context).textTheme.titleSmall
+                          ?.copyWith(
+                            color: Theme.of(context).colorScheme.primary,
+                          ),
                       unselectedLabelStyle: Theme.of(context)
                           .textTheme
                           .titleSmall
                           ?.copyWith(
-                            color:
-                                Theme.of(context).colorScheme.onSurfaceVariant,
+                            color: Theme.of(
+                              context,
+                            ).colorScheme.onSurfaceVariant,
                           ),
                       tabs: controller.tabList.map((page) {
                         return Tab(
@@ -243,9 +246,7 @@ class ChatDetailsView extends StatelessWidget {
 }
 
 class _AddMembersButton extends StatelessWidget {
-  const _AddMembersButton({
-    required this.controller,
-  });
+  const _AddMembersButton({required this.controller});
 
   final ChatDetailsController controller;
 
@@ -279,10 +280,8 @@ class _AddMembersButton extends StatelessWidget {
                   child: Text(
                     L10n.of(context)!.addMember,
                     style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                          color: Theme.of(context)
-                              .colorScheme
-                              .onSecondaryContainer,
-                        ),
+                      color: Theme.of(context).colorScheme.onSecondaryContainer,
+                    ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -297,9 +296,7 @@ class _AddMembersButton extends StatelessWidget {
 }
 
 class _RemoveMembersButton extends StatelessWidget {
-  const _RemoveMembersButton({
-    required this.controller,
-  });
+  const _RemoveMembersButton({required this.controller});
 
   final ChatDetailsController controller;
 
@@ -357,9 +354,7 @@ class _RemoveMembersButton extends StatelessWidget {
 }
 
 class _TileSubtitleText extends StatelessWidget {
-  const _TileSubtitleText({
-    required this.subtitle,
-  });
+  const _TileSubtitleText({required this.subtitle});
 
   final String subtitle;
 
@@ -369,16 +364,14 @@ class _TileSubtitleText extends StatelessWidget {
       subtitle,
       maxLines: 1,
       style: Theme.of(context).textTheme.labelMedium?.copyWith(
-            color: Theme.of(context).colorScheme.tertiary,
-          ),
+        color: Theme.of(context).colorScheme.tertiary,
+      ),
     );
   }
 }
 
 class _TileTitleText extends StatelessWidget {
-  const _TileTitleText({
-    required this.title,
-  });
+  const _TileTitleText({required this.title});
 
   final String title;
 
@@ -387,8 +380,8 @@ class _TileTitleText extends StatelessWidget {
     return Text(
       title,
       style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-            color: Theme.of(context).colorScheme.onSurface,
-          ),
+        color: Theme.of(context).colorScheme.onSurface,
+      ),
     );
   }
 }
@@ -461,8 +454,8 @@ class _GroupInformation extends StatelessWidget {
                 Text(
                   displayName ?? '',
                   style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                        color: LinagoraSysColors.material().onSurface,
-                      ),
+                    color: LinagoraSysColors.material().onSurface,
+                  ),
                   maxLines: 2,
                   textAlign: TextAlign.center,
                 ),
@@ -471,8 +464,8 @@ class _GroupInformation extends StatelessWidget {
                       ? L10n.of(context)!.countMembers(membersCount!)
                       : '',
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: LinagoraRefColors.material().tertiary[30],
-                      ),
+                    color: LinagoraRefColors.material().tertiary[30],
+                  ),
                   maxLines: 2,
                   textAlign: TextAlign.center,
                 ),

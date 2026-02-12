@@ -28,15 +28,17 @@ class StickyTimestampWidget extends StatelessWidget {
                 : null,
             alignment: Alignment.center,
             child: Padding(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+              padding: const EdgeInsets.symmetric(
+                horizontal: 16.0,
+                vertical: 8.0,
+              ),
               child: Column(
                 children: [
                   Text(
                     content,
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: LinagoraRefColors.material().tertiary[20],
-                        ),
+                      color: LinagoraRefColors.material().tertiary[20],
+                    ),
                   ),
                 ],
               ),

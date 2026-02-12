@@ -4,9 +4,9 @@ import 'package:matrix/matrix.dart';
 
 extension RoomListExtension on List<Room> {
   bool _matchedMatrixId(RecentChatSearchModel model, String keyword) {
-    return model.directChatMatrixID
-            ?.toLowerCase()
-            .contains(keyword.toLowerCase()) ??
+    return model.directChatMatrixID?.toLowerCase().contains(
+          keyword.toLowerCase(),
+        ) ??
         false;
   }
 
@@ -25,12 +25,10 @@ extension RoomListExtension on List<Room> {
     int? limit,
   }) {
     return where(
-      (room) => room.isNotSpaceAndStoryRoom() && room.isShowInChatList(),
-    )
-        .map((room) => room.toRecentChatSearchModel(matrixLocalizations))
-        .where(
-          (model) => _matchedNameOrMatrixId(model, keyword),
+          (room) => room.isNotSpaceAndStoryRoom() && room.isShowInChatList(),
         )
+        .map((room) => room.toRecentChatSearchModel(matrixLocalizations))
+        .where((model) => _matchedNameOrMatrixId(model, keyword))
         .take(limit ?? length)
         .toList();
   }

@@ -44,8 +44,10 @@ void main() {
 
     test('Large data set is correctly processed', () async {
       // Generating a large data set
-      final largeDataSet =
-          List.generate(10, (index) => List.filled(1024 * 1024, index % 256));
+      final largeDataSet = List.generate(
+        10,
+        (index) => List.filled(1024 * 1024, index % 256),
+      );
       final stream = Stream.fromIterable(largeDataSet);
       final result = await stream.toUint8List();
 

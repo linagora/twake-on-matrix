@@ -8,14 +8,11 @@ import 'package:mockito/mockito.dart';
 
 import 'typing_timer_wrapper_test.mocks.dart';
 
-@GenerateNiceMocks([
-  MockSpec<Room>(),
-  MockSpec<Client>(),
-  MockSpec<L10n>(),
-])
+@GenerateNiceMocks([MockSpec<Room>(), MockSpec<Client>(), MockSpec<L10n>()])
 void main() {
-  testWidgets('typing timer wrapper should stop showing typing after 30s',
-      (tester) async {
+  testWidgets('typing timer wrapper should stop showing typing after 30s', (
+    tester,
+  ) async {
     final room = MockRoom();
     final client = MockClient();
     final l10n = MockL10n();

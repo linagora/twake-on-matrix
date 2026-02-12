@@ -44,16 +44,13 @@ class _TypingTimerWrapperState extends State<TypingTimerWrapper> {
   @override
   void initState() {
     super.initState();
-    timer = RestartableTimer(
-      const Duration(seconds: 30),
-      () {
-        if (!mounted) return;
+    timer = RestartableTimer(const Duration(seconds: 30), () {
+      if (!mounted) return;
 
-        setState(() {
-          showTyping = false;
-        });
-      },
-    )..cancel();
+      setState(() {
+        showTyping = false;
+      });
+    })..cancel();
     checkTyping();
   }
 

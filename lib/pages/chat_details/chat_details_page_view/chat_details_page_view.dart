@@ -72,12 +72,10 @@ class ChatDetailsPageViewBuilder extends StatelessWidget {
     );
   }
 
-  Widget _highlightTitlePageSelected(
-    BuildContext context,
-    int index,
-  ) {
+  Widget _highlightTitlePageSelected(BuildContext context, int index) {
     return Container(
-      width: _getSizeTitleTabBarPage(
+      width:
+          _getSizeTitleTabBarPage(
             context,
             pages[index].page.getTitle(context),
           ).size.width +
@@ -110,23 +108,20 @@ class ChatDetailsPageViewBuilder extends StatelessWidget {
       title,
       textAlign: TextAlign.center,
       style: Theme.of(context).textTheme.titleSmall?.copyWith(
-            color: currentIndexPageSelected == index
-                ? LinagoraSysColors.material().primary
-                : LinagoraSysColors.material().onSurface,
-          ),
+        color: currentIndexPageSelected == index
+            ? LinagoraSysColors.material().primary
+            : LinagoraSysColors.material().onSurface,
+      ),
     );
   }
 
-  TextPainter _getSizeTitleTabBarPage(
-    BuildContext context,
-    String title,
-  ) {
+  TextPainter _getSizeTitleTabBarPage(BuildContext context, String title) {
     return TextPainter(
       text: TextSpan(
         text: title,
         style: Theme.of(context).textTheme.titleSmall?.copyWith(
-              color: LinagoraSysColors.material().primary,
-            ),
+          color: LinagoraSysColors.material().primary,
+        ),
       ),
       maxLines: 1,
       textDirection: TextDirection.ltr,

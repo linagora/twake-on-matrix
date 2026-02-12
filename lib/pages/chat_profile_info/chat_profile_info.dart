@@ -61,12 +61,11 @@ class ChatProfileInfoController extends State<ChatProfileInfo>
   StreamSubscription? ignoredUsersStreamSub;
 
   final ValueNotifier<Either<Failure, Success>> userInfoNotifier =
-      ValueNotifier<Either<Failure, Success>>(
-    Right(GettingUserInfo()),
-  );
+      ValueNotifier<Either<Failure, Success>>(Right(GettingUserInfo()));
 
-  final ValueNotifier<bool?> blockUserLoadingNotifier =
-      ValueNotifier<bool?>(null);
+  final ValueNotifier<bool?> blockUserLoadingNotifier = ValueNotifier<bool?>(
+    null,
+  );
 
   final ValueNotifier<bool> isBlockedUser = ValueNotifier<bool>(false);
 
@@ -87,12 +86,8 @@ class ChatProfileInfoController extends State<ChatProfileInfo>
 
   void getUserInfoAction() {
     userInfoNotifierSub = _getUserInfoInteractor
-        .execute(
-          userId: presentationContact?.matrixId ?? user?.id ?? '',
-        )
-        .listen(
-          (event) => userInfoNotifier.value = event,
-        );
+        .execute(userId: presentationContact?.matrixId ?? user?.id ?? '')
+        .listen((event) => userInfoNotifier.value = event);
   }
 
   ScrollPhysics getScrollPhysics() {
@@ -114,10 +109,7 @@ class ChatProfileInfoController extends State<ChatProfileInfo>
             (failure) {
               if (failure is UnblockUserFailure) {
                 blockUserLoadingNotifier.value = false;
-                TwakeSnackBar.show(
-                  context,
-                  failure.exception.toString(),
-                );
+                TwakeSnackBar.show(context, failure.exception.toString());
                 return;
               }
 
@@ -173,10 +165,7 @@ class ChatProfileInfoController extends State<ChatProfileInfo>
             (failure) {
               if (failure is BlockUserFailure) {
                 blockUserLoadingNotifier.value = false;
-                TwakeSnackBar.show(
-                  context,
-                  failure.exception.toString(),
-                );
+                TwakeSnackBar.show(context, failure.exception.toString());
                 return;
               }
 
@@ -211,19 +200,17 @@ class ChatProfileInfoController extends State<ChatProfileInfo>
   }
 
   void listenIgnoredUser() {
-    isBlockedUser.value = Matrix.read(context)
-        .client
-        .ignoredUsers
-        .contains(presentationContact?.matrixId ?? user?.id ?? '');
-    ignoredUsersStreamSub =
-        Matrix.read(context).client.ignoredUsersStream.listen((value) {
-      final userBlocked = Matrix.read(context)
-          .client
-          .ignoredUsers
-          .contains(presentationContact?.matrixId ?? user?.id ?? '');
-      blockUserLoadingNotifier.value = false;
-      isBlockedUser.value = userBlocked;
-    });
+    isBlockedUser.value = Matrix.read(context).client.ignoredUsers.contains(
+      presentationContact?.matrixId ?? user?.id ?? '',
+    );
+    ignoredUsersStreamSub = Matrix.read(context).client.ignoredUsersStream
+        .listen((value) {
+          final userBlocked = Matrix.read(context).client.ignoredUsers.contains(
+            presentationContact?.matrixId ?? user?.id ?? '',
+          );
+          blockUserLoadingNotifier.value = false;
+          isBlockedUser.value = userBlocked;
+        });
   }
 
   bool isAlreadyInChat(BuildContext context) {
@@ -248,11 +235,11 @@ class ChatProfileInfoController extends State<ChatProfileInfo>
       (failure) => null,
       (success) => success is GetContactsSuccess
           ? success.contacts
-              .firstWhereOrNull(
-                (c) => c.emails?.any((e) => e.matrixId == matrixId) == true,
-              )
-              ?.toPresentationContacts()
-              .firstOrNull
+                .firstWhereOrNull(
+                  (c) => c.emails?.any((e) => e.matrixId == matrixId) == true,
+                )
+                ?.toPresentationContacts()
+                .firstOrNull
           : null,
     );
   }
@@ -287,8 +274,8 @@ class ChatProfileInfoController extends State<ChatProfileInfo>
     super.initState();
     _initPresentationContact();
     getIt.get<ContactsManager>().getContactsNotifier().addListener(
-          _onTomContactsUpdateListener,
-        );
+      _onTomContactsUpdateListener,
+    );
     getUserInfoAction();
     listenIgnoredUser();
   }
@@ -296,8 +283,8 @@ class ChatProfileInfoController extends State<ChatProfileInfo>
   @override
   void dispose() {
     getIt.get<ContactsManager>().getContactsNotifier().removeListener(
-          _onTomContactsUpdateListener,
-        );
+      _onTomContactsUpdateListener,
+    );
     userInfoNotifier.dispose();
     userInfoNotifierSub?.cancel();
     ignoredUsersStreamSub?.cancel();

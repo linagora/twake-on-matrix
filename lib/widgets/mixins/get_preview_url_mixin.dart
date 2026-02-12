@@ -10,11 +10,12 @@ import 'package:matrix/matrix.dart';
 mixin GetPreviewUrlMixin {
   static const int _defaultPreferredPreviewTimeInMilliseconds = 2000;
 
-  final GetPreviewURLInteractor _getPreviewURLInteractor =
-      getIt.get<GetPreviewURLInteractor>();
+  final GetPreviewURLInteractor _getPreviewURLInteractor = getIt
+      .get<GetPreviewURLInteractor>();
 
-  final getPreviewUrlStateNotifier =
-      ValueNotifier<Either<Failure, Success>>(Right(GetPreviewUrlInitial()));
+  final getPreviewUrlStateNotifier = ValueNotifier<Either<Failure, Success>>(
+    Right(GetPreviewUrlInitial()),
+  );
 
   abstract String debugLabel;
 
@@ -23,10 +24,7 @@ mixin GetPreviewUrlMixin {
     int preferredPreviewTime = _defaultPreferredPreviewTimeInMilliseconds,
   }) {
     _getPreviewURLInteractor
-        .execute(
-          uri: uri,
-          preferredPreviewTime: preferredPreviewTime,
-        )
+        .execute(uri: uri, preferredPreviewTime: preferredPreviewTime)
         .listen(
           _handleGetPreviewUrlOnData,
           onError: _handleGetPreviewUrlOnError,
@@ -40,15 +38,10 @@ mixin GetPreviewUrlMixin {
   }
 
   void _handleGetPreviewUrlOnDone() {
-    Logs().d(
-      '$debugLabel::_handleGetPreviewUrlOnDone() - done',
-    );
+    Logs().d('$debugLabel::_handleGetPreviewUrlOnDone() - done');
   }
 
-  void _handleGetPreviewUrlOnError(
-    dynamic error,
-    StackTrace? stackTrace,
-  ) {
+  void _handleGetPreviewUrlOnError(dynamic error, StackTrace? stackTrace) {
     Logs().e(
       '$debugLabel::_handleGetPreviewUrlOnError() - error: $error | stackTrace: $stackTrace',
     );

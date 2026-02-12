@@ -19,45 +19,43 @@ class ErrorPageStyle {
 
   static TextStyle? titleTextStyle(BuildContext context) =>
       ErrorPageStyle.responsiveUtils.isMobile(context)
-          ? Theme.of(context).textTheme.headlineSmall?.copyWith(
-                fontWeight: FontWeight.w600,
-                color: Theme.of(context).colorScheme.onSurface,
-              )
-          : Theme.of(context).textTheme.headlineLarge?.copyWith(
-                fontWeight: FontWeight.w600,
-                color: Theme.of(context).colorScheme.onSurface,
-              );
+      ? Theme.of(context).textTheme.headlineSmall?.copyWith(
+          fontWeight: FontWeight.w600,
+          color: Theme.of(context).colorScheme.onSurface,
+        )
+      : Theme.of(context).textTheme.headlineLarge?.copyWith(
+          fontWeight: FontWeight.w600,
+          color: Theme.of(context).colorScheme.onSurface,
+        );
   static TextStyle? descriptionTextStyle(BuildContext context) =>
       ErrorPageStyle.responsiveUtils.isMobile(context)
-          ? Theme.of(context).textTheme.labelLarge?.copyWith(
-                fontWeight: FontWeight.w500,
-                color: LinagoraRefColors.material().tertiary[20],
-              )
-          : Theme.of(context).textTheme.bodyLarge?.copyWith(
-                fontWeight: FontWeight.w500,
-                color: LinagoraRefColors.material().tertiary[20],
-              );
+      ? Theme.of(context).textTheme.labelLarge?.copyWith(
+          fontWeight: FontWeight.w500,
+          color: LinagoraRefColors.material().tertiary[20],
+        )
+      : Theme.of(context).textTheme.bodyLarge?.copyWith(
+          fontWeight: FontWeight.w500,
+          color: LinagoraRefColors.material().tertiary[20],
+        );
 
   static ButtonStyle buttonStyle(BuildContext context) => ButtonStyle(
-        iconSize: WidgetStateProperty.all<double>(18),
-        textStyle: WidgetStateProperty.all(
-          Theme.of(context).textTheme.labelLarge?.copyWith(
-                fontWeight: FontWeight.w500,
-                color: Theme.of(context).colorScheme.onPrimary,
-              ),
-        ),
-        backgroundColor: WidgetStateProperty.all<Color>(
-          Theme.of(context).colorScheme.primary,
-        ),
-        foregroundColor: WidgetStateProperty.all<Color>(
-          Theme.of(context).colorScheme.onPrimary,
-        ),
-        shape: WidgetStateProperty.all<RoundedRectangleBorder>(
-          RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(100),
-          ),
-        ),
-      );
+    iconSize: WidgetStateProperty.all<double>(18),
+    textStyle: WidgetStateProperty.all(
+      Theme.of(context).textTheme.labelLarge?.copyWith(
+        fontWeight: FontWeight.w500,
+        color: Theme.of(context).colorScheme.onPrimary,
+      ),
+    ),
+    backgroundColor: WidgetStateProperty.all<Color>(
+      Theme.of(context).colorScheme.primary,
+    ),
+    foregroundColor: WidgetStateProperty.all<Color>(
+      Theme.of(context).colorScheme.onPrimary,
+    ),
+    shape: WidgetStateProperty.all<RoundedRectangleBorder>(
+      RoundedRectangleBorder(borderRadius: BorderRadius.circular(100)),
+    ),
+  );
 
   static const double textsGap = 12.0;
 }

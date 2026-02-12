@@ -7,8 +7,9 @@ extension TextEdittingControllerExtension on TextEditingController {
     final start = selection.start;
     final end = selection.end;
     TwakeClipboard.instance.initReader();
-    final pastedText = await TwakeClipboard.instance
-        .pasteText(clipboardReader: clipboardReader);
+    final pastedText = await TwakeClipboard.instance.pasteText(
+      clipboardReader: clipboardReader,
+    );
     if (pastedText != null) {
       if (start == -1 || end == -1) {
         text = pastedText + text;

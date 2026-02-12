@@ -71,8 +71,8 @@ class SettingsProfileViewWeb extends StatelessWidget {
                       child: Text(
                         L10n.of(context)!.basicInfo,
                         style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                              color: Theme.of(context).colorScheme.onSurface,
-                            ),
+                          color: Theme.of(context).colorScheme.onSurface,
+                        ),
                       ),
                     ),
                     Row(
@@ -89,42 +89,41 @@ class SettingsProfileViewWeb extends StatelessWidget {
                               ),
                               ValueListenableBuilder(
                                 valueListenable: settingsProfileUIState,
-                                builder: (context, uiState, child) =>
-                                    uiState.fold(
-                                  (failure) => child!,
-                                  (success) {
-                                    if (success
-                                        is GetAvatarOnWebUIStateSuccess) {
-                                      return ClipOval(
-                                        child: SizedBox.fromSize(
-                                          size: const Size.fromRadius(
-                                            SettingsProfileViewWebStyle
-                                                .radiusImageMemory,
+                                builder: (context, uiState, child) => uiState
+                                    .fold((failure) => child!, (success) {
+                                      if (success
+                                          is GetAvatarOnWebUIStateSuccess) {
+                                        return ClipOval(
+                                          child: SizedBox.fromSize(
+                                            size: const Size.fromRadius(
+                                              SettingsProfileViewWebStyle
+                                                  .radiusImageMemory,
+                                            ),
+                                            child: StreamImageViewer(
+                                              matrixFile: success.matrixFile!,
+                                              onImageLoaded: onImageLoaded,
+                                            ),
                                           ),
-                                          child: StreamImageViewer(
-                                            matrixFile: success.matrixFile!,
-                                            onImageLoaded: onImageLoaded,
-                                          ),
-                                        ),
-                                      );
-                                    }
-                                    return child!;
-                                  },
-                                ),
+                                        );
+                                      }
+                                      return child!;
+                                    }),
                                 child: ValueListenableBuilder(
                                   valueListenable: currentProfile,
                                   builder: (context, profile, _) {
-                                    final displayName = profile?.displayName ??
+                                    final displayName =
+                                        profile?.displayName ??
                                         client.mxid(context).localpart ??
                                         client.mxid(context);
                                     return Material(
-                                      elevation: Theme.of(context)
+                                      elevation:
+                                          Theme.of(context)
                                               .appBarTheme
                                               .scrolledUnderElevation ??
                                           4,
-                                      shadowColor: Theme.of(context)
-                                          .appBarTheme
-                                          .shadowColor,
+                                      shadowColor: Theme.of(
+                                        context,
+                                      ).appBarTheme.shadowColor,
                                       shape: RoundedRectangleBorder(
                                         side: BorderSide(
                                           color: Theme.of(context).dividerColor,
@@ -171,54 +170,57 @@ class SettingsProfileViewWeb extends StatelessWidget {
                                         ),
                                       ),
                                     ),
-                                    builder: (
-                                      BuildContext context,
-                                      MenuController menuController,
-                                      Widget? child,
-                                    ) {
-                                      return GestureDetector(
-                                        onTap: () => menuController.isOpen
-                                            ? menuController.close()
-                                            : menuController.open(),
-                                        child: Container(
-                                          decoration: BoxDecoration(
-                                            color: Theme.of(context)
-                                                .colorScheme
-                                                .primary,
-                                            borderRadius: BorderRadius.circular(
-                                              SettingsProfileViewWebStyle
-                                                  .avatarSize,
+                                    builder:
+                                        (
+                                          BuildContext context,
+                                          MenuController menuController,
+                                          Widget? child,
+                                        ) {
+                                          return GestureDetector(
+                                            onTap: () => menuController.isOpen
+                                                ? menuController.close()
+                                                : menuController.open(),
+                                            child: Container(
+                                              decoration: BoxDecoration(
+                                                color: Theme.of(
+                                                  context,
+                                                ).colorScheme.primary,
+                                                borderRadius:
+                                                    BorderRadius.circular(
+                                                      SettingsProfileViewWebStyle
+                                                          .avatarSize,
+                                                    ),
+                                                border: Border.all(
+                                                  color: Theme.of(
+                                                    context,
+                                                  ).colorScheme.onPrimary,
+                                                  width:
+                                                      SettingsProfileViewWebStyle
+                                                          .iconEditBorderWidth,
+                                                ),
+                                              ),
+                                              padding:
+                                                  SettingsProfileViewWebStyle
+                                                      .paddingEditIcon,
+                                              child: Icon(
+                                                Icons.edit,
+                                                size:
+                                                    SettingsProfileViewWebStyle
+                                                        .iconEditSize,
+                                                color: Theme.of(
+                                                  context,
+                                                ).colorScheme.onPrimary,
+                                              ),
                                             ),
-                                            border: Border.all(
-                                              color: Theme.of(context)
-                                                  .colorScheme
-                                                  .onPrimary,
-                                              width: SettingsProfileViewWebStyle
-                                                  .iconEditBorderWidth,
-                                            ),
-                                          ),
-                                          padding: SettingsProfileViewWebStyle
-                                              .paddingEditIcon,
-                                          child: Icon(
-                                            Icons.edit,
-                                            size: SettingsProfileViewWebStyle
-                                                .iconEditSize,
-                                            color: Theme.of(context)
-                                                .colorScheme
-                                                .onPrimary,
-                                          ),
-                                        ),
-                                      );
-                                    },
+                                          );
+                                        },
                                     menuChildren: menuChildren ?? [],
                                   ),
                                 ),
                             ],
                           ),
                         ),
-                        Expanded(
-                          child: basicInfoWidget,
-                        ),
+                        Expanded(child: basicInfoWidget),
                       ],
                     ),
                   ],
@@ -230,8 +232,8 @@ class SettingsProfileViewWeb extends StatelessWidget {
                 child: Text(
                   L10n.of(context)!.editProfileDescriptions,
                   style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                        color: LinagoraRefColors.material().tertiary[30],
-                      ),
+                    color: LinagoraRefColors.material().tertiary[30],
+                  ),
                 ),
               ),
               Container(
@@ -256,8 +258,8 @@ class SettingsProfileViewWeb extends StatelessWidget {
                       child: Text(
                         L10n.of(context)!.workIdentitiesInfo,
                         style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                              color: Theme.of(context).colorScheme.onSurface,
-                            ),
+                          color: Theme.of(context).colorScheme.onSurface,
+                        ),
                       ),
                     ),
                     Padding(

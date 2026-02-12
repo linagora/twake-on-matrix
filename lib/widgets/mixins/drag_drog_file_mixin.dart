@@ -31,11 +31,8 @@ mixin DragDrogFileMixin {
   Future<List<MatrixFile>> onDragDone(DropDoneDetails details) async {
     draggingNotifier.value = false;
     final bytesList = await TwakeDialog.showFutureLoadingDialogFullScreen(
-      future: () => Future.wait(
-        details.files.map(
-          (xfile) => xfile.readAsBytes(),
-        ),
-      ),
+      future: () =>
+          Future.wait(details.files.map((xfile) => xfile.readAsBytes())),
     );
     if (bytesList.error != null) return [];
 
@@ -45,8 +42,9 @@ mixin DragDrogFileMixin {
         MatrixFile(
           bytes: bytesList.result![i],
           name: details.files[i].name,
-          mimeType:
-              MimeTypeUitls.instance.getTwakeMimeType(details.files[i].name),
+          mimeType: MimeTypeUitls.instance.getTwakeMimeType(
+            details.files[i].name,
+          ),
         ).detectFileType,
       );
     }

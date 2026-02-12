@@ -19,8 +19,8 @@ class PushNotificationExtensions {
       content: json['content'] is Map
           ? Map<String, dynamic>.from(json['content'])
           : json['content'] is String
-              ? jsonDecode(json['content'])
-              : null,
+          ? jsonDecode(json['content'])
+          : null,
       counts: _extractCounts(json),
       devices: [],
       eventId: json['event_id'],
@@ -44,14 +44,12 @@ class PushNotificationExtensions {
 
   PushNotificationCounts? _extractCounts(Map<String, dynamic> json) {
     final unread = json['unread'] is int ? json['unread'] : null;
-    final missedCalls =
-        json['missed_calls'] is int ? json['missed_calls'] : null;
+    final missedCalls = json['missed_calls'] is int
+        ? json['missed_calls']
+        : null;
 
     if (unread != null || missedCalls != null) {
-      return PushNotificationCounts(
-        missedCalls: missedCalls,
-        unread: unread,
-      );
+      return PushNotificationCounts(missedCalls: missedCalls, unread: unread);
     }
     return null;
   }

@@ -71,11 +71,13 @@ class MediaViewerController extends State<MediaViewer> {
         );
         forwardToken = expandResult.forward?.end;
         backwardToken = expandResult.backward?.end;
-        List<Event> forwardEvents = expandResult.forward?.chunk
+        List<Event> forwardEvents =
+            expandResult.forward?.chunk
                 .map((e) => Event.fromMatrixEvent(e, room))
                 .toList() ??
             [];
-        List<Event> backwardEvents = expandResult.backward?.chunk
+        List<Event> backwardEvents =
+            expandResult.backward?.chunk
                 .map((e) => Event.fromMatrixEvent(e, room))
                 .toList() ??
             [];
@@ -112,31 +114,23 @@ class MediaViewerController extends State<MediaViewer> {
     if (client?.encryption == null) return events;
 
     return await Future.wait(
-      events.map(
-        (event) async {
-          try {
-            if (event.type != EventTypes.Encrypted) {
-              return event;
-            }
-
-            return await client!.encryption!.decryptRoomEvent(event);
-          } catch (e) {
-            Logs().e('Error decrypting event id ${event.eventId}', e);
+      events.map((event) async {
+        try {
+          if (event.type != EventTypes.Encrypted) {
             return event;
           }
-        },
-      ),
+
+          return await client!.encryption!.decryptRoomEvent(event);
+        } catch (e) {
+          Logs().e('Error decrypting event id ${event.eventId}', e);
+          return event;
+        }
+      }),
     );
   }
 
-  Future<
-      ({
-        GetRoomEventsResponse? backward,
-        GetRoomEventsResponse? forward,
-      })> expandEvents({
-    String? backwardToken,
-    String? forwardToken,
-  }) async {
+  Future<({GetRoomEventsResponse? backward, GetRoomEventsResponse? forward})>
+  expandEvents({String? backwardToken, String? forwardToken}) async {
     if (client == null) return (backward: null, forward: null);
 
     final roomId = widget.event.room.id;
@@ -184,29 +178,23 @@ class MediaViewerController extends State<MediaViewer> {
     );
     List<Event> loadMoreEvents = direction == Direction.b
         ? result.backward?.chunk
-                .map((e) => Event.fromMatrixEvent(e, room))
-                .toList() ??
-            []
+                  .map((e) => Event.fromMatrixEvent(e, room))
+                  .toList() ??
+              []
         : result.forward?.chunk
-                .map((e) => Event.fromMatrixEvent(e, room))
-                .toList() ??
-            [];
+                  .map((e) => Event.fromMatrixEvent(e, room))
+                  .toList() ??
+              [];
     if (mustDecrypt) {
       loadMoreEvents = await decryptEvents(loadMoreEvents);
     }
     loadMoreEvents = loadMoreEvents.mediaEventsOnly;
     if (direction == Direction.b) {
       backwardToken = result.backward?.end;
-      mediaEvents = [
-        ...mediaEvents,
-        ...loadMoreEvents,
-      ];
+      mediaEvents = [...mediaEvents, ...loadMoreEvents];
     } else {
       forwardToken = result.forward?.end;
-      mediaEvents = [
-        ...loadMoreEvents.reversed,
-        ...mediaEvents,
-      ];
+      mediaEvents = [...loadMoreEvents.reversed, ...mediaEvents];
     }
     if (loadMoreEvents.isEmpty) {
       await loadMore(direction, limit: limit - 1);

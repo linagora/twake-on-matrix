@@ -30,8 +30,8 @@ class ReadChatListTitleTextStyleDecorator
   @override
   TextStyle textStyle(Room room) {
     return LinagoraTextStyle.material().bodyMedium2.copyWith(
-          color: LinagoraSysColors.material().onSurface,
-        );
+      color: LinagoraSysColors.material().onSurface,
+    );
   }
 }
 
@@ -44,10 +44,12 @@ class UnreadChatListTitleTextStyleDecorator
   @override
   TextStyle textStyle(Room room) {
     if (room.isUnreadOrInvited) {
-      return _interfaceTextStyleComponent.textStyle(room).merge(
+      return _interfaceTextStyleComponent
+          .textStyle(room)
+          .merge(
             LinagoraTextStyle.material().bodyMedium2.copyWith(
-                  color: LinagoraSysColors.material().onSurface,
-                ),
+              color: LinagoraSysColors.material().onSurface,
+            ),
           );
     } else {
       return _interfaceTextStyleComponent.textStyle(room);
@@ -69,9 +71,9 @@ class MuteChatListTitleTextStyleDecorator
   TextStyle textStyle(Room room) {
     final isMuted = room.pushRuleState != PushRuleState.notify;
     if (isMuted) {
-      return _interfaceTextStyleComponent.textStyle(room).copyWith(
-            color: LinagoraSysColors.material().onSurface,
-          );
+      return _interfaceTextStyleComponent
+          .textStyle(room)
+          .copyWith(color: LinagoraSysColors.material().onSurface);
     } else {
       return _interfaceTextStyleComponent.textStyle(room);
     }

@@ -12,8 +12,9 @@ class VerifyNameInteractor {
     List<Validator> listValidator,
   ) {
     try {
-      return CompositeNameValidator(listValidator)
-          .validate(NewNameRequest(newName));
+      return CompositeNameValidator(
+        listValidator,
+      ).validate(NewNameRequest(newName));
     } catch (exception) {
       return Left<Failure, Success>(VerifyNameFailure(exception));
     }

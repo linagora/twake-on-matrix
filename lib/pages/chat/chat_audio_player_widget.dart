@@ -90,7 +90,8 @@ class ChatAudioPlayerWidget extends StatelessWidget {
                               onTap: () async =>
                                   _handlePlayOrPauseAudioPlayer(context),
                               iconColor: LinagoraSysColors.material().primary,
-                              icon: audioPlayer?.playing == true &&
+                              icon:
+                                  audioPlayer?.playing == true &&
                                       audioPlayer?.isAtEndPosition == false
                                   ? Icons.pause_outlined
                                   : Icons.play_arrow,
@@ -101,7 +102,7 @@ class ChatAudioPlayerWidget extends StatelessWidget {
                                 event: hasEvent,
                                 duration:
                                     audioPlayer?.position.minuteSecondString ??
-                                        '',
+                                    '',
                               ),
                             ),
                             Row(
@@ -201,20 +202,16 @@ class ChatAudioPlayerWidget extends StatelessWidget {
       matrix?.currentAudioStatus.value = AudioPlayerStatus.downloaded;
     } catch (e, s) {
       Logs().v('Could not download audio file', e, s);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(e.toLocalizedString(context)),
-        ),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(e.toLocalizedString(context))));
       rethrow;
     }
     if (!context.mounted) return;
 
     if (matrix == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(L10n.of(context)!.couldNotPlayAudioFile),
-        ),
+        SnackBar(content: Text(L10n.of(context)!.couldNotPlayAudioFile)),
       );
       return;
     }
@@ -224,13 +221,12 @@ class ChatAudioPlayerWidget extends StatelessWidget {
     if (file != null) {
       await matrix?.audioPlayer.setFilePath(file.path);
     } else if (matrixFile != null) {
-      await matrix?.audioPlayer
-          .setAudioSource(MatrixFileAudioSource(matrixFile));
+      await matrix?.audioPlayer.setAudioSource(
+        MatrixFileAudioSource(matrixFile),
+      );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(L10n.of(context)!.couldNotPlayAudioFile),
-        ),
+        SnackBar(content: Text(L10n.of(context)!.couldNotPlayAudioFile)),
       );
       return;
     }
@@ -318,16 +314,15 @@ class _DisplaySenderNameWhenPlayingAudio extends StatelessWidget {
     return FutureBuilder<User?>(
       future: event.fetchSenderUser(),
       builder: (context, snapshot) {
-        final displayName = snapshot.data?.calcDisplayname() ??
+        final displayName =
+            snapshot.data?.calcDisplayname() ??
             event.senderFromMemoryOrFallback.calcDisplayname();
         return Text(
-          "${displayName.shortenDisplayName(
-            maxCharacters: DisplayNameWidget.maxCharactersDisplayNameBubble,
-          )}  $duration",
+          "${displayName.shortenDisplayName(maxCharacters: DisplayNameWidget.maxCharactersDisplayNameBubble)}  $duration",
           style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                fontFamily: 'Inter',
-                color: LinagoraRefColors.material().neutral[50],
-              ),
+            fontFamily: 'Inter',
+            color: LinagoraRefColors.material().neutral[50],
+          ),
           maxLines: 1,
           overflow: TextOverflow.clip,
         );

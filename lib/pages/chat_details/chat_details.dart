@@ -41,9 +41,7 @@ class ChatDetailsController extends State<ChatDetails>
 
   final actionsWebAndDesktopKey = const Key('ActionsWebAndDesktopKey');
 
-  final muteNotifier = ValueNotifier<PushRuleState>(
-    PushRuleState.notify,
-  );
+  final muteNotifier = ValueNotifier<PushRuleState>(PushRuleState.notify);
 
   @override
   Room? get room => Matrix.of(context).client.getRoomById(widget.roomId);
@@ -83,9 +81,7 @@ class ChatDetailsController extends State<ChatDetails>
     Navigator.of(context).push(
       CupertinoPageRoute(
         builder: (context) {
-          return ChatDetailsEdit(
-            roomId: roomId!,
-          );
+          return ChatDetailsEdit(roomId: roomId!);
         },
       ),
     );
@@ -93,10 +89,7 @@ class ChatDetailsController extends State<ChatDetails>
 
   void onTapInviteLink(BuildContext context, String inviteLink) async {
     await TwakeClipboard.instance.copyText(inviteLink);
-    TwakeSnackBar.show(
-      context,
-      L10n.of(context)!.copiedToClipboard,
-    );
+    TwakeSnackBar.show(context, L10n.of(context)!.copiedToClipboard);
   }
 
   @override

@@ -34,10 +34,7 @@ class MessageTime extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: timelineOverlayMessage
-          ? const EdgeInsets.symmetric(
-              vertical: 4,
-              horizontal: 8,
-            )
+          ? const EdgeInsets.symmetric(vertical: 4, horizontal: 8)
           : null,
       decoration: timelineOverlayMessage
           ? BoxDecoration(
@@ -63,38 +60,32 @@ class MessageTime extends StatelessWidget {
             ),
             const SizedBox(width: 4.0),
           ],
-          if (event.hasAggregatedEvents(
-            timeline,
-            RelationshipTypes.edit,
-          ))
+          if (event.hasAggregatedEvents(timeline, RelationshipTypes.edit))
             Text(
               '${L10n.of(context)!.edited} ',
               textScaler: const TextScaler.linear(1.0),
               style: Theme.of(context).textTheme.bodySmall?.merge(
-                    TextStyle(
-                      color: timelineOverlayMessage
-                          ? Colors.white
-                          : LinagoraRefColors.material().tertiary[30],
-                      letterSpacing: 0.4,
-                    ),
-                  ),
+                TextStyle(
+                  color: timelineOverlayMessage
+                      ? Colors.white
+                      : LinagoraRefColors.material().tertiary[30],
+                  letterSpacing: 0.4,
+                ),
+              ),
             ),
           Text(
             DateFormat("HH:mm").format(event.originServerTs),
             textScaler: const TextScaler.linear(1.0),
             style: Theme.of(context).textTheme.bodySmall?.merge(
-                  TextStyle(
-                    color: timelineOverlayMessage
-                        ? Colors.white
-                        : LinagoraRefColors.material().tertiary[30],
-                    letterSpacing: 0.4,
-                  ),
-                ),
+              TextStyle(
+                color: timelineOverlayMessage
+                    ? Colors.white
+                    : LinagoraRefColors.material().tertiary[30],
+                letterSpacing: 0.4,
+              ),
+            ),
           ),
-          TextMessageRetryButton(
-            event: event,
-            onRetry: onRetryTextMessage,
-          ),
+          TextMessageRetryButton(event: event, onRetry: onRetryTextMessage),
           if (showSeenIcon) ...[
             SizedBox(width: MessageTimeStyle.paddingTimeAndIcon),
             SeenByRow(
