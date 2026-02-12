@@ -20,23 +20,27 @@ class BanUserInteractor {
         return;
       }
 
-      // Reduce power level to guest before banning if user has elevated privileges
+      // Reduce power level to member before banning if user has elevated privileges
       if (user.powerLevel > DefaultPowerLevelMember.member.powerLevel) {
-        var powerMap = room.getState(EventTypes.RoomPowerLevels)?.content;
-        if (powerMap is! Map<String, dynamic>) {
-          powerMap = <String, dynamic>{};
+        final powerLevelEvent = room.getState(EventTypes.RoomPowerLevels);
+
+        // Skip power level reduction if state is null to avoid overwriting server data
+        if (powerLevelEvent != null) {
+          final powerMap = Map<String, dynamic>.from(
+            powerLevelEvent.content,
+          );
+          final usersMap = powerMap['users'] as Map<String, dynamic>? ?? {};
+          powerMap['users'] = usersMap;
+
+          usersMap[user.id] = DefaultPowerLevelMember.member.powerLevel;
+
+          await room.client.setRoomStateWithKey(
+            room.id,
+            EventTypes.RoomPowerLevels,
+            '',
+            powerMap,
+          );
         }
-        final usersMap = powerMap['users'] as Map<String, dynamic>? ?? {};
-        powerMap['users'] = usersMap;
-
-        usersMap[user.id] = DefaultPowerLevelMember.member.powerLevel;
-
-        await room.client.setRoomStateWithKey(
-          room.id,
-          EventTypes.RoomPowerLevels,
-          '',
-          powerMap,
-        );
       }
 
       await user.ban();

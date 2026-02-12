@@ -285,7 +285,7 @@ void main() {
       });
 
       test(
-          'should handle empty power levels and reduce elevated user power level',
+          'should skip power level reduction and ban user when power level state is null',
           () async {
         // Arrange
         when(mockUser.canBan).thenReturn(true);
@@ -294,9 +294,6 @@ void main() {
         when(mockUser.id).thenReturn('@mod:server.com');
         when(mockUser.ban()).thenAnswer((_) async {});
         when(mockRoom.getState(EventTypes.RoomPowerLevels)).thenReturn(null);
-        when(
-          mockClient.setRoomStateWithKey(any, any, any, any),
-        ).thenAnswer((_) async => '');
 
         // Act
         final result = interactor.execute(user: mockUser, room: mockRoom);
@@ -313,22 +310,17 @@ void main() {
           ]),
         );
 
-        // Verify power level was reduced to member
-        final captured = verify(
+        // Verify power level was NOT changed (to avoid overwriting server data)
+        verifyNever(
           mockClient.setRoomStateWithKey(
-            '!room:server.com',
-            EventTypes.RoomPowerLevels,
-            '',
-            captureAny,
+            any,
+            any,
+            any,
+            any,
           ),
-        ).captured.single as Map<String, dynamic>;
-
-        expect(captured['users'], isA<Map<String, dynamic>>());
-        expect(
-          (captured['users'] as Map<String, dynamic>)['@mod:server.com'],
-          equals(DefaultPowerLevelMember.member.powerLevel),
         );
 
+        // But ban still happened
         verify(mockUser.ban()).called(1);
       });
 
