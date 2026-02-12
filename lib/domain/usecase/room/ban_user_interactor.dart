@@ -14,9 +14,7 @@ class BanUserInteractor {
       yield Right(BanUserLoading());
 
       if (!user.canBan) {
-        yield const Left(
-          NoPermissionForBanFailure(),
-        );
+        yield const Left(NoPermissionForBanFailure());
         return;
       }
 
@@ -28,9 +26,7 @@ class BanUserInteractor {
         // Skip power level reduction if state is null to avoid overwriting server data
         if (powerLevelEvent != null) {
           try {
-            final powerMap = Map<String, dynamic>.from(
-              powerLevelEvent.content,
-            );
+            final powerMap = Map<String, dynamic>.from(powerLevelEvent.content);
             final usersMap = Map<String, dynamic>.from(
               powerMap['users'] as Map<String, dynamic>? ?? {},
             );
@@ -59,22 +55,12 @@ class BanUserInteractor {
       yield const Right(BanUserSuccess());
     } on MatrixException catch (e) {
       if (e.error == MatrixError.M_FORBIDDEN) {
-        yield const Left(
-          NoPermissionForBanFailure(),
-        );
+        yield const Left(NoPermissionForBanFailure());
       } else {
-        yield Left(
-          BanUserFailure(
-            exception: e,
-          ),
-        );
+        yield Left(BanUserFailure(exception: e));
       }
     } catch (error) {
-      yield Left(
-        BanUserFailure(
-          exception: error,
-        ),
-      );
+      yield Left(BanUserFailure(exception: error));
     }
   }
 }

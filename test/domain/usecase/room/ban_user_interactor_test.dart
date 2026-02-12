@@ -31,121 +31,145 @@ void main() {
 
   group('BanUserInteractor', () {
     test(
-        'should yield NoPermissionForBanFailure and NOT call user.ban() when !user.canBan',
-        () async {
-      // Arrange
-      when(mockUser.canBan).thenReturn(false);
+      'should yield NoPermissionForBanFailure and NOT call user.ban() when !user.canBan',
+      () async {
+        // Arrange
+        when(mockUser.canBan).thenReturn(false);
 
-      // Act
-      final result = interactor.execute(user: mockUser, room: mockRoom);
+        // Act
+        final result = interactor.execute(user: mockUser, room: mockRoom);
 
-      // Assert
-      await expectLater(
-        result,
-        emitsInOrder([
-          isA<Right<Failure, Success>>()
-              .having((r) => r.value, 'value', isA<BanUserLoading>()),
-          isA<Left<Failure, Success>>().having(
-            (l) => l.value,
-            'value',
-            isA<NoPermissionForBanFailure>(),
-          ),
-          emitsDone,
-        ]),
-      );
-      verifyNever(mockUser.ban());
-    });
-
-    test(
-        'should call user.ban() and yield BanUserSuccess when user.canBan is true',
-        () async {
-      // Arrange
-      when(mockUser.canBan).thenReturn(true);
-      when(mockUser.powerLevel)
-          .thenReturn(DefaultPowerLevelMember.member.powerLevel);
-      when(mockUser.ban()).thenAnswer((_) async {});
-
-      // Act
-      final result = interactor.execute(user: mockUser, room: mockRoom);
-
-      // Assert
-      await expectLater(
-        result,
-        emitsInOrder([
-          isA<Right<Failure, Success>>()
-              .having((r) => r.value, 'value', isA<BanUserLoading>()),
-          isA<Right<Failure, Success>>()
-              .having((r) => r.value, 'value', isA<BanUserSuccess>()),
-          emitsDone,
-        ]),
-      );
-      verify(mockUser.ban()).called(1);
-    });
+        // Assert
+        await expectLater(
+          result,
+          emitsInOrder([
+            isA<Right<Failure, Success>>().having(
+              (r) => r.value,
+              'value',
+              isA<BanUserLoading>(),
+            ),
+            isA<Left<Failure, Success>>().having(
+              (l) => l.value,
+              'value',
+              isA<NoPermissionForBanFailure>(),
+            ),
+            emitsDone,
+          ]),
+        );
+        verifyNever(mockUser.ban());
+      },
+    );
 
     test(
-        'should yield NoPermissionForBanFailure when MatrixException is M_FORBIDDEN',
-        () async {
-      // Arrange
-      when(mockUser.canBan).thenReturn(true);
-      when(mockUser.powerLevel)
-          .thenReturn(DefaultPowerLevelMember.member.powerLevel);
-      final mockException = MockMatrixException();
-      when(mockException.error).thenReturn(MatrixError.M_FORBIDDEN);
-      when(mockUser.ban()).thenThrow(mockException);
+      'should call user.ban() and yield BanUserSuccess when user.canBan is true',
+      () async {
+        // Arrange
+        when(mockUser.canBan).thenReturn(true);
+        when(
+          mockUser.powerLevel,
+        ).thenReturn(DefaultPowerLevelMember.member.powerLevel);
+        when(mockUser.ban()).thenAnswer((_) async {});
 
-      // Act
-      final result = interactor.execute(user: mockUser, room: mockRoom);
+        // Act
+        final result = interactor.execute(user: mockUser, room: mockRoom);
 
-      // Assert
-      await expectLater(
-        result,
-        emitsInOrder([
-          isA<Right<Failure, Success>>()
-              .having((r) => r.value, 'value', isA<BanUserLoading>()),
-          isA<Left<Failure, Success>>().having(
-            (l) => l.value,
-            'value',
-            isA<NoPermissionForBanFailure>(),
-          ),
-          emitsDone,
-        ]),
-      );
-    });
+        // Assert
+        await expectLater(
+          result,
+          emitsInOrder([
+            isA<Right<Failure, Success>>().having(
+              (r) => r.value,
+              'value',
+              isA<BanUserLoading>(),
+            ),
+            isA<Right<Failure, Success>>().having(
+              (r) => r.value,
+              'value',
+              isA<BanUserSuccess>(),
+            ),
+            emitsDone,
+          ]),
+        );
+        verify(mockUser.ban()).called(1);
+      },
+    );
 
-    test('should yield BanUserFailure when MatrixException is NOT M_FORBIDDEN',
-        () async {
-      // Arrange
-      when(mockUser.canBan).thenReturn(true);
-      when(mockUser.powerLevel)
-          .thenReturn(DefaultPowerLevelMember.member.powerLevel);
-      final mockException = MockMatrixException();
-      when(mockException.error).thenReturn(MatrixError.M_UNKNOWN);
-      when(mockUser.ban()).thenThrow(mockException);
+    test(
+      'should yield NoPermissionForBanFailure when MatrixException is M_FORBIDDEN',
+      () async {
+        // Arrange
+        when(mockUser.canBan).thenReturn(true);
+        when(
+          mockUser.powerLevel,
+        ).thenReturn(DefaultPowerLevelMember.member.powerLevel);
+        final mockException = MockMatrixException();
+        when(mockException.error).thenReturn(MatrixError.M_FORBIDDEN);
+        when(mockUser.ban()).thenThrow(mockException);
 
-      // Act
-      final result = interactor.execute(user: mockUser, room: mockRoom);
+        // Act
+        final result = interactor.execute(user: mockUser, room: mockRoom);
 
-      // Assert
-      await expectLater(
-        result,
-        emitsInOrder([
-          isA<Right<Failure, Success>>()
-              .having((r) => r.value, 'value', isA<BanUserLoading>()),
-          isA<Left<Failure, Success>>().having(
-            (l) => l.value,
-            'value',
-            isA<BanUserFailure>(),
-          ),
-          emitsDone,
-        ]),
-      );
-    });
+        // Assert
+        await expectLater(
+          result,
+          emitsInOrder([
+            isA<Right<Failure, Success>>().having(
+              (r) => r.value,
+              'value',
+              isA<BanUserLoading>(),
+            ),
+            isA<Left<Failure, Success>>().having(
+              (l) => l.value,
+              'value',
+              isA<NoPermissionForBanFailure>(),
+            ),
+            emitsDone,
+          ]),
+        );
+      },
+    );
+
+    test(
+      'should yield BanUserFailure when MatrixException is NOT M_FORBIDDEN',
+      () async {
+        // Arrange
+        when(mockUser.canBan).thenReturn(true);
+        when(
+          mockUser.powerLevel,
+        ).thenReturn(DefaultPowerLevelMember.member.powerLevel);
+        final mockException = MockMatrixException();
+        when(mockException.error).thenReturn(MatrixError.M_UNKNOWN);
+        when(mockUser.ban()).thenThrow(mockException);
+
+        // Act
+        final result = interactor.execute(user: mockUser, room: mockRoom);
+
+        // Assert
+        await expectLater(
+          result,
+          emitsInOrder([
+            isA<Right<Failure, Success>>().having(
+              (r) => r.value,
+              'value',
+              isA<BanUserLoading>(),
+            ),
+            isA<Left<Failure, Success>>().having(
+              (l) => l.value,
+              'value',
+              isA<BanUserFailure>(),
+            ),
+            emitsDone,
+          ]),
+        );
+      },
+    );
 
     test('should yield BanUserFailure for generic exceptions', () async {
       // Arrange
       when(mockUser.canBan).thenReturn(true);
-      when(mockUser.powerLevel)
-          .thenReturn(DefaultPowerLevelMember.member.powerLevel);
+      when(
+        mockUser.powerLevel,
+      ).thenReturn(DefaultPowerLevelMember.member.powerLevel);
       final exception = Exception('Something went wrong');
       when(mockUser.ban()).thenThrow(exception);
 
@@ -156,10 +180,16 @@ void main() {
       await expectLater(
         result,
         emitsInOrder([
-          isA<Right<Failure, Success>>()
-              .having((r) => r.value, 'value', isA<BanUserLoading>()),
-          isA<Left<Failure, Success>>()
-              .having((l) => l.value, 'value', isA<BanUserFailure>()),
+          isA<Right<Failure, Success>>().having(
+            (r) => r.value,
+            'value',
+            isA<BanUserLoading>(),
+          ),
+          isA<Left<Failure, Success>>().having(
+            (l) => l.value,
+            'value',
+            isA<BanUserFailure>(),
+          ),
           emitsDone,
         ]),
       );
@@ -173,282 +203,317 @@ void main() {
       });
 
       test(
-          'should reduce power level to member and ban user when user has moderator power level',
-          () async {
-        // Arrange
-        final powerLevelContent = {
-          'users': {
-            '@user:server.com': DefaultPowerLevelMember.moderator.powerLevel,
-          },
-        };
+        'should reduce power level to member and ban user when user has moderator power level',
+        () async {
+          // Arrange
+          final powerLevelContent = {
+            'users': {
+              '@user:server.com': DefaultPowerLevelMember.moderator.powerLevel,
+            },
+          };
 
-        when(mockUser.canBan).thenReturn(true);
-        when(mockUser.powerLevel)
-            .thenReturn(DefaultPowerLevelMember.moderator.powerLevel);
-        when(mockUser.id).thenReturn('@user:server.com');
-        when(mockUser.ban()).thenAnswer((_) async {});
-        when(mockRoom.getState(EventTypes.RoomPowerLevels))
-            .thenReturn(mockPowerLevelEvent);
-        when(mockPowerLevelEvent.content).thenReturn(powerLevelContent);
-        when(
-          mockClient.setRoomStateWithKey(any, any, any, any),
-        ).thenAnswer((_) async => '');
+          when(mockUser.canBan).thenReturn(true);
+          when(
+            mockUser.powerLevel,
+          ).thenReturn(DefaultPowerLevelMember.moderator.powerLevel);
+          when(mockUser.id).thenReturn('@user:server.com');
+          when(mockUser.ban()).thenAnswer((_) async {});
+          when(
+            mockRoom.getState(EventTypes.RoomPowerLevels),
+          ).thenReturn(mockPowerLevelEvent);
+          when(mockPowerLevelEvent.content).thenReturn(powerLevelContent);
+          when(
+            mockClient.setRoomStateWithKey(any, any, any, any),
+          ).thenAnswer((_) async => '');
 
-        // Act
-        final result = interactor.execute(user: mockUser, room: mockRoom);
+          // Act
+          final result = interactor.execute(user: mockUser, room: mockRoom);
 
-        // Assert
-        await expectLater(
-          result,
-          emitsInOrder([
-            isA<Right<Failure, Success>>()
-                .having((r) => r.value, 'value', isA<BanUserLoading>()),
-            isA<Right<Failure, Success>>()
-                .having((r) => r.value, 'value', isA<BanUserSuccess>()),
-            emitsDone,
-          ]),
-        );
+          // Assert
+          await expectLater(
+            result,
+            emitsInOrder([
+              isA<Right<Failure, Success>>().having(
+                (r) => r.value,
+                'value',
+                isA<BanUserLoading>(),
+              ),
+              isA<Right<Failure, Success>>().having(
+                (r) => r.value,
+                'value',
+                isA<BanUserSuccess>(),
+              ),
+              emitsDone,
+            ]),
+          );
 
-        // Verify power level was reduced to member
-        final captured = verify(
-          mockClient.setRoomStateWithKey(
-            '!room:server.com',
-            EventTypes.RoomPowerLevels,
-            '',
-            captureAny,
-          ),
-        ).captured.single as Map<String, dynamic>;
+          // Verify power level was reduced to member
+          final captured =
+              verify(
+                    mockClient.setRoomStateWithKey(
+                      '!room:server.com',
+                      EventTypes.RoomPowerLevels,
+                      '',
+                      captureAny,
+                    ),
+                  ).captured.single
+                  as Map<String, dynamic>;
 
-        expect(captured['users'], isA<Map<String, dynamic>>());
-        expect(
-          (captured['users'] as Map<String, dynamic>)['@user:server.com'],
-          equals(DefaultPowerLevelMember.member.powerLevel),
-        );
+          expect(captured['users'], isA<Map<String, dynamic>>());
+          expect(
+            (captured['users'] as Map<String, dynamic>)['@user:server.com'],
+            equals(DefaultPowerLevelMember.member.powerLevel),
+          );
 
-        verify(mockUser.ban()).called(1);
-      });
-
-      test(
-          'should reduce power level to member and ban user when user has admin power level',
-          () async {
-        // Arrange
-        final powerLevelContent = {
-          'users': {
-            '@admin:server.com': DefaultPowerLevelMember.admin.powerLevel,
-          },
-        };
-
-        when(mockUser.canBan).thenReturn(true);
-        when(mockUser.powerLevel)
-            .thenReturn(DefaultPowerLevelMember.admin.powerLevel);
-        when(mockUser.id).thenReturn('@admin:server.com');
-        when(mockUser.ban()).thenAnswer((_) async {});
-        when(mockRoom.getState(EventTypes.RoomPowerLevels))
-            .thenReturn(mockPowerLevelEvent);
-        when(mockPowerLevelEvent.content).thenReturn(powerLevelContent);
-        when(
-          mockClient.setRoomStateWithKey(any, any, any, any),
-        ).thenAnswer((_) async => '');
-
-        // Act
-        final result = interactor.execute(user: mockUser, room: mockRoom);
-
-        // Assert
-        await expectLater(
-          result,
-          emitsInOrder([
-            isA<Right<Failure, Success>>()
-                .having((r) => r.value, 'value', isA<BanUserLoading>()),
-            isA<Right<Failure, Success>>()
-                .having((r) => r.value, 'value', isA<BanUserSuccess>()),
-            emitsDone,
-          ]),
-        );
-
-        // Verify power level was reduced to member
-        final captured = verify(
-          mockClient.setRoomStateWithKey(
-            '!room:server.com',
-            EventTypes.RoomPowerLevels,
-            '',
-            captureAny,
-          ),
-        ).captured.single as Map<String, dynamic>;
-
-        expect(captured['users'], isA<Map<String, dynamic>>());
-        expect(
-          (captured['users'] as Map<String, dynamic>)['@admin:server.com'],
-          equals(DefaultPowerLevelMember.member.powerLevel),
-        );
-
-        verify(mockUser.ban()).called(1);
-      });
+          verify(mockUser.ban()).called(1);
+        },
+      );
 
       test(
-          'should skip power level reduction and ban user when power level state is null',
-          () async {
-        // Arrange
-        when(mockUser.canBan).thenReturn(true);
-        when(mockUser.powerLevel)
-            .thenReturn(DefaultPowerLevelMember.moderator.powerLevel);
-        when(mockUser.id).thenReturn('@mod:server.com');
-        when(mockUser.ban()).thenAnswer((_) async {});
-        when(mockRoom.getState(EventTypes.RoomPowerLevels)).thenReturn(null);
+        'should reduce power level to member and ban user when user has admin power level',
+        () async {
+          // Arrange
+          final powerLevelContent = {
+            'users': {
+              '@admin:server.com': DefaultPowerLevelMember.admin.powerLevel,
+            },
+          };
 
-        // Act
-        final result = interactor.execute(user: mockUser, room: mockRoom);
+          when(mockUser.canBan).thenReturn(true);
+          when(
+            mockUser.powerLevel,
+          ).thenReturn(DefaultPowerLevelMember.admin.powerLevel);
+          when(mockUser.id).thenReturn('@admin:server.com');
+          when(mockUser.ban()).thenAnswer((_) async {});
+          when(
+            mockRoom.getState(EventTypes.RoomPowerLevels),
+          ).thenReturn(mockPowerLevelEvent);
+          when(mockPowerLevelEvent.content).thenReturn(powerLevelContent);
+          when(
+            mockClient.setRoomStateWithKey(any, any, any, any),
+          ).thenAnswer((_) async => '');
 
-        // Assert
-        await expectLater(
-          result,
-          emitsInOrder([
-            isA<Right<Failure, Success>>()
-                .having((r) => r.value, 'value', isA<BanUserLoading>()),
-            isA<Right<Failure, Success>>()
-                .having((r) => r.value, 'value', isA<BanUserSuccess>()),
-            emitsDone,
-          ]),
-        );
+          // Act
+          final result = interactor.execute(user: mockUser, room: mockRoom);
 
-        // Verify power level was NOT changed (to avoid overwriting server data)
-        verifyNever(
-          mockClient.setRoomStateWithKey(
-            any,
-            any,
-            any,
-            any,
-          ),
-        );
+          // Assert
+          await expectLater(
+            result,
+            emitsInOrder([
+              isA<Right<Failure, Success>>().having(
+                (r) => r.value,
+                'value',
+                isA<BanUserLoading>(),
+              ),
+              isA<Right<Failure, Success>>().having(
+                (r) => r.value,
+                'value',
+                isA<BanUserSuccess>(),
+              ),
+              emitsDone,
+            ]),
+          );
 
-        // But ban still happened
-        verify(mockUser.ban()).called(1);
-      });
+          // Verify power level was reduced to member
+          final captured =
+              verify(
+                    mockClient.setRoomStateWithKey(
+                      '!room:server.com',
+                      EventTypes.RoomPowerLevels,
+                      '',
+                      captureAny,
+                    ),
+                  ).captured.single
+                  as Map<String, dynamic>;
 
-      test(
-          'should NOT reduce power level when user has regular member power level',
-          () async {
-        // Arrange
-        when(mockUser.canBan).thenReturn(true);
-        when(mockUser.powerLevel)
-            .thenReturn(DefaultPowerLevelMember.member.powerLevel);
-        when(mockUser.ban()).thenAnswer((_) async {});
+          expect(captured['users'], isA<Map<String, dynamic>>());
+          expect(
+            (captured['users'] as Map<String, dynamic>)['@admin:server.com'],
+            equals(DefaultPowerLevelMember.member.powerLevel),
+          );
 
-        // Act
-        final result = interactor.execute(user: mockUser, room: mockRoom);
-
-        // Assert
-        await expectLater(
-          result,
-          emitsInOrder([
-            isA<Right<Failure, Success>>()
-                .having((r) => r.value, 'value', isA<BanUserLoading>()),
-            isA<Right<Failure, Success>>()
-                .having((r) => r.value, 'value', isA<BanUserSuccess>()),
-            emitsDone,
-          ]),
-        );
-
-        // Verify power level was NOT changed
-        verifyNever(
-          mockClient.setRoomStateWithKey(
-            any,
-            any,
-            any,
-            any,
-          ),
-        );
-
-        verify(mockUser.ban()).called(1);
-      });
-
-      test('should NOT reduce power level when user has guest power level',
-          () async {
-        // Arrange
-        when(mockUser.canBan).thenReturn(true);
-        when(mockUser.powerLevel)
-            .thenReturn(DefaultPowerLevelMember.guest.powerLevel);
-        when(mockUser.ban()).thenAnswer((_) async {});
-
-        // Act
-        final result = interactor.execute(user: mockUser, room: mockRoom);
-
-        // Assert
-        await expectLater(
-          result,
-          emitsInOrder([
-            isA<Right<Failure, Success>>()
-                .having((r) => r.value, 'value', isA<BanUserLoading>()),
-            isA<Right<Failure, Success>>()
-                .having((r) => r.value, 'value', isA<BanUserSuccess>()),
-            emitsDone,
-          ]),
-        );
-
-        // Verify power level was NOT changed
-        verifyNever(
-          mockClient.setRoomStateWithKey(
-            any,
-            any,
-            any,
-            any,
-          ),
-        );
-
-        verify(mockUser.ban()).called(1);
-      });
+          verify(mockUser.ban()).called(1);
+        },
+      );
 
       test(
-          'should proceed with ban even when power level reduction fails',
-          () async {
-        // Arrange
-        final powerLevelContent = {
-          'users': {
-            '@mod:server.com': DefaultPowerLevelMember.moderator.powerLevel,
-          },
-        };
-        final mockException = MockMatrixException();
-        when(mockException.error).thenReturn(MatrixError.M_FORBIDDEN);
+        'should skip power level reduction and ban user when power level state is null',
+        () async {
+          // Arrange
+          when(mockUser.canBan).thenReturn(true);
+          when(
+            mockUser.powerLevel,
+          ).thenReturn(DefaultPowerLevelMember.moderator.powerLevel);
+          when(mockUser.id).thenReturn('@mod:server.com');
+          when(mockUser.ban()).thenAnswer((_) async {});
+          when(mockRoom.getState(EventTypes.RoomPowerLevels)).thenReturn(null);
 
-        when(mockUser.canBan).thenReturn(true);
-        when(mockUser.powerLevel)
-            .thenReturn(DefaultPowerLevelMember.moderator.powerLevel);
-        when(mockUser.id).thenReturn('@mod:server.com');
-        when(mockUser.ban()).thenAnswer((_) async {});
-        when(mockRoom.getState(EventTypes.RoomPowerLevels))
-            .thenReturn(mockPowerLevelEvent);
-        when(mockPowerLevelEvent.content).thenReturn(powerLevelContent);
-        when(
-          mockClient.setRoomStateWithKey(any, any, any, any),
-        ).thenThrow(mockException);
+          // Act
+          final result = interactor.execute(user: mockUser, room: mockRoom);
 
-        // Act
-        final result = interactor.execute(user: mockUser, room: mockRoom);
+          // Assert
+          await expectLater(
+            result,
+            emitsInOrder([
+              isA<Right<Failure, Success>>().having(
+                (r) => r.value,
+                'value',
+                isA<BanUserLoading>(),
+              ),
+              isA<Right<Failure, Success>>().having(
+                (r) => r.value,
+                'value',
+                isA<BanUserSuccess>(),
+              ),
+              emitsDone,
+            ]),
+          );
 
-        // Assert
-        await expectLater(
-          result,
-          emitsInOrder([
-            isA<Right<Failure, Success>>()
-                .having((r) => r.value, 'value', isA<BanUserLoading>()),
-            isA<Right<Failure, Success>>()
-                .having((r) => r.value, 'value', isA<BanUserSuccess>()),
-            emitsDone,
-          ]),
-        );
+          // Verify power level was NOT changed (to avoid overwriting server data)
+          verifyNever(mockClient.setRoomStateWithKey(any, any, any, any));
 
-        // Verify power level reduction was attempted but failed
-        verify(
-          mockClient.setRoomStateWithKey(
-            '!room:server.com',
-            EventTypes.RoomPowerLevels,
-            '',
-            any,
-          ),
-        ).called(1);
+          // But ban still happened
+          verify(mockUser.ban()).called(1);
+        },
+      );
 
-        // But ban still succeeded
-        verify(mockUser.ban()).called(1);
-      });
+      test(
+        'should NOT reduce power level when user has regular member power level',
+        () async {
+          // Arrange
+          when(mockUser.canBan).thenReturn(true);
+          when(
+            mockUser.powerLevel,
+          ).thenReturn(DefaultPowerLevelMember.member.powerLevel);
+          when(mockUser.ban()).thenAnswer((_) async {});
+
+          // Act
+          final result = interactor.execute(user: mockUser, room: mockRoom);
+
+          // Assert
+          await expectLater(
+            result,
+            emitsInOrder([
+              isA<Right<Failure, Success>>().having(
+                (r) => r.value,
+                'value',
+                isA<BanUserLoading>(),
+              ),
+              isA<Right<Failure, Success>>().having(
+                (r) => r.value,
+                'value',
+                isA<BanUserSuccess>(),
+              ),
+              emitsDone,
+            ]),
+          );
+
+          // Verify power level was NOT changed
+          verifyNever(mockClient.setRoomStateWithKey(any, any, any, any));
+
+          verify(mockUser.ban()).called(1);
+        },
+      );
+
+      test(
+        'should NOT reduce power level when user has guest power level',
+        () async {
+          // Arrange
+          when(mockUser.canBan).thenReturn(true);
+          when(
+            mockUser.powerLevel,
+          ).thenReturn(DefaultPowerLevelMember.guest.powerLevel);
+          when(mockUser.ban()).thenAnswer((_) async {});
+
+          // Act
+          final result = interactor.execute(user: mockUser, room: mockRoom);
+
+          // Assert
+          await expectLater(
+            result,
+            emitsInOrder([
+              isA<Right<Failure, Success>>().having(
+                (r) => r.value,
+                'value',
+                isA<BanUserLoading>(),
+              ),
+              isA<Right<Failure, Success>>().having(
+                (r) => r.value,
+                'value',
+                isA<BanUserSuccess>(),
+              ),
+              emitsDone,
+            ]),
+          );
+
+          // Verify power level was NOT changed
+          verifyNever(mockClient.setRoomStateWithKey(any, any, any, any));
+
+          verify(mockUser.ban()).called(1);
+        },
+      );
+
+      test(
+        'should proceed with ban even when power level reduction fails',
+        () async {
+          // Arrange
+          final powerLevelContent = {
+            'users': {
+              '@mod:server.com': DefaultPowerLevelMember.moderator.powerLevel,
+            },
+          };
+          final mockException = MockMatrixException();
+          when(mockException.error).thenReturn(MatrixError.M_FORBIDDEN);
+
+          when(mockUser.canBan).thenReturn(true);
+          when(
+            mockUser.powerLevel,
+          ).thenReturn(DefaultPowerLevelMember.moderator.powerLevel);
+          when(mockUser.id).thenReturn('@mod:server.com');
+          when(mockUser.ban()).thenAnswer((_) async {});
+          when(
+            mockRoom.getState(EventTypes.RoomPowerLevels),
+          ).thenReturn(mockPowerLevelEvent);
+          when(mockPowerLevelEvent.content).thenReturn(powerLevelContent);
+          when(
+            mockClient.setRoomStateWithKey(any, any, any, any),
+          ).thenThrow(mockException);
+
+          // Act
+          final result = interactor.execute(user: mockUser, room: mockRoom);
+
+          // Assert
+          await expectLater(
+            result,
+            emitsInOrder([
+              isA<Right<Failure, Success>>().having(
+                (r) => r.value,
+                'value',
+                isA<BanUserLoading>(),
+              ),
+              isA<Right<Failure, Success>>().having(
+                (r) => r.value,
+                'value',
+                isA<BanUserSuccess>(),
+              ),
+              emitsDone,
+            ]),
+          );
+
+          // Verify power level reduction was attempted but failed
+          verify(
+            mockClient.setRoomStateWithKey(
+              '!room:server.com',
+              EventTypes.RoomPowerLevels,
+              '',
+              any,
+            ),
+          ).called(1);
+
+          // But ban still succeeded
+          verify(mockUser.ban()).called(1);
+        },
+      );
     });
   });
 }

@@ -63,8 +63,8 @@ class AssignRolesController extends State<AssignRoles>
 
   final ValueNotifier<Either<Failure, Success>> searchUserResults =
       ValueNotifier<Either<Failure, Success>>(
-    Right(AssignRolesSearchInitialState()),
-  );
+        Right(AssignRolesSearchInitialState()),
+      );
 
   void onBack() {
     Navigator.of(context).pop();
@@ -128,8 +128,8 @@ class AssignRolesController extends State<AssignRoles>
 
     final searchResults = assignedUsers.where((user) {
       return (user.displayName ?? '').toLowerCase().contains(
-                searchTerm.toLowerCase(),
-              ) ||
+            searchTerm.toLowerCase(),
+          ) ||
           (user.id).toLowerCase().contains(searchTerm.toLowerCase());
     }).toList();
 
@@ -244,36 +244,36 @@ class AssignRolesController extends State<AssignRoles>
     _banUserSubscription = banUserInteractor
         .execute(user: user, room: widget.room)
         .listen((result) {
-      result.fold(
-        (failure) {
-          if (failure is BanUserFailure) {
-            TwakeDialog.hideLoadingDialog(context);
-            TwakeSnackBar.show(context, failure.exception.toString());
-            return;
-          }
+          result.fold(
+            (failure) {
+              if (failure is BanUserFailure) {
+                TwakeDialog.hideLoadingDialog(context);
+                TwakeSnackBar.show(context, failure.exception.toString());
+                return;
+              }
 
-          if (failure is NoPermissionForBanFailure) {
-            TwakeDialog.hideLoadingDialog(context);
-            TwakeSnackBar.show(
-              context,
-              L10n.of(context)!.permissionErrorBanUser,
-            );
-            return;
-          }
-        },
-        (success) async {
-          if (success is BanUserLoading) {
-            TwakeDialog.showLoadingDialog(context);
-            return;
-          }
+              if (failure is NoPermissionForBanFailure) {
+                TwakeDialog.hideLoadingDialog(context);
+                TwakeSnackBar.show(
+                  context,
+                  L10n.of(context)!.permissionErrorBanUser,
+                );
+                return;
+              }
+            },
+            (success) async {
+              if (success is BanUserLoading) {
+                TwakeDialog.showLoadingDialog(context);
+                return;
+              }
 
-          if (success is BanUserSuccess) {
-            TwakeDialog.hideLoadingDialog(context);
-            return;
-          }
-        },
-      );
-    });
+              if (success is BanUserSuccess) {
+                TwakeDialog.hideLoadingDialog(context);
+                return;
+              }
+            },
+          );
+        });
   }
 
   @override
