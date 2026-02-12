@@ -151,7 +151,6 @@ mixin ChatListItemMixin {
               ),
               child: MxcImage(
                 key: ValueKey(event.eventId),
-                cacheKey: event.eventId,
                 event: event,
                 placeholder: (context) => ImagePlaceholder(
                   event: event,

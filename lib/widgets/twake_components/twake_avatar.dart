@@ -75,7 +75,6 @@ class TwakeAvatar extends StatelessWidget {
                 width: size,
                 height: size,
                 placeholder: (_) => textWidget,
-                cacheKey: mxContent.toString(),
               ),
       ),
     );

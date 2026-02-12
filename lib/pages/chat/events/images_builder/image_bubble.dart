@@ -1,10 +1,8 @@
 import 'dart:typed_data';
 
-import 'package:fluffychat/pages/chat/events/images_builder/image_builder_web.dart';
 import 'package:fluffychat/pages/chat/events/images_builder/image_placeholder.dart';
 import 'package:fluffychat/pages/chat/events/message_content_style.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
-import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_blurhash/flutter_blurhash.dart';
 import 'package:matrix/matrix.dart';
@@ -26,8 +24,6 @@ class ImageBubble extends StatelessWidget {
   final Duration animationDuration;
   final Uint8List? imageData;
 
-  final String? thumbnailCacheKey;
-  final Map<EventId, ImageData>? thumbnailCacheMap;
   final bool noResizeThumbnail;
 
   const ImageBubble(
@@ -43,8 +39,6 @@ class ImageBubble extends StatelessWidget {
     this.onTapSelectMode,
     this.onTapPreview,
     this.animationDuration = const Duration(milliseconds: 500),
-    this.thumbnailCacheKey,
-    this.thumbnailCacheMap,
     this.noResizeThumbnail = false,
     this.isPreview = true,
     this.imageData,
@@ -80,54 +74,38 @@ class ImageBubble extends StatelessWidget {
         borderRadius: rounded
             ? MessageContentStyle.borderRadiusBubble
             : BorderRadius.zero,
-        child:
-            (PlatformInfos.isWeb &&
-                !event.isBubbleEventEncrypted(isThumbnail: thumbnailOnly))
-            ? UnencryptedImageBuilderWeb(
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            SizedBox(
+              width: maxWidth,
+              height: bubbleHeight,
+              child: BlurHash(
+                hash: event.blurHash ?? MessageContentStyle.defaultBlurHash,
+              ),
+            ),
+            MxcImage(
+              event: event,
+              width: width,
+              height: height,
+              fit: fit,
+              animated: animated,
+              isThumbnail: thumbnailOnly,
+              placeholder: (context) => ImagePlaceholder(
                 event: event,
-                bubbleMaxWidth: bubbleMaxWidth,
-                isThumbnail: thumbnailOnly,
                 width: width,
                 height: height,
-                onTapPreview: onTapPreview,
-                onTapSelectMode: onTapSelectMode,
                 fit: fit,
-              )
-            : Stack(
-                alignment: Alignment.center,
-                children: [
-                  SizedBox(
-                    width: maxWidth,
-                    height: bubbleHeight,
-                    child: BlurHash(
-                      hash:
-                          event.blurHash ?? MessageContentStyle.defaultBlurHash,
-                    ),
-                  ),
-                  MxcImage(
-                    event: event,
-                    width: width,
-                    height: height,
-                    fit: fit,
-                    animated: animated,
-                    isThumbnail: thumbnailOnly,
-                    placeholder: (context) => ImagePlaceholder(
-                      event: event,
-                      width: width,
-                      height: height,
-                      fit: fit,
-                    ),
-                    onTapPreview: onTapPreview,
-                    onTapSelectMode: onTapSelectMode,
-                    isPreview: isPreview,
-                    animationDuration: animationDuration,
-                    cacheKey: thumbnailCacheKey,
-                    cacheMap: thumbnailCacheMap,
-                    noResize: noResizeThumbnail,
-                    imageData: imageData,
-                  ),
-                ],
               ),
+              onTapPreview: onTapPreview,
+              onTapSelectMode: onTapSelectMode,
+              isPreview: isPreview,
+              animationDuration: animationDuration,
+              noResize: noResizeThumbnail,
+              imageData: imageData,
+            ),
+          ],
+        ),
       ),
     );
   }

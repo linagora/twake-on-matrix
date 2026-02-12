@@ -6,7 +6,6 @@ import 'package:fluffychat/pages/chat/events/message/message_style.dart';
 import 'package:fluffychat/pages/chat/events/message_content_style.dart';
 import 'package:fluffychat/pages/chat_details/chat_details_page_view/media/chat_details_media_style.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
-import 'package:fluffychat/widgets/mxc_image.dart';
 import 'package:flutter/material.dart';
 
 import 'package:flutter_blurhash/flutter_blurhash.dart';
@@ -29,9 +28,6 @@ class EventVideoPlayer extends StatelessWidget {
 
   final bool showDuration;
 
-  final String? thumbnailCacheKey;
-
-  final Map<EventId, ImageData>? thumbnailCacheMap;
   final String? thumbnailPath;
 
   /// Enable it if the thumbnail image is stretched, and you don't want to resize it
@@ -50,8 +46,6 @@ class EventVideoPlayer extends StatelessWidget {
     this.height,
     this.rounded = true,
     this.showDuration = false,
-    this.thumbnailCacheMap,
-    this.thumbnailCacheKey,
     this.thumbnailPath,
     this.noResizeThumbnail = false,
     this.onVideoTapped,
@@ -109,8 +103,6 @@ class EventVideoPlayer extends StatelessWidget {
                       ),
                       bubbleMaxWidth: maxWidth,
                       rounded: rounded,
-                      thumbnailCacheKey: thumbnailCacheKey,
-                      thumbnailCacheMap: thumbnailCacheMap,
                       noResizeThumbnail: noResizeThumbnail,
                       thumbnailOnly: true,
                       isPreview: false,
