@@ -210,6 +210,8 @@ dependencies:
   flutter_vodozemac: ^0.4.0
   html_unescape: 2.0.0
   sqflite_common_ffi: ^2.3.6
+  sqflite_common_ffi_web: ^0.4.3+1 # Web support via wasm
+  idb_shim: ^2.6.7 # IndexedDB abstraction for web fallback
   # https://github.com/tekartik/sqflite/blob/master/sqflite_common_ffi/doc/using_ffi_instead_of_sqflite.md#setup
   sqlite3_flutter_libs: ^0.5.40
   visibility_detector: ^0.4.0+2
