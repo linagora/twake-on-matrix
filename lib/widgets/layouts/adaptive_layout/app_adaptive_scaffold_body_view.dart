@@ -354,7 +354,7 @@ class _PrimaryNavigationBarBuilder extends StatelessWidget {
     return AdaptiveScaffoldPrimaryNavigation(
       selectedIndex: activeNavigationBar.value.index,
       getNavigationRailDestinations: destinations
-          .map((_) => AdaptiveScaffold.toRailDestination(_))
+          .map((destination) => AdaptiveScaffold.toRailDestination(destination))
           .toList(),
       onDestinationSelected: onDestinationSelected,
     );

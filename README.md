@@ -61,7 +61,7 @@ bash scripts/config-pre-commit.sh
 ```
 ### Requirements
 
-- [ ] Flutter 3.24 (more recent versions are not yet supported)
+- [ ] Flutter 3.38.9
 
 You can at any moment verify your flutter installation using:
 
@@ -170,9 +170,9 @@ Here is an example working with `matrix.org`:
 }
 ```
 
-### Runing the code
+### Running the code
 
-Before running the app, please update the dependancies:
+Before running the app, please update the dependencies:
 
 ```bash
 flutter pub get && flutter pub run build_runner build --delete-conflicting-outputs
@@ -248,7 +248,7 @@ docker run -d -p <host port>:<host port> -e TWAKECHAT_LISTEN_PORT=<host port> --
 
 - Run the image using the following command with my port is `6868`:
 ```
-docker run -d -p 6868:6868 -e TWAKECHAT_LISTEN_PORT=6868 --name twake-web -v /path/to/config.json:/usr/share/nginx/html/web/config.json linagora/twake-web:v2.6.5
+docker run -d -p 6868:6868 -e TWAKECHAT_LISTEN_PORT=6868 --name twake-web -v /path/to/config.json:/usr/share/nginx/html/web/config.json linagora/twake-web:v2.19.7
 ```
 
 - Open the browser and go to `http://localhost:6868`

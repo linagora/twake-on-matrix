@@ -1797,7 +1797,6 @@ class HiveCollectionsDatabase extends DatabaseApi {
     }
   }
 
-  @override
   Future<void> storeWellKnown(DiscoveryInformation? discoveryInformation) {
     if (discoveryInformation == null) {
       return _clientBox.delete('discovery_information');
@@ -1808,7 +1807,6 @@ class HiveCollectionsDatabase extends DatabaseApi {
     );
   }
 
-  @override
   Future<DiscoveryInformation?> getWellKnown() async {
     final rawDiscoveryInformation =
         await _clientBox.get('discovery_information');
@@ -1833,6 +1831,28 @@ class HiveCollectionsDatabase extends DatabaseApi {
   Future<void> storeUserProfile(
     String userId,
     CachedProfileInformation profile,
+  ) async {
+    return;
+  }
+
+  @override
+  Future<void> cacheCustomObject(
+    String cacheKey,
+    Map<String, Object?> object,
+  ) async {
+    return;
+  }
+
+  @override
+  Future<({Map<String, Object?> content, DateTime savedAt})?>
+  getCustomCacheObject(String cacheKey) async {
+    return null;
+  }
+
+  @override
+  Future<void> storeLatestReceiptState(
+    String roomId,
+    LatestReceiptState receiptState,
   ) async {
     return;
   }

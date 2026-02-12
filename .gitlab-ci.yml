@@ -1,5 +1,5 @@
 variables:
-  FLUTTER_VERSION: 3.32.8
+  FLUTTER_VERSION: 3.38.9
 
 image:
   name: cirrusci/flutter:${FLUTTER_VERSION}
@@ -18,7 +18,7 @@ stages:
 
 code_analyze:
   stage: test
-  script: [ ./scripts/code_analyze.sh ]
+  script: [./scripts/code_analyze.sh]
   artifacts:
     reports:
       codequality: code-quality-report.json
@@ -28,7 +28,7 @@ code_analyze:
 
 widget_test:
   stage: test
-  script: [ flutter test ]
+  script: [flutter test]
   tags:
     - docker
     - famedly
@@ -85,7 +85,6 @@ integration_test:
     - docker
     - famedly
 
-
 # integration tests for Linux builds
 ### disabled because of Linux headless issues
 .integration_test_linux:
@@ -100,7 +99,7 @@ integration_test:
     - apt-get install -y clang cmake ninja-build pkg-config libgtk-3-dev liblzma-dev libsecret-1-dev libjsoncpp-dev
     - flutter pub get
     - flutter test integration_test -d linux --dart-define=HOMESERVER=$HOMESERVER --dart-define=USER1_NAME=$USER1_NAME --dart-define=USER2_NAME=$USER2_NAME --dart-define=USER1_PW=$USER1_PW --dart-define=USER2_PW=$USER2_PW || ( sleep 10 && exit 1 )
-  after_script: [ ]
+  after_script: []
   artifacts:
 
 # extending the default tests to test the Google-flavored builds
@@ -144,8 +143,8 @@ release_mode_launches:
 build_web:
   stage: build
   before_script:
-    [ sudo apt update && sudo apt install curl -y, ./scripts/prepare-web.sh ]
-  script: [ ./scripts/build-web.sh ]
+    [sudo apt update && sudo apt install curl -y, ./scripts/prepare-web.sh]
+  script: [./scripts/build-web.sh]
   artifacts:
     paths:
       - build/web/
@@ -197,7 +196,7 @@ build_windows:
 
 build_android_debug:
   stage: build
-  script: [ ./scripts/build-android-debug.sh ]
+  script: [./scripts/build-android-debug.sh]
   artifacts:
     when: on_success
     paths:
@@ -214,7 +213,7 @@ build_android_apk:
   before_script:
     - git apply ./scripts/enable-android-google-services.patch
     - ./scripts/prepare-android-release.sh
-  script: [ ./scripts/build-android-apk.sh ]
+  script: [./scripts/build-android-apk.sh]
   artifacts:
     when: on_success
     paths:
@@ -231,7 +230,7 @@ deploy_playstore_internal:
   before_script:
     - git apply ./scripts/enable-android-google-services.patch
     - ./scripts/prepare-android-release.sh
-  script: [ ./scripts/release-playstore-beta.sh ]
+  script: [./scripts/release-playstore-beta.sh]
   artifacts:
     when: on_success
     paths:
@@ -294,7 +293,7 @@ build_linux_x86:
     [
       sudo apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install keyboard-configuration -y && sudo apt-get install curl clang cmake ninja-build pkg-config libgtk-3-dev libblkid-dev liblzma-dev libjsoncpp-dev cmake-data libsecret-1-dev libsecret-1-0 librhash0 -y,
     ]
-  script: [ ./scripts/build-linux.sh ]
+  script: [./scripts/build-linux.sh]
   tags:
     - docker
     - famedly
@@ -305,9 +304,9 @@ build_linux_x86:
 
 build_linux_arm64:
   stage: build
-  before_script: [ flutter upgrade ]
-  script: [ ./scripts/build-linux.sh ]
-  tags: [ docker_arm64 ]
+  before_script: [flutter upgrade]
+  script: [./scripts/build-linux.sh]
+  tags: [docker_arm64]
   only:
     - main
     - tags
@@ -319,7 +318,7 @@ build_linux_arm64:
 
 update_dependencies:
   stage: build
-  needs: [ ]
+  needs: []
   tags:
     - docker
   only:
@@ -401,7 +400,7 @@ deploy_playstore:
   before_script:
     - git apply ./scripts/enable-android-google-services.patch
     - ./scripts/prepare-android-release.sh
-  script: [ ./scripts/release-playstore.sh ]
+  script: [./scripts/release-playstore.sh]
   resource_group: playstore_release
   only:
     - tags

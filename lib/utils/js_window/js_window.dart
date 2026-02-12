@@ -1,28 +1,28 @@
 @JS()
 library window;
 
+import 'dart:js_interop';
+
 import 'package:fluffychat/utils/js_window/universal_image_bitmap.dart';
 import 'package:universal_html/html.dart';
 import 'dart:typed_data';
-
-import 'package:js/js.dart';
-import 'package:js/js_util.dart';
+import 'package:web/web.dart' as web;
 
 @JS()
 @staticInterop
 class JSWindow {}
 
 extension JSWindowExtension on JSWindow {
-  external Function get createImageBitmap;
+  @JS('createImageBitmap')
+  external JSPromise<web.ImageBitmap> createImageBitmap(web.Blob blob);
 }
 
 JSWindow get jsWindow => window as JSWindow;
 
 Future<UniversalImageBitmap?> convertUint8ListToBitmap(Uint8List buffer) async {
-  final blob = Blob([buffer]);
+  final blob = web.Blob([buffer.toJS].toJS);
 
-  final result = await jsWindow.createImageBitmap(blob);
-  final ImageBitmap bitmap = await promiseToFuture(result);
-
+  final web.ImageBitmap bitmap = await jsWindow.createImageBitmap(blob).toDart;
+  
   return UniversalImageBitmap(width: bitmap.width, height: bitmap.height);
 }
