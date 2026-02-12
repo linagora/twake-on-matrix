@@ -396,6 +396,59 @@ void main() {
 
         verify(mockUser.ban()).called(1);
       });
+
+      test(
+          'should proceed with ban even when power level reduction fails',
+          () async {
+        // Arrange
+        final powerLevelContent = {
+          'users': {
+            '@mod:server.com': DefaultPowerLevelMember.moderator.powerLevel,
+          },
+        };
+        final mockException = MockMatrixException();
+        when(mockException.error).thenReturn(MatrixError.M_FORBIDDEN);
+
+        when(mockUser.canBan).thenReturn(true);
+        when(mockUser.powerLevel)
+            .thenReturn(DefaultPowerLevelMember.moderator.powerLevel);
+        when(mockUser.id).thenReturn('@mod:server.com');
+        when(mockUser.ban()).thenAnswer((_) async {});
+        when(mockRoom.getState(EventTypes.RoomPowerLevels))
+            .thenReturn(mockPowerLevelEvent);
+        when(mockPowerLevelEvent.content).thenReturn(powerLevelContent);
+        when(
+          mockClient.setRoomStateWithKey(any, any, any, any),
+        ).thenThrow(mockException);
+
+        // Act
+        final result = interactor.execute(user: mockUser, room: mockRoom);
+
+        // Assert
+        await expectLater(
+          result,
+          emitsInOrder([
+            isA<Right<Failure, Success>>()
+                .having((r) => r.value, 'value', isA<BanUserLoading>()),
+            isA<Right<Failure, Success>>()
+                .having((r) => r.value, 'value', isA<BanUserSuccess>()),
+            emitsDone,
+          ]),
+        );
+
+        // Verify power level reduction was attempted but failed
+        verify(
+          mockClient.setRoomStateWithKey(
+            '!room:server.com',
+            EventTypes.RoomPowerLevels,
+            '',
+            any,
+          ),
+        ).called(1);
+
+        // But ban still succeeded
+        verify(mockUser.ban()).called(1);
+      });
     });
   });
 }
