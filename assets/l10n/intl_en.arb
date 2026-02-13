@@ -3640,6 +3640,7 @@
   "copyLink": "Copy link",
   "@copyLink": {},
   "downloadQrCode": "Download QR code",
+  "couldNotLaunchUrl": "Could not launch URL",
   "@downloadQrCode": {},
   "promoteToAdmin": "Promote to admin",
   "@promoteToAdmin": {
