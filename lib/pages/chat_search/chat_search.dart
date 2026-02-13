@@ -5,6 +5,7 @@ import 'package:fluffychat/pages/chat_search/chat_search_view.dart';
 import 'package:fluffychat/pages/search/server_search_controller.dart';
 import 'package:fluffychat/presentation/same_type_events_builder/same_type_events_controller.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
+import 'package:fluffychat/utils/responsive/responsive_utils.dart';
 import 'package:fluffychat/utils/scroll_controller_extension.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:flutter/material.dart';
@@ -95,9 +96,15 @@ class ChatSearchController extends State<ChatSearch> {
     }
   }
 
-  void onEventTap(Event event) async {
+  void onEventTap(BuildContext context, Event event) async {
     if (widget.isInStack) {
-      await onBack();
+      if (ResponsiveUtils().isRightColumnStacked(context)) {
+        widget.onBack?.call();
+      } else {
+        Navigator.of(context).popUntil(
+          (route) => route.settings.name == '/rooms/room_${widget.roomId}',
+        );
+      }
     }
 
     widget.jumpToEventStreamController?.add(event.eventId);

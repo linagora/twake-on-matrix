@@ -49,11 +49,7 @@ class StickerPickerDialogState extends State<StickerPickerDialog> {
           if (packIndex != 0) const SizedBox(height: 20),
           if (packName != 'user')
             ListTile(
-              leading: Avatar(
-                mxContent: pack.pack.avatarUrl,
-                name: packName,
-                client: widget.room.client,
-              ),
+              leading: Avatar(mxContent: pack.pack.avatarUrl, name: packName),
               title: Text(packName),
             ),
           const SizedBox(height: 6),
