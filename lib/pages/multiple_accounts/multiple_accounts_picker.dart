@@ -1,6 +1,7 @@
 import 'package:collection/collection.dart';
 import 'package:fluffychat/pages/twake_welcome/twake_welcome.dart';
 import 'package:fluffychat/presentation/multiple_account/twake_chat_presentation_account.dart';
+import 'package:fluffychat/utils/dialog/twake_dialog.dart';
 import 'package:fluffychat/widgets/layouts/agruments/switch_active_account_body_args.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:fluffychat/widgets/twake_components/twake_header_style.dart';
@@ -38,7 +39,7 @@ class MultipleAccountsPickerController {
       context: context,
       onAddAnotherAccount: _onAddAnotherAccount,
       onGoToAccountSettings: onGoToAccountSettings,
-      onSetAccountAsActive: (account) => _onSetAccountAsActive(
+      onSetAccountAsActive: (account) async => await _onSetAccountAsActive(
         multipleAccounts: multipleAccounts,
         account: account,
       ),
@@ -65,7 +66,7 @@ class MultipleAccountsPickerController {
     );
   }
 
-  void _onSetAccountAsActive({
+  Future<void> _onSetAccountAsActive({
     required List<TwakeChatPresentationAccount> multipleAccounts,
     required TwakePresentationAccount account,
   }) async {
@@ -84,14 +85,22 @@ class MultipleAccountsPickerController {
   }
 
   Future<void> _setActiveClient(Client newClient) async {
-    final result = await _matrixState.setActiveClient(newClient);
-    if (result.isSuccess) {
-      await _matrixState.cancelListenSynchronizeContacts();
-      _matrixState.reSyncContacts();
-      context.go(
-        '/rooms',
-        extra: SwitchActiveAccountBodyArgs(newActiveClient: newClient),
-      );
+    try {
+      TwakeDialog.showLoadingDialog(context);
+      final result = await _matrixState.setActiveClient(newClient);
+      if (result.isSuccess) {
+        await _matrixState.cancelListenSynchronizeContacts();
+        _matrixState.reSyncContacts();
+        if (!context.mounted) return;
+        context.go(
+          '/rooms',
+          extra: SwitchActiveAccountBodyArgs(newActiveClient: newClient),
+        );
+      }
+    } catch (e) {
+      Logs().e('MultipleAccountsPickerController::_setActiveClient', e);
+    } finally {
+      if (context.mounted) TwakeDialog.hideLoadingDialog(context);
     }
   }
 }
