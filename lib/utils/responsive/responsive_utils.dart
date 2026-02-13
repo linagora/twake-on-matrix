@@ -127,7 +127,7 @@ class ResponsiveUtils {
 
   double getChatAdaptiveBreakPoint(BuildContext context) {
     var breakpoint = getMinDesktopWidth(context);
-    if (breakpoint < 0) {
+    if (breakpoint < 0 || breakpoint.isInfinite || breakpoint.isNaN) {
       breakpoint =
           ResponsiveUtils.minTabletWidth +
           MessageStyle.messageBubbleDesktopMaxWidth;
