@@ -10,6 +10,7 @@ class ChatProfileInfoRoutes {
 
 class ChatProfileInfoNavigator extends StatelessWidget {
   final VoidCallback? onBack;
+  final VoidCallback? onSearch;
   final String? roomId;
   final PresentationContact? contact;
   final bool isInStack;
@@ -18,6 +19,7 @@ class ChatProfileInfoNavigator extends StatelessWidget {
   const ChatProfileInfoNavigator({
     super.key,
     this.onBack,
+    this.onSearch,
     this.roomId,
     this.contact,
     required this.isInStack,
@@ -33,6 +35,7 @@ class ChatProfileInfoNavigator extends StatelessWidget {
         roomId: roomId,
         contact: contact,
         isDraftInfo: isDraftInfo,
+        onSearch: onSearch,
       );
     }
     return Navigator(
@@ -43,6 +46,7 @@ class ChatProfileInfoNavigator extends StatelessWidget {
             case ChatProfileInfoRoutes.profileInfo:
               return ChatProfileInfo(
                 onBack: onBack,
+                onSearch: onSearch,
                 isInStack: isInStack,
                 roomId: roomId,
                 contact: contact,

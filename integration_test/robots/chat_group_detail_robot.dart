@@ -1,6 +1,7 @@
 import 'package:fluffychat/pages/chat/chat_app_bar_title.dart';
 import 'package:fluffychat/pages/chat/chat_event_list.dart';
 import 'package:fluffychat/pages/chat/events/message_content.dart';
+import 'package:fluffychat/pages/chat_profile_info/chat_profile_info_details.dart';
 import 'package:fluffychat/utils/permission_dialog.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/widgets/twake_components/twake_icon_button.dart';
@@ -47,6 +48,12 @@ class ChatGroupDetailRobot extends CoreRobot {
   Future<void> tapOnChatBarTitle() async {
     await getChatAppBarTitle().tap();
     await $.waitUntilVisible($("Group information"));
+  }
+
+  Future<void> tapOnChatBarTitleForDM() async {
+    await getChatAppBarTitle().tap();
+    // For DM chats, wait for the profile info details widget instead of "Group information"
+    await $.waitUntilVisible($(ChatProfileInfoDetails));
   }
 
   Future<void> confirmAccessMedia() async {

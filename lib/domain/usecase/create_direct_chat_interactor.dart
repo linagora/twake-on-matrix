@@ -32,13 +32,24 @@ class CreateDirectChatInteractor {
     CreateRoomPreset? preset = CreateRoomPreset.trustedPrivateChat,
   }) async* {
     yield const Right(CreateDirectChatLoading());
+
+    try {
+      await client.getUserProfile(contactMxId);
+    } on MatrixException catch (e) {
+      if (e.error == MatrixError.M_FORBIDDEN) {
+        yield const Left(NoPermissionForCreateChat());
+        return;
+      } else {
+        rethrow;
+      }
+    }
     String? roomId;
     try {
       // Check if a direct chat already exists with this contact
       final directChatRoomId = client.getDirectChatFromUserId(contactMxId);
       if (directChatRoomId != null) {
         final room = client.getRoomById(directChatRoomId);
-        if (room != null) {
+        if (room != null && !room.isAbandonedDMRoom) {
           // Case 1: Already joined - return existing room
           if (room.membership == Membership.join) {
             yield Right(CreateDirectChatSuccess(roomId: directChatRoomId));
@@ -76,9 +87,13 @@ class CreateDirectChatInteractor {
           );
         }
       }
-
-      // Create new direct chat room
+      // Create new direct chat room with the contact invited at creation
+      // time. The invite must be part of the createRoom payload so the
+      // server associates is_direct with an actual two-party room from the
+      // start. A separate inviteUser call after creation can cause some
+      // homeservers to treat the room as a group rather than a DM.
       roomId = await client.createRoom(
+        invite: [contactMxId],
         isDirect: true,
         preset: preset,
         initialState: initialState,
@@ -95,12 +110,8 @@ class CreateDirectChatInteractor {
         }
       }
 
-      // Mark as direct chat BEFORE inviting user so recipient's client
-      // recognizes it as a direct chat when they receive the invite
+      // Mark as direct chat so both sides recognise it as a DM
       await Room(id: roomId, client: client).addToDirectChat(contactMxId);
-
-      // Now invite the user to the direct chat
-      await client.inviteUser(roomId, contactMxId);
 
       yield Right(CreateDirectChatSuccess(roomId: roomId));
     } catch (e, s) {
@@ -108,8 +119,9 @@ class CreateDirectChatInteractor {
       if (roomId != null) {
         try {
           await client.leaveRoom(roomId);
+          await client.forgetRoom(roomId);
         } catch (e) {
-          Logs().e('CreateDirectChatInteractor: Failed to leave room', e);
+          Logs().e('CreateDirectChatInteractor: Failed to clean up room', e);
         }
       }
       yield Left(CreateDirectChatFailed(exception: e));
