@@ -94,6 +94,7 @@ class ChatListRobot extends HomeRobot {
     // Tap on the search TextField in the chat list to open search screen
     await $(TextField).tap();
     // Verify SearchView is opened
+    await $.pumpAndSettle();
     await $.waitUntilVisible($(SearchView));
   }
 

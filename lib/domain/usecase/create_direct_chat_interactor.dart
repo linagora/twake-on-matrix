@@ -34,15 +34,13 @@ class CreateDirectChatInteractor {
     yield const Right(CreateDirectChatLoading());
 
     try {
-      // Verify the contact is reachable on their homeserver before
-      // creating the room.  getUserProfile (unlike getProfileFromUserId)
-      // rethrows when the server request fails and there is no cached
-      // copy, so a federation denial or unknown user surfaces here
-      // instead of silently producing an empty DM later.
       await client.getUserProfile(contactMxId);
     } on MatrixException catch (e) {
       if (e.error == MatrixError.M_FORBIDDEN) {
         yield const Left(NoPermissionForCreateChat());
+        return;
+      } else {
+        rethrow;
       }
     }
     String? roomId;

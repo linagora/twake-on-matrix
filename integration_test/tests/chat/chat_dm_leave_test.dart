@@ -23,7 +23,15 @@ String generateTimestampAccount() {
       'Please provide it via --dart-define=SERVER_URL=your-server',
     );
   }
-  return '@user${now.year}${now.month.toString().padLeft(2, '0')}${now.day.toString().padLeft(2, '0')}.${now.hour.toString().padLeft(2, '0')}${now.minute.toString().padLeft(2, '0')}${now.second.toString().padLeft(2, '0')}:$serverUrl';
+  final date =
+      '${now.year}'
+      '${now.month.toString().padLeft(2, '0')}'
+      '${now.day.toString().padLeft(2, '0')}';
+  final time =
+      '${now.hour.toString().padLeft(2, '0')}'
+      '${now.minute.toString().padLeft(2, '0')}'
+      '${now.second.toString().padLeft(2, '0')}';
+  return '@user$date.$time:$serverUrl';
 }
 
 void main() {
@@ -60,8 +68,15 @@ void main() {
       await $.pumpAndSettle(timeout: _kNavigationTimeout);
 
       final chatListRobot = ChatListRobot($);
-      final chatExists = $(TwakeListItem).exists;
-      s.softAssertEquals(chatExists, true, 'Chat is not visible in chat list');
+      final chatExists = chatListRobot
+          .getChatGroupByTitle(timestampAccount)
+          .root
+          .exists;
+      s.softAssertEquals(
+        chatExists,
+        true,
+        'DM chat with $timestampAccount is not visible in chat list',
+      );
 
       // Step 4: Search for the chat and open it to try to leave
       await chatListRobot.openSearchScreenWithoutAcceptPermission();
