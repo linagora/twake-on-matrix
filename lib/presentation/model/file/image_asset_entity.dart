@@ -17,8 +17,8 @@ class ImageAssetEntity extends FileAssetEntity {
     return ImageFileInfo(
       file.path.split('/').last,
       filePath: file.path,
-      width: assetEntity.width,
-      height: assetEntity.height,
+      width: assetEntity.orientatedWidth,
+      height: assetEntity.orientatedHeight,
     );
   }
 
@@ -31,8 +31,8 @@ class ImageAssetEntity extends FileAssetEntity {
     return MatrixImageFile(
       name: file.path.split('/').last,
       bytes: file.readAsBytesSync(),
-      width: assetEntity.width,
-      height: assetEntity.height,
+      width: assetEntity.orientatedWidth,
+      height: assetEntity.orientatedHeight,
     );
   }
 
