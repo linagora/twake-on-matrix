@@ -241,39 +241,39 @@ class AssignRolesController extends State<AssignRoles>
   }
 
   void _handleOnTapRemoveUser({required User user}) {
-    _banUserSubscription = banUserInteractor.execute(user: user).listen((
-      result,
-    ) {
-      result.fold(
-        (failure) {
-          if (failure is BanUserFailure) {
-            TwakeDialog.hideLoadingDialog(context);
-            TwakeSnackBar.show(context, failure.exception.toString());
-            return;
-          }
+    _banUserSubscription = banUserInteractor
+        .execute(user: user, room: widget.room)
+        .listen((result) {
+          result.fold(
+            (failure) {
+              if (failure is BanUserFailure) {
+                TwakeDialog.hideLoadingDialog(context);
+                TwakeSnackBar.show(context, failure.exception.toString());
+                return;
+              }
 
-          if (failure is NoPermissionForBanFailure) {
-            TwakeDialog.hideLoadingDialog(context);
-            TwakeSnackBar.show(
-              context,
-              L10n.of(context)!.permissionErrorBanUser,
-            );
-            return;
-          }
-        },
-        (success) async {
-          if (success is BanUserLoading) {
-            TwakeDialog.showLoadingDialog(context);
-            return;
-          }
+              if (failure is NoPermissionForBanFailure) {
+                TwakeDialog.hideLoadingDialog(context);
+                TwakeSnackBar.show(
+                  context,
+                  L10n.of(context)!.permissionErrorBanUser,
+                );
+                return;
+              }
+            },
+            (success) async {
+              if (success is BanUserLoading) {
+                TwakeDialog.showLoadingDialog(context);
+                return;
+              }
 
-          if (success is BanUserSuccess) {
-            TwakeDialog.hideLoadingDialog(context);
-            return;
-          }
-        },
-      );
-    });
+              if (success is BanUserSuccess) {
+                TwakeDialog.hideLoadingDialog(context);
+                return;
+              }
+            },
+          );
+        });
   }
 
   @override
