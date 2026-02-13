@@ -278,7 +278,7 @@ class HomeserverPickerController extends State<HomeserverPicker>
           await client.importDump(String.fromCharCodes(file.bytes!));
           Matrix.of(context).initMatrix();
         } catch (e, s) {
-          Logs().e('Future error:', e, s);
+          Logs().wtf('HomeserverPicker::restoreBackup() [Exception]', e, s);
         }
       },
     );

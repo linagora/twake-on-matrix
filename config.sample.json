@@ -17,5 +17,6 @@
   "qr_code_download_url": "https://sign-up.twake.app/download/chat",
   "enable_logs": false,
   "support_url": "https://twake.app/support",
-  "cozy_external_bridge_version": "0.8.0"
+  "cozy_external_bridge_version": "0.8.0",
+  "sentry_dsn": ""
 }
