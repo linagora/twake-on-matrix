@@ -913,10 +913,11 @@ packages:
   flutter_highlight:
     dependency: transitive
     description:
-      name: flutter_highlight
-      sha256: "7b96333867aa07e122e245c033b8ad622e4e3a42a1a2372cbb098a2541d8782c"
-      url: "https://pub.dev"
-    source: hosted
+      path: flutter_highlight
+      ref: "hotfix/selectable-highlight"
+      resolved-ref: "79577f47620888337f2bb86d2fe0e0375b982d9f"
+      url: "https://github.com/linagora/highlight.dart.git"
+    source: git
     version: "0.7.0"
   flutter_image_compress:
     dependency: "direct main"
@@ -1151,8 +1152,8 @@ packages:
     dependency: "direct main"
     description:
       path: "."
-      ref: master
-      resolved-ref: b8252e3d6ce7d247ef961957a41c48225fcb19f3
+      ref: "hotfix/selectable-highlight"
+      resolved-ref: "68d2f22358613e0172ab82e71cccadf5b400449d"
       url: "https://github.com/linagora/flutter_matrix_html.git"
     source: git
     version: "1.2.0"

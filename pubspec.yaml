@@ -24,7 +24,7 @@ dependencies:
   flutter_matrix_html:
     git:
       url: https://github.com/linagora/flutter_matrix_html.git
-      ref: master
+      ref: hotfix/selectable-highlight
 
   # TODO: Remove it after this PR merged
   # https://github.com/justsoft/video_thumbnail/pull/135
