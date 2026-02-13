@@ -1,22 +1,43 @@
 import 'dart:io';
-import 'dart:typed_data';
 import 'dart:ui' as ui;
 
 import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/generated/l10n/app_localizations.dart';
 import 'package:fluffychat/pages/personal_qr/personal_qr_view.dart';
+import 'package:fluffychat/resource/image_paths.dart';
+import 'package:fluffychat/utils/dialog/twake_dialog.dart';
 import 'package:fluffychat/utils/permission_dialog.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/utils/permission_service.dart';
 import 'package:fluffychat/utils/twake_snackbar.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 import 'package:gal/gal.dart';
+import 'package:image/image.dart' as img;
 import 'package:matrix/matrix.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:path/path.dart' as path;
+
+Uint8List? _compositeInIsolate(List<dynamic> params) {
+  final background = img.decodePng(params[1] as Uint8List);
+  if (background == null) return null;
+
+  img.compositeImage(
+    background,
+    img.Image.fromBytes(
+      width: params[2] as int,
+      height: params[3] as int,
+      bytes: (params[0] as Uint8List).buffer,
+      order: img.ChannelOrder.rgba,
+    ),
+    center: true,
+  );
+  return Uint8List.fromList(img.encodePng(background));
+}
 
 class PersonalQr extends StatefulWidget {
   const PersonalQr({super.key});
@@ -69,6 +90,7 @@ class PersonalQrController extends State<PersonalQr> {
   Future<void> downloadQrCode(BuildContext context) async {
     File? tempFile;
     try {
+      TwakeDialog.showLoadingDialog(context);
       final l10n = L10n.of(context)!;
 
       final permissionGranted = await _requestStoragePermissions();
@@ -113,6 +135,8 @@ class PersonalQrController extends State<PersonalQr> {
       }
       if (!mounted) return;
       TwakeSnackBar.show(context, L10n.of(context)!.oopsSomethingWentWrong);
+    } finally {
+      TwakeDialog.hideLoadingDialog(context);
     }
   }
 
@@ -181,6 +205,25 @@ class PersonalQrController extends State<PersonalQr> {
     return permissionStatus.isGranted;
   }
 
+  Future<Uint8List?> _compositeOntoBackground(
+    ByteData data,
+    String asset,
+    int w,
+    int h,
+  ) async {
+    try {
+      return await compute(_compositeInIsolate, [
+        data.buffer.asUint8List(),
+        (await rootBundle.load(asset)).buffer.asUint8List(),
+        w,
+        h,
+      ]);
+    } catch (e) {
+      Logs().e('_compositeOntoBackground error', e);
+      return null;
+    }
+  }
+
   /// Captures the QR code widget as a PNG image
   Future<Uint8List?> _captureQrImage(BuildContext context, L10n l10n) async {
     final boundary =
@@ -192,7 +235,7 @@ class PersonalQrController extends State<PersonalQr> {
     }
 
     final image = await boundary.toImage(pixelRatio: 3.0);
-    final byteData = await image.toByteData(format: ui.ImageByteFormat.png);
+    final byteData = await image.toByteData(format: ui.ImageByteFormat.rawRgba);
     if (byteData == null) {
       Logs().e('PersonalQr::_captureQrImage():: byteData is null');
       if (!mounted) return null;
@@ -200,7 +243,12 @@ class PersonalQrController extends State<PersonalQr> {
       return null;
     }
 
-    return byteData.buffer.asUint8List();
+    return await _compositeOntoBackground(
+      byteData,
+      ImagePaths.personalQrBackground,
+      image.width,
+      image.height,
+    );
   }
 
   @override

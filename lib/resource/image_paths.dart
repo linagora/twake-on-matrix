@@ -91,6 +91,9 @@ class ImagePaths {
   static String get icE2EEncryptionMessageIndicator =>
       _getImagePath('ic_end_to_end_encryption_message_indicator.svg');
 
+  static String get personalQrBackground =>
+      _getAssetPath('personal_qr_background.png');
+
   static String _getImagePath(String imageName) {
     return AssetsPaths.images + imageName;
   }
