@@ -1,0 +1,157 @@
+.smart-banner {
+  display: none;
+  position: fixed;
+  z-index: 9999999;
+  top: max(16px, env(safe-area-inset-top));
+  left: max(21px, env(safe-area-inset-left));
+  right: max(20px, env(safe-area-inset-right));
+  border-radius: 10px;
+  background: linear-gradient(0deg, #FFFBFE, #FFFBFE), linear-gradient(0deg, rgba(122, 184, 255, 0.09), rgba(122, 184, 255, 0.09));
+  box-shadow: 0px 0px 24px 0px rgba(0, 0, 0, 0.16), 0px 0px 2px 0px rgba(0, 0, 0, 0.08);
+  transform: translateY(-100%);
+  opacity: 0;
+  transition: transform 0.3s ease-out, opacity 0.3s ease-out;
+}
+
+.smart-banner.visible {
+  transform: translateY(0);
+  opacity: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .smart-banner {
+    transition: none;
+  }
+}
+
+.banner-content {
+  padding: 14px 10px 18px 12px;
+  display: flex;
+  align-items: center;
+  gap: 13px;
+}
+
+.banner-text {
+  flex: 1;
+  min-width: 0;
+}
+
+.twake-chat-icon {
+  width: 47px;
+  height: 47px;
+  flex-shrink: 0;
+  display: block;
+}
+
+.twake-chat-icon img {
+  width: 100%;
+  height: 100%;
+  border-radius: 15.52px;
+  display: block;
+}
+
+.button {
+  border: none;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  margin: 4px 2px;
+  cursor: pointer;
+  background-color: transparent;
+}
+
+.button.close {
+  position: absolute;
+  top: 6px;
+  right: 7px;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.button.close:hover {
+  opacity: 0.7;
+}
+
+.button.close:active {
+  opacity: 0.5;
+}
+
+.close-icon {
+  width: 24px;
+  height: 24px;
+}
+
+.close-icon img {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.download-button {
+  flex-shrink: 0;
+  height: 36px;
+  padding: 6px 12px;
+  border: none;
+  border-radius: 10px;
+  background: transparent;
+  font-family: "Inter", Helvetica, sans-serif;
+  font-size: 17px;
+  font-weight: 500;
+  line-height: 24px;
+  letter-spacing: -0.41px;
+  color: #007aff;
+  cursor: pointer;
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.download-button:hover {
+  opacity: 0.8;
+}
+
+.download-button:active {
+  opacity: 0.6;
+}
+
+.banner-title {
+  margin: 0 0 10px 0;
+  font-family: "Inter", Helvetica, sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 20px;
+  letter-spacing: 0.25px;
+  color: #000000;
+}
+
+.banner-description {
+  margin: 0;
+  font-family: "Inter", Helvetica, sans-serif;
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 16px;
+  letter-spacing: 0px;
+  color: #000000;
+}
+
+@media (prefers-color-scheme: dark) {
+  .smart-banner {
+    background: linear-gradient(0deg, #1C1B1F, #1C1B1F), linear-gradient(0deg, rgba(122, 184, 255, 0.15), rgba(122, 184, 255, 0.15));
+    box-shadow: 0px 0px 24px 0px rgba(255, 255, 255, 0.12), 0px 0px 2px 0px rgba(255, 255, 255, 0.08);
+  }
+
+  .banner-title,
+  .banner-description {
+    color: #E6E1E5;
+  }
+
+  .download-button {
+    color: #A8C7FA;
+  }
+}
