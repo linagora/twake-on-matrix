@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
 set -e
 
+flutter pub get
+flutter pub run sqflite_common_ffi_web:setup --dir=web
+
 rm -rf .vodozemac
 
 version=$(yq ".dependencies.flutter_vodozemac" < pubspec.yaml)

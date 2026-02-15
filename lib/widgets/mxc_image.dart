@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'dart:typed_data';
-import 'package:fluffychat/data/memory/mxc_image_cache_manager.dart';
+import 'package:fluffychat/di/global/get_it_initializer.dart';
+import 'package:fluffychat/data/cache/mxc_cache_manager.dart';
 import 'package:fluffychat/pages/image_viewer/image_viewer.dart';
 import 'package:fluffychat/pages/media_viewer/media_viewer.dart';
 import 'package:fluffychat/presentation/enum/chat/media_viewer_popup_result_enum.dart';
@@ -37,27 +38,23 @@ class MxcImage extends StatefulWidget {
   final Curve animationCurve;
   final ThumbnailMethod thumbnailMethod;
   final Widget Function(BuildContext context)? placeholder;
-  final String? cacheKey;
   final bool rounded;
   final void Function()? onTapPreview;
   final void Function()? onTapSelectMode;
   final ImageData? imageData;
   final bool isPreview;
   final bool enableHeroAnimation;
-
-  /// Enable it if the image is stretched, and you don't want to resize it
   final bool noResize;
-
-  /// Cache for screen locally, if null, use global cache
-  final Map<EventId, ImageData>? cacheMap;
-
   final VoidCallback? closeRightColumn;
-
   final int? cacheWidth;
-
   final int? cacheHeight;
-
   final bool keepAlive;
+
+  // DEPRECATED: Use unified cache instead
+  @Deprecated('Local cacheMap no longer needed with unified cache')
+  final Map<String, ImageData>? cacheMap;
+  @Deprecated('cacheKey auto-generated from MXC URI')
+  final String? cacheKey;
 
   const MxcImage({
     this.uri,
@@ -72,13 +69,13 @@ class MxcImage extends StatefulWidget {
     this.retryDuration = const Duration(seconds: 2),
     this.animationCurve = TwakeThemes.animationCurve,
     this.thumbnailMethod = ThumbnailMethod.scale,
-    this.cacheKey,
+    @Deprecated('Use unified cache') this.cacheKey,
     this.rounded = false,
     this.onTapPreview,
     this.onTapSelectMode,
     this.imageData,
     this.isPreview = false,
-    this.cacheMap,
+    @Deprecated('Use unified cache') this.cacheMap,
     this.noResize = false,
     this.closeRightColumn,
     this.cacheWidth,
@@ -94,146 +91,267 @@ class MxcImage extends StatefulWidget {
 
 class _MxcImageState extends State<MxcImage>
     with AutomaticKeepAliveClientMixin {
-  static const String placeholderKey = 'placeholder';
-  ImageData? _imageDataNoCache;
-  bool isLoadDone = false;
-  String? filePath;
+  static const String _placeholderKey = 'placeholder';
 
-  ImageData? get _imageData {
-    final cacheKey = widget.cacheKey;
-    final image = cacheKey == null
-        ? _imageDataNoCache
-        : widget.cacheMap != null
-        ? _imageDataFromLocalCache
-        : _imageDataFromGlobalCache;
-    return image;
+  final MxcCacheManager _cacheManager = getIt<MxcCacheManager>();
+
+  ImageData? _imageData;
+  String? _filePath;
+  bool _isLoadDone = false;
+
+  Uri? get _mxcUri => widget.uri ?? _extractMxcFromEvent();
+
+  Uri? _extractMxcFromEvent() {
+    final event = widget.event;
+    if (event == null) return null;
+
+    if (widget.isThumbnail) {
+      final thumbnail = event.content
+          .tryGetMap<String, dynamic>('info')
+          ?.tryGet<String>('thumbnail_url');
+      if (thumbnail != null) return Uri.tryParse(thumbnail);
+    }
+    final url = event.content.tryGet<String>('url');
+    if (url != null) return Uri.tryParse(url);
+    return null;
   }
 
-  ImageData? get _imageDataFromLocalCache =>
-      widget.cacheKey != null && widget.cacheMap != null
-      ? widget.cacheMap![widget.cacheKey]
-      : null;
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) _loadImage();
+    });
+  }
 
-  ImageData? get _imageDataFromGlobalCache => widget.cacheKey != null
-      ? MxcImageCacheManager.instance.getImage(widget.cacheKey!)
-      : null;
+  @override
+  void dispose() {
+    _imageData = null;
+    super.dispose();
+  }
 
-  set _imageData(ImageData? data) {
-    if (data == null) return;
-    final cacheKey = widget.cacheKey;
-    if (cacheKey == null) {
-      _imageDataNoCache = data;
-    } else if (widget.cacheMap != null) {
-      widget.cacheMap![cacheKey] = data;
-    } else {
-      MxcImageCacheManager.instance.cacheImage(cacheKey, data);
+  Future<void> _loadImage({int maxRetry = 3}) async {
+    // Use pre-provided imageData if available
+    if (widget.imageData != null) {
+      _setLoadResult(widget.imageData, null);
+      return;
+    }
+
+    final mxcUri = _mxcUri;
+    if (mxcUri == null) return;
+
+    // Capture context-dependent values before any await
+    final cacheWidth = _cacheWidth;
+    final cacheHeight = _cacheHeight;
+    final httpUri = _getHttpUri(mxcUri);
+
+    try {
+      // Step 1: Check unified cache (with httpUri for SWR)
+      final cacheResult = await _cacheManager.get(
+        mxcUri,
+        width: cacheWidth,
+        height: cacheHeight,
+        isThumbnail: widget.isThumbnail,
+        httpUri: httpUri,
+      );
+
+      if (cacheResult.isHit) {
+        _setLoadResult(cacheResult.bytes, null);
+        return;
+      }
+
+      // Step 2: Download from network
+      final downloadResult = await _downloadMedia(
+        mxcUri,
+        httpUri,
+        cacheWidth,
+        cacheHeight,
+      );
+      if (downloadResult == null) return;
+
+      // Step 3: Store in unified cache
+      await _cacheManager.put(
+        mxcUri,
+        downloadResult.bytes,
+        mediaType: downloadResult.mimeType ?? 'application/octet-stream',
+        width: cacheWidth,
+        height: cacheHeight,
+        isThumbnail: widget.isThumbnail,
+        etag: downloadResult.etag,
+        lastModified: downloadResult.lastModified,
+      );
+
+      _setLoadResult(downloadResult.bytes, downloadResult.filePath);
+    } catch (e, s) {
+      Logs().e('MxcImage: load failed for $mxcUri', e, s);
+      if (mounted && !_isLoadDone) {
+        // Retry once after delay
+        await Future.delayed(widget.retryDuration);
+        if (mounted && maxRetry > 0) _loadImage(maxRetry: maxRetry - 1);
+      }
     }
   }
 
-  bool? _isCached;
-
-  Future<({Uint8List? imageData, String? filePath})> _load(
-    BuildContext context,
-  ) async {
-    if (!context.mounted) return (imageData: null, filePath: null);
+  /// Calculate HTTP URI for downloading or validating MXC content
+  Uri? _getHttpUri(Uri mxcUri) {
     final client = Matrix.of(context).client;
-    final uri = widget.uri;
+    return widget.isThumbnail
+        ? mxcUri.getThumbnail(
+            client,
+            width: _cacheWidth,
+            height: _cacheHeight,
+            animated: widget.animated,
+            method: widget.thumbnailMethod,
+          )
+        : mxcUri.getDownloadLink(client);
+  }
+
+  Future<_DownloadResult?> _downloadMedia(
+    Uri mxcUri,
+    Uri? httpUri,
+    int? cacheWidth,
+    int? cacheHeight,
+  ) async {
     final event = widget.event;
 
-    if (uri != null) {
-      final width = widget.width;
-      final realWidth = width == null ? null : context.getCacheSize(width);
-      final height = widget.height;
-      final realHeight = height == null ? null : context.getCacheSize(height);
-
-      final httpUri = widget.isThumbnail
-          ? uri.getThumbnail(
-              client,
-              width: realWidth,
-              height: realHeight,
-              animated: widget.animated,
-              method: widget.thumbnailMethod,
-            )
-          : uri.getDownloadLink(client);
-
-      if (_isCached == null && widget.event != null) {
-        final cachedData = await client.database.getFile(httpUri);
-        if (cachedData != null) {
-          _isCached = true;
-          return (imageData: cachedData, filePath: null);
-        }
-        _isCached = false;
-      }
-
-      final response = await http.get(httpUri);
-      if (response.statusCode != 200) {
-        if (response.statusCode == 404) {
-          return (imageData: null, filePath: null);
-        }
-        throw Exception();
-      }
-      final remoteData = response.bodyBytes;
-
-      if (widget.event != null) {
-        await client.database.storeFile(httpUri, remoteData, 0);
-      }
-
-      return (imageData: remoteData, filePath: null);
-    }
-
+    // Path 1: Download via Event (handles E2EE decryption)
     if (event != null) {
-      try {
-        if (!PlatformInfos.isWeb) {
-          final fileInfo = await event.getFileInfo(
-            getThumbnail: widget.isThumbnail,
-          );
-          Logs().d('MxcImage::Downloaded get file info = $fileInfo');
-          if (fileInfo != null) {
-            return (imageData: fileInfo.bytes, filePath: fileInfo.filePath);
-          }
-        }
-
-        final matrixFile = await event.downloadAndDecryptAttachment(
+      // Try local file first (mobile)
+      if (!PlatformInfos.isWeb) {
+        final fileInfo = await event.getFileInfo(
           getThumbnail: widget.isThumbnail,
         );
-        Logs().d(
-          'MxcImage::Downloaded attachment name = ${matrixFile.name} - mimeType = ${matrixFile.mimeType} - bytes = ${matrixFile.bytes.length}',
-        );
-        if (_notImageOrVideo(matrixFile, event)) {
-          return (imageData: null, filePath: null);
+        if (fileInfo != null) {
+          final bytes =
+              fileInfo.bytes ??
+              (fileInfo.filePath != null
+                  ? await File(fileInfo.filePath!).readAsBytes()
+                  : null);
+          if (bytes != null) {
+            return _DownloadResult(
+              bytes: bytes,
+              filePath: fileInfo.filePath,
+              mimeType: event.mimeType,
+            );
+          }
         }
-        return (imageData: matrixFile.bytes, filePath: null);
-      } catch (e) {
-        Logs().e('MxcImage::Error while downloading image: $e');
-        rethrow;
       }
+
+      final matrixFile = await event.downloadAndDecryptAttachment(
+        getThumbnail: widget.isThumbnail,
+      );
+
+      if (!matrixFile.isImage() && !event.isVideoOrImage) {
+        return null;
+      }
+
+      return _DownloadResult(
+        bytes: matrixFile.bytes,
+        mimeType: matrixFile.mimeType,
+      );
     }
 
-    return (imageData: null, filePath: null);
+    // Path 2: Download via URI directly (with HTTP 304 support)
+    if (httpUri == null) return null;
+
+    // Check for cached metadata to enable conditional GET
+    final cachedMetadata = await _cacheManager.getMetadata(
+      mxcUri,
+      width: cacheWidth,
+      height: cacheHeight,
+      isThumbnail: widget.isThumbnail,
+    );
+
+    // Build request headers with conditional headers if available
+    final headers = <String, String>{};
+    if (cachedMetadata != null && cachedMetadata.hasValidationHeaders) {
+      if (cachedMetadata.etag != null) {
+        headers['If-None-Match'] = cachedMetadata.etag!;
+      }
+      if (cachedMetadata.lastModified != null) {
+        headers['If-Modified-Since'] = cachedMetadata.lastModified!;
+      }
+      Logs().d(
+        'MxcImage: conditional GET for $mxcUri with ${headers.keys.join(", ")}',
+      );
+    }
+
+    final response = await http
+        .get(httpUri, headers: headers)
+        .timeout(const Duration(seconds: 30));
+
+    // Handle HTTP 304 Not Modified - content unchanged, use cache
+    if (response.statusCode == 304) {
+      Logs().d('MxcImage: HTTP 304 for $mxcUri, using cached content');
+      final cachedBytes = await _cacheManager.getFromDisk(
+        mxcUri,
+        width: cacheWidth,
+        height: cacheHeight,
+        isThumbnail: widget.isThumbnail,
+      );
+
+      if (cachedBytes != null) {
+        return _DownloadResult(
+          bytes: cachedBytes,
+          mimeType: 'application/octet-stream', // Safe fallback
+          etag: cachedMetadata?.etag,
+          lastModified: cachedMetadata?.lastModified,
+        );
+      }
+
+      // Cache miss after 304 (race condition) - retry unconditional GET
+      Logs().w('MxcImage: 304 but no cache, retrying unconditional GET');
+      final retryResponse = await http
+          .get(httpUri)
+          .timeout(const Duration(seconds: 30));
+      if (retryResponse.statusCode != 200) {
+        throw Exception(
+          'Failed to download image: ${retryResponse.statusCode} ${retryResponse.reasonPhrase}',
+        );
+      }
+      return _DownloadResult(
+        bytes: retryResponse.bodyBytes,
+        mimeType: retryResponse.headers['content-type'] ?? 'image/png',
+        etag: retryResponse.headers['etag'],
+        lastModified: retryResponse.headers['last-modified'],
+      );
+    }
+
+    if (response.statusCode != 200) {
+      throw Exception(
+        'Failed to download image: ${response.statusCode} ${response.reasonPhrase}',
+      );
+    }
+
+    return _DownloadResult(
+      bytes: response.bodyBytes,
+      mimeType: response.headers['content-type'] ?? 'image/png',
+      etag: response.headers['etag'],
+      lastModified: response.headers['last-modified'],
+    );
   }
 
-  bool _notImageOrVideo(MatrixFile matrixFile, Event event) =>
-      !matrixFile.isImage() && !event.isVideoOrImage;
+  void _setLoadResult(ImageData? bytes, String? filePath) {
+    if (!mounted) return;
+    setState(() {
+      _imageData = bytes;
+      _filePath = filePath;
+      _isLoadDone = true;
+    });
+  }
 
-  Future<void> _tryLoad(BuildContext context) async {
-    _imageData = widget.imageData;
-    if (_imageData != null) {
-      isLoadDone = true;
-      filePath = null;
-      setState(() {});
-    }
-    try {
-      final loadResult = await _load(context);
-      isLoadDone = true;
-      _imageData = loadResult.imageData;
-      filePath = loadResult.filePath;
-      setState(() {});
-    } catch (e) {
-      if (mounted && !isLoadDone) {
-        isLoadDone = true;
-        _tryLoad(context);
-      }
-    }
+  int? get _cacheWidth {
+    if (widget.cacheWidth != null) return widget.cacheWidth;
+    final width = widget.width;
+    if (width == null) return null;
+    return context.getCacheSize(width);
+  }
+
+  int? get _cacheHeight {
+    if (widget.cacheHeight != null) return widget.cacheHeight;
+    final height = widget.height;
+    if (height == null) return null;
+    return context.getCacheSize(height);
   }
 
   void _onTap(BuildContext context) async {
@@ -242,13 +360,11 @@ class _MxcImageState extends State<MxcImage>
       final result =
           await Navigator.of(context, rootNavigator: PlatformInfos.isWeb).push(
             HeroPageRoute(
-              builder: (context) {
-                return InteractiveViewerGallery(
-                  itemBuilder: PlatformInfos.isMobile
-                      ? MediaViewer(event: widget.event!)
-                      : ImageViewer(event: widget.event!),
-                );
-              },
+              builder: (context) => InteractiveViewerGallery(
+                itemBuilder: PlatformInfos.isMobile
+                    ? MediaViewer(event: widget.event!)
+                    : ImageViewer(event: widget.event!),
+              ),
             ),
           );
       if (result == MediaViewerPopupResultEnum.closeRightColumnFlag) {
@@ -256,38 +372,20 @@ class _MxcImageState extends State<MxcImage>
       }
     } else if (widget.onTapSelectMode != null) {
       widget.onTapSelectMode!();
-      return;
-    } else {
-      return;
     }
   }
 
-  Widget placeholder(BuildContext context) =>
+  Widget _placeholder(BuildContext context) =>
       widget.placeholder?.call(context) ??
       const Center(
-        key: Key(placeholderKey),
+        key: Key(_placeholderKey),
         child: CupertinoActivityIndicator(),
       );
 
   @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) {
-        _tryLoad(context);
-      }
-    });
-  }
-
-  @override
-  void dispose() {
-    _imageDataNoCache = null;
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
     super.build(context);
+
     Widget imageWidget = widget.animated
         ? AnimatedSwitcher(
             duration: widget.animationDuration,
@@ -312,23 +410,25 @@ class _MxcImageState extends State<MxcImage>
           child: imageWidget,
         ),
       );
-    } else {
-      return imageWidget;
     }
+
+    return imageWidget;
   }
 
   Widget _buildImageWidget(BuildContext context) {
-    final needResize = widget.event != null && !widget.noResize;
-    if (_imageData == null && filePath == null) {
-      return placeholder(context);
+    if (_imageData == null && _filePath == null) {
+      return _placeholder(context);
     }
+
+    final needResize = widget.event != null && !widget.noResize;
+
     return ClipRRect(
       key: Key('${_imageData.hashCode}'),
       borderRadius: widget.rounded
           ? BorderRadius.circular(12.0)
           : BorderRadius.zero,
       child: _ImageWidget(
-        filePath: filePath,
+        filePath: _filePath,
         event: widget.event,
         data: _imageData,
         width: widget.width,
@@ -339,11 +439,16 @@ class _MxcImageState extends State<MxcImage>
         cacheHeight: widget.cacheHeight,
         isThumbnail: widget.isThumbnail,
         imageErrorWidgetBuilder: (context, error, ___) {
-          _isCached = false;
-          _imageData = null;
-          return placeholder(context);
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (mounted) {
+              setState(() {
+                _imageData = null;
+              });
+            }
+          });
+          return _placeholder(context);
         },
-        placeholder: placeholder(context),
+        placeholder: _placeholder(context),
       ),
     );
   }
@@ -352,6 +457,24 @@ class _MxcImageState extends State<MxcImage>
   bool get wantKeepAlive => widget.keepAlive;
 }
 
+class _DownloadResult {
+  final Uint8List bytes;
+  final String? filePath;
+  final String? mimeType;
+  final String? etag;
+  final String? lastModified;
+
+  const _DownloadResult({
+    required this.bytes,
+    this.filePath,
+    this.mimeType,
+    this.etag,
+    this.lastModified,
+  });
+}
+
+// _ImageWidget and _ImageNativeBuilder remain unchanged
+// (they only render already-loaded bytes)
 class _ImageWidget extends StatelessWidget {
   final String? filePath;
   final Uint8List? data;
@@ -384,89 +507,100 @@ class _ImageWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (_isVideoData) {
-      final matrixVideoFile = MatrixVideoFile(
-        bytes: data!,
-        name: event?.filename ?? '${DateTime.now().millisecondsSinceEpoch}.mp4',
-        mimeType: event?.mimeType,
-      );
-      return FutureBuilder(
-        future: event?.room.generateVideoThumbnail(matrixVideoFile),
-        builder: (context, snapshot) {
-          if (snapshot.data == null) {
-            return placeholder;
-          }
+      return _buildVideoThumbnail(context);
+    }
 
-          return Image.memory(
-            snapshot.data!.bytes,
-            width: width,
-            height: height,
-            cacheWidth: cacheWidth != null
-                ? cacheWidth!
-                : (width != null && needResize)
-                ? context.getCacheSize(width!)
-                : null,
-            cacheHeight: cacheHeight != null
-                ? cacheHeight!
-                : (height != null && needResize)
-                ? context.getCacheSize(height!)
-                : null,
-            fit: fit,
-            filterQuality: FilterQuality.medium,
-            errorBuilder: imageErrorWidgetBuilder,
-          );
-        },
+    if (filePath != null && filePath!.isNotEmpty) {
+      return _ImageNativeBuilder(
+        filePath: filePath,
+        width: width,
+        height: height,
+        cacheWidth: cacheWidth,
+        needResize: needResize,
+        cacheHeight: cacheHeight,
+        fit: fit,
+        event: event,
+        imageErrorWidgetBuilder: imageErrorWidgetBuilder,
       );
     }
-    return filePath != null && filePath!.isNotEmpty
-        ? _ImageNativeBuilder(
-            filePath: filePath,
-            width: width,
-            height: height,
-            cacheWidth: cacheWidth,
-            needResize: needResize,
-            cacheHeight: cacheHeight,
-            fit: fit,
-            event: event,
-            imageErrorWidgetBuilder: imageErrorWidgetBuilder,
-          )
-        : data != null
-        ? event?.mimeType == TwakeMimeTypeExtension.avifMimeType
-              ? AvifImage.memory(
-                  data!,
-                  height: height,
-                  width: width,
-                  fit: BoxFit.cover,
-                  errorBuilder: imageErrorWidgetBuilder,
-                )
-              : Image.memory(
-                  data!,
-                  width: width,
-                  height: height,
-                  cacheWidth: cacheWidth != null
-                      ? cacheWidth!
-                      : (width != null && needResize)
-                      ? context.getCacheSize(width!)
-                      : null,
-                  cacheHeight: cacheHeight != null
-                      ? cacheHeight!
-                      : (height != null && needResize)
-                      ? context.getCacheSize(height!)
-                      : null,
-                  fit: fit,
-                  filterQuality: FilterQuality.medium,
-                  errorBuilder: imageErrorWidgetBuilder,
-                )
-        : const SizedBox.shrink();
+
+    if (data == null) return const SizedBox.shrink();
+
+    if (event?.mimeType == TwakeMimeTypeExtension.avifMimeType) {
+      return AvifImage.memory(
+        data!,
+        height: height,
+        width: width,
+        fit: BoxFit.cover,
+        errorBuilder: imageErrorWidgetBuilder,
+      );
+    }
+
+    return Image.memory(
+      data!,
+      width: width,
+      height: height,
+      cacheWidth: _effectiveCacheWidth(context),
+      cacheHeight: _effectiveCacheHeight(context),
+      fit: fit,
+      filterQuality: FilterQuality.medium,
+      errorBuilder: imageErrorWidgetBuilder,
+    );
   }
 
-  bool get _isVideoData {
-    return event?.messageType == MessageTypes.Video &&
-        data != null &&
-        !isThumbnail;
+  bool get _isVideoData =>
+      event?.messageType == MessageTypes.Video && data != null && !isThumbnail;
+
+  int? _effectiveCacheWidth(BuildContext context) {
+    if (cacheWidth != null) return cacheWidth;
+    if (width != null && needResize) return context.getCacheSize(width!);
+    return null;
+  }
+
+  int? _effectiveCacheHeight(BuildContext context) {
+    if (cacheHeight != null) return cacheHeight;
+    if (height != null && needResize) return context.getCacheSize(height!);
+    return null;
+  }
+
+  Widget _buildVideoThumbnail(BuildContext context) {
+    final matrixVideoFile = MatrixVideoFile(
+      bytes: data!,
+      name: event?.filename ?? '${DateTime.now().millisecondsSinceEpoch}.mp4',
+      mimeType: event?.mimeType,
+    );
+
+    return FutureBuilder<MatrixImageFile?>(
+      future: event?.room.generateVideoThumbnail(matrixVideoFile),
+      builder: (context, snapshot) {
+        if (snapshot.data == null) return placeholder;
+
+        return Image.memory(
+          snapshot.data!.bytes,
+          width: width,
+          height: height,
+          cacheWidth: _effectiveCacheWidth(context),
+          cacheHeight: _effectiveCacheHeight(context),
+          fit: fit,
+          filterQuality: FilterQuality.medium,
+          errorBuilder: imageErrorWidgetBuilder,
+        );
+      },
+    );
   }
 }
 
 class _ImageNativeBuilder extends StatelessWidget {
+  final String? filePath;
+  final Event? event;
+  final double? width;
+  final double? height;
+  final int? cacheWidth;
+  final bool needResize;
+  final int? cacheHeight;
+  final BoxFit? fit;
+  final ImageErrorWidgetBuilder imageErrorWidgetBuilder;
+
   const _ImageNativeBuilder({
     this.filePath,
     this.width,
@@ -479,16 +613,6 @@ class _ImageNativeBuilder extends StatelessWidget {
     this.event,
   });
 
-  final String? filePath;
-  final Event? event;
-  final double? width;
-  final double? height;
-  final int? cacheWidth;
-  final bool needResize;
-  final int? cacheHeight;
-  final BoxFit? fit;
-  final ImageErrorWidgetBuilder imageErrorWidgetBuilder;
-
   @override
   Widget build(BuildContext context) {
     if (event?.mimeType == TwakeMimeTypeExtension.avifMimeType) {
@@ -500,20 +624,17 @@ class _ImageNativeBuilder extends StatelessWidget {
         errorBuilder: imageErrorWidgetBuilder,
       );
     }
+
     return Image.file(
       File(filePath!),
       width: width,
       height: height,
-      cacheWidth: cacheWidth != null
-          ? cacheWidth!
-          : (width != null && needResize)
-          ? context.getCacheSize(width!)
-          : null,
-      cacheHeight: cacheHeight != null
-          ? cacheHeight!
-          : (height != null && needResize)
-          ? context.getCacheSize(height!)
-          : null,
+      cacheWidth:
+          cacheWidth ??
+          (width != null && needResize ? context.getCacheSize(width!) : null),
+      cacheHeight:
+          cacheHeight ??
+          (height != null && needResize ? context.getCacheSize(height!) : null),
       fit: fit,
       filterQuality: FilterQuality.medium,
       errorBuilder: imageErrorWidgetBuilder,

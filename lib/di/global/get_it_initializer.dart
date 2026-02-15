@@ -1,6 +1,10 @@
 import 'dart:collection';
 
 import 'package:fluffychat/config/app_grid_config/app_config_loader.dart';
+import 'package:fluffychat/data/cache/database/cache_database_interface.dart';
+import 'package:fluffychat/data/cache/database/cache_database_factory.dart';
+import 'package:fluffychat/data/cache/mxc_cache_config.dart';
+import 'package:fluffychat/data/cache/mxc_cache_manager.dart';
 import 'package:fluffychat/data/datasource/capabilities/server_capabilities_datasource.dart';
 import 'package:fluffychat/data/datasource/contact/address_book_datasource.dart';
 import 'package:fluffychat/data/datasource/contact/hive_third_party_contact_datasource.dart';
@@ -150,6 +154,7 @@ import 'package:fluffychat/utils/famedlysdk_store.dart';
 import 'package:fluffychat/utils/manager/download_manager/download_manager.dart';
 import 'package:fluffychat/utils/manager/download_manager/downloading_worker_queue.dart';
 import 'package:fluffychat/utils/manager/upload_manager/upload_manager.dart';
+import 'package:fluffychat/utils/cache_lifecycle_manager.dart';
 import 'package:fluffychat/utils/manager/upload_manager/upload_worker_queue.dart';
 import 'package:fluffychat/utils/power_level_manager.dart';
 import 'package:fluffychat/utils/responsive/responsive_utils.dart';
@@ -200,6 +205,26 @@ class GetItInitializer {
     );
     getIt.registerFactory<LanguageCacheManager>(() => LanguageCacheManager());
     getIt.registerFactory<ReactionsCacheManager>(() => ReactionsCacheManager());
+
+    // MXC cache manager
+    getIt.registerLazySingleton<CacheDatabaseInterface>(
+      () => CacheDatabaseFactory.create(),
+    );
+
+    getIt.registerLazySingleton<MxcCacheConfig>(
+      () => MxcCacheConfig.adaptive(),
+    );
+
+    getIt.registerLazySingleton<MxcCacheManager>(
+      () => MxcCacheManager(
+        database: getIt.get<CacheDatabaseInterface>(),
+        config: getIt.get<MxcCacheConfig>(),
+      ),
+    );
+
+    getIt.registerLazySingleton<CacheLifecycleManager>(
+      () => CacheLifecycleManager(getIt.get<MxcCacheManager>()),
+    );
   }
 
   void bindingQueue() {

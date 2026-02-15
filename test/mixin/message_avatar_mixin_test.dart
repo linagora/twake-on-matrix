@@ -1,6 +1,7 @@
 // ignore_for_file: depend_on_referenced_packages
 
 import 'package:fluffychat/config/localizations/localization_service.dart';
+import 'dart:typed_data';
 import 'package:fluffychat/config/themes.dart';
 import 'package:fluffychat/presentation/mixins/message_avatar_mixin.dart';
 import 'package:fluffychat/utils/responsive/responsive_utils.dart';
@@ -12,12 +13,21 @@ import 'package:flutter_localized_locales/flutter_localized_locales.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get_it/get_it.dart';
 import 'package:matrix/matrix.dart';
+import 'package:fluffychat/widgets/matrix.dart';
 import 'package:fluffychat/generated/l10n/app_localizations.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
+import 'package:fluffychat/data/cache/model/cache_result.dart';
+import 'package:fluffychat/data/cache/mxc_cache_manager.dart';
+import 'package:provider/provider.dart';
+import '../utils/fake_matrix_state.dart';
 import 'message_avatar_mixin_test.mocks.dart';
 
-@GenerateNiceMocks([MockSpec<User>(), MockSpec<Room>()])
+@GenerateNiceMocks([
+  MockSpec<User>(),
+  MockSpec<Room>(),
+  MockSpec<MxcCacheManager>(),
+])
 class MockMessageAvatarUtils with MessageAvatarMixin {}
 
 Future<void> main() async {
@@ -26,6 +36,9 @@ Future<void> main() async {
   late Room room;
   late User user;
   late Event event;
+  late MockMxcCacheManager mockCacheManager;
+  late FakeMatrixState fakeMatrixState;
+
   setUpAll(() {
     final getIt = GetIt.instance;
     getIt.registerSingleton(ResponsiveUtils());
@@ -33,7 +46,49 @@ Future<void> main() async {
   });
 
   group('Tests for when the avatar next to a message should be displayed ', () {
-    setUp(() {
+    setUp(() async {
+      mockCacheManager = MockMxcCacheManager();
+      fakeMatrixState = await getFakeMatrixState();
+
+      // Setup cache manager mock similar to twake_link_preview_item_test.dart
+      when(
+        mockCacheManager.get(
+          any,
+          width: anyNamed('width'),
+          height: anyNamed('height'),
+          isThumbnail: anyNamed('isThumbnail'),
+          httpUri: anyNamed('httpUri'),
+        ),
+      ).thenAnswer(
+        (_) async => CacheResult.hit(
+          bytes: Uint8List.fromList([0, 0, 0, 0]),
+          source: CacheSource.memory,
+        ),
+      );
+
+      when(
+        mockCacheManager.getMetadata(
+          any,
+          width: anyNamed('width'),
+          height: anyNamed('height'),
+          isThumbnail: anyNamed('isThumbnail'),
+        ),
+      ).thenAnswer((_) async => null);
+
+      when(
+        mockCacheManager.getFromDisk(
+          any,
+          width: anyNamed('width'),
+          height: anyNamed('height'),
+          isThumbnail: anyNamed('isThumbnail'),
+        ),
+      ).thenAnswer((_) async => null);
+
+      if (GetIt.I.isRegistered<MxcCacheManager>()) {
+        GetIt.I.unregister<MxcCacheManager>();
+      }
+      GetIt.I.registerSingleton<MxcCacheManager>(mockCacheManager);
+
       room = MockRoom();
       user = MockUser();
       event = Event(
@@ -64,8 +119,9 @@ Future<void> main() async {
       when(user.calcDisplayname()).thenReturn('Test');
       when(event.room.isDirectChat).thenReturn(isDirectChat);
       Widget? widget;
-      await tester.pumpWidget(
-        ThemeBuilder(
+      final testWidget = Provider<MatrixState>.value(
+        value: fakeMatrixState,
+        child: ThemeBuilder(
           builder: (context, themeMode, primaryColor) => MaterialApp(
             locale: const Locale('en'),
             localizationsDelegates: const [
@@ -103,6 +159,7 @@ Future<void> main() async {
           ),
         ),
       );
+      await tester.pumpWidget(testWidget);
 
       await tester.pumpAndSettle();
     }
