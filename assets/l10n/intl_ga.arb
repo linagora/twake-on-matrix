@@ -1856,7 +1856,7 @@
     "type": "text",
     "placeholders": {}
   },
-  "pleaseEnterYourPin": "Cuir isteach d'uimhir PIN le do thoil",
+  "pleaseEnterYourPin": "Cuir isteach d'uimhir uap le do thoil",
   "@pleaseEnterYourPin": {
     "type": "text",
     "placeholders": {}
