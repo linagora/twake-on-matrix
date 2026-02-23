@@ -116,68 +116,62 @@ class _QrCodeCard extends StatelessWidget {
           32.0,
         );
 
-        return RepaintBoundary(
-          key: qrKey,
-          child: Container(
-            padding: const EdgeInsets.all(
-              8,
-            ).add(const EdgeInsets.only(top: 36)),
-            constraints: BoxConstraints(maxWidth: maxWidth),
-            color: sysColor.surface,
+        return Container(
+          constraints: BoxConstraints(maxWidth: maxWidth),
+          child: RepaintBoundary(
+            key: qrKey,
             child: Stack(
               clipBehavior: Clip.none,
               children: [
-                ClipRRect(
-                  borderRadius: const BorderRadius.all(Radius.circular(20)),
-                  child: Container(
-                    padding: const EdgeInsets.only(
-                      top: 44,
-                      bottom: 24,
-                      left: 16,
-                      right: 16,
-                    ),
-                    decoration: BoxDecoration(
-                      color: sysColor.onPrimary,
-                      borderRadius: const BorderRadius.all(Radius.circular(20)),
-                    ),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Stack(
-                          alignment: Alignment.center,
-                          children: [
-                            TwakeQrCodeView(data: qrData, size: qrSize),
-                            Image.asset(
-                              ImagePaths.logoPng,
-                              width: logoSize,
-                              height: logoSize,
-                            ),
-                          ],
-                        ),
-                        SizedBox(height: qrToUserIdSpacing),
-                        Text(
-                          userId,
-                          textAlign: TextAlign.center,
-                          overflow: TextOverflow.ellipsis,
-                          maxLines: 2,
-                          style: textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.w600,
-                            letterSpacing: 0.15,
-                            color: sysColor.onSurface,
+                Container(
+                  margin: const EdgeInsets.only(top: 36),
+                  padding: const EdgeInsets.only(
+                    top: 44,
+                    bottom: 24,
+                    left: 16,
+                    right: 16,
+                  ),
+                  decoration: BoxDecoration(
+                    color: sysColor.onPrimary,
+                    borderRadius: const BorderRadius.all(Radius.circular(20)),
+                  ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Stack(
+                        alignment: Alignment.center,
+                        children: [
+                          TwakeQrCodeView(data: qrData, size: qrSize),
+                          Image.asset(
+                            ImagePaths.logoPng,
+                            width: logoSize,
+                            height: logoSize,
                           ),
+                        ],
+                      ),
+                      SizedBox(height: qrToUserIdSpacing),
+                      Text(
+                        userId,
+                        textAlign: TextAlign.center,
+                        overflow: TextOverflow.ellipsis,
+                        maxLines: 2,
+                        style: textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.w600,
+                          letterSpacing: 0.15,
+                          color: sysColor.onSurface,
                         ),
-                        SizedBox(height: userIdToDescriptionSpacing),
-                        Text(
-                          l10n.personalQrDescription,
-                          textAlign: TextAlign.center,
-                          overflow: TextOverflow.ellipsis,
-                          maxLines: 3,
-                          style: textTheme.bodyMedium?.copyWith(
-                            color: refColor.neutral[60],
-                          ),
+                      ),
+                      SizedBox(height: userIdToDescriptionSpacing),
+                      Text(
+                        l10n.personalQrDescription,
+                        textAlign: TextAlign.center,
+                        overflow: TextOverflow.ellipsis,
+                        maxLines: 3,
+                        style: textTheme.bodyMedium?.copyWith(
+                          color: refColor.neutral[60],
                         ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
                 ),
                 _ProfileAvatar(client: client),
@@ -198,7 +192,7 @@ class _ProfileAvatar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Positioned(
-      top: -36,
+      top: 0,
       left: 0,
       right: 0,
       child: Align(
