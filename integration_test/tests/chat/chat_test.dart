@@ -1,3 +1,4 @@
+import 'package:fluffychat/generated/l10n/app_localizations.dart';
 import 'package:fluffychat/pages/chat/chat_view.dart';
 import 'package:fluffychat/pages/chat_draft/draft_chat_empty_widget.dart';
 import '../../base/test_base.dart';
@@ -34,28 +35,34 @@ void main() {
       await HomeRobot($).gotoChatListScreen();
       // click on Pen icon
       await ChatScenario($).createANewDirectMessage(user);
+
+      // Get localization context
+      await $.pumpAndSettle();
+      final draftFinder = $(DraftChatEmpty);
+      if (!draftFinder.exists) {
+        throw StateError('DraftChatEmpty not visible');
+      }
+      final context = draftFinder.evaluate().first;
+      final l10n = L10n.of(context)!;
+
       // verify chat screen is shown
-      s.softAssertEquals($(ChatView).exists, true, "Chat view is not shown");
+      s.softAssertEquals($(ChatView).exists, true, l10n.chat);
       s.softAssertEquals(
         ChatGroupDetailRobot($).getBackIcon().exists,
         true,
-        "Back icon is not shown",
+        l10n.back,
       );
       s.softAssertEquals(
         ChatGroupDetailRobot($).getSearchIcon().exists,
         true,
-        "Seach icon is not shown",
+        l10n.search,
       );
       s.softAssertEquals(
         ChatGroupDetailRobot($).getMoreIconInAppBar().exists,
         false,
-        "More icon is shown",
+        l10n.more,
       );
-      s.softAssertEquals(
-        $(DraftChatEmpty).exists,
-        false,
-        "DraftChatEmpty view is shown",
-      );
+      s.softAssertEquals($(DraftChatEmpty).exists, false, "DraftChatEmpty");
 
       // try to send message
       await ChatScenario($).sendAMesage(message);
@@ -68,34 +75,42 @@ void main() {
 
   TestBase().runPatrolTest(
     description:
-        'Create a new message with a user who hasn’t been chatted with before',
+        "Create a new message with a user who hasn't been chatted with before",
     test: ($) async {
       final s = SoftAssertHelper();
       final now = DateTime.now();
       final message = "${now.month}${now.day}${now.hour}${now.minute}";
-      final account = "@$message:stg.lin-saas.com";
+      final account = "@$message:linagora.com";
 
       // goto chat screen
       await HomeRobot($).gotoChatListScreen();
       // click on Pen icon
       await ChatScenario($).createANewDirectMessage(account);
-      // verify chat screen is shown
+
+      // Get localization context
+      await $.pumpAndSettle();
+      final draftFinder = $(DraftChatEmpty);
+      if (!draftFinder.exists) {
+        throw StateError('DraftChatEmpty not visible');
+      }
+      final context = draftFinder.evaluate().first;
+      final l10n = L10n.of(context)!;
+
+      // verify draft chat empty widget is shown
       s.softAssertEquals(
-        $(DraftChatEmpty).$("No message here yet...").exists,
+        $(DraftChatEmpty).exists,
         true,
-        "No message here yet... is not shown",
+        "DraftChatEmpty widget",
       );
       s.softAssertEquals(
-        $(
-          DraftChatEmpty,
-        ).$("Send a message or tap on the greeting below.").exists,
+        $(DraftChatEmpty).$(l10n.noMessageHereYet).exists,
         true,
-        "Send a message or tap on the greeting below is not shown",
+        l10n.noMessageHereYet,
       );
       s.softAssertEquals(
-        $(DraftChatEmpty).$("🤗").exists,
+        $(DraftChatEmpty).$(l10n.sendMessageGuide).exists,
         true,
-        "🤗... is not shown",
+        l10n.sendMessageGuide,
       );
       //try to send a message
       await ChatScenario($).sendAMesage(message);
@@ -113,29 +128,37 @@ void main() {
       final now = DateTime.now();
       final message =
           "${now.year}${now.month}${now.day}${now.hour}${now.minute}";
-      final nonExisingAccount = "@a$message:stg.lin";
+      final nonExisingAccount = "@a$message:linagora.com";
 
       // goto chat screen
       await HomeRobot($).gotoChatListScreen();
       // click on Pen icon
       await ChatScenario($).createANewDirectMessage(nonExisingAccount);
-      // verify chat screen is shown
+
+      // Get localization context
+      await $.pumpAndSettle();
+      final draftFinder = $(DraftChatEmpty);
+      if (!draftFinder.exists) {
+        throw StateError('DraftChatEmpty not visible');
+      }
+      final context = draftFinder.evaluate().first;
+      final l10n = L10n.of(context)!;
+
+      // verify draft chat empty widget is shown
       s.softAssertEquals(
-        $(DraftChatEmpty).$("No message here yet...").exists,
+        $(DraftChatEmpty).exists,
         true,
-        "No message here yet... is not shown",
+        "DraftChatEmpty widget",
       );
       s.softAssertEquals(
-        $(
-          DraftChatEmpty,
-        ).$("Send a message or tap on the greeting below.").exists,
+        $(DraftChatEmpty).$(l10n.noMessageHereYet).exists,
         true,
-        "Send a message or tap on the greeting below is not shown",
+        l10n.noMessageHereYet,
       );
       s.softAssertEquals(
-        $(DraftChatEmpty).$("🤗").exists,
+        $(DraftChatEmpty).$(l10n.sendMessageGuide).exists,
         true,
-        "🤗... is not shown",
+        l10n.sendMessageGuide,
       );
 
       //try to send a message

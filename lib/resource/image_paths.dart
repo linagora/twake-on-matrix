@@ -88,6 +88,11 @@ class ImagePaths {
   static String get supportAvatarPng => _getAssetPath('support_avatar.png');
   static String get supportWelcome => _getImagePath('support_welcome.svg');
 
+  static String get chatBackground => _getImagePath('chat_background.png');
+
+  static String get mascotDraftChat =>
+      _getImagePath('ic_mascot_draft_chat.svg');
+
   static String get icE2EEncryptionMessageIndicator =>
       _getImagePath('ic_end_to_end_encryption_message_indicator.svg');
 

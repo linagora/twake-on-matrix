@@ -2656,9 +2656,9 @@
       "day": {}
     }
   },
-  "noMessageHereYet": "No message here yet...",
+  "noMessageHereYet": "No message here yet",
   "@noMessageHereYet": {},
-  "sendMessageGuide": "Send a message or tap on the greeting below.",
+  "sendMessageGuide": "Send a message or tap on the greeting",
   "@sendMessageGuide": {},
   "youCreatedGroupChat": "You created a Group chat",
   "@youCreatedGroupChat": {},
