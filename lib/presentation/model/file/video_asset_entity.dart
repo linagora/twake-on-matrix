@@ -1,7 +1,7 @@
 import 'dart:io';
 import 'dart:typed_data';
 
-import 'package:fluffychat/domain/model/extensions/file_extension.dart';
+import 'package:fluffychat/presentation/extensions/file_extension.dart';
 import 'package:fluffychat/domain/model/file_info/file_info.dart';
 import 'package:fluffychat/domain/model/file_info/video_file_info.dart';
 import 'package:fluffychat/presentation/extensions/uint8list_extension.dart';
@@ -20,18 +20,21 @@ class VideoAssetEntity extends FileAssetEntity {
       return null;
     }
     final tempDir = await getTemporaryDirectory();
-    final thumbnailFile = await VideoThumbnail.thumbnailFile(
+    final thumbnailXFile = await VideoThumbnail.thumbnailFile(
       video: file.path,
       thumbnailPath: tempDir.path,
     );
-    final thumbnailSize = await File(thumbnailFile.path).getImageDimensions();
+    final thumbnailFile = File(thumbnailXFile.path);
+    final thumbnailSize = await thumbnailFile.getImageDimensions();
+    final thumbnailBytes = await thumbnailFile.readAsBytes();
+    await thumbnailFile.delete();
     return VideoFileInfo(
       file.path.split('/').last,
       filePath: file.path,
       width: thumbnailSize?.width.toInt(),
       height: thumbnailSize?.height.toInt(),
       duration: assetEntity.videoDuration,
-      imagePlaceholderBytes: await thumbnailFile.readAsBytes(),
+      imagePlaceholderBytes: thumbnailBytes,
     );
   }
 

@@ -35,7 +35,10 @@ extension FileExtension on File {
       );
 
       stream.addListener(listener);
-      return completer.future;
+      return completer.future.timeout(
+        const Duration(seconds: 10),
+        onTimeout: () => throw TimeoutException('getImageDimensions timed out'),
+      );
     } catch (e, s) {
       Logs().e('getImageDimensions error:', e, s);
       return null;

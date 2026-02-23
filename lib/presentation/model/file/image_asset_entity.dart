@@ -1,6 +1,6 @@
 import 'dart:typed_data';
 
-import 'package:fluffychat/domain/model/extensions/file_extension.dart';
+import 'package:fluffychat/presentation/extensions/file_extension.dart';
 import 'package:fluffychat/domain/model/file_info/file_info.dart';
 import 'package:fluffychat/domain/model/file_info/image_file_info.dart';
 import 'package:fluffychat/presentation/extensions/uint8list_extension.dart';
