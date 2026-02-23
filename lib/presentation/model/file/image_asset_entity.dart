@@ -1,7 +1,9 @@
 import 'dart:typed_data';
 
+import 'package:fluffychat/domain/model/extensions/file_extension.dart';
 import 'package:fluffychat/domain/model/file_info/file_info.dart';
 import 'package:fluffychat/domain/model/file_info/image_file_info.dart';
+import 'package:fluffychat/presentation/extensions/uint8list_extension.dart';
 import 'package:fluffychat/presentation/model/file/file_asset_entity.dart';
 import 'package:matrix/matrix.dart';
 
@@ -14,11 +16,12 @@ class ImageAssetEntity extends FileAssetEntity {
     if (file == null) {
       return null;
     }
+    final imageSize = await file.getImageDimensions();
     return ImageFileInfo(
       file.path.split('/').last,
       filePath: file.path,
-      width: assetEntity.orientatedWidth,
-      height: assetEntity.orientatedHeight,
+      width: imageSize?.width.toInt(),
+      height: imageSize?.height.toInt(),
     );
   }
 
@@ -28,11 +31,13 @@ class ImageAssetEntity extends FileAssetEntity {
     if (file == null) {
       return null;
     }
+    final bytes = await file.readAsBytes();
+    final size = await bytes.imageSize;
     return MatrixImageFile(
       name: file.path.split('/').last,
-      bytes: file.readAsBytesSync(),
-      width: assetEntity.orientatedWidth,
-      height: assetEntity.orientatedHeight,
+      bytes: bytes,
+      width: size?.width.toInt(),
+      height: size?.height.toInt(),
     );
   }
 

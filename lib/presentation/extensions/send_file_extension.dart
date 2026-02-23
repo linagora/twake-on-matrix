@@ -836,7 +836,7 @@ extension SendFileExtension on Room {
     String txid, {
     required StreamController<Either<Failure, Success>>? uploadStreamController,
   }) async {
-    Logs().d('Video thumbnail generation started', fileInfo);
+    Logs().d('Video thumbnail generation started');
     uploadStreamController?.add(const Right(GeneratingThumbnailState()));
     if (fileInfo.imagePlaceholderBytes.isNotEmpty) {
       await tempThumbnailFile.writeAsBytes(fileInfo.imagePlaceholderBytes);

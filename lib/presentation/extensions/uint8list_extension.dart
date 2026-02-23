@@ -10,7 +10,9 @@ extension Uint8listExtension on Uint8List {
       codec = await instantiateImageCodec(this);
       final FrameInfo frameInfo = await codec.getNextFrame();
       final image = frameInfo.image;
-      return Size(image.width.toDouble(), image.height.toDouble());
+      final size = Size(image.width.toDouble(), image.height.toDouble());
+      image.dispose();
+      return size;
     } catch (e) {
       Logs().e('Uint8listExtension::imageSize: Error getting image size', e);
       return null;
