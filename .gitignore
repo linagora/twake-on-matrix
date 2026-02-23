@@ -47,6 +47,8 @@ config.json
 docs/build/
 docs/.jekyll-cache/
 docs/_site/
+web/sqflite_sw.js
+web/sqlite3.wasm
 
 # Exceptions to above rules.
 !/packages/flutter_tools/test/data/dart_dependencies_test/**/.packages

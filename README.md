@@ -186,6 +186,7 @@ flutter devices   # To list available run targets
 
 ```bash
 # flutter run -d <device>, e.g:
+# For web, run ./scripts/prepare-web.sh first
 flutter run -d chrome
 ```
 

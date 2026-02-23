@@ -2,6 +2,7 @@ import 'package:collection/collection.dart';
 import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/config/setting_keys.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
+import 'package:fluffychat/utils/cache_lifecycle_manager.dart';
 import 'package:fluffychat/utils/client_manager.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:flutter/material.dart';
@@ -40,6 +41,13 @@ void main() async {
   }
 
   GetItInitializer().setUp();
+
+  // Initialize MXC cache system
+  try {
+    await getIt<CacheLifecycleManager>().onAppStart();
+  } catch (e, s) {
+    Logs().e('Failed to initialize MXC cache, continuing without cache', e, s);
+  }
 
   Logs().nativeColors = !PlatformInfos.isIOS;
   final clients = await ClientManager.getClients();

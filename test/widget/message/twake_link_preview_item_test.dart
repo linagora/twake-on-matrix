@@ -1,13 +1,80 @@
+import 'package:fluffychat/data/cache/model/cache_result.dart';
+import 'package:fluffychat/data/cache/mxc_cache_manager.dart';
+import 'package:fluffychat/di/global/get_it_initializer.dart';
+import 'package:fluffychat/presentation/model/media/url_preview_presentation.dart';
+import 'package:fluffychat/widgets/matrix.dart';
 import 'package:fluffychat/widgets/mxc_image.dart';
 import 'package:fluffychat/widgets/twake_components/twake_preview_link/twake_link_preview.dart';
-import 'package:fluffychat/widgets/twake_components/twake_preview_link/twake_link_preview_item_style.dart';
-import 'package:flutter_test/flutter_test.dart';
-import 'package:flutter/material.dart';
-import 'package:fluffychat/presentation/model/media/url_preview_presentation.dart';
 import 'package:fluffychat/widgets/twake_components/twake_preview_link/twake_link_preview_item.dart';
+import 'package:fluffychat/widgets/twake_components/twake_preview_link/twake_link_preview_item_style.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_test/flutter_test.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
+import 'package:mockito/annotations.dart';
+import 'package:mockito/mockito.dart';
+import 'package:provider/provider.dart';
 
+import '../../utils/fake_matrix_state.dart';
+import 'twake_link_preview_item_test.mocks.dart';
+
+@GenerateMocks([MxcCacheManager])
 void main() {
+  late MockMxcCacheManager mockCacheManager;
+  late FakeMatrixState fakeMatrixState;
+
+  setUp(() async {
+    mockCacheManager = MockMxcCacheManager();
+
+    // Create fake MatrixState that provides the fake client
+    fakeMatrixState = await getFakeMatrixState();
+
+    // Setup cache manager mock
+    when(
+      mockCacheManager.get(
+        any,
+        width: anyNamed('width'),
+        height: anyNamed('height'),
+        isThumbnail: anyNamed('isThumbnail'),
+        httpUri: anyNamed('httpUri'),
+      ),
+    ).thenAnswer((_) async => CacheResult.miss());
+
+    // Mock getMetadata to return null (no cached metadata)
+    when(
+      mockCacheManager.getMetadata(
+        any,
+        width: anyNamed('width'),
+        height: anyNamed('height'),
+        isThumbnail: anyNamed('isThumbnail'),
+      ),
+    ).thenAnswer((_) async => null);
+
+    // Mock getFromDisk to return null (no cached data)
+    when(
+      mockCacheManager.getFromDisk(
+        any,
+        width: anyNamed('width'),
+        height: anyNamed('height'),
+        isThumbnail: anyNamed('isThumbnail'),
+      ),
+    ).thenAnswer((_) async => null);
+
+    getIt.registerSingleton<MxcCacheManager>(mockCacheManager);
+  });
+
+  tearDown(() async {
+    getIt.reset();
+  });
+
+  /// Helper method to wrap widget with required providers for testing
+  Widget wrapWithProviders(Widget child) {
+    return Provider<MatrixState>.value(
+      value: fakeMatrixState,
+      child: MaterialApp(home: Scaffold(body: child)),
+    );
+  }
+
   group('[WIDGET TEST] - TwakeLinkPreviewItem is own message\n', () {
     const ownMessage = true;
 
@@ -28,9 +95,7 @@ void main() {
       );
 
       // Build the TwakeLinkPreviewItem widget
-      await tester.pumpWidget(
-        MaterialApp(home: Scaffold(body: twakeLinkPreviewItem)),
-      );
+      await tester.pumpWidget(wrapWithProviders(twakeLinkPreviewItem));
 
       expect(twakeLinkPreviewItem.ownMessage, true);
 
@@ -129,9 +194,7 @@ void main() {
       );
 
       // Build the TwakeLinkPreviewItem widget
-      await tester.pumpWidget(
-        MaterialApp(home: Scaffold(body: twakeLinkPreviewItem)),
-      );
+      await tester.pumpWidget(wrapWithProviders(twakeLinkPreviewItem));
 
       expect(twakeLinkPreviewItem.ownMessage, true);
 
@@ -201,9 +264,7 @@ void main() {
       );
 
       // Build the TwakeLinkPreviewItem widget
-      await tester.pumpWidget(
-        MaterialApp(home: Scaffold(body: twakeLinkPreviewItem)),
-      );
+      await tester.pumpWidget(wrapWithProviders(twakeLinkPreviewItem));
 
       final linkPreviewNoImageBody = find.byKey(
         LinkPreviewBuilder.imageDefaultKey,
@@ -233,9 +294,7 @@ void main() {
       );
 
       // Build the TwakeLinkPreviewItem widget
-      await tester.pumpWidget(
-        MaterialApp(home: Scaffold(body: twakeLinkPreviewItem)),
-      );
+      await tester.pumpWidget(wrapWithProviders(twakeLinkPreviewItem));
 
       expect(twakeLinkPreviewItem.ownMessage, true);
 
@@ -253,6 +312,22 @@ void main() {
         'AND an image width is not empty\n'
         'AND only title and description\n'
         'THEN display MxcImage widget large', (WidgetTester tester) async {
+      // Setup cache to return fake image data for this test
+      when(
+        mockCacheManager.get(
+          Uri.parse('https://test.com'),
+          width: anyNamed('width'),
+          height: anyNamed('height'),
+          isThumbnail: anyNamed('isThumbnail'),
+          httpUri: anyNamed('httpUri'),
+        ),
+      ).thenAnswer(
+        (_) async => CacheResult.hit(
+          bytes: Uint8List.fromList([0, 0, 0, 0]),
+          source: CacheSource.memory,
+        ),
+      );
+
       // Define a UrlPreviewPresentation object
       final urlPreviewPresentation = UrlPreviewPresentation(
         title: 'Test Title',
@@ -269,9 +344,7 @@ void main() {
       );
 
       // Build the TwakeLinkPreviewItem widget
-      await tester.pumpWidget(
-        MaterialApp(home: Scaffold(body: twakeLinkPreviewItem)),
-      );
+      await tester.pumpWidget(wrapWithProviders(twakeLinkPreviewItem));
 
       expect(twakeLinkPreviewItem.ownMessage, true);
 
@@ -315,6 +388,22 @@ void main() {
         'AND an image width is not empty\n'
         'AND only title and description\n'
         'THEN display MxcImage widget small', (WidgetTester tester) async {
+      // Setup cache to return fake image data for this test
+      when(
+        mockCacheManager.get(
+          Uri.parse('https://test.com'),
+          width: anyNamed('width'),
+          height: anyNamed('height'),
+          isThumbnail: anyNamed('isThumbnail'),
+          httpUri: anyNamed('httpUri'),
+        ),
+      ).thenAnswer(
+        (_) async => CacheResult.hit(
+          bytes: Uint8List.fromList([0, 0, 0, 0]),
+          source: CacheSource.memory,
+        ),
+      );
+
       // Define a UrlPreviewPresentation object
       final urlPreviewPresentation = UrlPreviewPresentation(
         title: 'Test Title',
@@ -331,9 +420,7 @@ void main() {
       );
 
       // Build the TwakeLinkPreviewItem widget
-      await tester.pumpWidget(
-        MaterialApp(home: Scaffold(body: twakeLinkPreviewItem)),
-      );
+      await tester.pumpWidget(wrapWithProviders(twakeLinkPreviewItem));
 
       expect(twakeLinkPreviewItem.ownMessage, true);
 
@@ -370,9 +457,7 @@ void main() {
       );
 
       // Build the TwakeLinkPreviewItem widget
-      await tester.pumpWidget(
-        MaterialApp(home: Scaffold(body: twakeLinkPreviewItem)),
-      );
+      await tester.pumpWidget(wrapWithProviders(twakeLinkPreviewItem));
 
       expect(twakeLinkPreviewItem.ownMessage, false);
 

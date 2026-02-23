@@ -45,7 +45,6 @@ class Avatar extends StatelessWidget {
             height: size,
             cacheWidth: (size * MediaQuery.devicePixelRatioOf(context) * 2)
                 .round(),
-            cacheKey: mxContent.toString(),
             animated: true,
             isThumbnail: false,
             placeholder: (context) => _fallbackAvatar(),
