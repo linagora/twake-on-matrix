@@ -23,7 +23,7 @@ extension FileExtension on File {
             info.image.width.toDouble(),
             info.image.height.toDouble(),
           );
-
+          info.dispose();
           completer.complete(size);
 
           stream.removeListener(listener);
@@ -35,9 +35,12 @@ extension FileExtension on File {
       );
 
       stream.addListener(listener);
-      return completer.future.timeout(
+      return await completer.future.timeout(
         const Duration(seconds: 10),
-        onTimeout: () => throw TimeoutException('getImageDimensions timed out'),
+        onTimeout: () {
+          stream.removeListener(listener);
+          throw TimeoutException('getImageDimensions timed out');
+        },
       );
     } catch (e, s) {
       Logs().e('getImageDimensions error:', e, s);

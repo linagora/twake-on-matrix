@@ -151,12 +151,10 @@ mixin ReceiveSharingIntentMixin<T extends StatefulWidget> on State<T> {
             await _processIncomingSharedFiles(files);
           } catch (e, stackTrace) {
             Logs().e(
-              'ReceiveSharingIntentMixin::processCachedSharingIntents: Error processing cached files',
+              'ReceiveSharingIntentMixin::setupSharingIntentStreams: Error processing cached files',
               e,
               stackTrace,
             );
-          } finally {
-            _cachedSharedMediaFiles = null;
           }
         } else {
           // Otherwise cache for processing after sync
