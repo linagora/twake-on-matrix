@@ -1,5 +1,3 @@
-import 'dart:typed_data';
-
 import 'package:fluffychat/pages/chat/events/images_builder/image_builder_web.dart';
 import 'package:fluffychat/pages/chat/events/images_builder/image_placeholder.dart';
 import 'package:fluffychat/pages/chat/events/message_content_style.dart';
@@ -24,10 +22,7 @@ class ImageBubble extends StatelessWidget {
   final void Function()? onTapSelectMode;
   final bool isPreview;
   final Duration animationDuration;
-  final Uint8List? imageData;
 
-  final String? thumbnailCacheKey;
-  final Map<EventId, ImageData>? thumbnailCacheMap;
   final bool noResizeThumbnail;
 
   const ImageBubble(
@@ -43,11 +38,8 @@ class ImageBubble extends StatelessWidget {
     this.onTapSelectMode,
     this.onTapPreview,
     this.animationDuration = const Duration(milliseconds: 500),
-    this.thumbnailCacheKey,
-    this.thumbnailCacheMap,
     this.noResizeThumbnail = false,
     this.isPreview = true,
-    this.imageData,
     super.key,
   });
 
@@ -121,10 +113,7 @@ class ImageBubble extends StatelessWidget {
                     onTapSelectMode: onTapSelectMode,
                     isPreview: isPreview,
                     animationDuration: animationDuration,
-                    cacheKey: thumbnailCacheKey,
-                    cacheMap: thumbnailCacheMap,
                     noResize: noResizeThumbnail,
-                    imageData: imageData,
                   ),
                 ],
               ),
