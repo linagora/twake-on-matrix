@@ -6,9 +6,7 @@ import 'package:fluffychat/domain/app_state/room/ban_user_state.dart';
 import 'package:matrix/matrix.dart';
 
 class BanUserInteractor {
-  Stream<Either<Failure, Success>> execute({
-    required User user,
-  }) async* {
+  Stream<Either<Failure, Success>> execute({required User user}) async* {
     try {
       yield Right(BanUserLoading());
 
