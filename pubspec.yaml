@@ -24,7 +24,7 @@ dependencies:
   flutter_matrix_html:
     git:
       url: https://github.com/linagora/flutter_matrix_html.git
-      ref: hotfix/selectable-highlight
+      ref: master
 
   contacts_service:
     git:
