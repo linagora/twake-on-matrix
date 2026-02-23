@@ -22,9 +22,9 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:path/path.dart' as path;
 
-Uint8List? _compositeInIsolate(List<dynamic> params) {
+Uint8List _compositeInIsolate(List<dynamic> params) {
   final background = img.decodePng(params[1] as Uint8List);
-  if (background == null) return null;
+  if (background == null) return params[0] as Uint8List;
 
   img.compositeImage(
     background,
@@ -136,7 +136,7 @@ class PersonalQrController extends State<PersonalQr> {
       if (!mounted) return;
       TwakeSnackBar.show(context, L10n.of(context)!.oopsSomethingWentWrong);
     } finally {
-      TwakeDialog.hideLoadingDialog(context);
+      if (mounted) TwakeDialog.hideLoadingDialog(context);
     }
   }
 
@@ -205,7 +205,7 @@ class PersonalQrController extends State<PersonalQr> {
     return permissionStatus.isGranted;
   }
 
-  Future<Uint8List?> _compositeOntoBackground(
+  Future<Uint8List> _compositeOntoBackground(
     ByteData data,
     String asset,
     int w,
@@ -219,8 +219,8 @@ class PersonalQrController extends State<PersonalQr> {
         h,
       ]);
     } catch (e) {
-      Logs().e('_compositeOntoBackground error', e);
-      return null;
+      Logs().e('PersonalQr::_compositeOntoBackground error', e);
+      return data.buffer.asUint8List();
     }
   }
 
