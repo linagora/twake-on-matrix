@@ -8,7 +8,6 @@ import 'package:matrix/matrix.dart';
 class BanUserInteractor {
   Stream<Either<Failure, Success>> execute({
     required User user,
-    required Room room,
   }) async* {
     try {
       yield Right(BanUserLoading());
@@ -21,7 +20,7 @@ class BanUserInteractor {
       // Reduce power level to member before banning if user has elevated privileges
       // Note: This is a best-effort operation. If it fails, we still proceed with the ban.
       if (user.powerLevel > DefaultPowerLevelMember.member.powerLevel) {
-        final powerLevelEvent = room.getState(EventTypes.RoomPowerLevels);
+        final powerLevelEvent = user.room.getState(EventTypes.RoomPowerLevels);
 
         // Skip power level reduction if state is null to avoid overwriting server data
         if (powerLevelEvent != null) {
@@ -34,8 +33,8 @@ class BanUserInteractor {
 
             usersMap[user.id] = DefaultPowerLevelMember.member.powerLevel;
 
-            await room.client.setRoomStateWithKey(
-              room.id,
+            await user.room.client.setRoomStateWithKey(
+              user.room.id,
               EventTypes.RoomPowerLevels,
               '',
               powerMap,
@@ -43,7 +42,7 @@ class BanUserInteractor {
           } catch (e) {
             // Log the error but don't block the ban operation
             Logs().w(
-              'Failed to reduce power level for ${user.id} in room ${room.id}, proceeding with ban anyway',
+              'Failed to reduce power level for ${user.id} in room ${user.room.id}, proceeding with ban anyway',
               e,
             );
           }

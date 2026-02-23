@@ -37,7 +37,7 @@ void main() {
         when(mockUser.canBan).thenReturn(false);
 
         // Act
-        final result = interactor.execute(user: mockUser, room: mockRoom);
+        final result = interactor.execute(user: mockUser);
 
         // Assert
         await expectLater(
@@ -71,7 +71,7 @@ void main() {
         when(mockUser.ban()).thenAnswer((_) async {});
 
         // Act
-        final result = interactor.execute(user: mockUser, room: mockRoom);
+        final result = interactor.execute(user: mockUser);
 
         // Assert
         await expectLater(
@@ -107,7 +107,7 @@ void main() {
         when(mockUser.ban()).thenThrow(mockException);
 
         // Act
-        final result = interactor.execute(user: mockUser, room: mockRoom);
+        final result = interactor.execute(user: mockUser);
 
         // Assert
         await expectLater(
@@ -142,7 +142,7 @@ void main() {
         when(mockUser.ban()).thenThrow(mockException);
 
         // Act
-        final result = interactor.execute(user: mockUser, room: mockRoom);
+        final result = interactor.execute(user: mockUser);
 
         // Assert
         await expectLater(
@@ -174,7 +174,7 @@ void main() {
       when(mockUser.ban()).thenThrow(exception);
 
       // Act
-      final result = interactor.execute(user: mockUser, room: mockRoom);
+      final result = interactor.execute(user: mockUser);
 
       // Assert
       await expectLater(
@@ -217,6 +217,7 @@ void main() {
             mockUser.powerLevel,
           ).thenReturn(DefaultPowerLevelMember.moderator.powerLevel);
           when(mockUser.id).thenReturn('@user:server.com');
+          when(mockUser.room).thenReturn(mockRoom);
           when(mockUser.ban()).thenAnswer((_) async {});
           when(
             mockRoom.getState(EventTypes.RoomPowerLevels),
@@ -227,7 +228,7 @@ void main() {
           ).thenAnswer((_) async => '');
 
           // Act
-          final result = interactor.execute(user: mockUser, room: mockRoom);
+          final result = interactor.execute(user: mockUser);
 
           // Assert
           await expectLater(
@@ -284,6 +285,7 @@ void main() {
             mockUser.powerLevel,
           ).thenReturn(DefaultPowerLevelMember.admin.powerLevel);
           when(mockUser.id).thenReturn('@admin:server.com');
+          when(mockUser.room).thenReturn(mockRoom);
           when(mockUser.ban()).thenAnswer((_) async {});
           when(
             mockRoom.getState(EventTypes.RoomPowerLevels),
@@ -294,7 +296,7 @@ void main() {
           ).thenAnswer((_) async => '');
 
           // Act
-          final result = interactor.execute(user: mockUser, room: mockRoom);
+          final result = interactor.execute(user: mockUser);
 
           // Assert
           await expectLater(
@@ -345,11 +347,12 @@ void main() {
             mockUser.powerLevel,
           ).thenReturn(DefaultPowerLevelMember.moderator.powerLevel);
           when(mockUser.id).thenReturn('@mod:server.com');
+          when(mockUser.room).thenReturn(mockRoom);
           when(mockUser.ban()).thenAnswer((_) async {});
           when(mockRoom.getState(EventTypes.RoomPowerLevels)).thenReturn(null);
 
           // Act
-          final result = interactor.execute(user: mockUser, room: mockRoom);
+          final result = interactor.execute(user: mockUser);
 
           // Assert
           await expectLater(
@@ -388,7 +391,7 @@ void main() {
           when(mockUser.ban()).thenAnswer((_) async {});
 
           // Act
-          final result = interactor.execute(user: mockUser, room: mockRoom);
+          final result = interactor.execute(user: mockUser);
 
           // Assert
           await expectLater(
@@ -426,7 +429,7 @@ void main() {
           when(mockUser.ban()).thenAnswer((_) async {});
 
           // Act
-          final result = interactor.execute(user: mockUser, room: mockRoom);
+          final result = interactor.execute(user: mockUser);
 
           // Assert
           await expectLater(
@@ -470,6 +473,7 @@ void main() {
             mockUser.powerLevel,
           ).thenReturn(DefaultPowerLevelMember.moderator.powerLevel);
           when(mockUser.id).thenReturn('@mod:server.com');
+          when(mockUser.room).thenReturn(mockRoom);
           when(mockUser.ban()).thenAnswer((_) async {});
           when(
             mockRoom.getState(EventTypes.RoomPowerLevels),
@@ -480,7 +484,7 @@ void main() {
           ).thenThrow(mockException);
 
           // Act
-          final result = interactor.execute(user: mockUser, room: mockRoom);
+          final result = interactor.execute(user: mockUser);
 
           // Assert
           await expectLater(
