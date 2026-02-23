@@ -67,7 +67,7 @@ void main() async {
   if (PlatformInfos.isWeb) {
     CozyConfigManager()
         .injectCozyScript(AppConfig.cozyExternalBridgeVersion)
-        .then((value) => CozyConfigManager().initialize());
+        .then((value) => CozyConfigManager().initialize(validUrlSuffixes: AppConfig.cozyExternalBridgeAllowlist));
   }
 
   // Started in foreground mode.

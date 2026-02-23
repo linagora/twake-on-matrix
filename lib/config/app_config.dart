@@ -98,7 +98,8 @@ abstract class AppConfig {
   static const String sourceCodeUrl =
       'https://github.com/linagora/twake-on-matrix';
   static String supportUrl = 'https://twake.app/support';
-  static String cozyExternalBridgeVersion = '0.16.1';
+  static String cozyExternalBridgeVersion = '1.2.1';
+  static List<String> cozyExternalBridgeAllowlist = ['.twake.app', '.lin-saas.com','.lin-saas.dev'];
   static bool renderHtml = true;
   static bool hideRedactedEvents = false;
   static bool hideUnknownEvents = true;
@@ -193,6 +194,11 @@ abstract class AppConfig {
     defaultValue: ConfigurationSaas.homeserver,
   );
 
+  static const String _cozyExternalBridgeAllowlistEnv = String.fromEnvironment(
+    'COZY_EXTERNAL_BRIDGE_ALLOWLIST',
+    defaultValue: '.twake.app,.lin-saas.com,.lin-saas.dev',
+  );
+
   static void loadEnvironment() {
     twakeWorkplaceHomeserver = _twakeWorkplaceHomeserverEnv;
 
@@ -213,6 +219,14 @@ abstract class AppConfig {
     homeserver = _homeserverEnv;
 
     Logs().i('[Public Platform] AppConfig():: HOME_SERVER $_homeserverEnv');
+
+    cozyExternalBridgeAllowlist = _cozyExternalBridgeAllowlistEnv
+        .split(',')
+        .map((i) => i.trim())
+        .where((i) => i.isNotEmpty)
+        .toList();
+
+    Logs().i('[Public Platform] AppConfig():: COZY_EXTERNAL_BRIDGE_ALLOWLIST $_cozyExternalBridgeAllowlistEnv');
   }
 
   static bool get isSaasPlatForm => _platformEnv == 'saas';
@@ -301,6 +315,12 @@ abstract class AppConfig {
     if (json['cozy_external_bridge_version'] is String &&
         json['cozy_external_bridge_version'].isNotEmpty) {
       cozyExternalBridgeVersion = json['cozy_external_bridge_version'];
+    }
+    if (json['cozy_external_bridge_allowlist'] is List &&
+        json['cozy_external_bridge_allowlist'].isNotEmpty) {
+      cozyExternalBridgeAllowlist = json['cozy_external_bridge_allowlist']
+        .whereType<String>()
+        .toList();
     }
   }
 }

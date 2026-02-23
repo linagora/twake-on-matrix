@@ -528,8 +528,8 @@ class MatrixState extends State<Matrix>
 
   Future<void> _requestNotificationPermission() async {
     try {
-      final isInsideCozy = await CozyConfigManager().isInsideCozy;
-      if (isInsideCozy) {
+      final isInContainer = CozyConfigManager().isInContainer;
+      if (isInContainer) {
         CozyConfigManager().requestNotificationPermission();
       } else {
         html.Notification.requestPermission();
