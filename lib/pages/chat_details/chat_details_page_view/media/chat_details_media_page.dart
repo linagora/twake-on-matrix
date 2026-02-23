@@ -21,7 +21,6 @@ import 'package:fluffychat/widgets/hero_page_route.dart';
 
 class ChatDetailsMediaPage extends StatelessWidget {
   final SameTypeEventsBuilderController controller;
-  final Map<EventId, ImageData>? cacheMap;
   final DownloadVideoEventCallback handleDownloadVideoEvent;
   final VoidCallback? closeRightColumn;
 
@@ -29,7 +28,6 @@ class ChatDetailsMediaPage extends StatelessWidget {
     super.key,
     required this.controller,
     required this.handleDownloadVideoEvent,
-    this.cacheMap,
     this.closeRightColumn,
   });
 
@@ -53,13 +51,11 @@ class ChatDetailsMediaPage extends StatelessWidget {
               events[index].messageType == MessageTypes.Image
               ? _ImageItem(
                   event: events[index],
-                  cacheMap: cacheMap,
                   closeRightColumn: closeRightColumn,
                 )
               : _VideoItem(
                   event: events[index],
                   handleDownloadVideoEvent: handleDownloadVideoEvent,
-                  thumbnailCacheMap: cacheMap,
                   closeRightColumn: closeRightColumn,
                 ),
         );
@@ -70,10 +66,9 @@ class ChatDetailsMediaPage extends StatelessWidget {
 
 class _ImageItem extends StatelessWidget {
   final Event event;
-  final Map<EventId, ImageData>? cacheMap;
   final VoidCallback? closeRightColumn;
 
-  const _ImageItem({required this.event, this.cacheMap, this.closeRightColumn});
+  const _ImageItem({required this.event, this.closeRightColumn});
 
   @override
   Widget build(BuildContext context) {
@@ -85,8 +80,6 @@ class _ImageItem extends StatelessWidget {
       isPreview: true,
       placeholder: (context) =>
           BlurHash(hash: event.blurHash ?? AppConfig.defaultImageBlurHash),
-      cacheKey: event.eventId,
-      cacheMap: cacheMap,
       closeRightColumn: closeRightColumn,
     );
   }
@@ -95,13 +88,11 @@ class _ImageItem extends StatelessWidget {
 class _VideoItem extends StatelessWidget {
   final Event event;
   final DownloadVideoEventCallback handleDownloadVideoEvent;
-  final Map<EventId, ImageData>? thumbnailCacheMap;
   final VoidCallback? closeRightColumn;
 
   const _VideoItem({
     required this.event,
     required this.handleDownloadVideoEvent,
-    this.thumbnailCacheMap,
     this.closeRightColumn,
   });
 
@@ -116,8 +107,6 @@ class _VideoItem extends StatelessWidget {
       event,
       rounded: false,
       showDuration: true,
-      thumbnailCacheKey: event.eventId,
-      thumbnailCacheMap: thumbnailCacheMap,
       noResizeThumbnail: true,
       centerWidget: centerVideoWidget,
       onVideoTapped: () => _onTapVideo(context),

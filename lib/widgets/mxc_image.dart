@@ -1,6 +1,6 @@
 import 'dart:io';
 import 'dart:typed_data';
-import 'package:fluffychat/data/memory/mxc_image_cache_manager.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:fluffychat/pages/image_viewer/image_viewer.dart';
 import 'package:fluffychat/pages/media_viewer/media_viewer.dart';
 import 'package:fluffychat/presentation/enum/chat/media_viewer_popup_result_enum.dart';
@@ -16,9 +16,7 @@ import 'package:fluffychat/widgets/hero_page_route.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_avif/flutter_avif.dart';
-import 'package:http/http.dart' as http;
 import 'package:matrix/matrix.dart';
-import 'package:fluffychat/config/themes.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 
 typedef EventId = String;
@@ -32,24 +30,16 @@ class MxcImage extends StatefulWidget {
   final BoxFit? fit;
   final bool isThumbnail;
   final bool animated;
-  final Duration retryDuration;
   final Duration animationDuration;
-  final Curve animationCurve;
-  final ThumbnailMethod thumbnailMethod;
   final Widget Function(BuildContext context)? placeholder;
-  final String? cacheKey;
   final bool rounded;
   final void Function()? onTapPreview;
   final void Function()? onTapSelectMode;
-  final ImageData? imageData;
   final bool isPreview;
   final bool enableHeroAnimation;
 
   /// Enable it if the image is stretched, and you don't want to resize it
   final bool noResize;
-
-  /// Cache for screen locally, if null, use global cache
-  final Map<EventId, ImageData>? cacheMap;
 
   final VoidCallback? closeRightColumn;
 
@@ -69,16 +59,10 @@ class MxcImage extends StatefulWidget {
     this.isThumbnail = true,
     this.animated = false,
     this.animationDuration = const Duration(milliseconds: 500),
-    this.retryDuration = const Duration(seconds: 2),
-    this.animationCurve = TwakeThemes.animationCurve,
-    this.thumbnailMethod = ThumbnailMethod.scale,
-    this.cacheKey,
     this.rounded = false,
     this.onTapPreview,
     this.onTapSelectMode,
-    this.imageData,
     this.isPreview = false,
-    this.cacheMap,
     this.noResize = false,
     this.closeRightColumn,
     this.cacheWidth,
@@ -95,135 +79,50 @@ class MxcImage extends StatefulWidget {
 class _MxcImageState extends State<MxcImage>
     with AutomaticKeepAliveClientMixin {
   static const String placeholderKey = 'placeholder';
-  ImageData? _imageDataNoCache;
+  ImageData? _imageData;
   bool isLoadDone = false;
   String? filePath;
 
-  ImageData? get _imageData {
-    final cacheKey = widget.cacheKey;
-    final image = cacheKey == null
-        ? _imageDataNoCache
-        : widget.cacheMap != null
-        ? _imageDataFromLocalCache
-        : _imageDataFromGlobalCache;
-    return image;
-  }
-
-  ImageData? get _imageDataFromLocalCache =>
-      widget.cacheKey != null && widget.cacheMap != null
-      ? widget.cacheMap![widget.cacheKey]
-      : null;
-
-  ImageData? get _imageDataFromGlobalCache => widget.cacheKey != null
-      ? MxcImageCacheManager.instance.getImage(widget.cacheKey!)
-      : null;
-
-  set _imageData(ImageData? data) {
-    if (data == null) return;
-    final cacheKey = widget.cacheKey;
-    if (cacheKey == null) {
-      _imageDataNoCache = data;
-    } else if (widget.cacheMap != null) {
-      widget.cacheMap![cacheKey] = data;
-    } else {
-      MxcImageCacheManager.instance.cacheImage(cacheKey, data);
-    }
-  }
-
-  bool? _isCached;
-
-  Future<({Uint8List? imageData, String? filePath})> _load(
+  Future<({Uint8List? imageData, String? filePath})> _loadEvent(
     BuildContext context,
   ) async {
     if (!context.mounted) return (imageData: null, filePath: null);
-    final client = Matrix.of(context).client;
-    final uri = widget.uri;
     final event = widget.event;
+    if (event == null) return (imageData: null, filePath: null);
 
-    if (uri != null) {
-      final width = widget.width;
-      final realWidth = width == null ? null : context.getCacheSize(width);
-      final height = widget.height;
-      final realHeight = height == null ? null : context.getCacheSize(height);
-
-      final httpUri = widget.isThumbnail
-          ? uri.getThumbnail(
-              client,
-              width: realWidth,
-              height: realHeight,
-              animated: widget.animated,
-              method: widget.thumbnailMethod,
-            )
-          : uri.getDownloadLink(client);
-
-      if (_isCached == null && widget.event != null) {
-        final cachedData = await client.database.getFile(httpUri);
-        if (cachedData != null) {
-          _isCached = true;
-          return (imageData: cachedData, filePath: null);
-        }
-        _isCached = false;
-      }
-
-      final response = await http.get(httpUri);
-      if (response.statusCode != 200) {
-        if (response.statusCode == 404) {
-          return (imageData: null, filePath: null);
-        }
-        throw Exception();
-      }
-      final remoteData = response.bodyBytes;
-
-      if (widget.event != null) {
-        await client.database.storeFile(httpUri, remoteData, 0);
-      }
-
-      return (imageData: remoteData, filePath: null);
-    }
-
-    if (event != null) {
-      try {
-        if (!PlatformInfos.isWeb) {
-          final fileInfo = await event.getFileInfo(
-            getThumbnail: widget.isThumbnail,
-          );
-          Logs().d('MxcImage::Downloaded get file info = $fileInfo');
-          if (fileInfo != null) {
-            return (imageData: fileInfo.bytes, filePath: fileInfo.filePath);
-          }
-        }
-
-        final matrixFile = await event.downloadAndDecryptAttachment(
+    try {
+      if (!PlatformInfos.isWeb) {
+        final fileInfo = await event.getFileInfo(
           getThumbnail: widget.isThumbnail,
         );
-        Logs().d(
-          'MxcImage::Downloaded attachment name = ${matrixFile.name} - mimeType = ${matrixFile.mimeType} - bytes = ${matrixFile.bytes.length}',
-        );
-        if (_notImageOrVideo(matrixFile, event)) {
-          return (imageData: null, filePath: null);
+        Logs().d('MxcImage::Downloaded get file info = $fileInfo');
+        if (fileInfo != null) {
+          return (imageData: fileInfo.bytes, filePath: fileInfo.filePath);
         }
-        return (imageData: matrixFile.bytes, filePath: null);
-      } catch (e) {
-        Logs().e('MxcImage::Error while downloading image: $e');
-        rethrow;
       }
-    }
 
-    return (imageData: null, filePath: null);
+      final matrixFile = await event.downloadAndDecryptAttachment(
+        getThumbnail: widget.isThumbnail,
+      );
+      Logs().d(
+        'MxcImage::Downloaded attachment name = ${matrixFile.name} - mimeType = ${matrixFile.mimeType} - bytes = ${matrixFile.bytes.length}',
+      );
+      if (_notImageOrVideo(matrixFile, event)) {
+        return (imageData: null, filePath: null);
+      }
+      return (imageData: matrixFile.bytes, filePath: null);
+    } catch (e) {
+      Logs().e('MxcImage::Error while downloading image: $e');
+      rethrow;
+    }
   }
 
   bool _notImageOrVideo(MatrixFile matrixFile, Event event) =>
       !matrixFile.isImage() && !event.isVideoOrImage;
 
-  Future<void> _tryLoad(BuildContext context) async {
-    _imageData = widget.imageData;
-    if (_imageData != null) {
-      isLoadDone = true;
-      filePath = null;
-      setState(() {});
-    }
+  Future<void> _tryLoadEvent(BuildContext context) async {
     try {
-      final loadResult = await _load(context);
+      final loadResult = await _loadEvent(context);
       isLoadDone = true;
       _imageData = loadResult.imageData;
       filePath = loadResult.filePath;
@@ -231,7 +130,7 @@ class _MxcImageState extends State<MxcImage>
     } catch (e) {
       if (mounted && !isLoadDone) {
         isLoadDone = true;
-        _tryLoad(context);
+        _tryLoadEvent(context);
       }
     }
   }
@@ -272,16 +171,20 @@ class _MxcImageState extends State<MxcImage>
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) {
-        _tryLoad(context);
-      }
-    });
+    // URI-based images are handled by CachedNetworkImage directly.
+    // Only run the download flow when there's no URI (encrypted/event-only media).
+    if (widget.uri == null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          _tryLoadEvent(context);
+        }
+      });
+    }
   }
 
   @override
   void dispose() {
-    _imageDataNoCache = null;
+    _imageData = null;
     super.dispose();
   }
 
@@ -318,6 +221,12 @@ class _MxcImageState extends State<MxcImage>
   }
 
   Widget _buildImageWidget(BuildContext context) {
+    // URI-based images: delegate to CachedNetworkImage
+    if (widget.uri != null) {
+      return _buildCachedNetworkImage(context);
+    }
+
+    // Event-based (encrypted/downloaded) or pre-loaded imageData
     final needResize = widget.event != null && !widget.noResize;
     if (_imageData == null && filePath == null) {
       return placeholder(context);
@@ -339,11 +248,45 @@ class _MxcImageState extends State<MxcImage>
         cacheHeight: widget.cacheHeight,
         isThumbnail: widget.isThumbnail,
         imageErrorWidgetBuilder: (context, error, ___) {
-          _isCached = false;
           _imageData = null;
           return placeholder(context);
         },
         placeholder: placeholder(context),
+      ),
+    );
+  }
+
+  Widget _buildCachedNetworkImage(BuildContext context) {
+    final client = Matrix.of(context).client;
+    final width = widget.width;
+    final height = widget.height;
+    final realWidth = width == null ? null : context.getCacheSize(width);
+    final realHeight = height == null ? null : context.getCacheSize(height);
+
+    final httpUri = widget.isThumbnail
+        ? widget.uri!.getThumbnail(
+            client,
+            width: realWidth,
+            height: realHeight,
+            animated: widget.animated,
+            method: ThumbnailMethod.scale,
+          )
+        : widget.uri!.getDownloadLink(client);
+
+    return ClipRRect(
+      borderRadius: widget.rounded
+          ? BorderRadius.circular(12.0)
+          : BorderRadius.zero,
+      child: CachedNetworkImage(
+        imageUrl: httpUri.toString(),
+        width: width,
+        height: height,
+        fit: widget.fit,
+        filterQuality: FilterQuality.medium,
+        memCacheWidth: widget.cacheWidth ?? realWidth,
+        memCacheHeight: widget.cacheHeight ?? realHeight,
+        placeholder: (context, url) => placeholder(context),
+        errorWidget: (context, url, error) => placeholder(context),
       ),
     );
   }
