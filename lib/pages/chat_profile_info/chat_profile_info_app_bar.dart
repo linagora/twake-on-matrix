@@ -104,7 +104,7 @@ class _ChatProfileInfoAppBarState extends State<ChatProfileInfoAppBar>
         ).client.getProfileFromUserId(matrixId, getFromRooms: false);
         _profileNotifier.value = profile;
       } catch (_) {
-        // Keep profile as null on error
+        _profileNotifier.value = null;
       }
     } else {
       _profileNotifier.value = null;
