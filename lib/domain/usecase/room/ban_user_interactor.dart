@@ -15,37 +15,7 @@ class BanUserInteractor {
         return;
       }
 
-      // Reduce power level to member before banning if user has elevated privileges
-      // Note: This is a best-effort operation. If it fails, we still proceed with the ban.
-      if (user.powerLevel > DefaultPowerLevelMember.member.powerLevel) {
-        final powerLevelEvent = user.room.getState(EventTypes.RoomPowerLevels);
-
-        // Skip power level reduction if state is null to avoid overwriting server data
-        if (powerLevelEvent != null) {
-          try {
-            final powerMap = Map<String, dynamic>.from(powerLevelEvent.content);
-            final usersMap = Map<String, dynamic>.from(
-              powerMap['users'] as Map<String, dynamic>? ?? {},
-            );
-            powerMap['users'] = usersMap;
-
-            usersMap[user.id] = DefaultPowerLevelMember.member.powerLevel;
-
-            await user.room.client.setRoomStateWithKey(
-              user.room.id,
-              EventTypes.RoomPowerLevels,
-              '',
-              powerMap,
-            );
-          } catch (e) {
-            // Log the error but don't block the ban operation
-            Logs().w(
-              'Failed to reduce power level for ${user.id} in room ${user.room.id}, proceeding with ban anyway',
-              e,
-            );
-          }
-        }
-      }
+      await _reducePowerLevelIfNeeded(user);
 
       await user.ban();
 
@@ -58,6 +28,47 @@ class BanUserInteractor {
       }
     } catch (error) {
       yield Left(BanUserFailure(exception: error));
+    }
+  }
+
+  /// Reduces the power level of a user to member level before banning.
+  ///
+  /// This is a best-effort operation. If it fails, the error is logged
+  /// but the ban operation continues. This prevents issues when banning
+  /// users with elevated privileges.
+  Future<void> _reducePowerLevelIfNeeded(User user) async {
+    if (user.powerLevel <= DefaultPowerLevelMember.member.powerLevel) {
+      return;
+    }
+
+    final powerLevelEvent = user.room.getState(EventTypes.RoomPowerLevels);
+
+    // Skip power level reduction if state is null to avoid overwriting
+    // server data
+    if (powerLevelEvent == null) {
+      return;
+    }
+
+    try {
+      final powerMap = Map<String, dynamic>.from(powerLevelEvent.content);
+      final usersMap = Map<String, dynamic>.from(
+        powerMap['users'] as Map<String, dynamic>? ?? {},
+      );
+      powerMap['users'] = usersMap;
+
+      usersMap[user.id] = DefaultPowerLevelMember.member.powerLevel;
+
+      await user.room.client.setRoomStateWithKey(
+        user.room.id,
+        EventTypes.RoomPowerLevels,
+        '',
+        powerMap,
+      );
+    } catch (e) {
+      Logs().w(
+        'Failed to reduce power level for ${user.id} in room ${user.room.id}, proceeding with ban anyway',
+        e,
+      );
     }
   }
 }
