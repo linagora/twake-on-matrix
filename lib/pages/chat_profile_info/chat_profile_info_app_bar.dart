@@ -96,6 +96,7 @@ class _ChatProfileInfoAppBarState extends State<ChatProfileInfoAppBar>
   }
 
   Future<void> _loadProfileIfNeeded() async {
+    if (!mounted) return;
     final matrixId = widget.presentationContact?.matrixId;
     if (matrixId != null) {
       try {
@@ -120,6 +121,7 @@ class _ChatProfileInfoAppBarState extends State<ChatProfileInfoAppBar>
   }
 
   void _handleGroupInfoTap() {
+    if (!mounted) return;
     if (animationController.isCompleted) {
       animationController.reverse();
       Future.delayed(const Duration(milliseconds: _animationDuration)).then((
