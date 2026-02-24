@@ -86,8 +86,8 @@ class ChatProfileInfoDetails extends StatelessWidget {
             child: Column(
               children: [
                 if (matrixId != null)
-                  _CopiableRowWithSvgIcon(
-                    iconPath: ImagePaths.icMatrixid,
+                  _CopiableRow(
+                    svgIconPath: ImagePaths.icMatrixid,
                     text: matrixId!,
                     title: L10n.of(context)!.username,
                   ),
@@ -101,8 +101,8 @@ class ChatProfileInfoDetails extends StatelessWidget {
                             const SizedBox(
                               height: ChatProfileInfoStyle.textSpacing,
                             ),
-                            _CopiableRowWithMaterialIcon(
-                              icon: Icons.alternate_email,
+                            _CopiableRow(
+                              materialIcon: Icons.alternate_email,
                               title: L10n.of(context)!.email,
                               text: success.userInfo.emails?.firstOrNull ?? '',
                               enableDivider: true,
@@ -112,8 +112,8 @@ class ChatProfileInfoDetails extends StatelessWidget {
                             const SizedBox(
                               height: ChatProfileInfoStyle.textSpacing,
                             ),
-                            _CopiableRowWithMaterialIcon(
-                              icon: Icons.call,
+                            _CopiableRow(
+                              materialIcon: Icons.call,
                               title: L10n.of(context)!.phoneNumber,
                               text: success.userInfo.phones?.firstOrNull ?? '',
                             ),
@@ -134,8 +134,8 @@ class ChatProfileInfoDetails extends StatelessWidget {
                     focusColor: Colors.transparent,
                     splashColor: Colors.transparent,
                     onTap: onLeaveChat,
-                    child: _CopiableRowWithMaterialIcon(
-                      icon: Icons.logout_outlined,
+                    child: _CopiableRow(
+                      materialIcon: Icons.logout_outlined,
                       text: L10n.of(context)!.leaveChat,
                       enableCopy: false,
                     ),
@@ -170,9 +170,9 @@ class ChatProfileInfoDetails extends StatelessWidget {
                               : isBlockedUser
                               ? onUnblockUser
                               : onBlockUser,
-                          child: _CopiableRowWithSvgIcon(
-                            iconPath: ImagePaths.icFrontHand,
-                            enableCopyIcon: false,
+                          child: _CopiableRow(
+                            svgIconPath: ImagePaths.icFrontHand,
+                            enableCopy: false,
                             enableDivider: false,
                             text: isBlockedUser
                                 ? L10n.of(context)!.unblockUser
@@ -238,38 +238,59 @@ class ChatProfileInfoDetails extends StatelessWidget {
   }
 }
 
-class _CopiableRowWithMaterialIcon extends StatelessWidget {
-  const _CopiableRowWithMaterialIcon({
-    required this.icon,
+class _CopiableRow extends StatelessWidget {
+  const _CopiableRow({
+    this.materialIcon,
+    this.svgIconPath,
     this.iconColor,
     required this.text,
     this.title,
+    this.textColor,
+    this.textStyle,
     this.enableDivider = true,
     this.enableCopy = true,
-    this.textStyle,
-  });
+    this.actionIcon,
+  }) : assert(
+         materialIcon != null || svgIconPath != null,
+         'Either materialIcon or svgIconPath must be provided',
+       );
 
-  final IconData icon;
+  final IconData? materialIcon;
+  final String? svgIconPath;
   final Color? iconColor;
   final String text;
-  final TextStyle? textStyle;
   final String? title;
+  final Color? textColor;
+  final TextStyle? textStyle;
   final bool enableDivider;
   final bool enableCopy;
+  final Widget? actionIcon;
 
   @override
   Widget build(BuildContext context) {
+    final Widget iconWidget = materialIcon != null
+        ? Icon(
+            materialIcon,
+            size: ChatProfileInfoStyle.iconSize,
+            color: iconColor ?? LinagoraSysColors.material().tertiary,
+          )
+        : SvgPicture.asset(
+            svgIconPath!,
+            width: ChatProfileInfoStyle.iconSize,
+            height: ChatProfileInfoStyle.iconSize,
+            colorFilter: ColorFilter.mode(
+              iconColor ?? LinagoraSysColors.material().tertiary,
+              BlendMode.srcIn,
+            ),
+          );
+
     return Column(
       children: [
         Row(
           children: [
             Padding(
               padding: const EdgeInsets.all(ChatProfileInfoStyle.iconPadding),
-              child: Icon(
-                icon,
-                size: ChatProfileInfoStyle.iconSize,
-                color: iconColor ?? LinagoraSysColors.material().tertiary,
-              ),
+              child: iconWidget,
             ),
             Expanded(
               child: Padding(
@@ -292,7 +313,9 @@ class _CopiableRowWithMaterialIcon extends StatelessWidget {
                       style:
                           textStyle ??
                           Theme.of(context).textTheme.bodyLarge?.copyWith(
-                            color: LinagoraSysColors.material().onSurface,
+                            color:
+                                textColor ??
+                                LinagoraSysColors.material().onSurface,
                           ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
@@ -301,6 +324,7 @@ class _CopiableRowWithMaterialIcon extends StatelessWidget {
                 ),
               ),
             ),
+            if (actionIcon != null) actionIcon!,
             if (enableCopy)
               IconButton(
                 icon: Icon(
@@ -309,110 +333,6 @@ class _CopiableRowWithMaterialIcon extends StatelessWidget {
                   color: LinagoraRefColors.material().tertiary[40],
                 ),
                 color: LinagoraRefColors.material().tertiary[40],
-                onPressed: () {
-                  TwakeClipboard.instance.copyText(text);
-                  TwakeSnackBar.show(
-                    context,
-                    L10n.of(context)!.copiedToClipboard,
-                  );
-                },
-              ),
-          ],
-        ),
-        if (enableDivider) ...[
-          const SizedBox(height: 8),
-          Container(
-            width: double.infinity,
-            height: 1,
-            margin: const EdgeInsets.only(left: 48),
-            color: LinagoraStateLayer(
-              LinagoraSysColors.material().surfaceTint,
-            ).opacityLayer3,
-          ),
-        ],
-      ],
-    );
-  }
-}
-
-class _CopiableRowWithSvgIcon extends StatelessWidget {
-  const _CopiableRowWithSvgIcon({
-    required this.iconPath,
-    required this.text,
-    this.title,
-    this.textColor,
-    this.iconColor,
-    this.enableCopyIcon = true,
-    this.actionIcon,
-    this.enableDivider = true,
-  });
-
-  final String iconPath;
-  final String text;
-  final Color? textColor;
-  final Color? iconColor;
-  final bool enableCopyIcon;
-  final Widget? actionIcon;
-  final String? title;
-  final bool enableDivider;
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Row(
-          children: [
-            Padding(
-              padding: const EdgeInsets.all(ChatProfileInfoStyle.iconPadding),
-              child: SvgPicture.asset(
-                iconPath,
-                width: ChatProfileInfoStyle.iconSize,
-                height: ChatProfileInfoStyle.iconSize,
-                colorFilter: ColorFilter.mode(
-                  iconColor ?? LinagoraSysColors.material().tertiary,
-                  BlendMode.srcIn,
-                ),
-              ),
-            ),
-            Expanded(
-              child: Padding(
-                padding: ChatProfileInfoStyle.textPadding,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    if (title != null)
-                      Text(
-                        title!,
-                        style: Theme.of(context).textTheme.labelMedium
-                            ?.copyWith(
-                              color: LinagoraRefColors.material().neutral[40],
-                            ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    Text(
-                      text,
-                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                        color:
-                            textColor ?? LinagoraSysColors.material().onSurface,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            actionIcon ?? const SizedBox.shrink(),
-            if (enableCopyIcon)
-              IconButton(
-                icon: Icon(
-                  Icons.content_copy,
-                  size: ChatProfileInfoStyle.copyIconSize,
-                  color: LinagoraRefColors.material().tertiary[40],
-                ),
-                color: LinagoraRefColors.material().tertiary[40],
-                focusColor: Theme.of(context).primaryColor,
                 onPressed: () {
                   TwakeClipboard.instance.copyText(text);
                   TwakeSnackBar.show(
@@ -467,8 +387,8 @@ class _AddContactButton extends StatelessWidget {
           matrixId: matrixId,
           displayName: displayName,
         ),
-        child: _CopiableRowWithMaterialIcon(
-          icon: Icons.person_add_outlined,
+        child: _CopiableRow(
+          materialIcon: Icons.person_add_outlined,
           iconColor: LinagoraSysColors.material().primary,
           text: L10n.of(context)!.addToContacts,
           textStyle: Theme.of(context).textTheme.bodyLarge?.copyWith(

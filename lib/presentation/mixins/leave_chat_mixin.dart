@@ -9,6 +9,10 @@ import 'package:fluffychat/generated/l10n/app_localizations.dart';
 
 mixin LeaveChatMixin {
   Future<void> leaveChat(BuildContext context, Room? room) async {
+    if (context.mounted) {
+      return;
+    }
+
     try {
       if (room == null) {
         throw RoomNullException();

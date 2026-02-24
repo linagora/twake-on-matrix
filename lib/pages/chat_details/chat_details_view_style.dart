@@ -20,7 +20,7 @@ class ChatDetailViewStyle {
   );
 
   // Informations Content
-  static const double minToolbarHeightSliverAppBar = 616.0;
+  static const double minToolbarHeightSliverAppBar = 632.0;
   static const double mediumToolbarHeightSliverAppBar = 688.0;
   static const double maxToolbarHeightSliverAppBar = 744.0;
   static const double avatarSize = 96;

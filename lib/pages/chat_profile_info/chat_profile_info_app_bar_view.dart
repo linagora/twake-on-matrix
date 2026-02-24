@@ -20,7 +20,6 @@ class ChatProfileInfoAppBarView extends StatelessWidget {
     this.displayName,
     this.matrixId,
     required this.userInfoNotifier,
-    required this.isDraftInfo,
     required this.isBlockedUserNotifier,
     this.onUnblockUser,
     this.onBlockUser,
@@ -41,7 +40,6 @@ class ChatProfileInfoAppBarView extends StatelessWidget {
   final String? displayName;
   final String? matrixId;
   final ValueNotifier<Either<Failure, Success>> userInfoNotifier;
-  final bool isDraftInfo;
   final ValueNotifier<bool> isBlockedUserNotifier;
   final void Function()? onUnblockUser;
   final void Function()? onBlockUser;
@@ -154,7 +152,7 @@ class ChatProfileInfoAppBarView extends StatelessWidget {
         if (success is GetUserInfoSuccess) {
           return SecondaryAvatar(
             mxContent: userInfoModel?.avatarUrl != null
-                ? Uri.parse(userInfoModel?.avatarUrl ?? '')
+                ? Uri.tryParse(userInfoModel?.avatarUrl ?? '')
                 : avatarUri,
             name: userInfoModel?.displayName ?? displayName,
             fontSize: ChatProfileInfoStyle.avatarFontSize,

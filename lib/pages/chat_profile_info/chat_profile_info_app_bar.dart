@@ -74,6 +74,7 @@ class _ChatProfileInfoAppBarState extends State<ChatProfileInfoAppBar>
   static const int _animationDuration = 100;
 
   ValueNotifier<bool> isExpandedAvatar = ValueNotifier(false);
+  final ValueNotifier<Profile?> _profileNotifier = ValueNotifier(null);
 
   @override
   void initState() {
@@ -82,12 +83,39 @@ class _ChatProfileInfoAppBarState extends State<ChatProfileInfoAppBar>
       vsync: this,
       duration: const Duration(milliseconds: _animationDuration),
     );
+    _loadProfileIfNeeded();
+  }
+
+  @override
+  void didUpdateWidget(ChatProfileInfoAppBar oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.presentationContact?.matrixId !=
+        widget.presentationContact?.matrixId) {
+      _loadProfileIfNeeded();
+    }
+  }
+
+  Future<void> _loadProfileIfNeeded() async {
+    final matrixId = widget.presentationContact?.matrixId;
+    if (matrixId != null) {
+      try {
+        final profile = await Matrix.of(
+          context,
+        ).client.getProfileFromUserId(matrixId, getFromRooms: false);
+        _profileNotifier.value = profile;
+      } catch (_) {
+        // Keep profile as null on error
+      }
+    } else {
+      _profileNotifier.value = null;
+    }
   }
 
   @override
   void dispose() {
     animationController.dispose();
     isExpandedAvatar.dispose();
+    _profileNotifier.dispose();
     super.dispose();
   }
 
@@ -97,14 +125,10 @@ class _ChatProfileInfoAppBarState extends State<ChatProfileInfoAppBar>
       Future.delayed(const Duration(milliseconds: _animationDuration)).then((
         _,
       ) {
-        setState(() {
-          isExpandedAvatar.value = false;
-        });
+        isExpandedAvatar.value = false;
       });
     } else {
-      setState(() {
-        isExpandedAvatar.value = true;
-      });
+      isExpandedAvatar.value = true;
       Future.delayed(const Duration(milliseconds: _animationDuration)).then((
         _,
       ) {
@@ -137,104 +161,100 @@ class _ChatProfileInfoAppBarState extends State<ChatProfileInfoAppBar>
                 toolbarHeight: totalHeight,
                 title: ConstrainedBox(
                   constraints: BoxConstraints(maxHeight: totalHeight),
-                  child: AnimatedBuilder(
-                    animation: animationController,
-                    builder: (context, _) {
-                      final contact = widget.presentationContact;
-                      if (contact?.matrixId != null) {
-                        return FutureBuilder(
-                          future: Matrix.of(context).client
-                              .getProfileFromUserId(
-                                contact!.matrixId!,
-                                getFromRooms: false,
+                  child: ValueListenableBuilder<Profile?>(
+                    valueListenable: _profileNotifier,
+                    builder: (context, profile, _) {
+                      return AnimatedBuilder(
+                        animation: animationController,
+                        builder: (context, _) {
+                          final contact = widget.presentationContact;
+                          if (contact?.matrixId != null) {
+                            return ChatProfileInfoAppBarView(
+                              groupInfoHeight: ChatProfileInfoStyle
+                                  .toolbarHeightSliverAppBar,
+                              maxGroupInfoHeight:
+                                  ChatProfileInfoStyle.maxAvatarHeight,
+                              avatarUri: profile?.avatarUrl,
+                              displayName:
+                                  profile?.displayName ?? contact!.displayName,
+                              matrixId: contact?.matrixId,
+                              userInfoNotifier: widget.userInfoNotifier,
+                              isBlockedUserNotifier:
+                                  widget.isBlockedUserNotifier,
+                              onUnblockUser: widget.onUnblockUser,
+                              onBlockUser: widget.onBlockUser,
+                              isAlreadyInChat: widget.isAlreadyInChat,
+                              blockUserLoadingNotifier:
+                                  widget.blockUserLoadingNotifier,
+                              room: widget.room,
+                              onLeaveChat: () => widget.onLeaveChat?.call(
+                                context,
+                                widget.room,
                               ),
-                          builder: (context, snapshot) =>
-                              ChatProfileInfoAppBarView(
-                                groupInfoHeight: ChatProfileInfoStyle
-                                    .toolbarHeightSliverAppBar,
-                                maxGroupInfoHeight:
-                                    ChatProfileInfoStyle.maxAvatarHeight,
-                                avatarUri: snapshot.data?.avatarUrl,
-                                displayName:
-                                    snapshot.data?.displayName ??
-                                    contact.displayName,
-                                matrixId: contact.matrixId,
-                                userInfoNotifier: widget.userInfoNotifier,
-                                isDraftInfo: widget.isDraftInfo,
-                                isBlockedUserNotifier:
-                                    widget.isBlockedUserNotifier,
-                                onUnblockUser: widget.onUnblockUser,
-                                onBlockUser: widget.onBlockUser,
-                                isAlreadyInChat: widget.isAlreadyInChat,
-                                blockUserLoadingNotifier:
-                                    widget.blockUserLoadingNotifier,
-                                room: widget.room,
-                                onLeaveChat: () => widget.onLeaveChat?.call(
-                                  context,
-                                  widget.room,
-                                ),
-                                onChatInfoTap: _handleGroupInfoTap,
-                                animationController: animationController,
-                                getLocalizedStatusMessage:
-                                    widget.getLocalizedStatusMessage,
-                                onSearch: widget.onSearch,
-                                onMessage: widget.onMessage,
+                              onChatInfoTap: _handleGroupInfoTap,
+                              animationController: animationController,
+                              getLocalizedStatusMessage:
+                                  widget.getLocalizedStatusMessage,
+                              onSearch: widget.onSearch,
+                              onMessage: widget.onMessage,
+                            );
+                          }
+                          if (contact != null) {
+                            return ChatProfileInfoAppBarView(
+                              groupInfoHeight: ChatProfileInfoStyle
+                                  .toolbarHeightSliverAppBar,
+                              maxGroupInfoHeight:
+                                  ChatProfileInfoStyle.maxAvatarHeight,
+                              displayName: contact.displayName,
+                              matrixId: contact.matrixId,
+                              userInfoNotifier: widget.userInfoNotifier,
+                              isBlockedUserNotifier:
+                                  widget.isBlockedUserNotifier,
+                              onUnblockUser: widget.onUnblockUser,
+                              onBlockUser: widget.onBlockUser,
+                              isAlreadyInChat: widget.isAlreadyInChat,
+                              blockUserLoadingNotifier:
+                                  widget.blockUserLoadingNotifier,
+                              room: widget.room,
+                              onLeaveChat: () => widget.onLeaveChat?.call(
+                                context,
+                                widget.room,
                               ),
-                        );
-                      }
-                      if (contact != null) {
-                        return ChatProfileInfoAppBarView(
-                          groupInfoHeight:
-                              ChatProfileInfoStyle.toolbarHeightSliverAppBar,
-                          maxGroupInfoHeight:
-                              ChatProfileInfoStyle.maxAvatarHeight,
-                          displayName: contact.displayName,
-                          matrixId: contact.matrixId,
-                          userInfoNotifier: widget.userInfoNotifier,
-                          isDraftInfo: widget.isDraftInfo,
-                          isBlockedUserNotifier: widget.isBlockedUserNotifier,
-                          onUnblockUser: widget.onUnblockUser,
-                          onBlockUser: widget.onBlockUser,
-                          isAlreadyInChat: widget.isAlreadyInChat,
-                          blockUserLoadingNotifier:
-                              widget.blockUserLoadingNotifier,
-                          room: widget.room,
-                          onLeaveChat: () =>
-                              widget.onLeaveChat?.call(context, widget.room),
-                          onChatInfoTap: _handleGroupInfoTap,
-                          animationController: animationController,
-                          avatarUri: widget.avatarUri,
-                          getLocalizedStatusMessage:
-                              widget.getLocalizedStatusMessage,
-                          onSearch: widget.onSearch,
-                          onMessage: widget.onMessage,
-                        );
-                      }
-                      return ChatProfileInfoAppBarView(
-                        groupInfoHeight:
-                            ChatProfileInfoStyle.toolbarHeightSliverAppBar,
-                        maxGroupInfoHeight:
-                            ChatProfileInfoStyle.maxAvatarHeight,
-                        avatarUri: widget.user?.avatarUrl,
-                        displayName: widget.user?.calcDisplayname(),
-                        matrixId: widget.user?.id,
-                        userInfoNotifier: widget.userInfoNotifier,
-                        isDraftInfo: widget.isDraftInfo,
-                        isBlockedUserNotifier: widget.isBlockedUserNotifier,
-                        onUnblockUser: widget.onUnblockUser,
-                        onBlockUser: widget.onBlockUser,
-                        isAlreadyInChat: widget.isAlreadyInChat,
-                        blockUserLoadingNotifier:
-                            widget.blockUserLoadingNotifier,
-                        room: widget.room,
-                        onLeaveChat: () =>
-                            widget.onLeaveChat?.call(context, widget.room),
-                        onChatInfoTap: _handleGroupInfoTap,
-                        animationController: animationController,
-                        getLocalizedStatusMessage:
-                            widget.getLocalizedStatusMessage,
-                        onSearch: widget.onSearch,
-                        onMessage: widget.onMessage,
+                              onChatInfoTap: _handleGroupInfoTap,
+                              animationController: animationController,
+                              avatarUri: widget.avatarUri,
+                              getLocalizedStatusMessage:
+                                  widget.getLocalizedStatusMessage,
+                              onSearch: widget.onSearch,
+                              onMessage: widget.onMessage,
+                            );
+                          }
+                          return ChatProfileInfoAppBarView(
+                            groupInfoHeight:
+                                ChatProfileInfoStyle.toolbarHeightSliverAppBar,
+                            maxGroupInfoHeight:
+                                ChatProfileInfoStyle.maxAvatarHeight,
+                            avatarUri: widget.user?.avatarUrl,
+                            displayName: widget.user?.calcDisplayname(),
+                            matrixId: widget.user?.id,
+                            userInfoNotifier: widget.userInfoNotifier,
+                            isBlockedUserNotifier: widget.isBlockedUserNotifier,
+                            onUnblockUser: widget.onUnblockUser,
+                            onBlockUser: widget.onBlockUser,
+                            isAlreadyInChat: widget.isAlreadyInChat,
+                            blockUserLoadingNotifier:
+                                widget.blockUserLoadingNotifier,
+                            room: widget.room,
+                            onLeaveChat: () =>
+                                widget.onLeaveChat?.call(context, widget.room),
+                            onChatInfoTap: _handleGroupInfoTap,
+                            animationController: animationController,
+                            getLocalizedStatusMessage:
+                                widget.getLocalizedStatusMessage,
+                            onSearch: widget.onSearch,
+                            onMessage: widget.onMessage,
+                          );
+                        },
                       );
                     },
                   ),

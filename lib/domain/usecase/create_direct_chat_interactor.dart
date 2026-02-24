@@ -40,7 +40,7 @@ class CreateDirectChatInteractor {
         yield const Left(NoPermissionForCreateChat());
         return;
       } else {
-        rethrow;
+        yield Left(CreateDirectChatFailed(exception: e));
       }
     }
     String? roomId;
