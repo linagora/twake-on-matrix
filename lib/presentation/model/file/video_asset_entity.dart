@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'dart:typed_data';
+import 'dart:ui';
 
 import 'package:fluffychat/presentation/extensions/file_extension.dart';
 import 'package:fluffychat/domain/model/file_info/file_info.dart';
@@ -25,9 +26,14 @@ class VideoAssetEntity extends FileAssetEntity {
       thumbnailPath: tempDir.path,
     );
     final thumbnailFile = File(thumbnailXFile.path);
-    final thumbnailSize = await thumbnailFile.getImageDimensions();
     final thumbnailBytes = await thumbnailFile.readAsBytes();
-    await thumbnailFile.delete();
+    Size? thumbnailSize;
+    try {
+      thumbnailSize = await thumbnailFile.getImageDimensions();
+      await thumbnailFile.delete();
+    } catch (e, s) {
+      Logs().e('Unable to get thumbnail size or delete thumbnail file', e, s);
+    }
     return VideoFileInfo(
       file.path.split('/').last,
       filePath: file.path,
@@ -44,8 +50,14 @@ class VideoAssetEntity extends FileAssetEntity {
     if (file == null) {
       return null;
     }
-    final thumbnailData = await VideoThumbnail.thumbnailData(video: file.path);
-    final thumbnailSize = await thumbnailData.imageSize;
+    Size? thumbnailSize;
+    try {
+      final thumbnailDataToGetThumbnailSize =
+          await VideoThumbnail.thumbnailData(video: file.path);
+      thumbnailSize = await thumbnailDataToGetThumbnailSize.imageSize;
+    } catch (e, s) {
+      Logs().e('Unable to get thumbnail size', e, s);
+    }
     return MatrixVideoFile(
       name: file.path.split('/').last,
       width: thumbnailSize?.width.toInt(),
