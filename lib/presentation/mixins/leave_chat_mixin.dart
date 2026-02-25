@@ -44,12 +44,24 @@ mixin LeaveChatMixin {
         }
       }
 
+      if (!context.mounted) {
+        return;
+      }
+
       context.go('/rooms');
     } on RoomNullException catch (e) {
       Logs().e('LeaveChatMixin::leaveChat(): - RoomNullException - $e');
+      if (!context.mounted) {
+        return;
+      }
+
       TwakeSnackBar.show(context, L10n.of(context)!.leaveChatFailed);
     } catch (e) {
       Logs().e('LeaveChatMixin::leaveChat(): - error: $e');
+      if (!context.mounted) {
+        return;
+      }
+
       TwakeSnackBar.show(context, L10n.of(context)!.leaveChatFailed);
     }
   }

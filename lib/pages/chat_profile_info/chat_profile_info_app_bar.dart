@@ -103,8 +103,10 @@ class _ChatProfileInfoAppBarState extends State<ChatProfileInfoAppBar>
         final profile = await Matrix.of(
           context,
         ).client.getProfileFromUserId(matrixId, getFromRooms: false);
+        if (!mounted) return;
         _profileNotifier.value = profile;
       } catch (_) {
+        if (!mounted) return;
         _profileNotifier.value = null;
       }
     } else {
@@ -127,6 +129,7 @@ class _ChatProfileInfoAppBarState extends State<ChatProfileInfoAppBar>
       Future.delayed(const Duration(milliseconds: _animationDuration)).then((
         _,
       ) {
+        if (!mounted) return;
         isExpandedAvatar.value = false;
       });
     } else {
@@ -134,6 +137,7 @@ class _ChatProfileInfoAppBarState extends State<ChatProfileInfoAppBar>
       Future.delayed(const Duration(milliseconds: _animationDuration)).then((
         _,
       ) {
+        if (!mounted) return;
         animationController.forward();
       });
     }
