@@ -12,12 +12,12 @@ mixin ConnectivityMixin<T extends StatefulWidget> on State<T> {
 
   Future<void> onConnect();
 
-  late final Debouncer<bool?> _debouncer;
+  late final Throttle<bool?> _throttle;
 
   @override
   void initState() {
     super.initState();
-    _debouncer = Debouncer<bool?>(
+    _throttle = Throttle<bool?>(
       const Duration(seconds: 5),
       initialValue: null,
       onChanged: (value) async {
@@ -32,13 +32,13 @@ mixin ConnectivityMixin<T extends StatefulWidget> on State<T> {
         .get<NetworkConnectionService>()
         .getStreamInstance()
         .listen((event) {
-          _debouncer.value = event != ConnectivityResult.none;
+          _throttle.value = event != ConnectivityResult.none;
         });
   }
 
   @override
   void dispose() {
-    _debouncer.cancel();
+    _throttle.cancel();
     _connectivitySubscription?.cancel();
     super.dispose();
   }
