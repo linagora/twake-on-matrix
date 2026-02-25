@@ -64,7 +64,7 @@ class _ChatBlankNotChat extends StatelessWidget {
           child: Hero(
             tag: 'info-logo',
             child: SvgPicture.asset(
-              ImagePaths.icEmptyPage,
+              ImagePaths.mascotNoChat,
               width: ChatBlankStyle.mascotSize,
               height: ChatBlankStyle.mascotSize,
             ),
@@ -77,6 +77,7 @@ class _ChatBlankNotChat extends StatelessWidget {
             style: Theme.of(
               context,
             ).textTheme.headlineLarge?.copyWith(fontWeight: FontWeight.w600),
+            textAlign: TextAlign.center,
           ),
         ),
         _ChatBlankRichText(context: context),

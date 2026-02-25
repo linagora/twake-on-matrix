@@ -34,7 +34,6 @@ class ImagePaths {
       _getImagePath('ic_application_grid.svg');
   static String get icUsersOutline => _getImagePath('ic_users_outline.svg');
   static String get icReply => _getImagePath('ic_reply.svg');
-  static String get icEmptyPage => _getImagePath('ic_empty_page.svg');
   static String get icErrorPage => _getImagePath('ic_error_page.svg');
   static String get icErrorPageBackground =>
       _getImagePath('ic_error_page_background.svg');
@@ -90,8 +89,14 @@ class ImagePaths {
 
   static String get chatBackground => _getImagePath('chat_background.png');
 
-  static String get mascotDraftChat =>
-      _getImagePath('ic_mascot_draft_chat.svg');
+  static String get mascotEmptyGroup =>
+      _getImagePath('ic_mascot_empty_group.svg');
+
+  static String get mascotInvite => _getImagePath('ic_mascot_invite.svg');
+
+  static String get mascotNewChat => _getImagePath('ic_mascot_new_chat.svg');
+
+  static String get mascotNoChat => _getImagePath('ic_mascot_no_chat.svg');
 
   static String get icE2EEncryptionMessageIndicator =>
       _getImagePath('ic_end_to_end_encryption_message_indicator.svg');

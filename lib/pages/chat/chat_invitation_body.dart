@@ -1,9 +1,12 @@
 import 'package:fluffychat/pages/chat/chat.dart';
+import 'package:fluffychat/pages/chat/chat_background.dart';
 import 'package:fluffychat/pages/chat/chat_invitation_body_style.dart';
 import 'package:fluffychat/pages/chat/events/message_content_mixin.dart';
+import 'package:fluffychat/resource/image_paths.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:flutter/material.dart';
 import 'package:fluffychat/generated/l10n/app_localizations.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 
 class ChatInvitationBody extends StatelessWidget with MessageContentMixin {
@@ -15,6 +18,7 @@ class ChatInvitationBody extends StatelessWidget with MessageContentMixin {
   Widget build(BuildContext context) {
     return Stack(
       children: <Widget>[
+        const ChatBackground(),
         if (Matrix.of(context).wallpaper != null)
           Image.file(
             Matrix.of(context).wallpaper!,
@@ -41,76 +45,60 @@ class ChatInvitationBody extends StatelessWidget with MessageContentMixin {
 
   Widget _buildInvitationContent(BuildContext context) {
     return Center(
-      child: UnconstrainedBox(
-        child: Container(
-          width: ChatInvitationBodyStyle.dialogWidth,
-          decoration: BoxDecoration(
-            // TODO: change to colorSurface when its approved
-            // ignore: deprecated_member_use
-            color: Theme.of(context).colorScheme.background,
-            borderRadius: BorderRadius.circular(
-              ChatInvitationBodyStyle.dialogBorderRadius,
-            ),
-            border: Border.all(
-              color: Theme.of(
-                context,
-              ).colorScheme.surfaceTint.withOpacity(0.16),
-              width: 1,
-            ),
+      child: Container(
+        constraints: BoxConstraints(
+          maxWidth: ChatInvitationBodyStyle.maxWidth(context),
+        ),
+        decoration: BoxDecoration(
+          color: ChatInvitationBodyStyle.backgroundColor,
+          borderRadius: BorderRadius.circular(
+            ChatInvitationBodyStyle.dialogBorderRadius,
           ),
-          child: Padding(
-            padding: const EdgeInsets.all(
-              ChatInvitationBodyStyle.dialogPadding,
-            ),
-            child: Column(
-              children: [
-                Padding(
-                  padding: const EdgeInsets.all(
-                    ChatInvitationBodyStyle.dialogTextPadding,
-                  ),
-                  child: Text.rich(
-                    textAlign: TextAlign.center,
-                    TextSpan(
-                      children: [
-                        TextSpan(
-                          text: '${controller.displayInviterName} \n',
-                          style: Theme.of(context).textTheme.bodyMedium
-                              ?.copyWith(
-                                color: Theme.of(context).colorScheme.primary,
-                              ),
-                        ),
-                        TextSpan(
-                          text: L10n.of(context)!.hasInvitedYouToAChat,
-                          style: Theme.of(context).textTheme.bodyMedium
-                              ?.copyWith(
-                                color: Theme.of(
-                                  context,
-                                ).colorScheme.onSurfaceVariant,
-                              ),
-                        ),
-                      ],
-                    ),
-                  ),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(ChatInvitationBodyStyle.dialogPadding),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              SvgPicture.asset(
+                ImagePaths.mascotInvite,
+                width: ChatInvitationBodyStyle.iconSize(context),
+                height: ChatInvitationBodyStyle.iconSize(context),
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                child: Text(
+                  controller.displayInviterName,
+                  style: ChatInvitationBodyStyle.subTitleStyle(context),
+                  textAlign: TextAlign.center,
                 ),
-                Row(
-                  children: [
-                    Expanded(
-                      child: InvitationRejectButton(
-                        onReject: () => controller.onRejectInvitation(context),
-                      ),
+              ),
+              Text(
+                L10n.of(context)!.hasInvitedYouToAChat,
+                style: ChatInvitationBodyStyle.titleStyle(context),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 16),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Expanded(
+                    child: InvitationRejectButton(
+                      onReject: () => controller.onRejectInvitation(context),
                     ),
-                    const SizedBox(
-                      width: ChatInvitationBodyStyle.dialogButtonSpacing,
+                  ),
+                  const SizedBox(
+                    width: ChatInvitationBodyStyle.dialogButtonSpacing,
+                  ),
+                  Expanded(
+                    child: InvitationAcceptButton(
+                      onAccept: () => controller.onAcceptInvitation(),
                     ),
-                    Expanded(
-                      child: InvitationAcceptButton(
-                        onAccept: () => controller.onAcceptInvitation(),
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
+                  ),
+                ],
+              ),
+            ],
           ),
         ),
       ),
@@ -144,6 +132,9 @@ class InvitationAcceptButton extends StatelessWidget {
         fixedSize: WidgetStateProperty.all<Size>(
           const Size.fromHeight(ChatInvitationBodyStyle.dialogButtonHeight),
         ),
+        padding: WidgetStateProperty.all<EdgeInsetsGeometry>(
+          const EdgeInsets.symmetric(horizontal: 24),
+        ),
       ),
       onPressed: onAccept,
       child: Text(L10n.of(context)!.accept),
@@ -163,9 +154,6 @@ class InvitationRejectButton extends StatelessWidget {
         backgroundColor: WidgetStateProperty.all<Color>(
           Theme.of(context).colorScheme.surface,
         ),
-        foregroundColor: WidgetStateProperty.all<Color>(
-          Theme.of(context).colorScheme.error,
-        ),
         shape: WidgetStateProperty.all<RoundedRectangleBorder>(
           RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(
@@ -173,7 +161,12 @@ class InvitationRejectButton extends StatelessWidget {
             ),
           ),
         ),
-        side: WidgetStateProperty.all<BorderSide>(BorderSide.none),
+        side: WidgetStateProperty.all<BorderSide>(
+          BorderSide(color: Theme.of(context).colorScheme.primary, width: 1.0),
+        ),
+        padding: WidgetStateProperty.all<EdgeInsetsGeometry>(
+          const EdgeInsets.symmetric(horizontal: 24),
+        ),
         fixedSize: WidgetStateProperty.all<Size>(
           const Size.fromHeight(ChatInvitationBodyStyle.dialogButtonHeight),
         ),
