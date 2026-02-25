@@ -1195,6 +1195,7 @@ class MatrixState extends State<Matrix>
 
   @override
   Future<void> onConnect() async {
+    if (client.homeserver != null) return;
     await _refreshHomeserverInformation(client);
   }
 
