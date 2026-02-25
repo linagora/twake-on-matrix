@@ -3,7 +3,6 @@ import 'dart:typed_data';
 import 'package:fluffychat/presentation/extensions/file_extension.dart';
 import 'package:fluffychat/domain/model/file_info/file_info.dart';
 import 'package:fluffychat/domain/model/file_info/image_file_info.dart';
-import 'package:fluffychat/presentation/extensions/uint8list_extension.dart';
 import 'package:fluffychat/presentation/model/file/file_asset_entity.dart';
 import 'package:matrix/matrix.dart';
 
@@ -22,22 +21,6 @@ class ImageAssetEntity extends FileAssetEntity {
       filePath: file.path,
       width: imageSize?.width.toInt(),
       height: imageSize?.height.toInt(),
-    );
-  }
-
-  @override
-  Future<MatrixFile?> toMatrixFile() async {
-    final file = await assetEntity.loadFile();
-    if (file == null) {
-      return null;
-    }
-    final bytes = await file.readAsBytes();
-    final size = await bytes.imageSize;
-    return MatrixImageFile(
-      name: file.path.split('/').last,
-      bytes: bytes,
-      width: size?.width.toInt(),
-      height: size?.height.toInt(),
     );
   }
 

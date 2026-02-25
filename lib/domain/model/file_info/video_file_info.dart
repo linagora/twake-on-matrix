@@ -1,10 +1,6 @@
-import 'dart:typed_data';
-
 import 'package:fluffychat/domain/model/file_info/file_info.dart';
 
 class VideoFileInfo extends FileInfo {
-  final Uint8List imagePlaceholderBytes;
-
   final Duration? duration;
 
   final int? width;
@@ -16,7 +12,6 @@ class VideoFileInfo extends FileInfo {
     super.bytes,
     super.filePath,
     super.customMimeType,
-    required this.imagePlaceholderBytes,
     this.width,
     this.height,
     this.duration,
@@ -32,11 +27,5 @@ class VideoFileInfo extends FileInfo {
   });
 
   @override
-  List<Object?> get props => [
-    width,
-    height,
-    duration,
-    imagePlaceholderBytes,
-    ...super.props,
-  ];
+  List<Object?> get props => [width, height, duration, ...super.props];
 }

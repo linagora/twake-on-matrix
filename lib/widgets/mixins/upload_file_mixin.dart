@@ -71,6 +71,14 @@ mixin UploadFileMixin<T extends StatefulWidget> on State<T> {
   }
 
   @override
+  void didUpdateWidget(covariant T oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (streamSubscription == null) {
+      _trySetupUploadStreamSubcription();
+    }
+  }
+
+  @override
   void dispose() {
     streamSubscription?.cancel();
     uploadFileStateNotifier.dispose();

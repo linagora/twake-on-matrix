@@ -1,9 +1,11 @@
+import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/pages/chat/events/message/message_style.dart';
 import 'package:fluffychat/pages/chat/events/message_content_style.dart';
-import 'package:fluffychat/presentation/extensions/send_file_web_extension.dart';
 import 'package:fluffychat/presentation/mixins/play_video_action_mixin.dart';
 import 'package:fluffychat/presentation/model/chat/upload_file_ui_state.dart';
 import 'package:fluffychat/presentation/model/file/display_image_info.dart';
+import 'package:fluffychat/utils/manager/upload_manager/upload_manager.dart';
+import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
 import 'package:fluffychat/widgets/mixins/upload_file_mixin.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_blurhash/flutter_blurhash.dart';
@@ -13,8 +15,6 @@ import 'package:matrix/matrix.dart';
 class SendingVideoWidget extends StatefulWidget {
   final Event event;
 
-  final MatrixVideoFile matrixFile;
-
   final DisplayImageInfo displayImageInfo;
 
   final double? bubbleWidth;
@@ -22,7 +22,6 @@ class SendingVideoWidget extends StatefulWidget {
   const SendingVideoWidget({
     super.key,
     required this.event,
-    required this.matrixFile,
     required this.displayImageInfo,
     this.bubbleWidth,
   });
@@ -44,7 +43,6 @@ class _SendingVideoWidgetState extends State<SendingVideoWidget>
     videoWidget = VideoWidget(
       imageHeight: widget.displayImageInfo.size.height,
       imageWidth: widget.displayImageInfo.size.width,
-      matrixFile: widget.matrixFile,
       event: event,
     );
   }
@@ -87,14 +85,21 @@ class _SendingVideoWidgetState extends State<SendingVideoWidget>
                 ),
               ),
             ],
-            EventStatus.sent || EventStatus.synced => [
-              InkWell(
-                onTap: () => _onPlayVideo(context),
-                child: const _PlayVideoButton(),
-              ),
-            ],
             _ => [
-              _PlayVideoButton(event: event),
+              Container(
+                width: MessageContentStyle.videoCenterButtonSize,
+                height: MessageContentStyle.videoCenterButtonSize,
+                decoration: const BoxDecoration(
+                  color: Colors.black38,
+                  shape: BoxShape.circle,
+                ),
+                alignment: Alignment.center,
+                child: Icon(
+                  Icons.close,
+                  color: LinagoraRefColors.material().primary[100],
+                  size: MessageContentStyle.iconInsideVideoButtonSize,
+                ),
+              ),
               ValueListenableBuilder(
                 valueListenable: uploadFileStateNotifier,
                 builder: (context, state, child) {
@@ -132,15 +137,6 @@ class _SendingVideoWidgetState extends State<SendingVideoWidget>
       ),
     );
   }
-
-  void _onPlayVideo(BuildContext context) async {
-    playVideoAction(
-      context,
-      widget.matrixFile.bytes,
-      event: event,
-      isReplacement: false,
-    );
-  }
 }
 
 class VideoWidget extends StatelessWidget {
@@ -148,13 +144,11 @@ class VideoWidget extends StatelessWidget {
     super.key,
     required this.imageHeight,
     required this.imageWidth,
-    required this.matrixFile,
     required this.event,
   });
 
   final double imageHeight;
   final double imageWidth;
-  final MatrixVideoFile matrixFile;
   final Event event;
 
   @override
@@ -162,7 +156,7 @@ class VideoWidget extends StatelessWidget {
     final placeholder = SizedBox(width: imageWidth, height: imageHeight);
 
     return FutureBuilder(
-      future: event.room.generateVideoThumbnail(matrixFile),
+      future: event.getPlaceholderMatrixImageFile(getIt.get<UploadManager>()),
       builder: (context, snapshot) {
         if (snapshot.data == null) return placeholder;
 
@@ -174,30 +168,6 @@ class VideoWidget extends StatelessWidget {
           filterQuality: FilterQuality.medium,
         );
       },
-    );
-  }
-}
-
-class _PlayVideoButton extends StatelessWidget {
-  final Event? event;
-
-  const _PlayVideoButton({this.event});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: MessageContentStyle.videoCenterButtonSize,
-      height: MessageContentStyle.videoCenterButtonSize,
-      decoration: const BoxDecoration(
-        color: Colors.black38,
-        shape: BoxShape.circle,
-      ),
-      alignment: Alignment.center,
-      child: Icon(
-        event != null ? Icons.close : Icons.play_arrow_rounded,
-        color: LinagoraRefColors.material().primary[100],
-        size: MessageContentStyle.iconInsideVideoButtonSize,
-      ),
     );
   }
 }

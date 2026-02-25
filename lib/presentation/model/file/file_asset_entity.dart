@@ -5,7 +5,6 @@ import 'package:fluffychat/domain/model/file_info/file_info.dart';
 import 'package:fluffychat/presentation/model/file/default_asset_entity.dart';
 import 'package:fluffychat/presentation/model/file/image_asset_entity.dart';
 import 'package:fluffychat/presentation/model/file/video_asset_entity.dart';
-import 'package:matrix/matrix.dart';
 import 'package:photo_manager/photo_manager.dart';
 
 abstract class FileAssetEntity with EquatableMixin {
@@ -14,8 +13,6 @@ abstract class FileAssetEntity with EquatableMixin {
   FileAssetEntity({required this.assetEntity});
 
   Future<FileInfo?> toFileInfo();
-
-  Future<MatrixFile?> toMatrixFile();
 
   String get messageType;
 

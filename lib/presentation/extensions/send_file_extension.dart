@@ -8,7 +8,6 @@ import 'package:dio/dio.dart';
 import 'package:fluffychat/app_state/failure.dart';
 import 'package:fluffychat/app_state/success.dart';
 import 'package:fluffychat/config/app_config.dart';
-import 'package:fluffychat/data/network/extensions/file_info_extension.dart';
 import 'package:fluffychat/data/network/media/cancel_exception.dart';
 import 'package:fluffychat/data/network/media/file_not_exist_exception.dart';
 import 'package:fluffychat/data/network/media/media_api.dart';
@@ -148,7 +147,6 @@ extension SendFileExtension on Room {
         fileInfo.fileName,
         filePath: fileInfo.filePath,
         bytes: fileInfo.bytes,
-        imagePlaceholderBytes: Uint8List(0),
       );
     }
 
@@ -220,11 +218,9 @@ extension SendFileExtension on Room {
           fileInfo.fileName,
           filePath: fileInfo.filePath,
           bytes: fileInfo.bytes,
-          imagePlaceholderBytes: fileInfo.imagePlaceholderBytes,
           width: thumbnail?.width,
           height: thumbnail?.height,
         );
-        storePlaceholderFileInMem(fileInfo: fileInfo, txid: txid);
         fakeImageEvent = await sendFakeFileInfoEvent(
           fileInfo,
           txid: txid,
@@ -697,30 +693,6 @@ extension SendFileExtension on Room {
     await client.handleSync(fakeImageEvent, direction: direction);
   }
 
-  Future<void> _storePlaceholderFile({
-    required String txid,
-    required FileAssetEntity assetEntity,
-    required FileInfo fileInfo,
-  }) async {
-    // Check file size before loading into memory to prevent OOM on large files
-    final fileSize = fileInfo.fileSize;
-
-    if (fileSize > maxPlaceholderFileSize) {
-      Logs().w(
-        '_storePlaceholderFile: Skipping placeholder for large file '
-        '(${(fileSize / (1024 * 1024)).toStringAsFixed(2)}MB). '
-        'File will upload without in-memory placeholder to prevent OOM.',
-      );
-      return;
-    }
-
-    // in order to have placeholder, this line must have,
-    // otherwise the sending event will be removed from timeline
-    final matrixFile =
-        await assetEntity.toMatrixFile() ?? await fileInfo.toMatrixFile();
-    sendingFilePlaceholders[txid] = matrixFile;
-  }
-
   Future<Map<TransactionId, FakeSendingFileInfo>>
   sendPlaceholdersForImagePickerFiles({
     required List<FileAssetEntity> entities,
@@ -732,12 +704,6 @@ extension SendFileExtension on Room {
       final fileInfo = await entity.toFileInfo();
       if (fileInfo != null) {
         final txid = client.generateUniqueTransactionId();
-
-        await _storePlaceholderFile(
-          txid: txid,
-          assetEntity: entity,
-          fileInfo: fileInfo,
-        );
 
         final fakeImageEvent = await sendFakeFileInfoEvent(
           fileInfo,
@@ -838,9 +804,7 @@ extension SendFileExtension on Room {
   }) async {
     Logs().d('Video thumbnail generation started');
     uploadStreamController?.add(const Right(GeneratingThumbnailState()));
-    if (fileInfo.imagePlaceholderBytes.isNotEmpty) {
-      await tempThumbnailFile.writeAsBytes(fileInfo.imagePlaceholderBytes);
-    } else if (fileInfo.filePath != null) {
+    if (fileInfo.filePath != null) {
       await VideoThumbnail.thumbnailFile(
         video: fileInfo.filePath!,
         imageFormat: AppConfig.videoThumbnailFormat,

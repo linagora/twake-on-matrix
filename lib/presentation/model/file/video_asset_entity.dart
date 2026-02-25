@@ -1,15 +1,9 @@
-import 'dart:io';
 import 'dart:typed_data';
-import 'dart:ui';
 
-import 'package:fluffychat/presentation/extensions/file_extension.dart';
 import 'package:fluffychat/domain/model/file_info/file_info.dart';
 import 'package:fluffychat/domain/model/file_info/video_file_info.dart';
-import 'package:fluffychat/presentation/extensions/uint8list_extension.dart';
 import 'package:fluffychat/presentation/model/file/file_asset_entity.dart';
 import 'package:matrix/matrix.dart';
-import 'package:path_provider/path_provider.dart';
-import 'package:video_thumbnail/video_thumbnail.dart';
 
 class VideoAssetEntity extends FileAssetEntity {
   VideoAssetEntity({required super.assetEntity});
@@ -20,50 +14,10 @@ class VideoAssetEntity extends FileAssetEntity {
     if (file == null) {
       return null;
     }
-    final tempDir = await getTemporaryDirectory();
-    final thumbnailXFile = await VideoThumbnail.thumbnailFile(
-      video: file.path,
-      thumbnailPath: tempDir.path,
-    );
-    final thumbnailFile = File(thumbnailXFile.path);
-    final thumbnailBytes = await thumbnailFile.readAsBytes();
-    Size? thumbnailSize;
-    try {
-      thumbnailSize = await thumbnailFile.getImageDimensions();
-      await thumbnailFile.delete();
-    } catch (e, s) {
-      Logs().e('Unable to get thumbnail size or delete thumbnail file', e, s);
-    }
     return VideoFileInfo(
       file.path.split('/').last,
       filePath: file.path,
-      width: thumbnailSize?.width.toInt(),
-      height: thumbnailSize?.height.toInt(),
       duration: assetEntity.videoDuration,
-      imagePlaceholderBytes: thumbnailBytes,
-    );
-  }
-
-  @override
-  Future<MatrixFile?> toMatrixFile() async {
-    final file = await assetEntity.loadFile();
-    if (file == null) {
-      return null;
-    }
-    Size? thumbnailSize;
-    try {
-      final thumbnailDataToGetThumbnailSize =
-          await VideoThumbnail.thumbnailData(video: file.path);
-      thumbnailSize = await thumbnailDataToGetThumbnailSize.imageSize;
-    } catch (e, s) {
-      Logs().e('Unable to get thumbnail size', e, s);
-    }
-    return MatrixVideoFile(
-      name: file.path.split('/').last,
-      width: thumbnailSize?.width.toInt(),
-      height: thumbnailSize?.height.toInt(),
-      duration: assetEntity.videoDuration.inSeconds,
-      bytes: await file.readAsBytes(),
     );
   }
 
