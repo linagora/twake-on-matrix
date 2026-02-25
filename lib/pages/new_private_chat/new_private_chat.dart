@@ -65,7 +65,10 @@ class NewPrivateChatController extends State<NewPrivateChat>
     final roomId = Matrix.of(
       context,
     ).client.getDirectChatFromUserId(contact.matrixId!);
-    if (roomId == null) {
+    final room = roomId != null
+        ? Matrix.of(context).client.getRoomById(roomId)
+        : null;
+    if (roomId == null || room?.isAbandonedDMRoom == true) {
       goToDraftChat(
         context: context,
         path: 'rooms',

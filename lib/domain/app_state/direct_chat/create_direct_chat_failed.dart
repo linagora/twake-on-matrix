@@ -8,3 +8,10 @@ class CreateDirectChatFailed extends Failure {
   @override
   List<Object?> get props => [exception];
 }
+
+class NoPermissionForCreateChat extends Failure {
+  const NoPermissionForCreateChat();
+
+  @override
+  List<Object?> get props => [];
+}
