@@ -1745,8 +1745,8 @@ packages:
     dependency: "direct main"
     description:
       path: "."
-      ref: "hotfix/images-picker-grid-memory-leak"
-      resolved-ref: "6a324d4a847150272f974be30d049b31e5b0bc31"
+      ref: master
+      resolved-ref: c7a4a9f6fe1be9818010122b7761ba43020ed6f2
       url: "git@github.com:linagora/linagora-design-flutter.git"
     source: git
     version: "0.0.1"

@@ -332,7 +332,7 @@ dependency_overrides:
   linagora_design_flutter:
     git:
       url: git@github.com:linagora/linagora-design-flutter.git
-      ref: hotfix/images-picker-grid-memory-leak
+      ref: master
 
 cider:
   link_template:
