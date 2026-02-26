@@ -1745,8 +1745,8 @@ packages:
     dependency: "direct main"
     description:
       path: "."
-      ref: master
-      resolved-ref: "66d09a271f20243badd92352a8bb5866b430020d"
+      ref: "feat/update-cozy-external-bridge-setup"
+      resolved-ref: "4331015b1f10c4b2033493e756ebf86398185d8d"
       url: "git@github.com:linagora/linagora-design-flutter.git"
     source: git
     version: "0.0.1"
