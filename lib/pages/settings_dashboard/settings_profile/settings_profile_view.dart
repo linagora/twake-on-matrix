@@ -134,9 +134,12 @@ class SettingsProfileView extends StatelessWidget {
                           .getTrailingIcon(),
                       leadingIcon: controller.getListProfileMobile[index]
                           .getLeadingIcon(),
-                      focusNode: controller.getFocusNode(
-                        controller.getListProfileMobile[index],
-                      ),
+                      onEditRequested: () {
+                        final focusNode = controller.getFocusNode(
+                          controller.getListProfileMobile[index],
+                        );
+                        focusNode?.requestFocus();
+                      },
                       textEditingController: controller.getController(
                         controller.getListProfileMobile[index],
                       ),
@@ -192,9 +195,12 @@ class SettingsProfileView extends StatelessWidget {
                       ),
                       suffixIcon: controller.getListProfileBasicInfo[index]
                           .getTrailingIcon(),
-                      focusNode: controller.getFocusNode(
-                        controller.getListProfileBasicInfo[index],
-                      ),
+                      onEditRequested: () {
+                        final focusNode = controller.getFocusNode(
+                          controller.getListProfileBasicInfo[index],
+                        );
+                        focusNode?.requestFocus();
+                      },
                       textEditingController: controller.getController(
                         controller.getListProfileBasicInfo[index],
                       ),
@@ -229,9 +235,12 @@ class SettingsProfileView extends StatelessWidget {
                       suffixIcon: controller
                           .getListProfileWorkIdentitiesInfo[index]
                           .getTrailingIcon(),
-                      focusNode: controller.getFocusNode(
-                        controller.getListProfileWorkIdentitiesInfo[index],
-                      ),
+                      onEditRequested: () {
+                        final focusNode = controller.getFocusNode(
+                          controller.getListProfileWorkIdentitiesInfo[index],
+                        );
+                        focusNode?.requestFocus();
+                      },
                       textEditingController: controller.getController(
                         controller.getListProfileWorkIdentitiesInfo[index],
                       ),
@@ -248,7 +257,7 @@ class SettingsProfileView extends StatelessWidget {
                   separatorBuilder: (context, index) {
                     return const SizedBox(height: 16);
                   },
-                  itemCount: controller.getListProfileBasicInfo.length,
+                  itemCount: controller.getListProfileWorkIdentitiesInfo.length,
                 ),
                 canEditAvatar: capabilities?.canEditAvatar == true,
               );

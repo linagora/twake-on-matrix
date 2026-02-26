@@ -1,3 +1,5 @@
+import 'package:fluffychat/app_state/success.dart';
+import 'package:fluffychat/domain/app_state/user_info/get_user_info_state.dart';
 import 'package:fluffychat/pages/profile_info/profile_info_body/profile_info_body.dart';
 import 'package:fluffychat/pages/profile_info/profile_info_body/profile_info_body_view_style.dart';
 import 'package:fluffychat/pages/profile_info/profile_info_body/profile_info_contact_rows.dart';
@@ -43,7 +45,7 @@ class ProfileInfoBodyView extends StatelessWidget {
   Widget _buildMobileHeader(BuildContext context) {
     return ValueListenableBuilder(
       valueListenable: controller.isExpandedAvatar,
-      builder: (context, isExpanded, _) {
+      builder: (context, _, _) {
         return AnimatedBuilder(
           animation: controller.animationController,
           builder: (context, _) {
@@ -82,8 +84,14 @@ class ProfileInfoBodyView extends StatelessWidget {
     return ValueListenableBuilder(
       valueListenable: controller.userInfoNotifier,
       builder: (context, userInfo, _) {
-        final displayName = controller.user?.calcDisplayname() ?? '';
-        final avatarUrl = controller.user?.avatarUrl;
+        final userInfoData = userInfo.getSuccessOrNull<GetUserInfoSuccess>();
+        final displayName =
+            userInfoData?.userInfo.displayName ??
+            controller.user?.calcDisplayname() ??
+            '';
+        final avatarUrl =
+            Uri.tryParse(userInfoData?.userInfo.avatarUrl ?? '') ??
+            controller.user?.avatarUrl;
 
         return SecondaryAvatar(
           animationController: controller.animationController,

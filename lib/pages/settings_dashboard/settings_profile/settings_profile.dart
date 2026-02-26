@@ -72,6 +72,7 @@ class SettingsProfileController extends State<SettingsProfile>
   late final AnimationController animationController;
   static const int _animationDuration = 100;
   ValueNotifier<bool> isExpandedAvatar = ValueNotifier(false);
+  Timer? _avatarToggleTimer;
 
   final ValueNotifier<Profile?> currentProfile = ValueNotifier<Profile?>(null);
   AssetEntity? assetEntity;
@@ -639,28 +640,31 @@ class SettingsProfileController extends State<SettingsProfile>
   }
 
   void handleAvatarInfoTap() {
-    // Prevent rapid tapping during animation
-    if (animationController.isAnimating) {
+    // Prevent rapid tapping during animation or pending delayed toggle
+    if (animationController.isAnimating ||
+        (_avatarToggleTimer?.isActive ?? false)) {
       return;
     }
     if (animationController.isCompleted) {
       animationController.reverse();
-      Future.delayed(const Duration(milliseconds: _animationDuration)).then((
-        _,
-      ) {
-        if (mounted) {
-          isExpandedAvatar.value = false;
-        }
-      });
+      _avatarToggleTimer = Timer(
+        const Duration(milliseconds: _animationDuration),
+        () {
+          if (mounted) {
+            isExpandedAvatar.value = false;
+          }
+        },
+      );
     } else {
       isExpandedAvatar.value = true;
-      Future.delayed(const Duration(milliseconds: _animationDuration)).then((
-        _,
-      ) {
-        if (mounted) {
-          animationController.forward();
-        }
-      });
+      _avatarToggleTimer = Timer(
+        const Duration(milliseconds: _animationDuration),
+        () {
+          if (mounted) {
+            animationController.forward();
+          }
+        },
+      );
     }
   }
 
@@ -717,6 +721,7 @@ class SettingsProfileController extends State<SettingsProfile>
     displayNameFocusNode.dispose();
     isEditedProfileNotifier.dispose();
     settingsMultiAccountsUIState.dispose();
+    _avatarToggleTimer?.cancel();
     super.dispose();
   }
 

@@ -11,7 +11,6 @@ class SettingsProfileItemBuilder extends StatelessWidget {
   final String title;
   final SettingsProfilePresentation settingsProfilePresentation;
   final SettingsProfileEnum settingsProfileEnum;
-  final FocusNode? focusNode;
   final TextEditingController? textEditingController;
   final IconData suffixIcon;
   final IconData? leadingIcon;
@@ -20,13 +19,13 @@ class SettingsProfileItemBuilder extends StatelessWidget {
   final ValueNotifier<Either<Failure, Success>> settingsProfileUIState;
   final bool canEditDisplayName;
   final bool enableDivider;
+  final VoidCallback? onEditRequested;
 
   const SettingsProfileItemBuilder({
     super.key,
     required this.settingsProfileEnum,
     required this.title,
     required this.settingsProfilePresentation,
-    this.focusNode,
     this.textEditingController,
     required this.suffixIcon,
     this.leadingIcon,
@@ -35,6 +34,7 @@ class SettingsProfileItemBuilder extends StatelessWidget {
     required this.settingsProfileUIState,
     required this.canEditDisplayName,
     this.enableDivider = true,
+    this.onEditRequested,
   });
 
   @override
@@ -80,7 +80,7 @@ class SettingsProfileItemBuilder extends StatelessWidget {
             if (hasSuffixIcon)
               IconButton(
                 onPressed: settingsProfilePresentation.isEditable
-                    ? focusNode?.requestFocus
+                    ? onEditRequested
                     : onCopyAction,
                 icon: Icon(
                   suffixIcon,

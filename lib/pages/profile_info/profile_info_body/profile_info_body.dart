@@ -69,6 +69,8 @@ class ProfileInfoBodyController extends State<ProfileInfoBody>
 
   final ValueNotifier<bool> isExpandedAvatar = ValueNotifier<bool>(false);
 
+  Timer? _avatarToggleTimer;
+
   static const int _animationDuration = 100;
 
   User? get user => widget.user;
@@ -292,29 +294,32 @@ class ProfileInfoBodyController extends State<ProfileInfoBody>
       return;
     }
     // Prevent rapid tapping during animation
-    if (animationController.isAnimating) {
+    if (animationController.isAnimating ||
+        (_avatarToggleTimer?.isActive ?? false)) {
       return;
     }
     if (animationController.isCompleted) {
       animationController.reverse();
-      Future.delayed(const Duration(milliseconds: _animationDuration)).then((
-        _,
-      ) {
-        if (mounted) {
-          isExpandedAvatar.value = false;
-        }
-      });
+      _avatarToggleTimer = Timer(
+        const Duration(milliseconds: _animationDuration),
+        () {
+          if (mounted) {
+            isExpandedAvatar.value = false;
+          }
+        },
+      );
     } else {
       if (mounted) {
         isExpandedAvatar.value = true;
       }
-      Future.delayed(const Duration(milliseconds: _animationDuration)).then((
-        _,
-      ) {
-        if (mounted) {
-          animationController.forward();
-        }
-      });
+      _avatarToggleTimer = Timer(
+        const Duration(milliseconds: _animationDuration),
+        () {
+          if (mounted) {
+            animationController.forward();
+          }
+        },
+      );
     }
   }
 
@@ -335,6 +340,7 @@ class ProfileInfoBodyController extends State<ProfileInfoBody>
     userInfoNotifier.dispose();
     userInfoNotifierSub?.cancel();
     _setPermissionLevelSubscription?.cancel();
+    _avatarToggleTimer?.cancel();
     super.dispose();
   }
 
