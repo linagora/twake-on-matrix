@@ -143,9 +143,6 @@ class SettingsProfileView extends StatelessWidget {
                       textEditingController: controller.getController(
                         controller.getListProfileMobile[index],
                       ),
-                      onChange: (_, settingsProfileEnum) {
-                        controller.handleTextEditOnChange(settingsProfileEnum);
-                      },
                       onCopyAction: () => controller.copyEventsAction(
                         controller.getListProfileMobile[index],
                       ),
@@ -204,9 +201,6 @@ class SettingsProfileView extends StatelessWidget {
                       textEditingController: controller.getController(
                         controller.getListProfileBasicInfo[index],
                       ),
-                      onChange: (_, settingsProfileEnum) {
-                        controller.handleTextEditOnChange(settingsProfileEnum);
-                      },
                       canEditDisplayName:
                           capabilities?.canEditDisplayName == true,
                     );
@@ -244,9 +238,6 @@ class SettingsProfileView extends StatelessWidget {
                       textEditingController: controller.getController(
                         controller.getListProfileWorkIdentitiesInfo[index],
                       ),
-                      onChange: (_, settingsProfileEnum) {
-                        controller.handleTextEditOnChange(settingsProfileEnum);
-                      },
                       onCopyAction: () => controller.copyEventsAction(
                         controller.getListProfileWorkIdentitiesInfo[index],
                       ),

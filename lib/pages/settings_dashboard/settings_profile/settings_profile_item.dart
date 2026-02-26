@@ -14,7 +14,6 @@ class SettingsProfileItemBuilder extends StatelessWidget {
   final TextEditingController? textEditingController;
   final IconData suffixIcon;
   final IconData? leadingIcon;
-  final void Function(String, SettingsProfileEnum)? onChange;
   final VoidCallback? onCopyAction;
   final ValueNotifier<Either<Failure, Success>> settingsProfileUIState;
   final bool canEditDisplayName;
@@ -29,7 +28,6 @@ class SettingsProfileItemBuilder extends StatelessWidget {
     this.textEditingController,
     required this.suffixIcon,
     this.leadingIcon,
-    this.onChange,
     this.onCopyAction,
     required this.settingsProfileUIState,
     required this.canEditDisplayName,
@@ -43,14 +41,15 @@ class SettingsProfileItemBuilder extends StatelessWidget {
       children: [
         Row(
           children: [
-            Padding(
-              padding: SettingsProfileItemStyle.itemBuilderPadding,
-              child: Icon(
-                leadingIcon,
-                size: SettingsProfileItemStyle.iconSize,
-                color: LinagoraSysColors.material().tertiary,
+            if (leadingIcon != null)
+              Padding(
+                padding: SettingsProfileItemStyle.itemBuilderPadding,
+                child: Icon(
+                  leadingIcon,
+                  size: SettingsProfileItemStyle.iconSize,
+                  color: LinagoraSysColors.material().tertiary,
+                ),
               ),
-            ),
             Expanded(
               child: Padding(
                 padding: SettingsProfileItemStyle.textPadding,
@@ -109,15 +108,6 @@ class SettingsProfileItemBuilder extends StatelessWidget {
           ),
       ],
     );
-  }
-
-  bool get isReadOnly {
-    if (!settingsProfilePresentation.isEditable) return true;
-
-    return switch (settingsProfileEnum) {
-      SettingsProfileEnum.displayName => !canEditDisplayName,
-      _ => false,
-    };
   }
 
   bool get hasSuffixIcon {

@@ -485,28 +485,6 @@ class SettingsProfileController extends State<SettingsProfile>
     matrixIdEditingController.text = client.mxid(context);
   }
 
-  void handleTextEditOnChange(SettingsProfileEnum settingsProfileEnum) {
-    switch (settingsProfileEnum) {
-      case SettingsProfileEnum.displayName:
-        _listeningDisplayNameHasChange();
-        break;
-      default:
-        break;
-    }
-  }
-
-  void _listeningDisplayNameHasChange() {
-    if (displayNameEditingController.text.isEmpty) {
-      isEditedProfileNotifier.value = false;
-      return;
-    }
-    isEditedProfileNotifier.value =
-        displayNameEditingController.text != displayName;
-    Logs().d(
-      'SettingsProfileController::_listeningDisplayNameHasChange() - ${isEditedProfileNotifier.value}',
-    );
-  }
-
   void copyEventsAction(SettingsProfileEnum settingsProfileEnum) {
     switch (settingsProfileEnum) {
       case SettingsProfileEnum.matrixId:
