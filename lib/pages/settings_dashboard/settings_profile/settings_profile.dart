@@ -648,6 +648,7 @@ class SettingsProfileController extends State<SettingsProfile>
 
   @override
   void initState() {
+    super.initState();
     animationController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: _animationDuration),
@@ -659,7 +660,6 @@ class SettingsProfileController extends State<SettingsProfile>
       updateNewProfileForAccount();
       _getMultipleAccounts(client);
     });
-    super.initState();
   }
 
   void updateNewProfileForAccount() {

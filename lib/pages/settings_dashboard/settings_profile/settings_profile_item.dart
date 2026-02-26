@@ -81,7 +81,7 @@ class SettingsProfileItemBuilder extends StatelessWidget {
             if (hasSuffixIcon)
               IconButton(
                 onPressed: settingsProfilePresentation.isEditable
-                    ? onEditRequested
+                    ? onEditRequested ?? () {}
                     : onCopyAction,
                 icon: Icon(
                   suffixIcon,
