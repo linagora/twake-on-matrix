@@ -328,12 +328,6 @@ dependency_overrides:
       url: https://github.com/linagora/overflow_view.git
       ref: master
 
-  # TODO: Remove when https://github.com/linagora/linagora-design-flutter/pull/68 is merged
-  linagora_design_flutter:
-    git:
-      url: git@github.com:linagora/linagora-design-flutter.git
-      ref: master
-
 cider:
   link_template:
     tag: https://github.com/linagora/twake-on-matrix/releases/tag/%tag% # initial release link template
