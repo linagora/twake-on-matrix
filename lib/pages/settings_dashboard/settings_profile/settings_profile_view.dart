@@ -124,7 +124,6 @@ class SettingsProfileView extends StatelessWidget {
                       title: controller.getListProfileMobile[index].getTitle(
                         context,
                       ),
-                      settingsProfileUIState: controller.pickAvatarUIState,
                       settingsProfilePresentation: SettingsProfilePresentation(
                         settingsProfileType: controller
                             .getListProfileMobile[index]
@@ -179,7 +178,6 @@ class SettingsProfileView extends StatelessWidget {
                   physics: const NeverScrollableScrollPhysics(),
                   itemBuilder: (context, index) {
                     return SettingsProfileItemBuilder(
-                      settingsProfileUIState: controller.pickAvatarUIState,
                       settingsProfileEnum:
                           controller.getListProfileBasicInfo[index],
                       title: controller.getListProfileBasicInfo[index].getTitle(
@@ -216,7 +214,6 @@ class SettingsProfileView extends StatelessWidget {
                   physics: const NeverScrollableScrollPhysics(),
                   itemBuilder: (context, index) {
                     return SettingsProfileItemBuilder(
-                      settingsProfileUIState: controller.pickAvatarUIState,
                       settingsProfileEnum:
                           controller.getListProfileWorkIdentitiesInfo[index],
                       title: controller.getListProfileWorkIdentitiesInfo[index]

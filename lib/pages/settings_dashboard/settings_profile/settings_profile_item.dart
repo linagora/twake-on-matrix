@@ -1,6 +1,3 @@
-import 'package:dartz/dartz.dart';
-import 'package:fluffychat/app_state/failure.dart';
-import 'package:fluffychat/app_state/success.dart';
 import 'package:fluffychat/pages/settings_dashboard/settings_profile/settings_profile_item_style.dart';
 import 'package:fluffychat/presentation/enum/settings/settings_profile_enum.dart';
 import 'package:fluffychat/presentation/model/settings/settings_profile_presentation.dart';
@@ -15,7 +12,6 @@ class SettingsProfileItemBuilder extends StatelessWidget {
   final IconData suffixIcon;
   final IconData? leadingIcon;
   final VoidCallback? onCopyAction;
-  final ValueNotifier<Either<Failure, Success>> settingsProfileUIState;
   final bool canEditDisplayName;
   final bool enableDivider;
   final VoidCallback? onEditRequested;
@@ -29,7 +25,6 @@ class SettingsProfileItemBuilder extends StatelessWidget {
     required this.suffixIcon,
     this.leadingIcon,
     this.onCopyAction,
-    required this.settingsProfileUIState,
     required this.canEditDisplayName,
     this.enableDivider = true,
     this.onEditRequested,
