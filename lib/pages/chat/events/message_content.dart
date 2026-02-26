@@ -414,9 +414,12 @@ class _MessageVideoBuilder extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    DisplayImageInfo? displayImageInfo = event
-        .getOriginalResolution()
-        ?.getDisplayImageInfo(context);
+    DisplayImageInfo? displayImageInfo =
+        event.getOriginalResolution()?.getDisplayImageInfo(context) ??
+        Size(
+          MessageContentStyle.imageWidth(context),
+          MessageContentStyle.imageHeight(context),
+        ).getDisplayImageInfo(context);
 
     if (isSendingVideo()) {
       displayImageInfo = Size(
@@ -431,16 +434,8 @@ class _MessageVideoBuilder extends StatelessWidget {
       );
     }
 
-    displayImageInfo ??= DisplayImageInfo(
-      size: Size(
-        MessageContentStyle.imageWidth(context),
-        MessageContentStyle.imageHeight(context),
-      ),
-      hasBlur: true,
-    );
-
     if (PlatformInfos.isWeb) {
-      if (event.isSending()) {
+      if (event.status == EventStatus.error) {
         return MessageVideoUploadContent(
           event: event,
           width: displayImageInfo.size.width,
