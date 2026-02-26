@@ -325,12 +325,12 @@ class ProfileInfoBodyController extends State<ProfileInfoBody>
 
   @override
   void initState() {
+    super.initState();
     animationController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: _animationDuration),
     );
     getUserInfoAction();
-    super.initState();
   }
 
   @override
