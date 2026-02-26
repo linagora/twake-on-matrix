@@ -89,10 +89,10 @@ class ProfileInfoBodyView extends StatelessWidget {
             userInfoData?.userInfo.displayName ??
             controller.user?.calcDisplayname() ??
             '';
-        final avatarUrl =
-            Uri.tryParse(userInfoData?.userInfo.avatarUrl ?? '') ??
-            controller.user?.avatarUrl;
-
+        final rawAvatarUrl = userInfoData?.userInfo.avatarUrl;
+        final avatarUrl = (rawAvatarUrl == null || rawAvatarUrl.isEmpty)
+            ? controller.user?.avatarUrl
+            : (Uri.tryParse(rawAvatarUrl) ?? controller.user?.avatarUrl);
         return SecondaryAvatar(
           animationController: controller.animationController,
           mxContent: avatarUrl,

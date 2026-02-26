@@ -65,14 +65,21 @@ class SettingsProfileItemBuilder extends StatelessWidget {
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
-                    Text(
-                      textEditingController?.text ?? '',
-                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                        color: LinagoraSysColors.material().onSurface,
+                    if (textEditingController != null)
+                      ValueListenableBuilder<TextEditingValue>(
+                        valueListenable: textEditingController!,
+                        builder: (context, value, _) {
+                          return Text(
+                            value.text,
+                            style: Theme.of(context).textTheme.bodyLarge
+                                ?.copyWith(
+                                  color: LinagoraSysColors.material().onSurface,
+                                ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          );
+                        },
                       ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
                   ],
                 ),
               ),
