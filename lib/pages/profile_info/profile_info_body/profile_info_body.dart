@@ -18,6 +18,7 @@ import 'package:fluffychat/presentation/model/search/presentation_search.dart';
 import 'package:fluffychat/utils/dialog/twake_dialog.dart';
 import 'package:fluffychat/utils/dialog/warning_dialog.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
+import 'package:fluffychat/utils/responsive/responsive_utils.dart';
 import 'package:fluffychat/utils/twake_snackbar.dart';
 import 'package:fluffychat/utils/user_extension.dart';
 import 'package:fluffychat/widgets/matrix.dart';
@@ -48,11 +49,14 @@ class ProfileInfoBody extends StatefulWidget {
   State<ProfileInfoBody> createState() => ProfileInfoBodyController();
 }
 
-class ProfileInfoBodyController extends State<ProfileInfoBody> {
+class ProfileInfoBodyController extends State<ProfileInfoBody>
+    with SingleTickerProviderStateMixin {
   final _getUserInfoInteractor = getIt.get<GetUserInfoInteractor>();
 
   final _setPermissionLevelInteractor = getIt
       .get<SetPermissionLevelInteractor>();
+
+  final responsive = getIt.get<ResponsiveUtils>();
 
   StreamSubscription? _setPermissionLevelSubscription;
 
@@ -60,6 +64,14 @@ class ProfileInfoBodyController extends State<ProfileInfoBody> {
 
   final ValueNotifier<Either<Failure, Success>> userInfoNotifier =
       ValueNotifier<Either<Failure, Success>>(Right(GettingUserInfo()));
+
+  late AnimationController animationController;
+
+  final ValueNotifier<bool> isExpandedAvatar = ValueNotifier<bool>(false);
+
+  Timer? _avatarToggleTimer;
+
+  static const int _animationDuration = 100;
 
   User? get user => widget.user;
 
@@ -277,17 +289,58 @@ class ProfileInfoBodyController extends State<ProfileInfoBody> {
     );
   }
 
+  void onAvatarInfoTap() {
+    if (!responsive.isMobile(context)) {
+      return;
+    }
+    // Prevent rapid tapping during animation
+    if (animationController.isAnimating ||
+        (_avatarToggleTimer?.isActive ?? false)) {
+      return;
+    }
+    if (animationController.isCompleted) {
+      animationController.reverse();
+      _avatarToggleTimer = Timer(
+        const Duration(milliseconds: _animationDuration),
+        () {
+          if (mounted) {
+            isExpandedAvatar.value = false;
+          }
+        },
+      );
+    } else {
+      if (mounted) {
+        isExpandedAvatar.value = true;
+      }
+      _avatarToggleTimer = Timer(
+        const Duration(milliseconds: _animationDuration),
+        () {
+          if (mounted) {
+            animationController.forward();
+          }
+        },
+      );
+    }
+  }
+
   @override
   void initState() {
-    getUserInfoAction();
     super.initState();
+    animationController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: _animationDuration),
+    );
+    getUserInfoAction();
   }
 
   @override
   void dispose() {
+    animationController.dispose();
+    isExpandedAvatar.dispose();
     userInfoNotifier.dispose();
     userInfoNotifierSub?.cancel();
     _setPermissionLevelSubscription?.cancel();
+    _avatarToggleTimer?.cancel();
     super.dispose();
   }
 

@@ -60,13 +60,19 @@ class SettingsProfileController extends State<SettingsProfile>
         PopupContextMenuActionMixin,
         PopupMenuWidgetMixin,
         OnProfileChangeMixin,
-        PickAvatarMixin {
+        PickAvatarMixin,
+        SingleTickerProviderStateMixin {
   final uploadProfileInteractor = getIt.get<UpdateProfileInteractor>();
   final uploadContentInteractor = getIt.get<UploadContentInteractor>();
   final uploadContentWebInteractor = getIt
       .get<UploadContentInBytesInteractor>();
 
   final MenuController menuController = MenuController();
+
+  late final AnimationController animationController;
+  static const int _animationDuration = 100;
+  ValueNotifier<bool> isExpandedAvatar = ValueNotifier(false);
+  Timer? _avatarToggleTimer;
 
   final ValueNotifier<Profile?> currentProfile = ValueNotifier<Profile?>(null);
   AssetEntity? assetEntity;
@@ -479,28 +485,6 @@ class SettingsProfileController extends State<SettingsProfile>
     matrixIdEditingController.text = client.mxid(context);
   }
 
-  void handleTextEditOnChange(SettingsProfileEnum settingsProfileEnum) {
-    switch (settingsProfileEnum) {
-      case SettingsProfileEnum.displayName:
-        _listeningDisplayNameHasChange();
-        break;
-      default:
-        break;
-    }
-  }
-
-  void _listeningDisplayNameHasChange() {
-    if (displayNameEditingController.text.isEmpty) {
-      isEditedProfileNotifier.value = false;
-      return;
-    }
-    isEditedProfileNotifier.value =
-        displayNameEditingController.text != displayName;
-    Logs().d(
-      'SettingsProfileController::_listeningDisplayNameHasChange() - ${isEditedProfileNotifier.value}',
-    );
-  }
-
   void copyEventsAction(SettingsProfileEnum settingsProfileEnum) {
     switch (settingsProfileEnum) {
       case SettingsProfileEnum.matrixId:
@@ -633,8 +617,42 @@ class SettingsProfileController extends State<SettingsProfile>
     }
   }
 
+  void handleAvatarInfoTap() {
+    // Prevent rapid tapping during animation or pending delayed toggle
+    if (animationController.isAnimating ||
+        (_avatarToggleTimer?.isActive ?? false)) {
+      return;
+    }
+    if (animationController.isCompleted) {
+      animationController.reverse();
+      _avatarToggleTimer = Timer(
+        const Duration(milliseconds: _animationDuration),
+        () {
+          if (mounted) {
+            isExpandedAvatar.value = false;
+          }
+        },
+      );
+    } else {
+      isExpandedAvatar.value = true;
+      _avatarToggleTimer = Timer(
+        const Duration(milliseconds: _animationDuration),
+        () {
+          if (mounted) {
+            animationController.forward();
+          }
+        },
+      );
+    }
+  }
+
   @override
   void initState() {
+    super.initState();
+    animationController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: _animationDuration),
+    );
     _handleViewState();
     _getCurrentProfile(client);
     listenToPickAvatarUIState(context);
@@ -642,7 +660,6 @@ class SettingsProfileController extends State<SettingsProfile>
       updateNewProfileForAccount();
       _getMultipleAccounts(client);
     });
-    super.initState();
   }
 
   void updateNewProfileForAccount() {
@@ -670,6 +687,8 @@ class SettingsProfileController extends State<SettingsProfile>
 
   @override
   void dispose() {
+    animationController.dispose();
+    isExpandedAvatar.dispose();
     _clearImageInLocal();
     _clearImageInMemory();
     disposePickAvatarMixin();
@@ -680,6 +699,7 @@ class SettingsProfileController extends State<SettingsProfile>
     displayNameFocusNode.dispose();
     isEditedProfileNotifier.dispose();
     settingsMultiAccountsUIState.dispose();
+    _avatarToggleTimer?.cancel();
     super.dispose();
   }
 
