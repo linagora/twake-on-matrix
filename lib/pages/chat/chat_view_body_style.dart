@@ -1,8 +1,8 @@
 import 'package:fluffychat/config/themes.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
+import 'package:fluffychat/resource/image_paths.dart';
 import 'package:fluffychat/utils/responsive/responsive_utils.dart';
 import 'package:flutter/material.dart';
-import 'package:linagora_design_flutter/colors/linagora_sys_colors.dart';
 
 class ChatViewBodyStyle {
   static ResponsiveUtils responsive = getIt.get<ResponsiveUtils>();
@@ -16,10 +16,9 @@ class ChatViewBodyStyle {
 
   static double blockedUserBannerHeight = 40.0;
 
-  static Color chatViewBackgroundColor(BuildContext context) =>
-      responsive.isMobile(context)
-      ? LinagoraSysColors.material().background
-      : LinagoraSysColors.material().onPrimary;
+  static const Color backgroundColor = Color(0xFFF4EFE8);
+
+  static String get imageBackground => ImagePaths.chatBackground;
 
   static EdgeInsets inputBarPadding(BuildContext context) =>
       EdgeInsets.symmetric(

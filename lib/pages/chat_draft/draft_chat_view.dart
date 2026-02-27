@@ -6,6 +6,7 @@ import 'package:fluffychat/pages/chat/blocked_message_view.dart';
 import 'package:fluffychat/pages/chat/blocked_user_banner.dart';
 import 'package:fluffychat/pages/chat/chat.dart';
 import 'package:fluffychat/pages/chat/chat_app_bar_title_style.dart';
+import 'package:fluffychat/pages/chat/chat_background.dart';
 import 'package:fluffychat/pages/chat/chat_view_body_style.dart';
 import 'package:fluffychat/pages/chat/chat_view_style.dart';
 import 'package:fluffychat/pages/chat_draft/draft_chat.dart';
@@ -87,19 +88,12 @@ class DraftChatView extends StatelessWidget {
               ),
             ),
           ),
-          body: Container(
-            color: DraftChatViewStyle.responsive.isMobile(context)
-                ? LinagoraSysColors.material().surface
-                : Colors.transparent,
-            child:
-                AndroidUtils.isNavigationButtonsEnabled(
-                  systemGestureInsets: MediaQuery.systemGestureInsetsOf(
-                    context,
-                  ),
-                )
-                ? SafeArea(child: _chatViewBody(context))
-                : _chatViewBody(context),
-          ),
+          body:
+              AndroidUtils.isNavigationButtonsEnabled(
+                systemGestureInsets: MediaQuery.systemGestureInsetsOf(context),
+              )
+              ? SafeArea(child: _chatViewBody(context))
+              : _chatViewBody(context),
         ),
       ),
     );
@@ -109,20 +103,17 @@ class DraftChatView extends StatelessWidget {
     return Center(
       child: Stack(
         children: [
+          const ChatBackground(),
           Column(
             children: [
               Expanded(
-                child: Container(
-                  color: ChatViewBodyStyle.chatViewBackgroundColor(context),
-                  child: Center(
-                    child: DropTarget(
-                      onDragDone: (details) =>
-                          controller.handleDragDone(details),
-                      onDragEntered: controller.onDragEntered,
-                      onDragExited: controller.onDragExited,
-                      child: DraftChatEmpty(
-                        onTap: () => controller.handleDraftAction(context),
-                      ),
+                child: Center(
+                  child: DropTarget(
+                    onDragDone: (details) => controller.handleDragDone(details),
+                    onDragEntered: controller.onDragEntered,
+                    onDragExited: controller.onDragExited,
+                    child: DraftChatEmpty(
+                      onTap: () => controller.handleDraftAction(context),
                     ),
                   ),
                 ),

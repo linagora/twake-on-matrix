@@ -56,7 +56,11 @@ class CoreRobot {
     if (!tapped) {
       return;
     }
-    await $.native.denyPermission();
+    if (await $.native.isPermissionDialogVisible(
+      timeout: const Duration(seconds: 5),
+    )) {
+      await $.native.denyPermission();
+    }
   }
 
   Future<void> grantNotificationPermission() async {

@@ -6,6 +6,7 @@ import 'package:fluffychat/pages/chat/blocked_message_view.dart';
 import 'package:fluffychat/pages/chat/blocked_user_banner.dart';
 import 'package:fluffychat/pages/chat/chat.dart';
 import 'package:fluffychat/pages/chat/chat_audio_player_widget.dart';
+import 'package:fluffychat/pages/chat/chat_background.dart';
 import 'package:fluffychat/pages/chat/chat_event_list.dart';
 import 'package:fluffychat/pages/chat/chat_loading_view.dart';
 import 'package:fluffychat/pages/chat/chat_view_body_style.dart';
@@ -48,6 +49,7 @@ class ChatViewBody extends StatelessWidget with MessageContentMixin {
             : null,
         child: Stack(
           children: <Widget>[
+            const ChatBackground(),
             if (Matrix.of(context).wallpaper != null)
               Image.file(
                 Matrix.of(context).wallpaper!,
@@ -66,28 +68,23 @@ class ChatViewBody extends StatelessWidget with MessageContentMixin {
                         height: ChatViewStyle.pinnedMessageHintHeight,
                       ),
                     Expanded(
-                      child: Container(
-                        color: ChatViewBodyStyle.chatViewBackgroundColor(
-                          context,
-                        ),
-                        child: GestureDetector(
-                          onTap: controller.clearSingleSelectedEvent,
-                          child: ValueListenableBuilder(
-                            valueListenable:
-                                controller.openingChatViewStateNotifier,
-                            builder: (context, viewState, __) {
-                              if (viewState is ViewEventListLoading ||
-                                  controller.timeline == null) {
-                                return const ChatLoadingView();
-                              }
+                      child: GestureDetector(
+                        onTap: controller.clearSingleSelectedEvent,
+                        child: ValueListenableBuilder(
+                          valueListenable:
+                              controller.openingChatViewStateNotifier,
+                          builder: (context, viewState, __) {
+                            if (viewState is ViewEventListLoading ||
+                                controller.timeline == null) {
+                              return const ChatLoadingView();
+                            }
 
-                              if (viewState is ViewEventListSuccess) {
-                                return ChatEventList(controller: controller);
-                              }
+                            if (viewState is ViewEventListSuccess) {
+                              return ChatEventList(controller: controller);
+                            }
 
-                              return const SizedBox.shrink();
-                            },
-                          ),
+                            return const SizedBox.shrink();
+                          },
                         ),
                       ),
                     ),
@@ -338,7 +335,7 @@ class ChatViewBody extends StatelessWidget with MessageContentMixin {
                 ),
               ),
             )
-          : null,
+          : const BoxDecoration(color: Colors.transparent),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
