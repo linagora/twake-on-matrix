@@ -1,5 +1,6 @@
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/domain/model/capabilities/capabilities_extension.dart';
+import 'package:fluffychat/domain/model/user_info/user_info.dart';
 import 'package:fluffychat/pages/settings_dashboard/settings_profile/settings_profile.dart';
 import 'package:fluffychat/pages/settings_dashboard/settings_profile/settings_profile_item.dart';
 import 'package:fluffychat/pages/settings_dashboard/settings_profile/settings_profile_redirection_edit_button.dart';
@@ -21,6 +22,7 @@ import 'package:matrix/matrix.dart';
 class SettingsProfileView extends StatelessWidget {
   final SettingsProfileController controller;
   final Capabilities? capabilities;
+  final UserInfo? userInfo;
 
   static const ValueKey settingsProfileViewMobileKey = ValueKey(
     'settingsProfileViewMobile',
@@ -34,6 +36,7 @@ class SettingsProfileView extends StatelessWidget {
     super.key,
     required this.controller,
     required this.capabilities,
+    required this.userInfo,
   });
 
   @override
@@ -64,6 +67,7 @@ class SettingsProfileView extends StatelessWidget {
               if (!edited) {
                 return SettingsProfileRedirectionEditButton(
                   capabilities: capabilities,
+                  userInfo: userInfo,
                 );
               }
               return Padding(
