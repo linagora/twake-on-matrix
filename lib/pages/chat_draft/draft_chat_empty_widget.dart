@@ -3,7 +3,6 @@ import 'package:fluffychat/resource/image_paths.dart';
 import 'package:flutter/material.dart';
 import 'package:fluffychat/generated/l10n/app_localizations.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 
 class DraftChatEmpty extends StatelessWidget {
   final void Function()? onTap;
@@ -17,7 +16,9 @@ class DraftChatEmpty extends StatelessWidget {
       onTap: onTap,
       child: Container(
         padding: const EdgeInsets.all(32),
-        constraints: const BoxConstraints(maxWidth: 286),
+        constraints: BoxConstraints(
+          maxWidth: DraftChatEmptyWidgetStyle.maxWidth(context),
+        ),
         decoration: BoxDecoration(
           color: DraftChatEmptyWidgetStyle.greetingButtonBackground,
           borderRadius: BorderRadius.circular(16),
@@ -26,21 +27,22 @@ class DraftChatEmpty extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.center,
           mainAxisSize: MainAxisSize.min,
           children: [
-            SvgPicture.asset(ImagePaths.mascotDraftChat),
+            SvgPicture.asset(
+              ImagePaths.mascotNewChat,
+              width: DraftChatEmptyWidgetStyle.iconSize(context),
+              height: DraftChatEmptyWidgetStyle.iconSize(context),
+            ),
             const SizedBox(height: 8),
             Text(
               L10n.of(context)!.sendMessageGuide,
               textAlign: TextAlign.center,
-              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                color: LinagoraRefColors.material().tertiary[20],
-              ),
+              style: DraftChatEmptyWidgetStyle.subTitleStyle(context),
             ),
             const SizedBox(height: 8),
             Text(
               L10n.of(context)!.noMessageHereYet,
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                color: LinagoraSysColors.material().onSurface,
-              ),
+              style: DraftChatEmptyWidgetStyle.titleStyle(context),
+              textAlign: TextAlign.center,
             ),
           ],
         ),

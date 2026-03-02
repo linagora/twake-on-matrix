@@ -3,16 +3,11 @@ import 'package:fluffychat/utils/responsive/responsive_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 
-class DraftChatEmptyWidgetStyle {
+class GroupChatEmptyViewStyle {
   static final ResponsiveUtils responsiveUtils = getIt.get<ResponsiveUtils>();
-
-  static final Color greetingButtonBackground = LinagoraSysColors.material()
-      .onPrimary
-      .withOpacity(0.5);
 
   static const double _mobileIconSize = 140;
   static const double _nonMobileIconSize = 180;
-  static const double _mobileMaxWidth = 330;
   static const double _nonMobileMaxWidth = 442;
 
   static double iconSize(BuildContext context) {
@@ -35,7 +30,7 @@ class DraftChatEmptyWidgetStyle {
     }
   }
 
-  static TextStyle? subTitleStyle(BuildContext context) {
+  static TextStyle? ruleStyle(BuildContext context) {
     if (responsiveUtils.isMobile(context)) {
       return Theme.of(context).textTheme.labelLarge?.copyWith(
         color: LinagoraRefColors.material().tertiary[20],
@@ -47,11 +42,21 @@ class DraftChatEmptyWidgetStyle {
     }
   }
 
+  static EdgeInsetsGeometry rulePadding(BuildContext context) {
+    if (responsiveUtils.isMobile(context)) {
+      return const EdgeInsets.symmetric(horizontal: 12);
+    } else {
+      return const EdgeInsets.symmetric(horizontal: 80);
+    }
+  }
+
   static double maxWidth(BuildContext context) {
     if (responsiveUtils.isMobile(context)) {
-      return _mobileMaxWidth;
+      return minWidth;
     } else {
       return _nonMobileMaxWidth;
     }
   }
+
+  static const double minWidth = 330;
 }
