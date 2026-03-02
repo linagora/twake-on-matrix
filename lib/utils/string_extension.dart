@@ -385,6 +385,20 @@ extension StringCasingExtension on String {
   bool isPhoneNumberFormatted() {
     return RegExp(r'^\+?$|^\+?\d+$').hasMatch(replaceAll(' ', ''));
   }
+
+  String get msgTypeFromMime {
+    final mime = trim().toLowerCase();
+    if (mime.startsWith('image/')) {
+      return MessageTypes.Image;
+    }
+    if (mime.startsWith('video/')) {
+      return MessageTypes.Video;
+    }
+    if (mime.startsWith('audio/')) {
+      return MessageTypes.Audio;
+    }
+    return MessageTypes.File;
+  }
 }
 
 extension ListStringExtension on List<String> {
