@@ -3624,5 +3624,11 @@
   "startedKeyVerification": "🔐 {senderName} начал(а) проверку ключа",
   "@startedKeyVerification": {},
   "voiceMessageWithDuration": "🎤 Голосовое сообщение ({duration})",
-  "@voiceMessageWithDuration": {}
+  "@voiceMessageWithDuration": {},
+  "tapToRetry": "Нажмите, чтобы повторить",
+  "@tapToRetry": {},
+  "fileNoLongerExists": "Файл больше не существует",
+  "@fileNoLongerExists": {},
+  "cannotInviteBannedMember": "Этот пользователь был удалён администратором. Измените статус в разделе \"Удалённые пользователи\", чтобы продолжить",
+  "@cannotInviteBannedMember": {}
 }

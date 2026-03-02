@@ -3606,5 +3606,11 @@
   "startedKeyVerification": "🔐 {senderName} đã bắt đầu xác minh khóa",
   "@startedKeyVerification": {},
   "voiceMessageWithDuration": "🎤 Tin nhắn thoại ({duration})",
-  "@voiceMessageWithDuration": {}
+  "@voiceMessageWithDuration": {},
+  "tapToRetry": "Nhấn để thử lại",
+  "@tapToRetry": {},
+  "fileNoLongerExists": "Tệp không còn tồn tại",
+  "@fileNoLongerExists": {},
+  "cannotInviteBannedMember": "Người dùng này đã bị xóa bởi quản trị viên. Thay đổi trạng thái trong \"Người dùng bị xóa\" để tiếp tục",
+  "@cannotInviteBannedMember": {}
 }

@@ -3621,5 +3621,11 @@
   "startedKeyVerification": "🔐 {senderName} a démarré la vérification de clé",
   "@startedKeyVerification": {},
   "voiceMessageWithDuration": "🎤 Message vocal ({duration})",
-  "@voiceMessageWithDuration": {}
+  "@voiceMessageWithDuration": {},
+  "tapToRetry": "Appuyer pour réessayer",
+  "@tapToRetry": {},
+  "fileNoLongerExists": "Le fichier n'existe plus",
+  "@fileNoLongerExists": {},
+  "cannotInviteBannedMember": "Cet utilisateur a été supprimé par un administrateur. Modifiez le statut dans \"Utilisateurs supprimés\" pour continuer",
+  "@cannotInviteBannedMember": {}
 }
