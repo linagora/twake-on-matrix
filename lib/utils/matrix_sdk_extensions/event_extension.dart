@@ -3,7 +3,7 @@ import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/domain/model/extensions/string_extension.dart';
 import 'package:fluffychat/domain/model/room/room_extension.dart';
 import 'package:fluffychat/pages/chat/events/message_reactions.dart';
-import 'package:fluffychat/presentation/extensions/send_file_web_extension.dart';
+import 'package:fluffychat/presentation/extensions/media_thumbnail_extension.dart';
 import 'package:fluffychat/utils/clipboard.dart';
 import 'package:fluffychat/utils/dialog/twake_dialog.dart';
 import 'package:fluffychat/utils/extension/event_info_extension.dart';
@@ -645,8 +645,17 @@ extension FutureEventExtension on Event {
     if (matrixFile is MatrixImageFile) {
       return matrixFile;
     } else if (matrixFile is MatrixVideoFile) {
-      final thumbnail = await room.generateVideoThumbnail(matrixFile);
-      return thumbnail;
+      // Try path-based thumbnail generation to avoid loading video bytes
+      final uploadInfo = await uploadManager.getUploadFileInfo(
+        eventId,
+        room: room,
+      );
+      final filePath = uploadInfo?.fileInfo?.filePath;
+      if (filePath != null) {
+        return await room.generateVideoThumbnailFromPath(filePath);
+      }
+      // Fall back to bytes-based approach (web)
+      return await room.generateVideoThumbnail(matrixFile);
     }
     return null;
   }

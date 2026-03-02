@@ -139,7 +139,7 @@ class _SendingVideoWidgetState extends State<SendingVideoWidget>
   }
 }
 
-class VideoWidget extends StatelessWidget {
+class VideoWidget extends StatefulWidget {
   const VideoWidget({
     super.key,
     required this.imageHeight,
@@ -152,18 +152,36 @@ class VideoWidget extends StatelessWidget {
   final Event event;
 
   @override
+  State<VideoWidget> createState() => _VideoWidgetState();
+}
+
+class _VideoWidgetState extends State<VideoWidget> {
+  late final Future<MatrixImageFile?> _thumbnailFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    _thumbnailFuture = widget.event.getPlaceholderMatrixImageFile(
+      getIt.get<UploadManager>(),
+    );
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final placeholder = SizedBox(width: imageWidth, height: imageHeight);
+    final placeholder = SizedBox(
+      width: widget.imageWidth,
+      height: widget.imageHeight,
+    );
 
     return FutureBuilder(
-      future: event.getPlaceholderMatrixImageFile(getIt.get<UploadManager>()),
+      future: _thumbnailFuture,
       builder: (context, snapshot) {
         if (snapshot.data == null) return placeholder;
 
         return Image.memory(
           snapshot.data!.bytes,
-          width: imageWidth,
-          height: imageHeight,
+          width: widget.imageWidth,
+          height: widget.imageHeight,
           fit: BoxFit.cover,
           filterQuality: FilterQuality.medium,
         );

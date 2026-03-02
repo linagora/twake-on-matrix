@@ -1,32 +1,20 @@
 import 'dart:async';
-import 'dart:io';
-import 'dart:typed_data';
-import 'package:blurhash_dart/blurhash_dart.dart';
 import 'package:dartz/dartz.dart' hide id;
 import 'package:dio/dio.dart';
 import 'package:fluffychat/app_state/failure.dart';
 import 'package:fluffychat/app_state/success.dart';
-import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/data/network/media/cancel_exception.dart';
 import 'package:fluffychat/data/network/media/media_api.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/domain/model/room/room_extension.dart';
+import 'package:fluffychat/presentation/extensions/media_thumbnail_extension.dart';
+import 'package:fluffychat/presentation/extensions/send_file_fake_event_extension.dart';
 import 'package:fluffychat/utils/exception/upload_exception.dart';
-import 'package:fluffychat/utils/extension/web_url_creation_extension.dart';
 import 'package:fluffychat/utils/js_window/non_js_window.dart'
     if (dart.library.js) 'package:fluffychat/utils/js_window/js_window.dart';
 import 'package:fluffychat/utils/js_window/universal_image_bitmap.dart';
 import 'package:fluffychat/utils/manager/upload_manager/upload_state.dart';
-import 'package:fluffychat/utils/platform_infos.dart';
-import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:matrix/matrix.dart';
-// ignore: implementation_imports
-import 'package:matrix/src/utils/run_benchmarked.dart';
-import 'package:image/image.dart';
-import 'package:mime/mime.dart';
-import 'package:path_provider/path_provider.dart';
-import 'package:video_player/video_player.dart';
-import 'package:video_thumbnail/video_thumbnail.dart';
 
 extension SendFileWebExtension on Room {
   Future<String?> sendFileOnWebEvent(
@@ -259,7 +247,7 @@ extension SendFileWebExtension on Room {
     }
 
     final duration = file is MatrixVideoFile
-        ? await _getVideoDuration(file)
+        ? await getVideoDuration(file)
         : null;
 
     final contentFromCaption = getEventContentFromMsgText(
@@ -330,198 +318,5 @@ extension SendFileWebExtension on Room {
     sendingFilePlaceholders.remove(txid);
 
     return eventId;
-  }
-
-  Future<SyncUpdate> sendFakeFileEvent(
-    MatrixFile file, {
-    required String txid,
-    Event? inReplyTo,
-    String? editEventId,
-    int? shrinkImageMaxDimension,
-    Map<String, dynamic>? extraContent,
-    DateTime? sentDate,
-    String? captionInfo,
-    Map<String, dynamic>? uploadInfo,
-  }) async {
-    // sendingFileThumbnails[txid] =  MatrixImageFile(bytes: file.bytes, name: file.name);
-
-    final contentFromCaption = getEventContentFromMsgText(
-      message: captionInfo ?? '',
-      msgtype: file.msgType,
-    );
-
-    final contentCaptionFormat = contentFromCaption['formatted_body'] != null
-        ? {
-            'format': contentFromCaption['format'],
-            'formatted_body': contentFromCaption['formatted_body'],
-          }
-        : null;
-
-    // Create a fake Event object as a placeholder for the uploading file:
-    final fakeImageEventEvent = SyncUpdate(
-      nextBatch: '',
-      rooms: RoomsUpdate(
-        join: {
-          id: JoinedRoomUpdate(
-            timeline: TimelineUpdate(
-              events: [
-                MatrixEvent(
-                  content: {
-                    'msgtype': file.msgType,
-                    'body': captionInfo ?? '',
-                    if (contentCaptionFormat != null) ...contentCaptionFormat,
-                    'filename': file.name,
-                    'info': file.info,
-                  },
-                  type: EventTypes.Message,
-                  eventId: txid,
-                  senderId: client.userID!,
-                  originServerTs: sentDate ?? DateTime.now(),
-                  unsigned: {
-                    messageSendingStatusKey: EventStatus.sending.intValue,
-                    'transaction_id': txid,
-                    if (inReplyTo?.eventId != null)
-                      'in_reply_to': inReplyTo?.eventId,
-                    if (editEventId != null) 'edit_event_id': editEventId,
-                    if (shrinkImageMaxDimension != null)
-                      'shrink_image_max_dimension': shrinkImageMaxDimension,
-                    if (extraContent != null) 'extra_content': extraContent,
-                    if (uploadInfo != null) 'upload_info': uploadInfo,
-                  },
-                ),
-              ],
-            ),
-          ),
-        },
-      ),
-    );
-    await handleImageFakeSync(fakeImageEventEvent);
-    return fakeImageEventEvent;
-  }
-
-  Future<void> handleImageFakeSync(
-    SyncUpdate fakeImageEvent, {
-    Direction? direction,
-  }) async {
-    await client.database.transaction(() async {
-      await client.handleSync(fakeImageEvent, direction: direction);
-    });
-  }
-
-  Future<MatrixImageFile?> generateThumbnail(
-    MatrixImageFile originalFile, {
-    StreamController<Either<Failure, Success>>? uploadStreamController,
-  }) async {
-    try {
-      uploadStreamController?.add(const Right(GeneratingThumbnailState()));
-      final result = await FlutterImageCompress.compressWithList(
-        originalFile.bytes,
-        quality: AppConfig.thumbnailQuality,
-        format: AppConfig.imageCompressFormmat,
-      );
-
-      final blurHash = await runBenchmarked(
-        '_generateBlurHash',
-        () => _generateBlurHash(result),
-      );
-
-      uploadStreamController?.add(const Right(GenerateThumbnailSuccess()));
-
-      return MatrixImageFile(
-        bytes: result,
-        name: '${originalFile.name}.${AppConfig.imageCompressFormmat.name}',
-        mimeType: originalFile.mimeType,
-        width: originalFile.width,
-        height: originalFile.height,
-        blurhash: blurHash,
-      );
-    } catch (e) {
-      uploadStreamController?.add(Left(GenerateThumbnailFailed(exception: e)));
-      Logs().e('Error while generating thumbnail', e);
-      return null;
-    }
-  }
-
-  Future<MatrixImageFile?> generateVideoThumbnail(
-    MatrixVideoFile originalFile, {
-    StreamController<Either<Failure, Success>>? uploadStreamController,
-  }) async {
-    try {
-      uploadStreamController?.add(const Right(GeneratingThumbnailState()));
-      late String url;
-      if (PlatformInfos.isWeb) {
-        url = originalFile.bytes.toWebUrl(mimeType: originalFile.mimeType);
-      } else {
-        final tempDir = await getTemporaryDirectory();
-        final tempFile = File('${tempDir.path}/${originalFile.name}');
-        await tempFile.writeAsBytes(originalFile.bytes);
-        url = tempFile.path;
-      }
-
-      final result = await VideoThumbnail.thumbnailData(
-        video: url,
-        imageFormat: AppConfig.videoThumbnailFormat,
-        quality: AppConfig.thumbnailQuality,
-      );
-      final thumbnailBitmap = await convertUint8ListToBitmap(result);
-      final blurHash = await runBenchmarked(
-        '_generateBlurHash',
-        () => _generateBlurHash(result),
-      );
-
-      uploadStreamController?.add(const Right(GenerateThumbnailSuccess()));
-
-      final thumbnailFileName = _getVideoThumbnailFileName(originalFile);
-
-      if (PlatformInfos.isMobile) await File(url).delete();
-
-      return MatrixImageFile(
-        bytes: result,
-        name: thumbnailFileName,
-        mimeType: lookupMimeType(thumbnailFileName) ?? 'image/jpeg',
-        width: thumbnailBitmap?.width,
-        height: thumbnailBitmap?.height,
-        blurhash: blurHash,
-      );
-    } catch (e) {
-      uploadStreamController?.add(Left(GenerateThumbnailFailed(exception: e)));
-      Logs().e('Error while generating thumbnail', e);
-      return null;
-    }
-  }
-
-  String _getVideoThumbnailFileName(MatrixVideoFile originalFile) =>
-      '${originalFile.name}.${AppConfig.videoThumbnailFormat.name.toLowerCase()}';
-
-  Future<int?> _getVideoDuration(MatrixVideoFile originalFile) async {
-    VideoPlayerController? videoPlayerController;
-    try {
-      final url = originalFile.bytes.toWebUrl(mimeType: originalFile.mimeType);
-      videoPlayerController = VideoPlayerController.networkUrl(Uri.parse(url));
-      await videoPlayerController.initialize();
-      final duration = videoPlayerController.value.duration.inMilliseconds;
-      return duration;
-    } catch (e) {
-      Logs().e('Error while generating thumbnail', e);
-      return null;
-    } finally {
-      videoPlayerController?.dispose();
-    }
-  }
-}
-
-Future<String?> _generateBlurHash(Uint8List data) async {
-  try {
-    final result = await FlutterImageCompress.compressWithList(
-      data,
-      minHeight: AppConfig.blurHashSize,
-      minWidth: AppConfig.blurHashSize,
-    );
-    final image = decodeJpg(result);
-    final blurHash = image != null ? BlurHash.encode(image) : null;
-    return blurHash?.hash;
-  } catch (e) {
-    Logs().e('_generateBlurHash::error', e);
-    return null;
   }
 }

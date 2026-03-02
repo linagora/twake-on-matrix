@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:blurhash_dart/blurhash_dart.dart';
 import 'package:collection/collection.dart';
 import 'package:dartz/dartz.dart' hide id;
 import 'package:dio/dio.dart';
@@ -17,6 +16,8 @@ import 'package:fluffychat/domain/model/file_info/image_file_info.dart';
 import 'package:fluffychat/domain/model/file_info/video_file_info.dart';
 import 'package:fluffychat/domain/model/room/room_extension.dart';
 import 'package:fluffychat/presentation/extensions/image_extension.dart';
+import 'package:fluffychat/presentation/extensions/media_thumbnail_extension.dart';
+import 'package:fluffychat/presentation/extensions/send_file_fake_event_extension.dart';
 import 'package:fluffychat/presentation/fake_sending_file_info.dart';
 import 'package:fluffychat/presentation/model/file/file_asset_entity.dart';
 import 'package:fluffychat/utils/date_time_extension.dart';
@@ -28,7 +29,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:heic_to_png_jpg/heic_to_png_jpg.dart';
-import 'package:image/image.dart' as img;
 import 'package:matrix/matrix.dart';
 
 // ignore: implementation_imports
@@ -90,7 +90,7 @@ extension SendFileExtension on Room {
       }
     } catch (e) {
       Logs().d('Config error while sending file', e);
-      await _updateFakeSync(
+      await updateFakeSync(
         fakeImageEvent,
         messageSendingStatusKey,
         EventStatus.error.intValue,
@@ -153,7 +153,7 @@ extension SendFileExtension on Room {
     // computing the thumbnail in case we can
     if (fileInfo is ImageFileInfo &&
         (thumbnail == null || shrinkImageMaxDimension != null)) {
-      await _updateFakeSync(
+      await updateFakeSync(
         fakeImageEvent,
         fileSendingStatusKey,
         FileSendingStatus.generatingThumbnail.name,
@@ -196,7 +196,7 @@ extension SendFileExtension on Room {
         thumbnail = null; // in this case, the thumbnail is not usefull
       }
     } else if (fileInfo is VideoFileInfo) {
-      await _updateFakeSync(
+      await updateFakeSync(
         fakeImageEvent,
         fileSendingStatusKey,
         FileSendingStatus.generatingThumbnail.name,
@@ -238,7 +238,7 @@ extension SendFileExtension on Room {
     EncryptedFile? encryptedFileInfo;
     EncryptedFile? encryptedThumbnail;
     if (isRoomEncrypted()) {
-      await _updateFakeSync(
+      await updateFakeSync(
         fakeImageEvent,
         fileSendingStatusKey,
         FileSendingStatus.encrypting.name,
@@ -256,7 +256,7 @@ extension SendFileExtension on Room {
         uploadStreamController?.add(const Right(EncryptedFileState()));
       } catch (e) {
         uploadStreamController?.add(Left(EncryptFailedFileState(exception: e)));
-        await _updateFakeSync(
+        await updateFakeSync(
           fakeImageEvent,
           messageSendingStatusKey,
           EventStatus.error.intValue,
@@ -300,7 +300,7 @@ extension SendFileExtension on Room {
     }
     Uri? uploadResp, thumbnailUploadResp;
 
-    await _updateFakeSync(
+    await updateFakeSync(
       fakeImageEvent,
       fileSendingStatusKey,
       FileSendingStatus.uploading.name,
@@ -313,7 +313,7 @@ extension SendFileExtension on Room {
     while (uploadResp == null ||
         (encryptedThumbnail != null && thumbnailUploadResp == null)) {
       if (retryCount >= maxRetries) {
-        await _updateFakeSync(
+        await updateFakeSync(
           fakeImageEvent,
           messageSendingStatusKey,
           EventStatus.error.intValue,
@@ -399,7 +399,7 @@ extension SendFileExtension on Room {
           Right(UploadFileSuccessState(eventId: txid)),
         );
       } on MatrixException catch (e) {
-        await _updateFakeSync(
+        await updateFakeSync(
           fakeImageEvent,
           messageSendingStatusKey,
           EventStatus.error.name,
@@ -429,7 +429,7 @@ extension SendFileExtension on Room {
         Logs().e('Error: $e');
         Logs().e('Send File into room failed. Retry $retryCount/$maxRetries');
         if (retryCount >= maxRetries) {
-          await _updateFakeSync(
+          await updateFakeSync(
             fakeImageEvent,
             messageSendingStatusKey,
             EventStatus.error.intValue,
@@ -463,9 +463,9 @@ extension SendFileExtension on Room {
 
     final blurHash = thumbnail != null
         ? await runBenchmarked(
-            '_generateBlurHash',
+            'generateBlurHash',
             () async =>
-                _generateBlurHashFromBytes(await _resolveBytes(thumbnail!)),
+                generateBlurHash(await _resolveBytes(thumbnail!)),
           )
         : null;
 
@@ -620,79 +620,6 @@ extension SendFileExtension on Room {
     }
   }
 
-  Future<SyncUpdate> sendFakeFileInfoEvent(
-    FileInfo fileInfo, {
-    String messageType = MessageTypes.Image,
-    required String txid,
-    Event? inReplyTo,
-    String? editEventId,
-    int? shrinkImageMaxDimension,
-    Map<String, dynamic>? extraContent,
-    DateTime? sentDate,
-    String? captionInfo,
-    Map<String, dynamic>? uploadInfo,
-  }) async {
-    final contentFromCaption = getEventContentFromMsgText(
-      message: captionInfo ?? '',
-      msgtype: messageType,
-    );
-
-    final contentCaptionFormat = contentFromCaption['formatted_body'] != null
-        ? {
-            'format': contentFromCaption['format'],
-            'formatted_body': contentFromCaption['formatted_body'],
-          }
-        : null;
-    // Create a fake Event object as a placeholder for the uploading file:
-    final fakeImageEvent = SyncUpdate(
-      nextBatch: '',
-      rooms: RoomsUpdate(
-        join: {
-          id: JoinedRoomUpdate(
-            timeline: TimelineUpdate(
-              events: [
-                MatrixEvent(
-                  content: {
-                    'msgtype': messageType,
-                    'body': captionInfo ?? '',
-                    'filename': fileInfo.fileName,
-                    'info': <String, dynamic>{...fileInfo.metadata},
-                    if (contentCaptionFormat != null) ...contentCaptionFormat,
-                    if (extraContent != null) ...extraContent,
-                  },
-                  type: EventTypes.Message,
-                  eventId: txid,
-                  senderId: client.userID!,
-                  originServerTs: sentDate ?? DateTime.now(),
-                  unsigned: {
-                    messageSendingStatusKey: EventStatus.sending.intValue,
-                    'transaction_id': txid,
-                    if (inReplyTo?.eventId != null)
-                      'in_reply_to': inReplyTo?.eventId,
-                    if (editEventId != null) 'edit_event_id': editEventId,
-                    if (shrinkImageMaxDimension != null)
-                      'shrink_image_max_dimension': shrinkImageMaxDimension,
-                    if (extraContent != null) 'extra_content': extraContent,
-                    if (uploadInfo != null) 'upload_info': uploadInfo,
-                  },
-                ),
-              ],
-            ),
-          ),
-        },
-      ),
-    );
-    await handleFakeSync(fakeImageEvent);
-    return fakeImageEvent;
-  }
-
-  Future<void> handleFakeSync(
-    SyncUpdate fakeImageEvent, {
-    Direction? direction,
-  }) async {
-    await client.handleSync(fakeImageEvent, direction: direction);
-  }
-
   Future<Map<TransactionId, FakeSendingFileInfo>>
   sendPlaceholdersForImagePickerFiles({
     required List<FileAssetEntity> entities,
@@ -778,24 +705,6 @@ extension SendFileExtension on Room {
     }
   }
 
-  Future<String?> _generateBlurHashFromBytes(Uint8List bytes) async {
-    try {
-      final result = await FlutterImageCompress.compressWithList(
-        bytes,
-        minHeight: AppConfig.blurHashSize,
-        minWidth: AppConfig.blurHashSize,
-      );
-      final blurHash = await compute((imageData) {
-        final image = img.decodeJpg(imageData);
-        return BlurHash.encode(image!);
-      }, result);
-      return blurHash.hash;
-    } catch (e) {
-      Logs().e('_generateBlurHashFromBytes::error', e);
-      return null;
-    }
-  }
-
   Future<ImageFileInfo?> _getThumbnailVideo(
     File tempThumbnailFile,
     VideoFileInfo fileInfo,
@@ -846,61 +755,11 @@ extension SendFileExtension on Room {
     return newThumbnail;
   }
 
-  Future<void> _updateFakeSync(
-    SyncUpdate fakeImageEvent,
-    String key,
-    Object? value,
-  ) async {
-    fakeImageEvent
-            .rooms!
-            .join!
-            .values
-            .first
-            .timeline!
-            .events!
-            .first
-            .unsigned![key] =
-        value;
-    await handleFakeSync(fakeImageEvent);
-  }
-
   Future<Size> _calculateImageBytesDimension(Uint8List bytes) {
     return Image.memory(bytes).calculateImageDimension();
   }
 
   bool isRoomEncrypted() {
     return encrypted && client.fileEncryptionEnabled;
-  }
-
-  Future<void> sendFakeMessage({
-    required Map<String, Object?> content,
-    required String messageId,
-  }) async {
-    final sentDate = DateTime.now();
-    final syncUpdate = SyncUpdate(
-      nextBatch: '',
-      rooms: RoomsUpdate(
-        join: {
-          id: JoinedRoomUpdate(
-            timeline: TimelineUpdate(
-              events: [
-                MatrixEvent(
-                  content: content,
-                  type: EventTypes.Message,
-                  eventId: messageId,
-                  senderId: client.userID!,
-                  originServerTs: sentDate,
-                  unsigned: {
-                    messageSendingStatusKey: EventStatus.sending.intValue,
-                    'transaction_id': messageId,
-                  },
-                ),
-              ],
-            ),
-          ),
-        },
-      ),
-    );
-    await handleFakeSync(syncUpdate);
   }
 }

@@ -24,6 +24,7 @@ import 'package:fluffychat/presentation/enum/chat/send_media_with_caption_status
 import 'package:fluffychat/presentation/extensions/client_extension.dart';
 import 'package:fluffychat/presentation/extensions/contact/presentation_contact_extension.dart';
 import 'package:fluffychat/presentation/extensions/send_file_extension.dart';
+import 'package:fluffychat/presentation/extensions/send_file_fake_event_extension.dart';
 import 'package:fluffychat/presentation/extensions/send_file_web_extension.dart';
 import 'package:fluffychat/presentation/mixins/audio_mixin.dart';
 import 'package:fluffychat/presentation/mixins/common_media_picker_mixin.dart';
