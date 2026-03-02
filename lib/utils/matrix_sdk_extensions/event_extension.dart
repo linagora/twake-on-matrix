@@ -341,7 +341,7 @@ extension LocalizedBody on Event {
   }
 
   bool canEditEvents(MatrixState? matrix) {
-    if (isCaptionModeOrReply()) {
+    if (isCaptionModeOrReply() && isOwnMessage) {
       return true;
     }
 

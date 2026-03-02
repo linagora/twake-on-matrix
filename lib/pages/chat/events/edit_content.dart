@@ -60,7 +60,7 @@ class EditContent extends StatelessWidget {
                   ),
                   if (displayEvent.isCaptionModeOrReply())
                     Text(
-                      displayEvent.body,
+                      displayEvent.plaintextBody,
                       overflow: TextOverflow.ellipsis,
                       maxLines: 1,
                       style: TextStyle(
