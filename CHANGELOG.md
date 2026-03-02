@@ -1,3 +1,27 @@
+## [2.20.0] - 2026-03-02
+### Added
+- #2846 Add background to personal QR code
+- #2868 Add ability to leave a DM
+- #2880 Improve adding new user as Member role by default
+
+### Changed
+- #2870 Group chat details new UI
+- #2873 Update profile info design
+- #2887 Add new mascot for chat invitations and update UI elements
+- #2885 Add draft chat mascot and update chat background styles
+- #2871 Upgrade Flutter to 3.38.9
+- #2861 Add loading indicator to switch account
+- #2849 Removed italic style in chat list item
+- #2844 Hide member role name
+- #2859 Hide reaction and pinned message events in chat list
+
+### Fixed
+- #2857 Fix no highlight on selected code block
+- #2842 Fix date format parsed as phone number
+- #2878 Restore homeserver on connected
+- #2799 Reduce ReDoS vulnerability
+- Missing translations in Fr, Vi, Ru
+
 ## [2.19.7] - 2026-01-30
 ### Fixed
 - #2854 Jump to search doesn't work
