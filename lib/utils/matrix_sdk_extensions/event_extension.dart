@@ -341,7 +341,11 @@ extension LocalizedBody on Event {
   }
 
   bool canEditEvents(MatrixState? matrix) {
-    if (isCaptionModeOrReply() && isOwnMessage) {
+    final isAuthoredByCurrentBundle = currentRoomBundle(
+      matrix,
+    ).any((cl) => senderId == cl!.userID);
+
+    if (isCaptionModeOrReply() && isAuthoredByCurrentBundle) {
       return true;
     }
 
@@ -357,7 +361,7 @@ extension LocalizedBody on Event {
       return false;
     }
 
-    return currentRoomBundle(matrix).any((cl) => senderId == cl!.userID);
+    return isAuthoredByCurrentBundle;
   }
 
   bool get canDelete {
