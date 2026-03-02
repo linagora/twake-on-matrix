@@ -67,9 +67,9 @@ extension LocalNotificationsExtension on MatrixState {
           method: ThumbnailMethod.crop,
         );
     if (kIsWeb) {
-      final isInsideCozy = await CozyConfigManager().isInsideCozy;
+      final isInContainer = CozyConfigManager().isInContainer;
       _audioPlayer.play();
-      if (isInsideCozy) {
+      if (isInContainer) {
         CozyConfigManager().sendNotification(title, body);
         return;
       }

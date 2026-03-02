@@ -20,7 +20,7 @@ dependencies:
   linagora_design_flutter:
     git:
       url: git@github.com:linagora/linagora-design-flutter.git
-      ref: master
+      ref: feat/update-cozy-external-bridge-setup
   flutter_matrix_html:
     git:
       url: https://github.com/linagora/flutter_matrix_html.git
@@ -327,6 +327,12 @@ dependency_overrides:
     git:
       url: https://github.com/linagora/overflow_view.git
       ref: master
+  
+  # Fix dependency conflict between flutter_emoji_mart and linagora_design_flutter
+  linagora_design_flutter:
+    git:
+      url: git@github.com:linagora/linagora-design-flutter.git
+      ref: feat/update-cozy-external-bridge-setup
 
 cider:
   link_template:
