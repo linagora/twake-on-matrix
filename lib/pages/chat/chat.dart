@@ -1174,7 +1174,7 @@ class ChatController extends State<Chat>
     pendingText = sendController.text;
     editEventNotifier.value = eventToEdit;
     sendController.text = eventToEdit.isCaptionModeOrReply()
-        ? eventToEdit.body
+        ? eventToEdit.plaintextBody
         : eventToEdit
               .getDisplayEventWithoutEditEvent(timeline!)
               .calcLocalizedBodyFallback(
