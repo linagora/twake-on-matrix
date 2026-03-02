@@ -147,7 +147,15 @@ mixin ReceiveSharingIntentMixin<T extends StatefulWidget> on State<T> {
           Logs().d(
             'ReceiveSharingIntentMixin::setupSharingIntentStreams: Already synced, processing files immediately',
           );
-          await _processIncomingSharedFiles(files);
+          try {
+            await _processIncomingSharedFiles(files);
+          } catch (e, stackTrace) {
+            Logs().e(
+              'ReceiveSharingIntentMixin::setupSharingIntentStreams: Error processing incoming files',
+              e,
+              stackTrace,
+            );
+          }
         } else {
           // Otherwise cache for processing after sync
           Logs().d(

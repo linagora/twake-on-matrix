@@ -4,7 +4,7 @@ import 'package:fluffychat/app_state/success.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/domain/app_state/send_file_dialog/generate_thumbnails_media_state.dart';
 import 'package:fluffychat/domain/repository/server_config_repository.dart';
-import 'package:fluffychat/presentation/extensions/send_file_web_extension.dart';
+import 'package:fluffychat/presentation/extensions/media_thumbnail_extension.dart';
 import 'package:matrix/matrix.dart';
 
 typedef OnConvertReadStreamToBytesDone =

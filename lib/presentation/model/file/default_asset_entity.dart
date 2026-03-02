@@ -16,16 +16,4 @@ class DefaultAssetEntity extends FileAssetEntity {
     }
     return FileInfo(file.path.split('/').last, filePath: file.path);
   }
-
-  @override
-  Future<MatrixFile?> toMatrixFile() async {
-    final file = await assetEntity.loadFile();
-    if (file == null) {
-      return null;
-    }
-    return MatrixFile(
-      name: file.path.split('/').last,
-      bytes: file.readAsBytesSync(),
-    );
-  }
 }

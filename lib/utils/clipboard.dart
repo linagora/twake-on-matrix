@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:fluffychat/presentation/extensions/uint8list_extension.dart';
 import 'package:fluffychat/presentation/model/clipboard/clipboard_image_info.dart';
 import 'package:flutter/services.dart';
 import 'package:matrix/matrix.dart';
@@ -104,14 +105,22 @@ class TwakeClipboard {
             (file) async {
               try {
                 final data = await file.readAll();
-
-                c.complete(
-                  MatrixFile(
-                    name: file.fileName ?? 'copied',
-                    bytes: data,
-                    mimeType: format.mimeTypes?.first,
-                  ),
+                MatrixFile matrixFile = MatrixFile.fromMimeType(
+                  name: file.fileName ?? 'copied',
+                  bytes: data,
+                  mimeType: format.mimeTypes?.first,
                 );
+                if (matrixFile is MatrixImageFile) {
+                  final size = await data.imageSize;
+                  matrixFile = MatrixImageFile(
+                    bytes: data,
+                    name: matrixFile.name,
+                    mimeType: matrixFile.mimeType,
+                    width: size?.width.toInt(),
+                    height: size?.height.toInt(),
+                  );
+                }
+                c.complete(matrixFile);
               } catch (e) {
                 Logs().e('Clipboard::pasteImageUsingBytes(): $e');
                 c.completeError(e);
