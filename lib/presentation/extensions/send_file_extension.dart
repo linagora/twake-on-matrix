@@ -464,8 +464,7 @@ extension SendFileExtension on Room {
     final blurHash = thumbnail != null
         ? await runBenchmarked(
             'generateBlurHash',
-            () async =>
-                generateBlurHash(await _resolveBytes(thumbnail!)),
+            () async => generateBlurHash(await _resolveBytes(thumbnail!)),
           )
         : null;
 

@@ -131,7 +131,10 @@ extension MediaThumbnailExtension on Room {
     String filePath, {
     String? videoFileName,
   }) async {
-    assert(!PlatformInfos.isWeb, 'generateVideoThumbnailFromPath is mobile-only');
+    assert(
+      !PlatformInfos.isWeb,
+      'generateVideoThumbnailFromPath is mobile-only',
+    );
     try {
       final result = await VideoThumbnail.thumbnailData(
         video: filePath,

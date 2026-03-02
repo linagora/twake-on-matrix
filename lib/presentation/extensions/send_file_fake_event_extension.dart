@@ -73,7 +73,9 @@ extension SendFileFakeEventExtension on Room {
     SyncUpdate fakeImageEvent, {
     Direction? direction,
   }) async {
-    await client.handleSync(fakeImageEvent, direction: direction);
+    await client.database.transaction(() async {
+      await client.handleSync(fakeImageEvent, direction: direction);
+    });
   }
 
   Future<void> updateFakeSync(
@@ -150,7 +152,7 @@ extension SendFileFakeEventExtension on Room {
         : null;
 
     // Create a fake Event object as a placeholder for the uploading file:
-    final fakeImageEventEvent = SyncUpdate(
+    final fakeImageEvent = SyncUpdate(
       nextBatch: '',
       rooms: RoomsUpdate(
         join: {
@@ -187,8 +189,8 @@ extension SendFileFakeEventExtension on Room {
         },
       ),
     );
-    await handleImageFakeSync(fakeImageEventEvent);
-    return fakeImageEventEvent;
+    await handleImageFakeSync(fakeImageEvent);
+    return fakeImageEvent;
   }
 
   Future<void> handleImageFakeSync(
