@@ -1,0 +1,32 @@
+# Native platform dirs (web-only build)
+android
+ios
+linux
+macos
+windows
+
+# Build outputs
+build
+.dart_tool
+.pub-cache
+*.g.dart
+
+# Test files
+test
+integration_test
+
+# CI/CD & docs
+.github
+*.md
+plans
+docs
+
+# Local dev artifacts
+.vodozemac
+.env*
+*.log
+
+# IDE
+.idea
+.vscode
+*.iml

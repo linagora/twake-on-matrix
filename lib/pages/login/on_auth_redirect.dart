@@ -65,8 +65,12 @@ class _OnAuthRedirectState extends State<OnAuthRedirect> with ConnectPageMixin {
     }
   }
 
-  void _handleLoginError(Object? error) {
-    Logs().e('OnAuthRedirect::_handleLoginError - $error');
+  void _handleLoginError(Object? error, StackTrace stackTrace) {
+    Logs().wtf(
+      'OnAuthRedirect::_handleLoginError [Exception]',
+      error,
+      stackTrace,
+    );
     context.go('/home');
   }
 
@@ -102,8 +106,8 @@ class _OnAuthRedirectState extends State<OnAuthRedirect> with ConnectPageMixin {
         token: loginToken,
         initialDeviceDisplayName: PlatformInfos.clientName,
       );
-    } catch (e) {
-      _handleLoginError(e);
+    } catch (e, s) {
+      _handleLoginError(e, s);
     }
   }
 
