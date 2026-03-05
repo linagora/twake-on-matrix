@@ -17,13 +17,21 @@
 import CryptoKit
 import Foundation
 
-import MatrixRustSDK
+struct Session: Codable, Equatable {
+    let accessToken: String
+    let refreshToken: String?
+    let userId: String
+    let deviceId: String
+    let homeserverUrl: String
+    let oidcData: String?
+    let slidingSyncProxy: String?
+}
 
 struct RestorationToken: Codable, Equatable {
-    let session: MatrixRustSDK.Session
+    let session: Session
     let pusherNotificationClientIdentifier: String?
 
-    init(session: MatrixRustSDK.Session) {
+    init(session: Session) {
         self.session = session
         if let data = session.userId.data(using: .utf8) {
             let digest = SHA256.hash(data: data)
@@ -31,33 +39,5 @@ struct RestorationToken: Codable, Equatable {
         } else {
             pusherNotificationClientIdentifier = nil
         }
-    }
-}
-
-extension MatrixRustSDK.Session: Codable {
-    public init(from decoder: Decoder) throws {
-        let container = try decoder.container(keyedBy: CodingKeys.self)
-        self = try .init(accessToken: container.decode(String.self, forKey: .accessToken),
-                         refreshToken: container.decodeIfPresent(String.self, forKey: .refreshToken),
-                         userId: container.decode(String.self, forKey: .userId),
-                         deviceId: container.decode(String.self, forKey: .deviceId),
-                         homeserverUrl: container.decode(String.self, forKey: .homeserverUrl),
-                         oidcData: container.decodeIfPresent(String.self, forKey: .oidcData),
-                         slidingSyncProxy: container.decodeIfPresent(String.self, forKey: .slidingSyncProxy))
-    }
-    
-    public func encode(to encoder: Encoder) throws {
-        var container = encoder.container(keyedBy: CodingKeys.self)
-        try container.encode(accessToken, forKey: .accessToken)
-        try container.encode(refreshToken, forKey: .refreshToken)
-        try container.encode(userId, forKey: .userId)
-        try container.encode(deviceId, forKey: .deviceId)
-        try container.encode(homeserverUrl, forKey: .homeserverUrl)
-        try container.encode(oidcData, forKey: .oidcData)
-        try container.encode(slidingSyncProxy, forKey: .slidingSyncProxy)
-    }
-    
-    enum CodingKeys: String, CodingKey {
-        case accessToken, refreshToken, userId, deviceId, homeserverUrl, oidcData, slidingSyncProxy
     }
 }

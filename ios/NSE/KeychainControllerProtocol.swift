@@ -15,17 +15,12 @@
 //
 
 import Foundation
-import MatrixRustSDK
 
 struct KeychainCredentials {
     let userID: String
     let restorationToken: RestorationToken
 }
 
-protocol KeychainControllerProtocol: ClientSessionDelegate {
-    func setRestorationToken(_ restorationToken: RestorationToken, forUsername: String)
-    func restorationTokenForUsername(_ username: String) -> RestorationToken?
+protocol KeychainControllerProtocol {
     func restorationTokens() -> [KeychainCredentials]
-    func removeRestorationTokenForUsername(_ username: String)
-    func removeAllRestorationTokens()
 }
