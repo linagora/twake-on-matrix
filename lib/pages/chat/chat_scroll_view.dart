@@ -107,8 +107,6 @@ class _ChatScrollViewState extends State<ChatScrollView> {
 
     return Padding(
       padding: EdgeInsets.only(
-        top: 16,
-        bottom: 8.0,
         left: horizontalPadding,
         right: horizontalPadding,
       ),
