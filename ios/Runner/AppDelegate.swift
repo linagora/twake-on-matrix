@@ -24,6 +24,7 @@ let apnTokenKey = "apnToken"
     func didInitializeImplicitFlutterEngine(_ engineBridge: FlutterImplicitEngineBridge) {
         GeneratedPluginRegistrant.register(with: engineBridge.pluginRegistry)
         twakeApnChannel = createApnChannel(engineBridge.applicationRegistrar.messenger())
+        AppGroupMegolmPlugin.register(with: engineBridge.applicationRegistrar.messenger())
     }
     
     func createApnChannel(_ messenger: FlutterBinaryMessenger) -> FlutterMethodChannel {

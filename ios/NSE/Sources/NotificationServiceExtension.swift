@@ -15,120 +15,289 @@
 //
 
 import Intents
-import MatrixRustSDK
 import UserNotifications
 
 class NotificationServiceExtension: UNNotificationServiceExtension {
-    private let settings = NSESettings()
-    private let notificationContentBuilder = NotificationContentBuilder(messageEventStringBuilder: RoomMessageEventStringBuilder(attributedStringBuilder: AttributedStringBuilder(permalinkBaseURL: .homeDirectory)))
     private lazy var keychainController = KeychainController(service: .sessions,
                                                              accessGroup: InfoPlistReader.main.keychainAccessGroupIdentifier)
     private var handler: ((UNNotificationContent) -> Void)?
+    private var originalContent: UNNotificationContent?
     private var modifiedContent: UNMutableNotificationContent?
-    private var userSession: NSEUserSession?
 
     override func didReceive(_ request: UNNotificationRequest,
                              withContentHandler contentHandler: @escaping (UNNotificationContent) -> Void) {
-        guard !DataProtectionManager.isDeviceLockedAfterReboot(containerURL: URL.appGroupContainerDirectory),
-              let roomId = request.roomId,
+        guard let roomId = request.roomId,
               let eventId = request.eventId,
               let clientID = request.pusherNotificationClientIdentifier,
-              let credentials = keychainController.restorationTokens().first(where: { $0.restorationToken.pusherNotificationClientIdentifier == clientID }) else {
-            // We cannot process this notification, it might be due to one of these:
-            // - Device rebooted and locked
-            // - Not a Matrix notification
-            // - User is not signed in
-            // - NotificationID could not be resolved
+              let credentials = keychainController.restorationTokens().first(where: {
+                  $0.restorationToken.pusherNotificationClientIdentifier == clientID
+              })
+        else {
             return contentHandler(request.content)
         }
 
         handler = contentHandler
+        originalContent = request.content
         modifiedContent = request.content.mutableCopy() as? UNMutableNotificationContent
 
         NSELogger.configure()
-
         NSELogger.logMemory(with: tag)
 
         MXLog.info("\(tag) #########################################")
         MXLog.info("\(tag) Payload came: \(request.content.userInfo)")
 
         Task {
-            await run(with: credentials,
-                      roomId: roomId,
-                      eventId: eventId,
-                      unreadCount: request.unreadCount)
+            await processEvent(credentials: credentials, roomId: roomId, eventId: eventId)
         }
     }
-    
+
     override func serviceExtensionTimeWillExpire() {
-        // Called just before the extension will be terminated by the system.
-        // Use this as an opportunity to deliver your "best attempt" at modified content, otherwise the original push payload will be used.
         MXLog.warning("\(tag) serviceExtensionTimeWillExpire")
         notify()
     }
 
-    private func run(with credentials: KeychainCredentials,
-                     roomId: String,
-                     eventId: String,
-                     unreadCount: Int?) async {
-        MXLog.info("\(tag) run with roomId: \(roomId), eventId: \(eventId)")
+    // MARK: - Content decoration
+
+    private func decorateModifiedContent(
+        roomId: String,
+        eventId: String,
+        sender: String,
+        body: String,
+        receiverId: String,
+        fetcher: MatrixHTTPFetcher,
+        mediaData: Data? = nil,
+        mediaFileExtension: String? = nil
+    ) async {
+        let newContent = UNMutableNotificationContent()
+        newContent.body = body
+
+        async let profileResponse = fetcher.fetchProfile(userId: sender)
+        async let roomNameResponse = fetcher.fetchRoomState(roomId: roomId, eventType: "m.room.name")
+        async let roomAvatarResponse = fetcher.fetchRoomState(roomId: roomId, eventType: "m.room.avatar")
+
+        let profile = await profileResponse
+        let senderDisplayName = profile?["displayname"] as? String ?? sender
+        let senderAvatarUrl = profile?["avatar_url"] as? String
+
+        let roomNameState = await roomNameResponse
+        let isDM = roomNameState == nil || roomNameState?["name"] == nil
+        let roomName = roomNameState?["name"] as? String ?? senderDisplayName
+
+        let roomAvatarState = await roomAvatarResponse
+        let roomAvatarUrl = roomAvatarState?["url"] as? String
+
+        var avatarData: Data?
+        if isDM, let url = senderAvatarUrl {
+            avatarData = await fetcher.fetchMedia(mxcURL: url)
+        } else if !isDM, let url = roomAvatarUrl {
+            avatarData = await fetcher.fetchMedia(mxcURL: url)
+        }
+
+        newContent.title = senderDisplayName
+        if senderDisplayName != roomName {
+            newContent.subtitle = roomName
+        }
+        newContent.categoryIdentifier = NotificationConstants.Category.message
+        newContent.receiverID = receiverId
+        newContent.roomID = roomId
+        newContent.eventID = eventId
+        newContent.threadIdentifier = "\(receiverId)\(roomId)".replacingOccurrences(of: "@", with: "")
+        newContent.sound = modifiedContent?.sound ?? UNNotificationSound(named: UNNotificationSoundName(rawValue: "message.caf"))
+        newContent.badge = modifiedContent?.badge
 
         do {
-            let userSession = try NSEUserSession(credentials: credentials, clientSessionDelegate: keychainController)
-            self.userSession = userSession
-            
-            guard let itemProxy = await userSession.notificationItemProxy(roomID: roomId, eventID: eventId) else {
-                MXLog.info("\(tag) no notification for the event, discard")
-                return discard()
-            }
-            
-            // After the first processing, update the modified content
-            modifiedContent = try await notificationContentBuilder.content(for: itemProxy, mediaProvider: nil)
-            
-            guard itemProxy.hasMedia else {
-                MXLog.info("\(tag) no media needed")
-
-                // We've processed the item and no media operations needed, so no need to go further
-                return notify()
-            }
-
-            MXLog.info("\(tag) process with media")
-
-            // There is some media to load, process it again
-            if let latestContent = try? await notificationContentBuilder.content(for: itemProxy, mediaProvider: userSession.mediaProvider) {
-                // Processing finished, hopefully with some media
-                modifiedContent = latestContent
-            }
-            // We still notify, but without the media attachment if it fails to load
-            
-            // Finally update the app badge
-            if let unreadCount {
-                modifiedContent?.badge = NSNumber(value: unreadCount)
-            }
-            
-            return notify()
+            let icon = NotificationIcon(
+                fallbackImageData: avatarData,
+                groupInfo: isDM ? nil : NotificationIcon.GroupInfo(name: roomName, id: roomId)
+            )
+            modifiedContent = try await newContent.addSenderIcon(
+                senderID: sender,
+                senderName: senderDisplayName,
+                icon: icon
+            )
         } catch {
-            MXLog.error("NSE run error: \(error)")
-            return discard()
+            MXLog.error("\(tag) decorateModifiedContent: failed to add sender icon: \(error)")
+            modifiedContent = newContent
+        }
+
+        if let data = mediaData, let ext = mediaFileExtension {
+            modifiedContent?.addMediaAttachment(data: data, fileExtension: ext)
         }
     }
-    
-    private func notify() {
-        MXLog.info("\(tag) notify")
 
-        guard let modifiedContent else {
-            MXLog.info("\(tag) notify: no modified content")
+    // MARK: - Event processing
+
+    private func processEvent(
+        credentials: KeychainCredentials,
+        roomId: String,
+        eventId: String
+    ) async {
+        let session = credentials.restorationToken.session
+        let fetcher = MatrixHTTPFetcher(
+            accessToken: session.accessToken,
+            homeserverURL: session.homeserverUrl)
+
+        guard let event = await fetcher.fetchEvent(roomId: roomId, eventId: eventId) else {
+            MXLog.info("\(tag) processEvent: could not fetch event")
             return discard()
         }
 
+        let type = event["type"] as? String
+        let content = event["content"] as? [String: Any]
+        let sender = event["sender"] as? String ?? "@unknown"
+
+        if type == "m.room.message" {
+            if let body = friendlyBody(from: content) {
+                MXLog.info("\(tag) processEvent: unencrypted message processed successfully")
+                let (mediaData, mediaExt) = await fetchUnencryptedMedia(from: content, fetcher: fetcher)
+                await decorateModifiedContent(roomId: roomId, eventId: eventId, sender: sender, body: body,
+                                              receiverId: credentials.userID, fetcher: fetcher,
+                                              mediaData: mediaData, mediaFileExtension: mediaExt)
+                notify()
+            } else {
+                MXLog.info("\(tag) processEvent: unencrypted message has no usable body")
+                discard()
+            }
+            return
+        }
+
+        guard type == "m.room.encrypted",
+              let algorithm = content?["algorithm"] as? String, algorithm == "m.megolm.v1.aes-sha2",
+              let sessionId = content?["session_id"] as? String,
+              let ciphertext = content?["ciphertext"] as? String
+        else {
+            MXLog.info("\(tag) processEvent: unsupported event type or missing fields")
+            return discard()
+        }
+
+        guard let sessionKey = AppGroupMegolmStore.sessionKey(roomId: roomId, sessionId: sessionId) else {
+            MXLog.info("\(tag) processEvent: no session key for sessionId=\(sessionId)")
+            return discard()
+        }
+        MXLog.info("\(tag) processEvent: found session key, ciphertext len=\(ciphertext.count)")
+
+        do {
+            let plaintextJSON = try MegolmDecryptor.decrypt(
+                ciphertextBase64: ciphertext,
+                sessionKeyBase64url: sessionKey)
+            guard let decryptedContent = MegolmDecryptor.extractContent(from: plaintextJSON),
+                  let body = friendlyBody(from: decryptedContent) else {
+                MXLog.info("\(tag) processEvent: could not extract body from decrypted content")
+                return discard()
+            }
+            MXLog.info("\(tag) processEvent: decryption successful")
+            let (mediaData, mediaExt) = await fetchEncryptedMedia(from: decryptedContent, fetcher: fetcher)
+            await decorateModifiedContent(roomId: roomId, eventId: eventId, sender: sender, body: body,
+                                          receiverId: credentials.userID, fetcher: fetcher,
+                                          mediaData: mediaData, mediaFileExtension: mediaExt)
+            notify()
+        } catch {
+            MXLog.error("\(tag) processEvent: decryption failed: \(error)")
+            discard()
+        }
+    }
+
+    /// Maps a Matrix message event content dict to a user-friendly notification body string.
+    /// Media types (image, video, audio, file, location) return localized type labels
+    /// instead of raw filenames. Text-like types return the raw body.
+    private func friendlyBody(from content: [String: Any]?) -> String? {
+        guard let content else { return nil }
+        let msgtype = content["msgtype"] as? String
+        switch msgtype {
+        case "m.image":    return L10n.commonImage
+        case "m.video":    return L10n.commonVideo
+        case "m.audio":    return L10n.commonAudio
+        case "m.file":     return L10n.commonFile
+        case "m.location": return L10n.commonSharedLocation
+        default:           return content["body"] as? String
+        }
+    }
+
+    // MARK: - Media helpers
+
+    /// Returns downloaded media data and file extension for an unencrypted `m.room.message`.
+    /// Only `m.image`, `m.video`, and `m.audio` are fetched; other types return `(nil, nil)`.
+    private func fetchUnencryptedMedia(from content: [String: Any]?, fetcher: MatrixHTTPFetcher) async -> (Data?, String?) {
+        guard let content,
+              let msgtype = content["msgtype"] as? String,
+              mediaCapableType(msgtype),
+              let mxcURL = content["url"] as? String else { return (nil, nil) }
+        let mimeType = (content["info"] as? [String: Any])?["mimetype"] as? String
+        let ext = fileExtension(for: mimeType) ?? defaultExtension(for: msgtype)
+        guard let data = await fetcher.fetchMedia(mxcURL: mxcURL) else { return (nil, nil) }
+        return (data, ext)
+    }
+
+    /// Returns decrypted media data and file extension for an encrypted `m.room.message`.
+    /// Reads `content["file"]` (Matrix EncryptedFile spec) and decrypts with AES-256-CTR.
+    private func fetchEncryptedMedia(from content: [String: Any]?, fetcher: MatrixHTTPFetcher) async -> (Data?, String?) {
+        guard let content,
+              let msgtype = content["msgtype"] as? String,
+              mediaCapableType(msgtype),
+              let file = content["file"] as? [String: Any],
+              let mxcURL = file["url"] as? String,
+              let keyDict = file["key"] as? [String: Any],
+              let key = keyDict["k"] as? String,
+              let iv = file["iv"] as? String,
+              let sha256 = (file["hashes"] as? [String: Any])?["sha256"] as? String else { return (nil, nil) }
+        let mimeType = (content["info"] as? [String: Any])?["mimetype"] as? String
+        let ext = fileExtension(for: mimeType) ?? defaultExtension(for: msgtype)
+        guard let encryptedData = await fetcher.fetchMedia(mxcURL: mxcURL) else { return (nil, nil) }
+        do {
+            let decrypted = try MatrixAttachmentDecryptor.decrypt(
+                encryptedData: encryptedData,
+                keyBase64url: key,
+                ivBase64: iv,
+                sha256Base64: sha256)
+            return (decrypted, ext)
+        } catch {
+            MXLog.warning("\(tag) fetchEncryptedMedia: decryption failed: \(error)")
+            return (nil, nil)
+        }
+    }
+
+    private func mediaCapableType(_ msgtype: String) -> Bool {
+        msgtype == "m.image" || msgtype == "m.video" || msgtype == "m.audio"
+    }
+
+    private func fileExtension(for mimeType: String?) -> String? {
+        switch mimeType {
+        case "image/jpeg", "image/jpg": return "jpg"
+        case "image/png": return "png"
+        case "image/gif": return "gif"
+        case "image/webp": return "webp"
+        case "video/mp4": return "mp4"
+        case "video/quicktime": return "mov"
+        case "audio/mpeg", "audio/mp3": return "mp3"
+        case "audio/ogg": return "ogg"
+        case "audio/wav": return "wav"
+        default: return nil
+        }
+    }
+
+    private func defaultExtension(for msgtype: String) -> String {
+        switch msgtype {
+        case "m.image": return "jpg"
+        case "m.video": return "mp4"
+        case "m.audio": return "mp3"
+        default: return "bin"
+        }
+    }
+
+    // MARK: - Notification delivery
+
+    private func notify() {
+        MXLog.info("\(tag) notify")
+        guard let modifiedContent else {
+            return discard()
+        }
         handler?(modifiedContent)
         cleanUp()
     }
 
     private func discard() {
         MXLog.info("\(tag) discard")
-
-        handler?(UNMutableNotificationContent())
+        handler?(originalContent ?? UNMutableNotificationContent())
         cleanUp()
     }
 
@@ -138,6 +307,7 @@ class NotificationServiceExtension: UNNotificationServiceExtension {
 
     private func cleanUp() {
         handler = nil
+        originalContent = nil
         modifiedContent = nil
     }
 
