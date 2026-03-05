@@ -2,15 +2,14 @@ import 'dart:async';
 
 import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/config/themes.dart';
+import 'package:fluffychat/generated/l10n/app_localizations.dart';
 import 'package:fluffychat/pages/chat/typing_timer_wrapper.dart';
-import 'package:fluffychat/presentation/mixins/chat_list_item_mixin.dart';
 import 'package:fluffychat/pages/chat_list/chat_list_item_style.dart';
+import 'package:fluffychat/presentation/mixins/chat_list_item_mixin.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
 import 'package:fluffychat/utils/room_status_extension.dart';
-import 'package:fluffychat/widgets/matrix.dart';
 import 'package:flutter/material.dart';
-import 'package:fluffychat/generated/l10n/app_localizations.dart';
 import 'package:linagora_design_flutter/colors/linagora_ref_colors.dart';
 import 'package:linagora_design_flutter/colors/linagora_sys_colors.dart';
 import 'package:matrix/matrix.dart';
@@ -23,20 +22,25 @@ class ChatListItemSubtitle extends StatelessWidget with ChatListItemMixin {
 
   @override
   Widget build(BuildContext context) {
-    final typingText = room.getLocalizedTypingText(L10n.of(context)!);
-    final isGroup = !room.isDirectChat;
-    final unreadBadgeSize = ChatListItemStyle.unreadBadgeSize(
+    final String typingText = room.getLocalizedTypingText(L10n.of(context)!);
+    final bool isGroup = !room.isDirectChat;
+    final double unreadBadgeSize = ChatListItemStyle.unreadBadgeSize(
       room.isUnreadOrInvited,
       room.hasNewMessages,
       room.notificationCount > 0,
     );
-    final lastEvent = this.lastEvent ?? room.lastEvent;
-    final isMediaEvent =
+    final Event? lastEvent = this.lastEvent ?? room.lastEvent;
+    final bool isMediaEvent =
         lastEvent?.messageType == MessageTypes.Image ||
         lastEvent?.messageType == MessageTypes.Video;
+
+    final ThemeData theme = Theme.of(context);
+    final ColorScheme colorScheme = theme.colorScheme;
+    final TextTheme textScheme = theme.textTheme;
+
     return Row(
-      mainAxisAlignment: MainAxisAlignment.start,
-      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisAlignment: .start,
+      crossAxisAlignment: .start,
       children: <Widget>[
         Expanded(
           child: _buildMainSubtitleContent(
@@ -59,16 +63,16 @@ class ChatListItemSubtitle extends StatelessWidget with ChatListItemMixin {
               ) ??
               Future.value(''),
           builder: (context, snapshot) {
-            if (snapshot.data == '' ||
-                snapshot.data == null ||
+            if (snapshot.data == null ||
+                snapshot.data!.isEmpty ||
                 lastEvent == null) {
               return const SizedBox.shrink();
             }
             final isMentioned = lastEvent.isMention == true;
-            return lastEvent.senderId == Matrix.of(context).client.userID
+            return lastEvent.senderId == room.client.userID
                 ? Icon(
                     Icons.done_all,
-                    color: lastEvent.receipts.isEmpty
+                    color: room.hasLastEventBeenSeenByOthers
                         ? LinagoraRefColors.material().tertiary[30]
                         : LinagoraSysColors.material().secondary,
                     size: 20,
@@ -76,16 +80,14 @@ class ChatListItemSubtitle extends StatelessWidget with ChatListItemMixin {
                 : AnimatedContainer(
                     duration: TwakeThemes.animationDuration,
                     curve: TwakeThemes.animationCurve,
-                    padding: const EdgeInsets.only(bottom: 4),
+                    padding: const .only(bottom: 4),
                     height: ChatListItemStyle.mentionIconWidth,
                     width: isMentioned && room.isUnreadOrInvited
                         ? ChatListItemStyle.mentionIconWidth
                         : 0,
                     decoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.primary,
-                      borderRadius: BorderRadius.circular(
-                        AppConfig.borderRadius,
-                      ),
+                      color: colorScheme.primary,
+                      borderRadius: .circular(AppConfig.borderRadius),
                     ),
                     child: Center(
                       child: isMentioned && room.isUnreadOrInvited
@@ -93,16 +95,12 @@ class ChatListItemSubtitle extends StatelessWidget with ChatListItemMixin {
                               '@',
                               style: TextStyle(
                                 color: isMentioned
-                                    ? Theme.of(context).colorScheme.onPrimary
-                                    : Theme.of(
-                                        context,
-                                      ).colorScheme.onPrimaryContainer,
-                                fontSize: Theme.of(
-                                  context,
-                                ).textTheme.labelMedium?.fontSize,
+                                    ? colorScheme.onPrimary
+                                    : colorScheme.onPrimaryContainer,
+                                fontSize: textScheme.labelMedium?.fontSize,
                               ),
                             )
-                          : Container(),
+                          : const SizedBox.shrink(),
                     ),
                   );
           },
@@ -111,7 +109,7 @@ class ChatListItemSubtitle extends StatelessWidget with ChatListItemMixin {
         AnimatedContainer(
           duration: TwakeThemes.animationDuration,
           curve: TwakeThemes.animationCurve,
-          padding: const EdgeInsets.symmetric(horizontal: 7),
+          padding: const .symmetric(horizontal: 7),
           height: unreadBadgeSize,
           width: ChatListItemStyle.notificationBadgeSize(
             room.isUnreadOrInvited,
@@ -120,18 +118,18 @@ class ChatListItemSubtitle extends StatelessWidget with ChatListItemMixin {
           ),
           decoration: BoxDecoration(
             color: notificationColor(context: context, room: room),
-            borderRadius: BorderRadius.circular(AppConfig.borderRadius),
+            borderRadius: .circular(AppConfig.borderRadius),
           ),
           child: Center(
             child: room.notificationCount > 0
                 ? Text(
                     room.notificationCount.toString(),
-                    style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                    style: textScheme.labelMedium?.copyWith(
                       letterSpacing: -0.5,
-                      color: Theme.of(context).colorScheme.onPrimary,
+                      color: colorScheme.onPrimary,
                     ),
                   )
-                : Container(),
+                : const SizedBox.shrink(),
           ),
         ),
       ],
