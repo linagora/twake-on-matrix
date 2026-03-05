@@ -1,3 +1,9 @@
+## [2.20.1] - 2026-03-06
+### Fixed
+- #2895 remove gap in top/bottom of chat
+- #2874 Distorted image/video
+- #2891 edit reply should not contain relates_content
+
 ## [2.20.0] - 2026-03-02
 ### Added
 - #2846 Add background to personal QR code
