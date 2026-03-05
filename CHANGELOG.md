@@ -1,4 +1,4 @@
-## [2.20.1] - 2026-03-06
+## [2.20.2] - 2026-03-06
 ### Fixed
 - #2895 remove gap in top/bottom of chat
 - #2874 Distorted image/video
