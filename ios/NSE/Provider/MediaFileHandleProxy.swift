@@ -38,7 +38,12 @@ class MediaFileHandleProxy {
     
     /// The media file's location on disk.
     var url: URL {
-        URL(filePath: handle.path())
+        do {
+            return URL(filePath: try handle.path())
+        } catch {
+            MXLog.error("Failed to get media file path: \(error)")
+            return URL(filePath: "")
+        }
     }
 }
 
@@ -59,8 +64,16 @@ extension MediaFileHandleProxy: Hashable {
 /// An unmanaged file handle that can be created direct from a URL.
 ///
 /// This type allows for mocking but doesn't provide the automatic clean-up mechanism provided by the SDK.
-private struct UnmanagedMediaFileHandle: MediaFileHandleProtocol {
+private final class UnmanagedMediaFileHandle: MediaFileHandleProtocol {
+    func persist(path: String) throws -> Bool {
+        false
+    }
+    
     let url: URL
+    
+    init(url: URL) {
+        self.url = url
+    }
     
     func path() -> String {
         url.path()

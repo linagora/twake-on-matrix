@@ -33,10 +33,10 @@ struct NotificationContentBuilder {
         case .invite:
             return try await processInvited(notificationItem: notificationItem, mediaProvider: mediaProvider)
         case .timeline(let event):
-            switch try? event.eventType() {
-            case let .messageLike(content):
+            switch try? event.content() {
+            case .messageLike(content: let content):
                 switch content {
-                case .roomMessage(let messageType, _):
+                case .roomMessage(messageType: let messageType, inReplyToEventId: _):
                     return try await processRoomMessage(notificationItem: notificationItem, messageType: messageType, mediaProvider: mediaProvider)
                 default:
                     return processEmpty(notificationItem: notificationItem)
