@@ -47,7 +47,7 @@ class ChatGroupDetailRobot extends CoreRobot {
 
   Future<void> tapOnChatBarTitle() async {
     await getChatAppBarTitle().tap();
-    await $.waitUntilVisible($("Group information"));
+    await $.waitUntilVisible($("Group info"));
   }
 
   Future<void> tapOnChatBarTitleForDM() async {
