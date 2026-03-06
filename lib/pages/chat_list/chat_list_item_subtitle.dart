@@ -73,8 +73,8 @@ class ChatListItemSubtitle extends StatelessWidget with ChatListItemMixin {
                 ? Icon(
                     Icons.done_all,
                     color: room.hasLastEventBeenSeenByOthers
-                        ? LinagoraRefColors.material().tertiary[30]
-                        : LinagoraSysColors.material().secondary,
+                        ? LinagoraSysColors.material().secondary
+                        : LinagoraRefColors.material().neutral[50],
                     size: 20,
                   )
                 : AnimatedContainer(
