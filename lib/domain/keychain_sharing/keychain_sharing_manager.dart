@@ -2,6 +2,8 @@ import 'dart:convert';
 
 import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/domain/keychain_sharing/keychain_sharing_restore_token.dart';
+import 'package:fluffychat/domain/keychain_sharing/keychain_sharing_session.dart';
+import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:matrix/matrix.dart';
 
@@ -10,10 +12,38 @@ class KeychainSharingManager {
     iOptions: IOSOptions(
       groupId: AppConfig.iOSKeychainSharingId,
       accountName: AppConfig.iOSKeychainSharingAccount,
-      synchronizable: true,
+      synchronizable: false,
       accessibility: KeychainAccessibility.first_unlock_this_device,
     ),
   );
+
+  static const String _ssssRecoveryKeyPrefix = 'ssss_recovery_';
+
+  static Future<void> saveRecoveryKey({
+    required String? userId,
+    required String recoveryKey,
+  }) async {
+    if (!PlatformInfos.isIOS || userId == null) return;
+    try {
+      await _secureStorage.write(
+        key: '$_ssssRecoveryKeyPrefix$userId',
+        value: recoveryKey,
+      );
+      Logs().d('[KeychainSharing] Saved SSSS recovery key for $userId');
+    } catch (e, s) {
+      Logs().wtf('[KeychainSharing] Unable to save SSSS recovery key', e, s);
+    }
+  }
+
+  static Future<void> deleteRecoveryKey({required String? userId}) async {
+    if (!PlatformInfos.isIOS || userId == null) return;
+    try {
+      await _secureStorage.delete(key: '$_ssssRecoveryKeyPrefix$userId');
+      Logs().d('[KeychainSharing] Deleted SSSS recovery key for $userId');
+    } catch (e, s) {
+      Logs().wtf('[KeychainSharing] Unable to delete SSSS recovery key', e, s);
+    }
+  }
 
   static Future<void> saveSession({
     required String accessToken,

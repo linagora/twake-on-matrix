@@ -15,6 +15,7 @@
 //
 
 import Foundation
+import os
 import MatrixRustSDK
 
 /**
@@ -59,8 +60,6 @@ enum MXLog {
             return
         }
         
-        setupTracing(configuration: .init(logLevel: logLevel), otlpConfiguration: otlpConfiguration)
-        
         if let target {
             self.target = target
             MXLogger.setSubLogName(target)
@@ -68,7 +67,7 @@ enum MXLog {
             self.target = Constants.target
         }
         
-        rootSpan = Span(file: #file, line: #line, level: .info, target: self.target, name: "root")
+        rootSpan = Span(file: #file, line: UInt32(#line), level: .info, target: self.target, name: "root", bridgeTraceId: nil)
         
         rootSpan.enter()
         
@@ -174,7 +173,7 @@ enum MXLog {
             rootSpan.enter()
         }
         
-        return Span(file: file, line: UInt32(line), level: level, target: target, name: name)
+        return Span(file: file, line: UInt32(line), level: level, target: target, name: name, bridgeTraceId: nil)
     }
     
     private static func log(_ message: Any,
@@ -192,6 +191,8 @@ enum MXLog {
             rootSpan.enter()
         }
         
-        logEvent(file: (file as NSString).lastPathComponent, line: UInt32(line), level: level, target: target, message: "\(message)")
+        let messageString = "\(message)"
+        logEvent(file: (file as NSString).lastPathComponent, line: UInt32(line), level: level, target: target, message: messageString)
+        os_log("MXLog: %{public}@", messageString)
     }
 }

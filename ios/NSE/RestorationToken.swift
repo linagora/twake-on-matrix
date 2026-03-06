@@ -43,7 +43,7 @@ extension MatrixRustSDK.Session: Codable {
                          deviceId: container.decode(String.self, forKey: .deviceId),
                          homeserverUrl: container.decode(String.self, forKey: .homeserverUrl),
                          oidcData: container.decodeIfPresent(String.self, forKey: .oidcData),
-                         slidingSyncProxy: container.decodeIfPresent(String.self, forKey: .slidingSyncProxy))
+                         slidingSyncVersion: .native)
     }
     
     public func encode(to encoder: Encoder) throws {
@@ -54,7 +54,6 @@ extension MatrixRustSDK.Session: Codable {
         try container.encode(deviceId, forKey: .deviceId)
         try container.encode(homeserverUrl, forKey: .homeserverUrl)
         try container.encode(oidcData, forKey: .oidcData)
-        try container.encode(slidingSyncProxy, forKey: .slidingSyncProxy)
     }
     
     enum CodingKeys: String, CodingKey {
