@@ -16,7 +16,6 @@
 
 import Foundation
 import KeychainAccess
-import MatrixRustSDK
 
 enum KeychainControllerService: String {
     case sessions
@@ -30,77 +29,18 @@ enum KeychainControllerService: String {
 class KeychainController: KeychainControllerProtocol {
     private let keychain: Keychain
 
-    init(service: KeychainControllerService,
-         accessGroup: String) {
-        keychain = Keychain(service: service.identifier,
-                            accessGroup: accessGroup)
-    }
-
-    func setRestorationToken(_ restorationToken: RestorationToken, forUsername username: String) {
-        do {
-            let tokenData = try JSONEncoder().encode(restorationToken)
-            try keychain.set(tokenData, key: username)
-        } catch {
-            MXLog.error("Failed storing user restore token with error: \(error)")
-        }
-    }
-
-    func restorationTokenForUsername(_ username: String) -> RestorationToken? {
-        do {
-            guard let tokenData = try keychain.getData(username) else {
-                return nil
-            }
-
-            return try JSONDecoder().decode(RestorationToken.self, from: tokenData)
-        } catch {
-            MXLog.error("Failed retrieving user restore token")
-            return nil
-        }
+    init(service: KeychainControllerService, accessGroup: String) {
+        keychain = Keychain(service: service.identifier, accessGroup: accessGroup)
     }
 
     func restorationTokens() -> [KeychainCredentials] {
         keychain.allKeys().compactMap { username in
-            guard let restorationToken = restorationTokenForUsername(username) else {
+            guard let tokenData = try? keychain.getData(username),
+                  let token = try? JSONDecoder().decode(RestorationToken.self, from: tokenData)
+            else {
                 return nil
             }
-
-            return KeychainCredentials(userID: username, restorationToken: restorationToken)
+            return KeychainCredentials(userID: username, restorationToken: token)
         }
-    }
-
-    func removeRestorationTokenForUsername(_ username: String) {
-        MXLog.warning("Removing restoration token for user: \(username).")
-        
-        do {
-            try keychain.remove(username)
-        } catch {
-            MXLog.error("Failed removing restore token with error: \(error)")
-        }
-    }
-
-    func removeAllRestorationTokens() {
-        MXLog.warning("Removing all user restoration tokens.")
-        
-        do {
-            try keychain.removeAll()
-        } catch {
-            MXLog.error("Failed removing all tokens")
-        }
-    }
-    
-    // MARK: - ClientSessionDelegate
-    
-    func retrieveSessionFromKeychain(userId: String) throws -> Session {
-        MXLog.info("Retrieving an updated Session from the keychain.")
-        guard let session = restorationTokenForUsername(userId)?.session else {
-            throw ClientError.Generic(msg: "Failed to find RestorationToken in the Keychain.")
-        }
-        return session
-    }
-    
-    func saveSessionInKeychain(session: Session) {
-        MXLog.info("Saving session changes in the keychain.")
-        let restorationToken = RestorationToken(session: session)
-        setRestorationToken(restorationToken, forUsername: session.userId)
     }
 }

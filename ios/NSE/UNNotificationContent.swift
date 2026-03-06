@@ -27,8 +27,7 @@ struct NotificationIcon {
         let id: String
     }
 
-    let mediaSource: MediaSourceProxy?
-    // Required as the key to set images for groups
+    let fallbackImageData: Data?
     let groupInfo: GroupInfo?
 
     var shouldDisplayAsGroup: Bool {
@@ -52,86 +51,42 @@ extension UNNotificationContent {
 
 extension UNMutableNotificationContent {
     override var receiverID: String? {
-        get {
-            userInfo[NotificationConstants.UserInfoKey.receiverIdentifier] as? String
-        }
-        set {
-            userInfo[NotificationConstants.UserInfoKey.receiverIdentifier] = newValue
-        }
+        get { userInfo[NotificationConstants.UserInfoKey.receiverIdentifier] as? String }
+        set { userInfo[NotificationConstants.UserInfoKey.receiverIdentifier] = newValue }
     }
 
     override var roomID: String? {
-        get {
-            userInfo[NotificationConstants.UserInfoKey.roomIdentifier] as? String
-        }
-        set {
-            userInfo[NotificationConstants.UserInfoKey.roomIdentifier] = newValue
-        }
+        get { userInfo[NotificationConstants.UserInfoKey.roomIdentifier] as? String }
+        set { userInfo[NotificationConstants.UserInfoKey.roomIdentifier] = newValue }
     }
 
     override var eventID: String? {
-        get {
-            userInfo[NotificationConstants.UserInfoKey.eventIdentifier] as? String
-        }
-        set {
-            userInfo[NotificationConstants.UserInfoKey.eventIdentifier] = newValue
+        get { userInfo[NotificationConstants.UserInfoKey.eventIdentifier] as? String }
+        set { userInfo[NotificationConstants.UserInfoKey.eventIdentifier] = newValue }
+    }
+
+    /// Writes `data` to a temporary file and adds it as a `UNNotificationAttachment`.
+    /// Silently ignores failures — the notification is delivered without the attachment.
+    func addMediaAttachment(data: Data, fileExtension: String) {
+        let fileName = UUID().uuidString + "." + fileExtension
+        let fileURL = URL.temporaryDirectory.appendingPathComponent(fileName)
+        do {
+            try data.write(to: fileURL)
+            let attachment = try UNNotificationAttachment(identifier: fileName, url: fileURL, options: nil)
+            attachments = [attachment]
+        } catch {
+            MXLog.error("UNMutableNotificationContent: addMediaAttachment failed: \(error)")
         }
     }
 
-    func addMediaAttachment(using mediaProvider: MediaProviderProtocol?,
-                            mediaSource: MediaSourceProxy) async -> UNMutableNotificationContent {
-        guard let mediaProvider else {
-            return self
-        }
-        switch await mediaProvider.loadFileFromSource(mediaSource) {
-        case .success(let file):
-            do {
-                let identifier = ProcessInfo.processInfo.globallyUniqueString
-                let newURL = try FileManager.default.copyFileToTemporaryDirectory(file: file.url, with: "\(identifier).\(file.url.pathExtension)")
-                let attachment = try UNNotificationAttachment(identifier: identifier,
-                                                              url: newURL,
-                                                              options: nil)
-                attachments.append(attachment)
-            } catch {
-                MXLog.error("Couldn't add media attachment:: \(error)")
-                return self
-            }
-        case .failure(let error):
-            MXLog.error("Couldn't load the file for media attachment: \(error)")
-        }
-
-        return self
-    }
-
-    func addSenderIcon(using mediaProvider: MediaProviderProtocol?,
-                       senderID: String,
+    func addSenderIcon(senderID: String,
                        senderName: String,
                        icon: NotificationIcon) async throws -> UNMutableNotificationContent {
-        // We display the placeholder only if...
-        var needsPlaceholder = false
-
-        var fetchedImage: INImage?
         let image: INImage
-        if let mediaSource = icon.mediaSource {
-            switch await mediaProvider?.loadImageDataFromSource(mediaSource) {
-            case .success(let data):
-                fetchedImage = INImage(imageData: data)
-            case .failure(let error):
-                MXLog.error("Couldn't add sender icon: \(error)")
-                // ...The provider failed to fetch
-                needsPlaceholder = true
-            case .none:
-                break
-            }
-        } else {
-            // ...There is no media
-            needsPlaceholder = true
-        }
 
-        if let fetchedImage {
-            image = fetchedImage
-        } else if needsPlaceholder,
-                  let data = await getPlaceholderAvatarImageData(name: icon.groupInfo?.name ?? senderName,
+        if let data = icon.fallbackImageData {
+            image = INImage(imageData: data)
+        } else if let data = await getPlaceholderAvatarImageData(name: icon.groupInfo?.name ?? senderName,
                                                                  id: icon.groupInfo?.id ?? senderID) {
             image = INImage(imageData: data)
         } else {
@@ -146,7 +101,6 @@ extension UNMutableNotificationContent {
                               contactIdentifier: nil,
                               customIdentifier: nil)
 
-        // These are required to show the group name as subtitle
         var speakableGroupName: INSpeakableString?
         var recipients: [INPerson]?
         if let groupInfo = icon.groupInfo {
@@ -168,17 +122,9 @@ extension UNMutableNotificationContent {
             intent.setImage(image, forParameterNamed: \.speakableGroupName)
         }
 
-        // Use the intent to initialize the interaction.
         let interaction = INInteraction(intent: intent, response: nil)
-
-        // Interaction direction is incoming because the user is
-        // receiving this message.
         interaction.direction = .incoming
-
-        // Donate the interaction before updating notification content.
         try await interaction.donate()
-        // Update notification content before displaying the
-        // communication notification.
         let updatedContent = try updating(from: intent)
 
         // swiftlint:disable:next force_cast
@@ -186,56 +132,38 @@ extension UNMutableNotificationContent {
     }
 
     private func getPlaceholderAvatarImageData(name: String, id: String) async -> Data? {
-        // The version value is used in case the design of the placeholder is updated to force a replacement
         let isIOS17Available = isIOS17Available()
         let prefix = "notification_placeholder\(isIOS17Available ? "V3" : "V2")"
         let fileName = "\(prefix)_\(name)_\(id).png"
         if let data = try? Data(contentsOf: URL.temporaryDirectory.appendingPathComponent(fileName)) {
-            MXLog.info("Found existing notification icon placeholder")
             return data
         }
 
-        MXLog.info("Generating notification icon placeholder")
-        let image = PlaceholderAvatarImage(name: name,
-                                           contentID: id)
+        let image = PlaceholderAvatarImage(name: name, contentID: id)
             .clipShape(Circle())
             .frame(width: 50, height: 50)
         let renderer = await ImageRenderer(content: image)
-        guard let image = await renderer.uiImage else {
-            MXLog.info("Generating notification icon placeholder failed")
-            return nil
-        }
+        guard let uiImage = await renderer.uiImage else { return nil }
 
         let data: Data?
-        // On simulator and macOS the image is rendered correctly
-        // But on other devices before iOS 17 is rendered upside down so we need to flip it
         #if targetEnvironment(simulator)
-        data = image.pngData()
+        data = uiImage.pngData()
         #else
         if ProcessInfo.processInfo.isiOSAppOnMac || isIOS17Available {
-            data = image.pngData()
+            data = uiImage.pngData()
         } else {
-            data = image.flippedVertically().pngData()
+            data = uiImage.flippedVertically().pngData()
         }
         #endif
 
         if let data {
-            do {
-                // cache image data
-                try FileManager.default.writeDataToTemporaryDirectory(data: data, fileName: fileName)
-            } catch {
-                MXLog.error("Could not store placeholder image")
-                return data
-            }
+            try? FileManager.default.writeDataToTemporaryDirectory(data: data, fileName: fileName)
         }
         return data
     }
-    
+
     private func isIOS17Available() -> Bool {
-        guard let version = Version(UIDevice.current.systemVersion) else {
-            return false
-        }
-        
+        guard let version = Version(UIDevice.current.systemVersion) else { return false }
         return version.major >= 17
     }
 }

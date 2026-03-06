@@ -21,6 +21,8 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:fluffychat/domain/keychain_sharing/keychain_sharing_manager.dart';
+
 import 'package:fcm_shared_isolate/fcm_shared_isolate.dart';
 import 'package:fluffychat/domain/model/extensions/push/push_notification_extension.dart';
 import 'package:fluffychat/presentation/extensions/client_extension.dart';
@@ -43,6 +45,7 @@ import 'package:unifiedpush/unifiedpush.dart';
 import '../config/app_config.dart';
 import '../config/setting_keys.dart';
 import 'famedlysdk_store.dart';
+import 'ios_megolm_session_writer.dart';
 import 'platform_infos.dart';
 
 class NoTokenException implements Exception {
@@ -109,6 +112,78 @@ class BackgroundPush {
         }
       });
       getIosInitialNoti();
+      _setupKeychainSyncListener();
+      _setupRoomKeyExportListener();
+      _exportExistingSessionKeys();
+    }
+  }
+
+  String? _lastKeychainAccessToken;
+
+  // Updates keychain on token rotation (initial write is done in ClientManager).
+  void _setupKeychainSyncListener() {
+    client.onSync.stream.listen((_) async {
+      final accessToken = client.accessToken;
+      if (accessToken == null ||
+          !client.isLogged() ||
+          accessToken == _lastKeychainAccessToken) {
+        return;
+      }
+      _lastKeychainAccessToken = accessToken;
+      final userId = client.userID;
+      final homeserver = client.homeserver?.toString();
+      if (userId == null || homeserver == null) return;
+      await KeychainSharingManager.saveSession(
+        accessToken: accessToken,
+        userId: userId,
+        deviceId: client.deviceID ?? '',
+        homeserverUrl: homeserver,
+      );
+    });
+  }
+
+  // Writes each incoming m.room_key to the AppGroup so the NSE can decrypt notifications.
+  void _setupRoomKeyExportListener() {
+    client.onToDeviceEvent.stream.listen((event) async {
+      if (event.type != EventTypes.RoomKey) return;
+      final roomId = event.content.tryGet<String>('room_id');
+      final sessionId = event.content.tryGet<String>('session_id');
+      final sessionKey = event.content.tryGet<String>('session_key');
+      if (roomId == null || sessionId == null || sessionKey == null) return;
+      await IosMegolmSessionWriter.writeSession(
+        roomId: roomId,
+        sessionId: sessionId,
+        sessionKey: sessionKey,
+      );
+    });
+  }
+
+  // Seeds the AppGroup with all existing inbound sessions at startup.
+  Future<void> _exportExistingSessionKeys() async {
+    if (!Platform.isIOS) return;
+    try {
+      final sessions = await client.database.getAllInboundGroupSessions();
+      for (final stored in sessions) {
+        Map<String, dynamic>? content;
+        try {
+          content = jsonDecode(stored.content) as Map<String, dynamic>?;
+        } catch (_) {
+          continue;
+        }
+        if (content == null) continue;
+        final sessionKey = content['session_key'];
+        if (sessionKey is! String) continue;
+        await IosMegolmSessionWriter.writeSession(
+          roomId: stored.roomId,
+          sessionId: stored.sessionId,
+          sessionKey: sessionKey,
+        );
+      }
+      Logs().d(
+        '[MegolmExport] Exported ${sessions.length} existing sessions to AppGroup',
+      );
+    } catch (e, s) {
+      Logs().w('[MegolmExport] Failed to export existing sessions', e, s);
     }
   }
 

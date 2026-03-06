@@ -220,15 +220,6 @@ class FlutterHiveCollectionsDatabase extends HiveCollectionsDatabase {
     );
   }
 
-  @override
-  Future<void> clear({bool supportDeleteCollections = false}) async {
-    if (PlatformInfos.isIOS) {
-      // TODO: Should pass userId here when support multiple accounts
-      await KeychainSharingManager.delete(userId: null);
-    }
-    return super.clear(supportDeleteCollections: supportDeleteCollections);
-  }
-
   static void _onStartMigrating(int currentVersion, int newVersion) async {
     Logs().d(
       'FlutterHiveCollectionsDatabase::startMigrationProcess() CurrentVersion - $currentVersion || NewVersion - $newVersion',
