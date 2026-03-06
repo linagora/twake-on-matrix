@@ -6,6 +6,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:patrol/patrol.dart';
 
+import 'package:fluffychat/presentation/enum/profile_info/profile_info_body_enum.dart';
+
 import '../../base/core_robot.dart';
 
 class ChatProfileInfoRobot extends CoreRobot {
@@ -181,6 +183,79 @@ class ChatProfileInfoRobot extends CoreRobot {
       await $(confirmButtons.first).tap();
     }
     await $.pumpAndSettle(timeout: const Duration(seconds: 5));
+  }
+
+  /// Find a profile action button by its enum value
+  PatrolFinder getProfileActionButton(ProfileInfoActions action) {
+    return $(find.byKey(Key('profile_action_${action.name}')));
+  }
+
+  /// Verify a profile action button is visible
+  Future<void> verifyProfileActionButtonVisible(
+    ProfileInfoActions action, {
+    bool expected = true,
+  }) async {
+    if (expected) {
+      try {
+        await getProfileActionButton(
+          action,
+        ).waitUntilVisible(timeout: const Duration(seconds: 5));
+      } catch (_) {
+        // Fall through to the expect below for a clear error message
+      }
+    } else {
+      await $.pump(const Duration(seconds: 2));
+    }
+    final button = getProfileActionButton(action);
+    expect(
+      button.exists,
+      expected,
+      reason: expected
+          ? '${action.name} button not found'
+          : '${action.name} button should not be visible',
+    );
+  }
+
+  /// Tap on a profile action button
+  Future<void> tapProfileActionButton(ProfileInfoActions action) async {
+    final button = getProfileActionButton(action);
+    await button.waitUntilVisible();
+    await button.tap();
+    await $.pump(const Duration(seconds: 2));
+  }
+
+  /// Confirm the transfer ownership dialog
+  Future<void> confirmTransferOwnership() async {
+    await $.waitUntilVisible(
+      $(find.byKey(TwakeDialog.showConfirmAlertDialogKey)),
+    );
+
+    final dialogFinder = find.byKey(TwakeDialog.showConfirmAlertDialogKey);
+    final confirmButton = find.descendant(
+      of: dialogFinder,
+      matching: find.textContaining('Confirm'),
+    );
+
+    if (confirmButton.evaluate().isNotEmpty) {
+      await $(confirmButton).tap();
+      await $.pump(const Duration(seconds: 3));
+      return;
+    }
+
+    // Fallback: tap the first confirm-style button
+    final buttons = find.descendant(
+      of: dialogFinder,
+      matching: find.byWidgetPredicate(
+        (widget) => widget is TextButton || widget is ElevatedButton,
+      ),
+    );
+
+    if (buttons.evaluate().length >= 2) {
+      await $(buttons.at(1)).tap();
+    } else if (buttons.evaluate().isNotEmpty) {
+      await $(buttons.first).tap();
+    }
+    await $.pump(const Duration(seconds: 3));
   }
 
   /// Navigate back from profile info screen
