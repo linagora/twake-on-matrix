@@ -315,7 +315,8 @@ class _MessageContentWithTimestampBuilderState
                                                       mainAxisSize:
                                                           MainAxisSize.min,
                                                       context: context,
-                                                      timelineText: timelineText,
+                                                      timelineText:
+                                                          timelineText,
                                                       noBubble: noBubble,
                                                       displayTime: displayTime,
                                                       paddingBubble:
