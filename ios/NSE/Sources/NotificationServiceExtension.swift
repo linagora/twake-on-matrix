@@ -74,7 +74,8 @@ class NotificationServiceExtension: UNNotificationServiceExtension {
         MXLog.info("\(tag) run with roomId: \(roomId), eventId: \(eventId)")
 
         do {
-            let userSession = try NSEUserSession(credentials: credentials, clientSessionDelegate: keychainController)
+            let recoveryKey = keychainController.recoveryKey(forUsername: credentials.userID)
+            let userSession = try await NSEUserSession(credentials: credentials, roomID: roomId, clientSessionDelegate: keychainController, recoveryKey: recoveryKey)
             self.userSession = userSession
             
             guard let itemProxy = await userSession.notificationItemProxy(roomID: roomId, eventID: eventId) else {
@@ -128,7 +129,7 @@ class NotificationServiceExtension: UNNotificationServiceExtension {
     private func discard() {
         MXLog.info("\(tag) discard")
 
-        handler?(UNMutableNotificationContent())
+        handler?(modifiedContent ?? UNMutableNotificationContent())
         cleanUp()
     }
 

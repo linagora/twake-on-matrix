@@ -78,4 +78,18 @@ extension URL: ExpressibleByStringLiteral {
 
         return url
     }
+    
+    static func sessionsBaseDirectory(userId: String, deviceId: String) -> URL {
+        let dir = sessionsBaseDirectory;
+        let userIdAppendedDir = dir.appendingPathComponent(userId, isDirectory: true).appendingPathComponent(deviceId, isDirectory: true)
+        try? FileManager.default.createDirectoryIfNeeded(at: userIdAppendedDir)
+        return userIdAppendedDir
+    }
+    
+    static func cacheBaseDirectory(userId: String, deviceId: String) -> URL {
+        let dir = cacheBaseDirectory;
+        let userIdAppendedDir = dir.appendingPathComponent(userId, isDirectory: true).appendingPathComponent(deviceId, isDirectory: true)
+        try? FileManager.default.createDirectoryIfNeeded(at: userIdAppendedDir)
+        return userIdAppendedDir
+    }
 }
