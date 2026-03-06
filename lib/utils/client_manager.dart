@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:fluffychat/domain/keychain_sharing/keychain_sharing_manager.dart';
 import 'package:fluffychat/utils/custom_http_client.dart';
 import 'package:fluffychat/utils/custom_image_resizer.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/flutter_hive_collections_database.dart';
@@ -41,6 +42,7 @@ abstract class ClientManager {
                 waitForFirstSync: false,
                 waitUntilLoadCompletedLoaded: false,
               )
+              .then((_) => _syncKeychainForClient(client))
               .catchError(
                 (e, s) => Logs().e('Unable to initialize client', e, s),
               ),
@@ -86,6 +88,20 @@ abstract class ClientManager {
     }
     clientNamesList.remove(clientName);
     await Store().setItem(clientNamespace, jsonEncode(clientNamesList));
+  }
+
+  static Future<void> _syncKeychainForClient(Client client) async {
+    if (!PlatformInfos.isIOS || !client.isLogged()) return;
+    final accessToken = client.accessToken;
+    final userId = client.userID;
+    final homeserver = client.homeserver?.toString();
+    if (accessToken == null || userId == null || homeserver == null) return;
+    await KeychainSharingManager.saveSession(
+      accessToken: accessToken,
+      userId: userId,
+      deviceId: client.deviceID ?? '',
+      homeserverUrl: homeserver,
+    );
   }
 
   static NativeImplementations get nativeImplementations => kIsWeb
