@@ -1,16 +1,16 @@
+import 'package:fluffychat/generated/l10n/app_localizations.dart';
 import 'package:fluffychat/pages/chat/events/message/message_style.dart';
 import 'package:fluffychat/pages/chat/events/message_time_style.dart';
 import 'package:fluffychat/pages/chat/events/text_message_retry_button.dart';
 import 'package:fluffychat/pages/chat/seen_by_row.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
+import 'package:fluffychat/utils/room_status_extension.dart';
 import 'package:fluffychat/widgets/twake_components/twake_icon_button.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:linagora_design_flutter/colors/linagora_ref_colors.dart';
-import 'package:matrix/matrix.dart';
 import 'package:linagora_design_flutter/colors/linagora_state_layer.dart';
-import 'package:fluffychat/utils/room_status_extension.dart';
-import 'package:fluffychat/generated/l10n/app_localizations.dart';
+import 'package:matrix/matrix.dart';
 
 class MessageTime extends StatelessWidget {
   const MessageTime({
@@ -90,13 +90,11 @@ class MessageTime extends StatelessWidget {
             SizedBox(width: MessageTimeStyle.paddingTimeAndIcon),
             SeenByRow(
               timelineOverlayMessage: timelineOverlayMessage,
-              participants: timeline.room.getParticipants(),
               getSeenByUsers: room.getSeenByUsers(
                 timeline,
                 eventId: event.eventId,
               ),
               eventStatus: event.status,
-              event: event,
             ),
           ],
         ],

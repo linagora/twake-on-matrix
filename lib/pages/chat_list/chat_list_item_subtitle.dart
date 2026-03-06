@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/config/themes.dart';
 import 'package:fluffychat/generated/l10n/app_localizations.dart';
+import 'package:fluffychat/pages/chat/events/message_time_style.dart';
 import 'package:fluffychat/pages/chat/typing_timer_wrapper.dart';
 import 'package:fluffychat/pages/chat_list/chat_list_item_style.dart';
 import 'package:fluffychat/presentation/mixins/chat_list_item_mixin.dart';
@@ -10,8 +11,6 @@ import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
 import 'package:fluffychat/utils/room_status_extension.dart';
 import 'package:flutter/material.dart';
-import 'package:linagora_design_flutter/colors/linagora_ref_colors.dart';
-import 'package:linagora_design_flutter/colors/linagora_sys_colors.dart';
 import 'package:matrix/matrix.dart';
 
 class ChatListItemSubtitle extends StatelessWidget with ChatListItemMixin {
@@ -72,9 +71,9 @@ class ChatListItemSubtitle extends StatelessWidget with ChatListItemMixin {
             return lastEvent.senderId == room.client.userID
                 ? Icon(
                     Icons.done_all,
-                    color: room.hasLastEventBeenSeenByOthers
-                        ? LinagoraSysColors.material().secondary
-                        : LinagoraRefColors.material().neutral[50],
+                    color: MessageTimeStyle.readReceiptColor(
+                      room.hasLastEventBeenSeenByOthers,
+                    ),
                     size: 20,
                   )
                 : AnimatedContainer(
