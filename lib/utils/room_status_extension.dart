@@ -1,8 +1,8 @@
+import 'package:collection/collection.dart';
+import 'package:fluffychat/generated/l10n/app_localizations.dart';
 import 'package:fluffychat/utils/date_time_extension.dart';
 import 'package:fluffychat/utils/string_extension.dart';
 import 'package:flutter/widgets.dart';
-
-import 'package:fluffychat/generated/l10n/app_localizations.dart';
 import 'package:matrix/matrix.dart';
 
 import '../config/app_config.dart';
@@ -80,9 +80,22 @@ extension RoomStatusExtension on Room {
           break;
         }
       }
+      /* Remove the current user from the receipts list, as we don't want to show that the current user
+      has seen their own message. Because sender always sees their own message.  */
       lastReceipts.removeWhere((user) => user.id == client.userID);
     }
     return lastReceipts.toList();
+  }
+
+  /// Returns true if the last event has been seen by at least one other user.
+  ///
+  /// [receipts] is a getter that reads from [room.receiptState], so it is always
+  /// up to date without requiring the [Timeline] to be loaded.
+  bool get hasLastEventBeenSeenByOthers {
+    return lastEvent?.receipts
+            .whereNot((r) => r.user.id == client.userID)
+            .isNotEmpty ??
+        false;
   }
 
   bool isTypingText(BuildContext context) {

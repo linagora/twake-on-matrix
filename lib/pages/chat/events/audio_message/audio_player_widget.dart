@@ -1,11 +1,14 @@
 import 'dart:async';
 import 'dart:io';
+
 import 'package:async/async.dart';
+import 'package:fluffychat/generated/l10n/app_localizations.dart';
 import 'package:fluffychat/pages/chat/events/audio_message/audio_play_extension.dart';
 import 'package:fluffychat/pages/chat/events/audio_message/audio_player_style.dart';
 import 'package:fluffychat/pages/chat/events/message/message_style.dart';
 import 'package:fluffychat/pages/chat/seen_by_row.dart';
 import 'package:fluffychat/presentation/mixins/audio_mixin.dart';
+import 'package:fluffychat/utils/localized_exception_extension.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/download_file_extension.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
@@ -22,11 +25,8 @@ import 'package:intl/intl.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:matrix/matrix.dart';
-import 'package:fluffychat/generated/l10n/app_localizations.dart';
-import 'package:path_provider/path_provider.dart';
-
-import 'package:fluffychat/utils/localized_exception_extension.dart';
 import 'package:opus_caf_converter_dart/opus_caf_converter_dart.dart';
+import 'package:path_provider/path_provider.dart';
 
 class AudioPlayerWidget extends StatefulWidget {
   final Color color;
@@ -430,13 +430,11 @@ class AudioPlayerState extends State<AudioPlayerWidget>
                 const SizedBox(width: 4),
                 SeenByRow(
                   timelineOverlayMessage: widget.event.timelineOverlayMessage,
-                  participants: widget.timeline.room.getParticipants(),
                   getSeenByUsers: widget.event.room.getSeenByUsers(
                     widget.timeline,
                     eventId: widget.event.eventId,
                   ),
                   eventStatus: widget.event.status,
-                  event: widget.event,
                 ),
               ],
             ),
