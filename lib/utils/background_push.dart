@@ -22,6 +22,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:fcm_shared_isolate/fcm_shared_isolate.dart';
+import 'package:fluffychat/domain/keychain_sharing/keychain_sharing_manager.dart';
 import 'package:fluffychat/domain/model/extensions/push/push_notification_extension.dart';
 import 'package:fluffychat/presentation/extensions/client_extension.dart';
 import 'package:fluffychat/presentation/extensions/go_router_extensions.dart';
@@ -109,7 +110,31 @@ class BackgroundPush {
         }
       });
       getIosInitialNoti();
+      _setupKeychainSyncListener();
     }
+  }
+
+  String? _lastKeychainAccessToken;
+
+  void _setupKeychainSyncListener() {
+    client.onSync.stream.listen((_) async {
+      final accessToken = client.accessToken;
+      if (accessToken == null || !client.isLogged()) return;
+
+      if (accessToken != _lastKeychainAccessToken) {
+        _lastKeychainAccessToken = accessToken;
+        final userId = client.userID;
+        final homeserver = client.homeserver?.toString();
+        if (userId != null && homeserver != null) {
+          await KeychainSharingManager.saveSession(
+            accessToken: accessToken,
+            userId: userId,
+            deviceId: client.deviceID ?? '',
+            homeserverUrl: homeserver,
+          );
+        }
+      }
+    });
   }
 
   factory BackgroundPush.clientOnly(Client client) {

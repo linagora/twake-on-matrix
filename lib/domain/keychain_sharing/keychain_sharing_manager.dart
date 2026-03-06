@@ -15,6 +15,35 @@ class KeychainSharingManager {
     ),
   );
 
+  static Future<void> saveSession({
+    required String accessToken,
+    required String userId,
+    required String homeserverUrl,
+    String deviceId = '',
+  }) async {
+    try {
+      final oldToken = await read(userId: userId);
+      if (oldToken?.session.accessToken == accessToken &&
+          oldToken?.session.userId == userId &&
+          oldToken?.session.homeserverUrl == homeserverUrl &&
+          oldToken?.session.deviceId == deviceId) {
+        return;
+      }
+      final token = KeychainSharingRestoreToken(
+        session: KeychainSharingSession(
+          accessToken: accessToken,
+          userId: userId,
+          deviceId: deviceId,
+          homeserverUrl: homeserverUrl,
+        ),
+      );
+      await save(token);
+      Logs().d('[KeychainSharing] Saved restore token for $userId');
+    } catch (e, s) {
+      Logs().w('[KeychainSharing] Unable to save restore token', e, s);
+    }
+  }
+
   static Future save(KeychainSharingRestoreToken token) => _secureStorage.write(
     key: token.session.userId,
     value: jsonEncode(token.toJson()),
