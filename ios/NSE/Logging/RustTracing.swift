@@ -132,19 +132,3 @@ struct TracingConfiguration {
         filter = components.joined(separator: ",")
     }
 }
-
-func setupTracing(configuration: TracingConfiguration, otlpConfiguration: OTLPConfiguration?) {
-    if let otlpConfiguration {
-        setupOtlpTracing(config: .init(clientName: "ElementX-iOS",
-                                       user: otlpConfiguration.username,
-                                       password: otlpConfiguration.password,
-                                       otlpEndpoint: otlpConfiguration.url,
-                                       filter: configuration.filter,
-                                       writeToStdoutOrSystem: true,
-                                       writeToFiles: nil))
-    } else {
-        setupTracing(config: .init(filter: configuration.filter,
-                                   writeToStdoutOrSystem: true,
-                                   writeToFiles: nil))
-    }
-}

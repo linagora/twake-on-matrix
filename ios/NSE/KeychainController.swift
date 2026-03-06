@@ -88,6 +88,18 @@ class KeychainController: KeychainControllerProtocol {
         }
     }
     
+    // MARK: - Recovery Key
+
+    func recoveryKey(forUsername username: String) -> String? {
+        let keychainKey = "ssss_recovery_\(username)"
+        do {
+            return try keychain.getString(keychainKey)
+        } catch {
+            MXLog.error("Failed retrieving SSSS recovery key: \(error)")
+            return nil
+        }
+    }
+
     // MARK: - ClientSessionDelegate
     
     func retrieveSessionFromKeychain(userId: String) throws -> Session {

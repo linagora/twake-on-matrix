@@ -12,6 +12,7 @@ import 'package:fluffychat/presentation/mixins/connect_page_mixin.dart';
 import 'package:fluffychat/presentation/enum/settings/settings_enum.dart';
 import 'package:fluffychat/presentation/extensions/client_extension.dart';
 import 'package:fluffychat/utils/dialog/twake_dialog.dart';
+import 'package:fluffychat/domain/keychain_sharing/keychain_sharing_manager.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/utils/url_launcher.dart';
 import 'package:fluffychat/widgets/matrix.dart';
@@ -119,10 +120,13 @@ class SettingsController extends State<Settings> with ConnectPageMixin {
           if (matrix.backgroundPush != null) {
             await matrix.backgroundPush!.removeCurrentPusher();
           }
+          final userId = matrix.client.userID;
           await Future.wait([
             matrix.client.logout(),
             _deleteTomConfigurations(matrix.client),
             _deleteFederationConfigurations(matrix.client),
+            if (PlatformInfos.isIOS && userId != null)
+              KeychainSharingManager.deleteRecoveryKey(userId: userId),
           ]);
         } catch (e) {
           Logs().e('SettingsController()::_logoutActionsOnMobile - error: $e');
@@ -138,10 +142,13 @@ class SettingsController extends State<Settings> with ConnectPageMixin {
           if (matrix.backgroundPush != null) {
             await matrix.backgroundPush!.removeCurrentPusher();
           }
+          final userId = matrix.client.userID;
           await Future.wait([
             matrix.client.logout(),
             _deleteTomConfigurations(matrix.client),
             _deleteFederationConfigurations(matrix.client),
+            if (PlatformInfos.isIOS && userId != null)
+              KeychainSharingManager.deleteRecoveryKey(userId: userId),
           ]);
         } catch (e) {
           Logs().e('SettingsController()::_logoutActions - error: $e');

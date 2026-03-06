@@ -25,41 +25,52 @@ final class NSEUserSession {
                                                                                imageCache: .onlyOnDisk,
                                                                                backgroundTaskService: nil)
 
-    init(credentials: KeychainCredentials, clientSessionDelegate: ClientSessionDelegate) throws {
+    init(credentials: KeychainCredentials,
+         clientSessionDelegate: ClientSessionDelegate,
+         recoveryKey: String?) async throws {
         userID = credentials.userID
-        baseClient = try ClientBuilder()
-            .basePath(path: URL.sessionsBaseDirectory.path)
+        baseClient = try await ClientBuilder()
+            .sessionPaths(dataPath: URL.sessionsBaseDirectory.path,
+                          cachePath: URL.cacheBaseDirectory.path)
             .username(username: credentials.userID)
             .userAgent(userAgent: UserAgentBuilder.makeASCIIUserAgent())
+            .backupDownloadStrategy(backupDownloadStrategy: .afterDecryptionFailure)
             .enableCrossProcessRefreshLock(processId: InfoPlistReader.main.bundleIdentifier,
                                            sessionDelegate: clientSessionDelegate)
             .build()
         
-        baseClient.setDelegate(delegate: ClientDelegateWrapper())
-        try baseClient.restoreSession(session: credentials.restorationToken.session)
+        _ = baseClient.setDelegate(delegate: ClientDelegateWrapper())
+        try await baseClient.restoreSession(session: credentials.restorationToken.session)
         
-        notificationClient = try baseClient
+        if let recoveryKey {
+            do {
+                MXLog.info("NSE: Registering backup recovery key...")
+                try await baseClient.encryption().recover(recoveryKey: recoveryKey)
+                MXLog.info("NSE: Backup recovery key registered successfully")
+            } catch {
+                MXLog.warning("NSE: Failed to register backup recovery key (will attempt decryption without it): \(error)")
+            }
+        } else {
+            MXLog.info("NSE: No backup recovery key found in keychain, skipping recovery")
+        }
+
+        notificationClient = try await baseClient
             .notificationClient(processSetup: .multipleProcesses)
-            .filterByPushRules()
-            .finish()
     }
     
     func notificationItemProxy(roomID: String, eventID: String) async -> NotificationItemProxyProtocol? {
-        await Task.dispatch(on: .global()) {
-            do {
-                let notification = try self.notificationClient.getNotification(roomId: roomID, eventId: eventID)
-                
-                guard let notification else {
-                    return nil
-                }
-                return NotificationItemProxy(notificationItem: notification,
-                                             eventID: eventID,
-                                             receiverID: self.userID,
-                                             roomID: roomID)
-            } catch {
-                MXLog.error("NSE: Could not get notification's content creating an empty notification instead, error: \(error)")
-                return EmptyNotificationItemProxy(eventID: eventID, roomID: roomID, receiverID: self.userID)
+        do {
+            let notification = try await self.notificationClient.getNotification(roomId: roomID, eventId: eventID)
+            guard let notification else {
+                return nil
             }
+            return NotificationItemProxy(notificationItem: notification,
+                                         eventID: eventID,
+                                         receiverID: self.userID,
+                                         roomID: roomID)
+        } catch {
+            MXLog.error("NSE: Could not get notification's content creating an empty notification instead, error: \(error)")
+            return EmptyNotificationItemProxy(eventID: eventID, roomID: roomID, receiverID: self.userID)
         }
     }
 }
