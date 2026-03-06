@@ -1,5 +1,6 @@
 import 'package:adaptive_dialog/adaptive_dialog.dart';
 import 'package:fluffychat/config/themes.dart';
+import 'package:fluffychat/domain/keychain_sharing/keychain_sharing_manager.dart';
 import 'package:fluffychat/pages/bootstrap/tom_bootstrap_dialog.dart';
 import 'package:fluffychat/pages/key_verification/key_verification_dialog.dart';
 import 'package:fluffychat/utils/dialog/twake_dialog.dart';
@@ -299,6 +300,10 @@ class BootstrapDialogState extends State<BootstrapDialog> {
                                     .selfSign(keyOrPassphrase: key);
                                 Logs().d('Successful elfsigned');
                                 await bootstrap.openExistingSsss();
+                                await KeychainSharingManager.saveRecoveryKey(
+                                  userId: bootstrap.client.userID,
+                                  recoveryKey: key,
+                                );
                               } catch (e, s) {
                                 Logs().w('Unable to unlock SSSS', e, s);
                                 setState(
