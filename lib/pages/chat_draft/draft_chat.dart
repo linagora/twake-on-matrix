@@ -43,7 +43,7 @@ import 'package:fluffychat/widgets/mixins/drag_drog_file_mixin.dart';
 import 'package:flutter/material.dart';
 import 'package:fluffychat/generated/l10n/app_localizations.dart';
 import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
-import 'package:go_router/go_router.dart';
+import 'package:fluffychat/config/go_routes/app_routes.dart';
 import 'package:linagora_design_flutter/images_picker/asset_counter.dart';
 import 'package:linagora_design_flutter/images_picker/images_picker.dart'
     hide ImagePicker;
@@ -427,16 +427,16 @@ class DraftChatController extends State<DraftChat>
                 ).client.getRoomById(success.roomId);
                 if (room != null) {
                   onRoomCreatedSuccess?.call(room);
-                  context.go(
-                    '/rooms/${room.id}/',
-                    extra: ChatRouterInputArgument(
+                  RoomRoute(
+                    roomid: room.id,
+                    $extra: ChatRouterInputArgument(
                       type: ChatRouterInputArgumentType.draft,
                       data:
                           _userProfile.value?.displayName ??
                           presentationContact.displayName ??
                           room.name,
                     ),
-                  );
+                  ).go(context);
                 }
               }
             },

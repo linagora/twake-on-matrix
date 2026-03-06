@@ -5,6 +5,7 @@ import 'package:adaptive_dialog/adaptive_dialog.dart';
 import 'package:collection/collection.dart';
 import 'package:fluffychat/generated/l10n/app_localizations.dart';
 
+import 'package:fluffychat/config/go_routes/app_routes.dart';
 import 'package:go_router/go_router.dart';
 import 'package:matrix/matrix.dart';
 import 'package:fluffychat/pages/chat_list/chat_list.dart';
@@ -69,7 +70,7 @@ class _SpaceViewState extends State<SpaceView> {
       }
       return;
     }
-    context.go('/rooms/${spaceChild.roomId}');
+    RoomRoute(roomid: spaceChild.roomId).go(context);
   }
 
   void _onSpaceChildContextMenu([

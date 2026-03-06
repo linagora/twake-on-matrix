@@ -11,7 +11,7 @@ import 'package:fluffychat/widgets/mixins/popup_menu_widget_style.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:fluffychat/generated/l10n/app_localizations.dart';
-import 'package:go_router/go_router.dart';
+import 'package:fluffychat/config/go_routes/app_routes.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 
 class ChatBlank extends StatelessWidget {
@@ -173,7 +173,7 @@ class _ChatBlankRichText extends StatelessWidget with GoToGroupChatMixin {
     if (!goRouteAvailableInFirstColumn) {
       innerNavigatorContext().pushInner('innernavigator/newprivatechat');
     } else {
-      innerNavigatorContext().push('/rooms/newprivatechat');
+      const NewPrivateChatRoute().push(innerNavigatorContext());
     }
   }
 }

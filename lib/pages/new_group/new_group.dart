@@ -5,7 +5,7 @@ import 'package:fluffychat/utils/extension/build_context_extension.dart';
 import 'package:fluffychat/utils/responsive/responsive_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:fluffychat/generated/l10n/app_localizations.dart';
-import 'package:go_router/go_router.dart';
+import 'package:fluffychat/config/go_routes/app_routes.dart';
 
 class NewGroup extends StatefulWidget {
   const NewGroup({super.key});
@@ -39,10 +39,7 @@ class NewGroupController extends ContactsSelectionController<NewGroup> {
         arguments: contactsList.toSet(),
       );
     } else {
-      context.push(
-        '/rooms/newprivatechat/newgroup/newgroupinfo',
-        extra: contactsList.toSet(),
-      );
+      NewPrivateChatNewGroupInfoRoute($extra: contactsList.toSet()).push(context);
     }
   }
 }

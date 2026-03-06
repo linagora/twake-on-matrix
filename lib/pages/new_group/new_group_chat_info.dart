@@ -36,7 +36,7 @@ import 'package:fluffychat/presentation/model/chat/chat_router_input_argument.da
 import 'package:fluffychat/utils/dialog/warning_dialog.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/generated/l10n/app_localizations.dart';
-import 'package:go_router/go_router.dart';
+import 'package:fluffychat/config/go_routes/app_routes.dart';
 import 'package:linagora_design_flutter/images_picker/asset_counter.dart';
 import 'package:linagora_design_flutter/images_picker/images_picker.dart';
 import 'package:wechat_camera_picker/wechat_camera_picker.dart';
@@ -271,13 +271,13 @@ class NewGroupChatInfoController extends State<NewGroupChatInfo>
   }
 
   void _goToRoom({required String roomId, String? groupName}) {
-    context.go(
-      "/rooms/$roomId",
-      extra: ChatRouterInputArgument(
+    RoomRoute(
+      roomid: roomId,
+      $extra: ChatRouterInputArgument(
         type: ChatRouterInputArgumentType.draft,
         data: groupName,
       ),
-    );
+    ).go(context);
   }
 
   void updateAvatarFilePicker(MatrixFile matrixFile) {

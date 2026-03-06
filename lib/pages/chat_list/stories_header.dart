@@ -6,7 +6,7 @@ import 'package:adaptive_dialog/adaptive_dialog.dart';
 import 'package:collection/collection.dart';
 import 'package:fluffychat/generated/l10n/app_localizations.dart';
 
-import 'package:go_router/go_router.dart';
+import 'package:fluffychat/config/go_routes/app_routes.dart';
 import 'package:matrix/matrix.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/client_stories_extension.dart';
 import 'package:fluffychat/widgets/avatar/avatar.dart';
@@ -19,7 +19,7 @@ class StoriesHeader extends StatelessWidget {
 
   const StoriesHeader({required this.filter, super.key});
 
-  void _addToStoryAction(BuildContext context) => context.go('/stories/create');
+  void _addToStoryAction(BuildContext context) => const StoriesCreateRoute().go(context);
 
   void _goToStoryAction(BuildContext context, String roomId) async {
     final room = Matrix.of(context).client.getRoomById(roomId);
@@ -30,7 +30,7 @@ class StoriesHeader extends StatelessWidget {
       );
       if (result.error != null) return;
     }
-    context.go('/stories/$roomId');
+    StoryRoute(roomid: roomId).go(context);
   }
 
   void _contextualActions(BuildContext context, Room room) async {
@@ -249,7 +249,7 @@ class _StoryButton extends StatelessWidget {
                               height: 24,
                               child: FloatingActionButton.small(
                                 heroTag: null,
-                                onPressed: () => context.go('/stories/create'),
+                                onPressed: () => const StoriesCreateRoute().go(context),
                                 child: const Icon(Icons.add_outlined, size: 16),
                               ),
                             ),

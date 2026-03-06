@@ -8,6 +8,7 @@ import 'package:flutter/services.dart';
 import 'package:adaptive_dialog/adaptive_dialog.dart';
 import 'package:fluffychat/generated/l10n/app_localizations.dart';
 
+import 'package:fluffychat/config/go_routes/app_routes.dart';
 import 'package:go_router/go_router.dart';
 import 'package:keyboard_shortcuts/keyboard_shortcuts.dart';
 import 'package:matrix/matrix.dart';
@@ -148,7 +149,7 @@ class ChatSettingsPopupMenuState extends State<ChatSettingsPopupMenu> {
                         future: () => widget.room.leave(),
                       );
                   if (success.error == null) {
-                    context.go('/rooms');
+                    const RoomsRoute().go(context);
                   }
                 }
                 break;
@@ -189,7 +190,7 @@ class ChatSettingsPopupMenuState extends State<ChatSettingsPopupMenu> {
 
   void _showChatDetails() {
     if (GoRouterState.of(context).path?.endsWith('/details') == true) {
-      context.go('/rooms/${widget.room.id}');
+      RoomRoute(roomid: widget.room.id).go(context);
     } else {
       context.go('/rooms/${widget.room.id}/details');
     }

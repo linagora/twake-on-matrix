@@ -1,4 +1,4 @@
-import 'package:fluffychat/config/go_routes/app_route_paths.dart';
+import 'package:fluffychat/config/go_routes/app_routes.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/pages/settings_dashboard/settings/settings_item_builder.dart';
 import 'package:fluffychat/pages/settings_dashboard/settings/settings_view_style.dart';
@@ -72,7 +72,7 @@ class SettingsSecurityView extends StatelessWidget {
                       leadingIconColor:
                           LinagoraRefColors.material().tertiary[30],
                       onTap: () {
-                        context.push(AppRoutePaths.contactsVisibilityFull);
+                        const SecurityContactsVisibilityRoute().push(context);
                       },
                     ),
                   ),
@@ -109,7 +109,7 @@ class SettingsSecurityView extends StatelessWidget {
                           ),
                           onTap: () {
                             if (ignoredUsers.isNotEmpty) {
-                              context.push('/rooms/security/blockedUsers');
+                              const SecurityBlockedUsersRoute().push(context);
                             }
                           },
                         );

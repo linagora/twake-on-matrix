@@ -9,7 +9,7 @@ import 'package:fluffychat/utils/extension/value_notifier_extension.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
-import 'package:go_router/go_router.dart';
+import 'package:fluffychat/config/go_routes/app_routes.dart';
 import 'package:matrix/matrix.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
 
@@ -90,7 +90,7 @@ class ShareController extends State<Share>
     if (textContent == null) return;
     Navigator.pop(context);
     room.sendEvent(textContent);
-    context.go('/rooms/${room.id}');
+    RoomRoute(roomid: room.id).go(context);
   }
 
   void _handleShareFilesContent({
@@ -108,13 +108,13 @@ class ShareController extends State<Share>
               .map((content) => content?.tryGet<MatrixFile>('file'))
               .toList();
           Matrix.of(context).clearShareContentList();
-          context.go(
-            '/rooms/${room.id}',
-            extra: ChatRouterInputArgument(
+          RoomRoute(
+            roomid: room.id,
+            $extra: ChatRouterInputArgument(
               type: ChatRouterInputArgumentType.share,
               data: fileList,
             ),
-          );
+          ).go(context);
         });
       }
     }

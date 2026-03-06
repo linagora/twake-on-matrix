@@ -18,6 +18,7 @@ import 'package:flutter/material.dart' hide SearchController;
 import 'package:flutter/scheduler.dart';
 import 'package:fluffychat/generated/l10n/app_localizations.dart';
 
+import 'package:fluffychat/config/go_routes/app_routes.dart';
 import 'package:go_router/go_router.dart';
 import 'package:matrix/matrix.dart';
 
@@ -103,7 +104,7 @@ class SearchController extends State<Search> with WidgetsBindingObserver {
   }
 
   void goToSettingsProfile() {
-    context.go('/rooms/profile');
+    const ProfileRoute().go(context);
   }
 
   void onContactTap(ContactPresentationSearch contactPresentationSearch) {
@@ -116,7 +117,7 @@ class SearchController extends State<Search> with WidgetsBindingObserver {
         contactPresentationSearch: contactPresentationSearch,
       );
     } else {
-      context.go('/rooms/$roomId');
+      RoomRoute(roomid: roomId).go(context);
     }
   }
 
@@ -126,7 +127,7 @@ class SearchController extends State<Search> with WidgetsBindingObserver {
     Logs().d(
       'SearchController::onRecentChatTap() - MatrixID: ${recentChatPresentationSearch.id}',
     );
-    context.go('/rooms/${recentChatPresentationSearch.id}');
+    RoomRoute(roomid: recentChatPresentationSearch.id).go(context);
   }
 
   void goToDraftChat({
@@ -156,7 +157,7 @@ class SearchController extends State<Search> with WidgetsBindingObserver {
       future: () => user.startDirectChat(),
     );
     if (roomIdResult.error != null) return;
-    context.go('/rooms/${roomIdResult.result!}');
+    RoomRoute(roomid: roomIdResult.result!).go(context);
   }
 
   @override

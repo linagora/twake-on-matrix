@@ -3,7 +3,7 @@ import 'package:fluffychat/resource/image_paths.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:fluffychat/generated/l10n/app_localizations.dart';
-import 'package:go_router/go_router.dart';
+import 'package:fluffychat/config/go_routes/app_routes.dart';
 
 class ErrorPage extends StatelessWidget {
   const ErrorPage({super.key});
@@ -83,7 +83,7 @@ class _ErrorPageBackButton extends StatelessWidget {
   }
 
   void _goToRooms(BuildContext context) {
-    context.go('/rooms');
+    const RoomsRoute().go(context);
   }
 }
 
