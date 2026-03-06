@@ -355,11 +355,15 @@ extension RoomExtension on Room {
                 false)),
   );
 
+  /// Get the default power level for users in the room
+  ///
   int getUserDefaultLevel() {
+    const usersDefaultKey = 'users_default';
+
     return getState(
           EventTypes.RoomPowerLevels,
-        )!.content.tryGet<int>('users_default') ??
-        0;
+        )?.content.tryGet<int>(usersDefaultKey) ??
+        DefaultPowerLevelMember.guest.powerLevel;
   }
 
   bool get canTransferOwnership {
