@@ -1,5 +1,8 @@
+import 'dart:io';
+
 import 'package:fluffychat/di/global/dio_cache_interceptor_for_client.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
+import 'package:fluffychat/domain/keychain_sharing/keychain_sharing_manager.dart';
 import 'package:fluffychat/domain/model/recovery_words/recovery_words.dart';
 import 'package:fluffychat/domain/usecase/recovery/delete_recovery_words_interactor.dart';
 import 'package:fluffychat/domain/usecase/recovery/get_recovery_words_interactor.dart';
@@ -214,10 +217,16 @@ class TomBootstrapDialogState extends State<TomBootstrapDialog>
             'TomBootstrapDialogState::build(): start backup process with key ${bootstrap?.newSsssKey!.recoveryKey}',
           );
           final key = bootstrap?.newSsssKey!.recoveryKey;
-          WidgetsBinding.instance.addPostFrameCallback((_) {
+          WidgetsBinding.instance.addPostFrameCallback((_) async {
             Logs().i(
               'TomBootstrapDialogState::build(): check if key is already in TOM = ${_existedRecoveryWordsInTom(key)} - ${_recoveryWords?.words}',
             );
+            if (Platform.isIOS && key != null && widget.client.userID != null) {
+              await KeychainSharingManager.saveRecoveryKey(
+                userId: widget.client.userID!,
+                recoveryKey: key,
+              );
+            }
             if (_existedRecoveryWordsInTom(key)) {
               _uploadRecoveryKeyState = UploadRecoveryKeyState.uploaded;
               return;
@@ -364,7 +373,9 @@ class TomBootstrapDialogState extends State<TomBootstrapDialog>
         case BootstrapState.done:
           WidgetsBinding.instance.addPostFrameCallback((_) {
             Matrix.of(context).showToMBootstrap.value = false;
-            Navigator.of(context, rootNavigator: false).pop<bool>(true);
+            if (Navigator.canPop(context)) {
+              Navigator.of(context, rootNavigator: false).pop<bool>(true);
+            }
           });
           break;
       }
@@ -446,6 +457,12 @@ class TomBootstrapDialogState extends State<TomBootstrapDialog>
       );
       Logs().i('TomBootstrapDialogState::_unlockBackUp() open existing SSSS');
       await bootstrap?.openExistingSsss();
+      if (Platform.isIOS && widget.client.userID != null) {
+        await KeychainSharingManager.saveRecoveryKey(
+          userId: widget.client.userID!,
+          recoveryKey: recoveryWords.words,
+        );
+      }
     } catch (e, s) {
       Logs().w(
         'TomBootstrapDialogState::_unlockBackUp() Unable to unlock SSSS',
