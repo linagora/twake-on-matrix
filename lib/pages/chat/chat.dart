@@ -1140,7 +1140,9 @@ class ChatController extends State<Chat>
       );
     }
     _clearSelectEvent();
-    ForwardRoute($extra: ForwardArgument(fromRoomId: roomId ?? '')).push(context);
+    ForwardRoute(
+      $extra: ForwardArgument(fromRoomId: roomId ?? ''),
+    ).push(context);
   }
 
   void sendAgainAction() {

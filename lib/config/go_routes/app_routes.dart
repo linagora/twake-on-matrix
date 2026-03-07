@@ -65,16 +65,14 @@ ResponsiveUtils get _responsive => getIt.get<ResponsiveUtils>();
 FutureOr<String?> _loggedInRedirect(
   BuildContext context,
   GoRouterState state,
-) =>
-    Matrix.of(context).client.isLogged() ? const RoomsRoute().location : null;
+) => Matrix.of(context).client.isLogged() ? const RoomsRoute().location : null;
 
 FutureOr<String?> _loggedOutRedirect(
   BuildContext context,
   GoRouterState state,
-) =>
-    Matrix.of(context).client.isLogged()
-        ? null
-        : const HomeTwakeWelcomeRoute().location;
+) => Matrix.of(context).client.isLogged()
+    ? null
+    : const HomeTwakeWelcomeRoute().location;
 
 Page<void> _defaultPage(BuildContext context, Widget child, {String? name}) =>
     CustomTransitionPage(
@@ -82,13 +80,13 @@ Page<void> _defaultPage(BuildContext context, Widget child, {String? name}) =>
       child: child,
       transitionsBuilder: (context, animation, secondaryAnimation, child) =>
           !_responsive.isMobile(context)
-              ? FadeTransition(opacity: animation, child: child)
-              : CupertinoPageTransition(
-                  primaryRouteAnimation: animation,
-                  secondaryRouteAnimation: secondaryAnimation,
-                  linearTransition: false,
-                  child: child,
-                ),
+          ? FadeTransition(opacity: animation, child: child)
+          : CupertinoPageTransition(
+              primaryRouteAnimation: animation,
+              secondaryRouteAnimation: secondaryAnimation,
+              linearTransition: false,
+              child: child,
+            ),
     );
 
 // ===========================================================================
@@ -111,8 +109,8 @@ class RootRoute extends GoRouteData with $RootRoute {
   @override
   FutureOr<String?> redirect(BuildContext context, GoRouterState state) =>
       Matrix.of(context).client.isLogged()
-          ? const RoomsRoute().location
-          : const HomeRoute().location;
+      ? const RoomsRoute().location
+      : const HomeRoute().location;
 
   // Never displayed — always redirects.
   @override
@@ -170,7 +168,8 @@ class HomeTwakeWelcomeRoute extends GoRouteData with $HomeTwakeWelcomeRoute {
       _defaultPage(context, const TwakeWelcome());
 }
 
-class HomeHomeserverPickerRoute extends GoRouteData with $HomeHomeserverPickerRoute {
+class HomeHomeserverPickerRoute extends GoRouteData
+    with $HomeHomeserverPickerRoute {
   const HomeHomeserverPickerRoute();
 
   @override
@@ -239,15 +238,11 @@ class ErrorRoute extends GoRouteData with $ErrorRoute {
         TypedGoRoute<StoriesCreateRoute>(path: 'stories/create'),
         TypedGoRoute<StoryRoute>(
           path: 'stories/:roomid',
-          routes: [
-            TypedGoRoute<StoryShareRoute>(path: 'share'),
-          ],
+          routes: [TypedGoRoute<StoryShareRoute>(path: 'share')],
         ),
         TypedGoRoute<ArchiveRoute>(
           path: 'archive',
-          routes: [
-            TypedGoRoute<ArchiveRoomRoute>(path: ':roomid'),
-          ],
+          routes: [TypedGoRoute<ArchiveRoomRoute>(path: ':roomid')],
         ),
         // Always include newprivatechat in the route tree.
         // The conditional (mobile-only first-column) is handled in redirect.
@@ -258,7 +253,8 @@ class ErrorRoute extends GoRouteData with $ErrorRoute {
               path: 'newgroup',
               routes: [
                 TypedGoRoute<NewPrivateChatNewGroupInfoRoute>(
-                    path: 'newgroupinfo'),
+                  path: 'newgroupinfo',
+                ),
               ],
             ),
           ],
@@ -269,9 +265,7 @@ class ErrorRoute extends GoRouteData with $ErrorRoute {
         TypedGoRoute<ShareRoute>(path: 'share'),
         TypedGoRoute<ProfileRoute>(
           path: 'profile',
-          routes: [
-            TypedGoRoute<ProfileQrRoute>(path: 'qr'),
-          ],
+          routes: [TypedGoRoute<ProfileQrRoute>(path: 'qr')],
         ),
         TypedGoRoute<NotificationsRoute>(path: 'notifications'),
         TypedGoRoute<StyleRoute>(path: 'style'),
@@ -279,16 +273,15 @@ class ErrorRoute extends GoRouteData with $ErrorRoute {
         TypedGoRoute<AppLanguageRoute>(path: 'appLanguage'),
         TypedGoRoute<ChatSettingsRoute>(
           path: 'chat',
-          routes: [
-            TypedGoRoute<EmotesRoute>(path: 'emotes'),
-          ],
+          routes: [TypedGoRoute<EmotesRoute>(path: 'emotes')],
         ),
         TypedGoRoute<AddAccountRoute>(
           path: 'addaccount',
           routes: [
             TypedGoRoute<AddAccountLoginRoute>(path: 'login'),
             TypedGoRoute<AddAccountHomeserverPickerRoute>(
-                path: 'homeserverpicker'),
+              path: 'homeserverpicker',
+            ),
           ],
         ),
         TypedGoRoute<SecurityRoute>(
@@ -298,7 +291,8 @@ class ErrorRoute extends GoRouteData with $ErrorRoute {
             TypedGoRoute<SecurityBlockedUsersRoute>(path: 'blockedUsers'),
             TypedGoRoute<Security3PidRoute>(path: '3pid'),
             TypedGoRoute<SecurityContactsVisibilityRoute>(
-                path: 'contactsVisibility'),
+              path: 'contactsVisibility',
+            ),
           ],
         ),
         TypedGoRoute<RoomRoute>(
@@ -321,22 +315,21 @@ class RoomsShellRoute extends ShellRouteData {
     BuildContext context,
     GoRouterState state,
     Widget navigator,
-  ) =>
-      _defaultPage(
-        context,
-        !_responsive.isMobile(context) &&
-                state.fullPath?.startsWith('/rooms/settings') == false
-            ? AppAdaptiveScaffold(
-                body: AppAdaptiveScaffoldBody(
-                  activeRoomId: state.pathParameters['roomid'],
-                  args: state.extra is AbsAppAdaptiveScaffoldBodyArgs
-                      ? state.extra as AbsAppAdaptiveScaffoldBodyArgs
-                      : null,
-                ),
-                secondaryBody: navigator,
-              )
-            : navigator,
-      );
+  ) => _defaultPage(
+    context,
+    !_responsive.isMobile(context) &&
+            state.fullPath?.startsWith('/rooms/settings') == false
+        ? AppAdaptiveScaffold(
+            body: AppAdaptiveScaffoldBody(
+              activeRoomId: state.pathParameters['roomid'],
+              args: state.extra is AbsAppAdaptiveScaffoldBodyArgs
+                  ? state.extra as AbsAppAdaptiveScaffoldBodyArgs
+                  : null,
+            ),
+            secondaryBody: navigator,
+          )
+        : navigator,
+  );
 }
 
 class RoomsRoute extends GoRouteData with $RoomsRoute {
@@ -426,10 +419,7 @@ class ArchiveRoomRoute extends GoRouteData with $ArchiveRoomRoute {
 
   @override
   Page<void> buildPage(BuildContext context, GoRouterState state) =>
-      _defaultPage(
-        context,
-        ChatAdaptiveScaffold(roomId: roomid),
-      );
+      _defaultPage(context, ChatAdaptiveScaffold(roomId: roomid));
 }
 
 // --- New chat ---
@@ -450,7 +440,8 @@ class NewPrivateChatRoute extends GoRouteData with $NewPrivateChatRoute {
       _defaultPage(context, const NewPrivateChat());
 }
 
-class NewPrivateChatNewGroupRoute extends GoRouteData with $NewPrivateChatNewGroupRoute {
+class NewPrivateChatNewGroupRoute extends GoRouteData
+    with $NewPrivateChatNewGroupRoute {
   const NewPrivateChatNewGroupRoute();
 
   @override
@@ -458,16 +449,14 @@ class NewPrivateChatNewGroupRoute extends GoRouteData with $NewPrivateChatNewGro
       _defaultPage(context, const NewGroup());
 }
 
-class NewPrivateChatNewGroupInfoRoute extends GoRouteData with $NewPrivateChatNewGroupInfoRoute {
+class NewPrivateChatNewGroupInfoRoute extends GoRouteData
+    with $NewPrivateChatNewGroupInfoRoute {
   const NewPrivateChatNewGroupInfoRoute({this.$extra});
   final Set<PresentationContact>? $extra;
 
   @override
   Page<void> buildPage(BuildContext context, GoRouterState state) =>
-      _defaultPage(
-        context,
-        NewGroupChatInfo(contactsList: $extra ?? {}),
-      );
+      _defaultPage(context, NewGroupChatInfo(contactsList: $extra ?? {}));
 }
 
 class NewGroupRoute extends GoRouteData with $NewGroupRoute {
@@ -522,10 +511,7 @@ class ForwardRoute extends GoRouteData with $ForwardRoute {
 
   @override
   Page<void> buildPage(BuildContext context, GoRouterState state) =>
-      _defaultPage(
-        context,
-        Forward(sendFromRoomId: $extra?.fromRoomId),
-      );
+      _defaultPage(context, Forward(sendFromRoomId: $extra?.fromRoomId));
 }
 
 // --- Share ---
@@ -661,7 +647,8 @@ class AddAccountLoginRoute extends GoRouteData with $AddAccountLoginRoute {
       _defaultPage(context, const Login());
 }
 
-class AddAccountHomeserverPickerRoute extends GoRouteData with $AddAccountHomeserverPickerRoute {
+class AddAccountHomeserverPickerRoute extends GoRouteData
+    with $AddAccountHomeserverPickerRoute {
   const AddAccountHomeserverPickerRoute();
 
   @override
@@ -695,7 +682,8 @@ class SecurityStoriesRoute extends GoRouteData with $SecurityStoriesRoute {
       _defaultPage(context, const SettingsStories());
 }
 
-class SecurityBlockedUsersRoute extends GoRouteData with $SecurityBlockedUsersRoute {
+class SecurityBlockedUsersRoute extends GoRouteData
+    with $SecurityBlockedUsersRoute {
   const SecurityBlockedUsersRoute();
 
   @override
@@ -719,7 +707,8 @@ class Security3PidRoute extends GoRouteData with $Security3PidRoute {
       _defaultPage(context, const Settings3Pid());
 }
 
-class SecurityContactsVisibilityRoute extends GoRouteData with $SecurityContactsVisibilityRoute {
+class SecurityContactsVisibilityRoute extends GoRouteData
+    with $SecurityContactsVisibilityRoute {
   const SecurityContactsVisibilityRoute();
 
   @override
@@ -848,8 +837,6 @@ class PinnedMessagesRoute extends GoRouteData with $PinnedMessagesRoute {
         ),
       );
     }
-    return const CupertinoPage(
-      child: PinnedMessages(pinnedEvents: []),
-    );
+    return const CupertinoPage(child: PinnedMessages(pinnedEvents: []));
   }
 }

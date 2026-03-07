@@ -39,7 +39,9 @@ class NewGroupController extends ContactsSelectionController<NewGroup> {
         arguments: contactsList.toSet(),
       );
     } else {
-      NewPrivateChatNewGroupInfoRoute($extra: contactsList.toSet()).push(context);
+      NewPrivateChatNewGroupInfoRoute(
+        $extra: contactsList.toSet(),
+      ).push(context);
     }
   }
 }

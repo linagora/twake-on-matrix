@@ -404,7 +404,9 @@ class PinnedMessagesController extends State<PinnedMessages>
     Logs().d(
       "forwardEventsAction():: shareContent: ${Matrix.of(context).shareContent}",
     );
-    ForwardRoute($extra: ForwardArgument(fromRoomId: event.roomId ?? '')).go(context);
+    ForwardRoute(
+      $extra: ForwardArgument(fromRoomId: event.roomId ?? ''),
+    ).go(context);
   }
 
   void handleContextMenuAction(

@@ -19,7 +19,8 @@ class StoriesHeader extends StatelessWidget {
 
   const StoriesHeader({required this.filter, super.key});
 
-  void _addToStoryAction(BuildContext context) => const StoriesCreateRoute().go(context);
+  void _addToStoryAction(BuildContext context) =>
+      const StoriesCreateRoute().go(context);
 
   void _goToStoryAction(BuildContext context, String roomId) async {
     final room = Matrix.of(context).client.getRoomById(roomId);
@@ -249,7 +250,8 @@ class _StoryButton extends StatelessWidget {
                               height: 24,
                               child: FloatingActionButton.small(
                                 heroTag: null,
-                                onPressed: () => const StoriesCreateRoute().go(context),
+                                onPressed: () =>
+                                    const StoriesCreateRoute().go(context),
                                 child: const Icon(Icons.add_outlined, size: 16),
                               ),
                             ),
