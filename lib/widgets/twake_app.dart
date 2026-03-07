@@ -37,9 +37,9 @@ class TwakeApp extends StatefulWidget {
     navigatorKey: routerKey,
     onException: (context, state, router) {
       Logs().e('GoRouter exception: ${state.error}');
-      return router.go('/error');
+      return router.go(const ErrorRoute().location);
     },
-    initialLocation: PlatformInfos.isIOS ? '/splash' : null,
+    initialLocation: PlatformInfos.isIOS ? const SplashRoute().location : null,
   );
 
   static bool isCurrentPageIsInRooms() =>
