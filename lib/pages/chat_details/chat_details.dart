@@ -15,7 +15,7 @@ import 'package:fluffychat/widgets/matrix.dart';
 import 'package:fluffychat/widgets/mixins/twake_context_menu_mixin.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
+import 'package:fluffychat/config/go_routes/app_routes.dart';
 import 'package:linagora_design_flutter/colors/linagora_sys_colors.dart';
 import 'package:matrix/matrix.dart';
 
@@ -160,7 +160,7 @@ class ChatDetailsController extends State<ChatDetails>
       if (result.error != null) throw result.error;
 
       if (context.mounted) {
-        context.go('/rooms');
+        const RoomsRoute().go(context);
       }
     } catch (e) {
       Logs().e('ChatDetailsController._leaveRoom', e);

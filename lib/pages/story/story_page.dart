@@ -9,6 +9,7 @@ import 'package:adaptive_dialog/adaptive_dialog.dart';
 import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
 import 'package:fluffychat/generated/l10n/app_localizations.dart';
 
+import 'package:fluffychat/config/go_routes/app_routes.dart';
 import 'package:go_router/go_router.dart';
 import 'package:matrix/matrix.dart';
 import 'package:path_provider/path_provider.dart';
@@ -118,7 +119,7 @@ class StoryPageController extends State<StoryPage> {
   void share() async {
     Matrix.of(context).shareContent = currentEvent?.content;
     hold();
-    context.go('/share');
+    const ShareRoute().go(context);
   }
 
   void displaySeenByUsers() async {
@@ -224,9 +225,9 @@ class StoryPageController extends State<StoryPage> {
   void skip() {
     if (index + 1 >= max) {
       if (isOwnStory) {
-        context.go('/stories/create');
+        const StoriesCreateRoute().go(context);
       } else {
-        context.go('/rooms');
+        const RoomsRoute().go(context);
       }
       return;
     }
@@ -483,7 +484,7 @@ class StoryPageController extends State<StoryPage> {
                   currentEvent!.senderFromMemoryOrFallback.startDirectChat(),
             );
         if (roomIdResult.error != null) return;
-        context.go('/rooms/${roomIdResult.result!}');
+        RoomRoute(roomid: roomIdResult.result!).go(context);
         break;
     }
   }
