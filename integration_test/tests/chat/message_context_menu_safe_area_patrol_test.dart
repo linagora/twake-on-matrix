@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import '../../base/test_base.dart';
 import '../../help/soft_assertion_helper.dart';
 import '../../robots/message_context_menu_robot.dart';
@@ -59,42 +58,10 @@ void main() {
       // Verify ClampingScrollPhysics is used
       await menuRobot.verifyClampingScrollPhysics();
 
-      // Verify SafeArea respects all insets (top, bottom, left, right)
-      final safeAreas = $.tester.widgetList<SafeArea>(
-        menuRobot.getSafeArea().finder,
-      );
-
-      bool foundDialogSafeArea = false;
-      for (final safeArea in safeAreas) {
-        if (safeArea.child is SingleChildScrollView) {
-          foundDialogSafeArea = true;
-
-          s.softAssertEquals(
-            safeArea.top,
-            true,
-            'SafeArea should respect top inset',
-          );
-          s.softAssertEquals(
-            safeArea.bottom,
-            true,
-            'SafeArea should respect bottom inset',
-          );
-          s.softAssertEquals(
-            safeArea.left,
-            true,
-            'SafeArea should respect left inset',
-          );
-          s.softAssertEquals(
-            safeArea.right,
-            true,
-            'SafeArea should respect right inset',
-          );
-          break;
-        }
-      }
-
+      // Replace the safeAreas loop entirely with:
+      await menuRobot.verifySafeAreaInsets();
       s.softAssertEquals(
-        foundDialogSafeArea,
+        menuRobot.getSafeArea().exists,
         true,
         'Dialog SafeArea should be found',
       );
@@ -108,17 +75,28 @@ void main() {
         'At least one menu item should be visible',
       );
 
-      // Test scrolling to bottom
+      // Test scrolling to bottom — verify a "late" item becomes visible
       await menuRobot.scrollDialogToBottom();
       await $.pumpAndSettle();
 
-      // Test scrolling to top
+      s.softAssertEquals(
+        menuRobot.getSelectItem().exists || menuRobot.getPinItem().exists,
+        true,
+        'Select or Pin item should be visible after scrolling to bottom',
+      );
+
+      // Test scrolling to top — verify the first item is visible again
       await menuRobot.scrollDialogToTop();
       await $.pumpAndSettle();
 
+      s.softAssertEquals(
+        menuRobot.getReplyItem().exists || menuRobot.getForwardItem().exists,
+        true,
+        'Reply or Forward item should be visible after scrolling to top',
+      );
+
       // Close dialog
       await menuRobot.closeByTappingBackdrop();
-      await $.pumpAndSettle();
 
       s.verifyAll();
     },

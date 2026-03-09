@@ -1,3 +1,4 @@
+import 'package:fluffychat/pages/chat/events/message/message_content_with_timestamp_builder.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:patrol/patrol.dart';
@@ -10,7 +11,7 @@ class MessageContextMenuRobot extends CoreRobot {
 
   /// Find SafeArea widget in the dialog
   PatrolFinder getSafeArea() {
-    return $(SafeArea);
+    return $(MessageContentWithTimestampBuilder.dialogSafeAreaKey);
   }
 
   /// Find SingleChildScrollView in the dialog
@@ -134,21 +135,20 @@ class MessageContextMenuRobot extends CoreRobot {
     // Tap at top-left corner of screen (outside the dialog)
     // This is more reliable than trying to find the GestureDetector
     await $.tester.tapAt(const Offset(10, 10));
-    await $.pumpAndSettle();
+    // Use pump() with a specific duration instead of pumpAndSettle()
+    // to avoid potential timeout issues with continuous animations
+    await $.pump(const Duration(milliseconds: 300));
+    await $.pump();
   }
 
   /// Verify SafeArea respects insets
   Future<void> verifySafeAreaInsets() async {
-    final safeAreas = $.tester.widgetList<SafeArea>(getSafeArea().finder);
-
-    // Find the SafeArea that wraps our content
-    final dialogSafeArea = safeAreas.firstWhere(
-      (sa) => sa.child is SingleChildScrollView,
-      orElse: () => safeAreas.first,
-    );
-
-    expect(dialogSafeArea.top, isTrue, reason: 'Top inset not respected');
-    expect(dialogSafeArea.bottom, isTrue, reason: 'Bottom inset not respected');
+    // With a keyed finder, there is exactly one match — the dialog SafeArea
+    final safeArea = $.tester.widget<SafeArea>(getSafeArea().finder);
+    expect(safeArea.top, isTrue, reason: 'Top inset not respected');
+    expect(safeArea.bottom, isTrue, reason: 'Bottom inset not respected');
+    expect(safeArea.left, isTrue, reason: 'Left inset not respected');
+    expect(safeArea.right, isTrue, reason: 'Right inset not respected');
   }
 
   /// Wait for dialog to appear
@@ -161,8 +161,10 @@ class MessageContextMenuRobot extends CoreRobot {
 
   /// Verify menu item is visible after scrolling
   Future<void> verifyMenuItemVisible(String itemText) async {
-    final item = getMenuItem(itemText);
-    expect(item.exists, isTrue, reason: 'Menu item "$itemText" not visible');
+    await $.waitUntilVisible(
+      getMenuItem(itemText),
+      timeout: const Duration(seconds: 3),
+    );
   }
 
   /// Scroll incrementally by a specific distance
