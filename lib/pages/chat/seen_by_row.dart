@@ -6,27 +6,23 @@ enum MessageStatus { sending, sent, hasBeenSeen, error }
 
 class SeenByRow extends StatelessWidget {
   final List<User> getSeenByUsers;
-  final List<User> participants;
   final EventStatus? eventStatus;
   final bool timelineOverlayMessage;
-  final Event event;
 
   const SeenByRow({
     this.eventStatus,
     super.key,
     required this.getSeenByUsers,
-    required this.participants,
     required this.timelineOverlayMessage,
-    required this.event,
   });
 
   @override
   Widget build(BuildContext context) {
-    return getEventIcon(context, getSeenByUsers, eventStatus: eventStatus);
+    final ColorScheme colorScheme = Theme.of(context).colorScheme;
+    return getEventIcon(colorScheme, getSeenByUsers, eventStatus: eventStatus);
   }
 
   MessageStatus getMessageStatus(
-    BuildContext context,
     List<User> seenByUsers, {
     EventStatus? eventStatus,
   }) {
@@ -46,13 +42,11 @@ class SeenByRow extends StatelessWidget {
   }
 
   Widget getEventIcon(
-    BuildContext context,
+    ColorScheme colorScheme,
     List<User> seenByUsers, {
-    bool? oldMessageFullyRead,
     EventStatus? eventStatus,
   }) {
     final messageStatus = getMessageStatus(
-      context,
       seenByUsers,
       eventStatus: eventStatus,
     );
@@ -62,7 +56,7 @@ class SeenByRow extends StatelessWidget {
           Icons.schedule,
           color: MessageTimeStyle.seenByRowIconSecondaryColor(
             timelineOverlayMessage,
-            context,
+            colorScheme,
           ),
           size: MessageTimeStyle.seenByRowIconSize,
         );
@@ -71,7 +65,7 @@ class SeenByRow extends StatelessWidget {
           Icons.done_all,
           color: MessageTimeStyle.seenByRowIconSecondaryColor(
             timelineOverlayMessage,
-            context,
+            colorScheme,
           ),
           size: MessageTimeStyle.seenByRowIconSize,
         );
@@ -80,14 +74,13 @@ class SeenByRow extends StatelessWidget {
           Icons.done_all,
           color: MessageTimeStyle.seenByRowIconPrimaryColor(
             timelineOverlayMessage,
-            context,
           ),
           size: MessageTimeStyle.seenByRowIconSize,
         );
       case MessageStatus.error:
         return Icon(
           Icons.error,
-          color: Theme.of(context).colorScheme.error,
+          color: colorScheme.error,
           size: MessageTimeStyle.seenByRowIconSize,
         );
     }
