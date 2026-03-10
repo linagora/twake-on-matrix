@@ -7,7 +7,7 @@ name: Build
 
 env:
   FLUTTER_VERSION: 3.38.9
-  XCODE_VERSION: 16.0
+  XCODE_VERSION: 26.0
 
 jobs:
   build_debug_mobile:
