@@ -1,3 +1,4 @@
+import 'package:fluffychat/generated/l10n/app_localizations.dart';
 import 'package:fluffychat/pages/chat/events/message/message_content_with_timestamp_builder.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -34,6 +35,11 @@ class MessageContextMenuRobot extends CoreRobot {
     return $(PullDownMenu);
   }
 
+  /// Get BuildContext from the context menu
+  BuildContext _getContext() {
+    return $.tester.element(getContextMenu().finder);
+  }
+
   /// Find a specific menu item by text
   PatrolFinder getMenuItem(String text) {
     return $(
@@ -43,32 +49,32 @@ class MessageContextMenuRobot extends CoreRobot {
 
   /// Get Reply menu item
   PatrolFinder getReplyItem() {
-    return getMenuItem('Reply');
+    final context = _getContext();
+    return getMenuItem(L10n.of(context)!.reply);
   }
 
   /// Get Forward menu item
   PatrolFinder getForwardItem() {
-    return getMenuItem('Forward');
+    final context = _getContext();
+    return getMenuItem(L10n.of(context)!.forward);
   }
 
   /// Get Copy menu item
   PatrolFinder getCopyItem() {
-    return getMenuItem('Copy');
-  }
-
-  /// Get Delete menu item
-  PatrolFinder getDeleteItem() {
-    return getMenuItem('Delete');
+    final context = _getContext();
+    return getMenuItem(L10n.of(context)!.copy);
   }
 
   /// Get Pin menu item
   PatrolFinder getPinItem() {
-    return getMenuItem('Pin');
+    final context = _getContext();
+    return getMenuItem(L10n.of(context)!.pin);
   }
 
   /// Get Select menu item
   PatrolFinder getSelectItem() {
-    return getMenuItem('Select');
+    final context = _getContext();
+    return getMenuItem(L10n.of(context)!.select);
   }
 
   /// Verify SafeArea wraps SingleChildScrollView
@@ -163,43 +169,6 @@ class MessageContextMenuRobot extends CoreRobot {
     await $.waitUntilVisible(
       getSafeArea(),
       timeout: const Duration(seconds: 5),
-    );
-  }
-
-  /// Verify menu item is visible after scrolling
-  Future<void> verifyMenuItemVisible(String itemText) async {
-    await $.waitUntilVisible(
-      getMenuItem(itemText),
-      timeout: const Duration(seconds: 3),
-    );
-  }
-
-  /// Scroll incrementally by a specific distance
-  Future<void> _scrollByDistance(double distance) async {
-    final scrollViewInSafeArea = find.descendant(
-      of: getSafeArea().finder,
-      matching: getDialogScrollView().finder,
-    );
-    await $.tester.drag(scrollViewInSafeArea.first, Offset(0, distance));
-    await $.pumpAndSettle();
-  }
-
-  /// Scroll until menu item is visible
-  Future<void> scrollUntilMenuItemVisible(String itemText) async {
-    final item = getMenuItem(itemText);
-
-    int attempts = 0;
-    const maxAttempts = 5;
-
-    while (!item.visible && attempts < maxAttempts) {
-      await _scrollByDistance(-100);
-      attempts++;
-    }
-
-    expect(
-      item.visible,
-      isTrue,
-      reason: 'Could not make menu item "$itemText" visible after scrolling',
     );
   }
 }
