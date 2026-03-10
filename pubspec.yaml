@@ -347,7 +347,6 @@ sentry:
   org:
   symbols_path: build/app/outputs/symbols
   dart_symbol_map_path: build/app/obfuscation.map.json
-  upload_sources: true
   upload_debug_symbols: true
   upload_source_maps: true
   url_prefix:
