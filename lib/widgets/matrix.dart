@@ -564,6 +564,12 @@ class MatrixState extends State<Matrix>
     Client currentClient,
   ) async {
     waitForFirstSync = false;
+
+    if (PlatformInfos.isIOS) {
+      backgroundPush?.cancelKeychainSyncForClient(currentClient);
+      await backgroundPush?.removePusherForClient(currentClient);
+    }
+
     await _cancelSubs(currentClient.clientName);
     widget.clients.remove(currentClient);
     await ClientManager.removeClientNameFromStore(currentClient.clientName);
@@ -623,7 +629,17 @@ class MatrixState extends State<Matrix>
     waitForFirstSync = false;
     await setUpToMServicesInLogin(activeClient);
     await setUpFederationServicesInLogin(activeClient);
+
+    if (PlatformInfos.isIOS) {
+      await backgroundPush?.syncRecoveryKeyForClient(activeClient);
+    }
+
     final result = await setActiveClient(activeClient);
+
+    if (PlatformInfos.isIOS) {
+      await backgroundPush?.setupPushForAdditionalClient(activeClient);
+    }
+
     await matrixState.cancelListenSynchronizeContacts();
     matrixState.reSyncContacts();
     if (result.isSuccess) {

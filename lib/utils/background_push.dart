@@ -21,6 +21,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:collection/collection.dart';
 import 'package:fcm_shared_isolate/fcm_shared_isolate.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/domain/keychain_sharing/keychain_sharing_manager.dart';
@@ -108,56 +109,199 @@ class BackgroundPush {
         if (call.method == 'willPresent') {
           onReceiveNotification(call.arguments);
         } else if (call.method == 'didReceive') {
-          iOSUserSelectedNoti(call.arguments);
+          await iOSUserSelectedNoti(call.arguments);
         }
       });
       getIosInitialNoti();
-      _setupKeychainSyncListener();
+      _setupKeychainSyncForClient(client);
     }
   }
 
-  String? _lastKeychainAccessToken;
-  bool _didSyncRecoveryKey = false;
+  final Map<String, StreamSubscription> _keychainSyncSubs = {};
 
-  void _setupKeychainSyncListener() {
-    client.onSync.stream.listen((_) async {
-      final accessToken = client.accessToken;
-      if (accessToken == null || !client.isLogged()) return;
+  bool _isActiveClient(Client targetClient) =>
+      _matrixState?.client.userID == targetClient.userID;
 
-      if (accessToken != _lastKeychainAccessToken) {
-        _lastKeychainAccessToken = accessToken;
-        final userId = client.userID;
-        final homeserver = client.homeserver?.toString();
-        if (userId != null && homeserver != null) {
-          await KeychainSharingManager.saveSession(
-            accessToken: accessToken,
-            userId: userId,
-            deviceId: client.deviceID ?? '',
-            homeserverUrl: homeserver,
-          );
-        }
-      }
-
-      if (!_didSyncRecoveryKey) {
-        _didSyncRecoveryKey = true;
-        await _syncRecoveryKeyToKeychain();
-      }
-    });
-  }
-
-  Future<void> _syncRecoveryKeyToKeychain() async {
-    final userId = client.userID;
-    if (userId == null) return;
+  Future<void> _syncRecoveryKeyForUserId(String userId) async {
     final result = await getIt.get<GetRecoveryWordsInteractor>().execute();
     await result.fold(
       (failure) async => Logs().d(
-        '[KeychainSharing] No recovery words found to sync: $failure',
+        '[KeychainSharing] No recovery words found to sync for $userId: $failure',
       ),
       (success) => KeychainSharingManager.saveRecoveryKey(
         userId: userId,
         recoveryKey: success.words.words,
       ),
     );
+  }
+
+  void _setupKeychainSyncForClient(Client targetClient) {
+    String? lastAccessToken;
+    bool didSyncRecoveryKey = false;
+
+    final sub = targetClient.onSync.stream.listen((_) async {
+      final accessToken = targetClient.accessToken;
+      if (accessToken == null || !targetClient.isLogged()) return;
+
+      if (accessToken != lastAccessToken) {
+        lastAccessToken = accessToken;
+        final userId = targetClient.userID;
+        final homeserver = targetClient.homeserver?.toString();
+        if (userId != null && homeserver != null) {
+          await KeychainSharingManager.saveSession(
+            accessToken: accessToken,
+            userId: userId,
+            deviceId: targetClient.deviceID ?? '',
+            homeserverUrl: homeserver,
+          );
+        }
+      }
+
+      if (!didSyncRecoveryKey && _isActiveClient(targetClient)) {
+        final userId = targetClient.userID;
+        if (userId != null) await _syncRecoveryKeyForUserId(userId);
+        didSyncRecoveryKey = true;
+      }
+    });
+
+    final userId = targetClient.userID;
+    if (userId != null) {
+      _keychainSyncSubs[userId]?.cancel();
+      _keychainSyncSubs[userId] = sub;
+    }
+  }
+
+  void cancelKeychainSyncForClient(Client targetClient) {
+    final userId = targetClient.userID;
+    if (userId == null) return;
+    _keychainSyncSubs[userId]?.cancel();
+    _keychainSyncSubs.remove(userId);
+  }
+
+  Future<void> syncRecoveryKeyForClient(Client targetClient) async {
+    if (!PlatformInfos.isIOS) return;
+    final userId = targetClient.userID;
+    if (userId == null) return;
+    await _syncRecoveryKeyForUserId(userId);
+  }
+
+  Future<void> _setupPusherForClient({
+    required Client targetClient,
+    required String gatewayUrl,
+    required String token,
+  }) async {
+    final clientName = PlatformInfos.clientName;
+    final appId = AppConfig.pushNotificationsAppId;
+
+    final pushers =
+        await targetClient.getPushers().catchError((e) {
+          Logs().w(
+            '[Push] Unable to request pushers for ${targetClient.userID}',
+            e,
+          );
+          return <Pusher>[];
+        }) ??
+        [];
+
+    final currentPushers = pushers.where((p) => p.pushkey == token);
+    if (currentPushers.length == 1 &&
+        currentPushers.first.kind == 'http' &&
+        currentPushers.first.appId == appId &&
+        currentPushers.first.appDisplayName == clientName &&
+        currentPushers.first.deviceDisplayName == targetClient.deviceName &&
+        currentPushers.first.lang == 'en' &&
+        currentPushers.first.data.url.toString() == gatewayUrl &&
+        currentPushers.first.data.format ==
+            AppConfig.pushNotificationsPusherFormat) {
+      Logs().i('[Push] Pusher already set for ${targetClient.userID}');
+      return;
+    }
+
+    try {
+      await targetClient.postPusher(
+        Pusher(
+          pushkey: token,
+          appId: appId,
+          appDisplayName: clientName,
+          deviceDisplayName: targetClient.deviceName!,
+          lang: 'en',
+          data: PusherData(
+            url: Uri.parse(gatewayUrl),
+            format: AppConfig.pushNotificationsPusherFormat,
+            additionalProperties: {
+              "default_payload": {
+                "aps": {
+                  "mutable-content": 1,
+                  "content-available": 1,
+                  "badge": 1,
+                  "sound": "default",
+                  "alert": {"loc-key": "newMessageInTwake", "loc-args": []},
+                },
+                "pusher_notification_client_identifier":
+                    targetClient.pusherNotificationClientIdentifier,
+              },
+            },
+          ),
+          kind: 'http',
+        ),
+        append: false,
+      );
+      Logs().i(
+        '[Push] Pusher registered for additional account ${targetClient.userID}',
+      );
+    } catch (e, s) {
+      Logs().e('[Push] Unable to set pusher for ${targetClient.userID}', e, s);
+    }
+  }
+
+  Future<void> setupPushForAdditionalClient(Client additionalClient) async {
+    if (!PlatformInfos.isIOS) return;
+
+    _setupKeychainSyncForClient(additionalClient);
+
+    final token = _pushToken;
+    if (token == null) {
+      Logs().w(
+        '[Push] setupPushForAdditionalClient: no APN token cached yet for ${additionalClient.userID}',
+      );
+      return;
+    }
+    await _setupPusherForClient(
+      targetClient: additionalClient,
+      gatewayUrl: AppConfig.pushNotificationsGatewayUrl,
+      token: token,
+    );
+  }
+
+  Future<void> removePusherForClient(Client targetClient) async {
+    if (!PlatformInfos.isIOS) return;
+    final token = _pushToken;
+    if (token == null) return;
+
+    try {
+      final pushers =
+          await targetClient.getPushers().catchError((e) {
+            Logs().w(
+              '[Push] Unable to get pushers for ${targetClient.userID}',
+              e,
+            );
+            return <Pusher>[];
+          }) ??
+          [];
+
+      for (final pusher in pushers) {
+        if (pusher.pushkey == token) {
+          await targetClient.deletePusher(pusher);
+          Logs().i('[Push] Removed pusher for ${targetClient.userID}');
+        }
+      }
+    } catch (e, s) {
+      Logs().e(
+        '[Push] Failed to remove pusher for ${targetClient.userID}',
+        e,
+        s,
+      );
+    }
   }
 
   factory BackgroundPush.clientOnly(Client client) {
@@ -380,6 +524,14 @@ class BackgroundPush {
       gatewayUrl: AppConfig.pushNotificationsGatewayUrl,
       token: _pushToken,
     );
+
+    if (PlatformInfos.isIOS && _matrixState != null) {
+      for (final additionalClient in _matrixState!.widget.clients) {
+        if (additionalClient == client) continue;
+        if (!additionalClient.isLogged()) continue;
+        await setupPushForAdditionalClient(additionalClient);
+      }
+    }
   }
 
   Future<void> getIosInitialNoti() async {
@@ -387,18 +539,47 @@ class BackgroundPush {
       final noti = await apnChannel.invokeMethod('getInitialNoti');
       Logs().v('[Push] Got initial notification: $noti');
       if (noti != null) {
-        iOSUserSelectedNoti(noti);
+        await iOSUserSelectedNoti(noti);
       }
     } catch (e, s) {
       Logs().e('[Push] Failed to get initial notification', e, s);
     }
   }
 
-  void iOSUserSelectedNoti(dynamic noti) {
+  Future<void> iOSUserSelectedNoti(dynamic noti) async {
     // roomId is payload if noti is local
-    final roomId = noti['room_id'] ?? noti['payload'];
+    String? roomId = noti['room_id'];
     final eventId = noti['event_id'];
-    goToRoom(roomId, eventId: eventId);
+    String? receiverId = noti['receiver_id'] as String?;
+    final payload = noti['payload'] != null
+        ? jsonDecode(noti['payload'])
+        : null;
+    if (payload is Map) {
+      payload['room_id'] is String ? roomId = payload['room_id'] : null;
+      payload['receiver_id'] is String
+          ? receiverId = payload['receiver_id']
+          : null;
+    }
+    await _switchAccount(receiverId);
+    await goToRoom(roomId, eventId: eventId);
+  }
+
+  Future<void> _switchAccount(String? receiverId) async {
+    Client? targetClient;
+    if (receiverId != null && _matrixState != null) {
+      targetClient = _matrixState!.widget.clients.firstWhereOrNull(
+        (c) => c.userID == receiverId,
+      );
+      if (targetClient != null &&
+          targetClient.userID != _matrixState!.client.userID) {
+        Logs().d(
+          '[Push] Switching to account ${targetClient.userID} for notification',
+        );
+        await _matrixState!.setActiveClient(targetClient);
+        await _matrixState!.cancelListenSynchronizeContacts();
+        await _matrixState!.reSyncContacts();
+      }
+    }
   }
 
   void onReceiveNotification(dynamic message) {
@@ -418,11 +599,19 @@ class BackgroundPush {
   Future<void> onSelectNotification(
     NotificationResponse? response, {
     String? eventId,
-  }) {
+  }) async {
+    final payload = jsonDecode(response?.payload ?? '{}');
+    final roomId = payload['room_id'];
+    final receiverId = payload['receiver_id'];
     Logs().d(
-      'BackgroundPush::onSelectNotification() roomId - ${response?.payload} ||eventId - $eventId',
+      'BackgroundPush::onSelectNotification() roomId - $roomId ||eventId - $eventId',
     );
-    return goToRoom(response?.payload, eventId: eventId);
+    if (receiverId is String?) {
+      await _switchAccount(receiverId);
+    }
+    if (roomId is String?) {
+      await goToRoom(roomId, eventId: eventId);
+    }
   }
 
   Future<void> goToRoom(String? roomId, {String? eventId}) async {
