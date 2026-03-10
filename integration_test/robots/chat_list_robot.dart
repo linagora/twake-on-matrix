@@ -83,11 +83,14 @@ class ChatListRobot extends HomeRobot {
     // Tap on the search TextField in the chat list to open search screen
     await $(TextField).tap();
     await $.pumpAndSettle();
-    // Verify SearchView is opened
-    await $.waitUntilVisible($(SearchView));
 
+    // Handle the contacts permission dialog before waiting for SearchView,
+    // as the dialog overlays SearchView and makes it non-hit-testable
     await confirmShareContactInformation();
     await confirmAccessContact();
+
+    // Verify SearchView is opened
+    await $.waitUntilVisible($(SearchView));
   }
 
   Future<void> openSearchScreenWithoutAcceptPermission() async {

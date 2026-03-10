@@ -25,7 +25,7 @@ class SearchViewRobot extends SearchRobot {
       await $.waitUntilVisible($(CircularProgressIndicator));
       await CoreRobot($).waitUntilAbsent($, $(CircularProgressIndicator));
     }
-    await $.pumpAndSettle();
+    await $.pump(const Duration(seconds: 2));
 
     await enterSearchText(roomName);
 
