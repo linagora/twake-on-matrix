@@ -95,7 +95,8 @@ class ChatDetailsMembersPage extends StatelessWidget {
                       listenable: selectedUsersMapChangeNotifier,
                       builder: (context, child) {
                         return ParticipantListItem(
-                          members![index],
+                          key: ValueKey(members![index].id),
+                          members[index],
                           onUpdatedMembers: onUpdatedMembers,
                           selectionMode: selectedUsersMapChangeNotifier
                               .getSelectionModeForUser(members[index]),

@@ -1,5 +1,6 @@
 import 'dart:developer';
 import 'dart:io';
+
 import 'package:fluffychat/generated/l10n/app_localizations.dart';
 import 'package:fluffychat/pages/chat/chat_app_bar_title.dart';
 import 'package:fluffychat/pages/chat/chat_input_row.dart';
@@ -8,6 +9,7 @@ import 'package:fluffychat/pages/chat/chat_pinned_events/pinned_events_view.dart
 import 'package:fluffychat/pages/chat/chat_pinned_events/pinned_messages_screen.dart';
 import 'package:fluffychat/pages/chat/chat_view.dart';
 import 'package:fluffychat/pages/chat/event_info_dialog.dart';
+import 'package:fluffychat/pages/chat/events/images_builder/sending_image_info_widget.dart';
 import 'package:fluffychat/pages/chat/events/message/multi_platform_message_container.dart';
 import 'package:fluffychat/pages/chat/events/message_content.dart';
 import 'package:fluffychat/pages/chat/events/message_time.dart';
@@ -16,18 +18,18 @@ import 'package:fluffychat/pages/chat_draft/draft_chat_view.dart';
 import 'package:fluffychat/pages/chat_list/chat_list_body_view.dart';
 import 'package:fluffychat/widgets/context_menu/context_menu_action_item_widget.dart';
 import 'package:fluffychat/widgets/twake_components/twake_icon_button.dart';
-import 'package:fluffychat/pages/chat/events/images_builder/sending_image_info_widget.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:linagora_design_flutter/images_picker/image_item_widget.dart';
 import 'package:linkfy_text/linkfy_text.dart';
 import 'package:patrol/patrol.dart';
+
 import '../base/core_robot.dart';
 import '../help/soft_assertion_helper.dart';
 import '../robots/add_member_robot.dart';
 import '../robots/chat_group_detail_robot.dart';
 import '../robots/chat_list_robot.dart';
-import 'package:flutter/material.dart';
 import '../robots/group_information_robot.dart';
 import '../robots/menu_robot.dart';
 import '../robots/new_chat_robot.dart';
@@ -39,6 +41,11 @@ enum UserLevel { member, admin, owner, moderator }
 
 class ChatScenario extends CoreRobot {
   ChatScenario(super.$);
+
+  L10n get _l10n {
+    final context = $.tester.element(find.byType(Scaffold));
+    return L10n.of(context)!;
+  }
 
   Future<void> enterSearchText(String searchText) async {
     await SearchRobot($).enterSearchText(searchText);
@@ -66,7 +73,7 @@ class ChatScenario extends CoreRobot {
     }
     await AddMemberRobot($).getNextIcon().tap();
     await AddMemberRobot($).getAgreeInviteMemberBtn().tap();
-    await $.waitUntilVisible($("Group information"));
+    await $.waitUntilVisible($(_l10n.groupInfo));
     return (await GroupInformationRobot($).getListOfMembers()).length;
   }
 
@@ -77,7 +84,7 @@ class ChatScenario extends CoreRobot {
       await GroupInformationRobot($).clickOnRemoveFromGroup();
       await GroupInformationRobot($).clickOnAgreeIRemoveMemberBtn();
     }
-    await $.waitUntilVisible($("Group information"));
+    await $.waitUntilVisible($(_l10n.groupInfo));
     return (await GroupInformationRobot($).getListOfMembers()).length;
   }
 
@@ -149,6 +156,9 @@ class ChatScenario extends CoreRobot {
 
     // 2) Get MaterialLocalizations from the input's own context (NOT WidgetsApp)
     final BuildContext inputCtx = $.tester.element(input.finder);
+    if (inputCtx.mounted == false) {
+      throw StateError('Input context is not mounted');
+    }
     final String pasteLabel = MaterialLocalizations.of(
       inputCtx,
     ).pasteButtonLabel;
@@ -221,7 +231,7 @@ class ChatScenario extends CoreRobot {
   Future<void> deleteMessage(String message) async {
     await ChatGroupDetailRobot($).openPullDownMenu(message);
     await (PullDownMenuRobot($).getDeleteItem()).tap();
-    await $.native.tap(Selector(text: 'Delete'));
+    await $.native.tap(Selector(text: _l10n.delete));
   }
 
   Future<ChatGroupDetailRobot> createANewGroupChat(
@@ -318,11 +328,8 @@ class ChatScenario extends CoreRobot {
     await icon.tap();
     // wait for the pinned UI (a real widget on that screen)
     await $.waitUntilVisible(
-      $(AppBar).containing(find.textContaining('Pinned message')),
+      $(AppBar).containing(find.textContaining(_l10n.pinnedMessagesTooltip)),
     );
-    // await $.waitUntilVisible(
-    //   $(PinnedMessagesScreen).containing(find.text('Unpin all message')),
-    // );
 
     await $.waitUntilVisible(
       $(PinnedMessagesScreen),
@@ -331,7 +338,7 @@ class ChatScenario extends CoreRobot {
     await $.waitUntilVisible(
       $(
         PinnedMessagesScreen,
-      ).containing(find.textContaining('Unpin all message')),
+      ).containing(find.textContaining(_l10n.unpinAllMessages)),
     );
   }
 
@@ -342,13 +349,16 @@ class ChatScenario extends CoreRobot {
     final chatInputRow = $(ChatInputRow);
 
     expect(
-      find.descendant(of: $(AppBar).finder, matching: find.byTooltip('Close')),
+      find.descendant(
+        of: $(AppBar).finder,
+        matching: find.byTooltip(_l10n.close),
+      ),
       findsOneWidget,
     );
     expect(
       find.descendant(
         of: $(ChatAppBarTitle).finder,
-        matching: find.byTooltip('Copy'),
+        matching: find.byTooltip(_l10n.copy),
       ),
       findsOneWidget,
     );
@@ -363,24 +373,30 @@ class ChatScenario extends CoreRobot {
       expect(
         find.descendant(
           of: $(ChatAppBarTitle).finder,
-          matching: find.byTooltip('Pin'),
+          matching: find.byTooltip(_l10n.pin),
         ),
         findsOneWidget,
       );
       expect(
         find.descendant(
           of: $(ChatAppBarTitle).finder,
-          matching: find.byTooltip('More'),
+          matching: find.byTooltip(_l10n.more),
         ),
         findsOneWidget,
       );
       expect(
-        find.descendant(of: chatInputRow.finder, matching: find.text('Reply')),
+        find.descendant(
+          of: chatInputRow.finder,
+          matching: find.text(_l10n.reply),
+        ),
         findsOneWidget,
       );
     }
     expect(
-      find.descendant(of: chatInputRow.finder, matching: find.text('Forward')),
+      find.descendant(
+        of: chatInputRow.finder,
+        matching: find.text(_l10n.forward),
+      ),
       findsOneWidget,
     );
     await expectMessageTickSelected(
@@ -599,9 +615,7 @@ class ChatScenario extends CoreRobot {
       return widget.icon == Icons.add_circle_outline;
     });
     await addIcon.tap();
-    final context = $(addIcon).evaluate().first;
-    final nextLabel = L10n.of(context)!.next;
-    await $(nextLabel).tap();
+    await $(_l10n.next).tap();
 
     // 2. Handle permissions if necessary (though usually handled by CoreRobot or LoginScenario)
     // CoreRobot's confirmAccessContact style
