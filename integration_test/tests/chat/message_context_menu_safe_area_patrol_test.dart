@@ -68,9 +68,9 @@ void main() {
 
       // Verify at least one menu item is visible
       s.softAssertEquals(
-        menuRobot.getReplyItem().exists ||
-            menuRobot.getForwardItem().exists ||
-            menuRobot.getCopyItem().exists,
+        menuRobot.getReplyItem().visible ||
+            menuRobot.getForwardItem().visible ||
+            menuRobot.getCopyItem().visible,
         true,
         'At least one menu item should be visible',
       );
@@ -80,7 +80,7 @@ void main() {
       await $.pumpAndSettle();
 
       s.softAssertEquals(
-        menuRobot.getSelectItem().exists || menuRobot.getPinItem().exists,
+        menuRobot.getSelectItem().visible || menuRobot.getPinItem().visible,
         true,
         'Select or Pin item should be visible after scrolling to bottom',
       );
@@ -90,7 +90,7 @@ void main() {
       await $.pumpAndSettle();
 
       s.softAssertEquals(
-        menuRobot.getReplyItem().exists || menuRobot.getForwardItem().exists,
+        menuRobot.getReplyItem().visible || menuRobot.getForwardItem().visible,
         true,
         'Reply or Forward item should be visible after scrolling to top',
       );

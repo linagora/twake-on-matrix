@@ -184,15 +184,15 @@ class MessageContextMenuRobot extends CoreRobot {
     int attempts = 0;
     const maxAttempts = 5;
 
-    while (!item.exists && attempts < maxAttempts) {
+    while (!item.visible && attempts < maxAttempts) {
       await _scrollByDistance(-100);
       attempts++;
     }
 
     expect(
-      item.exists,
+      item.visible,
       isTrue,
-      reason: 'Could not find menu item "$itemText" after scrolling',
+      reason: 'Could not make menu item "$itemText" visible after scrolling',
     );
   }
 }
