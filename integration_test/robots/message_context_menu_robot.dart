@@ -15,8 +15,13 @@ class MessageContextMenuRobot extends CoreRobot {
   }
 
   /// Find SingleChildScrollView in the dialog
-  PatrolFinder getScrollView() {
-    return $(SingleChildScrollView);
+  PatrolFinder getDialogScrollView() {
+    return $(
+      find.ancestor(
+        of: getContextMenu().finder,
+        matching: find.byType(SingleChildScrollView),
+      ),
+    );
   }
 
   /// Find the backdrop filter (background)
@@ -31,7 +36,9 @@ class MessageContextMenuRobot extends CoreRobot {
 
   /// Find a specific menu item by text
   PatrolFinder getMenuItem(String text) {
-    return $(find.text(text));
+    return $(
+      find.descendant(of: getContextMenu().finder, matching: find.text(text)),
+    );
   }
 
   /// Get Reply menu item
@@ -72,7 +79,7 @@ class MessageContextMenuRobot extends CoreRobot {
     // Find SingleChildScrollView inside SafeArea
     final scrollViewInSafeArea = find.descendant(
       of: getSafeArea().finder,
-      matching: getScrollView().finder,
+      matching: getDialogScrollView().finder,
     );
 
     expect(
@@ -87,7 +94,7 @@ class MessageContextMenuRobot extends CoreRobot {
     // Find SingleChildScrollView inside SafeArea (to get the specific one in dialog)
     final scrollViewInSafeArea = find.descendant(
       of: getSafeArea().finder,
-      matching: getScrollView().finder,
+      matching: getDialogScrollView().finder,
     );
 
     final scrollViews = $.tester.widgetList<SingleChildScrollView>(
@@ -109,7 +116,7 @@ class MessageContextMenuRobot extends CoreRobot {
     // Find SingleChildScrollView inside SafeArea (the dialog's scroll view)
     final scrollViewInSafeArea = find.descendant(
       of: getSafeArea().finder,
-      matching: getScrollView().finder,
+      matching: getDialogScrollView().finder,
     );
 
     // Scroll all the way to the top
@@ -122,7 +129,7 @@ class MessageContextMenuRobot extends CoreRobot {
     // Find SingleChildScrollView inside SafeArea (the dialog's scroll view)
     final scrollViewInSafeArea = find.descendant(
       of: getSafeArea().finder,
-      matching: getScrollView().finder,
+      matching: getDialogScrollView().finder,
     );
 
     // Scroll all the way to the bottom
@@ -171,7 +178,7 @@ class MessageContextMenuRobot extends CoreRobot {
   Future<void> _scrollByDistance(double distance) async {
     final scrollViewInSafeArea = find.descendant(
       of: getSafeArea().finder,
-      matching: getScrollView().finder,
+      matching: getDialogScrollView().finder,
     );
     await $.tester.drag(scrollViewInSafeArea.first, Offset(0, distance));
     await $.pumpAndSettle();
