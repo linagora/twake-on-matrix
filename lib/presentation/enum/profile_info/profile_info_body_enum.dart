@@ -1,6 +1,6 @@
+import 'package:fluffychat/generated/l10n/app_localizations.dart';
 import 'package:fluffychat/pages/profile_info/profile_info_body/profile_info_body_view_style.dart';
 import 'package:flutter/material.dart';
-import 'package:fluffychat/generated/l10n/app_localizations.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 
 enum ProfileInfoActions {
@@ -10,34 +10,33 @@ enum ProfileInfoActions {
   transferOwnership;
 
   String label(BuildContext context) {
+    final L10n l10n = L10n.of(context)!;
     switch (this) {
       case ProfileInfoActions.sendMessage:
-        return L10n.of(context)!.sendMessage;
+        return l10n.sendMessage;
       case ProfileInfoActions.removeFromGroup:
-        return L10n.of(context)!.removeFromGroup;
+        return l10n.removeFromGroup;
       case ProfileInfoActions.downgradeToReadOnly:
-        return L10n.of(context)!.downgradeToReadOnly;
+        return l10n.downgradeToReadOnly;
       case ProfileInfoActions.transferOwnership:
-        return L10n.of(context)!.transferOwnership;
+        return l10n.transferOwnership;
     }
   }
 
   TextStyle textStyle(BuildContext context) {
+    final TextTheme textTheme = Theme.of(context).textTheme;
     switch (this) {
       case ProfileInfoActions.sendMessage:
-        return Theme.of(context).textTheme.labelLarge!.copyWith(
+        return textTheme.labelLarge!.copyWith(
           color: LinagoraSysColors.material().onPrimary,
         );
       case ProfileInfoActions.removeFromGroup:
-        return Theme.of(context).textTheme.labelLarge!.copyWith(
+        return textTheme.labelLarge!.copyWith(
           color: LinagoraSysColors.material().error,
         );
       case ProfileInfoActions.downgradeToReadOnly:
-        return Theme.of(context).textTheme.labelLarge!.copyWith(
-          color: LinagoraSysColors.material().primary,
-        );
       case ProfileInfoActions.transferOwnership:
-        return Theme.of(context).textTheme.labelLarge!.copyWith(
+        return textTheme.labelLarge!.copyWith(
           color: LinagoraSysColors.material().primary,
         );
     }

@@ -78,3 +78,7 @@ devenv.local.nix
 # pre-commit
 .pre-commit-config.yaml
 
+# Patrol generated
+test_bundle.dart
+
+.fvm
