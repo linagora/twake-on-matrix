@@ -6,9 +6,14 @@ import 'package:media_kit/media_kit.dart';
 import 'package:media_kit_video/media_kit_video.dart';
 
 class VideoPlayer extends StatefulWidget {
-  const VideoPlayer({super.key, required this.bytes, required this.event});
+  const VideoPlayer({super.key, this.bytes, this.url, required this.event})
+    : assert(bytes != null || url != null, 'bytes or url must be provided');
 
-  final Uint8List bytes;
+  /// In-memory video bytes (web path).
+  final Uint8List? bytes;
+
+  /// File URI for playback (mobile/desktop), e.g. file:///path/to/video.mp4
+  final String? url;
 
   final Event? event;
 
@@ -22,19 +27,25 @@ class _VideoPlayerState extends State<VideoPlayer> {
   @override
   void initState() {
     super.initState();
-    Media.memory(widget.bytes).then(
-      (v) => videoController.player.open(v),
-      onError: (e, s) => Logs().e('Error opening video:', e, s),
-    );
+    if (widget.url != null) {
+      videoController.player
+          .open(Media(widget.url!))
+          .onError((e, s) => Logs().e('Error opening video url:', e, s));
+    } else {
+      Media.memory(widget.bytes!).then(
+        (v) => videoController.player.open(v),
+        onError: (e, s) => Logs().e('Error opening video bytes:', e, s),
+      );
+    }
   }
 
   @override
   void dispose() {
-    super.dispose();
     videoController.player.dispose();
     videoController.notifier.dispose();
     videoController.id.dispose();
     videoController.rect.dispose();
+    super.dispose();
   }
 
   @override

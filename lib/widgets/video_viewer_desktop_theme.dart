@@ -8,9 +8,12 @@ import 'package:matrix/matrix.dart';
 import 'package:media_kit_video/media_kit_video.dart';
 
 class VideoViewerDesktopTheme extends StatelessWidget {
-  const VideoViewerDesktopTheme({super.key, required this.bytes, this.event});
+  const VideoViewerDesktopTheme({super.key, this.bytes, this.url, this.event})
+    : assert(bytes != null || url != null, 'bytes or url must be provided');
 
-  final Uint8List bytes;
+  final Uint8List? bytes;
+
+  final String? url;
 
   final Event? event;
 
@@ -31,7 +34,7 @@ class VideoViewerDesktopTheme extends StatelessWidget {
         seekBarHeight: VideoViewerStyle.seekBarHeight,
         seekBarThumbColor: Theme.of(context).colorScheme.primary,
       ),
-      child: VideoPlayer(bytes: bytes, event: event),
+      child: VideoPlayer(bytes: bytes, url: url, event: event),
     );
   }
 }

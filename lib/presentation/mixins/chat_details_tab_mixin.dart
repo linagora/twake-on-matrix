@@ -108,10 +108,15 @@ mixin ChatDetailsTabMixin<T extends StatefulWidget>
     return _timeline;
   }
 
-  Future<Uint8List> _handleDownloadAndPlayVideo(Event event) {
+  Future<Uint8List?> _handleDownloadAndPlayVideo(Event event) {
     return handleDownloadVideoEvent(
       event: event,
-      playVideoAction: (path) => playVideoAction(context, path, event: event),
+      playVideoAction: PlatformInfos.isWeb
+          ? (bytes) => playVideoAction(context, bytes, event: event)
+          : null,
+      playVideoActionByUrl: PlatformInfos.isWeb
+          ? null
+          : (url) => playVideoActionByUrl(context, url, event: event),
     );
   }
 

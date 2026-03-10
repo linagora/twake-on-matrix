@@ -9,14 +9,18 @@ import 'package:matrix/matrix.dart';
 import 'package:media_kit_video/media_kit_video.dart';
 
 class VideoViewerMobileTheme extends StatelessWidget {
-  const VideoViewerMobileTheme({super.key, required this.bytes, this.event});
+  const VideoViewerMobileTheme({super.key, this.bytes, this.url, this.event})
+    : assert(bytes != null || url != null, 'bytes or url must be provided');
 
-  final Uint8List bytes;
+  final Uint8List? bytes;
+
+  final String? url;
 
   final Event? event;
 
   @override
   Widget build(BuildContext context) {
+    final player = VideoPlayer(bytes: bytes, url: url, event: event);
     return MaterialVideoControlsTheme(
       normal: MaterialVideoControlsThemeData(
         topButtonBarMargin: VideoViewerStyle.topButtonBarMargin(context),
@@ -40,10 +44,10 @@ class VideoViewerMobileTheme extends StatelessWidget {
               alignment: Alignment.center,
               children: [
                 MxcImage(event: event),
-                VideoPlayer(bytes: bytes, event: event),
+                player,
               ],
             )
-          : VideoPlayer(bytes: bytes, event: event),
+          : player,
     );
   }
 }
