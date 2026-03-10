@@ -10,6 +10,7 @@ import 'package:fluffychat/domain/app_state/user_info/get_user_info_state.dart';
 import 'package:fluffychat/domain/model/room/room_extension.dart';
 import 'package:fluffychat/domain/usecase/room/set_permission_level_interactor.dart';
 import 'package:fluffychat/domain/usecase/user_info/get_user_info_interactor.dart';
+import 'package:fluffychat/generated/l10n/app_localizations.dart';
 import 'package:fluffychat/pages/profile_info/profile_info_body/profile_info_body_view.dart';
 import 'package:fluffychat/pages/profile_info/profile_info_body/profile_info_body_view_style.dart';
 import 'package:fluffychat/presentation/enum/profile_info/profile_info_body_enum.dart';
@@ -26,7 +27,6 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:matrix/matrix.dart';
-import 'package:fluffychat/generated/l10n/app_localizations.dart';
 
 class ProfileInfoBody extends StatefulWidget {
   const ProfileInfoBody({
@@ -51,12 +51,9 @@ class ProfileInfoBody extends StatefulWidget {
 
 class ProfileInfoBodyController extends State<ProfileInfoBody>
     with SingleTickerProviderStateMixin {
-  final _getUserInfoInteractor = getIt.get<GetUserInfoInteractor>();
+  static const int _animationDuration = 100;
 
-  final _setPermissionLevelInteractor = getIt
-      .get<SetPermissionLevelInteractor>();
-
-  final responsive = getIt.get<ResponsiveUtils>();
+  final ResponsiveUtils responsive = getIt.get<ResponsiveUtils>();
 
   StreamSubscription? _setPermissionLevelSubscription;
 
@@ -71,15 +68,35 @@ class ProfileInfoBodyController extends State<ProfileInfoBody>
 
   Timer? _avatarToggleTimer;
 
-  static const int _animationDuration = 100;
-
   User? get user => widget.user;
 
   bool get isOwnProfile => user?.id == user?.room.client.userID;
 
+  @override
+  void initState() {
+    super.initState();
+    animationController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: _animationDuration),
+    );
+    getUserInfoAction();
+  }
+
+  @override
+  void dispose() {
+    userInfoNotifierSub?.cancel();
+    _setPermissionLevelSubscription?.cancel();
+    _avatarToggleTimer?.cancel();
+    animationController.dispose();
+    isExpandedAvatar.dispose();
+    userInfoNotifier.dispose();
+    super.dispose();
+  }
+
   void getUserInfoAction() {
     if (user == null) return;
-    userInfoNotifierSub = _getUserInfoInteractor
+    userInfoNotifierSub = getIt
+        .get<GetUserInfoInteractor>()
         .execute(userId: user!.id)
         .listen((event) => userInfoNotifier.value = event);
   }
@@ -116,33 +133,36 @@ class ProfileInfoBodyController extends State<ProfileInfoBody>
     required String path,
     required ContactPresentationSearch contactPresentationSearch,
   }) {
-    if (contactPresentationSearch.matrixId !=
+    if (contactPresentationSearch.matrixId ==
         Matrix.of(context).client.userID) {
-      Router.neglect(
-        context,
-        () => context.go(
-          '/$path/draftChat',
-          extra: {
-            PresentationContactConstant.receiverId:
-                contactPresentationSearch.matrixId ?? '',
-            PresentationContactConstant.displayName:
-                contactPresentationSearch.displayName ?? '',
-            PresentationContactConstant.status: '',
-          },
-        ),
-      );
+      return;
     }
+
+    Router.neglect(
+      context,
+      () => context.go(
+        '/$path/draftChat',
+        extra: {
+          PresentationContactConstant.receiverId:
+              contactPresentationSearch.matrixId ?? '',
+          PresentationContactConstant.displayName:
+              contactPresentationSearch.displayName ?? '',
+          PresentationContactConstant.status: '',
+        },
+      ),
+    );
   }
 
   Future<void> removeFromGroupChat() async {
     if (user == null) return;
+
     WarningDialog.hideWarningDialog(context);
     final result = await TwakeDialog.showFutureLoadingDialogFullScreen(
       future: () => user!.ban(),
     );
     if (result.error != null) {
-      TwakeSnackBar.show(context, result.error!.message);
-      return;
+      if (!mounted) return;
+      return TwakeSnackBar.show(context, result.error!.message);
     }
     widget.onUpdatedMembers?.call();
   }
@@ -187,6 +207,7 @@ class ProfileInfoBodyController extends State<ProfileInfoBody>
               children: [
                 if (action.divider(context) != null) action.divider(context)!,
                 InkWell(
+                  key: Key('profile_action_${action.name}'),
                   highlightColor: Colors.transparent,
                   splashColor: Colors.transparent,
                   focusColor: Colors.transparent,
@@ -230,60 +251,74 @@ class ProfileInfoBodyController extends State<ProfileInfoBody>
     );
   }
 
+  /// Transfer ownership of the room to the user
+  ///
+  /// Related to:
+  ///   [SetPermissionLevelInteractor] to set the user's power level to owner and the current user's power level to admin
+  ///   [DefaultPowerLevelMember] to get the power level of owner and admin
+  ///
   Future<void> transferOwnership() async {
-    if (user == null) return;
-    if (user?.room == null) return;
+    if (user == null || user?.room == null) return;
+
+    final L10n? translations = L10n.of(context);
+
     await showConfirmAlertDialog(
       context: context,
-      title: L10n.of(
-        context,
-      )?.confirmTransferOwnership(user?.displayName ?? ''),
-      message: L10n.of(context)?.transferOwnershipDescription,
-      okLabel: L10n.of(context)?.confirm,
-      cancelLabel: L10n.of(context)?.cancel,
+      title: translations?.confirmTransferOwnership(user?.displayName ?? ''),
+      message: translations?.transferOwnershipDescription,
+      okLabel: translations?.confirm,
+      cancelLabel: translations?.cancel,
     ).then((result) {
-      if (result == ConfirmResult.ok) {
-        _setPermissionLevelSubscription = _setPermissionLevelInteractor
-            .execute(
-              room: user!.room,
-              userPermissionLevels: {
-                user!: DefaultPowerLevelMember.owner.powerLevel,
-                user!.room.ownUser: DefaultPowerLevelMember.admin.powerLevel,
-              },
-            )
-            .listen((state) => _handleSetPermissionState(state));
-      }
+      if (result == ConfirmResult.cancel) return;
+
+      final Room room = user!.room;
+      _setPermissionLevelSubscription = getIt
+          .get<SetPermissionLevelInteractor>()
+          .execute(
+            room: room,
+            userPermissionLevels: {
+              user!: room.ownUser.powerLevel,
+              room.ownUser: room.getUserDefaultLevel(),
+            },
+          )
+          .listen(_handleSetPermissionState);
     });
   }
 
+  /// Handles the result state of a permission level change operation.
+  ///
   void _handleSetPermissionState(Either<Failure, Success> state) {
     state.fold(
-      (failure) {
-        if (failure is SetPermissionLevelFailure) {
-          TwakeDialog.hideLoadingDialog(context);
-          TwakeSnackBar.show(context, failure.exception.toString());
-          return;
-        }
+      (Failure failure) {
+        _setPermissionLevelSubscription?.cancel();
+        if (!mounted) return;
+        switch (failure) {
+          case SetPermissionLevelFailure():
+            TwakeDialog.hideLoadingDialog(context);
+            TwakeSnackBar.show(context, failure.exception.toString());
 
-        if (failure is NoPermissionFailure) {
-          TwakeDialog.hideLoadingDialog(context);
-          TwakeSnackBar.show(
-            context,
-            L10n.of(context)!.permissionErrorChangeRole,
-          );
-          return;
+          case NoPermissionFailure():
+            TwakeDialog.hideLoadingDialog(context);
+            TwakeSnackBar.show(
+              context,
+              L10n.of(context)!.permissionErrorChangeRole,
+            );
+          default:
+            break;
         }
       },
-      (success) {
-        if (success is SetPermissionLevelLoading) {
-          TwakeDialog.showLoadingDialog(context);
-          return;
-        }
+      (Success success) {
+        switch (success) {
+          case SetPermissionLevelLoading():
+            TwakeDialog.showLoadingDialog(context);
 
-        if (success is SetPermissionLevelSuccess) {
-          TwakeDialog.hideLoadingDialog(context);
-          widget.onTransferOwnershipSuccess?.call();
-          return;
+          case SetPermissionLevelSuccess():
+            _setPermissionLevelSubscription?.cancel();
+            if (!mounted) return;
+            TwakeDialog.hideLoadingDialog(context);
+            widget.onTransferOwnershipSuccess?.call();
+          default:
+            break;
         }
       },
     );
@@ -321,27 +356,6 @@ class ProfileInfoBodyController extends State<ProfileInfoBody>
         },
       );
     }
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    animationController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: _animationDuration),
-    );
-    getUserInfoAction();
-  }
-
-  @override
-  void dispose() {
-    animationController.dispose();
-    isExpandedAvatar.dispose();
-    userInfoNotifier.dispose();
-    userInfoNotifierSub?.cancel();
-    _setPermissionLevelSubscription?.cancel();
-    _avatarToggleTimer?.cancel();
-    super.dispose();
   }
 
   @override
