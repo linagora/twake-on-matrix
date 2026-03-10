@@ -80,7 +80,8 @@ void main() {
       await $.pumpAndSettle();
 
       s.softAssertEquals(
-        menuRobot.getSelectItem().visible || menuRobot.getPinItem().visible,
+        menuRobot.getSelectItem().visible ||
+            menuRobot.getPinItem(isPinned: true).visible,
         true,
         'Select or Pin item should be visible after scrolling to bottom',
       );

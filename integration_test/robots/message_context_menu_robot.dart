@@ -66,9 +66,11 @@ class MessageContextMenuRobot extends CoreRobot {
   }
 
   /// Get Pin menu item
-  PatrolFinder getPinItem() {
+  PatrolFinder getPinItem({required bool isPinned}) {
     final context = _getContext();
-    return getMenuItem(L10n.of(context)!.pin);
+    return getMenuItem(
+      isPinned ? L10n.of(context)!.unpin : L10n.of(context)!.pin,
+    );
   }
 
   /// Get Select menu item

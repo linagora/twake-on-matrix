@@ -71,7 +71,9 @@ class MessageContentWithTimestampBuilder extends StatefulWidget {
   final Future<Category?>? recentEmojiFuture;
   final Future<void> Function(Event)? onRetryTextMessage;
 
-  static const Key dialogSafeAreaKey = Key('message_context_menu_dialog_safe_area');
+  static const Key dialogSafeAreaKey = Key(
+    'message_context_menu_dialog_safe_area',
+  );
 
   const MessageContentWithTimestampBuilder({
     super.key,
@@ -265,7 +267,8 @@ class _MessageContentWithTimestampBuilderState
                                         ),
                                       ),
                                       SafeArea(
-                                        key: MessageContentWithTimestampBuilder.dialogSafeAreaKey,
+                                        key: MessageContentWithTimestampBuilder
+                                            .dialogSafeAreaKey,
                                         child: Center(
                                           child: SingleChildScrollView(
                                             physics:
