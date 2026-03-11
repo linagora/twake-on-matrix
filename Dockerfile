@@ -2,7 +2,7 @@
 ARG FLUTTER_VERSION=3.38.9
 
 # Building Twake for the web
-FROM --platform=linux/arm64 ghcr.io/cirruslabs/flutter:${FLUTTER_VERSION} AS web-builder
+FROM --platform=linux/amd64 ghcr.io/cirruslabs/flutter:${FLUTTER_VERSION} AS web-builder
 ARG TWAKECHAT_BASE_HREF="/web/"
 # Sentry: all values passed from outside — nothing is hardcoded here.
 # Usage: docker build \
@@ -32,7 +32,7 @@ RUN apt-get update && \
       curl pkg-config libssl-dev openssh-client && \
     rm -rf /var/lib/apt/lists/* && \
     curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y && \
-    curl -fsSL "https://github.com/mikefarah/yq/releases/download/v${YQ_VERSION}/yq_linux_arm64" \
+    curl -fsSL "https://github.com/mikefarah/yq/releases/download/v${YQ_VERSION}/yq_linux_amd64" \
       -o /usr/local/bin/yq && \
     chmod +x /usr/local/bin/yq && \
     curl -sL https://sentry.io/get-cli/ | sh
