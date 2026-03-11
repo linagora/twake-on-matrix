@@ -1527,7 +1527,7 @@
     "type": "text",
     "placeholders": {}
   },
-  "search": "Rechercher des personnes ou salons",
+  "search": "Recherche",
   "@search": {
     "type": "text",
     "placeholders": {}
@@ -1857,7 +1857,7 @@
       "type": {}
     }
   },
-  "unmuteChat": "Retirer la sourdine de la discussion",
+  "unmuteChat": "Son",
   "@unmuteChat": {
     "type": "text",
     "placeholders": {}
@@ -2520,7 +2520,7 @@
   "matrixId": "Matrix ID",
   "roomCreationFailed": "La création d'un salon a échoué",
   "externalContactTitle": "Inviter d'autres utilisateurs",
-  "mute": "Mettre en sourdine",
+  "mute": "Muet",
   "contact": "Contact",
   "unpinThisChat": "Désépingler ce salon",
   "notInAChatYet": "Vous n'êtes pas encore dans une discussion",
@@ -2571,7 +2571,7 @@
   "cut": "Couper",
   "continueProcess": "Continuer",
   "tapToAllowAccessToYourCamera": "Vous pouvez activer l'accès à la caméra dans les Réglages de l'application pour passer des appels vidéo sur",
-  "unmute": "Retirer la sourdine",
+  "unmute": "Son",
   "selectChat": "Sélectionner la discussion",
   "file": "Fichier",
   "add": "Ajouter",
@@ -2581,11 +2581,11 @@
   "done": "Terminé",
   "twakeChatUser": "Utilisateur de Twake Chat",
   "noResultsFound": "Aucun résultat trouvé",
-  "muteThisChat": "Mettre ce salon en sourdine",
+  "muteThisChat": "Muet",
   "clearAllSelected": "Tout désélectionner",
   "encryptionMessage": "Protège vos messages contre la lecture par d'autres personnes. Évite également leur sauvegarde sur nos serveurs. Choix définitif : vous ne pourrez pas désactiver cette fonction plus tard.",
   "selectedUsers": "Utilisateurs sélectionnés",
-  "unmuteThisChat": "Retirer la sourdine de ce salon",
+  "unmuteThisChat": "Son",
   "encryptionWarning": "Vous risquez de perdre vos messages si vous accédez à l'application Twake Chat sur un autre appareil.",
   "newDirectMessage": "Nouveau message",
   "contactInfo": "Coordonnées",
