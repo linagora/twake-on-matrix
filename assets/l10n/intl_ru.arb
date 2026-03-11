@@ -1127,7 +1127,7 @@
     "type": "text",
     "placeholders": {}
   },
-  "muteChat": "Отключить уведомления",
+  "muteChat": "Откл. уведомления",
   "@muteChat": {
     "type": "text",
     "placeholders": {}
@@ -1354,7 +1354,7 @@
     "type": "text",
     "placeholders": {}
   },
-  "pleaseEnter4Digits": "Установите 4-значный PIN. Чтобы убрать блокировку, удалите код.",
+  "pleaseEnter4Digits": "Установите 4-значный PIN. Чтобы убрать блокировку, удалите код",
   "@pleaseEnter4Digits": {
     "type": "text",
     "placeholders": {}
@@ -1844,7 +1844,7 @@
       "type": {}
     }
   },
-  "unmuteChat": "Включить уведомления",
+  "unmuteChat": "Вкл. уведомления",
   "@unmuteChat": {
     "type": "text",
     "placeholders": {}
@@ -2523,7 +2523,7 @@
   "privacyAndSecurity": "Конфиденциальность",
   "matrixId": "Matrix ID",
   "roomCreationFailed": "Не удалось создать комнату",
-  "mute": "Отключить уведомления",
+  "mute": "Откл. уведомления",
   "notInAChatYet": "У вас еще нет чатов",
   "basicInfo": "ИНФОРМАЦИЯ ПРОФИЛЯ",
   "downloadFileInWeb": "Файл сохранен в {directory}",
@@ -2547,7 +2547,7 @@
   "workIdentitiesInfo": "ИДЕНТИФИКАТОРЫ",
   "members": "Участники",
   "errorGettingPdf": "Не удалось загрузить PDF",
-  "unmute": "Включить уведомления",
+  "unmute": "Вкл. уведомления",
   "selectChat": "Выбрать чат",
   "add": "Добавить",
   "cannotUploadKey": "Невозможно сохранить резервную копию ключа.",
@@ -2830,7 +2830,7 @@
     "placeholders": {}
   },
   "message": "Сообщение",
-  "enable_notifications": "Включить уведомления",
+  "enable_notifications": "Вкл. уведомления",
   "fileTooBig": "Выбранный файл слишком большой. Загрузите файл размером менее {maxSize} МБ.",
   "@fileTooBig": {
     "placeholders": {
@@ -2839,7 +2839,7 @@
       }
     }
   },
-  "disable_notifications": "Отключить уведомления",
+  "disable_notifications": "Откл. уведомления",
   "logoutDialogWarning": "Вы потеряете доступ к зашифрованным сообщениям. Рекомендуем активировать резервную копию чатов перед выходом",
   "callViaCarrier": "Позвонить через Carrier",
   "thisFieldCannotBeBlank": "Это поле не может быть пустым",
