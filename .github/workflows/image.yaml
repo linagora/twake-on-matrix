@@ -57,7 +57,7 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           push: true
-          platforms: "linux/amd64"
+          platforms: "linux/amd64,linux/arm64"
           cache-from: |
             type=gha
           cache-to: |
@@ -68,6 +68,7 @@ jobs:
             default
           # SENTRY_RELEASE/DIST default to pubspec.yaml values inside the build
           build-args: |
+            BUILDKIT_CONTEXT_KEEP_GIT_DIR=1
             SENTRY_PROJECT=${{ secrets.SENTRY_PROJECT }}
             SENTRY_ORG=${{ secrets.SENTRY_ORG }}
             SENTRY_DSN=${{ secrets.SENTRY_DSN }}
@@ -124,7 +125,7 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           push: true
-          platforms: "linux/amd64"
+          platforms: "linux/amd64,linux/arm64"
           cache-from: |
             type=gha
           cache-to: |
@@ -135,6 +136,7 @@ jobs:
             default
           # SENTRY_DIST defaults to the build number from pubspec.yaml inside the build
           build-args: |
+            BUILDKIT_CONTEXT_KEEP_GIT_DIR=1
             SENTRY_PROJECT=${{ secrets.SENTRY_PROJECT }}
             SENTRY_ORG=${{ secrets.SENTRY_ORG }}
             SENTRY_RELEASE=${{ steps.sentry_version.outputs.release }}
