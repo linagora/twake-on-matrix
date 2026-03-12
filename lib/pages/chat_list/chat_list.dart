@@ -37,6 +37,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:fluffychat/generated/l10n/app_localizations.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:fluffychat/config/go_routes/app_routes.dart';
 import 'package:go_router/go_router.dart';
 import 'package:matrix/matrix.dart';
 
@@ -734,14 +735,14 @@ class ChatListController extends State<ChatList>
 
   void goToNewPrivateChat() {
     if (FirstColumnInnerRoutes.instance.goRouteAvailableInFirstColumn()) {
-      context.go('/rooms/newprivatechat');
+      const NewPrivateChatRoute().go(context);
     } else {
       context.pushInner('innernavigator/newprivatechat');
     }
   }
 
   void onClickAvatar() {
-    context.push('/rooms/profile');
+    const ProfileRoute().push(context);
   }
 
   void _handleRecovery() {

@@ -12,7 +12,7 @@ import 'package:fluffychat/widgets/matrix.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:fluffychat/generated/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
+import 'package:fluffychat/config/go_routes/app_routes.dart';
 import 'package:matrix/matrix.dart';
 
 class NewPrivateChat extends StatefulWidget {
@@ -78,7 +78,7 @@ class NewPrivateChatController extends State<NewPrivateChat>
         ),
       );
     } else {
-      context.push('/rooms/$roomId');
+      RoomRoute(roomid: roomId).push(context);
     }
   }
 

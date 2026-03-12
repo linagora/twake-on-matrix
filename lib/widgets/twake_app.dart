@@ -1,5 +1,5 @@
 import 'package:fluffychat/config/app_config.dart';
-import 'package:fluffychat/config/go_routes/go_router.dart';
+import 'package:fluffychat/config/go_routes/app_routes.dart';
 import 'package:fluffychat/config/localizations/localization_service.dart';
 import 'package:fluffychat/config/themes.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
@@ -32,14 +32,14 @@ class TwakeApp extends StatefulWidget {
   // Router must be outside of build method so that hot reload does not reset
   // the current path.
   static final GoRouter router = GoRouter(
-    routes: AppRoutes.routes,
+    routes: $appRoutes,
     debugLogDiagnostics: true,
     navigatorKey: routerKey,
     onException: (context, state, router) {
       Logs().e('GoRouter exception: ${state.error}');
-      return router.go('/error');
+      return router.go(const ErrorRoute().location);
     },
-    initialLocation: PlatformInfos.isIOS ? '/splash' : null,
+    initialLocation: PlatformInfos.isIOS ? const SplashRoute().location : null,
   );
 
   static bool isCurrentPageIsInRooms() =>

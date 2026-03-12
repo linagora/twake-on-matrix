@@ -3,7 +3,7 @@ import 'package:fluffychat/widgets/avatar/avatar_style.dart';
 import 'package:flutter/material.dart';
 
 import 'package:fluffychat/generated/l10n/app_localizations.dart';
-import 'package:go_router/go_router.dart';
+import 'package:fluffychat/config/go_routes/app_routes.dart';
 import 'package:matrix/matrix.dart';
 
 import 'package:fluffychat/widgets/avatar/avatar.dart';
@@ -25,7 +25,7 @@ class ProfileBottomSheet extends StatelessWidget {
       future: () => client.startDirectChat(userId),
     );
     if (result.error == null) {
-      context.go('/rooms/${result.result!}');
+      RoomRoute(roomid: result.result!).go(context);
       Navigator.of(context, rootNavigator: false).pop();
       return;
     }

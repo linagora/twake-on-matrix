@@ -21,6 +21,7 @@ import 'package:fluffychat/widgets/matrix.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:fluffychat/config/go_routes/app_routes.dart';
 import 'package:go_router/go_router.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:matrix/matrix.dart' hide Contact;
@@ -233,7 +234,7 @@ class ChatProfileInfoDetails extends StatelessWidget {
         },
       );
     } else {
-      context.go('/rooms/$roomId');
+      RoomRoute(roomid: roomId).go(context);
     }
   }
 }

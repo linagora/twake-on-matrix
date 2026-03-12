@@ -4,7 +4,7 @@ import 'package:fluffychat/utils/display_name_widget.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
 import 'package:fluffychat/widgets/avatar/avatar.dart';
 import 'package:flutter/material.dart' hide SearchController;
-import 'package:go_router/go_router.dart';
+import 'package:fluffychat/config/go_routes/app_routes.dart';
 import 'package:matrix/matrix.dart';
 import 'package:fluffychat/generated/l10n/app_localizations.dart';
 
@@ -50,7 +50,7 @@ class PreSearchRecentContactWidget extends StatelessWidget {
       MatrixLocals(L10n.of(context)!),
     );
     return InkWell(
-      onTap: () => context.go('/rooms/${room.id}'),
+      onTap: () => RoomRoute(roomid: room.id).go(context),
       child: SizedBox(
         width: RecentContactsBannerWidgetStyle.chatRecentContactItemWidth,
         child: Column(

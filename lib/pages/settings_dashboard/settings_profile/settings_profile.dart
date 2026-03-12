@@ -39,7 +39,7 @@ import 'package:fluffychat/widgets/mixins/popup_menu_widget_mixin.dart';
 import 'package:fluffychat/widgets/mixins/popup_menu_widget_style.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:go_router/go_router.dart';
+import 'package:fluffychat/config/go_routes/app_routes.dart';
 import 'package:linagora_design_flutter/images_picker/asset_counter.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:matrix/matrix.dart';
@@ -556,7 +556,7 @@ class SettingsProfileController extends State<SettingsProfile>
     ).showMultipleAccountsPicker(
       client,
       onGoToAccountSettings: () {
-        context.go('/rooms/profile');
+        const ProfileRoute().go(context);
       },
     );
   }

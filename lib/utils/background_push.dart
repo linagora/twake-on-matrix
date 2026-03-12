@@ -22,6 +22,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:fcm_shared_isolate/fcm_shared_isolate.dart';
+import 'package:fluffychat/config/go_routes/app_routes.dart';
 import 'package:fluffychat/domain/model/extensions/push/push_notification_extension.dart';
 import 'package:fluffychat/presentation/extensions/client_extension.dart';
 import 'package:fluffychat/presentation/extensions/go_router_extensions.dart';
@@ -646,9 +647,9 @@ class BackgroundPush {
 
   void _handleRedirectRoom(String roomId, {String? eventId}) {
     if (eventId != null) {
-      TwakeApp.router.go('/rooms/$roomId?event=$eventId');
+      TwakeApp.router.go(RoomRoute(roomid: roomId, event: eventId).location);
       return;
     }
-    TwakeApp.router.go('/rooms/$roomId');
+    TwakeApp.router.go(RoomRoute(roomid: roomId).location);
   }
 }
