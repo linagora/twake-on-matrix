@@ -13,12 +13,11 @@ class SettingsProfileViewMobileStyle {
   static const double dividerHeight = 2;
   static const int thumbnailSize = 28;
 
-  static EdgeInsetsDirectional editIconPadding =
-      const EdgeInsetsDirectional.all(8);
+  static EdgeInsetsDirectional editIconPadding = const .all(8);
 
   static const bottomButtonHeight = 48.0;
-  static const paddingBottomButton = EdgeInsets.only(left: 16.0, right: 16.0);
-  static const marginBottomButton = EdgeInsets.only(
+  static const EdgeInsets paddingBottomButton = .only(left: 16.0, right: 16.0);
+  static const EdgeInsets marginBottomButton = .only(
     bottom: 32.0,
     left: 16,
     right: 16,

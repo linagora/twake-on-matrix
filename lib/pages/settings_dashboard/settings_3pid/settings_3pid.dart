@@ -1,12 +1,10 @@
-import 'package:fluffychat/utils/dialog/twake_dialog.dart';
-import 'package:flutter/material.dart';
-
 import 'package:adaptive_dialog/adaptive_dialog.dart';
 import 'package:fluffychat/generated/l10n/app_localizations.dart';
-
+import 'package:fluffychat/utils/dialog/twake_dialog.dart';
+import 'package:fluffychat/widgets/matrix.dart';
+import 'package:flutter/material.dart';
 import 'package:matrix/matrix.dart';
 
-import 'package:fluffychat/widgets/matrix.dart';
 import 'settings_3pid_view.dart';
 
 class Settings3Pid extends StatefulWidget {
@@ -20,16 +18,18 @@ class Settings3Pid extends StatefulWidget {
 
 class Settings3PidController extends State<Settings3Pid> {
   void add3PidAction() async {
+    final l10n = L10n.of(context)!;
+
     final input = await showTextInputDialog(
       useRootNavigator: false,
       context: context,
-      title: L10n.of(context)!.enterAnEmailAddress,
-      okLabel: L10n.of(context)!.ok,
-      cancelLabel: L10n.of(context)!.cancel,
+      title: l10n.enterAnEmailAddress,
+      okLabel: l10n.ok,
+      cancelLabel: l10n.cancel,
       textFields: [
         DialogTextField(
-          hintText: L10n.of(context)!.enterAnEmailAddress,
-          keyboardType: TextInputType.emailAddress,
+          hintText: l10n.enterAnEmailAddress,
+          keyboardType: .emailAddress,
         ),
       ],
     );
@@ -46,9 +46,9 @@ class Settings3PidController extends State<Settings3Pid> {
     final ok = await showOkAlertDialog(
       useRootNavigator: false,
       context: context,
-      title: L10n.of(context)!.weSentYouAnEmail,
-      message: L10n.of(context)!.pleaseClickOnLink,
-      okLabel: L10n.of(context)!.iHaveClickedOnLink,
+      title: l10n.weSentYouAnEmail,
+      message: l10n.pleaseClickOnLink,
+      okLabel: l10n.iHaveClickedOnLink,
     );
     if (ok != OkCancelResult.ok) return;
     final success = await TwakeDialog.showFutureLoadingDialogFullScreen(
@@ -65,12 +65,13 @@ class Settings3PidController extends State<Settings3Pid> {
   Future<List<ThirdPartyIdentifier>?>? request;
 
   void delete3Pid(ThirdPartyIdentifier identifier) async {
+    final l10n = L10n.of(context)!;
     if (await showOkCancelAlertDialog(
           useRootNavigator: false,
           context: context,
-          title: L10n.of(context)!.areYouSure,
-          okLabel: L10n.of(context)!.yes,
-          cancelLabel: L10n.of(context)!.cancel,
+          title: l10n.areYouSure,
+          okLabel: l10n.yes,
+          cancelLabel: l10n.cancel,
         ) !=
         OkCancelResult.ok) {
       return;

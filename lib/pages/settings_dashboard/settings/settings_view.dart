@@ -22,10 +22,18 @@ class SettingsView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = L10n.of(context)!;
+    final sysColor = LinagoraSysColors.material();
+    final refColorTertiary30 = LinagoraRefColors.material().tertiary[30];
+    final theme = Theme.of(context);
+    final appbarTheme = theme.appBarTheme;
+    final textTheme = theme.textTheme;
+    final colorScheme = theme.colorScheme;
+
     return Scaffold(
-      backgroundColor: LinagoraSysColors.material().onPrimary,
+      backgroundColor: sysColor.onPrimary,
       appBar: TwakeAppBar(
-        title: L10n.of(context)!.settings,
+        title: l10n.settings,
         withDivider: responsiveUtils.isMobile(context),
         context: context,
       ),
@@ -33,24 +41,22 @@ class SettingsView extends StatelessWidget {
       body: ListTileTheme(
         // TODO: change to colorSurface when its approved
         // ignore: deprecated_member_use
-        iconColor: Theme.of(context).colorScheme.onBackground,
+        iconColor: colorScheme.onBackground,
         child: ListView(
           key: const Key('SettingsListViewContent'),
           children: <Widget>[
             Padding(
               padding: SettingsViewStyle.bodySettingsScreenPadding,
               child: Material(
-                borderRadius: BorderRadius.circular(
-                  SettingsViewStyle.borderRadius,
-                ),
-                clipBehavior: Clip.hardEdge,
+                borderRadius: .circular(SettingsViewStyle.borderRadius),
+                clipBehavior: .hardEdge,
                 color:
                     controller.optionsSelectNotifier.value ==
                         SettingEnum.profile
-                    ? Theme.of(context).colorScheme.secondaryContainer
-                    : LinagoraSysColors.material().onPrimary,
+                    ? colorScheme.secondaryContainer
+                    : sysColor.onPrimary,
                 child: InkWell(
-                  onTap: () => controller.goToSettingsProfile(),
+                  onTap: controller.goToSettingsProfile,
                   child: Padding(
                     padding: SettingsViewStyle.itemBuilderPadding,
                     child: Row(
@@ -62,18 +68,11 @@ class SettingsView extends StatelessWidget {
                               padding: SettingsViewStyle.avatarPadding,
                               child: Material(
                                 elevation:
-                                    Theme.of(
-                                      context,
-                                    ).appBarTheme.scrolledUnderElevation ??
-                                    4,
-                                shadowColor: Theme.of(
-                                  context,
-                                ).appBarTheme.shadowColor,
+                                    appbarTheme.scrolledUnderElevation ?? 4,
+                                shadowColor: appbarTheme.shadowColor,
                                 shape: RoundedRectangleBorder(
-                                  side: BorderSide(
-                                    color: Theme.of(context).dividerColor,
-                                  ),
-                                  borderRadius: BorderRadius.circular(
+                                  side: BorderSide(color: theme.dividerColor),
+                                  borderRadius: .circular(
                                     AvatarStyle.defaultSize,
                                   ),
                                 ),
@@ -89,12 +88,12 @@ class SettingsView extends StatelessWidget {
                         ),
                         Expanded(
                           child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            mainAxisAlignment: .spaceBetween,
                             children: [
                               Expanded(
                                 child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  mainAxisAlignment: .center,
+                                  crossAxisAlignment: .start,
                                   children: [
                                     ValueListenableBuilder(
                                       valueListenable:
@@ -102,14 +101,9 @@ class SettingsView extends StatelessWidget {
                                       builder: (context, displayName, _) {
                                         return Text(
                                           displayName ?? controller.displayName,
-                                          style: Theme.of(context)
-                                              .textTheme
-                                              .titleLarge
-                                              ?.copyWith(
-                                                color: Theme.of(
-                                                  context,
-                                                ).colorScheme.onSurface,
-                                              ),
+                                          style: textTheme.titleLarge?.copyWith(
+                                            color: colorScheme.onSurface,
+                                          ),
                                           maxLines: 1,
                                           overflow: TextOverflow.ellipsis,
                                         );
@@ -117,13 +111,9 @@ class SettingsView extends StatelessWidget {
                                     ),
                                     Text(
                                       controller.client.mxid(context),
-                                      style: Theme.of(context)
-                                          .textTheme
-                                          .labelLarge
-                                          ?.copyWith(
-                                            color: LinagoraRefColors.material()
-                                                .tertiary[30],
-                                          ),
+                                      style: textTheme.labelLarge?.copyWith(
+                                        color: refColorTertiary30,
+                                      ),
                                       maxLines: 1,
                                       overflow: TextOverflow.ellipsis,
                                     ),
@@ -133,8 +123,7 @@ class SettingsView extends StatelessWidget {
                               Icon(
                                 Icons.chevron_right_outlined,
                                 size: SettingsViewStyle.iconSize,
-                                color:
-                                    LinagoraRefColors.material().tertiary[30],
+                                color: refColorTertiary30,
                               ),
                             ],
                           ),
@@ -148,34 +137,32 @@ class SettingsView extends StatelessWidget {
             Padding(
               padding: SettingsViewStyle.profileItemDividerPadding(context),
               child: Divider(
-                color: LinagoraStateLayer(
-                  LinagoraSysColors.material().surfaceTint,
-                ).opacityLayer3,
-                thickness: SettingsViewStyle.settingsItemDividerThikness,
+                color: LinagoraStateLayer(sysColor.surfaceTint).opacityLayer3,
+                thickness: SettingsViewStyle.settingsItemDividerThickness,
                 height: SettingsViewStyle.settingsItemDividerHeight,
               ),
             ),
             if (!controller.matrix.twakeSupported)
               ValueListenableBuilder(
                 valueListenable: controller.showChatBackupSwitch,
-                builder: (context, backUpAvailable, child) {
+                builder: (_, backUpAvailable, _) {
                   return SwitchListTile(
-                    controlAffinity: ListTileControlAffinity.trailing,
+                    controlAffinity: .trailing,
                     contentPadding: SettingsViewStyle.backupSwitchPadding,
                     value: backUpAvailable == false,
                     secondary: const Icon(Icons.backup_outlined),
-                    title: Text(L10n.of(context)!.chatBackup),
+                    title: Text(l10n.chatBackup),
                     onChanged: controller.firstRunBootstrapAction,
                   );
                 },
                 child: ListTile(
                   leading: const Icon(Icons.backup_outlined),
-                  title: Text(L10n.of(context)!.chatBackup),
+                  title: Text(l10n.chatBackup),
                   trailing: const CircularProgressIndicator.adaptive(),
                 ),
               ),
             Column(
-              children: controller.getListSettingItem.map((item) {
+              children: controller.getListSettingItem.map((SettingEnum item) {
                 return Column(
                   children: [
                     Padding(
@@ -198,10 +185,10 @@ class SettingsView extends StatelessWidget {
                                 SettingsViewStyle.settingsItemDividerPadding(),
                             child: Divider(
                               color: LinagoraStateLayer(
-                                LinagoraSysColors.material().surfaceTint,
+                                sysColor.surfaceTint,
                               ).opacityLayer3,
-                              thickness:
-                                  SettingsViewStyle.settingsItemDividerThikness,
+                              thickness: SettingsViewStyle
+                                  .settingsItemDividerThickness,
                               height:
                                   SettingsViewStyle.settingsItemDividerHeight,
                             ),

@@ -32,6 +32,10 @@ class SettingsProfileItemBuilder extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final sysColor = LinagoraSysColors.material();
+    final refColor = LinagoraRefColors.material();
+    final textTheme = Theme.of(context).textTheme;
+
     return Column(
       children: [
         Row(
@@ -42,22 +46,22 @@ class SettingsProfileItemBuilder extends StatelessWidget {
                 child: Icon(
                   leadingIcon,
                   size: SettingsProfileItemStyle.iconSize,
-                  color: LinagoraSysColors.material().tertiary,
+                  color: sysColor.tertiary,
                 ),
               ),
             Expanded(
               child: Padding(
                 padding: SettingsProfileItemStyle.textPadding,
                 child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                  crossAxisAlignment: .start,
                   children: [
                     Text(
                       title,
-                      style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                        color: LinagoraRefColors.material().neutral[40],
+                      style: textTheme.labelMedium?.copyWith(
+                        color: refColor.neutral[40],
                       ),
                       maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
+                      overflow: .ellipsis,
                     ),
                     if (textEditingController != null)
                       ValueListenableBuilder<TextEditingValue>(
@@ -65,12 +69,11 @@ class SettingsProfileItemBuilder extends StatelessWidget {
                         builder: (context, value, _) {
                           return Text(
                             value.text,
-                            style: Theme.of(context).textTheme.bodyLarge
-                                ?.copyWith(
-                                  color: LinagoraSysColors.material().onSurface,
-                                ),
+                            style: textTheme.bodyLarge?.copyWith(
+                              color: sysColor.onSurface,
+                            ),
                             maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
+                            overflow: .ellipsis,
                           );
                         },
                       ),
@@ -86,7 +89,7 @@ class SettingsProfileItemBuilder extends StatelessWidget {
                 icon: Icon(
                   suffixIcon,
                   size: SettingsProfileItemStyle.copyIconSize,
-                  color: LinagoraRefColors.material().tertiary[40],
+                  color: refColor.tertiary[40],
                 ),
               ),
           ],
@@ -94,12 +97,10 @@ class SettingsProfileItemBuilder extends StatelessWidget {
         const SizedBox(height: 8),
         if (enableDivider)
           Container(
-            width: double.infinity,
+            width: .infinity,
             height: 1,
-            margin: const EdgeInsets.only(left: 40),
-            color: LinagoraStateLayer(
-              LinagoraSysColors.material().surfaceTint,
-            ).opacityLayer3,
+            margin: const .only(left: 40),
+            color: LinagoraStateLayer(sysColor.surfaceTint).opacityLayer3,
           ),
       ],
     );
@@ -107,7 +108,7 @@ class SettingsProfileItemBuilder extends StatelessWidget {
 
   bool get hasSuffixIcon {
     return switch (settingsProfileEnum) {
-      SettingsProfileEnum.displayName => canEditDisplayName,
+      .displayName => canEditDisplayName,
       _ => true,
     };
   }

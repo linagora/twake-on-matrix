@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:adaptive_dialog/adaptive_dialog.dart';
+import 'package:fluffychat/config/go_routes/app_route_paths.dart';
 import 'package:collection/collection.dart';
 import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/config/first_column_inner_routes.dart';
@@ -741,7 +742,7 @@ class ChatListController extends State<ChatList>
   }
 
   void onClickAvatar() {
-    context.push('/rooms/profile');
+    context.push(AppRoutePaths.profileFull);
   }
 
   void _handleRecovery() {

@@ -1,5 +1,7 @@
+import 'package:fluffychat/config/go_routes/app_route_paths.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/domain/model/capabilities/capabilities_extension.dart';
+import 'package:fluffychat/generated/l10n/app_localizations.dart';
 import 'package:fluffychat/pages/settings_dashboard/settings_profile/settings_profile.dart';
 import 'package:fluffychat/pages/settings_dashboard/settings_profile/settings_profile_item.dart';
 import 'package:fluffychat/pages/settings_dashboard/settings_profile/settings_profile_redirection_edit_button.dart';
@@ -13,7 +15,6 @@ import 'package:fluffychat/widgets/app_bars/twake_app_bar.dart';
 import 'package:fluffychat/widgets/twake_components/twake_icon_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_adaptive_scaffold/flutter_adaptive_scaffold.dart';
-import 'package:fluffychat/generated/l10n/app_localizations.dart';
 import 'package:go_router/go_router.dart';
 import 'package:linagora_design_flutter/colors/linagora_sys_colors.dart';
 import 'package:matrix/matrix.dart';
@@ -39,16 +40,18 @@ class SettingsProfileView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final responsive = getIt.get<ResponsiveUtils>();
+    final l10n = L10n.of(context)!;
+
     return Scaffold(
       appBar: TwakeAppBar(
-        title: L10n.of(context)!.profile,
+        title: l10n.profile,
         leading: responsive.isMobile(context)
             ? IconButton(
                 icon: const Icon(
                   Icons.arrow_back_ios,
                   size: SettingsProfileViewStyle.sizeIcon,
                 ),
-                onPressed: () => context.pop(),
+                onPressed: context.pop,
               )
             : const SizedBox.shrink(),
         actions: [
@@ -56,7 +59,7 @@ class SettingsProfileView extends StatelessWidget {
             TwakeIconButton(
               icon: Icons.qr_code,
               iconColor: LinagoraSysColors.material().primary,
-              onTap: () => context.go('/rooms/profile/qr'),
+              onTap: () => context.go(AppRoutePaths.profileQrFull),
             ),
           ValueListenableBuilder(
             valueListenable: controller.isEditedProfileNotifier,
@@ -69,14 +72,14 @@ class SettingsProfileView extends StatelessWidget {
               return Padding(
                 padding: SettingsProfileViewStyle.actionButtonPadding,
                 child: InkWell(
-                  borderRadius: BorderRadius.circular(
+                  borderRadius: .circular(
                     SettingsProfileViewStyle.borderRadius,
                   ),
                   onTap: () => controller.onUploadProfileAction(),
                   child: Padding(
                     padding: SettingsProfileViewStyle.paddingTextButton,
                     child: Text(
-                      L10n.of(context)!.done,
+                      l10n.done,
                       style: Theme.of(context).textTheme.labelLarge?.copyWith(
                         color: Theme.of(context).colorScheme.primary,
                       ),
@@ -118,40 +121,36 @@ class SettingsProfileView extends StatelessWidget {
                   padding: EdgeInsets.zero,
                   physics: const NeverScrollableScrollPhysics(),
                   itemBuilder: (context, index) {
+                    final settingsProfile =
+                        controller.getListProfileMobile[index];
+
                     return SettingsProfileItemBuilder(
-                      settingsProfileEnum:
-                          controller.getListProfileMobile[index],
-                      title: controller.getListProfileMobile[index].getTitle(
-                        context,
-                      ),
+                      settingsProfileEnum: settingsProfile,
+                      title: settingsProfile.getTitle(context),
                       settingsProfilePresentation: SettingsProfilePresentation(
-                        settingsProfileType: controller
-                            .getListProfileMobile[index]
+                        settingsProfileType: settingsProfile
                             .getSettingsProfileType(),
                       ),
-                      suffixIcon: controller.getListProfileMobile[index]
-                          .getTrailingIcon(),
-                      leadingIcon: controller.getListProfileMobile[index]
-                          .getLeadingIcon(),
+                      suffixIcon: settingsProfile.getTrailingIcon(),
+                      leadingIcon: settingsProfile.getLeadingIcon(),
                       onEditRequested: () {
                         final focusNode = controller.getFocusNode(
-                          controller.getListProfileMobile[index],
+                          settingsProfile,
                         );
                         focusNode?.requestFocus();
                       },
                       textEditingController: controller.getController(
-                        controller.getListProfileMobile[index],
+                        settingsProfile,
                       ),
-                      onCopyAction: () => controller.copyEventsAction(
-                        controller.getListProfileMobile[index],
-                      ),
+                      onCopyAction: () =>
+                          controller.copyEventsAction(settingsProfile),
                       canEditDisplayName:
                           capabilities?.canEditDisplayName == true,
                       enableDivider:
                           index != (controller.getListProfileMobile.length - 1),
                     );
                   },
-                  separatorBuilder: (context, index) {
+                  separatorBuilder: (_, _) {
                     return const SizedBox(height: 8);
                   },
                   itemCount: controller.getListProfileMobile.length,
@@ -177,33 +176,31 @@ class SettingsProfileView extends StatelessWidget {
                   shrinkWrap: true,
                   physics: const NeverScrollableScrollPhysics(),
                   itemBuilder: (context, index) {
+                    final settingsProfile =
+                        controller.getListProfileBasicInfo[index];
+
                     return SettingsProfileItemBuilder(
-                      settingsProfileEnum:
-                          controller.getListProfileBasicInfo[index],
-                      title: controller.getListProfileBasicInfo[index].getTitle(
-                        context,
-                      ),
+                      settingsProfileEnum: settingsProfile,
+                      title: settingsProfile.getTitle(context),
                       settingsProfilePresentation: SettingsProfilePresentation(
-                        settingsProfileType: controller
-                            .getListProfileBasicInfo[index]
+                        settingsProfileType: settingsProfile
                             .getSettingsProfileType(),
                       ),
-                      suffixIcon: controller.getListProfileBasicInfo[index]
-                          .getTrailingIcon(),
+                      suffixIcon: settingsProfile.getTrailingIcon(),
                       onEditRequested: () {
                         final focusNode = controller.getFocusNode(
-                          controller.getListProfileBasicInfo[index],
+                          settingsProfile,
                         );
                         focusNode?.requestFocus();
                       },
                       textEditingController: controller.getController(
-                        controller.getListProfileBasicInfo[index],
+                        settingsProfile,
                       ),
                       canEditDisplayName:
                           capabilities?.canEditDisplayName == true,
                     );
                   },
-                  separatorBuilder: (context, index) {
+                  separatorBuilder: (_, _) {
                     return const SizedBox(height: 16);
                   },
                   itemCount: controller.getListProfileBasicInfo.length,
@@ -213,36 +210,33 @@ class SettingsProfileView extends StatelessWidget {
                   shrinkWrap: true,
                   physics: const NeverScrollableScrollPhysics(),
                   itemBuilder: (context, index) {
+                    final workIdentityInfo =
+                        controller.getListProfileWorkIdentitiesInfo[index];
+
                     return SettingsProfileItemBuilder(
-                      settingsProfileEnum:
-                          controller.getListProfileWorkIdentitiesInfo[index],
-                      title: controller.getListProfileWorkIdentitiesInfo[index]
-                          .getTitle(context),
+                      settingsProfileEnum: workIdentityInfo,
+                      title: workIdentityInfo.getTitle(context),
                       settingsProfilePresentation: SettingsProfilePresentation(
-                        settingsProfileType: controller
-                            .getListProfileWorkIdentitiesInfo[index]
+                        settingsProfileType: workIdentityInfo
                             .getSettingsProfileType(),
                       ),
-                      suffixIcon: controller
-                          .getListProfileWorkIdentitiesInfo[index]
-                          .getTrailingIcon(),
+                      suffixIcon: workIdentityInfo.getTrailingIcon(),
                       onEditRequested: () {
                         final focusNode = controller.getFocusNode(
-                          controller.getListProfileWorkIdentitiesInfo[index],
+                          workIdentityInfo,
                         );
                         focusNode?.requestFocus();
                       },
                       textEditingController: controller.getController(
-                        controller.getListProfileWorkIdentitiesInfo[index],
+                        workIdentityInfo,
                       ),
-                      onCopyAction: () => controller.copyEventsAction(
-                        controller.getListProfileWorkIdentitiesInfo[index],
-                      ),
+                      onCopyAction: () =>
+                          controller.copyEventsAction(workIdentityInfo),
                       canEditDisplayName:
                           capabilities?.canEditDisplayName == true,
                     );
                   },
-                  separatorBuilder: (context, index) {
+                  separatorBuilder: (_, _) {
                     return const SizedBox(height: 16);
                   },
                   itemCount: controller.getListProfileWorkIdentitiesInfo.length,
@@ -257,11 +251,13 @@ class SettingsProfileView extends StatelessWidget {
   }
 
   Color backgroundColor(ResponsiveUtils responsive, BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
     if (PlatformInfos.isMobile) {
-      return Theme.of(context).colorScheme.surface;
+      return colorScheme.surface;
     } else {
       return responsive.isWebDesktop(context)
-          ? Theme.of(context).colorScheme.surface
+          ? colorScheme.surface
           : LinagoraSysColors.material().onPrimary;
     }
   }

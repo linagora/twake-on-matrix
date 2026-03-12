@@ -1,16 +1,15 @@
+import 'package:fluffychat/generated/l10n/app_localizations.dart';
+import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/widgets/app_bars/twake_app_bar.dart';
 import 'package:fluffychat/widgets/context_menu_builder_ios_paste_without_permission.dart';
+import 'package:fluffychat/widgets/layouts/max_width_body.dart';
 import 'package:fluffychat/widgets/matrix.dart';
+import 'package:fluffychat/widgets/mxc_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-
-import 'package:fluffychat/generated/l10n/app_localizations.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:matrix/matrix.dart';
 
-import 'package:fluffychat/utils/platform_infos.dart';
-import 'package:fluffychat/widgets/layouts/max_width_body.dart';
-import 'package:fluffychat/widgets/mxc_image.dart';
 import 'settings_emotes.dart';
 
 class EmotesSettingsView extends StatelessWidget {
@@ -22,12 +21,16 @@ class EmotesSettingsView extends StatelessWidget {
   Widget build(BuildContext context) {
     final client = Matrix.of(context).client;
     final imageKeys = controller.pack!.images.keys.toList();
+    final l10n = L10n.of(context)!;
+    final theme = Theme.of(context);
+    final textTheme = TextStyle(
+      color: Theme.of(context).colorScheme.secondary,
+      fontWeight: FontWeight.bold,
+    );
+
     return Scaffold(
       backgroundColor: LinagoraSysColors.material().onPrimary,
-      appBar: TwakeAppBar(
-        title: L10n.of(context)!.emoteSettings,
-        context: context,
-      ),
+      appBar: TwakeAppBar(title: l10n.emoteSettings, context: context),
       floatingActionButton: controller.showSave
           ? FloatingActionButton(
               onPressed: controller.saveAction,
@@ -39,15 +42,15 @@ class EmotesSettingsView extends StatelessWidget {
           children: <Widget>[
             if (!controller.readonly)
               Container(
-                padding: const EdgeInsets.symmetric(vertical: 8.0),
+                padding: const .symmetric(vertical: 8.0),
                 child: ListTile(
                   leading: Container(
                     width: 180.0,
                     height: 38,
-                    padding: const EdgeInsets.symmetric(horizontal: 8),
+                    padding: const .symmetric(horizontal: 8),
                     decoration: BoxDecoration(
-                      borderRadius: const BorderRadius.all(Radius.circular(10)),
-                      color: Theme.of(context).secondaryHeaderColor,
+                      borderRadius: const .all(.circular(10)),
+                      color: theme.secondaryHeaderColor,
                     ),
                     child: TextField(
                       controller: controller.newImageCodeController,
@@ -56,18 +59,12 @@ class EmotesSettingsView extends StatelessWidget {
                       minLines: 1,
                       maxLines: 1,
                       decoration: InputDecoration(
-                        hintText: L10n.of(context)!.emoteShortcode,
+                        hintText: l10n.emoteShortcode,
                         prefixText: ': ',
                         suffixText: ':',
-                        prefixStyle: TextStyle(
-                          color: Theme.of(context).colorScheme.secondary,
-                          fontWeight: FontWeight.bold,
-                        ),
-                        suffixStyle: TextStyle(
-                          color: Theme.of(context).colorScheme.secondary,
-                          fontWeight: FontWeight.bold,
-                        ),
-                        border: InputBorder.none,
+                        prefixStyle: textTheme,
+                        suffixStyle: textTheme,
+                        border: .none,
                       ),
                     ),
                   ),
@@ -87,131 +84,124 @@ class EmotesSettingsView extends StatelessWidget {
               ),
             if (controller.room != null)
               SwitchListTile.adaptive(
-                title: Text(L10n.of(context)!.enableEmotesGlobally),
+                title: Text(l10n.enableEmotesGlobally),
                 value: controller.isGloballyActive(client),
                 onChanged: controller.setIsGloballyActive,
               ),
             if (!controller.readonly || controller.room != null)
-              Divider(
-                height: 2,
-                thickness: 2,
-                color: Theme.of(context).primaryColor,
-              ),
+              Divider(height: 2, thickness: 2, color: theme.primaryColor),
             Expanded(
               child: imageKeys.isEmpty
                   ? Center(
                       child: Padding(
-                        padding: const EdgeInsets.all(16),
+                        padding: const .all(16),
                         child: Text(
-                          L10n.of(context)!.noEmotesFound,
+                          l10n.noEmotesFound,
                           style: const TextStyle(fontSize: 20),
                         ),
                       ),
                     )
-                  : ListView.separated(
-                      separatorBuilder: (BuildContext context, int i) =>
-                          Container(),
-                      itemCount: imageKeys.length + 1,
-                      itemBuilder: (BuildContext context, int i) {
-                        if (i >= imageKeys.length) {
-                          return Container(height: 70);
-                        }
-                        final imageCode = imageKeys[i];
-                        final image = controller.pack!.images[imageCode]!;
-                        final textEditingController = TextEditingController();
-                        textEditingController.text = imageCode;
-                        final useShortCuts =
-                            (PlatformInfos.isWeb || PlatformInfos.isDesktop);
-                        return ListTile(
-                          leading: Container(
-                            width: 180.0,
-                            height: 38,
-                            padding: const EdgeInsets.symmetric(horizontal: 8),
-                            decoration: BoxDecoration(
-                              borderRadius: const BorderRadius.all(
-                                Radius.circular(10),
-                              ),
-                              color: Theme.of(context).secondaryHeaderColor,
-                            ),
-                            child: Shortcuts(
-                              shortcuts: !useShortCuts
-                                  ? {}
-                                  : {
-                                      LogicalKeySet(LogicalKeyboardKey.enter):
-                                          SubmitLineIntent(),
-                                    },
-                              child: Actions(
-                                actions: !useShortCuts
-                                    ? {}
-                                    : {
-                                        SubmitLineIntent: CallbackAction(
-                                          onInvoke: (i) {
-                                            controller.submitImageAction(
-                                              imageCode,
-                                              textEditingController.text,
-                                              image,
-                                              textEditingController,
-                                            );
-                                            return null;
-                                          },
-                                        ),
-                                      },
-                                child: TextField(
-                                  readOnly: controller.readonly,
-                                  controller: textEditingController,
-                                  contextMenuBuilder:
-                                      mobileTwakeContextMenuBuilder,
-                                  autocorrect: false,
-                                  minLines: 1,
-                                  maxLines: 1,
-                                  decoration: InputDecoration(
-                                    hintText: L10n.of(context)!.emoteShortcode,
-                                    prefixText: ': ',
-                                    suffixText: ':',
-                                    prefixStyle: TextStyle(
-                                      color: Theme.of(
-                                        context,
-                                      ).colorScheme.secondary,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                    suffixStyle: TextStyle(
-                                      color: Theme.of(
-                                        context,
-                                      ).colorScheme.secondary,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                    border: InputBorder.none,
-                                  ),
-                                  onSubmitted: (s) =>
-                                      controller.submitImageAction(
-                                        imageCode,
-                                        s,
-                                        image,
-                                        textEditingController,
-                                      ),
-                                ),
-                              ),
-                            ),
-                          ),
-                          title: _EmoteImage(image.url),
-                          trailing: controller.readonly
-                              ? null
-                              : InkWell(
-                                  onTap: () =>
-                                      controller.removeImageAction(imageCode),
-                                  child: const Icon(
-                                    Icons.delete_outlined,
-                                    color: Colors.red,
-                                    size: 32.0,
-                                  ),
-                                ),
-                        );
-                      },
-                    ),
+                  : _buildImageKeysNotEmptyResult(imageKeys),
             ),
           ],
         ),
       ),
+    );
+  }
+
+  ListView _buildImageKeysNotEmptyResult(List<String> imageKeys) {
+    return ListView.separated(
+      separatorBuilder: (_, _) => Container(),
+      itemCount: imageKeys.length + 1,
+      itemBuilder: (BuildContext context, int i) {
+        final l10n = L10n.of(context)!;
+        final theme = Theme.of(context);
+        final colorScheme = theme.colorScheme;
+
+        if (i >= imageKeys.length) return Container(height: 70);
+
+        final imageCode = imageKeys[i];
+        final image = controller.pack!.images[imageCode]!;
+        final textEditingController = TextEditingController();
+        textEditingController.text = imageCode;
+        final useShortCuts = (PlatformInfos.isWeb || PlatformInfos.isDesktop);
+
+        return ListTile(
+          leading: Container(
+            width: 180.0,
+            height: 38,
+            padding: const EdgeInsets.symmetric(horizontal: 8),
+            decoration: BoxDecoration(
+              borderRadius: const .all(.circular(10)),
+              color: theme.secondaryHeaderColor,
+            ),
+            child: Shortcuts(
+              shortcuts: !useShortCuts
+                  ? {}
+                  : {
+                      LogicalKeySet(LogicalKeyboardKey.enter):
+                          SubmitLineIntent(),
+                    },
+              child: Actions(
+                actions: !useShortCuts
+                    ? {}
+                    : {
+                        SubmitLineIntent: CallbackAction(
+                          onInvoke: (i) {
+                            controller.submitImageAction(
+                              imageCode,
+                              textEditingController.text,
+                              image,
+                              textEditingController,
+                            );
+                            return null;
+                          },
+                        ),
+                      },
+                child: TextField(
+                  readOnly: controller.readonly,
+                  controller: textEditingController,
+                  contextMenuBuilder: mobileTwakeContextMenuBuilder,
+                  autocorrect: false,
+                  minLines: 1,
+                  maxLines: 1,
+                  decoration: InputDecoration(
+                    hintText: l10n.emoteShortcode,
+                    prefixText: ': ',
+                    suffixText: ':',
+                    prefixStyle: TextStyle(
+                      color: colorScheme.secondary,
+                      fontWeight: .bold,
+                    ),
+                    suffixStyle: TextStyle(
+                      color: colorScheme.secondary,
+                      fontWeight: .bold,
+                    ),
+                    border: .none,
+                  ),
+                  onSubmitted: (s) => controller.submitImageAction(
+                    imageCode,
+                    s,
+                    image,
+                    textEditingController,
+                  ),
+                ),
+              ),
+            ),
+          ),
+          title: _EmoteImage(image.url),
+          trailing: controller.readonly
+              ? null
+              : InkWell(
+                  onTap: () => controller.removeImageAction(imageCode),
+                  child: const Icon(
+                    Icons.delete_outlined,
+                    color: Colors.red,
+                    size: 32.0,
+                  ),
+                ),
+        );
+      },
     );
   }
 }
@@ -223,7 +213,7 @@ class _EmoteImage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     const size = 38.0;
-    return MxcImage(uri: mxc, fit: BoxFit.contain, width: size, height: size);
+    return MxcImage(uri: mxc, fit: .contain, width: size, height: size);
   }
 }
 
@@ -246,9 +236,8 @@ class _ImagePickerState extends State<_ImagePicker> {
         onPressed: () => widget.onPressed(widget.controller),
         child: Text(L10n.of(context)!.pickImage),
       );
-    } else {
-      return _EmoteImage(widget.controller.value!.url);
     }
+    return _EmoteImage(widget.controller.value!.url);
   }
 }
 

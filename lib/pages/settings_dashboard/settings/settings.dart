@@ -1,26 +1,25 @@
 import 'dart:async';
 
+import 'package:adaptive_dialog/adaptive_dialog.dart';
 import 'package:fluffychat/config/app_config.dart';
+import 'package:fluffychat/config/go_routes/app_route_paths.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/domain/model/extensions/common_settings/common_settings_extensions.dart';
 import 'package:fluffychat/domain/model/extensions/homeserver_summary_extensions.dart';
 import 'package:fluffychat/domain/repository/federation_configurations_repository.dart';
 import 'package:fluffychat/domain/repository/tom_configurations_repository.dart';
 import 'package:fluffychat/event/twake_inapp_event_types.dart';
+import 'package:fluffychat/generated/l10n/app_localizations.dart';
 import 'package:fluffychat/pages/bootstrap/bootstrap_dialog.dart';
-import 'package:fluffychat/presentation/mixins/connect_page_mixin.dart';
 import 'package:fluffychat/presentation/enum/settings/settings_enum.dart';
 import 'package:fluffychat/presentation/extensions/client_extension.dart';
+import 'package:fluffychat/presentation/mixins/connect_page_mixin.dart';
 import 'package:fluffychat/utils/dialog/twake_dialog.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/utils/url_launcher.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:fluffychat/widgets/twake_app.dart';
 import 'package:flutter/material.dart';
-
-import 'package:adaptive_dialog/adaptive_dialog.dart';
-import 'package:fluffychat/generated/l10n/app_localizations.dart';
-
 import 'package:go_router/go_router.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:matrix/matrix.dart';
@@ -81,13 +80,14 @@ class SettingsController extends State<Settings> with ConnectPageMixin {
     if (twakeContext == null) {
       Logs().e('SettingsController()::logoutAction - Twake context is null');
     }
+    final l10n = L10n.of(context)!;
     if (await showConfirmAlertDialog(
           useRootNavigator: false,
           context: twakeContext!,
-          title: L10n.of(context)!.areYouSureYouWantToLogout,
-          message: L10n.of(context)!.logoutDialogWarning,
-          okLabel: L10n.of(context)!.logout,
-          cancelLabel: L10n.of(context)!.cancel,
+          title: l10n.areYouSureYouWantToLogout,
+          message: l10n.logoutDialogWarning,
+          okLabel: l10n.logout,
+          cancelLabel: l10n.cancel,
         ) ==
         ConfirmResult.cancel) {
       return;
@@ -199,12 +199,13 @@ class SettingsController extends State<Settings> with ConnectPageMixin {
   }
 
   void firstRunBootstrapAction([_]) async {
+    final l10n = L10n.of(context)!;
     if (showChatBackupSwitch.value != true) {
       showOkAlertDialog(
         context: context,
-        title: L10n.of(context)!.chatBackup,
-        message: L10n.of(context)!.onlineKeyBackupEnabled,
-        okLabel: L10n.of(context)!.close,
+        title: l10n.chatBackup,
+        message: l10n.onlineKeyBackupEnabled,
+        okLabel: l10n.close,
       );
       return;
     }
@@ -214,7 +215,7 @@ class SettingsController extends State<Settings> with ConnectPageMixin {
 
   void goToSettingsProfile() async {
     optionsSelectNotifier.value = SettingEnum.profile;
-    final result = await context.push('/rooms/profile');
+    final result = await context.push(AppRoutePaths.profileFull);
     if (result == null) {
       optionsSelectNotifier.value = null;
     }
@@ -224,19 +225,19 @@ class SettingsController extends State<Settings> with ConnectPageMixin {
     optionsSelectNotifier.value = settingEnum;
     switch (settingEnum) {
       case SettingEnum.chatSettings:
-        final result = await context.push('/rooms/chat');
+        final result = await context.push(AppRoutePaths.chatFull);
         if (result == null) {
           optionsSelectNotifier.value = null;
         }
         break;
       case SettingEnum.privacyAndSecurity:
-        final result = await context.push('/rooms/security');
+        final result = await context.push(AppRoutePaths.roomsSecurityFull);
         if (result == null) {
           optionsSelectNotifier.value = null;
         }
         break;
       case SettingEnum.notificationAndSounds:
-        final result = await context.push('/rooms/notifications');
+        final result = await context.push(AppRoutePaths.notificationsFull);
         if (result == null) {
           optionsSelectNotifier.value = null;
         }
@@ -244,13 +245,13 @@ class SettingsController extends State<Settings> with ConnectPageMixin {
       case SettingEnum.chatFolders:
         break;
       case SettingEnum.appLanguage:
-        final result = await context.push('/rooms/appLanguage');
+        final result = await context.push(AppRoutePaths.appLanguageFull);
         if (result == null) {
           optionsSelectNotifier.value = null;
         }
         break;
       case SettingEnum.devices:
-        final result = await context.push('/rooms/devices');
+        final result = await context.push(AppRoutePaths.devicesFull);
         if (result == null) {
           optionsSelectNotifier.value = null;
         }
@@ -277,17 +278,22 @@ class SettingsController extends State<Settings> with ConnectPageMixin {
           launchUrl(Uri.parse(commonSettingsUrl), webOnlyWindowName: '_blank');
           return;
         }
+
+        final l10n = L10n.of(context)!;
+        final sysColor = LinagoraSysColors.material();
+        final primaryColor = sysColor.primary;
+
         if (await showConfirmAlertDialog(
               useRootNavigator: false,
               context: context,
-              title: L10n.of(context)!.areYouSureYouWantToDeleteAccount,
-              message: L10n.of(context)!.deleteAccountMessage,
-              okLabel: L10n.of(context)!.continueProcess,
+              title: l10n.areYouSureYouWantToDeleteAccount,
+              message: l10n.deleteAccountMessage,
+              okLabel: l10n.continueProcess,
               okLabelButtonColor: Colors.transparent,
-              okTextColor: LinagoraSysColors.material().primary,
-              cancelLabel: L10n.of(context)!.deleteLater,
-              cancelLabelButtonColor: LinagoraSysColors.material().primary,
-              cancelTextColor: LinagoraSysColors.material().onPrimary,
+              okTextColor: primaryColor,
+              cancelLabel: l10n.deleteLater,
+              cancelLabelButtonColor: primaryColor,
+              cancelTextColor: sysColor.onPrimary,
             ) ==
             ConfirmResult.cancel) {
           return;

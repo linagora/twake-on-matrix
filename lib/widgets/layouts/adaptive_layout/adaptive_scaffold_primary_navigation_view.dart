@@ -1,3 +1,4 @@
+import 'package:fluffychat/config/go_routes/app_route_paths.dart';
 import 'package:fluffychat/pages/chat_list/client_chooser_button_style.dart';
 import 'package:fluffychat/widgets/avatar/avatar.dart';
 import 'package:fluffychat/widgets/layouts/adaptive_layout/adaptive_scaffold_primary_navigation_style.dart';
@@ -73,7 +74,7 @@ class AdaptiveScaffoldPrimaryNavigationView extends StatelessWidget {
                         size: AdaptiveScaffoldPrimaryNavigationStyle.avatarSize,
                         fontSize:
                             ClientChooserButtonStyle.avatarFontSizeInAppBar,
-                        onTap: () => context.go('/rooms/profile'),
+                        onTap: () => context.go(AppRoutePaths.profileFull),
                       );
                     },
                   ),

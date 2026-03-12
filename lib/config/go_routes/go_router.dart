@@ -143,7 +143,7 @@ abstract class AppRoutes {
       pageBuilder: (context, state, child) => defaultPageBuilder(
         context,
         !_responsive.isMobile(context) &&
-                state.fullPath?.startsWith('/rooms/settings') == false
+                state.fullPath?.startsWith(AppRoutePaths.roomsSettings) == false
             ? AppAdaptiveScaffold(
                 body: AppAdaptiveScaffoldBody(
                   activeRoomId: state.pathParameters['roomid'],
@@ -296,13 +296,13 @@ abstract class AppRoutes {
               },
             ),
             GoRoute(
-              path: 'profile',
+              path: AppRoutePaths.profileSegment,
               pageBuilder: (context, state) =>
                   defaultPageBuilder(context, const SettingsProfile()),
               routes: [
                 if (PlatformInfos.isMobile)
                   GoRoute(
-                    path: 'qr',
+                    path: AppRoutePaths.profileQrSegment,
                     pageBuilder: (context, state) =>
                         defaultPageBuilder(context, const PersonalQr()),
                     redirect: loggedOutRedirect,
@@ -310,36 +310,36 @@ abstract class AppRoutes {
               ],
             ),
             GoRoute(
-              path: 'notifications',
+              path: AppRoutePaths.notificationsSegment,
               pageBuilder: (context, state) =>
                   defaultPageBuilder(context, const SettingsNotifications()),
               redirect: loggedOutRedirect,
             ),
             GoRoute(
-              path: 'style',
+              path: AppRoutePaths.styleSegment,
               pageBuilder: (context, state) =>
                   defaultPageBuilder(context, const SettingsStyle()),
               redirect: loggedOutRedirect,
             ),
             GoRoute(
-              path: 'devices',
+              path: AppRoutePaths.devicesSegment,
               pageBuilder: (context, state) =>
                   defaultPageBuilder(context, const DevicesSettings()),
               redirect: loggedOutRedirect,
             ),
             GoRoute(
-              path: 'appLanguage',
+              path: AppRoutePaths.appLanguageSegment,
               pageBuilder: (context, state) =>
                   defaultPageBuilder(context, const SettingsAppLanguage()),
               redirect: loggedOutRedirect,
             ),
             GoRoute(
-              path: 'chat',
+              path: AppRoutePaths.chatSegment,
               pageBuilder: (context, state) =>
                   defaultPageBuilder(context, const SettingsChat()),
               routes: [
                 GoRoute(
-                  path: 'emotes',
+                  path: AppRoutePaths.emotesSegment,
                   pageBuilder: (context, state) =>
                       defaultPageBuilder(context, const EmotesSettings()),
                 ),
@@ -347,7 +347,7 @@ abstract class AppRoutes {
               redirect: loggedOutRedirect,
             ),
             GoRoute(
-              path: 'addaccount',
+              path: AppRoutePaths.addAccountSegment,
               redirect: loggedOutRedirect,
               pageBuilder: (context, state) => defaultPageBuilder(
                 context,
@@ -359,38 +359,38 @@ abstract class AppRoutes {
               ),
               routes: [
                 GoRoute(
-                  path: 'login',
+                  path: AppRoutePaths.addAccountLoginSegment,
                   pageBuilder: (context, state) =>
                       defaultPageBuilder(context, const Login()),
                   redirect: loggedOutRedirect,
                 ),
                 GoRoute(
-                  path: 'homeserverpicker',
+                  path: AppRoutePaths.addAccountHomeserverPickerSegment,
                   pageBuilder: (context, state) =>
                       defaultPageBuilder(context, const HomeserverPicker()),
                 ),
               ],
             ),
             GoRoute(
-              path: 'security',
+              path: AppRoutePaths.securitySegment,
               redirect: loggedOutRedirect,
               pageBuilder: (context, state) =>
                   defaultPageBuilder(context, const SettingsSecurity()),
               routes: [
                 GoRoute(
-                  path: 'stories',
+                  path: AppRoutePaths.storiesSegment,
                   pageBuilder: (context, state) =>
                       defaultPageBuilder(context, const SettingsStories()),
                   redirect: loggedOutRedirect,
                 ),
                 GoRoute(
-                  path: 'blockedUsers',
+                  path: AppRoutePaths.blockedUsersSegment,
                   pageBuilder: (context, state) =>
                       defaultPageBuilder(context, const BlockedUsers()),
                   redirect: loggedOutRedirect,
                 ),
                 GoRoute(
-                  path: '3pid',
+                  path: AppRoutePaths.threePidSegment,
                   pageBuilder: (context, state) =>
                       defaultPageBuilder(context, const Settings3Pid()),
                   redirect: loggedOutRedirect,
