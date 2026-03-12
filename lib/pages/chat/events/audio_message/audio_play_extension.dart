@@ -1,6 +1,9 @@
+// ignore_for_file: experimental_member_use
+
 import 'package:just_audio/just_audio.dart';
 import 'package:matrix/matrix.dart';
 
+///TODO(clement): Remove the ignore linter when the experimental member use is no longer needed.
 class MatrixFileAudioSource extends StreamAudioSource {
   final MatrixFile file;
 

@@ -36,6 +36,9 @@ class SettingsItemBuilder extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final textStyle = LinagoraTextStyle.material();
+    final tertiary30 = LinagoraRefColors.material().tertiary[30];
+
     return TwakeInkWell(
       isSelected: isSelected,
       onTap: onTap,
@@ -45,7 +48,7 @@ class SettingsItemBuilder extends StatelessWidget {
         child: Padding(
           padding: SettingsViewStyle.itemBuilderPadding,
           child: Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
+            crossAxisAlignment: .center,
             children: [
               Padding(
                 padding: SettingsViewStyle.leadingItemBuilderPadding,
@@ -59,22 +62,21 @@ class SettingsItemBuilder extends StatelessWidget {
               ),
               Expanded(
                 child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
+                  crossAxisAlignment: .center,
                   children: [
                     Expanded(
                       child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: .min,
+                        crossAxisAlignment: .start,
                         children: [
                           Text(
                             title,
-                            style: LinagoraTextStyle.material().bodyMedium2
-                                .copyWith(
-                                  color: titleColor,
-                                  fontFamily: 'Inter',
-                                ),
+                            style: textStyle.bodyMedium2.copyWith(
+                              color: titleColor,
+                              fontFamily: 'Inter',
+                            ),
                             maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
+                            overflow: .ellipsis,
                           ),
                           if (subtitle != null)
                             Padding(
@@ -83,27 +85,24 @@ class SettingsItemBuilder extends StatelessWidget {
                                 subtitle!,
                                 style:
                                     subtitleStyle ??
-                                    LinagoraTextStyle.material().bodyMedium
-                                        .copyWith(
-                                          color:
-                                              subtitleColor ??
-                                              LinagoraRefColors.material()
-                                                  .tertiary[30],
-                                          fontFamily: 'Inter',
-                                        ),
-                                overflow: TextOverflow.ellipsis,
+                                    textStyle.bodyMedium.copyWith(
+                                      color: subtitleColor ?? tertiary30,
+                                      fontFamily: 'Inter',
+                                    ),
+                                overflow: .ellipsis,
                               ),
                             ),
                         ],
                       ),
                     ),
-                    if (!isHideTrailingIcon)
-                      trailingWidget ??
-                          Icon(
-                            Icons.chevron_right_outlined,
-                            size: SettingsViewStyle.iconSize,
-                            color: LinagoraRefColors.material().tertiary[30],
-                          ),
+                    if (trailingWidget != null)
+                      trailingWidget!
+                    else if (!isHideTrailingIcon)
+                      Icon(
+                        Icons.chevron_right_outlined,
+                        size: SettingsViewStyle.iconSize,
+                        color: tertiary30,
+                      ),
                   ],
                 ),
               ),
