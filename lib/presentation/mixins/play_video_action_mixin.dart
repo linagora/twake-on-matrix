@@ -41,6 +41,7 @@ mixin PlayVideoActionMixin {
     Event? event,
     bool isReplacement = true,
   }) {
+    assert(bytes != null || url != null, 'bytes or url must be provided');
     final pageRoute = HeroPageRoute(
       builder: (context) {
         return InteractiveViewerGallery(

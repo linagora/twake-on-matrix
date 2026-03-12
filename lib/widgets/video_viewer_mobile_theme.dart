@@ -8,7 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:matrix/matrix.dart';
 import 'package:media_kit_video/media_kit_video.dart';
 
-class VideoViewerMobileTheme extends StatelessWidget {
+class VideoViewerMobileTheme extends StatefulWidget {
   const VideoViewerMobileTheme({super.key, this.bytes, this.url, this.event})
     : assert(bytes != null || url != null, 'bytes or url must be provided');
 
@@ -19,15 +19,48 @@ class VideoViewerMobileTheme extends StatelessWidget {
   final Event? event;
 
   @override
+  State<VideoViewerMobileTheme> createState() => _VideoViewerMobileThemeState();
+}
+
+class _VideoViewerMobileThemeState extends State<VideoViewerMobileTheme> {
+  late VideoPlayer player;
+
+  @override
+  void initState() {
+    super.initState();
+    player = VideoPlayer(
+      bytes: widget.bytes,
+      url: widget.url,
+      event: widget.event,
+    );
+  }
+
+  @override
+  void didUpdateWidget(covariant VideoViewerMobileTheme oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.bytes != widget.bytes ||
+        oldWidget.url != widget.url ||
+        oldWidget.event != widget.event) {
+      player = VideoPlayer(
+        bytes: widget.bytes,
+        url: widget.url,
+        event: widget.event,
+      );
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final player = VideoPlayer(bytes: bytes, url: url, event: event);
     return MaterialVideoControlsTheme(
       normal: MaterialVideoControlsThemeData(
         topButtonBarMargin: VideoViewerStyle.topButtonBarMargin(context),
         bottomButtonBar: const [MaterialPositionIndicator(), Spacer()],
         topButtonBar: [
           Expanded(
-            child: MediaViewerAppBar(event: event, enablePaddingAppbar: false),
+            child: MediaViewerAppBar(
+              event: widget.event,
+              enablePaddingAppbar: false,
+            ),
           ),
         ],
         controlsHoverDuration: VideoViewerStyle.controlsHoverDuration,
@@ -39,11 +72,11 @@ class VideoViewerMobileTheme extends StatelessWidget {
         seekBarThumbColor: Theme.of(context).colorScheme.primary,
       ),
       fullscreen: const MaterialVideoControlsThemeData(),
-      child: event != null
+      child: widget.event != null
           ? Stack(
               alignment: Alignment.center,
               children: [
-                MxcImage(event: event),
+                MxcImage(event: widget.event),
                 player,
               ],
             )

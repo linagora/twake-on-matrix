@@ -22,15 +22,21 @@ class VideoPlayer extends StatefulWidget {
 }
 
 class _VideoPlayerState extends State<VideoPlayer> {
-  final videoController = VideoController(Player());
+  late final Player player;
+  late final VideoController videoController;
 
   @override
   void initState() {
     super.initState();
+    player = Player();
+    videoController = VideoController(player);
     if (widget.url != null) {
       videoController.player
           .open(Media(widget.url!))
-          .onError((e, s) => Logs().e('Error opening video url:', e, s));
+          .then(
+            (_) {},
+            onError: (e, s) => Logs().e('Error opening video url:', e, s),
+          );
     } else {
       Media.memory(widget.bytes!).then(
         (v) => videoController.player.open(v),
@@ -41,10 +47,7 @@ class _VideoPlayerState extends State<VideoPlayer> {
 
   @override
   void dispose() {
-    videoController.player.dispose();
-    videoController.notifier.dispose();
-    videoController.id.dispose();
-    videoController.rect.dispose();
+    player.dispose();
     super.dispose();
   }
 
