@@ -1,4 +1,5 @@
 import 'package:fluffychat/di/global/get_it_initializer.dart';
+import 'package:fluffychat/presentation/widget_keys/widget_keys.dart';
 import 'package:fluffychat/pages/forward/forward.dart';
 import 'package:fluffychat/pages/forward/forward_web_view.dart';
 import 'package:fluffychat/presentation/enum/chat/media_viewer_popup_result_enum.dart';
@@ -49,13 +50,11 @@ mixin MediaViewerAppBarMixin on SaveMediaToGalleryAndroidMixin {
     builder: (c) => const Forward(),
   );
 
-  final forwardSelectionMobileAndTabletKey = const Key(
-    'ForwardSelectionMobileAndTabletKey',
-  );
+  final forwardSelectionMobileAndTabletKey =
+      ChatKeys.forwardSelectionMobileAndTablet.key;
 
-  final forwardSelectionWebAndDesktopKey = const Key(
-    'ForwardSelectionWebAndDesktopKey',
-  );
+  final forwardSelectionWebAndDesktopKey =
+      ChatKeys.forwardSelectionWebAndDesktop.key;
 
   Future<PopResultFromForward?> _showForwardWebDialog(
     BuildContext context,
