@@ -207,6 +207,9 @@ class HomeserverPickerController extends State<HomeserverPicker>
           if (result == SsoLoginState.error) {
             state = HomeserverState.ssoLoginServer;
           }
+        } else if (supportsLogin(context)) {
+          state = HomeserverState.passwordLoginMethod;
+          context.push('/home/login');
         }
         FocusManager.instance.primaryFocus?.unfocus();
         setState(() {});

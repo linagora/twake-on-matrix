@@ -1,7 +1,10 @@
 import 'dart:async';
 
+import 'package:fluffychat/presentation/model/client_login_state_event.dart';
 import 'package:fluffychat/utils/dialog/twake_dialog.dart';
-import 'package:fluffychat/utils/twake_snackbar.dart';
+import 'package:fluffychat/widgets/layouts/agruments/logged_in_body_args.dart';
+import 'package:fluffychat/widgets/layouts/agruments/logged_in_other_account_body_args.dart';
+import 'package:fluffychat/widgets/twake_app.dart';
 import 'package:flutter/material.dart';
 
 import 'package:adaptive_dialog/adaptive_dialog.dart';
@@ -51,6 +54,8 @@ class LoginController extends State<Login> {
 
     setState(() => loading = true);
 
+    TwakeDialog.showLoadingDialog(context);
+
     _coolDown?.cancel();
 
     try {
@@ -83,9 +88,11 @@ class LoginController extends State<Login> {
         initialDeviceDisplayName: PlatformInfos.clientName,
       );
     } on MatrixException catch (exception) {
+      TwakeDialog.hideLoadingDialog(context);
       setState(() => passwordError = exception.errorMessage);
       return setState(() => loading = false);
     } catch (exception) {
+      TwakeDialog.hideLoadingDialog(context);
       setState(() => passwordError = exception.toString());
       return setState(() => loading = false);
     }
@@ -100,6 +107,49 @@ class LoginController extends State<Login> {
     _coolDown = Timer(
       const Duration(seconds: 1),
       () => _checkWellKnown(userId),
+    );
+  }
+
+  final Completer _loginCompleter = Completer();
+
+  void _listenClientLoginStateChanged(ClientLoginStateEvent event) {
+    Logs().i(
+      'StreamDialogBuilder::_listenClientLoginStateChanged - ${event.multipleAccountLoginType}',
+    );
+    if (event.multipleAccountLoginType ==
+        MultipleAccountLoginType.firstLoggedIn) {
+      _handleFirstLoggedIn(event.client);
+      if (!_loginCompleter.isCompleted) _loginCompleter.complete();
+      return;
+    }
+
+    if (event.multipleAccountLoginType ==
+        MultipleAccountLoginType.otherAccountLoggedIn) {
+      _handleAddAnotherAccount(event.client);
+      if (!_loginCompleter.isCompleted) _loginCompleter.complete();
+      return;
+    }
+  }
+
+  void _handleFirstLoggedIn(Client client) {
+    if (!mounted) return;
+
+    TwakeDialog.hideLoadingDialog(context);
+
+    TwakeApp.router.go(
+      '/rooms',
+      extra: LoggedInBodyArgs(newActiveClient: client),
+    );
+  }
+
+  void _handleAddAnotherAccount(Client client) {
+    if (!mounted) return;
+
+    TwakeDialog.hideLoadingDialog(context);
+
+    TwakeApp.router.go(
+      '/rooms',
+      extra: LoggedInOtherAccountBodyArgs(newActiveClient: client),
     );
   }
 
@@ -160,95 +210,25 @@ class LoginController extends State<Login> {
     }
   }
 
-  void passwordForgotten() async {
-    final input = await showTextInputDialog(
-      useRootNavigator: false,
-      context: context,
-      title: L10n.of(context)!.passwordForgotten,
-      message: L10n.of(context)!.enterAnEmailAddress,
-      okLabel: L10n.of(context)!.ok,
-      cancelLabel: L10n.of(context)!.cancel,
-      fullyCapitalizedForMaterial: false,
-      textFields: [
-        DialogTextField(
-          initialText: usernameController.text.isEmail
-              ? usernameController.text
-              : '',
-          hintText: L10n.of(context)!.enterAnEmailAddress,
-          keyboardType: TextInputType.emailAddress,
-        ),
-      ],
-    );
-    if (input == null) return;
-    final client = await loginClientFuture;
-    final clientSecret = DateTime.now().millisecondsSinceEpoch.toString();
-    final response = await TwakeDialog.showFutureLoadingDialogFullScreen(
-      future: () => client.requestTokenToResetPasswordEmail(
-        clientSecret,
-        input.single,
-        sendAttempt++,
-      ),
-    );
-    if (response.error != null) return;
-    final password = await showTextInputDialog(
-      useRootNavigator: false,
-      context: context,
-      title: L10n.of(context)!.passwordForgotten,
-      message: L10n.of(context)!.chooseAStrongPassword,
-      okLabel: L10n.of(context)!.ok,
-      cancelLabel: L10n.of(context)!.cancel,
-      fullyCapitalizedForMaterial: false,
-      textFields: [
-        const DialogTextField(
-          hintText: '******',
-          obscureText: true,
-          minLines: 1,
-          maxLines: 1,
-        ),
-      ],
-    );
-    if (password == null) return;
-    final ok = await showOkAlertDialog(
-      useRootNavigator: false,
-      context: context,
-      title: L10n.of(context)!.weSentYouAnEmail,
-      message: L10n.of(context)!.pleaseClickOnLink,
-      okLabel: L10n.of(context)!.iHaveClickedOnLink,
-      fullyCapitalizedForMaterial: false,
-    );
-    if (ok != OkCancelResult.ok) return;
-    final data = <String, dynamic>{
-      'new_password': password.single,
-      'logout_devices': false,
-      "auth": AuthenticationThreePidCreds(
-        type: AuthenticationTypes.emailIdentity,
-        threepidCreds: ThreepidCreds(
-          sid: response.result!.sid,
-          clientSecret: clientSecret,
-        ),
-      ).toJson(),
-    };
-    final success = await TwakeDialog.showFutureLoadingDialogFullScreen(
-      future: () => client.request(
-        RequestType.POST,
-        '/client/r0/account/password',
-        data: data,
-      ),
-    );
-    if (success.error == null) {
-      TwakeSnackBar.show(context, L10n.of(context)!.passwordHasBeenChanged);
-      usernameController.text = input.single;
-      passwordController.text = password.single;
-      login();
-    }
-  }
-
   static int sendAttempt = 0;
+
+  StreamSubscription? _clientLoginStateChangedSubscription;
 
   @override
   void initState() {
     super.initState();
     loginClientFuture = Matrix.of(context).getLoginClient();
+    _clientLoginStateChangedSubscription = Matrix.of(
+      context,
+    ).onClientLoginStateChanged.stream.listen(_listenClientLoginStateChanged);
+  }
+
+  @override
+  void dispose() {
+    usernameController.dispose();
+    passwordController.dispose();
+    _clientLoginStateChangedSubscription?.cancel();
+    super.dispose();
   }
 
   @override
