@@ -32,6 +32,7 @@ import 'package:fluffychat/pages/chat/dialog_reject_invite_widget.dart';
 import 'package:fluffychat/pages/chat/events/message_content_mixin.dart';
 import 'package:fluffychat/pages/chat/input_bar/focus_suggestion_controller.dart';
 import 'package:fluffychat/presentation/enum/chat/right_column_type_enum.dart';
+import 'package:fluffychat/presentation/widget_keys/widget_keys.dart';
 import 'package:fluffychat/presentation/enum/chat/send_media_with_caption_status_enum.dart';
 import 'package:fluffychat/presentation/extensions/client_extension.dart';
 import 'package:fluffychat/presentation/extensions/event_update_extension.dart';
@@ -189,13 +190,11 @@ class ChatController extends State<Chat>
   final storeRecentReactionsInteractor = getIt
       .get<StoreRecentReactionsInteractor>();
 
-  final ValueKey chatComposerTypeAheadKey = const ValueKey(
-    'chatComposerTypeAheadKey',
-  );
+  final ValueKey<String> chatComposerTypeAheadKey =
+      ChatKeys.composerTypeAhead.valueKey;
 
-  final ValueKey _chatMediaPickerTypeAheadKey = const ValueKey(
-    'chatMediaPickerTypeAheadKey',
-  );
+  final ValueKey<String> _chatMediaPickerTypeAheadKey =
+      ChatKeys.mediaPickerTypeAhead.valueKey;
 
   StreamSubscription? onUpdateEventStreamSubcription;
 

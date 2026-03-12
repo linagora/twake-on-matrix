@@ -7,6 +7,7 @@ import 'package:fluffychat/domain/usecase/generate_thumbnails_media_interactor.d
 import 'package:fluffychat/pages/chat/input_bar/focus_suggestion_controller.dart';
 import 'package:fluffychat/pages/chat/send_file_dialog/send_file_dialog_view.dart';
 import 'package:fluffychat/presentation/list_notifier.dart';
+import 'package:fluffychat/presentation/widget_keys/widget_keys.dart';
 import 'package:fluffychat/utils/manager/upload_manager/upload_manager.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_file_extension.dart';
 import 'package:fluffychat/presentation/enum/chat/send_media_with_caption_status_enum.dart';
@@ -53,9 +54,8 @@ class SendFileDialogController extends State<SendFileDialog> {
 
   final FocusNode captionsFocusNode = FocusNode();
 
-  final ValueKey sendFileDialogTypeAheadKey = const ValueKey(
-    'sendFileDialogTypeAhead',
-  );
+  final ValueKey<String> sendFileDialogTypeAheadKey =
+      ChatKeys.sendFileDialogTypeAhead.valueKey;
 
   bool isSendMediaWithCaption = true;
 
