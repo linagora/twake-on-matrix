@@ -23,6 +23,7 @@ import 'package:fluffychat/pages/chat_details/chat_details_page_view/media/chat_
 import 'package:fluffychat/pages/invitation_selection/invitation_selection.dart';
 import 'package:fluffychat/pages/invitation_selection/invitation_selection_web.dart';
 import 'package:fluffychat/presentation/enum/chat/chat_details_screen_enum.dart';
+import 'package:fluffychat/presentation/widget_keys/widget_keys.dart';
 import 'package:fluffychat/presentation/extensions/event_update_extension.dart';
 import 'package:fluffychat/presentation/extensions/room_summary_extension.dart';
 import 'package:fluffychat/presentation/mixins/handle_video_download_mixin.dart';
@@ -95,13 +96,6 @@ mixin ChatDetailsTabMixin<T extends StatefulWidget>
   static const _mediaPageKey = PageStorageKey('media');
   static const _linksPageKey = PageStorageKey('links');
   static const _filesPageKey = PageStorageKey('files');
-
-  static const invitationSelectionMobileAndTabletKey = Key(
-    'InvitationSelectionMobileAndTabletKey',
-  );
-  static const invitationSelectionWebAndDesktopKey = Key(
-    'InvitationSelectionWebAndDesktopKey',
-  );
 
   Future<Timeline?> _getTimeline() async {
     _timeline ??= await room?.getTimeline();
@@ -186,13 +180,13 @@ mixin ChatDetailsTabMixin<T extends StatefulWidget>
             const WidthPlatformBreakpoint(
               begin: ResponsiveUtils.minDesktopWidth,
             ): SlotLayout.from(
-              key: invitationSelectionWebAndDesktopKey,
+              key: ChatKeys.invitationSelectionWebAndDesktop.key,
               builder: (_) => InvitationSelectionWebView(roomId: room!.id),
             ),
             const WidthPlatformBreakpoint(
               end: ResponsiveUtils.minDesktopWidth,
             ): SlotLayout.from(
-              key: invitationSelectionMobileAndTabletKey,
+              key: ChatKeys.invitationSelectionMobileAndTablet.key,
               builder: (_) => InvitationSelection(roomId: room!.id),
             ),
           },

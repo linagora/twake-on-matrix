@@ -1,4 +1,5 @@
 import 'package:collection/collection.dart';
+import 'package:fluffychat/presentation/widget_keys/widget_keys.dart';
 import 'package:dartz/dartz.dart' hide State;
 import 'package:fluffychat/app_state/failure.dart';
 import 'package:fluffychat/app_state/success.dart';
@@ -26,7 +27,7 @@ import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:matrix/matrix.dart' hide Contact;
 
 class ChatProfileInfoDetails extends StatelessWidget {
-  static const Key leaveChatButtonKey = Key('leave_chat_button');
+  static Key get leaveChatButtonKey => ChatKeys.leaveChatButton.key;
 
   const ChatProfileInfoDetails({
     super.key,

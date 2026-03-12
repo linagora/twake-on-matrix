@@ -20,6 +20,7 @@ import 'package:fluffychat/pages/chat/chat.dart';
 import 'package:fluffychat/pages/chat/input_bar/focus_suggestion_controller.dart';
 import 'package:fluffychat/pages/chat_draft/draft_chat_view.dart';
 import 'package:fluffychat/presentation/enum/chat/right_column_type_enum.dart';
+import 'package:fluffychat/presentation/widget_keys/widget_keys.dart';
 import 'package:fluffychat/presentation/enum/chat/send_media_with_caption_status_enum.dart';
 import 'package:fluffychat/presentation/extensions/client_extension.dart';
 import 'package:fluffychat/presentation/extensions/contact/presentation_contact_extension.dart';
@@ -104,13 +105,11 @@ class DraftChatController extends State<DraftChat>
 
   StreamSubscription? _createRoomSubscription;
 
-  final ValueKey draftChatComposerTypeAheadKey = const ValueKey(
-    'draftChatComposerTypeAheadKey',
-  );
+  final ValueKey<String> draftChatComposerTypeAheadKey =
+      ChatKeys.draftComposerTypeAhead.valueKey;
 
-  final ValueKey _draftChatMediaPickerTypeAheadKey = const ValueKey(
-    'draftChatMediaPickerTypeAheadKey',
-  );
+  final ValueKey<String> _draftChatMediaPickerTypeAheadKey =
+      ChatKeys.draftMediaPickerTypeAhead.valueKey;
 
   final ValueNotifier<bool> isBlockedUserNotifier = ValueNotifier(false);
 

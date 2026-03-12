@@ -1,4 +1,5 @@
 import 'package:fluffychat/config/go_routes/app_route_paths.dart';
+import 'package:fluffychat/presentation/widget_keys/widget_keys.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/pages/settings_dashboard/settings/settings_item_builder.dart';
 import 'package:fluffychat/pages/settings_dashboard/settings/settings_view_style.dart';
@@ -64,7 +65,7 @@ class SettingsSecurityView extends StatelessWidget {
                   Padding(
                     padding: SettingsViewStyle.bodySettingsScreenPadding,
                     child: SettingsItemBuilder(
-                      key: const Key('contacts_visibility_settings_item'),
+                      key: SettingsKeys.contactsVisibilityItem.key,
                       title: L10n.of(context)!.contactsVisibility,
                       titleColor: Theme.of(context).colorScheme.onBackground,
                       subtitle: L10n.of(context)!.whoCanFindMeByMyContacts,

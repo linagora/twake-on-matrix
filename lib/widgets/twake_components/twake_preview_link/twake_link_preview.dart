@@ -1,4 +1,5 @@
 import 'package:fluffychat/domain/app_state/preview_url/get_preview_url_success.dart';
+import 'package:fluffychat/presentation/widget_keys/widget_keys.dart';
 import 'package:fluffychat/pages/chat/events/formatted_text_widget.dart';
 import 'package:fluffychat/presentation/extensions/media/url_preview_extension.dart';
 import 'package:fluffychat/presentation/mixins/linkify_mixin.dart';
@@ -43,9 +44,11 @@ class TwakeLinkPreviewController extends State<TwakeLinkPreview>
 
   Uri get uri => Uri.parse(firstValidUrl ?? '');
 
-  static const twakeLinkViewKey = ValueKey('TwakeLinkPreviewKey');
+  static ValueKey<String> get twakeLinkViewKey =>
+      LinkPreviewKeys.twakeLinkView.valueKey;
 
-  static const twakeLinkPreviewItemKey = ValueKey('TwakeLinkPreviewItemKey');
+  static ValueKey<String> get twakeLinkPreviewItemKey =>
+      LinkPreviewKeys.twakeLinkPreviewItem.valueKey;
 
   @override
   String debugLabel = 'TwakeLinkPreviewController';
