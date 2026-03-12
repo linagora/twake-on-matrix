@@ -71,6 +71,10 @@ class MessageContentWithTimestampBuilder extends StatefulWidget {
   final Future<Category?>? recentEmojiFuture;
   final Future<void> Function(Event)? onRetryTextMessage;
 
+  static const Key dialogSafeAreaKey = Key(
+    'message_context_menu_dialog_safe_area',
+  );
+
   const MessageContentWithTimestampBuilder({
     super.key,
     required this.event,
@@ -262,173 +266,209 @@ class _MessageContentWithTimestampBuilderState
                                           ),
                                         ),
                                       ),
-                                      ValueListenableBuilder(
-                                        valueListenable: _displayEmojiPicker,
-                                        builder: (context, display, child) {
-                                          return ReactionsDialogWidget(
-                                            messageWidget: Material(
-                                              color: widget.event.isOwnMessage
-                                                  ? LinagoraRefColors.material()
-                                                        .primary[95]
-                                                  : _responsiveUtils.isMobile(
-                                                      context,
-                                                    )
-                                                  ? LinagoraSysColors.material()
-                                                        .onPrimary
-                                                  : Theme.of(context)
-                                                        .colorScheme
-                                                        .surfaceContainerHighest,
-                                              shape: RoundedRectangleBorder(
-                                                borderRadius: MessageStyle
-                                                    .bubbleBorderRadius,
-                                              ),
-                                              child: Container(
-                                                padding:
-                                                    const EdgeInsets.symmetric(
-                                                      horizontal: 4,
-                                                      vertical: 4,
-                                                    ),
-                                                decoration: BoxDecoration(
-                                                  borderRadius: MessageStyle
-                                                      .bubbleBorderRadius,
-                                                  border:
-                                                      !widget
-                                                              .event
-                                                              .isOwnMessage &&
-                                                          _responsiveUtils
+                                      SafeArea(
+                                        key: MessageContentWithTimestampBuilder
+                                            .dialogSafeAreaKey,
+                                        child: Center(
+                                          child: SingleChildScrollView(
+                                            physics:
+                                                const ClampingScrollPhysics(),
+                                            child: ValueListenableBuilder(
+                                              valueListenable:
+                                                  _displayEmojiPicker,
+                                              builder: (context, display, child) {
+                                                return ReactionsDialogWidget(
+                                                  messageWidget: Material(
+                                                    color:
+                                                        widget
+                                                            .event
+                                                            .isOwnMessage
+                                                        ? LinagoraRefColors.material()
+                                                              .primary[95]
+                                                        : _responsiveUtils
                                                               .isMobile(context)
-                                                      ? Border.all(
-                                                          color: MessageStyle
-                                                              .borderColorReceivedBubble,
+                                                        ? LinagoraSysColors.material()
+                                                              .onPrimary
+                                                        : Theme.of(context)
+                                                              .colorScheme
+                                                              .surfaceContainerHighest,
+                                                    shape: RoundedRectangleBorder(
+                                                      borderRadius: MessageStyle
+                                                          .bubbleBorderRadius,
+                                                    ),
+                                                    child: Container(
+                                                      padding:
+                                                          const EdgeInsets.symmetric(
+                                                            horizontal: 4,
+                                                            vertical: 4,
+                                                          ),
+                                                      decoration: BoxDecoration(
+                                                        borderRadius: MessageStyle
+                                                            .bubbleBorderRadius,
+                                                        border:
+                                                            !widget
+                                                                    .event
+                                                                    .isOwnMessage &&
+                                                                _responsiveUtils
+                                                                    .isMobile(
+                                                                      context,
+                                                                    )
+                                                            ? Border.all(
+                                                                color: MessageStyle
+                                                                    .borderColorReceivedBubble,
+                                                              )
+                                                            : null,
+                                                      ),
+                                                      child: SingleChildScrollView(
+                                                        primary: true,
+                                                        physics:
+                                                            const ClampingScrollPhysics(),
+                                                        child: _messageBuilder(
+                                                          key: ValueKey(
+                                                            'PreviewReactionWidgetKey%${DateTime.now().millisecondsSinceEpoch}',
+                                                          ),
+                                                          mainAxisSize:
+                                                              MainAxisSize.min,
+                                                          context: context,
+                                                          timelineText:
+                                                              timelineText,
+                                                          noBubble: noBubble,
+                                                          displayTime:
+                                                              displayTime,
+                                                          paddingBubble:
+                                                              EdgeInsets.zero,
+                                                          enableBorder: false,
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  ),
+                                                  reactionWidget:
+                                                      !event
+                                                          .room
+                                                          .canSendReactions
+                                                      ? const SizedBox.shrink()
+                                                      : display
+                                                      ? _emojiPickerBuilder(
+                                                          emojiData: Matrix.of(
+                                                            context,
+                                                          ).emojiData,
+                                                          myReaction:
+                                                              myReaction,
+                                                          event: event,
+                                                          relatesTo: relatesTo,
                                                         )
                                                       : null,
-                                                ),
-                                                child: SingleChildScrollView(
-                                                  primary: true,
-                                                  physics:
-                                                      const ClampingScrollPhysics(),
-                                                  child: _messageBuilder(
-                                                    key: ValueKey(
-                                                      'PreviewReactionWidgetKey%${DateTime.now().millisecondsSinceEpoch}',
-                                                    ),
-                                                    mainAxisSize:
-                                                        MainAxisSize.min,
-                                                    context: context,
-                                                    timelineText: timelineText,
-                                                    noBubble: noBubble,
-                                                    displayTime: displayTime,
-                                                    paddingBubble:
-                                                        EdgeInsets.zero,
-                                                    enableBorder: false,
-                                                  ),
-                                                ),
-                                              ),
-                                            ),
-                                            reactionWidget:
-                                                !event.room.canSendReactions
-                                                ? const SizedBox.shrink()
-                                                : display
-                                                ? _emojiPickerBuilder(
-                                                    emojiData: Matrix.of(
-                                                      context,
-                                                    ).emojiData,
-                                                    myReaction: myReaction,
-                                                    event: event,
-                                                    relatesTo: relatesTo,
-                                                  )
-                                                : null,
-                                            isOwnMessage: event.isOwnMessage,
-                                            emojis: AppConfig.emojisDefault,
-                                            enableMoreEmojiWidget: true,
-                                            onPickEmojiReactionAction: () {
-                                              _displayEmojiPicker.value = true;
-                                            },
-                                            myEmojiReacted:
-                                                relatesTo?['key'] ?? '',
-                                            onClickEmojiReactionAction:
-                                                (emoji) async {
-                                                  final isSelected =
-                                                      emoji ==
-                                                      (relatesTo?['key'] ?? '');
-                                                  if (myReaction == null) {
-                                                    widget.onSendEmojiReaction
-                                                        ?.call(emoji, event);
-                                                    return;
-                                                  }
+                                                  isOwnMessage:
+                                                      event.isOwnMessage,
+                                                  emojis:
+                                                      AppConfig.emojisDefault,
+                                                  enableMoreEmojiWidget: true,
+                                                  onPickEmojiReactionAction:
+                                                      () {
+                                                        _displayEmojiPicker
+                                                                .value =
+                                                            true;
+                                                      },
+                                                  myEmojiReacted:
+                                                      relatesTo?['key'] ?? '',
+                                                  onClickEmojiReactionAction:
+                                                      (emoji) async {
+                                                        final isSelected =
+                                                            emoji ==
+                                                            (relatesTo?['key'] ??
+                                                                '');
+                                                        if (myReaction ==
+                                                            null) {
+                                                          widget
+                                                              .onSendEmojiReaction
+                                                              ?.call(
+                                                                emoji,
+                                                                event,
+                                                              );
+                                                          return;
+                                                        }
 
-                                                  if (isSelected) {
-                                                    await myReaction
-                                                        .redactEvent();
-                                                    return;
-                                                  }
+                                                        if (isSelected) {
+                                                          await myReaction
+                                                              .redactEvent();
+                                                          return;
+                                                        }
 
-                                                  if (!isSelected) {
-                                                    await myReaction
-                                                        .redactEvent();
-                                                    widget.onSendEmojiReaction
-                                                        ?.call(emoji, event);
-                                                    return;
-                                                  }
-                                                },
-                                            contextMenuWidget: display
-                                                ? const SizedBox()
-                                                : Padding(
-                                                    padding:
-                                                        const EdgeInsets.only(
-                                                          top: 16,
+                                                        if (!isSelected) {
+                                                          await myReaction
+                                                              .redactEvent();
+                                                          widget
+                                                              .onSendEmojiReaction
+                                                              ?.call(
+                                                                emoji,
+                                                                event,
+                                                              );
+                                                          return;
+                                                        }
+                                                      },
+                                                  contextMenuWidget: display
+                                                      ? const SizedBox()
+                                                      : Padding(
+                                                          padding:
+                                                              const EdgeInsets.only(
+                                                                top: 16,
+                                                              ),
+                                                          child: PullDownMenu(
+                                                            routeTheme: PullDownMenuRouteTheme(
+                                                              backgroundColor:
+                                                                  LinagoraRefColors.material()
+                                                                      .primary[100],
+                                                              borderRadius:
+                                                                  BorderRadius.circular(
+                                                                    20,
+                                                                  ),
+                                                            ),
+                                                            items: _messageContextMenu(event)
+                                                                .map(
+                                                                  (
+                                                                    item,
+                                                                  ) => PullDownMenuItem(
+                                                                    title: item
+                                                                        .getTitle(
+                                                                          context,
+                                                                          event,
+                                                                        ),
+                                                                    itemTheme:
+                                                                        _themeContextMenu(
+                                                                          item,
+                                                                        ),
+                                                                    icon: item
+                                                                        .getIcon(
+                                                                          event,
+                                                                        ),
+                                                                    onTap: () =>
+                                                                        item.onTap(
+                                                                          context,
+                                                                        ),
+                                                                    iconWidget:
+                                                                        _iconContextMenu(
+                                                                          event,
+                                                                          item,
+                                                                        ),
+                                                                    iconColor: item
+                                                                        .getIconColor(
+                                                                          context,
+                                                                          event,
+                                                                        ),
+                                                                  ),
+                                                                )
+                                                                .toList(),
+                                                          ),
                                                         ),
-                                                    child: PullDownMenu(
-                                                      routeTheme: PullDownMenuRouteTheme(
-                                                        backgroundColor:
-                                                            LinagoraRefColors.material()
-                                                                .primary[100],
-                                                        borderRadius:
-                                                            BorderRadius.circular(
-                                                              20,
-                                                            ),
-                                                      ),
-                                                      items: _messageContextMenu(event)
-                                                          .map(
-                                                            (
-                                                              item,
-                                                            ) => PullDownMenuItem(
-                                                              title: item
-                                                                  .getTitle(
-                                                                    context,
-                                                                    event,
-                                                                  ),
-                                                              itemTheme:
-                                                                  _themeContextMenu(
-                                                                    item,
-                                                                  ),
-                                                              icon: item
-                                                                  .getIcon(
-                                                                    event,
-                                                                  ),
-                                                              onTap: () =>
-                                                                  item.onTap(
-                                                                    context,
-                                                                  ),
-                                                              iconWidget:
-                                                                  _iconContextMenu(
-                                                                    event,
-                                                                    item,
-                                                                  ),
-                                                              iconColor: item
-                                                                  .getIconColor(
-                                                                    context,
-                                                                    event,
-                                                                  ),
-                                                            ),
-                                                          )
-                                                          .toList(),
-                                                    ),
-                                                  ),
-                                            widgetAlignment: event.isOwnMessage
-                                                ? Alignment.centerRight
-                                                : Alignment.centerLeft,
-                                          );
-                                        },
+                                                  widgetAlignment:
+                                                      event.isOwnMessage
+                                                      ? Alignment.centerRight
+                                                      : Alignment.centerLeft,
+                                                );
+                                              },
+                                            ),
+                                          ),
+                                        ),
                                       ),
                                     ],
                                   ),
