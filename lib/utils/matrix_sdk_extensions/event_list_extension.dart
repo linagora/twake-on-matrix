@@ -114,9 +114,11 @@ extension EventListExtension on List<Event> {
 
       updatedTop.addAll(itemsToAdd.reversed);
 
-      // Scroll to bottom if new events arrived and conditions are met
+      // Scroll to bottom only for own sent messages, not incoming from others
       if (!wasRequestingFuture &&
-          updatedTop.any((event) => event.isVisibleInGui)) {
+          itemsToAdd.any(
+            (event) => event.isVisibleInGui && event.isOwnMessage,
+          )) {
         shouldScrollToBottom = true;
       }
     }
