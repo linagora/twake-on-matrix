@@ -36,8 +36,9 @@ class _VideoPlayerState extends State<VideoPlayer> {
             onError: (e, s) => Logs().e('Error opening video url:', e, s),
           );
     } else {
+      final currentPlayer = player;
       Media.memory(widget.bytes!).then(
-        (v) => videoController.player.open(v),
+        (v) => currentPlayer.open(v),
         onError: (e, s) => Logs().e('Error opening video bytes:', e, s),
       );
     }
@@ -61,7 +62,7 @@ class _VideoPlayerState extends State<VideoPlayer> {
       player = Player();
       videoController = VideoController(player);
       Media.memory(widget.bytes!).then(
-        (v) => videoController.player.open(v),
+        (v) => player.open(v),
         onError: (e, s) => Logs().e('Error opening video bytes:', e, s),
       );
     }
