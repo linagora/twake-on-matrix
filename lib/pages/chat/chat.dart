@@ -393,6 +393,10 @@ class ChatController extends State<Chat>
 
   ChatScrollState _currentChatScrollState = ChatScrollState.endScroll;
 
+  /// Whether an updateView() was requested while the user was scrolling.
+  /// If true, a single setState() is flushed when scrolling ends.
+  bool _hasPendingUpdateView = false;
+
   AutoScrollController suggestionScrollController = AutoScrollController();
 
   SuggestionsController<Map<String, String?>> suggestionsController =
@@ -667,7 +671,15 @@ class ChatController extends State<Chat>
 
   void updateView() {
     if (!mounted) return;
-    setState(() {});
+
+    // During active scroll, defer setState to avoid mid-scroll rebuilds.
+    // The deferred update is flushed in handleScrollEndNotification().
+    if (_currentChatScrollState.isScrolling ||
+        _currentChatScrollState.isStartScroll) {
+      _hasPendingUpdateView = true;
+    } else {
+      setState(() {});
+    }
 
     // Complete any pending timeline update waiters
     final completer = _timelineUpdateCompleter;
@@ -2937,19 +2949,26 @@ class ChatController extends State<Chat>
   }
 
   void _handleHideStickyTimestamp() {
+    if (!mounted) return;
     Logs().d('Chat::_handleHideStickyTimestamp() - Hide sticky timestamp');
     _updateStickyTimestampNotifier();
   }
 
   void handleScrollEndNotification() {
     Logs().d('Chat::handleScrollEndNotification() - End of scroll');
+    _currentChatScrollState = ChatScrollState.endScroll;
     if (PlatformInfos.isMobile) {
       _timestampTimer?.cancel();
-      _currentChatScrollState = ChatScrollState.endScroll;
       _timestampTimer = Timer(
         _delayHideStickyTimestampHeader,
         _handleHideStickyTimestamp,
       );
+    }
+
+    // Flush any deferred updateView() that arrived during scroll.
+    if (_hasPendingUpdateView) {
+      _hasPendingUpdateView = false;
+      if (mounted) setState(() {});
     }
   }
 
@@ -3052,29 +3071,28 @@ class ChatController extends State<Chat>
 
   void _listenRoomUpdateEvent() {
     if (room == null) return;
-    onUpdateEventStreamSubcription = client.onEvent.stream.listen((
-      eventUpdate,
-    ) async {
-      Logs().d(
-        'Chat::_listenRoomUpdateEvent():: Event Update Content ${eventUpdate.content}',
-      );
-      if (room?.id != eventUpdate.roomID) return;
-      if (eventUpdate.isPinnedEventsHasChanged) {
-        eventUpdate.updatePinnedMessage(
-          onPinnedMessageUpdated: _handlePinnedMessageCallBack,
-        );
-      } else if (isPinnedEventDeleted(eventUpdate)) {
-        final events = room!.pinnedEventIds
-          ..removeWhere(
-            (oldEvent) => oldEvent == eventUpdate.content['redacts'],
+    onUpdateEventStreamSubcription = client.onEvent.stream
+        .where((eventUpdate) => eventUpdate.roomID == room?.id)
+        .listen((eventUpdate) async {
+          Logs().d(
+            'Chat::_listenRoomUpdateEvent():: Event Update Content ${eventUpdate.content}',
           );
-        try {
-          await room!.setPinnedEvents(events);
-        } catch (e) {
-          Logs().e('Chat::_listenRoomUpdateEvent():: Error - $e');
-        }
-      }
-    });
+          if (eventUpdate.isPinnedEventsHasChanged) {
+            eventUpdate.updatePinnedMessage(
+              onPinnedMessageUpdated: _handlePinnedMessageCallBack,
+            );
+          } else if (isPinnedEventDeleted(eventUpdate)) {
+            final events = room!.pinnedEventIds
+              ..removeWhere(
+                (oldEvent) => oldEvent == eventUpdate.content['redacts'],
+              );
+            try {
+              await room!.setPinnedEvents(events);
+            } catch (e) {
+              Logs().e('Chat::_listenRoomUpdateEvent():: Error - $e');
+            }
+          }
+        });
   }
 
   bool isPinnedEventDeleted(EventUpdate eventUpdate) {
@@ -3686,6 +3704,7 @@ class ChatController extends State<Chat>
 
   @override
   void dispose() {
+    _timestampTimer?.cancel();
     unregisterPasteShortcutListeners();
     disposeAutoMarkAsReadMixin();
     timeline?.cancelSubscriptions();

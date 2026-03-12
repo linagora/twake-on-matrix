@@ -24,9 +24,14 @@ class ConnectionStatusHeaderState extends State<ConnectionStatusHeader> {
 
   @override
   void initState() {
-    _onSyncSub = Matrix.of(
-      context,
-    ).client.onSyncStatus.stream.listen((_) => setState(() {}));
+    _onSyncSub = Matrix.of(context).client.onSyncStatus.stream
+        .map((s) => s.status)
+        .distinct()
+        .listen(
+          (_) => setState(() {
+            // Rebuild to reflect sync status change
+          }),
+        );
     super.initState();
   }
 

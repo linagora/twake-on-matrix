@@ -10,6 +10,7 @@ import 'package:fluffychat/data/network/media/cancel_exception.dart';
 import 'package:fluffychat/data/network/media/media_api.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/domain/model/file_info/file_info.dart';
+import 'package:fluffychat/utils/file_io_helper.dart' show FileIOWorker;
 import 'package:fluffychat/utils/manager/download_manager/download_file_state.dart';
 import 'package:fluffychat/utils/manager/storage_directory_manager.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
@@ -219,7 +220,7 @@ extension DownloadFileExtension on Event {
       throw StateError("decryptFile: Missing 'decrypt' in 'key_ops'.");
     }
 
-    final encryptedBytes = await File(fileInfo.filePath!).readAsBytes();
+    final encryptedBytes = await FileIOWorker.readFile(fileInfo.filePath!);
 
     final encryptedFile = EncryptedFile(
       data: encryptedBytes,
@@ -236,8 +237,7 @@ extension DownloadFileExtension on Event {
       throw Exception('decryptFile: Unable to decrypt file');
     }
 
-    final decryptedFile = File(decryptedPath);
-    await decryptedFile.writeAsBytes(decryptedBytes);
+    await FileIOWorker.writeFile(decryptedPath, decryptedBytes);
 
     return FileInfo(filename, filePath: decryptedPath);
   }

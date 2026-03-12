@@ -145,18 +145,18 @@ class LoginController extends State<Login> {
             return;
           }
         }
-        usernameError = null;
-        if (mounted) setState(() {});
+        if (mounted) setState(() => usernameError = null);
       } else {
         client.homeserver = oldHomeserver;
         if (mounted) {
-          setState(() {});
+          setState(() {
+            // Rebuild after restoring homeserver
+          });
         }
       }
     } catch (e) {
       client.homeserver = oldHomeserver;
-      usernameError = e.toLocalizedString(context);
-      if (mounted) setState(() {});
+      if (mounted) setState(() => usernameError = e.toLocalizedString(context));
     }
   }
 

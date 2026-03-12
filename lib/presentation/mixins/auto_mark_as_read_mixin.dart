@@ -25,6 +25,11 @@ mixin AutoMarkAsReadMixin {
   String? visibleEventId;
   StreamSubscription? _autoMarkAsReadSubscription;
 
+  /// Cached event-id-to-index map for O(1) lookups during scroll.
+  /// Invalidated when the timeline length changes.
+  Map<String, int> _eventIndexCache = const {};
+  int _eventIndexCacheLength = -1;
+
   /// Required getters that the implementing class must provide
   BuildContext get context;
   Room? get room;
@@ -45,6 +50,21 @@ mixin AutoMarkAsReadMixin {
     });
   }
 
+  /// Returns a cached {eventId: index} map for O(1) lookups into
+  /// timeline.events. The cache is rebuilt only when the timeline length
+  /// changes (new events loaded or received).
+  Map<String, int> _getEventIndexMap() {
+    final events = timeline?.events;
+    if (events == null || events.isEmpty) return const {};
+    if (events.length != _eventIndexCacheLength) {
+      _eventIndexCache = {
+        for (var i = 0; i < events.length; i++) events[i].eventId: i,
+      };
+      _eventIndexCacheLength = events.length;
+    }
+    return _eventIndexCache;
+  }
+
   /// Called when an event becomes visible on screen.
   /// Tracks the newest (furthest down) event the user has seen.
   /// Only updates if the new event is newer than the previously tracked one.
@@ -52,11 +72,11 @@ mixin AutoMarkAsReadMixin {
     final timeline = this.timeline;
     if (timeline == null || timeline.events.isEmpty) return;
 
-    // Find the index of the new visible event
-    final newEventIndex = timeline.events.indexWhere(
-      (e) => e.eventId == event.eventId,
-    );
-    if (newEventIndex == -1) return;
+    final indexMap = _getEventIndexMap();
+
+    // Find the index of the new visible event — O(1)
+    final newEventIndex = indexMap[event.eventId];
+    if (newEventIndex == null) return;
 
     visibleEventId = event.eventId;
 
@@ -66,12 +86,10 @@ mixin AutoMarkAsReadMixin {
       _newestVisibleEventId = event.eventId;
       _autoMarkVisibleMessagesAsRead();
     } else {
-      final currentNewestIndex = timeline.events.indexWhere(
-        (e) => e.eventId == _newestVisibleEventId,
-      );
+      final currentNewestIndex = indexMap[_newestVisibleEventId];
 
       // Lower index = newer event (index 0 is newest in timeline.events)
-      if (currentNewestIndex == -1 || newEventIndex < currentNewestIndex) {
+      if (currentNewestIndex == null || newEventIndex < currentNewestIndex) {
         _newestVisibleEventId = event.eventId;
         _autoMarkVisibleMessagesAsRead();
       }
@@ -107,5 +125,7 @@ mixin AutoMarkAsReadMixin {
   void disposeAutoMarkAsReadMixin() {
     _autoMarkAsReadSubscription?.cancel();
     _autoMarkAsReadDebouncer.cancel();
+    _eventIndexCache = const {};
+    _eventIndexCacheLength = -1;
   }
 }

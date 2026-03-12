@@ -45,12 +45,14 @@ class KeyVerificationPageState extends State<KeyVerificationDialog> {
       setState(() {});
     };
     widget.request.client.getProfileFromUserId(widget.request.userId).then((p) {
-      profile = p;
-      setState(() {});
+      setState(() {
+        profile = p;
+      });
     });
     rootBundle.loadString('assets/sas-emoji.json').then((e) {
-      sasEmoji = json.decode(e);
-      setState(() {});
+      setState(() {
+        sasEmoji = json.decode(e);
+      });
     });
     super.initState();
   }

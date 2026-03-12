@@ -1,4 +1,5 @@
 import 'package:fluffychat/di/global/get_it_initializer.dart';
+import 'package:fluffychat/utils/extension/build_context_extension.dart';
 import 'package:fluffychat/pages/chat/events/message/message_style.dart';
 import 'package:fluffychat/pages/chat/events/message_content_style.dart';
 import 'package:fluffychat/presentation/mixins/play_video_action_mixin.dart';
@@ -178,12 +179,16 @@ class _VideoWidgetState extends State<VideoWidget> {
       builder: (context, snapshot) {
         if (snapshot.data == null) return placeholder;
 
-        return Image.memory(
-          snapshot.data!.bytes,
-          width: widget.imageWidth,
-          height: widget.imageHeight,
-          fit: BoxFit.cover,
-          filterQuality: FilterQuality.medium,
+        return RepaintBoundary(
+          child: Image.memory(
+            snapshot.data!.bytes,
+            width: widget.imageWidth,
+            height: widget.imageHeight,
+            cacheWidth: context.getCacheSize(widget.imageWidth),
+            cacheHeight: context.getCacheSize(widget.imageHeight),
+            fit: BoxFit.cover,
+            filterQuality: FilterQuality.medium,
+          ),
         );
       },
     );

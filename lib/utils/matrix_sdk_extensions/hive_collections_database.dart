@@ -23,6 +23,8 @@ import 'dart:convert';
 import 'dart:math';
 import 'dart:typed_data';
 
+import 'package:flutter/foundation.dart';
+
 import 'package:collection/collection.dart';
 import 'package:hive/hive.dart';
 
@@ -36,6 +38,10 @@ import 'package:matrix/src/utils/queued_to_device_event.dart';
 import 'package:matrix/src/utils/run_benchmarked.dart';
 
 typedef OnStartMigrating = Function(int oldVersion, int newVersion);
+
+/// Top-level function for [compute] to parse JSON on a background isolate.
+Map<dynamic, dynamic> _jsonDecodeIsolate(String source) =>
+    Map<dynamic, dynamic>.from(jsonDecode(source) as Map);
 
 /// This database does not support file caching!
 /// Use [MatrixSdkDatabase] instead. Don\'t forget to properly migrate!
@@ -1670,7 +1676,10 @@ class HiveCollectionsDatabase extends DatabaseApi {
     try {
       await clear(supportDeleteCollections: supportDeleteCollections);
       await open();
-      final json = Map.from(jsonDecode(export)).cast<String, Map>();
+      final json = (await compute(
+        _jsonDecodeIsolate,
+        export,
+      )).cast<String, Map>();
       for (final key in json[_clientBoxName]?.keys ?? []) {
         await _clientBox.put(key, json[_clientBoxName]![key]);
       }

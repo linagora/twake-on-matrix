@@ -1,4 +1,5 @@
 import 'package:fluffychat/config/app_config.dart';
+import 'package:fluffychat/utils/extension/build_context_extension.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:flutter/material.dart';
 
@@ -109,7 +110,12 @@ class SettingsStyleView extends StatelessWidget {
             ),
             if (wallpaper != null)
               ListTile(
-                title: Image.file(wallpaper, height: 38, fit: BoxFit.cover),
+                title: Image.file(
+                  wallpaper,
+                  height: 38,
+                  cacheHeight: context.getCacheSize(38),
+                  fit: BoxFit.cover,
+                ),
                 trailing: const Icon(Icons.delete_outlined, color: Colors.red),
                 onTap: controller.deleteWallpaperAction,
               ),

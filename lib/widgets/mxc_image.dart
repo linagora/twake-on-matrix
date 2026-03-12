@@ -218,16 +218,18 @@ class _MxcImageState extends State<MxcImage>
   Future<void> _tryLoad(BuildContext context) async {
     _imageData = widget.imageData;
     if (_imageData != null) {
-      isLoadDone = true;
-      filePath = null;
-      setState(() {});
+      setState(() {
+        isLoadDone = true;
+        filePath = null;
+      });
     }
     try {
       final loadResult = await _load(context);
-      isLoadDone = true;
-      _imageData = loadResult.imageData;
-      filePath = loadResult.filePath;
-      setState(() {});
+      setState(() {
+        isLoadDone = true;
+        _imageData = loadResult.imageData;
+        filePath = loadResult.filePath;
+      });
     } catch (e) {
       if (mounted && !isLoadDone) {
         isLoadDone = true;
@@ -300,20 +302,22 @@ class _MxcImageState extends State<MxcImage>
     }
 
     if (widget.isPreview) {
-      return Material(
-        child: InkWell(
-          mouseCursor: SystemMouseCursors.click,
-          borderRadius: widget.rounded
-              ? BorderRadius.circular(12.0)
-              : BorderRadius.zero,
-          onTap: widget.onTapPreview != null || widget.onTapSelectMode != null
-              ? () => _onTap(context)
-              : null,
-          child: imageWidget,
+      return RepaintBoundary(
+        child: Material(
+          child: InkWell(
+            mouseCursor: SystemMouseCursors.click,
+            borderRadius: widget.rounded
+                ? BorderRadius.circular(12.0)
+                : BorderRadius.zero,
+            onTap: widget.onTapPreview != null || widget.onTapSelectMode != null
+                ? () => _onTap(context)
+                : null,
+            child: imageWidget,
+          ),
         ),
       );
     } else {
-      return imageWidget;
+      return RepaintBoundary(child: imageWidget);
     }
   }
 

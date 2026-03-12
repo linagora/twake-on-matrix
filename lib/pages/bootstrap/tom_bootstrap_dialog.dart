@@ -126,9 +126,10 @@ class TomBootstrapDialogState extends State<TomBootstrapDialog>
         final recoveryWords = await _getRecoveryWords();
         _createBootstrap();
         if (recoveryWords != null) {
-          _recoveryWords = recoveryWords;
-          _uploadRecoveryKeyState = UploadRecoveryKeyState.useExisting;
-          setState(() {});
+          setState(() {
+            _recoveryWords = recoveryWords;
+            _uploadRecoveryKeyState = UploadRecoveryKeyState.useExisting;
+          });
           return;
         } else {
           Logs().i(
@@ -147,13 +148,14 @@ class TomBootstrapDialogState extends State<TomBootstrapDialog>
       );
       final recoveryWords = await _getRecoveryWords();
       _createBootstrap();
-      _wipe = recoveryWords != null;
-      if (recoveryWords != null) {
-        _uploadRecoveryKeyState = UploadRecoveryKeyState.wipeRecovery;
-      } else {
-        _uploadRecoveryKeyState = UploadRecoveryKeyState.initial;
-      }
-      setState(() {});
+      setState(() {
+        _wipe = recoveryWords != null;
+        if (recoveryWords != null) {
+          _uploadRecoveryKeyState = UploadRecoveryKeyState.wipeRecovery;
+        } else {
+          _uploadRecoveryKeyState = UploadRecoveryKeyState.initial;
+        }
+      });
       return;
     }
   }

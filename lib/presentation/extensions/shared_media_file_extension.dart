@@ -1,13 +1,14 @@
 import 'dart:io';
 
 import 'package:fluffychat/presentation/extensions/uint8list_extension.dart';
+import 'package:fluffychat/utils/file_io_helper.dart' show FileIOWorker;
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:matrix/matrix.dart';
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 
 extension SharedMediaFileExtension on SharedMediaFile {
   Future<MatrixFile> toMatrixFile() async {
-    final bytes = await File(path).readAsBytes();
+    final bytes = await FileIOWorker.readFile(path);
     final name = path.split("/").last;
     if (type == SharedMediaType.image) {
       final size = await bytes.imageSize;
