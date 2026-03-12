@@ -1,15 +1,14 @@
+import 'package:adaptive_dialog/adaptive_dialog.dart';
 import 'package:collection/collection.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:fluffychat/generated/l10n/app_localizations.dart';
+import 'package:fluffychat/utils/client_manager.dart';
 import 'package:fluffychat/utils/dialog/twake_dialog.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:flutter/material.dart';
-
-import 'package:adaptive_dialog/adaptive_dialog.dart';
-import 'package:fluffychat/generated/l10n/app_localizations.dart';
-
 import 'package:go_router/go_router.dart';
 import 'package:matrix/matrix.dart';
-import 'package:fluffychat/utils/client_manager.dart';
+
 import 'settings_emotes_view.dart';
 
 class EmotesSettings extends StatefulWidget {
@@ -121,13 +120,14 @@ class EmotesSettingsController extends State<EmotesSettings> {
     ImagePackImageContent image,
     TextEditingController controller,
   ) {
+    final l10n = L10n.of(context)!;
     if (pack!.images.keys.any((k) => k == imageCode && k != oldImageCode)) {
       controller.text = oldImageCode;
       showOkAlertDialog(
         useRootNavigator: false,
         context: context,
-        message: L10n.of(context)!.emoteExists,
-        okLabel: L10n.of(context)!.ok,
+        message: l10n.emoteExists,
+        okLabel: l10n.ok,
       );
       return;
     }
@@ -136,8 +136,8 @@ class EmotesSettingsController extends State<EmotesSettings> {
       showOkAlertDialog(
         useRootNavigator: false,
         context: context,
-        message: L10n.of(context)!.emoteInvalid,
-        okLabel: L10n.of(context)!.ok,
+        message: l10n.emoteInvalid,
+        okLabel: l10n.ok,
       );
       return;
     }
@@ -176,13 +176,15 @@ class EmotesSettingsController extends State<EmotesSettings> {
   }
 
   void addImageAction() async {
+    final l10n = L10n.of(context)!;
+
     if (newImageCodeController.text.isEmpty ||
         newImageController.value == null) {
       await showOkAlertDialog(
         useRootNavigator: false,
         context: context,
-        message: L10n.of(context)!.emoteWarnNeedToPick,
-        okLabel: L10n.of(context)!.ok,
+        message: l10n.emoteWarnNeedToPick,
+        okLabel: l10n.ok,
       );
       return;
     }
@@ -191,8 +193,8 @@ class EmotesSettingsController extends State<EmotesSettings> {
       await showOkAlertDialog(
         useRootNavigator: false,
         context: context,
-        message: L10n.of(context)!.emoteExists,
-        okLabel: L10n.of(context)!.ok,
+        message: l10n.emoteExists,
+        okLabel: l10n.ok,
       );
       return;
     }
@@ -200,8 +202,8 @@ class EmotesSettingsController extends State<EmotesSettings> {
       await showOkAlertDialog(
         useRootNavigator: false,
         context: context,
-        message: L10n.of(context)!.emoteInvalid,
-        okLabel: L10n.of(context)!.ok,
+        message: l10n.emoteInvalid,
+        okLabel: l10n.ok,
       );
       return;
     }

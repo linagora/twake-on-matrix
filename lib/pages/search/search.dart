@@ -1,4 +1,5 @@
 import 'package:dartz/dartz.dart' hide State;
+import 'package:fluffychat/config/go_routes/app_route_paths.dart';
 import 'package:fluffychat/app_state/failure.dart';
 import 'package:fluffychat/app_state/success.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
@@ -103,7 +104,7 @@ class SearchController extends State<Search> with WidgetsBindingObserver {
   }
 
   void goToSettingsProfile() {
-    context.go('/rooms/profile');
+    context.go(AppRoutePaths.profileFull);
   }
 
   void onContactTap(ContactPresentationSearch contactPresentationSearch) {

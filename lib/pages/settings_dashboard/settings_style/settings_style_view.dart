@@ -1,11 +1,10 @@
 import 'package:fluffychat/config/app_config.dart';
+import 'package:fluffychat/generated/l10n/app_localizations.dart';
+import 'package:fluffychat/widgets/layouts/max_width_body.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:flutter/material.dart';
-
-import 'package:fluffychat/generated/l10n/app_localizations.dart';
-
-import 'package:fluffychat/widgets/layouts/max_width_body.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
+
 import 'settings_style.dart';
 
 class SettingsStyleView extends StatelessWidget {
@@ -17,12 +16,17 @@ class SettingsStyleView extends StatelessWidget {
   Widget build(BuildContext context) {
     const colorPickerSize = 32.0;
     final wallpaper = Matrix.of(context).wallpaper;
+    final onPrimary = LinagoraSysColors.material().onPrimary;
+    final l10n = L10n.of(context)!;
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return Scaffold(
-      backgroundColor: LinagoraSysColors.material().onPrimary,
+      backgroundColor: onPrimary,
       appBar: AppBar(
-        backgroundColor: LinagoraSysColors.material().onPrimary,
+        backgroundColor: onPrimary,
         leading: const BackButton(),
-        title: Text(L10n.of(context)!.changeTheme),
+        title: Text(l10n.changeTheme),
       ),
       body: MaxWidthBody(
         withScrolling: true,
@@ -32,20 +36,18 @@ class SettingsStyleView extends StatelessWidget {
               height: colorPickerSize + 24,
               child: ListView(
                 shrinkWrap: true,
-                scrollDirection: Axis.horizontal,
+                scrollDirection: .horizontal,
                 children: SettingsStyleController.customColors
                     .map(
                       (color) => Padding(
-                        padding: const EdgeInsets.all(12.0),
+                        padding: const .all(12.0),
                         child: InkWell(
-                          borderRadius: BorderRadius.circular(colorPickerSize),
+                          borderRadius: .circular(colorPickerSize),
                           onTap: () => controller.setChatColor(color),
                           child: color == null
                               ? Material(
                                   elevation: 0,
-                                  borderRadius: BorderRadius.circular(
-                                    colorPickerSize,
-                                  ),
+                                  borderRadius: .circular(colorPickerSize),
                                   child: Image.asset(
                                     'assets/colors.png',
                                     width: colorPickerSize,
@@ -55,9 +57,7 @@ class SettingsStyleView extends StatelessWidget {
                               : Material(
                                   color: color,
                                   elevation: 6,
-                                  borderRadius: BorderRadius.circular(
-                                    colorPickerSize,
-                                  ),
+                                  borderRadius: .circular(colorPickerSize),
                                   child: SizedBox(
                                     width: colorPickerSize,
                                     height: colorPickerSize,
@@ -81,45 +81,45 @@ class SettingsStyleView extends StatelessWidget {
             const Divider(height: 1),
             RadioListTile<ThemeMode>(
               groupValue: controller.currentTheme,
-              value: ThemeMode.system,
-              title: Text(L10n.of(context)!.systemTheme),
+              value: .system,
+              title: Text(l10n.systemTheme),
               onChanged: controller.switchTheme,
             ),
             RadioListTile<ThemeMode>(
               groupValue: controller.currentTheme,
-              value: ThemeMode.light,
-              title: Text(L10n.of(context)!.lightTheme),
+              value: .light,
+              title: Text(l10n.lightTheme),
               onChanged: controller.switchTheme,
             ),
             RadioListTile<ThemeMode>(
               groupValue: controller.currentTheme,
-              value: ThemeMode.dark,
-              title: Text(L10n.of(context)!.darkTheme),
+              value: .dark,
+              title: Text(l10n.darkTheme),
               onChanged: controller.switchTheme,
             ),
             const Divider(height: 1),
             ListTile(
               title: Text(
-                L10n.of(context)!.wallpaper,
+                l10n.wallpaper,
                 style: TextStyle(
-                  color: Theme.of(context).colorScheme.secondary,
-                  fontWeight: FontWeight.bold,
+                  color: colorScheme.secondary,
+                  fontWeight: .bold,
                 ),
               ),
             ),
             if (wallpaper != null)
               ListTile(
-                title: Image.file(wallpaper, height: 38, fit: BoxFit.cover),
+                title: Image.file(wallpaper, height: 38, fit: .cover),
                 trailing: const Icon(Icons.delete_outlined, color: Colors.red),
                 onTap: controller.deleteWallpaperAction,
               ),
             Builder(
               builder: (context) {
                 return ListTile(
-                  title: Text(L10n.of(context)!.changeWallpaper),
+                  title: Text(l10n.changeWallpaper),
                   trailing: Icon(
                     Icons.photo_outlined,
-                    color: Theme.of(context).textTheme.bodyLarge?.color,
+                    color: theme.textTheme.bodyLarge?.color,
                   ),
                   onTap: controller.setWallpaperAction,
                 );
@@ -128,29 +128,27 @@ class SettingsStyleView extends StatelessWidget {
             const Divider(height: 1),
             ListTile(
               title: Text(
-                L10n.of(context)!.messages,
+                l10n.messages,
                 style: TextStyle(
-                  color: Theme.of(context).colorScheme.secondary,
-                  fontWeight: FontWeight.bold,
+                  color: colorScheme.secondary,
+                  fontWeight: .bold,
                 ),
               ),
             ),
             Container(
-              alignment: Alignment.centerLeft,
-              padding: const EdgeInsets.symmetric(horizontal: 12),
+              alignment: .centerLeft,
+              padding: const .symmetric(horizontal: 12),
               child: Material(
-                color: Theme.of(context).colorScheme.primary,
+                color: colorScheme.primary,
                 elevation: 6,
-                shadowColor: Theme.of(
-                  context,
-                ).secondaryHeaderColor.withAlpha(100),
-                borderRadius: BorderRadius.circular(AppConfig.borderRadius),
+                shadowColor: theme.secondaryHeaderColor.withAlpha(100),
+                borderRadius: .circular(AppConfig.borderRadius),
                 child: Padding(
-                  padding: EdgeInsets.all(16 * AppConfig.bubbleSizeFactor),
+                  padding: .all(16 * AppConfig.bubbleSizeFactor),
                   child: Text(
                     'Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor',
                     style: TextStyle(
-                      color: Theme.of(context).colorScheme.onPrimary,
+                      color: colorScheme.onPrimary,
                       fontSize:
                           AppConfig.messageFontSize * AppConfig.fontSizeFactor,
                     ),
@@ -159,7 +157,7 @@ class SettingsStyleView extends StatelessWidget {
               ),
             ),
             ListTile(
-              title: Text(L10n.of(context)!.fontSize),
+              title: Text(l10n.fontSize),
               trailing: Text('× ${AppConfig.fontSizeFactor}'),
             ),
             Slider.adaptive(
@@ -171,7 +169,7 @@ class SettingsStyleView extends StatelessWidget {
               onChanged: controller.changeFontSizeFactor,
             ),
             ListTile(
-              title: Text(L10n.of(context)!.bubbleSize),
+              title: Text(l10n.bubbleSize),
               trailing: Text('× ${AppConfig.bubbleSizeFactor}'),
             ),
             Slider.adaptive(

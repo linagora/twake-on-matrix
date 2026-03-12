@@ -31,6 +31,7 @@ class SettingsSecurityView extends StatelessWidget {
     final refColorTertiary30 = LinagoraRefColors.material().tertiary[30];
     final sysColor = LinagoraSysColors.material();
     final linagoraTextStyleBodyMedium = LinagoraTextStyle.material().bodyMedium;
+    final client = Matrix.of(context).client;
 
     return Scaffold(
       backgroundColor: sysColor.onPrimary,
@@ -98,14 +99,16 @@ class SettingsSecurityView extends StatelessWidget {
                               : ignoredUsers.length.toString(),
                           leadingWidget: SvgPicture.asset(
                             ImagePaths.icFrontHand,
-                            colorFilter: ColorFilter.mode(
+                            colorFilter: .mode(
                               refColorTertiary30 ?? sysColor.onSurface,
                               BlendMode.srcIn,
                             ),
                           ),
                           onTap: () {
                             if (ignoredUsers.isNotEmpty) {
-                              context.push('/rooms/security/blockedUsers');
+                              context.push(
+                                AppRoutePaths.securityBlockedUsersFull,
+                              );
                             }
                           },
                         );
@@ -147,7 +150,7 @@ class SettingsSecurityView extends StatelessWidget {
                             ImagePaths.icRecoveryKey,
                             colorFilter: ColorFilter.mode(
                               refColorTertiary30 ?? sysColor.onSurface,
-                              BlendMode.srcIn,
+                              .srcIn,
                             ),
                           ),
                           isHideTrailingIcon: true,
@@ -173,7 +176,7 @@ class SettingsSecurityView extends StatelessWidget {
                   );
                 },
               ),
-              if (Matrix.of(context).client.encryption != null) ...{
+              if (client.encryption != null) ...{
                 if (PlatformInfos.isMobile)
                   Column(
                     children: [
@@ -206,9 +209,7 @@ class SettingsSecurityView extends StatelessWidget {
                     height: 116,
                     title: l10n.yourPublicKey,
                     titleColor: colorScheme.onBackground,
-                    subtitle: Matrix.of(
-                      context,
-                    ).client.fingerprintKey.beautified,
+                    subtitle: client.fingerprintKey.beautified,
                     subtitleStyle: linagoraTextStyleBodyMedium.copyWith(
                       color: refColorTertiary30,
                       fontFamily: 'monospace',

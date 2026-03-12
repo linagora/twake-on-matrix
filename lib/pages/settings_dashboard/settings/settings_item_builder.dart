@@ -38,6 +38,7 @@ class SettingsItemBuilder extends StatelessWidget {
   Widget build(BuildContext context) {
     final textStyle = LinagoraTextStyle.material();
     final tertiary30 = LinagoraRefColors.material().tertiary[30];
+    const fontFamily = 'Inter';
 
     return TwakeInkWell(
       isSelected: isSelected,
@@ -73,7 +74,7 @@ class SettingsItemBuilder extends StatelessWidget {
                             title,
                             style: textStyle.bodyMedium2.copyWith(
                               color: titleColor,
-                              fontFamily: 'Inter',
+                              fontFamily: fontFamily,
                             ),
                             maxLines: 2,
                             overflow: .ellipsis,
@@ -87,7 +88,7 @@ class SettingsItemBuilder extends StatelessWidget {
                                     subtitleStyle ??
                                     textStyle.bodyMedium.copyWith(
                                       color: subtitleColor ?? tertiary30,
-                                      fontFamily: 'Inter',
+                                      fontFamily: fontFamily,
                                     ),
                                 overflow: .ellipsis,
                               ),

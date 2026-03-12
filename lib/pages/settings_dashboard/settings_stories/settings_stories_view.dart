@@ -1,10 +1,8 @@
-import 'package:flutter/material.dart';
-
 import 'package:fluffychat/generated/l10n/app_localizations.dart';
-
 import 'package:fluffychat/pages/settings_dashboard/settings_stories/settings_stories.dart';
 import 'package:fluffychat/utils/localized_exception_extension.dart';
 import 'package:fluffychat/widgets/avatar/avatar.dart';
+import 'package:flutter/material.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 
 class SettingsStoriesView extends StatelessWidget {
@@ -13,20 +11,24 @@ class SettingsStoriesView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final onPrimary = LinagoraSysColors.material().onPrimary;
+    final l10n = L10n.of(context)!;
+    final theme = Theme.of(context);
+
     return Scaffold(
-      backgroundColor: LinagoraSysColors.material().onPrimary,
+      backgroundColor: onPrimary,
       appBar: AppBar(
-        backgroundColor: LinagoraSysColors.material().onPrimary,
-        title: Text(L10n.of(context)!.whoCanSeeMyStories),
+        backgroundColor: onPrimary,
+        title: Text(l10n.whoCanSeeMyStories),
         elevation: 0,
       ),
       body: Column(
         children: [
           ListTile(
-            title: Text(L10n.of(context)!.whoCanSeeMyStoriesDesc),
+            title: Text(l10n.whoCanSeeMyStoriesDesc),
             leading: CircleAvatar(
-              backgroundColor: Theme.of(context).secondaryHeaderColor,
-              foregroundColor: Theme.of(context).colorScheme.secondary,
+              backgroundColor: theme.secondaryHeaderColor,
+              foregroundColor: theme.colorScheme.secondary,
               child: const Icon(Icons.lock),
             ),
           ),
@@ -39,14 +41,14 @@ class SettingsStoriesView extends StatelessWidget {
                 if (error != null) {
                   return Center(child: Text(error.toLocalizedString(context)));
                 }
-                if (snapshot.connectionState != ConnectionState.done) {
+                if (snapshot.connectionState != .done) {
                   return const Center(
                     child: CircularProgressIndicator.adaptive(strokeWidth: 2),
                   );
                 }
                 return ListView.builder(
                   itemCount: controller.users.length,
-                  itemBuilder: (context, i) {
+                  itemBuilder: (_, i) {
                     final user = controller.users.keys.toList()[i];
                     return SwitchListTile.adaptive(
                       value: controller.users[user] ?? false,

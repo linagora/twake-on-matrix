@@ -1,10 +1,9 @@
+import 'package:fluffychat/pages/settings_dashboard/settings_stories/settings_stories_view.dart';
 import 'package:fluffychat/utils/dialog/twake_dialog.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/client_stories_extension.dart';
-import 'package:flutter/material.dart';
-
-import 'package:matrix/matrix.dart';
-import 'package:fluffychat/pages/settings_dashboard/settings_stories/settings_stories_view.dart';
 import 'package:fluffychat/widgets/matrix.dart';
+import 'package:flutter/material.dart';
+import 'package:matrix/matrix.dart';
 
 class SettingsStories extends StatefulWidget {
   const SettingsStories({super.key});
@@ -34,9 +33,7 @@ class SettingsStoriesController extends State<SettingsStories> {
         future: () async {
           await user.kick();
           await room.client.setStoriesBlockList(blockList.toSet().toList());
-          setState(() {
-            users[user] = false;
-          });
+          setState(() => users[user] = false);
         },
       );
       return;
@@ -49,27 +46,25 @@ class SettingsStoriesController extends State<SettingsStories> {
       future: () async {
         await room.client.setStoriesBlockList(blockList);
         await room.invite(user.id);
-        setState(() {
-          users[user] = true;
-        });
+        setState(() => users[user] = true);
       },
     );
     return;
   }
 
   Future<void> _loadUsers() async {
-    final room = _storiesRoom = await Matrix.of(
-      context,
-    ).client.getStoriesRoom(context);
+    final client = Matrix.of(context).client;
+
+    final room = _storiesRoom = await client.getStoriesRoom(context);
     if (room == null) {
       noStoriesRoom = true;
       return;
     }
     final users = await room.requestParticipants();
     users.removeWhere((u) => u.id == room.client.userID);
-    final contacts = Matrix.of(
-      context,
-    ).client.contacts.where((contact) => !users.any((u) => u.id == contact.id));
+    final contacts = client.contacts.where(
+      (contact) => !users.any((u) => u.id == contact.id),
+    );
     for (final user in contacts) {
       this.users[user] = false;
     }
@@ -83,12 +78,10 @@ class SettingsStoriesController extends State<SettingsStories> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      setState(() {
-        loadUsers = _loadUsers();
-      });
+      setState(() => loadUsers = _loadUsers());
     });
   }
 
   @override
-  Widget build(BuildContext context) => SettingsStoriesView(this);
+  Widget build(_) => SettingsStoriesView(this);
 }

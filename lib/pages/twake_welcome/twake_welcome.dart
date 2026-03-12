@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:fluffychat/config/app_config.dart';
+import 'package:fluffychat/config/go_routes/app_route_paths.dart';
 import 'package:equatable/equatable.dart';
 import 'package:fluffychat/presentation/mixins/connect_page_mixin.dart';
 import 'package:fluffychat/pages/twake_welcome/twake_welcome_view.dart';
@@ -40,7 +41,7 @@ class TwakeWelcome extends StatefulWidget {
 class TwakeWelcomeController extends State<TwakeWelcome> with ConnectPageMixin {
   void goToHomeserverPicker() {
     if (widget.arg != null && widget.arg?.isAddAnotherAccount == true) {
-      context.push('/rooms/addaccount/homeserverpicker');
+      context.push(AppRoutePaths.addAccountHomeserverPickerFull);
     } else {
       context.push('/home/homeserverpicker');
     }

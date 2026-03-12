@@ -1,7 +1,9 @@
 import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/config/setting_keys.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
+import 'package:fluffychat/generated/l10n/app_localizations.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
+import 'package:fluffychat/utils/responsive/responsive_utils.dart';
 import 'package:fluffychat/widgets/app_bars/twake_app_bar.dart';
 import 'package:fluffychat/widgets/app_bars/twake_app_bar_style.dart';
 import 'package:fluffychat/widgets/layouts/max_width_body.dart';
@@ -9,10 +11,8 @@ import 'package:fluffychat/widgets/matrix.dart';
 import 'package:fluffychat/widgets/settings_switch_list_tile.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:fluffychat/generated/l10n/app_localizations.dart';
 import 'package:go_router/go_router.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
-import 'package:fluffychat/utils/responsive/responsive_utils.dart';
 
 import 'settings_chat.dart';
 
@@ -23,10 +23,13 @@ class SettingsChatView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = L10n.of(context)!;
+    final isWebRTCSupported = Matrix.of(context).webrtcIsSupported;
+
     return Scaffold(
       backgroundColor: LinagoraSysColors.material().onPrimary,
       appBar: TwakeAppBar(
-        title: L10n.of(context)!.chat,
+        title: l10n.chat,
         context: context,
         withDivider: true,
         centerTitle: true,
@@ -34,7 +37,7 @@ class SettingsChatView extends StatelessWidget {
             ? Padding(
                 padding: TwakeAppBarStyle.leadingIconPadding,
                 child: IconButton(
-                  tooltip: L10n.of(context)!.back,
+                  tooltip: l10n.back,
                   icon: const Icon(Icons.arrow_back_ios),
                   onPressed: () => context.pop(),
                   iconSize: TwakeAppBarStyle.leadingIconSize,
@@ -49,39 +52,39 @@ class SettingsChatView extends StatelessWidget {
           child: Column(
             children: [
               SettingsSwitchListTile.adaptive(
-                title: L10n.of(context)!.renderRichContent,
+                title: l10n.renderRichContent,
                 onChanged: (b) => AppConfig.renderHtml = b,
                 storeKey: SettingKeys.renderHtml,
                 defaultValue: AppConfig.renderHtml,
               ),
               SettingsSwitchListTile.adaptive(
-                title: L10n.of(context)!.hideRedactedEvents,
+                title: l10n.hideRedactedEvents,
                 onChanged: (b) => AppConfig.hideRedactedEvents = b,
                 storeKey: SettingKeys.hideRedactedEvents,
                 defaultValue: AppConfig.hideRedactedEvents,
               ),
               SettingsSwitchListTile.adaptive(
-                title: L10n.of(context)!.hideUnknownEvents,
+                title: l10n.hideUnknownEvents,
                 onChanged: (b) => AppConfig.hideUnknownEvents = b,
                 storeKey: SettingKeys.hideUnknownEvents,
                 defaultValue: AppConfig.hideUnknownEvents,
               ),
               SettingsSwitchListTile.adaptive(
-                title: L10n.of(context)!.hideUnimportantStateEvents,
+                title: l10n.hideUnimportantStateEvents,
                 onChanged: (b) => AppConfig.hideUnimportantStateEvents = b,
                 storeKey: SettingKeys.hideUnimportantStateEvents,
                 defaultValue: AppConfig.hideUnimportantStateEvents,
               ),
               if (PlatformInfos.isMobile)
                 SettingsSwitchListTile.adaptive(
-                  title: L10n.of(context)!.autoplayImages,
+                  title: l10n.autoplayImages,
                   onChanged: (b) => AppConfig.autoplayImages = b,
                   storeKey: SettingKeys.autoplayImages,
                   defaultValue: AppConfig.autoplayImages,
                 ),
               if (!responsive.isMobile(context))
                 SettingsSwitchListTile.adaptive(
-                  title: L10n.of(context)!.enableRightAndLeftMessageAlignment,
+                  title: l10n.enableRightAndLeftMessageAlignment,
                   onChanged: (value) =>
                       AppConfig.enableRightAndLeftMessageAlignmentOnWeb = value,
                   storeKey: SettingKeys.enableRightAndLeftMessageAlignmentOnWeb,
@@ -89,9 +92,9 @@ class SettingsChatView extends StatelessWidget {
                       AppConfig.enableRightAndLeftMessageAlignmentOnWeb,
                 ),
               const Divider(),
-              if (Matrix.of(context).webrtcIsSupported)
+              if (isWebRTCSupported)
                 SettingsSwitchListTile.adaptive(
-                  title: L10n.of(context)!.experimentalVideoCalls,
+                  title: l10n.experimentalVideoCalls,
                   onChanged: (b) {
                     AppConfig.experimentalVoip = b;
                     Matrix.of(context).createVoipPlugin();
@@ -100,13 +103,11 @@ class SettingsChatView extends StatelessWidget {
                   storeKey: SettingKeys.experimentalVoip,
                   defaultValue: AppConfig.experimentalVoip,
                 ),
-              if (Matrix.of(context).webrtcIsSupported && !kIsWeb)
+              if (isWebRTCSupported && !kIsWeb)
                 ListTile(
-                  title: Text(L10n.of(context)!.callingPermissions),
-                  // onTap: () =>
-                  //     CallKeepManager().checkoutPhoneAccountSetting(context),
+                  title: Text(l10n.callingPermissions),
                   trailing: const Padding(
-                    padding: EdgeInsets.all(16.0),
+                    padding: .all(16.0),
                     child: Icon(Icons.call),
                   ),
                 ),
