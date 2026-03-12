@@ -34,7 +34,7 @@ class VideoViewerDesktopTheme extends StatelessWidget {
         seekBarHeight: VideoViewerStyle.seekBarHeight,
         seekBarThumbColor: Theme.of(context).colorScheme.primary,
       ),
-      child: VideoPlayer(bytes: bytes, url: url, event: event),
+      child: VideoPlayer(bytes: bytes, url: url),
     );
   }
 }

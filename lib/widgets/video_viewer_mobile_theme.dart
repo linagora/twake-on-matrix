@@ -28,24 +28,14 @@ class _VideoViewerMobileThemeState extends State<VideoViewerMobileTheme> {
   @override
   void initState() {
     super.initState();
-    player = VideoPlayer(
-      bytes: widget.bytes,
-      url: widget.url,
-      event: widget.event,
-    );
+    player = VideoPlayer(bytes: widget.bytes, url: widget.url);
   }
 
   @override
   void didUpdateWidget(covariant VideoViewerMobileTheme oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.bytes != widget.bytes ||
-        oldWidget.url != widget.url ||
-        oldWidget.event != widget.event) {
-      player = VideoPlayer(
-        bytes: widget.bytes,
-        url: widget.url,
-        event: widget.event,
-      );
+    if (oldWidget.bytes != widget.bytes || oldWidget.url != widget.url) {
+      player = VideoPlayer(bytes: widget.bytes, url: widget.url);
     }
   }
 

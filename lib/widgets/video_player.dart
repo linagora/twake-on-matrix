@@ -6,7 +6,7 @@ import 'package:media_kit/media_kit.dart';
 import 'package:media_kit_video/media_kit_video.dart';
 
 class VideoPlayer extends StatefulWidget {
-  const VideoPlayer({super.key, this.bytes, this.url, required this.event})
+  const VideoPlayer({super.key, this.bytes, this.url})
     : assert(bytes != null || url != null, 'bytes or url must be provided');
 
   /// In-memory video bytes (web path).
@@ -15,15 +15,13 @@ class VideoPlayer extends StatefulWidget {
   /// File URI for playback (mobile/desktop), e.g. file:///path/to/video.mp4
   final String? url;
 
-  final Event? event;
-
   @override
   State<VideoPlayer> createState() => _VideoPlayerState();
 }
 
 class _VideoPlayerState extends State<VideoPlayer> {
-  late final Player player;
-  late final VideoController videoController;
+  late Player player;
+  late VideoController videoController;
 
   @override
   void initState() {
@@ -38,6 +36,30 @@ class _VideoPlayerState extends State<VideoPlayer> {
             onError: (e, s) => Logs().e('Error opening video url:', e, s),
           );
     } else {
+      Media.memory(widget.bytes!).then(
+        (v) => videoController.player.open(v),
+        onError: (e, s) => Logs().e('Error opening video bytes:', e, s),
+      );
+    }
+  }
+
+  @override
+  Future<void> didUpdateWidget(covariant VideoPlayer oldWidget) async {
+    super.didUpdateWidget(oldWidget);
+    if (widget.url != oldWidget.url && widget.url != null) {
+      await player.dispose();
+      player = Player();
+      videoController = VideoController(player);
+      videoController.player
+          .open(Media(widget.url!))
+          .then(
+            (_) {},
+            onError: (e, s) => Logs().e('Error opening video url:', e, s),
+          );
+    } else if (widget.bytes != oldWidget.bytes && widget.bytes != null) {
+      await player.dispose();
+      player = Player();
+      videoController = VideoController(player);
       Media.memory(widget.bytes!).then(
         (v) => videoController.player.open(v),
         onError: (e, s) => Logs().e('Error opening video bytes:', e, s),
