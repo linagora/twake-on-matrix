@@ -1,4 +1,5 @@
 import 'package:fluffychat/pages/chat/chat.dart';
+import 'package:fluffychat/widgets/twake_components/unread_count_badge.dart';
 import 'package:fluffychat/pages/chat/chat_app_bar_title.dart';
 import 'package:fluffychat/pages/chat/chat_invitation_body.dart';
 import 'package:fluffychat/pages/chat/chat_view_body.dart';
@@ -198,12 +199,35 @@ class ChatView extends StatelessWidget with MessageContentMixin {
                         if (audioRecordState != AudioRecordState.initial) {
                           return const SizedBox.shrink();
                         }
+                        final unreadCount =
+                            controller.room?.notificationCount ?? 0;
                         return Padding(
                           padding: const EdgeInsets.only(bottom: 56.0),
-                          child: FloatingActionButton(
-                            onPressed: controller.scrollDown,
-                            mini: true,
-                            child: const Icon(Icons.arrow_downward_outlined),
+                          child: Stack(
+                            clipBehavior: Clip.none,
+                            children: [
+                              FloatingActionButton(
+                                onPressed: controller.scrollDown,
+                                mini: true,
+                                child: const Icon(
+                                  Icons.arrow_downward_outlined,
+                                ),
+                              ),
+                              if (unreadCount > 0)
+                                Positioned(
+                                  top: -6,
+                                  left: 0,
+                                  right: 0,
+                                  child: Center(
+                                    child: UnreadCountBadge(
+                                      count: unreadCount,
+                                      backgroundColor: Theme.of(
+                                        context,
+                                      ).colorScheme.primary,
+                                    ),
+                                  ),
+                                ),
+                            ],
                           ),
                         );
                       },

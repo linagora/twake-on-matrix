@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/config/themes.dart';
+import 'package:fluffychat/widgets/twake_components/unread_count_badge.dart';
 import 'package:fluffychat/pages/chat/typing_timer_wrapper.dart';
 import 'package:fluffychat/presentation/mixins/chat_list_item_mixin.dart';
 import 'package:fluffychat/pages/chat_list/chat_list_item_style.dart';
@@ -25,11 +26,6 @@ class ChatListItemSubtitle extends StatelessWidget with ChatListItemMixin {
   Widget build(BuildContext context) {
     final typingText = room.getLocalizedTypingText(L10n.of(context)!);
     final isGroup = !room.isDirectChat;
-    final unreadBadgeSize = ChatListItemStyle.unreadBadgeSize(
-      room.isUnreadOrInvited,
-      room.hasNewMessages,
-      room.notificationCount > 0,
-    );
     final lastEvent = this.lastEvent ?? room.lastEvent;
     final isMediaEvent =
         lastEvent?.messageType == MessageTypes.Image ||
@@ -108,31 +104,19 @@ class ChatListItemSubtitle extends StatelessWidget with ChatListItemMixin {
           },
         ),
         const SizedBox(width: 4),
-        AnimatedContainer(
+        AnimatedSize(
           duration: TwakeThemes.animationDuration,
           curve: TwakeThemes.animationCurve,
-          padding: const EdgeInsets.symmetric(horizontal: 7),
-          height: unreadBadgeSize,
-          width: ChatListItemStyle.notificationBadgeSize(
-            room.isUnreadOrInvited,
-            room.hasNewMessages,
-            room.notificationCount,
-          ),
-          decoration: BoxDecoration(
-            color: notificationColor(context: context, room: room),
-            borderRadius: BorderRadius.circular(AppConfig.borderRadius),
-          ),
-          child: Center(
-            child: room.notificationCount > 0
-                ? Text(
-                    room.notificationCount.toString(),
-                    style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                      letterSpacing: -0.5,
-                      color: Theme.of(context).colorScheme.onPrimary,
-                    ),
-                  )
-                : Container(),
-          ),
+          child:
+              (room.isUnreadOrInvited || room.hasNewMessages) &&
+                  room.notificationCount > 0
+              ? UnreadCountBadge(
+                  count: room.notificationCount,
+                  backgroundColor:
+                      notificationColor(context: context, room: room) ??
+                      Colors.transparent,
+                )
+              : const SizedBox.shrink(),
         ),
       ],
     );
