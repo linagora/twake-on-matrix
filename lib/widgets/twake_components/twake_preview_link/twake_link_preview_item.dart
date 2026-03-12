@@ -1,6 +1,7 @@
 import 'package:fluffychat/domain/app_state/preview_url/get_preview_url_success.dart';
 import 'package:fluffychat/presentation/extensions/media/url_preview_extension.dart';
 import 'package:fluffychat/presentation/model/media/url_preview_presentation.dart';
+import 'package:fluffychat/presentation/widget_keys/widget_keys.dart';
 import 'package:fluffychat/utils/url_launcher.dart';
 import 'package:fluffychat/widgets/mixins/get_preview_url_mixin.dart';
 import 'package:fluffychat/widgets/mxc_image.dart';
@@ -19,9 +20,11 @@ class TwakeLinkPreviewItem extends StatefulWidget {
     this.previewLink,
   });
 
-  static const linkPreviewBodyKey = ValueKey('TwakeLinkPreviewBodyKey');
+  static ValueKey<String> get linkPreviewBodyKey =>
+      LinkPreviewKeys.linkPreviewBody.valueKey;
 
-  static const linkPreviewLargeKey = ValueKey('LinkPreviewLargeKey');
+  static ValueKey<String> get linkPreviewLargeKey =>
+      LinkPreviewKeys.linkPreviewLarge.valueKey;
 
   @override
   State<TwakeLinkPreviewItem> createState() => _TwakeLinkPreviewItemState();
@@ -180,19 +183,23 @@ class LinkPreviewBuilder extends StatelessWidget {
 
   final UrlPreviewPresentation urlPreviewPresentation;
 
-  static const clipRRectKey = ValueKey('ClipRRectKey');
+  static ValueKey<String> get clipRRectKey =>
+      LinkPreviewKeys.clipRRect.valueKey;
 
-  static const mxcImageKey = ValueKey('MxcImageKey');
+  static ValueKey<String> get mxcImageKey => LinkPreviewKeys.mxcImage.valueKey;
 
-  static const paddingTitleKey = ValueKey('PaddingTitleKey');
+  static ValueKey<String> get paddingTitleKey =>
+      LinkPreviewKeys.paddingTitle.valueKey;
 
-  static const paddingSubtitleKey = ValueKey('PaddingSubtitleKey');
+  static ValueKey<String> get paddingSubtitleKey =>
+      LinkPreviewKeys.paddingSubtitle.valueKey;
 
-  static const titleKey = ValueKey('TextTitleKey');
+  static ValueKey<String> get titleKey => LinkPreviewKeys.title.valueKey;
 
-  static const subtitleKey = ValueKey('TextSubtitleKey');
+  static ValueKey<String> get subtitleKey => LinkPreviewKeys.subtitle.valueKey;
 
-  static const imageDefaultKey = ValueKey('ImageDefaultKey');
+  static ValueKey<String> get imageDefaultKey =>
+      LinkPreviewKeys.imageDefault.valueKey;
 
   @override
   Widget build(BuildContext context) {
@@ -241,10 +248,10 @@ class LinkPreviewBuilder extends StatelessWidget {
                         ),
                       ),
                     )
-                  : const SizedBox(
+                  : SizedBox(
                       key: LinkPreviewBuilder.imageDefaultKey,
                       height: TwakeLinkPreviewItemStyle.heightMxcImagePreview,
-                      child: Icon(
+                      child: const Icon(
                         Icons.link,
                         size: TwakeLinkPreviewItemStyle.linkIconSize,
                       ),

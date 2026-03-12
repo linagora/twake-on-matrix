@@ -1,7 +1,9 @@
+import 'package:fluffychat/presentation/widget_keys/widget_keys.dart';
 import 'package:flutter/material.dart';
 
 class AdaptiveScaffoldAppBarStyle {
-  static const ValueKey adaptiveAppBarKey = ValueKey('AppBar');
+  static ValueKey<String> get adaptiveAppBarKey =>
+      NavigationKeys.adaptiveAppBar.valueKey;
 
   static const EdgeInsetsDirectional appBarPadding =
       EdgeInsetsDirectional.symmetric(horizontal: 30);

@@ -1,3 +1,4 @@
+import 'package:fluffychat/presentation/widget_keys/widget_keys.dart';
 import 'package:fluffychat/pages/chat/events/formatted_text_widget.dart';
 import 'package:fluffychat/presentation/mixins/linkify_mixin.dart';
 import 'package:fluffychat/utils/string_extension.dart';
@@ -27,9 +28,11 @@ class TwakeLinkPreview extends StatelessWidget with LinkifyMixin {
     this.isCaption = false,
   });
 
-  static const twakeLinkViewKey = ValueKey('TwakeLinkPreviewKey');
+  static ValueKey<String> get twakeLinkViewKey =>
+      LinkPreviewKeys.twakeLinkView.valueKey;
 
-  static const twakeLinkPreviewItemKey = ValueKey('TwakeLinkPreviewItemKey');
+  static ValueKey<String> get twakeLinkPreviewItemKey =>
+      LinkPreviewKeys.twakeLinkPreviewItem.valueKey;
 
   @override
   Widget build(BuildContext context) {
