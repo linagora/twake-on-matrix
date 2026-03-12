@@ -16,7 +16,7 @@ import 'package:matrix/matrix.dart';
 import 'package:fluffychat/pages/chat/events/images_builder/image_bubble.dart';
 import 'package:linagora_design_flutter/extensions/duration_extension.dart';
 
-typedef DownloadVideoEventCallback = Future<Uint8List> Function(Event event);
+typedef DownloadVideoEventCallback = Future<Uint8List?> Function(Event event);
 
 class EventVideoPlayer extends StatelessWidget {
   final Event event;

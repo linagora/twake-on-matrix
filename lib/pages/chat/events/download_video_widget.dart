@@ -34,6 +34,7 @@ class _DownloadVideoWidgetState extends State<DownloadVideoWidget>
     with HandleVideoDownloadMixin, PlayVideoActionMixin {
   final _downloadStateNotifier = ValueNotifier(DownloadVideoState.initial);
   Uint8List? bytes;
+  String? _videoUrl;
   final downloadProgressNotifier = ValueNotifier(0.0);
   final cancelToken = CancelToken();
 
@@ -65,6 +66,11 @@ class _DownloadVideoWidgetState extends State<DownloadVideoWidget>
         playVideoAction: PlatformInfos.isWeb
             ? (path) => playVideoAction(context, path, event: widget.event)
             : null,
+        playVideoActionByUrl: PlatformInfos.isWeb
+            ? null
+            : (url) {
+                _videoUrl = url;
+              },
         progressCallback: (count, total) {
           downloadProgressNotifier.value = count / total;
         },
@@ -75,6 +81,24 @@ class _DownloadVideoWidgetState extends State<DownloadVideoWidget>
       _downloadStateNotifier.value = DownloadVideoState.failed;
       TwakeSnackBar.show(context, e.toLocalizedString(context));
       Logs().e('Error while playing video', e, s);
+    }
+  }
+
+  void _openVideo() {
+    if (_videoUrl != null) {
+      playVideoActionByUrl(
+        context,
+        _videoUrl!,
+        event: widget.event,
+        isReplacement: false,
+      );
+    } else if (bytes != null) {
+      playVideoAction(
+        context,
+        bytes!,
+        event: widget.event,
+        isReplacement: false,
+      );
     }
   }
 
@@ -134,16 +158,7 @@ class _DownloadVideoWidgetState extends State<DownloadVideoWidget>
                       );
                     case DownloadVideoState.done:
                       return InkWell(
-                        onTap: () {
-                          if (bytes != null) {
-                            playVideoAction(
-                              context,
-                              bytes!,
-                              event: widget.event,
-                              isReplacement: false,
-                            );
-                          }
-                        },
+                        onTap: _openVideo,
                         child: const Center(
                           child: CenterVideoButton(icon: Icons.play_arrow),
                         ),

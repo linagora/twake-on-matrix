@@ -9,18 +9,45 @@ import 'package:flutter/material.dart';
 import 'package:matrix/matrix.dart';
 
 mixin PlayVideoActionMixin {
+  /// Navigates to the video viewer using in-memory [bytes] (web path).
   void playVideoAction(
     BuildContext context,
     Uint8List bytes, {
     Event? event,
     bool isReplacement = true,
-  }) async {
+  }) {
+    _navigate(
+      context,
+      bytes: bytes,
+      event: event,
+      isReplacement: isReplacement,
+    );
+  }
+
+  /// Navigates to the video viewer using a proxy [url] (mobile/desktop path).
+  void playVideoActionByUrl(
+    BuildContext context,
+    String url, {
+    Event? event,
+    bool isReplacement = true,
+  }) {
+    _navigate(context, url: url, event: event, isReplacement: isReplacement);
+  }
+
+  void _navigate(
+    BuildContext context, {
+    Uint8List? bytes,
+    String? url,
+    Event? event,
+    bool isReplacement = true,
+  }) {
+    assert(bytes != null || url != null, 'bytes or url must be provided');
     final pageRoute = HeroPageRoute(
       builder: (context) {
         return InteractiveViewerGallery(
           itemBuilder: PlatformInfos.isMobile
-              ? VideoViewerMobileTheme(bytes: bytes, event: event)
-              : VideoViewerDesktopTheme(bytes: bytes, event: event),
+              ? VideoViewerMobileTheme(bytes: bytes, url: url, event: event)
+              : VideoViewerDesktopTheme(bytes: bytes, url: url, event: event),
         );
       },
     );
