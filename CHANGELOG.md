@@ -1,3 +1,7 @@
+## [2.20.3] - 2026-03-12
+### Fixed
+- #2905 Play video directly from path in mobile
+
 ## [2.20.2] - 2026-03-06
 ### Fixed
 - #2895 remove gap in top/bottom of chat
