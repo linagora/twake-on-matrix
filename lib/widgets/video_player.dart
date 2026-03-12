@@ -6,8 +6,15 @@ import 'package:media_kit/media_kit.dart';
 import 'package:media_kit_video/media_kit_video.dart';
 
 class VideoPlayer extends StatefulWidget {
-  const VideoPlayer({super.key, this.bytes, this.url})
-    : assert(bytes != null || url != null, 'bytes or url must be provided');
+  VideoPlayer({super.key, this.bytes, this.url})
+    : assert(
+        (bytes == null) != (url == null),
+        'Provide exactly one of bytes or url',
+      ) {
+    if ((bytes == null) == (url == null)) {
+      throw ArgumentError('Provide exactly one of bytes or url');
+    }
+  }
 
   /// In-memory video bytes (web path).
   final Uint8List? bytes;
