@@ -20,6 +20,7 @@ import MatrixRustSDK
 
 enum KeychainControllerService: String {
     case sessions
+    case ssss
     case tests
 
     var identifier: String {
@@ -29,11 +30,16 @@ enum KeychainControllerService: String {
 
 class KeychainController: KeychainControllerProtocol {
     private let keychain: Keychain
+    private let ssssKeychain: Keychain
 
     init(service: KeychainControllerService,
          accessGroup: String) {
         keychain = Keychain(service: service.identifier,
                             accessGroup: accessGroup)
+        ssssKeychain = Keychain(
+            service: KeychainControllerService.ssss.identifier,
+            accessGroup: accessGroup
+        )
     }
 
     func setRestorationToken(_ restorationToken: RestorationToken, forUsername username: String) {
@@ -93,7 +99,7 @@ class KeychainController: KeychainControllerProtocol {
     func recoveryKey(forUsername username: String) -> String? {
         let keychainKey = "ssss_recovery_\(username)"
         do {
-            return try keychain.getString(keychainKey)
+            return try ssssKeychain.getString(keychainKey)
         } catch {
             MXLog.error("Failed retrieving SSSS recovery key: \(error)")
             return nil

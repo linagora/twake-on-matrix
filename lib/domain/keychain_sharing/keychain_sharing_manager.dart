@@ -17,6 +17,16 @@ class KeychainSharingManager {
     ),
   );
 
+  static FlutterSecureStorage get _recoveryStorage =>
+      const FlutterSecureStorage(
+        iOptions: IOSOptions(
+          groupId: AppConfig.iOSKeychainSharingId,
+          accountName: AppConfig.iOSKeychainSharingSsssAccount,
+          synchronizable: false,
+          accessibility: KeychainAccessibility.first_unlock_this_device,
+        ),
+      );
+
   static const String _ssssRecoveryKeyPrefix = 'ssss_recovery_';
 
   static Future<void> saveRecoveryKey({
@@ -25,7 +35,7 @@ class KeychainSharingManager {
   }) async {
     if (!PlatformInfos.isIOS || userId == null) return;
     try {
-      await _secureStorage.write(
+      await _recoveryStorage.write(
         key: '$_ssssRecoveryKeyPrefix$userId',
         value: recoveryKey,
       );
@@ -38,7 +48,7 @@ class KeychainSharingManager {
   static Future<void> deleteRecoveryKey({required String? userId}) async {
     if (!PlatformInfos.isIOS || userId == null) return;
     try {
-      await _secureStorage.delete(key: '$_ssssRecoveryKeyPrefix$userId');
+      await _recoveryStorage.delete(key: '$_ssssRecoveryKeyPrefix$userId');
       Logs().d('[KeychainSharing] Deleted SSSS recovery key for $userId');
     } catch (e, s) {
       Logs().wtf('[KeychainSharing] Unable to delete SSSS recovery key', e, s);
