@@ -60,12 +60,12 @@ extension NotificationItemProxyProtocol {
         case .invite, .none:
             return false
         case .timeline(let event):
-            switch try? event.eventType() {
+            switch try? event.content() {
             case .state, .none:
                 return false
-            case let .messageLike(content):
+            case .messageLike(content: let content):
                 switch content {
-                case let .roomMessage(messageType, _):
+                case .roomMessage(messageType: let messageType, inReplyToEventId: _):
                     switch messageType {
                     case .image, .video, .audio:
                         return true
