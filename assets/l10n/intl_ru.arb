@@ -2658,7 +2658,7 @@
   "countFilesSendPerDialog": "Максимальный размер файла: {count}.",
   "sendFiles": "Отправить {count} файлов",
   "failedToSendFiles": "Ошибка отправки файлов",
-  "groupInfo": "Инфо о группе",
+  "groupInfo": "Сведения о чате",
   "groupInformation": "Информация о чате",
   "linkInvite": "Приглашение по ссылке",
   "noDescription": "Нет описания",
@@ -3085,5 +3085,8 @@
   "fileNoLongerExists": "Файл больше не существует",
   "@fileNoLongerExists": {},
   "cannotInviteBannedMember": "Этот пользователь был удалён администратором. Измените статус в разделе \"Удалённые пользователи\", чтобы продолжить",
-  "@cannotInviteBannedMember": {}
+  "@cannotInviteBannedMember": {},
+  "leaveChat": "Покинуть чат",
+  "leaveChatDescription": "История сообщений будет доступна другому пользователю",
+  "leaveChatTitle": "Вы уверены, что хотите покинуть чат?"
 }
