@@ -3080,5 +3080,8 @@
   "fileNoLongerExists": "Le fichier n'existe plus",
   "@fileNoLongerExists": {},
   "cannotInviteBannedMember": "Cet utilisateur a été supprimé par un administrateur. Modifiez le statut dans \"Utilisateurs supprimés\" pour continuer",
-  "@cannotInviteBannedMember": {}
+  "@cannotInviteBannedMember": {},
+  "leaveChat": "Quitter la discussion",
+  "leaveChatDescription": "L'historique des messages restera disponible pour les autres membres encore présents.",
+  "leaveChatTitle": "Êtes-vous sûr de vouloir quitter la discussion ?"
 }
