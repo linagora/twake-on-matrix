@@ -4,9 +4,13 @@ import 'package:fluffychat/pages/search/search.dart';
 import 'package:fluffychat/pages/search/search_external_contact_style.dart';
 import 'package:fluffychat/presentation/model/contact/presentation_contact.dart';
 import 'package:fluffychat/presentation/model/search/presentation_search.dart';
+import 'package:fluffychat/widgets/matrix.dart';
+import 'package:fluffychat/widgets/search/empty_search_widget.dart';
+import 'package:fluffychat/widgets/twake_components/twake_loading/center_loading_indicator.dart';
 import 'package:flutter/material.dart' hide SearchController;
+import 'package:matrix/matrix.dart';
 
-class SearchExternalContactWidget extends StatelessWidget {
+class SearchExternalContactWidget extends StatefulWidget {
   const SearchExternalContactWidget({
     super.key,
     required this.keyword,
@@ -17,30 +21,83 @@ class SearchExternalContactWidget extends StatelessWidget {
   final SearchController searchController;
 
   @override
-  Widget build(BuildContext context) {
-    final newContact = PresentationContact(
-      matrixId: keyword,
-      displayName: keyword.substring(1),
-      type: ContactType.external,
-    );
+  State<SearchExternalContactWidget> createState() =>
+      _SearchExternalContactWidgetState();
+}
 
-    return Padding(
-      padding: SearchExternalContactStyle.contentPadding,
-      child: InkWell(
-        onTap: () {
-          searchController.onSearchItemTap(
-            ContactPresentationSearch(
-              matrixId: newContact.matrixId,
-              displayName: newContact.displayName,
-            ),
+class _SearchExternalContactWidgetState
+    extends State<SearchExternalContactWidget> {
+  Future<Profile>? _profileFuture;
+  String? _currentKeyword;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _fetchProfileIfNeeded();
+  }
+
+  @override
+  void didUpdateWidget(covariant SearchExternalContactWidget oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.keyword != widget.keyword) {
+      _fetchProfileIfNeeded();
+    }
+  }
+
+  void _fetchProfileIfNeeded() {
+    if (_currentKeyword != widget.keyword) {
+      _currentKeyword = widget.keyword;
+      final client = Matrix.of(context).client;
+      _profileFuture = client.getProfileFromUserId(
+        widget.keyword,
+        getFromRooms: false,
+      );
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder<Profile>(
+      future: _profileFuture,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Padding(
+            padding: EdgeInsets.only(top: 48),
+            child: CenterLoadingIndicator(),
           );
-        },
-        borderRadius: SearchExternalContactStyle.borderRadius,
-        child: ExpansionContactListTile(
-          contact: newContact,
-          highlightKeyword: searchController.textEditingController.text,
-        ),
-      ),
+        }
+
+        if (snapshot.hasError || !snapshot.hasData) {
+          return const EmptySearchWidget();
+        }
+
+        final profile = snapshot.data!;
+        final newContact = PresentationContact(
+          matrixId: widget.keyword,
+          displayName: profile.displayName ?? widget.keyword.substring(1),
+          type: ContactType.external,
+        );
+
+        return Padding(
+          padding: SearchExternalContactStyle.contentPadding,
+          child: InkWell(
+            onTap: () {
+              widget.searchController.onSearchItemTap(
+                ContactPresentationSearch(
+                  matrixId: newContact.matrixId,
+                  displayName: newContact.displayName,
+                ),
+              );
+            },
+            borderRadius: SearchExternalContactStyle.borderRadius,
+            child: ExpansionContactListTile(
+              contact: newContact,
+              highlightKeyword:
+                  widget.searchController.textEditingController.text,
+            ),
+          ),
+        );
+      },
     );
   }
 }
