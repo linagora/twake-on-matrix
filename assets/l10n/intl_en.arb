@@ -2723,13 +2723,9 @@
   },
   "copyImageSuccess": "Image copied to clipboard",
   "youNeedToAcceptTheInvitation": "You need to accept the invitation to start chatting",
-<<<<<<< HEAD
   "@youNeedToAcceptTheInvitation": {},
   "hasInvitedYouToAChat": "Has invited you to a chat",
   "@hasInvitedYouToAChat": {},
-=======
-  "hasInvitedYouToAChat": " has invited you to a chat. Accept or reject and delete the conversation?",
->>>>>>> a0104f1cc (Translated using Weblate (English))
   "declineTheInvitation": "Decline the invitation?",
   "doYouReallyWantToDeclineThisInvitation": "Do you really want to decline this invitation and remove the chat? You won't be able to undo this action.",
   "declineAndRemove": "Decline and remove",
@@ -2769,13 +2765,9 @@
   "showLess": "Show Less",
   "showMore": "Show More",
   "unreadMessages": "Unread messages",
-<<<<<<< HEAD
   "@unreadMessages": {},
   "groupInfo": "Group info",
   "@groupInfo": {},
-=======
-  "groupInformation": "Group details",
->>>>>>> a0104f1cc (Translated using Weblate (English))
   "linkInvite": "Link invite",
   "noDescription": "No description",
   "description": "Description",
