@@ -220,12 +220,14 @@ Future<void> _tryPushHelper(
     iOS: iOSPlatformChannelSpecifics,
   );
 
+  final receiverId = event.room.client.userID;
+
   await flutterLocalNotificationsPlugin.show(
     id,
     event.room.getLocalizedDisplayname(MatrixLocals(l10n)),
     body,
     platformChannelSpecifics,
-    payload: event.roomId,
+    payload: jsonEncode({'room_id': event.roomId, 'receiver_id': receiverId}),
   );
   Logs().v('Push helper has been completed!');
 }
