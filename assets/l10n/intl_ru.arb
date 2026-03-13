@@ -2658,6 +2658,7 @@
   "countFilesSendPerDialog": "Максимальный размер файла: {count}.",
   "sendFiles": "Отправить {count} файлов",
   "failedToSendFiles": "Ошибка отправки файлов",
+  "groupInfo": "Инфо о группе",
   "groupInformation": "Информация о чате",
   "linkInvite": "Приглашение по ссылке",
   "noDescription": "Нет описания",
