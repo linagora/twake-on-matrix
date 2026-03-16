@@ -35,15 +35,13 @@ class AddWidgetTileState extends State<AddWidgetTile> {
 
   void addWidget() {
     try {
-      nameError = null;
-      urlError = null;
-
       final room = widget.room;
       final name = nameController.text;
       final uri = Uri.tryParse(urlController.text);
 
       if (name.length < 3) {
         setState(() {
+          urlError = null;
           nameError = L10n.of(context)!.widgetNameError;
         });
         return;
@@ -51,11 +49,15 @@ class AddWidgetTileState extends State<AddWidgetTile> {
 
       if (uri == null || uri.scheme != 'https') {
         setState(() {
+          nameError = null;
           urlError = L10n.of(context)!.widgetUrlError;
         });
         return;
       }
-      setState(() {});
+      setState(() {
+        nameError = null;
+        urlError = null;
+      });
 
       late MatrixWidget matrixWidget;
       switch (widgetType) {
