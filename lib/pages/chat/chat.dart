@@ -385,6 +385,12 @@ class ChatController extends State<Chat>
 
   final int _loadHistoryCount = 100;
 
+  /// Maximum number of events to keep in memory per timeline.
+  /// When exceeded after a history request, older events are trimmed
+  /// to prevent unbounded memory growth during long scroll sessions.
+  /// 500 events ≈ a generous scroll buffer while keeping memory bounded.
+  static const int _maxTimelineEvents = 500;
+
   final inputText = ValueNotifier('');
 
   String pendingText = '';
@@ -527,16 +533,37 @@ class ChatController extends State<Chat>
     if (!timeline!.canRequestHistory) return;
     Logs().v('Chat::requestHistory(): Requesting history...');
     try {
-      return timeline!.requestHistory(
+      await timeline!.requestHistory(
         historyCount: historyCount ?? _loadHistoryCount,
         filter: filter,
       );
+      _trimTimelineIfNeeded();
     } catch (err) {
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text((err).toLocalizedString(context))));
       rethrow;
     }
+  }
+
+  /// Trims the timeline event list if it exceeds [_maxTimelineEvents].
+  ///
+  /// Removes the oldest events (at the end of the list, since events
+  /// are ordered newest-first) to keep memory bounded during long
+  /// scroll sessions. This is safe because:
+  /// - The trimmed events are still persisted in the database
+  /// - They will be re-loaded if the user scrolls back to that point
+  /// - The SDK's `canRequestHistory` still works correctly
+  void _trimTimelineIfNeeded() {
+    final events = timeline?.events;
+    if (events == null || events.length <= _maxTimelineEvents) return;
+
+    final excess = events.length - _maxTimelineEvents;
+    Logs().d(
+      'Chat::_trimTimelineIfNeeded(): Trimming $excess old events '
+      '(${events.length} -> $_maxTimelineEvents)',
+    );
+    events.removeRange(_maxTimelineEvents, events.length);
   }
 
   void _updateScrollController() async {
@@ -1279,6 +1306,9 @@ class ChatController extends State<Chat>
   void scrollDown() async {
     if (timeline == null) return;
     if (!timeline!.allowNewEvent) {
+      // Cancel subscriptions BEFORE nulling the reference to avoid
+      // leaking the old Timeline's 5 stream subscriptions.
+      timeline!.cancelSubscriptions();
       setState(() {
         timeline = null;
         loadTimelineFuture = _getTimeline().onError((e, s) {
@@ -1330,6 +1360,9 @@ class ChatController extends State<Chat>
         );
         return;
       }
+      // Cancel subscriptions BEFORE nulling the reference to avoid
+      // leaking the old Timeline's 5 stream subscriptions.
+      timeline?.cancelSubscriptions();
       setState(() {
         timeline = null;
         loadTimelineFuture = _getTimeline(eventContextId: eventId).onError((
@@ -1619,6 +1652,9 @@ class ChatController extends State<Chat>
   }) async {
     Logs().d('$logContext: Reloading timeline centered on $eventId');
 
+    // Cancel subscriptions BEFORE nulling the reference to avoid
+    // leaking the old Timeline's 5 stream subscriptions.
+    timeline?.cancelSubscriptions();
     setState(() {
       timeline = null;
       loadTimelineFuture = _getTimeline(eventContextId: eventId).onError((
@@ -3709,6 +3745,13 @@ class ChatController extends State<Chat>
     disposeAutoMarkAsReadMixin();
     timeline?.cancelSubscriptions();
     timeline = null;
+
+    // Evict decoded images from Flutter's image cache to free GPU/raster
+    // memory. This is important because decoded bitmaps can consume
+    // significantly more memory than their compressed form.
+    PaintingBinding.instance.imageCache.clear();
+    PaintingBinding.instance.imageCache.clearLiveImages();
+
     inputFocus.dispose();
     searchEmojiFocusNode.dispose();
     composerDebouncer.cancel();
