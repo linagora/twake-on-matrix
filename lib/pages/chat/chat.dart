@@ -393,6 +393,10 @@ class ChatController extends State<Chat>
 
   ChatScrollState _currentChatScrollState = ChatScrollState.endScroll;
 
+  /// Whether an updateView() was requested while the user was scrolling.
+  /// If true, a single setState() is flushed when scrolling ends.
+  bool _hasPendingUpdateView = false;
+
   AutoScrollController suggestionScrollController = AutoScrollController();
 
   SuggestionsController<Map<String, String?>> suggestionsController =
@@ -667,7 +671,15 @@ class ChatController extends State<Chat>
 
   void updateView() {
     if (!mounted) return;
-    setState(() {});
+
+    // During active scroll, defer setState to avoid mid-scroll rebuilds.
+    // The deferred update is flushed in handleScrollEndNotification().
+    if (_currentChatScrollState.isScrolling ||
+        _currentChatScrollState.isStartScroll) {
+      _hasPendingUpdateView = true;
+    } else {
+      setState(() {});
+    }
 
     // Complete any pending timeline update waiters
     final completer = _timelineUpdateCompleter;
@@ -2944,13 +2956,19 @@ class ChatController extends State<Chat>
 
   void handleScrollEndNotification() {
     Logs().d('Chat::handleScrollEndNotification() - End of scroll');
+    _currentChatScrollState = ChatScrollState.endScroll;
     if (PlatformInfos.isMobile) {
       _timestampTimer?.cancel();
-      _currentChatScrollState = ChatScrollState.endScroll;
       _timestampTimer = Timer(
         _delayHideStickyTimestampHeader,
         _handleHideStickyTimestamp,
       );
+    }
+
+    // Flush any deferred updateView() that arrived during scroll.
+    if (_hasPendingUpdateView) {
+      _hasPendingUpdateView = false;
+      if (mounted) setState(() {});
     }
   }
 

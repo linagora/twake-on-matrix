@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:fluffychat/domain/app_state/preview_url/get_preview_url_success.dart';
 import 'package:fluffychat/pages/chat/events/formatted_text_widget.dart';
 import 'package:fluffychat/presentation/extensions/media/url_preview_extension.dart';
@@ -47,6 +49,12 @@ class TwakeLinkPreviewController extends State<TwakeLinkPreview>
 
   static const twakeLinkPreviewItemKey = ValueKey('TwakeLinkPreviewItemKey');
 
+  /// Delay before fetching the preview URL. If the widget is disposed
+  /// (scrolled off-screen) before this fires, the HTTP request is skipped.
+  static const _previewFetchDelay = Duration(milliseconds: 150);
+
+  Timer? _deferredFetchTimer;
+
   @override
   String debugLabel = 'TwakeLinkPreviewController';
 
@@ -54,12 +62,17 @@ class TwakeLinkPreviewController extends State<TwakeLinkPreview>
   void initState() {
     super.initState();
     if (firstValidUrl != null) {
-      getPreviewUrl(uri: uri);
+      _deferredFetchTimer = Timer(_previewFetchDelay, () {
+        if (mounted) {
+          getPreviewUrl(uri: uri);
+        }
+      });
     }
   }
 
   @override
   void dispose() {
+    _deferredFetchTimer?.cancel();
     disposeGetPreviewUrlMixin();
     super.dispose();
   }
