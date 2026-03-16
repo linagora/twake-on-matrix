@@ -1498,6 +1498,7 @@
     "placeholders": {}
   },
   "repeatPassword": "Jelszó megismétlése",
+  "@repeatPassword": {},
   "addEmail": "E-mail-cím hozzáadása",
   "@addEmail": {
     "type": "text",
@@ -1519,6 +1520,7 @@
     "placeholder": {}
   },
   "sendOnEnter": "Küldés Enterrel",
+  "@sendOnEnter": {},
   "cantOpenUri": "Nem sikerült az URI megnyitása: {uri}",
   "@cantOpenUri": {
     "type": "text",
@@ -1532,7 +1534,9 @@
     "placeholders": {}
   },
   "yourUserId": "Saját Matrix címed:",
+  "@yourUserId": {},
   "addToSpace": "Hozzáadás térhez",
+  "@addToSpace": {},
   "areYouSureYouWantToLogout": "Biztos, hogy kijelentkezel?",
   "@areYouSureYouWantToLogout": {
     "type": "text",
@@ -1552,6 +1556,7 @@
     "placeholders": {}
   },
   "passwordsDoNotMatch": "A jelszavak nem egyeznek.",
+  "@passwordsDoNotMatch": {},
   "pleaseChooseAtLeastChars": "Válasszon legalább {min} karaktert.",
   "@pleaseChooseAtLeastChars": {
     "type": "text",
@@ -1560,6 +1565,7 @@
     }
   },
   "pleaseEnterValidEmail": "Adjon meg egy érvényes e-mail-címet.",
+  "@pleaseEnterValidEmail": {},
   "appLock": "Alkalmazászár",
   "@appLock": {
     "type": "text",
@@ -1616,6 +1622,7 @@
     "placeholders": {}
   },
   "enterASpacepName": "Add meg a tér nevét",
+  "@enterASpacepName": {},
   "extremeOffensive": "Extrém sértő",
   "@extremeOffensive": {
     "type": "text",
@@ -1657,7 +1664,9 @@
     "placeholders": {}
   },
   "scanQrCode": "QR kód beolvasása",
+  "@scanQrCode": {},
   "typeInInviteLinkManually": "Meghívási link beírása...",
+  "@typeInInviteLinkManually": {},
   "offensive": "Sértő",
   "@offensive": {
     "type": "text",
@@ -1669,6 +1678,7 @@
     "placeholders": {}
   },
   "loginWithOneClick": "Bejelentkezés egy kattintással",
+  "@loginWithOneClick": {},
   "commandHint_create": "Egy üres csoport létrehozása\nA --no-encryption kapcsolóval titkosítatlan szoba hozható létre",
   "@commandHint_create": {
     "type": "text",
@@ -1685,6 +1695,7 @@
     "placeholders": {}
   },
   "homeserver": "Matrix szerver",
+  "@homeserver": {},
   "chatBackup": "Beszélgetések mentése",
   "@chatBackup": {
     "type": "text",
@@ -1701,6 +1712,7 @@
     "placeholders": {}
   },
   "yourChatBackupHasBeenSetUp": "A beszélgetések mentése be lett állítva.",
+  "@yourChatBackupHasBeenSetUp": {},
   "chatBackupDescription": "A régebbi beszélgetéseid egy biztonsági kulccsal vanak védve. Bizonyosodj meg róla, hogy nem fogod elveszíteni.",
   "@chatBackupDescription": {
     "type": "text",
@@ -1737,12 +1749,14 @@
     "placeholders": {}
   },
   "chatHasBeenAddedToThisSpace": "A beszélgetés hozzá lett adva ehhez a térhez",
+  "@chatHasBeenAddedToThisSpace": {},
   "chats": "Beszélgetések",
   "@chats": {
     "type": "text",
     "placeholders": {}
   },
   "clearArchive": "Archívum törlése",
+  "@clearArchive": {},
   "commandHint_ban": "Felhasználó kitiltása ebből a szobából",
   "@commandHint_ban": {
     "type": "text",
@@ -1841,6 +1855,7 @@
     }
   },
   "shareYourInviteLink": "Meghívási link küldése",
+  "@shareYourInviteLink": {},
   "notifications": "Értesítések",
   "@notifications": {
     "type": "text",
@@ -1897,12 +1912,19 @@
     "placeholders": {}
   },
   "dehydrate": "Munkamenet exportálásssa és az eszköz törlése",
+  "@dehydrate": {},
   "dehydrateWarning": "Ez nem visszavonható. Bizonyosodj meg róla, hogy biztonságos helyen tárolod a mentett fájlt.",
+  "@dehydrateWarning": {},
   "dehydrateTor": "Tor felhasználók: munkamenet dehidratálása",
+  "@dehydrateTor": {},
   "dehydrateTorLong": "Tor felhasználóknak ajánlott a munkamenet dehidratálása az ablak bezárása előtt.",
+  "@dehydrateTorLong": {},
   "hydrateTor": "Tor felhasználók: hidratált munkamenet importálása",
+  "@hydrateTor": {},
   "hydrate": "Visszaállítás fájlból",
+  "@hydrate": {},
   "link": "Hivatkozás",
+  "@link": {},
   "redactMessage": "Üzenet visszavonása",
   "@redactMessage": {
     "type": "text",
@@ -1926,14 +1948,18 @@
     }
   },
   "commandHint_markasgroup": "Csoportnak jelölés",
+  "@commandHint_markasgroup": {},
   "addAccount": "Fiók hozzáadása",
+  "@addAccount": {},
   "search": "Keresés",
   "@search": {
     "type": "text",
     "placeholders": {}
   },
   "commandHint_googly": "Gülüszemek küldése",
+  "@commandHint_googly": {},
   "commandHint_cuddle": "Ölelés küldése",
+  "@commandHint_cuddle": {},
   "sendMessages": "Üzenetek küldése",
   "@sendMessages": {
     "type": "text",
@@ -1960,13 +1986,16 @@
     "placeholders": {}
   },
   "updateAvailable": "FluffyChat-frissítés elérhető",
+  "@updateAvailable": {},
   "updateNow": "Frissítés elindítása a háttérben",
+  "@updateNow": {},
   "roomVersion": "Szobaverzió",
   "@roomVersion": {
     "type": "text",
     "placeholders": {}
   },
   "confirmMatrixId": "A fiók törléséhez adja meg a Matrix ID-t.",
+  "@confirmMatrixId": {},
   "or": "Vagy",
   "@or": {
     "type": "text",
@@ -1978,7 +2007,9 @@
     "placeholders": {}
   },
   "commandHint_hug": "Ölelés küldése",
+  "@commandHint_hug": {},
   "dehydrateShare": "Ez egy privát FluffyChat-export. Tartsa biztonságban, és ne vessze el.",
+  "@dehydrateShare": {},
   "reason": "Ok",
   "@reason": {
     "type": "text",
@@ -1995,6 +2026,7 @@
     "placeholders": {}
   },
   "noSearchResult": "Nincs megfelelő találat.",
+  "@noSearchResult": {},
   "googlyEyesContent": "{senderName} gülüszemeket küld",
   "@googlyEyesContent": {
     "type": "text",
