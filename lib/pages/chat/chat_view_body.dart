@@ -55,6 +55,10 @@ class ChatViewBody extends StatelessWidget with MessageContentMixin {
                 Matrix.of(context).wallpaper!,
                 width: double.infinity,
                 height: double.infinity,
+                cacheWidth:
+                    (MediaQuery.sizeOf(context).width *
+                            MediaQuery.devicePixelRatioOf(context))
+                        .round(),
                 fit: BoxFit.cover,
                 filterQuality: FilterQuality.medium,
               ),

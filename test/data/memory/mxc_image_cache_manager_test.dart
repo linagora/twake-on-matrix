@@ -9,14 +9,11 @@ void main() {
 
     setUp(() {
       manager = MxcImageCacheManager.instance;
+      manager.clear();
     });
 
     tearDown(() {
-      // Clear the cache after each test
-      // We can't directly access the private _imageCache, so we'll add a large number of items to force eviction
-      for (int i = 0; i < 100; i++) {
-        manager.cacheImage('clear_$i', Uint8List(1));
-      }
+      manager.clear();
     });
 
     test('singleton instance', () {
@@ -35,21 +32,47 @@ void main() {
       expect(cachedImage, equals(imageData));
     });
 
-    test('cache size limit', () {
-      for (int i = 0; i < 105; i++) {
+    test('cache entry count limit', () {
+      for (int i = 0; i < MxcImageCacheManager.maxEntries + 5; i++) {
         final eventId = 'test_event_id_$i';
-        final imageData = Uint8List.fromList([i, i + 1, i + 2, i + 3, i + 4]);
+        final imageData = Uint8List.fromList([i % 256]);
         manager.cacheImage(eventId, imageData);
       }
 
-      // The cache should only keep the last 100 items
-      expect(manager.getImage('test_event_id_0'), isNull);
-      expect(manager.getImage('test_event_id_34'), isNotNull);
+      // The first 5 items should have been evicted
+      for (int i = 0; i < 5; i++) {
+        expect(manager.getImage('test_event_id_$i'), isNull);
+      }
+      // The rest should still be cached
+      expect(manager.getImage('test_event_id_5'), isNotNull);
+      expect(
+        manager.getImage(
+          'test_event_id_${MxcImageCacheManager.maxEntries + 4}',
+        ),
+        isNotNull,
+      );
+    });
+
+    test('cache size limit eviction', () {
+      // Each image is 10 MB, so 50 MB budget fits 5
+      final tenMb = Uint8List(10 * 1024 * 1024);
+      for (int i = 0; i < 7; i++) {
+        manager.cacheImage('big_$i', tenMb);
+      }
+
+      // Only the last 5 should fit (50 MB / 10 MB = 5)
+      expect(manager.getImage('big_0'), isNull);
+      expect(manager.getImage('big_1'), isNull);
+      expect(manager.getImage('big_2'), isNotNull);
+      expect(manager.getImage('big_6'), isNotNull);
+      expect(
+        manager.currentSizeBytes,
+        lessThanOrEqualTo(MxcImageCacheManager.maxSizeBytes),
+      );
     });
 
     test('getImage returns null for non-existent key', () {
       const nonExistentEventId = 'non_existent_id';
-
       expect(manager.getImage(nonExistentEventId), isNull);
     });
 
@@ -65,6 +88,19 @@ void main() {
       expect(cachedImage, equals(imageData2));
     });
 
+    test('cacheImage overwrites and tracks size correctly', () {
+      final small = Uint8List(100);
+      final big = Uint8List(200);
+
+      manager.cacheImage('id1', small);
+      expect(manager.currentSizeBytes, 100);
+
+      // Overwrite with bigger data
+      manager.cacheImage('id1', big);
+      expect(manager.currentSizeBytes, 200);
+      expect(manager.length, 1);
+    });
+
     test('cacheImage with empty image data', () {
       const eventId = 'test_event_id';
       final emptyImageData = Uint8List(0);
@@ -75,34 +111,55 @@ void main() {
       expect(cachedImage, equals(emptyImageData));
     });
 
-    test('cacheImage with very large image data', () {
-      const eventId = 'test_event_id';
-      final largeImageData = Uint8List(1024 * 1024); // 1MB of data
+    test('LRU promotion - getImage prevents eviction', () {
+      // Fill cache with small items up to maxEntries
+      for (int i = 0; i < MxcImageCacheManager.maxEntries; i++) {
+        manager.cacheImage('item_$i', Uint8List.fromList([i % 256]));
+      }
 
-      manager.cacheImage(eventId, largeImageData);
-      final cachedImage = manager.getImage(eventId);
+      // Access item_0 to promote it (LRU)
+      expect(manager.getImage('item_0'), isNotNull);
 
-      expect(cachedImage, equals(largeImageData));
+      // Add 5 more items to trigger eviction
+      for (int i = 0; i < 5; i++) {
+        manager.cacheImage('new_item_$i', Uint8List.fromList([i % 256]));
+      }
+
+      // item_0 should still be cached (was promoted by getImage)
+      expect(manager.getImage('item_0'), isNotNull);
+
+      // item_1 through item_5 should have been evicted (oldest non-promoted)
+      for (int i = 1; i <= 5; i++) {
+        expect(manager.getImage('item_$i'), isNull);
+      }
     });
 
-    test('cache eviction order', () {
+    test('cache eviction order (FIFO without access)', () {
       // Fill the cache to its capacity
-      for (int i = 0; i < 100; i++) {
+      for (int i = 0; i < MxcImageCacheManager.maxEntries; i++) {
         final eventId = 'test_event_id_$i';
-        final imageData = Uint8List.fromList([i]);
+        final imageData = Uint8List.fromList([i % 256]);
         manager.cacheImage(eventId, imageData);
       }
 
       // Verify all items are in the cache
-      for (int i = 0; i < 100; i++) {
+      for (int i = 0; i < MxcImageCacheManager.maxEntries; i++) {
         expect(manager.getImage('test_event_id_$i'), isNotNull);
       }
 
+      // Note: getImage above promoted all items, so re-fill for clean test
+      manager.clear();
+      for (int i = 0; i < MxcImageCacheManager.maxEntries; i++) {
+        manager.cacheImage('test_event_id_$i', Uint8List.fromList([i % 256]));
+      }
+
       // Add 5 more items to trigger eviction of the oldest items
-      for (int i = 100; i < 105; i++) {
-        final eventId = 'test_event_id_$i';
-        final imageData = Uint8List.fromList([i]);
-        manager.cacheImage(eventId, imageData);
+      for (
+        int i = MxcImageCacheManager.maxEntries;
+        i < MxcImageCacheManager.maxEntries + 5;
+        i++
+      ) {
+        manager.cacheImage('test_event_id_$i', Uint8List.fromList([i % 256]));
       }
 
       // Verify the 5 oldest items have been evicted
@@ -110,13 +167,8 @@ void main() {
         expect(manager.getImage('test_event_id_$i'), isNull);
       }
 
-      // Verify the 25 items that were not evicted are still in the cache
-      for (int i = 5; i < 100; i++) {
-        expect(manager.getImage('test_event_id_$i'), isNotNull);
-      }
-
-      // Verify the 5 new items are in the cache
-      for (int i = 100; i < 105; i++) {
+      // Verify the remaining items are still in the cache
+      for (int i = 5; i < MxcImageCacheManager.maxEntries; i++) {
         expect(manager.getImage('test_event_id_$i'), isNotNull);
       }
     });
@@ -150,6 +202,18 @@ void main() {
 
       final cachedImage = manager.getImage(eventId);
       expect(cachedImage, equals(imageData3));
+    });
+
+    test('clear resets cache completely', () {
+      manager.cacheImage('id1', Uint8List(100));
+      manager.cacheImage('id2', Uint8List(200));
+      expect(manager.length, 2);
+      expect(manager.currentSizeBytes, 300);
+
+      manager.clear();
+      expect(manager.length, 0);
+      expect(manager.currentSizeBytes, 0);
+      expect(manager.getImage('id1'), isNull);
     });
   });
 }
