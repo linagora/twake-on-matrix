@@ -2937,6 +2937,7 @@ class ChatController extends State<Chat>
   }
 
   void _handleHideStickyTimestamp() {
+    if (!mounted) return;
     Logs().d('Chat::_handleHideStickyTimestamp() - Hide sticky timestamp');
     _updateStickyTimestampNotifier();
   }
@@ -3052,29 +3053,28 @@ class ChatController extends State<Chat>
 
   void _listenRoomUpdateEvent() {
     if (room == null) return;
-    onUpdateEventStreamSubcription = client.onEvent.stream.listen((
-      eventUpdate,
-    ) async {
-      Logs().d(
-        'Chat::_listenRoomUpdateEvent():: Event Update Content ${eventUpdate.content}',
-      );
-      if (room?.id != eventUpdate.roomID) return;
-      if (eventUpdate.isPinnedEventsHasChanged) {
-        eventUpdate.updatePinnedMessage(
-          onPinnedMessageUpdated: _handlePinnedMessageCallBack,
-        );
-      } else if (isPinnedEventDeleted(eventUpdate)) {
-        final events = room!.pinnedEventIds
-          ..removeWhere(
-            (oldEvent) => oldEvent == eventUpdate.content['redacts'],
+    onUpdateEventStreamSubcription = client.onEvent.stream
+        .where((eventUpdate) => eventUpdate.roomID == room?.id)
+        .listen((eventUpdate) async {
+          Logs().d(
+            'Chat::_listenRoomUpdateEvent():: Event Update Content ${eventUpdate.content}',
           );
-        try {
-          await room!.setPinnedEvents(events);
-        } catch (e) {
-          Logs().e('Chat::_listenRoomUpdateEvent():: Error - $e');
-        }
-      }
-    });
+          if (eventUpdate.isPinnedEventsHasChanged) {
+            eventUpdate.updatePinnedMessage(
+              onPinnedMessageUpdated: _handlePinnedMessageCallBack,
+            );
+          } else if (isPinnedEventDeleted(eventUpdate)) {
+            final events = room!.pinnedEventIds
+              ..removeWhere(
+                (oldEvent) => oldEvent == eventUpdate.content['redacts'],
+              );
+            try {
+              await room!.setPinnedEvents(events);
+            } catch (e) {
+              Logs().e('Chat::_listenRoomUpdateEvent():: Error - $e');
+            }
+          }
+        });
   }
 
   bool isPinnedEventDeleted(EventUpdate eventUpdate) {
@@ -3686,6 +3686,7 @@ class ChatController extends State<Chat>
 
   @override
   void dispose() {
+    _timestampTimer?.cancel();
     unregisterPasteShortcutListeners();
     disposeAutoMarkAsReadMixin();
     timeline?.cancelSubscriptions();

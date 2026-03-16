@@ -52,10 +52,16 @@ class TwakeLinkPreviewController extends State<TwakeLinkPreview>
 
   @override
   void initState() {
+    super.initState();
     if (firstValidUrl != null) {
       getPreviewUrl(uri: uri);
     }
-    super.initState();
+  }
+
+  @override
+  void dispose() {
+    disposeGetPreviewUrlMixin();
+    super.dispose();
   }
 
   @override

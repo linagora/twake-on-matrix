@@ -36,6 +36,12 @@ class _ChatDetailsLinkItemState extends State<ChatDetailsLinkItem>
   }
 
   @override
+  void dispose() {
+    disposeGetPreviewUrlMixin();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return ValueListenableBuilder(
       valueListenable: getPreviewUrlStateNotifier,

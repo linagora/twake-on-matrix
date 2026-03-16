@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:dartz/dartz.dart';
 import 'package:fluffychat/app_state/failure.dart';
 import 'package:fluffychat/app_state/success.dart';
@@ -17,19 +19,28 @@ mixin GetPreviewUrlMixin {
     Right(GetPreviewUrlInitial()),
   );
 
+  StreamSubscription<Either<Failure, Success>>? _previewUrlSubscription;
+
   abstract String debugLabel;
 
   void getPreviewUrl({
     required Uri uri,
     int preferredPreviewTime = _defaultPreferredPreviewTimeInMilliseconds,
   }) {
-    _getPreviewURLInteractor
+    _previewUrlSubscription?.cancel();
+    _previewUrlSubscription = _getPreviewURLInteractor
         .execute(uri: uri, preferredPreviewTime: preferredPreviewTime)
         .listen(
           _handleGetPreviewUrlOnData,
           onError: _handleGetPreviewUrlOnError,
           onDone: _handleGetPreviewUrlOnDone,
         );
+  }
+
+  void disposeGetPreviewUrlMixin() {
+    _previewUrlSubscription?.cancel();
+    _previewUrlSubscription = null;
+    getPreviewUrlStateNotifier.dispose();
   }
 
   void _handleGetPreviewUrlOnData(Either<Failure, Success> event) {

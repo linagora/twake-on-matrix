@@ -223,23 +223,25 @@ class MatrixState extends State<Matrix>
   StreamSubscription? _presenceSubscription;
   void _listenSyncPresence(Client client) {
     _presenceSubscription?.cancel();
-    _presenceSubscription = client.onSync.stream.listen((sync) {
-      CachedPresence? lastActivePresence;
+    _presenceSubscription = client.onSync.stream
+        .where((sync) => sync.presence?.isNotEmpty ?? false)
+        .listen((sync) {
+          CachedPresence? lastActivePresence;
 
-      for (final newPresence in sync.presence ?? []) {
-        final cachedPresence = CachedPresence.fromMatrixEvent(newPresence);
-        final newTs = cachedPresence.lastActiveTimestamp;
-        final oldTs = lastActivePresence?.lastActiveTimestamp;
-        if (lastActivePresence == null ||
-            (newTs != null && (oldTs == null || newTs.isAfter(oldTs)))) {
-          lastActivePresence = cachedPresence;
-        }
-      }
+          for (final newPresence in sync.presence ?? []) {
+            final cachedPresence = CachedPresence.fromMatrixEvent(newPresence);
+            final newTs = cachedPresence.lastActiveTimestamp;
+            final oldTs = lastActivePresence?.lastActiveTimestamp;
+            if (lastActivePresence == null ||
+                (newTs != null && (oldTs == null || newTs.isAfter(oldTs)))) {
+              lastActivePresence = cachedPresence;
+            }
+          }
 
-      if (lastActivePresence != null) {
-        onLatestPresenceChanged.add(lastActivePresence);
-      }
-    });
+          if (lastActivePresence != null) {
+            onLatestPresenceChanged.add(lastActivePresence);
+          }
+        });
   }
 
   List<Client?>? get currentBundle {
@@ -357,6 +359,7 @@ class MatrixState extends State<Matrix>
   final onNotification = <String, StreamSubscription>{};
   final onLoginStateChanged = <String, StreamSubscription<LoginState>>{};
   final onUiaRequest = <String, StreamSubscription<UiaRequest>>{};
+  final onToDeviceEventSub = <String, StreamSubscription>{};
   final StreamController<ClientLoginStateEvent> onClientLoginStateChanged =
       StreamController.broadcast();
   StreamSubscription<html.Event>? onFocusSub;
@@ -514,7 +517,9 @@ class MatrixState extends State<Matrix>
             .listen(showLocalNotification);
       });
     }
-    currentClient.onToDeviceEvent.stream.listen((deviceEvent) {
+    onToDeviceEventSub[name] ??= currentClient.onToDeviceEvent.stream.listen((
+      deviceEvent,
+    ) {
       if (deviceEvent.type == TwakeEventTypes.addressBookUpdatedEventType) {
         final senderId = deviceEvent.senderId;
         Logs().d(
@@ -660,6 +665,10 @@ class MatrixState extends State<Matrix>
     onLoginStateChanged.remove(name);
     await onNotification[name]?.cancel();
     onNotification.remove(name);
+    await onUiaRequest[name]?.cancel();
+    onUiaRequest.remove(name);
+    await onToDeviceEventSub[name]?.cancel();
+    onToDeviceEventSub.remove(name);
   }
 
   Future<void> initMatrix() async {
@@ -1301,10 +1310,24 @@ class MatrixState extends State<Matrix>
     }
     intentFileStreamSubscription?.cancel();
     intentUriStreamSubscription?.cancel();
-    onRoomKeyRequestSub.values.map((s) => s.cancel());
-    onKeyVerificationRequestSub.values.map((s) => s.cancel());
-    onLoginStateChanged.values.map((s) => s.cancel());
-    onNotification.values.map((s) => s.cancel());
+    for (final s in onRoomKeyRequestSub.values) {
+      s.cancel();
+    }
+    for (final s in onKeyVerificationRequestSub.values) {
+      s.cancel();
+    }
+    for (final s in onLoginStateChanged.values) {
+      s.cancel();
+    }
+    for (final s in onNotification.values) {
+      s.cancel();
+    }
+    for (final s in onUiaRequest.values) {
+      s.cancel();
+    }
+    for (final s in onToDeviceEventSub.values) {
+      s.cancel();
+    }
     onClientLoginStateChanged.close();
     client.httpClient.close();
     onFocusSub?.cancel();
