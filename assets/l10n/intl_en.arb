@@ -3140,5 +3140,40 @@
   "cannotInviteBannedMember": "This user has been removed by an administrator. Change status in \"Removed users\" to proceed",
   "leaveChat": "Leave chat",
   "leaveChatDescription": "Messaging history will still be available to the other person.",
-  "leaveChatTitle": "Are you sure you want to leave this chat?"
+  "leaveChatTitle": "Are you sure you want to leave this chat?",
+  "dataAndStorage": "Data and storage",
+  "phoneStorage": "Phone Storage",
+  "@phoneStorage": {},
+  "phoneStorageDescription": "Twake Chat is using {percent} of storage on your phone",
+  "@phoneStorageDescription": {
+    "placeholders": {
+      "percent": {
+        "type": "String"
+      }
+    }
+  },
+  "medias": "Medias",
+  "@medias": {},
+  "videos": "Videos",
+  "@videos": {},
+  "stickersAndEmojis": "Stickers and emojis",
+  "@stickersAndEmojis": {},
+  "clearCacheSize": "Clear cache {size}",
+  "@clearCacheSize": {
+    "placeholders": {
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "available": "Available",
+  "@available": {},
+  "clearCacheConfirmTitle": "Clear cache?",
+  "@clearCacheConfirmTitle": {},
+  "clearCacheConfirmMessage": "This will delete all temporary files stored on your device. This action cannot be undone.",
+  "@clearCacheConfirmMessage": {},
+  "cacheClearedSuccessfully": "Cache cleared successfully",
+  "@cacheClearedSuccessfully": {},
+  "cacheIsScanning": "Cache is scanning. Please wait...",
+  "@cacheIsScanning": {}
 }

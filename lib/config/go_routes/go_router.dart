@@ -46,6 +46,7 @@ import 'package:fluffychat/pages/settings_dashboard/settings_emotes/settings_emo
 import 'package:fluffychat/pages/settings_dashboard/settings_notifications/settings_notifications.dart';
 import 'package:fluffychat/pages/settings_dashboard/settings_security/settings_security.dart';
 import 'package:fluffychat/pages/settings_dashboard/settings_stories/settings_stories.dart';
+import 'package:fluffychat/pages/settings_dashboard/settings_data_and_storage/settings_data_and_storage.dart';
 import 'package:fluffychat/pages/settings_dashboard/settings_style/settings_style.dart';
 import 'package:fluffychat/pages/sign_up/signup.dart';
 import 'package:fluffychat/widgets/layouts/agruments/app_adaptive_scaffold_body_args.dart';
@@ -345,6 +346,13 @@ abstract class AppRoutes {
                   defaultPageBuilder(context, const SettingsAppLanguage()),
               redirect: loggedOutRedirect,
             ),
+            if (PlatformInfos.isMobile)
+              GoRoute(
+                path: AppRoutePaths.dataAndStorageSegment,
+                pageBuilder: (context, state) =>
+                    defaultPageBuilder(context, const SettingsDataAndStorage()),
+                redirect: loggedOutRedirect,
+              ),
             GoRoute(
               path: 'chat',
               pageBuilder: (context, state) =>

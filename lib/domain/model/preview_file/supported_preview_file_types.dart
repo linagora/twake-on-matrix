@@ -194,15 +194,7 @@ class SupportedPreviewFileTypes {
 
   static const supportAnotherTypes = ['application/octet-stream'];
 
-  static const docFileTypes = [
-    'docx',
-    'doc',
-    'docx',
-    'docm',
-    'dot',
-    'dotx',
-    'dotm',
-  ];
+  static const docFileTypes = ['doc', 'docx', 'docm', 'dot', 'dotx', 'dotm'];
 
   static const pdfFileTypes = ['pdf'];
 

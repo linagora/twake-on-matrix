@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:fluffychat/config/app_config.dart';
+import 'package:fluffychat/config/go_routes/app_route_paths.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/domain/model/extensions/common_settings/common_settings_extensions.dart';
 import 'package:fluffychat/domain/model/extensions/homeserver_summary_extensions.dart';
@@ -56,6 +57,7 @@ class SettingsController extends State<Settings> with ConnectPageMixin {
     SettingEnum.notificationAndSounds,
     SettingEnum.appLanguage,
     SettingEnum.devices,
+    if (PlatformInfos.isMobile) SettingEnum.dataAndStorage,
     SettingEnum.help,
     SettingEnum.about,
     SettingEnum.logout,
@@ -251,6 +253,12 @@ class SettingsController extends State<Settings> with ConnectPageMixin {
         break;
       case SettingEnum.devices:
         final result = await context.push('/rooms/devices');
+        if (result == null) {
+          optionsSelectNotifier.value = null;
+        }
+        break;
+      case SettingEnum.dataAndStorage:
+        final result = await context.push(AppRoutePaths.dataAndStorageFull);
         if (result == null) {
           optionsSelectNotifier.value = null;
         }
