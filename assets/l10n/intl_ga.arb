@@ -2509,7 +2509,7 @@
   "encryptionMessage": "Cosain do theachtaireachtaí ó dhaoine eile a bheith á léamh. Cuireann sé cosc orthu cúltaca a dhéanamh ar ár bhfreastalaithe. Ní féidir leat é seo a dhíchumasú níos déanaí.",
   "newDirectMessage": "Teachtaireacht dhíreach nua",
   "unmuteThisChat": "Unmute an comhrá seo",
-  "hasInvitedYouToAChat": " thug sé cuireadh duit comhrá a dhéanamh. Glac leis an gcomhrá nó diúltaigh dó agus scrios é?",
+  "hasInvitedYouToAChat": "Thug cuireadh duit chuig comhrá",
   "notNow": "Ní anois",
   "settingsLanguageDescription": "Socraigh an teanga a úsáideann tú ar Twake Chat",
   "showLess": "Taispeáin Níos Lú",
@@ -2549,10 +2549,10 @@
   "tapToAllowAccessToYourGallery": "Tapáil chun rochtain ar an ngailearaí a cheadú",
   "acceptInvite": "Tá, le do thoil, páirt a ghlacadh",
   "contactsCount": "Teagmhálacha ({count})",
-  "sendMessageGuide": "Seol teachtaireacht nó tapáil ar an mbeannacht thíos.",
+  "sendMessageGuide": "Seol teachtaireacht nó tapáil ar an mbeannacht",
   "declineAndRemove": "Meath agus bain",
   "iUnderstand": "Tuigim",
-  "upTo100000Members": "Suas le 100.000 ball",
+  "upTo100000Members": "✅ Suas le 100,000 ball",
   "oneClientLoggedOut": "Tá ceann de do chliaint logáilte amach",
   "back": "Ar ais",
   "commandHint_googly": "Seol roinnt súile googly",
@@ -2704,10 +2704,10 @@
       "hour": {}
     }
   },
-  "noMessageHereYet": "Níl teachtaireacht ar bith anseo go fóill...",
-  "youCreatedGroupChat": "Chruthaigh tú comhrá Grúpa",
+  "noMessageHereYet": "Níl aon teachtaireacht anseo fós",
+  "youCreatedGroupChat": "Comhghairdeas leat\nas do chomhrá nua!",
   "chatCanHave": "Is féidir le comhrá a bheith:",
-  "persistentChatHistory": "Stair Comhrá Leanúnach",
+  "persistentChatHistory": "✅ Stair chomhrá leanúnach",
   "profile": "Próifíl",
   "@profile": {
     "type": "text",
@@ -3134,5 +3134,12 @@
   "changePermissions": "Athraigh ceadanna",
   "@changePermissions": {
     "description": "Context menu action to open permission picker dialog"
-  }
+  },
+  "groupInfo": "Eolas grúpa",
+  "tapToRetry": "Tapáil le hath-iarracht a dhéanamh",
+  "fileNoLongerExists": "Níl an comhad ann a thuilleadh",
+  "cannotInviteBannedMember": "Tá an t-úsáideoir seo bainte ag riarthóir. Athraigh an stádas i \"Úsáideoirí Bainte\" le dul ar aghaidh",
+  "leaveChat": "Fág an comhrá",
+  "leaveChatDescription": "Beidh stair teachtaireachtaí fós ar fáil don duine eile.",
+  "leaveChatTitle": "An bhfuil tú cinnte gur mian leat an comhrá seo a fhágáil?"
 }
