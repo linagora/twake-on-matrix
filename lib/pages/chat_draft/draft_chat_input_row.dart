@@ -230,14 +230,14 @@ class DraftChatInputRow extends StatelessWidget {
                 Logs().d('DraftChatInputRow:: deleteRecording');
                 deleteRecording?.call();
               },
-              sendRequestFunction: (soundFile, time, waveFrom) {
+              sendRequestFunction: (soundFile, time, waveFrom) async {
                 Logs().d('DraftChatInputRow:: sendRequestFunction $soundFile');
                 stopRecording?.call();
 
                 final file = TwakeAudioFile(
                   name: soundFile.path,
                   duration: time.inMilliseconds,
-                  bytes: soundFile.readAsBytesSync(),
+                  bytes: await soundFile.readAsBytes(),
                 );
                 sendVoiceMessageAction?.call(file, time, waveFrom);
               },
