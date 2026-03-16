@@ -212,6 +212,10 @@ class StoryView extends StatelessWidget {
                       child: Image.memory(
                         matrixFile.bytes,
                         fit: controller.storyThemeData.fit,
+                        cacheWidth:
+                            (MediaQuery.sizeOf(context).width *
+                                    MediaQuery.devicePixelRatioOf(context))
+                                .round(),
                       ),
                     );
                   },

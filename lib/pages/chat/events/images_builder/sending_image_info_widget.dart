@@ -145,18 +145,20 @@ class _SendingImageInfoWidgetState extends State<SendingImageInfoWidget>
                       ),
                     )
                   else
-                    Image.memory(
-                      widget.matrixFile.bytes,
-                      width: widget.displayImageInfo.size.width,
-                      height: widget.displayImageInfo.size.height,
-                      cacheHeight: context.getCacheSize(
-                        widget.displayImageInfo.size.height,
+                    RepaintBoundary(
+                      child: Image.memory(
+                        widget.matrixFile.bytes,
+                        width: widget.displayImageInfo.size.width,
+                        height: widget.displayImageInfo.size.height,
+                        cacheHeight: context.getCacheSize(
+                          widget.displayImageInfo.size.height,
+                        ),
+                        cacheWidth: context.getCacheSize(
+                          widget.displayImageInfo.size.width,
+                        ),
+                        fit: BoxFit.cover,
+                        filterQuality: FilterQuality.none,
                       ),
-                      cacheWidth: context.getCacheSize(
-                        widget.displayImageInfo.size.width,
-                      ),
-                      fit: BoxFit.cover,
-                      filterQuality: FilterQuality.none,
                     ),
                 ],
               ),

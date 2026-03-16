@@ -302,20 +302,22 @@ class _MxcImageState extends State<MxcImage>
     }
 
     if (widget.isPreview) {
-      return Material(
-        child: InkWell(
-          mouseCursor: SystemMouseCursors.click,
-          borderRadius: widget.rounded
-              ? BorderRadius.circular(12.0)
-              : BorderRadius.zero,
-          onTap: widget.onTapPreview != null || widget.onTapSelectMode != null
-              ? () => _onTap(context)
-              : null,
-          child: imageWidget,
+      return RepaintBoundary(
+        child: Material(
+          child: InkWell(
+            mouseCursor: SystemMouseCursors.click,
+            borderRadius: widget.rounded
+                ? BorderRadius.circular(12.0)
+                : BorderRadius.zero,
+            onTap: widget.onTapPreview != null || widget.onTapSelectMode != null
+                ? () => _onTap(context)
+                : null,
+            child: imageWidget,
+          ),
         ),
       );
     } else {
-      return imageWidget;
+      return RepaintBoundary(child: imageWidget);
     }
   }
 
