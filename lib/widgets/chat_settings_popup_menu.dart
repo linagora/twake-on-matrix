@@ -40,7 +40,11 @@ class ChatSettingsPopupMenuState extends State<ChatSettingsPopupMenu> {
   Widget build(BuildContext context) {
     notificationChangeSub ??= Matrix.of(context).client.onAccountData.stream
         .where((u) => u.type == 'm.push_rules')
-        .listen((u) => setState(() {}));
+        .listen(
+          (_) => setState(() {
+            // Rebuild to reflect push rule changes
+          }),
+        );
     final items = <PopupMenuEntry<String>>[
       PopupMenuItem<String>(
         value: 'widgets',

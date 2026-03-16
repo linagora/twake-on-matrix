@@ -199,9 +199,12 @@ class MediaViewerController extends State<MediaViewer> {
     if (loadMoreEvents.isEmpty) {
       await loadMore(direction, limit: limit - 1);
     }
-    loadingMoreDirection = null;
     if (limit == 10) {
-      setState(() {});
+      setState(() {
+        loadingMoreDirection = null;
+      });
+    } else {
+      loadingMoreDirection = null;
     }
   }
 
