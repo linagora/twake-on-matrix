@@ -18,6 +18,7 @@ import 'package:fluffychat/widgets/contacts_warning_banner/contacts_warning_bann
 import 'package:fluffychat/widgets/sliver_expandable_list.dart';
 import 'package:flutter/material.dart';
 import 'package:fluffychat/generated/l10n/app_localizations.dart';
+import 'package:matrix/matrix.dart';
 
 class ContactsTabBodyView extends StatelessWidget {
   final ContactsTabController controller;
@@ -268,7 +269,7 @@ class _SliverContactsList extends StatelessWidget {
   }
 }
 
-class _SilverExternalContact extends StatelessWidget {
+class _SilverExternalContact extends StatefulWidget {
   final ContactsTabController controller;
   final PresentationContact externalContact;
 
@@ -278,23 +279,92 @@ class _SilverExternalContact extends StatelessWidget {
   });
 
   @override
+  State<_SilverExternalContact> createState() => _SilverExternalContactState();
+}
+
+class _SilverExternalContactState extends State<_SilverExternalContact> {
+  Future<CachedProfileInformation>? _profileFuture;
+  String? _currentMatrixId;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _fetchProfileIfNeeded();
+  }
+
+  @override
+  void didUpdateWidget(covariant _SilverExternalContact oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.externalContact.matrixId != widget.externalContact.matrixId) {
+      _fetchProfileIfNeeded();
+    }
+  }
+
+  void _fetchProfileIfNeeded() {
+    final matrixId = widget.externalContact.matrixId;
+    if (matrixId == null) {
+      _currentMatrixId = null;
+      _profileFuture = null;
+      return;
+    }
+    if (_currentMatrixId != matrixId) {
+      _currentMatrixId = matrixId;
+      _profileFuture = widget.controller.client.getUserProfile(
+        matrixId,
+        maxCacheAge: Duration.zero,
+      );
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return SliverToBoxAdapter(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(
-          horizontal: ContactsTabViewStyle.padding,
-        ),
-        child: ExpansionContactListTile(
-          contact: externalContact,
-          highlightKeyword: controller.textEditingController.text,
-          enableInvitation: controller.supportInvitation(),
-          onContactTap: () => controller.onContactTap(
-            context: context,
-            path: 'rooms',
-            contact: externalContact,
+    return FutureBuilder<CachedProfileInformation>(
+      future: _profileFuture,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const SliverToBoxAdapter(child: LoadingContactWidget());
+        }
+
+        if (snapshot.hasError || !snapshot.hasData) {
+          return SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.only(
+                left: ContactsTabViewStyle.padding,
+                top: ContactsTabViewStyle.padding,
+              ),
+              child: NoContactsFound(
+                keyword: widget.controller.textEditingController.text,
+              ),
+            ),
+          );
+        }
+
+        final profile = snapshot.data!;
+        final validatedContact = PresentationContact(
+          matrixId: widget.externalContact.matrixId,
+          displayName:
+              profile.displayname ?? widget.externalContact.displayName,
+          type: widget.externalContact.type,
+        );
+
+        return SliverToBoxAdapter(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(
+              horizontal: ContactsTabViewStyle.padding,
+            ),
+            child: ExpansionContactListTile(
+              contact: validatedContact,
+              highlightKeyword: widget.controller.textEditingController.text,
+              enableInvitation: widget.controller.supportInvitation(),
+              onContactTap: () => widget.controller.onContactTap(
+                context: context,
+                path: 'rooms',
+                contact: validatedContact,
+              ),
+            ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 }
