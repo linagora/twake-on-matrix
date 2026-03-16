@@ -177,29 +177,26 @@ class AppAdaptiveScaffoldBodyController extends State<AppAdaptiveScaffoldBody>
   @override
   void didUpdateWidget(covariant AppAdaptiveScaffoldBody oldWidget) {
     activeRoomIdNotifier.value = widget.activeRoomId;
-    Logs().d(
-      'AppAdaptiveScaffoldBodyController::didUpdateWidget():oldWidget - ${oldWidget.args}',
-    );
-    Logs().d(
-      'AppAdaptiveScaffoldBodyController::didUpdateWidget():newWidget - ${widget.args}',
-    );
-    if (oldWidget.args != widget.args && widget.args is LogoutBodyArgs) {
-      _handleLogout(oldWidget);
-    }
 
-    if (oldWidget.args != widget.args &&
-        widget.args is LoggedInOtherAccountBodyArgs) {
-      getCurrentProfile();
-      _handleProfileDataChange();
-    }
-
-    if (oldWidget.args != widget.args &&
-        widget.args is SwitchActiveAccountBodyArgs) {
-      _handleSwitchAccount(oldWidget);
-    }
-
-    if (oldWidget.args != widget.args && widget.args is ReceiveContentArgs) {
-      _handleReceiveContent(widget.args as ReceiveContentArgs);
+    // Skip expensive checks and logging when args haven't changed,
+    // which is the common case during parent rebuilds.
+    if (oldWidget.args != widget.args) {
+      Logs().d(
+        'AppAdaptiveScaffoldBodyController::didUpdateWidget():oldWidget - ${oldWidget.args}',
+      );
+      Logs().d(
+        'AppAdaptiveScaffoldBodyController::didUpdateWidget():newWidget - ${widget.args}',
+      );
+      if (widget.args is LogoutBodyArgs) {
+        _handleLogout(oldWidget);
+      } else if (widget.args is LoggedInOtherAccountBodyArgs) {
+        getCurrentProfile();
+        _handleProfileDataChange();
+      } else if (widget.args is SwitchActiveAccountBodyArgs) {
+        _handleSwitchAccount(oldWidget);
+      } else if (widget.args is ReceiveContentArgs) {
+        _handleReceiveContent(widget.args as ReceiveContentArgs);
+      }
     }
     super.didUpdateWidget(oldWidget);
   }

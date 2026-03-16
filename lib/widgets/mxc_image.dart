@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'dart:typed_data';
+import 'package:fluffychat/config/themes.dart';
 import 'package:fluffychat/data/memory/mxc_image_cache_manager.dart';
 import 'package:fluffychat/pages/image_viewer/image_viewer.dart';
 import 'package:fluffychat/pages/media_viewer/media_viewer.dart';
@@ -7,19 +8,19 @@ import 'package:fluffychat/presentation/enum/chat/media_viewer_popup_result_enum
 import 'package:fluffychat/presentation/extensions/media_thumbnail_extension.dart';
 import 'package:fluffychat/utils/extension/build_context_extension.dart';
 import 'package:fluffychat/utils/extension/mime_type_extension.dart';
+import 'package:fluffychat/utils/image_download_queue.dart';
 import 'package:fluffychat/utils/interactive_viewer_gallery.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/download_file_extension.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_file_extension.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/widgets/hero_page_route.dart';
+import 'package:fluffychat/widgets/matrix.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_avif/flutter_avif.dart';
 import 'package:http/http.dart' as http;
 import 'package:matrix/matrix.dart';
-import 'package:fluffychat/config/themes.dart';
-import 'package:fluffychat/widgets/matrix.dart';
 
 typedef EventId = String;
 typedef ImageData = Uint8List;
@@ -98,6 +99,10 @@ class _MxcImageState extends State<MxcImage>
   ImageData? _imageDataNoCache;
   bool isLoadDone = false;
   String? filePath;
+
+  /// Ticket from [ImageDownloadQueue] — held while a download is in-flight
+  /// so it can be cancelled when the widget is disposed (scrolled off-screen).
+  ImageDownloadTicket? _downloadTicket;
 
   ImageData? get _imageData {
     final cacheKey = widget.cacheKey;
@@ -222,20 +227,46 @@ class _MxcImageState extends State<MxcImage>
         isLoadDone = true;
         filePath = null;
       });
+      return;
     }
+
+    // Acquire a slot from the download queue.
+    // This limits the number of concurrent image loads to avoid
+    // memory spikes that cause iOS OOM kills.
+    final ticket = ImageDownloadQueue.instance.acquire();
+    _downloadTicket = ticket;
+
+    final shouldProceed = await ticket.ready;
+    if (!shouldProceed || !mounted) {
+      // Widget was disposed while waiting — release the slot.
+      ImageDownloadQueue.instance.release(ticket);
+      _downloadTicket = null;
+      return;
+    }
+
     try {
       final loadResult = await _load(context);
-      setState(() {
-        isLoadDone = true;
-        _imageData = loadResult.imageData;
-        filePath = loadResult.filePath;
-      });
+      if (mounted) {
+        setState(() {
+          isLoadDone = true;
+          _imageData = loadResult.imageData;
+          filePath = loadResult.filePath;
+        });
+      }
     } catch (e) {
       if (mounted && !isLoadDone) {
         isLoadDone = true;
+        // Don't retry immediately — release first, then re-enqueue.
+        ImageDownloadQueue.instance.release(ticket);
+        _downloadTicket = null;
         _tryLoad(context);
+        return;
       }
     }
+
+    // Release the slot for the next queued image.
+    ImageDownloadQueue.instance.release(ticket);
+    _downloadTicket = null;
   }
 
   void _onTap(BuildContext context) async {
@@ -283,6 +314,17 @@ class _MxcImageState extends State<MxcImage>
 
   @override
   void dispose() {
+    // Cancel any pending or active download — releases the queue slot
+    // so other images can proceed.
+    final ticket = _downloadTicket;
+    if (ticket != null) {
+      if (ticket.isActive) {
+        ImageDownloadQueue.instance.release(ticket);
+      } else {
+        ticket.cancel();
+      }
+      _downloadTicket = null;
+    }
     _imageDataNoCache = null;
     super.dispose();
   }

@@ -87,7 +87,7 @@ dependencies:
     git:
       url: https://github.com/famedly/fcm_shared_isolate.git
       ref: main
-  file_picker: ^10.1.7
+  file_picker: ^10.3.10
   flutter:
     sdk: flutter
   # TODO: remove this after this PR is merged https://github.com/g123k/flutter_app_badger/pull/92

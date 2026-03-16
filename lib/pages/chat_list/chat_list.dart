@@ -757,12 +757,22 @@ class ChatListController extends State<ChatList>
 
   @override
   void didUpdateWidget(covariant ChatList oldWidget) {
+    final newArgs = widget.adaptiveScaffoldBodyArgs;
+    final oldArgs = oldWidget.adaptiveScaffoldBodyArgs;
+
+    // Skip work if args haven't changed — avoids unnecessary logging
+    // and processing on every parent rebuild.
+    if (identical(newArgs, oldArgs)) {
+      super.didUpdateWidget(oldWidget);
+      return;
+    }
+
     Logs().d(
-      "ChatList::didUpdateWidget(): Old Args ${oldWidget.adaptiveScaffoldBodyArgs} - UserId ${oldWidget.adaptiveScaffoldBodyArgs?.newActiveClient?.userID}",
+      "ChatList::didUpdateWidget(): Old Args $oldArgs - UserId ${oldArgs?.newActiveClient?.userID}",
     );
-    final newActiveClient = widget.adaptiveScaffoldBodyArgs?.newActiveClient;
+    final newActiveClient = newArgs?.newActiveClient;
     Logs().d(
-      "ChatList::didUpdateWidget(): New Args ${widget.adaptiveScaffoldBodyArgs} - UserId ${newActiveClient?.userID}",
+      "ChatList::didUpdateWidget(): New Args $newArgs - UserId ${newActiveClient?.userID}",
     );
     if (newActiveClient != null && newActiveClient.userID != null) {
       setState(() {
