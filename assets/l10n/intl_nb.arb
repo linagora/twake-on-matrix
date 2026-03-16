@@ -1754,6 +1754,7 @@
     "placeholders": {}
   },
   "pleaseEnterValidEmail": "Skriv inn en gyldig e-postadresse.",
+  "@pleaseEnterValidEmail": {},
   "addEmail": "Legg til e-post",
   "@addEmail": {
     "type": "text",
@@ -1767,8 +1768,11 @@
     }
   },
   "repeatPassword": "Gjenta passord",
+  "@repeatPassword": {},
   "passwordsDoNotMatch": "Passordet samsvarer ikke!",
+  "@passwordsDoNotMatch": {},
   "addToSpace": "Legg til space",
+  "@addToSpace": {},
   "allChats": "Alle samtaler",
   "@allChats": {
     "type": "text",
@@ -1788,6 +1792,7 @@
     }
   },
   "sendOnEnter": "Trykk på enter for å sende",
+  "@sendOnEnter": {},
   "badServerVersionsException": "Denne hjemme serveren støtter følgene Spec-versjoner:\n{serverVersions}\nMen denne applikasjonen støtter kun {supportedVersions}",
   "@badServerVersionsException": {
     "type": "text",
@@ -1813,5 +1818,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "yourUserId": "Din bruker ID:"
+  "yourUserId": "Din bruker ID:",
+  "@yourUserId": {}
 }

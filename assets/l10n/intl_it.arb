@@ -1897,6 +1897,7 @@
     "placeholders": {}
   },
   "clearArchive": "Cancella archivio",
+  "@clearArchive": {},
   "changeYourAvatar": "Cambia il tuo avatar",
   "@changeYourAvatar": {
     "type": "text",
@@ -1908,9 +1909,13 @@
     "placeholders": {}
   },
   "addToSpace": "Aggiungi a uno spazio",
+  "@addToSpace": {},
   "passwordsDoNotMatch": "Le password non corrispondono!",
+  "@passwordsDoNotMatch": {},
   "pleaseEnterValidEmail": "Inserire un indirizzo email valido.",
+  "@pleaseEnterValidEmail": {},
   "yourUserId": "Il tuo ID utente:",
+  "@yourUserId": {},
   "commandHint_leave": "Lascia questa stanza",
   "@commandHint_leave": {
     "type": "text",
@@ -1952,14 +1957,18 @@
     "placeholders": {}
   },
   "serverRequiresEmail": "Questo server ha bisogno di validare la tua email per la registrazione.",
+  "@serverRequiresEmail": {},
   "openInMaps": "Apri in maps",
   "@openInMaps": {
     "type": "text",
     "placeholders": {}
   },
   "scanQrCode": "Scansiona codice QR",
+  "@scanQrCode": {},
   "addAccount": "Aggiungi account",
+  "@addAccount": {},
   "unverified": "Non verificato",
+  "@unverified": {},
   "pleaseChooseAtLeastChars": "Per favore scegli almeno {min} caratteri.",
   "@pleaseChooseAtLeastChars": {
     "type": "text",
@@ -1972,6 +1981,7 @@
     "type": "text"
   },
   "repeatPassword": "Ripeti password",
+  "@repeatPassword": {},
   "autoplayImages": "Riproduci automaticamente sticker animati ed emoticon",
   "@autoplayImages": {
     "type": "text",
@@ -1989,10 +1999,12 @@
     "type": "text"
   },
   "link": "Link",
+  "@link": {},
   "shareLocation": "Condividi posizione",
   "@shareLocation": {
     "type": "text",
     "placeholders": {}
   },
-  "yourChatBackupHasBeenSetUp": "Il tuo backup delle chat è stato configurato."
+  "yourChatBackupHasBeenSetUp": "Il tuo backup delle chat è stato configurato.",
+  "@yourChatBackupHasBeenSetUp": {}
 }

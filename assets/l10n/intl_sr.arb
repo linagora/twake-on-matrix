@@ -342,6 +342,7 @@
     "placeholders": {}
   },
   "clearArchive": "Очисти архиву",
+  "@clearArchive": {},
   "close": "Затвори",
   "@close": {
     "type": "text",

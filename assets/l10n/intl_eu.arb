@@ -1343,10 +1343,15 @@
     "placeholders": {}
   },
   "emojis": "Emojiak",
+  "@emojis": {},
   "placeCall": "Egin deia",
+  "@placeCall": {},
   "voiceCall": "Ahozko deia",
+  "@voiceCall": {},
   "unsupportedAndroidVersion": "Android bertsioa ez da bateragarria",
+  "@unsupportedAndroidVersion": {},
   "unsupportedAndroidVersionLong": "Funtzio honek Android bertsio berriago bat behar du. Egiaztatu eguneraketak ote dauden edo begiratu Lineage OS-ek zure gailuarentzat aukerarik eskaintzen duen.",
+  "@unsupportedAndroidVersionLong": {},
   "commandHint_ban": "Debekatu erabiltzailea gela honetan",
   "@commandHint_ban": {
     "type": "text",
@@ -1413,7 +1418,9 @@
     "placeholders": {}
   },
   "enterASpacepName": "Sartu gunerako izena",
+  "@enterASpacepName": {},
   "homeserver": "Zerbitzaria",
+  "@homeserver": {},
   "errorObtainingLocation": "Errorea kokapena lortzerakoan: {error}",
   "@errorObtainingLocation": {
     "type": "text",
@@ -1457,6 +1464,7 @@
     "placeholders": {}
   },
   "shareYourInviteLink": "Partekatu gonbidapen esteka",
+  "@shareYourInviteLink": {},
   "numUsersTyping": "{count} erabiltzaile idazten ari dira",
   "@numUsersTyping": {
     "type": "text",
@@ -1470,8 +1478,11 @@
     "placeholders": {}
   },
   "oneClientLoggedOut": "Zure gailuetako batek saioa itxi du",
+  "@oneClientLoggedOut": {},
   "addAccount": "Gehitu kontua",
+  "@addAccount": {},
   "editBundlesForAccount": "Moldatu kontu honetarako sortak",
+  "@editBundlesForAccount": {},
   "oopsPushError": "Hara! Zoritxarrez, errore bat gertatu da jakinarazpenak ezartzerakoan.",
   "@oopsPushError": {
     "type": "text",
@@ -1500,20 +1511,25 @@
     }
   },
   "iUnderstand": "Ulertzen dut",
+  "@iUnderstand": {},
   "videoCallsBetaWarning": "Kontuan izan bideo deiak beta fasean daudela. Litekeena da behar bezala erabili ezin izatea —erabili ahal badira—.",
+  "@videoCallsBetaWarning": {},
   "toggleMuted": "Ikusi / Ezkutatu mutututakoak",
   "@toggleMuted": {
     "type": "text",
     "placeholders": {}
   },
   "yourStory": "Zure storya",
+  "@yourStory": {},
   "replyHasBeenSent": "Erantzuna bidali da",
+  "@replyHasBeenSent": {},
   "all": "Guztia",
   "@all": {
     "type": "text",
     "placeholders": {}
   },
   "loginWithOneClick": "Hasi saioa klik bakarrarekin",
+  "@loginWithOneClick": {},
   "next": "Hurrengoa",
   "@next": {
     "type": "text",
@@ -1528,22 +1544,29 @@
     }
   },
   "whoCanSeeMyStoriesDesc": "Kontuan izan jendeak bata bestea ikusi eta harremanetan jar daitekeela zure storyan.",
+  "@whoCanSeeMyStoriesDesc": {},
   "experimentalVideoCalls": "Bideo-dei esperimentalak",
+  "@experimentalVideoCalls": {},
   "emailOrUsername": "ePosta edo erabiltzaile-izena",
+  "@emailOrUsername": {},
   "enableMultiAccounts": "(BETA) Gaitu kontu bat baino gehiago gailu honetan",
+  "@enableMultiAccounts": {},
   "openVideoCamera": "Ireki kamera bideorako",
   "@openVideoCamera": {
     "type": "text",
     "placeholders": {}
   },
   "removeFromBundle": "Kendu sorta honetatik",
+  "@removeFromBundle": {},
   "serverRequiresEmail": "Zerbitzari honek zure posta elektronikoa egiaztatu behar du izena eman dezazun.",
+  "@serverRequiresEmail": {},
   "or": "Edo",
   "@or": {
     "type": "text",
     "placeholders": {}
   },
   "link": "Esteka",
+  "@link": {},
   "privacy": "Pribatutasuna",
   "@privacy": {
     "type": "text",
@@ -1585,9 +1608,13 @@
     "placeholders": {}
   },
   "messageType": "Mezu mota",
+  "@messageType": {},
   "time": "Ordua",
+  "@time": {},
   "dismiss": "Baztertu",
+  "@dismiss": {},
   "matrixWidgets": "Matrixen widgetak",
+  "@matrixWidgets": {},
   "switchToAccount": "Aldatu {number} kontura",
   "@switchToAccount": {
     "type": "number",
@@ -1596,6 +1623,7 @@
     }
   },
   "previousAccount": "Aurreko kontua",
+  "@previousAccount": {},
   "edit": "Editatu",
   "@edit": {
     "type": "text",
@@ -1607,10 +1635,15 @@
     "placeholders": {}
   },
   "whatIsGoingOn": "Zertan zabiltza?",
+  "@whatIsGoingOn": {},
   "addDescription": "Gehitu deskribapena",
+  "@addDescription": {},
   "passwordsDoNotMatch": "Pasahitzak ez datoz bat!",
+  "@passwordsDoNotMatch": {},
   "pleaseEnterValidEmail": "Sartu baliozko ePosta helbide bat.",
+  "@pleaseEnterValidEmail": {},
   "repeatPassword": "Idatzi berriro pasahitza",
+  "@repeatPassword": {},
   "pleaseChooseAtLeastChars": "Aukeratu gutxienez {min} karaktere.",
   "@pleaseChooseAtLeastChars": {
     "type": "text",
@@ -1649,6 +1682,7 @@
     "placeholder": {}
   },
   "sendOnEnter": "Bidali enter sakatuz",
+  "@sendOnEnter": {},
   "badServerVersionsException": "Zerbitzariak ondorengo ezaugarriak onartzen ditu:\n{serverVersions}\nBaina aplikazioak hauek baino ez: {supportedVersions}",
   "@badServerVersionsException": {
     "type": "text",
@@ -1685,6 +1719,7 @@
     "placeholders": {}
   },
   "yourUserId": "Zure erabiltzaile IDa:",
+  "@yourUserId": {},
   "chatBackup": "Txataren babeskopia",
   "@chatBackup": {
     "type": "text",
@@ -1696,6 +1731,7 @@
     "placeholders": {}
   },
   "chatHasBeenAddedToThisSpace": "Berriketa gune honetara gehitu da",
+  "@chatHasBeenAddedToThisSpace": {},
   "configureChat": "Konfiguratu berriketa",
   "@configureChat": {
     "type": "text",
@@ -1727,6 +1763,7 @@
     "placeholders": {}
   },
   "addToSpace": "Gehitu gunera",
+  "@addToSpace": {},
   "allChats": "Txat guztiak",
   "@allChats": {
     "type": "text",
@@ -1815,6 +1852,7 @@
     "placeholders": {}
   },
   "typeInInviteLinkManually": "Idatzi eskuz gonbidapen esteka…",
+  "@typeInInviteLinkManually": {},
   "online": "Linean",
   "@online": {
     "type": "text",
@@ -1858,7 +1896,9 @@
     }
   },
   "openGallery": "Ireki galeria",
+  "@openGallery": {},
   "storyPrivacyWarning": "Kontuan izan jendeak bata bestea ikus dezakeela eta bata bestearekin harremanetan jar daitekeela. Zure storya 24 orduz egongo da ikusgai baina ezin da ziurtatu gailu eta zerbitzari guztietatik ezabatuko denik denbora pasatakoan.",
+  "@storyPrivacyWarning": {},
   "reactedWith": "{sender}(e)k {reaction}(r)ekin erreakzionatu du",
   "@reactedWith": {
     "type": "text",
@@ -1868,10 +1908,15 @@
     }
   },
   "confirmEventUnpin": "Ziur zaude gertaerari iltzea kendu nahi diozula?",
+  "@confirmEventUnpin": {},
   "nextAccount": "Hurrengo kontua",
+  "@nextAccount": {},
   "markAsRead": "Markatu irakurrita gisa",
+  "@markAsRead": {},
   "yourChatBackupHasBeenSetUp": "Txaten babeskopiak ezarri dira.",
+  "@yourChatBackupHasBeenSetUp": {},
   "clearArchive": "Ezabatu artxiboa",
+  "@clearArchive": {},
   "commandHint_html": "Bidali testua HTML formatuan",
   "@commandHint_html": {
     "type": "text",
@@ -2009,6 +2054,7 @@
     }
   },
   "scanQrCode": "Eskaneatu QR kodea",
+  "@scanQrCode": {},
   "obtainingLocation": "Kokapena atzitzen…",
   "@obtainingLocation": {
     "type": "text",
@@ -2025,7 +2071,9 @@
     "placeholders": {}
   },
   "addToBundle": "Gehitu sortara",
+  "@addToBundle": {},
   "bundleName": "Sortaren izena",
+  "@bundleName": {},
   "openInMaps": "Ireki mapen aplikazioan",
   "@openInMaps": {
     "type": "text",
@@ -2159,6 +2207,7 @@
     "placeholders": {}
   },
   "unverified": "Egiaztatu gabe",
+  "@unverified": {},
   "verified": "Egiaztatuta",
   "@verified": {
     "type": "text",
@@ -2185,31 +2234,52 @@
     "placeholders": {}
   },
   "messageInfo": "Mezuaren xehetasunak",
+  "@messageInfo": {},
   "sender": "Igorlea",
+  "@sender": {},
   "removeFromSpace": "Kendu gunetik",
+  "@removeFromSpace": {},
   "addToSpaceDescription": "Aukeratu gune bat berriketa hau gehitzeko.",
+  "@addToSpaceDescription": {},
   "start": "Hasi",
+  "@start": {},
   "addToStory": "Gehitu storyra",
+  "@addToStory": {},
   "publish": "Argitaratu",
+  "@publish": {},
   "whoCanSeeMyStories": "Nork ikus ditzazke nire storyak?",
+  "@whoCanSeeMyStories": {},
   "unsubscribeStories": "Storyak jasotzeari utzi",
+  "@unsubscribeStories": {},
   "thisUserHasNotPostedAnythingYet": "Erabiltzaile honek oraindik ez du ezer argitaratu bere storyetan",
+  "@thisUserHasNotPostedAnythingYet": {},
   "reportUser": "Salatu erabiltzailea",
+  "@reportUser": {},
   "openChat": "Ireki berriketa",
+  "@openChat": {},
   "addWidget": "Gehitu widgeta",
+  "@addWidget": {},
   "showDirectChatsInSpaces": "Erakutsi zerikusia duten Mezu Zuzenak guneetan",
   "@showDirectChatsInSpaces": {
     "type": "text",
     "placeholders": {}
   },
   "editWidgets": "Editatu widgetak",
+  "@editWidgets": {},
   "widgetVideo": "Bideoa",
+  "@widgetVideo": {},
   "widgetEtherpad": "Testu-oharra",
+  "@widgetEtherpad": {},
   "widgetJitsi": "Jitsi Meet",
+  "@widgetJitsi": {},
   "widgetCustom": "Neurrira egindakoa",
+  "@widgetCustom": {},
   "widgetName": "Izena",
+  "@widgetName": {},
   "youJoinedTheChat": "Berriketara batu zara",
+  "@youJoinedTheChat": {},
   "youAcceptedTheInvitation": "👍 Gonbidapena onartu duzu",
+  "@youAcceptedTheInvitation": {},
   "youBannedUser": "{user}(r)i debekua ezarri diozu",
   "@youBannedUser": {
     "placeholders": {
@@ -2253,25 +2323,40 @@
     }
   },
   "youRejectedTheInvitation": "Gonbidapena baztertu duzu",
+  "@youRejectedTheInvitation": {},
   "separateChatTypes": "Bereizi zuzeneko mezuak eta taldeak",
   "@separateChatTypes": {
     "type": "text",
     "placeholders": {}
   },
   "widgetUrlError": "Ez da baliozko URL bat.",
+  "@widgetUrlError": {},
   "widgetNameError": "Zehaztu goitizen bat.",
+  "@widgetNameError": {},
   "errorAddingWidget": "Errorea widgeta gehitzerakoan.",
+  "@errorAddingWidget": {},
   "pleaseEnterRecoveryKey": "Idatzi berreskuratze-gakoa:",
+  "@pleaseEnterRecoveryKey": {},
   "recoveryKey": "Berreskuratze-gakoa",
+  "@recoveryKey": {},
   "recoveryKeyLost": "Berreskuratze-gakoa galdu al duzu?",
+  "@recoveryKeyLost": {},
   "users": "Erabiltzaileak",
+  "@users": {},
   "storeInAndroidKeystore": "Gorde Android KeyStore-n",
+  "@storeInAndroidKeystore": {},
   "dehydrate": "Esportatu saioa eta ezabatu gailua",
+  "@dehydrate": {},
   "dehydrateWarning": "Ekintza hau ezin da desegin. Egiaztatu babeskopia toki seguruan gorde duzula.",
+  "@dehydrateWarning": {},
   "hydrate": "Berreskuratu babeskopia bat erabiliz",
+  "@hydrate": {},
   "pleaseEnterRecoveryKeyDescription": "Mezu zaharrak ikusi ahal izateko, sartu aurreko saioan sortu zen berreskuratze-gakoa. Berreskuratze-gakoa EZ da zure pasahitza.",
+  "@pleaseEnterRecoveryKeyDescription": {},
   "indexedDbErrorLong": "Mezuen artxibatzea ez dago defektuz gaituta modu pribatua erabiltzean.\nGaitzeko:\n - about:config\n - dom.indexedDB.privateBrowsing.enabled aukerak true erakutsi dezala\nBestela ezin da FluffyChat erabili.",
+  "@indexedDbErrorLong": {},
   "storeSecurlyOnThisDevice": "Gorde gailu honetan modu seguruan",
+  "@storeSecurlyOnThisDevice": {},
   "countFiles": "{count} fitxategi",
   "@countFiles": {
     "placeholders": {
@@ -2279,37 +2364,69 @@
     }
   },
   "user": "Erabiltzailea",
+  "@user": {},
   "custom": "Neurrira egindakoa",
+  "@custom": {},
   "updateAvailable": "FluffyChaten eguneraketa bat dago",
+  "@updateAvailable": {},
   "updateNow": "Abiarazi eguneraketa atzeko planoan",
+  "@updateNow": {},
   "storeInSecureStorageDescription": "Gorde berreskuratze-gakoa gailu honetako biltegiratze seguruan.",
+  "@storeInSecureStorageDescription": {},
   "storeInAppleKeyChain": "Gorde Apple KeyChain-en",
+  "@storeInAppleKeyChain": {},
   "unlockOldMessages": "Desblokeatu mezu zaharrak",
+  "@unlockOldMessages": {},
   "dehydrateTorLong": "TOR erabiltzaileentzat gomendioa leihoa itxi baino lehen saioa esportatzea da.",
+  "@dehydrateTorLong": {},
   "hydrateTorLong": "Esportatu al zenuen zure saioa TOR erabili zenuen azken aldian? Inportatu segidan eta jarraitu txateatzen.",
+  "@hydrateTorLong": {},
   "noEmailWarning": "Sartu baliozko posta helbide bat. Bestela ezingo duzu pasahitza berrezarri. Hala ere nahi ez baduzu, sakatu berriro botoia aurrera egiteko.",
+  "@noEmailWarning": {},
   "enableAutoBackups": "Gaitu babeskopia automatikoak",
+  "@enableAutoBackups": {},
   "dehydrateShare": "Hau zure FluffyChaten esportazio pribatua da. Ez galdu eta ez partekatu inorekin.",
+  "@dehydrateShare": {},
   "dehydrateTor": "TOR Erabiltzaileak: Esportatu saioa",
+  "@dehydrateTor": {},
   "hydrateTor": "TOR Erabiltzaileak: Inportatu esportatutako saioa",
+  "@hydrateTor": {},
   "stories": "Storyak",
+  "@stories": {},
   "saveKeyManuallyDescription": "Gorde eskuz gako hau gailuko partekatze-menua edo arbela erabiliz.",
+  "@saveKeyManuallyDescription": {},
   "indexedDbErrorTitle": "Modu pribatuaren arazoak",
+  "@indexedDbErrorTitle": {},
   "confirmMatrixId": "Baieztatu zure Matrix IDa kontua ezabatzeko.",
+  "@confirmMatrixId": {},
   "newSpace": "Gune berria",
+  "@newSpace": {},
   "enterRoom": "Batu gelara",
+  "@enterRoom": {},
   "whyIsThisMessageEncrypted": "Zergatik ezin da mezu hau irakurri?",
+  "@whyIsThisMessageEncrypted": {},
   "allSpaces": "Gune guztiak",
+  "@allSpaces": {},
   "newGroup": "Talde berria",
+  "@newGroup": {},
   "enterSpace": "Batu gunera",
+  "@enterSpace": {},
   "appearOnTopDetails": "Aplikazioa goikaldean agertzea baimentzen du (ez da beharrezkoa FluffyChat dei egiteko kontua bezala ezarri baduzu)",
+  "@appearOnTopDetails": {},
   "screenSharingTitle": "pantaila partekatzen",
+  "@screenSharingTitle": {},
   "screenSharingDetail": "Pantaila FluffyChaten partekatzen ari zara",
+  "@screenSharingDetail": {},
   "callingPermissions": "Deiak egiteko baimenak",
+  "@callingPermissions": {},
   "callingAccount": "Deia egiteko kontua",
+  "@callingAccount": {},
   "callingAccountDetails": "Baimendu FluffyCaht Android gailuko telefono markagailua erabiltzea.",
+  "@callingAccountDetails": {},
   "appearOnTop": "Gainean erakutsi",
+  "@appearOnTop": {},
   "otherCallingPermissions": "Mikrofono, kamera eta FluffyChaten beste baimen batzuk",
+  "@otherCallingPermissions": {},
   "numChats": "{number} berriketa",
   "@numChats": {
     "type": "number",
@@ -2318,7 +2435,9 @@
     }
   },
   "hideUnimportantStateEvents": "Izkutatu garrantzirik gabeko gertaerak",
+  "@hideUnimportantStateEvents": {},
   "noKeyForThisMessage": "Mezua gailu honetan saioa hasi baino lehen bidali bazen gertatu daiteke.\n\nBeste aukera bat igorleak zure gailua blokeatu izana da, edo zerbaitek huts egin izana interneteko konexioan.\n\nMezua beste saio batean irakur dezakezu? Hala bada, mezua transferitu dezakezu! Zoaz Ezrpenetara > Gailuak eta baieztatu zure gailuek bata bestea egiaztatu dutela. Gela irakiko duzun hurrengo aldian eta bi saioak aurreko planoan irekita daudenean, gakoak automatikoki partekatuko dira.\n\nEz duzu gakorik galdu nahi saioa amaitu edo gailuak aldatzen dituzunean? Baieztatu ezarpenetan berriketen babeskopiak gaituta dituzula.",
+  "@noKeyForThisMessage": {},
   "supposedMxid": "Hau {mxid} izan behar da",
   "@supposedMxid": {
     "type": "text",
@@ -2327,8 +2446,11 @@
     }
   },
   "commandHint_markasgroup": "Markatu talde bezala",
+  "@commandHint_markasgroup": {},
   "foregroundServiceRunning": "Jakinarazpen hau zerbitzua martxan dagoenean agertzen da.",
+  "@foregroundServiceRunning": {},
   "commandHint_markasdm": "Markatu mezu-zuzen gela bezala",
+  "@commandHint_markasdm": {},
   "wasDirectChatDisplayName": "Txata hutsik dago ({oldDisplayName} zen lehen)",
   "@wasDirectChatDisplayName": {
     "type": "text",
@@ -2337,18 +2459,31 @@
     }
   },
   "deviceKeys": "Gailuaren gakoak:",
+  "@deviceKeys": {},
   "noBackupWarning": "Adi! Txataren babeskopia gaitzen ez baduzu, ezingo dituzu zifratutako txatak atzitu. Oso gomendagarria da txaten babeskopia gaitzea saioa amaitu baino lehen.",
+  "@noBackupWarning": {},
   "doNotShowAgain": "Ez erakutsi berriro",
+  "@doNotShowAgain": {},
   "enterInviteLinkOrMatrixId": "Sartu gonbidapen-esteka edo Matrix IDa…",
+  "@enterInviteLinkOrMatrixId": {},
   "fileIsTooBigForServer": "Zerbitzariak dio fitxategia handiegia dela bidali ahal izateko.",
+  "@fileIsTooBigForServer": {},
   "noOtherDevicesFound": "Ez da beste gailurik aurkitu",
+  "@noOtherDevicesFound": {},
   "startFirstChat": "Hasi zure lehen txata",
+  "@startFirstChat": {},
   "newSpaceDescription": "Guneek txatak taldekatzea ahalbidetzen dute eta komunitate pribatu edo publikoak osatzea.",
+  "@newSpaceDescription": {},
   "endToEndEncryption": "Puntuz puntuko zifraketa",
+  "@endToEndEncryption": {},
   "disableEncryptionWarning": "Segurtasun arrazoiak direla-eta, ezin duzu lehendik zifratuta zegoen txat bateko zifraketa ezgaitu.",
+  "@disableEncryptionWarning": {},
   "encryptThisChat": "Zifratu txata",
+  "@encryptThisChat": {},
   "commandHint_hug": "Bidali besarkada",
+  "@commandHint_hug": {},
   "letsStart": "Has gaitezen",
+  "@letsStart": {},
   "hugContent": "{senderName}(e)k besarkatu zaitu",
   "@hugContent": {
     "type": "text",
@@ -2357,6 +2492,9 @@
     }
   },
   "sorryThatsNotPossible": "Barka… hori ez da posible",
+  "@sorryThatsNotPossible": {},
   "reopenChat": "Ireki txata berriro",
-  "noSearchResult": "Ez da emaitzarik aurkitu."
+  "@reopenChat": {},
+  "noSearchResult": "Ez da emaitzarik aurkitu.",
+  "@noSearchResult": {}
 }

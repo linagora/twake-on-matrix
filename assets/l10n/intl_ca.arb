@@ -1654,6 +1654,7 @@
     "placeholders": {}
   },
   "addToSpace": "Afegeix a un espai",
+  "@addToSpace": {},
   "areYouSureYouWantToLogout": "Segur que voleu finalitzar la sessió?",
   "@areYouSureYouWantToLogout": {
     "type": "text",
@@ -1684,6 +1685,7 @@
     "placeholders": {}
   },
   "link": "Enllaç",
+  "@link": {},
   "people": "Gent",
   "@people": {
     "type": "text",
@@ -1695,13 +1697,16 @@
     "placeholders": {}
   },
   "sendOnEnter": "Envia en prémer Retorn",
+  "@sendOnEnter": {},
   "clearArchive": "Neteja l’arxiu",
+  "@clearArchive": {},
   "chatBackupDescription": "La còpia de seguretat dels xats és protegida amb una clau. Assegureu-vos de no perdre-la.",
   "@chatBackupDescription": {
     "type": "text",
     "placeholders": {}
   },
   "chatHasBeenAddedToThisSpace": "El xat s’ha afegit a aquest espai",
+  "@chatHasBeenAddedToThisSpace": {},
   "autoplayImages": "Reprodueix automàticament enganxines i emoticones animades",
   "@autoplayImages": {
     "type": "text",
@@ -1768,19 +1773,23 @@
     "placeholders": {}
   },
   "yourChatBackupHasBeenSetUp": "S’ha configurat la còpia de seguretat del xat.",
+  "@yourChatBackupHasBeenSetUp": {},
   "contentHasBeenReported": "El contingut s’ha denunciat als administradors del servidor",
   "@contentHasBeenReported": {
     "type": "text",
     "placeholders": {}
   },
   "yourUserId": "El vostre id. d’usuari:",
+  "@yourUserId": {},
   "enableEncryption": "Activa el xifratge",
   "@enableEncryption": {
     "type": "text",
     "placeholders": {}
   },
   "enterASpacepName": "Introduïu un nom d’espai",
+  "@enterASpacepName": {},
   "addAccount": "Afegeix un compte",
+  "@addAccount": {},
   "noEncryptionForPublicRooms": "Només podreu activar el xifratge quan la sala ja no sigui accessible públicament.",
   "@noEncryptionForPublicRooms": {
     "type": "text",
@@ -1862,6 +1871,7 @@
     "placeholders": {}
   },
   "unverified": "No verificat",
+  "@unverified": {},
   "commandHint_me": "Descriviu-vos",
   "@commandHint_me": {
     "type": "text",
@@ -1918,6 +1928,7 @@
     "placeholders": {}
   },
   "scanQrCode": "Escaneja un codi QR",
+  "@scanQrCode": {},
   "obtainingLocation": "S’està obtenint la ubicació…",
   "@obtainingLocation": {
     "type": "text",
@@ -1997,8 +2008,11 @@
     "description": "Usage hint for the command /discardsession"
   },
   "passwordsDoNotMatch": "Les contrasenyes no coincideixen!",
+  "@passwordsDoNotMatch": {},
   "pleaseEnterValidEmail": "Introduïu una adreça electrònica vàlida.",
+  "@pleaseEnterValidEmail": {},
   "repeatPassword": "Repetiu la contrasenya",
+  "@repeatPassword": {},
   "pleaseChooseAtLeastChars": "Seleccioneu almenys {min} caràcters.",
   "@pleaseChooseAtLeastChars": {
     "type": "text",

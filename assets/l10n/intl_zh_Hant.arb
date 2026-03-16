@@ -1900,6 +1900,7 @@
     "placeholders": {}
   },
   "addToSpace": "加入空間",
+  "@addToSpace": {},
   "cantOpenUri": "無法打開URI {uri}",
   "@cantOpenUri": {
     "type": "text",
@@ -1908,7 +1909,9 @@
     }
   },
   "repeatPassword": "再次輸入密碼",
+  "@repeatPassword": {},
   "yourChatBackupHasBeenSetUp": "您的聊天記錄備份已設定。",
+  "@yourChatBackupHasBeenSetUp": {},
   "pleaseChooseAtLeastChars": "請至少輸入 {min} 个字元。",
   "@pleaseChooseAtLeastChars": {
     "type": "text",
@@ -1932,19 +1935,25 @@
     "description": "Usage hint for the command /unban"
   },
   "passwordsDoNotMatch": "密碼不匹配！",
+  "@passwordsDoNotMatch": {},
   "pleaseEnterValidEmail": "請輸入一個有效的電子郵件地址。",
+  "@pleaseEnterValidEmail": {},
   "autoplayImages": "自動播放動態貼圖和表情",
   "@autoplayImages": {
     "type": "text",
     "placeholder": {}
   },
   "sendOnEnter": "按 Enter 鍵發送",
+  "@sendOnEnter": {},
   "changeYourAvatar": "更改您的大頭貼",
   "@changeYourAvatar": {
     "type": "text",
     "placeholders": {}
   },
   "yourUserId": "您的ID：",
+  "@yourUserId": {},
   "chatHasBeenAddedToThisSpace": "聊天室已添加到此空間",
-  "clearArchive": "清除存檔"
+  "@chatHasBeenAddedToThisSpace": {},
+  "clearArchive": "清除存檔",
+  "@clearArchive": {}
 }
