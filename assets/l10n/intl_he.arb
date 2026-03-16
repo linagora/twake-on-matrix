@@ -131,6 +131,7 @@
     "placeholders": {}
   },
   "sendOnEnter": "שלח בכניסה",
+  "@sendOnEnter": {},
   "badServerLoginTypesException": "שרת הבית תומך בסוגי הכניסה:\n{serverVersions}\nאבל אפליקציה זו תומכת רק ב:\n{supportedVersions}",
   "@badServerLoginTypesException": {
     "type": "text",
@@ -175,8 +176,11 @@
     }
   },
   "passwordsDoNotMatch": "הסיסמאות לא תואמות!",
+  "@passwordsDoNotMatch": {},
   "pleaseEnterValidEmail": "אנא כתוב כתובת אימייל תקינה.",
+  "@pleaseEnterValidEmail": {},
   "repeatPassword": "כתוב שוב את הסיסמה",
+  "@repeatPassword": {},
   "areYouSureYouWantToLogout": "האם אתה בטוח שברצונך לצאת?",
   "@areYouSureYouWantToLogout": {
     "type": "text",
@@ -340,7 +344,9 @@
     "placeholders": {}
   },
   "yourUserId": "מזהה המשתמש שלך:",
+  "@yourUserId": {},
   "yourChatBackupHasBeenSetUp": "גיבוי הצ'אט שלך הוגדר.",
+  "@yourChatBackupHasBeenSetUp": {},
   "chatBackup": "גיבוי צ'אט",
   "@chatBackup": {
     "type": "text",
@@ -412,6 +418,7 @@
     "placeholders": {}
   },
   "chatHasBeenAddedToThisSpace": "צ'אט נוסף למרחב הזה",
+  "@chatHasBeenAddedToThisSpace": {},
   "chats": "צ'אטים",
   "@chats": {
     "type": "text",
@@ -428,6 +435,7 @@
     "placeholders": {}
   },
   "clearArchive": "נקה ארכיון",
+  "@clearArchive": {},
   "close": "סגור",
   "@close": {
     "type": "text",
@@ -444,6 +452,7 @@
     "description": "Usage hint for the command /myroomnick"
   },
   "addToSpace": "הוסף לחלל",
+  "@addToSpace": {},
   "commandHint_unban": "בטל את החסימה של המשתמש הנתון מהחדר הזה",
   "@commandHint_unban": {
     "type": "text",
@@ -578,6 +587,7 @@
     "placeholders": {}
   },
   "enterASpacepName": "הזן שם חלל",
+  "@enterASpacepName": {},
   "enterYourHomeserver": "הזן את שרת הבית שלך",
   "@enterYourHomeserver": {
     "type": "text",
@@ -947,6 +957,7 @@
     }
   },
   "homeserver": "שרת בית",
+  "@homeserver": {},
   "ignore": "התעלם",
   "@ignore": {
     "type": "text",
@@ -1122,7 +1133,9 @@
     "placeholders": {}
   },
   "shareYourInviteLink": "שתף את קישור ההזמנה שלך",
+  "@shareYourInviteLink": {},
   "typeInInviteLinkManually": "הקלד את קישור ההזמנה באופן ידני...",
+  "@typeInInviteLinkManually": {},
   "noRoomsFound": "לא נמצאו חדרים…",
   "@noRoomsFound": {
     "type": "text",
@@ -1166,8 +1179,11 @@
     "placeholders": {}
   },
   "oneClientLoggedOut": "אחד מהמכשירים שלך התנתק",
+  "@oneClientLoggedOut": {},
   "addAccount": "הוסף חשבון",
+  "@addAccount": {},
   "editBundlesForAccount": "ערוך חבילות עבור חשבון זה",
+  "@editBundlesForAccount": {},
   "participant": "משתתף",
   "@participant": {
     "type": "text",
@@ -1189,12 +1205,14 @@
     "placeholders": {}
   },
   "loginWithOneClick": "היכנס בלחיצה אחת",
+  "@loginWithOneClick": {},
   "online": "מחובר/ת",
   "@online": {
     "type": "text",
     "placeholders": {}
   },
   "addToBundle": "הוסף לחבילה",
+  "@addToBundle": {},
   "optionalGroupName": "(אופציונלי) שם קבוצה",
   "@optionalGroupName": {
     "type": "text",
@@ -1311,6 +1329,7 @@
     "placeholders": {}
   },
   "bundleName": "שם החבילה",
+  "@bundleName": {},
   "offline": "לא מקוון",
   "@offline": {
     "type": "text",
@@ -1322,14 +1341,18 @@
     "placeholders": {}
   },
   "removeFromBundle": "הסר מחבילה זו",
+  "@removeFromBundle": {},
   "enableMultiAccounts": "(בטא) אפשר ריבוי חשבונות במכשיר זה",
+  "@enableMultiAccounts": {},
   "openInMaps": "פתיחה במפות",
   "@openInMaps": {
     "type": "text",
     "placeholders": {}
   },
   "link": "קישור",
+  "@link": {},
   "serverRequiresEmail": "שרת זה צריך לאמת את כתובת הדואר האלקטרוני שלך לרישום.",
+  "@serverRequiresEmail": {},
   "logout": "יציאה",
   "@logout": {
     "type": "text",
@@ -1341,6 +1364,7 @@
     "placeholders": {}
   },
   "scanQrCode": "סרוק קוד QR",
+  "@scanQrCode": {},
   "noPermission": "אין הרשאה",
   "@noPermission": {
     "type": "text",
@@ -1389,14 +1413,18 @@
     "placeholders": {}
   },
   "updateAvailable": "עדכון FluffyChat זמין",
+  "@updateAvailable": {},
   "updateNow": "התחל עדכון ברקע",
+  "@updateNow": {},
   "bubbleSize": "גודל בועות",
   "@bubbleSize": {
     "type": "text",
     "placeholders": {}
   },
   "commandHint_markasgroup": "סמן כצ׳אט",
+  "@commandHint_markasgroup": {},
   "commandHint_markasdm": "סמן כצ׳אט ישיר",
+  "@commandHint_markasdm": {},
   "googlyEyesContent": "{senderName} שלח לך עיניים",
   "@googlyEyesContent": {
     "type": "text",
@@ -1412,6 +1440,7 @@
     }
   },
   "confirmMatrixId": "אנא אשר את ה ID שלך על מנת למחוק את המתשמש.",
+  "@confirmMatrixId": {},
   "supposedMxid": "זה צריך להיות {mxid}",
   "@supposedMxid": {
     "type": "text",
@@ -1420,6 +1449,7 @@
     }
   },
   "commandHint_hug": "שלח חיבוק",
+  "@commandHint_hug": {},
   "cuddleContent": "{senderName} מחבק אותך",
   "@cuddleContent": {
     "type": "text",
@@ -1427,5 +1457,6 @@
       "senderName": {}
     }
   },
-  "commandHint_cuddle": "שלח כרבול"
+  "commandHint_cuddle": "שלח כרבול",
+  "@commandHint_cuddle": {}
 }

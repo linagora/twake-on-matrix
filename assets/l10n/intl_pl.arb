@@ -328,6 +328,7 @@
     "placeholders": {}
   },
   "clearArchive": "Wyczyść archiwum",
+  "@clearArchive": {},
   "close": "Zamknij",
   "@close": {
     "type": "text",
@@ -1563,6 +1564,7 @@
     "placeholders": {}
   },
   "passwordsDoNotMatch": "Hasła nie pasują!",
+  "@passwordsDoNotMatch": {},
   "allChats": "Wszystkie",
   "@allChats": {
     "type": "text",
@@ -1589,7 +1591,9 @@
     "placeholders": {}
   },
   "addAccount": "Dodaj konto",
+  "@addAccount": {},
   "serverRequiresEmail": "Ten serwer wymaga potwierdzenia twojego adresu email w celu rejestracji.",
+  "@serverRequiresEmail": {},
   "or": "Lub",
   "@or": {
     "type": "text",
@@ -1697,7 +1701,9 @@
     "placeholders": {}
   },
   "yourStory": "Twoja relacja",
+  "@yourStory": {},
   "enableMultiAccounts": "(BETA) Włącza obsługę wiele kont na tym urządzeniu",
+  "@enableMultiAccounts": {},
   "pickImage": "Wybierz obraz",
   "@pickImage": {
     "type": "text",
@@ -1714,14 +1720,18 @@
     "placeholders": {}
   },
   "link": "Link",
+  "@link": {},
   "roomHasBeenUpgraded": "Pokój zostać zaktualizowany",
   "@roomHasBeenUpgraded": {
     "type": "text",
     "placeholders": {}
   },
   "whatIsGoingOn": "Co u Ciebie słychać?",
+  "@whatIsGoingOn": {},
   "pleaseEnterValidEmail": "Proszę podaj poprawny adres email.",
+  "@pleaseEnterValidEmail": {},
   "repeatPassword": "Powtórz hasło",
+  "@repeatPassword": {},
   "pleaseChooseAtLeastChars": "Proszę podaj przynajmniej {min} znaków.",
   "@pleaseChooseAtLeastChars": {
     "type": "text",
@@ -1745,6 +1755,7 @@
     "placeholders": {}
   },
   "sendOnEnter": "Wyślij enterem",
+  "@sendOnEnter": {},
   "autoplayImages": "Automatycznie odtwarzaj animowane naklejki i emotki",
   "@autoplayImages": {
     "type": "text",
@@ -1763,13 +1774,16 @@
     "placeholders": {}
   },
   "enterASpacepName": "Podaj nazwę przestrzeni",
+  "@enterASpacepName": {},
   "homeserver": "Adres serwera",
+  "@homeserver": {},
   "locationDisabledNotice": "Usługi lokalizacji są wyłączone. Proszę włącz je aby móc udostępnić swoją lokalizację.",
   "@locationDisabledNotice": {
     "type": "text",
     "placeholders": {}
   },
   "oneClientLoggedOut": "Jedno z twoich urządzeń zostało wylogowane",
+  "@oneClientLoggedOut": {},
   "privacy": "Prywatność",
   "@privacy": {
     "type": "text",
@@ -1786,8 +1800,11 @@
     "placeholders": {}
   },
   "yourUserId": "Twoja nazwa użytkownika:",
+  "@yourUserId": {},
   "yourChatBackupHasBeenSetUp": "Twoja kopia zapasowa chatu została ustawiona.",
+  "@yourChatBackupHasBeenSetUp": {},
   "chatHasBeenAddedToThisSpace": "Chat został dodany do tej przestrzeni",
+  "@chatHasBeenAddedToThisSpace": {},
   "contentHasBeenReported": "Zawartość została zgłoszona administratorom serwera",
   "@contentHasBeenReported": {
     "type": "text",
@@ -1824,6 +1841,7 @@
     "placeholders": {}
   },
   "loginWithOneClick": "Zaloguj się jednym kliknięciem",
+  "@loginWithOneClick": {},
   "messages": "Wiadomości",
   "@messages": {
     "type": "text",
@@ -1900,10 +1918,15 @@
     "placeholders": {}
   },
   "publish": "Opublikuj",
+  "@publish": {},
   "whoCanSeeMyStories": "Kto może widzieć moje relacje?",
+  "@whoCanSeeMyStories": {},
   "scanQrCode": "Skanuj kod QR",
+  "@scanQrCode": {},
   "addToStory": "Dodaj do relacji",
+  "@addToStory": {},
   "typeInInviteLinkManually": "Wpisz link ręcznie...",
+  "@typeInInviteLinkManually": {},
   "createNewSpace": "Nowa przestrzeń",
   "@createNewSpace": {
     "type": "text",
@@ -1920,6 +1943,7 @@
     "placeholders": {}
   },
   "addToSpace": "Dodaj do przestrzeni",
+  "@addToSpace": {},
   "changeYourAvatar": "Zmień avatar",
   "@changeYourAvatar": {
     "type": "text",
