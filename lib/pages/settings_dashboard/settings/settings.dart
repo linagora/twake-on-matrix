@@ -294,7 +294,7 @@ class SettingsController extends State<Settings> with ConnectPageMixin {
         }
 
         final emailUri = Uri.parse(
-          'mailto:software@linagora.com?subject=${Uri.encodeComponent(generateEmailSubject)}',
+          'mailto:${AppConfig.supportEmail}?subject=${Uri.encodeComponent(generateEmailSubject)}',
         );
         if (await canLaunchUrl(emailUri)) {
           await launchUrl(emailUri);

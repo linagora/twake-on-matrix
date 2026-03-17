@@ -13,10 +13,11 @@
 - To specify environment declarations to the Flutter tool, use the `--dart-define` option instead:
 
 ```
-flutter run --dart-define=REGISTRATION_URL=https://example.com/ 
---dart-define=TWAKE_WORKPLACE_HOMESERVER=https://example.com/ 
---dart-define=PLATFORM=saas 
---dart-define=HOME_SERVER=https://example.com/ 
+flutter run --dart-define=REGISTRATION_URL=https://example.com/
+--dart-define=TWAKE_WORKPLACE_HOMESERVER=https://example.com/
+--dart-define=PLATFORM=saas
+--dart-define=HOME_SERVER=https://example.com/
+--dart-define=SUPPORT_EMAIL=support@example.com
 
 ```
 

@@ -134,6 +134,13 @@ abstract class AppConfig {
   );
 
   static String pushNotificationsGatewayUrl = _pushNotificationsGatewayUrlEnv;
+
+  static const String _supportEmailEnv = String.fromEnvironment(
+    'SUPPORT_EMAIL',
+    defaultValue: 'support@twake.app',
+  );
+
+  static String supportEmail = _supportEmailEnv;
   static const String pushNotificationsPusherFormat = 'event_id_only';
   static const String emojiFontName = 'Noto Emoji';
   static const String emojiFontUrl =
@@ -297,6 +304,9 @@ abstract class AppConfig {
     }
     if (json['support_url'] is String) {
       supportUrl = json['support_url'];
+    }
+    if (json['support_email'] is String && json['support_email'].isNotEmpty) {
+      supportEmail = json['support_email'];
     }
     if (json['cozy_external_bridge_version'] is String &&
         json['cozy_external_bridge_version'].isNotEmpty) {
