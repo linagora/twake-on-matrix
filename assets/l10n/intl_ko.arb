@@ -180,7 +180,9 @@
     "placeholders": {}
   },
   "homeserver": "홈서버",
+  "@homeserver": {},
   "enterASpacepName": "스페이스 이름 입력",
+  "@enterASpacepName": {},
   "enterAnEmailAddress": "이메일 주소 입력",
   "@enterAnEmailAddress": {
     "type": "text",
@@ -485,6 +487,7 @@
     "placeholders": {}
   },
   "clearArchive": "저장 지우기",
+  "@clearArchive": {},
   "chooseAUsername": "닉네임 고르기",
   "@chooseAUsername": {
     "type": "text",
@@ -496,6 +499,7 @@
     "placeholders": {}
   },
   "chatHasBeenAddedToThisSpace": "이 스페이스에 채팅이 추가되었습니다",
+  "@chatHasBeenAddedToThisSpace": {},
   "chatDetails": "채팅 정보",
   "@chatDetails": {
     "type": "text",
@@ -707,6 +711,7 @@
     }
   },
   "sendOnEnter": "엔터로 보내기",
+  "@sendOnEnter": {},
   "badServerLoginTypesException": "홈서버가 지원하는 로그인 유형:\n{serverVersions}\n하지만 이 앱에서 지원하는 것은:\n{supportedVersions}",
   "@badServerLoginTypesException": {
     "type": "text",
@@ -785,6 +790,7 @@
     "placeholders": {}
   },
   "addToSpace": "스페이스에 추가",
+  "@addToSpace": {},
   "addGroupDescription": "그룹 소개 추가",
   "@addGroupDescription": {
     "type": "text",
@@ -1127,6 +1133,7 @@
     "placeholders": {}
   },
   "addAccount": "계정 추가",
+  "@addAccount": {},
   "openCamera": "카메라 열기",
   "@openCamera": {
     "type": "text",
@@ -1190,8 +1197,11 @@
     "placeholders": {}
   },
   "scanQrCode": "QR 코드 스캔",
+  "@scanQrCode": {},
   "typeInInviteLinkManually": "초대 링크 직접 입력...",
+  "@typeInInviteLinkManually": {},
   "shareYourInviteLink": "당신의 초대 링크 공유",
+  "@shareYourInviteLink": {},
   "noMatrixServer": "{server1}은 matrix 서버가 아닙니다, {server2}를 대신 사용할까요?",
   "@noMatrixServer": {
     "type": "text",
@@ -1555,12 +1565,19 @@
     "placeholders": {}
   },
   "serverRequiresEmail": "이 서버는 가입을 위해 당신의 이메일을 확인해야 합니다.",
+  "@serverRequiresEmail": {},
   "enableMultiAccounts": "(베타) 이 기기에서 다중 계정 활성화",
+  "@enableMultiAccounts": {},
   "bundleName": "번들 이름",
+  "@bundleName": {},
   "removeFromBundle": "이 번들에서 삭제",
+  "@removeFromBundle": {},
   "addToBundle": "번들에 추가",
+  "@addToBundle": {},
   "editBundlesForAccount": "이 계정의 번들 수정",
+  "@editBundlesForAccount": {},
   "oneClientLoggedOut": "당신의 클라이언트 중 하나가 로그아웃 됨",
+  "@oneClientLoggedOut": {},
   "onlineKeyBackupEnabled": "온라인 키 백업이 활성화됨",
   "@onlineKeyBackupEnabled": {
     "type": "text",
@@ -2092,14 +2109,23 @@
     }
   },
   "link": "링크",
+  "@link": {},
   "yourUserId": "당신의 유저 ID:",
+  "@yourUserId": {},
   "unverified": "확인되지 않음",
+  "@unverified": {},
   "yourChatBackupHasBeenSetUp": "당신의 채팅 백업이 설정되었습니다.",
+  "@yourChatBackupHasBeenSetUp": {},
   "time": "시간",
+  "@time": {},
   "messageType": "메시지 유형",
+  "@messageType": {},
   "openGallery": "갤러리 열기",
+  "@openGallery": {},
   "sender": "발신자",
+  "@sender": {},
   "passwordsDoNotMatch": "비밀번호가 일치하지 않습니다!",
+  "@passwordsDoNotMatch": {},
   "pleaseChooseAtLeastChars": "최소 {min}자를 선택하세요.",
   "@pleaseChooseAtLeastChars": {
     "type": "text",
@@ -2108,12 +2134,19 @@
     }
   },
   "messageInfo": "메시지 정보",
+  "@messageInfo": {},
   "pleaseEnterValidEmail": "유효한 이메일 주소를 입력해주세요.",
+  "@pleaseEnterValidEmail": {},
   "repeatPassword": "비밀번호 다시 입력",
+  "@repeatPassword": {},
   "loginWithOneClick": "클릭 한 번으로 로그인",
+  "@loginWithOneClick": {},
   "start": "시작",
+  "@start": {},
   "removeFromSpace": "스페이스에서 삭제",
+  "@removeFromSpace": {},
   "addToSpaceDescription": "이 채팅을 추가할 스페이스를 선택하세요.",
+  "@addToSpaceDescription": {},
   "commandHint_discardsession": "세션 삭제",
   "@commandHint_discardsession": {
     "type": "text",
@@ -2140,9 +2173,13 @@
     "placeholders": {}
   },
   "addToStory": "스토리에 추가",
+  "@addToStory": {},
   "publish": "공개",
+  "@publish": {},
   "yourStory": "내 스토리",
+  "@yourStory": {},
   "replyHasBeenSent": "답장을 보냈습니다",
+  "@replyHasBeenSent": {},
   "videoWithSize": "영상 ({size})",
   "@videoWithSize": {
     "type": "text",
@@ -2159,23 +2196,36 @@
     }
   },
   "whoCanSeeMyStoriesDesc": "스토리에서 사람들이 서로를 보고 연락할 수 있다는 점에 유의하십시오.",
+  "@whoCanSeeMyStoriesDesc": {},
   "whatIsGoingOn": "무슨 일이 일어나고 있나요?",
+  "@whatIsGoingOn": {},
   "addDescription": "설명 추가",
+  "@addDescription": {},
   "whoCanSeeMyStories": "누가 내 스토리를 볼 수 있나요?",
+  "@whoCanSeeMyStories": {},
   "unsubscribeStories": "스토리 구독 해제",
+  "@unsubscribeStories": {},
   "thisUserHasNotPostedAnythingYet": "이 유저는 스토리에 아무것도 올리지 않았습니다",
+  "@thisUserHasNotPostedAnythingYet": {},
   "bubbleSize": "버블 크기",
   "@bubbleSize": {
     "type": "text",
     "placeholders": {}
   },
   "dismiss": "닫기",
+  "@dismiss": {},
   "matrixWidgets": "Matrix 위젯",
+  "@matrixWidgets": {},
   "markAsRead": "읽음으로 표시하기",
+  "@markAsRead": {},
   "reportUser": "사용자 신고",
+  "@reportUser": {},
   "openChat": "채팅 열기",
+  "@openChat": {},
   "storyPrivacyWarning": "사람들이 서로를 보고 연락할 수 있다는 점에 유의해주세요. 스토리는 24시간 동안 보이지만 모든 기기와 서버에서 삭제된다는 보장은 없습니다.",
+  "@storyPrivacyWarning": {},
   "iUnderstand": "동의합니다",
+  "@iUnderstand": {},
   "reactedWith": "{sender}가 {reaction}로 반응함",
   "@reactedWith": {
     "type": "text",
@@ -2185,18 +2235,31 @@
     }
   },
   "confirmEventUnpin": "이벤트를 영구적으로 고정 해제할 것이 확실한가요?",
+  "@confirmEventUnpin": {},
   "emojis": "이모지",
+  "@emojis": {},
   "voiceCall": "음성 통화",
+  "@voiceCall": {},
   "placeCall": "전화 걸기",
+  "@placeCall": {},
   "experimentalVideoCalls": "실험적인 영상 통화",
+  "@experimentalVideoCalls": {},
   "unsupportedAndroidVersion": "지원되지 않는 안드로이드 버전",
+  "@unsupportedAndroidVersion": {},
   "unsupportedAndroidVersionLong": "이 기능은 새로운 안드로이드 버전을 요구합니다. Lineage OS 지원이나 업데이트를 확인해주세요.",
+  "@unsupportedAndroidVersionLong": {},
   "videoCallsBetaWarning": "영상 통화는 베타임을 확인해주세요. 의도한 대로 작동하지 않거나 모든 플랫폼에서 작동하지 않을 수 있습니다.",
+  "@videoCallsBetaWarning": {},
   "emailOrUsername": "이메일이나 유저 이름",
+  "@emailOrUsername": {},
   "updateAvailable": "FluffyChat 업데이트 이용가능",
+  "@updateAvailable": {},
   "updateNow": "백그라운드에서 업데이트 시작",
+  "@updateNow": {},
   "confirmMatrixId": "계정을 삭제하려면 Matrix ID를 확인해 주세요.",
+  "@confirmMatrixId": {},
   "commandHint_googly": "왕눈이 눈알 보내기",
+  "@commandHint_googly": {},
   "googlyEyesContent": "{senderName} 님이 왕눈이 눈알을 보냈습니다",
   "@googlyEyesContent": {
     "type": "text",
@@ -2205,6 +2268,9 @@
     }
   },
   "dehydrate": "세션을 내보내고 기기 초기화 하기",
+  "@dehydrate": {},
   "dehydrateWarning": "이 동작은 되돌릴 수 없습니다. 백업 파일을 꼭 안전하게 보관하세요.",
-  "dehydrateShare": "FluffyChat 개인 내보내기 파일입니다. 분실하지 않도록 하시고 비공개로 보관하세요."
+  "@dehydrateWarning": {},
+  "dehydrateShare": "FluffyChat 개인 내보내기 파일입니다. 분실하지 않도록 하시고 비공개로 보관하세요.",
+  "@dehydrateShare": {}
 }

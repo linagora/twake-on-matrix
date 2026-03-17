@@ -1,7 +1,3 @@
-## [Unreleased]
-### Added
-- Translated using Weblate (Arabic, Basque, Catalan, Chinese (Simplified), Chinese (Traditional), Croatian, Czech, Dutch, English, Esperanto, Estonian, Finnish, French, Galician, German, Hebrew, Hungarian, Indonesian, Irish, Italian, Japanese, Korean, Lithuanian, Norwegian Bokmål, Polish, Portuguese, Portuguese (Brazil), Portuguese (Portugal), Russian, Serbian, Slovak, Spanish, Swedish, Turkish, Ukrainian, Vietnamese)
-
 ## [2.20.3] - 2026-03-12
 ### Fixed
 - #2905 Play video directly from path in mobile

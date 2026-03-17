@@ -218,16 +218,18 @@ class _MxcImageState extends State<MxcImage>
   Future<void> _tryLoad(BuildContext context) async {
     _imageData = widget.imageData;
     if (_imageData != null) {
-      isLoadDone = true;
-      filePath = null;
-      setState(() {});
+      setState(() {
+        isLoadDone = true;
+        filePath = null;
+      });
     }
     try {
       final loadResult = await _load(context);
-      isLoadDone = true;
-      _imageData = loadResult.imageData;
-      filePath = loadResult.filePath;
-      setState(() {});
+      setState(() {
+        isLoadDone = true;
+        _imageData = loadResult.imageData;
+        filePath = loadResult.filePath;
+      });
     } catch (e) {
       if (mounted && !isLoadDone) {
         isLoadDone = true;
