@@ -45,8 +45,8 @@ class SettingsController extends State<Settings> with ConnectPageMixin {
   final federationConfigurationsRepository = getIt
       .get<FederationConfigurationsRepository>();
 
-  static const String generateEmailSubject =
-      'Request for Deletion of Twake Chat Account';
+  static String generateEmailSubject(String? matrixId) =>
+      'Request for Deletion of Twake Chat Account${matrixId != null ? ' - $matrixId' : ''}';
 
   StreamSubscription? onAccountDataSubscription;
 
@@ -294,7 +294,7 @@ class SettingsController extends State<Settings> with ConnectPageMixin {
         }
 
         final emailUri = Uri.parse(
-          'mailto:${AppConfig.supportEmail}?subject=${Uri.encodeComponent(generateEmailSubject)}',
+          'mailto:${AppConfig.supportEmail}?subject=${Uri.encodeComponent(generateEmailSubject(userId))}',
         );
         if (await canLaunchUrl(emailUri)) {
           await launchUrl(emailUri);
