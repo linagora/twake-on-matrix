@@ -1,6 +1,9 @@
-## [Unreleased]
+## [2.20.6] - 2026-03-18
 ### Added
 - Translated using Weblate (Arabic, Basque, Catalan, Chinese (Simplified), Chinese (Traditional), Croatian, Czech, Dutch, English, Esperanto, Estonian, Finnish, French, Galician, German, Hebrew, Hungarian, Indonesian, Irish, Italian, Japanese, Korean, Lithuanian, Norwegian Bokmål, Polish, Portuguese, Portuguese (Brazil), Portuguese (Portugal), Russian, Serbian, Slovak, Spanish, Swedish, Turkish, Ukrainian, Vietnamese)
+
+### Fixed
+- Change email in support Delete Account request
 
 ## [2.20.3] - 2026-03-12
 ### Fixed
