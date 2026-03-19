@@ -1,10 +1,10 @@
 import 'package:fluffychat/domain/model/user_info/user_info_visibility.dart';
+import 'package:fluffychat/generated/l10n/app_localizations.dart';
 import 'package:fluffychat/pages/settings_dashboard/settings_contacts_visibility/settings_contacts_visibility.dart';
 import 'package:fluffychat/pages/settings_dashboard/settings_contacts_visibility/settings_contacts_visibility_enum.dart';
 import 'package:fluffychat/presentation/extensions/settings/user_info_visibility_extension.dart';
 import 'package:fluffychat/widgets/app_bars/twake_app_bar.dart';
 import 'package:fluffychat/widgets/layouts/max_width_body.dart';
-import 'package:fluffychat/generated/l10n/app_localizations.dart';
 import 'package:fluffychat/widgets/twake_components/twake_icon_button.dart';
 import 'package:flutter/material.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
@@ -16,11 +16,16 @@ class SettingsContactsVisibilityView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = L10n.of(context)!;
+    final sysColor = LinagoraSysColors.material();
+    final refColor90 = LinagoraRefColors.material().neutral[90];
+    final textTheme = Theme.of(context).textTheme;
+
     return Scaffold(
-      backgroundColor: LinagoraSysColors.material().onPrimary,
+      backgroundColor: sysColor.onPrimary,
       resizeToAvoidBottomInset: false,
       appBar: TwakeAppBar(
-        title: L10n.of(context)!.contactsVisibility,
+        title: l10n.contactsVisibility,
         centerTitle: true,
         withDivider: true,
         context: context,
@@ -40,33 +45,31 @@ class SettingsContactsVisibilityView extends StatelessWidget {
           child: SizedBox(
             width: double.infinity,
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
+              padding: const .symmetric(horizontal: 16),
               child: Column(
-                mainAxisSize: MainAxisSize.max,
+                mainAxisSize: .max,
                 children: [
                   Padding(
-                    padding: const EdgeInsets.only(
+                    padding: const .only(
                       left: 32,
                       right: 32,
                       top: 24,
                       bottom: 16,
                     ),
                     child: Text(
-                      L10n.of(context)!.whoCanSeeMyPhoneEmail,
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: LinagoraSysColors.material().tertiary,
+                      l10n.whoCanSeeMyPhoneEmail,
+                      style: textTheme.bodyMedium?.copyWith(
+                        color: sysColor.tertiary,
                       ),
-                      textAlign: TextAlign.center,
+                      textAlign: .center,
                     ),
                   ),
                   Container(
                     width: double.infinity,
                     decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(16),
-                      border: Border.all(
-                        color:
-                            LinagoraRefColors.material().neutral[90] ??
-                            Colors.transparent,
+                      borderRadius: .circular(16),
+                      border: .all(
+                        color: refColor90 ?? Colors.transparent,
                         width: 1,
                       ),
                     ),
@@ -110,35 +113,30 @@ class SettingsContactsVisibilityView extends StatelessWidget {
                           SettingsContactsVisibilityEnum.private) {
                         return const SizedBox.shrink();
                       }
+
                       return Column(
                         children: [
                           Padding(
-                            padding: const EdgeInsets.only(
+                            padding: const .only(
                               left: 32,
                               right: 32,
                               top: 32,
                               bottom: 8,
                             ),
                             child: Text(
-                              L10n.of(
-                                context,
-                              )!.chooseWhichDetailsAreVisibleToOtherUsers,
-                              style: Theme.of(context).textTheme.bodyMedium
-                                  ?.copyWith(
-                                    color:
-                                        LinagoraSysColors.material().tertiary,
-                                  ),
-                              textAlign: TextAlign.center,
+                              l10n.chooseWhichDetailsAreVisibleToOtherUsers,
+                              style: textTheme.bodyMedium?.copyWith(
+                                color: sysColor.tertiary,
+                              ),
+                              textAlign: .center,
                             ),
                           ),
                           Container(
                             width: double.infinity,
                             decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(16),
-                              border: Border.all(
-                                color:
-                                    LinagoraRefColors.material().neutral[90] ??
-                                    Colors.transparent,
+                              borderRadius: .circular(16),
+                              border: .all(
+                                color: refColor90 ?? Colors.transparent,
                                 width: 1,
                               ),
                             ),
@@ -189,17 +187,14 @@ class SettingsContactsVisibilityView extends StatelessWidget {
     required SettingsContactsVisibilityEnum option,
   }) {
     switch (option) {
-      case SettingsContactsVisibilityEnum.public:
-        return const BorderRadius.only(
-          topLeft: Radius.circular(16),
-          topRight: Radius.circular(16),
-        );
-      case SettingsContactsVisibilityEnum.contacts:
+      case .public:
+        return const .only(topLeft: .circular(16), topRight: .circular(16));
+      case .contacts:
         return null;
-      case SettingsContactsVisibilityEnum.private:
-        return const BorderRadius.only(
-          bottomLeft: Radius.circular(16),
-          bottomRight: Radius.circular(16),
+      case .private:
+        return const .only(
+          bottomLeft: .circular(16),
+          bottomRight: .circular(16),
         );
     }
   }
@@ -211,6 +206,8 @@ class SettingsContactsVisibilityView extends StatelessWidget {
     bool enableDivider = true,
     bool isSelected = false,
   }) {
+    final sysColor = LinagoraSysColors.material();
+
     return InkWell(
       key: Key('visibility_option_${option.name}'),
       onTap: () => onTap?.call(option),
@@ -219,19 +216,19 @@ class SettingsContactsVisibilityView extends StatelessWidget {
         children: [
           Expanded(
             child: Column(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: .spaceAround,
+              crossAxisAlignment: .start,
               children: [
                 Padding(
-                  padding: const EdgeInsets.all(16),
+                  padding: const .all(16),
                   child: Text(
                     option.title(context),
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      color: LinagoraSysColors.material().onSurface,
+                      color: sysColor.onSurface,
                     ),
-                    overflow: TextOverflow.ellipsis,
+                    overflow: .ellipsis,
                     maxLines: 1,
-                    textAlign: TextAlign.center,
+                    textAlign: .center,
                   ),
                 ),
                 if (enableDivider)
@@ -243,7 +240,7 @@ class SettingsContactsVisibilityView extends StatelessWidget {
             ),
           ),
           Padding(
-            padding: const EdgeInsets.only(left: 8, right: 16),
+            padding: const .only(left: 8, right: 16),
             child: SizedBox(
               width: 24,
               height: 24,
@@ -251,7 +248,7 @@ class SettingsContactsVisibilityView extends StatelessWidget {
                   ? Icon(
                       key: Key('visibility_option_selected_${option.name}'),
                       Icons.check,
-                      color: LinagoraSysColors.material().primary,
+                      color: sysColor.primary,
                       size: 24,
                     )
                   : null,
@@ -264,15 +261,12 @@ class SettingsContactsVisibilityView extends StatelessWidget {
 
   BorderRadius? _buildVisibleFieldBorderRadius({required VisibleEnum option}) {
     switch (option) {
-      case VisibleEnum.phone:
-        return const BorderRadius.only(
-          topLeft: Radius.circular(16),
-          topRight: Radius.circular(16),
-        );
-      case VisibleEnum.email:
-        return const BorderRadius.only(
-          bottomLeft: Radius.circular(16),
-          bottomRight: Radius.circular(16),
+      case .phone:
+        return const .only(topLeft: .circular(16), topRight: .circular(16));
+      case .email:
+        return const .only(
+          bottomLeft: .circular(16),
+          bottomRight: .circular(16),
         );
     }
   }
@@ -284,6 +278,9 @@ class SettingsContactsVisibilityView extends StatelessWidget {
     bool enableDivider = true,
     bool isSelected = false,
   }) {
+    final sysColor = LinagoraSysColors.material();
+    final textTheme = Theme.of(context).textTheme;
+
     return InkWell(
       key: Key('visible_field_option_${option.name}'),
       onTap: () => onTap?.call(option),
@@ -292,33 +289,31 @@ class SettingsContactsVisibilityView extends StatelessWidget {
         children: [
           Expanded(
             child: Column(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: .spaceAround,
+              crossAxisAlignment: .start,
               children: [
                 Padding(
-                  padding: const EdgeInsets.all(16),
+                  padding: const .all(16),
                   child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                    crossAxisAlignment: .start,
                     children: [
                       Text(
                         option.title(context),
-                        style: Theme.of(context).textTheme.titleMedium
-                            ?.copyWith(
-                              color: LinagoraSysColors.material().onSurface,
-                            ),
-                        overflow: TextOverflow.ellipsis,
+                        style: textTheme.titleMedium?.copyWith(
+                          color: sysColor.onSurface,
+                        ),
+                        overflow: .ellipsis,
                         maxLines: 1,
-                        textAlign: TextAlign.center,
+                        textAlign: .center,
                       ),
                       Text(
                         option.subtitle(context),
-                        style: Theme.of(context).textTheme.labelMedium
-                            ?.copyWith(
-                              color: LinagoraSysColors.material().tertiary,
-                            ),
-                        overflow: TextOverflow.ellipsis,
+                        style: textTheme.labelMedium?.copyWith(
+                          color: sysColor.tertiary,
+                        ),
+                        overflow: .ellipsis,
                         maxLines: 2,
-                        textAlign: TextAlign.left,
+                        textAlign: .left,
                       ),
                     ],
                   ),
@@ -332,7 +327,7 @@ class SettingsContactsVisibilityView extends StatelessWidget {
             ),
           ),
           Padding(
-            padding: const EdgeInsets.only(left: 8, right: 16),
+            padding: const .only(left: 8, right: 16),
             child: SizedBox(
               width: 24,
               height: 24,
@@ -340,7 +335,7 @@ class SettingsContactsVisibilityView extends StatelessWidget {
                   ? Icon(
                       key: Key('visible_field_option_selected_${option.name}'),
                       Icons.check,
-                      color: LinagoraSysColors.material().primary,
+                      color: sysColor.primary,
                       size: 24,
                     )
                   : null,

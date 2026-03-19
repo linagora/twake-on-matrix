@@ -1,7 +1,9 @@
 import 'dart:async';
+
 import 'package:dartz/dartz.dart' hide State;
 import 'package:fluffychat/app_state/failure.dart';
 import 'package:fluffychat/app_state/success.dart';
+import 'package:fluffychat/config/go_routes/app_route_paths.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/domain/app_state/user_info/get_user_info_visibility_state.dart';
 import 'package:fluffychat/domain/app_state/user_info/update_user_info_visibility_state.dart';
@@ -9,11 +11,11 @@ import 'package:fluffychat/domain/model/user_info/user_info_visibility.dart';
 import 'package:fluffychat/domain/model/user_info/user_info_visibility_request.dart';
 import 'package:fluffychat/domain/usecase/user_info/get_user_info_visibility_interactor.dart';
 import 'package:fluffychat/domain/usecase/user_info/update_user_info_visibility_interactor.dart';
+import 'package:fluffychat/generated/l10n/app_localizations.dart';
 import 'package:fluffychat/pages/settings_dashboard/settings_contacts_visibility/settings_contacts_visibility_enum.dart';
 import 'package:fluffychat/pages/settings_dashboard/settings_contacts_visibility/settings_contacts_visibility_view.dart';
 import 'package:fluffychat/utils/dialog/twake_dialog.dart';
 import 'package:fluffychat/utils/twake_snackbar.dart';
-import 'package:fluffychat/generated/l10n/app_localizations.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -32,53 +34,41 @@ class SettingsContactsVisibilityController
   Client get client => Matrix.read(context).client;
 
   void onBack() {
-    context.go('/rooms/security');
+    context.go(AppRoutePaths.roomsSecurityFull);
   }
 
   StreamSubscription? getUserInfoVisibilityStreamSub;
 
   StreamSubscription? updateUserInfoVisibilityStreamSub;
 
-  final getUserInfoVisibilityInteractor = getIt
-      .get<GetUserInfoVisibilityInteractor>();
-
-  final updateUserInfoVisibilityInteractor = getIt
-      .get<UpdateUserInfoVisibilityInteractor>();
-
-  final ValueNotifier<Either<Failure, Success>> getUserInfoVisibilityNotifier =
-      ValueNotifier<Either<Failure, Success>>(
-        Right(GettingUserInfoVisibility()),
-      );
-
-  final ValueNotifier<Either<Failure, Success>>
-  updateUserInfoVisibilityNotifier = ValueNotifier<Either<Failure, Success>>(
-    Right(UpdatingUserInfoVisibility()),
+  final getUserInfoVisibilityNotifier = ValueNotifier<Either<Failure, Success>>(
+    Right(GettingUserInfoVisibility()),
   );
 
-  final List<SettingsContactsVisibilityEnum> visibilityOptions = [
+  final updateUserInfoVisibilityNotifier =
+      ValueNotifier<Either<Failure, Success>>(
+        Right(UpdatingUserInfoVisibility()),
+      );
+
+  final visibilityOptions = [
     SettingsContactsVisibilityEnum.public,
     SettingsContactsVisibilityEnum.contacts,
     SettingsContactsVisibilityEnum.private,
   ];
 
-  final List<VisibleEnum> visibleFieldsOptions = [
-    VisibleEnum.phone,
-    VisibleEnum.email,
-  ];
+  final visibleFieldsOptions = [VisibleEnum.phone, VisibleEnum.email];
 
-  final ValueNotifier<SettingsContactsVisibilityEnum?>
-  selectedVisibilityOptionNotifier =
+  final selectedVisibilityOptionNotifier =
       ValueNotifier<SettingsContactsVisibilityEnum?>(null);
 
-  final ValueNotifier<List<VisibleEnum>> selectedVisibleFieldNotifier =
-      ValueNotifier<List<VisibleEnum>>([]);
+  final selectedVisibleFieldNotifier = ValueNotifier<List<VisibleEnum>>([]);
 
   void onSelectVisibilityOption(SettingsContactsVisibilityEnum option) {
     if (option == selectedVisibilityOptionNotifier.value) {
       return;
     }
     switch (option) {
-      case SettingsContactsVisibilityEnum.private:
+      case .private:
         updateUserInfoVisibility(
           userInfoVisibility: UserInfoVisibilityRequest(
             visibility: option.name,
@@ -86,8 +76,8 @@ class SettingsContactsVisibilityController
           ),
         );
         break;
-      case SettingsContactsVisibilityEnum.public:
-      case SettingsContactsVisibilityEnum.contacts:
+      case .public:
+      case .contacts:
         updateUserInfoVisibility(
           userInfoVisibility: UserInfoVisibilityRequest(
             visibility: option.name,
@@ -120,15 +110,14 @@ class SettingsContactsVisibilityController
   void updateUserInfoVisibility({
     required UserInfoVisibilityRequest userInfoVisibility,
   }) {
+    final l10n = L10n.of(context)!;
     if (client.userID == null) {
-      TwakeSnackBar.show(
-        context,
-        L10n.of(context)!.failedToChangeContactsVisibility,
-      );
+      TwakeSnackBar.show(context, l10n.failedToChangeContactsVisibility);
       return;
     }
     updateUserInfoVisibilityStreamSub?.cancel();
-    updateUserInfoVisibilityStreamSub = updateUserInfoVisibilityInteractor
+    updateUserInfoVisibilityStreamSub = getIt
+        .get<UpdateUserInfoVisibilityInteractor>()
         .execute(userId: client.userID!, body: userInfoVisibility)
         .listen((either) {
           if (!mounted) return;
@@ -140,7 +129,7 @@ class SettingsContactsVisibilityController
                 TwakeDialog.hideLoadingDialog(context);
                 TwakeSnackBar.show(
                   context,
-                  L10n.of(context)!.failedToChangeContactsVisibility,
+                  l10n.failedToChangeContactsVisibility,
                 );
               }
             },
@@ -150,7 +139,7 @@ class SettingsContactsVisibilityController
                     SettingsContactsVisibilityEnum.values.firstWhere(
                       (option) =>
                           option.name == success.userInfoVisibility.visibility,
-                      orElse: () => SettingsContactsVisibilityEnum.contacts,
+                      orElse: () => .contacts,
                     );
                 selectedVisibleFieldNotifier.value =
                     success.userInfoVisibility.visibleFields ?? [];
@@ -170,7 +159,8 @@ class SettingsContactsVisibilityController
       return;
     }
     getUserInfoVisibilityStreamSub?.cancel();
-    getUserInfoVisibilityStreamSub = getUserInfoVisibilityInteractor
+    getUserInfoVisibilityStreamSub = getIt
+        .get<GetUserInfoVisibilityInteractor>()
         .execute(userId: client.userID!)
         .listen((either) {
           if (!mounted) return;
@@ -196,7 +186,7 @@ class SettingsContactsVisibilityController
                     SettingsContactsVisibilityEnum.values.firstWhere(
                       (option) =>
                           option.name == success.userInfoVisibility.visibility,
-                      orElse: () => SettingsContactsVisibilityEnum.contacts,
+                      orElse: () => .contacts,
                     );
                 selectedVisibleFieldNotifier.value =
                     success.userInfoVisibility.visibleFields ?? [];
@@ -225,7 +215,7 @@ class SettingsContactsVisibilityController
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(_) {
     return SettingsContactsVisibilityView(controller: this);
   }
 }

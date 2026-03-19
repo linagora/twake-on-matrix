@@ -4,6 +4,7 @@ import 'package:adaptive_dialog/adaptive_dialog.dart';
 import 'package:dartz/dartz.dart' hide State;
 import 'package:fluffychat/app_state/failure.dart';
 import 'package:fluffychat/app_state/success.dart';
+import 'package:fluffychat/config/go_routes/app_route_paths.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/domain/app_state/room/upload_content_state.dart';
 import 'package:fluffychat/domain/app_state/settings/update_profile_failure.dart';
@@ -13,19 +14,20 @@ import 'package:fluffychat/domain/usecase/room/upload_content_interactor.dart';
 import 'package:fluffychat/domain/usecase/settings/update_profile_interactor.dart';
 import 'package:fluffychat/event/twake_event_dispatcher.dart';
 import 'package:fluffychat/event/twake_inapp_event_types.dart';
+import 'package:fluffychat/generated/l10n/app_localizations.dart';
 import 'package:fluffychat/pages/multiple_accounts/multiple_accounts_picker.dart';
 import 'package:fluffychat/pages/settings_dashboard/settings_profile/settings_profile_capability_check.dart';
 import 'package:fluffychat/pages/settings_dashboard/settings_profile/settings_profile_context_menu_actions.dart';
 import 'package:fluffychat/pages/settings_dashboard/settings_profile/settings_profile_state/get_clients_ui_state.dart';
 import 'package:fluffychat/pages/settings_dashboard/settings_profile/settings_profile_view.dart';
-import 'package:fluffychat/presentation/extensions/multiple_accounts/client_profile_extension.dart';
-import 'package:fluffychat/presentation/mixins/pick_avatar_mixin.dart';
-import 'package:fluffychat/presentation/model/pick_avatar_state.dart';
-import 'package:fluffychat/presentation/multiple_account/client_profile_presentation.dart';
 import 'package:fluffychat/presentation/enum/settings/settings_profile_enum.dart';
 import 'package:fluffychat/presentation/extensions/client_extension.dart';
+import 'package:fluffychat/presentation/extensions/multiple_accounts/client_profile_extension.dart';
 import 'package:fluffychat/presentation/mixins/common_media_picker_mixin.dart';
+import 'package:fluffychat/presentation/mixins/pick_avatar_mixin.dart';
 import 'package:fluffychat/presentation/mixins/single_image_picker_mixin.dart';
+import 'package:fluffychat/presentation/model/pick_avatar_state.dart';
+import 'package:fluffychat/presentation/multiple_account/client_profile_presentation.dart';
 import 'package:fluffychat/presentation/multiple_account/twake_chat_presentation_account.dart';
 import 'package:fluffychat/utils/client_manager.dart';
 import 'package:fluffychat/utils/dialog/twake_dialog.dart';
@@ -43,7 +45,6 @@ import 'package:go_router/go_router.dart';
 import 'package:linagora_design_flutter/images_picker/asset_counter.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:matrix/matrix.dart';
-import 'package:fluffychat/generated/l10n/app_localizations.dart';
 import 'package:wechat_camera_picker/wechat_camera_picker.dart';
 
 class SettingsProfile extends StatefulWidget {
@@ -138,9 +139,9 @@ class SettingsProfileController extends State<SettingsProfile>
     SettingsProfileEnum settingsProfileEnum,
   ) {
     switch (settingsProfileEnum) {
-      case SettingsProfileEnum.displayName:
+      case .displayName:
         return displayNameEditingController;
-      case SettingsProfileEnum.matrixId:
+      case .matrixId:
         return matrixIdEditingController;
       default:
         return null;
@@ -149,7 +150,7 @@ class SettingsProfileController extends State<SettingsProfile>
 
   FocusNode? getFocusNode(SettingsProfileEnum settingsProfileEnum) {
     switch (settingsProfileEnum) {
-      case SettingsProfileEnum.displayName:
+      case .displayName:
         return displayNameFocusNode;
       default:
         return null;
@@ -221,7 +222,7 @@ class SettingsProfileController extends State<SettingsProfile>
       actions: actions(),
     );
     if (action == null) return;
-    if (action == AvatarAction.remove) {
+    if (action == .remove) {
       _handleRemoveAvatarAction();
       return;
     }
@@ -229,10 +230,8 @@ class SettingsProfileController extends State<SettingsProfile>
   }
 
   List<Widget> listContextMenuBuilder(BuildContext context) {
-    final listAction = [
-      SettingsProfileContextMenuActions.edit,
-      SettingsProfileContextMenuActions.delete,
-    ];
+    final List<SettingsProfileContextMenuActions> listAction = [.edit, .delete];
+
     final items = listAction.map((action) {
       return popupItemByTwakeAppRouter(
         context,
@@ -261,10 +260,10 @@ class SettingsProfileController extends State<SettingsProfile>
 
   void _handleActionContextMenu(SettingsProfileContextMenuActions action) {
     switch (action) {
-      case SettingsProfileContextMenuActions.edit:
+      case .edit:
         _showImagesPickerAction();
         break;
-      case SettingsProfileContextMenuActions.delete:
+      case .delete:
         pickAvatarUIState.value = Right<Failure, Success>(
           GetAvatarInitialUIState(),
         );
@@ -487,7 +486,7 @@ class SettingsProfileController extends State<SettingsProfile>
 
   void copyEventsAction(SettingsProfileEnum settingsProfileEnum) {
     switch (settingsProfileEnum) {
-      case SettingsProfileEnum.matrixId:
+      case .matrixId:
         Clipboard.setData(ClipboardData(text: client.mxid(context)));
         TwakeSnackBar.show(
           context,
@@ -556,7 +555,7 @@ class SettingsProfileController extends State<SettingsProfile>
     ).showMultipleAccountsPicker(
       client,
       onGoToAccountSettings: () {
-        context.go('/rooms/profile');
+        context.go(AppRoutePaths.profileFull);
       },
     );
   }
@@ -663,8 +662,9 @@ class SettingsProfileController extends State<SettingsProfile>
   }
 
   void updateNewProfileForAccount() {
+    final client = Matrix.of(context).client;
     listenOnProfileChangeStream(
-      client: Matrix.of(context).client,
+      client: client,
       currentProfile: currentProfile.value,
       onProfileChanged: (newProfile) {
         final indexOldAccount = _multipleAccounts.indexWhere(
@@ -674,9 +674,9 @@ class SettingsProfileController extends State<SettingsProfile>
           return;
         }
         final newAccount = ClientProfilePresentation(
-          client: Matrix.of(context).client,
+          client: client,
           profile: newProfile,
-        ).toTwakeChatPresentationAccount(Matrix.of(context).client);
+        ).toTwakeChatPresentationAccount(client);
         _multipleAccounts[indexOldAccount] = newAccount;
         settingsMultiAccountsUIState.value = Right<Failure, Success>(
           GetClientsSuccessUIState(multipleAccounts: _multipleAccounts),

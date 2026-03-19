@@ -7,23 +7,24 @@ enum SettingsContactsVisibilityEnum {
   contacts;
 
   String title(BuildContext context) {
+    final l10n = L10n.of(context)!;
     switch (this) {
-      case SettingsContactsVisibilityEnum.public:
-        return L10n.of(context)!.everyOne;
-      case SettingsContactsVisibilityEnum.contacts:
-        return L10n.of(context)!.myContacts;
-      case SettingsContactsVisibilityEnum.private:
-        return L10n.of(context)!.nobody;
+      case .public:
+        return l10n.everyOne;
+      case .contacts:
+        return l10n.myContacts;
+      case .private:
+        return l10n.nobody;
     }
   }
 
   bool enableDivider() {
     switch (this) {
-      case SettingsContactsVisibilityEnum.public:
+      case .public:
         return true;
-      case SettingsContactsVisibilityEnum.contacts:
+      case .contacts:
         return true;
-      case SettingsContactsVisibilityEnum.private:
+      case .private:
         return false;
     }
   }

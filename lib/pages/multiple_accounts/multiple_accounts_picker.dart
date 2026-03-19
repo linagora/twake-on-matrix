@@ -1,4 +1,5 @@
 import 'package:collection/collection.dart';
+import 'package:fluffychat/config/go_routes/app_route_paths.dart';
 import 'package:fluffychat/pages/twake_welcome/twake_welcome.dart';
 import 'package:fluffychat/presentation/multiple_account/twake_chat_presentation_account.dart';
 import 'package:fluffychat/utils/dialog/twake_dialog.dart';
@@ -79,7 +80,7 @@ class MultipleAccountsPickerController {
 
   void _onAddAnotherAccount() {
     context.push(
-      '/rooms/addaccount',
+      AppRoutePaths.addAccountFull,
       extra: const TwakeWelcomeArg(twakeIdType: TwakeWelcomeType.otherAccounts),
     );
   }

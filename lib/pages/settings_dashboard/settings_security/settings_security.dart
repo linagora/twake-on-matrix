@@ -1,25 +1,24 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:adaptive_dialog/adaptive_dialog.dart';
+import 'package:fluffychat/config/setting_keys.dart';
+import 'package:fluffychat/generated/l10n/app_localizations.dart';
 import 'package:fluffychat/pages/bootstrap/bootstrap_dialog.dart';
 import 'package:fluffychat/presentation/extensions/client_extension.dart';
 import 'package:fluffychat/utils/beautify_string_extension.dart';
+import 'package:fluffychat/utils/clipboard.dart';
 import 'package:fluffychat/utils/dialog/twake_dialog.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_file_extension.dart';
 import 'package:fluffychat/utils/twake_snackbar.dart';
+import 'package:fluffychat/widgets/matrix.dart';
 import 'package:flutter/material.dart';
-
-import 'package:adaptive_dialog/adaptive_dialog.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_app_lock/flutter_app_lock.dart';
-import 'package:fluffychat/generated/l10n/app_localizations.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-
 import 'package:intl/intl.dart';
 import 'package:matrix/matrix.dart';
 
-import 'package:fluffychat/config/setting_keys.dart';
-import 'package:fluffychat/widgets/matrix.dart';
 import 'settings_security_view.dart';
 
 class SettingsSecurity extends StatefulWidget {
@@ -32,57 +31,77 @@ class SettingsSecurity extends StatefulWidget {
 class SettingsSecurityController extends State<SettingsSecurity> {
   StreamSubscription? ignoredUsersStreamSub;
 
-  ValueNotifier<List<String>> ignoredUsersNotifier =
-      ValueNotifier<List<String>>([]);
+  final ignoredUsersNotifier = ValueNotifier<List<String>>([]);
 
   Client get client => Matrix.read(context).client;
 
+  @override
+  void initState() {
+    listenIgnoredUser();
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    ignoredUsersStreamSub?.cancel();
+    ignoredUsersNotifier.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => SettingsSecurityView(this);
+
   void changePasswordAccountAction() async {
+    final l10n = L10n.of(context)!;
     final input = await showTextInputDialog(
       useRootNavigator: false,
       context: context,
-      title: L10n.of(context)!.changePassword,
-      okLabel: L10n.of(context)!.ok,
-      cancelLabel: L10n.of(context)!.cancel,
+      title: l10n.changePassword,
+      okLabel: l10n.ok,
+      cancelLabel: l10n.cancel,
       textFields: [
         DialogTextField(
-          hintText: L10n.of(context)!.chooseAStrongPassword,
+          hintText: l10n.chooseAStrongPassword,
           obscureText: true,
           minLines: 1,
           maxLines: 1,
         ),
         DialogTextField(
-          hintText: L10n.of(context)!.repeatPassword,
+          hintText: l10n.repeatPassword,
           obscureText: true,
           minLines: 1,
           maxLines: 1,
         ),
       ],
     );
-    if (input == null) return;
+    if (!mounted || input == null) return;
     final success = await TwakeDialog.showFutureLoadingDialogFullScreen(
-      future: () => Matrix.of(
-        context,
-      ).client.changePassword(input.last, oldPassword: input.first),
+      future: () => client.changePassword(input.last, oldPassword: input.first),
     );
+    if (!mounted) return;
     if (success.error == null) {
-      TwakeSnackBar.show(context, L10n.of(context)!.passwordHasBeenChanged);
+      TwakeSnackBar.show(context, l10n.passwordHasBeenChanged);
     }
   }
 
   void setAppLockAction() async {
+    final l10n = L10n.of(context)!;
     final currentLock = await const FlutterSecureStorage().read(
       key: SettingKeys.appLockKey,
     );
+    if (!mounted) return;
+    final appLock = AppLock.of(context)!;
+
     if (currentLock?.isNotEmpty ?? false) {
-      await AppLock.of(context)!.showLockScreen();
+      await appLock.showLockScreen();
     }
+    if (!mounted) return;
     final newLock = await showTextInputDialog(
       useRootNavigator: false,
       context: context,
-      title: L10n.of(context)!.pleaseChooseAPasscode,
-      message: L10n.of(context)!.pleaseEnter4Digits,
-      cancelLabel: L10n.of(context)!.cancel,
+      title: l10n.pleaseChooseAPasscode,
+      message: l10n.pleaseEnter4Digits,
+      cancelLabel: l10n.cancel,
       textFields: [
         DialogTextField(
           validator: (text) {
@@ -90,44 +109,44 @@ class SettingsSecurityController extends State<SettingsSecurity> {
                 (text.length == 4 && int.tryParse(text)! >= 0)) {
               return null;
             }
-            return L10n.of(context)!.pleaseEnter4Digits;
+            return l10n.pleaseEnter4Digits;
           },
-          keyboardType: TextInputType.number,
+          keyboardType: .number,
           obscureText: true,
           maxLines: 1,
           minLines: 1,
         ),
       ],
     );
-    if (newLock != null) {
-      await const FlutterSecureStorage().write(
-        key: SettingKeys.appLockKey,
-        value: newLock.single,
-      );
-      if (newLock.single.isEmpty) {
-        AppLock.of(context)!.disable();
-      } else {
-        AppLock.of(context)!.enable();
-      }
+    if (!mounted || newLock == null) return;
+    await const FlutterSecureStorage().write(
+      key: SettingKeys.appLockKey,
+      value: newLock.single,
+    );
+    if (!mounted) return;
+    if (newLock.single.isEmpty) {
+      appLock.disable();
+    } else {
+      appLock.enable();
     }
   }
 
-  void showBootstrapDialog(BuildContext context) async {
-    await BootstrapDialog(client: Matrix.of(context).client).show();
+  void showBootstrapDialog() async {
+    await BootstrapDialog(client: client).show();
   }
 
   Future<void> dehydrateAction() => dehydrateDevice(context);
 
   static Future<void> dehydrateDevice(BuildContext context) async {
+    final l10n = L10n.of(context)!;
     final response = await showOkCancelAlertDialog(
       context: context,
       isDestructiveAction: true,
-      title: L10n.of(context)!.dehydrate,
-      message: L10n.of(context)!.dehydrateWarning,
+      title: l10n.dehydrate,
+      message: l10n.dehydrateWarning,
     );
-    if (response != OkCancelResult.ok) {
-      return;
-    }
+    if (response != OkCancelResult.ok) return;
+
     final file = await TwakeDialog.showFutureLoadingDialogFullScreen(
       future: () async {
         final export = await Matrix.of(context).client.exportDump();
@@ -148,9 +167,8 @@ class SettingsSecurityController extends State<SettingsSecurity> {
   }
 
   Future<void> copyPublicKey() async {
-    Clipboard.setData(
-      ClipboardData(text: Matrix.of(context).client.fingerprintKey.beautified),
-    );
+    await TwakeClipboard.instance.copyText(client.fingerprintKey.beautified);
+    if (!mounted) return;
     TwakeSnackBar.show(context, L10n.of(context)!.copiedPublicKeyToClipboard);
   }
 
@@ -160,20 +178,4 @@ class SettingsSecurityController extends State<SettingsSecurity> {
       ignoredUsersNotifier.value = client.ignoredUsers;
     });
   }
-
-  @override
-  void initState() {
-    listenIgnoredUser();
-    super.initState();
-  }
-
-  @override
-  void dispose() {
-    ignoredUsersStreamSub?.cancel();
-    ignoredUsersNotifier.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) => SettingsSecurityView(this);
 }

@@ -1,4 +1,5 @@
 import 'package:fluffychat/di/global/get_it_initializer.dart';
+import 'package:fluffychat/generated/l10n/app_localizations.dart';
 import 'package:fluffychat/pages/settings_dashboard/settings_app_language/settings_app_language.dart';
 import 'package:fluffychat/pages/settings_dashboard/settings_app_language/settings_app_language_view_style.dart';
 import 'package:fluffychat/presentation/extensions/localizations/locale_extension.dart';
@@ -7,7 +8,6 @@ import 'package:fluffychat/utils/responsive/responsive_utils.dart';
 import 'package:fluffychat/widgets/app_bars/twake_app_bar.dart';
 import 'package:fluffychat/widgets/app_bars/twake_app_bar_style.dart';
 import 'package:flutter/material.dart';
-import 'package:fluffychat/generated/l10n/app_localizations.dart';
 import 'package:go_router/go_router.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 
@@ -19,18 +19,21 @@ class SettingsAppLanguageView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = L10n.of(context)!;
+    final textTheme = Theme.of(context).textTheme;
+
     return Scaffold(
       backgroundColor: LinagoraSysColors.material().onPrimary,
       appBar: TwakeAppBar(
-        title: L10n.of(context)!.appLanguage,
+        title: l10n.appLanguage,
         context: context,
         leading: responsiveUtils.isMobile(context)
             ? Padding(
                 padding: TwakeAppBarStyle.leadingIconPadding,
                 child: IconButton(
-                  tooltip: L10n.of(context)!.back,
+                  tooltip: l10n.back,
                   icon: const Icon(Icons.arrow_back_ios),
-                  onPressed: () => context.pop(),
+                  onPressed: context.pop,
                   iconSize: TwakeAppBarStyle.leadingIconSize,
                 ),
               )
@@ -42,15 +45,15 @@ class SettingsAppLanguageView extends StatelessWidget {
         padding: SettingsAppLanguageViewStyle.paddingBody,
         physics: const ClampingScrollPhysics(),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment: .start,
           children: [
             ListView.separated(
               padding: SettingsAppLanguageViewStyle.paddingListItems,
               shrinkWrap: true,
-              itemBuilder: (context, index) {
+              itemBuilder: (_, int index) {
                 return ValueListenableBuilder(
                   valueListenable: controller.currentLocale,
-                  builder: (context, locale, child) {
+                  builder: (context, locale, _) {
                     return ListTile(
                       splashColor: Colors.transparent,
                       shape: RoundedRectangleBorder(
@@ -62,12 +65,12 @@ class SettingsAppLanguageView extends StatelessWidget {
                         controller.supportedLocales[index]
                             .getLanguageNameByCurrentLocale(context)
                             .capitalize(),
-                        style: Theme.of(context).textTheme.titleMedium,
+                        style: textTheme.titleMedium,
                       ),
                       subtitle: Text(
                         controller.supportedLocales[index]
                             .getSourceLanguageName(),
-                        style: Theme.of(context).textTheme.bodySmall!.copyWith(
+                        style: textTheme.bodySmall!.copyWith(
                           color: LinagoraRefColors.material().neutral[40],
                         ),
                       ),
@@ -89,7 +92,7 @@ class SettingsAppLanguageView extends StatelessWidget {
                   },
                 );
               },
-              separatorBuilder: (context, index) => const Divider(),
+              separatorBuilder: (_, _) => const Divider(),
               itemCount: controller.supportedLocales.length,
             ),
           ],

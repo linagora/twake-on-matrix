@@ -1,3 +1,4 @@
+import 'package:fluffychat/config/go_routes/app_route_paths.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/presentation/mixins/address_book_mixin.dart';
 import 'package:fluffychat/presentation/mixins/comparable_presentation_contact_mixin.dart';
@@ -89,7 +90,7 @@ class ContactsTabController extends State<ContactsTab>
   }
 
   void goToSettingsProfile() {
-    context.go('/rooms/profile');
+    context.go(AppRoutePaths.profileFull);
   }
 
   void goToDraftChat({

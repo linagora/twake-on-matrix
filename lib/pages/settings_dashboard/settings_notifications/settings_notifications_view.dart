@@ -1,14 +1,15 @@
 import 'package:fluffychat/di/global/get_it_initializer.dart';
+import 'package:fluffychat/generated/l10n/app_localizations.dart';
 import 'package:fluffychat/utils/dialog/twake_dialog.dart';
 import 'package:fluffychat/utils/responsive/responsive_utils.dart';
 import 'package:fluffychat/widgets/app_bars/twake_app_bar.dart';
 import 'package:fluffychat/widgets/app_bars/twake_app_bar_style.dart';
+import 'package:fluffychat/widgets/layouts/max_width_body.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:flutter/material.dart';
-import 'package:fluffychat/generated/l10n/app_localizations.dart';
 import 'package:go_router/go_router.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
-import 'package:fluffychat/widgets/layouts/max_width_body.dart';
+
 import 'settings_notifications.dart';
 
 class SettingsNotificationsView extends StatelessWidget {
@@ -19,10 +20,16 @@ class SettingsNotificationsView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = L10n.of(context)!;
+    final client = Matrix.of(context).client;
+    final theme = Theme.of(context);
+    final textTheme = theme.textTheme;
+    final colorScheme = theme.colorScheme;
+
     return Scaffold(
       backgroundColor: LinagoraSysColors.material().onPrimary,
       appBar: TwakeAppBar(
-        title: L10n.of(context)!.notifications,
+        title: l10n.notifications,
         context: context,
         centerTitle: true,
         withDivider: true,
@@ -30,9 +37,9 @@ class SettingsNotificationsView extends StatelessWidget {
             ? Padding(
                 padding: TwakeAppBarStyle.leadingIconPadding,
                 child: IconButton(
-                  tooltip: L10n.of(context)!.back,
+                  tooltip: l10n.back,
                   icon: const Icon(Icons.arrow_back_ios),
-                  onPressed: () => context.pop(),
+                  onPressed: context.pop,
                   iconSize: TwakeAppBarStyle.leadingIconSize,
                 ),
               )
@@ -41,39 +48,36 @@ class SettingsNotificationsView extends StatelessWidget {
       body: MaxWidthBody(
         withScrolling: true,
         child: StreamBuilder(
-          stream: Matrix.of(context).client.onAccountData.stream.where(
+          stream: client.onAccountData.stream.where(
             (event) => event.type == 'm.push_rules',
           ),
           builder: (BuildContext context, _) {
             return Column(
               children: [
                 SwitchListTile.adaptive(
-                  value: !Matrix.of(context).client.allPushNotificationsMuted,
+                  value: !client.allPushNotificationsMuted,
                   title: Text(
-                    Matrix.of(context).client.allPushNotificationsMuted
-                        ? L10n.of(context)!.enable_notifications
-                        : L10n.of(context)!.disable_notifications,
-                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                      color: Theme.of(context).colorScheme.onSurface,
+                    client.allPushNotificationsMuted
+                        ? l10n.enable_notifications
+                        : l10n.disable_notifications,
+                    style: textTheme.bodyLarge?.copyWith(
+                      color: colorScheme.onSurface,
                     ),
                   ),
                   onChanged: (_) =>
                       TwakeDialog.showFutureLoadingDialogFullScreen(
-                        future: () => Matrix.of(context).client
-                            .setMuteAllPushNotifications(
-                              !Matrix.of(
-                                context,
-                              ).client.allPushNotificationsMuted,
-                            ),
+                        future: () => client.setMuteAllPushNotifications(
+                          !client.allPushNotificationsMuted,
+                        ),
                       ),
                 ),
-                if (!Matrix.of(context).client.allPushNotificationsMuted) ...{
+                if (!client.allPushNotificationsMuted) ...{
                   const Divider(thickness: 1),
                   ListTile(
                     title: Text(
-                      L10n.of(context)!.pushRules,
-                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                        color: Theme.of(context).colorScheme.onSurface,
+                      l10n.pushRules,
+                      style: textTheme.bodyLarge?.copyWith(
+                        color: colorScheme.onSurface,
                         fontWeight: FontWeight.w700,
                       ),
                     ),
@@ -83,8 +87,8 @@ class SettingsNotificationsView extends StatelessWidget {
                       value: controller.getNotificationSetting(item) ?? true,
                       title: Text(
                         item.title(context),
-                        style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                          color: Theme.of(context).colorScheme.onSurface,
+                        style: textTheme.bodyLarge?.copyWith(
+                          color: colorScheme.onSurface,
                         ),
                       ),
                       onChanged: (bool enabled) =>

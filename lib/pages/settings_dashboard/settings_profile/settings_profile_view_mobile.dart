@@ -1,6 +1,7 @@
 import 'package:dartz/dartz.dart' hide State;
 import 'package:fluffychat/app_state/failure.dart';
 import 'package:fluffychat/app_state/success.dart';
+import 'package:fluffychat/generated/l10n/app_localizations.dart';
 import 'package:fluffychat/pages/settings_dashboard/settings_profile/settings_profile_state/get_clients_ui_state.dart';
 import 'package:fluffychat/pages/settings_dashboard/settings_profile/settings_profile_view_mobile_style.dart';
 import 'package:fluffychat/presentation/extensions/client_extension.dart';
@@ -12,7 +13,6 @@ import 'package:fluffychat/widgets/mixins/popup_menu_widget_style.dart';
 import 'package:flutter/material.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:matrix/matrix.dart';
-import 'package:fluffychat/generated/l10n/app_localizations.dart';
 
 typedef OnTapMultipleAccountsButton =
     void Function(List<TwakeChatPresentationAccount> multipleAccounts);
@@ -63,6 +63,10 @@ class _SettingsProfileViewMobileState extends State<SettingsProfileViewMobile> {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+    final l10n = L10n.of(context)!;
+
     return Column(
       children: [
         Column(
@@ -75,9 +79,9 @@ class _SettingsProfileViewMobileState extends State<SettingsProfileViewMobile> {
                   builder: (context, _) {
                     return Stack(
                       children: [
-                        Positioned.fill(child: _buildAvatarBackground(context)),
-                        Positioned.fill(child: _buildGradientOverlay(context)),
-                        Column(children: [_buildProfileInformation(context)]),
+                        Positioned.fill(child: _buildAvatarBackground()),
+                        Positioned.fill(child: _buildGradientOverlay()),
+                        Column(children: [_buildProfileInformation()]),
                         if (widget.canEditAvatar && !isExpanded)
                           Positioned(
                             bottom: SettingsProfileViewMobileStyle
@@ -87,9 +91,7 @@ class _SettingsProfileViewMobileState extends State<SettingsProfileViewMobile> {
                             child: MenuAnchor(
                               controller: widget.menuController,
                               style: MenuStyle(
-                                padding: const WidgetStatePropertyAll(
-                                  EdgeInsets.zero,
-                                ),
+                                padding: const WidgetStatePropertyAll(.zero),
                                 backgroundColor: WidgetStatePropertyAll(
                                   PopupMenuWidgetStyle.defaultMenuColor(
                                     context,
@@ -107,7 +109,7 @@ class _SettingsProfileViewMobileState extends State<SettingsProfileViewMobile> {
                                   (
                                     BuildContext context,
                                     MenuController menuController,
-                                    Widget? child,
+                                    _,
                                   ) {
                                     return GestureDetector(
                                       onTap: () {
@@ -121,17 +123,13 @@ class _SettingsProfileViewMobileState extends State<SettingsProfileViewMobile> {
                                       },
                                       child: Container(
                                         decoration: BoxDecoration(
-                                          color: Theme.of(
-                                            context,
-                                          ).colorScheme.primary,
-                                          borderRadius: BorderRadius.circular(
+                                          color: colorScheme.primary,
+                                          borderRadius: .circular(
                                             SettingsProfileViewMobileStyle
                                                 .avatarSize,
                                           ),
-                                          border: Border.all(
-                                            color: Theme.of(
-                                              context,
-                                            ).colorScheme.onPrimary,
+                                          border: .all(
+                                            color: colorScheme.onPrimary,
                                             width:
                                                 SettingsProfileViewMobileStyle
                                                     .iconEditBorderWidth,
@@ -143,9 +141,7 @@ class _SettingsProfileViewMobileState extends State<SettingsProfileViewMobile> {
                                           Icons.edit,
                                           size: SettingsProfileViewMobileStyle
                                               .iconEditSize,
-                                          color: Theme.of(
-                                            context,
-                                          ).colorScheme.onPrimary,
+                                          color: colorScheme.onPrimary,
                                         ),
                                       ),
                                     );
@@ -160,16 +156,16 @@ class _SettingsProfileViewMobileState extends State<SettingsProfileViewMobile> {
               },
             ),
             Container(
-              margin: const EdgeInsets.only(left: 12, right: 12, top: 12),
-              padding: const EdgeInsets.all(8),
+              margin: const .only(left: 12, right: 12, top: 12),
+              padding: const .all(8),
               decoration: BoxDecoration(
-                borderRadius: const BorderRadius.all(Radius.circular(8)),
-                border: Border.all(
+                borderRadius: const .all(.circular(8)),
+                border: .all(
                   color:
                       LinagoraRefColors.material().neutral[90] ?? Colors.black,
                 ),
                 color: widget.responsive.isWebDesktop(context)
-                    ? Theme.of(context).colorScheme.surface
+                    ? colorScheme.surface
                     : LinagoraSysColors.material().onPrimary,
               ),
               child: widget.settingsProfileOptions,
@@ -185,35 +181,34 @@ class _SettingsProfileViewMobileState extends State<SettingsProfileViewMobile> {
               (success) {
                 if (success is GetClientsLoadingUIState) {
                   return Container(
-                    width: double.infinity,
+                    width: .infinity,
                     height: SettingsProfileViewMobileStyle.bottomButtonHeight,
                     padding: SettingsProfileViewMobileStyle.paddingBottomButton,
                     margin: SettingsProfileViewMobileStyle.marginBottomButton,
                     decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(
+                      borderRadius: .circular(
                         SettingsProfileViewMobileStyle.bottomButtonRadius,
                       ),
-                      color: Theme.of(context).colorScheme.primary,
+                      color: colorScheme.primary,
                     ),
-                    alignment: Alignment.center,
+                    alignment: .center,
                     child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
+                      mainAxisAlignment: .center,
                       children: [
                         Transform.scale(
                           scale: SettingsProfileViewMobileStyle.indicatorScale,
                           child: CircularProgressIndicator(
-                            color: Theme.of(context).colorScheme.onPrimary,
+                            color: colorScheme.onPrimary,
                             strokeWidth: SettingsProfileViewMobileStyle
                                 .indicatorStrokeWidth,
                           ),
                         ),
                         SettingsProfileViewMobileStyle.paddingIconAndText,
                         Text(
-                          L10n.of(context)!.loadingPleaseWait,
-                          style: Theme.of(context).textTheme.labelLarge
-                              ?.copyWith(
-                                color: Theme.of(context).colorScheme.onPrimary,
-                              ),
+                          l10n.loadingPleaseWait,
+                          style: textTheme.labelLarge?.copyWith(
+                            color: colorScheme.onPrimary,
+                          ),
                         ),
                       ],
                     ),
@@ -229,39 +224,36 @@ class _SettingsProfileViewMobileState extends State<SettingsProfileViewMobile> {
                     splashColor: Colors.transparent,
                     hoverColor: Colors.transparent,
                     child: Container(
-                      width: double.infinity,
+                      width: .infinity,
                       height: SettingsProfileViewMobileStyle.bottomButtonHeight,
                       padding:
                           SettingsProfileViewMobileStyle.paddingBottomButton,
                       margin: SettingsProfileViewMobileStyle.marginBottomButton,
                       decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(
+                        borderRadius: .circular(
                           SettingsProfileViewMobileStyle.bottomButtonRadius,
                         ),
-                        color: Theme.of(context).colorScheme.primary,
+                        color: colorScheme.primary,
                       ),
-                      alignment: Alignment.center,
+                      alignment: .center,
                       child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
+                        mainAxisAlignment: .center,
                         children: [
                           Icon(
                             success.haveMultipleAccounts
                                 ? Icons.group_outlined
                                 : Icons.person_add_alt_outlined,
                             size: SettingsProfileViewMobileStyle.iconSize,
-                            color: Theme.of(context).colorScheme.onPrimary,
+                            color: colorScheme.onPrimary,
                           ),
                           SettingsProfileViewMobileStyle.paddingIconAndText,
                           Text(
                             success.haveMultipleAccounts
-                                ? L10n.of(context)!.switchAccounts
-                                : L10n.of(context)!.addAnotherAccount,
-                            style: Theme.of(context).textTheme.labelLarge
-                                ?.copyWith(
-                                  color: Theme.of(
-                                    context,
-                                  ).colorScheme.onPrimary,
-                                ),
+                                ? l10n.switchAccounts
+                                : l10n.addAnotherAccount,
+                            style: textTheme.labelLarge?.copyWith(
+                              color: colorScheme.onPrimary,
+                            ),
                           ),
                         ],
                       ),
@@ -278,7 +270,7 @@ class _SettingsProfileViewMobileState extends State<SettingsProfileViewMobile> {
     );
   }
 
-  Widget _buildAvatarBackground(BuildContext context) {
+  Widget _buildAvatarBackground() {
     return ValueListenableBuilder(
       valueListenable: widget.currentProfile,
       builder: (context, profile, _) {
@@ -296,16 +288,15 @@ class _SettingsProfileViewMobileState extends State<SettingsProfileViewMobile> {
     );
   }
 
-  Widget _buildGradientOverlay(BuildContext context) {
-    final sysColor = LinagoraSysColors.material();
+  Widget _buildGradientOverlay() {
     return DecoratedBox(
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
+          begin: .topCenter,
+          end: .bottomCenter,
           colors: [
             Colors.transparent,
-            sysColor.onTertiaryContainer.withValues(
+            LinagoraSysColors.material().onTertiaryContainer.withValues(
               alpha: widget.animationController.value,
             ),
           ],
@@ -314,10 +305,10 @@ class _SettingsProfileViewMobileState extends State<SettingsProfileViewMobile> {
     );
   }
 
-  Widget _buildProfileInformation(BuildContext context) {
+  Widget _buildProfileInformation() {
     return ValueListenableBuilder(
       valueListenable: widget.currentProfile,
-      builder: (context, profile, _) {
+      builder: (context, Profile? profile, _) {
         final displayName =
             profile?.displayName ??
             widget.client.mxid(context).localpart ??
@@ -332,13 +323,12 @@ class _SettingsProfileViewMobileState extends State<SettingsProfileViewMobile> {
             }
           },
           child: GestureDetector(
-            behavior: HitTestBehavior.opaque,
+            behavior: .opaque,
             onTap: () {
               if (!isTextSelected) {
                 widget.onAvatarInfoTap.call();
                 return;
               }
-
               FocusScope.of(context).unfocus();
             },
             child: Container(
@@ -346,9 +336,9 @@ class _SettingsProfileViewMobileState extends State<SettingsProfileViewMobile> {
                 begin: SettingsProfileViewMobileStyle.minAvatarBackgroundHeight,
                 end: SettingsProfileViewMobileStyle.maxAvatarBackgroundHeight,
               ).transform(widget.animationController.value),
-              padding: const EdgeInsets.symmetric(horizontal: 12),
+              padding: const .symmetric(horizontal: 12),
               child: Column(
-                mainAxisAlignment: MainAxisAlignment.end,
+                mainAxisAlignment: .end,
                 children: [
                   const SizedBox(
                     height: SettingsProfileViewMobileStyle.avatarSize,
@@ -357,8 +347,8 @@ class _SettingsProfileViewMobileState extends State<SettingsProfileViewMobile> {
                   const SizedBox(height: 8),
                   Align(
                     alignment: Tween<Alignment>(
-                      begin: Alignment.center,
-                      end: Alignment.centerLeft,
+                      begin: .center,
+                      end: .centerLeft,
                     ).transform(widget.animationController.value),
                     child: Text(
                       displayName,
@@ -367,10 +357,10 @@ class _SettingsProfileViewMobileState extends State<SettingsProfileViewMobile> {
                           begin: sysColors.onSurface,
                           end: sysColors.onPrimary,
                         ).transform(widget.animationController.value),
-                        fontWeight: FontWeight.bold,
+                        fontWeight: .bold,
                       ),
                       maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
+                      overflow: .ellipsis,
                     ),
                   ),
                   const SizedBox(height: 12),

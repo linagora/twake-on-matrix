@@ -1,3 +1,4 @@
+import 'package:fluffychat/generated/l10n/app_localizations.dart';
 import 'package:fluffychat/pages/chat_list/chat_list_header_style.dart';
 import 'package:fluffychat/pages/settings_dashboard/settings_blocked_users/settings_blocked_users_search_state.dart';
 import 'package:fluffychat/presentation/model/contact/presentation_contact_constant.dart';
@@ -10,10 +11,10 @@ import 'package:fluffychat/widgets/matrix.dart';
 import 'package:fluffychat/widgets/search/empty_search_widget.dart';
 import 'package:fluffychat/widgets/twake_components/twake_icon_button.dart';
 import 'package:flutter/material.dart';
-import 'package:fluffychat/generated/l10n/app_localizations.dart';
 import 'package:go_router/go_router.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:matrix/matrix.dart';
+
 import 'settings_blocked_user.dart';
 
 class SettingsBlockedUsersView extends StatelessWidget {
@@ -23,11 +24,14 @@ class SettingsBlockedUsersView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = L10n.of(context)!;
+    final tertiaryColor = LinagoraSysColors.material().tertiary;
+
     return Scaffold(
       backgroundColor: LinagoraSysColors.material().onPrimary,
       resizeToAvoidBottomInset: false,
       appBar: TwakeAppBar(
-        title: L10n.of(context)!.blockedUsers,
+        title: l10n.blockedUsers,
         centerTitle: true,
         withDivider: true,
         context: context,
@@ -48,27 +52,25 @@ class SettingsBlockedUsersView extends StatelessWidget {
           child: Column(
             children: [
               Padding(
-                padding: const EdgeInsets.all(16.0),
+                padding: const .all(16.0),
                 child: TextField(
                   controller: controller.textEditingController,
                   contextMenuBuilder: mobileTwakeContextMenuBuilder,
                   focusNode: controller.inputFocus,
-                  textInputAction: TextInputAction.search,
+                  textInputAction: .search,
                   autofocus: true,
                   decoration:
                       ChatListHeaderStyle.searchInputDecoration(
                         context,
-                        prefixIconColor: LinagoraSysColors.material().tertiary,
+                        prefixIconColor: tertiaryColor,
                       ).copyWith(
-                        hintStyle: Theme.of(context).textTheme.titleMedium
-                            ?.copyWith(
-                              color: LinagoraSysColors.material().tertiary,
-                            ),
-                        hintText: L10n.of(context)!.enterAnEmailAddress,
+                        hintStyle: Theme.of(
+                          context,
+                        ).textTheme.titleMedium?.copyWith(color: tertiaryColor),
+                        hintText: l10n.enterAnEmailAddress,
                         suffixIcon: ValueListenableBuilder(
                           valueListenable: controller.textEditingController,
-                          builder: (context, value, child) =>
-                              value.text.isNotEmpty
+                          builder: (_, value, _) => value.text.isNotEmpty
                               ? IconButton(
                                   onPressed: () {
                                     controller.textEditingController.clear();
@@ -82,7 +84,7 @@ class SettingsBlockedUsersView extends StatelessWidget {
               ),
               ValueListenableBuilder(
                 valueListenable: controller.searchUserResults,
-                builder: (context, searchResults, child) {
+                builder: (_, searchResults, _) {
                   return searchResults.fold(
                     (failure) {
                       if (failure is BlockedUsersSearchEmptyState) {
@@ -96,7 +98,7 @@ class SettingsBlockedUsersView extends StatelessWidget {
                           shrinkWrap: true,
                           physics: const NeverScrollableScrollPhysics(),
                           itemCount: success.blockedUsers.length,
-                          padding: const EdgeInsets.symmetric(horizontal: 12.0),
+                          padding: const .symmetric(horizontal: 12.0),
                           itemBuilder: (context, index) {
                             final profile = success.blockedUsers[index];
 
@@ -130,11 +132,11 @@ class SettingsBlockedUsersView extends StatelessWidget {
   }) {
     return TwakeInkWell(
       onTap: () {
-        final roomId = Matrix.of(
-          context,
-        ).client.getDirectChatFromUserId(profile.userId);
+        final client = Matrix.of(context).client;
+        final roomId = client.getDirectChatFromUserId(profile.userId);
+
         if (roomId == null) {
-          if (profile.userId != Matrix.of(context).client.userID) {
+          if (profile.userId != client.userID) {
             Router.neglect(
               context,
               () => context.go(
@@ -157,7 +159,7 @@ class SettingsBlockedUsersView extends StatelessWidget {
         }
       },
       child: TwakeListItem(
-        padding: const EdgeInsets.all(8),
+        padding: const .all(8),
         child: Row(
           children: [
             Avatar(
@@ -167,7 +169,7 @@ class SettingsBlockedUsersView extends StatelessWidget {
             const SizedBox(width: 8.0),
             Expanded(
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+                crossAxisAlignment: .start,
                 children: [
                   Row(
                     children: [

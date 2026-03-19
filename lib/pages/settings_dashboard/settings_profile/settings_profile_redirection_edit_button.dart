@@ -19,6 +19,7 @@ class SettingsProfileRedirectionEditButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
+    final sysColor = LinagoraSysColors.material();
     final matrix = Matrix.of(context);
     final userId = matrix.client.userID;
     final commonSettingsInformation = matrix
@@ -40,14 +41,12 @@ class SettingsProfileRedirectionEditButton extends StatelessWidget {
       padding: const EdgeInsetsDirectional.only(end: 16),
       child: TextButton(
         style: TextButton.styleFrom(
-          padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
-          overlayColor: LinagoraSysColors.material().shadow.withValues(
-            alpha: 0.2,
-          ),
+          padding: const .symmetric(vertical: 10, horizontal: 12),
+          overlayColor: sysColor.shadow.withValues(alpha: 0.2),
           textStyle: textTheme.labelLarge?.copyWith(
             fontSize: 14,
             height: 20 / 14,
-            color: LinagoraSysColors.material().primary,
+            color: sysColor.primary,
           ),
         ),
         onPressed: () {

@@ -1,10 +1,11 @@
 import 'package:collection/collection.dart';
 import 'package:file_picker/file_picker.dart';
-import 'package:fluffychat/widgets/matrix.dart';
-import 'package:flutter/material.dart';
 import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/config/setting_keys.dart';
+import 'package:fluffychat/widgets/matrix.dart';
 import 'package:fluffychat/widgets/theme_builder.dart';
+import 'package:flutter/material.dart';
+
 import 'settings_style_view.dart';
 
 class SettingsStyle extends StatefulWidget {
@@ -16,31 +17,31 @@ class SettingsStyle extends StatefulWidget {
 
 class SettingsStyleController extends State<SettingsStyle> {
   void setWallpaperAction() async {
-    final picked = await FilePicker.platform.pickFiles(type: FileType.image);
+    final picked = await FilePicker.platform.pickFiles(type: .image);
     final pickedFile = picked?.files.firstOrNull;
 
     if (pickedFile == null) return;
-    await Matrix.of(
-      context,
-    ).store.setItem(SettingKeys.wallpaper, pickedFile.path);
+    await matrix.store.setItem(SettingKeys.wallpaper, pickedFile.path);
     setState(() {});
   }
 
   void deleteWallpaperAction() async {
-    Matrix.of(context).wallpaper = null;
-    await Matrix.of(context).store.deleteItem(SettingKeys.wallpaper);
+    matrix.wallpaper = null;
+    await matrix.store.deleteItem(SettingKeys.wallpaper);
     setState(() {});
   }
 
   void setChatColor(Color? color) async {
     if (color != null) {
       AppConfig.colorSchemeSeed = color;
-      ThemeController.of(context).setPrimaryColor(color);
     }
+    controller.setPrimaryColor(color);
   }
 
-  ThemeMode get currentTheme => ThemeController.of(context).themeMode;
-  Color? get currentColor => ThemeController.of(context).primaryColor;
+  MatrixState get matrix => Matrix.of(context);
+  ThemeController get controller => ThemeController.of(context);
+  ThemeMode get currentTheme => controller.themeMode;
+  Color? get currentColor => controller.primaryColor;
 
   static final List<Color?> customColors = [
     AppConfig.chatColor,
@@ -55,14 +56,14 @@ class SettingsStyleController extends State<SettingsStyle> {
   void switchTheme(ThemeMode? newTheme) {
     if (newTheme == null) return;
     switch (newTheme) {
-      case ThemeMode.light:
-        ThemeController.of(context).setThemeMode(ThemeMode.light);
+      case .light:
+        controller.setThemeMode(.light);
         break;
-      case ThemeMode.dark:
-        ThemeController.of(context).setThemeMode(ThemeMode.dark);
+      case .dark:
+        controller.setThemeMode(.dark);
         break;
-      case ThemeMode.system:
-        ThemeController.of(context).setThemeMode(ThemeMode.system);
+      case .system:
+        controller.setThemeMode(.system);
         break;
     }
     setState(() {});
@@ -70,7 +71,7 @@ class SettingsStyleController extends State<SettingsStyle> {
 
   void changeFontSizeFactor(double d) {
     setState(() => AppConfig.fontSizeFactor = d);
-    Matrix.of(context).store.setItem(
+    matrix.store.setItem(
       SettingKeys.fontSizeFactor,
       AppConfig.fontSizeFactor.toString(),
     );
@@ -78,12 +79,12 @@ class SettingsStyleController extends State<SettingsStyle> {
 
   void changeBubbleSizeFactor(double d) {
     setState(() => AppConfig.bubbleSizeFactor = d);
-    Matrix.of(context).store.setItem(
+    matrix.store.setItem(
       SettingKeys.bubbleSizeFactor,
       AppConfig.bubbleSizeFactor.toString(),
     );
   }
 
   @override
-  Widget build(BuildContext context) => SettingsStyleView(this);
+  Widget build(_) => SettingsStyleView(this);
 }
