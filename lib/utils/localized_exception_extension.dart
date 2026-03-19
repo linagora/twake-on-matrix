@@ -45,6 +45,6 @@ extension LocalizedExceptionExtension on Object {
     if (this is String) return toString();
     if (this is UiaException) return toString();
     Logs().w('Something went wrong: ', this);
-    return L10n.of(context)!.oopsSomethingWentWrong;
+    return L10n.of(context)!.waitingForResponse;
   }
 }

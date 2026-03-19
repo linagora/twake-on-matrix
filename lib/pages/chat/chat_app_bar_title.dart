@@ -16,6 +16,7 @@ import 'package:fluffychat/resource/image_paths.dart';
 import 'package:fluffychat/utils/common_helper.dart';
 import 'package:fluffychat/utils/room_status_extension.dart';
 import 'package:fluffychat/utils/string_extension.dart';
+import 'package:fluffychat/widgets/connection_status_header.dart';
 import 'package:flutter/material.dart';
 import 'package:fluffychat/generated/l10n/app_localizations.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -143,17 +144,25 @@ class ChatAppBarTitle extends StatelessWidget {
                             style: ChatAppBarTitleStyle.appBarTitleStyle(
                               context,
                             ),
-                          ),
-                        ),
-                      ],
+                          );
+                        },
+                      ),
                     ),
-                    statusContent!,
                   ],
                 ),
-              ),
-            ],
-          );
-        },
+                ConnectionStatusHeader(
+                  connectedWidget: _ChatAppBarStatusContent(
+                    connectivityResultStream: connectivityResultStream,
+                    room: room!,
+                    cachedPresenceNotifier: cachedPresenceNotifier,
+                    cachedPresenceStreamController:
+                        cachedPresenceStreamController,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
