@@ -1,4 +1,5 @@
 import 'package:fluffychat/pages/chat/chat.dart';
+import 'package:fluffychat/widgets/twake_components/unread_count_badge.dart';
 import 'package:fluffychat/pages/chat/chat_app_bar_title.dart';
 import 'package:fluffychat/pages/chat/chat_invitation_body.dart';
 import 'package:fluffychat/pages/chat/chat_view_body.dart';
@@ -189,27 +190,54 @@ class ChatView extends StatelessWidget with MessageContentMixin {
               floatingActionButton: ValueListenableBuilder(
                 valueListenable: controller.showScrollDownButtonNotifier,
                 builder: (context, showScrollDownButton, _) {
-                  if (showScrollDownButton &&
-                      controller.selectedEvents.isEmpty &&
-                      controller.replyEventNotifier.value == null) {
-                    return ValueListenableBuilder(
-                      valueListenable: controller.audioRecordStateNotifier,
-                      builder: (context, audioRecordState, _) {
-                        if (audioRecordState != AudioRecordState.initial) {
-                          return const SizedBox.shrink();
-                        }
-                        return Padding(
-                          padding: const EdgeInsets.only(bottom: 56.0),
-                          child: FloatingActionButton(
-                            onPressed: controller.scrollDown,
-                            mini: true,
-                            child: const Icon(Icons.arrow_downward_outlined),
-                          ),
+                  return ValueListenableBuilder(
+                    valueListenable: controller.replyEventNotifier,
+                    builder: (context, replyEvent, _) {
+                      if (showScrollDownButton &&
+                          controller.selectedEvents.isEmpty &&
+                          replyEvent == null) {
+                        return ValueListenableBuilder(
+                          valueListenable: controller.audioRecordStateNotifier,
+                          builder: (context, audioRecordState, _) {
+                            if (audioRecordState != AudioRecordState.initial) {
+                              return const SizedBox.shrink();
+                            }
+                            final unreadCount =
+                                controller.room?.notificationCount ?? 0;
+                            return Padding(
+                              padding: const EdgeInsets.only(bottom: 56.0),
+                              child: Stack(
+                                clipBehavior: Clip.none,
+                                alignment: Alignment.center,
+                                children: [
+                                  FloatingActionButton(
+                                    onPressed: controller.scrollDown,
+                                    mini: true,
+                                    materialTapTargetSize:
+                                        MaterialTapTargetSize.shrinkWrap,
+                                    child: const Icon(
+                                      Icons.arrow_downward_outlined,
+                                    ),
+                                  ),
+                                  if (unreadCount > 0)
+                                    Positioned(
+                                      top: -10,
+                                      child: UnreadCountBadge(
+                                        count: unreadCount,
+                                        backgroundColor: Theme.of(
+                                          context,
+                                        ).colorScheme.primary,
+                                      ),
+                                    ),
+                                ],
+                              ),
+                            );
+                          },
                         );
-                      },
-                    );
-                  }
-                  return const SizedBox();
+                      }
+                      return const SizedBox();
+                    },
+                  );
                 },
               ),
               body: _buildBody(),
