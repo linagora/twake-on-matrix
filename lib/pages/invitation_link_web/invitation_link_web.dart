@@ -32,7 +32,6 @@ class _InvitationLinkWebState extends State<InvitationLinkWeb> {
     return Scaffold(
       body: Center(
         child: CupertinoActivityIndicator(
-          animating: true,
           color: LinagoraSysColors.material().onSurfaceVariant,
         ),
       ),
