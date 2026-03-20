@@ -89,6 +89,7 @@ class LoginController extends State<Login> {
       );
     } on MatrixException catch (exception) {
       if (!mounted) return;
+      TwakeDialog.hideLoadingDialog(context);
       setState(() {
         passwordError = exception.errorMessage;
         loading = false;
@@ -96,6 +97,7 @@ class LoginController extends State<Login> {
       return;
     } catch (exception) {
       if (!mounted) return;
+      TwakeDialog.hideLoadingDialog(context);
       setState(() {
         passwordError = exception.toString();
         loading = false;
