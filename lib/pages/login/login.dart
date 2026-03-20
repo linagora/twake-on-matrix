@@ -88,13 +88,19 @@ class LoginController extends State<Login> {
         initialDeviceDisplayName: PlatformInfos.clientName,
       );
     } on MatrixException catch (exception) {
-      TwakeDialog.hideLoadingDialog(context);
-      setState(() => passwordError = exception.errorMessage);
-      return setState(() => loading = false);
+      if (!mounted) return;
+      setState(() {
+        passwordError = exception.errorMessage;
+        loading = false;
+      });
+      return;
     } catch (exception) {
-      TwakeDialog.hideLoadingDialog(context);
-      setState(() => passwordError = exception.toString());
-      return setState(() => loading = false);
+      if (!mounted) return;
+      setState(() {
+        passwordError = exception.toString();
+        loading = false;
+      });
+      return;
     }
 
     if (mounted) setState(() => loading = false);
@@ -110,24 +116,21 @@ class LoginController extends State<Login> {
     );
   }
 
-  final Completer _loginCompleter = Completer();
+  final Completer<void> _loginCompleter = Completer<void>();
 
   void _listenClientLoginStateChanged(ClientLoginStateEvent event) {
+    if (!mounted || _loginCompleter.isCompleted) return;
     Logs().i(
       'StreamDialogBuilder::_listenClientLoginStateChanged - ${event.multipleAccountLoginType}',
     );
-    if (event.multipleAccountLoginType ==
-        MultipleAccountLoginType.firstLoggedIn) {
-      _handleFirstLoggedIn(event.client);
-      if (!_loginCompleter.isCompleted) _loginCompleter.complete();
-      return;
-    }
-
-    if (event.multipleAccountLoginType ==
-        MultipleAccountLoginType.otherAccountLoggedIn) {
-      _handleAddAnotherAccount(event.client);
-      if (!_loginCompleter.isCompleted) _loginCompleter.complete();
-      return;
+    _loginCompleter.complete();
+    switch (event.multipleAccountLoginType) {
+      case MultipleAccountLoginType.firstLoggedIn:
+        _handleFirstLoggedIn(event.client);
+        return;
+      case MultipleAccountLoginType.otherAccountLoggedIn:
+        _handleAddAnotherAccount(event.client);
+        return;
     }
   }
 
@@ -225,6 +228,7 @@ class LoginController extends State<Login> {
 
   @override
   void dispose() {
+    _coolDown?.cancel();
     usernameController.dispose();
     passwordController.dispose();
     _clientLoginStateChangedSubscription?.cancel();

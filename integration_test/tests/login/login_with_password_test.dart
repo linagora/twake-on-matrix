@@ -20,10 +20,11 @@ void main() {
       app.main();
 
       // Set up error handler
-      final originalOnError = FlutterError.onError!;
+      final originalOnError = FlutterError.onError;
       FlutterError.onError = (FlutterErrorDetails details) {
-        originalOnError(details);
+        (originalOnError ?? FlutterError.presentError)(details);
       };
+      addTearDown(() => FlutterError.onError = originalOnError);
 
       final s = SoftAssertHelper();
       final loginRobot = LoginRobot($);
@@ -31,6 +32,14 @@ void main() {
       const username = String.fromEnvironment('USERNAME');
       const password = String.fromEnvironment('PASSWORD');
       const serverUrl = String.fromEnvironment('SERVER_URL');
+
+      expect(username, isNotEmpty, reason: 'Missing USERNAME in --dart-define');
+      expect(password, isNotEmpty, reason: 'Missing PASSWORD in --dart-define');
+      expect(
+        serverUrl,
+        isNotEmpty,
+        reason: 'Missing SERVER_URL in --dart-define',
+      );
 
       // Navigate through welcome screen to login page
       if (await loginRobot.isWelcomePageVisible()) {
