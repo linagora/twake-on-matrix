@@ -122,6 +122,7 @@ abstract class AppRoutes {
     ),
     GoRoute(
       path: '/chat/:matrixId',
+      redirect: loggedOutRedirect,
       pageBuilder: (context, state) {
         final matrixId = state.pathParameters['matrixId'];
         return defaultPageBuilder(
