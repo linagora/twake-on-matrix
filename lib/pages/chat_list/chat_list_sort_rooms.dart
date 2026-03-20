@@ -30,6 +30,13 @@ class _ChatListSortRoomsState extends State<ChatListSortRooms> {
   Map<String, Event?> _lastEventByRoomId = {};
   List<Room> _sortCache = [];
   Map<String, StreamSubscription?> _roomSubscriptions = {};
+  Future<List<Room>>? _sortFuture;
+
+  /// Monotonically increasing counter to invalidate stale sort futures.
+  /// Each call to [_triggerSort] increments this value. When a sort future
+  /// completes, it checks whether its generation matches [_sortGeneration].
+  /// If not, the result is discarded (a newer sort has been triggered).
+  int _sortGeneration = 0;
 
   RoomSorter sortRoomsBy(Client client) => (a, b) {
     if (client.pinInvitedRooms &&
@@ -53,17 +60,32 @@ class _ChatListSortRoomsState extends State<ChatListSortRooms> {
         );
   };
 
-  Future<List<Room>> sortRooms() async {
+  Future<List<Room>> _sortRooms(int generation) async {
     await Matrix.of(context).initSettingsCompleter.future;
     for (final room in widget.rooms) {
+      // Bail out early if the widget was disposed or a newer sort was
+      // triggered while we were awaiting.
+      if (!mounted || generation != _sortGeneration) return _sortCache;
+
       if (_lastEventByRoomId[room.id] != null) continue;
 
       final event = await room.lastEventAvailableInPreview();
+
+      if (!mounted || generation != _sortGeneration) return _sortCache;
+
       _lastEventByRoomId[room.id] = event;
     }
+
+    if (!mounted) return _sortCache;
+
     widget.sortingRoomsNotifier.value = false;
     return List.from(widget.rooms)
       ..sort(sortRoomsBy(Matrix.of(context).client));
+  }
+
+  void _triggerSort() {
+    _sortGeneration++;
+    _sortFuture = _sortRooms(_sortGeneration);
   }
 
   @override
@@ -82,6 +104,7 @@ class _ChatListSortRoomsState extends State<ChatListSortRooms> {
         ),
       ),
     );
+    _triggerSort();
   }
 
   @override
@@ -114,12 +137,24 @@ class _ChatListSortRoomsState extends State<ChatListSortRooms> {
         ),
       ),
     );
+    _triggerSort();
+  }
+
+  @override
+  void dispose() {
+    for (final subscription in _roomSubscriptions.values) {
+      subscription?.cancel();
+    }
+    _roomSubscriptions.clear();
+    // Invalidate any in-flight sort future so its callbacks become no-ops.
+    _sortGeneration++;
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return FutureBuilder(
-      future: sortRooms(),
+      future: _sortFuture,
       builder: (context, snapshot) {
         if (snapshot.data != null) {
           _sortCache = snapshot.data!;
