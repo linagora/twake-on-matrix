@@ -121,10 +121,10 @@ abstract class AppRoutes {
       },
     ),
     GoRoute(
-      path: '/chat/:matrixId',
+      path: AppRoutePaths.invitationLinkFull,
       redirect: loggedOutRedirect,
       pageBuilder: (context, state) {
-        final matrixId = state.pathParameters['matrixId'];
+        final matrixId = state.pathParameters[AppRoutePaths.matrixId];
         return defaultPageBuilder(
           context,
           InvitationLinkWeb(matrixId: matrixId),

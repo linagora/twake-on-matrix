@@ -31,7 +31,7 @@ class UrlLauncher with GoToDraftChatMixin {
       ? ChromeSafariBrowser()
       : null;
 
-  void launchUrl() {
+  void launchUrl({bool isInvitationLink = false}) {
     if (url!.toLowerCase().startsWith(AppConfig.deepLinkPrefix) ||
         url!.toLowerCase().startsWith(AppConfig.inviteLinkPrefix) ||
         {'#', '@', '!', '+', '\$'}.contains(url![0]) ||
@@ -50,7 +50,10 @@ class UrlLauncher with GoToDraftChatMixin {
         host: inviteUri.host,
         path: uri.path.replaceFirst('/chat', ''),
       );
-      return openMatrixToUrl(matrixToUri.toString());
+      return openMatrixToUrl(
+        customUrl: matrixToUri.toString(),
+        isInvitationLink: isInvitationLink,
+      );
     }
     if (!{'https', 'http'}.contains(uri.scheme)) {
       // just launch non-https / non-http uris directly
@@ -111,7 +114,10 @@ class UrlLauncher with GoToDraftChatMixin {
     );
   }
 
-  void openMatrixToUrl([String? customUrl]) async {
+  void openMatrixToUrl({
+    String? customUrl,
+    bool isInvitationLink = false,
+  }) async {
     final matrix = Matrix.of(context);
     final url = (customUrl ?? this.url!).replaceFirst(
       AppConfig.deepLinkPrefix,
@@ -218,6 +224,7 @@ class UrlLauncher with GoToDraftChatMixin {
       onContactTap(
         context: context,
         path: 'rooms',
+        isInvitationLink: true,
         contactPresentationSearch: ContactPresentationSearch(
           matrixId: identityParts.primaryIdentifier,
           displayName:

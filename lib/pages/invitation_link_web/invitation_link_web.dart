@@ -23,7 +23,10 @@ class _InvitationLinkWebState extends State<InvitationLinkWeb> {
         context.go('/rooms');
         return;
       }
-      UrlLauncher(context, url: widget.matrixId).launchUrl();
+      UrlLauncher(
+        context,
+        url: widget.matrixId,
+      ).launchUrl(isInvitationLink: true);
     });
   }
 
