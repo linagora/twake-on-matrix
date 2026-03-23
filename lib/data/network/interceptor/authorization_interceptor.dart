@@ -23,7 +23,15 @@ class AuthorizationInterceptor extends InterceptorsWrapper {
 
   @override
   void onError(DioException err, ErrorInterceptorHandler handler) {
-    Logs().wtf('AuthorizationInterceptor::onError:', err.error, err.stackTrace);
+    if (err.response?.statusCode == 401) {
+      Logs().wtf(
+        'AuthorizationInterceptor::onError:',
+        err.error,
+        err.stackTrace,
+      );
+    } else {
+      Logs().e('AuthorizationInterceptor::onError:', err.error, err.stackTrace);
+    }
     super.onError(err, handler);
   }
 
