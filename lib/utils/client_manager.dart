@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:fluffychat/utils/custom_http_client.dart';
 import 'package:fluffychat/utils/custom_image_resizer.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/flutter_hive_collections_database.dart';
+import 'package:fluffychat/utils/matrix_sdk_extensions/twake_client.dart';
 import 'package:fluffychat/utils/open_sqflite_db.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:flutter/foundation.dart';
@@ -92,7 +93,7 @@ abstract class ClientManager {
       : NativeImplementationsIsolate(compute, vodozemacInit: () => vod.init());
 
   static Future<Client> createClient(String clientName) async {
-    return Client(
+    return TwakeClient(
       clientName,
       httpClient: PlatformInfos.isAndroid
           ? CustomHttpClient.createHTTPClient()
