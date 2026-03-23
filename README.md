@@ -1,10 +1,7 @@
 # Twake Chat Client
-[![Contributors](https://img.shields.io/github/contributors/linagora/twake-on-matrix?label=Contributors
-)](
-  https://github.com/linagora/twake-on-matrix/graphs/contributors
-)
-[![Issues](https://img.shields.io/github/issues/linagora/twake-on-matrix?label=Issues
-)](https://github.com/linagora/twake-on-matrix/issues)
+
+[![Contributors](https://img.shields.io/github/contributors/linagora/twake-on-matrix?label=Contributors)](https://github.com/linagora/twake-on-matrix/graphs/contributors)
+[![Issues](https://img.shields.io/github/issues/linagora/twake-on-matrix?label=Issues)](https://github.com/linagora/twake-on-matrix/issues)
 [![Documentation](https://img.shields.io/badge/Documentation-green.svg)](docs)
 [![Android application](https://img.shields.io/badge/App-Android-blue.svg)](https://play.google.com/store/apps/dev?id=8845244706987756601)
 [![Ios application](https://img.shields.io/badge/App-iOS-red.svg)](https://apps.apple.com/gr/developer/linagora/id1110867042)
@@ -14,8 +11,6 @@
   <a href="https://github.com/linagora/twake-on-matrix">
      <img src="https://github.com/linagora/twake-on-matrix/assets/146178981/3e395e0e-5796-4986-97ab-814ae28745b2">
   </a>
-
-
 
   <p align="center">
     <a href="https://twake-chat.com">Website</a>
@@ -59,6 +54,7 @@ Please make sure to run the following command at first, to verify your code befo
 ```bash
 bash scripts/config-pre-commit.sh
 ```
+
 ### Requirements
 
 - [ ] Flutter 3.38.9
@@ -71,7 +67,7 @@ flutter doctor -v
 
 #### Web
 
-If you only plan to work on the `web` target we recommend installing Google Chrome as it is the default supported target *(Flutter being developped by Google)*.
+If you only plan to work on the `web` target we recommend installing Google Chrome as it is the default supported target _(Flutter being developped by Google)_.
 
 It is also **required** to have a web ready version of libolm available in the `assets/js/package` folder. You can build a version using:
 
@@ -86,9 +82,10 @@ exit
 # back on your host
 sudo chown $(id -u):$(id -g) ./assets/js/package -Rv
 ```
+
 #### Android
 
-- [ ] An implementation of JDK 17 *(tested with openjdk-17.0.13+11)*
+- [ ] An implementation of JDK 17 _(tested with openjdk-17.0.13+11)_
 - [ ] (Optional) Android Studio
 - [ ] An Android SDK with:
   - [ ] Android build tools: 34.0.0
@@ -97,7 +94,7 @@ sudo chown $(id -u):$(id -g) ./assets/js/package -Rv
   - [ ] Android NDK: 26.1.10909125
   - [ ] Google APIs: enabled
 
-*Note: Gradle will try to install the JDK 8. If for any reasons the operation failed, try to install your own and use [this method](https://github.com/pm-McFly/twake-on-matrix/issues/1#issuecomment-2581428804) to tell Gradle where to find it.*
+_Note: Gradle will try to install the JDK 8. If for any reasons the operation failed, try to install your own and use [this method](https://github.com/pm-McFly/twake-on-matrix/issues/1#issuecomment-2581428804) to tell Gradle where to find it._
 
 #### Linux
 
@@ -107,13 +104,14 @@ sudo chown $(id -u):$(id -g) ./assets/js/package -Rv
 - [ ] Lib WebKit 2 GTK
 - [ ] Lib OLM
 
-*If needed, a complete list is available in the `flake.nix`.*
+_If needed, a complete list is available in the `flake.nix`._
 
 On Ubuntu, the following command should install all the required elements:
 
 ```bash
 sudo apt install libjsoncpp1 libsecret-1-dev libsecret-1-0 librhash0 libwebkit2gtk-4.0-dev libolm3
 ```
+
 ---
 
 In addition, the Linux build requires Rust. For macOS or Linux, execute the following command in a terminal emulator:
@@ -121,6 +119,7 @@ In addition, the Linux build requires Rust. For macOS or Linux, execute the foll
 ```bash
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 ```
+
 For Windows, you can use the [Rust Installer](https://static.rust-lang.org/rustup/dist/x86_64-pc-windows-msvc/rustup-init.exe).
 
 In case you have Rust already installed, make sure to update it to latest version:
@@ -134,7 +133,7 @@ rustup update
 A `devenv.nix` is provided in order to ease the process of setting up your dev environment. Check out the install instructions: https://devenv.sh/getting-started/
 
 Then you can use `devenv shell` to fire up your environment.
-*This can be automated thanks to: `[nix-direnv](https://github.com/nix-community/nix-direnv/)`*
+_This can be automated thanks to: `[nix-direnv](https://github.com/nix-community/nix-direnv/)`_
 
 Supported platforms:
 
@@ -213,6 +212,65 @@ Please use the helper script corresponding to your target in order to build:
 ./scripts/build-android-debug.sh
 ```
 
+### Performance Profiling
+
+#### Why Chrome DevTools instead of Flutter DevTools?
+
+Flutter DevTools is designed for native (iOS/Android/Desktop) profiling and provides frame-level insights via the Dart VM. On **Flutter Web** however, the Dart code is compiled to JavaScript and runs inside a browser engine. Flutter DevTools cannot profile the JavaScript execution, browser rendering pipeline, or web worker scheduling.
+
+**Chrome DevTools Performance panel** is the right tool for Flutter Web because it captures the actual browser behavior: main thread long tasks, animation frame durations, garbage collection pauses, network timing, and GPU compositing — which is where the real bottlenecks are on web.
+
+#### The problem with manual analysis
+
+A Chrome DevTools performance trace recorded over a typical user session (navigating conversations, scrolling, viewing members) produces a **JSON file exceeding 350,000 lines**. The flame chart is virtually unreadable by eye for identifying patterns across hundreds of animation frames and long tasks.
+
+#### Automated profiling with Chrome DevTools MCP
+
+We use the [Chrome DevTools MCP](https://github.com/ChromeDevTools/chrome-devtools-mcp/?tab=readme-ov-file) server connected to an AI coding assistant (OpenCode + Claude Code) to **automate the entire profiling workflow**:
+
+1. **Install the MCP server** — add to your OpenCode MCP configuration (~/.config/opencode/opencode.json):
+
+   ```json
+   {
+     "$schema": "https://opencode.ai/config.json",
+     "mcp": {
+       "chrome-devtools": {
+         "type": "local",
+         "command": ["npx", "-y", "chrome-devtools-mcp@latest"]
+       }
+     }
+   }
+   ```
+
+2. **Switch to the original branch you want to compare with your changes**
+
+3. **Ask Claude Opus 4.6 to perform the profiling** — example prompt:
+
+   > Run the app on Chrome, in profile mode, connect via the Chrome DevTools MCP, set CPU throttling to 4x (recommended threshold to simulate a low-end device), start a performance trace, navigate through the app (open DM conversations, group rooms, scroll through messages, view member lists), stop the trace, and analyze the results. Compare before/after if applicable (Sync XHR (main thread), Animation frame avg, Jank, Long tasks, JS Heap).
+
+Every now and then, manually scroll through the app using your mouse to make sure that the programmatic scrolling isn't skewing the data.
+
+4. **Switch to the branch where your changes are and ask again the AI to run the app and compare with the first run**
+
+5. **What the AI does automatically**:
+   - Connects to the running Chrome instance via the DevTools Protocol
+   - Sets CPU 4x throttling to simulate a low-end device
+   - Starts a performance trace recording
+   - Navigates the app by dispatching pointer/wheel events on the Flutter canvas
+   - Stops the trace and saves the raw JSON (typically 20+ MB compressed)
+   - Parses the trace programmatically to extract: long tasks (>50ms), animation frame durations (avg, P95, P99, jank %), GC pauses, XHR/sync timing, JS heap size
+   - Produces a comparison table if a baseline trace exists
+
+#### Key metrics to watch
+
+| Metric                 | Target   | Description                                                   |
+| ---------------------- | -------- | ------------------------------------------------------------- |
+| Sync XHR (main thread) | < 50ms   | Time spent parsing `/sync` responses on the main thread       |
+| Animation frame avg    | < 16.7ms | Average frame duration (60fps = 16.7ms budget)                |
+| Jank (frames > 16.7ms) | < 20%    | Percentage of frames that miss the 60fps deadline             |
+| Long tasks (> 50ms)    | Minimize | Tasks that block the main thread and cause visible stuttering |
+| JS Heap                | Monitor  | Memory pressure indicator — high values increase GC frequency |
+
 ## Deployment
 
 ### Web version using Docker
@@ -221,6 +279,7 @@ Please use the helper script corresponding to your target in order to build:
   [docs](https://github.com/linagora/twake-on-matrix/blob/main/docs/configurations/config_web_app_for_public_platform.md)
 
 - Run the image using the following command:
+
 ```
 docker run -d -p <host port>:<host port> -e TWAKECHAT_LISTEN_PORT=<host port> --name <container name> -v <host path>:/usr/share/nginx/html/web/config.json linagora/twake-web:<tag>
 ```
@@ -247,6 +306,7 @@ docker run -d -p <host port>:<host port> -e TWAKECHAT_LISTEN_PORT=<host port> --
 ```
 
 - Run the image using the following command with my port is `6868`:
+
 ```
 docker run -d -p 6868:6868 -e TWAKECHAT_LISTEN_PORT=6868 --name twake-web -v /path/to/config.json:/usr/share/nginx/html/web/config.json linagora/twake-web:v2.19.7
 ```
@@ -255,18 +315,18 @@ docker run -d -p 6868:6868 -e TWAKECHAT_LISTEN_PORT=6868 --name twake-web -v /pa
 
 # Special thanks
 
-* <a href="https://github.com/krille-chan/fluffychat">FluffyChat</a> is the original repository of this project. A huge thanks to the upstream repository for their vital contributions, not only for this project but also for [Matrix SDK in Dart](https://github.com/famedly/matrix-dart-sdk)
+- <a href="https://github.com/krille-chan/fluffychat">FluffyChat</a> is the original repository of this project. A huge thanks to the upstream repository for their vital contributions, not only for this project but also for [Matrix SDK in Dart](https://github.com/famedly/matrix-dart-sdk)
 
-* <a href="https://github.com/fabiyamada">Fabiyamada</a> is a graphics designer from Brasil and has made the fluffychat logo and the banner. Big thanks for her great designs.
+- <a href="https://github.com/fabiyamada">Fabiyamada</a> is a graphics designer from Brasil and has made the fluffychat logo and the banner. Big thanks for her great designs.
 
-* <a href="https://github.com/advocatux">Advocatux</a> has made the Spanish translation with great love and care. He always stands by my side and supports my work with great commitment.
+- <a href="https://github.com/advocatux">Advocatux</a> has made the Spanish translation with great love and care. He always stands by my side and supports my work with great commitment.
 
-* Thanks to MTRNord and Sorunome for developing.
+- Thanks to MTRNord and Sorunome for developing.
 
-* Also thanks to all translators and testers! With your help, fluffychat is now available in more than 12 languages.
+- Also thanks to all translators and testers! With your help, fluffychat is now available in more than 12 languages.
 
-* <a href="https://github.com/googlefonts/noto-emoji/">Noto Emoji Font</a> for the awesome emojis.
+- <a href="https://github.com/googlefonts/noto-emoji/">Noto Emoji Font</a> for the awesome emojis.
 
-* <a href="https://github.com/madsrh/WoodenBeaver">WoodenBeaver</a> sound theme for the notification sound.
+- <a href="https://github.com/madsrh/WoodenBeaver">WoodenBeaver</a> sound theme for the notification sound.
 
-* The Matrix Foundation for making and maintaining the [emoji translations](https://github.com/matrix-org/matrix-doc/blob/main/data-definitions/sas-emoji.json) used for emoji verification, licensed Apache 2.0
+- The Matrix Foundation for making and maintaining the [emoji translations](https://github.com/matrix-org/matrix-doc/blob/main/data-definitions/sas-emoji.json) used for emoji verification, licensed Apache 2.0
