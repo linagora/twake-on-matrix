@@ -132,6 +132,7 @@ class LoginController extends State<Login> {
       'StreamDialogBuilder::_listenClientLoginStateChanged - ${event.multipleAccountLoginType}',
     );
     _loginCompleter.complete();
+    _pendingLoginClient = null;
     switch (event.multipleAccountLoginType) {
       case MultipleAccountLoginType.firstLoggedIn:
         _handleFirstLoggedIn(event.client);

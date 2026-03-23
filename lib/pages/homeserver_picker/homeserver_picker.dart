@@ -29,8 +29,18 @@ import '../../utils/localized_exception_extension.dart';
 import 'package:fluffychat/utils/tor_stub.dart'
     if (dart.library.html) 'package:tor_detector_web/tor_detector_web.dart';
 
+enum HomeserverPickerType { singleAccount, multiAccount }
+
+class HomeserverPickerArg {
+  final HomeserverPickerType type;
+
+  const HomeserverPickerArg({required this.type});
+}
+
 class HomeserverPicker extends StatefulWidget {
-  const HomeserverPicker({super.key});
+  final HomeserverPickerArg arg;
+
+  const HomeserverPicker({super.key, required this.arg});
 
   @override
   HomeserverPickerController createState() => HomeserverPickerController();
@@ -208,8 +218,7 @@ class HomeserverPickerController extends State<HomeserverPicker>
             state = HomeserverState.ssoLoginServer;
           }
         } else if (supportsLogin(context)) {
-          state = HomeserverState.passwordLoginMethod;
-          context.push('/home/login');
+          handlePasswordLogin();
         }
         FocusManager.instance.primaryFocus?.unfocus();
         setState(() {});
@@ -222,6 +231,15 @@ class HomeserverPickerController extends State<HomeserverPicker>
     } catch (e) {
       state = HomeserverState.wrongServerName;
       setState(() => error = (e).toLocalizedString(context));
+    }
+  }
+
+  void handlePasswordLogin() {
+    state = HomeserverState.passwordLoginMethod;
+    if (widget.arg.type == HomeserverPickerType.singleAccount) {
+      context.push('/home/login');
+    } else {
+      context.push('/rooms/addaccount/homeserverpicker/login');
     }
   }
 
