@@ -6,11 +6,15 @@ class SentryLogger implements Logger {
   @override
   Future<void> log(LogEntry entry) async {
     if (entry.level == LogLevel.wtf) {
-      await Sentry.captureException(
-        entry.error,
-        stackTrace: entry.stackTrace,
-        message: SentryMessage(entry.message),
-      );
+      if (entry.error != null) {
+        await Sentry.captureException(
+          entry.error,
+          stackTrace: entry.stackTrace,
+          message: SentryMessage(entry.message),
+        );
+      } else {
+        await Sentry.captureMessage(entry.message, level: SentryLevel.fatal);
+      }
     }
   }
 }
