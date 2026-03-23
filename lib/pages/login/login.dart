@@ -39,6 +39,7 @@ class LoginController extends State<Login> {
       setState(() => showPassword = !loading && !showPassword);
 
   void login() async {
+    if (_pendingLoginClient != null || loading) return;
     if (usernameController.text.isEmpty) {
       setState(() => usernameError = L10n.of(context)!.pleaseEnterYourUsername);
     } else {
