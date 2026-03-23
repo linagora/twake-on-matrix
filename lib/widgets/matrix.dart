@@ -743,8 +743,8 @@ class MatrixState extends State<Matrix>
       final toMConfigurations = await tomConfigurationRepository
           .getTomConfigurations(userID);
       return toMConfigurations;
-    } catch (e) {
-      Logs().wtf('MatrixState::_getTomConfigurations: $e');
+    } catch (e, s) {
+      Logs().wtf('MatrixState::_getTomConfigurations:', e, s);
     }
     return null;
   }
@@ -758,8 +758,8 @@ class MatrixState extends State<Matrix>
       final federationConfigurations = await federationConfigurationRepository
           .getFederationConfigurations(userId);
       return federationConfigurations;
-    } catch (e) {
-      Logs().wtf('MatrixState::_getFederationConfigurations: $e');
+    } catch (e, s) {
+      Logs().wtf('MatrixState::_getFederationConfigurations:', e, s);
     }
     return null;
   }
@@ -778,8 +778,8 @@ class MatrixState extends State<Matrix>
       );
       _setupAuthUrl(url: toMConfigurations.authUrl);
       loginType = toMConfigurations.loginType;
-    } catch (e) {
-      Logs().wtf('MatrixState::_retrieveToMConfiguration: $e');
+    } catch (e, s) {
+      Logs().wtf('MatrixState::_retrieveToMConfiguration:', e, s);
     }
   }
 
@@ -865,7 +865,7 @@ class MatrixState extends State<Matrix>
 
       await _tryStoreFederationConfiguration();
     } catch (e, s) {
-      Logs().wtf('MatrixState::tryToGetFederationConfigurations: $e', e, s);
+      Logs().wtf('MatrixState::tryToGetFederationConfigurations:', e, s);
 
       if (e is FederationConfigurationNotFound) {
         Logs().wtf(
