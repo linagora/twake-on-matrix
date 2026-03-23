@@ -47,7 +47,7 @@ mixin GoToDraftChatMixin {
         context: context,
         path: path,
         contactPresentationSearch: contactPresentationSearch,
-        isInvitationLink: isInvitationLink
+        isInvitationLink: isInvitationLink,
       );
     } else {
       TwakeDialog.showFutureLoadingDialogFullScreen(
