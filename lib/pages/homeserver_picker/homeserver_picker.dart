@@ -218,6 +218,9 @@ class HomeserverPickerController extends State<HomeserverPicker>
           }
         } else if (supportsLogin(context)) {
           handlePasswordLogin();
+        } else {
+          state = HomeserverState.otherLoginMethod;
+          context.push('/connect');
         }
         FocusManager.instance.primaryFocus?.unfocus();
         setState(() {});
