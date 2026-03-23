@@ -34,6 +34,7 @@ mixin GoToDraftChatMixin {
     required BuildContext context,
     required String path,
     required ContactPresentationSearch contactPresentationSearch,
+    bool isInvitationLink = false,
   }) {
     final roomId = Matrix.of(
       context,
@@ -46,6 +47,7 @@ mixin GoToDraftChatMixin {
         context: context,
         path: path,
         contactPresentationSearch: contactPresentationSearch,
+        isInvitationLink: isInvitationLink,
       );
     } else {
       TwakeDialog.showFutureLoadingDialogFullScreen(
@@ -79,10 +81,14 @@ mixin GoToDraftChatMixin {
     required BuildContext context,
     required String path,
     required ContactPresentationSearch contactPresentationSearch,
+    bool isInvitationLink = false,
   }) {
     if (contactPresentationSearch.matrixId ==
         Matrix.of(context).client.userID) {
       TwakeSnackBar.show(context, L10n.of(context)!.cannotCreateChatWithSelf);
+      if (isInvitationLink) {
+        context.go('/rooms');
+      }
       return;
     }
 
