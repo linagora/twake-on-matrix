@@ -1,10 +1,8 @@
-import 'dart:developer' as developer;
-import 'dart:js_interop';
-
-import 'package:fluffychat/utils/platform_infos.dart';
-import 'package:web/web.dart' show console;
 import '../log_types.dart';
 import '../logger.dart';
+import 'mobile_log_console.dart'
+    if (dart.library.html) 'web_log_console.dart'
+    as console_log;
 
 class ConsoleLogger implements Logger {
   @override
@@ -30,10 +28,6 @@ class ConsoleLogger implements Logger {
       message += '\nContext: ${entry.context}';
     }
 
-    if (PlatformInfos.isWeb) {
-      console.log(message.toJS);
-    } else {
-      developer.log(message);
-    }
+    console_log.log(message);
   }
 }
