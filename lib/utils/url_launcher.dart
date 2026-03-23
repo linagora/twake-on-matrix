@@ -36,7 +36,7 @@ class UrlLauncher with GoToDraftChatMixin {
         url!.toLowerCase().startsWith(AppConfig.inviteLinkPrefix) ||
         {'#', '@', '!', '+', '\$'}.contains(url![0]) ||
         url!.toLowerCase().startsWith(AppConfig.schemePrefix)) {
-      return openMatrixToUrl();
+      return openMatrixToUrl(isInvitationLink: isInvitationLink);
     }
     final uri = Uri.tryParse(url!);
     if (uri == null) {
@@ -224,7 +224,7 @@ class UrlLauncher with GoToDraftChatMixin {
       onContactTap(
         context: context,
         path: 'rooms',
-        isInvitationLink: true,
+        isInvitationLink: isInvitationLink,
         contactPresentationSearch: ContactPresentationSearch(
           matrixId: identityParts.primaryIdentifier,
           displayName:
