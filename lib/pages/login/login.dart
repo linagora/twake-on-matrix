@@ -33,6 +33,8 @@ class LoginController extends State<Login> {
   bool showPassword = false;
   late final Future<Client> loginClientFuture;
 
+  Client? _pendingLoginClient;
+
   void toggleShowPassword() =>
       setState(() => showPassword = !loading && !showPassword);
 
@@ -76,6 +78,7 @@ class LoginController extends State<Login> {
       }
       Matrix.of(context).loginType = LoginType.mLoginPassword;
       final client = await loginClientFuture;
+      _pendingLoginClient = client;
       await client.login(
         LoginType.mLoginPassword,
         identifier: identifier,
@@ -89,6 +92,7 @@ class LoginController extends State<Login> {
       );
     } on MatrixException catch (exception) {
       if (!mounted) return;
+      _pendingLoginClient = null;
       TwakeDialog.hideLoadingDialog(context);
       setState(() {
         passwordError = exception.errorMessage;
@@ -97,6 +101,7 @@ class LoginController extends State<Login> {
       return;
     } catch (exception) {
       if (!mounted) return;
+      _pendingLoginClient = null;
       TwakeDialog.hideLoadingDialog(context);
       setState(() {
         passwordError = exception.toString();
@@ -122,6 +127,7 @@ class LoginController extends State<Login> {
 
   void _listenClientLoginStateChanged(ClientLoginStateEvent event) {
     if (!mounted || _loginCompleter.isCompleted) return;
+    if (event.client != _pendingLoginClient) return;
     Logs().i(
       'StreamDialogBuilder::_listenClientLoginStateChanged - ${event.multipleAccountLoginType}',
     );
