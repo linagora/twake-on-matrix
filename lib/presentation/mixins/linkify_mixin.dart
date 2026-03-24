@@ -1,6 +1,5 @@
 import 'package:fluffychat/pages/chat/phone_number_context_menu_actions.dart';
 import 'package:fluffychat/utils/extension/build_context_extension.dart';
-import 'package:fluffychat/utils/extension/value_notifier_extension.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/utils/twake_snackbar.dart';
 import 'package:fluffychat/utils/url_launcher.dart';
@@ -16,8 +15,6 @@ import 'package:pull_down_button/pull_down_button.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 mixin LinkifyMixin {
-  final ValueNotifier<bool> openingPopupMenu = ValueNotifier(false);
-
   List<PhoneNumberContextMenuActions> get phoneNumberContextMenuOnWeb => [
     PhoneNumberContextMenuActions.copy,
   ];
@@ -34,10 +31,6 @@ mixin LinkifyMixin {
     }).toList();
   }
 
-  void _handleStateContextMenu() {
-    openingPopupMenu.toggle();
-  }
-
   void _handleContextMenuAction({
     required BuildContext context,
     required TapDownDetails tapDownDetails,
@@ -52,7 +45,6 @@ mixin LinkifyMixin {
       context: context,
       offset: offset,
       listActions: listActions,
-      onClose: _handleStateContextMenu,
     );
     if (selectedActionIndex != null && selectedActionIndex is int) {
       _handleClickOnContextMenuItem(
@@ -189,9 +181,5 @@ mixin LinkifyMixin {
         Logs().i('LinkifyMixin: handleOnTappedLink: Unhandled link: $link');
         break;
     }
-  }
-
-  void linkifyDispose() {
-    openingPopupMenu.dispose();
   }
 }
