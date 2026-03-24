@@ -1,7 +1,7 @@
 name: fluffychat
 description: A convenient Matrix-based tool for personal and corporate communication.
 publish_to: none
-version: 2.21.6+2330
+version: 2.21.7+2330
 
 environment:
   sdk: ">=3.10.0 <4.0.0"
@@ -349,6 +349,8 @@ sentry:
   dart_symbol_map_path: build/app/obfuscation.map.json
   upload_debug_symbols: true
   upload_source_maps: true
+  log_level: debug
+  ignore_missing: true
   url_prefix:
   release:
   dist:
