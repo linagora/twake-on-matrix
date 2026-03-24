@@ -1,84 +1,52 @@
+import 'package:dartz/dartz.dart';
+import 'package:fluffychat/domain/app_state/preview_url/get_preview_url_success.dart';
+import 'package:fluffychat/domain/model/media/url_preview.dart';
+import 'package:fluffychat/domain/usecase/preview_url/get_preview_url_interactor.dart';
+import 'package:fluffychat/presentation/model/media/url_preview_presentation.dart';
 import 'package:fluffychat/widgets/mxc_image.dart';
 import 'package:fluffychat/widgets/twake_components/twake_preview_link/twake_link_preview.dart';
-import 'package:fluffychat/widgets/twake_components/twake_preview_link/twake_link_preview_item_style.dart';
-import 'package:flutter_test/flutter_test.dart';
-import 'package:flutter/material.dart';
-import 'package:fluffychat/presentation/model/media/url_preview_presentation.dart';
 import 'package:fluffychat/widgets/twake_components/twake_preview_link/twake_link_preview_item.dart';
+import 'package:fluffychat/widgets/twake_components/twake_preview_link/twake_link_preview_item_style.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:get_it/get_it.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
+import 'package:mockito/annotations.dart';
+import 'package:mockito/mockito.dart';
 
+import 'twake_link_preview_item_test.mocks.dart';
+
+@GenerateNiceMocks([MockSpec<GetPreviewURLInteractor>()])
 void main() {
-  group('[WIDGET TEST] - TwakeLinkPreviewItem is own message\n', () {
-    const ownMessage = true;
-
+  group('[WIDGET TEST] - LinkPreviewBuilder content\n', () {
     testWidgets('GIVEN no image uri\n'
         'AND no image width and height\n'
         'AND only title and description\n'
         'THEN not display MxcImage widget', (WidgetTester tester) async {
-      // Define a UrlPreviewPresentation object
       final urlPreviewPresentation = UrlPreviewPresentation(
         title: 'Test Title',
         description: 'Test Description',
       );
 
-      final twakeLinkPreviewItem = TwakeLinkPreviewItem(
-        key: TwakeLinkPreviewController.twakeLinkPreviewItemKey,
-        ownMessage: ownMessage,
-        urlPreviewPresentation: urlPreviewPresentation,
-      );
-
-      // Build the TwakeLinkPreviewItem widget
       await tester.pumpWidget(
-        MaterialApp(home: Scaffold(body: twakeLinkPreviewItem)),
+        MaterialApp(
+          home: Scaffold(
+            body: LinkPreviewBuilder(
+              urlPreviewPresentation: urlPreviewPresentation,
+            ),
+          ),
+        ),
       );
 
-      expect(twakeLinkPreviewItem.ownMessage, true);
-
-      final twakeLinkPreviewItemFind = find.byKey(
-        TwakeLinkPreviewItem.linkPreviewBodyKey,
-      );
-
-      expect(twakeLinkPreviewItemFind, findsOneWidget);
-
-      final Container twakeLinkPreviewItemBody = tester.widget(
-        twakeLinkPreviewItemFind,
-      );
-
-      expect(twakeLinkPreviewItemBody.decoration != null, true);
-
-      final ShapeDecoration twakeLinkPreviewItemBodyDecoration =
-          twakeLinkPreviewItemBody.decoration as ShapeDecoration;
-
-      expect(
-        twakeLinkPreviewItemBodyDecoration.color,
-        LinagoraSysColors.material().primaryContainer,
-      );
-
-      expect(twakeLinkPreviewItemBodyDecoration.shape, isNotNull);
-
-      final RoundedRectangleBorder shape =
-          twakeLinkPreviewItemBodyDecoration.shape as RoundedRectangleBorder;
-
-      expect(
-        shape.borderRadius,
-        BorderRadius.circular(TwakeLinkPreviewItemStyle.radiusBorder),
-      );
-
-      final linkPreviewNoImageBody = find.byKey(
-        LinkPreviewBuilder.imageDefaultKey,
-      );
-
-      expect(linkPreviewNoImageBody, findsOneWidget);
+      expect(find.byKey(LinkPreviewBuilder.imageDefaultKey), findsOneWidget);
 
       final paddingTitleFind = find.byKey(LinkPreviewBuilder.paddingTitleKey);
-
-      final paddingSubtitleKey = find.byKey(
+      final paddingSubtitleFind = find.byKey(
         LinkPreviewBuilder.paddingSubtitleKey,
       );
 
       final Padding paddingTitleWidget = tester.widget(paddingTitleFind);
-
-      final Padding paddingSubtitleWidget = tester.widget(paddingSubtitleKey);
+      final Padding paddingSubtitleWidget = tester.widget(paddingSubtitleFind);
 
       expect(
         paddingTitleWidget.padding,
@@ -90,22 +58,17 @@ void main() {
         TwakeLinkPreviewItemStyle.paddingSubtitle,
       );
 
-      final titleTextFind = find.byKey(LinkPreviewBuilder.titleKey);
+      expect(find.byKey(LinkPreviewBuilder.titleKey), findsOneWidget);
+      expect(find.byKey(LinkPreviewBuilder.subtitleKey), findsOneWidget);
 
-      final textSubtitleKeyTextFind = find.byKey(
-        LinkPreviewBuilder.subtitleKey,
+      final Text titleTextWidget = tester.widget(
+        find.byKey(LinkPreviewBuilder.titleKey),
+      );
+      final Text subtitleTextWidget = tester.widget(
+        find.byKey(LinkPreviewBuilder.subtitleKey),
       );
 
-      expect(titleTextFind, findsOneWidget);
-
-      expect(textSubtitleKeyTextFind, findsOneWidget);
-
-      final Text titleTextWidget = tester.widget(titleTextFind);
-
-      final Text subtitleTextWidget = tester.widget(textSubtitleKeyTextFind);
-
       expect(titleTextWidget.data, urlPreviewPresentation.title);
-
       expect(subtitleTextWidget.data, urlPreviewPresentation.description);
 
       expect(find.byType(MxcImage), findsNothing);
@@ -115,41 +78,31 @@ void main() {
         'AND no image width and height\n'
         'AND only title and description\n'
         'THEN not display MxcImage widget', (WidgetTester tester) async {
-      // Define a UrlPreviewPresentation object
       final urlPreviewPresentation = UrlPreviewPresentation(
         imageUri: Uri.parse('https://test.com'),
         title: 'Test Title',
         description: 'Test Description',
       );
 
-      final twakeLinkPreviewItem = TwakeLinkPreviewItem(
-        key: TwakeLinkPreviewController.twakeLinkPreviewItemKey,
-        ownMessage: ownMessage,
-        urlPreviewPresentation: urlPreviewPresentation,
-      );
-
-      // Build the TwakeLinkPreviewItem widget
       await tester.pumpWidget(
-        MaterialApp(home: Scaffold(body: twakeLinkPreviewItem)),
+        MaterialApp(
+          home: Scaffold(
+            body: LinkPreviewBuilder(
+              urlPreviewPresentation: urlPreviewPresentation,
+            ),
+          ),
+        ),
       );
 
-      expect(twakeLinkPreviewItem.ownMessage, true);
-
-      final linkPreviewNoImageBody = find.byKey(
-        LinkPreviewBuilder.imageDefaultKey,
-      );
-
-      expect(linkPreviewNoImageBody, findsOneWidget);
+      expect(find.byKey(LinkPreviewBuilder.imageDefaultKey), findsOneWidget);
 
       final paddingTitleFind = find.byKey(LinkPreviewBuilder.paddingTitleKey);
-
-      final paddingSubtitleKey = find.byKey(
+      final paddingSubtitleFind = find.byKey(
         LinkPreviewBuilder.paddingSubtitleKey,
       );
 
       final Padding paddingTitleWidget = tester.widget(paddingTitleFind);
-
-      final Padding paddingSubtitleWidget = tester.widget(paddingSubtitleKey);
+      final Padding paddingSubtitleWidget = tester.widget(paddingSubtitleFind);
 
       expect(
         paddingTitleWidget.padding,
@@ -161,22 +114,14 @@ void main() {
         TwakeLinkPreviewItemStyle.paddingSubtitle,
       );
 
-      final titleTextFind = find.byKey(LinkPreviewBuilder.titleKey);
-
-      final textSubtitleKeyTextFind = find.byKey(
-        LinkPreviewBuilder.subtitleKey,
+      final Text titleTextWidget = tester.widget(
+        find.byKey(LinkPreviewBuilder.titleKey),
+      );
+      final Text subtitleTextWidget = tester.widget(
+        find.byKey(LinkPreviewBuilder.subtitleKey),
       );
 
-      expect(titleTextFind, findsOneWidget);
-
-      expect(textSubtitleKeyTextFind, findsOneWidget);
-
-      final Text titleTextWidget = tester.widget(titleTextFind);
-
-      final Text subtitleTextWidget = tester.widget(textSubtitleKeyTextFind);
-
       expect(titleTextWidget.data, urlPreviewPresentation.title);
-
       expect(subtitleTextWidget.data, urlPreviewPresentation.description);
 
       expect(find.byType(MxcImage), findsNothing);
@@ -186,7 +131,6 @@ void main() {
         'AND an image width is null\n'
         'AND only title and description\n'
         'THEN not display MxcImage widget', (WidgetTester tester) async {
-      // Define a UrlPreviewPresentation object
       final urlPreviewPresentation = UrlPreviewPresentation(
         title: 'Test Title',
         description: 'Test Description',
@@ -194,23 +138,17 @@ void main() {
         imageHeight: 123,
       );
 
-      final twakeLinkPreviewItem = TwakeLinkPreviewItem(
-        key: TwakeLinkPreviewController.twakeLinkPreviewItemKey,
-        ownMessage: ownMessage,
-        urlPreviewPresentation: urlPreviewPresentation,
-      );
-
-      // Build the TwakeLinkPreviewItem widget
       await tester.pumpWidget(
-        MaterialApp(home: Scaffold(body: twakeLinkPreviewItem)),
+        MaterialApp(
+          home: Scaffold(
+            body: LinkPreviewBuilder(
+              urlPreviewPresentation: urlPreviewPresentation,
+            ),
+          ),
+        ),
       );
 
-      final linkPreviewNoImageBody = find.byKey(
-        LinkPreviewBuilder.imageDefaultKey,
-      );
-
-      expect(linkPreviewNoImageBody, findsOneWidget);
-
+      expect(find.byKey(LinkPreviewBuilder.imageDefaultKey), findsOneWidget);
       expect(find.byType(MxcImage), findsNothing);
     });
 
@@ -218,7 +156,6 @@ void main() {
         'AND an image height is null\n'
         'AND only title and description\n'
         'THEN not display MxcImage widget', (WidgetTester tester) async {
-      // Define a UrlPreviewPresentation object
       final urlPreviewPresentation = UrlPreviewPresentation(
         title: 'Test Title',
         description: 'Test Description',
@@ -226,34 +163,24 @@ void main() {
         imageWidth: 123,
       );
 
-      final twakeLinkPreviewItem = TwakeLinkPreviewItem(
-        key: TwakeLinkPreviewController.twakeLinkPreviewItemKey,
-        ownMessage: ownMessage,
-        urlPreviewPresentation: urlPreviewPresentation,
-      );
-
-      // Build the TwakeLinkPreviewItem widget
       await tester.pumpWidget(
-        MaterialApp(home: Scaffold(body: twakeLinkPreviewItem)),
+        MaterialApp(
+          home: Scaffold(
+            body: LinkPreviewBuilder(
+              urlPreviewPresentation: urlPreviewPresentation,
+            ),
+          ),
+        ),
       );
 
-      expect(twakeLinkPreviewItem.ownMessage, true);
-
-      final linkPreviewNoImageBody = find.byKey(
-        LinkPreviewBuilder.imageDefaultKey,
-      );
-
-      expect(linkPreviewNoImageBody, findsOneWidget);
-
+      expect(find.byKey(LinkPreviewBuilder.imageDefaultKey), findsOneWidget);
       expect(find.byType(MxcImage), findsNothing);
     });
 
     testWidgets('GIVEN an image response\n'
-        'AND an image height > 200 \n'
-        'AND an image width is not empty\n'
+        'AND an image height and width are not null\n'
         'AND only title and description\n'
-        'THEN display MxcImage widget large', (WidgetTester tester) async {
-      // Define a UrlPreviewPresentation object
+        'THEN display MxcImage widget', (WidgetTester tester) async {
       final urlPreviewPresentation = UrlPreviewPresentation(
         title: 'Test Title',
         description: 'Test Description',
@@ -262,24 +189,15 @@ void main() {
         imageHeight: 201,
       );
 
-      final twakeLinkPreviewItem = TwakeLinkPreviewItem(
-        key: TwakeLinkPreviewController.twakeLinkPreviewItemKey,
-        ownMessage: ownMessage,
-        urlPreviewPresentation: urlPreviewPresentation,
-      );
-
-      // Build the TwakeLinkPreviewItem widget
       await tester.pumpWidget(
-        MaterialApp(home: Scaffold(body: twakeLinkPreviewItem)),
+        MaterialApp(
+          home: Scaffold(
+            body: LinkPreviewBuilder(
+              urlPreviewPresentation: urlPreviewPresentation,
+            ),
+          ),
+        ),
       );
-
-      expect(twakeLinkPreviewItem.ownMessage, true);
-
-      final linkPreviewLargeBody = find.byKey(
-        TwakeLinkPreviewItem.linkPreviewLargeKey,
-      );
-
-      expect(linkPreviewLargeBody, findsOneWidget);
 
       final clipRRectMxcImage = find.byKey(LinkPreviewBuilder.clipRRectKey);
 
@@ -304,81 +222,107 @@ void main() {
       final MxcImage mxcImage = tester.widget(mxcImageFinder);
 
       expect(mxcImage.uri, urlPreviewPresentation.imageUri);
-
       expect(mxcImage.fit, BoxFit.cover);
-
-      expect(mxcImage.isThumbnail, false);
-    });
-
-    testWidgets('GIVEN an image response\n'
-        'AND an image height < 200 \n'
-        'AND an image width is not empty\n'
-        'AND only title and description\n'
-        'THEN display MxcImage widget small', (WidgetTester tester) async {
-      // Define a UrlPreviewPresentation object
-      final urlPreviewPresentation = UrlPreviewPresentation(
-        title: 'Test Title',
-        description: 'Test Description',
-        imageUri: Uri.parse('https://test.com'),
-        imageWidth: 123,
-        imageHeight: 199,
-      );
-
-      final twakeLinkPreviewItem = TwakeLinkPreviewItem(
-        key: TwakeLinkPreviewController.twakeLinkPreviewItemKey,
-        ownMessage: ownMessage,
-        urlPreviewPresentation: urlPreviewPresentation,
-      );
-
-      // Build the TwakeLinkPreviewItem widget
-      await tester.pumpWidget(
-        MaterialApp(home: Scaffold(body: twakeLinkPreviewItem)),
-      );
-
-      expect(twakeLinkPreviewItem.ownMessage, true);
-
-      final mxcImageFinder = find.byKey(LinkPreviewBuilder.mxcImageKey);
-
-      expect(mxcImageFinder, findsOneWidget);
-
-      final MxcImage mxcImage = tester.widget(mxcImageFinder);
-
-      expect(mxcImage.uri, urlPreviewPresentation.imageUri);
-
-      expect(mxcImage.fit, BoxFit.cover);
-
       expect(mxcImage.isThumbnail, false);
     });
   });
 
-  group('[WIDGET TEST] - TwakeLinkPreviewItem is not own message\n', () {
-    const ownMessage = false;
-    testWidgets('GIVEN no image uri\n'
-        'AND no image width and height\n'
-        'AND only title and description\n'
-        'THEN not display MxcImage widget', (WidgetTester tester) async {
-      // Define a UrlPreviewPresentation object
-      final urlPreviewPresentation = UrlPreviewPresentation(
-        title: 'Test Title',
-        description: 'Test Description',
-      );
+  group('[WIDGET TEST] - TwakeLinkPreviewItem ownMessage color\n', () {
+    late MockGetPreviewURLInteractor mockInteractor;
 
-      final twakeLinkPreviewItem = TwakeLinkPreviewItem(
-        key: TwakeLinkPreviewController.twakeLinkPreviewItemKey,
-        ownMessage: ownMessage,
-        urlPreviewPresentation: urlPreviewPresentation,
+    setUp(() {
+      mockInteractor = MockGetPreviewURLInteractor();
+      when(
+        mockInteractor.execute(
+          uri: anyNamed('uri'),
+          preferredPreviewTime: anyNamed('preferredPreviewTime'),
+        ),
+      ).thenAnswer(
+        (_) => Stream.value(
+          Right(
+            GetPreviewUrlSuccess(
+              urlPreview: UrlPreview(
+                title: 'Test Title',
+                description: 'Test Description',
+              ),
+            ),
+          ),
+        ),
       );
+      GetIt.instance.registerSingleton<GetPreviewURLInteractor>(mockInteractor);
+    });
 
-      // Build the TwakeLinkPreviewItem widget
+    tearDown(() {
+      GetIt.instance.unregister<GetPreviewURLInteractor>();
+    });
+
+    testWidgets('GIVEN ownMessage is true\n'
+        'THEN container uses primaryContainer color', (
+      WidgetTester tester,
+    ) async {
       await tester.pumpWidget(
-        MaterialApp(home: Scaffold(body: twakeLinkPreviewItem)),
+        const MaterialApp(
+          home: Scaffold(
+            body: TwakeLinkPreviewItem(
+              key: TwakeLinkPreview.twakeLinkPreviewItemKey,
+              ownMessage: true,
+              previewLink: 'https://test.com',
+            ),
+          ),
+        ),
       );
 
-      expect(twakeLinkPreviewItem.ownMessage, false);
+      await tester.pump();
 
-      expect(find.byKey(LinkPreviewBuilder.imageDefaultKey), findsOneWidget);
+      final bodyFinder = find.byKey(TwakeLinkPreviewItem.linkPreviewBodyKey);
 
-      expect(find.byType(MxcImage), findsNothing);
+      expect(bodyFinder, findsOneWidget);
+
+      final Container body = tester.widget(bodyFinder);
+      final ShapeDecoration decoration = body.decoration! as ShapeDecoration;
+
+      expect(decoration.color, LinagoraSysColors.material().primaryContainer);
+
+      expect(decoration.shape, isNotNull);
+
+      final RoundedRectangleBorder shape =
+          decoration.shape as RoundedRectangleBorder;
+
+      expect(
+        shape.borderRadius,
+        BorderRadius.circular(TwakeLinkPreviewItemStyle.radiusBorder),
+      );
+    });
+
+    testWidgets('GIVEN ownMessage is false\n'
+        'THEN container uses onSurface color with opacity', (
+      WidgetTester tester,
+    ) async {
+      await tester.pumpWidget(
+        const MaterialApp(
+          home: Scaffold(
+            body: TwakeLinkPreviewItem(
+              key: TwakeLinkPreview.twakeLinkPreviewItemKey,
+              ownMessage: false,
+              previewLink: 'https://test.com',
+            ),
+          ),
+        ),
+      );
+
+      await tester.pump();
+
+      final bodyFinder = find.byKey(TwakeLinkPreviewItem.linkPreviewBodyKey);
+
+      expect(bodyFinder, findsOneWidget);
+
+      final Container body = tester.widget(bodyFinder);
+      final ShapeDecoration decoration = body.decoration! as ShapeDecoration;
+
+      expect(
+        decoration.color,
+        LinagoraSysColors.material().onSurface.withOpacity(0.08),
+      );
     });
   });
 }
