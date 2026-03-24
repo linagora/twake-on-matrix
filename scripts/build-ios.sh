@@ -65,7 +65,7 @@ rm -f apple_please_fix_your_coreutils
 
 ### Make release build ###
 ./scripts/configure-sentry.sh
-flutter build ipa --dart-define=SENTRY_DSN="${SENTRY_DSN:-}" --release --obfuscate --split-debug-info=build/app/outputs/symbols --extra-gen-snapshot-options=--save-obfuscation-map=build/app/obfuscation.map.json
+flutter build ipa --dart-define=SENTRY_DSN="${SENTRY_DSN:-}" --dart-define=SENTRY_ENVIRONMENT="${SENTRY_ENVIRONMENT:-}" --release --obfuscate --split-debug-info=build/app/outputs/symbols --extra-gen-snapshot-options=--save-obfuscation-map=build/app/obfuscation.map.json
 ./scripts/run-sentry.sh
 
 ### [optional] Install release build ###

@@ -71,6 +71,8 @@ abstract class AppConfig {
 
   static String? sentryDsn;
 
+  static String? sentryEnvironment;
+
   static double toolbarHeight(BuildContext context) =>
       responsive.isMobile(context) ? 48 : 56;
   static const Color chatColor = primaryColor;
@@ -207,6 +209,10 @@ abstract class AppConfig {
 
   static const String _sentryDsnEnv = String.fromEnvironment('SENTRY_DSN');
 
+  static const String _sentryEnvironmentEnv = String.fromEnvironment(
+    'SENTRY_ENVIRONMENT',
+  );
+
   static void loadEnvironment() {
     twakeWorkplaceHomeserver = _twakeWorkplaceHomeserverEnv;
 
@@ -321,16 +327,25 @@ abstract class AppConfig {
     }
   }
 
-  static Future<void> loadSentryDsn() async {
+  static Future<void> loadSentryConfig() async {
     if (PlatformInfos.isMobile) {
       sentryDsn = _sentryDsnEnv.isNotEmpty ? _sentryDsnEnv : null;
+      sentryEnvironment = _sentryEnvironmentEnv.isNotEmpty
+          ? _sentryEnvironmentEnv
+          : null;
     } else {
       final configJsonString = utf8.decode(
         (await http.get(Uri.parse('config.json'))).bodyBytes,
       );
       final json = jsonDecode(configJsonString);
       sentryDsn = json['sentry_dsn'] is String ? json['sentry_dsn'] : null;
+      sentryEnvironment = json['sentry_environment'] is String
+          ? json['sentry_environment']
+          : null;
     }
     Logs().i('[Public Platform] AppConfig():: SENTRY_DSN $sentryDsn');
+    Logs().i(
+      '[Public Platform] AppConfig():: SENTRY_ENVIRONMENT $sentryEnvironment',
+    );
   }
 }

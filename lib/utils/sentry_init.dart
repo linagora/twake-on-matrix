@@ -9,10 +9,11 @@ Future<void> sentryInit({
   required Widget app,
 }) async {
   final info = await PackageInfo.fromPlatform();
-  await AppConfig.loadSentryDsn();
+  await AppConfig.loadSentryConfig();
   if (AppConfig.sentryDsn?.isNotEmpty ?? false) {
     await SentryFlutter.init((options) {
       options.dsn = AppConfig.sentryDsn;
+      options.environment = AppConfig.sentryEnvironment;
       options.enableLogs = true;
       // Set tracesSampleRate to 1.0 to capture 100% of transactions for tracing.
       // We recommend adjusting this value in production.
