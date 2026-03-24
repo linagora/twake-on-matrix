@@ -31,7 +31,7 @@ fi
 TOOLCHAIN="nightly-${RUST_ARCH}-${RUST_OS}"
 rustup component add rust-src --toolchain "$TOOLCHAIN"
 cargo install flutter_rust_bridge_codegen
-flutter_rust_bridge_codegen build-web --dart-root dart --rust-root $(cd rust && pwd) --release --verbose
+flutter_rust_bridge_codegen build-web --dart-root dart --rust-root "$(cd rust && pwd)" --release --verbose
 cd ..
 rm -rf ./web/pkg
 mv .vodozemac/dart/web/pkg ./web/
