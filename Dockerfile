@@ -65,7 +65,7 @@ RUN --mount=type=ssh,required=true \
     ./scripts/build-web.sh
 
 # Pre-compress all web assets at build time (avoids re-compressing on every container start)
-RUN gzip -k -r -f /app/build/web/
+RUN find /app/build/web -type f ! -name "config.json" -exec gzip -k -f {} \;
 
 # Final image — lean nginx:alpine with no extra packages needed
 FROM nginx:alpine AS final-image
