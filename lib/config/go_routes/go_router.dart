@@ -14,6 +14,7 @@ import 'package:fluffychat/pages/chat_draft/draft_chat_adaptive_scaffold.dart';
 import 'package:fluffychat/pages/chat_encryption_settings/chat_encryption_settings.dart';
 import 'package:fluffychat/pages/error_page/error_page.dart';
 import 'package:fluffychat/pages/homeserver_picker/homeserver_picker.dart';
+import 'package:fluffychat/pages/invitation_link_web/invitation_link_web.dart';
 import 'package:fluffychat/pages/login/on_auth_redirect.dart';
 import 'package:fluffychat/pages/new_group/new_group_chat_info.dart';
 import 'package:fluffychat/pages/personal_qr/personal_qr.dart';
@@ -117,6 +118,17 @@ abstract class AppRoutes {
       path: '/onAuthRedirect',
       pageBuilder: (context, state) {
         return defaultPageBuilder(context, const OnAuthRedirect());
+      },
+    ),
+    GoRoute(
+      path: AppRoutePaths.invitationLinkFull,
+      redirect: loggedOutRedirect,
+      pageBuilder: (context, state) {
+        final matrixId = state.pathParameters[AppRoutePaths.matrixId];
+        return defaultPageBuilder(
+          context,
+          InvitationLinkWeb(matrixId: matrixId),
+        );
       },
     ),
     GoRoute(

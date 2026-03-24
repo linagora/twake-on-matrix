@@ -45,6 +45,7 @@ class ChatDetailsHeaderStack extends StatelessWidget {
           ),
         ),
         Positioned.fill(
+          top: 83,
           child: ChatDetailsGroupInfoBackgroundView(
             animationController: animationController,
           ),

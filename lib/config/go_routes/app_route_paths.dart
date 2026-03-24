@@ -17,6 +17,7 @@ abstract class AppRoutePaths {
   static const String chatFull = '/rooms/$chatSegment';
   static const String emotesSegment = 'emotes';
   static const String chatEmotesFull = '$chatFull/$emotesSegment';
+  static const matrixId = 'matrixId';
 
   // Security routes
   static const String securitySegment = 'security';
@@ -59,4 +60,7 @@ abstract class AppRoutePaths {
   static const String addAccountHomeserverPickerSegment = 'homeserverpicker';
   static const String addAccountHomeserverPickerFull =
       '$addAccountFull/$addAccountHomeserverPickerSegment';
+
+  // Invitation route
+  static const String invitationLinkFull = '/chat/:matrixId';
 }
