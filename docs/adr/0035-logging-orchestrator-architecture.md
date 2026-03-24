@@ -14,21 +14,21 @@ Logging was ad-hoc via Matrix SDK's `Logs()` with no central control over destin
 
 Introduce `LogOrchestrator` (`lib/utils/logging/`) — a singleton that runs each `LogEntry` through a **filter chain** then dispatches to a **logger chain**.
 
-```
+```text
 log(entry) → [filters] → null = drop | entry = continue → [loggers]
 ```
 
 ### Key types
 
-| File | Role |
-|---|---|
-| `log_types.dart` | `LogLevel` (debug/info/warn/error/wtf) + `LogEntry` |
-| `logger.dart` | `Logger` interface — `void log(LogEntry)` |
-| `log_filter.dart` | `LogFilter` interface — `LogEntry? filter(entry)` (null = drop) |
-| `loggers/console_logger.dart` | All levels → `dart:developer` / browser `console` |
-| `loggers/sentry_logger.dart` | `wtf` only → `Sentry.captureException` |
-| `filters/sensitive_data_filter.dart` | Redacts password/token/secret in message + context |
-| `init_matrix_logger.dart` | Bridges Matrix SDK `Logs().onLog` into the orchestrator |
+| File                                 | Role                                                            |
+| ------------------------------------ | --------------------------------------------------------------- |
+| `log_types.dart`                     | `LogLevel` (debug/info/warn/error/wtf) + `LogEntry`             |
+| `logger.dart`                        | `Logger` interface — `void log(LogEntry)`                       |
+| `log_filter.dart`                    | `LogFilter` interface — `LogEntry? filter(entry)` (null = drop) |
+| `loggers/console_logger.dart`        | All levels → `dart:developer` / browser `console`               |
+| `loggers/sentry_logger.dart`         | `wtf` only → `Sentry.captureException`                          |
+| `filters/sensitive_data_filter.dart` | Redacts password/token/secret in message + context              |
+| `init_matrix_logger.dart`            | Bridges Matrix SDK `Logs().onLog` into the orchestrator         |
 
 ### Initialization (`get_it_initializer.dart`)
 
