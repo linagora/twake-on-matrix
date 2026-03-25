@@ -3,6 +3,7 @@ import 'package:fluffychat/pages/settings_dashboard/settings/settings_item_build
 import 'package:fluffychat/pages/settings_dashboard/settings/settings_view_style.dart';
 import 'package:fluffychat/presentation/enum/settings/settings_enum.dart';
 import 'package:fluffychat/presentation/extensions/client_extension.dart';
+import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/utils/responsive/responsive_utils.dart';
 import 'package:fluffychat/widgets/app_bars/twake_app_bar.dart';
 import 'package:fluffychat/widgets/avatar/avatar.dart';
@@ -10,8 +11,11 @@ import 'package:fluffychat/widgets/avatar/avatar_style.dart';
 import 'package:flutter/material.dart';
 import 'package:fluffychat/generated/l10n/app_localizations.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
+import 'package:matrix/matrix_api_lite/utils/logs.dart';
 
 import 'settings.dart';
+
+int _tapTimed = 0;
 
 class SettingsView extends StatelessWidget {
   final SettingsController controller;
@@ -185,7 +189,20 @@ class SettingsView extends StatelessWidget {
                         title: item.titleSettings(context),
                         titleColor: item.titleColor(context),
                         leading: item.iconLeading(),
-                        onTap: () => controller.onClickToSettingsItem(item),
+                        onTap: () {
+                          _tapTimed++;
+                          if (_tapTimed > 5) {
+                            _tapTimed = 0;
+                            try {
+                              throw StateError(
+                                'Test Sentry error from ${PlatformInfos.clientName} at ${DateTime.now().toIso8601String()}',
+                              );
+                            } catch (e, s) {
+                              Logs().wtf('SettingsView::onTap:', e, s);
+                            }
+                          }
+                          controller.onClickToSettingsItem(item);
+                        },
                         isHideTrailingIcon: item.isHideTrailingIcon,
                         leadingIconColor: item.iconColor(context),
                         isSelected: controller.optionSelected(item),
