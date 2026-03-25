@@ -8,7 +8,7 @@ enum SettingsKeys {
   profileViewWeb,
   listViewContent;
 
-  Key get key => Key(name);
+  Key get key => Key('settings.$name');
 
-  ValueKey<String> get valueKey => ValueKey(name);
+  ValueKey<String> get valueKey => ValueKey('settings.$name');
 }

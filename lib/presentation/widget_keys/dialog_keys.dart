@@ -7,7 +7,7 @@ enum DialogKeys {
   initClientBreakpointMobile,
   initClientBreakpointWebAndDesktop;
 
-  Key get key => Key(name);
+  Key get key => Key('dialog.$name');
 
-  ValueKey<String> get valueKey => ValueKey(name);
+  ValueKey<String> get valueKey => ValueKey('dialog.$name');
 }
