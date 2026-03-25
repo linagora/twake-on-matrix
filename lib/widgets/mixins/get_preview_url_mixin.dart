@@ -57,4 +57,9 @@ mixin GetPreviewUrlMixin<T extends StatefulWidget> on State<T> {
       '$debugLabel::_handleGetPreviewUrlOnError() - error: $error | stackTrace: $stackTrace',
     );
   }
+
+  void clearPreviewUrlState() {
+    _getPreviewUrlSubscription?.cancel();
+    getPreviewUrlStateNotifier.value = Right(GetPreviewUrlInitial());
+  }
 }

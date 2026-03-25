@@ -31,10 +31,14 @@ class _TwakeLinkPreviewItemState extends State<TwakeLinkPreviewItem>
     with AutomaticKeepAliveClientMixin, GetPreviewUrlMixin {
   void _getPreviewInfo() {
     if (widget.previewLink == null || widget.previewLink!.trim().isEmpty) {
+      clearPreviewUrlState();
       return;
     }
     final uri = Uri.tryParse(widget.previewLink!);
-    if (uri == null) return;
+    if (uri == null) {
+      clearPreviewUrlState();
+      return;
+    }
     getPreviewUrl(uri: uri);
   }
 
