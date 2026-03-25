@@ -1154,6 +1154,7 @@ class MatrixState extends State<Matrix>
     waitForFirstSync = false;
     matrixState.reSyncContacts();
     await matrixState.cancelListenSynchronizeContacts();
+    Sentry.configureScope((scope) => scope.setUser(null));
     if (PlatformInfos.isMobile) {
       await _deletePersistActiveAccount();
       TwakeApp.router.go('/home/twakeWelcome');
