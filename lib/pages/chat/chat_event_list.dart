@@ -1,13 +1,12 @@
-import 'dart:ui';
-
 import 'package:fluffychat/pages/chat/chat.dart';
 import 'package:fluffychat/pages/chat/chat_scroll_view.dart';
+import 'package:fluffychat/pages/chat/chat_web_scrollbar.dart';
 import 'package:fluffychat/pages/chat/empty_support_chat_view.dart';
 import 'package:fluffychat/pages/chat/group_chat_empty_view.dart';
 import 'package:fluffychat/pages/chat/optional_selection_area.dart';
 import 'package:fluffychat/pages/chat_draft/draft_chat_empty_widget.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
-import 'package:flutter/cupertino.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:matrix/matrix.dart';
 
@@ -61,34 +60,39 @@ class ChatEventList extends StatelessWidget {
             }
             return false;
           },
-          child: ScrollConfiguration(
-            behavior: ScrollConfiguration.of(
-              context,
-            ).copyWith(dragDevices: dragDevicesSupported()),
-            child: OptionalSelectionArea(
-              isEnabled: PlatformInfos.isWeb && !controller.selectMode,
-              child: ChatScrollView(
-                key: PageStorageKey('ChatScrollView-${controller.room?.id}'),
-                events: events,
-                controller: controller,
-                constraints: constraints,
-              ),
-            ),
-          ),
+          child: _buildScrollArea(context, controller, events, constraints),
         );
       },
     );
   }
 
-  Set<PointerDeviceKind>? dragDevicesSupported() {
+  Widget _buildScrollArea(
+    BuildContext context,
+    ChatController chatController,
+    List<Event> events,
+    BoxConstraints constraints,
+  ) {
+    final chatScrollView = ChatScrollView(
+      key: PageStorageKey('ChatScrollView-${chatController.room?.id}'),
+      events: events,
+      controller: chatController,
+      constraints: constraints,
+    );
+
     if (PlatformInfos.isWeb) {
-      return {PointerDeviceKind.touch};
+      return ChatWebScrollbar(
+        controller: chatController.scrollController,
+        child: ScrollConfiguration(
+          behavior: const _WebContentScrollBehavior(),
+          child: OptionalSelectionArea(
+            isEnabled: !chatController.selectMode,
+            child: chatScrollView,
+          ),
+        ),
+      );
     }
-    return {
-      PointerDeviceKind.touch,
-      PointerDeviceKind.mouse,
-      PointerDeviceKind.trackpad,
-    };
+
+    return OptionalSelectionArea(isEnabled: false, child: chatScrollView);
   }
 
   Widget _chatEmptyBuilder(Timeline timeline) {
@@ -106,4 +110,18 @@ class ChatEventList extends StatelessWidget {
       return const SizedBox.shrink();
     }
   }
+}
+
+class _WebContentScrollBehavior extends MaterialScrollBehavior {
+  const _WebContentScrollBehavior();
+
+  @override
+  Set<PointerDeviceKind> get dragDevices => {PointerDeviceKind.touch};
+
+  @override
+  Widget buildScrollbar(
+    BuildContext context,
+    Widget child,
+    ScrollableDetails details,
+  ) => child;
 }
