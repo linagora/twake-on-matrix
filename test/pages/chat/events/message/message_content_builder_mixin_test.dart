@@ -612,7 +612,8 @@ Future<void> main() async {
           "msgtype": "m.text",
           "body": "Check this out: https://example.com/some/path",
           "format": "org.matrix.custom.html",
-          "formatted_body": "<p>Check this out: https://example.com/some/path</p>",
+          "formatted_body":
+              "<p>Check this out: https://example.com/some/path</p>",
         },
         type: 'm.room.message',
         eventId: r'$143273582443PhrSn:example.org',
