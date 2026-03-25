@@ -19,6 +19,7 @@ import 'package:fluffychat/widgets/layouts/agruments/logout_body_args.dart';
 import 'package:flutter_emoji_mart/flutter_emoji_mart.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:linagora_design_flutter/cozy_config_manager/cozy_config_manager.dart';
+import 'package:sentry_flutter/sentry_flutter.dart';
 import 'package:universal_html/html.dart' as html hide File;
 
 import 'package:adaptive_dialog/adaptive_dialog.dart';
@@ -176,6 +177,11 @@ class MatrixState extends State<Matrix>
       getIt.get<ContactsManager>().refreshTomContacts(client);
       _createSupportChat(newClient);
       _listenSyncPresence(newClient);
+      Sentry.configureScope(
+        (scope) => scope.setUser(
+          SentryUser(username: newClient.userID, name: newClient.userID),
+        ),
+      );
       return SetActiveClientState.success;
     } else {
       Logs().w('Tried to set an unknown client ${newClient!.userID} as active');
