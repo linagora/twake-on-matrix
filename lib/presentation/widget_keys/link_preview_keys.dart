@@ -13,7 +13,7 @@ enum LinkPreviewKeys {
   twakeLinkView,
   twakeLinkPreviewItem;
 
-  Key get key => Key(name);
+  Key get key => Key('linkPreview.$name');
 
-  ValueKey<String> get valueKey => ValueKey(name);
+  ValueKey<String> get valueKey => ValueKey('linkPreview.$name');
 }

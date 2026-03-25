@@ -11,7 +11,7 @@ enum NavigationKeys {
   primaryNavigation,
   adaptiveAppBar;
 
-  Key get key => Key(name);
+  Key get key => Key('navigation.$name');
 
-  ValueKey<String> get valueKey => ValueKey(name);
+  ValueKey<String> get valueKey => ValueKey('navigation.$name');
 }

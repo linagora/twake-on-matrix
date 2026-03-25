@@ -15,7 +15,7 @@ enum ChatKeys {
   forwardSelectionMobileAndTablet,
   forwardSelectionWebAndDesktop;
 
-  Key get key => Key(name);
+  Key get key => Key('chat.$name');
 
-  ValueKey<String> get valueKey => ValueKey(name);
+  ValueKey<String> get valueKey => ValueKey('chat.$name');
 }
