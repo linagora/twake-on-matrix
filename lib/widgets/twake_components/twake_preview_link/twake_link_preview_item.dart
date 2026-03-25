@@ -75,16 +75,10 @@ class _TwakeLinkPreviewItemState extends State<TwakeLinkPreviewItem>
                   ),
                 ),
               ),
-              child: InkWell(
-                onTap: () {
-                  if (widget.previewLink == null) return;
-                  UrlLauncher(context, url: widget.previewLink).launchUrl();
-                },
-                child: LinkPreviewBuilder(
-                  key: TwakeLinkPreviewItem.linkPreviewLargeKey,
-                  urlPreviewPresentation: previewPresentation,
-                  previewLink: widget.previewLink,
-                ),
+              child: LinkPreviewBuilder(
+                key: TwakeLinkPreviewItem.linkPreviewLargeKey,
+                urlPreviewPresentation: previewPresentation,
+                previewLink: widget.previewLink,
               ),
             );
           }
