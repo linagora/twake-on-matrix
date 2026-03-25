@@ -275,6 +275,9 @@ mixin MessageContentBuilderMixin {
         event.messageType == MessageTypes.Text) {
       return true;
     }
+    if (event.body.getFirstValidUrl() != null) {
+      return true;
+    }
     if (totalMessageWidth == maxWidth) {
       return true;
     } else {
