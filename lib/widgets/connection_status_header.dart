@@ -75,9 +75,7 @@ class ConnectionStatusHeaderState extends State<ConnectionStatusHeader> {
         return FadeTransition(opacity: animation, child: child);
       },
       child: hide
-          ? (widget.connectedWidget != null
-                ? widget.connectedWidget!
-                : const SizedBox.shrink())
+          ? widget.connectedWidget ?? const SizedBox.shrink()
           : Text(
               status.toLocalizedString(context),
               key: ValueKey(status.status),
