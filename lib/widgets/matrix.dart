@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import 'package:fluffychat/config/go_routes/app_routes.dart';
 import 'package:fluffychat/config/localizations/localization_service.dart';
 import 'package:fluffychat/data/model/federation_server/federation_configuration.dart';
 import 'package:fluffychat/data/model/federation_server/federation_server_information.dart';
@@ -1157,9 +1158,9 @@ class MatrixState extends State<Matrix>
     Sentry.configureScope((scope) => scope.setUser(null));
     if (PlatformInfos.isMobile) {
       await _deletePersistActiveAccount();
-      TwakeApp.router.go('/home/twakeWelcome');
+      TwakeApp.router.go(const HomeTwakeWelcomeRoute().location);
     } else {
-      TwakeApp.router.go('/home', extra: true);
+      TwakeApp.router.go(const HomeRoute($extra: true).location, extra: true);
     }
     await _deleteAllTomConfigurations();
   }

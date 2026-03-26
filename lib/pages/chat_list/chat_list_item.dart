@@ -10,7 +10,7 @@ import 'package:fluffychat/widgets/avatar/avatar.dart';
 import 'package:flutter/material.dart';
 import 'package:fluffychat/generated/l10n/app_localizations.dart';
 
-import 'package:go_router/go_router.dart';
+import 'package:fluffychat/config/go_routes/app_routes.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:matrix/matrix.dart';
 
@@ -52,10 +52,10 @@ class ChatListItem extends StatelessWidget with ChatListItemMixin {
         );
         return;
       case Membership.leave:
-        context.go('/archive/${room.id}');
+        ArchiveRoomRoute(roomid: room.id).go(context);
       case Membership.invite:
       case Membership.join:
-        context.go('/rooms/${room.id}');
+        RoomRoute(roomid: room.id).go(context);
       default:
         return;
     }

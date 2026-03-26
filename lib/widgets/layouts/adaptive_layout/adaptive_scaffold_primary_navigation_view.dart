@@ -3,7 +3,7 @@ import 'package:fluffychat/widgets/avatar/avatar.dart';
 import 'package:fluffychat/widgets/layouts/adaptive_layout/adaptive_scaffold_primary_navigation_style.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
+import 'package:fluffychat/config/go_routes/app_routes.dart';
 import 'package:linagora_design_flutter/colors/linagora_sys_colors.dart';
 import 'package:matrix/matrix.dart';
 
@@ -73,7 +73,7 @@ class AdaptiveScaffoldPrimaryNavigationView extends StatelessWidget {
                         size: AdaptiveScaffoldPrimaryNavigationStyle.avatarSize,
                         fontSize:
                             ClientChooserButtonStyle.avatarFontSizeInAppBar,
-                        onTap: () => context.go('/rooms/profile'),
+                        onTap: () => const ProfileRoute().go(context),
                       );
                     },
                   ),

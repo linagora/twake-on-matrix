@@ -6,6 +6,7 @@ import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/utils/url_launcher.dart';
 import 'package:fluffychat/widgets/layouts/agruments/receive_content_args.dart';
 import 'package:fluffychat/widgets/layouts/enum/adaptive_destinations_enum.dart';
+import 'package:fluffychat/config/go_routes/app_routes.dart';
 import 'package:fluffychat/widgets/twake_app.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:flutter/material.dart';
@@ -65,7 +66,7 @@ mixin ReceiveSharingIntentMixin<T extends StatefulWidget> on State<T> {
     }
     if (TwakeApp.isCurrentPageIsInRooms()) {
       TwakeApp.router.go(
-        '/rooms',
+        const RoomsRoute().location,
         extra: ReceiveContentArgs(
           newActiveClient: matrixState.client,
           activeDestination: AdaptiveDestinationEnum.rooms,
@@ -73,7 +74,7 @@ mixin ReceiveSharingIntentMixin<T extends StatefulWidget> on State<T> {
       );
     }
 
-    TwakeApp.router.push('/rooms/share');
+    TwakeApp.router.push(const ShareRoute().location);
   }
 
   void _processIncomingSharedText(String? text) {

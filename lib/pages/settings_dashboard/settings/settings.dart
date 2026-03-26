@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:fluffychat/config/app_config.dart';
-import 'package:fluffychat/config/go_routes/app_route_paths.dart';
+
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/domain/model/extensions/common_settings/common_settings_extensions.dart';
 import 'package:fluffychat/domain/model/extensions/homeserver_summary_extensions.dart';
@@ -23,7 +23,7 @@ import 'package:flutter/material.dart';
 import 'package:adaptive_dialog/adaptive_dialog.dart';
 import 'package:fluffychat/generated/l10n/app_localizations.dart';
 
-import 'package:go_router/go_router.dart';
+import 'package:fluffychat/config/go_routes/app_routes.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:matrix/matrix.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -221,7 +221,7 @@ class SettingsController extends State<Settings> with ConnectPageMixin {
 
   void goToSettingsProfile() async {
     optionsSelectNotifier.value = SettingEnum.profile;
-    final result = await context.push('/rooms/profile');
+    final result = await const ProfileRoute().push(context);
     if (result == null) {
       optionsSelectNotifier.value = null;
     }
@@ -231,19 +231,19 @@ class SettingsController extends State<Settings> with ConnectPageMixin {
     optionsSelectNotifier.value = settingEnum;
     switch (settingEnum) {
       case SettingEnum.chatSettings:
-        final result = await context.push('/rooms/chat');
+        final result = await const ChatSettingsRoute().push(context);
         if (result == null) {
           optionsSelectNotifier.value = null;
         }
         break;
       case SettingEnum.privacyAndSecurity:
-        final result = await context.push('/rooms/security');
+        final result = await const SecurityRoute().push(context);
         if (result == null) {
           optionsSelectNotifier.value = null;
         }
         break;
       case SettingEnum.notificationAndSounds:
-        final result = await context.push('/rooms/notifications');
+        final result = await const NotificationsRoute().push(context);
         if (result == null) {
           optionsSelectNotifier.value = null;
         }
@@ -251,19 +251,19 @@ class SettingsController extends State<Settings> with ConnectPageMixin {
       case SettingEnum.chatFolders:
         break;
       case SettingEnum.appLanguage:
-        final result = await context.push('/rooms/appLanguage');
+        final result = await const AppLanguageRoute().push(context);
         if (result == null) {
           optionsSelectNotifier.value = null;
         }
         break;
       case SettingEnum.devices:
-        final result = await context.push('/rooms/devices');
+        final result = await const DevicesRoute().push(context);
         if (result == null) {
           optionsSelectNotifier.value = null;
         }
         break;
       case SettingEnum.dataAndStorage:
-        final result = await context.push(AppRoutePaths.dataAndStorageFull);
+        final result = await const DataAndStorageRoute().push(context);
         if (result == null) {
           optionsSelectNotifier.value = null;
         }
