@@ -28,7 +28,7 @@ jobs:
           - os: android
             runner: ubuntu-latest
           - os: ios
-            runner: macos-14
+            runner: macos-26
       fail-fast: false
 
     steps:

@@ -90,16 +90,23 @@ class ChatDetailsMembersPage extends StatelessWidget {
                   vertical: 8,
                 ),
                 itemBuilder: (BuildContext context, int index) {
-                  if (index < members!.length) {
+                  if (members == null) {
+                    return const SizedBox.shrink();
+                  }
+                  if (index < members.length) {
                     return ListenableBuilder(
                       listenable: selectedUsersMapChangeNotifier,
                       builder: (context, child) {
+                        final member = members?[index];
+                        if (member == null) {
+                          return const SizedBox.shrink();
+                        }
                         return ParticipantListItem(
-                          key: ValueKey(members![index].id),
-                          members[index],
+                          key: ValueKey(member.id),
+                          member,
                           onUpdatedMembers: onUpdatedMembers,
                           selectionMode: selectedUsersMapChangeNotifier
-                              .getSelectionModeForUser(members[index]),
+                              .getSelectionModeForUser(member),
                           onSelectMember: onSelectMember,
                           onRemoveMember: onRemoveMember,
                           onChangeRole: onChangeRole,
