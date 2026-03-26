@@ -261,19 +261,21 @@ class _MessageContentWithTimestampBuilderState
                                             )
                                           : null,
                                     ),
-                                    child: SingleChildScrollView(
-                                      primary: true,
-                                      physics: const ClampingScrollPhysics(),
-                                      child: _messageBuilder(
-                                        key: ValueKey(
-                                          'PreviewReactionWidgetKey%${DateTime.now().millisecondsSinceEpoch}',
+                                    child: SelectionArea(
+                                      child: SingleChildScrollView(
+                                        primary: true,
+                                        physics: const ClampingScrollPhysics(),
+                                        child: _messageBuilder(
+                                          key: ValueKey(
+                                            'PreviewReactionWidgetKey%${DateTime.now().millisecondsSinceEpoch}',
+                                          ),
+                                          context: context,
+                                          timelineText: timelineText,
+                                          noBubble: noBubble,
+                                          displayTime: displayTime,
+                                          paddingBubble: .zero,
+                                          enableBorder: false,
                                         ),
-                                        context: context,
-                                        timelineText: timelineText,
-                                        noBubble: noBubble,
-                                        displayTime: displayTime,
-                                        paddingBubble: .zero,
-                                        enableBorder: false,
                                       ),
                                     ),
                                   ),
