@@ -29,6 +29,7 @@ class LoginController extends State<Login> {
   final TextEditingController passwordController = TextEditingController();
   String? usernameError;
   String? passwordError;
+  String? loginError;
   bool loading = false;
   bool showPassword = false;
   late final Future<Client> loginClientFuture;
@@ -39,6 +40,7 @@ class LoginController extends State<Login> {
       setState(() => showPassword = !loading && !showPassword);
 
   void login() async {
+    setState(() => loginError = null);
     if (_pendingLoginClient != null || loading) return;
     if (usernameController.text.isEmpty) {
       setState(() => usernameError = L10n.of(context)!.pleaseEnterYourUsername);
@@ -83,11 +85,6 @@ class LoginController extends State<Login> {
       await client.login(
         LoginType.mLoginPassword,
         identifier: identifier,
-        // To stay compatible with older server versions
-        // ignore: deprecated_member_use
-        user: identifier.type == AuthenticationIdentifierTypes.userId
-            ? username
-            : null,
         password: passwordController.text,
         initialDeviceDisplayName: PlatformInfos.clientName,
       );
@@ -96,7 +93,7 @@ class LoginController extends State<Login> {
       _pendingLoginClient = null;
       TwakeDialog.hideLoadingDialog(context);
       setState(() {
-        passwordError = exception.errorMessage;
+        loginError = exception.errorMessage;
         loading = false;
       });
       return;
@@ -105,7 +102,7 @@ class LoginController extends State<Login> {
       _pendingLoginClient = null;
       TwakeDialog.hideLoadingDialog(context);
       setState(() {
-        passwordError = exception.toString();
+        loginError = exception.toString();
         loading = false;
       });
       return;

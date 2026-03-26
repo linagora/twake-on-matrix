@@ -96,14 +96,14 @@ class LoginView extends StatelessWidget {
                                 ),
                               )
                             : null,
-                        labelText: l10n.emailOrUsername,
+                        labelText: l10n.matrixIdOrUsername,
                         labelStyle: Theme.of(context).textTheme.bodySmall
                             ?.copyWith(
                               color: controller.usernameError != null
                                   ? Theme.of(context).colorScheme.error
                                   : Theme.of(context).colorScheme.onSurface,
                             ),
-                        hintText: l10n.emailOrUsername,
+                        hintText: l10n.matrixIdOrUsername,
                         contentPadding: const EdgeInsets.all(16.0),
                       ),
                     ),
@@ -184,6 +184,20 @@ class LoginView extends StatelessWidget {
                   ],
                 ),
               ),
+              if (controller.loginError != null) ...[
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                  child: Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      controller.loginError!,
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: Theme.of(context).colorScheme.error,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
               const SizedBox(height: 4.0),
               Container(
                 padding: const EdgeInsets.all(16),
