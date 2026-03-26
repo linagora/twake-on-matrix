@@ -1,3 +1,4 @@
+import 'package:fluffychat/generated/l10n/app_localizations.dart';
 import 'package:fluffychat/pages/chat_profile_info/chat_profile_info_details.dart';
 import 'package:fluffychat/pages/profile_info/profile_info_body/profile_info_contact_rows.dart';
 import 'package:fluffychat/pages/profile_info/profile_info_body/profile_info_header.dart';
@@ -231,9 +232,11 @@ class ChatProfileInfoRobot extends CoreRobot {
     );
 
     final dialogFinder = find.byKey(TwakeDialog.showConfirmAlertDialogKey);
+    final ctx = $.tester.element(dialogFinder);
+    final confirmLabel = L10n.of(ctx)!.confirmTransfer;
     final confirmButton = find.descendant(
       of: dialogFinder,
-      matching: find.textContaining('Confirm'),
+      matching: find.textContaining(confirmLabel),
     );
 
     if (confirmButton.evaluate().isNotEmpty) {
