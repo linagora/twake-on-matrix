@@ -102,7 +102,7 @@ class LoginController extends State<Login> {
       _pendingLoginClient = null;
       TwakeDialog.hideLoadingDialog(context);
       setState(() {
-        loginError = exception.toString();
+        loginError = exception.toLocalizedString(context);
         loading = false;
       });
       return;
