@@ -26,7 +26,7 @@ class TwakeClipboard {
   ];
 
   Future<void> copyText(String text) async {
-    Clipboard.setData(ClipboardData(text: text));
+    await Clipboard.setData(ClipboardData(text: text));
   }
 
   Future<void> copyImageAsStream(File image, {String? mimeType}) async {
