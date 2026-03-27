@@ -1587,7 +1587,7 @@
     "type": "text",
     "placeholders": {}
   },
-  "pleaseEnterYourUsername": "Please enter your username",
+  "pleaseEnterYourUsername": "Please enter your Matrix Id or username",
   "@pleaseEnterYourUsername": {
     "type": "text",
     "placeholders": {}
@@ -3175,5 +3175,8 @@
   "cacheClearedSuccessfully": "Cache cleared successfully",
   "@cacheClearedSuccessfully": {},
   "cacheIsScanning": "Cache is scanning. Please wait...",
-  "@cacheIsScanning": {}
+  "@cacheIsScanning": {},
+  "selectYourServer": "Select your server",
+  "welcomeBack": "Welcome back",
+  "matrixIdOrUsername": "Matrix Id or username"
 }

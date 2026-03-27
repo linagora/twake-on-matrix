@@ -14,6 +14,8 @@ import 'package:fluffychat/data/datasource/media/media_data_source.dart';
 import 'package:fluffychat/data/datasource/multiple_account/multiple_account_datasource.dart';
 import 'package:fluffychat/data/datasource/reactions/reactions_datasource.dart';
 import 'package:fluffychat/data/datasource/recovery_words_data_source.dart';
+import 'package:fluffychat/utils/logging/filters/sensitive_data_filter.dart';
+import 'package:fluffychat/utils/logging/log_orchestrator.dart';
 import 'package:fluffychat/data/datasource/server_config_datasource.dart';
 import 'package:fluffychat/data/datasource/server_search_datasource.dart';
 import 'package:fluffychat/data/datasource/tom_configurations_datasource.dart';
@@ -149,6 +151,8 @@ import 'package:fluffychat/pages/chat/chat_pinned_events/pinned_events_controlle
 import 'package:fluffychat/pages/settings_dashboard/settings_data_and_storage/isolate_storage_scanner_service.dart';
 import 'package:fluffychat/pages/settings_dashboard/settings_data_and_storage/settings_data_and_storage_scanner_service.dart';
 import 'package:fluffychat/utils/famedlysdk_store.dart';
+import 'package:fluffychat/utils/logging/loggers/console_logger.dart';
+import 'package:fluffychat/utils/logging/loggers/sentry_logger.dart';
 import 'package:fluffychat/utils/manager/download_manager/download_manager.dart';
 import 'package:fluffychat/utils/manager/download_manager/downloading_worker_queue.dart';
 import 'package:fluffychat/utils/manager/upload_manager/upload_manager.dart';
@@ -183,6 +187,13 @@ class GetItInitializer {
   }
 
   void bindingGlobal() {
+    // Initialize Logging
+    final logOrchestrator = LogOrchestrator();
+    logOrchestrator.addLogger(ConsoleLogger());
+    logOrchestrator.addFilter(SensitiveDataFilter());
+    logOrchestrator.addLogger(SentryLogger());
+    getIt.registerSingleton<LogOrchestrator>(logOrchestrator);
+
     HiveDI().bind();
     setupDioCache();
     NetworkDI().bind();

@@ -150,7 +150,7 @@ class AutoHomeserverPickerController extends State<AutoHomeserverPicker>
       autoHomeserverPickerUIState.value = AutoHomeServerPickerFailureState(
         error: e.toString(),
       );
-      Logs().e(
+      Logs().wtf(
         "AutoHomeserverPickerController: _autoConnectSaas: Error:",
         e,
         s,

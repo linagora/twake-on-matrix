@@ -22,7 +22,10 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:fcm_shared_isolate/fcm_shared_isolate.dart';
+import 'package:fluffychat/di/global/get_it_initializer.dart';
+import 'package:fluffychat/domain/keychain_sharing/keychain_sharing_manager.dart';
 import 'package:fluffychat/domain/model/extensions/push/push_notification_extension.dart';
+import 'package:fluffychat/domain/usecase/recovery/get_recovery_words_interactor.dart';
 import 'package:fluffychat/presentation/extensions/client_extension.dart';
 import 'package:fluffychat/presentation/extensions/go_router_extensions.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/client_stories_extension.dart';
@@ -109,7 +112,52 @@ class BackgroundPush {
         }
       });
       getIosInitialNoti();
+      _setupKeychainSyncListener();
     }
+  }
+
+  String? _lastKeychainAccessToken;
+  bool _didSyncRecoveryKey = false;
+
+  void _setupKeychainSyncListener() {
+    client.onSync.stream.listen((_) async {
+      final accessToken = client.accessToken;
+      if (accessToken == null || !client.isLogged()) return;
+
+      if (accessToken != _lastKeychainAccessToken) {
+        _lastKeychainAccessToken = accessToken;
+        final userId = client.userID;
+        final homeserver = client.homeserver?.toString();
+        if (userId != null && homeserver != null) {
+          await KeychainSharingManager.saveSession(
+            accessToken: accessToken,
+            userId: userId,
+            deviceId: client.deviceID ?? '',
+            homeserverUrl: homeserver,
+          );
+        }
+      }
+
+      if (!_didSyncRecoveryKey) {
+        _didSyncRecoveryKey = true;
+        await _syncRecoveryKeyToKeychain();
+      }
+    });
+  }
+
+  Future<void> _syncRecoveryKeyToKeychain() async {
+    final userId = client.userID;
+    if (userId == null) return;
+    final result = await getIt.get<GetRecoveryWordsInteractor>().execute();
+    await result.fold(
+      (failure) async => Logs().d(
+        '[KeychainSharing] No recovery words found to sync: $failure',
+      ),
+      (success) => KeychainSharingManager.saveRecoveryKey(
+        userId: userId,
+        recoveryKey: success.words.words,
+      ),
+    );
   }
 
   factory BackgroundPush.clientOnly(Client client) {

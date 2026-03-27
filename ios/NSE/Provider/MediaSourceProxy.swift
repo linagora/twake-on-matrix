@@ -32,8 +32,9 @@ struct MediaSourceProxy: Hashable {
         self.mimeType = mimeType
     }
     
-    init(url: URL, mimeType: String?) {
-        underlyingSource = mediaSourceFromUrl(url: url.absoluteString)
+    init?(url: URL, mimeType: String?) {
+        guard let source = try? MediaSource.fromUrl(url: url.absoluteString) else { return nil }
+        underlyingSource = source
         self.url = URL(string: underlyingSource.url())
         self.mimeType = mimeType
     }

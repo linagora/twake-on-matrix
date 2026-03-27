@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:fluffychat/generated/l10n/app_localizations.dart';
 
 import 'package:fluffychat/widgets/layouts/login_scaffold.dart';
+import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'login.dart';
 
 class LoginView extends StatelessWidget {
@@ -18,147 +19,234 @@ class LoginView extends StatelessWidget {
       appBar: AppBar(
         leading: controller.loading ? null : const BackButton(),
         automaticallyImplyLeading: !controller.loading,
-        centerTitle: true,
-        title: FutureBuilder(
-          future: controller.loginClientFuture,
-          builder: (context, asyncSnapshot) {
-            if (asyncSnapshot.hasError) {
-              return Text(l10n.oopsSomethingWentWrong);
-            }
-            final homeserver =
-                asyncSnapshot.data?.homeserver?.toString().replaceFirst(
-                  'https://',
-                  '',
-                ) ??
-                '';
-            if (homeserver.isEmpty &&
-                asyncSnapshot.connectionState == ConnectionState.done) {
-              return Text(l10n.oopsSomethingWentWrong);
-            }
-            return Text(l10n.logInTo(homeserver));
-          },
-        ),
       ),
-      body: Builder(
-        builder: (context) {
-          return AutofillGroup(
-            child: ListView(
-              children: <Widget>[
-                Padding(
-                  padding: const EdgeInsets.all(12.0),
-                  child: TextField(
-                    readOnly: controller.loading,
-                    autocorrect: false,
-                    autofocus: true,
-                    onChanged: controller.checkWellKnownWithCoolDown,
-                    contextMenuBuilder: mobileTwakeContextMenuBuilder,
-                    controller: controller.usernameController,
-                    textInputAction: TextInputAction.next,
-                    keyboardType: TextInputType.emailAddress,
-                    autofillHints: controller.loading
-                        ? null
-                        : [AutofillHints.username],
-                    decoration: InputDecoration(
-                      prefixIcon: const Icon(Icons.account_box_outlined),
-                      errorText: controller.usernameError,
-                      errorStyle: const TextStyle(color: Colors.orange),
-                      hintText: L10n.of(context)!.emailOrUsername,
+      body: SafeArea(
+        child: AutofillGroup(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              Padding(
+                padding: const EdgeInsets.only(bottom: 32),
+                child: Column(
+                  children: [
+                    Text(
+                      l10n.welcomeBack,
+                      style: Theme.of(context).textTheme.headlineMedium
+                          ?.copyWith(
+                            color: LinagoraSysColors.material().onBackground,
+                          ),
                     ),
-                  ),
+                    FutureBuilder(
+                      future: controller.loginClientFuture,
+                      builder: (context, asyncSnapshot) {
+                        if (asyncSnapshot.hasError) {
+                          return const SizedBox.shrink();
+                        }
+                        final homeserver =
+                            asyncSnapshot.data?.homeserver
+                                ?.toString()
+                                .replaceFirst('https://', '') ??
+                            '';
+                        if (homeserver.isEmpty &&
+                            asyncSnapshot.connectionState ==
+                                ConnectionState.done) {
+                          return const SizedBox.shrink();
+                        }
+                        return Text(
+                          homeserver,
+                          style: Theme.of(context).textTheme.titleSmall
+                              ?.copyWith(
+                                color:
+                                    LinagoraSysColors.material().onBackground,
+                              ),
+                        );
+                      },
+                    ),
+                  ],
                 ),
-                Padding(
-                  padding: const EdgeInsets.all(12.0),
-                  child: TextField(
-                    readOnly: controller.loading,
-                    autocorrect: false,
-                    autofillHints: controller.loading
-                        ? null
-                        : [AutofillHints.password],
-                    contextMenuBuilder: mobileTwakeContextMenuBuilder,
-                    controller: controller.passwordController,
-                    textInputAction: TextInputAction.go,
-                    obscureText: !controller.showPassword,
-                    onSubmitted: (_) => controller.login(),
-                    decoration: InputDecoration(
-                      prefixIcon: const Icon(Icons.lock_outlined),
-                      errorText: controller.passwordError,
-                      errorStyle: const TextStyle(color: Colors.orange),
-                      suffixIcon: IconButton(
-                        onPressed: controller.toggleShowPassword,
-                        icon: Icon(
-                          controller.showPassword
-                              ? Icons.visibility_off_outlined
-                              : Icons.visibility_outlined,
-                          color: Colors.black,
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    TextField(
+                      readOnly: controller.loading,
+                      autocorrect: false,
+                      autofocus: true,
+                      onChanged: controller.checkWellKnownWithCoolDown,
+                      contextMenuBuilder: mobileTwakeContextMenuBuilder,
+                      controller: controller.usernameController,
+                      textInputAction: TextInputAction.next,
+                      keyboardType: TextInputType.emailAddress,
+                      autofillHints: controller.loading
+                          ? null
+                          : [AutofillHints.username],
+                      decoration: InputDecoration(
+                        border: OutlineInputBorder(
+                          borderSide: BorderSide(
+                            color: Theme.of(context).colorScheme.outline,
+                          ),
+                        ),
+                        focusedBorder: controller.usernameError != null
+                            ? OutlineInputBorder(
+                                borderSide: BorderSide(
+                                  color: Theme.of(context).colorScheme.error,
+                                  width: 2.0,
+                                ),
+                              )
+                            : null,
+                        labelText: l10n.matrixIdOrUsername,
+                        labelStyle: Theme.of(context).textTheme.bodySmall
+                            ?.copyWith(
+                              color: controller.usernameError != null
+                                  ? Theme.of(context).colorScheme.error
+                                  : Theme.of(context).colorScheme.onSurface,
+                            ),
+                        hintText: l10n.matrixIdOrUsername,
+                        contentPadding: const EdgeInsets.all(16.0),
+                      ),
+                    ),
+                    const SizedBox(height: 4.0),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      child: Text(
+                        controller.usernameError ?? '',
+                        style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                          color: Theme.of(context).colorScheme.error,
                         ),
                       ),
-                      hintText: L10n.of(context)!.password,
                     ),
-                  ),
+                  ],
                 ),
-                Hero(
-                  tag: 'signinButton',
-                  child: Padding(
-                    padding: const EdgeInsets.all(12.0),
-                    child: ElevatedButton.icon(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Theme.of(context).colorScheme.primary,
-                        foregroundColor: Theme.of(
-                          context,
-                        ).colorScheme.onPrimary,
+              ),
+              const SizedBox(height: 8.0),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    TextField(
+                      readOnly: controller.loading,
+                      autocorrect: false,
+                      autofillHints: controller.loading
+                          ? null
+                          : [AutofillHints.password],
+                      contextMenuBuilder: mobileTwakeContextMenuBuilder,
+                      controller: controller.passwordController,
+                      textInputAction: TextInputAction.go,
+                      obscureText: !controller.showPassword,
+                      onSubmitted: (_) => controller.login(),
+                      decoration: InputDecoration(
+                        border: OutlineInputBorder(
+                          borderSide: BorderSide(
+                            color: Theme.of(context).colorScheme.outline,
+                          ),
+                        ),
+                        focusedBorder: controller.passwordError != null
+                            ? OutlineInputBorder(
+                                borderSide: BorderSide(
+                                  color: Theme.of(context).colorScheme.error,
+                                  width: 2.0,
+                                ),
+                              )
+                            : null,
+                        labelText: l10n.password,
+                        labelStyle: Theme.of(context).textTheme.bodySmall
+                            ?.copyWith(
+                              color: controller.passwordError != null
+                                  ? Theme.of(context).colorScheme.error
+                                  : Theme.of(context).colorScheme.onSurface,
+                            ),
+                        hintText: l10n.password,
+                        contentPadding: const EdgeInsets.all(16.0),
+                        suffixIcon: IconButton(
+                          onPressed: controller.toggleShowPassword,
+                          icon: Icon(
+                            controller.showPassword
+                                ? Icons.visibility_off_outlined
+                                : Icons.visibility_outlined,
+                            color: LinagoraSysColors.material()
+                                .onTertiaryContainer,
+                          ),
+                        ),
                       ),
-                      onPressed: controller.loading ? null : controller.login,
-                      icon: const Icon(Icons.login_outlined),
-                      label: controller.loading
-                          ? const LinearProgressIndicator()
-                          : Text(L10n.of(context)!.login),
                     ),
-                  ),
+                    const SizedBox(height: 4),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      child: Text(
+                        controller.passwordError ?? '',
+                        style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                          color: Theme.of(context).colorScheme.error,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
+              ),
+              if (controller.loginError != null) ...[
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: Divider(
-                          thickness: 1,
-                          color: Theme.of(context).dividerColor,
-                        ),
+                  child: Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      controller.loginError!,
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: Theme.of(context).colorScheme.error,
                       ),
-                      Padding(
-                        padding: const EdgeInsets.all(12.0),
-                        child: Text(
-                          L10n.of(context)!.or,
-                          style: const TextStyle(fontSize: 18),
-                        ),
-                      ),
-                      Expanded(
-                        child: Divider(
-                          thickness: 1,
-                          color: Theme.of(context).dividerColor,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.all(12.0),
-                  child: ElevatedButton.icon(
-                    onPressed: controller.loading
-                        ? () {}
-                        : controller.passwordForgotten,
-                    style: ElevatedButton.styleFrom(
-                      foregroundColor: Theme.of(context).colorScheme.error,
-                      backgroundColor: Theme.of(context).colorScheme.onError,
                     ),
-                    icon: const Icon(Icons.safety_check_outlined),
-                    label: Text(L10n.of(context)!.passwordForgotten),
                   ),
                 ),
               ],
-            ),
-          );
-        },
+              const SizedBox(height: 4.0),
+              Container(
+                padding: const EdgeInsets.all(16),
+                width: double.infinity,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Hero(
+                      tag: 'signInButton',
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                          maximumSize: const Size.fromHeight(40),
+                          backgroundColor: Theme.of(
+                            context,
+                          ).colorScheme.primary,
+                          foregroundColor: Theme.of(
+                            context,
+                          ).colorScheme.onPrimary,
+                        ),
+                        onPressed: controller.loading ? null : controller.login,
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            if (controller.loading)
+                              const Expanded(child: LinearProgressIndicator())
+                            else
+                              Text(
+                                l10n.signIn,
+                                style: Theme.of(context).textTheme.labelLarge
+                                    ?.copyWith(
+                                      color: Theme.of(
+                                        context,
+                                      ).colorScheme.onPrimary,
+                                      letterSpacing: 0.1,
+                                    ),
+                              ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

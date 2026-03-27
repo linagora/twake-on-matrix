@@ -19,6 +19,7 @@ import 'package:fluffychat/widgets/layouts/agruments/logout_body_args.dart';
 import 'package:flutter_emoji_mart/flutter_emoji_mart.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:linagora_design_flutter/cozy_config_manager/cozy_config_manager.dart';
+import 'package:sentry_flutter/sentry_flutter.dart';
 import 'package:universal_html/html.dart' as html hide File;
 
 import 'package:adaptive_dialog/adaptive_dialog.dart';
@@ -176,6 +177,11 @@ class MatrixState extends State<Matrix>
       getIt.get<ContactsManager>().refreshTomContacts(client);
       _createSupportChat(newClient);
       _listenSyncPresence(newClient);
+      Sentry.configureScope(
+        (scope) => scope.setUser(
+          SentryUser(username: newClient.userID, name: newClient.userID),
+        ),
+      );
       return SetActiveClientState.success;
     } else {
       Logs().w('Tried to set an unknown client ${newClient!.userID} as active');
@@ -301,7 +307,7 @@ class MatrixState extends State<Matrix>
               .first
               .then((state) => _handleAddAnotherAccount(state))
               .catchError(
-                (e, s) => Logs().e(
+                (e, s) => Logs().wtf(
                   'MatrixState::getLoginClient: add-account handler failed',
                   e,
                   s,
@@ -436,7 +442,7 @@ class MatrixState extends State<Matrix>
       await setupSharingIntentStreams();
       _hasSetupSharingStreams = true;
     } catch (e, s) {
-      Logs().e(
+      Logs().wtf(
         'MatrixState::_setupSharingStreamsOnce: Failed to setup sharing streams',
         e,
         s,
@@ -646,8 +652,8 @@ class MatrixState extends State<Matrix>
       Logs().d(
         'MatrixState::_handleLogoutWithMultipleAccount: Delete persist active account success',
       );
-    } catch (e) {
-      Logs().e('MatrixState::_handleLogoutWithMultipleAccount: Error - $e');
+    } catch (e, s) {
+      Logs().wtf('MatrixState::_handleLogoutWithMultipleAccount: Error', e, s);
     }
   }
 
@@ -743,8 +749,8 @@ class MatrixState extends State<Matrix>
       final toMConfigurations = await tomConfigurationRepository
           .getTomConfigurations(userID);
       return toMConfigurations;
-    } catch (e) {
-      Logs().e('MatrixState::_getTomConfigurations: $e');
+    } catch (e, s) {
+      Logs().wtf('MatrixState::_getTomConfigurations:', e, s);
     }
     return null;
   }
@@ -758,8 +764,8 @@ class MatrixState extends State<Matrix>
       final federationConfigurations = await federationConfigurationRepository
           .getFederationConfigurations(userId);
       return federationConfigurations;
-    } catch (e) {
-      Logs().e('MatrixState::_getFederationConfigurations: $e');
+    } catch (e, s) {
+      Logs().wtf('MatrixState::_getFederationConfigurations:', e, s);
     }
     return null;
   }
@@ -778,8 +784,8 @@ class MatrixState extends State<Matrix>
       );
       _setupAuthUrl(url: toMConfigurations.authUrl);
       loginType = toMConfigurations.loginType;
-    } catch (e) {
-      Logs().e('MatrixState::_retrieveToMConfiguration: $e');
+    } catch (e, s) {
+      Logs().wtf('MatrixState::_retrieveToMConfiguration:', e, s);
     }
   }
 
@@ -864,12 +870,14 @@ class MatrixState extends State<Matrix>
       }
 
       await _tryStoreFederationConfiguration();
-    } catch (e) {
-      Logs().e('MatrixState::tryToGetFederationConfigurations: $e');
+    } catch (e, s) {
+      Logs().wtf('MatrixState::tryToGetFederationConfigurations:', e, s);
 
       if (e is FederationConfigurationNotFound) {
-        Logs().e(
+        Logs().wtf(
           'MatrixState::tryToGetFederationConfigurations: FederationConfigurationNotFound',
+          e,
+          s,
         );
 
         await _tryStoreFederationConfiguration();
@@ -899,8 +907,8 @@ class MatrixState extends State<Matrix>
           ),
         ),
       );
-    } catch (e) {
-      Logs().e('MatrixState::_tryStoreFederationConfiguration: $e');
+    } catch (e, s) {
+      Logs().wtf('MatrixState::_tryStoreFederationConfiguration:', e, s);
     }
   }
 
@@ -1016,11 +1024,15 @@ class MatrixState extends State<Matrix>
           toMConfigurations.identityServerInformation,
         );
       }
-    } catch (e) {
+    } catch (e, s) {
       _setUpToMServer(null);
       _setupAuthUrl();
       setUpAuthorization(client);
-      Logs().e('Matrix::_setUpToMServicesWhenChangingActiveClient: error - $e');
+      Logs().wtf(
+        'Matrix::_setUpToMServicesWhenChangingActiveClient: error',
+        e,
+        s,
+      );
     }
     Logs().d(
       'Matrix::_setUpToMServicesWhenChangingActiveClient: New twakeSupported - $twakeSupported',
@@ -1043,8 +1055,8 @@ class MatrixState extends State<Matrix>
           await setActiveClient(newActiveClient);
         }
       }
-    } catch (e) {
-      Logs().e('Matrix::_retrievePersistedActiveAccount(): Error - $e');
+    } catch (e, s) {
+      Logs().wtf('Matrix::_retrievePersistedActiveAccount(): Error', e, s);
     }
   }
 
@@ -1059,8 +1071,8 @@ class MatrixState extends State<Matrix>
         context,
         serverLanguage: result.language,
       );
-    } catch (e) {
-      Logs().e('Matrix::_getUserInfoWithActiveClient(): Error - $e');
+    } catch (e, s) {
+      Logs().wtf('Matrix::_getUserInfoWithActiveClient(): Error', e, s);
       await LocalizationService.initializeLanguage(context);
     }
   }
@@ -1101,8 +1113,8 @@ class MatrixState extends State<Matrix>
       await multipleAccountRepository.storePersistActiveAccount(
         newClient.userID!,
       );
-    } catch (e) {
-      Logs().e('Matrix::_storePersistActiveAccount(): Error - $e');
+    } catch (e, s) {
+      Logs().wtf('Matrix::_storePersistActiveAccount(): Error', e, s);
     }
   }
 
@@ -1142,6 +1154,7 @@ class MatrixState extends State<Matrix>
     waitForFirstSync = false;
     matrixState.reSyncContacts();
     await matrixState.cancelListenSynchronizeContacts();
+    Sentry.configureScope((scope) => scope.setUser(null));
     if (PlatformInfos.isMobile) {
       await _deletePersistActiveAccount();
       TwakeApp.router.go('/home/twakeWelcome');
@@ -1280,8 +1293,8 @@ class MatrixState extends State<Matrix>
                   AppConfig.enableRightAndLeftMessageAlignmentOnWeb = value,
             ),
       ]);
-    } catch (e) {
-      Logs().e('MatrixState::initSettings: error - $e');
+    } catch (e, s) {
+      Logs().wtf('MatrixState::initSettings: error', e, s);
     } finally {
       initSettingsCompleter.complete();
     }
@@ -1378,7 +1391,7 @@ extension HomeserverSummaryConversion
         loginFlows: result.$3,
       );
     } catch (e, s) {
-      Logs().e('HomeserverSummaryConversion::toHomeserverSummary', e, s);
+      Logs().wtf('HomeserverSummaryConversion::toHomeserverSummary', e, s);
       return null;
     }
   }

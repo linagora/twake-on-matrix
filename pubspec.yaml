@@ -1,12 +1,13 @@
 name: fluffychat
 description: A convenient Matrix-based tool for personal and corporate communication.
 publish_to: none
-version: 2.20.6+2330
+version: 2.21.11+2330
 
 environment:
   sdk: ">=3.10.0 <4.0.0"
 
 dependencies:
+  sentry_flutter: ^9.10.0
   ### Dependencies from git ###
   matrix: ^6.0.0
 
@@ -218,6 +219,7 @@ dependencies:
   storage_space: ^1.2.0
 
 dev_dependencies:
+  sentry_dart_plugin: ^3.2.1
   build_runner: 2.10.5
   flutter_launcher_icons: ^0.13.1
   flutter_lints: ^3.0.2
@@ -340,3 +342,17 @@ patrol:
   ios:
     bundle_id: app.twake.ios.chat
     app_name: Twake Chat
+
+sentry:
+  project:
+  org:
+  symbols_path: build/app/outputs/symbols
+  dart_symbol_map_path: build/app/obfuscation.map.json
+  upload_debug_symbols: true
+  upload_source_maps: true
+  upload_sources: true
+  log_level: debug
+  ignore_missing: true
+  url_prefix:
+  release:
+  dist:

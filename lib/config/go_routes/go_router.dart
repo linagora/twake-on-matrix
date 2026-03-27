@@ -109,8 +109,14 @@ abstract class AppRoutes {
         ),
         GoRoute(
           path: 'homeserverpicker',
-          pageBuilder: (context, state) =>
-              defaultPageBuilder(context, const HomeserverPicker()),
+          pageBuilder: (context, state) => defaultPageBuilder(
+            context,
+            const HomeserverPicker(
+              arg: HomeserverPickerArg(
+                type: HomeserverPickerType.singleAccount,
+              ),
+            ),
+          ),
           redirect: loggedInRedirect,
         ),
       ],
@@ -379,15 +385,23 @@ abstract class AppRoutes {
               ),
               routes: [
                 GoRoute(
-                  path: 'login',
-                  pageBuilder: (context, state) =>
-                      defaultPageBuilder(context, const Login()),
-                  redirect: loggedOutRedirect,
-                ),
-                GoRoute(
                   path: 'homeserverpicker',
-                  pageBuilder: (context, state) =>
-                      defaultPageBuilder(context, const HomeserverPicker()),
+                  pageBuilder: (context, state) => defaultPageBuilder(
+                    context,
+                    const HomeserverPicker(
+                      arg: HomeserverPickerArg(
+                        type: HomeserverPickerType.multiAccount,
+                      ),
+                    ),
+                  ),
+                  routes: [
+                    GoRoute(
+                      path: 'login',
+                      pageBuilder: (context, state) =>
+                          defaultPageBuilder(context, const Login()),
+                      redirect: loggedOutRedirect,
+                    ),
+                  ],
                 ),
               ],
             ),

@@ -5,6 +5,10 @@ import 'package:fluffychat/domain/app_state/room/set_permission_level_state.dart
 import 'package:matrix/matrix.dart';
 
 class SetPermissionLevelInteractor {
+  /// Set the permission level for a list of users in a room
+  /// [room] The room in which to set the permission levels
+  /// [userPermissionLevels] A map of users and their corresponding permission levels to set
+  ///
   Stream<Either<Failure, Success>> execute({
     required Room room,
     required Map<User, int> userPermissionLevels,
@@ -12,13 +16,16 @@ class SetPermissionLevelInteractor {
     try {
       yield Right(SetPermissionLevelLoading());
 
-      var powerMap = room.getState(EventTypes.RoomPowerLevels)?.content;
-      if (powerMap is! Map<String, dynamic>) {
-        powerMap = <String, dynamic>{};
-      }
-      final usersMap = powerMap['users'] ??= {};
+      final powerMap = Map<String, dynamic>.from(
+        room.getState(EventTypes.RoomPowerLevels)?.content ??
+            const <String, dynamic>{},
+      );
+      final usersMap = Map<String, dynamic>.from(
+        powerMap['users'] as Map? ?? const <String, dynamic>{},
+      );
+      powerMap['users'] = usersMap;
 
-      userPermissionLevels.forEach((user, level) {
+      userPermissionLevels.forEach((User user, int level) {
         usersMap[user.id] = level;
       });
 
@@ -33,6 +40,8 @@ class SetPermissionLevelInteractor {
     } on MatrixException catch (e) {
       if (e.error == MatrixError.M_FORBIDDEN) {
         yield const Left(NoPermissionFailure());
+      } else {
+        yield Left(SetPermissionLevelFailure(exception: e));
       }
     } catch (error) {
       yield Left(SetPermissionLevelFailure(exception: error));
