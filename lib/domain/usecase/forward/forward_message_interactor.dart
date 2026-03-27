@@ -15,20 +15,42 @@ class ForwardMessageInteractor {
     try {
       yield Right(ForwardMessageLoading());
 
-      final room = rooms.firstWhere(
-        (element) => element.id == selectedEvents.first,
-      );
-      if (room.membership == Membership.join) {
-        if (matrixState.shareContentList.isEmpty &&
-            matrixState.shareContent != null) {
-          yield* _forwardOneMessageAction(room: room, matrixState: matrixState);
-        } else {
-          yield* _forwardMultipleMessagesAction(
-            room: room,
-            matrixState: matrixState,
-          );
+      int successCount = 0;
+      final totalCount = selectedEvents.length;
+
+      for (final roomId in selectedEvents) {
+        try {
+          final room = rooms.firstWhere((element) => element.id == roomId);
+          if (room.membership != Membership.join) continue;
+
+          if (matrixState.shareContentList.isEmpty &&
+              matrixState.shareContent != null) {
+            yield* _forwardOneMessageAction(
+              room: room,
+              matrixState: matrixState,
+            );
+          } else {
+            yield* _forwardMultipleMessagesAction(
+              room: room,
+              matrixState: matrixState,
+            );
+          }
+          successCount++;
+          yield Right(ForwardMessageSuccess(room));
+        } catch (exception) {
+          yield Left(ForwardMessageFailed(exception: exception));
         }
       }
+
+      matrixState.shareContent = null;
+      matrixState.shareContentList = null;
+
+      yield Right(
+        ForwardMessageAllDoneState(
+          successCount: successCount,
+          totalCount: totalCount,
+        ),
+      );
     } catch (exception) {
       yield Left(ForwardMessageFailed(exception: exception));
     }
@@ -53,15 +75,9 @@ class ForwardMessageInteractor {
     required Room room,
     required MatrixState matrixState,
   }) async* {
-    try {
-      final message = matrixState.shareContent;
-      if (message != null) {
-        yield* _forwardMessage(message, room);
-        matrixState.shareContent = null;
-      }
-      yield Right(ForwardMessageSuccess(room));
-    } catch (exception) {
-      yield Left(ForwardMessageFailed(exception: exception));
+    final message = matrixState.shareContent;
+    if (message != null) {
+      yield* _forwardMessage(message, room);
     }
   }
 
@@ -69,23 +85,13 @@ class ForwardMessageInteractor {
     required Room room,
     required MatrixState matrixState,
   }) async* {
-    try {
-      yield Right(ForwardMessageLoading());
-
-      final messages = matrixState.shareContentList;
-      if (messages.isNotEmpty) {
-        for (final message in messages) {
-          if (message != null) {
-            yield* _forwardMessage(message, room);
-          } else {
-            continue;
-          }
+    final messages = matrixState.shareContentList;
+    if (messages.isNotEmpty) {
+      for (final message in messages) {
+        if (message != null) {
+          yield* _forwardMessage(message, room);
         }
-        matrixState.shareContentList = null;
       }
-      yield Right(ForwardMessageSuccess(room));
-    } catch (exception) {
-      yield Left(ForwardMessageFailed(exception: exception));
     }
   }
 }

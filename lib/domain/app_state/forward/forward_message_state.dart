@@ -36,3 +36,16 @@ class ForwardMessageIsShareFileState extends Success {
   @override
   List<Object?> get props => [shareFile, room];
 }
+
+class ForwardMessageAllDoneState extends Success {
+  final int successCount;
+  final int totalCount;
+
+  const ForwardMessageAllDoneState({
+    required this.successCount,
+    required this.totalCount,
+  });
+
+  @override
+  List<Object?> get props => [successCount, totalCount];
+}

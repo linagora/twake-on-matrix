@@ -12,6 +12,8 @@ import 'package:fluffychat/presentation/extensions/client_extension.dart';
 import 'package:fluffychat/presentation/mixins/contacts_view_controller_mixin.dart';
 import 'package:fluffychat/presentation/mixins/search_recent_chat_mixin.dart';
 import 'package:fluffychat/presentation/model/pop_result_from_forward.dart';
+import 'package:fluffychat/utils/dialog/twake_dialog.dart';
+import 'package:fluffychat/utils/twake_snackbar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:fluffychat/config/go_routes/app_routes.dart';
@@ -48,7 +50,7 @@ class ForwardController extends State<Forward>
   final AutoScrollController recentChatScrollController =
       AutoScrollController();
 
-  final ValueNotifier<String> selectedRoomIdNotifier = ValueNotifier('');
+  final selectedRoomIdNotifier = ValueNotifier(<String>[]);
 
   @override
   void closeSearchBar() {
@@ -81,7 +83,13 @@ class ForwardController extends State<Forward>
   }
 
   void onToggleSelectChat(String id) {
-    selectedRoomIdNotifier.value = id;
+    final current = List<String>.from(selectedRoomIdNotifier.value);
+    if (current.contains(id)) {
+      current.remove(id);
+    } else {
+      current.add(id);
+    }
+    selectedRoomIdNotifier.value = current;
   }
 
   final ActiveFilter _activeFilterAllChats = ActiveFilter.acceptedChats;
@@ -89,11 +97,11 @@ class ForwardController extends State<Forward>
   List<Room> get filteredRoomsForAll =>
       Matrix.of(context).client.filteredRoomsForAll(_activeFilterAllChats);
 
-  void forwardAction() async {
+  void forwardAction(BuildContext context) async {
     forwardMessageInteractorStreamSubscription = _forwardMessageInteractor
         .execute(
           rooms: filteredRoomsForAll,
-          selectedEvents: [selectedRoomIdNotifier.value],
+          selectedEvents: selectedRoomIdNotifier.value,
           matrixState: Matrix.of(context),
         )
         .listen(
@@ -114,33 +122,64 @@ class ForwardController extends State<Forward>
         Logs().e(
           'ForwardController::_handleForwardMessageOnData() - failure: $failure',
         );
+        if (mounted) {
+          TwakeDialog.hideLoadingDialog(context);
+        }
       },
       (success) async {
         Logs().d(
           'ForwardController::_handleForwardMessageOnData() - success: $success',
         );
-        switch (success.runtimeType) {
-          case const (ForwardMessageSuccess):
-            final dataOnSuccess = success as ForwardMessageSuccess;
-            if (Navigator.of(context).canPop()) {
-              Navigator.of(context).pop(const PopResultFromForward());
-            }
-            RoomRoute(roomid: dataOnSuccess.room.id).go(context);
+        if (mounted && success is ForwardMessageLoading) {
+          TwakeDialog.showLoadingDialog(context);
+        } else if (mounted && success is ForwardMessageAllDoneState) {
+          TwakeDialog.hideLoadingDialog(context);
+        }
+        switch (success) {
+          case ForwardMessageAllDoneState():
+            _handleAllDone(context, success);
             break;
-          case const (ForwardMessageIsShareFileState):
-            final dataOnSuccess = success as ForwardMessageIsShareFileState;
+          case ForwardMessageIsShareFileState(:final shareFile, :final room):
             await showDialog(
               context: context,
               useRootNavigator: false,
-              builder: (c) => SendFileDialog(
-                files: [dataOnSuccess.shareFile],
-                room: dataOnSuccess.room,
-              ),
+              builder: (c) => SendFileDialog(files: [shareFile], room: room),
             );
             break;
         }
       },
     );
+  }
+
+  void _handleAllDone(BuildContext context, ForwardMessageAllDoneState done) {
+    if (done.totalCount != 1) {
+      if (Navigator.of(context).canPop()) {
+        Navigator.of(context).pop();
+      } else {
+        const RoomsRoute().go(context);
+      }
+      final message = _buildMultiForwardSnackbarMessage(done);
+      TwakeSnackBar.show(context, message);
+      return;
+    }
+
+    final roomId = selectedRoomIdNotifier.value.firstOrNull;
+    if (Navigator.of(context).canPop()) {
+      Navigator.of(context).pop(const PopResultFromForward());
+    }
+    if (roomId != null) {
+      RoomRoute(roomid: roomId).go(context);
+    }
+  }
+
+  String _buildMultiForwardSnackbarMessage(ForwardMessageAllDoneState done) {
+    if (done.successCount == 0) {
+      return 'Failed to forward message';
+    }
+    if (done.successCount == done.totalCount) {
+      return 'Forwarded to ${done.successCount} chats';
+    }
+    return 'Forwarded to ${done.successCount} of ${done.totalCount} chats';
   }
 
   void _handleForwardMessageOnDone() {

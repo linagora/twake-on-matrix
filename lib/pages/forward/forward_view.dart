@@ -3,7 +3,7 @@ import 'package:fluffychat/app_state/failure.dart';
 import 'package:fluffychat/app_state/success.dart';
 import 'package:fluffychat/domain/app_state/forward/forward_message_state.dart';
 import 'package:fluffychat/pages/forward/forward.dart';
-import 'package:fluffychat/pages/forward/recent_chat_list.dart';
+import 'package:fluffychat/pages/forward/forward_recent_chat_list.dart';
 import 'package:fluffychat/pages/forward/recent_chat_title.dart';
 import 'package:fluffychat/pages/forward/forward_view_style.dart';
 import 'package:fluffychat/widgets/app_bars/searchable_app_bar.dart';
@@ -62,7 +62,7 @@ class ForwardView extends StatelessWidget {
                     valueListenable: controller.recentlyChatsNotifier,
                     builder: (context, rooms, child) {
                       if (rooms.isNotEmpty) {
-                        return RecentChatList(
+                        return ForwardRecentChatList(
                           rooms: rooms,
                           selectedChatNotifier:
                               controller.selectedRoomIdNotifier,
@@ -84,13 +84,13 @@ class ForwardView extends StatelessWidget {
             _WebActionsButton(
               selectedChatNotifier: controller.selectedRoomIdNotifier,
               forwardMessageNotifier: controller.forwardMessageNotifier,
-              forwardAction: controller.forwardAction,
+              forwardAction: () => controller.forwardAction(context),
             ),
         ],
       ),
       floatingActionButton: controller.isFullScreen
           ? _ForwardButton(
-              forwardAction: controller.forwardAction,
+              forwardAction: () => controller.forwardAction(context),
               selectedChatNotifier: controller.selectedRoomIdNotifier,
               forwardMessageNotifier: controller.forwardMessageNotifier,
             )
@@ -100,7 +100,7 @@ class ForwardView extends StatelessWidget {
 }
 
 class _WebActionsButton extends StatelessWidget {
-  final ValueNotifier<String> selectedChatNotifier;
+  final ValueNotifier<List<String>> selectedChatNotifier;
 
   final ValueNotifier<Either<Failure, Success>?> forwardMessageNotifier;
 
@@ -116,9 +116,9 @@ class _WebActionsButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: ForwardViewStyle.webActionsButtonPadding,
-      child: ValueListenableBuilder<String>(
+      child: ValueListenableBuilder<List<String>>(
         valueListenable: selectedChatNotifier,
-        builder: ((context, selectedChat, child) {
+        builder: ((context, selectedChats, child) {
           return ValueListenableBuilder<Either<Failure, Success>?>(
             valueListenable: forwardMessageNotifier,
             builder: (context, forwardMessageState, child) {
@@ -167,7 +167,7 @@ class _WebActionsButton extends StatelessWidget {
                   margin: ForwardViewStyle.webActionsButtonMargin,
                   borderHover: ForwardViewStyle.webActionsButtonBorder,
                   buttonDecoration: BoxDecoration(
-                    color: selectedChat.isNotEmpty
+                    color: selectedChats.isNotEmpty
                         ? LinagoraSysColors.material().primary
                         : LinagoraStateLayer(
                             LinagoraSysColors.material().onSurface,
@@ -178,7 +178,7 @@ class _WebActionsButton extends StatelessWidget {
                   ),
                   styleMessage: Theme.of(context).textTheme.labelLarge
                       ?.copyWith(
-                        color: selectedChat.isNotEmpty
+                        color: selectedChats.isNotEmpty
                             ? LinagoraSysColors.material().onPrimary
                             : LinagoraSysColors.material().inverseSurface
                                   .withOpacity(0.6),
@@ -200,7 +200,7 @@ class _ForwardButton extends StatelessWidget {
     required this.forwardAction,
   });
 
-  final ValueNotifier<String> selectedChatNotifier;
+  final ValueNotifier<List<String>> selectedChatNotifier;
 
   final void Function() forwardAction;
 
@@ -208,10 +208,10 @@ class _ForwardButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ValueListenableBuilder<String>(
+    return ValueListenableBuilder<List<String>>(
       valueListenable: selectedChatNotifier,
-      builder: ((context, selectedChat, child) {
-        if (selectedChat.isEmpty) {
+      builder: ((context, selectedChats, child) {
+        if (selectedChats.isEmpty) {
           return const SizedBox();
         }
 
