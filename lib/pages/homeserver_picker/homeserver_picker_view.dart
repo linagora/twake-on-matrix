@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:fluffychat/generated/l10n/app_localizations.dart';
 import 'package:flutter_typeahead/flutter_typeahead.dart';
 import 'package:go_router/go_router.dart';
+import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:matrix_homeserver_recommendations/matrix_homeserver_recommendations.dart';
 import 'homeserver_picker.dart';
 
@@ -19,6 +20,7 @@ class HomeserverPickerView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final benchmarkResults = controller.benchmarkResults;
+    final l10n = L10n.of(context)!;
     return LoginScaffold(
       appBar: PlatformInfos.isMobile
           ? AppBar(
@@ -27,7 +29,7 @@ class HomeserverPickerView extends StatelessWidget {
                 onTap: controller.state != HomeserverState.loading
                     ? () => context.pop()
                     : null,
-                tooltip: L10n.of(context)!.back,
+                tooltip: l10n.back,
               ),
             )
           : null,
@@ -52,10 +54,19 @@ class HomeserverPickerView extends StatelessWidget {
                 color: Theme.of(context).colorScheme.surface,
                 child: ListTile(
                   leading: const Icon(Icons.vpn_key),
-                  title: Text(L10n.of(context)!.hydrateTor),
-                  subtitle: Text(L10n.of(context)!.hydrateTorLong),
+                  title: Text(l10n.hydrateTor),
+                  subtitle: Text(l10n.hydrateTorLong),
                   trailing: const Icon(Icons.chevron_right_outlined),
                   onTap: controller.restoreBackup,
+                ),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.only(bottom: 48),
+              child: Text(
+                l10n.selectYourServer,
+                style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                  color: LinagoraSysColors.material().onBackground,
                 ),
               ),
             ),
@@ -71,7 +82,7 @@ class HomeserverPickerView extends StatelessWidget {
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16.0),
                 child: Text(
-                  L10n.of(context)!.serverNameWrongExplain,
+                  l10n.serverNameWrongExplain,
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                     letterSpacing: 0.25,
                     color: Theme.of(context).colorScheme.outline,
@@ -114,18 +125,20 @@ class HomeserverPickerView extends StatelessWidget {
   }
 
   Widget _getLabelLoginButton(BuildContext context) {
+    final l10n = L10n.of(context)!;
     final textStyle = Theme.of(context).textTheme.labelLarge?.copyWith(
       color: Theme.of(context).colorScheme.onPrimary,
       letterSpacing: 0.1,
     );
     switch (controller.state) {
       case HomeserverState.otherLoginMethod:
-        return Text(L10n.of(context)!.continueProcess, style: textStyle);
+        return Text(l10n.continueProcess, style: textStyle);
       case HomeserverState.loading:
         return const Expanded(child: LinearProgressIndicator());
       case HomeserverState.ssoLoginServer:
       case HomeserverState.wrongServerName:
-        return Text(L10n.of(context)!.continueProcess, style: textStyle);
+      case HomeserverState.passwordLoginMethod:
+        return Text(l10n.continueProcess, style: textStyle);
     }
   }
 }
@@ -148,6 +161,7 @@ class HomeserverTextField extends StatelessWidget {
   TypeAheadField<HomeserverBenchmarkResult> _buildTypeAheadField(
     BuildContext context,
   ) {
+    final l10n = L10n.of(context)!;
     return TypeAheadField(
       builder: (context, value, focusNode) {
         return TextField(
@@ -175,14 +189,14 @@ class HomeserverTextField extends StatelessWidget {
                   )
                 : null,
             labelText: controller.state != HomeserverState.wrongServerName
-                ? L10n.of(context)!.homeserver
-                : L10n.of(context)!.wrongServerName,
+                ? l10n.homeserver
+                : l10n.wrongServerName,
             labelStyle: Theme.of(context).textTheme.bodySmall?.copyWith(
               color: controller.state != HomeserverState.wrongServerName
                   ? Theme.of(context).colorScheme.onSurface
                   : Theme.of(context).colorScheme.error,
             ),
-            hintText: L10n.of(context)!.enterYourHomeserver,
+            hintText: l10n.enterYourHomeserver,
             contentPadding: const EdgeInsets.all(16.0),
           ),
         );

@@ -1587,7 +1587,7 @@
     "type": "text",
     "placeholders": {}
   },
-  "pleaseEnterYourUsername": "Please enter your username",
+  "pleaseEnterYourUsername": "Please enter your Matrix Id or username",
   "@pleaseEnterYourUsername": {
     "type": "text",
     "placeholders": {}
@@ -3140,5 +3140,8 @@
   "cannotInviteBannedMember": "This user has been removed by an administrator. Change status in \"Removed users\" to proceed",
   "leaveChat": "Leave chat",
   "leaveChatDescription": "Messaging history will still be available to the other person.",
-  "leaveChatTitle": "Are you sure you want to leave this chat?"
+  "leaveChatTitle": "Are you sure you want to leave this chat?",
+  "selectYourServer": "Select your server",
+  "welcomeBack": "Welcome back",
+  "matrixIdOrUsername": "Matrix Id or username"
 }

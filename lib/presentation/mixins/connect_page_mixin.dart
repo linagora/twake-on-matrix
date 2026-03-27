@@ -237,18 +237,33 @@ mixin ConnectPageMixin {
   }) {
     final loginTypes = rawLoginTypes;
     if (loginTypes == null) return null;
-    final rawProviders = loginTypes
-        .tryGetList('flows')!
-        .singleWhere(
-          (flow) => flow['type'] == AuthenticationTypes.sso,
-        )['identity_providers'];
-    final list = (rawProviders as List)
-        .map((json) => IdentityProvider.fromJson(json))
-        .toList();
-    if (PlatformInfos.isCupertinoStyle) {
-      list.sort((a, b) => a.brand == 'apple' ? -1 : 1);
+
+    final flows = loginTypes.tryGetList('flows');
+    if (flows == null) return null;
+
+    try {
+      final ssoFlow = flows.singleWhere(
+        (flow) => flow['type'] == AuthenticationTypes.sso,
+      );
+
+      final rawProviders = ssoFlow['identity_providers'];
+
+      // If no identity_providers field, return a generic SSO provider
+      if (rawProviders == null) {
+        return [];
+      }
+
+      final list = (rawProviders as List)
+          .map((json) => IdentityProvider.fromJson(json))
+          .toList();
+      if (PlatformInfos.isCupertinoStyle) {
+        list.sort((a, b) => a.brand == 'apple' ? -1 : 1);
+      }
+      return list;
+    } catch (e) {
+      // No SSO flow found or other error
+      return null;
     }
-    return list;
   }
 
   Future<SsoLoginState> handleTokenFromRegistrationSite({

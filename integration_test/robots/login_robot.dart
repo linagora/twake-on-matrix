@@ -1,8 +1,10 @@
 import 'dart:io';
 import 'package:fluffychat/pages/chat_list/chat_list.dart';
 import 'package:fluffychat/pages/homeserver_picker/homeserver_picker_view.dart';
+import 'package:fluffychat/pages/login/login_view.dart';
 import 'package:fluffychat/pages/twake_welcome/twake_welcome.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
+import 'package:flutter/material.dart';
 import 'package:patrol/patrol.dart';
 import '../base/core_robot.dart';
 
@@ -199,5 +201,47 @@ class LoginRobot extends CoreRobot {
       );
       await $.native.tap(getSignInBtn(), appId: getBrowserAppId());
     }
+  }
+
+  // Password Login Methods (in-app)
+  Future<void> waitForLoginView() async {
+    await $(LoginView).waitUntilVisible(timeout: const Duration(seconds: 30));
+  }
+
+  Future<void> enterUsername(String username) async {
+    final usernameField = $(TextField).at(0);
+    await $.enterText(usernameField, username);
+  }
+
+  Future<void> enterPassword(String password) async {
+    final passwordField = $(TextField).at(1);
+    await $.enterText(passwordField, password);
+  }
+
+  Future<void> tapSignInButton() async {
+    final signInButton = $(ElevatedButton).first;
+    await signInButton.tap();
+  }
+
+  Future<void> loginWithPassword({
+    required String username,
+    required String password,
+  }) async {
+    await waitForLoginView();
+    await enterUsername(username);
+    await enterPassword(password);
+    await tapSignInButton();
+  }
+
+  Future<void> waitForChatList() async {
+    await $(ChatList).waitUntilVisible(timeout: const Duration(seconds: 60));
+  }
+
+  Future<bool> isLoginViewVisible() async {
+    return $(LoginView).exists;
+  }
+
+  Future<bool> isChatListVisible() async {
+    return $(ChatList).exists;
   }
 }
