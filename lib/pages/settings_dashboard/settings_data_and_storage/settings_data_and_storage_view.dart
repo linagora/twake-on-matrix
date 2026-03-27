@@ -1,9 +1,11 @@
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/generated/l10n/app_localizations.dart';
 import 'package:fluffychat/pages/settings_dashboard/settings_style/settings_style_twake_view.dart';
+import 'package:fluffychat/resource/image_paths.dart';
 import 'package:fluffychat/utils/responsive/responsive_utils.dart';
 import 'package:fluffychat/widgets/app_bars/twake_app_bar.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:linagora_design_flutter/colors/linagora_ref_colors.dart';
 import 'package:linagora_design_flutter/colors/linagora_sys_colors.dart';
@@ -28,6 +30,14 @@ class SettingsDataAndStorageView extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 13),
+            child: SvgPicture.asset(
+              ImagePaths.mascotDataAndStorage,
+              width: 106,
+              height: 126,
+            ),
+          ),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
             child: Column(
@@ -89,8 +99,8 @@ class SettingsDataAndStorageView extends StatelessWidget {
                         ? null
                         : controller.storageUsageRatio,
                     minHeight: 8,
-                    backgroundColor: const Color(0xFFEEEEEE),
-                    color: const Color(0xFF006DE2),
+                    backgroundColor: refColors.tertiary[70],
+                    color: sysColors.primary,
                   ),
                 ),
                 const SizedBox(height: 8),
@@ -100,13 +110,13 @@ class SettingsDataAndStorageView extends StatelessWidget {
                     Text(
                       l10n.twake,
                       style: textTheme.labelSmall?.copyWith(
-                        color: const Color(0xFF636363),
+                        color: refColors.tertiary[20],
                       ),
                     ),
                     Text(
                       l10n.available,
                       style: textTheme.labelSmall?.copyWith(
-                        color: const Color(0xFF636363),
+                        color: refColors.tertiary[20],
                       ),
                     ),
                   ],

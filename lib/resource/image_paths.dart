@@ -98,6 +98,9 @@ class ImagePaths {
 
   static String get mascotNoChat => _getImagePath('ic_mascot_no_chat.svg');
 
+  static String get mascotDataAndStorage =>
+      _getImagePath('data-and-storage.svg');
+
   static String get icE2EEncryptionMessageIndicator =>
       _getImagePath('ic_end_to_end_encryption_message_indicator.svg');
 
