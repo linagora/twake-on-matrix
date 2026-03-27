@@ -1,3 +1,26 @@
+## [2.21.12] - 2026-03-27
+
+### Added
+- #2948 Handle invitation link web page and routing
+- #2917 Allow mobile clear cache
+- #2911 Add connection to a matrix server through username/password
+- #2898 Add selection area to enable text copying in message preview
+- feat(search): Validate mxid profile via API before displaying external contact
+- #2839 Introduce comprehensive logging system with Sentry integration and sensitive data filtering
+
+### Changed
+- #2904 Refactor message context menu to use SafeArea and improve scrollability
+- #2931 Offload /sync JSON parsing to background isolate/web worker for better performance
+- #2934 Adjust avatar gradient when expanded
+- #2913 Disable scroll when viewing history
+- Upgrade Xcode version to 26.0 and update build configurations for CI release flow
+
+### Fixed
+- HOTFIX Resolve unclickable link issue
+- TW-2893 Fix decrypt encrypted notification and resync session to NSE
+- TW-2236 Fix transfer ownership bricking legacy rooms
+- fix: Correct read receipt indicator in chat list
+
 ## [2.20.6] - 2026-03-18
 ### Added
 - Translated using Weblate (Arabic, Basque, Catalan, Chinese (Simplified), Chinese (Traditional), Croatian, Czech, Dutch, English, Esperanto, Estonian, Finnish, French, Galician, German, Hebrew, Hungarian, Indonesian, Irish, Italian, Japanese, Korean, Lithuanian, Norwegian Bokmål, Polish, Portuguese, Portuguese (Brazil), Portuguese (Portugal), Russian, Serbian, Slovak, Spanish, Swedish, Turkish, Ukrainian, Vietnamese)
