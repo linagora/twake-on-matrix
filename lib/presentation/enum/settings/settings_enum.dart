@@ -10,6 +10,7 @@ enum SettingEnum {
   chatFolders,
   appLanguage,
   devices,
+  dataAndStorage,
   help,
   about,
   deleteAccount,
@@ -37,8 +38,10 @@ enum SettingEnum {
         return L10n.of(context)!.deleteAccount;
       case SettingEnum.logout:
         return L10n.of(context)!.logout;
-      default:
-        return '';
+      case SettingEnum.profile:
+        return L10n.of(context)!.profile;
+      case SettingEnum.dataAndStorage:
+        return L10n.of(context)!.dataAndStorage;
     }
   }
 
@@ -64,8 +67,10 @@ enum SettingEnum {
         return Icons.delete_outline;
       case SettingEnum.logout:
         return Icons.logout_outlined;
-      default:
+      case SettingEnum.profile:
         return Icons.person_outline;
+      case SettingEnum.dataAndStorage:
+        return Icons.data_usage;
     }
   }
 

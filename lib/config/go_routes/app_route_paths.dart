@@ -5,6 +5,10 @@
 abstract class AppRoutePaths {
   static const matrixId = 'matrixId';
 
+  // Data and Storage routes
+  static const String dataAndStorageSegment = 'dataAndStorage';
+  static const String dataAndStorageFull = '/rooms/dataAndStorage';
+
   // Security routes
   static const String roomsSecurityFull = '/rooms/security';
   static const String contactsVisibilitySegment = 'contactsVisibility';

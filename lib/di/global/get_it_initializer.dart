@@ -148,6 +148,8 @@ import 'package:fluffychat/modules/federation_identity_lookup/manager/federation
 import 'package:fluffychat/modules/federation_identity_lookup/manager/identity_lookup_manager.dart';
 import 'package:fluffychat/modules/federation_identity_request_token/manager/federation_identity_request_token_manager.dart';
 import 'package:fluffychat/pages/chat/chat_pinned_events/pinned_events_controller.dart';
+import 'package:fluffychat/pages/settings_dashboard/settings_data_and_storage/isolate_storage_scanner_service.dart';
+import 'package:fluffychat/pages/settings_dashboard/settings_data_and_storage/settings_data_and_storage_scanner_service.dart';
 import 'package:fluffychat/utils/famedlysdk_store.dart';
 import 'package:fluffychat/utils/logging/loggers/console_logger.dart';
 import 'package:fluffychat/utils/logging/loggers/sentry_logger.dart';
@@ -198,6 +200,9 @@ class GetItInitializer {
     NetworkConnectivityDI().bind();
     getIt.registerSingleton(ResponsiveUtils());
     getIt.registerSingleton(TwakeEventDispatcher());
+    getIt.registerLazySingleton<StorageScannerService>(
+      () => const IsolateStorageScannerService(),
+    );
     getIt.registerSingleton(Store());
     getIt.registerFactory<AppConfigLoader>(() => AppConfigLoader());
     bindingCachingManager();

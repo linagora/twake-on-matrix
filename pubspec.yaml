@@ -216,6 +216,7 @@ dependencies:
   visibility_detector: ^0.4.0+2
   path: ^1.8.0
   web: ^1.1.1
+  storage_space: ^1.2.0
 
 dev_dependencies:
   sentry_dart_plugin: ^3.2.1
