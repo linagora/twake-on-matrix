@@ -31,7 +31,7 @@ Future<void> sentryInit({
     } else {
       runApp(app);
     }
-  } on Exception catch (e, s) {
+  } catch (e, s) {
     Logs().e('sentryInit():', e, s);
     runApp(app);
   }
