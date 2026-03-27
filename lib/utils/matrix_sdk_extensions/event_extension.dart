@@ -616,6 +616,12 @@ extension LocalizedBody on Event {
     return thisInfoMap['size'] is int &&
         (thisInfoMap['size'] as int) <= database.maxFileSize;
   }
+
+  /// Returns true if this event contains a GIF image.
+  /// GIFs should be displayed as full images (not thumbnails) to preserve animation.
+  bool get isGifImage {
+    return messageType == MessageTypes.Image && mimeType == 'image/gif';
+  }
 }
 
 extension FutureEventExtension on Event {
