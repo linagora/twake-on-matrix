@@ -1,10 +1,12 @@
 import 'dart:io';
+import 'package:fluffychat/generated/l10n/app_localizations.dart';
 import 'package:fluffychat/pages/chat_list/chat_list.dart';
 import 'package:fluffychat/pages/homeserver_picker/homeserver_picker_view.dart';
 import 'package:fluffychat/pages/login/login_view.dart';
 import 'package:fluffychat/pages/twake_welcome/twake_welcome.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_test/flutter_test.dart';
 import 'package:patrol/patrol.dart';
 import '../base/core_robot.dart';
 
@@ -55,7 +57,9 @@ class LoginRobot extends CoreRobot {
   }
 
   Future<void> tapOnUseYourCompanyServer() async {
-    await $('Use your company server').tap();
+    final context = $.tester.element(find.byType(Scaffold).first);
+    final l10n = L10n.of(context)!;
+    await $(l10n.useYourCompanyServer).tap();
   }
 
   Future<void> enterServerUrl(String serverUrl) async {
@@ -63,7 +67,8 @@ class LoginRobot extends CoreRobot {
   }
 
   Future<void> clickOnContinueBtn() async {
-    const label = 'Continue';
+    final context = $.tester.element(find.byType(Scaffold).first);
+    final label = L10n.of(context)!.continueProcess;
     await $.waitUntilVisible($(label));
     await $.tap($(label));
     await waitUntilAbsent(
@@ -184,8 +189,15 @@ class LoginRobot extends CoreRobot {
     // set a delay for verifying Captcha
     await Future.delayed(const Duration(seconds: 2));
 
-    // tap on Sign in
-    await $.native.tap(getSignInBtn(), appId: getBrowserAppId());
+    // tap on Sign in – the browser modal may close immediately after a
+    // successful login, causing Patrol to report an error even though the
+    // tap succeeded. We catch that error and let the flow continue.
+    try {
+      await $.native.tap(getSignInBtn(), appId: getBrowserAppId());
+    } catch (_) {
+      // Browser closed after successful SSO login – expected.
+      return;
+    }
 
     // if "verify ...please wait for Captcha" dialog is shown, click OK to continue waiting
     // and click Sign in again
@@ -199,7 +211,11 @@ class LoginRobot extends CoreRobot {
         getOKBtnInVerifyCaptchaDialog(),
         appId: getBrowserAppId(),
       );
-      await $.native.tap(getSignInBtn(), appId: getBrowserAppId());
+      try {
+        await $.native.tap(getSignInBtn(), appId: getBrowserAppId());
+      } catch (_) {
+        // Browser closed after successful SSO login – expected.
+      }
     }
   }
 

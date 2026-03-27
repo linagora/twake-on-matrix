@@ -31,7 +31,7 @@ class SettingsViewStyle {
 
   static const double borderRadius = 4.0;
   static const double settingsItemDividerHeight = 1.0;
-  static const double settingsItemDividerThikness = 1;
+  static const double settingsItemDividerThickness = 1;
 
   static EdgeInsets settingsItemDividerPadding() =>
       const EdgeInsets.only(left: 48.0, right: 8.0);
