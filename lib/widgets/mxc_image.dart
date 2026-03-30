@@ -11,6 +11,7 @@ import 'package:fluffychat/utils/interactive_viewer_gallery.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/download_file_extension.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_file_extension.dart';
+import 'package:fluffychat/utils/image_download_queue.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/widgets/hero_page_route.dart';
 import 'package:flutter/cupertino.dart';
@@ -98,6 +99,7 @@ class _MxcImageState extends State<MxcImage>
   ImageData? _imageDataNoCache;
   bool isLoadDone = false;
   String? filePath;
+  ImageDownloadTicket? _downloadTicket;
 
   ImageData? get _imageData {
     final cacheKey = widget.cacheKey;
@@ -215,25 +217,75 @@ class _MxcImageState extends State<MxcImage>
   bool _notImageOrVideo(MatrixFile matrixFile, Event event) =>
       !matrixFile.isImage() && !event.isVideoOrImage;
 
+  static const int _maxRetryCount = 3;
+
   Future<void> _tryLoad(BuildContext context) async {
     _imageData = widget.imageData;
     if (_imageData != null) {
       isLoadDone = true;
       filePath = null;
       setState(() {});
+      return;
     }
-    try {
-      final loadResult = await _load(context);
-      isLoadDone = true;
-      _imageData = loadResult.imageData;
-      filePath = loadResult.filePath;
-      setState(() {});
-    } catch (e) {
-      if (mounted && !isLoadDone) {
+
+    // Acquire a slot from the shared download queue to prevent
+    // dozens of image downloads/decodes from running simultaneously,
+    // which causes OOM kills on iOS during fast scrolling.
+    for (int attempt = 0; attempt < _maxRetryCount; attempt++) {
+      if (!mounted) return;
+
+      if (attempt > 0) {
+        // Exponential backoff using widget.retryDuration as base: 2s, 4s.
+        // The slot is released before the delay so other widgets are not blocked.
+        final delay = widget.retryDuration * (1 << (attempt - 1));
+        await Future.delayed(delay);
+        if (!mounted) return;
+      }
+
+      _releaseDownloadTicket();
+      final ticket = ImageDownloadQueue.instance.acquire();
+      _downloadTicket = ticket;
+
+      final shouldProceed = await ticket.ready;
+      // dispose() may have called _releaseDownloadTicket() while we were
+      // awaiting, setting _downloadTicket to null. If so the ticket was already
+      // released — bail out without touching it again to avoid a double-release
+      // that would corrupt _running in the queue.
+      if (_downloadTicket != ticket) return;
+      if (!shouldProceed || !mounted) {
+        if (shouldProceed) {
+          ImageDownloadQueue.instance.release(ticket);
+          _downloadTicket = null;
+        }
+        return;
+      }
+
+      try {
+        final loadResult = await _load(context);
         isLoadDone = true;
-        _tryLoad(context);
+        _imageData = loadResult.imageData;
+        filePath = loadResult.filePath;
+        if (mounted) setState(() {});
+        _releaseDownloadTicket();
+        return;
+      } catch (e) {
+        // Release the slot before the backoff delay so the queue is not blocked
+        // while we wait. isLoadDone stays false so the placeholder remains shown.
+        _releaseDownloadTicket();
       }
     }
+    // All attempts exhausted — placeholder stays displayed.
+  }
+
+  void _releaseDownloadTicket() {
+    final ticket = _downloadTicket;
+    if (ticket == null) return;
+    if (ticket.isActive) {
+      ImageDownloadQueue.instance.release(ticket);
+    } else {
+      ticket.cancel();
+    }
+    _downloadTicket = null;
   }
 
   void _onTap(BuildContext context) async {
@@ -281,6 +333,7 @@ class _MxcImageState extends State<MxcImage>
 
   @override
   void dispose() {
+    _releaseDownloadTicket();
     _imageDataNoCache = null;
     super.dispose();
   }
@@ -437,6 +490,16 @@ class _ImageWidget extends StatelessWidget {
                   width: width,
                   fit: BoxFit.cover,
                   errorBuilder: imageErrorWidgetBuilder,
+                  cacheWidth: cacheWidth != null
+                      ? cacheWidth!
+                      : (width != null && needResize)
+                      ? context.getCacheSize(width!)
+                      : null,
+                  cacheHeight: cacheHeight != null
+                      ? cacheHeight!
+                      : (height != null && needResize)
+                      ? context.getCacheSize(height!)
+                      : null,
                 )
               : Image.memory(
                   data!,
@@ -498,6 +561,16 @@ class _ImageNativeBuilder extends StatelessWidget {
         width: width,
         fit: BoxFit.cover,
         errorBuilder: imageErrorWidgetBuilder,
+        cacheWidth: cacheWidth != null
+            ? cacheWidth!
+            : (width != null && needResize)
+            ? context.getCacheSize(width!)
+            : null,
+        cacheHeight: cacheHeight != null
+            ? cacheHeight!
+            : (height != null && needResize)
+            ? context.getCacheSize(height!)
+            : null,
       );
     }
     return Image.file(
