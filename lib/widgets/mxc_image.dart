@@ -11,6 +11,7 @@ import 'package:fluffychat/utils/interactive_viewer_gallery.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/download_file_extension.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_file_extension.dart';
+import 'package:fluffychat/utils/image_download_queue.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/widgets/hero_page_route.dart';
 import 'package:flutter/cupertino.dart';
@@ -98,6 +99,7 @@ class _MxcImageState extends State<MxcImage>
   ImageData? _imageDataNoCache;
   bool isLoadDone = false;
   String? filePath;
+  ImageDownloadTicket? _downloadTicket;
 
   ImageData? get _imageData {
     final cacheKey = widget.cacheKey;
@@ -221,19 +223,53 @@ class _MxcImageState extends State<MxcImage>
       isLoadDone = true;
       filePath = null;
       setState(() {});
+      return;
     }
+
+    // Acquire a slot from the shared download queue to prevent
+    // dozens of image downloads/decodes from running simultaneously,
+    // which causes OOM kills on iOS during fast scrolling.
+    _releaseDownloadTicket();
+    final ticket = ImageDownloadQueue.instance.acquire();
+    _downloadTicket = ticket;
+
+    final shouldProceed = await ticket.ready;
+    if (!shouldProceed || !mounted) {
+      if (shouldProceed) {
+        ImageDownloadQueue.instance.release(ticket);
+        _downloadTicket = null;
+      }
+      return;
+    }
+
     try {
       final loadResult = await _load(context);
       isLoadDone = true;
       _imageData = loadResult.imageData;
       filePath = loadResult.filePath;
-      setState(() {});
+      if (mounted) setState(() {});
     } catch (e) {
       if (mounted && !isLoadDone) {
         isLoadDone = true;
+        // Release before retry so the retry can acquire its own slot.
+        _releaseDownloadTicket();
         _tryLoad(context);
+        return;
       }
     }
+
+    _releaseDownloadTicket();
+  }
+
+  void _releaseDownloadTicket() {
+    final ticket = _downloadTicket;
+    if (ticket == null) return;
+    if (ticket.isActive) {
+      ImageDownloadQueue.instance.release(ticket);
+    } else {
+      ticket.cancel();
+    }
+    _downloadTicket = null;
   }
 
   void _onTap(BuildContext context) async {
@@ -281,6 +317,7 @@ class _MxcImageState extends State<MxcImage>
 
   @override
   void dispose() {
+    _releaseDownloadTicket();
     _imageDataNoCache = null;
     super.dispose();
   }
