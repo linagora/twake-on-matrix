@@ -32,6 +32,7 @@ import 'package:fluffychat/presentation/same_type_events_builder/same_type_event
 import 'package:fluffychat/utils/dialog/twake_dialog.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
+import 'package:fluffychat/utils/logging/sentry_tracked_events.dart';
 import 'package:fluffychat/utils/responsive/responsive_utils.dart';
 import 'package:fluffychat/utils/scroll_controller_extension.dart';
 import 'package:fluffychat/utils/twake_snackbar.dart';
@@ -137,6 +138,19 @@ mixin ChatDetailsTabMixin<T extends StatefulWidget>
               ?..sort(
                 (small, great) => great.powerLevel.compareTo(small.powerLevel),
               );
+            // Log only when summary count disagrees with actual participants list.
+            final summaryCount = room?.summary.actualMembersCount ?? 0;
+            final participantsCount = _membersNotifier.value?.length ?? 0;
+            if (summaryCount != participantsCount) {
+              Logs().d(
+                '${SentryTrackedEvents.wrongMemberCount.message}: '
+                '_listenForRoomMembersChanged() mismatch roomId=${room?.id}, '
+                'summaryCount=$summaryCount '
+                '(joined=${room?.summary.mJoinedMemberCount}, '
+                'invited=${room?.summary.mInvitedMemberCount}), '
+                'participantsCount=$participantsCount',
+              );
+            }
           }
         });
   }
@@ -204,6 +218,18 @@ mixin ChatDetailsTabMixin<T extends StatefulWidget>
   Future<void> onUpdateMembers() async {
     final members = room!.getParticipants([Membership.join, Membership.invite])
       ..sort((small, great) => great.powerLevel.compareTo(small.powerLevel));
+    // Log only when summary count disagrees with actual filtered participants.
+    final summaryCount = room?.summary.actualMembersCount ?? 0;
+    if (summaryCount != members.length) {
+      Logs().d(
+        '${SentryTrackedEvents.wrongMemberCount.message}: '
+        'onUpdateMembers() mismatch roomId=${room?.id}, '
+        'summaryCount=$summaryCount '
+        '(joined=${room?.summary.mJoinedMemberCount}, '
+        'invited=${room?.summary.mInvitedMemberCount}), '
+        'filteredParticipantsCount=${members.length}',
+      );
+    }
     _membersNotifier.value = members;
     _displayMembersNotifier.value = members;
   }
@@ -231,6 +257,19 @@ mixin ChatDetailsTabMixin<T extends StatefulWidget>
     if (chatType == ChatDetailsScreenEnum.group) {
       _membersNotifier.value = room?.getParticipants().toList()
         ?..sort((small, great) => great.powerLevel.compareTo(small.powerLevel));
+      // Log only when summary count disagrees with actual participants list.
+      final summaryCount = room?.summary.actualMembersCount ?? 0;
+      final participantsCount = _membersNotifier.value?.length ?? 0;
+      if (summaryCount != participantsCount) {
+        Logs().d(
+          '${SentryTrackedEvents.wrongMemberCount.message}: '
+          '_initMembers() mismatch roomId=${room?.id}, '
+          'summaryCount=$summaryCount '
+          '(joined=${room?.summary.mJoinedMemberCount}, '
+          'invited=${room?.summary.mInvitedMemberCount}), '
+          'participantsCount=$participantsCount',
+        );
+      }
       _initDisplayMembers();
     }
   }
