@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:fluffychat/utils/logging/sentry_tracked_events.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/filtered_timeline_extension.dart';
 import 'package:matrix/matrix.dart';
@@ -63,7 +64,21 @@ extension EventListExtension on List<Event> {
     final hasCommonItems = oldEvents.any(newEventsSet.contains);
 
     if (!hasCommonItems) {
-      // Completely different list - clear top and set bottom to new items
+      // Completely different list - clear top and set bottom to new items.
+      // Log: if the newest newEvent differs from the newest oldEvent, the visible
+      // "last message" may have changed unexpectedly (potential missing-message case).
+      if (oldEvents.isNotEmpty && newEvents.isNotEmpty) {
+        final oldNewest = oldEvents.first.eventId;
+        final newNewest = newEvents.first.eventId;
+        if (oldNewest != newNewest) {
+          Logs().d(
+            '${SentryTrackedEvents.missingLastMessage.message}: '
+            'syncEventLists() no common items — full reset '
+            '(oldCount=${oldEvents.length}, newCount=${newEvents.length}, '
+            'oldNewest=$oldNewest, newNewest=$newNewest)',
+          );
+        }
+      }
       return EventListSyncResult(
         top: const [],
         bottom: List.from(newEvents),
@@ -110,6 +125,16 @@ extension EventListExtension on List<Event> {
             existingEventsMap[transactionId] = newItem;
           }
         }
+      }
+
+      // Debug: log if any new-start items were silently dropped as duplicates
+      if (itemsToAdd.length < newStartItems.length) {
+        final droppedCount = newStartItems.length - itemsToAdd.length;
+        Logs().d(
+          '${SentryTrackedEvents.missingLastMessage.message}: '
+          'syncEventLists() $droppedCount new-start event(s) dropped as '
+          'duplicates (startDiff=$startDiff, added=${itemsToAdd.length})',
+        );
       }
 
       updatedTop.addAll(itemsToAdd.reversed);
