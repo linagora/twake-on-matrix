@@ -609,7 +609,12 @@ extension LocalizedBody on Event {
   /// Returns true if this event contains a GIF image.
   /// GIFs should be displayed as full images (not thumbnails) to preserve animation.
   bool get isGifImage {
-    return messageType == MessageTypes.Image && mimeType == 'image/gif';
+    if (messageType != MessageTypes.Image) return false;
+
+    final normalizedMimeType = mimeType?.toLowerCase().split(';').first.trim();
+    if (normalizedMimeType == 'image/gif') return true;
+
+    return filename.toLowerCase().endsWith('.gif');
   }
 }
 
