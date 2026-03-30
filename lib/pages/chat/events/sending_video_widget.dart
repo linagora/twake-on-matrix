@@ -5,6 +5,7 @@ import 'package:fluffychat/presentation/mixins/play_video_action_mixin.dart';
 import 'package:fluffychat/presentation/model/chat/upload_file_ui_state.dart';
 import 'package:fluffychat/presentation/model/file/display_image_info.dart';
 import 'package:fluffychat/utils/manager/upload_manager/upload_manager.dart';
+import 'package:fluffychat/utils/extension/build_context_extension.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
 import 'package:fluffychat/widgets/mixins/upload_file_mixin.dart';
 import 'package:flutter/material.dart';
@@ -182,6 +183,8 @@ class _VideoWidgetState extends State<VideoWidget> {
           snapshot.data!.bytes,
           width: widget.imageWidth,
           height: widget.imageHeight,
+          cacheWidth: context.getCacheSize(widget.imageWidth),
+          cacheHeight: context.getCacheSize(widget.imageHeight),
           fit: BoxFit.cover,
           filterQuality: FilterQuality.medium,
         );
