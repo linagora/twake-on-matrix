@@ -64,7 +64,7 @@ class CreateSupportChatInteractor {
       final powerLevelManager = getIt.get<PowerLevelManager>();
       roomId = await client.createGroupChat(
         groupName: 'Support Twake Workplace',
-        preset: CreateRoomPreset.trustedPrivateChat,
+        preset: CreateRoomPreset.privateChat,
         enableEncryption: false,
         initialState: [
           if (avatarUrl != null)
@@ -74,11 +74,6 @@ class CreateSupportChatInteractor {
               stateKey: '',
             ),
         ],
-        powerLevelContentOverride: {
-          'events': powerLevelManager.getDefaultPowerLevelEventForMember(),
-          'invite': powerLevelManager.getAdminPowerLevel(),
-          'kick': powerLevelManager.getAdminPowerLevel(),
-        },
       );
       room = client.getRoomById(roomId);
       if (room == null) {
