@@ -523,7 +523,7 @@ class ChatController extends State<Chat>
     if (!timeline!.canRequestHistory) return;
     Logs().v('Chat::requestHistory(): Requesting history...');
     try {
-      return timeline!.requestHistory(
+      await timeline!.requestHistory(
         historyCount: historyCount ?? _loadHistoryCount,
         filter: filter,
       );
@@ -1267,6 +1267,9 @@ class ChatController extends State<Chat>
   void scrollDown() async {
     if (timeline == null) return;
     if (!timeline!.allowNewEvent) {
+      // Cancel subscriptions BEFORE nulling the reference to avoid
+      // leaking the old Timeline's 5 stream subscriptions.
+      timeline!.cancelSubscriptions();
       setState(() {
         timeline = null;
         loadTimelineFuture = _getTimeline().onError((e, s) {
@@ -1318,6 +1321,9 @@ class ChatController extends State<Chat>
         );
         return;
       }
+      // Cancel subscriptions BEFORE nulling the reference to avoid
+      // leaking the old Timeline's 5 stream subscriptions.
+      timeline?.cancelSubscriptions();
       setState(() {
         timeline = null;
         loadTimelineFuture = _getTimeline(eventContextId: eventId).onError((
@@ -1607,6 +1613,9 @@ class ChatController extends State<Chat>
   }) async {
     Logs().d('$logContext: Reloading timeline centered on $eventId');
 
+    // Cancel subscriptions BEFORE nulling the reference to avoid
+    // leaking the old Timeline's 5 stream subscriptions.
+    timeline?.cancelSubscriptions();
     setState(() {
       timeline = null;
       loadTimelineFuture = _getTimeline(eventContextId: eventId).onError((
@@ -3690,6 +3699,23 @@ class ChatController extends State<Chat>
     disposeAutoMarkAsReadMixin();
     timeline?.cancelSubscriptions();
     timeline = null;
+
+    // Evict decoded images from Flutter's image cache on chat close.
+    //
+    // Trade-off: this is a global eviction — avatars and images from other
+    // screens are also cleared. However, Flutter's default LRU policy alone
+    // is insufficient here: a dense room (200+ messages with photos) can
+    // accumulate 50–100 decoded bitmaps well above 80MB before LRU starts
+    // evicting, since eviction only triggers when new images are added.
+    // On iOS (no swap), this causes OOM kills. The dispose() fires after
+    // navigation has already occurred, so the visibility window where other
+    // screens are affected is minimal.
+    //
+    // TODO: replace with per-room selective eviction via ImageProvider.evict()
+    // once MXC image providers are tracked at the room level.
+    PaintingBinding.instance.imageCache.clear();
+    PaintingBinding.instance.imageCache.clearLiveImages();
+
     inputFocus.dispose();
     searchEmojiFocusNode.dispose();
     composerDebouncer.cancel();
