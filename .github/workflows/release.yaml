@@ -5,7 +5,7 @@ on:
 
 env:
   FLUTTER_VERSION: 3.38.9
-  XCODE_VERSION: 26.0
+  XCODE_VERSION: 26.2
 
 name: Release
 
