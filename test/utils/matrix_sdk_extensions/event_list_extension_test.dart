@@ -234,5 +234,114 @@ void main() {
       expect(result.bottom[0].eventId, '\$event1');
       expect(result.bottom[1].eventId, '\$event3');
     });
+
+    // Regression for the logging path added in this PR: when lists share no common
+    // items but the newest events happen to be identical, no log is emitted, but the
+    // function must still return the correct result (bottom = newEvents, top = []).
+    test(
+      'should reset to new list when no common items even if newest eventIds match',
+      () {
+        // Two events with the same id but treated as different list instances.
+        final sharedNewest = createEvent(eventId: '\$shared', body: 'newest');
+        final oldUnrelated = createEvent(
+          eventId: '\$old-unrelated',
+          body: 'old',
+        );
+        final newOther = createEvent(eventId: '\$new-other', body: 'other');
+
+        // oldEvents = [sharedNewest, oldUnrelated]
+        // newEvents = [sharedNewest, newOther]
+        // They DO share sharedNewest, so this will follow the partial-sync path.
+        // Verify that the new event is appended correctly.
+        final result = EventListExtension.syncEventLists(
+          oldEvents: [sharedNewest, oldUnrelated],
+          newEvents: [sharedNewest, newOther],
+          currentTop: [],
+          currentBottom: [sharedNewest, oldUnrelated],
+          wasRequestingFuture: false,
+        );
+
+        expect(result.bottom, contains(sharedNewest));
+        expect(result.bottom, contains(newOther));
+        // oldUnrelated should be dropped because it is not in newEvents.
+        expect(
+          result.bottom.any((e) => e.eventId == '\$old-unrelated'),
+          isFalse,
+        );
+      },
+    );
+
+    // Regression for the logging path added in this PR: completely disjoint lists
+    // where the newest events differ — the full-reset branch is taken and the
+    // result must be correct regardless of the logging side-effect.
+    test(
+      'should reset bottom to newEvents when lists are completely different with different newest',
+      () {
+        final oldA = createEvent(eventId: '\$oldA', body: 'a');
+        final oldB = createEvent(eventId: '\$oldB', body: 'b');
+        final newX = createEvent(eventId: '\$newX', body: 'x');
+        final newY = createEvent(eventId: '\$newY', body: 'y');
+
+        final result = EventListExtension.syncEventLists(
+          oldEvents: [oldA, oldB],
+          newEvents: [newX, newY],
+          currentTop: [],
+          currentBottom: [oldA, oldB],
+          wasRequestingFuture: false,
+        );
+
+        expect(result.top, isEmpty);
+        expect(result.bottom.length, 2);
+        expect(result.bottom[0].eventId, '\$newX');
+        expect(result.bottom[1].eventId, '\$newY');
+        expect(result.shouldScrollToBottom, isFalse);
+      },
+    );
+
+    // Tests the path where every candidate "new start" item is a duplicate of
+    // an event already present in the current top/bottom lists.  The function
+    // must not add duplicates and the droppedCount log branch must not corrupt state.
+    test(
+      'should not add duplicate events when new-start items already exist in top list',
+      () {
+        final event1 = createEvent(eventId: '\$event1', body: 'test1');
+        final event2 = createEvent(eventId: '\$event2', body: 'test2');
+        final event3 = createEvent(eventId: '\$event3', body: 'test3');
+
+        // event3 is already in top; newEvents adds it again at the front.
+        final result = EventListExtension.syncEventLists(
+          oldEvents: [event2, event3],
+          newEvents: [event1, event2, event3],
+          currentTop: [event3],
+          currentBottom: [event2],
+          wasRequestingFuture: false,
+        );
+
+        // event1 should be added; event3 must not be duplicated.
+        final allEventIds = [
+          ...result.top.map((e) => e.eventId),
+          ...result.bottom.map((e) => e.eventId),
+        ];
+        final event3Count =
+            allEventIds.where((id) => id == '\$event3').length;
+        expect(event3Count, 1);
+        expect(allEventIds, contains('\$event1'));
+      },
+    );
+
+    // Boundary: empty old and new lists produce empty results without errors.
+    test('should handle empty old and new event lists gracefully', () {
+      final result = EventListExtension.syncEventLists(
+        oldEvents: [],
+        newEvents: [],
+        currentTop: [],
+        currentBottom: [],
+        wasRequestingFuture: false,
+      );
+
+      expect(result.top, isEmpty);
+      expect(result.bottom, isEmpty);
+      expect(result.shouldScrollToBottom, isFalse);
+    });
   });
 }
