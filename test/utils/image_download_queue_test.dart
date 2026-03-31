@@ -215,49 +215,43 @@ void main() {
   });
 
   group('stress test', () {
-    test(
-      'rapid acquire/cancel cycles leave queue in clean state',
-      () async {
-        final queue = ImageDownloadQueue.forTesting(maxConcurrent: 3);
+    test('rapid acquire/cancel cycles leave queue in clean state', () async {
+      final queue = ImageDownloadQueue.forTesting(maxConcurrent: 3);
 
-        final holders = <ImageDownloadTicket>[];
-        for (var i = 0; i < queue.maxConcurrent; i++) {
-          final t = queue.acquire();
-          await t.ready;
-          holders.add(t);
-        }
+      final holders = <ImageDownloadTicket>[];
+      for (var i = 0; i < queue.maxConcurrent; i++) {
+        final t = queue.acquire();
+        await t.ready;
+        holders.add(t);
+      }
 
-        for (var i = 0; i < 50; i++) {
-          final ticket = queue.acquire();
-          ticket.cancel();
-          await ticket.ready;
-        }
+      for (var i = 0; i < 50; i++) {
+        final ticket = queue.acquire();
+        ticket.cancel();
+        await ticket.ready;
+      }
 
-        for (final t in holders) {
-          queue.release(t);
-        }
+      for (final t in holders) {
+        queue.release(t);
+      }
 
-        expect(queue.activeCount, 0);
-        expect(queue.queuedCount, 0);
-      },
-    );
+      expect(queue.activeCount, 0);
+      expect(queue.queuedCount, 0);
+    });
 
-    test(
-      'acquire-release cycle with full throughput',
-      () async {
-        final queue = ImageDownloadQueue.forTesting(maxConcurrent: 2);
+    test('acquire-release cycle with full throughput', () async {
+      final queue = ImageDownloadQueue.forTesting(maxConcurrent: 2);
 
-        for (var i = 0; i < 20; i++) {
-          final ticket = queue.acquire();
-          final granted = await ticket.ready;
-          expect(granted, isTrue);
-          queue.release(ticket);
-        }
+      for (var i = 0; i < 20; i++) {
+        final ticket = queue.acquire();
+        final granted = await ticket.ready;
+        expect(granted, isTrue);
+        queue.release(ticket);
+      }
 
-        expect(queue.activeCount, 0);
-        expect(queue.queuedCount, 0);
-      },
-    );
+      expect(queue.activeCount, 0);
+      expect(queue.queuedCount, 0);
+    });
   });
 
   group('configurable maxConcurrent', () {
