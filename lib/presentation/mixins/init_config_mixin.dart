@@ -38,5 +38,8 @@ mixin InitConfigMixin {
     } catch (e) {
       Logs().e('[ConfigLoader] Config mobile error', e);
     }
+    if (!AppConfig.initConfigCompleter.isCompleted) {
+      AppConfig.initConfigCompleter.complete(true);
+    }
   }
 }
