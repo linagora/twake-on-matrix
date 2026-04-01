@@ -414,8 +414,8 @@ adb wait-for-device
 echo "Devices ready!"
 
 # Get device IDs
-IOS_ID=$(flutter devices | grep "iPhone 15 Pro" | awk '{print $5}' | tr -d '•')
-ANDROID_ID=$(flutter devices | grep "Pixel 8" | awk '{print $5}' | tr -d '•')
+IOS_ID=$(flutter devices --machine | jq -r '.[] | select(.name=="iPhone 15 Pro") | .id' | head -1)
+ANDROID_ID=$(flutter devices --machine | jq -r '.[] | select(.name=="Pixel 8") | .id' | head -1)
 
 echo "Running on iOS: $IOS_ID"
 flutter run -d $IOS_ID &

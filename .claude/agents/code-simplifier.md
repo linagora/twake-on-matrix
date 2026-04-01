@@ -52,7 +52,7 @@ You will analyze recently modified code and apply refinements that:
    - Prefer `function` keyword over arrow functions
    - Use explicit return type annotations for top-level functions
    - Follow proper React component patterns with explicit Props types
-   - Use proper error handling patterns (avoid try/catch when possible)
+   - Use structured error handling: avoid catch blocks that swallow errors or suppress diagnostics; prefer propagating errors or using typed/centralized handlers
    - Maintain consistent naming conventions
 
 3. **Enhance Clarity**: Simplify code structure by:
