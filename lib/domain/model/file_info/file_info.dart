@@ -77,6 +77,44 @@ class FileInfo with EquatableMixin {
 
   Map<String, dynamic> toJson() => _$FileInfoToJson(this);
 
+  FileInfo copyBytes(Uint8List updatedBytes) {
+    return switch (this) {
+      ImageFileInfo(
+        :final fileName,
+        :final customMimeType,
+        :final filePath,
+        :final height,
+        :final width,
+      ) =>
+        ImageFileInfo(
+          fileName,
+          bytes: updatedBytes,
+          customMimeType: customMimeType,
+          filePath: filePath,
+          height: height,
+          width: width,
+        ),
+      VideoFileInfo(
+        :final fileName,
+        :final filePath,
+        :final width,
+        :final height,
+        :final customMimeType,
+        :final duration,
+      ) =>
+        VideoFileInfo(
+          fileName,
+          filePath: filePath,
+          bytes: updatedBytes,
+          width: width,
+          height: height,
+          customMimeType: customMimeType,
+          duration: duration,
+        ),
+      _ => FileInfo(fileName, filePath: filePath, bytes: updatedBytes),
+    };
+  }
+
   @override
   List<Object?> get props => [fileName, filePath, customMimeType, bytes];
 }
