@@ -1,3 +1,7 @@
+## [2.21.15] - 2026-04-01
+### Fixed
+- fix distord image in Encrypted chat
+
 ## [2.21.14] - 2026-04-01
 
 ### Added
