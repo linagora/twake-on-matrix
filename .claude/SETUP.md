@@ -18,6 +18,22 @@ Capabilities: navigate pages, click, fill forms, take screenshots, capture netwo
 
 Typical use: debugging web views, automating UI tests, inspecting Matrix client behavior in the browser.
 
+### patrol
+
+Official MCP server by [LeanCode](https://pub.dev/packages/patrol_mcp). Lets Claude run and control Patrol integration tests directly from the conversation.
+
+**Requires global activation** (version conflict with current `patrol 3.x` prevents local install):
+
+```bash
+dart pub global activate patrol_mcp
+```
+
+The launcher script is at `.claude/run-patrol`. It auto-detects FVM and sets `PATROL_FLUTTER_COMMAND` accordingly.
+
+Capabilities: run a test file and wait for completion, capture screenshots, read the native UI tree, quit the active session.
+
+Typical use: running integration tests, inspecting native UI state, automating test workflows without leaving the conversation.
+
 ### flutter-inspector
 
 Unofficial MCP server by [Arenukvern](https://github.com/Arenukvern/mcp_flutter). Connects Claude to a running Flutter app via the Dart VM service.
