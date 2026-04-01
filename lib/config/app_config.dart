@@ -119,7 +119,7 @@ abstract class AppConfig {
   static const bool hideTypingUsernames = false;
   static const bool hideAllStateEvents = false;
   static const String inviteLinkPrefix = 'https://matrix.to/#/';
-  static const String deepLinkPrefix = 'im.fluffychat://chat/';
+  static const String deepLinkPrefix = 'twake.chat://chat/';
   static const String httpAppLinkUniversalLinkPrefix =
       'http://${AppConstants.appLinkUniversalLinkDomain}/';
   static const String httpsAppLinkUniversalLinkPrefix =
