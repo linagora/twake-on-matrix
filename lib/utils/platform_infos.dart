@@ -100,6 +100,8 @@ abstract class PlatformInfos {
       kIsWeb &&
       html.window.navigator.userAgent.toLowerCase().contains('firefox');
 
+  static bool get isSafari => isWeb && browserName == 'Safari';
+
   static String get clientName => isWeb
       ? '$webDomain: $browserName on $operatingSystemName ${kReleaseMode ? '' : 'Debug'}'
       : '${AppConfig.applicationName} ${Platform.operatingSystem} ${kReleaseMode ? '' : 'Debug'}';
