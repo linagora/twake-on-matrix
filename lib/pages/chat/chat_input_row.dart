@@ -428,7 +428,7 @@ class ChatInputRow extends StatelessWidget {
       room: controller.room!,
       minLines: 1,
       maxLines: 8,
-      autofocus: !PlatformInfos.isMobile && !PlatformInfos.isSafari,
+      autofocus: PlatformInfos.isDesktopNonSafari,
       keyboardType: TextInputType.multiline,
       textInputAction: null,
       onSubmitted: (_) => controller.onInputBarSubmitted(),
