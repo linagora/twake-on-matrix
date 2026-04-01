@@ -4,8 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:fluffychat/generated/l10n/app_localizations.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:matrix/matrix.dart';
-
-import '../utils/localized_exception_extension.dart';
 import 'matrix.dart';
 
 class ConnectionStatusHeader extends StatefulWidget {
@@ -96,9 +94,7 @@ extension on SyncStatusUpdate {
       case SyncStatus.waitingForResponse:
         return l10n!.waitingForResponse;
       case SyncStatus.error:
-        return ((error?.exception ?? Object()) as Object).toLocalizedString(
-          context,
-        );
+        return L10n.of(context)!.waitingForResponse;
       case SyncStatus.processing:
       case SyncStatus.cleaningUp:
       case SyncStatus.finished:
