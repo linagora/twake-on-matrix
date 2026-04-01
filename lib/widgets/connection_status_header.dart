@@ -94,7 +94,7 @@ extension on SyncStatusUpdate {
       case SyncStatus.waitingForResponse:
         return l10n!.waitingForResponse;
       case SyncStatus.error:
-        return L10n.of(context)!.waitingForResponse;
+        return l10n!.waitingForResponse;
       case SyncStatus.processing:
       case SyncStatus.cleaningUp:
       case SyncStatus.finished:
