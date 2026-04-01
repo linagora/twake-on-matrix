@@ -1,3 +1,16 @@
+## [2.21.14] - 2026-04-01
+
+### Added
+- TW-2991: Display recovery key in Privacy & Security settings with masked field and copy-to-clipboard functionality
+
+### Changed
+- TW-2928: Reorder contacts list
+- Update Xcode version to 26.2 in build and release configurations
+
+### Fixed
+- perf: Evict image cache on chat dispose to prevent OOM kills in image-heavy rooms (reduces memory usage by ~32 MB)
+- Disable auto focus in Safari
+
 ## [2.21.12] - 2026-03-27
 
 ### Added
