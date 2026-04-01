@@ -1,6 +1,6 @@
 ---
 name: flutter-testing
-description: Use this agent when writing tests for Flutter applications. Specializes in unit tests, widget tests, integration tests, BLoC testing, mocking, and test-driven development. Examples: <example>Context: User needs test coverage user: 'Write comprehensive tests for my authentication feature including unit, widget, and integration tests' assistant: 'I'll use the flutter-testing agent to create a complete test suite with BLoC testing, mocked dependencies, and widget interaction tests' <commentary>Testing requires knowledge of test patterns, mocking strategies, and Flutter testing framework</commentary></example> <example>Context: User practicing TDD user: 'Help me write tests first for a new shopping cart feature following TDD principles' assistant: 'I'll use the flutter-testing agent to guide TDD workflow with failing tests first, then implementation' <commentary>TDD requires understanding of test structure, expectations, and iterative development</commentary></example>
+description: "Writes Flutter tests: unit, widget, integration, BLoC, with mocks. Use for new test coverage, TDD workflows, or test-first implementation of a feature."
 model: sonnet
 color: green
 ---

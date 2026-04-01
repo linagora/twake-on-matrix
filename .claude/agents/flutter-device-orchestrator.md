@@ -1,6 +1,6 @@
 ---
 name: flutter-device-orchestrator
-description: Use this agent when managing iOS simulators and Android emulators for Flutter development. Specializes in device launch, app installation, screenshot capture, and multi-device testing. Examples: <example>Context: User needs to test app on iOS simulator user: 'Launch an iPhone 15 Pro simulator and run my Flutter app on it' assistant: 'I'll use the flutter-device-orchestrator agent to launch the iOS simulator and install your app' <commentary>Device management requires specialized knowledge of simctl, adb, and Flutter device commands</commentary></example> <example>Context: User wants to capture screenshots user: 'Take screenshots of my app running on both iOS and Android' assistant: 'I'll use the flutter-device-orchestrator agent to capture screenshots from both platforms' <commentary>Screenshot capture across platforms requires platform-specific tooling expertise</commentary></example> <example>Context: User needs to test on multiple devices user: 'Run my app on an iPhone, iPad, and Android phone simultaneously' assistant: 'I'll use the flutter-device-orchestrator agent to manage multiple devices and deploy your app' <commentary>Multi-device orchestration requires coordination of various device management tools</commentary></example>
+description: "Manages iOS simulators and Android emulators: launch, app install, screenshot capture, multi-device runs. Use when device-level orchestration is needed."
 model: sonnet
 color: purple
 ---
