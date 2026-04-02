@@ -62,6 +62,20 @@ final class NSEUserSession {
     }
     
     func notificationItemProxy(roomID: String, eventID: String) async -> NotificationItemProxyProtocol? {
+        var proxy: NotificationItemProxyProtocol?
+
+        for delay in 1...3 {
+            try? await Task.sleep(nanoseconds: UInt64(delay) * 1_000_000_000)
+            
+            proxy = await fetchNotificationItem(roomID: roomID, eventID: eventID)
+            
+            if let proxy, !proxy.isEncrypted { return proxy }
+        }
+
+        return proxy
+    }
+
+    private func fetchNotificationItem(roomID: String, eventID: String) async -> NotificationItemProxyProtocol? {
         do {
             let status = try await notificationClient.getNotification(roomId: roomID, eventId: eventID)
             switch status {
