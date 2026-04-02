@@ -1,16 +1,15 @@
 import 'dart:io' show ProcessInfo;
 
 import 'package:fluffychat/pages/chat/chat_event_list.dart';
-import 'package:fluffychat/pages/chat_list/chat_list_item_title.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:patrol/patrol.dart';
 
 import '../../base/test_base.dart';
+import '../../base/core_robot.dart';
 import '../../robots/chat_group_detail_robot.dart';
 import '../../robots/home_robot.dart';
-import '../../scenarios/chat_scenario.dart';
 
 /// Accumulated metrics flushed at the end of the test.
 /// Flushing at the end ensures idevicesyslog is reliably capturing output.
@@ -39,20 +38,18 @@ Future<void> _flushMetrics() async {
   }
 }
 
-/// Searches for [searchTerm] in the chat list and taps the result whose
-/// [ChatListItemTitle] contains [searchTerm] as a substring.
-/// This avoids tapping a DM or wrong room when there are multiple results.
-Future<void> _openRoomFromSearch(
+/// Navigates to a room by scrolling the chat list and tapping the first item
+/// whose title text contains [titleSubstring].
+///
+/// Avoids the search field entirely — no permission dialogs, no wrong-field
+/// risk from $(TextField).hitTestable() resolving to a server URL input.
+Future<void> _openRoomFromList(
   PatrolIntegrationTester $,
-  ChatScenario chatScenario,
-  String searchTerm,
+  String titleSubstring,
 ) async {
-  await chatScenario.enterSearchText(searchTerm);
-  await $.pumpAndSettle();
-  await $(ChatListItemTitle)
-      .containing($(find.textContaining(searchTerm)))
-      .first
-      .tap();
+  final target = find.textContaining(titleSubstring);
+  await CoreRobot($).scrollUntilVisible($, target);
+  await $.tester.tap(target.first);
   await $.pumpAndSettle();
 }
 
@@ -99,7 +96,6 @@ void main() {
         'Measure imageCache memory during 30s scroll in two image-heavy rooms',
     test: ($) async {
       final scrollable = find.byType(ChatEventList);
-      final chatScenario = ChatScenario($);
 
       // ── 0. Chat list baseline ─────────────────────────────────────────────
       await HomeRobot($).gotoChatListScreen();
@@ -107,9 +103,9 @@ void main() {
       _logCache('initial_lobby');
 
       // ── 1. Room 1: bug me harder ──────────────────────────────────────────
-      // Use _openRoomFromSearch which matches by substring (ChatListItemTitle
-      // containing searchTerm) to avoid tapping a DM or wrong first result.
-      await _openRoomFromSearch($, chatScenario, room1Search);
+      // Scroll the chat list and tap by title substring — avoids the search
+      // field entirely (no permission dialogs, no wrong TextField risk).
+      await _openRoomFromList($, room1Search);
       _logCache('room1_entered');
 
       await _scrollForDuration($, scrollable, 'room1');
@@ -121,7 +117,9 @@ void main() {
       _logCache('room1_left');
 
       // ── 2. Room 2: tech radar ─────────────────────────────────────────────
-      await _openRoomFromSearch($, chatScenario, room2Search);
+      await HomeRobot($).gotoChatListScreen();
+      await $.pumpAndSettle();
+      await _openRoomFromList($, room2Search);
       _logCache('room2_entered');
 
       await _scrollForDuration($, scrollable, 'room2');
