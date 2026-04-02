@@ -9,6 +9,7 @@ import 'package:patrol/patrol.dart';
 import '../../base/test_base.dart';
 import '../../robots/chat_group_detail_robot.dart';
 import '../../robots/home_robot.dart';
+import '../../scenarios/chat_scenario.dart';
 
 /// Accumulated metrics flushed at the end of the test.
 /// Flushing at the end ensures idevicesyslog is reliably capturing output.
@@ -35,22 +36,6 @@ Future<void> _flushMetrics() async {
     print(line);
     await Future.delayed(const Duration(milliseconds: 200));
   }
-}
-
-/// Taps the chat room whose accessibility label contains [titleSubstring]
-/// using Patrol's native (XCUITest) automator.
-///
-/// Bypasses Flutter's widget tree entirely — cannot accidentally interact
-/// with a TextField, search field, or any other input.
-Future<void> _openRoomNative(
-  PatrolIntegrationTester $,
-  String titleSubstring,
-) async {
-  await $.native.tap(
-    Selector(textContains: titleSubstring),
-    timeout: const Duration(seconds: 15),
-  );
-  await $.pumpAndSettle();
 }
 
 /// Scrolls upward (toward older, image-heavy messages) for approximately
@@ -103,9 +88,7 @@ void main() {
       _logCache('initial_lobby');
 
       // ── 1. Room 1: bug me harder ──────────────────────────────────────────
-      // Scroll the chat list and tap by title substring — avoids the search
-      // field entirely (no permission dialogs, no wrong TextField risk).
-      await _openRoomNative($, room1Search);
+      await ChatScenario($).openChatGroup(room1Search);
       _logCache('room1_entered');
 
       await _scrollForDuration($, scrollable, 'room1');
@@ -119,7 +102,7 @@ void main() {
       // ── 2. Room 2: tech radar ─────────────────────────────────────────────
       await HomeRobot($).gotoChatListScreen();
       await $.pumpAndSettle();
-      await _openRoomNative($, room2Search);
+      await ChatScenario($).openChatGroup(room2Search);
       _logCache('room2_entered');
 
       await _scrollForDuration($, scrollable, 'room2');
