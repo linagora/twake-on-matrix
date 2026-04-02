@@ -7,7 +7,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:patrol/patrol.dart';
 
 import '../../base/test_base.dart';
-import '../../base/core_robot.dart';
 import '../../robots/chat_group_detail_robot.dart';
 import '../../robots/home_robot.dart';
 
@@ -38,18 +37,19 @@ Future<void> _flushMetrics() async {
   }
 }
 
-/// Navigates to a room by scrolling the chat list and tapping the first item
-/// whose title text contains [titleSubstring].
+/// Taps the chat room whose accessibility label contains [titleSubstring]
+/// using Patrol's native (XCUITest) automator.
 ///
-/// Avoids the search field entirely — no permission dialogs, no wrong-field
-/// risk from $(TextField).hitTestable() resolving to a server URL input.
-Future<void> _openRoomFromList(
+/// Bypasses Flutter's widget tree entirely — cannot accidentally interact
+/// with a TextField, search field, or any other input.
+Future<void> _openRoomNative(
   PatrolIntegrationTester $,
   String titleSubstring,
 ) async {
-  final target = find.textContaining(titleSubstring);
-  await CoreRobot($).scrollUntilVisible($, target);
-  await $.tester.tap(target.first);
+  await $.native.tap(
+    Selector(textContains: titleSubstring),
+    timeout: const Duration(seconds: 15),
+  );
   await $.pumpAndSettle();
 }
 
@@ -105,7 +105,7 @@ void main() {
       // ── 1. Room 1: bug me harder ──────────────────────────────────────────
       // Scroll the chat list and tap by title substring — avoids the search
       // field entirely (no permission dialogs, no wrong TextField risk).
-      await _openRoomFromList($, room1Search);
+      await _openRoomNative($, room1Search);
       _logCache('room1_entered');
 
       await _scrollForDuration($, scrollable, 'room1');
@@ -119,7 +119,7 @@ void main() {
       // ── 2. Room 2: tech radar ─────────────────────────────────────────────
       await HomeRobot($).gotoChatListScreen();
       await $.pumpAndSettle();
-      await _openRoomFromList($, room2Search);
+      await _openRoomNative($, room2Search);
       _logCache('room2_entered');
 
       await _scrollForDuration($, scrollable, 'room2');
