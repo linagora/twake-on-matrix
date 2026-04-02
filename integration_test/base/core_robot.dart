@@ -56,9 +56,20 @@ class CoreRobot {
     if (!tapped) {
       return;
     }
-    if (await $.native.isPermissionDialogVisible(
+    if (!await $.native.isPermissionDialogVisible(
       timeout: const Duration(seconds: 5),
     )) {
+      return;
+    }
+    // When the contacts permission was already denied, iOS shows a
+    // "Settings redirect" alert (buttons: Cancel / Settings) instead of the
+    // regular permission dialog (buttons: Don't Allow / OK).
+    // denyPermission() would tap "Settings" on the redirect alert, opening
+    // the iOS Settings app. Tap "Cancel" first; fall back to denyPermission()
+    // for a real first-time permission dialog.
+    try {
+      await $.native.tap(Selector(text: 'Cancel'));
+    } catch (_) {
       await $.native.denyPermission();
     }
   }

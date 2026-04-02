@@ -1,3 +1,5 @@
+import 'dart:io' show ProcessInfo;
+
 import 'package:fluffychat/pages/chat/chat_event_list.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter/widgets.dart';
@@ -13,15 +15,17 @@ import '../../scenarios/chat_scenario.dart';
 /// Flushing at the end ensures idevicesyslog is reliably capturing output.
 final _pendingMetrics = <String>[];
 
-/// Records imageCache state at [label] for later flush.
+/// Records imageCache + process memory state at [label] for later flush.
 void _logCache(String label) {
   final cache = PaintingBinding.instance.imageCache;
+  final rss = ProcessInfo.currentRss;
   _pendingMetrics.add(
     'PERF_METRIC | $label'
     ' | bytes=${cache.currentSizeBytes}'
     ' | count=${cache.currentSize}'
     ' | live=${cache.liveImageCount}'
-    ' | pending=${cache.pendingImageCount}',
+    ' | pending=${cache.pendingImageCount}'
+    ' | rss=$rss',
   );
 }
 
@@ -60,15 +64,16 @@ Future<void> _scrollForDuration(
 }
 
 void main() {
-  // Room names are configurable via --dart-define so the same binary can be
-  // pointed at different channels without recompilation.
-  const room1 = String.fromEnvironment(
+  // Search terms are intentionally short/ASCII to avoid emoji/pipe parsing
+  // issues with --dart-define-from-file. The search does a prefix match so
+  // "Bug Me Harder" finds "Bug Me Harder 😏  | Twake" and "tech-radar" is exact.
+  const room1Search = String.fromEnvironment(
     'ScrollRoom1',
-    defaultValue: 'bug me harder',
+    defaultValue: 'Bug Me Harder',
   );
-  const room2 = String.fromEnvironment(
+  const room2Search = String.fromEnvironment(
     'ScrollRoom2',
-    defaultValue: 'tech radar',
+    defaultValue: 'tech-radar',
   );
 
   TestBase().runPatrolTest(
@@ -83,7 +88,9 @@ void main() {
       _logCache('initial_lobby');
 
       // ── 1. Room 1: bug me harder ──────────────────────────────────────────
-      await ChatScenario($).openChatGroup(room1);
+      // Use openChatGroupByTitle (no confirmAccessMedia) to avoid accidentally
+      // tapping "Go to Settings" on a previously-denied iOS permission.
+      await ChatScenario($).openChatGroupByTitle(room1Search);
       await $.pumpAndSettle();
       _logCache('room1_entered');
 
@@ -96,7 +103,7 @@ void main() {
       _logCache('room1_left');
 
       // ── 2. Room 2: tech radar ─────────────────────────────────────────────
-      await ChatScenario($).openChatGroup(room2);
+      await ChatScenario($).openChatGroupByTitle(room2Search);
       await $.pumpAndSettle();
       _logCache('room2_entered');
 
