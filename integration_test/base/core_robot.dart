@@ -403,7 +403,7 @@ class CoreRobot {
     if (location == null) {
       final responseBody = await utf8.decoder.bind(thirdResponse).join();
       throw Exception(
-        'No redirect found after login POST [status=${thirdResponse.statusCode}] body=${responseBody.substring(0, responseBody.length.clamp(0, 300))}',
+        'No redirect found after login POST [status=${thirdResponse.statusCode}] body=${responseBody.substring(0, responseBody.length.clamp(0, 300).toInt())}',
       );
     }
     final thirdRedirectUri = Uri.parse(location);
@@ -480,7 +480,7 @@ class CoreRobot {
       loginToken = match?.group(1);
       if (loginToken == null) {
         throw Exception(
-          'Could not extract loginToken from OIDC callback response [status=${fourthResponse.statusCode}] body=${responseBody.substring(0, responseBody.length.clamp(0, 500))}',
+          'Could not extract loginToken from OIDC callback response [status=${fourthResponse.statusCode}] body=${responseBody.substring(0, responseBody.length.clamp(0, 500).toInt())}',
         );
       }
     }
