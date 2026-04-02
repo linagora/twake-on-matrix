@@ -9,6 +9,7 @@ import 'package:patrol/patrol.dart';
 import '../../base/test_base.dart';
 import '../../robots/chat_group_detail_robot.dart';
 import '../../robots/home_robot.dart';
+import '../../robots/search_robot.dart';
 import '../../scenarios/chat_scenario.dart';
 
 /// Accumulated metrics flushed at the end of the test.
@@ -94,7 +95,8 @@ void main() {
       await _scrollForDuration($, scrollable, 'room1');
       _logCache('room1_after_30s_scroll');
 
-      await ChatGroupDetailRobot($).clickOnBackIcon();
+      await ChatGroupDetailRobot($).clickOnBackIcon(); // room → SearchView
+      await SearchRobot($).backToPreviousScreen(); // SearchView → ChatList
       await $.pumpAndSettle();
       await Future.delayed(const Duration(seconds: 3));
       _logCache('room1_left');
@@ -108,7 +110,8 @@ void main() {
       await _scrollForDuration($, scrollable, 'room2');
       _logCache('room2_after_30s_scroll');
 
-      await ChatGroupDetailRobot($).clickOnBackIcon();
+      await ChatGroupDetailRobot($).clickOnBackIcon(); // room → SearchView
+      await SearchRobot($).backToPreviousScreen(); // SearchView → ChatList
       await $.pumpAndSettle();
       await Future.delayed(const Duration(seconds: 3));
       _logCache('room2_left');
