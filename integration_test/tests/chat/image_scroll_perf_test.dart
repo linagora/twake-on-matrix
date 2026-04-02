@@ -1,6 +1,7 @@
 import 'dart:io' show ProcessInfo;
 
 import 'package:fluffychat/pages/chat/chat_event_list.dart';
+import 'package:fluffychat/pages/chat_list/chat_list_item_title.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -36,6 +37,23 @@ Future<void> _flushMetrics() async {
     print(line);
     await Future.delayed(const Duration(milliseconds: 200));
   }
+}
+
+/// Searches for [searchTerm] in the chat list and taps the result whose
+/// [ChatListItemTitle] contains [searchTerm] as a substring.
+/// This avoids tapping a DM or wrong room when there are multiple results.
+Future<void> _openRoomFromSearch(
+  PatrolIntegrationTester $,
+  ChatScenario chatScenario,
+  String searchTerm,
+) async {
+  await chatScenario.enterSearchText(searchTerm);
+  await $.pumpAndSettle();
+  await $(ChatListItemTitle)
+      .containing($(find.textContaining(searchTerm)))
+      .first
+      .tap();
+  await $.pumpAndSettle();
 }
 
 /// Scrolls upward (toward older, image-heavy messages) for approximately
@@ -81,6 +99,7 @@ void main() {
         'Measure imageCache memory during 30s scroll in two image-heavy rooms',
     test: ($) async {
       final scrollable = find.byType(ChatEventList);
+      final chatScenario = ChatScenario($);
 
       // ── 0. Chat list baseline ─────────────────────────────────────────────
       await HomeRobot($).gotoChatListScreen();
@@ -88,10 +107,9 @@ void main() {
       _logCache('initial_lobby');
 
       // ── 1. Room 1: bug me harder ──────────────────────────────────────────
-      // Use openChatGroupByTitle (no confirmAccessMedia) to avoid accidentally
-      // tapping "Go to Settings" on a previously-denied iOS permission.
-      await ChatScenario($).openChatGroupByTitle(room1Search);
-      await $.pumpAndSettle();
+      // Use _openRoomFromSearch which matches by substring (ChatListItemTitle
+      // containing searchTerm) to avoid tapping a DM or wrong first result.
+      await _openRoomFromSearch($, chatScenario, room1Search);
       _logCache('room1_entered');
 
       await _scrollForDuration($, scrollable, 'room1');
@@ -103,8 +121,7 @@ void main() {
       _logCache('room1_left');
 
       // ── 2. Room 2: tech radar ─────────────────────────────────────────────
-      await ChatScenario($).openChatGroupByTitle(room2Search);
-      await $.pumpAndSettle();
+      await _openRoomFromSearch($, chatScenario, room2Search);
       _logCache('room2_entered');
 
       await _scrollForDuration($, scrollable, 'room2');
