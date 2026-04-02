@@ -75,9 +75,18 @@ class CoreRobot {
   }
 
   Future<void> grantNotificationPermission() async {
-    if (await $.native.isPermissionDialogVisible(
+    if (!await $.native.isPermissionDialogVisible(
       timeout: const Duration(seconds: 15),
     )) {
+      return;
+    }
+    // If iOS shows a "Settings redirect" alert (permission already denied),
+    // tap Cancel to dismiss — Settings redirect has a "Cancel" button while
+    // the real first-time dialog does not. Fall back to grantPermissionWhenInUse()
+    // for the first-time dialog.
+    try {
+      await $.native.tap(Selector(text: 'Cancel'));
+    } catch (_) {
       await $.native.grantPermissionWhenInUse();
     }
   }
