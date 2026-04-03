@@ -91,11 +91,13 @@ class ChatAppBarTitle extends StatelessWidget {
       // when the contacts notifier emits.
       child: ValueListenableBuilder(
         valueListenable: getIt.get<ContactsManager>().getContactsNotifier(),
-        child: _ChatAppBarStatusContent(
-          connectivityResultStream: connectivityResultStream,
-          room: room!,
-          cachedPresenceNotifier: cachedPresenceNotifier,
-          cachedPresenceStreamController: cachedPresenceStreamController,
+        child: ConnectionStatusHeader(
+          connectedWidget: _ChatAppBarStatusContent(
+            connectivityResultStream: connectivityResultStream,
+            room: room!,
+            cachedPresenceNotifier: cachedPresenceNotifier,
+            cachedPresenceStreamController: cachedPresenceStreamController,
+          ),
         ),
         builder: (context, state, statusContent) {
           final resolvedRoomName = _getRoomName(context, state);
@@ -144,25 +146,17 @@ class ChatAppBarTitle extends StatelessWidget {
                             style: ChatAppBarTitleStyle.appBarTitleStyle(
                               context,
                             ),
-                          );
-                        },
-                      ),
+                          ),
+                        ),
+                      ],
                     ),
+                    statusContent!,
                   ],
                 ),
-                ConnectionStatusHeader(
-                  connectedWidget: _ChatAppBarStatusContent(
-                    connectivityResultStream: connectivityResultStream,
-                    room: room!,
-                    cachedPresenceNotifier: cachedPresenceNotifier,
-                    cachedPresenceStreamController:
-                        cachedPresenceStreamController,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
+              ),
+            ],
+          );
+        },
       ),
     );
   }

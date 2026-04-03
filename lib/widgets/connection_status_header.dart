@@ -17,7 +17,7 @@ class ConnectionStatusHeader extends StatefulWidget {
 
 class ConnectionStatusHeaderState extends State<ConnectionStatusHeader> {
   late final StreamSubscription _onSyncSub;
-  SyncStatus? _lastStatus;
+  SyncStatusUpdate? _lastStatus;
   bool _lastHideState = true;
   Timer? _debounceTimer;
 
@@ -40,9 +40,9 @@ class ConnectionStatusHeaderState extends State<ConnectionStatusHeader> {
           update.status != SyncStatus.error &&
           client.prevBatch != null;
 
-      if (_lastStatus != update.status || _lastHideState != hide) {
+      if (_lastStatus?.status != update.status || _lastHideState != hide) {
         setState(() {
-          _lastStatus = update.status;
+          _lastStatus = update;
           _lastHideState = hide;
         });
       }
@@ -60,6 +60,7 @@ class ConnectionStatusHeaderState extends State<ConnectionStatusHeader> {
   Widget build(BuildContext context) {
     final client = Matrix.of(context).client;
     final status =
+        _lastStatus ??
         client.onSyncStatus.value ??
         const SyncStatusUpdate(SyncStatus.waitingForResponse);
     final hide =
