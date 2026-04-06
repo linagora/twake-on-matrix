@@ -918,4 +918,160 @@ void main() {
       expect(event.isReplyEventWithAudio(), false);
     });
   });
+
+  group('isDisplayOnlyEmoji test', () {
+    late Client client;
+    late Room room;
+
+    setUpAll(() async {
+      client = await getClient();
+      room = Room(
+        client: client,
+        id: '!test:example.com',
+        membership: Membership.join,
+      );
+    });
+
+    Event createEmojiEvent({
+      required String body,
+      String eventId = '\$event1',
+      String senderId = '@user:example.com',
+      Map<String, dynamic>? relatesTo,
+    }) {
+      return Event(
+        senderId: senderId,
+        type: 'm.room.message',
+        room: room,
+        eventId: eventId,
+        content: {
+          'body': body,
+          'msgtype': 'm.text',
+          if (relatesTo != null) 'm.relates_to': relatesTo,
+        },
+        originServerTs: DateTime.fromMillisecondsSinceEpoch(1234567890),
+      );
+    }
+
+    test('GIVEN message with single emoji\n'
+        'AND NOT a reply\n'
+        'THEN return true\n', () {
+      final event = createEmojiEvent(body: '😊');
+
+      expect(event.isDisplayOnlyEmoji(), true);
+    });
+
+    test('GIVEN message with 2 emojis\n'
+        'AND NOT a reply\n'
+        'THEN return true\n', () {
+      final event = createEmojiEvent(body: '😊😎');
+
+      expect(event.isDisplayOnlyEmoji(), true);
+    });
+
+    test('GIVEN message with 3 emojis\n'
+        'AND NOT a reply\n'
+        'THEN return true\n', () {
+      final event = createEmojiEvent(body: '😊😎🎉');
+
+      expect(event.isDisplayOnlyEmoji(), true);
+    });
+
+    test('GIVEN message with 4 emojis\n'
+        'AND NOT a reply\n'
+        'THEN return true\n', () {
+      final event = createEmojiEvent(body: '😊😎🎉🔥');
+
+      expect(event.isDisplayOnlyEmoji(), true);
+    });
+
+    test('GIVEN message with 5 emojis\n'
+        'AND NOT a reply\n'
+        'THEN return true\n', () {
+      final event = createEmojiEvent(body: '😊😎🎉🔥❤️');
+
+      expect(event.isDisplayOnlyEmoji(), true);
+    });
+
+    test('GIVEN message with 6 emojis\n'
+        'AND NOT a reply\n'
+        'THEN return true\n', () {
+      final event = createEmojiEvent(body: '😊😎🎉🔥❤️👍');
+
+      expect(event.isDisplayOnlyEmoji(), true);
+    });
+
+    test('GIVEN message with 7 emojis\n'
+        'AND NOT a reply\n'
+        'THEN return false (exceeds limit)\n', () {
+      final event = createEmojiEvent(body: '😊😎🎉🔥❤️👍✨');
+
+      expect(event.isDisplayOnlyEmoji(), false);
+    });
+
+    test('GIVEN message with 10 emojis\n'
+        'AND NOT a reply\n'
+        'THEN return false (exceeds limit)\n', () {
+      final event = createEmojiEvent(body: '😊😎🎉🔥❤️👍✨🌟💯🚀');
+
+      expect(event.isDisplayOnlyEmoji(), false);
+    });
+
+    test('GIVEN message with single emoji\n'
+        'BUT is a reply event\n'
+        'THEN return false\n', () {
+      final event = createEmojiEvent(
+        body: '😊',
+        relatesTo: {
+          'm.in_reply_to': {'event_id': '\$original_event'},
+        },
+      );
+
+      expect(event.isDisplayOnlyEmoji(), false);
+    });
+
+    test('GIVEN message with 3 emojis\n'
+        'BUT is a reply event\n'
+        'THEN return false\n', () {
+      final event = createEmojiEvent(
+        body: '😊😎🎉',
+        relatesTo: {
+          'm.in_reply_to': {'event_id': '\$original_event'},
+        },
+      );
+
+      expect(event.isDisplayOnlyEmoji(), false);
+    });
+
+    test('GIVEN message with text and emoji\n'
+        'AND NOT a reply\n'
+        'THEN return false\n', () {
+      final event = createEmojiEvent(body: 'Hello 😊');
+
+      expect(event.isDisplayOnlyEmoji(), false);
+    });
+
+    test('GIVEN message with emoji and text\n'
+        'AND NOT a reply\n'
+        'THEN return false\n', () {
+      final event = createEmojiEvent(body: '😊 world');
+
+      expect(event.isDisplayOnlyEmoji(), false);
+    });
+
+    test('GIVEN plain text message with no emoji\n'
+        'AND NOT a reply\n'
+        'THEN return false\n', () {
+      final event = createEmojiEvent(body: 'Hello world');
+
+      expect(event.isDisplayOnlyEmoji(), false);
+    });
+
+    test('GIVEN empty message\n'
+        'AND NOT a reply\n'
+        'THEN return false\n', () {
+      final event = createEmojiEvent(body: '');
+
+      expect(event.isDisplayOnlyEmoji(), false);
+    });
+  });
 }

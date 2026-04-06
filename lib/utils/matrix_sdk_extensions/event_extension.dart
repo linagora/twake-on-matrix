@@ -265,8 +265,13 @@ extension LocalizedBody on Event {
     return isAttachmentEncrypted;
   }
 
+  /// Returns true if message contains only 1-6 emojis and is not a reply.
+  /// Used to display emoji in enlarged size.
   bool isDisplayOnlyEmoji() {
-    return onlyEmotes && numberEmotes > 0 && numberEmotes < 7;
+    return !isReplyEvent() &&
+        onlyEmotes &&
+        numberEmotes > 0 &&
+        numberEmotes < 7;
   }
 
   TextStyle? textStyleForOnlyEmoji(BuildContext context) {
