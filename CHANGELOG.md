@@ -1,3 +1,7 @@
+## [2.21.16] - 2026-04-06
+### Fixed
+- Retry to decrypt encrypted notification 
+
 ## [2.21.15] - 2026-04-01
 ### Fixed
 - fix distord image in Encrypted chat
