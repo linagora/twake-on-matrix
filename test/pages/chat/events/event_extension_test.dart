@@ -952,69 +952,34 @@ void main() {
       );
     }
 
-    test('GIVEN message with single emoji\n'
-        'AND NOT a reply\n'
-        'THEN return true\n', () {
-      final event = createEmojiEvent(body: '😊');
+    final validEmojiBodies = <String>[
+      '😊',
+      '😊😎',
+      '😊😎🎉',
+      '😊😎🎉🔥',
+      '😊😎🎉🔥❤️',
+      '😊😎🎉🔥❤️👍',
+    ];
+    for (final body in validEmojiBodies) {
+      test(
+        'GIVEN ${body.runes.length} emojis AND NOT a reply THEN return true',
+        () {
+          final event = createEmojiEvent(body: body);
+          expect(event.isDisplayOnlyEmoji(), isTrue);
+        },
+      );
+    }
 
-      expect(event.isDisplayOnlyEmoji(), true);
-    });
-
-    test('GIVEN message with 2 emojis\n'
-        'AND NOT a reply\n'
-        'THEN return true\n', () {
-      final event = createEmojiEvent(body: '😊😎');
-
-      expect(event.isDisplayOnlyEmoji(), true);
-    });
-
-    test('GIVEN message with 3 emojis\n'
-        'AND NOT a reply\n'
-        'THEN return true\n', () {
-      final event = createEmojiEvent(body: '😊😎🎉');
-
-      expect(event.isDisplayOnlyEmoji(), true);
-    });
-
-    test('GIVEN message with 4 emojis\n'
-        'AND NOT a reply\n'
-        'THEN return true\n', () {
-      final event = createEmojiEvent(body: '😊😎🎉🔥');
-
-      expect(event.isDisplayOnlyEmoji(), true);
-    });
-
-    test('GIVEN message with 5 emojis\n'
-        'AND NOT a reply\n'
-        'THEN return true\n', () {
-      final event = createEmojiEvent(body: '😊😎🎉🔥❤️');
-
-      expect(event.isDisplayOnlyEmoji(), true);
-    });
-
-    test('GIVEN message with 6 emojis\n'
-        'AND NOT a reply\n'
-        'THEN return true\n', () {
-      final event = createEmojiEvent(body: '😊😎🎉🔥❤️👍');
-
-      expect(event.isDisplayOnlyEmoji(), true);
-    });
-
-    test('GIVEN message with 7 emojis\n'
-        'AND NOT a reply\n'
-        'THEN return false (exceeds limit)\n', () {
-      final event = createEmojiEvent(body: '😊😎🎉🔥❤️👍✨');
-
-      expect(event.isDisplayOnlyEmoji(), false);
-    });
-
-    test('GIVEN message with 10 emojis\n'
-        'AND NOT a reply\n'
-        'THEN return false (exceeds limit)\n', () {
-      final event = createEmojiEvent(body: '😊😎🎉🔥❤️👍✨🌟💯🚀');
-
-      expect(event.isDisplayOnlyEmoji(), false);
-    });
+    final invalidEmojiBodies = <String>['😊😎🎉🔥❤️👍✨', '😊😎🎉🔥❤️👍✨🌟💯🚀'];
+    for (final body in invalidEmojiBodies) {
+      test(
+        'GIVEN ${body.runes.length} emojis AND NOT a reply THEN return false',
+        () {
+          final event = createEmojiEvent(body: body);
+          expect(event.isDisplayOnlyEmoji(), isFalse);
+        },
+      );
+    }
 
     test('GIVEN message with single emoji\n'
         'BUT is a reply event\n'
