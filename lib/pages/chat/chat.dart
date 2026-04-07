@@ -155,6 +155,8 @@ class ChatController extends State<Chat>
   /// Flag to prevent auto-loading history/future during programmatic scrolling
   bool _isProgrammaticScrolling = false;
 
+  Timer? _pinToBottomTimer;
+
   /// Completer to wait for timeline updates after requesting history
   Completer<void>? _timelineUpdateCompleter;
 
@@ -759,7 +761,6 @@ class ChatController extends State<Chat>
   }
 
   Future<void> send() async {
-    scrollDown();
     showEmojiPickerNotifier.value = false;
 
     if (sendController.text.trim().isEmpty) return;
@@ -801,6 +802,9 @@ class ChatController extends State<Chat>
       editEventNotifier.value = null;
       pendingText = '';
     });
+    // Scroll after reply widget collapses and setState rebuilds the layout,
+    // so maxScrollExtent is already correct before we jump.
+    WidgetsBinding.instance.addPostFrameCallback((_) => scrollDown());
   }
 
   void sendStickerAction() async {
@@ -1283,8 +1287,36 @@ class ChatController extends State<Chat>
           scrollController.position.maxScrollExtent) {
         scrollController.jumpTo(scrollController.position.maxScrollExtent);
       }
+      _keepScrollPinnedToBottom();
     }
     _handleHideStickyTimestamp();
+  }
+
+  void _keepScrollPinnedToBottom({
+    Duration duration = const Duration(milliseconds: 1200),
+  }) {
+    _pinToBottomTimer?.cancel();
+    final deadline = DateTime.now().add(duration);
+
+    _pinToBottomTimer = Timer.periodic(const Duration(milliseconds: 16), (
+      timer,
+    ) {
+      if (!mounted || scrollController.positions.isEmpty) {
+        timer.cancel();
+        if (identical(_pinToBottomTimer, timer)) _pinToBottomTimer = null;
+        return;
+      }
+
+      final position = scrollController.position;
+      if (position.pixels < position.maxScrollExtent) {
+        scrollController.jumpTo(position.maxScrollExtent);
+      }
+
+      if (DateTime.now().isAfter(deadline)) {
+        timer.cancel();
+        if (identical(_pinToBottomTimer, timer)) _pinToBottomTimer = null;
+      }
+    });
   }
 
   int getDisplayEventIndex(int eventIndex) {
@@ -3719,6 +3751,7 @@ class ChatController extends State<Chat>
     inputFocus.dispose();
     searchEmojiFocusNode.dispose();
     composerDebouncer.cancel();
+    _pinToBottomTimer?.cancel();
     focusSuggestionController.dispose();
     _focusSuggestionController.dispose();
     _jumpToEventIdSubscription?.cancel();
