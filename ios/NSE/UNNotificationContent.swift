@@ -113,9 +113,10 @@ extension UNMutableNotificationContent {
         var fetchedImage: INImage?
         let image: INImage
         if let mediaSource = icon.mediaSource {
-            switch await mediaProvider?.loadImageDataFromSource(mediaSource) {
-            case .success(let data):
-                fetchedImage = INImage(imageData: data)
+            let avatarSize = CGSize(width: 50, height: 50)
+            switch await mediaProvider?.loadImageFromSource(mediaSource, size: avatarSize) {
+            case .success(let uiImage):
+                fetchedImage = uiImage.pngData().map { INImage(imageData: $0) }
             case .failure(let error):
                 MXLog.error("Couldn't add sender icon: \(error)")
                 // ...The provider failed to fetch
