@@ -65,7 +65,7 @@ final class NSEUserSession {
         var proxy: NotificationItemProxyProtocol? = await fetchNotificationItem(roomID: roomID, eventID: eventID)
         if let proxy, !proxy.isEncrypted { return proxy }
 
-        for attempt in 0..<2 {
+        for attempt in 0..<3 {
             let delaySeconds = 1 << attempt
             MXLog.info("NSE: Notification is \(proxy == nil ? "nil" : "encrypted"), retrying in \(delaySeconds)s (attempt \(attempt)) - roomID: \(roomID)")
             try? await Task.sleep(nanoseconds: UInt64(delaySeconds) * 1_000_000_000)
