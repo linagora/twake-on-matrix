@@ -53,6 +53,7 @@ class ChatListItem extends StatelessWidget with ChatListItemMixin {
         return;
       case Membership.leave:
         ArchiveRoomRoute(roomid: room.id).go(context);
+        return;
       case Membership.invite:
       case Membership.join:
         RoomRoute(roomid: room.id).go(context);

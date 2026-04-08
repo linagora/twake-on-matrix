@@ -330,8 +330,7 @@ class RoomsShellRoute extends ShellRouteData {
     Widget navigator,
   ) => _defaultPage(
     context,
-    !_responsive.isMobile(context) &&
-            state.fullPath?.startsWith('/rooms/settings') == false
+    !_responsive.isMobile(context)
         ? AppAdaptiveScaffold(
             body: AppAdaptiveScaffoldBody(
               activeRoomId: state.pathParameters['roomid'],
@@ -794,9 +793,9 @@ class RoomRoute extends GoRouteData with $RoomRoute {
     List<MatrixFile?>? shareFiles,
   }) {
     final name = '/rooms/room_$roomid';
-    final key = Key(
-      '${prefix}_${roomid}_${DateTime.now().millisecondsSinceEpoch}',
-    );
+    final key = prefix == 'Share'
+        ? Key('${prefix}_${roomid}_${shareFiles.hashCode}')
+        : Key('${prefix}_$roomid');
     final child = ChatAdaptiveScaffold(
       roomId: roomid,
       key: key,
