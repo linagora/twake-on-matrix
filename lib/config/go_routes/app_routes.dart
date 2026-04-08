@@ -180,7 +180,12 @@ class HomeHomeserverPickerRoute extends GoRouteData
 
   @override
   Page<void> buildPage(BuildContext context, GoRouterState state) =>
-      _defaultPage(context, const HomeserverPicker());
+      _defaultPage(
+        context,
+        const HomeserverPicker(
+          arg: HomeserverPickerArg(type: HomeserverPickerType.singleAccount),
+        ),
+      );
 }
 
 @TypedGoRoute<OnAuthRedirectRoute>(path: '/onAuthRedirect')
@@ -681,7 +686,12 @@ class AddAccountHomeserverPickerRoute extends GoRouteData
 
   @override
   Page<void> buildPage(BuildContext context, GoRouterState state) =>
-      _defaultPage(context, const HomeserverPicker());
+      _defaultPage(
+        context,
+        const HomeserverPicker(
+          arg: HomeserverPickerArg(type: HomeserverPickerType.multiAccount),
+        ),
+      );
 }
 
 // --- Security ---

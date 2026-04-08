@@ -220,7 +220,7 @@ class HomeserverPickerController extends State<HomeserverPicker>
           handlePasswordLogin();
         } else {
           state = HomeserverState.otherLoginMethod;
-          context.push('/connect');
+          const ConnectRoute().push(context);
         }
         FocusManager.instance.primaryFocus?.unfocus();
         setState(() {});
@@ -239,9 +239,9 @@ class HomeserverPickerController extends State<HomeserverPicker>
   void handlePasswordLogin() {
     state = HomeserverState.passwordLoginMethod;
     if (widget.arg.type == HomeserverPickerType.singleAccount) {
-      context.push('/home/login');
+      const HomeLoginRoute().push(context);
     } else {
-      context.push('/rooms/addaccount/homeserverpicker/login');
+      const AddAccountLoginRoute().push(context);
     }
   }
 
