@@ -256,9 +256,9 @@ class _MxcImageState extends State<MxcImage>
         _tryLoad(context);
         return;
       }
+    } finally {
+      _releaseDownloadTicket();
     }
-
-    _releaseDownloadTicket();
   }
 
   void _releaseDownloadTicket() {
