@@ -226,39 +226,41 @@ class _MxcImageState extends State<MxcImage>
       return;
     }
 
-    // Acquire a slot from the shared download queue to prevent
-    // dozens of image downloads/decodes from running simultaneously,
-    // which causes OOM kills on iOS during fast scrolling.
-    _releaseDownloadTicket();
-    final ticket = ImageDownloadQueue.instance.acquire();
-    _downloadTicket = ticket;
+    var shouldRetry = false;
+    do {
+      shouldRetry = false;
 
-    final shouldProceed = await ticket.ready;
-    if (!shouldProceed || !mounted) {
-      if (shouldProceed) {
-        ImageDownloadQueue.instance.release(ticket);
-        _downloadTicket = null;
-      }
-      return;
-    }
+      // Acquire a slot from the shared download queue to prevent
+      // dozens of image downloads/decodes from running simultaneously,
+      // which causes OOM kills on iOS during fast scrolling.
+      _releaseDownloadTicket();
+      final ticket = ImageDownloadQueue.instance.acquire();
+      _downloadTicket = ticket;
 
-    try {
-      final loadResult = await _load(context);
-      isLoadDone = true;
-      _imageData = loadResult.imageData;
-      filePath = loadResult.filePath;
-      if (mounted) setState(() {});
-    } catch (e) {
-      if (mounted && !isLoadDone) {
-        isLoadDone = true;
-        // Release before retry so the retry can acquire its own slot.
-        _releaseDownloadTicket();
-        _tryLoad(context);
+      final shouldProceed = await ticket.ready;
+      if (!shouldProceed || !mounted) {
+        if (shouldProceed) {
+          ImageDownloadQueue.instance.release(ticket);
+          _downloadTicket = null;
+        }
         return;
       }
-    } finally {
-      _releaseDownloadTicket();
-    }
+
+      try {
+        final loadResult = await _load(context);
+        isLoadDone = true;
+        _imageData = loadResult.imageData;
+        filePath = loadResult.filePath;
+        if (mounted) setState(() {});
+      } catch (e) {
+        if (mounted && !isLoadDone) {
+          isLoadDone = true;
+          shouldRetry = true;
+        }
+      } finally {
+        _releaseDownloadTicket();
+      }
+    } while (shouldRetry);
   }
 
   void _releaseDownloadTicket() {
