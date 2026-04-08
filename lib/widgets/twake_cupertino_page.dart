@@ -202,18 +202,24 @@ class _TwakeCupertinoBackGestureDetectorState<T>
   void _handleDragUpdate(DragUpdateDetails details) {
     assert(mounted);
     assert(_backGestureController != null);
+    final size = context.size;
+    if (size == null) return;
     _backGestureController!.dragUpdate(
-      _convertToLogical(details.primaryDelta! / context.size!.width),
+      _convertToLogical(details.primaryDelta! / size.width),
     );
   }
 
   void _handleDragEnd(DragEndDetails details) {
     assert(mounted);
     assert(_backGestureController != null);
+    final size = context.size;
+    if (size == null) {
+      _backGestureController?.dragEnd(0.0);
+      _backGestureController = null;
+      return;
+    }
     _backGestureController!.dragEnd(
-      _convertToLogical(
-        details.velocity.pixelsPerSecond.dx / context.size!.width,
-      ),
+      _convertToLogical(details.velocity.pixelsPerSecond.dx / size.width),
     );
     _backGestureController = null;
   }
