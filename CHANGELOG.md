@@ -1,3 +1,11 @@
+## [2.21.17] - 2026-04-08
+### Fixed
+- HOTFIX: Fix disoriented notification avatar (#2992)
+
+### Performance
+- Prevent iOS OOM kills with image download queue (semaphore, max 4 concurrent downloads)
+- Add cacheWidth/cacheHeight to Image widgets to decode at display resolution (~130x memory reduction per image)
+
 ## [2.21.16] - 2026-04-06
 ### Fixed
 - Retry to decrypt encrypted notification 
