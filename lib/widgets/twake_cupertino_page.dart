@@ -181,12 +181,13 @@ class _TwakeCupertinoBackGestureDetectorState<T>
   @override
   void dispose() {
     _recognizer.dispose();
-    if (_backGestureController != null) {
+    final controller = _backGestureController;
+    _backGestureController = null;
+    if (controller != null) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (_backGestureController?.navigator.mounted ?? false) {
-          _backGestureController?.navigator.didStopUserGesture();
+        if (controller.navigator.mounted) {
+          controller.navigator.didStopUserGesture();
         }
-        _backGestureController = null;
       });
     }
     super.dispose();
