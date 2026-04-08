@@ -1,6 +1,17 @@
 import 'package:fluffychat/utils/image_download_queue.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+/// Fills all slots in [queue] and returns the granted tickets.
+Future<List<ImageDownloadTicket>> _fillSlots(ImageDownloadQueue queue) async {
+  final tickets = <ImageDownloadTicket>[];
+  for (var i = 0; i < queue.maxConcurrent; i++) {
+    final ticket = queue.acquire();
+    tickets.add(ticket);
+    await ticket.ready;
+  }
+  return tickets;
+}
+
 void main() {
   late ImageDownloadQueue queue;
 
@@ -11,13 +22,9 @@ void main() {
 
   group('basic acquire/release', () {
     test('acquire grants immediately when under maxConcurrent', () async {
-      final tickets = <ImageDownloadTicket>[];
-      for (var i = 0; i < queue.maxConcurrent; i++) {
-        final ticket = queue.acquire();
-        tickets.add(ticket);
-        final result = await ticket.ready;
-        expect(result, isTrue);
-        expect(ticket.isActive, isTrue);
+      final tickets = await _fillSlots(queue);
+      for (final t in tickets) {
+        expect(t.isActive, isTrue);
       }
 
       // Clean up
@@ -28,12 +35,7 @@ void main() {
     });
 
     test('acquire queues when at maxConcurrent', () async {
-      final tickets = <ImageDownloadTicket>[];
-      for (var i = 0; i < queue.maxConcurrent; i++) {
-        final ticket = queue.acquire();
-        tickets.add(ticket);
-        await ticket.ready;
-      }
+      final tickets = await _fillSlots(queue);
 
       final queuedTicket = queue.acquire();
       expect(queue.queuedCount, 1);
@@ -66,12 +68,7 @@ void main() {
     });
 
     test('release on queued ticket cancels it', () async {
-      final tickets = <ImageDownloadTicket>[];
-      for (var i = 0; i < queue.maxConcurrent; i++) {
-        final ticket = queue.acquire();
-        tickets.add(ticket);
-        await ticket.ready;
-      }
+      final tickets = await _fillSlots(queue);
 
       final queuedTicket = queue.acquire();
       expect(queue.queuedCount, 1);
@@ -91,12 +88,7 @@ void main() {
 
   group('cancel', () {
     test('cancel removes ticket from queue', () async {
-      final tickets = <ImageDownloadTicket>[];
-      for (var i = 0; i < queue.maxConcurrent; i++) {
-        final ticket = queue.acquire();
-        tickets.add(ticket);
-        await ticket.ready;
-      }
+      final tickets = await _fillSlots(queue);
 
       final queued1 = queue.acquire();
       final queued2 = queue.acquire();
@@ -121,12 +113,7 @@ void main() {
 
   group('FIFO ordering', () {
     test('FIFO order is respected', () async {
-      final tickets = <ImageDownloadTicket>[];
-      for (var i = 0; i < queue.maxConcurrent; i++) {
-        final ticket = queue.acquire();
-        tickets.add(ticket);
-        await ticket.ready;
-      }
+      final tickets = await _fillSlots(queue);
 
       final order = <int>[];
       final queued1 = queue.acquire();
