@@ -1297,6 +1297,8 @@ class ChatController extends State<Chat>
   }) {
     _pinToBottomTimer?.cancel();
     final deadline = DateTime.now().add(duration);
+    // Set flag to prevent scroll listener from triggering auto-loading
+    _isProgrammaticScrolling = true;
 
     _pinToBottomTimer = Timer.periodic(const Duration(milliseconds: 16), (
       timer,
@@ -1304,6 +1306,7 @@ class ChatController extends State<Chat>
       if (!mounted || scrollController.positions.isEmpty) {
         timer.cancel();
         if (identical(_pinToBottomTimer, timer)) _pinToBottomTimer = null;
+        _isProgrammaticScrolling = false;
         return;
       }
 
@@ -1315,6 +1318,7 @@ class ChatController extends State<Chat>
       if (DateTime.now().isAfter(deadline)) {
         timer.cancel();
         if (identical(_pinToBottomTimer, timer)) _pinToBottomTimer = null;
+        _isProgrammaticScrolling = false;
       }
     });
   }
