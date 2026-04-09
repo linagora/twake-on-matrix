@@ -1,3 +1,4 @@
+import 'package:fluffychat/domain/matrix_events/event_type_sets.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
 import 'package:matrix/matrix.dart';
 
@@ -24,7 +25,7 @@ extension IsStateExtension on Event {
       // hide unimportant state events
       (!AppConfig.hideUnimportantStateEvents ||
           !isState ||
-          importantStateEvents.contains(type)) &&
+          EventTypeSets.importantStateEvents.contains(type)) &&
       // hide simple join/leave member events in public rooms
       (!AppConfig.hideUnimportantStateEvents ||
           type != EventTypes.RoomMember ||
@@ -39,21 +40,7 @@ extension IsStateExtension on Event {
       !isActivateEndToEndEncryption() &&
       !isInviteWhenCreate();
 
-  static const Set<String> importantStateEvents = {
-    EventTypes.Encryption,
-    EventTypes.RoomCreate,
-    EventTypes.RoomMember,
-    EventTypes.RoomTombstone,
-    EventTypes.CallInvite,
-    EventTypes.RoomName,
-    EventTypes.RoomAvatar,
-  };
-
-  bool get isState => !{
-    EventTypes.Message,
-    EventTypes.Sticker,
-    EventTypes.Encrypted,
-  }.contains(type);
+  bool get isState => !EventTypeSets.messageContentTypes.contains(type);
 
   bool isSomeoneChangeDisplayName() {
     return stateKey != null &&

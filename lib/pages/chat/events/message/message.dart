@@ -1,3 +1,4 @@
+import 'package:fluffychat/domain/matrix_events/event_type_sets.dart';
 import 'package:fluffychat/config/themes.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/pages/chat/chat_horizontal_action_menu.dart';
@@ -214,12 +215,7 @@ class _MessageState extends State<Message> with MessageAvatarMixin {
 
   @override
   Widget build(BuildContext context) {
-    if (!{
-      EventTypes.Message,
-      EventTypes.Sticker,
-      EventTypes.Encrypted,
-      EventTypes.CallInvite,
-    }.contains(widget.event.type)) {
+    if (!EventTypeSets.userContentTypes.contains(widget.event.type)) {
       if (widget.event.type.startsWith('m.call.')) {
         return const SizedBox.shrink();
       }

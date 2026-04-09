@@ -1,5 +1,6 @@
 import 'package:collection/collection.dart';
 import 'package:fluffychat/config/app_config.dart';
+import 'package:fluffychat/domain/matrix_events/event_type_sets.dart';
 import 'package:fluffychat/domain/model/extensions/string_extension.dart';
 import 'package:fluffychat/domain/model/room/room_extension.dart';
 import 'package:fluffychat/pages/chat/events/message_reactions.dart';
@@ -157,11 +158,8 @@ extension LocalizedBody on Event {
       return true;
     }
 
-    final isPreviousOrNextEventMessage = {
-      EventTypes.Message,
-      EventTypes.Sticker,
-      EventTypes.Encrypted,
-    }.contains(comparedEvent.type);
+    final isPreviousOrNextEventMessage = EventTypeSets.messageContentTypes
+        .contains(comparedEvent.type);
 
     final isPreviousOrNextEventRedacted = {
       RelationshipTypes.edit,

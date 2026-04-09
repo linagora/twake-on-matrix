@@ -1,6 +1,7 @@
 import 'package:collection/collection.dart';
 import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/config/default_power_level_member.dart';
+import 'package:fluffychat/domain/matrix_events/event_type_sets.dart';
 import 'package:fluffychat/data/network/extensions/file_info_extension.dart';
 import 'package:fluffychat/domain/model/file_info/file_info.dart';
 import 'package:fluffychat/domain/model/search/recent_chat_model.dart';
@@ -40,11 +41,7 @@ extension RoomExtension on Room {
   }
 
   bool _isLastEventInRoomIsMessage() {
-    return [
-      EventTypes.Message,
-      EventTypes.Sticker,
-      EventTypes.Encrypted,
-    ].contains(lastEvent?.type);
+    return EventTypeSets.messageContentTypes.contains(lastEvent?.type);
   }
 
   Future<void> mute() async {
