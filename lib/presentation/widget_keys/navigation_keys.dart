@@ -4,7 +4,6 @@ enum NavigationKeys {
   contactsDestination,
   roomsDestination,
   settingsDestination,
-  scaffoldWithNestedNavigation,
   breakpointMobile,
   breakpointWebAndDesktop,
   bottomNavigation,

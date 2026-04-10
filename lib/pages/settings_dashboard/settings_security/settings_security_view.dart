@@ -137,7 +137,7 @@ class SettingsSecurityView extends StatelessWidget {
                       Padding(
                         padding: SettingsViewStyle.bodySettingsScreenPadding,
                         child: SettingsItemBuilder(
-                          key: const Key('recovery_key_settings_item'),
+                          key: SettingsKeys.recoveryKeyItem.key,
                           title: l10n.recoveryKey,
                           titleColor: colorScheme.onBackground,
                           subtitle: '\u2022' * 32,
@@ -153,7 +153,7 @@ class SettingsSecurityView extends StatelessWidget {
                             ),
                           ),
                           trailingWidget: InkWell(
-                            key: const Key('recovery_key_copy_button'),
+                            key: SettingsKeys.recoveryKeyCopyButton.key,
                             onTap: controller.copyRecoveryKey,
                             child: const Icon(Icons.content_copy),
                           ),

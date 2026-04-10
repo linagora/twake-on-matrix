@@ -29,8 +29,8 @@ class AppAdaptiveScaffoldBodyView extends StatelessWidget {
   final ValueNotifier<Profile?> currentProfile;
   final ValueNotifier<String?> activeRoomIdNotifier;
 
-  AppAdaptiveScaffoldBodyView({
-    Key? key,
+  const AppAdaptiveScaffoldBodyView({
+    super.key,
     required this.activeRoomIdNotifier,
     required this.pageController,
     required this.activeNavigationBarNotifier,
@@ -41,7 +41,7 @@ class AppAdaptiveScaffoldBodyView extends StatelessWidget {
     required this.onOpenSettings,
     this.adaptiveScaffoldBodyArgs,
     required this.currentProfile,
-  }) : super(key: key ?? NavigationKeys.scaffoldWithNestedNavigation.valueKey);
+  });
 
   @override
   Widget build(BuildContext context) {

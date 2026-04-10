@@ -13,11 +13,11 @@ class AppAdaptiveScaffold extends StatelessWidget {
   final bool? displayAppBar;
 
   const AppAdaptiveScaffold({
-    Key? key,
+    super.key,
     required this.body,
     this.secondaryBody,
     this.displayAppBar = true,
-  }) : super(key: key ?? const ValueKey('scaffoldWithNestedNavigation'));
+  });
 
   static final _responsiveUtils = ResponsiveUtils();
 
