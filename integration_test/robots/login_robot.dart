@@ -5,6 +5,7 @@ import 'package:fluffychat/pages/homeserver_picker/homeserver_picker_view.dart';
 import 'package:fluffychat/pages/login/login_view.dart';
 import 'package:fluffychat/pages/twake_welcome/twake_welcome.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
+import 'package:fluffychat/widgets/twake_app.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:patrol/patrol.dart';
@@ -87,7 +88,11 @@ class LoginRobot extends CoreRobot {
         Selector(textContains: label),
         appId: appId,
       )) {
-        await $.native.tap(Selector(textContains: label), appId: appId);
+        try {
+          await $.native.tap(Selector(textContains: label), appId: appId);
+        } catch (_) {
+          // Dialog may have been dismissed by iOS before the tap completed.
+        }
       }
     }
   }
@@ -247,6 +252,45 @@ class LoginRobot extends CoreRobot {
     await enterUsername(username);
     await enterPassword(password);
     await tapSignInButton();
+  }
+
+  /// Logs in by running the OIDC flow via HTTP (no browser UI interaction).
+  /// Obtains a one-time [loginToken] from the SSO server and feeds it directly
+  /// to the app via the /onAuthRedirect deep link, bypassing any SSO browser
+  /// modal entirely.
+  Future<void> loginViaApi({
+    required String serverUrl,
+    required String username,
+    required String password,
+  }) async {
+    // Wait for either TwakeWelcome (not logged in) or ChatList (already logged
+    // in from a previous test run whose tokens persisted in the iOS keychain).
+    await waitForEitherVisible(
+      $: $,
+      first: $(TwakeWelcome),
+      second: $(ChatList),
+      timeout: const Duration(seconds: 60),
+    );
+
+    if (await isChatListVisible()) return;
+
+    final httpClient = await initialRedirectRequest();
+    final oidcResult = await getLoginTokenViaOIDC(
+      httpClient,
+      username,
+      password,
+    );
+    await closeHTTPClient(httpClient);
+
+    final encodedServer = Uri.encodeComponent(serverUrl);
+    // Use router.go() directly — bypasses app_links which only listens when
+    // ChatList is active (post-login). go_router navigates synchronously.
+    TwakeApp.router.go(
+      '/onAuthRedirect?loginToken=${oidcResult.loginToken}&homeserver=$encodedServer',
+    );
+    await $.pump();
+
+    await waitForChatList();
   }
 
   Future<void> waitForChatList() async {

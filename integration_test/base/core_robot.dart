@@ -203,12 +203,16 @@ class CoreRobot {
     return client;
   }
 
-  Future<List<dynamic>> loginByAPI(HttpClient client) async {
-    const chatURL = String.fromEnvironment('CHAT_URL');
+  /// Runs the OIDC flow (steps 1-7) via HTTP without any browser UI.
+  /// Returns the one-time [loginToken] and the [lemonldap] session cookie.
+  Future<({String loginToken, String? lemonldap})> getLoginTokenViaOIDC(
+    HttpClient client,
+    String username,
+    String password,
+  ) async {
     const matrixURL = String.fromEnvironment('MATRIX_URL');
     const ssoURL = String.fromEnvironment('SSO_URL');
-    const receiver = String.fromEnvironment('Receiver');
-    const passOfReceiver = String.fromEnvironment('ReceiverPass');
+    const chatURL = String.fromEnvironment('CHAT_URL');
 
     // Step 1: Prepare the first request (no redirect)
     final uri = Uri.https(
@@ -320,6 +324,20 @@ class CoreRobot {
     final secondResponse = await secondRequest.close();
 
     // Step 4: Extract token, url from HTML (token is in a hidden input field)
+    // Also extract lemonldappdata cookie – required for the POST in step 5.
+    final allCookiesOfSecondResponse = secondResponse.headers['set-cookie'];
+    String? lemonldappdata;
+    if (allCookiesOfSecondResponse != null) {
+      final lemonldappdataCookie = allCookiesOfSecondResponse.firstWhere(
+        (cookie) => cookie.contains('lemonldappdata='),
+        orElse: () => '',
+      );
+      final lemonldappdataMatch = RegExp(
+        r'lemonldappdata=([^;]+)',
+      ).firstMatch(lemonldappdataCookie);
+      lemonldappdata = lemonldappdataMatch?.group(1);
+    }
+
     final body = await utf8.decoder.bind(secondResponse).join();
     final doc = parse(body);
     final tokenInput = doc.querySelector('input[name=token]');
@@ -332,35 +350,18 @@ class CoreRobot {
     if (url == null) {
       throw Exception('url not found in HTML form');
     }
+    final skinInput = doc.querySelector('input[name=skin]');
+    final skin = skinInput?.attributes['value'] ?? 'twake';
 
-    // Step 5: Submit login form to authorize (third request)
-    final thirdUri = Uri.https(ssoURL, '/oauth2/authorize', {
-      'response_type': 'code',
-      'client_id': 'matrix1',
-      'redirect_uri': 'https://$matrixURL/_synapse/client/oidc/callback',
-      'scope': 'openid profile email',
-      'state': state,
-      'nonce': nonce,
-      'code_challenge_method': codeChallengeMethod,
-      'code_challenge': codeChallenge,
-    });
-
-    final thirdRequest = await client.postUrl(thirdUri);
+    // Step 5: Submit login form to authorize (third request).
+    // The form action is "#" – POST to the same URL as step 3.
+    // Must include the lemonldappdata cookie received in step 4.
+    final thirdRequest = await client.postUrl(requestToSSOAuthorize);
     thirdRequest.followRedirects = false;
 
     thirdRequest.headers
       ..set('Sec-Fetch-Mode', 'navigate')
-      ..set(
-        HttpHeaders.refererHeader,
-        'https://$ssoURL/oauth2/authorize?response_type=code'
-        '&client_id=$clientId'
-        '&redirect_uri=$redirectUriValue'
-        '&scope=$scope'
-        '&state=$state'
-        '&nonce=$nonce'
-        '&code_challenge_method=$codeChallengeMethod'
-        '&code_challenge=$codeChallenge',
-      )
+      ..set(HttpHeaders.refererHeader, requestToSSOAuthorize.toString())
       ..set('Sec-Fetch-Site', 'same-origin')
       ..set(HttpHeaders.acceptLanguageHeader, 'en-US,en;q=0.9,vi;q=0.8')
       ..set('Origin', 'https://$ssoURL')
@@ -383,15 +384,16 @@ class CoreRobot {
         HttpHeaders.userAgentHeader,
         'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36',
       )
-      ..set('Sec-Fetch-Dest', 'document');
+      ..set('Sec-Fetch-Dest', 'document')
+      ..set(HttpHeaders.cookieHeader, 'lemonldappdata=$lemonldappdata');
 
     final thirdBody = {
       'url': url,
       'timezone': '7',
-      'skin': 'twake',
+      'skin': skin,
       'token': token,
-      'user': receiver,
-      'password': passOfReceiver,
+      'user': username,
+      'password': password,
     };
     thirdRequest.write(Uri(queryParameters: thirdBody).query);
 
@@ -399,11 +401,19 @@ class CoreRobot {
 
     final location = thirdResponse.headers.value('location');
     if (location == null) {
-      throw Exception('No redirect found after login POST');
+      final responseBody = await utf8.decoder.bind(thirdResponse).join();
+      throw Exception(
+        'No redirect found after login POST [status=${thirdResponse.statusCode}] body=${responseBody.substring(0, responseBody.length.clamp(0, 300))}',
+      );
     }
     final thirdRedirectUri = Uri.parse(location);
     final code = thirdRedirectUri.queryParameters['code'];
     final sessionState = thirdRedirectUri.queryParameters['session_state'];
+    if (code == null) {
+      throw Exception(
+        'No code in redirect after login POST – likely wrong credentials. Location: $location',
+      );
+    }
 
     final allCookiesOfThirdResponse =
         thirdResponse.headers['set-cookie']; // List<String>?
@@ -457,17 +467,44 @@ class CoreRobot {
 
     final fourthResponse = await fourthRequest.close();
 
+    // The OIDC callback either redirects (302) or returns a consent page (200)
+    // containing a "Continue" link with the loginToken already embedded.
     final locationIn4Response = fourthResponse.headers.value('location');
-    if (locationIn4Response == null) {
-      throw Exception('Missing location header in response');
+    String? loginToken;
+    if (locationIn4Response != null) {
+      loginToken = Uri.parse(locationIn4Response).queryParameters['loginToken'];
+    } else {
+      // Consent page: extract loginToken from the <a href="…&loginToken=…"> link.
+      final responseBody = await utf8.decoder.bind(fourthResponse).join();
+      final match = RegExp(r'loginToken=([^"&\s]+)').firstMatch(responseBody);
+      loginToken = match?.group(1);
+      if (loginToken == null) {
+        throw Exception(
+          'Could not extract loginToken from OIDC callback response [status=${fourthResponse.statusCode}] body=${responseBody.substring(0, responseBody.length.clamp(0, 500))}',
+        );
+      }
     }
-
-    final uriIn4Location = Uri.parse(locationIn4Response);
-    final loginToken = uriIn4Location.queryParameters['loginToken'];
 
     if (loginToken == null) {
-      throw Exception('Missing loginToken in redirect URL');
+      throw Exception('Missing loginToken in OIDC callback response');
     }
+
+    return (loginToken: loginToken, lemonldap: lemonldap);
+  }
+
+  Future<List<dynamic>> loginByAPI(HttpClient client) async {
+    const chatURL = String.fromEnvironment('CHAT_URL');
+    const matrixURL = String.fromEnvironment('MATRIX_URL');
+    const receiver = String.fromEnvironment('Receiver');
+    const passOfReceiver = String.fromEnvironment('ReceiverPass');
+
+    final oidcResult = await getLoginTokenViaOIDC(
+      client,
+      receiver,
+      passOfReceiver,
+    );
+    final loginToken = oidcResult.loginToken;
+    final lemonldap = oidcResult.lemonldap;
 
     // Step 8: Token login
     final fifthUri = Uri.https(matrixURL, '/_matrix/client/v3/login');
@@ -615,7 +652,7 @@ class CoreRobot {
     Finder? scrollable,
     int maxSwipes = 10,
   }) async {
-    final container = scrollable ?? find.byType(Scrollable);
+    final container = scrollable ?? find.byType(Scrollable).first;
 
     for (int i = 0; i < maxSwipes; i++) {
       if ($.tester.any(target)) return;
