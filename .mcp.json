@@ -1,0 +1,26 @@
+{
+  "mcpServers": {
+    "chrome-devtools": {
+      "command": "npx",
+      "args": ["-y", "chrome-devtools-mcp@latest"]
+    },
+    "flutter-inspector": {
+      "command": "${MCP_FLUTTER_BIN:-$HOME/tools/flutter_inspector_mcp}",
+      "args": [
+        "--dart-vm-host=localhost",
+        "--dart-vm-port=8181",
+        "--resources",
+        "--images",
+        "--dynamics"
+      ]
+    },
+    "patrol": {
+      "command": "./.claude/run-patrol",
+      "env": {
+        "PROJECT_ROOT": ".",
+        "PATROL_FLAGS": "--device <YOUR_DEVICE_ID> --dart-define-from-file integration_test/.env.local.do-not-commit",
+        "SHOW_TERMINAL": "false"
+      }
+    }
+  }
+}
