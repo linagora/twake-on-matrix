@@ -1,5 +1,6 @@
 import 'dart:typed_data';
 
+import 'package:fluffychat/utils/extension/build_context_extension.dart';
 import 'package:fluffychat/pages/chat/events/images_builder/image_builder_web.dart';
 import 'package:fluffychat/pages/chat/events/images_builder/image_placeholder.dart';
 import 'package:fluffychat/pages/chat/events/message_content_style.dart';
@@ -108,6 +109,8 @@ class ImageBubble extends StatelessWidget {
                     event: event,
                     width: width,
                     height: height,
+                    cacheWidth: context.getCacheSize(width),
+                    cacheHeight: context.getCacheSize(height),
                     fit: fit,
                     animated: animated,
                     isThumbnail: thumbnailOnly,

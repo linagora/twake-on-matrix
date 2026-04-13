@@ -79,7 +79,13 @@ class AddStoryView extends StatelessWidget {
                 image: controller.image == null
                     ? null
                     : DecorationImage(
-                        image: MemoryImage(controller.image!.bytes),
+                        image: ResizeImage(
+                          MemoryImage(controller.image!.bytes),
+                          width:
+                              (MediaQuery.sizeOf(context).width *
+                                      MediaQuery.devicePixelRatioOf(context))
+                                  .round(),
+                        ),
                         fit: controller.fit,
                         opacity: 0.75,
                       ),

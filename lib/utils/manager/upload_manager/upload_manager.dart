@@ -320,6 +320,10 @@ class UploadManager {
     String? caption,
     Event? inReplyTo,
   }) async {
+    // Store txids and fake events for all files
+    final uploadTasks = <String, SyncUpdate>{};
+
+    // First pass: Create all placeholders and fake events
     for (final matrixFile in files.asMap().entries) {
       final txid = room.client.generateUniqueTransactionId();
       final fileIndex = matrixFile.key;
@@ -343,6 +347,25 @@ class UploadManager {
         uploadInfo: _eventIdMapUploadFileInfo[txid]?.toJson(),
       );
 
+      uploadTasks[txid] = fakeFileEvent;
+
+      final streamController =
+          _eventIdMapUploadFileInfo[txid]?.uploadStateStreamController;
+
+      if (streamController != null) {
+        streamController.add(const Right(UploadFileInitial()));
+      }
+    }
+
+    // Second pass: Add all files to upload queue (uploads one by one)
+    for (final matrixFile in files.asMap().entries) {
+      final fileIndex = matrixFile.key;
+      final fileInfo = matrixFile.value;
+      final txid = uploadTasks.keys.elementAt(fileIndex);
+      final fakeFileEvent = uploadTasks[txid]!;
+
+      final isLastFile = fileIndex == files.length - 1;
+
       final streamController =
           _eventIdMapUploadFileInfo[txid]?.uploadStateStreamController;
 
@@ -362,26 +385,22 @@ class UploadManager {
             ),
           ),
         );
-        return;
+        continue;
       }
 
-      streamController.add(const Right(UploadFileInitial()));
-
-      await Future.wait([
-        _addFileTaskToWorkerQueueWeb(
-          txid: txid,
-          fakeImageEvent: fakeFileEvent,
-          room: room,
-          matrixFile: fileInfo,
-          streamController: streamController,
-          cancelToken: cancelToken,
-          thumbnail: thumbnails?[fileInfo],
-          sentDate: sentDate,
-          captionInfo: _eventIdMapUploadFileInfo[txid]?.captionInfo?.caption,
-          inReplyTo: isLastFile ? inReplyTo : null,
-          uploadInfo: _eventIdMapUploadFileInfo[txid]?.toJson(),
-        ),
-      ]);
+      _addFileTaskToWorkerQueueWeb(
+        txid: txid,
+        fakeImageEvent: fakeFileEvent,
+        room: room,
+        matrixFile: fileInfo,
+        streamController: streamController,
+        cancelToken: cancelToken,
+        thumbnail: thumbnails?[fileInfo],
+        sentDate: sentDate,
+        captionInfo: _eventIdMapUploadFileInfo[txid]?.captionInfo?.caption,
+        inReplyTo: isLastFile ? inReplyTo : null,
+        uploadInfo: _eventIdMapUploadFileInfo[txid]?.toJson(),
+      );
     }
   }
 

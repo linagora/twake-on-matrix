@@ -8,6 +8,7 @@ import 'package:desktop_drop/desktop_drop.dart';
 import 'package:fluffychat/app_state/failure.dart';
 import 'package:fluffychat/app_state/success.dart';
 import 'package:fluffychat/config/app_config.dart';
+import 'package:fluffychat/domain/matrix_events/event_type_sets.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/domain/app_state/contact/get_contacts_state.dart';
 import 'package:fluffychat/domain/app_state/room/report_content_state.dart';
@@ -230,22 +231,18 @@ class ChatController extends State<Chat>
   bool get hasNoMessageEvents {
     if (timeline == null) return true;
 
-    final events = timeline!.events;
-    final visibleEvents = events.where((event) => event.isVisibleInGui);
-    final validEventType = [
-      EventTypes.Message,
-      EventTypes.Sticker,
-      EventTypes.Encrypted,
-      EventTypes.CallInvite,
-    ];
+    final visibleEvents = timeline!.events.where(
+      (event) => event.isVisibleInGui,
+    );
     final validEvents = visibleEvents.where((event) {
+      if (EventTypeSets.userContentTypes.contains(event.type)) {
+        return true;
+      }
       final currentMembership = event.content.tryGet<String>('membership');
       final prevMembership = event.prevContent?.tryGet<String>('membership');
-      final isAcceptInviteEvent =
-          event.type == EventTypes.RoomMember &&
+      return event.type == EventTypes.RoomMember &&
           currentMembership == 'join' &&
           prevMembership == 'invite';
-      return validEventType.contains(event.type) || isAcceptInviteEvent;
     });
     return validEvents.isEmpty;
   }
@@ -260,17 +257,12 @@ class ChatController extends State<Chat>
 
     if (timeline == null) return true;
 
-    final events = timeline!.events;
-    final visibleEvents = events.where((event) => event.isVisibleInGui);
-    final validEventType = [
-      EventTypes.Message,
-      EventTypes.Sticker,
-      EventTypes.Encrypted,
-      EventTypes.CallInvite,
-    ];
-    final validEvents = visibleEvents.where((event) {
-      return validEventType.contains(event.type);
-    });
+    final visibleEvents = timeline!.events.where(
+      (event) => event.isVisibleInGui,
+    );
+    final validEvents = visibleEvents.where(
+      (event) => EventTypeSets.userContentTypes.contains(event.type),
+    );
     return validEvents.isEmpty && isSupportChat;
   }
 
@@ -2973,11 +2965,8 @@ class ChatController extends State<Chat>
     _currentChatScrollState = ChatScrollState.scrolling;
   }
 
-  List<String> get getEventTypeToFilterUnnecessaryEvent => [
-    EventTypes.Message,
-    EventTypes.Encrypted,
-    EventTypes.Sticker,
-  ];
+  List<String> get getEventTypeToFilterUnnecessaryEvent =>
+      EventTypeSets.messageContentTypesList;
 
   Future<void> _tryRequestHistory() async {
     if (timeline == null) return;
