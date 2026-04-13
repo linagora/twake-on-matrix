@@ -1,89 +1,11 @@
-import 'package:fluffychat/domain/matrix_events/event_type_sets.dart';
-import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
+import 'package:fluffychat/domain/matrix_events/event_visibility_resolver.dart';
 import 'package:matrix/matrix.dart';
 
-import '../../config/app_config.dart';
+extension FilteredTimelineExtension on Event {
+  bool get isVisibleInGui => EventVisibilityResolver.isVisibleInTimeline(this);
 
-extension IsStateExtension on Event {
-  bool get isVisibleInGui =>
-      // always filter out edit and reaction relationships
-      !{
-        RelationshipTypes.edit,
-        RelationshipTypes.reaction,
-      }.contains(relationshipType) &&
-      // always filter out m.key.* events
-      !type.startsWith('m.key.verification.') &&
-      // event types to hide: redaction and reaction events
-      // if a reaction has been redacted we also want it to be hidden in the timeline
-      !{EventTypes.Reaction, EventTypes.Redaction}.contains(type) &&
-      // if we enabled to hide all redacted events, don't show those
-      (!AppConfig.hideRedactedEvents || !shouldHideRedactedEvent()) &&
-      // if we enabled to hide all unknown events, don't show those
-      (!AppConfig.hideUnknownEvents || isEventTypeKnown) &&
-      // remove state events that we don't want to render
-      (isState || !AppConfig.hideAllStateEvents) &&
-      // hide unimportant state events
-      (!AppConfig.hideUnimportantStateEvents ||
-          !isState ||
-          EventTypeSets.importantStateEvents.contains(type)) &&
-      // hide simple join/leave member events in public rooms
-      (!AppConfig.hideUnimportantStateEvents ||
-          type != EventTypes.RoomMember ||
-          room.joinRules != JoinRules.public ||
-          content.tryGet<String>('membership') == 'ban' ||
-          stateKey != senderId) &&
-      !isSomeoneChangeDisplayName() &&
-      !isSomeoneChangeAvatar() &&
-      !isGroupNameChangeWhenCreate() &&
-      !isGroupAvatarChangeWhenCreate() &&
-      !isJoinedByYourself() &&
-      !isActivateEndToEndEncryption() &&
-      !isInviteWhenCreate();
-
-  bool get isState => !EventTypeSets.messageContentTypes.contains(type);
-
-  bool isSomeoneChangeDisplayName() {
-    return stateKey != null &&
-        prevContent?['displayname'] != null &&
-        prevContent!['displayname'] != content['displayname'];
-  }
-
-  bool isGroupNameChangeWhenCreate() {
-    return type == EventTypes.RoomName &&
-        content['name'] != null &&
-        prevContent?['name'] == null;
-  }
-
-  bool isGroupAvatarChangeWhenCreate() {
-    return type == EventTypes.RoomAvatar &&
-        content['url'] == null &&
-        prevContent?['url'] == null;
-  }
-
-  bool isJoinedByYourself() {
-    return type == EventTypes.RoomMember &&
-        content['membership'] == 'join' &&
-        senderId == stateKey &&
-        stateKey == room.client.userID;
-  }
-
-  bool isInviteWhenCreate() {
-    return type == EventTypes.RoomMember &&
-        content['membership'] != null &&
-        content['membership'] == 'invite' &&
-        content['reason'] == null;
-  }
-
-  bool isSomeoneChangeAvatar() {
-    return stateKey != null &&
-        prevContent?["membership"] == 'join' &&
-        prevContent?['avatar_url'] != content['avatar_url'];
-  }
-
-  bool isActivateEndToEndEncryption() {
-    return type == EventTypes.Encryption;
-  }
-
+  /// True when the room creator is joining for the first time.
+  /// Used by message widgets to skip the standard member-event display.
   bool isJoinedByRoomCreator() {
     return type == EventTypes.RoomMember &&
         content['membership'] == 'join' &&

@@ -870,6 +870,16 @@
     "type": "text",
     "placeholders": {}
   },
+  "thisIsANewChat": "This is a new chat",
+  "@thisIsANewChat": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "chatPreviewUnavailable": "Click to load the latest messages",
+  "@chatPreviewUnavailable": {
+    "type": "text",
+    "placeholders": {}
+  },
   "enableEmotesGlobally": "Enable emote pack globally",
   "@enableEmotesGlobally": {
     "type": "text",

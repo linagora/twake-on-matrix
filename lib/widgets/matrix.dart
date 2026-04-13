@@ -11,7 +11,7 @@ import 'package:fluffychat/domain/model/homeserver_summary.dart';
 import 'package:fluffychat/domain/repository/federation_configurations_repository.dart';
 import 'package:fluffychat/domain/repository/user_info/user_info_repository.dart';
 import 'package:fluffychat/domain/usecase/room/create_support_chat_interactor.dart';
-import 'package:fluffychat/domain/matrix_events/event_type_sets.dart';
+import 'package:fluffychat/domain/matrix_events/event_type_rules.dart';
 import 'package:fluffychat/event/twake_event_types.dart';
 import 'package:fluffychat/pages/chat/events/audio_message/audio_player_widget.dart';
 import 'package:fluffychat/presentation/mixins/connectivity_mixin.dart';
@@ -512,7 +512,7 @@ class MatrixState extends State<Matrix>
             .where(
               (e) =>
                   e.type == EventUpdateType.timeline &&
-                  EventTypeSets.messageContentTypes.contains(
+                  EventTypeRules.messageContentTypes.contains(
                     e.content['type'],
                   ) &&
                   e.content['sender'] != currentClient.userID,

@@ -1,4 +1,5 @@
 import 'package:collection/collection.dart';
+import 'package:fluffychat/domain/model/room/room_preview_result.dart';
 import 'package:fluffychat/pages/chat_list/chat_list.dart';
 import 'package:fluffychat/pages/chat_list/chat_list_item.dart';
 import 'package:flutter/material.dart';
@@ -7,13 +8,13 @@ import 'package:matrix/matrix.dart';
 class CommonChatListItem extends StatelessWidget {
   final ChatListController controller;
   final Room room;
-  final Event? lastEvent;
+  final RoomPreviewResult? previewResult;
 
   const CommonChatListItem({
     super.key,
     required this.controller,
     required this.room,
-    this.lastEvent,
+    this.previewResult,
   });
 
   @override
@@ -46,7 +47,7 @@ class CommonChatListItem extends StatelessWidget {
             },
           ),
           activeChat: activeRoomId == room.id,
-          lastEvent: lastEvent,
+          previewResult: previewResult,
         );
       },
     );

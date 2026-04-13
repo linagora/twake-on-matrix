@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:collection/collection.dart';
 import 'package:fluffychat/domain/model/room/room_extension.dart';
+import 'package:fluffychat/domain/model/room/room_preview_result.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:flutter/material.dart';
 import 'package:matrix/matrix.dart';
@@ -17,7 +18,7 @@ class ChatListSortRooms extends StatefulWidget {
   final List<Room> rooms;
   final Widget Function(
     List<Room> sortedRooms,
-    Map<String, Event?> lastEventByRoomId,
+    Map<String, RoomPreviewResult?> previewByRoomId,
   )
   builder;
   final ValueNotifier<bool> sortingRoomsNotifier;
@@ -27,7 +28,7 @@ class ChatListSortRooms extends StatefulWidget {
 }
 
 class _ChatListSortRoomsState extends State<ChatListSortRooms> {
-  Map<String, Event?> _lastEventByRoomId = {};
+  Map<String, RoomPreviewResult?> _previewByRoomId = {};
   List<Room> _sortCache = [];
   Map<String, StreamSubscription?> _roomSubscriptions = {};
   Future<List<Room>>? _sortFuture;
@@ -37,6 +38,11 @@ class _ChatListSortRoomsState extends State<ChatListSortRooms> {
   /// completes, it checks whether its generation matches [_sortGeneration].
   /// If not, the result is discarded (a newer sort has been triggered).
   int _sortGeneration = 0;
+
+  DateTime? _previewTs(String roomId) {
+    final result = _previewByRoomId[roomId];
+    return result is RoomPreviewFound ? result.event.originServerTs : null;
+  }
 
   RoomSorter sortRoomsBy(Client client) => (a, b) {
     if (client.pinInvitedRooms &&
@@ -50,12 +56,10 @@ class _ChatListSortRoomsState extends State<ChatListSortRooms> {
     if (client.pinUnreadRooms && a.notificationCount != b.notificationCount) {
       return b.notificationCount.compareTo(a.notificationCount);
     }
-    return (_lastEventByRoomId[b.id]?.originServerTs ??
-            b.latestEventReceivedTime)
+    return (_previewTs(b.id) ?? b.latestEventReceivedTime)
         .millisecondsSinceEpoch
         .compareTo(
-          (_lastEventByRoomId[a.id]?.originServerTs ??
-                  a.latestEventReceivedTime)
+          (_previewTs(a.id) ?? a.latestEventReceivedTime)
               .millisecondsSinceEpoch,
         );
   };
@@ -67,13 +71,13 @@ class _ChatListSortRoomsState extends State<ChatListSortRooms> {
       // triggered while we were awaiting.
       if (!mounted || generation != _sortGeneration) return _sortCache;
 
-      if (_lastEventByRoomId[room.id] != null) continue;
+      if (_previewByRoomId[room.id] != null) continue;
 
-      final event = await room.lastEventAvailableInPreview();
+      final result = await room.lastEventAvailableInPreview();
 
       if (!mounted || generation != _sortGeneration) return _sortCache;
 
-      _lastEventByRoomId[room.id] = event;
+      _previewByRoomId[room.id] = result;
     }
 
     if (!mounted) return _sortCache;
@@ -91,7 +95,7 @@ class _ChatListSortRoomsState extends State<ChatListSortRooms> {
   @override
   void initState() {
     super.initState();
-    _lastEventByRoomId = Map.fromEntries(
+    _previewByRoomId = Map.fromEntries(
       widget.rooms.map((room) => MapEntry(room.id, null)),
     );
     _roomSubscriptions = Map.fromEntries(
@@ -99,7 +103,7 @@ class _ChatListSortRoomsState extends State<ChatListSortRooms> {
         (room) => MapEntry(
           room.id,
           room.onUpdate.stream.listen((roomId) {
-            _lastEventByRoomId[roomId] = null;
+            _previewByRoomId[roomId] = null;
           }),
         ),
       ),
@@ -110,11 +114,11 @@ class _ChatListSortRoomsState extends State<ChatListSortRooms> {
   @override
   void didUpdateWidget(covariant ChatListSortRooms oldWidget) {
     super.didUpdateWidget(oldWidget);
-    _lastEventByRoomId = Map.fromEntries(
+    _previewByRoomId = Map.fromEntries(
       widget.rooms.map(
         (room) => MapEntry(
           room.id,
-          _lastEventByRoomId.putIfAbsent(room.id, () => null),
+          _previewByRoomId.putIfAbsent(room.id, () => null),
         ),
       ),
     );
@@ -131,7 +135,7 @@ class _ChatListSortRoomsState extends State<ChatListSortRooms> {
           _roomSubscriptions.putIfAbsent(
             room.id,
             () => room.onUpdate.stream.listen((roomId) {
-              _lastEventByRoomId[roomId] = null;
+              _previewByRoomId[roomId] = null;
             }),
           ),
         ),
@@ -162,7 +166,7 @@ class _ChatListSortRoomsState extends State<ChatListSortRooms> {
 
         return widget.builder(
           _sortCache.isEmpty ? widget.rooms : _sortCache,
-          _lastEventByRoomId,
+          _previewByRoomId,
         );
       },
     );
