@@ -107,6 +107,23 @@ import 'sticker_picker_dialog.dart';
 
 typedef OnJumpToMessage = void Function(String eventId);
 
+/// Trims an event list in place to at most [maxEvents], dropping the
+/// oldest entries (tail of the list, since Matrix timeline events are
+/// ordered newest-first).
+///
+/// No-op when `events.length <= maxEvents`. Exposed for unit testing of
+/// the per-room timeline cap used by [ChatController].
+@visibleForTesting
+void trimEventsIfNeeded(List<Event> events, int maxEvents) {
+  if (events.length <= maxEvents) return;
+  final excess = events.length - maxEvents;
+  Logs().d(
+    'trimEventsIfNeeded(): Trimming $excess old events '
+    '(${events.length} -> $maxEvents)',
+  );
+  events.removeRange(maxEvents, events.length);
+}
+
 class Chat extends StatefulWidget {
   final String roomId;
   final List<MatrixFile?>? shareFiles;
@@ -167,6 +184,12 @@ class ChatController extends State<Chat>
   static const double defaultMaxWidthReactionPicker = 326;
 
   static const double defaultMaxHeightReactionPicker = 360;
+
+  /// Maximum number of events to keep in memory per timeline.
+  /// When exceeded after a history request, older events are trimmed
+  /// to prevent unbounded memory growth during long scroll sessions.
+  /// 500 events ≈ a generous scroll buffer while keeping memory bounded.
+  static const int _maxTimelineEvents = 500;
 
   final GlobalKey stickyTimestampKey = GlobalKey(
     debugLabel: 'stickyTimestampKey',
@@ -527,12 +550,28 @@ class ChatController extends State<Chat>
         historyCount: historyCount ?? _loadHistoryCount,
         filter: filter,
       );
+      _trimTimelineIfNeeded();
     } catch (err) {
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text((err).toLocalizedString(context))));
       rethrow;
     }
+  }
+
+  /// Trims the timeline event list if it exceeds [_maxTimelineEvents].
+  ///
+  /// Removes the oldest events (at the end of the list, since events
+  /// are ordered newest-first) to keep memory bounded during long
+  /// scroll sessions. This is safe because:
+  /// - The trimmed events are still persisted in the database
+  /// - They will be re-loaded if the user scrolls back to that point
+  /// - The SDK's `canRequestHistory` still works correctly
+  void _trimTimelineIfNeeded() {
+    if (!mounted) return;
+    final events = timeline?.events;
+    if (events == null) return;
+    trimEventsIfNeeded(events, _maxTimelineEvents);
   }
 
   void _updateScrollController() async {
