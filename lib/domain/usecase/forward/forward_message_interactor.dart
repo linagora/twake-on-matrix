@@ -1,3 +1,4 @@
+import 'package:collection/collection.dart';
 import 'package:dartz/dartz.dart';
 import 'package:fluffychat/app_state/failure.dart';
 import 'package:fluffychat/app_state/success.dart';
@@ -20,8 +21,10 @@ class ForwardMessageInteractor {
 
       for (final roomId in selectedEvents) {
         try {
-          final room = rooms.firstWhere((element) => element.id == roomId);
-          if (room.membership != Membership.join) continue;
+          final room = rooms.firstWhereOrNull(
+            (element) => element.id == roomId,
+          );
+          if (room == null || room.membership != Membership.join) continue;
 
           if (matrixState.shareContentList.isEmpty &&
               matrixState.shareContent != null) {

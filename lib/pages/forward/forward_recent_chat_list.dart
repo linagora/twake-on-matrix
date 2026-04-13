@@ -32,6 +32,7 @@ class ForwardRecentChatList extends StatelessWidget {
         return ListView.builder(
           padding: EdgeInsets.zero,
           shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
           controller: recentChatScrollController,
           itemCount: rooms.length,
           itemBuilder: (BuildContext context, int index) {

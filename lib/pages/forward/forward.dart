@@ -15,6 +15,7 @@ import 'package:fluffychat/presentation/model/pop_result_from_forward.dart';
 import 'package:fluffychat/utils/dialog/twake_dialog.dart';
 import 'package:fluffychat/utils/twake_snackbar.dart';
 import 'package:flutter/material.dart';
+import 'package:fluffychat/generated/l10n/app_localizations.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:fluffychat/config/go_routes/app_routes.dart';
 import 'package:matrix/matrix.dart';
@@ -77,6 +78,11 @@ class ForwardController extends State<Forward>
     disposeContactsMixin();
     recentChatScrollController.dispose();
     forwardMessageInteractorStreamSubscription?.cancel();
+    // Clear share state in case the stream was cancelled mid-operation
+    // and the interactor's own cleanup lines never executed.
+    final matrixState = Matrix.of(context);
+    matrixState.shareContent = null;
+    matrixState.shareContentList = null;
     disposeSearchRecentChat();
     selectedRoomIdNotifier.dispose();
     super.dispose();
@@ -97,7 +103,7 @@ class ForwardController extends State<Forward>
   List<Room> get filteredRoomsForAll =>
       Matrix.of(context).client.filteredRoomsForAll(_activeFilterAllChats);
 
-  void forwardAction(BuildContext context) async {
+  void forwardAction() async {
     forwardMessageInteractorStreamSubscription = _forwardMessageInteractor
         .execute(
           rooms: filteredRoomsForAll,
@@ -130,11 +136,13 @@ class ForwardController extends State<Forward>
         Logs().d(
           'ForwardController::_handleForwardMessageOnData() - success: $success',
         );
-        if (mounted && success is ForwardMessageLoading) {
+        if (!mounted) return;
+        if (success is ForwardMessageLoading) {
           TwakeDialog.showLoadingDialog(context);
-        } else if (mounted && success is ForwardMessageAllDoneState) {
+        } else if (success is ForwardMessageAllDoneState) {
           TwakeDialog.hideLoadingDialog(context);
         }
+        if (!mounted) return;
         switch (success) {
           case ForwardMessageAllDoneState():
             _handleAllDone(context, success);
@@ -152,14 +160,20 @@ class ForwardController extends State<Forward>
   }
 
   void _handleAllDone(BuildContext context, ForwardMessageAllDoneState done) {
+    if (!mounted) return;
     if (done.totalCount != 1) {
       if (Navigator.of(context).canPop()) {
         Navigator.of(context).pop();
       } else {
         const RoomsRoute().go(context);
       }
-      final message = _buildMultiForwardSnackbarMessage(done);
+      final message = _buildMultiForwardSnackbarMessage(context, done);
       TwakeSnackBar.show(context, message);
+      return;
+    }
+
+    if (done.successCount == 0) {
+      TwakeSnackBar.show(context, L10n.of(context)!.forwardFailed);
       return;
     }
 
@@ -172,14 +186,19 @@ class ForwardController extends State<Forward>
     }
   }
 
-  String _buildMultiForwardSnackbarMessage(ForwardMessageAllDoneState done) {
+  String _buildMultiForwardSnackbarMessage(
+    BuildContext context,
+    ForwardMessageAllDoneState done,
+  ) {
     if (done.successCount == 0) {
-      return 'Failed to forward message';
+      return L10n.of(context)!.forwardFailed;
     }
     if (done.successCount == done.totalCount) {
-      return 'Forwarded to ${done.successCount} chats';
+      return L10n.of(context)!.forwardedToChats(done.successCount);
     }
-    return 'Forwarded to ${done.successCount} of ${done.totalCount} chats';
+    return L10n.of(
+      context,
+    )!.forwardedToChatsPartial(done.successCount, done.totalCount);
   }
 
   void _handleForwardMessageOnDone() {

@@ -84,13 +84,13 @@ class ForwardView extends StatelessWidget {
             _WebActionsButton(
               selectedChatNotifier: controller.selectedRoomIdNotifier,
               forwardMessageNotifier: controller.forwardMessageNotifier,
-              forwardAction: () => controller.forwardAction(context),
+              forwardAction: () => controller.forwardAction(),
             ),
         ],
       ),
       floatingActionButton: controller.isFullScreen
           ? _ForwardButton(
-              forwardAction: () => controller.forwardAction(context),
+              forwardAction: () => controller.forwardAction(),
               selectedChatNotifier: controller.selectedRoomIdNotifier,
               forwardMessageNotifier: controller.forwardMessageNotifier,
             )
@@ -162,7 +162,7 @@ class _WebActionsButton extends StatelessWidget {
                 ),
                 const SizedBox(width: 8.0),
                 TwakeTextButton(
-                  onTap: forwardAction,
+                  onTap: selectedChats.isNotEmpty ? forwardAction : null,
                   message: L10n.of(context)!.add,
                   margin: ForwardViewStyle.webActionsButtonMargin,
                   borderHover: ForwardViewStyle.webActionsButtonBorder,
