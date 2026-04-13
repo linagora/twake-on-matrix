@@ -1,7 +1,7 @@
+import 'package:fluffychat/config/go_routes/app_routes.dart';
 import 'package:fluffychat/utils/url_launcher.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 
 class InvitationLinkWeb extends StatefulWidget {
@@ -20,7 +20,7 @@ class _InvitationLinkWebState extends State<InvitationLinkWeb> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final matrixId = widget.matrixId;
       if (matrixId == null || matrixId.isEmpty) {
-        context.go('/rooms');
+        const RoomsRoute().go(context);
         return;
       }
       UrlLauncher(

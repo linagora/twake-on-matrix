@@ -14,7 +14,7 @@ import 'package:fluffychat/presentation/mixins/search_recent_chat_mixin.dart';
 import 'package:fluffychat/presentation/model/pop_result_from_forward.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
-import 'package:go_router/go_router.dart';
+import 'package:fluffychat/config/go_routes/app_routes.dart';
 import 'package:matrix/matrix.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
 import 'package:fluffychat/widgets/matrix.dart';
@@ -125,7 +125,7 @@ class ForwardController extends State<Forward>
             if (Navigator.of(context).canPop()) {
               Navigator.of(context).pop(const PopResultFromForward());
             }
-            context.go('/rooms/${dataOnSuccess.room.id}');
+            RoomRoute(roomid: dataOnSuccess.room.id).go(context);
             break;
           case const (ForwardMessageIsShareFileState):
             final dataOnSuccess = success as ForwardMessageIsShareFileState;
@@ -154,7 +154,11 @@ class ForwardController extends State<Forward>
   }
 
   void popScreen() {
-    context.go('/rooms/${widget.sendFromRoomId}');
+    if (widget.sendFromRoomId != null) {
+      RoomRoute(roomid: widget.sendFromRoomId!).go(context);
+    } else {
+      const RoomsRoute().go(context);
+    }
   }
 
   @override

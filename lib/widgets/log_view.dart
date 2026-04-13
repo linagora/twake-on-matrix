@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
+import 'package:fluffychat/config/go_routes/app_routes.dart';
 
 import 'package:matrix/matrix.dart';
 
@@ -22,7 +22,7 @@ class LogViewerState extends State<LogViewer> {
       backgroundColor: Colors.black,
       appBar: AppBar(
         title: Text(logLevel.toString()),
-        leading: BackButton(onPressed: () => context.go('/')),
+        leading: BackButton(onPressed: () => const RootRoute().go(context)),
         actions: [
           IconButton(
             icon: const Icon(Icons.zoom_in_outlined),

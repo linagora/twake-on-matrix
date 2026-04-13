@@ -92,6 +92,7 @@ import 'package:fluffychat/generated/l10n/app_localizations.dart';
 import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_typeahead/flutter_typeahead.dart';
+import 'package:fluffychat/config/go_routes/app_routes.dart';
 import 'package:go_router/go_router.dart';
 import 'package:linagora_design_flutter/dialog/options_dialog.dart';
 import 'package:linagora_design_flutter/images_picker/asset_counter.dart';
@@ -508,7 +509,7 @@ class ChatController extends State<Chat>
     );
     final roomId = success.result;
     if (roomId == null) return;
-    context.go('/rooms/$roomId');
+    RoomRoute(roomid: roomId).go(context);
   }
 
   Future<void> requestHistory({int? historyCount, StateFilter? filter}) async {
@@ -1131,10 +1132,9 @@ class ChatController extends State<Chat>
       );
     }
     _clearSelectEvent();
-    context.push(
-      '/rooms/forward',
-      extra: ForwardArgument(fromRoomId: roomId ?? ''),
-    );
+    ForwardRoute(
+      $extra: ForwardArgument(fromRoomId: roomId ?? ''),
+    ).push(context);
   }
 
   void sendAgainAction() {
@@ -2023,7 +2023,7 @@ class ChatController extends State<Chat>
       future: room!.forget,
     );
     if (result.error != null) return;
-    context.go('/archive');
+    const ArchiveRoute().go(context);
   }
 
   void typeEmoji(String emoji) {
@@ -2117,8 +2117,9 @@ class ChatController extends State<Chat>
       ),
     );
     await TwakeDialog.showFutureLoadingDialogFullScreen(future: room!.leave);
-    if (result.error == null) {
-      context.go('/rooms/${result.result}');
+    final newRoomId = result.result;
+    if (result.error == null && newRoomId != null) {
+      RoomRoute(roomid: newRoomId).go(context);
     }
   }
 
@@ -3606,7 +3607,7 @@ class ChatController extends State<Chat>
     SchedulerBinding.instance.addPostFrameCallback((_) async {
       if (!mounted) return;
       if (room == null) {
-        return context.go("/error");
+        return const ErrorRoute().go(context);
       }
       _handleReceivedShareFiles();
       _listenRoomUpdateEvent();

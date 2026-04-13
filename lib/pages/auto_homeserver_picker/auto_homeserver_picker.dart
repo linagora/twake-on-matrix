@@ -9,7 +9,7 @@ import 'package:fluffychat/utils/exception/homeserver_exception.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
+import 'package:fluffychat/config/go_routes/app_routes.dart';
 import 'package:matrix/matrix.dart';
 import 'package:fluffychat/generated/l10n/app_localizations.dart';
 
@@ -68,7 +68,7 @@ class AutoHomeserverPickerController extends State<AutoHomeserverPicker>
 
       if (!ssoSupported && matrix.loginRegistrationSupported == false) {
         // Server does not support SSO or registration. We can skip to login page:
-        context.push('/login');
+        const HomeLoginRoute().push(context);
       } else if (ssoSupported && matrix.loginRegistrationSupported == false) {
         Map<String, dynamic>? rawLoginTypes;
         await client
@@ -87,7 +87,7 @@ class AutoHomeserverPickerController extends State<AutoHomeserverPicker>
           ssoLoginAction(context: context, id: identitiesProvider!.single.id!);
         }
       } else {
-        context.push('/connect');
+        const ConnectRoute().push(context);
       }
     } catch (e) {
       autoHomeserverPickerUIState.value = AutoHomeServerPickerFailureState();

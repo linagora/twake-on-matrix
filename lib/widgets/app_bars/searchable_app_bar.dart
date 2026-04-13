@@ -5,7 +5,7 @@ import 'package:fluffychat/widgets/context_menu_builder_ios_paste_without_permis
 import 'package:fluffychat/widgets/twake_components/twake_icon_button.dart';
 import 'package:fluffychat/widgets/app_bars/searchable_app_bar_style.dart';
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
+import 'package:fluffychat/config/go_routes/app_routes.dart';
 import 'package:fluffychat/generated/l10n/app_localizations.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 
@@ -71,7 +71,7 @@ class SearchableAppBar extends StatelessWidget {
                         if (Navigator.of(context).canPop()) {
                           Navigator.of(context).pop();
                         } else {
-                          context.go('/rooms');
+                          const RoomsRoute().go(context);
                         }
                       }
                     },

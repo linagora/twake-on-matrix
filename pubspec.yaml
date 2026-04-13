@@ -235,6 +235,7 @@ dev_dependencies:
   mockito: 5.6.3
   patrol: 3.18.0
   html: ^0.15.4
+  go_router_builder: ^4.2.0
   patrol_cli: ^3.11.0
 
 flutter_launcher_icons:

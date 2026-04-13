@@ -24,6 +24,7 @@ import 'package:fluffychat/utils/twake_snackbar.dart';
 import 'package:fluffychat/utils/user_extension.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:flutter/material.dart';
+import 'package:fluffychat/config/go_routes/app_routes.dart';
 import 'package:go_router/go_router.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:matrix/matrix.dart';
@@ -124,7 +125,7 @@ class ProfileInfoBodyController extends State<ProfileInfoBody>
         if (widget.onNewChatOpen != null) widget.onNewChatOpen!();
       }
 
-      context.go('/rooms/$roomId');
+      RoomRoute(roomid: roomId).go(context);
     }
   }
 

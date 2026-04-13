@@ -15,7 +15,7 @@ import 'package:flutter/material.dart';
 import 'package:adaptive_dialog/adaptive_dialog.dart';
 import 'package:fluffychat/generated/l10n/app_localizations.dart';
 
-import 'package:go_router/go_router.dart';
+import 'package:fluffychat/config/go_routes/app_routes.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:matrix/matrix.dart';
 import 'package:matrix_homeserver_recommendations/matrix_homeserver_recommendations.dart';
@@ -220,13 +220,13 @@ class HomeserverPickerController extends State<HomeserverPicker>
           handlePasswordLogin();
         } else {
           state = HomeserverState.otherLoginMethod;
-          context.push('/connect');
+          const ConnectRoute().push(context);
         }
         FocusManager.instance.primaryFocus?.unfocus();
         setState(() {});
       } else {
         state = HomeserverState.otherLoginMethod;
-        context.push('/connect');
+        const ConnectRoute().push(context);
         FocusManager.instance.primaryFocus?.unfocus();
         setState(() {});
       }
@@ -239,9 +239,9 @@ class HomeserverPickerController extends State<HomeserverPicker>
   void handlePasswordLogin() {
     state = HomeserverState.passwordLoginMethod;
     if (widget.arg.type == HomeserverPickerType.singleAccount) {
-      context.push('/home/login');
+      const HomeLoginRoute().push(context);
     } else {
-      context.push('/rooms/addaccount/homeserverpicker/login');
+      const AddAccountLoginRoute().push(context);
     }
   }
 
