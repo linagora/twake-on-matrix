@@ -6,6 +6,7 @@ import 'package:dartz/dartz.dart' hide State;
 import 'package:debounce_throttle/debounce_throttle.dart';
 import 'package:desktop_drop/desktop_drop.dart';
 import 'package:fluffychat/app_state/failure.dart';
+import 'package:fluffychat/data/memory/mxc_image_cache_manager.dart';
 import 'package:fluffychat/app_state/success.dart';
 import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/domain/matrix_events/event_type_sets.dart';
@@ -3741,6 +3742,9 @@ class ChatController extends State<Chat>
     // once MXC image providers are tracked at the room level.
     PaintingBinding.instance.imageCache.clear();
     PaintingBinding.instance.imageCache.clearLiveImages();
+    // Global clear is acceptable: only one ChatController is active at a time.
+    // TODO: replace with room-scoped eviction if multi-room layout is added.
+    MxcImageCacheManager.instance.clear();
 
     inputFocus.dispose();
     searchEmojiFocusNode.dispose();
