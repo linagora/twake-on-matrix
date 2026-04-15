@@ -45,9 +45,6 @@ class ForwardMessageInteractor {
         }
       }
 
-      matrixState.shareContent = null;
-      matrixState.shareContentList = null;
-
       yield Right(
         ForwardMessageAllDoneState(
           successCount: successCount,
@@ -56,6 +53,9 @@ class ForwardMessageInteractor {
       );
     } catch (exception) {
       yield Left(ForwardMessageFailed(exception: exception));
+    } finally {
+      matrixState.shareContent = null;
+      matrixState.shareContentList = null;
     }
   }
 

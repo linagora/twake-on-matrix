@@ -80,9 +80,15 @@ class ForwardController extends State<Forward>
     forwardMessageInteractorStreamSubscription?.cancel();
     // Clear share state in case the stream was cancelled mid-operation
     // and the interactor's own cleanup lines never executed.
-    final matrixState = Matrix.of(context);
-    matrixState.shareContent = null;
-    matrixState.shareContentList = null;
+    try {
+      final matrixState = Matrix.of(context);
+      matrixState.shareContent = null;
+      matrixState.shareContentList = null;
+    } catch (e) {
+      Logs().w(
+        'ForwardController::dispose() - failed to clear share state: $e',
+      );
+    }
     disposeSearchRecentChat();
     selectedRoomIdNotifier.dispose();
     super.dispose();
@@ -104,6 +110,7 @@ class ForwardController extends State<Forward>
       Matrix.of(context).client.filteredRoomsForAll(_activeFilterAllChats);
 
   void forwardAction() async {
+    await forwardMessageInteractorStreamSubscription?.cancel();
     forwardMessageInteractorStreamSubscription = _forwardMessageInteractor
         .execute(
           rooms: filteredRoomsForAll,
@@ -162,12 +169,12 @@ class ForwardController extends State<Forward>
   void _handleAllDone(BuildContext context, ForwardMessageAllDoneState done) {
     if (!mounted) return;
     if (done.totalCount != 1) {
+      final message = _buildMultiForwardSnackbarMessage(context, done);
       if (Navigator.of(context).canPop()) {
         Navigator.of(context).pop();
       } else {
         const RoomsRoute().go(context);
       }
-      final message = _buildMultiForwardSnackbarMessage(context, done);
       TwakeSnackBar.show(context, message);
       return;
     }
