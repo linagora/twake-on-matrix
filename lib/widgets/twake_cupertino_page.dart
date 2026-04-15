@@ -28,7 +28,10 @@ class TwakeCupertinoPage<T> extends Page<T> {
     super.name,
     super.arguments,
     super.restorationId,
-  });
+  }) : assert(
+         backGestureWidth >= 0 && backGestureWidth < double.infinity,
+         'backGestureWidth must be a finite, non-negative value',
+       );
 
   /// The content to be shown in the [Route] created by this page.
   final Widget child;
