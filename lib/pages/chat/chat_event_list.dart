@@ -116,7 +116,8 @@ class _WebContentScrollBehavior extends MaterialScrollBehavior {
   const _WebContentScrollBehavior();
 
   @override
-  Set<PointerDeviceKind> get dragDevices => {PointerDeviceKind.touch};
+  Set<PointerDeviceKind> get dragDevices =>
+      super.dragDevices.difference({PointerDeviceKind.mouse});
 
   @override
   Widget buildScrollbar(

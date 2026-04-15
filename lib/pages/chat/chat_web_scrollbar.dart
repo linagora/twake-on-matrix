@@ -1,3 +1,4 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
 /// A custom scrollbar for bidirectional scroll views on Flutter web.
@@ -151,38 +152,53 @@ class _ChatWebScrollbarState extends State<ChatWebScrollbar> {
           final trackHeight = constraints.maxHeight;
           final metrics = _thumbMetrics(trackHeight);
 
-          return GestureDetector(
-            behavior: HitTestBehavior.opaque,
-            onTapUp: (details) => _onTrackTap(details, trackHeight),
-            child: Stack(
-              children: [
-                Positioned(
-                  top: metrics.top,
-                  right: _thumbPadding,
-                  width: _thumbWidth,
-                  height: metrics.height,
-                  child: MouseRegion(
-                    cursor: SystemMouseCursors.grab,
-                    onEnter: (_) => setState(() => _isThumbHovered = true),
-                    onExit: (_) => setState(() => _isThumbHovered = false),
-                    child: GestureDetector(
-                      behavior: HitTestBehavior.opaque,
-                      onVerticalDragStart: (_) =>
-                          setState(() => _isDragging = true),
-                      onVerticalDragUpdate: (details) =>
-                          _onThumbDragUpdate(details, trackHeight),
-                      onVerticalDragEnd: (_) =>
-                          setState(() => _isDragging = false),
-                      child: Container(
-                        decoration: BoxDecoration(
-                          color: thumbColor,
-                          borderRadius: BorderRadius.circular(_thumbWidth / 2),
+          return Listener(
+            // Forward wheel/trackpad scroll events so they reach the
+            // underlying scrollable even when the pointer is over the gutter.
+            onPointerSignal: (event) {
+              if (event is PointerScrollEvent && widget.controller.hasClients) {
+                final position = widget.controller.position;
+                final newPixels = (position.pixels + event.scrollDelta.dy)
+                    .clamp(position.minScrollExtent, position.maxScrollExtent);
+                widget.controller.jumpTo(newPixels);
+              }
+            },
+            child: GestureDetector(
+              // translucent so pointer signals can still reach widgets below
+              behavior: HitTestBehavior.translucent,
+              onTapUp: (details) => _onTrackTap(details, trackHeight),
+              child: Stack(
+                children: [
+                  Positioned(
+                    top: metrics.top,
+                    right: _thumbPadding,
+                    width: _thumbWidth,
+                    height: metrics.height,
+                    child: MouseRegion(
+                      cursor: SystemMouseCursors.grab,
+                      onEnter: (_) => setState(() => _isThumbHovered = true),
+                      onExit: (_) => setState(() => _isThumbHovered = false),
+                      child: GestureDetector(
+                        behavior: HitTestBehavior.opaque,
+                        onVerticalDragStart: (_) =>
+                            setState(() => _isDragging = true),
+                        onVerticalDragUpdate: (details) =>
+                            _onThumbDragUpdate(details, trackHeight),
+                        onVerticalDragEnd: (_) =>
+                            setState(() => _isDragging = false),
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: thumbColor,
+                            borderRadius: BorderRadius.circular(
+                              _thumbWidth / 2,
+                            ),
+                          ),
                         ),
                       ),
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           );
         },
