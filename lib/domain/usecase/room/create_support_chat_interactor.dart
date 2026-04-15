@@ -82,10 +82,6 @@ class CreateSupportChatInteractor {
 
       await room.invite(supportChatTwakeId);
       await Future.wait([
-        room.setPower(
-          supportChatTwakeId,
-          powerLevelManager.getAdminPowerLevel(),
-        ),
         room.setFavourite(true),
         client.setAccountData(userId, type, {accountDataKey: roomId}),
       ]);
