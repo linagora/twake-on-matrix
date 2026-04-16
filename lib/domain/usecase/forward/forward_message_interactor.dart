@@ -26,13 +26,14 @@ class ForwardMessageInteractor {
           );
           if (room == null || room.membership != Membership.join) continue;
 
+          final hasMultipleMessages = matrixState.shareContentList.any(
+            (message) => message != null,
+          );
           final hasContent =
-              matrixState.shareContent != null ||
-              matrixState.shareContentList.isNotEmpty;
+              matrixState.shareContent != null || hasMultipleMessages;
           if (!hasContent) continue;
 
-          if (matrixState.shareContentList.isEmpty &&
-              matrixState.shareContent != null) {
+          if (!hasMultipleMessages && matrixState.shareContent != null) {
             yield* _forwardOneMessageAction(
               room: room,
               matrixState: matrixState,
