@@ -14,6 +14,13 @@ class ForwardMessageInteractor {
     required MatrixState matrixState,
   }) async* {
     try {
+      final singleMessage = matrixState.shareContent;
+      final messages = List<Map<String, dynamic>?>.from(
+        matrixState.shareContentList,
+      );
+      final hasMultipleMessages = messages.any((message) => message != null);
+      final hasContent = singleMessage != null || hasMultipleMessages;
+
       yield Right(ForwardMessageLoading());
 
       int successCount = 0;
@@ -26,22 +33,14 @@ class ForwardMessageInteractor {
           );
           if (room == null || room.membership != Membership.join) continue;
 
-          final hasMultipleMessages = matrixState.shareContentList.any(
-            (message) => message != null,
-          );
-          final hasContent =
-              matrixState.shareContent != null || hasMultipleMessages;
           if (!hasContent) continue;
 
-          if (!hasMultipleMessages && matrixState.shareContent != null) {
-            yield* _forwardOneMessageAction(
-              room: room,
-              matrixState: matrixState,
-            );
+          if (!hasMultipleMessages && singleMessage != null) {
+            yield* _forwardOneMessageAction(room: room, message: singleMessage);
           } else {
             yield* _forwardMultipleMessagesAction(
               room: room,
-              matrixState: matrixState,
+              messages: messages,
             );
           }
           successCount++;
@@ -82,24 +81,18 @@ class ForwardMessageInteractor {
 
   Stream<Either<Failure, Success>> _forwardOneMessageAction({
     required Room room,
-    required MatrixState matrixState,
+    required Map<String, dynamic> message,
   }) async* {
-    final message = matrixState.shareContent;
-    if (message != null) {
-      yield* _forwardMessage(message, room);
-    }
+    yield* _forwardMessage(message, room);
   }
 
   Stream<Either<Failure, Success>> _forwardMultipleMessagesAction({
     required Room room,
-    required MatrixState matrixState,
+    required List<Map<String, dynamic>?> messages,
   }) async* {
-    final messages = matrixState.shareContentList;
-    if (messages.isNotEmpty) {
-      for (final message in messages) {
-        if (message != null) {
-          yield* _forwardMessage(message, room);
-        }
+    for (final message in messages) {
+      if (message != null) {
+        yield* _forwardMessage(message, room);
       }
     }
   }
