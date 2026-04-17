@@ -774,8 +774,9 @@ class RoomRoute extends GoRouteData with $RoomRoute {
 
   @override
   Page<void> buildPage(BuildContext context, GoRouterState state) {
-    final extra =
-        $extra is ChatRouterInputArgument ? $extra as ChatRouterInputArgument : null;
+    final extra = $extra is ChatRouterInputArgument
+        ? $extra as ChatRouterInputArgument
+        : null;
     if (extra != null) {
       switch (extra.type) {
         case ChatRouterInputArgumentType.draft:
