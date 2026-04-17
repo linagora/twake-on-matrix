@@ -108,67 +108,86 @@ extension EventListExtension on List<Event> {
 
     // Find and add new items at the start
     final startDiff = _findStartDiff(newEvents, firstOldEventInLists);
-    bool shouldScrollToBottom = false;
-
-    if (startDiff > 0) {
-      final newStartItems = newEvents.sublist(0, startDiff);
-
-      // Filter out duplicates using map lookup (O(1) per item)
-      final itemsToAdd = <Event>[];
-      for (final newItem in newStartItems) {
-        if (newItem.findEventInMap(existingEventsMap) == null) {
-          itemsToAdd.add(newItem);
-          // Update the map to prevent duplicates in end processing
-          existingEventsMap[newItem.eventId] = newItem;
-          final transactionId = newItem.unsigned?['transaction_id'] as String?;
-          if (transactionId != null) {
-            existingEventsMap[transactionId] = newItem;
-          }
-        }
-      }
-
-      // Debug: log if any new-start items were silently dropped as duplicates
-      if (itemsToAdd.length < newStartItems.length) {
-        final droppedCount = newStartItems.length - itemsToAdd.length;
-        Logs().d(
-          '${SentryTrackedEvents.missingLastMessage.message}: '
-          'syncEventLists() $droppedCount new-start event(s) dropped as '
-          'duplicates (startDiff=$startDiff, added=${itemsToAdd.length})',
-        );
-      }
-
-      updatedTop.addAll(itemsToAdd.reversed);
-
-      // Scroll to bottom only for own sent messages, not incoming from others
-      if (!wasRequestingFuture &&
-          itemsToAdd.any(
-            (event) => event.isVisibleInGui && event.isOwnMessage,
-          )) {
-        shouldScrollToBottom = true;
-      }
-    }
+    final shouldScrollToBottom = _applyStartDiff(
+      newEvents: newEvents,
+      startDiff: startDiff,
+      existingEventsMap: existingEventsMap,
+      updatedTop: updatedTop,
+      wasRequestingFuture: wasRequestingFuture,
+    );
 
     // Find and add new items at the end
     final endDiff = _findEndDiff(newEvents, lastOldEventInLists);
-    if (endDiff > 0) {
-      final newEndItems = newEvents.sublist(newEvents.length - endDiff);
-
-      // Filter out duplicates using map lookup (O(1) per item)
-      final itemsToAdd = <Event>[];
-      for (final newItem in newEndItems) {
-        if (newItem.findEventInMap(existingEventsMap) == null) {
-          itemsToAdd.add(newItem);
-        }
-      }
-
-      updatedBottom.addAll(itemsToAdd);
-    }
+    _applyEndDiff(
+      newEvents: newEvents,
+      endDiff: endDiff,
+      existingEventsMap: existingEventsMap,
+      updatedBottom: updatedBottom,
+    );
 
     return EventListSyncResult(
       top: updatedTop,
       bottom: updatedBottom,
       shouldScrollToBottom: shouldScrollToBottom,
     );
+  }
+
+  /// Applies new events found at the start of [newEvents] to [updatedTop].
+  /// Returns whether the view should scroll to bottom.
+  static bool _applyStartDiff({
+    required List<Event> newEvents,
+    required int startDiff,
+    required Map<String, Event> existingEventsMap,
+    required List<Event> updatedTop,
+    required bool wasRequestingFuture,
+  }) {
+    if (startDiff == 0) return false;
+
+    final newStartItems = newEvents.sublist(0, startDiff);
+    final itemsToAdd = <Event>[];
+
+    for (final newItem in newStartItems) {
+      if (newItem.findEventInMap(existingEventsMap) == null) {
+        itemsToAdd.add(newItem);
+        existingEventsMap[newItem.eventId] = newItem;
+        final transactionId = newItem.unsigned?['transaction_id'] as String?;
+        if (transactionId != null) {
+          existingEventsMap[transactionId] = newItem;
+        }
+      }
+    }
+
+    if (itemsToAdd.length < newStartItems.length) {
+      final droppedCount = newStartItems.length - itemsToAdd.length;
+      Logs().d(
+        '${SentryTrackedEvents.missingLastMessage.message}: '
+        'syncEventLists() $droppedCount new-start event(s) dropped as '
+        'duplicates (startDiff=$startDiff, added=${itemsToAdd.length})',
+      );
+    }
+
+    updatedTop.addAll(itemsToAdd.reversed);
+
+    return !wasRequestingFuture &&
+        itemsToAdd.any((event) => event.isVisibleInGui && event.isOwnMessage);
+  }
+
+  /// Applies new events found at the end of [newEvents] to [updatedBottom].
+  static void _applyEndDiff({
+    required List<Event> newEvents,
+    required int endDiff,
+    required Map<String, Event> existingEventsMap,
+    required List<Event> updatedBottom,
+  }) {
+    if (endDiff == 0) return;
+
+    final newEndItems = newEvents.sublist(newEvents.length - endDiff);
+    final itemsToAdd = [
+      for (final newItem in newEndItems)
+        if (newItem.findEventInMap(existingEventsMap) == null) newItem,
+    ];
+
+    updatedBottom.addAll(itemsToAdd);
   }
 
   /// Removes deleted events and updates changed events in a list.
