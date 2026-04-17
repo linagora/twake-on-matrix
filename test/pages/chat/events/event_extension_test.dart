@@ -3,6 +3,7 @@ import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get_it/get_it.dart';
 import 'package:matrix/matrix.dart';
+import 'package:matrix/src/models/timeline_chunk.dart';
 import 'package:mockito/annotations.dart';
 
 import '../../../fake_client.dart';
@@ -1037,6 +1038,106 @@ void main() {
       final event = createEmojiEvent(body: '');
 
       expect(event.isDisplayOnlyEmoji(), false);
+    });
+
+    group('with edit events (Timeline provided)', () {
+      Timeline createTimeline(Room r, List<Event> events) {
+        final timeline = Timeline(
+          room: r,
+          chunk: TimelineChunk(events: events),
+        );
+        for (final e in events) {
+          timeline.addAggregatedEvent(e);
+        }
+        return timeline;
+      }
+
+      Event createEditEvent({
+        required String originalEventId,
+        required String newBody,
+        String senderId = '@user:example.com',
+        int tsOffset = 1000,
+      }) {
+        return Event(
+          senderId: senderId,
+          type: EventTypes.Message,
+          room: room,
+          eventId: '\$edit_${newBody.hashCode}',
+          content: {
+            'body': '* $newBody',
+            'msgtype': 'm.text',
+            'm.new_content': {'body': newBody, 'msgtype': 'm.text'},
+            'm.relates_to': {
+              'rel_type': RelationshipTypes.edit,
+              'event_id': originalEventId,
+            },
+          },
+          originServerTs: DateTime.fromMillisecondsSinceEpoch(
+            1234567890 + tsOffset,
+          ),
+        );
+      }
+
+      test('GIVEN original emoji-only message\n'
+          'WHEN edited to text with emoji\n'
+          'THEN return false\n', () {
+        final original = createEmojiEvent(body: '😊', eventId: '\$orig1');
+        final edit = createEditEvent(
+          originalEventId: '\$orig1',
+          newBody: 'Hello 😊',
+        );
+        final timeline = createTimeline(room, [original, edit]);
+
+        expect(original.isDisplayOnlyEmoji(timeline), false);
+      });
+
+      test('GIVEN original text message\n'
+          'WHEN edited to emoji only\n'
+          'THEN return true\n', () {
+        final original = createEmojiEvent(body: 'Hello', eventId: '\$orig2');
+        final edit = createEditEvent(
+          originalEventId: '\$orig2',
+          newBody: '😊😎🎉',
+        );
+        final timeline = createTimeline(room, [original, edit]);
+
+        expect(original.isDisplayOnlyEmoji(timeline), true);
+      });
+
+      test('GIVEN original emoji-only message\n'
+          'WHEN edited to different emoji only\n'
+          'THEN return true\n', () {
+        final original = createEmojiEvent(body: '😊', eventId: '\$orig3');
+        final edit = createEditEvent(
+          originalEventId: '\$orig3',
+          newBody: '🔥❤️',
+        );
+        final timeline = createTimeline(room, [original, edit]);
+
+        expect(original.isDisplayOnlyEmoji(timeline), true);
+      });
+
+      test('GIVEN original emoji-only message\n'
+          'WHEN no edits\n'
+          'THEN return true (same as without timeline)\n', () {
+        final original = createEmojiEvent(body: '😊', eventId: '\$orig4');
+        final timeline = createTimeline(room, [original]);
+
+        expect(original.isDisplayOnlyEmoji(timeline), true);
+      });
+
+      test('GIVEN original emoji-only message\n'
+          'WHEN edited to too many emojis (>6)\n'
+          'THEN return false\n', () {
+        final original = createEmojiEvent(body: '😊', eventId: '\$orig5');
+        final edit = createEditEvent(
+          originalEventId: '\$orig5',
+          newBody: '😊😎🎉🔥❤️👍✨',
+        );
+        final timeline = createTimeline(room, [original, edit]);
+
+        expect(original.isDisplayOnlyEmoji(timeline), false);
+      });
     });
   });
 }

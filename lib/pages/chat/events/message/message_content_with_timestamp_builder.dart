@@ -427,7 +427,7 @@ class _MessageContentWithTimestampBuilderState
       isEnabled: hasReactionEvent,
       children: [
         Container(
-          decoration: widget.event.isDisplayOnlyEmoji()
+          decoration: widget.event.isDisplayOnlyEmoji(widget.timeline)
               ? null
               : BoxDecoration(
                   borderRadius: MessageStyle.bubbleBorderRadius,
