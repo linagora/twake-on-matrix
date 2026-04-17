@@ -3,6 +3,8 @@ import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get_it/get_it.dart';
 import 'package:matrix/matrix.dart';
+
+// ignore: implementation_imports — TimelineChunk is not yet exported publicly
 import 'package:matrix/src/models/timeline_chunk.dart';
 import 'package:mockito/annotations.dart';
 
@@ -1040,13 +1042,35 @@ void main() {
       expect(event.isDisplayOnlyEmoji(), false);
     });
 
+    test('GIVEN image with emoji caption\n'
+        'AND NOT a reply\n'
+        'THEN return false (caption mode always false)\n', () {
+      final event = Event(
+        senderId: '@user:example.com',
+        type: 'm.room.message',
+        room: room,
+        eventId: '\$caption1',
+        content: {
+          'body': '😊',
+          'filename': 'photo.jpg',
+          'msgtype': 'm.image',
+          'url': 'mxc://example.org/img',
+        },
+        originServerTs: DateTime.fromMillisecondsSinceEpoch(1234567890),
+      );
+
+      expect(event.isDisplayOnlyEmoji(), false);
+    });
+
     group('with edit events (Timeline provided)', () {
-      Timeline createTimeline(Room r, List<Event> events) {
+      /// Builds a Timeline using public SDK APIs only.
+      /// Populates [aggregatedEvents] directly — no private imports needed.
+      Timeline buildTimeline(Room r, List<Event> editEvents) {
         final timeline = Timeline(
           room: r,
-          chunk: TimelineChunk(events: events),
+          chunk: TimelineChunk(events: []),
         );
-        for (final e in events) {
+        for (final e in editEvents) {
           timeline.addAggregatedEvent(e);
         }
         return timeline;
@@ -1062,7 +1086,8 @@ void main() {
           senderId: senderId,
           type: EventTypes.Message,
           room: room,
-          eventId: '\$edit_${newBody.hashCode}',
+          // Deterministic id based on original event + offset, not hash
+          eventId: '${originalEventId}_edit_$tsOffset',
           content: {
             'body': '* $newBody',
             'msgtype': 'm.text',
@@ -1086,7 +1111,7 @@ void main() {
           originalEventId: '\$orig1',
           newBody: 'Hello 😊',
         );
-        final timeline = createTimeline(room, [original, edit]);
+        final timeline = buildTimeline(room, [original, edit]);
 
         expect(original.isDisplayOnlyEmoji(timeline), false);
       });
@@ -1099,7 +1124,7 @@ void main() {
           originalEventId: '\$orig2',
           newBody: '😊😎🎉',
         );
-        final timeline = createTimeline(room, [original, edit]);
+        final timeline = buildTimeline(room, [original, edit]);
 
         expect(original.isDisplayOnlyEmoji(timeline), true);
       });
@@ -1112,7 +1137,7 @@ void main() {
           originalEventId: '\$orig3',
           newBody: '🔥❤️',
         );
-        final timeline = createTimeline(room, [original, edit]);
+        final timeline = buildTimeline(room, [original, edit]);
 
         expect(original.isDisplayOnlyEmoji(timeline), true);
       });
@@ -1121,7 +1146,7 @@ void main() {
           'WHEN no edits\n'
           'THEN return true (same as without timeline)\n', () {
         final original = createEmojiEvent(body: '😊', eventId: '\$orig4');
-        final timeline = createTimeline(room, [original]);
+        final timeline = buildTimeline(room, [original]);
 
         expect(original.isDisplayOnlyEmoji(timeline), true);
       });
@@ -1134,7 +1159,7 @@ void main() {
           originalEventId: '\$orig5',
           newBody: '😊😎🎉🔥❤️👍✨',
         );
-        final timeline = createTimeline(room, [original, edit]);
+        final timeline = buildTimeline(room, [original, edit]);
 
         expect(original.isDisplayOnlyEmoji(timeline), false);
       });

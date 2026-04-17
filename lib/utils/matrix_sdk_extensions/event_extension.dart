@@ -270,7 +270,7 @@ extension LocalizedBody on Event {
   /// (display event) so that edits that add text return false, and edits that
   /// result in emoji-only content return true.
   bool isDisplayOnlyEmoji([Timeline? timeline]) {
-    if (isReplyEvent()) return false;
+    if (isCaptionModeOrReply()) return false;
     final target = timeline != null
         ? getDisplayEventWithoutEditEvent(timeline)
         : this;

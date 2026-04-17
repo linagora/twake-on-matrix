@@ -105,18 +105,23 @@ mixin MessageContentBuilderMixin {
     double maxWidth, {
     Timeline? timeline,
   }) {
+    // Use the display event (latest edit) so text content and style both
+    // match what MessageContent actually renders.
+    final displayEvent = timeline != null
+        ? event.getDisplayEventWithoutEditEvent(timeline)
+        : event;
     final double messageMaxWidth = maxWidth - AppConfig.messagePadding;
     return TextPainter(
       textScaler: MediaQuery.of(context).textScaler,
       text: TextSpan(
-        text: event.isCaptionModeOrReply()
-            ? event.body
-            : event.calcLocalizedBodyFallback(
+        text: displayEvent.isCaptionModeOrReply()
+            ? displayEvent.body
+            : displayEvent.calcLocalizedBodyFallback(
                 MatrixLocals(L10n.of(context)!),
                 hideReply: true,
                 plaintextBody: true,
               ),
-        style: event.getMessageTextStyle(context, timeline),
+        style: displayEvent.getMessageTextStyle(context),
       ),
       textDirection: TextDirection.ltr,
     )..layout(minWidth: 0, maxWidth: messageMaxWidth);
