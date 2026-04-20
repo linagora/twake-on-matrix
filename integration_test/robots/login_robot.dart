@@ -14,8 +14,9 @@ import 'package:matrix/matrix.dart';
 import 'package:patrol/patrol.dart';
 import '../base/api_login_helper.dart';
 import '../base/core_robot.dart';
+import 'abstract/abstract_login_robot.dart';
 
-class LoginRobot extends CoreRobot {
+class LoginRobot extends CoreRobot implements AbstractLoginRobot {
   LoginRobot(super.$);
 
   bool get _isAndroid =>
@@ -278,6 +279,7 @@ class LoginRobot extends CoreRobot {
   /// rather than going through `/onAuthRedirect`, since the latter expects
   /// a single-use `m.login.token` from SSO, not a password-login access
   /// token.
+  @override
   Future<void> loginViaApi({
     required String serverUrl,
     required String username,
