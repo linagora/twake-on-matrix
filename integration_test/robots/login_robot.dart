@@ -1,4 +1,5 @@
 import 'package:fluffychat/generated/l10n/app_localizations.dart';
+import 'package:fluffychat/pages/auto_homeserver_picker/auto_homeserver_picker.dart';
 import 'package:fluffychat/pages/chat_list/chat_list.dart';
 import 'package:fluffychat/pages/homeserver_picker/homeserver_picker_view.dart';
 import 'package:fluffychat/pages/login/login_view.dart';
@@ -262,21 +263,35 @@ class LoginRobot extends CoreRobot {
     await tapSignInButton();
   }
 
-  /// Authenticates the test user without driving the SSO browser UI.
+  /// Logs in without going through any login UI.
   ///
-  /// Two paths coexist, picked at compile time from the dart-defines:
-  ///   - `SSO_URL` set → OIDC flow over HTTP (LemonLDAP `sso.linagora.com`).
-  ///     Replays the SSO POST and feeds the resulting `loginToken` to the
-  ///     app via the `/onAuthRedirect` deep link. Used by developers running
-  ///     Patrol locally with their personal Linagora SSO credentials.
-  ///   - otherwise → `m.login.password` straight to the homeserver. Used by
-  ///     CI / FTL with a dedicated test account that has a local
-  ///     `password_hash` in Synapse.
+  /// On mobile, runs the 7-step OIDC flow against the configured SSO server
+  /// and feeds the resulting one-time [loginToken] into the app via the
+  /// `/onAuthRedirect` deep link.
+  ///
+  /// On web, the SSO bypass is not reachable (browser XHR cannot drive the
+  /// OIDC redirect chain and the SSO provider blocks cross-origin XHR). Web
+  /// integration tests are expected to run against a local Synapse (see
+  /// `scripts/integration-test-provision-synapse.sh`), which accepts
+  /// `m.login.password` directly on the client-server API — CORS-allowed
+  /// the same way Element Web relies on it. We drive the Matrix SDK inline
+  /// rather than going through `/onAuthRedirect`, since the latter expects
+  /// a single-use `m.login.token` from SSO, not a password-login access
+  /// token.
   Future<void> loginViaApi({
     required String serverUrl,
     required String username,
     required String password,
   }) async {
+    if (kIsWeb) {
+      await _loginViaMatrixPassword(
+        serverUrl: serverUrl,
+        username: username,
+        password: password,
+      );
+      return;
+    }
+
     // Wait for either TwakeWelcome (not logged in) or ChatList (already logged
     // in from a previous test run whose tokens persisted in the iOS keychain).
     await waitForEitherVisible(
@@ -329,6 +344,42 @@ class LoginRobot extends CoreRobot {
     // is detected and we land on the chat list.
     TwakeApp.router.go('/');
     await $.pump();
+  }
+
+  Future<void> _loginViaMatrixPassword({
+    required String serverUrl,
+    required String username,
+    required String password,
+  }) async {
+    // Wait for the app to land on a logged-out home screen (the local
+    // Synapse has registration enabled and no SSO, so AutoHomeserverPicker
+    // falls through to ConnectRoute without triggering any navigation).
+    await waitForEitherVisible(
+      $: $,
+      first: $(AutoHomeserverPicker),
+      second: $(ChatList),
+      timeout: const Duration(seconds: 60),
+    );
+    if (await isChatListVisible()) return;
+
+    // Grab the Matrix client from the running app and drive the SDK
+    // directly — cheaper than walking through the registration/login UI,
+    // and avoids every CORS pitfall of a real SSO flow.
+    final context = $.tester.element(find.byType(MaterialApp));
+    final matrix = Matrix.of(context);
+    final client = await matrix.getLoginClient();
+    matrix.loginHomeserverSummary = await client
+        .checkHomeserver(Uri.parse(serverUrl))
+        .toHomeserverSummary();
+
+    await client.login(
+      LoginType.mLoginPassword,
+      identifier: AuthenticationUserIdentifier(user: username),
+      password: password,
+      initialDeviceDisplayName: 'patrol-web-integration-test',
+    );
+
+    await waitForChatList();
   }
 
   Future<void> waitForChatList() async {

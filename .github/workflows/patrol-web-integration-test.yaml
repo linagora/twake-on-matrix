@@ -1,0 +1,105 @@
+name: Patrol Web Integration Tests
+
+on:
+  workflow_dispatch:
+    inputs:
+      patrol_test_target:
+        description: "Optional path to a single Patrol integration test Dart file. Leave empty to run the whole suite."
+        required: false
+        default: ""
+  pull_request:
+    branches: [main]
+    paths:
+      - "lib/**"
+      - "integration_test/**"
+      - "pubspec.yaml"
+      - "pubspec.lock"
+      - ".github/workflows/patrol-web-integration-test.yaml"
+
+jobs:
+  patrol-web:
+    name: Patrol Web (Chrome headless)
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      checks: write
+      pull-requests: write
+
+    env:
+      FLUTTER_VERSION: "3.38.9"
+      PATROL_CLI_VERSION: "4.3.1"
+      SYNAPSE_URL: http://localhost
+      SERVER_NAME: localhost
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+
+      - name: Start Synapse (Docker)
+        run: ./scripts/integration-server-synapse.sh
+
+      - name: Provision fixtures
+        id: fixtures
+        run: |
+          ./scripts/integration-test-provision-synapse.sh > .env.patrol-web
+          cat .env.patrol-web
+
+      - name: Install dependencies
+        run: |
+          flutter pub get
+          flutter pub run build_runner build --delete-conflicting-outputs
+          dart pub global activate patrol_cli ${{ env.PATROL_CLI_VERSION }}
+
+      - name: Run Patrol Web
+        run: |
+          TARGET_FLAG=""
+          if [ -n "${{ inputs.patrol_test_target }}" ]; then
+            TARGET_FLAG="--target ${{ inputs.patrol_test_target }}"
+          fi
+          # shellcheck disable=SC1091
+          set -a
+          . ./.env.patrol-web
+          set +a
+          patrol test \
+            --device chrome \
+            --web-headless=true \
+            --web-timeout 300000 \
+            $TARGET_FLAG \
+            --dart-define=MATRIX_URL="$MATRIX_URL" \
+            --dart-define=SERVER_URL="$SERVER_URL" \
+            --dart-define=USERNAME="$USERNAME" \
+            --dart-define=PASSWORD="$PASSWORD" \
+            --dart-define=Receiver="$Receiver" \
+            --dart-define=ReceiverPass="$ReceiverPass" \
+            --dart-define=CurrentAccount="$CurrentAccount" \
+            --dart-define=MemberMatrixID="$MemberMatrixID" \
+            --dart-define=SearchByMatrixAddress="$SearchByMatrixAddress" \
+            --dart-define=SearchByTitle="$SearchByTitle" \
+            --dart-define=TitleOfGroupTest="$TitleOfGroupTest" \
+            --dart-define=GroupID="$GroupID"
+
+      - name: Upload Playwright report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 7
+
+      - name: Upload failure traces
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results
+          path: test-results/
+          retention-days: 7
+
+      - name: Tear down Synapse
+        if: always()
+        run: docker rm -f synapse || true
