@@ -365,13 +365,15 @@ class ContactsManager {
                 lookupChunkSize: _lookupChunkSize,
                 argument: FederationLookUpArgument(
                   homeServerUrl: homeServerUrlInterceptor.baseUrl ?? '',
-                  federationUrl:
-                      federationConfigurations
-                          .fedServerInformation
-                          .baseUrls
-                          ?.first
-                          .toString() ??
-                      '',
+                  federationUrls:
+                      federationConfigurations.fedServerInformation.baseUrls
+                          ?.map((u) => u.toString())
+                          .toList() ??
+                      [],
+                  identityServerUrl: federationConfigurations
+                      .identityServerInformation
+                      ?.baseUrl
+                      .toString(),
                   withMxId: withMxId,
                   withAccessToken:
                       authorizationInterceptor.getAccessToken ?? '',

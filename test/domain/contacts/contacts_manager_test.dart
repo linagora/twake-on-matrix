@@ -360,10 +360,15 @@ void main() {
         mockFederationLookUpPhonebookContactInteractor.execute(
           argument: FederationLookUpArgument(
             homeServerUrl: baseUrl,
-            federationUrl:
-                federationConfigurations.fedServerInformation.baseUrls?.first
-                    .toString() ??
-                '',
+            federationUrls:
+                federationConfigurations.fedServerInformation.baseUrls
+                    ?.map((u) => u.toString())
+                    .toList() ??
+                [],
+            identityServerUrl: federationConfigurations
+                .identityServerInformation
+                ?.baseUrl
+                .toString(),
             withMxId: mxId,
             withAccessToken: accessToken,
           ),
@@ -484,10 +489,15 @@ void main() {
         mockFederationLookUpPhonebookContactInteractor.execute(
           argument: FederationLookUpArgument(
             homeServerUrl: baseUrl,
-            federationUrl:
-                federationConfigurations.fedServerInformation.baseUrls?.first
-                    .toString() ??
-                '',
+            federationUrls:
+                federationConfigurations.fedServerInformation.baseUrls
+                    ?.map((u) => u.toString())
+                    .toList() ??
+                [],
+            identityServerUrl: federationConfigurations
+                .identityServerInformation
+                ?.baseUrl
+                .toString(),
             withMxId: mxId,
             withAccessToken: accessToken,
           ),
@@ -549,10 +559,15 @@ void main() {
         mockFederationLookUpPhonebookContactInteractor.execute(
           argument: FederationLookUpArgument(
             homeServerUrl: baseUrl,
-            federationUrl:
-                federationConfigurations.fedServerInformation.baseUrls?.first
-                    .toString() ??
-                '',
+            federationUrls:
+                federationConfigurations.fedServerInformation.baseUrls
+                    ?.map((u) => u.toString())
+                    .toList() ??
+                [],
+            identityServerUrl: federationConfigurations
+                .identityServerInformation
+                ?.baseUrl
+                .toString(),
             withMxId: mxId,
             withAccessToken: accessToken,
           ),
@@ -605,10 +620,15 @@ void main() {
         mockFederationLookUpPhonebookContactInteractor.execute(
           argument: FederationLookUpArgument(
             homeServerUrl: baseUrl,
-            federationUrl:
-                federationConfigurations.fedServerInformation.baseUrls?.first
-                    .toString() ??
-                '',
+            federationUrls:
+                federationConfigurations.fedServerInformation.baseUrls
+                    ?.map((u) => u.toString())
+                    .toList() ??
+                [],
+            identityServerUrl: federationConfigurations
+                .identityServerInformation
+                ?.baseUrl
+                .toString(),
             withMxId: mxId,
             withAccessToken: accessToken,
           ),
@@ -673,10 +693,15 @@ void main() {
         mockFederationLookUpPhonebookContactInteractor.execute(
           argument: FederationLookUpArgument(
             homeServerUrl: baseUrl,
-            federationUrl:
-                federationConfigurations.fedServerInformation.baseUrls?.first
-                    .toString() ??
-                '',
+            federationUrls:
+                federationConfigurations.fedServerInformation.baseUrls
+                    ?.map((u) => u.toString())
+                    .toList() ??
+                [],
+            identityServerUrl: federationConfigurations
+                .identityServerInformation
+                ?.baseUrl
+                .toString(),
             withMxId: mxId,
             withAccessToken: accessToken,
           ),
@@ -740,10 +765,15 @@ void main() {
         mockFederationLookUpPhonebookContactInteractor.execute(
           argument: FederationLookUpArgument(
             homeServerUrl: baseUrl,
-            federationUrl:
-                federationConfigurations.fedServerInformation.baseUrls?.first
-                    .toString() ??
-                '',
+            federationUrls:
+                federationConfigurations.fedServerInformation.baseUrls
+                    ?.map((u) => u.toString())
+                    .toList() ??
+                [],
+            identityServerUrl: federationConfigurations
+                .identityServerInformation
+                ?.baseUrl
+                .toString(),
             withMxId: mxId,
             withAccessToken: accessToken,
           ),
@@ -806,10 +836,15 @@ void main() {
         mockFederationLookUpPhonebookContactInteractor.execute(
           argument: FederationLookUpArgument(
             homeServerUrl: baseUrl,
-            federationUrl:
-                federationConfigurations.fedServerInformation.baseUrls?.first
-                    .toString() ??
-                '',
+            federationUrls:
+                federationConfigurations.fedServerInformation.baseUrls
+                    ?.map((u) => u.toString())
+                    .toList() ??
+                [],
+            identityServerUrl: federationConfigurations
+                .identityServerInformation
+                ?.baseUrl
+                .toString(),
             withMxId: mxId,
             withAccessToken: accessToken,
           ),
@@ -873,10 +908,15 @@ void main() {
         mockFederationLookUpPhonebookContactInteractor.execute(
           argument: FederationLookUpArgument(
             homeServerUrl: baseUrl,
-            federationUrl:
-                federationConfigurations.fedServerInformation.baseUrls?.first
-                    .toString() ??
-                '',
+            federationUrls:
+                federationConfigurations.fedServerInformation.baseUrls
+                    ?.map((u) => u.toString())
+                    .toList() ??
+                [],
+            identityServerUrl: federationConfigurations
+                .identityServerInformation
+                ?.baseUrl
+                .toString(),
             withMxId: mxId,
             withAccessToken: accessToken,
           ),
@@ -938,10 +978,15 @@ void main() {
         mockFederationLookUpPhonebookContactInteractor.execute(
           argument: FederationLookUpArgument(
             homeServerUrl: baseUrl,
-            federationUrl:
-                federationConfigurations.fedServerInformation.baseUrls?.first
-                    .toString() ??
-                '',
+            federationUrls:
+                federationConfigurations.fedServerInformation.baseUrls
+                    ?.map((u) => u.toString())
+                    .toList() ??
+                [],
+            identityServerUrl: federationConfigurations
+                .identityServerInformation
+                ?.baseUrl
+                .toString(),
             withMxId: mxId,
             withAccessToken: accessToken,
           ),
@@ -1031,10 +1076,15 @@ void main() {
         mockFederationLookUpPhonebookContactInteractor.execute(
           argument: FederationLookUpArgument(
             homeServerUrl: baseUrl,
-            federationUrl:
-                federationConfigurations.fedServerInformation.baseUrls?.first
-                    .toString() ??
-                '',
+            federationUrls:
+                federationConfigurations.fedServerInformation.baseUrls
+                    ?.map((u) => u.toString())
+                    .toList() ??
+                [],
+            identityServerUrl: federationConfigurations
+                .identityServerInformation
+                ?.baseUrl
+                .toString(),
             withMxId: mxId,
             withAccessToken: accessToken,
           ),
@@ -1124,10 +1174,15 @@ void main() {
         mockFederationLookUpPhonebookContactInteractor.execute(
           argument: FederationLookUpArgument(
             homeServerUrl: baseUrl,
-            federationUrl:
-                federationConfigurations.fedServerInformation.baseUrls?.first
-                    .toString() ??
-                '',
+            federationUrls:
+                federationConfigurations.fedServerInformation.baseUrls
+                    ?.map((u) => u.toString())
+                    .toList() ??
+                [],
+            identityServerUrl: federationConfigurations
+                .identityServerInformation
+                ?.baseUrl
+                .toString(),
             withMxId: mxId,
             withAccessToken: accessToken,
           ),
@@ -1217,10 +1272,15 @@ void main() {
         mockFederationLookUpPhonebookContactInteractor.execute(
           argument: FederationLookUpArgument(
             homeServerUrl: baseUrl,
-            federationUrl:
-                federationConfigurations.fedServerInformation.baseUrls?.first
-                    .toString() ??
-                '',
+            federationUrls:
+                federationConfigurations.fedServerInformation.baseUrls
+                    ?.map((u) => u.toString())
+                    .toList() ??
+                [],
+            identityServerUrl: federationConfigurations
+                .identityServerInformation
+                ?.baseUrl
+                .toString(),
             withMxId: mxId,
             withAccessToken: accessToken,
           ),
@@ -1308,10 +1368,15 @@ void main() {
         mockFederationLookUpPhonebookContactInteractor.execute(
           argument: FederationLookUpArgument(
             homeServerUrl: baseUrl,
-            federationUrl:
-                federationConfigurations.fedServerInformation.baseUrls?.first
-                    .toString() ??
-                '',
+            federationUrls:
+                federationConfigurations.fedServerInformation.baseUrls
+                    ?.map((u) => u.toString())
+                    .toList() ??
+                [],
+            identityServerUrl: federationConfigurations
+                .identityServerInformation
+                ?.baseUrl
+                .toString(),
             withMxId: mxId,
             withAccessToken: accessToken,
           ),
@@ -1412,10 +1477,15 @@ void main() {
           mockFederationLookUpPhonebookContactInteractor.execute(
             argument: FederationLookUpArgument(
               homeServerUrl: baseUrl,
-              federationUrl:
-                  federationConfigurations.fedServerInformation.baseUrls?.first
-                      .toString() ??
-                  '',
+              federationUrls:
+                  federationConfigurations.fedServerInformation.baseUrls
+                      ?.map((u) => u.toString())
+                      .toList() ??
+                  [],
+              identityServerUrl: federationConfigurations
+                  .identityServerInformation
+                  ?.baseUrl
+                  .toString(),
               withMxId: mxId,
               withAccessToken: accessToken,
             ),
@@ -1525,10 +1595,15 @@ void main() {
         mockFederationLookUpPhonebookContactInteractor.execute(
           argument: FederationLookUpArgument(
             homeServerUrl: baseUrl,
-            federationUrl:
-                federationConfigurations.fedServerInformation.baseUrls?.first
-                    .toString() ??
-                '',
+            federationUrls:
+                federationConfigurations.fedServerInformation.baseUrls
+                    ?.map((u) => u.toString())
+                    .toList() ??
+                [],
+            identityServerUrl: federationConfigurations
+                .identityServerInformation
+                ?.baseUrl
+                .toString(),
             withMxId: mxId,
             withAccessToken: accessToken,
           ),
@@ -1614,10 +1689,15 @@ void main() {
         mockFederationLookUpPhonebookContactInteractor.execute(
           argument: FederationLookUpArgument(
             homeServerUrl: baseUrl,
-            federationUrl:
-                federationConfigurations.fedServerInformation.baseUrls?.first
-                    .toString() ??
-                '',
+            federationUrls:
+                federationConfigurations.fedServerInformation.baseUrls
+                    ?.map((u) => u.toString())
+                    .toList() ??
+                [],
+            identityServerUrl: federationConfigurations
+                .identityServerInformation
+                ?.baseUrl
+                .toString(),
             withMxId: mxId,
             withAccessToken: accessToken,
           ),
@@ -1705,10 +1785,15 @@ void main() {
         mockFederationLookUpPhonebookContactInteractor.execute(
           argument: FederationLookUpArgument(
             homeServerUrl: baseUrl,
-            federationUrl:
-                federationConfigurations.fedServerInformation.baseUrls?.first
-                    .toString() ??
-                '',
+            federationUrls:
+                federationConfigurations.fedServerInformation.baseUrls
+                    ?.map((u) => u.toString())
+                    .toList() ??
+                [],
+            identityServerUrl: federationConfigurations
+                .identityServerInformation
+                ?.baseUrl
+                .toString(),
             withMxId: mxId,
             withAccessToken: accessToken,
           ),
@@ -1796,10 +1881,15 @@ void main() {
         mockFederationLookUpPhonebookContactInteractor.execute(
           argument: FederationLookUpArgument(
             homeServerUrl: baseUrl,
-            federationUrl:
-                federationConfigurations.fedServerInformation.baseUrls?.first
-                    .toString() ??
-                '',
+            federationUrls:
+                federationConfigurations.fedServerInformation.baseUrls
+                    ?.map((u) => u.toString())
+                    .toList() ??
+                [],
+            identityServerUrl: federationConfigurations
+                .identityServerInformation
+                ?.baseUrl
+                .toString(),
             withMxId: mxId,
             withAccessToken: accessToken,
           ),
@@ -3168,10 +3258,15 @@ void main() {
           mockFederationLookUpPhonebookContactInteractor.execute(
             argument: FederationLookUpArgument(
               homeServerUrl: baseUrl,
-              federationUrl:
-                  federationConfigurations.fedServerInformation.baseUrls?.first
-                      .toString() ??
-                  '',
+              federationUrls:
+                  federationConfigurations.fedServerInformation.baseUrls
+                      ?.map((u) => u.toString())
+                      .toList() ??
+                  [],
+              identityServerUrl: federationConfigurations
+                  .identityServerInformation
+                  ?.baseUrl
+                  .toString(),
               withMxId: mxId,
               withAccessToken: accessToken,
             ),
@@ -3220,10 +3315,15 @@ void main() {
           mockFederationLookUpPhonebookContactInteractor.execute(
             argument: FederationLookUpArgument(
               homeServerUrl: baseUrl,
-              federationUrl:
-                  federationConfigurations.fedServerInformation.baseUrls?.first
-                      .toString() ??
-                  '',
+              federationUrls:
+                  federationConfigurations.fedServerInformation.baseUrls
+                      ?.map((u) => u.toString())
+                      .toList() ??
+                  [],
+              identityServerUrl: federationConfigurations
+                  .identityServerInformation
+                  ?.baseUrl
+                  .toString(),
               withMxId: mxId,
               withAccessToken: accessToken,
             ),
@@ -3278,10 +3378,15 @@ void main() {
           mockFederationLookUpPhonebookContactInteractor.execute(
             argument: FederationLookUpArgument(
               homeServerUrl: baseUrl,
-              federationUrl:
-                  federationConfigurations.fedServerInformation.baseUrls?.first
-                      .toString() ??
-                  '',
+              federationUrls:
+                  federationConfigurations.fedServerInformation.baseUrls
+                      ?.map((u) => u.toString())
+                      .toList() ??
+                  [],
+              identityServerUrl: federationConfigurations
+                  .identityServerInformation
+                  ?.baseUrl
+                  .toString(),
               withMxId: mxId,
               withAccessToken: accessToken,
             ),
@@ -3343,10 +3448,15 @@ void main() {
           mockFederationLookUpPhonebookContactInteractor.execute(
             argument: FederationLookUpArgument(
               homeServerUrl: baseUrl,
-              federationUrl:
-                  federationConfigurations.fedServerInformation.baseUrls?.first
-                      .toString() ??
-                  '',
+              federationUrls:
+                  federationConfigurations.fedServerInformation.baseUrls
+                      ?.map((u) => u.toString())
+                      .toList() ??
+                  [],
+              identityServerUrl: federationConfigurations
+                  .identityServerInformation
+                  ?.baseUrl
+                  .toString(),
               withMxId: mxId,
               withAccessToken: accessToken,
             ),
@@ -3399,10 +3509,15 @@ void main() {
           mockFederationLookUpPhonebookContactInteractor.execute(
             argument: FederationLookUpArgument(
               homeServerUrl: baseUrl,
-              federationUrl:
-                  federationConfigurations.fedServerInformation.baseUrls?.first
-                      .toString() ??
-                  '',
+              federationUrls:
+                  federationConfigurations.fedServerInformation.baseUrls
+                      ?.map((u) => u.toString())
+                      .toList() ??
+                  [],
+              identityServerUrl: federationConfigurations
+                  .identityServerInformation
+                  ?.baseUrl
+                  .toString(),
               withMxId: mxId,
               withAccessToken: accessToken,
             ),
@@ -3464,10 +3579,15 @@ void main() {
           mockFederationLookUpPhonebookContactInteractor.execute(
             argument: FederationLookUpArgument(
               homeServerUrl: baseUrl,
-              federationUrl:
-                  federationConfigurations.fedServerInformation.baseUrls?.first
-                      .toString() ??
-                  '',
+              federationUrls:
+                  federationConfigurations.fedServerInformation.baseUrls
+                      ?.map((u) => u.toString())
+                      .toList() ??
+                  [],
+              identityServerUrl: federationConfigurations
+                  .identityServerInformation
+                  ?.baseUrl
+                  .toString(),
               withMxId: mxId,
               withAccessToken: accessToken,
             ),
@@ -3523,10 +3643,15 @@ void main() {
           mockFederationLookUpPhonebookContactInteractor.execute(
             argument: FederationLookUpArgument(
               homeServerUrl: baseUrl,
-              federationUrl:
-                  federationConfigurations.fedServerInformation.baseUrls?.first
-                      .toString() ??
-                  '',
+              federationUrls:
+                  federationConfigurations.fedServerInformation.baseUrls
+                      ?.map((u) => u.toString())
+                      .toList() ??
+                  [],
+              identityServerUrl: federationConfigurations
+                  .identityServerInformation
+                  ?.baseUrl
+                  .toString(),
               withMxId: mxId,
               withAccessToken: accessToken,
             ),
@@ -3606,10 +3731,15 @@ void main() {
           mockFederationLookUpPhonebookContactInteractor.execute(
             argument: FederationLookUpArgument(
               homeServerUrl: baseUrl,
-              federationUrl:
-                  federationConfigurations.fedServerInformation.baseUrls?.first
-                      .toString() ??
-                  '',
+              federationUrls:
+                  federationConfigurations.fedServerInformation.baseUrls
+                      ?.map((u) => u.toString())
+                      .toList() ??
+                  [],
+              identityServerUrl: federationConfigurations
+                  .identityServerInformation
+                  ?.baseUrl
+                  .toString(),
               withMxId: mxId,
               withAccessToken: accessToken,
             ),
@@ -3689,10 +3819,15 @@ void main() {
           mockFederationLookUpPhonebookContactInteractor.execute(
             argument: FederationLookUpArgument(
               homeServerUrl: baseUrl,
-              federationUrl:
-                  federationConfigurations.fedServerInformation.baseUrls?.first
-                      .toString() ??
-                  '',
+              federationUrls:
+                  federationConfigurations.fedServerInformation.baseUrls
+                      ?.map((u) => u.toString())
+                      .toList() ??
+                  [],
+              identityServerUrl: federationConfigurations
+                  .identityServerInformation
+                  ?.baseUrl
+                  .toString(),
               withMxId: mxId,
               withAccessToken: accessToken,
             ),
@@ -3772,10 +3907,15 @@ void main() {
           mockFederationLookUpPhonebookContactInteractor.execute(
             argument: FederationLookUpArgument(
               homeServerUrl: baseUrl,
-              federationUrl:
-                  federationConfigurations.fedServerInformation.baseUrls?.first
-                      .toString() ??
-                  '',
+              federationUrls:
+                  federationConfigurations.fedServerInformation.baseUrls
+                      ?.map((u) => u.toString())
+                      .toList() ??
+                  [],
+              identityServerUrl: federationConfigurations
+                  .identityServerInformation
+                  ?.baseUrl
+                  .toString(),
               withMxId: mxId,
               withAccessToken: accessToken,
             ),
@@ -3917,13 +4057,15 @@ void main() {
             mockFederationLookUpPhonebookContactInteractor.execute(
               argument: FederationLookUpArgument(
                 homeServerUrl: baseUrl,
-                federationUrl:
-                    federationConfigurations
-                        .fedServerInformation
-                        .baseUrls
-                        ?.first
-                        .toString() ??
-                    '',
+                federationUrls:
+                    federationConfigurations.fedServerInformation.baseUrls
+                        ?.map((u) => u.toString())
+                        .toList() ??
+                    [],
+                identityServerUrl: federationConfigurations
+                    .identityServerInformation
+                    ?.baseUrl
+                    .toString(),
                 withMxId: mxId,
                 withAccessToken: accessToken,
               ),
@@ -3983,13 +4125,15 @@ void main() {
             mockFederationLookUpPhonebookContactInteractor.execute(
               argument: FederationLookUpArgument(
                 homeServerUrl: baseUrl,
-                federationUrl:
-                    federationConfigurations
-                        .fedServerInformation
-                        .baseUrls
-                        ?.first
-                        .toString() ??
-                    '',
+                federationUrls:
+                    federationConfigurations.fedServerInformation.baseUrls
+                        ?.map((u) => u.toString())
+                        .toList() ??
+                    [],
+                identityServerUrl: federationConfigurations
+                    .identityServerInformation
+                    ?.baseUrl
+                    .toString(),
                 withMxId: mxId,
                 withAccessToken: accessToken,
               ),

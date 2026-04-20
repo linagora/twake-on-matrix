@@ -63,7 +63,7 @@ void main() {
     homeServerUrl: homeserverUrl,
     withMxId: matrixId,
     withAccessToken: accessToken,
-    federationUrl: federationUrl,
+    federationUrls: [federationUrl],
   );
 
   final testTokenRequest = FederationTokenRequest(
@@ -1436,6 +1436,358 @@ void main() {
           ]),
         );
       });
+
+      test('should query all base_urls and merge their mappings', () async {
+        const secondFederationUrl = 'https://federation2.example.com';
+        final argumentMultiUrl = FederationLookUpArgument(
+          homeServerUrl: homeserverUrl,
+          withMxId: matrixId,
+          withAccessToken: accessToken,
+          federationUrls: [federationUrl, secondFederationUrl],
+        );
+
+        when(
+          mockRepository.fetchContacts(),
+        ).thenAnswer((_) async => testContacts);
+
+        // Both URLs succeed for token request.
+        when(
+          mockRequestTokenManager.execute(
+            federationTokenRequest: testTokenRequest,
+          ),
+        ).thenAnswer(
+          (_) async => const Right<Failure, Success>(
+            FederationIdentityRequestTokenSuccess(
+              tokenInformation: tokenInformation,
+            ),
+          ),
+        );
+
+        // First URL register.
+        when(
+          mockIdentityLookupManager.register(
+            federationUrl: federationUrl,
+            tokenInformation: tokenInformation,
+          ),
+        ).thenAnswer(
+          (_) async =>
+              const FederationRegisterResponse(token: 'token-server-1'),
+        );
+
+        // Second URL register.
+        when(
+          mockIdentityLookupManager.register(
+            federationUrl: secondFederationUrl,
+            tokenInformation: tokenInformation,
+          ),
+        ).thenAnswer(
+          (_) async =>
+              const FederationRegisterResponse(token: 'token-server-2'),
+        );
+
+        const hashDetails = FederationHashDetailsResponse(
+          algorithms: {'sha256'},
+          lookupPepper: 'pepper',
+          altLookupPeppers: {'pepper1'},
+        );
+
+        when(
+          mockIdentityLookupManager.getHashDetails(
+            federationUrl: anyNamed('federationUrl'),
+            registeredToken: anyNamed('registeredToken'),
+          ),
+        ).thenAnswer((_) async => hashDetails);
+
+        // First server finds Alice's phone.
+        when(
+          mockIdentityLookupManager.lookupMxid(
+            federationUrl: federationUrl,
+            request: anyNamed('request'),
+            registeredToken: anyNamed('registeredToken'),
+          ),
+        ).thenAnswer(
+          (_) async => const FederationLookupMxidResponse(
+            mappings: {
+              '6mWe5lBps9Rqabkqc_QIh0-jsdFogvcBi9EWs523fok':
+                  '@alice:matrix.org',
+            },
+            thirdPartyMappings: {},
+          ),
+        );
+
+        // Second server finds nothing new.
+        when(
+          mockIdentityLookupManager.lookupMxid(
+            federationUrl: secondFederationUrl,
+            request: anyNamed('request'),
+            registeredToken: anyNamed('registeredToken'),
+          ),
+        ).thenAnswer(
+          (_) async => const FederationLookupMxidResponse(
+            mappings: {},
+            thirdPartyMappings: {},
+          ),
+        );
+
+        final result = interactor.execute(argument: argumentMultiUrl);
+
+        await expectLater(
+          result,
+          emitsInOrder(<dynamic>[
+            const Right<Failure, Success>(GetPhonebookContactsLoading()),
+            isA<Right<Failure, Success>>().having(
+              (r) => (r.value as GetPhonebookContactsSuccess).contacts.any(
+                (c) =>
+                    c.phoneNumbers?.any(
+                      (p) => p.matrixId == '@alice:matrix.org',
+                    ) ==
+                    true,
+              ),
+              'alice has matrixId from first server',
+              true,
+            ),
+          ]),
+        );
+
+        verify(
+          mockIdentityLookupManager.lookupMxid(
+            federationUrl: federationUrl,
+            request: anyNamed('request'),
+            registeredToken: anyNamed('registeredToken'),
+          ),
+        ).called(1);
+
+        verify(
+          mockIdentityLookupManager.lookupMxid(
+            federationUrl: secondFederationUrl,
+            request: anyNamed('request'),
+            registeredToken: anyNamed('registeredToken'),
+          ),
+        ).called(1);
+      });
+
+      test(
+        'should query identity server when not covered by third_party_mappings',
+        () async {
+          const identityUrl = 'https://identity.example.com';
+
+          final argumentWithIdentity = FederationLookUpArgument(
+            homeServerUrl: homeserverUrl,
+            withMxId: matrixId,
+            withAccessToken: accessToken,
+            federationUrls: [federationUrl],
+            identityServerUrl: identityUrl,
+          );
+
+          when(
+            mockRepository.fetchContacts(),
+          ).thenAnswer((_) async => testContacts);
+
+          when(
+            mockRequestTokenManager.execute(
+              federationTokenRequest: testTokenRequest,
+            ),
+          ).thenAnswer(
+            (_) async => const Right<Failure, Success>(
+              FederationIdentityRequestTokenSuccess(
+                tokenInformation: tokenInformation,
+              ),
+            ),
+          );
+
+          when(
+            mockIdentityLookupManager.register(
+              federationUrl: anyNamed('federationUrl'),
+              tokenInformation: anyNamed('tokenInformation'),
+            ),
+          ).thenAnswer(
+            (_) async => const FederationRegisterResponse(
+              token: 'aB7c9Dz4EfGh5iJkLm3nOp==',
+            ),
+          );
+
+          const hashDetails = FederationHashDetailsResponse(
+            algorithms: {'sha256'},
+            lookupPepper: 'pepper',
+            altLookupPeppers: {'pepper1'},
+          );
+
+          when(
+            mockIdentityLookupManager.getHashDetails(
+              federationUrl: anyNamed('federationUrl'),
+              registeredToken: anyNamed('registeredToken'),
+            ),
+          ).thenAnswer((_) async => hashDetails);
+
+          final calledWithUrls = <String>[];
+
+          // Federation server returns nothing → identity server must be queried.
+          when(
+            mockIdentityLookupManager.lookupMxid(
+              federationUrl: argumentWithIdentity.federationUrls.first,
+              request: anyNamed('request'),
+              registeredToken: anyNamed('registeredToken'),
+            ),
+          ).thenAnswer((inv) async {
+            calledWithUrls.add(
+              inv.namedArguments[const Symbol('federationUrl')] as String,
+            );
+            return const FederationLookupMxidResponse(
+              mappings: {},
+              thirdPartyMappings: {},
+            );
+          });
+
+          // Identity server finds Bob's phone.
+          when(
+            mockIdentityLookupManager.lookupMxid(
+              federationUrl: identityUrl,
+              request: anyNamed('request'),
+              registeredToken: anyNamed('registeredToken'),
+            ),
+          ).thenAnswer((inv) async {
+            calledWithUrls.add(
+              inv.namedArguments[const Symbol('federationUrl')] as String,
+            );
+            return const FederationLookupMxidResponse(
+              mappings: {
+                'WYOGPQyKEyY0iTxQoPTfk58eQvGi0_hpP2hI0S8cQeM':
+                    '@bob:matrix.com',
+              },
+              thirdPartyMappings: {},
+            );
+          });
+
+          final result = interactor.execute(argument: argumentWithIdentity);
+
+          await expectLater(
+            result,
+            emitsInOrder(<dynamic>[
+              const Right<Failure, Success>(GetPhonebookContactsLoading()),
+              isA<Right<Failure, Success>>().having(
+                (r) => (r.value as GetPhonebookContactsSuccess).contacts.any(
+                  (c) =>
+                      c.phoneNumbers?.any(
+                        (p) => p.matrixId == '@bob:matrix.com',
+                      ) ==
+                      true,
+                ),
+                'bob has matrixId from identity server',
+                true,
+              ),
+            ]),
+          );
+
+          expect(
+            calledWithUrls,
+            containsAll([
+              argumentWithIdentity.federationUrls.first,
+              identityUrl,
+            ]),
+          );
+        },
+      );
+
+      test(
+        'should skip identity server when its URL is in third_party_mappings',
+        () async {
+          const identityUrl = 'https://identity.example.com';
+
+          final argumentWithIdentity = FederationLookUpArgument(
+            homeServerUrl: homeserverUrl,
+            withMxId: matrixId,
+            withAccessToken: accessToken,
+            federationUrls: [federationUrl],
+            identityServerUrl: identityUrl,
+          );
+
+          when(
+            mockRepository.fetchContacts(),
+          ).thenAnswer((_) async => testContacts);
+
+          when(
+            mockRequestTokenManager.execute(
+              federationTokenRequest: anyNamed('federationTokenRequest'),
+            ),
+          ).thenAnswer(
+            (_) async => const Right<Failure, Success>(
+              FederationIdentityRequestTokenSuccess(
+                tokenInformation: tokenInformation,
+              ),
+            ),
+          );
+
+          when(
+            mockIdentityLookupManager.register(
+              federationUrl: anyNamed('federationUrl'),
+              tokenInformation: anyNamed('tokenInformation'),
+            ),
+          ).thenAnswer(
+            (_) async => const FederationRegisterResponse(
+              token: 'aB7c9Dz4EfGh5iJkLm3nOp==',
+            ),
+          );
+
+          const hashDetails = FederationHashDetailsResponse(
+            algorithms: {'sha256'},
+            lookupPepper: 'pepper',
+          );
+
+          when(
+            mockIdentityLookupManager.getHashDetails(
+              federationUrl: anyNamed('federationUrl'),
+              registeredToken: anyNamed('registeredToken'),
+            ),
+          ).thenAnswer((_) async => hashDetails);
+
+          // Federation server delegates the identity URL via third_party_mappings
+          // → identity server must NOT be queried a second time via lookupMxid.
+          when(
+            mockIdentityLookupManager.lookupMxid(
+              federationUrl: federationUrl,
+              request: anyNamed('request'),
+              registeredToken: anyNamed('registeredToken'),
+            ),
+          ).thenAnswer(
+            (_) async => const FederationLookupMxidResponse(
+              mappings: <String, String>{},
+              thirdPartyMappings: <String, Set<String>>{
+                'identity.example.com': {'some-hash'},
+              },
+            ),
+          );
+
+          when(
+            mockFederationIdentityLookupManager.execute(
+              arguments: anyNamed('arguments'),
+            ),
+          ).thenAnswer(
+            (_) async => const Right<Failure, Success>(
+              FederationIdentityLookupSuccess(newContacts: {}),
+            ),
+          );
+
+          final result = interactor.execute(argument: argumentWithIdentity);
+
+          await result.last;
+
+          verify(
+            mockIdentityLookupManager.lookupMxid(
+              federationUrl: federationUrl,
+              request: anyNamed('request'),
+              registeredToken: anyNamed('registeredToken'),
+            ),
+          ).called(1);
+
+          verifyNever(
+            mockIdentityLookupManager.lookupMxid(
+              federationUrl: identityUrl,
+              request: anyNamed('request'),
+              registeredToken: anyNamed('registeredToken'),
+            ),
+          );
+        },
+      );
 
       test('should handle empty mappings in lookup response', () async {
         final contacts = [
