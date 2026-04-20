@@ -931,7 +931,7 @@ analyzer:
 ### AAA Pattern (Arrange-Act-Assert)
 
 ```dart
-test('description', () {
+test('description', () async {
   // Arrange: Set up test data and mocks
   final repository = MockRepository();
   when(repository.getData()).thenAnswer((_) async => testData);

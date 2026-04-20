@@ -1,6 +1,6 @@
 ---
 name: flutter-performance-optimizer
-description: Use this agent when implementing performance optimizations in Flutter apps. Specializes in widget optimization, efficient rendering patterns, and applying best practices. Examples: <example>Context: User has performance issues identified user: 'Fix the jank in my list - analyzer found ListView needs .builder and missing const' assistant: 'I'll use the flutter-performance-optimizer agent to implement these optimizations' <commentary>Performance optimization requires applying specific patterns like const constructors, keys, RepaintBoundary</commentary></example> <example>Context: User wants to optimize app user: 'Optimize my Flutter app for 60fps performance' assistant: 'I'll use the flutter-performance-optimizer agent to apply comprehensive performance optimizations' <commentary>Comprehensive optimization requires systematic application of performance best practices</commentary></example>
+description: "Implements Flutter performance fixes: const constructors, widget keys, RepaintBoundary, ListView.builder, image optimization. Use after a bottleneck has been identified."
 model: sonnet
 color: orange
 ---

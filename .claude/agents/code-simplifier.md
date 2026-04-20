@@ -1,8 +1,6 @@
 ---
 name: code-simplifier
-description: |
-  Use this agent when code has been written or modified and needs to be simplified for clarity, consistency, and maintainability while preserving all functionality. This agent should be triggered automatically after completing a coding task or writing a logical chunk of code. It simplifies code by following project best practices while retaining all functionality. The agent focuses only on recently modified code unless instructed otherwise.
-
+description: "Simplifies and refines code for clarity, consistency, and maintainability while preserving all functionality. Use after writing or modifying code to improve readability and reduce complexity."
   Examples:
 
   <example>
@@ -52,7 +50,7 @@ You will analyze recently modified code and apply refinements that:
    - Prefer `function` keyword over arrow functions
    - Use explicit return type annotations for top-level functions
    - Follow proper React component patterns with explicit Props types
-   - Use structured error handling: avoid catch blocks that swallow errors or suppress diagnostics; prefer propagating errors or using typed/centralized handlers
+   - Use proper error handling patterns (avoid try/catch when possible)
    - Maintain consistent naming conventions
 
 3. **Enhance Clarity**: Simplify code structure by:

@@ -528,24 +528,31 @@ class LoginPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    // authProvider is AsyncNotifierProvider → returns AsyncValue<AuthState>
     final authState = ref.watch(authProvider);
 
     // Listen to state changes
-    ref.listen<AuthState>(authProvider, (previous, next) {
-      if (next is Authenticated) {
-        Navigator.of(context).pushReplacementNamed('/home');
-      } else if (next is AuthError) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(next.message)),
-        );
-      }
+    ref.listen<AsyncValue<AuthState>>(authProvider, (previous, next) {
+      next.whenData((state) {
+        if (state is Authenticated) {
+          Navigator.of(context).pushReplacementNamed('/home');
+        } else if (state is AuthError) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(state.message)),
+          );
+        }
+      });
     });
 
     return Scaffold(
       appBar: AppBar(title: const Text('Login')),
-      body: authState is AuthLoading
-          ? const Center(child: CircularProgressIndicator())
-          : const LoginForm(),
+      body: authState.when(
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (error, _) => Center(child: Text('Error: $error')),
+        data: (state) => state is Authenticated
+            ? const SizedBox.shrink()
+            : const LoginForm(),
+      ),
     );
   }
 }

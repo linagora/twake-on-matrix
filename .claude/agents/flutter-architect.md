@@ -1153,10 +1153,9 @@ alignment: .center,
 
 **Outside this agent's scope:**
 - State management implementation details → Use `flutter-state-management`
-- UI implementation → Use `flutter-ui-implementer`
 - Platform-specific architecture → Use platform specialists
 - Performance optimization → Use `flutter-performance-optimizer`
-- Testing implementation → Use `flutter-testing-expert`
+- Testing implementation → Use `flutter-testing`
 
 If you encounter tasks outside these boundaries, recommend the appropriate specialist.
 

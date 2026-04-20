@@ -60,7 +60,7 @@ open -a Simulator
 xcrun simctl boot <DEVICE_ID> && open -a Simulator
 
 # Create a new simulator (Xcode 16+ with iOS 18)
-xcrun simctl create "iPhone 16 Pro Test" "iPhone 16 Pro" "iOS18.0"
+xcrun simctl create "iPhone 16 Pro Test" "iPhone 16 Pro" "iOS-18-0"
 
 # Common device configurations (2025+)
 # iPhone SE (3rd gen): compact phone
@@ -229,9 +229,9 @@ emulator -avd Pixel_9_API_35
 
 # Launch with specific options
 emulator -avd Pixel_9_API_35 \
-  -no-snapshot-load \  # Don't load from snapshot
-  -no-audio \          # Disable audio
-  -gpu swiftshader_indirect  # Software rendering
+  -no-snapshot-load \
+  -no-audio \
+  -gpu swiftshader_indirect
 
 # Launch in headless mode (no UI)
 emulator -avd Pixel_9_API_35 -no-window
@@ -414,8 +414,8 @@ adb wait-for-device
 echo "Devices ready!"
 
 # Get device IDs
-IOS_ID=$(flutter devices --machine | jq -r '.[] | select(.name=="iPhone 15 Pro") | .id' | head -1)
-ANDROID_ID=$(flutter devices --machine | jq -r '.[] | select(.name=="Pixel 8") | .id' | head -1)
+IOS_ID=$(flutter devices | grep "iPhone 15 Pro" | awk '{print $5}' | tr -d '•')
+ANDROID_ID=$(flutter devices | grep "Pixel 8" | awk '{print $5}' | tr -d '•')
 
 echo "Running on iOS: $IOS_ID"
 flutter run -d $IOS_ID &
@@ -539,16 +539,16 @@ lsof -i :8080  # Check if port is in use
 ```bash
 # Create standard test devices (Xcode 16+ / iOS 18)
 # iPhone SE - Small phone
-xcrun simctl create "iPhone SE Test" "iPhone SE (3rd generation)" "iOS18.0"
+xcrun simctl create "iPhone SE Test" "iPhone SE (3rd generation)" "iOS-18-0"
 
 # iPhone 16 Pro - Standard phone
-xcrun simctl create "iPhone 16 Pro Test" "iPhone 16 Pro" "iOS18.0"
+xcrun simctl create "iPhone 16 Pro Test" "iPhone 16 Pro" "iOS-18-0"
 
 # iPhone 16 Pro Max - Large phone
-xcrun simctl create "iPhone 16 Pro Max Test" "iPhone 16 Pro Max" "iOS18.0"
+xcrun simctl create "iPhone 16 Pro Max Test" "iPhone 16 Pro Max" "iOS-18-0"
 
 # iPad Pro - Tablet (M4)
-xcrun simctl create "iPad Pro Test" "iPad Pro 13-inch (M4)" "iOS18.0"
+xcrun simctl create "iPad Pro Test" "iPad Pro 13-inch (M4)" "iOS-18-0"
 
 # Configure for clean testing
 for device in "iPhone SE Test" "iPhone 16 Pro Test" "iPhone 16 Pro Max Test" "iPad Pro Test"; do
