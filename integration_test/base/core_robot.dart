@@ -43,6 +43,10 @@ class CoreRobot {
   }
 
   Future<void> confirmAccessContact() async {
+    // OS permission dialogs only exist on mobile — on web the browser
+    // handles its own prompts and nothing surfaces through Patrol's
+    // native automator, which itself is unavailable on the web target.
+    if (kIsWeb) return;
     try {
       await $.native.grantPermissionWhenInUse();
     } catch (e) {
@@ -55,6 +59,7 @@ class CoreRobot {
     if (!tapped) {
       return;
     }
+    if (kIsWeb) return;
     if (await $.native.isPermissionDialogVisible(
       timeout: const Duration(seconds: 5),
     )) {
@@ -63,6 +68,7 @@ class CoreRobot {
   }
 
   Future<void> grantNotificationPermission() async {
+    if (kIsWeb) return;
     if (await $.native.isPermissionDialogVisible(
       timeout: const Duration(seconds: 15),
     )) {
