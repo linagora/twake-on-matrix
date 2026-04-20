@@ -338,8 +338,10 @@ class LoginRobot extends CoreRobot {
 
     // Grab the Matrix client from the running app and drive the SDK
     // directly — cheaper than walking through the registration/login UI,
-    // and avoids every CORS pitfall of a real SSO flow.
-    final context = $.tester.element(find.byType(MaterialApp));
+    // and avoids every CORS pitfall of a real SSO flow. We anchor on the
+    // AutoHomeserverPicker because the `MatrixState` provider sits above
+    // the MaterialApp, so a MaterialApp-level context cannot see it.
+    final context = $.tester.element(find.byType(AutoHomeserverPicker).first);
     final matrix = Matrix.of(context);
     final client = await matrix.getLoginClient();
     matrix.loginHomeserverSummary = await client
@@ -352,6 +354,13 @@ class LoginRobot extends CoreRobot {
       password: password,
       initialDeviceDisplayName: 'patrol-web-integration-test',
     );
+
+    // After a manual SDK login the go_router redirects do not re-evaluate
+    // on their own — the AutoHomeserverPicker stays mounted. Pump a route
+    // change through the root so the `/` redirect observes the new
+    // `client.isLogged()` state and forwards us to the rooms list.
+    TwakeApp.router.go('/');
+    await $.pump();
 
     await waitForChatList();
   }

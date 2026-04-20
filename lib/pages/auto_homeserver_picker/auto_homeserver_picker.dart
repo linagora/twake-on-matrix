@@ -159,6 +159,14 @@ class AutoHomeserverPickerController extends State<AutoHomeserverPicker>
   }
 
   Future<void> _setupAutoHomeserverPicker() async {
+    // Integration tests set PATROL_WEB=true so the UI stays idle and
+    // the suite drives authentication directly on the Matrix client.
+    // Otherwise the auto-connect would race against the test's own
+    // `checkHomeserver()` call (and potentially redirect the tab to
+    // the production SSO provider).
+    if (const bool.fromEnvironment('PATROL_WEB')) {
+      return;
+    }
     autoHomeserverPickerUIState.value = AutoHomeServerPickerLoadingState();
     if (widget.loggedOut == null) {
       final isConfigured = await AppConfig.initConfigCompleter.future;
