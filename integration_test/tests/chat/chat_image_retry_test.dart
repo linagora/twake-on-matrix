@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fluffychat/pages/chat/events/images_builder/sending_image_info_widget.dart';
@@ -11,6 +12,9 @@ void main() {
     description:
         'User sends an image without internet, then retries after internet is restored',
     test: ($) async {
+      // Toggling Wi-Fi / cellular is mobile-only — there is no browser API
+      // for it. Skip the body on web so the suite stays green.
+      if (kIsWeb) return;
       final chatScenario = ChatScenario($);
 
       // 1. Navigate to a chat room

@@ -1,13 +1,16 @@
 import 'package:fluffychat/generated/l10n/app_localizations.dart';
+import 'package:fluffychat/pages/auto_homeserver_picker/auto_homeserver_picker.dart';
 import 'package:fluffychat/pages/chat_list/chat_list.dart';
 import 'package:fluffychat/pages/homeserver_picker/homeserver_picker_view.dart';
 import 'package:fluffychat/pages/login/login_view.dart';
 import 'package:fluffychat/pages/twake_welcome/twake_welcome.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
+import 'package:fluffychat/widgets/matrix.dart';
 import 'package:fluffychat/widgets/twake_app.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:matrix/matrix.dart';
 import 'package:patrol/patrol.dart';
 import '../base/api_login_helper.dart';
 import '../base/core_robot.dart';
@@ -260,15 +263,35 @@ class LoginRobot extends CoreRobot {
     await tapSignInButton();
   }
 
-  /// Logs in by running the OIDC flow via HTTP (no browser UI interaction).
-  /// Obtains a one-time [loginToken] from the SSO server and feeds it directly
-  /// to the app via the /onAuthRedirect deep link, bypassing any SSO browser
-  /// modal entirely.
+  /// Logs in without going through any login UI.
+  ///
+  /// On mobile, runs the 7-step OIDC flow against the configured SSO server
+  /// and feeds the resulting one-time [loginToken] into the app via the
+  /// `/onAuthRedirect` deep link.
+  ///
+  /// On web, the SSO bypass is not reachable (browser XHR cannot drive the
+  /// OIDC redirect chain and the SSO provider blocks cross-origin XHR). Web
+  /// integration tests are expected to run against a local Synapse (see
+  /// `scripts/integration-test-provision-synapse.sh`), which accepts
+  /// `m.login.password` directly on the client-server API — CORS-allowed
+  /// the same way Element Web relies on it. We drive the Matrix SDK inline
+  /// rather than going through `/onAuthRedirect`, since the latter expects
+  /// a single-use `m.login.token` from SSO, not a password-login access
+  /// token.
   Future<void> loginViaApi({
     required String serverUrl,
     required String username,
     required String password,
   }) async {
+    if (kIsWeb) {
+      await _loginViaMatrixPassword(
+        serverUrl: serverUrl,
+        username: username,
+        password: password,
+      );
+      return;
+    }
+
     // Wait for either TwakeWelcome (not logged in) or ChatList (already logged
     // in from a previous test run whose tokens persisted in the iOS keychain).
     await waitForEitherVisible(
@@ -292,6 +315,51 @@ class LoginRobot extends CoreRobot {
     TwakeApp.router.go(
       '/onAuthRedirect?loginToken=$encodedToken&homeserver=$encodedServer',
     );
+    await $.pump();
+
+    await waitForChatList();
+  }
+
+  Future<void> _loginViaMatrixPassword({
+    required String serverUrl,
+    required String username,
+    required String password,
+  }) async {
+    // Wait for the app to land on a logged-out home screen (the local
+    // Synapse has registration enabled and no SSO, so AutoHomeserverPicker
+    // falls through to ConnectRoute without triggering any navigation).
+    await waitForEitherVisible(
+      $: $,
+      first: $(AutoHomeserverPicker),
+      second: $(ChatList),
+      timeout: const Duration(seconds: 60),
+    );
+    if (await isChatListVisible()) return;
+
+    // Grab the Matrix client from the running app and drive the SDK
+    // directly — cheaper than walking through the registration/login UI,
+    // and avoids every CORS pitfall of a real SSO flow. We anchor on the
+    // AutoHomeserverPicker because the `MatrixState` provider sits above
+    // the MaterialApp, so a MaterialApp-level context cannot see it.
+    final context = $.tester.element(find.byType(AutoHomeserverPicker).first);
+    final matrix = Matrix.of(context);
+    final client = await matrix.getLoginClient();
+    matrix.loginHomeserverSummary = await client
+        .checkHomeserver(Uri.parse(serverUrl))
+        .toHomeserverSummary();
+
+    await client.login(
+      LoginType.mLoginPassword,
+      identifier: AuthenticationUserIdentifier(user: username),
+      password: password,
+      initialDeviceDisplayName: 'patrol-web-integration-test',
+    );
+
+    // After a manual SDK login the go_router redirects do not re-evaluate
+    // on their own — the AutoHomeserverPicker stays mounted. Pump a route
+    // change through the root so the `/` redirect observes the new
+    // `client.isLogged()` state and forwards us to the rooms list.
+    TwakeApp.router.go('/');
     await $.pump();
 
     await waitForChatList();
