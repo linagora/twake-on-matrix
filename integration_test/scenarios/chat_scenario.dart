@@ -1,5 +1,4 @@
 import 'dart:developer';
-import 'dart:io';
 
 import 'package:fluffychat/generated/l10n/app_localizations.dart';
 import 'package:fluffychat/pages/chat/chat_app_bar_title.dart';
@@ -18,6 +17,7 @@ import 'package:fluffychat/pages/chat_draft/draft_chat_view.dart';
 import 'package:fluffychat/pages/chat_list/chat_list_body_view.dart';
 import 'package:fluffychat/widgets/context_menu/context_menu_action_item_widget.dart';
 import 'package:fluffychat/widgets/twake_components/twake_icon_button.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -25,6 +25,7 @@ import 'package:linagora_design_flutter/images_picker/image_item_widget.dart';
 import 'package:linkfy_text/linkfy_text.dart';
 import 'package:patrol/patrol.dart';
 
+import '../base/api_login_helper.dart';
 import '../base/core_robot.dart';
 import '../help/soft_assertion_helper.dart';
 import '../robots/add_member_robot.dart';
@@ -174,7 +175,7 @@ class ChatScenario extends CoreRobot {
     }
 
     // 4) iOS native UIMenu fallback
-    if (Platform.isIOS) {
+    if (!kIsWeb && defaultTargetPlatform == TargetPlatform.iOS) {
       try {
         await $.native.waitUntilVisible(Selector(text: pasteLabel));
         await $.native.tap(Selector(text: pasteLabel));
@@ -501,12 +502,8 @@ class ChatScenario extends CoreRobot {
     return chatGroupDetailRobot;
   }
 
-  Future<void> sendAMessageByAPI(String message) async {
-    final client = await CoreRobot($).initialRedirectRequest();
-    final list = await CoreRobot($).loginByAPI(client);
-    await CoreRobot($).sendMessageByAPI(list[0], list[1], list[2], message);
-    await CoreRobot($).closeHTTPClient(client);
-  }
+  Future<void> sendAMessageByAPI(String message) =>
+      sendMessageAsReceiver(message: message);
 
   Future<void> verifyMessageIsShown(String message, bool isTrue) async {
     final text = await ChatGroupDetailRobot($).getText(message);
