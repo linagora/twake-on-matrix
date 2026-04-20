@@ -84,3 +84,6 @@ test_bundle.dart
 sentry.properties
 
 .fvm
+
+# Riverpod migration snippets — generated output
+docs/migration/snippets_generated/
