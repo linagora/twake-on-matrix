@@ -1,10 +1,9 @@
-import 'dart:io';
-
 import 'package:fluffychat/pages/new_group/new_group_chat_info_view.dart';
 import 'package:fluffychat/pages/new_group/widget/contact_item.dart';
 import 'package:fluffychat/widgets/twake_components/twake_fab.dart';
 import 'package:fluffychat/widgets/twake_components/twake_icon_button.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:patrol/patrol.dart';
@@ -35,7 +34,9 @@ class AddMemberRobot extends CoreRobot {
   }
 
   PatrolFinder getAgreeInviteMemberBtn() {
-    if (Platform.isAndroid) {
+    // `adaptive_dialog` renders Material on Android and Web, Cupertino on
+    // iOS/macOS.
+    if (kIsWeb || defaultTargetPlatform == TargetPlatform.android) {
       return $(AlertDialog).$(TextButton).containing(find.text('YES'));
     } else {
       return $(
@@ -45,7 +46,7 @@ class AddMemberRobot extends CoreRobot {
   }
 
   PatrolFinder getCancelnviteMemberBtn() {
-    if (Platform.isAndroid) {
+    if (kIsWeb || defaultTargetPlatform == TargetPlatform.android) {
       return $(AlertDialog).$(TextButton).containing(find.text('CANCEL'));
     } else {
       return $(

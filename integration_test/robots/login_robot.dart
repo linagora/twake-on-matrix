@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'package:fluffychat/generated/l10n/app_localizations.dart';
 import 'package:fluffychat/pages/chat_list/chat_list.dart';
 import 'package:fluffychat/pages/homeserver_picker/homeserver_picker_view.dart';
@@ -6,16 +5,23 @@ import 'package:fluffychat/pages/login/login_view.dart';
 import 'package:fluffychat/pages/twake_welcome/twake_welcome.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/widgets/twake_app.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:patrol/patrol.dart';
+import '../base/api_login_helper.dart';
 import '../base/core_robot.dart';
 
 class LoginRobot extends CoreRobot {
   LoginRobot(super.$);
 
+  bool get _isAndroid =>
+      !kIsWeb && defaultTargetPlatform == TargetPlatform.android;
+
+  bool get _isIOS => !kIsWeb && defaultTargetPlatform == TargetPlatform.iOS;
+
   Selector getLoginTxt() {
-    if (Platform.isAndroid) {
+    if (_isAndroid) {
       return Selector(resourceId: 'email_username');
     } else {
       return Selector(className: 'textField', textContains: 'Email / Username');
@@ -23,7 +29,7 @@ class LoginRobot extends CoreRobot {
   }
 
   Selector getPassTxt() {
-    if (Platform.isAndroid) {
+    if (_isAndroid) {
       return Selector(resourceId: 'password');
     } else {
       return Selector(className: 'secureTextField', textContains: 'Password');
@@ -32,7 +38,7 @@ class LoginRobot extends CoreRobot {
 
   Selector getSignInBtn() {
     const label = 'Sign in';
-    if (Platform.isIOS) {
+    if (_isIOS) {
       return Selector(text: label);
     } else {
       return Selector(className: 'android.widget.Button', textContains: label);
@@ -40,7 +46,7 @@ class LoginRobot extends CoreRobot {
   }
 
   Selector getOKBtnInVerifyCaptchaDialog() {
-    if (Platform.isIOS) {
+    if (_isIOS) {
       return Selector(text: 'Close', className: 'button');
     } else {
       return Selector(resourceId: 'com.android.chrome:id/positive_button');
@@ -108,7 +114,7 @@ class LoginRobot extends CoreRobot {
 
   Selector getSignInTab() {
     const label = 'Email / Username';
-    if (Platform.isAndroid) {
+    if (_isAndroid) {
       return Selector(className: 'android.widget.Button', textContains: label);
     } else {
       return Selector(text: label);
@@ -117,7 +123,7 @@ class LoginRobot extends CoreRobot {
 
   Future<bool> isSignInPageVisible() async {
     //login on Chrome browser without an account
-    if (Platform.isAndroid) {
+    if (_isAndroid) {
       final loginBrowserWithoutAccountOpt = Selector(
         resourceId: 'com.android.chrome:id/signin_fre_dismiss_button',
       );
@@ -274,19 +280,17 @@ class LoginRobot extends CoreRobot {
 
     if (await isChatListVisible()) return;
 
-    final httpClient = await initialRedirectRequest();
-    final oidcResult = await getLoginTokenViaOIDC(
-      httpClient,
-      username,
-      password,
+    final loginToken = await fetchOidcLoginToken(
+      username: username,
+      password: password,
     );
-    await closeHTTPClient(httpClient);
 
     final encodedServer = Uri.encodeComponent(serverUrl);
+    final encodedToken = Uri.encodeQueryComponent(loginToken);
     // Use router.go() directly — bypasses app_links which only listens when
     // ChatList is active (post-login). go_router navigates synchronously.
     TwakeApp.router.go(
-      '/onAuthRedirect?loginToken=${oidcResult.loginToken}&homeserver=$encodedServer',
+      '/onAuthRedirect?loginToken=$encodedToken&homeserver=$encodedServer',
     );
     await $.pump();
 
