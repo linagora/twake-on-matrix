@@ -13,7 +13,7 @@ void main() {
       printLogs: true,
       visibleTimeout: Duration(minutes: 1),
     ),
-    nativeAutomatorConfig: const NativeAutomatorConfig(),
+    nativeAutomatorConfig: NativeAutomatorConfig(),
     framePolicy: LiveTestWidgetsFlutterBindingFramePolicy.fullyLive,
     ($) async {
       // Initialize app without auto-login
