@@ -1,5 +1,4 @@
 import 'package:fluffychat/config/app_config.dart';
-import 'package:fluffychat/pages/chat/events/call_invite_content.dart';
 import 'package:fluffychat/pages/chat/events/encrypted_content.dart';
 import 'package:fluffychat/pages/chat/events/formatted_text_widget.dart';
 import 'package:fluffychat/pages/chat/events/images_builder/message_content_image_builder.dart';
@@ -386,11 +385,6 @@ class MessageContent extends StatelessWidget
               },
             );
         }
-      case EventTypes.CallInvite:
-        return OptionalSelectionContainerDisabled(
-          isEnabled: PlatformInfos.isWeb,
-          child: CallInviteContent(event: event),
-        );
       default:
         return OptionalSelectionContainerDisabled(
           isEnabled: PlatformInfos.isWeb,

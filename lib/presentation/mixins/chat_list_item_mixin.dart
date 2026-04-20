@@ -71,7 +71,7 @@ mixin ChatListItemMixin {
         softWrap: false,
         maxLines: 2,
         overflow: TextOverflow.ellipsis,
-        style: ChatLitSubSubtitleTextStyleView.textStyle.textStyle(
+        style: ChatListSubSubtitleTextStyleView.textStyle.textStyle(
           room,
           context,
         ),
@@ -102,7 +102,7 @@ mixin ChatListItemMixin {
         softWrap: false,
         maxLines: 2,
         overflow: TextOverflow.ellipsis,
-        style: ChatLitSubSubtitleTextStyleView.textStyle.textStyle(
+        style: ChatListSubSubtitleTextStyleView.textStyle.textStyle(
           room,
           context,
         ),

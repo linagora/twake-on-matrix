@@ -1,6 +1,6 @@
 import 'package:collection/collection.dart';
 import 'package:fluffychat/config/app_config.dart';
-import 'package:fluffychat/domain/matrix_events/event_type_sets.dart';
+import 'package:fluffychat/domain/matrix_events/event_type_rules.dart';
 import 'package:fluffychat/domain/model/extensions/string_extension.dart';
 import 'package:fluffychat/domain/model/room/room_extension.dart';
 import 'package:fluffychat/pages/chat/events/message_reactions.dart';
@@ -10,7 +10,6 @@ import 'package:fluffychat/utils/dialog/twake_dialog.dart';
 import 'package:fluffychat/utils/extension/event_info_extension.dart';
 import 'package:fluffychat/utils/extension/mime_type_extension.dart';
 import 'package:fluffychat/utils/manager/upload_manager/upload_manager.dart';
-import 'package:fluffychat/utils/matrix_sdk_extensions/filtered_timeline_extension.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/utils/size_string.dart';
@@ -158,7 +157,7 @@ extension LocalizedBody on Event {
       return true;
     }
 
-    final isPreviousOrNextEventMessage = EventTypeSets.messageContentTypes
+    final isPreviousOrNextEventMessage = EventTypeRules.messageContentTypes
         .contains(comparedEvent.type);
 
     final isPreviousOrNextEventRedacted = {
@@ -378,18 +377,6 @@ extension LocalizedBody on Event {
   bool shouldHideRedactedEvent() {
     return AppConfig.hideRedactedEvents &&
         (redacted || type == EventTypes.Redaction);
-  }
-
-  bool shouldHideBannedEvent() {
-    return type == EventTypes.RoomMember && content['membership'] == 'ban';
-  }
-
-  bool shouldHideChangedAvatarEvent() {
-    return isSomeoneChangeAvatar();
-  }
-
-  bool shouldHideChangedDisplayNameEvent() {
-    return isSomeoneChangeDisplayName();
   }
 
   bool hasReactionEvent({required Timeline timeline}) {
