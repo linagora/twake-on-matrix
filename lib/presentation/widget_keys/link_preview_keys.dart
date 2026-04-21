@@ -13,10 +13,7 @@ enum LinkPreviewKeys {
     Key('linkPreview.thumbnailClip'),
     ValueKey('linkPreview.thumbnailClip'),
   ),
-  mxcImage(
-    Key('linkPreview.mxcImage'),
-    ValueKey('linkPreview.mxcImage'),
-  ),
+  mxcImage(Key('linkPreview.mxcImage'), ValueKey('linkPreview.mxcImage')),
   paddingTitle(
     Key('linkPreview.paddingTitle'),
     ValueKey('linkPreview.paddingTitle'),
@@ -25,14 +22,8 @@ enum LinkPreviewKeys {
     Key('linkPreview.paddingSubtitle'),
     ValueKey('linkPreview.paddingSubtitle'),
   ),
-  title(
-    Key('linkPreview.title'),
-    ValueKey('linkPreview.title'),
-  ),
-  subtitle(
-    Key('linkPreview.subtitle'),
-    ValueKey('linkPreview.subtitle'),
-  ),
+  title(Key('linkPreview.title'), ValueKey('linkPreview.title')),
+  subtitle(Key('linkPreview.subtitle'), ValueKey('linkPreview.subtitle')),
   imageDefault(
     Key('linkPreview.imageDefault'),
     ValueKey('linkPreview.imageDefault'),
