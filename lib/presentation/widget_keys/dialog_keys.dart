@@ -1,13 +1,29 @@
 import 'package:flutter/foundation.dart';
 
 enum DialogKeys {
-  showConfirmAlertDialog,
-  bootstrapBreakpointMobile,
-  bootstrapBreakpointWebAndDesktop,
-  initClientBreakpointMobile,
-  initClientBreakpointWebAndDesktop;
+  showConfirmAlertDialog(
+    Key('dialog.showConfirmAlertDialog'),
+    ValueKey('dialog.showConfirmAlertDialog'),
+  ),
+  bootstrapBreakpointMobile(
+    Key('dialog.bootstrapBreakpointMobile'),
+    ValueKey('dialog.bootstrapBreakpointMobile'),
+  ),
+  bootstrapBreakpointWebAndDesktop(
+    Key('dialog.bootstrapBreakpointWebAndDesktop'),
+    ValueKey('dialog.bootstrapBreakpointWebAndDesktop'),
+  ),
+  initClientBreakpointMobile(
+    Key('dialog.initClientBreakpointMobile'),
+    ValueKey('dialog.initClientBreakpointMobile'),
+  ),
+  initClientBreakpointWebAndDesktop(
+    Key('dialog.initClientBreakpointWebAndDesktop'),
+    ValueKey('dialog.initClientBreakpointWebAndDesktop'),
+  );
 
-  Key get key => Key('dialog.$name');
+  const DialogKeys(this.key, this.valueKey);
 
-  ValueKey<String> get valueKey => ValueKey('dialog.$name');
+  final Key key;
+  final ValueKey<String> valueKey;
 }

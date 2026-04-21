@@ -199,7 +199,7 @@ void main() {
         ),
       );
 
-      final clipRRectMxcImage = find.byKey(LinkPreviewBuilder.clipRRectKey);
+      final clipRRectMxcImage = find.byKey(LinkPreviewBuilder.thumbnailClipKey);
 
       expect(clipRRectMxcImage, findsOneWidget);
 
