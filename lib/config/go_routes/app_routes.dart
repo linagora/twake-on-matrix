@@ -791,7 +791,9 @@ class RoomRoute extends GoRouteData with $RoomRoute {
             context,
             state,
             prefix: 'Share',
-            shareFiles: extra.data as List<MatrixFile?>?,
+            shareFiles: extra.data is List<MatrixFile?>
+                ? extra.data as List<MatrixFile?>
+                : null,
           );
       }
     }
