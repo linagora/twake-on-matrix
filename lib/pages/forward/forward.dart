@@ -152,7 +152,7 @@ class ForwardController extends State<Forward>
         if (!mounted) return;
         switch (success) {
           case ForwardMessageAllDoneState():
-            _handleAllDone(context, success);
+            _handleAllDone(success);
             break;
           case ForwardMessageIsShareFileState(:final shareFile, :final room):
             await showDialog(
@@ -166,12 +166,13 @@ class ForwardController extends State<Forward>
     );
   }
 
-  void _handleAllDone(BuildContext context, ForwardMessageAllDoneState done) {
+  void _handleAllDone(ForwardMessageAllDoneState done) {
+    final navigator = Navigator.of(context);
     if (!mounted) return;
     if (done.totalCount != 1) {
-      final message = _buildMultiForwardSnackbarMessage(context, done);
-      if (Navigator.of(context).canPop()) {
-        Navigator.of(context).pop();
+      final message = _buildMultiForwardSnackbarMessage(done);
+      if (navigator.canPop()) {
+        navigator.pop();
       } else {
         const RoomsRoute().go(context);
       }
@@ -185,27 +186,23 @@ class ForwardController extends State<Forward>
     }
 
     final roomId = selectedRoomIdNotifier.value.firstOrNull;
-    if (Navigator.of(context).canPop()) {
-      Navigator.of(context).pop(const PopResultFromForward());
+    if (navigator.canPop()) {
+      navigator.pop(const PopResultFromForward());
     }
     if (roomId != null) {
       RoomRoute(roomid: roomId).go(context);
     }
   }
 
-  String _buildMultiForwardSnackbarMessage(
-    BuildContext context,
-    ForwardMessageAllDoneState done,
-  ) {
+  String _buildMultiForwardSnackbarMessage(ForwardMessageAllDoneState done) {
+    final l10n = L10n.of(context)!;
     if (done.successCount == 0) {
-      return L10n.of(context)!.forwardFailed;
+      return l10n.forwardFailed;
     }
     if (done.successCount == done.totalCount) {
-      return L10n.of(context)!.forwardedToChats(done.successCount);
+      return l10n.forwardedToChats(done.successCount);
     }
-    return L10n.of(
-      context,
-    )!.forwardedToChatsPartial(done.successCount, done.totalCount);
+    return l10n.forwardedToChatsPartial(done.successCount, done.totalCount);
   }
 
   void _handleForwardMessageOnDone() {

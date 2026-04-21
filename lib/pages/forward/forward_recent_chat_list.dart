@@ -26,51 +26,48 @@ class ForwardRecentChatList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ValueListenableBuilder<List<String>>(
-      valueListenable: selectedChatNotifier,
-      builder: (context, selectedChats, child) {
-        return ListView.builder(
-          padding: EdgeInsets.zero,
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          controller: recentChatScrollController,
-          itemCount: rooms.length,
-          itemBuilder: (BuildContext context, int index) {
-            final room = rooms[index];
-            return Material(
-              borderRadius: RecentChatListStyle.borderRadiusItem,
-              color: LinagoraRefColors.material().primary[100],
-              child: InkWell(
-                borderRadius: RecentChatListStyle.borderRadiusItem,
-                onTap: () => onSelectedChat(room.id),
-                child: Padding(
-                  padding: RecentChatListStyle.paddingVerticalBetweenItem,
-                  child: Row(
-                    children: [
-                      Checkbox(
-                        value: selectedChats.contains(room.id),
-                        onChanged: (_) => onSelectedChat(room.id),
-                      ),
-                      Avatar(
-                        mxContent: room.avatar,
-                        name: room.getLocalizedDisplayname(
-                          MatrixLocals(L10n.of(context)!),
-                        ),
-                        onTap: null,
-                      ),
-                      Expanded(
-                        child: Padding(
-                          padding:
-                              RecentChatListStyle.paddingHorizontalBetweenItem,
-                          child: ChatListItemTitle(room: room),
-                        ),
-                      ),
-                    ],
+    return ListView.builder(
+      padding: EdgeInsets.zero,
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      controller: recentChatScrollController,
+      itemCount: rooms.length,
+      itemBuilder: (BuildContext context, int index) {
+        final room = rooms[index];
+        return Material(
+          borderRadius: RecentChatListStyle.borderRadiusItem,
+          color: LinagoraRefColors.material().primary[100],
+          child: InkWell(
+            borderRadius: RecentChatListStyle.borderRadiusItem,
+            onTap: () => onSelectedChat(room.id),
+            child: Padding(
+              padding: RecentChatListStyle.paddingVerticalBetweenItem,
+              child: Row(
+                children: [
+                  ValueListenableBuilder<List<String>>(
+                    valueListenable: selectedChatNotifier,
+                    builder: (context, selectedChats, _) => Checkbox(
+                      value: selectedChats.contains(room.id),
+                      onChanged: (_) => onSelectedChat(room.id),
+                    ),
                   ),
-                ),
+                  Avatar(
+                    mxContent: room.avatar,
+                    name: room.getLocalizedDisplayname(
+                      MatrixLocals(L10n.of(context)!),
+                    ),
+                    onTap: null,
+                  ),
+                  Expanded(
+                    child: Padding(
+                      padding: RecentChatListStyle.paddingHorizontalBetweenItem,
+                      child: ChatListItemTitle(room: room),
+                    ),
+                  ),
+                ],
               ),
-            );
-          },
+            ),
+          ),
         );
       },
     );

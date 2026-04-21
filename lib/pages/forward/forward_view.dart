@@ -84,13 +84,13 @@ class ForwardView extends StatelessWidget {
             _WebActionsButton(
               selectedChatNotifier: controller.selectedRoomIdNotifier,
               forwardMessageNotifier: controller.forwardMessageNotifier,
-              forwardAction: () => controller.forwardAction(),
+              forwardAction: controller.forwardAction,
             ),
         ],
       ),
       floatingActionButton: controller.isFullScreen
           ? _ForwardButton(
-              forwardAction: () => controller.forwardAction(),
+              forwardAction: controller.forwardAction,
               selectedChatNotifier: controller.selectedRoomIdNotifier,
               forwardMessageNotifier: controller.forwardMessageNotifier,
             )
@@ -116,78 +116,73 @@ class _WebActionsButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: ForwardViewStyle.webActionsButtonPadding,
-      child: ValueListenableBuilder<List<String>>(
-        valueListenable: selectedChatNotifier,
-        builder: ((context, selectedChats, child) {
-          return ValueListenableBuilder<Either<Failure, Success>?>(
-            valueListenable: forwardMessageNotifier,
-            builder: (context, forwardMessageState, child) {
-              if (forwardMessageState == null) {
-                return child!;
-              } else {
-                return forwardMessageState.fold((failure) => child!, (success) {
-                  if (success is ForwardMessageLoading) {
-                    return const SizedBox(
-                      height: ForwardViewStyle.bottomBarHeight,
-                      child: Align(
-                        alignment: Alignment.centerRight,
-                        child: TwakeFloatingActionButton(
-                          customIcon: SizedBox(
-                            child: CupertinoActivityIndicator(),
-                          ),
-                        ),
-                      ),
-                    );
-                  } else {
-                    return const SizedBox();
-                  }
-                });
-              }
-            },
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                TwakeTextButton(
-                  onTap: () => Navigator.of(context).pop(),
-                  message: L10n.of(context)!.cancel,
-                  borderHover: ForwardViewStyle.webActionsButtonBorder,
-                  margin: ForwardViewStyle.webActionsButtonMargin,
-                  buttonDecoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(
-                      ForwardViewStyle.webActionsButtonBorder,
-                    ),
+      child: ValueListenableBuilder<Either<Failure, Success>?>(
+        valueListenable: forwardMessageNotifier,
+        builder: (context, forwardMessageState, child) {
+          if (forwardMessageState == null) {
+            return child!;
+          }
+          return forwardMessageState.fold((failure) => child!, (success) {
+            if (success is ForwardMessageLoading) {
+              return const SizedBox(
+                height: ForwardViewStyle.bottomBarHeight,
+                child: Align(
+                  alignment: Alignment.centerRight,
+                  child: TwakeFloatingActionButton(
+                    customIcon: SizedBox(child: CupertinoActivityIndicator()),
                   ),
-                  styleMessage: Theme.of(context).textTheme.labelLarge
-                      ?.copyWith(color: LinagoraSysColors.material().primary),
                 ),
-                const SizedBox(width: 8.0),
-                TwakeTextButton(
-                  onTap: selectedChats.isNotEmpty ? forwardAction : null,
-                  message: L10n.of(context)!.add,
-                  margin: ForwardViewStyle.webActionsButtonMargin,
-                  borderHover: ForwardViewStyle.webActionsButtonBorder,
-                  buttonDecoration: BoxDecoration(
-                    color: selectedChats.isNotEmpty
-                        ? LinagoraSysColors.material().primary
-                        : LinagoraStateLayer(
-                            LinagoraSysColors.material().onSurface,
-                          ).opacityLayer2,
-                    borderRadius: BorderRadius.circular(
-                      ForwardViewStyle.webActionsButtonBorder,
-                    ),
-                  ),
-                  styleMessage: Theme.of(context).textTheme.labelLarge
-                      ?.copyWith(
-                        color: selectedChats.isNotEmpty
-                            ? LinagoraSysColors.material().onPrimary
-                            : LinagoraSysColors.material().inverseSurface
-                                  .withOpacity(0.6),
-                      ),
+              );
+            }
+            return const SizedBox();
+          });
+        },
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: [
+            TwakeTextButton(
+              onTap: () => Navigator.of(context).pop(),
+              message: L10n.of(context)!.cancel,
+              borderHover: ForwardViewStyle.webActionsButtonBorder,
+              margin: ForwardViewStyle.webActionsButtonMargin,
+              buttonDecoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(
+                  ForwardViewStyle.webActionsButtonBorder,
                 ),
-              ],
+              ),
+              styleMessage: Theme.of(context).textTheme.labelLarge?.copyWith(
+                color: LinagoraSysColors.material().primary,
+              ),
             ),
-          );
-        }),
+            const SizedBox(width: 8.0),
+            ValueListenableBuilder<List<String>>(
+              valueListenable: selectedChatNotifier,
+              builder: (context, selectedChats, _) => TwakeTextButton(
+                onTap: selectedChats.isNotEmpty ? forwardAction : null,
+                message: L10n.of(context)!.add,
+                margin: ForwardViewStyle.webActionsButtonMargin,
+                borderHover: ForwardViewStyle.webActionsButtonBorder,
+                buttonDecoration: BoxDecoration(
+                  color: selectedChats.isNotEmpty
+                      ? LinagoraSysColors.material().primary
+                      : LinagoraStateLayer(
+                          LinagoraSysColors.material().onSurface,
+                        ).opacityLayer2,
+                  borderRadius: BorderRadius.circular(
+                    ForwardViewStyle.webActionsButtonBorder,
+                  ),
+                ),
+                styleMessage: Theme.of(context).textTheme.labelLarge?.copyWith(
+                  color: selectedChats.isNotEmpty
+                      ? LinagoraSysColors.material().onPrimary
+                      : LinagoraSysColors.material().inverseSurface.withOpacity(
+                          0.6,
+                        ),
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -222,23 +217,21 @@ class _ForwardButton extends StatelessWidget {
         builder: (context, forwardMessageState, child) {
           if (forwardMessageState == null) {
             return child!;
-          } else {
-            return forwardMessageState.fold((failure) => child!, (success) {
-              if (success is ForwardMessageLoading) {
-                return const SizedBox(
-                  height: ForwardViewStyle.bottomBarHeight,
-                  child: Align(
-                    alignment: Alignment.centerRight,
-                    child: TwakeFloatingActionButton(
-                      customIcon: SizedBox(child: CupertinoActivityIndicator()),
-                    ),
-                  ),
-                );
-              } else {
-                return const SizedBox();
-              }
-            });
           }
+          return forwardMessageState.fold((failure) => child!, (success) {
+            if (success is ForwardMessageLoading) {
+              return const SizedBox(
+                height: ForwardViewStyle.bottomBarHeight,
+                child: Align(
+                  alignment: Alignment.centerRight,
+                  child: TwakeFloatingActionButton(
+                    customIcon: SizedBox(child: CupertinoActivityIndicator()),
+                  ),
+                ),
+              );
+            }
+            return const SizedBox();
+          });
         },
         child: SizedBox(
           height: ForwardViewStyle.bottomBarHeight,
