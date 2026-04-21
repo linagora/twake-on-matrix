@@ -183,8 +183,8 @@ class LinkPreviewBuilder extends StatelessWidget {
 
   final UrlPreviewPresentation urlPreviewPresentation;
 
-  static ValueKey<String> get clipRRectKey =>
-      LinkPreviewKeys.clipRRect.valueKey;
+  static ValueKey<String> get thumbnailClipKey =>
+      LinkPreviewKeys.thumbnailClip.valueKey;
 
   static ValueKey<String> get mxcImageKey => LinkPreviewKeys.mxcImage.valueKey;
 
@@ -212,7 +212,7 @@ class LinkPreviewBuilder extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           ClipRRect(
-            key: LinkPreviewBuilder.clipRRectKey,
+            key: LinkPreviewBuilder.thumbnailClipKey,
             borderRadius: const BorderRadius.vertical(
               top: Radius.circular(TwakeLinkPreviewItemStyle.radiusBorder),
               bottom: Radius.circular(TwakeLinkPreviewItemStyle.radiusBorder),
