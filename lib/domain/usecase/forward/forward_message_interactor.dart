@@ -21,6 +21,11 @@ class ForwardMessageInteractor {
       final hasMultipleMessages = messages.any((message) => message != null);
       final hasContent = singleMessage != null || hasMultipleMessages;
 
+      if (!hasContent) {
+        yield Left(ForwardEmptyContentFailure());
+        return;
+      }
+
       yield Right(ForwardMessageLoading());
 
       int successCount = 0;
@@ -32,8 +37,6 @@ class ForwardMessageInteractor {
             (element) => element.id == roomId,
           );
           if (room == null || room.membership != Membership.join) continue;
-
-          if (!hasContent) continue;
 
           if (!hasMultipleMessages && singleMessage != null) {
             yield* _forwardOneMessageAction(room: room, message: singleMessage);

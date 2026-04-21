@@ -11,6 +11,7 @@ class ForwardMessageSuccess extends Success {
   final Room room;
 
   const ForwardMessageSuccess(this.room);
+
   @override
   List<Object?> get props => [room];
 }
@@ -22,6 +23,11 @@ class ForwardMessageFailed extends Failure {
 
   @override
   List<Object?> get props => [exception];
+}
+
+class ForwardEmptyContentFailure extends Failure {
+  @override
+  List<Object?> get props => [];
 }
 
 class ForwardMessageIsShareFileState extends Success {
