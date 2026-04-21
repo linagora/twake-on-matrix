@@ -261,7 +261,7 @@ void main() {
       WidgetTester tester,
     ) async {
       await tester.pumpWidget(
-        const MaterialApp(
+        MaterialApp(
           home: Scaffold(
             body: TwakeLinkPreviewItem(
               key: TwakeLinkPreview.twakeLinkPreviewItemKey,
@@ -299,7 +299,7 @@ void main() {
       WidgetTester tester,
     ) async {
       await tester.pumpWidget(
-        const MaterialApp(
+        MaterialApp(
           home: Scaffold(
             body: TwakeLinkPreviewItem(
               key: TwakeLinkPreview.twakeLinkPreviewItemKey,
