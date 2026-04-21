@@ -114,6 +114,7 @@ class _WebActionsButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final linagoraSysColors = LinagoraSysColors.material();
     return Padding(
       padding: ForwardViewStyle.webActionsButtonPadding,
       child: ValueListenableBuilder<Either<Failure, Success>?>(
@@ -134,7 +135,7 @@ class _WebActionsButton extends StatelessWidget {
                 ),
               );
             }
-            return const SizedBox();
+            return const SizedBox.shrink();
           });
         },
         child: Row(
@@ -151,7 +152,7 @@ class _WebActionsButton extends StatelessWidget {
                 ),
               ),
               styleMessage: Theme.of(context).textTheme.labelLarge?.copyWith(
-                color: LinagoraSysColors.material().primary,
+                color: linagoraSysColors.primary,
               ),
             ),
             const SizedBox(width: 8.0),
@@ -164,9 +165,9 @@ class _WebActionsButton extends StatelessWidget {
                 borderHover: ForwardViewStyle.webActionsButtonBorder,
                 buttonDecoration: BoxDecoration(
                   color: selectedChats.isNotEmpty
-                      ? LinagoraSysColors.material().primary
+                      ? linagoraSysColors.primary
                       : LinagoraStateLayer(
-                          LinagoraSysColors.material().onSurface,
+                          linagoraSysColors.onSurface,
                         ).opacityLayer2,
                   borderRadius: BorderRadius.circular(
                     ForwardViewStyle.webActionsButtonBorder,
@@ -174,10 +175,8 @@ class _WebActionsButton extends StatelessWidget {
                 ),
                 styleMessage: Theme.of(context).textTheme.labelLarge?.copyWith(
                   color: selectedChats.isNotEmpty
-                      ? LinagoraSysColors.material().onPrimary
-                      : LinagoraSysColors.material().inverseSurface.withOpacity(
-                          0.6,
-                        ),
+                      ? linagoraSysColors.onPrimary
+                      : linagoraSysColors.inverseSurface.withOpacity(0.6),
                 ),
               ),
             ),
@@ -207,7 +206,7 @@ class _ForwardButton extends StatelessWidget {
       valueListenable: selectedChatNotifier,
       builder: ((context, selectedChats, child) {
         if (selectedChats.isEmpty) {
-          return const SizedBox();
+          return const SizedBox.shrink();
         }
 
         return child!;
@@ -219,18 +218,18 @@ class _ForwardButton extends StatelessWidget {
             return child!;
           }
           return forwardMessageState.fold((failure) => child!, (success) {
-            if (success is ForwardMessageLoading) {
-              return const SizedBox(
-                height: ForwardViewStyle.bottomBarHeight,
-                child: Align(
-                  alignment: Alignment.centerRight,
-                  child: TwakeFloatingActionButton(
-                    customIcon: SizedBox(child: CupertinoActivityIndicator()),
-                  ),
-                ),
-              );
+            if (success is! ForwardMessageLoading) {
+              return const SizedBox.shrink();
             }
-            return const SizedBox();
+            return const SizedBox(
+              height: ForwardViewStyle.bottomBarHeight,
+              child: Align(
+                alignment: Alignment.centerRight,
+                child: TwakeFloatingActionButton(
+                  customIcon: SizedBox(child: CupertinoActivityIndicator()),
+                ),
+              ),
+            );
           });
         },
         child: SizedBox(
