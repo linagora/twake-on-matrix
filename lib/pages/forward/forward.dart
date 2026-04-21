@@ -36,6 +36,8 @@ class ForwardController extends State<Forward>
     with SearchRecentChat, ContactsViewControllerMixin {
   final _forwardMessageInteractor = getIt.get<ForwardMessageInteractor>();
 
+  late MatrixState _matrixState;
+
   final forwardMessageNotifier = ValueNotifier<Either<Failure, Success>?>(null);
 
   StreamSubscription? forwardMessageInteractorStreamSubscription;
@@ -60,6 +62,12 @@ class ForwardController extends State<Forward>
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _matrixState = Matrix.of(context);
+  }
+
+  @override
   void initState() {
     super.initState();
     sendFromRoomId = widget.sendFromRoomId;
@@ -80,15 +88,8 @@ class ForwardController extends State<Forward>
     forwardMessageInteractorStreamSubscription?.cancel();
     // Clear share state in case the stream was cancelled mid-operation
     // and the interactor's own cleanup lines never executed.
-    try {
-      final matrixState = Matrix.of(context);
-      matrixState.shareContent = null;
-      matrixState.shareContentList = null;
-    } catch (e) {
-      Logs().w(
-        'ForwardController::dispose() - failed to clear share state: $e',
-      );
-    }
+    _matrixState.shareContent = null;
+    _matrixState.shareContentList = null;
     disposeSearchRecentChat();
     selectedRoomIdNotifier.dispose();
     super.dispose();
@@ -111,27 +112,32 @@ class ForwardController extends State<Forward>
 
   void forwardAction() async {
     await forwardMessageInteractorStreamSubscription?.cancel();
+    // asyncMap enforces sequential event handling: the next event is not
+    // processed until the async handler for the current one completes.
+    // This prevents ForwardMessageAllDoneState from triggering navigation
+    // while a SendFileDialog is still awaiting user input.
     forwardMessageInteractorStreamSubscription = _forwardMessageInteractor
         .execute(
           rooms: filteredRoomsForAll,
           selectedEvents: selectedRoomIdNotifier.value,
           matrixState: Matrix.of(context),
         )
+        .asyncMap((event) => _handleForwardMessageOnData(context, event))
         .listen(
-          (event) => _handleForwardMessageOnData(context, event),
+          (_) {},
           onDone: _handleForwardMessageOnDone,
           onError: _handleForwardMessageOnError,
         );
   }
 
-  void _handleForwardMessageOnData(
+  Future<void> _handleForwardMessageOnData(
     BuildContext context,
     Either<Failure, Success> event,
-  ) {
+  ) async {
     Logs().d('ForwardController::_handleForwardMessageOnData()');
     forwardMessageNotifier.value = event;
-    event.fold(
-      (failure) {
+    await event.fold(
+      (failure) async {
         Logs().e(
           'ForwardController::_handleForwardMessageOnData() - failure: $failure',
         );

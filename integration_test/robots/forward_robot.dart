@@ -166,4 +166,15 @@ class ForwardRobot extends CoreRobot {
       reason: '"$roomName" should NOT be selected',
     );
   }
+
+  /// Waits for and asserts the multi-forward success snackbar.
+  ///
+  /// [count] is the number of rooms successfully forwarded to.
+  Future<void> verifyMultiForwardSuccessSnackbar(int count) async {
+    // Resolve the expected text via l10n so the assertion stays locale-aware.
+    final expected = _l10n.forwardedToChats(count);
+    final snackbar = $(find.textContaining(expected));
+    await $.waitUntilVisible(snackbar, timeout: const Duration(seconds: 15));
+    expect(snackbar.exists, isTrue, reason: 'Expected snackbar: "$expected"');
+  }
 }

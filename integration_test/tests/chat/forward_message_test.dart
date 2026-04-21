@@ -149,6 +149,9 @@ void main() {
         isFalse,
         reason: 'ForwardView should be dismissed',
       );
+
+      // Success snackbar must confirm delivery to both rooms.
+      await robot.verifyMultiForwardSuccessSnackbar(2);
     },
   );
 }
