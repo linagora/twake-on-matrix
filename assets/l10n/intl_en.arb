@@ -3193,5 +3193,6 @@
   "@cacheIsScanning": {},
   "selectYourServer": "Select your server",
   "welcomeBack": "Welcome back",
-  "matrixIdOrUsername": "Matrix Id or username"
+  "matrixIdOrUsername": "Matrix Id or username",
+  "waitingForResponse": "Waiting for response"
 }

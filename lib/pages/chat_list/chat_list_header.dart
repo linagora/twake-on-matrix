@@ -3,6 +3,7 @@ import 'package:fluffychat/pages/chat_list/chat_list.dart';
 import 'package:fluffychat/pages/chat_list/chat_list_header_style.dart';
 import 'package:fluffychat/pages/search/search.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
+import 'package:fluffychat/widgets/connection_status_header.dart';
 import 'package:fluffychat/widgets/context_menu_builder_ios_paste_without_permission.dart';
 import 'package:fluffychat/widgets/swipe_to_dismiss_wrap.dart';
 import 'package:fluffychat/widgets/twake_components/twake_header.dart';
@@ -31,6 +32,7 @@ class ChatListHeader extends StatelessWidget {
           conversationSelectionNotifier:
               controller.conversationSelectionNotifier,
           onClickAvatar: controller.onClickAvatar,
+          connectionStatusHeaderWidget: const ConnectionStatusHeader(),
         ),
         Container(
           color: ChatListHeaderStyle.responsive.isMobile(context)
