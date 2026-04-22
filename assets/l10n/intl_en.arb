@@ -3194,5 +3194,19 @@
   "selectYourServer": "Select your server",
   "welcomeBack": "Welcome back",
   "matrixIdOrUsername": "Matrix Id or username",
-  "waitingForResponse": "Waiting for response"
+  "waitingForResponse": "Waiting for response",
+  "forwardFailed": "Failed to forward message",
+  "forwardedToChats": "Forwarded to {count} chats",
+  "@forwardedToChats": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "forwardedToChatsPartial": "Forwarded to {successCount} of {totalCount} chats",
+  "@forwardedToChatsPartial": {
+    "placeholders": {
+      "successCount": {},
+      "totalCount": {}
+    }
+  }
 }
