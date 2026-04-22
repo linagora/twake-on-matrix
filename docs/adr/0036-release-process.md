@@ -24,7 +24,7 @@ Weblate pushes translation commits to the `weblate/l10n` remote branch (tracked 
 
 Follow the format already established in the file:
 
-```
+```text
 ## [x.y.z] - YYYY-MM-DD
 ### Added
 - TW-XXXX: Short description, < 80 chars per line
@@ -46,7 +46,8 @@ Rules:
 
 Edit **`pubspec.yaml`** — `version: x.y.z+2330`:
 - `x.y.z` matches the new release tag.
-- `2330` (the integer after `+`) magic number handle by CICD. Don't touch
+- `2330` (the integer after `+`) is managed by CI/CD. Don't touch it.
+
 
 Then commit **only** the version bump and the CHANGELOG update together in a dedicated commit:
 
@@ -63,8 +64,10 @@ Examples: `v2.21.7`, `v2.21.7-rc01`
 
 ```bash
 git tag vx.y.z
-git push origin main
-git push origin refs/tags/vx.y.z
+git push origin main.                  # stable
+# or: git tag vx.y.z-rcNN              # release candidate
+git push origin refs/tags/vx.y.z.      # stable
+# or: git push origin refs/tags/vx.y.z-rcNN
 ```
 
 Pushing a tag that matches `v*.*.*` triggers **both** automated workflows (see §6).
