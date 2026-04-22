@@ -1,3 +1,29 @@
+## [2.22.0] - 2026-04-22
+### Added
+- TW-2963: Forward to multiple rooms
+- Translated using Weblate (French, Irish, Russian, Vietnamese)
+
+### Changed
+- TW-2942: Refactor connection status handling in chat components
+- TW-3568: EventVisibilityResolver and chat-list/timeline visibility rules
+- TW-2973: Update chat room preset to private, remove power level overrides
+- Migrate routing to go_router_builder for type-safe navigation
+- Enhance file picking and upload with sequential reading and task management
+- Sentry: Track wrong member count and missing last message
+
+### Fixed
+- TW-3004: Enhance emoji display in timeline to consider edit events
+- TW-2957: Fix cannot drag scrollbar on web
+- TW-2952: Fix message time overlap and scroll glitch
+- TW-2988: Fix emoji display logic to exclude replies
+- TW-2993: Improve scroll behavior for message replies
+- fix: resolve GoRouter type cast crash when opening pinned messages
+- fix: replace FluffyChat deep link prefix with Twake scheme
+- fix: timeline incorrectly shows message as unread
+
+### Performance
+- perf: fix O(N²) hashCode cascade in ChatAppBarTitle room name resolver
+
 ## [2.21.17] - 2026-04-08
 ### Fixed
 - HOTFIX: Fix disoriented notification avatar (#2992)
