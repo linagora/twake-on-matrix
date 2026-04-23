@@ -144,6 +144,8 @@ class _TwakePageBasedCupertinoPageRoute<T> extends PageRoute<T>
 // ---------------------------------------------------------------------------
 // Gesture detector — copy of _CupertinoBackGestureDetector with configurable
 // backGestureWidth instead of the hardcoded _kBackGestureWidth = 20.0.
+// Sourced from Flutter 3.38.9 (flutter/lib/src/cupertino/route.dart).
+// Keep in sync when upgrading Flutter.
 // ---------------------------------------------------------------------------
 
 class _TwakeCupertinoBackGestureDetector<T> extends StatefulWidget {
