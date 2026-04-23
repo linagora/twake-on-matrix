@@ -65,6 +65,8 @@ part 'app_routes.g.dart';
 
 ResponsiveUtils get _responsive => getIt.get<ResponsiveUtils>();
 
+const double _kWideBackGestureWidth = 100;
+
 FutureOr<String?> _loggedInRedirect(
   BuildContext context,
   GoRouterState state,
@@ -513,7 +515,7 @@ class DraftChatRoute extends GoRouteData with $DraftChatRoute {
   @override
   Page<void> buildPage(BuildContext context, GoRouterState state) =>
       TwakeCupertinoPage(
-        backGestureWidth: 100,
+        backGestureWidth: _kWideBackGestureWidth,
         child: DraftChatAdaptiveScaffold(
           key: Key($extra?['receiverId'] ?? ''),
           state: state,
@@ -831,7 +833,7 @@ class RoomRoute extends GoRouteData with $RoomRoute {
         name: name,
         restorationId: state.pageKey.value,
         child: child,
-        backGestureWidth: 100,
+        backGestureWidth: _kWideBackGestureWidth,
       );
     }
 
@@ -892,7 +894,7 @@ class PinnedMessagesRoute extends GoRouteData with $PinnedMessagesRoute {
       );
     }
     return const TwakeCupertinoPage(
-      backGestureWidth: 100,
+      backGestureWidth: _kWideBackGestureWidth,
       child: PinnedMessages(pinnedEvents: []),
     );
   }
