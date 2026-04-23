@@ -51,6 +51,7 @@ import 'package:fluffychat/widgets/layouts/adaptive_layout/app_adaptive_scaffold
 import 'package:fluffychat/widgets/layouts/agruments/app_adaptive_scaffold_body_args.dart';
 import 'package:fluffychat/widgets/log_view.dart';
 import 'package:fluffychat/widgets/matrix.dart';
+import 'package:fluffychat/widgets/twake_cupertino_page.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -63,6 +64,8 @@ part 'app_routes.g.dart';
 // ---------------------------------------------------------------------------
 
 ResponsiveUtils get _responsive => getIt.get<ResponsiveUtils>();
+
+const double _kWideBackGestureWidth = 100;
 
 FutureOr<String?> _loggedInRedirect(
   BuildContext context,
@@ -130,6 +133,7 @@ class RootRoute extends GoRouteData with $RootRoute {
 )
 class HomeRoute extends GoRouteData with $HomeRoute {
   const HomeRoute({this.$extra});
+
   final bool? $extra;
 
   @override
@@ -236,6 +240,7 @@ class ErrorRoute extends GoRouteData with $ErrorRoute {
 @TypedGoRoute<InvitationLinkWebRoute>(path: '/chat/:matrixid')
 class InvitationLinkWebRoute extends GoRouteData with $InvitationLinkWebRoute {
   const InvitationLinkWebRoute({required this.matrixid});
+
   final String matrixid;
 
   @override
@@ -388,6 +393,7 @@ class StoriesCreateRoute extends GoRouteData with $StoriesCreateRoute {
 
 class StoryRoute extends GoRouteData with $StoryRoute {
   const StoryRoute({required this.roomid});
+
   final String roomid;
 
   @override
@@ -401,6 +407,7 @@ class StoryRoute extends GoRouteData with $StoryRoute {
 
 class StoryShareRoute extends GoRouteData with $StoryShareRoute {
   const StoryShareRoute({required this.roomid});
+
   final String roomid;
 
   @override
@@ -428,6 +435,7 @@ class ArchiveRoute extends GoRouteData with $ArchiveRoute {
 
 class ArchiveRoomRoute extends GoRouteData with $ArchiveRoomRoute {
   const ArchiveRoomRoute({required this.roomid});
+
   final String roomid;
 
   @override
@@ -469,6 +477,7 @@ class NewPrivateChatNewGroupRoute extends GoRouteData
 class NewPrivateChatNewGroupInfoRoute extends GoRouteData
     with $NewPrivateChatNewGroupInfoRoute {
   const NewPrivateChatNewGroupInfoRoute({this.$extra});
+
   final Set<PresentationContact>? $extra;
 
   @override
@@ -492,6 +501,7 @@ class NewGroupRoute extends GoRouteData with $NewGroupRoute {
 
 class DraftChatRoute extends GoRouteData with $DraftChatRoute {
   const DraftChatRoute({this.$extra});
+
   final Map<String, String>? $extra;
 
   @override
@@ -504,7 +514,8 @@ class DraftChatRoute extends GoRouteData with $DraftChatRoute {
 
   @override
   Page<void> buildPage(BuildContext context, GoRouterState state) =>
-      CupertinoPage(
+      TwakeCupertinoPage(
+        backGestureWidth: _kWideBackGestureWidth,
         child: DraftChatAdaptiveScaffold(
           key: Key($extra?['receiverId'] ?? ''),
           state: state,
@@ -516,6 +527,7 @@ class DraftChatRoute extends GoRouteData with $DraftChatRoute {
 
 class ForwardRoute extends GoRouteData with $ForwardRoute {
   const ForwardRoute({this.$extra});
+
   final ForwardArgument? $extra;
 
   @override
@@ -657,6 +669,7 @@ class EmotesRoute extends GoRouteData with $EmotesRoute {
 
 class AddAccountRoute extends GoRouteData with $AddAccountRoute {
   const AddAccountRoute({this.$extra});
+
   final TwakeWelcomeArg? $extra;
 
   @override
@@ -764,6 +777,7 @@ class SecurityContactsVisibilityRoute extends GoRouteData
 
 class RoomRoute extends GoRouteData with $RoomRoute {
   const RoomRoute({required this.roomid, this.event, this.$extra});
+
   final String roomid;
   final String? event; // query param: ?event=xxx
   final Object? $extra;
@@ -819,11 +833,12 @@ class RoomRoute extends GoRouteData with $RoomRoute {
     );
 
     if (_responsive.isMobile(context)) {
-      return CupertinoPage(
+      return TwakeCupertinoPage(
         key: state.pageKey,
         name: name,
         restorationId: state.pageKey.value,
         child: child,
+        backGestureWidth: _kWideBackGestureWidth,
       );
     }
 
@@ -840,6 +855,7 @@ class RoomRoute extends GoRouteData with $RoomRoute {
 
 class EncryptionRoute extends GoRouteData with $EncryptionRoute {
   const EncryptionRoute({required this.roomid});
+
   final String roomid;
 
   @override
@@ -853,6 +869,7 @@ class EncryptionRoute extends GoRouteData with $EncryptionRoute {
 
 class InviteRoute extends GoRouteData with $InviteRoute {
   const InviteRoute({required this.roomid});
+
   final String roomid;
 
   @override
@@ -866,6 +883,7 @@ class InviteRoute extends GoRouteData with $InviteRoute {
 
 class PinnedMessagesRoute extends GoRouteData with $PinnedMessagesRoute {
   const PinnedMessagesRoute({required this.roomid, this.$extra});
+
   final String roomid;
   final PinnedEventsArgument? $extra;
 
@@ -880,6 +898,9 @@ class PinnedMessagesRoute extends GoRouteData with $PinnedMessagesRoute {
         ),
       );
     }
-    return const CupertinoPage(child: PinnedMessages(pinnedEvents: []));
+    return const TwakeCupertinoPage(
+      backGestureWidth: _kWideBackGestureWidth,
+      child: PinnedMessages(pinnedEvents: []),
+    );
   }
 }
