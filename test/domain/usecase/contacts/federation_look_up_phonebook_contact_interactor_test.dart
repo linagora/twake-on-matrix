@@ -1688,6 +1688,113 @@ void main() {
         },
       );
 
+      test('should dedupe when federation and identity return the same mapping '
+          'for one contact (combineContacts)', () async {
+        const identityUrl = 'https://identity.example.com';
+
+        final argumentWithIdentity = FederationLookUpArgument(
+          homeServerUrl: homeserverUrl,
+          withMxId: matrixId,
+          withAccessToken: accessToken,
+          federationUrls: [federationUrl],
+          identityServerUrl: identityUrl,
+        );
+
+        when(
+          mockRepository.fetchContacts(),
+        ).thenAnswer((_) async => testContacts);
+
+        when(
+          mockRequestTokenManager.execute(
+            federationTokenRequest: testTokenRequest,
+          ),
+        ).thenAnswer(
+          (_) async => const Right<Failure, Success>(
+            FederationIdentityRequestTokenSuccess(
+              tokenInformation: tokenInformation,
+            ),
+          ),
+        );
+
+        when(
+          mockIdentityLookupManager.register(
+            federationUrl: anyNamed('federationUrl'),
+            tokenInformation: anyNamed('tokenInformation'),
+          ),
+        ).thenAnswer(
+          (_) async => const FederationRegisterResponse(
+            token: 'aB7c9Dz4EfGh5iJkLm3nOp==',
+          ),
+        );
+
+        const hashDetails = FederationHashDetailsResponse(
+          algorithms: {'sha256'},
+          lookupPepper: 'pepper',
+          altLookupPeppers: {'pepper1'},
+        );
+
+        when(
+          mockIdentityLookupManager.getHashDetails(
+            federationUrl: anyNamed('federationUrl'),
+            registeredToken: anyNamed('registeredToken'),
+          ),
+        ).thenAnswer((_) async => hashDetails);
+
+        const sharedAliceMapping = <String, String>{
+          '6mWe5lBps9Rqabkqc_QIh0-jsdFogvcBi9EWs523fok': '@alice:matrix.org',
+        };
+
+        when(
+          mockIdentityLookupManager.lookupMxid(
+            federationUrl: federationUrl,
+            request: anyNamed('request'),
+            registeredToken: anyNamed('registeredToken'),
+          ),
+        ).thenAnswer(
+          (_) async => const FederationLookupMxidResponse(
+            mappings: sharedAliceMapping,
+            thirdPartyMappings: {},
+          ),
+        );
+
+        when(
+          mockIdentityLookupManager.lookupMxid(
+            federationUrl: identityUrl,
+            request: anyNamed('request'),
+            registeredToken: anyNamed('registeredToken'),
+          ),
+        ).thenAnswer(
+          (_) async => const FederationLookupMxidResponse(
+            mappings: sharedAliceMapping,
+            thirdPartyMappings: {},
+          ),
+        );
+
+        final events = await interactor
+            .execute(argument: argumentWithIdentity)
+            .toList();
+
+        final lastSuccess = events
+            .whereType<Right<Failure, Success>>()
+            .map((e) => e.value)
+            .whereType<GetPhonebookContactsSuccess>()
+            .last;
+
+        expect(lastSuccess.contacts.length, 2);
+        expect(
+          lastSuccess.contacts.where((c) => c.id == 'id_1').length,
+          1,
+          reason: 'Alice must not be duplicated when both sources map her',
+        );
+        final alice = lastSuccess.contacts.firstWhere((c) => c.id == 'id_1');
+        expect(
+          alice.phoneNumbers?.any((p) => p.matrixId == '@alice:matrix.org'),
+          true,
+        );
+        final bob = lastSuccess.contacts.firstWhere((c) => c.id == 'id_2');
+        expect(bob.phoneNumbers?.every((p) => p.matrixId == null), true);
+      });
+
       test(
         'should skip identity server when its URL is in third_party_mappings',
         () async {
