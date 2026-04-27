@@ -10,7 +10,13 @@ extension StringExtension on String {
   }
 
   String get convertToHttps {
-    final domain = split(':').first;
-    return 'https://$domain/';
+    if (startsWith('https://')) {
+      return endsWith('/') ? this : '$this/';
+    }
+    if (startsWith('http://')) {
+      final upgraded = replaceFirst('http://', 'https://');
+      return upgraded.endsWith('/') ? upgraded : '$upgraded/';
+    }
+    return 'https://$this/';
   }
 }

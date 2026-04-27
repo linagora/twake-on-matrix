@@ -1789,6 +1789,191 @@ void main() {
         },
       );
 
+      test(
+        'should skip identity server when third_party key is plain hostname '
+        'and identityServerUrl is full https URL with trailing slash',
+        () async {
+          const identityUrl = 'https://identity.example.com/';
+
+          final argumentWithIdentity = FederationLookUpArgument(
+            homeServerUrl: homeserverUrl,
+            withMxId: matrixId,
+            withAccessToken: accessToken,
+            federationUrls: [federationUrl],
+            identityServerUrl: identityUrl,
+          );
+
+          when(
+            mockRepository.fetchContacts(),
+          ).thenAnswer((_) async => testContacts);
+
+          when(
+            mockRequestTokenManager.execute(
+              federationTokenRequest: anyNamed('federationTokenRequest'),
+            ),
+          ).thenAnswer(
+            (_) async => const Right<Failure, Success>(
+              FederationIdentityRequestTokenSuccess(
+                tokenInformation: tokenInformation,
+              ),
+            ),
+          );
+
+          when(
+            mockIdentityLookupManager.register(
+              federationUrl: anyNamed('federationUrl'),
+              tokenInformation: anyNamed('tokenInformation'),
+            ),
+          ).thenAnswer(
+            (_) async => const FederationRegisterResponse(
+              token: 'aB7c9Dz4EfGh5iJkLm3nOp==',
+            ),
+          );
+
+          const hashDetails = FederationHashDetailsResponse(
+            algorithms: {'sha256'},
+            lookupPepper: 'pepper',
+          );
+
+          when(
+            mockIdentityLookupManager.getHashDetails(
+              federationUrl: anyNamed('federationUrl'),
+              registeredToken: anyNamed('registeredToken'),
+            ),
+          ).thenAnswer((_) async => hashDetails);
+
+          when(
+            mockIdentityLookupManager.lookupMxid(
+              federationUrl: federationUrl,
+              request: anyNamed('request'),
+              registeredToken: anyNamed('registeredToken'),
+            ),
+          ).thenAnswer(
+            (_) async => const FederationLookupMxidResponse(
+              mappings: <String, String>{},
+              thirdPartyMappings: <String, Set<String>>{
+                'identity.example.com': {'some-hash'},
+              },
+            ),
+          );
+
+          when(
+            mockFederationIdentityLookupManager.execute(
+              arguments: anyNamed('arguments'),
+            ),
+          ).thenAnswer(
+            (_) async => const Right<Failure, Success>(
+              FederationIdentityLookupSuccess(newContacts: {}),
+            ),
+          );
+
+          await interactor.execute(argument: argumentWithIdentity).last;
+
+          verify(
+            mockIdentityLookupManager.lookupMxid(
+              federationUrl: federationUrl,
+              request: anyNamed('request'),
+              registeredToken: anyNamed('registeredToken'),
+            ),
+          ).called(1);
+
+          verifyNever(
+            mockIdentityLookupManager.lookupMxid(
+              federationUrl: identityUrl,
+              request: anyNamed('request'),
+              registeredToken: anyNamed('registeredToken'),
+            ),
+          );
+        },
+      );
+
+      test('should skip identity server when third_party key is full https URL '
+          'matching identityServerUrl', () async {
+        const identityUrl = 'https://identity.example.com';
+
+        final argumentWithIdentity = FederationLookUpArgument(
+          homeServerUrl: homeserverUrl,
+          withMxId: matrixId,
+          withAccessToken: accessToken,
+          federationUrls: [federationUrl],
+          identityServerUrl: identityUrl,
+        );
+
+        when(
+          mockRepository.fetchContacts(),
+        ).thenAnswer((_) async => testContacts);
+
+        when(
+          mockRequestTokenManager.execute(
+            federationTokenRequest: anyNamed('federationTokenRequest'),
+          ),
+        ).thenAnswer(
+          (_) async => const Right<Failure, Success>(
+            FederationIdentityRequestTokenSuccess(
+              tokenInformation: tokenInformation,
+            ),
+          ),
+        );
+
+        when(
+          mockIdentityLookupManager.register(
+            federationUrl: anyNamed('federationUrl'),
+            tokenInformation: anyNamed('tokenInformation'),
+          ),
+        ).thenAnswer(
+          (_) async => const FederationRegisterResponse(
+            token: 'aB7c9Dz4EfGh5iJkLm3nOp==',
+          ),
+        );
+
+        const hashDetails = FederationHashDetailsResponse(
+          algorithms: {'sha256'},
+          lookupPepper: 'pepper',
+        );
+
+        when(
+          mockIdentityLookupManager.getHashDetails(
+            federationUrl: anyNamed('federationUrl'),
+            registeredToken: anyNamed('registeredToken'),
+          ),
+        ).thenAnswer((_) async => hashDetails);
+
+        when(
+          mockIdentityLookupManager.lookupMxid(
+            federationUrl: federationUrl,
+            request: anyNamed('request'),
+            registeredToken: anyNamed('registeredToken'),
+          ),
+        ).thenAnswer(
+          (_) async => const FederationLookupMxidResponse(
+            mappings: <String, String>{},
+            thirdPartyMappings: <String, Set<String>>{
+              'https://identity.example.com': {'some-hash'},
+            },
+          ),
+        );
+
+        when(
+          mockFederationIdentityLookupManager.execute(
+            arguments: anyNamed('arguments'),
+          ),
+        ).thenAnswer(
+          (_) async => const Right<Failure, Success>(
+            FederationIdentityLookupSuccess(newContacts: {}),
+          ),
+        );
+
+        await interactor.execute(argument: argumentWithIdentity).last;
+
+        verifyNever(
+          mockIdentityLookupManager.lookupMxid(
+            federationUrl: identityUrl,
+            request: anyNamed('request'),
+            registeredToken: anyNamed('registeredToken'),
+          ),
+        );
+      });
+
       test('should handle empty mappings in lookup response', () async {
         final contacts = [
           ContactFixtures.contact1,
