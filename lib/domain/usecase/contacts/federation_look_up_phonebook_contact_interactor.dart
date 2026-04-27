@@ -192,7 +192,6 @@ class FederationLookUpPhonebookContactInteractor {
                   identitySession: identitySession,
                   chunkContacts: chunkContacts,
                   globalSeenThirdPartyUrls: globalSeenThirdPartyUrls,
-                  argument: argument,
                 )
               : const <Contact>{};
 
@@ -358,12 +357,8 @@ class FederationLookUpPhonebookContactInteractor {
     required _FederationServerSession identitySession,
     required List<Contact> chunkContacts,
     required Set<String> globalSeenThirdPartyUrls,
-    required FederationLookUpArgument argument,
   }) async {
-    if (argument.identityServerUrl != null &&
-        globalSeenThirdPartyUrls.contains(
-          _normalizeUrl(argument.identityServerUrl!),
-        )) {
+    if (globalSeenThirdPartyUrls.contains(_normalizeUrl(identitySession.url))) {
       return const {};
     }
     final Set<Contact> result = {};
