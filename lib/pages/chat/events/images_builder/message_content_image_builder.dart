@@ -109,7 +109,9 @@ class _MessageImageBuilderState extends State<MessageImageBuilder> {
           onTapSelectMode: widget.onTapSelectMode,
           onTapPreview: widget.onTapPreview,
           animated: true,
-          thumbnailOnly: true,
+          // For GIF files, download the full image to preserve animation
+          // For other images, use thumbnail for better performance
+          thumbnailOnly: !widget.event.isGifImage,
         );
       },
     );

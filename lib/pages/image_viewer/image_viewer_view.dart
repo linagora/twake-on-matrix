@@ -130,7 +130,10 @@ class _ImageWidget extends StatelessWidget {
         );
       }
       return FutureBuilder(
-        future: event.downloadAndDecryptAttachment(getThumbnail: true),
+        // Download full image for GIFs to preserve animation
+        future: event.downloadAndDecryptAttachment(
+          getThumbnail: !event.isGifImage,
+        ),
         builder: (context, snapshot) {
           if (snapshot.data == null || snapshot.data!.bytes.isEmpty != false) {
             return const CircularProgressIndicator();
