@@ -277,6 +277,7 @@ class FederationLookUpPhonebookContactInteractor {
     final Set<Contact> fromThirdParty = {};
 
     Object? firstLookupError;
+    StackTrace? firstLookupStackTrace;
     var successfulLookups = 0;
 
     for (final session in sessions) {
@@ -295,8 +296,11 @@ class FederationLookUpPhonebookContactInteractor {
           registeredToken: session.registerToken.token!,
         );
         successfulLookups++;
-      } catch (e) {
-        firstLookupError ??= e;
+      } catch (e, s) {
+        if (firstLookupError == null) {
+          firstLookupError = e;
+          firstLookupStackTrace = s;
+        }
         Logs().e(
           'FederationLookUpPhonebookContactInteractor::_processFederationSessionsForChunk: '
           'lookup failed for ${session.url}',
@@ -339,7 +343,7 @@ class FederationLookUpPhonebookContactInteractor {
     if (sessions.isNotEmpty &&
         successfulLookups == 0 &&
         firstLookupError != null) {
-      throw firstLookupError;
+      Error.throwWithStackTrace(firstLookupError, firstLookupStackTrace!);
     }
 
     return _ChunkSessionResult(
