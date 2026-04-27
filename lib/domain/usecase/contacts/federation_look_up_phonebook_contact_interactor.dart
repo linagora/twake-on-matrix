@@ -109,11 +109,33 @@ class FederationLookUpPhonebookContactInteractor {
         return;
       }
 
-      final tokenRequest = FederationTokenRequest(
-        homeserverUrl: '${argument.homeServerUrl}/',
-        mxid: argument.withMxId,
-        accessToken: argument.withAccessToken,
-      );
+      FederationTokenInformation? sharedTokenInfo;
+      await _federationIdentityRequestTokenManager
+          .execute(
+            federationTokenRequest: FederationTokenRequest(
+              homeserverUrl: '${argument.homeServerUrl}/',
+              mxid: argument.withMxId,
+              accessToken: argument.withAccessToken,
+            ),
+          )
+          .then(
+            (state) => state.fold((failure) {}, (success) {
+              if (success is FederationIdentityRequestTokenSuccess) {
+                sharedTokenInfo = success.tokenInformation;
+              }
+            }),
+          );
+
+      if (sharedTokenInfo == null) {
+        Logs().e(
+          'FederationLookUpPhonebookContactInteractor::execute: '
+          'shared token request returned null',
+        );
+        yield Left(
+          RequestTokenFailure(exception: 'Token is empty', contacts: contacts),
+        );
+        return;
+      }
 
       Failure? firstSetupFailure;
       final List<_FederationServerSession> sessions = [];
@@ -121,7 +143,7 @@ class FederationLookUpPhonebookContactInteractor {
       for (final url in argument.federationUrls) {
         final session = await _setupSession(
           federationUrl: url,
-          tokenRequest: tokenRequest,
+          tokenInfo: sharedTokenInfo!,
           contacts: contacts,
           firstFailureRef: (f) => firstSetupFailure ??= f,
         );
@@ -135,7 +157,7 @@ class FederationLookUpPhonebookContactInteractor {
       if (argument.identityServerUrl != null) {
         identitySession = await _setupSession(
           federationUrl: argument.identityServerUrl!,
-          tokenRequest: tokenRequest,
+          tokenInfo: sharedTokenInfo!,
           contacts: contacts,
           firstFailureRef: (_) {},
         );
@@ -162,6 +184,7 @@ class FederationLookUpPhonebookContactInteractor {
             chunkContacts: chunkContacts,
             argument: argument,
             globalSeenThirdPartyUrls: globalSeenThirdPartyUrls,
+            tokenInfo: sharedTokenInfo!,
           );
 
           final contactsFromIdentity = identitySession != null
@@ -248,6 +271,7 @@ class FederationLookUpPhonebookContactInteractor {
     required List<Contact> chunkContacts,
     required FederationLookUpArgument argument,
     required Set<String> globalSeenThirdPartyUrls,
+    required FederationTokenInformation tokenInfo,
   }) async {
     final Set<Contact> fromMappings = {};
     final Set<Contact> fromThirdParty = {};
@@ -300,6 +324,7 @@ class FederationLookUpPhonebookContactInteractor {
             hashToContactIdMappings: hashing.hashToContactIdMappings,
             newContacts: hashing.contactIdToHashMap.values.toList(),
             argument: argument,
+            tokenInfo: tokenInfo,
           );
           fromThirdParty.addAll(thirdPartyContacts);
         } catch (e) {
@@ -362,42 +387,20 @@ class FederationLookUpPhonebookContactInteractor {
     return result;
   }
 
-  /// Runs request-token → register → hash-details for [federationUrl].
-  /// Returns null if any step fails; [firstFailureRef] receives the first
-  /// [Failure] encountered.
+  /// Runs register → hash-details for [federationUrl] using a pre-fetched
+  /// [tokenInfo]. Returns null if any step fails; [firstFailureRef] receives
+  /// the first [Failure] encountered.
   Future<_FederationServerSession?> _setupSession({
     required String federationUrl,
-    required FederationTokenRequest tokenRequest,
+    required FederationTokenInformation tokenInfo,
     required List<Contact> contacts,
     required void Function(Failure) firstFailureRef,
   }) async {
-    FederationTokenInformation? tokenInfo;
-    await _federationIdentityRequestTokenManager
-        .execute(federationTokenRequest: tokenRequest)
-        .then(
-          (state) => state.fold((failure) {}, (success) {
-            if (success is FederationIdentityRequestTokenSuccess) {
-              tokenInfo = success.tokenInformation;
-            }
-          }),
-        );
-
-    if (tokenInfo == null) {
-      Logs().e(
-        'FederationLookUpPhonebookContactInteractor::_setupSession: '
-        'request token null for $federationUrl',
-      );
-      firstFailureRef(
-        RequestTokenFailure(exception: 'Token is empty', contacts: contacts),
-      );
-      return null;
-    }
-
     FederationRegisterResponse? registerToken;
     try {
       final res = await _identityLookupManager.register(
         federationUrl: federationUrl,
-        tokenInformation: tokenInfo!,
+        tokenInformation: tokenInfo,
       );
       if (res.token == null || res.token!.isEmpty) {
         firstFailureRef(
@@ -519,6 +522,7 @@ class FederationLookUpPhonebookContactInteractor {
     required Map<String, List<String>> hashToContactIdMappings,
     required List<Contact> newContacts,
     required FederationLookUpArgument argument,
+    required FederationTokenInformation tokenInfo,
   }) async {
     final List<Contact> updatedContact = [];
     for (final server in thirdPartyToHashes.keys) {
@@ -533,30 +537,9 @@ class FederationLookUpPhonebookContactInteractor {
         contactsNeedToCalculate[contact.id] = contact;
       }
 
-      FederationTokenInformation? federationIdentityRequestTokenRes;
-      await _federationIdentityRequestTokenManager
-          .execute(
-            federationTokenRequest: FederationTokenRequest(
-              homeserverUrl: "${argument.homeServerUrl}/",
-              mxid: argument.withMxId,
-              accessToken: argument.withAccessToken,
-            ),
-          )
-          .then(
-            (state) => state.fold((failure) {}, (success) {
-              if (success is FederationIdentityRequestTokenSuccess) {
-                federationIdentityRequestTokenRes = success.tokenInformation;
-              }
-            }),
-          );
-
-      if (federationIdentityRequestTokenRes == null) {
-        return [];
-      }
-
       final arguments = FederationArguments(
         federationUrl: server.convertToHttps,
-        tokenInformation: federationIdentityRequestTokenRes!,
+        tokenInformation: tokenInfo,
         contactMaps: contactsNeedToCalculate.toFederationContactMap(),
       );
       final manager = getIt.get<FederationIdentityLookupManager>();
