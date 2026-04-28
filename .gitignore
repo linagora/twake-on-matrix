@@ -84,3 +84,7 @@ test_bundle.dart
 sentry.properties
 
 .fvm
+
+# Playwright
+playwright-report/
+test-results/
