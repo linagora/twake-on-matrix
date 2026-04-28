@@ -1,5 +1,6 @@
+import 'package:fluffychat/presentation/widget_keys/widget_keys.dart';
 import 'package:fluffychat/widgets/twake_components/twake_navigation_icon/twake_navigation_icon.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter_test/flutter_test.dart';
 import 'package:patrol/patrol.dart';
 import '../base/core_robot.dart';
 import 'chat_list_robot.dart';
@@ -18,7 +19,7 @@ class HomeRobot extends CoreRobot {
   }
 
   Future<PatrolFinder> getSettingTab() async {
-    return $(const Key('settings_navigation_destination'));
+    return $(find.byKey(NavigationKeys.settingsDestination.key));
   }
 
   Future<ContactListRobot> gotoContactListScreen() async {

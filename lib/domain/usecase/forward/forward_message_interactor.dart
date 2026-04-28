@@ -1,3 +1,4 @@
+import 'package:collection/collection.dart';
 import 'package:dartz/dartz.dart';
 import 'package:fluffychat/app_state/failure.dart';
 import 'package:fluffychat/app_state/success.dart';
@@ -13,24 +14,56 @@ class ForwardMessageInteractor {
     required MatrixState matrixState,
   }) async* {
     try {
+      final singleMessage = matrixState.shareContent;
+      final messages = List<Map<String, dynamic>?>.from(
+        matrixState.shareContentList,
+      );
+      final hasMultipleMessages = messages.any((message) => message != null);
+      final hasContent = singleMessage != null || hasMultipleMessages;
+
+      if (!hasContent) {
+        yield Left(ForwardEmptyContentFailure());
+        return;
+      }
+
       yield Right(ForwardMessageLoading());
 
-      final room = rooms.firstWhere(
-        (element) => element.id == selectedEvents.first,
-      );
-      if (room.membership == Membership.join) {
-        if (matrixState.shareContentList.isEmpty &&
-            matrixState.shareContent != null) {
-          yield* _forwardOneMessageAction(room: room, matrixState: matrixState);
-        } else {
-          yield* _forwardMultipleMessagesAction(
-            room: room,
-            matrixState: matrixState,
+      int successCount = 0;
+      final totalCount = selectedEvents.length;
+
+      for (final roomId in selectedEvents) {
+        try {
+          final room = rooms.firstWhereOrNull(
+            (element) => element.id == roomId,
           );
+          if (room == null || room.membership != Membership.join) continue;
+
+          if (!hasMultipleMessages && singleMessage != null) {
+            yield* _forwardOneMessageAction(room: room, message: singleMessage);
+          } else {
+            yield* _forwardMultipleMessagesAction(
+              room: room,
+              messages: messages,
+            );
+          }
+          successCount++;
+          yield Right(ForwardMessageSuccess(room));
+        } catch (exception) {
+          yield Left(ForwardMessageFailed(exception: exception));
         }
       }
+
+      yield Right(
+        ForwardMessageAllDoneState(
+          successCount: successCount,
+          totalCount: totalCount,
+        ),
+      );
     } catch (exception) {
       yield Left(ForwardMessageFailed(exception: exception));
+    } finally {
+      matrixState.shareContent = null;
+      matrixState.shareContentList = null;
     }
   }
 
@@ -51,41 +84,19 @@ class ForwardMessageInteractor {
 
   Stream<Either<Failure, Success>> _forwardOneMessageAction({
     required Room room,
-    required MatrixState matrixState,
+    required Map<String, dynamic> message,
   }) async* {
-    try {
-      final message = matrixState.shareContent;
-      if (message != null) {
-        yield* _forwardMessage(message, room);
-        matrixState.shareContent = null;
-      }
-      yield Right(ForwardMessageSuccess(room));
-    } catch (exception) {
-      yield Left(ForwardMessageFailed(exception: exception));
-    }
+    yield* _forwardMessage(message, room);
   }
 
   Stream<Either<Failure, Success>> _forwardMultipleMessagesAction({
     required Room room,
-    required MatrixState matrixState,
+    required List<Map<String, dynamic>?> messages,
   }) async* {
-    try {
-      yield Right(ForwardMessageLoading());
-
-      final messages = matrixState.shareContentList;
-      if (messages.isNotEmpty) {
-        for (final message in messages) {
-          if (message != null) {
-            yield* _forwardMessage(message, room);
-          } else {
-            continue;
-          }
-        }
-        matrixState.shareContentList = null;
+    for (final message in messages) {
+      if (message != null) {
+        yield* _forwardMessage(message, room);
       }
-      yield Right(ForwardMessageSuccess(room));
-    } catch (exception) {
-      yield Left(ForwardMessageFailed(exception: exception));
     }
   }
 }

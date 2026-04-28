@@ -766,7 +766,7 @@ class RoomRoute extends GoRouteData with $RoomRoute {
   const RoomRoute({required this.roomid, this.event, this.$extra});
   final String roomid;
   final String? event; // query param: ?event=xxx
-  final ChatRouterInputArgument? $extra;
+  final Object? $extra;
 
   @override
   FutureOr<String?> redirect(BuildContext context, GoRouterState state) =>
@@ -774,21 +774,26 @@ class RoomRoute extends GoRouteData with $RoomRoute {
 
   @override
   Page<void> buildPage(BuildContext context, GoRouterState state) {
-    if ($extra != null) {
-      switch ($extra!.type) {
+    final extra = $extra is ChatRouterInputArgument
+        ? $extra as ChatRouterInputArgument
+        : null;
+    if (extra != null) {
+      switch (extra.type) {
         case ChatRouterInputArgumentType.draft:
           return _buildRoomPage(
             context,
             state,
             prefix: 'Draft',
-            roomName: $extra!.data is String ? $extra!.data as String? : null,
+            roomName: extra.data is String ? extra.data as String? : null,
           );
         case ChatRouterInputArgumentType.share:
           return _buildRoomPage(
             context,
             state,
             prefix: 'Share',
-            shareFiles: $extra!.data as List<MatrixFile?>?,
+            shareFiles: extra.data is List<MatrixFile?>
+                ? extra.data as List<MatrixFile?>
+                : null,
           );
       }
     }

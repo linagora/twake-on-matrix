@@ -1,4 +1,5 @@
 import 'package:fluffychat/config/first_column_inner_routes.dart';
+import 'package:fluffychat/presentation/widget_keys/widget_keys.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/pages/chat_list/chat_list.dart';
 import 'package:fluffychat/pages/contacts_tab/contacts_tab.dart';
@@ -28,18 +29,8 @@ class AppAdaptiveScaffoldBodyView extends StatelessWidget {
   final ValueNotifier<Profile?> currentProfile;
   final ValueNotifier<String?> activeRoomIdNotifier;
 
-  static const ValueKey scaffoldWithNestedNavigationKey = ValueKey(
-    'ScaffoldWithNestedNavigation',
-  );
-
-  static const ValueKey bottomNavigationKey = ValueKey('BottomNavigation');
-
-  static const ValueKey primaryNavigationKey = ValueKey(
-    'AdaptiveScaffoldPrimaryNavigation',
-  );
-
   const AppAdaptiveScaffoldBodyView({
-    Key? key,
+    super.key,
     required this.activeRoomIdNotifier,
     required this.pageController,
     required this.activeNavigationBarNotifier,
@@ -50,7 +41,7 @@ class AppAdaptiveScaffoldBodyView extends StatelessWidget {
     required this.onOpenSettings,
     this.adaptiveScaffoldBodyArgs,
     required this.currentProfile,
-  }) : super(key: key ?? scaffoldWithNestedNavigationKey);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -73,7 +64,7 @@ class AppAdaptiveScaffoldBodyView extends StatelessWidget {
                       const WidthPlatformBreakpoint(
                         begin: ResponsiveUtils.minDesktopWidth,
                       ): SlotLayout.from(
-                        key: primaryNavigationKey,
+                        key: NavigationKeys.primaryNavigation.valueKey,
                         builder: (_) {
                           return ValueListenableBuilder(
                             valueListenable: activeNavigationBarNotifier,
@@ -124,7 +115,6 @@ class AppAdaptiveScaffoldBodyView extends StatelessWidget {
                                   onDestinationSelected: onDestinationSelected,
                                   onClientSelected: onClientSelected,
                                   destinations: destinations,
-                                  bottomNavigationKey: bottomNavigationKey,
                                   onOpenSettings: onOpenSettings,
                                   adaptiveScaffoldBodyArgs:
                                       adaptiveScaffoldBodyArgs,
@@ -151,7 +141,6 @@ class AppAdaptiveScaffoldBodyView extends StatelessWidget {
                       onDestinationSelected: onDestinationSelected,
                       onClientSelected: onClientSelected,
                       destinations: destinations,
-                      bottomNavigationKey: bottomNavigationKey,
                       onOpenSettings: onOpenSettings,
                       adaptiveScaffoldBodyArgs: adaptiveScaffoldBodyArgs,
                       currentProfile: currentProfile,
@@ -190,7 +179,6 @@ class _ColumnPageView extends StatelessWidget {
   final PageController pageController;
   final OnDestinationSelected onDestinationSelected;
   final OnClientSelectedSetting onClientSelected;
-  final ValueKey bottomNavigationKey;
   final ValueNotifier<String?> activeRoomIdNotifier;
   final VoidCallback onOpenSettings;
   final AbsAppAdaptiveScaffoldBodyArgs? adaptiveScaffoldBodyArgs;
@@ -203,7 +191,6 @@ class _ColumnPageView extends StatelessWidget {
     required this.onDestinationSelected,
     required this.onClientSelected,
     required this.destinations,
-    required this.bottomNavigationKey,
     required this.onOpenSettings,
     required this.adaptiveScaffoldBodyArgs,
     required this.currentProfile,
@@ -269,7 +256,7 @@ class _ColumnPageView extends StatelessWidget {
         const WidthPlatformBreakpoint(
           end: ResponsiveUtils.minDesktopWidth,
         ): SlotLayout.from(
-          key: bottomNavigationKey,
+          key: NavigationKeys.bottomNavigation.valueKey,
           builder: (_) {
             return Container(
               decoration: AppAdaptiveScaffoldBodyViewStyle.navBarBorder,

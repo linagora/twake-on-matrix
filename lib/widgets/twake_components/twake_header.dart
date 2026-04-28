@@ -19,6 +19,7 @@ class TwakeHeader extends StatefulWidget implements PreferredSizeWidget {
   conversationSelectionNotifier;
   final VoidCallback onClickAvatar;
   final Client client;
+  final Widget? connectionStatusHeaderWidget;
 
   const TwakeHeader({
     super.key,
@@ -27,6 +28,7 @@ class TwakeHeader extends StatefulWidget implements PreferredSizeWidget {
     required this.selectModeNotifier,
     required this.conversationSelectionNotifier,
     required this.onClickAvatar,
+    this.connectionStatusHeaderWidget,
   });
 
   @override
@@ -100,7 +102,12 @@ class _TwakeHeaderState extends State<TwakeHeader>
       valueListenable: widget.selectModeNotifier,
       builder: (context, selectMode, _) {
         return selectMode == SelectMode.normal
-            ? TwakeAppBar(title: L10n.of(context)!.chats, context: context)
+            ? TwakeAppBar(
+                title: L10n.of(context)!.chats,
+                context: context,
+                connectionStatusHeaderWidget:
+                    widget.connectionStatusHeaderWidget,
+              )
             : AppBar(
                 backgroundColor: responsive.isMobile(context)
                     ? LinagoraSysColors.material().background

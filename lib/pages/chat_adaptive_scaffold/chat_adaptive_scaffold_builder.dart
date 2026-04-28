@@ -1,7 +1,7 @@
 import 'package:fluffychat/presentation/enum/chat/right_column_type_enum.dart';
+import 'package:fluffychat/presentation/widget_keys/widget_keys.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/utils/responsive/responsive_utils.dart';
-import 'package:fluffychat/widgets/layouts/adaptive_layout/app_adaptive_scaffold.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_adaptive_scaffold/flutter_adaptive_scaffold.dart';
@@ -78,7 +78,7 @@ class ChatAdaptiveScaffoldBuilderController
             body: SlotLayout(
               config: {
                 WidthPlatformBreakpoint(end: breakpoint): SlotLayout.from(
-                  key: AppAdaptiveScaffold.breakpointMobileKey,
+                  key: NavigationKeys.breakpointMobile.key,
                   builder: (_) => Stack(
                     children: [
                       body!,
@@ -92,7 +92,7 @@ class ChatAdaptiveScaffoldBuilderController
                   ),
                 ),
                 WidthPlatformBreakpoint(begin: breakpoint): SlotLayout.from(
-                  key: AppAdaptiveScaffold.breakpointWebAndDesktopKey,
+                  key: NavigationKeys.breakpointWebAndDesktop.key,
                   builder: (_) => Container(
                     decoration: BoxDecoration(
                       border: Border(
@@ -113,13 +113,13 @@ class ChatAdaptiveScaffoldBuilderController
                 ? SlotLayout(
                     config: {
                       WidthPlatformBreakpoint(end: breakpoint): SlotLayout.from(
-                        key: AppAdaptiveScaffold.breakpointMobileKey,
+                        key: NavigationKeys.breakpointMobile.key,
                         builder: null,
                       ),
                       WidthPlatformBreakpoint(
                         begin: breakpoint,
                       ): SlotLayout.from(
-                        key: AppAdaptiveScaffold.breakpointWebAndDesktopKey,
+                        key: NavigationKeys.breakpointWebAndDesktop.key,
                         builder: (_) => widget.rightBuilder(
                           this,
                           isInStack: false,

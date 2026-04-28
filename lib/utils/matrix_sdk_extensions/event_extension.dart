@@ -317,7 +317,7 @@ extension LocalizedBody on Event {
     }
   }
 
-  TextStyle? getMessageTextStyle(BuildContext context) {
+  TextStyle? getMessageTextStyle(BuildContext context, [Timeline? timeline]) {
     if (redacted) {
       return Theme.of(context).textTheme.bodyLarge?.copyWith(
         fontSize: 17,
@@ -326,7 +326,7 @@ extension LocalizedBody on Event {
       );
     }
 
-    if (isDisplayOnlyEmoji()) {
+    if (isDisplayOnlyEmoji(timeline)) {
       return textStyleForOnlyEmoji(context);
     }
 

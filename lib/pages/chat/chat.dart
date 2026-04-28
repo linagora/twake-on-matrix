@@ -32,6 +32,7 @@ import 'package:fluffychat/pages/chat/dialog_reject_invite_widget.dart';
 import 'package:fluffychat/pages/chat/events/message_content_mixin.dart';
 import 'package:fluffychat/pages/chat/input_bar/focus_suggestion_controller.dart';
 import 'package:fluffychat/presentation/enum/chat/right_column_type_enum.dart';
+import 'package:fluffychat/presentation/widget_keys/widget_keys.dart';
 import 'package:fluffychat/presentation/enum/chat/send_media_with_caption_status_enum.dart';
 import 'package:fluffychat/presentation/extensions/client_extension.dart';
 import 'package:fluffychat/presentation/extensions/event_update_extension.dart';
@@ -64,6 +65,7 @@ import 'package:fluffychat/utils/extension/event_status_custom_extension.dart';
 import 'package:fluffychat/utils/extension/global_key_extension.dart';
 import 'package:fluffychat/utils/extension/value_notifier_extension.dart';
 import 'package:fluffychat/utils/localized_exception_extension.dart';
+import 'package:fluffychat/utils/logging/sentry_tracked_events.dart';
 import 'package:fluffychat/utils/manager/upload_manager/upload_manager.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/filtered_timeline_extension.dart';
@@ -188,13 +190,11 @@ class ChatController extends State<Chat>
   final storeRecentReactionsInteractor = getIt
       .get<StoreRecentReactionsInteractor>();
 
-  final ValueKey chatComposerTypeAheadKey = const ValueKey(
-    'chatComposerTypeAheadKey',
-  );
+  final ValueKey<String> chatComposerTypeAheadKey =
+      ChatKeys.composerTypeAhead.valueKey;
 
-  final ValueKey _chatMediaPickerTypeAheadKey = const ValueKey(
-    'chatMediaPickerTypeAheadKey',
-  );
+  final ValueKey<String> _chatMediaPickerTypeAheadKey =
+      ChatKeys.mediaPickerTypeAhead.valueKey;
 
   StreamSubscription? onUpdateEventStreamSubcription;
 
@@ -651,6 +651,21 @@ class ChatController extends State<Chat>
         return;
       }
       if (room?.hasNewMessages == true) {
+        // Log only when lastEvent is absent — scrolling to fullyRead may push it out of view.
+        final lastEventId = room?.lastEvent?.eventId;
+        final lastEventInTimeline =
+            lastEventId != null &&
+            (timeline?.events.any((e) => e.eventId == lastEventId) ?? false);
+        if (lastEventId != null && !lastEventInTimeline) {
+          final fullyReadInTimeline =
+              timeline?.events.any((e) => e.eventId == fullyRead) ?? false;
+          Logs().d(
+            '${SentryTrackedEvents.missingLastMessage.message}: '
+            '_tryLoadTimeline() lastEvent absent, will scroll to fullyRead '
+            '(fullyRead=$fullyRead, fullyReadInTimeline=$fullyReadInTimeline, '
+            'lastEventId=$lastEventId, allowNewEvent=${timeline?.allowNewEvent})',
+          );
+        }
         _initUnreadLocation(fullyRead);
       }
       if (!mounted) return;
@@ -1244,6 +1259,22 @@ class ChatController extends State<Chat>
     }
     timeline?.requestKeys(onlineKeyBackupOnly: false);
     if (room!.markedUnread) room?.markUnread(false);
+
+    // Debug: log if room's lastEvent is absent from the freshly loaded timeline
+    final lastEvent = room?.lastEvent;
+    final loadedEvents = timeline?.events;
+    if (lastEvent != null && loadedEvents != null) {
+      final found = loadedEvents.any((e) => e.eventId == lastEvent.eventId);
+      if (!found) {
+        Logs().d(
+          '${SentryTrackedEvents.missingLastMessage.message}: '
+          '_getTimeline() timeline does not contain room lastEvent '
+          '(lastEventId=${lastEvent.eventId}, contextId=$eventContextId, '
+          'timelineCount=${loadedEvents.length}, '
+          'allowNewEvent=${timeline?.allowNewEvent})',
+        );
+      }
+    }
 
     return;
   }
@@ -3011,12 +3042,24 @@ class ChatController extends State<Chat>
       (event) => event.type == EventTypes.RoomMember,
     );
 
-    final canRequestHistory =
-        timeline!.events
-            .where((event) => event.isVisibleInGui)
-            .toList()
-            .length <
-        _defaultEventCountDisplay;
+    final visibleEvents = timeline!.events
+        .where((event) => event.isVisibleInGui)
+        .toList();
+    final canRequestHistory = visibleEvents.length < _defaultEventCountDisplay;
+
+    // Log only when the room's lastEvent is absent — that's the actual anomaly.
+    final lastEventId = room?.lastEvent?.eventId;
+    final lastEventInTimeline =
+        lastEventId != null &&
+        timeline!.events.any((e) => e.eventId == lastEventId);
+    if (lastEventId != null && !lastEventInTimeline) {
+      Logs().d(
+        '${SentryTrackedEvents.missingLastMessage.message}: '
+        '_tryRequestHistory() lastEvent absent from timeline '
+        '(lastEventId=$lastEventId, visibleEvents=${visibleEvents.length}, '
+        'canRequestHistory=$canRequestHistory)',
+      );
+    }
 
     if (allMembershipEvents || canRequestHistory) {
       try {
