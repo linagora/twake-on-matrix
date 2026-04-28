@@ -16,8 +16,9 @@ class SimCountryProviderImpl implements SimCountryProvider {
     return _cache;
   }
 
+  // Only accept strict ISO 3166-1 alpha-2 codes (exactly two ASCII letters).
   bool _isValidSimCode(String? code) =>
-      code != null && code.isNotEmpty && code != '--';
+      code != null && RegExp(r'^[A-Za-z]{2}$').hasMatch(code);
 
   Future<String?> _resolve() async {
     // 1. Try SIM card country (most accurate for phone number context).
@@ -31,12 +32,22 @@ class SimCountryProviderImpl implements SimCountryProvider {
     }
 
     // 2. Fallback: derive country from device locale.
-    // Handles both POSIX ("fr_FR", "fr_FR.UTF-8") and BCP-47 ("fr-FR") formats.
+    // Handles POSIX ("fr_FR", "fr_FR.UTF-8", "zh_Hans_CN") and BCP-47 ("fr-FR").
     try {
       final locale = Platform.localeName;
       final parts = locale.split(RegExp(r'[_\-]'));
       if (parts.length >= 2) {
-        return parts[1].split('.').first.toUpperCase();
+        // Strip any trailing codec suffix (e.g. ".UTF-8") before validating.
+        String stripped(String s) => s.split('.').first;
+
+        // Prefer the last token (handles "zh_Hans_CN" → "CN");
+        // fall back to the second token only if the last is not a valid alpha-2.
+        final last = stripped(parts.last);
+        final second = stripped(parts[1]);
+        final token = _isValidSimCode(last)
+            ? last
+            : (_isValidSimCode(second) ? second : null);
+        if (token != null) return token.toUpperCase();
       }
     } catch (e) {
       Logs().w('SimCountryProvider: locale unavailable – $e');
