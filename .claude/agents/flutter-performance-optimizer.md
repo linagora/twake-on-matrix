@@ -634,7 +634,7 @@ ValueKey(item.id) // Better!
 **Outside this agent's scope:**
 - Performance profiling → Use `flutter-performance-analyzer`
 - Architecture design → Use `flutter-architect`
-- UI implementation → Use `flutter-ui-implementer`
+- UI implementation → Use the main assistant
 
 ## Output Standards
 
