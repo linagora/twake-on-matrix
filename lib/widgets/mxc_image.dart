@@ -391,7 +391,7 @@ class _MxcImageState extends State<MxcImage>
   bool get wantKeepAlive => widget.keepAlive;
 }
 
-class _ImageWidget extends StatelessWidget {
+class _ImageWidget extends StatefulWidget {
   final String? filePath;
   final Uint8List? data;
   final double? width;
@@ -421,87 +421,119 @@ class _ImageWidget extends StatelessWidget {
   });
 
   @override
+  State<_ImageWidget> createState() => _ImageWidgetState();
+}
+
+class _ImageWidgetState extends State<_ImageWidget> {
+  Future<MatrixImageFile?>? _thumbnailFuture;
+
+  bool get _isVideoData {
+    return widget.event?.messageType == MessageTypes.Video &&
+        widget.data != null &&
+        !widget.isThumbnail;
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _initThumbnailIfNeeded();
+  }
+
+  @override
+  void didUpdateWidget(_ImageWidget oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.data != oldWidget.data ||
+        widget.event != oldWidget.event ||
+        widget.isThumbnail != oldWidget.isThumbnail) {
+      _initThumbnailIfNeeded();
+    }
+  }
+
+  void _initThumbnailIfNeeded() {
+    if (!_isVideoData) return;
+    final matrixVideoFile = MatrixVideoFile(
+      bytes: widget.data!,
+      name:
+          widget.event?.filename ??
+          '${DateTime.now().millisecondsSinceEpoch}.mp4',
+      mimeType: widget.event?.mimeType,
+    );
+    _thumbnailFuture = widget.event?.room.generateVideoThumbnail(
+      matrixVideoFile,
+    );
+  }
+
+  @override
   Widget build(BuildContext context) {
     if (_isVideoData) {
-      final matrixVideoFile = MatrixVideoFile(
-        bytes: data!,
-        name: event?.filename ?? '${DateTime.now().millisecondsSinceEpoch}.mp4',
-        mimeType: event?.mimeType,
-      );
       return FutureBuilder(
-        future: event?.room.generateVideoThumbnail(matrixVideoFile),
+        future: _thumbnailFuture,
         builder: (context, snapshot) {
           if (snapshot.data == null) {
-            return placeholder;
+            return widget.placeholder;
           }
 
           return Image.memory(
             snapshot.data!.bytes,
-            width: width,
-            height: height,
-            cacheWidth: cacheWidth != null
-                ? cacheWidth!
-                : (width != null && needResize)
-                ? context.getCacheSize(width!)
+            width: widget.width,
+            height: widget.height,
+            cacheWidth: widget.cacheWidth != null
+                ? widget.cacheWidth!
+                : (widget.width != null && widget.needResize)
+                ? context.getCacheSize(widget.width!)
                 : null,
-            cacheHeight: cacheHeight != null
-                ? cacheHeight!
-                : (height != null && needResize)
-                ? context.getCacheSize(height!)
+            cacheHeight: widget.cacheHeight != null
+                ? widget.cacheHeight!
+                : (widget.height != null && widget.needResize)
+                ? context.getCacheSize(widget.height!)
                 : null,
-            fit: fit,
+            fit: widget.fit,
             filterQuality: FilterQuality.medium,
-            errorBuilder: imageErrorWidgetBuilder,
+            errorBuilder: widget.imageErrorWidgetBuilder,
           );
         },
       );
     }
-    return filePath != null && filePath!.isNotEmpty
+    return widget.filePath != null && widget.filePath!.isNotEmpty
         ? _ImageNativeBuilder(
-            filePath: filePath,
-            width: width,
-            height: height,
-            cacheWidth: cacheWidth,
-            needResize: needResize,
-            cacheHeight: cacheHeight,
-            fit: fit,
-            event: event,
-            imageErrorWidgetBuilder: imageErrorWidgetBuilder,
+            filePath: widget.filePath,
+            width: widget.width,
+            height: widget.height,
+            cacheWidth: widget.cacheWidth,
+            needResize: widget.needResize,
+            cacheHeight: widget.cacheHeight,
+            fit: widget.fit,
+            event: widget.event,
+            imageErrorWidgetBuilder: widget.imageErrorWidgetBuilder,
           )
-        : data != null
-        ? event?.mimeType == TwakeMimeTypeExtension.avifMimeType
+        : widget.data != null
+        ? widget.event?.mimeType == TwakeMimeTypeExtension.avifMimeType
               ? AvifImage.memory(
-                  data!,
-                  height: height,
-                  width: width,
+                  widget.data!,
+                  height: widget.height,
+                  width: widget.width,
                   fit: BoxFit.cover,
-                  errorBuilder: imageErrorWidgetBuilder,
+                  errorBuilder: widget.imageErrorWidgetBuilder,
                 )
               : Image.memory(
-                  data!,
-                  width: width,
-                  height: height,
-                  cacheWidth: cacheWidth != null
-                      ? cacheWidth!
-                      : (width != null && needResize)
-                      ? context.getCacheSize(width!)
+                  widget.data!,
+                  width: widget.width,
+                  height: widget.height,
+                  cacheWidth: widget.cacheWidth != null
+                      ? widget.cacheWidth!
+                      : (widget.width != null && widget.needResize)
+                      ? context.getCacheSize(widget.width!)
                       : null,
-                  cacheHeight: cacheHeight != null
-                      ? cacheHeight!
-                      : (height != null && needResize)
-                      ? context.getCacheSize(height!)
+                  cacheHeight: widget.cacheHeight != null
+                      ? widget.cacheHeight!
+                      : (widget.height != null && widget.needResize)
+                      ? context.getCacheSize(widget.height!)
                       : null,
-                  fit: fit,
+                  fit: widget.fit,
                   filterQuality: FilterQuality.medium,
-                  errorBuilder: imageErrorWidgetBuilder,
+                  errorBuilder: widget.imageErrorWidgetBuilder,
                 )
         : const SizedBox.shrink();
-  }
-
-  bool get _isVideoData {
-    return event?.messageType == MessageTypes.Video &&
-        data != null &&
-        !isThumbnail;
   }
 }
 
