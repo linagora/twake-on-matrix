@@ -179,13 +179,21 @@ class FederationLookUpPhonebookContactInteractor {
 
       for (final chunkContacts in chunks) {
         try {
-          final sessionsResult = await _processFederationSessionsForChunk(
-            sessions: sessions,
-            chunkContacts: chunkContacts,
-            argument: argument,
-            globalSeenThirdPartyUrls: globalSeenThirdPartyUrls,
-            tokenInfo: sharedTokenInfo!,
-          );
+          _ChunkSessionResult? sessionsResult;
+          Object? federationChunkError;
+          StackTrace? federationChunkStackTrace;
+          try {
+            sessionsResult = await _processFederationSessionsForChunk(
+              sessions: sessions,
+              chunkContacts: chunkContacts,
+              argument: argument,
+              globalSeenThirdPartyUrls: globalSeenThirdPartyUrls,
+              tokenInfo: sharedTokenInfo!,
+            );
+          } catch (e, s) {
+            federationChunkError = e;
+            federationChunkStackTrace = s;
+          }
 
           final contactsFromIdentity = identitySession != null
               ? await _processIdentityServerForChunk(
@@ -195,12 +203,19 @@ class FederationLookUpPhonebookContactInteractor {
                 )
               : const <Contact>{};
 
+          if (federationChunkError != null && contactsFromIdentity.isEmpty) {
+            Error.throwWithStackTrace(
+              federationChunkError,
+              federationChunkStackTrace!,
+            );
+          }
+
           final combinedContacts = chunkContacts.toSet().combineContacts(
             contactsFromMappings: {
-              ...sessionsResult.fromMappings,
+              ...sessionsResult?.fromMappings ?? {},
               ...contactsFromIdentity,
             },
-            contactsFromThirdParty: sessionsResult.fromThirdParty,
+            contactsFromThirdParty: sessionsResult?.fromThirdParty ?? {},
           );
 
           await _storeContactsInHive(
