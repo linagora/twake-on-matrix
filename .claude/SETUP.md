@@ -61,6 +61,11 @@ flutter run --debug \
   --disable-service-auth-codes
 ```
 
+> ⚠️ **Local development only.** `--disable-service-auth-codes` removes the
+> auth token that gates the Dart VM service. Anyone able to reach the port
+> can attach to your running app. Never use this flag on shared, remote, or
+> CI machines, and never expose the VM service port to the network.
+
 Capabilities: screenshots, error monitoring, widget inspection, and **dynamic tool registration** — the app itself can register custom MCP tools at runtime via the `mcp_toolkit` package.
 
 ---

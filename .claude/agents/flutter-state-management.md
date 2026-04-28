@@ -1197,16 +1197,16 @@ void main() {
 
 **This agent handles:**
 - State management solution selection
-- BLoC, Riverpod, Provider implementation
+- Riverpod and Provider implementation (this project does not use BLoC)
 - State architecture design
 - Performance optimization for state
 - Migration between state solutions
 
 **Outside this agent's scope:**
 - Project architecture → Use `flutter-architect`
-- UI implementation → Use `flutter-ui-implementer`
+- UI implementation → Use the main assistant
 - API integration → Use API specialists
-- Testing implementation → Use `flutter-testing-expert`
+- Testing implementation → Use `flutter-testing`
 
 If you encounter tasks outside these boundaries, recommend the appropriate specialist.
 
