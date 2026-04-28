@@ -92,20 +92,14 @@ class FederationLookUpPhonebookContactInteractor {
     try {
       yield const Right(GetPhonebookContactsLoading());
 
+      Failure? fetchFailure;
       final List<Contact> contacts = [];
-      try {
-        final res = await _phonebookContactRepository.fetchContacts();
-        if (res.isEmpty) {
-          yield const Left(GetPhonebookContactsIsEmpty());
-          return;
-        }
-        contacts.addAll(res);
-      } catch (e) {
-        Logs().e(
-          'FederationLookUpPhonebookContactInteractor::execute: fetchContacts',
-          e,
-        );
-        yield Left(GetPhoneBookContactFailure(exception: e));
+      (await _tryFetchContacts()).fold(
+        (f) => fetchFailure = f,
+        contacts.addAll,
+      );
+      if (fetchFailure != null) {
+        yield Left(fetchFailure!);
         return;
       }
 
@@ -179,53 +173,16 @@ class FederationLookUpPhonebookContactInteractor {
 
       for (final chunkContacts in chunks) {
         try {
-          _ChunkSessionResult? sessionsResult;
-          Object? federationChunkError;
-          StackTrace? federationChunkStackTrace;
-          try {
-            sessionsResult = await _processFederationSessionsForChunk(
-              sessions: sessions,
-              chunkContacts: chunkContacts,
-              argument: argument,
-              globalSeenThirdPartyUrls: globalSeenThirdPartyUrls,
-              tokenInfo: sharedTokenInfo!,
-            );
-          } catch (e, s) {
-            federationChunkError = e;
-            federationChunkStackTrace = s;
-          }
-
-          final contactsFromIdentity = identitySession != null
-              ? await _processIdentityServerForChunk(
-                  identitySession: identitySession,
-                  chunkContacts: chunkContacts,
-                  globalSeenThirdPartyUrls: globalSeenThirdPartyUrls,
-                )
-              : const <Contact>{};
-
-          if (federationChunkError != null && contactsFromIdentity.isEmpty) {
-            Error.throwWithStackTrace(
-              federationChunkError,
-              federationChunkStackTrace!,
-            );
-          }
-
-          final combinedContacts = chunkContacts.toSet().combineContacts(
-            contactsFromMappings: {
-              ...sessionsResult?.fromMappings ?? {},
-              ...contactsFromIdentity,
-            },
-            contactsFromThirdParty: sessionsResult?.fromThirdParty ?? {},
+          final combinedContacts = await _processChunkContacts(
+            chunkContacts: chunkContacts,
+            sessions: sessions,
+            identitySession: identitySession,
+            argument: argument,
+            globalSeenThirdPartyUrls: globalSeenThirdPartyUrls,
+            tokenInfo: sharedTokenInfo!,
           );
-
-          await _storeContactsInHive(
-            contacts: combinedContacts,
-            userId: argument.withMxId,
-          );
-
           updatedContact.addAll(combinedContacts);
           progress++;
-
           yield Right(
             GetPhonebookContactsSuccess(
               progress: (progress / chunks.length * 100).toInt(),
@@ -275,6 +232,75 @@ class FederationLookUpPhonebookContactInteractor {
         contacts: updatedContact.toList(),
       ),
     );
+  }
+
+  Future<Either<Failure, List<Contact>>> _tryFetchContacts() async {
+    try {
+      final res = await _phonebookContactRepository.fetchContacts();
+      if (res.isEmpty) return const Left(GetPhonebookContactsIsEmpty());
+      return Right(res);
+    } catch (e) {
+      Logs().e(
+        'FederationLookUpPhonebookContactInteractor::execute: fetchContacts',
+        e,
+      );
+      return Left(GetPhoneBookContactFailure(exception: e));
+    }
+  }
+
+  Future<Set<Contact>> _processChunkContacts({
+    required List<Contact> chunkContacts,
+    required List<_FederationServerSession> sessions,
+    required _FederationServerSession? identitySession,
+    required FederationLookUpArgument argument,
+    required Set<String> globalSeenThirdPartyUrls,
+    required FederationTokenInformation tokenInfo,
+  }) async {
+    _ChunkSessionResult? sessionsResult;
+    Object? federationChunkError;
+    StackTrace? federationChunkStackTrace;
+    try {
+      sessionsResult = await _processFederationSessionsForChunk(
+        sessions: sessions,
+        chunkContacts: chunkContacts,
+        argument: argument,
+        globalSeenThirdPartyUrls: globalSeenThirdPartyUrls,
+        tokenInfo: tokenInfo,
+      );
+    } catch (e, s) {
+      federationChunkError = e;
+      federationChunkStackTrace = s;
+    }
+
+    final contactsFromIdentity = identitySession != null
+        ? await _processIdentityServerForChunk(
+            identitySession: identitySession,
+            chunkContacts: chunkContacts,
+            globalSeenThirdPartyUrls: globalSeenThirdPartyUrls,
+          )
+        : const <Contact>{};
+
+    if (federationChunkError != null && contactsFromIdentity.isEmpty) {
+      Error.throwWithStackTrace(
+        federationChunkError,
+        federationChunkStackTrace!,
+      );
+    }
+
+    final combinedContacts = chunkContacts.toSet().combineContacts(
+      contactsFromMappings: {
+        ...sessionsResult?.fromMappings ?? {},
+        ...contactsFromIdentity,
+      },
+      contactsFromThirdParty: sessionsResult?.fromThirdParty ?? {},
+    );
+
+    await _storeContactsInHive(
+      contacts: combinedContacts,
+      userId: argument.withMxId,
+    );
+
+    return combinedContacts;
   }
 
   /// Processes all federation [sessions] for a single [chunkContacts] slice.
