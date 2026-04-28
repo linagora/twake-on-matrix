@@ -87,7 +87,7 @@ class ServerSearchMessagesList extends StatelessWidget {
                                   ),
                                   searchWord: searchWord,
                                   maxLines: 2,
-                                  style: ChatLitSubSubtitleTextStyleView
+                                  style: ChatListSubSubtitleTextStyleView
                                       .textStyle
                                       .textStyle(room, context),
                                 ),

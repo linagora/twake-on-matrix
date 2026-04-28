@@ -1,4 +1,6 @@
-import 'package:dartz/dartz.dart';
+import 'dart:async';
+
+import 'package:dartz/dartz.dart' hide State;
 import 'package:fluffychat/app_state/failure.dart';
 import 'package:fluffychat/app_state/success.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
@@ -7,7 +9,7 @@ import 'package:fluffychat/domain/usecase/preview_url/get_preview_url_interactor
 import 'package:flutter/material.dart';
 import 'package:matrix/matrix.dart';
 
-mixin GetPreviewUrlMixin {
+mixin GetPreviewUrlMixin<T extends StatefulWidget> on State<T> {
   static const int _defaultPreferredPreviewTimeInMilliseconds = 2000;
 
   final GetPreviewURLInteractor _getPreviewURLInteractor = getIt
@@ -16,6 +18,14 @@ mixin GetPreviewUrlMixin {
   final getPreviewUrlStateNotifier = ValueNotifier<Either<Failure, Success>>(
     Right(GetPreviewUrlInitial()),
   );
+  StreamSubscription<Either<Failure, Success>>? _getPreviewUrlSubscription;
+
+  @override
+  void dispose() {
+    getPreviewUrlStateNotifier.dispose();
+    _getPreviewUrlSubscription?.cancel();
+    super.dispose();
+  }
 
   abstract String debugLabel;
 
@@ -23,7 +33,8 @@ mixin GetPreviewUrlMixin {
     required Uri uri,
     int preferredPreviewTime = _defaultPreferredPreviewTimeInMilliseconds,
   }) {
-    _getPreviewURLInteractor
+    _getPreviewUrlSubscription?.cancel();
+    _getPreviewUrlSubscription = _getPreviewURLInteractor
         .execute(uri: uri, preferredPreviewTime: preferredPreviewTime)
         .listen(
           _handleGetPreviewUrlOnData,
@@ -45,5 +56,10 @@ mixin GetPreviewUrlMixin {
     Logs().e(
       '$debugLabel::_handleGetPreviewUrlOnError() - error: $error | stackTrace: $stackTrace',
     );
+  }
+
+  void clearPreviewUrlState() {
+    _getPreviewUrlSubscription?.cancel();
+    getPreviewUrlStateNotifier.value = Right(GetPreviewUrlInitial());
   }
 }

@@ -18,7 +18,7 @@
       "command": "./.claude/run-patrol",
       "env": {
         "PROJECT_ROOT": ".",
-        "PATROL_FLAGS": "",
+        "PATROL_FLAGS": "--device <YOUR_DEVICE_ID> --dart-define-from-file integration_test/.env.local.do-not-commit",
         "SHOW_TERMINAL": "false"
       }
     }

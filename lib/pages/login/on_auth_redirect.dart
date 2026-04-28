@@ -7,6 +7,7 @@ import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/widgets/layouts/agruments/logged_in_body_args.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:fluffychat/config/go_routes/app_routes.dart';
 import 'package:go_router/go_router.dart';
 import 'package:linagora_design_flutter/colors/linagora_sys_colors.dart';
 import 'package:matrix/matrix.dart';
@@ -45,6 +46,7 @@ class _OnAuthRedirectState extends State<OnAuthRedirect> with ConnectPageMixin {
     Logs().i(
       'StreamDialogBuilder::_listenClientLoginStateChanged - ${event.multipleAccountLoginType}',
     );
+    if (!mounted) return;
     if (event.multipleAccountLoginType ==
         MultipleAccountLoginType.firstLoggedIn) {
       _clientFirstLoggedIn = event.client;
@@ -55,13 +57,14 @@ class _OnAuthRedirectState extends State<OnAuthRedirect> with ConnectPageMixin {
 
   void _handleLoginSuccess() {
     Logs().i('OnAuthRedirect::_handleLoginSuccess');
+    if (!context.mounted) return;
     if (_clientFirstLoggedIn != null) {
       context.go(
         '/rooms',
         extra: LoggedInBodyArgs(newActiveClient: _clientFirstLoggedIn),
       );
     } else {
-      context.go('/home');
+      const HomeRoute().go(context);
     }
   }
 
@@ -71,10 +74,37 @@ class _OnAuthRedirectState extends State<OnAuthRedirect> with ConnectPageMixin {
       error,
       stackTrace,
     );
-    context.go('/home');
+    if (!mounted) return;
+    const HomeRoute().go(context);
   }
 
   Future<void> tryLoggingUsingToken({required BuildContext context}) async {
+    // Read route params SYNCHRONOUSLY before any await — GoRouterState
+    // must not be accessed after an async gap (inherited widget anti-pattern).
+    // AppConfig.homeserver must NOT be captured here on web: on a fresh
+    // /auth.html load after SSO, config.json may not have loaded yet, so
+    // it would still be the default sample value. Resolve it after the
+    // initConfigCompleter await below.
+    final String? loginToken;
+    final String? homeserverFromRoute;
+
+    if (PlatformInfos.isWeb) {
+      loginToken = getQueryParameter('loginToken');
+      homeserverFromRoute = null;
+    } else {
+      final routeParams = GoRouterState.of(context).uri.queryParameters;
+      loginToken = routeParams['loginToken'];
+      homeserverFromRoute = routeParams['homeserver'];
+    }
+
+    if (loginToken == null || loginToken.isEmpty) {
+      _handleLoginError(
+        Exception('tryLoggingUsingToken(): Missing loginToken'),
+        StackTrace.current,
+      );
+      return;
+    }
+
     try {
       final isConfigured = await AppConfig.initConfigCompleter.future;
       if (!isConfigured) {
@@ -83,20 +113,29 @@ class _OnAuthRedirectState extends State<OnAuthRedirect> with ConnectPageMixin {
         } else {
           throw Exception('tryLoggingUsingToken(): Config not found');
         }
-      }
-      final homeserver = AppConfig.homeserver;
-      if (!homeserverIsConfigured) {
-        throw Exception('tryLoggingUsingToken(): Missing homeserver');
+        return;
       }
 
-      final loginToken = getQueryParameter('loginToken');
-      if (loginToken == null || loginToken.isEmpty) {
-        throw Exception('tryLoggingUsingToken(): Missing loginToken');
+      // Resolve homeserver AFTER initConfig: AppConfig.homeserver is now populated.
+      // Route param takes precedence (tests, non-standard deployments);
+      // fallback to AppConfig for standard mobile SSO where the deep link omits it.
+      final homeserver =
+          homeserverFromRoute ??
+          (homeserverIsConfigured ? AppConfig.homeserver : '');
+
+      if (homeserver.isEmpty) {
+        _handleLoginError(
+          Exception('tryLoggingUsingToken(): Missing homeserver'),
+          StackTrace.current,
+        );
+        return;
       }
-      Logs().i('tryLoggingUsingToken::loginToken: $loginToken');
+
+      if (!context.mounted) return;
       Logs().i('tryLoggingUsingToken::homeserver: $homeserver');
       Matrix.of(context).loginType = LoginType.mLoginToken;
       final client = await Matrix.of(context).getLoginClient();
+      if (!context.mounted) return;
       Matrix.of(context).loginHomeserverSummary = await client
           .checkHomeserver(Uri.parse(homeserver))
           .toHomeserverSummary();

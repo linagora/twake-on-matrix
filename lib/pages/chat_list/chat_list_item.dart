@@ -1,4 +1,5 @@
 import 'package:adaptive_dialog/adaptive_dialog.dart';
+import 'package:fluffychat/domain/model/room/room_preview_result.dart';
 import 'package:fluffychat/presentation/mixins/chat_list_item_mixin.dart';
 import 'package:fluffychat/pages/chat_list/chat_list_item_style.dart';
 import 'package:fluffychat/pages/chat_list/chat_list_item_subtitle.dart';
@@ -10,7 +11,7 @@ import 'package:fluffychat/widgets/avatar/avatar.dart';
 import 'package:flutter/material.dart';
 import 'package:fluffychat/generated/l10n/app_localizations.dart';
 
-import 'package:go_router/go_router.dart';
+import 'package:fluffychat/config/go_routes/app_routes.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:matrix/matrix.dart';
 
@@ -26,7 +27,7 @@ class ChatListItem extends StatelessWidget with ChatListItemMixin {
   final void Function()? onTapAvatar;
   final void Function(TapDownDetails)? onSecondaryTapDown;
   final void Function()? onLongPress;
-  final Event? lastEvent;
+  final RoomPreviewResult? previewResult;
 
   const ChatListItem(
     this.room, {
@@ -38,7 +39,7 @@ class ChatListItem extends StatelessWidget with ChatListItemMixin {
     this.onTapAvatar,
     this.onSecondaryTapDown,
     this.onLongPress,
-    this.lastEvent,
+    this.previewResult,
     super.key,
   });
 
@@ -52,10 +53,11 @@ class ChatListItem extends StatelessWidget with ChatListItemMixin {
         );
         return;
       case Membership.leave:
-        context.go('/archive/${room.id}');
+        ArchiveRoomRoute(roomid: room.id).go(context);
+        return;
       case Membership.invite:
       case Membership.join:
-        context.go('/rooms/${room.id}');
+        RoomRoute(roomid: room.id).go(context);
       default:
         return;
     }
@@ -145,9 +147,16 @@ class ChatListItem extends StatelessWidget with ChatListItemMixin {
                     children: [
                       ChatListItemTitle(
                         room: room,
-                        originServerTs: lastEvent?.originServerTs,
+                        originServerTs: switch (previewResult) {
+                          RoomPreviewFound(:final event) =>
+                            event.originServerTs,
+                          _ => null,
+                        },
                       ),
-                      ChatListItemSubtitle(room: room, lastEvent: lastEvent),
+                      ChatListItemSubtitle(
+                        room: room,
+                        previewResult: previewResult,
+                      ),
                     ],
                   ),
                 ),

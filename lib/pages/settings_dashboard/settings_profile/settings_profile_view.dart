@@ -1,4 +1,5 @@
 import 'package:fluffychat/di/global/get_it_initializer.dart';
+import 'package:fluffychat/presentation/widget_keys/widget_keys.dart';
 import 'package:fluffychat/domain/model/capabilities/capabilities_extension.dart';
 import 'package:fluffychat/pages/settings_dashboard/settings_profile/settings_profile.dart';
 import 'package:fluffychat/pages/settings_dashboard/settings_profile/settings_profile_item.dart';
@@ -14,6 +15,7 @@ import 'package:fluffychat/widgets/twake_components/twake_icon_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_adaptive_scaffold/flutter_adaptive_scaffold.dart';
 import 'package:fluffychat/generated/l10n/app_localizations.dart';
+import 'package:fluffychat/config/go_routes/app_routes.dart';
 import 'package:go_router/go_router.dart';
 import 'package:linagora_design_flutter/colors/linagora_sys_colors.dart';
 import 'package:matrix/matrix.dart';
@@ -21,14 +23,6 @@ import 'package:matrix/matrix.dart';
 class SettingsProfileView extends StatelessWidget {
   final SettingsProfileController controller;
   final Capabilities? capabilities;
-
-  static const ValueKey settingsProfileViewMobileKey = ValueKey(
-    'settingsProfileViewMobile',
-  );
-
-  static const ValueKey settingsProfileViewWebKey = ValueKey(
-    'settingsProfileViewWeb',
-  );
 
   const SettingsProfileView({
     super.key,
@@ -56,7 +50,7 @@ class SettingsProfileView extends StatelessWidget {
             TwakeIconButton(
               icon: Icons.qr_code,
               iconColor: LinagoraSysColors.material().primary,
-              onTap: () => context.go('/rooms/profile/qr'),
+              onTap: () => const ProfileQrRoute().go(context),
             ),
           ValueListenableBuilder(
             valueListenable: controller.isEditedProfileNotifier,
@@ -97,7 +91,7 @@ class SettingsProfileView extends StatelessWidget {
           const WidthPlatformBreakpoint(
             end: ResponsiveUtils.minDesktopWidth,
           ): SlotLayout.from(
-            key: settingsProfileViewMobileKey,
+            key: SettingsKeys.profileViewMobile.valueKey,
             builder: (_) {
               return SettingsProfileViewMobile(
                 client: controller.client,
@@ -165,7 +159,7 @@ class SettingsProfileView extends StatelessWidget {
           const WidthPlatformBreakpoint(
             begin: ResponsiveUtils.minDesktopWidth,
           ): SlotLayout.from(
-            key: settingsProfileViewWebKey,
+            key: SettingsKeys.profileViewWeb.valueKey,
             builder: (_) {
               return SettingsProfileViewWeb(
                 currentProfile: controller.currentProfile,

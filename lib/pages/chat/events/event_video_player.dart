@@ -5,6 +5,7 @@ import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/pages/chat/events/message/message_style.dart';
 import 'package:fluffychat/pages/chat/events/message_content_style.dart';
 import 'package:fluffychat/pages/chat_details/chat_details_page_view/media/chat_details_media_style.dart';
+import 'package:fluffychat/utils/extension/build_context_extension.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
 import 'package:fluffychat/widgets/mxc_image.dart';
 import 'package:flutter/material.dart';
@@ -97,6 +98,12 @@ class EventVideoPlayer extends StatelessWidget {
                     File(thumbnailPath!),
                     width: MessageContentStyle.imageBubbleWidth(imageWidth),
                     height: MessageContentStyle.videoBubbleHeight(imageHeight),
+                    cacheWidth: context.getCacheSize(
+                      MessageContentStyle.imageBubbleWidth(imageWidth),
+                    ),
+                    cacheHeight: context.getCacheSize(
+                      MessageContentStyle.videoBubbleHeight(imageHeight),
+                    ),
                     fit: BoxFit.cover,
                   )
                 else

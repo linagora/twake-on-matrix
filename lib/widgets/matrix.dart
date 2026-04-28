@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import 'package:fluffychat/config/go_routes/app_routes.dart';
 import 'package:fluffychat/config/localizations/localization_service.dart';
 import 'package:fluffychat/data/model/federation_server/federation_configuration.dart';
 import 'package:fluffychat/data/model/federation_server/federation_server_information.dart';
@@ -10,6 +11,7 @@ import 'package:fluffychat/domain/model/homeserver_summary.dart';
 import 'package:fluffychat/domain/repository/federation_configurations_repository.dart';
 import 'package:fluffychat/domain/repository/user_info/user_info_repository.dart';
 import 'package:fluffychat/domain/usecase/room/create_support_chat_interactor.dart';
+import 'package:fluffychat/domain/matrix_events/event_type_rules.dart';
 import 'package:fluffychat/event/twake_event_types.dart';
 import 'package:fluffychat/pages/chat/events/audio_message/audio_player_widget.dart';
 import 'package:fluffychat/presentation/mixins/connectivity_mixin.dart';
@@ -510,11 +512,9 @@ class MatrixState extends State<Matrix>
             .where(
               (e) =>
                   e.type == EventUpdateType.timeline &&
-                  [
-                    EventTypes.Message,
-                    EventTypes.Sticker,
-                    EventTypes.Encrypted,
-                  ].contains(e.content['type']) &&
+                  EventTypeRules.messageContentTypes.contains(
+                    e.content['type'],
+                  ) &&
                   e.content['sender'] != currentClient.userID,
             )
             .listen(showLocalNotification);
@@ -1157,9 +1157,9 @@ class MatrixState extends State<Matrix>
     Sentry.configureScope((scope) => scope.setUser(null));
     if (PlatformInfos.isMobile) {
       await _deletePersistActiveAccount();
-      TwakeApp.router.go('/home/twakeWelcome');
+      TwakeApp.router.go(const HomeTwakeWelcomeRoute().location);
     } else {
-      TwakeApp.router.go('/home', extra: true);
+      TwakeApp.router.go(const HomeRoute($extra: true).location, extra: true);
     }
     await _deleteAllTomConfigurations();
   }

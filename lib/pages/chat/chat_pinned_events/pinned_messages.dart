@@ -33,6 +33,7 @@ import 'package:fluffychat/widgets/mixins/popup_menu_widget_style.dart';
 import 'package:fluffychat/widgets/mixins/twake_context_menu_mixin.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:fluffychat/config/go_routes/app_routes.dart';
 import 'package:go_router/go_router.dart';
 import 'package:linagora_design_flutter/colors/linagora_sys_colors.dart';
 import 'package:matrix/matrix.dart';
@@ -247,7 +248,7 @@ class PinnedMessagesController extends State<PinnedMessages>
     } else {
       final currentRoomId = GoRouterState.of(context).pathParameters['roomid'];
       if (currentRoomId != null) {
-        context.go('/rooms/$currentRoomId');
+        RoomRoute(roomid: currentRoomId).go(context);
       }
     }
   }
@@ -393,7 +394,9 @@ class PinnedMessagesController extends State<PinnedMessages>
   }
 
   void jumpToMessage(BuildContext context, Event event) {
-    context.go('/rooms/${event.roomId}?event=${event.eventId}');
+    final roomId = event.roomId;
+    if (roomId == null) return;
+    RoomRoute(roomid: roomId, event: event.eventId).go(context);
   }
 
   void forwardEventAction(Event event) async {
@@ -403,10 +406,9 @@ class PinnedMessagesController extends State<PinnedMessages>
     Logs().d(
       "forwardEventsAction():: shareContent: ${Matrix.of(context).shareContent}",
     );
-    context.go(
-      '/rooms/forward',
-      extra: ForwardArgument(fromRoomId: event.roomId ?? ''),
-    );
+    final fromRoomId = event.roomId ?? room?.id;
+    if (fromRoomId == null) return;
+    ForwardRoute($extra: ForwardArgument(fromRoomId: fromRoomId)).go(context);
   }
 
   void handleContextMenuAction(

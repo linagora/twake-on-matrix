@@ -264,11 +264,7 @@ extension SendFileExtension on Room {
         return null;
       }
 
-      fileInfo = FileInfo(
-        fileInfo.fileName,
-        filePath: fileInfo.filePath,
-        bytes: encryptedFileInfo.data,
-      );
+      fileInfo = fileInfo.copyBytes(encryptedFileInfo.data);
       if (thumbnail != null) {
         try {
           uploadStreamController?.add(
@@ -359,11 +355,9 @@ extension SendFileExtension on Room {
 
         if (thumbnail != null) {
           final thumbnailResponse = await mediaApi.uploadFileMobile(
-            fileInfo: FileInfo(
-              thumbnail.fileName,
-              filePath: thumbnail.filePath,
-              bytes: encryptedThumbnail?.data ?? thumbnail.bytes,
-            ),
+            fileInfo: encryptedThumbnail != null
+                ? thumbnail.copyBytes(encryptedThumbnail.data)
+                : thumbnail,
             cancelToken: cancelToken,
             onSendProgress: (receive, total) {
               if (uploadStreamController?.isClosed == true) return;

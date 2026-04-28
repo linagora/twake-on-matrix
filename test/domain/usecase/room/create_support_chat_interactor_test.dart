@@ -72,10 +72,6 @@ void main() {
           when(mockMediaAPI.uploadFileWeb(file: anyNamed('file'))).thenAnswer(
             (_) async => const UploadFileResponse(contentUri: testAvatarUrl),
           );
-          when(
-            mockPowerLevelManager.getDefaultPowerLevelEventForMember(),
-          ).thenReturn({});
-          when(mockPowerLevelManager.getAdminPowerLevel()).thenReturn(100);
           when(mockPowerLevelManager.getUserPowerLevel()).thenReturn(0);
           when(
             mockClient.createGroupChat(
@@ -83,16 +79,12 @@ void main() {
               enableEncryption: anyNamed('enableEncryption'),
               preset: anyNamed('preset'),
               initialState: anyNamed('initialState'),
-              powerLevelContentOverride: anyNamed('powerLevelContentOverride'),
             ),
           ).thenAnswer((_) async => testRoomId);
           when(mockClient.getRoomById(testRoomId)).thenReturn(mockRoom);
           when(
             mockRoom.invite(testSupportContactId),
           ).thenAnswer((_) async => {});
-          when(
-            mockRoom.setPower(testSupportContactId, 100),
-          ).thenAnswer((_) async => 'event_id');
           when(
             mockRoom.setPower(testUserId, 0),
           ).thenAnswer((_) async => 'event_id');
@@ -126,15 +118,13 @@ void main() {
             mockClient.createGroupChat(
               groupName: 'Support Twake Workplace',
               enableEncryption: false,
-              preset: CreateRoomPreset.trustedPrivateChat,
+              preset: CreateRoomPreset.privateChat,
               initialState: anyNamed('initialState'),
-              powerLevelContentOverride: anyNamed('powerLevelContentOverride'),
             ),
           ).called(1);
           verify(mockRoom.invite(testSupportContactId)).called(1);
-          verify(mockRoom.setPower(testSupportContactId, 100)).called(1);
-          verify(mockRoom.setPower(testUserId, 0)).called(1);
           verify(mockRoom.setFavourite(true)).called(1);
+          verify(mockRoom.setPower(testUserId, 0)).called(1);
           verify(
             mockClient.setAccountData(testUserId, 'app.twake.support_room', {
               'createdSupportChat': testRoomId,
@@ -184,7 +174,6 @@ void main() {
               enableEncryption: anyNamed('enableEncryption'),
               preset: anyNamed('preset'),
               initialState: anyNamed('initialState'),
-              powerLevelContentOverride: anyNamed('powerLevelContentOverride'),
             ),
           );
         },
@@ -208,10 +197,6 @@ void main() {
           when(mockMediaAPI.uploadFileWeb(file: anyNamed('file'))).thenAnswer(
             (_) async => const UploadFileResponse(contentUri: testAvatarUrl),
           );
-          when(
-            mockPowerLevelManager.getDefaultPowerLevelEventForMember(),
-          ).thenReturn({});
-          when(mockPowerLevelManager.getAdminPowerLevel()).thenReturn(100);
           when(mockPowerLevelManager.getUserPowerLevel()).thenReturn(0);
           when(
             mockClient.createGroupChat(
@@ -219,16 +204,12 @@ void main() {
               enableEncryption: anyNamed('enableEncryption'),
               preset: anyNamed('preset'),
               initialState: anyNamed('initialState'),
-              powerLevelContentOverride: anyNamed('powerLevelContentOverride'),
             ),
           ).thenAnswer((_) async => testRoomId);
           when(mockClient.getRoomById(testRoomId)).thenReturn(mockRoom);
           when(
             mockRoom.invite(testSupportContactId),
           ).thenAnswer((_) async => {});
-          when(
-            mockRoom.setPower(testSupportContactId, 100),
-          ).thenAnswer((_) async => 'event_id');
           when(
             mockRoom.setPower(testUserId, 0),
           ).thenAnswer((_) async => 'event_id');
@@ -261,13 +242,11 @@ void main() {
             mockClient.createGroupChat(
               groupName: 'Support Twake Workplace',
               enableEncryption: false,
-              preset: CreateRoomPreset.trustedPrivateChat,
+              preset: CreateRoomPreset.privateChat,
               initialState: anyNamed('initialState'),
-              powerLevelContentOverride: anyNamed('powerLevelContentOverride'),
             ),
           ).called(1);
           verify(mockRoom.invite(testSupportContactId)).called(1);
-          verify(mockRoom.setPower(testSupportContactId, 100)).called(1);
           verify(mockRoom.setPower(testUserId, 0)).called(1);
         },
       );
@@ -307,7 +286,6 @@ void main() {
               enableEncryption: anyNamed('enableEncryption'),
               preset: anyNamed('preset'),
               initialState: anyNamed('initialState'),
-              powerLevelContentOverride: anyNamed('powerLevelContentOverride'),
             ),
           );
         },
@@ -370,7 +348,6 @@ void main() {
             enableEncryption: anyNamed('enableEncryption'),
             preset: anyNamed('preset'),
             initialState: anyNamed('initialState'),
-            powerLevelContentOverride: anyNamed('powerLevelContentOverride'),
           ),
         );
       });
@@ -413,7 +390,6 @@ void main() {
             enableEncryption: anyNamed('enableEncryption'),
             preset: anyNamed('preset'),
             initialState: anyNamed('initialState'),
-            powerLevelContentOverride: anyNamed('powerLevelContentOverride'),
           ),
         );
       });
@@ -432,17 +408,13 @@ void main() {
         when(mockMediaAPI.uploadFileWeb(file: anyNamed('file'))).thenAnswer(
           (_) async => const UploadFileResponse(contentUri: testAvatarUrl),
         );
-        when(
-          mockPowerLevelManager.getDefaultPowerLevelEventForMember(),
-        ).thenReturn({});
-        when(mockPowerLevelManager.getAdminPowerLevel()).thenReturn(100);
+        when(mockPowerLevelManager.getUserPowerLevel()).thenReturn(0);
         when(
           mockClient.createGroupChat(
             groupName: anyNamed('groupName'),
             enableEncryption: anyNamed('enableEncryption'),
             preset: anyNamed('preset'),
             initialState: anyNamed('initialState'),
-            powerLevelContentOverride: anyNamed('powerLevelContentOverride'),
           ),
         ).thenThrow(Exception('Room creation failed'));
 
@@ -466,9 +438,8 @@ void main() {
           mockClient.createGroupChat(
             groupName: 'Support Twake Workplace',
             enableEncryption: false,
-            preset: CreateRoomPreset.trustedPrivateChat,
+            preset: CreateRoomPreset.privateChat,
             initialState: anyNamed('initialState'),
-            powerLevelContentOverride: anyNamed('powerLevelContentOverride'),
           ),
         ).called(1);
       });
@@ -487,17 +458,13 @@ void main() {
         when(mockMediaAPI.uploadFileWeb(file: anyNamed('file'))).thenAnswer(
           (_) async => const UploadFileResponse(contentUri: testAvatarUrl),
         );
-        when(
-          mockPowerLevelManager.getDefaultPowerLevelEventForMember(),
-        ).thenReturn({});
-        when(mockPowerLevelManager.getAdminPowerLevel()).thenReturn(100);
+        when(mockPowerLevelManager.getUserPowerLevel()).thenReturn(0);
         when(
           mockClient.createGroupChat(
             groupName: anyNamed('groupName'),
             enableEncryption: anyNamed('enableEncryption'),
             preset: anyNamed('preset'),
             initialState: anyNamed('initialState'),
-            powerLevelContentOverride: anyNamed('powerLevelContentOverride'),
           ),
         ).thenAnswer((_) async => testRoomId);
         when(mockClient.getRoomById(testRoomId)).thenReturn(null);
@@ -535,24 +502,20 @@ void main() {
         when(mockMediaAPI.uploadFileWeb(file: anyNamed('file'))).thenAnswer(
           (_) async => const UploadFileResponse(contentUri: testAvatarUrl),
         );
-        when(
-          mockPowerLevelManager.getDefaultPowerLevelEventForMember(),
-        ).thenReturn({});
-        when(mockPowerLevelManager.getAdminPowerLevel()).thenReturn(100);
+        when(mockPowerLevelManager.getUserPowerLevel()).thenReturn(0);
         when(
           mockClient.createGroupChat(
             groupName: anyNamed('groupName'),
             enableEncryption: anyNamed('enableEncryption'),
             preset: anyNamed('preset'),
             initialState: anyNamed('initialState'),
-            powerLevelContentOverride: anyNamed('powerLevelContentOverride'),
           ),
         ).thenAnswer((_) async => testRoomId);
         when(mockClient.getRoomById(testRoomId)).thenReturn(mockRoom);
         when(mockRoom.invite(testSupportContactId)).thenAnswer((_) async => {});
         when(
-          mockRoom.setPower(testSupportContactId, 100),
-        ).thenAnswer((_) async => 'event_id');
+          mockClient.setAccountData(testUserId, 'app.twake.support_room', any),
+        ).thenAnswer((_) async => {});
         when(
           mockRoom.setFavourite(true),
         ).thenThrow(Exception('setFavourite failed'));
@@ -574,7 +537,6 @@ void main() {
         );
 
         verify(mockRoom.invite(testSupportContactId)).called(1);
-        verify(mockRoom.setPower(testSupportContactId, 100)).called(1);
         verify(mockRoom.setFavourite(true)).called(1);
       });
     });
@@ -598,17 +560,13 @@ void main() {
           when(mockMediaAPI.uploadFileWeb(file: anyNamed('file'))).thenAnswer(
             (_) async => const UploadFileResponse(contentUri: testAvatarUrl),
           );
-          when(
-            mockPowerLevelManager.getDefaultPowerLevelEventForMember(),
-          ).thenReturn({});
-          when(mockPowerLevelManager.getAdminPowerLevel()).thenReturn(100);
+          when(mockPowerLevelManager.getUserPowerLevel()).thenReturn(0);
           when(
             mockClient.createGroupChat(
               groupName: anyNamed('groupName'),
               enableEncryption: anyNamed('enableEncryption'),
               preset: anyNamed('preset'),
               initialState: anyNamed('initialState'),
-              powerLevelContentOverride: anyNamed('powerLevelContentOverride'),
             ),
           ).thenAnswer((_) async => testRoomId);
           when(mockClient.getRoomById(testRoomId)).thenReturn(mockRoom);
@@ -616,8 +574,12 @@ void main() {
             mockRoom.invite(testSupportContactId),
           ).thenAnswer((_) async => {});
           when(
-            mockRoom.setPower(testSupportContactId, 100),
-          ).thenAnswer((_) async => 'event_id');
+            mockClient.setAccountData(
+              testUserId,
+              'app.twake.support_room',
+              any,
+            ),
+          ).thenAnswer((_) async => {});
           when(
             mockRoom.setFavourite(true),
           ).thenThrow(Exception('setFavourite failed'));
@@ -667,24 +629,20 @@ void main() {
         when(mockMediaAPI.uploadFileWeb(file: anyNamed('file'))).thenAnswer(
           (_) async => const UploadFileResponse(contentUri: testAvatarUrl),
         );
-        when(
-          mockPowerLevelManager.getDefaultPowerLevelEventForMember(),
-        ).thenReturn({});
-        when(mockPowerLevelManager.getAdminPowerLevel()).thenReturn(100);
+        when(mockPowerLevelManager.getUserPowerLevel()).thenReturn(0);
         when(
           mockClient.createGroupChat(
             groupName: anyNamed('groupName'),
             enableEncryption: anyNamed('enableEncryption'),
             preset: anyNamed('preset'),
             initialState: anyNamed('initialState'),
-            powerLevelContentOverride: anyNamed('powerLevelContentOverride'),
           ),
         ).thenAnswer((_) async => testRoomId);
         when(mockClient.getRoomById(testRoomId)).thenReturn(mockRoom);
         when(mockRoom.invite(testSupportContactId)).thenAnswer((_) async => {});
         when(
-          mockRoom.setPower(testSupportContactId, 100),
-        ).thenAnswer((_) async => 'event_id');
+          mockClient.setAccountData(testUserId, 'app.twake.support_room', any),
+        ).thenAnswer((_) async => {});
         when(
           mockRoom.setFavourite(true),
         ).thenThrow(Exception('setFavourite failed'));

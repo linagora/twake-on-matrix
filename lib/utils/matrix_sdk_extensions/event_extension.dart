@@ -1,5 +1,6 @@
 import 'package:collection/collection.dart';
 import 'package:fluffychat/config/app_config.dart';
+import 'package:fluffychat/domain/matrix_events/event_type_rules.dart';
 import 'package:fluffychat/domain/model/extensions/string_extension.dart';
 import 'package:fluffychat/domain/model/room/room_extension.dart';
 import 'package:fluffychat/pages/chat/events/message_reactions.dart';
@@ -9,7 +10,6 @@ import 'package:fluffychat/utils/dialog/twake_dialog.dart';
 import 'package:fluffychat/utils/extension/event_info_extension.dart';
 import 'package:fluffychat/utils/extension/mime_type_extension.dart';
 import 'package:fluffychat/utils/manager/upload_manager/upload_manager.dart';
-import 'package:fluffychat/utils/matrix_sdk_extensions/filtered_timeline_extension.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/utils/size_string.dart';
@@ -157,11 +157,8 @@ extension LocalizedBody on Event {
       return true;
     }
 
-    final isPreviousOrNextEventMessage = {
-      EventTypes.Message,
-      EventTypes.Sticker,
-      EventTypes.Encrypted,
-    }.contains(comparedEvent.type);
+    final isPreviousOrNextEventMessage = EventTypeRules.messageContentTypes
+        .contains(comparedEvent.type);
 
     final isPreviousOrNextEventRedacted = {
       RelationshipTypes.edit,
@@ -265,8 +262,20 @@ extension LocalizedBody on Event {
     return isAttachmentEncrypted;
   }
 
-  bool isDisplayOnlyEmoji() {
-    return onlyEmotes && numberEmotes > 0 && numberEmotes < 7;
+  /// Returns true if message contains only 1-6 emojis and is not a reply.
+  /// Used to display emoji in enlarged size.
+  ///
+  /// When [timeline] is provided, evaluates against the latest edited content
+  /// (display event) so that edits that add text return false, and edits that
+  /// result in emoji-only content return true.
+  bool isDisplayOnlyEmoji([Timeline? timeline]) {
+    if (isCaptionModeOrReply()) return false;
+    final target = timeline != null
+        ? getDisplayEventWithoutEditEvent(timeline)
+        : this;
+    return target.onlyEmotes &&
+        target.numberEmotes > 0 &&
+        target.numberEmotes < 7;
   }
 
   TextStyle? textStyleForOnlyEmoji(BuildContext context) {
@@ -308,7 +317,7 @@ extension LocalizedBody on Event {
     }
   }
 
-  TextStyle? getMessageTextStyle(BuildContext context) {
+  TextStyle? getMessageTextStyle(BuildContext context, [Timeline? timeline]) {
     if (redacted) {
       return Theme.of(context).textTheme.bodyLarge?.copyWith(
         fontSize: 17,
@@ -317,7 +326,7 @@ extension LocalizedBody on Event {
       );
     }
 
-    if (isDisplayOnlyEmoji()) {
+    if (isDisplayOnlyEmoji(timeline)) {
       return textStyleForOnlyEmoji(context);
     }
 
@@ -375,18 +384,6 @@ extension LocalizedBody on Event {
   bool shouldHideRedactedEvent() {
     return AppConfig.hideRedactedEvents &&
         (redacted || type == EventTypes.Redaction);
-  }
-
-  bool shouldHideBannedEvent() {
-    return type == EventTypes.RoomMember && content['membership'] == 'ban';
-  }
-
-  bool shouldHideChangedAvatarEvent() {
-    return isSomeoneChangeAvatar();
-  }
-
-  bool shouldHideChangedDisplayNameEvent() {
-    return isSomeoneChangeDisplayName();
   }
 
   bool hasReactionEvent({required Timeline timeline}) {

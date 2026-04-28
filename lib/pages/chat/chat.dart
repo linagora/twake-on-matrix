@@ -8,6 +8,7 @@ import 'package:desktop_drop/desktop_drop.dart';
 import 'package:fluffychat/app_state/failure.dart';
 import 'package:fluffychat/app_state/success.dart';
 import 'package:fluffychat/config/app_config.dart';
+import 'package:fluffychat/domain/matrix_events/event_type_rules.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/domain/app_state/contact/get_contacts_state.dart';
 import 'package:fluffychat/domain/app_state/room/report_content_state.dart';
@@ -31,6 +32,7 @@ import 'package:fluffychat/pages/chat/dialog_reject_invite_widget.dart';
 import 'package:fluffychat/pages/chat/events/message_content_mixin.dart';
 import 'package:fluffychat/pages/chat/input_bar/focus_suggestion_controller.dart';
 import 'package:fluffychat/presentation/enum/chat/right_column_type_enum.dart';
+import 'package:fluffychat/presentation/widget_keys/widget_keys.dart';
 import 'package:fluffychat/presentation/enum/chat/send_media_with_caption_status_enum.dart';
 import 'package:fluffychat/presentation/extensions/client_extension.dart';
 import 'package:fluffychat/presentation/extensions/event_update_extension.dart';
@@ -63,6 +65,7 @@ import 'package:fluffychat/utils/extension/event_status_custom_extension.dart';
 import 'package:fluffychat/utils/extension/global_key_extension.dart';
 import 'package:fluffychat/utils/extension/value_notifier_extension.dart';
 import 'package:fluffychat/utils/localized_exception_extension.dart';
+import 'package:fluffychat/utils/logging/sentry_tracked_events.dart';
 import 'package:fluffychat/utils/manager/upload_manager/upload_manager.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/filtered_timeline_extension.dart';
@@ -91,6 +94,7 @@ import 'package:fluffychat/generated/l10n/app_localizations.dart';
 import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_typeahead/flutter_typeahead.dart';
+import 'package:fluffychat/config/go_routes/app_routes.dart';
 import 'package:go_router/go_router.dart';
 import 'package:linagora_design_flutter/dialog/options_dialog.dart';
 import 'package:linagora_design_flutter/images_picker/asset_counter.dart';
@@ -155,6 +159,8 @@ class ChatController extends State<Chat>
   /// Flag to prevent auto-loading history/future during programmatic scrolling
   bool _isProgrammaticScrolling = false;
 
+  Timer? _pinToBottomTimer;
+
   /// Completer to wait for timeline updates after requesting history
   Completer<void>? _timelineUpdateCompleter;
 
@@ -184,13 +190,11 @@ class ChatController extends State<Chat>
   final storeRecentReactionsInteractor = getIt
       .get<StoreRecentReactionsInteractor>();
 
-  final ValueKey chatComposerTypeAheadKey = const ValueKey(
-    'chatComposerTypeAheadKey',
-  );
+  final ValueKey<String> chatComposerTypeAheadKey =
+      ChatKeys.composerTypeAhead.valueKey;
 
-  final ValueKey _chatMediaPickerTypeAheadKey = const ValueKey(
-    'chatMediaPickerTypeAheadKey',
-  );
+  final ValueKey<String> _chatMediaPickerTypeAheadKey =
+      ChatKeys.mediaPickerTypeAhead.valueKey;
 
   StreamSubscription? onUpdateEventStreamSubcription;
 
@@ -229,22 +233,18 @@ class ChatController extends State<Chat>
   bool get hasNoMessageEvents {
     if (timeline == null) return true;
 
-    final events = timeline!.events;
-    final visibleEvents = events.where((event) => event.isVisibleInGui);
-    final validEventType = [
-      EventTypes.Message,
-      EventTypes.Sticker,
-      EventTypes.Encrypted,
-      EventTypes.CallInvite,
-    ];
+    final visibleEvents = timeline!.events.where(
+      (event) => event.isVisibleInGui,
+    );
     final validEvents = visibleEvents.where((event) {
+      if (EventTypeRules.userContentTypes.contains(event.type)) {
+        return true;
+      }
       final currentMembership = event.content.tryGet<String>('membership');
       final prevMembership = event.prevContent?.tryGet<String>('membership');
-      final isAcceptInviteEvent =
-          event.type == EventTypes.RoomMember &&
+      return event.type == EventTypes.RoomMember &&
           currentMembership == 'join' &&
           prevMembership == 'invite';
-      return validEventType.contains(event.type) || isAcceptInviteEvent;
     });
     return validEvents.isEmpty;
   }
@@ -259,17 +259,12 @@ class ChatController extends State<Chat>
 
     if (timeline == null) return true;
 
-    final events = timeline!.events;
-    final visibleEvents = events.where((event) => event.isVisibleInGui);
-    final validEventType = [
-      EventTypes.Message,
-      EventTypes.Sticker,
-      EventTypes.Encrypted,
-      EventTypes.CallInvite,
-    ];
-    final validEvents = visibleEvents.where((event) {
-      return validEventType.contains(event.type);
-    });
+    final visibleEvents = timeline!.events.where(
+      (event) => event.isVisibleInGui,
+    );
+    final validEvents = visibleEvents.where(
+      (event) => EventTypeRules.userContentTypes.contains(event.type),
+    );
     return validEvents.isEmpty && isSupportChat;
   }
 
@@ -516,7 +511,7 @@ class ChatController extends State<Chat>
     );
     final roomId = success.result;
     if (roomId == null) return;
-    context.go('/rooms/$roomId');
+    RoomRoute(roomid: roomId).go(context);
   }
 
   Future<void> requestHistory({int? historyCount, StateFilter? filter}) async {
@@ -656,6 +651,21 @@ class ChatController extends State<Chat>
         return;
       }
       if (room?.hasNewMessages == true) {
+        // Log only when lastEvent is absent — scrolling to fullyRead may push it out of view.
+        final lastEventId = room?.lastEvent?.eventId;
+        final lastEventInTimeline =
+            lastEventId != null &&
+            (timeline?.events.any((e) => e.eventId == lastEventId) ?? false);
+        if (lastEventId != null && !lastEventInTimeline) {
+          final fullyReadInTimeline =
+              timeline?.events.any((e) => e.eventId == fullyRead) ?? false;
+          Logs().d(
+            '${SentryTrackedEvents.missingLastMessage.message}: '
+            '_tryLoadTimeline() lastEvent absent, will scroll to fullyRead '
+            '(fullyRead=$fullyRead, fullyReadInTimeline=$fullyReadInTimeline, '
+            'lastEventId=$lastEventId, allowNewEvent=${timeline?.allowNewEvent})',
+          );
+        }
         _initUnreadLocation(fullyRead);
       }
       if (!mounted) return;
@@ -759,7 +769,6 @@ class ChatController extends State<Chat>
   }
 
   Future<void> send() async {
-    scrollDown();
     showEmojiPickerNotifier.value = false;
 
     if (sendController.text.trim().isEmpty) return;
@@ -801,6 +810,9 @@ class ChatController extends State<Chat>
       editEventNotifier.value = null;
       pendingText = '';
     });
+    // Scroll after reply widget collapses and setState rebuilds the layout,
+    // so maxScrollExtent is already correct before we jump.
+    WidgetsBinding.instance.addPostFrameCallback((_) => scrollDown());
   }
 
   void sendStickerAction() async {
@@ -1139,10 +1151,9 @@ class ChatController extends State<Chat>
       );
     }
     _clearSelectEvent();
-    context.push(
-      '/rooms/forward',
-      extra: ForwardArgument(fromRoomId: roomId ?? ''),
-    );
+    ForwardRoute(
+      $extra: ForwardArgument(fromRoomId: roomId ?? ''),
+    ).push(context);
   }
 
   void sendAgainAction() {
@@ -1249,6 +1260,22 @@ class ChatController extends State<Chat>
     timeline?.requestKeys(onlineKeyBackupOnly: false);
     if (room!.markedUnread) room?.markUnread(false);
 
+    // Debug: log if room's lastEvent is absent from the freshly loaded timeline
+    final lastEvent = room?.lastEvent;
+    final loadedEvents = timeline?.events;
+    if (lastEvent != null && loadedEvents != null) {
+      final found = loadedEvents.any((e) => e.eventId == lastEvent.eventId);
+      if (!found) {
+        Logs().d(
+          '${SentryTrackedEvents.missingLastMessage.message}: '
+          '_getTimeline() timeline does not contain room lastEvent '
+          '(lastEventId=${lastEvent.eventId}, contextId=$eventContextId, '
+          'timelineCount=${loadedEvents.length}, '
+          'allowNewEvent=${timeline?.allowNewEvent})',
+        );
+      }
+    }
+
     return;
   }
 
@@ -1283,8 +1310,40 @@ class ChatController extends State<Chat>
           scrollController.position.maxScrollExtent) {
         scrollController.jumpTo(scrollController.position.maxScrollExtent);
       }
+      _keepScrollPinnedToBottom();
     }
     _handleHideStickyTimestamp();
+  }
+
+  void _keepScrollPinnedToBottom({
+    Duration duration = const Duration(milliseconds: 1200),
+  }) {
+    _pinToBottomTimer?.cancel();
+    final deadline = DateTime.now().add(duration);
+    // Set flag to prevent scroll listener from triggering auto-loading
+    _isProgrammaticScrolling = true;
+
+    _pinToBottomTimer = Timer.periodic(const Duration(milliseconds: 16), (
+      timer,
+    ) {
+      if (!mounted || scrollController.positions.isEmpty) {
+        timer.cancel();
+        if (identical(_pinToBottomTimer, timer)) _pinToBottomTimer = null;
+        _isProgrammaticScrolling = false;
+        return;
+      }
+
+      final position = scrollController.position;
+      if (position.pixels < position.maxScrollExtent) {
+        scrollController.jumpTo(position.maxScrollExtent);
+      }
+
+      if (DateTime.now().isAfter(deadline)) {
+        timer.cancel();
+        if (identical(_pinToBottomTimer, timer)) _pinToBottomTimer = null;
+        _isProgrammaticScrolling = false;
+      }
+    });
   }
 
   int getDisplayEventIndex(int eventIndex) {
@@ -2031,7 +2090,7 @@ class ChatController extends State<Chat>
       future: room!.forget,
     );
     if (result.error != null) return;
-    context.go('/archive');
+    const ArchiveRoute().go(context);
   }
 
   void typeEmoji(String emoji) {
@@ -2125,8 +2184,9 @@ class ChatController extends State<Chat>
       ),
     );
     await TwakeDialog.showFutureLoadingDialogFullScreen(future: room!.leave);
-    if (result.error == null) {
-      context.go('/rooms/${result.result}');
+    final newRoomId = result.result;
+    if (result.error == null && newRoomId != null) {
+      RoomRoute(roomid: newRoomId).go(context);
     }
   }
 
@@ -2972,11 +3032,8 @@ class ChatController extends State<Chat>
     _currentChatScrollState = ChatScrollState.scrolling;
   }
 
-  List<String> get getEventTypeToFilterUnnecessaryEvent => [
-    EventTypes.Message,
-    EventTypes.Encrypted,
-    EventTypes.Sticker,
-  ];
+  List<String> get getEventTypeToFilterUnnecessaryEvent =>
+      EventTypeRules.messageContentTypes.toList();
 
   Future<void> _tryRequestHistory() async {
     if (timeline == null) return;
@@ -2985,12 +3042,24 @@ class ChatController extends State<Chat>
       (event) => event.type == EventTypes.RoomMember,
     );
 
-    final canRequestHistory =
-        timeline!.events
-            .where((event) => event.isVisibleInGui)
-            .toList()
-            .length <
-        _defaultEventCountDisplay;
+    final visibleEvents = timeline!.events
+        .where((event) => event.isVisibleInGui)
+        .toList();
+    final canRequestHistory = visibleEvents.length < _defaultEventCountDisplay;
+
+    // Log only when the room's lastEvent is absent — that's the actual anomaly.
+    final lastEventId = room?.lastEvent?.eventId;
+    final lastEventInTimeline =
+        lastEventId != null &&
+        timeline!.events.any((e) => e.eventId == lastEventId);
+    if (lastEventId != null && !lastEventInTimeline) {
+      Logs().d(
+        '${SentryTrackedEvents.missingLastMessage.message}: '
+        '_tryRequestHistory() lastEvent absent from timeline '
+        '(lastEventId=$lastEventId, visibleEvents=${visibleEvents.length}, '
+        'canRequestHistory=$canRequestHistory)',
+      );
+    }
 
     if (allMembershipEvents || canRequestHistory) {
       try {
@@ -3617,7 +3686,7 @@ class ChatController extends State<Chat>
     SchedulerBinding.instance.addPostFrameCallback((_) async {
       if (!mounted) return;
       if (room == null) {
-        return context.go("/error");
+        return const ErrorRoute().go(context);
       }
       _handleReceivedShareFiles();
       _listenRoomUpdateEvent();
@@ -3719,6 +3788,7 @@ class ChatController extends State<Chat>
     inputFocus.dispose();
     searchEmojiFocusNode.dispose();
     composerDebouncer.cancel();
+    _pinToBottomTimer?.cancel();
     focusSuggestionController.dispose();
     _focusSuggestionController.dispose();
     _jumpToEventIdSubscription?.cancel();

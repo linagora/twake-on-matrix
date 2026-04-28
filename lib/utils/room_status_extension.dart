@@ -1,7 +1,6 @@
 import 'package:collection/collection.dart';
 import 'package:fluffychat/generated/l10n/app_localizations.dart';
 import 'package:fluffychat/utils/date_time_extension.dart';
-import 'package:fluffychat/utils/string_extension.dart';
 import 'package:flutter/widgets.dart';
 import 'package:matrix/matrix.dart';
 
@@ -57,32 +56,16 @@ extension RoomStatusExtension on Room {
     if (timeline.events.isEmpty) return [];
     eventId ??= timeline.events.first.eventId;
 
-    final lastReceipts = <User>{};
+    final targetIndex = timeline.events.indexWhere((e) => e.eventId == eventId);
+    if (targetIndex == -1) return [];
 
-    if (receiptState.mainThread != null) {
-      // receiptState contains all users and their last seen event
-      // we checked users that have seen the eventId argument or older
-      final mainThreadReceipts = receiptState.mainThread!.otherUsers.entries
-          .where(
-            (element) => element.value.eventId.isEventIdOlderOrSameAs(
-              timeline,
-              eventId!,
-            ),
-          )
-          .map((e) => unsafeGetUserFromMemoryOrFallback(e.key))
-          .toList();
-      lastReceipts.addAll(mainThreadReceipts);
-    } else {
-      // now we iterate the timeline events until we hit the first rendered event
-      for (final event in timeline.events) {
-        lastReceipts.addAll(event.receipts.map((r) => r.user));
-        if (event.eventId == eventId) {
-          break;
-        }
-      }
-      /* Remove the current user from the receipts list, as we don't want to show that the current user
-      has seen their own message. Because sender always sees their own message.  */
-      lastReceipts.removeWhere((user) => user.id == client.userID);
+    final lastReceipts = <User>{};
+    for (final event in timeline.events.take(targetIndex + 1)) {
+      lastReceipts.addAll(
+        event.receipts
+            .where((r) => r.user.id != client.userID)
+            .map((r) => r.user),
+      );
     }
     return lastReceipts.toList();
   }

@@ -9,7 +9,7 @@ import 'package:adaptive_dialog/adaptive_dialog.dart';
 import 'package:collection/collection.dart' show IterableExtension;
 import 'package:fluffychat/generated/l10n/app_localizations.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
-import 'package:go_router/go_router.dart';
+import 'package:fluffychat/config/go_routes/app_routes.dart';
 import 'package:matrix/matrix.dart';
 import 'package:punycode/punycode.dart';
 import 'package:url_launcher/url_launcher_string.dart';
@@ -164,14 +164,14 @@ class UrlLauncher with GoToDraftChatMixin {
       if (room != null) {
         if (room.isSpace) {
           // TODO: Implement navigate to space
-          context.go('/rooms');
+          const RoomsRoute().go(context);
           return;
         }
         // we have the room, so....just open it
         if (event != null) {
-          context.go('/rooms/${room.id}', extra: {'event': event});
+          RoomRoute(roomid: room.id, event: event).go(context);
         } else {
-          context.go('/rooms/${room.id}');
+          RoomRoute(roomid: room.id).go(context);
         }
         return;
       } else {
@@ -202,10 +202,12 @@ class UrlLauncher with GoToDraftChatMixin {
           await TwakeDialog.showFutureLoadingDialogFullScreen(
             future: () => Future.delayed(const Duration(seconds: 2)),
           );
+          final joinedRoomId = response.result;
+          if (joinedRoomId == null) return;
           if (event != null) {
-            context.go('/rooms/${response.result!}', extra: {'event': event});
+            RoomRoute(roomid: joinedRoomId, event: event).go(context);
           } else {
-            context.go('/rooms/${response.result!}');
+            RoomRoute(roomid: joinedRoomId).go(context);
           }
         }
       }

@@ -1,19 +1,15 @@
-import 'package:fluffychat/domain/app_state/preview_url/get_preview_url_success.dart';
+import 'package:fluffychat/presentation/widget_keys/widget_keys.dart';
 import 'package:fluffychat/pages/chat/events/formatted_text_widget.dart';
-import 'package:fluffychat/presentation/extensions/media/url_preview_extension.dart';
 import 'package:fluffychat/presentation/mixins/linkify_mixin.dart';
+import 'package:fluffychat/presentation/widget_keys/link_preview_keys.dart';
 import 'package:fluffychat/utils/string_extension.dart';
-import 'package:fluffychat/widgets/mixins/get_preview_url_mixin.dart';
 import 'package:fluffychat/widgets/twake_components/twake_preview_link/twake_link_preview_item.dart';
-import 'package:fluffychat/widgets/twake_components/twake_preview_link/twake_link_preview_item_style.dart';
 import 'package:fluffychat/widgets/twake_components/twake_preview_link/twake_link_view.dart';
 import 'package:flutter/material.dart';
-import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:linkfy_text/linkfy_text.dart';
 import 'package:matrix/matrix.dart' hide Visibility;
-import 'package:skeletonizer/skeletonizer.dart';
 
-class TwakeLinkPreview extends StatefulWidget {
+class TwakeLinkPreview extends StatelessWidget with LinkifyMixin {
   final Event event;
   final String localizedBody;
   final bool ownMessage;
@@ -33,47 +29,29 @@ class TwakeLinkPreview extends StatefulWidget {
     this.isCaption = false,
   });
 
-  @override
-  State<TwakeLinkPreview> createState() => TwakeLinkPreviewController();
-}
+  static ValueKey<String> get twakeLinkViewKey =>
+      LinkPreviewKeys.twakeLinkView.valueKey;
 
-class TwakeLinkPreviewController extends State<TwakeLinkPreview>
-    with GetPreviewUrlMixin, LinkifyMixin {
-  String? get firstValidUrl => widget.localizedBody.getFirstValidUrl();
-
-  Uri get uri => Uri.parse(firstValidUrl ?? '');
-
-  static const twakeLinkViewKey = ValueKey('TwakeLinkPreviewKey');
-
-  static const twakeLinkPreviewItemKey = ValueKey('TwakeLinkPreviewItemKey');
-
-  @override
-  String debugLabel = 'TwakeLinkPreviewController';
-
-  @override
-  void initState() {
-    if (firstValidUrl != null) {
-      getPreviewUrl(uri: uri);
-    }
-    super.initState();
-  }
+  static ValueKey<String> get twakeLinkPreviewItemKey =>
+      LinkPreviewKeys.twakeLinkPreviewItem.valueKey;
 
   @override
   Widget build(BuildContext context) {
+    final firstValidUrl = localizedBody.getFirstValidUrl();
     return TwakeLinkView(
       key: twakeLinkViewKey,
       firstValidUrl: firstValidUrl,
-      isCaption: widget.isCaption,
-      body: widget.event.formattedText.isNotEmpty
+      isCaption: isCaption,
+      body: event.formattedText.isNotEmpty
           ? FormattedTextWidget(
-              event: widget.event,
-              linkStyle: widget.linkStyle,
-              fontSize: widget.fontSize,
+              event: event,
+              linkStyle: linkStyle,
+              fontSize: fontSize,
             )
           : MatrixLinkifyText(
-              text: widget.localizedBody,
-              textStyle: widget.richTextStyle,
-              linkStyle: widget.linkStyle,
+              text: localizedBody,
+              textStyle: richTextStyle,
+              linkStyle: linkStyle,
               linkTypes: const [LinkType.url, LinkType.phone, LinkType.date],
               textAlign: TextAlign.start,
               onTapDownLink: (tapDownDetails, link) => handleOnTappedLinkHtml(
@@ -82,94 +60,10 @@ class TwakeLinkPreviewController extends State<TwakeLinkPreview>
                 link: link,
               ),
             ),
-      previewItemWidget: ValueListenableBuilder(
-        valueListenable: getPreviewUrlStateNotifier,
-        builder: (context, state, child) {
-          return state.fold((failure) => const SizedBox.shrink(), (success) {
-            if (success is GetPreviewUrlSuccess) {
-              final previewLink = success.urlPreview.toPresentation();
-              return TwakeLinkPreviewItem(
-                key: twakeLinkPreviewItemKey,
-                ownMessage: widget.ownMessage,
-                urlPreviewPresentation: previewLink,
-                previewLink: firstValidUrl,
-              );
-            }
-            return child!;
-          });
-        },
-        child: Skeletonizer.zone(
-          child: Container(
-            constraints: const BoxConstraints(minWidth: double.infinity),
-            height: TwakeLinkPreviewItemStyle.maxHeightPreviewItem,
-            decoration: ShapeDecoration(
-              color: widget.ownMessage
-                  ? LinagoraRefColors.material().primary[95]
-                  : LinagoraStateLayer(
-                      LinagoraSysColors.material().surfaceTint,
-                    ).opacityLayer1,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(
-                  TwakeLinkPreviewItemStyle.radiusBorder,
-                ),
-              ),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Bone.button(
-                  width: TwakeLinkPreviewItemStyle.heightMxcImagePreview,
-                  height: TwakeLinkPreviewItemStyle.heightMxcImagePreview,
-                  borderRadius: BorderRadius.vertical(
-                    top: Radius.circular(
-                      TwakeLinkPreviewItemStyle.radiusBorder,
-                    ),
-                    bottom: Radius.circular(
-                      TwakeLinkPreviewItemStyle.radiusBorder,
-                    ),
-                  ),
-                ),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Padding(
-                        key: LinkPreviewBuilder.paddingTitleKey,
-                        padding: TwakeLinkPreviewItemStyle.paddingTitle,
-                        child: Column(
-                          children: [
-                            Bone.text(
-                              style: Theme.of(context).textTheme.titleMedium,
-                            ),
-                            TwakeLinkPreviewItemStyle.skeletonizerTextPadding,
-                            Bone.text(
-                              style: Theme.of(context).textTheme.titleMedium,
-                            ),
-                          ],
-                        ),
-                      ),
-                      Padding(
-                        key: LinkPreviewBuilder.paddingSubtitleKey,
-                        padding: TwakeLinkPreviewItemStyle.paddingSubtitle,
-                        child: Column(
-                          children: [
-                            Bone.text(
-                              style: Theme.of(context).textTheme.bodyMedium,
-                            ),
-                            TwakeLinkPreviewItemStyle.skeletonizerTextPadding,
-                            Bone.text(
-                              style: Theme.of(context).textTheme.bodyMedium,
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
+      previewItemWidget: TwakeLinkPreviewItem(
+        key: twakeLinkPreviewItemKey,
+        ownMessage: ownMessage,
+        previewLink: firstValidUrl,
       ),
     );
   }

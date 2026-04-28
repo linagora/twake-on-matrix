@@ -1,4 +1,5 @@
 import 'package:collection/collection.dart';
+import 'package:fluffychat/presentation/widget_keys/widget_keys.dart';
 import 'package:dartz/dartz.dart' hide State;
 import 'package:fluffychat/app_state/failure.dart';
 import 'package:fluffychat/app_state/success.dart';
@@ -21,12 +22,13 @@ import 'package:fluffychat/widgets/matrix.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:fluffychat/config/go_routes/app_routes.dart';
 import 'package:go_router/go_router.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:matrix/matrix.dart' hide Contact;
 
 class ChatProfileInfoDetails extends StatelessWidget {
-  static const Key leaveChatButtonKey = Key('leave_chat_button');
+  static Key get leaveChatButtonKey => ChatKeys.leaveChatButton.key;
 
   const ChatProfileInfoDetails({
     super.key,
@@ -222,18 +224,17 @@ class ChatProfileInfoDetails extends StatelessWidget {
   void _handleSendMessageTap(BuildContext context) {
     if (matrixId == null) return;
     final roomId = Matrix.of(context).client.getDirectChatFromUserId(matrixId!);
+    final router = GoRouter.of(context);
     context.pop();
     if (roomId == null) {
-      context.go(
-        '/rooms/draftChat',
-        extra: {
-          PresentationContactConstant.receiverId: matrixId ?? '',
-          PresentationContactConstant.displayName: displayName ?? '',
-          PresentationContactConstant.status: '',
-        },
-      );
+      final extra = {
+        PresentationContactConstant.receiverId: matrixId ?? '',
+        PresentationContactConstant.displayName: displayName ?? '',
+        PresentationContactConstant.status: '',
+      };
+      router.go(DraftChatRoute($extra: extra).location, extra: extra);
     } else {
-      context.go('/rooms/$roomId');
+      router.go(RoomRoute(roomid: roomId).location);
     }
   }
 }

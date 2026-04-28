@@ -19,8 +19,6 @@ import Intents
 import SwiftUI
 import UserNotifications
 
-import Version
-
 struct NotificationIcon {
     struct GroupInfo {
         let name: String
@@ -113,7 +111,7 @@ extension UNMutableNotificationContent {
         var fetchedImage: INImage?
         let image: INImage
         if let mediaSource = icon.mediaSource {
-            switch await mediaProvider?.loadImageDataFromSource(mediaSource) {
+            switch await mediaProvider?.loadThumbnailForSource(mediaSource, size: CGSize(width: 50, height: 50)) {
             case .success(let data):
                 fetchedImage = INImage(imageData: data)
             case .failure(let error):
@@ -185,10 +183,10 @@ extension UNMutableNotificationContent {
         return updatedContent.mutableCopy() as! UNMutableNotificationContent
     }
 
+    @MainActor
     private func getPlaceholderAvatarImageData(name: String, id: String) async -> Data? {
         // The version value is used in case the design of the placeholder is updated to force a replacement
-        let isIOS17Available = isIOS17Available()
-        let prefix = "notification_placeholder\(isIOS17Available ? "V3" : "V2")"
+        let prefix = "notification_placeholderV4"
         let fileName = "\(prefix)_\(name)_\(id).png"
         if let data = try? Data(contentsOf: URL.temporaryDirectory.appendingPathComponent(fileName)) {
             MXLog.info("Found existing notification icon placeholder")
@@ -200,24 +198,18 @@ extension UNMutableNotificationContent {
                                            contentID: id)
             .clipShape(Circle())
             .frame(width: 50, height: 50)
-        let renderer = await ImageRenderer(content: image)
-        guard let image = await renderer.uiImage else {
+        let renderer = ImageRenderer(content: image)
+
+        // Specify the scale so the image is rendered correctly. We don't have access to the screen
+        // here so a hardcoded 3.0 will have to do.
+        renderer.scale = 3.0
+
+        guard let image = renderer.uiImage else {
             MXLog.info("Generating notification icon placeholder failed")
             return nil
         }
 
-        let data: Data?
-        // On simulator and macOS the image is rendered correctly
-        // But on other devices before iOS 17 is rendered upside down so we need to flip it
-        #if targetEnvironment(simulator)
-        data = image.pngData()
-        #else
-        if ProcessInfo.processInfo.isiOSAppOnMac || isIOS17Available {
-            data = image.pngData()
-        } else {
-            data = image.flippedVertically().pngData()
-        }
-        #endif
+        let data = image.pngData()
 
         if let data {
             do {
@@ -230,23 +222,5 @@ extension UNMutableNotificationContent {
         }
         return data
     }
-    
-    private func isIOS17Available() -> Bool {
-        guard let version = Version(UIDevice.current.systemVersion) else {
-            return false
-        }
-        
-        return version.major >= 17
-    }
 }
 
-private extension UIImage {
-    func flippedVertically() -> UIImage {
-        let format = UIGraphicsImageRendererFormat()
-        format.scale = scale
-        return UIGraphicsImageRenderer(size: size, format: format).image { context in
-            context.cgContext.concatenate(CGAffineTransform(scaleX: 1, y: -1))
-            self.draw(at: CGPoint(x: 0, y: -size.height))
-        }
-    }
-}

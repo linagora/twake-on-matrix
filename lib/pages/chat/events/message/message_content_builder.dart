@@ -55,6 +55,7 @@ class MessageContentBuilder extends StatelessWidget
             Message.responsiveUtils.isMobile(context),
           ),
           isEdited: event.hasAggregatedEvents(timeline, RelationshipTypes.edit),
+          timeline: timeline,
         );
         final stepWidth = sizeMessageBubble?.totalMessageWidth;
         final isNeedAddNewLine = sizeMessageBubble?.isNeedAddNewLine ?? false;

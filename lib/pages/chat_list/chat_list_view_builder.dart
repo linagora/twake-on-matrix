@@ -22,7 +22,7 @@ class ChatListViewBuilder extends StatelessWidget {
     return ChatListSortRooms(
       rooms: rooms,
       sortingRoomsNotifier: controller.sortingRoomsNotifier,
-      builder: (sortedRooms, lastEventByRoomId) {
+      builder: (sortedRooms, previewByRoomId) {
         return SliverList(
           delegate: SliverChildBuilderDelegate(
             (context, index) {
@@ -46,7 +46,7 @@ class ChatListViewBuilder extends StatelessWidget {
                     chatListItem: CommonChatListItem(
                       controller: controller,
                       room: sortedRooms[index],
-                      lastEvent: lastEventByRoomId[sortedRooms[index].id],
+                      previewResult: previewByRoomId[sortedRooms[index].id],
                     ),
                   );
                 },

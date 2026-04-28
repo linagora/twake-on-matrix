@@ -40,7 +40,10 @@ mixin SendFilesMixin {
   }) async {
     if (room == null) return;
     Navigator.pop(context);
-    final result = await FilePicker.platform.pickFiles(allowMultiple: true);
+    final result = await FilePicker.platform.pickFiles(
+      allowMultiple: true,
+      readSequential: true,
+    );
     fileInfos ??= result?.xFiles.map((file) {
       return FileInfo(file.name, filePath: file.path);
     }).toList();
@@ -59,6 +62,7 @@ mixin SendFilesMixin {
     final result = await FilePicker.platform.pickFiles(
       withData: true,
       allowMultiple: true,
+      readSequential: true,
     );
     if (result == null || result.xFiles.isEmpty) return [];
     return await Future.wait(

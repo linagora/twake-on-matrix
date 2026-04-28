@@ -6,6 +6,7 @@ import 'package:fluffychat/widgets/layouts/agruments/switch_active_account_body_
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:fluffychat/widgets/twake_components/twake_header_style.dart';
 import 'package:flutter/material.dart';
+import 'package:fluffychat/config/go_routes/app_routes.dart';
 import 'package:go_router/go_router.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:linagora_design_flutter/multiple_account/models/twake_presentation_account.dart';
@@ -78,10 +79,9 @@ class MultipleAccountsPickerController {
   }
 
   void _onAddAnotherAccount() {
-    context.push(
-      '/rooms/addaccount',
-      extra: const TwakeWelcomeArg(twakeIdType: TwakeWelcomeType.otherAccounts),
-    );
+    const AddAccountRoute(
+      $extra: TwakeWelcomeArg(twakeIdType: TwakeWelcomeType.otherAccounts),
+    ).push(context);
   }
 
   Future<void> _setActiveClient(Client newClient) async {

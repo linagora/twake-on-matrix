@@ -21,7 +21,6 @@ import 'package:fluffychat/pages/contacts_tab/widgets/add_contact/add_contact_di
 import 'package:fluffychat/presentation/model/chat/view_event_list_ui_state.dart';
 import 'package:fluffychat/resource/image_paths.dart';
 import 'package:fluffychat/utils/date_time_extension.dart';
-import 'package:fluffychat/widgets/connection_status_header.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_emoji_mart/flutter_emoji_mart.dart';
@@ -55,6 +54,10 @@ class ChatViewBody extends StatelessWidget with MessageContentMixin {
                 Matrix.of(context).wallpaper!,
                 width: double.infinity,
                 height: double.infinity,
+                cacheWidth:
+                    (MediaQuery.sizeOf(context).width *
+                            MediaQuery.devicePixelRatioOf(context))
+                        .round(),
                 fit: BoxFit.cover,
                 filterQuality: FilterQuality.medium,
               ),
@@ -339,7 +342,6 @@ class ChatViewBody extends StatelessWidget with MessageContentMixin {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const ConnectionStatusHeader(),
           ValueListenableBuilder(
             valueListenable: controller.editEventNotifier,
             builder: (context, editEvent, _) {

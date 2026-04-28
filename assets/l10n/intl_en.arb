@@ -870,6 +870,16 @@
     "type": "text",
     "placeholders": {}
   },
+  "thisIsANewChat": "This is a new chat",
+  "@thisIsANewChat": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "chatPreviewUnavailable": "Click to load the latest messages",
+  "@chatPreviewUnavailable": {
+    "type": "text",
+    "placeholders": {}
+  },
   "enableEmotesGlobally": "Enable emote pack globally",
   "@enableEmotesGlobally": {
     "type": "text",
@@ -3183,5 +3193,20 @@
   "@cacheIsScanning": {},
   "selectYourServer": "Select your server",
   "welcomeBack": "Welcome back",
-  "matrixIdOrUsername": "Matrix Id or username"
+  "matrixIdOrUsername": "Matrix Id or username",
+  "waitingForResponse": "Waiting for response",
+  "forwardFailed": "Failed to forward message",
+  "forwardedToChats": "Forwarded to {count} chats",
+  "@forwardedToChats": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "forwardedToChatsPartial": "Forwarded to {successCount} of {totalCount} chats",
+  "@forwardedToChatsPartial": {
+    "placeholders": {
+      "successCount": {},
+      "totalCount": {}
+    }
+  }
 }

@@ -1,11 +1,12 @@
 import 'package:collection/collection.dart';
-import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/config/default_power_level_member.dart';
+import 'package:fluffychat/domain/matrix_events/event_type_rules.dart';
+import 'package:fluffychat/domain/matrix_events/event_visibility_resolver.dart';
 import 'package:fluffychat/data/network/extensions/file_info_extension.dart';
 import 'package:fluffychat/domain/model/file_info/file_info.dart';
+import 'package:fluffychat/domain/model/room/room_preview_result.dart';
 import 'package:fluffychat/domain/model/search/recent_chat_model.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/client_stories_extension.dart';
-import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
 import 'package:html_unescape/html_unescape.dart';
 import 'package:matrix/matrix.dart';
 // ignore: implementation_imports
@@ -40,11 +41,7 @@ extension RoomExtension on Room {
   }
 
   bool _isLastEventInRoomIsMessage() {
-    return [
-      EventTypes.Message,
-      EventTypes.Sticker,
-      EventTypes.Encrypted,
-    ].contains(lastEvent?.type);
+    return EventTypeRules.messageContentTypes.contains(lastEvent?.type);
   }
 
   Future<void> mute() async {
@@ -161,130 +158,73 @@ extension RoomExtension on Room {
     return canRedact;
   }
 
-  Future<Event?> lastEventAvailableInPreview() async {
-    // as lastEvent calculation is based on the state events we unfortunately cannot
-    // use sortOrder here: With many state events we just know which ones are the
-    // newest ones, without knowing in which order they actually happened. As such,
-    // using the origin_server_ts is the best guess for this algorithm. While not
-    // perfect, it is only used for the room preview in the room list and sorting
-    // said room list, so it should be good enough.
-    Event? lastEventAvailableInPreview;
+  /// Returns the most recent event eligible for the chat-list "last message"
+  /// preview.
+  ///
+  /// - [RoomPreviewFound]       — an eligible event was found.
+  /// - [RoomPreviewEmpty]       — the full history was scanned (m.room.create
+  ///                              reached) with no eligible event.
+  /// - [RoomPreviewUnavailable] — the scan window was exhausted before
+  ///                              m.room.create: history may contain eligible
+  ///                              events beyond the scanned window.
+  Future<RoomPreviewResult> lastEventAvailableInPreview() async {
+    const previewLimit = 30;
     try {
-      final lastEvents = client.roomPreviewLastEvents
+      final statePreviewCandidates = client.roomPreviewLastEvents
           .map(getState)
-          .whereType<Event>();
-
-      lastEventAvailableInPreview = lastEvents.isEmpty
-          ? null
-          : lastEvents.reduce((a, b) {
-              if (AppConfig.hideRedactedEvents) {
-                if (a.shouldHideRedactedEvent()) return b;
-                if (b.shouldHideRedactedEvent()) return a;
-              }
-              if (a.shouldHideChangedAvatarEvent()) {
-                return b;
-              }
-              if (b.shouldHideChangedAvatarEvent()) {
-                return a;
-              }
-              if (a.shouldHideChangedDisplayNameEvent()) {
-                return b;
-              }
-              if (b.shouldHideChangedDisplayNameEvent()) {
-                return a;
-              }
-              // hide reaction events
-              if (a.type == EventTypes.Reaction ||
-                  a.relationshipType == RelationshipTypes.reaction) {
-                return b;
-              }
-              if (b.type == EventTypes.Reaction ||
-                  b.relationshipType == RelationshipTypes.reaction) {
-                return a;
-              }
-              // hide pinned message events
-              if (a.type == EventTypes.RoomPinnedEvents) return b;
-              if (b.type == EventTypes.RoomPinnedEvents) return a;
-              if (a.originServerTs == b.originServerTs) {
-                // if two events have the same sort order we want to give encrypted events a lower priority
-                // This is so that if the same event exists in the state both encrypted *and* unencrypted,
-                // the unencrypted one is picked
-                return a.type == EventTypes.Encrypted ? b : a;
-              }
-              return a.originServerTs.millisecondsSinceEpoch >
-                      b.originServerTs.millisecondsSinceEpoch
-                  ? a
-                  : b;
-            });
-
-      if (lastEventAvailableInPreview == null ||
-          lastEventAvailableInPreview.shouldHideRedactedEvent() ||
-          lastEventAvailableInPreview.shouldHideBannedEvent() ||
-          lastEventAvailableInPreview.type == EventTypes.Reaction ||
-          lastEventAvailableInPreview.relationshipType ==
-              RelationshipTypes.reaction ||
-          lastEventAvailableInPreview.type == EventTypes.RoomPinnedEvents) {
-        final lastState = _getLastestRoomState();
-
-        if (lastState == null) return null;
-
-        lastEventAvailableInPreview = lastState;
-        final messageEvents = await client.database.getEventList(
+          .whereType<Event>()
+          .toList();
+      Event? best;
+      for (final e in statePreviewCandidates) {
+        if (await EventVisibilityResolver.isEligibleForChatListPreview(
           this,
-          limit: 30,
-        );
-        if (messageEvents.isEmpty) {
-          return lastState;
-        }
-
-        for (final messageEvent in messageEvents) {
-          if (messageEvent.shouldHideRedactedEvent()) continue;
-          if (messageEvent.shouldHideBannedEvent()) continue;
-          if (messageEvent.shouldHideChangedAvatarEvent()) continue;
-          if (messageEvent.shouldHideChangedDisplayNameEvent()) continue;
-          // hide reaction events
-          if (messageEvent.type == EventTypes.Reaction) continue;
-          if (messageEvent.relationshipType == RelationshipTypes.reaction) {
-            continue;
-          }
-          // hide pinned message events
-          if (messageEvent.type == EventTypes.RoomPinnedEvents) continue;
-
-          if (messageEvent.originServerTs.millisecondsSinceEpoch >
-              lastState.originServerTs.millisecondsSinceEpoch) {
-            lastEventAvailableInPreview = messageEvent;
-            break;
-          }
+          e,
+        )) {
+          best = _newestEvent(best, e);
         }
       }
+      if (best != null) {
+        return RoomPreviewFound(best);
+      }
+
+      final dbEvents = await client.database.getEventList(
+        this,
+        limit: previewLimit,
+      );
+      var roomFullyScanned = false;
+      for (final e in dbEvents) {
+        if (e.type == EventTypes.RoomCreate) roomFullyScanned = true;
+        if (await EventVisibilityResolver.isEligibleForChatListPreview(
+          this,
+          e,
+        )) {
+          best = _newestEvent(best, e);
+        }
+      }
+      if (best != null) {
+        return RoomPreviewFound(best);
+      }
+      return roomFullyScanned
+          ? const RoomPreviewEmpty()
+          : const RoomPreviewUnavailable();
     } catch (e) {
       Logs().e('Room::lastEventAvailableInPreview: room: $id error - $e');
-      return null;
+      return const RoomPreviewUnavailable();
     }
-
-    return lastEventAvailableInPreview;
   }
 
-  Event? _getLastestRoomState() {
-    var lastTime = DateTime.fromMillisecondsSinceEpoch(0);
-    Event? lastState;
-    states.forEach((final String key, final entry) {
-      final state = entry[''];
-      if (state is! Event) return;
-      if (state.shouldHideRedactedEvent()) return;
-      if (state.shouldHideBannedEvent()) return;
-      // hide reaction events
-      if (state.type == EventTypes.Reaction) return;
-      if (state.relationshipType == RelationshipTypes.reaction) return;
-      // hide pinned message events
-      if (state.type == EventTypes.RoomPinnedEvents) return;
-      if (state.originServerTs.millisecondsSinceEpoch >
-          lastTime.millisecondsSinceEpoch) {
-        lastTime = state.originServerTs;
-        lastState = state;
-      }
-    });
-    return lastState;
+  /// Picks the newest of two events. At equal timestamps, prefers the
+  /// non-encrypted variant (the SDK may expose the same event both encrypted
+  /// and decrypted in state).
+  static Event _newestEvent(Event? a, Event b) {
+    if (a == null) return b;
+    if (a.originServerTs == b.originServerTs) {
+      return a.type == EventTypes.Encrypted ? b : a;
+    }
+    return a.originServerTs.millisecondsSinceEpoch >
+            b.originServerTs.millisecondsSinceEpoch
+        ? a
+        : b;
   }
 
   bool get canAssignRoles {

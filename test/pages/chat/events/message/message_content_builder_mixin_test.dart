@@ -601,6 +601,72 @@ Future<void> main() async {
       });
     });
 
+    group('[getSizeMessageBubbleWidth] TEST\n'
+        'GIVEN message body contains a URL\n'
+        'THEN isNeedAddNewLine is true\n', () {
+      const messageMaxWidthWeb = 504.0;
+      const messageMaxWidthMobile = 412.0;
+
+      final urlEvent = Event(
+        content: {
+          "msgtype": "m.text",
+          "body": "Check this out: https://example.com/some/path",
+          "format": "org.matrix.custom.html",
+          "formatted_body":
+              "<p>Check this out: https://example.com/some/path</p>",
+        },
+        type: 'm.room.message',
+        eventId: r'$143273582443PhrSn:example.org',
+        senderId: '@example:example.org',
+        originServerTs: DateTime.fromMillisecondsSinceEpoch(1432735824653),
+        room: room,
+      );
+
+      testWidgets('GIVEN ownMessage is true AND platform is Web\n'
+          'THEN isNeedAddNewLine is true\n', (WidgetTester tester) async {
+        await runTest(
+          tester,
+          event: urlEvent,
+          maxWidth: messageMaxWidthWeb,
+          expectedIsNeedAddNewLine: true,
+          ownMessage: true,
+        );
+      });
+
+      testWidgets('GIVEN ownMessage is true AND platform is Mobile\n'
+          'THEN isNeedAddNewLine is true\n', (WidgetTester tester) async {
+        await runTest(
+          tester,
+          event: urlEvent,
+          maxWidth: messageMaxWidthMobile,
+          expectedIsNeedAddNewLine: true,
+          ownMessage: true,
+        );
+      });
+
+      testWidgets('GIVEN ownMessage is false AND platform is Web\n'
+          'THEN isNeedAddNewLine is true\n', (WidgetTester tester) async {
+        await runTest(
+          tester,
+          event: urlEvent,
+          maxWidth: messageMaxWidthWeb,
+          expectedIsNeedAddNewLine: true,
+          ownMessage: false,
+        );
+      });
+
+      testWidgets('GIVEN ownMessage is false AND platform is Mobile\n'
+          'THEN isNeedAddNewLine is true\n', (WidgetTester tester) async {
+        await runTest(
+          tester,
+          event: urlEvent,
+          maxWidth: messageMaxWidthMobile,
+          expectedIsNeedAddNewLine: true,
+          ownMessage: false,
+        );
+      });
+    });
+
     group('[isContainsTagName] TEST\n', () {
       test('GIVEN body of event contains tag name\n'
           'THEN return true\n', () {

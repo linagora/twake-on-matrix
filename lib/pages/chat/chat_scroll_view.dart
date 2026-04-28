@@ -1,4 +1,5 @@
 import 'package:fluffychat/config/themes.dart';
+import 'package:fluffychat/presentation/widget_keys/widget_keys.dart';
 import 'package:fluffychat/pages/chat/chat.dart';
 import 'package:fluffychat/pages/chat/chat_event_list_item.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/event_list_extension.dart';
@@ -102,7 +103,7 @@ class _ChatScrollViewState extends State<ChatScrollView> {
 
   @override
   Widget build(BuildContext context) {
-    const centerKey = ValueKey('ChatEventList-center-key');
+    final centerKey = ChatKeys.eventListCenter.valueKey;
     final horizontalPadding = TwakeThemes.isColumnMode(context) ? 16.0 : 0.0;
 
     return Padding(

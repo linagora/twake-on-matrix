@@ -3,7 +3,7 @@ import 'package:fluffychat/utils/exception/leave_room_exception.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/utils/twake_snackbar.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:go_router/go_router.dart';
+import 'package:fluffychat/config/go_routes/app_routes.dart';
 import 'package:matrix/matrix.dart';
 import 'package:fluffychat/generated/l10n/app_localizations.dart';
 
@@ -48,7 +48,7 @@ mixin LeaveChatMixin {
         return;
       }
 
-      context.go('/rooms');
+      const RoomsRoute().go(context);
     } on RoomNullException catch (e) {
       Logs().e('LeaveChatMixin::leaveChat(): - RoomNullException - $e');
       if (!context.mounted) {

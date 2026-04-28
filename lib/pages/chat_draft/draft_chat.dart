@@ -20,6 +20,7 @@ import 'package:fluffychat/pages/chat/chat.dart';
 import 'package:fluffychat/pages/chat/input_bar/focus_suggestion_controller.dart';
 import 'package:fluffychat/pages/chat_draft/draft_chat_view.dart';
 import 'package:fluffychat/presentation/enum/chat/right_column_type_enum.dart';
+import 'package:fluffychat/presentation/widget_keys/widget_keys.dart';
 import 'package:fluffychat/presentation/enum/chat/send_media_with_caption_status_enum.dart';
 import 'package:fluffychat/presentation/extensions/client_extension.dart';
 import 'package:fluffychat/presentation/extensions/contact/presentation_contact_extension.dart';
@@ -43,7 +44,7 @@ import 'package:fluffychat/widgets/mixins/drag_drog_file_mixin.dart';
 import 'package:flutter/material.dart';
 import 'package:fluffychat/generated/l10n/app_localizations.dart';
 import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
-import 'package:go_router/go_router.dart';
+import 'package:fluffychat/config/go_routes/app_routes.dart';
 import 'package:linagora_design_flutter/images_picker/asset_counter.dart';
 import 'package:linagora_design_flutter/images_picker/images_picker.dart'
     hide ImagePicker;
@@ -104,13 +105,11 @@ class DraftChatController extends State<DraftChat>
 
   StreamSubscription? _createRoomSubscription;
 
-  final ValueKey draftChatComposerTypeAheadKey = const ValueKey(
-    'draftChatComposerTypeAheadKey',
-  );
+  final ValueKey<String> draftChatComposerTypeAheadKey =
+      ChatKeys.draftComposerTypeAhead.valueKey;
 
-  final ValueKey _draftChatMediaPickerTypeAheadKey = const ValueKey(
-    'draftChatMediaPickerTypeAheadKey',
-  );
+  final ValueKey<String> _draftChatMediaPickerTypeAheadKey =
+      ChatKeys.draftMediaPickerTypeAhead.valueKey;
 
   final ValueNotifier<bool> isBlockedUserNotifier = ValueNotifier(false);
 
@@ -427,16 +426,16 @@ class DraftChatController extends State<DraftChat>
                 ).client.getRoomById(success.roomId);
                 if (room != null) {
                   onRoomCreatedSuccess?.call(room);
-                  context.go(
-                    '/rooms/${room.id}/',
-                    extra: ChatRouterInputArgument(
+                  RoomRoute(
+                    roomid: room.id,
+                    $extra: ChatRouterInputArgument(
                       type: ChatRouterInputArgumentType.draft,
                       data:
                           _userProfile.value?.displayName ??
                           presentationContact.displayName ??
                           room.name,
                     ),
-                  );
+                  ).go(context);
                 }
               }
             },

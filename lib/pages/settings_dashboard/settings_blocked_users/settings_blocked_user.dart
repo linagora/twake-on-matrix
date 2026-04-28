@@ -11,7 +11,7 @@ import 'package:flutter/material.dart';
 import 'package:dartz/dartz.dart' hide State;
 import 'package:fluffychat/app_state/failure.dart';
 import 'package:fluffychat/app_state/success.dart';
-import 'package:go_router/go_router.dart';
+import 'package:fluffychat/config/go_routes/app_routes.dart';
 import 'package:matrix/matrix.dart';
 import 'settings_blocked_users_view.dart';
 
@@ -44,7 +44,7 @@ class SettingsIgnoreListController extends State<BlockedUsers>
   final List<Profile> blockedUsers = [];
 
   void onBack() {
-    context.go('/rooms/security');
+    const SecurityRoute().go(context);
   }
 
   Future<void> initialBlockedUsers() async {

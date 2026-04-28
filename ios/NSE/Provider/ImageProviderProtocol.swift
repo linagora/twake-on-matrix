@@ -22,6 +22,8 @@ protocol ImageProviderProtocol {
     func loadImageFromSource(_ source: MediaSourceProxy, size: CGSize?) async -> Result<UIImage, MediaProviderError>
     
     func loadImageDataFromSource(_ source: MediaSourceProxy) async -> Result<Data, MediaProviderError>
+
+    func loadThumbnailForSource(_ source: MediaSourceProxy, size: CGSize) async -> Result<Data, MediaProviderError>
 }
 
 extension ImageProviderProtocol {

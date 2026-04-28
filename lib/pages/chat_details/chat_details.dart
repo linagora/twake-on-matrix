@@ -1,4 +1,5 @@
 import 'package:fluffychat/domain/model/room/room_extension.dart';
+import 'package:fluffychat/presentation/widget_keys/widget_keys.dart';
 import 'package:fluffychat/generated/l10n/app_localizations.dart';
 import 'package:fluffychat/pages/chat_details/chat_details_edit.dart';
 import 'package:fluffychat/pages/chat_details/chat_details_view.dart';
@@ -15,7 +16,7 @@ import 'package:fluffychat/widgets/matrix.dart';
 import 'package:fluffychat/widgets/mixins/twake_context_menu_mixin.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
+import 'package:fluffychat/config/go_routes/app_routes.dart';
 import 'package:linagora_design_flutter/colors/linagora_sys_colors.dart';
 import 'package:matrix/matrix.dart';
 
@@ -46,9 +47,9 @@ class ChatDetailsController extends State<ChatDetails>
         TickerProviderStateMixin,
         ChatDetailsTabMixin<ChatDetails>,
         TwakeContextMenuMixin {
-  final actionsMobileAndTabletKey = const Key('ActionsMobileAndTabletKey');
+  final actionsMobileAndTabletKey = ChatKeys.actionsMobileAndTablet.key;
 
-  final actionsWebAndDesktopKey = const Key('ActionsWebAndDesktopKey');
+  final actionsWebAndDesktopKey = ChatKeys.actionsWebAndDesktop.key;
 
   final muteNotifier = ValueNotifier<PushRuleState>(PushRuleState.notify);
 
@@ -160,7 +161,7 @@ class ChatDetailsController extends State<ChatDetails>
       if (result.error != null) throw result.error;
 
       if (context.mounted) {
-        context.go('/rooms');
+        const RoomsRoute().go(context);
       }
     } catch (e) {
       Logs().e('ChatDetailsController._leaveRoom', e);

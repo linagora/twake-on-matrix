@@ -1,3 +1,4 @@
+import 'package:fluffychat/presentation/widget_keys/widget_keys.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/client_stories_extension.dart';
 import 'package:fluffychat/widgets/avatar/bottom_navigation_avatar.dart';
 import 'package:fluffychat/widgets/twake_components/twake_navigation_icon/twake_navigation_icon.dart';
@@ -19,7 +20,7 @@ enum AdaptiveDestinationEnum {
     switch (this) {
       case AdaptiveDestinationEnum.contacts:
         return NavigationDestination(
-          key: const Key('contacts_navigation_destination'),
+          key: NavigationKeys.contactsDestination.key,
           icon: TwakeNavigationIcon(
             color: LinagoraSysColors.material().onBackground,
             icon: Icons.supervised_user_circle_outlined,
@@ -32,7 +33,7 @@ enum AdaptiveDestinationEnum {
         );
       case AdaptiveDestinationEnum.rooms:
         return NavigationDestination(
-          key: const Key('rooms_navigation_destination'),
+          key: NavigationKeys.roomsDestination.key,
           icon: UnreadRoomsBadge(
             color: LinagoraSysColors.material().onBackground,
             filter: (room) => !room.isSpace && !room.isStoryRoom,
@@ -45,7 +46,7 @@ enum AdaptiveDestinationEnum {
         );
       case AdaptiveDestinationEnum.settings:
         return NavigationDestination(
-          key: const Key('settings_navigation_destination'),
+          key: NavigationKeys.settingsDestination.key,
           icon: TwakeNavigationIcon(
             color: LinagoraSysColors.material().onBackground,
             icon: Icons.settings_outlined,
@@ -91,12 +92,12 @@ enum AdaptiveDestinationEnum {
       case AdaptiveDestinationEnum.settings:
         return BottomNavigationBarItem(
           icon: BottomNavigationAvatar(
-            key: const Key('settings_navigation_destination'),
+            key: NavigationKeys.settingsDestination.key,
             profile: profile,
             isSelected: false,
           ),
           activeIcon: BottomNavigationAvatar(
-            key: const Key('settings_navigation_destination'),
+            key: NavigationKeys.settingsDestination.key,
             profile: profile,
             isSelected: true,
           ),

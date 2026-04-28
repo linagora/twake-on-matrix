@@ -51,6 +51,15 @@ extension NotificationItemProxyProtocol {
         isRoomDirect && roomJoinedMembers <= 2
     }
     
+    var isEncrypted: Bool {
+        guard case .timeline(let event) = self.event,
+              case .messageLike(let content) = try? event.content(),
+              case .roomEncrypted = content else {
+            return false
+        }
+        return true
+    }
+
     var hasMedia: Bool {
         if (isDM && senderAvatarMediaSource != nil) ||
             (!isDM && roomAvatarMediaSource != nil) {

@@ -11,6 +11,7 @@ import 'package:fluffychat/widgets/search/empty_search_widget.dart';
 import 'package:fluffychat/widgets/twake_components/twake_icon_button.dart';
 import 'package:flutter/material.dart';
 import 'package:fluffychat/generated/l10n/app_localizations.dart';
+import 'package:fluffychat/config/go_routes/app_routes.dart';
 import 'package:go_router/go_router.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:matrix/matrix.dart';
@@ -150,9 +151,9 @@ class SettingsBlockedUsersView extends StatelessWidget {
           }
         } else {
           if (responsiveUtils.isMobile(context)) {
-            context.push('/rooms/$roomId');
+            RoomRoute(roomid: roomId).push(context);
           } else {
-            context.go('/rooms/$roomId');
+            RoomRoute(roomid: roomId).go(context);
           }
         }
       },

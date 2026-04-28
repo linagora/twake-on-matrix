@@ -2,10 +2,14 @@ import 'dart:async';
 
 import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/config/themes.dart';
+import 'package:fluffychat/domain/matrix_events/event_visibility_resolver.dart';
+import 'package:fluffychat/domain/model/room/room_preview_result.dart';
 import 'package:fluffychat/generated/l10n/app_localizations.dart';
 import 'package:fluffychat/pages/chat/events/message_time_style.dart';
 import 'package:fluffychat/pages/chat/typing_timer_wrapper.dart';
 import 'package:fluffychat/pages/chat_list/chat_list_item_style.dart';
+import 'package:fluffychat/pages/chat_list/chat_preview_text.dart';
+import 'package:fluffychat/presentation/decorators/chat_list/subtitle_text_style_decorator/subtitle_text_style_view.dart';
 import 'package:fluffychat/presentation/mixins/chat_list_item_mixin.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
@@ -15,20 +19,37 @@ import 'package:matrix/matrix.dart';
 
 class ChatListItemSubtitle extends StatelessWidget with ChatListItemMixin {
   final Room room;
-  final Event? lastEvent;
+  final RoomPreviewResult? previewResult;
 
-  const ChatListItemSubtitle({super.key, required this.room, this.lastEvent});
+  const ChatListItemSubtitle({
+    super.key,
+    required this.room,
+    this.previewResult,
+  });
+
+  static Event? _syncPreview(Event? candidate) {
+    if (candidate == null) return null;
+    return EventVisibilityResolver.isEligibleForChatListPreviewSync(candidate)
+        ? candidate
+        : null;
+  }
 
   @override
   Widget build(BuildContext context) {
-    final String typingText = room.getLocalizedTypingText(L10n.of(context)!);
+    final L10n l10n = L10n.of(context)!;
+    final String typingText = room.getLocalizedTypingText(l10n);
     final bool isGroup = !room.isDirectChat;
     final double unreadBadgeSize = ChatListItemStyle.unreadBadgeSize(
       room.isUnreadOrInvited,
       room.hasNewMessages,
       room.notificationCount > 0,
     );
-    final Event? lastEvent = this.lastEvent ?? room.lastEvent;
+    final Event? lastEvent =
+        _syncPreview(room.lastEvent) ??
+        switch (previewResult) {
+          RoomPreviewFound(:final event) => event,
+          _ => null,
+        };
     final bool isMediaEvent =
         lastEvent?.messageType == MessageTypes.Image ||
         lastEvent?.messageType == MessageTypes.Video;
@@ -44,6 +65,7 @@ class ChatListItemSubtitle extends StatelessWidget with ChatListItemMixin {
         Expanded(
           child: _buildMainSubtitleContent(
             context,
+            l10n,
             lastEvent,
             typingText,
             isGroup,
@@ -54,7 +76,7 @@ class ChatListItemSubtitle extends StatelessWidget with ChatListItemMixin {
         FutureBuilder<String>(
           future:
               lastEvent?.calcLocalizedBody(
-                MatrixLocals(L10n.of(context)!),
+                MatrixLocals(l10n),
                 hideReply: true,
                 hideEdit: true,
                 plaintextBody: true,
@@ -137,16 +159,29 @@ class ChatListItemSubtitle extends StatelessWidget with ChatListItemMixin {
 
   Widget _buildMainSubtitleContent(
     BuildContext context,
+    L10n l10n,
     Event? lastEvent,
     String typingText,
     bool isGroup,
     bool isMediaEvent,
   ) {
+    final bool showPlaceholder =
+        lastEvent == null && room.membership != Membership.invite;
+
     return TypingTimerWrapper(
       room: room,
-      l10n: L10n.of(context)!,
+      l10n: l10n,
       typingWidget: typingTextWidget(typingText, context),
-      notTypingWidget: isGroup
+      notTypingWidget: showPlaceholder
+          ? ChatPreviewText(
+              previewResult: previewResult,
+              style: ChatListSubSubtitleTextStyleView.textStyle.textStyle(
+                room,
+                context,
+              ),
+              l10n: l10n,
+            )
+          : isGroup
           ? chatListItemSubtitleForGroup(
               context: context,
               room: room,

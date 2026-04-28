@@ -10,12 +10,13 @@ import 'package:fluffychat/domain/app_state/contact/get_contacts_state.dart';
 import 'package:fluffychat/domain/contact_manager/contacts_manager.dart';
 import 'package:fluffychat/pages/chat/chat_app_bar_title_style.dart';
 import 'package:fluffychat/presentation/extensions/contact/presentation_contact_extension.dart';
-import 'package:fluffychat/presentation/model/contact/presentation_contact.dart';
 import 'package:fluffychat/pages/chat/typing_timer_wrapper.dart';
+import 'package:fluffychat/presentation/model/contact/presentation_contact.dart';
 import 'package:fluffychat/resource/image_paths.dart';
 import 'package:fluffychat/utils/common_helper.dart';
 import 'package:fluffychat/utils/room_status_extension.dart';
 import 'package:fluffychat/utils/string_extension.dart';
+import 'package:fluffychat/widgets/connection_status_header.dart';
 import 'package:flutter/material.dart';
 import 'package:fluffychat/generated/l10n/app_localizations.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -54,34 +55,15 @@ class ChatAppBarTitle extends StatelessWidget {
     BuildContext context,
     Either<Failure, Success> getContactsState,
   ) {
-    final directChatMatrixId = room?.directChatMatrixID;
     final localizedRoomName = room?.getLocalizedDisplayname(
       MatrixLocals(L10n.of(context)!),
     );
-    if (directChatMatrixId == null) {
-      if (roomName != null) return roomName!;
-
-      return localizedRoomName ?? '';
-    }
-
-    final currentContacts = getContactsState.fold(
-      (failure) => <PresentationContact>[],
-      (success) => success is GetContactsSuccess
-          ? success.contacts
-                .fold(
-                  <PresentationContact>{},
-                  (previous, contact) => {
-                    ...previous,
-                    ...contact.toPresentationContacts(),
-                  },
-                )
-                .toList()
-          : <PresentationContact>[],
+    return resolveChatAppBarTitle(
+      directChatMatrixId: room?.directChatMatrixID,
+      fallbackRoomName: roomName,
+      localizedRoomName: localizedRoomName,
+      getContactsState: getContactsState,
     );
-    final availableContact = currentContacts.firstWhereOrNull(
-      (contact) => contact.matrixId == directChatMatrixId,
-    );
-    return availableContact?.displayName ?? localizedRoomName ?? '';
   }
 
   @override
@@ -104,80 +86,77 @@ class ChatAppBarTitle extends StatelessWidget {
       highlightColor: Colors.transparent,
       focusColor: Colors.transparent,
       onTap: isArchived ? null : onPushDetails,
-      child: Row(
-        children: [
-          Padding(
-            padding: ChatAppBarTitleStyle.avatarPadding,
-            child: Stack(
-              children: [
-                Hero(
-                  tag: 'content_banner',
-                  child: ValueListenableBuilder(
-                    valueListenable: getIt
-                        .get<ContactsManager>()
-                        .getContactsNotifier(),
-                    builder: (context, state, child) {
-                      return Avatar(
+      // Single listener drives both the avatar name and the title text;
+      // the status subtree is passed via `child:` so it does not rebuild
+      // when the contacts notifier emits.
+      child: ValueListenableBuilder(
+        valueListenable: getIt.get<ContactsManager>().getContactsNotifier(),
+        child: ConnectionStatusHeader(
+          connectedWidget: _ChatAppBarStatusContent(
+            connectivityResultStream: connectivityResultStream,
+            room: room!,
+            cachedPresenceNotifier: cachedPresenceNotifier,
+            cachedPresenceStreamController: cachedPresenceStreamController,
+          ),
+        ),
+        builder: (context, state, statusContent) {
+          final resolvedRoomName = _getRoomName(context, state);
+          return Row(
+            children: [
+              Padding(
+                padding: ChatAppBarTitleStyle.avatarPadding,
+                child: Stack(
+                  children: [
+                    Hero(
+                      tag: 'content_banner',
+                      child: Avatar(
                         fontSize: ChatAppBarTitleStyle.avatarFontSize,
                         mxContent: room!.avatar,
-                        name: _getRoomName(context, state),
+                        name: resolvedRoomName,
                         size: ChatAppBarTitleStyle.avatarSize(context),
-                      );
-                    },
-                  ),
-                ),
-              ],
-            ),
-          ),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  children: [
-                    if (room?.encrypted == true) ...[
-                      Padding(
-                        padding: const EdgeInsets.all(2.0),
-                        child: SvgPicture.asset(
-                          ImagePaths.icEncrypted,
-                          width: 16,
-                          height: 16,
-                        ),
                       ),
-                      const SizedBox(width: 4),
-                    ],
-                    Flexible(
-                      child: ValueListenableBuilder(
-                        valueListenable: getIt
-                            .get<ContactsManager>()
-                            .getContactsNotifier(),
-                        builder: (context, state, child) {
-                          return Text(
-                            _getRoomName(context, state),
+                    ),
+                  ],
+                ),
+              ),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        if (room?.encrypted == true) ...[
+                          Padding(
+                            padding: const EdgeInsets.all(2.0),
+                            child: SvgPicture.asset(
+                              ImagePaths.icEncrypted,
+                              width: 16,
+                              height: 16,
+                            ),
+                          ),
+                          const SizedBox(width: 4),
+                        ],
+                        Flexible(
+                          child: Text(
+                            resolvedRoomName,
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: ChatAppBarTitleStyle.appBarTitleStyle(
                               context,
                             ),
-                          );
-                        },
-                      ),
+                          ),
+                        ),
+                      ],
                     ),
+                    statusContent!,
                   ],
                 ),
-                _ChatAppBarStatusContent(
-                  connectivityResultStream: connectivityResultStream,
-                  room: room!,
-                  cachedPresenceNotifier: cachedPresenceNotifier,
-                  cachedPresenceStreamController:
-                      cachedPresenceStreamController,
-                ),
-              ],
-            ),
-          ),
-        ],
+              ),
+            ],
+          );
+        },
       ),
     );
   }
@@ -377,4 +356,34 @@ class _ChatAppBarTitleTyping extends StatelessWidget {
       ),
     );
   }
+}
+
+/// Resolves the string displayed in the chat app bar title (and used as the
+/// avatar fallback text).
+///
+/// For direct chats, walks the contacts state lazily to find the first
+/// [PresentationContact] whose `matrixId` matches [directChatMatrixId], and
+/// uses its display name. Falls back to [localizedRoomName] when no contact
+/// matches or when the state is not a success.
+///
+/// Lazy iteration + short-circuit on match is deliberate: do not rebuild a
+/// `Set<PresentationContact>` here. `PresentationContact` is `Equatable`
+/// with expensive props, and a Set-fold triggers an O(N²) `hashCode` cascade
+/// on every rebuild.
+@visibleForTesting
+String resolveChatAppBarTitle({
+  required String? directChatMatrixId,
+  required String? fallbackRoomName,
+  required String? localizedRoomName,
+  required Either<Failure, Success> getContactsState,
+}) {
+  if (directChatMatrixId == null) {
+    return fallbackRoomName ?? localizedRoomName ?? '';
+  }
+  final availableContact = getContactsState
+      .getSuccessOrNull<GetContactsSuccess>()
+      ?.contacts
+      .expand((contact) => contact.toPresentationContacts())
+      .firstWhereOrNull((contact) => contact.matrixId == directChatMatrixId);
+  return availableContact?.displayName ?? localizedRoomName ?? '';
 }

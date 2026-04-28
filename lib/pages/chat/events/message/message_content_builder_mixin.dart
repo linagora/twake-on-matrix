@@ -22,6 +22,7 @@ mixin MessageContentBuilderMixin {
     bool ownMessage = false,
     bool hideDisplayName = false,
     bool isEdited = false,
+    Timeline? timeline,
   }) {
     final isNotSupportCalcSize =
         {
@@ -51,6 +52,7 @@ mixin MessageContentBuilderMixin {
       event,
       maxWidth,
       isEdited: isEdited,
+      timeline: timeline,
     );
 
     if (ownMessage || hideDisplayName) {
@@ -100,20 +102,26 @@ mixin MessageContentBuilderMixin {
   TextPainter _paintMessageText(
     BuildContext context,
     Event event,
-    double maxWidth,
-  ) {
+    double maxWidth, {
+    Timeline? timeline,
+  }) {
+    // Use the display event (latest edit) so text content and style both
+    // match what MessageContent actually renders.
+    final displayEvent = timeline != null
+        ? event.getDisplayEventWithoutEditEvent(timeline)
+        : event;
     final double messageMaxWidth = maxWidth - AppConfig.messagePadding;
     return TextPainter(
       textScaler: MediaQuery.of(context).textScaler,
       text: TextSpan(
-        text: event.isCaptionModeOrReply()
-            ? event.body
-            : event.calcLocalizedBodyFallback(
+        text: displayEvent.isCaptionModeOrReply()
+            ? displayEvent.body
+            : displayEvent.calcLocalizedBodyFallback(
                 MatrixLocals(L10n.of(context)!),
                 hideReply: true,
                 plaintextBody: true,
               ),
-        style: event.getMessageTextStyle(context),
+        style: displayEvent.getMessageTextStyle(context),
       ),
       textDirection: TextDirection.ltr,
     )..layout(minWidth: 0, maxWidth: messageMaxWidth);
@@ -168,6 +176,7 @@ mixin MessageContentBuilderMixin {
     Event event,
     double maxWidth, {
     bool isEdited = false,
+    Timeline? timeline,
   }) {
     const spaceMessageAndTime = 4.0;
     final spaceHasEdited = isEdited ? 56.0 : 0.0;
@@ -176,7 +185,12 @@ mixin MessageContentBuilderMixin {
         ? 0.0
         : AppConfig.messagePadding;
 
-    final paintedMessageText = _paintMessageText(context, event, maxWidth);
+    final paintedMessageText = _paintMessageText(
+      context,
+      event,
+      maxWidth,
+      timeline: timeline,
+    );
     final sizeMessageTime = _getWidthMessageTime(context, event, maxWidth);
     final messageTimeAndPaddingWidth =
         sizeMessageTime + spaceMessageAndTime + spaceHasEdited + spaceHasPinned;
@@ -273,6 +287,9 @@ mixin MessageContentBuilderMixin {
     }
     if (event.status == EventStatus.error &&
         event.messageType == MessageTypes.Text) {
+      return true;
+    }
+    if (event.body.getFirstValidUrl() != null) {
       return true;
     }
     if (totalMessageWidth == maxWidth) {
