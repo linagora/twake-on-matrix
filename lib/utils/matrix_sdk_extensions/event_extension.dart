@@ -264,11 +264,18 @@ extension LocalizedBody on Event {
 
   /// Returns true if message contains only 1-6 emojis and is not a reply.
   /// Used to display emoji in enlarged size.
-  bool isDisplayOnlyEmoji() {
-    return !isReplyEvent() &&
-        onlyEmotes &&
-        numberEmotes > 0 &&
-        numberEmotes < 7;
+  ///
+  /// When [timeline] is provided, evaluates against the latest edited content
+  /// (display event) so that edits that add text return false, and edits that
+  /// result in emoji-only content return true.
+  bool isDisplayOnlyEmoji([Timeline? timeline]) {
+    if (isCaptionModeOrReply()) return false;
+    final target = timeline != null
+        ? getDisplayEventWithoutEditEvent(timeline)
+        : this;
+    return target.onlyEmotes &&
+        target.numberEmotes > 0 &&
+        target.numberEmotes < 7;
   }
 
   TextStyle? textStyleForOnlyEmoji(BuildContext context) {
