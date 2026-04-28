@@ -579,7 +579,12 @@ class FederationLookUpPhonebookContactInteractor {
     return updatedContact;
   }
 
-  String _normalizeUrl(String url) => url.replaceFirst(RegExp(r'/+$'), '');
+  String _normalizeUrl(String url) {
+    final trimmed = url.replaceFirst(RegExp(r'/+$'), '');
+    final uri = Uri.tryParse(trimmed);
+    if (uri == null) return trimmed;
+    return '${uri.scheme}://${uri.host}:${uri.port}';
+  }
 
   Future<void> _storeContactsInHive({
     required Set<Contact> contacts,

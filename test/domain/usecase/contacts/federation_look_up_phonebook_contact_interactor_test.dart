@@ -2081,6 +2081,101 @@ void main() {
         );
       });
 
+      test('should skip identity server when third_party key carries explicit '
+          'default port (:443) but identityServerUrl omits it', () async {
+        // Regression: third_party_mappings key "host:443" was stored as
+        // "https://host:443" while identitySession.url was "https://host"
+        // (no port), causing the dedup check to miss and TOM to be queried
+        // on every chunk after the first.
+        const identityUrl = 'https://identity.example.com';
+
+        final argumentWithIdentity = FederationLookUpArgument(
+          homeServerUrl: homeserverUrl,
+          withMxId: matrixId,
+          withAccessToken: accessToken,
+          federationUrls: [federationUrl],
+          identityServerUrl: identityUrl,
+        );
+
+        when(
+          mockRepository.fetchContacts(),
+        ).thenAnswer((_) async => testContacts);
+
+        when(
+          mockRequestTokenManager.execute(
+            federationTokenRequest: anyNamed('federationTokenRequest'),
+          ),
+        ).thenAnswer(
+          (_) async => const Right<Failure, Success>(
+            FederationIdentityRequestTokenSuccess(
+              tokenInformation: tokenInformation,
+            ),
+          ),
+        );
+
+        when(
+          mockIdentityLookupManager.register(
+            federationUrl: anyNamed('federationUrl'),
+            tokenInformation: anyNamed('tokenInformation'),
+          ),
+        ).thenAnswer(
+          (_) async => const FederationRegisterResponse(
+            token: 'aB7c9Dz4EfGh5iJkLm3nOp==',
+          ),
+        );
+
+        const hashDetails = FederationHashDetailsResponse(
+          algorithms: {'sha256'},
+          lookupPepper: 'pepper',
+        );
+
+        when(
+          mockIdentityLookupManager.getHashDetails(
+            federationUrl: anyNamed('federationUrl'),
+            registeredToken: anyNamed('registeredToken'),
+          ),
+        ).thenAnswer((_) async => hashDetails);
+
+        // third_party_mappings key includes the default port (:443)
+        when(
+          mockIdentityLookupManager.lookupMxid(
+            federationUrl: federationUrl,
+            request: anyNamed('request'),
+            registeredToken: anyNamed('registeredToken'),
+          ),
+        ).thenAnswer(
+          (_) async => const FederationLookupMxidResponse(
+            mappings: <String, String>{},
+            thirdPartyMappings: <String, Set<String>>{
+              'identity.example.com:443': {'some-hash'},
+            },
+          ),
+        );
+
+        when(
+          mockFederationIdentityLookupManager.execute(
+            arguments: anyNamed('arguments'),
+          ),
+        ).thenAnswer(
+          (_) async => const Right<Failure, Success>(
+            FederationIdentityLookupSuccess(newContacts: {}),
+          ),
+        );
+
+        await interactor.execute(argument: argumentWithIdentity).last;
+
+        // Identity server must NOT be queried via lookupMxid: the
+        // "host:443" key in third_party_mappings canonicalises to the same
+        // URL as identityServerUrl once the default port is stripped.
+        verifyNever(
+          mockIdentityLookupManager.lookupMxid(
+            federationUrl: identityUrl,
+            request: anyNamed('request'),
+            registeredToken: anyNamed('registeredToken'),
+          ),
+        );
+      });
+
       test('should handle empty mappings in lookup response', () async {
         final contacts = [
           ContactFixtures.contact1,
