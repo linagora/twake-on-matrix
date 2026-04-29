@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:fluffychat/data/datasource/contact/sim_country/sim_country_provider.dart';
 import 'package:matrix/matrix.dart';
+import 'package:phone_numbers_parser/phone_numbers_parser.dart' as pnp;
 import 'package:sim_country_code_plus/sim_country_code_plus.dart';
 
 class SimCountryProviderImpl implements SimCountryProvider {
@@ -10,9 +11,11 @@ class SimCountryProviderImpl implements SimCountryProvider {
   @override
   Future<String?> getCountryCode() => _countryCodeFuture ??= _resolve();
 
-  // Only accept strict ISO 3166-1 alpha-2 codes (exactly two ASCII letters).
+  // Accept only codes that phone_numbers_parser itself recognises the same
+  // lookup used by IsoCode.fromJson. This rejects syntactically valid but
+  // unknown codes (e.g. "ZZ") that would otherwise throw downstream.
   bool _isValidSimCode(String? code) =>
-      code != null && RegExp(r'^[A-Za-z]{2}$').hasMatch(code);
+      code != null && pnp.isoCodeConversionMap.containsKey(code.toUpperCase());
 
   Future<String?> _resolve() async {
     // 1. Try SIM card country (most accurate for phone number context).
