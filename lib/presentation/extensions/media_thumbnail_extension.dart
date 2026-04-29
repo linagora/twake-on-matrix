@@ -71,9 +71,9 @@ extension MediaThumbnailExtension on Room {
     MatrixVideoFile originalFile, {
     StreamController<Either<Failure, Success>>? uploadStreamController,
   }) async {
+    String? url;
     try {
       uploadStreamController?.add(const Right(GeneratingThumbnailState()));
-      late String url;
       if (PlatformInfos.isWeb) {
         // Web: create an object/blob URL from bytes — no file system access.
         url = originalFile.bytes.toWebUrl(mimeType: originalFile.mimeType);
@@ -101,8 +101,6 @@ extension MediaThumbnailExtension on Room {
 
       final thumbnailFileName = _getVideoThumbnailFileName(originalFile);
 
-      if (PlatformInfos.isMobile) await File(url).delete();
-
       return MatrixImageFile(
         bytes: result,
         name: thumbnailFileName,
@@ -115,6 +113,21 @@ extension MediaThumbnailExtension on Room {
       uploadStreamController?.add(Left(GenerateThumbnailFailed(exception: e)));
       Logs().e('Error while generating thumbnail', e);
       return null;
+    } finally {
+      if (url != null) {
+        if (PlatformInfos.isMobile) {
+          // Swallow: a delete failure (file already gone, permission, etc.)
+          // must not propagate from finally and override the function's
+          // MatrixImageFile? return value with an unrelated exception.
+          try {
+            await File(url).delete();
+          } catch (e) {
+            Logs().w('Failed to delete temp video thumbnail file', e);
+          }
+        } else if (PlatformInfos.isWeb) {
+          url.revokeWebUrl();
+        }
+      }
     }
   }
 
@@ -170,9 +183,12 @@ extension MediaThumbnailExtension on Room {
 
   Future<int?> getVideoDuration(MatrixVideoFile originalFile) async {
     VideoPlayerController? videoPlayerController;
+    String? blobUrl;
     try {
-      final url = originalFile.bytes.toWebUrl(mimeType: originalFile.mimeType);
-      videoPlayerController = VideoPlayerController.networkUrl(Uri.parse(url));
+      blobUrl = originalFile.bytes.toWebUrl(mimeType: originalFile.mimeType);
+      videoPlayerController = VideoPlayerController.networkUrl(
+        Uri.parse(blobUrl),
+      );
       await videoPlayerController.initialize();
       final duration = videoPlayerController.value.duration.inMilliseconds;
       return duration;
@@ -181,6 +197,7 @@ extension MediaThumbnailExtension on Room {
       return null;
     } finally {
       videoPlayerController?.dispose();
+      if (blobUrl != null && PlatformInfos.isWeb) blobUrl.revokeWebUrl();
     }
   }
 

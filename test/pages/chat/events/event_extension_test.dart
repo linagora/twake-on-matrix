@@ -955,13 +955,16 @@ void main() {
       );
     }
 
+    // Use only single-codepoint emojis here so `body.runes.length` matches the
+    // visible emoji count exactly (e.g. ❤️ would be 2 runes for 1 visible
+    // emoji and make the test name lie).
     final validEmojiBodies = <String>[
       '😊',
       '😊😎',
       '😊😎🎉',
       '😊😎🎉🔥',
-      '😊😎🎉🔥❤️',
-      '😊😎🎉🔥❤️👍',
+      '😊😎🎉🔥⭐',
+      '😊😎🎉🔥⭐👍',
     ];
     for (final body in validEmojiBodies) {
       test(
@@ -973,7 +976,7 @@ void main() {
       );
     }
 
-    final invalidEmojiBodies = <String>['😊😎🎉🔥❤️👍✨', '😊😎🎉🔥❤️👍✨🌟💯🚀'];
+    final invalidEmojiBodies = <String>['😊😎🎉🔥⭐👍✨', '😊😎🎉🔥⭐👍✨🌟💯🚀'];
     for (final body in invalidEmojiBodies) {
       test(
         'GIVEN ${body.runes.length} emojis AND NOT a reply THEN return false',
@@ -1063,8 +1066,13 @@ void main() {
     });
 
     group('with edit events (Timeline provided)', () {
-      /// Builds a Timeline using public SDK APIs only.
-      /// Populates [aggregatedEvents] directly — no private imports needed.
+      /// Builds a Timeline and registers [editEvents] as aggregated edits.
+      ///
+      /// Note: this uses [TimelineChunk] which is currently a private SDK
+      /// type (see the `// ignore: implementation_imports` at the top of the
+      /// file). Generated mocks across the repo already pull this same path,
+      /// so we accept the coupling rather than wrap a Mock just for one
+      /// constructor argument.
       Timeline buildTimeline(Room r, List<Event> editEvents) {
         final timeline = Timeline(
           room: r,
