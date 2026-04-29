@@ -404,8 +404,15 @@ class CoreRobot {
     final location = thirdResponse.headers.value('location');
     if (location == null) {
       final responseBody = await utf8.decoder.bind(thirdResponse).join();
+      final errorDoc = parse(responseBody);
+      final errorSpan = errorDoc.querySelector('[trspan]');
+      final errorMsg = errorSpan?.text ?? 'unknown';
       throw Exception(
-        'No redirect found after login POST [status=${thirdResponse.statusCode}] body=${responseBody.substring(0, responseBody.length.clamp(0, 300))}',
+        'OIDC login POST failed [status=${thirdResponse.statusCode}]: '
+        'LemonLDAP error="$errorMsg". '
+        'If using staging accounts, remove SSO_URL from your env file '
+        '(see .env.staging.example). '
+        'body=${responseBody.substring(0, responseBody.length.clamp(0, 200))}',
       );
     }
     final thirdRedirectUri = Uri.parse(location);
