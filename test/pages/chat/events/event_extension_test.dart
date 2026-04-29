@@ -976,10 +976,7 @@ void main() {
       );
     }
 
-    final invalidEmojiBodies = <String>[
-      '😊😎🎉🔥⭐👍✨',
-      '😊😎🎉🔥⭐👍✨🌟💯🚀',
-    ];
+    final invalidEmojiBodies = <String>['😊😎🎉🔥⭐👍✨', '😊😎🎉🔥⭐👍✨🌟💯🚀'];
     for (final body in invalidEmojiBodies) {
       test(
         'GIVEN ${body.runes.length} emojis AND NOT a reply THEN return false',
