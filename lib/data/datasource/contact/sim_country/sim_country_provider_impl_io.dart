@@ -5,16 +5,10 @@ import 'package:matrix/matrix.dart';
 import 'package:sim_country_code_plus/sim_country_code_plus.dart';
 
 class SimCountryProviderImpl implements SimCountryProvider {
-  String? _cache;
-  bool _fetched = false;
+  Future<String?>? _countryCodeFuture;
 
   @override
-  Future<String?> getCountryCode() async {
-    if (_fetched) return _cache;
-    _fetched = true;
-    _cache = await _resolve();
-    return _cache;
-  }
+  Future<String?> getCountryCode() => _countryCodeFuture ??= _resolve();
 
   // Only accept strict ISO 3166-1 alpha-2 codes (exactly two ASCII letters).
   bool _isValidSimCode(String? code) =>
