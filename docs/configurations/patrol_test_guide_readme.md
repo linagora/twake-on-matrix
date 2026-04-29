@@ -13,19 +13,24 @@ This guide explains how to run this project’s **Patrol** integration tests and
 
 ## 2) Environment configuration
 
-Create `integration_test/.env.local.do-not-commit` (not tracked by Git). Example keys used by scripts:
+Create `integration_test/.env.local.do-not-commit` (not tracked by Git) by copying the template:
 
 ```bash
-# Device configuration used by the run command below
-DEVICE=iPhone 16 Pro (18.0)
-
-# App/server runtime variables (examples)
-BASE_URL=https://staging.example.com
-USERNAME=john.doe@example.com
-PASSWORD=secret
+cp integration_test/.env integration_test/.env.local.do-not-commit
 ```
 
-> The file’s exact keys depend on your app and scripts. At a minimum, define **`DEVICE`** so the run command can pick the simulator/emulator.
+Then fill in the placeholder values, especially `DEVICE`, `SERVER_URL`, `MATRIX_URL`, and credentials.
+
+### 2.1) Authentication paths
+
+The test framework supports two login modes, selected at compile time by the `SSO_URL` env variable:
+
+| `SSO_URL` | Auth method | Identity source | Works in CI/FTL? |
+|-----------|-------------|-----------------|------------------|
+| **Not set** | `m.login.password` | Synapse `password_hash` | Yes |
+| **Set** (e.g. `sso.linagora.com`) | OIDC HTTP replay | LemonLDAP / Linagora LDAP | No (needs real SSO credentials) |
+
+> **Common mistake**: setting `SSO_URL` with staging accounts. Staging accounts only exist in staging Synapse, not in Linagora’s LDAP. The test will fail with `OIDC login POST failed: LemonLDAP error="..."`. Remove `SSO_URL` from your env file for staging.
 
 ## 3) Running tests
 
@@ -141,6 +146,7 @@ A convenience script is provided:
 - **Version mismatch errors**: align `Flutter`, `patrol_cli`, and `patrol` versions.
 - **Missing env values**: confirm required keys exist in `.env.local.do-not-commit`.
 - **Permission/native popups not handled**: verify native integration steps were completed during Patrol setup.
+- **`OIDC login POST failed: LemonLDAP error=...`**: you have `SSO_URL` set with accounts that don’t exist in Linagora LDAP. Remove `SSO_URL` from your env file for staging, or use real Linagora SSO credentials.
 
 ---
 

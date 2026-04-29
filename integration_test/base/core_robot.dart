@@ -203,8 +203,6 @@ class CoreRobot {
     return client;
   }
 
-  /// Runs the OIDC flow (steps 1-7) via HTTP without any browser UI.
-  /// Returns the one-time [loginToken] and the [lemonldap] session cookie.
   Future<({String loginToken, String? lemonldap})> getLoginTokenViaOIDC(
     HttpClient client,
     String username,
@@ -388,6 +386,10 @@ class CoreRobot {
       ..set(HttpHeaders.cookieHeader, 'lemonldappdata=$lemonldappdata');
 
     final thirdBody = {
+      // LemonLDAP requires these hidden fields to dispatch the POST to the
+      // auth module — without them the form is silently re-rendered (PE9).
+      'inProgress': '1',
+      'lmAuth': '1_LDAP',
       'url': url,
       'timezone': '7',
       'skin': skin,
@@ -402,8 +404,15 @@ class CoreRobot {
     final location = thirdResponse.headers.value('location');
     if (location == null) {
       final responseBody = await utf8.decoder.bind(thirdResponse).join();
+      final errorDoc = parse(responseBody);
+      final errorSpan = errorDoc.querySelector('[trspan]');
+      final errorMsg = errorSpan?.text ?? 'unknown';
       throw Exception(
-        'No redirect found after login POST [status=${thirdResponse.statusCode}] body=${responseBody.substring(0, responseBody.length.clamp(0, 300))}',
+        'OIDC login POST failed [status=${thirdResponse.statusCode}]: '
+        'LemonLDAP error="$errorMsg". '
+        'If using staging accounts, remove SSO_URL from your env file '
+        '(see .env.staging.example). '
+        'body=${responseBody.substring(0, responseBody.length.clamp(0, 200))}',
       );
     }
     final thirdRedirectUri = Uri.parse(location);
@@ -492,104 +501,67 @@ class CoreRobot {
     return (loginToken: loginToken, lemonldap: lemonldap);
   }
 
-  Future<List<dynamic>> loginByAPI(HttpClient client) async {
-    const chatURL = String.fromEnvironment('CHAT_URL');
+  /// Authenticates the configured `Receiver` test account via
+  /// `m.login.password` and returns the resulting Matrix access token. Used
+  /// to send messages from a second account during integration tests
+  /// without driving the UI of a second client.
+  Future<String> loginByAPI(HttpClient client) async {
     const matrixURL = String.fromEnvironment('MATRIX_URL');
     const receiver = String.fromEnvironment('Receiver');
     const passOfReceiver = String.fromEnvironment('ReceiverPass');
 
-    final oidcResult = await getLoginTokenViaOIDC(
-      client,
-      receiver,
-      passOfReceiver,
+    final req = await client.postUrl(
+      Uri.https(matrixURL, '/_matrix/client/v3/login'),
     );
-    final loginToken = oidcResult.loginToken;
-    final lemonldap = oidcResult.lemonldap;
-
-    // Step 8: Token login
-    final fifthUri = Uri.https(matrixURL, '/_matrix/client/v3/login');
-    final fifthRequest = await client.postUrl(fifthUri);
-    fifthRequest.followRedirects = false;
-    fifthRequest.headers
-      ..set('Sec-Fetch-Mode', 'cors')
-      ..set(HttpHeaders.refererHeader, 'https://$chatURL/')
-      ..set('Sec-Fetch-Site', 'same-site')
-      ..set(HttpHeaders.acceptLanguageHeader, 'en-US,en;q=0.9,vi;q=0.8')
-      ..set('Origin', 'https://$chatURL')
-      ..set(HttpHeaders.acceptHeader, '*/*')
-      ..set(
-        'sec-ch-ua',
-        '"Not)A;Brand";v="8", "Chromium";v="138", "Google Chrome";v="138"',
-      )
-      ..set('sec-ch-ua-mobile', '?0')
-      ..set('sec-ch-ua-platform', '"macOS"')
-      ..set(HttpHeaders.contentTypeHeader, 'application/json')
-      ..set(HttpHeaders.acceptEncodingHeader, 'gzip, deflate, br, zstd')
-      ..set(
-        HttpHeaders.userAgentHeader,
-        'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36',
-      )
-      ..set('Sec-Fetch-Dest', 'empty')
-      ..set(HttpHeaders.cookieHeader, 'lemonldap=$lemonldap');
-
-    fifthRequest.write(
+    req.headers.contentType = ContentType.json;
+    req.write(
       jsonEncode({
-        "initial_device_display_name": "$chatURL: Chrome on Web",
-        "token": loginToken,
-        "type": "m.login.token",
+        'type': 'm.login.password',
+        'identifier': {'type': 'm.id.user', 'user': receiver},
+        'password': passOfReceiver,
+        'initial_device_display_name': 'patrol-integration-test',
       }),
     );
-
-    final fifthResponse = await fifthRequest.close();
-    final fifthBody = await fifthResponse.transform(utf8.decoder).join();
-    final loginData = jsonDecode(fifthBody);
-    final accessToken = loginData['access_token'];
-
-    return [client, accessToken, lemonldap];
+    final resp = await req.close();
+    final body = await resp.transform(utf8.decoder).join();
+    if (resp.statusCode != 200) {
+      throw Exception('Receiver login HTTP ${resp.statusCode}: $body');
+    }
+    final accessToken =
+        (jsonDecode(body) as Map<String, dynamic>)['access_token'] as String?;
+    if (accessToken == null) {
+      throw Exception('Receiver login response missing access_token: $body');
+    }
+    return accessToken;
   }
 
+  /// Sends [message] into the configured `GroupID` room using a Matrix
+  /// access token (see [loginByAPI]). The room id from the env may be a
+  /// localpart (`!abc123`) — we let the server resolve the colon-suffixed
+  /// form unless the env already provides a fully-qualified id.
   Future<void> sendMessageByAPI(
     HttpClient client,
     String accessToken,
-    String lemonldap,
     String message,
   ) async {
-    const chatURL = String.fromEnvironment('CHAT_URL');
     const matrixURL = String.fromEnvironment('MATRIX_URL');
     const groupID = String.fromEnvironment('GroupID');
-    final sendMessageEndpoint = Uri.https(
+    final txnId = 'patrol-${DateTime.now().millisecondsSinceEpoch}';
+    final sendUri = Uri.https(
       matrixURL,
-      '/_matrix/client/v3/rooms/$groupID:linagora.com/send/m.room.message/$chatURL%3A%20Chrome%20on%20Web%20-9-${DateTime.now().millisecondsSinceEpoch}',
+      '/_matrix/client/v3/rooms/$groupID/send/m.room.message/$txnId',
     );
-    final sixthRequest = await client.putUrl(sendMessageEndpoint);
-    sixthRequest.followRedirects = false;
-    sixthRequest.headers
-      ..set(HttpHeaders.connectionHeader, 'keep-alive')
-      ..set('Sec-Fetch-Mode', 'cors')
-      ..set(HttpHeaders.refererHeader, 'https://$chatURL/')
-      ..set('Sec-Fetch-Site', 'same-site')
-      ..set(HttpHeaders.acceptLanguageHeader, 'en-US,en;q=0.9,vi;q=0.8')
-      ..set('Origin', 'https://$chatURL')
-      ..set(HttpHeaders.acceptHeader, '*/*')
-      ..set(HttpHeaders.authorizationHeader, 'Bearer $accessToken')
-      ..set(
-        'sec-ch-ua',
-        '"Not)A;Brand";v="8", "Chromium";v="138", "Google Chrome";v="138"',
-      )
-      ..set('sec-ch-ua-mobile', '?0')
-      ..set('sec-ch-ua-platform', '"macOS"')
-      ..set(HttpHeaders.contentTypeHeader, 'application/json')
-      ..set(HttpHeaders.acceptEncodingHeader, 'gzip, deflate, br, zstd')
-      ..set(
-        HttpHeaders.userAgentHeader,
-        'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36',
-      )
-      ..set('Sec-Fetch-Dest', 'empty')
-      ..set(HttpHeaders.cookieHeader, 'lemonldap=$lemonldap');
-
-    sixthRequest.write(jsonEncode({'msgtype': 'm.text', 'body': message}));
-
-    await sixthRequest.close();
+    final req = await client.putUrl(sendUri);
+    req.headers
+      ..contentType = ContentType.json
+      ..set(HttpHeaders.authorizationHeader, 'Bearer $accessToken');
+    req.write(jsonEncode({'msgtype': 'm.text', 'body': message}));
+    final resp = await req.close();
+    if (resp.statusCode != 200) {
+      final body = await resp.transform(utf8.decoder).join();
+      throw Exception('sendMessageByAPI HTTP ${resp.statusCode}: $body');
+    }
+    await resp.drain<void>();
   }
 
   Future<void> closeHTTPClient(HttpClient client) async {

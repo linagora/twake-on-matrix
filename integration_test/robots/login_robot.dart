@@ -5,9 +5,11 @@ import 'package:fluffychat/pages/homeserver_picker/homeserver_picker_view.dart';
 import 'package:fluffychat/pages/login/login_view.dart';
 import 'package:fluffychat/pages/twake_welcome/twake_welcome.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
+import 'package:fluffychat/widgets/matrix.dart';
 import 'package:fluffychat/widgets/twake_app.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:matrix/matrix.dart';
 import 'package:patrol/patrol.dart';
 import '../base/core_robot.dart';
 
@@ -254,10 +256,16 @@ class LoginRobot extends CoreRobot {
     await tapSignInButton();
   }
 
-  /// Logs in by running the OIDC flow via HTTP (no browser UI interaction).
-  /// Obtains a one-time [loginToken] from the SSO server and feeds it directly
-  /// to the app via the /onAuthRedirect deep link, bypassing any SSO browser
-  /// modal entirely.
+  /// Authenticates the test user without driving the SSO browser UI.
+  ///
+  /// Two paths coexist, picked at compile time from the dart-defines:
+  ///   - `SSO_URL` set → OIDC flow over HTTP (LemonLDAP `sso.linagora.com`).
+  ///     Replays the SSO POST and feeds the resulting `loginToken` to the
+  ///     app via the `/onAuthRedirect` deep link. Used by developers running
+  ///     Patrol locally with their personal Linagora SSO credentials.
+  ///   - otherwise → `m.login.password` straight to the homeserver. Used by
+  ///     CI / FTL with a dedicated test account that has a local
+  ///     `password_hash` in Synapse.
   Future<void> loginViaApi({
     required String serverUrl,
     required String username,
@@ -274,6 +282,30 @@ class LoginRobot extends CoreRobot {
 
     if (await isChatListVisible()) return;
 
+    const ssoURL = String.fromEnvironment('SSO_URL');
+    if (ssoURL.isNotEmpty) {
+      await _loginViaOidcBypass(
+        serverUrl: serverUrl,
+        username: username,
+        password: password,
+      );
+    } else {
+      await _loginViaMatrixPassword(
+        serverUrl: serverUrl,
+        username: username,
+        password: password,
+      );
+    }
+    await waitForChatList();
+  }
+
+  /// Replays the OIDC HTTP flow against LemonLDAP, gets a one-time
+  /// `loginToken`, and forwards it to the app's `/onAuthRedirect` route.
+  Future<void> _loginViaOidcBypass({
+    required String serverUrl,
+    required String username,
+    required String password,
+  }) async {
     final httpClient = await initialRedirectRequest();
     final oidcResult = await getLoginTokenViaOIDC(
       httpClient,
@@ -289,8 +321,34 @@ class LoginRobot extends CoreRobot {
       '/onAuthRedirect?loginToken=${oidcResult.loginToken}&homeserver=$encodedServer',
     );
     await $.pump();
+  }
 
-    await waitForChatList();
+  /// Drives the running app's Matrix SDK to authenticate via
+  /// `m.login.password`. Requires the user to have a local `password_hash`
+  /// on the target homeserver.
+  Future<void> _loginViaMatrixPassword({
+    required String serverUrl,
+    required String username,
+    required String password,
+  }) async {
+    final context = $.tester.element($(TwakeWelcome).finder.first);
+    final matrix = Matrix.of(context);
+    final client = await matrix.getLoginClient();
+    matrix.loginHomeserverSummary = await client
+        .checkHomeserver(Uri.parse(serverUrl))
+        .toHomeserverSummary();
+
+    await client.login(
+      LoginType.mLoginPassword,
+      identifier: AuthenticationUserIdentifier(user: username),
+      password: password,
+      initialDeviceDisplayName: PlatformInfos.clientName,
+    );
+
+    // Force the router to re-evaluate redirects so the now-logged-in client
+    // is detected and we land on the chat list.
+    TwakeApp.router.go('/');
+    await $.pump();
   }
 
   Future<void> waitForChatList() async {
