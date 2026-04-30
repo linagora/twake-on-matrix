@@ -233,10 +233,10 @@ dev_dependencies:
   msix: ^3.6.2
   translations_cleaner: ^0.0.5
   mockito: 5.6.3
-  patrol: 3.18.0
+  patrol: ^4.5.0
   html: ^0.15.4
   go_router_builder: ^4.2.0
-  patrol_cli: ^3.11.0
+  patrol_cli: ^4.3.1
 
 flutter_launcher_icons:
   android: false
@@ -339,6 +339,7 @@ cider:
 
 patrol:
   app_name: Twake Chat
+  test_directory: integration_test
   android:
     package_name: app.twake.android.chat
   ios:

@@ -81,6 +81,10 @@ devenv.local.nix
 # Patrol generated
 test_bundle.dart
 
+# Patrol web (Playwright) artifacts
+playwright-report/
+test-results/
+
 sentry.properties
 
 .fvm

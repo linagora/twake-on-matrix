@@ -45,8 +45,10 @@ class TestBase {
 
     const testTimeout = Timeout(Duration(milliseconds: testTimeoutMs));
 
-    const defaultNativeConfig = NativeAutomatorConfig(
-      findTimeout: Duration(milliseconds: nativeFindTimeoutMs),
+    // NativeAutomatorConfig is no longer a const-constructable class in
+    // Patrol 4.x, so we build it with `final` and inline a const Duration.
+    final defaultNativeConfig = NativeAutomatorConfig(
+      findTimeout: const Duration(milliseconds: nativeFindTimeoutMs),
     );
     patrolTest(
       description,
@@ -93,8 +95,7 @@ class TestBase {
         printLogs: true,
         visibleTimeout: Duration(minutes: 1),
       ),
-      nativeAutomatorConfig:
-          nativeAutomatorConfig ?? const NativeAutomatorConfig(),
+      nativeAutomatorConfig: nativeAutomatorConfig ?? NativeAutomatorConfig(),
       framePolicy: LiveTestWidgetsFlutterBindingFramePolicy.fullyLive,
       ($) async {
         await initTwakeChat();

@@ -1,6 +1,5 @@
-import 'dart:io';
-
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -42,7 +41,7 @@ class SettingsRecoveryKeyRobot extends HomeRobot {
     final context = $.tester.element(find.byType(Scaffold).first);
     final l10n = L10n.of(context)!;
 
-    if (Platform.isAndroid) {
+    if (!kIsWeb && defaultTargetPlatform == TargetPlatform.android) {
       final copyButton = $(
         AlertDialog,
       ).$(TextButton).containing(find.text(l10n.copy.toUpperCase()));
