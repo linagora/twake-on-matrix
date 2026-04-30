@@ -2,29 +2,35 @@ on:
   workflow_dispatch:
     inputs:
       patrol_test_target:
-        description: "Optional path to Patrol integration test Dart file (e.g. integration_test/tests/chat/chat_list_test.dart). Leave empty to run all tests."
+        description: "Path to Patrol integration test Dart file. Defaults to the perf test."
         required: false
-        default: ""
+        default: "integration_test/tests/chat/perf_test.dart"
+      perf_runs:
+        description: "Number of perf test runs for median (3-5 recommended)."
+        required: false
+        default: "3"
   schedule:
     - cron: "0 0 * * *"
 
 name: Integration
 
+env:
+  FLUTTER_VERSION: "3.38.9"
+  JAVA_VERSION: 17
+  ANDROID_SDK_ROOT: "/usr/local/lib/android/sdk"
+  # FTL_RESULTS_BUCKET cannot be defined here: secrets are not accessible in the
+  # workflow-level env block. It is defined at job level in each job that needs it.
+
 jobs:
+  # ────────────────────────────────────────────────────────────────────────────
+  # Job 1 – Functional integration tests (virtual device)
+  # ────────────────────────────────────────────────────────────────────────────
   integration_test:
     name: Integration Test
-    runs-on: self-hosted # Run on our self-hosted runner
+    runs-on: ubuntu-latest
     permissions:
       id-token: write
-      contents: write
-      actions: write
-      checks: write
-      pull-requests: write
-
-    env:
-      FLUTTER_VERSION: "3.38.9"
-      JAVA_VERSION: 17
-      ANDROID_SDK_ROOT: "/opt/android-sdk"
+      contents: read
 
     defaults:
       run:
@@ -41,33 +47,21 @@ jobs:
           workload_identity_provider: ${{ secrets.GOOGLE_CLOUD_WORKLOAD_IDENTITY_PROVIDER_ID }}
           service_account: ${{ secrets.GOOGLE_CLOUD_SERVICE_ACCOUNT }}
 
-      - name: Show runner resources
-        run: |
-          echo "CPU cores: $(nproc)"
-          echo "Memory usage:"
-          free -h
-          echo "Disk usage:"
-          df -h
-          echo "Top processes by memory:"
-          ps -eo pid,comm,%cpu,%mem --sort=-%mem | head -n 10
-
-      - name: Ensure PATH for Flutter, Android SDK and Patrol
-        run: |
-          echo "$HOME/fvm/versions/${{ env.FLUTTER_VERSION }}/bin" >> "$GITHUB_PATH"
-          echo "${{ env.ANDROID_SDK_ROOT }}/cmdline-tools/latest/bin" >> "$GITHUB_PATH"
-          echo "${{ env.ANDROID_SDK_ROOT }}/platform-tools" >> "$GITHUB_PATH"
-          echo "$HOME/.pub-cache/bin" >> "$GITHUB_PATH"
-
-      - name: Check flutter and sdkmanager version
-        run: |
-          flutter --version
-          sdkmanager --version
-
       - name: Set up Java
         uses: actions/setup-java@v4
         with:
           java-version: ${{ env.JAVA_VERSION }}
           distribution: "temurin"
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: "stable"
+          cache: true
+
+      - name: Add Android SDK tools to PATH
+        run: echo "${{ env.ANDROID_SDK_ROOT }}/cmdline-tools/latest/bin" >> "$GITHUB_PATH"
 
       - name: Accept Android SDK licenses
         run: |
@@ -85,11 +79,9 @@ jobs:
           ssh-private-key: ${{ secrets.SSH_KEY }}
 
       - name: Setup project
-        run: |
-          flutter pub get && flutter pub run build_runner build --delete-conflicting-outputs
+        run: flutter pub get && flutter pub run build_runner build --delete-conflicting-outputs
 
-      - name: Run Patrol Tests
-        shell: bash
+      - name: Build and run integration tests
         env:
           INTEGRATION_TEST_ENV_BASE64: ${{ secrets.INTEGRATION_TEST_ENV_BASE64 }}
           PATROL_TEST_TARGET: ${{ inputs.patrol_test_target }}
@@ -97,22 +89,22 @@ jobs:
           dart pub global activate patrol_cli 3.10.0
           flutter build apk --config-only
 
-          # export the secret file and clean it up after
           echo "$INTEGRATION_TEST_ENV_BASE64" | base64 --decode > .env.cicd
           trap 'rm -f .env.cicd' EXIT
 
-          TARGET_FLAG=""
           if [ -n "$PATROL_TEST_TARGET" ]; then
             echo "Running Patrol tests defined in $PATROL_TEST_TARGET"
-            TARGET_FLAG="--target $PATROL_TEST_TARGET"
+            patrol build android \
+              -v \
+              --dart-define-from-file .env.cicd \
+              --target "$PATROL_TEST_TARGET"
           else
             echo "Running full Patrol test suite"
+            patrol build android \
+              -v \
+              --dart-define-from-file .env.cicd
           fi
 
-          patrol build android \
-            -v \
-            --dart-define-from-file .env.cicd \
-            ${TARGET_FLAG}
           gcloud firebase test android run \
             --type instrumentation \
             --app build/app/outputs/apk/debug/app-debug.apk \
@@ -121,3 +113,300 @@ jobs:
             --timeout 60m \
             --use-orchestrator \
             --environment-variables clearPackageData=true
+
+  # ────────────────────────────────────────────────────────────────────────────
+  # Job 2 – Build perf APK once, upload as artifact
+  # ────────────────────────────────────────────────────────────────────────────
+  perf_build:
+    name: Build Perf APK
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+
+    defaults:
+      run:
+        shell: bash
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          java-version: ${{ env.JAVA_VERSION }}
+          distribution: "temurin"
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: "stable"
+          cache: true
+
+      - name: Add Android SDK tools to PATH
+        run: echo "${{ env.ANDROID_SDK_ROOT }}/cmdline-tools/latest/bin" >> "$GITHUB_PATH"
+
+      - name: Accept Android SDK licenses
+        run: |
+          yes | sdkmanager --licenses || echo "Warning: License acceptance failed"
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Install Rust targets for Android
+        run: |
+          rustup target add aarch64-linux-android armv7-linux-androideabi i686-linux-android x86_64-linux-android
+
+      - uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.SSH_KEY }}
+
+      - name: Setup project
+        run: flutter pub get && flutter pub run build_runner build --delete-conflicting-outputs
+
+      - name: Build perf test APK
+        env:
+          INTEGRATION_TEST_ENV_BASE64: ${{ secrets.INTEGRATION_TEST_ENV_BASE64 }}
+        run: |
+          dart pub global activate patrol_cli 3.10.0
+          flutter build apk --config-only
+
+          echo "$INTEGRATION_TEST_ENV_BASE64" | base64 --decode > .env.cicd
+          trap 'rm -f .env.cicd' EXIT
+
+          patrol build android \
+            -v \
+            --dart-define-from-file .env.cicd \
+            --target integration_test/tests/chat/perf_test.dart
+
+      - name: Upload APKs
+        uses: actions/upload-artifact@v4
+        with:
+          name: perf-apks-${{ github.run_id }}
+          retention-days: 1
+          path: |
+            build/app/outputs/apk/debug/app-debug.apk
+            build/app/outputs/apk/androidTest/debug/app-debug-androidTest.apk
+
+  # ────────────────────────────────────────────────────────────────────────────
+  # Job 3a – Memory metrics: 3 runs on virtual device (free tier)
+  # RSS and imageCache are reliable on virtual devices. Running ×3 gives a
+  # median that filters outliers from GC pauses or background activity.
+  # ────────────────────────────────────────────────────────────────────────────
+  perf_run_virtual:
+    name: Perf Memory Run ${{ matrix.run }}/3
+    needs: perf_build
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    env:
+      FTL_RESULTS_BUCKET: "${{ secrets.GOOGLE_CLOUD_PROJECT_ID }}_test_results"
+
+    strategy:
+      fail-fast: false
+      matrix:
+        run: [1, 2, 3]
+
+    defaults:
+      run:
+        shell: bash
+
+    steps:
+      - name: Validate FTL bucket name
+        run: |
+          if [[ "${{ env.FTL_RESULTS_BUCKET }}" == _* ]]; then
+            echo "ERROR: FTL_RESULTS_BUCKET='${{ env.FTL_RESULTS_BUCKET }}' — GOOGLE_CLOUD_PROJECT_ID secret is missing or empty."
+            exit 1
+          fi
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          project_id: ${{ secrets.GOOGLE_CLOUD_PROJECT_ID }}
+          workload_identity_provider: ${{ secrets.GOOGLE_CLOUD_WORKLOAD_IDENTITY_PROVIDER_ID }}
+          service_account: ${{ secrets.GOOGLE_CLOUD_SERVICE_ACCOUNT }}
+
+      - name: Download APKs
+        uses: actions/download-artifact@v4
+        with:
+          name: perf-apks-${{ github.run_id }}
+          path: apks/
+
+      - name: Run perf test on virtual device
+        run: |
+          PERF_RUN_ID="perf-virtual-${{ github.run_id }}-run${{ matrix.run }}"
+
+          gcloud firebase test android run \
+            --type instrumentation \
+            --app apks/build/app/outputs/apk/debug/app-debug.apk \
+            --test apks/build/app/outputs/apk/androidTest/debug/app-debug-androidTest.apk \
+            --device model=MediumPhone.arm,version=34 \
+            --timeout 30m \
+            --use-orchestrator \
+            --environment-variables clearPackageData=true \
+            --results-bucket "${{ env.FTL_RESULTS_BUCKET }}" \
+            --results-dir "$PERF_RUN_ID"
+
+          echo "PERF_RUN_ID=$PERF_RUN_ID" >> "$GITHUB_ENV"
+
+      - name: Download logcat from GCS
+        run: |
+          GCS_PATH="gs://${{ env.FTL_RESULTS_BUCKET }}/$PERF_RUN_ID"
+          gsutil -m cp -r "$GCS_PATH" ./perf_gcs_results/ \
+            || { echo "ERROR: gsutil failed to download results from $GCS_PATH"; exit 1; }
+          find ./perf_gcs_results -name "logcat" -exec cat {} + > perf_logcat.txt \
+            || { echo "ERROR: no logcat file found in GCS results"; exit 1; }
+          if [ ! -s perf_logcat.txt ]; then
+            echo "ERROR: logcat is empty"; exit 1
+          fi
+
+      - name: Upload run logcat
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: perf-virtual-logcat-${{ github.run_id }}-run${{ matrix.run }}
+          retention-days: 7
+          path: perf_logcat.txt
+
+  # ────────────────────────────────────────────────────────────────────────────
+  # Job 3b – Frame timing metrics: 1 run on physical device (free tier)
+  # build_p95, jank_rate are only meaningful on real hardware. 1 run within
+  # the 30min/day free tier — no median, but the signal is reliable.
+  # ────────────────────────────────────────────────────────────────────────────
+  perf_run_physical:
+    name: Perf Frame Run (physical)
+    needs: perf_build
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    env:
+      FTL_RESULTS_BUCKET: "${{ secrets.GOOGLE_CLOUD_PROJECT_ID }}_test_results"
+
+    defaults:
+      run:
+        shell: bash
+
+    steps:
+      - name: Validate FTL bucket name
+        run: |
+          if [[ "${{ env.FTL_RESULTS_BUCKET }}" == _* ]]; then
+            echo "ERROR: FTL_RESULTS_BUCKET='${{ env.FTL_RESULTS_BUCKET }}' — GOOGLE_CLOUD_PROJECT_ID secret is missing or empty."
+            exit 1
+          fi
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          project_id: ${{ secrets.GOOGLE_CLOUD_PROJECT_ID }}
+          workload_identity_provider: ${{ secrets.GOOGLE_CLOUD_WORKLOAD_IDENTITY_PROVIDER_ID }}
+          service_account: ${{ secrets.GOOGLE_CLOUD_SERVICE_ACCOUNT }}
+
+      - name: Download APKs
+        uses: actions/download-artifact@v4
+        with:
+          name: perf-apks-${{ github.run_id }}
+          path: apks/
+
+      - name: Run perf test on physical device
+        run: |
+          PERF_RUN_ID="perf-physical-${{ github.run_id }}"
+
+          gcloud firebase test android run \
+            --type instrumentation \
+            --app apks/build/app/outputs/apk/debug/app-debug.apk \
+            --test apks/build/app/outputs/apk/androidTest/debug/app-debug-androidTest.apk \
+            --device model=oriole,version=33 \
+            --timeout 30m \
+            --use-orchestrator \
+            --environment-variables clearPackageData=true \
+            --results-bucket "${{ env.FTL_RESULTS_BUCKET }}" \
+            --results-dir "$PERF_RUN_ID"
+
+          echo "PERF_RUN_ID=$PERF_RUN_ID" >> "$GITHUB_ENV"
+
+      - name: Download logcat from GCS
+        run: |
+          GCS_PATH="gs://${{ env.FTL_RESULTS_BUCKET }}/$PERF_RUN_ID"
+          gsutil -m cp -r "$GCS_PATH" ./perf_gcs_results/ \
+            || { echo "ERROR: gsutil failed to download results from $GCS_PATH"; exit 1; }
+          find ./perf_gcs_results -name "logcat" -exec cat {} + > perf_logcat.txt \
+            || { echo "ERROR: no logcat file found in GCS results"; exit 1; }
+          if [ ! -s perf_logcat.txt ]; then
+            echo "ERROR: logcat is empty"; exit 1
+          fi
+
+      - name: Upload physical run logcat
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: perf-physical-logcat-${{ github.run_id }}
+          retention-days: 7
+          path: perf_logcat.txt
+
+  # ────────────────────────────────────────────────────────────────────────────
+  # Job 4 – Compute median across the 3 virtual runs + annotate physical
+  # ────────────────────────────────────────────────────────────────────────────
+  perf_median:
+    name: Compute Perf Median
+    needs: [perf_run_virtual, perf_run_physical]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    defaults:
+      run:
+        shell: bash
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Download virtual run logcats
+        uses: actions/download-artifact@v4
+        with:
+          pattern: perf-virtual-logcat-${{ github.run_id }}-run*
+          path: perf_logcats/virtual/
+          merge-multiple: false
+
+      - name: Download physical run logcat
+        uses: actions/download-artifact@v4
+        with:
+          name: perf-physical-logcat-${{ github.run_id }}
+          path: perf_logcats/physical/
+
+      - name: Compute median (memory metrics — virtual ×3)
+        run: |
+          mapfile -t LOGCAT_FILES < <(find perf_logcats/virtual/ -name "perf_logcat.txt" | sort)
+          echo "Virtual logcat files: ${LOGCAT_FILES[*]}"
+
+          python3 scripts/perf/compute_median.py \
+            "${LOGCAT_FILES[@]}" \
+            perf_median_memory.json
+
+          echo "=== Memory Median Results ==="
+          cat perf_median_memory.json
+
+      - name: Extract frame metrics (physical ×1)
+        run: |
+          PHYSICAL_LOGCAT="perf_logcats/physical/perf_logcat.txt"
+          echo "Physical logcat: $PHYSICAL_LOGCAT"
+
+          python3 scripts/perf/compute_median.py \
+            "$PHYSICAL_LOGCAT" \
+            perf_frame_physical.json
+
+          echo "=== Frame Results (physical device) ==="
+          cat perf_frame_physical.json
+
+      - name: Upload results
+        uses: actions/upload-artifact@v4
+        with:
+          name: perf-results-${{ github.run_id }}
+          retention-days: 90
+          path: |
+            perf_median_memory.json
+            perf_frame_physical.json
