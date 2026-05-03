@@ -2071,7 +2071,7 @@
     "type": "text",
     "placeholders": {}
   },
-  "pleaseEnterYourUsername": "Harap masukkan nama pengguna Anda",
+  "pleaseEnterYourUsername": "Masukkan Id Matrix atau nama pengguna Anda",
   "@pleaseEnterYourUsername": {
     "type": "text",
     "placeholders": {}
@@ -2522,7 +2522,7 @@
       "day": {}
     }
   },
-  "noMessageHereYet": "Belum ada pesan di sini...",
+  "noMessageHereYet": "Belum ada pesan di sini",
   "sendMessageGuide": "Kirim pesan atau ketuk sapaan di bawah.",
   "youCreatedGroupChat": "Anda membuat obrolan grup",
   "chatCanHave": "Obrolan dapat memiliki:",
@@ -3135,5 +3135,68 @@
   "changePermissions": "Ubah izin",
   "@changePermissions": {
     "description": "Context menu action to open permission picker dialog"
+  },
+  "thisIsANewChat": "Ini adalah obrolan baru",
+  "@thisIsANewChat": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "chatPreviewUnavailable": "Klik untuk memuat pesan terbaru",
+  "@chatPreviewUnavailable": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "recoveryKeyWarningMessage": "Rahasia ini memberikan akses ke semua pesan terenkripsi Anda kepada siapa pun yang menggunakannya. Jaga kerahasiaannya dan jangan bagikan kepada siapa pun.",
+  "recoveryKeyCopiedToClipboard": "Kunci pemulihan disalin ke papan klip",
+  "groupInfo": "Info grup",
+  "tapToRetry": "Ketuk untuk mencoba lagi",
+  "fileNoLongerExists": "File tidak lagi ada",
+  "cannotInviteBannedMember": "Pengguna ini telah dihapus oleh administrator. Ubah status di \"Pengguna yang dihapus\" untuk melanjutkan",
+  "leaveChat": "Tinggalkan obrolan",
+  "leaveChatDescription": "Riwayat pesan akan tetap tersedia untuk orang lain.",
+  "leaveChatTitle": "Apakah Anda yakin ingin meninggalkan obrolan ini?",
+  "dataAndStorage": "Data dan penyimpanan",
+  "phoneStorage": "Penyimpanan Ponsel",
+  "phoneStorageDescription": "Twake Chat menggunakan {percent} penyimpanan di ponsel Anda",
+  "@phoneStorageDescription": {
+    "placeholders": {
+      "percent": {
+        "type": "String"
+      }
+    }
+  },
+  "medias": "Media",
+  "videos": "Video",
+  "stickersAndEmojis": "Stiker dan emoji",
+  "clearCacheSize": "Hapus cache {size}",
+  "@clearCacheSize": {
+    "placeholders": {
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "available": "Tersedia",
+  "clearCacheConfirmTitle": "Hapus cache?",
+  "clearCacheConfirmMessage": "Ini akan menghapus semua file sementara yang tersimpan di perangkat Anda. Tindakan ini tidak dapat dibatalkan.",
+  "cacheClearedSuccessfully": "Cache berhasil dihapus",
+  "cacheIsScanning": "Cache sedang dipindai. Harap tunggu...",
+  "selectYourServer": "Pilih server Anda",
+  "welcomeBack": "Selamat datang kembali",
+  "matrixIdOrUsername": "Id Matrix atau nama pengguna",
+  "waitingForResponse": "Menunggu respons",
+  "forwardFailed": "Gagal meneruskan pesan",
+  "forwardedToChats": "Diteruskan ke {count} obrolan",
+  "@forwardedToChats": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "forwardedToChatsPartial": "Diteruskan ke {successCount} dari {totalCount} obrolan",
+  "@forwardedToChatsPartial": {
+    "placeholders": {
+      "successCount": {},
+      "totalCount": {}
+    }
   }
 }
