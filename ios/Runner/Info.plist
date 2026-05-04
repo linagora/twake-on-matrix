@@ -66,6 +66,8 @@
 	<string>Play audio and voice messages on bluetooth devices</string>
 	<key>NSCameraUsageDescription</key>
 	<string>Open the camera and take a picture to share them with your contacts on Twake Chat.</string>
+	<key>NSCarrierUsageDescription</key>
+	<string>Used by Twake Chat to determine the default country code for phone number normalization.</string>
 	<key>NSContactsUsageDescription</key>
 	<string>Used by Twake Chat to find existed Twake account, who you can connect directly in Twake Chat or who you can send invitation.</string>
 	<key>NSFaceIDUsageDescription</key>
