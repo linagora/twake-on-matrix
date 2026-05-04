@@ -21,9 +21,20 @@ const universalLinkBase = "https://links.twake.app/chat";
 
 function getPlatform() {
   const ua = navigator.userAgent || navigator.vendor || window.opera;
+  const isMobileUa =
+    platformConfig.ios.pattern.test(ua) ||
+    platformConfig.android.pattern.test(ua);
+
+  // Require both a mobile UA and a coarse pointer (touch-primary device).
+  // This prevents the banner from appearing in desktop DevTools when a mobile
+  // UA is emulated but no real touch input is present.
+  const hasTouchPrimary =
+    window.matchMedia("(pointer: coarse)").matches ||
+    navigator.maxTouchPoints > 0;
+
+  if (!isMobileUa || !hasTouchPrimary) return "other";
   if (platformConfig.ios.pattern.test(ua)) return platformConfig.ios.name;
-  if (platformConfig.android.pattern.test(ua)) return platformConfig.android.name;
-  return "other";
+  return platformConfig.android.name;
 }
 
 function getStoreUrl(platform) {
