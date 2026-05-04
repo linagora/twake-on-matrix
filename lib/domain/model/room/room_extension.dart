@@ -170,22 +170,40 @@ extension RoomExtension on Room {
   Future<RoomPreviewResult> lastEventAvailableInPreview() async {
     const previewLimit = 30;
     try {
+      Event? bestSynced;
+      Event? bestPending;
+
+      final syncCandidate = lastEvent;
+      if (syncCandidate != null &&
+          EventVisibilityResolver.isEligibleForChatListPreviewSync(
+            syncCandidate,
+          )) {
+        if (syncCandidate.status.isSent) {
+          bestSynced = syncCandidate;
+        } else {
+          bestPending = syncCandidate;
+        }
+      }
+
+      if (bestSynced != null) return RoomPreviewFound(bestSynced);
+
       final statePreviewCandidates = client.roomPreviewLastEvents
           .map(getState)
           .whereType<Event>()
           .toList();
-      Event? best;
       for (final e in statePreviewCandidates) {
         if (await EventVisibilityResolver.isEligibleForChatListPreview(
           this,
           e,
         )) {
-          best = _newestEvent(best, e);
+          if (e.status.isSent) {
+            bestSynced = _newestEvent(bestSynced, e);
+          } else {
+            bestPending = _newestEvent(bestPending, e);
+          }
         }
       }
-      if (best != null) {
-        return RoomPreviewFound(best);
-      }
+      if (bestSynced != null) return RoomPreviewFound(bestSynced);
 
       final dbEvents = await client.database.getEventList(
         this,
@@ -198,11 +216,21 @@ extension RoomExtension on Room {
           this,
           e,
         )) {
-          best = _newestEvent(best, e);
+          if (e.status.isSent) {
+            bestSynced = _newestEvent(bestSynced, e);
+          } else {
+            bestPending = _newestEvent(bestPending, e);
+          }
         }
       }
-      if (best != null) {
-        return RoomPreviewFound(best);
+      // Prefer the most recent confirmed event. A pending/failed event wins
+      // only when it is genuinely newer (e.g. a message just sent without
+      // network).
+      final dbBest = bestPending != null
+          ? _newestEvent(bestSynced, bestPending)
+          : bestSynced;
+      if (dbBest != null) {
+        return RoomPreviewFound(dbBest);
       }
       return roomFullyScanned
           ? const RoomPreviewEmpty()
