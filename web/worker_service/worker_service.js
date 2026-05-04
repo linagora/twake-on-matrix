@@ -21,9 +21,18 @@ const universalLinkBase = "https://links.twake.app/chat";
 
 function getPlatform() {
   const ua = navigator.userAgent || navigator.vendor || window.opera;
-  const isMobileUa =
-    platformConfig.ios.pattern.test(ua) ||
-    platformConfig.android.pattern.test(ua);
+
+  // Store pattern results once to avoid redundant regex evaluations.
+  const isIOS = platformConfig.ios.pattern.test(ua);
+  const isAndroid = platformConfig.android.pattern.test(ua);
+
+  // iPadOS 13+ defaults to a macOS user agent ("Macintosh") to request the
+  // desktop version of websites, so the iOS pattern above will miss it.
+  // Fall back to checking maxTouchPoints: real Macs have 0, iPads have > 1.
+  // See: https://developer.apple.com/forums/thread/119186
+  const isIPad = !isIOS && /Macintosh/i.test(ua) && navigator.maxTouchPoints > 1;
+
+  const isMobileUa = isIOS || isIPad || isAndroid;
 
   // Require both a mobile UA and a coarse pointer (touch-primary device).
   // This prevents the banner from appearing in desktop DevTools when a mobile
@@ -33,7 +42,7 @@ function getPlatform() {
     navigator.maxTouchPoints > 0;
 
   if (!isMobileUa || !hasTouchPrimary) return "other";
-  if (platformConfig.ios.pattern.test(ua)) return platformConfig.ios.name;
+  if (isIOS || isIPad) return platformConfig.ios.name;
   return platformConfig.android.name;
 }
 
