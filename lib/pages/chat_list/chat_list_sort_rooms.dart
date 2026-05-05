@@ -136,6 +136,7 @@ class _ChatListSortRoomsState extends State<ChatListSortRooms> {
         .toList();
     for (final room in removedRooms) {
       _roomSubscriptions[room.id]?.cancel();
+      _pendingRefresh.remove(room.id);
     }
     _roomSubscriptions = Map.fromEntries(
       widget.rooms.map(
