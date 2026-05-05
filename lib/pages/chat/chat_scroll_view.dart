@@ -90,10 +90,10 @@ class _ChatScrollViewState extends State<ChatScrollView> {
       // New events arrived but we're not auto-scrolling (e.g. message from
       // others). Snapshot whether we're at the bottom NOW (before layout adds
       // the new message and grows maxScrollExtent), then act after layout.
-      final wasAtBottom =
-          controller.scrollController.hasClients &&
-          controller.scrollController.position.pixels >=
-              controller.scrollController.position.maxScrollExtent;
+      final wasAtBottom = controller.scrollController.hasClients &&
+          (controller.scrollController.position.maxScrollExtent -
+                  controller.scrollController.position.pixels) <=
+              2.0;
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (!mounted) return;
         if (!controller.scrollController.hasClients) return;

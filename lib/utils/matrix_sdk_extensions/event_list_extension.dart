@@ -87,7 +87,9 @@ extension EventListExtension on List<Event> {
         top: const [],
         bottom: List.from(newEvents),
         shouldScrollToBottom: false,
-        hasNewEvents: newEvents.length > oldEvents.length,
+        hasNewEvents: newEvents.isNotEmpty &&
+            (oldEvents.isEmpty ||
+                newEvents.first.eventId != oldEvents.first.eventId),
       );
     }
 
