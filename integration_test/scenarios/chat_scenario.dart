@@ -503,8 +503,8 @@ class ChatScenario extends CoreRobot {
 
   Future<void> sendAMessageByAPI(String message) async {
     final client = await CoreRobot($).initialRedirectRequest();
-    final list = await CoreRobot($).loginByAPI(client);
-    await CoreRobot($).sendMessageByAPI(list[0], list[1], list[2], message);
+    final accessToken = await CoreRobot($).loginByAPI(client);
+    await CoreRobot($).sendMessageByAPI(client, accessToken, message);
     await CoreRobot($).closeHTTPClient(client);
   }
 
