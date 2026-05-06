@@ -203,7 +203,12 @@ extension RoomExtension on Room {
           }
         }
       }
-      if (bestSynced != null) return RoomPreviewFound(bestSynced);
+      if (bestSynced != null) {
+        final best = bestPending != null
+            ? _newestEvent(bestSynced, bestPending)
+            : bestSynced;
+        return RoomPreviewFound(best);
+      }
 
       final dbEvents = await client.database.getEventList(
         this,
