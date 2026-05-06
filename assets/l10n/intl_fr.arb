@@ -825,7 +825,7 @@
     "type": "text",
     "placeholders": {}
   },
-  "groupDescription": "Description du salon",
+  "groupDescription": "Description",
   "@groupDescription": {
     "type": "text",
     "placeholders": {}
@@ -1366,7 +1366,7 @@
     "type": "text",
     "placeholders": {}
   },
-  "pleaseEnter4Digits": "Veuillez saisir 4 chiffres ou laisser vide pour désactiver le verrouillage de l’application.",
+  "pleaseEnter4Digits": "Veuillez saisir 4 chiffres, ou laissez vide pour désactiver le verrouillage",
   "@pleaseEnter4Digits": {
     "type": "text",
     "placeholders": {}
@@ -1386,7 +1386,7 @@
     "type": "text",
     "placeholders": {}
   },
-  "pleaseEnterYourUsername": "Renseignez votre nom d'utilisateur·ice",
+  "pleaseEnterYourUsername": "Renseignez votre nom d'utilisateur·ice Matrix",
   "@pleaseEnterYourUsername": {
     "type": "text",
     "placeholders": {}
@@ -1487,7 +1487,7 @@
     "type": "text",
     "placeholders": {}
   },
-  "renderRichContent": "Afficher le contenu enrichi des messages",
+  "renderRichContent": "Afficher le texte mis en forme",
   "@renderRichContent": {
     "type": "text",
     "placeholders": {}
@@ -2319,7 +2319,7 @@
       "number": {}
     }
   },
-  "hideUnimportantStateEvents": "Masquer les événements d'état sans importance",
+  "hideUnimportantStateEvents": "Masquer les événements sans importance",
   "doNotShowAgain": "Ne plus afficher",
   "commandHint_googly": "Envoyer des yeux écarquillés",
   "commandHint_cuddle": "Envoyer un câlin",
@@ -2402,7 +2402,7 @@
   },
   "inactive": "Compte non activé",
   "noMoreResult": "Plus de résultat !",
-  "youCreatedGroupChat": "Vous avez créé un groupe de discussion",
+  "youCreatedGroupChat": "Félicitations, vous avez créé une discussion",
   "searchForPeopleAndChannels": "Personnes ou Salons",
   "noResultForKeyword": "Pas de résultat pour \"{keyword}\"",
   "@noResultForKeyword": {
@@ -2416,17 +2416,17 @@
   "channels": "Salons",
   "back": "Revenir en arrière",
   "contacts": "Contacts",
-  "upTo100000Members": "Jusqu'à 100 000 membres",
+  "upTo100000Members": "✅ Jusqu'à 100 000 membres",
   "chatMessage": "Nouveau message",
   "shrink": "Rétrécir",
-  "persistentChatHistory": "Historique des discussions persistant",
+  "persistentChatHistory": "✅ Historique des discussions persistant",
   "previous": "Précédent",
   "owner": "Propriétaire",
   "active": "Compte activé",
   "more": "Plus",
   "whoWouldYouLikeToAdd": "Qui voulez-vous ajouter ?",
-  "sendMessageGuide": "Envoyez un message ou appuyez sur la salutation ci-dessous.",
-  "noMessageHereYet": "Pas encore de message...",
+  "sendMessageGuide": "Envoyez un message ou appuyez sur la salutation",
+  "noMessageHereYet": "Pas encore de message",
   "addAPhoto": "Ajouter une photo",
   "addMember": "Ajouter des membres",
   "startNewChatMessage": "Il est agréable de discuter avec vos amis et de collaborer avec vos équipes.\nEngageons une discussion, créons un salon, ou rejoignons un salon existant.",
@@ -2678,7 +2678,7 @@
   "doYouReallyWantToDeclineThisInvitation": "Voulez-vous vraiment refuser cette invitation et supprimer la discussion ? Vous ne pourrez pas annuler cette action.",
   "linagoraContactsCount": "Contacts Linagora ({count})",
   "youNeedToAcceptTheInvitation": "Vous devez accepter l'invitation avant de commencer à échanger",
-  "hasInvitedYouToAChat": " vous a invité à discuter. Accepter ou refuser et supprimer la discussion ?",
+  "hasInvitedYouToAChat": "vous a invité dans une discussion",
   "declineTheInvitation": "Refuser l'invitation ?",
   "pinnedMessages": "{count, plural, =1{1 Message épinglé} other{{count} Messages épinglés}}",
   "@pinnedMessages": {
@@ -3078,5 +3078,61 @@
   "cannotInviteBannedMember": "Cet utilisateur a été supprimé par un administrateur. Modifiez le statut dans \"Utilisateurs supprimés\" pour continuer",
   "leaveChat": "Quitter la discussion",
   "leaveChatDescription": "L'historique des messages restera disponible pour les autres membres encore présents.",
-  "leaveChatTitle": "Êtes-vous sûr de vouloir quitter la discussion ?"
+  "leaveChatTitle": "Êtes-vous sûr de vouloir quitter la discussion ?",
+  "thisIsANewChat": "Ceci est une nouvelle discussion",
+  "@thisIsANewChat": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "chatPreviewUnavailable": "Cliquez pour charger les derniers messages",
+  "@chatPreviewUnavailable": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "recoveryKeyWarningMessage": "Ce secret donne accès à tous vos messages chiffrés. Conservez-le précieusement et ne le partagez pas.",
+  "recoveryKeyCopiedToClipboard": "Clé de récupération copiée dans le presse-papier",
+  "dataAndStorage": "Données et stockage",
+  "phoneStorage": "Stockage du téléphone",
+  "phoneStorageDescription": "Twake Chat utilise {percent} de stockage sur votre téléphone",
+  "@phoneStorageDescription": {
+    "placeholders": {
+      "percent": {
+        "type": "String"
+      }
+    }
+  },
+  "medias": "Médias",
+  "videos": "Vidéos",
+  "stickersAndEmojis": "Stickers et emojis",
+  "clearCacheSize": "Supprimer le cache {size}",
+  "@clearCacheSize": {
+    "placeholders": {
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "available": "Disponible",
+  "clearCacheConfirmTitle": "Supprimer le cache ?",
+  "clearCacheConfirmMessage": "Cette opération supprimera tous les fichiers temporaires stockés sur votre appareil. Cette action ne peut pas être annulée.",
+  "cacheClearedSuccessfully": "Le cache a bien été supprimé",
+  "cacheIsScanning": "Examen du cache en cours, veuillez patienter...",
+  "selectYourServer": "Sélectionnez votre serveur",
+  "welcomeBack": "Bon retour ici",
+  "matrixIdOrUsername": "ID Matrix ou identifiant",
+  "waitingForResponse": "En attente de réponse",
+  "forwardFailed": "Échec du transfert du message",
+  "forwardedToChats": "Transféré à {count} discussions",
+  "@forwardedToChats": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "forwardedToChatsPartial": "Transféré à {successCount} sur {totalCount} discussions",
+  "@forwardedToChatsPartial": {
+    "placeholders": {
+      "successCount": {},
+      "totalCount": {}
+    }
+  }
 }
