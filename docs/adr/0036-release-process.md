@@ -64,9 +64,9 @@ Examples: `v2.21.7`, `v2.21.7-rc01`
 
 ```bash
 git tag vx.y.z
-git push origin main.                  # stable
+git push origin main                   # stable
 # or: git tag vx.y.z-rcNN              # release candidate
-git push origin refs/tags/vx.y.z.      # stable
+git push origin refs/tags/vx.y.z       # stable
 # or: git push origin refs/tags/vx.y.z-rcNN
 ```
 
