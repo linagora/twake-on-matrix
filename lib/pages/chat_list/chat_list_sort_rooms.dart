@@ -81,12 +81,12 @@ class _ChatListSortRoomsState extends State<ChatListSortRooms> {
         continue;
       }
 
+      _pendingRefresh.remove(room.id);
       final result = await room.lastEventAvailableInPreview();
 
       if (!mounted || generation != _sortGeneration) return _sortCache;
 
       _previewByRoomId[room.id] = result;
-      _pendingRefresh.remove(room.id);
     }
 
     if (!mounted) return _sortCache;
