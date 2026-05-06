@@ -33,6 +33,11 @@ class _ChatListSortRoomsState extends State<ChatListSortRooms> {
   Map<String, StreamSubscription?> _roomSubscriptions = {};
   Future<List<Room>>? _sortFuture;
 
+  /// Rooms whose preview is stale and must be recomputed on the next sort.
+  /// We keep the last known value in [_previewByRoomId] until the new result
+  /// is ready, so the UI never flickers to an empty preview mid-scan.
+  final Set<String> _pendingRefresh = {};
+
   /// Monotonically increasing counter to invalidate stale sort futures.
   /// Each call to [_triggerSort] increments this value. When a sort future
   /// completes, it checks whether its generation matches [_sortGeneration].
@@ -71,8 +76,12 @@ class _ChatListSortRoomsState extends State<ChatListSortRooms> {
       // triggered while we were awaiting.
       if (!mounted || generation != _sortGeneration) return _sortCache;
 
-      if (_previewByRoomId[room.id] != null) continue;
+      if (_previewByRoomId[room.id] != null &&
+          !_pendingRefresh.contains(room.id)) {
+        continue;
+      }
 
+      _pendingRefresh.remove(room.id);
       final result = await room.lastEventAvailableInPreview();
 
       if (!mounted || generation != _sortGeneration) return _sortCache;
@@ -103,7 +112,7 @@ class _ChatListSortRoomsState extends State<ChatListSortRooms> {
         (room) => MapEntry(
           room.id,
           room.onUpdate.stream.listen((roomId) {
-            _previewByRoomId[roomId] = null;
+            _pendingRefresh.add(roomId);
           }),
         ),
       ),
@@ -127,6 +136,7 @@ class _ChatListSortRoomsState extends State<ChatListSortRooms> {
         .toList();
     for (final room in removedRooms) {
       _roomSubscriptions[room.id]?.cancel();
+      _pendingRefresh.remove(room.id);
     }
     _roomSubscriptions = Map.fromEntries(
       widget.rooms.map(
@@ -135,7 +145,7 @@ class _ChatListSortRoomsState extends State<ChatListSortRooms> {
           _roomSubscriptions.putIfAbsent(
             room.id,
             () => room.onUpdate.stream.listen((roomId) {
-              _previewByRoomId[roomId] = null;
+              _pendingRefresh.add(roomId);
             }),
           ),
         ),
@@ -150,6 +160,7 @@ class _ChatListSortRoomsState extends State<ChatListSortRooms> {
       subscription?.cancel();
     }
     _roomSubscriptions.clear();
+    _pendingRefresh.clear();
     // Invalidate any in-flight sort future so its callbacks become no-ops.
     _sortGeneration++;
     super.dispose();
