@@ -160,6 +160,7 @@ class _ChatListSortRoomsState extends State<ChatListSortRooms> {
       subscription?.cancel();
     }
     _roomSubscriptions.clear();
+    _pendingRefresh.clear();
     // Invalidate any in-flight sort future so its callbacks become no-ops.
     _sortGeneration++;
     super.dispose();
