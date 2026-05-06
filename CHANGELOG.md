@@ -1,3 +1,26 @@
+## [2.22.1] - 2026-05-06
+### Changed
+- TW-3020: Simplify hover handling in chat events
+- Refactor widget keys to type-safe enums with runtime namespace prefix
+- Refactor: replace hardcoded widget keys with type-safe enums
+- Refactor: restore const scaffolds and finish SettingsKeys wiring
+- Refactor: cache widget keys as const enum fields, rename clipRRect
+- Refactor: route TwakeLinkPreview static keys through LinkPreviewKeys enum
+- Release process documentation (#3014)
+- chore: ignore playwright artifacts and remove committed reports
+- chore: apply dart format to link_preview_keys
+
+### Fixed
+- TW-2705: Stale pending events no longer shadow confirmed messages
+- TW-3027: Enable auto-scrolling to new messages when at the bottom of the chat
+- TW-3029: Hide app download banner on desktop
+- TW-2155: Normalize phonebook numbers to E.164 for lookup hashing
+- TW-3666: Multi-URL federation lookup with identity fallback
+- fix: edit rendering after merge and revoke web blob URLs
+
+### Tests
+- test(integration): support both OIDC bypass and m.login.password (#3015)
+
 ## [2.22.0] - 2026-04-22
 ### Added
 - TW-2963: Forward to multiple rooms
