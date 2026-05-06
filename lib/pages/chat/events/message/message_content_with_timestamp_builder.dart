@@ -564,7 +564,7 @@ class _MessageContentWithTimestampBuilderState
         valueListenable: widget.isHoverNotifier,
         builder: (context, isHover, child) {
           if (isHover != null &&
-              isHover.contains(widget.event.eventId) &&
+              isHover == widget.event.eventId &&
               !widget.event.redacted) {
             return child!;
           }

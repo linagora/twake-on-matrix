@@ -2480,10 +2480,8 @@ class ChatController extends State<Chat>
     );
   }
 
-  void onHover(bool isHovered, int index, Event event) {
-    if (index > 0 &&
-        timeline!.events[index - 1].eventId == event.eventId &&
-        !responsive.isMobile(context) &&
+  void onHover(bool isHovered, Event event) {
+    if (!responsive.isMobile(context) &&
         !selectMode &&
         !openingPopupMenu.value) {
       focusHover.value = isHovered ? event.eventId : null;

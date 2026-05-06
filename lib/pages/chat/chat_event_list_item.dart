@@ -56,7 +56,7 @@ class ChatEventListItem extends StatelessWidget {
         timeline: controller.timeline!,
         previousEvent: previousEvent,
         nextEvent: nextEvent,
-        onHover: (isHover, event) => controller.onHover(isHover, index, event),
+        onHover: (isHover, event) => controller.onHover(isHover, event),
         isHoverNotifier: controller.focusHover,
         listHorizontalActionMenu: controller.listHorizontalActionMenuBuilder(
           event,
