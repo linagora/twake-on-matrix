@@ -10,14 +10,18 @@ class EventListSyncResult extends Equatable {
     required this.top,
     required this.bottom,
     required this.shouldScrollToBottom,
+    required this.hasNewEvents,
   });
 
   final List<Event> top;
   final List<Event> bottom;
   final bool shouldScrollToBottom;
 
+  /// Whether new events were added during this sync (from any sender).
+  final bool hasNewEvents;
+
   @override
-  List<Object?> get props => [top, bottom, shouldScrollToBottom];
+  List<Object?> get props => [top, bottom, shouldScrollToBottom, hasNewEvents];
 }
 
 /// Extension for managing and syncing lists of Matrix events.
@@ -83,6 +87,10 @@ extension EventListExtension on List<Event> {
         top: const [],
         bottom: List.from(newEvents),
         shouldScrollToBottom: false,
+        hasNewEvents:
+            newEvents.isNotEmpty &&
+            (oldEvents.isEmpty ||
+                newEvents.first.eventId != oldEvents.first.eventId),
       );
     }
 
@@ -129,6 +137,7 @@ extension EventListExtension on List<Event> {
       top: updatedTop,
       bottom: updatedBottom,
       shouldScrollToBottom: shouldScrollToBottom,
+      hasNewEvents: startDiff > 0 || endDiff > 0,
     );
   }
 
