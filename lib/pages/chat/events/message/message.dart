@@ -1,3 +1,4 @@
+import 'package:scroll_to_index/scroll_to_index.dart';
 import 'package:fluffychat/domain/matrix_events/event_type_rules.dart';
 import 'package:fluffychat/config/themes.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
@@ -93,6 +94,8 @@ class Message extends StatefulWidget {
   onTapMoreButton;
   final Future<Category?>? recentEmojiFuture;
   final Future<void> Function(Event)? onRetryTextMessage;
+  final AutoScrollController? autoScrollController;
+  final int? scrollIndex;
 
   const Message(
     this.event, {
@@ -136,6 +139,8 @@ class Message extends StatefulWidget {
     this.onTapMoreButton,
     this.recentEmojiFuture,
     this.onRetryTextMessage,
+    this.autoScrollController,
+    this.scrollIndex,
   });
 
   /// Indicates wheither the user may use a mouse instead
@@ -339,46 +344,7 @@ class _MessageState extends State<Message> with MessageAvatarMixin {
             ),
           ),
         ],
-        MultiPlatformsMessageContainer(
-          onTap: widget.hideKeyboardChatScreen,
-          onHover: (hover) {
-            if (!widget.event.status.isAvailable) {
-              return;
-            }
-            if (widget.onHover != null) {
-              widget.onHover!(hover, widget.event);
-            }
-          },
-          child: Container(
-            constraints: BoxConstraints(
-              maxWidth: ChatViewBodyStyle.chatScreenMaxWidth,
-            ),
-            padding: MessageStyle.paddingMessage,
-            alignment: Alignment.bottomCenter,
-            child: SwipeableMessage(
-              event: widget.event,
-              onSwipe: widget.onSwipe,
-              child: OptionalGestureDetector(
-                onLongPress: () => widget.onSelect!(widget.event),
-                onTap: () => widget.onSelect!(widget.event),
-                isEnabled: widget.selectMode && widget.event.status.isAvailable,
-                child: OptionalPadding(
-                  padding: EdgeInsetsDirectional.only(
-                    end:
-                        widget.event.isOwnMessage ||
-                            Message.responsiveUtils.isDesktop(context)
-                        ? 8.0
-                        : 16.0,
-                    top: 1.0,
-                    bottom: 1.0,
-                  ),
-                  isEnabled: !widget.selected,
-                  child: _messageSelectedWidget(context, row, widget.event),
-                ),
-              ),
-            ),
-          ),
-        ),
+        _buildMessageContainer(context, row),
       ],
     );
 
@@ -387,6 +353,62 @@ class _MessageState extends State<Message> with MessageAvatarMixin {
       onVisibilityChanged: _onVisibilityChangedForMarkAsRead,
       child: column,
     );
+  }
+
+  Widget _buildMessageContainer(BuildContext context, Widget row) {
+    final container = MultiPlatformsMessageContainer(
+      onTap: widget.hideKeyboardChatScreen,
+      onHover: (hover) {
+        if (!widget.event.status.isAvailable) {
+          return;
+        }
+        if (widget.onHover != null) {
+          widget.onHover!(hover, widget.event);
+        }
+      },
+      child: Container(
+        constraints: BoxConstraints(
+          maxWidth: ChatViewBodyStyle.chatScreenMaxWidth,
+        ),
+        padding: MessageStyle.paddingMessage,
+        alignment: Alignment.bottomCenter,
+        child: SwipeableMessage(
+          event: widget.event,
+          onSwipe: widget.onSwipe,
+          child: OptionalGestureDetector(
+            onLongPress: () => widget.onSelect!(widget.event),
+            onTap: () => widget.onSelect!(widget.event),
+            isEnabled: widget.selectMode && widget.event.status.isAvailable,
+            child: OptionalPadding(
+              padding: EdgeInsetsDirectional.only(
+                end:
+                    widget.event.isOwnMessage ||
+                        Message.responsiveUtils.isDesktop(context)
+                    ? 8.0
+                    : 16.0,
+                top: 1.0,
+                bottom: 1.0,
+              ),
+              isEnabled: !widget.selected,
+              child: _messageSelectedWidget(context, row, widget.event),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final controller = widget.autoScrollController;
+    final scrollIdx = widget.scrollIndex;
+    if (controller != null && scrollIdx != null) {
+      return AutoScrollTag(
+        key: ValueKey(widget.event.eventId),
+        index: scrollIdx,
+        controller: controller,
+        highlightColor: Theme.of(context).highlightColor,
+        child: container,
+      );
+    }
+    return container;
   }
 
   Widget _messageSelectedWidget(
