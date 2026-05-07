@@ -92,7 +92,7 @@ class ChatListItemTitle extends StatelessWidget with ChatListItemMixin {
               Padding(
                 padding: ChatListItemTitleStyle.paddingLeftIcon,
                 child: Text(
-                  (originServerTs ?? room.latestEventReceivedTime)
+                  (originServerTs ?? room.realLatestEventTime)
                       .localizedTimeShort(context),
                   style: Theme.of(context).textTheme.labelMedium?.copyWith(
                     color: LinagoraRefColors.material().tertiary[30],

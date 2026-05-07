@@ -13,6 +13,7 @@ import 'package:matrix/matrix.dart';
 import 'package:matrix/src/utils/markdown.dart';
 
 extension RoomExtension on Room {
+  static const _kRefreshingLastEventType = 'com.famedly.refreshing_last_event';
   RecentChatSearchModel toRecentChatSearchModel(
     MatrixLocalizations matrixLocalizations,
   ) {
@@ -349,6 +350,19 @@ extension RoomExtension on Room {
   }
 
   bool get canReportContent => membership.isJoin;
+
+  /// Latest real event timestamp, ignoring the SDK's internal
+  /// `com.famedly.refreshing_last_event` placeholder which carries a synthetic
+  /// date (the sync date) that has no meaning for users.
+  DateTime get realLatestEventTime {
+    final last = lastEvent;
+    if (last == null || last.type == _kRefreshingLastEventType) {
+      final createEvent = getState(EventTypes.RoomCreate);
+      if (createEvent is Event) return createEvent.originServerTs;
+      return latestEventReceivedTime;
+    }
+    return last.originServerTs;
+  }
 
   Map<String, dynamic> getEventContentFromMsgText({
     required String message,

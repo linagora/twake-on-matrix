@@ -49,6 +49,9 @@ class _ChatListSortRoomsState extends State<ChatListSortRooms> {
     return result is RoomPreviewFound ? result.event.originServerTs : null;
   }
 
+  DateTime _effectiveSortTs(String roomId, DateTime realLatestEventTime) =>
+      _previewTs(roomId) ?? realLatestEventTime;
+
   RoomSorter sortRoomsBy(Client client) => (a, b) {
     if (client.pinInvitedRooms &&
         a.membership != b.membership &&
@@ -61,12 +64,12 @@ class _ChatListSortRoomsState extends State<ChatListSortRooms> {
     if (client.pinUnreadRooms && a.notificationCount != b.notificationCount) {
       return b.notificationCount.compareTo(a.notificationCount);
     }
-    return (_previewTs(b.id) ?? b.latestEventReceivedTime)
-        .millisecondsSinceEpoch
-        .compareTo(
-          (_previewTs(a.id) ?? a.latestEventReceivedTime)
-              .millisecondsSinceEpoch,
-        );
+    return _effectiveSortTs(
+      b.id,
+      b.realLatestEventTime,
+    ).millisecondsSinceEpoch.compareTo(
+      _effectiveSortTs(a.id, a.realLatestEventTime).millisecondsSinceEpoch,
+    );
   };
 
   Future<List<Room>> _sortRooms(int generation) async {

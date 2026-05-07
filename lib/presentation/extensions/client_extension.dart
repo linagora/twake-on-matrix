@@ -1,5 +1,6 @@
 import 'package:collection/collection.dart';
 import 'package:fluffychat/config/app_constants.dart';
+import 'package:fluffychat/domain/model/room/room_extension.dart';
 import 'package:fluffychat/presentation/enum/chat_list/chat_list_enum.dart';
 import 'package:fluffychat/utils/string_extension.dart';
 import 'package:flutter/material.dart';
@@ -15,9 +16,7 @@ extension ClientExtension on Client {
     if (room1.isFavourite ^ room2.isFavourite) {
       return room1.isFavourite ? newerChat : olderChat;
     }
-    return room2.latestEventReceivedTime.compareTo(
-      room1.latestEventReceivedTime,
-    );
+    return room2.realLatestEventTime.compareTo(room1.realLatestEventTime);
   }
 
   List<Room> filteredRoomsForAll(ActiveFilter activeFilter) {
