@@ -29,6 +29,11 @@ extension ResultExtension on Result {
     if (event == null) {
       return false;
     }
+    // Exclude edit events (m.replace) — the server returns both the original
+    // and the edit event; showing edit events causes duplicate results.
+    if (event.relationshipType == RelationshipTypes.edit) {
+      return false;
+    }
     final bodyContent = event.calcLocalizedBodyFallback(
       matrixLocalizations,
       hideEdit: true,
