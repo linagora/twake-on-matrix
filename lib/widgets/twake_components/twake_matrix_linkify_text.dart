@@ -73,10 +73,10 @@ class _TwakeCleanRichTextState extends State<_TwakeCleanRichText> {
 
   @override
   void dispose() {
-    super.dispose();
     if (widget.child is TextSpan) {
       _disposeTextspan(widget.child as TextSpan);
     }
+    super.dispose();
   }
 
   @override
@@ -118,38 +118,12 @@ class _TwakeLinkTextSpan extends TextSpan {
                onTapDownLink(details, link);
              }
            }
-           ..onSecondaryTapDown = (details) {
-             if (onSecondaryTapDownLink != null) {
-               onSecondaryTapDownLink(details, link);
-             }
-           },
-       ) {
-    _fixRecognizer(this, recognizer!);
-  }
-
-  void _fixRecognizer(TextSpan textSpan, GestureRecognizer recognizer) {
-    if (textSpan.children?.isEmpty ?? true) {
-      return;
-    }
-    final fixedChildren = <InlineSpan>[];
-    for (final child in textSpan.children!) {
-      if (child is TextSpan && child.recognizer == null) {
-        _fixRecognizer(child, recognizer);
-        fixedChildren.add(
-          TextSpan(
-            text: child.text,
-            style: child.style,
-            recognizer: recognizer,
-            children: child.children,
-          ),
+            ..onSecondaryTapDown = (details) {
+              if (onSecondaryTapDownLink != null) {
+                onSecondaryTapDownLink(details, link);
+              }
+            },
         );
-      } else {
-        fixedChildren.add(child);
-      }
-    }
-    textSpan.children!.clear();
-    textSpan.children!.addAll(fixedChildren);
-  }
 }
 
 TextSpan _twakeLinkifyTextSpans({
