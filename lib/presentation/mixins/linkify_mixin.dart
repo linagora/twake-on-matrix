@@ -1,4 +1,5 @@
 import 'package:fluffychat/pages/chat/phone_number_context_menu_actions.dart';
+import 'package:fluffychat/pages/chat/link_context_menu_actions.dart';
 import 'package:fluffychat/utils/extension/build_context_extension.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/utils/twake_snackbar.dart';
@@ -17,6 +18,9 @@ import 'package:url_launcher/url_launcher.dart';
 mixin LinkifyMixin {
   List<PhoneNumberContextMenuActions> get phoneNumberContextMenuOnWeb => [
     PhoneNumberContextMenuActions.copy,
+  ];
+  List<LinkContextMenuActions> get linkContextMenuOnWeb => [
+    LinkContextMenuActions.copy,
   ];
 
   List<ContextMenuAction> _mapPopupMenuActionsToContextMenuActions({
@@ -51,6 +55,32 @@ mixin LinkifyMixin {
         context: context,
         action: phoneNumberContextMenuOnWeb[selectedActionIndex],
         number: number,
+      );
+    }
+  }
+
+  void _handleLinkContextMenuAction({
+    required BuildContext context,
+    required TapDownDetails tapDownDetails,
+    required String url,
+  }) async {
+    final offset = tapDownDetails.globalPosition;
+    final listActions = linkContextMenuOnWeb.map((action) {
+      return ContextMenuAction(
+        name: action.getTitle(context),
+        icon: action.getIconData(),
+      );
+    }).toList();
+    final selectedActionIndex = await showTwakeContextMenu(
+      context: context,
+      offset: offset,
+      listActions: listActions,
+    );
+    if (selectedActionIndex != null && selectedActionIndex is int) {
+      _handleClickOnLinkContextMenuItem(
+        context: context,
+        action: linkContextMenuOnWeb[selectedActionIndex],
+        url: url,
       );
     }
   }
@@ -95,6 +125,23 @@ mixin LinkifyMixin {
         );
         break;
       default:
+        break;
+    }
+  }
+
+  void _handleClickOnLinkContextMenuItem({
+    required BuildContext context,
+    required LinkContextMenuActions action,
+    required String url,
+  }) async {
+    switch (action) {
+      case LinkContextMenuActions.copy:
+        Logs().i('LinkifyMixin: handleContextMenuAction: copyLink $url');
+        await Clipboard.setData(ClipboardData(text: url));
+        TwakeSnackBar.show(
+          context,
+          L10n.of(context)!.linkCopiedToClipboard,
+        );
         break;
     }
   }
@@ -154,13 +201,22 @@ mixin LinkifyMixin {
     required BuildContext context,
     required TapDownDetails details,
     required Link link,
+    bool isSecondaryTap = false,
   }) async {
     Logs().i(
       'LinkifyMixin: handleOnTappedLink: type: ${link.type} link: ${link.value}',
     );
     switch (link.type) {
       case LinkType.url:
-        UrlLauncher(context, url: link.value.toString()).launchUrl();
+        if (PlatformInfos.isWeb && isSecondaryTap) {
+          _handleLinkContextMenuAction(
+            context: context,
+            tapDownDetails: details,
+            url: link.value.toString(),
+          );
+        } else {
+          UrlLauncher(context, url: link.value.toString()).launchUrl();
+        }
         break;
       case LinkType.phone:
         if (PlatformInfos.isMobile) {

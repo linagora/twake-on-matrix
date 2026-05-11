@@ -3,6 +3,7 @@ import 'package:fluffychat/pages/chat/events/formatted_text_widget.dart';
 import 'package:fluffychat/presentation/mixins/linkify_mixin.dart';
 import 'package:fluffychat/presentation/widget_keys/link_preview_keys.dart';
 import 'package:fluffychat/utils/string_extension.dart';
+import 'package:fluffychat/widgets/twake_components/twake_matrix_linkify_text.dart';
 import 'package:fluffychat/widgets/twake_components/twake_preview_link/twake_link_preview_item.dart';
 import 'package:fluffychat/widgets/twake_components/twake_preview_link/twake_link_view.dart';
 import 'package:flutter/material.dart';
@@ -48,7 +49,7 @@ class TwakeLinkPreview extends StatelessWidget with LinkifyMixin {
               linkStyle: linkStyle,
               fontSize: fontSize,
             )
-          : MatrixLinkifyText(
+          : TwakeMatrixLinkifyText(
               text: localizedBody,
               textStyle: richTextStyle,
               linkStyle: linkStyle,
@@ -59,6 +60,13 @@ class TwakeLinkPreview extends StatelessWidget with LinkifyMixin {
                 details: tapDownDetails,
                 link: link,
               ),
+              onSecondaryTapDownLink:
+                  (tapDownDetails, link) => handleOnTappedLinkHtml(
+                    context: context,
+                    details: tapDownDetails,
+                    link: link,
+                    isSecondaryTap: true,
+                  ),
             ),
       previewItemWidget: TwakeLinkPreviewItem(
         key: twakeLinkPreviewItemKey,
