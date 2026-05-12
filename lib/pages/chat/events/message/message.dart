@@ -360,4 +360,3 @@ class _MessageState extends State<Message> with MessageAvatarMixin {
     );
   }
 }
-

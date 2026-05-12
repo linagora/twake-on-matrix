@@ -25,9 +25,7 @@ class MessageSelectedWidget extends StatelessWidget {
       padding: EdgeInsets.only(
         left: Message.responsiveUtils.isMobile(context) ? 8.0 : 0,
       ),
-      color: selected
-          ? LinagoraSysColors.material().secondaryContainer
-          : Theme.of(context).primaryColor.withAlpha(0),
+      color: Theme.of(context).primaryColor.withAlpha(0),
       constraints: const BoxConstraints(
         maxWidth: TwakeThemes.columnWidth * 2.5,
       ),
@@ -40,9 +38,7 @@ class MessageSelectedWidget extends StatelessWidget {
             Align(
               alignment: AlignmentDirectional.centerStart,
               child: Icon(
-                selected
-                    ? Icons.check_circle_rounded
-                    : Icons.circle_outlined,
+                selected ? Icons.check_circle_rounded : Icons.circle_outlined,
                 color: selected
                     ? LinagoraSysColors.material().primary
                     : Colors.black,
