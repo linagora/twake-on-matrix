@@ -666,6 +666,8 @@ class MatrixState extends State<Matrix>
     onLoginStateChanged.remove(name);
     await onNotification[name]?.cancel();
     onNotification.remove(name);
+    await onAutoReadReceipt[name]?.cancel();
+    onAutoReadReceipt.remove(name);
   }
 
   Future<void> initMatrix() async {
@@ -1318,6 +1320,7 @@ class MatrixState extends State<Matrix>
     onKeyVerificationRequestSub.values.map((s) => s.cancel());
     onLoginStateChanged.values.map((s) => s.cancel());
     onNotification.values.map((s) => s.cancel());
+    onAutoReadReceipt.values.map((s) => s.cancel());
     onClientLoginStateChanged.close();
     client.httpClient.close();
     onFocusSub?.cancel();
