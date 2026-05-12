@@ -666,8 +666,8 @@ class MatrixState extends State<Matrix>
     onLoginStateChanged.remove(name);
     await onNotification[name]?.cancel();
     onNotification.remove(name);
-    await onAutoReadReceipt[name]?.cancel();
-    onAutoReadReceipt.remove(name);
+    await onUiaRequest[name]?.cancel();
+    onUiaRequest.remove(name);
   }
 
   Future<void> initMatrix() async {
@@ -1316,11 +1316,21 @@ class MatrixState extends State<Matrix>
     }
     intentFileStreamSubscription?.cancel();
     intentUriStreamSubscription?.cancel();
-    onRoomKeyRequestSub.values.map((s) => s.cancel());
-    onKeyVerificationRequestSub.values.map((s) => s.cancel());
-    onLoginStateChanged.values.map((s) => s.cancel());
-    onNotification.values.map((s) => s.cancel());
-    onAutoReadReceipt.values.map((s) => s.cancel());
+    for (final s in onRoomKeyRequestSub.values) {
+      s.cancel();
+    }
+    for (final s in onKeyVerificationRequestSub.values) {
+      s.cancel();
+    }
+    for (final s in onLoginStateChanged.values) {
+      s.cancel();
+    }
+    for (final s in onNotification.values) {
+      s.cancel();
+    }
+    for (final s in onUiaRequest.values) {
+      s.cancel();
+    }
     onClientLoginStateChanged.close();
     client.httpClient.close();
     onFocusSub?.cancel();
