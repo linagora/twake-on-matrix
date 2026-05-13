@@ -26,8 +26,7 @@ extension ResultExtension on Result {
   /// Synapse stores the edit event under unsigned.m.relations.m.replace as:
   /// `{ "content": { "m.new_content": { ... } }, ... }`
   Event _resolveEditedContent(Event event) {
-    final relations = event.unsigned
-        ?.tryGetMap<String, Object?>('m.relations');
+    final relations = event.unsigned?.tryGetMap<String, Object?>('m.relations');
     if (relations == null) return event;
 
     // unsigned.m.relations.m.replace is the latest edit event object
