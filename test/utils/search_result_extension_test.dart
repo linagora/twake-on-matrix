@@ -170,6 +170,91 @@ Future<void> main() async {
       expect(isDisplayable, false);
     });
 
+    test('Given original message was edited\n'
+        'AND keyword only exists in the edited content\n'
+        'When isDisplayableResult is called with event using edited content\n'
+        'Then return available search result\n', () {
+      // Simulates the event returned after _resolveEditedContent applies
+      // unsigned.m.relations.m.replace -> m.new_content to the event content.
+      final editedEvent = Event(
+        content: {
+          "body": "Edited: Quisque rutrum updated content",
+          "msgtype": "m.text",
+        },
+        type: 'm.room.message',
+        eventId: '\$original:example.org',
+        senderId: '@exampleabcdh:example.org',
+        originServerTs: DateTime.fromMillisecondsSinceEpoch(1432735824653),
+        room: room,
+      );
+      final result = Result.fromJson({
+        "result": {
+          "content": {
+            "body": "Original message without the keyword",
+            "msgtype": "m.text",
+          },
+          "origin_server_ts": 1733711220820,
+          "room_id": "!room:example.abc",
+          "sender": "@exampleabcdh:example.org",
+          "type": "m.room.message",
+          "unsigned": {"membership": "join"},
+          "event_id": "\$original:example.org",
+          "user_id": "@devtest:lin-saas.dev",
+        },
+      });
+      const keyword = 'Quisque';
+
+      final isDisplayable = result.isDisplayableResult(
+        context: context,
+        event: editedEvent,
+        matrixLocalizations: const MatrixDefaultLocalizations(),
+        searchWord: keyword,
+      );
+
+      expect(isDisplayable, true);
+    });
+
+    test('Given original message was edited\n'
+        'AND keyword only exists in original content (not in edit)\n'
+        'When isDisplayableResult is called with event using edited content\n'
+        'Then return not available search result\n', () {
+      // The edit replaced "Quisque" with different text; the resolved event
+      // should show the edited body, so the keyword no longer matches.
+      final editedEvent = Event(
+        content: {
+          "body": "Edited: no longer contains the search term",
+          "msgtype": "m.text",
+        },
+        type: 'm.room.message',
+        eventId: '\$original2:example.org',
+        senderId: '@exampleabcdh:example.org',
+        originServerTs: DateTime.fromMillisecondsSinceEpoch(1432735824653),
+        room: room,
+      );
+      final result = Result.fromJson({
+        "result": {
+          "content": {"body": "Quisque original content", "msgtype": "m.text"},
+          "origin_server_ts": 1733711220820,
+          "room_id": "!room:example.abc",
+          "sender": "@exampleabcdh:example.org",
+          "type": "m.room.message",
+          "unsigned": {"membership": "join"},
+          "event_id": "\$original2:example.org",
+          "user_id": "@devtest:lin-saas.dev",
+        },
+      });
+      const keyword = 'Quisque';
+
+      final isDisplayable = result.isDisplayableResult(
+        context: context,
+        event: editedEvent,
+        matrixLocalizations: const MatrixDefaultLocalizations(),
+        searchWord: keyword,
+      );
+
+      expect(isDisplayable, false);
+    });
+
     test('Give search result is not empty\n'
         'AND keyword is Quisque\n'
         'AND body has the reply tag'
