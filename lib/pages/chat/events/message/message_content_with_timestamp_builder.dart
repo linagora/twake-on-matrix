@@ -225,13 +225,16 @@ class _MessageContentWithTimestampBuilderState
                       noBubble: noBubble,
                       displayTime: displayTime,
                     )
-                  : (event) => _handleAvailableMessageLongPress(
+                  : !widget.event.status.isError &&
+                        !widget.event.status.isSending
+                  ? (event) => _handleAvailableMessageLongPress(
                       context,
                       event,
                       timelineText: timelineText,
                       noBubble: noBubble,
                       displayTime: displayTime,
-                    ),
+                    )
+                  : null,
               child: _messageBuilder(
                 context: context,
                 timelineText: timelineText,
