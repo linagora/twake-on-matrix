@@ -15,13 +15,13 @@ import 'package:fluffychat/pages/chat/optional_stack.dart';
 import 'package:fluffychat/resource/image_paths.dart';
 import 'package:fluffychat/utils/date_time_extension.dart';
 import 'package:fluffychat/utils/extension/build_context_extension.dart';
-import 'package:fluffychat/utils/extension/event_status_custom_extension.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/utils/responsive/responsive_utils.dart';
 import 'package:fluffychat/widgets/context_menu/context_menu_action.dart';
 import 'package:fluffychat/widgets/context_menu/context_menu_action_item.dart';
 import 'package:fluffychat/widgets/context_menu/twake_context_menu_area.dart';
+import 'package:fluffychat/widgets/mixins/twake_context_menu_mixin.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:fluffychat/widgets/twake_components/twake_icon_button.dart';
 import 'package:flutter/material.dart';
@@ -115,7 +115,8 @@ class MessageContentWithTimestampBuilder extends StatefulWidget {
 }
 
 class _MessageContentWithTimestampBuilderState
-    extends State<MessageContentWithTimestampBuilder> {
+    extends State<MessageContentWithTimestampBuilder>
+    with TwakeContextMenuMixin {
   final ValueNotifier<bool> _displayEmojiPicker = ValueNotifier(false);
   final ResponsiveUtils _responsiveUtils = getIt.get<ResponsiveUtils>();
   bool someHorizontalActionHidden = false;
@@ -136,6 +137,11 @@ class _MessageContentWithTimestampBuilderState
     ],
     if (event.isVideoOrImage && !PlatformInfos.isWeb)
       MessageContextMenuAction.saveToGallery,
+    if (event.canDelete) MessageContextMenuAction.delete,
+  ];
+
+  List<MessageContextMenuAction> _errorMessageContextMenu(Event event) => [
+    if (event.isCopyable) MessageContextMenuAction.copy,
     if (event.canDelete) MessageContextMenuAction.delete,
   ];
 
@@ -188,7 +194,6 @@ class _MessageContentWithTimestampBuilderState
       children: [
         if (widget.event.shouldDisplayContextMenuInLeftBubble &&
             !_responsiveUtils.isMobile(context) &&
-            widget.event.status.isAvailable &&
             !widget.event.redacted)
           _menuActionsRowBuilder(context, isReversed: true),
         TwakeContextMenuArea(
@@ -210,90 +215,23 @@ class _MessageContentWithTimestampBuilderState
             child: MultiPlatformSelectionMode(
               event: widget.event,
               isClickable: _responsiveUtils.isMobile(context),
-              onLongPress: widget.event.status.isAvailable
-                  ? (event) async {
-                      if (event.redacted) return;
-
-                      // for pin screen
-                      if (widget.onLongPressMessage != null) {
-                        widget.onLongPressMessage?.call(event);
-                        return;
-                      }
-                      // for chat screen
-                      widget.onDisplayEmojiReaction?.call();
-                      _displayEmojiPicker.value = false;
-                      await Navigator.of(context)
-                          .push(
-                            HeroDialogRoute(
-                              builder: (context) => MessageReactionDialog(
-                                event: event,
-                                timeline: widget.timeline,
-                                displayEmojiPicker: _displayEmojiPicker,
-                                dialogSafeAreaKey:
-                                    MessageContentWithTimestampBuilder
-                                        .dialogSafeAreaKey,
-                                messageWidget: Material(
-                                  color: widget.event.isOwnMessage
-                                      ? LinagoraRefColors.material().primary[95]
-                                      : _responsiveUtils.isMobile(context)
-                                      ? LinagoraSysColors.material().onPrimary
-                                      : Theme.of(
-                                          context,
-                                        ).colorScheme.surfaceContainerHighest,
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius:
-                                        MessageStyle.bubbleBorderRadius,
-                                  ),
-                                  child: Container(
-                                    padding: const .symmetric(
-                                      horizontal: 4,
-                                      vertical: 4,
-                                    ),
-                                    decoration: BoxDecoration(
-                                      borderRadius:
-                                          MessageStyle.bubbleBorderRadius,
-                                      border:
-                                          !widget.event.isOwnMessage &&
-                                              _responsiveUtils.isMobile(context)
-                                          ? Border.all(
-                                              color: MessageStyle
-                                                  .borderColorReceivedBubble,
-                                            )
-                                          : null,
-                                    ),
-                                    child: SelectionArea(
-                                      child: SingleChildScrollView(
-                                        primary: true,
-                                        physics: const ClampingScrollPhysics(),
-                                        child: _messageBuilder(
-                                          key: ValueKey(
-                                            'PreviewReactionWidgetKey%${DateTime.now().millisecondsSinceEpoch}',
-                                          ),
-                                          context: context,
-                                          timelineText: timelineText,
-                                          noBubble: noBubble,
-                                          displayTime: displayTime,
-                                          paddingBubble: .zero,
-                                          enableBorder: false,
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                                emojiPickerBuilder: _emojiPickerBuilder,
-                                messageContextMenu: _messageContextMenu,
-                                themeContextMenu: _themeContextMenu,
-                                iconContextMenu: _iconContextMenu,
-                                onSendEmojiReaction: widget.onSendEmojiReaction,
-                              ),
-                            ),
-                          )
-                          .then((result) {
-                            _handleResultFromHeroPage(context, result);
-                            widget.onHideEmojiReaction?.call();
-                          });
-                    }
-                  : null,
+              onLongPress: widget.event.redacted
+                  ? null
+                  : widget.event.status.isError
+                  ? (event) => _handleErrorMessageLongPress(
+                      context,
+                      event,
+                      timelineText: timelineText,
+                      noBubble: noBubble,
+                      displayTime: displayTime,
+                    )
+                  : (event) => _handleAvailableMessageLongPress(
+                      context,
+                      event,
+                      timelineText: timelineText,
+                      noBubble: noBubble,
+                      displayTime: displayTime,
+                    ),
               child: _messageBuilder(
                 context: context,
                 timelineText: timelineText,
@@ -305,11 +243,168 @@ class _MessageContentWithTimestampBuilderState
         ),
         if (widget.event.shouldDisplayContextMenuInRightBubble &&
             !_responsiveUtils.isMobile(context) &&
-            widget.event.status.isAvailable &&
             !widget.event.redacted)
           _menuActionsRowBuilder(context),
       ],
     );
+  }
+
+  /// Opens the hero emoji reaction dialog for available messages.
+  Future<void> _handleAvailableMessageLongPress(
+    BuildContext context,
+    Event event, {
+    required bool timelineText,
+    required bool noBubble,
+    required bool displayTime,
+  }) async {
+    // for pin screen
+    if (widget.onLongPressMessage != null) {
+      widget.onLongPressMessage?.call(event);
+      return;
+    }
+    // for chat screen
+    widget.onDisplayEmojiReaction?.call();
+    _displayEmojiPicker.value = false;
+    await Navigator.of(context)
+        .push(
+          HeroDialogRoute(
+            builder: (context) => MessageReactionDialog(
+              event: event,
+              timeline: widget.timeline,
+              displayEmojiPicker: _displayEmojiPicker,
+              dialogSafeAreaKey:
+                  MessageContentWithTimestampBuilder.dialogSafeAreaKey,
+              messageWidget: Material(
+                color: widget.event.isOwnMessage
+                    ? LinagoraRefColors.material().primary[95]
+                    : _responsiveUtils.isMobile(context)
+                    ? LinagoraSysColors.material().onPrimary
+                    : Theme.of(context).colorScheme.surfaceContainerHighest,
+                shape: RoundedRectangleBorder(
+                  borderRadius: MessageStyle.bubbleBorderRadius,
+                ),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 4,
+                    vertical: 4,
+                  ),
+                  decoration: BoxDecoration(
+                    borderRadius: MessageStyle.bubbleBorderRadius,
+                    border:
+                        !widget.event.isOwnMessage &&
+                            _responsiveUtils.isMobile(context)
+                        ? Border.all(
+                            color: MessageStyle.borderColorReceivedBubble,
+                          )
+                        : null,
+                  ),
+                  child: SelectionArea(
+                    child: SingleChildScrollView(
+                      primary: true,
+                      physics: const ClampingScrollPhysics(),
+                      child: _messageBuilder(
+                        key: ValueKey(
+                          'PreviewReactionWidgetKey%${DateTime.now().millisecondsSinceEpoch}',
+                        ),
+                        context: context,
+                        timelineText: timelineText,
+                        noBubble: noBubble,
+                        displayTime: displayTime,
+                        paddingBubble: EdgeInsets.zero,
+                        enableBorder: false,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              emojiPickerBuilder: _emojiPickerBuilder,
+              messageContextMenu: _messageContextMenu,
+              themeContextMenu: _themeContextMenu,
+              iconContextMenu: _iconContextMenu,
+              onSendEmojiReaction: widget.onSendEmojiReaction,
+            ),
+          ),
+        )
+        .then((result) {
+          _handleResultFromHeroPage(context, result);
+          widget.onHideEmojiReaction?.call();
+        });
+  }
+
+  /// Opens the hero dialog for error messages (no emoji reactions).
+  Future<void> _handleErrorMessageLongPress(
+    BuildContext context,
+    Event event, {
+    required bool timelineText,
+    required bool noBubble,
+    required bool displayTime,
+  }) async {
+    widget.onDisplayEmojiReaction?.call();
+    _displayEmojiPicker.value = false;
+    await Navigator.of(context)
+        .push(
+          HeroDialogRoute(
+            builder: (context) => MessageReactionDialog(
+              event: event,
+              timeline: widget.timeline,
+              displayEmojiPicker: _displayEmojiPicker,
+              dialogSafeAreaKey:
+                  MessageContentWithTimestampBuilder.dialogSafeAreaKey,
+              showReactions: false,
+              messageWidget: Material(
+                color: widget.event.isOwnMessage
+                    ? LinagoraRefColors.material().primary[95]
+                    : _responsiveUtils.isMobile(context)
+                    ? LinagoraSysColors.material().onPrimary
+                    : Theme.of(context).colorScheme.surfaceContainerHighest,
+                shape: RoundedRectangleBorder(
+                  borderRadius: MessageStyle.bubbleBorderRadius,
+                ),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 4,
+                    vertical: 4,
+                  ),
+                  decoration: BoxDecoration(
+                    borderRadius: MessageStyle.bubbleBorderRadius,
+                    border:
+                        !widget.event.isOwnMessage &&
+                            _responsiveUtils.isMobile(context)
+                        ? Border.all(
+                            color: MessageStyle.borderColorReceivedBubble,
+                          )
+                        : null,
+                  ),
+                  child: SelectionArea(
+                    child: SingleChildScrollView(
+                      primary: true,
+                      physics: const ClampingScrollPhysics(),
+                      child: _messageBuilder(
+                        key: ValueKey(
+                          'PreviewErrorWidgetKey%${DateTime.now().millisecondsSinceEpoch}',
+                        ),
+                        context: context,
+                        timelineText: timelineText,
+                        noBubble: noBubble,
+                        displayTime: displayTime,
+                        paddingBubble: EdgeInsets.zero,
+                        enableBorder: false,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              emojiPickerBuilder: _emojiPickerBuilder,
+              messageContextMenu: _errorMessageContextMenu,
+              themeContextMenu: _themeContextMenu,
+              iconContextMenu: _iconContextMenu,
+            ),
+          ),
+        )
+        .then((result) {
+          _handleResultFromHeroPage(context, result);
+          widget.onHideEmojiReaction?.call();
+        });
   }
 
   void _handleResultFromHeroPage(BuildContext context, dynamic result) {

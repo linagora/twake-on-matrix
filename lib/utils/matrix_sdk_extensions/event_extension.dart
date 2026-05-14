@@ -375,6 +375,8 @@ extension LocalizedBody on Event {
   }
 
   bool get canDelete {
+    // Error-status events are local-only — always removable by their sender.
+    if (status.isError) return isOwnMessage;
     if (isOwnMessage) {
       return room.canSendRedactEvent;
     }
