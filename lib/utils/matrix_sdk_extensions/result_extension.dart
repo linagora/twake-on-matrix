@@ -1,3 +1,4 @@
+import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_event_fields.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:flutter/material.dart';
 import 'package:matrix/matrix.dart';
@@ -26,7 +27,9 @@ extension ResultExtension on Result {
   /// Synapse stores the edit event under unsigned.m.relations.m.replace as:
   /// `{ "content": { "m.new_content": { ... } }, ... }`
   Event _resolveEditedContent(Event event) {
-    final relations = event.unsigned?.tryGetMap<String, Object?>('m.relations');
+    final relations = event.unsigned?.tryGetMap<String, Object?>(
+      MatrixEventFields.relations,
+    );
     if (relations == null) return event;
 
     // unsigned.m.relations.m.replace is the latest edit event object
@@ -36,14 +39,18 @@ extension ResultExtension on Result {
     if (latestEditEvent == null) return event;
 
     // m.new_content is nested inside the edit event's content field
-    final editContent = latestEditEvent.tryGetMap<String, Object?>('content');
+    final editContent = latestEditEvent.tryGetMap<String, Object?>(
+      MatrixEventFields.content,
+    );
     if (editContent == null) return event;
 
-    final newContent = editContent.tryGetMap<String, Object?>('m.new_content');
+    final newContent = editContent.tryGetMap<String, Object?>(
+      MatrixEventFields.newContent,
+    );
     if (newContent == null) return event;
 
     final rawEvent = event.toJson();
-    rawEvent['content'] = newContent;
+    rawEvent[MatrixEventFields.content] = newContent;
     return Event.fromJson(rawEvent, event.room);
   }
 
