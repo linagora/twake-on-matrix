@@ -13,7 +13,9 @@ mixin InitConfigMixin {
       final configJson = json.decode(configJsonString);
       AppConfig.loadFromJson(configJson);
       Logs().d('[ConfigLoader] $configJson');
-      AppConfig.initConfigCompleter.complete(true);
+      if (!AppConfig.initConfigCompleter.isCompleted) {
+        AppConfig.initConfigCompleter.complete(true);
+      }
     } on FormatException catch (_) {
       _retryInitConfigWeb();
       Logs().v('[ConfigLoader] config.json not found');
@@ -28,7 +30,9 @@ mixin InitConfigMixin {
       AppConfig.retryCompleterCount++;
       initConfigWeb();
     } else {
-      AppConfig.initConfigCompleter.complete(false);
+      if (!AppConfig.initConfigCompleter.isCompleted) {
+        AppConfig.initConfigCompleter.complete(false);
+      }
     }
   }
 
