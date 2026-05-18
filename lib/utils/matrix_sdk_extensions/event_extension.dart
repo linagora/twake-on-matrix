@@ -520,8 +520,8 @@ extension LocalizedBody on Event {
     );
 
     final editEventJson = latestEdit.toJson();
-    final newContent = editEventJson[MatrixEventFields.content]
-        [MatrixEventFields.newContent];
+    final newContent =
+        editEventJson[MatrixEventFields.content][MatrixEventFields.newContent];
 
     if (newContent is! Map) {
       return this;
@@ -531,8 +531,9 @@ extension LocalizedBody on Event {
       // For media/files with caption, preserve original event structure
       // and add the edited content
       final originalEventJson = toJson();
-      originalEventJson[MatrixEventFields.content]
-          [MatrixEventFields.newContent] = newContent;
+      originalEventJson[MatrixEventFields.content][MatrixEventFields
+              .newContent] =
+          newContent;
       originalEventJson[MatrixEventFields.content]['body'] = newContent['body'];
 
       // Update formatted_body if it exists in the new content
