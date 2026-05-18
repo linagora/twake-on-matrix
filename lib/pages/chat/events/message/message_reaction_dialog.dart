@@ -30,6 +30,7 @@ class MessageReactionDialog extends StatelessWidget {
   final Widget? Function(Event, MessageContextMenuAction) iconContextMenu;
   final OnSendEmojiReactionAction? onSendEmojiReaction;
   final Key dialogSafeAreaKey;
+  final bool showReactions;
 
   const MessageReactionDialog({
     super.key,
@@ -43,6 +44,7 @@ class MessageReactionDialog extends StatelessWidget {
     required this.iconContextMenu,
     required this.dialogSafeAreaKey,
     this.onSendEmojiReaction,
+    this.showReactions = true,
   });
 
   @override
@@ -79,7 +81,8 @@ class MessageReactionDialog extends StatelessWidget {
                   builder: (context, display, child) {
                     return ReactionsDialogWidget(
                       messageWidget: messageWidget,
-                      reactionWidget: !event.room.canSendReactions
+                      reactionWidget:
+                          !showReactions || !event.room.canSendReactions
                           ? const SizedBox.shrink()
                           : display
                           ? emojiPickerBuilder(

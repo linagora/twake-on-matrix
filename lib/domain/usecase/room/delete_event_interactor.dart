@@ -7,8 +7,15 @@ import 'package:matrix/matrix.dart';
 
 class DeleteEventInteractor {
   Stream<Either<Failure, Success>> execute(Event event) async* {
+    // Error-status events never reached the server — remove locally only.
+    if (event.status.isError) {
+      yield* _removeLocalEvent(event);
+      return;
+    }
+
     if (!event.canDelete) {
       yield Left(NoPermissionToDeleteEvent());
+      return;
     }
 
     try {
@@ -18,6 +25,10 @@ class DeleteEventInteractor {
       return;
     }
 
+    yield* _removeLocalEvent(event);
+  }
+
+  Stream<Either<Failure, Success>> _removeLocalEvent(Event event) async* {
     try {
       await event.remove();
       yield Right(DeleteEventSuccess());

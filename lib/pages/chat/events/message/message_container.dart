@@ -44,8 +44,9 @@ class MessageContainer extends StatelessWidget {
     final container = MultiPlatformsMessageContainer(
       onTap: hideKeyboardChatScreen,
       onHover: (hover) {
-        if (!event.status.isAvailable) return;
-        onHover?.call(hover, event);
+        if (event.status.isAvailable || event.status.isError) {
+          onHover?.call(hover, event);
+        }
       },
       child: Container(
         constraints: BoxConstraints(

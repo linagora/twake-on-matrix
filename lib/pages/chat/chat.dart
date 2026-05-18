@@ -2493,12 +2493,9 @@ class ChatController extends State<Chat>
   }
 
   List<ContextMenuItemChatAction> listHorizontalActionMenuBuilder(Event event) {
-    final listAction = [
-      if (event.room.canSendReactions) ChatHorizontalActionMenu.reaction,
-      if (event.status.isAvailable && event.room.canSendDefaultMessages)
-        ChatHorizontalActionMenu.reply,
-      ChatHorizontalActionMenu.more,
-    ];
+    final listAction = event.status.isError
+        ? _errorMessageHorizontalActions()
+        : _availableMessageHorizontalActions(event);
     return listAction
         .map(
           (action) => ContextMenuItemChatAction(
@@ -2508,6 +2505,18 @@ class ChatController extends State<Chat>
         )
         .toList();
   }
+
+  List<ChatHorizontalActionMenu> _errorMessageHorizontalActions() => [
+    ChatHorizontalActionMenu.more,
+  ];
+
+  List<ChatHorizontalActionMenu> _availableMessageHorizontalActions(
+    Event event,
+  ) => [
+    if (event.room.canSendReactions) ChatHorizontalActionMenu.reaction,
+    if (event.room.canSendDefaultMessages) ChatHorizontalActionMenu.reply,
+    ChatHorizontalActionMenu.more,
+  ];
 
   void handleHorizontalActionMenu(
     BuildContext context,
@@ -2531,20 +2540,28 @@ class ChatController extends State<Chat>
     }
   }
 
-  List<ChatContextMenuActions> _getListPopupMenuActions(Event event) {
-    final listAction = [
-      if (event.status.isAvailable) ChatContextMenuActions.forward,
-      if (event.isCopyable) ChatContextMenuActions.copyMessage,
-      if (event.canEditEvents(matrix)) ...[ChatContextMenuActions.edit],
-      if (event.room.canReportContent) ChatContextMenuActions.report,
-      if (event.room.canPinMessage) ChatContextMenuActions.pinChat,
-      if (PlatformInfos.isWeb && event.hasAttachment)
-        ChatContextMenuActions.downloadFile,
-      ChatContextMenuActions.select,
-      if (event.canDelete) ChatContextMenuActions.delete,
-    ];
-    return listAction;
-  }
+  List<ChatContextMenuActions> _getListPopupMenuActions(Event event) =>
+      event.status.isError
+      ? _errorMessagePopupMenuActions(event)
+      : _availableMessagePopupMenuActions(event);
+
+  List<ChatContextMenuActions> _errorMessagePopupMenuActions(Event event) => [
+    if (event.isCopyable) ChatContextMenuActions.copyMessage,
+    if (event.canDelete) ChatContextMenuActions.delete,
+  ];
+
+  List<ChatContextMenuActions> _availableMessagePopupMenuActions(Event event) =>
+      [
+        ChatContextMenuActions.forward,
+        if (event.isCopyable) ChatContextMenuActions.copyMessage,
+        if (event.canEditEvents(matrix)) ChatContextMenuActions.edit,
+        if (event.room.canReportContent) ChatContextMenuActions.report,
+        if (event.room.canPinMessage) ChatContextMenuActions.pinChat,
+        if (PlatformInfos.isWeb && event.hasAttachment)
+          ChatContextMenuActions.downloadFile,
+        ChatContextMenuActions.select,
+        if (event.canDelete) ChatContextMenuActions.delete,
+      ];
 
   List<ContextMenuAction> _mapPopupMenuActionsToContextMenuActions(
     List<ChatContextMenuActions> listActions,
