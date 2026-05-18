@@ -55,7 +55,7 @@ class AutoHomeserverPickerController extends State<AutoHomeserverPicker>
       final ssoSupported = matrix.loginHomeserverSummary.supportSSOLogin;
 
       try {
-        await client.register().timeout(
+        await client.register(inhibitLogin: true).timeout(
           autoHomeserverPickerTimeout,
           onTimeout: () {
             throw CheckHomeserverTimeoutException();
@@ -64,10 +64,13 @@ class AutoHomeserverPickerController extends State<AutoHomeserverPicker>
         matrix.loginRegistrationSupported = true;
       } on MatrixException catch (e) {
         matrix.loginRegistrationSupported = e.requireAdditionalAuthentication;
+      } catch (e) {
+        Logs().w('Registration check failed', e);
+        matrix.loginRegistrationSupported = false;
       }
 
-      if (!ssoSupported && matrix.loginRegistrationSupported == false) {
-        // Server does not support SSO or registration. We can skip to login page:
+      if (!ssoSupported) {
+        // No SSO: go straight to password login page
         const HomeLoginRoute().push(context);
       } else if (ssoSupported && matrix.loginRegistrationSupported == false) {
         Map<String, dynamic>? rawLoginTypes;

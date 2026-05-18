@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:collection/collection.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:fluffychat/domain/model/extensions/homeserver_summary_extensions.dart';
+import 'package:fluffychat/domain/model/homeserver_summary.dart';
 import 'package:fluffychat/presentation/mixins/connect_page_mixin.dart';
 import 'package:fluffychat/pages/connect/sso_login_state.dart';
 import 'package:fluffychat/pages/homeserver_picker/homeserver_state.dart';
@@ -185,19 +186,27 @@ class HomeserverPickerController extends State<HomeserverPicker>
         return;
       }
 
-      matrix.loginHomeserverSummary = await client
-          .checkHomeserver(homeserver)
-          .toHomeserverSummary();
+      matrix.loginHomeserverSummary = HomeserverSummary(
+        discoveryInformation: homeserverSummary.$1,
+        versions: homeserverSummary.$2,
+        loginFlows: homeserverSummary.$3,
+      );
       final ssoSupported = matrix.loginHomeserverSummary.supportSSOLogin;
 
       try {
-        await client.register();
+        await client
+            .register(inhibitLogin: true)
+            .timeout(const Duration(seconds: 30));
         matrix.loginRegistrationSupported = true;
       } on MatrixException catch (e) {
         matrix.loginRegistrationSupported = e.requireAdditionalAuthentication;
+      } catch (e) {
+        Logs().w('Registration check failed', e);
+        matrix.loginRegistrationSupported = false;
       }
 
-      if (!ssoSupported && matrix.loginRegistrationSupported == false) {
+      if (!ssoSupported) {
+        // No SSO: go straight to password login page
         handlePasswordLogin();
       } else if (ssoSupported && matrix.loginRegistrationSupported == false) {
         Map<String, dynamic>? rawLoginTypes;

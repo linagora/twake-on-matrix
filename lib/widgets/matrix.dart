@@ -1382,7 +1382,7 @@ extension HomeserverSummaryConversion
             GetAuthMetadataResponse?,
           )
         > {
-  Future<HomeserverSummary?> toHomeserverSummary() async {
+  Future<HomeserverSummary> toHomeserverSummary() async {
     try {
       final result = await this;
       return HomeserverSummary(
@@ -1392,7 +1392,7 @@ extension HomeserverSummaryConversion
       );
     } catch (e, s) {
       Logs().wtf('HomeserverSummaryConversion::toHomeserverSummary', e, s);
-      return null;
+      rethrow;
     }
   }
 }
