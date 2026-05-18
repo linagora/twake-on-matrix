@@ -5,6 +5,7 @@ import 'package:fluffychat/pages/image_viewer/image_viewer.dart';
 import 'package:fluffychat/presentation/mixins/linkify_mixin.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
 import 'package:fluffychat/utils/url_launcher.dart';
+import 'package:fluffychat/widgets/native_link_span.dart';
 import 'package:fluffychat/widgets/mentioned_user.dart';
 import 'package:flutter/material.dart';
 
@@ -80,6 +81,13 @@ class HtmlMessage extends StatelessWidget with LinkifyMixin {
         context: context,
         details: tapDownDetails,
         link: link,
+      ),
+      linkBuilder: (url, childrenSpan, linkStyle) => buildNativeLinkSpan(
+        url: url,
+        childrenSpan: childrenSpan,
+        linkStyle: linkStyle,
+        onTapDown: (_) =>
+            UrlLauncher(context, url: url, room: room).launchUrl(),
       ),
       onPillTap: !room.isDirectChat
           ? (url) {

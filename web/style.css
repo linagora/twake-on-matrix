@@ -53,3 +53,7 @@ body {
   bottom: 0;
   right: 0;
 }
+
+a[href] {
+  cursor: pointer !important;
+}
