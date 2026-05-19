@@ -929,8 +929,8 @@ packages:
     dependency: "direct main"
     description:
       path: "."
-      ref: update-linagora-design-flutter-URL-to-use-HTTPS
-      resolved-ref: "2c28c0b51cf03d774431f0049eef469613dd9b85"
+      ref: master
+      resolved-ref: "66b2f48eef7c42f3a6a4dfcf0c50e38302ca3750"
       url: "https://github.com/linagora/emoji_mart.git"
     source: git
     version: "1.0.2"
