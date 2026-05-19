@@ -1,5 +1,4 @@
-import 'dart:typed_data';
-
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:matrix/matrix.dart';
 import 'package:media_kit/media_kit.dart';
@@ -30,49 +29,62 @@ class _VideoPlayerState extends State<VideoPlayer> {
   late Player player;
   late VideoController videoController;
 
-  @override
-  void initState() {
-    super.initState();
-    player = Player();
-    videoController = VideoController(player);
+  /// Creates a [Player] with explicit log level so decoder selection warnings
+  /// (e.g. silent HW → SW fallback on Android) are captured in logs.
+  Player _createPlayer() => Player(
+    configuration: const PlayerConfiguration(logLevel: MPVLogLevel.warn),
+  );
+
+  /// Creates a [VideoController] with hardware acceleration explicitly enabled.
+  ///
+  /// On Android, libmpv's `hwdec=auto` can silently fall back to software
+  /// decoding on some devices (e.g. Redmi Note 12 Pro), causing ~6x slow
+  /// playback. Explicit `enableHardwareAcceleration` ensures mediacodec is
+  /// preferred. Web uses a different renderer and does not need this flag.
+  VideoController _createController(Player p) => VideoController(
+    p,
+    configuration: const VideoControllerConfiguration(
+      enableHardwareAcceleration: true,
+    ),
+  );
+
+  /// Opens the media source on [player], logging any errors.
+  void _openMedia() {
     if (widget.url != null) {
-      videoController.player
+      player
           .open(Media(widget.url!))
           .then(
             (_) {},
             onError: (e, s) => Logs().e('Error opening video url:', e, s),
           );
     } else {
-      final currentPlayer = player;
       Media.memory(widget.bytes!).then(
-        (v) => currentPlayer.open(v),
+        (v) => player.open(v),
         onError: (e, s) => Logs().e('Error opening video bytes:', e, s),
       );
     }
   }
 
   @override
+  void initState() {
+    super.initState();
+    player = _createPlayer();
+    videoController = _createController(player);
+    _openMedia();
+  }
+
+  @override
   Future<void> didUpdateWidget(covariant VideoPlayer oldWidget) async {
     super.didUpdateWidget(oldWidget);
-    if (widget.url != oldWidget.url && widget.url != null) {
-      await player.dispose();
-      player = Player();
-      videoController = VideoController(player);
-      videoController.player
-          .open(Media(widget.url!))
-          .then(
-            (_) {},
-            onError: (e, s) => Logs().e('Error opening video url:', e, s),
-          );
-    } else if (widget.bytes != oldWidget.bytes && widget.bytes != null) {
-      await player.dispose();
-      player = Player();
-      videoController = VideoController(player);
-      Media.memory(widget.bytes!).then(
-        (v) => player.open(v),
-        onError: (e, s) => Logs().e('Error opening video bytes:', e, s),
-      );
-    }
+    final urlChanged = widget.url != oldWidget.url && widget.url != null;
+    final bytesChanged =
+        widget.bytes != oldWidget.bytes && widget.bytes != null;
+    if (!urlChanged && !bytesChanged) return;
+
+    await player.dispose();
+    player = _createPlayer();
+    videoController = _createController(player);
+    _openMedia();
   }
 
   @override
@@ -84,11 +96,10 @@ class _VideoPlayerState extends State<VideoPlayer> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Video(
-        fill: Colors.black,
-        pauseUponEnteringBackgroundMode: true,
-        resumeUponEnteringForegroundMode: true,
-        controller: videoController,
+      // RepaintBoundary isolates the video surface so that controls
+      // rebuilding above it do not trigger a repaint of the video layer.
+      body: RepaintBoundary(
+        child: Video(fill: Colors.black, controller: videoController),
       ),
     );
   }
