@@ -1106,9 +1106,7 @@ class MatrixState extends State<Matrix>
   }
 
   Future<void> _refreshHomeserverInformation(Client client) async {
-    if (client.homeserver == null) {
-      client.homeserver = Uri.parse(AppConfig.homeserver);
-    }
+    client.homeserver ??= Uri.parse(AppConfig.homeserver);
     await _getHomeserverInformation(client);
   }
 
