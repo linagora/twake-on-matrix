@@ -43,8 +43,9 @@ class ContactsTabController extends State<ContactsTab>
       WidgetsBinding.instance.addObserver(this);
       if (mounted) {
         listenAddressBookEvents(client);
-        discoveryInformationNotifier.value =
-            Matrix.of(context).loginHomeserverSummary?.discoveryInformation;
+        discoveryInformationNotifier.value = Matrix.of(
+          context,
+        ).loginHomeserverSummary?.discoveryInformation;
         synchronizeContactsOnContactTab(
           context: context,
           client: Matrix.of(context).client,
