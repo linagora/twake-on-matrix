@@ -344,7 +344,7 @@ Future<_MatrixSession> _loginWithMLoginToken({
     ..set('Origin', 'https://${endpoints.chatURL}');
   request.write(
     jsonEncode({
-      'initial_device_display_name': '${endpoints.chatURL}: Chrome on Web',
+      'initial_device_display_name': '${endpoints.chatURL}: $_deviceDisplayName',
       'token': loginToken,
       'type': 'm.login.token',
     }),
@@ -373,10 +373,9 @@ Future<void> _putMatrixMessage({
 }) async {
   final endpoints = session.endpoints;
   // Matrix `PUT /send/{eventType}/{txnId}` uses a per-request transaction ID
-  // for idempotency. We compose `<chatURL>: Chrome on Web -9-<epoch_ms>` so
-  // each retry generates a fresh ID and server logs identify the source run.
+  // for idempotency. Format: `<chatURL>: <device> <sep> <epoch_ms>`.
   final txnId = Uri.encodeComponent(
-    '${endpoints.chatURL}: Chrome on Web -9-'
+    '${endpoints.chatURL}: $_deviceDisplayName $_txnIdSeparator'
     '${DateTime.now().millisecondsSinceEpoch}',
   );
   // `groupID` is expected to be a full Matrix room ID (`!localpart:server`)
@@ -410,6 +409,16 @@ Future<void> _putMatrixMessage({
 // ---------------------------------------------------------------------------
 // Shared helpers
 // ---------------------------------------------------------------------------
+
+/// Device display-name used in both `initial_device_display_name` (login) and
+/// the transaction-ID prefix (send). Keeps server-side logs consistent and
+/// avoids duplicating the string literal.
+const _deviceDisplayName = 'Chrome on Web';
+
+/// Arbitrary separator between the human-readable txnId prefix and the
+/// epoch-ms suffix. No semantic meaning — it simply makes test-originated
+/// messages easy to grep in server logs.
+const _txnIdSeparator = '-9-';
 
 const _userAgent =
     'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) '

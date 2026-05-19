@@ -44,85 +44,91 @@ void main() {
         platformAutomator: platformAutomator,
       );
 
-      // -- PRD path: OIDC helpers must throw on web --
-      if (kIsWeb) {
-        expect(
-          () => fetchOidcLoginToken(username: 'any', password: 'any'),
-          throwsA(isA<UnsupportedError>()),
-        );
-        expect(
-          () => sendMessageAsReceiver(message: 'test'),
-          throwsA(isA<UnsupportedError>()),
-        );
-      }
+      _verifyPrdPathThrowsOnWeb();
 
-      // -- STG path: m.login.password via Matrix SDK --
       app.main();
-
-      const username = String.fromEnvironment('USERNAME');
-      const password = String.fromEnvironment('PASSWORD');
-      const serverUrl = String.fromEnvironment('SERVER_URL');
-
-      expect(username, isNotEmpty, reason: 'Missing USERNAME in --dart-define');
-      expect(password, isNotEmpty, reason: 'Missing PASSWORD in --dart-define');
-      expect(
-        serverUrl,
-        isNotEmpty,
-        reason: 'Missing SERVER_URL in --dart-define',
-      );
-
-      // Wait for either AutoHomeserverPicker (not-yet-logged-in) or ChatList.
-      final deadline = DateTime.now().add(const Duration(seconds: 60));
-      while (DateTime.now().isBefore(deadline)) {
-        await tester.pump(const Duration(milliseconds: 200));
-        if ($(AutoHomeserverPicker).exists || $(ChatList).exists) break;
-      }
-
-      if ($(ChatList).exists) {
-        // Already logged in (cached session) — nothing to do.
-        return;
-      }
-
-      expect(
-        $(AutoHomeserverPicker).exists,
-        isTrue,
-        reason:
-            'AutoHomeserverPicker should be visible on web before login. '
-            'If this fails the app may still be loading — check web/config.json.',
-      );
-
-      // Grab the live Matrix client from the widget tree.
-      final context = tester.element(
-        find.byType(AutoHomeserverPicker).first,
-      );
-      final matrix = Matrix.of(context);
-      final client = await matrix.getLoginClient();
-
-      matrix.loginHomeserverSummary = await client
-          .checkHomeserver(Uri.parse(serverUrl))
-          .toHomeserverSummary();
-
-      await client.login(
-        LoginType.mLoginPassword,
-        identifier: AuthenticationUserIdentifier(user: username),
-        password: password,
-        initialDeviceDisplayName: PlatformInfos.clientName,
-      );
-
-      // Force the router to re-evaluate redirects → lands on ChatList.
-      TwakeApp.router.go('/');
-      await tester.pump();
-
-      // Wait for ChatList to appear.
-      await $(ChatList).waitUntilVisible(
-        timeout: const Duration(seconds: 60),
-      );
-
-      expect(
-        $(ChatList).exists,
-        isTrue,
-        reason: 'Should navigate to ChatList after m.login.password',
-      );
+      await _loginViaMatrixPassword(tester, $);
     },
+  );
+}
+
+/// PRD path: OIDC helpers must throw [UnsupportedError] on web because
+/// `dart:io` is unavailable — the web stub rejects immediately.
+void _verifyPrdPathThrowsOnWeb() {
+  if (!kIsWeb) return;
+  expect(
+    () => fetchOidcLoginToken(username: 'any', password: 'any'),
+    throwsA(isA<UnsupportedError>()),
+  );
+  expect(
+    () => sendMessageAsReceiver(message: 'test'),
+    throwsA(isA<UnsupportedError>()),
+  );
+}
+
+/// STG path: authenticate via `m.login.password` through the Matrix SDK,
+/// then force the router to land on [ChatList].
+Future<void> _loginViaMatrixPassword(
+  WidgetTester tester,
+  PatrolIntegrationTester $,
+) async {
+  const username = String.fromEnvironment('USERNAME');
+  const password = String.fromEnvironment('PASSWORD');
+  const serverUrl = String.fromEnvironment('SERVER_URL');
+
+  expect(username, isNotEmpty, reason: 'Missing USERNAME in --dart-define');
+  expect(password, isNotEmpty, reason: 'Missing PASSWORD in --dart-define');
+  expect(serverUrl, isNotEmpty, reason: 'Missing SERVER_URL in --dart-define');
+
+  // Wait for either AutoHomeserverPicker (not-yet-logged-in) or ChatList.
+  final deadline = DateTime.now().add(const Duration(seconds: 60));
+  while (DateTime.now().isBefore(deadline)) {
+    await tester.pump(const Duration(milliseconds: 200));
+    if ($(AutoHomeserverPicker).exists || $(ChatList).exists) break;
+  }
+
+  if ($(ChatList).exists) {
+    // Already logged in (cached session) — nothing to do.
+    return;
+  }
+
+  expect(
+    $(AutoHomeserverPicker).exists,
+    isTrue,
+    reason:
+        'AutoHomeserverPicker should be visible on web before login. '
+        'If this fails the app may still be loading — check web/config.json.',
+  );
+
+  // Grab the live Matrix client from the widget tree.
+  final context = tester.element(
+    find.byType(AutoHomeserverPicker).first,
+  );
+  final matrix = Matrix.of(context);
+  final client = await matrix.getLoginClient();
+
+  matrix.loginHomeserverSummary = await client
+      .checkHomeserver(Uri.parse(serverUrl))
+      .toHomeserverSummary();
+
+  await client.login(
+    LoginType.mLoginPassword,
+    identifier: AuthenticationUserIdentifier(user: username),
+    password: password,
+    initialDeviceDisplayName: PlatformInfos.clientName,
+  );
+
+  // Force the router to re-evaluate redirects → lands on ChatList.
+  TwakeApp.router.go('/');
+  await tester.pump();
+
+  await $(ChatList).waitUntilVisible(
+    timeout: const Duration(seconds: 60),
+  );
+
+  expect(
+    $(ChatList).exists,
+    isTrue,
+    reason: 'Should navigate to ChatList after m.login.password',
   );
 }
