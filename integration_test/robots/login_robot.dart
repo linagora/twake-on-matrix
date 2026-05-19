@@ -279,8 +279,9 @@ class LoginRobot extends CoreRobot {
     required String password,
   }) async {
     // On web the home route renders AutoHomeserverPicker, not TwakeWelcome.
-    final notLoggedInFinder =
-        kIsWeb ? $(AutoHomeserverPicker) : $(TwakeWelcome);
+    final notLoggedInFinder = kIsWeb
+        ? $(AutoHomeserverPicker)
+        : $(TwakeWelcome);
 
     await waitForEitherVisible(
       $: $,
@@ -337,8 +338,9 @@ class LoginRobot extends CoreRobot {
     required String password,
   }) async {
     // On web the home route is AutoHomeserverPicker, not TwakeWelcome.
-    final homeFinder =
-        kIsWeb ? $(AutoHomeserverPicker).finder.first : $(TwakeWelcome).finder.first;
+    final homeFinder = kIsWeb
+        ? $(AutoHomeserverPicker).finder.first
+        : $(TwakeWelcome).finder.first;
     final context = $.tester.element(homeFinder);
     final matrix = Matrix.of(context);
     final client = await matrix.getLoginClient();

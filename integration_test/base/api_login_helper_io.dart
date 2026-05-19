@@ -344,7 +344,8 @@ Future<_MatrixSession> _loginWithMLoginToken({
     ..set('Origin', 'https://${endpoints.chatURL}');
   request.write(
     jsonEncode({
-      'initial_device_display_name': '${endpoints.chatURL}: $_deviceDisplayName',
+      'initial_device_display_name':
+          '${endpoints.chatURL}: $_deviceDisplayName',
       'token': loginToken,
       'type': 'm.login.token',
     }),

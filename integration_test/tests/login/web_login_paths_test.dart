@@ -27,29 +27,24 @@ void main() {
   final binding = IntegrationTestWidgetsFlutterBinding.ensureInitialized();
   binding.framePolicy = LiveTestWidgetsFlutterBindingFramePolicy.fullyLive;
 
-  testWidgets(
-    'Web login — PRD path throws UnsupportedError, '
-    'STG path logs in via m.login.password',
-    (tester) async {
-      // Build a PatrolIntegrationTester manually (bypassing patrolTest which
-      // accesses PatrolBinding.patrolAppService — uninitialised on web).
-      final platformAutomator = PlatformAutomator(
-        config: PlatformAutomatorConfig.defaultConfig(),
-      );
-      final $ = PatrolIntegrationTester(
-        tester: tester,
-        config: const PatrolTesterConfig(
-          visibleTimeout: Duration(minutes: 2),
-        ),
-        platformAutomator: platformAutomator,
-      );
+  testWidgets('Web login — PRD path throws UnsupportedError, '
+      'STG path logs in via m.login.password', (tester) async {
+    // Build a PatrolIntegrationTester manually (bypassing patrolTest which
+    // accesses PatrolBinding.patrolAppService — uninitialised on web).
+    final platformAutomator = PlatformAutomator(
+      config: PlatformAutomatorConfig.defaultConfig(),
+    );
+    final $ = PatrolIntegrationTester(
+      tester: tester,
+      config: const PatrolTesterConfig(visibleTimeout: Duration(minutes: 2)),
+      platformAutomator: platformAutomator,
+    );
 
-      _verifyPrdPathThrowsOnWeb();
+    _verifyPrdPathThrowsOnWeb();
 
-      app.main();
-      await _loginViaMatrixPassword(tester, $);
-    },
-  );
+    app.main();
+    await _loginViaMatrixPassword(tester, $);
+  });
 }
 
 /// PRD path: OIDC helpers must throw [UnsupportedError] on web because
@@ -101,9 +96,7 @@ Future<void> _loginViaMatrixPassword(
   );
 
   // Grab the live Matrix client from the widget tree.
-  final context = tester.element(
-    find.byType(AutoHomeserverPicker).first,
-  );
+  final context = tester.element(find.byType(AutoHomeserverPicker).first);
   final matrix = Matrix.of(context);
   final client = await matrix.getLoginClient();
 
@@ -122,9 +115,7 @@ Future<void> _loginViaMatrixPassword(
   TwakeApp.router.go('/');
   await tester.pump();
 
-  await $(ChatList).waitUntilVisible(
-    timeout: const Duration(seconds: 60),
-  );
+  await $(ChatList).waitUntilVisible(timeout: const Duration(seconds: 60));
 
   expect(
     $(ChatList).exists,
