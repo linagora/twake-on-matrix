@@ -136,6 +136,7 @@ class FlutterHiveCollectionsDatabase extends HiveCollectionsDatabase {
     String? deviceName,
     String? prevBatch,
     String? olmAccount,
+    String? oidcClientId,
   ) async {
     await _updateIOSKeychainSharingRestoreToken(
       homeserverUrl: homeserverUrl,
@@ -153,6 +154,7 @@ class FlutterHiveCollectionsDatabase extends HiveCollectionsDatabase {
       deviceName,
       prevBatch,
       olmAccount,
+      oidcClientId,
     );
   }
 
@@ -199,6 +201,7 @@ class FlutterHiveCollectionsDatabase extends HiveCollectionsDatabase {
     String? deviceName,
     String? prevBatch,
     String? olmAccount,
+    String? oidcClientId,
   ) async {
     await _updateIOSKeychainSharingRestoreToken(
       homeserverUrl: homeserverUrl,
@@ -217,6 +220,7 @@ class FlutterHiveCollectionsDatabase extends HiveCollectionsDatabase {
       deviceName,
       prevBatch,
       olmAccount,
+      oidcClientId,
     );
   }
 

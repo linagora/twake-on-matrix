@@ -841,6 +841,7 @@ class HiveCollectionsDatabase extends DatabaseApi {
     String? deviceName,
     String? prevBatch,
     String? olmAccount,
+    String? oidcClientId,
   ) async {
     await transaction(() async {
       await _clientBox.put('homeserver_url', homeserverUrl);
@@ -1498,6 +1499,7 @@ class HiveCollectionsDatabase extends DatabaseApi {
     String? deviceName,
     String? prevBatch,
     String? olmAccount,
+    String? oidcClientId,
   ) async {
     await transaction(() async {
       await _clientBox.put('homeserver_url', homeserverUrl);
