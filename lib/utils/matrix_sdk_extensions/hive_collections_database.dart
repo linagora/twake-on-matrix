@@ -880,6 +880,11 @@ class HiveCollectionsDatabase extends DatabaseApi {
       } else {
         await _clientBox.put('olm_account', olmAccount);
       }
+      if (oidcClientId == null) {
+        await _clientBox.delete('oidc_client_id');
+      } else {
+        await _clientBox.put('oidc_client_id', oidcClientId);
+      }
       await _clientBox.delete('sync_filter_id');
     });
     return 0;
@@ -1537,6 +1542,11 @@ class HiveCollectionsDatabase extends DatabaseApi {
         await _clientBox.delete('olm_account');
       } else {
         await _clientBox.put('olm_account', olmAccount);
+      }
+      if (oidcClientId == null) {
+        await _clientBox.delete('oidc_client_id');
+      } else {
+        await _clientBox.put('oidc_client_id', oidcClientId);
       }
     });
     return;
