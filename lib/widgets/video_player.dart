@@ -48,14 +48,22 @@ class _VideoPlayerState extends State<VideoPlayer> {
     configuration: const VideoControllerConfiguration(hwdec: 'mediacodec-copy'),
   );
 
-  /// Opens the media source on [player], logging any errors.
-  Future<void> _openMedia() async {
+  /// Opens the media source on [targetPlayer], logging any errors.
+  ///
+  /// Accepts an explicit [targetPlayer] so that a stale async call that
+  /// resumes after the widget has already recreated [player] cannot
+  /// accidentally open media on the new instance.
+  Future<void> _openMedia({
+    required Player targetPlayer,
+    required String? url,
+    required Uint8List? bytes,
+  }) async {
     try {
-      if (widget.url != null) {
-        await player.open(Media(widget.url!));
+      if (url != null) {
+        await targetPlayer.open(Media(url));
       } else {
-        final media = await Media.memory(widget.bytes!);
-        await player.open(media);
+        final media = await Media.memory(bytes!);
+        await targetPlayer.open(media);
       }
     } catch (e, s) {
       Logs().e('Error opening video media:', e, s);
@@ -67,7 +75,9 @@ class _VideoPlayerState extends State<VideoPlayer> {
     super.initState();
     player = _createPlayer();
     videoController = _createController(player);
-    unawaited(_openMedia());
+    unawaited(
+      _openMedia(targetPlayer: player, url: widget.url, bytes: widget.bytes),
+    );
   }
 
   @override
@@ -81,7 +91,11 @@ class _VideoPlayerState extends State<VideoPlayer> {
     await player.dispose();
     player = _createPlayer();
     videoController = _createController(player);
-    await _openMedia();
+    await _openMedia(
+      targetPlayer: player,
+      url: widget.url,
+      bytes: widget.bytes,
+    );
   }
 
   @override
