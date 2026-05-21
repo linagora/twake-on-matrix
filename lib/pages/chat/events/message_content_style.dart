@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/utils/responsive/responsive_utils.dart';
@@ -86,6 +87,9 @@ class MessageContentStyle {
   static TextStyle? linkStyleMessageContent(BuildContext context) =>
       Theme.of(context).textTheme.bodyLarge?.copyWith(
         color: Theme.of(context).colorScheme.secondary,
+        fontSize: AppConfig.messageFontSize * AppConfig.fontSizeFactor,
+        height: 18 / AppConfig.messageFontSize,
+        fontWeight: FontWeight.w400,
       );
 
   static const blurhashSize = 32;

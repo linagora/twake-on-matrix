@@ -1,3 +1,4 @@
+import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/pages/chat/events/html_message.dart';
 import 'package:flutter/material.dart';
 import 'package:matrix/matrix.dart' hide Visibility;
@@ -26,7 +27,11 @@ class FormattedTextWidget extends StatelessWidget {
 
     return HtmlMessage(
       html: html,
-      defaultTextStyle: Theme.of(context).textTheme.bodyLarge,
+      defaultTextStyle: Theme.of(context).textTheme.bodyLarge?.copyWith(
+        fontSize: AppConfig.messageFontSize * AppConfig.fontSizeFactor,
+        height: 18 / AppConfig.messageFontSize,
+        fontWeight: FontWeight.w400,
+      ),
       linkStyle: linkStyle,
       room: event.room,
       emoteSize: bigEmotes ? fontSize * 3 : fontSize * 1.5,

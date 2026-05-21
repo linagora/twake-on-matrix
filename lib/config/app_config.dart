@@ -77,7 +77,7 @@ abstract class AppConfig {
       responsive.isMobile(context) ? 48 : 56;
   static const Color chatColor = primaryColor;
   static Color colorSchemeSeed = primaryColor;
-  static const double messageFontSize = 17.0;
+  static const double messageFontSize = 14.0;
   static const bool allowOtherHomeservers = true;
   static const bool enableRegistration = true;
   static const Color primaryColor = Color.fromARGB(255, 135, 103, 172);

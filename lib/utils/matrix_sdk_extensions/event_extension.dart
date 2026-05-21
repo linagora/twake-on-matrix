@@ -320,8 +320,9 @@ extension LocalizedBody on Event {
   TextStyle? getMessageTextStyle(BuildContext context, [Timeline? timeline]) {
     if (redacted) {
       return Theme.of(context).textTheme.bodyLarge?.copyWith(
-        fontSize: 17,
-        height: 24 / 17,
+        fontSize: AppConfig.messageFontSize * AppConfig.fontSizeFactor,
+        height: 18 / AppConfig.messageFontSize,
+        fontWeight: FontWeight.w400,
         color: LinagoraRefColors.material().tertiary[30],
       );
     }
@@ -332,6 +333,9 @@ extension LocalizedBody on Event {
 
     return Theme.of(context).textTheme.bodyLarge?.copyWith(
       color: Theme.of(context).colorScheme.onSurface,
+      fontSize: AppConfig.messageFontSize * AppConfig.fontSizeFactor,
+      height: 18 / AppConfig.messageFontSize,
+      fontWeight: FontWeight.w400,
     );
   }
 
