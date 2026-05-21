@@ -10,8 +10,6 @@ class ChatViewBodyStyle {
   static double bottomSheetPadding(BuildContext context) =>
       TwakeThemes.isColumnMode(context) ? 16.0 : 8.0;
 
-  static double chatScreenMaxWidth = 800.0;
-
   static double dividerSize = 1.0;
 
   static double blockedUserBannerHeight = 40.0;

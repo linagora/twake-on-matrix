@@ -14,10 +14,38 @@ class MessageStyle {
   static ResponsiveUtils responsiveUtils = getIt.get<ResponsiveUtils>();
 
   static const double heightDivider = 1.0;
-  static final bubbleBorderRadius = BorderRadius.circular(16);
+  static const Radius bubbleRadius = Radius.circular(16);
+  static const Radius bubbleGroupedRadius = Radius.circular(8);
+  static const bubbleBorderRadius = BorderRadius.all(bubbleRadius);
+
+  static BorderRadius groupedBubbleBorderRadius({
+    required bool isOwnMessage,
+    required bool hasSameSenderAbove,
+    required bool hasSameSenderBelow,
+  }) {
+    final tailSideTop = hasSameSenderAbove ? bubbleGroupedRadius : bubbleRadius;
+    final tailSideBottom = hasSameSenderBelow
+        ? bubbleGroupedRadius
+        : bubbleRadius;
+    if (isOwnMessage) {
+      return BorderRadius.only(
+        topLeft: bubbleRadius,
+        bottomLeft: bubbleRadius,
+        topRight: tailSideTop,
+        bottomRight: tailSideBottom,
+      );
+    }
+    return BorderRadius.only(
+      topRight: bubbleRadius,
+      bottomRight: bubbleRadius,
+      topLeft: tailSideTop,
+      bottomLeft: tailSideBottom,
+    );
+  }
+
   static final errorStatusPlaceHolderWidth = 16 * AppConfig.bubbleSizeFactor;
   static final errorStatusPlaceHolderHeight = 16 * AppConfig.bubbleSizeFactor;
-  static const double avatarSize = 40;
+  static const double avatarSize = 36;
   static const double fontSize = 15;
   static const notSameSenderPadding = EdgeInsets.only(left: 8.0, bottom: 4);
 
@@ -64,7 +92,7 @@ class MessageStyle {
       Theme.of(context).colorScheme.surfaceTint.withOpacity(0.08);
 
   static const double messageBubbleDesktopMaxWidth = 520.0;
-  static const double messageBubbleMobileRatioMaxWidth = 0.80;
+  static const double messageBubbleMobileRatioMaxWidth = 0.88;
   static const double messageBubbleTabletRatioMaxWidth = 0.30;
   static const double iconContextMenuSize = 40;
 
@@ -204,25 +232,32 @@ class MessageStyle {
   static double messageSpacing(
     bool displayTime,
     Event? nextEvent,
-    Event currentEvent,
-  ) {
-    // add spaces to messages only
-    if (nextEvent == null ||
-        displayTime ||
-        nextEvent.type != EventTypes.Message) {
+    Event currentEvent, {
+    bool nextEventHasReaction = false,
+  }) {
+    if (nextEvent == null || displayTime) {
       return 0;
     }
 
-    return currentEvent.senderId != nextEvent.senderId ? 8 : 4;
+    if (nextEvent.shouldHideRedactedEvent()) {
+      return nextEventHasReaction ? 8 : 6;
+    }
+
+    if (nextEvent.type != EventTypes.Message) {
+      return 0;
+    }
+
+    if (currentEvent.senderId == nextEvent.senderId) {
+      return 0;
+    }
+    return nextEventHasReaction ? 8 : 6;
   }
 
-  static EdgeInsets paddingDisplayName(Event event) => EdgeInsets.only(
-    left: event.messageType == MessageTypes.Image ? 0 : 8.0,
-    bottom: 4.0,
-  );
+  static EdgeInsets paddingDisplayName(Event event) =>
+      const EdgeInsets.only(bottom: 4.0);
 
   static EdgeInsets get paddingMessage =>
-      const EdgeInsets.symmetric(vertical: 2.0);
+      const EdgeInsets.symmetric(vertical: 1.0);
 
   static EdgeInsets get paddingTimestamp =>
       const EdgeInsets.only(left: 8.0, right: 4.0);
@@ -237,19 +272,29 @@ class MessageStyle {
     BuildContext context,
     Event? nextEvent,
     Event event,
-    bool selected,
-  ) {
+    bool selected, {
+    bool nextEventHasReaction = false,
+  }) {
+    final needsRightMenuGap =
+        responsiveUtils.isDesktop(context) &&
+        event.shouldDisplayContextMenuInRightBubble;
+    final endPadding = selected || needsRightMenuGap ? 8.0 : 0.0;
     return EdgeInsetsDirectional.only(
-      top: MessageStyle.messageSpacing(displayTime, nextEvent, event),
-      end: selected || responsiveUtils.isDesktop(context) ? 8 : 0,
+      top: MessageStyle.messageSpacing(
+        displayTime,
+        nextEvent,
+        event,
+        nextEventHasReaction: nextEventHasReaction,
+      ),
+      end: endPadding,
     );
   }
 
   static EdgeInsets paddingMessageContentBuilder(Event event) =>
       EdgeInsets.only(
-        left: 8 * AppConfig.bubbleSizeFactor,
-        right: 8 * AppConfig.bubbleSizeFactor,
-        top: 8 * AppConfig.bubbleSizeFactor,
+        left: 10 * AppConfig.bubbleSizeFactor,
+        right: 10 * AppConfig.bubbleSizeFactor,
+        top: 6 * AppConfig.bubbleSizeFactor,
         bottom: event.timelineOverlayMessage
             ? 8 * AppConfig.bubbleSizeFactor
             : 0 * AppConfig.bubbleSizeFactor,
@@ -266,7 +311,7 @@ class MessageStyle {
   static const double pushpinIconSize = 14.0;
 
   static const double paddingAllPushpin = 0;
-  static const Color borderColorReceivedBubble = Color(0xFFEBEDF0);
+  static const Color borderColorReceivedBubble = Color(0xFFE5ECF3);
 
   static MainAxisAlignment messageAlignment(
     Event event,

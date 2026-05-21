@@ -1,6 +1,7 @@
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/domain/model/room/room_extension.dart';
 import 'package:fluffychat/pages/chat/chat_horizontal_action_menu.dart';
+import 'package:fluffychat/pages/chat/events/message/bubble_tail.dart';
 import 'package:fluffychat/pages/chat/events/message/display_name_widget.dart';
 import 'package:fluffychat/pages/chat/events/message/message.dart';
 import 'package:fluffychat/pages/chat/events/message/message_content_builder.dart';
@@ -38,6 +39,7 @@ class MessageContentWithTimestampBuilder extends StatefulWidget {
   final Event event;
   final MatrixState? matrixState;
   final Event? nextEvent;
+  final Event? previousEvent;
   final void Function(Event)? onSelect;
   final void Function(String)? scrollToEventId;
   final void Function()? onDisplayEmojiReaction;
@@ -78,6 +80,7 @@ class MessageContentWithTimestampBuilder extends StatefulWidget {
     required this.event,
     this.matrixState,
     this.nextEvent,
+    this.previousEvent,
     this.onSelect,
     this.scrollToEventId,
     this.onDisplayEmojiReaction,
@@ -211,6 +214,11 @@ class _MessageContentWithTimestampBuilderState
               widget.nextEvent,
               widget.event,
               widget.selected,
+              nextEventHasReaction:
+                  widget.nextEvent?.hasReactionEvent(
+                    timeline: widget.timeline,
+                  ) ??
+                  false,
             ),
             child: MultiPlatformSelectionMode(
               event: widget.event,
@@ -283,7 +291,7 @@ class _MessageContentWithTimestampBuilderState
                     : _responsiveUtils.isMobile(context)
                     ? LinagoraSysColors.material().onPrimary
                     : Theme.of(context).colorScheme.surfaceContainerHighest,
-                shape: RoundedRectangleBorder(
+                shape: const RoundedRectangleBorder(
                   borderRadius: MessageStyle.bubbleBorderRadius,
                 ),
                 child: Container(
@@ -360,7 +368,7 @@ class _MessageContentWithTimestampBuilderState
                     : _responsiveUtils.isMobile(context)
                     ? LinagoraSysColors.material().onPrimary
                     : Theme.of(context).colorScheme.surfaceContainerHighest,
-                shape: RoundedRectangleBorder(
+                shape: const RoundedRectangleBorder(
                   borderRadius: MessageStyle.bubbleBorderRadius,
                 ),
                 child: Container(
@@ -517,6 +525,39 @@ class _MessageContentWithTimestampBuilderState
       timeline: widget.timeline,
     );
 
+    final isDisplayOnlyEmoji = widget.event.isDisplayOnlyEmoji(widget.timeline);
+    final Color bubbleColor = widget.event.isOwnMessage
+        ? LinagoraRefColors.material().primary[95]!
+        : _responsiveUtils.isMobile(context)
+        ? LinagoraSysColors.material().onPrimary
+        : Theme.of(context).colorScheme.surfaceContainerHighest;
+
+    final hasSameSenderBelow =
+        widget.previousEvent != null &&
+        widget.previousEvent!.senderId == widget.event.senderId;
+    final hasSameSenderAbove =
+        widget.nextEvent != null &&
+        widget.nextEvent!.senderId == widget.event.senderId;
+
+    final showTail = !isDisplayOnlyEmoji && !noBubble && !hasSameSenderBelow;
+
+    final hasReceivedBorder =
+        enableBorder &&
+        !widget.event.isOwnMessage &&
+        _responsiveUtils.isMobile(context);
+
+    final tailDirection = showTail
+        ? (widget.event.isOwnMessage
+              ? BubbleTailDirection.right
+              : BubbleTailDirection.left)
+        : BubbleTailDirection.none;
+
+    final bubbleBorderRadius = MessageStyle.groupedBubbleBorderRadius(
+      isOwnMessage: widget.event.isOwnMessage,
+      hasSameSenderAbove: hasSameSenderAbove,
+      hasSameSenderBelow: hasSameSenderBelow,
+    );
+
     return OptionalStack(
       key: key,
       alignment: widget.event.isOwnMessage
@@ -524,82 +565,82 @@ class _MessageContentWithTimestampBuilderState
           : AlignmentDirectional.bottomEnd,
       isEnabled: hasReactionEvent,
       children: [
-        Container(
-          decoration: widget.event.isDisplayOnlyEmoji(widget.timeline)
-              ? null
-              : BoxDecoration(
-                  borderRadius: MessageStyle.bubbleBorderRadius,
-                  color: widget.event.isOwnMessage
-                      ? LinagoraRefColors.material().primary[95]
-                      : _responsiveUtils.isMobile(context)
-                      ? LinagoraSysColors.material().onPrimary
-                      : Theme.of(context).colorScheme.surfaceContainerHighest,
-                  border: enableBorder
-                      ? (!widget.event.isOwnMessage &&
-                                _responsiveUtils.isMobile(context)
-                            ? Border.all(
-                                color: MessageStyle.borderColorReceivedBubble,
-                              )
-                            : null)
-                      : null,
-                ),
-          padding:
-              paddingBubble ??
-              (noBubble
-                  ? const .symmetric(horizontal: 16.0)
-                  : MessageStyle.paddingMessageContentBuilder(widget.event)),
-          constraints: BoxConstraints(
-            maxWidth: MessageStyle.messageBubbleWidth(
-              context,
-              event: widget.event,
-              maxWidthScreen: widget.maxWidth,
-            ),
-          ),
-          margin: hasReactionEvent ? const .only(bottom: 24) : null,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              if (!_hideDisplayName(context))
-                OptionalSelectionContainerDisabled(
-                  isEnabled: PlatformInfos.isWeb,
-                  child: DisplayNameWidget(event: widget.event),
-                ),
-              OptionalStack(
-                isEnabled: timelineText,
-                alignment: AlignmentDirectional.bottomEnd,
-                children: [
-                  MessageContentBuilder(
-                    event: widget.event,
-                    timeline: widget.timeline,
-                    onSelect: widget.onSelect,
-                    nextEvent: widget.nextEvent,
-                    scrollToEventId: widget.scrollToEventId,
-                    selectMode: widget.selectMode,
-                    onRetryTextMessage: widget.onRetryTextMessage,
+        Padding(
+          padding: hasReactionEvent
+              ? const EdgeInsets.only(bottom: 24)
+              : EdgeInsets.zero,
+          child: Container(
+            decoration: isDisplayOnlyEmoji
+                ? null
+                : ShapeDecoration(
+                    color: bubbleColor,
+                    shape: BubbleShape(
+                      borderRadius: bubbleBorderRadius,
+                      side: hasReceivedBorder
+                          ? const BorderSide(
+                              color: MessageStyle.borderColorReceivedBubble,
+                            )
+                          : BorderSide.none,
+                      tailDirection: tailDirection,
+                    ),
                   ),
-                  if (!widget.event.isReplyEventWithAudio())
-                    OptionalSelectionContainerDisabled(
-                      isEnabled: PlatformInfos.isWeb,
-                      child: Padding(
-                        padding: MessageStyle.paddingMessageTime,
-                        child: Text.rich(
-                          WidgetSpan(
-                            child: MessageTime(
-                              timelineOverlayMessage:
-                                  widget.event.timelineOverlayMessage,
-                              room: widget.event.room,
-                              event: widget.event,
-                              showSeenIcon: widget.event.isOwnMessage,
-                              timeline: widget.timeline,
-                              onRetryTextMessage: widget.onRetryTextMessage,
+            padding:
+                paddingBubble ??
+                (noBubble
+                    ? const EdgeInsets.symmetric(horizontal: 16.0)
+                    : MessageStyle.paddingMessageContentBuilder(widget.event)),
+            constraints: BoxConstraints(
+              maxWidth: MessageStyle.messageBubbleWidth(
+                context,
+                event: widget.event,
+                maxWidthScreen: widget.maxWidth,
+              ),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                if (!_hideDisplayName(context))
+                  OptionalSelectionContainerDisabled(
+                    isEnabled: PlatformInfos.isWeb,
+                    child: DisplayNameWidget(event: widget.event),
+                  ),
+                OptionalStack(
+                  isEnabled: timelineText,
+                  alignment: AlignmentDirectional.bottomEnd,
+                  children: [
+                    MessageContentBuilder(
+                      event: widget.event,
+                      timeline: widget.timeline,
+                      onSelect: widget.onSelect,
+                      nextEvent: widget.nextEvent,
+                      scrollToEventId: widget.scrollToEventId,
+                      selectMode: widget.selectMode,
+                      onRetryTextMessage: widget.onRetryTextMessage,
+                    ),
+                    if (!widget.event.isReplyEventWithAudio())
+                      OptionalSelectionContainerDisabled(
+                        isEnabled: PlatformInfos.isWeb,
+                        child: Padding(
+                          padding: MessageStyle.paddingMessageTime,
+                          child: Text.rich(
+                            WidgetSpan(
+                              child: MessageTime(
+                                timelineOverlayMessage:
+                                    widget.event.timelineOverlayMessage,
+                                room: widget.event.room,
+                                event: widget.event,
+                                showSeenIcon: widget.event.isOwnMessage,
+                                timeline: widget.timeline,
+                                onRetryTextMessage: widget.onRetryTextMessage,
+                              ),
                             ),
                           ),
                         ),
                       ),
-                    ),
-                ],
-              ),
-            ],
+                  ],
+                ),
+              ],
+            ),
           ),
         ),
         PositionedDirectional(
@@ -671,7 +712,7 @@ class _MessageContentWithTimestampBuilderState
         child: Container(
           decoration: BoxDecoration(
             color: Colors.transparent,
-            borderRadius: .circular(24),
+            borderRadius: BorderRadius.circular(24),
           ),
           alignment: isReversed
               ? AlignmentDirectional.centerEnd
@@ -681,7 +722,7 @@ class _MessageContentWithTimestampBuilderState
               : const EdgeInsetsDirectional.only(start: 8),
           child: OverflowView.flexible(
             reverse: !isReversed,
-            spacing: 8,
+            spacing: 16,
             builder: (context, remainingItemCount) {
               someHorizontalActionHidden = remainingItemCount != 0;
               return const SizedBox();
@@ -707,6 +748,7 @@ class _MessageContentWithTimestampBuilderState
                 },
                 icon: item.action.getIcon(),
                 imagePath: item.action.getImagePath(),
+                paddingAll: 4,
                 tooltip: item.action.getTitle(context),
                 preferBelow: false,
               );

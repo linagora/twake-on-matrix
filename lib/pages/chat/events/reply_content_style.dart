@@ -61,10 +61,8 @@ class ReplyContentStyle {
     );
   }
 
-  static EdgeInsetsDirectional get marginReplyContent =>
-      EdgeInsetsDirectional.symmetric(
-        vertical: 4.0 * AppConfig.bubbleSizeFactor,
-      );
+  static const EdgeInsetsDirectional marginReplyContent =
+      EdgeInsetsDirectional.only(bottom: 8.0);
 
   static const double replyContainerHeight = 60;
 }

@@ -1,4 +1,3 @@
-import 'package:fluffychat/config/themes.dart';
 import 'package:fluffychat/pages/chat/events/message/message.dart';
 import 'package:fluffychat/utils/extension/event_status_custom_extension.dart';
 import 'package:flutter/material.dart';
@@ -26,9 +25,6 @@ class MessageSelectedWidget extends StatelessWidget {
         left: Message.responsiveUtils.isMobile(context) ? 8.0 : 0,
       ),
       color: Theme.of(context).primaryColor.withAlpha(0),
-      constraints: const BoxConstraints(
-        maxWidth: TwakeThemes.columnWidth * 2.5,
-      ),
       child: Row(
         mainAxisSize: MainAxisSize.max,
         children: [

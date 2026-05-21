@@ -18,7 +18,7 @@ class TwakeLinkView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (firstValidUrl == null) {
-      return _buildMessageBody(context);
+      return body;
     }
 
     return _buildMessageWithPreview(context);
@@ -36,17 +36,8 @@ class TwakeLinkView extends StatelessWidget {
           child: previewItemWidget,
         ),
         const SizedBox(height: TwakeLinkViewStyle.previewToBodySpacing),
-        _buildMessageBody(context),
+        body,
       ],
-    );
-  }
-
-  Widget _buildMessageBody(BuildContext context) {
-    return Padding(
-      padding: isCaption
-          ? EdgeInsets.zero
-          : TwakeLinkViewStyle.paddingMessageBody,
-      child: body,
     );
   }
 }

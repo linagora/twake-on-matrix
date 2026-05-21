@@ -1,5 +1,4 @@
 import 'package:scroll_to_index/scroll_to_index.dart';
-import 'package:fluffychat/pages/chat/chat_view_body_style.dart';
 import 'package:fluffychat/pages/chat/events/message/message.dart';
 import 'package:fluffychat/pages/chat/events/message/message_selected_widget.dart';
 import 'package:fluffychat/pages/chat/events/message/message_style.dart';
@@ -39,6 +38,20 @@ class MessageContainer extends StatelessWidget {
     this.scrollIndex,
   });
 
+  EdgeInsetsDirectional _rowPadding(BuildContext context) {
+    const double sidePadding = 16.0;
+    final isMobile = Message.responsiveUtils.isMobile(context);
+    final selectedWidgetLeftPadding = isMobile ? 8.0 : 0.0;
+
+    if (event.shouldAlignOwnMessageInDifferentSide) {
+      return const EdgeInsetsDirectional.only(end: sidePadding);
+    }
+    return EdgeInsetsDirectional.only(
+      start: sidePadding - selectedWidgetLeftPadding,
+      end: sidePadding,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final container = MultiPlatformsMessageContainer(
@@ -49,11 +62,7 @@ class MessageContainer extends StatelessWidget {
         }
       },
       child: Container(
-        constraints: BoxConstraints(
-          maxWidth: ChatViewBodyStyle.chatScreenMaxWidth,
-        ),
         padding: MessageStyle.paddingMessage,
-        alignment: Alignment.bottomCenter,
         child: SwipeableMessage(
           event: event,
           onSwipe: onSwipe,
@@ -62,15 +71,7 @@ class MessageContainer extends StatelessWidget {
             onTap: () => onSelect!(event),
             isEnabled: selectMode && event.status.isAvailable,
             child: OptionalPadding(
-              padding: EdgeInsetsDirectional.only(
-                end:
-                    event.isOwnMessage ||
-                        Message.responsiveUtils.isDesktop(context)
-                    ? 8.0
-                    : 16.0,
-                top: 1.0,
-                bottom: 1.0,
-              ),
+              padding: _rowPadding(context),
               isEnabled: !selected,
               child: MessageSelectedWidget(
                 event: event,

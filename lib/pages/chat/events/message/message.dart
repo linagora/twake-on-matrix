@@ -263,6 +263,7 @@ class _MessageState extends State<Message> with MessageAvatarMixin {
           event: widget.event,
           matrixState: widget.matrixState,
           nextEvent: widget.nextEvent,
+          previousEvent: widget.previousEvent,
           onSelect: widget.onSelect,
           scrollToEventId: widget.scrollToEventId,
           selected: widget.selected,
