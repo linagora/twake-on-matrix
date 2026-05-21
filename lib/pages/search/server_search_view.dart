@@ -4,14 +4,13 @@ import 'package:fluffychat/presentation/decorators/chat_list/subtitle_text_style
 import 'package:fluffychat/presentation/model/search/presentation_server_side_empty_search.dart';
 import 'package:fluffychat/presentation/model/search/presentation_server_side_search.dart';
 import 'package:fluffychat/utils/extension/build_context_extension.dart';
+import 'package:fluffychat/utils/matrix_sdk_extensions/result_extension.dart';
 import 'package:fluffychat/widgets/avatar/avatar.dart';
 import 'package:fluffychat/widgets/highlight_text.dart';
 import 'package:fluffychat/pages/chat_list/chat_list_item_title.dart';
-import 'package:fluffychat/widgets/matrix.dart';
 import 'package:fluffychat/widgets/search/empty_search_widget.dart';
 import 'package:flutter/material.dart' hide SearchController;
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
-import 'package:matrix/matrix.dart';
 
 class ServerSearchMessagesList extends StatelessWidget {
   final SearchController searchController;
@@ -44,17 +43,14 @@ class ServerSearchMessagesList extends StatelessWidget {
               itemCount: serverSearchNotifier.searchResults.length,
               padding: ServerSearchViewStyle.paddingListItem,
               itemBuilder: ((context, index) {
-                final searchResult =
-                    serverSearchNotifier.searchResults[index].result;
-                final room = Matrix.of(
-                  context,
-                ).client.getRoomById(searchResult?.roomId ?? '');
-                if (room == null || searchResult == null) {
+                final result = serverSearchNotifier.searchResults[index];
+                final event = result.getEvent(context);
+                if (event == null) {
                   return const SizedBox.shrink();
                 }
+                final room = event.room;
                 final searchWord = searchController.searchWord;
-                final event = Event.fromMatrixEvent(searchResult, room);
-                final originServerTs = searchResult.originServerTs;
+                final originServerTs = result.result?.originServerTs;
 
                 return TwakeInkWell(
                   onTap: () =>
