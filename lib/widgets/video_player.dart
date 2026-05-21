@@ -35,17 +35,15 @@ class _VideoPlayerState extends State<VideoPlayer> {
     configuration: const PlayerConfiguration(logLevel: MPVLogLevel.warn),
   );
 
-  /// Creates a [VideoController] with hardware acceleration explicitly enabled.
+  /// Creates a [VideoController] with explicit hwdec to force MediaCodec on Android.
   ///
-  /// On Android, libmpv's `hwdec=auto` can silently fall back to software
-  /// decoding on some devices (e.g. Redmi Note 12 Pro), causing ~6x slow
-  /// playback. Explicit `enableHardwareAcceleration` ensures mediacodec is
-  /// preferred. Web uses a different renderer and does not need this flag.
+  /// `hwdec=auto-safe` (the default) can silently fall back to software
+  /// decoding on some devices, causing slow playback. `mediacodec-copy` forces
+  /// HW decode via MediaCodec with a CPU-side copy, which has wider device
+  /// compatibility than plain `mediacodec`.
   VideoController _createController(Player p) => VideoController(
     p,
-    configuration: const VideoControllerConfiguration(
-      enableHardwareAcceleration: true,
-    ),
+    configuration: const VideoControllerConfiguration(hwdec: 'mediacodec-copy'),
   );
 
   /// Opens the media source on [player], logging any errors.
