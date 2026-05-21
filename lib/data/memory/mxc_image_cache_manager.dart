@@ -44,6 +44,23 @@ class MxcImageCacheManager {
     return data;
   }
 
+  static String roomScopedKey(String roomId, String key) => '$roomId/$key';
+
+  void evictRoom(String roomId) {
+    final prefix = '$roomId/';
+    final toRemove = _imageCache.keys
+        .where((k) => k.startsWith(prefix))
+        .toList(growable: false);
+    for (final key in toRemove) {
+      _totalBytes -= _imageCache[key]!.length;
+      _imageCache.remove(key);
+    }
+    assert(
+      _totalBytes == _imageCache.values.fold<int>(0, (s, e) => s + e.length),
+      'MxcImageCacheManager: _totalBytes drifted after evictRoom',
+    );
+  }
+
   void clear() {
     _imageCache.clear();
     _totalBytes = 0;
