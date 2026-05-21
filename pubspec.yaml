@@ -177,7 +177,7 @@ dependencies:
   lottie: ^3.0.0
   lottie_native: 0.1.2
   wechat_camera_picker: 4.4.0
-  open_file: ^3.3.2
+  open_file: ^3.5.11
   mime: ^1.0.4
   async: ^2.11.0
   flutter_image_compress: ^2.4.0

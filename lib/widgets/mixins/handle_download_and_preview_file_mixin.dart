@@ -2,7 +2,6 @@ import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/domain/app_state/preview_file/download_file_for_preview_failure.dart';
 import 'package:fluffychat/domain/app_state/preview_file/download_file_for_preview_loading.dart';
 import 'package:fluffychat/domain/app_state/preview_file/download_file_for_preview_success.dart';
-import 'package:fluffychat/domain/model/preview_file/document_uti.dart';
 import 'package:fluffychat/domain/model/preview_file/supported_preview_file_types.dart';
 import 'package:fluffychat/domain/usecase/download_file_for_preview_interactor.dart';
 import 'package:fluffychat/utils/dialog/twake_dialog.dart';
@@ -173,13 +172,7 @@ mixin HandleDownloadAndPreviewFileMixin {
       await Share.shareXFiles([XFile(filePath)]);
       return;
     }
-    final openResults = await OpenFile.open(
-      filePath,
-      type: mimeType,
-      uti: DocumentUti(
-        SupportedPreviewFileTypes.iOSSupportedTypes[mimeType],
-      ).value,
-    );
+    final openResults = await OpenFile.open(filePath, type: mimeType);
     Logs().d(
       'ChatController:_openDownloadedFileForPreviewAndroid(): ${openResults.message}',
     );
