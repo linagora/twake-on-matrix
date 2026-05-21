@@ -27,6 +27,10 @@ class ForwardRobot extends CoreRobot {
 
   PatrolFinder getBackIcon() => $(AppBar).$(TwakeIconButton).$(Icon);
 
+  Future<void> clickOnBackIcon() async {
+    await goBack();
+  }
+
   // ── Chat list items ───────────────────────────────────────────────────────
 
   /// Returns every room row rendered by [ForwardRecentChatList].

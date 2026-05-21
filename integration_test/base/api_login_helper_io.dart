@@ -6,7 +6,7 @@ import 'package:html/parser.dart';
 /// Drives the SSO OIDC flow (steps 1-7) over `dart:io` `HttpClient` and
 /// returns a one-time login token that can be handed to
 /// `/onAuthRedirect?loginToken=…` to complete authentication inside the app.
-Future<String> fetchOidcLoginToken({
+Future<String> fetchAuthToken({
   required String username,
   required String password,
 }) async {
@@ -48,7 +48,7 @@ Future<void> sendMessageAsReceiver({required String message}) async {
   const receiver = String.fromEnvironment('Receiver');
   const passOfReceiver = String.fromEnvironment('ReceiverPass');
 
-  final loginToken = await fetchOidcLoginToken(
+  final loginToken = await fetchAuthToken(
     username: receiver,
     password: passOfReceiver,
   );
