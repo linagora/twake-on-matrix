@@ -1,4 +1,6 @@
-import 'package:flutter/foundation.dart';
+import 'dart:async';
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import 'package:matrix/matrix.dart';
 import 'package:media_kit/media_kit.dart';
@@ -47,19 +49,16 @@ class _VideoPlayerState extends State<VideoPlayer> {
   );
 
   /// Opens the media source on [player], logging any errors.
-  void _openMedia() {
-    if (widget.url != null) {
-      player
-          .open(Media(widget.url!))
-          .then(
-            (_) {},
-            onError: (e, s) => Logs().e('Error opening video url:', e, s),
-          );
-    } else {
-      Media.memory(widget.bytes!).then(
-        (v) => player.open(v),
-        onError: (e, s) => Logs().e('Error opening video bytes:', e, s),
-      );
+  Future<void> _openMedia() async {
+    try {
+      if (widget.url != null) {
+        await player.open(Media(widget.url!));
+      } else {
+        final media = await Media.memory(widget.bytes!);
+        await player.open(media);
+      }
+    } catch (e, s) {
+      Logs().e('Error opening video media:', e, s);
     }
   }
 
@@ -68,7 +67,7 @@ class _VideoPlayerState extends State<VideoPlayer> {
     super.initState();
     player = _createPlayer();
     videoController = _createController(player);
-    _openMedia();
+    unawaited(_openMedia());
   }
 
   @override
@@ -82,7 +81,7 @@ class _VideoPlayerState extends State<VideoPlayer> {
     await player.dispose();
     player = _createPlayer();
     videoController = _createController(player);
-    _openMedia();
+    await _openMedia();
   }
 
   @override
@@ -97,7 +96,12 @@ class _VideoPlayerState extends State<VideoPlayer> {
       // RepaintBoundary isolates the video surface so that controls
       // rebuilding above it do not trigger a repaint of the video layer.
       body: RepaintBoundary(
-        child: Video(fill: Colors.black, controller: videoController),
+        child: Video(
+          fill: Colors.black,
+          controller: videoController,
+          pauseUponEnteringBackgroundMode: true,
+          resumeUponEnteringForegroundMode: true,
+        ),
       ),
     );
   }
