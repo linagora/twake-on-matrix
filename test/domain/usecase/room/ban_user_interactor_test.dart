@@ -213,9 +213,9 @@ void main() {
           };
 
           when(mockUser.canBan).thenReturn(true);
-          when(
-            mockUser.powerLevel,
-          ).thenReturn(PowerLevel(DefaultPowerLevelMember.moderator.powerLevel));
+          when(mockUser.powerLevel).thenReturn(
+            PowerLevel(DefaultPowerLevelMember.moderator.powerLevel),
+          );
           when(mockUser.id).thenReturn('@user:server.com');
           when(mockUser.room).thenReturn(mockRoom);
           when(mockUser.ban()).thenAnswer((_) async {});
@@ -343,9 +343,9 @@ void main() {
         () async {
           // Arrange
           when(mockUser.canBan).thenReturn(true);
-          when(
-            mockUser.powerLevel,
-          ).thenReturn(PowerLevel(DefaultPowerLevelMember.moderator.powerLevel));
+          when(mockUser.powerLevel).thenReturn(
+            PowerLevel(DefaultPowerLevelMember.moderator.powerLevel),
+          );
           when(mockUser.id).thenReturn('@mod:server.com');
           when(mockUser.room).thenReturn(mockRoom);
           when(mockUser.ban()).thenAnswer((_) async {});
@@ -469,9 +469,9 @@ void main() {
           when(mockException.error).thenReturn(MatrixError.M_FORBIDDEN);
 
           when(mockUser.canBan).thenReturn(true);
-          when(
-            mockUser.powerLevel,
-          ).thenReturn(PowerLevel(DefaultPowerLevelMember.moderator.powerLevel));
+          when(mockUser.powerLevel).thenReturn(
+            PowerLevel(DefaultPowerLevelMember.moderator.powerLevel),
+          );
           when(mockUser.id).thenReturn('@mod:server.com');
           when(mockUser.room).thenReturn(mockRoom);
           when(mockUser.ban()).thenAnswer((_) async {});
