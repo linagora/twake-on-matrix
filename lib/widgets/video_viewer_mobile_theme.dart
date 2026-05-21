@@ -13,9 +13,7 @@ class VideoViewerMobileTheme extends StatefulWidget {
     : assert(bytes != null || url != null, 'bytes or url must be provided');
 
   final Uint8List? bytes;
-
   final String? url;
-
   final Event? event;
 
   @override
@@ -41,10 +39,16 @@ class _VideoViewerMobileThemeState extends State<VideoViewerMobileTheme> {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return MaterialVideoControlsTheme(
       normal: MaterialVideoControlsThemeData(
         topButtonBarMargin: VideoViewerStyle.topButtonBarMargin(context),
-        bottomButtonBar: const [MaterialPositionIndicator(), Spacer()],
+        // RepaintBoundary around the position indicator isolates its frequent
+        // repaints (every ~250ms) from the rest of the controls layer.
+        bottomButtonBar: const [
+          RepaintBoundary(child: MaterialPositionIndicator()),
+          Spacer(),
+        ],
         topButtonBar: [
           Expanded(
             child: MediaViewerAppBar(
@@ -54,19 +58,21 @@ class _VideoViewerMobileThemeState extends State<VideoViewerMobileTheme> {
           ),
         ],
         controlsHoverDuration: VideoViewerStyle.controlsHoverDuration,
-        seekBarColor: Theme.of(context).colorScheme.onSurfaceVariant,
-        seekBarPositionColor: Theme.of(context).colorScheme.primary,
+        seekBarColor: colorScheme.onSurfaceVariant,
+        seekBarPositionColor: colorScheme.primary,
         bottomButtonBarMargin: VideoViewerStyle.bottomBarMargin(context),
         seekBarMargin: VideoViewerStyle.bottomBarMargin(context),
         seekBarHeight: VideoViewerStyle.seekBarHeight,
-        seekBarThumbColor: Theme.of(context).colorScheme.primary,
+        seekBarThumbColor: colorScheme.primary,
       ),
       fullscreen: const MaterialVideoControlsThemeData(),
       child: widget.event != null
           ? Stack(
               alignment: Alignment.center,
               children: [
-                MxcImage(event: widget.event),
+                // RepaintBoundary prevents thumbnail from repainting when
+                // the controls layer rebuilds during playback.
+                RepaintBoundary(child: MxcImage(event: widget.event)),
                 player,
               ],
             )
