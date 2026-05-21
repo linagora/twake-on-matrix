@@ -13,7 +13,7 @@ class MockUser extends Mock implements User {
   MockUser(this._powerLevel, {String id = ''}) : _id = id;
 
   @override
-  int get powerLevel => _powerLevel;
+  PowerLevel get powerLevel => PowerLevel(_powerLevel);
 
   @override
   String get id => _id;
@@ -33,7 +33,7 @@ void main() {
       final sortedUsers = users.sortByPowerLevel();
 
       // Assert
-      expect(sortedUsers.map((u) => u.powerLevel), [100, 50, 0]);
+      expect(sortedUsers.map((u) => u.powerLevel.level), [100, 50, 0]);
     });
 
     test('sortByPowerLevel with empty list', () {
@@ -58,7 +58,7 @@ void main() {
       final sortedUsers = users.sortByPowerLevel();
 
       // Assert
-      expect(sortedUsers.map((u) => u.powerLevel), [100, 50, 0]);
+      expect(sortedUsers.map((u) => u.powerLevel.level), [100, 50, 0]);
     });
 
     test('sortByPowerLevel with users with same power level', () {

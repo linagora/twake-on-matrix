@@ -193,7 +193,7 @@ class StoryPageController extends State<StoryPage> {
     final client = Matrix.of(context).client;
     final room = client.getRoomById(roomId);
     if (room == null) return false;
-    return room.ownPowerLevel >= 100;
+    return room.ownPowerLevel >= PowerLevel(100);
   }
 
   String get roomId => GoRouterState.of(context).pathParameters['roomid'] ?? '';

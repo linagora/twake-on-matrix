@@ -130,7 +130,8 @@ mixin ChatDetailsTabMixin<T extends StatefulWidget>
           if (event.isMemberChangedEvent && room?.id == event.roomID) {
             _membersNotifier.value = room?.getParticipants().toList()
               ?..sort(
-                (small, great) => great.powerLevel.compareTo(small.powerLevel),
+                (small, great) =>
+                    great.powerLevel.level.compareTo(small.powerLevel.level),
               );
             // Log only when summary count disagrees with actual participants list.
             final summaryCount = room?.summary.actualMembersCount ?? 0;
@@ -211,7 +212,10 @@ mixin ChatDetailsTabMixin<T extends StatefulWidget>
 
   Future<void> onUpdateMembers() async {
     final members = room!.getParticipants([Membership.join, Membership.invite])
-      ..sort((small, great) => great.powerLevel.compareTo(small.powerLevel));
+      ..sort(
+        (small, great) =>
+            great.powerLevel.level.compareTo(small.powerLevel.level),
+      );
     // Log only when summary count disagrees with actual filtered participants.
     final summaryCount = room?.summary.actualMembersCount ?? 0;
     if (summaryCount != members.length) {
@@ -250,7 +254,10 @@ mixin ChatDetailsTabMixin<T extends StatefulWidget>
   void _initMembers() {
     if (chatType == ChatDetailsScreenEnum.group) {
       _membersNotifier.value = room?.getParticipants().toList()
-        ?..sort((small, great) => great.powerLevel.compareTo(small.powerLevel));
+        ?..sort(
+          (small, great) =>
+              great.powerLevel.level.compareTo(small.powerLevel.level),
+        );
       // Log only when summary count disagrees with actual participants list.
       final summaryCount = room?.summary.actualMembersCount ?? 0;
       final participantsCount = _membersNotifier.value?.length ?? 0;
