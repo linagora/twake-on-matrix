@@ -188,21 +188,15 @@ void main() {
 
       expect(manager.getImage('mxc://server/avatar'), equals(avatar));
       expect(
-        manager.getImage(
-          MxcImageCacheManager.roomScopedKey('!roomA', 'ev1'),
-        ),
+        manager.getImage(MxcImageCacheManager.roomScopedKey('!roomA', 'ev1')),
         isNull,
       );
       expect(
-        manager.getImage(
-          MxcImageCacheManager.roomScopedKey('!roomA', 'ev2'),
-        ),
+        manager.getImage(MxcImageCacheManager.roomScopedKey('!roomA', 'ev2')),
         isNull,
       );
       expect(
-        manager.getImage(
-          MxcImageCacheManager.roomScopedKey('!roomB', 'ev3'),
-        ),
+        manager.getImage(MxcImageCacheManager.roomScopedKey('!roomB', 'ev3')),
         equals(img3),
       );
     });
