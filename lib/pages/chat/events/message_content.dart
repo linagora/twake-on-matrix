@@ -302,15 +302,10 @@ class MessageContent extends StatelessWidget
                 !event.redacted &&
                 event.isRichMessage &&
                 containedLink.isEmpty) {
-              return Padding(
-                padding: MessageContentStyle.emojiPadding,
-                child: FormattedTextWidget(
-                  event: event,
-                  linkStyle: MessageContentStyle.linkStyleMessageContent(
-                    context,
-                  ),
-                  fontSize: fontSize,
-                ),
+              return FormattedTextWidget(
+                event: event,
+                linkStyle: MessageContentStyle.linkStyleMessageContent(context),
+                fontSize: fontSize,
               );
             }
             // else we fall through to the normal message rendering

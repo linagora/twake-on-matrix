@@ -82,8 +82,6 @@ class MessageContentStyle {
     vertical: 4,
   );
 
-  static const EdgeInsets emojiPadding = EdgeInsets.symmetric(horizontal: 8.0);
-
   static TextStyle? linkStyleMessageContent(BuildContext context) =>
       Theme.of(context).textTheme.bodyLarge?.copyWith(
         color: Theme.of(context).colorScheme.secondary,
