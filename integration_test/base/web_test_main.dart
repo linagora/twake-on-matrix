@@ -4,9 +4,10 @@
 /// that can hang in headless Chrome / flutter drive --profile context.
 ///
 /// Pre-populates [AppConfig] with a dead homeserver (`localhost:1`) so
-/// [AutoHomeserverPicker] fails fast instead of triggering SSO redirect.
-/// The real server URL comes from `--dart-define=SERVER_URL` at the test
-/// level.  No physical `web/config.json` is required.
+/// [AutoHomeserverPicker]'s `_autoConnectHomeserver` fails fast (connection
+/// refused) instead of hitting the real Synapse and leaking a
+/// `MatrixException` from `register(inhibitLogin: true)` into the test zone.
+/// The test itself calls `checkHomeserver` on the real `SERVER_URL`.
 library;
 
 import 'package:fluffychat/config/app_config.dart';
@@ -21,7 +22,7 @@ import 'package:matrix/matrix.dart';
 
 import 'package:fluffychat/widgets/twake_app.dart';
 
-/// Test-safe config: dead homeserver prevents SSO / auto-connect side effects.
+/// Dead homeserver — prevents auto-connect side effects during test init.
 const _testConfig = <String, dynamic>{
   'app_grid_dashboard_available': false,
   'application_name': 'Twake Chat',
