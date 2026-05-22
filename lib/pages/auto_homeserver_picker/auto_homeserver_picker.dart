@@ -55,12 +55,14 @@ class AutoHomeserverPickerController extends State<AutoHomeserverPicker>
       final ssoSupported = matrix.loginHomeserverSummary.supportSSOLogin;
 
       try {
-        await client.register(inhibitLogin: true).timeout(
-          autoHomeserverPickerTimeout,
-          onTimeout: () {
-            throw CheckHomeserverTimeoutException();
-          },
-        );
+        await client
+            .register(inhibitLogin: true)
+            .timeout(
+              autoHomeserverPickerTimeout,
+              onTimeout: () {
+                throw CheckHomeserverTimeoutException();
+              },
+            );
         matrix.loginRegistrationSupported = true;
       } on MatrixException catch (e) {
         matrix.loginRegistrationSupported = e.requireAdditionalAuthentication;
