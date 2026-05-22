@@ -201,7 +201,10 @@ class MatrixState extends State<Matrix>
       StreamSubscription? createSupportChatListener;
       createSupportChatListener = getIt
           .get<CreateSupportChatInteractor>()
-          .execute(client)
+          .execute(
+            client,
+            cachedDiscovery: loginHomeserverSummary?.discoveryInformation,
+          )
           .listen(
             (state) {
               createSupportChatState = state.fold(
@@ -889,7 +892,8 @@ class MatrixState extends State<Matrix>
 
   Future<void> _tryStoreFederationConfiguration() async {
     try {
-      final wellKnown = await client.getWellknown();
+      final wellKnown = loginHomeserverSummary?.discoveryInformation;
+      if (wellKnown == null) return;
 
       Logs().d('MatrixState::_tryStoreFederationConfiguration: $wellKnown');
 
@@ -1084,20 +1088,27 @@ class MatrixState extends State<Matrix>
       'Matrix::_getHomeserverInformation: client homeserver = ${newClient.homeserver}',
     );
     if (newClient.homeserver == null) return;
-    loginHomeserverSummary = await newClient
-        .checkHomeserver(newClient.homeserver!)
+    final previousDiscovery = loginHomeserverSummary?.discoveryInformation;
+    final newSummary = await newClient
+        .checkHomeserver(newClient.homeserver!, checkWellKnown: false)
         .toHomeserverSummary();
+    if (newSummary == null) return;
+    if (newSummary.discoveryInformation == null && previousDiscovery != null) {
+      loginHomeserverSummary = HomeserverSummary(
+        discoveryInformation: previousDiscovery,
+        versions: newSummary.versions,
+        loginFlows: newSummary.loginFlows,
+      );
+    } else {
+      loginHomeserverSummary = newSummary;
+    }
     Logs().d(
       'Matrix::_getHomeserverInformation: appTwakeInformation ${loginHomeserverSummary?.appTwakeInformation}',
     );
   }
 
   Future<void> _refreshHomeserverInformation(Client client) async {
-    if (client.homeserver == null) {
-      final domain = client.userID?.domain;
-      if (domain == null) return;
-      client.homeserver = Uri.https(domain, '');
-    }
+    client.homeserver ??= Uri.parse(AppConfig.homeserver);
     await _getHomeserverInformation(client);
   }
 
