@@ -84,26 +84,10 @@ class _VideoPlayerState extends State<VideoPlayer> {
     unawaited(
       _openMedia(targetPlayer: player, url: widget.url, bytes: widget.bytes),
     );
-    player = Player();
-    videoController = VideoController(player);
     if (PlatformInfos.isWeb &&
         widget.bytes != null &&
         widget.mimeType != null) {
       _webOverlay.attach(bytes: widget.bytes!, mimeType: widget.mimeType!);
-    }
-    if (widget.url != null) {
-      videoController.player
-          .open(Media(widget.url!))
-          .then(
-            (_) {},
-            onError: (e, s) => Logs().e('Error opening video url:', e, s),
-          );
-    } else {
-      final currentPlayer = player;
-      Media.memory(widget.bytes!).then(
-        (v) => currentPlayer.open(v),
-        onError: (e, s) => Logs().e('Error opening video bytes:', e, s),
-      );
     }
   }
 
