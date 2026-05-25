@@ -81,15 +81,61 @@ extension MatrixFileExtension on MatrixFile {
   Future<String?> downloadFileInWeb(BuildContext context) async {
     Logs().d("MatrixFileExtension()::downloadFileInWeb()::download on Web");
     try {
+      final fileExt = _extensionFromMimeType(mimeType);
+      // Strip the extension from `name` if it already ends with it to avoid
+      // duplicates (FileSaver appends `ext` to `name`).
+      final baseName =
+          (fileExt.isNotEmpty && name.toLowerCase().endsWith(fileExt))
+          ? name.substring(0, name.length - fileExt.length)
+          : name;
       final directory = await FileSaver.instance.saveFile(
-        name: name,
+        name: baseName,
         bytes: bytes,
+        ext: fileExt,
+        mimeType: MimeType.custom,
+        customMimeType: mimeType ?? 'application/octet-stream',
       );
       return '$directory/$name';
     } catch (e) {
       Logs().e("MatrixFileExtension()::downloadFileInWeb()::Error: $e");
     }
     return null;
+  }
+
+  /// Returns the canonical file extension (without leading dot) for [mimeType].
+  static String _extensionFromMimeType(String? mimeType) {
+    switch (mimeType) {
+      case 'image/jpeg':
+        return 'jpg';
+      case 'image/png':
+        return 'png';
+      case 'image/gif':
+        return 'gif';
+      case 'image/webp':
+        return 'webp';
+      case 'image/bmp':
+        return 'bmp';
+      case 'image/tiff':
+        return 'tiff';
+      case 'image/avif':
+        return 'avif';
+      case 'image/heic':
+        return 'heic';
+      case 'image/heif':
+        return 'heif';
+      case 'video/mp4':
+        return 'mp4';
+      case 'video/webm':
+        return 'webm';
+      case 'audio/mpeg':
+        return 'mp3';
+      case 'audio/ogg':
+        return 'ogg';
+      case 'application/pdf':
+        return 'pdf';
+      default:
+        return '';
+    }
   }
 
   Future<String> downloadImageInMobile(BuildContext context) async {

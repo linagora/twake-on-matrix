@@ -119,6 +119,7 @@ class _MessageVideoDownloadContentWebState
               playVideoAction(
                 context,
                 downloadState.matrixFile.bytes,
+                event: widget.event,
                 isReplacement: false,
               );
             }

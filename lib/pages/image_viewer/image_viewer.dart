@@ -7,7 +7,10 @@ import 'package:fluffychat/domain/app_state/download/download_file_state.dart';
 import 'package:fluffychat/domain/usecase/room/download_media_file_interactor.dart';
 import 'package:fluffychat/pages/forward/forward.dart';
 import 'package:fluffychat/pages/image_viewer/image_viewer_view.dart';
+import 'package:fluffychat/pages/image_viewer/image_viewer_web_overlay.dart';
 import 'package:fluffychat/presentation/model/pop_result_from_forward.dart';
+import 'package:fluffychat/pages/image_viewer/image_viewer_style.dart';
+import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:flutter/material.dart';
@@ -53,13 +56,35 @@ class ImageViewerController extends State<ImageViewer> {
 
   StreamSubscription? streamSubcription;
 
+  final _webOverlay = ImageViewerWebOverlay();
+
   @override
   void initState() {
     super.initState();
     showAppbarPreview = ValueNotifier(widget.showAppBar);
+    if (PlatformInfos.isWeb && widget.event != null) {
+      _injectWebImageOverlay(widget.event!);
+    }
     if (!PlatformInfos.isWeb && widget.event != null) {
       handleDownloadFile(widget.event!);
       handleDownloadThumbnailFile(widget.event!);
+    }
+  }
+
+  /// Downloads the image bytes and injects a transparent `<img>` overlay into
+  /// the DOM so the browser's native "Save Image As" context menu works.
+  Future<void> _injectWebImageOverlay(Event event) async {
+    try {
+      final matrixFile = await event.downloadAndDecryptAttachment();
+      if (!mounted) return;
+      final mimeType = event.mimeType ?? 'image/jpeg';
+      _webOverlay.attach(
+        bytes: matrixFile.bytes,
+        mimeType: mimeType,
+        appBarHeight: ImageViewerStyle.appBarHeight ?? 56,
+      );
+    } catch (e) {
+      Logs().e('ImageViewerController: failed to inject web overlay', e);
     }
   }
 
@@ -135,6 +160,7 @@ class ImageViewerController extends State<ImageViewer> {
 
   @override
   void dispose() {
+    _webOverlay.dispose();
     streamSubcription?.cancel();
     transformationController.dispose();
     showAppbarPreview.dispose();

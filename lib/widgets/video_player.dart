@@ -1,13 +1,15 @@
 import 'dart:async';
 import 'dart:typed_data';
 
+import 'package:fluffychat/utils/platform_infos.dart';
+import 'package:fluffychat/widgets/video_viewer_web_overlay.dart';
 import 'package:flutter/material.dart';
 import 'package:matrix/matrix.dart';
 import 'package:media_kit/media_kit.dart';
 import 'package:media_kit_video/media_kit_video.dart';
 
 class VideoPlayer extends StatefulWidget {
-  VideoPlayer({super.key, this.bytes, this.url})
+  VideoPlayer({super.key, this.bytes, this.url, this.mimeType})
     : assert(
         (bytes == null) != (url == null),
         'Provide exactly one of bytes or url',
@@ -23,6 +25,9 @@ class VideoPlayer extends StatefulWidget {
   /// File URI for playback (mobile/desktop), e.g. file:///path/to/video.mp4
   final String? url;
 
+  /// MIME type used to build the web DOM overlay (e.g. `video/mp4`).
+  final String? mimeType;
+
   @override
   State<VideoPlayer> createState() => _VideoPlayerState();
 }
@@ -30,6 +35,7 @@ class VideoPlayer extends StatefulWidget {
 class _VideoPlayerState extends State<VideoPlayer> {
   late Player player;
   late VideoController videoController;
+  final _webOverlay = VideoViewerWebOverlay();
 
   /// Creates a [Player] with explicit log level so decoder selection warnings
   /// (e.g. silent HW → SW fallback on Android) are captured in logs.
@@ -78,6 +84,27 @@ class _VideoPlayerState extends State<VideoPlayer> {
     unawaited(
       _openMedia(targetPlayer: player, url: widget.url, bytes: widget.bytes),
     );
+    player = Player();
+    videoController = VideoController(player);
+    if (PlatformInfos.isWeb &&
+        widget.bytes != null &&
+        widget.mimeType != null) {
+      _webOverlay.attach(bytes: widget.bytes!, mimeType: widget.mimeType!);
+    }
+    if (widget.url != null) {
+      videoController.player
+          .open(Media(widget.url!))
+          .then(
+            (_) {},
+            onError: (e, s) => Logs().e('Error opening video url:', e, s),
+          );
+    } else {
+      final currentPlayer = player;
+      Media.memory(widget.bytes!).then(
+        (v) => currentPlayer.open(v),
+        onError: (e, s) => Logs().e('Error opening video bytes:', e, s),
+      );
+    }
   }
 
   @override
@@ -100,6 +127,7 @@ class _VideoPlayerState extends State<VideoPlayer> {
 
   @override
   void dispose() {
+    _webOverlay.dispose();
     player.dispose();
     super.dispose();
   }
