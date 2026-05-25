@@ -82,20 +82,23 @@ extension MatrixFileExtension on MatrixFile {
     Logs().d("MatrixFileExtension()::downloadFileInWeb()::download on Web");
     try {
       final fileExt = _extensionFromMimeType(mimeType);
-      // Strip the extension from `name` if it already ends with it to avoid
+      // Strip the dot + extension from `name` if already present to avoid
       // duplicates (FileSaver appends `ext` to `name`).
-      final baseName =
-          (fileExt.isNotEmpty && name.toLowerCase().endsWith(fileExt))
-          ? name.substring(0, name.length - fileExt.length)
+      final lowerName = name.toLowerCase();
+      final hasCanonicalExt =
+          fileExt.isNotEmpty && lowerName.endsWith('.$fileExt');
+      final baseName = hasCanonicalExt
+          ? name.substring(0, name.length - fileExt.length - 1)
           : name;
       final directory = await FileSaver.instance.saveFile(
         name: baseName,
         bytes: bytes,
         ext: fileExt,
         mimeType: MimeType.custom,
-        customMimeType: mimeType ?? 'application/octet-stream',
+        customMimeType: mimeType,
       );
-      return '$directory/$name';
+      final savedName = fileExt.isNotEmpty ? '$baseName.$fileExt' : baseName;
+      return '$directory/$savedName';
     } catch (e) {
       Logs().e("MatrixFileExtension()::downloadFileInWeb()::Error: $e");
     }
@@ -103,7 +106,7 @@ extension MatrixFileExtension on MatrixFile {
   }
 
   /// Returns the canonical file extension (without leading dot) for [mimeType].
-  static String _extensionFromMimeType(String? mimeType) {
+  static String _extensionFromMimeType(String mimeType) {
     switch (mimeType) {
       case 'image/jpeg':
         return 'jpg';

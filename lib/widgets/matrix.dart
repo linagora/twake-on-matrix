@@ -1092,7 +1092,6 @@ class MatrixState extends State<Matrix>
     final newSummary = await newClient
         .checkHomeserver(newClient.homeserver!, checkWellKnown: false)
         .toHomeserverSummary();
-    if (newSummary == null) return;
     if (newSummary.discoveryInformation == null && previousDiscovery != null) {
       loginHomeserverSummary = HomeserverSummary(
         discoveryInformation: previousDiscovery,

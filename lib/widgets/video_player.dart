@@ -113,6 +113,15 @@ class _VideoPlayerState extends State<VideoPlayer> {
     final urlChanged = widget.url != oldWidget.url && widget.url != null;
     final bytesChanged =
         widget.bytes != oldWidget.bytes && widget.bytes != null;
+    final mimeChanged = widget.mimeType != oldWidget.mimeType;
+
+    if (PlatformInfos.isWeb && (urlChanged || bytesChanged || mimeChanged)) {
+      _webOverlay.dispose();
+      if (widget.bytes != null && widget.mimeType != null) {
+        _webOverlay.attach(bytes: widget.bytes!, mimeType: widget.mimeType!);
+      }
+    }
+
     if (!urlChanged && !bytesChanged) return;
 
     await player.dispose();
