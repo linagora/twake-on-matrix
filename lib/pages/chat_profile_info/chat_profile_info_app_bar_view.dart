@@ -24,7 +24,6 @@ class ChatProfileInfoAppBarView extends StatelessWidget {
     this.onUnblockUser,
     this.onBlockUser,
     required this.blockUserLoadingNotifier,
-    required this.isAlreadyInChat,
     this.room,
     this.onLeaveChat,
     required this.groupInfoHeight,
@@ -44,7 +43,6 @@ class ChatProfileInfoAppBarView extends StatelessWidget {
   final void Function()? onUnblockUser;
   final void Function()? onBlockUser;
   final ValueNotifier<bool?> blockUserLoadingNotifier;
-  final bool isAlreadyInChat;
   final Room? room;
   final void Function()? onLeaveChat;
   final double groupInfoHeight;
@@ -107,7 +105,6 @@ class ChatProfileInfoAppBarView extends StatelessWidget {
               displayName: displayName,
               matrixId: matrixId,
               userInfoNotifier: userInfoNotifier,
-              isAlreadyInChat: isAlreadyInChat,
               isBlockedUserNotifier: isBlockedUserNotifier,
               onUnblockUser: onUnblockUser,
               onBlockUser: onBlockUser,

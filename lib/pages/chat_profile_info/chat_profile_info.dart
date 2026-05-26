@@ -22,6 +22,8 @@ import 'package:fluffychat/presentation/mixins/leave_chat_mixin.dart';
 import 'package:fluffychat/presentation/mixins/play_video_action_mixin.dart';
 import 'package:fluffychat/presentation/model/contact/presentation_contact.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
+import 'package:fluffychat/config/go_routes/app_routes.dart';
+import 'package:fluffychat/presentation/model/contact/presentation_contact_constant.dart';
 import 'package:fluffychat/utils/room_status_extension.dart';
 import 'package:fluffychat/utils/string_extension.dart';
 import 'package:fluffychat/utils/twake_snackbar.dart';
@@ -219,20 +221,6 @@ class ChatProfileInfoController extends State<ChatProfileInfo>
         });
   }
 
-  bool isAlreadyInChat(BuildContext context) {
-    if (!PlatformInfos.isMobile) return true;
-
-    final router = GoRouter.of(context);
-    final RouteMatch lastMatch =
-        router.routerDelegate.currentConfiguration.last;
-    final RouteMatchList matchList = lastMatch is ImperativeRouteMatch
-        ? lastMatch.matches
-        : router.routerDelegate.currentConfiguration;
-    final String location = matchList.uri.toString();
-    final pathParameters = matchList.pathParameters;
-    return location.contains('/draftChat') || pathParameters['roomid'] != null;
-  }
-
   PresentationContact? presentationContact;
 
   PresentationContact? _getContactFromId(String matrixId) {
@@ -282,7 +270,30 @@ class ChatProfileInfoController extends State<ChatProfileInfo>
   }
 
   void handleOnMessage() {
-    widget.onBack?.call();
+    if (!PlatformInfos.isMobile) {
+      widget.onBack?.call();
+      return;
+    }
+
+    final matrixId = presentationContact?.matrixId ?? user?.id;
+    if (matrixId == null) return;
+    final roomId = Matrix.of(context).client.getDirectChatFromUserId(matrixId);
+
+    if (roomId == null) {
+      final extra = {
+        PresentationContactConstant.receiverId: matrixId,
+        PresentationContactConstant.displayName:
+            presentationContact?.displayName ?? user?.calcDisplayname() ?? '',
+        PresentationContactConstant.status: '',
+      };
+      context.pop();
+      context.go(DraftChatRoute($extra: extra).location, extra: extra);
+    } else {
+      Navigator.of(
+        context,
+      ).popUntil((route) => route.settings.name == "/rooms/room");
+      RoomRoute(roomid: roomId).go(context);
+    }
   }
 
   void handleOnSearch() {
