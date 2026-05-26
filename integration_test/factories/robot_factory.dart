@@ -1,6 +1,13 @@
 import 'package:patrol/patrol.dart';
 
+import '../robots/abstract/abstract_chat_group_detail_robot.dart';
+import '../robots/abstract/abstract_chat_list_robot.dart';
+import '../robots/abstract/abstract_contact_list_robot.dart';
+import '../robots/abstract/abstract_home_robot.dart';
+import '../robots/abstract/abstract_language_setting_robot.dart';
 import '../robots/abstract/abstract_login_robot.dart';
+import '../robots/abstract/abstract_search_robot.dart';
+import '../robots/abstract/abstract_setting_robot.dart';
 
 /// Contract for producing platform-appropriate robot implementations.
 ///
@@ -9,13 +16,17 @@ import '../robots/abstract/abstract_login_robot.dart';
 /// that expose `dart:io`, `WebRobotFactory` on the web target. Scenarios
 /// and tests receive an instance of this factory and never reference a
 /// concrete robot class or a platform branch.
-///
-/// More abstract robot interfaces will be folded into this factory in
-/// subsequent PRs (see the cross-platform test architecture issue).
 abstract class RobotFactory {
   const RobotFactory();
 
   PatrolIntegrationTester get $;
 
   AbstractLoginRobot loginRobot();
+  AbstractHomeRobot homeRobot();
+  AbstractChatListRobot chatListRobot();
+  AbstractChatGroupDetailRobot chatGroupDetailRobot();
+  AbstractSearchRobot searchRobot();
+  AbstractContactListRobot contactListRobot();
+  AbstractSettingRobot settingRobot();
+  AbstractLanguageSettingRobot languageSettingRobot();
 }

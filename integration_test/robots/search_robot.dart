@@ -4,14 +4,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:patrol/patrol.dart';
 import '../base/core_robot.dart';
+import 'abstract/abstract_search_robot.dart';
 
-class SearchRobot extends CoreRobot {
+class SearchRobot extends CoreRobot implements AbstractSearchRobot {
   SearchRobot(super.$);
 
   PatrolFinder getBackIcon() {
     return $(AppBar).$(TwakeIconButton).$(Icon);
   }
 
+  @override
   Future<void> backToPreviousScreen() async {
     await goBack();
     if (!kIsWeb) {
@@ -36,6 +38,7 @@ class SearchRobot extends CoreRobot {
     return (getSearchTextField()).$(TwakeIconButton).$(Icon);
   }
 
+  @override
   Future<void> enterSearchText(String searchText) async {
     final field = getSearchTextField();
     await field.tap();
@@ -43,6 +46,7 @@ class SearchRobot extends CoreRobot {
     await typeSlowlyWithPatrol($, field, searchText);
   }
 
+  @override
   Future<void> deleteSearchPhrase() async {
     await getDeleteSearchingIcon().tap();
   }

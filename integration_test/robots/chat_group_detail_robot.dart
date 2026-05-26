@@ -11,9 +11,11 @@ import 'package:patrol/patrol.dart';
 import 'package:fluffychat/generated/l10n/app_localizations.dart';
 import 'package:pull_down_button/pull_down_button.dart';
 import '../base/core_robot.dart';
+import 'abstract/abstract_chat_group_detail_robot.dart';
 import 'menu_robot.dart';
 
-class ChatGroupDetailRobot extends CoreRobot {
+class ChatGroupDetailRobot extends CoreRobot
+    implements AbstractChatGroupDetailRobot {
   ChatGroupDetailRobot(super.$);
 
   PatrolFinder getBackIcon() {
@@ -36,26 +38,31 @@ class ChatGroupDetailRobot extends CoreRobot {
     return $(ChatAppBarTitle);
   }
 
+  @override
   String getTotalMemberLabel() {
     final a = $(ChatAppBarTitle).$(find.textContaining('member')).text;
     return a!.replaceFirst(RegExp(r'\s+m.*$', caseSensitive: false), '');
   }
 
+  @override
   String? getTitle() {
     return $(ChatAppBarTitle).$(Text).at(0).text;
   }
 
+  @override
   Future<void> tapOnChatBarTitle() async {
     await getChatAppBarTitle().tap();
     await $.waitUntilVisible($("Group info"));
   }
 
+  @override
   Future<void> tapOnChatBarTitleForDM() async {
     await getChatAppBarTitle().tap();
     // For DM chats, wait for the profile info details widget instead of "Group information"
     await $.waitUntilVisible($(ChatProfileInfoDetails));
   }
 
+  @override
   Future<void> confirmAccessMedia() async {
     if (PlatformInfos.isAndroid) return;
     final dialog = $(PermissionDialog);
@@ -75,6 +82,7 @@ class ChatGroupDetailRobot extends CoreRobot {
     }
   }
 
+  @override
   Future<bool> isVisible() async {
     await $.waitUntilVisible($(ChatEventList));
     return $(ChatEventList).exists;
@@ -89,6 +97,7 @@ class ChatGroupDetailRobot extends CoreRobot {
     return $(TextField);
   }
 
+  @override
   Future<void> inputMessage(String message) async {
     final textField = await getInputTextField();
     // catch exception when trying to chat with non-existing account
@@ -98,6 +107,7 @@ class ChatGroupDetailRobot extends CoreRobot {
     await textField.enterText(message);
   }
 
+  @override
   Future<void> clickOnBackIcon() async {
     await goBack();
   }

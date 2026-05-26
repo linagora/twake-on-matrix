@@ -7,11 +7,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:linagora_design_flutter/list_item/twake_list_item.dart';
 import 'package:patrol/patrol.dart';
+import 'abstract/abstract_chat_list_robot.dart';
 import 'chat_group_detail_robot.dart';
 import 'home_robot.dart';
 import 'twake_list_item_robot.dart';
 
-class ChatListRobot extends HomeRobot {
+class ChatListRobot extends HomeRobot implements AbstractChatListRobot {
   ChatListRobot(super.$);
 
   PatrolFinder showLessLabel() {
@@ -34,22 +35,26 @@ class ChatListRobot extends HomeRobot {
     return $(ChatListBottomNavigator).$(InkWell).containing($("Unpin"));
   }
 
+  @override
   Future<void> clickOnPenIcon() async {
     await getPenIcon().tap();
     await cancelSynchronizeContact();
     await $.waitUntilVisible($(AppBar).$("New chat"));
   }
 
+  @override
   Future<void> clickOnPinIcon() async {
     await getPinIcon().tap();
     await ChatListRobot($).waitUntilAbsent($, ChatListRobot($).getPinIcon());
   }
 
+  @override
   Future<void> clickOnUnPinIcon() async {
     await getUnPinIcon().tap();
     await ChatListRobot($).waitUntilAbsent($, ChatListRobot($).getUnPinIcon());
   }
 
+  @override
   Future<ChatGroupDetailRobot> openChatGroupByIndex(int index) async {
     await (await getListOfChatGroup())[index].root.tap();
     await $.pumpAndSettle();
@@ -75,10 +80,12 @@ class ChatListRobot extends HomeRobot {
     return TwakeListItemRobot($, finder);
   }
 
+  @override
   int getUnreadMessage(String title) {
     return getChatGroupByTitle(title).getUnreadMessage();
   }
 
+  @override
   Future<void> openSearchScreen() async {
     // Tap on the search TextField in the chat list to open search screen
     await $(TextField).tap();
@@ -101,6 +108,7 @@ class ChatListRobot extends HomeRobot {
     await $.waitUntilVisible($(SearchView));
   }
 
+  @override
   Future<int> getChatRoomCounts() async {
     final listChat = await getListOfChatGroup();
     return listChat.length;
