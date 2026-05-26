@@ -1,3 +1,10 @@
+## [2.22.3] - 2026-05-22
+### Changed
+- TW-3063: Update open_file version to v3.5.11
+
+### Fixed
+- Replace global image cache clear with room-scoped eviction
+
 ## [2.22.2] - 2026-05-21
 ### Changed
 - TW-2940: Widen iOS navigation
