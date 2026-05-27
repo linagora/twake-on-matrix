@@ -542,16 +542,18 @@ extension LocalizedBody on Event {
 
       // Update formatted_body if it exists in the new content
       if (newContent[MatrixEventFields.formattedBody] != null) {
-        originalEventJson[MatrixEventFields.content]
-            [MatrixEventFields.formattedBody] =
+        originalEventJson[MatrixEventFields.content][MatrixEventFields
+                .formattedBody] =
             newContent[MatrixEventFields.formattedBody];
         originalEventJson[MatrixEventFields.content][MatrixEventFields.format] =
             newContent[MatrixEventFields.format];
       } else {
-        originalEventJson[MatrixEventFields.content]
-            .remove(MatrixEventFields.formattedBody);
-        originalEventJson[MatrixEventFields.content]
-            .remove(MatrixEventFields.format);
+        originalEventJson[MatrixEventFields.content].remove(
+          MatrixEventFields.formattedBody,
+        );
+        originalEventJson[MatrixEventFields.content].remove(
+          MatrixEventFields.format,
+        );
       }
 
       return Event.fromJson(originalEventJson, room);
