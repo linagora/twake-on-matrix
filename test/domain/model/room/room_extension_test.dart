@@ -72,7 +72,7 @@ void main() {
       final sortedUsers = users.sortByPowerLevel();
 
       // Assert
-      expect(sortedUsers.map((u) => u.powerLevel), [100, 100, 50]);
+      expect(sortedUsers.map((u) => u.powerLevel.level), [100, 100, 50]);
     });
   });
 
