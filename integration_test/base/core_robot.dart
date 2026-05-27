@@ -15,6 +15,25 @@ class CoreRobot {
 
   dynamic ignoreException() => $.tester.takeException();
 
+  /// On web large layout there is no back button in the AppBar —
+  /// use Navigator.pop() instead.
+  Future<void> goBack() async {
+    if (kIsWeb) {
+      final nav = Navigator.of($.tester.element(find.byType(Scaffold).last));
+      if (!nav.canPop()) {
+        throw StateError(
+          'goBack() on web: Navigator cannot pop. '
+          'Use TwakeApp.router.pop() or a custom back action instead.',
+        );
+      }
+      nav.pop();
+      await $.pumpAndSettle();
+      return;
+    }
+    await $(AppBar).$(IconButton).first.tap();
+    await $.pumpAndSettle();
+  }
+
   String? getBrowserAppId() {
     if (!kIsWeb && defaultTargetPlatform == TargetPlatform.android) {
       return 'com.android.chrome';
@@ -43,6 +62,10 @@ class CoreRobot {
   }
 
   Future<void> confirmAccessContact() async {
+    // OS permission dialogs only exist on mobile — on web the browser
+    // handles its own prompts and nothing surfaces through Patrol's
+    // native automator, which itself is unavailable on the web target.
+    if (kIsWeb) return;
     try {
       await $.native.grantPermissionWhenInUse();
     } catch (e) {
@@ -55,6 +78,7 @@ class CoreRobot {
     if (!tapped) {
       return;
     }
+    if (kIsWeb) return;
     if (await $.native.isPermissionDialogVisible(
       timeout: const Duration(seconds: 5),
     )) {
@@ -63,6 +87,7 @@ class CoreRobot {
   }
 
   Future<void> grantNotificationPermission() async {
+    if (kIsWeb) return;
     if (await $.native.isPermissionDialogVisible(
       timeout: const Duration(seconds: 15),
     )) {

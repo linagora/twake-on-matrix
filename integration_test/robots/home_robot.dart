@@ -1,5 +1,6 @@
 import 'package:fluffychat/presentation/widget_keys/widget_keys.dart';
 import 'package:fluffychat/widgets/twake_components/twake_navigation_icon/twake_navigation_icon.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:patrol/patrol.dart';
 import '../base/core_robot.dart';
@@ -19,7 +20,11 @@ class HomeRobot extends CoreRobot {
   }
 
   Future<PatrolFinder> getSettingTab() async {
-    return $(find.byKey(NavigationKeys.settingsDestination.key));
+    final byKey = $(find.byKey(NavigationKeys.settingsDestination.key));
+    if (byKey.exists) return byKey;
+    // On web the NavigationRail loses the widget key during
+    // toRailDestination() conversion — fall back to the icon.
+    return $(NavigationRail).$(find.byIcon(Icons.settings_outlined)).first;
   }
 
   Future<ContactListRobot> gotoContactListScreen() async {

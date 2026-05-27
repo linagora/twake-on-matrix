@@ -99,7 +99,7 @@ class ChatGroupDetailRobot extends CoreRobot {
   }
 
   Future<void> clickOnBackIcon() async {
-    await getBackIcon().tap();
+    await goBack();
   }
 
   Future<PullDownMenuRobot> openPullDownMenu(String message) async {

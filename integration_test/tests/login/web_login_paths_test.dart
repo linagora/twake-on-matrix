@@ -52,7 +52,7 @@ void main() {
 void _verifyPrdPathThrowsOnWeb() {
   if (!kIsWeb) return;
   expect(
-    () => fetchOidcLoginToken(username: 'any', password: 'any'),
+    () => fetchAuthToken(username: 'any', password: 'any'),
     throwsA(isA<UnsupportedError>()),
   );
   expect(

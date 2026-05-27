@@ -14,8 +14,9 @@ import 'package:matrix/matrix.dart';
 import 'package:patrol/patrol.dart';
 import '../base/api_login_helper.dart';
 import '../base/core_robot.dart';
+import 'abstract/abstract_login_robot.dart';
 
-class LoginRobot extends CoreRobot {
+class LoginRobot extends CoreRobot implements AbstractLoginRobot {
   LoginRobot(super.$);
 
   bool get _isAndroid =>
@@ -273,6 +274,7 @@ class LoginRobot extends CoreRobot {
   ///   - otherwise → `m.login.password` straight to the homeserver. Used by
   ///     CI / FTL with a dedicated test account that has a local
   ///     `password_hash` in Synapse.
+  @override
   Future<void> loginViaApi({
     required String serverUrl,
     required String username,
@@ -314,7 +316,7 @@ class LoginRobot extends CoreRobot {
     required String username,
     required String password,
   }) async {
-    final loginToken = await fetchOidcLoginToken(
+    final loginToken = await fetchAuthToken(
       username: username,
       password: password,
     );

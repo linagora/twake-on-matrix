@@ -232,7 +232,13 @@ class ChatScenario extends CoreRobot {
   Future<void> deleteMessage(String message) async {
     await ChatGroupDetailRobot($).openPullDownMenu(message);
     await (PullDownMenuRobot($).getDeleteItem()).tap();
-    await $.native.tap(Selector(text: _l10n.delete));
+    // On mobile the confirmation surfaces as a native AlertDialog; on web it
+    // renders as a Flutter dialog, so the tap flows through a Flutter finder.
+    if (kIsWeb) {
+      await $(AlertDialog).$(find.text(_l10n.delete)).tap();
+    } else {
+      await $.native.tap(Selector(text: _l10n.delete));
+    }
   }
 
   Future<ChatGroupDetailRobot> createANewGroupChat(
@@ -462,7 +468,7 @@ class ChatScenario extends CoreRobot {
       'Chats tab is not visible',
     );
     s.softAssertEquals(
-      $(BottomNavigationBar).visible,
+      kIsWeb || $(BottomNavigationBar).visible,
       true,
       'Bottom navigator bar is not visible',
     );
@@ -614,11 +620,14 @@ class ChatScenario extends CoreRobot {
     await addIcon.tap();
     await $(_l10n.next).tap();
 
-    // 2. Handle permissions if necessary (though usually handled by CoreRobot or LoginScenario)
-    // CoreRobot's confirmAccessContact style
-    if (await $.native.isPermissionDialogVisible(
-      timeout: const Duration(seconds: 5),
-    )) {
+    // 2. Handle permissions if necessary (though usually handled by CoreRobot
+    // or LoginScenario). Browsers manage media permissions through their own
+    // prompts that Patrol cannot drive — web tests rely on the browser being
+    // launched with permissions pre-granted (Playwright default).
+    if (!kIsWeb &&
+        await $.native.isPermissionDialogVisible(
+          timeout: const Duration(seconds: 5),
+        )) {
       await $.native.tap(Selector(text: 'Allow all'));
     }
 

@@ -1,4 +1,5 @@
 import 'package:fluffychat/pages/contacts_tab/contacts_tab_body_view.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import '../base/base_scenario.dart';
@@ -47,7 +48,7 @@ class ContactScenario extends BaseScenario {
       'Contacts tab is not visible',
     );
     s.softAssertEquals(
-      $(BottomNavigationBar).visible,
+      kIsWeb || $(BottomNavigationBar).visible,
       true,
       'Bottom navigator bar is not visible',
     );
