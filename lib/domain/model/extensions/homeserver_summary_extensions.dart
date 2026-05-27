@@ -2,6 +2,7 @@ import 'package:fluffychat/config/app_constants.dart';
 import 'package:fluffychat/data/model/federation_server/federation_server_information.dart';
 import 'package:fluffychat/domain/model/app_twake_information.dart';
 import 'package:fluffychat/domain/model/homeserver_summary.dart';
+import 'package:fluffychat/domain/model/rtc_focus.dart';
 import 'package:fluffychat/domain/model/tom_server_information.dart';
 import 'package:matrix/matrix.dart';
 
@@ -69,6 +70,35 @@ extension HomeserverSummaryExtensions on HomeserverSummary {
       );
       return null;
     }
+  }
+
+  String? get videoCallBaseUrl {
+    if (discoveryInformation?.additionalProperties == null) {
+      return null;
+    }
+    final rtcFociJson =
+        discoveryInformation?.additionalProperties[RtcFocus.rtcFociKey];
+    if (rtcFociJson is! List) {
+      return null;
+    }
+    for (final focusJson in rtcFociJson) {
+      if (focusJson is! Map) continue;
+      try {
+        final focus = RtcFocus.fromJson(Map<String, dynamic>.from(focusJson));
+        final baseUrl = focus.liveKitBaseUrl;
+        if (!focus.isLiveKit || baseUrl == null || baseUrl.isEmpty) continue;
+        return baseUrl.endsWith('/')
+            ? baseUrl.substring(0, baseUrl.length - 1)
+            : baseUrl;
+      } catch (e, s) {
+        Logs().wtf(
+          'Failed to parse ${RtcFocus.rtcFociKey} from homeserver summary',
+          e,
+          s,
+        );
+      }
+    }
+    return null;
   }
 }
 
