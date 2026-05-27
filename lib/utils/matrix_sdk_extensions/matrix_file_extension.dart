@@ -12,6 +12,7 @@ import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/utils/size_string.dart';
 import 'package:fluffychat/generated/l10n/app_localizations.dart';
 import 'package:file_saver/file_saver.dart';
+import 'package:mime/mime.dart';
 
 extension MatrixFileExtension on MatrixFile {
   bool isImage() {
@@ -81,7 +82,7 @@ extension MatrixFileExtension on MatrixFile {
   Future<String?> downloadFileInWeb(BuildContext context) async {
     Logs().d("MatrixFileExtension()::downloadFileInWeb()::download on Web");
     try {
-      final fileExt = _extensionFromMimeType(mimeType);
+      final fileExt = extensionFromMime(mimeType);
       // Strip the dot + extension from `name` if already present to avoid
       // duplicates (FileSaver appends `ext` to `name`).
       final lowerName = name.toLowerCase();
@@ -103,42 +104,6 @@ extension MatrixFileExtension on MatrixFile {
       Logs().e("MatrixFileExtension()::downloadFileInWeb()::Error: $e");
     }
     return null;
-  }
-
-  /// Returns the canonical file extension (without leading dot) for [mimeType].
-  static String _extensionFromMimeType(String mimeType) {
-    switch (mimeType) {
-      case 'image/jpeg':
-        return 'jpg';
-      case 'image/png':
-        return 'png';
-      case 'image/gif':
-        return 'gif';
-      case 'image/webp':
-        return 'webp';
-      case 'image/bmp':
-        return 'bmp';
-      case 'image/tiff':
-        return 'tiff';
-      case 'image/avif':
-        return 'avif';
-      case 'image/heic':
-        return 'heic';
-      case 'image/heif':
-        return 'heif';
-      case 'video/mp4':
-        return 'mp4';
-      case 'video/webm':
-        return 'webm';
-      case 'audio/mpeg':
-        return 'mp3';
-      case 'audio/ogg':
-        return 'ogg';
-      case 'application/pdf':
-        return 'pdf';
-      default:
-        return '';
-    }
   }
 
   Future<String> downloadImageInMobile(BuildContext context) async {

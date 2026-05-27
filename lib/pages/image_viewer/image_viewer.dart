@@ -7,7 +7,7 @@ import 'package:fluffychat/domain/app_state/download/download_file_state.dart';
 import 'package:fluffychat/domain/usecase/room/download_media_file_interactor.dart';
 import 'package:fluffychat/pages/forward/forward.dart';
 import 'package:fluffychat/pages/image_viewer/image_viewer_view.dart';
-import 'package:fluffychat/pages/image_viewer/image_viewer_web_overlay.dart';
+import 'package:fluffychat/widgets/media_viewer_web_overlay.dart';
 import 'package:fluffychat/presentation/model/pop_result_from_forward.dart';
 import 'package:fluffychat/pages/image_viewer/image_viewer_style.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
@@ -56,7 +56,7 @@ class ImageViewerController extends State<ImageViewer> {
 
   StreamSubscription? streamSubcription;
 
-  final _webOverlay = ImageViewerWebOverlay();
+  final _webOverlay = MediaViewerWebOverlay.image();
 
   @override
   void initState() {
