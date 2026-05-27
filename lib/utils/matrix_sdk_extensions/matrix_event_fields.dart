@@ -14,4 +14,13 @@ abstract class MatrixEventFields {
   ///
   /// Edit events carry the replacement body under `content['m.new_content']`.
   static const String newContent = 'm.new_content';
+
+  /// Key for the plain-text message body in event content.
+  static const String body = 'body';
+
+  /// Key for the HTML-formatted body in event content.
+  static const String formattedBody = 'formatted_body';
+
+  /// Key for the format identifier (e.g. `org.matrix.custom.html`) in event content.
+  static const String format = 'format';
 }

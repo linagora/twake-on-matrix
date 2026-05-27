@@ -60,6 +60,7 @@ class UploadManager {
     final cancelToken = _eventIdMapUploadFileInfo[event.eventId]?.cancelToken;
     if (cancelToken != null) {
       Logs().d('Remove eventid: ${event.eventId}');
+      event.room.sendingFilePlaceholders.remove(event.eventId);
       _clearFileTask(event.eventId);
       event.remove();
       cancelToken.cancel();
@@ -527,8 +528,8 @@ class UploadManager {
           }
         },
         onTaskCompleted: () async {
+          room.sendingFilePlaceholders.remove(txid);
           if (info?.isFailed != true) {
-            room.sendingFilePlaceholders.remove(txid);
             await _clearFileTask(txid);
           }
         },
@@ -585,8 +586,8 @@ class UploadManager {
           }
         },
         onTaskCompleted: () async {
+          room.sendingFilePlaceholders.remove(txid);
           if (info?.isFailed != true) {
-            room.sendingFilePlaceholders.remove(txid);
             await _clearFileTask(txid);
           }
         },
