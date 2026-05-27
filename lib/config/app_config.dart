@@ -69,6 +69,8 @@ abstract class AppConfig {
   static String twakeChatGooglePlay =
       'https://play.google.com/store/apps/details?id=app.twake.android.chat';
 
+  static String videoCallBaseUrl = 'https://meet.linagora.com';
+
   static String? sentryDsn;
 
   static String? sentryEnvironment;

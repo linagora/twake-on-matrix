@@ -32,6 +32,7 @@ import 'package:fluffychat/pages/chat/chat_view.dart';
 import 'package:fluffychat/pages/chat/context_item_chat_action.dart';
 import 'package:fluffychat/pages/chat/dialog_reject_invite_widget.dart';
 import 'package:fluffychat/pages/chat/events/message_content_mixin.dart';
+import 'package:fluffychat/presentation/mixins/start_video_call_mixin.dart';
 import 'package:fluffychat/pages/chat/input_bar/focus_suggestion_controller.dart';
 import 'package:fluffychat/presentation/enum/chat/right_column_type_enum.dart';
 import 'package:fluffychat/presentation/widget_keys/widget_keys.dart';
@@ -154,7 +155,8 @@ class ChatController extends State<Chat>
         UnblockUserMixin,
         RetryTextMessageMixin,
         AudioMixin,
-        AutoMarkAsReadMixin {
+        AutoMarkAsReadMixin,
+        StartVideoCallMixin {
   final NetworkConnectionService networkConnectionService = getIt
       .get<NetworkConnectionService>();
 

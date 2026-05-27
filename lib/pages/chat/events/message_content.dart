@@ -33,6 +33,8 @@ import 'cute_events.dart';
 import 'map_bubble.dart';
 import 'message_download_content.dart';
 import 'sticker.dart';
+import 'video_call_content.dart';
+import 'video_call_message.dart';
 
 class MessageContent extends StatelessWidget
     with HandleDownloadAndPreviewFileMixin {
@@ -297,6 +299,10 @@ class MessageContent extends StatelessWidget
           case MessageTypes.Text:
           case MessageTypes.Notice:
           case MessageTypes.Emote:
+            final videoCallUrl = VideoCallMessage.extractUrl(event.text);
+            if (videoCallUrl != null) {
+              return VideoCallContent(callUrl: videoCallUrl);
+            }
             final containedLink = event.text.getFirstValidUrl() ?? '';
             if (AppConfig.renderHtml &&
                 !event.redacted &&

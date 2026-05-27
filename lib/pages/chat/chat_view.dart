@@ -160,6 +160,15 @@ class ChatView extends StatelessWidget with MessageContentMixin {
                             onPressed: controller.toggleSearch,
                             icon: const Icon(Icons.search),
                           ),
+                          TwakeIconButton(
+                            icon: Icons.videocam_outlined,
+                            tooltip: L10n.of(context)!.startVideoCall,
+                            onTap: () => controller.startVideoCall(
+                              room: controller.room,
+                              context: context,
+                            ),
+                            preferBelow: false,
+                          ),
                           if (controller.hasActionAppBarMenu)
                             Builder(
                               builder: (context) => TwakeIconButton(
