@@ -39,17 +39,20 @@ dependencies:
   # https://github.com/rvamsikrishna/inview_notifier_list/pull/60
   inview_notifier_list:
     git:
-      url: git@github.com:linagora/inview_notifier_list.git
+      # HTTPS so CI runners work without an SSH key (public repo)
+      url: https://github.com/linagora/inview_notifier_list.git
       ref: master
 
   future_loading_dialog:
     git:
-      url: git@github.com:linagora/future-loading-dialog.git
+      # HTTPS so CI runners work without an SSH key (public repo)
+      url: https://github.com/linagora/future-loading-dialog.git
       ref: main
 
   linkfy_text:
     git:
-      url: git@github.com:linagora/linkfy_text.git
+      # HTTPS so CI runners work without an SSH key (public repo)
+      url: https://github.com/linagora/linkfy_text.git
       ref: main
 
   flutter_emoji_mart:
@@ -59,7 +62,8 @@ dependencies:
 
   social_media_recorder:
     git:
-      url: git@github.com:linagora/social_media_recorder.git
+      # HTTPS so CI runners work without an SSH key (public repo)
+      url: https://github.com/linagora/social_media_recorder.git
       ref: twake_supported
 
   adaptive_dialog: ^1.8.0+1
@@ -308,8 +312,14 @@ dependency_overrides:
   # Upstream pull request: https://github.com/AntoineMarcel/keyboard_shortcuts/pull/13
   keyboard_shortcuts:
     git:
-      url: git@github.com:zhouzhuo810/keyboard_shortcuts.git
+      # HTTPS so CI runners work without an SSH key (public repo)
+      url: https://github.com/zhouzhuo810/keyboard_shortcuts.git
       ref: master
+  # Force HTTPS for transitive deps pulled via SSH by flutter_matrix_html
+  linkfy_text:
+    git:
+      url: https://github.com/linagora/linkfy_text.git
+      ref: main
   # TODO: Remove this part after upstream contribution is merged
   # https://github.com/Sorunome/matrix_link_text/pull/4
   # https://github.com/Sorunome/matrix_link_text/pull/5

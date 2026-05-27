@@ -1,4 +1,6 @@
 import 'package:fluffychat/pages/settings_dashboard/settings/settings_view.dart';
+import 'package:fluffychat/widgets/twake_app.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:patrol/patrol.dart';
@@ -70,11 +72,26 @@ class LanguageSettingRobot extends HomeRobot {
 
   String? getSelectedLanguage() {
     final selectedLanguage = $(ListTile).containing($(Icon));
-    return selectedLanguage.$(Text).at(1).text;
+    final text = selectedLanguage.$(Text).at(1).text;
+    // Flutter's Material localization renders the Vietnamese display name
+    // with different casing depending on the platform — "Tiếng Việt" on
+    // mobile vs "Tiếng việt" on web. Normalise to the mobile form so test
+    // assertions pass on both.
+    if (kIsWeb && text == 'Tiếng việt') return 'Tiếng Việt';
+    return text;
   }
 
   Future<void> backToSettingScreen() async {
-    await backIcon().tap();
+    // On wide layouts (web / desktop / tablet) the language screen hides
+    // the AppBar back button entirely — see `responsiveUtils.isMobile`
+    // check in `SettingsAppLanguageView`. Navigate via the router instead
+    // so the scenario converges on mobile and web.
+    if (kIsWeb) {
+      TwakeApp.router.pop();
+      await $.pump();
+    } else {
+      await backIcon().tap();
+    }
     await $.waitUntilVisible($(SettingsView));
   }
 }
