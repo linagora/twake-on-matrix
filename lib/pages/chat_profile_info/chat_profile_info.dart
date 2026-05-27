@@ -289,9 +289,9 @@ class ChatProfileInfoController extends State<ChatProfileInfo>
       context.pop();
       context.go(DraftChatRoute($extra: extra).location, extra: extra);
     } else {
-      Navigator.of(context).popUntil(
-        (route) => route.settings.name == '/rooms/room_$roomId',
-      );
+      Navigator.of(
+        context,
+      ).popUntil((route) => route.settings.name == '/rooms/room_$roomId');
       RoomRoute(roomid: roomId).go(context);
     }
   }
