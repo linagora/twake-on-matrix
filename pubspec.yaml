@@ -1,7 +1,7 @@
 name: fluffychat
 description: A convenient Matrix-based tool for personal and corporate communication.
 publish_to: none
-version: 2.22.1+2330
+version: 2.22.3+2330
 
 environment:
   sdk: ">=3.10.0 <4.0.0"
@@ -39,17 +39,20 @@ dependencies:
   # https://github.com/rvamsikrishna/inview_notifier_list/pull/60
   inview_notifier_list:
     git:
-      url: git@github.com:linagora/inview_notifier_list.git
+      # HTTPS so CI runners work without an SSH key (public repo)
+      url: https://github.com/linagora/inview_notifier_list.git
       ref: master
 
   future_loading_dialog:
     git:
-      url: git@github.com:linagora/future-loading-dialog.git
+      # HTTPS so CI runners work without an SSH key (public repo)
+      url: https://github.com/linagora/future-loading-dialog.git
       ref: main
 
   linkfy_text:
     git:
-      url: git@github.com:linagora/linkfy_text.git
+      # HTTPS so CI runners work without an SSH key (public repo)
+      url: https://github.com/linagora/linkfy_text.git
       ref: main
 
   flutter_emoji_mart:
@@ -59,7 +62,8 @@ dependencies:
 
   social_media_recorder:
     git:
-      url: git@github.com:linagora/social_media_recorder.git
+      # HTTPS so CI runners work without an SSH key (public repo)
+      url: https://github.com/linagora/social_media_recorder.git
       ref: twake_supported
 
   adaptive_dialog: ^1.8.0+1
@@ -177,7 +181,7 @@ dependencies:
   lottie: ^3.0.0
   lottie_native: 0.1.2
   wechat_camera_picker: 4.4.0
-  open_file: ^3.3.2
+  open_file: ^3.5.11
   mime: ^1.0.4
   async: ^2.11.0
   flutter_image_compress: ^2.4.0
@@ -308,8 +312,14 @@ dependency_overrides:
   # Upstream pull request: https://github.com/AntoineMarcel/keyboard_shortcuts/pull/13
   keyboard_shortcuts:
     git:
-      url: git@github.com:zhouzhuo810/keyboard_shortcuts.git
+      # HTTPS so CI runners work without an SSH key (public repo)
+      url: https://github.com/zhouzhuo810/keyboard_shortcuts.git
       ref: master
+  # Force HTTPS for transitive deps pulled via SSH by flutter_matrix_html
+  linkfy_text:
+    git:
+      url: https://github.com/linagora/linkfy_text.git
+      ref: main
   # TODO: Remove this part after upstream contribution is merged
   # https://github.com/Sorunome/matrix_link_text/pull/4
   # https://github.com/Sorunome/matrix_link_text/pull/5

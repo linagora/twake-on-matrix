@@ -15,9 +15,9 @@ mixin WellKnownMixin {
       Logs().d('WellKnownMixin::getWellKnownInformation() well-known $result');
       discoveryInformationNotifier.value = result;
     } catch (e) {
-      discoveryInformationNotifier.value = null;
       Logs().e(
-        'WellKnownMixin::getWellKnownInformation() Error checking wellknown status: $e',
+        'WellKnownMixin::getWellKnownInformation() Error checking wellknown '
+        'status (keeping previous value): $e',
       );
     }
   }

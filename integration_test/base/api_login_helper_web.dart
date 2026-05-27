@@ -17,11 +17,14 @@ import 'package:http/http.dart' as http;
 /// The function returns a Matrix **access token** (not a one-time
 /// `loginToken`); the caller is expected to inject it into the Matrix
 /// client rather than feeding it through the `/onAuthRedirect` deep link.
-Future<String> fetchAuthToken({
+Future<String> fetchOidcLoginToken({
   required String username,
   required String password,
 }) async {
   const matrixURL = String.fromEnvironment('MATRIX_URL');
+  if (matrixURL.isEmpty) {
+    throw StateError('Missing required --dart-define=MATRIX_URL');
+  }
   final loginUri = Uri.parse('$matrixURL/_matrix/client/v3/login');
 
   final response = await http.post(
@@ -58,8 +61,16 @@ Future<void> sendMessageAsReceiver({required String message}) async {
   const receiver = String.fromEnvironment('Receiver');
   const passOfReceiver = String.fromEnvironment('ReceiverPass');
   const groupID = String.fromEnvironment('GroupID');
+  if (matrixURL.isEmpty ||
+      receiver.isEmpty ||
+      passOfReceiver.isEmpty ||
+      groupID.isEmpty) {
+    throw StateError(
+      'Missing required dart-defines: MATRIX_URL/Receiver/ReceiverPass/GroupID',
+    );
+  }
 
-  final accessToken = await fetchAuthToken(
+  final accessToken = await fetchOidcLoginToken(
     username: receiver,
     password: passOfReceiver,
   );

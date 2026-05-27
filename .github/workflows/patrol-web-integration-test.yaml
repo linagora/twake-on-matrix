@@ -1,13 +1,10 @@
 name: Patrol Web Integration Tests
 
 on:
-  workflow_dispatch:
-    inputs:
-      patrol_test_target:
-        description: "Optional path to a single Patrol integration test Dart file. Leave empty to run the whole suite."
-        required: false
-        default: ""
-  # TODO: re-enable pull_request trigger once Patrol web CI is stable
+  # PR trigger disabled until all web integration tests are green.
+  # Re-enable the `pull_request` block below once SSH git deps are
+  # migrated to HTTPS and the test suite is stable.
+  #
   # pull_request:
   #   branches: [main]
   #   paths:
@@ -16,6 +13,12 @@ on:
   #     - "pubspec.yaml"
   #     - "pubspec.lock"
   #     - ".github/workflows/patrol-web-integration-test.yaml"
+  workflow_dispatch:
+    inputs:
+      patrol_test_target:
+        description: "Optional path to a single Patrol integration test Dart file. Leave empty to run the whole suite."
+        required: false
+        default: ""
 
 jobs:
   patrol-web:
@@ -51,8 +54,9 @@ jobs:
         id: fixtures
         run: |
           ./scripts/integration-test-provision-synapse.sh > .env.patrol-web
-          # Print non-secret values only
-          grep -E '^(MATRIX_URL|SERVER_URL|GroupID|SearchByTitle|TitleOfGroupTest)=' .env.patrol-web || true
+          # Log variable names without values (passwords are throwaway but
+          # no reason to leak them in CI logs).
+          cut -d= -f1 .env.patrol-web
 
       - name: Install dependencies
         run: |
@@ -64,9 +68,9 @@ jobs:
         env:
           PATROL_TEST_TARGET: ${{ inputs.patrol_test_target }}
         run: |
-          TARGET_FLAG=""
-          if [ -n "${PATROL_TEST_TARGET:-}" ]; then
-            TARGET_FLAG="--target ${PATROL_TEST_TARGET}"
+          TARGET_FLAG=()
+          if [ -n "$PATROL_TEST_TARGET" ]; then
+            TARGET_FLAG=(--target "$PATROL_TEST_TARGET")
           fi
           # shellcheck disable=SC1091
           set -a
@@ -76,11 +80,12 @@ jobs:
             --device chrome \
             --web-headless=true \
             --web-timeout 300000 \
-            $TARGET_FLAG \
+            "${TARGET_FLAG[@]}" \
+            --dart-define=PATROL_WEB=true \
             --dart-define=MATRIX_URL="$MATRIX_URL" \
             --dart-define=SERVER_URL="$SERVER_URL" \
-            --dart-define=USERNAME="$USERNAME" \
-            --dart-define=PASSWORD="$PASSWORD" \
+            --dart-define=USERNAME="$TEST_USERNAME" \
+            --dart-define=PASSWORD="$TEST_PASSWORD" \
             --dart-define=Receiver="$Receiver" \
             --dart-define=ReceiverPass="$ReceiverPass" \
             --dart-define=CurrentAccount="$CurrentAccount" \

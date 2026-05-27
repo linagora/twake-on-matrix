@@ -163,5 +163,42 @@ void main() {
       final cachedImage = manager.getImage(eventId);
       expect(cachedImage, equals(imageData3));
     });
+
+    test('evictRoom removes only room-scoped entries', () {
+      final avatar = Uint8List.fromList([1, 2]);
+      final img1 = Uint8List.fromList([3, 4]);
+      final img2 = Uint8List.fromList([5, 6]);
+      final img3 = Uint8List.fromList([7, 8]);
+
+      manager.cacheImage('mxc://server/avatar', avatar);
+      manager.cacheImage(
+        MxcImageCacheManager.roomScopedKey('!roomA', 'ev1'),
+        img1,
+      );
+      manager.cacheImage(
+        MxcImageCacheManager.roomScopedKey('!roomA', 'ev2'),
+        img2,
+      );
+      manager.cacheImage(
+        MxcImageCacheManager.roomScopedKey('!roomB', 'ev3'),
+        img3,
+      );
+
+      manager.evictRoom('!roomA');
+
+      expect(manager.getImage('mxc://server/avatar'), equals(avatar));
+      expect(
+        manager.getImage(MxcImageCacheManager.roomScopedKey('!roomA', 'ev1')),
+        isNull,
+      );
+      expect(
+        manager.getImage(MxcImageCacheManager.roomScopedKey('!roomA', 'ev2')),
+        isNull,
+      );
+      expect(
+        manager.getImage(MxcImageCacheManager.roomScopedKey('!roomB', 'ev3')),
+        equals(img3),
+      );
+    });
   });
 }

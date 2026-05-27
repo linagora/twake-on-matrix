@@ -3813,9 +3813,7 @@ class ChatController extends State<Chat>
     // once MXC image providers are tracked at the room level.
     PaintingBinding.instance.imageCache.clear();
     PaintingBinding.instance.imageCache.clearLiveImages();
-    // Global clear is acceptable: only one ChatController is active at a time.
-    // TODO: replace with room-scoped eviction if multi-room layout is added.
-    MxcImageCacheManager.instance.clear();
+    MxcImageCacheManager.instance.evictRoom(widget.roomId);
 
     inputFocus.dispose();
     searchEmojiFocusNode.dispose();
