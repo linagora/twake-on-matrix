@@ -1185,7 +1185,7 @@ packages:
     description:
       path: "."
       ref: master
-      resolved-ref: c136e053a9d8c78ee81a169f4c40dba2ce76802c
+      resolved-ref: "5699fee5968acf0dac2f6bf8b053eb8abce798c8"
       url: "https://github.com/linagora/flutter_matrix_html.git"
     source: git
     version: "1.2.0"
@@ -1820,7 +1820,7 @@ packages:
     description:
       path: "."
       ref: main
-      resolved-ref: "21818487a4b701fd453a72ad3f3e0d78e3184238"
+      resolved-ref: "1e631ed763b7c9a908b5fb210d860283918cf516"
       url: "git@github.com:linagora/linkfy_text.git"
     source: git
     version: "1.1.6"
