@@ -56,6 +56,7 @@ import 'package:future_loading_dialog/future_loading_dialog.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:matrix/encryption.dart';
 import 'package:matrix/matrix.dart';
+
 // ignore: implementation_imports
 import 'package:matrix/src/utils/cached_stream_controller.dart';
 import 'package:provider/provider.dart';
@@ -232,6 +233,7 @@ class MatrixState extends State<Matrix>
   final CachedStreamController<CachedPresence> onLatestPresenceChanged =
       CachedStreamController();
   StreamSubscription? _presenceSubscription;
+
   void _listenSyncPresence(Client client) {
     _presenceSubscription?.cancel();
     _presenceSubscription = client.onSync.stream.listen((sync) {
