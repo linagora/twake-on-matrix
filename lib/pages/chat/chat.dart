@@ -2335,6 +2335,10 @@ class ChatController extends State<Chat>
   bool get isArchived =>
       {Membership.leave, Membership.ban}.contains(room?.membership);
 
+  bool get canSendMessages =>
+      room?.canSendDefaultMessages == true &&
+      room?.membership == Membership.join;
+
   void onPhoneButtonTap() async {
     // VoIP required Android SDK 21
     // if (PlatformInfos.isAndroid) {
