@@ -5,6 +5,7 @@ import 'package:fluffychat/pages/chat/chat_invitation_body.dart';
 import 'package:fluffychat/pages/chat/chat_view_body.dart';
 import 'package:fluffychat/pages/chat/chat_view_style.dart';
 import 'package:fluffychat/pages/chat/events/message_content_mixin.dart';
+import 'package:fluffychat/pages/chat/events/video_call_message.dart';
 import 'package:fluffychat/presentation/mixins/audio_mixin.dart';
 import 'package:fluffychat/resource/image_paths.dart';
 import 'package:fluffychat/utils/stream_extension.dart';
@@ -163,7 +164,7 @@ class ChatView extends StatelessWidget with MessageContentMixin {
                           TwakeIconButton(
                             icon: Icons.videocam_outlined,
                             tooltip: L10n.of(context)!.startVideoCall,
-                            onTap: () => controller.startVideoCall(
+                            onTap: () => VideoCallMessage.start(
                               room: controller.room,
                               context: context,
                             ),

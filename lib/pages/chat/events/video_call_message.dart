@@ -1,6 +1,10 @@
+import 'dart:async';
 import 'dart:math';
 
 import 'package:fluffychat/config/app_config.dart';
+import 'package:fluffychat/generated/l10n/app_localizations.dart';
+import 'package:flutter/widgets.dart';
+import 'package:matrix/matrix.dart';
 
 class VideoCallMessage {
   const VideoCallMessage._();
@@ -22,5 +26,13 @@ class VideoCallMessage {
     ).join();
     final slug = '${letters(3)}-${letters(4)}-${letters(3)}';
     return '${AppConfig.videoCallBaseUrl}/$slug';
+  }
+
+  static void start({required Room? room, required BuildContext context}) {
+    if (room == null) return;
+    final url = generateUrl();
+    unawaited(
+      room.sendTextEvent('${L10n.of(context)!.videoCallStartedTitle} $url'),
+    );
   }
 }
