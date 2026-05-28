@@ -9,7 +9,7 @@ environment:
 dependencies:
   sentry_flutter: ^9.10.0
   ### Dependencies from git ###
-  matrix: ^6.0.0
+  matrix: ^6.2.0
 
   receive_sharing_intent:
     git:
@@ -214,7 +214,7 @@ dependencies:
   pull_down_button: 0.10.2
   pretty_qr_code: 3.3.0
   byte_converter: 2.0.0
-  flutter_vodozemac: ^0.4.0
+  flutter_vodozemac: ^0.5.0
   html_unescape: 2.0.0
   sqflite_common_ffi: ^2.3.6
   # https://github.com/tekartik/sqflite/blob/master/sqflite_common_ffi/doc/using_ffi_instead_of_sqflite.md#setup

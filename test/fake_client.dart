@@ -25,6 +25,7 @@ class MockDatabase extends Mock implements DatabaseApi {
     String? deviceName,
     String? prevBatch,
     String? olmAccount,
+    String? oidcClientId,
   ) {
     return Future.value(null);
   }
