@@ -1,4 +1,3 @@
-import 'package:fluffychat/config/themes.dart';
 import 'package:fluffychat/pages/chat/events/message/message.dart';
 import 'package:fluffychat/utils/extension/event_status_custom_extension.dart';
 import 'package:flutter/material.dart';
@@ -21,37 +20,34 @@ class MessageSelectedWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    // In normal mode, render the message row directly — no wrapper that would
+    // constrain width (maxWidth) or misalign via Align(centerEnd).
+    final bool showSelectionUI =
+        selectMode && (event.redacted || event.status.isAvailable);
+    if (!showSelectionUI) return child;
+
+    return Padding(
       padding: EdgeInsets.only(
         left: Message.responsiveUtils.isMobile(context) ? 8.0 : 0,
-      ),
-      color: Theme.of(context).primaryColor.withAlpha(0),
-      constraints: const BoxConstraints(
-        maxWidth: TwakeThemes.columnWidth * 2.5,
       ),
       child: Row(
         mainAxisSize: MainAxisSize.max,
         children: [
-          if (selectMode && event.redacted)
-            const SizedBox(width: 20)
-          else if (selectMode && event.status.isAvailable)
-            Align(
-              alignment: AlignmentDirectional.centerStart,
-              child: Icon(
-                selected ? Icons.check_circle_rounded : Icons.circle_outlined,
-                color: selected
-                    ? LinagoraSysColors.material().primary
-                    : Colors.black,
-                size: 20,
-              ),
-            ),
-          Expanded(
-            flex: 9,
-            child: Align(
-              alignment: AlignmentDirectional.centerEnd,
-              child: child,
-            ),
+          SizedBox(
+            width: 20,
+            child: event.redacted
+                ? null
+                : Icon(
+                    selected
+                        ? Icons.check_circle_rounded
+                        : Icons.circle_outlined,
+                    color: selected
+                        ? LinagoraSysColors.material().primary
+                        : Colors.black,
+                    size: 20,
+                  ),
           ),
+          Expanded(child: child),
         ],
       ),
     );
