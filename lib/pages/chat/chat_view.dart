@@ -166,7 +166,9 @@ class ChatView extends StatelessWidget with MessageContentMixin {
                             tooltip: L10n.of(context)!.startVideoCall,
                             onTap: () => VideoCallMessage.start(
                               room: controller.room,
-                              context: context,
+                              startedTitle: L10n.of(
+                                context,
+                              )!.videoCallStartedTitle,
                             ),
                             preferBelow: false,
                           ),
