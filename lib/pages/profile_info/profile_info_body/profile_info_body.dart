@@ -118,9 +118,9 @@ class ProfileInfoBodyController extends State<ProfileInfoBody>
       );
     } else {
       if (PlatformInfos.isMobile) {
-        Navigator.of(
-          context,
-        ).popUntil((route) => route.settings.name == "/rooms/room");
+        Navigator.of(context).popUntil(
+          (Route route) => route.settings.name?.startsWith('/rooms/') ?? false,
+        );
       } else {
         if (widget.onNewChatOpen != null) widget.onNewChatOpen!();
       }
