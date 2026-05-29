@@ -1184,8 +1184,8 @@ packages:
     dependency: "direct main"
     description:
       path: "."
-      ref: master
-      resolved-ref: "5699fee5968acf0dac2f6bf8b053eb8abce798c8"
+      ref: "fix/double-encoded-html-entities-in-code-blocks"
+      resolved-ref: "2d0d3c3d38630d426b734dc5741e9a800218607c"
       url: "https://github.com/linagora/flutter_matrix_html.git"
     source: git
     version: "1.2.0"
