@@ -20,16 +20,18 @@ class MessageSelectedWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // In normal mode, render the message row directly — no wrapper that would
-    // constrain width (maxWidth) or misalign via Align(centerEnd).
+    final bool isMobile = Message.responsiveUtils.isMobile(context);
     final bool showSelectionUI =
         selectMode && (event.redacted || event.status.isAvailable);
-    if (!showSelectionUI) return child;
+    // In normal mode on mobile, preserve the left 8px padding but skip
+    // the selection UI (checkbox + row wrapper).
+    if (!showSelectionUI) {
+      if (!isMobile) return child;
+      return Padding(padding: const EdgeInsets.only(left: 8.0), child: child);
+    }
 
     return Padding(
-      padding: EdgeInsets.only(
-        left: Message.responsiveUtils.isMobile(context) ? 8.0 : 0,
-      ),
+      padding: EdgeInsets.only(left: isMobile ? 8.0 : 0),
       child: Row(
         mainAxisSize: MainAxisSize.max,
         children: [
