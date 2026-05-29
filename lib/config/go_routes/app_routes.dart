@@ -824,7 +824,7 @@ class RoomRoute extends GoRouteData with $RoomRoute {
     String? roomName,
     List<MatrixFile?>? shareFiles,
   }) {
-    final name = '/rooms/room_$roomid';
+    final name = '$pathPrefix$roomid';
     final key = prefix == 'Share'
         ? Key('${prefix}_${roomid}_${shareFiles.hashCode}')
         : Key('${prefix}_$roomid');
