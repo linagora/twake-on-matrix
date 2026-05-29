@@ -37,6 +37,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
 
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
@@ -59,7 +61,7 @@ jobs:
       - name: Install dependencies
         run: |
           flutter pub get
-          flutter pub run build_runner build --delete-conflicting-outputs
+          dart run build_runner build --delete-conflicting-outputs
           dart pub global activate patrol_cli ${{ env.PATROL_CLI_VERSION }}
 
       - name: Run Patrol Web

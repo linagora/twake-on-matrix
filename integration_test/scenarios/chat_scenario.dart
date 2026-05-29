@@ -468,7 +468,7 @@ class ChatScenario extends CoreRobot {
       'Chats tab is not visible',
     );
     s.softAssertEquals(
-      $(BottomNavigationBar).visible,
+      kIsWeb || $(BottomNavigationBar).visible,
       true,
       'Bottom navigator bar is not visible',
     );

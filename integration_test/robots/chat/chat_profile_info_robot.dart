@@ -263,8 +263,6 @@ class ChatProfileInfoRobot extends CoreRobot {
 
   /// Navigate back from profile info screen
   Future<void> navigateBack() async {
-    final backButton = $(AppBar).$(IconButton).first;
-    await backButton.tap();
-    await $.pumpAndSettle();
+    await goBack();
   }
 }

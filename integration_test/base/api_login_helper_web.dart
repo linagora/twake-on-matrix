@@ -75,8 +75,9 @@ Future<void> sendMessageAsReceiver({required String message}) async {
     password: passOfReceiver,
   );
 
+  final encodedRoomId = Uri.encodeComponent(groupID);
   final sendUri = Uri.parse(
-    '$matrixURL/_matrix/client/v3/rooms/$groupID/send/m.room.message/'
+    '$matrixURL/_matrix/client/v3/rooms/$encodedRoomId/send/m.room.message/'
     'patrol-web-${DateTime.now().millisecondsSinceEpoch}',
   );
   final response = await http.put(

@@ -15,6 +15,25 @@ class CoreRobot {
 
   dynamic ignoreException() => $.tester.takeException();
 
+  /// On web large layout there is no back button in the AppBar —
+  /// use Navigator.pop() instead.
+  Future<void> goBack() async {
+    if (kIsWeb) {
+      final nav = Navigator.of($.tester.element(find.byType(Scaffold).last));
+      if (!nav.canPop()) {
+        throw StateError(
+          'goBack() on web: Navigator cannot pop. '
+          'Use TwakeApp.router.pop() or a custom back action instead.',
+        );
+      }
+      nav.pop();
+      await $.pumpAndSettle();
+      return;
+    }
+    await $(AppBar).$(IconButton).first.tap();
+    await $.pumpAndSettle();
+  }
+
   String? getBrowserAppId() {
     if (!kIsWeb && defaultTargetPlatform == TargetPlatform.android) {
       return 'com.android.chrome';

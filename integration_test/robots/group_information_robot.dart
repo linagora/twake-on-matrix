@@ -84,7 +84,7 @@ class GroupInformationRobot extends CoreRobot {
   }
 
   Future<void> clickOnBackBtn() async {
-    await getBackIcon().tap();
+    await goBack();
     await $.waitUntilVisible($(ChatView));
   }
 
