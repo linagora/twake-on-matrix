@@ -119,7 +119,8 @@ class ProfileInfoBodyController extends State<ProfileInfoBody>
     } else {
       if (PlatformInfos.isMobile) {
         Navigator.of(context).popUntil(
-          (route) => route.settings.name?.startsWith('/rooms/room_') ?? false,
+          (route) =>
+              route.settings.name?.startsWith(RoomRoute.pathPrefix) ?? false,
         );
       } else {
         if (widget.onNewChatOpen != null) widget.onNewChatOpen!();
