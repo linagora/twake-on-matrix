@@ -69,8 +69,6 @@ abstract class AppConfig {
   static String twakeChatGooglePlay =
       'https://play.google.com/store/apps/details?id=app.twake.android.chat';
 
-  static String videoCallBaseUrl = 'https://meet.linagora.com';
-
   static String? sentryDsn;
 
   static String? sentryEnvironment;
@@ -143,6 +141,13 @@ abstract class AppConfig {
   );
 
   static String pushNotificationsGatewayUrl = _pushNotificationsGatewayUrlEnv;
+
+  static const String _videoCallBaseUrlEnv = String.fromEnvironment(
+    'VIDEO_CALL_BASE_URL',
+    defaultValue: 'https://meet.twake.app',
+  );
+
+  static String videoCallBaseUrl = _videoCallBaseUrlEnv;
 
   static const String _supportEmailEnv = String.fromEnvironment(
     'SUPPORT_EMAIL',
@@ -327,6 +332,10 @@ abstract class AppConfig {
     if (json['cozy_external_bridge_version'] is String &&
         json['cozy_external_bridge_version'].isNotEmpty) {
       cozyExternalBridgeVersion = json['cozy_external_bridge_version'];
+    }
+    if (json['video_call_base_url'] is String &&
+        json['video_call_base_url'].isNotEmpty) {
+      videoCallBaseUrl = json['video_call_base_url'];
     }
   }
 

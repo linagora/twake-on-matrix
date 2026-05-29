@@ -20,5 +20,6 @@
   "support_email": "support@twake.app",
   "cozy_external_bridge_version": "0.8.0",
   "sentry_dsn": "",
-  "sentry_environment": ""
+  "sentry_environment": "",
+  "video_call_base_url": "https://meet.twake.app"
 }
