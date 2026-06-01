@@ -4,7 +4,8 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   group('fixDoubleEncodedCodeBlocks', () {
     test('decodes double-encoded angle brackets in fenced code block', () {
-      const input = '<pre><code class="language-dart">&amp;lt;&amp;gt;\n</code></pre>';
+      const input =
+          '<pre><code class="language-dart">&amp;lt;&amp;gt;\n</code></pre>';
       final result = fixDoubleEncodedCodeBlocks(input);
       expect(result, '<pre><code class="language-dart"><>\n</code></pre>');
     });
@@ -29,10 +30,7 @@ void main() {
       const input =
           '<pre><code>Map&amp;lt;String, List&amp;lt;int&amp;gt;&amp;gt;</code></pre>';
       final result = fixDoubleEncodedCodeBlocks(input);
-      expect(
-        result,
-        '<pre><code>Map<String, List<int>></code></pre>',
-      );
+      expect(result, '<pre><code>Map<String, List<int>></code></pre>');
     });
 
     test('does not modify content outside code tags', () {
