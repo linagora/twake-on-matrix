@@ -84,9 +84,10 @@ class MessageContainer extends StatelessWidget {
       ),
     );
 
-    // SizedBox forces the Stack to fill the full row width so the highlight
-    // color spans the screen. Positioned.fill paints behind the content
-    // without affecting the message layout.
+    // Outer SizedBox(∞) gives the Stack a bounded width.
+    // Inner SizedBox(∞) wrapping container forces it to fill that width,
+    // overriding Container's tendency to shrink-wrap to its child.
+    // Being non-positioned, it also determines the Stack's height.
     final highlighted = SizedBox(
       width: double.infinity,
       child: Stack(
@@ -97,7 +98,7 @@ class MessageContainer extends StatelessWidget {
                 color: LinagoraSysColors.material().secondaryContainer,
               ),
             ),
-          container,
+          SizedBox(width: double.infinity, child: container),
         ],
       ),
     );
