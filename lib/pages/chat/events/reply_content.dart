@@ -1,5 +1,6 @@
 import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/pages/chat/events/reply_content_style.dart';
+import 'package:fluffychat/utils/matrix_sdk_extensions/markdown_fix.dart';
 import 'package:fluffychat/pages/chat/optional_selection_container_disabled.dart';
 import 'package:fluffychat/resource/image_paths.dart';
 import 'package:fluffychat/utils/extension/event_info_extension.dart';
@@ -49,7 +50,9 @@ class ReplyContent extends StatelessWidget {
         !displayEvent.redacted &&
         displayEvent.content['format'] == 'org.matrix.custom.html' &&
         displayEvent.content['formatted_body'] is String) {
-      String? html = (displayEvent.content['formatted_body'] as String?);
+      String? html = fixDoubleEncodedCodeBlocks(
+        displayEvent.content['formatted_body'] as String? ?? '',
+      );
       if (displayEvent.messageType == MessageTypes.Emote) {
         html = '* $html';
       }

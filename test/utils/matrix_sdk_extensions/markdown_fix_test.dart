@@ -7,13 +7,16 @@ void main() {
       const input =
           '<pre><code class="language-dart">&amp;lt;&amp;gt;\n</code></pre>';
       final result = fixDoubleEncodedCodeBlocks(input);
-      expect(result, '<pre><code class="language-dart"><>\n</code></pre>');
+      expect(
+        result,
+        '<pre><code class="language-dart">&lt;&gt;\n</code></pre>',
+      );
     });
 
     test('decodes double-encoded generics in inline code', () {
       const input = '<code>&amp;lt;String&amp;gt;</code>';
       final result = fixDoubleEncodedCodeBlocks(input);
-      expect(result, '<code><String></code>');
+      expect(result, '<code>&lt;String&gt;</code>');
     });
 
     test('decodes List<String> in code block', () {
@@ -22,7 +25,7 @@ void main() {
       final result = fixDoubleEncodedCodeBlocks(input);
       expect(
         result,
-        '<pre><code class="language-dart">List<String> items = [];\n</code></pre>',
+        '<pre><code class="language-dart">List&lt;String&gt; items = [];\n</code></pre>',
       );
     });
 
@@ -30,7 +33,10 @@ void main() {
       const input =
           '<pre><code>Map&amp;lt;String, List&amp;lt;int&amp;gt;&amp;gt;</code></pre>';
       final result = fixDoubleEncodedCodeBlocks(input);
-      expect(result, '<pre><code>Map<String, List<int>></code></pre>');
+      expect(
+        result,
+        '<pre><code>Map&lt;String, List&lt;int&gt;&gt;</code></pre>',
+      );
     });
 
     test('does not modify content outside code tags', () {
@@ -45,11 +51,14 @@ void main() {
       expect(result, input);
     });
 
-    test('handles already-correct HTML in code tags', () {
-      const input = '<code>List&lt;String&gt;</code>';
-      final result = fixDoubleEncodedCodeBlocks(input);
-      expect(result, '<code>List<String></code>');
-    });
+    test(
+      'does not modify already-correct single-encoded HTML in code tags',
+      () {
+        const input = '<code>List&lt;String&gt;</code>';
+        final result = fixDoubleEncodedCodeBlocks(input);
+        expect(result, input);
+      },
+    );
 
     test('handles mixed content with code and non-code', () {
       const input =
@@ -57,7 +66,7 @@ void main() {
       final result = fixDoubleEncodedCodeBlocks(input);
       expect(
         result,
-        '<p>See this: <code><T></code> in &amp;lt;div&amp;gt;</p>',
+        '<p>See this: <code>&lt;T&gt;</code> in &amp;lt;div&amp;gt;</p>',
       );
     });
 
@@ -65,13 +74,13 @@ void main() {
       const input =
           '<code>&amp;lt;A&amp;gt;</code> text <code>&amp;lt;B&amp;gt;</code>';
       final result = fixDoubleEncodedCodeBlocks(input);
-      expect(result, '<code><A></code> text <code><B></code>');
+      expect(result, '<code>&lt;A&gt;</code> text <code>&lt;B&gt;</code>');
     });
 
     test('handles &amp;amp; entity in code block', () {
       const input = '<code>a &amp;amp; b</code>';
       final result = fixDoubleEncodedCodeBlocks(input);
-      expect(result, '<code>a & b</code>');
+      expect(result, '<code>a &amp; b</code>');
     });
 
     test('returns input unchanged when no code tags present', () {
@@ -96,7 +105,7 @@ void main() {
       expect(
         result,
         '<pre><code class="language-dart">void main() {\n'
-        '  final list = <String>[];\n'
+        '  final list = &lt;String&gt;[];\n'
         '  print(list);\n'
         '}</code></pre>',
       );
