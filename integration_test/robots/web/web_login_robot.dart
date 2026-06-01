@@ -35,9 +35,7 @@ class WebLoginRobot extends CoreRobot implements AbstractLoginRobot {
 
     // On web, always authenticate via m.login.password — SSO bypass
     // is not reachable (cross-origin XHR blocked).
-    final context = $.tester.element(
-      find.byType(AutoHomeserverPicker).first,
-    );
+    final context = $.tester.element(find.byType(AutoHomeserverPicker).first);
     final matrix = Matrix.of(context);
     final client = await matrix.getLoginClient();
     matrix.loginHomeserverSummary = await client
