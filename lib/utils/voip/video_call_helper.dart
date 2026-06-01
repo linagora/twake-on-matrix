@@ -4,8 +4,8 @@ import 'dart:math';
 import 'package:fluffychat/config/app_config.dart';
 import 'package:matrix/matrix.dart';
 
-class VideoCallMessage {
-  const VideoCallMessage._();
+class VideoCallHelper {
+  const VideoCallHelper._();
 
   static const _slugAlphabet = 'abcdefghijklmnopqrstuvwxyz';
 

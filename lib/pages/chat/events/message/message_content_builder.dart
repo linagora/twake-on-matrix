@@ -1,7 +1,7 @@
 import 'package:fluffychat/pages/chat/events/message/message_content_builder_mixin.dart';
 import 'package:fluffychat/pages/chat/events/message/message_style.dart';
 import 'package:fluffychat/pages/chat/events/message_time.dart';
-import 'package:fluffychat/pages/chat/events/video_call_message.dart';
+import 'package:fluffychat/utils/voip/video_call_helper.dart';
 import 'package:fluffychat/pages/chat/optional_padding.dart';
 import 'package:fluffychat/pages/chat/optional_selection_container_disabled.dart';
 import 'package:fluffychat/pages/chat/optional_stack.dart';
@@ -71,7 +71,7 @@ class MessageContentBuilder extends StatelessWidget
                 isContainsTagName(event) ||
                     isContainsSpecialHTMLTag(event) ||
                     event.isCaptionModeOrReply() ||
-                    VideoCallMessage.extractUrl(event.text) != null
+                    VideoCallHelper.extractUrl(event.text) != null
                 ? null
                 : stepWidth,
             child: Column(
