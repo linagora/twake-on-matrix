@@ -43,16 +43,21 @@ wait_for_synapse() {
 register_user() {
   local user="$1"
   local pass="$2"
+  local payload
+  payload=$(jq -nc \
+    --arg user "$user" \
+    --arg pass "$pass" \
+    '{
+      username: $user,
+      password: $pass,
+      auth: {type: "m.login.dummy"},
+      initial_device_display_name: "integration-test-setup"
+    }')
   local response
-  response=$(curl -sS -X POST \
+  response=$(curl -sS --fail-with-body -X POST \
     "$BASE_URL/_matrix/client/v3/register" \
     -H "Content-Type: application/json" \
-    -d "{
-      \"username\": \"$user\",
-      \"password\": \"$pass\",
-      \"auth\": {\"type\":\"m.login.dummy\"},
-      \"initial_device_display_name\": \"integration-test-setup\"
-    }")
+    -d "$payload")
   local token
   token=$(echo "$response" | jq -r '.access_token // empty')
   if [ -z "$token" ]; then
@@ -67,25 +72,40 @@ create_room() {
   local mxid1="$2"
   local mxid2="$3"
   local mxid3="$4"
-  curl -sS -X POST \
+  local payload
+  payload=$(jq -nc \
+    --arg name "$ROOM_NAME" \
+    --arg mxid1 "$mxid1" \
+    --arg mxid2 "$mxid2" \
+    --arg mxid3 "$mxid3" \
+    '{
+      name: $name,
+      preset: "private_chat",
+      visibility: "private",
+      invite: [$mxid2, $mxid3],
+      power_level_content_override: {
+        users: {($mxid1): 100, ($mxid2): 50}
+      }
+    }')
+  local response
+  response=$(curl -sS --fail-with-body -X POST \
     "$BASE_URL/_matrix/client/v3/createRoom" \
     -H "Authorization: Bearer $owner_token" \
     -H "Content-Type: application/json" \
-    -d "{
-      \"name\": \"$ROOM_NAME\",
-      \"preset\": \"private_chat\",
-      \"visibility\": \"private\",
-      \"invite\": [\"$mxid2\", \"$mxid3\"],
-      \"power_level_content_override\": {
-        \"users\": {\"$mxid1\": 100, \"$mxid2\": 50}
-      }
-    }" | jq -r '.room_id'
+    -d "$payload")
+  local room_id
+  room_id=$(echo "$response" | jq -r '.room_id // empty')
+  if [ -z "$room_id" ]; then
+    log "createRoom failed: $response"
+    exit 1
+  fi
+  echo "$room_id"
 }
 
 accept_invite() {
   local token="$1"
   local room_id="$2"
-  curl -sS -X POST \
+  curl -sS --fail-with-body -X POST \
     "$BASE_URL/_matrix/client/v3/rooms/$room_id/join" \
     -H "Authorization: Bearer $token" \
     -H "Content-Type: application/json" \
@@ -97,11 +117,13 @@ send_message() {
   local room_id="$2"
   local body="$3"
   local txn_id="txn-$RANDOM-$(date +%s%N)"
-  curl -sS -X PUT \
+  local payload
+  payload=$(jq -nc --arg body "$body" '{msgtype: "m.text", body: $body}')
+  curl -sS --fail-with-body -X PUT \
     "$BASE_URL/_matrix/client/v3/rooms/$room_id/send/m.room.message/$txn_id" \
     -H "Authorization: Bearer $token" \
     -H "Content-Type: application/json" \
-    -d "{\"msgtype\":\"m.text\",\"body\":\"$body\"}" >/dev/null
+    -d "$payload" >/dev/null
 }
 
 wait_for_synapse
@@ -117,10 +139,6 @@ MXID3="@$USER3:$SERVER_NAME"
 
 log "Creating $ROOM_NAME with $USER1 as admin..."
 ROOM_ID=$(create_room "$TOKEN1" "$MXID1" "$MXID2" "$MXID3")
-if [ -z "$ROOM_ID" ] || [ "$ROOM_ID" = "null" ]; then
-  log "ERROR: Failed to create room $ROOM_NAME"
-  exit 1
-fi
 
 log "Joining invitees to $ROOM_ID..."
 accept_invite "$TOKEN2" "$ROOM_ID"
@@ -133,11 +151,14 @@ send_message "$TOKEN1" "$ROOM_ID" "Follow-up from $USER1"
 
 log "Provisioning complete."
 
+# TEST_USERNAME / TEST_PASSWORD instead of USERNAME / PASSWORD because zsh
+# (macOS default) treats USERNAME as a read-only built-in — assignments are
+# silently ignored, causing local patrol runs to send the OS login name.
 cat <<EOF
 MATRIX_URL=$BASE_URL
 SERVER_URL=$BASE_URL
-USERNAME=$USER1
-PASSWORD=$PASSWORD1
+TEST_USERNAME=$USER1
+TEST_PASSWORD=$PASSWORD1
 Receiver=$USER2
 ReceiverPass=$PASSWORD2
 CurrentAccount=$MXID1

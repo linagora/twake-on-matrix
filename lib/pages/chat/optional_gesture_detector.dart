@@ -18,6 +18,7 @@ class OptionalGestureDetector extends StatelessWidget {
   Widget build(BuildContext context) {
     if (isEnabled) {
       return GestureDetector(
+        behavior: HitTestBehavior.opaque,
         onTap: onTap,
         onLongPress: onLongPress,
         child: child,

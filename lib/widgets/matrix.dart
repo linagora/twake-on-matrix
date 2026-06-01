@@ -56,6 +56,7 @@ import 'package:future_loading_dialog/future_loading_dialog.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:matrix/encryption.dart';
 import 'package:matrix/matrix.dart';
+
 // ignore: implementation_imports
 import 'package:matrix/src/utils/cached_stream_controller.dart';
 import 'package:provider/provider.dart';
@@ -201,7 +202,10 @@ class MatrixState extends State<Matrix>
       StreamSubscription? createSupportChatListener;
       createSupportChatListener = getIt
           .get<CreateSupportChatInteractor>()
-          .execute(client)
+          .execute(
+            client,
+            cachedDiscovery: loginHomeserverSummary?.discoveryInformation,
+          )
           .listen(
             (state) {
               createSupportChatState = state.fold(
@@ -229,6 +233,7 @@ class MatrixState extends State<Matrix>
   final CachedStreamController<CachedPresence> onLatestPresenceChanged =
       CachedStreamController();
   StreamSubscription? _presenceSubscription;
+
   void _listenSyncPresence(Client client) {
     _presenceSubscription?.cancel();
     _presenceSubscription = client.onSync.stream.listen((sync) {
@@ -889,7 +894,8 @@ class MatrixState extends State<Matrix>
 
   Future<void> _tryStoreFederationConfiguration() async {
     try {
-      final wellKnown = await client.getWellknown();
+      final wellKnown = loginHomeserverSummary?.discoveryInformation;
+      if (wellKnown == null) return;
 
       Logs().d('MatrixState::_tryStoreFederationConfiguration: $wellKnown');
 
@@ -1084,20 +1090,26 @@ class MatrixState extends State<Matrix>
       'Matrix::_getHomeserverInformation: client homeserver = ${newClient.homeserver}',
     );
     if (newClient.homeserver == null) return;
-    loginHomeserverSummary = await newClient
-        .checkHomeserver(newClient.homeserver!)
+    final previousDiscovery = loginHomeserverSummary?.discoveryInformation;
+    final newSummary = await newClient
+        .checkHomeserver(newClient.homeserver!, checkWellKnown: false)
         .toHomeserverSummary();
+    if (newSummary.discoveryInformation == null && previousDiscovery != null) {
+      loginHomeserverSummary = HomeserverSummary(
+        discoveryInformation: previousDiscovery,
+        versions: newSummary.versions,
+        loginFlows: newSummary.loginFlows,
+      );
+    } else {
+      loginHomeserverSummary = newSummary;
+    }
     Logs().d(
       'Matrix::_getHomeserverInformation: appTwakeInformation ${loginHomeserverSummary?.appTwakeInformation}',
     );
   }
 
   Future<void> _refreshHomeserverInformation(Client client) async {
-    if (client.homeserver == null) {
-      final domain = client.userID?.domain;
-      if (domain == null) return;
-      client.homeserver = Uri.https(domain, '');
-    }
+    client.homeserver ??= Uri.parse(AppConfig.homeserver);
     await _getHomeserverInformation(client);
   }
 
@@ -1395,7 +1407,7 @@ extension HomeserverSummaryConversion
             GetAuthMetadataResponse?,
           )
         > {
-  Future<HomeserverSummary?> toHomeserverSummary() async {
+  Future<HomeserverSummary> toHomeserverSummary() async {
     try {
       final result = await this;
       return HomeserverSummary(
@@ -1405,7 +1417,7 @@ extension HomeserverSummaryConversion
       );
     } catch (e, s) {
       Logs().wtf('HomeserverSummaryConversion::toHomeserverSummary', e, s);
-      return null;
+      rethrow;
     }
   }
 }

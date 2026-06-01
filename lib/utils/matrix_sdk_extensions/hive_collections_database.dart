@@ -37,6 +37,22 @@ import 'package:matrix/src/utils/run_benchmarked.dart';
 
 typedef OnStartMigrating = Function(int oldVersion, int newVersion);
 
+abstract class _ClientBoxKeys {
+  static const String version = 'version';
+  static const String homeserverUrl = 'homeserver_url';
+  static const String token = 'token';
+  static const String userId = 'user_id';
+  static const String refreshToken = 'refresh_token';
+  static const String tokenExpiresAt = 'token_expires_at';
+  static const String deviceId = 'device_id';
+  static const String deviceName = 'device_name';
+  static const String prevBatch = 'prev_batch';
+  static const String olmAccount = 'olm_account';
+  static const String oidcClientId = 'oidc_client_id';
+  static const String syncFilterId = 'sync_filter_id';
+  static const String discoveryInformation = 'discovery_information';
+}
+
 /// This database does not support file caching!
 /// Use [MatrixSdkDatabase] instead. Don\'t forget to properly migrate!
 class HiveCollectionsDatabase extends DatabaseApi {
@@ -211,9 +227,11 @@ class HiveCollectionsDatabase extends DatabaseApi {
     _seenDeviceKeysBox = await _collection.openBox(_seenDeviceKeysBoxName);
 
     // Check version and check if we need a migration
-    final currentVersion = int.tryParse(await _clientBox.get('version') ?? '');
+    final currentVersion = int.tryParse(
+      await _clientBox.get(_ClientBoxKeys.version) ?? '',
+    );
     if (currentVersion == null) {
-      await _clientBox.put('version', version.toString());
+      await _clientBox.put(_ClientBoxKeys.version, version.toString());
     } else if (currentVersion != version) {
       await _migrateFromVersion(currentVersion);
     }
@@ -227,7 +245,7 @@ class HiveCollectionsDatabase extends DatabaseApi {
       onStartMigrating?.call(currentVersion, version);
     }
     await clearCache();
-    await _clientBox.put('version', version.toString());
+    await _clientBox.put(_ClientBoxKeys.version, version.toString());
   }
 
   @override
@@ -268,7 +286,7 @@ class HiveCollectionsDatabase extends DatabaseApi {
     await _timelineFragmentsBox.clear();
     await _outboundGroupSessionsBox.clear();
     await _presencesBox.clear();
-    await _clientBox.delete('prev_batch');
+    await _clientBox.delete(_ClientBoxKeys.prevBatch);
   });
 
   @override
@@ -341,7 +359,7 @@ class HiveCollectionsDatabase extends DatabaseApi {
         final map = <String, dynamic>{};
         final keys = await _clientBox.getAllKeys();
         for (final key in keys) {
-          if (key == 'version') continue;
+          if (key == _ClientBoxKeys.version) continue;
           final value = await _clientBox.get(key);
           if (value != null) map[key] = value;
         }
@@ -841,45 +859,51 @@ class HiveCollectionsDatabase extends DatabaseApi {
     String? deviceName,
     String? prevBatch,
     String? olmAccount,
+    String? oidcClientId,
   ) async {
     await transaction(() async {
-      await _clientBox.put('homeserver_url', homeserverUrl);
-      await _clientBox.put('token', token);
-      await _clientBox.put('user_id', userId);
+      await _clientBox.put(_ClientBoxKeys.homeserverUrl, homeserverUrl);
+      await _clientBox.put(_ClientBoxKeys.token, token);
+      await _clientBox.put(_ClientBoxKeys.userId, userId);
       if (refreshToken == null) {
-        await _clientBox.delete('refresh_token');
+        await _clientBox.delete(_ClientBoxKeys.refreshToken);
       } else {
-        await _clientBox.put('refresh_token', refreshToken);
+        await _clientBox.put(_ClientBoxKeys.refreshToken, refreshToken);
       }
       if (tokenExpiresAt == null) {
-        await _clientBox.delete('token_expires_at');
+        await _clientBox.delete(_ClientBoxKeys.tokenExpiresAt);
       } else {
         await _clientBox.put(
-          'token_expires_at',
+          _ClientBoxKeys.tokenExpiresAt,
           tokenExpiresAt.millisecondsSinceEpoch.toString(),
         );
       }
       if (deviceId == null) {
-        await _clientBox.delete('device_id');
+        await _clientBox.delete(_ClientBoxKeys.deviceId);
       } else {
-        await _clientBox.put('device_id', deviceId);
+        await _clientBox.put(_ClientBoxKeys.deviceId, deviceId);
       }
       if (deviceName == null) {
-        await _clientBox.delete('device_name');
+        await _clientBox.delete(_ClientBoxKeys.deviceName);
       } else {
-        await _clientBox.put('device_name', deviceName);
+        await _clientBox.put(_ClientBoxKeys.deviceName, deviceName);
       }
       if (prevBatch == null) {
-        await _clientBox.delete('prev_batch');
+        await _clientBox.delete(_ClientBoxKeys.prevBatch);
       } else {
-        await _clientBox.put('prev_batch', prevBatch);
+        await _clientBox.put(_ClientBoxKeys.prevBatch, prevBatch);
       }
       if (olmAccount == null) {
-        await _clientBox.delete('olm_account');
+        await _clientBox.delete(_ClientBoxKeys.olmAccount);
       } else {
-        await _clientBox.put('olm_account', olmAccount);
+        await _clientBox.put(_ClientBoxKeys.olmAccount, olmAccount);
       }
-      await _clientBox.delete('sync_filter_id');
+      if (oidcClientId == null) {
+        await _clientBox.delete(_ClientBoxKeys.oidcClientId);
+      } else {
+        await _clientBox.put(_ClientBoxKeys.oidcClientId, oidcClientId);
+      }
+      await _clientBox.delete(_ClientBoxKeys.syncFilterId);
     });
     return 0;
   }
@@ -1338,7 +1362,7 @@ class HiveCollectionsDatabase extends DatabaseApi {
   @override
   Future<void> storePrevBatch(String prevBatch) async {
     if ((await _clientBox.getAllKeys()).isEmpty) return;
-    await _clientBox.put('prev_batch', prevBatch);
+    await _clientBox.put(_ClientBoxKeys.prevBatch, prevBatch);
     return;
   }
 
@@ -1436,7 +1460,7 @@ class HiveCollectionsDatabase extends DatabaseApi {
 
   @override
   Future<void> storeSyncFilterId(String syncFilterId) async {
-    await _clientBox.put('sync_filter_id', syncFilterId);
+    await _clientBox.put(_ClientBoxKeys.syncFilterId, syncFilterId);
   }
 
   @override
@@ -1498,43 +1522,49 @@ class HiveCollectionsDatabase extends DatabaseApi {
     String? deviceName,
     String? prevBatch,
     String? olmAccount,
+    String? oidcClientId,
   ) async {
     await transaction(() async {
-      await _clientBox.put('homeserver_url', homeserverUrl);
-      await _clientBox.put('token', token);
+      await _clientBox.put(_ClientBoxKeys.homeserverUrl, homeserverUrl);
+      await _clientBox.put(_ClientBoxKeys.token, token);
       if (tokenExpiresAt == null) {
-        await _clientBox.delete('token_expires_at');
+        await _clientBox.delete(_ClientBoxKeys.tokenExpiresAt);
       } else {
         await _clientBox.put(
-          'token_expires_at',
+          _ClientBoxKeys.tokenExpiresAt,
           tokenExpiresAt.millisecondsSinceEpoch.toString(),
         );
       }
       if (refreshToken == null) {
-        await _clientBox.delete('refresh_token');
+        await _clientBox.delete(_ClientBoxKeys.refreshToken);
       } else {
-        await _clientBox.put('refresh_token', refreshToken);
+        await _clientBox.put(_ClientBoxKeys.refreshToken, refreshToken);
       }
-      await _clientBox.put('user_id', userId);
+      await _clientBox.put(_ClientBoxKeys.userId, userId);
       if (deviceId == null) {
-        await _clientBox.delete('device_id');
+        await _clientBox.delete(_ClientBoxKeys.deviceId);
       } else {
-        await _clientBox.put('device_id', deviceId);
+        await _clientBox.put(_ClientBoxKeys.deviceId, deviceId);
       }
       if (deviceName == null) {
-        await _clientBox.delete('device_name');
+        await _clientBox.delete(_ClientBoxKeys.deviceName);
       } else {
-        await _clientBox.put('device_name', deviceName);
+        await _clientBox.put(_ClientBoxKeys.deviceName, deviceName);
       }
       if (prevBatch == null) {
-        await _clientBox.delete('prev_batch');
+        await _clientBox.delete(_ClientBoxKeys.prevBatch);
       } else {
-        await _clientBox.put('prev_batch', prevBatch);
+        await _clientBox.put(_ClientBoxKeys.prevBatch, prevBatch);
       }
       if (olmAccount == null) {
-        await _clientBox.delete('olm_account');
+        await _clientBox.delete(_ClientBoxKeys.olmAccount);
       } else {
-        await _clientBox.put('olm_account', olmAccount);
+        await _clientBox.put(_ClientBoxKeys.olmAccount, olmAccount);
+      }
+      if (oidcClientId == null) {
+        await _clientBox.delete(_ClientBoxKeys.oidcClientId);
+      } else {
+        await _clientBox.put(_ClientBoxKeys.oidcClientId, oidcClientId);
       }
     });
     return;
@@ -1542,7 +1572,7 @@ class HiveCollectionsDatabase extends DatabaseApi {
 
   @override
   Future<void> updateClientKeys(String olmAccount) async {
-    await _clientBox.put('olm_account', olmAccount);
+    await _clientBox.put(_ClientBoxKeys.olmAccount, olmAccount);
     return;
   }
 
@@ -1749,17 +1779,17 @@ class HiveCollectionsDatabase extends DatabaseApi {
 
   Future<void> storeWellKnown(DiscoveryInformation? discoveryInformation) {
     if (discoveryInformation == null) {
-      return _clientBox.delete('discovery_information');
+      return _clientBox.delete(_ClientBoxKeys.discoveryInformation);
     }
     return _clientBox.put(
-      'discovery_information',
+      _ClientBoxKeys.discoveryInformation,
       jsonEncode(discoveryInformation.toJson()),
     );
   }
 
   Future<DiscoveryInformation?> getWellKnown() async {
     final rawDiscoveryInformation = await _clientBox.get(
-      'discovery_information',
+      _ClientBoxKeys.discoveryInformation,
     );
     if (rawDiscoveryInformation == null) return null;
     return DiscoveryInformation.fromJson(jsonDecode(rawDiscoveryInformation));

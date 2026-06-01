@@ -1,3 +1,30 @@
+## [2.22.3] - 2026-05-22
+### Changed
+- TW-3063: Update open_file version to v3.5.11
+
+### Fixed
+- Replace global image cache clear with room-scoped eviction
+
+## [2.22.2] - 2026-05-21
+### Changed
+- TW-2940: Widen iOS navigation
+- TW-3047: Optimize video playback performance with hardware acceleration and improved player initialization
+- TW-3018: Highlight only message bubble, not unread divider
+- TW-1707: Update git URLs in pubspec files to use HTTPS
+
+### Fixed
+- TW-3038: Exclude edit events to prevent duplicate search results for edited messages
+- TW-3037: Actually cancel stream subscriptions in dispose()
+- TW-3037: Advance read marker past hidden trailing events
+- TW-3019: Ignore refreshing_last_event placeholder in chat list date
+- TW-3043: Fix interaction with errored messages
+
+### Performance
+- Byte budget for image cache, fix video thumbnail rebuild, mounted guards
+
+### Tests
+- Upgrade Patrol to 4.5.0 for Web support
+
 ## [2.22.1] - 2026-05-06
 ### Changed
 - TW-3020: Simplify hover handling in chat events

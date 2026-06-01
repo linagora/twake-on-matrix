@@ -1185,7 +1185,7 @@ packages:
     description:
       path: "."
       ref: master
-      resolved-ref: c136e053a9d8c78ee81a169f4c40dba2ce76802c
+      resolved-ref: "5699fee5968acf0dac2f6bf8b053eb8abce798c8"
       url: "https://github.com/linagora/flutter_matrix_html.git"
     source: git
     version: "1.2.0"
@@ -1327,10 +1327,10 @@ packages:
     dependency: "direct main"
     description:
       name: flutter_vodozemac
-      sha256: "16d4b44dd338689441fe42a80d0184e5c864e9563823de9e7e6371620d2c0590"
+      sha256: ef4c3580a7f2fe8eebb7602c6cba593a42b4a5e5466c372a022f77ccc14914a5
       url: "https://pub.dev"
     source: hosted
-    version: "0.4.1"
+    version: "0.5.0"
   flutter_web_auth_2:
     dependency: "direct main"
     description:
@@ -1387,7 +1387,7 @@ packages:
       path: "."
       ref: main
       resolved-ref: b902d115c4e6680b353302c0eba74bf66fffd29a
-      url: "git@github.com:linagora/future-loading-dialog.git"
+      url: "https://github.com/linagora/future-loading-dialog.git"
     source: git
     version: "0.3.0"
   gal:
@@ -1674,7 +1674,7 @@ packages:
       path: "."
       ref: master
       resolved-ref: ef7d32491a2a934aadcb74f1555bace2af7d56aa
-      url: "git@github.com:linagora/inview_notifier_list.git"
+      url: "https://github.com/linagora/inview_notifier_list.git"
     source: git
     version: "3.0.0"
   io:
@@ -1771,7 +1771,7 @@ packages:
       path: "."
       ref: master
       resolved-ref: e94d4feffc78e24147d7c4cc9d16707b9235c5fc
-      url: "git@github.com:zhouzhuo810/keyboard_shortcuts.git"
+      url: "https://github.com/zhouzhuo810/keyboard_shortcuts.git"
     source: git
     version: "0.1.4"
   latlong2:
@@ -1820,8 +1820,8 @@ packages:
     description:
       path: "."
       ref: main
-      resolved-ref: "21818487a4b701fd453a72ad3f3e0d78e3184238"
-      url: "git@github.com:linagora/linkfy_text.git"
+      resolved-ref: "1e631ed763b7c9a908b5fb210d860283918cf516"
+      url: "https://github.com/linagora/linkfy_text.git"
     source: git
     version: "1.1.6"
   lints:
@@ -1916,10 +1916,10 @@ packages:
     dependency: "direct main"
     description:
       name: matrix
-      sha256: f1c0cc366a8cd0b9aec6b57f81203c4d9aa9f92793f7ac12ae50410648b070e4
+      sha256: "5bb38e98212bc4c3244c762a1af787f7239a38d2cfdf44488258283ff899f77c"
       url: "https://pub.dev"
     source: hosted
-    version: "6.0.0"
+    version: "6.2.0"
   matrix_api_lite:
     dependency: "direct overridden"
     description:
@@ -2087,10 +2087,66 @@ packages:
     dependency: "direct main"
     description:
       name: open_file
-      sha256: a5a32d44acb7c899987d0999e1e3cbb0a0f1adebbf41ac813ec6d2d8faa0af20
+      sha256: b22decdae85b459eac24aeece48f33845c6f16d278a9c63d75c5355345ca236b
       url: "https://pub.dev"
     source: hosted
-    version: "3.3.2"
+    version: "3.5.11"
+  open_file_android:
+    dependency: transitive
+    description:
+      name: open_file_android
+      sha256: "58141fcaece2f453a9684509a7275f231ac0e3d6ceb9a5e6de310a7dff9084aa"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.0.6"
+  open_file_ios:
+    dependency: transitive
+    description:
+      name: open_file_ios
+      sha256: a5acd07ba1f304f807a97acbcc489457e1ad0aadff43c467987dd9eef814098f
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.0.4"
+  open_file_linux:
+    dependency: transitive
+    description:
+      name: open_file_linux
+      sha256: d189f799eecbb139c97f8bc7d303f9e720954fa4e0fa1b0b7294767e5f2d7550
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.0.5"
+  open_file_mac:
+    dependency: transitive
+    description:
+      name: open_file_mac
+      sha256: cd293f6750de6438ab2390513c99128ade8c974825d4d8128886d1cda8c64d01
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.0.4"
+  open_file_platform_interface:
+    dependency: transitive
+    description:
+      name: open_file_platform_interface
+      sha256: "101b424ca359632699a7e1213e83d025722ab668b9fd1412338221bf9b0e5757"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.0.3"
+  open_file_web:
+    dependency: transitive
+    description:
+      name: open_file_web
+      sha256: e3dbc9584856283dcb30aef5720558b90f88036360bd078e494ab80a80130c4f
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.0.4"
+  open_file_windows:
+    dependency: transitive
+    description:
+      name: open_file_windows
+      sha256: d26c31ddf935a94a1a3aa43a23f4fff8a5ff4eea395fe7a8cb819cf55431c875
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.0.3"
   opus_caf_converter_dart:
     dependency: "direct main"
     description:
@@ -2817,7 +2873,7 @@ packages:
       path: "."
       ref: twake_supported
       resolved-ref: "4ec1f26e7f13b9d2558c3e48b2c5f1e5a4376049"
-      url: "git@github.com:linagora/social_media_recorder.git"
+      url: "https://github.com/linagora/social_media_recorder.git"
     source: git
     version: "1.2.1"
   source_gen:
@@ -3363,10 +3419,10 @@ packages:
     dependency: transitive
     description:
       name: vodozemac
-      sha256: "39144e20740807731871c9248d811ed5a037b21d0aa9ffcfa630954de74139d9"
+      sha256: bbe7dd31d7f623e2aeedb92e4b71a8b519e6109ce1e2911b5a220f6752b65cda
       url: "https://pub.dev"
     source: hosted
-    version: "0.4.0"
+    version: "0.5.0"
   wakelock_plus:
     dependency: "direct main"
     description:

@@ -6,6 +6,9 @@ import 'package:matrix/matrix.dart';
 
 mixin InitConfigMixin {
   Future<void> initConfigWeb() async {
+    // Config already loaded (e.g. by web_test_main for integration tests).
+    // Don't overwrite it with config.json.
+    if (AppConfig.initConfigCompleter.isCompleted) return;
     try {
       final configJsonString = utf8.decode(
         (await http.get(Uri.parse('config.json'))).bodyBytes,

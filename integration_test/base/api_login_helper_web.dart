@@ -22,6 +22,9 @@ Future<String> fetchAuthToken({
   required String password,
 }) async {
   const matrixURL = String.fromEnvironment('MATRIX_URL');
+  if (matrixURL.isEmpty) {
+    throw StateError('Missing required --dart-define=MATRIX_URL');
+  }
   final loginUri = Uri.parse('$matrixURL/_matrix/client/v3/login');
 
   final response = await http.post(
@@ -58,14 +61,23 @@ Future<void> sendMessageAsReceiver({required String message}) async {
   const receiver = String.fromEnvironment('Receiver');
   const passOfReceiver = String.fromEnvironment('ReceiverPass');
   const groupID = String.fromEnvironment('GroupID');
+  if (matrixURL.isEmpty ||
+      receiver.isEmpty ||
+      passOfReceiver.isEmpty ||
+      groupID.isEmpty) {
+    throw StateError(
+      'Missing required dart-defines: MATRIX_URL/Receiver/ReceiverPass/GroupID',
+    );
+  }
 
   final accessToken = await fetchAuthToken(
     username: receiver,
     password: passOfReceiver,
   );
 
+  final encodedRoomId = Uri.encodeComponent(groupID);
   final sendUri = Uri.parse(
-    '$matrixURL/_matrix/client/v3/rooms/$groupID/send/m.room.message/'
+    '$matrixURL/_matrix/client/v3/rooms/$encodedRoomId/send/m.room.message/'
     'patrol-web-${DateTime.now().millisecondsSinceEpoch}',
   );
   final response = await http.put(

@@ -90,9 +90,13 @@ class LanguageSettingRobot extends HomeRobot
 
   @override
   Future<void> backToSettingScreen() async {
+    // On wide layouts (web / desktop / tablet) the language screen hides
+    // the AppBar back button entirely — see `responsiveUtils.isMobile`
+    // check in `SettingsAppLanguageView`. Navigate via the router instead
+    // so the scenario converges on mobile and web.
     if (kIsWeb) {
       TwakeApp.router.pop();
-      await $.pumpAndSettle();
+      await $.pump();
     } else {
       await backIcon().tap();
     }
