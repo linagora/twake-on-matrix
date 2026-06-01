@@ -58,9 +58,6 @@ void main() {
         'should create new support chat successfully when no existing room found',
         () async {
           when(mockClient.userID).thenReturn(testUserId);
-          when(
-            mockClient.getWellknown(),
-          ).thenAnswer((_) async => mockDiscovery);
           when(mockDiscovery.additionalProperties).thenReturn({
             WellKnownMixin.twakeChatKey: {
               WellKnownMixin.supportContact: testSupportContactId,
@@ -97,7 +94,10 @@ void main() {
             ),
           ).thenAnswer((_) async => {});
 
-          final result = interactor.execute(mockClient);
+          final result = interactor.execute(
+            mockClient,
+            cachedDiscovery: mockDiscovery,
+          );
 
           await expectLater(
             result,
@@ -110,7 +110,6 @@ void main() {
             ]),
           );
 
-          verify(mockClient.getWellknown()).called(1);
           verify(
             mockClient.getAccountData(testUserId, 'app.twake.support_room'),
           ).called(1);
@@ -137,9 +136,6 @@ void main() {
         'should return existing support chat when room already exists',
         () async {
           when(mockClient.userID).thenReturn(testUserId);
-          when(
-            mockClient.getWellknown(),
-          ).thenAnswer((_) async => mockDiscovery);
           when(mockDiscovery.additionalProperties).thenReturn({
             WellKnownMixin.twakeChatKey: {
               WellKnownMixin.supportContact: testSupportContactId,
@@ -150,7 +146,10 @@ void main() {
           ).thenAnswer((_) async => {'createdSupportChat': testRoomId});
           when(mockClient.getRoomById(testRoomId)).thenReturn(mockRoom);
 
-          final result = interactor.execute(mockClient);
+          final result = interactor.execute(
+            mockClient,
+            cachedDiscovery: mockDiscovery,
+          );
 
           await expectLater(
             result,
@@ -163,7 +162,6 @@ void main() {
             ]),
           );
 
-          verify(mockClient.getWellknown()).called(1);
           verify(
             mockClient.getAccountData(testUserId, 'app.twake.support_room'),
           ).called(1);
@@ -183,9 +181,6 @@ void main() {
         'should continue when account data throws exception but room does not exist',
         () async {
           when(mockClient.userID).thenReturn(testUserId);
-          when(
-            mockClient.getWellknown(),
-          ).thenAnswer((_) async => mockDiscovery);
           when(mockDiscovery.additionalProperties).thenReturn({
             WellKnownMixin.twakeChatKey: {
               WellKnownMixin.supportContact: testSupportContactId,
@@ -222,7 +217,10 @@ void main() {
             ),
           ).thenAnswer((_) async => {});
 
-          final result = interactor.execute(mockClient);
+          final result = interactor.execute(
+            mockClient,
+            cachedDiscovery: mockDiscovery,
+          );
 
           await expectLater(
             result,
@@ -253,17 +251,35 @@ void main() {
     });
 
     group('execute - failure cases', () {
+      test('should fail when cachedDiscovery is null', () async {
+        final result = interactor.execute(mockClient);
+
+        await expectLater(
+          result,
+          emitsInOrder([
+            predicate(
+              (dynamic value) =>
+                  value is Right && value.value is CreatingSupportChat,
+            ),
+            predicate(
+              (dynamic value) =>
+                  value is Left && value.value is CreateSupportChatFailed,
+            ),
+          ]),
+        );
+      });
+
       test(
         'should fail when support contact is not found in well-known',
         () async {
           when(
-            mockClient.getWellknown(),
-          ).thenAnswer((_) async => mockDiscovery);
-          when(
             mockDiscovery.additionalProperties,
           ).thenReturn({WellKnownMixin.twakeChatKey: {}});
 
-          final result = interactor.execute(mockClient);
+          final result = interactor.execute(
+            mockClient,
+            cachedDiscovery: mockDiscovery,
+          );
 
           await expectLater(
             result,
@@ -279,7 +295,6 @@ void main() {
             ]),
           );
 
-          verify(mockClient.getWellknown()).called(1);
           verifyNever(
             mockClient.createGroupChat(
               groupName: anyNamed('groupName'),
@@ -292,12 +307,14 @@ void main() {
       );
 
       test('should fail when support contact is not a string', () async {
-        when(mockClient.getWellknown()).thenAnswer((_) async => mockDiscovery);
         when(mockDiscovery.additionalProperties).thenReturn({
           WellKnownMixin.twakeChatKey: {WellKnownMixin.supportContact: 123},
         });
 
-        final result = interactor.execute(mockClient);
+        final result = interactor.execute(
+          mockClient,
+          cachedDiscovery: mockDiscovery,
+        );
 
         await expectLater(
           result,
@@ -312,20 +329,20 @@ void main() {
             ),
           ]),
         );
-
-        verify(mockClient.getWellknown()).called(1);
       });
 
       test('should fail when user ID is null', () async {
         when(mockClient.userID).thenReturn(null);
-        when(mockClient.getWellknown()).thenAnswer((_) async => mockDiscovery);
         when(mockDiscovery.additionalProperties).thenReturn({
           WellKnownMixin.twakeChatKey: {
             WellKnownMixin.supportContact: testSupportContactId,
           },
         });
 
-        final result = interactor.execute(mockClient);
+        final result = interactor.execute(
+          mockClient,
+          cachedDiscovery: mockDiscovery,
+        );
 
         await expectLater(
           result,
@@ -341,7 +358,6 @@ void main() {
           ]),
         );
 
-        verify(mockClient.getWellknown()).called(1);
         verifyNever(
           mockClient.createGroupChat(
             groupName: anyNamed('groupName'),
@@ -354,7 +370,6 @@ void main() {
 
       test('should fail when avatar upload fails', () async {
         when(mockClient.userID).thenReturn(testUserId);
-        when(mockClient.getWellknown()).thenAnswer((_) async => mockDiscovery);
         when(mockDiscovery.additionalProperties).thenReturn({
           WellKnownMixin.twakeChatKey: {
             WellKnownMixin.supportContact: testSupportContactId,
@@ -367,7 +382,10 @@ void main() {
           mockMediaAPI.uploadFileWeb(file: anyNamed('file')),
         ).thenThrow(Exception('Upload failed'));
 
-        final result = interactor.execute(mockClient);
+        final result = interactor.execute(
+          mockClient,
+          cachedDiscovery: mockDiscovery,
+        );
 
         await expectLater(
           result,
@@ -396,7 +414,6 @@ void main() {
 
       test('should fail when room creation fails', () async {
         when(mockClient.userID).thenReturn(testUserId);
-        when(mockClient.getWellknown()).thenAnswer((_) async => mockDiscovery);
         when(mockDiscovery.additionalProperties).thenReturn({
           WellKnownMixin.twakeChatKey: {
             WellKnownMixin.supportContact: testSupportContactId,
@@ -418,7 +435,10 @@ void main() {
           ),
         ).thenThrow(Exception('Room creation failed'));
 
-        final result = interactor.execute(mockClient);
+        final result = interactor.execute(
+          mockClient,
+          cachedDiscovery: mockDiscovery,
+        );
 
         await expectLater(
           result,
@@ -446,7 +466,6 @@ void main() {
 
       test('should fail when room is not found after creation', () async {
         when(mockClient.userID).thenReturn(testUserId);
-        when(mockClient.getWellknown()).thenAnswer((_) async => mockDiscovery);
         when(mockDiscovery.additionalProperties).thenReturn({
           WellKnownMixin.twakeChatKey: {
             WellKnownMixin.supportContact: testSupportContactId,
@@ -469,7 +488,10 @@ void main() {
         ).thenAnswer((_) async => testRoomId);
         when(mockClient.getRoomById(testRoomId)).thenReturn(null);
 
-        final result = interactor.execute(mockClient);
+        final result = interactor.execute(
+          mockClient,
+          cachedDiscovery: mockDiscovery,
+        );
 
         await expectLater(
           result,
@@ -490,7 +512,6 @@ void main() {
 
       test('should fail when setFavourite fails', () async {
         when(mockClient.userID).thenReturn(testUserId);
-        when(mockClient.getWellknown()).thenAnswer((_) async => mockDiscovery);
         when(mockDiscovery.additionalProperties).thenReturn({
           WellKnownMixin.twakeChatKey: {
             WellKnownMixin.supportContact: testSupportContactId,
@@ -520,7 +541,10 @@ void main() {
           mockRoom.setFavourite(true),
         ).thenThrow(Exception('setFavourite failed'));
 
-        final result = interactor.execute(mockClient);
+        final result = interactor.execute(
+          mockClient,
+          cachedDiscovery: mockDiscovery,
+        );
 
         await expectLater(
           result,
@@ -546,9 +570,6 @@ void main() {
         'should leave room and clear account data when creation fails',
         () async {
           when(mockClient.userID).thenReturn(testUserId);
-          when(
-            mockClient.getWellknown(),
-          ).thenAnswer((_) async => mockDiscovery);
           when(mockDiscovery.additionalProperties).thenReturn({
             WellKnownMixin.twakeChatKey: {
               WellKnownMixin.supportContact: testSupportContactId,
@@ -590,7 +611,10 @@ void main() {
             }),
           ).thenAnswer((_) async => {});
 
-          final result = interactor.execute(mockClient);
+          final result = interactor.execute(
+            mockClient,
+            cachedDiscovery: mockDiscovery,
+          );
 
           await expectLater(
             result,
@@ -617,7 +641,6 @@ void main() {
 
       test('should handle cleanup failure gracefully', () async {
         when(mockClient.userID).thenReturn(testUserId);
-        when(mockClient.getWellknown()).thenAnswer((_) async => mockDiscovery);
         when(mockDiscovery.additionalProperties).thenReturn({
           WellKnownMixin.twakeChatKey: {
             WellKnownMixin.supportContact: testSupportContactId,
@@ -655,7 +678,10 @@ void main() {
           }),
         ).thenThrow(Exception('Set account data failed'));
 
-        final result = interactor.execute(mockClient);
+        final result = interactor.execute(
+          mockClient,
+          cachedDiscovery: mockDiscovery,
+        );
 
         await expectLater(
           result,

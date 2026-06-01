@@ -170,18 +170,27 @@ class LoginController extends State<Login> {
     final oldHomeserver = client.homeserver;
     try {
       var newDomain = Uri.https(userId.domain!, '');
-      client.homeserver = newDomain;
-      DiscoveryInformation? wellKnownInformation;
-      try {
-        wellKnownInformation = await client.getWellknown();
-        if (wellKnownInformation.mHomeserver.baseUrl.toString().isNotEmpty) {
-          newDomain = wellKnownInformation.mHomeserver.baseUrl;
-        }
-      } catch (_) {
-        // do nothing, newDomain is already set to a reasonable fallback
+
+      // Use cached discovery from loginHomeserverSummary instead of
+      // re-fetching well-known (which fails on domains like twake.app
+      // that don't serve .well-known/matrix/client).
+      // Only apply when the MXID domain matches the current homeserver
+      // (e.g. twake.app ↔ matrix.twake.app), so users entering an MXID
+      // from a different server are not silently redirected.
+      final mxidDomain = userId.domain!;
+      final currentHost = oldHomeserver?.host ?? '';
+      final cachedDiscovery = Matrix.of(
+        context,
+      ).loginHomeserverSummary?.discoveryInformation;
+      final cachedBaseUrl =
+          cachedDiscovery?.mHomeserver.baseUrl.toString() ?? '';
+      if (currentHost.endsWith(mxidDomain) && cachedBaseUrl.isNotEmpty) {
+        newDomain = cachedDiscovery!.mHomeserver.baseUrl;
       }
+
       if (newDomain != oldHomeserver) {
-        await client.checkHomeserver(newDomain);
+        client.homeserver = newDomain;
+        await client.checkHomeserver(newDomain, checkWellKnown: false);
 
         if (client.homeserver == null) {
           client.homeserver = oldHomeserver;
