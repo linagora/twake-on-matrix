@@ -1,5 +1,4 @@
 import 'package:fluffychat/generated/l10n/app_localizations.dart';
-import 'package:fluffychat/pages/auto_homeserver_picker/auto_homeserver_picker.dart';
 import 'package:fluffychat/pages/chat_list/chat_list.dart';
 import 'package:fluffychat/pages/homeserver_picker/homeserver_picker_view.dart';
 import 'package:fluffychat/pages/login/login_view.dart';
@@ -273,22 +272,19 @@ class LoginRobot extends CoreRobot implements AbstractLoginRobot {
   ///     Patrol locally with their personal Linagora SSO credentials.
   ///   - otherwise → `m.login.password` straight to the homeserver. Used by
   ///     CI / FTL with a dedicated test account that has a local
-  ///     `password_hash` in Synapse.  On web, SSO bypass is not reachable
-  ///     (cross-origin XHR blocked), so this path is always taken.
+  ///     `password_hash` in Synapse.
+  ///
+  /// This is the **mobile** implementation. Web uses [WebLoginRobot] which
+  /// always goes through `m.login.password` via [AutoHomeserverPicker].
   @override
   Future<void> loginViaApi({
     required String serverUrl,
     required String username,
     required String password,
   }) async {
-    // On web the home route renders AutoHomeserverPicker, not TwakeWelcome.
-    final notLoggedInFinder = kIsWeb
-        ? $(AutoHomeserverPicker)
-        : $(TwakeWelcome);
-
     await waitForEitherVisible(
       $: $,
-      first: notLoggedInFinder,
+      first: $(TwakeWelcome),
       second: $(ChatList),
       timeout: const Duration(seconds: 60),
     );
@@ -340,11 +336,7 @@ class LoginRobot extends CoreRobot implements AbstractLoginRobot {
     required String username,
     required String password,
   }) async {
-    // On web the home route is AutoHomeserverPicker, not TwakeWelcome.
-    final homeFinder = kIsWeb
-        ? $(AutoHomeserverPicker).finder.first
-        : $(TwakeWelcome).finder.first;
-    final context = $.tester.element(homeFinder);
+    final context = $.tester.element($(TwakeWelcome).finder.first);
     final matrix = Matrix.of(context);
     final client = await matrix.getLoginClient();
     matrix.loginHomeserverSummary = await client
