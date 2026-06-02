@@ -71,7 +71,7 @@ class MessageContentBuilder extends StatelessWidget
                 isContainsTagName(event) ||
                     isContainsSpecialHTMLTag(event) ||
                     event.isCaptionModeOrReply() ||
-                    VideoCallHelper.extractUrl(event.text) != null
+                    VideoCallHelper.extractUrl(event) != null
                 ? null
                 : stepWidth,
             child: Column(

@@ -299,7 +299,7 @@ class MessageContent extends StatelessWidget
           case MessageTypes.Text:
           case MessageTypes.Notice:
           case MessageTypes.Emote:
-            final videoCallUrl = VideoCallHelper.extractUrl(event.text);
+            final videoCallUrl = VideoCallHelper.extractUrl(event);
             if (videoCallUrl != null) {
               return VideoCallContent(callUrl: videoCallUrl);
             }

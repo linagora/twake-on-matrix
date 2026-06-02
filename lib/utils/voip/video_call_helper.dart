@@ -8,13 +8,14 @@ class VideoCallHelper {
   const VideoCallHelper._();
 
   static const _slugAlphabet = 'abcdefghijklmnopqrstuvwxyz';
+  static const callUrlKey = 'call_url';
 
-  static final RegExp _urlRegExp = RegExp(
-    '${RegExp.escape(AppConfig.videoCallBaseUrl)}/[a-z]{3}-[a-z]{4}-[a-z]{3}(?=\\s|\$)',
-  );
-
-  static String? extractUrl(String body) =>
-      _urlRegExp.firstMatch(body.trim())?.group(0);
+  static String? extractUrl(Event event) {
+    if (event.messageType != MessageTypes.Text) return null;
+    final url = event.content.tryGet<String>(callUrlKey);
+    if (url == null || url.isEmpty) return null;
+    return url;
+  }
 
   static String generateUrl() {
     final random = Random.secure();
@@ -29,6 +30,12 @@ class VideoCallHelper {
   static void start({required Room? room, required String startedTitle}) {
     if (room == null) return;
     final url = generateUrl();
-    unawaited(room.sendTextEvent('$startedTitle $url'));
+    unawaited(
+      room.sendEvent({
+        'msgtype': MessageTypes.Text,
+        'body': '$startedTitle $url',
+        callUrlKey: url,
+      }),
+    );
   }
 }
