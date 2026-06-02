@@ -10,10 +10,15 @@ class VideoCallHelper {
   static const _slugAlphabet = 'abcdefghijklmnopqrstuvwxyz';
   static const callUrlKey = 'call_url';
 
+  static final RegExp _validMeetUrlRegExp = RegExp(
+    '^${RegExp.escape(AppConfig.videoCallBaseUrl)}/[a-z]{3}-[a-z]{4}-[a-z]{3}\$',
+  );
+
   static String? extractUrl(Event event) {
     if (event.messageType != MessageTypes.Text) return null;
     final url = event.content.tryGet<String>(callUrlKey);
     if (url == null || url.isEmpty) return null;
+    if (!_validMeetUrlRegExp.hasMatch(url)) return null;
     return url;
   }
 
