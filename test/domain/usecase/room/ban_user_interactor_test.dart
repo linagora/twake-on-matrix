@@ -67,7 +67,7 @@ void main() {
         when(mockUser.canBan).thenReturn(true);
         when(
           mockUser.powerLevel,
-        ).thenReturn(DefaultPowerLevelMember.member.powerLevel);
+        ).thenReturn(PowerLevel(DefaultPowerLevelMember.member.powerLevel));
         when(mockUser.ban()).thenAnswer((_) async {});
 
         // Act
@@ -101,7 +101,7 @@ void main() {
         when(mockUser.canBan).thenReturn(true);
         when(
           mockUser.powerLevel,
-        ).thenReturn(DefaultPowerLevelMember.member.powerLevel);
+        ).thenReturn(PowerLevel(DefaultPowerLevelMember.member.powerLevel));
         final mockException = MockMatrixException();
         when(mockException.error).thenReturn(MatrixError.M_FORBIDDEN);
         when(mockUser.ban()).thenThrow(mockException);
@@ -136,7 +136,7 @@ void main() {
         when(mockUser.canBan).thenReturn(true);
         when(
           mockUser.powerLevel,
-        ).thenReturn(DefaultPowerLevelMember.member.powerLevel);
+        ).thenReturn(PowerLevel(DefaultPowerLevelMember.member.powerLevel));
         final mockException = MockMatrixException();
         when(mockException.error).thenReturn(MatrixError.M_UNKNOWN);
         when(mockUser.ban()).thenThrow(mockException);
@@ -169,7 +169,7 @@ void main() {
       when(mockUser.canBan).thenReturn(true);
       when(
         mockUser.powerLevel,
-      ).thenReturn(DefaultPowerLevelMember.member.powerLevel);
+      ).thenReturn(PowerLevel(DefaultPowerLevelMember.member.powerLevel));
       final exception = Exception('Something went wrong');
       when(mockUser.ban()).thenThrow(exception);
 
@@ -213,9 +213,9 @@ void main() {
           };
 
           when(mockUser.canBan).thenReturn(true);
-          when(
-            mockUser.powerLevel,
-          ).thenReturn(DefaultPowerLevelMember.moderator.powerLevel);
+          when(mockUser.powerLevel).thenReturn(
+            PowerLevel(DefaultPowerLevelMember.moderator.powerLevel),
+          );
           when(mockUser.id).thenReturn('@user:server.com');
           when(mockUser.room).thenReturn(mockRoom);
           when(mockUser.ban()).thenAnswer((_) async {});
@@ -283,7 +283,7 @@ void main() {
           when(mockUser.canBan).thenReturn(true);
           when(
             mockUser.powerLevel,
-          ).thenReturn(DefaultPowerLevelMember.admin.powerLevel);
+          ).thenReturn(PowerLevel(DefaultPowerLevelMember.admin.powerLevel));
           when(mockUser.id).thenReturn('@admin:server.com');
           when(mockUser.room).thenReturn(mockRoom);
           when(mockUser.ban()).thenAnswer((_) async {});
@@ -343,9 +343,9 @@ void main() {
         () async {
           // Arrange
           when(mockUser.canBan).thenReturn(true);
-          when(
-            mockUser.powerLevel,
-          ).thenReturn(DefaultPowerLevelMember.moderator.powerLevel);
+          when(mockUser.powerLevel).thenReturn(
+            PowerLevel(DefaultPowerLevelMember.moderator.powerLevel),
+          );
           when(mockUser.id).thenReturn('@mod:server.com');
           when(mockUser.room).thenReturn(mockRoom);
           when(mockUser.ban()).thenAnswer((_) async {});
@@ -387,7 +387,7 @@ void main() {
           when(mockUser.canBan).thenReturn(true);
           when(
             mockUser.powerLevel,
-          ).thenReturn(DefaultPowerLevelMember.member.powerLevel);
+          ).thenReturn(PowerLevel(DefaultPowerLevelMember.member.powerLevel));
           when(mockUser.ban()).thenAnswer((_) async {});
 
           // Act
@@ -425,7 +425,7 @@ void main() {
           when(mockUser.canBan).thenReturn(true);
           when(
             mockUser.powerLevel,
-          ).thenReturn(DefaultPowerLevelMember.guest.powerLevel);
+          ).thenReturn(PowerLevel(DefaultPowerLevelMember.guest.powerLevel));
           when(mockUser.ban()).thenAnswer((_) async {});
 
           // Act
@@ -469,9 +469,9 @@ void main() {
           when(mockException.error).thenReturn(MatrixError.M_FORBIDDEN);
 
           when(mockUser.canBan).thenReturn(true);
-          when(
-            mockUser.powerLevel,
-          ).thenReturn(DefaultPowerLevelMember.moderator.powerLevel);
+          when(mockUser.powerLevel).thenReturn(
+            PowerLevel(DefaultPowerLevelMember.moderator.powerLevel),
+          );
           when(mockUser.id).thenReturn('@mod:server.com');
           when(mockUser.room).thenReturn(mockRoom);
           when(mockUser.ban()).thenAnswer((_) async {});

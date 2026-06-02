@@ -278,7 +278,7 @@ class ProfileInfoBodyController extends State<ProfileInfoBody>
           .execute(
             room: room,
             userPermissionLevels: {
-              user!: room.ownUser.powerLevel,
+              user!: room.ownUser.powerLevel.level,
               room.ownUser: room.getUserDefaultLevel(),
             },
           )

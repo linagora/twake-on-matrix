@@ -522,8 +522,9 @@ extension LocalizedBody on Event {
     );
 
     final editEventJson = latestEdit.toJson();
-    final newContent =
-        editEventJson[MatrixEventFields.content][MatrixEventFields.newContent];
+    final editContent =
+        editEventJson[MatrixEventFields.content] as Map<String, Object?>?;
+    final newContent = editContent?[MatrixEventFields.newContent];
 
     if (newContent is! Map) {
       return this;
@@ -536,17 +537,23 @@ extension LocalizedBody on Event {
       originalEventJson[MatrixEventFields.content][MatrixEventFields
               .newContent] =
           newContent;
-      originalEventJson[MatrixEventFields.content]['body'] = newContent['body'];
+      originalEventJson[MatrixEventFields.content][MatrixEventFields.body] =
+          newContent[MatrixEventFields.body];
 
       // Update formatted_body if it exists in the new content
-      if (newContent['formatted_body'] != null) {
-        originalEventJson[MatrixEventFields.content]['formatted_body'] =
-            newContent['formatted_body'];
-        originalEventJson[MatrixEventFields.content]['format'] =
-            newContent['format'];
+      if (newContent[MatrixEventFields.formattedBody] != null) {
+        originalEventJson[MatrixEventFields.content][MatrixEventFields
+                .formattedBody] =
+            newContent[MatrixEventFields.formattedBody];
+        originalEventJson[MatrixEventFields.content][MatrixEventFields.format] =
+            newContent[MatrixEventFields.format];
       } else {
-        originalEventJson[MatrixEventFields.content].remove('formatted_body');
-        originalEventJson[MatrixEventFields.content].remove('format');
+        originalEventJson[MatrixEventFields.content].remove(
+          MatrixEventFields.formattedBody,
+        );
+        originalEventJson[MatrixEventFields.content].remove(
+          MatrixEventFields.format,
+        );
       }
 
       return Event.fromJson(originalEventJson, room);

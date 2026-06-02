@@ -902,6 +902,7 @@ class ChatController extends State<Chat>
           extraContent: extraContent,
         )
         .catchError((e) {
+          room?.sendingFilePlaceholders.remove(txid);
           TwakeSnackBar.show(
             context,
             L10n.of(context)!.audioMessageFailedToSend,
@@ -956,7 +957,7 @@ class ChatController extends State<Chat>
           inReplyTo: replyEventNotifier.value,
           extraContent: extraContent,
         )
-        .then((_) {
+        .whenComplete(() {
           room?.sendingFilePlaceholders.remove(txid);
         })
         .catchError((e) {

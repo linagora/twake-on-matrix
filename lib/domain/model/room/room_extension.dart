@@ -12,8 +12,17 @@ import 'package:matrix/matrix.dart';
 // ignore: implementation_imports
 import 'package:matrix/src/utils/markdown.dart';
 
+/// In-memory store for files being sent, keyed by transaction ID.
+///
+/// Replaces `Room.sendingFilePlaceholders` which was removed in matrix SDK v7.0.
+final Map<String, MatrixFile> _globalSendingFilePlaceholders = {};
+
 extension RoomExtension on Room {
   static const _kRefreshingLastEventType = 'com.famedly.refreshing_last_event';
+
+  // ignore: library_private_types_in_public_api
+  Map<String, MatrixFile> get sendingFilePlaceholders =>
+      _globalSendingFilePlaceholders;
   RecentChatSearchModel toRecentChatSearchModel(
     MatrixLocalizations matrixLocalizations,
   ) {
@@ -73,66 +82,66 @@ extension RoomExtension on Room {
 
   bool get canPinMessage {
     final currentPowerLevelsMap = getState(EventTypes.RoomPowerLevels)?.content;
-    if (currentPowerLevelsMap == null) return 0 <= ownPowerLevel;
+    if (currentPowerLevelsMap == null) return PowerLevel(0) <= ownPowerLevel;
     return (currentPowerLevelsMap
                 .tryGetMap<String, Object?>('events')
                 ?.tryGet<int>(EventTypes.RoomPinnedEvents) ??
-            getDefaultPowerLevel(currentPowerLevelsMap)) <=
-        ownPowerLevel;
+            getDefaultPowerLevel(currentPowerLevelsMap).level) <=
+        ownPowerLevel.level;
   }
 
   bool get canSendReactions {
     final currentPowerLevelsMap = getState(EventTypes.RoomPowerLevels)?.content;
-    if (currentPowerLevelsMap == null) return 0 <= ownPowerLevel;
+    if (currentPowerLevelsMap == null) return PowerLevel(0) <= ownPowerLevel;
     return (currentPowerLevelsMap
                 .tryGetMap<String, Object?>('events')
                 ?.tryGet<int>(EventTypes.Reaction) ??
-            getDefaultPowerLevel(currentPowerLevelsMap)) <=
-        ownPowerLevel;
+            getDefaultPowerLevel(currentPowerLevelsMap).level) <=
+        ownPowerLevel.level;
   }
 
   bool get canChangeRoomName {
     final currentPowerLevelsMap = getState(EventTypes.RoomPowerLevels)?.content;
-    if (currentPowerLevelsMap == null) return 0 <= ownPowerLevel;
+    if (currentPowerLevelsMap == null) return PowerLevel(0) <= ownPowerLevel;
     return (currentPowerLevelsMap
                 .tryGetMap<String, Object?>('events')
                 ?.tryGet<int>(EventTypes.RoomName) ??
             currentPowerLevelsMap.tryGet<int>('state_default') ??
             80) <=
-        ownPowerLevel;
+        ownPowerLevel.level;
   }
 
   bool get canChangeTopic {
     final currentPowerLevelsMap = getState(EventTypes.RoomPowerLevels)?.content;
-    if (currentPowerLevelsMap == null) return 0 <= ownPowerLevel;
+    if (currentPowerLevelsMap == null) return PowerLevel(0) <= ownPowerLevel;
     return (currentPowerLevelsMap
                 .tryGetMap<String, Object?>('events')
                 ?.tryGet<int>(EventTypes.RoomTopic) ??
             currentPowerLevelsMap.tryGet<int>('state_default') ??
             80) <=
-        ownPowerLevel;
+        ownPowerLevel.level;
   }
 
   bool get canChangeRoomAvatar {
     final currentPowerLevelsMap = getState(EventTypes.RoomPowerLevels)?.content;
-    if (currentPowerLevelsMap == null) return 0 <= ownPowerLevel;
+    if (currentPowerLevelsMap == null) return PowerLevel(0) <= ownPowerLevel;
     return (currentPowerLevelsMap
                 .tryGetMap<String, Object?>('events')
                 ?.tryGet<int>(EventTypes.RoomAvatar) ??
             currentPowerLevelsMap.tryGet<int>('state_default') ??
             80) <=
-        ownPowerLevel;
+        ownPowerLevel.level;
   }
 
   bool get canEnableEncryption {
     final currentPowerLevelsMap = getState(EventTypes.RoomPowerLevels)?.content;
-    if (currentPowerLevelsMap == null) return 0 <= ownPowerLevel;
+    if (currentPowerLevelsMap == null) return PowerLevel(0) <= ownPowerLevel;
     return (currentPowerLevelsMap
                 .tryGetMap<String, Object?>('events')
                 ?.tryGet<int>(EventTypes.Encryption) ??
             currentPowerLevelsMap.tryGet<int>('state_default') ??
             80) <=
-        ownPowerLevel;
+        ownPowerLevel.level;
   }
 
   bool get canEditChatDetails {
@@ -146,12 +155,12 @@ extension RoomExtension on Room {
 
   bool get canSendRedactEvent {
     final currentPowerLevelsMap = getState(EventTypes.RoomPowerLevels)?.content;
-    if (currentPowerLevelsMap == null) return 0 <= ownPowerLevel;
+    if (currentPowerLevelsMap == null) return PowerLevel(0) <= ownPowerLevel;
     return (currentPowerLevelsMap
                 .tryGetMap<String, Object?>('events')
                 ?.tryGet<int>(EventTypes.Redaction) ??
-            getDefaultPowerLevel(currentPowerLevelsMap)) <=
-        ownPowerLevel;
+            getDefaultPowerLevel(currentPowerLevelsMap).level) <=
+        ownPowerLevel.level;
   }
 
   bool get canRedactEventSentByOther {
@@ -263,49 +272,59 @@ extension RoomExtension on Room {
 
   bool get canAssignRoles {
     final currentPowerLevelsMap = getState(EventTypes.RoomPowerLevels)?.content;
-    if (currentPowerLevelsMap == null) return 0 <= ownPowerLevel;
+    if (currentPowerLevelsMap == null) return PowerLevel(0) <= ownPowerLevel;
     return (currentPowerLevelsMap
                 .tryGetMap<String, Object?>('events')
                 ?.tryGet<int>(EventTypes.RoomPowerLevels) ??
             currentPowerLevelsMap.tryGet<int>('state_default') ??
             DefaultPowerLevelMember.admin.powerLevel) <=
-        ownPowerLevel;
+        ownPowerLevel.level;
   }
 
   List<User> getAssignRolesMember() {
     final members = getParticipants();
     if (members.isEmpty) return [];
     return members.where((final User member) {
-        final powerLevel = member.powerLevel;
-        return powerLevel >= DefaultPowerLevelMember.moderator.powerLevel &&
-            member.membership == Membership.join;
-      }).toList()
-      ..sort((small, great) => great.powerLevel.compareTo(small.powerLevel));
+      final powerLevel = member.powerLevel;
+      return powerLevel >=
+              PowerLevel(DefaultPowerLevelMember.moderator.powerLevel) &&
+          member.membership == Membership.join;
+    }).toList()..sort(
+      (small, great) =>
+          great.powerLevel.level.compareTo(small.powerLevel.level),
+    );
   }
 
   List<User> getExceptionsMember() {
     final members = getParticipants();
     if (members.isEmpty) return [];
     return members.where((final User member) {
-        final powerLevel = member.powerLevel;
-        return powerLevel < DefaultPowerLevelMember.member.powerLevel &&
-            member.membership == Membership.join;
-      }).toList()
-      ..sort((small, great) => great.powerLevel.compareTo(small.powerLevel));
+      final powerLevel = member.powerLevel;
+      return powerLevel <
+              PowerLevel(DefaultPowerLevelMember.member.powerLevel) &&
+          member.membership == Membership.join;
+    }).toList()..sort(
+      (small, great) =>
+          great.powerLevel.level.compareTo(small.powerLevel.level),
+    );
   }
 
   List<User> getBannedMembers() {
     final members = getParticipants([Membership.ban]);
     if (members.isEmpty) return [];
-    return members
-      ..sort((small, great) => great.powerLevel.compareTo(small.powerLevel));
+    return members..sort(
+      (small, great) =>
+          great.powerLevel.level.compareTo(small.powerLevel.level),
+    );
   }
 
   List<User> getCurrentMembers() {
     final members = getParticipants([Membership.invite, Membership.join]);
     if (members.isEmpty) return [];
-    return members
-      ..sort((small, great) => great.powerLevel.compareTo(small.powerLevel));
+    return members..sort(
+      (small, great) =>
+          great.powerLevel.level.compareTo(small.powerLevel.level),
+    );
   }
 
   bool canUpdateRoleInRoom(User user) {
@@ -341,7 +360,8 @@ extension RoomExtension on Room {
   }
 
   bool get canTransferOwnership {
-    return ownPowerLevel >= DefaultPowerLevelMember.owner.powerLevel &&
+    return ownPowerLevel >=
+            PowerLevel(DefaultPowerLevelMember.owner.powerLevel) &&
         canAssignRoles;
   }
 
@@ -406,7 +426,7 @@ extension NullableRoomExtension on Room? {
 extension SortByPowerLevel on List<User> {
   List<User> sortByPowerLevel() {
     final newList = [...this];
-    newList.sort((a, b) => b.powerLevel.compareTo(a.powerLevel));
+    newList.sort((a, b) => b.powerLevel.level.compareTo(a.powerLevel.level));
     return newList;
   }
 }

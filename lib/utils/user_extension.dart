@@ -15,7 +15,7 @@ extension UserExtension on User {
 
   DefaultPowerLevelMember get getDefaultPowerLevelMember {
     return DefaultPowerLevelMember.getDefaultPowerLevelByUsersDefault(
-      usersDefault: powerLevel,
+      usersDefault: powerLevel.level,
     );
   }
 

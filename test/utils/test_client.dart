@@ -9,7 +9,7 @@ Future<Client> prepareTestClient({
 }) async {
   homeserver ??= Uri.parse('https://fakeserver.notexisting');
   final client = await getClient();
-  await client.checkHomeserver(homeserver);
+  await client.checkHomeserver(homeserver, checkWellKnown: false);
   if (loggedIn) {
     await client.login(
       LoginType.mLoginToken,

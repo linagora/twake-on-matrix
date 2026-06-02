@@ -37,7 +37,8 @@ class BanUserInteractor {
   /// but the ban operation continues. This prevents issues when banning
   /// users with elevated privileges.
   Future<void> _reducePowerLevelIfNeeded(User user) async {
-    if (user.powerLevel <= DefaultPowerLevelMember.member.powerLevel) {
+    if (user.powerLevel <=
+        PowerLevel(DefaultPowerLevelMember.member.powerLevel)) {
       return;
     }
 
