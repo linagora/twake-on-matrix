@@ -40,7 +40,6 @@ class ChatProfileInfoView extends StatelessWidget {
               room: controller.room,
               user: user,
               presentationContact: contact,
-              isAlreadyInChat: controller.isAlreadyInChat(context),
               tabList: controller.tabList,
               tabController: controller.tabController,
               isDraftInfo: controller.widget.isDraftInfo,

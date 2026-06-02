@@ -778,6 +778,9 @@ class SecurityContactsVisibilityRoute extends GoRouteData
 class RoomRoute extends GoRouteData with $RoomRoute {
   const RoomRoute({required this.roomid, this.event, this.$extra});
 
+  /// Prefix used to match room route names (e.g. in [Navigator.popUntil]).
+  static const String pathPrefix = '/rooms/room_';
+
   final String roomid;
   final String? event; // query param: ?event=xxx
   final Object? $extra;
@@ -821,7 +824,7 @@ class RoomRoute extends GoRouteData with $RoomRoute {
     String? roomName,
     List<MatrixFile?>? shareFiles,
   }) {
-    final name = '/rooms/room_$roomid';
+    final name = '$pathPrefix$roomid';
     final key = prefix == 'Share'
         ? Key('${prefix}_${roomid}_${shareFiles.hashCode}')
         : Key('${prefix}_$roomid');
