@@ -1292,6 +1292,9 @@ class MatrixState extends State<Matrix>
             .getItemBool(SettingKeys.autoplayImages, AppConfig.autoplayImages)
             .then((value) => AppConfig.autoplayImages = value),
         store
+            .getItemBool(SettingKeys.gifAutoplay, AppConfig.gifAutoplay)
+            .then((value) => AppConfig.gifAutoplay = value),
+        store
             .getItemBool(
               SettingKeys.experimentalVoip,
               AppConfig.experimentalVoip,
