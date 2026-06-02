@@ -9,7 +9,7 @@ environment:
 dependencies:
   sentry_flutter: ^9.10.0
   ### Dependencies from git ###
-  matrix: ^6.2.0
+  matrix: ^7.1.2
 
   receive_sharing_intent:
     git:

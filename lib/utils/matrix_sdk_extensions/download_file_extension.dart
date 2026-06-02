@@ -13,6 +13,7 @@ import 'package:fluffychat/domain/model/file_info/file_info.dart';
 import 'package:fluffychat/utils/manager/download_manager/download_file_state.dart';
 import 'package:fluffychat/utils/manager/storage_directory_manager.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
+import 'package:fluffychat/domain/model/room/room_extension.dart';
 import 'package:matrix/matrix.dart';
 
 extension DownloadFileExtension on Event {

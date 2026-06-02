@@ -81,7 +81,7 @@ extension ClientStoriesExtension on Client {
                   ?.content
                   .tryGet<String>('type') ==
               storiesRoomType &&
-          room.ownPowerLevel >= 100,
+          room.ownPowerLevel >= PowerLevel(100),
     );
     if (candidates.isEmpty) return null;
     if (candidates.length == 1) return candidates.single;
