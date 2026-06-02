@@ -4,9 +4,11 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:patrol/patrol.dart';
+import '../abstract/abstract_language_setting_robot.dart';
 import '../home_robot.dart';
 
-class LanguageSettingRobot extends HomeRobot {
+class LanguageSettingRobot extends HomeRobot
+    implements AbstractLanguageSettingRobot {
   LanguageSettingRobot(super.$);
 
   PatrolFinder title() {
@@ -49,27 +51,32 @@ class LanguageSettingRobot extends HomeRobot {
     return vietnamese().$(Text).at(0).text;
   }
 
+  @override
   Future<void> chooseEnglish() async {
     await english().tap();
     await $.waitUntilVisible(english().$(Icon));
     await $.waitUntilVisible(english().$(Icon));
   }
 
+  @override
   Future<void> chooseFrench() async {
     await french().tap();
     await $.waitUntilVisible(french().$(Icon));
   }
 
+  @override
   Future<void> chooseRussian() async {
     await russian().tap();
     await $.waitUntilVisible(russian().$(Icon));
   }
 
+  @override
   Future<void> chooseVietnamese() async {
     await vietnamese().tap();
     await $.waitUntilVisible(vietnamese().$(Icon));
   }
 
+  @override
   String? getSelectedLanguage() {
     final selectedLanguage = $(ListTile).containing($(Icon));
     final text = selectedLanguage.$(Text).at(1).text;
@@ -81,6 +88,7 @@ class LanguageSettingRobot extends HomeRobot {
     return text;
   }
 
+  @override
   Future<void> backToSettingScreen() async {
     // On wide layouts (web / desktop / tablet) the language screen hides
     // the AppBar back button entirely — see `responsiveUtils.isMobile`

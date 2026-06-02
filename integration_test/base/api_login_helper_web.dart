@@ -17,7 +17,7 @@ import 'package:http/http.dart' as http;
 /// The function returns a Matrix **access token** (not a one-time
 /// `loginToken`); the caller is expected to inject it into the Matrix
 /// client rather than feeding it through the `/onAuthRedirect` deep link.
-Future<String> fetchOidcLoginToken({
+Future<String> fetchAuthToken({
   required String username,
   required String password,
 }) async {
@@ -70,7 +70,7 @@ Future<void> sendMessageAsReceiver({required String message}) async {
     );
   }
 
-  final accessToken = await fetchOidcLoginToken(
+  final accessToken = await fetchAuthToken(
     username: receiver,
     password: passOfReceiver,
   );

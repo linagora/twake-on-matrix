@@ -4,11 +4,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:patrol/patrol.dart';
 import '../base/core_robot.dart';
+import 'abstract/abstract_home_robot.dart';
 import 'chat_list_robot.dart';
 import 'contact_list_robot.dart';
 import 'setting/setting_robot.dart';
 
-class HomeRobot extends CoreRobot {
+class HomeRobot extends CoreRobot implements AbstractHomeRobot {
   HomeRobot(super.$);
 
   Future<PatrolFinder> getContactTab() async {
@@ -27,6 +28,7 @@ class HomeRobot extends CoreRobot {
     return $(NavigationRail).$(find.byIcon(Icons.settings_outlined)).first;
   }
 
+  @override
   Future<ContactListRobot> gotoContactListScreen() async {
     await (await getContactTab()).tap();
     await confirmShareContactInformation();
@@ -36,12 +38,14 @@ class HomeRobot extends CoreRobot {
     return ContactListRobot($);
   }
 
+  @override
   Future<ChatListRobot> gotoChatListScreen() async {
     await (await getChatTab()).tap();
     await $.pumpAndSettle();
     return ChatListRobot($);
   }
 
+  @override
   Future<SettingRobot> gotoSettingScreen() async {
     final settingTab = await getSettingTab();
     await settingTab.tap();

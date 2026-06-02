@@ -235,7 +235,7 @@ class ChatScenario extends CoreRobot {
     // On mobile the confirmation surfaces as a native AlertDialog; on web it
     // renders as a Flutter dialog, so the tap flows through a Flutter finder.
     if (kIsWeb) {
-      await $(find.text(_l10n.delete)).tap();
+      await $(AlertDialog).$(find.text(_l10n.delete)).tap();
     } else {
       await $.native.tap(Selector(text: _l10n.delete));
     }
