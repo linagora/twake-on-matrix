@@ -88,6 +88,12 @@ class SettingsChatView extends StatelessWidget {
                   defaultValue:
                       AppConfig.enableRightAndLeftMessageAlignmentOnWeb,
                 ),
+              SettingsSwitchListTile.adaptive(
+                title: L10n.of(context)!.gifAutoplay,
+                onChanged: (value) => AppConfig.gifAutoplay = value,
+                storeKey: SettingKeys.gifAutoplay,
+                defaultValue: AppConfig.gifAutoplay,
+              ),
               const Divider(),
               if (Matrix.of(context).webrtcIsSupported)
                 SettingsSwitchListTile.adaptive(
