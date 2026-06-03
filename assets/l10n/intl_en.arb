@@ -3209,5 +3209,7 @@
       "totalCount": {}
     }
   },
-  "gifAutoplay": "GIF autoplay"
+  "gifAutoplay": "GIF autoplay",
+  "couldNotLaunchUrl": "Could not launch URL",
+  "@downloadQrCode": {}
 }
