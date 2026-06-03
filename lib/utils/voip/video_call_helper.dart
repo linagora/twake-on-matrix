@@ -42,7 +42,7 @@ class VideoCallHelper {
     unawaited(
       room.sendEvent({
         'msgtype': MessageTypes.Text,
-        'body': url,
+        'body': "$startedTitle $url",
         callUrlKey: url,
       }),
     );
