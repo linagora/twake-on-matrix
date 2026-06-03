@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 import 'package:fluffychat/config/go_routes/app_routes.dart';
+import 'package:fluffychat/utils/matrix_sdk_extensions/hive_collections_database.dart';
 import 'package:fluffychat/config/localizations/localization_service.dart';
 import 'package:fluffychat/data/model/federation_server/federation_configuration.dart';
 import 'package:fluffychat/data/model/federation_server/federation_server_information.dart';
@@ -1090,7 +1091,10 @@ class MatrixState extends State<Matrix>
       'Matrix::_getHomeserverInformation: client homeserver = ${newClient.homeserver}',
     );
     if (newClient.homeserver == null) return;
-    final previousDiscovery = loginHomeserverSummary?.discoveryInformation;
+    final db = newClient.database;
+    final previousDiscovery =
+        loginHomeserverSummary?.discoveryInformation ??
+        (db is HiveCollectionsDatabase ? await db.getWellKnown() : null);
     final newSummary = await newClient
         .checkHomeserver(newClient.homeserver!, checkWellKnown: false)
         .toHomeserverSummary();

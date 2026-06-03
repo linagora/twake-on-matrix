@@ -25,7 +25,10 @@ class CreateSupportChatInteractor {
     String? roomId;
     String? userId;
     try {
-      final discovery = cachedDiscovery ?? await client.getWellknown();
+      if (cachedDiscovery == null) {
+        throw Exception('No cached discovery information available');
+      }
+      final discovery = cachedDiscovery;
       final supportChatTwakeId =
           (discovery.additionalProperties[WellKnownMixin.twakeChatKey]
               as Map?)?[WellKnownMixin.supportContact];
