@@ -12,19 +12,18 @@ import '../robots/chat_group_detail_robot.dart';
 import '../robots/chat_list_robot.dart';
 import '../robots/contact_list_robot.dart';
 import '../robots/home_robot.dart';
-import '../robots/login_robot.dart';
-import '../robots/search_robot.dart';
-import '../robots/setting/app_language_setting_robot.dart';
 import '../robots/setting/setting_robot.dart';
+import '../robots/web/web_language_setting_robot.dart';
+import '../robots/web/web_login_robot.dart';
+import '../robots/web/web_search_robot.dart';
 import 'robot_factory.dart';
 
 /// Web implementation of [RobotFactory].
 ///
-/// Today it reuses the existing robots directly — the `kIsWeb` branches
-/// inside each robot already handle web-specific differences. Subsequent
-/// PRs will introduce dedicated `WebXRobot` classes wherever the UI
-/// surface genuinely diverges; this factory is the one place those swaps
-/// get wired.
+/// Uses dedicated `WebXRobot` classes where the UI genuinely diverges
+/// between mobile and web (login flow, navigation back, language text
+/// casing). Robots without platform divergence (home, chat list, chat
+/// group detail, contacts, settings) are shared with mobile.
 class WebRobotFactory implements RobotFactory {
   const WebRobotFactory(this.$);
 
@@ -32,7 +31,7 @@ class WebRobotFactory implements RobotFactory {
   final PatrolIntegrationTester $;
 
   @override
-  AbstractLoginRobot loginRobot() => LoginRobot($);
+  AbstractLoginRobot loginRobot() => WebLoginRobot($);
 
   @override
   AbstractHomeRobot homeRobot() => HomeRobot($);
@@ -45,7 +44,7 @@ class WebRobotFactory implements RobotFactory {
       ChatGroupDetailRobot($);
 
   @override
-  AbstractSearchRobot searchRobot() => SearchRobot($);
+  AbstractSearchRobot searchRobot() => WebSearchRobot($);
 
   @override
   AbstractContactListRobot contactListRobot() => ContactListRobot($);
@@ -55,5 +54,5 @@ class WebRobotFactory implements RobotFactory {
 
   @override
   AbstractLanguageSettingRobot languageSettingRobot() =>
-      LanguageSettingRobot($);
+      WebLanguageSettingRobot($);
 }

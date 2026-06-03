@@ -1,5 +1,4 @@
 import 'package:fluffychat/widgets/twake_components/twake_icon_button.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:patrol/patrol.dart';
@@ -13,12 +12,12 @@ class SearchRobot extends CoreRobot implements AbstractSearchRobot {
     return $(AppBar).$(TwakeIconButton).$(Icon);
   }
 
+  /// Mobile implementation — waits for `BottomNavigationBar` after going back.
+  /// Web uses [WebSearchRobot] which skips that wait.
   @override
   Future<void> backToPreviousScreen() async {
     await goBack();
-    if (!kIsWeb) {
-      await $.waitUntilVisible($(BottomNavigationBar));
-    }
+    await $.waitUntilVisible($(BottomNavigationBar));
   }
 
   PatrolFinder getSearchTextField() {
