@@ -11,7 +11,7 @@ class RtcFocus with EquatableMixin {
   final String? type;
 
   @JsonKey(name: 'livekit_base_url')
-  final String? liveKitBaseUrl;
+  final Uri? liveKitBaseUrl;
 
   RtcFocus({this.type, this.liveKitBaseUrl});
 
