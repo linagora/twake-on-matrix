@@ -1,3 +1,24 @@
+## [2.22.4] - 2026-06-03
+### Added
+- TW-2634: Native browser right-click context menu on chat links (web)
+- TW-2965: Enable autoplay of GIFs in chat
+
+### Changed
+- Upgrade matrix SDK to version 7.1.2 with PowerLevel class comparisons
+- Upgrade matrix SDK to version 6.2.0 with oidcClientId parameter support
+
+### Fixed
+- TW-3070: Fix cannot download video
+- TW-3074: Fix duplicate message button issue and update message handling
+- TW-3084: Fix broken 'Enable right/left message alignment' option
+- TW-3077: Fix app crash when clicking Send message in profile info
+- Fix: eliminate post-login well-known 404s by never re-fetching from MXID domain
+
+### Tests
+- Integration test: Patrol web support with robot fixes
+- Integration test: extract abstract robot interfaces
+- Integration test: web robot implementations and factory wiring
+
 ## [2.22.3] - 2026-05-22
 ### Changed
 - TW-3063: Update open_file version to v3.5.11
