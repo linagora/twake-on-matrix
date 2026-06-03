@@ -1,6 +1,7 @@
 import 'dart:typed_data';
 
 import 'package:fluffychat/pages/image_viewer/media_viewer_app_bar_web.dart';
+import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
 import 'package:fluffychat/widgets/video_player.dart';
 import 'package:fluffychat/widgets/video_viewer_style.dart';
 import 'package:flutter/material.dart';
@@ -34,7 +35,7 @@ class VideoViewerDesktopTheme extends StatelessWidget {
         seekBarHeight: VideoViewerStyle.seekBarHeight,
         seekBarThumbColor: Theme.of(context).colorScheme.primary,
       ),
-      child: VideoPlayer(bytes: bytes, url: url),
+      child: VideoPlayer(bytes: bytes, url: url, mimeType: event?.mimeType),
     );
   }
 }

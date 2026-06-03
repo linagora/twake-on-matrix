@@ -12,6 +12,7 @@ import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/utils/size_string.dart';
 import 'package:fluffychat/generated/l10n/app_localizations.dart';
 import 'package:file_saver/file_saver.dart';
+import 'package:mime/mime.dart';
 
 extension MatrixFileExtension on MatrixFile {
   bool isImage() {
@@ -81,11 +82,24 @@ extension MatrixFileExtension on MatrixFile {
   Future<String?> downloadFileInWeb(BuildContext context) async {
     Logs().d("MatrixFileExtension()::downloadFileInWeb()::download on Web");
     try {
+      final fileExt = extensionFromMime(mimeType);
+      // Strip the dot + extension from `name` if already present to avoid
+      // duplicates (FileSaver appends `ext` to `name`).
+      final lowerName = name.toLowerCase();
+      final hasCanonicalExt =
+          fileExt.isNotEmpty && lowerName.endsWith('.$fileExt');
+      final baseName = hasCanonicalExt
+          ? name.substring(0, name.length - fileExt.length - 1)
+          : name;
       final directory = await FileSaver.instance.saveFile(
-        name: name,
+        name: baseName,
         bytes: bytes,
+        ext: fileExt,
+        mimeType: MimeType.custom,
+        customMimeType: mimeType,
       );
-      return '$directory/$name';
+      final savedName = fileExt.isNotEmpty ? '$baseName.$fileExt' : baseName;
+      return '$directory/$savedName';
     } catch (e) {
       Logs().e("MatrixFileExtension()::downloadFileInWeb()::Error: $e");
     }
