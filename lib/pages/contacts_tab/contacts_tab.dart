@@ -37,6 +37,11 @@ class ContactsTabController extends State<ContactsTab>
 
   Client get client => Matrix.of(context).client;
 
+  /// The Contacts page reflects the ToM Address Book only; DMs found by the
+  /// SDK must not be listed here (issue #3097).
+  @override
+  bool get enableRecentContacts => false;
+
   @override
   void initState() {
     SchedulerBinding.instance.addPostFrameCallback((_) async {
