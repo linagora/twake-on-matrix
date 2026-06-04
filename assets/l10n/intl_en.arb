@@ -3209,5 +3209,25 @@
       "totalCount": {}
     }
   },
-  "gifAutoplay": "GIF autoplay"
+  "gifAutoplay": "GIF autoplay",
+  "videoCallStartedTitle": "Has started a video call",
+  "@videoCallStartedTitle": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "startVideoCall": "Start video call",
+  "@startVideoCall": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "videoCallCopyLink": "Copy link",
+  "@videoCallCopyLink": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "videoCallJoinCall": "Join call",
+  "@videoCallJoinCall": {
+    "type": "text",
+    "placeholders": {}
+  }
 }
