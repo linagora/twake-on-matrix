@@ -156,29 +156,52 @@ class TwakeClipboard {
 
   Future<String?> pasteText({ClipboardReader? clipboardReader}) async {
     _reader = clipboardReader ?? await SystemClipboard.instance?.read();
-    String? copied;
 
     final readersFormat = _reader!.getFormats(Formats.standardFormats);
     if (readersFormat.isEmpty) {
-      return copied;
+      return null;
     }
 
-    final c = Completer<String?>();
-    final progress = _reader!.getValue<String>(
+    // Try plain text first.
+    final plainProgress = _reader!.getValue<String>(
       Formats.plainText,
-      (value) {
-        copied = value;
-        c.complete(copied);
-      },
-      onError: (error) {
-        Logs().e('Clipboard::readText(): $error');
-        c.completeError(error);
-      },
+      (_) {},
+      onError: (_) {},
     );
-    if (progress == null) {
-      c.completeError('Clipboard::readText(): error');
+    if (plainProgress != null) {
+      final c = Completer<String?>();
+      _reader!.getValue<String>(
+        Formats.plainText,
+        (value) => c.complete(value),
+        onError: (error) {
+          Logs().e('Clipboard::readText() plain: $error');
+          c.completeError(error);
+        },
+      );
+      return c.future;
     }
-    return c.future;
+
+    // Fallback: clipboard holds a URL (e.g. public.url copied from a browser).
+    // Read it as Formats.uri and convert to its string representation.
+    final uriProgress = _reader!.getValue<NamedUri>(
+      Formats.uri,
+      (_) {},
+      onError: (_) {},
+    );
+    if (uriProgress != null) {
+      final c = Completer<String?>();
+      _reader!.getValue<NamedUri>(
+        Formats.uri,
+        (namedUri) => c.complete(namedUri?.uri.toString()),
+        onError: (error) {
+          Logs().e('Clipboard::readText() uri: $error');
+          c.completeError(error);
+        },
+      );
+      return c.future;
+    }
+
+    return null;
   }
 
   SimpleFileFormat getFormatFrom(String? mimeType) {
