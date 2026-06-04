@@ -3,17 +3,16 @@ import 'package:json_annotation/json_annotation.dart';
 
 part 'rtc_focus.g.dart';
 
-@JsonSerializable()
+@JsonSerializable(fieldRename: FieldRename.snake)
 class RtcFocus with EquatableMixin {
   static const String rtcFociKey = 'org.matrix.msc4143.rtc_foci';
   static const String liveKitType = 'livekit';
 
   final String? type;
 
-  @JsonKey(name: 'livekit_base_url')
-  final Uri? liveKitBaseUrl;
+  final Uri? livekitBaseUrl;
 
-  RtcFocus({this.type, this.liveKitBaseUrl});
+  RtcFocus({this.type, this.livekitBaseUrl});
 
   bool get isLiveKit => type == liveKitType;
 
@@ -23,5 +22,5 @@ class RtcFocus with EquatableMixin {
   Map<String, dynamic> toJson() => _$RtcFocusToJson(this);
 
   @override
-  List<Object?> get props => [type, liveKitBaseUrl];
+  List<Object?> get props => [type, livekitBaseUrl];
 }

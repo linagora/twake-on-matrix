@@ -85,7 +85,7 @@ extension HomeserverSummaryExtensions on HomeserverSummary {
       if (focusJson is! Map) continue;
       try {
         final focus = RtcFocus.fromJson(Map<String, dynamic>.from(focusJson));
-        final baseUrl = focus.liveKitBaseUrl?.toString();
+        final baseUrl = focus.livekitBaseUrl?.toString();
         if (!focus.isLiveKit || baseUrl == null || baseUrl.isEmpty) continue;
         return baseUrl.endsWith('/')
             ? baseUrl.substring(0, baseUrl.length - 1)
