@@ -1,10 +1,10 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:patrol/patrol.dart';
-import 'package:fluffychat/main.dart' as app;
 import '../factories/robot_factory_provider.dart';
 import '../scenarios/login_scenario.dart';
 import 'base_test_scenario.dart';
+import 'test_app_initializer.dart';
 
 class TestBase {
   /// Runs a Patrol integration test.
@@ -94,18 +94,22 @@ class TestBase {
   }
 
   Future<void> initTwakeChat() async {
-    app.main();
+    await initTestApp();
   }
 
   Future<void> loginAndRun(PatrolIntegrationTester $) async {
-    final loginScenario = LoginScenario(
-      $,
-      username: const String.fromEnvironment('USERNAME'),
+    // Route the auto-login through the platform factory so web uses
+    // `WebLoginRobot` (waits for `AutoHomeserverPicker`, then
+    // `m.login.password`) and mobile keeps `LoginRobot` (waits for
+    // `TwakeWelcome`, OIDC/SSO bypass). The mobile path is byte-equivalent
+    // to the previous `LoginScenario.login()`.
+    final loginRobot = createRobotFactory($).loginRobot();
+    await loginRobot.loginViaApi(
       serverUrl: const String.fromEnvironment('SERVER_URL'),
+      username: const String.fromEnvironment('USERNAME'),
       password: const String.fromEnvironment('PASSWORD'),
     );
-
-    await loginScenario.login();
+    await loginRobot.grantNotificationPermission();
   }
 
   void twakePatrolTest({
