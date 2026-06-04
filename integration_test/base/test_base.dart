@@ -23,10 +23,13 @@ class TestBase {
     NativeAutomatorConfig? nativeAutomatorConfig,
     dynamic tags = const [],
   }) {
-    assert(
-      (test == null) != (scenarioBuilder == null),
-      'runPatrolTest requires exactly one of `test` or `scenarioBuilder`.',
-    );
+    // Enforced at runtime (not via `assert`) so the contract holds in
+    // profile/release builds too, where assertions are compiled out.
+    if ((test == null) == (scenarioBuilder == null)) {
+      throw ArgumentError(
+        'runPatrolTest requires exactly one of `test` or `scenarioBuilder`.',
+      );
+    }
     const testTimeoutMs = int.fromEnvironment(
       'GLOBAL_TEST_TIMEOUT_MS',
       defaultValue: 120000,
