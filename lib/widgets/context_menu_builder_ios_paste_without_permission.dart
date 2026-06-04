@@ -1,3 +1,4 @@
+import 'package:fluffychat/presentation/extensions/text_editting_controller_extension.dart';
 import 'package:flutter/material.dart';
 
 Widget mobileTwakeContextMenuBuilder(
@@ -15,9 +16,8 @@ Widget mobileTwakeContextMenuBuilder(
   //
   // Fix: build the button list from editableTextState.contextMenuButtonItems
   // and, when Paste is absent, add it explicitly. The injected Paste button
-  // calls editableTextState.pasteText() which reads all clipboard types
-  // through the platform channel, including public.url — so it works on all
-  // iOS versions without triggering an extra permission alert on iOS 16+.
+  // routes through TextEdittingControllerExtension.pasteText() so that the
+  // Formats.uri fallback and correct cursor/undo behaviour are preserved.
   final buttonItems = _buttonItemsWithPaste(editableTextState);
 
   if (SystemContextMenu.isSupported(context)) {
@@ -55,11 +55,19 @@ List<ContextMenuButtonItem> _buttonItemsWithPaste(
   );
   if (hasPaste) return items;
 
-  // Insert Paste after Cut (index 1) or at the front when Cut is absent.
+  // Route through the repo's controller extension so the Formats.uri fallback
+  // and cursor placement in TextEdittingControllerExtension.pasteText() apply,
+  // rather than calling Flutter's internal EditableTextState.pasteText().
+  final controller = editableTextState.widget.controller;
   final pasteItem = ContextMenuButtonItem(
     type: ContextMenuButtonType.paste,
-    onPressed: () => editableTextState.pasteText(SelectionChangedCause.toolbar),
+    onPressed: () {
+      editableTextState.hideToolbar();
+      controller.pasteText();
+    },
   );
+
+  // Insert Paste after Cut or at the front when Cut is absent.
   final cutIndex = items.indexWhere(
     (item) => item.type == ContextMenuButtonType.cut,
   );
