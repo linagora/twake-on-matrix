@@ -50,14 +50,14 @@ class ReplyContent extends StatelessWidget {
         !displayEvent.redacted &&
         displayEvent.content['format'] == 'org.matrix.custom.html' &&
         displayEvent.content['formatted_body'] is String) {
-      String? html = fixDoubleEncodedCodeBlocks(
+      String html = fixDoubleEncodedCodeBlocks(
         displayEvent.content['formatted_body'] as String? ?? '',
       );
       if (displayEvent.messageType == MessageTypes.Emote) {
         html = '* $html';
       }
       replyBody = HtmlMessage(
-        html: html!,
+        html: html,
         defaultTextStyle: ReplyContentStyle.replyBodyTextStyle(context),
         maxLines: 1,
         room: displayEvent.room,
