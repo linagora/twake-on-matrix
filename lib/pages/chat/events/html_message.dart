@@ -60,20 +60,29 @@ class HtmlMessage extends StatelessWidget with LinkifyMixin {
     final matrix = Matrix.of(context);
 
     final themeData = Theme.of(context);
-    return Html(
-      data: renderHtml,
-      defaultTextStyle: defaultTextStyle,
-      emoteSize: emoteSize,
-      inlineSpanEnd: bottomWidgetSpan != null
-          ? WidgetSpan(child: bottomWidgetSpan!)
-          : null,
-      linkStyle:
-          linkStyle ??
+
+    // `Html` renders through raw `RichText`, which (unlike `Text`/`Text.rich`)
+    // does not merge the ambient `DefaultTextStyle`. We merge it in here so the
+    // app font family is preserved for styles that don't specify one — the
+    // design-system type-scale tokens intentionally carry no `fontFamily`.
+    final ambientStyle = DefaultTextStyle.of(context).style;
+    final effectiveDefaultTextStyle = ambientStyle.merge(defaultTextStyle);
+    final effectiveLinkStyle = ambientStyle.merge(
+      linkStyle ??
           themeData.textTheme.bodyMedium!.copyWith(
             color: themeData.colorScheme.secondary,
             decoration: TextDecoration.underline,
             decorationColor: themeData.colorScheme.secondary,
           ),
+    );
+    return Html(
+      data: renderHtml,
+      defaultTextStyle: effectiveDefaultTextStyle,
+      emoteSize: emoteSize,
+      inlineSpanEnd: bottomWidgetSpan != null
+          ? WidgetSpan(child: bottomWidgetSpan!)
+          : null,
+      linkStyle: effectiveLinkStyle,
       linkTypes: const [LinkType.url, LinkType.phone],
       shrinkToFit: true,
       maxLines: maxLines,
