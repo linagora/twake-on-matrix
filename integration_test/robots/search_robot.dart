@@ -1,3 +1,4 @@
+import 'package:fluffychat/generated/l10n/app_localizations.dart';
 import 'package:fluffychat/widgets/twake_components/twake_icon_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -7,6 +8,8 @@ import 'abstract/abstract_search_robot.dart';
 
 class SearchRobot extends CoreRobot implements AbstractSearchRobot {
   SearchRobot(super.$);
+
+  L10n get _l10n => L10n.of($.tester.element(find.byType(Scaffold).first))!;
 
   PatrolFinder getBackIcon() {
     return $(AppBar).$(TwakeIconButton).$(Icon);
@@ -26,8 +29,14 @@ class SearchRobot extends CoreRobot implements AbstractSearchRobot {
   }
 
   PatrolFinder getNoResultIcon() {
-    return $('No Results');
+    return $(_l10n.noResults);
   }
+
+  @override
+  bool isNoResultVisible() => getNoResultIcon().visible;
+
+  @override
+  bool isSearchFieldVisible() => getSearchTextField().exists;
 
   PatrolFinder getSearchingIcon() {
     return (getSearchTextField()).$(Icon).at(0);

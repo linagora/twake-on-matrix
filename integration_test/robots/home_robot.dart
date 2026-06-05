@@ -12,6 +12,10 @@ import 'setting/setting_robot.dart';
 class HomeRobot extends CoreRobot implements AbstractHomeRobot {
   HomeRobot(super.$);
 
+  @override
+  bool isMainNavigationVisible() =>
+      $(BottomNavigationBar).visible || $(NavigationRail).visible;
+
   Future<PatrolFinder> getContactTab() async {
     return $(TwakeNavigationIcon).at(0);
   }
