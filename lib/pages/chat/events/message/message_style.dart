@@ -8,6 +8,7 @@ import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_file_extension.dart';
 import 'package:fluffychat/utils/responsive/responsive_utils.dart';
 import 'package:flutter/material.dart';
+import 'package:linagora_design_flutter/spacings/linagora_spacing.dart';
 import 'package:matrix/matrix.dart';
 
 class MessageStyle {
@@ -216,7 +217,7 @@ class MessageStyle {
   }
 
   static EdgeInsets paddingDisplayName(Event event) =>
-      const EdgeInsets.only(bottom: 4.0);
+      const EdgeInsets.only(bottom: LinagoraSpacing.base / 2);
 
   static EdgeInsets get paddingMessage =>
       const EdgeInsets.symmetric(vertical: 2.0);
