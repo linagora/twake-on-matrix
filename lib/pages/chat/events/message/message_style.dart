@@ -216,10 +216,8 @@ class MessageStyle {
     return currentEvent.senderId != nextEvent.senderId ? 8 : 4;
   }
 
-  static EdgeInsets paddingDisplayName(Event event) => EdgeInsets.only(
-    left: event.messageType == MessageTypes.Image ? 0 : 8.0,
-    bottom: 4.0,
-  );
+  static EdgeInsets paddingDisplayName(Event event) =>
+      const EdgeInsets.only(bottom: 4.0);
 
   static EdgeInsets get paddingMessage =>
       const EdgeInsets.symmetric(vertical: 2.0);
@@ -244,16 +242,6 @@ class MessageStyle {
       end: selected || responsiveUtils.isDesktop(context) ? 8 : 0,
     );
   }
-
-  static EdgeInsets paddingMessageContentBuilder(Event event) =>
-      EdgeInsets.only(
-        left: 8 * AppConfig.bubbleSizeFactor,
-        right: 8 * AppConfig.bubbleSizeFactor,
-        top: 8 * AppConfig.bubbleSizeFactor,
-        bottom: event.timelineOverlayMessage
-            ? 8 * AppConfig.bubbleSizeFactor
-            : 0 * AppConfig.bubbleSizeFactor,
-      );
 
   static EdgeInsets get paddingMessageTime =>
       const EdgeInsets.only(left: 6, right: 8.0, bottom: 4.0);
