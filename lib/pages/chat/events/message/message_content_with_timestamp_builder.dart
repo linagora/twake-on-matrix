@@ -38,6 +38,7 @@ class MessageContentWithTimestampBuilder extends StatefulWidget {
   final Event event;
   final MatrixState? matrixState;
   final Event? nextEvent;
+  final Event? previousEvent;
   final void Function(Event)? onSelect;
   final void Function(String)? scrollToEventId;
   final void Function()? onDisplayEmojiReaction;
@@ -78,6 +79,7 @@ class MessageContentWithTimestampBuilder extends StatefulWidget {
     required this.event,
     this.matrixState,
     this.nextEvent,
+    this.previousEvent,
     this.onSelect,
     this.scrollToEventId,
     this.onDisplayEmojiReaction,
@@ -159,9 +161,6 @@ class _MessageContentWithTimestampBuilderState
         !widget.event.originServerTs.sameEnvironment(
           widget.nextEvent!.originServerTs,
         );
-    final noBubble =
-        {MessageTypes.Sticker}.contains(widget.event.messageType) &&
-        !widget.event.redacted;
 
     final timelineText =
         {
@@ -175,7 +174,6 @@ class _MessageContentWithTimestampBuilderState
       child: _messageContentWithTimestampBuilder(
         context: context,
         displayTime: displayTime,
-        noBubble: noBubble,
         timelineText: timelineText,
       ),
     );
@@ -184,7 +182,6 @@ class _MessageContentWithTimestampBuilderState
   Widget _messageContentWithTimestampBuilder({
     required BuildContext context,
     required bool displayTime,
-    required bool noBubble,
     required bool timelineText,
   }) {
     return Row(
@@ -222,8 +219,6 @@ class _MessageContentWithTimestampBuilderState
                       context,
                       event,
                       timelineText: timelineText,
-                      noBubble: noBubble,
-                      displayTime: displayTime,
                     )
                   : !widget.event.status.isError &&
                         !widget.event.status.isSending
@@ -231,15 +226,11 @@ class _MessageContentWithTimestampBuilderState
                       context,
                       event,
                       timelineText: timelineText,
-                      noBubble: noBubble,
-                      displayTime: displayTime,
                     )
                   : null,
               child: _messageBuilder(
                 context: context,
                 timelineText: timelineText,
-                noBubble: noBubble,
-                displayTime: displayTime,
               ),
             ),
           ),
@@ -252,13 +243,35 @@ class _MessageContentWithTimestampBuilderState
     );
   }
 
+  /// Wraps the message preview for a hero dialog with selection/scroll support.
+  Widget _buildHeroPreviewMessage({
+    required BuildContext context,
+    required String keyPrefix,
+    required bool timelineText,
+  }) {
+    return Material(
+      color: Colors.transparent,
+      child: SelectionArea(
+        child: SingleChildScrollView(
+          primary: true,
+          physics: const ClampingScrollPhysics(),
+          child: _messageBuilder(
+            key: ValueKey(
+              '$keyPrefix%${DateTime.now().millisecondsSinceEpoch}',
+            ),
+            context: context,
+            timelineText: timelineText,
+          ),
+        ),
+      ),
+    );
+  }
+
   /// Opens the hero emoji reaction dialog for available messages.
   Future<void> _handleAvailableMessageLongPress(
     BuildContext context,
     Event event, {
     required bool timelineText,
-    required bool noBubble,
-    required bool displayTime,
   }) async {
     // for pin screen
     if (widget.onLongPressMessage != null) {
@@ -277,48 +290,10 @@ class _MessageContentWithTimestampBuilderState
               displayEmojiPicker: _displayEmojiPicker,
               dialogSafeAreaKey:
                   MessageContentWithTimestampBuilder.dialogSafeAreaKey,
-              messageWidget: Material(
-                color: widget.event.isOwnMessage
-                    ? LinagoraRefColors.material().primary[95]
-                    : _responsiveUtils.isMobile(context)
-                    ? LinagoraSysColors.material().onPrimary
-                    : Theme.of(context).colorScheme.surfaceContainerHighest,
-                shape: RoundedRectangleBorder(
-                  borderRadius: MessageStyle.bubbleBorderRadius,
-                ),
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 4,
-                    vertical: 4,
-                  ),
-                  decoration: BoxDecoration(
-                    borderRadius: MessageStyle.bubbleBorderRadius,
-                    border:
-                        !widget.event.isOwnMessage &&
-                            _responsiveUtils.isMobile(context)
-                        ? Border.all(
-                            color: MessageStyle.borderColorReceivedBubble,
-                          )
-                        : null,
-                  ),
-                  child: SelectionArea(
-                    child: SingleChildScrollView(
-                      primary: true,
-                      physics: const ClampingScrollPhysics(),
-                      child: _messageBuilder(
-                        key: ValueKey(
-                          'PreviewReactionWidgetKey%${DateTime.now().millisecondsSinceEpoch}',
-                        ),
-                        context: context,
-                        timelineText: timelineText,
-                        noBubble: noBubble,
-                        displayTime: displayTime,
-                        paddingBubble: EdgeInsets.zero,
-                        enableBorder: false,
-                      ),
-                    ),
-                  ),
-                ),
+              messageWidget: _buildHeroPreviewMessage(
+                context: context,
+                keyPrefix: 'PreviewReactionWidgetKey',
+                timelineText: timelineText,
               ),
               emojiPickerBuilder: _emojiPickerBuilder,
               messageContextMenu: _messageContextMenu,
@@ -339,8 +314,6 @@ class _MessageContentWithTimestampBuilderState
     BuildContext context,
     Event event, {
     required bool timelineText,
-    required bool noBubble,
-    required bool displayTime,
   }) async {
     widget.onDisplayEmojiReaction?.call();
     _displayEmojiPicker.value = false;
@@ -354,48 +327,10 @@ class _MessageContentWithTimestampBuilderState
               dialogSafeAreaKey:
                   MessageContentWithTimestampBuilder.dialogSafeAreaKey,
               showReactions: false,
-              messageWidget: Material(
-                color: widget.event.isOwnMessage
-                    ? LinagoraRefColors.material().primary[95]
-                    : _responsiveUtils.isMobile(context)
-                    ? LinagoraSysColors.material().onPrimary
-                    : Theme.of(context).colorScheme.surfaceContainerHighest,
-                shape: RoundedRectangleBorder(
-                  borderRadius: MessageStyle.bubbleBorderRadius,
-                ),
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 4,
-                    vertical: 4,
-                  ),
-                  decoration: BoxDecoration(
-                    borderRadius: MessageStyle.bubbleBorderRadius,
-                    border:
-                        !widget.event.isOwnMessage &&
-                            _responsiveUtils.isMobile(context)
-                        ? Border.all(
-                            color: MessageStyle.borderColorReceivedBubble,
-                          )
-                        : null,
-                  ),
-                  child: SelectionArea(
-                    child: SingleChildScrollView(
-                      primary: true,
-                      physics: const ClampingScrollPhysics(),
-                      child: _messageBuilder(
-                        key: ValueKey(
-                          'PreviewErrorWidgetKey%${DateTime.now().millisecondsSinceEpoch}',
-                        ),
-                        context: context,
-                        timelineText: timelineText,
-                        noBubble: noBubble,
-                        displayTime: displayTime,
-                        paddingBubble: EdgeInsets.zero,
-                        enableBorder: false,
-                      ),
-                    ),
-                  ),
-                ),
+              messageWidget: _buildHeroPreviewMessage(
+                context: context,
+                keyPrefix: 'PreviewErrorWidgetKey',
+                timelineText: timelineText,
               ),
               emojiPickerBuilder: _emojiPickerBuilder,
               messageContextMenu: _errorMessageContextMenu,
@@ -508,13 +443,78 @@ class _MessageContentWithTimestampBuilderState
     Key? key,
     required BuildContext context,
     required bool timelineText,
-    required bool noBubble,
-    required bool displayTime,
-    EdgeInsets? paddingBubble,
-    bool enableBorder = true,
   }) {
     final hasReactionEvent = widget.event.hasReactionEvent(
       timeline: widget.timeline,
+    );
+
+    final isDisplayOnlyEmoji = widget.event.isDisplayOnlyEmoji(widget.timeline);
+    // The tail is shown on the last bubble of a same-sender group.
+    final hasSameSenderBelow =
+        widget.previousEvent != null &&
+        widget.previousEvent!.senderId == widget.event.senderId;
+    final showTail = !isDisplayOnlyEmoji && !hasSameSenderBelow;
+    final tailDirection = showTail
+        ? (widget.event.isOwnMessage
+              ? BubbleTailDirection.right
+              : BubbleTailDirection.left)
+        : BubbleTailDirection.none;
+    // Media without caption/reply uses the tighter media padding.
+    final isMediaOnly = widget.event.isVideoOrImage && !timelineText;
+    final bubbleContentType = isMediaOnly
+        ? BubbleContentType.mediaOnly
+        : BubbleContentType.other;
+    final bubbleConstraints = BoxConstraints(
+      maxWidth: MessageStyle.messageBubbleWidth(
+        context,
+        event: widget.event,
+        maxWidthScreen: widget.maxWidth,
+      ),
+    );
+    final bubbleContent = Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        if (!_hideDisplayName(context))
+          OptionalSelectionContainerDisabled(
+            isEnabled: PlatformInfos.isWeb,
+            child: DisplayNameWidget(event: widget.event),
+          ),
+        OptionalStack(
+          isEnabled: timelineText,
+          alignment: AlignmentDirectional.bottomEnd,
+          children: [
+            MessageContentBuilder(
+              event: widget.event,
+              timeline: widget.timeline,
+              onSelect: widget.onSelect,
+              nextEvent: widget.nextEvent,
+              scrollToEventId: widget.scrollToEventId,
+              selectMode: widget.selectMode,
+              onRetryTextMessage: widget.onRetryTextMessage,
+            ),
+            if (!widget.event.isReplyEventWithAudio())
+              OptionalSelectionContainerDisabled(
+                isEnabled: PlatformInfos.isWeb,
+                child: Padding(
+                  padding: MessageStyle.paddingMessageTime,
+                  child: Text.rich(
+                    WidgetSpan(
+                      child: MessageTime(
+                        timelineOverlayMessage:
+                            widget.event.timelineOverlayMessage,
+                        room: widget.event.room,
+                        event: widget.event,
+                        showSeenIcon: widget.event.isOwnMessage,
+                        timeline: widget.timeline,
+                        onRetryTextMessage: widget.onRetryTextMessage,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+          ],
+        ),
+      ],
     );
 
     return OptionalStack(
@@ -524,84 +524,17 @@ class _MessageContentWithTimestampBuilderState
           : AlignmentDirectional.bottomEnd,
       isEnabled: hasReactionEvent,
       children: [
-        Container(
-          decoration: widget.event.isDisplayOnlyEmoji(widget.timeline)
-              ? null
-              : BoxDecoration(
-                  borderRadius: MessageStyle.bubbleBorderRadius,
-                  color: widget.event.isOwnMessage
-                      ? LinagoraRefColors.material().primary[95]
-                      : _responsiveUtils.isMobile(context)
-                      ? LinagoraSysColors.material().onPrimary
-                      : Theme.of(context).colorScheme.surfaceContainerHighest,
-                  border: enableBorder
-                      ? (!widget.event.isOwnMessage &&
-                                _responsiveUtils.isMobile(context)
-                            ? Border.all(
-                                color: MessageStyle.borderColorReceivedBubble,
-                              )
-                            : null)
-                      : null,
-                ),
-          padding:
-              paddingBubble ??
-              (noBubble
-                  ? const .symmetric(horizontal: 16.0)
-                  : MessageStyle.paddingMessageContentBuilder(widget.event)),
-          constraints: BoxConstraints(
-            maxWidth: MessageStyle.messageBubbleWidth(
-              context,
-              event: widget.event,
-              maxWidthScreen: widget.maxWidth,
-            ),
+        if (isDisplayOnlyEmoji)
+          Container(constraints: bubbleConstraints, child: bubbleContent)
+        else
+          MessageBubble(
+            isOwnMessage: widget.event.isOwnMessage,
+            tailDirection: tailDirection,
+            hasReactions: hasReactionEvent,
+            contentType: bubbleContentType,
+            constraints: bubbleConstraints,
+            child: bubbleContent,
           ),
-          margin: hasReactionEvent ? const .only(bottom: 24) : null,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              if (!_hideDisplayName(context))
-                OptionalSelectionContainerDisabled(
-                  isEnabled: PlatformInfos.isWeb,
-                  child: DisplayNameWidget(event: widget.event),
-                ),
-              OptionalStack(
-                isEnabled: timelineText,
-                alignment: AlignmentDirectional.bottomEnd,
-                children: [
-                  MessageContentBuilder(
-                    event: widget.event,
-                    timeline: widget.timeline,
-                    onSelect: widget.onSelect,
-                    nextEvent: widget.nextEvent,
-                    scrollToEventId: widget.scrollToEventId,
-                    selectMode: widget.selectMode,
-                    onRetryTextMessage: widget.onRetryTextMessage,
-                  ),
-                  if (!widget.event.isReplyEventWithAudio())
-                    OptionalSelectionContainerDisabled(
-                      isEnabled: PlatformInfos.isWeb,
-                      child: Padding(
-                        padding: MessageStyle.paddingMessageTime,
-                        child: Text.rich(
-                          WidgetSpan(
-                            child: MessageTime(
-                              timelineOverlayMessage:
-                                  widget.event.timelineOverlayMessage,
-                              room: widget.event.room,
-                              event: widget.event,
-                              showSeenIcon: widget.event.isOwnMessage,
-                              timeline: widget.timeline,
-                              onRetryTextMessage: widget.onRetryTextMessage,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                ],
-              ),
-            ],
-          ),
-        ),
         PositionedDirectional(
           start: 8,
           end: 0,
