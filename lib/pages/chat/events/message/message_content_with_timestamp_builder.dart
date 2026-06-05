@@ -455,7 +455,7 @@ class _MessageContentWithTimestampBuilderState
         widget.previousEvent!.senderId == widget.event.senderId;
     final showTail = !isDisplayOnlyEmoji && !hasSameSenderBelow;
     final tailDirection = showTail
-        ? (widget.event.isOwnMessage
+        ? (widget.event.shouldAlignOwnMessageInDifferentSide
               ? BubbleTailDirection.right
               : BubbleTailDirection.left)
         : BubbleTailDirection.none;
