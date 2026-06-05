@@ -2,15 +2,34 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:patrol/patrol.dart';
 import 'package:fluffychat/main.dart' as app;
+import '../factories/robot_factory_provider.dart';
 import '../scenarios/login_scenario.dart';
+import 'base_test_scenario.dart';
 
 class TestBase {
+  /// Runs a Patrol integration test.
+  ///
+  /// Provide exactly one of:
+  /// - [scenarioBuilder] (preferred): builds a [BaseTestScenario] from the
+  ///   tester and the platform [RobotFactory]; the scenario drives the test
+  ///   through abstract robots, so it runs on both mobile and web.
+  /// - [test] (legacy): an imperative callback receiving only the tester.
+  ///   Kept in parallel so existing mobile tests keep compiling during the
+  ///   cross-platform migration.
   void runPatrolTest({
     required String description,
-    required Function(PatrolIntegrationTester $) test,
+    Function(PatrolIntegrationTester $)? test,
+    ScenarioBuilder? scenarioBuilder,
     NativeAutomatorConfig? nativeAutomatorConfig,
     dynamic tags = const [],
   }) {
+    // Enforced at runtime (not via `assert`) so the contract holds in
+    // profile/release builds too, where assertions are compiled out.
+    if ((test == null) == (scenarioBuilder == null)) {
+      throw ArgumentError(
+        'runPatrolTest requires exactly one of `test` or `scenarioBuilder`.',
+      );
+    }
     const testTimeoutMs = int.fromEnvironment(
       'GLOBAL_TEST_TIMEOUT_MS',
       defaultValue: 120000,
@@ -64,7 +83,12 @@ class TestBase {
           originalOnError(details);
         };
         await loginAndRun($);
-        await test($);
+        if (scenarioBuilder != null) {
+          final robots = createRobotFactory($);
+          await scenarioBuilder($, robots).runTestLogic();
+        } else {
+          await test!($);
+        }
       },
     );
   }
