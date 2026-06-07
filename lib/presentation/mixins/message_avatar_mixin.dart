@@ -24,8 +24,7 @@ mixin MessageAvatarMixin {
     required BuildContext context,
     required bool selectMode,
   }) {
-    if (selectMode ||
-        (event.room.isDirectChat && responsive.isMobile(context))) {
+    if (selectMode || event.room.isDirectChat) {
       return const SizedBox.shrink();
     }
 
