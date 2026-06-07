@@ -6,6 +6,7 @@ import 'package:fluffychat/utils/matrix_sdk_extensions/event_list_extension.dart
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:inview_notifier_list/inview_notifier_list.dart';
+import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:matrix/matrix.dart';
 
 class ChatScrollView extends StatefulWidget {
@@ -127,21 +128,23 @@ class _ChatScrollViewState extends State<ChatScrollView> {
   @override
   Widget build(BuildContext context) {
     final centerKey = ChatKeys.eventListCenter.valueKey;
-    final horizontalPadding = TwakeThemes.isColumnMode(context) ? 16.0 : 0.0;
+    final horizontalPadding = TwakeThemes.isColumnMode(context)
+        ? LinagoraSpacing.base * 2
+        : 0.0;
+    final horizontalPaddingInsets = EdgeInsets.symmetric(
+      horizontal: horizontalPadding,
+    );
 
-    return Padding(
-      padding: EdgeInsets.only(
-        left: horizontalPadding,
-        right: horizontalPadding,
-      ),
-      child: InViewNotifierCustomScrollView(
-        isInViewPortCondition: controller.isInViewPortCondition,
-        center: centerKey,
-        anchor: 1,
-        controller: controller.scrollController,
-        keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-        slivers: [
-          SliverList(
+    return InViewNotifierCustomScrollView(
+      isInViewPortCondition: controller.isInViewPortCondition,
+      center: centerKey,
+      anchor: 1,
+      controller: controller.scrollController,
+      keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+      slivers: [
+        SliverPadding(
+          padding: horizontalPaddingInsets,
+          sliver: SliverList(
             delegate: SliverChildBuilderDelegate((context, index) {
               if (index == _bottom.length) {
                 if (controller.timeline!.isRequestingHistory) {
@@ -182,8 +185,11 @@ class _ChatScrollViewState extends State<ChatScrollView> {
               );
             }, childCount: _bottom.length + 1),
           ),
-          SliverList(
-            key: centerKey,
+        ),
+        SliverPadding(
+          key: centerKey,
+          padding: horizontalPaddingInsets,
+          sliver: SliverList(
             delegate: SliverChildBuilderDelegate((context, index) {
               if (index == _top.length) {
                 if (controller.timeline!.isRequestingFuture) {
@@ -224,8 +230,8 @@ class _ChatScrollViewState extends State<ChatScrollView> {
               );
             }, childCount: _top.length + 1),
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }
