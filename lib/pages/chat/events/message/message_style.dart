@@ -63,7 +63,7 @@ class MessageStyle {
       Theme.of(context).colorScheme.surfaceTint.withOpacity(0.08);
 
   static const double messageBubbleDesktopMaxWidth = 520.0;
-  static const double messageBubbleMobileRatioMaxWidth = 0.80;
+  static const double messageBubbleMobileRatioMaxWidth = 0.88;
   static const double messageBubbleTabletRatioMaxWidth = 0.30;
   static const double iconContextMenuSize = 40;
 
