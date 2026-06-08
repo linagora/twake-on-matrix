@@ -1,5 +1,6 @@
 import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
+import 'package:fluffychat/domain/matrix_events/event_type_rules.dart';
 import 'package:fluffychat/pages/chat/events/message_content_style.dart';
 import 'package:fluffychat/presentation/model/file/display_image_info.dart';
 import 'package:fluffychat/utils/extension/build_context_extension.dart';
@@ -205,21 +206,19 @@ class MessageStyle {
     Event? nextEvent,
     Event currentEvent,
   ) {
-    // add spaces to messages only
     if (nextEvent == null ||
         displayTime ||
-        nextEvent.type != EventTypes.Message) {
+        !EventTypeRules.messageContentTypes.contains(nextEvent.type)) {
       return 0;
     }
 
-    return currentEvent.senderId != nextEvent.senderId ? 8 : 4;
+    return currentEvent.senderId != nextEvent.senderId
+        ? LinagoraSpacing.base
+        : LinagoraSpacing.base / 4;
   }
 
   static EdgeInsets paddingDisplayName(Event event) =>
       const EdgeInsets.only(bottom: LinagoraSpacing.base / 2);
-
-  static EdgeInsets get paddingMessage =>
-      const EdgeInsets.symmetric(vertical: 2.0);
 
   static EdgeInsets get paddingTimestamp =>
       const EdgeInsets.only(left: 8.0, right: 4.0);
