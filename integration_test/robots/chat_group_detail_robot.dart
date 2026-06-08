@@ -1,6 +1,8 @@
 import 'package:fluffychat/pages/chat/chat_app_bar_title.dart';
 import 'package:fluffychat/pages/chat/chat_event_list.dart';
+import 'package:fluffychat/pages/chat/chat_input_row_send_btn.dart';
 import 'package:fluffychat/pages/chat/events/message_content.dart';
+import 'package:fluffychat/pages/chat/input_bar/input_bar.dart';
 import 'package:fluffychat/pages/chat_profile_info/chat_profile_info_details.dart';
 import 'package:fluffychat/utils/permission_dialog.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
@@ -88,13 +90,20 @@ class ChatGroupDetailRobot extends CoreRobot
     return $(ChatEventList).exists;
   }
 
+  @override
   Future<PatrolFinder> getText(String text) async {
-    return $(MessageContent).containing(find.text(text));
-    // return $(MatrixLinkifyText).containing(text);
+    // Text messages render through a linkified RichText (`TwakeLinkPreview`),
+    // so match rich text too — on web the body is not a plain `Text` widget.
+    return $(
+      MessageContent,
+    ).containing(find.textContaining(text, findRichText: true));
   }
 
   Future<PatrolFinder> getInputTextField() async {
-    return $(TextField);
+    // Scope to the composer's `InputBar`. On web's wide two-pane layout the
+    // chat-list search field is also a `TextField`, so a bare `$(TextField)`
+    // resolves to the wrong field.
+    return $(InputBar).$(TextField);
   }
 
   @override
@@ -104,7 +113,17 @@ class ChatGroupDetailRobot extends CoreRobot
     await CoreRobot($).captureAsyncError(() async {
       await textField.tap();
     });
-    await textField.enterText(message);
+    // Type slowly so the composer's `inputText` ValueListenable updates — a
+    // plain `enterText` does not fire `onChanged` on web, leaving the send
+    // button hidden (web renders the audio recorder while the text is empty).
+    await typeSlowlyWithPatrol($, textField, message);
+  }
+
+  @override
+  Future<void> sendMessage(String message) async {
+    await inputMessage(message);
+    await $(ChatInputRowSendBtn).tap();
+    await $.pump(const Duration(milliseconds: 300));
   }
 
   @override

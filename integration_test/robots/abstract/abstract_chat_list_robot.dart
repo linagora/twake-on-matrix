@@ -1,3 +1,5 @@
+import '../twake_list_item_robot.dart';
+
 /// Platform-agnostic contract for the chat-list screen.
 ///
 /// Covers opening individual chats, search, and querying list state.
@@ -12,4 +14,19 @@ abstract class AbstractChatListRobot {
   Future<void> clickOnUnPinIcon();
   int getUnreadMessage(String title);
   Future<int> getChatRoomCounts();
+
+  /// All chat rows currently rendered in the list.
+  Future<List<TwakeListItemRobot>> getListOfChatGroup();
+
+  /// Whether the chat list actually scrolls (content exceeds viewport).
+  Future<bool> isListScrollable();
+
+  /// Pins the chat titled [title] (no-op if already pinned).
+  Future<void> pinChat(String title);
+
+  /// Unpins the chat titled [title] (no-op if not pinned).
+  Future<void> unpinChat(String title);
+
+  /// Whether the chat titled [title] is currently pinned.
+  Future<bool> isChatPinned(String title);
 }
