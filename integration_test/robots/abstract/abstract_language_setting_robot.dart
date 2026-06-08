@@ -11,5 +11,14 @@ abstract class AbstractLanguageSettingRobot {
   Future<void> chooseRussian();
   Future<void> chooseVietnamese();
   String? getSelectedLanguage();
+
+  /// The label of each language option as currently rendered in the list,
+  /// i.e. translated into the app's active language. Scenarios assert these
+  /// to verify the UI re-localises after a language switch.
+  String? getEnglishInDisplay();
+  String? getFrenchInDisplay();
+  String? getRussianInDisplay();
+  String? getVietnameseInDisplay();
+
   Future<void> backToSettingScreen();
 }

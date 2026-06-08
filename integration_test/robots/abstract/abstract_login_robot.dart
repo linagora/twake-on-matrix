@@ -10,4 +10,8 @@ abstract class AbstractLoginRobot {
     required String username,
     required String password,
   });
+
+  /// Grants the OS notification permission after login. Mobile drives the
+  /// native dialog; web is a no-op (handled in `CoreRobot`, `kIsWeb` guard).
+  Future<void> grantNotificationPermission();
 }

@@ -33,18 +33,22 @@ class LanguageSettingRobot extends HomeRobot
     return $(ListTile).containing(find.text('Tiếng Việt'));
   }
 
+  @override
   String? getEnglishInDisplay() {
     return english().$(Text).at(0).text;
   }
 
+  @override
   String? getFrenchInDisplay() {
     return french().$(Text).at(0).text;
   }
 
+  @override
   String? getRussianInDisplay() {
     return russian().$(Text).at(0).text;
   }
 
+  @override
   String? getVietnameseInDisplay() {
     return vietnamese().$(Text).at(0).text;
   }
