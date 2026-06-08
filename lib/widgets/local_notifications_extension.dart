@@ -67,19 +67,27 @@ extension LocalNotificationsExtension on MatrixState {
           method: ThumbnailMethod.crop,
         );
     if (kIsWeb) {
-      final isInsideCozy = await CozyConfigManager().isInsideCozy;
-      _audioPlayer.play();
-      if (isInsideCozy) {
-        CozyConfigManager().sendNotification(title, body);
-        return;
+      // Displaying a web notification depends on the hosting page (Cozy parent
+      // frame, the `handleNotifications` JS hook). When those are absent the
+      // interop throws; a notification-display failure must not crash the app
+      // (and, as an unhandled async error, fail web integration tests).
+      try {
+        final isInsideCozy = await CozyConfigManager().isInsideCozy;
+        _audioPlayer.play();
+        if (isInsideCozy) {
+          CozyConfigManager().sendNotification(title, body);
+          return;
+        }
+        js.context.callMethod("handleNotifications", [
+          title,
+          body,
+          icon,
+          eventUpdate.roomID,
+          eventUpdate.eventId,
+        ]);
+      } catch (e, s) {
+        Logs().w('showLocalNotification: web notification failed', e, s);
       }
-      js.context.callMethod("handleNotifications", [
-        title,
-        body,
-        icon,
-        eventUpdate.roomID,
-        eventUpdate.eventId,
-      ]);
     } else if (Platform.isLinux) {
       final appIconUrl = room.avatar?.getThumbnail(
         room.client,

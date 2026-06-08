@@ -61,6 +61,7 @@ class ChatListRobot extends HomeRobot implements AbstractChatListRobot {
     return ChatGroupDetailRobot($);
   }
 
+  @override
   Future<List<TwakeListItemRobot>> getListOfChatGroup() async {
     final List<TwakeListItemRobot> groupList = [];
 
@@ -112,5 +113,46 @@ class ChatListRobot extends HomeRobot implements AbstractChatListRobot {
   Future<int> getChatRoomCounts() async {
     final listChat = await getListOfChatGroup();
     return listChat.length;
+  }
+
+  @override
+  Future<bool> isListScrollable() async {
+    // No `root` filter: the chat list's scroll container differs by platform
+    // (mobile `SingleChildScrollView`, web a different scrollable), so just
+    // assert a scrollable exists on the list screen.
+    return isActuallyScrollable($);
+  }
+
+  bool _isPinned(TwakeListItemRobot item) => item.getPinIcon().visible;
+
+  @override
+  Future<void> pinChat(String title) async {
+    final item = getChatGroupByTitle(title);
+    await scrollUntilVisible($, item.root);
+    if (!_isPinned(item)) {
+      await $.tester.ensureVisible(item.root);
+      await item.root.longPress();
+      await $.waitUntilVisible(item.getCheckBox());
+      await clickOnPinIcon();
+    }
+  }
+
+  @override
+  Future<void> unpinChat(String title) async {
+    final item = getChatGroupByTitle(title);
+    await scrollUntilVisible($, item.root);
+    if (_isPinned(item)) {
+      await $.tester.ensureVisible(item.root);
+      await item.root.longPress();
+      await $.waitUntilVisible(item.getCheckBox());
+      await clickOnUnPinIcon();
+    }
+  }
+
+  @override
+  Future<bool> isChatPinned(String title) async {
+    final item = getChatGroupByTitle(title);
+    await $.tester.ensureVisible(item.root);
+    return _isPinned(item);
   }
 }

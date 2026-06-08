@@ -60,17 +60,14 @@ class TwakeListItemRobot extends CoreRobot {
   }
 
   int getUnreadMessage() {
-    final animated = find.descendant(
-      of: root,
-      matching: find.byType(AnimatedContainer),
-    );
-    if (animated.evaluate().isNotEmpty) {
-      final raw = root.$(ChatListItemSubtitle).$(Text).last.text; // String?
-      final s = (raw ?? '').trim();
-      final n = int.tryParse(s);
-      return n ?? 0;
-    } else {
-      return 0;
-    }
+    // The notification-count badge is the trailing `AnimatedContainer` in the
+    // subtitle (the earlier one is the "@" mention badge). Read its `Text`
+    // rather than `Text.last`, which on web resolves to the message preview
+    // (and would mis-parse a numeric message body as the count).
+    final badges = root.$(ChatListItemSubtitle).$(AnimatedContainer);
+    if (badges.evaluate().isEmpty) return 0;
+    final countText = badges.last.$(Text);
+    if (!countText.exists) return 0;
+    return int.tryParse((countText.text ?? '').trim()) ?? 0;
   }
 }

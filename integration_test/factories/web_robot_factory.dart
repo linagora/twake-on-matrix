@@ -8,11 +8,11 @@ import '../robots/abstract/abstract_language_setting_robot.dart';
 import '../robots/abstract/abstract_login_robot.dart';
 import '../robots/abstract/abstract_search_robot.dart';
 import '../robots/abstract/abstract_setting_robot.dart';
-import '../robots/chat_group_detail_robot.dart';
 import '../robots/chat_list_robot.dart';
 import '../robots/contact_list_robot.dart';
 import '../robots/home_robot.dart';
 import '../robots/setting/setting_robot.dart';
+import '../robots/web/web_chat_group_detail_robot.dart';
 import '../robots/web/web_language_setting_robot.dart';
 import '../robots/web/web_login_robot.dart';
 import '../robots/web/web_search_robot.dart';
@@ -22,8 +22,8 @@ import 'robot_factory.dart';
 ///
 /// Uses dedicated `WebXRobot` classes where the UI genuinely diverges
 /// between mobile and web (login flow, navigation back, language text
-/// casing). Robots without platform divergence (home, chat list, chat
-/// group detail, contacts, settings) are shared with mobile.
+/// casing, the chat-room media-permission dialog). Robots without platform
+/// divergence (home, chat list, contacts, settings) are shared with mobile.
 class WebRobotFactory implements RobotFactory {
   const WebRobotFactory(this.$);
 
@@ -41,7 +41,7 @@ class WebRobotFactory implements RobotFactory {
 
   @override
   AbstractChatGroupDetailRobot chatGroupDetailRobot() =>
-      ChatGroupDetailRobot($);
+      WebChatGroupDetailRobot($);
 
   @override
   AbstractSearchRobot searchRobot() => WebSearchRobot($);
