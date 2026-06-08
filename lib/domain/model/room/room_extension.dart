@@ -7,6 +7,7 @@ import 'package:fluffychat/domain/model/file_info/file_info.dart';
 import 'package:fluffychat/domain/model/room/room_preview_result.dart';
 import 'package:fluffychat/domain/model/search/recent_chat_model.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/client_stories_extension.dart';
+import 'package:fluffychat/utils/matrix_sdk_extensions/markdown_fix.dart';
 import 'package:html_unescape/html_unescape.dart';
 import 'package:matrix/matrix.dart';
 // ignore: implementation_imports
@@ -391,11 +392,13 @@ extension RoomExtension on Room {
   }) {
     final event = <String, dynamic>{'msgtype': msgtype, 'body': message};
     if (parseMarkdown) {
-      final html = markdown(
+      var html = markdown(
         event['body'],
         getEmotePacks: () => getImagePacksFlat(ImagePackUsage.emoticon),
         getMention: getMention,
       );
+
+      html = fixDoubleEncodedCodeBlocks(html);
 
       final formatText = event['body']
           .toString()

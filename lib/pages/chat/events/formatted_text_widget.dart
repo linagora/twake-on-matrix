@@ -1,4 +1,5 @@
 import 'package:fluffychat/pages/chat/events/html_message.dart';
+import 'package:fluffychat/utils/matrix_sdk_extensions/markdown_fix.dart';
 import 'package:flutter/material.dart';
 import 'package:matrix/matrix.dart' hide Visibility;
 
@@ -16,7 +17,7 @@ class FormattedTextWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    var html = event.formattedText;
+    var html = fixDoubleEncodedCodeBlocks(event.formattedText);
 
     if (event.messageType == MessageTypes.Emote) {
       html = '* $html';
