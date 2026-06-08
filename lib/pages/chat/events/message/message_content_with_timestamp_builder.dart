@@ -462,8 +462,10 @@ class _MessageContentWithTimestampBuilderState
               ? BubbleTailDirection.right
               : BubbleTailDirection.left)
         : BubbleTailDirection.none;
-    // Media without caption/reply uses the tighter media padding.
-    final isMediaOnly = widget.event.isVideoOrImage && !timelineText;
+    final showDisplayName = !_hideDisplayName(context);
+    // Media without caption/reply uses the tighter media padding
+    final isMediaOnly =
+        widget.event.isVideoOrImage && !timelineText && !showDisplayName;
     final bubbleContentType = isMediaOnly
         ? BubbleContentType.mediaOnly
         : BubbleContentType.other;
@@ -477,7 +479,7 @@ class _MessageContentWithTimestampBuilderState
     final bubbleContent = Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        if (!_hideDisplayName(context))
+        if (showDisplayName)
           OptionalSelectionContainerDisabled(
             isEnabled: PlatformInfos.isWeb,
             child: DisplayNameWidget(event: widget.event),
