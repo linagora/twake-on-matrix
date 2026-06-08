@@ -3,6 +3,7 @@ import 'package:fluffychat/presentation/mixins/paste_image_mixin.dart';
 import 'package:fluffychat/utils/clipboard.dart';
 import 'package:flutter/material.dart';
 import 'package:matrix/matrix.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:super_clipboard/super_clipboard.dart';
 
 mixin HandleClipboardActionMixin on PasteImageMixin {
@@ -37,11 +38,18 @@ mixin HandleClipboardActionMixin on PasteImageMixin {
   void onSendFileCallback();
 
   Future<void> pasteClipboardImage(ClipboardReader? clipboardReader) async {
+    final pendingText = sendController.text;
     return pasteImage(
       context,
       room!,
       clipboardReader: clipboardReader,
-      onSendFileCallback: onSendFileCallback,
+      pendingText: pendingText,
+      onSendFileCallback: () async {
+        sendController.clear();
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.remove('draft_${room!.id}');
+        onSendFileCallback();
+      },
     );
   }
 
