@@ -454,8 +454,11 @@ class _MessageContentWithTimestampBuilderState
         widget.previousEvent != null &&
         widget.previousEvent!.senderId == widget.event.senderId;
     final showTail = !isDisplayOnlyEmoji && !hasSameSenderBelow;
+    final alignOwnMessageRight =
+        widget.event.isOwnMessage &&
+        _responsiveUtils.enableRightAndLeftMessageAlignment(context);
     final tailDirection = showTail
-        ? (widget.event.shouldAlignOwnMessageInDifferentSide
+        ? (alignOwnMessageRight
               ? BubbleTailDirection.right
               : BubbleTailDirection.left)
         : BubbleTailDirection.none;
