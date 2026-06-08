@@ -25,7 +25,7 @@ dependencies:
   flutter_matrix_html:
     git:
       url: https://github.com/linagora/flutter_matrix_html.git
-      ref: fix/double-encoded-html-entities-in-code-blocks
+      ref: master
 
   # TODO: Remove it after this PR merged
   # https://github.com/justsoft/video_thumbnail/pull/135
