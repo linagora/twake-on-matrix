@@ -23,6 +23,7 @@ import 'dart:io';
 
 import 'package:collection/collection.dart';
 import 'package:fcm_shared_isolate/fcm_shared_isolate.dart';
+import 'package:fluffychat/data/model/push/twake_local_notification_payload.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/domain/keychain_sharing/keychain_sharing_manager.dart';
 import 'package:fluffychat/domain/model/extensions/push/push_notification_extension.dart';
@@ -48,6 +49,24 @@ import '../config/app_config.dart';
 import '../config/setting_keys.dart';
 import 'famedlysdk_store.dart';
 import 'platform_infos.dart';
+
+/// APN method names sent from the native iOS layer via [MethodChannel].
+enum _ApnMethod {
+  willPresent,
+  didReceive;
+
+  String get value {
+    switch (this) {
+      case _ApnMethod.willPresent:
+        return 'willPresent';
+      case _ApnMethod.didReceive:
+        return 'didReceive';
+    }
+  }
+}
+
+/// Language tag sent in Matrix pusher registration (RFC 5646 / Matrix spec).
+const _pusherLang = 'en';
 
 class NoTokenException implements Exception {
   String get cause => 'Cannot get push token';
@@ -106,9 +125,9 @@ class BackgroundPush {
     } else if (Platform.isIOS) {
       apnChannel.setMethodCallHandler((call) async {
         Logs().v('[Push] Received APN call: $call');
-        if (call.method == 'willPresent') {
+        if (call.method == _ApnMethod.willPresent.value) {
           onReceiveNotification(call.arguments);
-        } else if (call.method == 'didReceive') {
+        } else if (call.method == _ApnMethod.didReceive.value) {
           await iOSUserSelectedNoti(call.arguments);
         }
       });
@@ -209,7 +228,7 @@ class BackgroundPush {
         currentPushers.first.appId == appId &&
         currentPushers.first.appDisplayName == clientName &&
         currentPushers.first.deviceDisplayName == targetClient.deviceName &&
-        currentPushers.first.lang == 'en' &&
+        currentPushers.first.lang == _pusherLang &&
         currentPushers.first.data.url.toString() == gatewayUrl &&
         currentPushers.first.data.format ==
             AppConfig.pushNotificationsPusherFormat) {
@@ -223,8 +242,9 @@ class BackgroundPush {
           pushkey: token,
           appId: appId,
           appDisplayName: clientName,
-          deviceDisplayName: targetClient.deviceName!,
-          lang: 'en',
+          deviceDisplayName:
+              targetClient.deviceName ?? PlatformInfos.clientName,
+          lang: _pusherLang,
           data: PusherData(
             url: Uri.parse(gatewayUrl),
             format: AppConfig.pushNotificationsPusherFormat,
@@ -370,7 +390,7 @@ class BackgroundPush {
           currentPushers.first.appId == thisAppId &&
           currentPushers.first.appDisplayName == clientName &&
           currentPushers.first.deviceDisplayName == client.deviceName &&
-          currentPushers.first.lang == 'en' &&
+          currentPushers.first.lang == _pusherLang &&
           currentPushers.first.data.url.toString() == gatewayUrl &&
           currentPushers.first.data.format ==
               AppConfig.pushNotificationsPusherFormat) {
@@ -405,8 +425,8 @@ class BackgroundPush {
             pushkey: token!,
             appId: thisAppId,
             appDisplayName: clientName,
-            deviceDisplayName: client.deviceName!,
-            lang: 'en',
+            deviceDisplayName: client.deviceName ?? clientName,
+            lang: _pusherLang,
             data: PusherData(
               url: Uri.parse(gatewayUrl!),
               format: AppConfig.pushNotificationsPusherFormat,
@@ -551,15 +571,21 @@ class BackgroundPush {
     String? roomId = noti['room_id'];
     final eventId = noti['event_id'];
     String? receiverId = noti['receiver_id'] as String?;
-    final payload = noti['payload'] != null
-        ? jsonDecode(noti['payload'])
-        : null;
-    if (payload is Map) {
-      payload['room_id'] is String ? roomId = payload['room_id'] : null;
-      payload['receiver_id'] is String
-          ? receiverId = payload['receiver_id']
-          : null;
+
+    // Remote APN notifications nest the routing data inside 'payload'.
+    if (noti['payload'] != null) {
+      try {
+        final rawPayload = jsonDecode(noti['payload'] as String);
+        if (rawPayload is Map<String, dynamic>) {
+          final parsed = TwakeLocalNotificationPayload.fromJson(rawPayload);
+          if (parsed.roomId != null) roomId = parsed.roomId;
+          if (parsed.receiverId != null) receiverId = parsed.receiverId;
+        }
+      } catch (e) {
+        Logs().w('[Push] iOSUserSelectedNoti: failed to parse payload', e);
+      }
     }
+
     await _switchAccount(receiverId);
     await goToRoom(roomId, eventId: eventId);
   }
@@ -600,18 +626,19 @@ class BackgroundPush {
     NotificationResponse? response, {
     String? eventId,
   }) async {
-    final payload = jsonDecode(response?.payload ?? '{}');
-    final roomId = payload['room_id'];
-    final receiverId = payload['receiver_id'];
+    TwakeLocalNotificationPayload payload;
+    try {
+      final raw = jsonDecode(response?.payload ?? '{}') as Map<String, dynamic>;
+      payload = TwakeLocalNotificationPayload.fromJson(raw);
+    } catch (e) {
+      Logs().w('[Push] onSelectNotification: failed to parse payload', e);
+      payload = TwakeLocalNotificationPayload.empty();
+    }
     Logs().d(
-      'BackgroundPush::onSelectNotification() roomId - $roomId ||eventId - $eventId',
+      'BackgroundPush::onSelectNotification() roomId - ${payload.roomId} ||eventId - $eventId',
     );
-    if (receiverId is String?) {
-      await _switchAccount(receiverId);
-    }
-    if (roomId is String?) {
-      await goToRoom(roomId, eventId: eventId);
-    }
+    await _switchAccount(payload.receiverId);
+    await goToRoom(payload.roomId, eventId: eventId);
   }
 
   Future<void> goToRoom(String? roomId, {String? eventId}) async {

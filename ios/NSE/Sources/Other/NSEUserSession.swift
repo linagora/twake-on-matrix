@@ -62,6 +62,23 @@ final class NSEUserSession {
     }
     
     func notificationItemProxy(roomID: String, eventID: String) async -> NotificationItemProxyProtocol? {
+        var proxy = await fetchNotificationItem(roomID: roomID, eventID: eventID)
+        guard proxy?.isEncrypted == true else { return proxy }
+
+        // Recovery key is registered in init, but decryption may not have settled yet.
+        // Two bounded retries give the Rust SDK time to decrypt without blocking indefinitely.
+        let retryDelaysNs: [UInt64] = [300_000_000, 800_000_000]
+        for (attempt, delayNs) in retryDelaysNs.enumerated() {
+            MXLog.info("NSE: Notification still encrypted, retrying after \(delayNs / 1_000_000)ms (attempt \(attempt + 1)) - roomID: \(roomID)")
+            try? await Task.sleep(nanoseconds: delayNs)
+            proxy = await fetchNotificationItem(roomID: roomID, eventID: eventID)
+            if proxy?.isEncrypted != true { break }
+        }
+
+        return proxy
+    }
+
+    private func fetchNotificationItem(roomID: String, eventID: String) async -> NotificationItemProxyProtocol? {
         do {
             let status = try await notificationClient.getNotification(roomId: roomID, eventId: eventID)
             switch status {
