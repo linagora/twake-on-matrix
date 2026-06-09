@@ -60,7 +60,9 @@ class CreateDirectChatWithUnsupportedUserScenario extends BaseTestScenario {
     final deadline = DateTime.now().add(const Duration(seconds: 5));
     while (DateTime.now().isBefore(deadline)) {
       await $.pump(const Duration(milliseconds: 300));
-      if ((await robots.chatListRobot().getListOfChatGroup()).isNotEmpty) return;
+      if ((await robots.chatListRobot().getListOfChatGroup()).isNotEmpty) {
+        return;
+      }
     }
   }
 }

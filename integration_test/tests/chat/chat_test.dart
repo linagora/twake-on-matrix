@@ -5,8 +5,7 @@ void main() {
   TestBase().runPatrolTest(
     description:
         'create a new message with a user who has been chatted with before',
-    scenarioBuilder: ($, robots) =>
-        CreateDmWithExistingUserScenario($, robots),
+    scenarioBuilder: ($, robots) => CreateDmWithExistingUserScenario($, robots),
   );
 
   TestBase().runPatrolTest(
