@@ -116,7 +116,7 @@ abstract class AppConfig {
   static bool experimentalVoip = false;
   static bool appGridDashboardAvailable = true;
   static bool enableRightAndLeftMessageAlignmentOnWeb = false;
-  static bool gifAutoplay = false;
+  static bool gifAutoplay = true;
   static const bool hideTypingUsernames = false;
   static const bool hideAllStateEvents = false;
   static const String inviteLinkPrefix = 'https://matrix.to/#/';
