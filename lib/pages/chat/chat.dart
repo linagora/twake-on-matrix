@@ -77,6 +77,7 @@ import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
 import 'package:fluffychat/utils/network_connection_service.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/utils/responsive/responsive_utils.dart';
+import 'package:fluffychat/utils/room_draft_storage.dart';
 import 'package:fluffychat/utils/room_status_extension.dart';
 import 'package:fluffychat/utils/twake_snackbar.dart';
 import 'package:fluffychat/widgets/context_menu/context_menu_action.dart';
@@ -106,7 +107,6 @@ import 'package:linagora_design_flutter/linagora_design_flutter.dart'
 import 'package:linagora_design_flutter/reaction/reaction_picker.dart';
 import 'package:matrix/matrix.dart' hide Contact;
 import 'package:scroll_to_index/scroll_to_index.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:universal_html/html.dart' as html;
 
 import 'events/audio_message/audio_player_widget.dart';
@@ -319,6 +319,8 @@ class ChatController extends State<Chat>
       AutoScrollController();
 
   final TextEditingController _captionsController = TextEditingController();
+
+  final RoomDraftStorage _draftStorage = const RoomDraftStorage();
 
   FocusNode inputFocus = FocusNode();
 
@@ -573,8 +575,7 @@ class ChatController extends State<Chat>
   }
 
   void _loadDraft() async {
-    final prefs = await SharedPreferences.getInstance();
-    final draft = prefs.getString('draft_$roomId');
+    final draft = await _draftStorage.read(roomId!);
     if (draft != null && draft.isNotEmpty) {
       sendController.text = draft;
       inputText.value = draft;
@@ -788,8 +789,7 @@ class ChatController extends State<Chat>
 
     if (sendController.text.trim().isEmpty) return;
     _storeInputTimeoutTimer?.cancel();
-    final prefs = await SharedPreferences.getInstance();
-    prefs.remove('draft_$roomId');
+    await _draftStorage.remove(roomId!);
     var parseCommands = true;
 
     final commandMatch = RegExp(r'^/(\w+)').firstMatch(sendController.text);
@@ -2295,8 +2295,7 @@ class ChatController extends State<Chat>
     }
     _storeInputTimeoutTimer?.cancel();
     _storeInputTimeoutTimer = Timer(_storeInputTimeout, () async {
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setString('draft_$roomId', text);
+      await _draftStorage.save(roomId!, text);
     });
     if (text.endsWith(' ') && matrix!.hasComplexBundles) {
       final clients = currentRoomBundle;
@@ -2445,8 +2444,7 @@ class ChatController extends State<Chat>
     }
     if (result == SendMediaWithCaptionStatus.done ||
         result == SendMediaWithCaptionStatus.emptyRoom) {
-      final prefs = await SharedPreferences.getInstance();
-      prefs.remove('draft_$roomId');
+      await _draftStorage.remove(roomId!);
       replyEventNotifier.value = null;
     }
 
@@ -2555,9 +2553,7 @@ class ChatController extends State<Chat>
         );
         scrollDown();
 
-        // Also add draft cleanup here
-        final prefs = await SharedPreferences.getInstance();
-        await prefs.remove('draft_$roomId');
+        await _draftStorage.remove(roomId!);
         replyEventNotifier.value = null;
       },
       captionController: _captionsController,
