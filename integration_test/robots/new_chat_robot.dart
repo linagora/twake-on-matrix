@@ -26,7 +26,16 @@ class NewChatRobot extends CoreRobot {
   }
 
   Future<void> makeASearch(String searchKey) async {
-    await getSearchIcon().tap();
+    // The new-chat screen's `SearchableAppBar` mounts its `TextField` only in
+    // search mode, so activate it first. Scope the trigger to the new-chat
+    // screen — on web's two-pane layout the chat-list pane has its own search
+    // affordance.
+    // The search `TextField` mounts only in search mode on mobile (revealed by
+    // the search icon); the web new-chat shows it inline. Tap the icon only
+    // when no field is present yet.
+    if (!$(TextField).exists) {
+      await $(find.byIcon(Icons.search)).first.tap();
+    }
     await typeSlowlyWithPatrol($, getSearchField(), searchKey);
     await waitForEitherVisible(
       $: $,

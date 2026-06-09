@@ -460,7 +460,10 @@ class _InputBarState extends State<InputBar> with PasteImageMixin {
             textCapitalization: TextCapitalization.sentences,
           ),
           suggestionsCallback: (text) {
-            if (widget.room!.isDirectChat) return [];
+            // In a draft chat the room does not exist yet, so there are no
+            // members to suggest. Guard the null room (web opens DMs as a draft
+            // and fires this callback, which would otherwise crash on `room!`).
+            if (widget.room?.isDirectChat ?? true) return [];
             final suggestions = getSuggestions(text);
             if (PlatformInfos.isMobile) {
               _handleSuggestionsCallbackMobile();

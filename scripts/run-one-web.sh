@@ -34,6 +34,7 @@ patrol test \
   --dart-define=ReceiverPass="$ReceiverPass" \
   --dart-define=CurrentAccount="$CurrentAccount" \
   --dart-define=MemberMatrixID="$MemberMatrixID" \
+  --dart-define=User2MaxtrixAddress="$MemberMatrixID" \
   --dart-define=SearchByMatrixAddress="$SearchByMatrixAddress" \
   --dart-define=SearchByTitle="$SearchByTitle" \
   --dart-define=TitleOfGroupTest="$TitleOfGroupTest" \

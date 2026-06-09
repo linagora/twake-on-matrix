@@ -29,4 +29,12 @@ abstract class AbstractChatListRobot {
 
   /// Whether the chat titled [title] is currently pinned.
   Future<bool> isChatPinned(String title);
+
+  /// Opens the new-chat flow, searches for [account] and starts a direct
+  /// message with the first match. Settles on the chat or draft-chat screen.
+  ///
+  /// Returns `false` when the search yields no account row (e.g. an
+  /// unresolvable remote address on web), so callers can branch without a
+  /// timeout.
+  Future<bool> createDirectMessage(String account);
 }
