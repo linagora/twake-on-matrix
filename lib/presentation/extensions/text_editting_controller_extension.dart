@@ -10,17 +10,21 @@ extension TextEdittingControllerExtension on TextEditingController {
     final pastedText = await TwakeClipboard.instance.pasteText(
       clipboardReader: clipboardReader,
     );
-    if (pastedText == null) return;
-
-    if (start == -1 || end == -1) {
-      text = pastedText + text;
-      selection = TextSelection.collapsed(offset: pastedText.length);
-      return;
+    if (pastedText != null) {
+      if (start == -1 || end == -1) {
+        text = pastedText + text;
+        selection = TextSelection.collapsed(offset: text.length);
+        return;
+      }
+      if (start == end) {
+        final startText = text.substring(0, start);
+        final trailingText = text.substring(end, text.length);
+        text = startText + pastedText + trailingText;
+      } else {
+        text = text.replaceRange(start, end, pastedText);
+      }
+      selection = TextSelection.collapsed(offset: start + pastedText.length);
     }
-
-    // Replace [start, end) with pastedText, then place cursor after insertion.
-    text = text.replaceRange(start, end, pastedText);
-    selection = TextSelection.collapsed(offset: start + pastedText.length);
   }
 
   Future<void> copyText() async {
