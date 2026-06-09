@@ -61,18 +61,28 @@ final class NSEUserSession {
             .notificationClient(processSetup: .multipleProcesses)
     }
     
+    // Retry delays in milliseconds; kept as ms for readability, converted to ns at call site.
+    private static let retryDelaysMs: [UInt64] = [300, 800]
+
     func notificationItemProxy(roomID: String, eventID: String) async -> NotificationItemProxyProtocol? {
         var proxy = await fetchNotificationItem(roomID: roomID, eventID: eventID)
         guard proxy?.isEncrypted == true else { return proxy }
 
         // Recovery key is registered in init, but decryption may not have settled yet.
         // Two bounded retries give the Rust SDK time to decrypt without blocking indefinitely.
-        let retryDelaysNs: [UInt64] = [300_000_000, 800_000_000]
-        for (attempt, delayNs) in retryDelaysNs.enumerated() {
-            MXLog.info("NSE: Notification still encrypted, retrying after \(delayNs / 1_000_000)ms (attempt \(attempt + 1)) - roomID: \(roomID)")
-            try? await Task.sleep(nanoseconds: delayNs)
-            proxy = await fetchNotificationItem(roomID: roomID, eventID: eventID)
+        for (attempt, delayMs) in Self.retryDelaysMs.enumerated() {
+            MXLog.info("NSE: Notification still encrypted, retrying after \(delayMs)ms (attempt \(attempt + 1)) - roomID: \(roomID)")
+            try? await Task.sleep(nanoseconds: delayMs * 1_000_000)
+            // Only overwrite proxy when the retry returns a value, to avoid losing
+            // the encrypted fallback if the SDK transiently returns nil.
+            if let retried = await fetchNotificationItem(roomID: roomID, eventID: eventID) {
+                proxy = retried
+            }
             if proxy?.isEncrypted != true { break }
+        }
+
+        if proxy?.isEncrypted == true {
+            MXLog.warning("NSE: Notification remains encrypted after \(Self.retryDelaysMs.count) retries - roomID: \(roomID)")
         }
 
         return proxy
