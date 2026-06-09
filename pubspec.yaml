@@ -21,7 +21,7 @@ dependencies:
   linagora_design_flutter:
     git:
       url: https://github.com/linagora/linagora-design-flutter.git
-      ref: master
+      ref: v0.1.0
   flutter_matrix_html:
     git:
       url: https://github.com/linagora/flutter_matrix_html.git
