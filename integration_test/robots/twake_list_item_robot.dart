@@ -1,3 +1,4 @@
+import 'package:fluffychat/generated/l10n/app_localizations.dart';
 import 'package:fluffychat/pages/chat_details/participant_list_item/participant_list_item.dart';
 import 'package:fluffychat/pages/chat_list/chat_list_item_subtitle.dart';
 import 'package:fluffychat/pages/chat_list/chat_list_item_title.dart';
@@ -12,6 +13,8 @@ class TwakeListItemRobot extends CoreRobot {
 
   TwakeListItemRobot(super.$, this.root);
 
+  L10n get _l10n => L10n.of($.tester.element(find.byType(Scaffold).first))!;
+
   Future<PatrolFinder> getRadiobtn() async {
     return root.$(Radio).at(0);
   }
@@ -25,7 +28,7 @@ class TwakeListItemRobot extends CoreRobot {
   }
 
   Future<PatrolFinder> getOwnerLabel() async {
-    return root.$(Text).containing('Owner');
+    return root.$(Text).containing(_l10n.owner);
   }
 
   Future<PatrolFinder> getEmailLabelIncaseSearching() async {
