@@ -47,7 +47,9 @@ class NewChatRobot extends CoreRobot {
 
   Future<void> clickOnNewGroupChatIcon() async {
     await getNewGroupChatIcon().tap();
-    await $.waitUntilVisible($(AppBar).$("Add members"));
+    // The "Add members" AppBar title is mobile-only (absent on web's wide
+    // layout); wait for the add-members search affordance instead.
+    await $.waitUntilVisible($(find.byIcon(Icons.search)).first);
   }
 
   List<TwakeListItemRobot> getListOfAccount() {

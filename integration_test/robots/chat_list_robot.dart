@@ -10,9 +10,11 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:linagora_design_flutter/list_item/twake_list_item.dart';
 import 'package:patrol/patrol.dart';
 import 'abstract/abstract_chat_list_robot.dart';
+import 'add_member_robot.dart';
 import 'chat_group_detail_robot.dart';
 import 'home_robot.dart';
 import 'new_chat_robot.dart';
+import 'setting_for_new_group.dart';
 import 'twake_list_item_robot.dart';
 
 class ChatListRobot extends HomeRobot implements AbstractChatListRobot {
@@ -179,5 +181,18 @@ class ChatListRobot extends HomeRobot implements AbstractChatListRobot {
       timeout: const Duration(seconds: 30),
     );
     return true;
+  }
+
+  @override
+  Future<void> createGroupChat(String name, String memberSearchKey) async {
+    await clickOnPenIcon();
+    await NewChatRobot($).clickOnNewGroupChatIcon();
+    await AddMemberRobot($).makeASearch(memberSearchKey);
+    await AddMemberRobot($).selectAllFilteredAccounts();
+    await AddMemberRobot($).clickOnNextIcon();
+    await SettingForNewGroupRobot($).settingForNewGroup(name);
+    await SettingForNewGroupRobot($).getConfirmIcon().tap();
+    await $.pump(const Duration(seconds: 10));
+    await $.waitUntilVisible($(ChatView));
   }
 }

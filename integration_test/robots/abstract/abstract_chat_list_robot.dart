@@ -37,4 +37,8 @@ abstract class AbstractChatListRobot {
   /// unresolvable remote address on web), so callers can branch without a
   /// timeout.
   Future<bool> createDirectMessage(String account);
+
+  /// Opens the new-group flow, adds the member(s) matched by [memberSearchKey],
+  /// names the group [name] and confirms. Settles on the new group's chat view.
+  Future<void> createGroupChat(String name, String memberSearchKey);
 }

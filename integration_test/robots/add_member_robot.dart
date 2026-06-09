@@ -56,7 +56,11 @@ class AddMemberRobot extends CoreRobot {
   }
 
   Future<void> makeASearch(String searchKey) async {
-    await getSearchIcon().tap();
+    // Mobile reveals the field via the search icon; web shows it inline. Tap
+    // the icon only when no field is present yet.
+    if (!$(TextField).exists) {
+      await $(find.byIcon(Icons.search)).first.tap();
+    }
     await typeSlowlyWithPatrol($, getSearchField(), searchKey);
     await waitForEitherVisible(
       $: $,
