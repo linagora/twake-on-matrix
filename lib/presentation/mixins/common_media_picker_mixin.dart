@@ -77,8 +77,11 @@ mixin CommonMediaPickerMixin {
   Future<AssetEntity?> pickMediaFromCameraAction({
     required BuildContext context,
     bool onlyImage = false,
+    bool popContext = true,
   }) async {
-    Navigator.pop(context);
+    // [popContext] closes the legacy media-picker bottom sheet before opening
+    // the camera. The new input-bar popup menu has no sheet, so it passes false.
+    if (popContext) Navigator.pop(context);
     return await CameraPicker.pickFromCamera(
       context,
       pickerConfig: onlyImage

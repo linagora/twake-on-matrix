@@ -73,6 +73,35 @@ enum PickerType {
   }
 }
 
+/// Actions offered by the chat input-bar "+" popup menu on mobile.
+enum AttachmentMenuAction {
+  gallery,
+  document,
+  camera;
+
+  String getTitle(BuildContext context) {
+    switch (this) {
+      case AttachmentMenuAction.gallery:
+        return L10n.of(context)!.gallery;
+      case AttachmentMenuAction.document:
+        return L10n.of(context)!.documents;
+      case AttachmentMenuAction.camera:
+        return L10n.of(context)!.openCamera;
+    }
+  }
+
+  IconData getIcon() {
+    switch (this) {
+      case AttachmentMenuAction.gallery:
+        return Icons.image_outlined;
+      case AttachmentMenuAction.document:
+        return Icons.attach_file;
+      case AttachmentMenuAction.camera:
+        return Icons.photo_camera_outlined;
+    }
+  }
+}
+
 enum ChatScrollState {
   scrolling,
   startScroll,

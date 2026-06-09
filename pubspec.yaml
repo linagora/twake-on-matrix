@@ -126,6 +126,10 @@ dependencies:
   http: ^0.13.4
   image: ^4.0.15
   image_picker: ^1.2.0
+  # Direct deps so we can opt into the Android Photo Picker (useAndroidPhotoPicker)
+  # in main.dart; both are already pulled in transitively by image_picker.
+  image_picker_android: ^0.8.13
+  image_picker_platform_interface: ^2.11.0
   intl: any
   just_audio: 0.10.5
   opus_caf_converter_dart: ^1.0.1

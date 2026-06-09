@@ -327,17 +327,21 @@ mixin MediaPickerMixin on CommonMediaPickerMixin {
       ),
       cameraWidget: UseCameraWidget(
         onPressed: () =>
-            _onPressedCamera(context, imagePickerController, onCameraPicked),
+            onPressedCamera(context, imagePickerController, onCameraPicked),
         backgroundImage: const AssetImage("assets/verification.png"),
       ),
     );
   }
 
-  void _onPressedCamera(
+  /// Checks camera + micro permissions, then opens the camera and forwards the
+  /// captured asset to [onCameraPicked]. [popContext] closes the legacy bottom
+  /// sheet before opening the camera; the new input-bar popup passes false.
+  void onPressedCamera(
     BuildContext context,
     ImagePickerGridController imagePickerController,
-    OnCameraPicked? onCameraPicked,
-  ) async {
+    OnCameraPicked? onCameraPicked, {
+    bool popContext = true,
+  }) async {
     final currentPermissionMicro = await getCurrentMicroPermission(
       context: context,
       audioTypeEnum: AudioTypeEnum.camera,
@@ -349,6 +353,7 @@ mixin MediaPickerMixin on CommonMediaPickerMixin {
         context: context,
         imagePickerGridController: imagePickerController,
         onCameraPicked: onCameraPicked,
+        popContext: popContext,
       );
     } else {
       goToSettings(
@@ -363,10 +368,12 @@ mixin MediaPickerMixin on CommonMediaPickerMixin {
     required ImagePickerGridController imagePickerGridController,
     OnCameraPicked? onCameraPicked,
     bool onlyImage = false,
+    bool popContext = true,
   }) async {
     var assetEntity = await pickMediaFromCameraAction(
       context: context,
       onlyImage: onlyImage,
+      popContext: popContext,
     );
     Logs().d(
       "MediaPickerMixin::_pickFromCameraAction(): assetEntity - $assetEntity",

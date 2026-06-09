@@ -2453,6 +2453,68 @@ class ChatController extends State<Chat>
     scrollDown();
   }
 
+  /// Post-send cleanup shared by the native media, document and camera send
+  /// paths: scrolls to the latest message, clears the input bar and its saved
+  /// draft, and resets the reply state.
+  Future<void> _onMediaSent() async {
+    scrollDown();
+    sendController.clear();
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove('draft_$roomId');
+    replyEventNotifier.value = null;
+  }
+
+  /// Opens the OS-native media picker (PHPicker on iOS, Photo Picker on
+  /// Android). Wired to the dedicated image button in the mobile input bar.
+  void onPickImageClick() {
+    pickAndSendMediaNative(
+      context,
+      room: room,
+      caption: sendController.text.isNotEmpty ? sendController.text : null,
+      inReplyTo: replyEventNotifier.value,
+      onSendCallback: _onMediaSent,
+    );
+  }
+
+  /// Handles the mobile input-bar "+" popup menu selection (document / camera).
+  void onAttachmentMenuSelected(
+    BuildContext context,
+    AttachmentMenuAction action,
+  ) {
+    switch (action) {
+      case AttachmentMenuAction.gallery:
+        onPickImageClick();
+        break;
+      case AttachmentMenuAction.document:
+        sendFileAction(
+          context,
+          room: room,
+          onSendFileCallback: _onMediaSent,
+          inReplyTo: replyEventNotifier.value,
+          popContext: false,
+        );
+        break;
+      case AttachmentMenuAction.camera:
+        _pickFromCameraAndSend(context);
+        break;
+    }
+  }
+
+  void _pickFromCameraAndSend(BuildContext context) {
+    final imagePickerController = ImagePickerGridController(
+      AssetCounter(imagePickerMode: ImagePickerMode.single),
+    );
+    onPressedCamera(context, imagePickerController, (_) async {
+      await sendMedia(
+        imagePickerController,
+        room: room,
+        caption: sendController.text.isNotEmpty ? sendController.text : null,
+        inReplyTo: replyEventNotifier.value,
+      );
+      await _onMediaSent();
+    }, popContext: false);
+  }
+
   void _showMediaPicker(BuildContext context) {
     final imagePickerController = ImagePickerGridController(
       AssetCounter(imagePickerMode: ImagePickerMode.multiple),

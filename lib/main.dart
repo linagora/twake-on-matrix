@@ -15,6 +15,8 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_vodozemac/flutter_vodozemac.dart' as vod;
 import 'package:go_router/go_router.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:image_picker_android/image_picker_android.dart';
+import 'package:image_picker_platform_interface/image_picker_platform_interface.dart';
 import 'package:linagora_design_flutter/cozy_config_manager/cozy_config_manager.dart';
 import 'package:matrix/matrix.dart';
 import 'package:media_kit/media_kit.dart';
@@ -40,6 +42,7 @@ Future<void> initializeApp() async {
   SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
   initMatrixLogger();
   MediaKit.ensureInitialized();
+  _enableAndroidPhotoPicker();
   await vod.init();
   if (PlatformInfos.isMobile) {
     databaseFactory = databaseFactoryFfi;
@@ -87,6 +90,19 @@ Future<void> initializeApp() async {
     '${AppConfig.applicationName} started in foreground mode. Rendering GUI...',
   );
   await startGui(clients);
+}
+
+/// Opts the Android `image_picker` implementation into the modern, system
+/// Android Photo Picker (`ACTION_PICK_IMAGES`) instead of the legacy
+/// `ACTION_GET_CONTENT` document/SAF intent. Without this flag the chat media
+/// button on Android opens the file-explorer-style picker rather than the
+/// WhatsApp-like photo gallery. No-op on every other platform.
+void _enableAndroidPhotoPicker() {
+  if (!PlatformInfos.isAndroid) return;
+  final imagePickerImplementation = ImagePickerPlatform.instance;
+  if (imagePickerImplementation is ImagePickerAndroid) {
+    imagePickerImplementation.useAndroidPhotoPicker = true;
+  }
 }
 
 /// Fetch the pincode for the applock and start the flutter engine.
