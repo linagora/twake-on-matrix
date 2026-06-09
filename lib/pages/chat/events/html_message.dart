@@ -69,7 +69,7 @@ class HtmlMessage extends StatelessWidget with LinkifyMixin {
     final effectiveDefaultTextStyle = ambientStyle.merge(defaultTextStyle);
     final effectiveLinkStyle = ambientStyle.merge(
       linkStyle ??
-          themeData.textTheme.bodyMedium!.copyWith(
+          themeData.textTheme.bodyMedium?.copyWith(
             color: themeData.colorScheme.secondary,
             decoration: TextDecoration.underline,
             decorationColor: themeData.colorScheme.secondary,
