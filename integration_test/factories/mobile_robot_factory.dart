@@ -2,17 +2,23 @@ import 'package:patrol/patrol.dart';
 
 import '../robots/abstract/abstract_chat_group_detail_robot.dart';
 import '../robots/abstract/abstract_chat_list_robot.dart';
+import '../robots/abstract/abstract_chat_profile_info_robot.dart';
 import '../robots/abstract/abstract_contact_list_robot.dart';
+import '../robots/abstract/abstract_group_information_robot.dart';
 import '../robots/abstract/abstract_home_robot.dart';
 import '../robots/abstract/abstract_language_setting_robot.dart';
 import '../robots/abstract/abstract_login_robot.dart';
 import '../robots/abstract/abstract_search_robot.dart';
+import '../robots/abstract/abstract_search_view_robot.dart';
 import '../robots/abstract/abstract_setting_robot.dart';
+import '../robots/chat/chat_profile_info_robot.dart';
 import '../robots/chat_group_detail_robot.dart';
 import '../robots/chat_list_robot.dart';
 import '../robots/contact_list_robot.dart';
+import '../robots/group_information_robot.dart';
 import '../robots/home_robot.dart';
 import '../robots/login_robot.dart';
+import '../robots/search/search_view_robot.dart';
 import '../robots/search_robot.dart';
 import '../robots/setting/app_language_setting_robot.dart';
 import '../robots/setting/setting_robot.dart';
@@ -43,6 +49,17 @@ class MobileRobotFactory implements RobotFactory {
 
   @override
   AbstractSearchRobot searchRobot() => SearchRobot($);
+
+  @override
+  AbstractSearchViewRobot searchViewRobot() => SearchViewRobot($);
+
+  @override
+  AbstractGroupInformationRobot groupInformationRobot() =>
+      GroupInformationRobot($);
+
+  @override
+  AbstractChatProfileInfoRobot chatProfileInfoRobot() =>
+      ChatProfileInfoRobot($);
 
   @override
   AbstractContactListRobot contactListRobot() => ContactListRobot($);

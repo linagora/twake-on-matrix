@@ -8,9 +8,11 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:patrol/patrol.dart';
 import '../base/core_robot.dart';
+import 'abstract/abstract_group_information_robot.dart';
 import 'twake_list_item_robot.dart';
 
-class GroupInformationRobot extends CoreRobot {
+class GroupInformationRobot extends CoreRobot
+    implements AbstractGroupInformationRobot {
   GroupInformationRobot(super.$);
 
   PatrolFinder getBackIcon() {
@@ -127,6 +129,7 @@ class GroupInformationRobot extends CoreRobot {
     return $(find.byKey(ValueKey<String>(matrixID)));
   }
 
+  @override
   Future<void> openMemberDetail({required String matrixID}) async {
     await $.scrollUntilVisible(finder: getMemberByMatrixID(matrixID));
     await getMemberByMatrixID(matrixID).tap();

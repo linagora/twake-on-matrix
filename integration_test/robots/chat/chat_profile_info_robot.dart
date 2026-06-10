@@ -10,37 +10,46 @@ import 'package:patrol/patrol.dart';
 import 'package:fluffychat/presentation/enum/profile_info/profile_info_body_enum.dart';
 
 import '../../base/core_robot.dart';
+import '../abstract/abstract_chat_profile_info_robot.dart';
 
-class ChatProfileInfoRobot extends CoreRobot {
+class ChatProfileInfoRobot extends CoreRobot
+    implements AbstractChatProfileInfoRobot {
   ChatProfileInfoRobot(super.$);
 
+  @override
   Future<void> verifyDisplayName({required String displayName}) async {
     final displayNameFinder = find.text(displayName);
     expect(displayNameFinder, findsOneWidget);
   }
 
+  @override
   Future<void> verifyDisplayMatrixId({required String matrixId}) async {
     final matrixIdFinder = find.text(matrixId);
     expect(matrixIdFinder, findsOneWidget);
   }
 
+  @override
   Future<void> verifyEmail({required String email}) async {
     final emailFinder = find.text(email);
     if (email.isEmpty) {
       expect(emailFinder, findsNothing);
       return;
     }
+    expect(emailFinder, findsOneWidget);
   }
 
+  @override
   Future<void> verifyPhoneNumber({required String phoneNumber}) async {
     final phoneNumberFinder = find.text(phoneNumber);
     if (phoneNumber.isEmpty) {
       expect(phoneNumberFinder, findsNothing);
       return;
     }
+    expect(phoneNumberFinder, findsOneWidget);
   }
 
   /// Get the display name from the ProfileInfoHeader widget
+  @override
   Future<String> getDisplayName() async {
     // Wait for ProfileInfoHeader to be visible
     await $.waitUntilVisible($(ProfileInfoHeader));
@@ -82,6 +91,7 @@ class ChatProfileInfoRobot extends CoreRobot {
   }
 
   /// Get email from the ProfileInfoContactRows widget
+  @override
   Future<String> getEmail() async {
     await $.waitUntilVisible($(ProfileInfoContactRows));
 
@@ -102,6 +112,7 @@ class ChatProfileInfoRobot extends CoreRobot {
   }
 
   /// Get phone number from the ProfileInfoContactRows widget
+  @override
   Future<String> getPhoneNumber() async {
     await $.waitUntilVisible($(ProfileInfoContactRows));
 
@@ -192,6 +203,7 @@ class ChatProfileInfoRobot extends CoreRobot {
   }
 
   /// Verify a profile action button is visible
+  @override
   Future<void> verifyProfileActionButtonVisible(
     ProfileInfoActions action, {
     bool expected = true,
@@ -218,6 +230,7 @@ class ChatProfileInfoRobot extends CoreRobot {
   }
 
   /// Tap on a profile action button
+  @override
   Future<void> tapProfileActionButton(ProfileInfoActions action) async {
     final button = getProfileActionButton(action);
     await button.waitUntilVisible();
@@ -226,6 +239,7 @@ class ChatProfileInfoRobot extends CoreRobot {
   }
 
   /// Confirm the transfer ownership dialog
+  @override
   Future<void> confirmTransferOwnership() async {
     await $.waitUntilVisible(
       $(find.byKey(TwakeDialog.showConfirmAlertDialogKey)),
