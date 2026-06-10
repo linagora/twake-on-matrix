@@ -23,6 +23,10 @@ class PowerLevelManager {
       EventTypes.RoomAvatar: getAdminPowerLevel(),
       EventTypes.RoomMember: getUserPowerLevel(),
       EventTypes.RoomTopic: getAdminPowerLevel(),
+      // MSC1236 widget state event, published when starting a video call.
+      'im.vector.modular.widgets': getUserPowerLevel(),
+      // Element widget layout, pins the call widget to the top of the room.
+      'io.element.widgets.layout': getUserPowerLevel(),
     };
   }
 }

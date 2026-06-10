@@ -6,6 +6,7 @@ import 'package:fluffychat/pages/chat/chat_invitation_body.dart';
 import 'package:fluffychat/pages/chat/chat_view_body.dart';
 import 'package:fluffychat/pages/chat/chat_view_style.dart';
 import 'package:fluffychat/pages/chat/events/message_content_mixin.dart';
+import 'package:fluffychat/pages/video_call/video_call_webview_page.dart';
 import 'package:fluffychat/utils/voip/video_call_helper.dart';
 import 'package:fluffychat/presentation/mixins/audio_mixin.dart';
 import 'package:fluffychat/resource/image_paths.dart';
@@ -166,15 +167,30 @@ class ChatView extends StatelessWidget with MessageContentMixin {
                             TwakeIconButton(
                               icon: Icons.videocam_outlined,
                               tooltip: L10n.of(context)!.startVideoCall,
-                              onTap: () => VideoCallHelper.start(
-                                room: controller.room,
-                                startedTitle: L10n.of(
+                              onTap: () async {
+                                final room = controller.room;
+                                final baseUrl = Matrix.of(
                                   context,
-                                )!.videoCallStartedTitle,
-                                baseUrl: Matrix.of(
+                                ).loginHomeserverSummary?.videoCallBaseUrl;
+                                final callUrl = VideoCallHelper.start(
+                                  room: room,
+                                  baseUrl: baseUrl,
+                                );
+                                if (callUrl == null) return;
+                                await VideoCallWebViewPage.open(
                                   context,
-                                ).loginHomeserverSummary?.videoCallBaseUrl,
-                              ),
+                                  callUrl,
+                                );
+                                // Back from the call: remove the widgets we
+                                // own so the room is not left with a stale
+                                // pinned call (POC heuristic).
+                                if (room != null && baseUrl != null) {
+                                  await VideoCallHelper.cleanUpOwnCallWidgets(
+                                    room,
+                                    baseUrl,
+                                  );
+                                }
+                              },
                               preferBelow: false,
                             ),
                           if (controller.hasActionAppBarMenu)

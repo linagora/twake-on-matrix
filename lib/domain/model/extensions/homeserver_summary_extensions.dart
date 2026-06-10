@@ -73,6 +73,11 @@ extension HomeserverSummaryExtensions on HomeserverSummary {
   }
 
   String? get videoCallBaseUrl {
+    // TODO(POC): hardcoded while the .well-known of the test homeserver
+    // does not expose org.matrix.msc4143.rtc_foci. Remove to restore the
+    // discovery-based resolution below.
+    return "https://meet.twake.app";
+    // ignore: dead_code
     if (discoveryInformation?.additionalProperties == null) {
       return null;
     }

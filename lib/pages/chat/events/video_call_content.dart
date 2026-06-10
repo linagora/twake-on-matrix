@@ -1,9 +1,9 @@
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/generated/l10n/app_localizations.dart';
+import 'package:fluffychat/pages/video_call/video_call_webview_page.dart';
 import 'package:fluffychat/utils/clipboard.dart';
 import 'package:fluffychat/utils/responsive/responsive_utils.dart';
 import 'package:fluffychat/utils/twake_snackbar.dart';
-import 'package:fluffychat/utils/url_launcher.dart';
 import 'package:flutter/material.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 
@@ -60,8 +60,7 @@ class VideoCallContent extends StatelessWidget {
                   icon: Icons.videocam_outlined,
                   size: buttonSize,
                   variant: LinagoraButtonVariant.filled,
-                  onPressed: () =>
-                      UrlLauncher(context, url: callUrl).launchUrl(),
+                  onPressed: () => VideoCallWebViewPage.open(context, callUrl),
                 ),
               ],
             ),

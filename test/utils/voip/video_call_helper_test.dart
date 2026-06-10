@@ -107,42 +107,61 @@ void main() {
   group('VideoCallHelper.start', () {
     late MockRoom room;
 
+    StrippedStateEvent widgetState(String url, {String? creator}) =>
+        StrippedStateEvent(
+          type: 'im.vector.modular.widgets',
+          stateKey: 'video_call_${creator ?? '@alice:example.com'}',
+          senderId: creator ?? '@alice:example.com',
+          content: {
+            'type': 'm.video',
+            'name': VideoCallHelper.widgetName,
+            'url': url,
+            'data': {'url': url},
+          },
+        );
+
     setUp(() {
       room = MockRoom();
-      when(room.sendEvent(any)).thenAnswer((_) async => '\$sent:example.com');
+      when(room.states).thenReturn({});
     });
 
-    test('sends a text event carrying the generated call_url', () {
-      VideoCallHelper.start(
-        room: room,
-        startedTitle: 'Has started a video call',
-        baseUrl: baseUrl,
-      );
+    test('returns null when room or baseUrl is null', () {
+      expect(VideoCallHelper.start(room: null, baseUrl: baseUrl), isNull);
+      expect(VideoCallHelper.start(room: room, baseUrl: null), isNull);
+    });
 
-      final captured =
-          verify(room.sendEvent(captureAny)).captured.single
-              as Map<String, dynamic>;
-      expect(captured['msgtype'], MessageTypes.Text);
-      final url = captured[VideoCallHelper.callUrlKey] as String;
+    test('returns a generated slug url and no longer sends a message', () {
+      final url = VideoCallHelper.start(room: room, baseUrl: baseUrl);
+      expect(url, isNotNull);
       expect(
-        VideoCallHelper.extractUrl(buildTextEvent(captured), baseUrl),
-        url,
-      );
-      expect(captured['body'], contains(url));
-    });
-
-    test('does nothing when room is null', () {
-      VideoCallHelper.start(
-        room: null,
-        startedTitle: 'title',
-        baseUrl: baseUrl,
+        RegExp(
+          '^${RegExp.escape(baseUrl)}/[a-z]{3}-[a-z]{4}-[a-z]{3}\$',
+        ).hasMatch(url!),
+        isTrue,
+        reason: 'unexpected url: $url',
       );
       verifyNever(room.sendEvent(any));
     });
 
-    test('does nothing when baseUrl is null', () {
-      VideoCallHelper.start(room: room, startedTitle: 'title', baseUrl: null);
-      verifyNever(room.sendEvent(any));
+    test('joins the call already advertised in the room state', () {
+      const ongoing = '$baseUrl/abc-defg-hij';
+      when(room.states).thenReturn({
+        'im.vector.modular.widgets': {
+          'video_call_@alice:example.com': widgetState(ongoing),
+        },
+      });
+      expect(VideoCallHelper.start(room: room, baseUrl: baseUrl), ongoing);
+    });
+
+    test('ongoingCallUrl ignores widgets pointing to other services', () {
+      when(room.states).thenReturn({
+        'im.vector.modular.widgets': {
+          'etherpad_@alice:example.com': widgetState(
+            'https://pad.example.com/p/notes',
+          ),
+        },
+      });
+      expect(VideoCallHelper.ongoingCallUrl(room, baseUrl), isNull);
     });
   });
 }
