@@ -122,6 +122,10 @@ class ChatGroupDetailRobot extends CoreRobot
   @override
   Future<void> sendMessage(String message) async {
     await inputMessage(message);
+    // Wait for the send button to surface before tapping — on web the composer
+    // swaps the audio recorder for the send button only once `onChanged` fires,
+    // so an immediate tap can race the composer update and miss the target.
+    await $.waitUntilVisible($(ChatInputRowSendBtn));
     await $(ChatInputRowSendBtn).tap();
     await $.pump(const Duration(milliseconds: 300));
   }

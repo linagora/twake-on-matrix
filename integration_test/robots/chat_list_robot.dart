@@ -56,6 +56,9 @@ class ChatListRobot extends HomeRobot implements AbstractChatListRobot {
 
   @override
   Future<ChatGroupDetailRobot> openChatGroupByIndex(int index) async {
+    // Search/list population is async; wait for at least one row before
+    // indexing to avoid a RangeError or opening the wrong chat in web/headless.
+    await $.waitUntilVisible($(TwakeListItem));
     await (await getListOfChatGroup())[index].root.tap();
     await $.pumpAndSettle();
     return ChatGroupDetailRobot($);
@@ -152,7 +155,7 @@ class ChatListRobot extends HomeRobot implements AbstractChatListRobot {
   @override
   Future<bool> isChatPinned(String title) async {
     final item = getChatGroupByTitle(title);
-    await $.tester.ensureVisible(item.root);
+    await scrollUntilVisible($, item.root);
     return _isPinned(item);
   }
 }

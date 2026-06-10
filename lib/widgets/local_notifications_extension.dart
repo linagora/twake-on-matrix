@@ -73,7 +73,12 @@ extension LocalNotificationsExtension on MatrixState {
       // (and, as an unhandled async error, fail web integration tests).
       try {
         final isInsideCozy = await CozyConfigManager().isInsideCozy;
-        _audioPlayer.play();
+        // `play()` returns a Future that rejects under autoplay policies; await
+        // (and swallow) it so the rejection is caught here instead of surfacing
+        // as an unhandled async error that crashes web integration tests.
+        await _audioPlayer.play().catchError((e, s) {
+          Logs().w('showLocalNotification: audio playback failed', e, s);
+        });
         if (isInsideCozy) {
           CozyConfigManager().sendNotification(title, body);
           return;
