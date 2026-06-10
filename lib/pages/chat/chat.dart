@@ -2457,8 +2457,7 @@ class ChatController extends State<Chat>
   Future<void> _onMediaSent() async {
     scrollDown();
     sendController.clear();
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.remove('draft_$roomId');
+    await _draftStorage.remove(roomId!);
     replyEventNotifier.value = null;
   }
 
