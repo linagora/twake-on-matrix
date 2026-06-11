@@ -863,6 +863,40 @@ log_config: "/data/localhost.log.config"
 #
 # The defaults are as shown below.
 #
+# Integration-test overrides: the Patrol suite logs in once per test and
+# sends several messages, which trips Synapse's default login/message rate
+# limits (M_LIMIT_EXCEEDED). Raise them so the whole suite can run.
+rc_message:
+  per_second: 1000
+  burst_count: 1000
+rc_login:
+  address:
+    per_second: 1000
+    burst_count: 1000
+  account:
+    per_second: 1000
+    burst_count: 1000
+  failed_attempts:
+    per_second: 1000
+    burst_count: 1000
+rc_registration:
+  per_second: 1000
+  burst_count: 1000
+rc_joins:
+  local:
+    per_second: 1000
+    burst_count: 1000
+  remote:
+    per_second: 1000
+    burst_count: 1000
+rc_invites:
+  per_room:
+    per_second: 1000
+    burst_count: 1000
+  per_user:
+    per_second: 1000
+    burst_count: 1000
+#
 #rc_message:
 #  per_second: 0.2
 #  burst_count: 10
