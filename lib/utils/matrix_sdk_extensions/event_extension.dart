@@ -6,6 +6,7 @@ import 'package:fluffychat/domain/model/room/room_extension.dart';
 import 'package:fluffychat/pages/chat/events/message_reactions.dart';
 import 'package:fluffychat/presentation/extensions/media_thumbnail_extension.dart';
 import 'package:fluffychat/utils/clipboard.dart';
+import 'package:fluffychat/utils/date_time_extension.dart';
 import 'package:fluffychat/utils/dialog/twake_dialog.dart';
 import 'package:fluffychat/utils/extension/event_info_extension.dart';
 import 'package:fluffychat/utils/extension/mime_type_extension.dart';
@@ -152,7 +153,10 @@ extension LocalizedBody on Event {
     );
   }
 
-  // Check if the sender of the current event is the same as the compared event.
+  // Returns true when this event and the compared event do NOT belong to the
+  // same visual sender group: different sender, non-message event in between,
+  // or a date separator between them (different environment). Avatar, bubble
+  // tail and display name all rely on this boundary.
   bool isSameSenderWith(Event? comparedEvent) {
     // If the compared event is null, it is assumed that the message is the newest.
     if (comparedEvent == null) {
@@ -175,7 +179,8 @@ extension LocalizedBody on Event {
       return true;
     }
 
-    return senderId != comparedEvent.senderId;
+    return senderId != comparedEvent.senderId ||
+        !originServerTs.sameEnvironment(comparedEvent.originServerTs);
   }
 
   bool get isOwnMessage => senderId == room.client.userID;

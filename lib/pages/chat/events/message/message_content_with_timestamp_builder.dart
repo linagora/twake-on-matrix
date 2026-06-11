@@ -449,10 +449,12 @@ class _MessageContentWithTimestampBuilderState
     );
 
     final isDisplayOnlyEmoji = widget.event.isDisplayOnlyEmoji(widget.timeline);
-    // The tail is shown on the last bubble of a same-sender group.
-    final hasSameSenderBelow =
-        widget.previousEvent != null &&
-        widget.previousEvent!.senderId == widget.event.senderId;
+    // The tail is shown on the last bubble of a same-sender group. A group
+    // ends below when the sender changes or a date separator breaks it
+    // (see [Event.isSameSenderWith]).
+    final hasSameSenderBelow = !widget.event.isSameSenderWith(
+      widget.previousEvent,
+    );
     final showTail = !isDisplayOnlyEmoji && !hasSameSenderBelow;
     final alignOwnMessageRight =
         widget.event.isOwnMessage &&
