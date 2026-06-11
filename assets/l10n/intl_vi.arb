@@ -3064,5 +3064,70 @@
   "cannotInviteBannedMember": "Người dùng này đã bị xóa bởi quản trị viên. Thay đổi trạng thái trong \"Người dùng bị xóa\" để tiếp tục",
   "leaveChat": "Rời cuộc trò chuyện",
   "leaveChatDescription": "Lịch sử tin nhắn vẫn sẽ hiển thị với người còn lại.",
-  "leaveChatTitle": "Bạn có chắc chắn muốn rời cuộc trò chuyện này không?"
+  "leaveChatTitle": "Bạn có chắc chắn muốn rời cuộc trò chuyện này không?",
+  "dataAndStorage": "Dữ liệu và bộ nhớ",
+  "phoneStorage": "Bộ nhớ điện thoại",
+  "phoneStorageDescription": "Twake Chat đang sử dụng {percent} bộ nhớ trên điện thoại của bạn",
+  "@phoneStorageDescription": {
+    "placeholders": {
+      "percent": {
+        "type": "String"
+      }
+    }
+  },
+  "medias": "Phương tiện",
+  "videos": "Các đoạn phim",
+  "stickersAndEmojis": "Nhãn dán và biểu tượng cảm xúc",
+  "clearCacheSize": "Xóa bộ nhớ đệm {size}",
+  "@clearCacheSize": {
+    "placeholders": {
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "available": "Khả dụng",
+  "clearCacheConfirmTitle": "Xóa bộ nhớ đệm?",
+  "clearCacheConfirmMessage": "Thao tác này sẽ xóa tất cả các tệp tạm thời được lưu trên thiết bị của bạn. Hành động này không thể hoàn tác.",
+  "cacheClearedSuccessfully": "Đã xóa bộ nhớ đệm thành công",
+  "cacheIsScanning": "Đang quét bộ nhớ đệm. Vui lòng chờ...",
+  "selectYourServer": "Chọn máy chủ của bạn",
+  "welcomeBack": "Chào mừng trở lại",
+  "matrixIdOrUsername": "Matrix ID hoặc tên người dùng",
+  "waitingForResponse": "Đang chờ phản hồi",
+  "forwardFailed": "Không thể chuyển tiếp tin nhắn",
+  "forwardedToChats": "Đã chuyển tiếp đến {count} cuộc trò chuyện",
+  "@forwardedToChats": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "forwardedToChatsPartial": "Đã chuyển tiếp đến {successCount} trong số {totalCount} cuộc trò chuyện",
+  "@forwardedToChatsPartial": {
+    "placeholders": {
+      "successCount": {},
+      "totalCount": {}
+    }
+  },
+  "gifAutoplay": "Tự động phát GIF",
+  "videoCallStartedTitle": "Đã bắt đầu cuộc gọi hình ảnh",
+  "@videoCallStartedTitle": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "startVideoCall": "Bắt đầu cuộc gọi hình ảnh",
+  "@startVideoCall": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "videoCallCopyLink": "Sao chép liên kết",
+  "@videoCallCopyLink": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "videoCallJoinCall": "Tham gia cuộc gọi",
+  "@videoCallJoinCall": {
+    "type": "text",
+    "placeholders": {}
+  }
 }
