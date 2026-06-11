@@ -1374,7 +1374,7 @@
     "type": "text",
     "placeholders": {}
   },
-  "pleaseEnterYourUsername": "Пожалуйста, введите имя пользователя",
+  "pleaseEnterYourUsername": "Введите Matrix ID или имя пользователя",
   "@pleaseEnterYourUsername": {
     "type": "text",
     "placeholders": {}
@@ -2393,11 +2393,11 @@
     "type": "text",
     "placeholders": {}
   },
-  "noMessageHereYet": "Здесь еще нет сообщений...",
-  "sendMessageGuide": "Отправьте сообщение или нажмите на приветствие.",
-  "youCreatedGroupChat": "Вы создали групповой чат",
-  "upTo100000Members": "Не более 100.000 участников",
-  "persistentChatHistory": "История чата сохраняется",
+  "noMessageHereYet": "Здесь еще нет сообщений",
+  "sendMessageGuide": "Отправьте сообщение или нажмите на приветствие",
+  "youCreatedGroupChat": "Это новый\nгрупповой чат",
+  "upTo100000Members": "✅ До 100.000 участников",
+  "persistentChatHistory": "✅ История чата сохраняется",
   "addMember": "Добавить участников",
   "profile": "Профиль",
   "@profile": {
@@ -2608,7 +2608,7 @@
   "notNow": "Позже",
   "clearAllSelected": "Удалить выбранные",
   "selectedUsers": "Выбранные пользователи",
-  "hasInvitedYouToAChat": " пригласил(-а) вас в чат. Принять или отклонить и удалить беседу?",
+  "hasInvitedYouToAChat": "Вас пригласили в чат",
   "doYouReallyWantToDeclineThisInvitation": "Вы действительно хотите отклонить это приглашение и удалить чат? Это действие нельзя отменить.",
   "pinnedMessages": "{count, plural, =1{1 закрепленное сообщение} other{{count} закрепленных сообщения}}",
   "@pinnedMessages": {
@@ -3077,16 +3077,67 @@
   "requestedKeyVerification": "🔐 {senderName} запросил(а) проверку ключа",
   "startedAPoll": "📊 {senderName} начал(а) опрос",
   "startedKeyVerification": "🔐 {senderName} начал(а) проверку ключа",
-  "@startedKeyVerification": {},
   "voiceMessageWithDuration": "🎤 Голосовое сообщение ({duration})",
-  "@voiceMessageWithDuration": {},
   "tapToRetry": "Нажмите, чтобы повторить",
-  "@tapToRetry": {},
   "fileNoLongerExists": "Файл больше не существует",
-  "@fileNoLongerExists": {},
   "cannotInviteBannedMember": "Этот пользователь был удалён администратором. Измените статус в разделе \"Удалённые пользователи\", чтобы продолжить",
-  "@cannotInviteBannedMember": {},
   "leaveChat": "Покинуть чат",
-  "leaveChatDescription": "История сообщений будет доступна другому пользователю",
-  "leaveChatTitle": "Вы уверены, что хотите покинуть чат?"
+  "leaveChatDescription": "История сообщений будет доступна другому пользователю.",
+  "leaveChatTitle": "Вы уверены, что хотите покинуть чат?",
+  "thisIsANewChat": "Это новый чат",
+  "@thisIsANewChat": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "chatPreviewUnavailable": "Загрузить последние сообщения",
+  "@chatPreviewUnavailable": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "recoveryKeyWarningMessage": "Этот ключ даёт доступ к вашим зашифрованным сообщениям. Храните его в безопасности и никому не передавайте.",
+  "recoveryKeyCopiedToClipboard": "Ключ восстановления скопирован",
+  "dataAndStorage": "Данные и память",
+  "phoneStorage": "Память телефона",
+  "phoneStorageDescription": "Twake Chat занимает {percent} памяти на телефоне",
+  "@phoneStorageDescription": {
+    "placeholders": {
+      "percent": {
+        "type": "String"
+      }
+    }
+  },
+  "medias": "Медиа",
+  "videos": "Видео",
+  "stickersAndEmojis": "Стикеры и эмоджи",
+  "clearCacheSize": "Очистить кэш {size}",
+  "@clearCacheSize": {
+    "placeholders": {
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "available": "Доступно",
+  "clearCacheConfirmTitle": "Очистить?",
+  "clearCacheConfirmMessage": "Удалить временные файлы Twake Chat с телефона? Это действие нельзя отменить.",
+  "cacheClearedSuccessfully": "Кэш успешно очищен",
+  "cacheIsScanning": "Сканируем кэш. Подождите...",
+  "selectYourServer": "Выбор сервера",
+  "welcomeBack": "Добро пожаловать",
+  "matrixIdOrUsername": "Matrix ID или имя пользователя",
+  "waitingForResponse": "Ожидание ответа",
+  "forwardFailed": "Не удалось переслать сообщение",
+  "forwardedToChats": "Переслано в {count} чатов",
+  "@forwardedToChats": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "forwardedToChatsPartial": "Переслано в {successCount} из {totalCount} чатов",
+  "@forwardedToChatsPartial": {
+    "placeholders": {
+      "successCount": {},
+      "totalCount": {}
+    }
+  }
 }

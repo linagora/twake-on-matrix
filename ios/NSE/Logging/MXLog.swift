@@ -59,7 +59,7 @@ enum MXLog {
                                logFileSizeLimit: logFileSizeLimit)
             return
         }
-        
+
         if let target {
             self.target = target
             MXLogger.setSubLogName(target)
@@ -193,6 +193,6 @@ enum MXLog {
         
         let messageString = "\(message)"
         logEvent(file: (file as NSString).lastPathComponent, line: UInt32(line), level: level, target: target, message: messageString)
-        os_log("MXLog: %{private}@", messageString)
+        os_log("MXLog: %{public}@", messageString)
     }
 }

@@ -89,6 +89,8 @@ sentry.properties
 
 .fvm
 
+# Riverpod migration snippets — generated output
+docs/migration/snippets_generated/
 # Playwright
 playwright-report/
 test-results/

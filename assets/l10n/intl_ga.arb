@@ -1851,7 +1851,7 @@
     "type": "text",
     "placeholders": {}
   },
-  "pleaseEnterYourUsername": "Cuir isteach d'ainm úsáideora le do thoil",
+  "pleaseEnterYourUsername": "Cuir isteach d’Aitheantas Matrix nó d’ainm úsáideora le do thoil",
   "@pleaseEnterYourUsername": {
     "type": "text",
     "placeholders": {}
@@ -2509,7 +2509,7 @@
   "encryptionMessage": "Cosain do theachtaireachtaí ó dhaoine eile a bheith á léamh. Cuireann sé cosc orthu cúltaca a dhéanamh ar ár bhfreastalaithe. Ní féidir leat é seo a dhíchumasú níos déanaí.",
   "newDirectMessage": "Teachtaireacht dhíreach nua",
   "unmuteThisChat": "Unmute an comhrá seo",
-  "hasInvitedYouToAChat": " thug sé cuireadh duit comhrá a dhéanamh. Glac leis an gcomhrá nó diúltaigh dó agus scrios é?",
+  "hasInvitedYouToAChat": "Thug cuireadh duit chuig comhrá",
   "notNow": "Ní anois",
   "settingsLanguageDescription": "Socraigh an teanga a úsáideann tú ar Twake Chat",
   "showLess": "Taispeáin Níos Lú",
@@ -2549,7 +2549,7 @@
   "tapToAllowAccessToYourGallery": "Tapáil chun rochtain ar an ngailearaí a cheadú",
   "acceptInvite": "Tá, le do thoil, páirt a ghlacadh",
   "contactsCount": "Teagmhálacha ({count})",
-  "sendMessageGuide": "Seol teachtaireacht nó tapáil ar an mbeannacht thíos.",
+  "sendMessageGuide": "Seol teachtaireacht nó tapáil ar an mbeannacht",
   "declineAndRemove": "Meath agus bain",
   "iUnderstand": "Tuigim",
   "upTo100000Members": "Suas le 100.000 ball",
@@ -2704,8 +2704,8 @@
       "hour": {}
     }
   },
-  "noMessageHereYet": "Níl teachtaireacht ar bith anseo go fóill...",
-  "youCreatedGroupChat": "Chruthaigh tú comhrá Grúpa",
+  "noMessageHereYet": "Níl aon teachtaireacht anseo fós",
+  "youCreatedGroupChat": "Comhghairdeas leat\nas do chomhrá nua!",
   "chatCanHave": "Is féidir le comhrá a bheith:",
   "persistentChatHistory": "Stair Comhrá Leanúnach",
   "profile": "Próifíl",
@@ -3134,5 +3134,68 @@
   "changePermissions": "Athraigh ceadanna",
   "@changePermissions": {
     "description": "Context menu action to open permission picker dialog"
+  },
+  "thisIsANewChat": "Is comhrá nua é seo",
+  "@thisIsANewChat": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "chatPreviewUnavailable": "Cliceáil chun na teachtaireachtaí is déanaí a luchtú",
+  "@chatPreviewUnavailable": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "recoveryKeyWarningMessage": "Tugann an rún seo rochtain ar do theachtaireachtaí criptithe go léir do cibé duine a úsáideann é. Coinnigh slán é agus ná roinn é.",
+  "recoveryKeyCopiedToClipboard": "Eochair aisghabhála cóipeáilte chuig an ghearrthaisce",
+  "groupInfo": "Eolas grúpa",
+  "tapToRetry": "Tapáil le hath-iarracht a dhéanamh",
+  "fileNoLongerExists": "Níl an comhad ann a thuilleadh",
+  "cannotInviteBannedMember": "Tá an t-úsáideoir seo bainte ag riarthóir. Athraigh an stádas i \"Úsáideoirí Bainte\" le dul ar aghaidh",
+  "leaveChat": "Fág an comhrá",
+  "leaveChatDescription": "Beidh stair teachtaireachtaí fós ar fáil don duine eile.",
+  "leaveChatTitle": "An bhfuil tú cinnte gur mian leat an comhrá seo a fhágáil?",
+  "dataAndStorage": "Sonraí agus stóráil",
+  "phoneStorage": "Stóráil Fóin",
+  "phoneStorageDescription": "Tá Twake Chat ag úsáid {percent} de stóras ar do ghuthán",
+  "@phoneStorageDescription": {
+    "placeholders": {
+      "percent": {
+        "type": "String"
+      }
+    }
+  },
+  "medias": "Meáin",
+  "videos": "Físeáin",
+  "stickersAndEmojis": "Greamáin agus emojis",
+  "clearCacheSize": "Glan an taisce {size}",
+  "@clearCacheSize": {
+    "placeholders": {
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "available": "Ar fáil",
+  "clearCacheConfirmTitle": "Glan an taisce?",
+  "clearCacheConfirmMessage": "Scriosfaidh sé seo na comhaid shealadacha go léir atá stóráilte ar do ghléas. Ní féidir an gníomh seo a chealú.",
+  "cacheClearedSuccessfully": "Glanadh an taisce go rathúil",
+  "cacheIsScanning": "Tá an taisce á scanadh. Fan le do thoil...",
+  "selectYourServer": "Roghnaigh do fhreastalaí",
+  "welcomeBack": "Fáilte ar ais",
+  "matrixIdOrUsername": "Aitheantas Maitrís nó ainm úsáideora",
+  "waitingForResponse": "Ag fanacht le freagra",
+  "forwardFailed": "Theip ar an teachtaireacht a chur ar aghaidh",
+  "forwardedToChats": "Ar aghaidh chuig {count} comhráite",
+  "@forwardedToChats": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "forwardedToChatsPartial": "Ar aghaidh chuig {successCount} de {totalCount} comhráite",
+  "@forwardedToChatsPartial": {
+    "placeholders": {
+      "successCount": {},
+      "totalCount": {}
+    }
   }
 }
