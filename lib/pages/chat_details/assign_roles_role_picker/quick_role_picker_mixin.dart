@@ -37,7 +37,7 @@ mixin QuickRolePickerMixin on TwakeContextMenuMixin {
     return quickRolePicker.map((action) {
       return ContextMenuAction(
         name: action.displayName(context),
-        icon: action.powerLevel == user.powerLevel ? Icons.check : null,
+        icon: action.powerLevel == user.powerLevel.level ? Icons.check : null,
         colorIcon: LinagoraRefColors.material().neutral[30],
       );
     }).toList();
@@ -135,7 +135,7 @@ mixin QuickRolePickerMixin on TwakeContextMenuMixin {
                 ),
               ),
             ),
-            if (role.powerLevel == user.powerLevel)
+            if (role.powerLevel == user.powerLevel.level)
               SizedBox(
                 width: 36,
                 height: 36,

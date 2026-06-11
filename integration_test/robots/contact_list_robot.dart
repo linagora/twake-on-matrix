@@ -1,12 +1,15 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:linagora_design_flutter/list_item/twake_list_item.dart';
+import 'abstract/abstract_contact_list_robot.dart';
 import 'home_robot.dart';
 
 import 'twake_list_item_robot.dart';
 
-class ContactListRobot extends HomeRobot {
+class ContactListRobot extends HomeRobot implements AbstractContactListRobot {
   ContactListRobot(super.$);
 
+  @override
   Future<List<TwakeListItemRobot>> getListOfContact() async {
     final List<TwakeListItemRobot> contactList = [];
 
@@ -20,4 +23,8 @@ class ContactListRobot extends HomeRobot {
 
     return contactList;
   }
+
+  @override
+  Future<bool> isListScrollable() =>
+      isActuallyScrollable($, root: $(CustomScrollView));
 }

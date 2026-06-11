@@ -14,7 +14,10 @@ import 'package:matrix/matrix.dart';
 class CreateSupportChatInteractor {
   const CreateSupportChatInteractor();
 
-  Stream<Either<Failure, Success>> execute(Client client) async* {
+  Stream<Either<Failure, Success>> execute(
+    Client client, {
+    DiscoveryInformation? cachedDiscovery,
+  }) async* {
     yield Right(CreatingSupportChat());
 
     const type = TwakeEventTypes.supportChatCreatedEventType;
@@ -22,7 +25,10 @@ class CreateSupportChatInteractor {
     String? roomId;
     String? userId;
     try {
-      final discovery = await client.getWellknown();
+      if (cachedDiscovery == null) {
+        throw Exception('No cached discovery information available');
+      }
+      final discovery = cachedDiscovery;
       final supportChatTwakeId =
           (discovery.additionalProperties[WellKnownMixin.twakeChatKey]
               as Map?)?[WellKnownMixin.supportContact];

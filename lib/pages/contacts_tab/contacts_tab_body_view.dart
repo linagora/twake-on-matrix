@@ -7,7 +7,6 @@ import 'package:fluffychat/pages/contacts_tab/widgets/sliver_invite_friend_butto
 import 'package:fluffychat/pages/contacts_tab/widgets/sliver_loading_contacts.dart';
 import 'package:fluffychat/pages/contacts_tab/widgets/sliver_phonebook_contacts_with_matrix_id.dart';
 import 'package:fluffychat/pages/contacts_tab/widgets/sliver_phonebook_contacts_without_matrix_id.dart';
-import 'package:fluffychat/pages/contacts_tab/widgets/sliver_recent_contacts.dart';
 import 'package:fluffychat/pages/contacts_tab/widgets/sliver_warning_banner.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:flutter/material.dart';
@@ -24,7 +23,6 @@ class ContactsTabBodyView extends StatelessWidget {
         if (controller.client.userID != null)
           SliverInviteFriendButton(userId: controller.client.userID!),
         SliverWarningBanner(controller: controller),
-        SliverRecentContacts(controller: controller),
         SliverLoadingContacts(controller: controller),
         SliverContactsWithMatrixId(controller: controller),
         if (PlatformInfos.isMobile)

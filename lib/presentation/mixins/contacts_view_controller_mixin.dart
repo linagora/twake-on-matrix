@@ -76,6 +76,12 @@ mixin class ContactsViewControllerMixin {
   bool get phoneBookFilterSuccess => presentationPhonebookContactNotifier.value
       .fold((_) => false, (success) => success is GetPhonebookContactsSuccess);
 
+  /// Whether recent contacts (DMs found by the SDK) are mixed into the
+  /// contacts list. The Contacts page must reflect the ToM Address Book only,
+  /// so it overrides this to `false` (see issue #3097). Views like DM/group
+  /// creation keep recents enabled.
+  bool get enableRecentContacts => true;
+
   Future displayContactPermissionDialog(BuildContext context) async {
     final fetchContactsPermissionStatus =
         await _permissionHandlerService.contactsPermissionStatus;
@@ -294,12 +300,14 @@ mixin class ContactsViewControllerMixin {
     final keyword = _debouncer.value.trim();
     _refreshContacts(keyword);
     _refreshPhoneBookContacts(keyword);
-    _refreshRecentContacts(
-      context: context,
-      client: client,
-      keyword: keyword.isEmpty ? null : keyword,
-      matrixLocalizations: matrixLocalizations,
-    );
+    if (enableRecentContacts) {
+      _refreshRecentContacts(
+        context: context,
+        client: client,
+        keyword: keyword.isEmpty ? null : keyword,
+        matrixLocalizations: matrixLocalizations,
+      );
+    }
   }
 
   Future<void> _refreshContacts(String keyword) async {

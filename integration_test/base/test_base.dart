@@ -1,16 +1,35 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:patrol/patrol.dart';
-import 'package:fluffychat/main.dart' as app;
+import '../factories/robot_factory_provider.dart';
 import '../scenarios/login_scenario.dart';
+import 'base_test_scenario.dart';
+import 'test_app_initializer.dart';
 
 class TestBase {
+  /// Runs a Patrol integration test.
+  ///
+  /// Provide exactly one of:
+  /// - [scenarioBuilder] (preferred): builds a [BaseTestScenario] from the
+  ///   tester and the platform [RobotFactory]; the scenario drives the test
+  ///   through abstract robots, so it runs on both mobile and web.
+  /// - [test] (legacy): an imperative callback receiving only the tester.
+  ///   Kept in parallel so existing mobile tests keep compiling during the
+  ///   cross-platform migration.
   void runPatrolTest({
     required String description,
-    required Function(PatrolIntegrationTester $) test,
+    Function(PatrolIntegrationTester $)? test,
+    ScenarioBuilder? scenarioBuilder,
     NativeAutomatorConfig? nativeAutomatorConfig,
     dynamic tags = const [],
   }) {
+    // Enforced at runtime (not via `assert`) so the contract holds in
+    // profile/release builds too, where assertions are compiled out.
+    if ((test == null) == (scenarioBuilder == null)) {
+      throw ArgumentError(
+        'runPatrolTest requires exactly one of `test` or `scenarioBuilder`.',
+      );
+    }
     const testTimeoutMs = int.fromEnvironment(
       'GLOBAL_TEST_TIMEOUT_MS',
       defaultValue: 120000,
@@ -45,8 +64,10 @@ class TestBase {
 
     const testTimeout = Timeout(Duration(milliseconds: testTimeoutMs));
 
-    const defaultNativeConfig = NativeAutomatorConfig(
-      findTimeout: Duration(milliseconds: nativeFindTimeoutMs),
+    // NativeAutomatorConfig is no longer a const-constructable class in
+    // Patrol 4.x, so we build it with `final` and inline a const Duration.
+    final defaultNativeConfig = NativeAutomatorConfig(
+      findTimeout: const Duration(milliseconds: nativeFindTimeoutMs),
     );
     patrolTest(
       description,
@@ -62,24 +83,33 @@ class TestBase {
           originalOnError(details);
         };
         await loginAndRun($);
-        await test($);
+        if (scenarioBuilder != null) {
+          final robots = createRobotFactory($);
+          await scenarioBuilder($, robots).runTestLogic();
+        } else {
+          await test!($);
+        }
       },
     );
   }
 
   Future<void> initTwakeChat() async {
-    app.main();
+    await initTestApp();
   }
 
   Future<void> loginAndRun(PatrolIntegrationTester $) async {
-    final loginScenario = LoginScenario(
-      $,
-      username: const String.fromEnvironment('USERNAME'),
+    // Route the auto-login through the platform factory so web uses
+    // `WebLoginRobot` (waits for `AutoHomeserverPicker`, then
+    // `m.login.password`) and mobile keeps `LoginRobot` (waits for
+    // `TwakeWelcome`, OIDC/SSO bypass). The mobile path is byte-equivalent
+    // to the previous `LoginScenario.login()`.
+    final loginRobot = createRobotFactory($).loginRobot();
+    await loginRobot.loginViaApi(
       serverUrl: const String.fromEnvironment('SERVER_URL'),
+      username: const String.fromEnvironment('USERNAME'),
       password: const String.fromEnvironment('PASSWORD'),
     );
-
-    await loginScenario.login();
+    await loginRobot.grantNotificationPermission();
   }
 
   void twakePatrolTest({
@@ -93,8 +123,7 @@ class TestBase {
         printLogs: true,
         visibleTimeout: Duration(minutes: 1),
       ),
-      nativeAutomatorConfig:
-          nativeAutomatorConfig ?? const NativeAutomatorConfig(),
+      nativeAutomatorConfig: nativeAutomatorConfig ?? NativeAutomatorConfig(),
       framePolicy: LiveTestWidgetsFlutterBindingFramePolicy.fullyLive,
       ($) async {
         await initTwakeChat();

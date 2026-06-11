@@ -81,9 +81,16 @@ devenv.local.nix
 # Patrol generated
 test_bundle.dart
 
+# Patrol web (Playwright) artifacts
+playwright-report/
+test-results/
+
 sentry.properties
 
 .fvm
 
 # Riverpod migration snippets — generated output
 docs/migration/snippets_generated/
+# Playwright
+playwright-report/
+test-results/

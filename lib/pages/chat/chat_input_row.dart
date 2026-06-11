@@ -24,6 +24,7 @@ import 'package:social_media_recorder/audio_encoder_type.dart';
 import 'package:social_media_recorder/screen/social_media_recorder.dart';
 
 import 'chat.dart';
+import 'chat_actions.dart';
 import 'input_bar/input_bar.dart';
 
 class ChatInputRow extends StatelessWidget {
@@ -62,15 +63,60 @@ class ChatInputRow extends StatelessWidget {
                                 return const SizedBox.shrink();
                               }
 
+                              // The enclosing block is gated on
+                              // responsiveUtils.isMobile (viewport-based), so on a
+                              // narrow web viewport it still renders. The native
+                              // picker + popup actions feed the mobile upload
+                              // pipeline (dart:io), which breaks on web — so when
+                              // the actual platform is not mobile, fall back to the
+                              // single "+" button routed through onSendFileClick's
+                              // platform-aware path.
+                              if (!PlatformInfos.isMobile) {
+                                return SizedBox(
+                                  height: ChatInputRowStyle.chatInputRowHeight,
+                                  child: TwakeIconButton(
+                                    size: ChatInputRowStyle
+                                        .chatInputRowMoreBtnSize,
+                                    tooltip: L10n.of(context)!.more,
+                                    icon: Icons.add_circle_outline,
+                                    onTap: () =>
+                                        controller.onSendFileClick(context),
+                                  ),
+                                );
+                              }
+
+                              // Single "+" button. Gallery, Documents and Camera
+                              // all live inside its popup menu now.
                               return SizedBox(
                                 height: ChatInputRowStyle.chatInputRowHeight,
-                                child: TwakeIconButton(
-                                  size:
-                                      ChatInputRowStyle.chatInputRowMoreBtnSize,
+                                child: PopupMenuButton<AttachmentMenuAction>(
                                   tooltip: L10n.of(context)!.more,
-                                  icon: Icons.add_circle_outline,
-                                  onTap: () =>
-                                      controller.onSendFileClick(context),
+                                  iconSize:
+                                      ChatInputRowStyle.chatInputRowMoreBtnSize,
+                                  icon: const Icon(Icons.add_circle_outline),
+                                  onSelected: (action) =>
+                                      controller.onAttachmentMenuSelected(
+                                        context,
+                                        action,
+                                      ),
+                                  itemBuilder: (context) => AttachmentMenuAction
+                                      .values
+                                      .map(
+                                        (action) =>
+                                            PopupMenuItem<AttachmentMenuAction>(
+                                              value: action,
+                                              child: Row(
+                                                children: [
+                                                  Icon(action.getIcon()),
+                                                  const SizedBox(width: 12),
+                                                  Text(
+                                                    action.getTitle(context),
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                      )
+                                      .toList(),
                                 ),
                               );
                             },

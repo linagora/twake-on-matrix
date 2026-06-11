@@ -1,3 +1,4 @@
+import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/pages/chat/events/images_builder/image_bubble.dart';
 import 'package:fluffychat/pages/chat/events/message_content_style.dart';
@@ -100,6 +101,9 @@ class _MessageImageBuilderState extends State<MessageImageBuilder> {
             bubbleWidth: widget.maxWidth,
           );
         }
+        // Use full image for GIFs only when gifAutoplay is enabled,
+        // otherwise use thumbnail (no animation).
+        final isAnimatedGif = AppConfig.gifAutoplay && widget.event.isGifImage;
         return ImageBubble(
           widget.event,
           bubbleMaxWidth: widget.maxWidth,
@@ -109,7 +113,7 @@ class _MessageImageBuilderState extends State<MessageImageBuilder> {
           onTapSelectMode: widget.onTapSelectMode,
           onTapPreview: widget.onTapPreview,
           animated: true,
-          thumbnailOnly: true,
+          thumbnailOnly: !isAnimatedGif,
         );
       },
     );

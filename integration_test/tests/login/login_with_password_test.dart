@@ -13,7 +13,7 @@ void main() {
       printLogs: true,
       visibleTimeout: Duration(minutes: 1),
     ),
-    nativeAutomatorConfig: const NativeAutomatorConfig(),
+    nativeAutomatorConfig: NativeAutomatorConfig(),
     framePolicy: LiveTestWidgetsFlutterBindingFramePolicy.fullyLive,
     ($) async {
       // Initialize app without auto-login
@@ -41,21 +41,27 @@ void main() {
         reason: 'Missing SERVER_URL in --dart-define',
       );
 
-      // Navigate through welcome screen to login page
-      if (await loginRobot.isWelcomePageVisible()) {
-        await loginRobot.tapOnUseYourCompanyServer();
-        await loginRobot.enterServerUrl(serverUrl);
-        await loginRobot.clickOnContinueBtn();
+      if (kIsWeb) {
+        // On web, PATROL_WEB=true keeps AutoHomeserverPicker idle so the
+        // test can drive authentication via the Matrix SDK directly.
+        await loginRobot.loginViaApi(
+          serverUrl: serverUrl,
+          username: username,
+          password: password,
+        );
+      } else {
+        // On mobile, navigate through the UI login flow.
+        if (await loginRobot.isWelcomePageVisible()) {
+          await loginRobot.tapOnUseYourCompanyServer();
+          await loginRobot.enterServerUrl(serverUrl);
+          await loginRobot.clickOnContinueBtn();
+        }
+        await loginRobot.loginWithPassword(
+          username: username,
+          password: password,
+        );
+        await loginRobot.waitForChatList();
       }
-
-      // Perform password login
-      await loginRobot.loginWithPassword(
-        username: username,
-        password: password,
-      );
-
-      // Wait for navigation to chat list
-      await loginRobot.waitForChatList();
 
       // Verify we're on the chat list screen
       s.softAssertEquals(

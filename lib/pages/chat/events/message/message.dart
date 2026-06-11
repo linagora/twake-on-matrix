@@ -1,22 +1,17 @@
+import 'package:scroll_to_index/scroll_to_index.dart';
 import 'package:fluffychat/domain/matrix_events/event_type_rules.dart';
-import 'package:fluffychat/config/themes.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/pages/chat/chat_horizontal_action_menu.dart';
-import 'package:fluffychat/pages/chat/chat_view_body_style.dart';
 import 'package:fluffychat/pages/chat/context_item_chat_action.dart';
+import 'package:fluffychat/pages/chat/events/message/message_container.dart';
 import 'package:fluffychat/pages/chat/events/message/message_content_with_timestamp_builder.dart';
 import 'package:fluffychat/pages/chat/events/message/message_style.dart';
-import 'package:fluffychat/pages/chat/events/message/multi_platform_message_container.dart';
-import 'package:fluffychat/pages/chat/events/message/swipeable_message.dart';
 import 'package:fluffychat/pages/chat/events/state_message.dart';
 import 'package:fluffychat/pages/chat/events/verification_request_content.dart';
-import 'package:fluffychat/pages/chat/optional_gesture_detector.dart';
-import 'package:fluffychat/pages/chat/optional_padding.dart';
 import 'package:fluffychat/pages/chat/optional_selection_container_disabled.dart';
 import 'package:fluffychat/pages/chat/sticky_timestamp_widget.dart';
 import 'package:fluffychat/presentation/mixins/message_avatar_mixin.dart';
 import 'package:fluffychat/utils/date_time_extension.dart';
-import 'package:fluffychat/utils/extension/event_status_custom_extension.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/filtered_timeline_extension.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
@@ -93,6 +88,8 @@ class Message extends StatefulWidget {
   onTapMoreButton;
   final Future<Category?>? recentEmojiFuture;
   final Future<void> Function(Event)? onRetryTextMessage;
+  final AutoScrollController? autoScrollController;
+  final int? scrollIndex;
 
   const Message(
     this.event, {
@@ -136,6 +133,8 @@ class Message extends StatefulWidget {
     this.onTapMoreButton,
     this.recentEmojiFuture,
     this.onRetryTextMessage,
+    this.autoScrollController,
+    this.scrollIndex,
   });
 
   /// Indicates wheither the user may use a mouse instead
@@ -339,45 +338,17 @@ class _MessageState extends State<Message> with MessageAvatarMixin {
             ),
           ),
         ],
-        MultiPlatformsMessageContainer(
-          onTap: widget.hideKeyboardChatScreen,
-          onHover: (hover) {
-            if (!widget.event.status.isAvailable) {
-              return;
-            }
-            if (widget.onHover != null) {
-              widget.onHover!(hover, widget.event);
-            }
-          },
-          child: Container(
-            constraints: BoxConstraints(
-              maxWidth: ChatViewBodyStyle.chatScreenMaxWidth,
-            ),
-            padding: MessageStyle.paddingMessage,
-            alignment: Alignment.bottomCenter,
-            child: SwipeableMessage(
-              event: widget.event,
-              onSwipe: widget.onSwipe,
-              child: OptionalGestureDetector(
-                onLongPress: () => widget.onSelect!(widget.event),
-                onTap: () => widget.onSelect!(widget.event),
-                isEnabled: widget.selectMode && widget.event.status.isAvailable,
-                child: OptionalPadding(
-                  padding: EdgeInsetsDirectional.only(
-                    end:
-                        widget.event.isOwnMessage ||
-                            Message.responsiveUtils.isDesktop(context)
-                        ? 8.0
-                        : 16.0,
-                    top: 1.0,
-                    bottom: 1.0,
-                  ),
-                  isEnabled: !widget.selected,
-                  child: _messageSelectedWidget(context, row, widget.event),
-                ),
-              ),
-            ),
-          ),
+        MessageContainer(
+          event: widget.event,
+          row: row,
+          selected: widget.selected,
+          selectMode: widget.selectMode,
+          onHover: widget.onHover,
+          onSwipe: widget.onSwipe,
+          onSelect: widget.onSelect,
+          hideKeyboardChatScreen: widget.hideKeyboardChatScreen,
+          autoScrollController: widget.autoScrollController,
+          scrollIndex: widget.scrollIndex,
         ),
       ],
     );
@@ -386,51 +357,6 @@ class _MessageState extends State<Message> with MessageAvatarMixin {
       key: Key('visibility_${widget.event.eventId}'),
       onVisibilityChanged: _onVisibilityChangedForMarkAsRead,
       child: column,
-    );
-  }
-
-  Widget _messageSelectedWidget(
-    BuildContext context,
-    Widget child,
-    Event event,
-  ) {
-    return Container(
-      padding: EdgeInsets.only(
-        left: Message.responsiveUtils.isMobile(context) ? 8.0 : 0,
-      ),
-      color: widget.selected
-          ? LinagoraSysColors.material().secondaryContainer
-          : Theme.of(context).primaryColor.withAlpha(0),
-      constraints: const BoxConstraints(
-        maxWidth: TwakeThemes.columnWidth * 2.5,
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.max,
-        children: [
-          if (widget.selectMode && event.redacted)
-            const SizedBox(width: 20)
-          else if (widget.selectMode && event.status.isAvailable)
-            Align(
-              alignment: AlignmentDirectional.centerStart,
-              child: Icon(
-                widget.selected
-                    ? Icons.check_circle_rounded
-                    : Icons.circle_outlined,
-                color: widget.selected
-                    ? LinagoraSysColors.material().primary
-                    : Colors.black,
-                size: 20,
-              ),
-            ),
-          Expanded(
-            flex: 9,
-            child: Align(
-              alignment: AlignmentDirectional.centerEnd,
-              child: child,
-            ),
-          ),
-        ],
-      ),
     );
   }
 }

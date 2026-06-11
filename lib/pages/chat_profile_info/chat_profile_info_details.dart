@@ -1,4 +1,5 @@
 import 'package:collection/collection.dart';
+import 'package:fluffychat/presentation/widget_keys/widget_keys.dart';
 import 'package:dartz/dartz.dart' hide State;
 import 'package:fluffychat/app_state/failure.dart';
 import 'package:fluffychat/app_state/success.dart';
@@ -9,25 +10,20 @@ import 'package:fluffychat/domain/contact_manager/contacts_manager.dart';
 import 'package:fluffychat/domain/model/contact/contact.dart';
 import 'package:fluffychat/domain/model/extensions/contact/contact_extension.dart';
 import 'package:fluffychat/generated/l10n/app_localizations.dart';
-import 'package:fluffychat/pages/chat_profile_info/chat_profile_action_button.dart';
 import 'package:fluffychat/pages/chat_profile_info/chat_profile_info_style.dart';
 import 'package:fluffychat/pages/contacts_tab/widgets/add_contact/add_contact_dialog.dart';
-import 'package:fluffychat/presentation/model/contact/presentation_contact_constant.dart';
 import 'package:fluffychat/resource/image_paths.dart';
 import 'package:fluffychat/utils/clipboard.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/utils/twake_snackbar.dart';
-import 'package:fluffychat/widgets/matrix.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:fluffychat/config/go_routes/app_routes.dart';
-import 'package:go_router/go_router.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:matrix/matrix.dart' hide Contact;
 
 class ChatProfileInfoDetails extends StatelessWidget {
-  static const Key leaveChatButtonKey = Key('leave_chat_button');
+  static Key get leaveChatButtonKey => ChatKeys.leaveChatButton.key;
 
   const ChatProfileInfoDetails({
     super.key,
@@ -38,7 +34,6 @@ class ChatProfileInfoDetails extends StatelessWidget {
     this.onUnblockUser,
     this.onBlockUser,
     required this.blockUserLoadingNotifier,
-    required this.isAlreadyInChat,
     this.room,
     this.onLeaveChat,
   });
@@ -50,7 +45,6 @@ class ChatProfileInfoDetails extends StatelessWidget {
   final void Function()? onUnblockUser;
   final void Function()? onBlockUser;
   final ValueNotifier<bool?> blockUserLoadingNotifier;
-  final bool isAlreadyInChat;
   final Room? room;
   final void Function()? onLeaveChat;
 
@@ -60,20 +54,6 @@ class ChatProfileInfoDetails extends StatelessWidget {
       padding: ChatProfileInfoStyle.mainPadding,
       child: Column(
         children: [
-          if (!isAlreadyInChat)
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 8),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  ChatProfileActionButton(
-                    title: L10n.of(context)!.message,
-                    iconData: Icons.messenger_outline_rounded,
-                    onTap: () => _handleSendMessageTap(context),
-                  ),
-                ],
-              ),
-            ),
           Container(
             padding: ChatProfileInfoStyle.copiableContainerPadding,
             margin: ChatProfileInfoStyle.copiableContainerMargin,
@@ -218,23 +198,6 @@ class ChatProfileInfoDetails extends StatelessWidget {
       (success) => success is GetContactsSuccess ? success.contacts : [],
     );
     return contacts.none((contact) => contact.inTomAddressBook(matrixId!));
-  }
-
-  void _handleSendMessageTap(BuildContext context) {
-    if (matrixId == null) return;
-    final roomId = Matrix.of(context).client.getDirectChatFromUserId(matrixId!);
-    final router = GoRouter.of(context);
-    context.pop();
-    if (roomId == null) {
-      final extra = {
-        PresentationContactConstant.receiverId: matrixId ?? '',
-        PresentationContactConstant.displayName: displayName ?? '',
-        PresentationContactConstant.status: '',
-      };
-      router.go(DraftChatRoute($extra: extra).location, extra: extra);
-    } else {
-      router.go(RoomRoute(roomid: roomId).location);
-    }
   }
 }
 

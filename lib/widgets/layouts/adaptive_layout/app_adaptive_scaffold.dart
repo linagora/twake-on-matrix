@@ -1,3 +1,4 @@
+import 'package:fluffychat/presentation/widget_keys/widget_keys.dart';
 import 'package:fluffychat/utils/responsive/responsive_utils.dart';
 import 'package:fluffychat/widgets/layouts/adaptive_layout/adaptive_scaffold_appbar.dart';
 import 'package:fluffychat/widgets/layouts/adaptive_layout/adaptive_scaffold_route_style.dart';
@@ -11,20 +12,12 @@ class AppAdaptiveScaffold extends StatelessWidget {
   final Widget? secondaryBody;
   final bool? displayAppBar;
 
-  static const scaffoldWithNestedNavigationKey = ValueKey(
-    'ScaffoldWithNestedNavigation',
-  );
-
-  static const breakpointMobileKey = Key('BreakPointMobile');
-
-  static const breakpointWebAndDesktopKey = Key('BreakpointWebAndDesktopKey');
-
   const AppAdaptiveScaffold({
-    Key? key,
+    super.key,
     required this.body,
     this.secondaryBody,
     this.displayAppBar = true,
-  }) : super(key: key ?? scaffoldWithNestedNavigationKey);
+  });
 
   static final _responsiveUtils = ResponsiveUtils();
 
@@ -46,7 +39,7 @@ class AppAdaptiveScaffold extends StatelessWidget {
                         const WidthPlatformBreakpoint(
                           end: ResponsiveUtils.maxMobileWidth,
                         ): SlotLayout.from(
-                          key: breakpointMobileKey,
+                          key: NavigationKeys.breakpointMobile.key,
                           builder: (_) => secondaryBody != null
                               ? _secondaryBodyWidget(
                                   context,
@@ -57,7 +50,7 @@ class AppAdaptiveScaffold extends StatelessWidget {
                         const WidthPlatformBreakpoint(
                           begin: ResponsiveUtils.minTabletWidth,
                         ): SlotLayout.from(
-                          key: breakpointWebAndDesktopKey,
+                          key: NavigationKeys.breakpointWebAndDesktop.key,
                           builder: (_) => _bodyWidget(context),
                         ),
                       },
@@ -68,13 +61,13 @@ class AppAdaptiveScaffold extends StatelessWidget {
                         const WidthPlatformBreakpoint(
                           end: ResponsiveUtils.maxMobileWidth,
                         ): SlotLayout.from(
-                          key: breakpointMobileKey,
+                          key: NavigationKeys.breakpointMobile.key,
                           builder: null,
                         ),
                         const WidthPlatformBreakpoint(
                           begin: ResponsiveUtils.minTabletWidth,
                         ): SlotLayout.from(
-                          key: breakpointWebAndDesktopKey,
+                          key: NavigationKeys.breakpointWebAndDesktop.key,
                           builder: secondaryBody != null
                               ? (_) => _secondaryBodyWidget(context)
                               : AdaptiveScaffold.emptyBuilder,

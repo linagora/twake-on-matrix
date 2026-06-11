@@ -10,6 +10,7 @@ import 'package:fluffychat/utils/dialog/twake_dialog.dart';
 import 'package:fluffychat/utils/extension/event_info_extension.dart';
 import 'package:fluffychat/utils/extension/mime_type_extension.dart';
 import 'package:fluffychat/utils/manager/upload_manager/upload_manager.dart';
+import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_event_fields.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/utils/size_string.dart';
@@ -264,11 +265,18 @@ extension LocalizedBody on Event {
 
   /// Returns true if message contains only 1-6 emojis and is not a reply.
   /// Used to display emoji in enlarged size.
-  bool isDisplayOnlyEmoji() {
-    return !isReplyEvent() &&
-        onlyEmotes &&
-        numberEmotes > 0 &&
-        numberEmotes < 7;
+  ///
+  /// When [timeline] is provided, evaluates against the latest edited content
+  /// (display event) so that edits that add text return false, and edits that
+  /// result in emoji-only content return true.
+  bool isDisplayOnlyEmoji([Timeline? timeline]) {
+    if (isCaptionModeOrReply()) return false;
+    final target = timeline != null
+        ? getDisplayEventWithoutEditEvent(timeline)
+        : this;
+    return target.onlyEmotes &&
+        target.numberEmotes > 0 &&
+        target.numberEmotes < 7;
   }
 
   TextStyle? textStyleForOnlyEmoji(BuildContext context) {
@@ -310,7 +318,7 @@ extension LocalizedBody on Event {
     }
   }
 
-  TextStyle? getMessageTextStyle(BuildContext context) {
+  TextStyle? getMessageTextStyle(BuildContext context, [Timeline? timeline]) {
     if (redacted) {
       return Theme.of(context).textTheme.bodyLarge?.copyWith(
         fontSize: 17,
@@ -319,7 +327,7 @@ extension LocalizedBody on Event {
       );
     }
 
-    if (isDisplayOnlyEmoji()) {
+    if (isDisplayOnlyEmoji(timeline)) {
       return textStyleForOnlyEmoji(context);
     }
 
@@ -368,6 +376,8 @@ extension LocalizedBody on Event {
   }
 
   bool get canDelete {
+    // Error-status events are local-only — always removable by their sender.
+    if (status.isError) return isOwnMessage;
     if (isOwnMessage) {
       return room.canSendRedactEvent;
     }
@@ -512,7 +522,9 @@ extension LocalizedBody on Event {
     );
 
     final editEventJson = latestEdit.toJson();
-    final newContent = editEventJson['content']['m.new_content'];
+    final editContent =
+        editEventJson[MatrixEventFields.content] as Map<String, Object?>?;
+    final newContent = editContent?[MatrixEventFields.newContent];
 
     if (newContent is! Map) {
       return this;
@@ -522,24 +534,33 @@ extension LocalizedBody on Event {
       // For media/files with caption, preserve original event structure
       // and add the edited content
       final originalEventJson = toJson();
-      originalEventJson['content']['m.new_content'] = newContent;
-      originalEventJson['content']['body'] = newContent['body'];
+      originalEventJson[MatrixEventFields.content][MatrixEventFields
+              .newContent] =
+          newContent;
+      originalEventJson[MatrixEventFields.content][MatrixEventFields.body] =
+          newContent[MatrixEventFields.body];
 
       // Update formatted_body if it exists in the new content
-      if (newContent['formatted_body'] != null) {
-        originalEventJson['content']['formatted_body'] =
-            newContent['formatted_body'];
-        originalEventJson['content']['format'] = newContent['format'];
+      if (newContent[MatrixEventFields.formattedBody] != null) {
+        originalEventJson[MatrixEventFields.content][MatrixEventFields
+                .formattedBody] =
+            newContent[MatrixEventFields.formattedBody];
+        originalEventJson[MatrixEventFields.content][MatrixEventFields.format] =
+            newContent[MatrixEventFields.format];
       } else {
-        originalEventJson['content'].remove('formatted_body');
-        originalEventJson['content'].remove('format');
+        originalEventJson[MatrixEventFields.content].remove(
+          MatrixEventFields.formattedBody,
+        );
+        originalEventJson[MatrixEventFields.content].remove(
+          MatrixEventFields.format,
+        );
       }
 
       return Event.fromJson(originalEventJson, room);
     }
 
     // For regular text messages, use the edited event structure
-    editEventJson['content'] = newContent;
+    editEventJson[MatrixEventFields.content] = newContent;
     return Event.fromJson(editEventJson, room);
   }
 
@@ -594,6 +615,17 @@ extension LocalizedBody on Event {
     final thisInfoMap = getThumbnail ? thumbnailInfoMap : infoMap;
     return thisInfoMap['size'] is int &&
         (thisInfoMap['size'] as int) <= database.maxFileSize;
+  }
+
+  /// Returns true if this event contains a GIF image.
+  /// GIFs should be displayed as full images (not thumbnails) to preserve animation.
+  bool get isGifImage {
+    if (messageType != MessageTypes.Image) return false;
+
+    final normalizedMimeType = mimeType?.toLowerCase().split(';').first.trim();
+    if (normalizedMimeType == 'image/gif') return true;
+
+    return filename.toLowerCase().endsWith('.gif');
   }
 }
 

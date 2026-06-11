@@ -11,6 +11,7 @@ import 'package:fluffychat/domain/repository/phonebook_contact_repository.dart';
 import 'package:fluffychat/domain/usecase/contacts/twake_look_up_argument.dart';
 import 'package:fluffychat/domain/usecase/contacts/twake_look_up_phonebook_contact_interactor.dart';
 import 'package:fluffychat/modules/federation_identity_lookup/domain/models/federation_hash_details_response.dart';
+import 'package:fluffychat/modules/federation_identity_lookup/domain/models/federation_lookup_mxid_request.dart';
 import 'package:fluffychat/modules/federation_identity_lookup/domain/models/federation_lookup_mxid_response.dart';
 import 'package:fluffychat/modules/federation_identity_lookup/manager/identity_lookup_manager.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -63,6 +64,93 @@ void main() {
   });
 
   group('TwakeLookupPhonebookContactInteractor', () {
+    test(
+      'Lookup request should send hashes from sanitized msisdn values only',
+      () async {
+        final contacts = [
+          Contact(
+            id: 'id_valid',
+            displayName: 'Valid',
+            phoneNumbers: {PhoneNumber(number: '+1 (212) 555-6789')},
+            emails: {Email(address: 'valid@example.com')},
+          ),
+          Contact(
+            id: 'id_email_only',
+            displayName: 'Email only',
+            emails: {Email(address: 'email.only@example.com')},
+          ),
+        ];
+        const hashDetails = FederationHashDetailsResponse(
+          algorithms: {'sha256'},
+          lookupPepper: 'pepper',
+        );
+        final argument = TwakeLookUpArgument(
+          homeServerUrl: 'https://example.com',
+          withAccessToken: 'token',
+        );
+
+        when(mockRepository.fetchContacts()).thenAnswer((_) async => contacts);
+        when(
+          mockIdentityLookupManager.getHashDetails(
+            federationUrl: argument.homeServerUrl,
+            registeredToken: argument.withAccessToken,
+          ),
+        ).thenAnswer((_) async => hashDetails);
+        when(
+          mockIdentityLookupManager.lookupMxid(
+            federationUrl: argument.homeServerUrl,
+            request: anyNamed('request'),
+            registeredToken: argument.withAccessToken,
+          ),
+        ).thenAnswer(
+          (_) async => const FederationLookupMxidResponse(
+            mappings: {},
+            inactiveMappings: {},
+          ),
+        );
+
+        await interactor.execute(argument: argument).toList();
+
+        final capturedRequest =
+            verify(
+                  mockIdentityLookupManager.lookupMxid(
+                    federationUrl: argument.homeServerUrl,
+                    request: captureAnyNamed('request'),
+                    registeredToken: argument.withAccessToken,
+                  ),
+                ).captured.single
+                as FederationLookupMxidRequest;
+        final addresses = capturedRequest.addresses ?? {};
+
+        final expectedPhoneHash = PhoneNumber(number: '+1 (212) 555-6789')
+            .calculateHashUsingAllPeppers(
+              lookupPepper: hashDetails.lookupPepper,
+              altLookupPeppers: hashDetails.altLookupPeppers,
+              algorithms: hashDetails.algorithms,
+            )
+            .first;
+        final expectedEmailHash = Email(address: 'valid@example.com')
+            .calculateHashUsingAllPeppers(
+              lookupPepper: hashDetails.lookupPepper,
+              altLookupPeppers: hashDetails.altLookupPeppers,
+              algorithms: hashDetails.algorithms,
+            )
+            .first;
+        final unexpectedMsisdnWithExtensionHash =
+            PhoneNumber(number: '+1 (212) 555-6789 ext. 123')
+                .calculateHashUsingAllPeppers(
+                  lookupPepper: hashDetails.lookupPepper,
+                  altLookupPeppers: hashDetails.altLookupPeppers,
+                  algorithms: hashDetails.algorithms,
+                )
+                .first;
+
+        expect(addresses.contains(expectedPhoneHash), isTrue);
+        expect(addresses.contains(expectedEmailHash), isTrue);
+        expect(addresses.contains(unexpectedMsisdnWithExtensionHash), isFalse);
+      },
+    );
+
     test(
       'Success case - emits loading, then success states with contacs size of one chunk',
       () async {

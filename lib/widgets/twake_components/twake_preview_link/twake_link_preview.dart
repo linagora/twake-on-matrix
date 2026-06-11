@@ -1,6 +1,9 @@
+import 'package:fluffychat/presentation/widget_keys/widget_keys.dart';
 import 'package:fluffychat/pages/chat/events/formatted_text_widget.dart';
 import 'package:fluffychat/presentation/mixins/linkify_mixin.dart';
+import 'package:fluffychat/presentation/widget_keys/link_preview_keys.dart';
 import 'package:fluffychat/utils/string_extension.dart';
+import 'package:fluffychat/widgets/native_link_span.dart';
 import 'package:fluffychat/widgets/twake_components/twake_preview_link/twake_link_preview_item.dart';
 import 'package:fluffychat/widgets/twake_components/twake_preview_link/twake_link_view.dart';
 import 'package:flutter/material.dart';
@@ -27,9 +30,11 @@ class TwakeLinkPreview extends StatelessWidget with LinkifyMixin {
     this.isCaption = false,
   });
 
-  static const twakeLinkViewKey = ValueKey('TwakeLinkPreviewKey');
+  static ValueKey<String> get twakeLinkViewKey =>
+      LinkPreviewKeys.twakeLinkView.valueKey;
 
-  static const twakeLinkPreviewItemKey = ValueKey('TwakeLinkPreviewItemKey');
+  static ValueKey<String> get twakeLinkPreviewItemKey =>
+      LinkPreviewKeys.twakeLinkPreviewItem.valueKey;
 
   @override
   Widget build(BuildContext context) {
@@ -55,6 +60,21 @@ class TwakeLinkPreview extends StatelessWidget with LinkifyMixin {
                 details: tapDownDetails,
                 link: link,
               ),
+              linkBuilder: (link, style) {
+                if (link.type != LinkType.url) return null;
+                final url = link.value;
+                if (url == null) return null;
+                return buildNativeLinkSpan(
+                  url: url,
+                  childrenSpan: TextSpan(text: url, style: style),
+                  linkStyle: style,
+                  onTapDown: (details) => handleOnTappedLinkHtml(
+                    context: context,
+                    details: details,
+                    link: link,
+                  ),
+                );
+              },
             ),
       previewItemWidget: TwakeLinkPreviewItem(
         key: twakeLinkPreviewItemKey,

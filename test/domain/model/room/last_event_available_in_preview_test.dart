@@ -88,6 +88,16 @@ Event _reaction(Room room, String eventId, DateTime ts) => Event(
   room: room,
 );
 
+Event _pendingMessage(Room room, String eventId, DateTime ts) => Event(
+  content: {'msgtype': 'm.text', 'body': 'pending'},
+  type: EventTypes.Message,
+  eventId: eventId,
+  senderId: '@alice:test.local',
+  originServerTs: ts,
+  room: room,
+  status: EventStatus.sending,
+);
+
 Event _roomCreate(Room room, String eventId, DateTime ts) => Event(
   content: {'creator': '@alice:test.local'},
   type: EventTypes.RoomCreate,
@@ -166,6 +176,94 @@ void main() {
         expect((result as RoomPreviewFound).event.eventId, '\$m1');
       },
     );
+
+    group('pending vs confirmed priority', () {
+      test(
+        'confirmed event in DB wins over an older pending event in room.lastEvent',
+        () async {
+          final db = FixedEventListDatabase();
+          final client = await _clientWithDatabase(db);
+          final room = _room(client);
+          final base = DateTime.utc(2024, 6, 1);
+
+          room.lastEvent = _pendingMessage(
+            room,
+            '\$phantom',
+            base.subtract(const Duration(days: 7)),
+          );
+          db.events.add(_message(room, '\$confirmed', base));
+
+          final result = await room.lastEventAvailableInPreview();
+
+          expect(result, isA<RoomPreviewFound>());
+          expect((result as RoomPreviewFound).event.eventId, '\$confirmed');
+        },
+      );
+
+      test(
+        'fresh pending event in room.lastEvent wins over an older confirmed event in DB',
+        () async {
+          final db = FixedEventListDatabase();
+          final client = await _clientWithDatabase(db);
+          final room = _room(client);
+          final base = DateTime.utc(2024, 6, 1);
+
+          room.lastEvent = _pendingMessage(room, '\$sending', base);
+          db.events.add(
+            _message(
+              room,
+              '\$confirmed',
+              base.subtract(const Duration(days: 1)),
+            ),
+          );
+
+          final result = await room.lastEventAvailableInPreview();
+
+          expect(result, isA<RoomPreviewFound>());
+          expect((result as RoomPreviewFound).event.eventId, '\$sending');
+        },
+      );
+
+      test(
+        'confirmed event in room.lastEvent is returned without scanning the DB',
+        () async {
+          // DB is empty — if the fast-path did not work the result would be
+          // RoomPreviewUnavailable instead of RoomPreviewFound.
+          final db = FixedEventListDatabase();
+          final client = await _clientWithDatabase(db);
+          final room = _room(client);
+
+          room.lastEvent = _message(
+            room,
+            '\$confirmed',
+            DateTime.utc(2024, 6, 1),
+          );
+
+          final result = await room.lastEventAvailableInPreview();
+
+          expect(result, isA<RoomPreviewFound>());
+          expect((result as RoomPreviewFound).event.eventId, '\$confirmed');
+        },
+      );
+
+      test(
+        'falls back to pending event when no confirmed event exists anywhere',
+        () async {
+          final db = FixedEventListDatabase();
+          final client = await _clientWithDatabase(db);
+          final room = _room(client);
+
+          db.events.add(
+            _pendingMessage(room, '\$pending', DateTime.utc(2024, 6, 1)),
+          );
+
+          final result = await room.lastEventAvailableInPreview();
+
+          expect(result, isA<RoomPreviewFound>());
+          expect((result as RoomPreviewFound).event.eventId, '\$pending');
+        },
+      );
+    });
 
     test('returns RoomPreviewUnavailable when getEventList fails', () async {
       final client = await _clientWithDatabase(ThrowingGetEventListDatabase());

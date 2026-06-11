@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:fluffychat/presentation/widget_keys/widget_keys.dart';
 import 'package:fluffychat/pages/bootstrap/tom_bootstrap_dialog_mobile_view.dart';
 import 'package:fluffychat/pages/bootstrap/tom_bootstrap_dialog_web_view.dart';
 import 'package:fluffychat/presentation/model/client_login_state_event.dart';
@@ -26,14 +27,6 @@ class _InitClientDialogState extends State<InitClientDialog>
   late AnimationController loginSSOProgressController;
 
   StreamSubscription? _clientLoginStateChangedSubscription;
-
-  static const breakpointMobileDialogKey = Key(
-    'BreakPointMobileInitClientDialog',
-  );
-
-  static const breakpointWebAndDesktopDialogKey = Key(
-    'BreakpointWebAndDesktopKeyInitClientDialog',
-  );
 
   @override
   void initState() {
@@ -152,7 +145,7 @@ class _InitClientDialogState extends State<InitClientDialog>
         const WidthPlatformBreakpoint(
           end: ResponsiveUtils.maxMobileWidth,
         ): SlotLayout.from(
-          key: breakpointMobileDialogKey,
+          key: DialogKeys.initClientBreakpointMobile.key,
           builder: (_) => TomBootstrapDialogMobileView(
             description: L10n.of(context)!.backingUpYourMessage,
           ),
@@ -160,7 +153,7 @@ class _InitClientDialogState extends State<InitClientDialog>
         const WidthPlatformBreakpoint(
           begin: ResponsiveUtils.minTabletWidth,
         ): SlotLayout.from(
-          key: breakpointWebAndDesktopDialogKey,
+          key: DialogKeys.initClientBreakpointWebAndDesktop.key,
           builder: (_) => TomBootstrapDialogWebView(
             description: L10n.of(context)!.backingUpYourMessage,
           ),

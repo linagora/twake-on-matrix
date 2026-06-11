@@ -1,3 +1,100 @@
+## [2.22.4] - 2026-06-03
+### Added
+- TW-2634: Native browser right-click context menu on chat links (web)
+- TW-2965: Enable autoplay of GIFs in chat
+
+### Changed
+- Upgrade matrix SDK to version 7.1.2 with PowerLevel class comparisons
+- Upgrade matrix SDK to version 6.2.0 with oidcClientId parameter support
+
+### Fixed
+- TW-3070: Fix cannot download video
+- TW-3074: Fix duplicate message button issue and update message handling
+- TW-3084: Fix broken 'Enable right/left message alignment' option
+- TW-3077: Fix app crash when clicking Send message in profile info
+- Fix: eliminate post-login well-known 404s by never re-fetching from MXID domain
+
+### Tests
+- Integration test: Patrol web support with robot fixes
+- Integration test: extract abstract robot interfaces
+- Integration test: web robot implementations and factory wiring
+
+## [2.22.3] - 2026-05-22
+### Changed
+- TW-3063: Update open_file version to v3.5.11
+
+### Fixed
+- Replace global image cache clear with room-scoped eviction
+
+## [2.22.2] - 2026-05-21
+### Changed
+- TW-2940: Widen iOS navigation
+- TW-3047: Optimize video playback performance with hardware acceleration and improved player initialization
+- TW-3018: Highlight only message bubble, not unread divider
+- TW-1707: Update git URLs in pubspec files to use HTTPS
+
+### Fixed
+- TW-3038: Exclude edit events to prevent duplicate search results for edited messages
+- TW-3037: Actually cancel stream subscriptions in dispose()
+- TW-3037: Advance read marker past hidden trailing events
+- TW-3019: Ignore refreshing_last_event placeholder in chat list date
+- TW-3043: Fix interaction with errored messages
+
+### Performance
+- Byte budget for image cache, fix video thumbnail rebuild, mounted guards
+
+### Tests
+- Upgrade Patrol to 4.5.0 for Web support
+
+## [2.22.1] - 2026-05-06
+### Changed
+- TW-3020: Simplify hover handling in chat events
+- Refactor widget keys to type-safe enums with runtime namespace prefix
+- Refactor: replace hardcoded widget keys with type-safe enums
+- Refactor: restore const scaffolds and finish SettingsKeys wiring
+- Refactor: cache widget keys as const enum fields, rename clipRRect
+- Refactor: route TwakeLinkPreview static keys through LinkPreviewKeys enum
+- Release process documentation (#3014)
+- chore: ignore playwright artifacts and remove committed reports
+- chore: apply dart format to link_preview_keys
+
+### Fixed
+- TW-2705: Stale pending events no longer shadow confirmed messages
+- TW-3027: Enable auto-scrolling to new messages when at the bottom of the chat
+- TW-3029: Hide app download banner on desktop
+- TW-2155: Normalize phonebook numbers to E.164 for lookup hashing
+- TW-3666: Multi-URL federation lookup with identity fallback
+- fix: edit rendering after merge and revoke web blob URLs
+
+### Tests
+- test(integration): support both OIDC bypass and m.login.password (#3015)
+
+## [2.22.0] - 2026-04-22
+### Added
+- TW-2963: Forward to multiple rooms
+- Translated using Weblate (French, Irish, Russian, Vietnamese)
+
+### Changed
+- TW-2942: Refactor connection status handling in chat components
+- TW-3568: EventVisibilityResolver and chat-list/timeline visibility rules
+- TW-2973: Update chat room preset to private, remove power level overrides
+- Migrate routing to go_router_builder for type-safe navigation
+- Enhance file picking and upload with sequential reading and task management
+- Sentry: Track wrong member count and missing last message
+
+### Fixed
+- TW-3004: Enhance emoji display in timeline to consider edit events
+- TW-2957: Fix cannot drag scrollbar on web
+- TW-2952: Fix message time overlap and scroll glitch
+- TW-2988: Fix emoji display logic to exclude replies
+- TW-2993: Improve scroll behavior for message replies
+- fix: resolve GoRouter type cast crash when opening pinned messages
+- fix: replace FluffyChat deep link prefix with Twake scheme
+- fix: timeline incorrectly shows message as unread
+
+### Performance
+- perf: fix O(N²) hashCode cascade in ChatAppBarTitle room name resolver
+
 ## [2.21.17] - 2026-04-08
 ### Fixed
 - HOTFIX: Fix disoriented notification avatar (#2992)

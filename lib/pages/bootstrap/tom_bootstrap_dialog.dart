@@ -1,4 +1,5 @@
 import 'package:fluffychat/di/global/dio_cache_interceptor_for_client.dart';
+import 'package:fluffychat/presentation/widget_keys/widget_keys.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/domain/keychain_sharing/keychain_sharing_manager.dart';
 import 'package:fluffychat/domain/model/recovery_words/recovery_words.dart';
@@ -47,12 +48,6 @@ class TomBootstrapDialogState extends State<TomBootstrapDialog>
 
   final _deleteRecoveryWordsInteractor = getIt
       .get<DeleteRecoveryWordsInteractor>();
-
-  static const breakpointMobileDialogKey = Key('BreakPointMobileDialog');
-
-  static const breakpointWebAndDesktopDialogKey = Key(
-    'BreakpointWebAndDesktopKeyDialog',
-  );
 
   static const Duration getRecoveryWordsDelay = Duration(seconds: 5);
 
@@ -262,14 +257,14 @@ class TomBootstrapDialogState extends State<TomBootstrapDialog>
         const WidthPlatformBreakpoint(
           end: ResponsiveUtils.maxMobileWidth,
         ): SlotLayout.from(
-          key: breakpointMobileDialogKey,
+          key: DialogKeys.bootstrapBreakpointMobile.key,
           builder: (_) =>
               TomBootstrapDialogMobileView(description: _description),
         ),
         const WidthPlatformBreakpoint(
           begin: ResponsiveUtils.minTabletWidth,
         ): SlotLayout.from(
-          key: breakpointWebAndDesktopDialogKey,
+          key: DialogKeys.bootstrapBreakpointWebAndDesktop.key,
           builder: (_) => TomBootstrapDialogWebView(description: _description),
         ),
       },

@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:animations/animations.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/pages/bootstrap/init_client_dialog.dart';
+import 'package:fluffychat/presentation/widget_keys/widget_keys.dart';
 import 'package:fluffychat/resource/image_paths.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/utils/responsive/responsive_utils.dart';
@@ -30,7 +31,8 @@ class TwakeDialog {
 
   static const int defaultMaxLinesMessage = 3;
 
-  static const Key showConfirmAlertDialogKey = Key('show_confirm_alert_dialog');
+  static Key get showConfirmAlertDialogKey =>
+      DialogKeys.showConfirmAlertDialog.key;
 
   static void hideLoadingDialog(BuildContext context) {
     if (PlatformInfos.isWeb) {

@@ -1,21 +1,30 @@
-import 'dart:io';
 import 'package:fluffychat/generated/l10n/app_localizations.dart';
 import 'package:fluffychat/pages/chat_list/chat_list.dart';
 import 'package:fluffychat/pages/homeserver_picker/homeserver_picker_view.dart';
 import 'package:fluffychat/pages/login/login_view.dart';
 import 'package:fluffychat/pages/twake_welcome/twake_welcome.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
+import 'package:fluffychat/widgets/matrix.dart';
 import 'package:fluffychat/widgets/twake_app.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:matrix/matrix.dart';
 import 'package:patrol/patrol.dart';
+import '../base/api_login_helper.dart';
 import '../base/core_robot.dart';
+import 'abstract/abstract_login_robot.dart';
 
-class LoginRobot extends CoreRobot {
+class LoginRobot extends CoreRobot implements AbstractLoginRobot {
   LoginRobot(super.$);
 
+  bool get _isAndroid =>
+      !kIsWeb && defaultTargetPlatform == TargetPlatform.android;
+
+  bool get _isIOS => !kIsWeb && defaultTargetPlatform == TargetPlatform.iOS;
+
   Selector getLoginTxt() {
-    if (Platform.isAndroid) {
+    if (_isAndroid) {
       return Selector(resourceId: 'email_username');
     } else {
       return Selector(className: 'textField', textContains: 'Email / Username');
@@ -23,7 +32,7 @@ class LoginRobot extends CoreRobot {
   }
 
   Selector getPassTxt() {
-    if (Platform.isAndroid) {
+    if (_isAndroid) {
       return Selector(resourceId: 'password');
     } else {
       return Selector(className: 'secureTextField', textContains: 'Password');
@@ -32,7 +41,7 @@ class LoginRobot extends CoreRobot {
 
   Selector getSignInBtn() {
     const label = 'Sign in';
-    if (Platform.isIOS) {
+    if (_isIOS) {
       return Selector(text: label);
     } else {
       return Selector(className: 'android.widget.Button', textContains: label);
@@ -40,7 +49,7 @@ class LoginRobot extends CoreRobot {
   }
 
   Selector getOKBtnInVerifyCaptchaDialog() {
-    if (Platform.isIOS) {
+    if (_isIOS) {
       return Selector(text: 'Close', className: 'button');
     } else {
       return Selector(resourceId: 'com.android.chrome:id/positive_button');
@@ -108,7 +117,7 @@ class LoginRobot extends CoreRobot {
 
   Selector getSignInTab() {
     const label = 'Email / Username';
-    if (Platform.isAndroid) {
+    if (_isAndroid) {
       return Selector(className: 'android.widget.Button', textContains: label);
     } else {
       return Selector(text: label);
@@ -117,7 +126,7 @@ class LoginRobot extends CoreRobot {
 
   Future<bool> isSignInPageVisible() async {
     //login on Chrome browser without an account
-    if (Platform.isAndroid) {
+    if (_isAndroid) {
       final loginBrowserWithoutAccountOpt = Selector(
         resourceId: 'com.android.chrome:id/signin_fre_dismiss_button',
       );
@@ -254,17 +263,25 @@ class LoginRobot extends CoreRobot {
     await tapSignInButton();
   }
 
-  /// Logs in by running the OIDC flow via HTTP (no browser UI interaction).
-  /// Obtains a one-time [loginToken] from the SSO server and feeds it directly
-  /// to the app via the /onAuthRedirect deep link, bypassing any SSO browser
-  /// modal entirely.
+  /// Authenticates the test user without driving the SSO browser UI.
+  ///
+  /// Two paths coexist, picked at compile time from the dart-defines:
+  ///   - `SSO_URL` set → OIDC flow over HTTP (LemonLDAP `sso.linagora.com`).
+  ///     Replays the SSO POST and feeds the resulting `loginToken` to the
+  ///     app via the `/onAuthRedirect` deep link. Used by developers running
+  ///     Patrol locally with their personal Linagora SSO credentials.
+  ///   - otherwise → `m.login.password` straight to the homeserver. Used by
+  ///     CI / FTL with a dedicated test account that has a local
+  ///     `password_hash` in Synapse.
+  ///
+  /// This is the **mobile** implementation. Web uses [WebLoginRobot] which
+  /// always goes through `m.login.password` via [AutoHomeserverPicker].
+  @override
   Future<void> loginViaApi({
     required String serverUrl,
     required String username,
     required String password,
   }) async {
-    // Wait for either TwakeWelcome (not logged in) or ChatList (already logged
-    // in from a previous test run whose tokens persisted in the iOS keychain).
     await waitForEitherVisible(
       $: $,
       first: $(TwakeWelcome),
@@ -274,23 +291,69 @@ class LoginRobot extends CoreRobot {
 
     if (await isChatListVisible()) return;
 
-    final httpClient = await initialRedirectRequest();
-    final oidcResult = await getLoginTokenViaOIDC(
-      httpClient,
-      username,
-      password,
+    const ssoURL = String.fromEnvironment('SSO_URL');
+    if (ssoURL.isNotEmpty) {
+      await _loginViaOidcBypass(
+        serverUrl: serverUrl,
+        username: username,
+        password: password,
+      );
+    } else {
+      await _loginViaMatrixPassword(
+        serverUrl: serverUrl,
+        username: username,
+        password: password,
+      );
+    }
+    await waitForChatList();
+  }
+
+  Future<void> _loginViaOidcBypass({
+    required String serverUrl,
+    required String username,
+    required String password,
+  }) async {
+    final loginToken = await fetchAuthToken(
+      username: username,
+      password: password,
     );
-    await closeHTTPClient(httpClient);
 
     final encodedServer = Uri.encodeComponent(serverUrl);
+    final encodedToken = Uri.encodeQueryComponent(loginToken);
     // Use router.go() directly — bypasses app_links which only listens when
     // ChatList is active (post-login). go_router navigates synchronously.
     TwakeApp.router.go(
-      '/onAuthRedirect?loginToken=${oidcResult.loginToken}&homeserver=$encodedServer',
+      '/onAuthRedirect?loginToken=$encodedToken&homeserver=$encodedServer',
     );
     await $.pump();
+  }
 
-    await waitForChatList();
+  /// Drives the running app's Matrix SDK to authenticate via
+  /// `m.login.password`. Requires the user to have a local `password_hash`
+  /// on the target homeserver.
+  Future<void> _loginViaMatrixPassword({
+    required String serverUrl,
+    required String username,
+    required String password,
+  }) async {
+    final context = $.tester.element($(TwakeWelcome).finder.first);
+    final matrix = Matrix.of(context);
+    final client = await matrix.getLoginClient();
+    matrix.loginHomeserverSummary = await client
+        .checkHomeserver(Uri.parse(serverUrl))
+        .toHomeserverSummary();
+
+    await client.login(
+      LoginType.mLoginPassword,
+      identifier: AuthenticationUserIdentifier(user: username),
+      password: password,
+      initialDeviceDisplayName: PlatformInfos.clientName,
+    );
+
+    // Force the router to re-evaluate redirects so the now-logged-in client
+    // is detected and we land on the chat list.
+    TwakeApp.router.go('/');
+    await $.pump();
   }
 
   Future<void> waitForChatList() async {

@@ -23,7 +23,6 @@ class ChatProfileInfoAppBar extends StatefulWidget {
   final Room? room;
   final User? user;
   final PresentationContact? presentationContact;
-  final bool isAlreadyInChat;
   final List<ChatDetailsPage> tabList;
   final TabController? tabController;
   final bool isDraftInfo;
@@ -49,7 +48,6 @@ class ChatProfileInfoAppBar extends StatefulWidget {
     required this.isDraftInfo,
     required this.tabList,
     this.tabController,
-    required this.isAlreadyInChat,
     this.avatarUri,
     this.displayName,
     this.matrixId,
@@ -155,7 +153,6 @@ class _ChatProfileInfoAppBarState extends State<ChatProfileInfoAppBar>
             room: widget.room,
             user: widget.user,
             contact: widget.presentationContact,
-            isAlreadyInChat: widget.isAlreadyInChat,
             builder: (context, height) {
               final totalHeight = isExpanded
                   ? height
@@ -189,7 +186,6 @@ class _ChatProfileInfoAppBarState extends State<ChatProfileInfoAppBar>
                                   widget.isBlockedUserNotifier,
                               onUnblockUser: widget.onUnblockUser,
                               onBlockUser: widget.onBlockUser,
-                              isAlreadyInChat: widget.isAlreadyInChat,
                               blockUserLoadingNotifier:
                                   widget.blockUserLoadingNotifier,
                               room: widget.room,
@@ -218,7 +214,6 @@ class _ChatProfileInfoAppBarState extends State<ChatProfileInfoAppBar>
                                   widget.isBlockedUserNotifier,
                               onUnblockUser: widget.onUnblockUser,
                               onBlockUser: widget.onBlockUser,
-                              isAlreadyInChat: widget.isAlreadyInChat,
                               blockUserLoadingNotifier:
                                   widget.blockUserLoadingNotifier,
                               room: widget.room,
@@ -247,7 +242,6 @@ class _ChatProfileInfoAppBarState extends State<ChatProfileInfoAppBar>
                             isBlockedUserNotifier: widget.isBlockedUserNotifier,
                             onUnblockUser: widget.onUnblockUser,
                             onBlockUser: widget.onBlockUser,
-                            isAlreadyInChat: widget.isAlreadyInChat,
                             blockUserLoadingNotifier:
                                 widget.blockUserLoadingNotifier,
                             room: widget.room,
@@ -305,7 +299,6 @@ class _SizedAppBar extends StatelessWidget {
     required this.userInfoNotifier,
     required this.user,
     required this.contact,
-    required this.isAlreadyInChat,
     required this.builder,
     this.room,
   });
@@ -313,7 +306,6 @@ class _SizedAppBar extends StatelessWidget {
   final ValueNotifier<Either<Failure, Success>> userInfoNotifier;
   final User? user;
   final PresentationContact? contact;
-  final bool isAlreadyInChat;
   final Widget Function(BuildContext context, double height) builder;
   final Room? room;
 
@@ -351,11 +343,6 @@ class _SizedAppBar extends StatelessWidget {
     );
 
     double additionalHeight = 0;
-
-    if (!isAlreadyInChat) {
-      additionalHeight += ChatDetailViewStyle.chatInfoActionHeight;
-    }
-
     final matrixId = contact?.matrixId ?? user?.id;
     final canAddContact =
         matrixId != null &&

@@ -1,3 +1,4 @@
+import 'package:fluffychat/generated/l10n/app_localizations.dart';
 import 'package:fluffychat/pages/chat_details/participant_list_item/participant_list_item.dart';
 import 'package:fluffychat/pages/chat_list/chat_list_item_subtitle.dart';
 import 'package:fluffychat/pages/chat_list/chat_list_item_title.dart';
@@ -12,6 +13,8 @@ class TwakeListItemRobot extends CoreRobot {
 
   TwakeListItemRobot(super.$, this.root);
 
+  L10n get _l10n => L10n.of($.tester.element(find.byType(Scaffold).first))!;
+
   Future<PatrolFinder> getRadiobtn() async {
     return root.$(Radio).at(0);
   }
@@ -25,7 +28,7 @@ class TwakeListItemRobot extends CoreRobot {
   }
 
   Future<PatrolFinder> getOwnerLabel() async {
-    return root.$(Text).containing('Owner');
+    return root.$(Text).containing(_l10n.owner);
   }
 
   Future<PatrolFinder> getEmailLabelIncaseSearching() async {
@@ -57,17 +60,14 @@ class TwakeListItemRobot extends CoreRobot {
   }
 
   int getUnreadMessage() {
-    final animated = find.descendant(
-      of: root,
-      matching: find.byType(AnimatedContainer),
-    );
-    if (animated.evaluate().isNotEmpty) {
-      final raw = root.$(ChatListItemSubtitle).$(Text).last.text; // String?
-      final s = (raw ?? '').trim();
-      final n = int.tryParse(s);
-      return n ?? 0;
-    } else {
-      return 0;
-    }
+    // The notification-count badge is the trailing `AnimatedContainer` in the
+    // subtitle (the earlier one is the "@" mention badge). Read its `Text`
+    // rather than `Text.last`, which on web resolves to the message preview
+    // (and would mis-parse a numeric message body as the count).
+    final badges = root.$(ChatListItemSubtitle).$(AnimatedContainer);
+    if (badges.evaluate().isEmpty) return 0;
+    final countText = badges.last.$(Text);
+    if (!countText.exists) return 0;
+    return int.tryParse((countText.text ?? '').trim()) ?? 0;
   }
 }

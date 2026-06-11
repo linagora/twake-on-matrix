@@ -1,4 +1,5 @@
 import 'package:fluffychat/config/themes.dart';
+import 'package:fluffychat/presentation/widget_keys/widget_keys.dart';
 import 'package:fluffychat/pages/chat/chat.dart';
 import 'package:fluffychat/pages/chat/chat_event_list_item.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/event_list_extension.dart';
@@ -25,6 +26,7 @@ class ChatScrollView extends StatefulWidget {
 
 class _ChatScrollViewState extends State<ChatScrollView> {
   final _top = <Event>[], _bottom = <Event>[];
+
   ChatController get controller => widget.controller;
   bool _wasRequestingFuture = false;
   List<Event> _currentEvents = [];
@@ -84,6 +86,28 @@ class _ChatScrollViewState extends State<ChatScrollView> {
     // Scroll to bottom if needed
     if (result.shouldScrollToBottom) {
       _scrollToBottom();
+    } else if (result.hasNewEvents) {
+      // New events arrived but we're not auto-scrolling (e.g. message from
+      // others). Snapshot whether we're at the bottom NOW (before layout adds
+      // the new message and grows maxScrollExtent), then act after layout.
+      final wasAtBottom =
+          controller.scrollController.hasClients &&
+          (controller.scrollController.position.maxScrollExtent -
+                  controller.scrollController.position.pixels) <=
+              2.0;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        if (!controller.scrollController.hasClients) return;
+        if (wasAtBottom) {
+          // User was pinned to the bottom — scroll to reveal the new message.
+          controller.scrollController.jumpTo(
+            controller.scrollController.position.maxScrollExtent,
+          );
+          controller.showScrollDownButtonNotifier.value = false;
+        } else {
+          controller.showScrollDownButtonNotifier.value = true;
+        }
+      });
     }
   }
 
@@ -102,7 +126,7 @@ class _ChatScrollViewState extends State<ChatScrollView> {
 
   @override
   Widget build(BuildContext context) {
-    const centerKey = ValueKey('ChatEventList-center-key');
+    final centerKey = ChatKeys.eventListCenter.valueKey;
     final horizontalPadding = TwakeThemes.isColumnMode(context) ? 16.0 : 0.0;
 
     return Padding(

@@ -1,4 +1,5 @@
 import 'package:fluffychat/config/go_routes/app_routes.dart';
+import 'package:fluffychat/presentation/widget_keys/widget_keys.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/generated/l10n/app_localizations.dart';
 import 'package:fluffychat/pages/settings_dashboard/settings/settings_item_builder.dart';
@@ -64,7 +65,7 @@ class SettingsSecurityView extends StatelessWidget {
                   Padding(
                     padding: SettingsViewStyle.bodySettingsScreenPadding,
                     child: SettingsItemBuilder(
-                      key: const Key('contacts_visibility_settings_item'),
+                      key: SettingsKeys.contactsVisibilityItem.key,
                       title: l10n.contactsVisibility,
                       titleColor: colorScheme.onBackground,
                       subtitle: l10n.whoCanFindMeByMyContacts,
@@ -136,7 +137,7 @@ class SettingsSecurityView extends StatelessWidget {
                       Padding(
                         padding: SettingsViewStyle.bodySettingsScreenPadding,
                         child: SettingsItemBuilder(
-                          key: const Key('recovery_key_settings_item'),
+                          key: SettingsKeys.recoveryKeyItem.key,
                           title: l10n.recoveryKey,
                           titleColor: colorScheme.onBackground,
                           subtitle: '\u2022' * 32,
@@ -152,7 +153,7 @@ class SettingsSecurityView extends StatelessWidget {
                             ),
                           ),
                           trailingWidget: InkWell(
-                            key: const Key('recovery_key_copy_button'),
+                            key: SettingsKeys.recoveryKeyCopyButton.key,
                             onTap: controller.copyRecoveryKey,
                             child: const Icon(Icons.content_copy),
                           ),

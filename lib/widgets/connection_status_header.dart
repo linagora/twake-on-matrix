@@ -1,19 +1,15 @@
 import 'dart:async';
-
-import 'package:fluffychat/pages/chat_list/chat_list.dart';
-import 'package:fluffychat/widgets/chat_sort_loading.dart';
 import 'package:flutter/material.dart';
 
 import 'package:fluffychat/generated/l10n/app_localizations.dart';
+import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:matrix/matrix.dart';
-
-import '../utils/localized_exception_extension.dart';
 import 'matrix.dart';
 
 class ConnectionStatusHeader extends StatefulWidget {
-  const ConnectionStatusHeader({super.key, this.controller});
+  const ConnectionStatusHeader({super.key, this.connectedWidget});
 
-  final ChatListController? controller;
+  final Widget? connectedWidget;
 
   @override
   ConnectionStatusHeaderState createState() => ConnectionStatusHeaderState();
@@ -21,17 +17,41 @@ class ConnectionStatusHeader extends StatefulWidget {
 
 class ConnectionStatusHeaderState extends State<ConnectionStatusHeader> {
   late final StreamSubscription _onSyncSub;
+  SyncStatusUpdate? _lastStatus;
+  bool _lastHideState = true;
+  Timer? _debounceTimer;
 
   @override
   void initState() {
+    super.initState();
     _onSyncSub = Matrix.of(
       context,
-    ).client.onSyncStatus.stream.listen((_) => setState(() {}));
-    super.initState();
+    ).client.onSyncStatus.stream.listen(_onStatusUpdate);
+  }
+
+  void _onStatusUpdate(SyncStatusUpdate update) {
+    _debounceTimer?.cancel();
+    _debounceTimer = Timer(const Duration(milliseconds: 100), () {
+      if (!mounted) return;
+
+      final client = Matrix.of(context).client;
+      final hide =
+          client.onSync.value != null &&
+          update.status != SyncStatus.error &&
+          client.prevBatch != null;
+
+      if (_lastStatus?.status != update.status || _lastHideState != hide) {
+        setState(() {
+          _lastStatus = update;
+          _lastHideState = hide;
+        });
+      }
+    });
   }
 
   @override
   void dispose() {
+    _debounceTimer?.cancel();
     _onSyncSub.cancel();
     super.dispose();
   }
@@ -40,6 +60,7 @@ class ConnectionStatusHeaderState extends State<ConnectionStatusHeader> {
   Widget build(BuildContext context) {
     final client = Matrix.of(context).client;
     final status =
+        _lastStatus ??
         client.onSyncStatus.value ??
         const SyncStatusUpdate(SyncStatus.waitingForResponse);
     final hide =
@@ -47,50 +68,38 @@ class ConnectionStatusHeaderState extends State<ConnectionStatusHeader> {
         status.status != SyncStatus.error &&
         client.prevBatch != null;
 
-    if (hide) return ChatSortLoading(controller: widget.controller);
-
-    return Container(
-      height: 36,
-      clipBehavior: Clip.hardEdge,
-      decoration: BoxDecoration(color: Theme.of(context).colorScheme.surface),
-      padding: const EdgeInsets.symmetric(horizontal: 12),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          SizedBox(
-            width: 24,
-            height: 24,
-            child: CircularProgressIndicator.adaptive(
-              strokeWidth: 2,
-              value: hide ? 1.0 : status.progress,
+    return AnimatedSwitcher(
+      duration: const Duration(milliseconds: 200),
+      transitionBuilder: (child, animation) {
+        return FadeTransition(opacity: animation, child: child);
+      },
+      child: hide
+          ? widget.connectedWidget ?? const SizedBox.shrink()
+          : Text(
+              status.toLocalizedString(context),
+              key: ValueKey(status.status),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                color: LinagoraSysColors.material().secondary,
+              ),
             ),
-          ),
-          const SizedBox(width: 12),
-          Text(
-            status.toLocalizedString(context),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
-          ),
-        ],
-      ),
     );
   }
 }
 
 extension on SyncStatusUpdate {
   String toLocalizedString(BuildContext context) {
+    final l10n = L10n.of(context);
     switch (status) {
       case SyncStatus.waitingForResponse:
-        return L10n.of(context)!.loadingPleaseWait;
+        return l10n!.waitingForResponse;
       case SyncStatus.error:
-        return ((error?.exception ?? Object()) as Object).toLocalizedString(
-          context,
-        );
+        return l10n!.waitingForResponse;
       case SyncStatus.processing:
       case SyncStatus.cleaningUp:
       case SyncStatus.finished:
-        return L10n.of(context)!.synchronizingPleaseWait;
+        return l10n!.synchronizingPleaseWait;
     }
   }
 }

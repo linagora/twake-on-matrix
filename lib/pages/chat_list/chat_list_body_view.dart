@@ -8,7 +8,6 @@ import 'package:fluffychat/pages/chat_list/space_view.dart';
 import 'package:fluffychat/presentation/enum/chat_list/chat_list_enum.dart';
 import 'package:fluffychat/resource/image_paths.dart';
 import 'package:fluffychat/utils/stream_extension.dart';
-import 'package:fluffychat/widgets/connection_status_header.dart';
 import 'package:flutter/material.dart';
 import 'package:fluffychat/generated/l10n/app_localizations.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
@@ -115,9 +114,6 @@ class ChatListBodyView extends StatelessWidget {
                 return CustomScrollView(
                   controller: controller.scrollController,
                   slivers: [
-                    SliverToBoxAdapter(
-                      child: ConnectionStatusHeader(controller: controller),
-                    ),
                     SliverToBoxAdapter(
                       child: AnimatedContainer(
                         height: ChatListBodyViewStyle.heightIsTorBrowser(

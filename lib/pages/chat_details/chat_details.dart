@@ -1,4 +1,5 @@
 import 'package:fluffychat/domain/model/room/room_extension.dart';
+import 'package:fluffychat/presentation/widget_keys/widget_keys.dart';
 import 'package:fluffychat/generated/l10n/app_localizations.dart';
 import 'package:fluffychat/pages/chat_details/chat_details_edit.dart';
 import 'package:fluffychat/pages/chat_details/chat_details_view.dart';
@@ -46,9 +47,9 @@ class ChatDetailsController extends State<ChatDetails>
         TickerProviderStateMixin,
         ChatDetailsTabMixin<ChatDetails>,
         TwakeContextMenuMixin {
-  final actionsMobileAndTabletKey = const Key('ActionsMobileAndTabletKey');
+  final actionsMobileAndTabletKey = ChatKeys.actionsMobileAndTablet.key;
 
-  final actionsWebAndDesktopKey = const Key('ActionsWebAndDesktopKey');
+  final actionsWebAndDesktopKey = ChatKeys.actionsWebAndDesktop.key;
 
   final muteNotifier = ValueNotifier<PushRuleState>(PushRuleState.notify);
 

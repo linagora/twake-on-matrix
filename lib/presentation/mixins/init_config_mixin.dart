@@ -6,6 +6,9 @@ import 'package:matrix/matrix.dart';
 
 mixin InitConfigMixin {
   Future<void> initConfigWeb() async {
+    // Config already loaded (e.g. by web_test_main for integration tests).
+    // Don't overwrite it with config.json.
+    if (AppConfig.initConfigCompleter.isCompleted) return;
     try {
       final configJsonString = utf8.decode(
         (await http.get(Uri.parse('config.json'))).bodyBytes,
@@ -13,7 +16,9 @@ mixin InitConfigMixin {
       final configJson = json.decode(configJsonString);
       AppConfig.loadFromJson(configJson);
       Logs().d('[ConfigLoader] $configJson');
-      AppConfig.initConfigCompleter.complete(true);
+      if (!AppConfig.initConfigCompleter.isCompleted) {
+        AppConfig.initConfigCompleter.complete(true);
+      }
     } on FormatException catch (_) {
       _retryInitConfigWeb();
       Logs().v('[ConfigLoader] config.json not found');
@@ -28,7 +33,9 @@ mixin InitConfigMixin {
       AppConfig.retryCompleterCount++;
       initConfigWeb();
     } else {
-      AppConfig.initConfigCompleter.complete(false);
+      if (!AppConfig.initConfigCompleter.isCompleted) {
+        AppConfig.initConfigCompleter.complete(false);
+      }
     }
   }
 

@@ -118,9 +118,10 @@ class ProfileInfoBodyController extends State<ProfileInfoBody>
       );
     } else {
       if (PlatformInfos.isMobile) {
-        Navigator.of(
-          context,
-        ).popUntil((route) => route.settings.name == "/rooms/room");
+        Navigator.of(context).popUntil(
+          (route) =>
+              route.settings.name?.startsWith(RoomRoute.pathPrefix) ?? false,
+        );
       } else {
         if (widget.onNewChatOpen != null) widget.onNewChatOpen!();
       }
@@ -278,7 +279,7 @@ class ProfileInfoBodyController extends State<ProfileInfoBody>
           .execute(
             room: room,
             userPermissionLevels: {
-              user!: room.ownUser.powerLevel,
+              user!: room.ownUser.powerLevel.level,
               room.ownUser: room.getUserDefaultLevel(),
             },
           )

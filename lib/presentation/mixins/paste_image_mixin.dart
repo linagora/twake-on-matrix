@@ -13,6 +13,7 @@ mixin PasteImageMixin {
     BuildContext context,
     Room room, {
     ClipboardReader? clipboardReader,
+    String? pendingText,
     VoidCallback? onSendFileCallback,
     Event? inReplyTo,
   }) async {
@@ -40,6 +41,7 @@ mixin PasteImageMixin {
         return SendFileDialog(
           room: room,
           files: matrixFiles!.nonNulls.toList(),
+          pendingText: pendingText,
           inReplyTo: inReplyTo,
         );
       },

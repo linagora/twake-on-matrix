@@ -1,4 +1,5 @@
 import 'package:fluffychat/di/global/get_it_initializer.dart';
+import 'package:fluffychat/presentation/widget_keys/widget_keys.dart';
 import 'package:fluffychat/pages/settings_dashboard/settings/settings_item_builder.dart';
 import 'package:fluffychat/pages/settings_dashboard/settings/settings_view_style.dart';
 import 'package:fluffychat/presentation/enum/settings/settings_enum.dart';
@@ -43,7 +44,7 @@ class SettingsView extends StatelessWidget {
         // ignore: deprecated_member_use
         iconColor: colorScheme.onBackground,
         child: ListView(
-          key: const Key('SettingsListViewContent'),
+          key: SettingsKeys.listViewContent.key,
           children: <Widget>[
             Padding(
               padding: SettingsViewStyle.bodySettingsScreenPadding,

@@ -1,7 +1,7 @@
 name: fluffychat
 description: A convenient Matrix-based tool for personal and corporate communication.
 publish_to: none
-version: 2.21.17+2330
+version: 2.22.4+2330
 
 environment:
   sdk: ">=3.10.0 <4.0.0"
@@ -9,7 +9,7 @@ environment:
 dependencies:
   sentry_flutter: ^9.10.0
   ### Dependencies from git ###
-  matrix: ^6.0.0
+  matrix: ^7.1.2
 
   receive_sharing_intent:
     git:
@@ -20,7 +20,7 @@ dependencies:
 
   linagora_design_flutter:
     git:
-      url: git@github.com:linagora/linagora-design-flutter.git
+      url: https://github.com/linagora/linagora-design-flutter.git
       ref: master
   flutter_matrix_html:
     git:
@@ -39,27 +39,31 @@ dependencies:
   # https://github.com/rvamsikrishna/inview_notifier_list/pull/60
   inview_notifier_list:
     git:
-      url: git@github.com:linagora/inview_notifier_list.git
+      # HTTPS so CI runners work without an SSH key (public repo)
+      url: https://github.com/linagora/inview_notifier_list.git
       ref: master
 
   future_loading_dialog:
     git:
-      url: git@github.com:linagora/future-loading-dialog.git
+      # HTTPS so CI runners work without an SSH key (public repo)
+      url: https://github.com/linagora/future-loading-dialog.git
       ref: main
 
   linkfy_text:
     git:
-      url: git@github.com:linagora/linkfy_text.git
+      # HTTPS so CI runners work without an SSH key (public repo)
+      url: https://github.com/linagora/linkfy_text.git
       ref: main
 
   flutter_emoji_mart:
     git:
-      url: git@github.com:linagora/emoji_mart.git
+      url: https://github.com/linagora/emoji_mart.git
       ref: master
 
   social_media_recorder:
     git:
-      url: git@github.com:linagora/social_media_recorder.git
+      # HTTPS so CI runners work without an SSH key (public repo)
+      url: https://github.com/linagora/social_media_recorder.git
       ref: twake_supported
 
   adaptive_dialog: ^1.8.0+1
@@ -122,6 +126,10 @@ dependencies:
   http: ^0.13.4
   image: ^4.0.15
   image_picker: ^1.2.0
+  # Direct deps so we can opt into the Android Photo Picker (useAndroidPhotoPicker)
+  # in main.dart; both are already pulled in transitively by image_picker.
+  image_picker_android: ^0.8.13
+  image_picker_platform_interface: ^2.11.0
   intl: any
   just_audio: 0.10.5
   opus_caf_converter_dart: ^1.0.1
@@ -177,7 +185,7 @@ dependencies:
   lottie: ^3.0.0
   lottie_native: 0.1.2
   wechat_camera_picker: 4.4.0
-  open_file: ^3.3.2
+  open_file: ^3.5.11
   mime: ^1.0.4
   async: ^2.11.0
   flutter_image_compress: ^2.4.0
@@ -194,6 +202,8 @@ dependencies:
   super_clipboard: 0.9.1
   crypto: ^3.0.3
   flutter_contacts: ^2.0.0-beta.2
+  phone_numbers_parser: ^9.0.21
+  sim_country_code_plus: ^0.1.4
   flutter_localized_locales: ^2.0.5
   after_layout: ^1.2.0
   photo_manager_image_provider: ^2.1.0
@@ -208,7 +218,7 @@ dependencies:
   pull_down_button: 0.10.2
   pretty_qr_code: 3.3.0
   byte_converter: 2.0.0
-  flutter_vodozemac: ^0.4.0
+  flutter_vodozemac: ^0.5.0
   html_unescape: 2.0.0
   sqflite_common_ffi: ^2.3.6
   # https://github.com/tekartik/sqflite/blob/master/sqflite_common_ffi/doc/using_ffi_instead_of_sqflite.md#setup
@@ -233,10 +243,10 @@ dev_dependencies:
   msix: ^3.6.2
   translations_cleaner: ^0.0.5
   mockito: 5.6.3
-  patrol: 3.18.0
+  patrol: ^4.5.0
   html: ^0.15.4
   go_router_builder: ^4.2.0
-  patrol_cli: ^3.11.0
+  patrol_cli: ^4.3.1
 
 flutter_launcher_icons:
   android: false
@@ -306,8 +316,14 @@ dependency_overrides:
   # Upstream pull request: https://github.com/AntoineMarcel/keyboard_shortcuts/pull/13
   keyboard_shortcuts:
     git:
-      url: git@github.com:zhouzhuo810/keyboard_shortcuts.git
+      # HTTPS so CI runners work without an SSH key (public repo)
+      url: https://github.com/zhouzhuo810/keyboard_shortcuts.git
       ref: master
+  # Force HTTPS for transitive deps pulled via SSH by flutter_matrix_html
+  linkfy_text:
+    git:
+      url: https://github.com/linagora/linkfy_text.git
+      ref: main
   # TODO: Remove this part after upstream contribution is merged
   # https://github.com/Sorunome/matrix_link_text/pull/4
   # https://github.com/Sorunome/matrix_link_text/pull/5
@@ -339,6 +355,7 @@ cider:
 
 patrol:
   app_name: Twake Chat
+  test_directory: integration_test
   android:
     package_name: app.twake.android.chat
   ios:

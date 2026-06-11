@@ -1,6 +1,9 @@
+import 'package:fluffychat/domain/model/extensions/homeserver_summary_extensions.dart';
 import 'package:fluffychat/pages/chat/events/message/message_content_builder_mixin.dart';
 import 'package:fluffychat/pages/chat/events/message/message_style.dart';
 import 'package:fluffychat/pages/chat/events/message_time.dart';
+import 'package:fluffychat/utils/voip/video_call_helper.dart';
+import 'package:fluffychat/widgets/matrix.dart';
 import 'package:fluffychat/pages/chat/optional_padding.dart';
 import 'package:fluffychat/pages/chat/optional_selection_container_disabled.dart';
 import 'package:fluffychat/pages/chat/optional_stack.dart';
@@ -55,11 +58,15 @@ class MessageContentBuilder extends StatelessWidget
             Message.responsiveUtils.isMobile(context),
           ),
           isEdited: event.hasAggregatedEvents(timeline, RelationshipTypes.edit),
+          timeline: timeline,
         );
         final stepWidth = sizeMessageBubble?.totalMessageWidth;
         final isNeedAddNewLine = sizeMessageBubble?.isNeedAddNewLine ?? false;
         final isTextMessageError =
             event.status.isError && event.messageType == MessageTypes.Text;
+        final videoCallBaseUrl = Matrix.of(
+          context,
+        ).loginHomeserverSummary?.videoCallBaseUrl;
 
         return OptionalPadding(
           padding: const EdgeInsets.only(bottom: 8),
@@ -68,7 +75,8 @@ class MessageContentBuilder extends StatelessWidget
             stepWidth:
                 isContainsTagName(event) ||
                     isContainsSpecialHTMLTag(event) ||
-                    event.isCaptionModeOrReply()
+                    event.isCaptionModeOrReply() ||
+                    VideoCallHelper.extractUrl(event, videoCallBaseUrl) != null
                 ? null
                 : stepWidth,
             child: Column(

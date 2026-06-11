@@ -12,11 +12,7 @@ void main() {
     });
 
     tearDown(() {
-      // Clear the cache after each test
-      // We can't directly access the private _imageCache, so we'll add a large number of items to force eviction
-      for (int i = 0; i < 100; i++) {
-        manager.cacheImage('clear_$i', Uint8List(1));
-      }
+      manager.clear();
     });
 
     test('singleton instance', () {
@@ -121,6 +117,22 @@ void main() {
       }
     });
 
+    test(
+      'overwriting existing key at capacity does not evict other entries',
+      () {
+        for (int i = 0; i < 100; i++) {
+          manager.cacheImage('id_$i', Uint8List.fromList([i]));
+        }
+
+        manager.cacheImage('id_50', Uint8List.fromList([99, 99]));
+
+        for (int i = 0; i < 100; i++) {
+          expect(manager.getImage('id_$i'), isNotNull, reason: 'id_$i evicted');
+        }
+        expect(manager.getImage('id_50'), equals(Uint8List.fromList([99, 99])));
+      },
+    );
+
     test('cacheImage with empty eventId', () {
       final imageData = Uint8List.fromList([1, 2, 3, 4, 5]);
 
@@ -150,6 +162,43 @@ void main() {
 
       final cachedImage = manager.getImage(eventId);
       expect(cachedImage, equals(imageData3));
+    });
+
+    test('evictRoom removes only room-scoped entries', () {
+      final avatar = Uint8List.fromList([1, 2]);
+      final img1 = Uint8List.fromList([3, 4]);
+      final img2 = Uint8List.fromList([5, 6]);
+      final img3 = Uint8List.fromList([7, 8]);
+
+      manager.cacheImage('mxc://server/avatar', avatar);
+      manager.cacheImage(
+        MxcImageCacheManager.roomScopedKey('!roomA', 'ev1'),
+        img1,
+      );
+      manager.cacheImage(
+        MxcImageCacheManager.roomScopedKey('!roomA', 'ev2'),
+        img2,
+      );
+      manager.cacheImage(
+        MxcImageCacheManager.roomScopedKey('!roomB', 'ev3'),
+        img3,
+      );
+
+      manager.evictRoom('!roomA');
+
+      expect(manager.getImage('mxc://server/avatar'), equals(avatar));
+      expect(
+        manager.getImage(MxcImageCacheManager.roomScopedKey('!roomA', 'ev1')),
+        isNull,
+      );
+      expect(
+        manager.getImage(MxcImageCacheManager.roomScopedKey('!roomA', 'ev2')),
+        isNull,
+      );
+      expect(
+        manager.getImage(MxcImageCacheManager.roomScopedKey('!roomB', 'ev3')),
+        equals(img3),
+      );
     });
   });
 }

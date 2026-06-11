@@ -1,6 +1,7 @@
 import 'package:fluffychat/presentation/extensions/text_editting_controller_extension.dart';
 import 'package:fluffychat/presentation/mixins/paste_image_mixin.dart';
 import 'package:fluffychat/utils/clipboard.dart';
+import 'package:fluffychat/utils/room_draft_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:matrix/matrix.dart';
 import 'package:super_clipboard/super_clipboard.dart';
@@ -13,6 +14,8 @@ mixin HandleClipboardActionMixin on PasteImageMixin {
   Room? get room;
 
   TextEditingController get sendController;
+
+  final RoomDraftStorage _draftStorage = const RoomDraftStorage();
 
   void registerPasteShortcutListeners() {
     ClipboardEvents.instance?.registerPasteEventListener(_onPasteEvent);
@@ -37,11 +40,17 @@ mixin HandleClipboardActionMixin on PasteImageMixin {
   void onSendFileCallback();
 
   Future<void> pasteClipboardImage(ClipboardReader? clipboardReader) async {
+    final pendingText = sendController.text;
     return pasteImage(
       context,
       room!,
       clipboardReader: clipboardReader,
-      onSendFileCallback: onSendFileCallback,
+      pendingText: pendingText,
+      onSendFileCallback: () async {
+        sendController.clear();
+        await _draftStorage.remove(room!.id);
+        onSendFileCallback();
+      },
     );
   }
 

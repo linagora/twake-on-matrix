@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/config/themes.dart';
-import 'package:fluffychat/domain/matrix_events/event_visibility_resolver.dart';
 import 'package:fluffychat/domain/model/room/room_preview_result.dart';
 import 'package:fluffychat/generated/l10n/app_localizations.dart';
 import 'package:fluffychat/pages/chat/events/message_time_style.dart';
@@ -27,13 +26,6 @@ class ChatListItemSubtitle extends StatelessWidget with ChatListItemMixin {
     this.previewResult,
   });
 
-  static Event? _syncPreview(Event? candidate) {
-    if (candidate == null) return null;
-    return EventVisibilityResolver.isEligibleForChatListPreviewSync(candidate)
-        ? candidate
-        : null;
-  }
-
   @override
   Widget build(BuildContext context) {
     final L10n l10n = L10n.of(context)!;
@@ -44,12 +36,10 @@ class ChatListItemSubtitle extends StatelessWidget with ChatListItemMixin {
       room.hasNewMessages,
       room.notificationCount > 0,
     );
-    final Event? lastEvent =
-        _syncPreview(room.lastEvent) ??
-        switch (previewResult) {
-          RoomPreviewFound(:final event) => event,
-          _ => null,
-        };
+    final Event? lastEvent = switch (previewResult) {
+      RoomPreviewFound(:final event) => event,
+      _ => null,
+    };
     final bool isMediaEvent =
         lastEvent?.messageType == MessageTypes.Image ||
         lastEvent?.messageType == MessageTypes.Video;

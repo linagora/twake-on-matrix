@@ -32,14 +32,6 @@ class ChatListView extends StatelessWidget {
     required this.onTapBottomNavigation,
   });
 
-  static const ValueKey bottomNavigationKey = ValueKey('BottomNavigation');
-
-  static const ValueKey primaryNavigationKey = ValueKey(
-    'AdaptiveScaffoldPrimaryNavigation',
-  );
-
-  static const ValueKey contacts = ValueKey('Contacts');
-
   @override
   Widget build(BuildContext context) {
     return ValueListenableBuilder(

@@ -1,31 +1,47 @@
 import 'package:fluffychat/data/datasource/contact/contacts_provider.dart';
+import 'package:fluffychat/data/datasource/contact/sim_country/sim_country_provider.dart';
+import 'package:fluffychat/data/datasource/contact/phonebook_datasource.dart';
 import 'package:fluffychat/domain/model/contact/contact.dart';
+import 'package:fluffychat/utils/phone_number_normalizer.dart'
+    show tryNormalizePhoneNumberToE164;
 import 'package:fluffychat/utils/string_extension.dart';
 import 'package:flutter_contacts/flutter_contacts.dart' as flutter_contact;
-import 'package:fluffychat/data/datasource/contact/phonebook_datasource.dart';
 
 class PhonebookContactDatasourceImpl implements PhonebookContactDatasource {
   final ContactsProvider _contactsProvider;
+  final SimCountryProvider _simCountryProvider;
 
-  PhonebookContactDatasourceImpl(this._contactsProvider);
+  PhonebookContactDatasourceImpl(
+    this._contactsProvider,
+    this._simCountryProvider,
+  );
 
   @override
   Future<List<Contact>> fetchContacts() async {
-    final phonebookContacts = await _contactsProvider.getAll(
-      properties: flutter_contact.ContactProperties.all,
-    );
+    final (phonebookContacts, callerIsoCode) = await (
+      _contactsProvider.getAll(
+        properties: flutter_contact.ContactProperties.all,
+      ),
+      _simCountryProvider.getCountryCode(),
+    ).wait;
 
-    final contacts = mappingToContact(phonebookContacts);
+    final contacts = mappingToContact(
+      phonebookContacts,
+      callerIsoCode: callerIsoCode,
+    );
     return _sortContactsByDisplayName(contacts);
   }
 
   List<Contact> mappingToContact(
-    List<flutter_contact.Contact> phoneBookContacts,
-  ) {
+    List<flutter_contact.Contact> phoneBookContacts, {
+    String? callerIsoCode,
+  }) {
     final listAllContacts = phoneBookContacts.map((contact) {
       final phoneNumbers = contact.phones
-          .map((phone) => PhoneNumber(number: phone.number))
+          .map((phone) => _toPhoneNumber(phone.number, callerIsoCode))
+          .whereType<PhoneNumber>()
           .toList();
+
       final emails = contact.emails
           .map((email) => Email(address: email.address))
           .toList();
@@ -44,6 +60,12 @@ class PhonebookContactDatasourceImpl implements PhonebookContactDatasource {
     }).toList();
 
     return listFilteredContacts;
+  }
+
+  PhoneNumber? _toPhoneNumber(String rawNumber, String? callerIsoCode) {
+    final normalized = tryNormalizePhoneNumberToE164(rawNumber, callerIsoCode);
+    if (normalized == null) return null;
+    return PhoneNumber(number: normalized);
   }
 
   List<Contact> _sortContactsByDisplayName(List<Contact> contacts) {

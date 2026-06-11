@@ -23,7 +23,7 @@ extension TextEdittingControllerExtension on TextEditingController {
       } else {
         text = text.replaceRange(start, end, pastedText);
       }
-      selection = TextSelection.collapsed(offset: end + pastedText.length);
+      selection = TextSelection.collapsed(offset: start + pastedText.length);
     }
   }
 

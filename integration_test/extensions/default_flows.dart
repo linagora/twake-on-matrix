@@ -2,6 +2,7 @@ import 'dart:developer';
 
 import 'package:fluffychat/pages/chat_list/chat_list_body_view.dart';
 import 'package:fluffychat/pages/homeserver_picker/homeserver_picker.dart';
+import 'package:fluffychat/presentation/widget_keys/widget_keys.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -33,16 +34,6 @@ extension DefaultFlowExtensions on WidgetTester {
     // in case registration is allowed
     // try {
     await Future.delayed(const Duration(milliseconds: 50));
-
-    await tester.scrollUntilVisible(
-      find.text('Login'),
-      500,
-      scrollable: find.descendant(
-        of: find.byKey(const Key('ConnectPageListView')),
-        matching: find.byType(Scrollable).first,
-      ),
-    );
-    await tester.pumpAndSettle();
 
     await tester.tap(find.text('Login'));
     await tester.pumpAndSettle();
@@ -114,7 +105,7 @@ extension DefaultFlowExtensions on WidgetTester {
         find.text('Account'),
         500,
         scrollable: find.descendant(
-          of: find.byKey(const Key('SettingsListViewContent')),
+          of: find.byKey(SettingsKeys.listViewContent.key),
           matching: find.byType(Scrollable),
         ),
       );

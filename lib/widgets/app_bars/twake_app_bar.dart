@@ -16,6 +16,7 @@ class TwakeAppBar extends StatelessWidget implements PreferredSizeWidget {
   final double? leadingWidth;
   final bool enableLeftTitle;
   final bool isDialog;
+  final Widget? connectionStatusHeaderWidget;
 
   const TwakeAppBar({
     super.key,
@@ -29,6 +30,7 @@ class TwakeAppBar extends StatelessWidget implements PreferredSizeWidget {
     this.leadingWidth,
     this.enableLeftTitle = false,
     this.isDialog = false,
+    this.connectionStatusHeaderWidget,
   });
 
   @override
@@ -57,6 +59,8 @@ class TwakeAppBar extends StatelessWidget implements PreferredSizeWidget {
                     ),
                   ),
                 ),
+                if (connectionStatusHeaderWidget != null)
+                  connectionStatusHeaderWidget!,
               ],
             )
           : Row(
@@ -65,12 +69,19 @@ class TwakeAppBar extends StatelessWidget implements PreferredSizeWidget {
                   padding: enableLeftTitle
                       ? EdgeInsets.zero
                       : const EdgeInsets.only(left: 16),
-                  child: Text(
-                    title,
-                    style: TwakeAppBarStyle.titleTextStyle(
-                      context,
-                      isDialog: isDialog,
-                    ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        title,
+                        style: TwakeAppBarStyle.titleTextStyle(
+                          context,
+                          isDialog: isDialog,
+                        ),
+                      ),
+                      if (connectionStatusHeaderWidget != null)
+                        connectionStatusHeaderWidget!,
+                    ],
                   ),
                 ),
               ],

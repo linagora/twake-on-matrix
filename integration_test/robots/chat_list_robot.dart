@@ -7,11 +7,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:linagora_design_flutter/list_item/twake_list_item.dart';
 import 'package:patrol/patrol.dart';
+import 'abstract/abstract_chat_list_robot.dart';
 import 'chat_group_detail_robot.dart';
 import 'home_robot.dart';
 import 'twake_list_item_robot.dart';
 
-class ChatListRobot extends HomeRobot {
+class ChatListRobot extends HomeRobot implements AbstractChatListRobot {
   ChatListRobot(super.$);
 
   PatrolFinder showLessLabel() {
@@ -34,28 +35,36 @@ class ChatListRobot extends HomeRobot {
     return $(ChatListBottomNavigator).$(InkWell).containing($("Unpin"));
   }
 
+  @override
   Future<void> clickOnPenIcon() async {
     await getPenIcon().tap();
     await cancelSynchronizeContact();
     await $.waitUntilVisible($(AppBar).$("New chat"));
   }
 
+  @override
   Future<void> clickOnPinIcon() async {
     await getPinIcon().tap();
     await ChatListRobot($).waitUntilAbsent($, ChatListRobot($).getPinIcon());
   }
 
+  @override
   Future<void> clickOnUnPinIcon() async {
     await getUnPinIcon().tap();
     await ChatListRobot($).waitUntilAbsent($, ChatListRobot($).getUnPinIcon());
   }
 
+  @override
   Future<ChatGroupDetailRobot> openChatGroupByIndex(int index) async {
+    // Search/list population is async; wait for at least one row before
+    // indexing to avoid a RangeError or opening the wrong chat in web/headless.
+    await $.waitUntilVisible($(TwakeListItem));
     await (await getListOfChatGroup())[index].root.tap();
     await $.pumpAndSettle();
     return ChatGroupDetailRobot($);
   }
 
+  @override
   Future<List<TwakeListItemRobot>> getListOfChatGroup() async {
     final List<TwakeListItemRobot> groupList = [];
 
@@ -75,10 +84,12 @@ class ChatListRobot extends HomeRobot {
     return TwakeListItemRobot($, finder);
   }
 
+  @override
   int getUnreadMessage(String title) {
     return getChatGroupByTitle(title).getUnreadMessage();
   }
 
+  @override
   Future<void> openSearchScreen() async {
     // Tap on the search TextField in the chat list to open search screen
     await $(TextField).tap();
@@ -101,8 +112,50 @@ class ChatListRobot extends HomeRobot {
     await $.waitUntilVisible($(SearchView));
   }
 
+  @override
   Future<int> getChatRoomCounts() async {
     final listChat = await getListOfChatGroup();
     return listChat.length;
+  }
+
+  @override
+  Future<bool> isListScrollable() async {
+    // No `root` filter: the chat list's scroll container differs by platform
+    // (mobile `SingleChildScrollView`, web a different scrollable), so just
+    // assert a scrollable exists on the list screen.
+    return isActuallyScrollable($);
+  }
+
+  bool _isPinned(TwakeListItemRobot item) => item.getPinIcon().visible;
+
+  @override
+  Future<void> pinChat(String title) async {
+    final item = getChatGroupByTitle(title);
+    await scrollUntilVisible($, item.root);
+    if (!_isPinned(item)) {
+      await $.tester.ensureVisible(item.root);
+      await item.root.longPress();
+      await $.waitUntilVisible(item.getCheckBox());
+      await clickOnPinIcon();
+    }
+  }
+
+  @override
+  Future<void> unpinChat(String title) async {
+    final item = getChatGroupByTitle(title);
+    await scrollUntilVisible($, item.root);
+    if (_isPinned(item)) {
+      await $.tester.ensureVisible(item.root);
+      await item.root.longPress();
+      await $.waitUntilVisible(item.getCheckBox());
+      await clickOnUnPinIcon();
+    }
+  }
+
+  @override
+  Future<bool> isChatPinned(String title) async {
+    final item = getChatGroupByTitle(title);
+    await scrollUntilVisible($, item.root);
+    return _isPinned(item);
   }
 }

@@ -6,6 +6,8 @@ import 'package:fluffychat/data/datasource/contact/address_book_datasource.dart'
 import 'package:fluffychat/data/datasource/contact/hive_third_party_contact_datasource.dart';
 import 'package:fluffychat/data/datasource/contact/contacts_provider.dart';
 import 'package:fluffychat/data/datasource/contact/phonebook_datasource.dart';
+import 'package:fluffychat/data/datasource/contact/sim_country/sim_country_provider.dart';
+import 'package:fluffychat/data/datasource/contact/sim_country/sim_country_provider_impl.dart';
 import 'package:fluffychat/data/datasource/federation_configurations_datasource.dart';
 import 'package:fluffychat/data/datasource/invitation/hive_invitation_status_datasource.dart';
 import 'package:fluffychat/data/datasource/invitation/invitation_datasource.dart';
@@ -290,8 +292,14 @@ class GetItInitializer {
     getIt.registerFactory<ContactsProvider>(
       () => FlutterContactsProviderImpl(),
     );
+    getIt.registerLazySingleton<SimCountryProvider>(
+      () => SimCountryProviderImpl(),
+    );
     getIt.registerFactory<PhonebookContactDatasource>(
-      () => PhonebookContactDatasourceImpl(getIt.get<ContactsProvider>()),
+      () => PhonebookContactDatasourceImpl(
+        getIt.get<ContactsProvider>(),
+        getIt.get<SimCountryProvider>(),
+      ),
     );
     getIt.registerLazySingleton(
       () => MediaDataSourceImpl(getIt.get<MediaAPI>()),

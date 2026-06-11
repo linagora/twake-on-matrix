@@ -55,19 +55,24 @@ class AutoHomeserverPickerController extends State<AutoHomeserverPicker>
       final ssoSupported = matrix.loginHomeserverSummary.supportSSOLogin;
 
       try {
-        await client.register().timeout(
-          autoHomeserverPickerTimeout,
-          onTimeout: () {
-            throw CheckHomeserverTimeoutException();
-          },
-        );
+        await client
+            .register(inhibitLogin: true)
+            .timeout(
+              autoHomeserverPickerTimeout,
+              onTimeout: () {
+                throw CheckHomeserverTimeoutException();
+              },
+            );
         matrix.loginRegistrationSupported = true;
       } on MatrixException catch (e) {
         matrix.loginRegistrationSupported = e.requireAdditionalAuthentication;
+      } catch (e) {
+        Logs().w('Registration check failed', e);
+        matrix.loginRegistrationSupported = false;
       }
 
-      if (!ssoSupported && matrix.loginRegistrationSupported == false) {
-        // Server does not support SSO or registration. We can skip to login page:
+      if (!ssoSupported) {
+        // No SSO: go straight to password login page
         const HomeLoginRoute().push(context);
       } else if (ssoSupported && matrix.loginRegistrationSupported == false) {
         Map<String, dynamic>? rawLoginTypes;
@@ -159,6 +164,14 @@ class AutoHomeserverPickerController extends State<AutoHomeserverPicker>
   }
 
   Future<void> _setupAutoHomeserverPicker() async {
+    // Integration tests set PATROL_WEB=true so the UI stays idle and
+    // the suite drives authentication directly on the Matrix client.
+    // Otherwise the auto-connect would race against the test's own
+    // `checkHomeserver()` call (and potentially redirect the tab to
+    // the production SSO provider).
+    if (const bool.fromEnvironment('PATROL_WEB')) {
+      return;
+    }
     autoHomeserverPickerUIState.value = AutoHomeServerPickerLoadingState();
     if (widget.loggedOut == null) {
       final isConfigured = await AppConfig.initConfigCompleter.future;
