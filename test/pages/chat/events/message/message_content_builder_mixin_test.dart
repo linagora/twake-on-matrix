@@ -256,7 +256,10 @@ Future<void> main() async {
             content: {
               "msgtype": "m.text",
               "body":
-                  "prefix line one\nprefix line two\nsioaldhgowehg wegh welg abcdefghij klmn",
+                  "#2730 Fallback value for Always read receipt settings is false -> Done\n\n#2628 Disable view PDF file in mobile -> Done\n\n#2726 Remove logo in printed email -> Done\n\n#2737 View PDF in js to support download with filename -> Done",
+              "format": "org.matrix.custom.html",
+              "formatted_body":
+                  "<p>#2730 Fallback value for Always read receipt settings is false -&gt; Done</p><br/><p>#2628 Disable view PDF file in mobile -&gt; Done</p><br/><p>#2726 Remove logo in printed email -&gt; Done</p><br/><p>#2737 View PDF in js to support download with filename -&gt; Done</p>",
             },
             type: 'm.room.message',
             eventId: '\$143273582443PhrSn:example.org',
@@ -358,7 +361,10 @@ Future<void> main() async {
             content: {
               "msgtype": "m.text",
               "body":
-                  "prefix line one\nprefix line two\nsioaldhgowehg wegh welg abcdefghij klmn",
+                  "#2730 Fallback value for Always read receipt settings is false -> Done\n\n#2628 Disable view PDF file in mobile -> Done\n\n#2726 Remove logo in printed email -> Done\n\n#2737 View PDF in js to support download with filename -> Done",
+              "format": "org.matrix.custom.html",
+              "formatted_body":
+                  "<p>#2730 Fallback value for Always read receipt settings is false -&gt; Done</p><br/><p>#2628 Disable view PDF file in mobile -&gt; Done</p><br/><p>#2726 Remove logo in printed email -&gt; Done</p><br/><p>#2737 View PDF in js to support download with filename -&gt; Done</p>",
             },
             type: 'm.room.message',
             eventId: '\$143273582443PhrSn:example.org',
@@ -466,7 +472,10 @@ Future<void> main() async {
             content: {
               "msgtype": "m.text",
               "body":
-                  "prefix line one\nprefix line two\nsioaldhgowehg wegh welg abcdefghij",
+                  "- Copy/Drop text from LibreOffice files to composer\n- Download PDF file from Chrome viewer\n- Download attachment for mobile\n- Small improvements for Printing emails",
+              "format": "org.matrix.custom.html",
+              "formatted_body":
+                  "- Copy/Drop text from LibreOffice files to composer<br/>- Download PDF file from Chrome viewer<br/>- Download attachment for mobile<br/>- Small improvements for Printing emails",
             },
             type: 'm.room.message',
             eventId: '\$143273582443PhrSn:example.org',
@@ -566,7 +575,10 @@ Future<void> main() async {
             content: {
               "msgtype": "m.text",
               "body":
-                  "prefix line one\nprefix line two\nsioaldhgowehg wegh welg abcdefghij",
+                  "- Copy/Drop text from LibreOffice files to composer\n- Download PDF file from Chrome viewer\n- Download attachment for mobile\n- Small improvements for Printing emails",
+              "format": "org.matrix.custom.html",
+              "formatted_body":
+                  "- Copy/Drop text from LibreOffice files to composer<br/>- Download PDF file from Chrome viewer<br/>- Download attachment for mobile<br/>- Small improvements for Printing emails",
             },
             type: 'm.room.message',
             eventId: '\$143273582443PhrSn:example.org',
