@@ -22,6 +22,8 @@ analyzer:
     - integration_test/test_bundle.dart
     - lib/l10n/*.dart
     - "**.g.dart"
+    - 'docs/migration/snippets/**'
+    - 'docs/migration/snippets_generated/**'
 
 dart_code_metrics:
   metrics:
