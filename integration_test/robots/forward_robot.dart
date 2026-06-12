@@ -1,4 +1,6 @@
 import 'package:fluffychat/generated/l10n/app_localizations.dart';
+import 'package:fluffychat/pages/chat/chat_app_bar_title.dart';
+import 'package:fluffychat/pages/chat/chat_view.dart';
 import 'package:fluffychat/pages/chat_list/chat_list_item_title.dart';
 import 'package:fluffychat/pages/forward/forward_recent_chat_list.dart';
 import 'package:fluffychat/pages/forward/forward_view.dart';
@@ -8,9 +10,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:patrol/patrol.dart';
 import '../base/core_robot.dart';
+import 'abstract/abstract_forward_robot.dart';
 
 /// Robot for interacting with the Forward screen.
-class ForwardRobot extends CoreRobot {
+class ForwardRobot extends CoreRobot implements AbstractForwardRobot {
   ForwardRobot(super.$);
 
   L10n get _l10n {
@@ -54,6 +57,7 @@ class ForwardRobot extends CoreRobot {
   }
 
   /// Taps the row to toggle selection.
+  @override
   Future<void> selectChatByName(String roomName) async {
     await getChatItemByName(roomName).tap();
     await $.pump(const Duration(milliseconds: 300));
@@ -69,6 +73,7 @@ class ForwardRobot extends CoreRobot {
   PatrolFinder getWebForwardButton() => $(find.text(_l10n.add));
 
   /// Taps the send / forward button. Works on both mobile and web layout.
+  @override
   Future<void> tapSendButton() async {
     // On mobile the FAB only appears after at least one room is selected.
     // Wait for it explicitly before tapping to avoid Patrol's internal
@@ -96,6 +101,7 @@ class ForwardRobot extends CoreRobot {
   /// Opens the search bar (if needed) and types [query].
   ///
   /// After entering text we pump briefly so the filter debounce can run.
+  @override
   Future<void> searchRoom(String query) async {
     // Search icon has tooltip L10n.search – tap it to reveal the TextField.
     final searchIcon = $(
@@ -117,6 +123,7 @@ class ForwardRobot extends CoreRobot {
   }
 
   /// Clears the search field to restore the full room list.
+  @override
   Future<void> clearSearch() async {
     final closeIcon = $(
       SearchableAppBar,
@@ -134,6 +141,7 @@ class ForwardRobot extends CoreRobot {
   /// Uses the widget type rather than AppBar text so that it works even when
   /// the AppBar is not hit-testable (Patrol's visibility check ignores widgets
   /// whose render-box cannot receive pointer events).
+  @override
   Future<void> verifyForwardScreenVisible() async {
     // ForwardRecentChatList is always rendered inside ForwardView even when
     // the room list is empty – the ForwardView Scaffold is the safe anchor.
@@ -145,6 +153,7 @@ class ForwardRobot extends CoreRobot {
   }
 
   /// Waits until the row for [roomName] is visible in the list.
+  @override
   Future<void> verifyRoomInList(String roomName) async {
     await $.waitUntilVisible(
       getChatItemByName(roomName),
@@ -154,6 +163,7 @@ class ForwardRobot extends CoreRobot {
   }
 
   /// Asserts the checkbox for [roomName] is checked.
+  @override
   void verifyRoomSelected(String roomName) {
     expect(
       isChatSelected(roomName),
@@ -163,6 +173,7 @@ class ForwardRobot extends CoreRobot {
   }
 
   /// Asserts the checkbox for [roomName] is unchecked.
+  @override
   void verifyRoomNotSelected(String roomName) {
     expect(
       isChatSelected(roomName),
@@ -174,11 +185,42 @@ class ForwardRobot extends CoreRobot {
   /// Waits for and asserts the multi-forward success snackbar.
   ///
   /// [count] is the number of rooms successfully forwarded to.
+  @override
   Future<void> verifyMultiForwardSuccessSnackbar(int count) async {
     // Resolve the expected text via l10n so the assertion stays locale-aware.
     final expected = _l10n.forwardedToChats(count);
     final snackbar = $(find.textContaining(expected));
     await $.waitUntilVisible(snackbar, timeout: const Duration(seconds: 15));
     expect(snackbar.exists, isTrue, reason: 'Expected snackbar: "$expected"');
+  }
+
+  /// Waits until the receiver room [roomName] is opened (single-forward pops
+  /// the Forward screen then routes to the receiver's [ChatView]).
+  @override
+  Future<void> verifyOpenedRoom(String roomName) async {
+    await $.waitUntilVisible(
+      $(ChatView),
+      timeout: const Duration(seconds: 15),
+    );
+    expect(
+      $(ChatAppBarTitle).containing(find.textContaining(roomName)).exists,
+      isTrue,
+      reason: 'Expected to open "$roomName" room',
+    );
+  }
+
+  /// Waits for the source [ChatView] then asserts the Forward screen is gone
+  /// (multi-forward pops back to the source chat).
+  @override
+  Future<void> verifyForwardViewDismissed() async {
+    await $.waitUntilVisible(
+      $(ChatView),
+      timeout: const Duration(seconds: 15),
+    );
+    expect(
+      $(ForwardView).exists,
+      isFalse,
+      reason: 'ForwardView should be dismissed',
+    );
   }
 }
