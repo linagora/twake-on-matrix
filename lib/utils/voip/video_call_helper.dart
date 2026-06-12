@@ -114,7 +114,7 @@ class VideoCallHelper {
         // never sends `content_loaded`. Tell clients to rely on the
         // iframe load event instead (otherwise Element shows an
         // infinite loading spinner).
-        waitForIframeLoad: false,
+        waitForIframeLoad: true,
       ),
     );
     // Pin the widget to the top of the room for everyone, so Element
