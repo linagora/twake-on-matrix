@@ -1,3 +1,24 @@
+## [2.22.5] - 2026-06-11
+### Added
+- TW-3048: Visio link integration
+- TW-3112: Enable GIF autoplay feature
+- Native OS photo picker in chat (iOS PHPicker + Android Photo Picker)
+
+### Changed
+- TW-3078: Enhance iOS clipboard paste to support URLs
+
+### Fixed
+- Use RoomDraftStorage in _onMediaSent
+- Prefill caption with composer text when pasting an image
+- Remove SDK DM entries from Contacts page
+- Decode double-encoded HTML entities in code blocks
+
+### Tests
+- Integration test: migrate chat_list/search/sending tests to scenarioBuilder
+- Integration test: migrate contact_test to scenarioBuilder
+- Integration test: migrate language_test to scenarioBuilder + web auto-login
+- Integration test: scenarioBuilder API on TestBase
+
 ## [2.22.4] - 2026-06-03
 ### Added
 - TW-2634: Native browser right-click context menu on chat links (web)
