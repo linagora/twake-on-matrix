@@ -198,10 +198,7 @@ class ForwardRobot extends CoreRobot implements AbstractForwardRobot {
   /// the Forward screen then routes to the receiver's [ChatView]).
   @override
   Future<void> verifyOpenedRoom(String roomName) async {
-    await $.waitUntilVisible(
-      $(ChatView),
-      timeout: const Duration(seconds: 15),
-    );
+    await $.waitUntilVisible($(ChatView), timeout: const Duration(seconds: 15));
     expect(
       $(ChatAppBarTitle).containing(find.textContaining(roomName)).exists,
       isTrue,
@@ -213,10 +210,7 @@ class ForwardRobot extends CoreRobot implements AbstractForwardRobot {
   /// (multi-forward pops back to the source chat).
   @override
   Future<void> verifyForwardViewDismissed() async {
-    await $.waitUntilVisible(
-      $(ChatView),
-      timeout: const Duration(seconds: 15),
-    );
+    await $.waitUntilVisible($(ChatView), timeout: const Duration(seconds: 15));
     expect(
       $(ForwardView).exists,
       isFalse,

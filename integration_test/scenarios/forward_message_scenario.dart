@@ -7,14 +7,16 @@ const _sourceRoom = String.fromEnvironment(
   defaultValue: 'My Default Group',
 );
 
+// Non-overlapping names: a textContaining finder on "Receiver Group" would also
+// match "Receiver Group 2", so neither name is a prefix of the other.
 const _receiver1 = String.fromEnvironment(
   'ForwardReceiver1Name',
-  defaultValue: 'Receiver Group',
+  defaultValue: 'Receiver Alpha',
 );
 
 const _receiver2 = String.fromEnvironment(
   'ForwardReceiver2Name',
-  defaultValue: 'Receiver Group 2',
+  defaultValue: 'Receiver Beta',
 );
 
 int _uid() => DateTime.now().microsecondsSinceEpoch;
