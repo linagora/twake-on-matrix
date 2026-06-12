@@ -48,7 +48,10 @@ class ChatGroupDetailRobot extends CoreRobot
 
   @override
   String? getTitle() {
-    return $(ChatAppBarTitle).$(Text).at(0).text;
+    // The avatar renders the room's fallback initial as the first `Text` in
+    // `ChatAppBarTitle`; scope to the `Expanded` title column so we read the
+    // room name and not the avatar letter.
+    return $(ChatAppBarTitle).$(Expanded).$(Text).at(0).text;
   }
 
   @override

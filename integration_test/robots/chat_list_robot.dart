@@ -1,3 +1,5 @@
+import 'package:fluffychat/pages/chat/chat_view.dart';
+import 'package:fluffychat/pages/chat_draft/draft_chat_view.dart';
 import 'package:fluffychat/pages/chat_list/chat_list_bottom_navigator.dart';
 import 'package:fluffychat/pages/chat_list/chat_list_item_title.dart';
 import 'package:fluffychat/pages/search/search_view.dart';
@@ -8,8 +10,11 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:linagora_design_flutter/list_item/twake_list_item.dart';
 import 'package:patrol/patrol.dart';
 import 'abstract/abstract_chat_list_robot.dart';
+import 'add_member_robot.dart';
 import 'chat_group_detail_robot.dart';
 import 'home_robot.dart';
+import 'new_chat_robot.dart';
+import 'setting_for_new_group.dart';
 import 'twake_list_item_robot.dart';
 
 class ChatListRobot extends HomeRobot implements AbstractChatListRobot {
@@ -39,7 +44,10 @@ class ChatListRobot extends HomeRobot implements AbstractChatListRobot {
   Future<void> clickOnPenIcon() async {
     await getPenIcon().tap();
     await cancelSynchronizeContact();
-    await $.waitUntilVisible($(AppBar).$("New chat"));
+    // The new-chat screen's AppBar title ("New chat") is mobile-only — on web's
+    // wide layout it is not rendered. Wait instead for the "New Group Chat"
+    // entry, which is present on both platforms.
+    await $.waitUntilVisible($("New Group Chat"));
   }
 
   @override
@@ -157,5 +165,34 @@ class ChatListRobot extends HomeRobot implements AbstractChatListRobot {
     final item = getChatGroupByTitle(title);
     await scrollUntilVisible($, item.root);
     return _isPinned(item);
+  }
+
+  @override
+  Future<bool> createDirectMessage(String account) async {
+    await clickOnPenIcon();
+    await NewChatRobot($).makeASearch(account);
+    final accounts = NewChatRobot($).getListOfAccount();
+    if (accounts.isEmpty) return false;
+    await accounts[0].root.tap();
+    await waitForEitherVisible(
+      $: $,
+      first: $(ChatView),
+      second: $(DraftChatView),
+      timeout: const Duration(seconds: 30),
+    );
+    return true;
+  }
+
+  @override
+  Future<void> createGroupChat(String name, String memberSearchKey) async {
+    await clickOnPenIcon();
+    await NewChatRobot($).clickOnNewGroupChatIcon();
+    await AddMemberRobot($).makeASearch(memberSearchKey);
+    await AddMemberRobot($).selectAllFilteredAccounts();
+    await AddMemberRobot($).clickOnNextIcon();
+    await SettingForNewGroupRobot($).settingForNewGroup(name);
+    await SettingForNewGroupRobot($).getConfirmIcon().tap();
+    await $.pump(const Duration(seconds: 10));
+    await $.waitUntilVisible($(ChatView));
   }
 }
